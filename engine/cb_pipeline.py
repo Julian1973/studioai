@@ -27,7 +27,56 @@ GATE_SEQ = ["1", "2a", "2b", "3", "4", "5"]  # 2 split into 2a (anchors) + 2b (c
 
 def _lock():  return json.load(open(LOCK)) if os.path.exists(LOCK) else {}
 def _save(d): json.dump(d, open(LOCK, "w"), indent=1)
+
+# ── GATE-1 CASCADE-RELOCK (bug fix, 2026-07-02, Julian) ─────────────────────────────────────────────────────────
+# A Gate-1 deliverable change — HOWEVER it happened (a Director redirect, a retake brief, or a direct data edit —
+# there is no single mutation choke-point to hook, beat-package writes happen from many places) — must automatically
+# relock every downstream sign-off. Before this fix, the studio kept showing a scene's Gate 2/3/4/5 as "signed off"
+# after its Scene-1 restructure (4 beats -> 5) even though the approved storyboard no longer existed; nothing
+# detected the drift. Fixed with the SAME lazy content-hash pattern as scene_cache_stale() (T33 Ruling 3): a
+# fingerprint of the scene's beats is stored when Gate 1 is approved; every gate-readiness check recomputes the
+# CURRENT fingerprint and cascade-clears (exactly like unapprove("1", scene)) the moment they differ — a passive
+# read never returns a stale "signed off" again. ⚠ DUPLICATED in cb-studio/serve.py (a separate process with no
+# engine import) — same convention as GATE_SEQ above; update BOTH the SAME way if the fingerprinted fields change.
+def _scene_beats_fingerprint(pkg_path, scene):
+    """A content hash of every beat belonging to `scene` — the Gate-1 deliverable. Hashes the FULL beat dicts (sorted
+    by beatCode, sorted keys) so it changes on ANY story edit: beats added/removed/renamed, cuts/dialogue/camera/
+    duration/etc. changed. Nothing downstream (Gate 2/3/4/5) writes back into a beat's own fields, so hashing the
+    whole dict is safe — there is nothing to exclude."""
+    import hashlib
+    d = json.load(open(pkg_path))
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
+    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    blob = json.dumps(beats, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+
+def _relock_if_stale(scene, episode=None):
+    """Lazy invalidation — call before ANY gate-readiness read. Returns True (and cascade-clears "1" + every
+    downstream gate + every per-beat audio/keyframe/clip lock for this scene, exactly like unapprove("1", scene))
+    if Gate 1 is approved with a recorded fingerprint that no longer matches the beat package on disk."""
+    episode = episode or EP
+    d = _lock()
+    sd = d.get(episode, {}).get(str(scene), {})
+    if not sd.get("1") or not sd.get("1_fp"):
+        return False   # never signed, or signed before this fix shipped (no fingerprint to compare) — nothing to do
+    try:
+        current = _scene_beats_fingerprint(PKG, scene)
+    except Exception:
+        return False    # fail-open: a package read error must never brick gate status
+    if sd["1_fp"] == current:
+        return False
+    stale_fp = sd["1_fp"]
+    for g in ("1", "2a", "2b", "3", "4", "5", "2", "1_fp"):
+        sd.pop(g, None)
+    sd["beats"] = {}
+    d.setdefault(episode, {})[str(scene)] = sd
+    _save(d)
+    print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — Gate 1 deliverable changed since sign-off "
+          f"(fingerprint {current} != approved {stale_fp}); every downstream gate + per-beat lock reset.", flush=True)
+    return True
+
 def _approved(scene, gate):
+    _relock_if_stale(scene)
     d = _lock().get(EP, {}).get(str(scene), {})
     return bool(d.get(str(gate).lower()))   # explicit per-gate sign-off only (no legacy whole-gate-2 shortcut —
                                             # a bare "2" never locked the plate as master, so it must NOT satisfy 2a)
@@ -83,7 +132,10 @@ def _lock_plate_as_master(scene):
 
 def approve(gate, scene):
     gate = str(gate).lower()
-    d = _lock(); d.setdefault(EP, {}).setdefault(str(scene), {})[gate] = True; _save(d)
+    d = _lock(); sd = d.setdefault(EP, {}).setdefault(str(scene), {}); sd[gate] = True
+    if gate == "1":
+        sd["1_fp"] = _scene_beats_fingerprint(PKG, scene)   # the cascade-relock baseline (see _relock_if_stale)
+    _save(d)
     if gate == "2a":
         _lock_plate_as_master(scene)
     print(f"✓ approved {EP} scene {scene} gate {gate} — next gate unlocked")
@@ -100,6 +152,8 @@ def unapprove(gate, scene):
         for g in order[order.index(gate):]:   # this gate + everything downstream
             sd.pop(g, None)
     sd.pop("2", None)                          # drop any legacy whole-gate-2 flag too
+    if gate == "1":
+        sd.pop("1_fp", None)                   # drop the cascade-relock baseline too — a fresh approve() recomputes it
     # ── TICKET 4 reconciliation — a scene-gate unapprove MUST also clear the DEPENDENT per-beat cascade approvals
     #    (locked[EP][scene]["beats"][code]) for THIS scene ONLY; otherwise a stale beats{} approval survives an
     #    un-signed gate (a keyframe/clip still reads "approved" after its gate was reopened). Each gate clears the

@@ -161,10 +161,60 @@ def _pkg_name(episode="Ep1"):
             else f"{episode}_The_Adventure_Begins_beat_package.json")
 PKG_NAME = _pkg_name()
 
+# ── GATE-1 CASCADE-RELOCK (bug fix, 2026-07-02, Julian) — ⚠ DUPLICATED from engine/cb_pipeline.py's
+#    _scene_beats_fingerprint/_relock_if_stale (a separate process, no engine import here — same convention as
+#    the already-duplicated GATE_SEQ above). See cb_pipeline.py for the full rationale. Every read of locked_state()
+#    (the studio's ONLY path to gate-status data) re-checks every episode/scene it finds and cascade-clears a
+#    scene's "1"/"2a"/"2b"/"3"/"4"/"5" + per-beat locks the moment its Gate-1 deliverable no longer matches the
+#    fingerprint recorded when Gate 1 was approved — so the Pipeline page can never show a stale "signed off" again.
+def _scene_beats_fingerprint(episode, scene):
+    import hashlib
+    cands = sorted(OUT.glob(f"{episode}_*beat_package.json")) or sorted(OUT.glob(f"{episode}_*shot_package.json"))
+    if not cands:
+        return None
+    pkg = max(cands, key=lambda p: p.stat().st_mtime)
+    d = json.loads(pkg.read_text())
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
+    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    blob = json.dumps(beats, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+
+def _relock_stale_scenes(d):
+    """Mutates `d` (the parsed locked.json) in place, cascade-clearing any scene whose Gate-1 fingerprint has
+    drifted. Returns True if anything changed (caller persists it back to disk)."""
+    changed = False
+    for episode, escenes in list(d.items()):
+        if not isinstance(escenes, dict):
+            continue
+        for scene, sd in list(escenes.items()):
+            if not isinstance(sd, dict) or not sd.get("1") or not sd.get("1_fp"):
+                continue
+            try:
+                current = _scene_beats_fingerprint(episode, scene)
+            except Exception:
+                continue
+            if current is None or current == sd["1_fp"]:
+                continue
+            print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — Gate 1 deliverable changed since sign-off "
+                  f"(fingerprint {current} != approved {sd['1_fp']}); every downstream gate + per-beat lock reset.", flush=True)
+            for g in ("1", "2a", "2b", "3", "4", "5", "2", "1_fp"):
+                sd.pop(g, None)
+            sd["beats"] = {}
+            changed = True
+    return changed
+
 def locked_state():
     f = CBGEN / "locked.json"
-    try: return json.loads(f.read_text()) if f.exists() else {}
-    except Exception: return {}
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+    try:
+        if _relock_stale_scenes(d):
+            f.write_text(json.dumps(d, indent=1))
+    except Exception:
+        pass   # fail-open: a relock error must never brick gate-status reads
+    return d
 
 def notes_state():
     f = CBGEN / "notes.json"

@@ -14,6 +14,7 @@ This document is the studio's taste. The staging laws below become HARD RULES in
 8. Holds only on buttons. The superhero pose, the almost laugh, the thunder stop, the final "Ah, Fuzzby." Maximum one hold per clip, under 1.5 seconds. Nothing else pauses.
 9. The one full stop is earned. The thunder is the scene's single dead stop, and it lands BECAUSE laws 1 to 8 never stopped before it.
 10. Sound is comic percussion. FWIP, THUMP THUMP THUMP, the humming crescendo, the flower's soft absorb. The score chases Fuzzby too, and ducks for every button.
+11. A beat never ends on a leaf hit. Leaves are mid-flight bounces only — a beat, a ricochet, a recovery — never the finisher. The flower is always the finisher: the sustained gag, the payoff, the thing the beat lands on.
 
 ## THE FIVE BEATS
 

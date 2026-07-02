@@ -465,12 +465,20 @@ def _expression_mood(shot):
     """The EXPRESSION & MOOD line — weaves a beat's emotional read (feeling + performance surface/underneath) into its
     OPENING keyframe so each is DISTINCT. SHARED by build_keyframe_prompt AND build_vision_prompt (engine-wide, every
     beat; the action lives in the Seedance clip, so the keyframe's distinctiveness is the emotion). Empty when the beat
-    carries no emotion data (so a thin beat just omits it rather than erroring)."""
+    carries no emotion data (so a thin beat just omits it rather than erroring).
+    innerThought is deliberately NOT read here — it is the actor's monologue for the i2v/motion performance, not the
+    still frame (see the comment at perf_block); folding it in here would blur that line."""
     perf = shot.get("performance") if isinstance(shot.get("performance"), dict) else {}
     feel = (shot.get("physicalFeeling") or shot.get("feelMoment") or shot.get("emotionalIntent") or "").strip().rstrip(".")
     surf = str(perf.get("surface") or "").strip().rstrip(".")
     under = str(perf.get("underneath") or "").strip().rstrip(".")
-    segs = ([feel + "."] if feel else []) + (["Surface: " + surf + "."] if surf else []) + (["Underneath: " + under + "."] if under else [])
+    truth = (shot.get("crystalTruth") or "").strip().rstrip(".")
+    aft = (shot.get("audience_feeling_target") or "").strip().rstrip(".")
+    segs = (([feel + "."] if feel else []) + (["Surface: " + surf + "."] if surf else [])
+            + (["Underneath: " + under + "."] if under else []) + (["Crystal truth: " + truth + "."] if truth else [])
+            + (["The audience should feel: " + aft + "."] if aft else [])
+            + (["This is the held, wordless, stillness-carries-it moment — no dialogue; the silence and the body "
+                "language do all the work."] if shot.get("wordlessHeld") else []))
     return ("EXPRESSION & MOOD (the opening read — show it in the faces and body language; this is the FIRST frame, before "
             "the action): " + " ".join(segs)) if segs else ""
 
@@ -525,6 +533,10 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
         if not identity:
             continue
         char_img[c] = (refs.index(identity) + 1) if identity in refs else _img(identity)
+        if c == "Keen":                                 # Keen's cuffs are a tracked STORY STATE (none/vacant/crystal,
+            wb = shot.get("keenWristbands", "none")     # T ruling: one character, two states) — attach its own
+            for r in CHARACTERS["Keen"].get("wristband_states", {}).get(wb, []):  # reference image so the state the
+                if r not in refs: _img(r)                                          # Director picked actually renders
     for r in (items_for(episode, shot)[0] or []):      # props (rare) — after the characters
         if r and r not in refs:
             _img(r)
@@ -562,7 +574,12 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     if chained and not chain_present:        # continuation whose previous frame isn't rendered yet (preview only — file attaches at generation)
         ref_lines.append(f"[Image {chain_img}] — Atmosphere Reference (the previous beat's approved frame — attaches once it is rendered): match its lighting, colors and textures; DO NOT copy its framing or poses.")
     header = "REFERENCE IMAGES:\n" + "\n".join(ref_lines)
-    text = ((shot.get("action") if end_beat else (shot.get("startState") or shot.get("action"))) or "").strip()
+    # cuts[0] is the Director's OWN first-shot direction for this beat — richer and more specific than startState
+    # (which tends toward a generic "both hovering" template repeated beat to beat with only mood-adjectives
+    # changed). The keyframe IS the beat's opening frame, and cuts[0] IS the beat's opening cut, so its action text
+    # is the correct, more varied source; startState remains the fallback for a beat with no cuts authored yet.
+    _cut0 = (shot.get("cuts") or [{}])[0] if not end_beat else {}
+    text = ((shot.get("action") if end_beat else (_cut0.get("action") or shot.get("startState") or shot.get("action"))) or "").strip()
     text = _strip_temp_state(text)   # CLEAN BASE IDENTITY (below) FORBIDS a temporary body-state (pollen, dirt, wet
                                       # fur…); asserting it POSITIVELY in a per-character block a few lines below
                                       # would contradict that constraint in the SAME prompt call. Drop it here instead
@@ -610,6 +627,25 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
                 for pos, endp, c in pts:
                     out.append((c, (c + " " + pred).strip()))
                 continue
+            # MIXED case: a LEADING list run ("as Fuzzby and Zenny weave…") shares a predicate, but the SAME sentence
+            # then splits into genuinely separate per-character clauses later ("…; Zenny's path is precise while
+            # Fuzzby zig-zags…"). The whole-sentence check above only catches a PURE list; without this, the
+            # PARALLEL loop below would split at each name in the list too, handing the shared predicate to only the
+            # LAST name in the run and leaving the earlier name(s) a bare, contentless clause (the source of a
+            # "Fuzzby Fuzzby zig-zags…" duplicate once _pose() joins it with that name's real clause).
+            run = 0
+            while (run + 1 < len(pts) and
+                   re.fullmatch(r"[\s,;]*(?:and|&)?[\s,;]*", s[pts[run][1]:pts[run + 1][0]], flags=re.I)):
+                run += 1
+            if run > 0:
+                pred_end = pts[run + 1][0] if run + 1 < len(pts) else len(s)
+                pred = re.sub(r"[\s,;]*(?:\band\b|\bbut\b|\bthen\b|\bwhile\b|\bas\b)?[\s,;]*$", "",
+                              s[pts[run][1]:pred_end]).strip(" ,;")
+                for pos, endp, c in pts[:run + 1]:
+                    out.append((c, (c + " " + pred).strip()))
+                pts = pts[run + 1:]
+                if not pts:
+                    continue
             for i, (pos, endp, c) in enumerate(pts):            # PARALLEL ("A does X, B does Y") — one clause per SUBJECT
                 seg = s[pos:(pts[i + 1][0] if i + 1 < len(pts) else len(s))]
                 seg = re.sub(r"[\s,;]*(?:\band\b|\bbut\b|\bthen\b|\bwhile\b|\bas\b)?[\s,;]*$", "", seg).strip(" ,;")
@@ -619,7 +655,9 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     units = _units(text)
     def _pose(c):
         mine = [seg for own, seg in units if own == c]                 # ONLY the clause(s) this character is SUBJECT of
-        clause = " ".join(mine) if mine else (text if len(block_chars) == 1 else f"{c} is in frame, mid-action")
+        # Join multiple clauses as separate sentences (". "), never a bare space — a bare join runs two independent
+        # clauses together with no punctuation ("...pollen from flower to flower Zenny's path is smooth...").
+        clause = ". ".join(seg.rstrip(" .,;") for seg in mine) if mine else (text if len(block_chars) == 1 else f"{c} is in frame, mid-action")
         clause = re.sub(r"\bframe[- ]left\b", "on the left of the frame", clause, flags=re.I)
         clause = re.sub(r"\bframe[- ]right\b", "on the right of the frame", clause, flags=re.I)
         return clause.strip().rstrip(".") or f"{c} in frame"
@@ -640,14 +678,24 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     env_line = (f"ENVIRONMENT & CONTEXT: Place the characters INTO Image {env_img} (the empty set) — {world}. Keep its "
                 f"set, dressing, depth and lighting exactly; add only the characters."
                 if env_img else f"ENVIRONMENT & CONTEXT: Place them {world}.")
-    framing = (shot.get("shotSize") or shot.get("shotType") or "Medium shot").strip()
+    # shotSize/shotType are legacy pre-beat-native fields — always None on current data, silently collapsing every
+    # keyframe to the "Medium shot" default. cuts[0].framing is the Director's own camera call for this beat's first
+    # shot (lens, angle, move) and is the correct, beat-varying source; the old fields stay as a defensive fallback.
+    framing = (_cut0.get("framing") or shot.get("shotSize") or shot.get("shotType") or "Medium shot").strip()
     comp = f"COMPOSITION: {framing}. Compose a natural film shot with the subject(s) clear and appropriately scaled within the frame."
-    light = (shot.get("lighting") or sc.get("lighting") or "").strip().rstrip(".")
+    # "light" is the Director's own PER-BEAT lighting call (richer and beat-varying — e.g. differentiated per character);
+    # "lighting" is a legacy/alternate key that is never actually populated on beat-native data. sc's scene-level
+    # lighting stays the fallback for a beat that hasn't authored its own. Same bug class as the shotSize/cuts[0] find.
+    light = (shot.get("light") or shot.get("lighting") or sc.get("lighting") or "").strip().rstrip(".")
+    atmosphere = (shot.get("atmosphere") or "").strip().rstrip(".")
     style = ("STYLE: Premium 3D CGI, Disney/Pixar animation style, 8K resolution, Octane render, subsurface scattering "
              "(fur/skin), volumetric lighting, cinematic depth of field, hyper-realistic textures. "
              "Captured as a SINGLE FROZEN INSTANT at high shutter speed — the action is caught and held perfectly still, "
              "every part of it tack-sharp and fully in focus, as if the frame were paused. This is the frame the animation "
-             "is built FROM.")
+             "is built FROM."
+             # beautyMoment: the Director's choice of the scene's ONE visual high point — push the render further here.
+             + (" THIS IS THE SCENE'S BEAUTY MOMENT: push the lighting, colour and composition further than the "
+                "surrounding beats — this is the single most visually beautiful frame in the scene." if shot.get("beautyMoment") else ""))
     one_each = " and ".join(f"one {c}" for c in chars) or "one of each character"
     ranked = sorted([c for c in chars if c in CHARACTERS and CHARACTERS[c].get("sizeRank") is not None],
                     key=lambda c: -(CHARACTERS[c].get("sizeRank") or 0))
@@ -694,8 +742,17 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     _recur = recurring_line(episode, shot)
     _props = props_block(shot)
     _size = size_line(shot)
+    # Keen's cuffs (none/vacant/crystal) — the story-state SENTENCE, alongside the reference image added above.
+    _band = _band_line(shot)
+    band_line = f" {_band}." if _band else ""
+    # A bear's crystal-brightness state for THIS beat (crystalGlow) — bees never carry crystal, so this only ever
+    # fires for bears in frame (mirrors cb_qa.check_done_frame's own `if bears and glow` gating for CRYSTAL_STATE_MISMATCH,
+    # so the keyframe asserts exactly the state QA will later check the render against).
+    _glow = (shot.get("crystalGlow") or "").strip().rstrip(".")
+    _bears_present = [c for c in block_chars if c not in _bees]
+    glow_line = f" CRYSTAL STATE: {_glow}." if (_glow and _bears_present) else ""
     constraints = ("CONSTRAINTS: Avoid multiple faces, distorted proportions, or duplicating the characters. "
-                   f"Exactly {one_each}.{size_clause}{_size}{sig}{neg}{wings}{clean_base}{env_neg}{_worn}{_recur}{_props}")
+                   f"Exactly {one_each}.{size_clause}{_size}{sig}{neg}{wings}{clean_base}{env_neg}{band_line}{glow_line}{_worn}{_recur}{_props}")
     lead = "Reason through this composition:"
     # ── EXPRESSION & MOOD — weave THIS beat's emotional read into the OPENING frame so each keyframe is DISTINCT;
     #    engine-wide via the shared _expression_mood (same helper the vision builder uses). Action stays in the clip.
@@ -707,8 +764,12 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # so the standalone COMPOSITION + LIGHTING blocks are dropped for chained beats.
     continuity_lock = ([f"CONTINUITY & CAMERA SHIFT: Reason through this camera cut. Use Image {chain_img} ONLY for the "
                         f"lighting and background textures. The camera has now changed to a {framing}. Reason through how "
-                        f"the characters and the environment from Image {chain_img} look from this new angle."] if chained else [])
-    light_block = [] if chained else ([f"LIGHTING: {light}."] if light else [])
+                        f"the characters and the environment from Image {chain_img} look from this new angle."
+                        # the chain image shows the PREVIOUS frame's light — it can't show a narrative shift THIS beat
+                        # introduces (e.g. cooling before a thunder beat), so state this beat's own light/atmosphere too.
+                        + (f" This beat's own light: {light}." if light else "")
+                        + (f" Atmosphere: {atmosphere}." if atmosphere else "")] if chained else [])
+    light_block = [] if chained else (([f"LIGHTING: {light}."] if light else []) + ([f"ATMOSPHERE: {atmosphere}."] if atmosphere else []))
     comp_block = [] if chained else [comp]   # chained: COMPOSITION is folded into the CONTINUITY & CAMERA SHIFT above
     body = [lead] + continuity_lock + blocks + ([mood] if mood else []) + [env_line] + comp_block + light_block + [style, constraints]
     prompt = re.sub(r"[ ]{2,}", " ", header + "\n\nPROMPT:\n" + "\n\n".join(body) + _fix_line(note))

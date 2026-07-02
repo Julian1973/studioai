@@ -158,6 +158,13 @@ RESOLVE_VERBS = ("wipe", "sneeze", "shake", "dry", "dries", "drop", "eat", "fini
                  "wash", "brush", "rinse", "blow")
 SUBSTANCE_WORDS = ("pollen", "moustache", "dust", "dirt", "mud", "water", "wet", "honey", "food",
                    "soaked", "splash", "sticky", "crumbs", "soot", "paint")
+
+def _any_word(words, text):
+    """Word-boundary membership (not bare substring) — a bare `w in text` false-positives short verbs/nouns inside
+    an unrelated word ("eat" inside "neatly", "dry" inside "drying" is fine but inside "dryad" isn't, "mud" inside
+    "mudlark"). Reading the full cuts[] action text (below) widened the search space enough for this to fire in
+    practice on real Ep1 beats, so it needs a real boundary check, not the old naive substring test."""
+    return any(re.search(r"\b" + re.escape(w) + r"\b", text) for w in words)
 FROZEN_EPS = 1.5   # mean-abs luma diff (0-255) below which consecutive frames count as "identical" → a near-still
 
 def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False):
@@ -190,10 +197,15 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
             labels.append(f"the CHARACTER reference for {c} (the TURNAROUND — judge {c}'s identity against this; the "
                           f"render shows {c} at one angle, which is fine, as long as the design matches the turnaround)")
     # scan ALL the beat's text fields, not just "action" — beat-native packages name a story-substance (the pollen
-    # moustache, dirt) in storyBeat/startState/endState, so a named state is EXPECTED and must not flag TRANSIENT_PROP_DRIFT
-    a = " ".join(str(shot.get(k) or "") for k in ("action", "storyBeat", "startState", "endState")).lower()
-    light = (shot.get("lighting") or sc.get("lighting") or "").strip()
-    substance = any(t in a for t in ("pollen", "dust", "dirt", "mud", "water", "wet", "wipe", "smear", "food", "honey", "splash", "soaked"))
+    # moustache, dirt) in storyBeat/startState, so a named state is EXPECTED and must not flag TRANSIENT_PROP_DRIFT.
+    # "action" is a CUT-level field on beat-native data (there is no beat-level "action"), so shot.get("action") was
+    # always empty here — same bug class as the shotSize/cuts[0] find; join every cut's own action text instead.
+    # "endState" was a leftover read from the removed continuity-tail mechanism (T2 ruling) — no such field is ever
+    # written, so it always contributed nothing; dropped.
+    cuts_action = " ".join(str(c.get("action") or "") for c in (shot.get("cuts") or []))
+    a = " ".join([str(shot.get(k) or "") for k in ("storyBeat", "startState")] + [cuts_action]).lower()
+    light = (shot.get("light") or shot.get("lighting") or sc.get("lighting") or "").strip()
+    substance = _any_word(("pollen", "dust", "dirt", "mud", "water", "wet", "wipe", "smear", "food", "honey", "splash", "soaked"), a)
     bees_present = any(c in BEES for c in chars); bears = [c for c in chars if c not in BEES]
     glow = (shot.get("crystalGlow") or "").strip()
     items = [
@@ -339,12 +351,16 @@ def _passB(shot, ordered, comedy_big, next_beat=None):
     """ONE multi-frame continuity+weight vision call. ordered=[keyframe(TRUTH), first, mid, last]. Returns [CLIP_* codes]
     or None if the vision call was unavailable (so the caller can mark QA_UNAVAILABLE, not a content fail)."""
     chars = [c for c in shot.get("characters", []) if c]; cast = ", ".join(chars) or "the characters"
-    state = next((wd for wd in SUBSTANCE_WORDS if wd in (shot.get("startState") or "").lower()), None)
-    a = (shot.get("storyBeat") or shot.get("action") or "").lower()
-    next_needs = bool(state and state in ((next_beat or {}).get("startState") or "").lower())
+    _start = (shot.get("startState") or "").lower()
+    state = next((wd for wd in SUBSTANCE_WORDS if re.search(r"\b" + re.escape(wd) + r"\b", _start)), None)
+    # "action" is a CUT-level field (there is no beat-level "action") — read every cut's action text, same fix as
+    # check_done_frame's substance scan above.
+    cuts_action = " ".join(str(c.get("action") or "") for c in (shot.get("cuts") or []))
+    a = (shot.get("storyBeat") or cuts_action or "").lower()
+    next_needs = bool(state and re.search(r"\b" + re.escape(state) + r"\b", ((next_beat or {}).get("startState") or "").lower()))
     # carry = the state must still be on him at the END of this take. The NEXT beat needing it OVERRIDES a resolve-verb
     # (B3 'tries to clean his pollen face' but B4 opens 'covered in pollen' → the pollen MUST persist; flag if it drops).
-    resolves = any(v in a for v in RESOLVE_VERBS) and not next_needs
+    resolves = _any_word(RESOLVE_VERBS, a) and not next_needs
     big = ("\nThis beat is BIG COMEDY: deliberate squash-and-stretch, motion-smear/streak frames and extreme exaggerated "
            "poses are CORRECT and must PASS. A streaked/stretched limb on a fast frame is a smear, NOT a melted limb; an "
            "exaggerated face squash is timing, NOT a morph. Judge identity ONLY where motion settles (the keyframe, the "

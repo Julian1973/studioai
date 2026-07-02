@@ -136,8 +136,8 @@ def _leak(shot, tags):
     One leak, placed once; never a second emotion word. (The crystal contradicts the face; so must the voice.)"""
     if not shot or _is_tender(shot):
         return ""
-    contradiction = bool(shot.get("crystalTruth") or shot.get("need")
-                         or ((shot.get("performance") or {}).get("underneath")))
+    perf = shot.get("performance") or {}
+    contradiction = bool(shot.get("crystalTruth") or shot.get("need") or perf.get("underneath") or perf.get("innerThought"))
     if not (contradiction and any(t in _MASKING for t in (tags or []))):
         return ""
     return " [gulps]" if "[proudly]" in (tags or []) else " [exhales]"
@@ -294,11 +294,23 @@ def _resolve_turns(shot, vd):
     resolve to their own canon voice (fails loud on a missing voiceId). Shared by both the Text-to-Dialogue and the
     per-line paths, so the ACTING is identical whichever renders it."""
     turns = []
+    # The fallback shot _tags()/_leak() see when there is no cached Director's-Pass line (`pre`) for this exact line.
+    # It carries only per-cut `delivery` as performance.surface — every BEAT-level field _is_tender()/_leak() read
+    # (emotionalIntent, crystalGlow, crystalTruth, need, performance.underneath/innerThought) was a stripped-out
+    # near-empty dict here, so a Heart/Crystal-Call beat with no cached direction for one of its lines could get
+    # mis-tagged or miss its need-leak entirely. Base it on the REAL beat and only override `surface` with the
+    # line's own delivery note (a per-line acting nuance, not a substitute for the beat's actual emotional data).
+    def _line_shot(delivery):
+        perf = dict(shot.get("performance") or {})
+        if delivery:
+            perf["surface"] = delivery
+        s = dict(shot); s["performance"] = perf
+        return s
     def add(speaker, line, pre=None, delivery="", treatment="", label=None):
         if not (speaker and line):
             return
         text = (pre.strip() if (pre and pre.strip())
-                else direct_line(speaker, shot={"performance": {"surface": delivery}, "intent": {}}, raw=line))
+                else direct_line(speaker, shot=_line_shot(delivery), raw=line))
         if not text:
             return
         vid = _char(speaker).get("voiceId")

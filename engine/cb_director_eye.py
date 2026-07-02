@@ -48,10 +48,16 @@ def _slim(b):
         "cuts": [{"framing": c.get("framing"), "action": c.get("action")} for c in (b.get("cuts") or [])],
         "dialogue": [c.get("dialogue") for c in (b.get("cuts") or []) if c.get("dialogue")],
         "emotionalIntent": b.get("emotionalIntent"), "want": b.get("want"), "need": b.get("need"),
+        "kidRead": b.get("kidRead"), "audienceFeelingTarget": b.get("audience_feeling_target"),
         "cameraArc": b.get("cameraArc"), "light": b.get("light"), "atmosphere": b.get("atmosphere"),
         "crystal": b.get("crystalGlow") or b.get("crystal"),
         "keenCuffs": b.get("keenWristbands"),
         "comedyMode": b.get("comedyMode"),
+        "beautyMoment": b.get("beautyMoment"),
+        # the Director's OWN self-check triad — the Eye's independent read is what STANDARD 2 already judges; handing
+        # it the Director's self-assessment too lets it flag a beat where the two disagree (the same craft standard,
+        # applied to the Director's own claim about the beat, not just the beat's raw content).
+        "selfCheck": b.get("check"),
         "continuity": b.get("continuity"),
     }
 

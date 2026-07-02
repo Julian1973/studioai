@@ -49,8 +49,13 @@ chairs skill + cb_director.py output schema. Add sceneProse and actionProse to t
 **T9 · Physics as a clause, plus the prompt budget law** ⏳ OPEN
 cb_segprompt.py, cb_continuity checks, Studio Bible.
 
-**T10 · The golden set harness** ⏳ OPEN
-New: cb_golden.py + a goldens/ folder.
+**T10 · The golden set harness** ✅ DONE (2026-07-02)
+engine/cb_golden.py + engine/goldens/. Stores the 3 Seedance baseline prompts (1.B1-1.B3) + the 4 Scene-1 keyframe prompts (1.B1-1.B4, anchor + chained) as of the T33 fix pass; `python3 cb_golden.py diff` compares current output against them, `capture` deliberately overwrites (only after a diff has been shown).
+DoD: one command diffs current output vs the stored golden set; no prompt-touching commit merges without that diff shown (CLAUDE.md hard rule). Verified: captured clean, `diff` reports ZERO DIFFS against itself.
+
+**T33 · Field-to-frame audit (Director-field consumption sweep)** ✅ DONE (2026-07-02)
+tools/field_audit.py (mechanical, re-runnable: Pydantic-introspects the schema, greps engine/*.py, flags zero-hit fields) + FIELD_TO_FRAME_AUDIT.md (the full judged report — 74 fields, 18 LEAK, 18 PARTIAL, fixed vs deferred, with why). Same bug class as the startState/shotSize find (2026-07-02).
+DoD: one report of all leaks — done (FIELD_TO_FRAME_AUDIT.md). Every LEAK/PARTIAL confirmed in the keyframe, voice or QA paths fixed in this pass (18 fixes across cb_prompts.py, cb_qa.py, cb_director_eye.py, cb_voice.py) with baseline proof (cb_segprompt.py byte-identical). Leaks outside those three paths (the Seedance-clip path, and items needing a design decision — director_mode, cameraArc/staging-verification QA, performance_notes, writerNote) logged in the report, not silently fixed or dropped.
 
 ---
 

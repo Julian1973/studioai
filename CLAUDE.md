@@ -15,7 +15,10 @@ Hard rules (never work around these):
 8. Restructure work follows RESTRUCTURE_SPEC_T30.md: one phase per commit, baseline byte-identical prompts proven after each phase.
 9. A temporary state (e.g. a pollen moustache) resolves WITHIN the take it started in — it never carries across a take boundary (T2 ruling, 2026-07-02, Julian). There is no continuity-tail/previous-clip-tail chaining mechanism; do not re-add one without a fresh ruling.
 10. cb_seedance.py's older validation machinery (the 15 minds, physical-action archetypes, authoring/compact validators) is a KEPT, intentional second validation layer underneath the Director's chair (T3 ruling, 2026-07-02, Julian) — not leftover code. It can legitimately refuse a render; that is by design.
+11. When a bug is found, the fix is not done until the same pattern has been hunted across every module — not just the one file where it was noticed. State the sweep's result in the commit message: what was checked, what else was found, and what was fixed vs deliberately left for a later ticket (T33 ruling, 2026-07-02, Julian, from the startState/shotSize field-leak find).
 
 Baseline proof (run before and after any change that touches prompt code):
-  cd cb-gen && python3 cb_segprompt.py ../cb-output/Ep1_The_Adventure_Begins_beat_package.json 1.B1
+  cd engine && python3 cb_segprompt.py ../cb-output/Ep1_Episode_1_beat_package.json 1.B1
   plus for_beat on the first three Ep1 beats — outputs must be byte identical unless the ticket explicitly changes them.
+  T10 golden set (goldens/): python3 cb_golden.py diff — must show ZERO diffs on a non-prompt-touching change; any diff on a
+  prompt-touching change must be shown to Julian before the commit merges, and the golden updated only once he has seen it.

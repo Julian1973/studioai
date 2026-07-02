@@ -13,14 +13,23 @@ CLAUDE.md hard rule: no prompt-touching commit merges without this diff shown. A
 wrong — a ticket can deliberately change a prompt — but it must be SHOWN to Julian before the golden is
 recaptured, never silently overwritten.
 
-Content assertions (T33 Ruling, 2026-07-02, Julian): diffing only proves "unchanged since last time" — it
-never proves anything is actually THERE, so a snapshot itself could be lean and every later diff would still
-pass. `assertions()` checks every shipped segprompt beat directly: (1) if the beat authored a motionTempo, a
-real fragment of it must survive into the prompt (checked as the longest name-free chunk of the raw field, so
-it holds regardless of which delabeled form — full first-mention or short — a character name became); (2) if
-the beat has dialogue, the prompt must carry a SPEAKER MAP. Wired into both commands: `diff` fails (exit 1) on
-a failed assertion even with zero text diffs; `capture` refuses to bless a snapshot that fails one — a lean
-prompt can never silently become the new normal.
+Content assertions (spec freeze, 2026-07-02, Julian): diffing only proves "unchanged since last time" — it never
+proves anything is actually THERE, so a snapshot itself could be lean and every later diff would still pass.
+`assertions()` checks every shipped segprompt beat against v3's OWN spec (updated from the v2-era checks, which
+tested for motionTempo/physicalFeeling language and a literal "SPEAKER MAP:" string — v3 deliberately drops both:
+the trials found them token tax, and the JSON emitter binds a speaker per SHOT, not a beat-level line map):
+  1. a real fragment of the beat's own cuts[].action content survives into the prompt (checked as the longest
+     name-free chunk, so it holds regardless of which delabeled role-label form a character name became) —
+     proves the shots carry the Director's actual action, not generic filler.
+  2. if the beat has dialogue: the PROSE emitter must carry a "SPEAKER MAP:" line; the JSON emitter must have at
+     least one shot with a dialogue object whose line is the fixed "the line in @Audio1 during this shot" string
+     (never the actual words).
+  3. the PROSE emitter's NEGATIVES line has exactly six comma-separated items (the worked example's own spec).
+  4. the JSON emitter parses as valid JSON with the required top-level keys and a non-empty shots[] array.
+  5. both emitters' per-shot seconds sum to exactly the beat's total duration (the mechanical assembler's own
+     invariant — durations become PER-SHOT seconds, they must never drift from the beat total).
+Wired into both commands: `diff` fails (exit 1) on a failed assertion even with zero text diffs; `capture`
+refuses to bless a snapshot that fails one — a lean or malformed prompt can never silently become the new normal.
 
     python3 cb_golden.py diff       # compare current output vs the stored golden set (exit 1 on any diff or failed assertion)
     python3 cb_golden.py capture    # OVERWRITE the golden set with current output (only after Julian has seen the diff)
@@ -97,14 +106,65 @@ def assertions(snap=None):
             continue
         prompt = snap.get(f"segprompt__{code}", "")
         cast = b.get("openingCast") or b.get("characters") or []
-        mt = str(b.get("motionTempo") or "").strip()
-        if mt:
-            chunks = _name_free_chunks(mt, cast)
+        is_json = prompt.strip().startswith("{")
+
+        # (1) a real fragment of the beat's OWN cuts[].action survives — proves real content, not generic filler
+        action = " ".join(str(c.get("action") or "").strip() for c in (b.get("cuts") or []))
+        if action.strip():
+            chunks = _name_free_chunks(action, cast)
             check = (max(chunks, key=len) if chunks else "")[:60].strip()
             if check and check not in prompt:
-                fails.append(f"{code}: motionTempo language not found in the shipped prompt (looked for: {check!r})")
-        if _has_dialogue(b) and "SPEAKER MAP:" not in prompt:
-            fails.append(f"{code}: beat has dialogue but the shipped prompt has no SPEAKER MAP")
+                fails.append(f"{code}: none of the beat's own cuts[].action content survived into the shipped prompt (looked for: {check!r})")
+
+        # (2) dialogue binding — SPEAKER MAP for prose, a per-shot dialogue object for JSON
+        has_dlg = _has_dialogue(b)
+        if has_dlg and not is_json and "SPEAKER MAP:" not in prompt:
+            fails.append(f"{code}: beat has dialogue but the PROSE prompt has no SPEAKER MAP")
+        if has_dlg and is_json:
+            try:
+                doc = json.loads(prompt)
+                shots = doc.get("shots") or []
+                dlg_shots = [s for s in shots if isinstance(s.get("dialogue"), dict)]
+                if not dlg_shots:
+                    fails.append(f"{code}: beat has dialogue but no JSON shot carries a dialogue object")
+                bad_line = [s for s in dlg_shots if s["dialogue"].get("line") != "the line in @Audio1 during this shot"]
+                if bad_line:
+                    fails.append(f"{code}: a JSON dialogue shot's line is not the fixed @Audio1 reference — "
+                                 f"actual words may have leaked: {bad_line[0]['dialogue'].get('line')!r}")
+            except Exception as e:
+                fails.append(f"{code}: JSON prompt failed to parse ({e})")
+
+        # (3) NEGATIVES trimmed to six (prose only — the JSON emitter has no NEGATIVES section). Split on ", no "
+        # (the clause boundary — every item starts with "no"), NOT every comma: an item like "no on-screen text,
+        # subtitles, logos or watermarks" is ONE clause with commas inside its own internal list.
+        if not is_json:
+            m = re.search(r"NEGATIVES:\s*(.+)$", prompt, re.S)
+            if m:
+                n = len([x for x in re.split(r",\s*(?=no )", m.group(1).strip()) if x.strip()])
+                if n != 6:
+                    fails.append(f"{code}: NEGATIVES should have exactly 6 items, has {n}")
+            else:
+                fails.append(f"{code}: no NEGATIVES section found in the prose prompt")
+
+        # (4)+(5) structural invariants — durations become PER-SHOT seconds, must sum to the beat total
+        dur = int(b.get("durationSec") or 12); dur = max(8, min(15, dur))
+        if is_json:
+            try:
+                doc = json.loads(prompt)
+                for key in ("duration", "aspect", "style", "references", "shots"):
+                    if key not in doc:
+                        fails.append(f"{code}: JSON prompt missing required top-level key {key!r}")
+                if not doc.get("shots"):
+                    fails.append(f"{code}: JSON prompt has an empty shots[] array")
+                total = sum(s.get("seconds", 0) for s in (doc.get("shots") or []))
+                if total != dur:
+                    fails.append(f"{code}: JSON shots[].seconds sum to {total}, expected the beat total {dur}")
+            except Exception:
+                pass   # already reported above
+        else:
+            secs = [int(x) for x in re.findall(r"SHOT \d+ \((\d+)s\)", prompt)]
+            if secs and sum(secs) != dur:
+                fails.append(f"{code}: prose SHOT seconds sum to {sum(secs)}, expected the beat total {dur}")
     return fails
 
 

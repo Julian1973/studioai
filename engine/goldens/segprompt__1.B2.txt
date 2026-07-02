@@ -1,15 +1,43 @@
-10 seconds, 16:9.
-
-REFERENCE LAW: @图1 (the keyframe) is TRUTH — copy the character(s) EXACTLY as drawn (no redesign, no morphing, no rescale, no new accessories) and copy the environment and lighting from it. @图2 is the larger, eager, manic bee (frame-LEFT); @图3 is the smaller, calm, deadpan bee (frame-RIGHT). Their turnarounds lock proportions, markings and features. Add ONLY motion and performance. No extra characters, no redesign.
-
-WINGS: whenever a bee is AIRBORNE — which is almost the whole time — its wings BEAT rapidly and continuously, a fast visible flap with real motion blur-and-snap, the entire time it is off a surface. A hovering, drifting, gliding or zipping bee is ALWAYS flapping. NEVER a still, frozen or motionless wing while a bee is in the air (a bee that stopped flapping would drop); wings only come to rest when the bee is fully landed or perched on a surface.
-
-SCENE: Warm amber light catches the pollen dust on the larger, eager, manic bee's face so the gag reads instantly, while the smaller, calm, deadpan bee is lit cleanly and evenly for the deadpan line. Pollen motes thicken into a soft golden cloud around the flower, building the sneezy-tickly feeling before the reveal. a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals
-
-ACTION / PERFORMANCE: the larger bee rockets into the flower too fast, then holds an instant for the moustache reveal — a quick flash, not a dead stop; the smaller bee's stillness in the same world lets the punchline land. From the prior watch, the larger bee zooms toward another flower, humming louder, and lines himself up with too much confidence while the smaller bee holds a clean hover nearby, working calm and precise; both airborne wings beat rapidly and continuously. the larger bee sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO the smaller bee: trying not to laugh. the larger bee presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering. the smaller bee fights the smile for a beat, then lets the smallest dry amusement through while the larger bee waits for praise. The moustache reveal lands as a quick flash, not a held pause; the beat's ONE hold is the smaller bee's almost-laugh on her button line, under 1.5 seconds — nothing else pauses. Weighty cartoon physics: clear anticipation → impact → follow-through; readable comedy/emotional timing; the performance carried in the eyes, the breath and the weight. The take should feel like: A little tickle under the nose that turns into a held giggle in the throat.
-
-CAMERA: Seedance directs the camera cinematically — smooth feature-film movement and tasteful cuts where they help the storytelling — but keep every character readable and on-model at all times. No chaotic camera. Drone-style camera tracks the larger bee's full-throttle acceleration into the pollen-cloud reveal, then cuts SHORT to the smaller bee — punctuation, not coverage — for her trying-not-to-laugh reaction and her dry topper. Never sits wide and observes.
-
-AUDIO: use ONLY @Audio1 for ALL dialogue — the characters speak the words in @Audio1 with precise en-US lip-sync, each mouthing its own lines in @Audio1 in order; generate no other, different or duplicate voice, and no other speech. Seedance generates and mixes everything else: Continuous fast wing buzz, muffled flower whoomp, soft pollen poof as the moustache reveals; the larger bee's proud voice slightly forward; music pauses a half-beat before the smaller bee's line, then lands a dry pizzicato tick on the line in @Audio1. — kept low under the voice (no sung lyrics). SPEAKER MAP: line 1 → the larger bee; line 2 → the smaller bee.
-
-NEGATIVES: no morphing, no redesign, no rescale, no extra limbs, no flicker, no compression or grain artifacts, no on-screen text or subtitles, no logos or watermarks, no foreign-language speech, no crystals on or attached to the bees, no still/frozen/motionless wings on any bee that is airborne, no bee gliding or hovering with static wings
+{
+  "duration": 10,
+  "aspect": "16:9",
+  "style": "Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field.",
+  "references": {
+    "@图1": "the opening keyframe — TRUTH for environment, lighting and continuity",
+    "@图2": "the larger, eager, manic bee",
+    "@图3": "the smaller, calm, deadpan bee"
+  },
+  "voices": "ElevenLabs @Audio1 law — one combined track, precise per-shot lip-sync, no native-voice fallback.",
+  "shots": [
+    {
+      "seconds": 3,
+      "camera": "Drone-style camera chases the larger bee full-throttle into the next flower, the smaller bee working calmly in the same frame",
+      "action": "From the prior watch, the larger, eager, manic bee zooms toward another flower, humming louder, and lines himself up with too much confidence while the smaller, calm, deadpan bee holds a clean hover nearby, working calm and precise; both airborne wings beat rapidly and continuously."
+    },
+    {
+      "seconds": 2,
+      "camera": "Camera stays with the larger bee for the reveal, then a short punctuation cut to the smaller bee",
+      "action": "the larger bee sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO the smaller bee: trying not to laugh."
+    },
+    {
+      "seconds": 2,
+      "camera": "Close on the larger bee, proud, presenting the moustache",
+      "action": "the larger bee presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering.",
+      "dialogue": {
+        "speaker": "the larger bee",
+        "line": "the line in @Audio1 during this shot",
+        "note": "only this speaker's mouth moves in this shot"
+      }
+    },
+    {
+      "seconds": 3,
+      "camera": "Short punctuation cut to the smaller bee for the dry topper — no long coverage",
+      "action": "the smaller bee fights the smile for a beat, then lets the smallest dry amusement through while the larger bee waits for praise.",
+      "dialogue": {
+        "speaker": "the smaller bee",
+        "line": "the line in @Audio1 during this shot",
+        "note": "only this speaker's mouth moves in this shot"
+      }
+    }
+  ]
+}

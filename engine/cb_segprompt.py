@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """GATE 3 — the SINGLE SOURCE OF TRUTH for the Seedance video prompt.
 
-THE DEFINITIVE STRUCTURE (3-model consensus — GPT-5.5 · Claude Opus 4.8 · Gemini 3.1 Pro). The principle: the
-REFERENCES ARE LAW (they own identity + look); the TEXT owns only motion, performance beats, camera freedom and audio
-rules. Let Seedance do the heavy lifting. Prose-first (fal's own I2V calls are plain prose); this module is the internal
-spec that emits that prose.
+THE DEFINITIVE STRUCTURE is v3 (spec freeze, 2026-07-02, Julian) — ONE mechanical assembler (for_beat_v3 /
+_v3_shots, zero LLM: cuts become shots, durations become per-shot seconds, dialogue order becomes per-shot
+speaker binding) feeding TWO emitters: emit_prose_v3 (multi-shot native prose, for a beat with 0-1 distinct
+speakers) and emit_json_v3 (light JSON shots, for a beat with 2+ distinct speakers, giving per-shot dialogue
+binding an exchange needs). shipped_prompt() is the one entry point every caller uses; for_beat (v1) and
+for_beat_v2 are RETIRED — kept for rollback/reference, never called except as the loud, logged fallback chain.
 
-Six sections, always in this order:
-  12s / 16:9  →  REFERENCE LAW  →  SCENE  →  ACTION / PERFORMANCE  →  CAMERA  →  AUDIO  →  NEGATIVES
+The governing principle carries forward from v1/v2: REFERENCES ARE LAW (they own identity + look); the TEXT owns
+only motion, performance, camera freedom and audio rules. Prose-first (fal's own I2V calls are plain prose; the
+"light JSON" emitter is just a more structured flavour of the same text field) — this module is the internal spec
+that emits both.
 
 Rules baked in (so they can never drift):
   • NO character DESCRIPTION in the text — identity comes ENTIRELY from @图1 (keyframe) + @图2/@图3 (turnarounds). The
@@ -15,11 +19,11 @@ Rules baked in (so they can never drift):
   • ROLE LABELS, not names — "the larger bee" / "the smaller bee" (avoids the name-trap; names still live in @AudioN).
   • VOICE lives IN the render: each speaker "says @AudioN" (the fal-documented pattern → Seedance OUTPUTS the supplied
     11Labs voice), lip-synced, no other speech. generate_audio stays TRUE so Seedance ALSO scores ambience/SFX/underscore.
-  • CAMERA is loose — Seedance directs cinematically; we only forbid chaos and demand both bees stay readable + on-model.
-  • 12s is action-dense: if a beat drifts past ~7s, split into a 2-clip fallback rather than rewriting.
+  • CAMERA is loose — Seedance directs cinematically; we only forbid chaos and demand every character stay readable + on-model.
+  • A take is action-dense (8-15s): if a beat drifts past its budget, split it into another beat rather than rewriting.
 """
 
-import os, json
+import os, re, json
 import paths as P                             # T30 Phase 3 — show-specific "laws" load from the show's tenant dir
 
 # WING LAW — a bee in the air ALWAYS has beating wings. Seedance must never render a mid-air bee with still/frozen wings.
@@ -104,9 +108,13 @@ def _audio_for(beat):
             "playful underscore kept low under the voice (no sung lyrics).")
 
 def for_beat(beat, scene=None):
-    """Generate the DEFINITIVE 6-section Seedance prompt from a Director beat — the signed-off model, for ANY beat of ANY
-    episode. `scene` = optional scene-plate dict (look/definingFeature/location). References are law; the faithful dialogue
-    lives in @Audio1 (never in the prose)."""
+    """RETIRED (spec freeze, 2026-07-02, Julian) — superseded by for_beat_v3 (mechanical, per-shot assembler). Kept
+    for rollback/reference only; never called except as shipped_prompt()'s should-never-happen final fallback,
+    which fires a loud log line if it ever actually runs. Do not call this directly, and do not build on it.
+
+    (Original docstring, for historical context:) Generate the 6-section Seedance prompt from a Director beat —
+    the FIRST signed-off model, for any beat of any episode. `scene` = optional scene-plate dict (look/
+    definingFeature/location). References are law; the faithful dialogue lives in @Audio1 (never in the prose)."""
     dur = int(beat.get("durationSec") or 12); dur = max(8, min(15, dur))
     chars = beat.get("openingCast") or beat.get("characters") or []
     ref_bits, any_bee = [], False
@@ -265,7 +273,13 @@ def _audio_v2(beat, cast):
 _SIDES = ["frame-LEFT", "frame-RIGHT", "frame-CENTRE"]
 
 def for_beat_v2(beat, scene=None):
-    """The definitive 6-section prompt, now carrying the Director's ACTUAL direction. Same law, richer canvas."""
+    """RETIRED (spec freeze, 2026-07-02, Julian) — superseded by for_beat_v3 (mechanical, per-shot assembler; the
+    prompt trials found v2's section-of-prose shape, its rules blocks and its physics/emotional-arc paragraphs were
+    token tax with no quality payoff). Kept for rollback/reference only; never called except as shipped_prompt()'s
+    loud fallback if for_beat_v3 ever returns empty. Do not call this directly, and do not build on it.
+
+    (Original docstring, for historical context:) The SECOND-generation 6-section prompt, carrying the Director's
+    ACTUAL direction (motionTempo/pauseHold/physicalFeeling/soundIntent/light/atmosphere/cameraArc) that v1 discarded."""
     dur = int(beat.get("durationSec") or 12); dur = max(8, min(15, dur))
     chars = beat.get("openingCast") or beat.get("characters") or []
     ref_bits, any_bee = [], False
@@ -287,26 +301,205 @@ def for_beat_v2(beat, scene=None):
             f"NEGATIVES: {neg}")
     return out
 
-# ══════════ THE SINGLE SHIPPING DECISION (T33 Ruling, 2026-07-02, Julian) ══════════
-# for_beat_v2 is now THE definitive builder — it carries the Director's actual direction (motionTempo, pauseHold,
-# the speaker map, physicalFeeling, soundIntent, light, atmosphere, cameraArc) that for_beat (v1) discards. v1 is
-# retired to a FALLBACK ONLY, for the (should-never-happen) case where v2 returns empty for a beat — and firing it
-# prints a loud, unmissable log line, so a silent reversion to the leaner old builder can never pass unnoticed.
-# EVERY caller that needs "the prompt Seedance will actually receive" calls THIS function — never for_beat or
-# for_beat_v2 directly — so preview and fire are provably the SAME call, through the SAME decision, every time.
+# ══════════ FOR_BEAT V3 — THE MECHANICAL ASSEMBLER (spec freeze, 2026-07-02, Julian) ══════════
+# The prompt trials are complete and crowned. ONE assembler builds ONE shot data structure mechanically from the
+# Director's EXISTING fields — cuts become shots (camera first, from framing), durations become PER-SHOT seconds
+# (weighted by how much is happening in each shot — the same weighting convention the legacy compact builder
+# used), dialogue order becomes PER-SHOT speaker binding (via the SAME cb_voice parser that cuts the real @Audio1
+# track, so a shot's claimed speaker can never drift from the actual voice file). ZERO LLM — pure field-to-shape
+# derivation, same discipline as v2 but now organized by SHOT, not by section-of-prose.
+#
+# TWO emitters consume the SAME shot list. The trials proved rules blocks, per-shot SFX lists and physics/emotional-
+# arc sections were token tax — cut. Match the two worked examples' weight and shape exactly; they are verbatim law:
+#   A — PROSE, multi-shot native, for a beat with 0-1 distinct speakers (Julian's crowned 1.B1): SUBJECTS (role
+#       labels + frame homes + the ONE-line wing law) -> ENVIRONMENT (@图1 is TRUTH, then the plate + one breeze
+#       force) -> STYLE (one line) -> SHOT n (lens+move first, then action, then one minimal sound cue) -> AUDIO
+#       (the law sentence + the speaker map, now shot-indexed) -> NEGATIVES (six).
+#   B — LIGHT JSON, for a beat with 2+ distinct speakers (Julian's crowned 1.B2): duration/aspect/style/references/
+#       voices, then a shots[] array — each shot carries seconds, camera, action, and (if it has dialogue) a
+#       dialogue object binding ONE speaker to THAT shot. The "line" field is NEVER the actual words — always the
+#       fixed string "the line in @Audio1 during this shot" (rule 5: dialogue lives only in @Audio1); "voices" names
+#       the ElevenLabs law, not a per-character descriptor (the trial's voice placeholders are retired).
+#
+# Speaker-count routing (0-1 -> prose, 2+ -> JSON) is the shape that matches BOTH worked examples: 1.B1 has dialogue
+# (two lines) but ONE speaker, and is prose; 1.B2 has TWO speakers in exchange, and needs the JSON's per-shot
+# binding to stay unambiguous — a single beat-level "line 1/line 2" map (v2's mechanism) can't express WHICH SHOT a
+# multi-speaker exchange's line lands in, only a light-JSON shot-by-shot binding can.
+_WING_LAW_ONE_LINE = ("Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless "
+                      "in flight.")
+
+def _v3_shots(beat, cast):
+    """THE mechanical assembler — see the module note above. Returns (shots, dur) where each shot is
+    {n, seconds, camera, action, speaker (short role label or None)}; seconds always sum to dur."""
+    import cb_voice as V
+    dur = int(beat.get("durationSec") or 12); dur = max(8, min(15, dur))
+    cuts = beat.get("cuts") or []
+    used = set()
+    raw = []
+    for c in cuts:
+        action = _strip_spoken_words(_delabel(str(c.get("action") or "").strip(), cast, used=used))
+        camera = _strip_spoken_words(_delabel(str(c.get("framing") or "").strip(), cast, used=set(cast)))
+        speaker = None
+        dlg = (c.get("dialogue") or "").strip()
+        if dlg:
+            segs = V._cut_segments(dlg)
+            if segs:
+                name = V._resolve_speaker(segs[0][0], beat)
+                if name:
+                    speaker = _short_role(_char_meta(name)[0])
+        weight = max(1, len(action) + (40 if speaker else 0))   # dialogue shots get real screen time, never squeezed
+        raw.append({"action": action, "camera": camera, "speaker": speaker, "weight": weight})
+    if not raw:
+        return [], dur
+    total_w = sum(s["weight"] for s in raw) or 1
+    shots, running = [], 0
+    for i, s in enumerate(raw):
+        sec = max(1, dur - running) if i == len(raw) - 1 else max(1, round(dur * s["weight"] / total_w))
+        running += sec
+        shots.append({"n": i + 1, "seconds": sec, "camera": s["camera"], "action": s["action"], "speaker": s["speaker"]})
+    return shots, dur
+
+def _v3_subjects(cast):
+    ref_bits, any_bee = [], False
+    for i, name in enumerate(cast):
+        role, is_bee = _char_meta(name); any_bee = any_bee or is_bee
+        side = _SIDES[min(i, 2)] if len(cast) > 1 else None
+        ref_bits.append(f"@图{i + 2} is {role}" + (f" ({side})" if side else ""))
+    line = ("; ".join(ref_bits) + ".") if ref_bits else ""
+    if any_bee:
+        line = (line + " " + _WING_LAW_ONE_LINE).strip()
+    return line
+
+def _v3_environment(beat, scene, cast):
+    bits = ["@图1 is TRUTH — copy the environment and lighting from it exactly."]
+    loc = ""
+    if scene:
+        for k in ("definingFeature", "location"):
+            v = str(scene.get(k) or "").strip()
+            if v:
+                loc = v; break
+    if not loc:
+        loc = str(beat.get("scene") or "the approved scene").strip()
+    bits.append(loc.rstrip(".") + ".")
+    atmo = str(beat.get("atmosphere") or "").strip()
+    if atmo:
+        first = re.split(r"(?<=[.!?])\s+", atmo)[0]          # ONE breeze/atmosphere force, not the whole paragraph
+        bits.append(_strip_spoken_words(_delabel(first, cast, used=set(cast))))
+    return " ".join(bits)
+
+def _v3_style():
+    return "Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field."
+
+def _v3_negatives(any_bee):
+    core = ["no morphing, redesign or rescale of the characters", "no extra characters or props",
+            "no on-screen text, subtitles, logos or watermarks", "no foreign-language speech"]
+    core += (["no crystals on or attached to the bees", "no still or frozen wings while airborne"] if any_bee
+             else ["no flicker or compression artifacts", "no continuity break in lighting or palette"])
+    return ", ".join(core[:6])
+
+def _v3_shot_sounds(beat, n):
+    """ONE minimal sound cue per shot — mechanically sliced from the beat's OWN soundIntent (already-authored
+    prose, never re-invented), never a per-shot SFX list. Falls back to a generic ambience note if soundIntent
+    has fewer clauses than shots."""
+    intent = str(beat.get("soundIntent") or "").strip()
+    parts = [p.strip() for p in re.split(r"[;,]", intent) if p.strip()] if intent else []
+    if n - 1 < len(parts):
+        return parts[n - 1].rstrip(".")
+    return "ambient sound continues" if parts else "quiet ambience"
+
+def _v3_speaker_map(shots, cast):
+    speaking = [(s["n"], s["speaker"]) for s in shots if s["speaker"]]
+    if not speaking:
+        return ""
+    smap = "; ".join(f"shot {n} → {spk}" for n, spk in speaking)
+    distinct = list(dict.fromkeys(spk for _, spk in speaking))
+    tail = ""
+    if len(distinct) == 1:
+        silent = [_short_role(_char_meta(c)[0]) for c in cast if _short_role(_char_meta(c)[0]) != distinct[0]]
+        if silent:
+            tail = f" Only {distinct[0]} speaks in this beat; {', '.join(silent)} stays visibly silent throughout."
+    return f"SPEAKER MAP: {smap}.{tail}"
+
+def emit_prose_v3(beat, scene, shots, dur, cast):
+    """Worked example A — PROSE, multi-shot native. Verbatim law: SUBJECTS -> ENVIRONMENT -> STYLE -> SHOT n... ->
+    AUDIO -> NEGATIVES. No rules blocks, no per-shot SFX lists, no physics/emotional-arc sections."""
+    any_bee = any(_char_meta(n)[1] for n in cast)
+    out = f"{dur} seconds, 16:9.\n\n"
+    out += f"SUBJECTS: {_v3_subjects(cast)}\n\n"
+    out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast)}\n\n"
+    out += f"STYLE: {_v3_style()}\n\n"
+    for s in shots:
+        out += f"SHOT {s['n']} ({s['seconds']}s): {s['camera']}. {s['action']} {_v3_shot_sounds(beat, s['n'])}.\n\n"
+    has_dlg = any(s["speaker"] for s in shots)
+    if has_dlg:
+        law = ("use ONLY @Audio1 for ALL dialogue — each speaking character mouths its own lines in @Audio1, in "
+               "order; no other, different or duplicate voice.")
+        out += f"AUDIO: {law} {_v3_speaker_map(shots, cast)}\n\n"
+    else:
+        out += ("AUDIO: this beat has no dialogue — generate no speech or voices; Seedance scores ambience and a "
+                "light underscore.\n\n")
+    out += f"NEGATIVES: {_v3_negatives(any_bee)}"
+    return out
+
+def emit_json_v3(beat, scene, shots, dur, cast):
+    """Worked example B — LIGHT JSON, for any beat with 2+ distinct speakers. duration/aspect/style/references/
+    voices, then shots[] — each shot: seconds, camera, action, and (if it speaks) a dialogue object binding ONE
+    speaker to THAT shot. line is ALWAYS the fixed @Audio1 reference, never the actual words."""
+    refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
+    for i, name in enumerate(cast):
+        role, _ = _char_meta(name)
+        refs[f"@图{i + 2}"] = role
+    out_shots = []
+    for s in shots:
+        shot = {"seconds": s["seconds"], "camera": s["camera"], "action": s["action"]}
+        if s["speaker"]:
+            shot["dialogue"] = {"speaker": s["speaker"], "line": "the line in @Audio1 during this shot",
+                                 "note": "only this speaker's mouth moves in this shot"}
+        out_shots.append(shot)
+    doc = {
+        "duration": dur, "aspect": "16:9", "style": _v3_style(), "references": refs,
+        "voices": "ElevenLabs @Audio1 law — one combined track, precise per-shot lip-sync, no native-voice fallback.",
+        "shots": out_shots,
+    }
+    return json.dumps(doc, indent=2, ensure_ascii=False)
+
+def for_beat_v3(beat, scene=None):
+    """THE top-level v3 entry point — builds the shot list once, routes to the emitter that matches the worked
+    examples (0-1 distinct speakers -> prose; 2+ -> light JSON), and returns (prompt_text, emitter_label)."""
+    cast = beat.get("openingCast") or beat.get("characters") or []
+    shots, dur = _v3_shots(beat, cast)
+    if not shots:
+        return "", "v3 (empty — no cuts)"
+    distinct_speakers = len(set(s["speaker"] for s in shots if s["speaker"]))
+    if distinct_speakers >= 2:
+        return emit_json_v3(beat, scene, shots, dur, cast), "v3-json"
+    return emit_prose_v3(beat, scene, shots, dur, cast), "v3-prose"
+
+# ══════════ THE SINGLE SHIPPING DECISION (spec freeze, 2026-07-02, Julian) ══════════
+# for_beat_v3 is now THE definitive builder. for_beat_v2 and for_beat (v1) are RETIRED — kept in this file for
+# rollback/reference only, never called except as the should-never-happen fallback chain below, each firing a
+# loud, unmissable log line so a silent reversion to a retired builder can never pass unnoticed. EVERY caller that
+# needs "the prompt Seedance will actually receive" calls THIS function — never for_beat/for_beat_v2/for_beat_v3
+# directly — so preview and fire are provably the SAME call, through the SAME decision, every time.
 def shipped_prompt(beat, scene=None):
-    """Returns (prompt, builder_label, is_v2). is_v2=False means the fallback fired — treat that as worth
+    """Returns (prompt, builder_label, is_v3). is_v3=False means a retired fallback fired — treat that as worth
     investigating, not routine."""
-    v2 = for_beat_v2(beat, scene)
-    if v2:
-        return v2, "cb_segprompt_v2 (DEFINITIVE)", True
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
-    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v1 (for_beat) — for_beat_v2 returned EMPTY\n"
-          f"  for beat {code}. v1 is retired to fallback-only; this should not\n"
+    v3, emitter = for_beat_v3(beat, scene)
+    if v3:
+        return v3, f"cb_segprompt_v3 ({emitter})", True
+    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v2 (for_beat_v2) — for_beat_v3 returned EMPTY\n"
+          f"  for beat {code}. v3 is the definitive builder; this should not\n"
           f"  happen in practice. Investigate the beat's data before trusting\n"
           f"  this render.\n{'!' * 70}\n", flush=True)
+    v2 = for_beat_v2(beat, scene)
+    if v2:
+        return v2, "cb_segprompt_v2 (RETIRED FALLBACK — v3 returned empty, see log)", False
+    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v1 (for_beat) — for_beat_v2 ALSO returned EMPTY\n"
+          f"  for beat {code}. Both v3 and v2 are empty; investigate the beat's\n"
+          f"  data before trusting this render.\n{'!' * 70}\n", flush=True)
     v1 = for_beat(beat, scene)
-    return v1, "cb_segprompt_v1 (FALLBACK — v2 returned empty, see log)", False
+    return v1, "cb_segprompt_v1 (RETIRED FALLBACK — v3 and v2 both empty, see log)", False
 
 if __name__ == "__main__":
     import sys
@@ -315,6 +508,6 @@ if __name__ == "__main__":
     d = json.load(open(pkg))
     beat = next(b for b in d.get("beats") or d.get("shots") or [] if (b.get("beatCode") or b.get("shotCode")) == code)
     scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(beat.get("sceneNumber"))), None)
-    prompt, _builder, _is_v2 = shipped_prompt(beat, scene)
+    prompt, _builder, _is_v3 = shipped_prompt(beat, scene)
     print(f"===== GATE-3 SEEDANCE PROMPT — {code}  ({len(prompt)} chars) =====\n")
     print(prompt)

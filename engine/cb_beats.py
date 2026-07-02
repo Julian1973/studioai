@@ -119,6 +119,13 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
     va = [p for p in cb_voice.audit_attribution(pkg_path) if p.startswith(beat_code)]
     if va:
         blockers.append("audio attribution: " + "; ".join(va))
+    # T33 Ruling 3: config/locations.json is a CACHE of the beat package's own scene data — a stale cache used to
+    # diverge silently (a beat-package scene edit never reaching keyframe/plate/Seedance prompts, with no signal).
+    # Now a hard BLOCK, not a silent divergence.
+    if beat is not None:
+        stale = P.scene_cache_stale(episode, beat.get("sceneNumber"), pkg_path=pkg_path)
+        if stale:
+            blockers.append("scene cache: " + stale)
     if not g["authoring_validator"]["ok"] or rstat == "NEEDS_SOURCE_DATA_FIX":
         status = "NEEDS_SOURCE_DATA_FIX"
     elif blockers:

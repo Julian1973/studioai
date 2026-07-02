@@ -147,6 +147,59 @@ VISION_FRAME = ("THE VISION FILLS THE ENTIRE FRAME — this is Aida's point of v
 def scene_cfg(episode, scene_num):
     return LOCATIONS[episode][str(scene_num)]
 
+# ── SCENE-CACHE FRESHNESS (T33 Ruling 3, 2026-07-02, Julian) ──────────────────────────────────────────────────────
+# config/locations.json (LOCATIONS above) is a SNAPSHOT of each scene's descriptive fields, cached for fast lookup —
+# but the beat package's own scenes[] array is the actual single source of truth (the Director's Gate-1 output). The
+# 2026-07-02 find: a beat-package scene edit silently never reached scene_cfg()'s callers (keyframe/plate/Seedance
+# prompts) because nothing ever re-synced this cache — a stale snapshot diverged from its source with no signal at
+# all. Same discipline as tools/sync_canon.py (source hash vs copy hash), extended to scene data: a mismatch is now
+# a detectable, blockable condition, not a silent divergence.
+SCENE_SYNC_FIELDS = ("name", "locationId", "sceneShotName", "time", "weather", "location", "look",
+                     "lighting", "definingFeature", "colorTemperature", "lens", "cameraHeight")
+
+def _scene_source_hash(scene):
+    """Canonical hash of a scene dict's SYNCED fields only (excludes cache-only bookkeeping like `master`/
+    `updatedAt`/`_sourceHash` itself, and beat-package-only story fields like `cast`/`pillar`/`intensity`/
+    `emotionalCore` that config/locations.json was never meant to mirror) — so the beat package's raw scene dict and
+    its locations.json snapshot hash identically when they genuinely agree, in either representation's native shape."""
+    import hashlib
+    projected = {k: scene.get(k) for k in SCENE_SYNC_FIELDS}
+    return hashlib.sha256(json.dumps(projected, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
+
+def _resolve_beat_pkg(episode):
+    """The episode's current beat package, resolved by glob (mirrors cb_pipeline._resolve_pkg, parameterised by
+    episode so this works for the freshness check regardless of which episode is active)."""
+    import glob
+    cands = (glob.glob(os.path.join(HERE, "..", "cb-output", f"{episode}_*beat_package.json"))
+             or glob.glob(os.path.join(HERE, "..", "cb-output", f"{episode}_*shot_package.json")))
+    return max(cands, key=os.path.getmtime) if cands else None
+
+def scene_cache_stale(episode, scene_num, pkg_path=None):
+    """None if config/locations.json's cached scene matches its beat-package source; otherwise a short string
+    describing the mismatch (missing hash = never synced; hash mismatch = the source has since changed underneath
+    it). Fails LOUD by design — a stale/unsynced scene cache is exactly the bug this closes, so silence here would
+    just reintroduce it. `pkg_path` can be supplied when the caller already resolved it (avoids a second glob)."""
+    cached = (LOCATIONS.get(episode) or {}).get(str(scene_num))
+    if cached is None:
+        return f"no cached scene {scene_num} for {episode} in config/locations.json at all"
+    pkg_path = pkg_path or _resolve_beat_pkg(episode)
+    if not pkg_path or not os.path.exists(pkg_path):
+        return None                                    # no beat package to compare against — nothing to detect drift from
+    try:
+        d = json.load(open(pkg_path))
+    except Exception:
+        return None                                    # an unreadable package can't be compared; not this check's job to fail on that
+    src = next((s for s in (d.get("scenes") or []) if str(s.get("sceneNumber")) == str(scene_num)), None)
+    if src is None:
+        return None                                    # scene not in this package (e.g. a different episode's number) — not a mismatch
+    want = _scene_source_hash(src)
+    got = cached.get("_sourceHash")
+    if got is None:
+        return f"scene {scene_num} cache has never been synced (run tools/sync_scenes.py)"
+    if got != want:
+        return f"scene {scene_num} cache is STALE (hash {got} != source {want} — run tools/sync_scenes.py)"
+    return None
+
 def location_history(episode, scene_num):
     """STATEFUL LOCATIONS — a place remembers. For a RETURNING location (a scene whose `locationId`
     appeared in an EARLIER scene), return the location's LAST-SEEN state (the most recent earlier

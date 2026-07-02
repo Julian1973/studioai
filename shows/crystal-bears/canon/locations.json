@@ -5,7 +5,6 @@
    "name": "Rainforest Pollen Run",
    "locationId": "deep_rainforest_flower_field",
    "sceneShotName": "Rainforest Pollen Run — sunlit wildflower meadow, bee's-eye low",
-   "master": "media/Ep1_S1_plate.png",
    "time": "Morning moving toward late morning",
    "weather": "Warm breeze under mostly clear sky; distant pressure beginning to build but not yet visible.",
    "location": "A sunlit wildflower meadow in Crystal Cove, framed at bee-flight height so ordinary lavender spikes, daisies and clover loom like a towering blossom corridor. Sparkling heart-shaped light trails and floating cut crystals (quartz, amethyst, opal, garnet) drift among the stems and rest low in the grass; warm rolling hills glow gold-pink in the deep background.",
@@ -14,13 +13,14 @@
    "definingFeature": "a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals",
    "colorTemperature": "warm golden-amber morning safety with a faint cool sky undertone",
    "lens": "wide bee's-eye 24mm",
-   "cameraHeight": "low bee's-eye height, just above the grass, looking across the meadow so ordinary blooms loom tall"
+   "cameraHeight": "low bee's-eye height, just above the grass, looking across the meadow so ordinary blooms loom tall",
+   "master": "media/Ep1_S1_plate.png",
+   "_sourceHash": "4f186605242d7e4a"
   },
   "2": {
    "name": "Aida’s Sanctuary Vision",
    "locationId": "aidas_sanctuary",
    "sceneShotName": "Aida’s sanctuary shore — late-morning rose-gold wide with crystal bowl",
-   "master": null,
    "time": "Late morning, shortly after Scene 1",
    "weather": "Clear but the distant wind is beginning to gather beyond the sanctuary.",
    "location": "A quiet sheltered cove sanctuary at the edge of Crystal Cove, where gentle waves meet a smooth shore and a forest path begins just beyond the crystal bowl.",
@@ -29,13 +29,13 @@
    "definingFeature": "the crystal singing bowl set at the sanctuary shoreline, catching rose-gold light as waves quiet around it",
    "colorTemperature": "warm late-morning amber softened by rose-quartz tenderness, with the first cool hint of distant wind",
    "lens": "wide natural 35mm",
-   "cameraHeight": "grounded eye-level from the shore, slightly low toward the bowl"
+   "cameraHeight": "grounded eye-level from the shore, slightly low toward the bowl",
+   "_sourceHash": "9ecb568f5841f0a1"
   },
   "3": {
    "name": "The Pier Goodbye",
    "locationId": "keen_pier",
    "sceneShotName": "Crystal Cove pier — late-morning goodbye, moored sailboat wide",
-   "master": null,
    "time": "Late morning, continuous emotional flow from Aida’s vision",
    "weather": "Clear and breezy, with the first subtle signs of unsettled air over the open sea.",
    "location": "The Crystal Cove pier at the edge of the beach: a weathered wooden dock projecting into clear open sea, with enough water beside it for Squeaky to surface and enough horizon beyond for Keen’s boat to leave screen-right.",
@@ -44,13 +44,13 @@
    "definingFeature": "the small moored sailboat tied to the goodbye pier, waiting between safe dock and wide open water",
    "colorTemperature": "warm late-morning amber safety with cool aquamarine sea-fill, love beginning to feel like distance",
    "lens": "wide 24mm",
-   "cameraHeight": "low child-height on the dock, looking gently out toward the boat and open water"
+   "cameraHeight": "low child-height on the dock, looking gently out toward the boat and open water",
+   "_sourceHash": "b3c07577a820c407"
   },
   "4": {
    "name": "Lost at Sea",
    "locationId": "open_sea",
    "sceneShotName": "Open sea — storm front swallowing small sailboat, high wide",
-   "master": null,
    "time": "Early afternoon",
    "weather": "Clear sea turning rapidly to heavy storm: gusts, dark clouds, hard rain, lightning far off, roughening waves.",
    "location": "Endless open water beyond Crystal Cove, with no land in sight: a small sailboat space on roughening waves, open horizon, and enough surrounding water for Squeaky to surface, vanish, leap, and signal beside the boat.",
@@ -59,13 +59,13 @@
    "definingFeature": "the tiny sailboat being swallowed by an enormous grey storm horizon",
    "colorTemperature": "cool blue-silver storm fear, faintly storm-washed aquamarine from the sea",
    "lens": "wide anamorphic 24mm",
-   "cameraHeight": "slightly high looking down, making the boat feel small in the vast water"
+   "cameraHeight": "slightly high looking down, making the boat feel small in the vast water",
+   "_sourceHash": "80814612c1a910a4"
   },
   "5": {
    "name": "Rainforest Edge Alarm",
    "locationId": "rainforest_edge",
    "sceneShotName": "Rainforest edge — storm-lashed sea gap, bee's-eye wide",
-   "master": null,
    "time": "Early afternoon, continuous with the storm",
    "weather": "Storm building hard: strong wind, rain beginning to cut through the trees, branches swaying sharply.",
    "location": "The outer edge of the rainforest where a narrow bee-height flight corridor breaks through wind-bent trees toward the beach and stormy open water beyond.",
@@ -74,13 +74,13 @@
    "definingFeature": "a storm-dark break in the rainforest that frames the tiny boat beyond the rain",
    "colorTemperature": "cool blue-grey storm fear with drained green-gold forest undertone",
    "lens": "wide bee's-eye 24mm",
-   "cameraHeight": "bee-flight height, slightly low looking through the corridor toward the sea"
+   "cameraHeight": "bee-flight height, slightly low looking through the corridor toward the sea",
+   "_sourceHash": "9b303a4ee7f7c538"
   },
   "6": {
    "name": "Crystal Cove Beacon",
    "locationId": "crystal_cove_shore",
    "sceneShotName": "Crystal Cove shore — storm-building beacon beach, wide waterline plate",
-   "master": null,
    "time": "Early afternoon, storm peak approaching",
    "weather": "Storm building over the cove: heavy clouds, wind through grasses, rain beginning to blur the sea.",
    "location": "The wet Crystal Cove shoreline at the water’s edge, with rain-dark sea stretching screen-right into the storm and a shallow strip of beach wide enough for the bears to gather in a protective circle.",
@@ -89,13 +89,13 @@
    "definingFeature": "the open storm-dark sea corridor beyond the wet waterline, aimed like a path for a crystal beacon",
    "colorTemperature": "cool blue-grey storm fear with faint aquamarine crystal promise",
    "lens": "wide anamorphic 24mm",
-   "cameraHeight": "low shore-level, slightly looking out across the water"
+   "cameraHeight": "low shore-level, slightly looking out across the water",
+   "_sourceHash": "b134409029bed394"
   },
   "7": {
    "name": "Underwater Rescue",
    "locationId": "storm_sea_rescue",
    "sceneShotName": "Crystal Cove storm sea — split-level rescue wide, shore beacon and submerged rock",
-   "master": null,
    "time": "Early afternoon, the darkest point of the storm",
    "weather": "Full storm: crashing waves above, rain-lashed surface, violent current below, foam and lightning-muted water.",
    "location": "Off the rain-lashed Crystal Cove shore where the storm sea drops into a blue-grey underwater rescue channel, with the water’s edge on screen-left and open churning water driving screen-right.",
@@ -104,13 +104,13 @@
    "definingFeature": "the storm-lit split waterline revealing both the crashing surface and the submerged rock-and-drift-net rescue zone beneath it",
    "colorTemperature": "cool blue-silver fear with a faint aquamarine-white beacon glow",
    "lens": "wide anamorphic 24mm",
-   "cameraHeight": "low split-level at the waterline, slightly canted by the swell, looking from shore-left toward the open storm sea"
+   "cameraHeight": "low split-level at the waterline, slightly canted by the swell, looking from shore-left toward the open storm sea",
+   "_sourceHash": "e0c1d10a5bc84e79"
   },
   "8": {
    "name": "Welcome to Crystal Cove",
    "locationId": "crystal_cove_shore",
    "sceneShotName": "Crystal Cove shore — rain-easing welcome circle wide",
-   "master": null,
    "time": "Mid afternoon, immediately after the rescue",
    "weather": "Rain easing; storm breaking apart; waves still active but softening near shore.",
    "location": "The sheltered Crystal Cove beach at the edge of the shallows, where wet sand meets softening waves beneath a crystal-veined cove wall.",
@@ -119,13 +119,13 @@
    "definingFeature": "the crystal-veined cove wall curving protectively around the wet welcome shore",
    "colorTemperature": "soft warm aquamarine after-storm — safety returning through rain",
    "lens": "wide 24mm",
-   "cameraHeight": "low bear-eye shoreline height, looking slightly across the wet sand toward the shallows"
+   "cameraHeight": "low bear-eye shoreline height, looking slightly across the wet sand toward the shallows",
+   "_sourceHash": "937a6c4997503783"
   },
   "9": {
    "name": "Aquamarine Welcome Circle",
    "locationId": "crystal_cove_gathering_area",
    "sceneShotName": "Crystal Cove welcome circle — storm-washed late-afternoon wide",
-   "master": null,
    "time": "Late afternoon, after the storm has passed",
    "weather": "Storm cleared; damp air, glistening leaves, calm breeze returning.",
    "location": "A sheltered Crystal Cove gathering circle just beyond the beach, with a broad open center, damp crystal-veined ground, and rainforest leaves enclosing the space after the storm has cleared.",
@@ -134,13 +134,13 @@
    "definingFeature": "a rain-washed circular welcome space ringed by low aquamarine crystal-veined stones",
    "colorTemperature": "storm-cleared warm gold with cool aquamarine glints — fear witnessed into belonging",
    "lens": "wide natural 35mm",
-   "cameraHeight": "gentle eye-level, slightly low enough to make the circle feel embracing"
+   "cameraHeight": "gentle eye-level, slightly low enough to make the circle feel embracing",
+   "_sourceHash": "3a6503c3cf4b040d"
   },
   "10": {
    "name": "Honey Friendship Walk",
    "locationId": "crystal_cove_shore",
    "sceneShotName": "Crystal Cove beach — post-storm golden-hour shoreline, wide walking plate",
-   "master": null,
    "time": "Early evening golden hour, continuous emotional release after the welcome circle",
    "weather": "Clear after storm; peaceful breeze, settled surf, rain still clinging to leaves and sand.",
    "location": "Crystal Cove’s damp golden-sand shoreline where the calm surf meets the crystal-veined cove edge, with the beach stretching clearly screen-right for a group walk.",
@@ -149,7 +149,8 @@
    "definingFeature": "the crystal-veined cove wall glowing softly over rain-polished golden sand",
    "colorTemperature": "warm amber golden-hour safety with faint storm-washed aquamarine coolness in the wet sand",
    "lens": "wide natural 24mm",
-   "cameraHeight": "bear eye-level, slightly low and open toward the shoreline"
+   "cameraHeight": "bear eye-level, slightly low and open toward the shoreline",
+   "_sourceHash": "bcc8674ca8514986"
   }
  }
 }

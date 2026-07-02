@@ -158,10 +158,23 @@ def _delabel(text, cast, used=None):
 
 def _strip_spoken_words(text):
     """The dialogue's WORDS never appear in the prose — they live only in @Audio1. Quoted lines
-    become a reference to the track, so Seedance never renders text or invents a second voice."""
+    become a reference to the track, so Seedance never renders text or invents a second voice.
+    A bare possessive apostrophe (Zenny's, the bee's) is NOT a quote — the old pattern's quote-char
+    class included the plain "'", so it could open (or close) a "match" on a possessive apostrophe
+    and then greedily swallow everything up to the NEXT quote-like character (including a real
+    quoted line further on), replacing that whole span and leaving a stray "Zennythe line in
+    @Audio1" behind. Fixed with boundaries: a quote delimiter is never immediately between two
+    letters (that's a possessive), so "Zenny's" is skipped, but a possessive INSIDE a real quoted
+    line ("A Storm's coming.") still passes through as ordinary matched content. Run this AFTER
+    _delabel (not before) so every character mention is delabeled — and counted for first-mention
+    tracking — before any text is removed."""
     import re as _re
-    return _re.sub("[“\"‘']{1}[^”\"’']{2,80}[”\"’']{1}",
-                   "the line in @Audio1", str(text or ""))
+    return _re.sub(
+        r'(?<![A-Za-z])["“‘\']'                                        # open: not immediately after a letter (excludes a possessive)
+        r'((?:[^"“‘’”\']|(?<=[A-Za-z])[\'’](?=[a-zA-Z])){2,80})'       # body: non-quote chars; a possessive apostrophe (straight OR
+                                                                        # curly — the actual authored text uses curly ’) passes through
+        r'["”’\'](?![A-Za-z])',                                        # close: not immediately before a letter (excludes a possessive)
+        "the line in @Audio1", str(text or ""))
 
 def _scene_v2(beat, scene):
     """SCENE = the WORLD as the Director lit it: light + atmosphere + the location's look.
@@ -190,14 +203,17 @@ def _action_v2(beat, cast, used=None):
     for c in (beat.get("cuts") or []):
         a = str(c.get("action") or "").strip()
         if a and a not in bits: bits.append(a)
-    ph = _strip_spoken_words(str(beat.get("pauseHold") or "").strip())
+    ph = str(beat.get("pauseHold") or "").strip()
     if ph: bits.append(ph)                                   # the Docter held beat — the laugh lands in stillness
     tail = ("Weighty cartoon physics: clear anticipation → impact → follow-through; readable comedy/emotional "
             "timing; the performance carried in the eyes, the breath and the weight.")
     pf = str(beat.get("physicalFeeling") or "").strip()
     if pf: tail += " The take should feel like: " + pf
     bits.append(tail)
-    return _delabel(" ".join(bits), cast, used=used)
+    # delabel FIRST (every mention counted, in order, for the first-mention/short-label tracking), THEN strip the
+    # now-delabeled text's quoted dialogue — never the reverse (stripping first can eat a mention before delabel
+    # ever sees it, and — the bug this fixed — a bare possessive apostrophe is not a quote to strip in either order).
+    return _strip_spoken_words(_delabel(" ".join(bits), cast, used=used))
 
 def _audio_v2(beat, cast):
     has = bool(beat.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (beat.get("cuts") or []))
@@ -208,7 +224,7 @@ def _audio_v2(beat, cast):
         base = ("use ONLY @Audio1 for ALL dialogue — the characters speak the words in @Audio1 with precise en-US "
                 "lip-sync, each mouthing its own lines in @Audio1 in order; generate no other, different or duplicate "
                 "voice, and no other speech. Seedance generates and mixes everything else")
-        si = _delabel(_strip_spoken_words(str(beat.get("soundIntent") or "").strip()), cast, used=set(cast))
+        si = _strip_spoken_words(_delabel(str(beat.get("soundIntent") or "").strip(), cast, used=set(cast)))
         base += (": " + si if si else ": the scene ambience, gentle character SFX and a light playful underscore")                 + " — kept low under the voice (no sung lyrics)."
     return base
 

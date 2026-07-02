@@ -1,7 +1,7 @@
 REFERENCE IMAGES:
 [Image 1] — Fuzzby Reference: Maintain this character's specific facial features and proportions exactly.
 [Image 2] — Zenny Reference: Maintain this character's specific facial features and proportions exactly.
-[Image 3] — Atmosphere Reference (the previous beat's approved frame — attaches once it is rendered): match its lighting, colors and textures; DO NOT copy its framing or poses.
+[Image 3] — Atmosphere Reference: Match the lighting, colors, and environmental textures of this image, but DO NOT copy the camera framing or character poses.
 
 PROMPT:
 Reason through this composition:

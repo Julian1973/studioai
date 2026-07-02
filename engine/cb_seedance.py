@@ -949,45 +949,34 @@ def validate_seedance_prompt(text, a):
     if "Zenny" not in speakers and re.search(r"zenny (speaks|lip-syncs|says|delivers)", rlow):
         rejects.append('"Zenny speaks" but Zenny has no assigned line')
     low = text.lower()
-    # ── SCRIPT GAG LOCK enforcement (mutation = FAIL) ──
+    # ── SCRIPT GAG LOCK enforcement (mutation = FAIL) — content requirements live in canon/gag_locks.json, keyed by
+    #    script_gag_lock_id: {"required_words": [...], "prohibited_patterns": [...regex...]}. A beat whose lock has
+    #    no canon entry passes silently — no rejects, no warns (T33 Ruling 2, 2026-07-02, Julian: hardcoded story
+    #    words — "moustache", "goatee", "Do I look official?" — do not belong in validator code; canon lives in data).
     gag = a.get("gag_lock")
     if gag:
-        if "moustache" not in low:
-            rejects.append(f'gag {a.get("script_gag_lock_id")}: prompt does not contain "moustache"')
-        else:
-            mi, di = low.find("moustache"), low.find("do i look official")
-            if di < 0:
-                rejects.append('gag: the misread line "Do I look official?" is missing')
-            elif mi > di:
-                rejects.append('gag: the pollen moustache must be stated BEFORE "Do I look official?"')
-        # the re-staged gag REQUIRES the readable handlebar+goatee disguise and the body staying outside the flower
-        if "goatee" not in low:
-            warns.append("gag: the pollen goatee is not described (payoff should be handlebar moustache + goatee)")
-        # scan the REQUEST (not the NEGATIVE block, which legitimately says "no buried inside") + negation-aware
-        if any(not _negated(m.start()) for m in re.finditer(
-                r"buried inside|swallowed by|disappears? into the flower|plunges? into|enters the flower", rlow)):
-            rejects.append("gag: Fuzzby must stay OUTSIDE the flower — no entering/burying/plunging/disappearing")
+        for w in (gag.get("required_words") or []):
+            if str(w).lower() not in low:
+                rejects.append(f'gag {a.get("script_gag_lock_id")}: prompt does not contain "{w}"')
+        for pat in (gag.get("prohibited_patterns") or []):
+            if any(not _negated(m.start()) for m in re.finditer(pat, rlow)):
+                rejects.append(f'gag {a.get("script_gag_lock_id")}: stages a prohibited pattern ("{pat}")')
         if any(not _negated(m.start()) for m in re.finditer(r"\b(embarrass\w*|ashamed|shame|sad(ness|ly)?|humiliat\w*|wounded|tearful)\b", rlow)):
-            warns.append("gag may be reframed as embarrassment/sadness/shame — keep Fuzzby proud & clueless")
+            warns.append("gag may be reframed as embarrassment/sadness/shame — keep the tone proud & clueless")
     if a.get("gag_carry"):
+        # gag_carry describes what THIS beat hands FORWARD — it must be checked against the NEXT beat's own opening
+        # (next_continuity_in), never this beat's own continuity_in (that was checking the wrong direction — T33
+        # Ruling 2). The match is a blunt first-word substring heuristic even now, so a miss is a NOTE, not a BLOCK.
         carry = str(a["gag_carry"]).lower().split()[0]
-        if carry not in (a.get("continuity_in") or "").lower():
-            rejects.append(f'gag carryover: continuity-in must carry "{a["gag_carry"]}" forward')
+        if carry not in (a.get("next_continuity_in") or "").lower():
+            warns.append(f'gag carryover note: the next beat\'s opening does not obviously echo "{a["gag_carry"]}"')
     # ── PHYSICAL STAGING INTENT enforcement (a physical gag must declare its staging, not just its emotion) ──
     dmode_phys = a.get("director_mode", ""); bcode = a.get("beat_code", "")
     if dmode_phys == "COMEDY_PHYSICAL" and not (a.get("physical_staging_intent") or "").strip():
         rejects.append("COMEDY_PHYSICAL beat has no PHYSICAL STAGING INTENT")
-    if bcode == "1.B3b":
-        if any(not _negated(m.start()) for m in re.finditer(r"plunges? into|buried inside|enters the flower|disappears? into", rlow)):
-            rejects.append("1.B3b: Fuzzby must not plunge into / enter / be buried inside / disappear into the flower")
-        if not ("handlebar" in low and "goatee" in low):
-            rejects.append("1.B3b must state the handlebar moustache + goatee")
-        if "smear" not in low:
-            rejects.append("1.B3b must state the failed wipe / smear-worse action")
-        co = (a.get("continuity_out") or "").lower()
-        if not (("moustache" in co or "goatee" in co) and ("smear" in co or "messy" in co)):
-            rejects.append("1.B3b continuity_out must preserve the smeared moustache/goatee")
-    # ── PHYSICAL ACTION ARCHETYPE enforcement (scan the STAGED action, not the prohibited/boilerplate text) ──
+    # ── PHYSICAL ACTION ARCHETYPE enforcement (scan the STAGED action, not the prohibited/boilerplate text) — these
+    #    are the archetype's own reusable PHYSICS/STAGING rules (any show using this pattern needs them), not
+    #    story-specific content; the gag's specific visual payoff words are the gag-lock check above, not here. ──
     arch = a.get("physical_action_archetype", "")
     staged = " ".join((s.get("action", "") + " " + " ".join(s.get("dialogue", []))) for s in a.get("shots", [])).lower()
     scn = bcode.split(".")[0]
@@ -995,15 +984,8 @@ def validate_seedance_prompt(text, a):
         rejects.append("high-risk physical beat has no resolvable physical_action_archetype (NEEDS_EXPLICIT_PHYSICAL_STAGING)")
     if arch == "LEAF_CRASH_REBOUND" and re.search(r"buried inside|disappears? into|plunges? into|swallow|face[- ]first into|vanish\w* into|makes it worse", staged):
         rejects.append("LEAF_CRASH_REBOUND must not stage face-first contact, flower entry, disappearing or 'makes it worse'")
-    if arch == "POLLEN_FACE_PRESS_REVEAL":
-        if re.search(r"full[- ]body|body enters the flower|buried inside|disappears? into", staged):
-            rejects.append("POLLEN_FACE_PRESS_REVEAL must not stage full-body flower entry / disappearing")
-        if not ("handlebar" in low and "goatee" in low):
-            rejects.append("POLLEN_FACE_PRESS_REVEAL must state the handlebar moustache + goatee")
-    if arch == "POLLEN_SMEAR_TUMBLE":
-        cin = (a.get("continuity_in") or "").lower()
-        if not (("moustache" in cin or "goatee" in cin) or "pollen" in cin):
-            rejects.append("POLLEN_SMEAR_TUMBLE must enter still wearing the pollen moustache/goatee (carried in)")
+    if arch == "POLLEN_FACE_PRESS_REVEAL" and re.search(r"full[- ]body|body enters the flower|buried inside|disappears? into", staged):
+        rejects.append("POLLEN_FACE_PRESS_REVEAL must not stage full-body flower entry / disappearing")
     if arch == "UNDERWATER_NET_PULL":
         miss = [n for n, kws in (("geography", ("geography", "readable", "where")),
                 ("trapped object", ("net", "trapped", "squeaky")),
@@ -1258,8 +1240,11 @@ def validate_compact_prompt(compact, a):
             rej.append("compact lost the GROUP_CHORUS lock")
         if "nderwater" in vl and "underwater" not in low:
             rej.append("compact lost the underwater_vo lock")
-    if a.get("gag_lock") and "moustache" not in low:
-        rej.append("compact lost the gag payoff (moustache)")
+    _gag = a.get("gag_lock")
+    if _gag:
+        for w in (_gag.get("required_words") or []):
+            if str(w).lower() not in low:
+                rej.append(f'compact lost the gag payoff ("{w}")')
     # ── stale language / old-JSON structure ──
     rej += detect_stale_prompt(compact)
     n = len(blob)
@@ -1283,8 +1268,16 @@ def surgical_repair_metadata(beat_code="", **vals):
 # ── convenience: gather refs for a beat and build everything ─────────────────────────────────────────────────
 def build_for_beat(pkg_path, beat_code, episode="Ep1"):
     d = json.load(open(pkg_path))
-    beat = next(b for b in (d.get("beats") or d.get("shots") or [])
-                if (b.get("beatCode") or b.get("shotCode")) == beat_code)
+    all_beats = d.get("beats") or d.get("shots") or []
+    beat = next(b for b in all_beats if (b.get("beatCode") or b.get("shotCode")) == beat_code)
+    # gag_carry describes what THIS beat hands FORWARD — the validator's carryover check must confirm the NEXT
+    # beat actually opens with it, not that THIS beat's own opening (continuity_in) already contains it. Find the
+    # next beat in the SAME scene, in beat-package order (the same order cb_beats.run renders in).
+    _scene_beats = [b for b in all_beats if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+    _idx = next((i for i, b in enumerate(_scene_beats)
+                 if (b.get("beatCode") or b.get("shotCode")) == beat_code), None)
+    _next_beat = _scene_beats[_idx + 1] if (_idx is not None and _idx + 1 < len(_scene_beats)) else None
+    next_continuity_in = ((_next_beat.get("continuity") or {}).get("opensFrom") or _next_beat.get("startState") or "") if _next_beat else ""
     sc = P.scene_cfg(episode, str(beat.get("sceneNumber")))
     slug = beat.get("slug") or beat_code.replace(".", "_")
     here = os.path.dirname(os.path.abspath(__file__))
@@ -1304,6 +1297,7 @@ def build_for_beat(pkg_path, beat_code, episode="Ep1"):
     continuity = {"in": (beat.get("continuity") or {}).get("opensFrom", ""),
                   "out": (beat.get("continuity") or {}).get("carryToNext", "")}
     authoring = build_seedance_authoring_json(beat, sc, refs, continuity, episode=episode)
+    authoring["next_continuity_in"] = next_continuity_in      # the NEXT beat's own opening — what gag_carry validates against
     prompt = flatten_seedance_prompt(authoring)               # the full bible (review/debug)
     report = validate_seedance_prompt(prompt, authoring)
     compact = compact_seedance_prompt(authoring)              # the disciplined render prompt

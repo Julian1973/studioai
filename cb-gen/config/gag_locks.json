@@ -1,0 +1,37 @@
+{
+ "_note": "SCRIPT GAG LOCKS — the mechanism of a scripted comedy gag is LOCKED. The Director may SPLIT a beat into shots/sub-beats, but must NEVER mutate the gag (weaken the visual payoff, delay the reveal, drop the moustache shape, reframe the tone, or reorder the locked lines). cb_seedance injects these into the flattened Seedance prompt + the validator enforces them. Keyed by gag_id; a beat references one via beat.script_gag_lock_id.",
+ "S1_FUZZBY_POLLEN_MOUSTACHE": {
+  "gag_id": "S1_FUZZBY_POLLEN_MOUSTACHE",
+  "source_script_span": "Fuzzby boasts he is an extremely busy bee, presses his face into a flower's pollen, pulls back with a fuzzy yellow pollen handlebar moustache and goatee, asks 'Do I look official?'; Zenny answers 'Yes Fuzzby. Officially nuts!'",
+  "setup": "Fuzzby boasts he is an extremely busy bee and leans face-first into an open flower's pollen — body always outside the bloom.",
+  "required_visual_payoff": "Fuzzby pulls his face back from the flower — his whole body, wings and legs fully visible and OUTSIDE the bloom the entire time — now wearing a large yellow pollen handlebar moustache and a small yellow pollen goatee, with pollen dust on his cheeks and nose.",
+  "carry_visual": "large yellow pollen handlebar moustache and small pollen goatee",
+  "timing_lock": "The handlebar moustache and goatee must be clearly visible BEFORE Fuzzby says 'Do I look official?', and must stay visible — getting messier when he wipes, never clean — through Zenny's 'Officially nuts!' and to the end of the beat.",
+  "character_misread": "Fuzzby sincerely believes the pollen handlebar moustache and goatee may make him look official.",
+  "reaction_line": "Zenny says: 'Yes Fuzzby. Officially nuts!'",
+  "carryover_state": "Beat 4 opens with Fuzzby still wearing the smeared handlebar pollen moustache and messy pollen goatee — he never wiped it clean.",
+  "forbidden_interpretations": [
+   "Do not make the moment primarily emotional or embarrassed.",
+   "Do not make Zenny overly sentimental.",
+   "Do not change the line order.",
+   "No disappearing into the flower; Fuzzby's body, wings, legs and silhouette never vanish into the bloom.",
+   "No full body entering the flower; only his face, nose and cheeks press into the pollen.",
+   "No 'buried inside flower' or 'swallowed by the flower' staging.",
+   "No hidden Fuzzby silhouette.",
+   "No vague pollen dusting — the payoff is a readable large yellow handlebar moustache PLUS a small pollen goatee.",
+   "No clean face after wiping; the wipe smears the pollen worse, it never removes it.",
+   "No wiping the moustache or goatee off completely.",
+   "No loss of the pollen moustache or goatee before the end of the beat."
+  ],
+  "required_keyframe_type": "REVEAL",
+  "reveal_target_time": "2.6s-3.7s",
+  "acting_note": "Fuzzby: proud, clueless and hopeful, not embarrassed or wounded — he presses only his FACE into the pollen, never his body. Zenny: dry and trying not to laugh, almost still. The joke is the readable handlebar-moustache-and-goatee disguise plus Fuzzby's total lack of self-awareness — and the failed wipe that smears it worse.",
+  "validation_rules": [
+   "Beat 3b prompt MUST contain 'moustache' and 'goatee'.",
+   "Beat 3b MUST state the moustache is visible before 'Do I look official?'.",
+   "Fuzzby's body must stay OUTSIDE the flower (no entering/burying/disappearing).",
+   "Beat 4 continuity MUST carry the smeared pollen moustache/goatee forward.",
+   "Do not reframe the gag as embarrassment, sadness, shame or emotional hurt."
+  ]
+ }
+}

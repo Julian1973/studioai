@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "id": "crystal-bears",
+      "name": "Crystal Bears",
+      "primary": true,
+      "animationType": "3D CGI (Pixar/Bluey)",
+      "style": "Pixar/Bluey-quality 3D CGI — soft fur and fabric, warm cinematic lighting, tactile crystal glow, shallow depth of field.",
+      "premise": "Seven Crystal Bears in Crystal Cove help children name and navigate big feelings — social-emotional learning wrapped in adventure.",
+      "audience": "Kids 3–7, with a co-viewing layer for parents (Haidt/Bluey model).",
+      "episodeLength": "11-min episode",
+      "aspectRatio": "16:9",
+      "voiceProvider": "ElevenLabs (v3)",
+      "musicStyle": "Warm orchestral with gentle motifs; each bear seeded to a musical note.",
+      "configBase": "cb-gen/config",
+      "showBibleFile": "CRYSTAL_BEARS_LOCKED_CANON.md",
+      "episodesFile": "cb-studio/data/episodes.json",
+      "mediaBase": "cb-gen/media",
+      "createdAt": "2026-06-24"
+    }
+  ]
+}

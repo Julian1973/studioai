@@ -299,7 +299,7 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 13,
+      "durationSec": 9,
       "pillar": "spark",
       "intensity": 0.22,
       "storyBeat": "The giant flower field is safe, warm and playful as Fuzzby and Zenny collect pollen; Zenny works with calm precision while Fuzzby turns the job into a manic aerial performance, overdoes a dip into a flower, ricochets off a leaf, and proudly buttons the crash.",
@@ -344,18 +344,9 @@
           "delivery": "crisp, dignified cover-up; a tiny beat of delayed self-certainty after the FWIP",
           "voiceTreatment": null,
           "chorusMembers": null
-        },
-        {
-          "n": 4,
-          "framing": "Cut to two-shot reaction hold, 50mm, locked-off with Fuzzby frame-left and Zenny frame-right",
-          "action": "Zenny glides up beside Fuzzby and watches him for a beat, perfectly still except for rapid wing flaps; Fuzzby sustains the proud pose one blink too long.",
-          "dialogue": null,
-          "delivery": null,
-          "voiceTreatment": null,
-          "chorusMembers": null
         }
       ],
-      "cameraArc": "Begin wide and warm to make the world feel huge and safe, chase Fuzzby's chaotic confidence into the FWIP, then settle into a locked two-shot so Zenny's stillness becomes the quiet topper.",
+      "cameraArc": "Track Fuzzby continuously and hyper-paced throughout the whole beat — frame-left, chasing his flight, dive and FWIP spin — with Zenny frame-right in the same moving composition, barely keeping up. The ONLY hold in the whole beat is close on Fuzzby's own proud chest-out pose on his button line. No separate reaction shot, no locked two-shot ending.",
       "pacingVerbs": [
         "swaying",
         "weaving",
@@ -366,7 +357,7 @@
         "straightening",
         "holding"
       ],
-      "pauseHold": "After “Nailed it.” hold Zenny's silent watch for about 1.2 seconds; music ducks so the still look lands.",
+      "pauseHold": "After 'Nailed it.' hold Fuzzby's own proud chest-out pose for about 1.0-1.5 seconds — the beat's only hold; music buttons the moment. Zenny never stops to watch; she stays in frame, still barely keeping up.",
       "performance": {
         "surface": "Fuzzby performs expert competence; Zenny performs calm efficiency.",
         "underneath": "Fuzzby is desperate to be impressive and accepted; Zenny is already amused and fond, though she refuses to give him the satisfaction yet.",

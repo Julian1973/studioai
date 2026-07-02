@@ -215,6 +215,37 @@ def _action_v2(beat, cast, used=None):
     # ever sees it, and — the bug this fixed — a bare possessive apostrophe is not a quote to strip in either order).
     return _strip_spoken_words(_delabel(" ".join(bits), cast, used=used))
 
+def _speaker_map(beat, cast):
+    """LINE INDEX -> ROLE LABEL, in the order the lines are actually voiced — built from the SAME parser cb_voice
+    uses to cut and attribute the real @Audio1 track (_cut_segments/_resolve_speaker), so the prompt's claim about
+    who is speaking can never drift from what the track actually contains. This is the fix for the ambiguous-speaker
+    class of bug (a beat where only one on-screen character has lines still let Seedance guess, and it guessed
+    wrong — "Nailed it." rendered in Zenny's mouth instead of Fuzzby's): naming the mapping explicitly, and naming
+    who stays silent, removes the guess. Returns '' when the beat has no dialogue (nothing to map)."""
+    try:
+        import cb_voice as V
+    except Exception:
+        return ""
+    speakers = []
+    for c in (beat.get("cuts") or []):
+        dlg = (c.get("dialogue") or "").strip()
+        if not dlg:
+            continue
+        for label, text in V._cut_segments(dlg):
+            if text:
+                speakers.append(V._resolve_speaker(label, beat))
+    if not speakers:
+        return ""
+    lines = "; ".join(f"line {i + 1} → {_short_role(_char_meta(name)[0])}" for i, name in enumerate(speakers) if name)
+    speaking = list(dict.fromkeys(n for n in speakers if n))
+    silent = [n for n in cast if n not in speaking]
+    tail = ""
+    if len(speaking) == 1 and silent:
+        solo = _short_role(_char_meta(speaking[0])[0])
+        others = ", ".join(_short_role(_char_meta(n)[0]) for n in silent)
+        tail = f" Only {solo} speaks in this beat; {others} has no lines and must stay visibly silent throughout — no mouth movement, no voice."
+    return f"SPEAKER MAP: {lines}.{tail}"
+
 def _audio_v2(beat, cast):
     has = bool(beat.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (beat.get("cuts") or []))
     if beat.get("wordlessHeld") is True or not has:
@@ -226,6 +257,9 @@ def _audio_v2(beat, cast):
                 "voice, and no other speech. Seedance generates and mixes everything else")
         si = _strip_spoken_words(_delabel(str(beat.get("soundIntent") or "").strip(), cast, used=set(cast)))
         base += (": " + si if si else ": the scene ambience, gentle character SFX and a light playful underscore")                 + " — kept low under the voice (no sung lyrics)."
+        smap = _speaker_map(beat, cast)
+        if smap:
+            base += " " + smap
     return base
 
 _SIDES = ["frame-LEFT", "frame-RIGHT", "frame-CENTRE"]
@@ -240,7 +274,7 @@ def for_beat_v2(beat, scene=None):
         side = _SIDES[min(i, 2)] if len(chars) > 1 else None
         ref_bits.append(f"@图{i + 2} is {role}" + (f" ({side})" if side else ""))
     reflaw = _REFLAW_HEAD + ((" " + "; ".join(ref_bits) + ".") if ref_bits else "") + _REFLAW_TAIL
-    cam = CAMERA_GENERIC + ((" " + _delabel(str(beat.get("cameraArc")).strip(), chars, used=set(chars))) if beat.get("cameraArc") else "")
+    cam = CAMERA_GENERIC + ((" " + _strip_spoken_words(_delabel(str(beat.get("cameraArc")).strip(), chars, used=set(chars)))) if beat.get("cameraArc") else "")
     neg = NEGATIVES_GENERIC + (_BEE_NEG if any_bee else ".")
     out = f"{dur} seconds, 16:9.\n\n{reflaw}\n\n"
     if any_bee:

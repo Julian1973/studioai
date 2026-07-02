@@ -226,12 +226,20 @@ def _retake_brief_fp(issue, change, shot_action):
     return hashlib.sha1("|".join([RETAKE_DIRECTOR_VERSION, issue or "", change or "", shot_action or ""]).encode()).hexdigest()[:16]
 
 def director_retake_brief(pkg, code, sh, beat, char_refs, issue, change, episode="Ep1"):
-    """Rewrite a plain-English retake note into a precise, continuity-locked Director instruction. Returns a dict
-    {action, continuity_lock, keep_unchanged, rationale, confidence, flags, _raw_change} or None (fail-open / off)."""
+    """Rewrite a plain-English retake note into a precise, continuity-locked Director instruction. `sh=None` means a
+    WHOLE-BEAT brief (the beat is being re-fired from scratch, not spliced) — e.g. a full creative redirect applied
+    before Gate 3 re-fires; `sh` given means the usual single-spliced-shot brief. Returns a dict {action,
+    continuity_lock, keep_unchanged, rationale, confidence, flags, _raw_change} or None (fail-open / off)."""
     if not _retake_director_on() or not str(change or "").strip():
         return None
-    shot_action = (sh or {}).get("action", "")
-    cache = f"media/_retake_brief_{episode}_{code}_s{sh.get('index')}.json"
+    if sh is not None:
+        shot_action = sh.get("action", "")
+        cache = f"media/_retake_brief_{episode}_{code}_s{sh.get('index')}.json"
+    else:
+        bits = [str(beat.get("storyBeat") or "").strip()]
+        bits += [str(c.get("action") or "").strip() for c in (beat.get("cuts") or [])]
+        shot_action = " ".join(b for b in bits if b)
+        cache = f"media/_retake_brief_{episode}_{code}_beat.json"
     fp = _retake_brief_fp(issue, change, shot_action)
     try:
         c = json.load(open(cache))
@@ -248,9 +256,10 @@ def director_retake_brief(pkg, code, sh, beat, char_refs, issue, change, episode
             bibles = "(bibles unavailable — direct from the reference frame)"
         beat_ctx = " · ".join(f"{k}: {str(beat.get(k))[:160]}" for k in ("beatCode", "summary", "want", "need", "action")
                               if beat.get(k))
+        scope = "ONE shot inside a finished beat" if sh is not None else "an ENTIRE beat, about to be re-rendered from scratch (not a single spliced shot)"
         system = (
             "You are the DIRECTOR of the animated kids' show Crystal Bears, doing a RETAKE NOTE pass. The showrunner "
-            "has flagged ONE shot inside a finished beat and written, in plain English, what is wrong (ISSUE) and how "
+            f"has flagged {scope} and written, in plain English, what is wrong (ISSUE) and how "
             "he wants it (CHANGE TO). Your job is to translate his note into ONE precise, continuity-locked retake "
             "instruction the renderer will perform as this shot's action.\n"
             "HARD RULES:\n"
@@ -259,16 +268,21 @@ def director_retake_brief(pkg, code, sh, beat, char_refs, issue, change, episode
             "• Honour weight and real cartoon physics, and the character bibles + canon you are given.\n"
             "• If the shot contains a gag, preserve its mechanism; only fix what he flagged.\n"
             "• NEVER add a new character, prop, on-screen text, location, or restyle. NEVER drift the character.\n"
+            "• NEVER write or alter dialogue — the spoken lines are locked verbatim elsewhere; direct only the "
+            "physical action, camera and timing around them.\n"
             "• If his note is ambiguous, choose the reading that best preserves continuity and the beat's intent, and "
             "say so in flags. Keep 'action' to one concrete imperative sentence a renderer can execute.")
         user = (
             f"BEAT: {beat_ctx or code}\n"
-            f"SHOT: {code}#shot{sh.get('index')} — current action: {shot_action or '(unknown)'}\n"
-            f"CHARACTER(S) IN FRAME (direct THEM, on-model):\n{bibles}\n\n"
+            + (f"SHOT: {code}#shot{sh.get('index')} — current action: {shot_action or '(unknown)'}\n"
+               if sh is not None else
+               f"WHOLE BEAT {code} — current combined action across all cuts: {shot_action or '(unknown)'}\n")
+            + f"CHARACTER(S) IN FRAME (direct THEM, on-model):\n{bibles}\n\n"
             f"SHOWRUNNER'S ISSUE (what's wrong): {issue or '(not stated — infer from the change)'}\n"
             f"SHOWRUNNER'S CHANGE TO (how he wants it): {change}\n\n"
             "Rewrite this into the retake brief.")
-        out = cb_llm.structured(system, user, _retake_brief_schema(), label=f"retake_director_{code}_s{sh.get('index')}").model_dump()
+        label = f"retake_director_{code}_s{sh.get('index')}" if sh is not None else f"retake_director_{code}_beat"
+        out = cb_llm.structured(system, user, _retake_brief_schema(), label=label).model_dump()
         out["_raw_change"] = change
         try:
             os.makedirs("media", exist_ok=True)
@@ -282,6 +296,18 @@ def director_retake_brief(pkg, code, sh, beat, char_refs, issue, change, episode
     except Exception as e:
         print(f"  retake director error ({type(e).__name__}: {str(e)[:120]}) — using the note verbatim.", flush=True)
         return None
+
+def beat_retake_brief(pkg, code, issue, change, episode="Ep1"):
+    """WHOLE-BEAT variant of director_retake_brief — for a full creative redirect applied to a beat's own Gate-1
+    direction fields (storyBeat/cameraArc/pauseHold/motionTempo) before Gate 3 re-fires it from scratch, never a
+    hand-patched prompt. Returns the same brief dict as director_retake_brief, or None (fail-open)."""
+    d = json.load(open(pkg))
+    beat = next((b for b in (d.get("beats") or d.get("shots") or [])
+                 if (b.get("beatCode") or b.get("shotCode")) == code), None)
+    if not beat:
+        return None
+    char_refs, _ = _char_refs(beat)
+    return director_retake_brief(pkg, code, None, beat, char_refs, issue, change, episode)
 
 def preview_brief(pkg, locator, issue, change, episode="Ep1", scene=None):
     """Resolve a locator (Ref or timecode) and return the Director's reworded retake brief WITHOUT rendering — so the

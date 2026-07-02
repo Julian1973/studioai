@@ -68,6 +68,63 @@ def test_cb_pipeline(tmp):
     return fails
 
 
+def test_frame_chain_cascade(tmp):
+    """FRAME CHAIN doctrine (2026-07-02, Julian): a retake upstream (a new ENDING FRAME) must mark every downstream
+    beat's keyframe/clip dirty. Exercises the real cb_pipeline functions with a scratch package + scratch media/
+    ending-frame files (arbitrary bytes — _beat_end_frame_hash only hashes bytes, it never decodes the PNG)."""
+    fails = []
+    spec = importlib.util.spec_from_file_location("cb_pipeline_test2", os.path.join(HERE, "cb_pipeline.py"))
+    P = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(P)
+
+    pkg = os.path.join(tmp, "Ep9_Chain_beat_package.json")
+    beats = [
+        {"beatCode": "9.B1", "sceneNumber": 9, "slug": "b1", "storyBeat": "anchor"},
+        {"beatCode": "9.B2", "sceneNumber": 9, "slug": "b2", "storyBeat": "continuation one"},
+        {"beatCode": "9.B3", "sceneNumber": 9, "slug": "b3", "storyBeat": "continuation two"},
+    ]
+    _scratch_package(pkg, beats)
+    P.PKG, P.LOCK, P.EP = pkg, os.path.join(tmp, "locked_chain.json"), "Ep9"
+
+    cwd = os.getcwd()
+    media = os.path.join(tmp, "media"); os.makedirs(media, exist_ok=True)
+    os.chdir(tmp)
+    try:
+        # 9.B1's ending frame (what 9.B2 chained off) + 9.B2's ending frame (what 9.B3 chained off)
+        open("media/Ep9_9.B1_b1_end.png", "wb").write(b"end-frame-v1")
+        open("media/Ep9_9.B2_b2_end.png", "wb").write(b"end-frame-v1")
+
+        P.approve("1", "9"); P.approve("2a", "9")
+        for code in ("9.B1", "9.B2", "9.B3"):
+            P._set_beat_lock("9", code, "keyframe", True)
+            P._set_beat_lock("9", code, "clip", True)
+        P.record_chain_source("9", "9.B2")   # stamps against 9.B1's CURRENT ending-frame hash
+        P.record_chain_source("9", "9.B3")   # stamps against 9.B2's CURRENT ending-frame hash
+
+        if P._relock_chain_if_dirty("9"):
+            fails.append("frame chain: should NOT be dirty yet — nothing has changed")
+        lk = P._lock().get("Ep9", {}).get("9", {}).get("beats", {})
+        for code in ("9.B2", "9.B3"):
+            if not lk.get(code, {}).get("keyframe"):
+                fails.append(f"frame chain: {code} keyframe should still read locked before any retake")
+
+        # a retake on 9.B1 composes a NEW ending frame — everything chained through it is now stale
+        open("media/Ep9_9.B1_b1_end.png", "wb").write(b"end-frame-v2-AFTER-A-RETAKE")
+
+        if not P._relock_chain_if_dirty("9"):
+            fails.append("frame chain: should detect 9.B1's changed ending frame and cascade-clear downstream")
+        lk = P._lock().get("Ep9", {}).get("9", {}).get("beats", {})
+        for code in ("9.B2", "9.B3"):
+            bl = lk.get(code, {})
+            if bl.get("keyframe") or bl.get("clip"):
+                fails.append(f"frame chain: {code} keyframe/clip should have been cleared (built from the stale chain), still {bl!r}")
+        if not lk.get("9.B1", {}).get("keyframe"):
+            fails.append("frame chain: 9.B1 itself is upstream of the change, not downstream — its own lock must NOT be touched")
+    finally:
+        os.chdir(cwd)
+    return fails
+
+
 def _extract_functions(src_path, names):
     """Pull just the named top-level function defs out of a source file via ast (not a full import) — serve.py
     binds a live socket at module level with no __main__ guard, so it can't be imported directly in a test."""
@@ -118,7 +175,7 @@ def test_serve_py(tmp):
 def main():
     tmp = tempfile.mkdtemp(prefix="cb_gate_cascade_test_")
     try:
-        fails = test_cb_pipeline(tmp) + test_serve_py(tmp)
+        fails = test_cb_pipeline(tmp) + test_serve_py(tmp) + test_frame_chain_cascade(tmp)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     if fails:
@@ -127,7 +184,8 @@ def main():
             print(f"  - {f}")
         return 1
     print("CASCADE ASSERTION PASSED — a Gate-1 deliverable change correctly cascade-relocks every downstream "
-          "sign-off, in both cb_pipeline.py and its serve.py mirror.")
+          "sign-off (cb_pipeline.py + its serve.py mirror), and an upstream ending-frame retake correctly marks "
+          "every downstream beat's keyframe/clip dirty (the FRAME CHAIN doctrine).")
     return 0
 
 

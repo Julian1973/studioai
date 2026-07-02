@@ -75,8 +75,91 @@ def _relock_if_stale(scene, episode=None):
           f"(fingerprint {current} != approved {stale_fp}); every downstream gate + per-beat lock reset.", flush=True)
     return True
 
+# ── FRAME CHAIN cascade (doctrine, 2026-07-02, Julian) ───────────────────────────────────────────────────────────
+# "A retake upstream marks downstream opening frames dirty through the cascade." A beat's keyframe now chains off
+# the PREVIOUS beat's ENDING FRAME (cb_scene.chain_source_for) rather than its opening frame — so if that upstream
+# beat's clip is retaken (a new ending frame composed), every beat built from the OLD ending frame is stale, exactly
+# like the Gate-1 cascade above but scoped to the per-beat keyframe/clip locks, not the scene gates.
+def _beat_end_frame_hash(episode, code, slug):
+    """Content hash of a beat's composed ENDING FRAME (see cb_scene.build_ending_frame) — None if it doesn't exist."""
+    import hashlib
+    p = f"media/{episode}_{code}_{slug}_end.png"
+    if not os.path.exists(p):
+        return None
+    return hashlib.sha1(open(p, "rb").read()).hexdigest()[:16]
+
+def record_chain_source(scene, code, episode=None):
+    """Stamp the upstream ending-frame hash THIS beat's keyframe was just built from — the baseline
+    _relock_chain_if_dirty compares against. Call right after a continuation beat's keyframe is (re)built."""
+    episode = episode or EP
+    d = json.load(open(PKG))
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
+    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    i = next((k for k, b in enumerate(beats) if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
+    if i is None or i == 0:
+        return   # not found, or the scene anchor (chains off the plate, not a previous beat's ending frame)
+    prev = beats[i - 1]
+    prev_code = prev.get("beatCode") or prev.get("shotCode")
+    prev_slug = prev.get("slug", str(prev_code).replace(".", "_"))
+    fp = _beat_end_frame_hash(episode, prev_code, prev_slug)
+    if fp is None:
+        return   # the upstream beat hasn't rendered a clip yet — this keyframe chained off its OPENING frame instead
+    lk = _lock()
+    beats_locks = lk.setdefault(episode, {}).setdefault(str(scene), {}).setdefault("beats", {})
+    bs = beats_locks.setdefault(str(code), {"audio": False, "keyframe": False, "clip": False})
+    bs["chain_source_fp"] = fp
+    _save(lk)
+
+def _relock_chain_if_dirty(scene, episode=None):
+    """Lazy invalidation, same pattern as _relock_if_stale — call before any gate-readiness read. Walks the scene's
+    beats in order; the first one whose recorded chain_source_fp no longer matches its upstream beat's CURRENT
+    ending-frame hash, and every beat after it (their own chain sources are now suspect too), get "keyframe" and
+    "clip" cleared. Returns True if anything changed."""
+    episode = episode or EP
+    d = _lock()
+    beats_locks = d.get(episode, {}).get(str(scene), {}).get("beats", {})
+    if not beats_locks:
+        return False
+    try:
+        pkg = json.load(open(PKG))
+    except Exception:
+        return False
+    scene_beats = [b for b in (pkg.get("beats") or pkg.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
+    scene_beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    dirty_from = None
+    for i, b in enumerate(scene_beats):
+        if i == 0:
+            continue   # the scene anchor chains off the PLATE, not a previous beat's ending frame
+        code = str(b.get("beatCode") or b.get("shotCode"))
+        bl = beats_locks.get(code)
+        if not bl or not bl.get("keyframe") or not bl.get("chain_source_fp"):
+            continue
+        prev = scene_beats[i - 1]
+        prev_code = prev.get("beatCode") or prev.get("shotCode")
+        prev_slug = prev.get("slug", str(prev_code).replace(".", "_"))
+        current_fp = _beat_end_frame_hash(episode, prev_code, prev_slug)
+        if current_fp and current_fp != bl["chain_source_fp"]:
+            dirty_from = i
+            break
+    if dirty_from is None:
+        return False
+    changed = False
+    for b in scene_beats[dirty_from:]:
+        code = str(b.get("beatCode") or b.get("shotCode"))
+        bl = beats_locks.get(code)
+        if bl and (bl.get("keyframe") or bl.get("clip")):
+            bl["keyframe"] = False; bl["clip"] = False
+            changed = True
+    if changed:
+        _save(d)
+        print(f"⚠ FRAME CHAIN DIRTY — {EP if episode is None else episode} scene {scene}: an upstream ending frame "
+              f"changed (a retake); {len(scene_beats) - dirty_from} downstream beat(s) marked needing keyframe "
+              f"review.", flush=True)
+    return changed
+
 def _approved(scene, gate):
     _relock_if_stale(scene)
+    _relock_chain_if_dirty(scene)
     d = _lock().get(EP, {}).get(str(scene), {})
     return bool(d.get(str(gate).lower()))   # explicit per-gate sign-off only (no legacy whole-gate-2 shortcut —
                                             # a bare "2" never locked the plate as master, so it must NOT satisfy 2a)
@@ -450,6 +533,8 @@ def _scene_beat_order(scene):
 def build_beat(scene, code, chain_from=None):
     """Build ONE beat's opening keyframe (CASCADE unit). chain_from = the previous beat's APPROVED keyframe path."""
     kf = cb_scene.build_one_beat(PKG, scene, code, EP, chain_from=(chain_from or None))
+    if kf:
+        record_chain_source(scene, code)   # FRAME CHAIN doctrine baseline — see _relock_chain_if_dirty
     print(f"KEYFRAME={kf}", flush=True)
     return kf
 

@@ -250,6 +250,14 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
         try:
             cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, duration=dur, out=out, raw_prompt=raw)
             clips.append(f"media/{out}")
+            try:    # FRAME CHAIN doctrine — compose the beat's ENDING FRAME (its clip's literal last frame) as a
+                    # first-class deliverable; the NEXT beat's keyframe chains off THIS, not this beat's own opening
+                    # frame. Fail-open: an extraction hiccup must never break the render loop or the stitch.
+                    import cb_scene
+                    endf = cb_scene.build_ending_frame(episode, code, slug)
+                    print(f"  [ENDING FRAME] {code}: {'composed -> ' + endf if endf else 'skipped (extraction failed)'}", flush=True)
+            except Exception as ee:
+                print(f"  beat {code}: ending-frame composition skipped ({str(ee)[:120]})", flush=True)
             try:    # Gate-3 CLIP QA — automatic, advisory; NEVER let a QA hiccup kill the render loop or the stitch
                 import cb_qa
                 v = cb_qa.check_clip(b, clip=f"media/{out}", keyframe=start, anchors=imgs[1:],

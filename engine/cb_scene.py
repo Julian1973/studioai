@@ -92,12 +92,40 @@ def beat_frame_path(b, episode="Ep1"):
     slug = b.get("slug", (code or "").replace(".", "_"))
     return f"media/{episode}_{code}_{slug}.png"
 
+def beat_end_frame_path(b, episode="Ep1"):
+    """FRAME CHAIN doctrine (spec freeze, 2026-07-02, Julian) — the ENDING FRAME path for a beat: the literal last
+    frame of its RENDERED clip, composed as a first-class deliverable (not a throwaway ffmpeg grab). This is what
+    the NEXT beat chains off, in place of the previous beat's own opening frame — the true state after the full
+    take rendered (identity, pose, and anything that escalated, like pollen) beats a separately re-imagined
+    approximation of it every time."""
+    code = b.get("beatCode") or b.get("shotCode") or ""
+    slug = b.get("slug", (code or "").replace(".", "_"))
+    return f"media/{episode}_{code}_{slug}_end.png"
+
+def build_ending_frame(episode, code, slug):
+    """Compose a beat's ENDING FRAME from its rendered clip — the literal last decodable frame, via ffmpeg's
+    standard "-sseof" idiom (seek near EOF, keep overwriting with -update until the stream ends), so it works
+    regardless of the clip's exact frame count or variable frame rate. Returns the path, or None if the clip
+    doesn't exist yet — the chain then falls back to this beat's own OPENING frame, exactly as before this
+    doctrine (never a hard block: an unrendered beat simply hasn't produced its ending frame yet)."""
+    import subprocess
+    clip = f"media/{episode}_{code}_{slug}.mp4"
+    if not os.path.exists(clip):
+        return None
+    out = f"media/{episode}_{code}_{slug}_end.png"
+    r = subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-sseof", "-1", "-i", clip,
+                        "-update", "1", "-q:v", "2", out], capture_output=True)
+    return out if (not r.returncode and os.path.exists(out)) else None
+
 def chain_source_for(beats, code, episode="Ep1"):
     """The Lock & Chain source for a beat. Returns (prev_frame_path_or_None, status, prev_code):
       first        the scene's first beat — builds from its plate master (anchor; no chain)
       vision       a vision beat — its own POV; never chains, never a chain source
-      continuation any later beat — chains off the previous NON-VISION beat's frame in the SAME scene. The path is
-                   returned whether or not that frame is rendered yet; the caller checks existence for the file + label."""
+      continuation any later beat — chains off the previous NON-VISION beat's frame in the SAME scene. FRAME CHAIN
+                   doctrine: prefers that beat's ENDING FRAME (its rendered clip's literal last frame) when one
+                   exists, falling back to its OPENING frame when it doesn't (not yet rendered through Gate 3) —
+                   so this never regresses a beat that hasn't reached Gate 3 yet. The path is returned whether or
+                   not that frame is rendered yet; the caller checks existence for the file + label."""
     idx = next((i for i, b in enumerate(beats)
                 if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
     if idx is None:
@@ -110,7 +138,10 @@ def chain_source_for(beats, code, episode="Ep1"):
     if j < 0:
         return None, "first", None
     prev = beats[j]
-    return beat_frame_path(prev, episode), "continuation", (prev.get("beatCode") or prev.get("shotCode"))
+    prev_code = prev.get("beatCode") or prev.get("shotCode")
+    end_path = beat_end_frame_path(prev, episode)
+    chosen = end_path if os.path.exists(end_path) else beat_frame_path(prev, episode)
+    return chosen, "continuation", prev_code
 
 def keyframe_for(all_beats, code, episode="Ep1", note=""):
     """THE SINGLE keyframe call for a beat — returns the EXACT (prompt, refs, info) the image API receives AND the

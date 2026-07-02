@@ -58,6 +58,13 @@ tools/field_audit.py (mechanical, re-runnable: Pydantic-introspects the schema, 
 DoD: one report of all leaks — done (FIELD_TO_FRAME_AUDIT.md). Every LEAK/PARTIAL confirmed in the keyframe, voice or QA paths fixed in this pass (18 fixes across cb_prompts.py, cb_qa.py, cb_director_eye.py, cb_voice.py) with baseline proof (cb_segprompt.py byte-identical). Leaks outside those three paths (the Seedance-clip path, and items needing a design decision — director_mode, cameraArc/staging-verification QA, performance_notes, writerNote) logged in the report, not silently fixed or dropped.
 Follow-up (same day, found reviewing the regenerated Gate 2b keyframes): a chained beat's environment was competing against a text re-description of the scene's location and losing — 1.B2-1.B4 drifted to a different world than the approved plate. Fixed in build_keyframe_prompt (the chain image is now the sole environment source for a continuation beat); locked as CLAUDE.md hard rule 12 + Studio Bible §3.1. Verified: QA 4/4 PASS (was 1/4, PLATE_DRIFT on the other 3), confirmed visually, golden set diffed and recaptured.
 
+Three further rulings (same day, Julian, after reviewing the regenerated keyframes):
+1. Scene 1's location/look/definingFeature/cameraHeight/sceneShotName/lighting rewritten at the TRUE source — discovered scene_cfg() reads config/locations.json (a separate cache), not the beat package directly, so the earlier fix hadn't actually reached the pipeline until this. Fixed in both places; swept every consumer (segprompt/seedance/QA/pipeline). Golden set re-blessed.
+2. for_beat_v2's dangling-possessive bug fixed (delabel now runs before the quote-stripper, with proper apostrophe boundaries) — FOR_BEAT_V2_REVIEW_EP1_SCENE1.md regenerated clean. The kept validator's gag-carryover check (wrong direction — fixed to check the NEXT beat, demoted to a NOTE) and gag-lock content check (hardcoded "moustache"/"goatee" moved to canon/gag_locks.json, passing silently when empty) were ruled drift, not protection, and fixed; swept for other hardcoded story words in cb_seedance.py's validators (found and reported, not all fixed — see the commit for the full list).
+3. tools/sync_scenes.py — a sync/hash check for config/locations.json vs the beat package (mirrors tools/sync_canon.py), wired into cb_beats.render_readiness() as a hard BLOCK on drift, not a silent divergence.
+
+Result: render_readiness() reports READY_TO_RENDER on all of Ep1 1.B1-1.B4. Voice tracks built for real (V3 Text-to-Dialogue, attribution clean). Nothing fired, nothing signed — held at staged per Julian's explicit instruction, pending his read of the regenerated v2 doc.
+
 ---
 
 ## THE RETAKE ROOM (P1)

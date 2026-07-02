@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cb-studio",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "cb-studio/serve.py"
+      ],
+      "port": 8765,
+      "autoPort": false
+    }
+  ]
+}

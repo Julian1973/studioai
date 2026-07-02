@@ -196,9 +196,16 @@ Work ONE scene at a time, never the whole episode at once. Within a scene:
 
 ---
 
-## Two keyframes per shot — START and END (standard for EVERY shot)
+## Two keyframes per shot — START and END (standard for EVERY shot) — SUPERSEDED, see below
 
 Every shot gets a **START** keyframe and an **END** keyframe — not just action shots. This doubles the (cheap) keyframes but gives exact control of each shot's full motion arc: define precisely where the shot begins and ends, and Seedance animates between. The two can be near-identical for a near-static hold, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (the primary, shown in the studio), end = `Ep{n}_{code}_{slug}_end.png`. The keyframe rule still holds: the START is the first frame of the shot's action.
+
+## ⚑ ONE keyframe per BEAT, chained — not two per shot (LOCKED 2026-07-02; supersedes the section above)
+
+The production unit is now the **BEAT** (a 10–12s multi-shot Seedance take with its own internal cuts), not the individual shot, and each beat gets **exactly ONE keyframe — its OPENING frame** (from `startState`), never a separate END frame:
+- Generating an independent END keyframe per shot is exactly the drift source the section above already warned about, taken further — it's not needed at all now. Cross-BEAT identity continuity instead comes from the **Lock & Chain cascade**: each beat's keyframe chains off the **previous beat's own APPROVED final frame** (`chain_ref` + a delta describing only what changes), so identity carries shot-to-shot and beat-to-beat without ever generating a second keyframe for the same beat.
+- Turnarounds still anchor identity on every keyframe; the master/anchor-frame discipline below is unchanged.
+- Seedance directs its OWN internal cuts and motion arc across the beat's full duration from that one opening frame — it is not animating start→end between two authored stills.
 
 ---
 
@@ -214,7 +221,7 @@ Fuzzby and Zenny are near-identical bee designs, so make the canon distinction v
 
 ---
 
-## Kill drift — generate the END keyframe FROM the START keyframe
+## Kill drift — generate the END keyframe FROM the START keyframe (historical — see the LOCKED 2026-07-02 note above: beats now use ONE chained keyframe, no END keyframe at all)
 
 For every start→end shot, do NOT generate the two keyframes independently — that hands Seedance two slightly-different characters to morph between, and that morph IS the drift (it got worse the moment we added end frames). Instead: generate the **START** keyframe first, then make the **END** keyframe by passing the START frame in as a reference and changing **only the pose / moment** — same fur, same glasses, same light, same world:
 

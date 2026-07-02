@@ -133,8 +133,8 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 ### 3.4 — The reference model
 `@图N` is Seedance's native image token (not `@ImageN`). Order: `@图1` keyframe, `@图2` larger-bee turnaround, `@图3` smaller-bee turnaround. Audio: `@Audio1..` per speaker.
 
-### 3.5 — Density
-12s is action-dense. If a beat drifts past ~7s, **split into a 2-clip fallback** — never keep rewriting.
+### 3.5 — Density and duration (T5 amendment, 2026-07-02 — stated once, here, as the single source)
+Every beat clamps to **8–15 seconds** (`cb_segprompt.for_beat` and `cb_beats.run` both compute `max(8, min(15, durationSec))`), targeting **~10–12s** in practice. 12s is action-dense: if a beat drifts past ~7s of real action, **split into a 2-clip fallback** — never keep rewriting a single take longer.
 
 ---
 
@@ -142,9 +142,11 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 
 - **Each chair = one LLM pass with one auteur system-prompt** (its mind's taste + craft + the rules above). No stacked layers.
 - **Gate 1 (Docter):** system prompt carries the brand DNA + the Seedance craft + this bible; writes SCENE + ACTION per segment. The old Director's Pass / 15 modes / staging / comedy / crystal layers **collapse into his head as taste**, not separate passes.
-- **Gate 3 form:** `cb_segprompt.py` is the definitive builder — REFERENCE LAW / SCENE / ACTION / CAMERA / AUDIO / NEGATIVES. The Director fills SCENE + ACTION; the rest is baked law.
-- **`cb_voice`:** emits per-speaker tracks. **`cb_gen`:** sends prose + `@图N` + per-speaker `audio_urls` + `generate_audio`. **`cb_post`:** mix/master only, no voice swap.
+- **Gate 3 form:** `cb_segprompt.py` is the definitive builder — REFERENCE LAW / SCENE / ACTION / CAMERA / AUDIO / NEGATIVES. The Director fills SCENE + ACTION; the rest is baked law. `cb_segprompt.for_beat` is THE shipped prompt for every beat, applied identically in the studio preview and the render (`cb_beats.run`); `cb_seedance`'s COMPACT_TIMED_JSON build is the validation/readiness layer underneath it, not a competing shipping format.
+- **The second master (T3 ruling, 2026-07-02, Julian — KEPT, declared here on purpose):** `cb_seedance.py`'s older machinery — the 15 minds, the physical-action archetypes, and the authoring/compact validators — still runs on EVERY beat via `get_seedance_prompt`/`render_readiness`, independently of the Director's chair, and it CAN refuse a render (`READY_TO_RENDER` requires both the authoring AND the compact validator to pass). This is intentional, not leftover: it is the studio's structural, code-level backstop underneath the Director's prose-level taste — a mechanical check that catches malformed/stale source data and archetype gaps the Director's own judgment doesn't audit. The two layers are NOT redundant: the Director decides what a beat SAYS; this layer decides whether a beat's DATA is well-formed enough to say it safely.
+- **`cb_voice`:** emits per-speaker tracks — the FINAL voice, supplied to Seedance as `@AudioN` and lip-synced, never a placeholder. A beat with dialogue whose V3 track fails REFUSES to render rather than falling back to a native Seedance voice (Law 5). **`cb_gen`:** sends prose + `@图N` + per-speaker `audio_urls` + `generate_audio`. **`cb_post`:** mix/master only, no voice swap — voice stems are for balance/ducking, never replacement.
 - **Continuity:** a check that runs at every gate against the turnarounds + canon.
+- **Temporary state resolves within the take (T2 ruling, 2026-07-02, Julian):** a transient like Fuzzby's pollen moustache is established and (if the beat calls for it) resolved entirely inside the ONE take it belongs to. It never carries across a take boundary — there is no continuity-tail/previous-clip-tail chaining mechanism. Each beat renders from its own signed-off opening keyframe, clean.
 
 ---
 
@@ -154,3 +156,11 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 - ✅ **Gate 3 prompt — fixed** to the definitive structure (`cb_segprompt`), verified.
 - ⏳ **Remaining wiring:** per-speaker voice (`cb_voice`) · `@图N` + audio pass (`cb_gen`) · point Gate 3 at `cb_segprompt` (`cb_beats`) · crisp-keyframe rule (`cb_prompts`) · strip post voice-swap (`cb_post`).
 - ⏳ **Then:** render Segments 1–4 the proper way, voice in the render, and judge.
+
+---
+
+## PART 6 — THE TWO UNIVERSES (ruling proposed, Addendum A, 2026-07-02 — ADDED AS PROPOSED, pending Julian's accept/amend/reject)
+
+**The skill fleet is the discovery engine: short form, fast, audience testing. The studio is the franchise engine: long form, gated, broadcaster grade. Winners discovered by the fleet graduate to the studio. Neither system produces the other's format.**
+
+This paragraph resolves an ambiguity that had no other written answer: whether the ad-hoc Claude-skill workflows Julian runs for quick experiments are a lightweight version of this studio, or a genuinely separate system with a different job. They are separate. The fleet exists to find out fast, cheaply, and without gates, what's worth making at all — a format, a joke, a character beat, tested against a real audience before a single dollar of gated production spend. The studio exists to take a PROVEN winner and put it through broadcaster-grade production discipline — gates, canon, continuity, sign-offs — at a cadence a commissioner can build a slate around. A skill-fleet experiment never ships as a "finished episode"; a studio episode never skips a gate because a fast test proved the joke works. The bridge between them is a human decision (Julian's), not a code path: something the fleet found funny gets RE-BUILT inside the studio from a script, not ported wholesale.

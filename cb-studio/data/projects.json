@@ -12,10 +12,10 @@
       "aspectRatio": "16:9",
       "voiceProvider": "ElevenLabs (v3)",
       "musicStyle": "Warm orchestral with gentle motifs; each bear seeded to a musical note.",
-      "configBase": "cb-gen/config",
+      "configBase": "engine/config",
       "showBibleFile": "CRYSTAL_BEARS_LOCKED_CANON.md",
       "episodesFile": "cb-studio/data/episodes.json",
-      "mediaBase": "cb-gen/media",
+      "mediaBase": "engine/media",
       "createdAt": "2026-06-24"
     }
   ]

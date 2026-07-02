@@ -200,7 +200,7 @@ const ANIM_TYPES=[
   {v:"2D vector / flat",d:"Modern flat / motion-graphic — clean bold shapes."},
   {v:"Stop-motion / claymation",d:"Tactile — clay, puppets, real-set lighting."}
 ];
-function projConfig(){return (CURRENT_PROJECT&&CURRENT_PROJECT.configBase)||"cb-gen/config";}
+function projConfig(){return (CURRENT_PROJECT&&CURRENT_PROJECT.configBase)||"engine/config";}
 function _esc(s){return (''+(s==null?'':s)).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
 async function bootProjects(){
   try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
@@ -449,7 +449,7 @@ async function renderScenes(){
   let L={manifest:{},reuse:{},scenes:[]};
   try{L=await fetch(BASE+"/api/loclib",{cache:"no-store"}).then(r=>r.json());}catch(e){}
   const RE=L.reuse||{}, SC=L.scenes||[], M=L.manifest||{};
-  const img=p=>BASE+"/cb-gen/media/"+p+"?v="+Date.now();
+  const img=p=>BASE+"/engine/media/"+p+"?v="+Date.now();
   const card=(s)=>{
     const reused=(RE[s.locationId]||[]).length>1?`<span style="font-size:11px;color:var(--brandink);background:var(--brandbg);border-radius:6px;padding:2px 8px">↻ reused in scenes ${RE[s.locationId].join(", ")}</span>`:'';
     const status=s.master?'<span style="color:var(--ok);font-weight:600">✓ approved &amp; stored (reusable)</span>':(s.plate?'<span style="color:var(--info);font-weight:600">● scene shot built — sign off Step 1 to store it</span>':'<span style="color:var(--hint)">○ no scene shot yet</span>');
@@ -494,7 +494,7 @@ function uploadSceneShot(sn){
   if(!f){alert('Pick a scene-shot image first.');return;}
   const rd=new FileReader();
   rd.onload=async()=>{
-    try{const r=await fetch(BASE+"/api/scene-shot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),imageData:rd.result})});const j=await r.json();if(!j.ok){alert("Upload error: "+(j.error||"failed"));return;}
+    try{const r=await fetch(BASE+"/api/scene-shot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),imageData:rd.result,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Upload error: "+(j.error||"failed"));return;}
       try{MEDIA=await fetch(BASE+"/cb-studio/data/media-index.json",{cache:"no-store"}).then(r=>r.json());}catch(e){}
       MEDIA_V=Date.now();render();alert("Scene shot uploaded — it's the foundation now. Review it, then sign off Step 1.");
     }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
@@ -507,7 +507,7 @@ async function openScenePicker(sn){
   const u=p=>BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now();
   const opts=[];
   (L.uploadedRefs||[]).forEach(r=>opts.push({file:r.file,name:r.name}));
-  (L.scenes||[]).filter(s=>s.plate).forEach(s=>opts.push({file:'cb-gen/media/'+s.plate,name:'Scene '+s.scene+' · '+(s.name||s.locationId)}));
+  (L.scenes||[]).filter(s=>s.plate).forEach(s=>opts.push({file:'engine/media/'+s.plate,name:'Scene '+s.scene+' · '+(s.name||s.locationId)}));
   Object.entries(L.manifest||{}).filter(([k])=>k[0]!=='_').forEach(([lid,e])=>opts.push({file:'cb-seed/assets/locations/'+e.file,name:(e.name||lid)+' (library)'}));
   let HS={houses:[]};
   try{HS=await fetch(BASE+"/api/houses",{cache:"no-store"}).then(r=>r.json());}catch(e){}
@@ -518,7 +518,7 @@ async function openScenePicker(sn){
   document.getElementById("modal").classList.add("show");
 }
 async function useSceneFromLib(sn,file){
-  try{const r=await fetch(BASE+"/api/scene-shot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),fromFile:file})});const j=await r.json();if(!j.ok){alert("Error: "+(j.error||"failed"));return;}
+  try{const r=await fetch(BASE+"/api/scene-shot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),fromFile:file,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Error: "+(j.error||"failed"));return;}
     closeM();try{MEDIA=await fetch(BASE+"/cb-studio/data/media-index.json",{cache:"no-store"}).then(r=>r.json());}catch(e){}MEDIA_V=Date.now();render();
     alert("Scene shot set from the library — review it, then sign off Step 1.");
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
@@ -702,7 +702,7 @@ function scriptOutline(){
   return `<h1 class="h1" style="font-size:15px;margin-top:20px">Scenes &amp; ${U} (${SHOTS.length})</h1>`+scenes.map(scn=>{
     const ss=SHOTS.filter(s=>s.sceneNumber==scn);
     return `<div class="scene"><div class="scenehd"><b>Scene ${ss[0].sceneNumber} · ${ss[0].scene}</b><span class="ct">${ss.length} ${U} · ${cap(ss[0].intent.pillar)}</span></div>`+
-      ss.map(s=>{const pc=PILL[s.intent.pillar]||PILL.Spark;const lab=s._beat?`Beat ${s.shotCode} · ${s.duration}s`:`Shot ${s.shotCode||s.id}`;return `<div class="srow" onclick="openShot(${s.id})"><span class="num" style="min-width:96px">${lab}</span><div style="flex:1"><div style="font-size:12.5px">${s.action}</div>${s.dialogue?`<div class="dlg" style="margin:4px 0 0">"${s.dialogue.replace(/^[A-Z' ]+:\s*/,'')}"</div>`:''}</div><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])};align-self:center">${cap(s.intent.pillar)}</span></div>`;}).join("")+`</div>`;
+      ss.map(s=>{const pc=PILL[s.intent.pillar]||PILL.Spark;const lab=s._beat?`Beat ${s.shotCode} · ${s.duration}s`:`Shot ${s.shotCode||s.id}`;return `<div class="srow" onclick="openShot(${s.id})"><span class="num" style="min-width:96px">${lab}</span><div style="flex:1"><div style="font-size:12.5px">${_esc(s.action)}</div>${s.dialogue?`<div class="dlg" style="margin:4px 0 0">"${_esc(s.dialogue.replace(/^[A-Z' ]+:\s*/,''))}"</div>`:''}</div><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])};align-self:center">${cap(s.intent.pillar)}</span></div>`;}).join("")+`</div>`;
   }).join("");
 }
 const DEMAND_SEEDS=[
@@ -766,10 +766,10 @@ function noteChip(s){const n=(PIPE.notes||{})[s.shotCode];if(!n)return"";const t
 function card(s){
   const m=mediaFor(s),[sc,sb,slab]=statusOf(m),pc=PILL[s.intent.pillar]||PILL.Spark;
   const wb=s.keenWristbands&&s.keenWristbands!="none"?`<span class="wb" style="color:${s.keenWristbands=='crystal'?'#185FA5':'#5F5E5A'};background:${s.keenWristbands=='crystal'?'#E6F1FB':'#F1EFE8'}">${s.keenWristbands=='crystal'?'◆ crystal':'◇ vacant'}</span>`:'';
-  const thumb=m.key?`<img class="zoom" data-cap="${(s.shotCode||('Shot '+s.id))} · keyframe" src="${BASE}/cb-gen/media/${m.key}?v=${MEDIA_V}"/>`+(m.clip||m.final?'<span class="play">►</span>':''):`<span class="ph" style="color:${v(pc[0])}">▤</span>`;
+  const thumb=m.key?`<img class="zoom" data-cap="${(s.shotCode||('Shot '+s.id))} · keyframe" src="${BASE}/engine/media/${m.key}?v=${MEDIA_V}"/>`+(m.clip||m.final?'<span class="play">►</span>':''):`<span class="ph" style="color:${v(pc[0])}">▤</span>`;
   return `<div class="card" onclick="openShot(${s.id},'clip')"><div class="thumb"><span class="badge">${s.shotCode||('Shot '+s.id)}</span>${wb}${thumb}</div>
     <div class="cbody"><div class="crow"><span class="meta" style="margin:0">${s._beat?(s.duration+'s · '+(s._cuts||[]).length+' cuts'):(s.shotSize+' · '+s.movement)}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(s.intent.pillar)}</span></div>
-    <div class="act">${(s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||'')}</div>${s.dialogue?`<div class="dlg">"${s.dialogue.replace(/^[A-Z' ]+:\s*/,'')}"</div>`:''}
+    <div class="act">${_esc((s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||''))}</div>${s.dialogue?`<div class="dlg">"${_esc(s.dialogue.replace(/^[A-Z' ]+:\s*/,''))}"</div>`:''}
     <span class="st" style="color:${v(sc)};${sb?'background:'+v(sb):''}">${slab}</span>${noteChip(s)}</div></div>`;
 }
 function keyframesFor(s){
@@ -782,17 +782,17 @@ function keyframesFor(s){
 function kfCard(s){
   const kf=keyframesFor(s),pc=PILL[s.intent.pillar]||PILL.Spark;
   const wb=s.keenWristbands&&s.keenWristbands!="none"?`<span class="pill" style="color:${s.keenWristbands=='crystal'?'#185FA5':'#5F5E5A'};background:${s.keenWristbands=='crystal'?'#E6F1FB':'#F1EFE8'}">${s.keenWristbands=='crystal'?'◆ crystal':'◇ vacant'}</span>`:'';
-  const cell=(src,lab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:#efeef6;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/cb-gen/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">▤</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · pending'}</div></div>`;
+  const cell=(src,lab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:#efeef6;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/engine/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">▤</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · pending'}</div></div>`;
   const frames=s._beat?cell(kf.start,'OPENING KEYFRAME'):`${cell(kf.start,'START')}<span style="color:var(--hint)">→</span>${cell(kf.end,'END')}`;
   const meta=s._beat?`Beat ${s.shotCode} · ${s.duration}s · ${(s._cuts||[]).length} cuts`:`Shot ${s.shotCode} · ${s.shotSize} · ${s.duration}s`;
   return `<div class="card" onclick="openShot(${s.id})"><div style="padding:9px 11px">
     <div class="crow"><span class="meta" style="margin:0">${meta}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(s.intent.pillar)}</span></div>
     <div style="display:flex;gap:8px;align-items:center;margin:6px 0">${frames}</div>
-    <div class="act">${(s.action||'').length>72?s.action.slice(0,72)+'…':(s.action||'')}</div>${wb}${noteChip(s)}</div></div>`;
+    <div class="act">${_esc((s.action||'').length>72?s.action.slice(0,72)+'…':(s.action||''))}</div>${wb}${noteChip(s)}</div></div>`;
 }
 function sceneComplete(sn){
   const f=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_beats\\.mp4$").test(m))||MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_animation\\.mp4$").test(m))||MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_complete\\.mp4$").test(m))||MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"\\.mp4$").test(m));
-  return `<div class="mc" style="margin-top:12px;border:1px solid var(--brand)"><div class="lab" style="color:var(--brandink);font-weight:600">✓ Scene ${sn} — completed animation</div>${f?`<video controls src="${BASE}/cb-gen/media/${f}?v=${MEDIA_V}" style="width:100%;border-radius:8px;margin-top:8px;max-height:420px"></video><div style="font-size:11px;color:var(--hint);margin-top:6px">the stitched clips (guide audio) — full music &amp; mix appear in Post</div>`:`<div class="coming" style="margin-top:8px">Completed animation appears here once the clips are rendered (Gate 3) — they're auto-stitched into the scene.</div>`}</div>`;
+  return `<div class="mc" style="margin-top:12px;border:1px solid var(--brand)"><div class="lab" style="color:var(--brandink);font-weight:600">✓ Scene ${sn} — completed animation</div>${f?`<video controls src="${BASE}/engine/media/${f}?v=${MEDIA_V}" style="width:100%;border-radius:8px;margin-top:8px;max-height:420px"></video><div style="font-size:11px;color:var(--hint);margin-top:6px">the stitched clips (guide audio) — full music &amp; mix appear in Post</div>`:`<div class="coming" style="margin-top:8px">Completed animation appears here once the clips are rendered (Gate 3) — they're auto-stitched into the scene.</div>`}</div>`;
 }
 function gateState(sn){const ek="Ep"+(CUR&&CUR.number);return ((PIPE.locked||{})[ek]||{})[sn]||{};}
 function charTurnURL(c){
@@ -842,7 +842,7 @@ async function signSub(sn,sub){
 async function unsignSub(sn,sub){
   const lbl=sub=='1'?'Step 0 (the Director plan)':sub=='2a'?'Step 1 (the foundation)':'Step 2 (the keyframes)';
   if(!confirm(`Un-sign ${lbl} for Scene ${sn}?\n\nThis removes the sign-off AND re-locks every step after it, so you can alter it and sign off again. Un-signing Step 1 also resets the locked scene shot.`))return;
-  try{const r=await fetch(BASE+"/api/unapprove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub})});const j=await r.json();if(!j.ok){alert("Un-sign failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;render();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+  try{const r=await fetch(BASE+"/api/unapprove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Un-sign failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;render();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 async function renderBible(){
   const view=document.getElementById("view");
@@ -882,7 +882,15 @@ async function refreshPipe(){
   const jobs=Object.values(PIPE.jobs||{});
   if(_seenDone===null){_seenDone={};jobs.forEach(j=>{if(j.status!="running")_seenDone[j.jobId]=1;});}
   let done=false,finished=[];jobs.forEach(j=>{if(j.status!="running"&&!_seenDone[j.jobId]){_seenDone[j.jobId]=1;done=true;finished.push(j);}});
+  const anyRunning=jobs.some(j=>j.status=="running");
   if(done){try{await fetch(BASE+"/api/reindex");MEDIA=await fetch(BASE+"/cb-studio/data/media-index.json",{cache:"no-store"}).then(r=>r.json());MEDIA_V=Date.now();}catch(e){}if(page!="pipeline"&&page!="script")render();}
+  else if(anyRunning){
+    // a batch job (e.g. Gate 2b building every beat in a scene) is ONE long-running subprocess — the server now
+    // reindexes media incrementally as each beat finishes, so poll it too instead of waiting for the whole batch
+    // to exit, or an early-finished beat's keyframe stays invisible for the rest of the run.
+    try{MEDIA=await fetch(BASE+"/cb-studio/data/media-index.json",{cache:"no-store"}).then(r=>r.json());MEDIA_V=Date.now();}catch(e){}
+    if(page=="pipeline")renderPipeline();
+  }
   finished.forEach(j=>{const st=j.status;const ic=st=="done"?'✓':st=="stopped"?'■':'✗';const tail=st=="done"?'finished — review & sign off':st=="stopped"?'stopped':'failed — see log';showToast(`${ic} ${jobLabel(j)} · Scene ${j.scene} ${tail}`,st=="done");});
   if(finished.some(j=>String(j.gate)=="write"&&j.status=="done")&&CUR){
     // the Writers' Room just wrote + scored the script — reindex so it appears, then show it
@@ -993,7 +1001,7 @@ function gatePhase(sn,g){
   return 'ready';
 }
 function scenesList(){return [...new Set(SHOTS.map(s=>s.sceneNumber))].sort((a,b)=>a-b);}
-// SCENE-SPINE: a scene is unlocked only when the PREVIOUS scene's final stage (Gate 4) is signed off (first scene always open).
+// SCENE-SPINE: a scene is unlocked only when the PREVIOUS scene's final stage (Gate 5 = Post) is signed off (first scene always open).
 function scenePrevSigned(sn){const sl=scenesList(),i=sl.indexOf(sn);return i<=0?true:gatePhase(sl[i-1],5)=='signed';}
 function activeGateOf(sn){for(const d of GATE_DEF){if(gatePhase(sn,d[0])!='signed')return d[0];}return 5;}
 function panelGate(sn){return (FOCUSGATE&&gatePhase(sn,FOCUSGATE)!='locked')?FOCUSGATE:activeGateOf(sn);}
@@ -1028,7 +1036,7 @@ function renderPipeline(){
     const drun=djob&&djob.status=="running";
     view.innerHTML=`<h1 class="h1" style="margin-bottom:2px">Pipeline — Ep${CUR.number} · ${_esc(CUR.title||CUR.name||"")} <span onclick="renameEp(${CUR.number})" title="Rename episode" style="cursor:pointer;font-size:14px;opacity:.5;vertical-align:middle">✏️</span></h1>
       <p class="sub">This episode has a script but no beats yet. <b>Gate 1 is the Director</b> — it reads the script and breaks the whole episode into scenes &amp; <b>beats</b> (theme → beat map → per-scene beats → the Braintrust remake). Press to begin; every other gate unlocks after.</p>
-      <div class="grail" style="opacity:.9"><div class="gnode active"><div class="gglyph" style="color:var(--brand)">▷</div><div class="gnum">GATE 1</div><div class="gname">Storyboard</div><div class="gph" style="color:var(--brand)">ready — press to fire</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 2</div><div class="gname">Keyframes</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 3</div><div class="gname">Animation</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 4</div><div class="gname">Post</div><div class="gph" style="color:var(--hint)">locked</div></div></div>
+      <div class="grail" style="opacity:.9"><div class="gnode active"><div class="gglyph" style="color:var(--brand)">▷</div><div class="gnum">GATE 1</div><div class="gname">Storyboard</div><div class="gph" style="color:var(--brand)">ready — press to fire</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 2</div><div class="gname">Keyframes</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 3</div><div class="gname">Animation</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 4</div><div class="gname">Retake/Edit</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 5</div><div class="gname">Post</div><div class="gph" style="color:var(--hint)">locked</div></div></div>
       <div class="scene" style="padding:16px;border:1px solid ${drun?'var(--info)':'var(--line)'}">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="flex:1;min-width:220px">
@@ -1121,7 +1129,7 @@ function gate2Panel(sn){
   const kfStep=building?((kfJob.step||"working…").replace(/</g,"&lt;")):"";
   const cell=(src,lab,sub)=>`<div style="flex:1;min-width:0;max-width:200px"><div style="aspect-ratio:16/9;background:#efeef6;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${lab}${sub?' · '+sub:''}" src="${src}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:#aaa;font-size:11px">pending</span>`}</div><div style="font-size:10.5px;color:var(--hint);text-align:center;margin-top:3px"><b>${lab}</b>${sub?" · "+sub:""}</div></div>`;
   let h=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px">Two steps — sign off each. The foundation freezes the world &amp; the locked character sheets; the keyframes derive from it.</div>`;
-  h+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">${cell(built?`${BASE}/cb-gen/media/${plate}?v=${MEDIA_V}`:"","SCENE PLATE","the empty stage")}${chars.map(c=>cell(charTurnURL(c),c,"🔒 locked sheet")).join("")}</div>`;
+  h+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">${cell(built?`${BASE}/engine/media/${plate}?v=${MEDIA_V}`:"","SCENE PLATE","the empty stage")}${chars.map(c=>cell(charTurnURL(c),c,"🔒 locked sheet")).join("")}</div>`;
   h+=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 0;border-top:1px solid var(--line)"><b style="font-size:12px;min-width:110px">Step 1 · Foundation</b>`;
   if(fdBuilding)h+=`<span style="color:var(--info);font-weight:600"><span class="pulse">●</span> ${(fdJob.step||"building the plate…").replace(/</g,"&lt;")}</span> <button class="btn" style="padding:4px 11px;font-size:12px;background:#c0392b;color:#fff;border-color:#c0392b" onclick="stopFiring('${fdJob.jobId}')">■ Stop</button>`;
   else if(fdStarting)h+=`<span style="color:var(--info);font-weight:600"><span class="pulse">●</span> starting the foundation build…</span>`;
@@ -1145,11 +1153,11 @@ function animCard(s){
   const m=mediaFor(s),clip=m.final||m.clip,pc=PILL[(s.intent||{}).pillar]||PILL.Spark;
   const meta=s._beat?`Beat ${s.shotCode} · ${s.duration}s · ${(s._cuts||[]).length} cuts`:`Shot ${s.shotCode||s.id} · ${s.duration}s`;
   const cell=clip
-    ? `<video src="${BASE}/cb-gen/media/${clip}?v=${MEDIA_V}" muted preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover"></video><span class="play">►</span>`
+    ? `<video src="${BASE}/engine/media/${clip}?v=${MEDIA_V}" muted preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover"></video><span class="play">►</span>`
     : `<span class="ph" style="color:${v(pc[0])}">🎬</span><span style="position:absolute;bottom:7px;left:0;right:0;text-align:center;font-size:9.5px;color:var(--hint);letter-spacing:.03em">awaiting animation</span>`;
   return `<div class="card" onclick="openShot(${s.id},'clip')"><div class="thumb"><span class="badge">${s.shotCode||('Shot '+s.id)}</span>${cell}</div>
     <div class="cbody"><div class="crow"><span class="meta" style="margin:0">${meta}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap((s.intent||{}).pillar)}</span></div>
-    <div class="act">${(s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||'')}</div>
+    <div class="act">${_esc((s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||''))}</div>
     <span class="st" style="color:${clip?'var(--ok)':'var(--hint)'}">${clip?'● clip':'○ empty'}</span>${noteChip(s)}</div></div>`;
 }
 function gate3Panel(sn){
@@ -1182,15 +1190,15 @@ function removeRetake(i){RETAKES_DRAFT.splice(i,1);renderRetakeList();}
 async function fireRetakes(sn,idx){const list=(idx==null)?RETAKES_DRAFT.slice():(RETAKES_DRAFT[idx]?[RETAKES_DRAFT[idx]]:[]);if(!list.length){alert('Add a retake first.');return;}try{const r=await fetch(BASE+"/api/retakes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),episode:"Ep"+CUR.number,retakes:list})});const j=await r.json();if(!j.ok){alert("Couldn't start the retake: "+(j.error||"failed"));return;}setTimeout(refreshPipe,250);/* keep the list — fire one to test, review, fire the rest; sign off Gate 4 only when happy */}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}}
 function uploadRetakeCSV(sn,input){const f=input&&input.files&&input.files[0];if(!f)return;const rd=new FileReader();rd.onload=async()=>{try{const r=await fetch(BASE+"/api/retake-csv",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),episode:"Ep"+CUR.number,csv:rd.result})});const j=await r.json();if(!j.ok){alert("Couldn't run the sheet: "+(j.error||"failed"));return;}setTimeout(refreshPipe,250);}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}};rd.readAsText(f);input.value='';}
 async function loadRetakeLog(sn){if(sn==null)return;try{const r=await fetch(BASE+"/api/retake-log?scene="+encodeURIComponent(sn)+"&episode=Ep"+CUR.number);const j=await r.json();const el=document.getElementById('rt_log');if(!el)return;const es=(j.entries||[]);el.innerHTML=es.length?es.map(retakeLogCard).join(""):`<div style="font-size:12px;color:var(--hint)">No retakes fired yet — fire one above and its <b>before / after</b> appears here.</div>`;}catch(e){}}
-function retakeLogCard(e){const src=f=>`${BASE}/cb-gen/media/${f}?v=${MEDIA_V}`;const vid=(f,lab)=>f?`<div style="flex:1;min-width:170px"><div style="font-size:10.5px;letter-spacing:.04em;color:var(--hint);margin-bottom:3px">${lab}</div><video src="${src(f)}" muted loop autoplay playsinline style="width:100%;border-radius:6px;background:#000"></video></div>`:`<div style="flex:1;min-width:170px;font-size:11px;color:var(--hint)">${lab}: —</div>`;const stat=e.ok?`<span style="color:var(--ok)">✓ landed</span>`:`<span style="color:var(--danger)">✗ ${_esc(e.error||'failed')}</span>`;const seam=(e.seam_delta!=null)?` · seam Δ ${e.seam_delta}`:'';return `<div class="mc" style="margin-top:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px"><code style="color:var(--brandink)">${_esc(e.ref)}</code><span style="font-size:11.5px">${stat}${seam}</span></div><div style="font-size:12px;margin:4px 0 2px">→ ${_esc(e.change)}</div>${e.action?`<div style="font-size:11px;color:var(--brandink);background:#eef0fb;border-radius:5px;padding:4px 7px;margin:5px 0"><b>✦ Director:</b> ${_esc(e.action)}</div>`:''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px">${vid(e.before,'BEFORE')}${vid(e.after,'AFTER ✦ retaken')}</div></div>`;}
+function retakeLogCard(e){const src=f=>`${BASE}/engine/media/${f}?v=${MEDIA_V}`;const vid=(f,lab)=>f?`<div style="flex:1;min-width:170px"><div style="font-size:10.5px;letter-spacing:.04em;color:var(--hint);margin-bottom:3px">${lab}</div><video src="${src(f)}" muted loop autoplay playsinline style="width:100%;border-radius:6px;background:#000"></video></div>`:`<div style="flex:1;min-width:170px;font-size:11px;color:var(--hint)">${lab}: —</div>`;const stat=e.ok?`<span style="color:var(--ok)">✓ landed</span>`:`<span style="color:var(--danger)">✗ ${_esc(e.error||'failed')}</span>`;const seam=(e.seam_delta!=null)?` · seam Δ ${e.seam_delta}`:'';return `<div class="mc" style="margin-top:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px"><code style="color:var(--brandink)">${_esc(e.ref)}</code><span style="font-size:11.5px">${stat}${seam}</span></div><div style="font-size:12px;margin:4px 0 2px">→ ${_esc(e.change)}</div>${e.action?`<div style="font-size:11px;color:var(--brandink);background:#eef0fb;border-radius:5px;padding:4px 7px;margin:5px 0"><b>✦ Director:</b> ${_esc(e.action)}</div>`:''}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px">${vid(e.before,'BEFORE')}${vid(e.after,'AFTER ✦ retaken')}</div></div>`;}
 function retakeForm(sn){RT_SN=sn;return `<div class="mc" style="margin-top:10px;border:1px solid var(--brand)"><div class="lab" style="color:var(--brandink);font-weight:600">Retakes — type the timecode + the change</div><div style="font-size:12px;color:var(--hint);margin:6px 0 10px">Read the <b>timecode</b> off the review video (e.g. <code>0:50</code>) — it maps to the shot at that moment — then say what&rsquo;s wrong and how you want it, and Add. The <b>Director</b> reads your note against the shot + the character bibles and shows you the precise, continuity-locked retake wording it will render (<span style="color:var(--brandink)">✦ Director</span>); <b>↻</b> re-checks. (A shot Ref like <code>1.B4#shot7</code> works too. ) Use <b>▶ test</b> to fire ONE and see it land, or <b>Fire ALL</b>. Firing never signs off Gate 4 — iterate freely, then sign off only when you&rsquo;re happy.</div><input id="rt_ref" placeholder="Timecode — e.g. 0:50 (or a shot Ref)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px;font-family:monospace"><input id="rt_issue" placeholder="Issue — what's wrong (optional, helps the director)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px"><textarea id="rt_change" placeholder="Change to — how you want this shot instead" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:6px;min-height:54px"></textarea><button class="btn" style="margin-top:6px" onclick="addRetake()">+ Add retake</button><div id="rt_list" style="margin-top:10px">${retakeListHTML()}</div><button id="rt_fire" class="bigfire" style="margin-top:10px" onclick="fireRetakes(${sn})">▶ Fire ALL ${RETAKES_DRAFT.length} — Gate 4</button><div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><div class="lab" style="font-weight:600">Retake log — before / after</div><div style="font-size:11.5px;color:var(--hint);margin:4px 0 2px">Each shot you fire shows up here as <b>BEFORE</b> vs <b>AFTER</b> — just the changed clip, so you see how it landed without scrubbing the whole scene.</div><div id="rt_log" style="margin-top:6px"></div></div><div class="mc" style="margin-top:12px;background:#faf9fe"><div class="lab" style="font-weight:600">Or upload the amended sheet</div><div style="font-size:12px;color:var(--hint);margin:5px 0 8px">Download the CSV (the <b>&darr; retake sheet</b> link above), <b>delete the rows that are fine</b>, keep only the shots + your changes, then choose the file here — it runs those shots straight through the same director check.</div><input type="file" accept=".csv,text/csv" onchange="uploadRetakeCSV(RT_SN,this)" style="font-size:12px"></div></div>`;}
 function gateArtifacts(sn,g){
   const ss=SHOTS.filter(s=>s.sceneNumber==sn);
   if(g==1)return beatListReview(ss);
   const _final=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_complete\\.mp4$").test(m));
   const _rev=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_REVIEW\\.mp4$").test(m));
-  const _csv=`${BASE}/cb-gen/media/${PREFIX}Scene${sn}_RETAKES.csv`;
-  const _player=(file,lab,sub)=>`<div class="mc" style="border:1px solid var(--brand);margin-top:10px"><div class="lab" style="color:var(--brandink);font-weight:600">${lab}</div><video controls src="${BASE}/cb-gen/media/${file}?v=${MEDIA_V}" style="width:100%;border-radius:8px;margin-top:8px;max-height:440px"></video><div style="font-size:11px;color:var(--hint);margin-top:6px">${sub}</div></div>`;
+  const _csv=`${BASE}/engine/media/${PREFIX}Scene${sn}_RETAKES.csv`;
+  const _player=(file,lab,sub)=>`<div class="mc" style="border:1px solid var(--brand);margin-top:10px"><div class="lab" style="color:var(--brandink);font-weight:600">${lab}</div><video controls src="${BASE}/engine/media/${file}?v=${MEDIA_V}" style="width:100%;border-radius:8px;margin-top:8px;max-height:440px"></video><div style="font-size:11px;color:var(--hint);margin-top:6px">${sub}</div></div>`;
   const _reviewBlock=(lab)=>_rev?_player(_rev,lab,`Timecode + frame + the live BEAT / SHOT / Ref + in&ndash;out burned in &mdash; watch this, then mark up the retakes: <a href="${_csv}" download style="color:var(--brandink);text-decoration:underline">&darr; retake sheet (CSV)</a>`):`<div class="coming" style="margin-top:10px">The timecoded review copy appears here once Gate 3 (Animation) finishes.</div>`;
   if(g==3)return `${sceneComplete(sn)}<div class="grid" style="margin-top:10px">${ss.map(card).join("")}</div>`+_reviewBlock(`▶ Scene ${sn} — timecoded review copy (for retakes)`);
   if(g==4)return _reviewBlock(`▶ Scene ${sn} — review copy (read the timecode)`)+retakeForm(sn);
@@ -1218,7 +1226,7 @@ async function unsignGate(sn,g){
   try{const r=await fetch(BASE+"/api/unapprove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:String(g),episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Un-sign failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;FOCUSGATE=null;renderPipeline();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 function cmpSlider(start,end){
-  const B=BASE+"/cb-gen/media/";
+  const B=BASE+"/engine/media/";
   return `<div class="cmp" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000;user-select:none">
     <img src="${B}${start}?v=${MEDIA_V}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>
     <img id="cmpEnd" src="${B}${end}?v=${MEDIA_V}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 0 50%)"/>
@@ -1242,9 +1250,9 @@ async function openShot(id,kind){
   // ALWAYS show the keyframe IMAGE at the top; if a clip/animation exists, show it BELOW it (never instead) so you can always see the still.
   let media="";
   if(_kf.start&&_kf.end) media=cmpSlider(_kf.start,_kf.end);
-  else if(_kf.start||m.key) media=`<img class="media" src="${BASE}/cb-gen/media/${_kf.start||m.key}?v=${MEDIA_V}"/>`;
+  else if(_kf.start||m.key) media=`<img class="media" src="${BASE}/engine/media/${_kf.start||m.key}?v=${MEDIA_V}"/>`;
   const _clip=m.final||m.clip;
-  if(_clip) media+=`<div class="kv" style="margin-top:10px">Animation</div><video class="media" src="${BASE}/cb-gen/media/${_clip}?v=${MEDIA_V}" controls></video>`;
+  if(_clip) media+=`<div class="kv" style="margin-top:10px">Animation</div><video class="media" src="${BASE}/engine/media/${_clip}?v=${MEDIA_V}" controls></video>`;
   if(!media) media=`<div class="media" style="height:160px;display:flex;align-items:center;justify-content:center;color:var(--hint)">No key image yet</div>`;
   const isB=s._beat;
   const _kfExists=!!(_kf.start||m.key);
@@ -1256,7 +1264,7 @@ async function openShot(id,kind){
     : "";
   const cutsHtml=isB&&s._cuts&&s._cuts.length
     ? `<div class="kv">Director's cuts (source — flattened into the single-take Seedance prompt above; not sent as cuts)</div>`+s._cuts.map((c,i)=>`<div class="srow" style="cursor:default;align-items:flex-start"><span class="num" style="min-width:46px">Cut ${c.n||i+1}</span><div style="flex:1"><div style="font-size:11px;color:var(--hint)">${(c.framing||'').replace(/</g,'&lt;')}</div><div style="font-size:12.5px;margin-top:2px">${(c.action||'').replace(/</g,'&lt;')}</div>${c.dialogue?`<div class="dlg" style="margin:5px 0 0">"${c.dialogue.replace(/^[A-Z' ]+:\s*/,'').replace(/</g,'&lt;')}"${c.delivery?` <span style="color:var(--hint);font-style:normal">— ${c.delivery.replace(/</g,'&lt;')}</span>`:''}</div>`:''}</div></div>`).join("")
-    : (s.dialogue?`<div class="kv">Dialogue${s.speaker?" · "+s.speaker:""}</div><div>${s.dialogue}</div>`:'');
+    : (s.dialogue?`<div class="kv">Dialogue${s.speaker?" · "+_esc(s.speaker):""}</div><div>${_esc(s.dialogue)}</div>`:'');
   const headMeta=isB
     ? `${cap(s.intent.pillar)} · ${s.duration}s · ${(s._cuts||[]).length} cuts · ${(s.characters||[]).join(", ")}${s.keenWristbands&&s.keenWristbands!="none"?" · Keen: "+s.keenWristbands:""}`
     : `${s.intent.pillar} · ${s.shotSize} · ${s.angle} · ${s.movement} · ${s.lens} · ${s.duration}s · intensity ${s.intent.intensity}${s.keenWristbands&&s.keenWristbands!="none"?" · Keen wristbands: "+s.keenWristbands:""}`;
@@ -1277,7 +1285,7 @@ async function openShot(id,kind){
       <div style="font-size:10.5px;color:var(--hint);margin-top:3px">one line per spoken line — <b>Character: [tag] the line [tag]</b>. The WORDS are locked; the <b>[tags]</b> are the acting (e.g. [proudly], [gulps], [whispers], [quietly]). Saved verbatim, voiced in each character's canon voice.</div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" onclick="saveVoice('${_code}')">✓ Save the voice lines</button>${s.voiceScript?`<button class="btn ghost" onclick="revertVoice('${_code}')">↺ Revert to auto</button>`:''}<span style="font-size:11px;color:var(--hint);align-self:center">then Regenerate the clip</span></div>
       <div class="kv" style="margin-top:16px;color:var(--hint);font-weight:700;border-top:1px solid var(--line);padding-top:9px">▼ Director's intent &amp; source — NOT sent to any API (context only)</div>`:''}
-    <div class="kv">${isB?'Story beat':'Action'}</div><div>${s.action||''}</div>
+    <div class="kv">${isB?'Story beat':'Action'}</div><div>${_esc(s.action||'')}</div>
     ${cutsHtml}
     ${isB&&s.cameraArc?`<div class="kv">Camera arc</div><div style="font-size:12.5px">${s.cameraArc}</div>`:''}
     ${!isB?`<div class="kv">Directorial intent</div><div>${s.intent.beat} — ${s.intent.emotion}; music: ${s.intent.musicMood}${s.intent.humour?"; humour: "+s.intent.humour:""}</div>`:''}

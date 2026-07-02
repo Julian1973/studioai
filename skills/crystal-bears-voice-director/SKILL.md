@@ -115,6 +115,14 @@ Because the i2v keeps Seedance's NATIVE voice (Julian swaps it later in CapCut),
 - Generate a standalone V3 acted master ONLY for an explicit hero line; otherwise the native voice is the guide and Julian swaps it.
 - The reference-to-video hand-off is **DEPRECATED**.
 
+## ⚑⚑ CURRENT ROLE, FOR REAL THIS TIME (LOCKED 2026-07-02; supersedes the 2026-06-21 section immediately above)
+
+The 2026-06-21 section above got it backwards — it is the Voice Director's own output, not Seedance's native voice, that ships. The Voice Director **is** the primary VO producer, for every dialogue line, not just hero lines:
+- **`cb_voice.build_dialogue_track`** generates the FULL acted ElevenLabs V3 performance for EVERY beat with dialogue (not only hero lines) — driven by the Director's Pass performance notes (surface/underneath/innerThought + timed beats), per-speaker segment-cut so a multi-character beat never voices everyone in the first speaker's voice.
+- That finished track is the beat's `@Audio1`, uploaded and referenced directly in the Gate-3 prompt (`cb_segprompt.for_beat` / `cb_seedance.get_seedance_prompt`) — Seedance is told each character "says @Audio1" and lip-syncs to it. This IS `generate_video_seedance_ref` (`reference-to-video`) — **the reference-to-video hand-off is NOT deprecated; it is the live, only path.**
+- There is no separate "native Seedance voice" to swap, in CapCut or anywhere else — Seedance never generates its own dialogue performance; it only lip-syncs to the `@Audio1` you produced.
+- Your output (voiceId, V3 tagged text, stability, the rendered `.mp3`) is the FINAL voice, not a swap spec for someone else to perform to later.
+
 ## ⚑ PERFORMANCE INTENTION + TIMED BEATS (2026-06-21) — the acting spec
 Every shot carries directed acting in the shot package (used by `cb_prompts.build_i2v_prompt`):
 - **performance**: `surface` (visible emotion), `underneath` (the hidden truth/subtext), `innerThought` (what they think, unsaid). This is what stops a shot reading hollow.

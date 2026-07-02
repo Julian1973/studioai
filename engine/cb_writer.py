@@ -97,8 +97,11 @@ def _loadjson(text, what="output"):
 
 # ── the room's mind (the writer skill + canon + the cast) ────────────────────
 def _roster(chars):
+    # a stub character (e.g. Bo, T6 ruling) can have sizeRank explicitly null, not merely absent — .get(key, default)
+    # only falls back to default on a MISSING key, so a present-but-None value reaches sorted() as None and crashes
+    # comparing against another character's int rank. `or 99` catches both missing AND explicitly-null the same way.
     order = sorted([k for k, v in chars.items() if isinstance(v, dict) and k not in ("sizeClasses",)],
-                   key=lambda k: chars[k].get("sizeRank", 99))
+                   key=lambda k: chars[k].get("sizeRank") or 99)
     out = []
     for k in order:
         c = chars[k]

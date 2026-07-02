@@ -299,7 +299,7 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 9,
+      "durationSec": 10,
       "pillar": "spark",
       "intensity": 0.22,
       "storyBeat": "The giant flower field is safe, warm and playful as Fuzzby and Zenny collect pollen; Zenny works with calm precision while Fuzzby turns the job into a manic aerial performance, overdoes a dip into a flower, ricochets off a leaf, and proudly buttons the crash.",
@@ -315,13 +315,13 @@
       "physicalFeeling": "A fizzy upward bounce in the chest that lands as a soft FWIP in the ribs within the first two seconds.",
       "light": "Warm golden morning god-rays isolate the flower corridor; pollen motes sparkle around Fuzzby's path while Zenny remains in cleaner, calmer amber light.",
       "atmosphere": "Floating pollen, swaying petals, and soft breeze make the air feel edible and safe; leaves at bee-height create playful obstacle rhythm.",
-      "motionTempo": "Fuzzby is full-throttle hyper, zig-zagging, bumping and snapping back; Zenny is smooth and measured, holding the comic contrast.",
+      "motionTempo": "Fuzzby is full-throttle hyper from frame one, zig-zagging, bumping and snapping back; Zenny works calm, precise, neat and efficient in the SAME frame, never cutting away to alternate coverage.",
       "grade": "Saturated honey-amber with gentle green-teal forest fill, preserving warmth after the FWIP so the bonk never feels mean.",
       "cuts": [
         {
           "n": 1,
-          "framing": "Wide establishing, 24mm, slightly low angle, very gentle organic push through towering flowers",
-          "action": "Tall flowers sway gently in the warm breeze as Fuzzby and Zenny weave between blossoms collecting pollen from flower to flower; Zenny's path is smooth and precise while Fuzzby zig-zags wildly and loudly hums as he works, wings beating rapidly and continuously while airborne.",
+          "framing": "Drone-style chase opens low and wide through towering flowers, gentle organic push",
+          "action": "Tall flowers sway gently, everything beautiful, as Fuzzby and Zenny weave flower to flower collecting pollen together; Zenny's path is smooth and precise while Fuzzby zig-zags wildly and loudly hums as he works, wings beating rapidly and continuously while airborne.",
           "dialogue": "FUZZBY: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
           "delivery": "fun sing-song rhythm; puffed-up pride, breathless tempo, delighted with himself before the gag lands",
           "voiceTreatment": null,
@@ -329,8 +329,8 @@
         },
         {
           "n": 2,
-          "framing": "Cut to action mid on Fuzzby, 24mm handheld-feel reframe tracking his dive",
-          "action": "Fuzzby dips low into a flower and scoops up pollen, overdoes the exit, spins sideways into a leaf with a soft FWIP, bounces back into the air, and rapidly straightens into a proud on-parade hover; wings keep flapping fast with motion blur.",
+          "framing": "The camera picks Fuzzby up and CHASES him drone-style — high, low, round and round — as he builds speed",
+          "action": "Fuzzby zigzags wilder, humming louder and louder, dips low into a flower and scoops up pollen, overdoes the exit, spins sideways into a leaf with a soft FWIP, and bounces back into the air; wings keep flapping fast with motion blur.",
           "dialogue": null,
           "delivery": null,
           "voiceTreatment": null,
@@ -338,15 +338,15 @@
         },
         {
           "n": 3,
-          "framing": "Cut to medium close-up, 35mm eye-level, tiny surprised push-in then locked for the button",
-          "action": "Fuzzby holds his proud hover after the leaf bounce as if the impact were part of the method; Zenny remains frame-right in the background line, still working neatly.",
+          "framing": "Camera settles close on Fuzzby for the button as Zenny glides into the same frame",
+          "action": "As if nobody has seen him, Fuzzby instantly straightens into a wicked superhero chest-out pose; Zenny glides up beside him and watches for the beat, still working neatly.",
           "dialogue": "FUZZBY: Nailed it.",
           "delivery": "crisp, dignified cover-up; a tiny beat of delayed self-certainty after the FWIP",
           "voiceTreatment": null,
           "chorusMembers": null
         }
       ],
-      "cameraArc": "Track Fuzzby continuously and hyper-paced throughout the whole beat — frame-left, chasing his flight, dive and FWIP spin — with Zenny frame-right in the same moving composition, barely keeping up. The ONLY hold in the whole beat is close on Fuzzby's own proud chest-out pose on his button line. No separate reaction shot, no locked two-shot ending.",
+      "cameraArc": "Drone-style camera chases Fuzzby the whole beat — high, low, round and round — building speed with him through the weave, the dive and the FWIP; it never sits wide and observes. The ONLY hold in the whole beat is close on Fuzzby's own proud chest-out pose as Zenny glides into frame beside him, under 1.5 seconds. No separate reaction shot, no locked two-shot ending.",
       "pacingVerbs": [
         "swaying",
         "weaving",
@@ -357,7 +357,7 @@
         "straightening",
         "holding"
       ],
-      "pauseHold": "After 'Nailed it.' hold Fuzzby's own proud chest-out pose for about 1.0-1.5 seconds — the beat's only hold; music buttons the moment. Zenny never stops to watch; she stays in frame, still barely keeping up.",
+      "pauseHold": "After 'Nailed it.' hold Fuzzby's own proud chest-out pose, with Zenny arriving to watch in the same frame, for under 1.5 seconds — the beat's only hold; music buttons the moment.",
       "performance": {
         "surface": "Fuzzby performs expert competence; Zenny performs calm efficiency.",
         "underneath": "Fuzzby is desperate to be impressive and accepted; Zenny is already amused and fond, though she refuses to give him the satisfaction yet.",
@@ -366,12 +366,12 @@
       "crystalGlow": "No character crystal glow in this beat; environmental pollen glow steady-warm, with Fuzzby's pollen trail scattering chaotically and Zenny's staying clean and even.",
       "beautyMoment": true,
       "startState": "Opening frame: Fuzzby is frame-left mid-hover at bee height between tall pollen-filled blossoms, already poised in a proud working posture; Zenny is frame-right among neighboring blossoms in a calm collecting pose; both are airborne with wings in rapid continuous flap; flowers, grass corridors, pollen motes and 2-3 soft ambient crystals fill the rainforest flower-field plate.",
-      "keyframePrompt": "Polished 3D CGI animation — modern feature-film CGI (Pixar/DreamWorks quality): fully 3D-modelled characters and environments, physically-based rendering, soft global illumination and volumetric lighting, subsurface scattering on plush fur, large expressive eyes with warm catch-lights, realistic materials, cinematic depth of field. NOT 2D, NOT hand-drawn, NOT flat. Use the deep rainforest flower-field scene plate as reference: towering soft-necked blossoms, tall grass corridors, swaying canopy edges, pollen-heavy petals, 2-3 subtle ambient crystals in soft bokeh. Characters as per the reference image of Fuzzby and as per the reference image of Zenny; Fuzzby frame-left, Zenny frame-right, clear size distinction and locked positions. Opening frame only: both airborne at bee-height between blossoms, Fuzzby in a proud working hover, Zenny in a calm precise collecting pose, both wings visibly beating rapidly. CINEMATOGRAPHY: Lens 24mm wide to make the flower field feel enormous and playful; camera height slightly low at flower-stem level; composition uses tall vertical flower necks around a warm horizontal grass corridor, Fuzzby on left third, Zenny on right third; camera movement implied as very slight organic breathing push; key light warm golden morning god-rays from upper-left motivated by canopy sun; fill light cool soft forest teal-green; depth of field moderate-shallow with foreground petals soft and bees tack-sharp; warm rim light wraps pollen motes so the world feels safe and alive.",
-      "i2vPrompt": "Anchor Image is TRUTH. COPY EXACTLY. Multi-shot sequence with clean cuts between shots. Shot 1 (wide establishing, 24mm, slightly low angle, gentle organic push): tall flowers sway in a warm breeze while Fuzzby and Zenny weave between pollen-filled blossoms collecting pollen; Zenny works with smooth calm precision, Fuzzby zig-zags wildly through the air, humming loudly, wings beating rapidly and continuously. FUZZBY: \"BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…\" Shot 2 (cut to action mid on Fuzzby, handheld-feel reframe): Fuzzby dips low into a flower, scoops up pollen, overdoes it, spins sideways into a leaf, FWIP, then bounces back into the air and straightens proudly; keep the impact squash-and-settle weighted but harmless. Shot 3 (cut to medium close-up, eye-level, tiny surprised push-in then still): Fuzzby holds the proud hover and says, FUZZBY: \"Nailed it.\" Shot 4 (cut to locked two-shot reaction hold, 50mm): Zenny glides up beside him and watches him for a beat, deadpan stillness, Fuzzby frame-left and Zenny frame-right, both airborne wings continuously flapping. Style+Audio: 3D CGI Pixar-quality animation; Seedance scores bright plucky comedy music timed to the FWIP, then ducks under the held look; SFX include soft flower rustle, fast bee wing buzz, pollen puffs, leaf FWIP, tiny rebound wobble; voice forward for Fuzzby; no text, no watermarks, no logos.",
-      "soundIntent": "Warm morning insects, soft petal rustle, fast continuous bee wings; Fuzzby's sing-song rides a light pizzicato motif, FWIP lands with a soft leafy snap and tiny percussion puff, music drops for Zenny's hold, then a small proud button chord under “Nailed it.”",
+      "keyframePrompt": null,
+      "i2vPrompt": null,
+      "soundIntent": "Warm morning insects, soft petal rustle, fast continuous bee wings; Fuzzby's sing-song rides a light pizzicato motif that chases him, FWIP lands with a soft leafy snap and tiny percussion puff, then a small proud button chord under the line in @Audio1 as the music ducks.",
       "continuity": {
         "opensFrom": "Scene opens from black into the warm deep rainforest flower field with both bees already present and working.",
-        "carryToNext": "Fuzzby remains airborne frame-left, proud and overconfident; Zenny frame-right has just watched him and is close enough to be the counterweight for the next flower gag.",
+        "carryToNext": "Fuzzby remains airborne frame-left, proud and overconfident; Zenny frame-right has just glided up to watch and is close enough to be the counterweight for the next flower gag.",
         "screenDirection": "LEFT"
       },
       "check": {
@@ -417,15 +417,15 @@
         "Zenny"
       ],
       "keenWristbands": null,
-      "durationSec": 12,
+      "durationSec": 10,
       "pillar": "spark",
       "intensity": 0.27,
-      "storyBeat": "Fuzzby escalates from proud professional to pollen-disaster, sticks his whole face into another flower, emerges with a fuzzy pollen moustache, asks for validation, and Zenny lands the dry answer he did not ask for.",
+      "storyBeat": "Fuzzby escalates from proud professional to pollen-disaster, sticks his whole face into another flower, emerges wearing a magnificent goatee handlebar moustache of pollen, asks for validation, and Zenny lands the dry answer he did not ask for.",
       "emotionalIntent": "The audience should feel the warm snap of a shared joke: Fuzzby wants applause, Zenny gives him truth, and affection leaks through the tease.",
       "want": "Fuzzby wants Zenny to certify him as official and impressive; Zenny wants to keep the work orderly without admitting how funny she finds him.",
       "need": "Fuzzby needs permission to be ridiculous and still belong; Zenny needs to let her affection crack the deadpan for one tiny second.",
       "crystalTruth": "No bear crystal is present; the pollen on Fuzzby's face contradicts his official posture, telling the truth his line cannot: he is not in control, but he is lovable.",
-      "kidRead": "Fuzzby gets a giant pollen moustache and Zenny calls him nuts.",
+      "kidRead": "Fuzzby gets a magnificent goatee handlebar moustache made of pollen and Zenny calls him nuts.",
       "adultRead": "The same tease is an affectionate boundary: Zenny sees through the performance and likes him anyway.",
       "theGame": "Pollen Run Rules: if Fuzzby can make the mess look official, he wins; Zenny’s rule is that the truth gets the final word.",
       "wordlessHeld": false,
@@ -433,13 +433,13 @@
       "physicalFeeling": "A little tickle under the nose that turns into a held giggle in the throat.",
       "light": "Warm amber light catches the pollen dust on Fuzzby's face so the gag reads instantly, while Zenny is lit cleanly and evenly for the deadpan line.",
       "atmosphere": "Pollen motes thicken into a soft golden cloud around the flower, building the sneezy-tickly feeling before the reveal.",
-      "motionTempo": "Fuzzby rockets into the flower too fast, then freezes for the moustache reveal; Zenny’s stillness slows time for the punchline.",
+      "motionTempo": "Fuzzby rockets into the flower too fast, then holds an instant for the moustache reveal — a quick flash, not a dead stop; Zenny's stillness in the same world lets the punchline land.",
       "grade": "Honey-gold grade with soft teal shadows; the comedy remains bright and safe with no storm colour yet.",
       "cuts": [
         {
           "n": 1,
-          "framing": "Medium two-shot, 35mm eye-level, organic breathing camera with Fuzzby frame-left and Zenny frame-right",
-          "action": "From the prior watch, Fuzzby zooms toward another flower, humming louder, and lines himself up with too much confidence while Zenny holds a clean hover nearby; both airborne wings beat rapidly and continuously.",
+          "framing": "Drone-style camera chases Fuzzby full-throttle into the next flower, Zenny working calmly in the same frame",
+          "action": "From the prior watch, Fuzzby zooms toward another flower, humming louder, and lines himself up with too much confidence while Zenny holds a clean hover nearby, working calm and precise; both airborne wings beat rapidly and continuously.",
           "dialogue": null,
           "delivery": null,
           "voiceTreatment": null,
@@ -447,8 +447,8 @@
         },
         {
           "n": 2,
-          "framing": "Cut to close action insert, 35mm, quick push with soft pollen bloom",
-          "action": "Fuzzby sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen like a fuzzy yellow moustache as Zenny tries not to laugh.",
+          "framing": "Camera stays with Fuzzby for the reveal, then a short punctuation cut to Zenny",
+          "action": "Fuzzby sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO Zenny: trying not to laugh.",
           "dialogue": null,
           "delivery": null,
           "voiceTreatment": null,
@@ -456,8 +456,8 @@
         },
         {
           "n": 3,
-          "framing": "Cut to medium close-up on Fuzzby, 50mm, locked for his self-assessment",
-          "action": "Fuzzby presents the pollen moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering.",
+          "framing": "Close on Fuzzby, proud, presenting the moustache",
+          "action": "Fuzzby presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering.",
           "dialogue": "FUZZBY: Do I look official?",
           "delivery": "earnest, pompous, genuinely hoping for approval",
           "voiceTreatment": null,
@@ -465,7 +465,7 @@
         },
         {
           "n": 4,
-          "framing": "Cut to locked close two-shot favoring Zenny, 50mm, no camera movement",
+          "framing": "Short punctuation cut to Zenny for the dry topper — no long coverage",
           "action": "Zenny fights the smile for a beat, then lets the smallest dry amusement through while Fuzzby waits for praise.",
           "dialogue": "ZENNY: Yes Fuzzby Officially nuts!",
           "delivery": "deadpan, dry, understated; the tiny smile tries to hide inside the line",
@@ -473,7 +473,7 @@
           "chorusMembers": null
         }
       ],
-      "cameraArc": "Track Fuzzby's overconfident acceleration into a pollen-cloud reveal, then go still and honest so the line reads through Zenny's controlled face.",
+      "cameraArc": "Drone-style camera tracks Fuzzby's full-throttle acceleration into the pollen-cloud reveal, then cuts SHORT to Zenny — punctuation, not coverage — for her trying-not-to-laugh reaction and her dry topper. Never sits wide and observes.",
       "pacingVerbs": [
         "zooming",
         "humming",
@@ -483,7 +483,7 @@
         "withholding",
         "cracking"
       ],
-      "pauseHold": "Hold the pollen-moustache reveal for about 0.8 seconds before “Do I look official?”, then hold Zenny’s almost-laugh for 0.7 seconds before her answer.",
+      "pauseHold": "The moustache reveal lands as a quick flash, not a held pause; the beat's ONE hold is Zenny's almost-laugh on her button line, under 1.5 seconds — nothing else pauses.",
       "performance": {
         "surface": "Fuzzby asks for professional approval; Zenny gives a dry evaluation.",
         "underneath": "Fuzzby wants to be admired so badly that he cannot see the mess; Zenny’s teasing is affection wearing a straight face.",
@@ -492,12 +492,12 @@
       "crystalGlow": "No character crystal glow; golden pollen glow blooms around Fuzzby's face as the truth-telling visual, while the ambient crystals stay soft and steady.",
       "beautyMoment": false,
       "startState": "Opening frame: Fuzzby frame-left hovering near the next tall blossom in a proud ready pose; Zenny frame-right hovering nearby, watching with composed stillness; both airborne wings in rapid continuous flap; warm pollen and tall flower stems surround them with 2-3 ambient crystals in the background.",
-      "keyframePrompt": "Polished 3D CGI animation — modern feature-film CGI (Pixar/DreamWorks quality): fully 3D-modelled characters and environments, physically-based rendering, soft global illumination and volumetric lighting, subsurface scattering on plush fur, large expressive eyes with warm catch-lights, realistic materials, cinematic depth of field. NOT 2D, NOT hand-drawn, NOT flat. Use the deep rainforest flower-field scene plate as reference: tall pollen-heavy blossoms, grass corridors, leaf obstacles, warm pollen motes, 2-3 subtle ambient crystals. Characters as per the reference image of Fuzzby and as per the reference image of Zenny; Fuzzby frame-left and Zenny frame-right, clear locked size distinction. Opening frame only: Fuzzby hovering beside the next flower in proud ready posture, Zenny hovering nearby in a composed watching pose, both wings visibly beating rapidly. CINEMATOGRAPHY: Lens 35mm for present comic intimacy; camera movement slight organic breathing, ready to push with Fuzzby's zoom; camera height eye-level with the bees; composition frames the flower mouth as foreground left, Fuzzby on left third, Zenny on right third, negative space between them for the coming look; key light warm golden canopy sun through pollen from upper-left; fill cool diffuse forest teal; depth of field shallow enough for pollen bokeh while keeping both bees sharp; front-warm light on Zenny for deadpan readability and glittering rim on Fuzzby's pollen path.",
-      "i2vPrompt": "Anchor Image is TRUTH. COPY EXACTLY. Multi-shot sequence with clean cuts between shots. Shot 1 (medium two-shot, 35mm eye-level, organic breathing camera): Fuzzby frame-left zooms toward another flower, humming louder, while Zenny frame-right holds a smooth calm hover; both airborne wings beat rapidly and continuously. Shot 2 (cut to close action insert): Fuzzby sticks his whole face into the flower; hold a beat; he pulls back completely dusted in pollen like a fuzzy yellow moustache, and Zenny tries not to laugh. Shot 3 (cut to medium close-up on Fuzzby, 50mm locked): Fuzzby presents himself with pompous sincerity and says, FUZZBY: \"Do I look official?\" Shot 4 (cut to locked close two-shot favoring Zenny): Zenny fights the laugh, then answers with dry stillness, ZENNY: \"Yes Fuzzby Officially nuts!\" Keep Fuzzby frame-left and Zenny frame-right; comedy lands through Fuzzby's earnestness and Zenny's tiny crack. Style+Audio: 3D CGI Pixar-quality animation; Seedance scores light comedy music with a soft pollen poof reveal, then a tiny dry pluck under Zenny's line; SFX include fast wings, flower muffled thump, pollen puff, restrained Zenny breath; voice forward; no text, no watermarks, no logos.",
-      "soundIntent": "Continuous fast wing buzz, muffled flower whoomp, soft pollen poof, Fuzzby's proud voice slightly forward; music pauses a half-beat before Zenny’s line, then lands a dry pizzicato tick on “nuts!”",
+      "keyframePrompt": null,
+      "i2vPrompt": null,
+      "soundIntent": "Continuous fast wing buzz, muffled flower whoomp, soft pollen poof as the moustache reveals; Fuzzby's proud voice slightly forward; music pauses a half-beat before Zenny's line, then lands a dry pizzicato tick on the line in @Audio1.",
       "continuity": {
-        "opensFrom": "Opens from Beat 1 with Fuzzby and Zenny already close together after Zenny's watch; Fuzzby's confidence has increased, not decreased.",
-        "carryToNext": "Fuzzby is pollen-covered and offended enough to overcorrect; Zenny's hidden smile carries into the next bigger tumble.",
+        "opensFrom": "Opens from Beat 1 with Fuzzby and Zenny already close together after Zenny glided up to watch; Fuzzby's confidence has increased, not decreased.",
+        "carryToNext": "Fuzzby is pollen-covered (moustache remnants) and offended enough to overcorrect; Zenny's hidden smile carries into the next bigger tumble.",
         "screenDirection": "LEFT"
       },
       "check": {
@@ -528,7 +528,7 @@
       "id": 2
     },
     {
-      "slug": "s1-b3-buzz-crash-thunder-prickle",
+      "slug": "s1-b3-smear-thup-buzz-crash",
       "scene": "Rainforest Pollen Run",
       "characters": [
         "Fuzzby",
@@ -542,29 +542,29 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 15,
+      "durationSec": 9,
       "pillar": "spark",
-      "intensity": 0.38,
-      "storyBeat": "Stung by Zenny's joke, Fuzzby wipes at his face and makes the pollen worse, dives into a bigger overcorrection, clips a branch, tumbles into a blossom upside down, pops up with his trademark crash-call, then dives into another flower until a distant rumble interrupts the play.",
-      "emotionalIntent": "The audience should feel the big comic tumble first, then a tiny cold prickle as the safe morning changes by one degree.",
+      "intensity": 0.34,
+      "storyBeat": "Stung by Zenny's joke, Fuzzby wipes at his face and makes the pollen worse, dives into a bigger overcorrection, clips a branch, tumbles into a blossom upside down, and pops back up undimmed with his trademark crash-call as Zenny's eye-roll cracks into a smile.",
+      "emotionalIntent": "The audience should feel the big comic tumble land as pure carnival fun that refuses to hurt.",
       "want": "Fuzzby wants to recover his dignity through an even bigger demonstration of competence.",
-      "need": "Fuzzby needs to accept that his chaos can still become useful, and Zenny needs to stay open to care when play turns serious.",
-      "crystalTruth": "No bear crystal is present; the flower-field light tells the truth by shifting from steady amber to the first faint cool edge as Fuzzby's face still performs confidence but the world quietly warns of change.",
-      "kidRead": "Fuzzby smears himself worse, bounces THUP THUP THUP, pops up shouting, then freezes at thunder.",
-      "adultRead": "The gag is the last carefree breath before the episode's risk arrives; even silliness has to notice the world changing.",
-      "theGame": "Pollen Run Rules: Fuzzby tries to beat the flowers by getting more official each round, but the flowers keep awarding him more pollen until the sky changes the rules.",
+      "need": "Fuzzby needs to trust that even his mistakes can look heroic if he commits to them fully.",
+      "crystalTruth": "No bear crystal is present; the pollen keeps thickening on Fuzzby's face even as his confidence does too, telling the truth his crash-call cannot: the mess and the pride are the same thing.",
+      "kidRead": "Fuzzby smears himself worse, bounces THUMP THUMP THUMP, and pops up shouting his crash-call.",
+      "adultRead": "Committing fully to a mistake, instantly, is its own kind of bravery — even when it's silly.",
+      "theGame": "Pollen Run Rules: every flower Fuzzby loses to still counts as a win if he announces it loudly enough.",
       "wordlessHeld": false,
       "comedyMode": "BIG",
-      "physicalFeeling": "A tumbling carnival drop that suddenly catches as a tiny held breath when thunder rolls.",
-      "light": "The beat begins in golden amber, then the distant background cools by the thunder hold, isolating Fuzzby's mid-hover pause against a slightly dimmer sky gap.",
-      "atmosphere": "Pollen clouds and petal bounce build the chaos; the air subtly stills for the rumble, with motes hanging for a half-second like the world is listening.",
-      "motionTempo": "Fastest Fuzzby tempo of the scene: frantic wipe, dive, clip, tumble, pop; then abrupt suspended stillness at the thunder.",
-      "grade": "Amber warmth preserved in foreground with a faint blue-grey wash entering the far canopy after the rumble.",
+      "physicalFeeling": "A tumbling carnival drop that refuses to hurt.",
+      "light": "Golden amber holds steady through the tumble — nothing cools yet; this is still safe, playful chaos.",
+      "atmosphere": "Pollen clouds and petal bounce build the chaos; branch and blossom obstacles keep the corridor busy.",
+      "motionTempo": "Full-throttle from frame one: frantic wipe, dive, clip, tumble, pop — Fuzzby never slows until the pop-up; Zenny stays calm and precise in the same frame throughout.",
+      "grade": "Amber warmth, unbroken — the storm has not touched this beat yet.",
       "cuts": [
         {
           "n": 1,
-          "framing": "Action mid, 24mm, energetic handheld-feel follow on Fuzzby frame-left",
-          "action": "Fuzzby gasps, wipes at his face, somehow smears the pollen worse, then dives again toward another flower as Zenny watches from frame-right; both airborne wings beat rapidly.",
+          "framing": "Drone-style camera chases Fuzzby full-throttle, energetic handheld-feel follow, frame-left",
+          "action": "Fuzzby gasps, wipes at his face, somehow smears the pollen worse, then dives again toward another flower as Zenny watches from frame-right, working calm and precise; both airborne wings beat rapidly.",
           "dialogue": null,
           "delivery": null,
           "voiceTreatment": null,
@@ -572,8 +572,8 @@
         },
         {
           "n": 2,
-          "framing": "Cut to wide full-body gag shot, 24mm, whip-pan and quick reframe through branch and blossom",
-          "action": "Fuzzby clips a branch, tumbles end over end through the air with weighted THUP, THUP, THUP impacts, lands upside down inside a blossom, holds a beat with little legs kicking, then pops back up.",
+          "framing": "Camera stays glued to Fuzzby through the tumble, whip-pan and quick reframe through branch and blossom",
+          "action": "Fuzzby clips a branch, tumbles end over end through the air with weighted THUMP, THUMP, THUMP impacts, lands upside down inside a blossom, holds a beat with little legs kicking, then pops back up undimmed.",
           "dialogue": "FUZZBY: Buzz Crash!!",
           "delivery": "popping up; triumphant self-announcement, as if the crash is his official brand",
           "voiceTreatment": null,
@@ -581,24 +581,15 @@
         },
         {
           "n": 3,
-          "framing": "Cut to medium two-shot, 35mm, steadying from chaos into Zenny's reaction",
-          "action": "Zenny rolls her eyes, but she is smiling now; Fuzzby hums louder, dives into another flower, and pops back out somehow even more covered in pollen than before.",
+          "framing": "Short punctuation cut to Zenny — the joke's frame, not the pace",
+          "action": "CUT TO Zenny: she rolls her eyes, but she is smiling now.",
           "dialogue": null,
           "delivery": null,
           "voiceTreatment": null,
           "chorusMembers": null
-        },
-        {
-          "n": 4,
-          "framing": "Cut to held medium close two-shot, 50mm, camera locks as sound drops",
-          "action": "Zenny watches Fuzzby for a beat; a distant rumble of thunder rolls; Fuzzby pauses mid-hover, wings still beating rapidly as his confidence catches.",
-          "dialogue": "FUZZBY: …okay that sounded dramatic.",
-          "delivery": "small, suddenly aware, trying to keep the joke alive while the world has shifted",
-          "voiceTreatment": null,
-          "chorusMembers": null
         }
       ],
-      "cameraArc": "Go with Fuzzby's wild overcorrection at full comic intensity, then drain the motion into a locked 50mm hold when thunder enters, letting the first prickle land in the same frame as the pollen mess.",
+      "cameraArc": "Drone-style camera stays glued to Fuzzby through the whole overcorrection — dive, branch clip, tumble, THUMPs — full comic intensity throughout, then a SHORT punctuation cut to Zenny's eye-roll-smile as the button. One gag arc: setup, impact, recovery, button. Ends here — does not continue into more pollen or the thunder.",
       "pacingVerbs": [
         "gasping",
         "wiping",
@@ -610,52 +601,150 @@
         "popping",
         "freezing"
       ],
-      "pauseHold": "Hold Fuzzby upside down in the blossom for about 0.8 seconds before the pop-up, then hold the thunder pause for 1.2 seconds before the line.",
+      "pauseHold": "Hold Fuzzby upside down in the blossom with legs kicking for under a second, then he pops back up — the beat's only hold, under 1.5 seconds.",
       "performance": {
         "surface": "Fuzzby doubles down on dignity and turns the crash into a slogan; Zenny rolls her eyes but smiles.",
-        "underneath": "Fuzzby is embarrassed and covering it with volume; Zenny's affection becomes visible just as the world asks them to pay attention.",
-        "innerThought": "Fuzzby: If I make the crash sound official, it counts. Zenny: He is impossible. Also, I like him. Then: Wait... what was that?"
+        "underneath": "Fuzzby is embarrassed and covering it with volume; Zenny's affection becomes visible despite herself.",
+        "innerThought": "Fuzzby: If I make the crash sound official, it counts. Zenny: He is impossible. Also, I like him."
       },
-      "crystalGlow": "No character crystal glow; ambient crystals and pollen remain warm at first, then pulse faintly cooler for the thunder prickle without becoming stormy yet.",
+      "crystalGlow": "No character crystal glow; ambient crystals and pollen remain warm throughout — nothing cools yet.",
       "beautyMoment": false,
       "startState": "Opening frame: Fuzzby frame-left hovers pollen-covered from the prior gag with one paw lifted near his face in a startled, offended pose; Zenny frame-right hovers close by with controlled deadpan composure; both airborne wings in rapid continuous flap; warm flowers, leaves at bee height, pollen motes and soft ambient crystals surround them.",
-      "keyframePrompt": "Polished 3D CGI animation — modern feature-film CGI (Pixar/DreamWorks quality): fully 3D-modelled characters and environments, physically-based rendering, soft global illumination and volumetric lighting, subsurface scattering on plush fur, large expressive eyes with warm catch-lights, realistic materials, cinematic depth of field. NOT 2D, NOT hand-drawn, NOT flat. Use the deep rainforest flower-field scene plate as reference: towering blossoms, branch obstacles at bee height, grass below, pollen in the air, 2-3 subtle ambient crystals. Characters as per the reference image of Fuzzby and as per the reference image of Zenny; Fuzzby frame-left, Zenny frame-right, locked size distinction. Opening frame only: Fuzzby hovering pollen-covered with a startled offended pose and paw near his face; Zenny hovering nearby in calm composed stillness; both wings visibly beating rapidly. CINEMATOGRAPHY: Lens 24mm for comic speed and spatial readability; camera height eye-level with bee flight path; composition keeps branch obstacle in foreground left, blossom target midground, Zenny right as still counterweight; camera movement implied as energetic handheld-feel ready for whip-pan; key light warm golden canopy sun with pollen scatter; fill cool forest teal; depth of field moderate so branch, flower and bees remain readable; light direction warm side-rim on pollen, with far background allowed a very faint cooler edge for the later thunder.",
-      "i2vPrompt": "Anchor Image is TRUTH. COPY EXACTLY. Multi-shot sequence with clean cuts between shots. Shot 1 (action mid, 24mm energetic handheld-feel): Fuzzby frame-left gasps, wipes at his face, smears the pollen worse, then dives again toward another flower; Zenny frame-right watches with deadpan control; both airborne wings beat rapidly and continuously. Shot 2 (cut to wide full-body gag shot with whip-pan reframe): Fuzzby clips a branch, tumbles end over end through the air, THUP, THUP, THUP, lands upside down inside a blossom; hold a beat as his legs kick; he pops back up and says, FUZZBY: \"Buzz Crash!!\" Shot 3 (cut to medium two-shot): Zenny rolls her eyes, but she is smiling now; Fuzzby hums louder, dives into another flower, and pops back out even more covered in pollen than before. Shot 4 (cut to held medium close two-shot, 50mm locked): Zenny watches him; a distant RUMBLE of thunder rolls; Fuzzby pauses mid-hover, wings still beating rapidly, and says, FUZZBY: \"…okay that sounded dramatic.\" Let the warm flower field subtly cool in the far background after the rumble; do not show storm clouds yet. Style+Audio: 3D CGI Pixar-quality animation; Seedance scores full over-the-top gag timing with branch BONK/THUPs, then ducks to near-silence for the thunder and line; SFX include fast wings, pollen smears, branch clip, blossom thuds, distant thunder; voice forward; no text, no watermarks, no logos.",
-      "soundIntent": "Rule-of-three THUPs with real weight, pollen puff on each bounce, tiny triumphant sting on “Buzz Crash!!”; music resumes for his louder humming, then drops out under a low distant thunder rumble, leaving only wings and the small line.",
+      "keyframePrompt": null,
+      "i2vPrompt": null,
+      "soundIntent": "Rule-of-three THUMPs with real weight, pollen puff on each bounce, tiny triumphant sting on the line in @Audio1; music chases the tumble at full comic energy, then buttons on the pop-up.",
       "continuity": {
-        "opensFrom": "Opens from Beat 2 immediately after Zenny’s “Officially nuts!” with Fuzzby pollen-covered and affronted.",
-        "carryToNext": "A distant rumble has shifted the emotional temperature; Fuzzby is paused mid-hover and Zenny has turned from amusement toward attention.",
+        "opensFrom": "Opens from Beat 2 immediately after Zenny's dry answer, with Fuzzby pollen-covered and affronted.",
+        "carryToNext": "Fuzzby has just popped up triumphantly from the tumble, still buzzing with pride and more disheveled than before; Zenny is smiling despite herself. This continues straight into another pollen dive, not a cutaway.",
         "screenDirection": "LEFT"
       },
       "check": {
-        "focalSubject": "Fuzzby’s overcorrection crashing into the first sign of weather.",
-        "emotionalRead": "Big laughter that catches in the throat for one second when the rumble arrives.",
-        "heartCheck": "The child laughs at the tumble and catchphrase, then notices the sky sound; the parent feels the episode pivot from play toward responsibility without losing warmth."
+        "focalSubject": "Fuzzby's overcorrection turning into a proud crash-call, countered by Zenny's cracking deadpan.",
+        "emotionalRead": "Big laughter at a tumble that refuses to hurt.",
+        "heartCheck": "The child laughs at the tumble and the catchphrase; the parent sees a kid who turns every stumble into a story."
       },
       "writerNote": null,
       "shot_style": "Over-the-top physical comedy collapsing into a still 50mm prickle beat.",
-      "script_gag_lock_id": "S1_GAG_03_SMEAR_THUP_BUZZ_CRASH_THUNDER",
-      "gag_carry": "The pollen disaster escalates to maximum before thunder interrupts and changes the rules.",
+      "script_gag_lock_id": "S1_GAG_03_SMEAR_THUP_BUZZ_CRASH",
+      "gag_carry": "Fuzzby's crash-call pride is instantly topped by an even bigger pollen dive in the next beat.",
       "director_mode": "BIG comedy with a clean emotional turn; the final stillness must be felt, not overplayed.",
       "audience_feeling_target": "Laughing breath becomes a tiny inhale of concern.",
-      "emotional_function": "Action escalation, climax gag, reaction hold, tonal hook toward storm.",
-      "script_truth_lock": "Use script order exactly: gasp, wipe, smear worse, dive, branch clip, tumble, THUPs, upside-down blossom, legs kick, pop up, Buzz Crash, Zenny rolls eyes smiling, another flower, more pollen, thunder, Fuzzby pause, line.",
-      "music_emotion": "Comic chaos thinning into a low unresolved rumble.",
-      "performance_notes": "Fuzzby’s pop-up is proud and branded; his thunder line is smaller, as if he is asking the world not to become serious yet. Zenny’s smile is small and real before it fades toward concern.",
-      "physical_staging_intent": "The branch and blossom form the rule-of-three obstacle path; the thunder hold stops all broad motion except wing flap.",
+      "emotional_function": "Action escalation, tumble gag, reaction button.",
+      "script_truth_lock": "Use script order exactly: gasp, wipe, smear worse, dive, branch clip, tumble, THUMPs, upside-down blossom, legs kick, pop up, Buzz Crash!!, Zenny rolls eyes smiling.",
+      "music_emotion": "Comic chaos at full tilt, buttoned by the pop-up.",
+      "performance_notes": "Fuzzby's pop-up is proud and branded, never sheepish; Zenny's smile is small and real.",
+      "physical_staging_intent": "The branch and blossom form a rule-of-three obstacle path; nothing stops the momentum until the pop-up.",
       "visibility_rule": "Both bees present from opening; Fuzzby frame-left, Zenny frame-right in shared frames.",
       "contact_rule": "Branch and blossom impacts are cartoon-safe but weighted; Fuzzby never sinks through flower surfaces.",
       "physics_rule": "Every impact has squash, overshoot and settle; airborne wings remain continuously flapping, including the mid-hover thunder pause.",
-      "visual_payoff_rule": "The first cool light shift should be subtle enough that the warm scene is not fully stormy yet.",
-      "failed_correction_rule": "If thunder arrives too visually big, reroll: only distant rumble and slight light shift; they do not see anything yet.",
-      "continuity_physical_rule": "Fuzzby may be temporarily more pollen-covered but returns to reference structure; no permanent moustache or accessories.",
-      "prohibited_staging": "Do not show ocean, boat, bears, rain, lightning, or visible storm clouds yet; only distant thunder and subtle light change.",
+      "visual_payoff_rule": "The crash-call must read as pride, never as a complaint or an apology.",
+      "failed_correction_rule": "If Fuzzby looks hurt or embarrassed instead of proud, reroll heroic and undimmed.",
+      "continuity_physical_rule": "Fuzzby returns to reference structure after the tumble; pollen stays temporary, no permanent moustache or accessories.",
+      "prohibited_staging": "Do not show thunder, storm, ocean, boat, or bears yet; do not let this beat continue into another pollen dive or the rumble — that begins fresh in 1.B4.",
       "sceneNumber": 1,
       "beatCode": "1.B3",
       "id": 3
     },
     {
-      "slug": "s1-b4-storm-coming-pressure-flower-stuck",
+      "scene": "Rainforest Pollen Run",
+      "characters": [
+        "Fuzzby",
+        "Zenny"
+      ],
+      "openingCast": [
+        "Fuzzby",
+        "Zenny"
+      ],
+      "keenWristbands": null,
+      "pillar": "spark",
+      "wordlessHeld": false,
+      "comedyMode": "BIG",
+      "sceneNumber": 1,
+      "slug": "s1-b4-more-pollen-thunder-stop",
+      "speakers": [
+        "Fuzzby"
+      ],
+      "durationSec": 9,
+      "intensity": 0.4,
+      "storyBeat": "Fuzzby hums louder and dives into another flower, popping back up even more covered in pollen than before while Zenny watches in amazement; then a distant rumble of thunder stops him dead mid-hover — the scene's one earned full stop.",
+      "emotionalIntent": "The audience should feel the escalating comic high suddenly catch in the throat as the thunder lands.",
+      "want": "Fuzzby wants to keep topping his own chaos until it becomes legendary; Zenny wants to keep enjoying the show without admitting it.",
+      "need": "Fuzzby needs to notice the world can interrupt him; Zenny needs to shift from amusement to attentiveness the instant it matters.",
+      "crystalTruth": "No bear crystal is present; the flower-field light tells the truth by shifting from steady amber to the first faint cool edge as Fuzzby's face still performs confidence but the world quietly warns of change.",
+      "kidRead": "Fuzzby gets even MORE covered in pollen, it's amazing, then a big rumble makes him freeze.",
+      "adultRead": "The gag is the last carefree breath before the episode's risk arrives; even silliness has to notice the world changing.",
+      "theGame": "Pollen Run Rules: Fuzzby tries to beat the flowers by getting more official each round, but the sky changes the rules.",
+      "physicalFeeling": "The carnival catching its breath.",
+      "light": "The beat begins in golden amber, then the distant background cools right at the thunder hold, isolating Fuzzby's mid-hover pause against a slightly dimmer sky gap.",
+      "atmosphere": "Pollen clouds thicken with each dive; the air subtly stills for the rumble, motes hanging for a half-second like the world is listening.",
+      "motionTempo": "The larger bee's fastest tempo yet — full-throttle hum, dive, pop, undimmed pride — then abrupt suspended stillness at the thunder, the scene's one earned full stop.",
+      "grade": "Amber warmth preserved in foreground with a faint blue-grey wash entering the far canopy after the rumble.",
+      "cuts": [
+        {
+          "n": 1,
+          "framing": "Drone-style camera chases Fuzzby into the dive, Zenny holding steady in the same frame",
+          "action": "Fuzzby hums louder and dives into another flower, popping back out somehow even more covered in pollen than before; Zenny just watches him, amazed — it's astonishing to see; both airborne wings beat rapidly.",
+          "dialogue": null,
+          "delivery": null,
+          "voiceTreatment": null,
+          "chorusMembers": null
+        },
+        {
+          "n": 2,
+          "framing": "Camera drains all motion into a locked close hold the instant thunder lands",
+          "action": "A distant rumble of thunder rolls; Fuzzby stops dead mid-hover, wings still beating rapidly as his confidence catches.",
+          "dialogue": "FUZZBY: …okay that sounded dramatic.",
+          "delivery": "small, suddenly aware, trying to keep the joke alive while the world has shifted",
+          "voiceTreatment": null,
+          "chorusMembers": null
+        }
+      ],
+      "cameraArc": "Drone-style camera chases Fuzzby's dive at full comic intensity with no earlier pauses, then — and only here — drains all motion into a locked close hold the instant thunder lands. This is the scene's ONE full stop, earned because nothing before it ever stopped.",
+      "pauseHold": "Hold the thunder stop for 1.2-1.4 seconds — the longest hold in the scene, and the only one over a second; music drops out, leaving only wings and the small line.",
+      "soundIntent": "Continuous fast wing buzz and pollen puff on the dive; music resumes for his louder humming, then drops out completely under a low distant thunder rumble, leaving only wings and the line in @Audio1.",
+      "performance": {
+        "surface": "Fuzzby turns escalation into a badge of honor; Zenny watches, entertained.",
+        "underneath": "Fuzzby is performing invincibility; Zenny's amusement is about to become attention.",
+        "innerThought": "Fuzzby: More pollen means more official. Zenny: He is impossible. Also — wait, what was that?"
+      },
+      "crystalGlow": "No character crystal glow; ambient crystals and pollen stay warm at first, then pulse faintly cooler for the thunder prickle without becoming stormy yet.",
+      "beautyMoment": false,
+      "startState": "Opening frame: Fuzzby frame-left hovers freshly popped-up from the tumble, still buzzing with pride and more pollen-disheveled than before; Zenny frame-right hovers nearby, smiling despite herself, in a calm collecting pose; both airborne wings in rapid continuous flap; warm flowers, pollen motes and soft ambient crystals surround them.",
+      "keyframePrompt": null,
+      "i2vPrompt": null,
+      "continuity": {
+        "opensFrom": "Opens immediately from 1.B3's pop-up — Fuzzby still buzzing with pride, Zenny smiling despite herself — not a cutaway.",
+        "carryToNext": "A distant rumble has shifted the emotional temperature; Fuzzby is paused mid-hover and Zenny has turned from amusement toward attention.",
+        "screenDirection": "LEFT"
+      },
+      "check": {
+        "focalSubject": "Fuzzby's overcorrection crashing into the first sign of weather.",
+        "emotionalRead": "Laughing breath becomes a tiny inhale of concern.",
+        "heartCheck": "The child laughs at the ever-bigger pollen mess, then notices the sky sound; the parent feels the episode pivot from play toward responsibility without losing warmth."
+      },
+      "writerNote": null,
+      "shot_style": "Full-tilt comic escalation collapsing into one locked prickle beat.",
+      "script_gag_lock_id": "S1_GAG_04_MORE_POLLEN_THUNDER_STOP",
+      "gag_carry": "The pollen disaster escalates to maximum before thunder interrupts and changes the rules.",
+      "director_mode": "BIG comedy with a clean emotional turn; the final stillness must be felt, not overplayed.",
+      "audience_feeling_target": "Laughing breath becomes a tiny inhale of concern.",
+      "emotional_function": "Escalation climax, the scene's one full stop, tonal hook toward storm.",
+      "script_truth_lock": "Use script order exactly: hum louder, dive, pop out even more pollen-covered, Zenny watches amazed, thunder rumble, Fuzzby freezes mid-hover, line.",
+      "music_emotion": "Comic momentum thinning into a low unresolved rumble.",
+      "performance_notes": "Fuzzby's dive is proud and undimmed; his thunder line is smaller, as if asking the world not to become serious yet.",
+      "physical_staging_intent": "Nothing stops the momentum until the thunder hold — the contrast IS the stop.",
+      "visibility_rule": "Both bees visible from opening; Fuzzby frame-left, Zenny frame-right.",
+      "contact_rule": "Pollen contact stays soft and cartoon-safe; no injury.",
+      "physics_rule": "Every dive has squash, overshoot and settle; airborne wings remain continuously flapping, including the mid-hover thunder pause.",
+      "visual_payoff_rule": "The first cool light shift should be subtle enough that the warm scene is not fully stormy yet.",
+      "failed_correction_rule": "If thunder arrives too visually big, reroll: only distant rumble and slight light shift; they do not see anything yet.",
+      "continuity_physical_rule": "Fuzzby may be temporarily more pollen-covered but returns to reference structure; no permanent moustache or accessories.",
+      "prohibited_staging": "Do not show ocean, boat, bears, rain, lightning, or visible storm clouds yet; only distant thunder and subtle light change.",
+      "beatCode": "1.B4",
+      "id": 4
+    },
+    {
+      "slug": "s1-b5-storm-coming-pressure-flower-stuck",
       "scene": "Rainforest Pollen Run",
       "characters": [
         "Fuzzby",
@@ -670,7 +759,7 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 12,
+      "durationSec": 10,
       "pillar": "spark",
       "intensity": 0.44,
       "storyBeat": "After the distant thunder, Zenny looks toward the sky and reads the shift before Fuzzby does; she names the coming storm, Fuzzby performs confidence under pressure, and immediately gets stuck in another flower as Zenny sighs.",
@@ -686,13 +775,13 @@
       "physicalFeeling": "A tiny cool shiver on the back of the neck followed by a soft comic thump of relief.",
       "light": "Warm amber foreground remains on the bees, but a faint cool blue-grey veil slides across the upper flower tops and sky gap to isolate Zenny's sky glance.",
       "atmosphere": "Pollen motes slow and thin; the breeze gains a slightly firmer push through petals, but nothing dangerous is visible yet.",
-      "motionTempo": "Zenny is slow, precise and watchful; Fuzzby snaps back into fast bravado and immediately over-shoots into the flower.",
+      "motionTempo": "Zenny is slow, precise and watchful; Fuzzby snaps back into full-throttle bravado and immediately over-shoots into the flower.",
       "grade": "Amber morning grade gently contaminated by blue-grey in the background, preserving the safe foreground while foreshadowing the storm.",
       "cuts": [
         {
           "n": 1,
-          "framing": "Medium two-shot, 50mm, locked and quiet after the thunder with Fuzzby frame-left and Zenny frame-right",
-          "action": "Zenny glances toward the sky as the light shifts slightly; something feels different, but they do not see anything yet; Fuzzby remains paused mid-hover beside her, wings rapidly flapping.",
+          "framing": "Continuing straight from 1.B4's hold, a brief punctuation beat on Zenny before full pace resumes",
+          "action": "CUT TO Zenny: she glances toward the sky as the light shifts slightly; something feels different, but they do not see anything yet. Fuzzby remains paused mid-hover beside her, wings rapidly flapping.",
           "dialogue": "ZENNY: A Storm’s coming.",
           "delivery": "low, dry but newly serious; she trusts what she notices without panic",
           "voiceTreatment": null,
@@ -700,7 +789,7 @@
         },
         {
           "n": 2,
-          "framing": "Cut to medium close-up on Fuzzby, 35mm, tiny push-in for bravado",
+          "framing": "Camera pushes in on Fuzzby for the bravado beat",
           "action": "Fuzzby resets into a proud hover, trying to make the pressure sound like an achievement; the shifted light grazes the pollen still on him.",
           "dialogue": "FUZZBY: Good thing I work well under pressure.",
           "delivery": "over-confident, chest-forward, a beat too quick, covering the prickle he just felt",
@@ -709,24 +798,15 @@
         },
         {
           "n": 3,
-          "framing": "Cut to wide full-body comic exit, 24mm, quick pan with Fuzzby's dive then locked on the result",
-          "action": "Fuzzby immediately flies into a flower and gets stuck again; the flower absorbs him with a soft thump while his wings buzz and legs kick; Zenny sighs, still frame-right, dry and unsurprised.",
-          "dialogue": null,
-          "delivery": null,
-          "voiceTreatment": null,
-          "chorusMembers": null
-        },
-        {
-          "n": 4,
-          "framing": "Exit wide, 24mm, gentle pull-back through swaying flower tops",
-          "action": "The flower field holds on Fuzzby stuck in the blossom and Zenny's small sighing stillness as the light remains subtly shifted and the breeze moves the petals; no storm is visible yet.",
+          "framing": "Drone-style camera chases Fuzzby's launch upward, then holds on the stuck-flower button with a short cut to Zenny",
+          "action": "Fuzzby immediately launches and flies into a flower HIGH UP and gets stuck, legs in the air, spinning; the flower absorbs him with a soft thump. CUT TO Zenny, the scene's button: a small sigh, still frame-right, dry and unsurprised.",
           "dialogue": null,
           "delivery": null,
           "voiceTreatment": null,
           "chorusMembers": null
         }
       ],
-      "cameraArc": "Start still and attentive with Zenny's read of the sky, push into Fuzzby's bravado, then release to a wide comic exit that lets the stuck-flower button sit inside a slightly cooler world.",
+      "cameraArc": "Camera holds still and attentive on Zenny's short sky-glance (punctuation, not coverage), pushes into Fuzzby's bravado, then chases his launch drone-style up into the flower before holding on the stuck-legs-kicking button under Zenny's sigh — the exit.",
       "pacingVerbs": [
         "glancing",
         "stilling",
@@ -738,7 +818,7 @@
         "sighing",
         "pulling-back"
       ],
-      "pauseHold": "Hold 0.9 seconds after “A Storm’s coming.” before Fuzzby’s boast, then hold Fuzzby stuck and Zenny's sigh for about 1.3 seconds as the exit button.",
+      "pauseHold": "The beat's ONE hold is the stuck-flower exit button: Fuzzby stuck with legs kicking, under Zenny's sigh, under 1.5 seconds. Nothing else pauses — the storm line and the boast play at full pace with no hold between them.",
       "performance": {
         "surface": "Zenny calmly identifies the storm; Fuzzby insists he thrives under pressure.",
         "underneath": "Zenny is already shifting from worker to watcher; Fuzzby is unsettled and hides it with heroic self-advertising.",
@@ -747,12 +827,12 @@
       "crystalGlow": "No character crystal glow; ambient crystals remain soft but the upper background cools slightly, as if the forest is listening before it answers.",
       "beautyMoment": false,
       "startState": "Opening frame: Fuzzby frame-left paused mid-hover after the distant rumble, pollen-dusted and alert; Zenny frame-right angled slightly toward the sky in a composed listening pose; both airborne wings in rapid continuous flap; flowers sway around them, warm foreground with a faint cooler sky gap beyond and 2-3 ambient crystals.",
-      "keyframePrompt": "Polished 3D CGI animation — modern feature-film CGI (Pixar/DreamWorks quality): fully 3D-modelled characters and environments, physically-based rendering, soft global illumination and volumetric lighting, subsurface scattering on plush fur, large expressive eyes with warm catch-lights, realistic materials, cinematic depth of field. NOT 2D, NOT hand-drawn, NOT flat. Use the deep rainforest flower-field scene plate as reference: tall flowers, leaf corridors, grass below, pollen motes, subtle sky gap beyond canopy, 2-3 ambient crystals. Characters as per the reference image of Fuzzby and as per the reference image of Zenny; Fuzzby frame-left, Zenny frame-right, locked size distinction. Opening frame only: Fuzzby paused mid-hover, alert and pollen-dusted from flower contact; Zenny angled slightly toward the sky in composed listening stillness; both wings visibly beating rapidly. CINEMATOGRAPHY: Lens 50mm for the first serious prickle, honest and still; camera movement locked at opening, later able to pull back; camera height eye-level with bees; composition places Zenny right third looking into upper-right sky gap, Fuzzby left third caught between bravado and attention; key light warm amber foreground from canopy sun; fill cool forest teal with faint blue-grey sky contamination in background; depth of field moderate, sky gap and flower tops readable; light direction soft side-front on Zenny for clarity, warm rim on Fuzzby’s pollen edges.",
-      "i2vPrompt": "Anchor Image is TRUTH. COPY EXACTLY. Multi-shot sequence with clean cuts between shots. Shot 1 (medium two-shot, 50mm locked): after the distant thunder, Zenny frame-right glances toward the sky as the light shifts slightly; something feels different but they do not see anything yet; Fuzzby frame-left pauses mid-hover, wings still rapidly flapping. ZENNY: \"A Storm’s coming.\" Shot 2 (cut to medium close-up on Fuzzby, 35mm tiny push-in): Fuzzby resets into a proud chest-forward hover and says, FUZZBY: \"Good thing I work well under pressure.\" Shot 3 (cut to wide full-body comic exit, 24mm quick pan): Fuzzby immediately flies into a flower and gets stuck again; the flower absorbs him with a soft thump, wings buzzing and little legs kicking; Zenny sighs with deadpan stillness. Shot 4 (exit wide, gentle pull-back): hold the flower field with Fuzzby stuck and Zenny beside him as the light stays subtly cooler in the distance; no visible storm yet. Style+Audio: 3D CGI Pixar-quality animation; Seedance scores a small suspense note under Zenny, a proud comic flourish under Fuzzby, then a soft flower-thump button and dry silence for Zenny’s sigh; SFX include distant breeze shift, fast wings, soft petal thud, muffled stuck buzz; voice forward; no text, no watermarks, no logos.",
-      "soundIntent": "Low distant thunder tail fades into firmer breeze; a faint unresolved note under Zenny’s line, proud tiny brass-like sting for Fuzzby’s boast, immediate soft flower thump and muffled wing buzz, then Zenny’s sigh in near-silence.",
+      "keyframePrompt": null,
+      "i2vPrompt": null,
+      "soundIntent": "Low distant thunder tail fades into firmer breeze; a faint unresolved note under Zenny's line, proud tiny brass-like sting for Fuzzby's boast, immediate soft flower thump and muffled wing buzz on the stuck exit, then near-silence for Zenny's sigh.",
       "continuity": {
-        "opensFrom": "Opens directly from Beat 3 with Fuzzby paused mid-hover after “...okay that sounded dramatic.” and Zenny watching the changed air.",
-        "carryToNext": "Scene exits with storm foreshadow planted: Fuzzby stuck again, Zenny aware, light subtly cooled; next scene can move to Aida's sanctuary vision while the distant wind begins to matter.",
+        "opensFrom": "Opens directly from 1.B4 with Fuzzby paused mid-hover after the thunder and Zenny watching the changed air.",
+        "carryToNext": "Scene exits with storm foreshadow planted: Fuzzby stuck again, Zenny aware, light subtly cooled; next scene moves to Aida's sanctuary vision while the distant wind begins to matter.",
         "screenDirection": "LEFT"
       },
       "check": {
@@ -762,7 +842,7 @@
       },
       "writerNote": null,
       "shot_style": "Still 50mm prickle into wide comic button and exit.",
-      "script_gag_lock_id": "S1_GAG_04_PRESSURE_STUCK_EXIT",
+      "script_gag_lock_id": "S1_GAG_05_PRESSURE_STUCK_EXIT",
       "gag_carry": "Fuzzby’s “work well under pressure” boast is immediately disproved by the flower, preserving humor while the storm setup remains active.",
       "director_mode": "BIG comedy used as release after a true tonal shift; protect the prickle, then exit quickly on the gag.",
       "audience_feeling_target": "A small shiver softened by a final laugh.",
@@ -779,8 +859,8 @@
       "continuity_physical_rule": "Pollen remains temporary flower dust; no new props or body changes persist beyond action logic.",
       "prohibited_staging": "Do not show rain, lightning, boat, ocean, Aida, bears, or any rescue imagery; do not have Zenny laugh loudly or panic.",
       "sceneNumber": 1,
-      "beatCode": "1.B4",
-      "id": 4
+      "beatCode": "1.B5",
+      "id": 5
     },
     {
       "slug": "sanctuary-bowl-vision",
@@ -894,7 +974,7 @@
       "prohibited_staging": "Do not show Aida, the sanctuary, or any surrounding real location around the vision bubble; do not add storm rain, Crystal Bears group, or wristbands to Keen.",
       "sceneNumber": 2,
       "beatCode": "2.B1",
-      "id": 5
+      "id": 6
     },
     {
       "slug": "aida-time-to-go",
@@ -1007,7 +1087,7 @@
       "prohibited_staging": "Do not add other Crystal Bears, the pier, sailboat, Keen, Keen's Mum, storm rain, or any Crystal Call gesture in this beat.",
       "sceneNumber": 2,
       "beatCode": "2.B2",
-      "id": 6
+      "id": 7
     },
     {
       "slug": "pier-goodbye-ready-check",
@@ -1132,7 +1212,7 @@
       "prohibited_staging": "No added hug, no Squeaky, no storm rain, no wristbands visible yet.",
       "sceneNumber": 3,
       "beatCode": "3.B1",
-      "id": 7
+      "id": 8
     },
     {
       "slug": "pier-goodbye-big-step",
@@ -1256,7 +1336,7 @@
       "prohibited_staging": "No hug, no tears falling from Keen, no storm.",
       "sceneNumber": 3,
       "beatCode": "3.B2",
-      "id": 8
+      "id": 9
     },
     {
       "slug": "pier-goodbye-fathers-wristbands",
@@ -1381,7 +1461,7 @@
       "prohibited_staging": "No Aquamarine gems, no crystal power, no Squeaky.",
       "sceneNumber": 3,
       "beatCode": "3.B3",
-      "id": 9
+      "id": 10
     },
     {
       "slug": "pier-goodbye-promise-and-cheek",
@@ -1507,7 +1587,7 @@
       "prohibited_staging": "No Aquamarine crystal, no power activation, no Squeaky.",
       "sceneNumber": 3,
       "beatCode": "3.B4",
-      "id": 10
+      "id": 11
     },
     {
       "slug": "pier-goodbye-love-before-launch",
@@ -1622,7 +1702,7 @@
       "prohibited_staging": "No Squeaky, no storm rain, no magical cuff glow.",
       "sceneNumber": 3,
       "beatCode": "3.B5",
-      "id": 11
+      "id": 12
     },
     {
       "slug": "pier-goodbye-push-off-and-splash",
@@ -1750,7 +1830,7 @@
       "prohibited_staging": "No storm rain, no map loss, no Squeaky before splash.",
       "sceneNumber": 3,
       "beatCode": "3.B6",
-      "id": 12
+      "id": 13
     },
     {
       "slug": "pier-goodbye-new-friend-open-water",
@@ -1878,7 +1958,7 @@
       "prohibited_staging": "No storm rain, no map use yet, no Crystal Cove bears.",
       "sceneNumber": 3,
       "beatCode": "3.B7",
-      "id": 13
+      "id": 14
     },
     {
       "slug": "open-water-meet-squeaky",
@@ -2001,7 +2081,7 @@
       "prohibited_staging": "No pier, no beach, no additional dolphins, no storm rain, no magical beacon.",
       "sceneNumber": 4,
       "beatCode": "4.B1",
-      "id": 14
+      "id": 15
     },
     {
       "slug": "map-north-wobble",
@@ -2124,7 +2204,7 @@
       "prohibited_staging": "No land, no beacon, no rain sheets before the next beat, no additional navigation tools.",
       "sceneNumber": 4,
       "beatCode": "4.B2",
-      "id": 15
+      "id": 16
     },
     {
       "slug": "gust-map-lost",
@@ -2249,7 +2329,7 @@
       "prohibited_staging": "No beacon light yet, no Crystal Bears, no shoreline, no Squeaky rescue action, no wristband glow.",
       "sceneNumber": 4,
       "beatCode": "4.B3",
-      "id": 16
+      "id": 17
     },
     {
       "slug": "one-steady-breath",
@@ -2361,7 +2441,7 @@
       "prohibited_staging": "No Squeaky, no beacon, no Crystal Bears, no magic light, no sudden clear sky.",
       "sceneNumber": 4,
       "beatCode": "4.B4",
-      "id": 17
+      "id": 18
     },
     {
       "slug": "follow-squeaky-through-storm",
@@ -2487,7 +2567,7 @@
       "prohibited_staging": "No Crystal Bears beacon yet, no underwater rescue, no landfall, no crystal glow, no added dialogue.",
       "sceneNumber": 4,
       "beatCode": "4.B5",
-      "id": 18
+      "id": 19
     },
     {
       "slug": "wind-stops-the-joke",
@@ -2612,7 +2692,7 @@
       "prohibited_staging": "No bears, no beach gathering, no pier foreground, no added characters, no clear view of Keen, no invented dialogue.",
       "sceneNumber": 5,
       "beatCode": "5.B1",
-      "id": 19
+      "id": 20
     },
     {
       "slug": "emergency-bears-blastoff",
@@ -2739,7 +2819,7 @@
       "prohibited_staging": "No additional dialogue, no bears entering early, no beach reveal, no invented rescue action, no extra characters, no branch impact that injures or grounds Fuzzby.",
       "sceneNumber": 5,
       "beatCode": "5.B2",
-      "id": 20
+      "id": 21
     },
     {
       "slug": "storm-shore-fuzzby-crash-button",
@@ -2865,7 +2945,7 @@
       "prohibited_staging": "Do not add a pier, sailboat on shore, extra characters, pollen sacks, or any prop attached to Fuzzby.",
       "sceneNumber": 6,
       "beatCode": "6.B1",
-      "id": 21
+      "id": 22
     },
     {
       "slug": "alarm-finds-its-words",
@@ -3003,7 +3083,7 @@
       "prohibited_staging": "Do not add dialogue, do not have other bears react verbally, do not show the boat yet in this beat.",
       "sceneNumber": 6,
       "beatCode": "6.B2",
-      "id": 22
+      "id": 23
     },
     {
       "slug": "aida-finds-the-boat",
@@ -3140,7 +3220,7 @@
       "prohibited_staging": "Do not show Keen close-up, do not move the boat onto shore, do not begin the crystal burst before the call sequence.",
       "sceneNumber": 6,
       "beatCode": "6.B3",
-      "id": 23
+      "id": 24
     },
     {
       "slug": "aida-rose-quartz-call",
@@ -3267,7 +3347,7 @@
       "prohibited_staging": "Do not fire the combined beacon yet; do not add lines or change the Crystal Call wording.",
       "sceneNumber": 6,
       "beatCode": "6.B4",
-      "id": 24
+      "id": 25
     },
     {
       "slug": "combined-light-beacon",
@@ -3420,7 +3500,7 @@
       "prohibited_staging": "Do not show Keen receiving the beam in this scene, do not show the boat clearly on shore, do not end with a full weather clearing.",
       "sceneNumber": 6,
       "beatCode": "6.B5",
-      "id": 25
+      "id": 26
     },
     {
       "slug": "beam-hope-to-dive",
@@ -3542,7 +3622,7 @@
       "prohibited_staging": "No crystal-set cuffs, no calm water, no fearless pose, no extra characters.",
       "sceneNumber": 7,
       "beatCode": "7.B1",
-      "id": 26
+      "id": 27
     },
     {
       "slug": "shore-witness",
@@ -3668,7 +3748,7 @@
       "prohibited_staging": "No rescue magic from shore, no Aida power-up, no additional lines.",
       "sceneNumber": 7,
       "beatCode": "7.B2",
-      "id": 27
+      "id": 28
     },
     {
       "slug": "underwater-first-pull",
@@ -3781,7 +3861,7 @@
       "prohibited_staging": "No line repetition, no cutting the net early, no extra tools.",
       "sceneNumber": 7,
       "beatCode": "7.B3",
-      "id": 28
+      "id": 29
     },
     {
       "slug": "wordless-cuff-glow-nadir",
@@ -3903,7 +3983,7 @@
       "prohibited_staging": "No crystal-set cuff, no Crystal Call, no shore cutaway, no invented father vision.",
       "sceneNumber": 7,
       "beatCode": "7.B4",
-      "id": 29
+      "id": 30
     },
     {
       "slug": "steadying-and-shore-truth",
@@ -4018,7 +4098,7 @@
       "prohibited_staging": "No added Aida gesture, no extra dialogue, no magical rescue beam.",
       "sceneNumber": 7,
       "beatCode": "7.B5",
-      "id": 30
+      "id": 31
     },
     {
       "slug": "net-snap-wave-tumble",
@@ -4143,7 +4223,7 @@
       "prohibited_staging": "No repeated Come on lines, no crystal beams tearing the net, no fearless pose.",
       "sceneNumber": 7,
       "beatCode": "7.B6",
-      "id": 31
+      "id": 32
     },
     {
       "slug": "squeaky-saves-keen",
@@ -4259,7 +4339,7 @@
       "prohibited_staging": "No shoreline arrival yet, no extra dialogue, no crystal gems.",
       "sceneNumber": 7,
       "beatCode": "7.B7",
-      "id": 32
+      "id": 33
     },
     {
       "slug": "shore-awe-and-yee-haw",
@@ -4401,7 +4481,7 @@
       "prohibited_staging": "No beach landing yet, no extra cheers, no duplicated YEEHAW.",
       "sceneNumber": 7,
       "beatCode": "7.B8",
-      "id": 33
+      "id": 34
     },
     {
       "slug": "s8-b1-storm-landing-steadied",
@@ -4525,7 +4605,7 @@
       "prohibited_staging": "No pier, no sailboat, no net, no extra characters, no crystal award, no line changes.",
       "sceneNumber": 8,
       "beatCode": "8.B1",
-      "id": 34
+      "id": 35
     },
     {
       "slug": "s8-b2-fuzzby-legend-question",
@@ -4655,7 +4735,7 @@
       "prohibited_staging": "No pollen, no branch crash, no extra bee props, no changed dialogue.",
       "sceneNumber": 8,
       "beatCode": "8.B2",
-      "id": 35
+      "id": 36
     },
     {
       "slug": "s8-b3-fuzzby-amazed-zenny-space",
@@ -4786,7 +4866,7 @@
       "prohibited_staging": "No crash, no new joke line, no scolding tone, no added props.",
       "sceneNumber": 8,
       "beatCode": "8.B3",
-      "id": 36
+      "id": 37
     },
     {
       "slug": "s8-b4-welcome-and-cove-wonder",
@@ -4933,7 +5013,7 @@
       "prohibited_staging": "No Crystal Call, no award, no hug swarm, no moral summary.",
       "sceneNumber": 8,
       "beatCode": "8.B4",
-      "id": 37
+      "id": 38
     },
     {
       "slug": "s8-b5-message-home-thank-you",
@@ -5076,7 +5156,7 @@
       "prohibited_staging": "No added hug, no Crystal Call, no Aquamarine gem, no sailboat, no visible Mum, no dialogue changes.",
       "sceneNumber": 8,
       "beatCode": "8.B5",
-      "id": 38
+      "id": 39
     },
     {
       "slug": "aquamarine-circle-witnessed-courage",
@@ -5214,7 +5294,7 @@
       "prohibited_staging": "No extra characters, no flashback, no spoken version of the later action text, no added props, no new gestures beyond the scripted recognition.",
       "sceneNumber": 9,
       "beatCode": "9.B1",
-      "id": 39
+      "id": 40
     },
     {
       "slug": "keen-crystal-call-settles",
@@ -5352,7 +5432,7 @@
       "prohibited_staging": "Do not repeat Aida’s line; do not start the Fuzzby clap gag until the next beat.",
       "sceneNumber": 9,
       "beatCode": "9.B2",
-      "id": 40
+      "id": 41
     },
     {
       "slug": "fuzzby-clap-into-bear-hug-swarm",
@@ -5490,7 +5570,7 @@
       "prohibited_staging": "No extra crash, no invented bonk, no added dialogue, no moving the scene to the beach.",
       "sceneNumber": 9,
       "beatCode": "9.B3",
-      "id": 41
+      "id": 42
     },
     {
       "slug": "homecoming-smile-family-does",
@@ -5629,7 +5709,7 @@
       "prohibited_staging": "No additional dialogue, no visual text, no flashback to Mum, no moralizing gesture to camera.",
       "sceneNumber": 9,
       "beatCode": "9.B4",
-      "id": 42
+      "id": 43
     },
     {
       "slug": "s10-b1-honey-question",
@@ -5779,7 +5859,7 @@
       "prohibited_staging": "Do not add honey cakes, honey jars, props, pier, sailboat, storm rain, Squeaky, or any non-canon characters.",
       "sceneNumber": 10,
       "beatCode": "10.B1",
-      "id": 43
+      "id": 44
     },
     {
       "slug": "s10-b2-honey-spiral-friendship-button",
@@ -5920,7 +6000,7 @@
       "prohibited_staging": "No honey items appear physically; no additional slapstick crash, no bonk, no storm threat, no Squeaky return, no extra dialogue.",
       "sceneNumber": 10,
       "beatCode": "10.B2",
-      "id": 44
+      "id": 45
     },
     {
       "slug": "s10-b3-cove-laughter-linger",
@@ -6048,7 +6128,7 @@
       "prohibited_staging": "No new honey props, no Squeaky return, no pier, no sailboat, no storm rain, no extra characters, no additional dialogue.",
       "sceneNumber": 10,
       "beatCode": "10.B3",
-      "id": 45
+      "id": 46
     }
   ]
 }

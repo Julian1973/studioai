@@ -4,9 +4,9 @@
 Stores a known-good snapshot of BOTH prompt paths and diffs current output against it:
   • the Seedance clip-prompt baseline (cb_segprompt.shipped_prompt — for_beat_v2, the SAME call
     gate3_dryrun/cb_beats.run/get_seedance_prompt make; a raw cb_segprompt.for_beat() call would
-    silently measure the retired v1 fallback instead of what the studio actually ships) on Ep1
-    1.B1-1.B3 — the same 3 beats CLAUDE.md's "Baseline proof" already names.
-  • the keyframe prompt (cb_scene.keyframe_for) on all 4 Ep1 Scene-1 beats (1.B1-1.B4) — anchor + 3
+    silently measure the retired v1 fallback instead of what the studio actually ships) on all 5
+    Ep1 Scene-1 beats (1.B1-1.B5, since Julian's Director's Cut restructure — was 1.B1-1.B3).
+  • the keyframe prompt (cb_scene.keyframe_for) on all 5 Ep1 Scene-1 beats (1.B1-1.B5) — anchor + 4
     chained beats, so a chain-vs-anchor formatting regression shows up too.
 
 CLAUDE.md hard rule: no prompt-touching commit merges without this diff shown. A diff is not automatically
@@ -30,8 +30,8 @@ import os, sys, re, json, difflib
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLDEN_DIR = os.path.join(HERE, "goldens")
 PKG = os.path.join(HERE, "..", "cb-output", "Ep1_Episode_1_beat_package.json")
-SEGPROMPT_BEATS = ["1.B1", "1.B2", "1.B3"]
-KEYFRAME_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4"]
+SEGPROMPT_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4", "1.B5"]
+KEYFRAME_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4", "1.B5"]
 
 
 def _pkg():

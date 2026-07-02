@@ -84,23 +84,11 @@ def _scene_for(beat, scene):
 
 def _action_for(beat):
     bits = []
-    # the TEMPO/CONTRAST frame — confirmed leak (2026-07-02 field-to-frame audit): the Director's own pacing call
-    # ("Fuzzby is full-throttle hyper... Zenny is smooth and measured, holding the comic contrast") was written every
-    # beat and read by nothing shipped. Its absence directly showed up as a real render reading "slow and boring"
-    # instead of hyper — with no tempo direction at all, Seedance has to invent a pace, and it invented a calm one.
-    # Leads the section (before the cuts) so it frames how everything that follows should MOVE, not just what happens.
-    mt = (beat.get("motionTempo") or "").strip()
-    if mt: bits.append(mt)
     sb = (beat.get("storyBeat") or "").strip()
     if sb: bits.append(sb)
     for c in (beat.get("cuts") or []):
         a = (c.get("action") or "").strip()
         if a and a not in bits: bits.append(a)
-    # the HELD BEAT — confirmed leak, same audit: without it, the gap between where the audio ends and the clip's
-    # full duration is unaccounted for (measured: 3.3s of dialogue in a 13s take = 9.7s with no direction at all),
-    # and Seedance filled that silence by winding the pace down rather than holding a specific, timed beat.
-    ph = _strip_spoken_words((beat.get("pauseHold") or "").strip())
-    if ph: bits.append(ph)
     action = " ".join(bits).strip()
     return (action + " Weighty cartoon physics: clear anticipation → impact → follow-through; readable comedy/emotional "
             "timing; the performance carried in the eyes, the breath and the weight.").strip()

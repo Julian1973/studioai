@@ -675,9 +675,17 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
              "aboard", "outside", "behind", "beneath", "under", "over", "through", "across", "along"}
     if world.split() and not ({w.lower().strip(",.") for w in world.split()[:3]} & _PREP):
         world = "in " + world
+    # For a CHAINED beat this line was firing UNCONDITIONALLY with no image to anchor to ("Place them {world}") — a
+    # second, competing environment instruction alongside the chain-image anchor below, sourced from the scene's
+    # broad `location` text rather than the actual approved frame. When that text is loose enough to admit more than
+    # one reading (e.g. "towering blossoms... corridor... canopy" can read as a genuine forest OR as an ordinary
+    # meadow at bee-scale), the model can drift to a DIFFERENT world than the one already established — confirmed on
+    # real Ep1 beats: 1.B2-1.B4 rendered a denser, forest-like place than 1.B1/the plate. The chain image + the
+    # CONTINUITY & CAMERA SHIFT instruction below are the correct, single source of environment truth for a
+    # continuation; this text-only restatement is dropped for chained beats rather than left to compete with it.
     env_line = (f"ENVIRONMENT & CONTEXT: Place the characters INTO Image {env_img} (the empty set) — {world}. Keep its "
                 f"set, dressing, depth and lighting exactly; add only the characters."
-                if env_img else f"ENVIRONMENT & CONTEXT: Place them {world}.")
+                if env_img else f"ENVIRONMENT & CONTEXT: Place them {world}.") if not chained else ""
     # shotSize/shotType are legacy pre-beat-native fields — always None on current data, silently collapsing every
     # keyframe to the "Medium shot" default. cuts[0].framing is the Director's own camera call for this beat's first
     # shot (lens, angle, move) and is the correct, beat-varying source; the old fields stay as a defensive fallback.
@@ -764,14 +772,18 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # so the standalone COMPOSITION + LIGHTING blocks are dropped for chained beats.
     continuity_lock = ([f"CONTINUITY & CAMERA SHIFT: Reason through this camera cut. Use Image {chain_img} ONLY for the "
                         f"lighting and background textures. The camera has now changed to a {framing}. Reason through how "
-                        f"the characters and the environment from Image {chain_img} look from this new angle."
+                        f"the characters and the environment from Image {chain_img} look from this new angle. "
+                        # explicit negative: the observed failure mode was the model inventing a DIFFERENT place
+                        # (denser, forest-like) rather than reframing the SAME one — say so directly, not just imply it.
+                        "This is the SAME location, the SAME scale and the SAME world as Image "
+                        f"{chain_img} — do not invent a different place, a different kind of plant, or a different scale."
                         # the chain image shows the PREVIOUS frame's light — it can't show a narrative shift THIS beat
                         # introduces (e.g. cooling before a thunder beat), so state this beat's own light/atmosphere too.
                         + (f" This beat's own light: {light}." if light else "")
                         + (f" Atmosphere: {atmosphere}." if atmosphere else "")] if chained else [])
     light_block = [] if chained else (([f"LIGHTING: {light}."] if light else []) + ([f"ATMOSPHERE: {atmosphere}."] if atmosphere else []))
     comp_block = [] if chained else [comp]   # chained: COMPOSITION is folded into the CONTINUITY & CAMERA SHIFT above
-    body = [lead] + continuity_lock + blocks + ([mood] if mood else []) + [env_line] + comp_block + light_block + [style, constraints]
+    body = [lead] + continuity_lock + blocks + ([mood] if mood else []) + ([env_line] if env_line else []) + comp_block + light_block + [style, constraints]
     prompt = re.sub(r"[ ]{2,}", " ", header + "\n\nPROMPT:\n" + "\n\n".join(body) + _fix_line(note))
     return prompt, refs
 

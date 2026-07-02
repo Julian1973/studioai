@@ -58,8 +58,30 @@ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
                 "reason": "shipping format must be COMPACT_TIMED_JSON (SEEDANCE_PROMPT_FORMAT=full is review/debug only)"}
     prompt, rep = r["compact"], r["compact_report"]
     auth = r["report"]                            # render needs BOTH: the authoring/source validator AND the shipping format
-    both_ok = auth["ok"] and rep["ok"]
-    reason = "; ".join(([] if rep["ok"] else rep["rejects"]) + ([] if auth["ok"] else ["authoring/source: " + x for x in auth["rejects"]]))
+    # DEFINITIVE BYPASS — a beat with a working cb_segprompt.for_beat prose ships THAT text, never this compact
+    # JSON (the docstring above already said so), so the compact validator's opinion of a JSON nobody sends must
+    # not block the render. get_seedance_prompt()/render_readiness() already apply exactly this bypass; this
+    # function silently lacked it, so a beat render_readiness reported READY_TO_RENDER could still be refused HERE
+    # (the function cb_beats.run actually calls to decide whether to render) on a compact-JSON complaint that had
+    # nothing to do with the prose actually being sent. Confirmed live: Julian fired Gate 3 on 4 READY beats and
+    # all 4 were refused for exactly this reason before this fix.
+    definitive = False
+    try:
+        import cb_segprompt
+        _d = json.load(open(pkg_path))
+        _scene = None
+        if beat.get("sceneNumber") is not None and _d.get("scenes"):
+            _sn = str(beat.get("sceneNumber"))
+            _scene = next((s for s in _d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
+        definitive = bool(cb_segprompt.for_beat(beat, _scene))
+    except Exception:
+        definitive = False
+    if definitive:
+        both_ok = auth["ok"]
+        reason = "; ".join([] if auth["ok"] else ["authoring/source: " + x for x in auth["rejects"]])
+    else:
+        both_ok = auth["ok"] and rep["ok"]
+        reason = "; ".join(([] if rep["ok"] else rep["rejects"]) + ([] if auth["ok"] else ["authoring/source: " + x for x in auth["rejects"]]))
     return {"builder": "cb_seedance", "format": "COMPACT_TIMED_JSON", "prompt": prompt, "report": rep, "authoring": r["authoring"],
             "refuse": not both_ok, "reason": reason}
 

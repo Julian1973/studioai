@@ -56,6 +56,7 @@ DoD: one command diffs current output vs the stored golden set; no prompt-touchi
 **T33 · Field-to-frame audit (Director-field consumption sweep)** ✅ DONE (2026-07-02)
 tools/field_audit.py (mechanical, re-runnable: Pydantic-introspects the schema, greps engine/*.py, flags zero-hit fields) + FIELD_TO_FRAME_AUDIT.md (the full judged report — 74 fields, 18 LEAK, 18 PARTIAL, fixed vs deferred, with why). Same bug class as the startState/shotSize find (2026-07-02).
 DoD: one report of all leaks — done (FIELD_TO_FRAME_AUDIT.md). Every LEAK/PARTIAL confirmed in the keyframe, voice or QA paths fixed in this pass (18 fixes across cb_prompts.py, cb_qa.py, cb_director_eye.py, cb_voice.py) with baseline proof (cb_segprompt.py byte-identical). Leaks outside those three paths (the Seedance-clip path, and items needing a design decision — director_mode, cameraArc/staging-verification QA, performance_notes, writerNote) logged in the report, not silently fixed or dropped.
+Follow-up (same day, found reviewing the regenerated Gate 2b keyframes): a chained beat's environment was competing against a text re-description of the scene's location and losing — 1.B2-1.B4 drifted to a different world than the approved plate. Fixed in build_keyframe_prompt (the chain image is now the sole environment source for a continuation beat); locked as CLAUDE.md hard rule 12 + Studio Bible §3.1. Verified: QA 4/4 PASS (was 1/4, PLATE_DRIFT on the other 3), confirmed visually, golden set diffed and recaptured.
 
 ---
 

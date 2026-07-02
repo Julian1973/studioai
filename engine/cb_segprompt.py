@@ -105,27 +105,14 @@ def _action_for(beat):
     return (action + " Weighty cartoon physics: clear anticipation → impact → follow-through; readable comedy/emotional "
             "timing; the performance carried in the eyes, the breath and the weight.").strip()
 
-def _audio_for(beat, chars=None):
+def _audio_for(beat):
     has = bool(beat.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (beat.get("cuts") or []))
     if beat.get("wordlessHeld") or not has:
         return ("this beat has NO character dialogue — generate no speech or voices at all. Seedance generates and mixes the "
                 "scene ambience, gentle character SFX and a light underscore that fits the moment (no sung lyrics).")
-    # Confirmed bug (2026-07-02, real render): a beat where only ONE on-screen character speaks got the OTHER,
-    # silent character's mouth lip-synced to the line instead. "the characters speak... each mouthing its own
-    # lines" never actually said only ONE of them has lines here — Seedance had to guess. Name who speaks (by role
-    # label — names stay in @Audio1 only, per Law 5) and who doesn't, whenever it's not the whole on-screen cast.
-    chars = chars or []
-    speakers = [c for c in (beat.get("speakers") or []) if c in chars]
-    silent = [c for c in chars if c not in speakers]
-    speaker_line = ""
-    if speakers and silent:
-        sp_roles = ", ".join(dict.fromkeys(_char_meta(c)[0] for c in speakers))
-        si_roles = ", ".join(dict.fromkeys(_char_meta(c)[0] for c in silent))
-        speaker_line = (f" ONLY {sp_roles} speaks in this beat — lip-sync {sp_roles} to @Audio1; "
-                        f"{si_roles} stays completely silent, no lip-sync, mouth closed or neutral.")
     return ("use ONLY @Audio1 for ALL dialogue — the characters speak the words in @Audio1 with precise en-US lip-sync, each "
             "mouthing its own lines in @Audio1 in order; generate no other, different or duplicate voice, and no other "
-            "speech." + speaker_line + " Seedance generates and mixes everything else: the scene ambience, gentle character SFX and a light "
+            "speech. Seedance generates and mixes everything else: the scene ambience, gentle character SFX and a light "
             "playful underscore kept low under the voice (no sung lyrics).")
 
 def for_beat(beat, scene=None):
@@ -147,7 +134,7 @@ def for_beat(beat, scene=None):
     out += (f"SCENE: {_scene_for(beat, scene)}\n\n"
             f"ACTION / PERFORMANCE: {_action_for(beat)}\n\n"
             f"CAMERA: {cam}\n\n"
-            f"AUDIO: {_audio_for(beat, chars)}\n\n"
+            f"AUDIO: {_audio_for(beat)}\n\n"
             f"NEGATIVES: {neg}")
     return out
 

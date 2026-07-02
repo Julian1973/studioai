@@ -253,6 +253,27 @@ def for_beat_v2(beat, scene=None):
             f"NEGATIVES: {neg}")
     return out
 
+# ══════════ THE SINGLE SHIPPING DECISION (T33 Ruling, 2026-07-02, Julian) ══════════
+# for_beat_v2 is now THE definitive builder — it carries the Director's actual direction (motionTempo, pauseHold,
+# the speaker map, physicalFeeling, soundIntent, light, atmosphere, cameraArc) that for_beat (v1) discards. v1 is
+# retired to a FALLBACK ONLY, for the (should-never-happen) case where v2 returns empty for a beat — and firing it
+# prints a loud, unmissable log line, so a silent reversion to the leaner old builder can never pass unnoticed.
+# EVERY caller that needs "the prompt Seedance will actually receive" calls THIS function — never for_beat or
+# for_beat_v2 directly — so preview and fire are provably the SAME call, through the SAME decision, every time.
+def shipped_prompt(beat, scene=None):
+    """Returns (prompt, builder_label, is_v2). is_v2=False means the fallback fired — treat that as worth
+    investigating, not routine."""
+    v2 = for_beat_v2(beat, scene)
+    if v2:
+        return v2, "cb_segprompt_v2 (DEFINITIVE)", True
+    code = beat.get("beatCode") or beat.get("shotCode") or "?"
+    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v1 (for_beat) — for_beat_v2 returned EMPTY\n"
+          f"  for beat {code}. v1 is retired to fallback-only; this should not\n"
+          f"  happen in practice. Investigate the beat's data before trusting\n"
+          f"  this render.\n{'!' * 70}\n", flush=True)
+    v1 = for_beat(beat, scene)
+    return v1, "cb_segprompt_v1 (FALLBACK — v2 returned empty, see log)", False
+
 if __name__ == "__main__":
     import sys
     pkg = sys.argv[1] if len(sys.argv) > 1 else "../cb-output/Ep1_The_Adventure_Begins_beat_package.json"
@@ -260,6 +281,6 @@ if __name__ == "__main__":
     d = json.load(open(pkg))
     beat = next(b for b in d.get("beats") or d.get("shots") or [] if (b.get("beatCode") or b.get("shotCode")) == code)
     scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(beat.get("sceneNumber"))), None)
-    prompt = for_beat(beat, scene)
+    prompt, _builder, _is_v2 = shipped_prompt(beat, scene)
     print(f"===== GATE-3 SEEDANCE PROMPT — {code}  ({len(prompt)} chars) =====\n")
     print(prompt)

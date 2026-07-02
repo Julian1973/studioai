@@ -1354,11 +1354,13 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
         status = "READY_TO_RENDER"
     else:
         status = "BLOCKED"
-    # ── DEFINITIVE (Gate 3, single source): the signed-off 6-section Seedance prompt, GENERATED from THIS beat by
-    #    cb_segprompt.for_beat — the SAME string cb_beats.run sends (both call for_beat), so the studio can never preview
-    #    one prompt and fire another. UNIVERSAL: every beat of every episode comes out in the model. build_for_beat above
-    #    still runs for validation/readiness; for_beat produces the shipped prose (dialogue lives in @Audio1, not the prose).
+    # ── DEFINITIVE (Gate 3, single source): the signed-off 6-section Seedance prompt comes from
+    #    cb_segprompt.shipped_prompt — for_beat_v2 (the faithful translator) is THE shipping builder; for_beat (v1)
+    #    is a loud, logged fallback only if v2 returns empty. The SAME call cb_beats.run/gate3_dryrun use, so the
+    #    studio can never preview one prompt and fire another. build_for_beat above still runs for validation/
+    #    readiness; shipped_prompt produces the shipped prose (dialogue lives in @Audio1, not the prose).
     _def = None
+    _builder_label = "cb_segprompt (GENERATED 6-section)"
     try:
         import cb_segprompt
         _d = json.load(open(pkg_path))
@@ -1369,14 +1371,14 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
             _sn = str(_beat.get("sceneNumber"))
             _scene = next((s for s in _d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
         if _beat:
-            _def = cb_segprompt.for_beat(_beat, _scene)
+            _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene)
     except Exception:
         _def = None
     if _def:
         gen_status = ("NEEDS_SOURCE_DATA_FIX" if not auth_ok
                       else "NEEDS_KEYFRAME_REVIEW" if not kf_exists
                       else "READY_TO_RENDER")
-        return {"builder": "cb_segprompt (GENERATED 6-section)", "mode": mode, "format": "DEFINITIVE_PROSE",
+        return {"builder": _builder_label, "mode": mode, "format": "DEFINITIVE_PROSE",
                 "prompt": _def, "raw": True, "compact": _def, "full_prompt": _def, "authoring": a,
                 "keyframe_exists": kf_exists,
                 "authoring_validator": {"ok": auth_ok, "rejects": r["report"]["rejects"]},

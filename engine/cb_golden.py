@@ -2,8 +2,10 @@
 """cb_golden.py — T10, the golden-set harness.
 
 Stores a known-good snapshot of BOTH prompt paths and diffs current output against it:
-  • the Seedance clip-prompt baseline (cb_segprompt.for_beat) on Ep1 1.B1-1.B3 — the same 3 beats
-    CLAUDE.md's "Baseline proof" already names.
+  • the Seedance clip-prompt baseline (cb_segprompt.shipped_prompt — for_beat_v2, the SAME call
+    gate3_dryrun/cb_beats.run/get_seedance_prompt make; a raw cb_segprompt.for_beat() call would
+    silently measure the retired v1 fallback instead of what the studio actually ships) on Ep1
+    1.B1-1.B3 — the same 3 beats CLAUDE.md's "Baseline proof" already names.
   • the keyframe prompt (cb_scene.keyframe_for) on all 4 Ep1 Scene-1 beats (1.B1-1.B4) — anchor + 3
     chained beats, so a chain-vs-anchor formatting regression shows up too.
 
@@ -28,8 +30,10 @@ def _pkg():
 
 
 def current_snapshot():
-    """{key: prompt text} for every golden-set entry, built the SAME way the live paths build them (cb_beats.run's
-    scene lookup for segprompt; cb_scene.keyframe_for for the keyframe) — never a bespoke re-implementation."""
+    """{key: prompt text} for every golden-set entry, built the SAME way the live paths build them
+    (cb_segprompt.shipped_prompt — the shared decision gate3_dryrun/cb_beats.run/get_seedance_prompt all call,
+    v2 first with v1 as a loud logged fallback; cb_scene.keyframe_for for the keyframe) — never a bespoke
+    re-implementation, and never a raw for_beat()/for_beat_v2() call that could measure a path nothing ships."""
     import cb_segprompt, cb_scene
     d = _pkg()
     beats = d["beats"]
@@ -41,7 +45,8 @@ def current_snapshot():
         if not b:
             continue
         sc = scenes.get(str(b.get("sceneNumber")))
-        out[f"segprompt__{code}"] = cb_segprompt.for_beat(b, sc) or ""
+        prompt, _builder, _is_v2 = cb_segprompt.shipped_prompt(b, sc)
+        out[f"segprompt__{code}"] = prompt or ""
     for code in KEYFRAME_BEATS:
         if code not in by_code:
             continue

@@ -58,8 +58,8 @@ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
                 "reason": "shipping format must be COMPACT_TIMED_JSON (SEEDANCE_PROMPT_FORMAT=full is review/debug only)"}
     prompt, rep = r["compact"], r["compact_report"]
     auth = r["report"]                            # render needs BOTH: the authoring/source validator AND the shipping format
-    # DEFINITIVE BYPASS — a beat with a working cb_segprompt.for_beat prose ships THAT text, never this compact
-    # JSON (the docstring above already said so), so the compact validator's opinion of a JSON nobody sends must
+    # DEFINITIVE BYPASS — a beat with a working cb_segprompt.shipped_prompt prose (for_beat_v2, or the loud v1
+    # fallback) ships THAT text, never this compact JSON, so the compact validator's opinion of a JSON nobody sends must
     # not block the render. get_seedance_prompt()/render_readiness() already apply exactly this bypass; this
     # function silently lacked it, so a beat render_readiness reported READY_TO_RENDER could still be refused HERE
     # (the function cb_beats.run actually calls to decide whether to render) on a compact-JSON complaint that had
@@ -73,7 +73,7 @@ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
         if beat.get("sceneNumber") is not None and _d.get("scenes"):
             _sn = str(beat.get("sceneNumber"))
             _scene = next((s for s in _d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-        definitive = bool(cb_segprompt.for_beat(beat, _scene))
+        _, _, definitive = cb_segprompt.shipped_prompt(beat, _scene)   # THE single shipping decision — v2 first, v1 loud fallback
     except Exception:
         definitive = False
     if definitive:
@@ -88,8 +88,9 @@ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
 def gate3_dryrun(pkg_path, code, episode="Ep1"):
     """PROMPT-ONLY proof that Gate 3 would use the selected builder — NO Seedance call, NO render. Returns the
     builder, the Episode-Director classification and the validator result for one beat (the acceptance check).
-    Mirrors run()'s OWN override logic exactly (cb_segprompt.for_beat wins whenever it returns non-empty prose) —
-    this used to report ONLY the cb_seedance fallback, which is NOT what actually fires for a definitive beat."""
+    Mirrors run()'s OWN override logic exactly (cb_segprompt.shipped_prompt wins whenever it returns non-empty
+    prose) — this used to report ONLY the cb_seedance fallback, which is NOT what actually fires for a definitive
+    beat. THE SAME shipped_prompt() call as run() and get_seedance_prompt() — preview == fire, provably."""
     d = json.load(open(pkg_path))
     beat = next(b for b in (d.get("beats") or d.get("shots") or [])
                 if (b.get("beatCode") or b.get("shotCode")) == code)
@@ -103,9 +104,9 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
         if d.get("scenes"):
             _sn = str(beat.get("sceneNumber"))
             _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-        _def = cb_segprompt.for_beat(beat, _scene)
+        _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene)
         if _def:
-            prompt, builder, raw = _def, "cb_segprompt (DEFINITIVE)", True
+            prompt, builder, raw = _def, _builder_label, True
     except Exception:
         pass
     return {"builder": builder, "format": ("DEFINITIVE_PROSE" if raw else prep.get("format", "?")), "beat": code,
@@ -209,21 +210,23 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
         if prep["refuse"]:
             print(f"  {code}: Gate 3 REFUSED to render — {prep['reason']}; skipping (no clip)", flush=True); continue
         prompt = prep["prompt"]; raw = False
-        # ── BIBLE (Gate 3): the DEFINITIVE Seedance prompt is the 6-section model GENERATED from this beat by
-        #    cb_segprompt.for_beat (REFERENCE LAW / SCENE / ACTION / CAMERA / AUDIO / NEGATIVES + the wing law for bees).
-        #    Same call the studio preview uses (get_seedance_prompt) → preview == fire. Sent VERBATIM (raw).
+        # ── BIBLE (Gate 3): the DEFINITIVE Seedance prompt comes from cb_segprompt.shipped_prompt — for_beat_v2
+        #    (the faithful translator: motionTempo/pauseHold/physicalFeeling/soundIntent/light/cameraArc/speaker map)
+        #    is THE shipping builder; for_beat (v1) is a loud, logged fallback only if v2 returns empty. Same call
+        #    the studio preview (gate3_dryrun/get_seedance_prompt) uses → preview == fire, provably. Sent VERBATIM (raw).
+        builder_label = prep["builder"]
         try:
             import cb_segprompt
             _scene = None
             if d.get("scenes"):
                 _sn = str(b.get("sceneNumber"))
                 _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-            _def = cb_segprompt.for_beat(b, _scene)   # THE single routing point — identical to the studio preview path
+            _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene)   # THE single routing point — identical to the studio preview path
             if _def:
-                prompt = _def; raw = True
+                prompt = _def; raw = True; builder_label = _builder_label
         except Exception as _se:
             print(f"  {code}: cb_segprompt unavailable ({str(_se)[:80]}) — falling back to {prep['builder']}", flush=True)
-        print(f"  {code}: prompt builder = {'cb_segprompt (DEFINITIVE)' if raw else prep['builder']}"
+        print(f"  {code}: prompt builder = {builder_label}"
               + (f" | director_mode={prep['authoring']['director_mode']} shot_style={prep['authoring']['shot_style']}" if (not raw and prep.get("authoring")) else ""), flush=True)
         empty = (not (prompt.get("visual_prompt") or prompt.get("timeline") or prompt.get("direction") or prompt.get("cuts") or prompt.get("subject") or prompt.get("action"))
                  if isinstance(prompt, dict) else not str(prompt or "").strip())
@@ -231,7 +234,7 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
             print(f"  {code}: empty Seedance prompt — skipping", flush=True); continue
         dur = int(b.get("durationSec") or 11); dur = max(8, min(15, dur))   # a take ≤~15s holds 1-3 whole moments
         out = f"{episode}_{code}_{slug}.mp4"
-        # THE SAME character list cb_segprompt.for_beat used to build the @图N role labels (openingCast, falling back
+        # THE SAME character list cb_segprompt.shipped_prompt used to build the @图N role labels (openingCast, falling back
         # to characters) — MUST match exactly, or the uploaded image at position N no longer corresponds to the @图N
         # identity the prompt text asserts (e.g. a beat where openingCast omits/reorders someone in `characters`
         # would silently upload the wrong species/character at that reference slot).

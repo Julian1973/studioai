@@ -693,8 +693,8 @@
           "n": 2,
           "framing": "Camera drains all motion into a locked close hold the instant thunder lands",
           "action": "A distant rumble of thunder rolls; Fuzzby stops dead mid-hover, wings still beating rapidly as his confidence catches.",
-          "dialogue": "FUZZBY: …okay that sounded dramatic.",
-          "delivery": "small, suddenly aware, trying to keep the joke alive while the world has shifted",
+          "dialogue": "FUZZBY: Whoa. Okay, that sounded dramatic.",
+          "delivery": "a startled beat then trying to keep the joke alive; the Whoa is the stop made audible",
           "voiceTreatment": null,
           "chorusMembers": null
         }
@@ -799,9 +799,9 @@
         {
           "n": 3,
           "framing": "Drone-style camera chases Fuzzby's launch upward, then holds on the stuck-flower button with a short cut to Zenny",
-          "action": "Fuzzby immediately launches and flies into a flower HIGH UP and gets stuck, legs in the air, spinning; the flower absorbs him with a soft thump. CUT TO Zenny, the scene's button: a small sigh, still frame-right, dry and unsurprised.",
-          "dialogue": null,
-          "delivery": null,
+          "action": "Fuzzby immediately launches and flies into a flower HIGH UP and gets stuck, legs in the air, spinning; the flower absorbs him with a soft thump. CUT TO Zenny, the scene's button: still frame-right, dry and unsurprised.",
+          "dialogue": "ZENNY: Ah, Fuzzby.",
+          "delivery": "a small sigh spoken as the words themselves — dry, fond, unsurprised",
           "voiceTreatment": null,
           "chorusMembers": null
         }
@@ -818,7 +818,7 @@
         "sighing",
         "pulling-back"
       ],
-      "pauseHold": "The beat's ONE hold is the stuck-flower exit button: Fuzzby stuck with legs kicking, under Zenny's sigh, under 1.5 seconds. Nothing else pauses — the storm line and the boast play at full pace with no hold between them.",
+      "pauseHold": "The beat's ONE hold is the stuck-flower exit button: Fuzzby stuck with legs kicking, under Zenny's line, spoken as a sigh, under 1.5 seconds. Nothing else pauses — the storm line and the boast play at full pace with no hold between them.",
       "performance": {
         "surface": "Zenny calmly identifies the storm; Fuzzby insists he thrives under pressure.",
         "underneath": "Zenny is already shifting from worker to watcher; Fuzzby is unsettled and hides it with heroic self-advertising.",
@@ -829,7 +829,7 @@
       "startState": "Opening frame: Fuzzby frame-left paused mid-hover after the distant rumble, pollen-dusted and alert; Zenny frame-right angled slightly toward the sky in a composed listening pose; both airborne wings in rapid continuous flap; flowers sway around them, warm foreground with a faint cooler sky gap beyond and 2-3 ambient crystals.",
       "keyframePrompt": null,
       "i2vPrompt": null,
-      "soundIntent": "Low distant thunder tail fades into firmer breeze; a faint unresolved note under Zenny's line, proud tiny brass-like sting for Fuzzby's boast, immediate soft flower thump and muffled wing buzz on the stuck exit, then near-silence for Zenny's sigh.",
+      "soundIntent": "Low distant thunder tail fades into firmer breeze; a faint unresolved note under Zenny's line, proud tiny brass-like sting for Fuzzby's boast, immediate soft flower thump and muffled wing buzz on the stuck exit, then near-silence but for the line in @Audio1, sighed rather than spoken loud.",
       "continuity": {
         "opensFrom": "Opens directly from 1.B4 with Fuzzby paused mid-hover after the thunder and Zenny watching the changed air.",
         "carryToNext": "Scene exits with storm foreshadow planted: Fuzzby stuck again, Zenny aware, light subtly cooled; next scene moves to Aida's sanctuary vision while the distant wind begins to matter.",

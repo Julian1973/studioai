@@ -1,0 +1,1577 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..dd04227
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,19 @@
++# Crystal Bears Studio — operating instructions for Claude Code
++
++Source of truth order: CRYSTAL_BEARS_LOCKED_CANON.md (what the show is) > CRYSTAL_BEARS_STUDIO_BIBLE.md (how it is made) > this file. Where they touch, canon wins.
++
++Every session: read this file, TICKET_PACK_001.md and the current phase of WORLD_CLASS_ROADMAP.md before writing any code. Work tickets in the pack's order of play, one commit per ticket, the commit message naming the ticket. A ticket is done only when its Definition of Done is true AND the Bible agrees — never merely when the code compiles.
++
++Hard rules (never work around these):
++1. Gates are hard locks. Never advance past an unsigned gate; never sign past an open BLOCK.
++2. Taste lives in prose (the chair skills); law lives in code; canon lives in data. Anything found in the wrong layer moves the day it is found.
++3. No output is ever hand patched. A fault routes through a retake with a layer diagnosis (keyframe / brief / reference / take).
++4. Law 5: the voice lives in the render. One combined @Audio1; no native-voice fallback; no post voice swap. cb_post has no swap function by design — do not add one.
++5. Never describe a character's appearance in prompt text. Identity comes only from the reference images; names live only in the audio.
++6. Canon is edited ONLY at root CRYSTAL_BEARS_LOCKED_CANON.md, then `python3 tools/sync_canon.py`. The skill copies are generated; editing one is drift. `--check` must pass before any sign off.
++7. When code becomes sharper than the documents, the documents update in the same commit.
++8. Restructure work follows RESTRUCTURE_SPEC_T30.md: one phase per commit, baseline byte-identical prompts proven after each phase.
++
++Baseline proof (run before and after any change that touches prompt code):
++  cd cb-gen && python3 cb_segprompt.py 1.B1
++  plus for_beat on the first three Ep1 beats — outputs must be byte identical unless the ticket explicitly changes them.
+diff --git a/DISPATCH_001.md b/DISPATCH_001.md
+new file mode 100644
+index 0000000..a7a5ed9
+--- /dev/null
++++ b/DISPATCH_001.md
+@@ -0,0 +1,18 @@
++# DISPATCH 001 — 2 July 2026 (applied as one patch, split into these commits)
++
++Contains, in commit order:
++1. T1  — cb_beats.py: a beat WITH dialogue whose V3 track failed now REFUSES to render (Law 5). Wordless beats unaffected.
++2. T21 — cb_post.py: CapCut readme no longer offers "replace the voice"; stems are for balance/duck only.
++3. T20 — cb_post.py: module docstring now matches the (already correct) hard-cut assembly; cross-dissolves between scenes only.
++4. T4  — cb_beats.py + cb_seedance.py: docstrings now state the truth — cb_segprompt prose is the shipped prompt; compact is validation.
++5. T16 — cb_retake.py (Gate 4 — Retake/Edit) + cb_post.py (Gate 5 — Post): one gate vocabulary.
++6. T28 / Restructure Phase 1 — tools/sync_canon.py added; all 7 skill canon copies regenerated as STAMPED, hash-verified copies of the root source. `python3 tools/sync_canon.py --check` passes.
++7. Docs — TICKET_PACK_001.md, WORLD_CLASS_ROADMAP.md, RESTRUCTURE_SPEC_T30.md, CLAUDE.md, this file.
++8. Additive only — cb_segprompt.py gains for_beat_v2 (T7, the faithful translator) UNROUTED: nothing calls it yet, shipping behaviour unchanged. Routing it is T7's own ticket after Julian reads the regenerated prompts.
++
++Verification performed before packaging (and to re-run after applying):
++- import proof: all cb_* modules import clean
++- baseline: definitive('1.B1') and for_beat(Ep1 beat 1) byte-identical to HEAD
++- canon: tools/sync_canon.py --check passes
++
++NOT in this dispatch (needs desktop / API keys / Julian's eyes): T2, T3, T5, T6 rulings; T7 routing; renders of any kind.
+diff --git a/RESTRUCTURE_SPEC_T30.md b/RESTRUCTURE_SPEC_T30.md
+new file mode 100644
+index 0000000..60d65c7
+--- /dev/null
++++ b/RESTRUCTURE_SPEC_T30.md
+@@ -0,0 +1,106 @@
++# STUDIO RESTRUCTURE SPEC — TICKET T30
++*Cleans the canons and the code into the efficient structure the studio's own doctrine demands: the ENGINE is show agnostic and permanent; the SHOW is a tenant profile. One canon, one home per document, one import path. Executed by Claude Code, phase by phase, with the safety rule below governing every move.*
++
++**The safety rule: behaviour must not change.** Before Phase 1, capture the baseline: run the Gate 3 dry run on three Ep1 beats and save the emitted prompts, plus `python3 -c "import cb_pipeline, cb_beats, cb_segprompt, cb_post, cb_retake, cb_qa, cb_continuity, cb_voice, cb_gen"` as the import proof. After every phase, both must produce identical results. A restructure that changes an emitted prompt has failed, whatever it improved.
++
++---
++
++## THE TARGET TREE
++
++```
++studioai/
++  CLAUDE.md                      operating instructions + session protocol
++  STUDIO_BIBLE.md                how things are made (engine doctrine, renamed from CRYSTAL_BEARS_STUDIO_BIBLE.md
++                                 with show specifics moved to the show profile)
++  WORLD_CLASS_ROADMAP.md
++  TICKET_PACK_001.md
++  engine/                        the permanent, show agnostic spine (was cb-gen)
++    cb_pipeline.py  cb_state helpers, gates, locks, cascade
++    cb_beats.py     cb_gen.py    cb_seedance.py   cb_llm.py
++    cb_segprompt.py cb_prompts.py cb_keyframe helpers
++    cb_voice.py     cb_post.py   cb_retake.py     cb_address.py
++    cb_qa.py        cb_continuity.py  cb_director.py  cb_director_*.py
++    cb_writer.py    cb_script.py cb_scene.py      cb_context.py
++    paths.py        NEW: every path constant in one file (see Phase 2)
++    previews/       kf_preview.py  voice_preview.py  beat_preview.py  retake_preview.py
++    tests/          test_unapprove_locks.py  test_static_hardening.py (from cb-studio)
++  shows/
++    crystal-bears/               the tenant profile: everything Crystal Bears specific
++      profile.json               NEW: the manifest the engine loads (see Phase 3)
++      canon/
++        LOCKED_CANON.md          THE single source (the eight skill copies die)
++        characters.json  locations.json  continuity.json  episode_arc.json  gag_locks.json
++      laws/
++        wing_law.txt             per show prompt law, loaded by profile
++        style.txt                the visual DNA paragraph (out of cb_director.py's STYLE constant)
++      docs/
++        COMEDY_DOCTRINE.md  CHARACTER_SHEETS.md  CHARACTER_REFERENCE_DATA.md  CHARACTER_LORA_PROMPTS.md
++      chairs/                    the skill prompts + worked examples (director, writer, dp, voice,
++                                 composer, continuity, camera, post) — references/ subfolders deleted,
++                                 canon read from ../canon at runtime
++      episodes/
++        scripts/                 the Ep1..Ep7 .txt files (from cb-studio/data/scripts)
++        output/                  beat packages (from cb-output)
++  studio-ui/                     was cb-studio: app.html, serve.py, data/ (minus scripts, moved above)
++  tools/
++    sync_canon.py                NEW: generates any needed canon copies + verifies hashes (Phase 1)
++    migrate_paths.py             the one time mover, kept for the record
++  archive/
++    2026-07-pre-restructure/     the six superseded pipeline docs + anything replaced, untouched, dated
++```
++
++---
++
++## PHASE 1 — ONE CANON (do this first; it is the disease the studio exists to cure)
++
++1. `git mv CRYSTAL_BEARS_LOCKED_CANON.md shows/crystal-bears/canon/LOCKED_CANON.md` — the root copy becomes THE copy.
++2. Delete all eight `skills/*/references/CRYSTAL_BEARS_LOCKED_CANON.md` duplicates. Any skill that read its local copy reads the canonical path instead (cb_director.py already reads a single CANON path constant; repoint it).
++3. Write `tools/sync_canon.py`: if any consumer genuinely requires a local copy (a skill packaged for ~/.claude/skills), the copy is GENERATED from the canonical file and stamped `AUTO GENERATED — edit shows/crystal-bears/canon/LOCKED_CANON.md`, and the script verifies hashes match, exiting nonzero on drift.
++4. Continuity gains a startup check: canonical hash matches every generated copy, BLOCK on mismatch.
++
++DoD: `grep -r "LOCKED_CANON" --include="*.md" -l` returns one source file plus only stamped copies; editing a duplicate is impossible without the stamp shouting.
++
++## PHASE 2 — PATHS BEFORE MOVES (the step that makes the rest safe)
++
++1. Create `engine/paths.py`: ROOT, ENGINE, SHOW (resolved from profile), CANON, CHARS, LOCATIONS, MEDIA, OUTPUT, SCRIPTS, LOCKED, NOTES — every path constant currently scattered through the modules (the HERE/ROOT patterns in cb_director, cb_beats, cb_gen, cb_prompts, serve.py) imports from here.
++2. Only when every module reads paths.py do the physical moves happen, all as `git mv` so history survives.
++3. serve.py's CBGEN/ROOT constants repoint to paths.py values.
++
++DoD: the import proof passes; the three baseline prompts are byte identical.
++
++## PHASE 3 — THE SHOW PROFILE (the tenancy decision made physical)
++
++1. `shows/crystal-bears/profile.json`: show name, canon paths, laws to inject (wing_law where any bee is cast), the style paragraph, chair prompt locations, character/location file paths, output conventions.
++2. The engine loads ONE profile (env `STUDIO_SHOW=crystal-bears` default). Everything currently hardcoded moves behind it: the ROLE dict and bee logic in cb_segprompt read from characters.json (already mostly true), WING_LAW loads from laws/, STYLE from laws/style.txt, the characters/locations paths from the profile.
++3. Acceptance: `STUDIO_SHOW=thistlewoods` with an empty stub profile starts the engine and fails ONLY on missing content, never on Crystal Bears assumptions baked in code.
++
++DoD: grep the engine for "bee", "Fuzzby", "crystal" — zero hits outside comments; every hit lives in shows/crystal-bears/.
++
++## PHASE 4 — THE DOCUMENT CONSOLIDATION (fourteen roots become four)
++
++Stays at root: CLAUDE.md, STUDIO_BIBLE.md, WORLD_CLASS_ROADMAP.md, TICKET_PACK_001.md.
++
++Moves to shows/crystal-bears/docs/: STUDIO_COMEDY_DOCTRINE.md, CHARACTER_SHEETS.md, CHARACTER_REFERENCE_DATA.md, CHARACTER_LORA_PROMPTS.md.
++
++Archives (dated, untouched, with a one line supersession note prepended pointing at the Bible): CRYSTAL_BEARS_PIPELINE.md, CRYSTAL_BEARS_PIPELINE_WORKFLOW.md, CRYSTAL_BEARS_PIPELINE_CREW.md, CRYSTAL_BEARS_ENGINE.md, CRYSTAL_BEARS_PROCEDURE.md, CRYSTAL_BEARS_SCENE_WORKFLOW.md — six descriptions of the pipeline from different eras; the Bible is the survivor. Anything in them still true and absent from the Bible gets folded into the Bible FIRST, then the file archives.
++
++STUDIO_GATE_FLOW_SPEC.md and STUDIO_WRITERS_ROOM_SPEC.md stay live at root until their builds complete (the UI redesign, Gate 0), then archive.
++
++DoD: root holds four living documents; every archived file carries its supersession note; nothing true was lost (the fold in is reviewed at sign off).
++
++## PHASE 5 — CODE HYGIENE (last, least, still worth it)
++
++1. previews/ and tests/ subfolders as per the tree; KEYFRAME_DONE.md and CLIP_DONE.md move into engine/docs or fold into the Bible's gate contracts.
++2. Dead code sweep: anything the T3 ruling retires (the unused compact prompt paths if Julian retires rather than declares them) deletes in the same commit as the Bible line that kills it.
++3. One `README.md` at root, ten lines: what this is, the tree, where the Bible is, how a session starts.
++4. Gate numbering (T16) lands in the same sweep since every file is being touched anyway.
++
++DoD: a stranger (or a fresh Claude Code session) finds any file's home in one guess.
++
++---
++
++## THE ORDER AND THE RULE
++
++Phases run 1 → 2 → 3 → 4 → 5, one phase per commit, baseline checks green after each. Phase 3 is the one that pays forever: it is standing rule 6 finishing its thought — the model is a tenant, the show is a tenant, only the studio is permanent. If time is short, Phases 1 and 2 alone remove the two live dangers (canon drift, path spaghetti); 3 to 5 can follow next week.
++
++*This spec supersedes nothing in the Ticket Pack; it IS ticket T30, and T16 (gate numbering) plus T28 (canon sync) close inside it.*
+diff --git a/TICKET_PACK_001.md b/TICKET_PACK_001.md
+new file mode 100644
+index 0000000..312b8b6
+--- /dev/null
++++ b/TICKET_PACK_001.md
+@@ -0,0 +1,113 @@
++# CRYSTAL BEARS STUDIO — TICKET PACK 001
++*Everything from the 2 July 2026 audit session, one pack. Each ticket: the files, the change, the definition of done. Priorities: P0 = the floor (nothing else ships first) · P1 = this month · P2 = next. Companion patch already built: for_beat_v2.patch (T7). Source of truth order: Locked Canon > Studio Bible > this pack.*
++
++---
++
++## THE FLOOR (P0)
++
++**T1 · Voice failure refuses the render**
++cb_beats.py. A failed ElevenLabs track currently falls back to Seedance's native voice, silently. Law 5. Change the fallback to a refuse and skip, same as a failed validator.
++DoD: no clip can exist whose voice is not the acted V3 track; the refusal prints its reason.
++
++**T2 · Continuity tail: decide, then wire or delete**
++cb_beats.py + Studio Bible 3.1. The last frame chaining only fires when not raw, and for_beat always sets raw, so the feature is dead on the shipping path, and its purpose (carry the pollen moustache across takes) contradicts the Bible's transients resolve inside the take rule. Julian rules: cross take state carry is law, or it isn't.
++DoD: one doctrine in the Bible; the code path either fires on the raw path or no longer exists.
++
++**T3 · The second master is declared or retired**
++cb_seedance.py, cb_beats.py, Studio Bible Part 4. The 15 minds, the archetypes and the compact validators still run on every beat and can REFUSE a render, despite the Bible saying they collapsed into the Director. Either the Bible names them as the kept validation layer, or their veto moves into Continuity and the machinery retires.
++DoD: the Bible and the code tell one story about who may refuse a render and why.
++
++**T4 · Docstrings match the wiring**
++cb_beats.py, cb_seedance.py. gate3_prepare declares COMPACT_TIMED_JSON the only shipping format; the run loop overrides with six section prose on every beat. The comments describe the old machine.
++DoD: a fresh Claude Code session reading only docstrings would build the current truth.
++
++**T5 · Bible amendments from the audit**
++CRYSTAL_BEARS_STUDIO_BIBLE.md, cb_post.py. Record WING LAW in the section order; state the duration rule once (the 8 to 15s clamp or the flat 12); mark the Ep1 hand authored SEGMENTS as benchmark fixtures to retire once the Director beats You Mind; remove "replace the voice" from the CapCut readme.
++DoD: no two documents disagree.
++
++**T6 · Rule on Bo**
++CRYSTAL_BEARS_LOCKED_CANON.md, config/characters.json. Ep2 stars a character with no canon entry and no assets. Confirm the recurring guest tier with reference art, or park Ep2 formally.
++DoD: Ep2 is producible under the cast lock or out of the queue.
++
++**T16 · One gate numbering, everywhere**
++cb_retake.py (says GATE 5), cb_post.py (prints GATE 4), serve.py, app.html, Studio Bible. The canonical map: 0 Write · 1 Direct · 2 Keyframe (2a anchors, 2b coverage) · 3 Animate · 4 Retake/Edit · 5 Post.
++DoD: grep for gate numbers returns one vocabulary across code, UI and Bible.
++
++---
++
++## THE PROMPT (P1)
++
++**T7 · Ship for_beat_v2 as the routing point** *(patch built: for_beat_v2.patch)*
++cb_segprompt.py, cb_beats.py, cb_seedance.py preview. The faithful translator: the Director's light, atmosphere, motionTempo, cuts, pauseHold, physicalFeeling and soundIntent ship inside the baked law; names delabeled with first mention full and short label after; spoken words stripped from prose (they live only in @Audio1); frame sides restored to REFERENCE LAW; the empty plate text ("No characters.") never ships as SCENE again.
++DoD: preview and fire both call for_beat_v2; all 44 Ep1 prompts regenerate and read at the You Mind standard; the mechanical checks (no names, no spoken words, tokens ordered) pass on every one.
++
++**T8 · The Director authors the prose (the next level)**
++chairs skill + cb_director.py output schema. Add sceneProse and actionProse to the Director's contract: continuous direction written to the You Mind standard, with the worked example in his system prompt and one hard rule added: never quote a spoken line, reference the line in @Audio1. The assembler's job reduces to delabel, strip, wrap in law, refuse on violation. v2 remains the safety net when prose fields are absent.
++DoD: a regenerated Ep1 beat ships Director authored prose inside the six sections; Continuity blocks any spoken words or names.
++
++**T9 · Physics as a clause, not a section, plus the prompt budget law**
++cb_segprompt.py, cb_continuity checks, Studio Bible. One clause folded into the existing physics tail from the Director's contact_rule and physics_rule: every surface is solid, leaves and petals flex and spring back, every impact deforms and rebounds, nothing passes through geometry. One backstop line in NEGATIVES. Offset the tokens: compress WING LAW (90 words saying flap) and prune negatives that have never fired. Then the budget becomes law: total prompt ceiling ~500 words, per section budgets, Continuity BLOCKS overruns. To add a sentence, earn it or cut one.
++DoD: the physics clause ships; the prompt total is at or below the You Mind benchmark length; the budget check fires on overrun.
++
++**T10 · The golden set harness**
++New: cb_golden.py + a goldens/ folder. You Mind 1.B1 plus five approved beats. Every change to a chair prompt, the assembler or canon reruns the set and the score diff travels with the commit. First two experiments queued: lean versus heavy physics prompt (5 seeds each, QA scores contact), and old path versus v2 on 1.B1, same keyframe, same @Audio1.
++DoD: one command runs the set and writes the scorecard; nothing about prompts merges on vibes again.
++
++---
++
++## THE RETAKE ROOM (P1)
++
++**T11 · The layer question, wired in front**
++cb_retake.py director_retake_brief schema, studio UI. Add suggested_layer (keyframe · brief · reference · take) to the Director check output; the retake form routes accordingly. Shot regen becomes one of four routes, not the only door. Upstream routes trip the unapprove cascade.
++DoD: no retake fires without a layer; keyframe and brief faults route upstream automatically.
++
++**T12 · The retake prompt obeys the law**
++cb_retake.py _shot_fix_prompt. The bespoke third prompt system retires; retake prompts assemble through the definitive builder with the change folded into ACTION, and pass the same Continuity validators as any render.
++DoD: a retake prompt is structurally identical to a first render prompt; the validators run on it.
++
++**T13 · The failure class ledger**
++retakes.json schema, serve.py, roadmap 1.1. Every retake carries a class: floaty · off model · clip through · flat comedy · seam · audio · continuity. The monthly chair review reads the ledger.
++DoD: the ledger exists, every retake is classified, and the first monthly readout can be produced from it.
++
++**T14 · failed_correction_rule wired**
++cb_qa.py, cb_retake.py. The Director already writes a pre authorised reroll instruction per beat. When clip QA fails on the matching condition, the retake brief auto populates from it.
++DoD: a QA fail on a covered condition produces a one click (or automatic) retake with the Director's own wording.
++
++**T15 · Sample and select arrives in the retake room first**
++cb_retake.py regen_shot. Three takes per retake instead of one; auto select the lowest seam delta that passes QA (the seam delta measurement already exists). The roadmap's biggest quality lever, landed where it pays most.
++DoD: a retake renders N takes, the selection is logged with its seam delta, and only the winner splices.
++
++---
++
++## POST (P1 and P2)
++
++**T17 · Dual loudness masters (P1)**
++cb_post.py mix(). Keep the -14 LUFS master as the YouTube preview; add the EBU R128 -23 LUFS TP -1 broadcast master alongside. Measure the delivered file and log actual LUFS into the state file, so "broadcast loudness" is a verified fact, not a filter setting.
++DoD: two masters per scene, measured numbers logged, the Bible's Gate 5 line is true.
++
++**T18 · Giacchino becomes a decision maker (P2)**
++cb_post.py + a small keep/replace pass. Per cue: keep Seedance's score or replace it, informed by the Director's music_emotion and soundIntent (currently unread by Post), with Suno as the wired replacement source per roadmap 2.3. ElevenLabs Music demotes to scratch only.
++DoD: each scene's mix log records keep or replace per cue with the reason; Suno cues render from the Director's brief.
++
++**T19 · The episode master and the handoff pack (P2)**
++New: cb_episode.py. All scenes stitch into the finished film with the between scene transitions the XF constant reserves; the broadcaster pack auto produces at Gate 5 sign off: mastered film (R128), stems, locked screenplay, filter scorecard, bible extract. Roadmap 3.1.
++DoD: one command, one finished episode, one pack, no hand assembly.
++
++**T20 · Crossfade doctrine reconciled (P1, one line)**
++cb_post.py. The docstring says scene clips crossfade; the XF constant says crossfades are between scenes only. Bluey pace says hard cuts within a scene. Pick, state, align both comments and the assemble behaviour.
++DoD: one sentence of doctrine, code matching it.
++
++**T21 · Readme language (P1, five minutes)**
++cb_post.py CAPCUT_README. Voice stems are for balance and ducking; "replace the voice" leaves the vocabulary. Law 5 holds even in a text file.
++DoD: no document in the repo offers a voice swap.
++
++---
++
++## THE ORDER OF PLAY
++
++Week one: T1 to T6 and T16 (the floor), T21 and T20 (five minute fixes) alongside.
++Week two: T7 (patch ready), T9, then T10 so every later change is measured.
++Week three: T11 to T15 (the retake room), T17.
++Then: T8 (the Director's prose), T18, T19, feeding the roadmap's Phase 2 and the three episode consistency run.
++
++*Rule for the pack: a ticket is done when its DoD is true and the Bible agrees, not when the code compiles.*
+diff --git a/WORLD_CLASS_ROADMAP.md b/WORLD_CLASS_ROADMAP.md
+new file mode 100644
+index 0000000..7d4b3c9
+--- /dev/null
++++ b/WORLD_CLASS_ROADMAP.md
+@@ -0,0 +1,115 @@
++# CRYSTAL BEARS — THE WORLD CLASS ROADMAP
++*How the studio becomes world class. Sits beside the Studio Bible. The Bible governs how things are made; the Locked Canon governs what Crystal Bears is; this document governs how the machine earns the word world class. Where they touch, canon wins.*
++
++**The principle: clarity before complexity. Nothing new is built until the numbers say the current machine is learning.**
++
++---
++
++## WHAT WORLD CLASS ACTUALLY MEANS
++
++Not a bigger pipeline. The pipeline already exceeds most funded studios. World class is three things the repo does not have yet:
++
++1. **A taste loop.** Every failure teaches the studio, not just the human. Pixar's edge was never software; it was dailies, notes routed to the right department, and a standard that rose weekly because the system learned.
++2. **A measured bar.** "Pixar quality" is a feeling until it is a checklist with numbers stored next to the renders. The bar is written down, scored every episode, and never argued with.
++3. **A cadence that ships.** Thirteen consistent episodes in front of a commissioner while competitors are still rendering their second. The output contract is broadcaster grade by default.
++
++The studio is world class when Julian's only jobs are the seed, the taste calls at sign off, and the retake diagnoses. Everything else runs on rails. Make yourself unnecessary.
++
++---
++
++## PHASE 0 — THE FLOOR (this week)
++
++*A world class studio cannot stand on a floor with holes in it. From the audit of 2 July 2026. Nothing else starts until these are closed.*
++
++| # | Fix | File | Definition of done |
++|---|---|---|---|
++| 0.1 | A failed ElevenLabs voice track REFUSES the render. No silent fallback to Seedance's native voice, ever. Law 5: the voice lives in the render. | cb_beats.py | Voice failure prints the reason and skips the take; no clip exists with an invented voice |
++| 0.2 | Settle the continuity tail doctrine, then wire or delete. Decision: does end state carry across takes, or do transients resolve inside each take per the Bible? One answer becomes law; the other path is removed. | cb_beats.py + Studio Bible 3.1 | The tail either fires on the shipping (raw) path or no longer exists; the Bible states the rule |
++| 0.3 | Name the second master or retire it. The cb_seedance validators, the 15 minds and the archetypes either become the DECLARED validation layer, written into the Bible as kept deliberately, or their veto is removed and their checks move into Continuity. No undocumented machine may block a render. | cb_seedance.py, cb_beats.py, Studio Bible Part 4 | The Bible and the code tell one story about who can refuse a render and why |
++| 0.4 | Docstrings match the wiring. gate3_prepare stops declaring compact JSON the shipping format; the shipped format is the six section prose from cb_segprompt.for_beat, stated everywhere. | cb_beats.py, cb_seedance.py | A new Claude Code session reading only the docstrings would build the right thing |
++| 0.5 | Bible amendments from the audit: WING LAW recorded as baked law in the section order; duration rule stated once (the 8 to 15s clamp or the flat 12, whichever is now true); the Ep1 hand authored SEGMENTS marked as benchmark fixtures to be retired once the Director beats You Mind; the post readme loses "replace the voice" language. | CRYSTAL_BEARS_STUDIO_BIBLE.md, cb_post.py | No two documents disagree; the code and the Bible are in lockstep |
++| 0.6 | Rule on Bo. Recurring guest tier confirmed or Ep2 shelved. Canon entry plus reference art, or the script leaves the production queue. | CRYSTAL_BEARS_LOCKED_CANON.md, config/characters.json | Ep2 is either producible under the cast lock or formally parked |
++
++---
++
++## PHASE 1 — THE TASTE LOOP AND THE VISIBLE BAR (this month)
++
++**1.1 The retake ledger.** Every RetakeOrder is tagged with its layer (keyframe, brief, reference) AND its failure class: floaty, off model, flat comedy, dead eyes, broken continuity, audio mismatch. Stored in the state file next to the forensics. This is the studio's memory of its own mistakes.
++
++**1.2 The monthly chair review.** Once a month the ledger is read back into the chairs. If forty percent of retakes are weight problems, Keane's craft paragraph in the Director's prompt is sharpened, the change is dated, and the Bible records the revision. A bad clip teaching Julian is a cost. A bad clip teaching the studio is an asset.
++
++**1.3 The Six Question Filter becomes the scored exit exam.** Run at Gate 4 on every episode, all six questions, pass or fail per question, stored in the state file. An episode that fails a question does not ship, whatever the render quality. The Five Anti Patterns are checked in the same pass.
++
++**1.4 QA becomes visible.** cb_qa verdicts graduate from log lines to the sign off screen: the keyframe verdict beside the keyframe, the clip verdict beside the clip, the beat's soul (want, need, crystalTruth, kidRead, adultRead, theGame, wordlessHeld) in front of Julian at Gate 1 sign off. Per the gate flow redesign spec: nobody signs what they cannot see.
++
++**1.5 The gate spine ships.** The Pipeline page becomes home: the stepper, one glowing next action, the unapprove cascade visible. The studio should answer "where am I and what is next" in one glance, every time.
++
++---
++
++## PHASE 2 — IDENTITY AT THE MODEL LAYER AND THE SOUND OF THE SHOW (next)
++
++**2.1 Character LoRAs.** train_lora.py stops being a loaded gun nobody fired. One LoRA per bear and bee, trained on the locked turnarounds, versioned in the asset library. References stay law; the LoRA makes identity survive a thousand renders without vigilance. On model stops being a judgement and becomes a lookup.
++
++**2.2 The versioned asset library.** Turnarounds, plates, props: each hashed, each stamped with the canon version. Every episode records the canon version it was built under. No asset without a version; no version without a date.
++
++**2.3 Gate 5 grows up.** Sound is half of Pixar; Bluey's warmth is scored. The Suno pipeline (Crystal Songs, Sparks and Calls, per the catalogue conventions) is wired in as Giacchino's replacement source for weak Seedance cues. The mix ducks under dialogue automatically; loudness masters to broadcast spec without a manual pass. CapCut by ear becomes the exception, not the workflow. An acquisitions person hears the mix before they consciously see the animation.
++
++**2.4 Sample and select, never generate and pray.** Pixar keeps no first takes; with generative models, takes are nearly free. Every beat renders 3 to 5 takes with seed variation; the vision QA scores each against the turnarounds and the Director's brief; the best two reach the sign off screen. Dailies become choosing between good takes instead of diagnosing bad ones. This is the single biggest quality lever available to the studio and it is pure orchestration on machinery that already exists (seeded renders, forensic logs, cb_qa). Retake rate is measured against the SELECTED take.
++
++**2.5 The data flywheel.** Every approved keyframe and every signed clip feeds the character dataset behind the LoRAs, so the models grow more Crystal Bears shaped with every episode. Approved output is the moat: nobody else on earth holds a thousand on model frames of Fuzzby. The flywheel is automatic at sign off, not a chore; a signed deliverable that does not enrich the dataset is a leak.
++
++**2.6 The model port and the golden set.** NB2 and Seedance 2 are tenants, not the landlord. Assume both are superseded within eighteen months: cb_gen becomes a clean port any model can sit behind, and a golden benchmark set (the You Mind segment plus five approved beats) is the audition every new model must beat before it earns the chair. The same set is the studio's regression suite: any change to a chair's prompt, the assembler, or canon reruns the golden set and the score diff ships with the commit. Nothing merges on vibes. The permanent assets are the canon, the prompt doctrine, the state machine and the taste ledger; every model swap must leave all four untouched.
++
++---
++
++## PHASE 3 — THE CONSISTENCY RUN AND THE OPEN DOOR (the proof)
++
++**3.1 The broadcaster handoff pack, automatic.** Every episode signed at Gate 5 produces its pack without being asked: mastered film, stems, the locked screenplay, the filter scorecard, a bible extract. Broadcaster grade by default, because the rooms are already open: Paramount Milkshake correspondence, the Kabillion relationship, Kidscreen behind us, Syndicate in negotiation. The machine's output contract is written for the person who can say yes.
++
++**3.2 The three episode run.** Three episodes back to back through the full machine with a falling retake rate and no canon drift between them. This, not any single beautiful clip, is the studio's real test. Consistency at cadence is the thing nobody else in the room can show.
++
++---
++
++## THE BENCHMARK LADDER
++
++*Each rung is pass or fail. No rung is skipped. A failed rung fixes the chair or the canon, never the output: Law 3 pointed at the studio itself.*
++
++| Rung | The test | Passes when |
++|---|---|---|
++| 1 | Our Director vs You Mind, Segment 1 | The generated brief plus assembled prompt matches or beats the benchmark on comedy, weight and Seedance craft |
++| 2 | Ep1 end to end | Every gate signed through the machine, voice in every render, filter score 6 of 6 |
++| 3 | Ep2 (post Bo ruling) | A second episode with ZERO code changes: only seeds, canon and taste |
++| 4 | The consistency run | Three episodes, falling retake rate, one canon version, packs auto produced |
++| 5 | The room | An episode pack in front of a commissioner, produced start to finish inside the cadence target |
++
++---
++
++## THE NUMBERS (tracked per episode, stored in the state file)
++
++- **Retake rate**: retakes per signed clip. Must fall episode on episode. The single most important internal number. If it is not falling, the chairs are not learning and the machine is being hand cranked.
++- **Filter score**: Six Question exit exam, x of 6. Ship bar is 6.
++- **First pass yield**: clips signed without any retake. Should rise as the taste loop compounds.
++- **Julian touch time**: hours of human decisions per episode. World class is roughly two hours of taste, not two days of production.
++- **On model rate**: QA vision verdicts passed first time, keyframes and clips.
++- **Cost per signed minute**: render spend divided by signed runtime, so quality never hides waste. Sample and select raises render spend per clip and must LOWER cost per signed minute by killing retake cycles; if it does not, the take count comes down.
++- **Golden set score**: the benchmark suite result, rerun on every chair, assembler or canon change and on every candidate model. The diff travels with the commit.
++
++---
++
++## THE OPERATING RHYTHM
++
++- **Per beat**: Continuity before every sign off, verdicts visible, no BLOCK survives a signature.
++- **Per episode (the Nolting screening)**: watch the assembled cut once, file retakes with layer plus failure class, then the exit exam.
++- **Per month (the chair review)**: read the ledger, sharpen exactly one chair, date the change in the Bible.
++- **Per quarter**: benchmark ladder review; the commercial doors (Milkshake, Kabillion, Syndicate) checked against what the machine can now put in front of them.
++
++---
++
++## THE STANDING RULES
++
++1. Nothing new is built while the retake rate on the current episode is rising.
++2. Taste lives in prose; law lives in code; canon lives in data. Anything found living in the wrong layer is moved the day it is found.
++3. When the code becomes sharper than the documents, the documents update the same day. The audit found the code ahead of the Bible; that gap is where drift breeds.
++4. No output is ever hand patched. The button does not exist. One lawful exception, because the keyframe is upstream: an art directed repaint of a HERO keyframe (the moustache reveal, the crystal moment, the six frames per episode that carry the poster) is a Law 3 compliant structural fix, entered through Gate 2 with a new sign off, never a patch to a render. Human taste is spent where it carries furthest; the machine owns the rest.
++5. The studio serves the show. The show serves the child watching, and the parent beside them. Every number above exists for that and nothing else.
++6. The model is a tenant; the canon is the landlord. No model earns the chair without beating the golden set, and no dependency on any model's quirks is ever written into canon, doctrine or state. The studio must survive every model swap with its identity intact.
+diff --git a/cb-gen/cb_beats.py b/cb-gen/cb_beats.py
+index adc8c74..b7e8bb0 100644
+--- a/cb-gen/cb_beats.py
++++ b/cb-gen/cb_beats.py
+@@ -33,11 +33,11 @@ def _anchor(c):
+         return None
+ 
+ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
+-    """SAFE Gate-3 prompt source selector for beats WITHOUT a cb_segprompt segment — NEVER calls Seedance. The ONLY
+-    builder is cb_seedance (COMPACT_TIMED_JSON); a manual seedancePromptOverride is honoured verbatim (stale-guarded).
+-    The old cb_prompts.seedance_json JSON builder has been REMOVED — there is no way to select it. (Beats that DO have a
+-    cb_segprompt segment never reach here for their final prompt: cb_beats.run overrides with the definitive prose.)
+-    Returns {builder, prompt, report, authoring, refuse, reason}."""
++    """Gate-3 VALIDATION + fallback source — NEVER calls Seedance. THE SHIPPED PROMPT for every beat is the
++    definitive six-section PROSE from cb_segprompt.for_beat (applied in cb_beats.run AND the studio preview — one
++    routing point, preview == fire). This builder's COMPACT output is the validation/readiness layer (its validators
++    can refuse a render) and the fallback ONLY if cb_segprompt is unavailable. A manual seedancePromptOverride is
++    honoured verbatim (stale-guarded). Returns {builder, prompt, report, authoring, refuse, reason}. (T4)"""
+     code = beat.get("beatCode") or beat.get("shotCode")
+     ovr = str(beat.get("seedancePromptOverride") or "").strip()
+     if ovr:
+@@ -49,7 +49,7 @@ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
+                 "authoring": None, "refuse": bool(stale),
+                 "reason": ("override contains stale language: " + "; ".join(stale)) if stale else ""}
+     r = cb_seedance.build_for_beat(pkg_path, code, episode)
+-    fmt = os.environ.get("SEEDANCE_PROMPT_FORMAT", "compact")   # compact (COMPACT_TIMED_JSON) is the ONLY shipping format
++    fmt = os.environ.get("SEEDANCE_PROMPT_FORMAT", "compact")   # compact is the ONLY VALIDATION format (the shipped prompt is cb_segprompt prose — see run)
+     if fmt != "compact":                          # the flattened production-bible prompt is REVIEW/DEBUG only — never shipped
+         return {"builder": "cb_seedance", "format": "FLATTENED_REVIEW", "prompt": None,
+                 "report": {"ok": False, "rejects": [f"format {fmt!r} is review/debug only — the shipping format MUST be COMPACT_TIMED_JSON"],
+@@ -155,7 +155,13 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
+             try:
+                 track = cb_voice.build_dialogue_track(b, out=f"vo_{episode}_{code}.mp3", voice_direction=_vd)
+             except Exception as e:
+-                print(f"  {code}: voice track failed ({str(e)[:120]}) — take falls back to native voice", flush=True)
++                print(f"  {code}: voice track failed ({str(e)[:120]})", flush=True)
++        # ── T1 (Law 5): the voice lives IN the render. A beat WITH dialogue whose V3 track failed REFUSES to
++        #    render — no silent fallback to Seedance's native voice, ever. Wordless beats render with no track.
++        _has_dlg = bool(b.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (b.get("cuts") or []))
++        if _has_dlg and not (track and track.get("track")):
++            print(f"  {code}: REFUSED — beat has dialogue but no V3 @Audio1 track (Law 5: no native-voice fallback); fix the voice and re-fire", flush=True)
++            continue
+         audio_dur = _audio_dur(track["track"]) if (track and track.get("track")) else 0.0
+         # ── MANUAL OVERRIDE: a human-edited exact Seedance JSON ("Save & use this exact prompt") is sent VERBATIM
+         #    (mirrors how build_keyframe_prompt honors keyframePromptOverride). Otherwise build it as now.
+diff --git a/cb-gen/cb_post.py b/cb-gen/cb_post.py
+index 3a73b15..819c120 100644
+--- a/cb-gen/cb_post.py
++++ b/cb-gen/cb_post.py
+@@ -3,9 +3,10 @@
+ 
+ POST = CURATION (the quality filter — NOT composition). The hardest creative work happens at GATE 3: Seedance
+ scores each take — the acted ElevenLabs V3 voice + Seedance's own synchronised SFX and TIMED comedy/emotional
+-music (its timing is the point) are ALREADY in the clip audio. Gate 4 LISTENS and decides what Seedance got
++music (its timing is the point) are ALREADY in the clip audio. Gate 5 LISTENS and decides what Seedance got
+ right — keeps what works, trims or replaces what doesn't. For a scene Post:
+-  1) ASSEMBLES the picture from the scene's clips — crossfades (NO jumps) + a held last frame — KEEPING the
++  1) ASSEMBLES the picture from the scene's clips — HARD CUTS shot-to-shot (cross-dissolves live ONLY between
++     scenes, passage-of-time, at episode assembly) + a held last frame — KEEPING the
+      clip audio (voice + SFX + Seedance's timed music) so the sound flows continuously while the picture cuts.
+   2) MASTERS to broadcast loudness -> a preview "complete" mix. The ElevenLabs Music bed is the FALLBACK, not the
+      default — fired ONLY if Seedance's own music isn't right for a scene: a hand-supplied MUSIC.mp3 (always wins)
+@@ -202,8 +203,8 @@ def run(pkg, scene_num, episode="Ep1"):
+     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+     clips = _clips(pkg, episode, scene_num)
+     if not clips:
+-        print(f"GATE 4: no clips for {episode} scene {scene_num} (fire gate 3 first)."); return
+-    print(f"GATE 4 — Post: {episode} scene {scene_num}, {len(clips)} clips", flush=True)
++        print(f"GATE 5: no clips for {episode} scene {scene_num} (fire gate 3 first)."); return
++    print(f"GATE 5 — Post: {episode} scene {scene_num}, {len(clips)} clips", flush=True)
+     picture = f"media/{episode}_Scene{scene_num}_picture.mp4"
+     assemble_picture(_norm(clips), picture)
+     print(f"  picture (clips crossfaded + held tail, native voice) -> {picture}", flush=True)
+@@ -253,7 +254,8 @@ def run(pkg, scene_num, episode="Ep1"):
+         fh.write(f"CRYSTAL BEARS — CapCut handoff — {episode} Scene {scene_num}\n\n"
+                  "PICTURE.mp4   = the polished, seamlessly-stitched cut, with the acted ElevenLabs V3 voice + Seedance's\n"
+                  "                own synchronised SFX and TIMED comedy/emotional music already in it (timing locked to the action).\n"
+-                 "VOICE_<shot>.mp3 = clean per-shot V3 dialogue stems — to re-balance / duck / replace the voice.\n"
++                 "VOICE_<shot>.mp3 = clean per-shot V3 dialogue stems — to re-balance / duck the voice IN THE MIX.\n"
++                 "                (Law 5: the render's voice is final — there is no voice swap.)\n"
+                  "MUSIC.mp3 / AMBIENCE.mp3 = only if you supplied one or opted into the scratch bed (CB_AUTO_MUSIC_BED=1).\n\n"
+                  "TO FINISH IN CAPCUT: drop PICTURE in (it already plays with score + SFX). If you want a music bed ON TOP,\n"
+                  "lay it under the voice and balance by ear — or keep Seedance's own score. Pull a music moment if it's not working.\n"
+diff --git a/cb-gen/cb_retake.py b/cb-gen/cb_retake.py
+index 008fc3a..4db90b2 100644
+--- a/cb-gen/cb_retake.py
++++ b/cb-gen/cb_retake.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""GATE 5 — RETAKES (surgical). Regenerate ONE shot inside a beat (continuity-matched) and splice it back at its
++"""GATE 4 — RETAKES / EDIT (surgical). Regenerate ONE shot inside a beat (continuity-matched) and splice it back at its
+ frame boundaries, instead of re-rendering the whole beat. Never lose the good bits; never pay for a full re-render.
+ 
+     splice_shot(beat_clip, fs, fe, replacement, fps, out)   # frame-accurate: beat[:fs] + replacement(slot) + beat[fe:]
+diff --git a/cb-gen/cb_seedance.py b/cb-gen/cb_seedance.py
+index ccc5eb3..717e163 100644
+--- a/cb-gen/cb_seedance.py
++++ b/cb-gen/cb_seedance.py
+@@ -1417,7 +1417,7 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
+     {builder, mode, prompt, authoring, readiness_status, hard_fails, warnings}."""
+     if mode not in ("render", "preview", "export", "dryrun", "regen"):
+         raise ValueError(f"unknown mode {mode!r}")
+-    # THE ONLY builders are cb_segprompt (definitive prose, applied at the end of this function) and cb_seedance (compact,
++    # cb_segprompt prose is THE shipped prompt (applied at the end of this function); cb_seedance compact is validation,
+     # for beats without a segment). The old cb_prompts.seedance_json JSON path and its SEEDANCE_ALLOW_OLD_BUILDER hatch
+     # have been REMOVED — there is no way to reach an old builder from any mode (preview/export/dryrun/regen/render).
+     r = build_for_beat(pkg_path, beat_code, episode); a = r["authoring"]
+diff --git a/cb-gen/cb_segprompt.py b/cb-gen/cb_segprompt.py
+index 690449b..a785c09 100644
+--- a/cb-gen/cb_segprompt.py
++++ b/cb-gen/cb_segprompt.py
+@@ -234,3 +234,113 @@ if __name__ == "__main__":
+     sid = sys.argv[1] if len(sys.argv) > 1 else "1.B1"
+     print(f"===== GATE-3 SEEDANCE PROMPT — {sid}  ({len(build(sid))} chars) =====\n")
+     print(build(sid))
++
++# ══════════ FOR_BEAT V2 — the FAITHFUL TRANSLATOR (audit fix, 2 Jul 2026) ══════════
++# The Director already directs (performance, pauseHold, motionTempo, physicalFeeling, soundIntent, light,
++# atmosphere, cameraArc). V1 discarded that direction and stitched storyBeat + cuts instead, shipped the
++# keyframe PLATE text ("No characters.") as SCENE, and left character NAMES in the prose (the name-trap).
++# V2 ships the Director's direction inside the same baked law. Deterministic — zero LLM.
++
++def _short_role(role):
++    """'the larger, eager, manic bee' -> 'the larger bee' — first descriptor + species."""
++    parts = [p.strip() for p in str(role).split(",")]
++    if len(parts) < 2: return role
++    species = parts[-1].split()[-1]
++    return f"{parts[0]} {species}"
++
++def _delabel(text, cast, used=None):
++    """Names -> role labels in prose (names live ONLY in @Audio1). Full label on FIRST mention,
++    the short label after — the gold-standard cadence, not a six-times mouthful."""
++    import re as _re
++    out = str(text or "")
++    used = used if used is not None else set()
++    for name in cast:
++        role, _ = _char_meta(name); short = _short_role(role)
++        def _sub(m, n=name, r=role, s=short):
++            poss = m.group(0).endswith("'s")
++            label = r if n not in used else s
++            used.add(n)
++            return label + ("'s" if poss else "")
++        out = _re.sub(rf"\b{name}(?:'s)?\b", _sub, out)
++    return out
++
++def _strip_spoken_words(text):
++    """The dialogue's WORDS never appear in the prose — they live only in @Audio1. Quoted lines
++    become a reference to the track, so Seedance never renders text or invents a second voice."""
++    import re as _re
++    return _re.sub(r'[\u201c"\u2018\u0027]{1}[^\u201d"\u2019\u0027]{2,80}[\u201d"\u2019\u0027]{1}',
++                   "the line in @Audio1", str(text or ""))
++
++def _scene_v2(beat, scene):
++    """SCENE = the WORLD as the Director lit it: light + atmosphere + the location's look.
++    NEVER the empty keyframe plate text (that is Gate-2 language; 'No characters.' in a
++    video prompt actively fights the performance)."""
++    bits = []
++    for k in ("light", "atmosphere"):
++        v = str(beat.get(k) or "").strip()
++        if v: bits.append(v)
++    if scene:
++        for k in ("definingFeature", "location"):
++            v = str(scene.get(k) or "").strip()
++            if v and v not in bits: bits.append(v); break   # one look line, not three restatements
++    if not bits:
++        loc = str(beat.get("scene") or "").strip()
++        bits = [loc + " — rendered exactly as the world in the references (environment and lighting only)"]
++    return " ".join(bits)   # delabeled + de-quoted by the caller
++
++def _action_v2(beat, cast, used=None):
++    """ACTION = the Director's direction, in performance order:
++    the tempo/contrast frame -> the cuts as continuous directed prose -> the HELD BEAT -> physics
++    coloured by how the moment should FEEL. All delabeled."""
++    bits = []
++    mt = str(beat.get("motionTempo") or "").strip()
++    if mt: bits.append(mt)                                   # the contrast frame (her grace vs his chaos)
++    for c in (beat.get("cuts") or []):
++        a = str(c.get("action") or "").strip()
++        if a and a not in bits: bits.append(a)
++    ph = _strip_spoken_words(str(beat.get("pauseHold") or "").strip())
++    if ph: bits.append(ph)                                   # the Docter held beat — the laugh lands in stillness
++    tail = ("Weighty cartoon physics: clear anticipation → impact → follow-through; readable comedy/emotional "
++            "timing; the performance carried in the eyes, the breath and the weight.")
++    pf = str(beat.get("physicalFeeling") or "").strip()
++    if pf: tail += " The take should feel like: " + pf
++    bits.append(tail)
++    return _delabel(" ".join(bits), cast, used=used)
++
++def _audio_v2(beat, cast):
++    has = bool(beat.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (beat.get("cuts") or []))
++    if beat.get("wordlessHeld") is True or not has:
++        base = ("this beat has NO character dialogue — generate no speech or voices at all. Seedance generates and "
++                "mixes the scene ambience, gentle character SFX and a light underscore that fits the moment (no sung lyrics).")
++    else:
++        base = ("use ONLY @Audio1 for ALL dialogue — the characters speak the words in @Audio1 with precise en-US "
++                "lip-sync, each mouthing its own lines in @Audio1 in order; generate no other, different or duplicate "
++                "voice, and no other speech. Seedance generates and mixes everything else")
++        si = _delabel(_strip_spoken_words(str(beat.get("soundIntent") or "").strip()), cast, used=set(cast))
++        base += (": " + si if si else ": the scene ambience, gentle character SFX and a light playful underscore")                 + " — kept low under the voice (no sung lyrics)."
++    return base
++
++_SIDES = ["frame-LEFT", "frame-RIGHT", "frame-CENTRE"]
++
++def for_beat_v2(beat, scene=None):
++    """The definitive 6-section prompt, now carrying the Director's ACTUAL direction. Same law, richer canvas."""
++    dur = int(beat.get("durationSec") or 12); dur = max(8, min(15, dur))
++    chars = beat.get("openingCast") or beat.get("characters") or []
++    ref_bits, any_bee = [], False
++    for i, name in enumerate(chars):
++        role, is_bee = _char_meta(name); any_bee = any_bee or is_bee
++        side = _SIDES[min(i, 2)] if len(chars) > 1 else None
++        ref_bits.append(f"@图{i + 2} is {role}" + (f" ({side})" if side else ""))
++    reflaw = _REFLAW_HEAD + ((" " + "; ".join(ref_bits) + ".") if ref_bits else "") + _REFLAW_TAIL
++    cam = CAMERA_GENERIC + ((" " + _delabel(str(beat.get("cameraArc")).strip(), chars, used=set(chars))) if beat.get("cameraArc") else "")
++    neg = NEGATIVES_GENERIC + (_BEE_NEG if any_bee else ".")
++    out = f"{dur} seconds, 16:9.\n\n{reflaw}\n\n"
++    if any_bee:
++        out += WING_LAW + "\n\n"
++    _used = set()
++    out += (f"SCENE: {_delabel(_scene_v2(beat, scene), chars, used=_used)}\n\n"
++            f"ACTION / PERFORMANCE: {_action_v2(beat, chars, used=_used)}\n\n"
++            f"CAMERA: {cam}\n\n"
++            f"AUDIO: {_audio_v2(beat, chars)}\n\n"
++            f"NEGATIVES: {neg}")
++    return out
+diff --git a/skills/crystal-bears-camera/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-camera/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index a125cb7..ba130e5 100644
+--- a/skills/crystal-bears-camera/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-camera/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -69,7 +99,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
+ 
+ **Principal cast (LOCKED — the core 9):**
+ - 7 bears: Aida, Sunny, Luna, Misty, Amie, Howey, Keen
+-- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!") + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping")
++- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
+ 
+ **Recurring guests (canon, separate tier — decided 2026-06-19):**
+ - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+@@ -214,3 +244,83 @@ The management tool must let Julian **upload scenery and add characters** into t
+ - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).
+ - **SFX + music libraries** — not yet present; needed for the post layer.
+ - **SEL→CASEL mapping** — confirm (see §9).
++
++---
++
++## EP3 — "The Adventure Begins" (FIRST EPISODE / Keen's origin) — production notes
++
++- **Lead:** Keen (Aquamarine / Courage). Engine: courage emerging through selfless action; this is Keen's **origin** — how he joins the Crystal Bears and earns his crystal.
++- **Writers:** Lloyd Beau Knight & Julian Jenkins (created); Douglas Booth (written). Format: ~11' pilot.
++- **CRITICAL CONTINUITY — Keen's wristbands:** they are his late father's, given to him by his **Mum in Scene 3 EMPTY (vacant — no gems)**. He wears the **vacant** wristbands through Scenes 3–8 (they faintly self-glow underwater in Scene 7 — courage from within, not the crystal). In **Scene 9** Aida awards the **Aquamarine crystal**, which splits into two gems that settle into the wristbands → from that beat on (Scenes 9–10) the wristbands are **crystal-set (azure)**. The DP must use the **vacant-wristband Keen reference** for 3–8 and the **crystal-set reference** for 9–10. Encoded per shot as `keenWristbands: "vacant" | "crystal" | "none"`.
++- **New references supplied (need saving as files for Gate 2):** Keen character turnaround; Keen wristband prop turnaround (vacant) + (crystal-set); scene anchors for **Crystal Cove (beach/cove)**, **Whispering Woods**, **Buzzing Nook** — these fill the shared-scene anchor gap (canon §10 Scenery). Wristband palette: gold band F1B43F, vacant recess 1A1A1A, kite-shaped bezel.
++- **Five-Pillars arc:** Spark (S1–3: world, the call, the goodbye+wristbands) → Deepening (S4–5: storm, lost) → Heart (S7: dives without hesitation to save Squeaky; wristbands first glow) → Connection (S6, S8–9: beacon, rescue, welcome, crystal earned) → Ripple (S10: belonging, honey-friendship button).
++
++### EP3 wristband references — BOTH states supplied
++- **Vacant** (gold band `F1B43F`, empty kite-shaped bezel, void `1A1A1A`) → Keen scenes 3–8.
++- **Crystal-set** (gold band `F1B43F`, faceted Aquamarine kite gem ~`#47DFFF`) → Keen scenes 9–10.
++Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 (gems set in). Image FILES to be saved to `cb-seed/assets/ep3/` for Gate-2 ingest.
++
++### EP3 references INGESTED (2026-06-19) → `cb-seed/assets/ep3/`
++- `CB_Keen_turnaround.jpeg` (Keen body, bare wrists), `CB_Keen_wristband_vacant.jpeg` (verified: empty bezel), `CB_Keen_wristband_crystal.jpeg` (verified: aqua gem set).
++- Scene anchors (fill the §10 scenery gap): `CB_Scene_CrystalCove_anchor.jpeg`, `CB_Scene_WhisperingWoods_anchor.jpeg`, `CB_Scene_BuzzingNook_anchor.jpeg`.
++- DP reference plan for Ep3: Keen body anchor + wristband-VACANT for scenes 3–8, + wristband-CRYSTAL for 9–10; scene anchor by location. All eyeball-verified, no swap.
++
++---
++
++## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
++
++**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
++
++| Name | Spell in speech as | Note |
++|------|--------------------|------|
++| Aida | **Ada** | confirmed — model won't say "Aida" |
++| Amie | **Ah-mee** | confirmed — never "Amy" |
++| Fuzzby | **Fuzz-bee** | confirmed — Zenny was mispronouncing it |
++| Howey | How-ee | confirm |
++| Luna | Loo-na | confirm |
++| Zenny | Zen-ee | confirm |
++| Misty / Sunny / Keen / Squeaky | (as written) | likely fine — confirm |
++
++Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
++
++## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
++
++Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
++
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
++## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
++
++They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/skills/crystal-bears-composer/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-composer/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index a125cb7..ba130e5 100644
+--- a/skills/crystal-bears-composer/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-composer/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -69,7 +99,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
+ 
+ **Principal cast (LOCKED — the core 9):**
+ - 7 bears: Aida, Sunny, Luna, Misty, Amie, Howey, Keen
+-- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!") + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping")
++- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
+ 
+ **Recurring guests (canon, separate tier — decided 2026-06-19):**
+ - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+@@ -214,3 +244,83 @@ The management tool must let Julian **upload scenery and add characters** into t
+ - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).
+ - **SFX + music libraries** — not yet present; needed for the post layer.
+ - **SEL→CASEL mapping** — confirm (see §9).
++
++---
++
++## EP3 — "The Adventure Begins" (FIRST EPISODE / Keen's origin) — production notes
++
++- **Lead:** Keen (Aquamarine / Courage). Engine: courage emerging through selfless action; this is Keen's **origin** — how he joins the Crystal Bears and earns his crystal.
++- **Writers:** Lloyd Beau Knight & Julian Jenkins (created); Douglas Booth (written). Format: ~11' pilot.
++- **CRITICAL CONTINUITY — Keen's wristbands:** they are his late father's, given to him by his **Mum in Scene 3 EMPTY (vacant — no gems)**. He wears the **vacant** wristbands through Scenes 3–8 (they faintly self-glow underwater in Scene 7 — courage from within, not the crystal). In **Scene 9** Aida awards the **Aquamarine crystal**, which splits into two gems that settle into the wristbands → from that beat on (Scenes 9–10) the wristbands are **crystal-set (azure)**. The DP must use the **vacant-wristband Keen reference** for 3–8 and the **crystal-set reference** for 9–10. Encoded per shot as `keenWristbands: "vacant" | "crystal" | "none"`.
++- **New references supplied (need saving as files for Gate 2):** Keen character turnaround; Keen wristband prop turnaround (vacant) + (crystal-set); scene anchors for **Crystal Cove (beach/cove)**, **Whispering Woods**, **Buzzing Nook** — these fill the shared-scene anchor gap (canon §10 Scenery). Wristband palette: gold band F1B43F, vacant recess 1A1A1A, kite-shaped bezel.
++- **Five-Pillars arc:** Spark (S1–3: world, the call, the goodbye+wristbands) → Deepening (S4–5: storm, lost) → Heart (S7: dives without hesitation to save Squeaky; wristbands first glow) → Connection (S6, S8–9: beacon, rescue, welcome, crystal earned) → Ripple (S10: belonging, honey-friendship button).
++
++### EP3 wristband references — BOTH states supplied
++- **Vacant** (gold band `F1B43F`, empty kite-shaped bezel, void `1A1A1A`) → Keen scenes 3–8.
++- **Crystal-set** (gold band `F1B43F`, faceted Aquamarine kite gem ~`#47DFFF`) → Keen scenes 9–10.
++Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 (gems set in). Image FILES to be saved to `cb-seed/assets/ep3/` for Gate-2 ingest.
++
++### EP3 references INGESTED (2026-06-19) → `cb-seed/assets/ep3/`
++- `CB_Keen_turnaround.jpeg` (Keen body, bare wrists), `CB_Keen_wristband_vacant.jpeg` (verified: empty bezel), `CB_Keen_wristband_crystal.jpeg` (verified: aqua gem set).
++- Scene anchors (fill the §10 scenery gap): `CB_Scene_CrystalCove_anchor.jpeg`, `CB_Scene_WhisperingWoods_anchor.jpeg`, `CB_Scene_BuzzingNook_anchor.jpeg`.
++- DP reference plan for Ep3: Keen body anchor + wristband-VACANT for scenes 3–8, + wristband-CRYSTAL for 9–10; scene anchor by location. All eyeball-verified, no swap.
++
++---
++
++## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
++
++**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
++
++| Name | Spell in speech as | Note |
++|------|--------------------|------|
++| Aida | **Ada** | confirmed — model won't say "Aida" |
++| Amie | **Ah-mee** | confirmed — never "Amy" |
++| Fuzzby | **Fuzz-bee** | confirmed — Zenny was mispronouncing it |
++| Howey | How-ee | confirm |
++| Luna | Loo-na | confirm |
++| Zenny | Zen-ee | confirm |
++| Misty / Sunny / Keen / Squeaky | (as written) | likely fine — confirm |
++
++Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
++
++## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
++
++Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
++
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
++## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
++
++They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/skills/crystal-bears-continuity/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-continuity/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index a125cb7..ba130e5 100644
+--- a/skills/crystal-bears-continuity/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-continuity/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -69,7 +99,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
+ 
+ **Principal cast (LOCKED — the core 9):**
+ - 7 bears: Aida, Sunny, Luna, Misty, Amie, Howey, Keen
+-- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!") + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping")
++- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
+ 
+ **Recurring guests (canon, separate tier — decided 2026-06-19):**
+ - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+@@ -214,3 +244,83 @@ The management tool must let Julian **upload scenery and add characters** into t
+ - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).
+ - **SFX + music libraries** — not yet present; needed for the post layer.
+ - **SEL→CASEL mapping** — confirm (see §9).
++
++---
++
++## EP3 — "The Adventure Begins" (FIRST EPISODE / Keen's origin) — production notes
++
++- **Lead:** Keen (Aquamarine / Courage). Engine: courage emerging through selfless action; this is Keen's **origin** — how he joins the Crystal Bears and earns his crystal.
++- **Writers:** Lloyd Beau Knight & Julian Jenkins (created); Douglas Booth (written). Format: ~11' pilot.
++- **CRITICAL CONTINUITY — Keen's wristbands:** they are his late father's, given to him by his **Mum in Scene 3 EMPTY (vacant — no gems)**. He wears the **vacant** wristbands through Scenes 3–8 (they faintly self-glow underwater in Scene 7 — courage from within, not the crystal). In **Scene 9** Aida awards the **Aquamarine crystal**, which splits into two gems that settle into the wristbands → from that beat on (Scenes 9–10) the wristbands are **crystal-set (azure)**. The DP must use the **vacant-wristband Keen reference** for 3–8 and the **crystal-set reference** for 9–10. Encoded per shot as `keenWristbands: "vacant" | "crystal" | "none"`.
++- **New references supplied (need saving as files for Gate 2):** Keen character turnaround; Keen wristband prop turnaround (vacant) + (crystal-set); scene anchors for **Crystal Cove (beach/cove)**, **Whispering Woods**, **Buzzing Nook** — these fill the shared-scene anchor gap (canon §10 Scenery). Wristband palette: gold band F1B43F, vacant recess 1A1A1A, kite-shaped bezel.
++- **Five-Pillars arc:** Spark (S1–3: world, the call, the goodbye+wristbands) → Deepening (S4–5: storm, lost) → Heart (S7: dives without hesitation to save Squeaky; wristbands first glow) → Connection (S6, S8–9: beacon, rescue, welcome, crystal earned) → Ripple (S10: belonging, honey-friendship button).
++
++### EP3 wristband references — BOTH states supplied
++- **Vacant** (gold band `F1B43F`, empty kite-shaped bezel, void `1A1A1A`) → Keen scenes 3–8.
++- **Crystal-set** (gold band `F1B43F`, faceted Aquamarine kite gem ~`#47DFFF`) → Keen scenes 9–10.
++Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 (gems set in). Image FILES to be saved to `cb-seed/assets/ep3/` for Gate-2 ingest.
++
++### EP3 references INGESTED (2026-06-19) → `cb-seed/assets/ep3/`
++- `CB_Keen_turnaround.jpeg` (Keen body, bare wrists), `CB_Keen_wristband_vacant.jpeg` (verified: empty bezel), `CB_Keen_wristband_crystal.jpeg` (verified: aqua gem set).
++- Scene anchors (fill the §10 scenery gap): `CB_Scene_CrystalCove_anchor.jpeg`, `CB_Scene_WhisperingWoods_anchor.jpeg`, `CB_Scene_BuzzingNook_anchor.jpeg`.
++- DP reference plan for Ep3: Keen body anchor + wristband-VACANT for scenes 3–8, + wristband-CRYSTAL for 9–10; scene anchor by location. All eyeball-verified, no swap.
++
++---
++
++## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
++
++**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
++
++| Name | Spell in speech as | Note |
++|------|--------------------|------|
++| Aida | **Ada** | confirmed — model won't say "Aida" |
++| Amie | **Ah-mee** | confirmed — never "Amy" |
++| Fuzzby | **Fuzz-bee** | confirmed — Zenny was mispronouncing it |
++| Howey | How-ee | confirm |
++| Luna | Loo-na | confirm |
++| Zenny | Zen-ee | confirm |
++| Misty / Sunny / Keen / Squeaky | (as written) | likely fine — confirm |
++
++Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
++
++## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
++
++Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
++
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
++## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
++
++They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/skills/crystal-bears-director/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-director/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index a125cb7..ba130e5 100644
+--- a/skills/crystal-bears-director/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-director/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -69,7 +99,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
+ 
+ **Principal cast (LOCKED — the core 9):**
+ - 7 bears: Aida, Sunny, Luna, Misty, Amie, Howey, Keen
+-- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!") + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping")
++- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
+ 
+ **Recurring guests (canon, separate tier — decided 2026-06-19):**
+ - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+@@ -214,3 +244,83 @@ The management tool must let Julian **upload scenery and add characters** into t
+ - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).
+ - **SFX + music libraries** — not yet present; needed for the post layer.
+ - **SEL→CASEL mapping** — confirm (see §9).
++
++---
++
++## EP3 — "The Adventure Begins" (FIRST EPISODE / Keen's origin) — production notes
++
++- **Lead:** Keen (Aquamarine / Courage). Engine: courage emerging through selfless action; this is Keen's **origin** — how he joins the Crystal Bears and earns his crystal.
++- **Writers:** Lloyd Beau Knight & Julian Jenkins (created); Douglas Booth (written). Format: ~11' pilot.
++- **CRITICAL CONTINUITY — Keen's wristbands:** they are his late father's, given to him by his **Mum in Scene 3 EMPTY (vacant — no gems)**. He wears the **vacant** wristbands through Scenes 3–8 (they faintly self-glow underwater in Scene 7 — courage from within, not the crystal). In **Scene 9** Aida awards the **Aquamarine crystal**, which splits into two gems that settle into the wristbands → from that beat on (Scenes 9–10) the wristbands are **crystal-set (azure)**. The DP must use the **vacant-wristband Keen reference** for 3–8 and the **crystal-set reference** for 9–10. Encoded per shot as `keenWristbands: "vacant" | "crystal" | "none"`.
++- **New references supplied (need saving as files for Gate 2):** Keen character turnaround; Keen wristband prop turnaround (vacant) + (crystal-set); scene anchors for **Crystal Cove (beach/cove)**, **Whispering Woods**, **Buzzing Nook** — these fill the shared-scene anchor gap (canon §10 Scenery). Wristband palette: gold band F1B43F, vacant recess 1A1A1A, kite-shaped bezel.
++- **Five-Pillars arc:** Spark (S1–3: world, the call, the goodbye+wristbands) → Deepening (S4–5: storm, lost) → Heart (S7: dives without hesitation to save Squeaky; wristbands first glow) → Connection (S6, S8–9: beacon, rescue, welcome, crystal earned) → Ripple (S10: belonging, honey-friendship button).
++
++### EP3 wristband references — BOTH states supplied
++- **Vacant** (gold band `F1B43F`, empty kite-shaped bezel, void `1A1A1A`) → Keen scenes 3–8.
++- **Crystal-set** (gold band `F1B43F`, faceted Aquamarine kite gem ~`#47DFFF`) → Keen scenes 9–10.
++Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 (gems set in). Image FILES to be saved to `cb-seed/assets/ep3/` for Gate-2 ingest.
++
++### EP3 references INGESTED (2026-06-19) → `cb-seed/assets/ep3/`
++- `CB_Keen_turnaround.jpeg` (Keen body, bare wrists), `CB_Keen_wristband_vacant.jpeg` (verified: empty bezel), `CB_Keen_wristband_crystal.jpeg` (verified: aqua gem set).
++- Scene anchors (fill the §10 scenery gap): `CB_Scene_CrystalCove_anchor.jpeg`, `CB_Scene_WhisperingWoods_anchor.jpeg`, `CB_Scene_BuzzingNook_anchor.jpeg`.
++- DP reference plan for Ep3: Keen body anchor + wristband-VACANT for scenes 3–8, + wristband-CRYSTAL for 9–10; scene anchor by location. All eyeball-verified, no swap.
++
++---
++
++## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
++
++**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
++
++| Name | Spell in speech as | Note |
++|------|--------------------|------|
++| Aida | **Ada** | confirmed — model won't say "Aida" |
++| Amie | **Ah-mee** | confirmed — never "Amy" |
++| Fuzzby | **Fuzz-bee** | confirmed — Zenny was mispronouncing it |
++| Howey | How-ee | confirm |
++| Luna | Loo-na | confirm |
++| Zenny | Zen-ee | confirm |
++| Misty / Sunny / Keen / Squeaky | (as written) | likely fine — confirm |
++
++Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
++
++## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
++
++Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
++
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
++## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
++
++They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/skills/crystal-bears-dp/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-dp/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index a125cb7..ba130e5 100644
+--- a/skills/crystal-bears-dp/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-dp/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -69,7 +99,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
+ 
+ **Principal cast (LOCKED — the core 9):**
+ - 7 bears: Aida, Sunny, Luna, Misty, Amie, Howey, Keen
+-- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!") + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping")
++- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
+ 
+ **Recurring guests (canon, separate tier — decided 2026-06-19):**
+ - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+@@ -214,3 +244,83 @@ The management tool must let Julian **upload scenery and add characters** into t
+ - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).
+ - **SFX + music libraries** — not yet present; needed for the post layer.
+ - **SEL→CASEL mapping** — confirm (see §9).
++
++---
++
++## EP3 — "The Adventure Begins" (FIRST EPISODE / Keen's origin) — production notes
++
++- **Lead:** Keen (Aquamarine / Courage). Engine: courage emerging through selfless action; this is Keen's **origin** — how he joins the Crystal Bears and earns his crystal.
++- **Writers:** Lloyd Beau Knight & Julian Jenkins (created); Douglas Booth (written). Format: ~11' pilot.
++- **CRITICAL CONTINUITY — Keen's wristbands:** they are his late father's, given to him by his **Mum in Scene 3 EMPTY (vacant — no gems)**. He wears the **vacant** wristbands through Scenes 3–8 (they faintly self-glow underwater in Scene 7 — courage from within, not the crystal). In **Scene 9** Aida awards the **Aquamarine crystal**, which splits into two gems that settle into the wristbands → from that beat on (Scenes 9–10) the wristbands are **crystal-set (azure)**. The DP must use the **vacant-wristband Keen reference** for 3–8 and the **crystal-set reference** for 9–10. Encoded per shot as `keenWristbands: "vacant" | "crystal" | "none"`.
++- **New references supplied (need saving as files for Gate 2):** Keen character turnaround; Keen wristband prop turnaround (vacant) + (crystal-set); scene anchors for **Crystal Cove (beach/cove)**, **Whispering Woods**, **Buzzing Nook** — these fill the shared-scene anchor gap (canon §10 Scenery). Wristband palette: gold band F1B43F, vacant recess 1A1A1A, kite-shaped bezel.
++- **Five-Pillars arc:** Spark (S1–3: world, the call, the goodbye+wristbands) → Deepening (S4–5: storm, lost) → Heart (S7: dives without hesitation to save Squeaky; wristbands first glow) → Connection (S6, S8–9: beacon, rescue, welcome, crystal earned) → Ripple (S10: belonging, honey-friendship button).
++
++### EP3 wristband references — BOTH states supplied
++- **Vacant** (gold band `F1B43F`, empty kite-shaped bezel, void `1A1A1A`) → Keen scenes 3–8.
++- **Crystal-set** (gold band `F1B43F`, faceted Aquamarine kite gem ~`#47DFFF`) → Keen scenes 9–10.
++Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 (gems set in). Image FILES to be saved to `cb-seed/assets/ep3/` for Gate-2 ingest.
++
++### EP3 references INGESTED (2026-06-19) → `cb-seed/assets/ep3/`
++- `CB_Keen_turnaround.jpeg` (Keen body, bare wrists), `CB_Keen_wristband_vacant.jpeg` (verified: empty bezel), `CB_Keen_wristband_crystal.jpeg` (verified: aqua gem set).
++- Scene anchors (fill the §10 scenery gap): `CB_Scene_CrystalCove_anchor.jpeg`, `CB_Scene_WhisperingWoods_anchor.jpeg`, `CB_Scene_BuzzingNook_anchor.jpeg`.
++- DP reference plan for Ep3: Keen body anchor + wristband-VACANT for scenes 3–8, + wristband-CRYSTAL for 9–10; scene anchor by location. All eyeball-verified, no swap.
++
++---
++
++## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
++
++**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
++
++| Name | Spell in speech as | Note |
++|------|--------------------|------|
++| Aida | **Ada** | confirmed — model won't say "Aida" |
++| Amie | **Ah-mee** | confirmed — never "Amy" |
++| Fuzzby | **Fuzz-bee** | confirmed — Zenny was mispronouncing it |
++| Howey | How-ee | confirm |
++| Luna | Loo-na | confirm |
++| Zenny | Zen-ee | confirm |
++| Misty / Sunny / Keen / Squeaky | (as written) | likely fine — confirm |
++
++Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
++
++## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
++
++Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
++
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
++## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
++
++They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/skills/crystal-bears-post/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-post/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index a125cb7..ba130e5 100644
+--- a/skills/crystal-bears-post/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-post/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -69,7 +99,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
+ 
+ **Principal cast (LOCKED — the core 9):**
+ - 7 bears: Aida, Sunny, Luna, Misty, Amie, Howey, Keen
+-- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!") + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping")
++- 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
+ 
+ **Recurring guests (canon, separate tier — decided 2026-06-19):**
+ - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+@@ -214,3 +244,83 @@ The management tool must let Julian **upload scenery and add characters** into t
+ - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).
+ - **SFX + music libraries** — not yet present; needed for the post layer.
+ - **SEL→CASEL mapping** — confirm (see §9).
++
++---
++
++## EP3 — "The Adventure Begins" (FIRST EPISODE / Keen's origin) — production notes
++
++- **Lead:** Keen (Aquamarine / Courage). Engine: courage emerging through selfless action; this is Keen's **origin** — how he joins the Crystal Bears and earns his crystal.
++- **Writers:** Lloyd Beau Knight & Julian Jenkins (created); Douglas Booth (written). Format: ~11' pilot.
++- **CRITICAL CONTINUITY — Keen's wristbands:** they are his late father's, given to him by his **Mum in Scene 3 EMPTY (vacant — no gems)**. He wears the **vacant** wristbands through Scenes 3–8 (they faintly self-glow underwater in Scene 7 — courage from within, not the crystal). In **Scene 9** Aida awards the **Aquamarine crystal**, which splits into two gems that settle into the wristbands → from that beat on (Scenes 9–10) the wristbands are **crystal-set (azure)**. The DP must use the **vacant-wristband Keen reference** for 3–8 and the **crystal-set reference** for 9–10. Encoded per shot as `keenWristbands: "vacant" | "crystal" | "none"`.
++- **New references supplied (need saving as files for Gate 2):** Keen character turnaround; Keen wristband prop turnaround (vacant) + (crystal-set); scene anchors for **Crystal Cove (beach/cove)**, **Whispering Woods**, **Buzzing Nook** — these fill the shared-scene anchor gap (canon §10 Scenery). Wristband palette: gold band F1B43F, vacant recess 1A1A1A, kite-shaped bezel.
++- **Five-Pillars arc:** Spark (S1–3: world, the call, the goodbye+wristbands) → Deepening (S4–5: storm, lost) → Heart (S7: dives without hesitation to save Squeaky; wristbands first glow) → Connection (S6, S8–9: beacon, rescue, welcome, crystal earned) → Ripple (S10: belonging, honey-friendship button).
++
++### EP3 wristband references — BOTH states supplied
++- **Vacant** (gold band `F1B43F`, empty kite-shaped bezel, void `1A1A1A`) → Keen scenes 3–8.
++- **Crystal-set** (gold band `F1B43F`, faceted Aquamarine kite gem ~`#47DFFF`) → Keen scenes 9–10.
++Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 (gems set in). Image FILES to be saved to `cb-seed/assets/ep3/` for Gate-2 ingest.
++
++### EP3 references INGESTED (2026-06-19) → `cb-seed/assets/ep3/`
++- `CB_Keen_turnaround.jpeg` (Keen body, bare wrists), `CB_Keen_wristband_vacant.jpeg` (verified: empty bezel), `CB_Keen_wristband_crystal.jpeg` (verified: aqua gem set).
++- Scene anchors (fill the §10 scenery gap): `CB_Scene_CrystalCove_anchor.jpeg`, `CB_Scene_WhisperingWoods_anchor.jpeg`, `CB_Scene_BuzzingNook_anchor.jpeg`.
++- DP reference plan for Ep3: Keen body anchor + wristband-VACANT for scenes 3–8, + wristband-CRYSTAL for 9–10; scene anchor by location. All eyeball-verified, no swap.
++
++---
++
++## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
++
++**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
++
++| Name | Spell in speech as | Note |
++|------|--------------------|------|
++| Aida | **Ada** | confirmed — model won't say "Aida" |
++| Amie | **Ah-mee** | confirmed — never "Amy" |
++| Fuzzby | **Fuzz-bee** | confirmed — Zenny was mispronouncing it |
++| Howey | How-ee | confirm |
++| Luna | Loo-na | confirm |
++| Zenny | Zen-ee | confirm |
++| Misty / Sunny / Keen / Squeaky | (as written) | likely fine — confirm |
++
++Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
++
++## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
++
++Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
++
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
++## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
++
++They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/skills/crystal-bears-voice-director/references/CRYSTAL_BEARS_LOCKED_CANON.md b/skills/crystal-bears-voice-director/references/CRYSTAL_BEARS_LOCKED_CANON.md
+index bc19605..ba130e5 100644
+--- a/skills/crystal-bears-voice-director/references/CRYSTAL_BEARS_LOCKED_CANON.md
++++ b/skills/crystal-bears-voice-director/references/CRYSTAL_BEARS_LOCKED_CANON.md
+@@ -1,9 +1,39 @@
++<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
++
+ # THE CRYSTAL BEARS — Locked Canon & Asset Register
+ 
+ **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+ 
+ ---
+ 
++## 0. NORTH STAR — the soul every gate is measured against
++
++**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
++
++_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
++
++The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
++
++**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
++
++And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
++
++**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
++
++**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
++
++### The eight craft laws beneath the North Star
++1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
++2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
++3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
++4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
++5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
++6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
++7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
++8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
++
++---
++
+ ## 1. Show Canon
+ 
+ - **Title:** The Crystal Bears
+@@ -257,6 +287,40 @@ Applies to the words inside the i2v dialogue line and any ElevenLabs line. The o
+ 
+ Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
+ 
++## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
++
++In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
++
++## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
++
++The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
++
++**Guest / additional-character rule** — anyone new is sized by class:
++- any **adult female** → the same size as **Aida**
++- any **adult male** → the same size as **Howey**
++- any **child female** → the same size as **Amie**
++- any **child male** → the same size as **Luna**
++
++(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
++
+ ## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
+ 
+ They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
++
++## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
++
++Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
++- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
++- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
++- Others per their own anchor.
++
++Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
++
++### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
++
++Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
++- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
++- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
++- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
++- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
++- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.
+diff --git a/tools/sync_canon.py b/tools/sync_canon.py
+new file mode 100644
+index 0000000..874476b
+--- /dev/null
++++ b/tools/sync_canon.py
+@@ -0,0 +1,38 @@
++#!/usr/bin/env python3
++"""ONE CANON (Restructure Phase 1 / T28). The single source of truth is the root
++CRYSTAL_BEARS_LOCKED_CANON.md. Every skills/*/references/ copy is GENERATED from it by this
++script, stamped, and hash-verified. Editing a copy is drift; this script shouts and fixes.
++
++    python3 tools/sync_canon.py            # regenerate all copies from the source
++    python3 tools/sync_canon.py --check    # verify only — exit 1 on any drift (CI / Continuity)
++"""
++import sys, os, glob, hashlib
++
++ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++SRC = os.path.join(ROOT, "CRYSTAL_BEARS_LOCKED_CANON.md")
++STAMP = ("<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is "
++         "/CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->\n\n")
++
++def body(path):
++    t = open(path, encoding="utf-8").read()
++    return t.split("-->\n\n", 1)[1] if t.startswith("<!-- AUTO-GENERATED") and "-->\n\n" in t else t
++
++def main():
++    check = "--check" in sys.argv
++    src = open(SRC, encoding="utf-8").read()
++    h = hashlib.sha256(src.encode()).hexdigest()[:12]
++    copies = sorted(glob.glob(os.path.join(ROOT, "skills", "*", "references", "CRYSTAL_BEARS_LOCKED_CANON.md")))
++    drift = []
++    for c in copies:
++        if hashlib.sha256(body(c).encode()).hexdigest()[:12] != h:
++            drift.append(c)
++            if not check:
++                open(c, "w", encoding="utf-8").write(STAMP + src)
++    if check:
++        if drift:
++            print("CANON DRIFT (BLOCK):"); [print("  " + d) for d in drift]; sys.exit(1)
++        print(f"canon in sync — {len(copies)} copies match source {h}"); return
++    print(f"canon source {h} -> {len(copies)} copies " + ("regenerated: " + str(len(drift)) if drift else "(all already in sync)"))
++
++if __name__ == "__main__":
++    main()

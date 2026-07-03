@@ -69,6 +69,11 @@ Into Seedance at Gate 3 go only three things: **the keyframe (`@图1`), the char
 - **Why them:** Giacchino scored *Up*, *Ratatouille*, *Inside Out*, *Coco* — the Pixar emotional composer. Rydstrom is a seven-time-Oscar sound legend (*Toy Story*, *Finding Nemo*).
 - **On board for:** the final polish — balance, master, warmth.
 - **Owns:** because the **voice is already in the render** and Seedance scores the music/SFX, Post = **curate, mix, master, stitch**. Their taste replaces any weak Seedance music, ducks the score under dialogue, and masters to broadcast loudness. **No voice swap.**
+- **AUDIO DOCTRINE (Julian, 2026-07-03):** two of Gate 5's moves are now declared law, not taste calls —
+  - **Perspective rides are a MIX law.** A character further from camera reads quieter, with a touch of air; closer reads full — riding the clean voice stem's volume/EQ to follow the picture's distance. Applied at mix time, on signed clips; nothing re-renders for it.
+  - **SFX SWEETENING is declared doctrine.** Seedance's own soundscape stays the bed; weak comedy hits get reinforced, additively, from a small library of the show's OWN signature one-shots (the FWIP, the THUP, the pollen poof, the pop) — building a consistent Crystal Bears sound identity the way Bluey always sounds like Bluey. Additive only — the voice is never touched (Law 5 intact).
+  - Every vocal sound, including a hum or a sing-song, is a V3 performance inside @Audio1 by the SAME Law 5 that governs spoken lines — see `cb_segprompt.py`'s audio law text. Seedance never generates a voice-like sound of any kind.
+  - A scripted DISTANCE ENVELOPE (baking far/near into @Audio1 itself from the beat's own shot geography, so future chase beats arrive pre-spatialised) is logged in `LAB_BACKLOG.md` for adoption between scenes — not built yet.
 - **Hands down:** the finished film.
 
 ### CROSS-CUTTING — CONTINUITY / SCRIPT SUPERVISOR · **the bible-keeper**

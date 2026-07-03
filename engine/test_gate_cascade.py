@@ -69,9 +69,10 @@ def test_cb_pipeline(tmp):
 
 
 def test_frame_chain_cascade(tmp):
-    """FRAME CHAIN doctrine (2026-07-02, Julian): a retake upstream (a new ENDING FRAME) must mark every downstream
+    """FRAME CHAIN doctrine (2026-07-02, Julian; frame source updated 2026-07-03 — THE HARVEST, "ending frames
+    are harvested, never composed"): a retake upstream (a new HARVESTED SETTLE FRAME) must mark every downstream
     beat's keyframe/clip dirty. Exercises the real cb_pipeline functions with a scratch package + scratch media/
-    ending-frame files (arbitrary bytes — _beat_end_frame_hash only hashes bytes, it never decodes the PNG)."""
+    settle-frame files (arbitrary bytes — _beat_end_frame_hash only hashes bytes, it never decodes the PNG)."""
     fails = []
     spec = importlib.util.spec_from_file_location("cb_pipeline_test2", os.path.join(HERE, "cb_pipeline.py"))
     P = importlib.util.module_from_spec(spec)
@@ -90,16 +91,16 @@ def test_frame_chain_cascade(tmp):
     media = os.path.join(tmp, "media"); os.makedirs(media, exist_ok=True)
     os.chdir(tmp)
     try:
-        # 9.B1's ending frame (what 9.B2 chained off) + 9.B2's ending frame (what 9.B3 chained off)
-        open("media/Ep9_9.B1_b1_end.png", "wb").write(b"end-frame-v1")
-        open("media/Ep9_9.B2_b2_end.png", "wb").write(b"end-frame-v1")
+        # 9.B1's harvested settle frame (what 9.B2 chained off) + 9.B2's (what 9.B3 chained off)
+        open("media/Ep9_9.B1_b1_settle.png", "wb").write(b"settle-frame-v1")
+        open("media/Ep9_9.B2_b2_settle.png", "wb").write(b"settle-frame-v1")
 
         P.approve("1", "9"); P.approve("2a", "9")
         for code in ("9.B1", "9.B2", "9.B3"):
             P._set_beat_lock("9", code, "keyframe", True)
             P._set_beat_lock("9", code, "clip", True)
-        P.record_chain_source("9", "9.B2")   # stamps against 9.B1's CURRENT ending-frame hash
-        P.record_chain_source("9", "9.B3")   # stamps against 9.B2's CURRENT ending-frame hash
+        P.record_chain_source("9", "9.B2")   # stamps against 9.B1's CURRENT settle-frame hash
+        P.record_chain_source("9", "9.B3")   # stamps against 9.B2's CURRENT settle-frame hash
 
         if P._relock_chain_if_dirty("9"):
             fails.append("frame chain: should NOT be dirty yet — nothing has changed")
@@ -108,8 +109,8 @@ def test_frame_chain_cascade(tmp):
             if not lk.get(code, {}).get("keyframe"):
                 fails.append(f"frame chain: {code} keyframe should still read locked before any retake")
 
-        # a retake on 9.B1 composes a NEW ending frame — everything chained through it is now stale
-        open("media/Ep9_9.B1_b1_end.png", "wb").write(b"end-frame-v2-AFTER-A-RETAKE")
+        # a retake on 9.B1 harvests a NEW settle frame — everything chained through it is now stale
+        open("media/Ep9_9.B1_b1_settle.png", "wb").write(b"settle-frame-v2-AFTER-A-RETAKE")
 
         if not P._relock_chain_if_dirty("9"):
             fails.append("frame chain: should detect 9.B1's changed ending frame and cascade-clear downstream")

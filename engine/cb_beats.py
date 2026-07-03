@@ -99,12 +99,16 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
     a = prep.get("authoring") or {}
     prompt, builder, raw = prep["prompt"], prep["builder"], False
     try:
-        import cb_segprompt
+        import cb_segprompt, cb_scene
         _scene = None
         if d.get("scenes"):
             _sn = str(beat.get("sceneNumber"))
             _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-        _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene)
+        # relay-aware (rule 21) — mirrors run()'s own check, so the preview matches what would actually fire
+        _scene_beats = [b for b in (d.get("beats") or d.get("shots") or [])
+                        if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+        _, _relay_status, _ = cb_scene.relay_source_for(_scene_beats, code, episode)
+        _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene, relay=(_relay_status == "relay"))
         if _def:
             prompt, builder, raw = _def, _builder_label, True
     except Exception:
@@ -157,10 +161,12 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
         status = "READY_TO_RENDER"
     return {"status": status, "blockers": blockers}
 
-def run(pkg_path, scene_num, episode="Ep1", codes=None):
+def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
     """GATE 3 (beat-native) — each beat is ALREADY a 10-12s unit (the Director designed it). Render each beat as
     ONE Seedance take from its OWN signed-off opening keyframe (Gate 2b) using the beat's i2vPrompt (the Director's
-    multi-cut take prompt — Seedance directs the internal cuts). Then stitch the scene. NOT eight per-shot clips."""
+    multi-cut take prompt — Seedance directs the internal cuts). Then stitch the scene. NOT eight per-shot clips.
+    fast=True is RENDER ECONOMY LAW (Julian, 2026-07-03) — fal's cheaper/quicker Seedance endpoint variant, for
+    exploratory seeds; leave False for a beat's real delivery fire."""
     d = json.load(open(pkg_path)); scene_num = str(scene_num)
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == scene_num]
     if not beats:
@@ -171,7 +177,19 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
         code = b.get("beatCode") or b.get("shotCode"); slug = b.get("slug", (code or "").replace(".", "_"))
         if codes and code not in codes:
             continue
-        start = f"media/{episode}_{code}_{slug}.png"          # the beat's OWN opening keyframe (Gate 2b)
+        # THE RELAY CHAIN (Julian, 2026-07-03, CLAUDE.md rule 21): a continuation beat whose predecessor already
+        # has a rendered clip opens directly off that clip's HARVESTED SETTLE FRAME for @图1 — no Gate-2b keyframe
+        # generation for THIS beat at all. Falls back to the beat's own Gate-2b keyframe (unchanged behaviour)
+        # when there's no predecessor (the scene's first beat) or the predecessor has no clip yet to harvest from.
+        import cb_scene
+        relay_frame, relay_status, relay_prev = cb_scene.relay_source_for(beats, code, episode)
+        if relay_status == "relay":
+            start = relay_frame
+            print(f"  {code}: RELAY CHAIN — opening off {relay_prev}'s harvested settle frame ({os.path.basename(start)}), no keyframe generation for this beat", flush=True)
+        else:
+            start = f"media/{episode}_{code}_{slug}.png"          # the beat's OWN opening keyframe (Gate 2b)
+            if relay_status == "no_predecessor_clip":
+                print(f"  {code}: relay not ready ({relay_prev} has no rendered clip yet) — falling back to this beat's own keyframe", flush=True)
         if not os.path.exists(start):
             print(f"  {code}: opening keyframe missing ({os.path.basename(start)}) — fire Gate 2b first; skipping", flush=True); continue
         # THE PERMANENT RENDER GATE — was computed by render_readiness() but never actually CALLED anywhere, so a
@@ -221,7 +239,7 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
             if d.get("scenes"):
                 _sn = str(b.get("sceneNumber"))
                 _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-            _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene)   # THE single routing point — identical to the studio preview path
+            _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"))   # THE single routing point — identical to the studio preview path
             if _def:
                 prompt = _def; raw = True; builder_label = _builder_label
         except Exception as _se:
@@ -240,6 +258,13 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
         # would silently upload the wrong species/character at that reference slot).
         _chars = b.get("openingCast") or b.get("characters") or []
         imgs = [start] + [a for c in _chars if (a := _anchor(c))]
+        if relay_status == "relay":
+            # THE RELAY CHAIN's 4th reference (CLAUDE.md rule 21): the scene's plate anchors the world's canonical
+            # look/palette/light WITHOUT forcing the frame (the harvested settle already IS the frame) — @图1 is
+            # the harvested settle, @图2/@图3... the character turnarounds, the plate always comes last.
+            _plate = f"media/{episode}_S{scene_num}_plate.png"
+            if os.path.exists(_plate):
+                imgs.append(_plate)
         # T2 ruling (2026-07-02, Julian): a temporary state resolves WITHIN the take it started in — it never carries
         # across a take boundary. The continuity-tail chaining (appending the previous clip's last frame as a
         # reference + a "flow continuously from it" instruction) is retired; each take starts clean from its own keyframe.
@@ -248,16 +273,32 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
         print(f"  beat {code}: {dur}s ref2vid | audio {audio_dur:.1f}s -> hold {max(0.0, dur - audio_dur):.1f}s | imgs={len(imgs)} | "
               f"V3 {'@Audio1 lip-sync' if aud else 'none'}; Seedance scores SFX+music\n         {said}", flush=True)
         try:
-            cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, duration=dur, out=out, raw_prompt=raw)
+            cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, duration=dur, out=out, raw_prompt=raw, fast=fast)
             clips.append(f"media/{out}")
-            try:    # FRAME CHAIN doctrine — compose the beat's ENDING FRAME (its clip's literal last frame) as a
-                    # first-class deliverable; the NEXT beat's keyframe chains off THIS, not this beat's own opening
-                    # frame. Fail-open: an extraction hiccup must never break the render loop or the stitch.
+            try:    # THE HARVEST doctrine (Julian, 2026-07-03 — "ending frames are harvested, never composed"):
+                    # sample the clip's settle window and keep the SHARPEST frame, not a blind EOF grab. This is
+                    # what the NEXT beat's relay opens from (rule 21). Fail-open: an extraction hiccup must never
+                    # break the render loop or the stitch.
                     import cb_scene
-                    endf = cb_scene.build_ending_frame(episode, code, slug)
-                    print(f"  [ENDING FRAME] {code}: {'composed -> ' + endf if endf else 'skipped (extraction failed)'}", flush=True)
+                    settlef = cb_scene.harvest_settle_frame(episode, code, slug)
+                    print(f"  [HARVEST] {code}: {'settle frame -> ' + settlef if settlef else 'skipped (extraction failed)'}", flush=True)
             except Exception as ee:
-                print(f"  beat {code}: ending-frame composition skipped ({str(ee)[:120]})", flush=True)
+                print(f"  beat {code}: settle-frame harvest skipped ({str(ee)[:120]})", flush=True)
+            try:    # THE JOIN CHECK (item EIGHT, Julian, 2026-07-03) — automatic, advisory: compare this clip's
+                    # ACTUAL first rendered frame against the settle it was told to open from, before this ever
+                    # reaches Julian's review. Only meaningful for a relay beat (one that had a carried settle to
+                    # check against); a first-of-scene beat has nothing to compare against.
+                    if relay_status == "relay" and relay_frame:
+                        import cb_qa, subprocess, tempfile
+                        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as _tf:
+                            _first = _tf.name
+                        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"media/{out}",
+                                        "-vframes", "1", _first], capture_output=True)
+                        jv = cb_qa.check_join(relay_frame, _first)
+                        print(f"  [JOIN CHECK] {code}: {'CONTINUOUS' if jv['ok'] else 'BROKEN'} — {jv['verdict'][:200]}", flush=True)
+                        os.remove(_first)
+            except Exception as je:
+                print(f"  beat {code}: join check skipped ({str(je)[:120]})", flush=True)
             try:    # Gate-3 CLIP QA — automatic, advisory; NEVER let a QA hiccup kill the render loop or the stitch
                 import cb_qa
                 v = cb_qa.check_clip(b, clip=f"media/{out}", keyframe=start, anchors=imgs[1:],
@@ -303,6 +344,59 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None):
         print(f"  Gate-3 review/sheet skipped ({str(_e)[:120]})", flush=True)
     print("=== BEAT DRIVER DONE ===", flush=True)
     return clips
+
+def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path, seeds=2):
+    """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes Julian's WINNER for the
+    beat just decided (winner_code + the exact seed file he picked), designates it as that beat's official signed
+    clip, harvests its settle frame, then fires the NEXT beat in the scene — exactly `seeds` takes (2, per the
+    ruling), RENDER ECONOMY LAW (the fast Seedance endpoint) — and STOPS. No parallel beats, no auto-advance:
+    production within a scene is strictly serial through Julian's sign-offs — call this again only once he has
+    picked a winner for the beat this call just fired."""
+    import shutil, cb_scene
+    d = json.load(open(pkg_path))
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
+    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    idx = next((i for i, b in enumerate(beats) if (b.get("beatCode") or b.get("shotCode")) == winner_code), None)
+    if idx is None:
+        print(f"fire_next_beat: {winner_code} not found in scene {scene_num}", flush=True); return None
+    if idx + 1 >= len(beats):
+        print(f"fire_next_beat: {winner_code} is the scene's last beat — nothing to fire next", flush=True); return None
+
+    # 1. DESIGNATE THE WINNER — copy Julian's picked seed to the beat's OFFICIAL clip path (what every downstream
+    #    consumer — the relay, the stitch, the QA — treats as "this beat's signed clip").
+    wb = beats[idx]
+    w_slug = wb.get("slug", (winner_code or "").replace(".", "_"))
+    official = f"media/{episode}_{winner_code}_{w_slug}.mp4"
+    if not os.path.exists(winner_seed_path):
+        print(f"fire_next_beat: winner seed {winner_seed_path} not found", flush=True); return None
+    shutil.copyfile(winner_seed_path, official)
+    print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
+
+    # 2. HARVEST — the sharpest frame in the winner's settle window; what the next beat opens from.
+    settlef = cb_scene.harvest_settle_frame(episode, winner_code, w_slug)
+    print(f"fire_next_beat: harvested -> {settlef or '(FAILED — check the clip)'}", flush=True)
+    if not settlef:
+        print("fire_next_beat: cannot proceed without a harvested settle frame; stopping.", flush=True); return None
+
+    # 3. FIRE THE NEXT BEAT ONLY — exactly `seeds` takes, render economy law, then STOP (no further advance).
+    next_b = beats[idx + 1]
+    next_code = next_b.get("beatCode") or next_b.get("shotCode")
+    next_slug = next_b.get("slug", (next_code or "").replace(".", "_"))
+    official_next = f"media/{episode}_{next_code}_{next_slug}.mp4"
+    results = []
+    for i in range(1, seeds + 1):
+        print(f"fire_next_beat: {next_code} — seed {i}/{seeds} (fast endpoint, render economy law)", flush=True)
+        run(pkg_path, scene_num, episode, codes=[next_code], fast=True)
+        seed_out = f"media/{episode}_{next_code}_seed{i}.mp4"
+        if os.path.exists(official_next):
+            shutil.copyfile(official_next, seed_out)
+            results.append(seed_out)
+            print(f"  -> {seed_out}", flush=True)
+        else:
+            print(f"  {next_code} seed {i}: no clip produced — check the render log above", flush=True)
+    print(f"=== fire_next_beat STOPPED after {next_code} ({len(results)}/{seeds} seeds) — no auto-advance. "
+          f"Pick a winner, then call fire_next_beat again. Sign nothing. ===", flush=True)
+    return results
 
 def stitch(clips, out):
     lst = cb_gen.MEDIA / "_beats_concat.txt"

@@ -328,11 +328,24 @@ def for_beat_v2(beat, scene=None):
 _WING_LAW_ONE_LINE = ("Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless "
                       "in flight.")
 
+# ══════════ THE HANDLE DOCTRINE (Julian, 2026-07-03) ══════════
+# "Every shot shoots long so the cutter has meat to trim into." All beats now render at 15s — superseding the old
+# per-beat durationSec-driven 8-15s range. 13s is the story-action budget (split across the beat's own shots by
+# weight, exactly as before); the final 2s are a DIRECTED LIVING SETTLE appended to the closing shot, never dead
+# air (the dead-time-causes-hallucinations rule) — the relay's harvest window (the sharpest frame anywhere in
+# those 2s, not a prayer that the literal last frame is clean) AND Gate 4's trim handle (the editor cuts into the
+# settle per join — CLAUDE.md rule 19).
+HANDLE_TOTAL = 15
+HANDLE_SETTLE = 2
+HANDLE_ACTION = HANDLE_TOTAL - HANDLE_SETTLE
+
 def _v3_shots(beat, cast):
     """THE mechanical assembler — see the module note above. Returns (shots, dur) where each shot is
-    {n, seconds, camera, action, speaker (short role label or None)}; seconds always sum to dur."""
+    {n, seconds, camera, action, speaker (short role label or None)}; seconds always sum to dur (15, Handle
+    Doctrine) — action shots split HANDLE_ACTION (13s) by weight, then the closing shot gets +HANDLE_SETTLE (2s)
+    added on top for its directed living settle (see _v3_settle)."""
     import cb_voice as V
-    dur = int(beat.get("durationSec") or 12); dur = max(8, min(15, dur))
+    dur = HANDLE_TOTAL
     cuts = beat.get("cuts") or []
     used = set()
     raw = []
@@ -354,24 +367,49 @@ def _v3_shots(beat, cast):
     total_w = sum(s["weight"] for s in raw) or 1
     shots, running = [], 0
     for i, s in enumerate(raw):
-        sec = max(1, dur - running) if i == len(raw) - 1 else max(1, round(dur * s["weight"] / total_w))
+        sec = max(1, HANDLE_ACTION - running) if i == len(raw) - 1 else max(1, round(HANDLE_ACTION * s["weight"] / total_w))
         running += sec
         shots.append({"n": i + 1, "seconds": sec, "camera": s["camera"], "action": s["action"], "speaker": s["speaker"]})
+    shots[-1]["seconds"] += HANDLE_SETTLE   # the closing shot's extra 2s IS the directed living settle
     return shots, dur
 
+def _v3_settle(beat):
+    """THE HANDLE DOCTRINE's directed living settle text — built from the Director's own endState field when
+    authored; a universal idle-life guarantee is ALWAYS appended (wings, breeze, pollen, held expressions, camera
+    locked) so the closing shot never reads as dead air even before endState is written for every beat.
+    Mechanical: renders what's authored, never invents a specific pose."""
+    es = str(beat.get("endState") or "").strip()
+    idle = ("wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — "
+            "nothing freezes, nothing new happens")
+    if es:
+        return f" SETTLE: {es.rstrip('.')}. Idle life continues through the hold — {idle}."
+    return f" SETTLE: hold the frame at rest, camera locked. Idle life continues through the hold — {idle}."
+
 def _v3_subjects(cast):
+    """REFERENCE STACK doctrine (Julian, 2026-07-03): every reference declares its JOB, not just its identity —
+    the turnarounds are the identity reference EVERY beat, the anti-drift anchor pulling each chain link back to
+    canon, stated explicitly here rather than left implicit."""
     ref_bits, any_bee = [], False
     for i, name in enumerate(cast):
         role, is_bee = _char_meta(name); any_bee = any_bee or is_bee
         side = _SIDES[min(i, 2)] if len(cast) > 1 else None
         ref_bits.append(f"@图{i + 2} is {role}" + (f" ({side})" if side else ""))
-    line = ("; ".join(ref_bits) + ".") if ref_bits else ""
+    line = ("; ".join(ref_bits) + " — the identity reference every beat, the anti-drift anchor pulling this "
+            "chain link back to canon.") if ref_bits else ""
     if any_bee:
         line = (line + " " + _WING_LAW_ONE_LINE).strip()
     return line
 
-def _v3_environment(beat, scene, cast):
-    bits = ["@图1 is TRUTH — copy the environment and lighting from it exactly."]
+def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
+    """RELAY CHAIN aware (Julian, 2026-07-03, CLAUDE.md rule 21): a relay beat's @图1 is the HARVESTED SETTLE
+    FRAME, not a fresh keyframe — it IS the scene continuing, not a reference to copy FROM, so the wording changes
+    accordingly; the scene's canonical world look/palette/light then comes from a separate plate reference
+    (@图{plate_n}, always last) instead, stated so it never competes with or forces the harvested frame."""
+    if relay:
+        bits = ["@图1 is the harvested settle frame from the previous beat's signed clip — the scene continues "
+                "from exactly this moment, use it as the first frame."]
+    else:
+        bits = ["@图1 is TRUTH — copy the environment and lighting from it exactly."]
     loc = ""
     if scene:
         for k in ("definingFeature", "location"):
@@ -385,17 +423,22 @@ def _v3_environment(beat, scene, cast):
     if atmo:
         first = re.split(r"(?<=[.!?])\s+", atmo)[0]          # ONE breeze/atmosphere force, not the whole paragraph
         bits.append(_strip_spoken_words(_delabel(first, cast, used=set(cast))))
+    if relay and plate_n:
+        bits.append(f"@图{plate_n} is the scene's plate: reference for the world's canonical look, palette and "
+                    "light only — it never forces the frame, the harvested settle already IS the frame.")
     return " ".join(bits)
 
 def _v3_style():
     return "Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field."
 
 def _v3_negatives(any_bee):
+    """Returns the 6 negative-constraint PHRASES as a list (each phrase may itself contain an internal comma —
+    callers that want a single line join them with ", "; the JSON emitter ships the list as-is, never re-split)."""
     core = ["no morphing, redesign or rescale of the characters", "no extra characters or props",
             "no on-screen text, subtitles, logos or watermarks", "no foreign-language speech"]
     core += (["no crystals on or attached to the bees", "no still or frozen wings while airborne"] if any_bee
              else ["no flicker or compression artifacts", "no continuity break in lighting or palette"])
-    return ", ".join(core[:6])
+    return core[:6]
 
 def _v3_shot_sounds(beat, n):
     """ONE minimal sound cue per shot — mechanically sliced from the beat's OWN soundIntent (already-authored
@@ -420,60 +463,182 @@ def _v3_speaker_map(shots, cast):
             tail = f" Only {distinct[0]} speaks in this beat; {', '.join(silent)} stays visibly silent throughout."
     return f"SPEAKER MAP: {smap}.{tail}"
 
-def emit_prose_v3(beat, scene, shots, dur, cast):
+def emit_prose_v3(beat, scene, shots, dur, cast, relay=False):
     """Worked example A — PROSE, multi-shot native. Verbatim law: SUBJECTS -> ENVIRONMENT -> STYLE -> SHOT n... ->
-    AUDIO -> NEGATIVES. No rules blocks, no per-shot SFX lists, no physics/emotional-arc sections."""
+    AUDIO -> NEGATIVES. No rules blocks, no per-shot SFX lists, no physics/emotional-arc sections. The closing
+    SHOT carries the Handle Doctrine's directed living-settle block (Julian, 2026-07-03) — see _v3_settle.
+    relay=True (RELAY CHAIN, rule 21): @图1 is the harvested settle frame, not a fresh keyframe, and a 4th
+    reference (the scene plate, @图{len(cast)+2}) anchors the world's canonical look without forcing the frame."""
     any_bee = any(_char_meta(n)[1] for n in cast)
+    plate_n = len(cast) + 2 if relay else None
     out = f"{dur} seconds, 16:9.\n\n"
     out += f"SUBJECTS: {_v3_subjects(cast)}\n\n"
-    out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast)}\n\n"
+    out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast, relay=relay, plate_n=plate_n)}\n\n"
     out += f"STYLE: {_v3_style()}\n\n"
-    for s in shots:
-        out += f"SHOT {s['n']} ({s['seconds']}s): {s['camera']}. {s['action']} {_v3_shot_sounds(beat, s['n'])}.\n\n"
+    last_i = len(shots) - 1
+    for i, s in enumerate(shots):
+        camera = s["camera"] + _v3_camera_end(beat, cast, i)
+        settle = _v3_settle(beat) if i == last_i else ""
+        out += f"SHOT {s['n']} ({s['seconds']}s): {camera}. {s['action']} {_v3_shot_sounds(beat, s['n'])}.{settle}\n\n"
     has_dlg = any(s["speaker"] for s in shots)
     if has_dlg:
         law = ("use ONLY @Audio1 for ALL dialogue — each speaking character mouths its own lines in @Audio1, in "
-               "order; no other, different or duplicate voice.")
+               "order; no other, different or duplicate voice. ALL vocal sounds — hums, sing-songs, exclamations, "
+               "not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like "
+               "sound of any kind (Audio Doctrine, Julian, 2026-07-03).")
         out += f"AUDIO: {law} {_v3_speaker_map(shots, cast)}\n\n"
     else:
         out += ("AUDIO: this beat has no dialogue — generate no speech or voices; Seedance scores ambience and a "
                 "light underscore.\n\n")
-    out += f"NEGATIVES: {_v3_negatives(any_bee)}"
+    out += f"NEGATIVES: {', '.join(_v3_negatives(any_bee))}"
     return out
 
-def emit_json_v3(beat, scene, shots, dur, cast):
+# ══════════ GOLD STANDARD additions to the JSON emitter (Julian, 2026-07-03) ══════════
+# Filed as the worked example for the JSON emitter's goldens AND as T8's Director writing standard (see
+# cb_director.py). Every addition below stays MECHANICAL — sourced from existing law/gag-lock/cast data, never
+# invented text — matching the v3 spec's zero-LLM promise.
+_GAG_LOCKS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "gag_locks.json")
+def _v3_gag_locks():
+    try:
+        return {k: v for k, v in json.load(open(_GAG_LOCKS_PATH)).items() if not k.startswith("_")}
+    except Exception:
+        return {}
+
+def _gag_lock_for(beat):
+    lock_id = beat.get("script_gag_lock_id")
+    return _v3_gag_locks().get(lock_id) if lock_id else None
+
+def _v3_rule(beat, cast, any_bee):
+    """THE WRITTEN INVARIANT field — something that must hold true for the WHOLE beat, not just one shot. The
+    wing law for any beat with an airborne bee; a hold/deadpan invariant (e.g. "her expression does not change
+    once") sourced from a gag-lock's own timing_lock when this beat references one, falling back to the beat's
+    own pauseHold field (every beat has one authored, gag-lock or not) so the invariant isn't gag-lock-only.
+    Mechanical only — never invented; empty when none apply."""
+    bits = []
+    if any_bee:
+        bits.append("Any airborne bee beats its wings rapidly and continuously; wings rest only when landed.")
+    tl = str((_gag_lock_for(beat) or {}).get("timing_lock") or "").strip()
+    if not tl:
+        tl = str(beat.get("pauseHold") or "").strip()
+    if tl:
+        bits.append(_strip_spoken_words(_delabel(tl, cast, used=set())))
+    return " ".join(bits)
+
+def _v3_expression(beat, cast, speaker_role):
+    """A per-line EXPRESSION BINDING — only when a gag-lock's own acting_note names this speaker's clause
+    (semicolon-separated, one clause per character); never invented for a beat without one. The speaker's own
+    NAME is stripped out entirely (not delabeled) — dialogue.speaker already carries identity, an expression is
+    pure feeling/face, and rule 5 (identity text never ships) means this field should never repeat it either way."""
+    note = str((_gag_lock_for(beat) or {}).get("acting_note") or "").strip()
+    if not note:
+        return None
+    name = next((c for c in cast if _short_role(_char_meta(c)[0]) == speaker_role), None)
+    if not name:
+        return None
+    for clause in note.split(";"):
+        if name.lower() in clause.lower():
+            clean = re.sub(rf"\bfrom {name}\b", "", clause, flags=re.I)
+            clean = re.sub(rf"\b{name}'s\b", "", clean, flags=re.I)
+            clean = re.sub(rf"\b{name}\b", "", clean, flags=re.I)
+            clean = re.sub(r"\s{2,}", " ", clean).strip(" .,")
+            if clean:
+                return clean[0].upper() + clean[1:]
+    return None
+
+def _v3_camera_end(beat, cast, shot_i):
+    """CAMERA END STATE — EVERY shot states explicitly what it ends framing (Julian's reference-stack doctrine,
+    2026-07-03: "camera end states on every shot"), so the harvested settle frame and this text always agree on
+    what's actually in frame at each cut. Mechanical: whoever THIS shot's own raw cut text actually names (not
+    blindly the whole beat's cast — a tight single-character close shouldn't be overclaimed as a two-shot).
+    shots and cuts are 1:1 (_v3_shots builds one shot per cut, same order) — shot_i indexes straight into cuts."""
+    if not cast:
+        return ""
+    cuts = beat.get("cuts") or []
+    if not cuts:
+        return ""
+    shot_i = min(shot_i, len(cuts) - 1)   # defensive floor only; shots/cuts are always 1:1 in practice
+    raw = str(cuts[shot_i].get("action") or "") + " " + str(cuts[shot_i].get("framing") or "")
+    present = [c for c in cast if re.search(rf"\b{re.escape(c)}\b", raw, re.I)]
+    who_list = present or cast
+    who = " and ".join(_short_role(_char_meta(c)[0]) for c in who_list)
+    return f", ending on {who} in frame"
+
+def _v3_constraints(cast):
+    """THE CONSTRAINTS LINE — one positive-framed identity/consistency directive, reference-first (rule 5: no
+    character description in the text — "per their reference images", never the marks themselves)."""
+    if not cast:
+        return ""
+    who = "both characters'" if len(cast) == 2 else ("each character's" if len(cast) > 2 else "the character's")
+    return (f"Maintain {who} design, proportions and markings exactly per their reference images throughout — "
+            "no distortion, redesign or rescale.")
+
+def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
     """Worked example B — LIGHT JSON, for any beat with 2+ distinct speakers. duration/aspect/style/references/
-    voices, then shots[] — each shot: seconds, camera, action, and (if it speaks) a dialogue object binding ONE
-    speaker to THAT shot. line is ALWAYS the fixed @Audio1 reference, never the actual words."""
-    refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
+    world/rule/shots/constraints/negatives. line is ALWAYS the fixed @Audio1 reference, never the actual words.
+    GOLD STANDARD (Julian, 2026-07-03, filed as T8's Director writing standard too): a camera end-state on the
+    closing shot, a written invariant ("rule") for the whole beat, a per-line expression binding when a gag-lock
+    authors one, a directed living-settle block on the closing shot (Handle Doctrine, superseding the plain
+    ambience-resumes tail), and a constraints line — every addition
+    mechanical, from existing law/gag-lock/cast data, nothing invented.
+    relay=True (RELAY CHAIN, rule 21): @图1 is the harvested settle frame, not a fresh keyframe, and a 4th
+    reference (the scene plate) anchors the world's canonical look without forcing the frame."""
+    any_bee = any(_char_meta(n)[1] for n in cast)
+    if relay:
+        refs = {"@图1": "the harvested settle frame from the previous beat's signed clip — use as the first "
+                        "frame, the scene continues from exactly this moment"}
+    else:
+        refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
     for i, name in enumerate(cast):
         role, _ = _char_meta(name)
-        refs[f"@图{i + 2}"] = role
+        refs[f"@图{i + 2}"] = (f"{role} — identity reference every beat, the anti-drift anchor pulling this "
+                              "chain link back to canon")
+    plate_n = len(cast) + 2
+    if relay:
+        refs[f"@图{plate_n}"] = ("the scene's plate: reference for the world's canonical look, palette and light "
+                                "only — never forces the frame, the harvested settle already IS the frame")
     out_shots = []
-    for s in shots:
-        shot = {"seconds": s["seconds"], "camera": s["camera"], "action": s["action"]}
+    last_i = len(shots) - 1
+    for i, s in enumerate(shots):
+        camera = s["camera"] + _v3_camera_end(beat, cast, i)
+        action = s["action"] + (_v3_settle(beat) if i == last_i else "")
+        shot = {"seconds": s["seconds"], "camera": camera, "action": action}
         if s["speaker"]:
-            shot["dialogue"] = {"speaker": s["speaker"], "line": "the line in @Audio1 during this shot",
-                                 "note": "only this speaker's mouth moves in this shot"}
+            dlg = {"speaker": s["speaker"], "line": "the line in @Audio1 during this shot",
+                   "note": "only this speaker's mouth moves in this shot"}
+            expr = _v3_expression(beat, cast, s["speaker"])
+            if expr:
+                dlg["expression"] = expr
+            shot["dialogue"] = dlg
         out_shots.append(shot)
     doc = {
         "duration": dur, "aspect": "16:9", "style": _v3_style(), "references": refs,
-        "voices": "ElevenLabs @Audio1 law — one combined track, precise per-shot lip-sync, no native-voice fallback.",
-        "shots": out_shots,
+        "voices": ("@Audio1 is the ONLY source of all dialogue — animate lips to it exactly; never invent, "
+                   "duplicate or generate a different voice. ALL vocal sounds — hums, sing-songs, exclamations, "
+                   "not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a "
+                   "voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03)."),
+        "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None)),
     }
+    rule = _v3_rule(beat, cast, any_bee)
+    if rule:
+        doc["rule"] = rule
+    doc["shots"] = out_shots
+    doc["constraints"] = _v3_constraints(cast)
+    doc["negatives"] = _v3_negatives(any_bee)
     return json.dumps(doc, indent=2, ensure_ascii=False)
 
-def for_beat_v3(beat, scene=None):
+def for_beat_v3(beat, scene=None, relay=False):
     """THE top-level v3 entry point — builds the shot list once, routes to the emitter that matches the worked
-    examples (0-1 distinct speakers -> prose; 2+ -> light JSON), and returns (prompt_text, emitter_label)."""
+    examples (0-1 distinct speakers -> prose; 2+ -> light JSON), and returns (prompt_text, emitter_label).
+    relay=True (RELAY CHAIN, rule 21): this beat opens off its predecessor's harvested settle frame, not its own
+    Gate-2b keyframe — threaded into whichever emitter fires."""
     cast = beat.get("openingCast") or beat.get("characters") or []
     shots, dur = _v3_shots(beat, cast)
     if not shots:
         return "", "v3 (empty — no cuts)"
     distinct_speakers = len(set(s["speaker"] for s in shots if s["speaker"]))
     if distinct_speakers >= 2:
-        return emit_json_v3(beat, scene, shots, dur, cast), "v3-json"
-    return emit_prose_v3(beat, scene, shots, dur, cast), "v3-prose"
+        return emit_json_v3(beat, scene, shots, dur, cast, relay=relay), "v3-json"
+    return emit_prose_v3(beat, scene, shots, dur, cast, relay=relay), "v3-prose"
 
 # ══════════ THE SINGLE SHIPPING DECISION (spec freeze, 2026-07-02, Julian) ══════════
 # for_beat_v3 is now THE definitive builder. for_beat_v2 and for_beat (v1) are RETIRED — kept in this file for
@@ -481,11 +646,12 @@ def for_beat_v3(beat, scene=None):
 # loud, unmissable log line so a silent reversion to a retired builder can never pass unnoticed. EVERY caller that
 # needs "the prompt Seedance will actually receive" calls THIS function — never for_beat/for_beat_v2/for_beat_v3
 # directly — so preview and fire are provably the SAME call, through the SAME decision, every time.
-def shipped_prompt(beat, scene=None):
+def shipped_prompt(beat, scene=None, relay=False):
     """Returns (prompt, builder_label, is_v3). is_v3=False means a retired fallback fired — treat that as worth
-    investigating, not routine."""
+    investigating, not routine. relay=True (RELAY CHAIN, rule 21) — see for_beat_v3; ignored by the retired v1/v2
+    fallbacks (they predate the doctrine and are never expected to fire in practice)."""
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
-    v3, emitter = for_beat_v3(beat, scene)
+    v3, emitter = for_beat_v3(beat, scene, relay=relay)
     if v3:
         return v3, f"cb_segprompt_v3 ({emitter})", True
     print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v2 (for_beat_v2) — for_beat_v3 returned EMPTY\n"

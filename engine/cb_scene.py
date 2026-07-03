@@ -93,21 +93,18 @@ def beat_frame_path(b, episode="Ep1"):
     return f"media/{episode}_{code}_{slug}.png"
 
 def beat_end_frame_path(b, episode="Ep1"):
-    """FRAME CHAIN doctrine (spec freeze, 2026-07-02, Julian) — the ENDING FRAME path for a beat: the literal last
-    frame of its RENDERED clip, composed as a first-class deliverable (not a throwaway ffmpeg grab). This is what
-    the NEXT beat chains off, in place of the previous beat's own opening frame — the true state after the full
-    take rendered (identity, pose, and anything that escalated, like pollen) beats a separately re-imagined
-    approximation of it every time."""
+    """RETIRED (Julian, 2026-07-03 — "ending frames are harvested, never composed"). Kept for rollback/reference
+    only; no active caller. Superseded by beat_settle_frame_path + harvest_settle_frame below, which pick the
+    SHARPEST frame anywhere in the settle window instead of blindly grabbing the literal last decodable frame."""
     code = b.get("beatCode") or b.get("shotCode") or ""
     slug = b.get("slug", (code or "").replace(".", "_"))
     return f"media/{episode}_{code}_{slug}_end.png"
 
 def build_ending_frame(episode, code, slug):
-    """Compose a beat's ENDING FRAME from its rendered clip — the literal last decodable frame, via ffmpeg's
-    standard "-sseof" idiom (seek near EOF, keep overwriting with -update until the stream ends), so it works
-    regardless of the clip's exact frame count or variable frame rate. Returns the path, or None if the clip
-    doesn't exist yet — the chain then falls back to this beat's own OPENING frame, exactly as before this
-    doctrine (never a hard block: an unrendered beat simply hasn't produced its ending frame yet)."""
+    """RETIRED (Julian, 2026-07-03 — "ending frames are harvested, never composed"). Kept for rollback/reference
+    only; no active caller. This "composed" a frame by blindly seeking to EOF (-sseof -1), which could land on a
+    soft/motion-blurred frame; harvest_settle_frame below samples the whole settle window and scores each
+    candidate for sharpness instead."""
     import subprocess
     clip = f"media/{episode}_{code}_{slug}.mp4"
     if not os.path.exists(clip):
@@ -117,12 +114,105 @@ def build_ending_frame(episode, code, slug):
                         "-update", "1", "-q:v", "2", out], capture_output=True)
     return out if (not r.returncode and os.path.exists(out)) else None
 
+def beat_settle_frame_path(b, episode="Ep1"):
+    """THE HARVEST doctrine's path helper (Julian, 2026-07-03) — mirrors beat_end_frame_path's signature but
+    points at the HARVESTED settle frame (see harvest_settle_frame), the sole active "ending frame" concept now:
+    ending frames are harvested, never composed."""
+    code = b.get("beatCode") or b.get("shotCode") or ""
+    slug = b.get("slug", (code or "").replace(".", "_"))
+    return f"media/{episode}_{code}_{slug}_settle.png"
+
+SETTLE_WINDOW = 2.0   # matches cb_segprompt.HANDLE_SETTLE — kept as a plain local constant (no cross-module import,
+                      # same convention as this file's other standalone doctrine constants) so cb_scene never needs
+                      # to import the prompt-emitter module just to know the settle's length.
+
+def _clip_dur(clip):
+    import subprocess
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                        "-of", "default=nk=1:nw=1", clip], capture_output=True, text=True)
+    try:
+        return float(r.stdout.strip())
+    except Exception:
+        return 0.0
+
+def harvest_settle_frame(episode, code, slug, window=SETTLE_WINDOW, samples=12):
+    """THE RELAY CHAIN's harvest (Julian, 2026-07-03, CLAUDE.md rule 21): the SHARPEST frame anywhere in a beat's
+    final `window` seconds — its Handle Doctrine settle (rule 20) — not a prayer that the literal last frame is
+    clean. Scored by a Laplacian-variance sharpness metric over a plain numpy array (no cv2 dependency). Returns
+    the harvested frame's path, or None if the clip doesn't exist yet (a relay beat then blocks rather than
+    guessing — CLAUDE.md rule 21)."""
+    import subprocess, tempfile, glob
+    import numpy as np
+    from PIL import Image
+    clip = f"media/{episode}_{code}_{slug}.mp4"
+    if not os.path.exists(clip):
+        return None
+    dur = _clip_dur(clip)
+    if dur <= 0:
+        return None
+    start = max(0.0, dur - window)
+    out_path = f"media/{episode}_{code}_{slug}_settle.png"
+    with tempfile.TemporaryDirectory() as tmp:
+        pattern = os.path.join(tmp, "f_%03d.png")
+        fps = max(1.0, samples / max(window, 0.1))
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{start:.3f}", "-i", clip,
+                        "-t", f"{window:.3f}", "-vf", f"fps={fps:.3f}", pattern], capture_output=True)
+        frames = sorted(glob.glob(os.path.join(tmp, "f_*.png")))
+        if not frames:
+            return None
+        best_path, best_score = None, -1.0
+        for f in frames:
+            try:
+                arr = np.asarray(Image.open(f).convert("L"), dtype=np.float64)
+                lap = (-4 * arr + np.roll(arr, 1, axis=0) + np.roll(arr, -1, axis=0)
+                              + np.roll(arr, 1, axis=1) + np.roll(arr, -1, axis=1))
+                score = float(lap.var())
+            except Exception:
+                score = -1.0
+            if score > best_score:
+                best_score, best_path = score, f
+        if not best_path:
+            return None
+        Image.open(best_path).convert("RGB").save(out_path)
+    return out_path if os.path.exists(out_path) else None
+
+def relay_source_for(beats, code, episode="Ep1"):
+    """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21) — distinct from chain_source_for (which
+    feeds Gate 2b's KEYFRAME generation). Returns (harvested_frame_path_or_None, status, prev_code):
+      first          the scene's first beat (or a vision beat, or no previous beat) — no relay source; this beat
+                     keeps its own Gate-2b-generated keyframe, exactly as before this doctrine.
+      no_predecessor_clip   there IS a previous beat, but it has no rendered clip yet to harvest from — blocks
+                     the relay at this beat rather than guessing; falls back to this beat's own keyframe.
+      relay          the previous beat has a rendered clip; its harvested settle frame is returned for THIS
+                     beat's Seedance ref2vid @图1, skipping keyframe generation for this beat entirely."""
+    idx = next((i for i, b in enumerate(beats)
+                if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
+    if idx is None or idx == 0:
+        return None, "first", None
+    if P.vision_for(episode, str(code)):
+        return None, "first", None
+    j = idx - 1
+    while j >= 0 and P.vision_for(episode, str(beats[j].get("beatCode") or beats[j].get("shotCode"))):
+        j -= 1
+    if j < 0:
+        return None, "first", None
+    prev = beats[j]
+    prev_code = prev.get("beatCode") or prev.get("shotCode")
+    prev_slug = prev.get("slug", (prev_code or "").replace(".", "_"))
+    harvested = harvest_settle_frame(episode, prev_code, prev_slug)
+    if not harvested:
+        return None, "no_predecessor_clip", prev_code
+    return harvested, "relay", prev_code
+
 def chain_source_for(beats, code, episode="Ep1"):
-    """The Lock & Chain source for a beat. Returns (prev_frame_path_or_None, status, prev_code):
+    """The Lock & Chain source for a beat's KEYFRAME (Gate 2b) — the fallback path, used only when the Relay
+    Chain (rule 21, relay_source_for) isn't ready yet (this beat's predecessor has no signed clip to harvest
+    from), so this beat still needs its OWN keyframe generated. Returns (prev_frame_path_or_None, status, prev_code):
       first        the scene's first beat — builds from its plate master (anchor; no chain)
       vision       a vision beat — its own POV; never chains, never a chain source
-      continuation any later beat — chains off the previous NON-VISION beat's frame in the SAME scene. FRAME CHAIN
-                   doctrine: prefers that beat's ENDING FRAME (its rendered clip's literal last frame) when one
+      continuation any later beat — chains off the previous NON-VISION beat's frame in the SAME scene. THE HARVEST
+                   doctrine (2026-07-03, superseding the old FRAME CHAIN "composed ending frame"): prefers that
+                   beat's HARVESTED SETTLE FRAME (the sharpest frame in its rendered clip's settle window) when one
                    exists, falling back to its OPENING frame when it doesn't (not yet rendered through Gate 3) —
                    so this never regresses a beat that hasn't reached Gate 3 yet. The path is returned whether or
                    not that frame is rendered yet; the caller checks existence for the file + label."""
@@ -139,8 +229,8 @@ def chain_source_for(beats, code, episode="Ep1"):
         return None, "first", None
     prev = beats[j]
     prev_code = prev.get("beatCode") or prev.get("shotCode")
-    end_path = beat_end_frame_path(prev, episode)
-    chosen = end_path if os.path.exists(end_path) else beat_frame_path(prev, episode)
+    settle_path = beat_settle_frame_path(prev, episode)
+    chosen = settle_path if os.path.exists(settle_path) else beat_frame_path(prev, episode)
     return chosen, "continuation", prev_code
 
 def keyframe_for(all_beats, code, episode="Ep1", note=""):

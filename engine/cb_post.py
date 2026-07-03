@@ -97,6 +97,59 @@ def assemble_picture(clips, out):
     if r.returncode: print("assemble_picture ERROR:", r.stderr[-400:])
     return _dur(out)
 
+SETTLE_TRIM = 2.0   # matches cb_segprompt.HANDLE_SETTLE (mirrored locally, no cross-module import — same house
+                    # convention as elsewhere). JOIN ON LIVE MOTION (Julian, 2026-07-03, superseding the earlier
+                    # fixed-fraction trim below): the settle exists in the footage for the relay's harvest and for
+                    # these trim handles — it is trimmed OUT of the visible cut ENTIRELY, off every clip but the
+                    # scene's last (whose settle IS the scene's real landing and stays in full).
+EDGE_FRAMES = 4     # "3 to 5 frames" — trimmed off EVERY clip's own opening ease-in, and off the closing
+                    # deceleration of what remains after the settle is removed (every clip but the last) — cutting
+                    # where the motion is alive, not where it's still ramping up or ramping down.
+DEFAULT_FPS = 24.0  # fallback only if a clip's own fps can't be read; confirmed 24fps on real rendered clips.
+
+def _clip_fps(clip):
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                        "stream=r_frame_rate", "-of", "default=nk=1:nw=1", clip], capture_output=True, text=True)
+    try:
+        num, den = r.stdout.strip().split("/")
+        return float(num) / float(den)
+    except Exception:
+        return DEFAULT_FPS
+
+def assemble_conformed(clips, out, settle_trim=SETTLE_TRIM, edge_frames=EDGE_FRAMES):
+    """JOIN ON LIVE MOTION (Julian, 2026-07-03) — Gate 4's conform doctrine, superseding the earlier fixed-
+    fraction settle trim. Still HARD CUTS (no cross-dissolve — that rule is unchanged); the flow comes from WHERE
+    each cut lands. Per clip: the full settle (settle_trim seconds) is removed from the tail of every clip but the
+    scene's last, PLUS a small edge_frames trim off the closing deceleration of what's left (every clip but the
+    last) and off the opening ease-in (every clip, including the first). Never re-renders — trims/concats
+    already-rendered clips only. This is the "conformed cut"; assemble_picture (unchanged) remains the raw
+    butt-join for comparison."""
+    inputs = []
+    for c in clips: inputs += ["-i", c]
+    durs = [_dur(c) for c in clips]
+    fpss = [_clip_fps(c) for c in clips]
+    n = len(clips)
+    fc = []
+    for i in range(n):
+        edge_in = edge_frames / fpss[i]
+        edge_out = (edge_frames / fpss[i]) if i < n - 1 else 0.0
+        settle_out = settle_trim if i < n - 1 else 0.0
+        start = edge_in
+        end = max(start + 0.5, durs[i] - settle_out - edge_out)   # floor: never trim a clip to nothing
+        fc.append(f"[{i}:v]trim=start={start:.3f}:end={end:.3f},setpts=PTS-STARTPTS,setsar=1,format=yuv420p[v{i}]")
+        fc.append(f"[{i}:a]atrim=start={start:.3f}:end={end:.3f},asetpts=PTS-STARTPTS,"
+                  f"aformat=sample_rates=44100:channel_layouts=stereo[a{i}]")
+    joins = "".join(f"[v{i}][a{i}]" for i in range(n))
+    fc.append(f"{joins}concat=n={n}:v=1:a=1[cv][ca]")
+    fc.append(f"[cv]tpad=stop_mode=clone:stop_duration={HELD}[v]")
+    fc.append(f"[ca]apad=pad_dur={HELD}[a]")
+    cmd = ["ffmpeg","-y"] + inputs + ["-filter_complex", ";".join(fc),
+           "-map","[v]","-map","[a]","-c:v","libx264","-preset","medium","-crf","18","-pix_fmt","yuv420p",
+           "-c:a","aac","-b:a","256k","-movflags","+faststart", out]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode: print("assemble_conformed ERROR:", r.stderr[-400:])
+    return _dur(out)
+
 def _review_font():
     for p in ("/System/Library/Fonts/Supplemental/Arial.ttf", "/Library/Fonts/Arial.ttf",
               "/System/Library/Fonts/Supplemental/Verdana.ttf", "/System/Library/Fonts/Menlo.ttc"):

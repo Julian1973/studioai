@@ -299,7 +299,7 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 10,
+      "durationSec": 15,
       "pillar": "spark",
       "intensity": 0.22,
       "storyBeat": "The giant flower field is safe, warm and playful as Fuzzby and Zenny collect pollen; Zenny works with calm precision while Fuzzby turns the job into a manic aerial performance, overdoes a dip into a flower, ricochets off a leaf, and proudly buttons the crash.",
@@ -399,7 +399,8 @@
       "prohibited_staging": "Do not add bears, ocean, storm rain, pier, boat, or any non-script character; do not make Zenny broad or slapstick.",
       "sceneNumber": 1,
       "beatCode": "1.B1",
-      "id": 1
+      "id": 1,
+      "endState": "He straightens into a heroic chest-out superhero pose and holds it one blink too long; the smaller bee glides up beside him, perfectly still except her rapid wings, watching, her expression never changing. End on his pose and her flat stare, both at rest, camera locked, as the meadow's gentle hum resumes."
     },
     {
       "slug": "s1-b2-officially-nuts",
@@ -417,7 +418,7 @@
         "Zenny"
       ],
       "keenWristbands": null,
-      "durationSec": 10,
+      "durationSec": 15,
       "pillar": "spark",
       "intensity": 0.27,
       "storyBeat": "Fuzzby escalates from proud professional to pollen-disaster, sticks his whole face into another flower, emerges wearing a magnificent goatee handlebar moustache of pollen, asks for validation, and Zenny lands the dry answer he did not ask for.",
@@ -525,7 +526,8 @@
       "prohibited_staging": "Do not add extra dialogue, do not make Zenny collide, do not introduce thunder yet.",
       "sceneNumber": 1,
       "beatCode": "1.B2",
-      "id": 2
+      "id": 2,
+      "endState": "End on the smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both at rest, camera locked, as the meadow's gentle hum resumes."
     },
     {
       "slug": "s1-b3-smear-thup-buzz-crash",
@@ -542,7 +544,7 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 9,
+      "durationSec": 15,
       "pillar": "spark",
       "intensity": 0.34,
       "storyBeat": "Stung by Zenny's joke, Fuzzby wipes at his face and makes the pollen worse, dives into a bigger overcorrection, clips a branch, tumbles into a blossom upside down, and pops back up undimmed with his trademark crash-call as Zenny's eye-roll cracks into a smile.",
@@ -643,7 +645,8 @@
       "prohibited_staging": "Do not show thunder, storm, ocean, boat, or bears yet; do not let this beat continue into another pollen dive or the rumble — that begins fresh in 1.B4.",
       "sceneNumber": 1,
       "beatCode": "1.B3",
-      "id": 3
+      "id": 3,
+      "endState": "End on the two of them: the larger bee hovering upright and undimmed, proud; the smaller bee's eye-roll softening into a small smile. Both at rest, camera locked."
     },
     {
       "scene": "Rainforest Pollen Run",
@@ -664,7 +667,7 @@
       "speakers": [
         "Fuzzby"
       ],
-      "durationSec": 9,
+      "durationSec": 15,
       "intensity": 0.4,
       "storyBeat": "Fuzzby hums louder and dives into another flower, popping back up even more covered in pollen than before while Zenny watches in amazement; then a distant rumble of thunder stops him dead mid-hover — the scene's one earned full stop.",
       "emotionalIntent": "The audience should feel the escalating comic high suddenly catch in the throat as the thunder lands.",
@@ -741,7 +744,8 @@
       "continuity_physical_rule": "Fuzzby may be temporarily more pollen-covered but returns to reference structure; no permanent moustache or accessories.",
       "prohibited_staging": "Do not show ocean, boat, bears, rain, lightning, or visible storm clouds yet; only distant thunder and subtle light change.",
       "beatCode": "1.B4",
-      "id": 4
+      "id": 4,
+      "endState": "End on the larger bee frozen mid-hover from the thunder, the smaller bee turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet."
     },
     {
       "slug": "s1-b5-storm-coming-pressure-flower-stuck",
@@ -759,7 +763,7 @@
         "Fuzzby"
       ],
       "keenWristbands": null,
-      "durationSec": 10,
+      "durationSec": 15,
       "pillar": "spark",
       "intensity": 0.44,
       "storyBeat": "After the distant thunder, Zenny looks toward the sky and reads the shift before Fuzzby does; she names the coming storm, Fuzzby performs confidence under pressure, and immediately gets stuck in another flower as Zenny sighs.",

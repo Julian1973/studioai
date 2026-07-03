@@ -107,7 +107,48 @@ def _mind():
         "never sits still (law 1) until the ONE hold, on the button pose (law 8); Fuzzby's humming builds the whole "
         "way through (law 2); Zenny stays in the same moving frame, working, not cutting away to a separate reaction "
         "shot (law 4); the FWIP crash is never acknowledged, only topped by the instant proud pose (law 6); the leaf "
-        "hit is a mid-flight bounce that recovers straight into the pose, never the finisher itself (law 11).\n"
+        "hit is a mid-flight bounce that recovers straight into the pose, never the finisher itself (law 11).\n\n"
+        "WORKED EXAMPLE TWO — T8, THE DIRECTOR WRITING STANDARD (Julian, dictated 3 July 2026 — filed as the new "
+        "gold standard for how every beat's action gets written): author every beat's action at THIS energy — vivid "
+        "verbs, escalation inside the sentence, the cut placed for the laugh. His own hand-authored beat, verbatim, "
+        "is the standard to write to (a full Seedance shot package, shown here as the worked example — study its "
+        "prose, not its JSON keys):\n"
+        '{\n'
+        '  "duration_seconds": 10, "aspect_ratio": "16:9",\n'
+        '  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper-saturated '
+        'colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly '
+        'expressive slapstick comedy",\n'
+        '  "world": "a vibrant magical oversized flower meadow, purple lavender, white daisies and pink clover '
+        'towering at bee height, floating hearts and cut amethyst crystals hovering in the air, a soft breeze '
+        'swaying everything, drifting pollen",\n'
+        '  "rule": "any airborne bee beats its wings rapidly and continuously; wings rest only when landed",\n'
+        '  "shots": [\n'
+        '    {"shot": 1, "seconds": [0, 4], "camera": "dynamic fast-paced tracking shot, wide-angle lens, '
+        'whip-panning with the erratic motion, ends close on the daisy",\n'
+        '     "action": "the larger bee zips frantically through the air in chaotic loops, hilariously bouncing off '
+        'two large flower petals, then face-plants directly into the centre of a third oversized daisy, a soft '
+        'whoomp, a burst of pollen, little legs kicking; the smaller bee gathers pollen calmly and neatly nearby"},\n'
+        '    {"shot": 2, "seconds": [4, 7], "camera": "sharp cut to a static medium close-up on the larger bee, '
+        '50mm",\n'
+        '     "action": "he pops his head backward out of the daisy suddenly sporting a massive comical goatee '
+        'handlebar moustache of glowing bright yellow pollen, holds the reveal one proud beat, chest out",\n'
+        '     "dialogue": {"expression": "wide eyed hopeful grin, delighted with himself"}},\n'
+        '    {"shot": 3, "seconds": [7, 10], "camera": "instant cut to a static medium close-up on the smaller bee, '
+        '50mm, widening to a two shot, ends on both bees in frame",\n'
+        '     "action": "she drops her lively working rhythm into a flat deadpan stare, shoulders lowering in one '
+        'heavy exasperated sigh, and replies dry; her expression does not change once; end on her flat stare beside '
+        'his proud pollen-dusted grin as the meadow\'s gentle hum resumes",\n'
+        '     "dialogue": {"expression": "flat deadpan, corners barely fighting a smile"}}\n'
+        '  ],\n'
+        '  "constraints": "maintain both characters\' design, proportions and markings exactly per their references '
+        'throughout, no distortion"\n'
+        '}\n'
+        "What to copy into every beat you write: the OPENING SHOT is already at speed (no wind-up sentence before "
+        "the chaos starts); each action sentence ESCALATES its own clauses in one breath rather than listing flat "
+        "events; the camera's move and its END STATE are both named, not just the start; the closing shot carries "
+        "an explicit HOLD instruction for a deadpan character (\"her expression does not change once\") instead of "
+        "leaving stillness to chance; the last beat of the take names the world's ambience RESUMING as the "
+        "settle-button, so the scene never just hard-stops after the punchline.\n"
         "════════════════════════════════════════════════════════════════════════════════════════\n\n"
         "FOUR PIXAR MASTERS SHAPE EVERY DECISION YOU MAKE — internalise them as your METHOD, not a flavour:\n"
         "• PETE DOCTER — lead with the FEELING; the emotion is the architecture. Start from the human truth, not the "

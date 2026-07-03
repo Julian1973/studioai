@@ -1,15 +1,15 @@
-9 seconds, 16:9.
+15 seconds, 16:9.
 
-SUBJECTS: @图2 is the larger, eager, manic bee (frame-LEFT); @图3 is the smaller, calm, deadpan bee (frame-RIGHT). Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless in flight.
+SUBJECTS: @图2 is the larger, eager, manic bee (frame-LEFT); @图3 is the smaller, calm, deadpan bee (frame-RIGHT) — the identity reference every beat, the anti-drift anchor pulling this chain link back to canon. Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless in flight.
 
 ENVIRONMENT: @图1 is TRUTH — copy the environment and lighting from it exactly. a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals. Pollen clouds thicken with each dive; the air subtly stills for the rumble, motes hanging for a half-second like the world is listening.
 
 STYLE: Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field.
 
-SHOT 1 (5s): Drone-style camera chases the larger bee into the dive, the smaller bee holding steady in the same frame. the larger, eager, manic bee hums louder and dives into another flower, popping back out somehow even more covered in pollen than before; the smaller, calm, deadpan bee just watches him, amazed — it's astonishing to see; both airborne wings beat rapidly. Continuous fast wing buzz and pollen puff on the dive.
+SHOT 1 (8s): Drone-style camera chases the larger bee into the dive, the smaller bee holding steady in the same frame, ending on the larger bee and the smaller bee in frame. the larger, eager, manic bee hums louder and dives into another flower, popping back out somehow even more covered in pollen than before; the smaller, calm, deadpan bee just watches him, amazed — it's astonishing to see; both airborne wings beat rapidly. Continuous fast wing buzz and pollen puff on the dive.
 
-SHOT 2 (4s): Camera drains all motion into a locked close hold the instant thunder lands. A distant rumble of thunder rolls; the larger bee stops dead mid-hover, wings still beating rapidly as his confidence catches. music resumes for his louder humming.
+SHOT 2 (7s): Camera drains all motion into a locked close hold the instant thunder lands, ending on the larger bee in frame. A distant rumble of thunder rolls; the larger bee stops dead mid-hover, wings still beating rapidly as his confidence catches. music resumes for his louder humming. SETTLE: End on the larger bee frozen mid-hover from the thunder, the smaller bee turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet. Idle life continues through the hold — wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing freezes, nothing new happens.
 
-AUDIO: use ONLY @Audio1 for ALL dialogue — each speaking character mouths its own lines in @Audio1, in order; no other, different or duplicate voice. SPEAKER MAP: shot 2 → the larger bee. Only the larger bee speaks in this beat; the smaller bee stays visibly silent throughout.
+AUDIO: use ONLY @Audio1 for ALL dialogue — each speaking character mouths its own lines in @Audio1, in order; no other, different or duplicate voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03). SPEAKER MAP: shot 2 → the larger bee. Only the larger bee speaks in this beat; the smaller bee stays visibly silent throughout.
 
 NEGATIVES: no morphing, redesign or rescale of the characters, no extra characters or props, no on-screen text, subtitles, logos or watermarks, no foreign-language speech, no crystals on or attached to the bees, no still or frozen wings while airborne

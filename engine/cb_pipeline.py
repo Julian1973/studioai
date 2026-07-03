@@ -75,15 +75,17 @@ def _relock_if_stale(scene, episode=None):
           f"(fingerprint {current} != approved {stale_fp}); every downstream gate + per-beat lock reset.", flush=True)
     return True
 
-# ── FRAME CHAIN cascade (doctrine, 2026-07-02, Julian) ───────────────────────────────────────────────────────────
-# "A retake upstream marks downstream opening frames dirty through the cascade." A beat's keyframe now chains off
-# the PREVIOUS beat's ENDING FRAME (cb_scene.chain_source_for) rather than its opening frame — so if that upstream
-# beat's clip is retaken (a new ending frame composed), every beat built from the OLD ending frame is stale, exactly
-# like the Gate-1 cascade above but scoped to the per-beat keyframe/clip locks, not the scene gates.
+# ── FRAME CHAIN cascade (doctrine, 2026-07-02, Julian; frame source updated 2026-07-03 — THE HARVEST) ──────────
+# "A retake upstream marks downstream opening frames dirty through the cascade." A beat's keyframe/relay opens off
+# the PREVIOUS beat's HARVESTED SETTLE FRAME (cb_scene.chain_source_for / relay_source_for) rather than its opening
+# frame — so if that upstream beat's clip is retaken (a new settle frame harvested), every beat built from the OLD
+# settle frame is stale, exactly like the Gate-1 cascade above but scoped to the per-beat keyframe/clip locks, not
+# the scene gates. "Ending frames are harvested, never composed" (2026-07-03) — this hash now reads the harvested
+# settle frame, not the retired "composed" ending frame.
 def _beat_end_frame_hash(episode, code, slug):
-    """Content hash of a beat's composed ENDING FRAME (see cb_scene.build_ending_frame) — None if it doesn't exist."""
+    """Content hash of a beat's HARVESTED SETTLE FRAME (see cb_scene.harvest_settle_frame) — None if it doesn't exist."""
     import hashlib
-    p = f"media/{episode}_{code}_{slug}_end.png"
+    p = f"media/{episode}_{code}_{slug}_settle.png"
     if not os.path.exists(p):
         return None
     return hashlib.sha1(open(p, "rb").read()).hexdigest()[:16]

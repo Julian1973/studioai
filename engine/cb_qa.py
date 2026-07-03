@@ -100,6 +100,32 @@ def check_anatomy(kf, characters):
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CLEAN"), "verdict": text.strip()}
 
+def check_join(prev_end_frame, next_open_frame):
+    """THE JOIN CHECK (Julian's JOIN CONTRACT ruling, 2026-07-03): compares beat N's final frame (its SETTLE) to
+    beat N+1's opening frame for the three concrete things a cut must hold across — POSITION, STATE and LIGHT.
+    Report-only / advisory, same as the other frame-level checks below; never auto-fails a beat on its own. Concrete
+    visual criteria per rule 17 — never a vague "does this flow" question."""
+    if not (prev_end_frame and next_open_frame and os.path.exists(prev_end_frame) and os.path.exists(next_open_frame)):
+        return {"ok": None, "verdict": "(missing end or open frame — cannot check this join)"}
+    prompt = (
+        "You are shown TWO consecutive film frames: Image 1 is the LAST frame of the shot that just ended; Image 2 "
+        "is the FIRST frame of the very next shot. Check three concrete things across this cut:\n"
+        "1. POSITION: is each character in the SAME screen half (left/right) as before, at a similar apparent "
+        "size/distance from camera — not swapped sides, not suddenly much closer or much farther away?\n"
+        "2. STATE: does any visible temporary substance or prop on a character (pollen dusting, a moustache, dirt, "
+        "a held object) match between the two images — present in both or absent in both, not present in one and "
+        "gone in the other?\n"
+        "3. LIGHT: is the colour and brightness of the sky/environment roughly continuous (both warm/golden, or "
+        "both a cooler dusk-blue, etc.) rather than one clearly warmer, cooler, brighter or darker than the other?\n"
+        "Reply 'CONTINUOUS' on line 1 if all three hold. Otherwise reply 'BROKEN' then ONE short line PER broken "
+        "criterion, prefixed POSITION/STATE/LIGHT, naming exactly what changed (e.g. 'POSITION: the larger bee was "
+        "frame-left, now frame-right' or 'STATE: a pollen moustache is visible in image 1, gone in image 2')."
+    )
+    text, err = vision_verdict(prompt, [prev_end_frame, next_open_frame])
+    if err:
+        return {"ok": None, "verdict": err}
+    return {"ok": text.strip().upper().startswith("CONTINUOUS"), "verdict": text.strip()}
+
 # Canonical QA reason codes (machine-readable) + the one-line fix each implies. Merges OUR anatomy check (their DoD
 # lacks limb-counting) with the useful codes from the QA-agent spec. The fuzzy camera / staging / shot-type /
 # screen-direction checks are deliberately LEFT OUT of the hard gate for now — vision QA can't judge them reliably and
@@ -141,6 +167,9 @@ DONE_CODES = {
     "CLIP_STATE_MISSING_START": "the beat's named story-state is absent at the start — frame 1 must match the keyframe",
     "CLIP_STATE_DROPPED":     "the beat's named story-state disappears by the end — keep it for the whole take",
     "QA_UNAVAILABLE":         "QA could not run (ffmpeg/vision unavailable) — not a clip fault; check tooling",
+    # ── JOIN CONTRACT (Julian, 2026-07-03) — the handoff between beat N and beat N+1 ──────────────────
+    "JOIN_DISCONTINUITY":     "beat N's settle (final frame) and beat N+1's opening frame disagree on position, "
+                              "state or light — see check_join()'s per-criterion verdict for which",
 }
 BEES = {"Zenny", "Fuzzby"}
 

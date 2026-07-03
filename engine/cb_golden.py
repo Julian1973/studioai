@@ -134,9 +134,10 @@ def assertions(snap=None):
             except Exception as e:
                 fails.append(f"{code}: JSON prompt failed to parse ({e})")
 
-        # (3) NEGATIVES trimmed to six (prose only — the JSON emitter has no NEGATIVES section). Split on ", no "
-        # (the clause boundary — every item starts with "no"), NOT every comma: an item like "no on-screen text,
-        # subtitles, logos or watermarks" is ONE clause with commas inside its own internal list.
+        # (3) NEGATIVES trimmed to six. Prose: split on ", no " (the clause boundary — every item starts with
+        # "no"), NOT every comma: an item like "no on-screen text, subtitles, logos or watermarks" is ONE clause
+        # with commas inside its own internal list. JSON (gold standard, 2026-07-03): a "negatives" list, checked
+        # by length directly — no string-splitting needed since it ships as an actual array.
         if not is_json:
             m = re.search(r"NEGATIVES:\s*(.+)$", prompt, re.S)
             if m:
@@ -145,13 +146,20 @@ def assertions(snap=None):
                     fails.append(f"{code}: NEGATIVES should have exactly 6 items, has {n}")
             else:
                 fails.append(f"{code}: no NEGATIVES section found in the prose prompt")
+        else:
+            try:
+                neg = json.loads(prompt).get("negatives")
+                if not isinstance(neg, list) or len(neg) != 6:
+                    fails.append(f"{code}: JSON negatives should be a 6-item list, got {neg!r}")
+            except Exception:
+                pass   # JSON parse failure already reported below
 
         # (4)+(5) structural invariants — durations become PER-SHOT seconds, must sum to the beat total
         dur = int(b.get("durationSec") or 12); dur = max(8, min(15, dur))
         if is_json:
             try:
                 doc = json.loads(prompt)
-                for key in ("duration", "aspect", "style", "references", "shots"):
+                for key in ("duration", "aspect", "style", "references", "world", "shots", "constraints", "negatives"):
                     if key not in doc:
                         fails.append(f"{code}: JSON prompt missing required top-level key {key!r}")
                 if not doc.get("shots"):
@@ -159,12 +167,33 @@ def assertions(snap=None):
                 total = sum(s.get("seconds", 0) for s in (doc.get("shots") or []))
                 if total != dur:
                     fails.append(f"{code}: JSON shots[].seconds sum to {total}, expected the beat total {dur}")
+
+                # GOLD STANDARD / REFERENCE STACK additions (Julian, 2026-07-03) — camera end-state on EVERY
+                # shot (not just the closing one — item SIX of the consolidated doctrine sync); an expression
+                # binding never leaks a cast name (rule 5: identity text never ships). HANDLE DOCTRINE — the
+                # closing shot carries a SETTLE: block (superseding the plain ambience-resumes tail), and total
+                # seconds must include the +2s settle allowance.
+                shots = doc.get("shots") or []
+                if cast:
+                    for s in shots:
+                        if ", ending on " not in str(s.get("camera") or ""):
+                            fails.append(f"{code}: a shot's camera has no end-state clause (every shot, per the reference-stack doctrine)")
+                if shots and "SETTLE:" not in str(shots[-1].get("action") or ""):
+                    fails.append(f"{code}: closing shot's action has no Handle Doctrine SETTLE block")
+                for s in shots:
+                    expr = (s.get("dialogue") or {}).get("expression") if isinstance(s.get("dialogue"), dict) else None
+                    if expr and cast and any(re.search(rf"\b{re.escape(n)}\b", expr, re.I) for n in cast):
+                        fails.append(f"{code}: dialogue.expression leaks a cast name (rule 5): {expr!r}")
             except Exception:
                 pass   # already reported above
         else:
             secs = [int(x) for x in re.findall(r"SHOT \d+ \((\d+)s\)", prompt)]
             if secs and sum(secs) != dur:
                 fails.append(f"{code}: prose SHOT seconds sum to {sum(secs)}, expected the beat total {dur}")
+            if "SETTLE:" not in prompt:
+                fails.append(f"{code}: prose prompt has no Handle Doctrine SETTLE block on its closing shot")
+            if cast and secs and prompt.count(", ending on ") < len(secs):
+                fails.append(f"{code}: not every prose SHOT has a camera end-state clause (every shot, per the reference-stack doctrine)")
     return fails
 
 

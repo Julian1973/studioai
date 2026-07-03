@@ -13,6 +13,9 @@ checks each item automatically, on **both** the start frame **and** the end fram
 - **SIZE_MISMATCH** — relative scale is correct (e.g. Fuzzby > Zenny); a smaller character never renders as large as or larger than a bigger one.
 - **PLATE_DRIFT** — the environment, layout, camera and composition match the locked scene plate; the world is not re‑invented.
 
+### The sixth (added 2026‑07‑03, Julian — "if the first scene is them flying through the meadow, then they need to be flying through the meadow")
+- **ACTION_STATE_MISMATCH** — when the beat's own action text names an active locomotion verb (flying, chasing, diving, zigzagging, weaving, dipping, bouncing, etc. — deliberately excludes "hover", the default bee state), the frame must SHOW that state, not just gesture at it. For a flying character this is checked concretely: wings must be ASYMMETRIC (one raised, one lowered, mid‑downstroke), never both spread flat and symmetrical; the body must lean forward and down into the direction of travel, legs tucked or trailing, never hanging vertical like a puppet at rest. Found live: the "CRISP WINGS" rule (frozen, sharp, non‑blurred — still correct, for identity‑lock clarity) was being satisfied by a symmetric, static‑looking hover pose, which read as floating in place rather than already in flight — forcing Seedance to invent a standstill‑to‑motion transition instead of just continuing existing motion. `cb_prompts.build_keyframe_prompt`'s WINGS/FLIGHT‑ENERGY law and this QA check now ask for and verify the SAME concrete criteria.
+
 ## A. Structure (how every frame is built)
 1. **Two reference inputs, by role.** Image 1 = the SCENE shot (the locked plate). Image 2 = the all‑characters
    SHEET. Nothing else attached for a normal shot (no size chart — the sheet carries relative scale; a third

@@ -779,10 +779,20 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # FULLY DEFINED exactly as in the turnaround (four separate translucent wings, clean edges), NEVER a motion-blur,
     # translucent smear, haze, double-image or fan of blur. Blurred wings in the keyframe dampen the wing motion Seedance
     # then adds — so freeze them crisp.
-    wings = (" WINGS: capture the wings FROZEN mid-beat and held perfectly still — each of the four translucent wings in a "
-             "clear, fully-defined position with clean sharp edges, exactly as in the turnaround, as if caught by a fast "
-             "camera shutter. The bee hovers, but its wings read solid, crisp and readable — a frozen wingbeat, never a "
-             "soft blur or fan." if (block_chars and set(block_chars) <= _bees) else "")
+    # LAUNCH-READY (Julian, 2026-07-03, from reviewing the first real fires): "frozen mid-beat" alone kept rendering
+    # as both wings spread flat and symmetrical, body hanging vertical with legs dangling — a bee floating in place,
+    # not a bee in flight. Seedance then has to invent a standstill-to-motion transition instead of continuing
+    # existing motion. Fixed by making the freeze frame explicitly ASYMMETRIC (one wing up, one down, mid-downstroke)
+    # and the body explicitly already accelerating (forward lean, legs tucked/trailing) — same crisp, non-blurred
+    # wings, but a pose that reads as already airborne and launching, so the clip picks it up and just takes off.
+    wings = (" WINGS: capture the wings CAUGHT mid-downstroke, ASYMMETRIC — one wing raised, the other lowered, as if "
+             "a fraction of a second into a beat cycle — never both wings spread flat and symmetrical at rest. Each of "
+             "the four translucent wings stays sharp, solid and fully defined with clean edges, exactly as in the "
+             "turnaround, as if caught by a fast camera shutter — crisp and readable, never a soft blur or fan. FLIGHT "
+             "ENERGY: the body leans forward and down into the direction of travel, already accelerating, legs tucked "
+             "or trailing back — never hanging straight down at rest like a puppet. This is a bee already IN FLIGHT "
+             "and about to launch into the action, not hovering still in place."
+             if (block_chars and set(block_chars) <= _bees) else "")
     # CLEAN BASE IDENTITY (baked principle, 2026-07-01): the keyframe is the CLEAN BASE the animation builds ON TOP OF.
     # Seedance does the heavy lifting — it applies AND removes every temporary state within the take. So the keyframe
     # renders each character as its plain turnaround self, and any temporary body-state named in the staging is IGNORED

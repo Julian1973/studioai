@@ -116,6 +116,7 @@ DONE_CODES = {
     "ADDED_PROP":             "remove anything on the character not in its turnaround — no added accessories, items or props on the body (it will flicker and vanish in the clip)",
     "SIZE_MISMATCH":          "fix the relative scale — each character at its canonical size; the smaller character must never render as large as or larger than the bigger one",
     "WEAK_POSE":              "restage into a clear, acting opening pose that reads in silhouette and carries the feeling — never stiff, neutral, blank or T-posed",
+    "ACTION_STATE_MISMATCH":  "restage so the pose ACTIVELY performs the beat's own scripted action (e.g. mid-flight and already in motion, not static, posed or floating in place) — the image must show what the story says is happening",
     "BELOW_BAR":              "lift to world-class feature-film Pixar 3D-CGI — beautiful motivated lighting, polished materials, real depth, cinematic composition; not flat, dull, cheap, plasticky or AI-mushy",
     "PLATE_DRIFT":            "match the locked scene plate's environment, layout, camera and composition — do not re-invent the world or depart from its arrangement",
     # ── Gate-3 CLIP QA (temporal) ─────────────────────────────────────────────────────────────────────
@@ -208,6 +209,25 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
     substance = _any_word(("pollen", "dust", "dirt", "mud", "water", "wet", "wipe", "smear", "food", "honey", "splash", "soaked"), a)
     bees_present = any(c in BEES for c in chars); bears = [c for c in chars if c not in BEES]
     glow = (shot.get("crystalGlow") or "").strip()
+    # ACTION-STATE FIDELITY (Julian, 2026-07-03): "whenever we're bringing the story to life... make sure the images
+    # are right — if the first scene is them flying through the meadow, then they need to be flying through the
+    # meadow." A pose can pass WEAK_POSE's generic "dynamic, not stiff" bar while still missing the SPECIFIC
+    # scripted action — this is exactly the bee-flight bug (both wings spread symmetrically, body hanging static
+    # read as "a pose", just the wrong one). Checks the frame against the beat's OWN action text, not a generic
+    # dynamism bar. Deliberately excludes "hover"/"hovering" — it's the default state description for nearly every
+    # bee beat and isn't inherently wrong (the WING/FLIGHT-ENERGY prompt law is what makes a hover read as active,
+    # not this gate); only fires on clearly active locomotion verbs, so a genuinely held/still beat is never flagged.
+    _ACTION_VERBS = ("fly", "flying", "flies", "flew", "chase", "chases", "chasing", "chased", "dive", "diving",
+                     "dives", "dived", "dove", "run", "running", "runs", "ran", "swim", "swimming", "swims",
+                     "climb", "climbing", "climbs", "dash", "dashing", "dashes", "zoom", "zooming", "zooms",
+                     "race", "racing", "races", "sprint", "sprinting", "leap", "leaping", "leaps", "jump", "jumping",
+                     "jumps", "soar", "soaring", "soars", "glide", "gliding", "glides", "tumble", "tumbling",
+                     "tumbles", "zigzag", "zigzags", "zigzagging", "zig-zag", "zig-zags", "zig-zagging", "weave",
+                     "weaves", "weaving", "dip", "dips", "dipping", "dart", "darts", "darting", "swoop", "swoops",
+                     "swooping", "bounce", "bounces", "bouncing", "dodge", "dodges", "dodging", "buzz", "buzzes",
+                     "buzzing", "drift", "drifts", "drifting", "spin", "spins", "spinning", "whirl", "whirls",
+                     "whirling", "accelerate", "accelerates", "accelerating", "swerve", "swerves", "swerving")
+    action_verb = next((v for v in _ACTION_VERBS if _any_word([v], a)), None)
     items = [
         ("ANATOMY_DEFECT", f"each character ({cast}) has correct COMPLETE anatomy — exact number of arms, legs, wings, "
          "paws, eyes, antennae (cartoon bee = 2 arms, 2 legs, 1 pair wings, 2 antennae). Flag ONLY a CLEARLY extra, "
@@ -249,6 +269,19 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
          "motivated lighting, polished believable materials, real layered depth, cinematic composition; flag ONLY if it is "
          "clearly flat, dull, cheap, plasticky, muddy or has obvious AI artefacts/mush — not for subtle taste"),
     ]
+    if action_verb and bees_present:
+        # concrete, checkable criteria — the SAME ones cb_prompts.build_keyframe_prompt's WINGS/FLIGHT-ENERGY law
+        # asks the generator to produce, so QA verifies the exact thing generation was told to do, not a vague
+        # "does this look dynamic enough" taste call the model will wave through.
+        items.append(("ACTION_STATE_MISMATCH", f"look SPECIFICALLY at each bee's WINGS and BODY ANGLE (this beat calls "
+                      f"for them caught mid-{action_verb}, already accelerating): (1) WINGS — are both wings spread "
+                      "OPEN and SYMMETRICAL (same angle, mirror images of each other)? That is a static hover/rest "
+                      "pose and FAILS. A correct pose has the wings ASYMMETRIC — one visibly higher than the other, "
+                      "mid-downstroke. (2) BODY — is the body hanging near-VERTICAL with legs dangling straight down "
+                      "underneath, like a puppet at rest? That FAILS. A correct pose leans the body FORWARD and DOWN "
+                      "into the direction of travel, with legs tucked or trailing back. This PASSES only if BOTH the "
+                      "wings are asymmetric AND the body leans forward into the motion — flag ACTION_STATE_MISMATCH "
+                      "if EITHER the wings are symmetrical OR the body/legs hang passively"))
     if plate and os.path.exists(plate) and plate != kf:
         items.append(("PLATE_DRIFT", "the environment, layout, camera angle and composition MATCH the SCENE reference (the "
                       "locked plate) — same set in the same arrangement; flag if the world is re-invented or the composition "

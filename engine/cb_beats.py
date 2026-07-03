@@ -352,19 +352,24 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
     print("=== BEAT DRIVER DONE ===", flush=True)
     return clips
 
-def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False):
+def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False, approved=False):
     """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes Julian's WINNER for the
     beat just decided (winner_code + the exact seed file he picked), designates it as that beat's official signed
-    clip, harvests its settle frame, then fires the NEXT beat in the scene — exactly `seeds` takes (2, per the
-    ruling), RENDER ECONOMY LAW (the fast Seedance endpoint) — and STOPS. No parallel beats, no auto-advance:
-    production within a scene is strictly serial through Julian's sign-offs — call this again only once he has
-    picked a winner for the beat this call just fired.
+    clip, harvests its settle frame, RE-MINTS it (Julian's ruling, 2026-07-03 — standard for every link now, not
+    QA-triggered; see cb_scene.remint_settle_frame), runs the drift check (cb_qa.check_remint), then STOPS —
+    presenting the cleaned anchor for Julian's approval. It does NOT fire the next beat until called again with
+    approved=True. No parallel beats, no auto-advance: production within a scene is strictly serial through
+    Julian's sign-offs.
 
     dry_run=True (Fable's code review, 2026-07-03, item TWO — "prove the relay injection"): NO file mutation
-    (winner_seed_path is ignored; harvests from winner_code's CURRENT official clip, whatever is already there)
-    and NO Seedance call. Returns {prompt, builder, images} for inspection instead of firing — the mechanism
-    check, not the render."""
-    import shutil, cb_scene, cb_segprompt
+    (winner_seed_path is ignored; harvests from winner_code's CURRENT official clip, whatever is already there),
+    but the harvest + re-mint + drift-check ARE real (they only read the clip and write derived images). Returns
+    {prompt, builder, images, ...} built from the re-minted anchor for inspection instead of firing.
+
+    approved=True: skips designation/harvest/re-mint (reuses the anchor an earlier, unapproved call already
+    produced) and fires the next beat's `seeds` takes, render economy law. Call this only after you have actually
+    looked at the re-minted anchor from the prepare call."""
+    import shutil, cb_scene, cb_segprompt, cb_qa
     d = json.load(open(pkg_path))
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
     beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
@@ -377,47 +382,70 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
     wb = beats[idx]
     w_slug = wb.get("slug", (winner_code or "").replace(".", "_"))
     official = f"media/{episode}_{winner_code}_{w_slug}.mp4"
-
-    if dry_run:
-        # 1'. DRY RUN — no designation, no file mutation: use whatever is CURRENTLY the winner beat's official clip.
-        print(f"fire_next_beat [DRY RUN]: using {winner_code}'s CURRENT official clip as-is (no file changes)", flush=True)
-        if not os.path.exists(official):
-            print(f"fire_next_beat [DRY RUN]: {official} doesn't exist yet — nothing to harvest", flush=True); return None
-    else:
-        # 1. DESIGNATE THE WINNER — copy Julian's picked seed to the beat's OFFICIAL clip path (what every
-        #    downstream consumer — the relay, the stitch, the QA — treats as "this beat's signed clip").
-        if not winner_seed_path or not os.path.exists(winner_seed_path):
-            print(f"fire_next_beat: winner seed {winner_seed_path!r} not found", flush=True); return None
-        shutil.copyfile(winner_seed_path, official)
-        print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
-
-    # 2. HARVEST — the sharpest frame in the winner's settle window; what the next beat opens from. Real in both
-    #    modes (it only reads the clip and writes a derived _settle.png — never touches the official clip itself).
-    settlef = cb_scene.harvest_settle_frame(episode, winner_code, w_slug)
-    print(f"fire_next_beat{' [DRY RUN]' if dry_run else ''}: harvested -> {settlef or '(FAILED — check the clip)'}", flush=True)
-    if not settlef:
-        print("fire_next_beat: cannot proceed without a harvested settle frame; stopping.", flush=True); return None
-
+    remint_path = f"media/{episode}_{winner_code}_{w_slug}_remint.png"
     next_b = beats[idx + 1]
     next_code = next_b.get("beatCode") or next_b.get("shotCode")
     next_slug = next_b.get("slug", (next_code or "").replace(".", "_"))
 
-    if dry_run:
-        # 3'. PROVE THE INJECTION — build the next beat's real shipped prompt (relay=True) and the reference
-        #     image list it would upload, WITHOUT calling Seedance.
-        _scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), None)
-        prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True)
-        _chars = next_b.get("openingCast") or next_b.get("characters") or []
-        imgs = [settlef] + [a for c in _chars if (a := _anchor(c))]
-        _plate = f"media/{episode}_S{scene_num}_plate.png"
-        if os.path.exists(_plate):
-            imgs.append(_plate)
-        print(f"fire_next_beat [DRY RUN]: {next_code} shipped prompt (builder={builder}):\n{prompt}", flush=True)
-        print(f"fire_next_beat [DRY RUN]: would upload {len(imgs)} images: {imgs}", flush=True)
-        print(f"=== fire_next_beat [DRY RUN] complete for {next_code} — nothing fired, nothing mutated. ===", flush=True)
-        return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "next_code": next_code}
+    if not approved:
+        # PHASE 1 — PREPARE: designate (unless dry_run), harvest, RE-MINT, drift-check, then STOP for approval.
+        if dry_run:
+            print(f"fire_next_beat [DRY RUN]: using {winner_code}'s CURRENT official clip as-is (no file changes)", flush=True)
+            if not os.path.exists(official):
+                print(f"fire_next_beat [DRY RUN]: {official} doesn't exist yet — nothing to harvest", flush=True); return None
+        else:
+            # DESIGNATE THE WINNER — copy Julian's picked seed to the beat's OFFICIAL clip path (what every
+            # downstream consumer — the relay, the stitch, the QA — treats as "this beat's signed clip").
+            if not winner_seed_path or not os.path.exists(winner_seed_path):
+                print(f"fire_next_beat: winner seed {winner_seed_path!r} not found", flush=True); return None
+            shutil.copyfile(winner_seed_path, official)
+            print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
 
-    # 3. FIRE THE NEXT BEAT ONLY — exactly `seeds` takes, render economy law, then STOP (no further advance).
+        # HARVEST — the sharpest frame in the winner's settle window. Real in both modes (only reads the clip and
+        # writes a derived _settle.png — never touches the official clip itself).
+        settlef = cb_scene.harvest_settle_frame(episode, winner_code, w_slug)
+        print(f"fire_next_beat: harvested -> {settlef or '(FAILED — check the clip)'}", flush=True)
+        if not settlef:
+            print("fire_next_beat: cannot proceed without a harvested settle frame; stopping.", flush=True); return None
+
+        # RE-MINT — standard for every link now (Julian's ruling, 2026-07-03, superseding the earlier NB2-refresh
+        # rejection). A real NB2 call in both modes — the restoration pass is the thing being proven/prepared.
+        cast = wb.get("openingCast") or wb.get("characters") or []
+        remint_out = cb_scene.remint_settle_frame(episode, winner_code, w_slug, cast, settlef)
+        print(f"fire_next_beat: re-minted -> {remint_out or '(FAILED)'}", flush=True)
+        if not remint_out:
+            print("fire_next_beat: cannot proceed without a re-minted anchor; stopping.", flush=True); return None
+
+        turnarounds = [a for c in cast if (a := _anchor(c))]
+        drift = cb_qa.check_remint(settlef, remint_out, turnarounds)
+        print(f"fire_next_beat: RE-MINT DRIFT CHECK -> {'CLEAN' if drift['ok'] else 'BLOCK'} — {drift['verdict']}", flush=True)
+
+        if dry_run:
+            # PROVE THE INJECTION — the next beat's real shipped prompt (relay=True), @图1 = the re-minted anchor.
+            _scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), None)
+            prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True)
+            _chars = next_b.get("openingCast") or next_b.get("characters") or []
+            imgs = [remint_out] + [a for c in _chars if (a := _anchor(c))]
+            _plate = f"media/{episode}_S{scene_num}_plate.png"
+            if os.path.exists(_plate):
+                imgs.append(_plate)
+            print(f"fire_next_beat [DRY RUN]: {next_code} shipped prompt (builder={builder}):\n{prompt}", flush=True)
+            print(f"fire_next_beat [DRY RUN]: would upload {len(imgs)} images: {imgs}", flush=True)
+            print(f"=== fire_next_beat [DRY RUN] complete for {next_code} — nothing fired, nothing mutated. ===", flush=True)
+            return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "harvested": settlef,
+                    "remint": remint_out, "drift_check": drift, "next_code": next_code}
+
+        print(f"=== fire_next_beat STOPPED — {winner_code}'s cleaned anchor is ready for your approval:\n"
+              f"    {remint_out}\n"
+              f"    Review it, then call fire_next_beat(..., approved=True) to launch {next_code}. Sign nothing else. ===",
+              flush=True)
+        return {"harvested": settlef, "remint": remint_out, "drift_check": drift, "next_code": next_code}
+
+    # PHASE 2 — approved=True: the anchor was already prepared; this call's only job is to launch.
+    if not os.path.exists(remint_path):
+        print(f"fire_next_beat: approved=True but no re-minted anchor at {remint_path} — call without approved "
+              f"first to prepare it.", flush=True); return None
+    print(f"fire_next_beat: {winner_code}'s re-minted anchor APPROVED -> launching {next_code}", flush=True)
     official_next = f"media/{episode}_{next_code}_{next_slug}.mp4"
     results = []
     for i in range(1, seeds + 1):

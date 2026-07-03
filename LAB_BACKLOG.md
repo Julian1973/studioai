@@ -103,15 +103,24 @@ revisit whether the right criterion is actually "is this an EXCHANGE beat" (dial
 characters) rather than raw speaker count — judged by where the losing seeds cluster (does prose lose more often
 on beats that happen to have 2 speakers but only one really carries the scene, etc.). Not actioned now.
 
-## NB2 chain refresh — REJECTED as a routine step (2026-07-03, Julian's consolidated doctrine sync, item NINE)
+## NB2 chain refresh / RE-MINT — REJECTED 2026-07-03, then SUPERSEDED BY THE DIRECTOR the same day
 
-Proposed idea: re-mint a harvested settle frame through NB2 whenever QA flags its sharpness below a threshold,
-with turnarounds enforced to hold identity. **Explicitly rejected as a routine mechanism** — it compounds
-identity drift against the pixel-carry ruling (the whole point of harvesting is that the relay continues off the
-ACTUAL rendered pixels, not a re-imagined approximation; running a harvested frame back through a generative
-re-mint step reintroduces exactly the re-imagining the relay was built to remove). Logged as a rejected idea, not
-a queued one — the answer to a soft harvest is a better harvest (a wider sample, more candidate frames) or a
-retake of the underlying clip, never a generative refresh of the frame itself.
+Original proposal (consolidated doctrine sync, item NINE): re-mint a harvested settle frame through NB2 whenever
+QA flags its sharpness below a threshold, with turnarounds enforced to hold identity. **Explicitly rejected as a
+routine mechanism** at the time — reasoned that it compounds identity drift against the pixel-carry ruling (the
+relay continues off ACTUAL rendered pixels, not a re-imagined approximation; running a harvested frame back
+through a generative step reintroduces exactly the re-imagining the relay was built to remove).
+
+**Superseded the same day, by Julian's explicit ruling as director**: "The prior lab ruling is superseded by the
+director: re-mint is now every link, not QA triggered." Re-mint is now STANDARD for every relay link —
+`cb_scene.remint_settle_frame`, using a LOCKED, deliberately minimal restoration-only prompt
+(`cb_prompts.build_remint_prompt`: same everything, artifacts and blur removed ONLY, turnarounds attached purely
+to hold identity while cleaning) — narrower in scope than the originally-rejected "chain refresh" idea (which had
+no locked prompt and no drift check). Guarded by a new hard BLOCK, `cb_qa.check_remint`, comparing the re-mint
+against the harvest (position/state) and the turnarounds (identity), and by a human approval gate —
+`cb_beats.fire_next_beat` prepares the cleaned anchor and STOPS; it only fires the next beat once called again
+with `approved=True`. This record stays as the "why we nearly didn't do this" reasoning, in case the drift risk
+the original rejection named ever actually shows up in the check's verdicts.
 
 ## Canon-correction check — 1.B2 hybrid prompt (2026-07-03)
 

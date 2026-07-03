@@ -176,15 +176,31 @@ def harvest_settle_frame(episode, code, slug, window=SETTLE_WINDOW, samples=12):
         Image.open(best_path).convert("RGB").save(out_path)
     return out_path if os.path.exists(out_path) else None
 
+def remint_settle_frame(episode, code, slug, cast, harvested_path):
+    """THE RE-MINT step (Julian's ruling, 2026-07-03) — now STANDARD for every relay link, not QA-triggered;
+    supersedes the earlier "NB2 chain refresh, rejected as routine" backlog note (LAB_BACKLOG.md) — the director
+    overrides the lab. Runs the harvested settle frame through NB2 with the LOCKED, deliberately minimal re-mint
+    prompt (cb_prompts.build_remint_prompt): turnarounds attached ONLY to hold identity while cleaning, artifacts
+    and blur removed, same everything else. Returns the re-minted frame's path, or None on failure."""
+    turnarounds = [a for c in cast if (a := P.char_identity_ref(c)) and os.path.exists(a)]
+    prompt = P.build_remint_prompt()
+    out = f"{episode}_{code}_{slug}_remint.png"
+    outpath = f"media/{out}"
+    cb_gen.generate_image(prompt, [harvested_path] + turnarounds, "16:9", out)
+    return outpath if os.path.exists(outpath) else None
+
 def relay_source_for(beats, code, episode="Ep1"):
     """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21) — distinct from chain_source_for (which
-    feeds Gate 2b's KEYFRAME generation). Returns (harvested_frame_path_or_None, status, prev_code):
+    feeds Gate 2b's KEYFRAME generation). Returns (frame_path_or_None, status, prev_code):
       first          the scene's first beat (or a vision beat, or no previous beat) — no relay source; this beat
                      keeps its own Gate-2b-generated keyframe, exactly as before this doctrine.
       no_predecessor_clip   there IS a previous beat, but it has no rendered clip yet to harvest from — blocks
                      the relay at this beat rather than guessing; falls back to this beat's own keyframe.
-      relay          the previous beat has a rendered clip; its harvested settle frame is returned for THIS
-                     beat's Seedance ref2vid @图1, skipping keyframe generation for this beat entirely."""
+      relay          the previous beat has a rendered clip. Prefers its RE-MINTED anchor (Julian's ruling,
+                     2026-07-03 — a pure lookup here, never generates one: fire_next_beat's prepare step is what
+                     produces it, gated on Julian's approval); falls back to the raw harvested settle frame if no
+                     re-mint exists yet, so a relay beat fired outside that ceremony still degrades gracefully
+                     rather than blocking. Either way, skips keyframe generation for THIS beat entirely."""
     idx = next((i for i, b in enumerate(beats)
                 if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
     if idx is None or idx == 0:
@@ -199,6 +215,9 @@ def relay_source_for(beats, code, episode="Ep1"):
     prev = beats[j]
     prev_code = prev.get("beatCode") or prev.get("shotCode")
     prev_slug = prev.get("slug", (prev_code or "").replace(".", "_"))
+    remint_path = f"media/{episode}_{prev_code}_{prev_slug}_remint.png"
+    if os.path.exists(remint_path):
+        return remint_path, "relay", prev_code
     harvested = harvest_settle_frame(episode, prev_code, prev_slug)
     if not harvested:
         return None, "no_predecessor_clip", prev_code

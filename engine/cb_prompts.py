@@ -850,6 +850,23 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     prompt = re.sub(r"[ ]{2,}", " ", header + "\n\nPROMPT:\n" + "\n\n".join(body) + _fix_line(note))
     return prompt, refs
 
+def build_remint_prompt():
+    """THE RE-MINT prompt (Julian's ruling, 2026-07-03) — LOCKED and deliberately minimal: a restoration pass,
+    never a re-generation. @图1 is the harvested settle frame to reproduce EXACTLY; the turnaround references
+    that follow are attached SOLELY to hold each character's identity steady while cleaning — never to change
+    pose, position or anything else about the frame being restored. This supersedes the earlier "NB2 chain
+    refresh, rejected as routine" backlog note (LAB_BACKLOG.md) — re-mint is now standard for every relay link,
+    per the director, not a QA-triggered exception."""
+    return (
+        "@图1 is a single film frame from an already-approved animated take — reproduce it EXACTLY as shown: same "
+        "characters, same pose, same position, same environment, same lighting, same everything. The ONLY "
+        "permitted change is technical cleanup: remove compression artifacts, motion blur or softness so the "
+        "frame is tack-sharp and clean. Do NOT redesign, restage, reframe, recolour, add, remove or reinterpret "
+        "anything. The turnaround references that follow are attached ONLY to confirm each character's exact "
+        "locked identity (face, markings, proportions) while cleaning — never to change their pose or position "
+        "from @图1. This is a restoration pass, not a new composition."
+    )
+
 def scene_characters(scene_shots):
     """Union of the characters appearing across a scene's shots, in order of first appearance."""
     seen = []

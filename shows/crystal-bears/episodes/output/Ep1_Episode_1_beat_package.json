@@ -400,6 +400,10 @@
       "sceneNumber": 1,
       "beatCode": "1.B1",
       "id": 1,
+      "actionStates": {
+        "Fuzzby": "dynamic-flight",
+        "Zenny": "static-calm"
+      },
       "endState": "He straightens into a heroic chest-out superhero pose and holds it one blink too long; the smaller bee glides up beside him, perfectly still except her rapid wings, watching, her expression never changing. End on his pose and her flat stare, both at rest, camera locked, as the meadow's gentle hum resumes."
     },
     {

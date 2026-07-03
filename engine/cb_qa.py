@@ -126,6 +126,32 @@ def check_join(prev_end_frame, next_open_frame):
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CONTINUOUS"), "verdict": text.strip()}
 
+def check_remint(harvested_path, remint_path, turnaround_paths=None):
+    """THE RE-MINT DRIFT CHECK (Julian's ruling, 2026-07-03) — the re-mint's only job is a technical cleanup pass
+    (compression artifacts, motion blur), never a restage or a redesign. Checks the re-minted frame against the
+    HARVESTED frame for POSITION and STATE match, and against the character TURNAROUNDS for IDENTITY match. A
+    hit is a hard BLOCK — concrete criteria per rule 17, never a vague "does this still look right" call."""
+    if not (harvested_path and remint_path and os.path.exists(harvested_path) and os.path.exists(remint_path)):
+        return {"ok": None, "verdict": "(missing harvested or re-minted frame — cannot check)"}
+    turnarounds = [p for p in (turnaround_paths or []) if p and os.path.exists(p)]
+    prompt = (
+        "Image 1 is a HARVESTED frame from an animated take. Image 2 is the SAME frame after a cleanup pass meant "
+        "ONLY to remove compression artifacts and motion blur — never to restage or redesign anything.\n"
+        "1. POSITION: is each character in the SAME screen half (left/right), the same apparent size/distance, "
+        "the same pose and body angle in both images — not moved, not restaged, not reframed?\n"
+        "2. STATE: does any visible temporary substance or prop on a character (pollen dusting, dirt, a held "
+        "object) match exactly between the two images — nothing added, removed or changed?\n"
+        + (f"The remaining {len(turnarounds)} image(s) are the characters' locked identity turnarounds.\n"
+           "3. IDENTITY: does each character in Image 2 still match its own turnaround exactly — face, markings, "
+           "proportions — with no drift toward a different design?\n" if turnarounds else "") +
+        "Reply 'CLEAN' on line 1 if everything holds. Otherwise reply 'DRIFT' then ONE short line PER broken "
+        "criterion, prefixed POSITION/STATE/IDENTITY, naming exactly what changed."
+    )
+    text, err = vision_verdict(prompt, [harvested_path, remint_path] + turnarounds)
+    if err:
+        return {"ok": None, "verdict": err}
+    return {"ok": text.strip().upper().startswith("CLEAN"), "verdict": text.strip()}
+
 # Canonical QA reason codes (machine-readable) + the one-line fix each implies. Merges OUR anatomy check (their DoD
 # lacks limb-counting) with the useful codes from the QA-agent spec. The fuzzy camera / staging / shot-type /
 # screen-direction checks are deliberately LEFT OUT of the hard gate for now — vision QA can't judge them reliably and
@@ -170,6 +196,10 @@ DONE_CODES = {
     # ── JOIN CONTRACT (Julian, 2026-07-03) — the handoff between beat N and beat N+1 ──────────────────
     "JOIN_DISCONTINUITY":     "beat N's settle (final frame) and beat N+1's opening frame disagree on position, "
                               "state or light — see check_join()'s per-criterion verdict for which",
+    # ── RE-MINT (Julian's ruling, 2026-07-03) — the harvest's NB2 cleanup pass ────────────────────────
+    "REMINT_DRIFT":           "the re-minted frame drifted from the harvested frame (position/state) or the "
+                              "turnarounds (identity) — see check_remint()'s per-criterion verdict for which; "
+                              "re-mint is a cleanup pass only, never a restage",
 }
 BEES = {"Zenny", "Fuzzby"}
 
@@ -306,10 +336,40 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
          "motivated lighting, polished believable materials, real layered depth, cinematic composition; flag ONLY if it is "
          "clearly flat, dull, cheap, plasticky, muddy or has obvious AI artefacts/mush — not for subtle taste"),
     ]
-    if action_verb and bees_present:
+    action_states = shot.get("actionStates") or {}
+    if action_verb and bees_present and action_states:
+        # PER-CHARACTER ACTION STATE (Julian's ruling, 2026-07-03, re: 1.B1's Fuzzby/Zenny false-positive): a beat
+        # can declare EACH character's own expected state — one bee can be the beat's action-state subject while
+        # another is a deliberate STILL counterpoint, and the two must not be judged by the same bar. Judge every
+        # named character against ITS OWN declared state; fires if ANY character deviates from its own state (a
+        # "static-calm" character rendered racing at speed still fails — this is not a blanket exemption).
+        per_char = []
+        for c in chars:
+            state = str(action_states.get(c) or "").strip().lower()
+            if state in ("dynamic-flight", "dynamic", "flight"):
+                per_char.append(
+                    f"{c} (declared DYNAMIC-FLIGHT — caught mid-{action_verb}, already accelerating): wings must be "
+                    "ASYMMETRIC (one visibly higher than the other, mid-downstroke — NOT both spread open and "
+                    "symmetrical) AND the body must LEAN FORWARD/DOWN into the direction of travel with legs tucked "
+                    f"or trailing back (NOT hanging near-vertical with legs dangling straight down like a puppet at "
+                    f"rest). Flag {c} under ACTION_STATE_MISMATCH if EITHER condition fails.")
+            elif state in ("static-calm", "static", "calm"):
+                per_char.append(
+                    f"{c} (declared STATIC-CALM — a deliberate still counterpoint, NOT part of this beat's action "
+                    f"verb): an upright, hovering or gently-posed body is CORRECT for {c} — symmetrical or naturally "
+                    f"fluttering wings are FINE and must NOT be flagged. Flag {c} under ACTION_STATE_MISMATCH ONLY "
+                    "if she instead shows the racing signature — body sharply angled forward/down into a flight "
+                    "line with a speed/motion trail behind her, i.e. wrongly staged as if she were also the action "
+                    "subject.")
+        if per_char:
+            items.append(("ACTION_STATE_MISMATCH", "Each named character below has its OWN declared action state "
+                          "for this beat — judge every character SEPARATELY against its own line, never hold one "
+                          "character to another's bar:\n" + "\n".join(per_char)))
+    elif action_verb and bees_present:
         # concrete, checkable criteria — the SAME ones cb_prompts.build_keyframe_prompt's WINGS/FLIGHT-ENERGY law
         # asks the generator to produce, so QA verifies the exact thing generation was told to do, not a vague
-        # "does this look dynamic enough" taste call the model will wave through.
+        # "does this look dynamic enough" taste call the model will wave through. UNIFORM bar — used only when a
+        # beat has no per-character actionStates declared (see above); every bee in frame is held to one bar.
         items.append(("ACTION_STATE_MISMATCH", f"look SPECIFICALLY at each bee's WINGS and BODY ANGLE (this beat calls "
                       f"for them caught mid-{action_verb}, already accelerating): (1) WINGS — are both wings spread "
                       "OPEN and SYMMETRICAL (same angle, mirror images of each other)? That is a static hover/rest "

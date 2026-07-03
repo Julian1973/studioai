@@ -1,6 +1,7 @@
 REFERENCE IMAGES:
 [Image 1] — Fuzzby Reference: Maintain this character's specific facial features and proportions exactly.
 [Image 2] — Zenny Reference: Maintain this character's specific facial features and proportions exactly.
+[Image 3] — Scene Plate (the empty set): the EXACT location — composite the characters INTO it; reproduce its layout, set dressing, depth and lighting unchanged, adding only the characters.
 
 PROMPT:
 Reason through this composition:
@@ -11,7 +12,7 @@ CHARACTER 2 (Zenny): Use Image 2. Zenny weave flower to flower collecting pollen
 
 EXPRESSION & MOOD (the opening read — show it in the faces and body language; this is the FIRST frame, before the action): A fizzy upward bounce in the chest that lands as a soft FWIP in the ribs within the first two seconds. Surface: Fuzzby performs expert competence; Zenny performs calm efficiency. Underneath: Fuzzby is desperate to be impressive and accepted; Zenny is already amused and fond, though she refuses to give him the satisfaction yet. Crystal truth: No bear crystal is present in this scene; the truth is carried by the environment instead: warm pollen light stays steady around Zenny's calm competence while it scatters wildly around Fuzzby's performed competence, revealing the need beneath his proud face. The audience should feel: A sunny belly-laugh that says this world is safe enough to be silly in.
 
-ENVIRONMENT & CONTEXT: Place them in a sunlit wildflower meadow in Crystal Cove, framed at bee-flight height so ordinary lavender spikes, daisies and clover loom like a towering blossom corridor. Sparkling heart-shaped light trails and floating cut crystals (quartz, amethyst, opal, garnet) drift among the stems and rest low in the grass; warm rolling hills glow gold-pink in the deep background.
+ENVIRONMENT & CONTEXT: Place the characters INTO Image 3 (the empty set) — in a sunlit wildflower meadow in Crystal Cove, framed at bee-flight height so ordinary lavender spikes, daisies and clover loom like a towering blossom corridor. Sparkling heart-shaped light trails and floating cut crystals (quartz, amethyst, opal, garnet) drift among the stems and rest low in the grass; warm rolling hills glow gold-pink in the deep background. Keep its set, dressing, depth and lighting exactly; add only the characters.
 
 COMPOSITION: Drone-style chase opens low and wide through towering flowers, gentle organic push. Compose a natural film shot with the subject(s) clear and appropriately scaled within the frame.
 

@@ -772,8 +772,48 @@ function card(s){
     <div class="act">${_esc((s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||''))}</div>${s.dialogue?`<div class="dlg">"${_esc(s.dialogue.replace(/^[A-Z' ]+:\s*/,''))}"</div>`:''}
     <span class="st" style="color:${v(sc)};${sb?'background:'+v(sb):''}">${slab}</span>${noteChip(s)}</div></div>`;
 }
+function sceneBeats(sceneNumber){
+  // beats only, in AUTHORED order (package order, not re-sorted) — the same sequence the relay walks.
+  return SHOTS.filter(x=>x._beat&&String(x.sceneNumber)==String(sceneNumber));
+}
+function visionCodes(){
+  // declared vision shot codes for the CURRENT episode (cb_prompts.vision_for's data, server-exposed via
+  // /api/pipeline's "visions" key) — a vision beat never chains and is never chained through.
+  return new Set((PIPE.visions||{})["Ep"+((CUR&&CUR.number)||1)]||[]);
+}
 function keyframesFor(s){
   const pre=PREFIX+s.shotCode+"_", slug=s&&s.slug;
+  if(s._beat){
+    // THE STORYBOARD SHOWS THE LOOP'S TRUTH (Julian, 2026-07-04): only the scene's first beat shows its OWN
+    // generated keyframe. Every beat after it shows the RELAY ANCHOR it received from its predecessor's signed
+    // clip (harvested + re-minted settle frame) — never its own pre-relay keyframe file, even if one still
+    // exists on disk. "awaiting relay" when the chain hasn't produced that anchor yet (the predecessor hasn't
+    // been fired + approved through fire_next_beat). Mirrors cb_scene.relay_source_for's own walk-back-past-
+    // visions logic EXACTLY (a vision beat keeps its own keyframe like the scene's first beat; the walk-back
+    // for a later beat skips over any vision sitting at its predecessor position) so the storyboard never
+    // disagrees with what the engine will actually chain off — a review pass caught the frontend silently
+    // treating a vision as an ordinary predecessor, which the engine never does.
+    const beats=sceneBeats(s.sceneNumber);
+    const idx=beats.findIndex(b=>b.shotCode==s.shotCode);
+    const visions=visionCodes();
+    if(idx<=0||visions.has(s.shotCode)){
+      const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png")&&!/_end\.png$|_settle\.png$|_remint\.png$/.test(m));
+      const exactStart=slug&&pngs.includes(pre+slug+".png")?pre+slug+".png":null;
+      return {start:exactStart||pngs[0]||null, isAnchor:true};
+    }
+    let j=idx-1;
+    while(j>=0&&visions.has(beats[j].shotCode)) j--;
+    if(j<0){
+      const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png")&&!/_end\.png$|_settle\.png$|_remint\.png$/.test(m));
+      const exactStart=slug&&pngs.includes(pre+slug+".png")?pre+slug+".png":null;
+      return {start:exactStart||pngs[0]||null, isAnchor:true};
+    }
+    const prev=beats[j];
+    const prevPre=PREFIX+prev.shotCode+"_", prevSlug=prev.slug;
+    const remint=prevSlug?prevPre+prevSlug+"_remint.png":null;
+    const hasRemint=!!(remint&&MEDIA.includes(remint));
+    return {start:hasRemint?remint:null, awaitingRelay:!hasRemint, isAnchor:false, relayFrom:prev.shotCode};
+  }
   const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png"));
   // prefer the beat's CURRENT slug (same fix as mediaFor — a stale duplicate must never shadow the real start frame)
   const exactStart=slug&&pngs.includes(pre+slug+".png")?pre+slug+".png":null;
@@ -782,8 +822,8 @@ function keyframesFor(s){
 function kfCard(s){
   const kf=keyframesFor(s),pc=PILL[s.intent.pillar]||PILL.Spark;
   const wb=s.keenWristbands&&s.keenWristbands!="none"?`<span class="pill" style="color:${s.keenWristbands=='crystal'?'#185FA5':'#5F5E5A'};background:${s.keenWristbands=='crystal'?'#E6F1FB':'#F1EFE8'}">${s.keenWristbands=='crystal'?'◆ crystal':'◇ vacant'}</span>`:'';
-  const cell=(src,lab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:#efeef6;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/engine/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">▤</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · pending'}</div></div>`;
-  const frames=s._beat?cell(kf.start,'OPENING KEYFRAME'):`${cell(kf.start,'START')}<span style="color:var(--hint)">→</span>${cell(kf.end,'END')}`;
+  const cell=(src,lab,emptyLab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:#efeef6;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/engine/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">${emptyLab?'⧗':'▤'}</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · '+(emptyLab||'pending')}</div></div>`;
+  const frames=s._beat?cell(kf.start,kf.isAnchor?'OPENING KEYFRAME':'RELAY ANCHOR',kf.awaitingRelay?'awaiting relay':undefined):`${cell(kf.start,'START')}<span style="color:var(--hint)">→</span>${cell(kf.end,'END')}`;
   const meta=s._beat?`Beat ${s.shotCode} · ${s.duration}s · ${(s._cuts||[]).length} cuts`:`Shot ${s.shotCode} · ${s.shotSize} · ${s.duration}s`;
   return `<div class="card" onclick="openShot(${s.id})"><div style="padding:9px 11px">
     <div class="crow"><span class="meta" style="margin:0">${meta}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(s.intent.pillar)}</span></div>
@@ -1249,15 +1289,19 @@ async function openShot(id,kind){
   try{PIPE=await (await fetch(BASE+"/api/pipeline")).json();}catch(e){}
   const _code=s.shotCode||s.id,_note=(PIPE.notes||{})[_code]||"",_kind=(kind=="clip")?"clip":"keyframe";  // explicit kind (page-coupling removed)
   const _rj=Object.values(PIPE.jobs||{}).filter(j=>j.gate=="regen:"+_code).sort((a,b)=>a.started-b.started).pop(),_run=_rj&&_rj.status=="running";
+  const isB=s._beat;
   // ALWAYS show the keyframe IMAGE at the top; if a clip/animation exists, show it BELOW it (never instead) so you can always see the still.
+  // THE LOOP'S TRUTH (Julian, 2026-07-04): for a beat, never fall back to m.key (mediaFor isn't relay-aware —
+  // it would silently resurface the beat's own archived pre-relay keyframe). _kf.start is the only source of
+  // truth here; "awaiting relay" gets its own explicit placeholder instead of the generic "no key image yet".
   let media="";
   if(_kf.start&&_kf.end) media=cmpSlider(_kf.start,_kf.end);
-  else if(_kf.start||m.key) media=`<img class="media" src="${BASE}/engine/media/${_kf.start||m.key}?v=${MEDIA_V}"/>`;
+  else if(_kf.start||(!isB&&m.key)) media=`<img class="media" src="${BASE}/engine/media/${_kf.start||m.key}?v=${MEDIA_V}"/>`;
+  else if(isB&&_kf.awaitingRelay) media=`<div class="media" style="height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--hint);background:#efeef6;border-radius:8px"><span style="font-size:14px;font-weight:600">⧗ Awaiting relay</span><span style="font-size:11.5px;text-align:center;max-width:340px;padding:0 12px">This beat's relay anchor from ${_esc(_kf.relayFrom||'the previous beat')} hasn't been approved yet — approve it in ${_esc(_kf.relayFrom||'that beat')}'s panel to bring the officially cleaned frame in here.</span></div>`;
   const _clip=m.final||m.clip;
   if(_clip) media+=`<div class="kv" style="margin-top:10px">Animation</div><video class="media" src="${BASE}/engine/media/${_clip}?v=${MEDIA_V}" controls></video>`;
   if(!media) media=`<div class="media" style="height:160px;display:flex;align-items:center;justify-content:center;color:var(--hint)">No key image yet</div>`;
-  const isB=s._beat;
-  const _kfExists=!!(_kf.start||m.key);
+  const _kfExists=!!(_kf.start||(!isB&&m.key));
   const _cast=(s.characters||[]);
   const masterUI=(isB&&_kind=="keyframe"&&_kfExists)
     ? (_cast.length===1

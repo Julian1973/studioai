@@ -221,6 +221,21 @@ def notes_state():
     try: return json.loads(f.read_text()) if f.exists() else {}
     except Exception: return {}
 
+def visions_state():
+    """{"Ep1": ["2.V1", ...], ...} — every declared vision shot code per episode, straight off continuity.json.
+    Lets the Studio's relay-truth walk-back (app.html's keyframesFor) skip vision beats exactly like the
+    engine's own cb_prompts.vision_for does server-side — a vision never chains and is never chained through."""
+    f = CBGEN / "config" / "continuity.json"
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+    out = {}
+    for ep, block in d.items():
+        if isinstance(block, dict):
+            out[ep] = [v.get("shot") for v in (block.get("visions") or []) if isinstance(v, dict) and v.get("shot")]
+    return out
+
 def continuity_state():
     try:
         p = subprocess.run(["python3", "cb_continuity.py", "--json"], cwd=str(CBGEN),
@@ -623,7 +638,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         if self.path == "/api/pipeline":
-            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state()})
+            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state(), "visions": visions_state()})
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})

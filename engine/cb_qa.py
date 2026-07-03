@@ -8,6 +8,14 @@ continuity supervisor whether the render matches — set identical to the master
 items exactly as their reference. It catches the drifted pier / wrong cuff BEFORE Julian's eye does.
 
     python3 cb_qa.py [package.json] <scene>
+
+DOCTRINE — every checklist item MUST state CONCRETE, LITERALLY-CHECKABLE visual criteria, never a subjective
+question (Julian's Ruling, 2026-07-03). Worked example, ACTION_STATE_MISMATCH's first draft: asking "does this
+pose read static, posed, standing still, or passively floating?" is a taste call a generous grader waves through
+— it PASSED both of the known-bad 1.B1/1.B2 keyframes clean. Rewritten to ask two concrete things — are the wings
+SYMMETRICAL (fail) or ASYMMETRIC/mid-downstroke (pass)? Is the body VERTICAL with legs dangling (fail) or LEANING
+FORWARD into the direction of travel (pass)? — and it correctly failed both. Name the specific feature (an angle,
+a count, a symmetry, a position) that separates a pass from a fail; never phrase an item as an open judgment call.
 """
 import json, os, sys, struct, time, re, subprocess, tempfile, shutil, requests
 import cb_gen, cb_prompts as P

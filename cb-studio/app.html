@@ -772,8 +772,48 @@ function card(s){
     <div class="act">${_esc((s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||''))}</div>${s.dialogue?`<div class="dlg">"${_esc(s.dialogue.replace(/^[A-Z' ]+:\s*/,''))}"</div>`:''}
     <span class="st" style="color:${v(sc)};${sb?'background:'+v(sb):''}">${slab}</span>${noteChip(s)}</div></div>`;
 }
+function sceneBeats(sceneNumber){
+  // beats only, in AUTHORED order (package order, not re-sorted) — the same sequence the relay walks.
+  return SHOTS.filter(x=>x._beat&&String(x.sceneNumber)==String(sceneNumber));
+}
+function visionCodes(){
+  // declared vision shot codes for the CURRENT episode (cb_prompts.vision_for's data, server-exposed via
+  // /api/pipeline's "visions" key) — a vision beat never chains and is never chained through.
+  return new Set((PIPE.visions||{})["Ep"+((CUR&&CUR.number)||1)]||[]);
+}
 function keyframesFor(s){
   const pre=PREFIX+s.shotCode+"_", slug=s&&s.slug;
+  if(s._beat){
+    // THE STORYBOARD SHOWS THE LOOP'S TRUTH (Julian, 2026-07-04): only the scene's first beat shows its OWN
+    // generated keyframe. Every beat after it shows the RELAY ANCHOR it received from its predecessor's signed
+    // clip (harvested + re-minted settle frame) — never its own pre-relay keyframe file, even if one still
+    // exists on disk. "awaiting relay" when the chain hasn't produced that anchor yet (the predecessor hasn't
+    // been fired + approved through fire_next_beat). Mirrors cb_scene.relay_source_for's own walk-back-past-
+    // visions logic EXACTLY (a vision beat keeps its own keyframe like the scene's first beat; the walk-back
+    // for a later beat skips over any vision sitting at its predecessor position) so the storyboard never
+    // disagrees with what the engine will actually chain off — a review pass caught the frontend silently
+    // treating a vision as an ordinary predecessor, which the engine never does.
+    const beats=sceneBeats(s.sceneNumber);
+    const idx=beats.findIndex(b=>b.shotCode==s.shotCode);
+    const visions=visionCodes();
+    if(idx<=0||visions.has(s.shotCode)){
+      const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png")&&!/_end\.png$|_settle\.png$|_remint\.png$/.test(m));
+      const exactStart=slug&&pngs.includes(pre+slug+".png")?pre+slug+".png":null;
+      return {start:exactStart||pngs[0]||null, isAnchor:true};
+    }
+    let j=idx-1;
+    while(j>=0&&visions.has(beats[j].shotCode)) j--;
+    if(j<0){
+      const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png")&&!/_end\.png$|_settle\.png$|_remint\.png$/.test(m));
+      const exactStart=slug&&pngs.includes(pre+slug+".png")?pre+slug+".png":null;
+      return {start:exactStart||pngs[0]||null, isAnchor:true};
+    }
+    const prev=beats[j];
+    const prevPre=PREFIX+prev.shotCode+"_", prevSlug=prev.slug;
+    const remint=prevSlug?prevPre+prevSlug+"_remint.png":null;
+    const hasRemint=!!(remint&&MEDIA.includes(remint));
+    return {start:hasRemint?remint:null, awaitingRelay:!hasRemint, isAnchor:false, relayFrom:prev.shotCode};
+  }
   const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png"));
   // prefer the beat's CURRENT slug (same fix as mediaFor — a stale duplicate must never shadow the real start frame)
   const exactStart=slug&&pngs.includes(pre+slug+".png")?pre+slug+".png":null;
@@ -782,8 +822,8 @@ function keyframesFor(s){
 function kfCard(s){
   const kf=keyframesFor(s),pc=PILL[s.intent.pillar]||PILL.Spark;
   const wb=s.keenWristbands&&s.keenWristbands!="none"?`<span class="pill" style="color:${s.keenWristbands=='crystal'?'#185FA5':'#5F5E5A'};background:${s.keenWristbands=='crystal'?'#E6F1FB':'#F1EFE8'}">${s.keenWristbands=='crystal'?'◆ crystal':'◇ vacant'}</span>`:'';
-  const cell=(src,lab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:#efeef6;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/engine/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">▤</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · pending'}</div></div>`;
-  const frames=s._beat?cell(kf.start,'OPENING KEYFRAME'):`${cell(kf.start,'START')}<span style="color:var(--hint)">→</span>${cell(kf.end,'END')}`;
+  const cell=(src,lab,emptyLab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:#efeef6;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/engine/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">${emptyLab?'⧗':'▤'}</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · '+(emptyLab||'pending')}</div></div>`;
+  const frames=s._beat?cell(kf.start,kf.isAnchor?'OPENING KEYFRAME':'RELAY ANCHOR',kf.awaitingRelay?'awaiting relay':undefined):`${cell(kf.start,'START')}<span style="color:var(--hint)">→</span>${cell(kf.end,'END')}`;
   const meta=s._beat?`Beat ${s.shotCode} · ${s.duration}s · ${(s._cuts||[]).length} cuts`:`Shot ${s.shotCode} · ${s.shotSize} · ${s.duration}s`;
   return `<div class="card" onclick="openShot(${s.id})"><div style="padding:9px 11px">
     <div class="crow"><span class="meta" style="margin:0">${meta}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(s.intent.pillar)}</span></div>
@@ -873,6 +913,8 @@ function showToast(msg,ok){
 }
 function jobLabel(j){
   if(String(j.gate).startsWith('regen'))return 'Regenerate '+String(j.gate).split(':')[1];
+  if(String(j.gate).startsWith('relay-prepare'))return 'Relay — preparing '+String(j.gate).split(':')[1]+"'s anchor";
+  if(String(j.gate).startsWith('relay-approve'))return 'Relay — launching the next beat off '+String(j.gate).split(':')[1];
   if(String(j.gate)=="write")return "Gate 0 · Writers' Room";
   const d=GATE_DEF[+j.gate-1]; return 'Gate '+j.gate+(d?' · '+d[1]:'');
 }
@@ -1247,15 +1289,19 @@ async function openShot(id,kind){
   try{PIPE=await (await fetch(BASE+"/api/pipeline")).json();}catch(e){}
   const _code=s.shotCode||s.id,_note=(PIPE.notes||{})[_code]||"",_kind=(kind=="clip")?"clip":"keyframe";  // explicit kind (page-coupling removed)
   const _rj=Object.values(PIPE.jobs||{}).filter(j=>j.gate=="regen:"+_code).sort((a,b)=>a.started-b.started).pop(),_run=_rj&&_rj.status=="running";
+  const isB=s._beat;
   // ALWAYS show the keyframe IMAGE at the top; if a clip/animation exists, show it BELOW it (never instead) so you can always see the still.
+  // THE LOOP'S TRUTH (Julian, 2026-07-04): for a beat, never fall back to m.key (mediaFor isn't relay-aware —
+  // it would silently resurface the beat's own archived pre-relay keyframe). _kf.start is the only source of
+  // truth here; "awaiting relay" gets its own explicit placeholder instead of the generic "no key image yet".
   let media="";
   if(_kf.start&&_kf.end) media=cmpSlider(_kf.start,_kf.end);
-  else if(_kf.start||m.key) media=`<img class="media" src="${BASE}/engine/media/${_kf.start||m.key}?v=${MEDIA_V}"/>`;
+  else if(_kf.start||(!isB&&m.key)) media=`<img class="media" src="${BASE}/engine/media/${_kf.start||m.key}?v=${MEDIA_V}"/>`;
+  else if(isB&&_kf.awaitingRelay) media=`<div class="media" style="height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--hint);background:#efeef6;border-radius:8px"><span style="font-size:14px;font-weight:600">⧗ Awaiting relay</span><span style="font-size:11.5px;text-align:center;max-width:340px;padding:0 12px">This beat's relay anchor from ${_esc(_kf.relayFrom||'the previous beat')} hasn't been approved yet — approve it in ${_esc(_kf.relayFrom||'that beat')}'s panel to bring the officially cleaned frame in here.</span></div>`;
   const _clip=m.final||m.clip;
   if(_clip) media+=`<div class="kv" style="margin-top:10px">Animation</div><video class="media" src="${BASE}/engine/media/${_clip}?v=${MEDIA_V}" controls></video>`;
   if(!media) media=`<div class="media" style="height:160px;display:flex;align-items:center;justify-content:center;color:var(--hint)">No key image yet</div>`;
-  const isB=s._beat;
-  const _kfExists=!!(_kf.start||m.key);
+  const _kfExists=!!(_kf.start||(!isB&&m.key));
   const _cast=(s.characters||[]);
   const masterUI=(isB&&_kind=="keyframe"&&_kfExists)
     ? (_cast.length===1
@@ -1302,9 +1348,73 @@ async function openShot(id,kind){
         : `<button class="btn" ${_run?'disabled':''} style="${_run?'opacity:.5;cursor:default':''}" onclick="regenShot('${s.sceneNumber}','${_code}','clip','both')">${_run?'Regenerating…':'Regenerate clip'}</button>`}
       <span style="font-size:11.5px;color:var(--hint)">${_run?'running — this can take a minute':(_kind=="keyframe"?'your note applies to whatever you regenerate':'feeds your note into the prompt and re-renders this beat')}</span>
     </div>
-    ${masterUI}`;
+    ${masterUI}
+    ${isB?`<div id="relayPanel_${_code}" style="margin-top:16px"></div>`:''}`;
   document.getElementById("modal").classList.add("show");
-  if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);}
+  if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);fetchRelayInfo(s.sceneNumber,s.shotCode);}
+}
+// ── THE RELAY, front door (Julian, 2026-07-03) — seeds land here, QA shows, winner pick is a button, the
+// prepared anchor + its drift verdict display, and Approve Anchor is the ONLY thing that may launch the next
+// beat. Same stop-points as the terminal fire_next_beat flow; nothing here advances without an explicit click.
+async function fetchRelayInfo(scene,code){
+  const el=document.getElementById('relayPanel_'+code); if(!el)return;
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const [seedsJ,relayJ]=await Promise.all([
+      fetch(BASE+"/api/beat-seeds?code="+encodeURIComponent(code)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json()),
+      fetch(BASE+"/api/relay-state?scene="+encodeURIComponent(scene)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json())
+    ]);
+    renderRelayPanel(scene,code,seedsJ.seeds||[],relayJ||{});
+  }catch(e){el.innerHTML=`<div style="font-size:11px;color:var(--hint)">Couldn't load the relay/seed state — is the server running?</div>`;}
+}
+function renderRelayPanel(scene,code,seeds,relay){
+  const el=document.getElementById('relayPanel_'+code); if(!el)return;
+  let h='';
+  if(seeds.length){
+    h+=`<div class="kv" style="color:var(--brandink);border-top:2px solid var(--brand);padding-top:9px">◈ Candidate seeds — pick the winner</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">`+seeds.map(sd=>{
+        const qa=sd.qa,qaOk=qa&&qa.ok===true,qaBad=qa&&qa.ok===false;
+        const qaLab=qa?(qaOk?`<span style="color:var(--ok)">✓ ${_esc(qa.verdict||'PASS')}</span>`:qaBad?`<span style="color:#c0392b">✗ ${_esc(qa.verdict||'FAIL')}</span>`:_esc(qa.verdict||''))
+                      :`<span style="color:var(--hint)">no QA recorded</span>`;
+        return `<div style="width:220px"><video src="${BASE}/engine/media/${sd.file}?v=${MEDIA_V}" controls style="width:100%;border-radius:6px;background:#000"></video>
+          <div style="font-size:10.5px;margin-top:3px;line-height:1.4">Seed ${sd.n} · ${qaLab}</div>
+          <button class="btn ghost" style="margin-top:4px;padding:4px 9px;font-size:11px;width:100%" onclick="pickWinner('${scene}','${code}','${sd.file}')">${relay.winnerCode==code?'↻ Re-pick as winner':'✓ Pick as winner'}</button></div>`;
+      }).join('')+`</div>`;
+  }
+  if(relay.winnerCode==code){
+    const dc=relay.driftCheck||{},clean=dc.ok===true;
+    h+=`<div class="kv" style="color:var(--brandink);margin-top:14px">◈ Prepared relay anchor — for ${_esc(relay.nextCode||'the next beat')}</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
+        ${relay.remint?`<img src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:#efeef6"/>`:''}
+        <div style="flex:1;min-width:220px">
+          <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'}</div>
+          <div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>
+          <button class="btn" style="margin-top:8px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${scene}','${code}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')}</button>
+          ${clean?'':`<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-pick a seed above to retry the re-mint (harvest + re-mint run fresh each time), or hold for a ruling. check_remint's bar is untouched.</div>`}
+        </div>
+      </div>`;
+  }
+  if(!seeds.length && relay.winnerCode!=code)
+    h+=`<div style="font-size:11px;color:var(--hint);border-top:2px solid var(--brand);padding-top:9px">◈ No seed takes yet for this beat — these land once the previous beat's anchor is approved (or fire this beat directly via Gate 3).</div>`;
+  el.innerHTML=h;
+}
+async function pickWinner(scene,code,seedFile){
+  if(!confirm(`Designate ${seedFile} as ${code}'s winner?\n\nThis copies it in as the official clip, then harvests + re-mints its settle frame for the relay anchor. Nothing launches yet — you approve the anchor separately.`))return;
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const r=await fetch(BASE+"/api/relay-prepare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,seedPath:'media/'+seedFile,episode:ep})});
+    const j=await r.json();if(!j.ok){alert("Couldn't start the relay prepare: "+(j.error||"failed"));return;}
+    closeM();setTimeout(refreshPipe,400);
+  }catch(e){alert("Can't reach the studio server.");}
+}
+async function approveAnchor(scene,code){
+  if(!confirm(`Approve ${code}'s anchor and launch the next beat's two seeds?\n\nThis is the ONLY action that launches the next beat — nothing else advances the relay.`))return;
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const r=await fetch(BASE+"/api/relay-approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,episode:ep})});
+    const j=await r.json();if(!j.ok){alert("Couldn't approve: "+(j.error||"failed"));return;}
+    closeM();setTimeout(refreshPipe,400);
+  }catch(e){alert("Can't reach the studio server.");}
 }
 function closeM(){document.getElementById("modal").classList.remove("show")}
 document.getElementById("modal").onclick=e=>{if(e.target.id=="modal")closeM()};

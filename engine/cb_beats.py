@@ -454,6 +454,9 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
         seed_out = f"media/{episode}_{next_code}_seed{i}.mp4"
         if os.path.exists(official_next):
             shutil.copyfile(official_next, seed_out)
+            official_qa = f"media/{episode}_{next_code}_{next_slug}.qa.json"
+            if os.path.exists(official_qa):    # preserve THIS seed's own QA verdict — the next loop iteration
+                shutil.copyfile(official_qa, f"media/{episode}_{next_code}_seed{i}.qa.json")  # overwrites official_qa before it's copied
             results.append(seed_out)
             print(f"  -> {seed_out}", flush=True)
         else:

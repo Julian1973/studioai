@@ -221,6 +221,21 @@ def notes_state():
     try: return json.loads(f.read_text()) if f.exists() else {}
     except Exception: return {}
 
+def visions_state():
+    """{"Ep1": ["2.V1", ...], ...} — every declared vision shot code per episode, straight off continuity.json.
+    Lets the Studio's relay-truth walk-back (app.html's keyframesFor) skip vision beats exactly like the
+    engine's own cb_prompts.vision_for does server-side — a vision never chains and is never chained through."""
+    f = CBGEN / "config" / "continuity.json"
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+    out = {}
+    for ep, block in d.items():
+        if isinstance(block, dict):
+            out[ep] = [v.get("shot") for v in (block.get("visions") or []) if isinstance(v, dict) and v.get("shot")]
+    return out
+
 def continuity_state():
     try:
         p = subprocess.run(["python3", "cb_continuity.py", "--json"], cwd=str(CBGEN),
@@ -447,6 +462,21 @@ def rebuild_keyframes(scene, episode="Ep1"):
     return _start(_jid(f"rebuild_kf_{scene}"), "2b", scene,
                   ["cb_pipeline.py", "rebuild", str(scene), f"--episode={episode}"])
 
+# ── THE RELAY, front door (Julian, 2026-07-03) — job-launch wrappers around cb_pipeline.relay_prepare/
+#    relay_approve. relay_approve_beat is the ONLY function in this file that may fire fire_next_beat's
+#    approved=True launch — the Approve Anchor button in app.html is the only caller of it.
+def relay_prepare_beat(scene, winner_code, seed_path, seeds=2, episode="Ep1"):
+    """PHASE 1: designate the picked seed, harvest, re-mint, drift-check, STOP for approval (job)."""
+    return _start(_jid(f"relayprep_{winner_code}"), f"relay-prepare:{winner_code}", scene,
+                  ["cb_pipeline.py", "relay-prepare", str(scene), str(winner_code), str(seed_path),
+                   str(seeds), f"--episode={episode}"])
+
+def relay_approve_beat(scene, winner_code, seeds=2, episode="Ep1"):
+    """PHASE 2: launch the next beat's seeds off the anchor an earlier relay_prepare_beat already produced (job)."""
+    return _start(_jid(f"relayapprove_{winner_code}"), f"relay-approve:{winner_code}", scene,
+                  ["cb_pipeline.py", "relay-approve", str(scene), str(winner_code),
+                   str(seeds), f"--episode={episode}"])
+
 # ── STATIC FILE HARDENING (security) ──────────────────────────────────────────────────────────────────────────
 # The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read engine/.env (API keys),
 # *.py source, *.bak snapshots, *.log, internal config/state, node_modules and audit/archive/unpack folders.
@@ -608,7 +638,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         if self.path == "/api/pipeline":
-            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state()})
+            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state(), "visions": visions_state()})
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
@@ -754,6 +784,42 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, obj)
             except Exception as e:
                 return self._json(400, {"error": str(e)})
+        if self.path.startswith("/api/relay-state"):
+            # read-only: the prepared (unapproved) anchor for this scene, straight off relay_state.json — never
+            # re-derives or re-calls NB2. Empty {} if nothing is waiting (no anchor prepared, or already launched).
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            f = CBGEN / "relay_state.json"
+            try:
+                d = json.loads(f.read_text()) if f.exists() else {}
+            except Exception:
+                d = {}
+            return self._json(200, d.get(ep, {}).get(scene) or {})
+        if self.path.startswith("/api/beat-seeds"):
+            # the candidate takes for one beat (Ep1_{code}_seed{N}.mp4) + each one's cached QA verdict, if any —
+            # never re-runs QA here (that's a real vision call; it's cached at render time as a .qa.json sidecar).
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]; code = (q.get("code") or [""])[0]
+            if not code:
+                return self._json(400, {"error": "code required"})
+            import re as _re
+            pat = _re.compile(r"^" + _re.escape(f"{ep}_{code}_seed") + r"(\d+)\.mp4$")
+            seeds = []
+            if MEDIA.exists():
+                for p in sorted(MEDIA.glob(f"{ep}_{code}_seed*.mp4")):
+                    m = pat.match(p.name)
+                    if not m:
+                        continue
+                    qa_p = MEDIA / f"{ep}_{code}_seed{m.group(1)}.qa.json"
+                    qa = None
+                    if qa_p.exists():
+                        try: qa = json.loads(qa_p.read_text())
+                        except Exception: qa = None
+                    seeds.append({"n": int(m.group(1)), "file": p.name, "qa": qa})
+            seeds.sort(key=lambda s: s["n"])
+            return self._json(200, {"seeds": seeds})
         if self.path.startswith("/api/beat-prompt"):
             # TICKET 4 — the editable JSON the Cascade panel surfaces: kind=seedance (clip take) | keyframe (image).
             import sys as _sys
@@ -964,6 +1030,28 @@ class H(http.server.SimpleHTTPRequestHandler):
                 scene = str(d["scene"]); beat = str(d["beat"]); stage = str(d["stage"]); episode = d.get("episode", "Ep1")
                 ok, log, nxt = approve_beat(scene, beat, stage, episode, value=d.get("value", True))
                 self._json(200, {"ok": ok, "log": log, "next": nxt})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/relay-prepare":
+            # PHASE 1 (front door): "Pick as winner" on a seed calls this. Designates the seed, harvests its
+            # settle frame, re-mints it, runs the drift check, then STOPS — never launches anything.
+            try:
+                d = self._body()
+                scene = str(d["scene"]); code = str(d["code"]); seed = str(d["seedPath"])
+                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2))
+                self._json(200, {"ok": True, "jobId": relay_prepare_beat(scene, code, seed, seeds, episode)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/relay-approve":
+            # PHASE 2 (front door): the Approve Anchor button — the ONLY caller of this route, which is the
+            # ONLY thing allowed to launch the next beat's seeds (fire_next_beat approved=True).
+            try:
+                d = self._body()
+                scene = str(d["scene"]); code = str(d["code"])
+                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2))
+                self._json(200, {"ok": True, "jobId": relay_approve_beat(scene, code, seeds, episode)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

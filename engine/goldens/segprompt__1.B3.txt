@@ -4,7 +4,7 @@ SUBJECTS: @图2 is the larger, eager, manic bee (frame-LEFT); @图3 is the small
 
 ENVIRONMENT: @图1 is TRUTH — copy the environment and lighting from it exactly. a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals. Pollen clouds and petal bounce build the chaos; branch and blossom obstacles keep the corridor busy.
 
-STYLE: Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field.
+STYLE: Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy
 
 SHOT 1 (6s): Drone-style camera chases the larger bee full-throttle, energetic handheld-feel follow, frame-left, ending on the larger bee and the smaller bee in frame. the larger, eager, manic bee gasps, wipes at his face, somehow smears the pollen worse, then dives again toward another flower as the smaller, calm, deadpan bee watches from frame-right, working calm and precise; both airborne wings beat rapidly. Rule-of-three THUMPs with real weight.
 

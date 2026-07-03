@@ -153,6 +153,13 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
         stale = P.scene_cache_stale(episode, beat.get("sceneNumber"), pkg_path=pkg_path)
         if stale:
             blockers.append("scene cache: " + stale)
+        # THE CONTINUITY BLOCK on banned world vocabulary (Fable's code review, 2026-07-03) — a corrected-away
+        # scene name/description reappearing anywhere (e.g. Scene 1's old "Rainforest Pollen Run") is drift, not
+        # a taste call; hard-blocks the render exactly like the scene-cache staleness check above.
+        import cb_qa
+        vocab = cb_qa.check_scene_vocabulary(pkg_path, beat.get("sceneNumber"), episode)
+        if not vocab["ok"]:
+            blockers.append("banned vocabulary: " + vocab["verdict"])
     if not g["authoring_validator"]["ok"] or rstat == "NEEDS_SOURCE_DATA_FIX":
         status = "NEEDS_SOURCE_DATA_FIX"
     elif blockers:
@@ -345,14 +352,19 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
     print("=== BEAT DRIVER DONE ===", flush=True)
     return clips
 
-def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path, seeds=2):
+def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False):
     """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes Julian's WINNER for the
     beat just decided (winner_code + the exact seed file he picked), designates it as that beat's official signed
     clip, harvests its settle frame, then fires the NEXT beat in the scene — exactly `seeds` takes (2, per the
     ruling), RENDER ECONOMY LAW (the fast Seedance endpoint) — and STOPS. No parallel beats, no auto-advance:
     production within a scene is strictly serial through Julian's sign-offs — call this again only once he has
-    picked a winner for the beat this call just fired."""
-    import shutil, cb_scene
+    picked a winner for the beat this call just fired.
+
+    dry_run=True (Fable's code review, 2026-07-03, item TWO — "prove the relay injection"): NO file mutation
+    (winner_seed_path is ignored; harvests from winner_code's CURRENT official clip, whatever is already there)
+    and NO Seedance call. Returns {prompt, builder, images} for inspection instead of firing — the mechanism
+    check, not the render."""
+    import shutil, cb_scene, cb_segprompt
     d = json.load(open(pkg_path))
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
     beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
@@ -362,26 +374,50 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path, 
     if idx + 1 >= len(beats):
         print(f"fire_next_beat: {winner_code} is the scene's last beat — nothing to fire next", flush=True); return None
 
-    # 1. DESIGNATE THE WINNER — copy Julian's picked seed to the beat's OFFICIAL clip path (what every downstream
-    #    consumer — the relay, the stitch, the QA — treats as "this beat's signed clip").
     wb = beats[idx]
     w_slug = wb.get("slug", (winner_code or "").replace(".", "_"))
     official = f"media/{episode}_{winner_code}_{w_slug}.mp4"
-    if not os.path.exists(winner_seed_path):
-        print(f"fire_next_beat: winner seed {winner_seed_path} not found", flush=True); return None
-    shutil.copyfile(winner_seed_path, official)
-    print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
 
-    # 2. HARVEST — the sharpest frame in the winner's settle window; what the next beat opens from.
+    if dry_run:
+        # 1'. DRY RUN — no designation, no file mutation: use whatever is CURRENTLY the winner beat's official clip.
+        print(f"fire_next_beat [DRY RUN]: using {winner_code}'s CURRENT official clip as-is (no file changes)", flush=True)
+        if not os.path.exists(official):
+            print(f"fire_next_beat [DRY RUN]: {official} doesn't exist yet — nothing to harvest", flush=True); return None
+    else:
+        # 1. DESIGNATE THE WINNER — copy Julian's picked seed to the beat's OFFICIAL clip path (what every
+        #    downstream consumer — the relay, the stitch, the QA — treats as "this beat's signed clip").
+        if not winner_seed_path or not os.path.exists(winner_seed_path):
+            print(f"fire_next_beat: winner seed {winner_seed_path!r} not found", flush=True); return None
+        shutil.copyfile(winner_seed_path, official)
+        print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
+
+    # 2. HARVEST — the sharpest frame in the winner's settle window; what the next beat opens from. Real in both
+    #    modes (it only reads the clip and writes a derived _settle.png — never touches the official clip itself).
     settlef = cb_scene.harvest_settle_frame(episode, winner_code, w_slug)
-    print(f"fire_next_beat: harvested -> {settlef or '(FAILED — check the clip)'}", flush=True)
+    print(f"fire_next_beat{' [DRY RUN]' if dry_run else ''}: harvested -> {settlef or '(FAILED — check the clip)'}", flush=True)
     if not settlef:
         print("fire_next_beat: cannot proceed without a harvested settle frame; stopping.", flush=True); return None
 
-    # 3. FIRE THE NEXT BEAT ONLY — exactly `seeds` takes, render economy law, then STOP (no further advance).
     next_b = beats[idx + 1]
     next_code = next_b.get("beatCode") or next_b.get("shotCode")
     next_slug = next_b.get("slug", (next_code or "").replace(".", "_"))
+
+    if dry_run:
+        # 3'. PROVE THE INJECTION — build the next beat's real shipped prompt (relay=True) and the reference
+        #     image list it would upload, WITHOUT calling Seedance.
+        _scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), None)
+        prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True)
+        _chars = next_b.get("openingCast") or next_b.get("characters") or []
+        imgs = [settlef] + [a for c in _chars if (a := _anchor(c))]
+        _plate = f"media/{episode}_S{scene_num}_plate.png"
+        if os.path.exists(_plate):
+            imgs.append(_plate)
+        print(f"fire_next_beat [DRY RUN]: {next_code} shipped prompt (builder={builder}):\n{prompt}", flush=True)
+        print(f"fire_next_beat [DRY RUN]: would upload {len(imgs)} images: {imgs}", flush=True)
+        print(f"=== fire_next_beat [DRY RUN] complete for {next_code} — nothing fired, nothing mutated. ===", flush=True)
+        return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "next_code": next_code}
+
+    # 3. FIRE THE NEXT BEAT ONLY — exactly `seeds` takes, render economy law, then STOP (no further advance).
     official_next = f"media/{episode}_{next_code}_{next_slug}.mp4"
     results = []
     for i in range(1, seeds + 1):

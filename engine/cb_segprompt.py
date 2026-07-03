@@ -39,6 +39,17 @@ except Exception:
         "gliding or zipping bee is ALWAYS flapping. NEVER a still, frozen or motionless wing while a bee is in the air (a bee "
         "that stopped flapping would drop); wings only come to rest when the bee is fully landed or perched on a surface.")
 
+# STYLE LAW — the show's confirmed style line (Julian, 2026-07-03, item THREE of Fable's code review), loaded
+# from the show profile (shows/crystal-bears/laws/style.txt, declared in profile.json's laws.style key) the same
+# way as WING_LAW above. The inline string is the fallback if the law file is ever missing.
+_STYLE_LAW_FILE = os.path.join(os.path.dirname(P.CONFIG), "laws", "style.txt")
+try:
+    STYLE_LAW = open(_STYLE_LAW_FILE, encoding="utf-8").read().strip()
+except Exception:
+    STYLE_LAW = ("Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated "
+        "colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly "
+        "expressive slapstick comedy")
+
 # ══════════════════ GENERATE THE DEFINITIVE 6-SECTION PROMPT FROM ANY DIRECTOR BEAT ══════════════════
 # The Director brings the script to life; this turns each faithful beat into the SIGNED-OFF Seedance model — for EVERY
 # beat of EVERY episode, not just the hand-authored ones. Same structure: 12s/16:9 → REFERENCE LAW (@图1 keyframe +
@@ -429,7 +440,7 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
     return " ".join(bits)
 
 def _v3_style():
-    return "Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field."
+    return STYLE_LAW
 
 def _v3_negatives(any_bee):
     """Returns the 6 negative-constraint PHRASES as a list (each phrase may itself contain an internal comma —

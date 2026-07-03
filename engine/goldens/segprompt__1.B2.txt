@@ -1,7 +1,7 @@
 {
   "duration": 15,
   "aspect": "16:9",
-  "style": "Pixar-quality stylised 3D animation: warm volumetric light, weighty cartoon physics, shallow depth of field.",
+  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
   "references": {
     "@图1": "the opening keyframe — TRUTH for environment, lighting and continuity",
     "@图2": "the larger, eager, manic bee — identity reference every beat, the anti-drift anchor pulling this chain link back to canon",

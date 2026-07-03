@@ -1,4 +1,4 @@
-<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /CRYSTAL_BEARS_LOCKED_CANON.md at repo root. Regenerate: python3 tools/sync_canon.py -->
+<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /shows/crystal-bears/canon/LOCKED_CANON.md. Regenerate: python3 tools/sync_canon.py -->
 
 # THE CRYSTAL BEARS — Locked Canon & Asset Register
 
@@ -328,7 +328,7 @@ Never invent or drop wardrobe. Keep each character's full look (clothing + acces
 ### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
 
 Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
-- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. Rainforest, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
+- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. The meadow, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
 - **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
 - **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
 - **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.

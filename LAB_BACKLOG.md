@@ -66,13 +66,15 @@ end-states, a written invariant "rule" field, expression bindings, the ambience-
 line) were also applied to `cb_segprompt.py`'s `emit_json_v3` the same day — see the golden set
 (`engine/goldens/segprompt__1.B2.txt`, `segprompt__1.B5.txt`) for the resulting shipped shape.
 
-## 7. Julian's style line as the candidate show style line
+## 7. Julian's style line as the show style line — APPLIED 2026-07-03
 
-**FLAGGED, pending Julian's confirmation** — not the freeze alone; he must explicitly confirm before this replaces
-anything. Candidate replacement text for the show's style line in the profile: "Premium 3D animated feature film
-aesthetic for children, bright hyper-saturated colours, warm golden hour sunlight with volumetric rays, glowing
-magical particles, lighthearted highly expressive slapstick comedy" (from the same 1.B2 hybrid prompt). The current
-style line stays in place until he confirms the swap.
+**No longer a backlog item — Julian confirmed it directly** (Fable's code review sync, item THREE). Replaced the
+show profile's style law: `shows/crystal-bears/laws/style.txt` (declared in `profile.json`'s `laws.style` key) now
+holds "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm
+golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick
+comedy". `cb_segprompt.py`'s `_v3_style()` now reads this file at import time (mirroring exactly how `WING_LAW`
+loads from `laws/wing_law.txt`, inline-string fallback if the file is ever missing) instead of returning a
+hardcoded string — every beat's shipped prompt (both emitters) carries the confirmed line now, not a candidate.
 
 ## 8. A scripted distance envelope baked into @Audio1
 

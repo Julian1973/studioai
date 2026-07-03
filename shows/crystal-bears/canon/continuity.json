@@ -1,210 +1,210 @@
 {
- "_note": "",
- "Ep1": {
-  "visions": [
-   {
-    "shot": "2.V1",
-    "ofScene": "3",
-    "wristbands": "none in the vision; the cuffs have not yet been given, and Keen is checking his satchel beside his Mum before departure",
-    "style": "Aida’s POV into the vision: the vision bubble fills the entire frame, with only a soft rose-quartz haze and orb-edge at the outermost margins dissolving into darkness and mist; no sanctuary or Aida visible around it.",
-    "materialize": "Rose-quartz light coalesces within the full frame out of soft darkness, resolving into the later pier goodbye image before fading gently back to Aida."
-   }
-  ],
-  "recurring": [
-   {
-    "name": "Squeaky",
-    "appearance": "Canonical Squeaky dolphin model sheet; playful dolphin chirps and clicks; no added markings or accessories.",
-    "orientation": "Introduced frame-right of Keen’s boat in Scene 3, then keeps pace beside the boat through Scene 4; rescue orientation follows Keen toward the glowing shore.",
-    "anchorScene": "3"
-   },
-   {
-    "name": "Keen's Mum",
-    "appearance": "Canonical Keen’s Mum reference; adult female sized to Aida class, no clothes, gold scalloped collar and light-blue bow only.",
-    "orientation": "Anchored on the pier facing seaward as Keen departs; remains the emotional home point behind him.",
-    "anchorScene": "3"
-   },
-   {
-    "name": "Fuzzby and Zenny pair lock",
-    "appearance": "Fuzzby is the bigger male bee and Zenny is the smaller female bee; keep Fuzzby frame-left and Zenny frame-right whenever they share a frame.",
-    "orientation": "Fuzzby’s motion is fast, chaotic and forward-driving; Zenny holds steadier, cleaner counter-positioning.",
-    "anchorScene": "1"
-   }
-  ],
-  "persistent": [
-   {
-    "item": "Father’s gold cuffs, vacant",
-    "in": "On Keen’s wrists from the gift moment in Scene 3 through Scenes 4, 5 if glimpsed at sea, 6 if seen through rain, 7 underwater, and 8 on the beach",
-    "fromShot": "3.CUFFS"
-   },
-   {
-    "item": "Father’s gold cuffs, crystal-set",
-    "in": "On Keen’s wrists from the Aquamarine crystal settling in Scene 9 through Scene 10 and onward",
-    "fromShot": "9.CUFFS"
-   },
-   {
-    "item": "Storm-washed Crystal Cove shore state",
-    "in": "Crystal Cove shore scenes after the storm: wet sand, driftwood and grasses persist from Scene 6 into Scenes 8 and 10",
-    "fromShot": "6.EST"
-   }
-  ],
-  "lost": [
-   {
-    "name": "Keen’s map",
-    "atShot": "4.MAP",
-    "reason": "The storm wind snatches it from Keen’s paws and it vanishes into the rain, making his uncertainty physical and irreversible."
-   },
-   {
-    "name": "Keen’s sailboat",
-    "atShot": "7.BOAT",
-    "reason": "During the rescue and wave crash, the boat is lost in the storm; Misty confirms it is gone as Keen returns on Squeaky."
-   }
-  ],
-  "items": [
-   {
-    "name": "Crystal bowl",
-    "appearance": "Sanctuary sound bowl with wand; source of Aida’s low shimmering tone and vision entry.",
-    "shots": [
-     "2.BOWL"
+  "_note": "",
+  "Ep1": {
+    "visions": [
+      {
+        "shot": "2.V1",
+        "ofScene": "3",
+        "wristbands": "none in the vision; the cuffs have not yet been given, and Keen is checking his satchel beside his Mum before departure",
+        "style": "Aida’s POV into the vision: the vision bubble fills the entire frame, with only a soft rose-quartz haze and orb-edge at the outermost margins dissolving into darkness and mist; no sanctuary or Aida visible around it.",
+        "materialize": "Rose-quartz light coalesces within the full frame out of soft darkness, resolving into the later pier goodbye image before fading gently back to Aida."
+      }
+    ],
+    "recurring": [
+      {
+        "name": "Squeaky",
+        "appearance": "Canonical Squeaky dolphin model sheet; playful dolphin chirps and clicks; no added markings or accessories.",
+        "orientation": "Introduced frame-right of Keen’s boat in Scene 3, then keeps pace beside the boat through Scene 4; rescue orientation follows Keen toward the glowing shore.",
+        "anchorScene": "3"
+      },
+      {
+        "name": "Keen's Mum",
+        "appearance": "Canonical Keen’s Mum reference; adult female sized to Aida class, no clothes, gold scalloped collar and light-blue bow only.",
+        "orientation": "Anchored on the pier facing seaward as Keen departs; remains the emotional home point behind him.",
+        "anchorScene": "3"
+      },
+      {
+        "name": "Fuzzby and Zenny pair lock",
+        "appearance": "Fuzzby is the bigger male bee and Zenny is the smaller female bee; keep Fuzzby frame-left and Zenny frame-right whenever they share a frame.",
+        "orientation": "Fuzzby’s motion is fast, chaotic and forward-driving; Zenny holds steadier, cleaner counter-positioning.",
+        "anchorScene": "1"
+      }
+    ],
+    "persistent": [
+      {
+        "item": "Father’s gold cuffs, vacant",
+        "in": "On Keen’s wrists from the gift moment in Scene 3 through Scenes 4, 5 if glimpsed at sea, 6 if seen through rain, 7 underwater, and 8 on the beach",
+        "fromShot": "3.CUFFS"
+      },
+      {
+        "item": "Father’s gold cuffs, crystal-set",
+        "in": "On Keen’s wrists from the Aquamarine crystal settling in Scene 9 through Scene 10 and onward",
+        "fromShot": "9.CUFFS"
+      },
+      {
+        "item": "Storm-washed Crystal Cove shore state",
+        "in": "Crystal Cove shore scenes after the storm: wet sand, driftwood and grasses persist from Scene 6 into Scenes 8 and 10",
+        "fromShot": "6.EST"
+      }
+    ],
+    "lost": [
+      {
+        "name": "Keen’s map",
+        "atShot": "4.MAP",
+        "reason": "The storm wind snatches it from Keen’s paws and it vanishes into the rain, making his uncertainty physical and irreversible."
+      },
+      {
+        "name": "Keen’s sailboat",
+        "atShot": "7.BOAT",
+        "reason": "During the rescue and wave crash, the boat is lost in the storm; Misty confirms it is gone as Keen returns on Squeaky."
+      }
+    ],
+    "items": [
+      {
+        "name": "Crystal bowl",
+        "appearance": "Sanctuary sound bowl with wand; source of Aida’s low shimmering tone and vision entry.",
+        "shots": [
+          "2.BOWL"
+        ]
+      },
+      {
+        "name": "Keen’s satchel",
+        "appearance": "Travel satchel checked repeatedly by Keen before departure; treated as an environment-carried prop, never attached as a new body feature.",
+        "shots": [
+          "2.V1",
+          "3.SUPPLIES",
+          "3.DEPART",
+          "4.MAPCHECK"
+        ]
+      },
+      {
+        "name": "Rolled map",
+        "appearance": "Simple travel map handled by Keen at sea; must be readable as a loose paper prop that can be wind-snapped away.",
+        "shots": [
+          "3.SUPPLIES",
+          "4.MAPCHECK",
+          "4.MAPLOST"
+        ]
+      },
+      {
+        "name": "Berry pouch",
+        "appearance": "Small packed supply pouch loaded into the sailboat with other departure items.",
+        "shots": [
+          "3.SUPPLIES"
+        ]
+      },
+      {
+        "name": "Blanket",
+        "appearance": "Rolled travel blanket loaded into the sailboat as part of Keen’s careful preparation.",
+        "shots": [
+          "3.SUPPLIES"
+        ]
+      },
+      {
+        "name": "Small sailboat",
+        "appearance": "Neat little sailboat with mast, sail, rope tie, and room for Keen’s supplies; starts at the pier, then rides open water, then is lost in the storm.",
+        "shots": [
+          "3.BOAT",
+          "4.SAIL",
+          "7.BOATLOST"
+        ]
+      },
+      {
+        "name": "Father’s gold cuffs, vacant",
+        "appearance": "Gold cuffs with empty kite-shaped recesses; no gems present until Scene 9; faint self-glow underwater in Scene 7 comes from within, not from installed crystals.",
+        "shots": [
+          "3.CUFFS",
+          "4.CUFFS",
+          "7.GLOW",
+          "8.CUFFS"
+        ]
+      },
+      {
+        "name": "Father’s gold cuffs, crystal-set",
+        "appearance": "Gold cuffs with faceted Aquamarine kite gems settled into the recesses from Scene 9 onward.",
+        "shots": [
+          "9.CRYSTALSET",
+          "10.CUFFS"
+        ]
+      },
+      {
+        "name": "Ragged drift net",
+        "appearance": "Torn, rough net wrapped around Squeaky’s tail underwater; it is an obstacle from the storm environment, not a villain.",
+        "shots": [
+          "7.NET",
+          "7.SNAP"
+        ]
+      },
+      {
+        "name": "Aquamarine crystal",
+        "appearance": "Glowing aquamarine light that forms between Aida and Keen, splits into two smaller gems, and settles into the cuffs as recognition.",
+        "shots": [
+          "9.AWARD",
+          "9.CRYSTALSET"
+        ]
+      }
+    ],
+    "worldState": [
+      {
+        "locationId": "crystal_cove_meadow",
+        "atScene": "1",
+        "change": "Warm playful flower field receives the first distant thunder and slight light shift.",
+        "persists": true
+      },
+      {
+        "locationId": "aidas_sanctuary",
+        "atScene": "2",
+        "change": "The sanctuary quiets for Aida’s bowl tone, then distant wind enters as the vision ends.",
+        "persists": true
+      },
+      {
+        "locationId": "keen_pier",
+        "atScene": "3",
+        "change": "Keen leaves the dock; his Mum remains behind as the emotional home anchor, and the boat departs into open water.",
+        "persists": true
+      },
+      {
+        "locationId": "open_sea",
+        "atScene": "4",
+        "change": "Clear open water becomes storm-closed, with map lost and horizon erased.",
+        "persists": true
+      },
+      {
+        "locationId": "rainforest_edge",
+        "atScene": "5",
+        "change": "Forest edge becomes a lookout into danger; Fuzzby and Zenny redirect from returning home to raising the alarm.",
+        "persists": true
+      },
+      {
+        "locationId": "crystal_cove_shore",
+        "atScene": "6",
+        "change": "Cove shifts from storm-battered uncertainty to active beacon site; wet sand, shells, driftwood and wind-bent grasses establish positions for later return.",
+        "persists": true
+      },
+      {
+        "locationId": "storm_sea_rescue",
+        "atScene": "7",
+        "change": "Underwater net is torn; Squeaky is freed; Keen’s empty cuffs glow faint aquamarine for the first time; the sailboat is lost.",
+        "persists": true
+      },
+      {
+        "locationId": "crystal_cove_shore",
+        "atScene": "8",
+        "change": "Storm breaks and the shore becomes a receiving place; Squeaky departs to carry word home.",
+        "persists": true
+      },
+      {
+        "locationId": "crystal_cove_gathering_area",
+        "atScene": "9",
+        "change": "Post-storm gathering circle becomes Keen’s welcome place; Aquamarine gems settle into the cuffs.",
+        "persists": true
+      },
+      {
+        "locationId": "crystal_cove_shore",
+        "atScene": "10",
+        "change": "Beach settles into golden-hour peace; wet leaves and sand retain the storm’s trace while the group walks into everyday belonging.",
+        "persists": true
+      }
     ]
-   },
-   {
-    "name": "Keen’s satchel",
-    "appearance": "Travel satchel checked repeatedly by Keen before departure; treated as an environment-carried prop, never attached as a new body feature.",
-    "shots": [
-     "2.V1",
-     "3.SUPPLIES",
-     "3.DEPART",
-     "4.MAPCHECK"
-    ]
-   },
-   {
-    "name": "Rolled map",
-    "appearance": "Simple travel map handled by Keen at sea; must be readable as a loose paper prop that can be wind-snapped away.",
-    "shots": [
-     "3.SUPPLIES",
-     "4.MAPCHECK",
-     "4.MAPLOST"
-    ]
-   },
-   {
-    "name": "Berry pouch",
-    "appearance": "Small packed supply pouch loaded into the sailboat with other departure items.",
-    "shots": [
-     "3.SUPPLIES"
-    ]
-   },
-   {
-    "name": "Blanket",
-    "appearance": "Rolled travel blanket loaded into the sailboat as part of Keen’s careful preparation.",
-    "shots": [
-     "3.SUPPLIES"
-    ]
-   },
-   {
-    "name": "Small sailboat",
-    "appearance": "Neat little sailboat with mast, sail, rope tie, and room for Keen’s supplies; starts at the pier, then rides open water, then is lost in the storm.",
-    "shots": [
-     "3.BOAT",
-     "4.SAIL",
-     "7.BOATLOST"
-    ]
-   },
-   {
-    "name": "Father’s gold cuffs, vacant",
-    "appearance": "Gold cuffs with empty kite-shaped recesses; no gems present until Scene 9; faint self-glow underwater in Scene 7 comes from within, not from installed crystals.",
-    "shots": [
-     "3.CUFFS",
-     "4.CUFFS",
-     "7.GLOW",
-     "8.CUFFS"
-    ]
-   },
-   {
-    "name": "Father’s gold cuffs, crystal-set",
-    "appearance": "Gold cuffs with faceted Aquamarine kite gems settled into the recesses from Scene 9 onward.",
-    "shots": [
-     "9.CRYSTALSET",
-     "10.CUFFS"
-    ]
-   },
-   {
-    "name": "Ragged drift net",
-    "appearance": "Torn, rough net wrapped around Squeaky’s tail underwater; it is an obstacle from the storm environment, not a villain.",
-    "shots": [
-     "7.NET",
-     "7.SNAP"
-    ]
-   },
-   {
-    "name": "Aquamarine crystal",
-    "appearance": "Glowing aquamarine light that forms between Aida and Keen, splits into two smaller gems, and settles into the cuffs as recognition.",
-    "shots": [
-     "9.AWARD",
-     "9.CRYSTALSET"
-    ]
-   }
-  ],
-  "worldState": [
-   {
-    "locationId": "deep_rainforest_flower_field",
-    "atScene": "1",
-    "change": "Warm playful flower field receives the first distant thunder and slight light shift.",
-    "persists": true
-   },
-   {
-    "locationId": "aidas_sanctuary",
-    "atScene": "2",
-    "change": "The sanctuary quiets for Aida’s bowl tone, then distant wind enters as the vision ends.",
-    "persists": true
-   },
-   {
-    "locationId": "keen_pier",
-    "atScene": "3",
-    "change": "Keen leaves the dock; his Mum remains behind as the emotional home anchor, and the boat departs into open water.",
-    "persists": true
-   },
-   {
-    "locationId": "open_sea",
-    "atScene": "4",
-    "change": "Clear open water becomes storm-closed, with map lost and horizon erased.",
-    "persists": true
-   },
-   {
-    "locationId": "rainforest_edge",
-    "atScene": "5",
-    "change": "Forest edge becomes a lookout into danger; Fuzzby and Zenny redirect from returning home to raising the alarm.",
-    "persists": true
-   },
-   {
-    "locationId": "crystal_cove_shore",
-    "atScene": "6",
-    "change": "Cove shifts from storm-battered uncertainty to active beacon site; wet sand, shells, driftwood and wind-bent grasses establish positions for later return.",
-    "persists": true
-   },
-   {
-    "locationId": "storm_sea_rescue",
-    "atScene": "7",
-    "change": "Underwater net is torn; Squeaky is freed; Keen’s empty cuffs glow faint aquamarine for the first time; the sailboat is lost.",
-    "persists": true
-   },
-   {
-    "locationId": "crystal_cove_shore",
-    "atScene": "8",
-    "change": "Storm breaks and the shore becomes a receiving place; Squeaky departs to carry word home.",
-    "persists": true
-   },
-   {
-    "locationId": "crystal_cove_gathering_area",
-    "atScene": "9",
-    "change": "Post-storm gathering circle becomes Keen’s welcome place; Aquamarine gems settle into the cuffs.",
-    "persists": true
-   },
-   {
-    "locationId": "crystal_cove_shore",
-    "atScene": "10",
-    "change": "Beach settles into golden-hour peace; wet leaves and sand retain the storm’s trace while the group walks into everyday belonging.",
-    "persists": true
-   }
-  ]
- }
+  }
 }

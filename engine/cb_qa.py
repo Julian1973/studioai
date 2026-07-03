@@ -597,6 +597,48 @@ def check_scene(pkg, scene, episode="Ep1", only=None):
         out.append({"shot": code, "ok": ok, "verdict": verdict})
     return out
 
+_BANNED_VOCAB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shows", "crystal-bears",
+                                   "canon", "banned_vocabulary.json")
+
+def check_scene_vocabulary(pkg_path, scene_num, episode="Ep1"):
+    """THE CONTINUITY BLOCK on banned world vocabulary (Fable's code review, 2026-07-03) — mechanical, text-only,
+    no vision call. A scene can carry a list of BANNED words/phrases (canon/banned_vocabulary.json) — vocabulary
+    from a name this scene was corrected AWAY from, so its reappearance anywhere is the same ghost recurring
+    (e.g. Scene 1's old "Rainforest Pollen Run" / "deep_rainforest_flower_field", corrected to the confirmed
+    meadow — found and fixed a third time before this check existed). Checks the scene's own
+    name/location/look/sceneShotName/definingFeature fields AND every one of its beats'
+    scene/startState/continuity.opensFrom/shot_style text. A hit is a hard BLOCK, never a NOTE."""
+    try:
+        banned = json.load(open(_BANNED_VOCAB_PATH)).get(episode, {}).get(str(scene_num), {}).get("banned") or []
+    except Exception:
+        banned = []
+    if not banned:
+        return {"ok": True, "verdict": "no banned vocabulary registered for this scene"}
+    d = json.load(open(pkg_path))
+    scene = next((s for s in (d.get("scenes") or []) if str(s.get("sceneNumber")) == str(scene_num)), {})
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
+    fields = []   # (label, text) pairs — every place the ghost has actually been found hiding
+    for k in ("name", "location", "look", "sceneShotName", "definingFeature"):
+        if scene.get(k):
+            fields.append((f"scenes[{scene_num}].{k}", str(scene[k])))
+    for b in beats:
+        code = b.get("beatCode") or b.get("shotCode") or "?"
+        for k in ("scene", "startState", "shot_style"):
+            if b.get(k):
+                fields.append((f"{code}.{k}", str(b[k])))
+        cont = b.get("continuity") or {}
+        if isinstance(cont, dict) and cont.get("opensFrom"):
+            fields.append((f"{code}.continuity.opensFrom", str(cont["opensFrom"])))
+    hits = []
+    for label, text in fields:
+        low = text.lower()
+        for term in banned:
+            if term.lower() in low:
+                hits.append(f"{label}: found {term!r}")
+    if hits:
+        return {"ok": False, "verdict": "BLOCK — banned vocabulary present:\n  " + "\n  ".join(hits)}
+    return {"ok": True, "verdict": f"clean — none of {banned!r} present anywhere checked"}
+
 def check_plate(plate_path, location_desc, layout_ref=None):
     """Visual QA for the A1 empty SCENE PLATE: correct environment + (key) NO characters in frame.
     Optionally checks layout vs a world/layout reference. Returns {ok, verdict}."""

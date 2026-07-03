@@ -26,8 +26,8 @@
   "scenes": [
     {
       "sceneNumber": 1,
-      "name": "Rainforest Pollen Run",
-      "locationId": "deep_rainforest_flower_field",
+      "name": "Meadow Pollen Run",
+      "locationId": "crystal_cove_meadow",
       "location": "A sunlit wildflower meadow in Crystal Cove, framed at bee-flight height so ordinary lavender spikes, daisies and clover loom like a towering blossom corridor. Sparkling heart-shaped light trails and floating cut crystals (quartz, amethyst, opal, garnet) drift among the stems and rest low in the grass; warm rolling hills glow gold-pink in the deep background.",
       "time": "Morning moving toward late morning",
       "weather": "Warm breeze under mostly clear sky; distant pressure beginning to build but not yet visible.",
@@ -40,7 +40,7 @@
       "pillar": "spark",
       "intensity": 0.22,
       "emotionalCore": "This scene is really about joy before the world turns: the audience must feel safe enough to laugh, then feel the first tiny prickle that adventure will ask for courage.",
-      "sceneShotName": "Rainforest Pollen Run — sunlit wildflower meadow, bee's-eye low",
+      "sceneShotName": "Meadow Pollen Run — sunlit wildflower meadow, bee's-eye low",
       "definingFeature": "a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals",
       "colorTemperature": "warm golden-amber morning safety with a faint cool sky undertone",
       "lens": "wide bee's-eye 24mm",
@@ -286,7 +286,7 @@
   "beats": [
     {
       "slug": "s1-b1-bizzy-fwip-nailed-it",
-      "scene": "Rainforest Pollen Run",
+      "scene": "Meadow Pollen Run",
       "characters": [
         "Fuzzby",
         "Zenny"
@@ -365,12 +365,12 @@
       },
       "crystalGlow": "No character crystal glow in this beat; environmental pollen glow steady-warm, with Fuzzby's pollen trail scattering chaotically and Zenny's staying clean and even.",
       "beautyMoment": true,
-      "startState": "Opening frame: Fuzzby is frame-left mid-hover at bee height between tall pollen-filled blossoms, already poised in a proud working posture; Zenny is frame-right among neighboring blossoms in a calm collecting pose; both are airborne with wings in rapid continuous flap; flowers, grass corridors, pollen motes and 2-3 soft ambient crystals fill the rainforest flower-field plate.",
+      "startState": "Opening frame: Fuzzby is frame-left mid-hover at bee height between tall pollen-filled blossoms, already poised in a proud working posture; Zenny is frame-right among neighboring blossoms in a calm collecting pose; both are airborne with wings in rapid continuous flap; flowers, grass corridors, pollen motes and 2-3 soft ambient crystals fill the meadow flower-field plate.",
       "keyframePrompt": null,
       "i2vPrompt": null,
       "soundIntent": "Warm morning insects, soft petal rustle, fast continuous bee wings; Fuzzby's sing-song rides a light pizzicato motif that chases him, FWIP lands with a soft leafy snap and tiny percussion puff, then a small proud button chord under the line in @Audio1 as the music ducks.",
       "continuity": {
-        "opensFrom": "Scene opens from black into the warm deep rainforest flower field with both bees already present and working.",
+        "opensFrom": "Scene opens from black into the warm sunlit meadow flower field with both bees already present and working.",
         "carryToNext": "Fuzzby remains airborne frame-left, proud and overconfident; Zenny frame-right has just glided up to watch and is close enough to be the counterweight for the next flower gag.",
         "screenDirection": "LEFT"
       },
@@ -380,7 +380,7 @@
         "heartCheck": "The child laughs at the FWIP and the proud cover-up; the parent recognizes the tender little performance of competence underneath the chaos."
       },
       "writerNote": null,
-      "shot_style": "Pixar-style warm organic rainforest comedy; wide-to-close gag clock with locked deadpan topper.",
+      "shot_style": "Pixar-style warm organic meadow comedy; wide-to-close gag clock with locked deadpan topper.",
       "script_gag_lock_id": "S1_GAG_01_FLOURISH_FWIP_NAILED_IT",
       "gag_carry": "Fuzzby’s bravado survives the first bonk and escalates into wanting to look official.",
       "director_mode": "Comedy-first, BIG, but never cruel; Fuzzby is the lovable engine and Zenny’s stillness is the frame.",
@@ -404,7 +404,7 @@
     },
     {
       "slug": "s1-b2-officially-nuts",
-      "scene": "Rainforest Pollen Run",
+      "scene": "Meadow Pollen Run",
       "characters": [
         "Fuzzby",
         "Zenny"
@@ -531,7 +531,7 @@
     },
     {
       "slug": "s1-b3-smear-thup-buzz-crash",
-      "scene": "Rainforest Pollen Run",
+      "scene": "Meadow Pollen Run",
       "characters": [
         "Fuzzby",
         "Zenny"
@@ -649,7 +649,7 @@
       "endState": "End on the two of them: the larger bee hovering upright and undimmed, proud; the smaller bee's eye-roll softening into a small smile. Both at rest, camera locked."
     },
     {
-      "scene": "Rainforest Pollen Run",
+      "scene": "Meadow Pollen Run",
       "characters": [
         "Fuzzby",
         "Zenny"
@@ -749,7 +749,7 @@
     },
     {
       "slug": "s1-b5-storm-coming-pressure-flower-stuck",
-      "scene": "Rainforest Pollen Run",
+      "scene": "Meadow Pollen Run",
       "characters": [
         "Fuzzby",
         "Zenny"

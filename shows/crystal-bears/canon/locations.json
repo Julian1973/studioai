@@ -2,9 +2,9 @@
  "_note": "",
  "Ep1": {
   "1": {
-   "name": "Rainforest Pollen Run",
-   "locationId": "deep_rainforest_flower_field",
-   "sceneShotName": "Rainforest Pollen Run — sunlit wildflower meadow, bee's-eye low",
+   "name": "Meadow Pollen Run",
+   "locationId": "crystal_cove_meadow",
+   "sceneShotName": "Meadow Pollen Run — sunlit wildflower meadow, bee's-eye low",
    "time": "Morning moving toward late morning",
    "weather": "Warm breeze under mostly clear sky; distant pressure beginning to build but not yet visible.",
    "location": "A sunlit wildflower meadow in Crystal Cove, framed at bee-flight height so ordinary lavender spikes, daisies and clover loom like a towering blossom corridor. Sparkling heart-shaped light trails and floating cut crystals (quartz, amethyst, opal, garnet) drift among the stems and rest low in the grass; warm rolling hills glow gold-pink in the deep background.",
@@ -14,8 +14,7 @@
    "colorTemperature": "warm golden-amber morning safety with a faint cool sky undertone",
    "lens": "wide bee's-eye 24mm",
    "cameraHeight": "low bee's-eye height, just above the grass, looking across the meadow so ordinary blooms loom tall",
-   "master": null,
-   "_sourceHash": "4f186605242d7e4a"
+   "_sourceHash": "965f06ef32668569"
   },
   "2": {
    "name": "Aida’s Sanctuary Vision",

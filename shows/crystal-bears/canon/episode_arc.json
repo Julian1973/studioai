@@ -1,0 +1,63 @@
+{
+ "_note": "",
+ "Ep1": {
+  "episode": "Episode 1",
+  "title": "The Adventure Begins",
+  "lead": "Keen",
+  "engine": "Courage",
+  "the_day_unfolds": [
+   {
+    "scenes": [
+     1,
+     2,
+     3
+    ],
+    "pillar": "spark",
+    "light": "Warm golden morning: safe, playful, and full of possibility, with only the first faint cool hint of weather changing."
+   },
+   {
+    "scenes": [
+     4,
+     5
+    ],
+    "pillar": "deepening",
+    "light": "Gold drains into storm blue-grey: wind rises, rain arrives, and the world becomes too large for Keen’s performed confidence."
+   },
+   {
+    "scenes": [
+     6
+    ],
+    "pillar": "connection",
+    "light": "Cold cove storm interrupted by warm crystal beacon: belonging reaches across distance before Keen knows its name."
+   },
+   {
+    "scenes": [
+     7
+    ],
+    "pillar": "heart",
+    "light": "Darkest storm and underwater blue-grey: fear nearly swallows the frame until the small aquamarine glow from Keen’s empty cuffs reveals courage already inside him."
+   },
+   {
+    "scenes": [
+     8,
+     9
+    ],
+    "pillar": "connection",
+    "light": "Storm clears into washed, hopeful warmth: the world receives Keen, and the Aquamarine crystal recognizes his choice."
+   },
+   {
+    "scenes": [
+     10
+    ],
+    "pillar": "ripple",
+    "light": "Golden-hour after-rain warmth: peaceful, funny, and safe, with wet leaves and aquamarine traces preserving the cost of the storm."
+   }
+  ],
+  "wristbands": [
+   "none",
+   "transition",
+   "vacant",
+   "crystal"
+  ]
+ }
+}

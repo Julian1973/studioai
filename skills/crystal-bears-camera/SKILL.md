@@ -1,6 +1,6 @@
 ---
 name: crystal-bears-camera
-description: "The world-class Camera Operator for Crystal Bears. Takes a SIGNED-OFF, locked keyframe (frame one) plus the Director's motion intent and writes a production-grade IMAGE-TO-VIDEO prompt that adds ONLY motion and camera — preserving the keyframe's locked character, lighting and background pixel-for-pixel. Supports Seedance / Veo 3.1 / Kling (selectable per shot). Enforces the drift-discipline (one clean motion arc per clip, never re-describe what's already in the frame). Speaks the dialogue IN the video for correct lip-sync, then swaps the voice to the canonical ElevenLabs voice in post so voices stay swappable. Gate-aware: runs only on locked keyframes, one clip per shot, per-shot sign-off, regenerate-on-any, writes the locked clip back, STOPS at Gate 3. Use after keyframes are signed off, or on 'i2v', 'image to video', 'animate the keyframes', 'camera prompts', 'motion prompts', 'take it to video'. Hands locked clips down to the Post skill."
+description: "The world-class Camera Operator for Crystal Bears. Takes a SIGNED-OFF, locked keyframe (frame one) plus the Director's motion intent and writes a production-grade IMAGE-TO-VIDEO prompt that adds ONLY motion and camera — preserving the keyframe's locked character, lighting and background pixel-for-pixel. Supports Seedance / Veo 3.1 / Kling (selectable per shot). Enforces the drift-discipline (one clean motion arc per clip, never re-describe what's already in the frame). Dialogue ships as the SUPPLIED ElevenLabs V3 track (@AudioN) — Seedance lip-syncs to it directly; there is no native-voice-then-swap step of any kind (see the LOCKED 2026-07-02 voice-pipeline section). Gate-aware: runs only on locked keyframes, one clip per shot, per-shot sign-off, regenerate-on-any, writes the locked clip back, STOPS at Gate 3. Use after keyframes are signed off, or on 'i2v', 'image to video', 'animate the keyframes', 'camera prompts', 'motion prompts', 'take it to video'. Hands locked clips down to the Post skill."
 metadata:
   author: Julian Jenkins — Enaid Creative
   version: 1.0.0
@@ -40,7 +40,7 @@ If a prompt could be read without ever seeing the keyframe, it's wrong — it's 
 1. **Consistency is inherited, not re-stated.** Lighting, characters, backgrounds carry from the locked keyframe. Your prompt must not contradict or restyle them.
 2. **One clean motion arc per clip.** AI video drifts across chained multi-step action. Name **one** main action (max ~3 concrete beats) and **one** camera move. No multi-stage gags in a single clip — split them.
 3. **Tight prompts.** 1–3 sentences of motion + camera. Verbose i2v = drift.
-4. **Dialogue goes IN the video for lip-sync, then the voice is swapped** (§6). The model speaks the line so the mouth syncs to real speech; in Post the vocal identity is swapped to the canonical ElevenLabs voice — so it stays swappable, with correct lip-sync.
+4. **Dialogue ships as the supplied ElevenLabs V3 track — no swap.** The finished, directed `@AudioN` track is handed to Seedance and the character "says @AudioN"; Seedance lip-syncs to that real audio. There is no native-voice-then-swap step (§6 below is superseded — see the LOCKED 2026-07-02 voice-pipeline section near the end of this file).
 5. **Pixar motion quality** — believable weight, anticipation, follow-through, soft easing; never stiff or rubbery; one clear read.
 6. **Gate-aware.** Produce → present per shot → **stop at Gate 3.**
 
@@ -385,6 +385,19 @@ Every i2v prompt is assembled by the software in clean sections (validated again
 
 ## ⚑ Keep the FULL guide audio on every clip (2026-06-21)
 i2v renders with `generate_audio=True` for EVERY shot (not just dialogue ones) — keep Seedance's full guide soundscape (voice/ambience/SFX/light musical tone), never silence. It is the **alignment reference**: in CapCut the original waveform shows exactly where the voice/SFX/music landed, so clean ADR + replacement music/SFX drop onto the same marks, then the guide is muted. Do NOT blank the audio.
+
+## ⚑⚑ THE VOICE PIPELINE, FOR REAL THIS TIME — SUPPLIED @AudioN, no swap of any kind (LOCKED 2026-07-02)
+
+Everything above about a **native Seedance voice** (guide-track-then-swap, whether via Voice Changer, V3-master+lip-sync, ADR, or Julian's CapCut swap) describes a **retired** era of the pipeline. It is **all superseded**, including the "⚑ CURRENT DIALOGUE PIPELINE — RESOLVED (2026-06-21)" section above — that section's own claimed "executable truth" (`cb_prompts.build_i2v_prompt` / `seedance_json`) is now a **retired, RuntimeError-raising stub**; it never runs.
+
+**The real, current, executable truth is `cb-gen/cb_segprompt.for_beat()`** (called via `cb_seedance.get_seedance_prompt`, the single Gate-3 source of truth — same function the studio previews AND the render fires):
+- **ElevenLabs V3 generates the ACTED dialogue track FIRST**, per beat (`cb_voice.build_dialogue_track`, driven by the Director's Pass performance notes) — this IS the final, canonical, already-directed voice. Nothing about it is a placeholder.
+- That finished track is supplied to Seedance as **`@Audio1`**. The prompt tells each speaking character to **"say @Audio1"** — Seedance lip-syncs its render to the audio it was GIVEN, in order, per speaker. It does not invent its own dialogue performance.
+- `generate_audio=True` so Seedance ALSO scores ambience/light SFX/underscore around that supplied voice.
+- **There is no swap step of any kind** — no Voice Changer speech-to-speech, no V3-master-then-lip-sync-tool, no ADR, no Julian-does-it-in-CapCut. The voice that ships is exactly the voice that was fed in. Post (`cb_post.py`) only curates/masters/mixes what Seedance returned — it never replaces the dialogue.
+- Music is Seedance's weakest leg — Post may layer a fallback bed, but dialogue is never touched.
+
+If you are prompting a shot's audio and find yourself writing "native voice", "throwaway lip-sync source", or "swap in Post/CapCut" — stop; that instinct is stale. Name the music, lock English, and let `@Audio1` carry the voice.
 
 ## Character SIZES — the chart is the authority (LOCKED 2026-06-22, Julian)
 

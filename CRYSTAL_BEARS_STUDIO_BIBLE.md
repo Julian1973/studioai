@@ -69,6 +69,11 @@ Into Seedance at Gate 3 go only three things: **the keyframe (`@图1`), the char
 - **Why them:** Giacchino scored *Up*, *Ratatouille*, *Inside Out*, *Coco* — the Pixar emotional composer. Rydstrom is a seven-time-Oscar sound legend (*Toy Story*, *Finding Nemo*).
 - **On board for:** the final polish — balance, master, warmth.
 - **Owns:** because the **voice is already in the render** and Seedance scores the music/SFX, Post = **curate, mix, master, stitch**. Their taste replaces any weak Seedance music, ducks the score under dialogue, and masters to broadcast loudness. **No voice swap.**
+- **AUDIO DOCTRINE (Julian, 2026-07-03):** two of Gate 5's moves are now declared law, not taste calls —
+  - **Perspective rides are a MIX law.** A character further from camera reads quieter, with a touch of air; closer reads full — riding the clean voice stem's volume/EQ to follow the picture's distance. Applied at mix time, on signed clips; nothing re-renders for it.
+  - **SFX SWEETENING is declared doctrine.** Seedance's own soundscape stays the bed; weak comedy hits get reinforced, additively, from a small library of the show's OWN signature one-shots (the FWIP, the THUP, the pollen poof, the pop) — building a consistent Crystal Bears sound identity the way Bluey always sounds like Bluey. Additive only — the voice is never touched (Law 5 intact).
+  - Every vocal sound, including a hum or a sing-song, is a V3 performance inside @Audio1 by the SAME Law 5 that governs spoken lines — see `cb_segprompt.py`'s audio law text. Seedance never generates a voice-like sound of any kind.
+  - A scripted DISTANCE ENVELOPE (baking far/near into @Audio1 itself from the beat's own shot geography, so future chase beats arrive pre-spatialised) is logged in `LAB_BACKLOG.md` for adoption between scenes — not built yet.
 - **Hands down:** the finished film.
 
 ### CROSS-CUTTING — CONTINUITY / SCRIPT SUPERVISOR · **the bible-keeper**
@@ -99,9 +104,9 @@ Into Seedance at Gate 3 go only three things: **the keyframe (`@图1`), the char
 ### 3.1 — Keyframe discipline (Gate 2)
 - **Reference-first:** identity comes *only* from the locked turnarounds (`@图2`/`@图3`); the prompt describes staging, light and mood — **never** the character's design.
 - **CLEAN base identity — render exactly per the reference, add nothing beyond it. Baked software-wide in `build_keyframe_prompt` (not per-beat).** The keyframe renders each character *exactly as its turnaround shows it* — **including canonical accessories the reference itself carries** (glasses, Aida's pendant, Keen's worn wristbands). It does **not** apply a **temporary transformation** the story puts the character through — a pollen moustache, being caked/dusted/covered in pollen, dirt, wet or muddy fur, a smear, a loose held prop. Those are **applied *and* removed by Seedance inside the take**. Baking a transient state in locks the whole beat to "with it" and creates a jarring *with-it / without-it* cut at the boundary — and it's exactly the heavy lifting Seedance is for. *The distinction that matters:* canonical accessory (in the reference → render) vs temporary transformation (not in the reference → Seedance adds it). The rule is enforced for **every keyframe in every scene**, so a beat whose start-state names a state (audited: 1.B4 moustache, 5.B wet, etc.) is cleaned automatically — no hand-edit.
-- **Crisp / frozen instant:** describe the pose *positively* — "a single frozen instant at high shutter speed, wings held sharp and fully defined." Front-end pose, not a back-end "no blur" constraint. A blurred keyframe reads as "already moving" and *dampens* the motion Seedance adds.
+- **Crisp / flying instant** *(the frozen instant is superseded, 2026-07-03, Julian)*: describe the pose *positively* — sharp, wings caught **mid-downstroke and ASYMMETRIC** (one raised, one lowered, never both spread flat and symmetrical), body **leaning forward and down** into the direction of travel, legs tucked or trailing, never hanging vertical like a puppet at rest. Front-end pose, not a back-end "no blur" constraint — crispness is kept (still sharp, still fully defined, never a motion-blur smear), but the OLD symmetric "frozen mid-beat" wording was being satisfied by a static, floating-in-place pose that read as hovering, not flying: "if the first scene is them flying through the meadow, then they need to be flying through the meadow." Energy lives in the POSE, not in blur. `cb_qa.check_done_frame`'s `ACTION_STATE_MISMATCH` verifies the same two concrete criteria (wing asymmetry, body lean) whenever a beat's own action names active locomotion — applied FORWARD ONLY from 2026-07-03; already-signed keyframes are not retroactively regenerated (logged in `QA_CALIBRATION_LOG.md`, not corrected).
 - **No overrides that shadow the engine:** a saved `keyframePromptOverride` fires verbatim and silently pins that beat, so later engine improvements never reach it. Prefer editing the start-state; clear stale overrides.
-- **Cascade:** each keyframe chains off the previous approved one for lighting/world continuity (not body states — those live in Seedance).
+- **Cascade:** each keyframe chains off the previous approved one for lighting/world continuity (not body states — those live in Seedance). **The chain image is the SOLE source of environment truth for a continuation beat** — no competing text re-description of the scene's location ships alongside it. That competition is exactly what let a chained beat drift to a visibly different world than the approved plate (found on Ep1 Scene 1: 1.B2-1.B4 rendered a denser, forest-like place against a small-meadow plate) before the fix; `build_keyframe_prompt` now drops the text restatement for any chained beat and states explicitly "the SAME location, the SAME scale and the SAME world" (ruling, 2026-07-02, Julian). Standing, software-wide, every scene.
 
 ### 3.2 — The definitive Seedance prompt (Gate 3) — *3-model consensus (GPT-5.5 · Claude Opus 4.8 · Gemini 3.1 Pro)*
 Prose-first (Seedance follows natural language). Six sections, always in order. **The Director writes only SCENE + ACTION/PERFORMANCE (+ an optional camera hint); REFERENCE LAW, AUDIO and NEGATIVES are baked law he cannot break.**
@@ -133,8 +138,8 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 ### 3.4 — The reference model
 `@图N` is Seedance's native image token (not `@ImageN`). Order: `@图1` keyframe, `@图2` larger-bee turnaround, `@图3` smaller-bee turnaround. Audio: `@Audio1..` per speaker.
 
-### 3.5 — Density
-12s is action-dense. If a beat drifts past ~7s, **split into a 2-clip fallback** — never keep rewriting.
+### 3.5 — Density and duration (T5 amendment, 2026-07-02 — stated once, here, as the single source)
+Every beat clamps to **8–15 seconds** (`cb_segprompt.for_beat` and `cb_beats.run` both compute `max(8, min(15, durationSec))`), targeting **~10–12s** in practice. 12s is action-dense: if a beat drifts past ~7s of real action, **split into a 2-clip fallback** — never keep rewriting a single take longer.
 
 ---
 
@@ -142,9 +147,11 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 
 - **Each chair = one LLM pass with one auteur system-prompt** (its mind's taste + craft + the rules above). No stacked layers.
 - **Gate 1 (Docter):** system prompt carries the brand DNA + the Seedance craft + this bible; writes SCENE + ACTION per segment. The old Director's Pass / 15 modes / staging / comedy / crystal layers **collapse into his head as taste**, not separate passes.
-- **Gate 3 form:** `cb_segprompt.py` is the definitive builder — REFERENCE LAW / SCENE / ACTION / CAMERA / AUDIO / NEGATIVES. The Director fills SCENE + ACTION; the rest is baked law.
-- **`cb_voice`:** emits per-speaker tracks. **`cb_gen`:** sends prose + `@图N` + per-speaker `audio_urls` + `generate_audio`. **`cb_post`:** mix/master only, no voice swap.
+- **Gate 3 form:** `cb_segprompt.py` is the definitive builder — REFERENCE LAW / SCENE / ACTION / CAMERA / AUDIO / NEGATIVES. The Director fills SCENE + ACTION; the rest is baked law. `cb_segprompt.for_beat` is THE shipped prompt for every beat, applied identically in the studio preview and the render (`cb_beats.run`); `cb_seedance`'s COMPACT_TIMED_JSON build is the validation/readiness layer underneath it, not a competing shipping format.
+- **The second master (T3 ruling, 2026-07-02, Julian — KEPT, declared here on purpose):** `cb_seedance.py`'s older machinery — the 15 minds, the physical-action archetypes, and the authoring/compact validators — still runs on EVERY beat via `get_seedance_prompt`/`render_readiness`, independently of the Director's chair, and it CAN refuse a render (`READY_TO_RENDER` requires both the authoring AND the compact validator to pass). This is intentional, not leftover: it is the studio's structural, code-level backstop underneath the Director's prose-level taste — a mechanical check that catches malformed/stale source data and archetype gaps the Director's own judgment doesn't audit. The two layers are NOT redundant: the Director decides what a beat SAYS; this layer decides whether a beat's DATA is well-formed enough to say it safely.
+- **`cb_voice`:** emits per-speaker tracks — the FINAL voice, supplied to Seedance as `@AudioN` and lip-synced, never a placeholder. A beat with dialogue whose V3 track fails REFUSES to render rather than falling back to a native Seedance voice (Law 5). **`cb_gen`:** sends prose + `@图N` + per-speaker `audio_urls` + `generate_audio`. **`cb_post`:** mix/master only, no voice swap — voice stems are for balance/ducking, never replacement.
 - **Continuity:** a check that runs at every gate against the turnarounds + canon.
+- **Temporary state resolves within the take (T2 ruling, 2026-07-02, Julian):** a transient like Fuzzby's pollen moustache is established and (if the beat calls for it) resolved entirely inside the ONE take it belongs to. It never carries across a take boundary — there is no continuity-tail/previous-clip-tail chaining mechanism. Each beat renders from its own signed-off opening keyframe, clean.
 
 ---
 
@@ -154,3 +161,11 @@ NEGATIVES:  no morphing/redesign/rescale, no extra limbs, no flicker/artifacts, 
 - ✅ **Gate 3 prompt — fixed** to the definitive structure (`cb_segprompt`), verified.
 - ⏳ **Remaining wiring:** per-speaker voice (`cb_voice`) · `@图N` + audio pass (`cb_gen`) · point Gate 3 at `cb_segprompt` (`cb_beats`) · crisp-keyframe rule (`cb_prompts`) · strip post voice-swap (`cb_post`).
 - ⏳ **Then:** render Segments 1–4 the proper way, voice in the render, and judge.
+
+---
+
+## PART 6 — THE TWO UNIVERSES (ruling proposed, Addendum A, 2026-07-02 — ADDED AS PROPOSED, pending Julian's accept/amend/reject)
+
+**The skill fleet is the discovery engine: short form, fast, audience testing. The studio is the franchise engine: long form, gated, broadcaster grade. Winners discovered by the fleet graduate to the studio. Neither system produces the other's format.**
+
+This paragraph resolves an ambiguity that had no other written answer: whether the ad-hoc Claude-skill workflows Julian runs for quick experiments are a lightweight version of this studio, or a genuinely separate system with a different job. They are separate. The fleet exists to find out fast, cheaply, and without gates, what's worth making at all — a format, a joke, a character beat, tested against a real audience before a single dollar of gated production spend. The studio exists to take a PROVEN winner and put it through broadcaster-grade production discipline — gates, canon, continuity, sign-offs — at a cadence a commissioner can build a slate around. A skill-fleet experiment never ships as a "finished episode"; a studio episode never skips a gate because a fast test proved the joke works. The bridge between them is a human decision (Julian's), not a code path: something the fleet found funny gets RE-BUILT inside the studio from a script, not ported wholesale.

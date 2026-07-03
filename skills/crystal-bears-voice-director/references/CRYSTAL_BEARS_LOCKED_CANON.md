@@ -1,6 +1,36 @@
+<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is /shows/crystal-bears/canon/LOCKED_CANON.md. Regenerate: python3 tools/sync_canon.py -->
+
 # THE CRYSTAL BEARS — Locked Canon & Asset Register
 
 **Status:** Source of truth (v1, 2026-06-19). This document reconciles the Show Bible (PDF), Julian's existing Crystal Bears skill stack, and the reference-asset library into ONE canon. The app's IP library and every skill must derive from this. Where any skill disagrees, **this document + the Show Bible win** (see §9 — Drift Corrections).
+
+---
+
+## 0. NORTH STAR — the soul every gate is measured against
+
+**We are taking _Inside Out_ to the next level — through the bear's heart and soul.**
+
+_Inside Out_ put the feeling on the **inside** and let us watch the control room. The Crystal Bears puts it on the **outside** — a crystal you can *see* glow, a note you can *hear* ring, a colour that floods the clearing — so a child with no word for the feeling **sees** it, **hears** it, and **feels** it in their own tummy. Emotion made multisensory and visible-in-the-world, never narrated. That is the show's one true invention.
+
+The crystal is **not a thermometer that matches the face. It is the bear's heart** — the part that won't perform the *want* and quietly holds the *need*. It contradicts the brave smile until the truth can't be hidden, and it lights up only when the bear stops hiding and lets the feeling through. **Sincerity, never volume.**
+
+**There is no villain, ever. The antagonist is always the feeling** — so the child is never braced, and is free to feel. Bears don't fix each other. They sit *with* each other. The turn comes from being witnessed, never solved.
+
+And we land it the **Bluey** way — never discussed, always *played*, the truth riding inside the joke on a single beat. The child is still giggling while the parent has gone quiet and a little wet-eyed — the same thirty seconds reaching both, through different doors. We touch the ache, then move on before it tips into sentiment. **We never resolve the ache away:** the end is warmer *and* carries the memory of what it cost. The crystal is the secret weapon Bluey never had — a visible emotional read-out doing the adult-level truth-telling in the exact frame the kid reads as magic.
+
+**What it feels like in the room:** real emotional truth never hollow · comedy and emotion in the same breath, funny that comes *from* feeling · kids falling about laughing while the whole room **breathes in** — that sharp little gasp · a 5-year-old and their parent both moved and both laughing in the same beat, for their own reasons. That co-watch is the whole game.
+
+**THE TEST FOR ANY BEAT:** Will they laugh out loud? Will they breathe in — that sharp little gasp? **Does the crystal tell the truth the bear can't yet say?** Does it reach the kid *and* the parent at once? **If not, it isn't there yet.**
+
+### The eight craft laws beneath the North Star
+1. **The crystal is the Need, not the Mood** — it CONTRADICTS the brave face; a crystal that agrees with the face is the gimmick — flag it.
+2. **Want vs Need on every beat** — name both before staging; the gap is where the acting and the crystal's contradiction live.
+3. **The Surrender beat, not the power-up** — the Crystal Call ignites only AFTER the bear stops hiding and lets the feeling drive. Sincerity, never volume. A Call placed before the feeling is felt is the single biggest soul-violation — flag it.
+4. **The one wordless held beat** — every episode has exactly ONE, at the nadir: no dialogue, the camera held longer than comfortable, the crystal and the face carry the turn. The reproducible "Riley finally cries."
+5. **Play is the vehicle** — never sit and discuss a feeling (lecture posture — restage it); an invented GAME whose made-up rules ARE the emotional logic.
+6. **The catch and the release** — one half-second where the funny goes quietly true, then exit within ~2s (a cut, a new gag, a bear bounding off). The laugh and the lump in the same moment; held sentiment is the failure.
+7. **Hold the ache — bittersweet, not sweet** — the closing image is warmer AND carries a visible trace of the cost (rain still on the leaves, the friend gone whose note plays in the chord). Never reset to zero.
+8. **The note carries the feeling** — each bear's canon note is the crystal's audio twin: alone-and-unresolved at the contradiction, resolving to true pitch on surrender, lingering as the ache at the close.
 
 ---
 
@@ -74,6 +104,11 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 **Recurring guests (canon, separate tier — decided 2026-06-19):**
 - **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
 - **Keen's Mum** — a bear (single reference exists). Recurring guest / family.
+- **Bo** — a cub (T6 ruling, 2026-07-02, Julian: CONFIRMED recurring-guest tier, Ep2's lead). No reference art or
+  bible yet — a `characters.json` stub exists so Ep2's pipeline/canon isn't blocked, but species/appearance,
+  voice, sizeRank and the full character bible are still needed from Julian before Gate 2 can build Ep2 keyframes.
+  Ep2 is NOT yet producible — the stub only unblocks canon lookups, not rendering. "Bo's Mum" also needs her own
+  stub once Bo's is filled in.
 
 ### Voice Cast — ElevenLabs IDs (locked 2026-06-19)
 
@@ -93,10 +128,10 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 > All voice IDs confirmed 2026-06-19 (`XEiPrIitaegdirIGkODX` = Zenny; Keen's Mum = `J4zlKWvIIVHQN0EIvCc4`). Per-character ElevenLabs V3 settings (Stability/Similarity/Staggeration) live in `crystal-bears-voice`.
 
 **Other named characters seen in scripts (status to confirm):**
-- **Bo** + **Bo's Mum** — appear in `crystal-bears-voice` settings & an example episode (Bo is a cub). No assets in the library yet. Treat as recurring guest pending Julian's confirmation + reference art.
+- **Bo's Mum** — appears alongside Bo in an example episode. No assets in the library yet; needs her own stub + Julian's confirmation once Bo's entry is filled in.
 - **The Great Oak** — the world's wisdom-keeper (sentient tree). Canon environment-character; deep resonant voice.
 
-> Skill rule to update: the "cast is locked — 7 bears + Fuzzby + Zenny ONLY, no other species" line in `crystal-bears-stack` must be amended to allow the recurring-guest tier (Squeeky, Keen's Mum, Bo).
+> The cast-lock check (`cb_director._script_roster`) reads `characters.json` dynamically — no hardcoded name list to amend. The `crystal-bears-continuity` skill's checklist wording ("cast lock — only the 7 bears + Fuzzby + Zenny, plus approved guests Squeeky/Keen's Mum") is updated to include Bo in the same commit as his stub.
 
 ---
 
@@ -141,7 +176,7 @@ Hard rules the app's audio provider MUST enforce on every call:
 7. **Crystal Calls:** generated ALONE, Stability 45 / Staggeration 15, minimum 3 takes (v3 is non-deterministic — multi-take every emotional peak).
 8. **Voices:** Instant Voice Clones (IVC) or designed library voices only (PVCs aren't fully tag-responsive). Never set `use_speaker_boost` (unavailable in v3).
 
-**Pipeline implication — dialogue & lip-sync.** Dialogue **is spoken in the video** so the mouth lip-syncs to real speech — but the model's voice is a **throwaway source** and never ships. In Post the final voice is always the canonical **ElevenLabs** voice, by one of two paths: **(default — video is the timing master)** strip the native audio from the clip and run it through **ElevenLabs Voice Changer (speech-to-speech)** to swap the vocal identity while keeping the exact timing/phrasing — **never re-generate with text-to-speech (fresh timing drifts off the lips → the gap)**; **(hero / Heart lines — audio is the timing master, to keep the V3 bracket-acted performance)** generate the **V3 acted master first** → lip-sync the video's mouth to it (e.g. HeyGen Avatar IV). The i2v dialogue line must match the script word-for-word. Music is always the Suno track in Post, never from the video.
+**Pipeline implication — dialogue & lip-sync (LOCKED 2026-07-02, supersedes any older "native voice + swap" framing).** The Voice Director generates the FULL acted ElevenLabs V3 performance FIRST, for every beat with dialogue — this IS the final, canonical voice, never a placeholder. That finished track is supplied to Seedance directly as `@Audio1`; the prompt tells each speaking character to "say @Audio1" and Seedance lip-syncs its render to the audio it was GIVEN (`reference-to-video`), in order, per speaker. There is no separate "native Seedance voice" to strip, swap, Voice-Change, or re-lip-sync afterward — the voice that ships is exactly the voice that was fed in. Post only masters/mixes music and SFX around it. Music is always the Suno track (or Seedance's own score) in Post, never a separate video-native track.
 
 ---
 
@@ -239,7 +274,7 @@ Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 
 
 ## Name pronunciation lock — for ALL generated speech (2026-06-19, Julian)
 
-**Voice Changer is speech-to-speech: it preserves the INPUT's pronunciation.** So names must be spelled PHONETICALLY in every dialogue line fed to a generator (Seedance native dialogue AND ElevenLabs), or the wrong pronunciation carries through into the bear's voice.
+**ElevenLabs V3 generates the FINAL voice, so pronunciation is set once, at the source.** Names must be spelled PHONETICALLY in every V3 dialogue line — that track is supplied to Seedance as `@Audio1` and lip-synced verbatim, so a wrong pronunciation at the V3 stage carries straight through into the shipped bear's voice with nothing downstream to correct it.
 
 | Name | Spell in speech as | Note |
 |------|--------------------|------|
@@ -253,10 +288,48 @@ Both exist as prop turnaround sheets. The Camera/DP switch reference at shot 41 
 
 Applies to the words inside the i2v dialogue line and any ElevenLabs line. The on-screen TITLES/scripts keep the correct spelling (Aida, Amie); only the *spoken* lines use the phonetic form.
 
-## Start + END keyframe on EVERY shot (new standard, 2026-06-19, Julian)
+## Start + END keyframe on EVERY shot (2026-06-19) — SUPERSEDED, see below
 
 Every shot gets a **START keyframe and an END keyframe** (not just action shots). Doubles the (cheap, ~$0.04) keyframes but gives exact control of each shot's full motion arc — we define precisely where the shot begins and ends, prompt it properly, and Seedance animates the true motion between (`image_url` + `end_image_url`). For a near-static hold the two can be nearly identical, but always produce both. Naming: start = `Ep{n}_{code}_{slug}.png` (primary, shown in studio), end = `Ep{n}_{code}_{slug}_end.png`.
+
+## ⚑ ONE keyframe per BEAT, chained — not two per shot (LOCKED 2026-07-02; supersedes the section above)
+
+The production unit is the **BEAT** (a 10–15s multi-shot Seedance take with its own internal cuts, per `cb_segprompt.for_beat`), not the individual shot, and each beat gets **exactly ONE keyframe — its OPENING frame** (from `startState`), never a separate END frame. Generating an independent END keyframe is exactly the drift source the section above already warned about, taken further — it's not needed at all now. Cross-beat identity continuity instead comes from the **Lock & Chain cascade**: each beat's keyframe chains off the **previous beat's own APPROVED final frame**, so identity carries beat-to-beat without ever generating a second keyframe for the same beat. Seedance directs its OWN internal cuts and motion arc across the beat's full duration from that one opening frame.
+
+## Aida's vision — the bubble FILLS the frame (LOCKED, every episode, 2026-06-22, Julian)
+
+In every episode Aida looks through and sees a **vision**. The vision shot is her **POV *into* the vision — the bubble FILLS the entire frame.** We see **only what is inside the bubble**; the glowing orb edge and soft rose-pink haze sit at the outermost margins and dissolve into darkness/mist — **mysterious**. We must **never** see the real scene / sanctuary / Aida / anything on either side of the orb (it must NOT read as "a small bubble sitting on a wider scene"). The surrounding location is established in the *other* shots of the scene; the vision shot is pure bubble. The vision materialises *within the frame* (drifting rose-quartz light coalescing out of soft darkness), never by showing an orb rising from the singing bowl. Enforced in code: `cb_prompts.VISION_FRAME` + `build_vision_prompt`; config: `continuity.json` vision `style`/`materialize`.
+
+## Character SIZES — the chart + the guest rule (LOCKED, 2026-06-22, Julian)
+
+The authority for relative sizes is the **bear size chart** (`cb-seed/assets/CB_size_chart.png` — attached as a reference to every multi-character shot). Order shortest→tallest: **Amie < Sunny < Luna ≈ Keen ≈ Aida < Misty < Howey.** Note **Luna, Keen and Aida are CLOSE in height** — Keen is a *sturdy young bear*, NOT a tiny cub; only Amie and Sunny are clearly smaller, and Misty/Howey are taller.
+
+**Guest / additional-character rule** — anyone new is sized by class:
+- any **adult female** → the same size as **Aida**
+- any **adult male** → the same size as **Howey**
+- any **child female** → the same size as **Amie**
+- any **child male** → the same size as **Luna**
+
+(Keen's Mum = adult female = Aida's size.) Encoded: `characters.json` `sizeRank`/`size`/`sizeRef` + `sizeClasses`; `cb_prompts.size_line` (fires on every shot — solo *and* multi) + `size_chart_ref()` attaches the chart image when present.
 
 ## Fuzzby / Zenny distinction lock (2026-06-19, Julian)
 
 They are NOT interchangeable bees. **Fuzzby = bigger, male, chaotic.** **Zenny = smaller, female, calm.** Render the size difference clearly in every shot they share (Fuzzby noticeably larger), with gendered design cues, so the model and a 4-year-old can always tell them apart. When together, lock positions: **Fuzzby frame-left, Zenny frame-right.** This (plus one-speaker-per-shot) is what prevents the line-attribution / voice-swap crossover.
+
+## Wardrobe is PER-CHARACTER, off the bible (2026-06-20, Julian)
+
+Clothing is **NOT uniform** — render each character EXACTLY to their reference/anchor and the show bible:
+- **Aida** — WEARS ornate flowing **robes** (purple/teal, embroidered), her **crystal headdress/tiara**, and layered **crystal necklaces**. Always fully robed, per her anchor.
+- **Keen's Mum** — **no clothes**: natural pale-blue fur + gold scalloped collar + light-blue bow only.
+- Others per their own anchor.
+
+Never invent or drop wardrobe. Keep each character's full look (clothing + accessories) **IDENTICAL from a shot's start frame to its end frame** — e.g. Aida must not lose her robes between frames (continuity).
+
+### EP3 lighting / time-of-day continuity — "the day unfolds" (2026-06-20, Julian)
+
+Light is continuity. It must progress logically across the episode as ONE continuous day; adjacent scenes match in time + temperature, never an arbitrary palette jump:
+- **S1–3 (Spark, morning):** warm golden morning, soft sun, gold god-rays — the world waking. The meadow, Aida's cove sanctuary and the pier goodbye all share this same warm morning.
+- **S4–5 (Deepening, storm rolls in):** light cools and dims, grey storm clouds, wind; the gold drains to cold blue-grey.
+- **S7 (Heart, storm / underwater):** darkest — storm-dark / cold underwater; the wristbands' aqua self-glow is the emotional light.
+- **S6, S8–9 (Connection, clearing):** storm breaks, light returns — cool clears to warm, hopeful brightening; the crystal award glows.
+- **S10 (Ripple, evening):** warm golden-hour, settled, brighter/warmer than the start — belonging.

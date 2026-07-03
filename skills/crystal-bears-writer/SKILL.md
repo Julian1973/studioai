@@ -1,6 +1,6 @@
 ---
 name: crystal-bears-writer
-description: GATE 0 — THE DEFINITIVE WRITERS' ROOM SKILL. The generative front of the Crystal Bears pipeline. Takes a SEED and WRITES one artifact — a complete, funny, heartfelt, DIALOGUE-LOCKED social-emotional-learning episode SCRIPT for ages 4–8 — then self-scores it /10 and won't ship below 8. Where the Director (Gate 1) breaks a script DOWN, the Writer WRITES it. Five internalised minds (Docter · Brumm · Stanton · Nee · Woolverton) run eight passes (Heart Lock → Lesson Lock → Game+Spine → Outline → Draft → Co-Watch Punch-up → Braintrust → Lock). Use on 'write the script', 'writers room', 'Gate 0', 'draft the episode', 'write me an episode', or whenever a seed needs to become a locked screenplay. Hands one locked screenplay down to the Director.
+description: GATE 0 — THE DEFINITIVE WRITERS' ROOM SKILL. The generative front of the Crystal Bears pipeline. Takes a SEED and WRITES one artifact — a complete, funny, heartfelt, DIALOGUE-LOCKED social-emotional-learning episode SCRIPT for ages 4–8 — then self-scores it /10, remaking weak beats up to 2 times to chase 8+ on every factor (best-effort — a script still below the bar after that ships anyway, flagged "belowBar" for a human punch-up). Where the Director (Gate 1) breaks a script DOWN, the Writer WRITES it. Five internalised minds (Docter · Brumm · Stanton · Nee · Woolverton) run eight passes (Heart Lock → Lesson Lock → Game+Spine → Outline → Draft → Co-Watch Punch-up → Braintrust → Lock). Use on 'write the script', 'writers room', 'Gate 0', 'draft the episode', 'write me an episode', or whenever a seed needs to become a locked screenplay. Hands one locked screenplay down to the Director.
 ---
 
 # GATE 0 — THE DEFINITIVE WRITERS' ROOM SKILL
@@ -316,7 +316,7 @@ On every heading (room-facing).
 
 ## THE SCORECARD — EVERY SCRIPT SELF-SCORES /10
 
-After the Braintrust, before it locks, the room scores the script against **four factors** plus an **overall** — and **does not ship below the bar.** The scorecard travels with the script and shows in the studio next to it, one line of justification per factor.
+After the Braintrust, before it locks, the room scores the script against **four factors** plus an **overall** — and remakes the weak beats and re-scores, **up to 2 times**, chasing the bar. That is best-effort, not a guarantee: if it is still below the bar after 2 passes, `cb_writer.py` ships the script anyway (so Gate 1 is never blocked on a stuck loop) but writes `"belowBar": true` to the scorecard sidecar and logs it loudly — treat that script as needing a human punch-up before it's truly locked. The scorecard travels with the script and shows in the studio next to it, one line of justification per factor.
 
 | Factor | A 10 looks like… | Loses points for… |
 |--------|------------------|-------------------|

@@ -1,0 +1,23 @@
+{
+ "_note": "Content requirements per script_gag_lock_id, read by cb_seedance._gag_locks(). TWO consumers share this schema: (1) the kept legacy compact-JSON authoring path (_build_shots' reveal/misread shot construction, and the 'SCRIPT LOCKS' summary text) reads required_visual_payoff/timing_lock/character_misread/reaction_line as PLAIN REQUIRED KEYS (KeyError if absent) plus carry_visual/acting_note/reveal_target_time/forbidden_interpretations as optional; (2) validate_seedance_prompt/validate_compact_prompt (T33 Ruling) read required_words (substrings the shipped prompt MUST contain, case-insensitive) and prohibited_patterns (regexes it must NOT match) — a beat whose gag drifts off either fails the render, not silently. An entry missing the first group crashes any beat referencing it; always fill in both groups.",
+ "S1_GAG_02_OFFICIAL_MOUSTACHE_NUTS": {
+  "_gag": "1.B2 — Fuzzby's pollen moustache is specifically a goatee handlebar moustache (Julian's Scene-1 Director's Cut, 2026-07-02), not a vague pollen-dust shape.",
+  "required_visual_payoff": "He pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache.",
+  "timing_lock": "The moustache reveal is a quick flash, not a held pause; the beat's ONE hold is Zenny's almost-laugh on her button line, under 1.5 seconds.",
+  "character_misread": "Fuzzby believes the goatee handlebar moustache makes him look official and impressive, not ridiculous.",
+  "reaction_line": "ZENNY: Yes Fuzzby Officially nuts!",
+  "acting_note": "Earnest, pompous pride from Fuzzby; Zenny's dry deadpan cracks for one tiny beat before the line.",
+  "carry_visual": "goatee handlebar moustache",
+  "forbidden_interpretations": [
+   "Fuzzby acknowledging the moustache looks silly or embarrassing"
+  ],
+  "required_words": [
+   "goatee",
+   "handlebar"
+  ],
+  "prohibited_patterns": [
+   "\\bfull beard\\b",
+   "\\bfuzzy yellow moustache\\b"
+  ]
+ }
+}

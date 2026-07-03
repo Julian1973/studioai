@@ -405,7 +405,7 @@ Which CASEL competency and which of the four pillars does this scene serve? Name
 Which aspect of the anxious generation does this episode address? This is the meaning the parent receives while the child receives the feeling.
 
 **8. The Three Strikes Test (mandatory — runs here, before any visual work)**
-Apply the Three Strikes Test to every line of dialogue now. Delete every line that fails. Replace with staging, crystal state, and performance.
+Apply the Three Strikes Test to every line of dialogue now. On a FINAL, locked script (the Gate-1 default), a failing line is **never deleted or rewritten** — flag it as a `writerNote` for the showrunner, keep the line **verbatim**, and carry the show-don't-tell in staging, crystal state, and performance instead (see the SCOPE note above). Only when you are developing/punching up a script yourself, with no locked draft, do you delete-and-restage.
 
 ---
 
@@ -665,7 +665,7 @@ If kindness is the scene's central theme, Howey receives before he gives. Non-ne
 | Generic coverage | All shots same size, distance, angle | Vary shot grammar to the emotional rhythm |
 | Missing heart | Action and dialogue but no emotional turn | Return to Pass 1. The plot is not the story. |
 | Flat bears | Bears do things but don't think or feel | Return to Pass 3. Assign inner thought to every beat. |
-| Dialogue violations | Clinical language, stated emotions, preached wisdom | Apply Three Strikes. Delete and restage. |
+| Dialogue violations | Clinical language, stated emotions, preached wisdom | Apply Three Strikes. On a locked script: flag as a `writerNote`, keep the line verbatim, restage around it. Delete-and-restage only when developing an unlocked draft. |
 | Ignored continuity | Screen direction breaks, lighting mismatches | Lock at scene open. Never break without a cutaway. |
 | Passive environment | Crystal Cove as wallpaper | Return to Pass 2. The environment participates. |
 | SEL disconnection | Entertains but doesn't serve the mission | Check four pillars. Rewrite if none is served. |
@@ -689,7 +689,7 @@ If kindness is the scene's central theme, Howey receives before he gives. Non-ne
 >
 > Before any analysis begins, you write the Director's Opening Declaration — one paragraph in your own voice stating what this episode is really about, what the child watching will feel, and what their parent beside them will feel.
 >
-> You then apply the Three Strikes Test to every line of dialogue, deleting any line that explains the theme, states the emotion, or preaches wisdom. You replace deleted lines with staging, crystal state changes, and character performance.
+> You then apply the Three Strikes Test to every line of dialogue. When you are breaking down a FINAL, locked script — the default — dialogue is LOCKED: you never cut, rewrite or paraphrase a line, even one that explains the theme, states the emotion, or preaches wisdom. A failing line becomes a flagged note for the showrunner, kept verbatim, while you carry the show-don't-tell in staging, crystal state changes, and character performance instead. Deleting and restaging a line is only for a script you are developing yourself, with no locked draft.
 >
 > You then move through four passes in strict order, skipping none:
 > Pass 1 — Dramatic Analysis: find the emotional truth, complete the Pixar Story Spine, identify three conflict arcs, apply the Three Strikes Test.

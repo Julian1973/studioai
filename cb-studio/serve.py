@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Crystal Bears Studio — local server. Episodes + shared Show Bible + script storage."""
-import os, re, json, http.server, socketserver, pathlib, subprocess, threading, time, zipfile, signal, sys, glob
+import os, re, json, http.server, socketserver, pathlib, subprocess, threading, time, zipfile, signal, sys, glob, uuid
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent   # Desktop/8Th Hour
-CBGEN = ROOT / "cb-gen"
-MEDIA = ROOT / "cb-gen" / "media"
+CBGEN = ROOT / "engine"
+MEDIA = ROOT / "engine" / "media"
 OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 SCRIPTS = DATA / "scripts"
@@ -13,12 +13,12 @@ SCRIPTS.mkdir(parents=True, exist_ok=True)
 
 # ── SOFTWARE-FRESHNESS GUARD ──────────────────────────────────────────────────────────────────────────────────
 # The UI is the ONLY way we fire, so the server behind it must NEVER run stale code. We fingerprint every Python
-# source a fire depends on (this server + the whole cb-gen engine — Director, prompt builder, voice, pipeline) at
+# source a fire depends on (this server + the whole engine engine — Director, prompt builder, voice, pipeline) at
 # startup. If any changes on disk the server is STALE: it REFUSES to fire (so a fire can never run old code) AND it
 # auto-reloads itself the moment it's idle, so the UI always has the latest software behind it without anyone
 # remembering to restart. (The render itself already runs in a fresh subprocess; this closes the serve.py gap.)
 def _source_fingerprint():
-    # ONLY this server's own source. cb-gen modules are reloaded fresh by each per-render SUBPROCESS, so they never
+    # ONLY this server's own source. engine modules are reloaded fresh by each per-render SUBPROCESS, so they never
     # need a serve.py reload — watching them would needlessly re-exec and DROP the UI's open connections on every
     # engine edit ("can't reach server"). serve.py is the only long-lived code, so it's the only thing to watch.
     try: return os.path.getmtime(os.path.abspath(__file__))
@@ -146,7 +146,12 @@ def reindex_episodes():
 # ---- pipeline driver: fire/approve gates via cb_pipeline (renders run in a background thread) ----
 JOBS = {}  # jobId -> {jobId, scene, gate, status, log, started, ended}
 PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid-run)
-GATE_NAME = {"1": "Director plan", "2": "DP keyframes", "3": "Camera clips", "4": "Post"}
+GATE_NAME = {"1": "Director plan", "2a": "Foundation", "2b": "DP keyframes", "3": "Camera clips", "4": "Retake/Edit", "5": "Post"}
+
+def _jid(prefix):
+    """A job ID that can NEVER collide — a second-resolution timestamp alone lets two fast fires on the same
+    beat/scene overwrite each other in JOBS/PROCS, orphaning the first process with no way to track or stop it."""
+    return f"{prefix}_{int(time.time())}_{uuid.uuid4().hex[:6]}"
 
 def _pkg_name(episode="Ep1"):
     """The current episode's beat-package FILENAME (basename only) — the default `package` for beat previews.
@@ -156,10 +161,60 @@ def _pkg_name(episode="Ep1"):
             else f"{episode}_The_Adventure_Begins_beat_package.json")
 PKG_NAME = _pkg_name()
 
+# ── GATE-1 CASCADE-RELOCK (bug fix, 2026-07-02, Julian) — ⚠ DUPLICATED from engine/cb_pipeline.py's
+#    _scene_beats_fingerprint/_relock_if_stale (a separate process, no engine import here — same convention as
+#    the already-duplicated GATE_SEQ above). See cb_pipeline.py for the full rationale. Every read of locked_state()
+#    (the studio's ONLY path to gate-status data) re-checks every episode/scene it finds and cascade-clears a
+#    scene's "1"/"2a"/"2b"/"3"/"4"/"5" + per-beat locks the moment its Gate-1 deliverable no longer matches the
+#    fingerprint recorded when Gate 1 was approved — so the Pipeline page can never show a stale "signed off" again.
+def _scene_beats_fingerprint(episode, scene):
+    import hashlib
+    cands = sorted(OUT.glob(f"{episode}_*beat_package.json")) or sorted(OUT.glob(f"{episode}_*shot_package.json"))
+    if not cands:
+        return None
+    pkg = max(cands, key=lambda p: p.stat().st_mtime)
+    d = json.loads(pkg.read_text())
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
+    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    blob = json.dumps(beats, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+
+def _relock_stale_scenes(d):
+    """Mutates `d` (the parsed locked.json) in place, cascade-clearing any scene whose Gate-1 fingerprint has
+    drifted. Returns True if anything changed (caller persists it back to disk)."""
+    changed = False
+    for episode, escenes in list(d.items()):
+        if not isinstance(escenes, dict):
+            continue
+        for scene, sd in list(escenes.items()):
+            if not isinstance(sd, dict) or not sd.get("1") or not sd.get("1_fp"):
+                continue
+            try:
+                current = _scene_beats_fingerprint(episode, scene)
+            except Exception:
+                continue
+            if current is None or current == sd["1_fp"]:
+                continue
+            print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — Gate 1 deliverable changed since sign-off "
+                  f"(fingerprint {current} != approved {sd['1_fp']}); every downstream gate + per-beat lock reset.", flush=True)
+            for g in ("1", "2a", "2b", "3", "4", "5", "2", "1_fp"):
+                sd.pop(g, None)
+            sd["beats"] = {}
+            changed = True
+    return changed
+
 def locked_state():
     f = CBGEN / "locked.json"
-    try: return json.loads(f.read_text()) if f.exists() else {}
-    except Exception: return {}
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+    try:
+        if _relock_stale_scenes(d):
+            f.write_text(json.dumps(d, indent=1))
+    except Exception:
+        pass   # fail-open: a relock error must never brick gate-status reads
+    return d
 
 def notes_state():
     f = CBGEN / "notes.json"
@@ -218,13 +273,21 @@ def _stream(jobId, args):
                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
                              start_new_session=True)   # own process group, so STOP kills the gate + every render it spawns
         PROCS[jobId] = p; job["pid"] = p.pid
-        lines = []
+        lines = []; _last_reindex = 0.0
         for line in p.stdout:
             line = line.rstrip()
             if not line: continue
             lines.append(line)
             job["log"] = "\n".join(lines[-250:])
             job["step"] = _humanise(line)
+            # a batch job (e.g. Gate 2b building every beat in a scene) is ONE long subprocess — without this,
+            # a beat finished early in the batch stays invisible until the WHOLE batch exits. Throttled to ~2s
+            # so a chatty subprocess doesn't turn this into a reindex-per-line hot loop.
+            now = time.time()
+            if now - _last_reindex > 2:
+                try: reindex_media()
+                except Exception: pass
+                _last_reindex = now
         p.wait()
         if job.get("stopped"):
             job["status"] = "stopped"; job["step"] = "Stopped by user."
@@ -236,6 +299,11 @@ def _stream(jobId, args):
         job["status"] = "failed"; job["step"] = "Failed — see log."
     finally:
         PROCS.pop(jobId, None)
+        # THE central completion point for every gate action fired from the studio (keyframes, clips, voice,
+        # retakes, ...) — reindex here regardless of outcome (done/failed/stopped can all have left new files
+        # on disk) so the UI's next media-index.json fetch reflects reality instead of the stale server-start snapshot.
+        try: reindex_media()
+        except Exception: pass
     job["ended"] = time.time()
 
 def _start(jobId, gate, scene, args):
@@ -257,9 +325,9 @@ def fire_gate(scene, gate, force=False, episode="Ep1"):
     # --episode=<ep> retargets cb_pipeline.py's EP/PKG globals for THIS invocation (see cb_pipeline.py __main__) —
     # without it every gate action silently ran against Ep1 regardless of which episode was actually selected.
     if str(gate) == "1" and force:
-        return _start(f"g1s{scene}_{int(time.time())}", gate, scene,
+        return _start(_jid(f"g1s{scene}"), gate, scene,
                       ["cb_pipeline.py", "redirect", str(scene), f"--episode={episode}"])
-    return _start(f"g{gate}s{scene}_{int(time.time())}", gate, scene,
+    return _start(_jid(f"g{gate}s{scene}"), gate, scene,
                   ["cb_pipeline.py", str(gate), str(scene), f"--episode={episode}"])
 
 def write_script(seed, episode="Ep1"):
@@ -267,7 +335,7 @@ def write_script(seed, episode="Ep1"):
     SCRIPTS.mkdir(parents=True, exist_ok=True)
     seedpath = SCRIPTS / f"_seed_{episode}.json"
     seedpath.write_text(json.dumps(seed, ensure_ascii=False))
-    return _start(f"write{episode}_{int(time.time())}", "write", "0",
+    return _start(_jid(f"write{episode}"), "write", "0",
                   ["cb_writer.py", str(seedpath), str(episode)])
 
 def stop_job(jobId):
@@ -319,6 +387,9 @@ def clear_master_studio(scene, character, episode="Ep1"):
     return ("cleared" in out), out
 
 # server-side gate guard (defense in depth — the HTTP boundary itself refuses to fire/regen past an unsigned step)
+# ⚠ DUPLICATED (deliberately, not shared) from engine/cb_pipeline.py's own GATE_SEQ — a separate process. If a gate
+# is ever added/renamed/reordered, update BOTH lists in the SAME change, or this HTTP-layer guard and cb_pipeline's
+# process-layer guard could silently disagree on what "the previous gate" is.
 GATE_SEQ = ["1", "2a", "2b", "3", "4", "5"]   # …3 Animation · 4 Retakes · 5 Post
 def _scene_locks(scene, episode="Ep1"):
     return locked_state().get(episode or "Ep1", {}).get(str(scene), {})
@@ -333,13 +404,13 @@ def _gate_ready(scene, gate, episode="Ep1"):
     return False, f"Gate {prev} not signed off for scene {scene} — sign it off first."
 
 def regen_shot(scene, shot_code, kind, note, target="both", episode="Ep1"):
-    return _start(f"regen_{kind}_{shot_code}_{int(time.time())}", f"regen:{shot_code}", scene,
+    return _start(_jid(f"regen_{kind}_{shot_code}"), f"regen:{shot_code}", scene,
                   ["cb_pipeline.py", "regen", str(scene), str(shot_code), kind, note or "", target, f"--episode={episode}"])
 
 # ---- TICKET 4: per-beat Linear Gated Cascade drivers (mirror the gate drivers above) ----
 def gen_audio_beat(scene, beat, episode="Ep1"):
     """Generate the dialogue track for ONE beat (job; cb_pipeline gen-audio prints AUDIO_DUR + the track path)."""
-    return _start(f"audio_{beat}_{int(time.time())}", f"audio:{beat}", scene,
+    return _start(_jid(f"audio_{beat}"), f"audio:{beat}", scene,
                   ["cb_pipeline.py", "gen-audio", str(scene), str(beat), f"--episode={episode}"])
 
 def gen_keyframe_beat(scene, beat, chain_from=None, episode="Ep1"):
@@ -348,11 +419,11 @@ def gen_keyframe_beat(scene, beat, chain_from=None, episode="Ep1"):
     if chain_from:
         args.append(str(chain_from))
     args.append(f"--episode={episode}")
-    return _start(f"kf_{beat}_{int(time.time())}", f"keyframe:{beat}", scene, args)
+    return _start(_jid(f"kf_{beat}"), f"keyframe:{beat}", scene, args)
 
 def render_beat_clip(scene, beat, episode="Ep1"):
     """Render ONE beat's 10-12s Seedance take (job; cb_pipeline render-beat -> cb_beats.run for that beat)."""
-    return _start(f"render_{beat}_{int(time.time())}", f"render:{beat}", scene,
+    return _start(_jid(f"render_{beat}"), f"render:{beat}", scene,
                   ["cb_pipeline.py", "render-beat", str(scene), str(beat), f"--episode={episode}"])
 
 def approve_beat(scene, beat, stage, episode="Ep1", value=True):
@@ -373,11 +444,11 @@ def approve_beat(scene, beat, stage, episode="Ep1", value=True):
 def rebuild_keyframes(scene, episode="Ep1"):
     """CLEAN rebuild of ALL keyframes for a scene — deletes stale frames + re-renders every beat fresh.
     Tagged gate '2b' so the studio shows it LIVE as a keyframe build (progress bar + storyboard populating)."""
-    return _start(f"rebuild_kf_{scene}_{int(time.time())}", "2b", scene,
+    return _start(_jid(f"rebuild_kf_{scene}"), "2b", scene,
                   ["cb_pipeline.py", "rebuild", str(scene), f"--episode={episode}"])
 
 # ── STATIC FILE HARDENING (security) ──────────────────────────────────────────────────────────────────────────
-# The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read cb-gen/.env (API keys),
+# The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read engine/.env (API keys),
 # *.py source, *.bak snapshots, *.log, internal config/state, node_modules and audit/archive/unpack folders.
 # Policy = ALLOW-LIST by approved ROOT + extension: everything is BLOCKED by default; a file is served ONLY if it
 # sits under an approved root with an approved extension, OR is an explicitly-approved exact file. Blocked → 404
@@ -387,7 +458,7 @@ def rebuild_keyframes(scene, episode="Ep1"):
 # Approved EXACT files the UI fetches by name (case-insensitive):
 _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
-    "/cb-gen/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
+    "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
 }                                         # add a new project's showBibleFile / configBase characters.json here if it differs
 _MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
@@ -396,7 +467,7 @@ _MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
 _IMG_EXT   = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
 # Approved ROOTS (path-prefix → the extensions allowed under it). Nothing outside these is served.
 _APPROVED_ROOTS = (
-    ("/cb-gen/media/",   _MEDIA_EXT),               # generated review media (keyframes, clips, voice)
+    ("/engine/media/",   _MEDIA_EXT),               # generated review media (keyframes, clips, voice)
     ("/cb-seed/assets/", _IMG_EXT),                 # character/location reference images (turnarounds, masters)
     ("/cb-output/",      {".json"}),                # output packages — FURTHER limited to *_beat_package.json (below)
     ("/cb-studio/data/", {".json", ".txt"}),        # registries (episodes/media-index/projects) + scripts the UI reads
@@ -552,7 +623,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 manifest = {}
             reuse = {}
-            lf = ROOT / "cb-gen" / "config" / "locations.json"
+            lf = ROOT / "engine" / "config" / "locations.json"
             try:
                 if lf.exists():
                     locs = json.loads(lf.read_text())
@@ -612,7 +683,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/houses":
             houses = []
             try:
-                cf = ROOT / "cb-gen" / "config" / "characters.json"
+                cf = ROOT / "engine" / "config" / "characters.json"
                 cfg = json.loads(cf.read_text()) if cf.exists() else {}
                 for char, v in cfg.items():
                     if not isinstance(v, dict):
@@ -662,7 +733,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "package and beat required"})
             try:
                 r = subprocess.run([_sys.executable, "kf_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "cb-gen"), capture_output=True, text=True, timeout=40)
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
                 return self._json(200, obj)
@@ -677,7 +748,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "package and beat required"})
             try:
                 r = subprocess.run([_sys.executable, "voice_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "cb-gen"), capture_output=True, text=True, timeout=40)
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
                 return self._json(200, obj)
@@ -695,7 +766,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "scene and beat required"})
             try:
                 r = subprocess.run([_sys.executable, "beat_preview.py", pkg, scene, beat, ep, kind],
-                                   cwd=str(ROOT / "cb-gen"), capture_output=True, text=True, timeout=40)
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
                 return self._json(200, obj)
@@ -777,7 +848,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "issue": d.get("issue", ""), "change": d.get("change", ""),
                     "episode": d.get("episode", "Ep1"),
                 })
-                r = subprocess.run([_sys.executable, "retake_preview.py"], cwd=str(ROOT / "cb-gen"),
+                r = subprocess.run([_sys.executable, "retake_preview.py"], cwd=str(ROOT / "engine"),
                                    input=payload, capture_output=True, text=True, timeout=60)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"ok": False, "error": (r.stderr or "no output")[:400]}
@@ -862,6 +933,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/gen-audio":
             try:
                 d = self._body(); scene = str(d["scene"]); beat = str(d["beat"]); episode = d.get("episode", "Ep1")
+                if not _scene_locks(scene, episode).get("2a"):   # matches /api/rebuild's gate — per-beat cascade needs the foundation first
+                    self._json(409, {"error": f"Gate 2a (foundation) not signed off for scene {scene} — sign it off before generating audio."}); return
                 self._json(200, {"ok": True, "jobId": gen_audio_beat(scene, beat, episode)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -870,6 +943,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 d = self._body(); scene = str(d["scene"]); beat = str(d["beat"]); episode = d.get("episode", "Ep1")
                 chain_from = d.get("chain_from") or None
+                if not _scene_locks(scene, episode).get("2a"):   # matches /api/rebuild's gate — same underlying action, one beat at a time
+                    self._json(409, {"error": f"Gate 2a (foundation) not signed off for scene {scene} — sign it off before building keyframes."}); return
                 self._json(200, {"ok": True, "jobId": gen_keyframe_beat(scene, beat, chain_from, episode)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -877,6 +952,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/render-beat":
             try:
                 d = self._body(); scene = str(d["scene"]); beat = str(d["beat"]); episode = d.get("episode", "Ep1")
+                if not _scene_locks(scene, episode).get("2b"):   # matches /api/regen's kind=clip gate — clips need signed keyframes
+                    self._json(409, {"error": f"Gate 2b (keyframes) not signed off for scene {scene} — sign it off before rendering clips."}); return
                 self._json(200, {"ok": True, "jobId": render_beat_clip(scene, beat, episode)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -892,8 +969,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/api/director-eye":
             try:
-                d = self._body(); episode = d.get("episode", "Ep1")   # episode-level review; the package is resolved cb-gen-side
-                jid = _start(f"directoreye_{int(time.time())}", "1.5", "1",
+                d = self._body(); episode = d.get("episode", "Ep1")   # episode-level review; the package is resolved engine-side
+                jid = _start(_jid("directoreye"), "1.5", "1",
                              ["cb_pipeline.py", "director-eye", f"--episode={episode}"])
                 self._json(200, {"ok": True, "jobId": jid})
             except Exception as e:
@@ -966,7 +1043,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 scene = str(d.get("scene", "")).strip()
                 if not scene:
                     raise ValueError("scene required")
-                fname = f"Ep1_S{scene}_plate.png"
+                episode = str(d.get("episode") or "Ep1").strip() or "Ep1"
+                fname = f"{episode}_S{scene}_plate.png"
                 MEDIA.mkdir(parents=True, exist_ok=True)
                 src = d.get("fromFile")
                 if src:   # PULL from the library — copy an existing image to this scene's plate
@@ -981,6 +1059,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                     if raw.strip().startswith("data:") and "," in raw:
                         raw = raw.split(",", 1)[1]
                     (MEDIA / fname).write_bytes(base64.b64decode(raw))
+                reindex_media()   # the file exists on disk now — without this, media-index.json (what the UI
+                                  # re-fetches right after this call) stays stale and the plate never appears
                 self._json(200, {"ok": True, "plate": fname})
             except Exception as e:
                 self._json(400, {"error": str(e)})

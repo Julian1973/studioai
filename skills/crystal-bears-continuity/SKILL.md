@@ -39,7 +39,7 @@ Invoked by the Producer/1st AD before each sign-off (and on demand). You read th
 
 ## 3. THE CHECK DIMENSIONS
 
-**A. Canon lock.** Bear ↔ crystal ↔ feeling ↔ colour ↔ note all correct; Crystal Call text exact; **cast lock** (only the 7 bears + Fuzzby + Zenny, plus approved guests Squeeky/Keen's Mum — no invented characters/species); locations from the canon list; names spelled right.
+**A. Canon lock.** Bear ↔ crystal ↔ feeling ↔ colour ↔ note all correct; Crystal Call text exact; **cast lock** (only the 7 bears + Fuzzby + Zenny, plus approved guests Squeeky/Keen's Mum/Bo — no invented characters/species); locations from the canon list; names spelled right.
 
 **B. Reference anchoring.** Characters and homes are **referenced, never described** ("as per the reference image of …"); the correct **anchor** is used (clean single-subject, not a contact sheet); ≤6 refs.
 
@@ -47,7 +47,7 @@ Invoked by the Producer/1st AD before each sign-off (and on demand). You read th
 
 **D. Story / structure.** Five Pillars present and *functioning* with right timecodes; emotion is the mechanic (remove it and the story collapses); **show-don't-tell** (no teaching voice / "remember kids…"); a genuine **laugh in every non-Heart Pillar**; a **parent-mirror** beat; ends on an **image, not a speech**.
 
-**E. Audio / voice.** Dialogue mapped to the **correct voice ID**; (voice stage) **V3 brackets** present + 1–2 per segment; **lip-sync path** tagged per shot; (post) the **native voice never ships**, dialogue is Voice-Changed/lip-synced, music **ducks** under dialogue, **loudness** hits target.
+**E. Audio / voice.** Dialogue mapped to the **correct voice ID**; (voice stage) **V3 brackets** present + 1–2 per segment; the finished V3 track is supplied to Seedance as **`@AudioN`** and lip-synced (not generated natively by Seedance, no post-render swap); (post) that voice **ships unchanged**, music **ducks** under dialogue, **loudness** hits target.
 
 **F. Cross-shot continuity.** Props/wardrobe/state **carry correctly** across shots — e.g. Howey's load *accumulates* (don't drop an item), his crystal **dims progressively** then recovers, the **lopsided crown stays lopsided** once chosen; time-of-day and location stay continuous across a scene; no element appears/vanishes between cuts.
 
@@ -59,9 +59,9 @@ Invoked by the Producer/1st AD before each sign-off (and on demand). You read th
 
 **GATE 2 — keyframes (DP).** On-model vs the anchor (B/C); no extra/duplicate bears; **crystal colour + glow state** correct; **2–3 ambient crystals**; lighting + colour script per pillar; composition/screen direction; 16:9, no text/watermark.
 
-**GATE 3 — clips (Camera).** Still on-model (no motion drift / morphing); crystal continuity; **mouth moves on dialogue** shots (lip-sync source present); one clean motion arc (no chained-gag drift); no new elements introduced; screen direction held; native voice flagged as throwaway.
+**GATE 3 — clips (Camera).** Still on-model (no motion drift / morphing); crystal continuity; **mouth moves on dialogue** shots, lip-synced to the supplied `@AudioN` V3 track (the FINAL voice, not a throwaway); one clean motion arc (no chained-gag drift); no new elements introduced; screen direction held.
 
-**GATE 4 — final (Post).** Every line in the **canonical voice**, on the lips (no TTS-over-picture drift); ambience beds present (no dead silence); FX hit the frame; music ducks + spotting correct; **loudness target met** (−23/−24 LUFS broadcast or −14 streaming, true peak ≤ −1 dBTP); stems exported; **end-to-end** cast/world/voice consistency.
+**GATE 5 — final (Post).** Every line in the **canonical voice**, on the lips (no TTS-over-picture drift); ambience beds present (no dead silence); FX hit the frame; music ducks + spotting correct; **loudness target met** (−23/−24 LUFS broadcast or −14 streaming, true peak ≤ −1 dBTP); stems exported; **end-to-end** cast/world/voice consistency.
 
 ---
 
@@ -119,7 +119,7 @@ Each finding: **SEVERITY · WHERE (shot/stage) · ISSUE · CANON RULE · FIX (ow
 
 ## 8. HAND-OFF
 
-Return the report to the **Producer/1st AD**: **BLOCKs** go back to the owning department to fix and re-submit; **NOTEs** are logged. When there are no open BLOCKs, the gate is clear for the human sign-off. A final pass at Gate 4 certifies end-to-end consistency.
+Return the report to the **Producer/1st AD**: **BLOCKs** go back to the owning department to fix and re-submit; **NOTEs** are logged. When there are no open BLOCKs, the gate is clear for the human sign-off. A final pass at Gate 5 (Post) certifies end-to-end consistency.
 
 *Check against the bible, never memory. Name the shot, the rule, the fix. Block the drift before it costs. That's how the show always looks like itself.*
 
@@ -133,7 +133,7 @@ When an earlier shot shows a **vision, dream, flashback or foresight** of a plac
 ---
 
 ## ⚑ Clarifications — RESOLVED (2026-06-21)
-- **Cast tiers:** principals = 7 bears + Fuzzby + Zenny; approved GUESTS = Squeeky + Keen's Mum. No ad-hoc invented characters or humans.
+- **Cast tiers:** principals = 7 bears + Fuzzby + Zenny; approved GUESTS = Squeeky + Keen's Mum + Bo (Bo is a stub — no reference art/bible yet, Ep2 not producible). No ad-hoc invented characters or humans.
 - **Crystal Call text** = canon §4 (the bible set; the Selenite/"strong and true" variant is stale).
 - **Vision↔reality:** flag the match at the vision's gate; verify it when the real scene renders (e.g. 2.2 vision pier/boat ↔ Scene 3).
 - Continuity is a **pre-gate checkpoint** (flags BLOCK/NOTE); the department fixes; the Producer signs off.

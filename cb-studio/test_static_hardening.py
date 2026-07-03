@@ -18,22 +18,22 @@ BASE = sys.argv[1].rstrip("/") if len(sys.argv) > 1 else "http://localhost:8765"
 
 # 1) Sensitive paths — must be REFUSED (404/403).
 BLOCKED_SENSITIVE = [
-    "/cb-gen/.env", "/.env", "/cb-gen/cb_prompts.py", "/cb-gen/cb_gen.py", "/cb-studio/serve.py",
-    "/cb-gen/locked.json", "/cb-gen/notes.json", "/cb-studio/data/projects-index.json",
+    "/engine/.env", "/.env", "/engine/cb_prompts.py", "/engine/cb_gen.py", "/cb-studio/serve.py",
+    "/engine/locked.json", "/engine/notes.json", "/cb-studio/data/projects-index.json",
     "/.replit", "/.DS_Store", "/node_modules/", "/_audit_unpack/", "/client/index.html",
-    "/cb-gen/_master3.log", "/server.js.bak", "/../cb-gen/.env",
+    "/engine/_master3.log", "/server.js.bak", "/../engine/.env",
 ]
 
 # 2) THE POINT OF THIS REVISION — random JSON / MD / TXT OUTSIDE an approved root must be REFUSED (404),
 #    even when the extension itself is otherwise legitimate elsewhere.
 BLOCKED_OUTSIDE_ROOTS = [
-    "/cb-gen/continuity.json",          # JSON in a non-approved folder
-    "/cb-gen/config/continuity.json",   # JSON in config — only characters.json is approved there
-    "/cb-gen/config/locations.json",    # ditto
+    "/engine/continuity.json",          # JSON in a non-approved folder
+    "/engine/config/continuity.json",   # JSON in config — only characters.json is approved there
+    "/engine/config/locations.json",    # ditto
     "/cb-output/Ep1_theme.json",        # JSON in cb-output but NOT a *_beat_package.json
-    "/STUDIO_COMEDY_DOCTRINE.md",       # a doc that is not the show-bible
+    "/STUDIO_GATE_FLOW_SPEC.md",        # a real doc that exists at root but is not the show-bible
     "/README.md",                       # any other markdown doc
-    "/CRYSTAL_BEARS_PIPELINE.md",       # ditto
+    "/STUDIO_WRITERS_ROOM_SPEC.md",     # ditto
     "/random-not-real.txt",             # stray text at root
     "/cb-studio/data/anything.md",      # MD inside the approved data root (wrong extension there)
     "/secrets.json",                    # stray JSON at root
@@ -42,13 +42,13 @@ BLOCKED_OUTSIDE_ROOTS = [
 # 3) Real assets the SPA fetches — must be SERVED (200). All of these exist on disk.
 ALLOWED = [
     "/cb-studio/app.html",
-    "/cb-gen/config/characters.json",
+    "/engine/config/characters.json",
     "/CRYSTAL_BEARS_LOCKED_CANON.md",
     "/cb-studio/data/episodes.json",
     "/cb-studio/data/media-index.json",
     "/cb-studio/data/scripts/Ep1_The_Adventure_Begins.txt",
     "/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
-    "/cb-gen/media/AB_1.B1_flux.png",
+    "/engine/media/AB_1.B1_flux.png",
 ]
 
 

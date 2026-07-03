@@ -1,6 +1,6 @@
 ---
 name: crystal-bears-post
-description: "The world-class Post department for Crystal Bears — Sound Designer + Picture Editor + Re-recording Mixer. Takes the locked video clips (Gate 3) plus the ElevenLabs dialogue and the Suno music + spotting map, and finishes the episode: strips the i2v native dialogue and Voice-Changes it to the canonical voice, lays ambience beds + SFX/foley, places and DUCKS music under dialogue, edits the cut, mixes to broadcast loudness, and stitches the final film. Can also export a prepped session (OpenTimelineIO/AAF/EDL) for a human finishing pass. Gate-aware: runs on signed-off clips + voice + music, produces the final cut, takes Gate 4 sign-off, exports. This is the AI-slop-to-broadcast step — the biggest differentiator. Use on 'post', 'mix', 'stitch', 'assemble', 'final cut', 'sound design', 'finish the episode', 'export'."
+description: "The world-class Post department for Crystal Bears — Sound Designer + Picture Editor + Re-recording Mixer. Takes the locked video clips (Gate 3), each already carrying its final ElevenLabs V3 dialogue (supplied to Seedance as @AudioN and lip-synced, never a placeholder — never stripped or swapped), and finishes the episode: lays ambience beds + SFX/foley, places and DUCKS a music bed under the dialogue (curate/master — music is Seedance's weakest leg), edits the cut (hard cuts within a scene, cross-dissolves only between scenes), mixes to broadcast loudness, and stitches the final film. Can also export a prepped session (OpenTimelineIO/AAF/EDL) for a human finishing pass. Gate-aware: runs on signed-off clips + voice + music, produces the final cut, takes Gate 4 sign-off, exports. This is the AI-slop-to-broadcast step — the biggest differentiator. Use on 'post', 'mix', 'stitch', 'assemble', 'final cut', 'sound design', 'finish the episode', 'export'."
 metadata:
   author: Julian Jenkins — Enaid Creative
   version: 1.0.0
@@ -212,3 +212,10 @@ Post = **music + SFX + mix + stems** only (executable truth: `cb-gen/cb_post.py`
 
 ## ⚑ Guide audio is the alignment reference (2026-06-21)
 Every clip carries Seedance's full guide soundscape. Post delivers the stitched picture WITH that guide audio (`PICTURE_with_guide_audio.mp4`) + clean replacement stems (music, ambience). Julian aligns ADR + new music/SFX to the guide's waveform in CapCut, then mutes the guide. Never strip the guide audio before delivery.
+
+## ⚑⚑ IT WAS NEVER A GUIDE — the clip's voice is the final voice (LOCKED 2026-07-02; supersedes the "guide"/ADR/CapCut framing above)
+
+The "never strip the native/guide audio" MECHANICS above are correct and still exactly how `cb-gen/cb_post.py` works today (see its own module docstring: *"The clip audio is never stripped. Post is the quality filter + the seamless stitch + the stems — never the creative layer."*). What's wrong is the REASON given for it — there is no later ADR pass, no CapCut mute-and-replace, nothing for Julian to swap:
+- The dialogue baked into every clip is the beat's `@Audio1` — the FULL ElevenLabs V3 acted performance the Voice Director produced and Seedance was told to lip-sync to (`reference-to-video`, `generate_audio=True`). It is not a placeholder; it is not muted; it ships.
+- Post's real job, unchanged: assemble picture (hard cuts within a scene, cross-dissolves only between scenes), lay ONE continuous music bed + ambience UNDER that voice (ducked, never touched or replaced), time SFX, master to spec, deliver stems. Music is Seedance's weakest leg, so Post's own bed is often the one that actually ships — but the VOICE always stays exactly what was rendered.
+- Drop "guide track", "ADR", and "CapCut swap" from how you talk about this — there is nothing downstream still to happen to the dialogue.

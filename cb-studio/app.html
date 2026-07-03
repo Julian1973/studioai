@@ -873,6 +873,8 @@ function showToast(msg,ok){
 }
 function jobLabel(j){
   if(String(j.gate).startsWith('regen'))return 'Regenerate '+String(j.gate).split(':')[1];
+  if(String(j.gate).startsWith('relay-prepare'))return 'Relay — preparing '+String(j.gate).split(':')[1]+"'s anchor";
+  if(String(j.gate).startsWith('relay-approve'))return 'Relay — launching the next beat off '+String(j.gate).split(':')[1];
   if(String(j.gate)=="write")return "Gate 0 · Writers' Room";
   const d=GATE_DEF[+j.gate-1]; return 'Gate '+j.gate+(d?' · '+d[1]:'');
 }
@@ -1302,9 +1304,73 @@ async function openShot(id,kind){
         : `<button class="btn" ${_run?'disabled':''} style="${_run?'opacity:.5;cursor:default':''}" onclick="regenShot('${s.sceneNumber}','${_code}','clip','both')">${_run?'Regenerating…':'Regenerate clip'}</button>`}
       <span style="font-size:11.5px;color:var(--hint)">${_run?'running — this can take a minute':(_kind=="keyframe"?'your note applies to whatever you regenerate':'feeds your note into the prompt and re-renders this beat')}</span>
     </div>
-    ${masterUI}`;
+    ${masterUI}
+    ${isB?`<div id="relayPanel_${_code}" style="margin-top:16px"></div>`:''}`;
   document.getElementById("modal").classList.add("show");
-  if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);}
+  if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);fetchRelayInfo(s.sceneNumber,s.shotCode);}
+}
+// ── THE RELAY, front door (Julian, 2026-07-03) — seeds land here, QA shows, winner pick is a button, the
+// prepared anchor + its drift verdict display, and Approve Anchor is the ONLY thing that may launch the next
+// beat. Same stop-points as the terminal fire_next_beat flow; nothing here advances without an explicit click.
+async function fetchRelayInfo(scene,code){
+  const el=document.getElementById('relayPanel_'+code); if(!el)return;
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const [seedsJ,relayJ]=await Promise.all([
+      fetch(BASE+"/api/beat-seeds?code="+encodeURIComponent(code)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json()),
+      fetch(BASE+"/api/relay-state?scene="+encodeURIComponent(scene)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json())
+    ]);
+    renderRelayPanel(scene,code,seedsJ.seeds||[],relayJ||{});
+  }catch(e){el.innerHTML=`<div style="font-size:11px;color:var(--hint)">Couldn't load the relay/seed state — is the server running?</div>`;}
+}
+function renderRelayPanel(scene,code,seeds,relay){
+  const el=document.getElementById('relayPanel_'+code); if(!el)return;
+  let h='';
+  if(seeds.length){
+    h+=`<div class="kv" style="color:var(--brandink);border-top:2px solid var(--brand);padding-top:9px">◈ Candidate seeds — pick the winner</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">`+seeds.map(sd=>{
+        const qa=sd.qa,qaOk=qa&&qa.ok===true,qaBad=qa&&qa.ok===false;
+        const qaLab=qa?(qaOk?`<span style="color:var(--ok)">✓ ${_esc(qa.verdict||'PASS')}</span>`:qaBad?`<span style="color:#c0392b">✗ ${_esc(qa.verdict||'FAIL')}</span>`:_esc(qa.verdict||''))
+                      :`<span style="color:var(--hint)">no QA recorded</span>`;
+        return `<div style="width:220px"><video src="${BASE}/engine/media/${sd.file}?v=${MEDIA_V}" controls style="width:100%;border-radius:6px;background:#000"></video>
+          <div style="font-size:10.5px;margin-top:3px;line-height:1.4">Seed ${sd.n} · ${qaLab}</div>
+          <button class="btn ghost" style="margin-top:4px;padding:4px 9px;font-size:11px;width:100%" onclick="pickWinner('${scene}','${code}','${sd.file}')">${relay.winnerCode==code?'↻ Re-pick as winner':'✓ Pick as winner'}</button></div>`;
+      }).join('')+`</div>`;
+  }
+  if(relay.winnerCode==code){
+    const dc=relay.driftCheck||{},clean=dc.ok===true;
+    h+=`<div class="kv" style="color:var(--brandink);margin-top:14px">◈ Prepared relay anchor — for ${_esc(relay.nextCode||'the next beat')}</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
+        ${relay.remint?`<img src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:#efeef6"/>`:''}
+        <div style="flex:1;min-width:220px">
+          <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'}</div>
+          <div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>
+          <button class="btn" style="margin-top:8px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${scene}','${code}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')}</button>
+          ${clean?'':`<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-pick a seed above to retry the re-mint (harvest + re-mint run fresh each time), or hold for a ruling. check_remint's bar is untouched.</div>`}
+        </div>
+      </div>`;
+  }
+  if(!seeds.length && relay.winnerCode!=code)
+    h+=`<div style="font-size:11px;color:var(--hint);border-top:2px solid var(--brand);padding-top:9px">◈ No seed takes yet for this beat — these land once the previous beat's anchor is approved (or fire this beat directly via Gate 3).</div>`;
+  el.innerHTML=h;
+}
+async function pickWinner(scene,code,seedFile){
+  if(!confirm(`Designate ${seedFile} as ${code}'s winner?\n\nThis copies it in as the official clip, then harvests + re-mints its settle frame for the relay anchor. Nothing launches yet — you approve the anchor separately.`))return;
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const r=await fetch(BASE+"/api/relay-prepare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,seedPath:'media/'+seedFile,episode:ep})});
+    const j=await r.json();if(!j.ok){alert("Couldn't start the relay prepare: "+(j.error||"failed"));return;}
+    closeM();setTimeout(refreshPipe,400);
+  }catch(e){alert("Can't reach the studio server.");}
+}
+async function approveAnchor(scene,code){
+  if(!confirm(`Approve ${code}'s anchor and launch the next beat's two seeds?\n\nThis is the ONLY action that launches the next beat — nothing else advances the relay.`))return;
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const r=await fetch(BASE+"/api/relay-approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,episode:ep})});
+    const j=await r.json();if(!j.ok){alert("Couldn't approve: "+(j.error||"failed"));return;}
+    closeM();setTimeout(refreshPipe,400);
+  }catch(e){alert("Can't reach the studio server.");}
 }
 function closeM(){document.getElementById("modal").classList.remove("show")}
 document.getElementById("modal").onclick=e=>{if(e.target.id=="modal")closeM()};

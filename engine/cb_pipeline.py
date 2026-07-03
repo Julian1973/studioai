@@ -592,6 +592,56 @@ def approve_beat(scene, code, stage, value=True):
             nxt = order[i + 1] if i + 1 < len(order) else None
         print(f"NEXT={nxt or 'NONE'}", flush=True)
 
+# ── THE RELAY, front door (Julian, 2026-07-03 — "everything through the front door now") — thin CLI wrappers
+# around cb_beats.fire_next_beat, persisting the prepared-anchor state to relay_state.json so the Studio can
+# display it without re-deriving/re-calling NB2 on every page load. Two phases, same as the terminal flow:
+# relay_prepare (designate winner -> harvest -> re-mint -> drift-check -> STOP) and relay_approve (launch the
+# next beat's seeds). The UI's Approve Anchor button is the ONLY caller of relay_approve — see cb-studio/serve.py.
+RELAY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "relay_state.json")
+
+def _relay_all():
+    return json.load(open(RELAY)) if os.path.exists(RELAY) else {}
+
+def _relay_save(d):
+    json.dump(d, open(RELAY, "w"), indent=1)
+
+def relay_state_for(scene, episode=None):
+    """Read-only: the prepared (unapproved) anchor for this scene, or None if nothing is waiting."""
+    episode = episode or EP
+    return _relay_all().get(episode, {}).get(str(scene))
+
+def relay_prepare(scene, winner_code, winner_seed_path, seeds=2, episode=None):
+    """PHASE 1 (front door): designate `winner_code`'s picked seed as its official clip, harvest its settle
+    frame, re-mint it, run the drift check, then STOP — persisting the result for the UI to display. Mirrors
+    cb_beats.fire_next_beat(..., approved=False) exactly; this IS that call, not a reimplementation."""
+    episode = episode or EP
+    r = cb_beats.fire_next_beat(PKG, scene, episode, winner_code, winner_seed_path=winner_seed_path,
+                                 seeds=seeds, dry_run=False, approved=False)
+    d = _relay_all()
+    scene_d = d.setdefault(episode, {})
+    if r:
+        scene_d[str(scene)] = {"winnerCode": winner_code, "nextCode": r.get("next_code"),
+                                "harvested": r.get("harvested"), "remint": r.get("remint"),
+                                "driftCheck": r.get("drift_check"), "seeds": seeds}
+    else:
+        scene_d.pop(str(scene), None)
+    _relay_save(d)
+    print(f"RELAY_PREPARED={json.dumps(scene_d.get(str(scene)))}", flush=True)
+    return r
+
+def relay_approve(scene, winner_code, seeds=2, episode=None):
+    """PHASE 2 (front door): the ONLY path that may launch the next beat — fires `seeds` new takes off the
+    anchor an earlier relay_prepare already produced and cleared for approval. Clears the prepared state on
+    success so the UI stops showing an anchor that has already launched."""
+    episode = episode or EP
+    r = cb_beats.fire_next_beat(PKG, scene, episode, winner_code, seeds=seeds, dry_run=False, approved=True)
+    if r:
+        d = _relay_all()
+        d.get(episode, {}).pop(str(scene), None)
+        _relay_save(d)
+    print(f"RELAY_LAUNCHED={json.dumps(r)}", flush=True)
+    return r
+
 def gate3(scene):
     # GATE 3 = Camera. THE BEAT METHOD (the first-ever FLOW, 2026-06-23): group the scene's shots into ~10-12s BEATS
     # and render each beat as ONE multi-shot Seedance take (Seedance directs its OWN internal cuts + camera + timing —
@@ -687,6 +737,15 @@ if __name__ == "__main__":
     elif cmd == "approve-beat":
         # approve-beat <scene> <beatCode> <stage> [value]  — lock (default) or unlock (value=false) one beat stage
         approve_beat(sys.argv[2], sys.argv[3], sys.argv[4], value=(len(sys.argv) < 6 or str(sys.argv[5]).lower() != "false"))
+    elif cmd == "relay-prepare":
+        # relay-prepare <scene> <winnerCode> <winnerSeedPath> [seeds]  — Phase 1: designate+harvest+re-mint+drift-check, STOP
+        relay_prepare(sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]) if len(sys.argv) > 5 else 2)
+    elif cmd == "relay-approve":
+        # relay-approve <scene> <winnerCode> [seeds]  — Phase 2: the ONLY path that launches the next beat's seeds
+        relay_approve(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 2)
+    elif cmd == "relay-state":
+        # relay-state <scene>  — read-only; prints the prepared anchor JSON (or 'null')
+        print(json.dumps(relay_state_for(sys.argv[2])))
     elif cmd == "director-eye":
         # director-eye  — Gate 1.5: flag-and-report review of the beat package vs the show bible (changes NOTHING)
         import cb_director_eye

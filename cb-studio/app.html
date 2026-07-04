@@ -1003,9 +1003,23 @@ async function approveGate(scene,gate){
     PIPE.locked=j.locked;advanceAfterSignoff(scene,gate);
   }catch(e){alert("Can't reach the studio server. Reload the page (Cmd-Shift-R), then try again.");}
 }
+function gate2Ready(ss){
+  // THE LOOP'S TRUTH, PART TWO (2026-07-04 — found live: the sign-off button never enabled once
+  // keyframesFor started correctly reporting "awaiting relay" as no start frame). Under the relay
+  // doctrine, only the scene's own anchor beat(s) (the true first beat, or a vision) ever get a
+  // keyframe BEFORE Gate 3 — every other beat's frame is a relay anchor that Gate 3's own loop
+  // produces progressively, beat by beat, as each predecessor is approved. Requiring EVERY beat to
+  // already have a frame here is a structural impossibility now, not a real readiness bar — a relay
+  // beat is "ready for Gate 2b" regardless of whether the chain has reached it yet.
+  return ss.every(s=>{
+    if(!s._beat) return !!keyframesFor(s).start;         // legacy shot-native data — unchanged, exact bar as before
+    const kf=keyframesFor(s);
+    return kf.isAnchor ? !!kf.start : true;
+  });
+}
 function gateProduced(sn,g){ // has this gate's OUTPUT actually been created on disk? (any-source-of-truth, not just our job log)
   const ss=SHOTS.filter(s=>s.sceneNumber==sn); if(!ss.length) return false;
-  if(g==2) return ss.every(s=>keyframesFor(s).start);
+  if(g==2) return gate2Ready(ss);
   if(g==3) return ss.every(s=>{const m=mediaFor(s);return m.clip||m.final;});
   if(g==4) return MEDIA.some(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_(REVIEW|beats)\\.mp4$").test(m));   // Retakes: ready to review as soon as Gate-3 animation exists
   if(g==5) return MEDIA.some(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_complete\\.mp4$").test(m));          // Post: the mastered complete.mp4
@@ -1024,7 +1038,7 @@ const PHASE_META={
 const GATE_VERB={1:'Run the Director',2:'Build the keyframes',3:'Animate the keyframes',4:'Run the retakes',5:'Mix &amp; stitch'};
 const GATE_READY_DESC={
   1:'Reads the script and breaks the episode into beats — theme, beat map, per-scene beats, the Braintrust remake.',
-  2:'Builds the foundation (the empty plate + each character&rsquo;s locked sheet), then one opening keyframe per beat.',
+  2:'Builds the foundation (the empty plate + each character&rsquo;s locked sheet), then the scene&rsquo;s one opening keyframe (every later beat opens from a relay anchor Gate 3 produces as it goes).',
   3:'Animates each opening keyframe into a 10&ndash;12s Seedance take — voice, SFX and timed music baked in.',
   4:'Reads the typed/CSV retakes and surgically regenerates ONLY the flagged shots — grade-matched, continuity-held — then re-conforms the scene for re-review. No full re-render; the good bits stay.',
   5:'Curates and stitches the retaken scene — masters the mix to &minus;14 LUFS, exports the stems for CapCut.'
@@ -1183,7 +1197,7 @@ function gate2Panel(sn){
   else if(kfStarting)h+=`<span style="color:var(--info);font-weight:600"><span class="pulse">●</span> starting the keyframe build…</span>`;
   else{ h+=`<button class="btn ghost" ${fdSigned?"":'disabled style="opacity:.5;cursor:default"'} onclick="fireSub(${sn},'2b')">Build the keyframes</button>`;
     h+=`<button class="btn ghost" ${fdSigned?"":'disabled style="opacity:.5;cursor:default"'} style="padding:4px 9px;font-size:11px" onclick="rebuildKeyframes(${sn})" title="Delete every keyframe in this scene and re-render all beats fresh from the locked template + references">↻ Rebuild ALL (clean)</button>`;
-    h+=kfSigned?`<span style="color:var(--ok);font-weight:600">✓ signed</span> <button class="btn ghost" style="padding:4px 9px;font-size:11px" onclick="unsignSub(${sn},'2b')">↺ Unsign</button>`:`<button class="bigsign" style="padding:7px 15px;font-size:13px" ${(fdSigned&&ss.every(s=>keyframesFor(s).start))?"":'disabled style="opacity:.4;cursor:default"'} onclick="signSub(${sn},'2b')">✓ Sign off keyframes →</button>`; }
+    h+=kfSigned?`<span style="color:var(--ok);font-weight:600">✓ signed</span> <button class="btn ghost" style="padding:4px 9px;font-size:11px" onclick="unsignSub(${sn},'2b')">↺ Unsign</button>`:`<button class="bigsign" style="padding:7px 15px;font-size:13px" ${(fdSigned&&gate2Ready(ss))?"":'disabled style="opacity:.4;cursor:default"'} onclick="signSub(${sn},'2b')">✓ Sign off keyframes →</button>`; }
   h+=`</div>`;
   if(building||kfStarting)h+=`<div style="margin-top:4px;height:8px;background:#eee;border-radius:5px;overflow:hidden"><div class="${kfStarting?'pulse':''}" style="height:100%;width:${kfStarting?100:kfPct}%;background:var(--brand);transition:width .5s"></div></div>`;
   if(ss.some(s=>keyframesFor(s).start))h+=`<div class="kv" style="margin-top:13px">Opening keyframes — review each (click to inspect &amp; regenerate)</div><div class="grid">${ss.map(kfCard).join("")}</div>`;

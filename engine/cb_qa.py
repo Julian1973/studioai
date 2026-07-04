@@ -700,7 +700,12 @@ def check_scene_vocabulary(pkg_path, scene_num, episode="Ep1"):
     return {"ok": True, "verdict": f"clean — none of {banned!r} present anywhere checked"}
 
 def check_plate(plate_path, location_desc, layout_ref=None):
-    """Visual QA for the A1 empty SCENE PLATE: correct environment + (key) NO characters in frame.
+    """Visual QA for the A1 empty SCENE PLATE: correct environment + (key) NO characters in frame + CRYSTAL
+    CANON (Julian's ruling, 2026-07-04, after Scene 1's plate was found showing faceted/cut crystal shapes:
+    "every future scene plate is verified against crystal canon... before entering the reference stack"). The
+    crystal check names concrete, checkable shape features (rule 17 — never a subjective "does this look
+    natural" ask): FACETED/geometric/symmetrical-pointed = FAIL; rough/irregular/geode-like = PASS. World
+    crystals are expected on every plate (brand identity) — this checks their SHAPE, never their presence.
     Optionally checks layout vs a world/layout reference. Returns {ok, verdict}."""
     if not os.path.exists(plate_path):
         return {"ok": None, "verdict": f"(no scene plate at {plate_path})"}
@@ -713,8 +718,14 @@ def check_plate(plate_path, location_desc, layout_ref=None):
          + (imglist + "\n\n" if labels else "")
          + f"Requirements:\n- The scene is: {location_desc}. Its environment, set elements, layout and lighting are correct.\n"
          "- CRITICAL: there are NO characters, NO bears, NO people and NO creatures anywhere in frame — it is an EMPTY set.\n"
+         "- CRYSTAL SHAPE: look specifically at any crystals in frame. FAIL if they show FACETED, geometric, "
+         "symmetrical-pointed surfaces (sharp flat planes meeting at edges — a cut-gemstone or jewelry-store "
+         "look), or if they are laid out in a deliberate, arranged pattern. PASS if they read as rough, "
+         "irregular, geode-like natural formations — uneven surfaces, no faceting, scattered rather than "
+         "composed. (Their mere presence is correct and expected — only the SHAPE is being judged.)\n"
          + ("- The set, layout and screen-direction match the WORLD/LAYOUT reference.\n" if labels else "")
-         + "Reply 'PASS' on line 1 if ALL hold (correct, empty environment), otherwise 'FLAG' then one short line per break.")
+         + "Reply 'PASS' on line 1 if ALL hold (correct, empty environment, natural-shaped crystals), otherwise "
+         "'FLAG' then one short line per break.")
     text, err = vision_verdict(q, [plate_path] + refs)
     if err:
         return {"ok": None, "verdict": err}

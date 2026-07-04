@@ -411,12 +411,16 @@ def _v3_settle(beat):
 def _v3_subjects(cast):
     """REFERENCE STACK doctrine (Julian, 2026-07-03): every reference declares its JOB, not just its identity —
     the turnarounds are the identity reference EVERY beat, the anti-drift anchor pulling each chain link back to
-    canon, stated explicitly here rather than left implicit."""
+    canon, stated explicitly here rather than left implicit.
+    Binding handle is SIZE-ONLY (fix, 2026-07-04, Julian — "trim the personality adjectives from the binding
+    handles"): the identity-BINDING declaration names just size + species ("the larger bee"); personality
+    descriptors ("eager, manic") stay where they belong — the ACTION/PERFORMANCE prose's own first-mention label
+    (via _delabel, unchanged) — never repeated in the cold identity-binding line itself."""
     ref_bits, any_bee = [], False
     for i, name in enumerate(cast):
         role, is_bee = _char_meta(name); any_bee = any_bee or is_bee
         side = _SIDES[min(i, 2)] if len(cast) > 1 else None
-        ref_bits.append(f"@图{i + 2} is {role}" + (f" ({side})" if side else ""))
+        ref_bits.append(f"@图{i + 2} is {_short_role(role)}" + (f" ({side})" if side else ""))
     line = ("; ".join(ref_bits) + " — the identity reference for every beat, the anti-drift anchor: maintain "
             "these characters' proportions, colours, and features exactly.") if ref_bits else ""
     if any_bee:
@@ -433,23 +437,29 @@ def _v3_prev_frame_content(prev_end_state, cast):
         return ""
     return _strip_spoken_words(_delabel(es.rstrip("."), cast, used=set()))
 
-def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state=None):
+def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state=None, include_refs=True):
     """RELAY CHAIN aware (Julian, 2026-07-03, CLAUDE.md rule 21): a relay beat's @图1 is the HARVESTED SETTLE
     FRAME, not a fresh keyframe — it IS the scene continuing, not a reference to copy FROM, so the wording changes
     accordingly; the scene's canonical world look/palette/light then comes from a separate plate reference
     (@图{plate_n}, always last) instead, stated so it never competes with or forces the harvested frame.
     THE FOUR-ANCHOR GROUNDING SET (Julian, 2026-07-04): @图1 is the POINT anchor (this exact instant), the plate
     (@图{plate_n}) is the DURATION anchor (the whole clip's environment, held constant), the turnarounds are the
-    IDENTITY anchor, @Audio1 is the PERFORMANCE track — nothing left for the model to invent."""
-    if relay:
-        bits = ["@图1 — the harvested settle frame from the previous beat's approved clip: this image IS the "
-                "first frame of this shot. It is not a style reference. Nothing is composed fresh; the shot "
-                "begins on this exact image and motion grows out of it."]
-        content = _v3_prev_frame_content(prev_end_state, cast)
-        if content:
-            bits.append(content.rstrip(".") + ".")
-    else:
-        bits = ["@图1 is TRUTH — copy the environment and lighting from it exactly."]
+    IDENTITY anchor, @Audio1 is the PERFORMANCE track — nothing left for the model to invent.
+    include_refs=False (fix, 2026-07-04, Julian — "world should compose each element once, cleanly"): the JSON
+    emitter's own `references` dict already states the @图1 and plate JOBS in full — repeating them again inside
+    `world` was pure duplication (and, with the point-anchor content added, a visibly bloated one). Only the
+    prose emitter (which has no separate references dict) still needs them folded in here."""
+    bits = []
+    if include_refs:
+        if relay:
+            bits.append("@图1 — the harvested settle frame from the previous beat's approved clip: this image IS "
+                        "the first frame of this shot. It is not a style reference. Nothing is composed fresh; "
+                        "the shot begins on this exact image and motion grows out of it.")
+            content = _v3_prev_frame_content(prev_end_state, cast)
+            if content:
+                bits.append(content.rstrip(".") + ".")
+        else:
+            bits.append("@图1 is TRUTH — copy the environment and lighting from it exactly.")
     loc = ""
     if scene:
         for k in ("definingFeature", "location"):
@@ -458,16 +468,28 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state
                 loc = v; break
     if not loc:
         loc = str(beat.get("scene") or "the approved scene").strip()
-    bits.append(loc.rstrip(".") + ".")
+    loc = loc.rstrip(".")
+    loc = (loc[:1].upper() + loc[1:]) if loc else loc          # own sentence — never a lowercase run-on (fix, 2026-07-04)
+    bits.append(loc + ".")
     atmo = str(beat.get("atmosphere") or "").strip()
     if atmo:
         first = re.split(r"(?<=[.!?])\s+", atmo)[0]          # ONE breeze/atmosphere force, not the whole paragraph
         bits.append(_strip_spoken_words(_delabel(first, cast, used=set(cast))))
-    if relay and plate_n:
+    if include_refs and relay and plate_n:
         bits.append(f"@图{plate_n} — SCENE PLATE, the scene's environmental constant: match its lighting "
                     "direction, palette and environmental textures for the full duration of the clip — never "
                     "copy its framing or poses. The world must not drift from this plate.")
     return " ".join(bits)
+
+def _v3_ambience(scene):
+    """LOCKED AMBIENT BED (Julian, 2026-07-04 — "the ambient audio description line, word for word identical
+    every clip"): the scene's constant background sound, read straight from the scene's own authored ambientBed
+    field — never invented, never varying beat to beat. Layered UNDER each beat's own per-shot foreground SFX
+    (_v3_shot_sounds, sourced from the beat's own soundIntent) — the bed is the constant; the foreground is what
+    changes. Empty when the scene has no ambientBed authored yet."""
+    if not scene:
+        return ""
+    return str(scene.get("ambientBed") or "").strip()
 
 def _v3_style():
     return STYLE_LAW
@@ -531,6 +553,9 @@ def emit_prose_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state=Non
     tone = _v3_tone(beat)
     if tone:
         out += f"TONE: {tone}\n\n"
+    ambience = _v3_ambience(scene)
+    if ambience:
+        out += f"AMBIENCE: {ambience}\n\n"
     last_i = len(shots) - 1
     for i, s in enumerate(shots):
         camera = s["camera"] + _v3_camera_end(beat, cast, i)
@@ -654,8 +679,8 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state=None
         refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
     for i, name in enumerate(cast):
         role, _ = _char_meta(name)
-        refs[f"@图{i + 2}"] = (f"{role} — the identity reference for every beat, the anti-drift anchor: "
-                              "maintain these characters' proportions, colours, and features exactly.")
+        refs[f"@图{i + 2}"] = (f"{_short_role(role)} — the identity reference for every beat, the anti-drift "
+                              "anchor: maintain these characters' proportions, colours, and features exactly.")
     plate_n = len(cast) + 2
     if relay:
         refs[f"@图{plate_n}"] = ("SCENE PLATE, the scene's environmental constant: match its lighting direction, "
@@ -683,11 +708,14 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state=None
                    "are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind "
                    "(Audio Doctrine, Julian, 2026-07-03)."),
         "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None),
-                                 prev_end_state=prev_end_state),
+                                 prev_end_state=prev_end_state, include_refs=False),
     }
     tone = _v3_tone(beat)
     if tone:
         doc["tone"] = tone
+    ambience = _v3_ambience(scene)
+    if ambience:
+        doc["ambience"] = ambience
     rule = _v3_rule(beat, cast, any_bee)
     if rule:
         doc["rule"] = rule

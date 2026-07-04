@@ -1,12 +1,14 @@
 15 seconds, 16:9.
 
-SUBJECTS: @图2 is the larger, eager, manic bee (frame-LEFT); @图3 is the smaller, calm, deadpan bee (frame-RIGHT) — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly. Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless in flight.
+SUBJECTS: @图2 is the larger bee (frame-LEFT); @图3 is the smaller bee (frame-RIGHT) — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly. Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless in flight.
 
-ENVIRONMENT: @图1 is TRUTH — copy the environment and lighting from it exactly. a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals. Pollen clouds and petal bounce build the chaos; branch and blossom obstacles keep the corridor busy.
+ENVIRONMENT: @图1 is TRUTH — copy the environment and lighting from it exactly. A ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and natural crystal formations. Pollen clouds and petal bounce build the chaos; branch and blossom obstacles keep the corridor busy.
 
 STYLE: Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy
 
 TONE: big, over-the-top comedy — full energy, nothing held back
+
+AMBIENCE: a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze moving through grass and flowers
 
 SHOT 1 (6s): Drone-style camera chases the larger bee full-throttle, energetic handheld-feel follow, frame-left, ending on the larger bee and the smaller bee in frame. the larger, eager, manic bee gasps, wipes at his face, somehow smears the pollen worse, then dives again toward another flower as the smaller, calm, deadpan bee watches from frame-right, working calm and precise; both airborne wings beat rapidly. Rule-of-three THUMPs with real weight.
 

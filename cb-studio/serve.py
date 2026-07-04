@@ -221,6 +221,16 @@ def notes_state():
     try: return json.loads(f.read_text()) if f.exists() else {}
     except Exception: return {}
 
+def relay_state_all():
+    """The FULL relay_state.json, straight off disk — {"Ep1": {"1": {winnerCode, nextCode, remint, driftCheck,
+    ...}}}. Exposed on /api/pipeline (the payload every page already fetches) so Gate 3's own panel can render
+    a pending anchor SYNCHRONOUSLY (no extra round-trip, no per-beat modal needed to discover it exists)."""
+    f = CBGEN / "relay_state.json"
+    try:
+        return json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+
 def visions_state():
     """{"Ep1": ["2.V1", ...], ...} — every declared vision shot code per episode, straight off continuity.json.
     Lets the Studio's relay-truth walk-back (app.html's keyframesFor) skip vision beats exactly like the
@@ -638,7 +648,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         if self.path == "/api/pipeline":
-            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state(), "visions": visions_state()})
+            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state(),
+                                    "visions": visions_state(), "relay": relay_state_all()})
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})

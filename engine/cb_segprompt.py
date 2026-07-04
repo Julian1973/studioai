@@ -506,10 +506,11 @@ def emit_prose_v3(beat, scene, shots, dur, cast, relay=False):
         out += f"SHOT {s['n']} ({s['seconds']}s): {camera}. {s['action']} {_v3_shot_sounds(beat, s['n'])}.{settle}\n\n"
     has_dlg = any(s["speaker"] for s in shots)
     if has_dlg:
-        law = ("use ONLY @Audio1 for ALL dialogue — each speaking character mouths its own lines in @Audio1, in "
-               "order; no other, different or duplicate voice. ALL vocal sounds — hums, sing-songs, exclamations, "
-               "not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like "
-               "sound of any kind (Audio Doctrine, Julian, 2026-07-03).")
+        law = ("use ONLY @Audio1 for ALL dialogue — each speaking character's mouth, timing and full physical "
+               "performance are animated to match @Audio1 exactly, in order; no other, different or duplicate "
+               "voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — are V3 "
+               "performances inside @Audio1; Seedance never generates a voice-like sound of any kind (Audio "
+               "Doctrine, Julian, 2026-07-03).")
         out += f"AUDIO: {law} {_v3_speaker_map(shots, cast)}\n\n"
     else:
         out += ("AUDIO: this beat has no dialogue — generate no speech or voices; Seedance scores ambience and a "
@@ -539,6 +540,9 @@ def _v3_rule(beat, cast, any_bee):
     own pauseHold field (every beat has one authored, gag-lock or not) so the invariant isn't gag-lock-only.
     Mechanical only — never invented; empty when none apply."""
     bits = []
+    if any((c.get("dialogue") or "").strip() for c in (beat.get("cuts") or [])):
+        bits.append("Camera holds static and locked during any shot with dialogue — motion is reserved for "
+                     "shots without a speaking character.")
     if any_bee:
         bits.append("Any airborne bee beats its wings rapidly and continuously; wings rest only when landed.")
     tl = str((_gag_lock_for(beat) or {}).get("timing_lock") or "").strip()
@@ -637,10 +641,11 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
         out_shots.append(shot)
     doc = {
         "duration": dur, "aspect": "16:9", "style": _v3_style(), "references": refs,
-        "voices": ("@Audio1 is the ONLY source of all dialogue — animate lips to it exactly; never invent, "
-                   "duplicate or generate a different voice. ALL vocal sounds — hums, sing-songs, exclamations, "
-                   "not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a "
-                   "voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03)."),
+        "voices": ("@Audio1 is the ONLY source of all dialogue — animate each speaking character's mouth, timing "
+                   "and full physical performance to match @Audio1 exactly; never invent, duplicate or generate a "
+                   "different voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — "
+                   "are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind "
+                   "(Audio Doctrine, Julian, 2026-07-03)."),
         "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None)),
     }
     rule = _v3_rule(beat, cast, any_bee)

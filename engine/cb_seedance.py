@@ -1383,7 +1383,20 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
             _sn = str(_beat.get("sceneNumber"))
             _scene = next((s for s in _d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
         if _beat:
-            _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene)
+            # RELAY CHAIN aware (found live, 2026-07-04 — this call was missing relay= entirely, so the studio's
+            # own preview/export/dry-run path showed a relay beat's NON-relay prompt: no harvested @图1, no scene
+            # plate, no content-description — a different, weaker prompt than what cb_beats.run actually fires.
+            # Same resolution build_for_beat (above) and cb_beats.run/gate3_dryrun already use.
+            import cb_scene
+            _scene_beats = [b for b in (_d.get("beats") or _d.get("shots") or [])
+                            if str(b.get("sceneNumber")) == str(_beat.get("sceneNumber"))]
+            _, _relay_status, _relay_prev = cb_scene.relay_source_for(_scene_beats, beat_code, episode)
+            _prev_end_state = None
+            if _relay_status == "relay" and _relay_prev:
+                _prev_b = next((bb for bb in _scene_beats if (bb.get("beatCode") or bb.get("shotCode")) == _relay_prev), None)
+                _prev_end_state = _prev_b.get("endState") if _prev_b else None
+            _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene, relay=(_relay_status == "relay"),
+                                                                   prev_end_state=_prev_end_state)
     except Exception:
         _def = None
     if _def:

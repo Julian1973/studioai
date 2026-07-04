@@ -107,8 +107,13 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
         # relay-aware (rule 21) — mirrors run()'s own check, so the preview matches what would actually fire
         _scene_beats = [b for b in (d.get("beats") or d.get("shots") or [])
                         if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
-        _, _relay_status, _ = cb_scene.relay_source_for(_scene_beats, code, episode)
-        _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene, relay=(_relay_status == "relay"))
+        _, _relay_status, _relay_prev = cb_scene.relay_source_for(_scene_beats, code, episode)
+        _prev_end_state = None
+        if _relay_status == "relay" and _relay_prev:
+            _prev_b = next((bb for bb in _scene_beats if (bb.get("beatCode") or bb.get("shotCode")) == _relay_prev), None)
+            _prev_end_state = _prev_b.get("endState") if _prev_b else None
+        _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene, relay=(_relay_status == "relay"),
+                                                              prev_end_state=_prev_end_state)
         if _def:
             prompt, builder, raw = _def, _builder_label, True
     except Exception:
@@ -264,7 +269,12 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
             if d.get("scenes"):
                 _sn = str(b.get("sceneNumber"))
                 _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-            _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"))   # THE single routing point — identical to the studio preview path
+            _prev_end_state = None
+            if relay_status == "relay" and relay_prev:
+                _prev_b = next((bb for bb in beats if (bb.get("beatCode") or bb.get("shotCode")) == relay_prev), None)
+                _prev_end_state = _prev_b.get("endState") if _prev_b else None
+            _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"),
+                                                                  prev_end_state=_prev_end_state)   # THE single routing point — identical to the studio preview path
             if _def:
                 prompt = _def; raw = True; builder_label = _builder_label
         except Exception as _se:
@@ -441,7 +451,8 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
         if dry_run:
             # PROVE THE INJECTION — the next beat's real shipped prompt (relay=True), @图1 = the re-minted anchor.
             _scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), None)
-            prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True)
+            prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True,
+                                                                 prev_end_state=wb.get("endState"))
             _chars = next_b.get("openingCast") or next_b.get("characters") or []
             imgs = [remint_out] + [a for c in _chars if (a := _anchor(c))]
             _plate = f"media/{episode}_S{scene_num}_plate.png"

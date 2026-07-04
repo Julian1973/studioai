@@ -423,15 +423,31 @@ def _v3_subjects(cast):
         line = (line + " " + _WING_LAW_ONE_LINE).strip()
     return line
 
-def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
+def _v3_prev_frame_content(prev_end_state, cast):
+    """Content-description clause for the harvested @图1 reference (Julian, 2026-07-04 — the point anchor should
+    name WHAT it shows, not just its job): mechanical only, sourced from the PREVIOUS beat's own authored endState
+    field — the same text that beat's own SETTLE line was built from (see _v3_settle) — never invented. Empty when
+    the predecessor has no endState authored yet."""
+    es = str(prev_end_state or "").strip()
+    if not es:
+        return ""
+    return _strip_spoken_words(_delabel(es.rstrip("."), cast, used=set()))
+
+def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state=None):
     """RELAY CHAIN aware (Julian, 2026-07-03, CLAUDE.md rule 21): a relay beat's @图1 is the HARVESTED SETTLE
     FRAME, not a fresh keyframe — it IS the scene continuing, not a reference to copy FROM, so the wording changes
     accordingly; the scene's canonical world look/palette/light then comes from a separate plate reference
-    (@图{plate_n}, always last) instead, stated so it never competes with or forces the harvested frame."""
+    (@图{plate_n}, always last) instead, stated so it never competes with or forces the harvested frame.
+    THE FOUR-ANCHOR GROUNDING SET (Julian, 2026-07-04): @图1 is the POINT anchor (this exact instant), the plate
+    (@图{plate_n}) is the DURATION anchor (the whole clip's environment, held constant), the turnarounds are the
+    IDENTITY anchor, @Audio1 is the PERFORMANCE track — nothing left for the model to invent."""
     if relay:
         bits = ["@图1 — the harvested settle frame from the previous beat's approved clip: this image IS the "
                 "first frame of this shot. It is not a style reference. Nothing is composed fresh; the shot "
                 "begins on this exact image and motion grows out of it."]
+        content = _v3_prev_frame_content(prev_end_state, cast)
+        if content:
+            bits.append(content.rstrip(".") + ".")
     else:
         bits = ["@图1 is TRUTH — copy the environment and lighting from it exactly."]
     loc = ""
@@ -448,8 +464,9 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
         first = re.split(r"(?<=[.!?])\s+", atmo)[0]          # ONE breeze/atmosphere force, not the whole paragraph
         bits.append(_strip_spoken_words(_delabel(first, cast, used=set(cast))))
     if relay and plate_n:
-        bits.append(f"@图{plate_n} — the scene plate: lighting, palette and environmental texture reference "
-                    "only; never copy its framing.")
+        bits.append(f"@图{plate_n} — SCENE PLATE, the scene's environmental constant: match its lighting "
+                    "direction, palette and environmental textures for the full duration of the clip — never "
+                    "copy its framing or poses. The world must not drift from this plate.")
     return " ".join(bits)
 
 def _v3_style():
@@ -498,17 +515,18 @@ def _v3_speaker_map(shots, cast):
             tail = f" Only {distinct[0]} speaks in this beat; {', '.join(silent)} stays visibly silent throughout."
     return f"SPEAKER MAP: {smap}.{tail}"
 
-def emit_prose_v3(beat, scene, shots, dur, cast, relay=False):
+def emit_prose_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state=None):
     """Worked example A — PROSE, multi-shot native. Verbatim law: SUBJECTS -> ENVIRONMENT -> STYLE -> SHOT n... ->
     AUDIO -> NEGATIVES. No rules blocks, no per-shot SFX lists, no physics/emotional-arc sections. The closing
     SHOT carries the Handle Doctrine's directed living-settle block (Julian, 2026-07-03) — see _v3_settle.
     relay=True (RELAY CHAIN, rule 21): @图1 is the harvested settle frame, not a fresh keyframe, and a 4th
-    reference (the scene plate, @图{len(cast)+2}) anchors the world's canonical look without forcing the frame."""
+    reference (the scene plate, @图{len(cast)+2}) anchors the world's canonical look without forcing the frame.
+    prev_end_state: the PREVIOUS beat's own endState text, for @图1's content-description clause (2026-07-04)."""
     any_bee = any(_char_meta(n)[1] for n in cast)
     plate_n = len(cast) + 2 if relay else None
     out = f"{dur} seconds, 16:9.\n\n"
     out += f"SUBJECTS: {_v3_subjects(cast)}\n\n"
-    out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast, relay=relay, plate_n=plate_n)}\n\n"
+    out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast, relay=relay, plate_n=plate_n, prev_end_state=prev_end_state)}\n\n"
     out += f"STYLE: {_v3_style()}\n\n"
     tone = _v3_tone(beat)
     if tone:
@@ -614,7 +632,7 @@ def _v3_constraints(cast):
     return (f"Maintain {who} design, proportions and markings exactly per their reference images throughout — "
             "no distortion, redesign or rescale.")
 
-def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
+def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state=None):
     """Worked example B — LIGHT JSON, for any beat with 2+ distinct speakers. duration/aspect/style/references/
     world/rule/shots/constraints/negatives. line is ALWAYS the fixed @Audio1 reference, never the actual words.
     GOLD STANDARD (Julian, 2026-07-03, filed as T8's Director writing standard too): a camera end-state on the
@@ -623,12 +641,15 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
     ambience-resumes tail), and a constraints line — every addition
     mechanical, from existing law/gag-lock/cast data, nothing invented.
     relay=True (RELAY CHAIN, rule 21): @图1 is the harvested settle frame, not a fresh keyframe, and a 4th
-    reference (the scene plate) anchors the world's canonical look without forcing the frame."""
+    reference (the scene plate) anchors the world's canonical look without forcing the frame.
+    prev_end_state: the PREVIOUS beat's own endState text, for @图1's content-description clause (2026-07-04)."""
     any_bee = any(_char_meta(n)[1] for n in cast)
     if relay:
+        content = _v3_prev_frame_content(prev_end_state, cast)
         refs = {"@图1": "the harvested settle frame from the previous beat's approved clip: this image IS the "
                         "first frame of this shot. It is not a style reference. Nothing is composed fresh; the "
-                        "shot begins on this exact image and motion grows out of it."}
+                        "shot begins on this exact image and motion grows out of it."
+                        + (f" {content.rstrip('.')}." if content else "")}
     else:
         refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
     for i, name in enumerate(cast):
@@ -637,8 +658,9 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
                               "maintain these characters' proportions, colours, and features exactly.")
     plate_n = len(cast) + 2
     if relay:
-        refs[f"@图{plate_n}"] = ("the scene plate — lighting, palette and environmental texture reference only; "
-                                "never copy its framing.")
+        refs[f"@图{plate_n}"] = ("SCENE PLATE, the scene's environmental constant: match its lighting direction, "
+                                "palette and environmental textures for the full duration of the clip — never "
+                                "copy its framing or poses. The world must not drift from this plate.")
     out_shots = []
     last_i = len(shots) - 1
     for i, s in enumerate(shots):
@@ -660,7 +682,8 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
                    "different voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — "
                    "are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind "
                    "(Audio Doctrine, Julian, 2026-07-03)."),
-        "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None)),
+        "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None),
+                                 prev_end_state=prev_end_state),
     }
     tone = _v3_tone(beat)
     if tone:
@@ -673,19 +696,20 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
     doc["negatives"] = _v3_negatives(any_bee)
     return json.dumps(doc, indent=2, ensure_ascii=False)
 
-def for_beat_v3(beat, scene=None, relay=False):
+def for_beat_v3(beat, scene=None, relay=False, prev_end_state=None):
     """THE top-level v3 entry point — builds the shot list once, routes to the emitter that matches the worked
     examples (0-1 distinct speakers -> prose; 2+ -> light JSON), and returns (prompt_text, emitter_label).
     relay=True (RELAY CHAIN, rule 21): this beat opens off its predecessor's harvested settle frame, not its own
-    Gate-2b keyframe — threaded into whichever emitter fires."""
+    Gate-2b keyframe — threaded into whichever emitter fires. prev_end_state: the PREVIOUS beat's own endState
+    text, for @图1's content-description clause (2026-07-04) — ignored when relay=False."""
     cast = beat.get("openingCast") or beat.get("characters") or []
     shots, dur = _v3_shots(beat, cast, relay=relay)
     if not shots:
         return "", "v3 (empty — no cuts)"
     distinct_speakers = len(set(s["speaker"] for s in shots if s["speaker"]))
     if distinct_speakers >= 2:
-        return emit_json_v3(beat, scene, shots, dur, cast, relay=relay), "v3-json"
-    return emit_prose_v3(beat, scene, shots, dur, cast, relay=relay), "v3-prose"
+        return emit_json_v3(beat, scene, shots, dur, cast, relay=relay, prev_end_state=prev_end_state), "v3-json"
+    return emit_prose_v3(beat, scene, shots, dur, cast, relay=relay, prev_end_state=prev_end_state), "v3-prose"
 
 # ══════════ THE SINGLE SHIPPING DECISION (spec freeze, 2026-07-02, Julian) ══════════
 # for_beat_v3 is now THE definitive builder. for_beat_v2 and for_beat (v1) are RETIRED — kept in this file for
@@ -693,12 +717,14 @@ def for_beat_v3(beat, scene=None, relay=False):
 # loud, unmissable log line so a silent reversion to a retired builder can never pass unnoticed. EVERY caller that
 # needs "the prompt Seedance will actually receive" calls THIS function — never for_beat/for_beat_v2/for_beat_v3
 # directly — so preview and fire are provably the SAME call, through the SAME decision, every time.
-def shipped_prompt(beat, scene=None, relay=False):
+def shipped_prompt(beat, scene=None, relay=False, prev_end_state=None):
     """Returns (prompt, builder_label, is_v3). is_v3=False means a retired fallback fired — treat that as worth
     investigating, not routine. relay=True (RELAY CHAIN, rule 21) — see for_beat_v3; ignored by the retired v1/v2
-    fallbacks (they predate the doctrine and are never expected to fire in practice)."""
+    fallbacks (they predate the doctrine and are never expected to fire in practice). prev_end_state: the
+    PREVIOUS beat's own endState text, threaded to for_beat_v3 for @图1's content-description clause
+    (2026-07-04) — also ignored by the retired fallbacks."""
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
-    v3, emitter = for_beat_v3(beat, scene, relay=relay)
+    v3, emitter = for_beat_v3(beat, scene, relay=relay, prev_end_state=prev_end_state)
     if v3:
         return v3, f"cb_segprompt_v3 ({emitter})", True
     print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v2 (for_beat_v2) — for_beat_v3 returned EMPTY\n"

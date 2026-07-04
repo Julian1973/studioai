@@ -141,7 +141,25 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
     d = json.load(open(pkg_path))
     beat = next((b for b in (d.get("beats") or d.get("shots") or []) if (b.get("beatCode") or b.get("shotCode")) == beat_code), None)
     slug = (beat.get("slug") if beat else None) or beat_code.replace(".", "_")
-    if not os.path.exists(f"media/{episode}_{beat_code}_{slug}.png"):
+    # THE RELAY (found live, 2026-07-04 — fire_next_beat's very first real approved=True fire hard-blocked on
+    # this): a continuation beat never gets its own keyframe PNG — it opens off its predecessor's harvested/
+    # re-minted settle frame instead (cb_scene.relay_source_for). This check used to look ONLY at THIS beat's
+    # own keyframe path, which every relay beat correctly never has, silently BLOCKING every relay render while
+    # fire_next_beat still reported RELAY_LAUNCHED success (it copies the stale existing official clip to the
+    # seed path either way — that copy is not evidence the render happened). Same resolution gate3_dryrun (line
+    # ~110) and cb_seedance.build_for_beat already use, so this can't drift from what actually ships.
+    kf_path = f"media/{episode}_{beat_code}_{slug}.png"
+    if beat is not None:
+        try:
+            import cb_scene
+            _scene_beats = [b for b in (d.get("beats") or d.get("shots") or [])
+                            if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+            _relay_frame, _relay_status, _ = cb_scene.relay_source_for(_scene_beats, beat_code, episode)
+            if _relay_status == "relay" and _relay_frame:
+                kf_path = _relay_frame
+        except Exception:
+            pass
+    if not os.path.exists(kf_path):
         blockers.append("keyframe missing")
     va = [p for p in cb_voice.audit_attribution(pkg_path) if p.startswith(beat_code)]
     if va:

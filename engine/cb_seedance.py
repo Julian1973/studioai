@@ -1282,7 +1282,19 @@ def build_for_beat(pkg_path, beat_code, episode="Ep1"):
     slug = beat.get("slug") or beat_code.replace(".", "_")
     here = os.path.dirname(os.path.abspath(__file__))
     plate = sc.get("master") or f"media/{episode}_S{beat.get('sceneNumber')}_plate.png"
+    # THE RELAY (found live, 2026-07-04): a continuation beat never gets its own keyframe PNG — it opens off
+    # its predecessor's harvested/re-minted settle frame instead (cb_scene.relay_source_for). This readiness
+    # gate used to check ONLY for this beat's own file, which every relay beat correctly never has — hard-
+    # blocking the render this same authoring pass otherwise reports as clean. Same resolution cb_beats.
+    # render_readiness and gate3_dryrun use, so this can't drift from what actually ships.
     keyframe = f"media/{episode}_{beat_code}_{slug}.png"
+    try:
+        import cb_scene
+        _rf, _rstatus, _ = cb_scene.relay_source_for(_scene_beats, beat_code, episode)
+        if _rstatus == "relay" and _rf:
+            keyframe = _rf
+    except Exception:
+        pass
     oc = [c for c in (beat.get("openingCast") or beat.get("characters") or []) if c]
     char_refs = []
     for i, c in enumerate(oc):

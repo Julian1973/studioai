@@ -1441,6 +1441,9 @@ async function fetchRelayInfo(scene,code){
     renderRelayPanel(scene,code,seedsJ.seeds||[],relayJ||{});
   }catch(e){el.innerHTML=`<div style="font-size:11px;color:var(--hint)">Couldn't load the relay/seed state — is the server running?</div>`;}
 }
+function beatStageLocked(sn,code,stage){
+  const bs=((gateState(sn).beats)||{})[code]; return !!(bs&&bs[stage]);
+}
 function renderRelayPanel(scene,code,seeds,relay){
   const el=document.getElementById('relayPanel_'+code); if(!el)return;
   let h='';
@@ -1454,6 +1457,18 @@ function renderRelayPanel(scene,code,seeds,relay){
           <div style="font-size:10.5px;margin-top:3px;line-height:1.4">Seed ${sd.n} · ${qaLab}</div>
           <button class="btn ghost" style="margin-top:4px;padding:4px 9px;font-size:11px;width:100%" onclick="pickWinner('${scene}','${code}','${sd.file}')">${relay.winnerCode==code?'↻ Re-pick as winner':'✓ Pick as winner'}</button></div>`;
       }).join('')+`</div>`;
+    // THE MISSING SIGN-OFF (Julian, 2026-07-04 — "we're going to need the sign-off of the relay one as well on
+    // there"): the relay flow designates an official clip and preps the NEXT beat's anchor, but never actually
+    // recorded THIS beat's own clip sign-off anywhere — /api/approve-beat existed server-side (built earlier
+    // this session) but no button anywhere ever called it. Surfaced right here, in the same place the winner
+    // gets picked, so the whole per-beat lifecycle (seeds -> pick winner -> sign off -> approve anchor) lives
+    // in one place instead of the sign-off being a separate, undiscoverable action.
+    const signed=beatStageLocked(scene,code,'clip');
+    h+=`<div style="margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)">`+
+       (signed
+         ? `<span style="color:var(--ok);font-weight:600;font-size:12px">✓ ${_esc(code)}'s clip is signed off</span> <button class="btn ghost" style="padding:3px 9px;font-size:11px;margin-left:6px" onclick="signBeatClip('${scene}','${code}',false)">↺ Unsign</button>`
+         : `<button class="btn" onclick="signBeatClip('${scene}','${code}',true)">✓ Sign off ${_esc(code)}'s clip</button><span style="font-size:11px;color:var(--hint);margin-left:8px">records the official winner as reviewed &amp; approved</span>`)+
+       `</div>`;
   }
   if(relay.winnerCode==code){
     const dc=relay.driftCheck||{},clean=dc.ok===true;
@@ -1471,6 +1486,14 @@ function renderRelayPanel(scene,code,seeds,relay){
   if(!seeds.length && relay.winnerCode!=code)
     h+=`<div style="font-size:11px;color:var(--hint);border-top:2px solid var(--brand);padding-top:9px">◈ No seed takes yet for this beat — these land once the previous beat's anchor is approved (or fire this beat directly via Gate 3).</div>`;
   el.innerHTML=h;
+}
+async function signBeatClip(scene,code,value){
+  const ep="Ep"+((CUR&&CUR.number)||1);
+  try{
+    const r=await fetch(BASE+"/api/approve-beat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,beat:code,stage:'clip',value,episode:ep})});
+    const j=await r.json();if(!j.ok){alert("Couldn't "+(value?"sign off":"unsign")+": "+(j.log||j.error||"failed"));return;}
+    setTimeout(refreshPipe,250);
+  }catch(e){alert("Can't reach the studio server.");}
 }
 async function pickWinner(scene,code,seedFile){
   if(!confirm(`Designate ${seedFile} as ${code}'s winner?\n\nThis copies it in as the official clip, then harvests + re-mints its settle frame for the relay anchor. Nothing launches yet — you approve the anchor separately.`))return;

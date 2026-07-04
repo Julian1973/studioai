@@ -1221,9 +1221,46 @@ function relayBanner(sn){
   // existed only inside a per-beat modal; the natural, expected place to find "the thing that advances the
   // scene" is Gate 3 itself, and nothing was there). PIPE.relay is loaded synchronously with everything else
   // on /api/pipeline — no extra round-trip, no modal required to discover a prepared anchor exists.
+  //
+  // EXTENDED same day (Julian: "how do I know when they're done? ... There needs to be more information
+  // coming to me about exactly what's happening"): a static "waiting for approval" banner told him nothing
+  // while a job was actually IN FLIGHT (relay_state.json doesn't change until the job finishes, so the OLD
+  // banner kept showing the anchor as if nothing had happened, even mid-render), and nothing at all told him
+  // a render had just LANDED and was sitting there needing a winner picked. Three states now, in priority
+  // order: (1) a relay job is running RIGHT NOW for this scene — live progress, not a stale stale banner;
+  // (2) a relay-approve job just finished and nothing's been prepared from its seeds yet — a persistent
+  // "ready to review" call to action, not a 12s toast that's easy to miss; (3) the existing prepared-anchor/
+  // Approve-Anchor state, unchanged.
   const ep="Ep"+((CUR&&CUR.number)||1);
+  const relayJobs=jobsFor(sn).filter(j=>String(j.gate).startsWith('relay-prepare')||String(j.gate).startsWith('relay-approve'));
+  const running=relayJobs.filter(j=>j.status=='running').sort((a,b)=>b.started-a.started)[0];
+  if(running){
+    const isApprove=String(running.gate).startsWith('relay-approve');
+    const code=String(running.gate).split(':')[1]||'';
+    const lines=(running.log||'').trim().split('\n');
+    const stepLine=lines[lines.length-1]||'working…';
+    return `<div class="mc" style="border:2px solid var(--info);margin-bottom:14px;background:#eef6fb">
+      <div class="lab" style="color:var(--info);font-weight:700;font-size:13.5px"><span class="pulse">●</span> RELAY — ${isApprove?`launching the next beat off ${_esc(code)}`:`preparing ${_esc(code)}'s anchor`}</div>
+      <div style="font-size:11.5px;color:var(--hint);margin:4px 0 2px;font-family:monospace;white-space:pre-wrap">${_esc(stepLine)}</div>
+      <button class="btn" style="margin-top:8px;padding:4px 11px;font-size:12px;background:#c0392b;color:#fff;border-color:#c0392b" onclick="stopFiring('${running.jobId}')">■ Stop</button>
+    </div>`;
+  }
   const relay=((PIPE.relay||{})[ep]||{})[sn];
-  if(!relay||!relay.winnerCode) return "";
+  if(!relay||!relay.winnerCode){
+    // nothing prepared right now — did a relay-approve job just land seeds nobody's picked a winner from yet?
+    const justDone=relayJobs.filter(j=>String(j.gate).startsWith('relay-approve')&&j.status=='done')
+                            .sort((a,b)=>(b.ended||0)-(a.ended||0))[0];
+    if(justDone){
+      const m=(justDone.log||'').match(/launching (\S+)/);
+      const landedCode=m?m[1]:null;
+      if(landedCode)return `<div class="mc" style="border:2px solid var(--ok);margin-bottom:14px;background:#eefaf3">
+        <div class="lab" style="color:var(--ok);font-weight:700;font-size:13.5px">✓ RELAY — seeds are ready</div>
+        <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">${_esc(landedCode)}'s two candidate seeds finished rendering — open its card below, watch them, and pick a winner.</div>
+        <button class="bigsign" onclick="openShotByCode('${_esc(landedCode)}')">Review ${_esc(landedCode)}'s seeds →</button>
+      </div>`;
+    }
+    return "";
+  }
   const dc=relay.driftCheck||{},clean=dc.ok===true;
   return `<div class="mc" style="border:2px solid var(--brand);margin-bottom:14px;background:#faf9ff">
     <div class="lab" style="color:var(--brandink);font-weight:700;font-size:13.5px">◈ RELAY — next action</div>

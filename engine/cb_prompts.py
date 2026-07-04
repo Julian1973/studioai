@@ -856,14 +856,22 @@ def build_remint_prompt():
     that follow are attached SOLELY to hold each character's identity steady while cleaning — never to change
     pose, position or anything else about the frame being restored. This supersedes the earlier "NB2 chain
     refresh, rejected as routine" backlog note (LAB_BACKLOG.md) — re-mint is now standard for every relay link,
-    per the director, not a QA-triggered exception."""
+    per the director, not a QA-triggered exception.
+
+    Hardened 2026-07-04 (Julian, after a real drift: Zenny's glasses hallucinated from black to pink during a
+    re-mint) — the identity-lock list previously named only "face, markings, proportions", which left every
+    ACCESSORY (glasses, clothing, held objects) undeclared and free for the model to reinterpret. Named
+    explicitly now, with exact colour called out, since colour drift on an accessory is exactly what slipped
+    through the old wording."""
     return (
         "@图1 is a single film frame from an already-approved animated take — reproduce it EXACTLY as shown: same "
         "characters, same pose, same position, same environment, same lighting, same everything. The ONLY "
         "permitted change is technical cleanup: remove compression artifacts, motion blur or softness so the "
         "frame is tack-sharp and clean. Do NOT redesign, restage, reframe, recolour, add, remove or reinterpret "
         "anything. The turnaround references that follow are attached ONLY to confirm each character's exact "
-        "locked identity (face, markings, proportions) while cleaning — never to change their pose or position "
+        "locked identity — face, markings, proportions, AND every accessory exactly as the turnaround shows it "
+        "(glasses frame colour and shape, clothing, held objects, or any other worn/carried item) — while "
+        "cleaning; never to change their pose, position, or the exact colour of anything they wear or hold, "
         "from @图1. This is a restoration pass, not a new composition."
     )
 

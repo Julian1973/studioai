@@ -4,8 +4,8 @@
   "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
   "references": {
     "@图1": "the opening keyframe — TRUTH for environment, lighting and continuity",
-    "@图2": "the larger, eager, manic bee — identity reference every beat, the anti-drift anchor pulling this chain link back to canon",
-    "@图3": "the smaller, calm, deadpan bee — identity reference every beat, the anti-drift anchor pulling this chain link back to canon"
+    "@图2": "the larger, eager, manic bee — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly.",
+    "@图3": "the smaller, calm, deadpan bee — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly."
   },
   "voices": "@Audio1 is the ONLY source of all dialogue — animate lips to it exactly; never invent, duplicate or generate a different voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03).",
   "world": "@图1 is TRUTH — copy the environment and lighting from it exactly. a ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and cut crystals. Pollen motes slow and thin; the breeze gains a slightly firmer push through petals, but nothing dangerous is visible yet.",

@@ -417,8 +417,8 @@ def _v3_subjects(cast):
         role, is_bee = _char_meta(name); any_bee = any_bee or is_bee
         side = _SIDES[min(i, 2)] if len(cast) > 1 else None
         ref_bits.append(f"@图{i + 2} is {role}" + (f" ({side})" if side else ""))
-    line = ("; ".join(ref_bits) + " — the identity reference every beat, the anti-drift anchor pulling this "
-            "chain link back to canon.") if ref_bits else ""
+    line = ("; ".join(ref_bits) + " — the identity reference for every beat, the anti-drift anchor: maintain "
+            "these characters' proportions, colours, and features exactly.") if ref_bits else ""
     if any_bee:
         line = (line + " " + _WING_LAW_ONE_LINE).strip()
     return line
@@ -429,8 +429,9 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
     accordingly; the scene's canonical world look/palette/light then comes from a separate plate reference
     (@图{plate_n}, always last) instead, stated so it never competes with or forces the harvested frame."""
     if relay:
-        bits = ["@图1 is the harvested settle frame from the previous beat's signed clip — the scene continues "
-                "from exactly this moment, use it as the first frame."]
+        bits = ["@图1 — the harvested settle frame from the previous beat's approved clip: this image IS the "
+                "first frame of this shot. It is not a style reference. Nothing is composed fresh; the shot "
+                "begins on this exact image and motion grows out of it."]
     else:
         bits = ["@图1 is TRUTH — copy the environment and lighting from it exactly."]
     loc = ""
@@ -447,8 +448,8 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
         first = re.split(r"(?<=[.!?])\s+", atmo)[0]          # ONE breeze/atmosphere force, not the whole paragraph
         bits.append(_strip_spoken_words(_delabel(first, cast, used=set(cast))))
     if relay and plate_n:
-        bits.append(f"@图{plate_n} is the scene's plate: reference for the world's canonical look, palette and "
-                    "light only — it never forces the frame, the harvested settle already IS the frame.")
+        bits.append(f"@图{plate_n} — the scene plate: lighting, palette and environmental texture reference "
+                    "only; never copy its framing.")
     return " ".join(bits)
 
 def _v3_style():
@@ -607,18 +608,19 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
     reference (the scene plate) anchors the world's canonical look without forcing the frame."""
     any_bee = any(_char_meta(n)[1] for n in cast)
     if relay:
-        refs = {"@图1": "the harvested settle frame from the previous beat's signed clip — use as the first "
-                        "frame, the scene continues from exactly this moment"}
+        refs = {"@图1": "the harvested settle frame from the previous beat's approved clip: this image IS the "
+                        "first frame of this shot. It is not a style reference. Nothing is composed fresh; the "
+                        "shot begins on this exact image and motion grows out of it."}
     else:
         refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
     for i, name in enumerate(cast):
         role, _ = _char_meta(name)
-        refs[f"@图{i + 2}"] = (f"{role} — identity reference every beat, the anti-drift anchor pulling this "
-                              "chain link back to canon")
+        refs[f"@图{i + 2}"] = (f"{role} — the identity reference for every beat, the anti-drift anchor: "
+                              "maintain these characters' proportions, colours, and features exactly.")
     plate_n = len(cast) + 2
     if relay:
-        refs[f"@图{plate_n}"] = ("the scene's plate: reference for the world's canonical look, palette and light "
-                                "only — never forces the frame, the harvested settle already IS the frame")
+        refs[f"@图{plate_n}"] = ("the scene plate — lighting, palette and environmental texture reference only; "
+                                "never copy its framing.")
     out_shots = []
     last_i = len(shots) - 1
     for i, s in enumerate(shots):

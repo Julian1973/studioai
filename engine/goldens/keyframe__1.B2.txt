@@ -1,6 +1,6 @@
 REFERENCE IMAGES:
-[Image 1] — Fuzzby Reference: Maintain this character's specific facial features and proportions exactly.
-[Image 2] — Zenny Reference: Maintain this character's specific facial features and proportions exactly.
+[Image 1] — Fuzzby Reference: Maintain this character's exact identity as shown — facial features, proportions, AND every accessory exactly as the reference shows it (glasses frame colour and shape, clothing, held objects, or any other worn/carried item).
+[Image 2] — Zenny Reference: Maintain this character's exact identity as shown — facial features, proportions, AND every accessory exactly as the reference shows it (glasses frame colour and shape, clothing, held objects, or any other worn/carried item).
 [Image 3] — Atmosphere Reference: Match the lighting, colors, and environmental textures of this image, but DO NOT copy the camera framing or character poses.
 
 PROMPT:
@@ -8,9 +8,9 @@ Reason through this composition:
 
 CONTINUITY & CAMERA SHIFT: Reason through this camera cut. Use Image 3 ONLY for the lighting and background textures. The camera has now changed to a Drone-style camera chases Fuzzby full-throttle into the next flower, Zenny working calmly in the same frame. Reason through how the characters and the environment from Image 3 look from this new angle. This is the SAME location, the SAME scale and the SAME world as Image 3 — do not invent a different place, a different kind of plant, or a different scale. This beat's own light: Warm amber light catches the pollen dust on Fuzzby's face so the gag reads instantly, while Zenny is lit cleanly and evenly for the deadpan line. Atmosphere: Pollen motes thicken into a soft golden cloud around the flower, building the sneezy-tickly feeling before the reveal.
 
-CHARACTER 1 (Fuzzby): Use Image 1. Fuzzby zooms toward another flower, humming louder, and lines himself up with too much confidence. Maintain facial features and proportions exactly from the reference. Keep Fuzzby's signature round wire-frame glasses.
+CHARACTER 1 (Fuzzby): Use Image 1. Fuzzby zooms toward another flower, humming louder, and lines himself up with too much confidence. Maintain this character's exact identity from the reference — facial features, proportions, AND every accessory exactly as shown (glasses frame colour and shape, clothing, held objects, or any other worn/carried item). Keep Fuzzby's signature round wire-frame glasses.
 
-CHARACTER 2 (Zenny): Use Image 2. Zenny holds a clean hover nearby, working calm and precise; both airborne wings beat rapidly and continuously. Maintain facial features and proportions exactly from the reference. Keep Zenny's signature round glasses and rosy blush cheeks.
+CHARACTER 2 (Zenny): Use Image 2. Zenny holds a clean hover nearby, working calm and precise; both airborne wings beat rapidly and continuously. Maintain this character's exact identity from the reference — facial features, proportions, AND every accessory exactly as shown (glasses frame colour and shape, clothing, held objects, or any other worn/carried item). Keep Zenny's signature round glasses and rosy blush cheeks.
 
 EXPRESSION & MOOD (the opening read — show it in the faces and body language; this is the FIRST frame, before the action): A little tickle under the nose that turns into a held giggle in the throat. Surface: Fuzzby asks for professional approval; Zenny gives a dry evaluation. Underneath: Fuzzby wants to be admired so badly that he cannot see the mess; Zenny’s teasing is affection wearing a straight face. Crystal truth: No bear crystal is present; the pollen on Fuzzby's face contradicts his official posture, telling the truth his line cannot: he is not in control, but he is lovable. The audience should feel: A held giggle that releases on Zenny’s dry topper.
 

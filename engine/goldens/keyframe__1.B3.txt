@@ -1,6 +1,6 @@
 REFERENCE IMAGES:
-[Image 1] — Fuzzby Reference: Maintain this character's specific facial features and proportions exactly.
-[Image 2] — Zenny Reference: Maintain this character's specific facial features and proportions exactly.
+[Image 1] — Fuzzby Reference: Maintain this character's exact identity as shown — facial features, proportions, AND every accessory exactly as the reference shows it (glasses frame colour and shape, clothing, held objects, or any other worn/carried item).
+[Image 2] — Zenny Reference: Maintain this character's exact identity as shown — facial features, proportions, AND every accessory exactly as the reference shows it (glasses frame colour and shape, clothing, held objects, or any other worn/carried item).
 [Image 3] — Atmosphere Reference: Match the lighting, colors, and environmental textures of this image, but DO NOT copy the camera framing or character poses.
 
 PROMPT:
@@ -8,9 +8,9 @@ Reason through this composition:
 
 CONTINUITY & CAMERA SHIFT: Reason through this camera cut. Use Image 3 ONLY for the lighting and background textures. The camera has now changed to a Drone-style camera chases Fuzzby full-throttle, energetic handheld-feel follow, frame-left. Reason through how the characters and the environment from Image 3 look from this new angle. This is the SAME location, the SAME scale and the SAME world as Image 3 — do not invent a different place, a different kind of plant, or a different scale. This beat's own light: Golden amber holds steady through the tumble — nothing cools yet; this is still safe, playful chaos. Atmosphere: Pollen clouds and petal bounce build the chaos; branch and blossom obstacles keep the corridor busy.
 
-CHARACTER 1 (Fuzzby): Use Image 1. Fuzzby gasps, wipes at his face, somehow smears the pollen worse, then dives again toward another flower. Maintain facial features and proportions exactly from the reference. Keep Fuzzby's signature round wire-frame glasses.
+CHARACTER 1 (Fuzzby): Use Image 1. Fuzzby gasps, wipes at his face, somehow smears the pollen worse, then dives again toward another flower. Maintain this character's exact identity from the reference — facial features, proportions, AND every accessory exactly as shown (glasses frame colour and shape, clothing, held objects, or any other worn/carried item). Keep Fuzzby's signature round wire-frame glasses.
 
-CHARACTER 2 (Zenny): Use Image 2. Zenny watches from on the right of the frame, working calm and precise; both airborne wings beat rapidly. Maintain facial features and proportions exactly from the reference. Keep Zenny's signature round glasses and rosy blush cheeks.
+CHARACTER 2 (Zenny): Use Image 2. Zenny watches from on the right of the frame, working calm and precise; both airborne wings beat rapidly. Maintain this character's exact identity from the reference — facial features, proportions, AND every accessory exactly as shown (glasses frame colour and shape, clothing, held objects, or any other worn/carried item). Keep Zenny's signature round glasses and rosy blush cheeks.
 
 EXPRESSION & MOOD (the opening read — show it in the faces and body language; this is the FIRST frame, before the action): A tumbling carnival drop that refuses to hurt. Surface: Fuzzby doubles down on dignity and turns the crash into a slogan; Zenny rolls her eyes but smiles. Underneath: Fuzzby is embarrassed and covering it with volume; Zenny's affection becomes visible despite herself. Crystal truth: No bear crystal is present; the pollen keeps thickening on Fuzzby's face even as his confidence does too, telling the truth his crash-call cannot: the mess and the pride are the same thing. The audience should feel: Laughing breath becomes a tiny inhale of concern.
 

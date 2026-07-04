@@ -617,7 +617,13 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     ref_lines = []
     for i in range(1, len(refs) + 1):
         if i in idx_char:
-            ref_lines.append(f"[Image {i}] — {idx_char[i]} Reference: Maintain this character's specific facial features and proportions exactly.")
+            # Hardened 2026-07-04 (Julian, after a real re-mint drift on this exact class of gap — an
+            # accessory's colour hallucinated because the identity-lock text never named accessories at
+            # all): identity means EVERY visible thing the reference shows, not just the face.
+            ref_lines.append(f"[Image {i}] — {idx_char[i]} Reference: Maintain this character's exact identity as "
+                              f"shown — facial features, proportions, AND every accessory exactly as the reference "
+                              f"shows it (glasses frame colour and shape, clothing, held objects, or any other "
+                              f"worn/carried item).")
         elif i == chain_img:
             ref_lines.append(f"[Image {i}] — Atmosphere Reference: Match the lighting, colors, and environmental textures of this image, but DO NOT copy the camera framing or character poses.")
         elif i == env_img:
@@ -718,7 +724,9 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
         m = str(CHARACTERS.get(c, {}).get("markers") or "").strip().rstrip(".")
         return f" Keep {c}'s signature {m}." if m else ""
     blocks = [f"CHARACTER {i} ({c}): Use Image {char_img[c]}. {_pose(c)}. "
-              f"Maintain facial features and proportions exactly from the reference.{_markers(c)}"
+              f"Maintain this character's exact identity from the reference — facial features, proportions, AND "
+              f"every accessory exactly as shown (glasses frame colour and shape, clothing, held objects, or any "
+              f"other worn/carried item).{_markers(c)}"
               for i, c in enumerate(block_chars, 1)]
     world = (sc.get("location") or sc.get("name") or "the scene").strip().rstrip(".")
     world = (world[0].lower() + world[1:]) if world else "the scene"

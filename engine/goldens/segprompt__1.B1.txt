@@ -6,6 +6,8 @@ ENVIRONMENT: @图1 is TRUTH — copy the environment and lighting from it exactl
 
 STYLE: Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy
 
+TONE: big, over-the-top comedy — full energy, nothing held back
+
 SHOT 1 (6s): Drone-style chase opens low and wide through towering flowers, gentle organic push, ending on the larger bee and the smaller bee in frame. Tall flowers sway gently, everything beautiful, as the larger, eager, manic bee and the smaller, calm, deadpan bee weave flower to flower collecting pollen together; the smaller bee's path is smooth and precise while the larger bee zig-zags wildly and loudly hums as he works, wings beating rapidly and continuously while airborne. Warm morning insects.
 
 SHOT 2 (4s): The camera picks the larger bee up and CHASES him drone-style — high, low, round and round — as he builds speed, ending on the larger bee in frame. the larger bee zigzags wilder, humming louder and louder, dips low into a flower and scoops up pollen, overdoes the exit, spins sideways into a leaf with a soft FWIP, and bounces back into the air; wings keep flapping fast with motion blur. soft petal rustle.

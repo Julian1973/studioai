@@ -455,6 +455,17 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None):
 def _v3_style():
     return STYLE_LAW
 
+def _v3_tone(beat):
+    """TONE — one mechanical line naming the beat's emotional register, from the Director's own controlled-
+    vocabulary comedyMode field (BIG or TRUE) only — never inventing descriptive language beyond this fixed
+    mapping. Empty (no TONE line at all) when comedyMode is absent, so no beat gets an invented tone."""
+    mode = str(beat.get("comedyMode") or "").strip().upper()
+    if mode == "BIG":
+        return "big, over-the-top comedy — full energy, nothing held back"
+    if mode == "TRUE":
+        return "small and true — quiet, real, unforced"
+    return ""
+
 def _v3_negatives(any_bee):
     """Returns the 6 negative-constraint PHRASES as a list (each phrase may itself contain an internal comma —
     callers that want a single line join them with ", "; the JSON emitter ships the list as-is, never re-split)."""
@@ -499,6 +510,9 @@ def emit_prose_v3(beat, scene, shots, dur, cast, relay=False):
     out += f"SUBJECTS: {_v3_subjects(cast)}\n\n"
     out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast, relay=relay, plate_n=plate_n)}\n\n"
     out += f"STYLE: {_v3_style()}\n\n"
+    tone = _v3_tone(beat)
+    if tone:
+        out += f"TONE: {tone}\n\n"
     last_i = len(shots) - 1
     for i, s in enumerate(shots):
         camera = s["camera"] + _v3_camera_end(beat, cast, i)
@@ -648,6 +662,9 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False):
                    "(Audio Doctrine, Julian, 2026-07-03)."),
         "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None)),
     }
+    tone = _v3_tone(beat)
+    if tone:
+        doc["tone"] = tone
     rule = _v3_rule(beat, cast, any_bee)
     if rule:
         doc["rule"] = rule

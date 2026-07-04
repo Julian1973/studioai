@@ -350,11 +350,22 @@ HANDLE_TOTAL = 15
 HANDLE_SETTLE = 2
 HANDLE_ACTION = HANDLE_TOTAL - HANDLE_SETTLE
 
-def _v3_shots(beat, cast):
+_RELAY_OPEN_LOCK = ("OPENING FRAME LOCK: this shot's very first frame is @图1 exactly — same framing, same "
+                    "character positions, same pose as the reference; nothing has moved yet. ")
+
+def _v3_shots(beat, cast, relay=False):
     """THE mechanical assembler — see the module note above. Returns (shots, dur) where each shot is
     {n, seconds, camera, action, speaker (short role label or None)}; seconds always sum to dur (15, Handle
     Doctrine) — action shots split HANDLE_ACTION (13s) by weight, then the closing shot gets +HANDLE_SETTLE (2s)
-    added on top for its directed living settle (see _v3_settle)."""
+    added on top for its directed living settle (see _v3_settle).
+    relay=True (fix, 2026-07-04, Julian — "Seadance needs to be told that this is the first frame, not the last
+    frame"): the JOIN CONTRACT already declares shot 1 opens FROM the harvested settle (rule 19), but that lived
+    only as one abstract sentence in the ENVIRONMENT section, competing against shot 1's own vivid, already-
+    in-motion action text (e.g. 1.B2: "Fuzzby zooms toward another flower... wings beat rapidly") with nothing
+    textually anchoring it to @图1's calm, at-rest content — so the model built its own opening composition to
+    match the energetic text and only converged toward @图1 near the end (observed: join-check "wider shot,
+    character missing"; Julian: "at 15 seconds the re-mint is the end frame"). Now shot 1's OWN action text
+    carries the lock directly, right next to the motion it must ground, not in a separate section."""
     import cb_voice as V
     dur = HANDLE_TOTAL
     cuts = beat.get("cuts") or []
@@ -380,7 +391,8 @@ def _v3_shots(beat, cast):
     for i, s in enumerate(raw):
         sec = max(1, HANDLE_ACTION - running) if i == len(raw) - 1 else max(1, round(HANDLE_ACTION * s["weight"] / total_w))
         running += sec
-        shots.append({"n": i + 1, "seconds": sec, "camera": s["camera"], "action": s["action"], "speaker": s["speaker"]})
+        action = (_RELAY_OPEN_LOCK + s["action"]) if (relay and i == 0) else s["action"]
+        shots.append({"n": i + 1, "seconds": sec, "camera": s["camera"], "action": action, "speaker": s["speaker"]})
     shots[-1]["seconds"] += HANDLE_SETTLE   # the closing shot's extra 2s IS the directed living settle
     return shots, dur
 
@@ -643,7 +655,7 @@ def for_beat_v3(beat, scene=None, relay=False):
     relay=True (RELAY CHAIN, rule 21): this beat opens off its predecessor's harvested settle frame, not its own
     Gate-2b keyframe — threaded into whichever emitter fires."""
     cast = beat.get("openingCast") or beat.get("characters") or []
-    shots, dur = _v3_shots(beat, cast)
+    shots, dur = _v3_shots(beat, cast, relay=relay)
     if not shots:
         return "", "v3 (empty — no cuts)"
     distinct_speakers = len(set(s["speaker"] for s in shots if s["speaker"]))

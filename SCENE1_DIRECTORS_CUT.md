@@ -15,6 +15,7 @@ This document is the studio's taste. The staging laws below become HARD RULES in
 9. The one full stop is earned. The thunder is the scene's single dead stop, and it lands BECAUSE laws 1 to 8 never stopped before it.
 10. Sound is comic percussion. FWIP, THUMP THUMP THUMP, the humming crescendo, the flower's soft absorb. The score chases Fuzzby too, and ducks for every button.
 11. A beat never ends on a leaf hit. Leaves are mid-flight bounces only — a beat, a ricochet, a recovery — never the finisher. The flower is always the finisher: the sustained gag, the payoff, the thing the beat lands on.
+12. Slow motion is an available tool, not a hold. On Fuzzby's single biggest hit of a beat — the bumble/bonk of his three-beat comedy engine, the tumble, the crash-landing, the big impact — the moment may stretch into exaggerated cartoon slow motion, things hanging in the air, an antenna whipping slowly, the comic beat before gravity wins, then snapping back to full speed for the recovery and cover-up. This is not a pause: motion continues throughout at a stretched, exaggerated tempo, it never freezes, and it is reserved for the single biggest hit of the beat per the escalation ladder, never every bump or impact.
 
 ## THE FIVE BEATS
 
@@ -62,6 +63,6 @@ FEEL: a tiny cool shiver, answered by a soft comic thump.
 ## NOTES FOR THE SESSION
 
 - These five beats replace the current 1.B1 to 1.B4 structure for Scene 1; run through the Director retake brief so the fields (cameraArc, motionTempo, pauseHold, soundIntent, speaker order) are authored FROM this document, then reconcile dialogue against the locked Gate 0 script and flag any wording diffs to Julian rather than silently choosing.
-- Laws 1 to 10 are added to the Director's system prompt as hard staging rules, above his DNA paragraph, with 1.B1 here as worked example one.
+- Laws 1 to 12 are added to the Director's system prompt as hard staging rules, above his DNA paragraph, with 1.B1 here as worked example one.
 - gag_locks.json gains the goatee handlebar moustache entry (1.B2).
 - Durations are action budgets, not defaults: no clip carries dead air.

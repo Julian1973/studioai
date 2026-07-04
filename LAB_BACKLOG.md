@@ -140,3 +140,28 @@ verbatim per his instruction):
 - **References carry it** — `image_2`/`image_3` are pointed at Fuzzby's and Zenny's locked turnarounds
   (`cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg`, `CB_Zenny.jpeg`) with "no redesign," so identity comes from
   the reference images, not the text.
+
+## Golden harness gap — relay-mode prompts have never been golden-tested (2026-07-04)
+
+Found while diagnosing the "re-mint reads as the end frame, not the first" bug (fixed same day in
+`cb_segprompt.py` — see the OPENING FRAME LOCK fix). `cb_golden.py`'s `current_snapshot()` calls
+`cb_segprompt.shipped_prompt(b, sc)` with no `relay` argument at all, so it always exercises `relay=False` — the
+non-relay fallback path — for every one of the 5 Scene-1 beats, even though 1.B2-1.B5 actually ship in
+`relay=True` mode once the relay chain reaches them. The golden set showing "ZERO DIFFS" has therefore never
+once proven anything about the relay-mode prompt text; the OPENING FRAME LOCK fix was verified by hand (a direct
+`shipped_prompt(b, sc, relay=True)` call, diffed by eye, shown to Julian) precisely because the harness couldn't
+do it.
+
+**Why this wasn't just fixed on the spot**: making `current_snapshot()` call `cb_scene.relay_source_for()` to
+compute the real relay status would make the golden baseline depend on live `engine/media/` state — whether
+1.B1's remint file exists on disk at capture time, which changes day to day as beats get re-rendered/re-picked.
+A golden snapshot needs to be deterministic; wiring in a live filesystem/harvest dependency risks a "golden" that
+silently changes meaning between two runs on the same code, which defeats the harness's whole purpose.
+
+**What a real fix needs**: either (a) a synthetic/fixture relay state the golden harness can hold constant
+independent of `engine/media/`'s live contents (e.g. a fake remint path that's asserted to exist, never actually
+harvested), so `current_snapshot()` can safely call `shipped_prompt(b, sc, relay=True)` for beats 2-5 without
+touching real render output, or (b) a second, explicit set of golden entries (`segprompt_relay__1.B2` etc.)
+captured and diffed alongside the existing `relay=False` ones, so both shipping modes are covered and a
+prompt-touching change can't silently break one while the tool only reports the other clean. Needs a design
+decision before implementing — flagging here rather than guessing.

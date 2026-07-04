@@ -475,17 +475,19 @@ def rebuild_keyframes(scene, episode="Ep1"):
 # ── THE RELAY, front door (Julian, 2026-07-03) — job-launch wrappers around cb_pipeline.relay_prepare/
 #    relay_approve. relay_approve_beat is the ONLY function in this file that may fire fire_next_beat's
 #    approved=True launch — the Approve Anchor button in app.html is the only caller of it.
-def relay_prepare_beat(scene, winner_code, seed_path, seeds=2, episode="Ep1"):
-    """PHASE 1: designate the picked seed, harvest, re-mint, drift-check, STOP for approval (job)."""
+def relay_prepare_beat(scene, winner_code, seed_path, seeds=2, episode="Ep1", fast=True):
+    """PHASE 1: designate the picked seed, harvest, re-mint, drift-check, STOP for approval (job).
+    fast=False (2026-07-04, "single seed, standard tier"): explicit opt-in only, default unchanged."""
     return _start(_jid(f"relayprep_{winner_code}"), f"relay-prepare:{winner_code}", scene,
                   ["cb_pipeline.py", "relay-prepare", str(scene), str(winner_code), str(seed_path),
-                   str(seeds), f"--episode={episode}"])
+                   str(seeds), f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
 
-def relay_approve_beat(scene, winner_code, seeds=2, episode="Ep1"):
-    """PHASE 2: launch the next beat's seeds off the anchor an earlier relay_prepare_beat already produced (job)."""
+def relay_approve_beat(scene, winner_code, seeds=2, episode="Ep1", fast=True):
+    """PHASE 2: launch the next beat's seeds off the anchor an earlier relay_prepare_beat already produced (job).
+    fast=False (2026-07-04, "single seed, standard tier"): explicit opt-in only, default unchanged."""
     return _start(_jid(f"relayapprove_{winner_code}"), f"relay-approve:{winner_code}", scene,
                   ["cb_pipeline.py", "relay-approve", str(scene), str(winner_code),
-                   str(seeds), f"--episode={episode}"])
+                   str(seeds), f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
 
 # ── STATIC FILE HARDENING (security) ──────────────────────────────────────────────────────────────────────────
 # The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read engine/.env (API keys),
@@ -1050,8 +1052,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 d = self._body()
                 scene = str(d["scene"]); code = str(d["code"]); seed = str(d["seedPath"])
-                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2))
-                self._json(200, {"ok": True, "jobId": relay_prepare_beat(scene, code, seed, seeds, episode)})
+                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2)); fast = bool(d.get("fast", True))
+                self._json(200, {"ok": True, "jobId": relay_prepare_beat(scene, code, seed, seeds, episode, fast=fast)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -1061,8 +1063,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             try:
                 d = self._body()
                 scene = str(d["scene"]); code = str(d["code"])
-                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2))
-                self._json(200, {"ok": True, "jobId": relay_approve_beat(scene, code, seeds, episode)})
+                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2)); fast = bool(d.get("fast", True))
+                self._json(200, {"ok": True, "jobId": relay_approve_beat(scene, code, seeds, episode, fast=fast)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

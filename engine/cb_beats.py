@@ -394,7 +394,7 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
     print("=== BEAT DRIVER DONE ===", flush=True)
     return clips
 
-def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False, approved=False):
+def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False, approved=False, fast=True):
     """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes Julian's WINNER for the
     beat just decided (winner_code + the exact seed file he picked), designates it as that beat's official signed
     clip, harvests its settle frame, RE-MINTS it (Julian's ruling, 2026-07-03 — standard for every link now, not
@@ -402,6 +402,12 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
     presenting the cleaned anchor for Julian's approval. It does NOT fire the next beat until called again with
     approved=True. No parallel beats, no auto-advance: production within a scene is strictly serial through
     Julian's sign-offs.
+
+    fast=False (Julian, 2026-07-04, "single seed, standard tier"): the Phase-2 launch loop's own tier, previously
+    hardcoded to fast=True (Render Economy Law) with no way to override it — a single confirmatory fire (proving
+    a specific fix, not exploring variety) wants the more reliable standard tier per the seedance-20 skill
+    package's own field guidance ("field reports still favor the Standard tier for multi-shot... treat that as
+    field guidance"). Default stays True so every existing caller (ordinary seed exploration) is unaffected.
 
     dry_run=True (Fable's code review, 2026-07-03, item TWO — "prove the relay injection"): NO file mutation
     (winner_seed_path is ignored; harvests from winner_code's CURRENT official clip, whatever is already there),
@@ -494,8 +500,8 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
     official_next = f"media/{episode}_{next_code}_{next_slug}.mp4"
     results = []
     for i in range(1, seeds + 1):
-        print(f"fire_next_beat: {next_code} — seed {i}/{seeds} (fast endpoint, render economy law)", flush=True)
-        run(pkg_path, scene_num, episode, codes=[next_code], fast=True)
+        print(f"fire_next_beat: {next_code} — seed {i}/{seeds} ({'fast endpoint, render economy law' if fast else 'STANDARD tier'})", flush=True)
+        run(pkg_path, scene_num, episode, codes=[next_code], fast=fast)
         seed_out = f"media/{episode}_{next_code}_seed{i}.mp4"
         if os.path.exists(official_next):
             shutil.copyfile(official_next, seed_out)

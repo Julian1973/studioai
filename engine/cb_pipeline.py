@@ -610,13 +610,15 @@ def relay_state_for(scene, episode=None):
     episode = episode or EP
     return _relay_all().get(episode, {}).get(str(scene))
 
-def relay_prepare(scene, winner_code, winner_seed_path, seeds=2, episode=None):
+def relay_prepare(scene, winner_code, winner_seed_path, seeds=2, episode=None, fast=True):
     """PHASE 1 (front door): designate `winner_code`'s picked seed as its official clip, harvest its settle
     frame, re-mint it, run the drift check, then STOP — persisting the result for the UI to display. Mirrors
-    cb_beats.fire_next_beat(..., approved=False) exactly; this IS that call, not a reimplementation."""
+    cb_beats.fire_next_beat(..., approved=False) exactly; this IS that call, not a reimplementation.
+    fast=False (Julian, 2026-07-04, "single seed, standard tier"): standard-tier render, explicit opt-in only —
+    default stays fast=True (Render Economy Law) for ordinary seed exploration."""
     episode = episode or EP
     r = cb_beats.fire_next_beat(PKG, scene, episode, winner_code, winner_seed_path=winner_seed_path,
-                                 seeds=seeds, dry_run=False, approved=False)
+                                 seeds=seeds, dry_run=False, approved=False, fast=fast)
     d = _relay_all()
     scene_d = d.setdefault(episode, {})
     if r:
@@ -629,12 +631,14 @@ def relay_prepare(scene, winner_code, winner_seed_path, seeds=2, episode=None):
     print(f"RELAY_PREPARED={json.dumps(scene_d.get(str(scene)))}", flush=True)
     return r
 
-def relay_approve(scene, winner_code, seeds=2, episode=None):
+def relay_approve(scene, winner_code, seeds=2, episode=None, fast=True):
     """PHASE 2 (front door): the ONLY path that may launch the next beat — fires `seeds` new takes off the
     anchor an earlier relay_prepare already produced and cleared for approval. Clears the prepared state on
-    success so the UI stops showing an anchor that has already launched."""
+    success so the UI stops showing an anchor that has already launched.
+    fast=False (Julian, 2026-07-04, "single seed, standard tier"): standard-tier render, explicit opt-in only —
+    default stays fast=True (Render Economy Law) for ordinary seed exploration."""
     episode = episode or EP
-    r = cb_beats.fire_next_beat(PKG, scene, episode, winner_code, seeds=seeds, dry_run=False, approved=True)
+    r = cb_beats.fire_next_beat(PKG, scene, episode, winner_code, seeds=seeds, dry_run=False, approved=True, fast=fast)
     if r:
         d = _relay_all()
         d.get(episode, {}).pop(str(scene), None)
@@ -693,6 +697,15 @@ if __name__ == "__main__":
         sys.argv = [a for a in sys.argv if a != _epflag]
         EP = _epflag.split("=", 1)[1].strip() or EP
         PKG = _resolve_pkg()
+    # TIER SELECTION (Julian, 2026-07-04 — "single seed, standard tier"): same order-independent stripped-flag
+    # pattern as --episode= above. Defaults to fast=True (Render Economy Law) so every EXISTING caller (the studio
+    # UI's seed-exploration buttons) is unaffected; --fast=false is the deliberate, explicit opt-in for a single
+    # standard-tier confirmatory fire, not a new default.
+    _fastflag = next((a for a in sys.argv[1:] if a.startswith("--fast=")), None)
+    _fast = True
+    if _fastflag:
+        sys.argv = [a for a in sys.argv if a != _fastflag]
+        _fast = _fastflag.split("=", 1)[1].strip().lower() not in ("false", "0", "no")
     cmd = sys.argv[1].lower()
     if cmd == "approve":
         approve(sys.argv[2], sys.argv[3])
@@ -739,10 +752,10 @@ if __name__ == "__main__":
         approve_beat(sys.argv[2], sys.argv[3], sys.argv[4], value=(len(sys.argv) < 6 or str(sys.argv[5]).lower() != "false"))
     elif cmd == "relay-prepare":
         # relay-prepare <scene> <winnerCode> <winnerSeedPath> [seeds]  — Phase 1: designate+harvest+re-mint+drift-check, STOP
-        relay_prepare(sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]) if len(sys.argv) > 5 else 2)
+        relay_prepare(sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]) if len(sys.argv) > 5 else 2, fast=_fast)
     elif cmd == "relay-approve":
         # relay-approve <scene> <winnerCode> [seeds]  — Phase 2: the ONLY path that launches the next beat's seeds
-        relay_approve(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 2)
+        relay_approve(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 2, fast=_fast)
     elif cmd == "relay-state":
         # relay-state <scene>  — read-only; prints the prepared anchor JSON (or 'null')
         print(json.dumps(relay_state_for(sys.argv[2])))

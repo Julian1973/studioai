@@ -293,6 +293,7 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         # would silently upload the wrong species/character at that reference slot).
         _chars = b.get("openingCast") or b.get("characters") or []
         imgs = [start] + [a for c in _chars if (a := _anchor(c))]
+        vids = None
         if relay_status == "relay":
             # THE RELAY CHAIN's 4th reference (CLAUDE.md rule 21): the scene's plate anchors the world's canonical
             # look/palette/light WITHOUT forcing the frame (the harvested settle already IS the frame) — @图1 is
@@ -300,15 +301,28 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
             _plate = f"media/{episode}_S{scene_num}_plate.png"
             if os.path.exists(_plate):
                 imgs.append(_plate)
+            # THE VIDEO REFERENCE (Julian, 2026-07-04, from the seedance-20 skill's own field guidance — "prefer
+            # reference-to-video with the previous clip as a video reference, keeps motion and audio context;
+            # chaining image-to-video from the previous clip's last frame is the fallback"): the still-frame
+            # re-mint anchor (@图1) stays — this is ADDITIVE, the previous beat's actual signed clip uploaded
+            # alongside it, so the model has real motion/audio context, not just a single held pose.
+            if relay_prev:
+                _prev_b = next((bb for bb in beats if (bb.get("beatCode") or bb.get("shotCode")) == relay_prev), None)
+                if _prev_b:
+                    _prev_slug = _prev_b.get("slug", (relay_prev or "").replace(".", "_"))
+                    _prev_clip = f"media/{episode}_{relay_prev}_{_prev_slug}.mp4"
+                    if os.path.exists(_prev_clip):
+                        vids = [_prev_clip]
         # T2 ruling (2026-07-02, Julian): a temporary state resolves WITHIN the take it started in — it never carries
         # across a take boundary. The continuity-tail chaining (appending the previous clip's last frame as a
         # reference + a "flow continuously from it" instruction) is retired; each take starts clean from its own keyframe.
         said = " | ".join(f"{l['character']}: {l['text']}" for l in track["lines"]) if track else "(no dialogue)"
         aud = [track["track"]] if (track and track.get("track")) else None
-        print(f"  beat {code}: {dur}s ref2vid | audio {audio_dur:.1f}s -> hold {max(0.0, dur - audio_dur):.1f}s | imgs={len(imgs)} | "
+        print(f"  beat {code}: {dur}s ref2vid | audio {audio_dur:.1f}s -> hold {max(0.0, dur - audio_dur):.1f}s | imgs={len(imgs)}"
+              f"{' | vids=' + str(len(vids)) + ' (prev clip as motion/audio context)' if vids else ''} | "
               f"V3 {'@Audio1 lip-sync' if aud else 'none'}; Seedance scores SFX+music\n         {said}", flush=True)
         try:
-            cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, duration=dur, out=out, raw_prompt=raw, fast=fast)
+            cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, video_urls=vids, duration=dur, out=out, raw_prompt=raw, fast=fast)
             clips.append(f"media/{out}")
             try:    # THE HARVEST doctrine (Julian, 2026-07-03 — "ending frames are harvested, never composed"):
                     # sample the clip's settle window and keep the SHARPEST frame, not a blind EOF grab. This is
@@ -458,11 +472,13 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
             _plate = f"media/{episode}_S{scene_num}_plate.png"
             if os.path.exists(_plate):
                 imgs.append(_plate)
+            vids = [official] if os.path.exists(official) else None   # the previous beat's actual clip — motion/audio context (2026-07-04)
             print(f"fire_next_beat [DRY RUN]: {next_code} shipped prompt (builder={builder}):\n{prompt}", flush=True)
             print(f"fire_next_beat [DRY RUN]: would upload {len(imgs)} images: {imgs}", flush=True)
+            print(f"fire_next_beat [DRY RUN]: would upload {len(vids) if vids else 0} video ref(s): {vids}", flush=True)
             print(f"=== fire_next_beat [DRY RUN] complete for {next_code} — nothing fired, nothing mutated. ===", flush=True)
-            return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "harvested": settlef,
-                    "remint": remint_out, "drift_check": drift, "next_code": next_code}
+            return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "videos": vids,
+                    "harvested": settlef, "remint": remint_out, "drift_check": drift, "next_code": next_code}
 
         print(f"=== fire_next_beat STOPPED — {winner_code}'s cleaned anchor is ready for your approval:\n"
               f"    {remint_out}\n"

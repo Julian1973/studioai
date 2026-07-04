@@ -266,12 +266,17 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
     return str(outp)
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────
-def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, resolution="720p",
+def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False):
     """Seedance reference-to-video: feed reference image(s) + your OWN voice audio (≤15s);
     the character lip-syncs to your audio. Reference assets in the prompt as @图1/@Audio1.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
-    NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON."""
+    NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON.
+    video_urls (Julian, 2026-07-04, from the seedance-20 skill's own field guidance — "to continue a clip on fal,
+    prefer reference-to-video with the previous clip as a VIDEO reference, keeps motion and audio context;
+    chaining image-to-video from the previous clip's last frame is the fallback"): the RELAY's previous beat's
+    actual signed clip, uploaded alongside the still-frame anchor — real motion/audio context, not just a single
+    pose. Additive to the existing re-mint anchor, never a replacement for it."""
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
@@ -291,6 +296,9 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, resolution=
     if audio_urls:
         if isinstance(audio_urls, str): audio_urls = [audio_urls]
         args["audio_urls"] = [_fal_upload(str(pathlib.Path(p))) for p in audio_urls]
+    if video_urls:
+        if isinstance(video_urls, str): video_urls = [video_urls]
+        args["video_urls"] = [_fal_upload(str(pathlib.Path(p))) for p in video_urls]
     endpoint = ("bytedance/seedance-2.0/fast/reference-to-video" if fast
                 else "bytedance/seedance-2.0/reference-to-video")
     print(f"  seedance ref2vid ({endpoint}): rendering…")

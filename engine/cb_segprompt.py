@@ -351,7 +351,10 @@ HANDLE_SETTLE = 2
 HANDLE_ACTION = HANDLE_TOTAL - HANDLE_SETTLE
 
 _RELAY_OPEN_LOCK = ("OPENING FRAME LOCK: this shot's very first frame is @图1 exactly — same framing, same "
-                    "character positions, same pose as the reference; nothing has moved yet. ")
+                    "character positions, same pose as the reference; nothing has moved yet. From that single "
+                    "instant, the action below moves immediately and decisively away from it — do not hold this "
+                    "pose, repeat it or drift back to it later in the shot; by the shot's end the characters are "
+                    "in a completely different position and pose. ")
 
 def _v3_shots(beat, cast, relay=False):
     """THE mechanical assembler — see the module note above. Returns (shots, dur) where each shot is
@@ -454,10 +457,17 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state
         if relay:
             bits.append("@图1 — the harvested settle frame from the previous beat's approved clip: this image IS "
                         "the first frame of this shot. It is not a style reference. Nothing is composed fresh; "
-                        "the shot begins on this exact image and motion grows out of it.")
+                        "the shot begins on this exact image, then moves DECISIVELY AWAY from this pose for the "
+                        "rest of the shot. This is a one-frame launching point, never a pose to hold, repeat or "
+                        "return to — by the shot's end the characters are in a completely different position and "
+                        "pose, performing the beat's own described action.")
             content = _v3_prev_frame_content(prev_end_state, cast)
             if content:
                 bits.append(content.rstrip(".") + ".")
+            bits.append("@Video1 — the previous beat's own actual signed clip, alongside @图1's cleaned still: "
+                        "real motion and audio context leading directly into this shot. Reference only, for the "
+                        "true motion trajectory and vocal cadence arriving at this instant — never re-render or "
+                        "repeat its content.")
         else:
             bits.append("@图1 is TRUTH — copy the environment and lighting from it exactly.")
     loc = ""
@@ -673,8 +683,15 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state=None
         content = _v3_prev_frame_content(prev_end_state, cast)
         refs = {"@图1": "the harvested settle frame from the previous beat's approved clip: this image IS the "
                         "first frame of this shot. It is not a style reference. Nothing is composed fresh; the "
-                        "shot begins on this exact image and motion grows out of it."
-                        + (f" {content.rstrip('.')}." if content else "")}
+                        "shot begins on this exact image, then moves DECISIVELY AWAY from this pose for the rest "
+                        "of the shot. This is a one-frame launching point, never a pose to hold, repeat or return "
+                        "to — by the shot's end the characters are in a completely different position and pose, "
+                        "performing the beat's own described action."
+                        + (f" {content.rstrip('.')}." if content else ""),
+                "@Video1": "the previous beat's own actual signed clip, alongside @图1's cleaned still: real "
+                          "motion and audio context leading directly into this shot. Reference only, for the "
+                          "true motion trajectory and vocal cadence arriving at this instant — never re-render "
+                          "or repeat its content."}
     else:
         refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
     for i, name in enumerate(cast):

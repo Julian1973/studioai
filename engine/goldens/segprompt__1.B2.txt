@@ -14,12 +14,12 @@
   "rule": "Camera holds static and locked during any shot with dialogue — motion is reserved for shots without a speaking character. Any airborne bee beats its wings rapidly and continuously; wings rest only when landed. The moustache reveal is a quick flash, not a held pause; the beat's ONE hold is the smaller, calm, deadpan bee's almost-laugh on her button line, under 1.5 seconds.",
   "shots": [
     {
-      "seconds": 4,
-      "camera": "Drone-style camera chases the larger bee full-throttle into the next flower, the smaller bee working calmly in the same frame, ending on the larger bee and the smaller bee in frame",
-      "action": "From the prior watch, the larger, eager, manic bee zooms toward another flower, humming louder, and lines himself up with too much confidence while the smaller, calm, deadpan bee holds a clean hover nearby, working calm and precise; both airborne wings beat rapidly and continuously."
+      "seconds": 6,
+      "camera": "Drone-style camera chases the larger bee through a wild manic loop across the meadow, then swings back with him to land on the next flower where the smaller bee is already working, ending on the larger bee and the smaller bee in frame",
+      "action": "From the prior watch, the larger, eager, manic bee rockets off into a chaotic loop-the-loop, overshooting high then plunging low, zig-zagging wildly and bumping past stems and petals, humming louder and louder, while the smaller, calm, deadpan bee stays at her own flower nearby, already there, working calm and precise, entirely unbothered by his antics. He swings back around and comes barrelling straight for her flower, lining himself up with too much confidence; both airborne wings beat rapidly and continuously."
     },
     {
-      "seconds": 3,
+      "seconds": 2,
       "camera": "Camera stays with the larger bee for the reveal, then a short punctuation cut to the smaller bee, ending on the larger bee and the smaller bee in frame",
       "action": "the larger bee sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO the smaller bee: trying not to laugh."
     },
@@ -35,7 +35,7 @@
       }
     },
     {
-      "seconds": 5,
+      "seconds": 4,
       "camera": "Short punctuation cut to the smaller bee for the dry topper — no long coverage, ending on the larger bee and the smaller bee in frame",
       "action": "the smaller bee fights the smile for a beat, then lets the smallest dry amusement through while the larger bee waits for praise. SETTLE: End on the smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both at rest, camera locked, as the meadow's gentle hum resumes. Idle life continues through the hold — wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing freezes, nothing new happens.",
       "dialogue": {

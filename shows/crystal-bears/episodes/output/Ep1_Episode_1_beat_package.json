@@ -405,7 +405,8 @@
     "Fuzzby": "dynamic-flight",
     "Zenny": "static-calm"
    },
-   "endState": "He straightens into a heroic chest-out superhero pose and holds it one blink too long; the smaller bee glides up beside him, perfectly still except her rapid wings, watching, her expression never changing. End on his pose and her flat stare, both at rest, camera locked, as the meadow's gentle hum resumes."
+   "endState": "He straightens into a heroic chest-out superhero pose and holds it one blink too long; the smaller bee glides up beside him, perfectly still except her rapid wings, watching, her expression never changing. End on his pose and her flat stare, both at rest, camera locked, as the meadow's gentle hum resumes.",
+   "endStateStill": "The larger bee, frozen in a heroic chest-out superhero pose, chin lifted, chest puffed; the smaller bee hovering beside him, wings a rapid blur, flat unimpressed deadpan stare; both centred in the sunlit wildflower meadow."
   },
   {
    "slug": "s1-b2-officially-nuts",
@@ -532,7 +533,8 @@
    "sceneNumber": 1,
    "beatCode": "1.B2",
    "id": 2,
-   "endState": "End on the smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both at rest, camera locked, as the meadow's gentle hum resumes."
+   "endState": "End on the smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both at rest, camera locked, as the meadow's gentle hum resumes.",
+   "endStateStill": "The smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both centred in the sunlit wildflower meadow."
   },
   {
    "slug": "s1-b3-smear-thup-buzz-crash",
@@ -651,7 +653,8 @@
    "sceneNumber": 1,
    "beatCode": "1.B3",
    "id": 3,
-   "endState": "End on the two of them: the larger bee hovering upright and undimmed, proud; the smaller bee's eye-roll softening into a small smile. Both at rest, camera locked."
+   "endState": "End on the two of them: the larger bee hovering upright and undimmed, proud; the smaller bee's eye-roll softening into a small smile. Both at rest, camera locked.",
+   "endStateStill": "The two of them: the larger bee hovering upright, undimmed, proud; the smaller bee's expression at a small, warm smile, eyes still faintly rolled; both centred in the sunlit wildflower meadow."
   },
   {
    "scene": "Meadow Pollen Run",
@@ -750,7 +753,8 @@
    "prohibited_staging": "Do not show ocean, boat, bears, rain, lightning, or visible storm clouds yet; only distant thunder and subtle light change.",
    "beatCode": "1.B4",
    "id": 4,
-   "endState": "End on the larger bee frozen mid-hover from the thunder, the smaller bee turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet."
+   "endState": "End on the larger bee frozen mid-hover from the thunder, the smaller bee turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet.",
+   "endStateStill": "The larger bee frozen mid-hover from the thunder; the smaller bee turned slightly toward the sky; both suspended in the sunlit wildflower meadow, the light subtly cooler at the meadow's far edge."
   },
   {
    "slug": "s1-b5-storm-coming-pressure-flower-stuck",

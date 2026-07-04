@@ -1394,9 +1394,9 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
             _prev_end_state = None
             if _relay_status == "relay" and _relay_prev:
                 _prev_b = next((bb for bb in _scene_beats if (bb.get("beatCode") or bb.get("shotCode")) == _relay_prev), None)
-                _prev_end_state = _prev_b.get("endState") if _prev_b else None
+                _prev_end_state = _prev_b.get("endStateStill") if _prev_b else None
             _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene, relay=(_relay_status == "relay"),
-                                                                   prev_end_state=_prev_end_state)
+                                                                   prev_end_state_still=_prev_end_state)
     except Exception:
         _def = None
     if _def:

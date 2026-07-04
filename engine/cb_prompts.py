@@ -862,17 +862,23 @@ def build_remint_prompt():
     re-mint) — the identity-lock list previously named only "face, markings, proportions", which left every
     ACCESSORY (glasses, clothing, held objects) undeclared and free for the model to reinterpret. Named
     explicitly now, with exact colour called out, since colour drift on an accessory is exactly what slipped
-    through the old wording."""
+    through the old wording.
+
+    Restructured same day (Julian): lead with the two-part instruction in his own words — "copy this exactly"
+    then "for reference, here are the characters, to ensure 100% accuracy" — a plainer, more direct framing
+    than the previous paragraph-first version, on the theory that a short, sequential instruction reads more
+    reliably to the image model than a dense block of restrictions before the reference images' purpose is
+    even stated."""
     return (
-        "@图1 is a single film frame from an already-approved animated take — reproduce it EXACTLY as shown: same "
-        "characters, same pose, same position, same environment, same lighting, same everything. The ONLY "
-        "permitted change is technical cleanup: remove compression artifacts, motion blur or softness so the "
-        "frame is tack-sharp and clean. Do NOT redesign, restage, reframe, recolour, add, remove or reinterpret "
-        "anything. The turnaround references that follow are attached ONLY to confirm each character's exact "
-        "locked identity — face, markings, proportions, AND every accessory exactly as the turnaround shows it "
-        "(glasses frame colour and shape, clothing, held objects, or any other worn/carried item) — while "
-        "cleaning; never to change their pose, position, or the exact colour of anything they wear or hold, "
-        "from @图1. This is a restoration pass, not a new composition."
+        "Copy @图1 exactly — same characters, same pose, same position, same environment, same lighting, "
+        "everything unchanged. The ONLY permitted change is technical cleanup: remove compression artifacts, "
+        "motion blur or softness so the frame is tack-sharp and clean. Do NOT redesign, restage, reframe, "
+        "recolour, add, remove or reinterpret anything.\n\n"
+        "For reference, here are the characters in this frame, to ensure 100% accuracy on their identity: "
+        "face, markings, proportions, AND every accessory exactly as the reference shows it (glasses frame "
+        "colour and shape, clothing, held objects, or any other worn/carried item). Use these references for "
+        "identity accuracy ONLY — never to change a character's pose or position, or the exact colour of "
+        "anything they wear or hold, from @图1. This is a restoration pass, not a new composition."
     )
 
 def scene_characters(scene_shots):

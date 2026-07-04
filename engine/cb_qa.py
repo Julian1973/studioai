@@ -152,6 +152,86 @@ def check_remint(harvested_path, remint_path, turnaround_paths=None):
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CLEAN"), "verdict": text.strip()}
 
+# ── PROMPT LAWS AUDIT (PROMPT_LAWS_AUDIT.md, CLAUDE.md rule 28) — flag-only authoring checks ──────────
+# Three of the twelve Layer-1 invariant laws were found CONVENTION-ONLY, not code-enforced: Law 4 (the @图1
+# content clause must read as a photograph, never directing prose), Law 7 (the locked ambient bed must never
+# be restated inside any other field) and Law 8 (camera stays locked on any dialogue shot; one primary move
+# per shot otherwise). Each of these is the SAME shape of bug as rule 27's temporal-contradiction find — two
+# statements in one prompt that can quietly disagree, because nothing checks a hand-authored field against
+# the law stated right next to it. Deterministic keyword/overlap scans, no vision call, no LLM: cheap enough
+# to run on every beat before it fires. Advisory only, per Julian's ruling (2026-07-04) — flag, never block;
+# wired into cb_beats.render_readiness() as a non-blocking "flags" list.
+_TEMPORAL_MARKERS = (
+    "end on", "ends on", "ending on", "holds it", "holding it", "held it", "resumes", "resume", "resuming",
+    "begins to", "begin to", "starts to", "start to", "straightens into", "settles into", "settling into",
+    "camera locked", "then he", "then she", "then they", "after a beat", "before snapping", "snaps back",
+    "and holds", "one blink too long",
+)
+def check_endstate_still(text):
+    """LAW 4 DETECTOR — endStateStill must be a static PICTURE description (subjects, poses, positions,
+    expressions, setting), never directing prose with temporal verbs or imperatives — that leak is exactly
+    what rule 27 found and fixed once already (endState pasted verbatim into @图1's content clause). This
+    can't rewrite the prose the way Julian's own worked example does (rule 27 already rejected a mechanical
+    transform) — it only detects and flags, so a violation is never shipped un-reviewed."""
+    t = str(text or "").strip()
+    if not t:
+        return {"ok": True, "verdict": "(no endStateStill authored yet)"}
+    hits = [m for m in _TEMPORAL_MARKERS if m in t.lower()]
+    if hits:
+        return {"ok": False, "verdict": f"endStateStill reads like directing prose, not a photograph — "
+                f"temporal/imperative language found: {', '.join(hits)}"}
+    return {"ok": True, "verdict": "static picture description, no temporal markers found"}
+
+def check_ambience_overlap(atmosphere, ambient_bed):
+    """LAW 7 DETECTOR — the beat's own `atmosphere` text must never restate the scene's locked `ambientBed`
+    line (the bed is the constant every beat shares word-for-word; per-beat atmosphere/soundIntent is what's
+    supposed to change). Same bug CLASS as rule 27's endState/ambience duplication, a different field pair
+    that nothing currently guards. Word-overlap heuristic against the FIRST sentence of atmosphere (the same
+    slice _v3_environment actually ships, cb_segprompt.py's `atmo` clause) — deterministic, no vision call."""
+    a = str(atmosphere or "").strip()
+    bed = str(ambient_bed or "").strip()
+    if not a or not bed:
+        return {"ok": True, "verdict": "(nothing to compare — atmosphere or ambientBed not authored yet)"}
+    first = re.split(r"(?<=[.!?])\s+", a)[0]
+    def _words(s):
+        return [w for w in re.findall(r"[a-z']+", s.lower()) if len(w) > 3]
+    bed_words, atmo_words = set(_words(bed)), _words(first)
+    if not bed_words or not atmo_words:
+        return {"ok": True, "verdict": "(too short to compare)"}
+    shared = sorted({w for w in atmo_words if w in bed_words})
+    ratio = len(shared) / len(bed_words)
+    if ratio >= 0.4:
+        return {"ok": False, "verdict": f"beat's atmosphere text overlaps {ratio:.0%} of the scene's locked "
+                f"ambientBed wording ({', '.join(shared)}) — restating the bed inside `world` duplicates "
+                f"`ambience`; keep atmosphere to what's NEW this beat"}
+    return {"ok": True, "verdict": f"atmosphere/ambientBed word overlap {ratio:.0%} — no restatement"}
+
+_CAMERA_MOVE_WORDS = ("push", "pushes", "pushing", "pan", "pans", "panning", "dolly", "dollies", "truck",
+                      "trucks", "zoom", "zooms", "zooming", "orbit", "orbits", "orbiting", "whip", "tilt",
+                      "tilts", "crane", "cranes", "tracks", "tracking", "sweeps", "sweeping", "swings",
+                      "swinging", "chases", "chasing", "drifts", "drifting")
+def check_camera_lock_conflict(beat):
+    """LAW 8 DETECTOR — camera must be locked/static on any cut with dialogue (the beat-level `rule` field
+    already states this, per _v3_rule); at most one primary camera-movement per shot otherwise. Nothing
+    currently checks a dialogue cut's own authored `framing` text against the law stated right next to it in
+    the shipped prompt — the same two-statements-can-disagree shape as rule 27's bug, in the camera field
+    instead of the content-description field. Deterministic keyword scan over the beat's own cuts, no vision
+    call — runs at authoring time, before the emitter ever sees the beat."""
+    flags = []
+    for i, c in enumerate(beat.get("cuts") or [], start=1):
+        framing = str(c.get("framing") or "")
+        has_dlg = bool(str(c.get("dialogue") or "").strip())
+        moves = [w for w in _CAMERA_MOVE_WORDS if re.search(r"\b" + re.escape(w) + r"\b", framing.lower())]
+        if has_dlg and moves:
+            flags.append(f"cut {i}: has dialogue but framing names camera movement ({', '.join(moves)}) — "
+                         f"contradicts the beat's own camera-locked-during-dialogue rule")
+        elif len(moves) > 1:
+            flags.append(f"cut {i}: framing names {len(moves)} distinct camera moves ({', '.join(moves)}) — "
+                         f"Law 8 wants one primary move per shot")
+    if flags:
+        return {"ok": False, "verdict": "; ".join(flags)}
+    return {"ok": True, "verdict": "no camera-lock conflicts found"}
+
 # Canonical QA reason codes (machine-readable) + the one-line fix each implies. Merges OUR anatomy check (their DoD
 # lacks limb-counting) with the useful codes from the QA-agent spec. The fuzzy camera / staging / shot-type /
 # screen-direction checks are deliberately LEFT OUT of the hard gate for now — vision QA can't judge them reliably and

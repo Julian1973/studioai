@@ -21,3 +21,23 @@ disagreement here is the record; it is not an action item.
   a genuine signal that a still-frame pose check doesn't always predict whether the completed clip reads as
   intended once it's in motion — worth watching if this pattern repeats (a keyframe FAIL that Julian still signs
   off after seeing the finished clip) before deciding whether to tighten, loosen, or leave the check as is.
+
+## 2026-07-04 — Law 8 camera-lock-conflict detector vs 1.B1's already-signed cut 1
+
+- **Check verdict**: FLAG (`check_camera_lock_conflict`, PROMPT_LAWS_AUDIT.md's Law 8 detector, added this same
+  day) — 1.B1's cut 1 has dialogue but its authored `framing` text names a camera-movement word ("push"),
+  contradicting the beat-level "camera holds static during dialogue" rule stated in the same shipped prompt.
+  1.B2's cut 1 independently flagged too, for the OTHER Law 8 branch — its framing names two distinct
+  camera-movement words ("swings", "chases") in one shot, where the law wants one primary move per shot.
+- **Status**: 1.B1 is already fully signed (official clip stands, per its earlier sign-off run). Per Julian's
+  standing ruling (rule 18, 2026-07-03), this is calibration data only — the check applies forward, 1.B1's
+  signed clip is not touched or queued for regeneration because of it. 1.B2 is NOT yet signed (Julian is still
+  picking a winner for the just-fired re-render) — its flag is a live, actionable item for that pending
+  decision, not calibration data; surfaced in the same render's own log line, not logged here as a separate item.
+- **Why this matters for calibration**: this is the check's very first live run against real production data,
+  and it found something real on its first pass — both flags describe the actual authored `framing` text
+  accurately (verified against the shipped prompt directly). Worth watching whether "push"/"swings"/"chases"
+  turn out to be common, harmless authorial habit (camera-arc language describing Seedance's OWN cinematic
+  freedom, not a literal locked-camera violation) rather than a genuine law conflict — if this fires on most
+  beats going forward, the keyword list or the dialogue/movement distinction may need tightening before it's
+  useful signal rather than noise.

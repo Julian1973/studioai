@@ -189,7 +189,28 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
         status = "BLOCKED"
     else:
         status = "READY_TO_RENDER"
-    return {"status": status, "blockers": blockers}
+    # PROMPT LAWS AUDIT (PROMPT_LAWS_AUDIT.md, CLAUDE.md rule 28) — Laws 4/7/8's flag-only authoring checks.
+    # Deliberately NOT added to `blockers`: Julian's ruling (2026-07-04) was flag-only for these three, only
+    # Law 3's reference-alignment gets a hard block (that one's below, in run()'s imgs assertion — a shifted
+    # reference slot is a silent wrong-render, not a taste call). Advisory, additive key — existing callers
+    # reading status/blockers are unaffected.
+    flags = []
+    if beat is not None:
+        import cb_qa
+        scene = None
+        if d.get("scenes"):
+            _sn = str(beat.get("sceneNumber"))
+            scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
+        es = cb_qa.check_endstate_still(beat.get("endStateStill"))
+        if not es["ok"]:
+            flags.append("Law 4 (endStateStill): " + es["verdict"])
+        amb = cb_qa.check_ambience_overlap(beat.get("atmosphere"), (scene or {}).get("ambientBed"))
+        if not amb["ok"]:
+            flags.append("Law 7 (ambience): " + amb["verdict"])
+        cam = cb_qa.check_camera_lock_conflict(beat)
+        if not cam["ok"]:
+            flags.append("Law 8 (camera lock): " + cam["verdict"])
+    return {"status": status, "blockers": blockers, "flags": flags}
 
 def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
     """GATE 3 (beat-native) — each beat is ALREADY a 10-12s unit (the Director designed it). Render each beat as
@@ -226,6 +247,8 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         # beat that failed authoring/compact validation or had no built keyframe could render anyway with nothing
         # to catch it. Now actually gates.
         _ready = render_readiness(pkg_path, code, episode)
+        for _fl in _ready.get("flags") or []:    # PROMPT LAWS AUDIT flags (Laws 4/7/8) — advisory, never blocks
+            print(f"  {code}: [PROMPT LAW FLAG] {_fl}", flush=True)
         if _ready["status"] != "READY_TO_RENDER":
             print(f"  {code}: NOT READY ({_ready['status']}) — {'; '.join(_ready['blockers'])}; skipping (no clip)", flush=True); continue
         # ── TICKET 3 — AUDIO-FIRST: build + measure THIS beat's V3 voice BEFORE the prompt, so the action/HOLD timeline is
@@ -292,6 +315,20 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         # identity the prompt text asserts (e.g. a beat where openingCast omits/reorders someone in `characters`
         # would silently upload the wrong species/character at that reference slot).
         _chars = b.get("openingCast") or b.get("characters") or []
+        # LAW 3 HARD ASSERTION (PROMPT_LAWS_AUDIT.md, CLAUDE.md rule 28) — the prompt's @图N labels are built
+        # from THIS SAME _chars list, unconditionally, one label per character (cb_segprompt.emit_json_v3 /
+        # _v3_subjects). The upload list below used to filter out any character with no resolvable anchor
+        # (_anchor() returns None), silently shortening imgs relative to the label count — every later slot,
+        # the scene plate especially, would then shift one position left of what the prompt text claims it
+        # is. Confirmed live-reachable in PROMPT_LAWS_AUDIT.md's Law 3 finding. Refuse loudly instead of
+        # shipping a shifted reference stack — same style as the Law 5 voice-refusal below.
+        _missing_anchors = [c for c in _chars if not _anchor(c)]
+        if _missing_anchors:
+            print(f"  {code}: REFUSED — no resolvable identity reference for {', '.join(_missing_anchors)} "
+                  f"(Law 3: @图N labels and the uploaded image list must align 1:1 — a missing anchor here "
+                  f"would silently shift every later reference slot, including the scene plate); fix the "
+                  f"character's turnaround reference and re-fire", flush=True)
+            continue
         imgs = [start] + [a for c in _chars if (a := _anchor(c))]
         vids = None
         if relay_status == "relay":

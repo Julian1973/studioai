@@ -1229,7 +1229,7 @@ function relayBanner(sn){
     <div class="lab" style="color:var(--brandink);font-weight:700;font-size:13.5px">◈ RELAY — next action</div>
     <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">${_esc(relay.winnerCode)}'s anchor is prepared, waiting for your approval before ${_esc(relay.nextCode||'the next beat')} can launch.</div>
     <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-      ${relay.remint?`<img src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:220px;border-radius:8px;background:#efeef6"/>`:''}
+      ${relay.remint?`<img class="zoom" data-cap="${_esc(relay.winnerCode)} · relay anchor" src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:220px;border-radius:8px;background:#efeef6"/>`:''}
       <div style="flex:1;min-width:220px">
         <div style="font-size:12.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'}</div>
         <div style="font-size:11.5px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>
@@ -1422,7 +1422,7 @@ function renderRelayPanel(scene,code,seeds,relay){
     const dc=relay.driftCheck||{},clean=dc.ok===true;
     h+=`<div class="kv" style="color:var(--brandink);margin-top:14px">◈ Prepared relay anchor — for ${_esc(relay.nextCode||'the next beat')}</div>
       <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
-        ${relay.remint?`<img src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:#efeef6"/>`:''}
+        ${relay.remint?`<img class="zoom" data-cap="${_esc(code)} · relay anchor" src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:#efeef6"/>`:''}
         <div style="flex:1;min-width:220px">
           <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'}</div>
           <div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>

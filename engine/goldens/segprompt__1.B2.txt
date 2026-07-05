@@ -15,7 +15,7 @@
   "shots": [
     {
       "seconds": 6,
-      "camera": "Drone-style camera chases the larger bee through a wild manic loop across the meadow, then swings back with him to land on the next flower where the smaller bee is already working, ending on the larger bee and the smaller bee in frame",
+      "camera": "Drone-style camera chases the larger bee through his wild manic loop across the meadow, ending on the larger bee and the smaller bee in frame",
       "action": "From the prior watch, the larger, eager, manic bee rockets off into a chaotic loop-the-loop, overshooting high then plunging low, zig-zagging wildly and bumping past stems and petals, humming louder and louder, while the smaller, calm, deadpan bee stays at her own flower nearby, already there, working calm and precise, entirely unbothered by his antics. He swings back around and comes barrelling straight for her flower, lining himself up with too much confidence; both airborne wings beat rapidly and continuously."
     },
     {

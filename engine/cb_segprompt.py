@@ -356,6 +356,18 @@ _RELAY_OPEN_LOCK = ("OPENING FRAME LOCK: this shot's very first frame is @图1 e
                     "pose, repeat it or drift back to it later in the shot; by the shot's end the characters are "
                     "in a completely different position and pose. ")
 
+_RELAY_CAMERA_OPEN_LOCK = ("Camera opens locked on @图1's exact framing; as the action departs, the camera "
+                           "departs with it into: ")
+# THE CAMERA-SIDE OPENING LOCK (Julian, 2026-07-04, diagnosing 1.B2's re-fire: "the wide-open signature predates
+# @Video1, so @Video1 stays — the implicated variable is the camera text"): _RELAY_OPEN_LOCK above locks the
+# ACTION field's opening pose, but said nothing about the CAMERA field — so a relay beat's own authored shot-1
+# framing (e.g. 1.B2's "Drone-style camera chases the larger bee through a wild manic loop across the meadow")
+# could demand wide, already-in-motion coverage from frame one, directly contradicting a tight two-shot anchor,
+# and the model serves the camera: confirmed live via a frame-1 extraction + independent cross-check showing
+# the actual render opened on a wide establishing shot neither the re-mint anchor nor the raw harvest matched,
+# from the very first frame. Mirrors _RELAY_OPEN_LOCK's shape exactly, applied to the camera field instead of
+# the action field — same fix, same reasoning, the other half of the same shot.
+
 def _v3_shots(beat, cast, relay=False):
     """THE mechanical assembler — see the module note above. Returns (shots, dur) where each shot is
     {n, seconds, camera, action, speaker (short role label or None)}; seconds always sum to dur (15, Handle
@@ -368,7 +380,10 @@ def _v3_shots(beat, cast, relay=False):
     textually anchoring it to @图1's calm, at-rest content — so the model built its own opening composition to
     match the energetic text and only converged toward @图1 near the end (observed: join-check "wider shot,
     character missing"; Julian: "at 15 seconds the re-mint is the end frame"). Now shot 1's OWN action text
-    carries the lock directly, right next to the motion it must ground, not in a separate section."""
+    carries the lock directly, right next to the motion it must ground, not in a separate section. The CAMERA
+    field gets the same treatment via _RELAY_CAMERA_OPEN_LOCK (2026-07-04) — the action lock alone wasn't
+    enough; shot 1's own camera text needed the identical grounding, since the model serves the camera field's
+    own instruction over the action field's when the two disagree on what frame one looks like."""
     import cb_voice as V
     dur = HANDLE_TOTAL
     cuts = beat.get("cuts") or []
@@ -395,7 +410,8 @@ def _v3_shots(beat, cast, relay=False):
         sec = max(1, HANDLE_ACTION - running) if i == len(raw) - 1 else max(1, round(HANDLE_ACTION * s["weight"] / total_w))
         running += sec
         action = (_RELAY_OPEN_LOCK + s["action"]) if (relay and i == 0) else s["action"]
-        shots.append({"n": i + 1, "seconds": sec, "camera": s["camera"], "action": action, "speaker": s["speaker"]})
+        camera = (_RELAY_CAMERA_OPEN_LOCK + s["camera"]) if (relay and i == 0) else s["camera"]
+        shots.append({"n": i + 1, "seconds": sec, "camera": camera, "action": action, "speaker": s["speaker"]})
     shots[-1]["seconds"] += HANDLE_SETTLE   # the closing shot's extra 2s IS the directed living settle
     return shots, dur
 

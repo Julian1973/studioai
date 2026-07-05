@@ -358,6 +358,20 @@ _RELAY_OPEN_LOCK = ("OPENING FRAME LOCK: this shot's very first frame is @图1 e
 
 _RELAY_CAMERA_OPEN_LOCK = ("Camera opens locked on @图1's exact framing; as the action departs, the camera "
                            "departs with it into: ")
+
+_CANONICAL_FRAME_DECLARATION = "@图1 为首帧。@图1 is the first frame."
+# THE CANONICAL DECLARATION (Julian, 2026-07-05, single-variable test #2 after the camera-lock test #1 failed to
+# hold frame one): the surface research confirmed first-frame + audio-reference is a mutually-exclusive-mode
+# split on every surface checked (fal, Runway, Volcengine Ark, BytePlus ModelArk — all four, primary-sourced for
+# the latter two), but BytePlus's own docs sanction the PROMPT-TEXT convention for the soft/multimodal-reference
+# mode we're actually using: "@图1 为首帧" / "[Image1] is the first frame" as a short, positional opening
+# declaration — not the verbose paraphrase (_RELAY_OPEN_LOCK/_RELAY_CAMERA_OPEN_LOCK's "this shot's very first
+# frame is @图1 exactly...") buried inside the action/camera fields we'd been shipping instead. We had never
+# fired the exact canonical form. This is additive and relay-only: the existing lock text in the action/camera
+# fields is UNCHANGED; this declaration becomes the prompt's own opening line, ahead of everything else,
+# bilingual per the skill package's own reference-role wording (English alone was untested against this exact
+# canonical Chinese-first ordering). Isolates ONE variable from the camera-lock test — if frame one still
+# doesn't hold, the two-step architecture under CLAUDE.md rule 29 is next.
 # THE CAMERA-SIDE OPENING LOCK (Julian, 2026-07-04, diagnosing 1.B2's re-fire: "the wide-open signature predates
 # @Video1, so @Video1 stays — the implicated variable is the camera text"): _RELAY_OPEN_LOCK above locks the
 # ACTION field's opening pose, but said nothing about the CAMERA field — so a relay beat's own authored shot-1
@@ -588,7 +602,8 @@ def emit_prose_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_sti
     prev_end_state_still: the PREVIOUS beat's own endStateStill text, for @图1's content-description clause (2026-07-04)."""
     any_bee = any(_char_meta(n)[1] for n in cast)
     plate_n = len(cast) + 2 if relay else None
-    out = f"{dur} seconds, 16:9.\n\n"
+    out = f"{_CANONICAL_FRAME_DECLARATION}\n\n" if relay else ""
+    out += f"{dur} seconds, 16:9.\n\n"
     out += f"SUBJECTS: {_v3_subjects(cast)}\n\n"
     out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast, relay=relay, plate_n=plate_n, prev_end_state_still=prev_end_state_still)}\n\n"
     out += f"STYLE: {_v3_style()}\n\n"
@@ -749,7 +764,10 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_stil
                 dlg["expression"] = expr
             shot["dialogue"] = dlg
         out_shots.append(shot)
-    doc = {
+    doc = {}
+    if relay:
+        doc["first_frame"] = _CANONICAL_FRAME_DECLARATION   # the prompt's own opening line — see the constant's note
+    doc.update({
         "duration": dur, "aspect": "16:9", "style": _v3_style(), "references": refs,
         "voices": ("@Audio1 is the ONLY source of all dialogue — animate each speaking character's mouth, timing "
                    "and full physical performance to match @Audio1 exactly; never invent, duplicate or generate a "
@@ -758,7 +776,7 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_stil
                    "(Audio Doctrine, Julian, 2026-07-03)."),
         "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None),
                                  prev_end_state_still=prev_end_state_still, include_refs=False),
-    }
+    })
     tone = _v3_tone(beat)
     if tone:
         doc["tone"] = tone

@@ -1,0 +1,94 @@
+# THE REPLICATOR
+
+One command: `walk_scene(episode, scene)` (`engine/cb_replicator.py`). It runs Gate 3 end to end for a whole
+scene — every beat, relay chain and all — under the escorted-run rules, so the next ten scenes get built by
+the same hands rule 28 already established, and the only thing a director ever authors again is Layer 2.
+
+## The three inputs
+
+`walk_scene` takes exactly two arguments — `episode`, `scene` — and resolves everything else from them, through
+the same conventions every other module in this pipeline already uses:
+
+1. **The show profile** — the laws (`shows/<show>/laws/*.txt`), the show's confirmed style line, the character
+   config (`config/characters.json`) — read by `cb_segprompt`/`cb_prompts` exactly as they already do for any
+   other fire. Nothing new.
+2. **The scene data** — the scene's plate, ambient bed, location and atmosphere fields, resolved via the beat
+   package's `scenes[]` entry matching `sceneNumber`. Same lookup `cb_beats.run`/`gate3_dryrun` already do.
+3. **The director's cut** — the scene's signed, locked beat list: `cuts[]` (action/framing/dialogue),
+   `endState`/`endStateStill`, `comedyMode`, `soundIntent`, `pauseHold`. This is Layer 2 — a human (or the
+   Director skill) already wrote it before `walk_scene` is ever called. The beat package is resolved by the
+   same glob `cb_pipeline._resolve_pkg` uses (`cb-output/<episode>_*beat_package.json`, newest by mtime).
+
+Nothing else. No seed file, no winner pick, no approval flag — see "escorted" below for why.
+
+## The one command
+
+```
+python3 cb_replicator.py <episode> <scene>
+```
+or, from any engine script: `from cb_replicator import walk_scene; walk_scene(episode, scene)`.
+
+Each call processes as much of the scene as it safely can and returns one report:
+
+```
+{"status": "COMPLETE" | "HALTED", "scene": ..., "beats_done": [...], "halted_at": <beatCode or None>,
+ "reason": "...", "evidence": [<Downloads paths>]}
+```
+
+**Resumable by construction.** Every piece of state it reads — official clips, `.qa.json` sidecars, re-mint
+anchors, `locked.json` — lives on disk. Calling `walk_scene` again after fixing whatever halted it picks up
+from the same beat; it never re-fires a beat that already has a clean, QA-passed clip, and never spends money
+twice on the same take.
+
+## The gate map
+
+| Step | What runs | What it checks | Non-green means |
+|---|---|---|---|
+| Precondition | `locked.json`'s Gate 2b flag for this scene | Is the scene's own opening keyframe signed? | HALT before anything fires — rule 1, gates are hard locks |
+| Assemble | `cb_segprompt.shipped_prompt` (beat 1: `relay=False`; every beat after: `relay=True`, `prev_end_state_still` threaded from the prior beat's own authored field) | The rule-28 skeleton — Layer 1, mechanical | An empty prompt halts; nothing hand-edits it to fix that |
+| Twelve-law lint | `cb_qa.check_prompt_laws` | Laws 4/7/8 (the only currently-convention-only gaps) as flags; laws 1/2/3/5/6/9/10/11/12 reported structural/uncheckable — see PROMPT_LAWS_AUDIT.md | Flags never halt (advisory by Julian's ruling, 2026-07-04); Laws 3 and 5 (voice) are the two hard blocks, and they fire **upstream**, inside `cb_beats.run`, before a clip ever exists — a refused beat is caught by the next step, not this one |
+| Fire | `cb_beats.run` (beat 1) / `cb_beats.fire_next_beat(..., dry_run=True)` then `(..., approved=True)` (every beat after) | Single seed, standard tier (`fast=False`) — the same configuration as the 1.B2 camera-lock test | No clip on disk after firing = HALT (a Law 3/5-class refusal, or a render fault) |
+| Harvest → re-mint → drift check | `cb_scene.harvest_settle_frame` → `cb_scene.remint_settle_frame` → `cb_qa.check_remint` | Position/state vs the harvest, identity vs the turnarounds | `DRIFT` = HALT before the next beat's anchor is ever used |
+| Clip QA | `cb_qa.check_clip` (already run and sidecar-persisted by `cb_beats.run`) | Frozen/morph/identity-drift/pop-character/crystal-on-bee/unsafe-face and the rest of `CLIP_BLOCK_CODES` | Any block = HALT |
+| Join check + anti-hold | `cb_qa.check_join` against a fresh frame-1 extraction of the just-fired clip, plus a last-frame extraction for the evidence pack | POSITION / STATE / LIGHT continuity across the cut | `BROKEN` = HALT — this is exactly the check that caught the still-open camera-hypothesis failure on 1.B2 |
+| Next beat | `endStateStill` threads forward automatically (already read by `_v3_prev_frame_content`) | — | Loop continues only if every step above came back green |
+
+Gates are per CLAUDE.md rule 1 throughout: `walk_scene` can only ever operate on an already-signed Gate 2b, and
+it never signs anything itself. Scene boundaries reset to canon automatically — `walk_scene` filters the beat
+list to one scene before any of this runs, so `relay_source_for` can never see a different scene's settle
+frame; a scene's own first beat always resolves `"first"`.
+
+## What a director authors vs. what the machine owns
+
+| Director authors (Layer 2) | Machine owns (Layer 1, this file + rule 28) |
+|---|---|
+| Shot list: count, durations summing to 15, camera intention per shot | The 15s split itself (13s action + 2s settle) — fixed constants, cannot drift |
+| Action prose — the beat's own gag, written to the Layered Humour Model | The photograph-not-a-story discipline on @图1's content clause (endStateStill, once authored) |
+| Dialogue bindings: who speaks, in which shot, what expression | The @Audio1-only audio law, and the regex strip that guarantees no spoken words leak into the prose |
+| Tone line and per-beat foreground SFX | The locked ambient bed, word-for-word identical every clip in the scene |
+| `endState` (directing prose) **and** `endStateStill` (the static photograph, hand-authored in parallel — rule 27 explicitly rejected an automatic transform between the two) | Threading `endStateStill` forward as the next beat's point-anchor content, mechanically, every beat |
+| — | The five-anchor reference stack, the six negatives, the binding-handle wording, the style/world text — all assembled, never retyped |
+| — | Every check in the gate map above, and the halt/evidence-pack discipline itself |
+
+The hard rule this file enforces: **no prompt text is ever authored or edited by hand.** `cb_segprompt.py` is
+the sole writer of the shipped prompt; `walk_scene` only ever calls it, reads its output, and decides whether
+to keep going. Any change to what ships is an emitter change or a Layer-2 data change — golden-gated, shown to
+Julian before the golden set is re-blessed, exactly as it already is for every fix in this repo's history.
+
+## What this is not
+
+Not autonomous. "Escorted" means the mechanical steps run themselves for as long as every check is green, and
+stop the instant one isn't — never a fully unattended, fire-and-forget scene render. It fires one seed per
+beat, standard tier, because a single clean take plus automated QA is the escort; there is no "pick a winner"
+step because there's nothing for a human to adjudicate that the checks above don't already catch first.
+
+## Maiden run
+
+The 1.B2 camera-opening-lock test (2026-07-05) stands as the benchmark this module is measured against: single
+seed, standard tier, @Video1 in the stack, full evidence pack to Downloads, halted cleanly on a broken join
+check rather than shipping a bad take. That is exactly the behaviour `walk_scene`'s per-beat loop reproduces —
+the difference is only that it now runs beat-to-beat automatically instead of one manual `fire_next_beat` call
+at a time. A live, full-scene run has not been executed as part of this build: Gate 2b is not yet signed for
+Ep1 Scene 1 (confirmed live — `walk_scene("Ep1", "1")` correctly halts there, zero render cost), and this
+module does not sign gates. The first real end-to-end walk happens once a scene's Gate 2b is signed and Julian
+runs it.

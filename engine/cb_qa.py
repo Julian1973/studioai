@@ -232,6 +232,60 @@ def check_camera_lock_conflict(beat):
         return {"ok": False, "verdict": "; ".join(flags)}
     return {"ok": True, "verdict": "no camera-lock conflicts found"}
 
+# THE TWELVE-LAW PRE-FIRE LINT (Julian, 2026-07-05 — REPLICATOR.md) — one call covering all twelve Layer-1
+# invariant laws (CLAUDE.md rule 28), for the replicator's walk_scene to run before every fire. Two laws are
+# BLOCKERS (Law 3's reference/upload alignment, Law 5's voice-in-render requirement) — but both already refuse
+# the render loudly at their natural point of failure (cb_beats.run's imgs-assertion and its V3-track refusal),
+# BEFORE a clip file ever exists; this function does not re-implement them, it only documents that fact so
+# "all twelve checked" doesn't silently mean "ten checked, two forgotten". The other laws split two ways: four
+# (2, 6, 10, 12) and half of Law 1 (the duration split) are CODE-ENFORCED with no possible violation path — the
+# emitter cannot produce a wrong value, so there is nothing for a lint to catch; they're reported STRUCTURAL,
+# not re-parsed out of the shipped text (a fragile regex re-derivation of a guarantee the code already makes
+# would add risk without adding safety). Law 9 (living settle) is the same shape. Laws 4/7/8 are the genuine,
+# currently-convention-only gaps PROMPT_LAWS_AUDIT.md found — those are the real, meaningful checks below,
+# flag-only per Julian's ruling (2026-07-04): surfaced, never blocking. Law 1's OTHER half (one gag arc per
+# beat) and Law 5 (Layer-1's anti-hold — a generation-time outcome, unknowable before firing) are the two
+# laws this lint cannot cover at all, pre-fire or otherwise; named here so that's a stated limitation, not a
+# silent gap.
+LAW_NAMES = {
+    1: "one beat/one arc, 15s split", 2: "opener vs relay", 3: "five-anchor stack",
+    4: "@图1 is a photograph", 5: "anti-hold", 6: "audio law / no spoken words",
+    7: "ambience scene-property", 8: "camera law", 9: "living settle",
+    10: "six negatives", 11: "character law / neutral handles", 12: "style/world verbatim",
+}
+def check_prompt_laws(beat, scene, cast, relay):
+    """Runs the full twelve-law lint for one beat before it fires. Returns {blockers, flags, structural} —
+    blockers is always [] here (Laws 3/5 block upstream, in cb_beats.run, before this is even reached; a
+    refused beat simply never produces a clip, which is walk_scene's own halt condition); flags is Laws
+    4/7/8's advisory findings; structural lists every law that's code-enforced with no lint action needed,
+    for a complete, honest "all twelve accounted for" report rather than four checks presented as twelve."""
+    flags = []
+    es = check_endstate_still(beat.get("endStateStill"))
+    if not es["ok"]:
+        flags.append(f"Law 4 ({LAW_NAMES[4]}): " + es["verdict"])
+    amb = check_ambience_overlap(beat.get("atmosphere"), (scene or {}).get("ambientBed"))
+    if not amb["ok"]:
+        flags.append(f"Law 7 ({LAW_NAMES[7]}): " + amb["verdict"])
+    cam = check_camera_lock_conflict(beat)
+    if not cam["ok"]:
+        flags.append(f"Law 8 ({LAW_NAMES[8]}): " + cam["verdict"])
+    structural = {
+        1: "duration split (15s = 13s action + 2s settle) is a fixed constant in _v3_shots — cannot drift",
+        2: "opener-vs-relay is a single resolver (cb_scene.relay_source_for) every call site shares",
+        3: "hard-blocked upstream in cb_beats.run (reference/upload alignment) before any clip renders",
+        5: "hard-blocked upstream in cb_beats.run (Law 5: no V3 @Audio1 track, no native-voice fallback)",
+        6: "no-spoken-words is regex-enforced (_strip_spoken_words) on every free-text field, every emitter",
+        9: "the living settle block is unconditionally appended to the closing shot (_v3_settle)",
+        10: "the six negatives are a fixed, sliced-to-six list (_v3_negatives) — cannot ship 5 or 7",
+        11: "binding handles are size-only by construction (_short_role); identity exposure is Law 3's concern",
+        12: "style/world text is read verbatim from the show profile/scene data, never paraphrased",
+    }
+    uncheckable = {
+        1: "one-gag-arc-per-beat is a narrative-structure judgment, not mechanically checkable pre-fire",
+        5: "(Layer-1 anti-hold) is a generation-time outcome — unknowable before firing, verified after by check_join",
+    }
+    return {"blockers": [], "flags": flags, "structural": structural, "uncheckable": uncheckable}
+
 # Canonical QA reason codes (machine-readable) + the one-line fix each implies. Merges OUR anatomy check (their DoD
 # lacks limb-counting) with the useful codes from the QA-agent spec. The fuzzy camera / staging / shot-type /
 # screen-direction checks are deliberately LEFT OUT of the hard gate for now — vision QA can't judge them reliably and

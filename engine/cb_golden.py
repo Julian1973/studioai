@@ -13,21 +13,24 @@ CLAUDE.md hard rule: no prompt-touching commit merges without this diff shown. A
 wrong — a ticket can deliberately change a prompt — but it must be SHOWN to Julian before the golden is
 recaptured, never silently overwritten.
 
-Content assertions (spec freeze, 2026-07-02, Julian): diffing only proves "unchanged since last time" — it never
-proves anything is actually THERE, so a snapshot itself could be lean and every later diff would still pass.
-`assertions()` checks every shipped segprompt beat against v3's OWN spec (updated from the v2-era checks, which
-tested for motionTempo/physicalFeeling language and a literal "SPEAKER MAP:" string — v3 deliberately drops both:
-the trials found them token tax, and the JSON emitter binds a speaker per SHOT, not a beat-level line map):
-  1. a real fragment of the beat's own cuts[].action content survives into the prompt (checked as the longest
-     name-free chunk, so it holds regardless of which delabeled role-label form a character name became) —
-     proves the shots carry the Director's actual action, not generic filler.
-  2. if the beat has dialogue: the PROSE emitter must carry a "SPEAKER MAP:" line; the JSON emitter must have at
-     least one shot with a dialogue object whose line is the fixed "the line in @Audio1 during this shot" string
-     (never the actual words).
-  3. the PROSE emitter's NEGATIVES line has exactly six comma-separated items (the worked example's own spec).
-  4. the JSON emitter parses as valid JSON with the required top-level keys and a non-empty shots[] array.
-  5. both emitters' per-shot seconds sum to exactly the beat's total duration (the mechanical assembler's own
-     invariant — durations become PER-SHOT seconds, they must never drift from the beat total).
+Content assertions (spec freeze, 2026-07-02, Julian; REWRITTEN for v4, the blessed template, 2026-07-05):
+diffing only proves "unchanged since last time" — it never proves anything is actually THERE, so a snapshot
+itself could be lean and every later diff would still pass. `assertions()` checks every shipped segprompt beat
+against v4's OWN spec — v4 is JSON-only now (no more prose-vs-JSON branching by speaker count), so every check
+below reads doc['prompt']/['references']/['prohibited']/['continuity'] directly:
+  1. the required top-level keys are all present (duration/aspect/mode/references/style/ambience/prompt/
+     continuity/prohibited).
+  2. a real fragment of the beat's own cuts[].action content survives into doc['prompt'] verbatim (names are no
+     longer delabeled — v4 welds raw names — so no name-splitting is needed to find it).
+  3. if the beat has dialogue: doc['prompt'] names @Audio1 as the performance source, and the actual spoken
+     WORDS never leak into it (Law 6 — unconditional, unchanged by v4).
+  4. the six standing negatives (_v3_negatives, unchanged, still always exactly six) are all present WITHIN
+     doc['prohibited'] — additive with the beat's own staging-specific items now, never fewer than six.
+  5. the continuous timing clock inside doc['prompt'] chains 0..HANDLE_TOTAL with no gaps or overlaps, and its
+     closing segment is the labelled settle block (the Handle Doctrine's fixed HANDLE_ACTION/HANDLE_SETTLE split).
+  6. references carry @图1 and @Audio1, and one @图N per cast member with that character's NAME welded directly
+     into its reference text (rule 5, reversed 2026-07-05 — identity binding is now by name, never a role-label
+     paraphrase; see CLAUDE.md).
 Wired into both commands: `diff` fails (exit 1) on a failed assertion even with zero text diffs; `capture`
 refuses to bless a snapshot that fails one — a lean or malformed prompt can never silently become the new normal.
 
@@ -94,7 +97,15 @@ def _name_free_chunks(text, cast):
 
 def assertions(snap=None):
     """Content assertions on every shipped segprompt beat — see the module docstring. Returns a list of failure
-    strings (empty means everything passed)."""
+    strings (empty means everything passed).
+
+    REWRITTEN for v4 (the blessed template, Julian, 2026-07-05) — v3's shots[]/world/constraints/negatives/
+    SPEAKER-MAP shape is retired, so the checks below test v4's actual shape (references/prompt/continuity/
+    prohibited, one continuous timing clock, names welded to @图N) instead of the old one. The SPIRIT of every
+    v3-era check is preserved even though the concrete shape changed: real beat content must survive into the
+    prompt, dialogue must never leak actual words, the six standing negatives must always be present, and
+    durations must still sum to the beat total — just checked against v4's field names now."""
+    import cb_segprompt as CS
     d = _pkg()
     beats = d["beats"]
     by_code = {(b.get("beatCode") or b.get("shotCode")): b for b in beats}
@@ -106,94 +117,82 @@ def assertions(snap=None):
             continue
         prompt = snap.get(f"segprompt__{code}", "")
         cast = b.get("openingCast") or b.get("characters") or []
-        is_json = prompt.strip().startswith("{")
+        try:
+            doc = json.loads(prompt)
+        except Exception as e:
+            fails.append(f"{code}: JSON prompt failed to parse ({e})")
+            continue
 
-        # (1) a real fragment of the beat's OWN cuts[].action survives — proves real content, not generic filler
+        # (1) required top-level keys — v4's actual shape, not v3's
+        for key in ("duration", "aspect", "mode", "references", "style", "ambience", "prompt", "continuity", "prohibited"):
+            if key not in doc:
+                fails.append(f"{code}: JSON prompt missing required top-level key {key!r}")
+
+        # (2) a real fragment of the beat's OWN cuts[].action survives in "prompt" — proves real content, not
+        # generic filler. Names are no longer delabeled (v4 welds raw names), so no name-splitting needed —
+        # the raw action text should appear near-verbatim (only _strip_spoken_words/rstrip('.') may touch it).
         action = " ".join(str(c.get("action") or "").strip() for c in (b.get("cuts") or []))
         if action.strip():
-            chunks = _name_free_chunks(action, cast)
-            check = (max(chunks, key=len) if chunks else "")[:60].strip()
-            if check and check not in prompt:
+            check = action.strip()[:60].rstrip(".")
+            if check and check not in doc.get("prompt", ""):
                 fails.append(f"{code}: none of the beat's own cuts[].action content survived into the shipped prompt (looked for: {check!r})")
 
-        # (2) dialogue binding — SPEAKER MAP for prose, a per-shot dialogue object for JSON
+        # (3) dialogue binding — the speaker-order sentence must name every speaking character and bind them to
+        # @Audio1; actual dialogue words must NEVER appear in "prompt" (Law 6 — unconditional, unchanged by v4).
         has_dlg = _has_dialogue(b)
-        if has_dlg and not is_json and "SPEAKER MAP:" not in prompt:
-            fails.append(f"{code}: beat has dialogue but the PROSE prompt has no SPEAKER MAP")
-        if has_dlg and is_json:
-            try:
-                doc = json.loads(prompt)
-                shots = doc.get("shots") or []
-                dlg_shots = [s for s in shots if isinstance(s.get("dialogue"), dict)]
-                if not dlg_shots:
-                    fails.append(f"{code}: beat has dialogue but no JSON shot carries a dialogue object")
-                bad_line = [s for s in dlg_shots if s["dialogue"].get("line") != "the line in @Audio1 during this shot"]
-                if bad_line:
-                    fails.append(f"{code}: a JSON dialogue shot's line is not the fixed @Audio1 reference — "
-                                 f"actual words may have leaked: {bad_line[0]['dialogue'].get('line')!r}")
-            except Exception as e:
-                fails.append(f"{code}: JSON prompt failed to parse ({e})")
+        body = doc.get("prompt", "")
+        if has_dlg:
+            if "in @Audio1" not in body:
+                fails.append(f"{code}: beat has dialogue but 'prompt' has no @Audio1 speaker-performance sentence")
+            for c in (b.get("cuts") or []):
+                raw_dlg = str(c.get("dialogue") or "").strip()
+                if not raw_dlg:
+                    continue
+                words = raw_dlg.split(":", 1)[-1].strip()
+                if words and len(words) > 8 and words.lower() in body.lower():
+                    fails.append(f"{code}: actual dialogue words may have leaked into 'prompt' (Law 6): {words!r}")
 
-        # (3) NEGATIVES trimmed to six. Prose: split on ", no " (the clause boundary — every item starts with
-        # "no"), NOT every comma: an item like "no on-screen text, subtitles, logos or watermarks" is ONE clause
-        # with commas inside its own internal list. JSON (gold standard, 2026-07-03): a "negatives" list, checked
-        # by length directly — no string-splitting needed since it ships as an actual array.
-        if not is_json:
-            m = re.search(r"NEGATIVES:\s*(.+)$", prompt, re.S)
-            if m:
-                n = len([x for x in re.split(r",\s*(?=no )", m.group(1).strip()) if x.strip()])
-                if n != 6:
-                    fails.append(f"{code}: NEGATIVES should have exactly 6 items, has {n}")
-            else:
-                fails.append(f"{code}: no NEGATIVES section found in the prose prompt")
+        # (4) the six standing negatives are always present WITHIN "prohibited" (additive with beat-specific
+        # staging items now, never fewer than six — _v3_negatives itself is unchanged, still exactly six).
+        prohibited = doc.get("prohibited")
+        if not isinstance(prohibited, list) or len(prohibited) < 6:
+            fails.append(f"{code}: JSON prohibited should be a list of at least 6 items, got {prohibited!r}")
         else:
-            try:
-                neg = json.loads(prompt).get("negatives")
-                if not isinstance(neg, list) or len(neg) != 6:
-                    fails.append(f"{code}: JSON negatives should be a 6-item list, got {neg!r}")
-            except Exception:
-                pass   # JSON parse failure already reported below
+            any_bee = any(CS._char_meta(n)[1] for n in cast)
+            standing = CS._v3_negatives(any_bee)
+            missing = [n for n in standing if n not in prohibited]
+            if missing:
+                fails.append(f"{code}: prohibited list is missing standing negative(s): {missing}")
 
-        # (4)+(5) structural invariants — durations become PER-SHOT seconds, must sum to the beat total
-        dur = int(b.get("durationSec") or 12); dur = max(8, min(15, dur))
-        if is_json:
-            try:
-                doc = json.loads(prompt)
-                for key in ("duration", "aspect", "style", "references", "world", "shots", "constraints", "negatives"):
-                    if key not in doc:
-                        fails.append(f"{code}: JSON prompt missing required top-level key {key!r}")
-                if not doc.get("shots"):
-                    fails.append(f"{code}: JSON prompt has an empty shots[] array")
-                total = sum(s.get("seconds", 0) for s in (doc.get("shots") or []))
-                if total != dur:
-                    fails.append(f"{code}: JSON shots[].seconds sum to {total}, expected the beat total {dur}")
-
-                # GOLD STANDARD / REFERENCE STACK additions (Julian, 2026-07-03) — camera end-state on EVERY
-                # shot (not just the closing one — item SIX of the consolidated doctrine sync); an expression
-                # binding never leaks a cast name (rule 5: identity text never ships). HANDLE DOCTRINE — the
-                # closing shot carries a SETTLE: block (superseding the plain ambience-resumes tail), and total
-                # seconds must include the +2s settle allowance.
-                shots = doc.get("shots") or []
-                if cast:
-                    for s in shots:
-                        if ", ending on " not in str(s.get("camera") or ""):
-                            fails.append(f"{code}: a shot's camera has no end-state clause (every shot, per the reference-stack doctrine)")
-                if shots and "SETTLE:" not in str(shots[-1].get("action") or ""):
-                    fails.append(f"{code}: closing shot's action has no Handle Doctrine SETTLE block")
-                for s in shots:
-                    expr = (s.get("dialogue") or {}).get("expression") if isinstance(s.get("dialogue"), dict) else None
-                    if expr and cast and any(re.search(rf"\b{re.escape(n)}\b", expr, re.I) for n in cast):
-                        fails.append(f"{code}: dialogue.expression leaks a cast name (rule 5): {expr!r}")
-            except Exception:
-                pass   # already reported above
+        # (5) the continuous timing clock must chain 0..HANDLE_TOTAL with no gaps or overlaps, and the closing
+        # segment must be the settle (labelled "settle:"), matching the Handle Doctrine's fixed split.
+        spans = [(int(s), int(e)) for s, e in re.findall(r"(\d+)-(\d+)s", body)]
+        if not spans:
+            fails.append(f"{code}: no timing-clock segments found in 'prompt'")
         else:
-            secs = [int(x) for x in re.findall(r"SHOT \d+ \((\d+)s\)", prompt)]
-            if secs and sum(secs) != dur:
-                fails.append(f"{code}: prose SHOT seconds sum to {sum(secs)}, expected the beat total {dur}")
-            if "SETTLE:" not in prompt:
-                fails.append(f"{code}: prose prompt has no Handle Doctrine SETTLE block on its closing shot")
-            if cast and secs and prompt.count(", ending on ") < len(secs):
-                fails.append(f"{code}: not every prose SHOT has a camera end-state clause (every shot, per the reference-stack doctrine)")
+            if spans[0][0] != 0:
+                fails.append(f"{code}: timing clock doesn't start at 0s (starts at {spans[0][0]}s)")
+            if spans[-1][1] != CS.HANDLE_TOTAL:
+                fails.append(f"{code}: timing clock ends at {spans[-1][1]}s, expected the beat total {CS.HANDLE_TOTAL}")
+            for (s1, e1), (s2, e2) in zip(spans, spans[1:]):
+                if e1 != s2:
+                    fails.append(f"{code}: timing clock has a gap/overlap between {s1}-{e1}s and {s2}-{e2}s")
+            if f"{CS.HANDLE_ACTION}-{CS.HANDLE_TOTAL}s settle:" not in body:
+                fails.append(f"{code}: closing timing-clock segment isn't the labelled settle block")
+
+        # (6) references: @图1 present, @Audio1 present, one @图N per cast member with the name welded in
+        # (rule 5, reversed 2026-07-05 — see CLAUDE.md — names now appear directly, never a role-label paraphrase)
+        refs = doc.get("references") or {}
+        if "@图1" not in refs:
+            fails.append(f"{code}: references missing @图1")
+        if "@Audio1" not in refs:
+            fails.append(f"{code}: references missing @Audio1")
+        for i, name in enumerate(cast):
+            tag = f"@图{i + 2}"
+            if tag not in refs:
+                fails.append(f"{code}: references missing {tag} for {name!r}")
+            elif name not in refs[tag]:
+                fails.append(f"{code}: {tag}'s reference text doesn't name {name!r} directly: {refs[tag]!r}")
     return fails
 
 

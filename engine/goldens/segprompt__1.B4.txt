@@ -1,19 +1,23 @@
-15 seconds, 16:9.
-
-SUBJECTS: @图2 is the larger bee (frame-LEFT); @图3 is the smaller bee (frame-RIGHT) — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly. Wings beat rapidly and continuously whenever airborne — never still, frozen or motionless in flight.
-
-ENVIRONMENT: @图1 is TRUTH — copy the environment and lighting from it exactly. A ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and natural crystal formations. Pollen clouds thicken with each dive; the air subtly stills for the rumble, motes hanging for a half-second like the world is listening.
-
-STYLE: Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy
-
-TONE: big, over-the-top comedy — full energy, nothing held back
-
-AMBIENCE: a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze moving through grass and flowers
-
-SHOT 1 (8s): Drone-style camera chases the larger bee into the dive, the smaller bee holding steady in the same frame, ending on the larger bee and the smaller bee in frame. the larger, eager, manic bee hums louder and dives into another flower, popping back out somehow even more covered in pollen than before; the smaller, calm, deadpan bee just watches him, amazed — it's astonishing to see; both airborne wings beat rapidly. Continuous fast wing buzz and pollen puff on the dive.
-
-SHOT 2 (7s): Camera drains all motion into a locked close hold the instant thunder lands, ending on the larger bee in frame. A distant rumble of thunder rolls; the larger bee stops dead mid-hover, wings still beating rapidly as his confidence catches. music resumes for his louder humming. SETTLE: End on the larger bee frozen mid-hover from the thunder, the smaller bee turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet. Idle life continues through the hold — wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing freezes, nothing new happens.
-
-AUDIO: use ONLY @Audio1 for ALL dialogue — each speaking character's mouth, timing and full physical performance are animated to match @Audio1 exactly, in order; no other, different or duplicate voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03). SPEAKER MAP: shot 2 → the larger bee. Only the larger bee speaks in this beat; the smaller bee stays visibly silent throughout.
-
-NEGATIVES: no morphing, redesign or rescale of the characters, no extra characters or props, no on-screen text, subtitles, logos or watermarks, no foreign-language speech, no crystals on or attached to the bees, no still or frozen wings while airborne
+{
+  "duration": 15,
+  "aspect": "16:9",
+  "mode": "reference-to-video",
+  "references": {
+    "@图1": "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity.",
+    "@图2": "Use @图2 for Fuzzby's exact appearance.",
+    "@图3": "Use @图3 for Zenny's exact appearance.",
+    "@Audio1": "@Audio1 is the only dialogue, hums, sing-song rhythm and vocal performance source. It controls timing, mouth rhythm, speaker turns and emotional delivery."
+  },
+  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
+  "ambience": "a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze moving through grass and flowers",
+  "prompt": "Generate one continuous 15-second 3D CGI animated comedy beat for children aged 4 to 8. Begin from @图1's exact opening composition. Fuzzby is the bee from @图2. Zenny is the bee from @图3. Timing: 0-7s Fuzzby hums louder and dives into another flower, popping back out somehow even more covered in pollen than before; Zenny just watches him, amazed — it's astonishing to see; both airborne wings beat rapidly; 7-13s A distant rumble of thunder rolls; Fuzzby stops dead mid-hover, wings still beating rapidly as his confidence catches; 13-15s settle: Fuzzby and Zenny hold their poses at rest while wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing new happens. Fuzzby performs only Fuzzby's lines in @Audio1. Do not invent extra speech, hums or vocal sounds beyond @Audio1. Keep the camera readable and character-scale, with only small motivated reframing and no wild camera during dialogue.",
+  "continuity": "End with The larger bee frozen mid-hover from the thunder; the smaller bee turned slightly toward the sky; both suspended in the sunlit wildflower meadow, the light subtly cooler at the meadow's far edge. This mark carries into the next beat.",
+  "prohibited": [
+    "no morphing, redesign or rescale of the characters",
+    "no extra characters or props",
+    "no on-screen text, subtitles, logos or watermarks",
+    "no foreign-language speech",
+    "no crystals on or attached to the bees",
+    "no still or frozen wings while airborne"
+  ]
+}

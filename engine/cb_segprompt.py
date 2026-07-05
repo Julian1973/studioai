@@ -799,34 +799,232 @@ def for_beat_v3(beat, scene=None, relay=False, prev_end_state_still=None):
         return emit_json_v3(beat, scene, shots, dur, cast, relay=relay, prev_end_state_still=prev_end_state_still), "v3-json"
     return emit_prose_v3(beat, scene, shots, dur, cast, relay=relay, prev_end_state_still=prev_end_state_still), "v3-prose"
 
-# ══════════ THE SINGLE SHIPPING DECISION (spec freeze, 2026-07-02, Julian) ══════════
-# for_beat_v3 is now THE definitive builder. for_beat_v2 and for_beat (v1) are RETIRED — kept in this file for
-# rollback/reference only, never called except as the should-never-happen fallback chain below, each firing a
-# loud, unmissable log line so a silent reversion to a retired builder can never pass unnoticed. EVERY caller that
-# needs "the prompt Seedance will actually receive" calls THIS function — never for_beat/for_beat_v2/for_beat_v3
-# directly — so preview and fire are provably the SAME call, through the SAME decision, every time.
+# ══════════ THE BLESSED TEMPLATE — v4 (Julian, 2026-07-05, "lock it as the template") ══════════
+# Supersedes v3 (both emitters, shots[]-array shape) as the definitive builder, for EVERY beat, not just relay
+# ones. v3's own shots[]/SPEAKER MAP/rule/voices/world/tone/constraints shape is RETIRED the same way v3 retired
+# v1/v2 — kept below for rollback/reference, never called except as the loud fallback chain. Rule 28's Layer-1
+# skeleton (the 12 invariant laws) still holds in SPIRIT — one beat/one prompt/15s split, opener-vs-relay, the
+# five(now six)-anchor stack, no spoken words, the locked ambient bed, the living settle, the six negatives,
+# style/world verbatim — but its concrete SHAPE (shots[], SPEAKER MAP, role-label binding handles) is now
+# obsolete; PROMPT_LAWS_AUDIT.md's specific findings are historical, about v3's shape, not v4's.
+#
+# WHAT CHANGED, why, and what stays a hard rule regardless:
+#   - Character NAMES now weld directly to their @图N slot ("Fuzzby is the bee from @图2") and are used freely
+#     throughout the prompt, in place of anonymous role labels ("the larger bee"). This is a deliberate reversal
+#     of the old binding-handle convention (rule 25) and of CLAUDE.md's own hard rule 5's original wording —
+#     updated in the same commit as this code, per rule 7's mandate. It does NOT reopen the actual protection
+#     rule 5 exists for: identity still comes ONLY from the reference images, never from physical-description
+#     text in the prompt (no "round yellow bee with glasses" anywhere) — only the LABEL used to bind a name to
+#     its slot changed, not the no-appearance-description discipline underneath it.
+#   - Every reference declaration, including @Audio1 (now its own numbered reference, not just a separate
+#     "voices" field), is a terse one-liner — continuing test #3's subtraction principle, since it survived
+#     into this template even though test #3 itself didn't solve the frame-1 problem on its own.
+#   - The shots[] array is GONE. One continuous "prompt" field carries a TIMING CLOCK ("0-4s ...; 4-7s ...")
+#     built from the same per-cut weighted-duration split _v3_shots always used (HANDLE_ACTION split by weight,
+#     HANDLE_SETTLE as its own trailing segment) — camera per-shot description is dropped in favour of ONE
+#     whole-beat camera-discipline sentence; this is a real loss of per-shot camera detail, accepted for the
+#     terser, less-diluted whole.
+#   - "voices"/"world"/"tone"/"rule"/"constraints" are gone as separate fields — their substance folds into the
+#     one "prompt" field's fixed sentences (audio-prohibition, camera-discipline) or into "references"/"style"/
+#     "ambience", which stay separate, unchanged in spirit.
+#   - "negatives" is renamed "prohibited" and now MERGES the beat's own authored `stagingProhibited` list (new
+#     Layer-2 field, beat-specific failure modes named by the director) with the six standing negatives
+#     (_v3_negatives, unchanged, still always exactly six) — never fewer than six, beat-specific items additive.
+#   - A new "continuity" field states the beat's persisting visible state (from endStateStill, rule 27 — still
+#     a hand-authored static-picture field, never auto-derived from endState) plus a fixed "carries into the
+#     next beat" tail. endState/endStateStill should be authored with raw names now too, matching the rest of
+#     the prompt (fixed for 1.B2 in this same change).
+#   - Law 6 (no spoken words, ever) is UNCHANGED and un-reopenable: dialogue is still never quoted in the
+#     prompt; speaker binding is by name plus explicit ordinal ("Fuzzby's line comes first, Zenny's second"),
+#     never the actual words.
+_V4_ORDINALS = ("first", "second", "third", "fourth", "fifth")
+_V4_IDLE = ("wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — "
+            "nothing new happens")
+
+def _v4_species(role):
+    parts = [p.strip() for p in str(role).split(",")]
+    return parts[-1].split()[-1] if parts and parts[-1] else "character"
+
+def _v4_references(beat, scene, cast, relay, plate_n):
+    """The six(five)-line reference header — every entry a terse one-liner, names welded to character slots.
+    plate_n is None for a non-relay (first) beat: no separate plate reference, same as v3 (the beat's OWN
+    keyframe already IS the scene's establishing shot)."""
+    refs = {}
+    if relay:
+        refs["@图1"] = ("@图1 is the exact opening composition and visual anchor. Begin on this exact layout, "
+                        "camera angle, character scale and lighting.")
+        refs["@Video1"] = ("Use @Video1 only for accepted previous visual motion continuity and camera feel. Do "
+                           "not use or copy any audio from @Video1.")
+    else:
+        refs["@图1"] = "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity."
+    for i, name in enumerate(cast):
+        refs[f"@图{i + 2}"] = f"Use @图{i + 2} for {name}'s exact appearance."
+    if relay and plate_n:
+        refs[f"@图{plate_n}"] = f"Use @图{plate_n} for this scene's lighting, palette and environmental texture."
+    refs["@Audio1"] = ("@Audio1 is the only dialogue, hums, sing-song rhythm and vocal performance source. It "
+                       "controls timing, mouth rhythm, speaker turns and emotional delivery.")
+    return refs
+
+def _v4_timing_clock(beat, cast):
+    """The continuous prompt's own timing clock — SAME weighting algorithm _v3_shots always used (dialogue
+    cuts get real screen time), rendered as running-clock prose instead of a shots[] array. The settle is its
+    own trailing HANDLE_SETTLE-second segment, never folded into the last cut's own weighted time."""
+    cuts = beat.get("cuts") or []
+    if not cuts:
+        return ""
+    raw, weights = [], []
+    for c in cuts:
+        action = _strip_spoken_words(str(c.get("action") or "").strip()).rstrip(".")   # avoid "...airborne.; 5-9s"
+        has_dlg = bool((c.get("dialogue") or "").strip())
+        raw.append(action)
+        weights.append(max(1, len(action) + (40 if has_dlg else 0)))
+    total_w = sum(weights) or 1
+    segs, running, n = [], 0, len(raw)
+    for i, (a, w) in enumerate(zip(raw, weights)):
+        sec = max(1, HANDLE_ACTION - running) if i == n - 1 else max(1, round(HANDLE_ACTION * w / total_w))
+        start = running; running += sec
+        segs.append(f"{start}-{running}s {a}")
+    segs.append(f"{HANDLE_ACTION}-{HANDLE_TOTAL}s settle: {_v4_settle_text(cast)}")
+    return "Timing: " + "; ".join(segs) + "."
+
+def _v4_settle_text(cast):
+    subjects = " and ".join(cast) if cast else "the characters"
+    return f"{subjects} hold their poses at rest while {_V4_IDLE}"
+
+def _v4_speaker_order(beat, cast):
+    """Replaces the old shot-indexed SPEAKER MAP now that names, not role labels, do the binding: an ordered
+    list of DISTINCT speakers (by first appearance across cuts, via the SAME cb_voice parser that cuts the
+    real @Audio1 track — never drifts from what the track actually contains), rendered as a performance
+    sentence with ordinals. Empty when the beat has no dialogue."""
+    import cb_voice as V
+    order = []
+    for c in (beat.get("cuts") or []):
+        dlg = (c.get("dialogue") or "").strip()
+        if not dlg:
+            continue
+        for label, text in V._cut_segments(dlg):
+            if text:
+                name = V._resolve_speaker(label, beat)
+                if name and name not in order:
+                    order.append(name)
+    if not order:
+        return ""
+    if len(order) == 1:
+        return f"{order[0]} performs only {order[0]}'s lines in @Audio1."
+    perf = "; ".join(f"{n} performs only {n}'s lines in @Audio1" for n in order)
+    ords = ", ".join(f"{n}'s line comes {_V4_ORDINALS[min(i, len(_V4_ORDINALS) - 1)]}" for i, n in enumerate(order))
+    return f"{perf} — in this beat {ords}."
+
+def _v4_audio_prohibition():
+    return "Do not invent extra speech, hums or vocal sounds beyond @Audio1."
+
+def _v4_camera_discipline():
+    return ("Keep the camera readable and character-scale, with only small motivated reframing and no wild "
+            "camera during dialogue.")
+
+def _v4_continuity(beat):
+    """A hand-authored static picture (endStateStill, rule 27 — never auto-derived from endState) plus a
+    fixed, mechanical carry-forward tail. Empty when endStateStill isn't authored yet."""
+    es = str(beat.get("endStateStill") or "").strip()
+    if not es:
+        return ""
+    return f"End with {es.rstrip('.')}. This mark carries into the next beat."
+
+def _v4_prohibited(beat, any_bee):
+    """The beat's own authored stagingProhibited (Layer 2, director-named failure modes specific to this
+    beat's gag) merged with the six standing negatives (_v3_negatives, unchanged — always exactly six)."""
+    staging = [str(x).strip() for x in (beat.get("stagingProhibited") or []) if str(x).strip()]
+    return staging + _v3_negatives(any_bee)
+
+def emit_v4(beat, scene, cast, relay, prev_end_state_still=None):
+    """THE blessed template's assembler. prev_end_state_still is accepted for call-signature compatibility
+    with the rest of the shipped_prompt/for_beat_vN chain but UNUSED here — v4's @图1 text is generic (no
+    content-description clause); the beat's own persisting state is carried by "continuity" (from its OWN
+    endStateStill) instead of the NEXT beat's point-anchor content clause."""
+    any_bee = any(_char_meta(n)[1] for n in cast)
+    plate_n = (len(cast) + 2) if relay else None
+    mode = str(beat.get("comedyMode") or "").strip().upper()
+    tone_word = " comedy" if mode == "BIG" else (" emotional" if mode == "TRUE" else "")
+    opener = (f"Generate one continuous {HANDLE_TOTAL}-second 3D CGI animated{tone_word} beat for children aged "
+              f"4 to 8. Begin from @图1's exact opening composition.")
+    bindings = " ".join(f"{name} is the {_v4_species(_char_meta(name)[0])} from @图{i + 2}."
+                        for i, name in enumerate(cast))
+    clock = _v4_timing_clock(beat, cast)
+    speaker_sent = _v4_speaker_order(beat, cast)
+    prompt_body = " ".join(x for x in
+                           [opener, bindings, clock, speaker_sent, _v4_audio_prohibition(), _v4_camera_discipline()]
+                           if x)
+    doc = {
+        "duration": HANDLE_TOTAL, "aspect": "16:9", "mode": "reference-to-video",
+        "references": _v4_references(beat, scene, cast, relay, plate_n),
+        "style": _v3_style(),
+        "ambience": _v3_ambience(scene),
+        "prompt": prompt_body,
+        "continuity": _v4_continuity(beat),
+        "prohibited": _v4_prohibited(beat, any_bee),
+    }
+    return json.dumps(doc, indent=2, ensure_ascii=False)
+
+def for_beat_v4(beat, scene=None, relay=False, prev_end_state_still=None):
+    cast = beat.get("openingCast") or beat.get("characters") or []
+    if not (beat.get("cuts") or []):
+        return "", "v4 (empty — no cuts)"
+    return emit_v4(beat, scene, cast, relay, prev_end_state_still=prev_end_state_still), "v4"
+
+def for_beat_v3(beat, scene=None, relay=False, prev_end_state_still=None):
+    """RETIRED (2026-07-05, superseded by v4 — see the block above) — kept for rollback/reference only; never
+    called except as shipped_prompt()'s loud fallback if v4 ever returns empty. Do not call directly.
+
+    (Original docstring, for historical context:) THE top-level v3 entry point — builds the shot list once,
+    routes to the emitter that matches the worked examples (0-1 distinct speakers -> prose; 2+ -> light JSON),
+    and returns (prompt_text, emitter_label). relay=True (RELAY CHAIN, rule 21): this beat opens off its
+    predecessor's harvested settle frame, not its own Gate-2b keyframe — threaded into whichever emitter fires.
+    prev_end_state_still: the PREVIOUS beat's own endStateStill text, for @图1's content-description clause
+    (2026-07-04) — ignored when relay=False."""
+    cast = beat.get("openingCast") or beat.get("characters") or []
+    shots, dur = _v3_shots(beat, cast, relay=relay)
+    if not shots:
+        return "", "v3 (empty — no cuts)"
+    distinct_speakers = len(set(s["speaker"] for s in shots if s["speaker"]))
+    if distinct_speakers >= 2:
+        return emit_json_v3(beat, scene, shots, dur, cast, relay=relay, prev_end_state_still=prev_end_state_still), "v3-json"
+    return emit_prose_v3(beat, scene, shots, dur, cast, relay=relay, prev_end_state_still=prev_end_state_still), "v3-prose"
+
+# ══════════ THE SINGLE SHIPPING DECISION (spec freeze, 2026-07-02; superseded 2026-07-05 by v4 above) ══════════
+# for_beat_v4 is now THE definitive builder, for every beat. for_beat_v3 (both emitters), for_beat_v2 and
+# for_beat (v1) are ALL RETIRED — kept in this file for rollback/reference only, never called except as the
+# should-never-happen fallback chain below, each firing a loud, unmissable log line so a silent reversion to a
+# retired builder can never pass unnoticed. EVERY caller that needs "the prompt Seedance will actually receive"
+# calls THIS function — never for_beat/for_beat_v2/for_beat_v3/for_beat_v4 directly — so preview and fire are
+# provably the SAME call, through the SAME decision, every time.
 def shipped_prompt(beat, scene=None, relay=False, prev_end_state_still=None):
-    """Returns (prompt, builder_label, is_v3). is_v3=False means a retired fallback fired — treat that as worth
-    investigating, not routine. relay=True (RELAY CHAIN, rule 21) — see for_beat_v3; ignored by the retired v1/v2
-    fallbacks (they predate the doctrine and are never expected to fire in practice). prev_end_state_still: the
-    PREVIOUS beat's own endStateStill text, threaded to for_beat_v3 for @图1's content-description clause
-    (2026-07-04) — also ignored by the retired fallbacks."""
+    """Returns (prompt, builder_label, is_definitive). is_definitive=False means a retired fallback fired —
+    treat that as worth investigating, not routine. relay=True (RELAY CHAIN, rule 21) — see for_beat_v4;
+    ignored by the retired v1/v2/v3 fallbacks (they predate the doctrine and are never expected to fire in
+    practice). prev_end_state_still: threaded to for_beat_v4 for signature compatibility (unused there — see
+    emit_v4's note) and to the retired v3 fallback (still used there, unchanged)."""
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
-    v3, emitter = for_beat_v3(beat, scene, relay=relay, prev_end_state_still=prev_end_state_still)
-    if v3:
-        return v3, f"cb_segprompt_v3 ({emitter})", True
-    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v2 (for_beat_v2) — for_beat_v3 returned EMPTY\n"
-          f"  for beat {code}. v3 is the definitive builder; this should not\n"
+    v4, emitter4 = for_beat_v4(beat, scene, relay=relay, prev_end_state_still=prev_end_state_still)
+    if v4:
+        return v4, f"cb_segprompt_v4 ({emitter4})", True
+    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v3 (for_beat_v3) — for_beat_v4 returned EMPTY\n"
+          f"  for beat {code}. v4 is the definitive builder; this should not\n"
           f"  happen in practice. Investigate the beat's data before trusting\n"
           f"  this render.\n{'!' * 70}\n", flush=True)
+    v3, emitter3 = for_beat_v3(beat, scene, relay=relay, prev_end_state_still=prev_end_state_still)
+    if v3:
+        return v3, f"cb_segprompt_v3 ({emitter3}) (RETIRED FALLBACK — v4 returned empty, see log)", False
+    print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v2 (for_beat_v2) — for_beat_v3 ALSO returned EMPTY\n"
+          f"  for beat {code}. v4/v3 are both empty; investigate the beat's\n"
+          f"  data before trusting this render.\n{'!' * 70}\n", flush=True)
     v2 = for_beat_v2(beat, scene)
     if v2:
-        return v2, "cb_segprompt_v2 (RETIRED FALLBACK — v3 returned empty, see log)", False
+        return v2, "cb_segprompt_v2 (RETIRED FALLBACK — v4/v3 returned empty, see log)", False
     print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v1 (for_beat) — for_beat_v2 ALSO returned EMPTY\n"
-          f"  for beat {code}. Both v3 and v2 are empty; investigate the beat's\n"
+          f"  for beat {code}. v4/v3/v2 are all empty; investigate the beat's\n"
           f"  data before trusting this render.\n{'!' * 70}\n", flush=True)
     v1 = for_beat(beat, scene)
-    return v1, "cb_segprompt_v1 (RETIRED FALLBACK — v3 and v2 both empty, see log)", False
+    return v1, "cb_segprompt_v1 (RETIRED FALLBACK — v4/v3/v2 all empty, see log)", False
 
 if __name__ == "__main__":
     import sys

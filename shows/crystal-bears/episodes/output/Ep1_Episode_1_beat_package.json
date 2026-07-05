@@ -464,7 +464,7 @@
     {
      "n": 3,
      "framing": "Close on Fuzzby, proud, presenting the moustache",
-     "action": "Fuzzby presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering.",
+     "action": "Fuzzby presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering, then tries to wipe it off and only smears it worse, the moustache and goatee shape staying clearly visible throughout.",
      "dialogue": "FUZZBY: Do I look official?",
      "delivery": "earnest, pompous, genuinely hoping for approval",
      "voiceTreatment": null,
@@ -533,8 +533,16 @@
    "sceneNumber": 1,
    "beatCode": "1.B2",
    "id": 2,
-   "endState": "End on the smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both at rest, camera locked, as the meadow's gentle hum resumes.",
-   "endStateStill": "The smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both centred in the sunlit wildflower meadow."
+   "endState": "Fuzzby holds his proud pollen-dusted grin while Zenny keeps her flat deadpan stare beside him, both at rest, camera locked, as the meadow's gentle hum resumes.",
+   "endStateStill": "Fuzzby's smeared yellow handlebar moustache and small goatee still clearly visible, Zenny deadpan beside him.",
+   "stagingProhibited": [
+    "Fuzzby disappearing into the flower",
+    "full body entering the flower",
+    "random full-face pollen dusting",
+    "clean face after wiping",
+    "moustache or goatee removed",
+    "wrong speaker mouth movement"
+   ]
   },
   {
    "slug": "s1-b3-smear-thup-buzz-crash",

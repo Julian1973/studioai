@@ -1,51 +1,18 @@
 {
   "duration": 15,
   "aspect": "16:9",
-  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
+  "mode": "reference-to-video",
   "references": {
-    "@图1": "the opening keyframe — TRUTH for environment, lighting and continuity",
-    "@图2": "the larger bee — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly.",
-    "@图3": "the smaller bee — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly."
+    "@图1": "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity.",
+    "@图2": "Use @图2 for Fuzzby's exact appearance.",
+    "@图3": "Use @图3 for Zenny's exact appearance.",
+    "@Audio1": "@Audio1 is the only dialogue, hums, sing-song rhythm and vocal performance source. It controls timing, mouth rhythm, speaker turns and emotional delivery."
   },
-  "voices": "@Audio1 is the ONLY source of all dialogue — animate each speaking character's mouth, timing and full physical performance to match @Audio1 exactly; never invent, duplicate or generate a different voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03).",
-  "world": "A ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and natural crystal formations. Pollen motes slow and thin; the breeze gains a slightly firmer push through petals, but nothing dangerous is visible yet.",
-  "tone": "big, over-the-top comedy — full energy, nothing held back",
+  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
   "ambience": "a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze moving through grass and flowers",
-  "rule": "Camera holds static and locked during any shot with dialogue — motion is reserved for shots without a speaking character. Any airborne bee beats its wings rapidly and continuously; wings rest only when landed. The beat's ONE hold is the stuck-flower exit button: the larger, eager, manic bee stuck with legs kicking, under the smaller, calm, deadpan bee's line, spoken as a sigh, under 1.5 seconds. Nothing else pauses — the storm line and the boast play at full pace with no hold between them.",
-  "shots": [
-    {
-      "seconds": 5,
-      "camera": "Continuing straight from 1.B4's hold, a brief punctuation beat on the smaller bee before full pace resumes, ending on the larger bee and the smaller bee in frame",
-      "action": "CUT TO the smaller, calm, deadpan bee: she glances toward the sky as the light shifts slightly; something feels different, but they do not see anything yet. the larger, eager, manic bee remains paused mid-hover beside her, wings rapidly flapping.",
-      "dialogue": {
-        "speaker": "the smaller bee",
-        "line": "the line in @Audio1 during this shot",
-        "note": "only this speaker's mouth moves in this shot"
-      }
-    },
-    {
-      "seconds": 3,
-      "camera": "Camera pushes in on the larger bee for the bravado beat, ending on the larger bee in frame",
-      "action": "the larger bee resets into a proud hover, trying to make the pressure sound like an achievement; the shifted light grazes the pollen still on him.",
-      "dialogue": {
-        "speaker": "the larger bee",
-        "line": "the line in @Audio1 during this shot",
-        "note": "only this speaker's mouth moves in this shot"
-      }
-    },
-    {
-      "seconds": 7,
-      "camera": "Drone-style camera chases the larger bee's launch upward, then holds on the stuck-flower button with a short cut to the smaller bee, ending on the larger bee and the smaller bee in frame",
-      "action": "the larger bee immediately launches and flies into a flower HIGH UP and gets stuck, legs in the air, spinning; the flower absorbs him with a soft thump. CUT TO the smaller bee, the scene's button: still frame-right, dry and unsurprised. SETTLE: hold the frame at rest, camera locked. Idle life continues through the hold — wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing freezes, nothing new happens.",
-      "dialogue": {
-        "speaker": "the smaller bee",
-        "line": "the line in @Audio1 during this shot",
-        "note": "only this speaker's mouth moves in this shot"
-      }
-    }
-  ],
-  "constraints": "Maintain both characters' design, proportions and markings exactly per their reference images throughout — no distortion, redesign or rescale.",
-  "negatives": [
+  "prompt": "Generate one continuous 15-second 3D CGI animated comedy beat for children aged 4 to 8. Begin from @图1's exact opening composition. Fuzzby is the bee from @图2. Zenny is the bee from @图3. Timing: 0-5s CUT TO Zenny: she glances toward the sky as the light shifts slightly; something feels different, but they do not see anything yet. Fuzzby remains paused mid-hover beside her, wings rapidly flapping; 5-8s Fuzzby resets into a proud hover, trying to make the pressure sound like an achievement; the shifted light grazes the pollen still on him; 8-13s Fuzzby immediately launches and flies into a flower HIGH UP and gets stuck, legs in the air, spinning; the flower absorbs him with a soft thump. CUT TO Zenny, the scene's button: still frame-right, dry and unsurprised; 13-15s settle: Fuzzby and Zenny hold their poses at rest while wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing new happens. Zenny performs only Zenny's lines in @Audio1; Fuzzby performs only Fuzzby's lines in @Audio1 — in this beat Zenny's line comes first, Fuzzby's line comes second. Do not invent extra speech, hums or vocal sounds beyond @Audio1. Keep the camera readable and character-scale, with only small motivated reframing and no wild camera during dialogue.",
+  "continuity": "",
+  "prohibited": [
     "no morphing, redesign or rescale of the characters",
     "no extra characters or props",
     "no on-screen text, subtitles, logos or watermarks",

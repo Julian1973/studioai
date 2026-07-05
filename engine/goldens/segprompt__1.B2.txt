@@ -1,53 +1,24 @@
 {
   "duration": 15,
   "aspect": "16:9",
-  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
+  "mode": "reference-to-video",
   "references": {
-    "@图1": "the opening keyframe — TRUTH for environment, lighting and continuity",
-    "@图2": "the larger bee — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly.",
-    "@图3": "the smaller bee — the identity reference for every beat, the anti-drift anchor: maintain these characters' proportions, colours, and features exactly."
+    "@图1": "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity.",
+    "@图2": "Use @图2 for Fuzzby's exact appearance.",
+    "@图3": "Use @图3 for Zenny's exact appearance.",
+    "@Audio1": "@Audio1 is the only dialogue, hums, sing-song rhythm and vocal performance source. It controls timing, mouth rhythm, speaker turns and emotional delivery."
   },
-  "voices": "@Audio1 is the ONLY source of all dialogue — animate each speaking character's mouth, timing and full physical performance to match @Audio1 exactly; never invent, duplicate or generate a different voice. ALL vocal sounds — hums, sing-songs, exclamations, not just spoken lines — are V3 performances inside @Audio1; Seedance never generates a voice-like sound of any kind (Audio Doctrine, Julian, 2026-07-03).",
-  "world": "A ground-level wildflower corridor — lavender, daisies and clover that loom tall at bee-flight height — laced with floating hearts and natural crystal formations. Pollen motes thicken into a soft golden cloud around the flower, building the sneezy-tickly feeling before the reveal.",
-  "tone": "big, over-the-top comedy — full energy, nothing held back",
+  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
   "ambience": "a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze moving through grass and flowers",
-  "rule": "Camera holds static and locked during any shot with dialogue — motion is reserved for shots without a speaking character. Any airborne bee beats its wings rapidly and continuously; wings rest only when landed. The moustache reveal is a quick flash, not a held pause; the beat's ONE hold is the smaller, calm, deadpan bee's almost-laugh on her button line, under 1.5 seconds.",
-  "shots": [
-    {
-      "seconds": 6,
-      "camera": "Drone-style camera chases the larger bee through his wild manic loop across the meadow, ending on the larger bee and the smaller bee in frame",
-      "action": "From the prior watch, the larger, eager, manic bee rockets off into a chaotic loop-the-loop, overshooting high then plunging low, zig-zagging wildly and bumping past stems and petals, humming louder and louder, while the smaller, calm, deadpan bee stays at her own flower nearby, already there, working calm and precise, entirely unbothered by his antics. He swings back around and comes barrelling straight for her flower, lining himself up with too much confidence; both airborne wings beat rapidly and continuously."
-    },
-    {
-      "seconds": 2,
-      "camera": "Camera stays with the larger bee for the reveal, then a short punctuation cut to the smaller bee, ending on the larger bee and the smaller bee in frame",
-      "action": "the larger bee sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO the smaller bee: trying not to laugh."
-    },
-    {
-      "seconds": 3,
-      "camera": "Close on the larger bee, proud, presenting the moustache, ending on the larger bee in frame",
-      "action": "the larger bee presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering.",
-      "dialogue": {
-        "speaker": "the larger bee",
-        "line": "the line in @Audio1 during this shot",
-        "note": "only this speaker's mouth moves in this shot",
-        "expression": "Earnest, pompous pride"
-      }
-    },
-    {
-      "seconds": 4,
-      "camera": "Short punctuation cut to the smaller bee for the dry topper — no long coverage, ending on the larger bee and the smaller bee in frame",
-      "action": "the smaller bee fights the smile for a beat, then lets the smallest dry amusement through while the larger bee waits for praise. SETTLE: End on the smaller bee's flat deadpan stare beside the larger bee's proud pollen-dusted grin, both at rest, camera locked, as the meadow's gentle hum resumes. Idle life continues through the hold — wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing freezes, nothing new happens.",
-      "dialogue": {
-        "speaker": "the smaller bee",
-        "line": "the line in @Audio1 during this shot",
-        "note": "only this speaker's mouth moves in this shot",
-        "expression": "Dry deadpan cracks for one tiny beat before the line"
-      }
-    }
-  ],
-  "constraints": "Maintain both characters' design, proportions and markings exactly per their reference images throughout — no distortion, redesign or rescale.",
-  "negatives": [
+  "prompt": "Generate one continuous 15-second 3D CGI animated comedy beat for children aged 4 to 8. Begin from @图1's exact opening composition. Fuzzby is the bee from @图2. Zenny is the bee from @图3. Timing: 0-5s Fuzzby rockets off into a chaotic loop-the-loop — overshooting high, plunging low, zig-zagging between stems and petals, humming louder and louder — then swings back around and barrels toward the next flower, lining himself up with far too much confidence, while Zenny works her own bloom nearby, calm and precise, entirely unbothered; both bees' wings beat rapidly and continuously; 5-7s Fuzzby sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO Zenny: trying not to laugh; 7-11s Fuzzby presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering, then tries to wipe it off and only smears it worse, the moustache and goatee shape staying clearly visible throughout; 11-13s Zenny fights the smile for a beat, then lets the smallest dry amusement through while Fuzzby waits for praise; 13-15s settle: Fuzzby and Zenny hold their poses at rest while wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — nothing new happens. Fuzzby performs only Fuzzby's lines in @Audio1; Zenny performs only Zenny's lines in @Audio1 — in this beat Fuzzby's line comes first, Zenny's line comes second. Do not invent extra speech, hums or vocal sounds beyond @Audio1. Keep the camera readable and character-scale, with only small motivated reframing and no wild camera during dialogue.",
+  "continuity": "End with Fuzzby's smeared yellow handlebar moustache and small goatee still clearly visible, Zenny deadpan beside him. This mark carries into the next beat.",
+  "prohibited": [
+    "Fuzzby disappearing into the flower",
+    "full body entering the flower",
+    "random full-face pollen dusting",
+    "clean face after wiping",
+    "moustache or goatee removed",
+    "wrong speaker mouth movement",
     "no morphing, redesign or rescale of the characters",
     "no extra characters or props",
     "no on-screen text, subtitles, logos or watermarks",

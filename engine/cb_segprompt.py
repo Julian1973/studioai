@@ -432,16 +432,16 @@ def _v3_shots(beat, cast, relay=False):
     return shots, dur
 
 def _v3_settle(beat):
-    """THE HANDLE DOCTRINE's directed living settle text — built from the Director's own endState field when
-    authored; a universal idle-life guarantee is ALWAYS appended (wings, breeze, pollen, held expressions, camera
-    locked) so the closing shot never reads as dead air even before endState is written for every beat.
-    Mechanical: renders what's authored, never invents a specific pose."""
+    """RETIRED (v3 is a loud-fallback-only builder — see shipped_prompt). THE MANIFEST (rule 37, 2026-07-06):
+    raises ManifestFieldMissing instead of the old universal idle-life fallback when endState isn't authored —
+    same fix as v4's sibling, _v4_settle_text, kept consistent even on this retired path per Julian's "remove
+    every generic fallback," never invents a specific pose."""
+    import cb_qa
     es = str(beat.get("endState") or "").strip()
-    idle = ("wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — "
-            "nothing freezes, nothing new happens")
-    if es:
-        return f" SETTLE: {es.rstrip('.')}. Idle life continues through the hold — {idle}."
-    return f" SETTLE: hold the frame at rest, camera locked. Idle life continues through the hold — {idle}."
+    if not es:
+        raise cb_qa.ManifestFieldMissing("endState", "this beat's own settle text (v3 fallback path)")
+    return f" SETTLE: {es.rstrip('.')}. Idle life continues through the hold — wings beating, the breeze " \
+           "moving the flowers, pollen drifting, held expressions, camera locked — nothing freezes, nothing new happens."
 
 def _v3_subjects(cast, relay=False):
     """REFERENCE STACK doctrine (Julian, 2026-07-03): every reference declares its JOB, not just its identity —
@@ -881,11 +881,16 @@ def _v4_state_carry(cast, marks, scene):
     lighting, world-position — plus the Coverage Law's explicit spatial leash: the new camera setup stays
     CLOSE to the anchor's position, in the SAME space, never a relocation or a fresh establishing wide.
     `marks` is a SHORT, hand-authored phrase (the new `carryMarks` field — never the full endStateStill
-    prose) naming what specifically persists ("the pollen on their legs," "the smeared moustache") — falls
-    back to a generic phrase when the predecessor hasn't authored one yet. `scene` supplies the lighting
-    noun via `_v4_scene_noun`."""
+    prose) naming what specifically persists ("the pollen on their legs," "the smeared moustache").
+    THE MANIFEST (rule 37, 2026-07-06): raises ManifestFieldMissing instead of a generic phrase when the
+    predecessor hasn't authored carryMarks yet — a gate-ordering gap this beat should never have reached in
+    a correctly-manifest-gated pipeline, but this function refuses rather than papering over it either way.
+    `scene` supplies the lighting noun via `_v4_scene_noun`."""
+    import cb_qa
     subjects = " and ".join(cast) if cast else "the characters"
-    marks_txt = str(marks or "").strip().rstrip(".") or "any temporary marks or wardrobe"
+    marks_txt = str(marks or "").strip().rstrip(".")
+    if not marks_txt:
+        raise cb_qa.ManifestFieldMissing("carryMarks", "previous beat's own field, needed for this beat's @图1 state-carry clause")
     noun = _v4_scene_noun(scene)
     return (f"@图1 is the state reference from the previous beat. Carry everything it shows — "
             f"{subjects}'s appearance, {marks_txt}, the {noun} lighting and their positions in the world — "
@@ -954,13 +959,15 @@ def _v4_settle_text(beat, cast):
     read from the beat's OWN authored `endState` (directing prose for this beat's ending, rule 27) verbatim,
     so a manic character stays visibly manic even at rest ("vibrating with pride, hovering with tiny eager
     bounces") instead of flattening into the same idle-life boilerplate every beat shared before this
-    ruling. Falls back to the old universal idle-life guarantee when endState isn't authored yet — never
-    dead air, per the Handle Doctrine (rule 20)."""
+    ruling. THE MANIFEST (rule 37, 2026-07-06): raises ManifestFieldMissing instead of the old idle-life
+    fallback when endState isn't authored — this was the exact bug diagnosed live on 1.B1's own render
+    (the settle held a static, un-manic pose for ~9 of 15 seconds because this function silently
+    substituted boilerplate instead of blocking the fire)."""
+    import cb_qa
     es = str(beat.get("endState") or "").strip().rstrip(".")
-    if es:
-        return es
-    subjects = " and ".join(cast) if cast else "the characters"
-    return f"{subjects} hold their poses at rest while {_V4_IDLE}"
+    if not es:
+        raise cb_qa.ManifestFieldMissing("endState", "this beat's own settle text")
+    return es
 
 def _v4_speaker_order(beat, cast):
     """Replaces the old shot-indexed SPEAKER MAP now that names, not role labels, do the binding: an ordered
@@ -1041,17 +1048,22 @@ def _v4_acting_rules(beat, cast):
 
 def _v4_continuity(beat):
     """A hand-authored static picture (endStateStill, rule 27 — never auto-derived from endState) plus a
-    carry-forward tail. REWRITTEN 2026-07-05 (rules 33/34): the tail now names THIS beat's own authored
+    carry-forward tail. REWRITTEN 2026-07-05 (rules 33/34): the tail names THIS beat's own authored
     `carryMarks` (the same short phrase the NEXT beat's @图1 state-carry clause will quote, see
     _v4_state_carry) plus the show's universal warm light, instead of the old generic "this mark carries
-    into the next beat" — matching the specificity Fuzzby's energy-return law calls for throughout. Falls
-    back to the old generic tail when carryMarks isn't authored yet. Empty overall when endStateStill isn't
-    authored yet."""
+    into the next beat" — matching the specificity Fuzzby's energy-return law calls for throughout.
+    THE MANIFEST (rule 37, 2026-07-06): raises ManifestFieldMissing instead of the old generic tail when
+    carryMarks isn't authored — both endStateStill and carryMarks are required TECHNICAL-contract fields on
+    every beat, not just relay beats. Empty overall (not a raise) when endStateStill itself isn't authored —
+    that was already the correct block-by-omission behaviour before this rule, unchanged."""
     es = str(beat.get("endStateStill") or "").strip()
     if not es:
         return ""
     marks = str(beat.get("carryMarks") or "").strip().rstrip(".")
-    tail = f"{marks[:1].upper()}{marks[1:]}, and the warm light carry into the next beat." if marks else "This mark carries into the next beat."
+    if not marks:
+        import cb_qa
+        raise cb_qa.ManifestFieldMissing("carryMarks", "this beat's own field, needed for its continuity tail")
+    tail = f"{marks[:1].upper()}{marks[1:]}, and the warm light carry into the next beat."
     return f"End with {es.rstrip('.')}. {tail}"
 
 def _v4_prohibited(beat, any_bee):

@@ -16,14 +16,43 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SERVE_PY = os.path.join(os.path.dirname(HERE), "cb-studio", "serve.py")
 
 
-def _scratch_package(path, beats):
-    json.dump({"beats": beats}, open(path, "w"))
+def _scratch_scenes(scene_num=9):
+    """THE MANIFEST (CLAUDE.md rule 37, 2026-07-06): a manifest-compliant scratch scene entry — cb_pipeline.approve
+    now gates on manifest_ok, so every scratch package this test fires approve() against needs one of these.
+    pillar='heart' is a scratch shortcut, not a real story call — it trivially exempts this scene from the
+    "laugh beat per non-Heart pillar" check, which has nothing to do with what THIS test actually verifies
+    (cascade-relock mechanics), so there's no reason to also give the scratch beats a comedyMode."""
+    return [{"sceneNumber": scene_num, "ambientBed": "scratch test ambient bed — not real content",
+             "parentLine": "scratch test parent-layer line — not real content", "pillar": "heart"}]
+
+
+def _scratch_package(path, beats, scenes=None):
+    json.dump({"beats": beats, "scenes": scenes if scenes is not None else _scratch_scenes()}, open(path, "w"))
+
+
+def _manifest_compliant_beat(code, scene_num, story_beat, is_opener=True):
+    """THE MANIFEST (rule 37): fills every field cb_preflight's TECHNICAL/CREATIVE contracts require, so a
+    scratch beat used ONLY to exercise the cascade-relock logic doesn't ALSO fail the (unrelated) content gate
+    cb_pipeline.approve now enforces. Values are deliberately synthetic/scratch, never real creative content —
+    this test's own assertions are about relock behaviour, not about these values meaning anything."""
+    b = {
+        "beatCode": code, "sceneNumber": scene_num, "storyBeat": story_beat,
+        "endState": "scratch endState — not real content", "endStateStill": "scratch endStateStill",
+        "carryMarks": "scratch carry marks", "pauseHold": "one hold only: under 1 second",
+        "actingContrast": "scratch acting contrast", "humourLayer": 1, "kidRead": "scratch kid read",
+        "adultRead": "scratch adult read", "want": "scratch want", "need": "scratch need",
+        "emotionMechanic": "scratch emotion-as-mechanic statement",
+    }
+    if not is_opener:
+        b["junctionType"] = "intentional_next_shot"
+        b["opensOn"] = {"who": "Scratch", "action": "doing a scratch thing"}
+    return b
 
 
 def _base_beats():
     return [
-        {"beatCode": "9.B1", "sceneNumber": 9, "storyBeat": "original content"},
-        {"beatCode": "9.B2", "sceneNumber": 9, "storyBeat": "original content 2"},
+        _manifest_compliant_beat("9.B1", 9, "original content", is_opener=True),
+        _manifest_compliant_beat("9.B2", 9, "original content 2", is_opener=False),
     ]
 
 
@@ -47,7 +76,7 @@ def test_cb_pipeline(tmp):
         fails.append("cb_pipeline: gate 3 should read approved before any beat-package change")
 
     # the Gate-1 deliverable changes — a beat is added, exactly like the Scene-1 restructure
-    beats = _base_beats(); beats.append({"beatCode": "9.B3", "sceneNumber": 9, "storyBeat": "added by a restructure"})
+    beats = _base_beats(); beats.append(_manifest_compliant_beat("9.B3", 9, "added by a restructure", is_opener=False))
     _scratch_package(pkg, beats)
 
     if P._approved("9", "3"):
@@ -80,10 +109,12 @@ def test_frame_chain_cascade(tmp):
 
     pkg = os.path.join(tmp, "Ep9_Chain_beat_package.json")
     beats = [
-        {"beatCode": "9.B1", "sceneNumber": 9, "slug": "b1", "storyBeat": "anchor"},
-        {"beatCode": "9.B2", "sceneNumber": 9, "slug": "b2", "storyBeat": "continuation one"},
-        {"beatCode": "9.B3", "sceneNumber": 9, "slug": "b3", "storyBeat": "continuation two"},
+        _manifest_compliant_beat("9.B1", 9, "anchor", is_opener=True),
+        _manifest_compliant_beat("9.B2", 9, "continuation one", is_opener=False),
+        _manifest_compliant_beat("9.B3", 9, "continuation two", is_opener=False),
     ]
+    for b, slug in zip(beats, ("b1", "b2", "b3")):
+        b["slug"] = slug
     _scratch_package(pkg, beats)
     P.PKG, P.LOCK, P.EP = pkg, os.path.join(tmp, "locked_chain.json"), "Ep9"
 

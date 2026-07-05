@@ -216,7 +216,28 @@ def _lock_plate_as_master(scene):
                   f"(locationId '{lid}') — reusable as a reference anywhere this place appears", flush=True)
 
 def approve(gate, scene):
+    """Returns True if the gate was actually signed, False if refused (manifest BLOCK). Deliberately never
+    calls sys.exit itself — this function is called both as a CLI entry point (see __main__, which DOES exit
+    non-zero on a False return) and in-process by other Python code (test_gate_cascade.py's own approve()
+    calls, in particular) — an in-process sys.exit() here would kill the calling process outright instead of
+    just failing this one call."""
     gate = str(gate).lower()
+    # THE MANIFEST (CLAUDE.md rule 37, MANIFEST.md, 2026-07-06, Julian's ruling — "Gate N cannot arm... without
+    # both manifests green"): every gate sign-off, not just Gate 1, is refused while a BLOCK-kind gap exists in
+    # this scene's scope. The plate is never part of what BLOCKs (its own QA, cb_qa.check_plate, already runs
+    # automatically at Gate-2a build time) — the `gate` param is threaded through for forward compatibility only.
+    try:
+        import cb_preflight
+        ok, block_count, gaps = cb_preflight.manifest_ok(PKG, scene=scene, episode=EP, gate=gate)
+        if not ok:
+            named = [g.line().strip() for g in gaps if g.kind == "BLOCK"][:10]
+            print(f"✗ REFUSED — {EP} scene {scene} gate {gate} cannot arm: {block_count} manifest BLOCK(s), "
+                  f"including:\n  " + "\n  ".join(named)
+                  + ("\n  ... (see: python3 cb_preflight.py --scene=" + str(scene) + ")" if block_count > 10 else ""),
+                  flush=True)
+            return False
+    except Exception as e:
+        print(f"  (manifest check could not run — {str(e)[:120]} — proceeding without it; fix cb_preflight.py)", flush=True)
     d = _lock(); sd = d.setdefault(EP, {}).setdefault(str(scene), {}); sd[gate] = True
     if gate == "1":
         sd["1_fp"] = _scene_beats_fingerprint(PKG, scene)   # the cascade-relock baseline (see _relock_if_stale)
@@ -224,6 +245,7 @@ def approve(gate, scene):
     if gate == "2a":
         _lock_plate_as_master(scene)
     print(f"✓ approved {EP} scene {scene} gate {gate} — next gate unlocked")
+    return True
 
 def unapprove(gate, scene):
     """REVERSE a sign-off so you can go back and alter an earlier step. Removes THIS gate's sign-off AND every gate
@@ -281,14 +303,26 @@ def save_note(shot_code, note):
 
 def regen(scene, shot_code, kind, note, target="both"):
     """Regenerate ONE shot/beat with a human correction note. kind = 'keyframe' (default) or 'clip'.
-    target (keyframe only) = 'both' | 'start' | 'end'."""
+    target (keyframe only) = 'both' | 'start' | 'end'. Returns True if it actually fired, False on any refusal
+    (never sys.exit itself — see approve()'s docstring for why)."""
     need = "2b" if kind == "clip" else "2a"   # a keyframe regen needs the FOUNDATION (2a) signed; a clip regen needs the keyframes (2b)
     if not _approved(scene, need):
-        print(f"⛔ Gate {need} not signed off for {EP} scene {scene} — sign it off before regenerating ({kind}).", flush=True); return
+        print(f"⛔ Gate {need} not signed off for {EP} scene {scene} — sign it off before regenerating ({kind}).", flush=True); return False
+    # THE MANIFEST (CLAUDE.md rule 37, MANIFEST.md, 2026-07-06): a regen is a fire, same as any other arming
+    # path — refused on a red manifest for this scene, same choke-point as fire()/approve().
+    try:
+        import cb_preflight
+        ok, block_count, _ = cb_preflight.manifest_ok(PKG, scene=scene, episode=EP)
+        if not ok:
+            print(f"✗ REFUSED — {EP} scene {scene} regen of {shot_code} cannot fire: {block_count} manifest "
+                  f"BLOCK(s) outstanding (run: python3 cb_preflight.py --scene={scene})", flush=True)
+            return False
+    except Exception as e:
+        print(f"  (manifest check could not run — {str(e)[:120]} — proceeding without it; fix cb_preflight.py)", flush=True)
     save_note(shot_code, note)
     s = next((x for x in _shots(scene) if x["shotCode"] == shot_code), None)
     if not s:
-        print(f"REGEN: shot {shot_code} not found in scene {scene}"); return
+        print(f"REGEN: shot {shot_code} not found in scene {scene}"); return False
     if kind == "clip":
         # ── UNIFIED RENDER PATH — Gate 3 ≡ clip regen (they MUST stay on the same path) ──────────────────────────
         # A clip regen renders through the EXACT same path as Gate 3: cb_beats.run → cb_prompts.seedance_json →
@@ -302,6 +336,7 @@ def regen(scene, shot_code, kind, note, target="both"):
         cb_beats.run(PKG, scene, EP, codes=[shot_code])
     else:
         cb_scene.regen_shot(PKG, scene, shot_code, EP, note, target)
+    return True
 
 def build_master(scene, rounds=2):
     """STRUCTURAL master-build: (re)build the scene's establishing MASTER with the full reference + identity lock,
@@ -670,14 +705,37 @@ GATES = {"1": gate1, "2a": anchors, "2b": coverage, "3": gate3, "4": gate4, "5":
 _GENERATIVE = ("2a", "2b", "3")  # gates that render → run the pre-flight + continuity checks around them
 
 def fire(gate, scene):
+    """Returns True if the gate actually fired, False on any refusal (unknown gate, prev gate unsigned, or a
+    red manifest) — same never-sys.exit-itself convention as approve() (see its own docstring): this function
+    is called in-process as well as from the CLI, so only the __main__ dispatch below decides the process exit
+    code. Found in the SAME sweep as approve()'s own missing exit-code signal (rule 11): a refusal here used to
+    just print and return, leaving the CLI process exit 0 — the Studio's job-status check reads only the
+    subprocess return code, so a refused fire was silently reported as "done"."""
     gate = str(gate).lower()
     if gate not in GATES:
-        print(f"unknown gate '{gate}' — use one of {list(GATES)}"); return
+        print(f"unknown gate '{gate}' — use one of {list(GATES)}"); return False
     prev = _prev_gate(gate)
     if prev and not _approved(scene, prev):
         print(f"⛔ Gate {prev} not signed off for {EP} scene {scene}. Review it, then:")
         print(f"     python3 cb_pipeline.py approve {prev} {scene}")
-        return
+        return False
+    # THE MANIFEST (CLAUDE.md rule 37, MANIFEST.md, 2026-07-06, Julian's ruling — "no retakes, no fires" while
+    # a manifest is red): firing a gate is refused the same as approving one — same choke-point as approve().
+    # Gate 1 itself is EXEMPT: it's the step that PRODUCES the manifest's own content (the Director turns the
+    # script into the beat package) — gating its own fire on manifest completeness would be a bootstrap loop
+    # (you could never generate the content because the content doesn't exist yet). Its APPROVAL (sign-off)
+    # still requires the manifest, same as every other gate — see approve() — this exemption is for the FIRE
+    # (generate/regenerate) action only.
+    if gate != "1":
+        try:
+            import cb_preflight
+            ok, block_count, _ = cb_preflight.manifest_ok(PKG, scene=scene, episode=EP, gate=gate)
+            if not ok:
+                print(f"✗ REFUSED — {EP} scene {scene} gate {gate} cannot fire: {block_count} manifest BLOCK(s) "
+                      f"outstanding (run: python3 cb_preflight.py --scene={scene})", flush=True)
+                return False
+        except Exception as e:
+            print(f"  (manifest check could not run — {str(e)[:120]} — proceeding without it; fix cb_preflight.py)", flush=True)
     print(f"=== FIRE GATE {gate} — {EP} scene {scene} ===", flush=True)
     if gate in _GENERATIVE:
         print("--- pre-flight: context completeness audit (everything pulled in & locked?) ---", flush=True)
@@ -687,6 +745,7 @@ def fire(gate, scene):
         print("--- continuity check (cross-scene, data) ---", flush=True)
         cb_continuity.run(PKG, EP)
     print(f"=== gate {gate} done — REVIEW, then sign off:  python3 cb_pipeline.py approve {gate} {scene} ===", flush=True)
+    return True
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -714,7 +773,8 @@ if __name__ == "__main__":
         _fast = _fastflag.split("=", 1)[1].strip().lower() not in ("false", "0", "no")
     cmd = sys.argv[1].lower()
     if cmd == "approve":
-        approve(sys.argv[2], sys.argv[3])
+        if not approve(sys.argv[2], sys.argv[3]):
+            sys.exit(1)
     elif cmd == "unapprove":
         unapprove(sys.argv[2], sys.argv[3])
     elif cmd == "autofix":
@@ -726,9 +786,10 @@ if __name__ == "__main__":
         regen_anchor(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "")
     elif cmd == "regen":
         # regen <scene> <shotCode> <kind> [note] [target]
-        regen(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "keyframe",
-              sys.argv[5] if len(sys.argv) > 5 else "",
-              sys.argv[6] if len(sys.argv) > 6 else "both")
+        if not regen(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "keyframe",
+                     sys.argv[5] if len(sys.argv) > 5 else "",
+                     sys.argv[6] if len(sys.argv) > 6 else "both"):
+            sys.exit(1)
     elif cmd == "rebuild":
         # rebuild <scene>  — CLEAN rebuild of ALL keyframes (force; deletes stale frames, re-renders every beat)
         rebuild(sys.argv[2])
@@ -770,4 +831,5 @@ if __name__ == "__main__":
         import cb_director_eye
         cb_director_eye.run(PKG, EP)
     else:
-        fire(cmd.replace("gate", "").strip(), sys.argv[2])
+        if not fire(cmd.replace("gate", "").strip(), sys.argv[2]):
+            sys.exit(1)

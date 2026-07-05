@@ -20,6 +20,17 @@ a count, a symmetry, a position) that separates a pass from a fail; never phrase
 import json, os, sys, struct, time, re, subprocess, tempfile, shutil, requests
 import cb_gen, cb_prompts as P
 
+class ManifestFieldMissing(Exception):
+    """THE MANIFEST (CLAUDE.md rule 37, 2026-07-06 — 'remove every generic fallback; a missing field halts with
+    the field named'): raised by prompt-authoring functions instead of silently substituting generic boilerplate
+    for a beat's own missing TECHNICAL-contract field (endState, endStateStill, carryMarks, pauseHold, etc.).
+    Callers (cb_beats.run/gate3_prepare) catch this as a hard BLOCK naming the field, distinct from a genuine
+    emitter crash — a crash still falls back to an older builder; a missing manifest field never does."""
+    def __init__(self, field, context=""):
+        self.field = field
+        self.context = context
+        super().__init__(f"MANIFEST FIELD MISSING: {field}" + (f" ({context})" if context else ""))
+
 VISION_MODEL = "gemini-3.5-flash"
 DONE_MIN_WIDTH = 2048   # 2K floor for a finished keyframe (Pro renders 2752 wide; the old flash 1376 fails this)
 CLIP_MIN_WIDTH = 1280   # Seedance clips render 720p (1280x720) — the 2K keyframe floor would false-fail EVERY clip

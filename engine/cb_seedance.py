@@ -20,6 +20,7 @@ touches NOTHING in the render path, voices, locks, security, UI or Gates 1/2a/2b
 import os, re, json, subprocess
 import cb_prompts as P
 import cb_director_pass
+import cb_qa
 
 BEES = {k for k, v in P.CHARACTERS.items() if isinstance(v, dict) and "bee" in str(v.get("avoid", "")).lower()}
 
@@ -647,7 +648,15 @@ def build_physical_staging(beat, gag, archetype, lead):
 # ── A.1 + B/E — build the AUTHORING JSON (the internal structured object) ────────────────────────────────────
 def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1"):
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
-    dur = int(beat.get("durationSec") or 11); dur = max(8, min(15, dur))
+    # THE HANDLE DOCTRINE (CLAUDE.md rule 20): every beat renders at HANDLE_TOTAL now, superseding the old
+    # per-beat durationSec 8-15s range this used to clamp to (rule 10: this authoring/validation layer is kept
+    # intentionally, so its own hold-timing math must agree with what actually renders — found in the same
+    # sweep as cb_beats.py's matching stale line, 2026-07-06).
+    try:
+        from cb_segprompt import HANDLE_TOTAL as _handle_total
+    except Exception:
+        _handle_total = 15
+    dur = _handle_total
     # ACTION runs across the beat; the FINAL HOLD is the last ~2.4s (section E: 1.8–2.8s). The supplied dialogue
     # (audio_dur) lip-syncs WITHIN the action span — it is the line length, not where the action ends.
     active = max(float(refs.get("audio_dur") or 0), round(dur - 2.4, 1)); active = min(active, round(dur - 1.8, 1))
@@ -1397,6 +1406,17 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
                 _prev_end_state = _prev_b.get("endStateStill") if _prev_b else None
             _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene, relay=(_relay_status == "relay"),
                                                                    prev_end_state_still=_prev_end_state)
+    except cb_qa.ManifestFieldMissing as _mfm:
+        # THE MANIFEST (rule 37, 2026-07-06): unlike a genuine crash (still a silent fall-through to the older
+        # cb_seedance compact builder below, unchanged), a missing manifest field must surface as a hard
+        # BLOCKER here too — render_readiness (this function's own caller) reads authoring_validator["ok"] to
+        # decide READY_TO_RENDER; without explicitly flipping auth_ok (a plain bool already computed above,
+        # appending to the rejects LIST alone would not retroactively change it), render_readiness could report
+        # READY while cb_beats.run's own later, separate shipped_prompt call refuses anyway — same true block,
+        # reported inconsistently.
+        _def = None
+        auth_ok = False
+        r["report"]["rejects"] = list(r["report"]["rejects"]) + [f"MANIFEST: {_mfm}"]
     except Exception:
         _def = None
     if _def:

@@ -115,6 +115,20 @@ def walk_scene(episode, scene, fast=False):
     if not beats:
         return _halt(scene, [], None, f"no beats found for {episode} scene {scene}", [])
 
+    # THE MANIFEST (CLAUDE.md rule 37, MANIFEST.md, 2026-07-06, Julian's ruling — "Gate N cannot arm... without
+    # both manifests green"): walk_scene never arms a scene with a BLOCK-kind manifest gap outstanding, same
+    # choke-point cb_pipeline.approve now enforces for the Studio's gate sign-offs.
+    try:
+        import cb_preflight
+        first_code = beats[0].get("beatCode") or beats[0].get("shotCode")
+        ok, block_count, _gaps = cb_preflight.manifest_ok(pkg_path, scene=scene, episode=episode)
+        if not ok:
+            return _halt(scene, [], first_code,
+                         f"MANIFEST BLOCK — {block_count} gap(s) outstanding for this scene; walk_scene never "
+                         f"arms on a red manifest (run: python3 cb_preflight.py --scene={scene})", [])
+    except Exception as e:
+        print(f"walk_scene: manifest check could not run ({str(e)[:120]}) — proceeding without it; fix cb_preflight.py", flush=True)
+
     if not _gate2b_signed(episode, scene):
         first_code = beats[0].get("beatCode") or beats[0].get("shotCode")
         return _halt(scene, [], first_code,

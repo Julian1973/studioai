@@ -305,7 +305,7 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         #    the studio preview (gate3_dryrun/get_seedance_prompt) uses → preview == fire, provably. Sent VERBATIM (raw).
         builder_label = prep["builder"]
         try:
-            import cb_segprompt
+            import cb_segprompt, cb_qa
             _scene = None
             if d.get("scenes"):
                 _sn = str(b.get("sceneNumber"))
@@ -315,9 +315,18 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                 _prev_b = next((bb for bb in beats if (bb.get("beatCode") or bb.get("shotCode")) == relay_prev), None)
                 _prev_end_state = _prev_b.get("endStateStill") if _prev_b else None
                 _prev_carry_marks = _prev_b.get("carryMarks") if _prev_b else None   # rules 33/34, 2026-07-05
-            _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"),
-                                                                  prev_end_state_still=_prev_end_state,
-                                                                  prev_carry_marks=_prev_carry_marks)   # THE single routing point — identical to the studio preview path
+            try:
+                _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"),
+                                                                      prev_end_state_still=_prev_end_state,
+                                                                      prev_carry_marks=_prev_carry_marks)   # THE single routing point — identical to the studio preview path
+            except cb_qa.ManifestFieldMissing as _mfm:
+                # THE MANIFEST (rule 37, 2026-07-06): a missing TECHNICAL-contract field is a REFUSAL, never a
+                # reason to degrade to an older/weaker builder — the generic `except Exception` below is for a
+                # genuine emitter crash (import error, bug), not for "the data is honestly incomplete." Re-raise
+                # so the outer except sees it and skips the beat instead of silently falling back.
+                print(f"  {code}: REFUSED — {_mfm} (Manifest BLOCK, rule 37: no retakes, no fires until the "
+                      f"beat's own data is complete — fix the named field and re-fire)", flush=True)
+                continue
             if _def:
                 prompt = _def; raw = True; builder_label = _builder_label
         except Exception as _se:
@@ -328,7 +337,17 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                  if isinstance(prompt, dict) else not str(prompt or "").strip())
         if empty:
             print(f"  {code}: empty Seedance prompt — skipping", flush=True); continue
-        dur = int(b.get("durationSec") or 11); dur = max(8, min(15, dur))   # a take ≤~15s holds 1-3 whole moments
+        # THE HANDLE DOCTRINE (CLAUDE.md rule 20): every beat renders at HANDLE_TOTAL now, superseding the old
+        # per-beat durationSec 8-15s range this line used to clamp to. Found live 2026-07-06 (Julian: "it's meant
+        # to be twelve seconds of action, then the rest is doing whatever" — 1.B1's actual render came out ~10s
+        # because this line was still using the beat's own stale durationSec (10) as the real API duration
+        # parameter, while the shipped v4 prompt's own timing clock unconditionally described a 15s/13s+2s
+        # structure — Seedance was told two different lengths at once). durationSec is retired for this purpose.
+        try:
+            from cb_segprompt import HANDLE_TOTAL as _handle_total
+        except Exception:
+            _handle_total = 15
+        dur = _handle_total
         out = f"{episode}_{code}_{slug}.mp4"
         # THE SAME character list cb_segprompt.shipped_prompt used to build the @图N role labels (openingCast, falling back
         # to characters) — MUST match exactly, or the uploaded image at position N no longer corresponds to the @图N
@@ -628,6 +647,18 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
     if not os.path.exists(expected_anchor):
         print(f"fire_next_beat: approved=True but no prepared anchor at {expected_anchor} — call without approved "
               f"first to prepare it.", flush=True); return None
+    # THE MANIFEST (CLAUDE.md rule 37, MANIFEST.md, 2026-07-06, Julian's ruling — "Gate N cannot arm... without
+    # both manifests green"): fire_next_beat refuses to launch on a red manifest, same choke-point every other
+    # arming path (cb_pipeline.approve, cb_replicator.walk_scene, the Studio's fire/approve endpoints) enforces.
+    try:
+        import cb_preflight
+        _ok, _block_count, _ = cb_preflight.manifest_ok(pkg_path, scene=scene_num, episode=episode)
+        if not _ok:
+            print(f"fire_next_beat: REFUSED — {_block_count} manifest BLOCK(s) outstanding for scene {scene_num}; "
+                  f"never arms on a red manifest (run: python3 cb_preflight.py --scene={scene_num})", flush=True)
+            return None
+    except Exception as _e:
+        print(f"fire_next_beat: manifest check could not run ({str(_e)[:120]}) — proceeding without it; fix cb_preflight.py", flush=True)
     print(f"fire_next_beat: {winner_code}'s anchor APPROVED -> launching {next_code} under the one-render economy "
           f"(one fire, one automatic re-fire on a failed gate, then a hard stop — never a third roll)", flush=True)
     clip, ok, reasons = _fire_gated(pkg_path, scene_num, episode, next_code, next_slug, fast)

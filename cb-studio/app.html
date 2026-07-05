@@ -1247,16 +1247,24 @@ function relayBanner(sn){
   }
   const relay=((PIPE.relay||{})[ep]||{})[sn];
   if(!relay||!relay.winnerCode){
-    // nothing prepared right now — did a relay-approve job just land seeds nobody's picked a winner from yet?
+    // nothing prepared right now — did a relay-approve job just land the next beat's ONE take (the one-render
+    // economy, 2026-07-05: no more "several candidate seeds" — one fire, one automatic re-fire on a failed
+    // gate, then a hard stop)?
     const justDone=relayJobs.filter(j=>String(j.gate).startsWith('relay-approve')&&j.status=='done')
                             .sort((a,b)=>(b.ended||0)-(a.ended||0))[0];
     if(justDone){
       const m=(justDone.log||'').match(/launching (\S+)/);
       const landedCode=m?m[1]:null;
+      const hardStop=/HARD STOP/.test(justDone.log||'');
+      if(landedCode&&hardStop)return `<div class="mc" style="border:2px solid #c0392b;margin-bottom:14px;background:#fdeeec">
+        <div class="lab" style="color:#c0392b;font-weight:700;font-size:13.5px">✗ RELAY — ${_esc(landedCode)} hard-stopped</div>
+        <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">Its one take failed a gate, and so did the one automatic re-fire — the one-render economy stops here rather than rolling a third time. Open its card below to read the diagnosis in the fire log, fix the named layer, then re-fire by hand.</div>
+        <button class="bigsign" onclick="openShotByCode('${_esc(landedCode)}')">Review ${_esc(landedCode)} →</button>
+      </div>`;
       if(landedCode)return `<div class="mc" style="border:2px solid var(--ok);margin-bottom:14px;background:#eefaf3">
-        <div class="lab" style="color:var(--ok);font-weight:700;font-size:13.5px">✓ RELAY — seeds are ready</div>
-        <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">${_esc(landedCode)}'s two candidate seeds finished rendering — open its card below, watch them, and pick a winner.</div>
-        <button class="bigsign" onclick="openShotByCode('${_esc(landedCode)}')">Review ${_esc(landedCode)}'s seeds →</button>
+        <div class="lab" style="color:var(--ok);font-weight:700;font-size:13.5px">✓ RELAY — ${_esc(landedCode)}'s take landed</div>
+        <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">Open its card below, watch it, and sign it off when you're happy.</div>
+        <button class="bigsign" onclick="openShotByCode('${_esc(landedCode)}')">Review ${_esc(landedCode)} →</button>
       </div>`;
     }
     return "";
@@ -1274,8 +1282,8 @@ function relayBanner(sn){
       <div style="flex:1;min-width:220px">
         <div style="font-size:12.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut) — state continuity checked after firing'}</div>
         ${dc?`<div style="font-size:11.5px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
-        <button class="bigsign" style="margin-top:10px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${sn}','${_esc(relay.winnerCode)}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')}</button>
-        ${clean?'':'<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-pick the seed from that beat\'s card to retry the re-mint.</div>'}
+        <button class="bigsign" style="margin-top:10px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${sn}','${_esc(relay.winnerCode)}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')} (one take)</button>
+        ${clean?'':'<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-fire this beat (Gate 3 above) to retry the harvest + re-mint.</div>'}
       </div>
     </div>
   </div>`;
@@ -1431,48 +1439,43 @@ async function openShot(id,kind){
   document.getElementById("modal").classList.add("show");
   if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);fetchRelayInfo(s.sceneNumber,s.shotCode);}
 }
-// ── THE RELAY, front door (Julian, 2026-07-03) — seeds land here, QA shows, winner pick is a button, the
-// prepared anchor + its drift verdict display, and Approve Anchor is the ONLY thing that may launch the next
-// beat. Same stop-points as the terminal fire_next_beat flow; nothing here advances without an explicit click.
+// ── THE RELAY, front door (Julian, 2026-07-03; simplified for THE ONE-RENDER ECONOMY, 2026-07-05) — a beat
+// has exactly one official clip (auto-retried once internally on a failed gate — no more "pick a winner among
+// several seeds"). Once that clip exists, "Prepare anchor" harvests it for the next beat, the prepared anchor
+// + its drift verdict display, and Approve Anchor is the ONLY thing that may launch the next beat. Same
+// stop-points as the terminal fire_next_beat flow; nothing here advances without an explicit click.
 async function fetchRelayInfo(scene,code){
   const el=document.getElementById('relayPanel_'+code); if(!el)return;
   const ep="Ep"+((CUR&&CUR.number)||1);
   try{
-    const [seedsJ,relayJ]=await Promise.all([
-      fetch(BASE+"/api/beat-seeds?code="+encodeURIComponent(code)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json()),
-      fetch(BASE+"/api/relay-state?scene="+encodeURIComponent(scene)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json())
-    ]);
-    renderRelayPanel(scene,code,seedsJ.seeds||[],relayJ||{});
-  }catch(e){el.innerHTML=`<div style="font-size:11px;color:var(--hint)">Couldn't load the relay/seed state — is the server running?</div>`;}
+    const relayJ=await fetch(BASE+"/api/relay-state?scene="+encodeURIComponent(scene)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json());
+    renderRelayPanel(scene,code,relayJ||{});
+  }catch(e){el.innerHTML=`<div style="font-size:11px;color:var(--hint)">Couldn't load the relay state — is the server running?</div>`;}
 }
 function beatStageLocked(sn,code,stage){
   const bs=((gateState(sn).beats)||{})[code]; return !!(bs&&bs[stage]);
 }
-function renderRelayPanel(scene,code,seeds,relay){
+function renderRelayPanel(scene,code,relay){
   const el=document.getElementById('relayPanel_'+code); if(!el)return;
   let h='';
-  if(seeds.length){
-    h+=`<div class="kv" style="color:var(--brandink);border-top:2px solid var(--brand);padding-top:9px">◈ Candidate seeds — pick the winner</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">`+seeds.map(sd=>{
-        const qa=sd.qa,qaOk=qa&&qa.ok===true,qaBad=qa&&qa.ok===false;
-        const qaLab=qa?(qaOk?`<span style="color:var(--ok)">✓ ${_esc(qa.verdict||'PASS')}</span>`:qaBad?`<span style="color:#c0392b">✗ ${_esc(qa.verdict||'FAIL')}</span>`:_esc(qa.verdict||''))
-                      :`<span style="color:var(--hint)">no QA recorded</span>`;
-        return `<div style="width:220px"><video src="${BASE}/engine/media/${sd.file}?v=${MEDIA_V}" controls style="width:100%;border-radius:6px;background:#000"></video>
-          <div style="font-size:10.5px;margin-top:3px;line-height:1.4">Seed ${sd.n} · ${qaLab}</div>
-          <button class="btn ghost" style="margin-top:4px;padding:4px 9px;font-size:11px;width:100%" onclick="pickWinner('${scene}','${code}','${sd.file}')">${relay.winnerCode==code?'↻ Re-pick as winner':'✓ Pick as winner'}</button></div>`;
-      }).join('')+`</div>`;
+  const hasClip=!!(mediaFor({shotCode:code}).clip);
+  if(hasClip){
     // THE MISSING SIGN-OFF (Julian, 2026-07-04 — "we're going to need the sign-off of the relay one as well on
-    // there"): the relay flow designates an official clip and preps the NEXT beat's anchor, but never actually
-    // recorded THIS beat's own clip sign-off anywhere — /api/approve-beat existed server-side (built earlier
-    // this session) but no button anywhere ever called it. Surfaced right here, in the same place the winner
-    // gets picked, so the whole per-beat lifecycle (seeds -> pick winner -> sign off -> approve anchor) lives
+    // there"): the relay flow preps the NEXT beat's anchor off this beat's clip, but never actually recorded
+    // THIS beat's own clip sign-off anywhere — /api/approve-beat existed server-side but no button called it.
+    // Surfaced right here so the whole per-beat lifecycle (fire -> sign off -> prepare anchor -> approve) lives
     // in one place instead of the sign-off being a separate, undiscoverable action.
     const signed=beatStageLocked(scene,code,'clip');
-    h+=`<div style="margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)">`+
+    h+=`<div class="kv" style="color:var(--brandink);border-top:2px solid var(--brand);padding-top:9px">◈ This beat's clip</div>`;
+    h+=`<div style="margin-top:6px">`+
        (signed
          ? `<span style="color:var(--ok);font-weight:600;font-size:12px">✓ ${_esc(code)}'s clip is signed off</span> <button class="btn ghost" style="padding:3px 9px;font-size:11px;margin-left:6px" onclick="signBeatClip('${scene}','${code}',false)">↺ Unsign</button>`
-         : `<button class="btn" onclick="signBeatClip('${scene}','${code}',true)">✓ Sign off ${_esc(code)}'s clip</button><span style="font-size:11px;color:var(--hint);margin-left:8px">records the official winner as reviewed &amp; approved</span>`)+
+         : `<button class="btn" onclick="signBeatClip('${scene}','${code}',true)">✓ Sign off ${_esc(code)}'s clip</button><span style="font-size:11px;color:var(--hint);margin-left:8px">records this take as reviewed &amp; approved</span>`)+
        `</div>`;
+    if(relay.winnerCode!=code)
+      h+=`<div style="margin-top:8px"><button class="btn ghost" onclick="prepareAnchor('${scene}','${code}')">◈ Prepare ${_esc(code)}'s anchor for the next beat</button></div>`;
+  } else {
+    h+=`<div style="font-size:11px;color:var(--hint);border-top:2px solid var(--brand);padding-top:9px">◈ No clip yet for this beat — fire it via Gate 3 above (or approve the previous beat's anchor, if this beat is next in the relay).</div>`;
   }
   if(relay.winnerCode==code){
     // rule 32 (2026-07-05, RE-MINT SCOPING): see relayBanner()'s twin block above for why dc/clean/anchorImg
@@ -1484,13 +1487,11 @@ function renderRelayPanel(scene,code,seeds,relay){
         <div style="flex:1;min-width:220px">
           <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut)'}</div>
           ${dc?`<div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
-          <button class="btn" style="margin-top:8px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${scene}','${code}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')}</button>
-          ${clean?'':`<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-pick a seed above to retry the re-mint (harvest + re-mint run fresh each time), or hold for a ruling. check_remint's bar is untouched.</div>`}
+          <button class="btn" style="margin-top:8px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${scene}','${code}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')} (one take)</button>
+          ${clean?'':`<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-fire this beat above (Gate 3) to retry the harvest + re-mint, or hold for a ruling. check_remint's bar is untouched.</div>`}
         </div>
       </div>`;
   }
-  if(!seeds.length && relay.winnerCode!=code)
-    h+=`<div style="font-size:11px;color:var(--hint);border-top:2px solid var(--brand);padding-top:9px">◈ No seed takes yet for this beat — these land once the previous beat's anchor is approved (or fire this beat directly via Gate 3).</div>`;
   el.innerHTML=h;
 }
 async function signBeatClip(scene,code,value){
@@ -1501,17 +1502,17 @@ async function signBeatClip(scene,code,value){
     setTimeout(refreshPipe,250);
   }catch(e){alert("Can't reach the studio server.");}
 }
-async function pickWinner(scene,code,seedFile){
-  if(!confirm(`Designate ${seedFile} as ${code}'s winner?\n\nThis copies it in as the official clip, then harvests + re-mints its settle frame for the relay anchor. Nothing launches yet — you approve the anchor separately.`))return;
+async function prepareAnchor(scene,code){
+  if(!confirm(`Prepare ${code}'s anchor from its current clip?\n\nThis harvests its settle frame (and, if the next beat is a seamless join, re-mints it) for the relay anchor. Nothing launches yet — you approve the anchor separately.`))return;
   const ep="Ep"+((CUR&&CUR.number)||1);
   try{
-    const r=await fetch(BASE+"/api/relay-prepare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,seedPath:'media/'+seedFile,episode:ep})});
+    const r=await fetch(BASE+"/api/relay-prepare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,episode:ep})});
     const j=await r.json();if(!j.ok){alert("Couldn't start the relay prepare: "+(j.error||"failed"));return;}
     closeM();setTimeout(refreshPipe,400);
   }catch(e){alert("Can't reach the studio server.");}
 }
 async function approveAnchor(scene,code){
-  if(!confirm(`Approve ${code}'s anchor and launch the next beat's two seeds?\n\nThis is the ONLY action that launches the next beat — nothing else advances the relay.`))return;
+  if(!confirm(`Approve ${code}'s anchor and launch the next beat?\n\nThis fires ONE take, automatically re-fired once if a gate fails, then a hard stop naming the fault — never a third roll. This is the ONLY action that launches the next beat.`))return;
   const ep="Ep"+((CUR&&CUR.number)||1);
   try{
     const r=await fetch(BASE+"/api/relay-approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,code,episode:ep})});

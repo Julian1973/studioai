@@ -412,6 +412,11 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                         for _fl in jv.get("flags") or []:
                             print(f"  [JOIN CHECK] {code}: FLAG (advisory, non-blocking) — {_fl}", flush=True)
                         os.remove(_first)
+                        # Persisted (mirrors the CLIP QA .qa.json sidecar below) so the one-render economy's
+                        # gate-check in fire_next_beat/walk_scene can read this verdict back without re-deriving
+                        # it — the join check itself stays a real vision call, run exactly once per fire.
+                        with open(f"media/{episode}_{code}_{slug}.join.json", "w") as _jf:
+                            json.dump(jv, _jf, indent=2)
             except Exception as je:
                 print(f"  beat {code}: join check skipped ({str(je)[:120]})", flush=True)
             try:    # Gate-3 CLIP QA — automatic, advisory; NEVER let a QA hiccup kill the render loop or the stitch
@@ -460,36 +465,81 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
     print("=== BEAT DRIVER DONE ===", flush=True)
     return clips
 
-def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False, approved=False, fast=True):
-    """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes Julian's WINNER for the
-    beat just decided (winner_code + the exact seed file he picked), designates it as that beat's official signed
-    clip, harvests its settle frame, then EITHER re-mints it or uses it raw — depending on the NEXT beat's own
-    declared junction type (RE-MINT SCOPING, Julian's ruling, 2026-07-05, CLAUDE.md rule 32, superseding the
-    earlier "standard for every link now" wording): a `seamless_continuation` next beat gets the NB2 cleanup
-    pass (cb_scene.remint_settle_frame) plus the pre-fire drift check (cb_qa.check_remint), same as before this
-    ruling; an `intentional_next_shot` next beat (the DEFAULT) skips BOTH — its @图1 is a state reference, not a
-    pixel-perfect anchor, so re-mint buys nothing, and state continuity is verified AFTER the fact by the
-    two-tier join-check on the actual rendered clip instead (cb_qa.check_join, wired into run()). Either way,
-    STOPS after preparing the anchor, presenting it for Julian's approval; does NOT fire the next beat until
-    called again with approved=True. No parallel beats, no auto-advance: production within a scene is strictly
-    serial through Julian's sign-offs.
+def _layer_diagnosis(reasons):
+    """Maps a gate failure's own reported text to CLAUDE.md hard rule 3's four-layer taxonomy (keyframe / brief /
+    reference / take) — a starting hypothesis for a human's own diagnosis, never a verdict. THE ONE-RENDER
+    ECONOMY (Julian, 2026-07-05, PRODUCTION_DOCTRINE.md): a fault that survives one automatic re-fire gets named
+    by layer, then STOPS — it is never rolled a third time hoping something different happens."""
+    text = " ".join(reasons).lower()
+    if "drift" in text or "re-mint" in text or "remint" in text:
+        return "keyframe — the anchor image itself may be off (re-mint/drift is a pre-fire check on the still, not the render)"
+    if "no clip produced" in text or "render error" in text or "failed to render" in text:
+        return "take — the generation itself didn't complete (a transient render failure, not a data problem)"
+    if "identity" in text or "reference" in text or "anchor" in text:
+        return "reference — an identity/anchor image may not resolve to what the prompt names"
+    if "empty" in text or "prompt" in text:
+        return "brief — the assembled prompt itself may be malformed or empty"
+    return "take — the specific render came out wrong; nothing in the setup itself looks obviously at fault"
 
-    fast=False (Julian, 2026-07-04, "single seed, standard tier"): the Phase-2 launch loop's own tier, previously
-    hardcoded to fast=True (Render Economy Law) with no way to override it — a single confirmatory fire (proving
-    a specific fix, not exploring variety) wants the more reliable standard tier per the seedance-20 skill
-    package's own field guidance ("field reports still favor the Standard tier for multi-shot... treat that as
-    field guidance"). Default stays True so every existing caller (ordinary seed exploration) is unaffected.
 
-    dry_run=True (Fable's code review, 2026-07-03, item TWO — "prove the relay injection"): NO file mutation
-    (winner_seed_path is ignored; harvests from winner_code's CURRENT official clip, whatever is already there),
-    but the harvest + (conditional) re-mint + drift-check ARE real (they only read the clip and write derived
-    images). Returns {prompt, builder, images, ...} built from the actual anchor (re-mint or raw harvest,
-    whichever applies) for inspection instead of firing.
+def _fire_gated(pkg_path, scene_num, episode, next_code, next_slug, fast):
+    """ONE economy fire of next_code (cb_beats.run) — then reads back the gates run() itself already ran and
+    persisted (CLIP QA's .qa.json, the JOIN CHECK's .join.json) to decide pass/fail, without re-deriving either
+    verdict. Returns (clip_path_or_None, ok, reasons)."""
+    run(pkg_path, scene_num, episode, codes=[next_code], fast=fast)
+    clip = f"media/{episode}_{next_code}_{next_slug}.mp4"
+    if not os.path.exists(clip):
+        return None, False, ["no clip produced — check the render log above"]
+    reasons = []
+    qa_p = f"media/{episode}_{next_code}_{next_slug}.qa.json"
+    if os.path.exists(qa_p):
+        try:
+            qa = json.load(open(qa_p))
+            if qa.get("ok") is False:
+                reasons.append("CLIP QA BLOCK: " + "; ".join(qa.get("reasons") or [qa.get("verdict", "")]))
+        except Exception:
+            pass
+    join_p = f"media/{episode}_{next_code}_{next_slug}.join.json"
+    if os.path.exists(join_p):
+        try:
+            jv = json.load(open(join_p))
+            if jv.get("ok") is False:
+                reasons.append("JOIN DISCONTINUITY: " + jv.get("verdict", ""))
+        except Exception:
+            pass
+    return clip, (not reasons), reasons
 
-    approved=True: skips designation/harvest/re-mint (reuses the anchor an earlier, unapproved call already
-    produced) and fires the next beat's `seeds` takes, render economy law. Call this only after you have actually
-    looked at the anchor from the prepare call."""
-    import shutil, cb_scene, cb_segprompt, cb_qa
+
+def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, approved=False, fast=False):
+    """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes winner_code (the beat
+    just decided) and prepares the NEXT beat's anchor from winner_code's own official clip — there is exactly
+    one official clip per beat now (THE ONE-RENDER ECONOMY, Julian, 2026-07-05: one fire, one automatic re-fire
+    on a failed gate, then a hard stop — never a "pick a winner among several" ceremony, which this function
+    used to run and no longer does). Harvests the winner's settle frame, then EITHER re-mints it or uses it raw
+    — depending on the NEXT beat's own declared junction type (RE-MINT SCOPING, rule 32): a `seamless_continuation`
+    next beat gets the NB2 cleanup pass (cb_scene.remint_settle_frame) plus the pre-fire drift check
+    (cb_qa.check_remint); an `intentional_next_shot` next beat (the DEFAULT) skips both — its @图1 is a state
+    reference, not a pixel-perfect anchor, so re-mint buys nothing, and state continuity is verified AFTER the
+    fact by the two-tier join-check on the actual rendered clip instead (cb_qa.check_join, wired into run()).
+    Either way, STOPS after preparing the anchor, presenting it for Julian's approval; does NOT fire the next
+    beat until called again with approved=True. No parallel beats, no auto-advance: production within a scene
+    is strictly serial through Julian's sign-offs.
+
+    fast=False default (Julian, 2026-07-04/07-05, "single seed, standard tier" -> the one-render economy):
+    standard tier is now the default for every fire this function makes — the fast/cheap endpoint variant is
+    an explicit opt-in for exploratory work outside the escorted line, not the production default.
+
+    dry_run=True (Fable's code review, 2026-07-03, item TWO — "prove the relay injection"): NO file mutation —
+    harvests from winner_code's CURRENT official clip, whatever is already there — but the harvest + (conditional)
+    re-mint + drift-check ARE real (they only read the clip and write derived images). Returns
+    {prompt, builder, images, ...} built from the actual anchor (re-mint or raw harvest, whichever applies) for
+    inspection instead of firing.
+
+    approved=True: reuses the anchor an earlier, unapproved call already produced, then fires the next beat under
+    the one-render economy — ONE take, ONE automatic re-fire if either gate (Clip QA or the join-check) comes
+    back non-green, then a HARD STOP naming the layer at fault (CLAUDE.md rule 3) if the re-fire fails too. Call
+    this only after you have actually looked at the anchor from the prepare call."""
+    import cb_scene, cb_segprompt, cb_qa
     d = json.load(open(pkg_path))
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
     beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
@@ -514,19 +564,14 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
     needs_remint = junction == cb_segprompt.JUNCTION_SEAMLESS
 
     if not approved:
-        # PHASE 1 — PREPARE: designate (unless dry_run), harvest, then re-mint ONLY for a seamless next beat,
-        # then STOP for approval.
+        # PHASE 1 — PREPARE: harvest winner_code's own official clip (there is only ever one — the one-render
+        # economy fires exactly once per beat, auto-retried once internally on a failed gate — so there is no
+        # separate "pick a winner among candidates" step left to run here), then re-mint ONLY for a seamless
+        # next beat, then STOP for approval.
+        if not os.path.exists(official):
+            print(f"fire_next_beat: {winner_code} has no official clip yet at {official} — fire it (Gate 3) first, then prepare", flush=True); return None
         if dry_run:
             print(f"fire_next_beat [DRY RUN]: using {winner_code}'s CURRENT official clip as-is (no file changes)", flush=True)
-            if not os.path.exists(official):
-                print(f"fire_next_beat [DRY RUN]: {official} doesn't exist yet — nothing to harvest", flush=True); return None
-        else:
-            # DESIGNATE THE WINNER — copy Julian's picked seed to the beat's OFFICIAL clip path (what every
-            # downstream consumer — the relay, the stitch, the QA — treats as "this beat's signed clip").
-            if not winner_seed_path or not os.path.exists(winner_seed_path):
-                print(f"fire_next_beat: winner seed {winner_seed_path!r} not found", flush=True); return None
-            shutil.copyfile(winner_seed_path, official)
-            print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
 
         # HARVEST — the sharpest frame in the winner's settle window. Real in both modes (only reads the clip and
         # writes a derived _settle.png — never touches the official clip itself). Always runs, both junction types.
@@ -583,25 +628,25 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
     if not os.path.exists(expected_anchor):
         print(f"fire_next_beat: approved=True but no prepared anchor at {expected_anchor} — call without approved "
               f"first to prepare it.", flush=True); return None
-    print(f"fire_next_beat: {winner_code}'s anchor APPROVED -> launching {next_code}", flush=True)
-    official_next = f"media/{episode}_{next_code}_{next_slug}.mp4"
-    results = []
-    for i in range(1, seeds + 1):
-        print(f"fire_next_beat: {next_code} — seed {i}/{seeds} ({'fast endpoint, render economy law' if fast else 'STANDARD tier'})", flush=True)
-        run(pkg_path, scene_num, episode, codes=[next_code], fast=fast)
-        seed_out = f"media/{episode}_{next_code}_seed{i}.mp4"
-        if os.path.exists(official_next):
-            shutil.copyfile(official_next, seed_out)
-            official_qa = f"media/{episode}_{next_code}_{next_slug}.qa.json"
-            if os.path.exists(official_qa):    # preserve THIS seed's own QA verdict — the next loop iteration
-                shutil.copyfile(official_qa, f"media/{episode}_{next_code}_seed{i}.qa.json")  # overwrites official_qa before it's copied
-            results.append(seed_out)
-            print(f"  -> {seed_out}", flush=True)
-        else:
-            print(f"  {next_code} seed {i}: no clip produced — check the render log above", flush=True)
-    print(f"=== fire_next_beat STOPPED after {next_code} ({len(results)}/{seeds} seeds) — no auto-advance. "
-          f"Pick a winner, then call fire_next_beat again. Sign nothing. ===", flush=True)
-    return results
+    print(f"fire_next_beat: {winner_code}'s anchor APPROVED -> launching {next_code} under the one-render economy "
+          f"(one fire, one automatic re-fire on a failed gate, then a hard stop — never a third roll)", flush=True)
+    clip, ok, reasons = _fire_gated(pkg_path, scene_num, episode, next_code, next_slug, fast)
+    attempt = 1
+    if not ok:
+        print(f"fire_next_beat: {next_code} attempt 1 failed a gate — {'; '.join(reasons)} — ONE automatic "
+              f"re-fire (the one-render economy)", flush=True)
+        clip, ok, reasons = _fire_gated(pkg_path, scene_num, episode, next_code, next_slug, fast)
+        attempt = 2
+    if not ok:
+        diagnosis = _layer_diagnosis(reasons)
+        print(f"=== fire_next_beat HARD STOP — {next_code} failed its gate on both the fire and the one "
+              f"permitted re-fire. Reasons: {'; '.join(reasons)}. Diagnosis: {diagnosis}. Never a third blind "
+              f"roll (CLAUDE.md rule 3) — fix the named layer, then re-fire by hand when ready. Sign nothing. ===",
+              flush=True)
+        return {"status": "HARD_STOP", "next_code": next_code, "clip": clip, "reasons": reasons, "diagnosis": diagnosis}
+    print(f"=== fire_next_beat: {next_code} fired clean {'on the first try' if attempt == 1 else 'on the one permitted re-fire'} "
+          f"-> {clip}. No auto-advance — review it, sign it off, then continue the relay when ready. ===", flush=True)
+    return {"status": "OK", "next_code": next_code, "clip": clip, "attempt": attempt}
 
 def stitch(clips, out):
     lst = cb_gen.MEDIA / "_beats_concat.txt"

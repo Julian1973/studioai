@@ -96,13 +96,18 @@ def _halt(scene, done, code, reason, evidence):
     return {"status": "HALTED", "scene": scene, "beats_done": done, "halted_at": code,
             "reason": reason, "evidence": [e for e in evidence if e]}
 
-def walk_scene(episode, scene, seeds=1, fast=False):
+def walk_scene(episode, scene, fast=False):
     """THE REPLICATOR's one command. Returns {status: "COMPLETE"|"HALTED", scene, beats_done, halted_at,
-    reason, evidence}. seeds=1/fast=False (standard tier) matches the studio's current production default —
-    the same configuration the 1.B2 camera-lock test used, so any future maiden-run comparison stays apples
-    to apples. Resumable by construction: every state it reads (official clips, remint anchors, lock file) is
-    on disk, so calling walk_scene again after fixing whatever halted it picks up from the same beat, not from
-    scratch — it never re-fires a beat that already has a clean, QA-passed official clip."""
+    reason, evidence}. fast=False (standard tier) matches the studio's current production default — the same
+    configuration the 1.B2 camera-lock test used, so any future maiden-run comparison stays apples to apples.
+    THE ONE-RENDER ECONOMY (Julian, 2026-07-05, PRODUCTION_DOCTRINE.md): every beat gets exactly one fire, one
+    automatic re-fire if a gate comes back non-green, then a HARD STOP naming the layer at fault (CLAUDE.md
+    rule 3) — never a third roll, and never a "pick a winner among several" ceremony (retired the same day;
+    there is now only ever one official clip per beat). The scene's opening beat gets this directly via
+    cb_beats._fire_gated; every beat after it gets it from cb_beats.fire_next_beat, which now runs the same
+    economy internally. Resumable by construction: every state it reads (official clips, remint anchors, lock
+    file) is on disk, so calling walk_scene again after fixing whatever halted it picks up from the same beat,
+    not from scratch — it never re-fires a beat that already has a clean, QA-passed official clip."""
     pkg_path = _resolve_pkg(episode)
     d = json.load(open(pkg_path))
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
@@ -131,22 +136,35 @@ def walk_scene(episode, scene, seeds=1, fast=False):
         prompt_text, _builder, _is_v3 = cb_segprompt.shipped_prompt(first, scene_dict, relay=False)
         if not str(prompt_text or "").strip():
             return _halt(scene, done, first_code, "assembled prompt is empty — see cb_segprompt log", evidence)
-        cb_beats.run(pkg_path, scene, episode, codes=[first_code], fast=fast)
+        # THE ONE-RENDER ECONOMY (rule 3 / PRODUCTION_DOCTRINE.md): one fire, one automatic re-fire on a failed
+        # gate, then a hard stop naming the layer at fault — the scene's opening beat gets the identical
+        # discipline every relay beat gets inside cb_beats.fire_next_beat.
+        _, ok, reasons = cb_beats._fire_gated(pkg_path, scene, episode, first_code, first_slug, fast)
+        if not ok:
+            print(f"walk_scene: {first_code} attempt 1 failed a gate — {'; '.join(reasons)} — ONE automatic re-fire", flush=True)
+            _, ok, reasons = cb_beats._fire_gated(pkg_path, scene, episode, first_code, first_slug, fast)
         if not os.path.exists(first_clip):
             return _halt(scene, done, first_code,
                          "beat refused or failed to render (Law 3/5-class refusal, or a render error) — see console log", evidence)
-    qa = _load_qa(episode, first_code, first_slug)
+        if not ok:
+            return _halt(scene, done, first_code,
+                         f"one-render economy HARD STOP — {'; '.join(reasons)}. Diagnosis: {cb_beats._layer_diagnosis(reasons)}", evidence)
+    else:
+        # RESUME: a pre-existing clip — check its recorded QA rather than blindly trusting the file's presence.
+        qa = _load_qa(episode, first_code, first_slug)
+        if qa and qa.get("ok") is False:
+            return _halt(scene, done, first_code, "CLIP QA BLOCK: " + "; ".join(qa.get("reasons") or []), evidence)
     evidence.append(_copy_evidence(f"walk_scene_{first_code}_clip.mp4", first_clip))
-    if qa and qa.get("ok") is False:
-        return _halt(scene, done, first_code, "CLIP QA BLOCK: " + "; ".join(qa.get("reasons") or []), evidence)
     done.append(first_code)
 
     # BEATS 2..N — the relay chain, one escorted step per transition: PREPARE (harvest, re-mint, drift-check;
-    # dry_run=True reuses the predecessor's ALREADY-OFFICIAL clip rather than designating a new seed — there is
-    # no separate seed-pick in a single-seed walk) -> if the drift-check is clean, LINT the next beat's actual
-    # assembled prompt -> if clean, LAUNCH (approved=True; the drift-check's own CLEAN verdict IS the approval —
-    # there is nothing left for a human to catch that it didn't already catch) -> CLIP QA + JOIN CHECK
-    # (last-frame extraction, anti-hold) -> if clean, continue; otherwise halt with the full evidence pack.
+    # dry_run=True reuses the predecessor's own official clip — there is no seed-pick, ever, under the
+    # one-render economy) -> if the drift-check is clean, LINT the next beat's actual assembled prompt ->
+    # LAUNCH (approved=True — this now runs the full one-render economy INSIDE fire_next_beat itself: one fire,
+    # one automatic re-fire on a failed gate, a hard stop naming the layer at fault on a second failure) ->
+    # capture the evidence pack either way -> if fire_next_beat reports clean, continue; otherwise halt with
+    # its own diagnosis. walk_scene no longer re-derives CLIP QA/JOIN CHECK verdicts fire_next_beat already
+    # computed and persisted — that would just be the same vision calls run twice.
     for i in range(1, len(beats)):
         prev, cur = beats[i - 1], beats[i]
         prev_code = prev.get("beatCode") or prev.get("shotCode")
@@ -164,7 +182,7 @@ def walk_scene(episode, scene, seeds=1, fast=False):
             done.append(cur_code)
             continue
 
-        prep = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, seeds=seeds, fast=fast, dry_run=True)
+        prep = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, fast=fast, dry_run=True)
         if not prep:
             return _halt(scene, done, cur_code, f"prepare step failed (harvest/re-mint) for {cur_code} — see console log", evidence)
         # rule 32 (2026-07-05, RE-MINT SCOPING): the prepared anchor is the re-mint ONLY for a seamless_continuation
@@ -181,31 +199,22 @@ def walk_scene(episode, scene, seeds=1, fast=False):
         for fl in lint["flags"]:
             print(f"walk_scene: {cur_code} [PROMPT LAW FLAG] {fl}", flush=True)
 
-        launched = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, seeds=seeds, fast=fast, approved=True)
+        launched = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, fast=fast, approved=True)
         if not launched or not os.path.exists(cur_clip):
             return _halt(scene, done, cur_code, f"launch step failed for {cur_code} — see console log", evidence)
 
         first_frame = f"media/{episode}_{cur_code}_{cur_slug}_walkframe1.png"
         _extract_frame(cur_clip, first_frame)
-        # rule 31 (2026-07-05): the join-check's frame-identity half only applies when THIS beat declared
-        # its shot as an unbroken continuation of the previous one — state continuity is the hard gate either way.
-        # rule 36 (2026-07-05): STATE hard-gates ONLY on this beat's own declared carryMarks; anything else
-        # visible (an incidental held prop, say) is advisory only.
-        _junction = cb_segprompt._junction_type(cur)
-        join = cb_qa.check_join(anchor, first_frame, junction=_junction, carry_marks=cur.get("carryMarks")) if os.path.exists(first_frame) else {"ok": None, "verdict": "(frame extraction failed)"}
-        for _fl in join.get("flags") or []:
-            print(f"walk_scene: {cur_code} [JOIN CHECK] FLAG (advisory, non-blocking) — {_fl}", flush=True)
         last_frame = f"media/{episode}_{cur_code}_{cur_slug}_walklast.png"
         _extract_frame(cur_clip, last_frame, last=True)
         evidence.append(_copy_evidence(f"walk_scene_{cur_code}_frame1.png", first_frame))
         evidence.append(_copy_evidence(f"walk_scene_{cur_code}_lastframe.png", last_frame))
         evidence.append(_copy_evidence(f"walk_scene_{cur_code}_clip.mp4", cur_clip))
 
-        qa = _load_qa(episode, cur_code, cur_slug)
-        if qa and qa.get("ok") is False:
-            return _halt(scene, done, cur_code, "CLIP QA BLOCK: " + "; ".join(qa.get("reasons") or []), evidence)
-        if join.get("ok") is False:
-            return _halt(scene, done, cur_code, "JOIN DISCONTINUITY: " + join.get("verdict", ""), evidence)
+        if launched.get("status") == "HARD_STOP":
+            return _halt(scene, done, cur_code,
+                         f"one-render economy HARD STOP — {'; '.join(launched.get('reasons') or [])}. "
+                         f"Diagnosis: {launched.get('diagnosis', '')}", evidence)
         done.append(cur_code)
 
     print(f"walk_scene: COMPLETE — {episode} scene {scene}, {len(done)}/{len(beats)} beats: {', '.join(done)}", flush=True)

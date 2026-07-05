@@ -43,17 +43,37 @@ refuses to bless a snapshot that fails one — a lean or malformed prompt can ne
     python3 cb_golden.py diff       # compare current output vs the stored golden set (exit 1 on any diff or failed assertion)
     python3 cb_golden.py capture    # OVERWRITE the golden set with current output (only after Julian has seen the diff)
 """
-import os, sys, re, json, difflib
+import os, sys, re, json, glob, difflib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLDEN_DIR = os.path.join(HERE, "goldens")
-PKG = os.path.join(HERE, "..", "cb-output", "Ep1_Episode_1_beat_package.json")
 SEGPROMPT_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4", "1.B5"]
 KEYFRAME_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4", "1.B5"]
 
 
+class GoldenDormant(Exception):
+    """Raised when no beat package exists to check against — the golden harness has nothing to compare,
+    which is a legitimate state (a full reset, or before Stage 1 has ever produced a package), never a
+    crash. `diff()`/`capture()` catch this at the top level and report cleanly instead."""
+    pass
+
+
+def _resolve_pkg_path():
+    """Resolves the current production's beat package the SAME way cb_pipeline._resolve_pkg does — glob,
+    newest by mtime, never a hardcoded filename or episode — so the golden harness re-arms automatically
+    the moment a new package lands, whatever episode it's for. Returns None (never raises) when nothing
+    exists yet; callers that need a package call _pkg(), which turns None into GoldenDormant."""
+    cands = glob.glob(os.path.join(HERE, "..", "cb-output", "*beat_package.json"))
+    if not cands:
+        cands = glob.glob(os.path.join(HERE, "..", "cb-output", "*shot_package.json"))
+    return max(cands, key=os.path.getmtime) if cands else None
+
+
 def _pkg():
-    return json.load(open(PKG))
+    p = _resolve_pkg_path()
+    if not p:
+        raise GoldenDormant()
+    return json.load(open(p))
 
 
 def _relay_snapshot():
@@ -278,7 +298,12 @@ def assertions(snap=None):
 
 def diff():
     os.makedirs(GOLDEN_DIR, exist_ok=True)
-    snap = current_snapshot()
+    try:
+        snap = current_snapshot()
+    except GoldenDormant:
+        print("no production loaded — golden set dormant (no beat package found in cb-output/); "
+              "will re-arm automatically once a new package lands")
+        return 0
     any_diff = False
     for key, text in snap.items():
         gp = _golden_path(key)
@@ -307,7 +332,12 @@ def diff():
 
 def capture():
     os.makedirs(GOLDEN_DIR, exist_ok=True)
-    snap = current_snapshot()
+    try:
+        snap = current_snapshot()
+    except GoldenDormant:
+        print("no production loaded — golden set dormant (no beat package found in cb-output/); "
+              "nothing to capture until a new package lands")
+        return 0
     fails = assertions(snap)
     if fails:
         print("REFUSING TO CAPTURE — the current output fails its own content assertions (a lean prompt must not"

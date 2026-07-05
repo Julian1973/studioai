@@ -478,19 +478,23 @@ def rebuild_keyframes(scene, episode="Ep1"):
 # ── THE RELAY, front door (Julian, 2026-07-03) — job-launch wrappers around cb_pipeline.relay_prepare/
 #    relay_approve. relay_approve_beat is the ONLY function in this file that may fire fire_next_beat's
 #    approved=True launch — the Approve Anchor button in app.html is the only caller of it.
-def relay_prepare_beat(scene, winner_code, seed_path, seeds=2, episode="Ep1", fast=True):
-    """PHASE 1: designate the picked seed, harvest, re-mint, drift-check, STOP for approval (job).
-    fast=False (2026-07-04, "single seed, standard tier"): explicit opt-in only, default unchanged."""
+#    THE ONE-RENDER ECONOMY (Julian, 2026-07-05): both phases dropped their seed/seed-path parameters — a beat
+#    has exactly one official clip now (auto-retried once internally on a failed gate), so there is no seed to
+#    designate and no "how many candidates" choice left to make.
+def relay_prepare_beat(scene, winner_code, episode="Ep1", fast=False):
+    """PHASE 1: harvest the winner's own official clip, re-mint (seamless joins only), drift-check, STOP for
+    approval (job). fast=False default: standard tier is the production default under the one-render economy."""
     return _start(_jid(f"relayprep_{winner_code}"), f"relay-prepare:{winner_code}", scene,
-                  ["cb_pipeline.py", "relay-prepare", str(scene), str(winner_code), str(seed_path),
-                   str(seeds), f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
+                  ["cb_pipeline.py", "relay-prepare", str(scene), str(winner_code),
+                   f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
 
-def relay_approve_beat(scene, winner_code, seeds=2, episode="Ep1", fast=True):
-    """PHASE 2: launch the next beat's seeds off the anchor an earlier relay_prepare_beat already produced (job).
-    fast=False (2026-07-04, "single seed, standard tier"): explicit opt-in only, default unchanged."""
+def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
+    """PHASE 2: launch the next beat off the anchor an earlier relay_prepare_beat already produced (job) — one
+    take, one automatic re-fire on a failed gate, then a hard stop naming the layer at fault.
+    fast=False default: standard tier is the production default under the one-render economy."""
     return _start(_jid(f"relayapprove_{winner_code}"), f"relay-approve:{winner_code}", scene,
                   ["cb_pipeline.py", "relay-approve", str(scene), str(winner_code),
-                   str(seeds), f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
+                   f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
 
 # ── STATIC FILE HARDENING (security) ──────────────────────────────────────────────────────────────────────────
 # The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read engine/.env (API keys),
@@ -812,30 +816,6 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 d = {}
             return self._json(200, d.get(ep, {}).get(scene) or {})
-        if self.path.startswith("/api/beat-seeds"):
-            # the candidate takes for one beat (Ep1_{code}_seed{N}.mp4) + each one's cached QA verdict, if any —
-            # never re-runs QA here (that's a real vision call; it's cached at render time as a .qa.json sidecar).
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            ep = (q.get("episode") or ["Ep1"])[0]; code = (q.get("code") or [""])[0]
-            if not code:
-                return self._json(400, {"error": "code required"})
-            import re as _re
-            pat = _re.compile(r"^" + _re.escape(f"{ep}_{code}_seed") + r"(\d+)\.mp4$")
-            seeds = []
-            if MEDIA.exists():
-                for p in sorted(MEDIA.glob(f"{ep}_{code}_seed*.mp4")):
-                    m = pat.match(p.name)
-                    if not m:
-                        continue
-                    qa_p = MEDIA / f"{ep}_{code}_seed{m.group(1)}.qa.json"
-                    qa = None
-                    if qa_p.exists():
-                        try: qa = json.loads(qa_p.read_text())
-                        except Exception: qa = None
-                    seeds.append({"n": int(m.group(1)), "file": p.name, "qa": qa})
-            seeds.sort(key=lambda s: s["n"])
-            return self._json(200, {"seeds": seeds})
         if self.path.startswith("/api/beat-prompt"):
             # TICKET 4 — the editable JSON the Cascade panel surfaces: kind=seedance (clip take) | keyframe (image).
             import sys as _sys
@@ -1050,24 +1030,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(400, {"error": str(e)})
             return
         if self.path == "/api/relay-prepare":
-            # PHASE 1 (front door): "Pick as winner" on a seed calls this. Designates the seed, harvests its
-            # settle frame, re-mints it, runs the drift check, then STOPS — never launches anything.
+            # PHASE 1 (front door): "Prepare anchor" calls this. THE ONE-RENDER ECONOMY (2026-07-05) retired the
+            # seed-pick step — there is exactly one official clip per beat now, so this harvests ITS settle
+            # frame directly, re-mints it (seamless joins only), runs the drift check, then STOPS.
             try:
                 d = self._body()
-                scene = str(d["scene"]); code = str(d["code"]); seed = str(d["seedPath"])
-                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2)); fast = bool(d.get("fast", True))
-                self._json(200, {"ok": True, "jobId": relay_prepare_beat(scene, code, seed, seeds, episode, fast=fast)})
+                scene = str(d["scene"]); code = str(d["code"])
+                episode = d.get("episode", "Ep1"); fast = bool(d.get("fast", False))
+                self._json(200, {"ok": True, "jobId": relay_prepare_beat(scene, code, episode, fast=fast)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
         if self.path == "/api/relay-approve":
             # PHASE 2 (front door): the Approve Anchor button — the ONLY caller of this route, which is the
-            # ONLY thing allowed to launch the next beat's seeds (fire_next_beat approved=True).
+            # ONLY thing allowed to launch the next beat (fire_next_beat approved=True) — one take, one
+            # automatic re-fire on a failed gate, then a hard stop naming the layer at fault.
             try:
                 d = self._body()
                 scene = str(d["scene"]); code = str(d["code"])
-                episode = d.get("episode", "Ep1"); seeds = int(d.get("seeds", 2)); fast = bool(d.get("fast", True))
-                self._json(200, {"ok": True, "jobId": relay_approve_beat(scene, code, seeds, episode, fast=fast)})
+                episode = d.get("episode", "Ep1"); fast = bool(d.get("fast", False))
+                self._json(200, {"ok": True, "jobId": relay_approve_beat(scene, code, episode, fast=fast)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

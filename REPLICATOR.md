@@ -18,10 +18,14 @@ in `PRODUCTION_DOCTRINE.md`, mirrored in CLAUDE.md rule 28:
 anything itself — Stage 5's own machine gates are documented in the gate map below, and Stage 5's felt-intent
 sign-off is Julian's alone, beat by beat (see "The gates — machine vs showrunner").
 
-**THE ONE-RENDER ECONOMY** (locked 2026-07-05): one fire per beat, standard tier — already true of
-`walk_scene`'s own design (see "What this is not," below). One automatic re-fire on a failed gate, then a hard
-stop with a diagnosis, is the doctrine as of tonight; that retry/hard-stop wiring is not yet built into
-`cb_beats.run`/`fire_next_beat` — a follow-up ticket, not part of this document's current behaviour.
+**THE ONE-RENDER ECONOMY** (locked 2026-07-05, wired into code the same night): one fire per beat, standard
+tier — already true of `walk_scene`'s own design (see "What this is not," below). One automatic re-fire on a
+failed gate, then a hard stop with a diagnosis, is now CODE-ENFORCED: `cb_beats.fire_next_beat`'s launch phase
+fires once, reads back the CLIP QA + JOIN CHECK verdicts `cb_beats.run` persists as sidecars, auto-retries once,
+and returns a `HARD_STOP` naming the layer at fault (`cb_beats._layer_diagnosis`) if the retry also fails —
+`walk_scene` inherits this for every beat after the first, and carries the identical discipline itself
+(`cb_beats._fire_gated`) for the scene's opening beat. The old multi-seed default and the Studio's seed-picker
+panel are retired along with it.
 
 ## The three inputs
 

@@ -86,10 +86,15 @@ candidate reads. Julian's ear either approves it, or names the single correction
 re-fire. There is no "pick a favourite among several" step for voice — the same discipline the felt-intent
 gate already holds the beat render to.
 
-This is DOCTRINE as of tonight; the retry/hard-stop wiring itself is not yet code-enforced —
-`cb_beats.run`/`fire_next_beat`'s historical multi-seed default and the Studio's seed-picker panel still exist
-in the codebase unchanged. Wiring the economy into the code is a follow-up ticket for when the new script
-arrives, not done as part of the reset.
+CODE-ENFORCED (wired 2026-07-05, the same night, as a follow-up closer): `cb_beats.fire_next_beat`'s launch phase
+now fires once, reads back the CLIP QA + JOIN CHECK verdicts `cb_beats.run` persists as sidecars, auto-retries
+once on a failure, and returns a `HARD_STOP` with a layer diagnosis (`cb_beats._layer_diagnosis`) if the retry
+also fails — never a third roll. `cb_replicator.walk_scene` carries the identical discipline for the scene's
+opening beat (`cb_beats._fire_gated`) and inherits it from `fire_next_beat` for every beat after. The old
+multi-seed default (`seeds=2`, "fire N takes, pick a winner") is retired everywhere it flowed —
+`fire_next_beat`, `walk_scene`, `cb_pipeline.relay_prepare`/`relay_approve`, and the Studio's seed-picker panel
+(`/api/beat-seeds`, app.html's "candidate seeds" UI) are all gone; a beat now has exactly one official clip.
+Standard tier (`fast=False`) is the production default throughout, superseding the earlier fast-endpoint default.
 
 ## The loop, and the full production line — the canonical stage map
 

@@ -323,6 +323,34 @@ def check_camera_lock_conflict(beat):
         return {"ok": False, "verdict": "; ".join(flags)}
     return {"ok": True, "verdict": "no camera-lock conflicts found"}
 
+def check_settle_distinctiveness(this_end_state, prev_end_state):
+    """SETTLE-AUTHORING STRENGTHENING (Julian's ruling, 2026-07-05, lock-in night — "every beat's settle
+    must be written as that beat's OWN distinct moment in character... never a restatement of the previous
+    beat's pose"): found watching 1.B2's first intentional-cut render, which drifted back toward
+    reproducing 1.B1's own anchor pose at the settle instead of performing its own scripted ending. A word-
+    overlap heuristic (same style as check_ambience_overlap) between THIS beat's own `endState` and the
+    PREVIOUS beat's `endState` — high overlap signals the AUTHORED settle risks reading as a restatement,
+    not a distinct moment, before it ever reaches the model. Cannot detect the render-time drift itself
+    (that's a generation-time outcome, same limitation as Law 5's anti-hold) — only guards the data that
+    feeds it. Advisory only, flag-only per the established Laws 4/7/8 pattern; never invents a rewrite, only
+    detects and names the overlap."""
+    this_es = str(this_end_state or "").strip()
+    prev_es = str(prev_end_state or "").strip()
+    if not this_es or not prev_es:
+        return {"ok": True, "verdict": "(nothing to compare — this beat or its predecessor has no endState authored yet)"}
+    def _words(s):
+        return [w for w in re.findall(r"[a-z']+", s.lower()) if len(w) > 3]
+    this_words, prev_words = set(_words(this_es)), set(_words(prev_es))
+    if not this_words or not prev_words:
+        return {"ok": True, "verdict": "(too short to compare)"}
+    shared = sorted(this_words & prev_words)
+    ratio = len(shared) / min(len(this_words), len(prev_words))
+    if ratio >= 0.5:
+        return {"ok": False, "verdict": f"this beat's endState overlaps {ratio:.0%} of its predecessor's own "
+                f"wording ({', '.join(shared)}) — risks reading as a restatement of the previous beat's pose "
+                "rather than this beat's own distinct settle moment"}
+    return {"ok": True, "verdict": f"endState word overlap with predecessor {ratio:.0%} — reads as its own moment"}
+
 # THE TWELVE-LAW PRE-FIRE LINT (Julian, 2026-07-05 — REPLICATOR.md) — one call covering all twelve Layer-1
 # invariant laws (CLAUDE.md rule 28), for the replicator's walk_scene to run before every fire. Two laws are
 # BLOCKERS (Law 3's reference/upload alignment, Law 5's voice-in-render requirement) — but both already refuse

@@ -4,7 +4,7 @@
   "mode": "reference-to-video",
   "references": {
     "@图1": "@图1 is the state reference from the previous beat. Carry everything it shows — Fuzzby and Zenny's appearance, the moustache, the pollen on their legs, the meadow lighting and their positions in the world — but open on a fresh camera setup within the same space, close to where @图1 shows the characters. The camera moves; the world does not.",
-    "@Video1": "Use @Video1 only for accepted previous visual motion continuity and energy. Do not use or copy any audio from @Video1.",
+    "@Video1": "Use @Video1 only for motion energy and action continuity. Do not copy its camera framing, shot size, or composition — the camera setup comes from this beat's own direction.",
     "@图2": "Use @图2 for Fuzzby's exact appearance.",
     "@图3": "Use @图3 for Zenny's exact appearance.",
     "@图4": "Use @图4 for this scene's lighting, palette and environmental texture.",

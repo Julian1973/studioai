@@ -901,7 +901,12 @@ def _v4_references(beat, scene, cast, relay, plate_n, junction=None, prev_end_st
     REFERENCE clause instead (_v4_state_carry, rewritten under rules 33/34) — the beat opens on its own
     fresh setup, carrying state only. prev_end_state_still is accepted for call-signature parity with the
     rest of the shipped_prompt/for_beat_vN chain but UNUSED here (see _v4_state_carry's note — the marks
-    clause now comes from `prev_carry_marks`, a short phrase, never the full endStateStill sentence)."""
+    clause now comes from `prev_carry_marks`, a short phrase, never the full endStateStill sentence).
+    @Video1's text FIXED 2026-07-05 (Julian, lock-in night): the old wording ("previous visual motion
+    continuity and energy") left camera framing/shot size/composition implicitly fair game to copy from the
+    previous clip — now explicit that @Video1 supplies motion energy and action continuity ONLY; the camera
+    setup for THIS beat comes from its own direction (the opener/opens-on/camera-discipline sentences),
+    never from @Video1's own framing."""
     refs = {}
     if relay:
         if junction == JUNCTION_SEAMLESS:
@@ -909,8 +914,9 @@ def _v4_references(beat, scene, cast, relay, plate_n, junction=None, prev_end_st
                             "camera angle, character scale and lighting.")
         else:
             refs["@图1"] = _v4_state_carry(cast, prev_carry_marks, scene)
-        refs["@Video1"] = ("Use @Video1 only for accepted previous visual motion continuity and energy. Do "
-                           "not use or copy any audio from @Video1.")
+        refs["@Video1"] = ("Use @Video1 only for motion energy and action continuity. Do not copy its camera "
+                           "framing, shot size, or composition — the camera setup comes from this beat's own "
+                           "direction.")
     else:
         refs["@图1"] = "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity."
     for i, name in enumerate(cast):

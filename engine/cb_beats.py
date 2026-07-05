@@ -212,6 +212,22 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
         cam = cb_qa.check_camera_lock_conflict(beat)
         if not cam["ok"]:
             flags.append("Law 8 (camera lock): " + cam["verdict"])
+        # SETTLE-AUTHORING STRENGTHENING (Julian, 2026-07-05, lock-in night) — the beat's own endState must
+        # read as its own distinct moment, not a restatement of the predecessor's. Same isolated try/except
+        # pattern as the relay keyframe-path lookup above; never breaks render_readiness on a lookup hiccup.
+        try:
+            import cb_scene
+            _scene_beats3 = [b for b in (d.get("beats") or d.get("shots") or [])
+                             if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+            _, _relay_status3, _relay_prev3 = cb_scene.relay_source_for(_scene_beats3, beat_code, episode)
+            if _relay_status3 == "relay" and _relay_prev3:
+                _prev_beat3 = next((bb for bb in _scene_beats3
+                                    if (bb.get("beatCode") or bb.get("shotCode")) == _relay_prev3), None)
+                settle = cb_qa.check_settle_distinctiveness(beat.get("endState"), (_prev_beat3 or {}).get("endState"))
+                if not settle["ok"]:
+                    flags.append("Settle distinctiveness: " + settle["verdict"])
+        except Exception:
+            pass
     return {"status": status, "blockers": blockers, "flags": flags}
 
 def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):

@@ -1261,15 +1261,19 @@ function relayBanner(sn){
     }
     return "";
   }
-  const dc=relay.driftCheck||{},clean=dc.ok===true;
+  // rule 32 (2026-07-05, RE-MINT SCOPING): driftCheck is null for an intentional_next_shot next beat (the
+  // default) — no NB2 pass ran, so there's nothing to have drifted; that's not a block, it's "not applicable."
+  // clean defaults to true when dc is absent — only an ACTUAL dc.ok===false disables the button. "anchor" (not
+  // "remint", which is null for this junction type) is the image to show either way.
+  const dc=relay.driftCheck,clean=dc?dc.ok===true:true,anchorImg=relay.anchor||relay.remint;
   return `<div class="mc" style="border:2px solid var(--brand);margin-bottom:14px;background:#faf9ff">
     <div class="lab" style="color:var(--brandink);font-weight:700;font-size:13.5px">◈ RELAY — next action</div>
     <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">${_esc(relay.winnerCode)}'s anchor is prepared, waiting for your approval before ${_esc(relay.nextCode||'the next beat')} can launch.</div>
     <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-      ${relay.remint?`<img class="zoom" data-cap="${_esc(relay.winnerCode)} · relay anchor" src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:220px;border-radius:8px;background:#efeef6"/>`:''}
+      ${anchorImg?`<img class="zoom" data-cap="${_esc(relay.winnerCode)} · relay anchor${relay.remint?' (re-minted)':' (raw harvest)'}" src="${BASE}/engine/${anchorImg}?v=${MEDIA_V}" style="width:220px;border-radius:8px;background:#efeef6"/>`:''}
       <div style="flex:1;min-width:220px">
-        <div style="font-size:12.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'}</div>
-        <div style="font-size:11.5px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>
+        <div style="font-size:12.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut) — state continuity checked after firing'}</div>
+        ${dc?`<div style="font-size:11.5px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
         <button class="bigsign" style="margin-top:10px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${sn}','${_esc(relay.winnerCode)}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')}</button>
         ${clean?'':'<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-pick the seed from that beat\'s card to retry the re-mint.</div>'}
       </div>
@@ -1471,13 +1475,15 @@ function renderRelayPanel(scene,code,seeds,relay){
        `</div>`;
   }
   if(relay.winnerCode==code){
-    const dc=relay.driftCheck||{},clean=dc.ok===true;
+    // rule 32 (2026-07-05, RE-MINT SCOPING): see relayBanner()'s twin block above for why dc/clean/anchorImg
+    // are read this way — driftCheck is null (not a fail) for an intentional_next_shot next beat.
+    const dc=relay.driftCheck,clean=dc?dc.ok===true:true,anchorImg=relay.anchor||relay.remint;
     h+=`<div class="kv" style="color:var(--brandink);margin-top:14px">◈ Prepared relay anchor — for ${_esc(relay.nextCode||'the next beat')}</div>
       <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
-        ${relay.remint?`<img class="zoom" data-cap="${_esc(code)} · relay anchor" src="${BASE}/engine/${relay.remint}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:#efeef6"/>`:''}
+        ${anchorImg?`<img class="zoom" data-cap="${_esc(code)} · relay anchor${relay.remint?' (re-minted)':' (raw harvest)'}" src="${BASE}/engine/${anchorImg}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:#efeef6"/>`:''}
         <div style="flex:1;min-width:220px">
-          <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'}</div>
-          <div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>
+          <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'#c0392b'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut)'}</div>
+          ${dc?`<div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
           <button class="btn" style="margin-top:8px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${scene}','${code}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')}</button>
           ${clean?'':`<div style="font-size:11px;color:#c0392b;margin-top:4px">Fix the drift before approving — re-pick a seed above to retry the re-mint (harvest + re-mint run fresh each time), or hold for a ruling. check_remint's bar is untouched.</div>`}
         </div>

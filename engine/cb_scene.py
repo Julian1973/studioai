@@ -190,17 +190,26 @@ def remint_settle_frame(episode, code, slug, cast, harvested_path):
     return outpath if os.path.exists(outpath) else None
 
 def relay_source_for(beats, code, episode="Ep1"):
-    """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21) — distinct from chain_source_for (which
-    feeds Gate 2b's KEYFRAME generation). Returns (frame_path_or_None, status, prev_code):
+    """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21; RE-MINT SCOPING, rule 32, 2026-07-05)
+    — distinct from chain_source_for (which feeds Gate 2b's KEYFRAME generation). Returns (frame_path_or_None,
+    status, prev_code):
       first          the scene's first beat (or a vision beat, or no previous beat) — no relay source; this beat
                      keeps its own Gate-2b-generated keyframe, exactly as before this doctrine.
       no_predecessor_clip   there IS a previous beat, but it has no rendered clip yet to harvest from — blocks
                      the relay at this beat rather than guessing; falls back to this beat's own keyframe.
-      relay          the previous beat has a rendered clip. Prefers its RE-MINTED anchor (Julian's ruling,
-                     2026-07-03 — a pure lookup here, never generates one: fire_next_beat's prepare step is what
-                     produces it, gated on Julian's approval); falls back to the raw harvested settle frame if no
-                     re-mint exists yet, so a relay beat fired outside that ceremony still degrades gracefully
-                     rather than blocking. Either way, skips keyframe generation for THIS beat entirely."""
+      relay          the previous beat has a rendered clip. WHICH anchor is preferred now depends on THIS beat's
+                     own declared junction type (rule 32 — not merely "does a re-mint file happen to exist"):
+                     a `seamless_continuation` beat prefers its predecessor's RE-MINTED anchor (falling back to
+                     the raw harvest if no re-mint exists yet, so a beat fired outside the fire_next_beat
+                     ceremony still degrades gracefully). An `intentional_next_shot` beat (the DEFAULT) uses the
+                     raw HARVESTED settle frame directly, ALWAYS — even if a stale re-mint file happens to exist
+                     on disk from before this ruling (or from a differently-typed sibling beat); @图1 is a state
+                     reference for this junction type, not a pixel-perfect anchor, so the NB2 cleanup pass buys
+                     nothing and is skipped. A pure lookup either way — never generates the re-mint itself:
+                     fire_next_beat's prepare step is what produces one, gated on Julian's approval, and only
+                     when the NEXT beat it's preparing is itself seamless_continuation. Either way, skips
+                     keyframe generation for THIS beat entirely."""
+    import cb_segprompt
     idx = next((i for i, b in enumerate(beats)
                 if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
     if idx is None or idx == 0:
@@ -215,9 +224,20 @@ def relay_source_for(beats, code, episode="Ep1"):
     prev = beats[j]
     prev_code = prev.get("beatCode") or prev.get("shotCode")
     prev_slug = prev.get("slug", (prev_code or "").replace(".", "_"))
+    harvested_path = f"media/{episode}_{prev_code}_{prev_slug}_settle.png"
     remint_path = f"media/{episode}_{prev_code}_{prev_slug}_remint.png"
-    if os.path.exists(remint_path):
-        return remint_path, "relay", prev_code
+    junction = cb_segprompt._junction_type(beats[idx])
+    if junction == cb_segprompt.JUNCTION_SEAMLESS:
+        if os.path.exists(remint_path):
+            return remint_path, "relay", prev_code
+        harvested = harvest_settle_frame(episode, prev_code, prev_slug)
+        if not harvested:
+            return None, "no_predecessor_clip", prev_code
+        return harvested, "relay", prev_code
+    # intentional_next_shot (the default, rule 32): raw harvest ONLY — never the re-mint, regardless of
+    # whether one happens to exist on disk.
+    if os.path.exists(harvested_path):
+        return harvested_path, "relay", prev_code
     harvested = harvest_settle_frame(episode, prev_code, prev_slug)
     if not harvested:
         return None, "no_predecessor_clip", prev_code

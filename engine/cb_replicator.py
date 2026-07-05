@@ -167,7 +167,10 @@ def walk_scene(episode, scene, seeds=1, fast=False):
         prep = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, seeds=seeds, fast=fast, dry_run=True)
         if not prep:
             return _halt(scene, done, cur_code, f"prepare step failed (harvest/re-mint) for {cur_code} — see console log", evidence)
-        anchor = prep.get("remint")
+        # rule 32 (2026-07-05, RE-MINT SCOPING): the prepared anchor is the re-mint ONLY for a seamless_continuation
+        # beat; an intentional_next_shot beat (the default) uses the raw harvest directly — prep["anchor"] is
+        # whichever one actually applies (prep["remint"] is None for an intentional beat).
+        anchor = prep.get("anchor")
         evidence.append(_copy_evidence(f"walk_scene_{cur_code}_anchor.png", anchor))
         drift = prep.get("drift_check") or {}
         if drift.get("ok") is False:
@@ -184,7 +187,10 @@ def walk_scene(episode, scene, seeds=1, fast=False):
 
         first_frame = f"media/{episode}_{cur_code}_{cur_slug}_walkframe1.png"
         _extract_frame(cur_clip, first_frame)
-        join = cb_qa.check_join(anchor, first_frame) if os.path.exists(first_frame) else {"ok": None, "verdict": "(frame extraction failed)"}
+        # rule 31 (2026-07-05): the join-check's frame-identity half only applies when THIS beat declared
+        # its shot as an unbroken continuation of the previous one — state continuity is the hard gate either way.
+        _junction = cb_segprompt._junction_type(cur)
+        join = cb_qa.check_join(anchor, first_frame, junction=_junction) if os.path.exists(first_frame) else {"ok": None, "verdict": "(frame extraction failed)"}
         last_frame = f"media/{episode}_{cur_code}_{cur_slug}_walklast.png"
         _extract_frame(cur_clip, last_frame, last=True)
         evidence.append(_copy_evidence(f"walk_scene_{cur_code}_frame1.png", first_frame))

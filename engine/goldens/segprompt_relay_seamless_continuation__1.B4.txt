@@ -3,9 +3,11 @@
   "aspect": "16:9",
   "mode": "reference-to-video",
   "references": {
-    "@图1": "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity.",
+    "@图1": "@图1 is the exact opening composition and visual anchor. Begin on this exact layout, camera angle, character scale and lighting.",
+    "@Video1": "Use @Video1 only for accepted previous visual motion continuity and energy. Do not use or copy any audio from @Video1.",
     "@图2": "Use @图2 for Fuzzby's exact appearance.",
     "@图3": "Use @图3 for Zenny's exact appearance.",
+    "@图4": "Use @图4 for this scene's lighting, palette and environmental texture.",
     "@Audio1": "@Audio1 is the only dialogue, hums, sing-song rhythm and vocal performance source. It controls timing, mouth rhythm, speaker turns and emotional delivery."
   },
   "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",

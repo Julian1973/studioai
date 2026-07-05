@@ -1,0 +1,26 @@
+{
+  "duration": 15,
+  "aspect": "16:9",
+  "mode": "reference-to-video",
+  "references": {
+    "@图1": "@图1 is the state reference from the previous beat. Carry everything it shows — Fuzzby and Zenny's appearance, any temporary marks or wardrobe, the meadow lighting and their positions in the world — but open on a fresh camera setup within the same space, close to where @图1 shows the characters. The camera moves; the world does not.",
+    "@Video1": "Use @Video1 only for accepted previous visual motion continuity and energy. Do not use or copy any audio from @Video1.",
+    "@图2": "Use @图2 for Fuzzby's exact appearance.",
+    "@图3": "Use @图3 for Zenny's exact appearance.",
+    "@图4": "Use @图4 for this scene's lighting, palette and environmental texture.",
+    "@Audio1": "@Audio1 is the only dialogue, hums, sing-song rhythm and vocal performance source. It controls timing, mouth rhythm, speaker turns and emotional delivery."
+  },
+  "style": "Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper saturated colours, warm golden hour sunlight with volumetric rays, glowing magical particles, lighthearted highly expressive slapstick comedy",
+  "ambience": "a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze moving through grass and flowers",
+  "acting_rules": "Fuzzby is manic, eager and overconfident — full slapstick energy, but every action is a specific readable gag, never blurry movement. Zenny is tiny, dry and precisely controlled.",
+  "prompt": "Generate one continuous 15-second 3D CGI animated comedy beat. Fuzzby is the bee from @图2. Zenny is the bee from @图3. Timing: 0-7s Fuzzby hums louder and dives into another flower, popping back out somehow even more covered in pollen than before; Zenny just watches him, amazed — it's astonishing to see; both airborne wings beat rapidly; 7-13s A distant rumble of thunder rolls; Fuzzby stops dead mid-hover, wings still beating rapidly as his confidence catches; 13-15s settle in character: End on Fuzzby frozen mid-hover from the thunder, Zenny turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet. Fuzzby performs only Fuzzby's lines in @Audio1. Do not invent extra speech, hums or vocal sounds beyond @Audio1. Camera bee-scale and readable throughout — it may follow character eyelines and action with small motivated moves, locked whenever a character speaks.",
+  "continuity": "End with Fuzzby frozen mid-hover from the thunder; Zenny turned slightly toward the sky; both suspended in the sunlit wildflower meadow, the light subtly cooler at the meadow's far edge. This mark carries into the next beat.",
+  "prohibited": [
+    "no morphing, redesign or rescale of the characters",
+    "no extra characters or props",
+    "no on-screen text, subtitles, logos or watermarks",
+    "no foreign-language speech",
+    "no crystals on or attached to the bees",
+    "no still or frozen wings while airborne"
+  ]
+}

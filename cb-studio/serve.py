@@ -222,9 +222,12 @@ def notes_state():
     except Exception: return {}
 
 def relay_state_all():
-    """The FULL relay_state.json, straight off disk — {"Ep1": {"1": {winnerCode, nextCode, remint, driftCheck,
-    ...}}}. Exposed on /api/pipeline (the payload every page already fetches) so Gate 3's own panel can render
-    a pending anchor SYNCHRONOUSLY (no extra round-trip, no per-beat modal needed to discover it exists)."""
+    """The FULL relay_state.json, straight off disk — {"Ep1": {"1": {winnerCode, nextCode, harvested, remint,
+    anchor, driftCheck, ...}}}. Exposed on /api/pipeline (the payload every page already fetches) so Gate 3's
+    own panel can render a pending anchor SYNCHRONOUSLY (no extra round-trip, no per-beat modal needed to
+    discover it exists). RE-MINT SCOPING (rule 32, 2026-07-05): "remint" and "driftCheck" are both null for an
+    intentional_next_shot next beat (the default) — no NB2 pass ran. "anchor" is ALWAYS populated (the re-mint
+    when one ran, the raw harvest otherwise); the UI reads "anchor", never assumes "remint" is the only shape."""
     f = CBGEN / "relay_state.json"
     try:
         return json.loads(f.read_text()) if f.exists() else {}

@@ -841,19 +841,75 @@ _V4_ORDINALS = ("first", "second", "third", "fourth", "fifth")
 _V4_IDLE = ("wings beating, the breeze moving the flowers, pollen drifting, held expressions, camera locked — "
             "nothing new happens")
 
+# ══════════ THE JUNCTION-TYPE PIVOT (Julian's ruling, CLAUDE.md rule 31, 2026-07-05) ══════════
+# "The relay has been enforcing the wrong kind of join." Six consecutive frame-lock attempts on 1.B2 (rules
+# 15/19-30's history) all treated every relay beat as a SEAMLESS CONTINUATION of the previous instant — when
+# most beats are actually a NEW GAG ARC: an editorial cut to a fresh camera setup, already at the new beat's
+# own energy. Every beat now declares its OWN junction type; the field lives on the beat itself
+# (`junctionType`), never inferred or guessed.
+JUNCTION_INTENTIONAL = "intentional_next_shot"   # THE DEFAULT — a new gag arc, a fresh camera setup
+JUNCTION_SEAMLESS = "seamless_continuation"       # ONLY when the director's own cut explicitly continues
+_JUNCTION_TYPES = (JUNCTION_INTENTIONAL, JUNCTION_SEAMLESS)
+
+def _junction_type(beat):
+    """A beat that does not declare a junction type is `intentional_next_shot` by default — never
+    `seamless_continuation` by omission (Julian's ruling is explicit on this: omission is never read as
+    the stronger, rarer claim)."""
+    j = str(beat.get("junctionType") or "").strip()
+    return j if j in _JUNCTION_TYPES else JUNCTION_INTENTIONAL
+
 def _v4_species(role):
     parts = [p.strip() for p in str(role).split(",")]
     return parts[-1].split()[-1] if parts and parts[-1] else "character"
 
-def _v4_references(beat, scene, cast, relay, plate_n):
+def _v4_scene_noun(scene):
+    """A short location NOUN for the state-carry sentence's lighting clause ("the meadow lighting") — rule 33/34
+    (2026-07-05). Mechanical: the scene's own `locationId` (e.g. "crystal_cove_meadow" -> "meadow"), never
+    invented. Falls back to "scene" when locationId is missing or unparseable."""
+    lid = str((scene or {}).get("locationId") or "").strip()
+    if not lid:
+        return "scene"
+    return lid.rsplit("_", 1)[-1] or "scene"
+
+def _v4_state_carry(cast, marks, scene):
+    """THE STATE-REFERENCE clause for an `intentional_next_shot` beat's @图1 — REWRITTEN 2026-07-05 under
+    rule 33 (Fuzzby's energy returns) and rule 34 (the Coverage Law), superseding this function's original
+    version (which stuffed the predecessor's full endStateStill sentence in wholesale — reads as a prose
+    blob, not a clean law sentence, and the original wording implied "appear exactly as in @图1," which
+    reads like a pose-hold, contradicting the very "camera moves; the world does not" freedom this junction
+    type grants). The new shape is a FIXED CATEGORICAL template — identity, temporary marks/wardrobe,
+    lighting, world-position — plus the Coverage Law's explicit spatial leash: the new camera setup stays
+    CLOSE to the anchor's position, in the SAME space, never a relocation or a fresh establishing wide.
+    `marks` is a SHORT, hand-authored phrase (the new `carryMarks` field — never the full endStateStill
+    prose) naming what specifically persists ("the pollen on their legs," "the smeared moustache") — falls
+    back to a generic phrase when the predecessor hasn't authored one yet. `scene` supplies the lighting
+    noun via `_v4_scene_noun`."""
+    subjects = " and ".join(cast) if cast else "the characters"
+    marks_txt = str(marks or "").strip().rstrip(".") or "any temporary marks or wardrobe"
+    noun = _v4_scene_noun(scene)
+    return (f"@图1 is the state reference from the previous beat. Carry everything it shows — "
+            f"{subjects}'s appearance, {marks_txt}, the {noun} lighting and their positions in the world — "
+            f"but open on a fresh camera setup within the same space, close to where @图1 shows the "
+            f"characters. The camera moves; the world does not.")
+
+def _v4_references(beat, scene, cast, relay, plate_n, junction=None, prev_end_state_still=None, prev_carry_marks=None):
     """The six(five)-line reference header — every entry a terse one-liner, names welded to character slots.
     plate_n is None for a non-relay (first) beat: no separate plate reference, same as v3 (the beat's OWN
-    keyframe already IS the scene's establishing shot)."""
+    keyframe already IS the scene's establishing shot).
+    junction (rule 31): a `seamless_continuation` relay beat keeps @图1 as the locked opening-frame anchor
+    (the pre-pivot text, unchanged); an `intentional_next_shot` relay beat (the default) gets @图1's STATE-
+    REFERENCE clause instead (_v4_state_carry, rewritten under rules 33/34) — the beat opens on its own
+    fresh setup, carrying state only. prev_end_state_still is accepted for call-signature parity with the
+    rest of the shipped_prompt/for_beat_vN chain but UNUSED here (see _v4_state_carry's note — the marks
+    clause now comes from `prev_carry_marks`, a short phrase, never the full endStateStill sentence)."""
     refs = {}
     if relay:
-        refs["@图1"] = ("@图1 is the exact opening composition and visual anchor. Begin on this exact layout, "
-                        "camera angle, character scale and lighting.")
-        refs["@Video1"] = ("Use @Video1 only for accepted previous visual motion continuity and camera feel. Do "
+        if junction == JUNCTION_SEAMLESS:
+            refs["@图1"] = ("@图1 is the exact opening composition and visual anchor. Begin on this exact layout, "
+                            "camera angle, character scale and lighting.")
+        else:
+            refs["@图1"] = _v4_state_carry(cast, prev_carry_marks, scene)
+        refs["@Video1"] = ("Use @Video1 only for accepted previous visual motion continuity and energy. Do "
                            "not use or copy any audio from @Video1.")
     else:
         refs["@图1"] = "@图1 is the opening keyframe — TRUTH for environment, lighting and continuity."
@@ -884,10 +940,19 @@ def _v4_timing_clock(beat, cast):
         sec = max(1, HANDLE_ACTION - running) if i == n - 1 else max(1, round(HANDLE_ACTION * w / total_w))
         start = running; running += sec
         segs.append(f"{start}-{running}s {a}")
-    segs.append(f"{HANDLE_ACTION}-{HANDLE_TOTAL}s settle: {_v4_settle_text(cast)}")
+    segs.append(f"{HANDLE_ACTION}-{HANDLE_TOTAL}s settle in character: {_v4_settle_text(beat, cast)}")
     return "Timing: " + "; ".join(segs) + "."
 
-def _v4_settle_text(cast):
+def _v4_settle_text(beat, cast):
+    """FUZZBY'S ENERGY RETURNS (rule 33, 2026-07-05): the settle is IN CHARACTER, not a generic freeze —
+    read from the beat's OWN authored `endState` (directing prose for this beat's ending, rule 27) verbatim,
+    so a manic character stays visibly manic even at rest ("vibrating with pride, hovering with tiny eager
+    bounces") instead of flattening into the same idle-life boilerplate every beat shared before this
+    ruling. Falls back to the old universal idle-life guarantee when endState isn't authored yet — never
+    dead air, per the Handle Doctrine (rule 20)."""
+    es = str(beat.get("endState") or "").strip().rstrip(".")
+    if es:
+        return es
     subjects = " and ".join(cast) if cast else "the characters"
     return f"{subjects} hold their poses at rest while {_V4_IDLE}"
 
@@ -918,17 +983,70 @@ def _v4_speaker_order(beat, cast):
 def _v4_audio_prohibition():
     return "Do not invent extra speech, hums or vocal sounds beyond @Audio1."
 
-def _v4_camera_discipline():
-    return ("Keep the camera readable and character-scale, with only small motivated reframing and no wild "
-            "camera during dialogue.")
+def _v4_opens_on(beat):
+    """THE COVERAGE LAW's mechanical bridge (rule 34, 2026-07-05, "a scene is one continuous spatial
+    bubble"): a beat's own declared opening — WHO the camera opens on and their immediate mid-motion state
+    — is a hand-authored Layer-2 field (`opensOn`, a new field: {"who": <name>, "action": <short mid-motion
+    text>}), never invented, wrapped in a fixed "OPEN ON {NAME} mid-motion:" declaration. This IS the
+    standard eyeline/motion bridge the Coverage Law names: a foil character's look or turn is what
+    motivates a cut travelling within the same spatial bubble, instead of a fresh establishing wide. Empty
+    when a beat hasn't authored this field yet — never fabricated."""
+    oo = beat.get("opensOn") or {}
+    who = str(oo.get("who") or "").strip()
+    action = str(oo.get("action") or "").strip().rstrip(".")
+    if not (who and action):
+        return ""
+    return f"OPEN ON {who.upper()} mid-motion: {action}."
+
+def _v4_camera_discipline(cast, opens_on_who=None):
+    """THE CAMERA-DISCIPLINE LAW — REWRITTEN 2026-07-05 under rule 34 (the Coverage Law): species-scaled
+    (mechanical, from _v4_species over the cast — "bee-scale," "bear-scale," falling back to "character-
+    scale" for a mixed or empty cast) and, when the beat has declared an `opensOn` character (see
+    _v4_opens_on), names the SPECIFIC eyeline-follow character and the SPECIFIC action character the camera
+    may track — the Coverage Law's "motivated by eyeline or motion" bridge stated as a concrete camera
+    instruction, not a generic "small motivated reframing" line. Falls back to the old generic phrasing
+    when there's no opensOn character or the cast isn't exactly a pair."""
+    species_set = {_v4_species(_char_meta(c)[0]) for c in cast} if cast else set()
+    scale = species_set.pop() if len(species_set) == 1 else "character"
+    others = [c for c in cast if c != opens_on_who] if opens_on_who else []
+    if opens_on_who and len(others) == 1:
+        return (f"Camera {scale}-scale and readable throughout — it may follow {opens_on_who}'s eyeline and "
+                f"{others[0]}'s action with small motivated moves, locked whenever a character speaks.")
+    return (f"Camera {scale}-scale and readable throughout — it may follow character eyelines and action "
+            "with small motivated moves, locked whenever a character speaks.")
+
+def _v4_acting_rules(beat, cast):
+    """A new top-level field (rule 33, 2026-07-05, Fuzzby's energy-return law): per-character acting
+    essence, mechanical from each cast member's OWN characters.json bible.actingRule (a new, tightly-scoped
+    one-line field, distinct from the much longer essence/cadence/mannerisms prose — the same condensed-
+    companion-line convention WING_LAW/_WING_LAW_ONE_LINE already uses), plus the beat's own authored
+    `actingContrast` (a new Layer-2 field — WHICH characters play off each other and how is a director's
+    call, never hardcoded per-cast in Layer 1, since a future non-Fuzzby/Zenny cast has a different
+    dynamic). Empty when no cast member has an actingRule authored yet — never invented."""
+    lines = []
+    for name in cast:
+        rule = str(((_CHARS.get(name) or {}).get("bible") or {}).get("actingRule") or "").strip()
+        if rule:
+            lines.append(f"{name} is {rule.rstrip('.')}.")
+    contrast = str(beat.get("actingContrast") or "").strip()
+    if contrast:
+        lines.append(contrast)
+    return " ".join(lines)
 
 def _v4_continuity(beat):
     """A hand-authored static picture (endStateStill, rule 27 — never auto-derived from endState) plus a
-    fixed, mechanical carry-forward tail. Empty when endStateStill isn't authored yet."""
+    carry-forward tail. REWRITTEN 2026-07-05 (rules 33/34): the tail now names THIS beat's own authored
+    `carryMarks` (the same short phrase the NEXT beat's @图1 state-carry clause will quote, see
+    _v4_state_carry) plus the show's universal warm light, instead of the old generic "this mark carries
+    into the next beat" — matching the specificity Fuzzby's energy-return law calls for throughout. Falls
+    back to the old generic tail when carryMarks isn't authored yet. Empty overall when endStateStill isn't
+    authored yet."""
     es = str(beat.get("endStateStill") or "").strip()
     if not es:
         return ""
-    return f"End with {es.rstrip('.')}. This mark carries into the next beat."
+    marks = str(beat.get("carryMarks") or "").strip().rstrip(".")
+    tail = f"{marks[:1].upper()}{marks[1:]}, and the warm light carry into the next beat." if marks else "This mark carries into the next beat."
+    return f"End with {es.rstrip('.')}. {tail}"
 
 def _v4_prohibited(beat, any_bee):
     """The beat's own authored stagingProhibited (Layer 2, director-named failure modes specific to this
@@ -936,40 +1054,74 @@ def _v4_prohibited(beat, any_bee):
     staging = [str(x).strip() for x in (beat.get("stagingProhibited") or []) if str(x).strip()]
     return staging + _v3_negatives(any_bee)
 
-def emit_v4(beat, scene, cast, relay, prev_end_state_still=None):
-    """THE blessed template's assembler. prev_end_state_still is accepted for call-signature compatibility
-    with the rest of the shipped_prompt/for_beat_vN chain but UNUSED here — v4's @图1 text is generic (no
-    content-description clause); the beat's own persisting state is carried by "continuity" (from its OWN
-    endStateStill) instead of the NEXT beat's point-anchor content clause."""
-    any_bee = any(_char_meta(n)[1] for n in cast)
-    plate_n = (len(cast) + 2) if relay else None
+def _v4_opener(beat, relay, junction):
+    """THE OPENER SENTENCE — branches by junction type (rule 31, 2026-07-05); REWRITTEN 2026-07-05 under
+    rule 33 (dropped the redundant "for children aged 4 to 8" — `style` already states the audience once;
+    restating it here was a Law-7-class duplication) and rule 34 (dropped the generic "This beat opens on
+    its own fresh camera setup..." filler sentence for an intentional_next_shot beat — @图1's own reference
+    text now carries that instruction in full via _v4_state_carry, and the beat's own `opensOn` sentence,
+    see _v4_opens_on, states the SPECIFIC opening concretely; restating the same instruction a third time
+    generically is exactly the "reference re-description reads as drift, not reinforcement" mechanism this
+    session already found and fixed once, test #3/subtraction). A `seamless_continuation` relay beat (or
+    any non-relay opener beat, which has no junction concept at all — it opens from its own generated
+    keyframe) still begins "from @图1's exact opening composition.\""""
     mode = str(beat.get("comedyMode") or "").strip().upper()
     tone_word = " comedy" if mode == "BIG" else (" emotional" if mode == "TRUE" else "")
-    opener = (f"Generate one continuous {HANDLE_TOTAL}-second 3D CGI animated{tone_word} beat for children aged "
-              f"4 to 8. Begin from @图1's exact opening composition.")
+    lead = f"Generate one continuous {HANDLE_TOTAL}-second 3D CGI animated{tone_word} beat."
+    if relay and junction == JUNCTION_INTENTIONAL:
+        return lead
+    return f"{lead} Begin from @图1's exact opening composition."
+
+def emit_v4(beat, scene, cast, relay, prev_end_state_still=None, prev_carry_marks=None, junction=None):
+    """THE blessed template's assembler. junction (rule 31, 2026-07-05): resolved from the beat's own
+    `junctionType` field when not given explicitly — `intentional_next_shot` (the default) or
+    `seamless_continuation`. prev_end_state_still is accepted for call-signature parity with the rest of
+    the shipped_prompt/for_beat_vN chain but UNUSED here as of rules 33/34 (2026-07-05) — @图1's state-carry
+    content now comes from `prev_carry_marks` (a short phrase, see _v4_state_carry), not the predecessor's
+    full endStateStill sentence. Also assembles the beat's own `opensOn` sentence (Coverage Law bridge, rule
+    34) and the new top-level `acting_rules` field (Fuzzby's energy-return law, rule 33)."""
+    junction = junction or _junction_type(beat)
+    any_bee = any(_char_meta(n)[1] for n in cast)
+    plate_n = (len(cast) + 2) if relay else None
+    opener = _v4_opener(beat, relay, junction)
     bindings = " ".join(f"{name} is the {_v4_species(_char_meta(name)[0])} from @图{i + 2}."
                         for i, name in enumerate(cast))
+    # THE COVERAGE LAW (rule 34) applies ONLY to an intentional_next_shot relay beat — a `seamless_continuation`
+    # join is definitionally the SAME shot continuing, not a new camera angle, so there is no eyeline bridge to
+    # state; a non-relay opener beat has no predecessor to bridge from either. Gating here (not just on the
+    # sentence's own emptiness) matters because a beat's authored `opensOn` field doesn't disappear when its
+    # junctionType is overridden for testing (see cb_golden._relay_snapshot) — without this gate the sentence
+    # leaked into the seamless variant, where it doesn't make sense.
+    intentional_relay = relay and junction == JUNCTION_INTENTIONAL
+    opens_on = _v4_opens_on(beat) if intentional_relay else ""
     clock = _v4_timing_clock(beat, cast)
     speaker_sent = _v4_speaker_order(beat, cast)
+    opens_on_who = (str((beat.get("opensOn") or {}).get("who") or "").strip() or None) if intentional_relay else None
+    camera = _v4_camera_discipline(cast, opens_on_who)
     prompt_body = " ".join(x for x in
-                           [opener, bindings, clock, speaker_sent, _v4_audio_prohibition(), _v4_camera_discipline()]
+                           [opener, bindings, opens_on, clock, speaker_sent, _v4_audio_prohibition(), camera]
                            if x)
     doc = {
         "duration": HANDLE_TOTAL, "aspect": "16:9", "mode": "reference-to-video",
-        "references": _v4_references(beat, scene, cast, relay, plate_n),
+        "references": _v4_references(beat, scene, cast, relay, plate_n, junction=junction,
+                                     prev_end_state_still=prev_end_state_still, prev_carry_marks=prev_carry_marks),
         "style": _v3_style(),
         "ambience": _v3_ambience(scene),
-        "prompt": prompt_body,
-        "continuity": _v4_continuity(beat),
-        "prohibited": _v4_prohibited(beat, any_bee),
     }
+    acting = _v4_acting_rules(beat, cast)
+    if acting:
+        doc["acting_rules"] = acting
+    doc["prompt"] = prompt_body
+    doc["continuity"] = _v4_continuity(beat)
+    doc["prohibited"] = _v4_prohibited(beat, any_bee)
     return json.dumps(doc, indent=2, ensure_ascii=False)
 
-def for_beat_v4(beat, scene=None, relay=False, prev_end_state_still=None):
+def for_beat_v4(beat, scene=None, relay=False, prev_end_state_still=None, prev_carry_marks=None):
     cast = beat.get("openingCast") or beat.get("characters") or []
     if not (beat.get("cuts") or []):
         return "", "v4 (empty — no cuts)"
-    return emit_v4(beat, scene, cast, relay, prev_end_state_still=prev_end_state_still), "v4"
+    return emit_v4(beat, scene, cast, relay, prev_end_state_still=prev_end_state_still,
+                   prev_carry_marks=prev_carry_marks), "v4"
 
 def for_beat_v3(beat, scene=None, relay=False, prev_end_state_still=None):
     """RETIRED (2026-07-05, superseded by v4 — see the block above) — kept for rollback/reference only; never
@@ -997,14 +1149,18 @@ def for_beat_v3(beat, scene=None, relay=False, prev_end_state_still=None):
 # retired builder can never pass unnoticed. EVERY caller that needs "the prompt Seedance will actually receive"
 # calls THIS function — never for_beat/for_beat_v2/for_beat_v3/for_beat_v4 directly — so preview and fire are
 # provably the SAME call, through the SAME decision, every time.
-def shipped_prompt(beat, scene=None, relay=False, prev_end_state_still=None):
+def shipped_prompt(beat, scene=None, relay=False, prev_end_state_still=None, prev_carry_marks=None):
     """Returns (prompt, builder_label, is_definitive). is_definitive=False means a retired fallback fired —
     treat that as worth investigating, not routine. relay=True (RELAY CHAIN, rule 21) — see for_beat_v4;
     ignored by the retired v1/v2/v3 fallbacks (they predate the doctrine and are never expected to fire in
     practice). prev_end_state_still: threaded to for_beat_v4 for signature compatibility (unused there — see
-    emit_v4's note) and to the retired v3 fallback (still used there, unchanged)."""
+    emit_v4's note) and to the retired v3 fallback (still used there, unchanged). prev_carry_marks (rules
+    33/34, 2026-07-05): the PREVIOUS beat's own authored `carryMarks` — a short phrase (never a full
+    sentence) naming what temporary marks/wardrobe persist — threaded to for_beat_v4 for @图1's state-carry
+    clause; ignored by the retired v1/v2/v3 fallbacks."""
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
-    v4, emitter4 = for_beat_v4(beat, scene, relay=relay, prev_end_state_still=prev_end_state_still)
+    v4, emitter4 = for_beat_v4(beat, scene, relay=relay, prev_end_state_still=prev_end_state_still,
+                              prev_carry_marks=prev_carry_marks)
     if v4:
         return v4, f"cb_segprompt_v4 ({emitter4})", True
     print(f"\n{'!' * 70}\n  FALLBACK TO cb_segprompt v3 (for_beat_v3) — for_beat_v4 returned EMPTY\n"

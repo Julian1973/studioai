@@ -100,31 +100,90 @@ def check_anatomy(kf, characters):
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CLEAN"), "verdict": text.strip()}
 
-def check_join(prev_end_frame, next_open_frame):
-    """THE JOIN CHECK (Julian's JOIN CONTRACT ruling, 2026-07-03): compares beat N's final frame (its SETTLE) to
-    beat N+1's opening frame for the three concrete things a cut must hold across — POSITION, STATE and LIGHT.
-    Report-only / advisory, same as the other frame-level checks below; never auto-fails a beat on its own. Concrete
-    visual criteria per rule 17 — never a vague "does this flow" question."""
+JUNCTION_INTENTIONAL = "intentional_next_shot"   # THE DEFAULT — a new gag arc, a fresh camera setup
+JUNCTION_SEAMLESS = "seamless_continuation"       # ONLY when the director's own cut explicitly continues
+
+def check_join_state(prev_end_frame, next_open_frame):
+    """THE STATE-CONTINUITY GATE (Julian's junction-type ruling, CLAUDE.md rule 31, 2026-07-05; extended
+    under rule 34, the Coverage Law, same day) — the HARD GATE for EVERY join, cut or continuation:
+    marks/wardrobe, lighting, geography AND spatial coverage must hold across a beat boundary regardless of
+    camera setup or pose, which an `intentional_next_shot` join (the default) is explicitly allowed to
+    change. This is the half of the old single check_join that survives unconditionally; POSITION/framing
+    match moved to check_join_frame_identity below, which only applies to a declared `seamless_continuation`
+    join. COVERAGE (rule 34) is DISTINCT from GEOGRAPHY: geography asks "is this the same world at all";
+    coverage asks whether the beat's OWN opening reads as a continuation within that world (a new angle
+    close to where the previous beat left off) rather than a fresh, pulled-back establishing wide or a
+    sense of having relocated — "a scene is one continuous spatial bubble... never a relocation, never a
+    fresh establishing wide mid-scene." Report-only / advisory, same as every other frame-level check in
+    this module. Concrete visual criteria per rule 17 — never a vague "does this flow" question."""
     if not (prev_end_frame and next_open_frame and os.path.exists(prev_end_frame) and os.path.exists(next_open_frame)):
         return {"ok": None, "verdict": "(missing end or open frame — cannot check this join)"}
     prompt = (
-        "You are shown TWO consecutive film frames: Image 1 is the LAST frame of the shot that just ended; Image 2 "
-        "is the FIRST frame of the very next shot. Check three concrete things across this cut:\n"
-        "1. POSITION: is each character in the SAME screen half (left/right) as before, at a similar apparent "
-        "size/distance from camera — not swapped sides, not suddenly much closer or much farther away?\n"
-        "2. STATE: does any visible temporary substance or prop on a character (pollen dusting, a moustache, dirt, "
+        "You are shown TWO film frames: Image 1 is the LAST frame of the shot that just ended; Image 2 is the "
+        "FIRST frame of the very next shot — which may be a DIFFERENT camera setup (a new gag is allowed to open "
+        "on a fresh angle; do not penalise a changed camera or pose by itself). Check four concrete things that "
+        "must hold regardless of camera or pose:\n"
+        "1. STATE: does any visible temporary substance or prop on a character (pollen dusting, a moustache, dirt, "
         "a held object) match between the two images — present in both or absent in both, not present in one and "
         "gone in the other?\n"
-        "3. LIGHT: is the colour and brightness of the sky/environment roughly continuous (both warm/golden, or "
+        "2. LIGHT: is the colour and brightness of the sky/environment roughly continuous (both warm/golden, or "
         "both a cooler dusk-blue, etc.) rather than one clearly warmer, cooler, brighter or darker than the other?\n"
-        "Reply 'CONTINUOUS' on line 1 if all three hold. Otherwise reply 'BROKEN' then ONE short line PER broken "
-        "criterion, prefixed POSITION/STATE/LIGHT, naming exactly what changed (e.g. 'POSITION: the larger bee was "
-        "frame-left, now frame-right' or 'STATE: a pollen moustache is visible in image 1, gone in image 2')."
+        "3. GEOGRAPHY: is this visibly the SAME world/location — the same set, flowers, terrain and landmarks — "
+        "not a different place entirely?\n"
+        "4. COVERAGE: does Image 2 read as a new camera angle continuing WITHIN the same immediate space as Image "
+        "1 (close to where the characters already were, a plausible next angle on the same patch of the world) — "
+        "rather than a fresh, pulled-back ESTABLISHING WIDE that re-introduces the whole location from scratch, "
+        "or a sense that the scene has relocated to a different part of the world entirely?\n"
+        "Reply 'CONTINUOUS' on line 1 if all four hold. Otherwise reply 'BROKEN' then ONE short line PER broken "
+        "criterion, prefixed STATE/LIGHT/GEOGRAPHY/COVERAGE, naming exactly what changed (e.g. 'STATE: a pollen "
+        "moustache is visible in image 1, gone in image 2' or 'COVERAGE: image 2 pulls back to a wide establishing "
+        "shot instead of continuing close on the characters')."
     )
     text, err = vision_verdict(prompt, [prev_end_frame, next_open_frame])
     if err:
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CONTINUOUS"), "verdict": text.strip()}
+
+def check_join_frame_identity(prev_end_frame, next_open_frame):
+    """THE FRAME-IDENTITY CHECK — a `seamless_continuation` join ONLY (rule 31): does beat N+1's opening
+    frame literally match beat N's ending frame — same screen position/scale per character, same camera
+    framing? This is the half of the old single check_join that an `intentional_next_shot` join (the
+    default) is no longer held to — a cut is EXPECTED to open on a different camera setup; only a beat
+    that declares its shot continues unbroken owes this match. Report-only / advisory, concrete criteria
+    per rule 17."""
+    if not (prev_end_frame and next_open_frame and os.path.exists(prev_end_frame) and os.path.exists(next_open_frame)):
+        return {"ok": None, "verdict": "(missing end or open frame — cannot check this join)"}
+    prompt = (
+        "You are shown TWO consecutive film frames of an UNBROKEN, single continuing shot: Image 1 is the LAST "
+        "frame before the cut; Image 2 is the FIRST frame after it, meant to be the SAME instant continuing. "
+        "Check: is each character in the SAME screen half (left/right), at a similar apparent size/distance from "
+        "camera and in essentially the SAME pose/framing as in Image 1 — not swapped sides, not suddenly closer "
+        "or farther away, not a different camera angle?\n"
+        "Reply 'CONTINUOUS' on line 1 if this holds. Otherwise reply 'BROKEN' then ONE short line naming exactly "
+        "what changed (e.g. 'the larger bee was frame-left, now frame-right' or 'the camera angle changed')."
+    )
+    text, err = vision_verdict(prompt, [prev_end_frame, next_open_frame])
+    if err:
+        return {"ok": None, "verdict": err}
+    return {"ok": text.strip().upper().startswith("CONTINUOUS"), "verdict": text.strip()}
+
+def check_join(prev_end_frame, next_open_frame, junction=JUNCTION_INTENTIONAL):
+    """THE JOIN CHECK, TWO-TIER (Julian's junction-type ruling, CLAUDE.md rule 31, 2026-07-05 — supersedes
+    the single POSITION/STATE/LIGHT check this function ran from the original JOIN CONTRACT, 2026-07-03):
+    STATE CONTINUITY (check_join_state — marks/wardrobe, lighting, geography) is the hard gate for EVERY
+    join, no exceptions. FRAME IDENTITY (check_join_frame_identity — does the opening frame literally match
+    the settle) is checked ONLY when junction == 'seamless_continuation'; an 'intentional_next_shot' join
+    (the default — pass nothing, or an unrecognised value, and this is what runs) is never held to it,
+    since a new gag arc is expected to open on a different camera setup.
+    Returns {ok, verdict, state, frame_identity} — frame_identity is None (not applicable) for an
+    intentional_next_shot join, so a caller can tell "not checked" from "checked and passed"."""
+    state = check_join_state(prev_end_frame, next_open_frame)
+    frame_identity = check_join_frame_identity(prev_end_frame, next_open_frame) if junction == JUNCTION_SEAMLESS else None
+    ok = state["ok"] if frame_identity is None else (state["ok"] and frame_identity["ok"])
+    parts = [f"STATE: {state['verdict']}"]
+    if frame_identity is not None:
+        parts.append(f"FRAME-IDENTITY: {frame_identity['verdict']}")
+    return {"ok": ok, "verdict": " | ".join(parts), "state": state, "frame_identity": frame_identity}
 
 def check_remint(harvested_path, remint_path, turnaround_paths=None):
     """THE RE-MINT DRIFT CHECK (Julian's ruling, 2026-07-03) — the re-mint's only job is a technical cleanup pass
@@ -328,8 +387,10 @@ DONE_CODES = {
     "CLIP_STATE_DROPPED":     "the beat's named story-state disappears by the end — keep it for the whole take",
     "QA_UNAVAILABLE":         "QA could not run (ffmpeg/vision unavailable) — not a clip fault; check tooling",
     # ── JOIN CONTRACT (Julian, 2026-07-03) — the handoff between beat N and beat N+1 ──────────────────
-    "JOIN_DISCONTINUITY":     "beat N's settle (final frame) and beat N+1's opening frame disagree on position, "
-                              "state or light — see check_join()'s per-criterion verdict for which",
+    "JOIN_DISCONTINUITY":     "beat N's settle (final frame) and beat N+1's opening frame disagree on state, "
+                              "light, geography or spatial coverage (all four always checked, rule 34's Coverage "
+                              "Law), or — on a declared seamless_continuation join only — position/framing too; "
+                              "see check_join()'s per-criterion verdict for which",
     # ── RE-MINT (Julian's ruling, 2026-07-03) — the harvest's NB2 cleanup pass ────────────────────────
     "REMINT_DRIFT":           "the re-minted frame drifted from the harvested frame (position/state) or the "
                               "turnarounds (identity) — see check_remint()'s per-criterion verdict for which; "

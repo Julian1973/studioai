@@ -405,8 +405,9 @@
     "Fuzzby": "dynamic-flight",
     "Zenny": "static-calm"
    },
-   "endState": "He straightens into a heroic chest-out superhero pose and holds it one blink too long; the smaller bee glides up beside him, perfectly still except her rapid wings, watching, her expression never changing. End on his pose and her flat stare, both at rest, camera locked, as the meadow's gentle hum resumes.",
-   "endStateStill": "The larger bee, frozen in a heroic chest-out superhero pose, chin lifted, chest puffed; the smaller bee hovering beside him, wings a rapid blur, flat unimpressed deadpan stare; both centred in the sunlit wildflower meadow."
+   "endState": "Fuzzby straightens into a heroic chest-out superhero pose and holds it one blink too long; Zenny glides up beside him, perfectly still except her rapid wings, watching, her expression never changing. End on his pose and her flat stare, both at rest, camera locked, as the meadow's gentle hum resumes.",
+   "endStateStill": "Fuzzby, frozen in a heroic chest-out superhero pose, chin lifted, chest puffed; Zenny hovering beside him, wings a rapid blur, flat unimpressed deadpan stare; both centred in the sunlit wildflower meadow.",
+   "carryMarks": "the pollen on their legs"
   },
   {
    "slug": "s1-b2-officially-nuts",
@@ -445,8 +446,8 @@
    "cuts": [
     {
      "n": 1,
-     "framing": "Drone-style camera chases Fuzzby through his wild manic loop across the meadow",
-     "action": "Fuzzby rockets off into a chaotic loop-the-loop — overshooting high, plunging low, zig-zagging between stems and petals, humming louder and louder — then swings back around and barrels toward the next flower, lining himself up with far too much confidence, while Zenny works her own bloom nearby, calm and precise, entirely unbothered; both bees' wings beat rapidly and continuously.",
+     "framing": "Camera opens on Zenny, then follows her eyeline to find Fuzzby as he rockets to the next flower and loops to brake",
+     "action": "her head-turn follows him as he rockets to a big pollen-heavy flower, brakes too late and has to loop once around its stem to stop — camera follows her eyeline to find him",
      "dialogue": null,
      "delivery": null,
      "voiceTreatment": null,
@@ -454,8 +455,8 @@
     },
     {
      "n": 2,
-     "framing": "Camera stays with Fuzzby for the reveal, then a short punctuation cut to Zenny",
-     "action": "Fuzzby sticks his whole face into the flower; after a beat, he pulls back out completely dusted in pollen, wearing a magnificent goatee handlebar moustache. CUT TO Zenny: trying not to laugh.",
+     "framing": "Camera holds with Fuzzby for the flower-dive and pollen-moustache reveal",
+     "action": "he plants only his face into the flower's soft pollen centre with total commitment — body, wings and legs staying visible outside the petals — the centre squashes under his face and rebounds as he pops back out wearing a clear yellow handlebar moustache and small goatee of pollen, shaped like a moustache, not a full-face coating",
      "dialogue": null,
      "delivery": null,
      "voiceTreatment": null,
@@ -463,8 +464,8 @@
     },
     {
      "n": 3,
-     "framing": "Close on Fuzzby, proud, presenting the moustache",
-     "action": "Fuzzby presents the goatee handlebar moustache with proud seriousness, holding still enough for the audience to read the absurdity while his wings continue fast fluttering, then tries to wipe it off and only smears it worse, the moustache and goatee shape staying clearly visible throughout.",
+     "framing": "Close on Fuzzby's proud presentation for his line",
+     "action": "he snaps into a proud chest-out presentation, wings still going full speed, and delivers his first line from @Audio1 — mouth moving only on his line",
      "dialogue": "FUZZBY: Do I look official?",
      "delivery": "earnest, pompous, genuinely hoping for approval",
      "voiceTreatment": null,
@@ -472,8 +473,8 @@
     },
     {
      "n": 4,
-     "framing": "Short punctuation cut to Zenny for the dry topper — no long coverage",
-     "action": "Zenny fights the smile for a beat, then lets the smallest dry amusement through while Fuzzby waits for praise.",
+     "framing": "Camera catches Fuzzby's wipe and finds Zenny drifting in for her line",
+     "action": "he tries a quick nervous wipe and smears it worse, the moustache shape surviving, while Zenny drifts up beside him with two calm wingbeats and delivers her dry second line from @Audio1 — only her mouth moves",
      "dialogue": "ZENNY: Yes Fuzzby Officially nuts!",
      "delivery": "deadpan, dry, understated; the tiny smile tries to hide inside the line",
      "voiceTreatment": null,
@@ -533,15 +534,25 @@
    "sceneNumber": 1,
    "beatCode": "1.B2",
    "id": 2,
-   "endState": "Fuzzby holds his proud pollen-dusted grin while Zenny keeps her flat deadpan stare beside him, both at rest, camera locked, as the meadow's gentle hum resumes.",
-   "endStateStill": "Fuzzby's smeared yellow handlebar moustache and small goatee still clearly visible, Zenny deadpan beside him.",
+   "junctionType": "intentional_next_shot",
+   "endState": "Fuzzby is still vibrating with pride, hovering with tiny eager bounces, Zenny is deadpan and still beside him, wings beating naturally, breeze moving the flowers, pollen drifting.",
+   "endStateStill": "Fuzzby's smeared yellow handlebar moustache and goatee clearly visible and Zenny deadpan beside him.",
+   "carryMarks": "the moustache, the pollen on their legs",
+   "opensOn": {
+    "who": "Zenny",
+    "action": "her head turning to track Fuzzby as he streaks past her flower — he is already at full speed, humming his happy sing-song from @Audio1"
+   },
+   "actingContrast": "The comedy is the contrast: his chaos against her calm, and him mistaking every disaster for a triumph.",
    "stagingProhibited": [
     "Fuzzby disappearing into the flower",
     "full body entering the flower",
     "random full-face pollen dusting",
     "clean face after wiping",
     "moustache or goatee removed",
-    "wrong speaker mouth movement"
+    "wrong speaker mouth movement",
+    "extra generated dialogue or vocal sounds",
+    "using @Video1 audio",
+    "blurry or unreadable fast movement"
    ]
   },
   {
@@ -661,8 +672,8 @@
    "sceneNumber": 1,
    "beatCode": "1.B3",
    "id": 3,
-   "endState": "End on the two of them: the larger bee hovering upright and undimmed, proud; the smaller bee's eye-roll softening into a small smile. Both at rest, camera locked.",
-   "endStateStill": "The two of them: the larger bee hovering upright, undimmed, proud; the smaller bee's expression at a small, warm smile, eyes still faintly rolled; both centred in the sunlit wildflower meadow."
+   "endState": "End on the two of them: Fuzzby hovering upright and undimmed, proud; Zenny's eye-roll softening into a small smile. Both at rest, camera locked.",
+   "endStateStill": "Fuzzby and Zenny: Fuzzby hovering upright, undimmed, proud; Zenny's expression at a small, warm smile, eyes still faintly rolled; both centred in the sunlit wildflower meadow."
   },
   {
    "scene": "Meadow Pollen Run",
@@ -761,8 +772,8 @@
    "prohibited_staging": "Do not show ocean, boat, bears, rain, lightning, or visible storm clouds yet; only distant thunder and subtle light change.",
    "beatCode": "1.B4",
    "id": 4,
-   "endState": "End on the larger bee frozen mid-hover from the thunder, the smaller bee turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet.",
-   "endStateStill": "The larger bee frozen mid-hover from the thunder; the smaller bee turned slightly toward the sky; both suspended in the sunlit wildflower meadow, the light subtly cooler at the meadow's far edge."
+   "endState": "End on Fuzzby frozen mid-hover from the thunder, Zenny turned slightly toward the sky. Both suspended and at rest, camera locked; the light very subtly cooler at the meadow's far edge, nothing scary visible yet.",
+   "endStateStill": "Fuzzby frozen mid-hover from the thunder; Zenny turned slightly toward the sky; both suspended in the sunlit wildflower meadow, the light subtly cooler at the meadow's far edge."
   },
   {
    "slug": "s1-b5-storm-coming-pressure-flower-stuck",

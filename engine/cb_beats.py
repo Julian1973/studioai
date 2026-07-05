@@ -108,12 +108,14 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
         _scene_beats = [b for b in (d.get("beats") or d.get("shots") or [])
                         if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
         _, _relay_status, _relay_prev = cb_scene.relay_source_for(_scene_beats, code, episode)
-        _prev_end_state = None
+        _prev_end_state, _prev_carry_marks = None, None
         if _relay_status == "relay" and _relay_prev:
             _prev_b = next((bb for bb in _scene_beats if (bb.get("beatCode") or bb.get("shotCode")) == _relay_prev), None)
             _prev_end_state = _prev_b.get("endStateStill") if _prev_b else None
+            _prev_carry_marks = _prev_b.get("carryMarks") if _prev_b else None   # rules 33/34, 2026-07-05
         _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene, relay=(_relay_status == "relay"),
-                                                              prev_end_state_still=_prev_end_state)
+                                                              prev_end_state_still=_prev_end_state,
+                                                              prev_carry_marks=_prev_carry_marks)
         if _def:
             prompt, builder, raw = _def, _builder_label, True
     except Exception:
@@ -292,12 +294,14 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
             if d.get("scenes"):
                 _sn = str(b.get("sceneNumber"))
                 _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-            _prev_end_state = None
+            _prev_end_state, _prev_carry_marks = None, None
             if relay_status == "relay" and relay_prev:
                 _prev_b = next((bb for bb in beats if (bb.get("beatCode") or bb.get("shotCode")) == relay_prev), None)
                 _prev_end_state = _prev_b.get("endStateStill") if _prev_b else None
+                _prev_carry_marks = _prev_b.get("carryMarks") if _prev_b else None   # rules 33/34, 2026-07-05
             _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"),
-                                                                  prev_end_state_still=_prev_end_state)   # THE single routing point — identical to the studio preview path
+                                                                  prev_end_state_still=_prev_end_state,
+                                                                  prev_carry_marks=_prev_carry_marks)   # THE single routing point — identical to the studio preview path
             if _def:
                 prompt = _def; raw = True; builder_label = _builder_label
         except Exception as _se:
@@ -370,18 +374,22 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                     print(f"  [HARVEST] {code}: {'settle frame -> ' + settlef if settlef else 'skipped (extraction failed)'}", flush=True)
             except Exception as ee:
                 print(f"  beat {code}: settle-frame harvest skipped ({str(ee)[:120]})", flush=True)
-            try:    # THE JOIN CHECK (item EIGHT, Julian, 2026-07-03) — automatic, advisory: compare this clip's
-                    # ACTUAL first rendered frame against the settle it was told to open from, before this ever
-                    # reaches Julian's review. Only meaningful for a relay beat (one that had a carried settle to
-                    # check against); a first-of-scene beat has nothing to compare against.
+            try:    # THE JOIN CHECK (item EIGHT, Julian, 2026-07-03; two-tier per rule 31, 2026-07-05) —
+                    # automatic, advisory: compare this clip's ACTUAL first rendered frame against the settle
+                    # it was told to open from, before this ever reaches Julian's review. Only meaningful for a
+                    # relay beat (one that had a carried settle to check against); a first-of-scene beat has
+                    # nothing to compare against. junction (rule 31) is THIS beat's own declared junction type —
+                    # state continuity is the hard gate either way; frame-identity only applies when this beat
+                    # declared its shot as an unbroken continuation of the previous one.
                     if relay_status == "relay" and relay_frame:
-                        import cb_qa, subprocess, tempfile
+                        import cb_qa, cb_segprompt, subprocess, tempfile
                         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as _tf:
                             _first = _tf.name
                         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"media/{out}",
                                         "-vframes", "1", _first], capture_output=True)
-                        jv = cb_qa.check_join(relay_frame, _first)
-                        print(f"  [JOIN CHECK] {code}: {'CONTINUOUS' if jv['ok'] else 'BROKEN'} — {jv['verdict'][:200]}", flush=True)
+                        _junction = cb_segprompt._junction_type(b)
+                        jv = cb_qa.check_join(relay_frame, _first, junction=_junction)
+                        print(f"  [JOIN CHECK] {code} ({_junction}): {'CONTINUOUS' if jv['ok'] else 'BROKEN'} — {jv['verdict'][:200]}", flush=True)
                         os.remove(_first)
             except Exception as je:
                 print(f"  beat {code}: join check skipped ({str(je)[:120]})", flush=True)
@@ -434,11 +442,16 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
 def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=None, seeds=2, dry_run=False, approved=False, fast=True):
     """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes Julian's WINNER for the
     beat just decided (winner_code + the exact seed file he picked), designates it as that beat's official signed
-    clip, harvests its settle frame, RE-MINTS it (Julian's ruling, 2026-07-03 — standard for every link now, not
-    QA-triggered; see cb_scene.remint_settle_frame), runs the drift check (cb_qa.check_remint), then STOPS —
-    presenting the cleaned anchor for Julian's approval. It does NOT fire the next beat until called again with
-    approved=True. No parallel beats, no auto-advance: production within a scene is strictly serial through
-    Julian's sign-offs.
+    clip, harvests its settle frame, then EITHER re-mints it or uses it raw — depending on the NEXT beat's own
+    declared junction type (RE-MINT SCOPING, Julian's ruling, 2026-07-05, CLAUDE.md rule 32, superseding the
+    earlier "standard for every link now" wording): a `seamless_continuation` next beat gets the NB2 cleanup
+    pass (cb_scene.remint_settle_frame) plus the pre-fire drift check (cb_qa.check_remint), same as before this
+    ruling; an `intentional_next_shot` next beat (the DEFAULT) skips BOTH — its @图1 is a state reference, not a
+    pixel-perfect anchor, so re-mint buys nothing, and state continuity is verified AFTER the fact by the
+    two-tier join-check on the actual rendered clip instead (cb_qa.check_join, wired into run()). Either way,
+    STOPS after preparing the anchor, presenting it for Julian's approval; does NOT fire the next beat until
+    called again with approved=True. No parallel beats, no auto-advance: production within a scene is strictly
+    serial through Julian's sign-offs.
 
     fast=False (Julian, 2026-07-04, "single seed, standard tier"): the Phase-2 launch loop's own tier, previously
     hardcoded to fast=True (Render Economy Law) with no way to override it — a single confirmatory fire (proving
@@ -448,12 +461,13 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
 
     dry_run=True (Fable's code review, 2026-07-03, item TWO — "prove the relay injection"): NO file mutation
     (winner_seed_path is ignored; harvests from winner_code's CURRENT official clip, whatever is already there),
-    but the harvest + re-mint + drift-check ARE real (they only read the clip and write derived images). Returns
-    {prompt, builder, images, ...} built from the re-minted anchor for inspection instead of firing.
+    but the harvest + (conditional) re-mint + drift-check ARE real (they only read the clip and write derived
+    images). Returns {prompt, builder, images, ...} built from the actual anchor (re-mint or raw harvest,
+    whichever applies) for inspection instead of firing.
 
     approved=True: skips designation/harvest/re-mint (reuses the anchor an earlier, unapproved call already
     produced) and fires the next beat's `seeds` takes, render economy law. Call this only after you have actually
-    looked at the re-minted anchor from the prepare call."""
+    looked at the anchor from the prepare call."""
     import shutil, cb_scene, cb_segprompt, cb_qa
     d = json.load(open(pkg_path))
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
@@ -467,13 +481,20 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
     wb = beats[idx]
     w_slug = wb.get("slug", (winner_code or "").replace(".", "_"))
     official = f"media/{episode}_{winner_code}_{w_slug}.mp4"
+    settle_path = f"media/{episode}_{winner_code}_{w_slug}_settle.png"
     remint_path = f"media/{episode}_{winner_code}_{w_slug}_remint.png"
     next_b = beats[idx + 1]
     next_code = next_b.get("beatCode") or next_b.get("shotCode")
     next_slug = next_b.get("slug", (next_code or "").replace(".", "_"))
+    # RE-MINT SCOPING (rule 32): whether to re-mint at all is decided by the NEXT beat's OWN declared junction
+    # type, not the winner's — @图1's job (pixel-perfect anchor vs. state reference) is what the NEXT beat's
+    # prompt asks of it.
+    junction = cb_segprompt._junction_type(next_b)
+    needs_remint = junction == cb_segprompt.JUNCTION_SEAMLESS
 
     if not approved:
-        # PHASE 1 — PREPARE: designate (unless dry_run), harvest, RE-MINT, drift-check, then STOP for approval.
+        # PHASE 1 — PREPARE: designate (unless dry_run), harvest, then re-mint ONLY for a seamless next beat,
+        # then STOP for approval.
         if dry_run:
             print(f"fire_next_beat [DRY RUN]: using {winner_code}'s CURRENT official clip as-is (no file changes)", flush=True)
             if not os.path.exists(official):
@@ -487,31 +508,37 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
             print(f"fire_next_beat: {winner_code} winner designated -> {official} (from {winner_seed_path})", flush=True)
 
         # HARVEST — the sharpest frame in the winner's settle window. Real in both modes (only reads the clip and
-        # writes a derived _settle.png — never touches the official clip itself).
+        # writes a derived _settle.png — never touches the official clip itself). Always runs, both junction types.
         settlef = cb_scene.harvest_settle_frame(episode, winner_code, w_slug)
         print(f"fire_next_beat: harvested -> {settlef or '(FAILED — check the clip)'}", flush=True)
         if not settlef:
             print("fire_next_beat: cannot proceed without a harvested settle frame; stopping.", flush=True); return None
 
-        # RE-MINT — standard for every link now (Julian's ruling, 2026-07-03, superseding the earlier NB2-refresh
-        # rejection). A real NB2 call in both modes — the restoration pass is the thing being proven/prepared.
         cast = wb.get("openingCast") or wb.get("characters") or []
-        remint_out = cb_scene.remint_settle_frame(episode, winner_code, w_slug, cast, settlef)
-        print(f"fire_next_beat: re-minted -> {remint_out or '(FAILED)'}", flush=True)
-        if not remint_out:
-            print("fire_next_beat: cannot proceed without a re-minted anchor; stopping.", flush=True); return None
-
-        turnarounds = [a for c in cast if (a := _anchor(c))]
-        drift = cb_qa.check_remint(settlef, remint_out, turnarounds)
-        print(f"fire_next_beat: RE-MINT DRIFT CHECK -> {'CLEAN' if drift['ok'] else 'BLOCK'} — {drift['verdict']}", flush=True)
+        remint_out, drift, anchor = None, None, settlef
+        if needs_remint:
+            # RE-MINT — a `seamless_continuation` next beat only (rule 32): a real NB2 call, the restoration
+            # pass this beat's pixel-perfect anchor actually needs.
+            remint_out = cb_scene.remint_settle_frame(episode, winner_code, w_slug, cast, settlef)
+            print(f"fire_next_beat: re-minted -> {remint_out or '(FAILED)'} ({next_code} is seamless_continuation)", flush=True)
+            if not remint_out:
+                print("fire_next_beat: cannot proceed without a re-minted anchor; stopping.", flush=True); return None
+            turnarounds = [a for c in cast if (a := _anchor(c))]
+            drift = cb_qa.check_remint(settlef, remint_out, turnarounds)
+            print(f"fire_next_beat: RE-MINT DRIFT CHECK -> {'CLEAN' if drift['ok'] else 'BLOCK'} — {drift['verdict']}", flush=True)
+            anchor = remint_out
+        else:
+            print(f"fire_next_beat: no re-mint — {next_code} is intentional_next_shot (the default): the raw "
+                  f"harvested frame IS @图1 directly; state continuity moves to the post-fire join-check", flush=True)
 
         if dry_run:
-            # PROVE THE INJECTION — the next beat's real shipped prompt (relay=True), @图1 = the re-minted anchor.
+            # PROVE THE INJECTION — the next beat's real shipped prompt (relay=True), @图1 = the actual anchor.
             _scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), None)
             prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True,
-                                                                 prev_end_state_still=wb.get("endStateStill"))
+                                                                 prev_end_state_still=wb.get("endStateStill"),
+                                                                 prev_carry_marks=wb.get("carryMarks"))
             _chars = next_b.get("openingCast") or next_b.get("characters") or []
-            imgs = [remint_out] + [a for c in _chars if (a := _anchor(c))]
+            imgs = [anchor] + [a for c in _chars if (a := _anchor(c))]
             _plate = f"media/{episode}_S{scene_num}_plate.png"
             if os.path.exists(_plate):
                 imgs.append(_plate)
@@ -521,19 +548,21 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, winner_seed_path=N
             print(f"fire_next_beat [DRY RUN]: would upload {len(vids) if vids else 0} video ref(s): {vids}", flush=True)
             print(f"=== fire_next_beat [DRY RUN] complete for {next_code} — nothing fired, nothing mutated. ===", flush=True)
             return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "videos": vids,
-                    "harvested": settlef, "remint": remint_out, "drift_check": drift, "next_code": next_code}
+                    "harvested": settlef, "remint": remint_out, "anchor": anchor, "drift_check": drift, "next_code": next_code}
 
-        print(f"=== fire_next_beat STOPPED — {winner_code}'s cleaned anchor is ready for your approval:\n"
-              f"    {remint_out}\n"
+        print(f"=== fire_next_beat STOPPED — {winner_code}'s anchor is ready for your approval:\n"
+              f"    {anchor}\n"
               f"    Review it, then call fire_next_beat(..., approved=True) to launch {next_code}. Sign nothing else. ===",
               flush=True)
-        return {"harvested": settlef, "remint": remint_out, "drift_check": drift, "next_code": next_code}
+        return {"harvested": settlef, "remint": remint_out, "anchor": anchor, "drift_check": drift, "next_code": next_code}
 
-    # PHASE 2 — approved=True: the anchor was already prepared; this call's only job is to launch.
-    if not os.path.exists(remint_path):
-        print(f"fire_next_beat: approved=True but no re-minted anchor at {remint_path} — call without approved "
+    # PHASE 2 — approved=True: the anchor was already prepared; this call's only job is to launch. Which file
+    # to expect depends on the SAME junction-type decision the prepare phase made (rule 32).
+    expected_anchor = remint_path if needs_remint else settle_path
+    if not os.path.exists(expected_anchor):
+        print(f"fire_next_beat: approved=True but no prepared anchor at {expected_anchor} — call without approved "
               f"first to prepare it.", flush=True); return None
-    print(f"fire_next_beat: {winner_code}'s re-minted anchor APPROVED -> launching {next_code}", flush=True)
+    print(f"fire_next_beat: {winner_code}'s anchor APPROVED -> launching {next_code}", flush=True)
     official_next = f"media/{episode}_{next_code}_{next_slug}.mp4"
     results = []
     for i in range(1, seeds + 1):

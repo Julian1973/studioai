@@ -622,8 +622,12 @@ def relay_prepare(scene, winner_code, winner_seed_path, seeds=2, episode=None, f
     d = _relay_all()
     scene_d = d.setdefault(episode, {})
     if r:
+        # rule 32 (2026-07-05, RE-MINT SCOPING): "remint" is None for an intentional_next_shot next beat (the
+        # default) — no NB2 pass ran, since @图1 is a state reference for that junction type, not a pixel-perfect
+        # anchor. "anchor" is ALWAYS populated (the re-mint when one ran, the raw harvest otherwise) — the UI
+        # must display/gate on "anchor"/driftCheck-may-be-null, never assume "remint" is the only anchor shape.
         scene_d[str(scene)] = {"winnerCode": winner_code, "nextCode": r.get("next_code"),
-                                "harvested": r.get("harvested"), "remint": r.get("remint"),
+                                "harvested": r.get("harvested"), "remint": r.get("remint"), "anchor": r.get("anchor"),
                                 "driftCheck": r.get("drift_check"), "seeds": seeds}
     else:
         scene_d.pop(str(scene), None)

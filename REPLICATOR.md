@@ -4,6 +4,25 @@ One command: `walk_scene(episode, scene)` (`engine/cb_replicator.py`). It runs G
 scene — every beat, relay chain and all — under the escorted-run rules, so the next ten scenes get built by
 the same hands rule 28 already established, and the only thing a director ever authors again is Layer 2.
 
+## Where this sits in the full production line
+
+This whole document is about ONE stage of an 8-stage line (script to master) — full stage map and rationale
+in `PRODUCTION_DOCTRINE.md`, mirrored in CLAUDE.md rule 28:
+
+0. Script-in → 1. Beat package / Gate 1 (Julian signs) → 2. World and cast (plate, turnarounds, ambient bed) →
+3. Voice pass (one directed take, Julian's ear) → 4. Gate 2, anchor keyframe (Julian signs) →
+**5. Gate 3, the escorted walk — everything below this line** → 6. Gate 4, retakes on Julian's verdict only →
+7. Gate 5, post (settle-trim, assembly, music/grade, 16:9 master + 9:16 derivative, Julian's final-cut approval).
+
+`walk_scene` only ever operates on an already-signed Gate 2 (rule 1: gates are hard locks) and never signs
+anything itself — Stage 5's own machine gates are documented in the gate map below, and Stage 5's felt-intent
+sign-off is Julian's alone, beat by beat (see "The gates — machine vs showrunner").
+
+**THE ONE-RENDER ECONOMY** (locked 2026-07-05): one fire per beat, standard tier — already true of
+`walk_scene`'s own design (see "What this is not," below). One automatic re-fire on a failed gate, then a hard
+stop with a diagnosis, is the doctrine as of tonight; that retry/hard-stop wiring is not yet built into
+`cb_beats.run`/`fire_next_beat` — a follow-up ticket, not part of this document's current behaviour.
+
 ## The three inputs
 
 `walk_scene` takes exactly two arguments — `episode`, `scene` — and resolves everything else from them, through

@@ -1,9 +1,3 @@
 {
-  "_note": "Per-scene BANNED VOCABULARY — words/phrases that indicate a stale, pre-correction name has crept back in. Checked by cb_qa.check_scene_vocabulary against the scene's own name/location/look/sceneShotName/definingFeature fields AND every one of its beats' scene/startState/continuity.opensFrom/shot_style text. A hit is a hard BLOCK, never a NOTE — a corrected-away name reappearing is exactly the drift this guards against, not a taste call.",
-  "Ep1": {
-    "1": {
-      "banned": ["rainforest", "deep_rainforest_flower_field", "Rainforest Pollen Run"],
-      "reason": "Scene 1 was corrected from an early 'deep rainforest' concept to the confirmed sunlit wildflower meadow in Crystal Cove. This vocabulary reappearing anywhere is the same ghost recurring — caught and fixed a third time by Fable's code review, 2026-07-03 (name/locationId/sceneShotName in the beat package and locations.json, the worldState locationId in continuity.json, the LOCKED_CANON.md morning-light note, and the Gate-0 script's own scene heading)."
-    }
-  }
+ "_note": "Per-scene BANNED VOCABULARY — words/phrases that indicate a stale, pre-correction name has crept back in. Checked by cb_qa.check_scene_vocabulary against the scene's own name/location/look/sceneShotName/definingFeature fields AND every one of its beats' scene/startState/continuity.opensFrom/shot_style text. A hit is a hard BLOCK, never a NOTE — a corrected-away name reappearing is exactly the drift this guards against, not a taste call."
 }

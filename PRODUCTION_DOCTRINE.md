@@ -74,11 +74,47 @@ not a gap in the machine — no check is ever built to approximate it. The Layer
 it all: Fuzzby's chaos beats, Zenny's deadpan with its pause protected (the settle is where her look
 breathes), the laugh-so-hard-they-miss-it ambition intact.
 
-## The loop
+## The one-render economy (locked 2026-07-05, the full-reset night)
+
+One fire per artifact — the scene plate, a voice take, a keyframe, a beat render. Never a batch of exploratory
+seeds as the default. On a failed gate: ONE automatic re-fire, never blind. If that re-fire also fails: a HARD
+STOP with a diagnosis naming the layer at fault (keyframe / brief / reference / take, rule 3) — never a third
+roll.
+
+The voice pass is the same economy, stated explicitly: ONE directed V3 take per beat, never a batch of
+candidate reads. Julian's ear either approves it, or names the single correction for the one permitted
+re-fire. There is no "pick a favourite among several" step for voice — the same discipline the felt-intent
+gate already holds the beat render to.
+
+This is DOCTRINE as of tonight; the retry/hard-stop wiring itself is not yet code-enforced —
+`cb_beats.run`/`fire_next_beat`'s historical multi-seed default and the Studio's seed-picker panel still exist
+in the codebase unchanged. Wiring the economy into the code is a follow-up ticket for when the new script
+arrives, not done as part of the reset.
+
+## The loop, and the full production line — the canonical stage map
 
 fire → machine gates → Julian's eye → sign → harvest → cut into the next beat, which declares its own
 junction type. Escorted through Scene 1 by hand (`cb_beats.fire_next_beat`); `cb_replicator.walk_scene` walks
 it thereafter under the identical laws — nothing beat-specific lives in its own code, only in the beat data.
+That loop is Stage 5 below. The full line, script to master:
+
+Every stage names its gate holder. The machine checks; Julian signs. Nothing self-advances past any gate,
+ever (CLAUDE.md rule 1).
+
+| Stage | What happens | Gate holder |
+|---|---|---|
+| **0 — Script-in** | The script is the SOLE story source. Nothing downstream invents story; everything traces back to this. | — (the input) |
+| **1 — Beat package → Gate 1** | The script becomes the beat package (storyboard): scenes, beats, cuts, dialogue, junction types. | Julian signs Gate 1 |
+| **2 — World and cast** | The scene plate is built, then checked (`check_plate`) against the Crystal World Rule (natural, organic, never cut or arranged); character turnarounds verified against canon; the scene's ambient bed locked — word-for-word identical across every beat in the scene from here on (the Scene Bubble Law). | The machine checks (`check_plate`); folds into Gate 2's review, no separate sign-off |
+| **3 — Voice pass** | One directed V3 take per beat, per the Character Voice Bible (cadence, register, the per-character V3 tags). The one-render economy applies here explicitly (above). | Julian's ear approves, or names the single correction |
+| **4 — Gate 2: anchor keyframe** | One anchor keyframe per SCENE (not per beat — a relay beat never gets its own keyframe), 2K, centre-safe, per-character action-state QA (does the pose show what the story says is happening). | Julian signs Gate 2 |
+| **5 — Gate 3: the escorted walk** | `cb_replicator.walk_scene` fires one render per beat, standard tier. Machine gates: Clip QA, carryMarks-scoped state continuity, spatial adjacency (Coverage), settle distinctiveness, the prompt-law lint. Then the reserved verdict — does it flow, is it funny, does the four-year-old watch it again. | Machine gates, then Julian's felt-intent sign-off, PER BEAT |
+| **6 — Gate 4: retakes** | A retake fires only on Julian's own verdict — never a machine flag alone. One variable changes per re-fire (the retake protocol) — never re-roll blind hoping something different happens. | Julian names what's wrong and what changes; the machine never retakes on its own initiative |
+| **7 — Gate 5: post** | Settle-trim so the cut joins on living motion, not hold-into-hold (the JOIN CONTRACT). Beats assembled; the ambient bed continuous across the whole scene; music and grade pass; two masters delivered — the 16:9 feature master and a centre-safe 9:16 derivative. | Julian's final-cut approval |
+
+A stage marked "the machine checks" is still a real gate — it just doesn't need Julian's own eyes on every
+single instance, the way Gate 1/2/3/4/5 do. Nothing in this table skips a step by being fast, cheap or
+automatic.
 
 Directing goes in. Animation comes out.
 

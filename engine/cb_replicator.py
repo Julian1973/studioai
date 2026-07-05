@@ -189,8 +189,12 @@ def walk_scene(episode, scene, seeds=1, fast=False):
         _extract_frame(cur_clip, first_frame)
         # rule 31 (2026-07-05): the join-check's frame-identity half only applies when THIS beat declared
         # its shot as an unbroken continuation of the previous one — state continuity is the hard gate either way.
+        # rule 36 (2026-07-05): STATE hard-gates ONLY on this beat's own declared carryMarks; anything else
+        # visible (an incidental held prop, say) is advisory only.
         _junction = cb_segprompt._junction_type(cur)
-        join = cb_qa.check_join(anchor, first_frame, junction=_junction) if os.path.exists(first_frame) else {"ok": None, "verdict": "(frame extraction failed)"}
+        join = cb_qa.check_join(anchor, first_frame, junction=_junction, carry_marks=cur.get("carryMarks")) if os.path.exists(first_frame) else {"ok": None, "verdict": "(frame extraction failed)"}
+        for _fl in join.get("flags") or []:
+            print(f"walk_scene: {cur_code} [JOIN CHECK] FLAG (advisory, non-blocking) — {_fl}", flush=True)
         last_frame = f"media/{episode}_{cur_code}_{cur_slug}_walklast.png"
         _extract_frame(cur_clip, last_frame, last=True)
         evidence.append(_copy_evidence(f"walk_scene_{cur_code}_frame1.png", first_frame))

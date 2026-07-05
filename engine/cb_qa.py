@@ -103,29 +103,46 @@ def check_anatomy(kf, characters):
 JUNCTION_INTENTIONAL = "intentional_next_shot"   # THE DEFAULT — a new gag arc, a fresh camera setup
 JUNCTION_SEAMLESS = "seamless_continuation"       # ONLY when the director's own cut explicitly continues
 
-def check_join_state(prev_end_frame, next_open_frame):
+def check_join_state(prev_end_frame, next_open_frame, carry_marks=None):
     """THE STATE-CONTINUITY GATE (Julian's junction-type ruling, CLAUDE.md rule 31, 2026-07-05; extended
-    under rule 34, the Coverage Law, same day) — the HARD GATE for EVERY join, cut or continuation:
-    marks/wardrobe, lighting, geography AND spatial coverage must hold across a beat boundary regardless of
-    camera setup or pose, which an `intentional_next_shot` join (the default) is explicitly allowed to
-    change. This is the half of the old single check_join that survives unconditionally; POSITION/framing
+    under rule 34, the Coverage Law, same day; STATE tier narrowed under rule 36, 2026-07-05 — "hand-held
+    pollen is NOT a carry mark — incidental set dressing, audience-invisible across a cut") — the HARD GATE
+    for EVERY join, cut or continuation. STATE now hard-gates ONLY on `carry_marks` — the beat's own
+    DECLARED `carryMarks` text (never invented here, just passed through) — present in both frames or
+    absent in both, never present in one and gone in the other; ANY OTHER visible prop, held object or
+    substance (a bee casually holding pollen, say) is explicitly EXCLUDED from the hard gate and instead
+    surfaces as an advisory `flags` entry — logged, never blocking. LIGHT, GEOGRAPHY and COVERAGE are about
+    the WORLD's own continuity (not a declared prop) and stay unconditional hard gates, unaffected by this
+    narrowing. This is the half of the old single check_join that survives unconditionally; POSITION/framing
     match moved to check_join_frame_identity below, which only applies to a declared `seamless_continuation`
     join. COVERAGE (rule 34) is DISTINCT from GEOGRAPHY: geography asks "is this the same world at all";
     coverage asks whether the beat's OWN opening reads as a continuation within that world (a new angle
     close to where the previous beat left off) rather than a fresh, pulled-back establishing wide or a
     sense of having relocated — "a scene is one continuous spatial bubble... never a relocation, never a
     fresh establishing wide mid-scene." Report-only / advisory, same as every other frame-level check in
-    this module. Concrete visual criteria per rule 17 — never a vague "does this flow" question."""
+    this module. Concrete visual criteria per rule 17 — never a vague "does this flow" question.
+    Returns {ok, verdict, flags} — `flags` is a list of advisory-only notes (may be empty) that never affect
+    `ok`, even if the model happens to mention them after a BROKEN verdict on another criterion."""
     if not (prev_end_frame and next_open_frame and os.path.exists(prev_end_frame) and os.path.exists(next_open_frame)):
-        return {"ok": None, "verdict": "(missing end or open frame — cannot check this join)"}
+        return {"ok": None, "verdict": "(missing end or open frame — cannot check this join)", "flags": []}
+    marks_txt = str(carry_marks or "").strip()
+    state_ask = (
+        f'1. STATE (HARD GATE — ONLY this specific declared mark matters): does "{marks_txt}" persist between '
+        "the two images — present in both or absent in both, not present in one and gone in the other? Judge "
+        "ONLY this named mark. Do NOT fail this criterion for any OTHER visible prop, held object or substance "
+        "not named above (e.g. a bee casually holding a bit of pollen in its hands) — that is incidental set "
+        "dressing, not a continuity requirement, and must NEVER cause a BROKEN verdict on its own.\n"
+        if marks_txt else
+        "1. STATE (HARD GATE): no specific mark is declared for this beat, so treat STATE as automatically "
+        "PASSING regardless of what temporary props/substances you see — do not fail on incidental set dressing "
+        "(e.g. a bee casually holding pollen) with nothing formally declared to check it against.\n"
+    )
     prompt = (
         "You are shown TWO film frames: Image 1 is the LAST frame of the shot that just ended; Image 2 is the "
         "FIRST frame of the very next shot — which may be a DIFFERENT camera setup (a new gag is allowed to open "
         "on a fresh angle; do not penalise a changed camera or pose by itself). Check four concrete things that "
         "must hold regardless of camera or pose:\n"
-        "1. STATE: does any visible temporary substance or prop on a character (pollen dusting, a moustache, dirt, "
-        "a held object) match between the two images — present in both or absent in both, not present in one and "
-        "gone in the other?\n"
+        + state_ask +
         "2. LIGHT: is the colour and brightness of the sky/environment roughly continuous (both warm/golden, or "
         "both a cooler dusk-blue, etc.) rather than one clearly warmer, cooler, brighter or darker than the other?\n"
         "3. GEOGRAPHY: is this visibly the SAME world/location — the same set, flowers, terrain and landmarks — "
@@ -134,15 +151,26 @@ def check_join_state(prev_end_frame, next_open_frame):
         "1 (close to where the characters already were, a plausible next angle on the same patch of the world) — "
         "rather than a fresh, pulled-back ESTABLISHING WIDE that re-introduces the whole location from scratch, "
         "or a sense that the scene has relocated to a different part of the world entirely?\n"
-        "Reply 'CONTINUOUS' on line 1 if all four hold. Otherwise reply 'BROKEN' then ONE short line PER broken "
-        "criterion, prefixed STATE/LIGHT/GEOGRAPHY/COVERAGE, naming exactly what changed (e.g. 'STATE: a pollen "
-        "moustache is visible in image 1, gone in image 2' or 'COVERAGE: image 2 pulls back to a wide establishing "
-        "shot instead of continuing close on the characters')."
+        "Reply 'CONTINUOUS' on line 1 if all four hold (remembering STATE only concerns the ONE declared mark "
+        "above, never any other incidental prop). Otherwise reply 'BROKEN' then ONE short line PER broken "
+        "criterion, prefixed STATE/LIGHT/GEOGRAPHY/COVERAGE, naming exactly what changed (e.g. 'COVERAGE: image "
+        "2 pulls back to a wide establishing shot instead of continuing close on the characters'). THEN, on its "
+        "own final line prefixed EXACTLY 'FLAG:', note any OTHER visible prop/substance difference you noticed "
+        "that is NOT the declared mark — for the record only, this NEVER changes the CONTINUOUS/BROKEN verdict "
+        "above. If there is nothing else to note, write 'FLAG: none'."
     )
     text, err = vision_verdict(prompt, [prev_end_frame, next_open_frame])
     if err:
-        return {"ok": None, "verdict": err}
-    return {"ok": text.strip().upper().startswith("CONTINUOUS"), "verdict": text.strip()}
+        return {"ok": None, "verdict": err, "flags": []}
+    t = text.strip()
+    flags = []
+    m = re.search(r"^FLAG:\s*(.*)$", t, flags=re.MULTILINE | re.IGNORECASE)
+    if m:
+        note = m.group(1).strip()
+        if note and note.lower() not in ("none", "none.", "n/a"):
+            flags.append(note)
+        t = t[:m.start()].rstrip()   # the FLAG line is advisory-only — strip it before judging CONTINUOUS/BROKEN
+    return {"ok": t.strip().upper().startswith("CONTINUOUS"), "verdict": t.strip(), "flags": flags}
 
 def check_join_frame_identity(prev_end_frame, next_open_frame):
     """THE FRAME-IDENTITY CHECK — a `seamless_continuation` join ONLY (rule 31): does beat N+1's opening
@@ -167,23 +195,27 @@ def check_join_frame_identity(prev_end_frame, next_open_frame):
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CONTINUOUS"), "verdict": text.strip()}
 
-def check_join(prev_end_frame, next_open_frame, junction=JUNCTION_INTENTIONAL):
+def check_join(prev_end_frame, next_open_frame, junction=JUNCTION_INTENTIONAL, carry_marks=None):
     """THE JOIN CHECK, TWO-TIER (Julian's junction-type ruling, CLAUDE.md rule 31, 2026-07-05 — supersedes
     the single POSITION/STATE/LIGHT check this function ran from the original JOIN CONTRACT, 2026-07-03):
-    STATE CONTINUITY (check_join_state — marks/wardrobe, lighting, geography) is the hard gate for EVERY
-    join, no exceptions. FRAME IDENTITY (check_join_frame_identity — does the opening frame literally match
-    the settle) is checked ONLY when junction == 'seamless_continuation'; an 'intentional_next_shot' join
-    (the default — pass nothing, or an unrecognised value, and this is what runs) is never held to it,
-    since a new gag arc is expected to open on a different camera setup.
-    Returns {ok, verdict, state, frame_identity} — frame_identity is None (not applicable) for an
-    intentional_next_shot join, so a caller can tell "not checked" from "checked and passed"."""
-    state = check_join_state(prev_end_frame, next_open_frame)
+    STATE CONTINUITY (check_join_state — declared carry marks only as of rule 36, plus lighting, geography,
+    coverage) is the hard gate for EVERY join, no exceptions. FRAME IDENTITY (check_join_frame_identity —
+    does the opening frame literally match the settle) is checked ONLY when junction == 'seamless_continuation';
+    an 'intentional_next_shot' join (the default — pass nothing, or an unrecognised value, and this is what
+    runs) is never held to it, since a new gag arc is expected to open on a different camera setup.
+    carry_marks (rule 36, 2026-07-05): the beat's own declared `carryMarks` text — the ONLY thing STATE
+    hard-gates on; any other visible prop discrepancy surfaces as an advisory flag instead (see `flags`).
+    Returns {ok, verdict, state, frame_identity, flags} — frame_identity is None (not applicable) for an
+    intentional_next_shot join, so a caller can tell "not checked" from "checked and passed"; flags is
+    check_join_state's advisory-only notes, never affecting `ok`."""
+    state = check_join_state(prev_end_frame, next_open_frame, carry_marks=carry_marks)
     frame_identity = check_join_frame_identity(prev_end_frame, next_open_frame) if junction == JUNCTION_SEAMLESS else None
     ok = state["ok"] if frame_identity is None else (state["ok"] and frame_identity["ok"])
     parts = [f"STATE: {state['verdict']}"]
     if frame_identity is not None:
         parts.append(f"FRAME-IDENTITY: {frame_identity['verdict']}")
-    return {"ok": ok, "verdict": " | ".join(parts), "state": state, "frame_identity": frame_identity}
+    return {"ok": ok, "verdict": " | ".join(parts), "state": state, "frame_identity": frame_identity,
+            "flags": state.get("flags") or []}
 
 def check_remint(harvested_path, remint_path, turnaround_paths=None):
     """THE RE-MINT DRIFT CHECK (Julian's ruling, 2026-07-03) — the re-mint's only job is a technical cleanup pass

@@ -374,13 +374,16 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                     print(f"  [HARVEST] {code}: {'settle frame -> ' + settlef if settlef else 'skipped (extraction failed)'}", flush=True)
             except Exception as ee:
                 print(f"  beat {code}: settle-frame harvest skipped ({str(ee)[:120]})", flush=True)
-            try:    # THE JOIN CHECK (item EIGHT, Julian, 2026-07-03; two-tier per rule 31, 2026-07-05) —
-                    # automatic, advisory: compare this clip's ACTUAL first rendered frame against the settle
-                    # it was told to open from, before this ever reaches Julian's review. Only meaningful for a
-                    # relay beat (one that had a carried settle to check against); a first-of-scene beat has
-                    # nothing to compare against. junction (rule 31) is THIS beat's own declared junction type —
-                    # state continuity is the hard gate either way; frame-identity only applies when this beat
-                    # declared its shot as an unbroken continuation of the previous one.
+            try:    # THE JOIN CHECK (item EIGHT, Julian, 2026-07-03; two-tier per rule 31, 2026-07-05; STATE
+                    # scoped to declared carryMarks per rule 36, 2026-07-05) — automatic, advisory: compare
+                    # this clip's ACTUAL first rendered frame against the settle it was told to open from,
+                    # before this ever reaches Julian's review. Only meaningful for a relay beat (one that had
+                    # a carried settle to check against); a first-of-scene beat has nothing to compare against.
+                    # junction (rule 31) is THIS beat's own declared junction type — state continuity is the
+                    # hard gate either way; frame-identity only applies when this beat declared its shot as an
+                    # unbroken continuation of the previous one. carry_marks (rule 36) is THIS beat's own
+                    # declared carryMarks — the ONLY thing STATE hard-gates on; anything else visible (a held
+                    # prop, say) is advisory only.
                     if relay_status == "relay" and relay_frame:
                         import cb_qa, cb_segprompt, subprocess, tempfile
                         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as _tf:
@@ -388,8 +391,10 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"media/{out}",
                                         "-vframes", "1", _first], capture_output=True)
                         _junction = cb_segprompt._junction_type(b)
-                        jv = cb_qa.check_join(relay_frame, _first, junction=_junction)
+                        jv = cb_qa.check_join(relay_frame, _first, junction=_junction, carry_marks=b.get("carryMarks"))
                         print(f"  [JOIN CHECK] {code} ({_junction}): {'CONTINUOUS' if jv['ok'] else 'BROKEN'} — {jv['verdict'][:200]}", flush=True)
+                        for _fl in jv.get("flags") or []:
+                            print(f"  [JOIN CHECK] {code}: FLAG (advisory, non-blocking) — {_fl}", flush=True)
                         os.remove(_first)
             except Exception as je:
                 print(f"  beat {code}: join check skipped ({str(je)[:120]})", flush=True)

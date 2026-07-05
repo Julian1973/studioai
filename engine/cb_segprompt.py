@@ -355,49 +355,51 @@ _RELAY_OPEN_LOCK = ("OPENING FRAME LOCK: this shot's very first frame is @图1 e
                     "instant, the action below moves immediately and decisively away from it — do not hold this "
                     "pose, repeat it or drift back to it later in the shot; by the shot's end the characters are "
                     "in a completely different position and pose. ")
+# UNUSED as of test #3 (2026-07-05) — kept, not deleted, so a revert costs nothing if subtraction fails too. See
+# _CANONICAL_FRAME_DECLARATION's note: three attempts to hold frame one now exist in this file's history —
+# rule 26's original action-lock (this constant), test #1's camera-lock (_RELAY_CAMERA_OPEN_LOCK, below), and
+# test #2's separate bilingual first-line/first-key field — all superseded by test #3's SUBTRACTION approach,
+# never stacked. Do not reintroduce this text into _v3_shots without a fresh ruling.
 
 _RELAY_CAMERA_OPEN_LOCK = ("Camera opens locked on @图1's exact framing; as the action departs, the camera "
                            "departs with it into: ")
+# UNUSED as of test #3 (2026-07-05) — same status as _RELAY_OPEN_LOCK above; test #1 (2026-07-04) added this,
+# confirmed live not to hold frame one (join-check still BROKEN, same signature, on the very next re-fire).
+# Kept for revert only. Do not reintroduce without a fresh ruling.
 
 _CANONICAL_FRAME_DECLARATION = "@图1 为首帧。@图1 is the first frame."
-# THE CANONICAL DECLARATION (Julian, 2026-07-05, single-variable test #2 after the camera-lock test #1 failed to
-# hold frame one): the surface research confirmed first-frame + audio-reference is a mutually-exclusive-mode
-# split on every surface checked (fal, Runway, Volcengine Ark, BytePlus ModelArk — all four, primary-sourced for
-# the latter two), but BytePlus's own docs sanction the PROMPT-TEXT convention for the soft/multimodal-reference
-# mode we're actually using: "@图1 为首帧" / "[Image1] is the first frame" as a short, positional opening
-# declaration — not the verbose paraphrase (_RELAY_OPEN_LOCK/_RELAY_CAMERA_OPEN_LOCK's "this shot's very first
-# frame is @图1 exactly...") buried inside the action/camera fields we'd been shipping instead. We had never
-# fired the exact canonical form. This is additive and relay-only: the existing lock text in the action/camera
-# fields is UNCHANGED; this declaration becomes the prompt's own opening line, ahead of everything else,
-# bilingual per the skill package's own reference-role wording (English alone was untested against this exact
-# canonical Chinese-first ordering). Isolates ONE variable from the camera-lock test — if frame one still
-# doesn't hold, the two-step architecture under CLAUDE.md rule 29 is next.
-# THE CAMERA-SIDE OPENING LOCK (Julian, 2026-07-04, diagnosing 1.B2's re-fire: "the wide-open signature predates
-# @Video1, so @Video1 stays — the implicated variable is the camera text"): _RELAY_OPEN_LOCK above locks the
-# ACTION field's opening pose, but said nothing about the CAMERA field — so a relay beat's own authored shot-1
-# framing (e.g. 1.B2's "Drone-style camera chases the larger bee through a wild manic loop across the meadow")
-# could demand wide, already-in-motion coverage from frame one, directly contradicting a tight two-shot anchor,
-# and the model serves the camera: confirmed live via a frame-1 extraction + independent cross-check showing
-# the actual render opened on a wide establishing shot neither the re-mint anchor nor the raw harvest matched,
-# from the very first frame. Mirrors _RELAY_OPEN_LOCK's shape exactly, applied to the camera field instead of
-# the action field — same fix, same reasoning, the other half of the same shot.
+# THE CANONICAL DECLARATION (Julian, 2026-07-05): the surface research confirmed first-frame + audio-reference
+# is a mutually-exclusive-mode split on every surface checked (fal, Runway, Volcengine Ark, BytePlus ModelArk —
+# all four, primary-sourced for the latter two), but BytePlus's own docs sanction the PROMPT-TEXT convention for
+# the soft/multimodal-reference mode we're actually using: "@图1 为首帧" / "[Image1] is the first frame" as a
+# short, positional opening declaration.
+#
+# TEST #2 (same day, superseded within hours): tried this ADDITIVELY — a separate bilingual first line (prose)
+# / first JSON key (JSON), on top of the existing verbose lock text in the action/camera fields. Untested
+# whether it alone would have worked, because Julian's own diagnosis (the skill's model-mechanics doc +
+# unanimous community convention) reframed the whole failure mode before that test fired again: three
+# compounding mechanisms — reference re-description (a second, conflicting account of what @图1 shows reads as
+# drift, not reinforcement), negation stacking ("do not hold" linguistically primes holding), and attention
+# dilution (a short positional cue drowned inside an essay). The fix is SUBTRACTION, not another addition.
+#
+# TEST #3 (2026-07-05, current): @图1's entire reference text IS this constant, verbatim, nothing appended —
+# no essay, no endStateStill content clause, no anti-hold clause. Every other reference (@Video1, character
+# turnarounds, the scene plate) becomes a terse one-liner too, for the same reason. Shot 1's action drops
+# _RELAY_OPEN_LOCK entirely, opening instead with a short "From the first frame, " prefix — positive trajectory,
+# no negation. Shot 1's camera drops _RELAY_CAMERA_OPEN_LOCK entirely — no prefix of any kind. If frame one
+# holds under this test, law 13 is: reference declarations are terse role assignments, the model reads images,
+# not essays about images — and the two prior attempts' constants stay in the file, inert, as the record of
+# what addition already proved insufficient.
 
 def _v3_shots(beat, cast, relay=False):
     """THE mechanical assembler — see the module note above. Returns (shots, dur) where each shot is
     {n, seconds, camera, action, speaker (short role label or None)}; seconds always sum to dur (15, Handle
     Doctrine) — action shots split HANDLE_ACTION (13s) by weight, then the closing shot gets +HANDLE_SETTLE (2s)
     added on top for its directed living settle (see _v3_settle).
-    relay=True (fix, 2026-07-04, Julian — "Seadance needs to be told that this is the first frame, not the last
-    frame"): the JOIN CONTRACT already declares shot 1 opens FROM the harvested settle (rule 19), but that lived
-    only as one abstract sentence in the ENVIRONMENT section, competing against shot 1's own vivid, already-
-    in-motion action text (e.g. 1.B2: "Fuzzby zooms toward another flower... wings beat rapidly") with nothing
-    textually anchoring it to @图1's calm, at-rest content — so the model built its own opening composition to
-    match the energetic text and only converged toward @图1 near the end (observed: join-check "wider shot,
-    character missing"; Julian: "at 15 seconds the re-mint is the end frame"). Now shot 1's OWN action text
-    carries the lock directly, right next to the motion it must ground, not in a separate section. The CAMERA
-    field gets the same treatment via _RELAY_CAMERA_OPEN_LOCK (2026-07-04) — the action lock alone wasn't
-    enough; shot 1's own camera text needed the identical grounding, since the model serves the camera field's
-    own instruction over the action field's when the two disagree on what frame one looks like."""
+    relay=True: shot 1's action opens with a short "From the first frame, " prefix (test #3, 2026-07-05,
+    superseding _RELAY_OPEN_LOCK's verbose paraphrase — see _CANONICAL_FRAME_DECLARATION's note for the full
+    history of what this replaced and why). Shot 1's camera carries NO prefix at all under test #3 — plain
+    subtraction, matching the reasoning that a competing account of the same instant reads as drift, not lock."""
     import cb_voice as V
     dur = HANDLE_TOTAL
     cuts = beat.get("cuts") or []
@@ -423,8 +425,8 @@ def _v3_shots(beat, cast, relay=False):
     for i, s in enumerate(raw):
         sec = max(1, HANDLE_ACTION - running) if i == len(raw) - 1 else max(1, round(HANDLE_ACTION * s["weight"] / total_w))
         running += sec
-        action = (_RELAY_OPEN_LOCK + s["action"]) if (relay and i == 0) else s["action"]
-        camera = (_RELAY_CAMERA_OPEN_LOCK + s["camera"]) if (relay and i == 0) else s["camera"]
+        action = (f"From the first frame, {s['action']}") if (relay and i == 0) else s["action"]
+        camera = s["camera"]   # test #3 (2026-07-05): no relay camera prefix — see _RELAY_CAMERA_OPEN_LOCK's note
         shots.append({"n": i + 1, "seconds": sec, "camera": camera, "action": action, "speaker": s["speaker"]})
     shots[-1]["seconds"] += HANDLE_SETTLE   # the closing shot's extra 2s IS the directed living settle
     return shots, dur
@@ -441,21 +443,28 @@ def _v3_settle(beat):
         return f" SETTLE: {es.rstrip('.')}. Idle life continues through the hold — {idle}."
     return f" SETTLE: hold the frame at rest, camera locked. Idle life continues through the hold — {idle}."
 
-def _v3_subjects(cast):
+def _v3_subjects(cast, relay=False):
     """REFERENCE STACK doctrine (Julian, 2026-07-03): every reference declares its JOB, not just its identity —
     the turnarounds are the identity reference EVERY beat, the anti-drift anchor pulling each chain link back to
     canon, stated explicitly here rather than left implicit.
     Binding handle is SIZE-ONLY (fix, 2026-07-04, Julian — "trim the personality adjectives from the binding
     handles"): the identity-BINDING declaration names just size + species ("the larger bee"); personality
     descriptors ("eager, manic") stay where they belong — the ACTION/PERFORMANCE prose's own first-mention label
-    (via _delabel, unchanged) — never repeated in the cold identity-binding line itself."""
+    (via _delabel, unchanged) — never repeated in the cold identity-binding line itself.
+    relay=True (test #3, 2026-07-05, SUBTRACTION): terse one-liner per character instead of the anti-drift-anchor
+    essay — "the model reads images, not essays about images." Non-relay beats keep the fuller wording; only
+    relay beats carry the terseness this test isolates, matching every other reference in this same prompt."""
     ref_bits, any_bee = [], False
     for i, name in enumerate(cast):
         role, is_bee = _char_meta(name); any_bee = any_bee or is_bee
         side = _SIDES[min(i, 2)] if len(cast) > 1 else None
         ref_bits.append(f"@图{i + 2} is {_short_role(role)}" + (f" ({side})" if side else ""))
-    line = ("; ".join(ref_bits) + " — the identity reference for every beat, the anti-drift anchor: maintain "
-            "these characters' proportions, colours, and features exactly.") if ref_bits else ""
+    if relay:
+        line = "; ".join(f"Use @图{i + 2} for {_short_role(_char_meta(n)[0])}'s appearance — match it exactly."
+                         for i, n in enumerate(cast)) if cast else ""
+    else:
+        line = ("; ".join(ref_bits) + " — the identity reference for every beat, the anti-drift anchor: maintain "
+                "these characters' proportions, colours, and features exactly.") if ref_bits else ""
     if any_bee:
         line = (line + " " + _WING_LAW_ONE_LINE).strip()
     return line
@@ -501,19 +510,11 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state
     bits = []
     if include_refs:
         if relay:
-            bits.append("@图1 — the harvested settle frame from the previous beat's approved clip: this image IS "
-                        "the first frame of this shot. It is not a style reference. Nothing is composed fresh; "
-                        "the shot begins on this exact image, then moves DECISIVELY AWAY from this pose for the "
-                        "rest of the shot. This is a one-frame launching point, never a pose to hold, repeat or "
-                        "return to — by the shot's end the characters are in a completely different position and "
-                        "pose, performing the beat's own described action.")
-            content = _v3_prev_frame_content(prev_end_state_still, cast)
-            if content:
-                bits.append(content.rstrip(".") + ".")
-            bits.append("@Video1 — the previous beat's own actual signed clip, alongside @图1's cleaned still: "
-                        "real motion and audio context leading directly into this shot. Reference only, for the "
-                        "true motion trajectory and vocal cadence arriving at this instant — never re-render or "
-                        "repeat its content.")
+            # test #3 (2026-07-05, SUBTRACTION): @图1's entire text IS the canonical declaration, nothing else —
+            # no essay, no endStateStill content clause (_v3_prev_frame_content unused here as of this test, kept
+            # for revert), no anti-hold clause. Every other reference below is a terse one-liner too.
+            bits.append(_CANONICAL_FRAME_DECLARATION)
+            bits.append("Reference @Video1 for the motion and vocal rhythm arriving into this shot.")
         else:
             bits.append("@图1 is TRUTH — copy the environment and lighting from it exactly.")
     loc = ""
@@ -532,9 +533,7 @@ def _v3_environment(beat, scene, cast, relay=False, plate_n=None, prev_end_state
         first = re.split(r"(?<=[.!?])\s+", atmo)[0]          # ONE breeze/atmosphere force, not the whole paragraph
         bits.append(_strip_spoken_words(_delabel(first, cast, used=set(cast))))
     if include_refs and relay and plate_n:
-        bits.append(f"@图{plate_n} — SCENE PLATE, the scene's environmental constant: match its lighting "
-                    "direction, palette and environmental textures for the full duration of the clip — never "
-                    "copy its framing or poses. The world must not drift from this plate.")
+        bits.append(f"Match @图{plate_n}'s lighting, palette and environmental textures throughout.")
     return " ".join(bits)
 
 def _v3_ambience(scene):
@@ -602,9 +601,10 @@ def emit_prose_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_sti
     prev_end_state_still: the PREVIOUS beat's own endStateStill text, for @图1's content-description clause (2026-07-04)."""
     any_bee = any(_char_meta(n)[1] for n in cast)
     plate_n = len(cast) + 2 if relay else None
-    out = f"{_CANONICAL_FRAME_DECLARATION}\n\n" if relay else ""
-    out += f"{dur} seconds, 16:9.\n\n"
-    out += f"SUBJECTS: {_v3_subjects(cast)}\n\n"
+    # test #3 (2026-07-05): no standalone declaration line — the canonical form now lives INSIDE @图1's own
+    # ENVIRONMENT bit below, as its entire reference text, nothing else appended. See the constant's note.
+    out = f"{dur} seconds, 16:9.\n\n"
+    out += f"SUBJECTS: {_v3_subjects(cast, relay=relay)}\n\n"
     out += f"ENVIRONMENT: {_v3_environment(beat, scene, cast, relay=relay, plate_n=plate_n, prev_end_state_still=prev_end_state_still)}\n\n"
     out += f"STYLE: {_v3_style()}\n\n"
     tone = _v3_tone(beat)
@@ -727,29 +727,23 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_stil
     prev_end_state_still: the PREVIOUS beat's own endStateStill text, for @图1's content-description clause (2026-07-04)."""
     any_bee = any(_char_meta(n)[1] for n in cast)
     if relay:
-        content = _v3_prev_frame_content(prev_end_state_still, cast)
-        refs = {"@图1": "the harvested settle frame from the previous beat's approved clip: this image IS the "
-                        "first frame of this shot. It is not a style reference. Nothing is composed fresh; the "
-                        "shot begins on this exact image, then moves DECISIVELY AWAY from this pose for the rest "
-                        "of the shot. This is a one-frame launching point, never a pose to hold, repeat or return "
-                        "to — by the shot's end the characters are in a completely different position and pose, "
-                        "performing the beat's own described action."
-                        + (f" {content.rstrip('.')}." if content else ""),
-                "@Video1": "the previous beat's own actual signed clip, alongside @图1's cleaned still: real "
-                          "motion and audio context leading directly into this shot. Reference only, for the "
-                          "true motion trajectory and vocal cadence arriving at this instant — never re-render "
-                          "or repeat its content."}
+        # test #3 (2026-07-05, SUBTRACTION): @图1's entire text IS the canonical declaration, nothing appended —
+        # no essay, no endStateStill content clause (_v3_prev_frame_content unused here as of this test, kept
+        # for revert), no anti-hold clause. @Video1 is a terse one-liner too.
+        refs = {"@图1": _CANONICAL_FRAME_DECLARATION,
+                "@Video1": "Reference @Video1 for the motion and vocal rhythm arriving into this shot."}
     else:
         refs = {"@图1": "the opening keyframe — TRUTH for environment, lighting and continuity"}
     for i, name in enumerate(cast):
         role, _ = _char_meta(name)
-        refs[f"@图{i + 2}"] = (f"{_short_role(role)} — the identity reference for every beat, the anti-drift "
-                              "anchor: maintain these characters' proportions, colours, and features exactly.")
+        if relay:
+            refs[f"@图{i + 2}"] = f"Use @图{i + 2} for {_short_role(role)}'s appearance — match it exactly."
+        else:
+            refs[f"@图{i + 2}"] = (f"{_short_role(role)} — the identity reference for every beat, the anti-drift "
+                                  "anchor: maintain these characters' proportions, colours, and features exactly.")
     plate_n = len(cast) + 2
     if relay:
-        refs[f"@图{plate_n}"] = ("SCENE PLATE, the scene's environmental constant: match its lighting direction, "
-                                "palette and environmental textures for the full duration of the clip — never "
-                                "copy its framing or poses. The world must not drift from this plate.")
+        refs[f"@图{plate_n}"] = f"Match @图{plate_n}'s lighting, palette and environmental textures throughout."
     out_shots = []
     last_i = len(shots) - 1
     for i, s in enumerate(shots):
@@ -764,10 +758,9 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_stil
                 dlg["expression"] = expr
             shot["dialogue"] = dlg
         out_shots.append(shot)
-    doc = {}
-    if relay:
-        doc["first_frame"] = _CANONICAL_FRAME_DECLARATION   # the prompt's own opening line — see the constant's note
-    doc.update({
+    # test #3 (2026-07-05): no separate "first_frame" top-level key — the canonical declaration lives ONLY
+    # inside refs["@图1"] above now (test #2's separate-field approach is superseded; see the constant's note).
+    doc = {
         "duration": dur, "aspect": "16:9", "style": _v3_style(), "references": refs,
         "voices": ("@Audio1 is the ONLY source of all dialogue — animate each speaking character's mouth, timing "
                    "and full physical performance to match @Audio1 exactly; never invent, duplicate or generate a "
@@ -776,7 +769,7 @@ def emit_json_v3(beat, scene, shots, dur, cast, relay=False, prev_end_state_stil
                    "(Audio Doctrine, Julian, 2026-07-03)."),
         "world": _v3_environment(beat, scene, cast, relay=relay, plate_n=(plate_n if relay else None),
                                  prev_end_state_still=prev_end_state_still, include_refs=False),
-    })
+    }
     tone = _v3_tone(beat)
     if tone:
         doc["tone"] = tone

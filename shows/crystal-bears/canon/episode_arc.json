@@ -1,3 +1,63 @@
 {
- "_note": ""
+ "_note": "",
+ "Ep1": {
+  "episode": "Episode 1",
+  "title": "The Adventure Begins",
+  "lead": "Keen",
+  "engine": "Courage",
+  "the_day_unfolds": [
+   {
+    "scenes": [
+     1,
+     2,
+     3
+    ],
+    "pillar": "spark",
+    "light": "Warm golden morning: safe, bright, and tender, with only distant wind pressure beginning to disturb the day."
+   },
+   {
+    "scenes": [
+     4,
+     5
+    ],
+    "pillar": "deepening",
+    "light": "Gold drains into cool blue-grey as the storm rolls in; wind, rain, and lost visibility test Keen’s performed confidence."
+   },
+   {
+    "scenes": [
+     6
+    ],
+    "pillar": "connection",
+    "light": "Storm-dark shore pierced by combined crystal beacon light, hope visible before safety is guaranteed."
+   },
+   {
+    "scenes": [
+     7
+    ],
+    "pillar": "heart",
+    "light": "Darkest storm and underwater blue-grey; aquamarine cuff-glow becomes the truthful light of carried love and courage."
+   },
+   {
+    "scenes": [
+     8,
+     9
+    ],
+    "pillar": "connection",
+    "light": "Storm breaks into washed-clean warmth; welcome and recognition gather around Keen as the Cove brightens."
+   },
+   {
+    "scenes": [
+     10
+    ],
+    "pillar": "ripple",
+    "light": "Golden-hour calm after rain, warmer than the start, with the ache still present in wet leaves and softened surf."
+   }
+  ],
+  "wristbands": [
+   "none",
+   "transition",
+   "vacant",
+   "crystal"
+  ]
+ }
 }

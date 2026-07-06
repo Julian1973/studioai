@@ -31,7 +31,7 @@
       "location": "A bee-height corridor through an oversized rainforest flower meadow, with towering pollen-heavy blossoms, broad springy leaves, one low crossing branch, and open air lanes between stems for fast flower-to-flower flight.",
       "time": "Morning, early in the day.",
       "weather": "Warm breeze, clear sky beginning to carry a distant pressure change.",
-      "lighting": "Warm golden morning light with soft pollen scatter; only the faintest coolness begins to creep in at the thunder cue.",
+      "lighting": "Warm golden morning light with soft pollen scatter; at the thunder cue, the ambient meadow crystals shift from their steady warm glow to a faint cool flicker — the world's own truth-tell that something has changed, read in the crystals before it's visible anywhere else.",
       "look": "Empty establishing plate filled edge-to-edge with tall swaying flowers dominating the frame: large open pollen centers at frame-left, frame-right, and deeper center for repeated dives; a broad flexible leaf angled across the left flight path for a rebound; a small branch crossing the upper midground for a later clip; soft petal surfaces layered below as safe bounce points. Warm morning sunlight streams through drifting pollen, with the far background shadows just beginning to cool at the edges, hinting at distant weather pressure. No characters.",
       "cast": [
         "Fuzzby",
@@ -342,7 +342,7 @@
       "cuts": [
         {
           "n": 1,
-          "framing": "24mm wide-angle chase shot at bee height, camera dives between oversized flower stems then whips close behind Fuzzby, with Zenny held frame-right in the same moving world",
+          "framing": "24mm wide-angle bee-scale two-shot establishing both bees working the flower corridor; the camera holds a readable wide frame and gently tracks with Fuzzby's zig-zag, keeping Zenny visible frame-right the whole time",
           "action": "Tall flowers sway in the warm breeze as Fuzzby and Zenny weave flower to flower collecting pollen; tiny collected pollen puffs bob near their back legs, Zenny working smooth and precise while Fuzzby rockets in a named zig-zag ladder: left petal pass, right stem dodge, low grass skim, loud hum build.",
           "dialogue": "FUZZBY: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
           "delivery": "fun sing-song rhythm; breathless, delighted, overconfident, the hum rising with speed",
@@ -351,7 +351,7 @@
         },
         {
           "n": 2,
-          "framing": "fast push-in to medium action profile, camera banks with Fuzzby then snaps down to the leaf at impact height",
+          "framing": "the camera holds close enough to keep Fuzzby's dive, leaf bump and recovery fully readable, tracking gently rather than snapping — steadying into a locked frame the instant he straightens into his proud pose, with “Nailed it.” landing on that stable frame",
           "action": "Fuzzby dips low into a flower, scoops up pollen, overdoes the exit, spins sideways into a leaf with a crisp FWIP, rebounds off it in a soft squash-and-spring arc, and straightens in mid-air into a proud superhero chest-out pose as if the leaf were part of the plan.",
           "dialogue": "FUZZBY: Nailed it.",
           "delivery": "tiny triumphant button; pompous, clipped, absolutely refusing to acknowledge the crash",
@@ -368,7 +368,7 @@
           "chorusMembers": null
         }
       ],
-      "cameraArc": "The camera behaves like Fuzzby’s overexcited wingman: it chases, banks, drops, and then finally locks only on the proud button and Zenny’s punctuation stare.",
+      "cameraArc": "A single held wide shot: a readable bee-scale wide two-shot establishes both Fuzzby and Zenny working the flower corridor together. The camera gently tracks Fuzzby just enough to keep his over-energetic zig-zag and the leaf bump fully readable — never wild, never losing him. By the settle, the camera eases back to a stable two-shot with both bees in frame.",
       "pacingVerbs": [
         "weave",
         "rocket",
@@ -424,12 +424,18 @@
       "sceneNumber": 1,
       "beatCode": "1.B1",
       "id": 1,
-      "endState": "Fuzzby holds his mid-air superhero pose a beat too long, chest puffed, wings blurring fast beneath him, utterly convinced of his own triumph; Zenny settles into stillness beside him, her flat, fond stare fixed on him, the smallest almost-smile threatening at the corner of her mouth.",
+      "endState": "Fuzzby holds his mid-air superhero pose a beat too long, chest puffed and giving off tiny eager pulses of pride, body never fully still even at rest, wings blurring fast beneath him, utterly convinced of his own triumph; Zenny settles into stillness beside him, her flat, fond stare fixed on him, the smallest almost-smile threatening at the corner of her mouth.",
       "endStateStill": "Fuzzby hovers frame-left in a chest-out superhero pose, wings a blur, one leg still slightly lifted from the rebound; Zenny hovers frame-right beside him, upright and composed, her eyes on him and the faintest smile-line at her mouth. Tall flowers sway behind them in warm morning light; light pollen dust drifts between them.",
       "carryMarks": "light pollen dust across Fuzzby's face and front from the flower dip",
       "actingContrast": "Fuzzby's showy, oblivious pride plays directly against Zenny's silent, deadpan witness — his performance only works because she refuses to perform back.",
       "humourLayer": 3,
-      "emotionMechanic": "Fuzzby's need to be accepted mess-and-all is dramatized mechanically by the leaf-crash-to-proud-pose beat: the crash is the mess, the instant recovery is the need for acceptance without having to ask for it, and Zenny's watching silence is the acceptance already being granted before he even notices he needed it."
+      "emotionMechanic": "Fuzzby's need to be accepted mess-and-all is dramatized mechanically by the leaf-crash-to-proud-pose beat: the crash is the mess, the instant recovery is the need for acceptance without having to ask for it, and Zenny's watching silence is the acceptance already being granted before he even notices he needed it.",
+      "stagingProhibited": [
+        "no wild or disorienting camera movement that loses the action",
+        "no hard or violent-feeling collision",
+        "no knock-out, dazed collapse or injury implied",
+        "no random or invented prop gags"
+      ]
     },
     {
       "slug": "s1-b2-official-pollen-moustache",
@@ -488,7 +494,7 @@
           "n": 3,
           "framing": "cut to locked 50mm close-up on Zenny, eye-level, no camera movement",
           "action": "Zenny tries not to laugh: one slow blink, the tiniest tightening at the mouth, then a flat delivery without breaking posture.",
-          "dialogue": "ZENNY: Yes Fuzzby Officially nuts!",
+          "dialogue": "ZENNY: Yes, Fuzzby… officially nuts!",
           "delivery": "deadpan dry; the first line almost courteous, the second line a clean tiny blade with a hidden smile",
           "voiceTreatment": "music drops to a dry silence under the line, tiny ping after “nuts!”",
           "chorusMembers": null
@@ -568,7 +574,10 @@
       },
       "actingContrast": "Fuzzby's grand, hopeful self-presentation collides with Zenny's clean deadpan takedown — she doesn't mock him, she simply refuses to lie, and that honesty is what nearly breaks her own composure.",
       "humourLayer": 4,
-      "emotionMechanic": "Fuzzby's want (validation of his 'official' image) is mechanically punctured by Zenny's flat truth-telling line, which is exactly what delivers his need — being liked as himself, moustache and all, without the performance being required."
+      "emotionMechanic": "Fuzzby's want (validation of his 'official' image) is mechanically punctured by Zenny's flat truth-telling line, which is exactly what delivers his need — being liked as himself, moustache and all, without the performance being required.",
+      "stagingProhibited": [
+        "no full-body dive or plunge into the flower this beat — pollen contact stays face/head-level only; the full-body plunge is reserved for 1.B4's escalation"
+      ]
     },
     {
       "slug": "s1-b3-smear-branch-blossom-buzz-crash",
@@ -633,7 +642,7 @@
         },
         {
           "n": 4,
-          "framing": "cut to 50mm medium close-up on the blossom, slight upward pop-reframe as Fuzzby emerges",
+          "framing": "cut to 50mm medium close-up on the blossom, camera pop-reframes upward with him as he emerges then settles fully still — “Buzz Crash!!” lands only once the frame has locked",
           "action": "After one beat of upside-down kicking, Fuzzby pops back up from inside the blossom and restores full dignity instantly, pollen still worse than before.",
           "dialogue": "FUZZBY: Buzz Crash!!",
           "delivery": "popping up; triumphant invention, as if he has named a planned maneuver",
@@ -842,7 +851,8 @@
       },
       "actingContrast": "Fuzzby's tireless, oblivious confidence plays against Zenny's softening deadpan — her eye-roll melting into a real smile is the beat's whole joke, proof that his chaos has become something she quietly enjoys rather than merely tolerates.",
       "humourLayer": 3,
-      "emotionMechanic": "Fuzzby's need for quiet reassurance that Zenny is with him, not laughing at him, is answered mechanically by her smile breaking through her deadpan during his messiest moment yet — the more covered in pollen he gets, the more visible her affection becomes."
+      "emotionMechanic": "Fuzzby's need for quiet reassurance that Zenny is with him, not laughing at him, is answered mechanically by her smile breaking through her deadpan during his messiest moment yet — the more covered in pollen he gets, the more visible her affection becomes.",
+      "stagingProhibited": []
     },
     {
       "slug": "s1-b5-thunder-pressure-stuck",
@@ -929,7 +939,7 @@
         "stick",
         "sigh"
       ],
-      "pauseHold": "One hold only: about 1.2 seconds on Fuzzby stuck inside the flower while Zenny sighs, letting the thunder’s meaning sit under the joke.",
+      "pauseHold": "One hold only: under 1.2 seconds on Zenny's close-up as she says “A Storm's coming” — the tonal pivot, held just long enough for the warning to land before Fuzzby's bravado cuts back in.",
       "performance": {
         "surface": "Fuzzby acts unbothered and professionally pressure-ready; Zenny acts calm and matter-of-fact.",
         "underneath": "Fuzzby is rattled by the rumble; Zenny has moved from amusement to alert care.",

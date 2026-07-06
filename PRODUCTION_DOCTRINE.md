@@ -1,132 +1,168 @@
-# THE PRODUCTION DOCTRINE — CRYSTAL BEARS, THE WHOLE MACHINE, ONE PAGE
+# THE PRODUCTION DOCTRINE — CRYSTAL BEARS, THE DEFINITIVE BUILD
 
-Read this first. Full mechanical detail lives in `CLAUDE.md` rule 28 (the numbered constitution) and
-`REPLICATOR.md` (the escorted-run gate map); this page is the same doctrine, told straight through, the way
-Julian described it the night it locked (2026-07-05). If this page and either of those ever disagree, that's
-a bug — fix the disagreement the day it's found (CLAUDE.md rule 7).
+**Locked 2026-07-06, Julian's consolidation ruling: "consolidate, purge, prove."** This document supersedes
+`REPLICATOR.md` and the prior (2026-07-05) draft of this file, both retired the same day this was written —
+this is now the SOLE source of truth for the pipeline's shape. Full dated history of how each piece was
+arrived at still lives in `CLAUDE.md` (rules 1-39); this page states what is true NOW, not why. If code and
+this page ever disagree, that is a bug — fix the disagreement the day it is found (rule 7).
 
 ## The hierarchy
 
-**Episode → Scene → Beat.**
+**Episode → Scene → Beat.** A scene is a bubble: three locked constants (scene plate, ambient bed, style law)
+held verbatim across every beat inside it. A beat is one gag arc, 15 seconds — 13s action + 2s settle. A
+scene boundary is a full reset: new plate, new bed, a fresh anchor keyframe, relay depth back to zero.
 
-A **scene** is a bubble: three locked constants — scene plate, ambient bed, style law — held verbatim across
-every beat inside it. A **beat** is one gag arc, 15 seconds: 13s action + 2s settle. A scene boundary is a
-full reset: new plate, new bed, a fresh canon-generated anchor keyframe, relay depth back to zero. Nothing
-about the beat laws below is scene-specific — they apply identically inside every bubble.
+## Stage 0 — Script-in
 
-## The joins — the week's hardest-won truth
+The script is the SOLE story source. Verbatim law: nothing downstream invents story or rewrites a line.
+Dialogue is locked including its authored punctuation (a comma, an ellipsis, a case choice) — once Julian
+rules a line's exact text, that text is what every V3 take is generated from; changing it is a fresh ruling,
+not a typo fix. `cb_script.py` parses the signed script deterministically; `cb_qa`'s verbatim gate hard-blocks
+any beat whose dialogue drifts from it.
 
-Beats join by **cut, not freeze**. Nine renders proved frame-freezing is both impossible on this surface and,
-when approximated, boring — Julian's eye caught what no gate did.
+## Stage 1 — The Director pass (script → beat package) → GATE 1
 
-Every beat declares its own **junction type**:
-- `intentional_next_shot` — THE DEFAULT. A new gag arc, a fresh camera setup, energy already in frame.
-- `seamless_continuation` — ONLY when the director's cut explicitly says one shot continues unbroken across
-  the boundary. Omission is never read as this — it's always the rarer, declared case.
+`cb_director.py` breaks the script into scenes and beats. Scenes are bubbles (plate + ambient bed + style law,
+locked verbatim per scene, from Stage 0 onward). Beats are single 15-second gag arcs (13s action + 2s settle,
+`cb_segprompt.HANDLE_TOTAL`/`HANDLE_ACTION`/`HANDLE_SETTLE`) carrying BOTH manifests complete before Gate 1
+can be signed — see `MANIFEST.md` for the full field list, `cb_preflight.py` for the enforcement:
 
-Each beat opens on a **new angle within the bubble**, close to where the last beat ended, motivated by
-eyeline or motion — Zenny's head-turn tracking Fuzzby is the house bridge. Never a relocation, never a
-mid-scene establishing wide (the wide belongs to the scene's opening beat only).
+- **Technical contract**: `endState`, `endStateStill`, `carryMarks`, `junctionType` (cut-default —
+  `intentional_next_shot` unless the director's own cut explicitly declares `seamless_continuation`), a
+  timing map whose `pauseHold` names the beat's ONE featured hold and states it ≤1.5s, `opensOn` (the
+  Coverage Law's bridge — who the camera opens on and their mid-motion state), `actingContrast`, and speaker
+  order matching the cuts' actual dialogue sequence.
+- **Creative contract**: `humourLayer` (1-4), `kidRead`, `adultRead`, `want`/`need`, `emotionMechanic`, and
+  the featured hold explicitly designated (the SAME `pauseHold` field, naming which moment in the beat earns
+  the beat's one permitted hold — not necessarily the final button; a beat may hold on its tonal pivot
+  instead, director's call).
 
-**What carries across the cut is state, not framing.** The beat's own declared `carryMarks` (a short phrase —
-"the moustache, the pollen on their legs, the warm light" — never a full sentence) is HARD-GATED by the
-join-check; everything else visible in the anchor (a bee casually holding pollen, say) is advisory only,
-logged as a flag, never blocking.
+Blanks BLOCK. No fallback text exists anywhere in the authoring path — `cb_qa.ManifestFieldMissing` is raised
+by every emitter function that would otherwise have invented placeholder prose (rule 37's fallback sweep).
 
-The **raw harvested settle frame** is the state reference for a cut — no re-mint. Re-mint (the NB2 cleanup
-pass) is retained only for a declared `seamless_continuation` join, where @图1 really is used as literal
-first-frame pixels.
+**GATE 1**: the storyboard exports as one document for Julian's own review outside the Studio (the Gate-1
+external review rule); his signature — `cb_pipeline.approve("1", scene)` — follows that review, every scene,
+every time. `manifest_ok()` refuses the signature while any BLOCK-kind gap remains in scope.
 
-## The prompt — v4, locked
+## Stage 2 — World (Gate 2a)
 
-Six-line reference contract, one job each:
-- **@图1** — for a cut (the default): a state-reference clause naming what carries (identity, carryMarks,
-  lighting, position) plus the spatial leash ("open on a fresh camera setup within the same space, close to
-  where @图1 shows the characters — the camera moves, the world does not"). For a seamless join: the locked
-  opening frame, exactly.
-- **@Video1** — motion energy and action continuity ONLY. Never camera framing, shot size or composition —
-  the camera setup comes from THIS beat's own direction. (Fixed 2026-07-05 lock-in night — the earlier
-  wording left framing implicitly copyable from the previous clip.)
-- **Character turnarounds** — identity anchor, name-welded directly to the slot ("Fuzzby is the bee from
-  @图2"), zero physical description anywhere.
-- **Scene plate** — the duration anchor, the environmental constant for the whole clip.
-- **@Audio1** — the sole vocal source, covering dialogue, hums and sing-song alike; drives the generation
-  directly, never stitched on after (no post voice swap, ever, even in a future two-step fallback).
+The scene plate is built, then checked (`cb_qa.check_plate`) against the Crystal World Rule — natural,
+organic crystals, never cut, arranged or self-glowing at rest. Character turnarounds are verified against
+canon (`config/characters.json`'s bible). The scene's ambient bed is locked — word-for-word identical across
+every beat in the scene from here on (the Scene Bubble Law). **Gate 2a**: Julian signs; the signed plate
+becomes the scene's master and is stored in the reusable locations library (`cb_pipeline._lock_plate_as_master`).
 
-One continuous `prompt` field: the opener, character bindings, an OPEN-ON sentence naming who the camera
-opens on and their mid-motion state (cut beats only — the Coverage Law's bridge, stated concretely), then a
-labelled timing clock whose closing segment is always **"settle in character:"** — the beat's own `endState`
-verbatim, never a generic idle-life placeholder, never a restatement of the previous beat's pose. `acting_rules`
-is its own top-level field. `continuity` names the beat's own carry marks plus the show's warm light.
-`prohibited` merges the beat's own staging list with the six standing negatives — Crystal World Rule and Wing
-Law, always.
+## Stage 3 — Voices
 
-Dialogue words never appear in the prompt. **Erratic in character, precise in choreography**: every manic
-action is a named gag with cause and consequence (rockets, brakes too late, loops once, stops) — the model
-executes actions and butchers adjectives, so adjective-chaos ("wildly," "crazily") is banned as unreadable.
+One directed V3 take per beat, generated from the LOCKED dialogue text only (Stage 0) — never a reworded or
+paraphrased line. Fired INTO generation as `@Audio1`; Seedance generates no voice-like sound of its own, and
+there is no post-generation voice swap, ever, even in a hypothetical two-step fallback (rule 29, absolute —
+`cb_post` has no swap function by design). The Voice Bible registers (per-character cadence, stability,
+delivery direction) drive `cb_voice.build_dialogue_track`, itself driven by the Director's Pass so the
+performance matches the picture. Julian's ear approves the one take, or names the single correction for the
+one permitted re-fire — the same one-render economy every other artifact in this pipeline gets.
+
+## Stage 4 — Keyframes (Gate 2b)
+
+ONE generated anchor keyframe per SCENE — never per beat; a relay beat never gets its own — 2K, centre-safe,
+composited from the signed plate + character turnarounds (`cb_scene.keyframe_for`). Per-character
+action-state QA (`ACTION_STATE_MISMATCH`) checks concrete, literally-checkable criteria (wing symmetry, body
+lean), never a subjective "does this look dynamic" call (rule 17). **Gate 2b**: Julian signs.
+
+## Stage 5 — Animation, the walk (Gate 3)
+
+### The Scene-Opener Stack Law
+
+A scene's FIRST beat fires with exactly FOUR visual references — the signed keyframe (Stage 4), each cast
+member's turnaround, and the scene plate — plus `@Audio1`. No harvest, no re-mint, no `@Video1` on any
+opener: there is no predecessor to harvest a settle frame from or reference a clip against. This is now
+CODE-ENFORCED, not merely conventional: `cb_preflight.check_opener_stack` is a per-beat BLOCK for a scene's
+first beat if its actual reference plan would include a harvest, a re-mint, or a `@Video1` — the manifest
+refuses to arm Gate 3 on a scene whose opener stack is wrong, the same choke-point every other gate check
+uses.
+
+### Every subsequent beat
+
+Opens off the raw harvested settle frame from the **approved** predecessor take — never merely the predecessor
+with a clip file on disk; a rejected take is dead to all resume and harvest logic (see "Approval, not file
+existence," below). State reference is cut-default (`intentional_next_shot`): identity, carryMarks, lighting,
+position carry forward; camera is free within the coverage leash (a new angle close to the predecessor's,
+motivated by eyeline or motion, never a relocation or a fresh establishing wide — spatial-adjacency gated by
+the join-check's COVERAGE tier). `@Video1` is the approved predecessor's own clip — motion energy only, never
+camera framing, shot size or composition. Turnarounds and the scene plate are present on every beat, opener or
+not (rule 39 — the plate is a standing anchor, never relay-only).
+
+### The v4 emitter is the sole prompt author
+
+No hand-authored prompt text, anywhere, ever. `cb_segprompt.emit_v4`/`shipped_prompt` is the only path from
+beat data to shipped prompt; v3/v2/v1 and every hand-edit escape hatch are deleted, not merely deprecated (the
+Purge, below) — a builder that returns empty now surfaces as a hard `ManifestFieldMissing`-class refusal, not
+a silent degrade to a weaker builder.
+
+### The one-render economy
+
+One render per beat, standard tier. One automatic re-fire on a red gate. Second fail: a HARD STOP naming the
+layer at fault (keyframe / brief / reference / take). Never a third roll. Machine gates per beat: Clip QA
+(`cb_qa.check_clip`), carryMarks-scoped state continuity, spatial adjacency (Coverage), settle distinctiveness,
+anti-hold. These are the MACHINE half of the loop — they stop there, deliberately.
+
+### Approval, not file existence
+
+Julian's felt-intent verdict per beat — does it flow, is it funny, does the four-year-old watch it again — is
+the RESERVED VERDICT no machine check approximates. It is now recorded as a data field, not left implicit in
+"a clip file happens to exist": `locked.json`'s per-beat lock gains an `approval` key —
+`{"status": "approved"|"rejected"|"pending", "note": "..."}` — written by `cb_pipeline.approve_beat_take`.
+Only an `approved` take may be harvested (`cb_scene.harvest_settle_frame`) or referenced as `@Video1`; a
+`rejected` take's clip is moved to `media/rejected/` with a `.REJECTED.json` sidecar (recording why, and what
+the one changed variable was on the re-fire that superseded it) and is invisible to every resume/harvest path
+— `walk_scene` treats a beat with a `rejected`-only history as `pending`, not done, and re-fires it. **This is
+the resume key**: `walk_scene` resumes on approval status read from `locked.json`, never on whether a clip
+file happens to exist on disk — a clip can exist and still be correctly treated as not-done if it was never
+approved.
+
+## Stage 6 — Gate 4: retakes by timecode
+
+The walked scene assembles into a review cut with burnt-in timecode (`cb_post.assemble_review_cut`, an
+ffmpeg `drawtext` overlay on the hard-cut assembly, never on the delivery master). Julian names corrections
+by timecode, not by beat code or file name. `cb_post.retake_at_timecode(scene, timecode, variable, value)`
+maps timecode → beat → cut (via each beat's own duration and position in the scene's running order — a
+beat's actual rendered clip is always `HANDLE_TOTAL` seconds, so the mapping is arithmetic, not guesswork),
+applies the ONE named variable to that beat's data (never more than one field per retake — the retake
+protocol), re-fires that beat only under the identical one-render economy, re-gates it, and returns it to
+Julian. An approved retake replaces the take (the old one moves to `media/rejected/` exactly as any other
+rejected take does — nothing is ever silently overwritten without a trace). Downstream beats do not
+auto-refire off a changed predecessor: the join-check re-verifies state continuity against the new
+predecessor and FLAGS a break for Julian's attention; it never blindly cascades a re-render.
+
+## Stage 7 — Gate 5: post
+
+Settle-trim (2.0 seconds, off each clip's edge frames) so the assembled film joins on living motion, never
+hold-into-hold (`cb_post.assemble_conformed`, the JOIN CONTRACT). Beats stitched in signed order; the ambient
+bed continuous across the whole scene (guaranteed by construction — the Scene Bubble Law). Music and grade
+pass. Two masters delivered: the 16:9 feature master and a centre-safe 9:16 derivative
+(`cb_post.export_masters`). **Gate 5**: Julian's final-cut approval.
 
 ## The gates — machine vs showrunner
 
-The machine checks what it can check: state continuity on carryMarks, spatial adjacency (Coverage), Clip QA,
-gag-element presence, the flag-only prompt-law lint. Julian checks the only things that matter and that no
-gate owns: **does it flow, is it funny, does the four-year-old watch it again.** This is a reserved verdict,
-not a gap in the machine — no check is ever built to approximate it. The Layered Humour checklist rides above
-it all: Fuzzby's chaos beats, Zenny's deadpan with its pause protected (the settle is where her look
-breathes), the laugh-so-hard-they-miss-it ambition intact.
-
-## The one-render economy (locked 2026-07-05, the full-reset night)
-
-One fire per artifact — the scene plate, a voice take, a keyframe, a beat render. Never a batch of exploratory
-seeds as the default. On a failed gate: ONE automatic re-fire, never blind. If that re-fire also fails: a HARD
-STOP with a diagnosis naming the layer at fault (keyframe / brief / reference / take, rule 3) — never a third
-roll.
-
-The voice pass is the same economy, stated explicitly: ONE directed V3 take per beat, never a batch of
-candidate reads. Julian's ear either approves it, or names the single correction for the one permitted
-re-fire. There is no "pick a favourite among several" step for voice — the same discipline the felt-intent
-gate already holds the beat render to.
-
-CODE-ENFORCED (wired 2026-07-05, the same night, as a follow-up closer): `cb_beats.fire_next_beat`'s launch phase
-now fires once, reads back the CLIP QA + JOIN CHECK verdicts `cb_beats.run` persists as sidecars, auto-retries
-once on a failure, and returns a `HARD_STOP` with a layer diagnosis (`cb_beats._layer_diagnosis`) if the retry
-also fails — never a third roll. `cb_replicator.walk_scene` carries the identical discipline for the scene's
-opening beat (`cb_beats._fire_gated`) and inherits it from `fire_next_beat` for every beat after. The old
-multi-seed default (`seeds=2`, "fire N takes, pick a winner") is retired everywhere it flowed —
-`fire_next_beat`, `walk_scene`, `cb_pipeline.relay_prepare`/`relay_approve`, and the Studio's seed-picker panel
-(`/api/beat-seeds`, app.html's "candidate seeds" UI) are all gone; a beat now has exactly one official clip.
-Standard tier (`fast=False`) is the production default throughout, superseding the earlier fast-endpoint default.
-
-## The loop, and the full production line — the canonical stage map
-
-fire → machine gates → Julian's eye → sign → harvest → cut into the next beat, which declares its own
-junction type. Escorted through Scene 1 by hand (`cb_beats.fire_next_beat`); `cb_replicator.walk_scene` walks
-it thereafter under the identical laws — nothing beat-specific lives in its own code, only in the beat data.
-That loop is Stage 5 below. The full line, script to master:
-
-Every stage names its gate holder. The machine checks; Julian signs. Nothing self-advances past any gate,
-ever (CLAUDE.md rule 1).
+Every stage names its gate holder; nothing self-advances past any gate, ever (rule 1). The machine checks
+what it can check, mechanically and vision-assisted: verbatim dialogue, both manifests, plate canon,
+action-state QA, Clip QA, carryMarks state, Coverage, settle distinctiveness, the prompt-law lint, the
+opener-stack law. Julian checks the only things that matter and that no gate owns: does it flow, is it funny,
+does the four-year-old watch it again — recorded now as the `approval` field, never left implicit.
 
 | Stage | What happens | Gate holder |
 |---|---|---|
-| **0 — Script-in** | The script is the SOLE story source. Nothing downstream invents story; everything traces back to this. | — (the input) |
-| **1 — Beat package → Gate 1** | The script becomes the beat package (storyboard): scenes, beats, cuts, dialogue, junction types. | Julian signs Gate 1 |
-| **2 — World and cast** | The scene plate is built, then checked (`check_plate`) against the Crystal World Rule (natural, organic, never cut or arranged); character turnarounds verified against canon; the scene's ambient bed locked — word-for-word identical across every beat in the scene from here on (the Scene Bubble Law). | The machine checks (`check_plate`); folds into Gate 2's review, no separate sign-off |
-| **3 — Voice pass** | One directed V3 take per beat, per the Character Voice Bible (cadence, register, the per-character V3 tags). The one-render economy applies here explicitly (above). | Julian's ear approves, or names the single correction |
-| **4 — Gate 2: anchor keyframe** | One anchor keyframe per SCENE (not per beat — a relay beat never gets its own keyframe), 2K, centre-safe, per-character action-state QA (does the pose show what the story says is happening). | Julian signs Gate 2 |
-| **5 — Gate 3: the escorted walk** | `cb_replicator.walk_scene` fires one render per beat, standard tier. Machine gates: Clip QA, carryMarks-scoped state continuity, spatial adjacency (Coverage), settle distinctiveness, the prompt-law lint. Then the reserved verdict — does it flow, is it funny, does the four-year-old watch it again. | Machine gates, then Julian's felt-intent sign-off, PER BEAT |
-| **6 — Gate 4: retakes** | A retake fires only on Julian's own verdict — never a machine flag alone. One variable changes per re-fire (the retake protocol) — never re-roll blind hoping something different happens. | Julian names what's wrong and what changes; the machine never retakes on its own initiative |
-| **7 — Gate 5: post** | Settle-trim so the cut joins on living motion, not hold-into-hold (the JOIN CONTRACT). Beats assembled; the ambient bed continuous across the whole scene; music and grade pass; two masters delivered — the 16:9 feature master and a centre-safe 9:16 derivative. | Julian's final-cut approval |
-
-A stage marked "the machine checks" is still a real gate — it just doesn't need Julian's own eyes on every
-single instance, the way Gate 1/2/3/4/5 do. Nothing in this table skips a step by being fast, cheap or
-automatic.
-
-Directing goes in. Animation comes out.
+| 0 — Script-in | Sole story source; dialogue locked including authored punctuation | — (the input) |
+| 1 — Beat package | Script → storyboard; both manifests complete, blanks BLOCK | Julian signs Gate 1 (external review first) |
+| 2 — World | Plate built + `check_plate`; turnarounds verified; ambient bed locked | Julian signs Gate 2a |
+| 3 — Voices | One V3 take per beat from locked text, fired into generation | Julian's ear approves, or names the one correction |
+| 4 — Keyframes | One 2K anchor per scene, action-state QA | Julian signs Gate 2b |
+| 5 — The walk | Opener-stack law; cut-default relay; v4-only; one-render economy; approval-not-file-existence resume | Machine gates, then Julian's `approval` field per beat |
+| 6 — Retakes | Timecode → beat/cut mapping; one named variable; re-fire; re-gate | Julian names the timecode + correction |
+| 7 — Post | Settle-trim; stitch; continuous ambient bed; music/grade; two masters | Julian's final-cut approval |
 
 ## Where the detail lives
 
-- **CLAUDE.md rule 28** — the numbered, code-cross-referenced constitution (this page's source of record).
-- **REPLICATOR.md** — the escorted-run gate map, step by step, with the exact function each step calls.
-- **CLAUDE.md rules 29-36** — the dated case-by-case history of how this doctrine was arrived at (why each
-  piece exists, not just what it says).
-- **MORNING_HANDOVER.md** — the state of every beat, right now, and what to do next.
+- **CLAUDE.md** — the numbered, dated constitution (rules 1-39), the record of why each piece exists.
+- **MANIFEST.md** — the full field-by-field technical/creative contract spec.
+- **This document** — the only stage map; `REPLICATOR.md` is retired (see the Purge record in CLAUDE.md).

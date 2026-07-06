@@ -30,6 +30,21 @@ def _scratch_package(path, beats, scenes=None):
     json.dump({"beats": beats, "scenes": scenes if scenes is not None else _scratch_scenes()}, open(path, "w"))
 
 
+def _sync_scratch_scene_cache(episode, scene_num, scene_dict):
+    """FIXED 2026-07-06 (found live during THE DEFINITIVE BUILD's own dry-walk sweep): cb_preflight's scene-
+    cache-sync check used to shell out to a wrongly-pathed script and silently never fire (rule 39's sibling
+    fix in cb_preflight.py) — this test's approve() calls passed for months without ever actually exercising
+    a real scene-cache check. Now that the check is wired correctly (cb_prompts.scene_cache_stale), a scratch
+    episode/scene with no config/locations.json entry at all correctly BLOCKs — exactly as it should for a
+    real, never-synced scene. This helper keeps the scratch scene in sync the same way tools/sync_scenes.py
+    keeps a real one in sync, so this test still isolates CASCADE-RELOCK mechanics (its actual subject),
+    never re-testing scene-cache sync (a different, already-covered concern)."""
+    import cb_prompts
+    cb_prompts.LOCATIONS.setdefault(episode, {})[str(scene_num)] = {
+        "_sourceHash": cb_prompts._scene_source_hash(scene_dict)
+    }
+
+
 def _manifest_compliant_beat(code, scene_num, story_beat, is_opener=True):
     """THE MANIFEST (rule 37): fills every field cb_preflight's TECHNICAL/CREATIVE contracts require, so a
     scratch beat used ONLY to exercise the cascade-relock logic doesn't ALSO fail the (unrelated) content gate
@@ -66,6 +81,7 @@ def test_cb_pipeline(tmp):
     pkg = os.path.join(tmp, "Ep9_Test_beat_package.json")
     _scratch_package(pkg, _base_beats())
     P.PKG, P.LOCK, P.EP = pkg, os.path.join(tmp, "locked.json"), "Ep9"
+    _sync_scratch_scene_cache("Ep9", 9, _scratch_scenes()[0])
 
     P.approve("1", "9"); P.approve("2a", "9"); P.approve("2b", "9"); P.approve("3", "9")
     d = P._lock()
@@ -117,6 +133,7 @@ def test_frame_chain_cascade(tmp):
         b["slug"] = slug
     _scratch_package(pkg, beats)
     P.PKG, P.LOCK, P.EP = pkg, os.path.join(tmp, "locked_chain.json"), "Ep9"
+    _sync_scratch_scene_cache("Ep9", 9, _scratch_scenes()[0])
 
     cwd = os.getcwd()
     media = os.path.join(tmp, "media"); os.makedirs(media, exist_ok=True)

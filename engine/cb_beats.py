@@ -369,19 +369,29 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                   f"character's turnaround reference and re-fire", flush=True)
             continue
         imgs = [start] + [a for c in _chars if (a := _anchor(c))]
+        # THE PLATE IS A STANDING ANCHOR, NOT A RELAY-ONLY ONE (Julian's ruling, 2026-07-06 — "scene 1, beat 1
+        # should have the scene slate, Fuzzby, Zenny, and the keyframe that's been signed off... there
+        # shouldn't be any re-mint in... any first opening shot of a scene, because it's starting the role"):
+        # the scene's OPENING beat was never re-minted — that part was already correct, it fires straight from
+        # its own signed Gate-2b keyframe — but it was missing the scene plate as a 4th reference entirely,
+        # gated behind `relay_status == "relay"` for no principled reason. The plate anchors the world's
+        # canonical look/palette/light for the WHOLE clip regardless of which beat is firing; a single keyframe
+        # only shows what's visible in that one frame, and the plate covers whatever the camera reveals beyond
+        # it. By the time ANY beat's own opening image exists (its keyframe, or a relay anchor), Gate 2a (the
+        # plate) is already signed too, so this is always available. Confirmed live: cb_scene.keyframe_for
+        # already composites the plate into 1.B1's own keyframe for exactly this reason — the beat's actual
+        # FIRE was the one place that dropped it. Unconditional now, every beat, opener included.
+        _plate = f"media/{episode}_S{scene_num}_plate.png"
+        if os.path.exists(_plate):
+            imgs.append(_plate)
         vids = None
         if relay_status == "relay":
-            # THE RELAY CHAIN's 4th reference (CLAUDE.md rule 21): the scene's plate anchors the world's canonical
-            # look/palette/light WITHOUT forcing the frame (the harvested settle already IS the frame) — @图1 is
-            # the harvested settle, @图2/@图3... the character turnarounds, the plate always comes last.
-            _plate = f"media/{episode}_S{scene_num}_plate.png"
-            if os.path.exists(_plate):
-                imgs.append(_plate)
             # THE VIDEO REFERENCE (Julian, 2026-07-04, from the seedance-20 skill's own field guidance — "prefer
             # reference-to-video with the previous clip as a video reference, keeps motion and audio context;
             # chaining image-to-video from the previous clip's last frame is the fallback"): the still-frame
             # re-mint anchor (@图1) stays — this is ADDITIVE, the previous beat's actual signed clip uploaded
-            # alongside it, so the model has real motion/audio context, not just a single held pose.
+            # alongside it, so the model has real motion/audio context, not just a single held pose. Relay-
+            # only, unlike the plate above — a previous clip only exists for a beat with a predecessor.
             if relay_prev:
                 _prev_b = next((bb for bb in beats if (bb.get("beatCode") or bb.get("shotCode")) == relay_prev), None)
                 if _prev_b:

@@ -4,6 +4,33 @@ Reviewed 2026-07-03 (Julian). The change freeze holds — nothing here is implem
 the next between-scenes window works it in order, not ad hoc. Each item needs its own ruling before it enters code;
 none of these are pre-approved by being on this list.
 
+## 0. THE NAMED POST-SCENE-1 BUILD — Stage 5/6 infrastructure (2026-07-06, Julian's ruling)
+
+**THE named priority for the next between-scenes window** — logged when Julian chose "live sequence now, under
+today's mechanism" over building this first, with an explicit INFRASTRUCTURE FREEZE from that moment: `PRODUCTION_DOCTRINE.md`
+(rewritten the same day, THE DEFINITIVE BUILD) states this as Stage 5/6's TARGET architecture; none of it is built
+yet. Four pieces, in the order the doctrine describes them:
+
+1. **The `approval` per-beat data field** — `locked.json`'s per-beat lock gains `{"status": "approved"|"rejected"|
+   "pending", "note": "..."}`, written by a new `cb_pipeline.approve_beat_take` — recording Julian's felt-intent
+   verdict as data instead of leaving it implicit in "a clip file happens to exist."
+2. **`.REJECTED.json` sidecar archiving** — a rejected take's clip moves to `media/rejected/` with a sidecar
+   recording why and what the one changed variable was on the superseding re-fire; invisible to every resume/
+   harvest path.
+3. **`walk_scene` resuming on approval status, never file existence** — the actual behaviour change: today's
+   `walk_scene` treats "a clip file is on disk" as "this beat is done." Once (1) and (2) exist, it should treat
+   "an APPROVED clip is on disk" as done — a clip can exist and still correctly read as pending if never approved.
+4. **Stage 6's timecode-retake subsystem** — `cb_post.assemble_review_cut` (burnt-in timecode on the hard-cut
+   assembly, never the delivery master) and `cb_post.retake_at_timecode(scene, timecode, variable, value)`
+   (timecode → beat/cut mapping, arithmetic from each beat's fixed `HANDLE_TOTAL` duration and running order; one
+   named variable; re-fire; re-gate).
+
+**Why it waits**: the doctrine states the target; the code follows once real footage exists to build and test it
+against, not before. The safeguard standing in for approval-resume in the meantime: archive every existing take/
+harvest/settle-frame for the scene being worked, so file-existence resume starts from a genuinely clean disk each
+time, rather than risking a chain off pre-amendment footage. See CLAUDE.md rule 41 for the archiving and the
+INFRASTRUCTURE FREEZE rule that now governs bug triage until this build happens.
+
 ## 1. The 720p draft ladder
 
 Render exploratory seeds at DRAFT resolution; only the signed winner re-renders at full delivery resolution.

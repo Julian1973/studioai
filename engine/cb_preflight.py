@@ -166,15 +166,22 @@ def check_scene_technical(scene, episode, gate="1"):
         gaps.append(Gap("scene", sn, "ambientBed", "STRUCTURAL",
                         "present — word-for-word identity across every beat in the scene is already guaranteed by construction (rule 35), not re-checked"))
 
+    # FIXED 2026-07-06 (found live during Scene 1's real walk — 1.B2 hard-stopped on a stale scene cache that
+    # this manifest check had reported CLEAN moments earlier): this used to shell out to a script named
+    # "sync_scenes.py" with cwd=HERE (engine/) — but the real file lives at repo-root tools/sync_scenes.py, not
+    # engine/sync_scenes.py, so the subprocess always failed to even find the script. subprocess.run doesn't
+    # raise on a nonzero exit unless check=True, so the try/except here never caught it either — the failure's
+    # own message went to STDERR (never inspected), stdout stayed empty, and `f"scene {sn}:" in (r.stdout or "")`
+    # was always False, silently skipping the BLOCK entirely. Fixed by calling cb_prompts.scene_cache_stale()
+    # directly — the SAME function cb_beats.py already correctly uses to catch this at fire time — instead of
+    # shelling out to a script by a fragile relative path at all.
     try:
-        import subprocess
-        r = subprocess.run([sys.executable, "sync_scenes.py", "--check"], cwd=HERE,
-                           capture_output=True, text=True, timeout=30)
-        if r.returncode != 0 and f"scene {sn}:" in (r.stdout or ""):
-            line = next((l for l in r.stdout.splitlines() if f"scene {sn}:" in l), "").strip()
-            gaps.append(Gap("scene", sn, "locations cache sync", "BLOCK", line or "out of sync — run tools/sync_scenes.py"))
+        import cb_prompts
+        stale = cb_prompts.scene_cache_stale(episode, sn, pkg_path=_resolve_pkg(episode))
+        if stale:
+            gaps.append(Gap("scene", sn, "locations cache sync", "BLOCK", stale))
     except Exception as e:
-        gaps.append(Gap("scene", sn, "locations cache sync", "FLAG", f"could not run tools/sync_scenes.py --check ({str(e)[:80]})"))
+        gaps.append(Gap("scene", sn, "locations cache sync", "FLAG", f"could not run cb_prompts.scene_cache_stale ({str(e)[:80]})"))
 
     try:
         import cb_qa

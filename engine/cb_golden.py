@@ -2,9 +2,8 @@
 """cb_golden.py — T10, the golden-set harness.
 
 Stores a known-good snapshot of BOTH prompt paths and diffs current output against it:
-  • the Seedance clip-prompt baseline (cb_segprompt.shipped_prompt — for_beat_v2, the SAME call
-    gate3_dryrun/cb_beats.run/get_seedance_prompt make; a raw cb_segprompt.for_beat() call would
-    silently measure the retired v1 fallback instead of what the studio actually ships) on all 5
+  • the Seedance clip-prompt baseline (cb_segprompt.shipped_prompt — v4, the SOLE prompt author as of the
+    2026-07-06 purge (rule 39); the SAME call gate3_dryrun/cb_beats.run/get_seedance_prompt make) on all 5
     Ep1 Scene-1 beats (1.B1-1.B5, since Julian's Director's Cut restructure — was 1.B1-1.B3).
   • the keyframe prompt (cb_scene.keyframe_for) on all 5 Ep1 Scene-1 beats (1.B1-1.B5) — anchor + 4
     chained beats, so a chain-vs-anchor formatting regression shows up too.
@@ -148,17 +147,6 @@ def _has_dialogue(beat):
     return bool(beat.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (beat.get("cuts") or []))
 
 
-def _name_free_chunks(text, cast):
-    """Split `text` on any cast-name mention (with an optional possessive 's, matching the exact span
-    cb_segprompt._delabel rewrites) — the surviving fragments are words delabeling never touches, so they must
-    appear verbatim in the shipped prompt no matter which role-label form (full first-mention, or short) a name
-    became. Returns the fragments in order, stripped, empties dropped."""
-    if not cast:
-        return [text.strip()] if text.strip() else []
-    pat = r"\b(?:" + "|".join(re.escape(n) for n in cast) + r")(?:'s)?\b"
-    return [seg.strip() for seg in re.split(pat, text) if seg.strip()]
-
-
 def assertions(snap=None):
     """Content assertions on every shipped segprompt beat — see the module docstring. Returns a list of failure
     strings (empty means everything passed).
@@ -217,13 +205,13 @@ def assertions(snap=None):
                     fails.append(f"{code}: actual dialogue words may have leaked into 'prompt' (Law 6): {words!r}")
 
         # (4) the six standing negatives are always present WITHIN "prohibited" (additive with beat-specific
-        # staging items now, never fewer than six — _v3_negatives itself is unchanged, still exactly six).
+        # staging items now, never fewer than six — _standing_negatives itself is unchanged, still exactly six).
         prohibited = doc.get("prohibited")
         if not isinstance(prohibited, list) or len(prohibited) < 6:
             fails.append(f"{code}: JSON prohibited should be a list of at least 6 items, got {prohibited!r}")
         else:
             any_bee = any(CS._char_meta(n)[1] for n in cast)
-            standing = CS._v3_negatives(any_bee)
+            standing = CS._standing_negatives(any_bee)
             missing = [n for n in standing if n not in prohibited]
             if missing:
                 fails.append(f"{code}: prohibited list is missing standing negative(s): {missing}")

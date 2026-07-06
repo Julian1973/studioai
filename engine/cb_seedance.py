@@ -1400,12 +1400,20 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
             _scene_beats = [b for b in (_d.get("beats") or _d.get("shots") or [])
                             if str(b.get("sceneNumber")) == str(_beat.get("sceneNumber"))]
             _, _relay_status, _relay_prev = cb_scene.relay_source_for(_scene_beats, beat_code, episode)
-            _prev_end_state = None
+            _prev_end_state, _prev_carry_marks = None, None
             if _relay_status == "relay" and _relay_prev:
                 _prev_b = next((bb for bb in _scene_beats if (bb.get("beatCode") or bb.get("shotCode")) == _relay_prev), None)
                 _prev_end_state = _prev_b.get("endStateStill") if _prev_b else None
+                _prev_carry_marks = _prev_b.get("carryMarks") if _prev_b else None   # rules 33/34, 2026-07-05 —
+                #    found missing live, 2026-07-06: this call site was never updated when prev_carry_marks was
+                #    introduced (only cb_beats.py's three call sites were), so render_readiness/get_seedance_prompt
+                #    passed prev_carry_marks=None for every relay beat regardless of the real data, tripping
+                #    _v4_state_carry's ManifestFieldMissing guard on a beat whose predecessor's carryMarks was
+                #    actually authored — a false NEEDS_SOURCE_DATA_FIX. Confirmed live on 1.B2 during Scene 1's
+                #    Gate 3 walk (rule 11 sweep).
             _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene, relay=(_relay_status == "relay"),
-                                                                   prev_end_state_still=_prev_end_state)
+                                                                   prev_end_state_still=_prev_end_state,
+                                                                   prev_carry_marks=_prev_carry_marks)
     except cb_qa.ManifestFieldMissing as _mfm:
         # THE MANIFEST (rule 37, 2026-07-06): unlike a genuine crash (still a silent fall-through to the older
         # cb_seedance compact builder below, unchanged), a missing manifest field must surface as a hard

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""cb_replicator.py — THE REPLICATOR (Julian, 2026-07-05, REPLICATOR.md).
+"""cb_replicator.py — THE REPLICATOR (Julian, 2026-07-05; doctrine now in PRODUCTION_DOCTRINE.md's Stage 5 —
+REPLICATOR.md itself retired into that single document, 2026-07-06, THE DEFINITIVE BUILD).
 
 ONE command: walk_scene(episode, scene). It takes the show profile, the scene data and the director's cut as
 its only inputs (all resolved from episode+scene through the SAME path/config conventions cb_pipeline.py and

@@ -312,17 +312,31 @@ _CAMERA_MOVE_WORDS = ("push", "pushes", "pushing", "pan", "pans", "panning", "do
                       "trucks", "zoom", "zooms", "zooming", "orbit", "orbits", "orbiting", "whip", "tilt",
                       "tilts", "crane", "cranes", "tracks", "tracking", "sweeps", "sweeping", "swings",
                       "swinging", "chases", "chasing", "drifts", "drifting")
+_MOTION_EXEMPT_VOCAL_RE = re.compile(r"\b(hum|hums|humming|sing-song|singsong)\b", re.IGNORECASE)
+def _is_motion_exempt_vocal(cut):
+    """CAMERA LAW AMENDMENT (Julian's ruling, 2026-07-06, Gate 1 review of 1.B1): Law 8's camera lock applies
+    to SPOKEN LINES only — a continuous hum or sing-song vocalization has no shaped mouth performance that
+    needs a static frame to read clearly, so it is motion-exempt. Detected from the cut's OWN authored
+    `delivery`/`voiceTreatment` text naming it as such (e.g. "fun sing-song rhythm... the hum rising with
+    speed") — never inferred from the dialogue text itself (a repeated-syllable heuristic would be exactly
+    the kind of fragile, vibes-based signal rule 17 rejects for vision checks; this is the same principle
+    applied to a text lint: only a concrete, hand-declared marker counts)."""
+    text = f"{cut.get('delivery') or ''} {cut.get('voiceTreatment') or ''}"
+    return bool(_MOTION_EXEMPT_VOCAL_RE.search(text))
+
 def check_camera_lock_conflict(beat):
-    """LAW 8 DETECTOR — camera must be locked/static on any cut with dialogue (the beat-level `rule` field
-    already states this, per _v3_rule); at most one primary camera-movement per shot otherwise. Nothing
-    currently checks a dialogue cut's own authored `framing` text against the law stated right next to it in
-    the shipped prompt — the same two-statements-can-disagree shape as rule 27's bug, in the camera field
+    """LAW 8 DETECTOR — camera must be locked/static on any cut with a SPOKEN line (the beat-level `rule`
+    field already states this, per _v3_rule); at most one primary camera-movement per shot otherwise. A cut
+    whose dialogue is a hum/sing-song vocalization (per its own delivery/voiceTreatment text — see
+    `_is_motion_exempt_vocal`) is exempt from the lock, per Julian's 2026-07-06 ruling. Nothing currently
+    checks a dialogue cut's own authored `framing` text against the law stated right next to it in the
+    shipped prompt — the same two-statements-can-disagree shape as rule 27's bug, in the camera field
     instead of the content-description field. Deterministic keyword scan over the beat's own cuts, no vision
     call — runs at authoring time, before the emitter ever sees the beat."""
     flags = []
     for i, c in enumerate(beat.get("cuts") or [], start=1):
         framing = str(c.get("framing") or "")
-        has_dlg = bool(str(c.get("dialogue") or "").strip())
+        has_dlg = bool(str(c.get("dialogue") or "").strip()) and not _is_motion_exempt_vocal(c)
         moves = [w for w in _CAMERA_MOVE_WORDS if re.search(r"\b" + re.escape(w) + r"\b", framing.lower())]
         if has_dlg and moves:
             flags.append(f"cut {i}: has dialogue but framing names camera movement ({', '.join(moves)}) — "
@@ -362,7 +376,7 @@ def check_settle_distinctiveness(this_end_state, prev_end_state):
                 "rather than this beat's own distinct settle moment"}
     return {"ok": True, "verdict": f"endState word overlap with predecessor {ratio:.0%} — reads as its own moment"}
 
-# THE TWELVE-LAW PRE-FIRE LINT (Julian, 2026-07-05 — REPLICATOR.md) — one call covering all twelve Layer-1
+# THE TWELVE-LAW PRE-FIRE LINT (Julian, 2026-07-05 — PRODUCTION_DOCTRINE.md's Stage 5) — one call covering all twelve Layer-1
 # invariant laws (CLAUDE.md rule 28), for the replicator's walk_scene to run before every fire. Two laws are
 # BLOCKERS (Law 3's reference/upload alignment, Law 5's voice-in-render requirement) — but both already refuse
 # the render loudly at their natural point of failure (cb_beats.run's imgs-assertion and its V3-track refusal),

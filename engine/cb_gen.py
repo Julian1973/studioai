@@ -14,6 +14,7 @@ Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 """
 import os, sys, json, time, base64, mimetypes, argparse, pathlib
 import requests
+import cb_costs
 
 HERE = pathlib.Path(__file__).resolve().parent
 MEDIA = HERE / "media"
@@ -145,6 +146,7 @@ def generate_image(prompt, refs=None, aspect="16:9", out="keyframe.png",
         if blob and blob.get("data"):
             outp = MEDIA / out
             outp.write_bytes(base64.b64decode(blob["data"]))
+            cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(), out=out, meta={"model": model})
             return str(outp)
     raise SystemExit("No image returned. Response: " + json.dumps(resp.json())[:500])
 
@@ -263,6 +265,8 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
     vid.raise_for_status()
     outp = MEDIA / out
     outp.write_bytes(vid.content)
+    cb_costs.log_spend("seedance_i2v", cb_costs.estimate_video_cost("seedance_i2v_per_sec", duration),
+                        out=out, meta={"resolution": resolution})
     return str(outp)
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────
@@ -308,7 +312,12 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     print(f"  seedance ref2vid ({endpoint}): rendering…")
     result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
     vid = _rget(result["video"]["url"], timeout=300)
-    outp = MEDIA / out; outp.write_bytes(vid.content); return str(outp)
+    outp = MEDIA / out; outp.write_bytes(vid.content)
+    _secs = 15 if str(duration) == "auto" else float(duration)   # HANDLE_TOTAL default when duration="auto"
+    cb_costs.log_spend("seedance_ref2vid", cb_costs.estimate_video_cost(
+        "seedance_fast_per_sec" if fast else "seedance_standard_per_sec", _secs),
+        out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs})
+    return str(outp)
 
 def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync"):
     """Drive a clip's mouth to a provided audio track (V3 acted VO) — solves timing.
@@ -338,7 +347,9 @@ def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
                                                "similarity_boost": similarity_boost,
                                                "style": style}}, timeout=120)
     r.raise_for_status()
-    outp = MEDIA / out; outp.write_bytes(r.content); return str(outp)
+    outp = MEDIA / out; outp.write_bytes(r.content)
+    cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(text), out=out, meta={"model": model_id})
+    return str(outp)
 
 def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30):
     """V3 TEXT-TO-DIALOGUE — the OPTIMUM for character acting. One request weaves the WHOLE exchange TOGETHER, in
@@ -352,7 +363,11 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30):
                json={"inputs": inputs, "model_id": model_id, "settings": {"stability": stability},
                      "apply_text_normalization": "auto"}, timeout=180)
     r.raise_for_status()
-    outp = MEDIA / out; outp.write_bytes(r.content); return str(outp)
+    outp = MEDIA / out; outp.write_bytes(r.content)
+    _chars = sum(len(str(i.get("text") or "")) for i in (inputs or []))
+    cb_costs.log_spend("elevenlabs_dialogue", cb_costs.estimate_tts_cost(" " * _chars), out=out,
+                        meta={"model": model_id, "voices": len(inputs or [])})
+    return str(outp)
 
 def eleven_music(prompt, length_ms=None, out="music.mp3"):
     """ElevenLabs Music — generate an INSTRUMENTAL underscore bed (no vocals) that sits UNDER the dialogue
@@ -371,7 +386,9 @@ def eleven_music(prompt, length_ms=None, out="music.mp3"):
         # RuntimeError (an Exception subclass) so cb_post's `except Exception` skips the bed gracefully;
         # SystemExit would escape that catch and kill the whole post run.
         raise RuntimeError(f"Music API {r.status_code}: {r.text[:300]}")
-    outp = MEDIA / out; outp.write_bytes(r.content); return str(outp)
+    outp = MEDIA / out; outp.write_bytes(r.content)
+    cb_costs.log_spend("elevenlabs_music", cb_costs.estimate_music_cost(length_ms), out=out)
+    return str(outp)
 
 def voice_change(audio, voice_id, model_id="eleven_multilingual_sts_v2", out="swapped.mp3",
                  remove_noise=True, similarity=0.95, stability=0.4, style=0.0):
@@ -413,7 +430,9 @@ def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False):
                       json=body, timeout=120)
     if r.status_code != 200:
         raise SystemExit(f"SFX API {r.status_code}: {r.text[:300]}")
-    outp = MEDIA / out; outp.write_bytes(r.content); return str(outp)
+    outp = MEDIA / out; outp.write_bytes(r.content)
+    cb_costs.log_spend("elevenlabs_sfx", cb_costs.RATES["elevenlabs_sfx_flat"][0], out=out)
+    return str(outp)
 
 def list_voices():
     _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")

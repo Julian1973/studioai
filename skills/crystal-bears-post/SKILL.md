@@ -16,7 +16,7 @@ You are the **finishing department** for *The Crystal Bears* — a world-class s
 
 ## 0. LOAD ORDER (every run)
 
-1. `references/CRYSTAL_BEARS_LOCKED_CANON.md` — the **voice standard** (strip + Voice-Changer / V3-master paths), the loudness targets, the cast voice IDs.
+1. `references/CRYSTAL_BEARS_LOCKED_CANON.md` — the **voice standard** (the clip's own baked-in @Audio1 V3 performance is final, never stripped or swapped — see "⚑⚑ IT WAS NEVER A GUIDE" below), the loudness targets, the cast voice IDs.
 2. The enriched **shot package** with **locked clips** (Gate 3), the **spotting map** + rendered **music**, and the **dialogue** plan per shot (voiceId + path).
 
 ---
@@ -35,6 +35,8 @@ You are the **finishing department** for *The Crystal Bears* — a world-class s
 ---
 
 ## 2. DIALOGUE FINISHING (the lip-sync rule, executed here)
+
+> ⛔ **RETIRED 2026-07-02 (found still live-reading, unstruck, in the 2026-07-08 contradiction sweep).** The strip/Voice-Changer/V3-master-lip-sync mechanics below describe a pipeline this project no longer runs. There is no strip step, no later swap, no ADR. The dialogue baked into every clip IS the final voice — see "⚑⚑ IT WAS NEVER A GUIDE" near the end of this file, and CLAUDE.md rules 4/29 ("no post voice swap... cb_post has no swap function by design"). Kept below as dated historical record only — do not act on it.
 
 For each speaking shot, per the path the Camera tagged:
 - **Default — Voice Changer:** **strip the native dialogue audio** from the clip → run it through **ElevenLabs Voice Changer (speech-to-speech)** → the canonical bear voice (voiceId from canon), **timing preserved** → lay it back exactly on the clip. **Never re-generate from text (TTS) — fresh timing drifts off the lips.**
@@ -117,6 +119,8 @@ Trim every clip to its intended on-screen length (`duration` / `trimTo`) — don
 
 ## Per-character voice swap — don't cross the voices
 
+> ⛔ **RETIRED — same as §2 above (found still live-reading in the 2026-07-08 contradiction sweep).** There is no Voice-Changer pass and no per-character split to perform. Kept as dated historical record only.
+
 Voice Changer re-voices a WHOLE clip to ONE voice. So:
 - **One speaker per shot** → swap the clip to that character's canonical voice. Clean and unambiguous.
 - If a clip has **two speakers**, SPLIT the dialogue audio at the line boundary and Voice-Change each segment to ITS character's voice, then re-lay them in order.
@@ -177,6 +181,8 @@ Every post choice is judged first by emotion: **does this make the child feel th
 ---
 
 ## DELIVER TO THE POINT OF VOICE-SWAP (Julian 2026-06-20)
+
+> ⛔ **RETIRED (found still live-reading, unstruck, in the 2026-07-08 contradiction sweep).** There is no later voice-swap for a client to perform — the native dialogue IS the final voice, full stop (CLAUDE.md rules 4/29; "⚑⚑ IT WAS NEVER A GUIDE" below). Kept as dated historical record only — the section title itself is exactly the mechanism now forbidden.
 
 Take the scene all the way to broadcast EXCEPT the final voice-swap — the **native dialogue stays in** (the client swaps it in CapCut). Everything else is final and cinematic:
 - **Crossfades between beats** — no jumpy/hard cuts at the joins.

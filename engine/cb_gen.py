@@ -272,11 +272,15 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     the character lip-syncs to your audio. Reference assets in the prompt as @图1/@Audio1.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
     NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON.
-    video_urls (Julian, 2026-07-04, from the seedance-20 skill's own field guidance — "to continue a clip on fal,
-    prefer reference-to-video with the previous clip as a VIDEO reference, keeps motion and audio context;
-    chaining image-to-video from the previous clip's last frame is the fallback"): the RELAY's previous beat's
-    actual signed clip, uploaded alongside the still-frame anchor — real motion/audio context, not just a single
-    pose. Additive to the existing re-mint anchor, never a replacement for it."""
+    video_urls: RETIRED (found still describing this as a live, "additive" mechanism in the 2026-07-08
+    contradiction sweep — every sibling module in this dependency chain, cb_beats.py/cb_qa.py/cb_golden.py/
+    cb_segprompt.py, already carries its own 2026-07-07 retirement note; this docstring was the one gap the
+    sweep never reached). @Video1 (rule 26) was built 2026-07-04 then explicitly retired 2026-07-07 (rule
+    51 — Julian, watching real footage: "the video I don't like it either, I think it confuses things").
+    No current call site ever passes a real value — cb_beats.py passes video_urls=None explicitly;
+    cb_retake.py omits the argument entirely. The parameter stays in the signature (never removed, so a
+    stale caller fails loud rather than with a silent TypeError) but must never be populated again without
+    a fresh ruling."""
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
@@ -371,10 +375,15 @@ def eleven_music(prompt, length_ms=None, out="music.mp3"):
 
 def voice_change(audio, voice_id, model_id="eleven_multilingual_sts_v2", out="swapped.mp3",
                  remove_noise=True, similarity=0.95, stability=0.4, style=0.0):
-    """Strip-and-swap: re-voice existing audio to the canonical bear voice,
-    preserving timing (the lip-sync default path).
-    remove_noise strips baked-in ambient so the conversion locks the target voice;
-    high similarity forces the target identity."""
+    """RETIRED (2026-07-08 software-wide fix batch): this IS the "post voice swap" mechanism CLAUDE.md rules
+    4/29 forbid by name — "no native-voice fallback... no post voice swap... cb_post has no swap function by
+    design; do not add one, to a two-step pipeline or any other." Zero production callers (confirmed — only
+    this module's own CLI "swap" subcommand reached it, now guarded below too); kept for the record, raises
+    loud rather than deleted outright, matching cb_prompts.py's identical RETIRED precedent for its own dead
+    Law-6-violating builders. @Audio1 is the sole vocal source, generated once, never re-voiced afterward."""
+    raise RuntimeError("cb_gen.voice_change is RETIRED — no post voice swap, ever (CLAUDE.md rules 4/29). The "
+                        "voice is generated once (cb_voice.build_dialogue_track) and lip-synced from that same "
+                        "take; there is no code path that re-voices it afterward.")
     import json as _json
     _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
     url = f"{XI}/v1/speech-to-speech/{voice_id}"

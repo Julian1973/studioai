@@ -720,13 +720,20 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
         clause = re.sub(r"\bframe[- ]left\b", "on the left of the frame", clause, flags=re.I)
         clause = re.sub(r"\bframe[- ]right\b", "on the right of the frame", clause, flags=re.I)
         return clause.strip().rstrip(".") or f"{c} in frame"
-    def _markers(c):                                          # SSOT identity markers (config) — reinforced on EVERY keyframe
-        m = str(CHARACTERS.get(c, {}).get("markers") or "").strip().rstrip(".")
-        return f" Keep {c}'s signature {m}." if m else ""
+    # THE APPEARANCE-LEAK FIX (2026-07-08, software-wide sign-off audit): _markers() used to append "Keep
+    # {c}'s signature {m}." (e.g. "round wire-frame glasses", "rosy blush cheeks") to every character block —
+    # a direct violation of CLAUDE.md rule 5 ("no physical/appearance text anywhere, ever... what stays
+    # absolutely forbidden is DESCRIBING the character"), contradicting this very module's own docstring
+    # ("character REFERENCE-ONLY, never described"). cb_qa.check_gate3_lint's item (4) already guards the v5
+    # VIDEO prompt against exactly this leak (a character's markers text appearing outside the Acting DNA
+    # block) — this keyframe/still builder was the one sibling module the sweep never reached. Identity
+    # anchoring for accessories is already carried, losslessly, by the reference image itself via the
+    # "Maintain this character's exact identity from the reference... every accessory exactly as shown"
+    # sentence below — that sentence needed no appearance prose added on top; deleted, not just unused.
     blocks = [f"CHARACTER {i} ({c}): Use Image {char_img[c]}. {_pose(c)}. "
               f"Maintain this character's exact identity from the reference — facial features, proportions, AND "
               f"every accessory exactly as shown (glasses frame colour and shape, clothing, held objects, or any "
-              f"other worn/carried item).{_markers(c)}"
+              f"other worn/carried item)."
               for i, c in enumerate(block_chars, 1)]
     world = (sc.get("location") or sc.get("name") or "the scene").strip().rstrip(".")
     world = (world[0].lower() + world[1:]) if world else "the scene"
@@ -769,9 +776,14 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     ranked = sorted([c for c in chars if c in CHARACTERS and CHARACTERS[c].get("sizeRank") is not None],
                     key=lambda c: -(CHARACTERS[c].get("sizeRank") or 0))
     size_clause = f" Ensure {ranked[0]} is visibly larger than {ranked[-1]}." if len(ranked) >= 2 else ""
-    keeps  = [f"{c} keeps {CHARACTERS[c]['markers'].rstrip('.')}" for c in block_chars if CHARACTERS.get(c, {}).get("markers")]
+    # `keeps` (a positive "Fuzzby keeps round wire-frame glasses" restatement of characters.json's `markers`
+    # field) is DELETED, same rule-5 fix as `_markers()` above — a positive appearance description, not a
+    # prohibition. `avoids` is KEPT: "wears NO pendant/necklace/medallion/crystal" names something the
+    # character must NOT be given, matching the standing "Negative:"-style prohibition pattern already used
+    # everywhere else in this pipeline (v5's own standing negatives, the crystal-world rule below) — a
+    # constraint on invention, not a description of the character's actual appearance.
     avoids = [f"{c} wears NO {CHARACTERS[c]['avoid'].rstrip('.')}"  for c in block_chars if CHARACTERS.get(c, {}).get("avoid")]
-    sig = (" Signature features are NON-NEGOTIABLE: " + "; ".join(keeps) + ".") if keeps else ""
+    sig = ""
     neg = (" " + "; ".join(avoids) + ".") if avoids else ""
     # Bee comedy scenes: Crystal Cove world-crystals ARE allowed, but only as SUBTLE BACKGROUND world-detail — never
     # active magic, never on/near the bees, never a dominant foreground/centre object pulling focus from the gag.
@@ -793,13 +805,31 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # existing motion. Fixed by making the freeze frame explicitly ASYMMETRIC (one wing up, one down, mid-downstroke)
     # and the body explicitly already accelerating (forward lean, legs tucked/trailing) — same crisp, non-blurred
     # wings, but a pose that reads as already airborne and launching, so the clip picks it up and just takes off.
+    # THE TURNAROUND-CONFLICT FIX (Julian, 2026-07-07, diagnosing 1.B1's still-wrong wing on the actual rendered
+    # keyframe): the LAUNCH-READY fix above never actually closed the gap — CB_Fuzzby.jpeg (the turnaround sheet
+    # this text points at) shows all four wings in a static, evenly-spread, symmetrical REST pose in every one of
+    # its four views; there is no asymmetric/mid-flight reference anywhere in the character's canon assets. The old
+    # wording asked for wings "exactly as in the turnaround" in the SAME sentence as "ASYMMETRIC," and the separate
+    # CLEAN BASE IDENTITY clause immediately after this one repeats "render each character EXACTLY as its turnaround
+    # reference shows it... add NOTHING beyond the reference" with no bee/wing exception — two competing "match the
+    # turnaround" signals (one a stronger reference IMAGE, one a text line placed right after this one) pulling
+    # against the one asymmetry instruction. Same bug class as the rule-26 anti-hold fix and the rule-27 temporal-
+    # contradiction bug: two opposing instructions in one prompt, and the render satisfied the wrong one. Fixed by
+    # scoping "exactly as in the turnaround" to MATERIAL properties only (colour, translucency, vein pattern, edge
+    # quality) and explicitly naming the turnaround's own resting pose as the thing NOT to copy, with an explicit
+    # precedence statement over the later clean-base line.
     wings = (" WINGS: capture the wings CAUGHT mid-downstroke, ASYMMETRIC — one wing raised, the other lowered, as if "
              "a fraction of a second into a beat cycle — never both wings spread flat and symmetrical at rest. Each of "
-             "the four translucent wings stays sharp, solid and fully defined with clean edges, exactly as in the "
-             "turnaround, as if caught by a fast camera shutter — crisp and readable, never a soft blur or fan. FLIGHT "
-             "ENERGY: the body leans forward and down into the direction of travel, already accelerating, legs tucked "
-             "or trailing back — never hanging straight down at rest like a puppet. This is a bee already IN FLIGHT "
-             "and about to launch into the action, not hovering still in place."
+             "the four translucent wings keeps the turnaround's colour, translucency, vein pattern and clean edge "
+             "quality — sharp and solid, as if caught by a fast camera shutter, crisp and readable, never a soft blur "
+             "or fan — but the WING POSE itself must NOT match the turnaround: the turnaround shows its wings evenly "
+             "spread and symmetrical because that is a reference-sheet convention for showing all four wings clearly, "
+             "not a flight pose, and reproducing that resting spread here is the exact failure this instruction exists "
+             "to prevent. This wing-pose instruction overrides any later 'match the turnaround exactly' line for wing "
+             "pose specifically — every other feature (colour, glasses, body shape, markings) still matches the "
+             "turnaround exactly. FLIGHT ENERGY: the body leans forward and down into the direction of travel, already "
+             "accelerating, legs tucked or trailing back — never hanging straight down at rest like a puppet. This is "
+             "a bee already IN FLIGHT and about to launch into the action, not hovering still in place."
              if (block_chars and set(block_chars) <= _bees) else "")
     # CLEAN BASE IDENTITY (baked principle, 2026-07-01): the keyframe is the CLEAN BASE the animation builds ON TOP OF.
     # Seedance does the heavy lifting — it applies AND removes every temporary state within the take. So the keyframe
@@ -1276,9 +1306,12 @@ def acting_note(shot):
             + " ".join(notes)) if notes else ""
 
 def build_i2v_prompt(shot, note="", episode="Ep1"):
-    """Seedance i2v — the complete, sectioned production prompt. Reference-only (the keyframes carry identity);
-    one action + one camera move; native voice kept as the lip-sync guide (final via ADR); timed acting beats;
-    cast + active-speaker lock; vision materialisation; LOCKS. note => a high-priority human correction."""
+    """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 contradiction sweep). Its
+    dialogue-append line quotes literal spoken words directly into the prompt, a Law 6 violation the instant
+    this were ever called. The live builder is cb_segprompt.shipped_prompt (v5). Guarded rather than deleted
+    outright (unlike cb_prompts.seedance_json's own RETIRED precedent) — kept for the record; raises loud."""
+    raise RuntimeError("cb_prompts.build_i2v_prompt is RETIRED and unused — its dialogue handling leaks literal "
+                        "spoken words (Law 6). Use cb_segprompt.shipped_prompt (the v5 engine) instead.")
     dur = shot.get("duration"); move = shot.get("movement", "a gentle camera move")
     vision = vision_for(episode, shot.get("shotCode"))
     P = []
@@ -1445,11 +1478,14 @@ def music_brief(beats, sc, episode="Ep1"):
             "even dynamics, gently looping, never overpowering the voices.")
 
 def build_ref2vid_prompt(shot, episode="Ep1", note="", prev_frame=None):
-    """Seedance REFERENCE-TO-VIDEO prompt — the DIALOGUE path (the stylised bee lip-syncs to OUR V3 voice).
-    Binds @Image1 = the locked keyframe (TRUTH), @Image2.. = each character's anchor (in `characters` order),
-    @Audio1 = the directed V3 dialogue track. Per-speaker lip-sync via cast_block; identity locked to the
-    keyframe; motion + SFX from the shot; Seedance scores the SFX + timed music (reviewed/replaced in post). The image_urls passed to
-    generate_video_seedance_ref MUST be [keyframe, <each character anchor in `characters` order>]."""
+    """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 contradiction sweep). The
+    live builder is cb_segprompt.shipped_prompt (v5). Guarded rather than deleted outright — kept for the
+    record; raises loud.
+    Original design note: Seedance REFERENCE-TO-VIDEO prompt — the DIALOGUE path (the stylised bee lip-syncs
+    to OUR V3 voice). Binds @Image1 = the locked keyframe (TRUTH), @Image2.. = each character's anchor (in
+    `characters` order), @Audio1 = the directed V3 dialogue track."""
+    raise RuntimeError("cb_prompts.build_ref2vid_prompt is RETIRED and unused. Use cb_segprompt.shipped_prompt "
+                        "(the v5 engine) instead.")
     chars = shot.get("characters", [])
     move = shot.get("movement") or "a slow, gentle camera move"
     bind = []
@@ -1546,8 +1582,13 @@ def _beat_delivery(shot, char):
     return emo or cad or "natural"
 
 def build_beat_prompt(beat_shots, episode="Ep1", note=""):
-    """The MULTI-SHOT BEAT prompt — one continuous Seedance take that directs its own cuts/camera across 2-3 shots,
-    built from each shot's framing / camera-intensity / action / dialogue + the on-model identity lock + acting notes."""
+    """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 contradiction sweep). Its
+    _beat_lines dialogue-append quotes literal spoken words directly into the prompt, a Law 6 violation the
+    instant this were ever called. The live builder is cb_segprompt.shipped_prompt (v5). Guarded rather than
+    deleted outright — kept for the record; raises loud.
+    Original design note: one continuous Seedance take directing its own cuts/camera across 2-3 shots."""
+    raise RuntimeError("cb_prompts.build_beat_prompt is RETIRED and unused — its dialogue handling leaks "
+                        "literal spoken words (Law 6). Use cb_segprompt.shipped_prompt (the v5 engine) instead.")
     chars = []
     for s in beat_shots:
         for c in s.get("characters", []):

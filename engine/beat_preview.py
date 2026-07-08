@@ -23,16 +23,11 @@ def main():
         if not b:
             print(json.dumps({"error": "beat not found: " + beat})); return
         if kind == "seedance":
-            # cb_segprompt.for_beat is the definitive prose for EVERY beat (cb_beats.run calls it unconditionally and it
-            # never returns empty) — it always OVERRIDES any manual seedancePromptOverride. So the preview must never
-            # short-circuit to the override, or the card would differ from what actually fires.
-            _is_def = True
-            ovr = str(b.get("seedancePromptOverride") or "").strip()
-            if ovr and not _is_def:   # explicit human override on a NON-definitive beat — surfaced verbatim + flagged
-                print(json.dumps({"kind": "manual override (verbatim — bypasses cb_seedance)", "builder": "override",
-                                  "prompt": ovr, "readiness_status": "OVERRIDE",
-                                  "warnings": ["manual override bypasses the cb_seedance source of truth — revert to use the production prompt"]}))
-                return
+            # seedancePromptOverride RETIRED (2026-07-07, Julian's Studio-editing feature): this branch used to
+            # surface a manual override verbatim, but it was already permanently unreachable (_is_def was hardcoded
+            # True — cb_segprompt.for_beat is the definitive prose for EVERY beat and always wins), and the write
+            # side (the Studio's "Save & use this exact prompt" button) is gone now too. Editing happens on the
+            # beat's own cuts[] (the Studio's shots editor) — see cb_beats.gate3_prepare's docstring.
             # SOURCE OF TRUTH: cb_segprompt DEFINITIVE prose (segment beats) or the cb_seedance compact (never the old JSON builder).
             g = cb_seedance.get_seedance_prompt(os.path.join("..", "cb-output", pkg), beat, mode="export", episode=episode)
             print(json.dumps({"kind": "cb_seedance compact render prompt", "builder": g["builder"], "format": g.get("format"),

@@ -31,7 +31,11 @@ class ManifestFieldMissing(Exception):
         self.context = context
         super().__init__(f"MANIFEST FIELD MISSING: {field}" + (f" ({context})" if context else ""))
 
-VISION_MODEL = "gemini-3.5-flash"
+VISION_MODEL = os.environ.get("CB_VISION_MODEL", "gemini-3.5-flash")   # 2026-07-06: earlier today this model
+# returned a stable 403 PERMISSION_DENIED for this key's project (billing/access not yet enabled); Julian
+# fixed access mid-session and it now returns a real 200 (confirmed live) — gemini-2.0-flash, the interim
+# fallback used while blocked, has since been RETIRED by Google entirely (404 "no longer available") and is
+# no longer a viable fallback at all. Override via CB_VISION_MODEL if this ever needs pinning again.
 DONE_MIN_WIDTH = 2048   # 2K floor for a finished keyframe (Pro renders 2752 wide; the old flash 1376 fails this)
 CLIP_MIN_WIDTH = 1280   # Seedance clips render 720p (1280x720) — the 2K keyframe floor would false-fail EVERY clip
 
@@ -376,59 +380,365 @@ def check_settle_distinctiveness(this_end_state, prev_end_state):
                 "rather than this beat's own distinct settle moment"}
     return {"ok": True, "verdict": f"endState word overlap with predecessor {ratio:.0%} — reads as its own moment"}
 
-# THE TWELVE-LAW PRE-FIRE LINT (Julian, 2026-07-05 — PRODUCTION_DOCTRINE.md's Stage 5) — one call covering all twelve Layer-1
-# invariant laws (CLAUDE.md rule 28), for the replicator's walk_scene to run before every fire. Two laws are
-# BLOCKERS (Law 3's reference/upload alignment, Law 5's voice-in-render requirement) — but both already refuse
-# the render loudly at their natural point of failure (cb_beats.run's imgs-assertion and its V3-track refusal),
-# BEFORE a clip file ever exists; this function does not re-implement them, it only documents that fact so
-# "all twelve checked" doesn't silently mean "ten checked, two forgotten". The other laws split two ways: four
-# (2, 6, 10, 12) and half of Law 1 (the duration split) are CODE-ENFORCED with no possible violation path — the
-# emitter cannot produce a wrong value, so there is nothing for a lint to catch; they're reported STRUCTURAL,
-# not re-parsed out of the shipped text (a fragile regex re-derivation of a guarantee the code already makes
-# would add risk without adding safety). Law 9 (living settle) is the same shape. Laws 4/7/8 are the genuine,
-# currently-convention-only gaps PROMPT_LAWS_AUDIT.md found — those are the real, meaningful checks below,
-# flag-only per Julian's ruling (2026-07-04): surfaced, never blocking. Law 1's OTHER half (one gag arc per
-# beat) and Law 5 (Layer-1's anti-hold — a generation-time outcome, unknowable before firing) are the two
-# laws this lint cannot cover at all, pre-fire or otherwise; named here so that's a stated limitation, not a
-# silent gap.
-LAW_NAMES = {
-    1: "one beat/one arc, 15s split", 2: "opener vs relay", 3: "five-anchor stack",
-    4: "@图1 is a photograph", 5: "anti-hold", 6: "audio law / no spoken words",
-    7: "ambience scene-property", 8: "camera law", 9: "living settle",
-    10: "six negatives", 11: "character law / neutral handles", 12: "style/world verbatim",
-}
-def check_prompt_laws(beat, scene, cast, relay):
-    """Runs the full twelve-law lint for one beat before it fires. Returns {blockers, flags, structural} —
-    blockers is always [] here (Laws 3/5 block upstream, in cb_beats.run, before this is even reached; a
-    refused beat simply never produces a clip, which is walk_scene's own halt condition); flags is Laws
-    4/7/8's advisory findings; structural lists every law that's code-enforced with no lint action needed,
-    for a complete, honest "all twelve accounted for" report rather than four checks presented as twelve."""
-    flags = []
-    es = check_endstate_still(beat.get("endStateStill"))
-    if not es["ok"]:
-        flags.append(f"Law 4 ({LAW_NAMES[4]}): " + es["verdict"])
-    amb = check_ambience_overlap(beat.get("atmosphere"), (scene or {}).get("ambientBed"))
-    if not amb["ok"]:
-        flags.append(f"Law 7 ({LAW_NAMES[7]}): " + amb["verdict"])
-    cam = check_camera_lock_conflict(beat)
-    if not cam["ok"]:
-        flags.append(f"Law 8 ({LAW_NAMES[8]}): " + cam["verdict"])
-    structural = {
-        1: "duration split (15s = 13s action + 2s settle) is a fixed constant in _v3_shots — cannot drift",
-        2: "opener-vs-relay is a single resolver (cb_scene.relay_source_for) every call site shares",
-        3: "hard-blocked upstream in cb_beats.run (reference/upload alignment) before any clip renders",
-        5: "hard-blocked upstream in cb_beats.run (Law 5: no V3 @Audio1 track, no native-voice fallback)",
-        6: "no-spoken-words is regex-enforced (_strip_spoken_words) on every free-text field, every emitter",
-        9: "the living settle block is unconditionally appended to the closing shot (_v3_settle)",
-        10: "the six negatives are a fixed, sliced-to-six list (_v3_negatives) — cannot ship 5 or 7",
-        11: "binding handles are size-only by construction (_short_role); identity exposure is Law 3's concern",
-        12: "style/world text is read verbatim from the show profile/scene data, never paraphrased",
-    }
-    uncheckable = {
-        1: "one-gag-arc-per-beat is a narrative-structure judgment, not mechanically checkable pre-fire",
-        5: "(Layer-1 anti-hold) is a generation-time outcome — unknowable before firing, verified after by check_join",
-    }
-    return {"blockers": [], "flags": flags, "structural": structural, "uncheckable": uncheckable}
+# THE UNIFIED STEP 4 LINT (GATE3_ANIMATION_DOCTRINE.md §1 Step 4, 2026-07-06 — "The compiled prompt is
+# checked before money moves... Fail = the prompt never fires. Fix at data, recompile.") — REPLACES the
+# old twelve-Layer-1-law lint (`check_prompt_laws`, retired the same day): that function checked v3/v4-era
+# concepts (`endStateStill`'s Law 4, `atmosphere`-vs-`ambientBed` overlap for Law 7) and its own "structural"
+# dict named functions already deleted from cb_segprompt.py (`_v3_shots`, `_v3_settle`, `_v3_negatives`) —
+# stale documentation of a retired emitter, not a real check of what v5 actually ships. `check_endstate_still`/
+# `check_ambience_overlap` below is KEPT (not deleted — a full manifest-field audit against the new doctrine
+# is a separate, larger task, out of scope for this pass) but is no longer called by anything; a future
+# ticket should determine whether `endStateStill`/`atmosphere` still belong in the TECHNICAL contract at all
+# now that v5 doesn't read either field. `check_camera_lock_conflict` was ALSO left disconnected here —
+# found and RE-WIRED into check_gate3_lint itself in the 2026-07-08 software-wide sign-off audit (see its
+# own call site, item 1.6, below) — it is live again, not merely kept for the record.
+_NEGATION_RE = re.compile(r"\b(no|not|never|don't|doesn't|didn't|won't|isn't|aren't|can't|cannot)\b", re.IGNORECASE)
+
+# THE ANTI-SLOP LEXICON (2026-07-07, mined from "Seedance Prompt Engine," a reference tool built on the same
+# seedance-20 skill doctrine this project already draws on): generic AI-video filler words that name no
+# observable production detail — the rule that earns a word's place here is "if a camera, microphone, light
+# meter, or stopwatch cannot detect it, rewrite it as the one concrete thing that does." Found immediately
+# useful the day it was built: the v5 tech-close line's own locked constant ("smooth cinematic motion") tripped
+# this list — a real, honest finding surfaced by the check, not silently exempted. THAT specific source is
+# retired (rule 54, 2026-07-08 — the whole standalone tech line is gone, fps folded into the HEADER instead),
+# but the flag still fires from a second locked constant, the style law's own "cinematic lighting" — see
+# check_gate3_lint's own scoping (BLOCK in freely-authored prose, FLAG only where a locked constant/style law
+# is the source, since only Julian's own edit can rewrite those).
+ANTI_SLOP_WORDS = ["cinematic", "epic", "stunning", "beautiful", "dramatic", "dynamic", "magical",
+                   "ultra-realistic", "masterpiece", "award-winning", "8K", "high quality", "trending",
+                   "atmospheric", "breathtaking", "insanely detailed", "visually striking"]
+_ANTI_SLOP_RE = re.compile(r"\b(" + "|".join(re.escape(w) for w in ANTI_SLOP_WORDS) + r")\b", re.IGNORECASE)
+
+def check_character_vocabulary(beat):
+    """THE CHARACTER VOCABULARY LAW (Julian's ruling, 2026-07-06 — "every verb and adverb in every beat,
+    action and camera alike, is drawn from that character's own register... the camera inherits the
+    register of whoever it covers... readability enforced by 'readable at speed,' never by softening"):
+    each character's `characters.json` entry carries a locked `lexicon` (`verbs` it owns, `banned` words
+    that must never appear near its action) — e.g. Fuzzby's is chases/whips/banks/barrels/dives/snaps/
+    rockets, banned gently/slowly/softly/calm/careful; Zenny's own stillness words (which happen to
+    overlap Fuzzby's banned list) are HER register, never banned for her, only ever banned from crossing
+    into HIS action or the camera when it covers him.
+
+    ATTRIBUTION HEURISTIC (stated plainly, not hidden): a cut's action+framing text is checked against a
+    character's banned list whenever that character's NAME appears in the same cut's text — this is a
+    real, coarse heuristic (a cut naming both characters checks both lists against the same combined
+    text), not a grammatical-subject parse. It is what caught the two real, confirmed violations in
+    1.B1's own cuts 1-2 live (camera covering Fuzzby's zig-zag/dive described as "gently tracks"); it can
+    also flag a genuinely mixed or atmospheric two-shot (e.g. a shared reaction beat) that isn't really
+    "covering" either character's action in the chase/deadpan sense the law describes — those get
+    reported the same as any other flag, for a human to read and judge, never silently suppressed or
+    silently auto-corrected.
+
+    Returns {ok, violations: [{cut, character, word, text}]} — ok is False whenever any cut contains a
+    banned word for a character actually named in that same cut."""
+    import cb_segprompt as CS
+    violations = []
+    for i, c in enumerate(beat.get("cuts") or [], 1):
+        text = f"{c.get('framing') or ''} {c.get('action') or ''}"
+        low = text.lower()
+        for name in (beat.get("openingCast") or beat.get("characters") or []):
+            if name.lower() not in low:
+                continue
+            # FIXED 2026-07-08 (contradiction sweep): was CS._CHARS (a snapshot frozen at cb_segprompt's own
+            # import time, never re-read) — cb_director.py/cb_craft.py/cb_preflight.py all reload
+            # characters.json fresh on every call; this module was the one silently stale outlier, risking
+            # enforcement against an out-of-date lexicon in any long-lived process that edits the file
+            # mid-session. CS._load_chars() is the same loader, called fresh here instead.
+            lex = (CS._load_chars().get(name) or {}).get("lexicon") or {}
+            for banned in (lex.get("banned") or []):
+                if re.search(rf"\b{re.escape(banned)}\b", text, re.IGNORECASE):
+                    violations.append({"cut": i, "character": name, "word": banned, "text": text.strip()})
+    return {"ok": not violations, "violations": violations}
+
+def check_keyframe_lint(prompt, chars=None):
+    """THE GATE-2 SIBLING OF check_gate3_lint (found missing 2026-07-08 software-wide fix batch): every clip
+    prompt (v5, cb_segprompt) is linted for the anti-slop lexicon and the Character Vocabulary Law before it
+    fires; the KEYFRAME prompt (cb_prompts.build_keyframe_prompt) — the very first thing rendered for a beat,
+    and the seed every relay/re-mint frame downstream inherits — had neither check wired in at all. Zero-cost,
+    text-only (no vision call), matching check_gate3_lint's own design: called on the ALREADY-COMPILED prompt
+    string, never a separate re-authoring step.
+
+    Scoping (deliberately more precise than check_gate3_lint's own whole-cut heuristic for the vocabulary law):
+    build_keyframe_prompt's body joins one `CHARACTER N (Name): ...` paragraph per in-frame character (its own
+    `blocks` list, one entry per character) via blank-line joins — so a paragraph beginning "CHARACTER N (Name):"
+    is unambiguously THAT character's own freely-authored action/pose text, and only that paragraph's own banned
+    words are checked against that same name (no cross-attribution risk between two characters named in the
+    same beat, unlike the coarse whole-cut match rule 49 already flagged for check_character_vocabulary).
+
+    Anti-slop severity mirrors check_gate3_lint's own locked-vs-authored split: a hit inside a CHARACTER
+    paragraph (freely-authored per-beat prose) is a hard BLOCK; a hit anywhere else (STYLE/REFERENCE IMAGES/
+    CONSTRAINTS — largely locked template wording, e.g. STYLE's own "cinematic depth of field") is FLAG-only,
+    since only a source edit — not a beat rewrite — could remove it.
+
+    Returns {ok, blockers, flags}. ok=False means this keyframe prompt must never fire as-is."""
+    import cb_segprompt as CS
+    blockers, flags = [], []
+    paras = re.split(r"\n\n+", prompt or "")
+    char_para_re = re.compile(r"^CHARACTER\s+\d+\s+\(([^)]+)\):")
+    for para in paras:
+        m = char_para_re.match(para.strip())
+        owner = m.group(1).strip() if m else None
+        hits = _ANTI_SLOP_RE.findall(para)
+        if hits:
+            uniq = sorted(set(h.lower() for h in hits))
+            if owner:
+                blockers.append(f"anti-slop word(s) in {owner}'s character paragraph: {', '.join(uniq)}")
+            else:
+                flags.append(f"anti-slop word(s) in locked/template text: {', '.join(uniq)}")
+        if owner and (chars is None or owner in chars):
+            lex = (CS._load_chars().get(owner) or {}).get("lexicon") or {}
+            for banned in (lex.get("banned") or []):
+                if re.search(rf"\b{re.escape(banned)}\b", para, re.IGNORECASE):
+                    blockers.append(f"Character Vocabulary Law: {owner}'s keyframe paragraph uses {banned!r} "
+                                     f"— outside {owner}'s locked register")
+    return {"ok": not blockers, "blockers": blockers, "flags": flags}
+
+def check_gate3_lint(pkg_path, beat_code, episode="Ep1"):
+    """THE single Step-4 gate: compiles this beat's actual v5 prompt (cb_segprompt.shipped_prompt, the exact
+    call cb_beats.run makes) and checks it before anything fires. Returns {ok, blockers, flags, citations,
+    word_count, prompt}. ok=False means the prompt must never fire — "fix at data, recompile," never a hand
+    patch to the returned prompt text.
+    Checks: (1) word budgets — 400 hard, 250 target (flag), the beat-story block's own 80-word fence
+    (re-derived independently of emit_v5's internal truncation, so a future emitter bug can't silently ship
+    an over-length story block). (2) banned vocabulary, against the SHIPPED TEXT directly (complements
+    cb_preflight's source-field check, which reads the beat's own authored fields, not the compiled prompt).
+    (3) Law 5 — no actual dialogue words leak into the text. (4) no appearance-prose leak — a character's
+    own short `markers` field (its canonical visual tell, e.g. Fuzzby's "round wire-frame glasses") must
+    never appear outside the cited Acting DNA block; flag-only (some legitimate action words legitimately
+    overlap with markers text, e.g. "wings"), never a hard block, since only Julian's own bible edit can fix
+    a genuine leak (THE FIDELITY LAW). (5) no leftover speed adjectives (verifies `_v5_strip_speed_adjectives`
+    actually ran clean — a regression guard, not a new rule). (6) no negation outside the Negative line — the
+    Acting DNA and Beat Story blocks are EXEMPT (they quote/derive from real authored content that may
+    legitimately contain natural negation, e.g. Fuzzby's own bible: "he does NOT inflate his whole body");
+    checked only in the purely mechanical blocks (header, style, references, camera/ambience, tech line) that
+    should never need it. (7) structural congruence with §4a/§4b's exact reference-block wording. (8) a
+    citation map — which store field every block's content traces to — for the record, per THE FIDELITY LAW
+    ("every content line traces to a cited source"). (9) THE ANTI-SLOP LEXICON (2026-07-07, mined from a
+    seedance-20-doctrine-derived reference tool Julian shared, "Seedance Prompt Engine") — generic AI-video
+    filler words (cinematic, stunning, masterpiece, 8K...) that name no observable production detail at all;
+    hard-BLOCKED in the Beat Story block (freely-authored dynamic prose, no ruling stands behind a slop word
+    there), FLAG-only everywhere else (the style law is a locked constant only Julian's own edit can amend —
+    see ANTI_SLOP_WORDS's own module comment for why the style law's "cinematic lighting" already trips
+    this; the standalone tech line that used to be the OTHER source of this same flag was retired 2026-07-08,
+    rule 54)."""
+    import cb_segprompt as CS, cb_scene
+    d = json.load(open(pkg_path))
+    all_beats = d.get("beats") or d.get("shots") or []
+    beat = next((b for b in all_beats if (b.get("beatCode") or b.get("shotCode")) == beat_code), None)
+    if beat is None:
+        return {"ok": False, "blockers": [f"beat {beat_code} not found in package"], "flags": [],
+                "citations": {}, "word_count": 0, "prompt": ""}
+    scene = next((s for s in (d.get("scenes") or []) if str(s.get("sceneNumber")) == str(beat.get("sceneNumber"))), None)
+    cast = beat.get("openingCast") or beat.get("characters") or []
+    scene_beats = [b for b in all_beats if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+    _, relay_status, _ = cb_scene.relay_source_for(scene_beats, beat_code, episode)
+    relay = relay_status == "relay"
+
+    blockers, flags = [], []
+    try:
+        prompt, _builder, _is_def = CS.shipped_prompt(beat, scene, relay=relay)
+    except ManifestFieldMissing as e:
+        return {"ok": False, "blockers": [f"prompt could not compile — {e}"], "flags": [],
+                "citations": {}, "word_count": 0, "prompt": ""}
+    if not str(prompt or "").strip():
+        return {"ok": False, "blockers": ["compiled prompt is empty"], "flags": [],
+                "citations": {}, "word_count": 0, "prompt": ""}
+
+    # (1) word budgets — RAISED 2026-07-07 (rule 52, Julian's own call): 400/250 predated the shot-list
+    # restoration (rule 45) and decision 1's anti-hold-safe relay wording (+39 words on every relay beat).
+    import cb_preflight as PF
+    wc = CS._v5_word_count(prompt)
+    if wc > PF.WORD_BUDGET_BLOCK:
+        blockers.append(f"word budget: {wc} words exceeds the {PF.WORD_BUDGET_BLOCK}-word hard cap")
+    elif wc > PF.WORD_BUDGET_TARGET:
+        flags.append(f"word budget: {wc} words over the {PF.WORD_BUDGET_TARGET}-word target")
+    # the shot-list block's own 80-word sub-fence is RETIRED (Julian's ruling, 2026-07-06 — a real per-cut
+    # shot list needs room for camera + action per cut); the whole-prompt 400-word cap above is the real
+    # backstop now. Still re-derive it here so a missing cuts[]/endState surfaces as a named BLOCK.
+    try:
+        CS._v5_beat_story(beat, cast)
+    except ManifestFieldMissing as e:
+        blockers.append(f"shot-list block could not be re-derived — {e}")
+
+    # (1.5) THE CHARACTER VOCABULARY LAW (Julian, 2026-07-06) — every character's action/camera-coverage
+    # text must draw its verbs from that character's own locked lexicon; a banned word (another
+    # character's softer register bleeding into this one's action) is a hard BLOCK, checked against the
+    # beat's own authored cuts (the source, not the compiled text — the compiled shot list is a near-
+    # verbatim quote of the same words anyway).
+    cv = check_character_vocabulary(beat)
+    for v in cv["violations"]:
+        blockers.append(f"Character Vocabulary Law: cut {v['cut']} uses {v['word']!r} near {v['character']} "
+                         f"— outside {v['character']}'s locked register")
+
+    # (1.6) THE CAMERA-LOCK LAW (rule 28 Layer 1 Law 8 / rule 38) — found DISCONNECTED in the 2026-07-08
+    # software-wide sign-off audit: check_camera_lock_conflict was built (2026-07-02) and correctly detects
+    # a dialogue cut whose own framing names camera movement, but nothing ever called it once the twelve-
+    # law lint that used to own this check (check_prompt_laws) was retired the same day the unified Step-4
+    # lint (this function) replaced it — the law itself was never re-wired into the replacement. Confirmed
+    # live: 1.B2's real compiled prompt has NO stated camera-lock-during-dialogue instruction anywhere (the
+    # law used to live in the now-retired tech-line CLOSER, rule 54) and its own Shot 2 names a reveal move
+    # on a dialogue cut — exactly what this check exists to catch. A hard BLOCK, matching the severity of
+    # every other doctrine-backed check in this function (Law 5, the Vocabulary Law) — this is a stated HARD
+    # RULE (CLAUDE.md rule 28), not a style preference.
+    clc = check_camera_lock_conflict(beat)
+    if not clc["ok"]:
+        blockers.append(f"Camera-Lock Law (rule 38): {clc['verdict']}")
+
+    # (2) banned vocabulary, against the shipped text.
+    try:
+        banned = json.load(open(_BANNED_VOCAB_PATH)).get(episode, {}).get(str(beat.get("sceneNumber")), {}).get("banned") or []
+    except Exception:
+        banned = []
+    low = prompt.lower()
+    for term in banned:
+        if term.lower() in low:
+            blockers.append(f"banned vocabulary present: {term!r}")
+
+    # (3) Law 5 — dialogue words never leak.
+    for c in (beat.get("cuts") or []):
+        raw = str(c.get("dialogue") or "").strip()
+        if not raw:
+            continue
+        words = raw.split(":", 1)[-1].strip()
+        if words and len(words) > 8 and words.lower() in low:
+            blockers.append(f"Law 5: dialogue words leaked into the shipped prompt: {words!r}")
+
+    parts = prompt.split("\n\n")
+    # FIXED 2026-07-08 (the tech-line CLOSER retirement): emit_v5's shape is now 6 parts, not 7 — HEADER,
+    # style, references, actingDNA, story, Negative. The standalone tech line ("24fps, smooth cinematic
+    # motion...") is gone; fps folded into the HEADER (rule 54). `acting_idx`/`story_idx` are unchanged
+    # (still indices 3/4 — only the LAST block moved, from tech to Negative directly) but `tech_idx` no
+    # longer exists at all — removed outright, not left pointing at a stale index (the exact bug class rule
+    # 46 already found once for `camera_amb_idx`).
+    acting_idx = 3 if len(parts) > 3 else -1   # HEADER, style, references, actingDNA, story, Negative
+    story_idx = 4 if len(parts) > 4 else -1
+    # Self-check: confirm the part count itself still matches this model — if a future emitter change
+    # adds/removes a block, this fires as a named flag instead of the index model silently drifting stale
+    # again (exactly what happened to camera_amb_idx, then tech_idx, before each was fixed in turn).
+    if len(parts) != 6:
+        flags.append(f"block-index model may be stale: expected 6 top-level blocks (HEADER/style/references/actingDNA/story/Negative), found {len(parts)}")
+
+    # (4) appearance-prose leak — a character's own short `markers` field must stay inside Acting DNA only.
+    # CS._load_chars() (not CS._CHARS) — see the identical 2026-07-08 fix note at check_character_vocabulary.
+    for name in cast:
+        markers = str((CS._load_chars().get(name) or {}).get("markers") or "").strip().lower()
+        if not markers:
+            continue
+        for i, p in enumerate(parts):
+            if i == acting_idx:
+                continue
+            if markers in p.lower():
+                flags.append(f"possible appearance leak: {name}'s markers text ({markers!r}) found outside the Acting DNA block")
+
+    # (5) no leftover speed adjectives — scoped to the STORY block only (the only block
+    # `_v5_strip_speed_adjectives` is ever applied to; the style law and standing negatives legitimately
+    # contain words like "hyper" ("bright hyper saturated colours") that this check must not flag).
+    if story_idx >= 0 and CS._SPEED_ADJ_RE.search(parts[story_idx]):
+        flags.append("a speed adjective survived stripping in the beat-story block — check _v5_strip_speed_adjectives")
+
+    # (6) no negation outside the Negative line — exempt every block that legitimately quotes/derives from
+    # real authored prose (style, Acting DNA, Beat Story) PLUS the references block (see below). In practice
+    # this leaves only index 0 (HEADER) actually checked — a mechanical, fixed string that never needs
+    # negation, so the check is a low-cost regression guard, not a load-bearing lint (found and corrected in
+    # the 2026-07-08 sign-off audit: an earlier version of this comment claimed "header, references" were
+    # both checked, which was never true — references was already in the exempt set below; only the PROSE
+    # here was stale, not the logic).
+    # THE ANTI-HOLD-SAFE RELAY WORDING (2026-07-07, decision 1) put deliberate, mechanical negation into the
+    # references block itself — "Do not hold the previous pose, replay the previous action..." plus a
+    # beat-authored spatialAxis line ("never swap sides") — so the references block (ref_idx) is EXEMPT,
+    # same reasoning as style/Acting DNA/Beat Story: this is LAWFUL negation this doctrine now asks for
+    # by name, never "invented prohibition language" the check exists to catch.
+    style_idx = 1 if len(parts) > 1 else -1
+    ref_idx = 2 if len(parts) > 2 else -1
+    negative_idx = len(parts) - 1
+    exempt = {acting_idx, story_idx, style_idx, ref_idx, negative_idx}
+    for i, p in enumerate(parts):
+        if i in exempt:
+            continue
+        if _NEGATION_RE.search(p):
+            flags.append(f"negation found in a mechanical block (segment {i}) — check for invented prohibition language")
+
+    # (9) THE ANTI-SLOP LEXICON — hard BLOCK in the Beat Story block only (freely-authored dynamic prose; no
+    # ruling stands behind a slop word landing there, so it's always fixable at the data and worth blocking
+    # on). FLAG-only everywhere else — a hit in the style law or tech line names a LOCKED constant only
+    # Julian's own edit can amend, never something this beat's own authoring caused.
+    if story_idx >= 0:
+        for m in _ANTI_SLOP_RE.finditer(parts[story_idx]):
+            blockers.append(f"anti-slop: {m.group(0)!r} in the beat-story block — rewrite as the one concrete "
+                             f"production detail that earns it (light source+direction+behaviour, camera "
+                             f"verb+speed+endpoint, or material+texture+motion)")
+    for i, p in enumerate(parts):
+        if i == story_idx:
+            continue
+        for m in _ANTI_SLOP_RE.finditer(p):
+            flags.append(f"anti-slop word {m.group(0)!r} found in a locked block (segment {i}) — not this "
+                         f"beat's own authoring; only a style-law/tech-line edit can remove it")
+
+    # (7) structural congruence with §4a/§4b's exact reference wording.
+    ref_block = parts[2] if len(parts) > 2 else ""
+    # @Video1 RETIRED (Julian, 2026-07-07 — "the video I don't like it either, I think it confuses things"):
+    # rule 26's "FIFTH ANCHOR" is removed from the reference stack entirely, opener and relay alike.
+    if "@Video1" in ref_block:
+        blockers.append("@Video1 must never appear — retired 2026-07-07, see cb_segprompt.py's module docstring")
+    if not relay:
+        if "@图1 opening keyframe — begin on this exact composition." not in ref_block:
+            blockers.append("references block doesn't match the doctrine's exact opener wording (§4a)")
+    else:
+        # THE ANTI-HOLD-SAFE RELAY WORDING (2026-07-07, decision 1) — supersedes the "start from this frame"
+        # sentence checked here until today; see cb_segprompt._v5_references's docstring for the full ruling.
+        if ("@图1 is the approved final frame of the previous beat and must be matched exactly as the first "
+                "frame only.") not in ref_block:
+            blockers.append("references block doesn't match the doctrine's exact relay wording (§4b)")
+        if "Do not hold the previous pose" not in ref_block:
+            blockers.append("references block is missing the relay anti-hold counter-instruction (§4b)")
+    # THE CAST-SIZE FIX (2026-07-07, closing the long-open word-count ticket): an ACTIVE cast member (named
+    # in this beat's own cuts/speakers/opensOn — cb_segprompt._v5_active_cast) still gets the doctrine's
+    # exact per-member sentence; a BACKGROUND cast member (present but doing nothing named in this beat) is
+    # consolidated into one shared "background cast" line instead — so the check must confirm every cast
+    # member's own @图N-plus-name tag is present SOMEWHERE in the block, not that every one of them has its
+    # own full repeated "match exactly" sentence.
+    active, _background = CS._v5_active_cast(beat, cast)
+    for i, name in enumerate(cast):
+        tag = f"@图{i + 2} {name}"
+        if name in active:
+            if f"{tag} — match exactly." not in ref_block:
+                blockers.append(f"references block missing the exact binding line for {name!r} (§4a/§4b)")
+        elif tag not in ref_block:
+            blockers.append(f"references block missing {name!r}'s reference tag entirely (background-cast consolidation)")
+
+    # (8) citation map — every content line traces to a named source (THE FIDELITY LAW).
+    # FIXED 2026-07-07 (front-to-back audit): two of these were stale. "beat_story" cited the retired
+    # `storyBeat` flattened-summary field — Block 4 has walked the beat's own `cuts[]` + `endState` since
+    # the shot-list ruling (cb_segprompt._v5_beat_story's own docstring), never storyBeat. "camera_ambience"
+    # cited `scene.ambientBed`, but that whole paragraph was retired the same day (the thunder-leak bug) —
+    # no such content exists in the shipped prompt to cite at all, so the entry is removed, not just renamed.
+    # A BACKGROUND cast member (THE CAST-SIZE FIX, 2026-07-07) has no Acting DNA line in the shipped prompt
+    # at all — citing one for them would be the exact same "cites content that isn't actually there" bug
+    # just fixed above for camera_ambience; they're cited as reference-only instead.
+    citations = {"style": "laws/style.txt", "references": "engine stack logic (cb_scene.relay_source_for)"}
+    if str((scene or {}).get("sceneLook") or "").strip():
+        citations["style:sceneLook"] = f"scene {beat.get('sceneNumber')}.sceneLook"
+    if relay and str(beat.get("relayOpeningNote") or "").strip():
+        citations["references:relayOpeningNote"] = f"beat {beat_code}.relayOpeningNote"
+    if str(beat.get("spatialAxis") or "").strip():
+        citations["references:spatialAxis"] = f"beat {beat_code}.spatialAxis"
+    # THE DELIVERY LAW (rule 53) citation — found missing in the 2026-07-08 software-wide audit (delivery
+    # was only implicitly covered by the generic "beat_story" citation below, unlike its sibling optional
+    # Layer-2 fields relayOpeningNote/spatialAxis/sceneLook, each of which gets its own key above).
+    delivery_cuts = [str(c.get("n")) for c in (beat.get("cuts") or []) if str(c.get("delivery") or "").strip()]
+    if delivery_cuts:
+        citations["beat_story:delivery"] = f"beat {beat_code}.cuts[{','.join(delivery_cuts)}].delivery"
+    for name in cast:
+        if name in active:
+            _txt, field = CS._v5_acting_dna_source(name)
+            citations[f"actingDNA:{name}"] = f"characters.json:{name}.{field}" if field else "MISSING"
+        else:
+            citations[f"actingDNA:{name}"] = "background cast — reference image only, no Acting DNA line this beat"
+    citations["beat_story"] = f"beat {beat_code}.cuts[] + .endState"
+    citations["negatives"] = "GATE3_ANIMATION_DOCTRINE.md §2 standing eleven + beat.stagingProhibited"
+
+    return {"ok": not blockers, "blockers": blockers, "flags": flags, "citations": citations,
+            "word_count": wc, "prompt": prompt}
 
 # Canonical QA reason codes (machine-readable) + the one-line fix each implies. Merges OUR anatomy check (their DoD
 # lacks limb-counting) with the useful codes from the QA-agent spec. The fuzzy camera / staging / shot-type /

@@ -94,7 +94,29 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
   "promptRole": "the gentle elder bear (the leader)",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "hold",
+    "still",
+    "nod",
+    "gather",
+    "steady",
+    "lift",
+    "orbit"
+   ],
+   "banned": [
+    "loud",
+    "theatrical",
+    "rushed",
+    "showy",
+    "whip-pans",
+    "rapid montage",
+    "cold or distant",
+    "stern-headmistress"
+   ]
+  },
+  "cameraRegister": "Grounded, eye-level, slightly wider framing that holds on her without sudden moves or rapid cutting. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Sunny": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
@@ -178,7 +200,28 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
   "promptRole": "the cheerful, sunny bear",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "bounding",
+    "skipping",
+    "twirling",
+    "leaping",
+    "halts",
+    "tugs",
+    "spring",
+    "slump",
+    "beams"
+   ],
+   "banned": [
+    "shallow",
+    "relentlessly happy",
+    "cheering up",
+    "clinical",
+    "preach"
+   ]
+  },
+  "cameraRegister": "Lead with expansive motion verbs, then push to an extreme close-up on her one deliberate abrupt halt — hold the stillness longer than feels comfortable. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Luna": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
@@ -264,7 +307,28 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
   "promptRole": "the quiet, still bear",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "settle",
+    "soften",
+    "soothe",
+    "drift",
+    "slow",
+    "hold",
+    "lower"
+   ],
+   "banned": [
+    "sudden",
+    "loud",
+    "rushed",
+    "flicker",
+    "strobe",
+    "spike",
+    "bright"
+   ]
+  },
+  "cameraRegister": "Smooth, slow tracking shots and soft focus, never a sudden camera move — the camera moves the way she does. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Misty": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
@@ -340,7 +404,30 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
   "promptRole": "the soft, attentive bear",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "halts",
+    "glances",
+    "fidgets",
+    "tilts",
+    "stills",
+    "folds",
+    "notices",
+    "mirrors",
+    "steadies"
+   ],
+   "banned": [
+    "preach",
+    "diagnose",
+    "loud",
+    "sharp",
+    "bossy",
+    "chatty",
+    "loom"
+   ]
+  },
+  "cameraRegister": "Eye-level, gentle honest framing; hold on her listening face, then steady as she finally speaks. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Amie": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
@@ -420,7 +507,26 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
   "promptRole": "the warm, empathetic bear",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "tunes",
+    "fidgets",
+    "kneads",
+    "reaches",
+    "names",
+    "spins",
+    "freezes",
+    "presses"
+   ],
+   "banned": [
+    "anxious",
+    "regulate",
+    "stress",
+    "cute"
+   ]
+  },
+  "cameraRegister": "Rack focus, slightly unstable framing when overwhelmed; perfectly symmetrical, balanced compositions in resolution. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Howey": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
@@ -506,7 +612,27 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
   "promptRole": "the big, gentle guardian bear",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "settle",
+    "plant",
+    "shelter",
+    "reach",
+    "withdraw",
+    "lead",
+    "stage"
+   ],
+   "banned": [
+    "booming",
+    "intimidating",
+    "manic energy",
+    "fast patter",
+    "punchline",
+    "cheerfully accept help"
+   ]
+  },
+  "cameraRegister": "Eye-level or gentle low angle that reads his scale as safety, never looming; steady camera holding longer than comfortable on his face for the receiving beat. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Keen": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
@@ -625,7 +751,29 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
   "promptRole": "the young bear cub",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "lean",
+    "bounce",
+    "gulp",
+    "swallow",
+    "square",
+    "leap",
+    "blaze",
+    "turn"
+   ],
+   "banned": [
+    "fearless",
+    "effortless",
+    "given",
+    "tiny cub",
+    "scared",
+    "anxious",
+    "calm down"
+   ]
+  },
+  "cameraRegister": "Low angles to emphasise the scale of the obstacle he faces, with rapid dynamic push-ins on the Crystal Call. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Fuzzby": {
   "anchor": "../cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
@@ -633,6 +781,25 @@
   "size": "the BIGGER of the two bees (both tiny next to the bears)",
   "cadence": "manic, staccato, HYPER — always fast, chaotic, bumping into things; pompous-then-undercut; commits 100% then crashes (bigger, male)",
   "actingNote": "Pomp / pride / indignation = he puffs his CHEST out and strikes a proud SUPERHERO / on-parade stance — chest pumped forward, shoulders back, head high, standing tall (the first-ever render that worked). He does NOT inflate his whole body like a balloon. His feet / hover ALWAYS respect the ground — he NEVER sinks or falls through the floor. Any deflate that follows is a small slump or a dip, never the whole body shrinking.",
+  "lexicon": {
+   "verbs": [
+    "chases",
+    "whips",
+    "banks",
+    "barrels",
+    "dives",
+    "snaps",
+    "rockets"
+   ],
+   "banned": [
+    "gently",
+    "slowly",
+    "softly",
+    "calm",
+    "careful"
+   ]
+  },
+  "cameraRegister": "wingman-chase — the camera behaves like Fuzzby's overexcited wingman: it chases, banks, drops (Julian's ruling, 2026-07-06, THE CHARACTER VOCABULARY LAW)",
   "key_features": "a plump fuzzy striped bee (yellow & black) with round wire-frame SPECTACLES, a distinctive bulbous tan nose, translucent wings and antennae — the BIGGER of the two bees",
   "markers": "round wire-frame glasses",
   "avoid": "pendant, necklace, medallion or crystal (bees wear no crystal)",
@@ -727,6 +894,16 @@
   "size": "the SMALLER bee",
   "cadence": "deadpan, dry, understated; the reaction IS the comedy (smaller, female)",
   "actingNote": "Deadpan STILLNESS is the comedy — she holds almost perfectly still, only the smallest movements (a slow blink, a flat stare, a tiny head-tilt); never big or busy gestures.",
+  "lexicon": {
+   "verbs": [
+    "locks",
+    "holds",
+    "settles",
+    "glides"
+   ],
+   "banned": []
+  },
+  "cameraRegister": "locked deadpan — the camera holds still and lets her stillness read (Julian's ruling, 2026-07-06, THE CHARACTER VOCABULARY LAW). Her own stillness words (gently/slowly/softly/calm) are HER register — never banned for her, only ever banned from crossing into Fuzzby's action or the camera when it's covering him.",
   "key_features": "a small fuzzy striped bee (yellow & black) with round glasses, LONG eyelashes and rosy blush cheeks (her clear feminine tell vs Fuzzby), translucent wings and antennae — the SMALLER of the two bees",
   "markers": "round glasses and rosy blush cheeks",
   "avoid": "pendant, necklace, medallion or crystal (bees wear no crystal)",
@@ -865,7 +1042,28 @@
   },
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
   "promptRole": "the mother bear",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "smooth",
+    "tuck",
+    "cup",
+    "close",
+    "press",
+    "hold",
+    "settle",
+    "lean"
+   ],
+   "banned": [
+    "anxious",
+    "calm down",
+    "stress",
+    "regulate",
+    "overwhelmed",
+    "cling"
+   ]
+  },
+  "cameraRegister": "Eye-level, warm, and close — proximity reads as safety; no sudden camera moves around her, she is a place of stillness. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Squeaky": {
   "turnaround": "../cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
@@ -923,7 +1121,28 @@
   "sizeRank": 4,
   "render_ref": "../cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
   "promptRole": "the playful dolphin",
-  "isBee": false
+  "isBee": false,
+  "lexicon": {
+   "verbs": [
+    "leaps",
+    "arcs",
+    "spins",
+    "rolls",
+    "bumps",
+    "circles",
+    "splashes",
+    "thrashes",
+    "nuzzles"
+   ],
+   "banned": [
+    "words",
+    "narration",
+    "solves her own rescue",
+    "big heroic show-animal",
+    "glowing power crystal"
+   ]
+  },
+  "cameraRegister": "Stage her in and around water — leaping arcs, surface play, half-submerged; cut to her big expressive eyes for emotional beats, hold the rescue beat to let it breathe. (extracted from her/his own bible.staging field, 2026-07-06, THE CHARACTER VOCABULARY LAW — adversarially verified against the source text; not invented.)"
  },
  "Bo": {
   "_status": "STUB (T6 ruling, 2026-07-02, Julian) — confirmed as recurring-guest tier so Ep2's pipeline/canon isn't blocked. The ONE fact already in canon: Bo is a cub, and 'Bo's Mum' also appears as a related character needing her own stub. Everything else — species/appearance, reference art (turnaround), voice, sizeRank, role in Ep2's story, full character bible — is still needed from Julian before Gate 2 can build keyframes for Ep2. Do NOT invent these.",

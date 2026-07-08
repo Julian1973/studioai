@@ -12,6 +12,12 @@ engine/_director_pass/
 cb-studio/data/media-index.json
 cb-studio/data/episodes.json
 
+# Real Crystal Bears assets, but too large for git without LFS (~790MB combined, 2026-07-08) — backed up
+# instead via tools/backup_media.py (to the 5t external drive), not tracked here.
+/cb-seed/
+/archive/
+/cb_pages/
+
 # Python
 __pycache__/
 *.pyc
@@ -25,3 +31,27 @@ _archive_*/
 
 # OS junk
 .DS_Store
+
+# NOT Crystal Bears — a separate, unrelated project ("the-8th-hour," an Express/Replit app) sharing this same
+# top-level folder, with no version control of its own (confirmed 2026-07-08: no nested .git, never tracked
+# by this repo's history). Excluded so it's never accidentally swept into a Crystal Bears commit — nothing
+# here is touched, moved or deleted, this repo just declares it out of scope.
+/.replit
+/admin.html
+/CLAUDE_CODE_BRIEF.md
+/package.json
+/package-lock.json
+/server.js
+/node_modules/
+/client/
+
+# NOT Crystal Bears — older, separate prototype codebases predating this project (see memory: "merging
+# AnimForge + IP Studio prototypes"), plus raw zip uploads and their scratch extraction folders. Historical,
+# not source; excluded for the same reason as above, not deleted.
+/ai-film-director/
+/ai-film-director.zip
+/aifd-extracted/
+/animforge-extracted/
+/ip-studio/
+/Archive.zip
+/_audit_unpack/

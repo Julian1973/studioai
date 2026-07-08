@@ -17,13 +17,15 @@ SERVE_PY = os.path.join(os.path.dirname(HERE), "cb-studio", "serve.py")
 
 
 def _scratch_scenes(scene_num=9):
-    """THE MANIFEST (CLAUDE.md rule 37, 2026-07-06): a manifest-compliant scratch scene entry — cb_pipeline.approve
-    now gates on manifest_ok, so every scratch package this test fires approve() against needs one of these.
-    pillar='heart' is a scratch shortcut, not a real story call — it trivially exempts this scene from the
-    "laugh beat per non-Heart pillar" check, which has nothing to do with what THIS test actually verifies
-    (cascade-relock mechanics), so there's no reason to also give the scratch beats a comedyMode."""
+    """THE MANIFEST (CLAUDE.md rule 37, 2026-07-06; sceneLook added rule 53, 2026-07-08): a manifest-compliant
+    scratch scene entry — cb_pipeline.approve now gates on manifest_ok, so every scratch package this test
+    fires approve() against needs one of these. pillar='heart' is a scratch shortcut, not a real story call —
+    it trivially exempts this scene from the "laugh beat per non-Heart pillar" check, which has nothing to do
+    with what THIS test actually verifies (cascade-relock mechanics), so there's no reason to also give the
+    scratch beats a comedyMode."""
     return [{"sceneNumber": scene_num, "ambientBed": "scratch test ambient bed — not real content",
-             "parentLine": "scratch test parent-layer line — not real content", "pillar": "heart"}]
+             "parentLine": "scratch test parent-layer line — not real content",
+             "sceneLook": "scratch test scene-look line — not real content", "pillar": "heart"}]
 
 
 def _scratch_package(path, beats, scenes=None):
@@ -57,6 +59,10 @@ def _manifest_compliant_beat(code, scene_num, story_beat, is_opener=True):
         "actingContrast": "scratch acting contrast", "humourLayer": 1, "kidRead": "scratch kid read",
         "adultRead": "scratch adult read", "want": "scratch want", "need": "scratch need",
         "emotionMechanic": "scratch emotion-as-mechanic statement",
+        # THE FIDELITY-ALLOCATION LAW (rule 46/49, 2026-07-07) — required by check_beat_creative; added
+        # 2026-07-08 (rule 53's contradiction sweep) after this fixture was found still missing it,
+        # independently crashing the same approve() calls sceneLook's own gap did.
+        "fidelityAllocation": {"primary": "Scratch", "secondary": "none", "economized": "none"},
     }
     if not is_opener:
         b["junctionType"] = "intentional_next_shot"

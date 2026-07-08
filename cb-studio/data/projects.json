@@ -17,6 +17,26 @@
       "episodesFile": "cb-studio/data/episodes.json",
       "mediaBase": "engine/media",
       "createdAt": "2026-06-24"
+    },
+    {
+      "id": "ep1-v2-archive",
+      "name": "Episode 1 — v2 Archive",
+      "primary": false,
+      "archived": true,
+      "animationType": "3D CGI (Pixar/Bluey)",
+      "style": "Pixar/Bluey-quality 3D CGI — soft fur and fabric, warm cinematic lighting, tactile crystal glow, shallow depth of field.",
+      "premise": "ARCHIVED REFERENCE, not live production. Scene 1 exactly as produced by the 2026-06-22/23 'cleanslate' pipeline — single-image i2v chaining + native Seedance audio, no reference images, dialogue embedded in prompt text. This is the render Julian named the best take produced so far; kept here so every prompt and reference image used to make it stays visible and browsable.",
+      "audience": "Internal reference only",
+      "episodeLength": "Scene 1 only (4 beats)",
+      "aspectRatio": "16:9",
+      "voiceProvider": "Seedance native audio (generate_audio=True) — no separate V3 track",
+      "musicStyle": "Seedance's own native score/SFX, generated in the same pass as the picture and voice",
+      "configBase": "engine/config",
+      "showBibleFile": "CRYSTAL_BEARS_LOCKED_CANON.md",
+      "episodesFile": "projects/ep1-v2-archive/episodes.json",
+      "packageBase": "projects/ep1-v2-archive",
+      "mediaBase": "engine/media",
+      "createdAt": "2026-07-06"
     }
   ]
 }

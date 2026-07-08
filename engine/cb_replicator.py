@@ -83,15 +83,6 @@ def _extract_frame(clip, out_path, last=False):
         return None
     return out_path if os.path.exists(out_path) else None
 
-def _load_qa(episode, code, slug):
-    p = f"media/{episode}_{code}_{slug}.qa.json"
-    if not os.path.exists(p):
-        return None
-    try:
-        return json.load(open(p))
-    except Exception:
-        return None
-
 def _halt(scene, done, code, reason, evidence):
     print(f"walk_scene: HALT at {code} — {reason}", flush=True)
     return {"status": "HALTED", "scene": scene, "beats_done": done, "halted_at": code,
@@ -143,12 +134,21 @@ def walk_scene(episode, scene, fast=False):
     first_code = first.get("beatCode") or first.get("shotCode")
     first_slug = first.get("slug", (first_code or "").replace(".", "_"))
     first_clip = f"media/{episode}_{first_code}_{first_slug}.mp4"
-    if not os.path.exists(first_clip):
-        cast = first.get("openingCast") or first.get("characters") or []
-        lint = cb_qa.check_prompt_laws(first, scene_dict, cast, relay=False)
+    # STEP 7 — RESUME BY APPROVAL STATUS, NEVER FILE EXISTENCE (GATE3_ANIMATION_DOCTRINE.md §1 Step 7).
+    status, _detail = cb_beats.beat_approval_status(episode, first_code, first_slug)
+    if status == "pending":
+        return _halt(scene, done, first_code,
+                     "a rendered take exists with no recorded verdict yet — Julian's Eye is the gate no "
+                     "machine owns; call cb_beats.record_approval(...) before walk_scene can resume", evidence)
+    if status == "unrendered":
+        # STEP 4 — THE UNIFIED LINT (GATE3_ANIMATION_DOCTRINE.md §1 — "Fail = the prompt never fires. Fix at
+        # data, recompile."). Blockers halt walk_scene outright; flags are advisory, printed but non-fatal.
+        lint = cb_qa.check_gate3_lint(pkg_path, first_code, episode)
         for fl in lint["flags"]:
-            print(f"walk_scene: {first_code} [PROMPT LAW FLAG] {fl}", flush=True)
-        prompt_text, _builder, _is_v3 = cb_segprompt.shipped_prompt(first, scene_dict, relay=False)
+            print(f"walk_scene: {first_code} [LINT FLAG] {fl}", flush=True)
+        if not lint["ok"]:
+            return _halt(scene, done, first_code, "STEP 4 LINT BLOCK: " + "; ".join(lint["blockers"]), evidence)
+        prompt_text = lint["prompt"]
         if not str(prompt_text or "").strip():
             return _halt(scene, done, first_code, "assembled prompt is empty — see cb_segprompt log", evidence)
         # THE ONE-RENDER ECONOMY (rule 3 / PRODUCTION_DOCTRINE.md): one fire, one automatic re-fire on a failed
@@ -164,11 +164,11 @@ def walk_scene(episode, scene, fast=False):
         if not ok:
             return _halt(scene, done, first_code,
                          f"one-render economy HARD STOP — {'; '.join(reasons)}. Diagnosis: {cb_beats._layer_diagnosis(reasons)}", evidence)
-    else:
-        # RESUME: a pre-existing clip — check its recorded QA rather than blindly trusting the file's presence.
-        qa = _load_qa(episode, first_code, first_slug)
-        if qa and qa.get("ok") is False:
-            return _halt(scene, done, first_code, "CLIP QA BLOCK: " + "; ".join(qa.get("reasons") or []), evidence)
+        return _halt(scene, done, first_code,
+                     "rendered — awaiting Julian's Eye (Step 7): review the clip in Downloads, then call "
+                     "cb_beats.record_approval(...) and re-run walk_scene to continue", evidence + [
+                         _copy_evidence(f"walk_scene_{first_code}_clip.mp4", first_clip)])
+    # status == "approved"
     evidence.append(_copy_evidence(f"walk_scene_{first_code}_clip.mp4", first_clip))
     done.append(first_code)
 
@@ -187,15 +187,17 @@ def walk_scene(episode, scene, fast=False):
         cur_slug = cur.get("slug", (cur_code or "").replace(".", "_"))
         cur_clip = f"media/{episode}_{cur_code}_{cur_slug}.mp4"
 
-        if os.path.exists(cur_clip) and _load_qa(episode, cur_code, cur_slug):
-            # RESUMABLE: this beat already has a clip and a QA verdict from a prior walk_scene call — evaluate
-            # it exactly as freshly-fired below rather than re-firing (and re-spending) it.
-            qa = _load_qa(episode, cur_code, cur_slug)
+        # STEP 7 — RESUME BY APPROVAL STATUS, NEVER FILE EXISTENCE (GATE3_ANIMATION_DOCTRINE.md §1 Step 7).
+        status, _detail = cb_beats.beat_approval_status(episode, cur_code, cur_slug)
+        if status == "approved":
             evidence.append(_copy_evidence(f"walk_scene_{cur_code}_clip.mp4", cur_clip))
-            if qa and qa.get("ok") is False:
-                return _halt(scene, done, cur_code, "CLIP QA BLOCK: " + "; ".join(qa.get("reasons") or []), evidence)
             done.append(cur_code)
             continue
+        if status == "pending":
+            evidence.append(_copy_evidence(f"walk_scene_{cur_code}_clip.mp4", cur_clip))
+            return _halt(scene, done, cur_code,
+                         "a rendered take exists with no recorded verdict yet — Julian's Eye is the gate no "
+                         "machine owns; call cb_beats.record_approval(...) before walk_scene can resume", evidence)
 
         prep = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, fast=fast, dry_run=True)
         if not prep:
@@ -209,10 +211,15 @@ def walk_scene(episode, scene, fast=False):
         if drift.get("ok") is False:
             return _halt(scene, done, cur_code, "RE-MINT DRIFT: " + drift.get("verdict", ""), evidence)
 
-        cast = cur.get("openingCast") or cur.get("characters") or []
-        lint = cb_qa.check_prompt_laws(cur, scene_dict, cast, relay=True)
+        # STEP 4 — THE UNIFIED LINT, same choke-point as the opener. A relay beat with no predecessor CLIP yet
+        # correctly checks as an opener-shape prompt here (cb_scene.relay_source_for's own resolution); once
+        # the predecessor's clip exists this naturally checks the real relay wording instead — never a second,
+        # divergent lint path.
+        lint = cb_qa.check_gate3_lint(pkg_path, cur_code, episode)
         for fl in lint["flags"]:
-            print(f"walk_scene: {cur_code} [PROMPT LAW FLAG] {fl}", flush=True)
+            print(f"walk_scene: {cur_code} [LINT FLAG] {fl}", flush=True)
+        if not lint["ok"]:
+            return _halt(scene, done, cur_code, "STEP 4 LINT BLOCK: " + "; ".join(lint["blockers"]), evidence)
 
         launched = cb_beats.fire_next_beat(pkg_path, scene, episode, prev_code, fast=fast, approved=True)
         if not launched or not os.path.exists(cur_clip):
@@ -230,7 +237,10 @@ def walk_scene(episode, scene, fast=False):
             return _halt(scene, done, cur_code,
                          f"one-render economy HARD STOP — {'; '.join(launched.get('reasons') or [])}. "
                          f"Diagnosis: {launched.get('diagnosis', '')}", evidence)
-        done.append(cur_code)
+        # STEP 7 — machine gates are clean, but nothing self-advances past Julian's own eye (doctrine §1).
+        return _halt(scene, done, cur_code,
+                     "rendered — awaiting Julian's Eye (Step 7): review the clip in Downloads, then call "
+                     "cb_beats.record_approval(...) and re-run walk_scene to continue", evidence)
 
     print(f"walk_scene: COMPLETE — {episode} scene {scene}, {len(done)}/{len(beats)} beats: {', '.join(done)}", flush=True)
     return {"status": "COMPLETE", "scene": scene, "beats_done": done, "halted_at": None, "reason": "",

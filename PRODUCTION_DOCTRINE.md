@@ -11,14 +11,24 @@ this page ever disagree, that is a bug — fix the disagreement the day it is fo
 **Episode → Scene → Beat.** A scene is a bubble: three locked constants (scene plate, ambient bed, style law)
 held verbatim across every beat inside it. A beat is one gag arc, 15 seconds — 13s action + 2s settle. A
 scene boundary is a full reset: new plate, new bed, a fresh anchor keyframe, relay depth back to zero.
+**Ambient bed note (the v5 engine, 2026-07-06):** the scene plate and style law are still live-enforced in
+every shipped prompt (rules 39 and the style block); the ambient bed's "word-for-word identical every clip"
+guarantee is NOT currently enforced in the shipped text — v5's literal five-block spec has no ambience slot.
+Flagged to Julian in the v5 build report, not silently dropped; this line states the bubble's ORIGINAL three
+constants as designed, not a claim that all three are live in the prompt today.
 
 ## Stage 0 — Script-in
 
 The script is the SOLE story source. Verbatim law: nothing downstream invents story or rewrites a line.
 Dialogue is locked including its authored punctuation (a comma, an ellipsis, a case choice) — once Julian
 rules a line's exact text, that text is what every V3 take is generated from; changing it is a fresh ruling,
-not a typo fix. `cb_script.py` parses the signed script deterministically; `cb_qa`'s verbatim gate hard-blocks
-any beat whose dialogue drifts from it.
+not a typo fix. `cb_script.py` parses the signed script deterministically. TWO mechanisms enforce the lock, at two different
+times (corrected 2026-07-07 — this line previously mis-attributed the check to `cb_qa`, which has no such
+function): `cb_director.enforce_verbatim` snaps every beat's dialogue to the exact script line ONCE, at Gate-1
+authoring time, inside `direct()`; `cb_preflight.check_scene_dialogue_verbatim` is the STANDING, re-runnable
+hard BLOCK (a proper `difflib` alignment against `cb_script.dialogue_lines`, not a positional zip) that
+re-checks the SAME ground truth at any later gate-arming point — the gap that let a hand-edited package drift
+from the locked script go undetected before this rule was added (CLAUDE.md rule 48).
 
 ## Stage 1 — The Director pass (script → beat package) → GATE 1
 
@@ -71,15 +81,19 @@ lean), never a subjective "does this look dynamic" call (rule 17). **Gate 2b**: 
 
 ## Stage 5 — Animation, the walk (Gate 3)
 
+**SUPERSEDED 2026-07-06 — `GATE3_ANIMATION_DOCTRINE.md` (repo root) is now the Version of Record for Gate 3's
+workflow, prompt shape, and Fidelity Law sources; where this section and that document disagree, the
+document wins (its own Change Control, §5). This section is kept as a summary/cross-reference, not a second
+authority — fix any drift the day it's found (rule 7).**
+
 ### The Scene-Opener Stack Law
 
 A scene's FIRST beat fires with exactly FOUR visual references — the signed keyframe (Stage 4), each cast
-member's turnaround, and the scene plate — plus `@Audio1`. No harvest, no re-mint, no `@Video1` on any
-opener: there is no predecessor to harvest a settle frame from or reference a clip against. This is now
-CODE-ENFORCED, not merely conventional: `cb_preflight.check_opener_stack` is a per-beat BLOCK for a scene's
-first beat if its actual reference plan would include a harvest, a re-mint, or a `@Video1` — the manifest
-refuses to arm Gate 3 on a scene whose opener stack is wrong, the same choke-point every other gate check
-uses.
+member's turnaround, and the scene plate — plus `@Audio1`. No harvest, no re-mint on any opener: there is no
+predecessor to harvest a settle frame from. This is now CODE-ENFORCED, not merely conventional:
+`cb_preflight.check_opener_stack` is a per-beat BLOCK for a scene's first beat if its actual reference plan
+would include a harvest or a re-mint — the manifest refuses to arm Gate 3 on a scene whose opener stack is
+wrong, the same choke-point every other gate check uses.
 
 ### Every subsequent beat
 
@@ -88,16 +102,32 @@ with a clip file on disk; a rejected take is dead to all resume and harvest logi
 existence," below). State reference is cut-default (`intentional_next_shot`): identity, carryMarks, lighting,
 position carry forward; camera is free within the coverage leash (a new angle close to the predecessor's,
 motivated by eyeline or motion, never a relocation or a fresh establishing wide — spatial-adjacency gated by
-the join-check's COVERAGE tier). `@Video1` is the approved predecessor's own clip — motion energy only, never
-camera framing, shot size or composition. Turnarounds and the scene plate are present on every beat, opener or
-not (rule 39 — the plate is a standing anchor, never relay-only).
+the join-check's COVERAGE tier). Turnarounds and the scene plate are present on every beat, opener or not
+(rule 39 — the plate is a standing anchor, never relay-only).
 
-### The v4 emitter is the sole prompt author
+**CORRECTED 2026-07-08 (software-wide audit):** both paragraphs above used to also name `@Video1` — a fifth
+reference (the predecessor's own clip, for motion energy) that existed briefly (rule 26, added 2026-07-04)
+and was RETIRED 2026-07-07 (rule 51 — Julian, watching 1.B2's actual footage: "the video I don't like it
+either, I think it confuses things"). The reference stack is a fixed four now, opener or relay, with no
+`@Video1` anywhere — this section's own prose had not been swept for that retirement until this audit found
+it reading as if `@Video1` were still live.
 
-No hand-authored prompt text, anywhere, ever. `cb_segprompt.emit_v4`/`shipped_prompt` is the only path from
-beat data to shipped prompt; v3/v2/v1 and every hand-edit escape hatch are deleted, not merely deprecated (the
-Purge, below) — a builder that returns empty now surfaces as a hard `ManifestFieldMissing`-class refusal, not
-a silent degrade to a weaker builder.
+### The v5 engine is the sole prompt author
+
+No hand-authored prompt text, anywhere, ever. `cb_segprompt.emit_v5`/`shipped_prompt` is the only path from
+beat data to shipped prompt (superseding v4 the same way v4 superseded v3, Julian's ruling 2026-07-06 — "THE
+PERMANENT PROMPT COMPILER, superseding all prior emitter modes"); v4/v3/v2/v1 and every hand-edit escape
+hatch are deleted, not merely deprecated (the Purge, below) — a builder that returns empty now surfaces as a
+hard `ManifestFieldMissing`-class refusal, not a silent degrade to a weaker builder. Five mechanical blocks,
+zero per-beat authoring: style (verbatim) / references (one line each, the same opener-relay-junction stack
+logic v4 used) / actingDNA (per cast member, `characters.json`'s new `bible.actingDNA` field) / beat story
+(`storyBeat` as the spine, vocal order, ending on `endState`'s settle, speed adjectives mechanically stripped)
+/ tech close (duration/camera-lock law + the negative line — the standing six plus two new always-on items,
+"no 2D animation style" and "no flat, static-feeling rendering"). A hard word-count BLOCK is enforced in
+`cb_preflight.py` (`WORD_BUDGET_BLOCK`, 650 as of 2026-07-07 rule 52; `WORD_BUDGET_TARGET`, 400, is the
+target, not a gate); every emit prints its own word count. NOTE: this paragraph describes an early v5 draft
+(`bible.actingDNA`, a flattened `storyBeat` spine) both since superseded — see GATE3_ANIMATION_DOCTRINE.md
+§2/§3 for the current, authoritative shape (Stage 5's own cross-reference, above).
 
 ### The one-render economy
 
@@ -112,8 +142,9 @@ Julian's felt-intent verdict per beat — does it flow, is it funny, does the fo
 the RESERVED VERDICT no machine check approximates. It is now recorded as a data field, not left implicit in
 "a clip file happens to exist": `locked.json`'s per-beat lock gains an `approval` key —
 `{"status": "approved"|"rejected"|"pending", "note": "..."}` — written by `cb_pipeline.approve_beat_take`.
-Only an `approved` take may be harvested (`cb_scene.harvest_settle_frame`) or referenced as `@Video1`; a
-`rejected` take's clip is moved to `media/rejected/` with a `.REJECTED.json` sidecar (recording why, and what
+Only an `approved` take may be harvested (`cb_scene.harvest_settle_frame`) — the still-frame anchor, the only
+one that exists now that `@Video1` is retired (rule 51); a `rejected` take's clip is moved to `media/rejected/`
+with a `.REJECTED.json` sidecar (recording why, and what
 the one changed variable was on the re-fire that superseded it) and is invisible to every resume/harvest path
 — `walk_scene` treats a beat with a `rejected`-only history as `pending`, not done, and re-fires it. **This is
 the resume key**: `walk_scene` resumes on approval status read from `locked.json`, never on whether a clip
@@ -157,7 +188,7 @@ does the four-year-old watch it again — recorded now as the `approval` field, 
 | 2 — World | Plate built + `check_plate`; turnarounds verified; ambient bed locked | Julian signs Gate 2a |
 | 3 — Voices | One V3 take per beat from locked text, fired into generation | Julian's ear approves, or names the one correction |
 | 4 — Keyframes | One 2K anchor per scene, action-state QA | Julian signs Gate 2b |
-| 5 — The walk | Opener-stack law; cut-default relay; v4-only; one-render economy; approval-not-file-existence resume | Machine gates, then Julian's `approval` field per beat |
+| 5 — The walk | Opener-stack law; cut-default relay; v5-only; one-render economy; approval-not-file-existence resume | Machine gates, then Julian's `approval` field per beat |
 | 6 — Retakes | Timecode → beat/cut mapping; one named variable; re-fire; re-gate | Julian names the timecode + correction |
 | 7 — Post | Settle-trim; stitch; continuous ambient bed; music/grade; two masters | Julian's final-cut approval |
 

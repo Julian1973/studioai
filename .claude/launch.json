@@ -9,6 +9,15 @@
       ],
       "port": 8765,
       "autoPort": false
+    },
+    {
+      "name": "studio2-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m", "http.server", "8766", "--directory", "studio2"
+      ],
+      "port": 8766,
+      "autoPort": false
     }
   ]
 }

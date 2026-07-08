@@ -1,0 +1,67 @@
+# EPISODE 1, SCENE 1 — the four beats of the proven 2026-06-22 recipe, verbatim.
+# Archive law: shot-listed cuts, dialogue written in, one identity line, native audio.
+# NOTE (2026-07-06): the size/gender binding handle and each character's DNA are now
+# compiled automatically from canon.yaml — this `identity` field is world-consistency
+# ONLY, so character truth is never duplicated (and never allowed to drift) in two places.
+scene: s1
+cast: [fuzzby, zenny]
+identity: >-
+  Keep the crystal cove meadow consistent throughout.
+closer: >-
+  Big personality, snappy comic timing; pollen motes drift, crystals twinkle.
+  avoid jitter, avoid identity drift.
+beats:
+  - id: v2.B1
+    title: Bizzy Nailed It
+    duration: 12
+    audio: vo/vo_B1.mp3
+    shots: >-
+      Shot 1 (wide establishing, slow push-in): the sun-dappled crystal cove meadow of
+      tall pollen-flowers, pollen motes drifting and crystals glinting, as Fuzzby and
+      Zenny weave between the blooms collecting pollen. Shot 2 (cut to a medium shot of
+      FUZZBY): he dips into a flower, scoops a big puff of pollen, overdoes it and spins
+      once, then bounces back upright beaming and proud, full of personality. Fuzzby sings his
+      cheerful sing-song from @Audio1, then lands his proud line. Shot 3 (cut to a wide
+      two-shot): Fuzzby frame-left hovers proud while Zenny frame-right watches him,
+      calm and unimpressed. Lively expressive character animation, snappy comic timing.
+  - id: v2.B2
+    title: Not A Normal Bee
+    duration: 14
+    audio: vo/vo_B2.mp3
+    shots: >-
+      Shot 1 (wide two-shot): Zenny (frame-right) turns to Fuzzby (frame-left), tilting
+      her head. Shot 2 (cut to a medium close-up of ZENNY): calm and dry, one eyebrow
+      raised. Zenny delivers her dry question from @Audio1. Shot 3 (cut to a medium close-up
+      of FUZZBY): he puffs up his chest, utterly self-important, wings flaring with
+      pride. Fuzzby delivers his proud declaration from @Audio1. Shot 4 (cut to a medium close-up
+      of ZENNY): one slow, flat, deadpan blink. Zenny lands her deadpan agreement from @Audio1.
+      Shot 5 (cut to a brief wide two-shot): Fuzzby deflates a touch; Zenny gives the
+      tiniest shrug.
+  - id: v2.B3
+    title: Do I Look Official
+    duration: 13
+    audio: vo/vo_B3.mp3
+    shots: >-
+      Shot 1 (wide two-shot): Fuzzby (frame-left) spots a big open pollen-flower and
+      zips toward it eagerly; Zenny (frame-right) watches. Shot 2 (cut to a medium shot
+      of FUZZBY): he plunges his whole face into the flower and pulls back out, his face
+      comically dusted in pollen like a fuzzy moustache, beaming and tilting his head
+      proudly. Fuzzby delivers his hopeful, grand line from @Audio1. Shot 3 (cut to a medium close-up of ZENNY):
+      she tries not to laugh — one slow blink, the tiniest tightening at the mouth, then a flat delivery
+      without breaking posture. Zenny lands her dry, punning verdict from @Audio1, almost courteous
+      then a clean tiny blade with a hidden smile. Shot 4 (cut to a brief wide two-shot): Fuzzby wipes a bit of pollen off,
+      sheepish; Zenny stays calm.
+  - id: v2.B4
+    title: Storms Coming
+    duration: 15
+    audio: vo/vo_B4.mp3
+    shots: >-
+      Shot 1 (wide two-shot): a low thunder RUMBLES; the sky begins to darken and the
+      warm light cools; both bees freeze and glance up. Shot 2 (cut to a medium close-up
+      of FUZZBY): he flinches, then plays it cool with a breezy little wave and a smug
+      grin that cracks into a nervous gulp. Fuzzby delivers his breezy line from @Audio1, cracking at the end. Shot 3 (cut to a medium close-up of ZENNY): she calmly
+      tilts her head up at the blackening sky, utterly unimpressed, one slow blink.
+      Zenny delivers her calm warning from @Audio1. Shot 4 (cut to a wide two-shot, HELD LONG):
+      the wind gusts hard, petals and leaves whip past, the light goes cold and grey,
+      both bees brace as the first fat raindrops fall — HOLD on this darkening wide for
+      several seconds of rising tension.

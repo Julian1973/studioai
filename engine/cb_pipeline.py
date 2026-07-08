@@ -254,9 +254,13 @@ def unapprove(gate, scene):
     plate can never satisfy Gate 2b, and you can rebuild/alter the foundation cleanly before re-signing."""
     gate = str(gate).lower(); scene = str(scene)
     d = _lock(); sd = d.setdefault(EP, {}).setdefault(scene, {})
-    order = ["1", "2a", "2b", "3", "4", "5"]
-    if gate in order:
-        for g in order[order.index(gate):]:   # this gate + everything downstream
+    # FIXED 2026-07-08 (contradiction sweep): this used to hand-duplicate GATE_SEQ's value as a fresh local
+    # literal instead of referencing the module constant already used idiomatically elsewhere in this same
+    # file (_prev_gate) — a third, undocumented copy beyond the two cross-file ones the header comment at
+    # line 24 already warns about. A future edit to GATE_SEQ (e.g. inserting a new gate) would have updated
+    # this docstring's own review copy while silently leaving this cascade-clear loop on the stale sequence.
+    if gate in GATE_SEQ:
+        for g in GATE_SEQ[GATE_SEQ.index(gate):]:   # this gate + everything downstream
             sd.pop(g, None)
     sd.pop("2", None)                          # drop any legacy whole-gate-2 flag too
     if gate == "1":
@@ -325,13 +329,15 @@ def regen(scene, shot_code, kind, note, target="both"):
         print(f"REGEN: shot {shot_code} not found in scene {scene}"); return False
     if kind == "clip":
         # ── UNIFIED RENDER PATH — Gate 3 ≡ clip regen (they MUST stay on the same path) ──────────────────────────
-        # A clip regen renders through the EXACT same path as Gate 3: cb_beats.run → cb_prompts.seedance_json →
-        # cb_gen.generate_video_seedance_ref. That path honours the beat's seedancePromptOverride, the @Audio1
-        # ElevenLabs V3 lip-sync track, and Seedance-scored SFX + MUSIC. If Gate 3 and clip regen ever diverge, a
-        # re-rendered beat comes from a DIFFERENT system than the rest of the scene and POST stitches a mismatched
-        # take. (Was cb_dialogue.run / build_ref2vid_prompt — SFX-only, NO music — now DEPRECATED; see cb_dialogue.py.)
-        # The correction `note` is recorded via save_note() above; per-render prompt changes go through the beat's
-        # seedancePromptOverride (which this path honours), not an ad-hoc prompt note.
+        # A clip regen renders through the EXACT same path as Gate 3: cb_beats.run → cb_segprompt.shipped_prompt →
+        # cb_gen.generate_video_seedance_ref. That path always recompiles fresh from the beat's own cuts[] (the
+        # @Audio1 ElevenLabs V3 lip-sync track and Seedance-scored SFX + MUSIC ride along). If Gate 3 and clip
+        # regen ever diverge, a re-rendered beat comes from a DIFFERENT system than the rest of the scene and POST
+        # stitches a mismatched take. (Was cb_dialogue.run / build_ref2vid_prompt — SFX-only, NO music — now
+        # DEPRECATED; see cb_dialogue.py.) The correction `note` is recorded via save_note() above (context only,
+        # not sent to the model); per-render prompt changes now go through editing the beat's own cuts[] in the
+        # Studio (seedancePromptOverride RETIRED 2026-07-07 — it was silently overwritten by the v5 recompile the
+        # moment gate3_prepare returned, for every beat that has a cb_segprompt segment).
         print(f"REGEN clip {shot_code} via the Gate-3 beat path (cb_beats.run codes=[{shot_code}]) | note: {note[:80]!r}", flush=True)
         cb_beats.run(PKG, scene, EP, codes=[shot_code])
     else:
@@ -474,10 +480,15 @@ def rebuild(scene):
     (force, no resume-keep). Use after un-signing Gate 2B / changing the template or references. Requires 2A signed."""
     print(f"GATE 2B — CLEAN REBUILD (all keyframes, force), {EP} scene {scene}:", flush=True)
     if not _approved(scene, "2a"):
-        print(f"  ⛔ Gate 2A (foundation) not signed off for {EP} scene {scene} — sign off the foundation first.", flush=True); return
+        print(f"  ⛔ Gate 2A (foundation) not signed off for {EP} scene {scene} — sign off the foundation first.", flush=True); return False
     sc = P.scene_cfg(EP, str(scene))
     if not (sc.get("master") and os.path.exists(sc["master"])):
-        print(f"  ⛔ no scene plate (master) — fire gate 2a first.", flush=True); return
+        print(f"  ⛔ no scene plate (master) — fire gate 2a first.", flush=True); return False
+    # FIXED 2026-07-07 (contradiction-audit, the same sweep-the-pattern find as _manifest_gate_beat's own
+    # 2026-07-07 fix): rebuild() renders every keyframe in the scene fresh but never checked the manifest —
+    # a beat with an outstanding BLOCK (e.g. an invented dialogue line) could still have its keyframe rebuilt.
+    if not _manifest_gate_beat(scene, None):
+        return False
     cb_scene.run(PKG, scene, EP, force=True)   # force = clean each stale keyframe, then rebuild ALL fresh
     print(f"  --- KEYFRAME QA — every beat's opening frame vs the Definition of Done (report-only):", flush=True)
     try:
@@ -492,6 +503,7 @@ def rebuild(scene):
     except Exception as e:
         print(f"  --- keyframe QA skipped ({str(e)[:120]})", flush=True)
     print(f"=== CLEAN REBUILD done — {EP} scene {scene} all keyframes rebuilt fresh; review + sign off ===", flush=True)
+    return True
 
 def set_master(scene, beat_code, character, episode=None, scope="location", force=False):
     """★ Set the CHARACTER MASTER (Flow 'use this image as subject') for `character` from beat `beat_code`'s keyframe.
@@ -567,8 +579,31 @@ def _scene_beat_order(scene):
     return [(b.get("beatCode") or b.get("shotCode")) for b in (d.get("beats") or d.get("shots") or [])
             if str(b.get("sceneNumber")) == scene]
 
+def _manifest_gate_beat(scene, code):
+    """FIXED 2026-07-07 (front-to-back audit): rule 37's own text names manifest_ok as the choke-point for
+    'every Studio button that fires or approves a gate' — but the PER-BEAT cascade (build_beat/gen_audio/
+    render_beat, exposed by serve.py's /api/gen-keyframe, /api/gen-audio, /api/render-beat) never called it
+    at all, only the whole-scene gate3()/regen() path did. A beat with an outstanding manifest BLOCK could
+    still have its keyframe built, its audio generated, or its clip rendered through the per-beat UI buttons.
+    Returns True if clear to proceed, False (already printed a refusal) if not."""
+    try:
+        import cb_preflight
+        ok, block_count, _ = cb_preflight.manifest_ok(PKG, scene=scene, episode=EP)
+        if not ok:
+            print(f"  ⛔ REFUSED — {block_count} manifest BLOCK(s) outstanding for {EP} scene {scene}; "
+                  f"never arms on a red manifest (run: python3 cb_preflight.py --scene={scene})", flush=True)
+            return False
+    except Exception as e:
+        print(f"  (manifest check could not run — {str(e)[:120]} — proceeding without it; fix cb_preflight.py)", flush=True)
+    return True
+
 def build_beat(scene, code, chain_from=None):
     """Build ONE beat's opening keyframe (CASCADE unit). chain_from = the previous beat's APPROVED keyframe path."""
+    # `is False` (not falsy) is the manifest-refusal signal, distinct from a `None` genuine-build-failure return
+    # below — __main__ checks the SAME distinction (see its own 2026-07-07 fix note) so a refusal reliably exits
+    # non-zero without changing this function's pre-existing (separate, unrelated) None-on-failure behaviour.
+    if not _manifest_gate_beat(scene, code):
+        return False
     kf = cb_scene.build_one_beat(PKG, scene, code, EP, chain_from=(chain_from or None))
     if kf:
         record_chain_source(scene, code)   # FRAME CHAIN doctrine baseline — see _relock_chain_if_dirty
@@ -577,6 +612,11 @@ def build_beat(scene, code, chain_from=None):
 
 def gen_audio(scene, code):
     """Build THIS beat's V3 dialogue track and report its measured duration (drives the per-beat HOLD math)."""
+    # `is False` is the manifest-refusal signal specifically — a wordless beat legitimately returns None further
+    # down ("that's valid, not an error"), so refusal must use a DIFFERENT sentinel than the wordless-success
+    # path, or __main__'s exit-code check would wrongly treat a valid wordless beat as a failure.
+    if not _manifest_gate_beat(scene, code):
+        return False
     beat = _beat_in(scene, code)
     if not beat:
         print(f"  ⛔ beat '{code}' not found in scene {scene}.", flush=True); return
@@ -608,6 +648,8 @@ def gen_audio(scene, code):
 
 def render_beat(scene, code):
     """Render ONE beat as its Seedance take (the Gate-3 beat method, scoped to a single beat)."""
+    if not _manifest_gate_beat(scene, code):
+        return False
     clips = cb_beats.run(PKG, scene, EP, codes=[code])
     clip = clips[0] if clips else None
     _set_beat_lock(scene, code, "audio", True)   # the clip render generates the V3 voice inline — audio is AUTOMATIC
@@ -617,6 +659,12 @@ def render_beat(scene, code):
 def approve_beat(scene, code, stage, value=True):
     """Lock (value=True) or UNLOCK (value=False) ONE beat's ONE stage (audio|keyframe|clip). On a keyframe APPROVAL,
     print the NEXT beat in scene order so the studio can auto-fire the chain."""
+    # FIXED 2026-07-07 (contradiction-audit): a scene-level approve() has always refused to arm on a red
+    # manifest; this per-beat sign-off never did, despite being the same class of action (locking in a stage as
+    # done). Gated only on value=True (LOCKING) — unlocking, like the scene-level unapprove(), is always a safe,
+    # reversible "go back and fix it" action and stays ungated.
+    if value and not _manifest_gate_beat(scene, code):
+        return False
     _set_beat_lock(scene, code, stage, value)
     print(f"{'✓ approved' if value else '↺ unlocked'} {EP} scene {scene} beat {code} stage {stage}", flush=True)
     if value and str(stage).lower() == "keyframe":
@@ -626,6 +674,7 @@ def approve_beat(scene, code, stage, value=True):
             i = order.index(code)
             nxt = order[i + 1] if i + 1 < len(order) else None
         print(f"NEXT={nxt or 'NONE'}", flush=True)
+    return True
 
 # ── THE RELAY, front door (Julian, 2026-07-03 — "everything through the front door now") — thin CLI wrappers
 # around cb_beats.fire_next_beat, persisting the prepared-anchor state to relay_state.json so the Studio can
@@ -696,10 +745,27 @@ def gate3(scene):
     cb_beats.run(PKG, scene, EP)
 
 def gate4(scene):
-    cb_retake.process_retakes(PKG, scene, EP)   # RETAKES — off the Gate-3 sign-off: regen flagged shots + splice + re-conform
+    # RETAKES — off the Gate-3 sign-off: regen flagged shots + splice + re-conform. Wrapped in try/except
+    # 2026-07-07 (front-to-back audit): cb_retake.process_retakes' own per-retake loop has no guard around a
+    # bad/stale package path or scene mismatch, so an uncaught exception here used to propagate as a raw
+    # traceback through fire() — whose own docstring promises it "never sys.exit itself... only returns
+    # True/False." That promise held for every OTHER gate (each already wrapped or internally safe); this
+    # was the one gap. Root-caused, not silently patched: cb_retake.py's own missing try/except around
+    # regen_shot() is the real fix, flagged as a follow-up ticket, out of scope for tonight's audit pass —
+    # this wrapper is the safety net so a genuine crash there degrades to a clean refusal instead.
+    try:
+        cb_retake.process_retakes(PKG, scene, EP)
+    except Exception as e:
+        print(f"⛔ Gate 4 crashed ({str(e)[:200]}) — refusing cleanly instead of raising; fix cb_retake.py's "
+              f"process_retakes and re-fire.", flush=True)
 
 def gate5(scene):
-    cb_post.run(PKG, scene, EP)                 # POST — master the mix + export stems (once, after retakes)
+    # POST — master the mix + export stems (once, after retakes). Same safety-net wrapping as gate4() above.
+    try:
+        cb_post.run(PKG, scene, EP)
+    except Exception as e:
+        print(f"⛔ Gate 5 crashed ({str(e)[:200]}) — refusing cleanly instead of raising; fix cb_post.py and "
+              f"re-fire.", flush=True)
 
 GATES = {"1": gate1, "2a": anchors, "2b": coverage, "3": gate3, "4": gate4, "5": gate5}
 _GENERATIVE = ("2a", "2b", "3")  # gates that render → run the pre-flight + continuity checks around them
@@ -792,7 +858,8 @@ if __name__ == "__main__":
             sys.exit(1)
     elif cmd == "rebuild":
         # rebuild <scene>  — CLEAN rebuild of ALL keyframes (force; deletes stale frames, re-renders every beat)
-        rebuild(sys.argv[2])
+        if not rebuild(sys.argv[2]):
+            sys.exit(1)
     elif cmd in ("redirect", "rebreak"):
         # redirect [scene]  — FORCE a Gate-1 re-break (back up + remove the package, re-author with the current Director)
         redirect(sys.argv[2] if len(sys.argv) > 2 else "1")
@@ -807,16 +874,28 @@ if __name__ == "__main__":
         clear_master_cmd(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None)
     elif cmd == "build-beat":
         # build-beat <scene> <beatCode> [chain_from]  — CASCADE: build one beat's opening keyframe
-        build_beat(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None)
+        # FIXED 2026-07-07 (contradiction-audit): build-beat/gen-audio/render-beat/approve-beat all had a
+        # working manifest_ok refusal inside their Python functions, but __main__ never checked the return value
+        # and never exited non-zero — so serve.py's job-status poll (which reads ONLY the subprocess return
+        # code, cb-studio/serve.py:323-324) reported a REFUSED action as "done." The exact bug class rule 11's
+        # own fire()/approve() fix already named ("a refused fire was silently reported as done") had never been
+        # swept into this whole per-beat command family. Fixed for all four below.
+        if not build_beat(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None):
+            sys.exit(1)
     elif cmd == "gen-audio":
         # gen-audio <scene> <beatCode>  — build + measure this beat's V3 dialogue track
-        gen_audio(sys.argv[2], sys.argv[3])
+        # `is False` specifically (not a plain truthiness check) — a wordless beat legitimately returns None,
+        # which must NOT be treated as a failure the way a manifest-refusal False must be.
+        if gen_audio(sys.argv[2], sys.argv[3]) is False:
+            sys.exit(1)
     elif cmd == "render-beat":
         # render-beat <scene> <beatCode>  — render one beat's Seedance take
-        render_beat(sys.argv[2], sys.argv[3])
+        if not render_beat(sys.argv[2], sys.argv[3]):
+            sys.exit(1)
     elif cmd == "approve-beat":
         # approve-beat <scene> <beatCode> <stage> [value]  — lock (default) or unlock (value=false) one beat stage
-        approve_beat(sys.argv[2], sys.argv[3], sys.argv[4], value=(len(sys.argv) < 6 or str(sys.argv[5]).lower() != "false"))
+        if not approve_beat(sys.argv[2], sys.argv[3], sys.argv[4], value=(len(sys.argv) < 6 or str(sys.argv[5]).lower() != "false")):
+            sys.exit(1)
     elif cmd == "relay-prepare":
         # relay-prepare <scene> <winnerCode>  — Phase 1: harvest+re-mint+drift-check winner's own official clip, STOP
         relay_prepare(sys.argv[2], sys.argv[3], fast=_fast)

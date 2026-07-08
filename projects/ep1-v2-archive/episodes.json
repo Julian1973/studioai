@@ -1,0 +1,16 @@
+[
+ {
+  "number": 999,
+  "title": "The Adventure Begins — Scene 1 (v2 Archive, 2026-06-22/23)",
+  "logline": "Fuzzby and Zenny in the rainforest, collecting pollen, right up to the storm's first rumble — the ARCHIVED pre-doctrine render Julian called the best take produced so far.",
+  "leadBear": "Fuzzby & Zenny",
+  "format": "Archived reference — Scene 1 only, 4 beats",
+  "unit": "beat",
+  "beatCount": 4,
+  "shotCount": 4,
+  "package": "EP999_archive_beat_package.json",
+  "shotPackage": "EP999_archive_beat_package.json",
+  "script": null,
+  "status": "Archived reference — read only, not part of live production"
+ }
+]

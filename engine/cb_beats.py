@@ -14,6 +14,8 @@ cb_prompts.seedance_json JSON path was removed). THE VOICE RIDES IN THE RENDER: 
 """
 import os, sys, json, subprocess
 import cb_gen, cb_prompts as P, cb_voice, cb_seedance
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import tools.backup_media as _backup   # off-machine backup on approval (2026-07-08 operational-risk fix)
 
 def _audio_dur(path):
     """Exact duration (seconds) of an audio file via ffprobe — drives the per-beat action/HOLD math (Ticket 3)."""
@@ -34,20 +36,18 @@ def _anchor(c):
 
 def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
     """SAFE Gate-3 prompt source selector for beats WITHOUT a cb_segprompt segment — NEVER calls Seedance. The ONLY
-    builder is cb_seedance (COMPACT_TIMED_JSON); a manual seedancePromptOverride is honoured verbatim (stale-guarded).
-    The old cb_prompts.seedance_json JSON builder has been REMOVED — there is no way to select it. (Beats that DO have a
-    cb_segprompt segment never reach here for their final prompt: cb_beats.run overrides with the definitive prose.)
+    builder is cb_seedance (COMPACT_TIMED_JSON). The old cb_prompts.seedance_json JSON builder has been REMOVED —
+    there is no way to select it. (Beats that DO have a cb_segprompt segment never reach here for their final
+    prompt: cb_beats.run overrides with the definitive prose.)
+    THE DEAD OVERRIDE, RETIRED (2026-07-07, Julian's Studio-editing feature request): this function used to honour
+    a manual `seedancePromptOverride` verbatim — but for every beat that DOES have a cb_segprompt segment (every
+    real beat in this production), `cb_beats.run` always recompiled via `cb_segprompt.shipped_prompt` immediately
+    after calling this function and overwrote whatever it returned — so the override silently never took effect,
+    while the Studio UI's "Save & use this exact prompt" button told the user it had. Removed rather than left as
+    a trap; editing now happens on the beat's own `cuts[]` (the Studio's shots editor), which both this function's
+    fallback AND the definitive v5 compile always read from — one source of truth, never a shadow copy.
     Returns {builder, prompt, report, authoring, refuse, reason}."""
     code = beat.get("beatCode") or beat.get("shotCode")
-    ovr = str(beat.get("seedancePromptOverride") or "").strip()
-    if ovr:
-        try: prompt = json.loads(ovr)            # legacy JSON override
-        except Exception: prompt = ovr            # flattened-text override (the current format)
-        stale = cb_seedance.detect_stale_prompt(prompt)   # the stale guard applies to overrides too — no old language sneaks in
-        return {"builder": "manual_override", "prompt": prompt,
-                "report": {"ok": not stale, "rejects": stale, "warnings": ["manual override — bypasses the cb_seedance build"], "length": len(ovr)},
-                "authoring": None, "refuse": bool(stale),
-                "reason": ("override contains stale language: " + "; ".join(stale)) if stale else ""}
     r = cb_seedance.build_for_beat(pkg_path, code, episode)
     fmt = os.environ.get("SEEDANCE_PROMPT_FORMAT", "compact")   # compact (COMPACT_TIMED_JSON) is the ONLY shipping format
     if fmt != "compact":                          # the flattened production-bible prompt is REVIEW/DEBUG only — never shipped
@@ -120,13 +120,22 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
             prompt, builder, raw = _def, _builder_label, True
     except Exception:
         pass
+    word_count = None
+    if raw:
+        try:
+            import cb_segprompt
+            word_count = cb_segprompt._v5_word_count(prompt)
+        except Exception:
+            pass
     return {"builder": builder, "format": ("DEFINITIVE_PROSE" if raw else prep.get("format", "?")), "beat": code,
             "refuse": (False if raw else prep["refuse"]), "reason": ("" if raw else prep["reason"]),
             "director_mode": a.get("director_mode"), "audience_feeling_target": a.get("audience_feeling_target"),
             "physical_action_archetype": a.get("physical_action_archetype"),
             "shot_style": a.get("shot_style"), "gag_lock": a.get("script_gag_lock_id"),
             "validator_ok": (True if raw else prep["report"]["ok"]), "rejects": ([] if raw else prep["report"]["rejects"]),
-            "length": (len(prompt) if raw else prep["report"].get("length")), "prompt": prompt}
+            "length": (len(prompt) if raw else prep["report"].get("length")),
+            "word_count": word_count,   # THE V5 WORD BUDGET (Julian, 2026-07-06) — printed on every emit
+            "prompt": prompt}
 
 def render_readiness(pkg_path, beat_code, episode="Ep1"):
     """PERMANENT RENDER GATE. READY_TO_RENDER requires BOTH the authoring/full validator AND the compact validator to
@@ -331,7 +340,15 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                 prompt = _def; raw = True; builder_label = _builder_label
         except Exception as _se:
             print(f"  {code}: cb_segprompt unavailable ({str(_se)[:80]}) — falling back to {prep['builder']}", flush=True)
-        print(f"  {code}: prompt builder = {builder_label}"
+        _wc_note = ""
+        if raw:
+            try:
+                import cb_preflight as _PF
+                _wc_note = (f" | {cb_segprompt._v5_word_count(prompt)} words (target {_PF.WORD_BUDGET_TARGET}, "
+                            f"hard block {_PF.WORD_BUDGET_BLOCK})")
+            except Exception:
+                pass
+        print(f"  {code}: prompt builder = {builder_label}{_wc_note}"
               + (f" | director_mode={prep['authoring']['director_mode']} shot_style={prep['authoring']['shot_style']}" if (not raw and prep.get("authoring")) else ""), flush=True)
         empty = (not (prompt.get("visual_prompt") or prompt.get("timeline") or prompt.get("direction") or prompt.get("cuts") or prompt.get("subject") or prompt.get("action"))
                  if isinstance(prompt, dict) else not str(prompt or "").strip())
@@ -384,31 +401,19 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         _plate = f"media/{episode}_S{scene_num}_plate.png"
         if os.path.exists(_plate):
             imgs.append(_plate)
-        vids = None
-        if relay_status == "relay":
-            # THE VIDEO REFERENCE (Julian, 2026-07-04, from the seedance-20 skill's own field guidance — "prefer
-            # reference-to-video with the previous clip as a video reference, keeps motion and audio context;
-            # chaining image-to-video from the previous clip's last frame is the fallback"): the still-frame
-            # re-mint anchor (@图1) stays — this is ADDITIVE, the previous beat's actual signed clip uploaded
-            # alongside it, so the model has real motion/audio context, not just a single held pose. Relay-
-            # only, unlike the plate above — a previous clip only exists for a beat with a predecessor.
-            if relay_prev:
-                _prev_b = next((bb for bb in beats if (bb.get("beatCode") or bb.get("shotCode")) == relay_prev), None)
-                if _prev_b:
-                    _prev_slug = _prev_b.get("slug", (relay_prev or "").replace(".", "_"))
-                    _prev_clip = f"media/{episode}_{relay_prev}_{_prev_slug}.mp4"
-                    if os.path.exists(_prev_clip):
-                        vids = [_prev_clip]
+        # THE VIDEO REFERENCE, RETIRED (Julian, 2026-07-07, watching 1.B2's actual footage — "the video I
+        # don't like it either, I think it confuses things"): rule 26's "FIFTH ANCHOR" (2026-07-04, additive
+        # video-clip reference alongside the still-frame anchor) is removed. A relay beat now opens from the
+        # still-frame anchor only (@图1) — see cb_segprompt.py's module docstring, "THE FIFTH ANCHOR, RETIRED".
         # T2 ruling (2026-07-02, Julian): a temporary state resolves WITHIN the take it started in — it never carries
         # across a take boundary. The continuity-tail chaining (appending the previous clip's last frame as a
         # reference + a "flow continuously from it" instruction) is retired; each take starts clean from its own keyframe.
         said = " | ".join(f"{l['character']}: {l['text']}" for l in track["lines"]) if track else "(no dialogue)"
         aud = [track["track"]] if (track and track.get("track")) else None
         print(f"  beat {code}: {dur}s ref2vid | audio {audio_dur:.1f}s -> hold {max(0.0, dur - audio_dur):.1f}s | imgs={len(imgs)}"
-              f"{' | vids=' + str(len(vids)) + ' (prev clip as motion/audio context)' if vids else ''} | "
-              f"V3 {'@Audio1 lip-sync' if aud else 'none'}; Seedance scores SFX+music\n         {said}", flush=True)
+              f" | V3 {'@Audio1 lip-sync' if aud else 'none'}; Seedance scores SFX+music\n         {said}", flush=True)
         try:
-            cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, video_urls=vids, duration=dur, out=out, raw_prompt=raw, fast=fast)
+            cb_gen.generate_video_seedance_ref(prompt, imgs, audio_urls=aud, video_urls=None, duration=dur, out=out, raw_prompt=raw, fast=fast)
             clips.append(f"media/{out}")
             try:    # THE HARVEST doctrine (Julian, 2026-07-03 — "ending frames are harvested, never composed"):
                     # sample the clip's settle window and keep the SHARPEST frame, not a blind EOF grab. This is
@@ -511,6 +516,97 @@ def _layer_diagnosis(reasons):
     return "take — the specific render came out wrong; nothing in the setup itself looks obviously at fault"
 
 
+# ══════════ APPROVAL AS DATA (GATE3_ANIMATION_DOCTRINE.md §1 Step 7, 2026-07-06) ══════════
+# "Approval or rejection is recorded as data on the take... Resume logic reads approval status — never file
+# existence." Previously deferred (CLAUDE.md rule 41's infrastructure freeze, LAB_BACKLOG.md item 0) — built
+# now on Julian's own explicit instruction. A beat's status is one of four: "unrendered" (no clip at its
+# normal path), "pending" (a clip exists, no verdict recorded yet — Julian hasn't looked), "approved" (a
+# verdict of approved is on file), "rejected" is a TRANSIENT state that `record_approval` resolves immediately
+# by archiving the clip away, so a rejected take never lingers at a path that could be mistaken for ready —
+# it becomes "unrendered" again, ready for a corrected re-fire, with the rejection's own record preserved in
+# the archive folder (never deleted) for the audit trail.
+import datetime
+
+def _approval_path(episode, code, slug):
+    return f"media/{episode}_{code}_{slug}.approval.json"
+
+def beat_approval_status(episode, code, slug):
+    """Returns ("unrendered"|"pending"|"approved", detail_dict_or_None). Reads the approval sidecar, never
+    just trusts the clip's presence — the doctrine's whole point. A clip with no approval sidecar yet is
+    "pending", not "approved": Julian's Eye (Step 7) is the gate no machine owns, so an unreviewed take must
+    never be treated as ready to anchor/harvest/resume from."""
+    clip = f"media/{episode}_{code}_{slug}.mp4"
+    if not os.path.exists(clip):
+        return "unrendered", None
+    ap = _approval_path(episode, code, slug)
+    if not os.path.exists(ap):
+        return "pending", None
+    try:
+        data = json.load(open(ap))
+    except Exception:
+        return "pending", None
+    return ("approved" if data.get("approved") else "pending"), data
+
+def record_approval(episode, code, slug, approved, correction=None, scene_num=None):
+    """THE Step 7 data-recording call — the ONLY way a take's verdict becomes real. approved=True writes the
+    approval sidecar in place; the clip stays exactly where it is (the official, anchorable take).
+    approved=False immediately archives the clip + its .qa.json/.join.json/_settle.png/_remint.png sidecars to
+    media/archive/<episode>_scene<N>_rejected/<code>_<timestamp>/ together with a .REJECTED.json marker
+    naming Julian's own one-sentence correction (doctrine: "rejection names ONE correction in one sentence")
+    — then the beat's own normal path is clean again (status reverts to "unrendered"), ready for the data fix
+    + one re-fire the doctrine calls for. A rejected take NEVER anchors, sources or resumes anything again —
+    archived, not deleted, so the full history survives for the record. Returns the status string that
+    resulted ("approved" or "unrendered")."""
+    clip = f"media/{episode}_{code}_{slug}.mp4"
+    if approved:
+        with open(_approval_path(episode, code, slug), "w") as f:
+            json.dump({"approved": True, "correction": None,
+                       "recorded_at": datetime.datetime.now().isoformat()}, f, indent=2)
+        print(f"record_approval: {code} APPROVED — official take stands at {clip}", flush=True)
+        # OFF-MACHINE BACKUP (2026-07-08 operational-risk fix): the moment a take becomes official is exactly
+        # the moment it's worth protecting — copy it + its sidecars to the 5t drive backup (Julian's own
+        # choice of destination) the instant it's signed, rather than relying on someone remembering to run a
+        # manual full-sync later. Never blocks or fails the approval itself if the drive isn't mounted.
+        for p in [clip, f"media/{episode}_{code}_{slug}.qa.json", f"media/{episode}_{code}_{slug}.join.json",
+                  _approval_path(episode, code, slug)]:
+            if os.path.exists(p):
+                _backup.backup_one(os.path.abspath(p))
+        return "approved"
+
+    if scene_num is None:
+        scene_num = code.split(".")[0] if "." in str(code) else "unknown"
+    stamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+    dest = f"media/archive/{episode}_scene{scene_num}_rejected/{code}_{stamp}"
+    # THE COLLISION FIX (found in the 2026-07-08 contradiction sweep): the stamp above is second-resolution
+    # only, no monotonic counter — two rejections of the SAME beat landing in the same wall-clock second
+    # (e.g. a retry-after-exception pattern) used to compute the identical dest, and the os.replace calls
+    # below would silently overwrite the first rejection's archived clip + its one-sentence correction, in
+    # direct violation of this function's own stated guarantee ("archived, not deleted, so the full history
+    # survives for the record"). If dest already exists, disambiguate with a numeric suffix rather than
+    # silently clobbering it.
+    if os.path.exists(dest):
+        n = 2
+        while os.path.exists(f"{dest}_{n}"):
+            n += 1
+        dest = f"{dest}_{n}"
+    os.makedirs(dest, exist_ok=True)
+    sidecars = [clip, f"media/{episode}_{code}_{slug}.qa.json", f"media/{episode}_{code}_{slug}.join.json",
+                f"media/{episode}_{code}_{slug}_settle.png", f"media/{episode}_{code}_{slug}_remint.png",
+                _approval_path(episode, code, slug)]
+    moved = []
+    for p in sidecars:
+        if os.path.exists(p):
+            target = os.path.join(dest, os.path.basename(p))
+            os.replace(p, target)
+            moved.append(target)
+    with open(os.path.join(dest, f"{code}.REJECTED.json"), "w") as f:
+        json.dump({"beat": code, "correction": correction, "recorded_at": datetime.datetime.now().isoformat(),
+                   "archived_files": moved}, f, indent=2)
+    print(f"record_approval: {code} REJECTED — {correction!r}. Archived to {dest}; beat is unrendered again, "
+          f"ready for the data fix + one re-fire.", flush=True)
+    return "unrendered"
+
+
 def _fire_gated(pkg_path, scene_num, episode, next_code, next_slug, fast):
     """ONE economy fire of next_code (cb_beats.run) — then reads back the gates run() itself already ran and
     persisted (CLIP QA's .qa.json, the JOIN CHECK's .join.json) to decide pass/fail, without re-deriving either
@@ -586,17 +682,23 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
     next_b = beats[idx + 1]
     next_code = next_b.get("beatCode") or next_b.get("shotCode")
     next_slug = next_b.get("slug", (next_code or "").replace(".", "_"))
-    # RE-MINT SCOPING (rule 32): whether to re-mint at all is decided by the NEXT beat's OWN declared junction
-    # type, not the winner's — @图1's job (pixel-perfect anchor vs. state reference) is what the NEXT beat's
-    # prompt asks of it.
+    # RE-MINT SCOPING — THE RE-MINT CORRECTION (Julian, 2026-07-06, superseding rule 32's junction-type-only
+    # trigger — "do not re-mint the last frame every time by default... use the approved raw harvested settle
+    # frame... re-mint only if the harvested frame is degraded, blurred, off-model, or unsuitable... constant
+    # re-minting can introduce drift because Nano Banana may 'beautify' or subtly change the character"). A
+    # `seamless_continuation` next beat still ALWAYS re-mints (unchanged — @图1 is used as literal first-frame
+    # pixels there, so the cleanup pass earns its keep regardless of quality). An `intentional_next_shot` next
+    # beat (the default) no longer skips re-mint unconditionally — it re-mints ONLY when the actual harvested
+    # frame fails cb_scene.harvest_needs_remint's quality gate (sharpness today; off-model/identity drift is a
+    # flagged future check, not yet built — see that function's own docstring for why).
     junction = cb_segprompt._junction_type(next_b)
-    needs_remint = junction == cb_segprompt.JUNCTION_SEAMLESS
+    always_remint = junction == cb_segprompt.JUNCTION_SEAMLESS
 
     if not approved:
         # PHASE 1 — PREPARE: harvest winner_code's own official clip (there is only ever one — the one-render
         # economy fires exactly once per beat, auto-retried once internally on a failed gate — so there is no
-        # separate "pick a winner among candidates" step left to run here), then re-mint ONLY for a seamless
-        # next beat, then STOP for approval.
+        # separate "pick a winner among candidates" step left to run here), then re-mint only when the seamless
+        # rule or the quality gate calls for it, then STOP for approval.
         if not os.path.exists(official):
             print(f"fire_next_beat: {winner_code} has no official clip yet at {official} — fire it (Gate 3) first, then prepare", flush=True); return None
         if dry_run:
@@ -610,12 +712,14 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
             print("fire_next_beat: cannot proceed without a harvested settle frame; stopping.", flush=True); return None
 
         cast = wb.get("openingCast") or wb.get("characters") or []
+        quality_needs_remint, quality_reason = cb_scene.harvest_needs_remint(settlef)
+        needs_remint = always_remint or quality_needs_remint
+        print(f"fire_next_beat: re-mint quality gate — {quality_reason}", flush=True)
         remint_out, drift, anchor = None, None, settlef
         if needs_remint:
-            # RE-MINT — a `seamless_continuation` next beat only (rule 32): a real NB2 call, the restoration
-            # pass this beat's pixel-perfect anchor actually needs.
+            why = "seamless_continuation" if always_remint else f"quality gate: {quality_reason}"
             remint_out = cb_scene.remint_settle_frame(episode, winner_code, w_slug, cast, settlef)
-            print(f"fire_next_beat: re-minted -> {remint_out or '(FAILED)'} ({next_code} is seamless_continuation)", flush=True)
+            print(f"fire_next_beat: re-minted -> {remint_out or '(FAILED)'} ({next_code}: {why})", flush=True)
             if not remint_out:
                 print("fire_next_beat: cannot proceed without a re-minted anchor; stopping.", flush=True); return None
             turnarounds = [a for c in cast if (a := _anchor(c))]
@@ -623,8 +727,8 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
             print(f"fire_next_beat: RE-MINT DRIFT CHECK -> {'CLEAN' if drift['ok'] else 'BLOCK'} — {drift['verdict']}", flush=True)
             anchor = remint_out
         else:
-            print(f"fire_next_beat: no re-mint — {next_code} is intentional_next_shot (the default): the raw "
-                  f"harvested frame IS @图1 directly; state continuity moves to the post-fire join-check", flush=True)
+            print(f"fire_next_beat: no re-mint — {quality_reason}; the raw harvested frame IS @图1 directly; "
+                  f"state continuity moves to the post-fire join-check", flush=True)
 
         if dry_run:
             # PROVE THE INJECTION — the next beat's real shipped prompt (relay=True), @图1 = the actual anchor.
@@ -637,12 +741,13 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
             _plate = f"media/{episode}_S{scene_num}_plate.png"
             if os.path.exists(_plate):
                 imgs.append(_plate)
-            vids = [official] if os.path.exists(official) else None   # the previous beat's actual clip — motion/audio context (2026-07-04)
+            # @Video1 RETIRED (Julian, 2026-07-07 — "the video I don't like it either, I think it confuses
+            # things"): no video reference is built or uploaded any more; see cb_segprompt.py's module
+            # docstring, "THE FIFTH ANCHOR, RETIRED".
             print(f"fire_next_beat [DRY RUN]: {next_code} shipped prompt (builder={builder}):\n{prompt}", flush=True)
             print(f"fire_next_beat [DRY RUN]: would upload {len(imgs)} images: {imgs}", flush=True)
-            print(f"fire_next_beat [DRY RUN]: would upload {len(vids) if vids else 0} video ref(s): {vids}", flush=True)
             print(f"=== fire_next_beat [DRY RUN] complete for {next_code} — nothing fired, nothing mutated. ===", flush=True)
-            return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs, "videos": vids,
+            return {"prompt": prompt, "builder": builder, "is_v3": is_v3, "images": imgs,
                     "harvested": settlef, "remint": remint_out, "anchor": anchor, "drift_check": drift, "next_code": next_code}
 
         print(f"=== fire_next_beat STOPPED — {winner_code}'s anchor is ready for your approval:\n"
@@ -652,7 +757,18 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
         return {"harvested": settlef, "remint": remint_out, "anchor": anchor, "drift_check": drift, "next_code": next_code}
 
     # PHASE 2 — approved=True: the anchor was already prepared; this call's only job is to launch. Which file
-    # to expect depends on the SAME junction-type decision the prepare phase made (rule 32).
+    # to expect depends on the SAME junction-type decision the prepare phase made (rule 32) — but `needs_remint`
+    # is a LOCAL variable only ever assigned inside the `if not approved:` branch above (line ~724), so this is
+    # a genuinely SEPARATE call to `fire_next_beat` (per this function's own docstring: prepare, then approve —
+    # two distinct invocations) and cannot see phase 1's locals at all. FIXED 2026-07-07 (front-to-back audit —
+    # a 100% reproducible UnboundLocalError on every approved=True call, i.e. every relay beat cb_replicator.
+    # walk_scene launches from 1.B2 onward): re-derive the SAME decision here, reading the already-harvested
+    # settle frame phase 1 left on disk (it must exist by now — phase 1 never returns without it).
+    if not os.path.exists(settle_path):
+        print(f"fire_next_beat: approved=True but no harvested settle frame at {settle_path} — call without "
+              f"approved first to prepare it.", flush=True); return None
+    _quality_needs_remint, _quality_reason = cb_scene.harvest_needs_remint(settle_path)
+    needs_remint = always_remint or _quality_needs_remint
     expected_anchor = remint_path if needs_remint else settle_path
     if not os.path.exists(expected_anchor):
         print(f"fire_next_beat: approved=True but no prepared anchor at {expected_anchor} — call without approved "

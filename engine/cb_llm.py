@@ -58,10 +58,20 @@ def _client_get():
     return _client
 
 def _openai_call(model, system, user, schema):
-    """A single strict-Structured-Output OpenAI call → a validated Pydantic instance (raises on refusal)."""
+    """A single strict-Structured-Output OpenAI call → a validated Pydantic instance (raises on refusal).
+
+    FIXED 2026-07-07 (found while proving THE FIDELITY-ALLOCATION LAW's live-fire path, completely unrelated to
+    that feature): the installed openai SDK (2.41.1) now requires each message's `content` as a list of typed
+    content parts (`[{"type": "input_text", "text": ...}]`), not a plain string — the plain-string form that
+    worked at this session's earlier full-episode fire (CLAUDE.md rule 47, "ran for real, 3403s, exit code 0")
+    now raises "expected an object, but got a string instead" on EVERY call, meaning the Director could not
+    fire AT ALL until this was fixed — a real, currently-blocking regression from an SDK version drift, not a
+    bug in any beat/schema logic. Verified directly against the real API (a `.parse()` call with a tiny dummy
+    schema) before applying this exact fix, not guessed at."""
     resp = _client_get().responses.parse(
         model=model,
-        input=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+        input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
+               {"role": "user", "content": [{"type": "input_text", "text": user}]}],
         text_format=schema,
         max_output_tokens=MAX_OUTPUT_TOKENS,
     )

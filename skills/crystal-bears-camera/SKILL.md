@@ -97,6 +97,8 @@ Seedance 2.0 is a multi-shot, up-to-15s, native-audio model — prompt it as suc
 
 ## 6. DIALOGUE & AUDIO — speak it for lip-sync, swap it for the voice (CRITICAL)
 
+> ⛔ **RETIRED — this whole section describes a retired era of the pipeline (found still live-reading, unstruck, in the 2026-07-08 contradiction sweep; §2 rule 4 above already flags this, but that warning doesn't reach a reader who lands here directly).** There is no native-Seedance-voice-then-strip-then-Voice-Change step. The full ElevenLabs V3 performance is supplied to Seedance directly as `@Audio1` and Seedance lip-syncs to it — see "⚑⚑ THE VOICE PIPELINE, FOR REAL THIS TIME" near the end of this file. Kept below as dated historical record only.
+
 **To get correct lip-sync, the video model must generate the mouth moving to *real speech*.** So for any shot where a character speaks on camera, **put the actual dialogue line in the i2v prompt and have the model voice it natively** (Seedance native lip-sync / Veo native dialogue / Kling). The model's generated voice is a **throwaway source** — its only job is to drive the lips.
 
 Then in **Post**: **strip the native dialogue audio out of the clip** and run *that audio* through **ElevenLabs Voice Changer (speech-to-speech)** to re-voice it as the canonical bear voice.
@@ -340,6 +342,8 @@ Do NOT use Seedance's native voice, and do NOT post-swap with S2S (it won't soun
 
 ## DELIVERABLE = WORLD-CLASS PICTURE; VOICES ARE ADR'd LATER (Julian 2026-06-20)
 
+> ⛔ **RETIRED (found still live-reading, unstruck, in the 2026-07-08 contradiction sweep).** There is no ADR pass, no CapCut swap, no guide-track framing for dialogue — the section title itself is exactly the mechanism CLAUDE.md rules 4/29 forbid. See "⚑⚑ THE VOICE PIPELINE, FOR REAL THIS TIME" near the end of this file. Kept below as dated historical record only; the picture-method guidance (image-to-video, coverage, staging) is unaffected and still applies.
+
 **The deliverable is world-class Pixar broadcast-quality 3D CGI animation — PICTURE + FULL POST.** Final voices are done by **ADR afterwards** (the client's CapCut swap, or real actors recording to picture), so Seedance's native dialogue is only a **GUIDE track** for mouth movement + timing — never the final voice. Don't engineer the pipeline around solving the voice. So:
 - **Picture = image-to-video** (first image + last image + a strong in-between prompt) — cinematic. NOT reference-to-video (that softens the imagery). This is the chosen picture method.
 - **Full cinematic coverage — never hamstrung.** Use whatever the beat needs: close-ups, cuts, over-the-shoulders, two-shots, masters. Two-handers (both in frame) are available and great for emotion; close-ups and cuts for intensity and comedy. The Director picks the coverage that serves the moment — **no rigid one-speaker or always-two-hander rule.**
@@ -362,6 +366,8 @@ Same rule for i2v: the character is ONLY "the character from the keyframe / refe
 ---
 
 ## ⚑ CURRENT DIALOGUE PIPELINE — RESOLVED (2026-06-21; supersedes any conflicting section above)
+
+> ⛔ **ITSELF RETIRED — despite its own "RESOLVED"/"CURRENT" title (found still live-reading in the 2026-07-08 contradiction sweep).** This section's "GUIDE track"/"Julian swaps the voices in CapCut" framing was superseded 2026-07-02 by "⚑⚑ THE VOICE PIPELINE, FOR REAL THIS TIME" just below — there is no swap of any kind; the supplied @Audio1 V3 performance is the final voice, reference-to-video IS the current method (not deprecated), and `build_i2v_prompt` is not the live builder (see CLAUDE.md's own emitter history, `cb_segprompt`'s v5 engine). Kept as dated historical record only.
 
 The single current method (executable truth: `cb-gen/cb_prompts.build_i2v_prompt` + `cb_pipeline` gate 3):
 - Render i2v from the locked keyframes with Seedance, **native voice ON** — the dialogue spoken on camera is the lip-synced **GUIDE** track. Reference-only (the keyframe carries identity); add ONLY motion + performance + one camera move; `single continuous shot, no cuts, no zoom` (or labelled `Shot 1:/Shot 2:` for deliberate multi-shot cuts); start→end frames.

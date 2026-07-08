@@ -1,0 +1,221 @@
+{
+ "title": "The Adventure Begins — Scene 1 (v2 ARCHIVE, 2026-06-22/23 pipeline)",
+ "episode": 999,
+ "logline": "ARCHIVED REFERENCE, not live production. This is Scene 1 (Rainforest) exactly as it was produced by the pre-doctrine 'cleanslate' pipeline on 2026-06-22/23 — the render Julian named as by far the best take produced so far. Source: _archive_cleanslate_20260622/cbgen/render_scene1.py, read and reconstructed verbatim (never paraphrased or invented) plus the companion Gate-1 shot storyboard at _archive_cleanslate_20260622/cb-output/Ep1_The_Adventure_Begins_shot_package.json.",
+ "ip": "The Crystal Bears",
+ "leadBear": "Fuzzby & Zenny",
+ "engine": "ARCHIVE — how Scene 1 was actually made before the v5 / GATE3_ANIMATION_DOCTRINE.md system existed",
+ "format": "Archived reference — Scene 1 only, 4 beats",
+ "style": "Polished 3D CGI animation, Pixar/DreamWorks feature quality — physically-based rendering, soft global illumination, subsurface scattering on plush fur, large expressive eyes with warm catch-lights, cinematic depth of field, high-key warm saturated palette, soft rounded forms. 16:9. NOT 2D, NOT hand-drawn, NOT flat. 2–3 subtle crystal elements in the environment, soft bokeh. (quoted verbatim from the archived shot_package.json's `style` field)",
+ "_howThisWasMade": [
+  "METHOD: single-image i2v (image-to-video) via cb_gen.generate_video_seedance() — NOT the current ref2vid/multi-reference system. Each beat was seeded from ONE start-frame image; there were no character-turnaround or scene-plate reference images fed into the render call at all.",
+  "CHAINING: beat 1 opened from a hand-built start frame (media/Ep1_S1_b1_start.png — this exact file no longer survives in the archive; the closest surviving artifact is the scene plate, Ep1_S1_plate.png, copied into this project as v2.B1's keyframe). Beats 2-4 each opened from cb_gen.last_frame() of the PREVIOUS beat's own rendered clip — literally the last frame extracted from the .mp4, no re-generation or clean-up pass of any kind.",
+  "VOICE: generate_audio=True — Seedance's OWN native audio generation produced the voices, music and SFX together in one pass. There was no separate ElevenLabs V3 track, no @Audio1 reference, no lip-sync step. Under the CURRENT doctrine (CLAUDE.md rule 4 / Law 5) this is explicitly forbidden — the voice must now come from a combined @Audio1 V3 track with no native-voice fallback. This archive predates that rule.",
+  "DIALOGUE IN PROMPT: every line of dialogue is spelled out verbatim inside the prompt text itself (e.g. 'Fuzzby, cheerful sing-song: \"Bizzy bizzy bizzy... Nailed it!\"'). Under the CURRENT doctrine this is also forbidden (Law 6 — dialogue words must never appear in the prompt, only speaker/timing/expression bindings). This archive predates that rule too.",
+  "IDENTITY: carried by a short repeated plain-text reminder inside every beat's prompt (the CONSIST string, quoted verbatim below) describing Fuzzby/Zenny by relative size, gender and temperament. Under the CURRENT doctrine this is forbidden — Law 5/CLAUDE.md rule 5 requires identity to come ONLY from reference images, never physical/appearance description text. This archive predates that rule.",
+  "RESOLUTION: 720p (cb_gen.generate_video_seedance(..., resolution='720p')) — the current pipeline fires at standard tier by default, a different setting.",
+  "OUTPUT: the 4 beats were rendered as 4 separate files (Ep1_S1_beat1.mp4 .. beat4.mp4) and were never stitched into a single scene file by this script — the WhatsApp video Julian referenced is one of these beats (or a manual edit combining them; the archive does not contain a combined-scene render, only the per-beat outputs and this script). A copy of the referenced WhatsApp video is attached to beat v2.B1 below as 'full-sequence-output' for convenience.",
+  "WHAT'S MISSING FROM THE ARCHIVE: the actual rendered .mp4 output files (Ep1_S1_beat1-4.mp4) and the very first start-frame image (Ep1_S1_b1_start.png) do not survive on disk in _archive_cleanslate_20260622/ — only the generation SCRIPT, the scene plate, the character sheet, and the Gate-1 shot storyboard survive there. Nothing has been invented to fill these gaps; they are named here as genuinely absent."
+ ],
+ "beats": [
+  {
+   "id": 1,
+   "beatCode": "v2.B1",
+   "slug": "bizzy-nailed-it",
+   "scene": "Rainforest",
+   "sceneNumber": 1,
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "durationSec": 12,
+   "pillar": "spark",
+   "storyBeat": "Wide establish: Fuzzby and Zenny weave between tall pollen-flowers collecting pollen. Fuzzby dips into a flower, scoops a huge puff of pollen, overdoes it, spins once, bounces back upright beaming and proud. Cut wide: Fuzzby hovers proud frame-left; Zenny watches, calm and unimpressed, frame-right.",
+   "speakers": [
+    "Fuzzby"
+   ],
+   "cuts": [
+    {
+     "n": 1,
+     "framing": "wide establishing, slow push-in",
+     "action": "the sun-dappled rainforest of tall pollen-flowers, pollen motes drifting and crystals glinting, as Fuzzby and Zenny weave between the blooms collecting pollen",
+     "dialogue": null
+    },
+    {
+     "n": 2,
+     "framing": "medium shot of Fuzzby",
+     "action": "he dips into a flower, scoops a big puff of pollen, overdoes it and spins once, then bounces back upright beaming and proud, full of personality",
+     "dialogue": "Fuzzby, cheerful sing-song: \"Bizzy bizzy bizzy... Nailed it!\""
+    },
+    {
+     "n": 3,
+     "framing": "wide two-shot",
+     "action": "Fuzzby frame-left hovers proud while Zenny frame-right watches him, calm and unimpressed",
+     "dialogue": null
+    }
+   ],
+   "firedPrompt": "Multi-shot sequence with clean cuts between shots. Keep the two bees on-model and the Rainforest consistent throughout: Fuzzby = the BIGGER bumblebee (male, chaotic); Zenny = the SMALLER bumblebee (female, calm). Shot 1 (wide establishing, slow push-in): the sun-dappled rainforest of tall pollen-flowers, pollen motes drifting and crystals glinting, as Fuzzby and Zenny weave between the blooms collecting pollen. Shot 2 (cut to a medium shot of FUZZBY): he dips into a flower, scoops a big puff of pollen, overdoes it and spins once, then bounces back upright beaming and proud, full of personality. Fuzzby, cheerful sing-song: \"Bizzy bizzy bizzy... Nailed it!\" Shot 3 (cut to a wide two-shot): Fuzzby frame-left hovers proud while Zenny frame-right watches him, calm and unimpressed. Lively expressive character animation, snappy comic timing; avoid jitter, avoid identity drift.",
+   "renderCall": "cb_gen.generate_video_seedance(BEAT1, start='media/Ep1_S1_b1_start.png', resolution='720p', duration=12, generate_audio=True, out='Ep1_S1_beat1.mp4')",
+   "startFrame": "media/Ep1_S1_b1_start.png — NOT preserved in the archive; closest surviving artifact is the scene plate (attached below as this beat's keyframe)",
+   "keyframePrompt_gate1Storyboard": "as per the reference image of Fuzzby and Zenny; setting: lush rainforest of tall pollen-flowers, warm dappled light; ambient crystals in bokeh. / as per the reference image of Fuzzby mid-air by a big flower, dusted with pollen; bright rainforest; crystals in bokeh.",
+   "i2vPrompt_gate1Storyboard": "Bees drift flower to flower, petals sway; slow push-in. / Fuzzby zig-zags, scoops, spins into a leaf (FWIP), bounces back upright. Snappy comedic handheld.",
+   "writerNote": "Corresponds to Gate-1 storyboard shots 1.1 (rainforest-establish) + 1.2 (fuzzby-nailed-it) from the archived shot_package.json, merged into one continuous multi-shot take by render_scene1.py. Keyframe image attached is the scene's locked plate (Ep1_S1_plate.png), the closest surviving artifact to the true start frame. The attached clip is the referenced WhatsApp video, included here for direct playback."
+  },
+  {
+   "id": 2,
+   "beatCode": "v2.B2",
+   "slug": "not-a-normal-bee",
+   "scene": "Rainforest",
+   "sceneNumber": 1,
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "durationSec": 14,
+   "pillar": "spark",
+   "storyBeat": "Zenny turns to Fuzzby and asks why he's humming. Fuzzby puffs up his chest, proudly declaring he's not a normal bee. Zenny delivers one slow deadpan blink and agrees. Fuzzby deflates a touch; Zenny gives the tiniest shrug.",
+   "speakers": [
+    "Zenny",
+    "Fuzzby"
+   ],
+   "cuts": [
+    {
+     "n": 1,
+     "framing": "wide two-shot",
+     "action": "Zenny (frame-right) turns to Fuzzby (frame-left), tilting her head",
+     "dialogue": null
+    },
+    {
+     "n": 2,
+     "framing": "medium close-up of Zenny",
+     "action": "calm and dry, one eyebrow raised",
+     "dialogue": "Zenny: \"Fuzz-bee, why are you humming?\""
+    },
+    {
+     "n": 3,
+     "framing": "medium close-up of Fuzzby",
+     "action": "he puffs up his chest, utterly self-important, wings flaring with pride",
+     "dialogue": "Fuzzby, proud: \"I am not a normal bee!\""
+    },
+    {
+     "n": 4,
+     "framing": "medium close-up of Zenny",
+     "action": "one slow, flat, deadpan blink",
+     "dialogue": "Zenny, dry: \"I can agree with that.\""
+    },
+    {
+     "n": 5,
+     "framing": "brief wide two-shot",
+     "action": "Fuzzby deflates a touch; Zenny gives the tiniest shrug",
+     "dialogue": null
+    }
+   ],
+   "firedPrompt": "Multi-shot sequence with clean cuts between shots. Keep the two bees on-model and the Rainforest consistent throughout: Fuzzby = the BIGGER bumblebee (male, chaotic); Zenny = the SMALLER bumblebee (female, calm). Shot 1 (wide two-shot): Zenny (frame-right) turns to Fuzzby (frame-left), tilting her head. Shot 2 (cut to a medium close-up of ZENNY): calm and dry, one eyebrow raised. Zenny: \"Fuzz-bee, why are you humming?\" Shot 3 (cut to a medium close-up of FUZZBY): he puffs up his chest, utterly self-important, wings flaring with pride. Fuzzby, proud: \"I am not a normal bee!\" Shot 4 (cut to a medium close-up of ZENNY): one slow, flat, deadpan blink. Zenny, dry: \"I can agree with that.\" Shot 5 (cut to a brief wide two-shot): Fuzzby deflates a touch; Zenny gives the tiniest shrug. Big personality, snappy comic timing; pollen motes drift, crystals twinkle. avoid jitter, avoid identity drift.",
+   "renderCall": "cb_gen.generate_video_seedance(BEAT2, start='media/_work/Ep1_S1_b2_start.png' [= last_frame(beat1.mp4)], resolution='720p', duration=14, generate_audio=True, out='Ep1_S1_beat2.mp4')",
+   "startFrame": "media/_work/Ep1_S1_b2_start.png — the last extracted frame of beat 1's own rendered clip (cb_gen.last_frame); not preserved in the archive",
+   "keyframePrompt_gate1Storyboard": "as per the reference image of Fuzzby and Zenny hovering together; bright rainforest; crystals in bokeh.",
+   "i2vPrompt_gate1Storyboard": "Fuzzby strikes a heroic mid-air pose, wobbles, drops, bounces off a petal, recovers; Zenny blinks deadpan.",
+   "writerNote": "Corresponds to Gate-1 storyboard shot 1.3 (not-a-normal-bee). The archived character sheet (Ep1_S1_charsheet.png) is attached to this beat as a reference image — it was NOT itself fed to the render call (this pipeline used no reference images at all); it's shown here as the character reference sheet available at the time."
+  },
+  {
+   "id": 3,
+   "beatCode": "v2.B3",
+   "slug": "do-i-look-official",
+   "scene": "Rainforest",
+   "sceneNumber": 1,
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "durationSec": 13,
+   "pillar": "spark",
+   "storyBeat": "Fuzzby spots a big open flower and zips toward it eagerly. He plunges his whole face in and pulls back out with his face comically dusted in pollen like a moustache, beaming. Zenny looks him over, flat and unimpressed. Fuzzby wipes a bit off, sheepish.",
+   "speakers": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "cuts": [
+    {
+     "n": 1,
+     "framing": "wide two-shot",
+     "action": "Fuzzby (frame-left) spots a big open pollen-flower and zips toward it eagerly; Zenny (frame-right) watches",
+     "dialogue": null
+    },
+    {
+     "n": 2,
+     "framing": "medium shot of Fuzzby",
+     "action": "he plunges his whole face into the flower and pulls back out, his face comically dusted in pollen like a fuzzy moustache, beaming and tilting his head proudly",
+     "dialogue": "Fuzzby: \"Do I look official?\""
+    },
+    {
+     "n": 3,
+     "framing": "medium close-up of Zenny",
+     "action": "she looks him over, flat and unimpressed, one slow blink",
+     "dialogue": "Zenny, dry: \"You look dusty.\""
+    },
+    {
+     "n": 4,
+     "framing": "brief wide two-shot",
+     "action": "Fuzzby wipes a bit of pollen off, sheepish; Zenny stays calm",
+     "dialogue": null
+    }
+   ],
+   "firedPrompt": "Multi-shot sequence with clean cuts between shots. Keep the two bees on-model and the Rainforest consistent throughout: Fuzzby = the BIGGER bumblebee (male, chaotic); Zenny = the SMALLER bumblebee (female, calm). Shot 1 (wide two-shot): Fuzzby (frame-left) spots a big open pollen-flower and zips toward it eagerly; Zenny (frame-right) watches. Shot 2 (cut to a medium shot of FUZZBY): he plunges his whole face into the flower and pulls back out, his face comically dusted in pollen like a fuzzy moustache, beaming and tilting his head proudly. Fuzzby: \"Do I look official?\" Shot 3 (cut to a medium close-up of ZENNY): she looks him over, flat and unimpressed, one slow blink. Zenny, dry: \"You look dusty.\" Shot 4 (cut to a brief wide two-shot): Fuzzby wipes a bit of pollen off, sheepish; Zenny stays calm. Big personality, snappy comic timing; pollen motes drift, crystals twinkle. avoid jitter, avoid identity drift.",
+   "renderCall": "cb_gen.generate_video_seedance(BEAT3, start='media/_work/Ep1_S1_b3_start.png' [= last_frame(beat2.mp4)], resolution='720p', duration=13, generate_audio=True, out='Ep1_S1_beat3.mp4')",
+   "startFrame": "media/_work/Ep1_S1_b3_start.png — the last extracted frame of beat 2's own rendered clip; not preserved in the archive",
+   "keyframePrompt_gate1Storyboard": "as per the reference image of Fuzzby, face comically dusted in pollen like a yellow moustache; flower bokeh; small crystals.",
+   "i2vPrompt_gate1Storyboard": "Fuzzby pulls his face from a flower covered in pollen, beams. Hold on the face.",
+   "writerNote": "Corresponds to Gate-1 storyboard shot 1.4 (do-i-look-official) — this is the same pollen-moustache gag later re-adopted and locked into config/gag_locks.json in the current pipeline (see CLAUDE.md history). No surviving image for this beat in the archive."
+  },
+  {
+   "id": 4,
+   "beatCode": "v2.B4",
+   "slug": "storms-coming",
+   "scene": "Rainforest",
+   "sceneNumber": 1,
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "durationSec": 15,
+   "pillar": "spark",
+   "storyBeat": "Distant thunder rumbles; the sky darkens and light cools; both bees freeze and glance up. Fuzzby flinches then plays it cool with a breezy wave, cracking into a nervous gulp. Zenny calmly clocks the sky. Held long on a darkening wide as wind and the first raindrops arrive.",
+   "speakers": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "cuts": [
+    {
+     "n": 1,
+     "framing": "wide two-shot",
+     "action": "a low thunder rumbles; the sky begins to darken and the warm light cools; both bees freeze and glance up",
+     "dialogue": null
+    },
+    {
+     "n": 2,
+     "framing": "medium close-up of Fuzzby",
+     "action": "he flinches, then plays it cool with a breezy little wave and a smug grin that cracks into a nervous gulp",
+     "dialogue": "Fuzzby, breezy then a comic gulp: \"Okay... that sounded dramatic.\""
+    },
+    {
+     "n": 3,
+     "framing": "medium close-up of Zenny",
+     "action": "she calmly tilts her head up at the blackening sky, utterly unimpressed, one slow blink",
+     "dialogue": "Zenny, flat and dry: \"Storm's coming.\""
+    },
+    {
+     "n": 4,
+     "framing": "wide two-shot, HELD LONG",
+     "action": "the wind gusts hard, petals and leaves whip past, the light goes cold and grey, both bees brace as the first fat raindrops fall — hold on this darkening wide for several seconds of rising tension",
+     "dialogue": null
+    }
+   ],
+   "firedPrompt": "Multi-shot sequence with clean cuts between shots. Keep the two bees on-model and the Rainforest consistent throughout: Fuzzby = the BIGGER bumblebee (male, chaotic); Zenny = the SMALLER bumblebee (female, calm). Shot 1 (wide two-shot): a low thunder RUMBLES; the sky begins to darken and the warm light cools; both bees freeze and glance up. Shot 2 (cut to a medium close-up of FUZZBY): he flinches, then plays it cool with a breezy little wave and a smug grin that cracks into a nervous gulp. Fuzzby, breezy then a comic gulp: \"Okay... that sounded dramatic.\" Shot 3 (cut to a medium close-up of ZENNY): she calmly tilts her head up at the blackening sky, utterly unimpressed, one slow blink. Zenny, flat and dry: \"Storm's coming.\" Shot 4 (cut to a wide two-shot, HELD LONG): the wind gusts hard, petals and leaves whip past, the light goes cold and grey, both bees brace as the first fat raindrops fall — HOLD on this darkening wide for several seconds of rising tension. Big personality, cinematic timing; avoid jitter, avoid identity drift.",
+   "renderCall": "cb_gen.generate_video_seedance(BEAT4, start='media/_work/Ep1_S1_b4_start.png' [= last_frame(beat3.mp4)], resolution='720p', duration=15, generate_audio=True, out='Ep1_S1_beat4.mp4')",
+   "startFrame": "media/_work/Ep1_S1_b4_start.png — the last extracted frame of beat 3's own rendered clip; not preserved in the archive",
+   "keyframePrompt_gate1Storyboard": "as per the reference image of Zenny and Fuzzby small against a wide rainforest canopy; sky darkening at the edges; crystals in bokeh.",
+   "i2vPrompt_gate1Storyboard": "Both pause mid-hover; canopy stirs; light cools as clouds edge in.",
+   "writerNote": "Corresponds to Gate-1 storyboard shot 1.5 (storms-coming) — the scene's final beat, ending on the storm's arrival that carries into Scene 2. No surviving image for this beat in the archive."
+  }
+ ]
+}

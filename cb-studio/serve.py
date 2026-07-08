@@ -252,7 +252,7 @@ def visions_state():
 def continuity_state():
     try:
         p = subprocess.run(["python3", "cb_continuity.py", "--json"], cwd=str(CBGEN),
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
         return json.loads(p.stdout or "[]")
     except Exception as e:
         return [{"level": "NOTE", "scene": "-", "shot": "-", "msg": f"continuity check error: {e}"}]
@@ -299,6 +299,14 @@ def _stream(jobId, args):
     try:
         p = subprocess.Popen(["python3"] + args, cwd=str(CBGEN),
                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+                             stdin=subprocess.DEVNULL,   # THE STDIN-INHERITANCE BUG (2026-07-07, found while
+                             # building the Studio shots editor): without this, every render/regen/fire spawned
+                             # from here inherited serve.py's own stdin — if anything in the child's import chain
+                             # ever reads stdin, it hangs until the caller's own timeout (or forever, for this
+                             # streaming path, which sets none). Confirmed live: /api/beat-prompt's own subprocess
+                             # (same missing-stdin pattern) reproducibly hung ~40s when spawned from the running
+                             # server, but ran in <0.5s invoked directly from a terminal — the server's own stdin
+                             # is what differs. Swept to every subprocess.run/Popen call in this file (rule 11).
                              start_new_session=True)   # own process group, so STOP kills the gate + every render it spawns
         PROCS[jobId] = p; job["pid"] = p.pid
         lines = []; _last_reindex = 0.0
@@ -389,28 +397,28 @@ def stop_all():
 
 def approve_gate(scene, gate, episode="Ep1"):
     p = subprocess.run(["python3", "cb_pipeline.py", "approve", str(gate), str(scene), f"--episode={episode}"],
-                       cwd=str(CBGEN), capture_output=True, text=True)
+                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
     return p.returncode == 0, (p.stdout + p.stderr).strip()
 
 def unapprove_gate(scene, gate, episode="Ep1"):
     """Reverse a sign-off (un-sign a step) — clears the gate + everything downstream, and resets the scene master
     if the foundation is un-signed (cb_pipeline.unapprove)."""
     p = subprocess.run(["python3", "cb_pipeline.py", "unapprove", str(gate), str(scene), f"--episode={episode}"],
-                       cwd=str(CBGEN), capture_output=True, text=True)
+                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
     return p.returncode == 0, (p.stdout + p.stderr).strip()
 
 def set_master_studio(scene, beat_code, character, episode="Ep1", scope="location", force=False):
     """★ Set a CHARACTER MASTER from a beat's keyframe (synchronous; QA-gated inside cb_pipeline). Returns (ok, log)."""
     args = ["python3", "cb_pipeline.py", "set-master", str(scene), str(beat_code), str(character), str(episode), str(scope)]
     if force: args.append("force")
-    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, timeout=150)
+    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, timeout=150, stdin=subprocess.DEVNULL)
     out = (p.stdout + p.stderr).strip()
     return ("★ MASTER SET" in out), out
 
 def clear_master_studio(scene, character, episode="Ep1"):
     """Retire a character's master for this scene's location (→ falls back to the Character Box). Returns (ok, log)."""
     p = subprocess.run(["python3", "cb_pipeline.py", "clear-master", str(scene), str(character), str(episode)],
-                       cwd=str(CBGEN), capture_output=True, text=True, timeout=60)
+                       cwd=str(CBGEN), capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
     out = (p.stdout + p.stderr).strip()
     return ("cleared" in out), out
 
@@ -459,7 +467,7 @@ def approve_beat(scene, beat, stage, episode="Ep1", value=True):
     Returns (ok, log, next). For a keyframe approval, cb_pipeline prints 'NEXT=<code>'/'NEXT=NONE' — parsed for the chain auto-fire."""
     p = subprocess.run(["python3", "cb_pipeline.py", "approve-beat", str(scene), str(beat), str(stage),
                         ("true" if value else "false"), f"--episode={episode}"],
-                       cwd=str(CBGEN), capture_output=True, text=True)
+                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
     out = (p.stdout + p.stderr).strip()
     nxt = None
     for line in out.splitlines():
@@ -521,6 +529,7 @@ _APPROVED_ROOTS = (
     ("/cb-output/",      {".json"}),                # output packages — FURTHER limited to *_beat_package.json (below)
     ("/cb-studio/data/", {".json", ".txt"}),        # registries (episodes/media-index/projects) + scripts the UI reads
     ("/cb-studio/",      {".css", ".js", ".ico"}),  # frontend assets, if any (app.html is an exact-approved file above)
+    ("/projects/",       {".json", ".md", ".txt"} | _MEDIA_EXT),  # per-project scaffold (meta/characters/bible/episodes + its own assets/media)
 )
 _DENY_NAMES = {"locked.json", "notes.json", "projects-index.json"}   # internal state / stale registry — refused even inside a root
 
@@ -783,7 +792,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "package and beat required"})
             try:
                 r = subprocess.run([_sys.executable, "kf_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40)
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
+                                   stdin=subprocess.DEVNULL)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
                 return self._json(200, obj)
@@ -798,7 +808,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "package and beat required"})
             try:
                 r = subprocess.run([_sys.executable, "voice_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40)
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
+                                   stdin=subprocess.DEVNULL)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
                 return self._json(200, obj)
@@ -828,7 +839,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(400, {"error": "scene and beat required"})
             try:
                 r = subprocess.run([_sys.executable, "beat_preview.py", pkg, scene, beat, ep, kind],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40)
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
+                                   stdin=subprocess.DEVNULL)
                 out = (r.stdout or "").strip()
                 obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
                 return self._json(200, obj)
@@ -1171,7 +1183,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                 for k, v in (d.get("updates") or {}).items():
                     if isinstance(v, dict):
                         cur = target.get(k) if isinstance(target.get(k), dict) else {}
-                        cur.update({kk: vv for kk, vv in v.items() if vv not in (None, "")})
+                        # was `if vv not in (None, "")` — skipped every blank sub-field, so a user could never
+                        # actively CLEAR a nested field (opensOn/fidelityAllocation/performance/continuity) via
+                        # the Studio UI (found 2026-07-08). The only caller (app.html's ebSave) always sends the
+                        # FULL current state of every sub-field on every save, never a partial patch, so
+                        # excluding only None (not "") is safe — nothing relies on blank-means-leave-alone here.
+                        cur.update({kk: vv for kk, vv in v.items() if vv is not None})
                         target[k] = cur
                     elif v is not None:
                         target[k] = v
@@ -1183,6 +1200,44 @@ class H(http.server.SimpleHTTPRequestHandler):
                     pass
                 pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
                 self._json(200, {"ok": True, "beatCode": code})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/scene-update":
+            # THE SCENE-LOOK LAW + THE SCENE BUBBLE LAW's three locked constants (sceneLook, ambientBed,
+            # parentLine) had no write path at all before this — found in the 2026-07-08 software-wide audit.
+            # Mirrors /api/beat-update's own generic merge pattern, targeting data["scenes"] instead of
+            # data["beats"]/data["shots"].
+            try:
+                d = self._body()
+                pkg = str(d.get("package", "")).strip()
+                sn = str(d.get("sceneNumber", "")).strip()
+                if not pkg or not sn:
+                    raise ValueError("package and sceneNumber required")
+                if "/" in pkg or ".." in pkg:
+                    raise ValueError("bad package name")
+                pf = ROOT / "cb-output" / pkg
+                if not pf.exists():
+                    raise ValueError("package not found: " + pkg)
+                data = json.loads(pf.read_text())
+                scenes = data.get("scenes") or []
+                target = next((s for s in scenes if str(s.get("sceneNumber")) == sn), None)
+                if target is None:
+                    raise ValueError("scene not found: " + sn)
+                for k, v in (d.get("updates") or {}).items():
+                    if isinstance(v, dict):
+                        cur = target.get(k) if isinstance(target.get(k), dict) else {}
+                        # same nested-clearing fix as /api/beat-update above (2026-07-08) — excludes only None.
+                        cur.update({kk: vv for kk, vv in v.items() if vv is not None})
+                        target[k] = cur
+                    elif v is not None:
+                        target[k] = v
+                try:
+                    (ROOT / "cb-output" / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                except Exception:
+                    pass
+                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+                self._json(200, {"ok": True, "sceneNumber": sn})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

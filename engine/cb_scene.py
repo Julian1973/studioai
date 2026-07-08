@@ -9,7 +9,7 @@ package's own keyframePrompt/i2vPrompt seeds. No hardcoded references or prompts
 
     python3 cb_scene.py <package.json> <sceneNumber> [episode=Ep1]
 """
-import cb_gen, cb_prompts as P, json, sys, os, traceback
+import cb_gen, cb_prompts as P, cb_qa, json, sys, os, traceback
 
 def preflight(pkg_path, scene_num, episode="Ep1"):
     """THE GATE CHECK — verify a scene is production-ready BEFORE spending a single API call.
@@ -135,6 +135,21 @@ def _clip_dur(clip):
     except Exception:
         return 0.0
 
+def _laplacian_sharpness(path):
+    """Shared sharpness metric (Laplacian variance, plain numpy, no cv2) — used both to PICK the sharpest
+    frame in a harvest window and, separately, to SCORE the frame actually harvested (harvest_needs_remint,
+    below). A low score means blurred/degraded, not necessarily "the wrong pose" — this is a quality check,
+    not an identity check."""
+    import numpy as np
+    from PIL import Image
+    try:
+        arr = np.asarray(Image.open(path).convert("L"), dtype=np.float64)
+        lap = (-4 * arr + np.roll(arr, 1, axis=0) + np.roll(arr, -1, axis=0)
+                      + np.roll(arr, 1, axis=1) + np.roll(arr, -1, axis=1))
+        return float(lap.var())
+    except Exception:
+        return -1.0
+
 def harvest_settle_frame(episode, code, slug, window=SETTLE_WINDOW, samples=12):
     """THE RELAY CHAIN's harvest (Julian, 2026-07-03, CLAUDE.md rule 21): the SHARPEST frame anywhere in a beat's
     final `window` seconds — its Handle Doctrine settle (rule 20) — not a prayer that the literal last frame is
@@ -142,7 +157,6 @@ def harvest_settle_frame(episode, code, slug, window=SETTLE_WINDOW, samples=12):
     the harvested frame's path, or None if the clip doesn't exist yet (a relay beat then blocks rather than
     guessing — CLAUDE.md rule 21)."""
     import subprocess, tempfile, glob
-    import numpy as np
     from PIL import Image
     clip = f"media/{episode}_{code}_{slug}.mp4"
     if not os.path.exists(clip):
@@ -162,19 +176,39 @@ def harvest_settle_frame(episode, code, slug, window=SETTLE_WINDOW, samples=12):
             return None
         best_path, best_score = None, -1.0
         for f in frames:
-            try:
-                arr = np.asarray(Image.open(f).convert("L"), dtype=np.float64)
-                lap = (-4 * arr + np.roll(arr, 1, axis=0) + np.roll(arr, -1, axis=0)
-                              + np.roll(arr, 1, axis=1) + np.roll(arr, -1, axis=1))
-                score = float(lap.var())
-            except Exception:
-                score = -1.0
+            score = _laplacian_sharpness(f)
             if score > best_score:
                 best_score, best_path = score, f
         if not best_path:
             return None
         Image.open(best_path).convert("RGB").save(out_path)
     return out_path if os.path.exists(out_path) else None
+
+SETTLE_SHARPNESS_MIN = 40.0   # THE RE-MINT CORRECTION (Julian, 2026-07-06 — "do not re-mint the last frame
+# every time by default... re-mint only if the harvested frame is degraded, blurred, off-model, or
+# unsuitable... constant re-minting can introduce drift because Nano Banana may 'beautify' or subtly change
+# the character"). Threshold picked conservatively low: harvest_settle_frame already picks the SHARPEST frame
+# in the settle window before this is even checked, so a genuinely usable frame should clear this easily; this
+# only catches a settle window that was uniformly poor (motion blur throughout, compression artifacting).
+# Calibrate against real rendered clips once more are on hand — no real-clip sample exists yet to tune this
+# against beyond 1.B1's single render.
+
+def harvest_needs_remint(path):
+    """Quality gate for THE RE-MINT CORRECTION: does this ALREADY-HARVESTED frame need the NB2 cleanup pass,
+    or is it good enough to use raw? Returns (needs_remint: bool, reason: str). Checks SHARPNESS now (real,
+    testable, no external API); does NOT yet check off-model/identity drift on the raw harvest itself — that
+    would need a vision-model call (the same class of call cb_qa.check_remint already makes AFTER a re-mint,
+    just run instead BEFORE deciding whether to re-mint at all) and this project's vision-QA API is currently
+    quota-blocked end to end (see cb_qa.VISION_MODEL's 2026-07-06 note) — flagged here, not silently skipped,
+    so a future session wires it in rather than assuming sharpness alone is the whole check."""
+    if not path or not os.path.exists(path):
+        return True, "harvested frame missing"
+    score = _laplacian_sharpness(path)
+    if score < 0:
+        return True, "sharpness check failed to run (corrupt/unreadable frame) — re-mint to be safe"
+    if score < SETTLE_SHARPNESS_MIN:
+        return True, f"harvested frame sharpness {score:.1f} below the {SETTLE_SHARPNESS_MIN} floor — likely blurred/degraded"
+    return False, f"harvested frame sharpness {score:.1f} — clears the floor, used raw (no re-mint)"
 
 def remint_settle_frame(episode, code, slug, cast, harvested_path):
     """THE RE-MINT step (Julian's ruling, 2026-07-03) — now STANDARD for every relay link, not QA-triggered;
@@ -190,25 +224,27 @@ def remint_settle_frame(episode, code, slug, cast, harvested_path):
     return outpath if os.path.exists(outpath) else None
 
 def relay_source_for(beats, code, episode="Ep1"):
-    """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21; RE-MINT SCOPING, rule 32, 2026-07-05)
-    — distinct from chain_source_for (which feeds Gate 2b's KEYFRAME generation). Returns (frame_path_or_None,
-    status, prev_code):
+    """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21; RE-MINT SCOPING superseded by THE
+    RE-MINT CORRECTION, 2026-07-06 — "do not re-mint the last frame every time by default... use the
+    approved raw harvested settle frame... re-mint only if the harvested frame is degraded, blurred,
+    off-model, or unsuitable") — distinct from chain_source_for (which feeds Gate 2b's KEYFRAME generation).
+    Returns (frame_path_or_None, status, prev_code):
       first          the scene's first beat (or a vision beat, or no previous beat) — no relay source; this beat
                      keeps its own Gate-2b-generated keyframe, exactly as before this doctrine.
       no_predecessor_clip   there IS a previous beat, but it has no rendered clip yet to harvest from — blocks
                      the relay at this beat rather than guessing; falls back to this beat's own keyframe.
-      relay          the previous beat has a rendered clip. WHICH anchor is preferred now depends on THIS beat's
-                     own declared junction type (rule 32 — not merely "does a re-mint file happen to exist"):
-                     a `seamless_continuation` beat prefers its predecessor's RE-MINTED anchor (falling back to
-                     the raw harvest if no re-mint exists yet, so a beat fired outside the fire_next_beat
-                     ceremony still degrades gracefully). An `intentional_next_shot` beat (the DEFAULT) uses the
-                     raw HARVESTED settle frame directly, ALWAYS — even if a stale re-mint file happens to exist
-                     on disk from before this ruling (or from a differently-typed sibling beat); @图1 is a state
-                     reference for this junction type, not a pixel-perfect anchor, so the NB2 cleanup pass buys
-                     nothing and is skipped. A pure lookup either way — never generates the re-mint itself:
-                     fire_next_beat's prepare step is what produces one, gated on Julian's approval, and only
-                     when the NEXT beat it's preparing is itself seamless_continuation. Either way, skips
-                     keyframe generation for THIS beat entirely."""
+      relay          the previous beat has a rendered clip. A `seamless_continuation` beat still ALWAYS prefers
+                     its predecessor's RE-MINTED anchor (unchanged — @图1 is used as literal first-frame pixels
+                     there, falling back to the raw harvest if no re-mint exists yet, so a beat fired outside
+                     the fire_next_beat ceremony still degrades gracefully). An `intentional_next_shot` beat
+                     (the DEFAULT) now decides by the harvested frame's own QUALITY (harvest_needs_remint), not
+                     by junction type alone: a good-quality raw harvest is used directly, ALWAYS, even if a
+                     stale re-mint file happens to exist on disk (constant re-minting risks NB2 quietly
+                     "beautifying" the character — drift, not fidelity); a degraded harvest prefers an
+                     already-prepared re-mint if fire_next_beat's prepare step already made one, falling back to
+                     the raw harvest anyway if it hasn't (this function is a pure lookup — it never generates a
+                     re-mint itself; only fire_next_beat's prepare step does that, gated on Julian's approval).
+                     Either way, skips keyframe generation for THIS beat entirely."""
     import cb_segprompt
     idx = next((i for i, b in enumerate(beats)
                 if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
@@ -234,13 +270,13 @@ def relay_source_for(beats, code, episode="Ep1"):
         if not harvested:
             return None, "no_predecessor_clip", prev_code
         return harvested, "relay", prev_code
-    # intentional_next_shot (the default, rule 32): raw harvest ONLY — never the re-mint, regardless of
-    # whether one happens to exist on disk.
-    if os.path.exists(harvested_path):
-        return harvested_path, "relay", prev_code
-    harvested = harvest_settle_frame(episode, prev_code, prev_slug)
+    # intentional_next_shot (the default): quality-gated, per THE RE-MINT CORRECTION.
+    harvested = harvested_path if os.path.exists(harvested_path) else harvest_settle_frame(episode, prev_code, prev_slug)
     if not harvested:
         return None, "no_predecessor_clip", prev_code
+    needs_remint, _reason = harvest_needs_remint(harvested)
+    if needs_remint and os.path.exists(remint_path):
+        return remint_path, "relay", prev_code
     return harvested, "relay", prev_code
 
 def chain_source_for(beats, code, episode="Ep1"):
@@ -303,7 +339,17 @@ def keyframe_for(all_beats, code, episode="Ep1", note=""):
         master = sc.get("master")
         has_plate = bool(master and os.path.exists(master)) or bool(b.get("extraScenes"))
         sub = cstatus if has_plate else "needs-plate"
-    return prompt, refs, {"kind": "opening keyframe", "chain": {"status": sub, "prev": pcode}}
+    # THE GATE-2 LINT (2026-07-08 software-wide fix batch): check_gate3_lint's anti-slop + Character Vocabulary
+    # Law checks had no Gate-2 sibling at all — this is the SINGLE choke-point every keyframe-prompt consumer
+    # (generation, preview, manual regen) routes through, so the lint is computed HERE, once, and every caller
+    # reads info["lint"] rather than each re-deriving it. A manual override (keyframePromptOverride) is Julian's
+    # own hand-typed text, not compiled from beat data — build_keyframe_prompt already returns it verbatim
+    # before any of the logic above runs, so skip the lint entirely rather than judge hand-authored text.
+    if str(sh.get("keyframePromptOverride") or "").strip():
+        lint = {"ok": True, "blockers": [], "flags": ["manual override — lint skipped"]}
+    else:
+        lint = cb_qa.check_keyframe_lint(prompt, chars=P.opening_cast(sh))
+    return prompt, refs, {"kind": "opening keyframe", "chain": {"status": sub, "prev": pcode}, "lint": lint}
 
 def build_one_beat(pkg_path, scene_num, code, episode="Ep1", chain_from=None, force=True):
     """CASCADE UNIT (Lock & Chain) — build ONE beat's opening keyframe. chain_from = the PREVIOUS beat's APPROVED
@@ -327,6 +373,13 @@ def build_one_beat(pkg_path, scene_num, code, episode="Ep1", chain_from=None, fo
     if ch.get("status") == "needs-plate":      # an anchor needs the blank scene plate (Image 3) — build the foundation first
         print(f"  {code} BLOCKED — anchor needs the scene foundation (the blank scene shot, Image 3). Build the foundation first.", flush=True)
         return None
+    lint = info.get("lint") or {}
+    if not lint.get("ok", True):
+        print(f"  {code} BLOCKED — keyframe lint failed: {'; '.join(lint.get('blockers') or [])}", flush=True)
+        return None
+    for f in (lint.get("flags") or []):
+        if f != "manual override — lint skipped":
+            print(f"  {code} (keyframe lint flag) {f}", flush=True)
     print(f"  {code} {info.get('kind')} -> {out} | {ch.get('status')}"
           + (f" off {ch.get('prev')}" if ch.get('status') == 'chained' else "") + f" | refs={len(refs)}", flush=True)
     cb_gen.generate_image(prompt, refs, "16:9", out)
@@ -426,6 +479,9 @@ def regen_shot(pkg_path, scene_num, shot_code, episode="Ep1", note="", target="b
             print(f"  REGEN BLOCKED — {code} continues {(info.get('chain') or {}).get('prev')}, not rendered yet. Build the previous beat first.", flush=True); return
         if st == "needs-plate":
             print(f"  REGEN BLOCKED — {code} anchor needs the scene foundation (the blank scene shot). Build the foundation first.", flush=True); return
+        lint = info.get("lint") or {}
+        if not lint.get("ok", True):
+            print(f"  REGEN BLOCKED — {code} keyframe lint failed: {'; '.join(lint.get('blockers') or [])}", flush=True); return
         cb_gen.generate_image(prompt, refs, "16:9", out)
         print(f"  start -> {out} ({info.get('kind')}, {st}, refs={len(refs)})", flush=True)
         print("REGEN done", flush=True); return

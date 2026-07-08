@@ -56,6 +56,7 @@ def _norm(s):
 
 _ALT_MARKERS = {"ALT", "ALT.", "ALTERNATE", "ALTERNATIVE", "OPTION", "OPT", "OR"}
 _CUE_SHAPE = re.compile(r"^\s*\d*\s*([A-Z][A-Z' ]{1,24})(?:\s*\(.*\))?\s*$")
+_NAME_START = re.compile(r"^([A-Z][A-Za-z']*)\b(.*)$")
 
 def parse(script_text, roster, warn=None):
     """warn(msg) is called (if given) when a line LOOKS like a speaker cue (short, ALL-CAPS, its own line) but
@@ -100,6 +101,24 @@ def parse(script_text, roster, warn=None):
                         i += 1; break                          # locked ONE final line — stop here, never blend the
                                                                 # alternate text into the verbatim ground truth
                     i += 1; continue                           # any other mid-line direction (e.g. "(beat)") -> strip, keep collecting
+                if dlines and re.search(r"[.!?][\"'’”]*$", dlines[-1]):
+                    m = _NAME_START.match(ns)
+                    if m and _na(m.group(1).upper()) in (roster - {"ALL"}) and m.group(2).strip():
+                        # a new sentence starting with a roster character's own name, directly after a completed
+                        # line of dialogue, with NO blank line in the source to separate them — almost always
+                        # third-person ACTION narration bleeding into the dialogue block (the writer's source
+                        # formatting simply omitted the blank line before the next action paragraph), never more
+                        # speech — a real speaker doesn't open a fresh sentence by naming themselves or another
+                        # character as its bare grammatical subject straight after a full stop. Found live
+                        # 2026-07-07: this exact gap let cb_script swallow "Fuzzby zooms right into Keen's face."
+                        # and "Aida smiles." onto the end of KEEN's preceding line, so the "ground truth" dialogue
+                        # a downstream verbatim check compares against was itself polluted with action prose.
+                        # ("ALL" excluded — a common English word, not just a roster name, so it would false-fire
+                        # constantly if left in.) Stop collecting dialogue here; `ns` becomes its own action line.
+                        if warn:
+                            warn(f"scene {cur['sceneNumber']}: dialogue for {cue} stops before {ns[:44]!r} — reads "
+                                 f"like action narration glued on with no blank line in the source, not more speech.")
+                        break
                 dlines.append(ns); i += 1
             line_text = _norm(" ".join(dlines))
             if line_text:

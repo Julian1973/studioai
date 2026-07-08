@@ -21,6 +21,7 @@ import os, re, json, subprocess
 import cb_prompts as P
 import cb_director_pass
 import cb_qa
+from cb_segprompt import _strip_spoken_words   # Law 6 defense-in-depth (2026-07-08) — see its call site below
 
 BEES = {k for k, v in P.CHARACTERS.items() if isinstance(v, dict) and "bee" in str(v.get("avoid", "")).lower()}
 
@@ -839,7 +840,13 @@ def flatten_seedance_prompt(a):
         if s["action"]:
             L.append(s["action"].rstrip(" .,;…") + ".")
         for d in s["dialogue"]:
-            L.append(d)
+            # FIXED 2026-07-08 (contradiction sweep): _dialogue_lines() builds these as literal quoted
+            # dialogue ("X lip-syncs exactly to @Audio1: \"...\""); compact_seedance_prompt (the real shipping
+            # format) already strips this via _timeline_line, but this format (the review/debug FULL export,
+            # SEEDANCE_PROMPT_FORMAT=full) never did — a genuine Law 5/6 leak for any beat with zero cuts[]
+            # (the only condition that routes here instead of the v5 engine). Reuse the same stripper so both
+            # formats are equally safe rather than only one of them.
+            L.append(_timeline_line(d))
         L.append(f"Purpose: {s['purpose']}.")
     L += [""]
     L += ["PERFORMANCE TRUTH:",
@@ -1146,13 +1153,20 @@ def compact_seedance_prompt(a):
     dm = a.get("director_mode", "")
     dp = a.get("director_pass")
     if dp and dp.get("shots"):
-        action_timeline = [{"time": s.get("time", ""), "action": _cap(s.get("action", ""), 380),
-                            "camera": _cap(s.get("camera", ""), 190)}
+        # LAW 6 DEFENSE-IN-DEPTH (2026-07-08 software-wide fix batch): direct_beat's own system prompt already
+        # instructs the LLM never to write spoken words into `action`/`camera`/`performance`/`expression` (it
+        # asks for "<Name> speaks here, voiced ONLY by @Audio1" instead) — but that's a prompt instruction, not
+        # a code guarantee, and every OTHER Law-6 surface in this codebase (cb_segprompt's v5 engine) backs its
+        # own equivalent instruction with a code-level strip rather than trusting the LLM alone. This compact-
+        # prompt path (the one cb_beats.run's OLDER validator, rule 10, still fires against) had no such strip
+        # at all until now — _strip_spoken_words removes any quoted dialogue fragment that slips through.
+        action_timeline = [{"time": s.get("time", ""), "action": _cap(_strip_spoken_words(s.get("action", "")), 380),
+                            "camera": _cap(_strip_spoken_words(s.get("camera", "")), 190)}
                            for s in dp["shots"] if s.get("time") and s.get("action")]
         camera = {"coverage": a.get("shot_style", "DIRECTED_COVERAGE"),
-                  "movement": _cap(dp.get("camera_approach", ""), 320),
+                  "movement": _cap(_strip_spoken_words(dp.get("camera_approach", "")), 320),
                   "framing_rule": _cap(p.get("stays visible") or "keep the acting + the gag readable; honour the staging spine", 180)}
-        performance = _cap((dp.get("performance", "") + " " + dp.get("expression", "")).strip(), 640)
+        performance = _cap(_strip_spoken_words((dp.get("performance", "") + " " + dp.get("expression", "")).strip()), 640)
     else:
         action_timeline = []
         for s in a.get("shots", []):
@@ -1408,7 +1422,8 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
                 #    found missing live, 2026-07-06: this call site was never updated when prev_carry_marks was
                 #    introduced (only cb_beats.py's three call sites were), so render_readiness/get_seedance_prompt
                 #    passed prev_carry_marks=None for every relay beat regardless of the real data, tripping
-                #    _v4_state_carry's ManifestFieldMissing guard on a beat whose predecessor's carryMarks was
+                #    the state-carry clause's ManifestFieldMissing guard (v4's _v4_state_carry, now v5's
+                #    _v5_references) on a beat whose predecessor's carryMarks was
                 #    actually authored — a false NEEDS_SOURCE_DATA_FIX. Confirmed live on 1.B2 during Scene 1's
                 #    Gate 3 walk (rule 11 sweep).
             _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene, relay=(_relay_status == "relay"),

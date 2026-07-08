@@ -6,30 +6,34 @@ none of these are pre-approved by being on this list.
 
 ## 0. THE NAMED POST-SCENE-1 BUILD — Stage 5/6 infrastructure (2026-07-06, Julian's ruling)
 
-**THE named priority for the next between-scenes window** — logged when Julian chose "live sequence now, under
-today's mechanism" over building this first, with an explicit INFRASTRUCTURE FREEZE from that moment: `PRODUCTION_DOCTRINE.md`
-(rewritten the same day, THE DEFINITIVE BUILD) states this as Stage 5/6's TARGET architecture; none of it is built
-yet. Four pieces, in the order the doctrine describes them:
+**BUILT 2026-07-06** (items 1-3), same day as `GATE3_ANIMATION_DOCTRINE.md` itself, on Julian's own explicit
+instruction ("implement the doctrine exactly... approval recording on takes with resume-by-approval-status").
+The INFRASTRUCTURE FREEZE (CLAUDE.md rule 41) that deferred this is lifted for this specific build — it was a
+direct ask, not a sweep found on the way to something else.
 
-1. **The `approval` per-beat data field** — `locked.json`'s per-beat lock gains `{"status": "approved"|"rejected"|
-   "pending", "note": "..."}`, written by a new `cb_pipeline.approve_beat_take` — recording Julian's felt-intent
-   verdict as data instead of leaving it implicit in "a clip file happens to exist."
-2. **`.REJECTED.json` sidecar archiving** — a rejected take's clip moves to `media/rejected/` with a sidecar
-   recording why and what the one changed variable was on the superseding re-fire; invisible to every resume/
-   harvest path.
-3. **`walk_scene` resuming on approval status, never file existence** — the actual behaviour change: today's
-   `walk_scene` treats "a clip file is on disk" as "this beat is done." Once (1) and (2) exist, it should treat
-   "an APPROVED clip is on disk" as done — a clip can exist and still correctly read as pending if never approved.
-4. **Stage 6's timecode-retake subsystem** — `cb_post.assemble_review_cut` (burnt-in timecode on the hard-cut
-   assembly, never the delivery master) and `cb_post.retake_at_timecode(scene, timecode, variable, value)`
-   (timecode → beat/cut mapping, arithmetic from each beat's fixed `HANDLE_TOTAL` duration and running order; one
-   named variable; re-fire; re-gate).
+1. **DONE** — `cb_beats.record_approval(episode, code, slug, approved, correction=None, scene_num=None)` writes
+   a per-take sidecar (`media/<ep>_<code>_<slug>.approval.json`, `{"approved": bool, "correction": str|None,
+   "recorded_at": iso}`) recording Julian's felt-intent verdict as data — no `locked.json` schema change needed,
+   a simple sidecar was enough and matches this codebase's existing `.qa.json`/`.join.json` convention exactly.
+2. **DONE** — rejection archiving: `record_approval(approved=False, ...)` immediately moves the clip + its
+   `.qa.json`/`.join.json`/`_settle.png`/`_remint.png`/approval sidecar to
+   `media/archive/<episode>_scene<N>_rejected/<code>_<timestamp>/`, with a `.REJECTED.json` marker naming the
+   one-sentence correction — never deleted, never anchoring/sourcing/resuming anything again. The beat's own
+   normal path is clean afterward (status reverts to "unrendered"), ready for the corrected re-fire.
+3. **DONE** — `cb_beats.beat_approval_status(episode, code, slug)` returns `"unrendered"|"pending"|"approved"`
+   by reading the sidecar, never trusting a clip's mere presence. `cb_replicator.walk_scene` now checks this at
+   both its resume points (the opener and the relay loop) and, critically, **halts for Julian's Eye after every
+   single fire** rather than auto-advancing through green machine gates — "nothing self-advances past his eye"
+   is now literal, not just a stated intention. Verified with a scripted lifecycle test (unrendered → pending →
+   rejected+archived → unrendered → pending → approved) — every transition landed exactly as designed.
+4. **STILL OUTSTANDING** — Stage 6's timecode-retake subsystem (`cb_post.assemble_review_cut`,
+   `cb_post.retake_at_timecode`). Not part of this build; genuinely waits on real footage to test against.
 
-**Why it waits**: the doctrine states the target; the code follows once real footage exists to build and test it
-against, not before. The safeguard standing in for approval-resume in the meantime: archive every existing take/
-harvest/settle-frame for the scene being worked, so file-existence resume starts from a genuinely clean disk each
-time, rather than risking a chain off pre-amendment footage. See CLAUDE.md rule 41 for the archiving and the
-INFRASTRUCTURE FREEZE rule that now governs bug triage until this build happens.
+Also fixed the same day, found by the doctrine audit that motivated this build: **@Video1 was never actually
+trimmed to its documented "final ~3 seconds"** — the whole predecessor clip was being uploaded as the video
+reference. `cb_beats._trim_video_tail(clip_path, seconds=3.0)` (ffmpeg `-sseof`, stream-copied, falls back to
+the untrimmed clip on any failure) now wraps both call sites (`run`'s relay video-reference assembly,
+`fire_next_beat`'s dry-run preview). Verified against a real archived clip.
 
 ## 1. The 720p draft ladder
 
@@ -44,7 +48,13 @@ Vendor guidance says Seedance ignores traditional negative prompts. Proposed tes
 positive locks (state what must be true, not what must not happen) on ONE already-crowned beat, and compare against
 the current negatives-based version before deciding whether to change the doctrine for every beat.
 
-## 3. @Video motion and camera references for stubborn gags / direct continuations
+## 3. @Video motion and camera references for stubborn gags / direct continuations — MOOT, ALREADY TRIED AND KILLED
+
+**SUPERSEDED (found stale in the 2026-07-08 software-wide sign-off audit):** this exact mechanism was built —
+CLAUDE.md rule 26, THE FIFTH ANCHOR, @Video1 (2026-07-04) — fired against real 1.B2 footage, and then explicitly
+retired by Julian on render evidence (rule 51, 2026-07-07: "the video I don't like it either, I think it confuses
+things") — "REMOVED entirely, not narrowed." `cb_qa.py`/`cb_golden.py` now actively BLOCK if @Video1 ever
+reappears in a shipped prompt. Do not re-propose or re-build this without a fresh ruling from Julian.
 
 For beats where the still-image + text approach keeps missing the intended motion (e.g. a specific physical
 performance a static keyframe can't fully specify), supply an actual VIDEO reference for motion/camera guidance
@@ -122,7 +132,12 @@ perspective-rides-as-mix-law and SFX-sweetening-as-declared-doctrine (see `CRYST
 of those two touches a render — they're mix-time practice and law-text, not generation code. Item 8 above (the
 distance envelope) is the one piece actually queued, not applied.
 
-## 9. Revisit the prose/JSON fork criterion after Scene 1
+## 9. Revisit the prose/JSON fork criterion after Scene 1 — MOOT, THE FORK ITSELF NO LONGER EXISTS
+
+**SUPERSEDED (found stale in the 2026-07-08 software-wide sign-off audit):** `emit_prose_v3`/`emit_json_v3` (the
+v3 prose/JSON fork this item is about) were deleted outright in THE DEFINITIVE BUILD purge (CLAUDE.md rule 40),
+and the v4/v5 engines that replaced v3 never had a prose/JSON fork at all — v5 is one unified text compiler for
+every beat regardless of speaker count. There is no criterion left to revisit; nothing to action.
 
 **FLAGGED, queued for after Scene 1** (Julian's consolidated doctrine sync, 2026-07-03, item SIX). The fork
 currently routes on raw distinct-speaker count (0-1 -> prose, 2+ -> JSON). Once Scene 1's seeds are judged,

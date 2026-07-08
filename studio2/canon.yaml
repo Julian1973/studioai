@@ -1,0 +1,51 @@
+# CRYSTAL BEARS — CANON. The only source of truth. Everything else is derived.
+# Rule: if it isn't in this file or an episode file, it does not exist in a prompt.
+
+style: >-
+  Premium 3D animated feature film aesthetic for children aged 4 to 8, bright hyper
+  saturated colours, warm golden hour sunlight with volumetric rays, glowing magical
+  particles, lighthearted highly expressive slapstick comedy
+
+negatives: >-
+  no on-screen text, no extra characters, no character redesign, no crystals on the
+  bees, no frozen wings while airborne, no invented voices, no 2D or flat animation
+
+banned_words: [rainforest]        # scene 1 is the crystal cove meadow. always.
+
+# CHARACTERS — one line each. Movement and comedy verbs ONLY, curated by Julian
+# from the show bible. No appearance (the reference image carries it). No poses.
+# No negations (those live in `negatives`). This line IS the character in motion.
+# Cross-referenced against engine/config/characters.json's real bible — not paraphrased
+# from memory — per Julian's ruling (2026-07-06): "you should be pulling through from the
+# characters in the actual software... cross-referencing everything to ensure on character."
+characters:
+  fuzzby:
+    # dna sourced from characters.json -> Fuzzby.bible.motionRule (condensed, always-on rule
+    # preserved verbatim in spirit: ALWAYS fast/manic/hyper, erratic in altitude too, never slow)
+    dna: >-
+      always fast, manic, hyper in flight — zig-zags at full speed, porpoises wildly in
+      altitude never level, bangs into flowers, and plays every crash as a triumph
+    ref: refs/fuzzby_turnaround.png
+    voice_id: DNK8oCkkHjIyEjzlCeQq
+  zenny:
+    # dna sourced from characters.json -> Zenny.bible.mannerisms (condensed, deadpan-stillness
+    # signature preserved: barely moves, a slow blink, a flat stare, a tiny head-tilt)
+    dna: >-
+      calm, deadpan-still, barely moves — a slow blink, a flat stare, a tiny head-tilt,
+      steady while Fuzzby zips past
+    ref: refs/zenny_turnaround.png
+    voice_id: XEiPrIitaegdirIGkODX
+
+scenes:
+  s1:
+    script_location: "EXT. DEEP WITHIN THE RAINFOREST - DAY"   # the script's own slugline — story law
+    production_location: crystal cove meadow — morning          # the signed world it renders as
+    plate: refs/s1_plate.png
+    keyframe: refs/s1_keyframe.png     # generated once by `keyframe`, signed by Julian
+    keyframe_prompt: >-
+      Wide shot at bee height in a sunlit crystal cove wildflower meadow, tall lavender
+      and daisies, small natural crystal formations low in the grass. Fuzzby mid-flight,
+      full of energy; Zenny hovering calmly at a bloom nearby. Warm golden morning light.
+    ambience: >-
+      a warm meadow hum — distant birdsong, gentle insect chatter, a light breeze
+      moving through grass and flowers

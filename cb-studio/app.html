@@ -176,7 +176,7 @@ let EPISODES=[],MEDIA=[],CUR=null,SHOTS=[],PREFIX="",page="episodes",MEDIA_V=0,C
 
 // ── ONE PIPE (scene-spine). Script in → the Pipeline runs each scene Storyboard→Keyframes→Animation→Post, locked
 //    until the prior stage is signed, scenes unlocking in order. Cascade + the standalone boards are gone (one door per action).
-const NAV=[["script","Script","✎"],["pipeline","Pipeline","⚙"],["canvas","Canvas","▦"],["shots","Shots","▶"],["__sep","",""],["continuity","Continuity","✔"]];
+const NAV=[["script","Script","✎"],["storyboard","Storyboard","🎬"],["shots","Shots","▶"],["__sep","",""],["pipeline","Pipeline","⚙"],["canvas","Canvas","▦"],["continuity","Continuity","✔"]];
 
 function mediaFor(s){const codes=[s&&s.shotCode,s&&s.id].filter(x=>x!=null&&x!=="");const slug=s&&s.slug;
   // Show the keyframe/clip for the beat's CURRENT slug — NOT just the first .png matching the code. Multiple
@@ -581,6 +581,7 @@ function render(){
   if(page=="script")return renderScript();
   if(page=="pipeline"){renderPipeline();refreshPipe();return;}
   if(page=="canvas")return renderCanvas();
+  if(page=="storyboard"){renderStoryboard();return;}
   if(page=="shots")return renderShots();
   if(page=="continuity")return renderContinuity();
   if(page=="characters")return renderCharacters();
@@ -2457,6 +2458,94 @@ function lbToggleZoom(e){if(e)e.stopPropagation();var im=document.getElementById
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&t.classList.contains('zoom')){e.preventDefault();e.stopPropagation();var cap=t.getAttribute('data-cap')||decodeURIComponent((t.src.split('/').pop()||'').split('?')[0]);openLightbox(t.src,cap);}},true);
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox();});
 bootProjects();
+
+async function renderStoryboard(){
+  view.innerHTML=`<h1 class="h1">Storyboard — the Creative Room</h1><div id="sb" class="coming">Loading…</div>`;
+  let idx; try{idx=await (await fetch(BASE+"/api/storyboard?episode=Ep"+CUR.number)).json();}catch(e){document.getElementById('sb').textContent='Studio server unreachable.';return;}
+  const v=idx.vision, scenes=idx.scenes||[];
+  let h='';
+  h+=`<div class="card" style="padding:16px;margin:0 0 14px">
+    <div style="font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase">Episode</div>`;
+  if(v){h+=`<div style="font-size:15px;margin:6px 0"><b>${v.premise||''}</b></div>
+    <div style="font-size:13px;color:var(--muted)">Theme — ${v.theme||''}</div>
+    <div style="font-size:13px;margin-top:6px">Emotional journey: ${v.emotionalCurve||''}</div>
+    <div style="font-size:13px">Comedy: ${v.comedyCurve||''}</div>
+    <div style="font-size:13px">Motifs: ${v.visualMotifs||''}</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:6px">Ends on: ${v.intendedFinalFeeling||''}</div>`;}
+  else h+=`<div style="font-size:13px;color:var(--muted)">No episode vision yet.</div>
+    <button class="btn" onclick="creativeRun('vision')">✦ Run Episode Vision (Showrunner)</button>`;
+  h+=`</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px">`;
+  for(let n=1;n<=10;n++){const has=scenes.includes(String(n));
+    h+=`<button class="btn ${has?'':'ghost'}" onclick="${has?`openStoryboardScene(${n})`:`creativeRun('scene',${n})`}">${has?'▦ Scene '+n:'✦ Direct scene '+n}</button>`;}
+  h+=`</div><div id="sbscene"></div>`;
+  document.getElementById('sb').outerHTML=`<div>${h}</div>`;
+}
+async function creativeRun(cmd,scene){
+  const r=await fetch(BASE+"/api/creative-run",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({cmd,scene:scene?String(scene):"",episode:"Ep"+CUR.number})});
+  const j=await r.json(); if(!j.ok){alert(j.error||'failed');return;}
+  alert('The creative room is working — the four roles run automatically. Revisit this tab in a minute or two.');
+}
+async function openStoryboardScene(n){
+  const el=document.getElementById('sbscene'); el.innerHTML='Loading scene '+n+'…';
+  let p; try{p=await (await fetch(BASE+"/api/storyboard?episode=Ep"+CUR.number+"&scene="+n)).json();}catch(e){el.textContent='failed';return;}
+  const esc=t=>String(t==null?'':t).replace(/</g,'&lt;');
+  let h=`<div class="card" style="padding:16px;margin:0 0 12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><b>Scene ${n}</b> · ${esc(p.scene.location)} · ${esc(p.scene.time)}</div>
+      <div><span class="btn ghost" style="pointer-events:none">${esc(p.approvalState)}</span>
+      <button class="btn" onclick="sbApprove(${n},'scene','approved')">✓ Approve scene</button>
+      <button class="btn ghost" onclick="sbApprove(${n},'scene','revise')">✎ One creative note</button></div></div>
+    <div style="font-size:13px;margin-top:8px">${esc(p.scene.purpose)}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">Emotional owner: ${esc(p.scene.emotionalOwner)} · Enters ${esc(p.scene.emotionalEntry)} → exits ${esc(p.scene.emotionalExit)}</div>
+    <div style="font-size:12px;color:var(--muted)">Turn: ${esc(p.scene.storyTurn)}</div>
+    <div style="font-size:12px;color:var(--muted)">Visual identity: ${esc(p.scene.visualIdentity)} · Energy: ${esc(p.scene.energyShape)}</div>
+    <div style="font-size:12px;margin-top:8px;font-style:italic">Showrunner: ${esc(p.showrunnerJudgement)}</div>
+    ${p.escalation?`<div style="font-size:12px;color:#e0a136;margin-top:6px">⚠ Creative question for you: ${esc(p.escalation)}</div>`:''}
+  </div>`;
+  for(const b of p.beats||[]){
+    h+=`<div class="card" style="padding:14px;margin:0 0 10px;border-left:3px solid var(--accent,#7aa)">
+      <div><b>${esc(b.beatId)}</b> — ${esc(b.memorableImage)}</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0">${esc(b.sourceScript)}</div>
+      ${(b.exactDialogue||[]).map(d=>`<div style="font-size:13px;margin:2px 0 2px 10px">🗨 ${esc(d)}</div>`).join('')}
+      <div style="font-size:12px;margin-top:6px">Engine: <b>${esc(b.comedyOrEmotionEngine)}</b> · audience: ${esc(b.intendedAudienceResponse)}</div>
+      <div style="font-size:12px;margin-top:6px;background:rgba(127,127,127,.08);padding:8px;border-radius:8px">
+        <b>Selected direction — ${esc(b.selectedDirectorialInterpretation)}</b><br>${esc(b.selectionReason)}
+        <div style="color:var(--muted);margin-top:4px">Also explored: ${esc((b.rejectedApproachSummaries||[]).join(' · '))}
+        <button class="btn ghost" style="font-size:11px" onclick="sbApprove(${n},'${esc(b.beatId)}','revise')">request a different interpretation</button></div>
+      </div>`;
+    for(const sh of (p.shots||[]).filter(x=>x.beatId===b.beatId)){
+      h+=`<div style="margin:8px 0 0 12px;padding:10px;border:1px solid rgba(127,127,127,.25);border-radius:10px">
+        <div><b>${esc(sh.shotId)}</b> · ${esc(sh.intendedDurationRange)} · ${esc(sh.shotSize)} · ${sh.transitionType==='PLANNED_CUT'?'✂ planned cut · new keyframe':'→ continuous'}</div>
+        <div style="font-size:12px;margin-top:4px">Opens: ${esc(sh.openingComposition)}</div>
+        <div style="font-size:12px">Performance: ${esc(sh.principalPerformance)}</div>
+        <div style="font-size:12px">Physics: ${esc(sh.animationAndPhysics)}</div>
+        <div style="font-size:12px">Camera: ${esc(sh.cameraBehaviour)} · ${esc(sh.lensFeeling)} · ${esc(sh.cameraAngle)}</div>
+        <div style="font-size:12px">Light: ${esc(sh.lightingAndAtmosphere)}</div>
+        <div style="font-size:12px">Closes: ${esc(sh.closingComposition)} — cut because: ${esc(sh.cutMotivation)}</div>
+      </div>`;}
+    h+=`</div>`;}
+  if((p.voicePerformances||[]).length){
+    h+=`<div class="card" style="padding:14px;margin:0 0 10px"><b>Voice — how the lines are acted</b>`;
+    for(const vp of p.voicePerformances){
+      h+=`<div style="margin-top:8px;padding:8px;border-left:3px solid rgba(127,127,127,.3)">
+        <div><b>${esc(vp.speaker)}</b>: “${esc(vp.exactDialogue)}”</div>
+        <div style="font-size:12px;color:var(--muted)">wants: ${esc(vp.dramaticIntention)} · hides: ${esc(vp.subtext)}</div>
+        <div style="font-size:12px">v3: ${esc(vp.elevenLabsV3Direction)}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(vp.emotionalEntry)} → ${esc(vp.emotionalExit)} · lands: ${esc(vp.expectedTiming)}</div>
+      </div>`;}
+    h+=`</div>`;}
+  h+=`<details class="card" style="padding:12px"><summary style="cursor:pointer;font-size:12px;color:var(--muted)">Production panel (hashes · provenance · revisions)</summary>
+    <pre style="font-size:11px;overflow:auto">${esc(JSON.stringify({engineVersion:p.engineVersion,canonVersion:p.canonVersion,builtAt:p.builtAt,provenance:p.provenance,internalRevisions:p.internalRevisions,approvalLog:p.approvalLog},null,1))}</pre></details>`;
+  el.innerHTML=h;
+}
+async function sbApprove(scene,target,verdict){
+  let note='';
+  if(verdict==='revise'){note=prompt('One plain-language creative note for the room:')||'';if(!note)return;}
+  await fetch(BASE+"/api/storyboard-approve",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({episode:"Ep"+CUR.number,scene:String(scene),target,verdict:verdict==='revise'?'revision-requested':verdict,note})});
+  openStoryboardScene(scene);
+}
 </script>
 <div id="lightbox" onclick="if(event.target.id==='lightbox')closeLightbox()">
   <span id="lbclose" onclick="closeLightbox()" title="Close (Esc)">✕</span>

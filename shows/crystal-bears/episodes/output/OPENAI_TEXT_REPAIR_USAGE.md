@@ -30,3 +30,24 @@ Design-time note: every repair call is labelled (`repair_<shotId>_<field>`) via 
 repair records its model + prompt version in the package's `repairLog`. cb_llm does not currently
 capture per-call token usage; adding that capture is the natural follow-up if OpenAI spend is to
 be ledgered like fal/ElevenLabs media spend.
+
+---
+
+## Creative Room build (2026-07-16, CREATIVE ROOM vNEXT)
+
+Text-completion usage for the creative-room engine (cb_creative.py) — episode vision + 5 scene runs
+(the polluted maiden Scene-1 run included) across 4 role passes each plus Showrunner reviews/revisions:
+
+| Call type | Model | Count (approx) |
+|---|---|---|
+| Episode vision | gpt-5.5 | 1 |
+| Scene direction (Director, incl. 3-interpretation exploration) | gpt-5.5 | 6 |
+| Shot design + cinematography passes | gpt-5.5 | 12 |
+| Voice design | gpt-5.5 | 6 |
+| Showrunner reviews + internal revisions | gpt-5.5 | 9 |
+| **Total** | | **~34 completions** |
+
+No confirmed per-token OpenAI rate is on file for this billing profile — usage is recorded, cost is
+NOT invented. Order-of-magnitude judgement only: comparable to the repair-loop batch above (well under
+$1–$5 range for gpt-5.5 structured completions of this size). Zero media provider calls; zero Seedance
+tokens issued; zero fal/ElevenLabs spend.

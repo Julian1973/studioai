@@ -1,0 +1,66 @@
+{
+ "version": "1.0",
+ "note": "Seeded mechanically from existing character bibles and the locked Ep1 script; fields left null are authoring gaps for the user — never invented.",
+ "schema": [
+  "pair",
+  "wantsFromOther",
+  "misunderstands",
+  "affection",
+  "irritation",
+  "dependence",
+  "status",
+  "emotionalLeverage",
+  "comicContrast",
+  "typicalRhythm",
+  "privateVulnerability",
+  "underPressure"
+ ],
+ "pairs": [
+  {
+   "pair": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "wantsFromOther": {
+    "Fuzzby": "her admiration — an audience for his heroics",
+    "Zenny": "his safety — and for the work to actually get done"
+   },
+   "misunderstands": {
+    "Fuzzby": "reads her restraint as an invitation to try harder",
+    "Zenny": "underestimates how much of his showing-off is FOR her"
+   },
+   "affection": "deep and unspoken; her almost-smile is the episode's quietest reward",
+   "irritation": "his chaos costs her time; her calm steals his thunder",
+   "dependence": "he needs her as witness; she needs his energy to make work an adventure",
+   "status": "he claims it loudly; she holds it silently — the gap IS the comedy",
+   "emotionalLeverage": "one slow blink from Zenny outweighs any crash",
+   "comicContrast": "maximum motion against near-stillness in the same frame",
+   "typicalRhythm": "his three-beat overcommitment answered by her one-beat deadpan",
+   "privateVulnerability": "he fears she finds him ridiculous; she fears he'll get hurt",
+   "underPressure": "he escalates and performs; she narrows, stills and names the danger"
+  },
+  {
+   "pair": [
+    "Keen",
+    "Keen's Mum"
+   ],
+   "wantsFromOther": {
+    "Keen": "to be seen as brave enough — worthy of his father's wristbands",
+    "Keen's Mum": "to keep him safe without shrinking him"
+   },
+   "misunderstands": {
+    "Keen": "thinks bravery must look fearless",
+    "Keen's Mum": null
+   },
+   "affection": "carried in objects and hands (the wristbands), almost never in speeches",
+   "irritation": null,
+   "dependence": null,
+   "status": "she holds quiet authority; the wristbands transfer trust, not power",
+   "emotionalLeverage": "the father's memory, present but never named aloud",
+   "comicContrast": null,
+   "typicalRhythm": "her stillness makes his smallest step forward feel enormous",
+   "privateVulnerability": "her grief lives in the hand that lingers on the wristbands",
+   "underPressure": "she goes quieter, not louder; he acts before he's ready"
+  }
+ ]
+}

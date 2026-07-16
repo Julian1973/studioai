@@ -933,6 +933,25 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         # [removed 2026-07-16 cutover: /api/pipeline — handled by the 410 gate above]
+        if self.path.startswith("/api/storyboard"):
+            # THE CREATIVE ROOM's storyboard packages (2026-07-16): read-only view of
+            # cb-output/creative/. ?episode=Ep1[&scene=N] — scene omitted lists what exists.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            sc = (q.get("scene") or [None])[0]
+            base = ROOT / "cb-output" / "creative"
+            if sc:
+                f = base / f"{ep}_scene{sc}_storyboard.json"
+                if not f.exists():
+                    self._json(404, {"error": f"no storyboard for scene {sc} yet"}); return
+                self._json(200, json.load(open(f))); return
+            vision = base / f"{ep}_episode_vision.json"
+            scenes = sorted(x.name.split("_scene")[1].split("_")[0]
+                             for x in base.glob(f"{ep}_scene*_storyboard.json"))
+            self._json(200, {"episode": ep,
+                              "vision": json.load(open(vision)) if vision.exists() else None,
+                              "scenes": scenes}); return
         if self.path == "/api/jobs":
             # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline
             # route that incidentally carried JOBS is GONE; this is the clean replacement.
@@ -1423,6 +1442,55 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"ok": True, "name": name, "character": entry})
             except Exception as e:
                 self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/creative-run":
+            # THE CREATIVE ROOM job runner (2026-07-16): vision / scene passes — OpenAI text
+            # calls only; no media provider, no spend token (cb_creative imports no adapter).
+            try:
+                d = self._body()
+                cmd = str(d.get("cmd", "")).strip()
+                scene = str(d.get("scene", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                if cmd not in ("vision", "scene", "envelope", "migrate"):
+                    self._json(400, {"error": "cmd must be vision|scene|envelope|migrate"}); return
+                if cmd == "scene" and not re.match(r"^\w+$", scene):
+                    self._json(400, {"error": "scene must be a plain token"}); return
+                args = ["cb_creative.py", cmd] + ([scene, ep] if cmd == "scene" else [ep])
+                self._json(200, {"ok": True,
+                                  "jobId": _start(_jid(f"creative_{cmd}_{scene or ep}"),
+                                                   "creative:" + cmd, scene or "-", args)})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/storyboard-approve":
+            # HUMAN GATE A: approve/annotate at episode/scene/beat/shot level — a plain
+            # creative note in the user's own words; no compiler fields exposed.
+            try:
+                d = self._body()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                sc = str(d.get("scene", "")).strip()
+                f = ROOT / "cb-output" / "creative" / f"{ep}_scene{sc}_storyboard.json"
+                if not f.exists():
+                    self._json(404, {"error": "no storyboard"}); return
+                pkg = json.load(open(f))
+                target = str(d.get("target", "scene"))     # scene | beatId | shotId
+                verdict = str(d.get("verdict", "approved"))
+                note = str(d.get("note", "")).strip()
+                stamp = {"state": verdict, "note": note, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), "by": str(d.get("by") or "Julian")}
+                if target == "scene":
+                    pkg["approvalState"] = verdict
+                    pkg["humanNote"] = note
+                else:
+                    for coll in ("beats", "shots"):
+                        for item in pkg.get(coll, []):
+                            if item.get("beatId") == target or item.get("shotId") == target:
+                                item["approvalState"] = verdict
+                                item["humanNote"] = note
+                pkg.setdefault("approvalLog", []).append({"target": target, **stamp})
+                json.dump(pkg, open(f, "w"), indent=1, ensure_ascii=False)
+                self._json(200, {"ok": True})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
             return
         if self.path == "/api/shot-run":
             # THE SHOT PIPELINE, front door (additive, 2026-07-16; extended same day for the probabilistic-

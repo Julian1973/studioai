@@ -1,0 +1,66 @@
+{
+ "version": "1.0",
+ "note": "Only explicit human approvals and rejections become exemplars. A provider failure is not automatically a creative failure — no Seedance render may create a rule here.",
+ "schema": [
+  "id",
+  "where",
+  "attempted",
+  "outcome",
+  "userWords",
+  "character",
+  "principle",
+  "cinematography",
+  "voice",
+  "reusable"
+ ],
+ "exemplars": [
+  {
+   "id": "EX-001",
+   "where": "Ep1 1.B1.S1 keyframe take 1",
+   "attempted": "opening keyframe: Fuzzby upright mid-air, Zenny planted among stems",
+   "outcome": "rejected",
+   "userWords": "re-fired for a stronger in-flight read",
+   "character": "Fuzzby",
+   "principle": "an opening frame must already carry the shot's motion — body pitched into travel, never a figure hovering at rest",
+   "cinematography": "wide, room to breathe",
+   "voice": null,
+   "reusable": true
+  },
+  {
+   "id": "EX-002",
+   "where": "Ep1 1.B1.S1 keyframe take 2",
+   "attempted": "Fuzzby horizontal, chest leading, legs trailing; Zenny poised on a petal",
+   "outcome": "approved",
+   "userWords": "gate 2 — signed it off",
+   "character": "Fuzzby & Zenny",
+   "principle": "contrast in one frame: his momentum against her stillness reads as story before a single frame moves",
+   "cinematography": "wide bee-height, geography established",
+   "voice": null,
+   "reusable": true
+  },
+  {
+   "id": "EX-003",
+   "where": "Ep1 legacy 634-word beat prompt",
+   "attempted": "one 15-second take carrying chase + crash + deadpan + settle with 21 negatives",
+   "outcome": "rejected",
+   "userWords": "the full internal production contract was being treated as the provider prompt",
+   "character": null,
+   "principle": "creativity happens upstream; the performer receives a lean brief with room to act — never the whole contract",
+   "cinematography": null,
+   "voice": null,
+   "reusable": true
+  },
+  {
+   "id": "EX-004",
+   "where": "Ep1 1.B1.S3 direction",
+   "attempted": "'the pose itself becomes the joke' shipped as direction",
+   "outcome": "rejected",
+   "userWords": "one proposed replacement expressed entirely through visible character movement, pose, expression and timing",
+   "character": "Zenny",
+   "principle": "abstract intent is planning language; the storyboard's shipped direction is observable behaviour with timing",
+   "cinematography": null,
+   "voice": null,
+   "reusable": true
+  }
+ ]
+}

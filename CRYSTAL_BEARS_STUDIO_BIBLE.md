@@ -45,8 +45,17 @@ Into Seedance at Gate 3 go only three things: **the keyframe (`@图1`), the char
 - **Owns:** breaks the locked script into **segments** (dramatic-beat integrity — never cut mid-joke); writes each segment's **SCENE** and **ACTION / PERFORMANCE** — the craft half of the Seedance prompt (the beats, the weight, the comic timing). He sets emotional + comedic intent. **Every other chair serves this brief.**
 - **Hands down:** the segment breakdown + per-segment briefs → DP and Animator.
 
-### GATE 2 — CINEMATOGRAPHY + PRODUCTION DESIGN (Keyframes) · **Sharon Calahan** (DP) + **Ralph Eggleston** (Production Designer)
-- **Why them:** Calahan lit *Toy Story*, *A Bug's Life*, *Finding Nemo* — Pixar's foundational DP; warm, painterly, naturalistic light that feels both real and magical. Eggleston designed *Inside Out* and authored its colour script — the emotional use of colour.
+### GATE 2 — CINEMATOGRAPHY + PRODUCTION DESIGN (Keyframes) · **Patrick Lin** (Camera) + **Jean-Claude Kalache** (Lighting) + **Ralph Eggleston** (Production Designer)
+*(CORRECTED 2026-07-14, Julian's ruling: this chair was originally cast as Sharon Calahan, but the actual shipped
+code has always used Patrick Lin + Jean-Claude Kalache for this pairing — in `cb_director.py`'s Gate 1 crew and
+`cb_prompts.py`'s plate builder for months, predating any deliberate cross-check against this document. Rather
+than force the code to Calahan or leave the document silently wrong, Julian confirmed the code's own long-
+standing choice as the real decision — recast here to match, closing the drift rather than picking a name in
+either direction unilaterally.)*
+- **Why them:** Lin and Kalache are Pixar's own camera/lighting DP pairing — Lin on camera (*Ratatouille*, *Up*,
+  *Brave*, *Coco*), Kalache on lighting (*Brave*, *The Good Dinosaur*, *Coco*, *Soul*) — a motivated, invisible,
+  purposeful camera paired with a deliberate, soft key light and warm bounce. Eggleston designed *Inside Out* and
+  authored its colour script — the emotional use of colour.
 - **On board for:** the *look* — composition, lighting, the crystal-world palette.
 - **Owns:** from the Director's brief + the **locked turnarounds** + the scene plate, they compose and light each **keyframe** (opening, and closing where the beat needs it). **Reference-anchored** (identity from the turnarounds, never prose), **crisp** (sharp still, wings defined, *no motion blur* — the still is the frame Seedance animates *from*), 2K, QA'd.
 - **Status:** ✅ **Working — the keyframes are good.** This chair is not where we drifted.
@@ -92,7 +101,7 @@ Into Seedance at Gate 3 go only three things: **the keyframe (`@图1`), the char
 |---|---|---|---|
 | **0 · Write** (Brumm) | a SEED exists | 8-pass room: heart → lesson → game → outline → draft → punch-up → braintrust → lock | **Locked, dialogue-final SEL screenplay**, self-scored ≥ 8/10 |
 | **1 · Direct** (Docter) | Gate 0 signed | reads the locked script + world; cuts it into **segments** (beat-integrity); writes each segment's **SCENE + ACTION/PERFORMANCE** | **Full segment breakdown + per-segment briefs**, each a complete beat, on-brand; Director's-Eye passes |
-| **2 · Keyframe** (Calahan + Eggleston) | Gate 1 signed | compose + light each keyframe (opening + closing) from brief + turnarounds + plate; reference-anchored, crisp; QA each | **Every keyframe signed off** — 2K, on-model, crisp (no motion-blur), continuity-chained; `cb_qa.check_done_frame` passes |
+| **2 · Keyframe** (Lin/Kalache + Eggleston) | Gate 1 signed | compose + light each keyframe (opening + closing) from brief + turnarounds + plate; reference-anchored, crisp; QA each | **Every keyframe signed off** — 2K, on-model, crisp (no motion-blur), continuity-chained; `cb_qa.check_done_frame` passes |
 | **3 · Animate** (Keane + Voice Dir.) | Gate 2 signed | Voice Dir. acts V3 lines → `@AudioN`; the **definitive prompt** renders each segment from keyframe + turnarounds + voice; clip QA | **Every clip signed off** — on-model through motion, weighty physics, **11Labs voice IN the render**, lip-synced; `cb_qa.check_clip` passes |
 | **4 · Retake/Edit** (Nolting) | Gate 3 signed | watch the assembled scene; call **surgical retakes** per shot; regen + splice; conform the cut | **Locked cut** — flagged shots fixed (before/after reviewed), pacing signed off |
 | **5 · Post** (Giacchino + Rydstrom) | Gate 4 signed | curate/replace weak music, balance, duck score under dialogue, master to loudness, stitch | **Finished, mastered film** |

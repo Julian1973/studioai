@@ -11,6 +11,13 @@ package's own keyframePrompt/i2vPrompt seeds. No hardcoded references or prompts
 """
 import cb_gen, cb_prompts as P, cb_qa, json, sys, os, traceback
 
+# THE MANUAL-OVERRIDE FLAG — 2026-07-15 (guardrail-fidelity audit): a single source of truth for the exact
+# string keyframe_for() emits for a CONFIRMED manual override, so the two consumer-side filters (_run_beats,
+# build_one_beat) that suppress it from the printed "(keyframe lint flag)" log can never drift out of sync
+# with what's actually emitted again — confirmed live that they HAD drifted (comparing against an older,
+# shorter string), silently mislabeling a deliberate, Julian-authorized bypass as a generic content flag.
+_MANUAL_OVERRIDE_FLAG = "⚠ CONFIRMED manual override — Gate 2's DP compiler bypassed, lint skipped"
+
 def preflight(pkg_path, scene_num, episode="Ep1"):
     """THE GATE CHECK — verify a scene is production-ready BEFORE spending a single API call.
     Confirms the scene PLATE exists and EVERY character in the scene has a clean turn4 identity lock
@@ -55,9 +62,25 @@ def _beat_as_shot(b):
     return sh
 
 def _run_beats(d, scene_num, episode, codes=None, force=False):
-    """GATE 2B (beat-native) — build ONE opening keyframe per beat from the FROZEN plate master + the locked
-    character turnarounds (char_identity_ref), via build_keyframe_prompt. A vision beat builds from its own
-    scene's master (build_vision_prompt). No START+END pairs."""
+    """GATE 2B (beat-native) — build a keyframe ONLY for the scene's own opening beat (and any vision beat,
+    which is its own POV). A continuation beat gets NO Gate-2b keyframe at all (Julian, 2026-07-09, watching
+    Gate 2b spend five real Seedream calls on Scene 1 — "why would we create b2 keyframe, surely is that not
+    the last frame of g3 s1b1"): PRODUCTION_DOCTRINE.md's own Stage 4 already says "a relay beat never gets
+    its own [keyframe]," and CLAUDE.md rule 21 already says a continuation beat's @图1 comes solely from
+    harvesting its predecessor's RENDERED CLIP once Gate 3 fires it — never a second keyframe-generation step.
+    Confirmed zero risk to Gate 3: cb_beats.run/relay_source_for are Gate 3's ONLY source for a continuation
+    beat's opening reference (grepped clean — chain_source_for/beat_frame_path have no callers in cb_beats.py),
+    so a beat built here as "chained" was NEVER actually read by Gate 3 in normal (in-order) firing; it only
+    mattered as relay_source_for's own out-of-order fallback ("no_predecessor_clip"), which still works fine
+    with no file present — cb_beats.run just skips a not-yet-relay-ready beat with a clear reason, same as
+    today. The Studio's own storyboard display already assumed this: app.html's keyframesFor (2026-07-04)
+    shows a continuation beat's RELAY ANCHOR, never its own keyframe file, "even if one still exists on disk"
+    — the backend just hadn't caught up to what the frontend already displays. Manual single-beat regen
+    (build_one_beat, cb_pipeline.py's anchor/regen-shot command) is UNCHANGED — a director deliberately
+    building one specific beat's keyframe is a different, explicit action from this function's automatic
+    whole-scene sweep. Built from the FROZEN plate master + the locked character turnarounds
+    (char_identity_ref), via build_keyframe_prompt. A vision beat builds from its own scene's master
+    (build_vision_prompt). No START+END pairs."""
     beats = [b for b in d["beats"] if str(b.get("sceneNumber")) == scene_num]
     sc = P.scene_cfg(episode, scene_num); master = sc.get("master")
     print(f"BEAT keyframes: {episode} scene {scene_num} '{sc.get('name','')}', {len(beats)} beats, master={master}", flush=True)
@@ -79,8 +102,24 @@ def _run_beats(d, scene_num, episode, codes=None, force=False):
                 print(f"  {code} SKIPPED — continuation of {ch.get('prev')}, which isn't rendered yet (build it first).", flush=True); continue
             if ch.get("status") == "needs-plate":  # an anchor needs the blank scene plate (Image 3) — build the foundation first
                 print(f"  {code} SKIPPED — anchor needs the scene foundation (the blank scene shot, Image 3). Build the foundation first.", flush=True); continue
-            print(f"  {code} {info.get('kind')} -> {out} | {ch.get('status')}"
-                  + (f" off {ch.get('prev')}" if ch.get('status') == 'chained' else "") + f" | refs={len(refs)}", flush=True)
+            if ch.get("status") == "chained":      # THE RELAY CHAIN (rule 21): a continuation beat never gets its own Gate-2b keyframe
+                print(f"  {code} SKIPPED — continuation of {ch.get('prev')}; opens from its rendered clip's harvested settle frame at Gate 3, not a Gate-2b keyframe.", flush=True); continue
+            # THE GATE-2 LINT, NOW ENFORCED HERE TOO (2026-07-14, real gate-audit finding — CLAUDE.md rule
+            # 84/85): this function is the body of `coverage()`, GATE_SEQ's own canonical Gate-2b firing
+            # function (reached via the Studio's primary /api/fire endpoint) — NOT merely an auxiliary
+            # "rebuild after a change" path. keyframe_for() computes info["lint"] on every call but this
+            # loop used to fire the real Seedream generation call unconditionally, ignoring it entirely —
+            # meaning the OFFICIAL way a scene's keyframes get built had zero content enforcement, while the
+            # per-beat paths (build_one_beat/regen_shot) already hard-blocked on the identical lint. Mirrors
+            # build_one_beat's own established block/flag pattern exactly.
+            lint = info.get("lint") or {}
+            if not lint.get("ok", True):
+                print(f"  {code} BLOCKED — keyframe lint failed: {'; '.join(lint.get('blockers') or [])}", flush=True)
+                continue
+            for f in (lint.get("flags") or []):
+                if f != _MANUAL_OVERRIDE_FLAG:
+                    print(f"  {code} (keyframe lint flag) {f}", flush=True)
+            print(f"  {code} {info.get('kind')} -> {out} | {ch.get('status')} | refs={len(refs)}", flush=True)
             cb_gen.generate_image(prompt, refs, "16:9", out)
         except Exception as e:
             print(f"  FAIL {code}: {e}", flush=True); traceback.print_exc()
@@ -122,18 +161,22 @@ def beat_settle_frame_path(b, episode="Ep1"):
     slug = b.get("slug", (code or "").replace(".", "_"))
     return f"media/{episode}_{code}_{slug}_settle.png"
 
-SETTLE_WINDOW = 2.0   # matches cb_segprompt.HANDLE_SETTLE — kept as a plain local constant (no cross-module import,
-                      # same convention as this file's other standalone doctrine constants) so cb_scene never needs
-                      # to import the prompt-emitter module just to know the settle's length.
+def _settle_window():
+    """The settle-window length in seconds — read LIVE from cb_segprompt.HANDLE_SETTLE via a function-scoped
+    import, matching this module's own established deferred-import convention (e.g. relay_source_for's local
+    "import cb_segprompt" below). 2026-07-08 audit fix: this used to be a plain hardcoded local literal
+    (SETTLE_WINDOW = 2.0) that merely "matched" HANDLE_SETTLE by comment, with no actual import tying the two
+    together — a future change to HANDLE_SETTLE would have silently stopped propagating here. Same fix applied
+    to cb_post.py's SETTLE_TRIM."""
+    import cb_segprompt
+    return float(cb_segprompt.HANDLE_SETTLE)
 
 def _clip_dur(clip):
-    import subprocess
-    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
-                        "-of", "default=nk=1:nw=1", clip], capture_output=True, text=True)
-    try:
-        return float(r.stdout.strip())
-    except Exception:
-        return 0.0
+    # FIXED 2026-07-12 (loose-ends pass): this used to hand-roll its own ffprobe subprocess call, duplicated
+    # across 6 files — cb_post._dur() is the canonical probe. Lazy import (matching this function's own prior
+    # local `import subprocess`) since cb_post is not otherwise needed at this module's own top level.
+    import cb_post
+    return cb_post._dur(clip)
 
 def _laplacian_sharpness(path):
     """Shared sharpness metric (Laplacian variance, plain numpy, no cv2) — used both to PICK the sharpest
@@ -150,12 +193,15 @@ def _laplacian_sharpness(path):
     except Exception:
         return -1.0
 
-def harvest_settle_frame(episode, code, slug, window=SETTLE_WINDOW, samples=12):
+def harvest_settle_frame(episode, code, slug, window=None, samples=12):
     """THE RELAY CHAIN's harvest (Julian, 2026-07-03, CLAUDE.md rule 21): the SHARPEST frame anywhere in a beat's
     final `window` seconds — its Handle Doctrine settle (rule 20) — not a prayer that the literal last frame is
     clean. Scored by a Laplacian-variance sharpness metric over a plain numpy array (no cv2 dependency). Returns
     the harvested frame's path, or None if the clip doesn't exist yet (a relay beat then blocks rather than
-    guessing — CLAUDE.md rule 21)."""
+    guessing — CLAUDE.md rule 21). `window` defaults to cb_segprompt.HANDLE_SETTLE (see _settle_window) when not
+    given explicitly."""
+    if window is None:
+        window = _settle_window()
     import subprocess, tempfile, glob
     from PIL import Image
     clip = f"media/{episode}_{code}_{slug}.mp4"
@@ -216,12 +262,63 @@ def remint_settle_frame(episode, code, slug, cast, harvested_path):
     overrides the lab. Runs the harvested settle frame through NB2 with the LOCKED, deliberately minimal re-mint
     prompt (cb_prompts.build_remint_prompt): turnarounds attached ONLY to hold identity while cleaning, artifacts
     and blur removed, same everything else. Returns the re-minted frame's path, or None on failure."""
-    turnarounds = [a for c in cast if (a := P.char_identity_ref(c)) and os.path.exists(a)]
+    # char_identity_ref() RAISES (KeyError/FileNotFoundError) for a character with no resolvable identity
+    # reference — calling it unguarded inside the comprehension crashed this function (and fire_next_beat's
+    # whole prepare phase) on ANY single cast member missing a reference, instead of skipping just that one
+    # character the way this same file's own preflight() and cb_beats.py's _anchor() already do (2026-07-08 audit).
+    def _safe_ref(c):
+        try:
+            return P.char_identity_ref(c)
+        except Exception as e:
+            # FIXED 2026-07-15 (guardrail-fidelity audit): this used to degrade silently — a dropped
+            # character's identity reference had NO record anywhere a human could see, unlike this file's
+            # own preflight() (a printed FAIL) for the identical condition. Still degrades gracefully (never
+            # crashes the relay the way the original bug did) — just no longer invisible.
+            print(f"  WARNING remint_settle_frame: '{c}' has no resolvable identity reference ({e}) — "
+                  f"re-mint proceeding WITHOUT this character's identity anchor", flush=True)
+            return None
+    turnarounds = [a for c in cast if (a := _safe_ref(c)) and os.path.exists(a)]
     prompt = P.build_remint_prompt()
     out = f"{episode}_{code}_{slug}_remint.png"
     outpath = f"media/{out}"
     cb_gen.generate_image(prompt, [harvested_path] + turnarounds, "16:9", out)
     return outpath if os.path.exists(outpath) else None
+
+def _find_beat_idx(beats, code, caller_name):
+    """Shared beat-code lookup (2026-07-12 audit fix — extracted from relay_source_for/chain_source_for,
+    which used to carry this same lookup + its "not found" diagnostic copy-pasted near-verbatim in both).
+    Returns the beat's index in `beats`, or None if the code isn't present at all — NOT the same thing as a
+    genuine scene opener (idx==0), which each caller still resolves for itself. A None here is always a
+    caller error (wrong scene filter, a typo'd code) and is loudly WARNED about, never silently treated as
+    "first"."""
+    idx = next((i for i, b in enumerate(beats)
+                if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
+    if idx is None:
+        print(f"WARNING {caller_name}: beat code {code!r} not found in the supplied beat list "
+              f"(scene filter or typo?) — this should never happen in correct usage", flush=True)
+    return idx
+
+def _prev_non_vision_idx(beats, idx, episode):
+    """Shared walk-back (2026-07-12 audit fix — same duplication as _find_beat_idx above): steps back from
+    `idx` past any VISION beats (a vision is its own POV, never a relay/chain source) to the true previous
+    beat. Returns its index, or -1 when there is none — each caller reads -1 as "first"."""
+    j = idx - 1
+    while j >= 0 and P.vision_for(episode, str(beats[j].get("beatCode") or beats[j].get("shotCode"))):
+        j -= 1
+    return j
+
+def _sorted_beats(beats):
+    """Natural-sort a scene's beats by their trailing beat number (2026-07-12 audit fix). relay_source_for
+    and chain_source_for both locate "the previous beat" by raw array-index adjacency (beats[idx-1]), which
+    silently resolves the WRONG predecessor if the supplied list isn't already in strict narrative order —
+    the identical "1.B10 sorts before 1.B2" lexicographic bug CLAUDE.md rule 59 (2026-07-09) already fixed at
+    4 other call sites (cb_beats.fire_next_beat, cb_director._derive_performance_throughline,
+    cb_previz._beats_for_scene, cb_replicator.walk_scene) via cb_preflight._beat_sort_key, but never applied
+    to these two functions — the single most load-bearing predecessor lookup in the whole relay/harvest
+    chain. Sorting a local copy here, once, protects every current AND future caller instead of requiring
+    each one to remember to pre-sort."""
+    import cb_preflight
+    return sorted(beats, key=lambda b: cb_preflight._beat_sort_key(b.get("beatCode") or b.get("shotCode")))
 
 def relay_source_for(beats, code, episode="Ep1"):
     """THE RELAY CHAIN's source (Julian, 2026-07-03, CLAUDE.md rule 21; RE-MINT SCOPING superseded by THE
@@ -246,15 +343,20 @@ def relay_source_for(beats, code, episode="Ep1"):
                      re-mint itself; only fire_next_beat's prepare step does that, gated on Julian's approval).
                      Either way, skips keyframe generation for THIS beat entirely."""
     import cb_segprompt
-    idx = next((i for i, b in enumerate(beats)
-                if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
-    if idx is None or idx == 0:
+    # NATURAL-SORT GUARD (2026-07-12 audit fix) — see _sorted_beats' own docstring for why.
+    beats = _sorted_beats(beats)
+    idx = _find_beat_idx(beats, code, "relay_source_for")
+    if idx is None:
+        # NOT the same thing as a genuine scene opener (idx==0) — see _find_beat_idx. No current caller
+        # string-matches on "first" specifically (each checks its own positive cases — "relay"/
+        # "no_predecessor_clip" — and treats everything else as the same fallback), so this degrades exactly
+        # like "first" did, just under a distinct, loggable name (2026-07-08 audit fix).
+        return None, "not_found", None
+    if idx == 0:
         return None, "first", None
     if P.vision_for(episode, str(code)):
         return None, "first", None
-    j = idx - 1
-    while j >= 0 and P.vision_for(episode, str(beats[j].get("beatCode") or beats[j].get("shotCode"))):
-        j -= 1
+    j = _prev_non_vision_idx(beats, idx, episode)
     if j < 0:
         return None, "first", None
     prev = beats[j]
@@ -262,20 +364,42 @@ def relay_source_for(beats, code, episode="Ep1"):
     prev_slug = prev.get("slug", (prev_code or "").replace(".", "_"))
     harvested_path = f"media/{episode}_{prev_code}_{prev_slug}_settle.png"
     remint_path = f"media/{episode}_{prev_code}_{prev_slug}_remint.png"
+    clip_path = f"media/{episode}_{prev_code}_{prev_slug}.mp4"
+    # FIXED 2026-07-12 (full-codebase audit continued): remint_path used to be trusted by bare file
+    # existence alone in BOTH branches below, with no staleness check against the predecessor's current
+    # clip — unlike harvested_path's own freshness check a few lines down (2026-07-08 audit fix, identical
+    # reasoning). A beat's clip can be re-rendered directly via cb_pipeline.regen(kind="clip") without ever
+    # going through cb_beats.record_approval(approved=False) — the ONLY place that archives away a stale
+    # _remint.png — so a superseded take could leave an old re-mint anchoring the NEXT beat on outdated
+    # state/identity. Mirrors the harvested_path check below exactly.
+    remint_stale = (os.path.exists(remint_path) and os.path.exists(clip_path)
+                    and os.path.getmtime(remint_path) < os.path.getmtime(clip_path))
     junction = cb_segprompt._junction_type(beats[idx])
     if junction == cb_segprompt.JUNCTION_SEAMLESS:
-        if os.path.exists(remint_path):
+        if os.path.exists(remint_path) and not remint_stale:
             return remint_path, "relay", prev_code
         harvested = harvest_settle_frame(episode, prev_code, prev_slug)
         if not harvested:
             return None, "no_predecessor_clip", prev_code
         return harvested, "relay", prev_code
     # intentional_next_shot (the default): quality-gated, per THE RE-MINT CORRECTION.
-    harvested = harvested_path if os.path.exists(harvested_path) else harvest_settle_frame(episode, prev_code, prev_slug)
+    # FRESHNESS CHECK (2026-07-08 audit fix): the seamless branch above ALWAYS re-harvests fresh (unless a
+    # remint already exists); this branch used to trust a pre-existing _settle.png on disk unconditionally,
+    # meaning a retake that re-rendered the same beat code (a new .mp4) would silently leave the OLD, now-stale
+    # settle frame in place as @图1's source — harvest_settle_frame always overwrites its output with a freshly
+    # sampled/scored frame from the CURRENT clip, so skipping that call is what let staleness slip through. Only
+    # reuse the cached harvest if it's not older than the clip it was supposedly harvested from; otherwise fall
+    # through to a fresh harvest exactly like the seamless branch already does.
+    stale = (os.path.exists(harvested_path) and os.path.exists(clip_path)
+             and os.path.getmtime(harvested_path) < os.path.getmtime(clip_path))
+    if os.path.exists(harvested_path) and not stale:
+        harvested = harvested_path
+    else:
+        harvested = harvest_settle_frame(episode, prev_code, prev_slug)
     if not harvested:
         return None, "no_predecessor_clip", prev_code
     needs_remint, _reason = harvest_needs_remint(harvested)
-    if needs_remint and os.path.exists(remint_path):
+    if needs_remint and os.path.exists(remint_path) and not remint_stale:
         return remint_path, "relay", prev_code
     return harvested, "relay", prev_code
 
@@ -291,15 +415,17 @@ def chain_source_for(beats, code, episode="Ep1"):
                    exists, falling back to its OPENING frame when it doesn't (not yet rendered through Gate 3) —
                    so this never regresses a beat that hasn't reached Gate 3 yet. The path is returned whether or
                    not that frame is rendered yet; the caller checks existence for the file + label."""
-    idx = next((i for i, b in enumerate(beats)
-                if str(b.get("beatCode") or b.get("shotCode")) == str(code)), None)
+    # NATURAL-SORT GUARD (2026-07-12 audit fix) — see _sorted_beats' own docstring for why.
+    beats = _sorted_beats(beats)
+    idx = _find_beat_idx(beats, code, "chain_source_for")
     if idx is None:
-        return None, "first", None
+        # Same distinction as relay_source_for's own fix (2026-07-08 audit): code not found at all is a
+        # likely caller bug, never the same thing as a legitimate idx==0 scene opener — see _find_beat_idx.
+        # idx==0 still naturally resolves to "first" below via j<0, unchanged.
+        return None, "not_found", None
     if P.vision_for(episode, str(code)):
         return None, "vision", None
-    j = idx - 1                                  # walk back to the previous NON-VISION beat (a vision is its own POV)
-    while j >= 0 and P.vision_for(episode, str(beats[j].get("beatCode") or beats[j].get("shotCode"))):
-        j -= 1
+    j = _prev_non_vision_idx(beats, idx, episode)   # walk back to the previous NON-VISION beat (a vision is its own POV)
     if j < 0:
         return None, "first", None
     prev = beats[j]
@@ -325,7 +451,14 @@ def keyframe_for(all_beats, code, episode="Ep1", note=""):
     if vision:
         of_sc = P.scene_cfg(episode, vision["ofScene"])
         prompt, refs = P.build_vision_prompt(sh, vision, of_sc, note=note, episode=episode)
-        return prompt, refs, {"kind": "vision keyframe", "chain": {"status": "vision", "prev": None}}
+        # FIXED 2026-07-15 (guardrail-fidelity audit): this branch used to return before computing a "lint"
+        # key at all — every caller reads info.get("lint") or {} then lint.get("ok", True), so a MISSING key
+        # silently defaulted to "ok", identical to a check that ran and passed. A vision beat's own keyframe
+        # prompt now gets a real, computed verdict like every other branch (build_vision_prompt's own single-
+        # paragraph shape means the Character-Vocabulary/unattributed-character hard blocks structurally can't
+        # match here — matches STYLE-text-only anti-slop FLAGs, same as the rest of this function).
+        lint = cb_qa.check_keyframe_lint(prompt, chars=P.opening_cast(sh))
+        return prompt, refs, {"kind": "vision keyframe", "chain": {"status": "vision", "prev": None}, "lint": lint}
     scene_beats = [x for x in all_beats if str(x.get("sceneNumber")) == scene]
     cref, cstatus, pcode = chain_source_for(scene_beats, code, episode)
     is_cont = cstatus == "continuation"
@@ -345,11 +478,35 @@ def keyframe_for(all_beats, code, episode="Ep1", note=""):
     # reads info["lint"] rather than each re-deriving it. A manual override (keyframePromptOverride) is Julian's
     # own hand-typed text, not compiled from beat data — build_keyframe_prompt already returns it verbatim
     # before any of the logic above runs, so skip the lint entirely rather than judge hand-authored text.
-    if str(sh.get("keyframePromptOverride") or "").strip():
-        lint = {"ok": True, "blockers": [], "flags": ["manual override — lint skipped"]}
+    # GATED (2026-07-14, matching build_keyframe_prompt's own confirmation requirement, rule 82/83): an
+    # override with no keyframePromptOverrideConfirmed never actually ships — build_keyframe_prompt falls
+    # through to the real compiled prompt in that case, so the lint must run against THAT prompt, not skip it.
+    if str(sh.get("keyframePromptOverride") or "").strip() and sh.get("keyframePromptOverrideConfirmed"):
+        lint = {"ok": True, "blockers": [], "flags": [_MANUAL_OVERRIDE_FLAG]}
     else:
-        lint = cb_qa.check_keyframe_lint(prompt, chars=P.opening_cast(sh))
+        # FIXED 2026-07-15 (guardrail-fidelity audit, THE FIDELITY-ALLOCATION LAW): the unattributed-character
+        # fallback block inside check_keyframe_lint used to hard-BLOCK any present character it couldn't trace
+        # to explicit action text — with zero awareness that fidelityAllocation.economized is the beat's OWN
+        # declared statement a given character is deliberately generic this beat. 80 of 99 real blocker lines
+        # across 22+ real beats named an already-economized character. Mirrors cb_craft._economized_set's own
+        # established exemption pattern rather than inventing a new one.
+        import cb_craft
+        economized = cb_craft._economized_set(b, P.opening_cast(sh))
+        lint = cb_qa.check_keyframe_lint(prompt, chars=P.opening_cast(sh), economized=economized)
     return prompt, refs, {"kind": "opening keyframe", "chain": {"status": sub, "prev": pcode}, "lint": lint}
+
+def keyframe_preview_payload(all_beats, code, episode="Ep1"):
+    """The JSON-serializable preview dict for keyframe_for()'s result — kind/prompt/chain/refs/refCount/lint.
+    FIXED 2026-07-12 (loose-ends pass): kf_preview.py and beat_preview.py each independently built this exact
+    shape from keyframe_for()'s own (prompt, refs, info) return (both call sites already noted the drift risk
+    inline — beat_preview.py once had the lint field and kf_preview.py didn't, a real WYSIWYG gap since fixed
+    by hand in both places). One shared builder now, so the two preview scripts can never drift apart on this
+    shape again. Returns None for `prompt` (and an "error" key) when the beat isn't found."""
+    prompt, refs, info = keyframe_for(all_beats, code, episode)
+    if prompt is None and info.get("error"):
+        return {"error": info["error"]}
+    return {"kind": info.get("kind"), "prompt": prompt, "chain": info.get("chain"),
+            "refs": [os.path.basename(str(r)) for r in refs], "refCount": len(refs), "lint": info.get("lint")}
 
 def build_one_beat(pkg_path, scene_num, code, episode="Ep1", chain_from=None, force=True):
     """CASCADE UNIT (Lock & Chain) — build ONE beat's opening keyframe. chain_from = the PREVIOUS beat's APPROVED
@@ -357,7 +514,12 @@ def build_one_beat(pkg_path, scene_num, code, episode="Ep1", chain_from=None, fo
     locked, only the action + framing change). Beat 1 passes chain_from=None (builds from the approved plate master).
     Returns the keyframe path. This is the per-beat unit the approve-to-unlock UI auto-fires (Ticket 4)."""
     d = json.load(open(pkg_path)); scene_num = str(scene_num)
-    b = next((x for x in d.get("beats", []) if str(x.get("sceneNumber")) == scene_num and x.get("beatCode") == code), None)
+    # SAME lookup pattern as keyframe_for/relay_source_for/chain_source_for in this file (2026-07-08 audit fix)
+    # — this used to match on beatCode ONLY, the one lookup in this module that didn't fall back to shotCode.
+    # Harmless today (beatCode is always populated in current beat-native data) but a real inconsistency if this
+    # function is ever called with a shotCode-only reference.
+    b = next((x for x in d.get("beats", []) if str(x.get("sceneNumber")) == scene_num
+              and str(x.get("beatCode") or x.get("shotCode")) == str(code)), None)
     if not b:
         print(f"build_one_beat: beat {code} not found in scene {scene_num}", flush=True); return None
     slug = b.get("slug", (code or "").replace(".", "_")); out = f"{episode}_{code}_{slug}.png"; outpath = f"media/{out}"
@@ -378,7 +540,7 @@ def build_one_beat(pkg_path, scene_num, code, episode="Ep1", chain_from=None, fo
         print(f"  {code} BLOCKED — keyframe lint failed: {'; '.join(lint.get('blockers') or [])}", flush=True)
         return None
     for f in (lint.get("flags") or []):
-        if f != "manual override — lint skipped":
+        if f != _MANUAL_OVERRIDE_FLAG:
             print(f"  {code} (keyframe lint flag) {f}", flush=True)
     print(f"  {code} {info.get('kind')} -> {out} | {ch.get('status')}"
           + (f" off {ch.get('prev')}" if ch.get('status') == 'chained' else "") + f" | refs={len(refs)}", flush=True)
@@ -394,13 +556,29 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, force=False):
     shots = [s for s in d["shots"] if str(s.get("sceneNumber")) == scene_num]
     sc = P.scene_cfg(episode, scene_num)
     master = sc.get("master")  # may be None (not built yet)
+    # FIXED 2026-07-15 (guardrail-fidelity audit): this legacy "shots"-shape path (the older, non-beat-native
+    # scene shape this generic multi-project Studio still supports — reachable whenever cb_pipeline._resolve_pkg
+    # falls back to a shot_package.json) called cb_gen.generate_image directly, with ZERO cb_qa reference
+    # anywhere — the anti-slop/Character-Vocabulary-Law/unattributed-character protection keyframe_for() (the
+    # beat-native path, right above) already has. Mirrors that exact block/flag pattern for every keyframe/end-
+    # frame generate_image call in this branch, via one shared local helper so it can't drift out of sync again.
+    def _fire(code, kind, prompt, refs, out, chars):
+        lint = cb_qa.check_keyframe_lint(prompt, chars=chars)
+        if not lint.get("ok", True):
+            print(f"  {code} {kind} BLOCKED — keyframe lint failed: {'; '.join(lint.get('blockers') or [])}", flush=True)
+            return False
+        for f in (lint.get("flags") or []):
+            if f != _MANUAL_OVERRIDE_FLAG:
+                print(f"  {code} {kind} (keyframe lint flag) {f}", flush=True)
+        cb_gen.generate_image(prompt, refs, "16:9", out)
+        return True
     print(f"Structured build (FROZEN master + CHAINING): {episode} scene {scene_num} '{sc['name']}', "
           f"{len(shots)} shots, master={master}", flush=True)
-    prev_end = None  # the previous shot's END frame — the handshake into the next shot's start
     for i, s in enumerate(shots):
         code = s["shotCode"]; slug = s.get("slug", code.replace(".", "_"))
         out = f"{episode}_{code}_{slug}.png"; outpath = f"media/{out}"
         endout = f"{episode}_{code}_{slug}_end.png"
+        chars = P.opening_cast(s)
         if codes and code not in codes:    # shot-range filter (e.g. build only 1.1..1.6)
             continue
         try:
@@ -409,10 +587,10 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, force=False):
                 of_sc = P.scene_cfg(episode, vision["ofScene"])
                 prompt, refs = P.build_vision_prompt(s, vision, of_sc, episode=episode)
                 print(f"  {code} = VISION of scene {vision['ofScene']} (own master; breaks the chain) | refs={len(refs)}", flush=True)
-                cb_gen.generate_image(prompt, refs, "16:9", out)
+                _fire(code, "start", prompt, refs, out, chars)
                 eprompt, erefs = P.build_end_prompt(s, sc, master_path=master, start_path=outpath, episode=episode)
-                cb_gen.generate_image(eprompt, erefs, "16:9", endout)
-                continue  # prev_end unchanged — the next real shot chains from the last real shot
+                _fire(code, "end", eprompt, erefs, endout, chars)
+                continue  # a vision breaks the chain — the next real shot still derives from the plate/turnarounds only
             if master and outpath == master:
                 print(f"  {code} start = FROZEN MASTER (kept)", flush=True)
             elif os.path.exists(outpath) and not force:         # RESUME: already built (e.g. after a crash) — keep it (force = rebuild)
@@ -421,22 +599,21 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, force=False):
             elif master is None and i == 0:
                 prompt, refs = P.build_keyframe_prompt(s, sc, master_path=None, episode=episode)  # establishing master
                 print(f"  {code} start = NEW MASTER (establishing) | refs={len(refs)}", flush=True)
-                cb_gen.generate_image(prompt, refs, "16:9", out)
-                master = outpath
+                if _fire(code, "start", prompt, refs, out, chars):
+                    master = outpath
             else:  # derive from the frozen master (the plate) + the locked character turnarounds — NO cross-shot
                    # chaining. Passing the previous shot's RENDER forward compounded drift down the scene (1.1 clean
                    # -> each later shot inherited the last one's errors). Every shot is built independently from the
                    # SAME plate + SAME turnarounds = the canonical template, identical for every shot.
                 prompt, refs = P.build_keyframe_prompt(s, sc, master_path=master, episode=episode)
                 print(f"  {code} start -> {out} (plate + turnarounds, no chain) | refs={len(refs)}", flush=True)
-                cb_gen.generate_image(prompt, refs, "16:9", out)
+                _fire(code, "start", prompt, refs, out, chars)
             if os.path.exists(f"media/{endout}") and not force:  # RESUME: end already built — keep it (force = rebuild)
                 print(f"  {code} end = kept (already built — resume)", flush=True)
             else:
                 eprompt, erefs = P.build_end_prompt(s, sc, master_path=master, start_path=outpath, episode=episode)
-                cb_gen.generate_image(eprompt, erefs, "16:9", endout)  # end = same structure + start as motion anchor
                 print(f"  {code} end -> {endout} | refs={len(erefs)} (START frame + scene plate + turnaround(s))", flush=True)
-            prev_end = f"media/{endout}"  # this shot's end (readable path) becomes the next shot's handshake
+                _fire(code, "end", eprompt, erefs, endout, chars)  # end = same structure + start as motion anchor
         except Exception as e:
             print(f"  FAIL {code}: {e}", flush=True); traceback.print_exc()
     print("=== STRUCTURED SCENE BUILD DONE ===", flush=True)
@@ -454,10 +631,32 @@ def _derive_master(shots, s, sc, episode):
     fpath = f"media/{episode}_{first['shotCode']}_{fslug}.png"
     return fpath if os.path.exists(fpath) else None
 
+def _invalidate_keyframe_qa(episode, code, slug):
+    """FIXED (2026-07-14, live — Julian regenerating 1.B1, "there is no real status on the image"): regen_shot
+    writes a fresh keyframe .png but never touched the .keyframe_qa.json sidecar sitting next to it — so a
+    real regen (fired specifically to fix a flagged problem) left the OLD verdict, describing the OLD image,
+    sitting there looking current. Confirmed live: 1.B1's own real regen finished with a fresh 22:15 .png next
+    to a 21:10 sidecar still reading its pre-regen ACTION_STATE_MISMATCH verdict. Deliberately does NOT
+    re-run check_done_frame here (a real, paid vision-API call) — that's Julian's own cost/cadence call, not
+    one to make silently on every regen. This only removes the now-describing-nothing stale verdict so the
+    Studio correctly shows "not yet reviewed" rather than a wrong, misleadingly-confident one."""
+    try:
+        p = f"media/{episode}_{code}_{slug}.keyframe_qa.json"
+        if os.path.exists(p):
+            os.remove(p)
+    except Exception:
+        pass
+
 def regen_shot(pkg_path, scene_num, shot_code, episode="Ep1", note="", target="both"):
     """Regenerate ONE shot's keyframe(s), feeding the human correction note into the prompt.
     target = 'both' (start then end-from-start) | 'start' (leave end) | 'end' (from existing start, leave start)."""
     d = json.load(open(pkg_path))
+    # FIXED 2026-07-12 (full-codebase audit continued): scene_num was never normalized to str here, unlike
+    # preflight()/run()/build_one_beat() in this same file, which all cast it to str as their first step —
+    # a caller passing an int (e.g. regen_shot(pkg, 1, "1.B2", ...)) silently matched nothing (str(x) == int
+    # is always False), then printed "not found" below with no hint the real cause was a type mismatch and
+    # not a genuinely missing shot.
+    scene_num = str(scene_num)
     shots = [s for s in (d.get("beats") or d.get("shots") or []) if str(s.get("sceneNumber")) == scene_num]
     for _s in shots:
         _s.setdefault("shotCode", _s.get("beatCode"))
@@ -483,6 +682,7 @@ def regen_shot(pkg_path, scene_num, shot_code, episode="Ep1", note="", target="b
         if not lint.get("ok", True):
             print(f"  REGEN BLOCKED — {code} keyframe lint failed: {'; '.join(lint.get('blockers') or [])}", flush=True); return
         cb_gen.generate_image(prompt, refs, "16:9", out)
+        _invalidate_keyframe_qa(episode, code, slug)
         print(f"  start -> {out} ({info.get('kind')}, {st}, refs={len(refs)})", flush=True)
         print("REGEN done", flush=True); return
     s = _beat_as_shot(raw) if raw.get("beatCode") else raw
@@ -493,17 +693,20 @@ def regen_shot(pkg_path, scene_num, shot_code, episode="Ep1", note="", target="b
             of_sc = P.scene_cfg(episode, vision["ofScene"])
             prompt, refs = P.build_vision_prompt(s, vision, of_sc, note=note, episode=episode)
             cb_gen.generate_image(prompt, refs, "16:9", out)
+            _invalidate_keyframe_qa(episode, code, slug)
             print(f"  start -> {out} (VISION of scene {vision['ofScene']}, refs={len(refs)})", flush=True)
         else:
             mp = _derive_master(shots, s, sc, episode)
             prompt, refs = P.build_keyframe_prompt(s, sc, master_path=mp, note=note, episode=episode)
             cb_gen.generate_image(prompt, refs, "16:9", out)
+            _invalidate_keyframe_qa(episode, code, slug)
             print(f"  start -> {out} ({'derive' if mp else 'establishing'}, refs={len(refs)})", flush=True)
     if target in ("both", "end"):
         if not os.path.exists(outpath):
             print(f"  end SKIPPED: no start frame at {outpath} — regenerate the start first", flush=True); return
         eprompt, erefs = P.build_end_prompt(s, sc, start_path=outpath, episode=episode, note=note)
         cb_gen.generate_image(eprompt, erefs, "16:9", endout)
+        _invalidate_keyframe_qa(episode, code, slug)
         print(f"  end -> {endout} (from start)", flush=True)
     print("REGEN done", flush=True)
 
@@ -534,7 +737,9 @@ def build_plate(pkg_path, scene_num, episode="Ep1", note=""):
 def build_charsheet(pkg_path, scene_num, episode="Ep1", note=""):
     """A2 — build the per-scene CHARACTER-SHEET anchor (clean on-model group line-up). Returns its path."""
     d = json.load(open(pkg_path))
-    shots = [s for s in d["shots"] if str(s.get("sceneNumber")) == str(scene_num)]
+    # FIXED 2026-07-11 (full-codebase audit): indexed d["shots"] directly instead of the beats-or-shots
+    # fallback every other function in this file uses — a raw KeyError on any current (beat-native) package.
+    shots = [s for s in (d.get("beats") or d.get("shots") or []) if str(s.get("sceneNumber")) == str(scene_num)]
     sc = P.scene_cfg(episode, str(scene_num))
     out = f"{episode}_S{scene_num}_charsheet.png"
     prompt, refs = P.build_charsheet_prompt(shots, sc, episode, note=note)
@@ -550,6 +755,16 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1 and sys.argv[1] == "charsheet":
         build_charsheet(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "Ep1")
     elif len(sys.argv) > 1 and sys.argv[1] == "plate":
-        build_plate(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "Ep1")
+        # FIXED 2026-07-15 (guardrail-fidelity audit): this was the one plate-creation call site with no
+        # cb_qa.check_plate wrapper at all — cb_pipeline.anchors()/regen_anchor() (the other two, and only
+        # OTHER, call sites) both build_plate() then immediately check_plate(); this direct CLI dispatch built
+        # and returned without ever computing a verdict, and this file's own preflight() (found by a missing
+        # plate) prints THIS exact bypass command as its own recommended remediation — actively steering an
+        # operator toward the unguarded path. Mirrors cb_pipeline's own pattern exactly.
+        _episode = sys.argv[4] if len(sys.argv) > 4 else "Ep1"
+        _plate = build_plate(sys.argv[2], sys.argv[3], _episode)
+        _sc = P.scene_cfg(_episode, str(sys.argv[3]))
+        _v = cb_qa.check_plate(_plate, _sc["location"], _sc.get("master"))
+        print(f"  PLATE QA: {'PASS' if _v['ok'] else 'FLAG: ' + ((_v.get('verdict') or '')[:200])}", flush=True)
     else:
         run(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "Ep1")

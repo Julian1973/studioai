@@ -52,7 +52,8 @@ def full_sync(dry_run=False):
               "Nothing was copied; the local-only risk still stands until the drive is connected.",
               flush=True)
         return False
-    os.makedirs(BACKUP_ROOT, exist_ok=True)
+    if not dry_run:
+        os.makedirs(BACKUP_ROOT, exist_ok=True)
     ok = True
     for src_rel, dst_name in SOURCES:
         src = os.path.join(ROOT, src_rel)

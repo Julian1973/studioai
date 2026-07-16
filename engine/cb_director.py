@@ -2,24 +2,51 @@
 """cb_director.py — THE DIRECTOR (the real Gate 1).
 
 World-class SCRIPT BREAKDOWN / script analysis: reads a screenplay and breaks it into a
-production-ready SHOT PACKAGE + locations + continuity + episode arc — in the mode of
-Pete Docter (find the feeling and the why first) and John Lasseter (story, character, heart
-before everything). It does NOT invent the craft: it RUNS ON the crystal-bears-director skill
-and the locked canon (read at runtime as its mind), so every breakdown is bible-true.
+production-ready SHOT PACKAGE + locations + continuity + episode arc, directed as Pete Docter
+(find the feeling and the why first) — the ONE voice who makes the call, per
+CRYSTAL_BEARS_STUDIO_BIBLE.md's own Law 1 ("one mind per chair, never a committee"). John
+Lasseter (story/character), Patrick Lin (camera) and Jean-Claude Kalache (light) are his named
+department heads, executing HIS vision in their craft, never competing voices of their own.
+The craft doctrine (the sixteen staging laws, the worked examples, the crew framing) is
+hand-authored directly in `_mind()` below and kept current through this project's own iteration
+— NOT read from `skills/crystal-bears-director/SKILL.md` at runtime (RETIRED 2026-07-14: that
+file was found to be frozen at an early snapshot of the project — it still specified 10-12s
+beats and the retired FRAME CHAIN mechanism, directly contradicting the live Handle Doctrine
+(15s, rule 20) and the relay/junctionType system (rules 21/31) that superseded it. `_mind()`'s
+own text already independently covered everything of value the skill file supplied — this
+removes a source of silent, load-bearing contradiction rather than trying to repair a document
+nobody edits anymore. The locked canon IS still read at runtime, from the real config store.
 
 The director's own process, staged for reliability (BEAT-NATIVE — director skill v5.0):
   A. BEAT MAP   — script + bible -> scenes (plate look, cast, Pillar, time/weather/light,
                   the emotional core) + episode arc + continuity scaffold.
-  B. BEATS      — per scene, design the 2-4 BEATS the story needs. A BEAT = ONE 10-12s Seedance
-                  take that directs its OWN internal cuts (NOT a string of tiny shots). Each beat
-                  = one opening keyframe + an internal cut-list + the take's i2v prompt.
+  B. BEATS      — per scene, design the 2-4 BEATS the story needs. A BEAT = ONE 15s Seedance take
+                  (13s action + a 2s directed settle, the Handle Doctrine, rule 20 — corrected
+                  2026-07-14, this line's own "10-12s" was the identical staleness rule 307
+                  already fixed in `_mind()`) that directs its OWN internal cuts (NOT a string of
+                  tiny shots). Each beat = one opening keyframe/relay anchor + an internal cut-list.
   C. ASSEMBLE   — write the BEAT PACKAGE (beats[]) + locations.json + continuity.json + episode_arc.json,
                   exactly the schema the pipeline consumes. Gate 1 then displays it for sign-off.
+
+THE GATE-0 PROVENANCE HARD BLOCK (2026-07-14, Julian: "hard block if the input script has no
+record of having passed through Gate 0's own Writer process — no belowBar field, no lock"):
+`direct()` refuses outright, before spending a single token, if the script it's about to break
+down has no matching `{stem}.score.json` sidecar next to it (cb_writer.write()'s own Gate-0
+deliverable, always written alongside its script, always carrying a `belowBar` key) — a script
+pasted/uploaded straight into the Studio (`cb-studio/serve.py`'s own `/api/episode` handler
+explicitly deletes any such sidecar on upload, precisely because "an uploaded script carries no
+Writers'-Room scorecard") never gets a free pass into Gate 1. A below-bar SCORE does not block —
+cb_writer's own "written anyway so Gate 1 isn't blocked" design is unchanged; this is a
+PROVENANCE gate, not a quality one. Ep1's own founding script predates the automated Writers'
+Room and was hand-locked and hand-reviewed long before this mechanism existed, then carried
+through a full, extensively produced Gate 1-5 pipeline — a real, verifiable provenance far
+stronger than an automated scorecard; it is grandfathered with a hand-authored sidecar recording
+that true history (`Ep1_The_Adventure_Begins.score.json`), not a fabricated LLM score.
 
     python3 cb_director.py <script.txt> <Ep> "<Title>"     # break a script down
 """
 import os, sys, json, re, pathlib
-import cb_gen, cb_llm, cb_director_schemas as S
+import cb_llm, cb_director_schemas as S  # cb_gen removed 2026-07-11 (full-codebase audit, dead-code): unused
 import cb_script                              # deterministic screenplay parser — the verbatim ground truth (Gate 1)
 import paths as P                             # T30 Phase 2/3 — the single source of path constants
 
@@ -27,13 +54,13 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 OUT  = pathlib.Path(P.OUTPUT)
 
-# craft + bible — the single source of truth (read, never paraphrased from memory)
-SKILL = pathlib.Path.home() / ".claude/skills/crystal-bears-director/SKILL.md"
+# bible — the single source of truth (read, never paraphrased from memory). RETIRED 2026-07-14: this module
+# used to also read skills/crystal-bears-director/SKILL.md and skills/crystal-bears-cinematographer/SKILL.md
+# at runtime and concatenate them into the live system prompt — removed (see the module docstring above) once
+# both were confirmed frozen at an early project snapshot, actively contradicting the Handle Doctrine and the
+# relay/junctionType system that _mind() below already correctly, independently states.
 CANON = pathlib.Path(P.CANON)
 CHARS = pathlib.Path(P.CHARS)
-CINE  = next((p for p in [ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
-                          pathlib.Path.home() / ".claude/skills/crystal-bears-cinematographer/SKILL.md"] if p.exists()),
-             ROOT / "skills/crystal-bears-cinematographer/SKILL.md")  # Patrick Lin + Jean-Claude Kalache
 
 # THE DIRECTOR RUNS ON OPENAI (cb_llm: gpt-5.5, fallback gpt-5.4) with strict Structured Outputs + Pydantic.
 # Gemini is used ONLY for keyframe image generation (cb_gen / Nano Banana) — never for the breakdown itself.
@@ -50,11 +77,10 @@ except Exception:
 
 # ── craft assembly (the Director's mind) ─────────────────────────────────────
 def _roster(chars):
-    # a stub character (e.g. Bo, T6 ruling) can have sizeRank explicitly null, not merely absent — .get(key, default)
-    # only falls back to default on a MISSING key, so a present-but-None value reaches sorted() as None and crashes
-    # comparing against another character's int rank. `or 99` catches both missing AND explicitly-null the same way.
-    order = sorted([k for k, v in chars.items() if isinstance(v, dict) and k not in ("sizeClasses",)],
-                   key=lambda k: chars[k].get("sizeRank") or 99)
+    # FIXED 2026-07-11 (full-codebase audit, duplication finding): the sort itself now lives once in
+    # paths.char_size_order (see its own docstring for the null-safe-sizeRank rationale) — cb_writer.py's own
+    # _roster shared this exact block byte-for-byte before this fix.
+    order = P.char_size_order(chars)
     lines = []
     for k in order:
         c = chars[k]
@@ -68,15 +94,38 @@ def _roster(chars):
                      + lex_note)
     return "\n".join(lines)
 
+def _mode_archetype_menu():
+    """THE DIRECTOR'S OWN MENU (2026-07-14, restoring the named-auteur-per-chair doctrine —
+    CRYSTAL_BEARS_STUDIO_BIBLE.md Law 1, "one mind per chair, never a committee"): director_mode and
+    physical_action_archetype used to be inferred mechanically at Gate 3 (cb_seedance.infer_director_mode /
+    infer_physical_archetype), AFTER the beat's prose was already written — a classifier guessing at a choice
+    nobody actually made. Both resolvers already check for an authored value FIRST, before falling back to
+    inference (unchanged, still the safety net for a beat that leaves either null) — so handing the Director
+    the real menu here, at the point the beat is invented, turns it into his actual creative decision instead
+    of a guess made later from his own words. Reads the SAME two dicts cb_seedance.py's resolvers read — a
+    single source of truth, never a second copy that could drift out of sync — via a lazy import (matching
+    this module's own convention of never importing cb_seedance at module load time)."""
+    import cb_seedance as SD
+    modes = "; ".join(f'{k} ({v["feeling"]})' for k, v in SD.DIRECTOR_MODE_GUIDANCE.items())
+    archs = "; ".join(f'{k} — {v["visual_payoff_rule"]}' for k, v in SD.PHYSICAL_ARCHETYPES.items())
+    return modes, archs
+
 def _mind():
-    skill = SKILL.read_text() if SKILL.exists() else ""
-    cine = CINE.read_text() if CINE.exists() else ""
-    canon = CANON.read_text() if CANON.exists() else ""
-    chars = json.load(open(CHARS))
+    # FIXED 2026-07-12 (loose-ends pass): canon+chars reading was hand-duplicated here, in cb_writer.py's
+    # own _gen(), and in cb_director_eye.py's _show_bible() — now paths.load_show_bible() (P is already the
+    # `paths` module import at this module's own top level).
+    canon, chars = P.load_show_bible()
     system = (
-        "You are the Crystal Bears DIRECTOR — an Oscar-calibre animation director doing world-class SCRIPT BREAKDOWN.\n\n"
-        "════════ THE FOURTEEN STAGING LAWS (Julian, dictated 2 July 2026, law 13 added 2026-07-05, law 14 added "
-        "2026-07-06 — SCENE1_DIRECTORS_CUT.md; HARD RULES, cannot be softened) ════════\n"
+        "YOU ARE PETE DOCTER, directing Crystal Bears — an Oscar-calibre animation director doing world-class "
+        "SCRIPT BREAKDOWN. This is YOUR call, alone. You lead with the FEELING; the emotion is the architecture. "
+        "Start from the human truth, not the plot: name what each scene is REALLY about in one honest sentence "
+        "and let it govern every shot (plot serves feeling, never the reverse). Track the hidden inner NEED "
+        "beneath the outward want — the arc is emotional. Hold the BITTERSWEET — joy and ache together; never "
+        "resolve the ache away. Carry the most important feelings WORDLESSLY (the held beat, the face, the "
+        "look, the small gesture). Specific, observed, true — never generic.\n\n"
+        "════════ THE SIXTEEN STAGING LAWS (Julian, dictated 2 July 2026, law 13 added 2026-07-05, law 14 added "
+        "2026-07-06 — SCENE1_DIRECTORS_CUT.md; laws 15-16 added 2026-07-13 — the Motion Contract + the Shot "
+        "Budget; HARD RULES, cannot be softened) ════════\n"
         "These govern every COMEDY beat you stage (Fuzzby/Zenny physical-comedy beats above all; apply the spirit to any "
         "beat with a comic engine):\n"
         "1. THE CAMERA IS A CHARACTER. It chases, dives, climbs and orbits with the comic lead like a drone — high, low, "
@@ -126,7 +175,28 @@ def _mind():
         "mixes one character's registers into another's cut: if Fuzzby is chaotic in cut 1, cut 2 does not "
         "describe him or his camera as steady/gentle/calm just because the shot itself is calmer in pace — find "
         "the word from HIS list that means what you mean (banks, snaps, locks-on-the-crash), never reach for a "
-        "word from someone else's register because it happens to read smoother.\n\n"
+        "word from someone else's register because it happens to read smoother.\n"
+        "15. THE MOTION CONTRACT — ONE CAUSE, CHAINED CONSEQUENCES, NEVER A VERB CHECKLIST (2026-07-13, the "
+        "CapCut-formula deep-dive — mined directly from this project's own Seedance-20 doctrine, "
+        "skills/seedance-motion/SKILL.md): a real structural diff of tonight's own best and worst takes on the "
+        "identical beat found the single sharpest difference wasn't length or references, it was this. Write an "
+        "impact/action beat as ONE cause with two or three chained, visible CONSEQUENCES inside a single flowing "
+        "sentence — never as a list of independently-clocked verbs joined only by commas. WORKED CONTRAST, same "
+        "event, both real drafts tonight: WEAK (the checklist that shipped, unread as physics) — \"he bounces off, "
+        "spins once in mid-air, stabilizes himself, puffs out his chest proudly, and says the line\" — five separate "
+        "beats, none causing the next. STRONG (the rewrite that fixed it) — \"his own momentum shoots him sideways "
+        "out of the sunflower and straight into the broad leaf; the leaf snaps under the hit and the impact spins "
+        "him a full turn in the air before he catches himself on the rebound, chest already puffing out before his "
+        "feet have properly landed\" — one cause (his own momentum), each consequence explicitly produced by the "
+        "one before it. The test: could you cut any listed action out without the sentence losing its reason for "
+        "the next one happening? If yes, it's a checklist, not a chain — rewrite it.\n"
+        "16. THE SHOT BUDGET (2026-07-13, same session, also mined from the platform's own doctrine, "
+        "references/multishot-grammar.md — \"shots cost seconds; plan ~4-6s per shot... ask for four shots in 5s "
+        "and the model compresses or skips beats\"): this beat's 13-second action window (the Handle Doctrine's "
+        "own budget, rule 20) wants 2-3 cuts, not 4 — four cuts averages ~3.25s each, below the platform's own "
+        "documented comfort floor, and is the confirmed reason some of tonight's beats read rushed. Author 4 cuts "
+        "ONLY when the gag genuinely cannot compress into 3 without cutting a beat the story needs — the default "
+        "is 3.\n\n"
         "WORKED EXAMPLE ONE — beat 1.B1 (\"The chase and the pose\", ~10s, one speaker), staged to this standard:\n"
         "\"Tall flowers, everything swaying, beautiful. Both bees weave flower to flower collecting pollen, then the "
         "camera picks Fuzzby up and CHASES him, drone style, high, low, round and round, as he builds speed. Zenny "
@@ -180,32 +250,32 @@ def _mind():
         "leaving stillness to chance; the last beat of the take names the world's ambience RESUMING as the "
         "settle-button, so the scene never just hard-stops after the punchline.\n"
         "════════════════════════════════════════════════════════════════════════════════════════\n\n"
-        "FOUR PIXAR MASTERS SHAPE EVERY DECISION YOU MAKE — internalise them as your METHOD, not a flavour:\n"
-        "• PETE DOCTER — lead with the FEELING; the emotion is the architecture. Start from the human truth, not the "
-        "plot: name what each scene is REALLY about in one honest sentence and let it govern every shot (plot serves "
-        "feeling, never the reverse). Track the hidden inner NEED beneath the outward want — the arc is emotional. "
-        "Hold the BITTERSWEET — joy and ache together; never resolve the ache away. Carry the most important feelings "
-        "WORDLESSLY (the held beat, the face, the look, the small gesture). Specific, observed, true — never generic.\n"
-        "• JOHN LASSETER — STORY & CHARACTER first; make them believably ALIVE. Quality is non-negotiable (no generic "
-        "shot ever ships). Every bear a DISTINCT, appealing, fully-realised personality with a want, a flaw and heart — "
-        "never a type, never interchangeable. ENTERTAIN genuinely (real laughs, real delight). SINCERITY over cynicism "
-        "ALWAYS — warmth is the baseline, never irony or meanness. Believability through truthful behaviour and "
-        "PERFORMANCE (the 12 principles), alive through acting, not bigness.\n"
-        "• PATRICK LIN (Director of Photography — CAMERA) — SEE every shot as a composed film frame: a motivated, "
-        "invisible, purposeful camera; staging that reads INSTANTLY; frame, lens, height and distance chosen for the "
-        "FEELING (never showy); real depth with foreground / midground / background. Choose every shotSize / angle / "
-        "movement like a Pixar DP.\n"
-        "• JEAN-CLAUDE KALACHE (Director of Photography — LIGHTING & camera) — light is STORY and emotion: a "
-        "deliberate COLOUR SCRIPT per beat; soft, believable, beautiful light that shapes depth, carves the characters "
-        "off the background and directs the eye. Set each shot's lighting like a Pixar DP — motivated and felt, never flat.\n"
-        "When a choice is between a clever beat and an honest feeling, ALL of these masters choose the FEELING. "
-        "(Your full doctrine — role, the four passes, the Three Strikes, the canon — is the skill below.)\n\n"
+        "YOUR CREW SERVES YOUR CALL — you direct; they execute (CRYSTAL_BEARS_STUDIO_BIBLE.md Law 1: one mind per "
+        "chair, never a committee):\n"
+        "• STORY & CHARACTER (John Lasseter's tradition) — make every bear believably ALIVE. Quality is non-"
+        "negotiable (no generic shot ever ships). Every bear a DISTINCT, appealing, fully-realised personality "
+        "with a want, a flaw and heart — never a type, never interchangeable. ENTERTAIN genuinely (real laughs, "
+        "real delight). SINCERITY over cynicism ALWAYS — warmth is the baseline, never irony or meanness. "
+        "Believability through truthful behaviour and PERFORMANCE (the 12 principles), alive through acting, "
+        "not bigness.\n"
+        "• Patrick Lin, your Director of Photography for CAMERA — SEE every shot as a composed film frame: a "
+        "motivated, invisible, purposeful camera; staging that reads INSTANTLY; frame, lens, height and distance "
+        "chosen for the FEELING you decided above (never showy); real depth with foreground / midground / "
+        "background.\n"
+        "• Jean-Claude Kalache, your other DP, for LIGHT — light is STORY and emotion: a deliberate COLOUR "
+        "SCRIPT per beat; soft, believable, beautiful light that shapes depth, carves the characters off the "
+        "background and directs the eye — motivated and felt, never flat.\n"
+        "When a choice is between a clever beat and an honest feeling, YOU choose the FEELING, every time, and "
+        "your crew follows.\n\n"
+        "THIS BEAT'S OWN PHYSICAL COMEDY PATTERN AND EMOTIONAL REGISTER ARE YOUR CALL TOO — not something a "
+        "machine infers later by reading your prose back. When you write each beat below, you also choose its "
+        "director_mode (the emotional register it plays in) and, when it carries a real physical engine, its "
+        "physical_action_archetype (the specific comic-physics pattern it's built from) — the full menu for "
+        "both is given in the beat schema. Choose deliberately: this is what lets everyone downstream (the "
+        "animator, the compiler) execute YOUR intention, instead of guessing at it after the fact.\n\n"
         "So: find the FEELING and the WHY first, put heart before everything, then translate it into scenes -> shots -> "
         "visual elements that carry the show bible. Anchor the bears. Read the bible first, every time.\n"
         "Output STRICT JSON ONLY (no prose, no markdown) matching the schema you are given.\n\n"
-        "════════ YOUR CRAFT (the crystal-bears-director skill — your brain) ════════\n" + skill +
-        "\n\n════════ YOUR CINEMATOGRAPHY (the crystal-bears-cinematographer skill — Patrick Lin camera + "
-        "Jean-Claude Kalache light; apply it to EVERY shot's framing, lens, movement and lighting) ════════\n" + cine +
         "\n\n════════ THE LOCKED CANON / SHOW BIBLE (source of truth — never contradict it) ════════\n" + canon +
         "\n\n════════ THE CAST LOCK (only these characters exist — never invent any) ════════\n" + _roster(chars) +
         "\n\nNEVER invent characters or species. Use canon scene names. Hold the NORTH STAR throughout: "
@@ -242,6 +312,107 @@ def theme_lock(system, script, episode, title):
         "}"
     )
     return cb_llm.structured(system, user, S.Theme, label="theme_lock").model_dump()
+
+def motion_contract_pass(beats, scene, log=print):
+    """THE MOTION CONTRACT SELF-CORRECTION LOOP, FINALLY CLOSED (2026-07-15, Julian, live during the first real
+    Scene-1 walk of the fresh package — "You know the system. You've got the code. Why are we doing this? We
+    just should get it right first time!"): revise_flagged_action (below) was built earlier this same session
+    for exactly this purpose and had ZERO callers — the classic built-but-orphaned gap this project's own
+    audits keep finding. The Director's prompt states Law 15 (the Motion Contract), the Gate-3 lint flags
+    violations downstream, and the correction function sat between them completely unwired — meaning every
+    checklist-shaped cut the LLM produced despite the law (an LLM follows a style instruction most of the
+    time, never all of the time) reached Julian as a flag HE had to glance at, instead of being corrected at
+    the source. This closes the loop: for every authored cut whose action text trips the SAME fragment proxy
+    the lint uses (cb_qa.checklist_fragment_count — one shared definition, so fixer and flagger can never
+    drift apart), run the Director's own targeted correction, verify the revision actually clears the
+    threshold, retry once from the revised text if not, and keep whichever version scores best. Content
+    contract unchanged from revise_flagged_action's own: every physical event survives, only the prose SHAPE
+    is restructured — never dialogue, framing, or any other field. Fail-soft per cut: a correction-call
+    failure keeps the authored text and lets the downstream flag surface it, never crashes the Gate-1 fire.
+    Mutates `beats` in place; returns the number of cuts fixed."""
+    import cb_qa
+    fixed = 0
+    for b in beats:
+        code = b.get("beatCode") or b.get("slug") or "?"
+        for c in (b.get("cuts") or []):
+            n0 = cb_qa.checklist_fragment_count(c.get("action"))
+            if n0 < cb_qa.CHECKLIST_FLAG_THRESHOLD:
+                continue
+            best_text, best_n = str(c.get("action") or ""), n0
+            for attempt in (1, 2):
+                reason = (f"action reads as {best_n} separately-clocked, comma-listed actions — restructure "
+                          f"into ONE physical cause with chained consequences (Staging Law 15), keeping every "
+                          f"named event")
+                try:
+                    revised = revise_flagged_action(b, scene, c.get("n"), reason)
+                except (Exception, SystemExit) as e:
+                    log(f"      ⚠ motion-contract fix failed for {code} cut {c.get('n')} ({str(e)[:80]}) — "
+                        f"keeping authored text; the lint flag will surface it", flush=True)
+                    break
+                n1 = cb_qa.checklist_fragment_count(revised)
+                if n1 < best_n:
+                    best_text, best_n = revised, n1
+                    c["action"] = revised    # revise_flagged_action reads the cut off the beat — apply so a retry refines further
+                if best_n < cb_qa.CHECKLIST_FLAG_THRESHOLD:
+                    break
+            if best_n < n0:
+                c["action"] = best_text
+                fixed += 1
+                status = "clear" if best_n < cb_qa.CHECKLIST_FLAG_THRESHOLD else "improved, still flagged"
+                log(f"      ✦ motion-contract fix: {code} cut {c.get('n')} — {n0} fragments -> {best_n} ({status})", flush=True)
+    return fixed
+
+def revise_flagged_action(beat, scene, cut_n, flag_reason):
+    """THE MOTION CONTRACT SELF-CORRECTION (2026-07-15, Julian — "why aren't the prompts being created
+    understanding the flagging system... why do they get to this point" -> "you do it"): Staging Laws 15/16
+    (rule 78, the Motion Contract + the Shot Budget) already stop a FRESH Gate-1 fire from ever writing a
+    checklist-shaped cut — but a beat authored BEFORE those laws existed still carries the old shape, and
+    cb_qa.check_gate3_lint's checklist-verb check correctly flags it. That gap — existing content written
+    under an older, weaker authoring standard — was never closed for already-authored beats (rule 78's own
+    docstring names this explicitly: "it does not retroactively rewrite the other 42 beats' already-authored
+    action text... Whether to re-author existing beats... is Julian's own call").
+
+    This closes it the SAME way rule 78 closed it for future content: through the Director's own voice
+    (_mind(), the full Sixteen Staging Laws), not a hand patch from outside the authoring process. Scoped
+    narrowly — revises ONLY the one flagged cut's action text, never the beat, never dialogue/framing/any
+    other field. Zero invented content is the hard contract: every physical event the ORIGINAL cut named
+    must survive in the rewrite, restructured from a checklist into one cause with chained consequences
+    (the exact WEAK/STRONG worked example already baked into _mind()'s own Law 15 text). Raises SystemExit
+    on a genuine provider failure, matching every other LLM call in this module — no silent fallback."""
+    from pydantic import BaseModel, Field
+    class RevisedAction(BaseModel):
+        rewritten_action: str = Field(description=(
+            "the ONE cut's action text, rewritten as one physical cause with two or three chained, visible "
+            "consequences — every event the original named must still be present, just restructured out of "
+            "checklist form. Never touch dialogue, framing, or invent a new event."))
+    cut = next((c for c in (beat.get("cuts") or []) if c.get("n") == cut_n), None)
+    if cut is None:
+        raise ValueError(f"cut {cut_n} not found on beat {beat.get('beatCode')}")
+    chars = beat.get("openingCast") or beat.get("characters") or []
+    base_system, _roster_dict = _mind()   # _mind() returns (system_prompt, roster_dict), not a bare string
+    system = base_system + (
+        "\n\n════════ THIS IS A TARGETED MOTION-CONTRACT CORRECTION, NOT A RE-AUTHORING ════════\n"
+        "You already wrote this beat. The automatic lint has flagged ONE cut's action text as reading like a "
+        "checklist of separately-clocked events rather than one physical cause with chained consequences "
+        "(your own Staging Law 15, the Motion Contract). Rewrite ONLY that cut's action text. Every physical "
+        "event the original names must survive in your rewrite — you are restructuring the PROSE SHAPE, "
+        "never adding a new gag, prop or action, and never dropping one the original described. Never touch "
+        "dialogue, framing, or any other field."
+    )
+    user = (
+        f"BEAT {beat.get('beatCode')} — scene: {scene.get('name','')}\n"
+        f"Cast: {', '.join(chars)}\n"
+        f"The lint's own reason this was flagged: {flag_reason}\n\n"
+        f"THE FLAGGED CUT (n={cut_n}):\n"
+        f"  framing: {cut.get('framing','')}\n"
+        f"  action (REWRITE THIS, ONLY THIS): {cut.get('action','')}\n\n"
+        "Surrounding cuts, for continuity context only — do NOT rewrite these:\n" +
+        "\n".join(f"  cut {c.get('n')}: {c.get('action','')}" for c in (beat.get("cuts") or []) if c.get("n") != cut_n) +
+        f"\n\nThis beat's own endState (what it settles into): {beat.get('endState','')}\n"
+        f"Staging prohibitions this beat must never violate: {beat.get('stagingProhibited') or '(none authored)'}"
+    )
+    return cb_llm.structured(system, user, RevisedAction,
+                              label=f"motion_contract_fix_{beat.get('beatCode')}_{cut_n}").rewritten_action
 
 # ── STAGE A — episode_to_scenes (the BEAT MAP: scenes + arc + continuity) ─────
 def episode_to_scenes(system, script, episode, title, theme):
@@ -285,7 +456,10 @@ def episode_to_scenes(system, script, episode, title, theme):
         'never a restatement of "look" (the empty-plate composition) and never a multi-clause paragraph. '
         'Like ambientBed, this is the scene\'s CONSTANT — its dominant, opening atmosphere — not a '
         'beat-by-beat progression (a storm scene\'s pre-storm calm still gets this same line; the storm\'s '
-        'own arrival is each beat\'s own action/atmosphere field, not this one)\n'
+        'own arrival is each beat\'s own action/atmosphere field, not this one). Note: this scene\'s ensemble '
+        'throughline (who carries it, who gets the big moment) is NOT authored here — it is derived '
+        'automatically, after the fact, from each beat\'s own fidelityAllocation once the beats below are '
+        'written (see _derive_performance_throughline); nothing to write for it in this stage,\n'
         "  } ],\n"
         '  "arc": { "episode": str, "title": str, "lead": bear, "engine": str,\n'
         '           "the_day_unfolds": [ {"scenes":[ints], "pillar":str, "light":str} ],\n'
@@ -316,14 +490,17 @@ def episode_to_scenes(system, script, episode, title, theme):
 # every beat's dialogue back to the writer's EXACT lines, in order — so no rewording can ever survive. No "remake" pass.
 
 def _script_roster():
-    """UPPER-CASE speaker names for the parser — the canonical cast + the relational/group cues that also speak."""
-    names = set()
+    """UPPER-CASE speaker names for the parser — the canonical cast + the relational/group cues that also speak.
+    FIXED 2026-07-11 (full-codebase audit, duplication finding): this used to hand-duplicate cb_preflight's own
+    _script_roster byte-for-byte (same regexes, same hardcoded {"ALL", "KEEN'S MUM", "HOWIE", "HOWEY"} set) —
+    a real drift risk (e.g. a future name-spelling fix landing in only one copy). Delegates to the one real
+    implementation instead."""
+    import cb_preflight
     try:
-        cj = json.load(open(CHARS)); base = cj.get("characters", cj)
-        names = {k.upper() for k in (base.keys() if isinstance(base, dict) else [])}
+        cj = json.load(open(CHARS))
     except Exception:
-        pass
-    return names | {"ALL", "KEEN'S MUM", "HOWIE", "HOWEY"}
+        cj = {}
+    return cb_preflight._script_roster(cj)
 
 def _elements_block(elements):
     """The scene's verbatim elements, numbered, for the breakdown prompt — the LLM assigns these to beats, unchanged."""
@@ -337,10 +514,12 @@ def _elements_block(elements):
     return "\n".join(out)
 
 def _norm_line(s):
-    """Words only — drop [V3 tags], a leading NAME: and punctuation — to compare a beat's line to the script's line."""
-    s = re.sub(r"\[[^\]]*\]", "", s or "")
-    s = re.sub(r"^[A-Z' .]+:\s*", "", s.strip())
-    return " ".join(re.sub(r"[^a-z0-9 ]", " ", s.lower()).split())
+    """Words only — drop [V3 tags], a leading NAME: and punctuation — to compare a beat's line to the script's line.
+    FIXED 2026-07-11 (full-codebase audit, duplication finding): delegates to cb_preflight._norm_dialogue_words,
+    which mirrored this function's exact logic in a second, independently-maintained copy — see _script_roster's
+    own note above for the same class of risk."""
+    import cb_preflight
+    return cb_preflight._norm_dialogue_words(s)
 
 def enforce_verbatim(beats, scene_dialogue, scene_num, log=print):
     """HARD GATE — force the beats' dialogue to the writer's EXACT lines. scene_dialogue = ordered [(CHAR, line, paren)].
@@ -355,15 +534,25 @@ def enforce_verbatim(beats, scene_dialogue, scene_num, log=print):
                        # was already known and avoided in _force_include (beats[-1]); apply the same rule here.
         for c in (b.get("cuts") or []):
             if (c.get("dialogue") or "").strip():
-                slots.append(c)
+                slots.append((b, c))
     n = min(len(slots), len(scene_dialogue)); fixed = 0
     for k in range(n):
-        cut = slots[k]; char, line, paren = scene_dialogue[k]
+        beat, cut = slots[k]; char, line, paren = scene_dialogue[k]
         want = f"{char}: {line}"
         if (cut.get("dialogue") or "").strip() != want:
             if _norm_line(cut.get("dialogue")) != _norm_line(line):
                 log(f"      ⋯ verbatim: scene {scene_num} line {k+1} corrected → {char}: \"{line[:52]}\"", flush=True)
             cut["dialogue"] = want; fixed += 1
+            # FIXED 2026-07-11 (full-codebase audit, cb_director.py finding #2): a speaker correction here
+            # used to leave the OWNING BEAT's own characters/speakers/openingCast untouched — if the script's
+            # real speaker differs from what the LLM attributed, downstream reference-pulling (cb_prompts.py's
+            # opening_cast) would never fetch the CORRECT speaker's identity image, the same class of gap
+            # _force_include already guards against for its own forced-insert path (see its own comment above).
+            for _field in ("characters", "speakers", "openingCast"):
+                if _field in beat or _field == "characters":
+                    lst = beat.setdefault(_field, [])
+                    if char not in lst:
+                        lst.append(char)
         if paren and not (cut.get("delivery") or "").strip():
             cut["delivery"] = paren.strip("()")
     # COMPLETENESS (content-based) — every script line must be present exactly once. Catches DROPS + DUPLICATES that
@@ -371,7 +560,7 @@ def enforce_verbatim(beats, scene_dialogue, scene_num, log=print):
     # `dropped`/`dups` let Gate 1 flag the scene for a re-break rather than sign off an incomplete/corrupted scene —
     # a DUPLICATE is itself evidence the LLM split one script line across two cuts, misattributing content between
     # them, so it must trigger the same retry path as a drop, not just a soft log line.
-    pkg_norm = [_norm_line(c.get("dialogue")) for c in slots]
+    pkg_norm = [_norm_line(c.get("dialogue")) for (_b, c) in slots]
     dropped = [l for (_c, l, _p) in scene_dialogue if _norm_line(l) not in pkg_norm]
     dups = sorted({x for x in pkg_norm if x and pkg_norm.count(x) > 1})
     if dropped:
@@ -503,7 +692,265 @@ def _finalize_beat_manifest_fields(beats):
             b["fidelityAllocation"] = {"primary": primary, "secondary": secondary,
                                        "economized": ", ".join(economized) if economized else "none"}
 
+def _derive_performance_throughline(beats):
+    """THE PERFORMANCE THROUGHLINE, MECHANICAL (2026-07-08, Julian's correction of the same-night rule 57
+    addition — "the script and the storyboard and beat should deliver that", not a separately hand-authored
+    note): the earlier version of this asked the Director to WRITE a scene-level throughline sentence BEFORE
+    any beats existed, then fed it back into beat authoring as a plan. Julian's point: the beats themselves,
+    once written, already say who carries the scene — there is no reason to ask anyone to type that out
+    separately. This function reads it straight off each beat's OWN `fidelityAllocation.primary` (already
+    guaranteed present by `_finalize_beat_manifest_fields`, run just before this is ever called) and reports
+    the pattern in plain terms — a run of consecutive beats sharing one primary, and where it hands off.
+    Zero LLM calls, nothing invented: if the beats don't already show a throughline, this doesn't invent one."""
+    # Natural sort on the trailing beat number (cb_preflight._beat_sort_key) — a lexicographic sort on the raw
+    # code string would misorder any scene with 10+ beats ('1.B10' < '1.B2'); found in the 2026-07-08 audit
+    # inspecting this very function.
+    import cb_preflight
+    beats = sorted(beats, key=lambda b: cb_preflight._beat_sort_key(b.get("beatCode") or ""))
+    runs = []   # [(primary_name, [beatCodes]), ...] — consecutive beats sharing the same primary collapse into one run
+    for b in beats:
+        code = b.get("beatCode") or "?"
+        primary = str((b.get("fidelityAllocation") or {}).get("primary") or "").strip() or "Unknown"
+        if runs and runs[-1][0] == primary:
+            runs[-1][1].append(code)
+        else:
+            runs.append((primary, [code]))
+    if not runs:
+        return "No beats authored yet — nothing to derive."
+    if len(runs) == 1:
+        name, codes = runs[0]
+        span = f"{codes[0]}-{codes[-1]}" if len(codes) > 1 else codes[0]
+        return f"{name} carries this scene's focus throughout ({span}) — no hand-off to another character."
+    parts = []
+    for name, codes in runs:
+        span = f"{codes[0]}-{codes[-1]}" if len(codes) > 1 else codes[0]
+        parts.append(f"{name} ({span})")
+    last_name, last_codes = runs[-1]
+    last_span = f"{last_codes[0]}-{last_codes[-1]}" if len(last_codes) > 1 else last_codes[0]
+    last_word = "beats" if len(last_codes) > 1 else "beat"
+    return (f"This scene's focus moves from " + " to ".join(parts) +
+            f" — the moment lands on {last_name} in the closing {last_word} ({last_span}).")
+
+# ── THE TWO-STAGE SPLIT (2026-07-15, Julian's own architectural ruling) ──────────────────────────────────
+# "We build a guardrail around each beat to ensure that we deliver what the director wants, not working
+# within constraints all of the time... if the magic doesn't happen, then it doesn't happen." The single
+# scene_to_beats() call below asks one model to be a world-class creative director AND a compliance officer
+# filling out ~50 JSON fields in the same breath — the confirmed, repeated reason the craft rating
+# (cb_craft.py) kept finding "competent, not Pixar" beats even when every technical/canon law was honoured.
+# These two functions are the fix: STAGE ONE is pure creative authorship, nothing else in the room. STAGE TWO
+# is a separate engineering pass that reads what STAGE ONE already decided and labels the technical manifest
+# fields faithfully — it does not create, it delivers. direct() below merges their output and THEN runs the
+# existing verbatim-gate/repair loop (validate_scene_beats) — correctness-checking still happens, just after
+# creative authorship, never competing with it inside one generation call.
+def direct_scene_creative(system, script, beatmap, scene, theme, chars=None, elements=None, retry_note=""):
+    """STAGE ONE — THE DIRECTOR'S CUT. Pure creative authorship: what happens, how it's staged, what's funny,
+    what breaks the heart, what the camera does. No manifest/technical fields anywhere in this call's schema
+    or prompt — `system` (from _mind()) already carries the Sixteen Staging Laws, the worked examples and the
+    Docter/Lasseter/Lin/Kalache crew framing; this task instruction adds only what a director genuinely needs
+    to know to stage THIS scene (the locked dialogue, the beat-unit/pacing math, the comedy/emotion doctrine)
+    — never a schema field name."""
+    user = (
+        (retry_note + "\n\n" if retry_note else "") +
+        f"FULL SCRIPT for reference:\n\n{script}\n\n"
+        f"THE LOCKED THEME — every beat serves this (Docter):\n{json.dumps(theme, ensure_ascii=False)}\n\n"
+        f"BEAT MAP (whole episode context):\n{json.dumps(beatmap.get('scenes'), ensure_ascii=False)}\n\n"
+        f"CONTINUITY scaffold:\n{json.dumps(beatmap.get('continuity'), ensure_ascii=False)}\n\n"
+        f"════════ TASK: DIRECT SCENE {scene['sceneNumber']} ('{scene['name']}') ════════\n"
+        f"Scene emotional core: {scene.get('emotionalCore')}\n"
+        f"Pillar: {scene.get('pillar')} | cast: {scene.get('cast')} | time/weather: {scene.get('time')}/{scene.get('weather')}\n\n"
+        f"{_scene_character_truth(chars, scene.get('cast'))}"
+        "════════ WHAT YOU ARE ACTUALLY DOING ════════\n"
+        "This is not a form to complete. A studio has handed you a locked script and is trusting you to bring "
+        "it to life the way Pete Docter, John Lasseter or a DreamWorks A-team would — genuine wonder, genuine "
+        "comedy, genuine emotion, staging so specific and alive that a room full of professionals watching the "
+        "storyboard reel would gasp, laugh, or go quiet. Every rule below exists to serve THAT, never to "
+        "replace it. If a beat is technically compliant but reads as safe, generic, or interchangeable with "
+        "any other family cartoon, you have failed at the actual job regardless of whether every field below "
+        "is filled in correctly. Reach. Invent the specific physical bit nobody's seen before. Let the camera, "
+        "the light and the performance all serve ONE intention per beat, chosen on purpose.\n\n"
+        "════════ THE SCENE'S EXACT SCRIPT ELEMENTS — THE GROUND TRUTH (VERBATIM) ════════\n"
+        "This is your ONLY source for WHAT happens and WHAT is said — the words a director is handed, never "
+        "yours to change. BREAK IT DOWN into beats. Rules:\n"
+        "  • Assign EVERY dialogue line below to a cut, IN THIS ORDER, WORD-FOR-WORD (a hard gate snaps any drift "
+        "back, so match them exactly, keep the writer's parenthetical as the cut's delivery).\n"
+        "  • COMPLETENESS IS ABSOLUTE: use each line EXACTLY ONCE — the TOTAL number of dialogue cuts across your "
+        "beats must EQUAL the number of DIALOGUE lines listed below. NEVER drop a line, NEVER repeat one.\n"
+        "  • Each cut's ACTION must be FAITHFUL to these ACTION lines — invent nothing the script forbids, drop "
+        "nothing it requires, add no character it doesn't place here. Everything ELSE — how it's shot, paced, "
+        "escalated, felt — is entirely your own directorial invention.\n"
+        f"{_elements_block(elements)}\n\n"
+        "THE UNIT IS THE BEAT = ONE Seedance TAKE, up to ~15s. A take is a CONTAINER of complete MOMENTS: it "
+        "holds a WHOLE number of them — 1, 2, or 3 — each opening and closing, NEVER a fraction. First judge "
+        "the scene's screen time, then PACK its complete moments into the FEWEST takes of <=~15s. A take NEVER "
+        "ends mid-moment — it ENDS on a BUTTON, NEVER on an OPEN the next beat must resolve. A tight exchange "
+        "(question->answer, setup->payoff, joke->topper) lives ENTIRELY inside ONE beat; never end a beat on the "
+        "question and open the next with the answer.\n"
+        "COMEDY — the funny beats, ESPECIALLY FUZZBY the proud bumbler — GO OVER-THE-TOP: tag a gag beat "
+        "comedyMode=BIG and run the GAG CLOCK (over-confident WIND-UP -> the BANG with mass -> the delayed TAKE / "
+        "held beat -> the snap-back BUTTON), commit 110%, build the gag BACKWARDS from the bravado, rule-of-three "
+        "then break it, end on a button. Tag a heart beat comedyMode=TRUE (small + real). NEVER blend BIG and "
+        "TRUE in one beat.\n"
+        "If KEEN makes a brave choice, a FEAR cut (trembling paws / swallowed gulp / flattened ears) MUST precede "
+        "it within the beat — courage is SHOWN, never assumed.\n"
+        "Pick ONE dominant COLOUR TEMPERATURE for the scene (amber=safety/love · saturated crystal-glow=wonder · "
+        "cool blue-silver=fear/loneliness · rose-lavender=tenderness · grey-green=low ebb) — every beat inherits it. "
+        "CRYSTAL WOODS is an emotional PARTICIPANT, never wallpaper. Plan the scene's ONE 'that's beautiful' "
+        "beauty moment. Track each bear's CRYSTAL GLOW as an emotional signal.\n"
+        "DIALOGUE IS LOCKED — this is a FINAL script. Use each line EXACTLY as written; NEVER cut, rewrite, "
+        "paraphrase, soften, or invent dialogue. Attribute each line to its speaker inside the cut it lands on. "
+        "A beat or cut with no line carries it wordlessly through staging + performance.\n\n"
+        "Output JSON ONLY — a director's shot-by-shot treatment for this scene: { \"beats\": [ {\n"
+        '  "slug": "kebab-id", "scene": "' + scene['name'] + '", "characters": [canon names in this beat],\n'
+        '  "openingCast": [the SUBSET of "characters" actually VISIBLE IN THE OPENING FRAME — a character who '
+        'ENTERS LATER is in "characters" but not here],\n'
+        '  "speakers": [canon names who speak], "keenWristbands": "none"|"vacant"|"crystal" (per the arc; null if '
+        'Keen absent),\n'
+        '  "durationSec": int 8..15,\n'
+        '  "pillar": str, "intensity": 0..1, "storyBeat": what happens across this window,\n'
+        '  "emotionalIntent": what the audience FEELS across the beat,\n'
+        '  "want": what the bear PERFORMS/reaches for, "need": the true thing underneath they resist,\n'
+        '  "crystalTruth": what the crystal reveals that the FACE hides (the crystal is the NEED, contradicts the '
+        'face), "kidRead": what the CHILD laughs at/sees, "adultRead": the truth the PARENT catches — same beat, '
+        'same second,\n'
+        '  "theGame": for an emotional beat, the invented GAME whose made-up rules ARE the emotional logic; null if '
+        'none,\n'
+        '  "wordlessHeld": true ONLY for the single nadir beat of the WHOLE EPISODE — else false,\n'
+        '  "comedyMode": "BIG"|"TRUE"|null,\n'
+        '  "physicalFeeling": the SINGLE physical sensation the audience FEELS IN THEIR BODY in the first ~2s,\n'
+        '  "light": how light ISOLATES the feeling, "atmosphere": how the air/particles BUILD toward it, '
+        '"motionTempo": the motion tempo that LANDS on it, "grade": the colour grade after it passes,\n'
+        '  "cuts": [ {"n": int, "framing": "shotSize + angle + movement", "action": one flowing physical-cause-'
+        'and-chained-consequence sentence (never a checklist of separately-clocked verbs), "dialogue": "NAME: '
+        'line" or null, "delivery": REQUIRED whenever dialogue is non-null — a CLAUSE naming the specific tone '
+        'and physical behaviour carrying the line, starting with "with"/"as", never a generic tag, '
+        '"voiceTreatment": null, or "group_chorus" ONLY when 3+ named characters speak this line in unison, or '
+        '"underwater_vo" for a submerged/muffled internal VO, "chorusMembers": required list when '
+        'voiceTreatment=="group_chorus"} ], // 2-3 cuts, 4 only when the gag genuinely cannot compress,\n'
+        '  "cameraArc": the through-line of the whole beat, "pacingVerbs": [specific physics verbs],\n'
+        '  "pauseHold": where the beat goes still, machine-readable "N second(s)" (max 1.5),\n'
+        '  "performance": {"surface":str,"underneath":str,"innerThought":str},\n'
+        '  "crystalGlow": which bear(s) + state, "beautyMoment": true|false,\n'
+        '  "startState": the OPENING FRAME — WHERE each character is and what they are doing (the BEFORE; '
+        'positions + held action; NO motion words),\n'
+        '  "soundIntent": the SFX + timed-music cues this beat should score,\n'
+        '  "continuity": {"opensFrom": how this beat\'s opening hands off the previous beat\'s last frame, '
+        '"carryToNext": what carries forward, "screenDirection": "LEFT"|"RIGHT"},\n'
+        '  "check": {"focalSubject":str,"emotionalRead":str,"heartCheck":str},\n'
+        '  "endState": directing prose (1-3 sentences) for THIS beat\'s own distinct ending — a living settle, in '
+        'character — the new, distinct final moment (never a restatement of the previous beat\'s pose)\n'
+        "} ] }\n\n"
+        "Stage two-handers in locked positions (Fuzzby BIGGER frame-LEFT, Zenny SMALLER frame-RIGHT) and attribute "
+        "each line. Sizes per the chart (Amie<Sunny<Luna≈Keen≈Aida<Misty<Howey). Order beats in scene order."
+    )
+    return [b.model_dump(by_alias=True) for b in
+            cb_llm.structured(system, user, S.CreativeSceneBeats,
+                               label=f"direct_scene_creative s{scene['sceneNumber']}").beats]
+
+
+def _engineer_mind():
+    """STAGE TWO's system prompt — a DIFFERENT persona from _mind()'s Pete Docter, deliberately. The director's
+    creative work is already finished by the time this runs; this voice's whole job is engineering delivery of
+    that work, never re-directing it."""
+    return (
+        "You are the studio's technical/script supervisor — NOT the director. The director has already made "
+        "every creative decision for these beats: the story, the staging, the comedy, the emotion, the camera. "
+        "Your job is pure ENGINEERING — read what the director already wrote and derive/label the technical "
+        "fields below FAITHFULLY from it. You never invent new creative content, never second-guess a creative "
+        "choice, never soften or 'improve' a line of staging. If something is ambiguous, name the most literal, "
+        "grounded reading of what's already on the page — you are compiling, not rewriting."
+    )
+
+
+def deliver_beat_manifest(script, scene, theme, creative_beats):
+    """STAGE TWO — THE GUARDRAIL PASS. Reads the already-written creative beats for one scene and derives the
+    technical manifest layer (junctionType/opensOn/carryMarks/endStateStill/fidelityAllocation/director_mode/
+    physical_action_archetype/humourLayer/emotionMechanic/actingContrast) as a labeling task grounded in
+    content that already exists — never a second creative-authorship pass. Runs ONE call per scene (not per
+    beat) so the model sees the whole scene's own throughline when deciding fidelityAllocation/director_mode.
+    `_finalize_beat_manifest_fields` (defense-in-depth, unchanged) still runs on the merged result afterward —
+    this call is the primary source, that function is the safety net for anything it misses."""
+    _modes, _archs = _mode_archetype_menu()
+    digest = [{"slug": b.get("slug"), "storyBeat": b.get("storyBeat"), "endState": b.get("endState"),
+               "characters": b.get("characters"), "speakers": b.get("speakers"), "comedyMode": b.get("comedyMode"),
+               "cuts": [{"framing": c.get("framing"), "action": c.get("action")} for c in (b.get("cuts") or [])]}
+              for b in creative_beats]
+    user = (
+        f"THE LOCKED THEME:\n{json.dumps(theme, ensure_ascii=False)}\n\n"
+        f"SCENE {scene['sceneNumber']} ('{scene['name']}') — the director's OWN already-written beats, in order:\n"
+        f"{json.dumps(digest, ensure_ascii=False, indent=1)}\n\n"
+        "════════ TASK: LABEL THE TECHNICAL MANIFEST FIELDS FOR EACH BEAT ABOVE ════════\n"
+        "For EVERY beat listed, in the SAME order, output:\n"
+        '{ "beats": [ {\n'
+        '  "slug": "MUST match the beat\'s own slug above, exactly",\n'
+        '  "endStateStill": the beat\'s own "endState" re-described as a static PHOTOGRAPH: NO temporal verbs '
+        '("settles into", "turns to"), NO imperatives, NO camera/ambience — only subjects, poses, positions and '
+        'expressions exactly as one frozen frame would show them,\n'
+        '  "carryMarks": a SHORT phrase (never a sentence) naming what specifically, visibly persists INTO THIS '
+        'BEAT\'S OWN OPENING from the beat immediately before it in the list above (read its "endState") — a held '
+        'object, wet fur, a costume state, a physical position. If genuinely nothing persists, say so briefly '
+        '("no persisting marks — a clean reset"). This is backward-looking: what THIS beat inherits, not what it '
+        'hands off. Null/omit ONLY for the scene\'s own first beat (no predecessor),\n'
+        '  "junctionType": "intentional_next_shot" for every beat except the scene\'s own first (null there) — '
+        '"seamless_continuation" ONLY if this beat\'s own cut 1 explicitly continues one unbroken take from the '
+        'previous beat\'s last cut,\n'
+        '  "opensOn": {"who": name, "action": short phrase} — WHO the camera opens on and their immediate mid-'
+        'motion state, read directly from this beat\'s own cut 1. Null for the scene\'s own first beat,\n'
+        '  "relayOpeningNote": null on most beats — one extra sentence ONLY if carryMarks/opensOn alone leave real '
+        'ambiguity about the instant right after the opening frame,\n'
+        '  "spatialAxis": null on most beats — one sentence ONLY if this beat genuinely needs a stated left/right '
+        'blocking law beyond what startState already shows,\n'
+        '  "stagingProhibited": null on most beats — a short list ONLY if this beat\'s specific gag has a real, '
+        'specific way to go visibly wrong (e.g. a character vanishing into an object) beyond the standing '
+        'negatives,\n'
+        '  "actingContrast": one sentence — which characters in this beat play off each other and how (or, for a '
+        'solo beat, the internal surface-vs-interior contrast) — read this directly off the cuts already written,\n'
+        '  "humourLayer": 1-4 (1=pure physical/visual a toddler reads instantly; 2=a comic beat a 4-8 year old '
+        'GETS; 3=dual-register, the adult catches something extra; 4=mostly an adult/craft-level wink) — rate '
+        'what\'s ALREADY on the page, do not invent comedy that isn\'t there; a quiet Heart beat can honestly be 1,\n'
+        '  "emotionMechanic": one sentence stating the CONCRETE visual/physical mechanism (a glow, a gesture, a '
+        'held breath) that ALREADY makes this beat\'s emotion legible — read it off what\'s written, never restate '
+        '"emotionalIntent",\n'
+        '  "fidelityAllocation": {"primary": name, "secondary": name or "none", "economized": comma-separated '
+        'names or "none"} — read who this beat\'s ALREADY-WRITTEN cuts actually give real, specific performance '
+        'to (primary), who plays off them (secondary), and who is present but staying generic/background '
+        '(economized) — a factual read of what was written, not a new creative call,\n'
+        f'  "director_mode": the emotional register this beat\'s ALREADY-WRITTEN content plays in. One of: '
+        f'{_modes}. Null only if genuinely no strong emotional engine is present,\n'
+        f'  "physical_action_archetype": which pattern this beat\'s ALREADY-STAGED physical comedy matches. One '
+        f'of: {_archs}. Choose the one whose own beats match what\'s already in cuts[] above — you are naming the '
+        'shape already there, never inventing a new one. Null for a pure dialogue/reaction beat\n'
+        "} ] }"
+    )
+    return [b.model_dump(by_alias=True) for b in
+            cb_llm.structured(_engineer_mind(), user, S.SceneManifest,
+                               label=f"deliver_beat_manifest s{scene['sceneNumber']}").beats]
+
+
+def _merge_creative_and_manifest(creative_beats, manifest_beats):
+    """Combines STAGE ONE's creative content with STAGE TWO's technical labels into full beat dicts, matching
+    the shape every downstream consumer (validate_scene_beats, _finalize_beat_manifest_fields, direct()'s own
+    package assembly) already expects. Matched by slug; a manifest entry with no matching creative beat (or
+    vice versa) is a real authoring-order bug, not silently dropped — raises loudly so it's caught here, not
+    three stages downstream as a mystery missing field."""
+    by_slug = {m.get("slug"): m for m in manifest_beats}
+    merged = []
+    for cb in creative_beats:
+        slug = cb.get("slug")
+        m = by_slug.get(slug)
+        if m is None:
+            raise ValueError(f"deliver_beat_manifest returned no entry for creative beat slug={slug!r} — "
+                              f"stage two dropped a beat stage one wrote (available slugs: {list(by_slug)})")
+        out = dict(cb)
+        for k, v in m.items():
+            if k == "slug":
+                continue
+            out[k] = v
+        merged.append(out)
+    return merged
+
+
 def scene_to_beats(system, script, beatmap, scene, theme, chars=None, elements=None, retry_note=""):
+    _modes, _archs = _mode_archetype_menu()
     user = (
         (retry_note + "\n\n" if retry_note else "") +
         f"FULL SCRIPT for reference:\n\n{script}\n\n"
@@ -600,7 +1047,18 @@ def scene_to_beats(system, script, beatmap, scene, theme, chars=None, elements=N
         'preposition like "with" or "as", never a capital letter or a full independent sentence. WORKED '
         'EXAMPLES (the actual bar): "with earnest, hopeful pomp, presenting the pollen moustache as though it '
         'were an official uniform" / "as a dry, affectionate counterpunch, holding back the laugh until the '
-        'end of the delivery"} ],   // 2-4 internal cuts IN ORDER; cut 1 is the opening,\n'
+        'end of the delivery", '
+        '"voiceTreatment": null for an ordinary spoken line (the default — omit or leave null). Set to '
+        '"group_chorus" ONLY when 3+ named characters speak this SAME line/cue together in unison (e.g. an '
+        '"ALL:" line everyone delivers as one crowd voice, never one character lip-syncing for the group). Set '
+        'to "underwater_vo" ONLY for a cut set in a submerged, muffled-vocal moment (an internal/underwater '
+        'VO, not a normal surface line). '
+        '"chorusMembers": REQUIRED (a list of canon character names, 3 or more) whenever voiceTreatment=='
+        '"group_chorus" — exactly who forms the unison; null/omit otherwise. EXCLUDE any character whose own '
+        'canon rules forbid chorus participation for this line (e.g. the bees never join a bear chorus — '
+        'match the beat\'s own established logic, do not invent a new exclusion rule)'
+        '} ],   // 2-3 internal cuts IN ORDER (THE SHOT BUDGET, law 16 above) — 4 ONLY when the gag genuinely '
+        'cannot compress into 3 without losing a beat the story needs; cut 1 is the opening,\n'
         '  "cameraArc": the through-line of the whole beat, "pacingVerbs": [specific physics verbs],\n'
         '  "pauseHold": where the beat goes still and MUST state a concrete duration in the exact machine-'
         'readable form "N second(s)" or "N.N second(s)" (e.g. "1.2 second hold on Zenny\'s flat stare"), '
@@ -611,14 +1069,13 @@ def scene_to_beats(system, script, beatmap, scene, theme, chars=None, elements=N
         '  "startState": the OPENING FRAME — the STATIC HELD pose at the very first frame of the beat: WHERE each '
         'character is and what they are doing (the BEFORE; positions + held action, e.g. "Fuzzby frame-left mid-hover '
         'eyes closed, Zenny frame-right watching"; NO motion words), so the ONE opening keyframe is drawn from it,\n'
-        '  "keyframePrompt": self-contained t2i for the OPENING frame — the locked render STYLE, then "as per the '
-        'reference image of [BEAR]" for each character (NEVER describe a bear), the scene plate as reference, '
-        'framing/lens/lighting, 2-3 ambient crystals; the START of the action, never the aftermath,\n'
-        '  "i2vPrompt": the SEEDANCE BEAT prompt (ONE 10-12s take) — open "Anchor Image is TRUTH. COPY EXACTLY." then '
-        '"Multi-shot sequence with clean cuts between shots." then each internal cut IN ORDER ("Shot 1 (framing): '
-        'action … Shot 2 (cut to …): action, NAME: \\"line\\" … Shot 3 (cut to …): action …"), dialogue written IN for '
-        'lip-sync, ending Style+Audio (3D CGI Pixar; Seedance scores the SFX + timed comedy/emotional music ON the action; '
-        'voice forward; bear note Hz). Small emotive motion per cut; static props HOLD,\n'
+        '  "keyframePrompt"/"i2vPrompt": LEGACY, OPTIONAL fields — the real keyframe and Seedance prompts are '
+        'compiled mechanically from startState/cuts/plate/turnarounds by cb_prompts.py/cb_segprompt.py, never '
+        'from these. If authored at all, keyframePrompt is a rough self-contained t2i sketch of the OPENING '
+        'frame (reference-only — never describe a bear) and i2vPrompt is a rough sketch of the beat\'s action '
+        'across its cuts — but NEVER write spoken dialogue words into either (Law 6: no generation prompt ever '
+        'carries the words a character says, lip-sync included). Leave both blank if there is nothing useful '
+        'to add beyond what startState/cuts already say,\n'
         '  "soundIntent": the SFX + timed-music cues Seedance should score (the bonk on the tree, the button on the deflate); the bear\'s note where it lands,\n'
         '  "continuity": {"opensFrom": how this beat\'s opening frame hands off the previous beat\'s last frame, '
         '"carryToNext": what carries forward, "screenDirection": "LEFT"|"RIGHT" (locked at scene open)},\n'
@@ -632,9 +1089,13 @@ def scene_to_beats(system, script, beatmap, scene, theme, chars=None, elements=N
         '("settles into", "turns to", "begins to"), NO imperatives, NO camera or ambience — only subjects, poses, '
         'positions, and expressions, exactly as one frozen frame would show them (e.g. endState "he holds it one '
         'blink too long" -> endStateStill "frozen mid-hover"),\n'
-        '  "carryMarks": a SHORT phrase (never a full sentence) naming what specifically, visibly persists from '
-        'this beat into the next (a held object, wet fur, a costume state, a physical position) — if genuinely '
-        'nothing persists, say so explicitly and briefly ("no persisting marks — a clean reset"),\n'
+        '  "carryMarks": a SHORT phrase (never a full sentence) naming what specifically, visibly persists INTO '
+        'THIS BEAT\'S OWN OPENING from the beat immediately before it (a held object, wet fur, a costume state, '
+        'a physical position) — if genuinely nothing persists, say so explicitly and briefly ("no persisting '
+        'marks — a clean reset"). This is backward-looking: describe what THIS beat inherits, not what it '
+        'hands off to whatever comes after it — the automatic join-check compares this exact field against the '
+        'previous beat\'s own rendered ending, so getting the direction right here is what makes that check '
+        'mean anything,\n'
         '  "junctionType": "intentional_next_shot" for EVERY beat except a scene\'s own FIRST beat (which has no '
         'predecessor to join from — leave this null ONLY for beat 1 of a scene). "intentional_next_shot" is the '
         'DEFAULT for every other beat: a new gag arc, a fresh camera setup, NOT a continuation of the exact same '
@@ -656,7 +1117,7 @@ def scene_to_beats(system, script, beatmap, scene, theme, chars=None, elements=N
         '  "stagingProhibited": OPTIONAL, null on most beats — a short list of THIS beat\'s own specific gag-'
         'failure modes to forbid (e.g. "Fuzzby disappearing into the flower", "full-face pollen coating"), '
         'each phrase written WITHOUT its own leading "no" (that gets added mechanically). Only for a beat whose '
-        'own physical gag has a real, specific way to go visibly wrong beyond what the eleven standing '
+        'own physical gag has a real, specific way to go visibly wrong beyond what the twelve standing '
         'negatives already cover — never a restatement of the standing negatives in different words,\n'
         '  "actingContrast": one sentence — which characters in this beat play off each other and how (e.g. manic '
         'vs deadpan, urgency vs stillness). For a SOLO-character beat, describe the INTERNAL contrast within that '
@@ -680,7 +1141,15 @@ def scene_to_beats(system, script, beatmap, scene, theme, chars=None, elements=N
         'distinct, not needing individual performance, staged as an ensemble rather than as themselves. A beat '
         'demanding perfect performance from every named character at once is the failure mode this field exists '
         'to prevent — an ensemble scene should usually have 1-2 primary/secondary characters and the rest '
-        'economized, not everyone treated equally\n'
+        'economized, not everyone treated equally,\n'
+        f'  "director_mode": YOUR choice of this beat\'s emotional register, made HERE — not guessed at later by '
+        f'a machine reading your prose back. One of: {_modes}. Null only for a beat with no strong emotional '
+        'engine at all (rare),\n'
+        f'  "physical_action_archetype": when this beat carries a real physical/comic engine, YOUR choice of '
+        f'which pattern it\'s built from. One of: {_archs}. Choose the one whose own staging beats actually '
+        'match what you just wrote in cuts[] above — this is you naming the shape of the gag you already '
+        'staged, not inventing a new one. Null for a beat with no physical engine (a pure dialogue/reaction '
+        'beat)\n'
         "} ] }\n\n"
         "Stage two-handers in locked positions (Fuzzby BIGGER frame-LEFT, Zenny SMALLER frame-RIGHT) and attribute each "
         "line. Sizes per the chart (Amie<Sunny<Luna≈Keen≈Aida<Misty<Howey). Order beats in scene order."
@@ -788,10 +1257,6 @@ def validate_scene_beats(system, script, beatmap, scene, theme, beats, log=print
     return fixed
 
 # ── Stage C — ASSEMBLE + WRITE ───────────────────────────────────────────────
-def _slug(s):
-    return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_") or "Untitled"
-
-
 def _derive_north_star_answers(all_beats, scenes):
     """THE MANIFEST LAYER, package-scoped (rule 46, 2026-07-07): cb_preflight BLOCKs on this field being
     non-blank. Built ENTIRELY MECHANICALLY from the real, already-authored package data plus the actual canon
@@ -857,8 +1322,38 @@ def _derive_north_star_answers(all_beats, scenes):
 
 
 def direct(script_path, episode, title, log=print):
+    script_p = pathlib.Path(script_path)
+    script = script_p.read_text()
+    # THE GATE-0 PROVENANCE HARD BLOCK — see this module's own docstring for the full ruling. Raises
+    # (never sys.exit's itself — matches this codebase's own "never sys.exit itself" convention,
+    # cb_pipeline.fire()'s docstring) a plain RuntimeError, distinct from any other exception this
+    # function might raise, so a caller (cb_pipeline.gate1()) can catch it specifically and refuse
+    # cleanly instead of crashing with a raw traceback.
+    sidecar_p = script_p.parent / (script_p.stem + ".score.json")
+    if not sidecar_p.exists():
+        raise RuntimeError(
+            f"GATE 1 REFUSED — no Gate-0 record found for {script_p.name} (expected a sidecar at "
+            f"{sidecar_p.name}, same folder). Every script must be produced by the Writers' Room "
+            f"(cb_writer.write, Gate 0) before Gate 1 can break it down — a script pasted/uploaded "
+            f"directly, bypassing Gate 0, has no scorecard and no record of ever being reviewed "
+            f"against the Show Bible/North Star. Run Gate 0 first."
+        )
+    try:
+        _prov = json.loads(sidecar_p.read_text())
+    except Exception as e:
+        raise RuntimeError(f"GATE 1 REFUSED — {sidecar_p.name} exists but is not valid JSON ({e}); "
+                            f"cannot confirm this script's Gate-0 provenance.")
+    if "belowBar" not in _prov:
+        raise RuntimeError(
+            f"GATE 1 REFUSED — {sidecar_p.name} exists but has no 'belowBar' field, so it doesn't "
+            f"match the shape cb_writer.write() (Gate 0) produces — cannot confirm this script's "
+            f"Gate-0 provenance. Run Gate 0 first, or fix the sidecar's shape if it's a real (if "
+            f"differently-authored) Gate-0 record."
+        )
+    if _prov.get("belowBar"):
+        log(f"  ⚠ Gate-0 provenance confirmed, but this script SHIPPED BELOW THE BAR "
+            f"({sidecar_p.name}) — review it before treating the resulting storyboard as final.", flush=True)
     system, chars = _mind()
-    script = pathlib.Path(script_path).read_text()
     # FAITHFUL GROUND TRUTH — parse the screenplay DETERMINISTICALLY; every scene's breakdown is anchored to, and its
     # dialogue hard-gated against, these verbatim elements. The Director brings the script to life; it never changes it.
     _pmap = {}
@@ -910,7 +1405,21 @@ def direct(script_path, episode, title, log=print):
                 for attempt in (1, 2):
                     try:
                         _beats = scene_to_beats(system, script, bm, sc, theme, chars, _elems, retry_note=retry_note); break
-                    except Exception as e:
+                        # NOTE (2026-07-15): a two-stage split (direct_scene_creative + deliver_beat_manifest,
+                        # both still defined below) was built and tested tonight against the "why isn't the
+                        # Director producing Pixar-level staging" question. Tested on Scene 1 via cb_craft's
+                        # own rubric: no improvement (same-or-worse on 2/5 criteria vs this single-shot path).
+                        # Reverted to the proven path for the real, full-episode fire rather than run an
+                        # unproven, single-scene-tested architecture change at real cost — Julian's own call
+                        # ("even if we're not entirely happy with it, we're gonna run with it") was to stop
+                        # iterating on craft process and push the pipeline forward, not to gamble on this.
+                        # The two functions are kept, not deleted, in case a future, more careful test (the
+                        # multiple-independent-drafts/judge-panel idea discussed the same night) picks this up.
+                    except (Exception, SystemExit) as e:
+                        # widened to SystemExit too — scene_to_beats() calls straight into cb_llm.structured(),
+                        # which deliberately raises SystemExit (a BaseException) on a provider-level failure; a
+                        # bare "except Exception" here would let attempt 1's provider hiccup skip the intended
+                        # 2-attempt retry entirely instead of logging and trying again (rule 46 bug class).
                         log(f"      ⚠ scene {sc['sceneNumber']} attempt {attempt} failed ({str(e)[:90]})"
                             + ("" if attempt == 2 else " — retrying..."), flush=True)
                 if not _beats:
@@ -927,6 +1436,14 @@ def direct(script_path, episode, title, log=print):
                 _drop, _dup = [], []
                 if _scene_dialogue:                          # HARD VERBATIM GATE — snap every line back to the writer's EXACT words
                     _beats, _drop, _dup = enforce_verbatim(_beats, _scene_dialogue, sc["sceneNumber"], log=log)
+                # THE MOTION CONTRACT SELF-CORRECTION (2026-07-15, "get it right first time") — after the
+                # verbatim gate (dialogue is never touched; only cut action prose is reshaped), any cut still
+                # reading as a checklist of separately-clocked actions is corrected through the Director's own
+                # voice HERE, at authoring time, instead of surfacing downstream as a Gate-3 flag for Julian
+                # to glance at. See motion_contract_pass's own docstring for the full story.
+                _mc_fixed = motion_contract_pass(_beats, sc, log=log)
+                if _mc_fixed:
+                    log(f"      motion contract: {_mc_fixed} cut(s) self-corrected at authoring time", flush=True)
                 return _beats, _drop, _dup
 
             def _missing_tuples(normalized_targets):
@@ -988,8 +1505,14 @@ def direct(script_path, episode, title, log=print):
                 if dp.get("lens"): sc["lens"] = dp["lens"]
                 if dp.get("cameraHeight"): sc["cameraHeight"] = dp["cameraHeight"]
                 log(f"      scene shot DERIVED: \"{sc.get('sceneShotName','')}\" ✓", flush=True)
-            except Exception as e:
+            except (Exception, SystemExit) as e:
+                # cb_llm.structured() deliberately raises SystemExit (a BaseException, not caught by "except
+                # Exception") on any OpenAI provider-level failure — its documented fail-loud design for the
+                # primary authoring path. derive_plate() calls straight into it, so this catch must widen to
+                # SystemExit too, or a provider hiccup here would abort the whole Gate-1 fire instead of just
+                # falling back to the beat-map location as this comment always promised (rule 46 bug class).
                 log(f"      ⚠ derive_plate skipped ({str(e)[:60]}) — kept the beat-map location", flush=True)
+            sc["performanceThroughline"] = _derive_performance_throughline(beats)   # mechanical, from the beats
             log(f"      -> {len(beats)} beats", flush=True)
             all_beats += beats
     except SceneBreakdownError as e:
@@ -1051,7 +1574,7 @@ def direct(script_path, episode, title, log=print):
         "northStarAnswers": _derive_north_star_answers(all_beats, scenes),
     }
     OUT.mkdir(exist_ok=True)
-    pkg_path = OUT / f"{episode}_{_slug(title)}_beat_package.json"
+    pkg_path = OUT / f"{episode}_{P.slug(title)}_beat_package.json"
     json.dump(pkg, open(pkg_path, "w"), indent=1, ensure_ascii=False)
 
     # locations.json — MERGE into the existing per-episode dict; never rebuild the whole file. These configs are
@@ -1061,11 +1584,22 @@ def direct(script_path, episode, title, log=print):
     locp = HERE / "config" / "locations.json"
     L = json.load(open(locp)) if locp.exists() else {}
     L.setdefault("_note", "")
+    # FIXED 2026-07-11 (full-codebase audit): this used to hardcode "master": None for EVERY scene on every
+    # Gate-1 (re)fire, discarding any previously signed-off Gate-2a plate path unconditionally — including for
+    # scenes redirect() didn't materially change, and WITHOUT cascading the corresponding locked.json gate
+    # flags the way unapprove()/_relock_if_stale both correctly do when they reset this same field, leaving
+    # the two files inconsistent (locked.json still says "2a": approved while the plate path silently vanished).
+    # Now preserves each scene's existing master (and other prior fields not being freshly authored here) —
+    # a genuine Gate-1 content change is still caught and cascaded correctly by _relock_if_stale's own
+    # fingerprint check on the next gate-status read, which resets master IN STEP with the lock flags.
+    _prior = L.get(episode, {})
     L[episode] = {}
     for sc in scenes:
-        L[episode][str(sc["sceneNumber"])] = {
+        _sn = str(sc["sceneNumber"])
+        _prior_master = (_prior.get(_sn) or {}).get("master")
+        L[episode][_sn] = {
             "name": sc["name"], "locationId": sc.get("locationId", ""),
-            "sceneShotName": sc.get("sceneShotName", ""), "master": None,
+            "sceneShotName": sc.get("sceneShotName", ""), "master": _prior_master,
             "time": sc.get("time", ""), "weather": sc.get("weather", ""),
             "location": sc.get("location", ""), "look": sc.get("look", ""),
             "lighting": sc.get("lighting", ""),
@@ -1104,7 +1638,13 @@ def direct(script_path, episode, title, log=print):
     try:
         import cb_director_eye
         cb_director_eye.run(str(pkg_path), episode)
-    except Exception as e:
+    except (Exception, SystemExit) as e:
+        # cb_director_eye.run() calls straight into cb_llm.structured(), which deliberately raises SystemExit
+        # (a BaseException, NOT caught by "except Exception") on any OpenAI provider-level failure — its
+        # documented fail-loud design for the primary authoring path. This runs AFTER the beat package is
+        # already written to disk, so a provider hiccup here must degrade to a manual-review note, never take
+        # down an otherwise-successful Gate 1 — widened to catch SystemExit too, or this comment's own promise
+        # would be defeated (rule 46 bug class).
         log(f"  ⚠ Director's Eye skipped ({str(e)[:120]}) — review manually before signing off Gate 1.", flush=True)
 
     return {"package": str(pkg_path), "scenes": len(scenes), "beats": len(all_beats)}

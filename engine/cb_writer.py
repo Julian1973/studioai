@@ -5,7 +5,11 @@ cb_writer.py — GATE 0, THE WRITERS' ROOM.
 Turns a SEED into a finished, FUNNY, heartfelt, dialogue-LOCKED social-emotional-learning episode SCRIPT for
 ages 4-8 — then SELF-SCORES it /10 on four factors (Show Bible / serves the why / characters on point /
 layered humour). It runs ON the crystal-bears-writer skill (the room of five minds — Docter, Brumm, Stanton,
-Nee, Woolverton — and the eight passes, the North Star, the Five Pillars, the Show Bibles, the scorecard).
+Nee, Woolverton — and the eight passes, the North Star, the Five Pillars, the Show Bibles, the scorecard),
+read at runtime from `skills/crystal-bears-writer/SKILL.md`. NOTE (2026-07-14): that file is frozen at an
+early project snapshot and still states 10-12s beats; `_mind()` appends a correction block immediately after
+it, superseding that ONE point (the real beat length is 15s, the Handle Doctrine) without touching the file
+or discarding the eight-pass method's own still-valid craft.
 
 It WRITES the script. It does NOT break it down — that is Gate 1 (cb_director). The output drops into exactly
 the place Gate 1 reads, so the finished script flows straight into the pipeline.
@@ -18,6 +22,7 @@ Writes:
 """
 import os, re, sys, json, pathlib, requests
 import cb_gen
+import cb_llm                                 # shared JSON-recovery plumbing (repair_truncated/_loads)
 import paths as P                             # T30 Phase 2/3 — the single source of path constants
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -45,48 +50,31 @@ def _gen(system, user, temperature=0.85, max_tokens=65536):
     if r.status_code != 200:
         raise SystemExit(f"Writer model error {r.status_code}: {r.text[:400]}")
     j = r.json()
+    # FIXED 2026-07-12 (full-codebase audit continued): a safety-blocked/filtered Gemini response returns
+    # {"candidates": []} — the key IS present (empty list), so j["candidates"][0] raised IndexError, caught
+    # below, but the diagnostic itself then did j.get('candidates',[{}])[0] — since the key is present, .get()
+    # returns [] (never falls back to [{}]), so [0] on that empty list raised a SECOND, uncaught IndexError that
+    # propagated straight out of _gen() as a raw traceback instead of the intended SystemExit message. Guarding
+    # before ever indexing (matching cb_gen.py's own `if not rj.get("candidates")` pattern for this exact
+    # response shape) closes both the primary crash and the diagnostic's own crash in one place.
+    if not j.get("candidates"):
+        raise SystemExit(f"Writer model returned no candidates (likely a safety block): {str(j)[:400]}")
     try:
         return j["candidates"][0]["content"]["parts"][0]["text"]
     except Exception:
         raise SystemExit(f"Writer parse error — no text. Finish: {j.get('candidates',[{}])[0].get('finishReason')} | {str(j)[:300]}")
 
-def _repair_truncated(s):
-    """Close a JSON reply cut off by the token cap (open string, dangling comma, missing ]/}) — recover the complete elements."""
-    stack = []; in_str = esc = False
-    for ch in s:
-        if in_str:
-            if esc: esc = False
-            elif ch == "\\": esc = True
-            elif ch == '"': in_str = False
-        else:
-            if ch == '"': in_str = True
-            elif ch in "{[": stack.append(ch)
-            elif ch in "}]" and stack: stack.pop()
-    out = (s + ('"' if in_str else "")).rstrip()
-    if out.endswith(","): out = out[:-1].rstrip()
-    for ch in reversed(stack):
-        out += "}" if ch == "{" else "]"
-    return out
-
 def _loadjson(text, what="output"):
+    """FIXED 2026-07-12 (loose-ends pass): the first three recovery tiers here (strip code fences, decode the
+    first complete value, close a token-cap-truncated reply) were a hand-duplicate of cb_llm._loads — now
+    delegates to it, keeping only this module's own two extras: a final regex-based scrape for a genuinely
+    messy reply, and the user-facing SystemExit-with-diagnostic (cb_llm._loads is a library function and just
+    raises/propagates; this CLI tool wants a clear, contextual error naming what failed and showing the reply)."""
     t = text.strip()
-    if t.startswith("```"):
-        t = re.sub(r"^```[a-zA-Z]*\n", "", t).rsplit("```", 1)[0].strip()
     try:
-        return json.loads(t)
+        return cb_llm._loads(t)
     except Exception:
         pass
-    start = next((k for k, ch in enumerate(t) if ch in "{["), -1)
-    body = t[start:] if start >= 0 else t
-    if start >= 0:
-        try:
-            return json.JSONDecoder().raw_decode(body)[0]       # first complete value (handles "Extra data")
-        except Exception:
-            pass
-        try:
-            return json.loads(_repair_truncated(body))          # recover a TRUNCATED reply
-        except Exception:
-            pass
     m = re.search(r"[\{\[].*[\}\]]", t, re.S)
     if m:
         try:
@@ -97,11 +85,9 @@ def _loadjson(text, what="output"):
 
 # ── the room's mind (the writer skill + canon + the cast) ────────────────────
 def _roster(chars):
-    # a stub character (e.g. Bo, T6 ruling) can have sizeRank explicitly null, not merely absent — .get(key, default)
-    # only falls back to default on a MISSING key, so a present-but-None value reaches sorted() as None and crashes
-    # comparing against another character's int rank. `or 99` catches both missing AND explicitly-null the same way.
-    order = sorted([k for k, v in chars.items() if isinstance(v, dict) and k not in ("sizeClasses",)],
-                   key=lambda k: chars[k].get("sizeRank") or 99)
+    # FIXED 2026-07-11 (full-codebase audit, duplication finding): the sort itself now lives once in
+    # paths.char_size_order — cb_director.py's own _roster shared this exact block byte-for-byte before this fix.
+    order = P.char_size_order(chars)
     out = []
     for k in order:
         c = chars[k]
@@ -114,8 +100,9 @@ def _roster(chars):
 
 def _mind():
     skill = SKILL.read_text() if SKILL.exists() else ""
-    canon = CANON.read_text() if CANON.exists() else ""
-    chars = json.load(open(CHARS))
+    # FIXED 2026-07-12 (loose-ends pass): canon+chars reading was hand-duplicated here, in cb_director.py's
+    # own _mind(), and in cb_director_eye.py's own _show_bible() — now paths.load_show_bible().
+    canon, chars = P.load_show_bible()
     system = (
         "You are the CRYSTAL BEARS WRITERS' ROOM — five Emmy/Oscar-calibre minds writing the funniest, most "
         "heartfelt social-emotional-learning episode imaginable for ages 4-8. INTERNALISE the five as your "
@@ -139,6 +126,12 @@ def _mind():
         "(glow / flicker / dim / colour + the bear's note). Dialogue you write is FINAL and LOCKED.\n"
         "Output STRICT JSON ONLY (no prose, no markdown) matching the schema you are given.\n\n"
         "════════ YOUR CRAFT (the crystal-bears-writer skill — your brain: the eight passes + the scorecard) ════════\n" + skill +
+        "\n\n════════ CORRECTION TO THE ABOVE (2026-07-14 — the skill file above is frozen at an early project "
+        "snapshot; this correction takes precedence wherever the two disagree) ════════\n"
+        "Wherever the craft above states or implies a beat runs 10-12 seconds, that is SUPERSEDED: every beat is "
+        "now hard-locked at 15 seconds (13s of action + a 2s directed settle — the Handle Doctrine, live since "
+        "2026-07-03). Write toward a 15-second beat, not a 10-12 second one; everything else about the eight-pass "
+        "method, the scorecard, and the room's craft above still stands.\n"
         "\n\n════════ THE LOCKED CANON / SHOW BIBLE (source of truth — never contradict it) ════════\n" + canon +
         "\n\n════════ THE CAST (only these characters exist — never invent any) ════════\n" + _roster(chars) +
         "\n\nHold the NORTH STAR throughout: will they laugh out loud, will they breathe in, does the crystal tell "
@@ -238,11 +231,18 @@ def score(system, seed, the_draft):
     )
     return _loadjson(_gen(system, user, temperature=0.35), "scorecard")
 
-def _slug(s):
-    return re.sub(r"[^A-Za-z0-9]+", "_", s or "").strip("_") or "Untitled"
+def _score_of(sc, k):
+    # FIXED 2026-07-12 (full-codebase audit continued): score()'s prompt only asks for the nested
+    # {"score": number, "why": str} shape in plain English — there is no responseSchema/Pydantic enforcement on
+    # this Gemini call (unlike cb_director.py's structured path), so a factor is only guaranteed to be PRESENT,
+    # never guaranteed to be a dict. A bare number (sc["showBible"] = 8) used to reach (sc.get(k, {}) or {}) ->
+    # 8 (truthy, so `or {}` never applies), then 8.get("score", 0) -> AttributeError, crashing the whole write()
+    # call with no repair path. Coercing anything that isn't itself a dict to 0 degrades gracefully instead.
+    v = sc.get(k)
+    return v.get("score", 0) if isinstance(v, dict) else 0
 
 def _min_factor(sc):
-    return min((sc.get(k, {}) or {}).get("score", 0) for k in ("showBible", "why", "characters", "humour", "overall"))
+    return min(_score_of(sc, k) for k in ("showBible", "why", "characters", "humour", "overall"))
 
 # ── the room runs ────────────────────────────────────────────────────────────
 def write(seed, episode="Ep1", log=print):
@@ -266,14 +266,19 @@ def write(seed, episode="Ep1", log=print):
     tries = 0
     while _min_factor(sc) < BAR and tries < 2:
         tries += 1
-        low = {k: sc[k] for k in ("showBible", "why", "characters", "humour") if (sc.get(k, {}) or {}).get("score", 0) < BAR}
-        log(f"  ↻ below the bar ({min((sc.get(k,{}) or {}).get('score',0) for k in ('showBible','why','characters','humour','overall'))}/10) "
+        # sc.get(k, {}), not sc[k] — the filter condition already tolerates a missing factor key (LLM output isn't
+        # guaranteed complete); the old sc[k] here would then raise a real KeyError the moment a factor the LLM
+        # simply omitted was picked up by that same tolerant condition (2026-07-08 audit finding).
+        # _score_of (not the old (sc.get(k, {}) or {}).get(...) inline) — see its own docstring: a bare non-dict
+        # factor value used to raise AttributeError here too (2026-07-12 audit finding).
+        low = {k: sc.get(k, {}) for k in ("showBible", "why", "characters", "humour", "overall") if _score_of(sc, k) < BAR}
+        log(f"  ↻ below the bar ({min(_score_of(sc, k) for k in ('showBible','why','characters','humour','overall'))}/10) "
             f"— remaking weak beats (pass {tries})...", flush=True)
         d = draft(system, seed, the_plan, critique={"weakBeats": sc.get("weakBeats", []), "factors": low})
         sc = score(system, seed, d)
-    log(f"  SCORECARD — Bible {sc.get('showBible',{}).get('score')} · why {sc.get('why',{}).get('score')} · "
-        f"characters {sc.get('characters',{}).get('score')} · humour {sc.get('humour',{}).get('score')} · "
-        f"OVERALL {sc.get('overall',{}).get('score')}/10", flush=True)
+    log(f"  SCORECARD — Bible {_score_of(sc,'showBible')} · why {_score_of(sc,'why')} · "
+        f"characters {_score_of(sc,'characters')} · humour {_score_of(sc,'humour')} · "
+        f"OVERALL {_score_of(sc,'overall')}/10", flush=True)
     below_bar = _min_factor(sc) < BAR   # 2 remake passes is best-effort, not a guarantee — this can still be true
     if below_bar:
         log(f"  ⚠⚠ SHIPPING BELOW THE BAR — {_min_factor(sc)}/10 after {tries} remake pass(es); the LLM could not "
@@ -283,7 +288,7 @@ def write(seed, episode="Ep1", log=print):
     # write into exactly where Gate 1 reads — one script per episode
     SCRIPTS.mkdir(parents=True, exist_ok=True)
     title = (d.get("title") or title_hint).strip()
-    slug = _slug(title)
+    slug = P.slug(title)
     for old in list(SCRIPTS.glob(f"{episode}_*.txt")) + list(SCRIPTS.glob(f"{episode}_*.score.json")):
         try: old.unlink()
         except Exception: pass

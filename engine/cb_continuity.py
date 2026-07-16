@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""cb_continuity.py — the cross-scene continuity CHECK (fires every gate, surfaces in the studio).
+"""cb_continuity.py — the cross-scene continuity CHECK.
+
+CORRECTED 2026-07-14 (full-pipeline verification audit): this docstring used to say "fires every gate" —
+overclaimed. The code-enforced scope is 3 of 7 gates (2a/2b/3, via cb_pipeline.fire()'s own _GENERATIVE
+tuple, which just prints the findings) plus approve() itself (2026-07-14 fix, CLAUDE.md rule 85 — a real
+BLOCK-level finding for THIS scene, or a genuinely global finding, now actually refuses that gate's
+sign-off, closing the "computed but discarded" gap the old wording implied was already closed). Gates
+1/1.6/4/5 do not run this check automatically at all.
 
 Catches the things a single-scene build can't see:
   - Keen's wristbands must progress none -> vacant -> crystal across the whole episode (no regressions).
@@ -12,10 +19,47 @@ Catches the things a single-scene build can't see:
 import json, os, sys
 import cb_prompts as P
 
+def _resolve_pkg(episode="Ep1"):
+    """The current episode's beat package — resolved by glob, mirroring cb_pipeline._resolve_pkg() exactly,
+    so this module never carries its own second, independently-hardcoded guess at the filename.
+    FIXED 2026-07-12 (full-codebase audit continued): run() and __main__'s --json branch both used to
+    hardcode a single stale literal ("..._shot_package.json", a filename that no longer exists anywhere
+    outside old archive folders — the live package is "..._beat_package.json"). This is exactly the
+    invocation cb-studio/serve.py's continuity_state() fires on every /api/continuity poll (`python3
+    cb_continuity.py --json`, no path arg) — so the check was silently crashing (FileNotFoundError -> empty
+    stdout -> serve.py's `json.loads(p.stdout or "[]")` swallowing it into an always-empty [] with no
+    returncode check anywhere), and the Studio's continuity panel always showed 0 findings regardless of
+    real Keen-wristband regressions, stale visions, or canon drift. Callers still may pass an explicit pkg
+    path (unchanged); this only replaces the stale default."""
+    import glob
+    cands = (glob.glob(f"../cb-output/{episode}_*beat_package.json")
+             or glob.glob(f"../cb-output/{episode}_*shot_package.json"))
+    return max(cands, key=os.path.getmtime) if cands else f"../cb-output/{episode}_The_Adventure_Begins_beat_package.json"
+
 ORDER = {"none": 0, "vacant": 1, "crystal": 2}
 TIME_ORDER = {"early morning": 1, "morning": 2, "mid-morning": 3, "late morning": 4, "midday": 5,
               "early afternoon": 6, "afternoon": 7, "late afternoon": 8, "dusk": 9, "evening": 10, "night": 11}
 WEATHER_SEV = {"clear": 0, "fair": 0, "clouds gathering": 1, "overcast": 1, "clearing": 1, "storm": 2}
+
+def _rank(text, table):
+    """Resolve a TIME_ORDER/WEATHER_SEV rank from free-form authored prose (e.g. 'Morning, early in the
+    same warm day.') by finding the longest matching vocabulary keyword as a case-insensitive substring,
+    rather than requiring an exact full-string match. ADDED 2026-07-15 (guardrail-fidelity audit): Scene.
+    time/weather (cb_director_schemas.py) carry no enum — the Director authors full descriptive sentences —
+    so the old TIME_ORDER.get(t,0)/WEATHER_SEV.get(w,0) exact lookups silently fell back to 0 for every real
+    scene (confirmed: none of the real Ep1 scenes' time/weather text matches a bare dict key), meaning this
+    check was 100% silent on real data regardless of whether the day actually moved forward or backward.
+    'Longest match wins' resolves overlapping keys correctly (e.g. 'late morning' over the shorter 'morning'
+    substring it contains). Returns 0 when no keyword is found, matching the previous fallback."""
+    if not text:
+        return 0
+    t = str(text).lower()
+    best, best_len = 0, 0
+    for k, v in table.items():
+        if k in t and len(k) > best_len:
+            best, best_len = v, len(k)
+    return best
+
 def _exists(p): return bool(p) and os.path.exists(p)
 def _mtime(p): return os.path.getmtime(p) if _exists(p) else 0
 def _codekey(c):
@@ -74,15 +118,20 @@ def check(pkg, episode="Ep1"):
 
     # 1b. Time of day must move FORWARD; weather must transition logically
     scenes = P.LOCATIONS.get(episode, {})
-    prev_t = prev_w = None; prev_n = None
+    prev_t = prev_w = None; prev_n = None; prev_wn = None
     for n in sorted([k for k in scenes if k.isdigit()], key=int):
         sc = scenes[n]; t = sc.get("time"); w = sc.get("weather")
-        if t and prev_t and TIME_ORDER.get(t, 0) < TIME_ORDER.get(prev_t, 0):
+        if t and prev_t and _rank(t, TIME_ORDER) < _rank(prev_t, TIME_ORDER):
             add("BLOCK", n, "-", f"time goes BACKWARDS: scene {prev_n} ({prev_t}) -> scene {n} ({t}) (the day must move forward)")
-        if w and prev_w is not None and abs(WEATHER_SEV.get(w, 0) - WEATHER_SEV.get(prev_w, 0)) >= 2:
-            add("NOTE", n, "-", f"weather jumps {prev_w} -> {w} (scene {prev_n}->{n}) with no intermediate — intend a hard change?")
+        if w and prev_w is not None and abs(_rank(w, WEATHER_SEV) - _rank(prev_w, WEATHER_SEV)) >= 2:
+            # FIXED 2026-07-12 (full-codebase audit continued): this used to cite prev_n — the scene where
+            # prev_t (time) last advanced, tracked by the SEPARATE `if t:` branch below — not the scene
+            # where prev_w (weather) actually last advanced. A scene with weather but no time (or vice
+            # versa) could name the wrong previous scene as the source of the cited weather state.
+            # prev_wn now tracks that scoped to the `if w:` branch only, same pattern as prev_t/prev_n.
+            add("NOTE", n, "-", f"weather jumps {prev_w} -> {w} (scene {prev_wn}->{n}) with no intermediate — intend a hard change?")
         if t: prev_t, prev_n = t, n
-        if w: prev_w = w
+        if w: prev_w, prev_wn = w, n
 
     # 2. Visions must match — and must not be stale vs the real scene's master
     for v in P.CONTINUITY.get(episode, {}).get("visions", []):
@@ -126,9 +175,19 @@ def check(pkg, episode="Ep1"):
         appin = sorted([s for s in real if who in s.get("characters", []) and str(s.get("sceneNumber")) == fscene],
                        key=lambda s: _codekey(s["shotCode"]))
         if appin and _codekey(appin[0]["shotCode"]) < _codekey(fs):
-            add("NOTE", fscene, appin[0]["shotCode"],
+            # GUARD — added 2026-07-15 alongside restoring `on` above: a naive fix would immediately false-
+            # flag Keen's own real "vacant cuffs" entry (fromShot 3.3) against 3.B1, where he correctly has
+            # no wristbands yet — that's the story's own deliberate staging (his Mum gives them to him),
+            # already declared in the beat's own keenWristbands field, which is more authoritative than this
+            # hand-maintained config claim. Skip when the earliest beat's own declared state already says
+            # the item is explicitly absent — never override a beat's own more specific declared intent.
+            first = appin[0]
+            item_l = str(p.get("item", "")).lower()
+            if ("cuff" in item_l or "wristband" in item_l) and first.get("keenWristbands", "none") == "none":
+                continue
+            add("NOTE", fscene, first["shotCode"],
                 f"CARRY-BACK? {who} {p.get('verb','has')} {p['item']} from {fs}, but first appears at "
-                f"{appin[0]['shotCode']} — should it be present from there? Check the script for its true entry point.")
+                f"{first['shotCode']} — should it be present from there? Check the script for its true entry point.")
 
     # 5. STATEFUL LOCATIONS — a place REMEMBERS. A returning location (same `locationId`) must derive from its
     #    LAST-seen state (not be older than the previous visit) and carry the accumulated worldState changes.
@@ -153,7 +212,7 @@ def check(pkg, episode="Ep1"):
 
 def run(pkg=None, episode="Ep1"):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    pkg = pkg or "../cb-output/Ep1_The_Adventure_Begins_shot_package.json"
+    pkg = pkg or _resolve_pkg(episode)
     F = check(pkg, episode)
     blocks = [f for f in F if f["level"] == "BLOCK"]
     print(f"CONTINUITY — {episode}: {len(blocks)} BLOCK, {len(F)-len(blocks)} note", flush=True)
@@ -167,6 +226,6 @@ if __name__ == "__main__":
     ep = args[1] if len(args) > 1 else "Ep1"
     if "--json" in sys.argv:
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        print(json.dumps(check(pkg or "../cb-output/Ep1_The_Adventure_Begins_shot_package.json", ep)))
+        print(json.dumps(check(pkg or _resolve_pkg(ep), ep)))
     else:
         run(pkg, ep)

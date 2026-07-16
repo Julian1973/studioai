@@ -8,7 +8,7 @@ Usage: python3 beat_preview.py <beat_package.json> <scene> <beatCode> [episode=E
 import sys, os, json
 HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE); sys.path.insert(0, HERE)
-import cb_prompts as P, cb_scene, cb_seedance
+import cb_scene, cb_seedance
 
 def main():
     if len(sys.argv) < 4:
@@ -19,7 +19,8 @@ def main():
     try:
         d = json.load(open(os.path.join("..", "cb-output", pkg)))
         beats = d.get("beats") or d.get("shots") or []
-        b = next((x for x in beats if str(x.get("beatCode") or x.get("shotCode")) == beat), None)
+        b = next((x for x in beats if str(x.get("sceneNumber")) == str(scene)
+                   and str(x.get("beatCode") or x.get("shotCode")) == beat), None)
         if not b:
             print(json.dumps({"error": "beat not found: " + beat})); return
         if kind == "seedance":
@@ -34,10 +35,14 @@ def main():
                               "prompt": g["prompt"], "readiness_status": g["readiness_status"],
                               "hard_fails": g["hard_fails"], "warnings": g["warnings"]}))
             return
-        # kind == "keyframe" — the SAME resolver generation uses → card == API.
-        prompt, refs, info = cb_scene.keyframe_for(beats, beat, episode)
-        print(json.dumps({"kind": info.get("kind"), "prompt": prompt, "chain": info.get("chain"),
-                          "refs": [os.path.basename(str(r)) for r in refs], "refCount": len(refs)}))
+        # kind == "keyframe" — the SAME resolver generation uses → card == API. Reachable today only via a
+        # direct/manual API or CLI call with kind=keyframe — the live Studio UI's own keyframe-prompt display
+        # goes through the separate kf_preview.py script (called by /api/keyframe-prompt) instead of this
+        # endpoint; left as a manual/debug affordance, not wired into the UI.
+        # FIXED 2026-07-12 (loose-ends pass): both this branch and kf_preview.py independently built the same
+        # output dict from cb_scene.keyframe_for's raw return and had already drifted apart once (the lint
+        # field) — now cb_scene.keyframe_preview_payload() is the one shared builder both scripts call.
+        print(json.dumps(cb_scene.keyframe_preview_payload(beats, beat, episode)))
     except Exception as e:
         print(json.dumps({"error": str(e)}))
 

@@ -5,6 +5,15 @@ Director rewrites the plain-English note into precise, continuity-locked retake 
 LAST stdout line is the JSON result ({ok, ref, shot_action, brief}). Run from cb-gen (so media/ + ../cb-output resolve).
 """
 import sys, json, os
+# FIXED 2026-07-12 (full-codebase audit continued): unlike every sibling preview script (beat_preview.py,
+# kf_preview.py, voice_preview.py, sound_brief_preview.py, masters_preview.py), this file had no HERE/chdir/
+# sys.path prelude, so its "../cb-output/<pkg>" resolution silently depended on the caller's subprocess cwd
+# being correct (today: serve.py's one call site passes cwd=str(ROOT/"engine")) rather than being self-
+# sufficient like the rest of its family. A future second caller or a manual debug run from the wrong cwd would
+# silently mis-resolve the package path and fail with a generic FileNotFoundError giving no hint that cwd was
+# the real cause. Added the same prelude every sibling already uses.
+HERE = os.path.dirname(os.path.abspath(__file__))
+os.chdir(HERE); sys.path.insert(0, HERE)
 
 def main():
     try:

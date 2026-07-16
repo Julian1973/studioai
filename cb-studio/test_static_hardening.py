@@ -20,6 +20,7 @@ BASE = sys.argv[1].rstrip("/") if len(sys.argv) > 1 else "http://localhost:8765"
 BLOCKED_SENSITIVE = [
     "/engine/.env", "/.env", "/engine/cb_prompts.py", "/engine/cb_gen.py", "/cb-studio/serve.py",
     "/engine/locked.json", "/engine/notes.json", "/cb-studio/data/projects-index.json",
+    "/cb-studio/data/projects.json",
     "/.replit", "/.DS_Store", "/node_modules/", "/_audit_unpack/", "/client/index.html",
     "/engine/_master3.log", "/server.js.bak", "/../engine/.env",
 ]
@@ -46,9 +47,12 @@ ALLOWED = [
     "/CRYSTAL_BEARS_LOCKED_CANON.md",
     "/cb-studio/data/episodes.json",
     "/cb-studio/data/media-index.json",
-    "/cb-studio/data/scripts/Ep1_The_Adventure_Begins.txt",
+    "/cb-studio/data/scripts/Ep1_Final_Episode_one.txt",     # FIXTURE REFRESH 2026-07-16: the branch renamed the
+    #   Ep1 script (old name deleted in the same restructure) — same stale-fixture class fixed once before
+    #   (2026-07-08 audit); a 404 on a file that no longer exists is correct serving, not a regression.
     "/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
-    "/engine/media/AB_1.B1_flux.png",
+    "/engine/media/Ep1_1.B1_bizzy-leaf-rebound.png",         # FIXTURE REFRESH 2026-07-16: current real keyframe
+    #   (the old s1-b1-bizzy-fwip-nailed-it slug was retired by the Ep1 restructure).
 ]
 
 

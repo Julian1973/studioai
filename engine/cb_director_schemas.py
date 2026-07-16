@@ -12,6 +12,7 @@ nullable-but-present field. Keep these models flat; nest only where the package 
 import re
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
+import paths as _paths
 
 
 # ── STAGE 0 — theme lock ─────────────────────────────────────────────────────
@@ -68,6 +69,15 @@ class Scene(BaseModel):
     #   the scene, e.g. "drains into storm light by the end") — sceneLook is the CONSTANT held word-for-word
     #   across every beat (the Scene Bubble Law, rule 35), so it should read as the scene's dominant, opening
     #   atmosphere, not a beat-by-beat progression. Same min_length=1 reasoning as ambientBed/parentLine above.
+    performanceThroughline: Optional[str] = None  # THE PERFORMANCE THROUGHLINE (2026-07-08, Directing/Animation
+    #   panel finding, CORRECTED same night by Julian — "the script and the storyboard and beat should deliver
+    #   that" — not a separately hand/LLM-authored note. The first version of this field asked the Director to
+    #   WRITE it before any beats existed (required, min_length=1); that's backwards, since the beats
+    #   themselves already say who carries a scene once they're written. Now genuinely Optional/nullable here
+    #   (never required LLM output — OpenAI strict mode has nothing to author for it) and populated by CODE,
+    #   not the model: cb_director._derive_performance_throughline(beats) reads each beat's own already-
+    #   authored fidelityAllocation.primary AFTER scene_to_beats returns, and direct() attaches the result onto
+    #   this scene dict — mechanical, zero extra LLM calls, nothing invented. See CLAUDE.md rule 58.
 
 
 class ArcDay(BaseModel):
@@ -105,6 +115,12 @@ class Persistent(BaseModel):
     item: str
     in_: str = Field(alias="in")   # downstream cb_prompts reads persistent[].in — preserve the key exactly
     fromShot: str
+    # RESTORED 2026-07-15 (guardrail-fidelity audit): cb_continuity.py's CARRY-BACK check (and cb_prompts.
+    # worn_line()) have always read p.get("on") as the character an item is worn/held by — but this field
+    # was dropped from the schema at some point (a 2026-06-22-archive snapshot still had it on one entry;
+    # every snapshot since has collapsed to item/in/fromShot only), leaving both readers silently inert.
+    # Optional since not every persistent item is character-worn (some are asset-location only).
+    on: Optional[str] = None
 
 
 class Lost(BaseModel):
@@ -254,11 +270,20 @@ class Beat(BaseModel):
     crystalGlow: str
     beautyMoment: bool
     startState: str                       # the static held OPENING frame (the keyframe is drawn from it)
-    keyframePrompt: str
-    i2vPrompt: str                        # the Seedance beat take prompt
+    # keyframePrompt/i2vPrompt/check made OPTIONAL 2026-07-15 (guardrail-fidelity audit): confirmed zero
+    # downstream consumer for any of the three anywhere in the codebase — cb_prompts.build_keyframe_prompt
+    # (the real keyframe compiler) is built entirely from startState/plate/turnarounds, never keyframePrompt;
+    # cb_beats.py's own module docstring states "the legacy i2vPrompt field is not read by either path"; and
+    # i2vPrompt's own authoring instruction told the LLM to write dialogue IN for lip-sync — a direct Law-6
+    # violation, confirmed live in the real package (1.B1's i2vPrompt ships literal spoken lines), harmless
+    # only because nothing reads it. Requiring these non-blank as a Gate-1 BLOCK burned a real, paid repair
+    # call over content with zero bearing on delivery. Kept as optional fields (never deleted outright) in
+    # case a future stage re-consumes them.
+    keyframePrompt: Optional[str] = None
+    i2vPrompt: Optional[str] = None       # LEGACY — never sent; the shipped prompt is cb_segprompt's own
     soundIntent: str
     continuity: BeatContinuity
-    check: BeatCheck
+    check: Optional[BeatCheck] = None
     writerNote: Optional[str] = None      # Braintrust/Three-Strikes flag for Julian; the line STAYS verbatim
     shot_style: Optional[str] = None      # SINGLE_TAKE|CINEMATIC_CUTS|COMEDY_CUTS|HEART_COVERAGE|ACTION_COVERAGE|MAGIC_COVERAGE (inferred if null)
     script_gag_lock_id: Optional[str] = None  # a LOCKED scripted gag (config/gag_locks.json) — the Director may split, never mutate
@@ -276,9 +301,23 @@ class Beat(BaseModel):
     endStateStill: str                     # the SAME instant as endState, described as a static photograph:
     #                                         no temporal verbs ("settles into", "turns to"), no imperatives,
     #                                         no camera/ambience — only subjects, poses, positions, expressions
-    carryMarks: str                        # a SHORT phrase (not a sentence) naming what specifically, visibly
-    #                                         persists into the next beat (a held object, wet fur, a costume
-    #                                         state) — or an explicit "no persisting marks" if genuinely none
+    carryMarks: str                         # a SHORT phrase (not a sentence) naming what specifically, visibly
+    #                                         persists INTO THIS BEAT'S OWN OPENING from the beat BEFORE it (a
+    #                                         held object, wet fur, a costume state) — or an explicit "no
+    #                                         persisting marks" if genuinely none. CORRECTED 2026-07-11
+    #                                         (full-codebase audit, workflow-gap finding): this field used to
+    #                                         say "persists into the next beat" (outbound/forward) — backwards
+    #                                         from what the join-check actually reads. cb_beats.py's join-check
+    #                                         (cb_qa.check_join_state) reads THIS beat's OWN carryMarks field
+    #                                         and compares it against the harvested settle frame of the
+    #                                         PREVIOUS beat's clip — i.e. it verifies what THIS beat inherited
+    #                                         at its own opening, not what it hands off to whatever comes after
+    #                                         it. CLAUDE.md rule 65 (2026-07-09) already independently arrived
+    #                                         at and hand-enforced this same backward convention across 19 real
+    #                                         beat transitions; this comment (and the matching Director
+    #                                         authoring prompt in cb_director.py) had never been updated to
+    #                                         match, so every future Gate-1 fire would keep re-authoring this
+    #                                         field in the wrong direction.
     junctionType: Optional[str] = None     # "intentional_next_shot" (THE DEFAULT — a new gag arc, a fresh
     #                                         camera setup) | "seamless_continuation" (ONLY when the shot
     #                                         genuinely doesn't cut — ONE unbroken take spanning the boundary);
@@ -306,7 +345,7 @@ class Beat(BaseModel):
     #                                         beat's own specific gag-failure modes to forbid (e.g. "Fuzzby
     #                                         disappearing into the flower"), each phrase written WITHOUT its
     #                                         own leading "no" (the emitter adds that mechanically) — most
-    #                                         beats leave this null; the eleven standing negatives already
+    #                                         beats leave this null; the twelve standing negatives already
     #                                         cover every beat regardless
     actingContrast: str                    # which characters in this beat play off each other and how (for a
     #                                         solo-character beat: the INTERNAL contrast within that one
@@ -319,8 +358,18 @@ class Beat(BaseModel):
     #                                         breath, a physical gag) — never a restatement of emotionalIntent
     fidelityAllocation: FidelityAllocation  # THE FIDELITY-ALLOCATION LAW (2026-07-07) — who this beat's craft
     #                                         budget actually spends on; see FidelityAllocation's own docstring
-    # ── Episode Director layer (all optional / back-compatible; inferred by cb_seedance when null) ──
+    # ── Episode Director layer — THE DIRECTOR'S OWN CHOICE (2026-07-14, restoring the named-auteur-per-chair
+    #    doctrine, CRYSTAL_BEARS_STUDIO_BIBLE.md Law 1 — "one mind per chair, never a committee"): both fields
+    #    below used to be inferred mechanically at Gate 3 (cb_seedance.infer_director_mode/infer_physical_
+    #    archetype), AFTER the beat's prose was already written — a classifier guessing at a choice nobody
+    #    actually made. The Director now authors both directly, as a real creative decision made at the moment
+    #    the beat is invented (scene_to_beats's own prompt gives him the full menu). Kept Optional — a beat with
+    #    no strong engine of either kind legitimately leaves one or both null — and the Gate-3 inference stays
+    #    live underneath as the fallback for exactly that case, never removed.
     director_mode: Optional[str] = None         # one of the 15 universal emotional modes (DIRECTOR_MODE_GUIDANCE)
+    physical_action_archetype: Optional[str] = None  # one of the 18 physical-comedy patterns (PHYSICAL_ARCHETYPES)
+    #                                             — the Director's choice of which one this beat's own physical
+    #                                             engine is built from; null for a beat with no physical engine
     audience_feeling_target: Optional[str] = None  # what the audience should FEEL (laughter, tenderness, panic, awe …)
     emotional_function: Optional[str] = None    # the beat's emotional job in the arc
     script_truth_lock: Optional[str] = None     # a non-gag scripted truth the beat must preserve
@@ -339,6 +388,88 @@ class Beat(BaseModel):
 
 class SceneBeats(BaseModel):
     beats: List[Beat]
+
+
+# ── THE TWO-STAGE SPLIT (2026-07-15, Julian's own architectural ruling — "we build a guardrail around each
+# beat to ensure that we deliver what the director wants, not working within constraints all of the time"):
+# `Beat` above asks for ~50 fields in ONE structured-output call — genuine creative decisions (storyBeat,
+# cuts, comedy, emotion) sitting in the SAME schema as pure engineering bookkeeping (junctionType,
+# endStateStill, humourLayer, fidelityAllocation...). An LLM filling out that shape optimizes for "did I
+# satisfy every field," which is a compliance task, not a creative one — the confirmed, repeated reason the
+# craft rating (cb_craft.py) keeps finding "competent, not Pixar" beats even though every technical/canon law
+# is honoured. These two models split that one call into two genuinely separate stages: CreativeBeat is
+# EVERYTHING a director actually decides (story, staging, comedy, emotion, camera) with ZERO of the manifest
+# bookkeeping; ManifestFields is the engineering/labeling pass that runs SEPARATELY, AFTER the creative
+# content already exists, naming/deriving the technical fields from what the director already wrote — never
+# inventing new creative content, only describing it. cb_director.direct_scene_creative()/deliver_beat_
+# manifest() are the two calls; direct() merges their output into a full Beat before the existing verbatim-
+# gate/repair loop (validate_scene_beats) runs on the MERGED result, unchanged — correctness-checking still
+# happens, just after creative authorship, never competing with it inside one generation.
+class CreativeBeat(BaseModel):
+    slug: str
+    scene: str
+    characters: List[str]
+    openingCast: List[str]
+    speakers: List[str]
+    keenWristbands: Optional[str] = None
+    durationSec: int
+    pillar: str
+    intensity: float
+    storyBeat: str
+    emotionalIntent: str
+    want: str
+    need: str
+    crystalTruth: str
+    kidRead: str
+    adultRead: str
+    theGame: Optional[str] = None
+    wordlessHeld: bool
+    comedyMode: Optional[str] = None
+    physicalFeeling: str
+    light: str
+    atmosphere: str
+    motionTempo: str
+    grade: str
+    cuts: List[Cut]
+    cameraArc: str
+    pacingVerbs: List[str]
+    pauseHold: str
+    performance: Performance
+    crystalGlow: str
+    beautyMoment: bool
+    startState: str
+    soundIntent: str
+    continuity: BeatContinuity
+    check: Optional[BeatCheck] = None
+    writerNote: Optional[str] = None
+    endState: str
+
+
+class CreativeSceneBeats(BaseModel):
+    beats: List[CreativeBeat]
+
+
+class ManifestFields(BaseModel):
+    """One beat's worth of the engineering/manifest layer — see CreativeBeat's own docstring above for why
+    this is a separate call. `slug` matches this back to the CreativeBeat it labels."""
+    slug: str
+    endStateStill: str
+    carryMarks: str
+    junctionType: Optional[str] = None
+    opensOn: Optional[OpensOn] = None
+    relayOpeningNote: Optional[str] = None
+    spatialAxis: Optional[str] = None
+    stagingProhibited: Optional[List[str]] = None
+    actingContrast: str
+    humourLayer: int
+    emotionMechanic: str
+    fidelityAllocation: FidelityAllocation
+    director_mode: Optional[str] = None
+    physical_action_archetype: Optional[str] = None
+
+
+class SceneManifest(BaseModel):
+    beats: List[ManifestFields]
 
 
 # ── GATE 1.5 — DIRECTOR'S EYE (bible + Pixar-craft review, cb_director_eye.py) ─
@@ -368,7 +499,9 @@ class EyeReport(BaseModel):
 # ── validation helpers (business rules layered on top of the strict schema) ───
 VALID_COMEDY = {"BIG", "TRUE", None, ""}
 VALID_JUNCTION = {"intentional_next_shot", "seamless_continuation", None, ""}
-_PAUSEHOLD_RE = re.compile(r"(\d+(?:\.\d+)?)[\s-]*second")
+# FIXED 2026-07-11 (full-codebase audit, duplication finding): now shared with cb_preflight._HOLD_RE via
+# paths.PAUSEHOLD_RE — see that module's own comment for why.
+_PAUSEHOLD_RE = _paths.PAUSEHOLD_RE
 
 
 def beat_problems(beats, scene):
@@ -384,7 +517,6 @@ def beat_problems(beats, scene):
     if not beats:
         return [f"scene {scene.get('sceneNumber')} produced ZERO beats"]
     cast = set(scene.get("cast") or [])
-    opener_slug = beats[0].get("slug")
     for i, b in enumerate(beats):
         code = b.get("beatCode") or b.get("slug") or "?"
         chars = set(b.get("characters") or [])
@@ -398,9 +530,13 @@ def beat_problems(beats, scene):
             problems.append(f"{code}: characters {sorted(chars - cast)} are not in the scene cast {sorted(cast)}")
         if not (b.get("cuts")):
             problems.append(f"{code}: has no cuts (need 2-4 internal cuts)")
-        d = b.get("durationSec")
-        if not isinstance(d, int) or not (8 <= d <= 15):
-            problems.append(f"{code}: durationSec {d!r} out of range 8..15")
+        # durationSec range check REMOVED 2026-07-15 (guardrail-fidelity audit): the handoff it protected no
+        # longer exists — cb_beats.py states outright "durationSec is retired for this purpose": every beat
+        # renders for the fixed HANDLE_TOTAL (15s, the Handle Doctrine, rule 20) regardless of this field's
+        # value, and cb_qa.check_clip's own duration check compares the ACTUAL rendered clip against a
+        # hardcoded window, never this field. A spurious range flag here burns a real, paid LLM repair call
+        # (or halts Gate 1 outright via SceneBreakdownError) over a value with zero bearing on delivery. The
+        # `durationSec: int` field itself is left in the schema/authoring prompt as a pacing/density hint.
         if (b.get("comedyMode") or None) not in VALID_COMEDY:
             problems.append(f"{code}: comedyMode {b.get('comedyMode')!r} must be BIG, TRUE or null")
         hl = b.get("humourLayer")
@@ -439,14 +575,36 @@ def beat_problems(beats, scene):
             if str(c.get("dialogue") or "").strip() and not str(c.get("delivery") or "").strip():
                 problems.append(f"{code}: cut {c.get('n')} has dialogue but no delivery note — required (acting direction, never the words; see Cut.delivery's own docstring for the worked-example bar)")
         # A required `str` field in the Pydantic schema guarantees the KEY is present, never that its VALUE is
-        # non-empty — an LLM can still return "" for a required field, which Pydantic accepts (a valid string)
-        # but cb_preflight.check_beat_technical/check_beat_creative BLOCK on as blank. Check every one of them
-        # here too, so a blank value drives the SAME repair call other business-rule violations already do,
-        # instead of only surfacing much later as an unrepaired manifest BLOCK.
-        for field in ("endState", "endStateStill", "actingContrast", "emotionMechanic", "want", "need",
-                      "kidRead", "adultRead"):
-            if not str(b.get(field) or "").strip():
-                problems.append(f"{code}: {field} is required and must not be blank")
+        # non-empty — an LLM can still return "" for a required field, which Pydantic accepts (a valid string).
+        # FIXED 2026-07-11 (full-codebase audit, correctness finding): this used to be a hand-typed 8-field
+        # tuple (endState/endStateStill/actingContrast/emotionMechanic/want/need/kidRead/adultRead) that its
+        # own comment claimed checked "every one of them" — it didn't. storyBeat, startState, keyframePrompt,
+        # i2vPrompt, crystalTruth, physicalFeeling, light, atmosphere, motionTempo, grade, cameraArc,
+        # soundIntent, crystalGlow, slug, scene and emotionalIntent are ALL required `str` fields on Beat with
+        # no blank-check anywhere in this function OR in cb_preflight.py — meaning e.g. a blank `startState`
+        # (read live by cb_prompts.build_keyframe_prompt as "the OPENING frame — WHERE each character is and
+        # what they are doing") would sail through both Pydantic and every gate check, then fire a real, paid
+        # Seedream generation call from degraded/empty state text before anyone noticed. Now derived directly
+        # from Beat's own required-string fields via model_fields, so a FUTURE new required field can never be
+        # silently omitted from this check the way the hand-typed tuple was. pauseHold/carryMarks are excluded
+        # — they already have their own more specific dedicated checks above (concrete-duration format, the
+        # "no persisting marks" explicit-empty allowance) and would otherwise be double-reported here.
+        for field, info in Beat.model_fields.items():
+            if field in ("pauseHold", "carryMarks"):
+                continue
+            if info.annotation is str and info.is_required():
+                if not str(b.get(field) or "").strip():
+                    problems.append(f"{code}: {field} is required and must not be blank")
+                continue
+            # nested required sub-models (Performance/BeatCheck/BeatContinuity) — the LLM can equally return ""
+            # for one of THEIR required str fields; walk one level down so those aren't a silent second gap.
+            nested = info.annotation
+            if isinstance(nested, type) and issubclass(nested, BaseModel) and info.is_required():
+                sub = b.get(field) or {}
+                for sfield, sinfo in nested.model_fields.items():
+                    if sinfo.annotation is str and sinfo.is_required():
+                        if not str((sub or {}).get(sfield) or "").strip():
+                            problems.append(f"{code}: {field}.{sfield} is required and must not be blank")
     return problems
 
 

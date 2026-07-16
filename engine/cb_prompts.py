@@ -1,11 +1,31 @@
 #!/usr/bin/env python3
-"""cb_prompts.py — the BEST prompting recipe per engine, encoded once.
+"""cb_prompts.py — GATE 2, THE DP + PRODUCTION DESIGNER. THE BEST prompting recipe per engine, encoded once.
 
-Single place the proven recipes live (used by cb_scene.py + cb_pipeline.py):
-- Nano Banana keyframe: character REFERENCE-ONLY (never described) + the SCENE directed
+ROLE: turns a signed-off beat's own staging data into the production-grade, paste-ready KEYFRAME image
+prompt (build_keyframe_prompt) and the once-per-scene establishing PLATE prompt (build_plate_prompt) — the
+actual image-generation instructions Gate 2 fires. RESPONSIBILITY: every keyframe is on-model, reference-
+anchored (character identity comes ONLY from the reference images, never from prose — Law 5, un-reopenable)
+and lit/composed to a real cinematographer's standard, not a generic "nice picture." WORKFLOW: build_
+keyframe_prompt reads the beat's own authored staging (framing, light, atmosphere) and assembles it against
+the locked reference stack (turnarounds + scene plate) — deterministic, data-driven, ZERO LLM call in this
+step (matching Gate 5's own "mechanical, not a guess" design; the CREATIVE call already happened at Gate 1).
+INFLUENCE (2026-07-14, the named-auteur-per-chair doctrine, CRYSTAL_BEARS_STUDIO_BIBLE.md Law 1): every
+keyframe's COMPOSITION carries Ralph Eggleston's eye ("the world as the first character"), its STYLE carries
+Patrick Lin (camera) and Jean-Claude Kalache (lighting) — see build_keyframe_prompt's own comp/style
+construction, below, for the real, live text. build_plate_prompt (the once-per-scene establishing plate, a
+separate function) has always independently carried the same three names via PLATE_CINEMATOGRAPHY/PLATE_
+PRODUCTION_DESIGN.
+
+CORRECTED 2026-07-14 (this docstring was itself stale — confirmed via a skill-file staleness audit that
+found it still described mechanisms Law 4/29 forbid): the OLD text here said "native voice kept (Julian
+swaps in CapCut); start->end frames" — the retired post-voice-swap pipeline and the retired two-keyframe-
+per-shot model, neither true of the LIVE code below. The real, current recipe:
+- Seedream 5 Pro / Nano Banana keyframe: character REFERENCE-ONLY (never described) + the SCENE directed
   richly & cinematically + derive from the scene MASTER for continuity.
-- Seedance i2v: reference-only (the keyframe carries identity); only motion + performance +
-  one camera move; native voice kept (Julian swaps in CapCut); start->end frames.
+- Seedance i2v (built elsewhere, cb_segprompt.py/Gate 3): reference-only (the keyframe carries identity);
+  the acted ElevenLabs V3 track drives the render directly as @Audio1 — no native Seedance voice, no post
+  swap, ever (Law 5). ONE keyframe per BEAT (its opening frame), chained off the previous beat's own settle
+  — never a separate END frame per shot (rule 15/21, LOCKED 2026-07-02).
 
 Reads the SSOT config (config/characters.json, config/locations.json) so references are
 strong, complete (all characters) and never hardcoded.
@@ -19,6 +39,14 @@ def _load_opt(name):
 CHARACTERS = _load("characters.json")
 LOCATIONS  = _load("locations.json")
 CONTINUITY = _load_opt("continuity.json")
+
+# FIXED 2026-07-12 (full-codebase audit, duplication finding): this exact "who is a bee" derivation used to be
+# independently recomputed in three places — a local `_bees` inside this module's own build_keyframe_prompt,
+# cb_seedance.py's own module-level BEES, and cb_qa.py's own module-level BEES (all three byte-identical
+# formulas) — a real risk that a future edit to one copy silently drifts from the others. This module already
+# loads CHARACTERS at import time, so it's the natural single home; cb_seedance.py and cb_qa.py (both already
+# `import cb_prompts as P`) now reference P.BEES instead of recomputing their own copy.
+BEES = {c for c, v in CHARACTERS.items() if isinstance(v, dict) and "bee" in str(v.get("avoid", "")).lower()}
 
 # ── THE LOCATIONS LIBRARY — signed-off scene shots, stored & reusable (the world's reference set) ──
 # Parallel to the character library: when a scene shot (plate) is SIGNED OFF it is stored here keyed by
@@ -204,7 +232,18 @@ def location_history(episode, scene_num):
     """STATEFUL LOCATIONS — a place remembers. For a RETURNING location (a scene whose `locationId`
     appeared in an EARLIER scene), return the location's LAST-SEEN state (the most recent earlier
     same-id plate that exists) + the accumulated `worldState` changes up to this scene. The returning
-    scene's plate derives from that last state, not the original anchor. Returns (prior_plate|None, [change,...])."""
+    scene's plate derives from that last state, not the original anchor. Returns (prior_plate|None, [change,...]).
+    FIXED 2026-07-12 (Julian, live review — the plate reading as too tight, traced back to this function):
+    the `changes` filter used to be `atScene/atShot <= scene_num` — so a world-state change authored to occur
+    WITHIN this scene's own beats (e.g. Scene 1's own storm-pressure shift, tagged atScene:"1", meant to arrive
+    only by 1.B4/1.B5) got folded into THIS SAME SCENE's own opening establishing plate, and separately made
+    build_plate_prompt treat a scene's own FIRST-EVER plate as a "RETURNING location... reference image is its
+    LAST-SEEN state" (wrong: there is no earlier occurrence to return to, and no earlier same-episode plate —
+    prior_plate was None the whole time). A change only genuinely belongs to "what this location currently
+    shows" once a scene STRICTLY AFTER the one it's tagged to has actually happened — never the tagged scene's
+    own opening shot, which the change hasn't occurred in yet. `<=` -> `<` closes this; the returning/library-
+    reference distinction this function's own docstring already describes now actually holds for a scene's own
+    first appearance, matching build_plate's existing `if prior_plate: ... elif lib_ref: ...` design intent."""
     locs = LOCATIONS.get(episode, {})
     sc = locs.get(str(scene_num), {})
     lid = sc.get("locationId")
@@ -222,7 +261,7 @@ def location_history(episode, scene_num):
         if w.get("locationId") != lid:
             continue
         at = str(w.get("atScene") or str(w.get("atShot", "0")).split(".")[0])
-        if at.isdigit() and int(at) <= int(scene_num):
+        if at.isdigit() and int(at) < int(scene_num):
             changes.append(w["change"])
     return prior_plate, changes
 
@@ -278,23 +317,6 @@ def size_line(shot):
         out.append(f"SIZE — render {c} at {anchor} ({cc['size']}); give {c} real presence and correct "
                    f"proportions, do NOT shrink {c} (even in a wide shot); use any in-shot prop of known size to gauge scale")
     return (" " + "; ".join(out) + ".") if out else ""
-
-def scale_line(chars):
-    """Clean relative-SIZE lock for the keyframe + Seedance take (no size-chart image is attached there) —
-    built from each character's canonical `size` + `sizeRank` so a smaller character can NEVER render larger.
-    THE size-continuity guard (e.g. Fuzzby must stay bigger than Zenny across every keyframe and clip)."""
-    present = [c for c in (chars or []) if c in CHARACTERS and (CHARACTERS[c].get("size") or CHARACTERS[c].get("sizeRank") is not None)]
-    if not present:
-        return ""
-    if len(present) == 1:
-        c = present[0]; sz = CHARACTERS[c].get("size")
-        return (f"SCALE — render {c} at its true canonical size" + (f" ({sz})" if sz else "")
-                + f"; give {c} real presence and correct proportions, never shrink {c}.")
-    ranked = sorted(present, key=lambda c: -(CHARACTERS[c].get("sizeRank") or 0))
-    order = " > ".join(ranked)
-    bits = "; ".join(f"{c} = {CHARACTERS[c]['size']}" for c in ranked if CHARACTERS[c].get("size"))
-    return ("SCALE — keep every character at its EXACT canonical size; never resize anyone or let a smaller "
-            f"character render larger. Largest → smallest: {order}." + (f" {bits}." if bits else ""))
 
 def _shotord(scene, code):
     """Comparable (scene, [part,...]) ordinal for BOTH legacy shot codes ("3.1") and beat-native codes ("3.B1") —
@@ -408,29 +430,19 @@ def identity_line(shot):
 def _band_line(shot):
     if "Keen" not in shot.get("characters", []): return ""
     return {"none":   "Keen wears no cuffs (bare wrists)",
-            "vacant": "Keen is wearing the empty vacant gold cuffs shown in the cuffs reference (no crystals)",
-            "crystal":"Keen is wearing the crystal-set aquamarine cuffs shown in the cuffs reference"
+            "vacant": "Keen is wearing the cuffs shown in the cuffs reference — vacant, no crystal set",
+            "crystal":"Keen is wearing the cuffs shown in the cuffs reference — crystal-set"
             }.get(shot.get("keenWristbands", "none"), "")
 
 def _fix_line(note):
     note = (note or "").strip()
     return (f" CORRECTIONS — the previous render was WRONG. Fix exactly these and change nothing else: {note}" if note else "")
 
-def staging_line(shot):
-    """Director's STAGING intent (Gate 1) → shapes the keyframe composition: where the eye lands first,
-    and why this composition serves the beat. From the shot's attentionTarget + stagingNote."""
-    parts = []
-    at = (shot.get("attentionTarget") or "").strip()
-    sn = (shot.get("stagingNote") or "").strip()
-    if at: parts.append(f"compose so the eye lands FIRST on {at}")
-    if sn: parts.append(sn)
-    return (" Staging (compose for the beat): " + "; ".join(parts) + ".") if parts else ""
-
 def size_chart_ref():
     """The optional bear SIZE-CHART image (all bears drawn to scale) — the reliable scale authority for
     relative sizes. Returns its path if present (drop it at cb-seed/assets/CB_size_chart.*), else None."""
     import glob
-    for p in sorted(glob.glob("../cb-seed/assets/CB_size_chart.*")):
+    for p in sorted(glob.glob(os.path.join(HERE, "..", "cb-seed", "assets", "CB_size_chart.*"))):
         return p
     return None
 
@@ -547,13 +559,21 @@ def _strip_temp_state(t):
     kept = [s for s in sentences if not _TEMP_STATE_RE.search(s)]
     return " ".join(kept) if kept else t
 
-def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", chain_ref=None, end_from=None, end_beat=False):
+def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", chain_ref=None, end_beat=False):
     """Nano Banana keyframe. Returns (prompt, refs).
     master_path None => establishing/master shot (compose from anchors + location).
     master_path set  => DERIVE this shot from the master (lock world; only framing/action change).
-    end_from set     => this is the shot's END frame: same scene + character refs, PLUS the start frame as a labelled
-                        MOTION ANCHOR; the brief asks for ONE small emotive delta (everything else identical).
+    end_beat set     => this is the shot's END frame — built the SAME clean way as the start (fresh from refs),
+                        never composited against the start frame (see build_end_prompt's own docstring for why).
     note => a correction from the human review, appended as a high-priority fix."""
+    # FIXED 2026-07-12 (full-codebase audit continued): dropped the `end_from` parameter — it was accepted
+    # and documented ("PLUS the start frame as a labelled MOTION ANCHOR") but never once read in this
+    # function's body (only the separate `end_beat` boolean actually gates anything below); no caller
+    # anywhere in engine/ ever passed it either. The promised behaviour was also stale: build_end_prompt's
+    # own inline comment explains that approach was deliberately abandoned after it caused motion-blur/
+    # drift on real renders (fresh-from-refs holds identity better). A future maintainer reading the old
+    # docstring in isolation would believe the start frame was being fed in as a visual reference when it
+    # demonstrably wasn't — removed rather than wired up, since the abandoned behaviour is not wanted back.
     # ── REFERENCE IMAGES, by ROLE ("[Image N: filename] — ROLE"). ONE shot = TWO boundary frames:
     #    START frame refs = scene plate + each character's TURNAROUND (front/side/back).
     #    END   frame refs = the accepted START frame (PRIMARY anchor, Image 1) + scene plate + the same turnaround(s).
@@ -606,10 +626,25 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # the plate/scene env image is used ONLY for an anchor beat — a continuation inherits the environment from the chain frame.
     env_ref = None if chained else (beat_scenes[0] if beat_scenes else (scene_ref if (scene_ref and os.path.exists(scene_ref)) else None))
     env_img = ((refs.index(env_ref) + 1) if env_ref in refs else _img(env_ref)) if env_ref else None
-    # ── MANUAL OVERRIDE: a human-edited exact prompt ("Save & use this exact prompt") is sent VERBATIM (refs still attach).
+    # ── MANUAL OVERRIDE: a human-edited exact prompt ("Save & use this exact prompt") is sent VERBATIM (refs still
+    # attach). GATED BEHIND EXPLICIT CONFIRMATION (2026-07-14, CLAUDE.md rule 82/83's own named-auteur-per-chair
+    # doctrine — Julian: "keep them for genuine edge cases, but require an explicit confirmation... flag it
+    # visibly so it's never silent"): this text used to ship unconditionally the moment it was non-empty,
+    # completely bypassing Eggleston/Lin/Kalache's compiled voice (build_keyframe_prompt's own composition/
+    # style text, below) with zero record that a bypass happened. An override left over from an earlier
+    # experiment, or pasted in by accident, used to ship silently forever. Now requires the SAME beat to also
+    # carry `keyframePromptOverrideConfirmed: true` — an override with no confirmation is treated as if it
+    # were never set (falls through to the real DP compiler below), not as a partial/best-effort use.
     _ovr = str(shot.get("keyframePromptOverride") or "").strip()
     if _ovr:
-        return _ovr, refs
+        if shot.get("keyframePromptOverrideConfirmed"):
+            print(f"  ⚠ GATE 2 BYPASSED for {shot.get('beatCode') or shot.get('shotCode') or '(beat)'} — "
+                  f"a confirmed keyframePromptOverride is shipping VERBATIM, skipping the DP's own compiled "
+                  f"composition/style (Eggleston/Lin/Kalache) entirely.", flush=True)
+            return _ovr, refs
+        print(f"  keyframePromptOverride present but NOT confirmed for "
+              f"{shot.get('beatCode') or shot.get('shotCode') or '(beat)'} — ignoring it, compiling the real "
+              f"DP prompt instead. Set keyframePromptOverrideConfirmed: true to intentionally ship it.", flush=True)
     # ── THE LOCKED GATE-2 KEYFRAME PROMPT — Julian's canonical Nano Banana 2 template (2026-06-28): a REFERENCE IMAGES
     #    header (one role line per image) then the PROMPT body. As many CHARACTER references as characters in the shot;
     #    the Director's beat supplies the action / environment / shot / lighting. Identity comes ENTIRELY from the images.
@@ -758,14 +793,36 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # keyframe to the "Medium shot" default. cuts[0].framing is the Director's own camera call for this beat's first
     # shot (lens, angle, move) and is the correct, beat-varying source; the old fields stay as a defensive fallback.
     framing = (_cut0.get("framing") or shot.get("shotSize") or shot.get("shotType") or "Medium shot").strip()
-    comp = f"COMPOSITION: {framing}. Compose a natural film shot with the subject(s) clear and appropriately scaled within the frame."
+    # THE KEYFRAME GETS ITS NAMED CINEMATOGRAPHY VOICE (2026-07-14, restoring the named-auteur-per-chair doctrine
+    # — CRYSTAL_BEARS_STUDIO_BIBLE.md's Gate 2 chair): CINEMATOGRAPHY (Lin/Kalache, defined below) and Eggleston's
+    # production-design eye were already written into this file — CINEMATOGRAPHY carried its own comment saying
+    # it was meant to be "carried into the render stages" — but neither ever actually reached this function's own
+    # output; build_keyframe_prompt built its own generic, unattributed "STYLE:"/"COMPOSITION:" text instead. Wired
+    # in here, concise (this is a per-beat keyframe, not the once-per-scene establishing plate that already used
+    # the fuller PLATE_CINEMATOGRAPHY/PLATE_PRODUCTION_DESIGN text) — same two disciplines, same names, kept
+    # consistent with Gate 1's own crew (cb_director.py), just scoped to compose and light ONE frame, not a world.
+    # ROOM TO BREATHE (2026-07-14, Julian's own production note on Gate 2b — "with the opening keyframe we have
+    # to be conscious of it being slightly wider to give the animation room to breathe"): a keyframe framed to
+    # the LITERAL edge of its stated shot size leaves the video model nowhere to move the action into before it
+    # exits frame — the still is a composed PICTURE, but the clip built from it needs headroom the picture alone
+    # doesn't need. This is Eggleston's own standing composition law, applied on every beat, not a per-beat
+    # authored override of the Director's `framing` call — the stated shot size is kept exactly as written.
+    comp = (f"COMPOSITION (Ralph Eggleston's eye — the world as the first character): {framing}. Compose a natural "
+            "film shot, the subject(s) clear and appropriately scaled within the frame, with real depth — a "
+            "readable foreground/midground/background, never a flat cutout. Frame a touch WIDER than the shot "
+            "size alone implies — keep the stated framing's intent, but leave real headroom and side space "
+            "around the subject(s) so the animation has room to move before anything reaches the frame's edge; "
+            "never crop the action to its literal boundary.")
     # "light" is the Director's own PER-BEAT lighting call (richer and beat-varying — e.g. differentiated per character);
     # "lighting" is a legacy/alternate key that is never actually populated on beat-native data. sc's scene-level
     # lighting stays the fallback for a beat that hasn't authored its own. Same bug class as the shotSize/cuts[0] find.
     light = (shot.get("light") or shot.get("lighting") or sc.get("lighting") or "").strip().rstrip(".")
     atmosphere = (shot.get("atmosphere") or "").strip().rstrip(".")
-    style = ("STYLE: Premium 3D CGI, Disney/Pixar animation style, 8K resolution, Octane render, subsurface scattering "
-             "(fur/skin), volumetric lighting, cinematic depth of field, hyper-realistic textures. "
+    style = ("STYLE (Patrick Lin, camera; Jean-Claude Kalache, lighting — the Pixar DPs): Premium 3D CGI, "
+             "Disney/Pixar animation style, 8K resolution, Octane render, subsurface scattering (fur/skin), "
+             "cinematic depth of field, hyper-realistic textures. A motivated, invisible, purposeful camera and "
+             "a deliberate, soft key light with warm bounce and a gentle rim carving the characters off the "
+             "background — never showy, never flat. "
              "Captured as a SINGLE FROZEN INSTANT at high shutter speed — the action is caught and held perfectly still, "
              "every part of it tack-sharp and fully in focus, as if the frame were paused. This is the frame the animation "
              "is built FROM."
@@ -775,7 +832,15 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     one_each = " and ".join(f"one {c}" for c in chars) or "one of each character"
     ranked = sorted([c for c in chars if c in CHARACTERS and CHARACTERS[c].get("sizeRank") is not None],
                     key=lambda c: -(CHARACTERS[c].get("sizeRank") or 0))
-    size_clause = f" Ensure {ranked[0]} is visibly larger than {ranked[-1]}." if len(ranked) >= 2 else ""
+    # A tied sizeRank (e.g. Keen/Squeaky both rank 4) must never assert an ordinal claim neither character's own
+    # canon size prose supports — that's a pure artifact of this beat's own characters[] list order, not a real
+    # size fact, and contradicts size_line()'s own "do NOT invent a size for anyone" text in the same prompt.
+    if len(ranked) >= 2 and CHARACTERS[ranked[0]].get("sizeRank") != CHARACTERS[ranked[-1]].get("sizeRank"):
+        size_clause = f" Ensure {ranked[0]} is visibly larger than {ranked[-1]}."
+    elif len(ranked) >= 2:
+        size_clause = f" {ranked[0]} and {ranked[-1]} are the SAME size — do not make one visibly larger."
+    else:
+        size_clause = ""
     # `keeps` (a positive "Fuzzby keeps round wire-frame glasses" restatement of characters.json's `markers`
     # field) is DELETED, same rule-5 fix as `_markers()` above — a positive appearance description, not a
     # prohibition. `avoids` is KEPT: "wears NO pendant/necklace/medallion/crystal" names something the
@@ -787,11 +852,19 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     neg = (" " + "; ".join(avoids) + ".") if avoids else ""
     # Bee comedy scenes: Crystal Cove world-crystals ARE allowed, but only as SUBTLE BACKGROUND world-detail — never
     # active magic, never on/near the bees, never a dominant foreground/centre object pulling focus from the gag.
-    _bees = {c for c, v in CHARACTERS.items() if isinstance(v, dict) and "bee" in str(v.get("avoid", "")).lower()}
+    _bees = BEES   # FIXED 2026-07-12 (full-codebase audit, duplication finding): now the module-level canonical set
+    # FIXED 2026-07-12 (full-codebase audit continued): this clause used to hardcode the literal string
+    # "Fuzzby or Zenny" regardless of which bee(s) are actually in block_chars — every OTHER per-character
+    # clause in this function (avoids, wings, size_clause) derives its names dynamically from block_chars/
+    # chars; this was the one exception. Currently masked because every authored bee beat so far includes
+    # both bees together, but a future solo-Fuzzby or solo-Zenny beat (single-character beats are already
+    # normal elsewhere in this package, e.g. 8.B1's Keen+Squeaky-only opening) would name a character who
+    # isn't even in the shot. cb_segprompt._standing_negatives() states the equivalent v5 constraint
+    # generically ("no crystals on the bees") for this exact reason — matched here instead of the hardcode.
     env_neg = (" Crystal rule for this bee scene: Crystal Cove is crystal-RICH — reproduce the plate's ABUNDANT COLOURFUL "
                "CUT crystals (jewel-toned — amethyst, rose, aqua, citrine, sapphire — faceted, catching the ambient "
                "light) clustered through the rocks, roots, bark, banks and flower bases at every depth. NO crystal on or "
-               "near Fuzzby or Zenny; NO crystal self-glow, aura, beams, particles, hum or magical activity (colour and "
+               f"near {' or '.join(block_chars)}; NO crystal self-glow, aura, beams, particles, hum or magical activity (colour and "
                "sparkle come from reflected scene light only); crystals frame and fill the world but keep the immediate "
                "space around the bees, flowers, pollen and the gag readable — never crowd the performers or block the gag."
                if (block_chars and set(block_chars) <= _bees) else "")
@@ -818,18 +891,35 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # scoping "exactly as in the turnaround" to MATERIAL properties only (colour, translucency, vein pattern, edge
     # quality) and explicitly naming the turnaround's own resting pose as the thing NOT to copy, with an explicit
     # precedence statement over the later clean-base line.
+    # SHARPENED 2026-07-12 (Julian, live footage review — the turnaround-conflict fix above held the prompt-text
+    # override in place but the failure persisted identically across TWO different image models, Nano Banana 2
+    # and Seedream 5 Pro, on the real Ep1 1.B1 keyframe: both still rendered the exact same silhouette this
+    # clause already forbids). Diagnosis: the wording was already about as forceful as prose gets, so simply
+    # re-asserting "asymmetric, not symmetrical" harder was unlikely to move a second model that failed the
+    # identical instruction. Added: (1) a literal, concrete description of the RECURRING failure silhouette itself
+    # (both wings out to the sides, mirrored, at matching height) — naming the specific pattern being observed,
+    # not just the abstract "symmetrical" category, matching this project's own standing rule that a concrete,
+    # checkable description outperforms an abstract one (CLAUDE.md rule 17, applied here to pose/motion, not
+    # appearance — no character APPEARANCE is described, only a POSE to avoid, which this file's own FLIGHT
+    # ENERGY clause already does routinely); (2) a positive physical-mechanics alternative (foreshortening/
+    # overlap) so the model has a concrete correct target, not only a prohibition.
     wings = (" WINGS: capture the wings CAUGHT mid-downstroke, ASYMMETRIC — one wing raised, the other lowered, as if "
-             "a fraction of a second into a beat cycle — never both wings spread flat and symmetrical at rest. Each of "
-             "the four translucent wings keeps the turnaround's colour, translucency, vein pattern and clean edge "
-             "quality — sharp and solid, as if caught by a fast camera shutter, crisp and readable, never a soft blur "
-             "or fan — but the WING POSE itself must NOT match the turnaround: the turnaround shows its wings evenly "
-             "spread and symmetrical because that is a reference-sheet convention for showing all four wings clearly, "
-             "not a flight pose, and reproducing that resting spread here is the exact failure this instruction exists "
-             "to prevent. This wing-pose instruction overrides any later 'match the turnaround exactly' line for wing "
-             "pose specifically — every other feature (colour, glasses, body shape, markings) still matches the "
-             "turnaround exactly. FLIGHT ENERGY: the body leans forward and down into the direction of travel, already "
-             "accelerating, legs tucked or trailing back — never hanging straight down at rest like a puppet. This is "
-             "a bee already IN FLIGHT and about to launch into the action, not hovering still in place."
+             "a fraction of a second into a beat cycle. THE SINGLE MOST COMMON FAILURE TO AVOID: do not render both "
+             "wings (or all four) spread out flat to either side at matching height, mirrored, like a static "
+             "reference-sheet display — that exact silhouette, however crisp and sharp, reads as parked and floating, "
+             "never flying, and must not appear here. From this camera angle a wing mid-beat foreshortens and can "
+             "partially overlap the body or another wing — it does not fan out flat and clear on both sides at once. "
+             "Each of the four translucent wings keeps the turnaround's colour, translucency, vein pattern and clean "
+             "edge quality — sharp and solid, as if caught by a fast camera shutter, crisp and readable, never a soft "
+             "blur or fan — but the WING POSE itself must NOT match the turnaround: the turnaround shows its wings "
+             "evenly spread and symmetrical because that is a reference-sheet convention for showing all four wings "
+             "clearly, not a flight pose, and reproducing that resting spread here is the exact failure this "
+             "instruction exists to prevent. This wing-pose instruction overrides any later 'match the turnaround "
+             "exactly' line for wing pose specifically — every other feature (colour, glasses, body shape, markings) "
+             "still matches the turnaround exactly. FLIGHT ENERGY: the body leans forward and down into the direction "
+             "of travel, already accelerating, legs tucked or trailing back — never hanging straight down at rest "
+             "like a puppet. This is a bee already IN FLIGHT and about to launch into the action, not hovering still "
+             "in place."
              if (block_chars and set(block_chars) <= _bees) else "")
     # CLEAN BASE IDENTITY (baked principle, 2026-07-01): the keyframe is the CLEAN BASE the animation builds ON TOP OF.
     # Seedance does the heavy lifting — it applies AND removes every temporary state within the take. So the keyframe
@@ -847,10 +937,21 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
     # but never by THIS function — every Gate-2 keyframe (the one every chained beat and Gate-3 take builds on top
     # of) was missing them entirely. size_line adds the solo-character absolute-size anchor scale_line/the inline
     # size_clause above doesn't cover (the "Aida looks small" bug, for exactly-one-character shots).
-    _worn = worn_line(episode, shot)
+    # FIXED 2026-07-12 (full-codebase audit continued): worn_line/size_line both re-derive their own
+    # `chars = shot.get("characters", [])` internally — the beat's FULL authored cast, bypassing this
+    # function's own `chars = opening_cast(shot)` filtering (line 535) that exists specifically to exclude
+    # a character not yet in frame. Confirmed live on 8.B1 (openingCast=[Keen, Squeaky], "the welcoming
+    # group still off-frame") — this shipped a SIZE paragraph naming all 10 cast members with zero
+    # reference images attached, a real instruction-inconsistency risk (the model can invent an
+    # off-frame character into the shot). Pass the already-filtered `chars` in via a shallow dict
+    # override (same `dict(shot, k=v)` pattern build_vision_prompt already uses two functions down) so
+    # both helpers see only who's actually in this opening frame — no signature change, no other call
+    # site (build_charsheet_prompt/build_vision_prompt, both intentionally scoped to their own full casts) affected.
+    _shot_inframe = dict(shot, characters=chars)
+    _worn = worn_line(episode, _shot_inframe)
     _recur = recurring_line(episode, shot)
     _props = props_block(shot)
-    _size = size_line(shot)
+    _size = size_line(_shot_inframe)
     # Keen's cuffs (none/vacant/crystal) — the story-state SENTENCE, alongside the reference image added above.
     _band = _band_line(shot)
     band_line = f" {_band}." if _band else ""
@@ -882,7 +983,10 @@ def build_keyframe_prompt(shot, sc, master_path=None, note="", episode="Ep1", ch
                         # introduces (e.g. cooling before a thunder beat), so state this beat's own light/atmosphere too.
                         + (f" This beat's own light: {light}." if light else "")
                         + (f" Atmosphere: {atmosphere}." if atmosphere else "")] if chained else [])
-    light_block = [] if chained else (([f"LIGHTING: {light}."] if light else []) + ([f"ATMOSPHERE: {atmosphere}."] if atmosphere else []))
+    # LIGHTING carries Jean-Claude Kalache's own beat-specific call (2026-07-14, restoring the named-auteur-per-
+    # chair doctrine, CRYSTAL_BEARS_STUDIO_BIBLE.md) — distinct from STYLE's general lighting philosophy above,
+    # this is THIS beat's own key-light/mood instruction, in his voice.
+    light_block = [] if chained else (([f"LIGHTING (Kalache's key light): {light}."] if light else []) + ([f"ATMOSPHERE: {atmosphere}."] if atmosphere else []))
     comp_block = [] if chained else [comp]   # chained: COMPOSITION is folded into the CONTINUITY & CAMERA SHIFT above
     body = [lead] + continuity_lock + blocks + ([mood] if mood else []) + ([env_line] if env_line else []) + comp_block + light_block + [style, constraints]
     prompt = re.sub(r"[ ]{2,}", " ", header + "\n\nPROMPT:\n" + "\n\n".join(body) + _fix_line(note))
@@ -1049,9 +1153,22 @@ def build_plate_prompt(sc, episode, scene_num, layout_ref=None, location_ref=Non
                          "apply ONLY these accumulated changes that have happened since we were last here: "
                          + "; ".join(changes) + ". ")
     elif layout_ref:
-        layout_clause = ("Match the LAYOUT, perspective and screen direction of the reference image EXACTLY (every "
-                         "fixed element shown in it — structures, terrain, water line, crystals and horizon — in the "
-                         "same positions) but with EVERY character REMOVED — an empty set. ")
+        # SCOPED 2026-07-12 (Julian, live review — "the stage... too tight for the shot"): this used to say
+        # "Match the LAYOUT... EXACTLY... every fixed element... in the same positions" with no carve-out — so a
+        # re-fire meant to LOOSEN a scene's own composition (per its own updated `look`/`lens`/`cameraHeight`
+        # fields above) was simultaneously told to reproduce the OLD reference image's density/framing exactly,
+        # via a stronger image anchor fighting the very text this function just built. Same class of conflict as
+        # the wing-turnaround fix in build_keyframe_prompt (a reference image outweighing a text override) —
+        # same fix shape: split what "match exactly" covers (the functional, gag-load-bearing landmarks a beat's
+        # own action depends on finding in a fixed place) from what it explicitly does NOT cover (how tightly the
+        # space is framed/packed, which follows THIS beat's own scene-direction text above, not the old image).
+        layout_clause = ("Match the reference image for its FUNCTIONAL landmarks only — the fixed structures, "
+                         "terrain, water line, crystals, horizon and any named gag-load-bearing elements (a "
+                         "specific leaf, branch or flower a beat's own action depends on finding in the same "
+                         "place) — keep THOSE in the same relative positions. Do NOT match the reference for how "
+                         "tightly-packed, crowded or open the framing is — that comes from the scene direction "
+                         "above instead, even where it asks for something more open or spacious than the "
+                         "reference shows. Remove every character — an empty set. ")
         change_clause = (" The location currently shows (world state): " + "; ".join(changes) + ".") if changes else ""
     else:
         layout_clause = ""
@@ -1129,9 +1246,16 @@ def build_vision_prompt(shot, vision, of_sc, note="", episode="Ep1"):
     return prompt, refs
 
 def build_edit_prompt(shot, sc, episode="Ep1"):
-    """EDIT mode — modify the FROZEN master in place (the master is the FIRST ref = the canvas). Preserve every
-    pixel of the set/boat/props/other characters; change ONLY the active character's pose. This is the
-    frame-locked-compositing approach: the environment is a plate, the character is changed inside it."""
+    """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 full-codebase audit; missed
+    by the earlier 2026-07-08 contradiction sweep that guarded its three siblings build_i2v_prompt/
+    build_ref2vid_prompt/build_beat_prompt the same way). The live builder is cb_segprompt.shipped_prompt
+    (v5). Guarded rather than deleted outright — kept for the record; raises loud.
+    Original design note: EDIT mode — modify the FROZEN master in place (the master is the FIRST ref = the
+    canvas). Preserve every pixel of the set/boat/props/other characters; change ONLY the active character's
+    pose. This is the frame-locked-compositing approach: the environment is a plate, the character is changed
+    inside it."""
+    raise RuntimeError("cb_prompts.build_edit_prompt is RETIRED and unused. Use cb_segprompt.shipped_prompt "
+                        "(the v5 engine) instead.")
     refs = [sc["master"]] + char_refs(shot)
     item_refs, item_locks = items_for(episode, shot)
     for r in item_refs:
@@ -1150,8 +1274,16 @@ def build_edit_prompt(shot, sc, episode="Ep1"):
     return prompt, refs
 
 def build_end_prompt(shot, sc=None, master_path=None, start_path=None, episode="Ep1", note=""):
-    """End keyframe — the SAME full NB2 structure as the start (scene shot Image 1 + character sheet Image 2),
-    PLUS the start frame as a labelled MOTION ANCHOR. Returns (prompt, refs). start_path = the shot's start frame.
+    """End keyframe — built FRESH from refs (plate + character turnarounds), the SAME clean way as the start,
+    with end_beat=True so build_keyframe_prompt sources its action text from the beat's own end state.
+    Returns (prompt, refs). start_path is an EXISTENCE-GATE only — the LOCK below refuses to build an end
+    frame before its own start frame exists — never a visual reference passed into the composition (see the
+    inline comment just below for why that approach was tried and abandoned).
+    FIXED 2026-07-12 (full-codebase audit continued): this docstring used to claim the end frame carries
+    "the start frame as a labelled MOTION ANCHOR" — never true of this function's actual behaviour, and
+    directly contradicted by its own inline comment three lines down explaining that passing the start
+    frame as a reference caused motion-blur/drift on real renders. Corrected to describe what the code
+    actually does.
     master_path defaults to the scene's locked master (the plate) so the character sheet is always included."""
     if not (start_path and os.path.exists(start_path)):
         raise FileNotFoundError(
@@ -1165,98 +1297,26 @@ def build_end_prompt(shot, sc=None, master_path=None, start_path=None, episode="
     # holds identity exactly like the START.
     return build_keyframe_prompt(shot, sc, master_path=master_path, episode=episode, note=note, end_beat=True)
 
-def emotion_line(shot):
-    """The shot's emotional truth, shown in the FACES, eyes and body of the STILL — the keyframe must CARRY
-    the feeling, never a neutral pose. From intent.emotion + performance.surface/innerThought."""
-    bits = []
-    em = (shot.get("intent") or {}).get("emotion")
-    if em: bits.append(em)
-    p = shot.get("performance") or {}
-    if p.get("surface"): bits.append(p["surface"])
-    if not bits: return ""
-    line = (" EMOTION — the still must CARRY this feeling in the faces, eyes and body language (real acting, never a "
-            "neutral pose): " + "; ".join(bits) + ".")
-    if p.get("underneath"): line += f" The subtext beneath it (drives the expression, not shown as text): {p['underneath']}."
-    # innerThought is the actor's monologue — it belongs to the i2v performance, NOT the still image prompt (it would
-    # only confuse the renderer / risk rendered text). Deliberately omitted from the keyframe.
-    return line
-
-def perf_block(shot):
-    """PERFORMANCE INTENTION — the surface emotion, the hidden truth underneath, the inner thought.
-    This is the acting direction; it's what stops a shot reading as hollow AI."""
-    p = shot.get("performance")
-    if not p: return ""
-    bits = []
-    if p.get("surface"): bits.append(f"on the surface: {p['surface']}")
-    if p.get("underneath"): bits.append(f"underneath: {p['underneath']}")
-    if not bits and not p.get("innerThought"): return ""
-    line = " PERFORMANCE INTENTION — " + "; ".join(bits) + "." if bits else " PERFORMANCE INTENTION —"
-    if p.get("innerThought"): line += f' Inner thought: "{p["innerThought"]}".'
-    return line + " Acting: sincere, subtle, emotionally believable, child-safe."
-
-def beats_block(shot):
-    """ACTING BEATS (timed) — one action per beat; silent holds are real acting, not gaps."""
-    b = shot.get("beats")
-    if not b: return ""
-    parts = [f"{x.get('t','')} {x.get('do','')}" + (f" [{x['emotion']}]" if x.get("emotion") else "") for x in b]
-    return " ACTING BEATS (timed, one action per beat, silent holds are real acting): " + " | ".join(parts) + "."
-
 LOCKS = ("LOCKS — do NOT: redesign any character; swap identities, voices or dialogue; mis-sync lips; ADD anything "
          "not in the script (no extra characters, animals, people, objects or background elements) or remove anything "
          "it states; add random or exaggerated gestures; detach or float limbs; shake the camera; add unrequested "
          "cuts; or let anything clip or pass through anything else. Represent the script EXACTLY — nothing added, nothing omitted.")
 
-MOTION_ECONOMY = ("MOTION (clean motion the AI animates well and that CUTS together) — drive every move with the 12 "
-                  "principles: anticipation, ease-in / ease-out, follow-through, overlapping action, arcs, and a real "
-                  "settle. Match the BEAT: for DYNAMIC beats (flight, landing, crash, dive, chase, the wind hitting) allow "
-                  "CONTINUOUS, FLOWING movement with momentum and weight — the body carries through and eases into the end "
-                  "pose, never a frozen mid-air pose and never a flurry of disconnected actions. For STATIC beats (deadpan "
-                  "hold, reaction, a line of dialogue) ONE small, felt gesture — a look, a breath, a single step — camera "
-                  "mostly still. PHYSICS ALWAYS: feet on the ground, gravity respected, no clipping, no character balloons or "
-                  "whole-body inflation. STATIC OBJECTS DO NOT MOVE — props and every set element stay EXACTLY in place (no "
-                  "sliding, drifting, rotating, repositioning). The restraint is in truthful acting and smooth motion, never "
-                  "in freezing the life out of the shot. Less busy than reality, but alive.")
+# FIXED 2026-07-12 (full-codebase audit continued): MOTION_ECONOMY (a constant) plus acting_note/_BEAT_CAM/
+# _PHON/_beat_phon/_beat_lines/_beat_delivery (below) were confirmed via repo-wide grep to have zero live
+# callers anywhere — every reference to any of them sat inside build_beat_prompt's own body, AFTER that
+# function's unconditional `raise RuntimeError(...)` (RETIRED, 2026-07-08), making that body statically
+# unreachable Python. Deleted along with the dead body itself (see build_beat_prompt below) rather than
+# left as orphaned helpers kept alive by nothing.
 
-# PER-BEAT CAMERA INTENSITY — graduated camera language by emotional beat + character grammar (Lin + Kalache).
-# Selected per shot via shot['cameraIntensity']; appended ON TOP of MOTION_ECONOMY (never replaces it).
-CAMERA_INTENSITY = {
-    "CALM": ("CAMERA: very slow organic push-in (3-4s, steadicam-feel, never mechanical), starting very wide and "
-             "breathing gently forward; slight low angle so the world feels vast and the characters small but free. "
-             "Horizontal composition dominates; layered depth, near foreground soft. The world is alive — the camera breathes with it."),
-    "COMEDIC_FOLLOW": ("CAMERA: smooth tracking / organic push-in (2-3s, handheld-FEEL not shaky) that RIDES the action — "
-             "it anticipates where the action lands rather than flinching or cutting; constant speed with the subject through the move. "
-             "The character's energy drives the camera. End on a slightly tighter frame."),
-    "MACRO": ("CAMERA: slow creeping push-in (2-3s) from medium-CU to an extreme CU, drawing the audience INTO the moment; "
-             "shallow depth, background soft, the detail/face fills the frame. Side-light catches texture."),
-    "LOCKED": ("CAMERA: COMPLETELY STATIC, zero movement, zero drift. Character fills the frame (face-acting). The STILLNESS "
-             "is the comedy / the emotional weight — lock the camera and let the character carry it (the 50mm deadpan rule). Hold."),
-    "CHAOS_BLUR": ("CAMERA: LOCKED STILL, subject tack-sharp in the foreground, the chaos behind in heavily blurred bokeh. "
-             "The camera REFUSES to follow the background action — it does not pan or track; the held stillness against the off-focus "
-             "mayhem is the whole joke. Held a beat longer than comfortable."),
-    "CLIMAX": ("CAMERA: static hold, slight low angle (near worm's-eye) so the threat looms huge and the characters tiny — "
-             "the LIGHT does the work, not a pan: a rapid key-light shift from warm gold to cool teal (0.5-1s) and a shadow sweeping "
-             "overhead re-weight the frame. No camera move; light IS the motion."),
-    "RESOLUTION": ("CAMERA: slow, relentless pull-out (crane-feel, 3-4s) — the environment expands, the characters shrink, the "
-             "upper frame darkens with storm; horizontal composition returns but DARKER. The retreat is the metaphor for the threat closing in."),
-}
-
-# THE PIXAR DIRECTOR carried into the RENDER stages (Gate 1's cb_director persona — Docter + Lasseter — woven into the
-# keyframe + motion so the directorial eye doesn't stop at the breakdown). The single line that ties the pipeline together.
-DIRECTOR = ("DIRECTOR (Pete Docter + John Lasseter — the Pixar eye): lead with the FEELING — the emotion is the "
-            "architecture, carried in the face, the eyes, the held beat and the smallest true gesture, never spelled "
-            "out. ALIVE through truthful ACTING, never through bigness — believable behaviour, real weight, the 12 "
-            "principles in every move (anticipation, ease-in and ease-out, follow-through, arcs). Restraint: ONE honest "
-            "beat played fully beats a flurry. Warm, sincere, specific and observed — never generic, never cynical. "
-            "Quality is non-negotiable: no generic shot ships.")
-
-# THE PIXAR DIRECTORS OF PHOTOGRAPHY carried into the render stages — Patrick Lin (camera) + Jean-Claude Kalache
-# (lighting & camera). The cinematography eye: every frame composed and lit like a Pixar film frame, not a snapshot.
-CINEMATOGRAPHY = ("CINEMATOGRAPHY (Patrick Lin — camera; Jean-Claude Kalache — lighting & camera; the Pixar DPs): "
-    "CAMERA — a motivated, invisible, purposeful camera; staging that reads INSTANTLY and clean; frame, lens, height "
-    "and distance chosen for the FEELING, never showy; real depth — clear foreground / midground / background with a "
-    "natural shallow focus that guides the eye to the subject. LIGHTING — light is STORY and emotion: a deliberate "
-    "colour script, a soft, believable, beautiful key with warm bounce and a gentle rim that carves the characters "
-    "off the background, shaping depth and directing the eye. Every frame a composed, lit Pixar film frame.")
+# DIRECTOR/CINEMATOGRAPHY — RETIRED 2026-07-14 (restoring the named-auteur-per-chair doctrine,
+# CRYSTAL_BEARS_STUDIO_BIBLE.md Law 1): these two constants were written "to be carried into the render
+# stages" but, per the 2026-07-08 audit, never actually had a live caller anywhere — the keyframe path
+# shipped with no DP/director voice at all. Rather than wire the constants in as-is, their content is now
+# woven DIRECTLY into build_keyframe_prompt's own comp/style/light_block construction above (Eggleston on
+# composition, Lin on camera, Kalache on lighting) — the real, live path an image actually renders through.
+# Deleted here rather than left as a second, unused copy of the same voices sitting dead beside the one
+# that actually ships (this codebase's own "no orphaned duplicate of a now-live mechanism" discipline).
 
 def _speakers(shot):
     """Speakers in order of appearance, read from the dialogue labels (NAME:), matched to the cast."""
@@ -1274,146 +1334,6 @@ def _speakers(shot):
         if m not in out: out.append(m)
     if not out and shot.get("speaker"): out = [shot["speaker"]]
     return out
-
-def cast_block(shot):
-    """Name + position every character and lock the active speaker(s) — fixes look-alike dialogue attribution
-    (Fuzzby/Zenny) and handles a two-speaker shot in sequence."""
-    chars = shot.get("characters", [])
-    if not chars: return ""
-    speakers = _speakers(shot)
-    parts = [f"{c} ({'speaks' if c in speakers else 'listening'}, keep their exact position from the frames)" for c in chars]
-    out = "CAST & POSITIONS: " + "; ".join(parts) + "."
-    if shot.get("dialogue") and speakers:
-        if len(speakers) == 1:
-            others = [c for c in chars if c != speakers[0]]
-            out += f" ONLY {speakers[0]} speaks and forms the words"
-            out += (f"; {', '.join(others)} stay silent, mouths closed, but alive — blink, breathe, react." if others else ".")
-        else:
-            out += (f" Speakers in order: {' then '.join(speakers)}. Each forms ONLY their own line, in sequence — "
-                    "never overlapping; only the one currently speaking moves their mouth, the others listen with mouths closed.")
-    return out
-
-def acting_note(shot):
-    """Per-character ACTING SIGNATURE from config (characters.json `actingNote`) — e.g. Fuzzby's pomp = a chest-out
-    CAPTAIN pose (NOT a whole-body balloon), Zenny's deadpan stillness. Keeps physical comedy on-character and stops
-    Seedance over-animating; it OVERRIDES any over-broad wording in the shot's own action."""
-    notes = []
-    for c in shot.get("characters", []):
-        n = (CHARACTERS.get(c) or {}).get("actingNote")
-        if n:
-            notes.append(f"{c} — {n}")
-    return ("CHARACTER ACTING (on-character physical comedy; this OVERRIDES any over-broad action wording): "
-            + " ".join(notes)) if notes else ""
-
-def build_i2v_prompt(shot, note="", episode="Ep1"):
-    """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 contradiction sweep). Its
-    dialogue-append line quotes literal spoken words directly into the prompt, a Law 6 violation the instant
-    this were ever called. The live builder is cb_segprompt.shipped_prompt (v5). Guarded rather than deleted
-    outright (unlike cb_prompts.seedance_json's own RETIRED precedent) — kept for the record; raises loud."""
-    raise RuntimeError("cb_prompts.build_i2v_prompt is RETIRED and unused — its dialogue handling leaks literal "
-                        "spoken words (Law 6). Use cb_segprompt.shipped_prompt (the v5 engine) instead.")
-    dur = shot.get("duration"); move = shot.get("movement", "a gentle camera move")
-    vision = vision_for(episode, shot.get("shotCode"))
-    P = []
-    P.append(f"Create a continuous{(' ' + str(dur) + '-second') if dur else ''} premium 3D CGI animated shot. "
-             "Begin EXACTLY on the start frame and end EXACTLY on the end frame. "
-             f"One principal camera move only: {move}; no cuts, no zoom.")
-    P.append("FRAME CONTINUITY: preserve every character's identity, design, proportions, relative sizes, screen "
-             "positions, eyelines and screen direction, and the environment, lighting, shadows and colour grade — "
-             "exactly as the frames. Add ONLY motion and performance. (Do not re-describe or restyle the characters — "
-             "the frames ARE the look; you are only animating them, never re-fighting their anatomy.)")
-    P.append(PHYSICS)
-    cb = cast_block(shot)
-    if cb: P.append(cb)
-    if vision and vision.get("materialize"):
-        P.append(f"MAGICAL VISION forming: {vision['materialize']}.")
-    P.append(f"ACTION: {shot['action']}")
-    wl = worn_line(episode, shot).strip()
-    if wl: P.append(wl)
-    pr = props_block(shot).strip()
-    if pr: P.append(pr)
-    pb = perf_block(shot).strip()
-    if pb: P.append(pb)
-    bb = beats_block(shot).strip()
-    P.append((bb + " Settle precisely into the end frame and hold ~1 second.") if bb
-             else "End by settling precisely into the end frame and holding ~1 second.")
-    seed = shot.get("i2vPrompt", "").strip()
-    if seed: P.append(seed)
-    if shot.get("dialogue"):
-        P.append("DIALOGUE (native voice = the lip-sync guide; final voice via ADR): "
-                 + shot["dialogue"].replace("  /  ", "  ")
-                 + " ~2 words/sec, a small breath before, real pauses, silence after the last word.")
-    P.append("AUDIO: generate the FULL guide soundscape and KEEP it (never silence) — temporary dialogue (if any), "
-             "natural ambience, synchronised action SFX and a light musical tone. It is the timing/alignment "
-             "reference (its waveform) for the final voice ADR + music/SFX mix in post. No narration, no extra "
-             "voices, no overlapping speech.")
-    P.append(MOTION_ECONOMY)
-    P.append(LOCKS)
-    return " ".join(P) + _fix_line(note)
-
-# GATE 3 animation mind (ages 4–8) — Lasseter (Toy Story) + Dohrn (Trolls) + Docter + Brumm (Bluey)
-ANIMATION_DIRECTION = ("ANIMATION DIRECTION (John LASSETER / Toy Story — appeal + weight + the 12 principles; Walt "
-    "DOHRN / Trolls — joy, music-on-the-beat, full-body hugs; Pete DOCTER — the feeling acted + the wordless held beat; "
-    "Joe BRUMM / Bluey — economical real-kid micro-acting + the same-second co-watch): animate FORWARD from the "
-    "keyframe — add ONLY truthful, WEIGHTED performance, never restyle the frame. ACT IT then size it: emotion in the "
-    "FACE and eyes first, then the body, ONE clean arc (anticipation → action → the micro-turn of realisation → settle "
-    "→ a ~1s hold). WEIGHT IS NON-NEGOTIABLE: real mass, momentum and follow-through, feet planted, secondary parts "
-    "(ears, fur, the crystal on its cord) lagging and settling — NO sliding, floating, ballooning, rubber-limbs or "
-    "frozen mid-air poses (the anti-floaty-AI cure) — and WEIGHT survives even at full comedic size. MODE-AWARE — BIG "
-    "when it's funny, small when it's true (the per-beat comedy_mode block below decides): the DEFAULT register is "
-    "small-and-true (performance over bigness, warm over zany), but a BIG/comedy beat goes FULL over-the-top cartoon "
-    "(the gag clock below) with WEIGHT and HEART intact. Comedy is character + behaviour + TIMING (set-up → the beat → "
-    "the deadpan HOLD → the button), never speed, never mean. Joy is full-body and ON the beat; a hug commits with the whole body. HOLD THE ACHE: at "
-    "the one wordless held beat motion drops to a breath and one true gesture; the Crystal Call is played as a "
-    "SURRENDER (shoulders drop, breath out, weight settles), never a triumphant power-pose. Readable in silhouette and "
-    "huggable — a five-year-old names the feeling off the body in two seconds.")
-
-# ── THE COMEDY-GENIUS layer (Avery scale + Jones timing, on Lasseter weight, with the Bluey/Docter co-watch heart).
-#    Mode-aware: a beat tagged comedyMode=BIG gets the GAG CLOCK; comedyMode=TRUE drops the dial to small-and-true.
-COMEDY_BIG = (
-    "MODE = BIG — OVER-THE-TOP CARTOON COMEDY (Tex AVERY scale + Chuck JONES timing, on LASSETER weight, BRUMM/DOCTER "
-    "heart). This is a GAG: COMMIT 110% — half-hearted big is the worst outcome. Run the FOUR-STROKE GAG CLOCK in "
-    "order: (1) WIND-UP / ANTICIPATION — telegraph the promise: the over-confident flourish, big/slow/decelerating, "
-    "savouring; crouch & inhale deeper the bigger the coming impact (no wind-up = no laugh, just a glitch). (2) "
-    "EXAGGERATED ACTION — commit and SMEAR: push the pose to its cartoon extreme through the fast bit (squash to a "
-    "pancake, stretch to a noodle), snap HARD, the single fastest frame lands on the accent. (3) THE BANG — the "
-    "impact, BIG, WITH MASS: sudden stop, a frame or two of overshoot/compression, then settle; dust / a single "
-    "feather puffs; secondary jiggle (antennae whip past the head then recoil, a frame behind — overlapping action); "
-    "it reads as if it HURT (cartoon-hurt — fine the next frame); a WEIGHTLESS contact is the cardinal sin. (4) THE "
-    "TAKE / HELD BEAT — the delayed realisation: ~8-12 frames of TOTAL stillness (nobody and nothing moves) while he "
-    "still wears the proud face, THEN the slow dawn (eyes drift down, the penny drops, pupils shrink-then-POP) — the "
-    "audience already knew; the comedy is the gap until HE finds out. (5) THE SNAP-BACK / BUTTON — dignity restored: "
-    "peel up, dust off, re-puff, antennae snap proud, land the crisp button; EVERY deformation RETURNS to the locked "
-    "turnaround (the character is immutable — exaggeration is a temporary state the body passes through, never a "
-    "redesign); CUT within a beat of the button. TIMING: contrast of tempo is the engine (slow makes fast funny — "
-    "fast-fast-SLOW); the HOLD is SACRED (where the laugh is born — never even-pace it away); duck music/SFX to "
-    "SILENCE over the hold (the bonk lands into a vacuum, the button drops into clean air, music resumes ON the "
-    "button); rule of three then break it; escalate → top it → CUT (never milk past the laugh). NON-NEGOTIABLE AT "
-    "FULL SIZE: WEIGHT (the bigger the exaggeration, the STRONGER the weight — never floaty, rubber-limbed or frozen "
-    "mid-air) and HEART (laugh WITH never AT — the butt is the situation or the character's own lovable "
-    "over-confidence, never a victim; the crystal can flicker the NEED under the bravado in the SAME frame — the co-watch)."
-)
-HEART_TRUE = (
-    "MODE = TRUE — drop the dial to SMALL and REAL (the heart register): no gag scale, real-kid micro-acting, weighted "
-    "stillness, the smallest honest gesture, the wordless held breath. The Crystal Call is a SURRENDER (shoulders "
-    "drop, breath out, weight settles), never a power-pose; the wordless North-Star nadir is the ONE long hold and it "
-    "is NOT a comic hold — never play a punch-line inside it. Switch INTO this mode on a WEIGHTED breath (the mass "
-    "settles, one held beat, then the tone turns), never a snap-cut. Performance, weight and warmth over bigness."
-)
-
-def _animation_direction(beat):
-    """Mode-aware Gate-3 animation direction: the base craft + the BIG gag-clock or the TRUE heart block per the beat's comedyMode."""
-    cm = str(beat.get("comedyMode") or "").upper()
-    block = COMEDY_BIG if cm == "BIG" else HEART_TRUE if cm == "TRUE" else ""
-    return ANIMATION_DIRECTION + (("\n\n" + block) if block else "")
-
-def identity_cast_line(characters):
-    """Name the cast INSIDE identity_lock so the lock is per-character, not generic — the single biggest drift lever."""
-    names = [c for c in (characters or []) if c]
-    if not names:
-        return "Every character stays exactly on-model."
-    return ("These exact characters and ONLY these appear, each kept identical to the keyframe: "
-            + ", ".join(names) + ".")
 
 def _music_line(beat):
     """A named-genre, mood-led music cue (genre + mood + emotion read far better to a video model than technical terms).
@@ -1477,68 +1397,6 @@ def music_brief(beats, sc, episode="Ep1"):
             "NO vocals, no lyrics, no heavy drums or drops — a calm bed that sits UNDER spoken dialogue, "
             "even dynamics, gently looping, never overpowering the voices.")
 
-def build_ref2vid_prompt(shot, episode="Ep1", note="", prev_frame=None):
-    """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 contradiction sweep). The
-    live builder is cb_segprompt.shipped_prompt (v5). Guarded rather than deleted outright — kept for the
-    record; raises loud.
-    Original design note: Seedance REFERENCE-TO-VIDEO prompt — the DIALOGUE path (the stylised bee lip-syncs
-    to OUR V3 voice). Binds @Image1 = the locked keyframe (TRUTH), @Image2.. = each character's anchor (in
-    `characters` order), @Audio1 = the directed V3 dialogue track."""
-    raise RuntimeError("cb_prompts.build_ref2vid_prompt is RETIRED and unused. Use cb_segprompt.shipped_prompt "
-                        "(the v5 engine) instead.")
-    chars = shot.get("characters", [])
-    move = shot.get("movement") or "a slow, gentle camera move"
-    bind = []
-    idx = 1
-    if prev_frame and os.path.exists(prev_frame):
-        bind.append(f"@Image{idx} is the CONTINUITY HANDSHAKE — the PREVIOUS shot's final frame. This shot BEGINS exactly "
-                    "where that ended: keep every character's screen position, eyeline, heading and motion DIRECTION continuous "
-                    "and unbroken into this shot. Do NOT teleport, reset the pose, or reverse screen direction. This is a SPATIAL "
-                    "anchor for continuity ONLY — it is NOT a character design reference; identity comes from the keyframe and the "
-                    "character anchors below.")
-        idx += 1
-    kf_idx = idx
-    bind.append(f"@Image{kf_idx} is the locked KEYFRAME and is TRUTH — copy it EXACTLY: every character's identity, design, "
-                "proportions, relative sizes, screen positions and eyelines, plus the environment, lighting, shadows "
-                f"and colour grade. Begin ON @Image{kf_idx} and add ONLY motion and performance — never restyle or re-fight the "
-                "anatomy; the frame IS the look.")
-    idx += 1
-    for j, c in enumerate(chars, start=idx):
-        bind.append(f"@Image{j} is {c} — reproduce {c} 100% from this reference image; copy every detail exactly, "
-                    f"never re-interpret or describe in words.")
-    out = [" ".join(bind),
-           f"{shot.get('shotSize','medium')} shot, {shot.get('angle','eye-level')}; {move}; no cuts, no zoom.",
-           DIRECTOR, CINEMATOGRAPHY]
-    cb = cast_block(shot)
-    if cb:
-        out.append(cb + " The speaking character lip-syncs PRECISELY to @Audio1 and forms the words; any listener "
-                   "keeps their mouth closed but stays alive — blink, breathe, react.")
-    if shot.get("action"):
-        out.append(f"ACTION: {shot['action']}")
-    bb = beats_block(shot).strip()
-    if bb:
-        out.append(bb)
-    an = acting_note(shot).strip()   # Fuzzby's pomp = chest-out captain pose, Zenny's deadpan stillness, etc.
-    if an:
-        out.append(an)
-    out.append(MOTION_ECONOMY)   # beat-aware FLOW: flowing for dynamic beats, economy for static holds (physics intact)
-    cam = CAMERA_INTENSITY.get(shot.get("cameraIntensity"))
-    if cam:
-        out.append(cam)          # graduated camera language per the beat (Lin) — un-clamps the camera
-    if prev_frame and os.path.exists(prev_frame):
-        out.append("CONTINUITY: motion and spatial layout from @Image1 (the previous shot's end) carry directly into this "
-                   "shot — screen position, eyeline, heading and energy direction stay continuous; never reset, teleport or "
-                   "reverse direction mid-gesture. The camera move follows naturally from the prior shot's direction.")
-    out.append(PHYSICS)          # solid world — feet on the ground, respect gravity, nothing falls through the floor
-    sfx = ", ".join((shot.get("intent") or {}).get("sfxTags") or [])
-    out.append("SOUND: Seedance scores it — synchronised diegetic SFX" + (f" ({sfx})" if sfx else "")
-               + " AND timed comedy/emotional music that lands ON the action; the spoken dialogue is @Audio1 and stays "
-               "FORWARD. Post reviews + keeps, trims or replaces.")
-    out.append(LOCKS)            # no exaggerated gestures, no clipping, no added business
-    out.append("Premium 3D CGI Pixar/DreamWorks style. Settle precisely into the end pose and hold ~1 second. "
-               "No extra voices, no overlapping speech, no narration.")
-    return " ".join(out) + _fix_line(note)
-
 # ── MULTI-SHOT BEATS — THE FLOW METHOD (the first-ever way) ───────────────────────────────────────────────
 # THE RULE: one Seedance take per BEAT, 10-12 seconds. Group the scene's shots into ~10-12s beats; each beat is ONE
 # multi-shot Seedance generation that directs its OWN internal cuts + camera + timing (that's where the flow comes
@@ -1557,56 +1415,18 @@ def group_beats(shots, lo=10, hi=12):
             beats.append({"shots": cur, "duration": max(lo, min(hi, tot))})
     return beats
 
-_BEAT_CAM = {"CALM": "wide establishing, slow push-in", "COMEDIC_FOLLOW": "medium, smooth tracking",
-             "MACRO": "close-up, slow push-in", "LOCKED": "medium close-up, locked still",
-             "CHAOS_BLUR": "medium, locked still", "CLIMAX": "wide, slight low angle, held",
-             "RESOLUTION": "wide, slow pull-out"}
-_PHON = {"Fuzzby": "Fuzz-bee", "Aida": "Ada", "Amie": "Ah-mee"}
-
-def _beat_phon(t):
-    for n, p in _PHON.items():
-        t = re.sub(rf"\b{re.escape(n)}\b", p, t)
-    return t
-
-def _beat_lines(shot):
-    pairs = re.findall(r"([A-Z][A-Z'’ ]{1,22}?):\s*(.*?)(?=\n[A-Z][A-Z'’ ]{1,22}?:|\Z)", shot.get("dialogue") or "", re.S)
-    out = []
-    for lab, txt in pairs:
-        c = next((x for x in shot.get("characters", []) if x.lower() == lab.strip().lower() or x.lower() in lab.strip().lower()), lab.title())
-        out.append((c, " ".join(txt.split())))
-    return out
-
-def _beat_delivery(shot, char):
-    emo = ((shot.get("intent") or {}).get("emotion") or "").replace("->", " then ").strip()
-    cad = (CHARACTERS.get(char) or {}).get("cadence", "").split(";")[0].split(",")[0].strip()
-    return emo or cad or "natural"
-
 def build_beat_prompt(beat_shots, episode="Ep1", note=""):
     """RETIRED (found dead — zero callers anywhere in engine/ — in the 2026-07-08 contradiction sweep). Its
     _beat_lines dialogue-append quotes literal spoken words directly into the prompt, a Law 6 violation the
     instant this were ever called. The live builder is cb_segprompt.shipped_prompt (v5). Guarded rather than
     deleted outright — kept for the record; raises loud.
-    Original design note: one continuous Seedance take directing its own cuts/camera across 2-3 shots."""
+    Original design note: one continuous Seedance take directing its own cuts/camera across 2-3 shots.
+    FIXED 2026-07-12 (full-codebase audit continued): the unreachable body below this raise (statically
+    unreachable — AST-confirmed, the raise is unconditional) was stripped, and its private helpers
+    (_BEAT_CAM, _PHON, _beat_phon, _beat_lines, _beat_delivery, MOTION_ECONOMY — none with a caller
+    anywhere outside this dead body) were deleted along with it, rather than left as orphaned dead code
+    kept alive by nothing. DIRECTOR/CINEMATOGRAPHY (also referenced only here) were deleted outright
+    2026-07-14 once their content was woven into the live build_keyframe_prompt path instead (see that
+    function). PHYSICS is left defined — not named in this finding, not touched."""
     raise RuntimeError("cb_prompts.build_beat_prompt is RETIRED and unused — its dialogue handling leaks "
                         "literal spoken words (Law 6). Use cb_segprompt.shipped_prompt (the v5 engine) instead.")
-    chars = []
-    for s in beat_shots:
-        for c in s.get("characters", []):
-            if c not in chars:
-                chars.append(c)
-    consist = ("Keep every character on-model and the setting consistent throughout — each character is EXACTLY "
-               "their reference/keyframe, copied 100%, never re-interpreted or described in words.")
-    parts = [f"Multi-shot sequence with clean cuts between shots. {consist}"]
-    for i, s in enumerate(beat_shots, 1):
-        cam = _BEAT_CAM.get(s.get("cameraIntensity"), s.get("shotSize", "medium"))
-        action = (s.get("action") or s.get("startState") or "").strip().rstrip(". ")
-        seg = f"Shot {i} ({'cut to ' if i > 1 else ''}{cam}): {action}."
-        for char, line in _beat_lines(s):
-            seg += f" {char}, {_beat_delivery(s, char)}: \"{_beat_phon(line)}\""
-        parts.append(seg)
-    an = " ".join(acting_note(s) for s in beat_shots if acting_note(s)).strip()
-    if an:
-        parts.append(an)
-    parts += [DIRECTOR, CINEMATOGRAPHY, MOTION_ECONOMY, PHYSICS,
-              "Premium 3D CGI Pixar/DreamWorks quality, snappy comic timing; avoid jitter, avoid identity drift."]
-    return " ".join(parts) + _fix_line(note)

@@ -1,0 +1,9 @@
+{
+  "ts": 1784192953.317047,
+  "recorded_at": "2026-07-16T10:09:13",
+  "op": "elevenlabs_dialogue",
+  "model": "eleven_v3",
+  "stability": 0.3,
+  "chars": 10,
+  "voices": 1
+}

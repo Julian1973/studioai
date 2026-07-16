@@ -23,9 +23,12 @@ Canon: skills/crystal-bears-voice-director/SKILL.md  +  CRYSTAL_BEARS_LOCKED_CAN
 import os, re, sys, json, shutil, subprocess
 import cb_gen
 import cb_prompts as P
+import paths as _paths   # FIXED 2026-07-12 (loose-ends pass): _CHARS below used to hand-roll its own
+                          # os.path.join(_HERE, "config", "characters.json") — now paths.CHARS (same file).
+                          # _HERE stays — still genuinely needed for os.chdir(_HERE) elsewhere in this file.
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_CHARS = json.load(open(os.path.join(_HERE, "config", "characters.json")))
+_CHARS = json.load(open(_paths.CHARS))
 
 def _char(name):
     if isinstance(_CHARS.get(name), dict):
@@ -77,11 +80,23 @@ def phonetic(line):
         out = re.sub(rf"\b{re.escape(name)}\b", ph, out)
     return out
 
+def _is_wordless_held(shot):
+    """Shared, hardened wordlessHeld coercion (2026-07-14, sweeping the pattern rule 11 style — the same bare-
+    truthiness bug found and fixed once in build_dialogue_track, 2026-07-12/rule 70, was still live in two
+    OTHER call sites in this same file, _is_tender and audit_attribution, because the original fix patched
+    the one call site that was actively failing rather than extracting a shared helper every caller uses. A
+    beat with wordlessHeld stored as the JSON STRING "false" (confirmed live on real production data once
+    already) is truthy under bare Python truthiness but must read as NOT wordless. Only a real True (bool) or
+    the case-insensitive string "true" counts."""
+    wh = (shot or {}).get("wordlessHeld")
+    return wh is True or (isinstance(wh, str) and wh.strip().lower() == "true")
+
+
 def _is_tender(shot):
     """Heart / surrender / nadir / Crystal-Call beat — the LOW-ENERGY palette (quieter, slower, never bigger)."""
     if not shot:
         return False
-    if shot.get("wordlessHeld"):
+    if _is_wordless_held(shot):
         return True
     ei = str(shot.get("emotionalIntent", "")).lower()
     # COMEDY ALWAYS WINS — a comedic beat is never voiced with the tender/quiet palette, even if its PHYSICS use words
@@ -109,9 +124,19 @@ def _line_for(shot, character):
     """One speaker's own words from the shot dialogue (their LABEL: up to the next LABEL: or end)."""
     dlg = shot.get("dialogue") or ""
     pairs = re.findall(r"([A-Z][A-Z'’ ]{1,22}?):\s*(.*?)(?=\n[A-Z][A-Z'’ ]{1,22}?:|\Z)", dlg, re.S)
+    cl = character.lower()
+    # FIXED 2026-07-12 (full-codebase audit continued): the old single combined condition
+    # (`ll == cl or cl in ll or ll in cl`) let a shorter name substring-match a longer, unrelated
+    # one that happens to contain it (e.g. character="Keen" matching label "KEEN'S MUM" before ever
+    # reaching a real "KEEN" label, misattributing her line to him) — the identical bug class already
+    # fixed in the sibling _resolve_speaker() (2026-07-08). Same two-pass fix here: an EXACT label
+    # match across every pair first, substring matching only as a fallback when no exact label exists.
+    for lab, txt in pairs:
+        if lab.strip().lower() == cl:
+            return " ".join(txt.split())
     for lab, txt in pairs:
         ll = lab.strip().lower()
-        if ll == character.lower() or character.lower() in ll or ll in character.lower():
+        if cl in ll or ll in cl:
             return " ".join(txt.split())
     if not pairs and dlg.strip():
         return " ".join(dlg.split())
@@ -173,7 +198,10 @@ def say(character, shot=None, raw=None, out=None, pre=None):
 def _canon_names():
     """Every canonical character name (characters.json) — the stale-pool safety net for speaker resolution."""
     base = _CHARS.get("characters") if isinstance(_CHARS.get("characters"), dict) else _CHARS
-    return [k for k, v in base.items() if isinstance(v, dict)]
+    # A real character record always carries voiceId; `sizeClasses` (a class->name lookup table, not a
+    # character) is also a dict at this same level and was being returned as a fake character name, polluting
+    # the speaker-resolution fallback pool (2026-07-08 audit finding).
+    return [k for k, v in base.items() if isinstance(v, dict) and "voiceId" in v]
 
 def _cut_segments(dlg):
     """Split a cut's (possibly MULTI-speaker) dialogue into ordered (label, line) segments. Each 'LABEL:' opens a new
@@ -203,11 +231,11 @@ def _upcase_leading_label(line):
     robust to case. Applies only at line start, so mid-line 'word:' text is never mistaken for a speaker."""
     return re.sub(r"^\s*([A-Za-z][A-Za-z'’ \-]{0,22}?):", lambda m: m.group(1).strip().upper() + ":", line)
 
-def _parse_cut_line(dlg):
-    """DEPRECATED single-segment shim (kept for back-compat). Returns the FIRST speaker-segment only — callers that
-    may see multi-speaker cuts must use _cut_segments instead, or they re-introduce voice drift."""
-    segs = _cut_segments(dlg)
-    return segs[0] if segs else (None, "")
+
+# FIXED 2026-07-12 (full-codebase audit continued): _parse_cut_line (a "DEPRECATED single-segment shim, kept
+# for back-compat") had zero callers anywhere in the repo — confirmed by grep across engine/, cb-studio/ and
+# every test file. Deleted outright rather than left as inert weight; every real caller already uses
+# _cut_segments directly (the migration this shim's own docstring says already happened).
 
 def _resolve_speaker(label, shot):
     """Map a cut label (FUZZBY / KEEN'S MUM) to the exact canonical character name. Resolve against the beat's speaker
@@ -218,9 +246,17 @@ def _resolve_speaker(label, shot):
     if not label:
         return pool[0] if pool else None
     ll = label.strip().lower()
-    for c in list(pool) + _canon_names():
+    candidates = list(pool) + _canon_names()
+    # EXACT match first — a same-shot substring pass used to let a short name silently match a longer, unrelated
+    # one that happens to contain it (e.g. label "KEEN" matching "Keen's Mum" before ever reaching the real
+    # "Keen" entry, misattributing Keen's own lines to his mother's voice; 2026-07-08 audit finding). Substring
+    # matching is now only a fallback for when no exact name is present anywhere in the pool.
+    for c in candidates:
+        if c.lower() == ll:
+            return c
+    for c in candidates:
         cl = c.lower()
-        if cl == ll or ll in cl or cl in ll:
+        if ll in cl or cl in ll:
             return c
     return label.title()
 
@@ -281,8 +317,11 @@ def _voice_dir_lookup(voice_direction):
 
 def _pad_min(final):
     """Seedance ref2vid requires audio_urls >= 2.0s — pad a short track with trailing silence."""
-    d = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
-                              "default=nw=1:nk=1", final], capture_output=True, text=True).stdout.strip() or "0")
+    # FIXED 2026-07-12 (loose-ends pass): was a hand-rolled ffprobe call, duplicated across 6 files —
+    # cb_post._dur() (lazy-imported, matching this module's pattern of not needing cb_post at top level) is
+    # the canonical probe.
+    import cb_post
+    d = cb_post._dur(final)
     if d < 2.1:
         tmp = final.rsplit(".", 1)[0] + "_pad.mp3"
         subprocess.run(["ffmpeg", "-y", "-i", final, "-af", "apad=whole_dur=2.5", tmp], check=True, capture_output=True)
@@ -317,9 +356,23 @@ def _resolve_turns(shot, vd):
         if not vid:
             raise SystemExit(f"no voiceId for {speaker!r} in characters.json")
         turns.append({"character": speaker, "voiceId": vid, "text": text, "label": label, "treatment": treatment})
+    # GATED (2026-07-14, matching cb_prompts.build_keyframe_prompt's identical confirmation requirement, rule
+    # 82/83 — Julian: "keep them for genuine edge cases, but require an explicit confirmation... flag it
+    # visibly so it's never silent"): voiceScript used to bypass the whole cadence/tag compiler (Andrea Romano
+    # + Docter + Brumm's own "THE MIND," this file's own module docstring) the instant it was non-empty, with
+    # no record a bypass happened. Now requires the SAME beat to also carry `voiceScriptConfirmed: true` —
+    # unconfirmed text is treated as never set, falling through to the real directed performance below.
     vs = (shot.get("voiceScript") or "").strip()
+    vs_confirmed = bool(vs) and bool(shot.get("voiceScriptConfirmed"))
+    if vs and not vs_confirmed:
+        print(f"  voiceScript present but NOT confirmed for "
+              f"{shot.get('beatCode') or shot.get('shotCode') or '(beat)'} — ignoring it, directing the real "
+              f"V3 performance instead. Set voiceScriptConfirmed: true to intentionally ship it.", flush=True)
     cut_dlg = [c for c in (shot.get("cuts") or []) if (c.get("dialogue") or "").strip()]
-    if vs:                           # MANUAL OVERRIDE — acted lines used VERBATIM (still case-insensitive labels)
+    if vs_confirmed:                 # CONFIRMED MANUAL OVERRIDE — acted lines used VERBATIM (still case-insensitive labels)
+        print(f"  ⚠ VOICE DIRECTION BYPASSED for {shot.get('beatCode') or shot.get('shotCode') or '(beat)'} — "
+              f"a confirmed voiceScript is shipping VERBATIM, skipping the directed cadence/tag compiler entirely.",
+              flush=True)
         for ln in [l for l in vs.splitlines() if l.strip()]:
             for label, line in _cut_segments(_upcase_leading_label(ln.strip())):
                 add(_resolve_speaker(label, shot), line, pre=line, label=label)
@@ -347,8 +400,14 @@ def build_dialogue_track(shot, out="vo.mp3", gap=0.55, voice_direction=None):
     speakers, times the reactions, and lets each line breathe (far better acting than synthesising one-liners alone).
     Each turn keeps its own voice; the [audio tags] lead the delivery. Falls back to per-line synthesis + concat for
     special voiceTreatments (chorus/underwater) or if the dialogue call errors. Returns {track, lines, speakers}."""
-    if shot.get("wordlessHeld"):   # the ONE wordless held beat per episode — silence carries it, never a voice (rule 9)
-        return None
+    # FIXED 2026-07-12 (live Gate-3 diagnosis): was a bare truthiness check on shot.get("wordlessHeld") — 1.B1
+    # and 1.B2 both had this field stored as the STRING "false" (not the JSON boolean), which is truthy in
+    # Python, so both beats silently returned None here on EVERY fire, misdiagnosed at the time (rule 61) as a
+    # transient ElevenLabs contention blip since this early-return path prints no diagnostic and raises no
+    # exception. NOW uses the shared _is_wordless_held helper (2026-07-14) — the fix originally landed only
+    # here, leaving the identical bug live in two sibling call sites in this same file until swept.
+    if _is_wordless_held(shot):
+        return None   # the ONE wordless held beat per episode — silence carries it, never a voice (rule 9)
     vd = _voice_dir_lookup(voice_direction)    # the Director's per-line acted V3 lines (cadence/arc), used as `pre`
     if not vd:                                  # SOFTWARE-WIDE SAFETY NET: no explicit direction passed → load the cached director acting
         try:
@@ -390,8 +449,15 @@ def build_dialogue_track(shot, out="vo.mp3", gap=0.55, voice_direction=None):
     for t in turns:
         if t["treatment"] == "group_chorus":
             ch = _chorus(t["text"], t.get("members"), out=f"_seg{len(segs)}_chorus.mp3")
-            if ch:
-                segs.append({"character": "GROUP_CHORUS", "label": None, "text": t["text"], "out": ch})
+            if not ch:
+                # THE SILENT-DROP FIX (2026-07-08 audit finding, Law 5): a chorus with NO resolvable voice among
+                # its members used to just `continue` here — the beat's dialogue turn vanished with no record,
+                # while @Audio1 still shipped (built from whatever OTHER turns did resolve). That is exactly the
+                # silent Law-5 violation risk (a rendered clip missing dialogue it was supposed to speak) — fail
+                # loud instead, matching say()'s own "no voiceId" SystemExit convention elsewhere in this module.
+                raise SystemExit(f"group_chorus turn in {shot.get('beatCode') or shot.get('slug')} has no "
+                                  f"resolvable voice among members {t.get('members')!r}")
+            segs.append({"character": "GROUP_CHORUS", "label": None, "text": t["text"], "out": ch})
             continue
         r = say(t["character"], shot={"performance": {"surface": ""}, "intent": {}}, pre=t["text"],
                 out=f"_seg{len(segs)}_{re.sub(r'[^A-Za-z0-9]', '', t['character'])}.mp3")
@@ -422,16 +488,32 @@ def audit_attribution(package_path):
     """ACROSS-THE-BOARD regression check — NO audio generated. For every beat, split every cut into speaker-segments
     and confirm each labelled line resolves to its OWN character with a real canonical voiceId, with no speaker label
     leaking into the spoken text. Catches the whole class of voice drift (multi-speaker collapse, label leak,
-    unresolved/voiceless label) before anything is voiced. Returns a list of problem strings ([] = clean)."""
+    unresolved/voiceless label) before anything is voiced. Returns a list of problem strings ([] = clean).
+
+    THE GROUP_CHORUS + EMPTY-POOL GAP (2026-07-08 audit finding, Law 5): this used to unconditionally SKIP every
+    group_chorus cut, and waved through EVERY unlabelled line as "the sole speaker (ok)" with no check that a sole
+    speaker actually existed. Both are real silent-drop risks: build_dialogue_track's own fallback loop used to
+    `continue` past an unresolvable chorus with no record at all, and _resolve_turns.add() silently returns without
+    recording anything when an unlabelled line resolves to no speaker (_resolve_speaker(None, shot) returns None on
+    an empty pool) — either way a beat could ship @Audio1 PRESENT but missing dialogue it was supposed to speak,
+    completely undetected. Now both are actually validated here, the pre-fire safety net cb_beats.render_readiness
+    already calls."""
     d = json.load(open(package_path))
     beats = d.get("beats") or d.get("shots") or []
     problems = []
     for b in beats:
-        if b.get("wordlessHeld"):
+        if _is_wordless_held(b):
             continue
         code = b.get("beatCode") or b.get("slug") or "?"
         for ci, c in enumerate(b.get("cuts") or [], 1):
             if (c.get("voiceTreatment") or "").strip() == "group_chorus":
+                # Same member pool build_dialogue_track's _resolve_turns/_chorus read (cb_voice.py ~line 344/250).
+                line = " ".join(t for _, t in _cut_segments(c.get("dialogue")) if t)
+                if not line:
+                    continue                                   # no actual line to speak — nothing to validate
+                members = c.get("chorusMembers") or b.get("speakers") or []
+                if not any(_char(m).get("voiceId") for m in members if m):
+                    problems.append(f"{code} cut{ci}: group_chorus has NO resolvable voice among members {members!r}")
                 continue
             for label, line in _cut_segments(c.get("dialogue")):
                 if not line:
@@ -439,7 +521,14 @@ def audit_attribution(package_path):
                 if re.search(r"[A-Z][A-Z'’ ]{1,22}?:", line):
                     problems.append(f"{code} cut{ci}: a speaker label leaked into the spoken text -> \"{line[:48]}\"")
                 if not label:
-                    continue                                   # unlabelled single line -> the sole speaker (ok)
+                    # An unlabelled line falls back to the sole/first speaker in the beat's pool — but if that pool
+                    # is empty (or its sole speaker has no voiceId), it resolves to NO ONE and would be silently
+                    # dropped downstream (_resolve_turns.add() records nothing when speaker is falsy). Only pass an
+                    # unlabelled line when it actually resolves to a real, voiced speaker.
+                    sp = _resolve_speaker(None, b)
+                    if not sp or not _char(sp).get("voiceId"):
+                        problems.append(f"{code} cut{ci}: unlabelled line resolves to no speaker -> \"{line[:48]}\"")
+                    continue
                 sp = _resolve_speaker(label, b)
                 if not sp or not _char(sp).get("voiceId"):
                     problems.append(f"{code} cut{ci}: label '{label}' -> '{sp}' has NO canonical voiceId")

@@ -22,11 +22,9 @@ ROOT = HERE.parent
 
 def _show_bible():
     """The project's show bible: the canon doc + every character's structured bible."""
-    canon = ""
-    _canon_path = pathlib.Path(P.CANON)
-    if _canon_path.exists():
-        canon = _canon_path.read_text()
-    chars = json.load(open(P.CHARS))
+    # FIXED 2026-07-12 (loose-ends pass): canon+chars reading was hand-duplicated here, in cb_director.py's
+    # own _mind(), and in cb_writer.py's own _gen() — now paths.load_show_bible().
+    canon, chars = P.load_show_bible()
     base = chars.get("characters", chars)
     bibles = {n: c["bible"] for n, c in base.items() if isinstance(c, dict) and c.get("bible")}
     return canon, bibles
@@ -34,12 +32,30 @@ def _show_bible():
 def _project():
     try:
         pj = json.load(open(ROOT / "cb-studio" / "data" / "projects.json"))
-        return (pj.get("projects") or [{}])[0]
+        # FIXED 2026-07-12 (full-codebase audit continued): this used to return array index [0] regardless
+        # of the `primary` flag, so it only happened to return Crystal Bears because it's listed first today
+        # (projects.json now also carries "ep1-v2-archive", primary:false, appended after it). app.html's own
+        # project picker already treats `primary` as the real signal, not list position — match that here so
+        # a future reorder/append never silently hands the Eye a different project's premise/audience/style.
+        projs = pj.get("projects") or [{}]
+        return next((x for x in projs if x.get("primary")), projs[0])
     except Exception:
         return {}
 
 def _slim(b):
-    """Just the Director's DECISIONS for one beat — what the Eye judges."""
+    """Just the Director's DECISIONS for one beat — what the Eye judges.
+
+    FIXED 2026-07-15 (Julian, live — "the job of the rules is to deliver the scene then the beats within the
+    scene... the guard rails are there... to protect the beat the director has created... deliver what the
+    storyboard says"): confirmed live on 1.B5 — Director's Eye flagged its cooling light as a HIGH-severity
+    break of the locked EP3 "S1-3 stay warm-golden" doctrine, but this function never handed the Eye the ONE
+    field that explains and justifies exactly that cooling: `director_mode` ("Exit on a comic button while
+    planting the larger weather turn faithfully"). The Eye was judging the beat's light/atmosphere against an
+    episode-wide rule with zero visibility into the storyboard's own stated reason for the deviation — grading
+    the answer without ever being shown the working. `director_mode` and `carryMarks` (which for 1.B5 literally
+    names "the named storm and cooling sky" as a carried, declared state) now go to the Eye alongside
+    everything else, so it can judge whether the beat DELIVERS its own stated creative intent, not overrule
+    that intent with a scene-boundary assumption it never got to weigh against it."""
     return {
         "beatCode": b.get("beatCode") or b.get("shotCode"),
         "scene": b.get("sceneNumber"),
@@ -54,6 +70,12 @@ def _slim(b):
         "keenCuffs": b.get("keenWristbands"),
         "comedyMode": b.get("comedyMode"),
         "beautyMoment": b.get("beautyMoment"),
+        # the Director's own DECLARED creative intent for this beat — the storyboard's own stated reason a
+        # beat may deliberately transition/deviate from a scene- or episode-level default (see the fix note
+        # above). Never itself an excuse for a genuine, un-declared bible violation (wrong character voice, a
+        # wrong crystal-power mapping, an appearance leak) — the SYSTEM prompt states that distinction explicitly.
+        "directorMode": b.get("director_mode"),
+        "carryMarks": b.get("carryMarks"),
         # the Director's OWN self-check triad — the Eye's independent read is what STANDARD 2 already judges; handing
         # it the Director's self-assessment too lets it flag a beat where the two disagree (the same craft standard,
         # applied to the Director's own claim about the beat, not just the beat's raw content).
@@ -72,6 +94,17 @@ SYSTEM = (
     "power-up; (4) the COMEDY DOCTRINE — BIG when funny / small when true, never mean, laugh WITH not AT; (5) every "
     "beat OPENS and CLOSES (lands a button, never a dangling open the next beat resolves); (6) tone + safety for "
     "the target audience; (7) story + visual continuity across beats; (8) the episode theme is served.\n\n"
+    "YOUR JOB IS TO DELIVER THE SCENE, THEN THE BEATS WITHIN THE SCENE (2026-07-15, Julian's own ruling on this "
+    "exact tension) — a scene- or episode-level canon rule (e.g. a locked lighting/time-of-day progression) "
+    "describes the DEFAULT shape of the day; it does not override a beat whose own `directorMode`/`carryMarks` "
+    "EXPLICITLY declares a deliberate transition or foreshadow away from that default (a beat planting the next "
+    "act's turn, a held button that runs long, a beat that deliberately breaks a pattern for the gag). When a "
+    "beat's own stated creative intent already accounts for why its content diverges from the scene-level "
+    "default, your job is to judge whether the beat FAITHFULLY DELIVERS that declared intent — not to flag the "
+    "divergence itself as a violation the storyboard never asked to make. This is never a blanket excuse: an "
+    "un-declared drift (nothing in directorMode/carryMarks explains it), or a beat that breaks a genuinely "
+    "absolute rule regardless of stated intent (a character's own essence, the Crystal Power System's own "
+    "mapping, an appearance-description leak, a mean-spirited joke), still gets flagged exactly as before.\n\n"
     "STANDARD 2 — PIXAR-CALIBRE 3D-CGI CRAFT (ruleType='craft'): judge EVERY beat through the SAME four masters "
     "that are supposed to have written it — flag a beat that fails their standard even if it is on-bible:\n"
     "• PETE DOCTER — does the FEELING lead the shot, is there a hidden inner NEED under the outward want, is the "

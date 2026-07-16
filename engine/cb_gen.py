@@ -3,11 +3,21 @@
 Crystal Bears — local generation module (the app's provider layer).
 
 Wires the crew's prompts to the real APIs, locally (no Replit):
-  - generate_image()  -> Nano Banana 2 (gemini-3.1-flash-image) [DP keyframes]
-  - generate_video()  -> Veo 3.1 (veo-3.1-generate-preview)     [Camera i2v]
+  - generate_image()  -> DP keyframes; dispatches to Seedream 5 Pro (fal.ai, default, 2026-07-09) or
+                         Nano Banana 2 (gemini-3.1-flash-image, kept live, CB_IMAGE_PROVIDER=nanobanana)
+  - generate_video_seedance_ref() -> Seedance reference-to-video (fal.ai) — THE real production video path;
+                         every render (cb_beats.py, cb_retake.py) calls this one exclusively.
+  - generate_video()  -> Veo 3.1 (veo-3.1-generate-preview) [Camera i2v] — unused in production; CLI/manual-only.
   - eleven_tts()      -> ElevenLabs TTS (V3 acted masters)
-  - voice_change()    -> ElevenLabs speech-to-speech (the lip-sync voice swap)
+  - voice_change()    -> RETIRED (CLAUDE.md rules 4/29 — no post voice swap, ever); raises loud on call, kept
+                         only for the record.
   - list_voices()/keycheck -> cheap validity checks
+
+FIXED 2026-07-12 (full-codebase audit continued): this list had drifted from the code — voice_change() was
+listed as a live feature (it unconditionally raises RuntimeError; see its own RETIRED docstring below) and
+generate_video_seedance_ref() (this module's actual sole production video path) wasn't mentioned at all, while
+generate_video() (Veo) read as the production camera path even though no render caller anywhere uses it —
+corrected above to match what the code actually does.
 
 Keys come from cb-gen/.env (gitignored): GEMINI_API_KEY, ELEVENLABS_API_KEY.
 Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
@@ -32,7 +42,23 @@ _load_env()
 
 # THE keyframe image model — "Nano Banana 2" (gemini-3.1-flash-image): 2K, best reference-hold. A/B-confirmed 2026-06-28
 # to hold fine identity markers on the CHAINED cascade where Pro (gemini-3-pro-image) dropped them. Override via CB_IMAGE_MODEL.
+# HISTORICAL NOTE (2026-07-09): NB2 was the sole keyframe model from 2026-06-28 until today. Left as the dated record
+# of that decision, not rewritten — see IMAGE_PROVIDER below for the current, superseding decision.
 IMAGE_MODEL = os.environ.get("CB_IMAGE_MODEL", "gemini-3.1-flash-image")  # NB2 — the A/B winner for the cascade
+
+# THE PROVIDER SWITCH (Julian's ruling, 2026-07-09 — "we go Seedream 5 pro, it's the one the industry is
+# suggesting"): a real, evidence-based side-by-side on 1.B1's actual production prompt+references (identical
+# 1086-word prompt, identical 3 refs — Fuzzby turnaround, Zenny turnaround, scene plate — fired through both
+# models) found NB2 violated the Crystal World Rule outright (invented glowing hearts + swirling magic-light
+# crystal auras, directly contradicting the prompt's own "NO crystal self-glow, aura, beams, particles" line)
+# and dropped Zenny's signature identity detail (rosy blush cheeks, present on her turnaround); Seedream 5 Pro
+# held both correctly. n=1 — a single seed each, not a benchmark, and generation is stochastic — so NB2 is
+# KEPT LIVE, never deleted, selectable via CB_IMAGE_PROVIDER=nanobanana for rollback or a future re-test.
+# Cost: Seedream 5 Pro runs ~40% more per image (~$0.144 vs NB2's real ~$0.101 at 2K, both confirmed against
+# each vendor's own pricing page the same day — see cb_costs.py's RATES, also corrected today) — accepted as
+# immaterial at episode scale (~43 keyframes).
+IMAGE_PROVIDER = os.environ.get("CB_IMAGE_PROVIDER", "seedream")  # "seedream" (default) | "nanobanana" (rollback)
+SEEDREAM_ENDPOINT = os.environ.get("CB_SEEDREAM_ENDPOINT", "bytedance/seedream/v5/pro/edit")
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 ELEVEN_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
@@ -99,8 +125,74 @@ def last_frame(clip, out="lastframe.png"):
                    check=True, capture_output=True)
     return out
 
-# ── Nano Banana — image (DP keyframes) ───────────────────────────────────────
+# ── DP keyframes — provider dispatch (2026-07-09) ────────────────────────────
+
+# ── THE SINGLE PRODUCTION ROUTE (Julian's cutover order, 2026-07-16) ─────────────────────────
+# After the old Pipeline tab's Gate-3 button fired a legacy 15s mega-prompt around every spend
+# protection ($4.57, uncontrolled), every PAID provider call now requires the authorized route
+# sentinel. Only cb_render (the shot pipeline: disclosure -> sealed envelope -> single-use token)
+# passes it. Every legacy caller — cb_beats, cb_retake, cb_replicator, cb_pipeline, cb_scene,
+# cb_previz, cb_voice, this module's own CLI — is DISABLED AT RUNTIME at this chokepoint: legacy
+# prompts and outputs stay archived and readable, but they can no longer reach a provider.
+_AUTHORIZED_PRODUCTION_ROUTE = "cb_render"
+
+
+def _require_production_route(production_route, op):
+    if production_route != _AUTHORIZED_PRODUCTION_ROUTE:
+        raise RuntimeError(
+            f"BLOCKED — legacy fire route disabled (production cutover, 2026-07-16). Every paid "
+            f"provider call ({op}) must travel through cb_render's shot pipeline: disclosure -> "
+            f"sealed envelope -> Julian's single-use spend token. This call came from an "
+            f"unauthorized route and spent nothing.")
+
 def generate_image(prompt, refs=None, aspect="16:9", out="keyframe.png",
+                   model=None, image_size="2K", production_route=None):
+    _require_production_route(production_route, "generate_image")
+    """THE single keyframe-generation entry point every cb_scene.py call site uses — unchanged signature, so
+    no caller needed to change for the provider swap. Dispatches on IMAGE_PROVIDER (module-level, env-overridable
+    via CB_IMAGE_PROVIDER): "seedream" (default, Seedream 5 Pro via fal.ai) or "nanobanana" (NB2 via direct
+    Gemini API, kept live for rollback). `model=` is NB2-specific (a Gemini model id) and ignored by the
+    Seedream path; passing it explicitly forces the nanobanana path's model regardless of IMAGE_PROVIDER,
+    matching the old function's own back-compat contract for any caller that still passes model= explicitly."""
+    if model or IMAGE_PROVIDER == "nanobanana":
+        return _generate_image_nanobanana(prompt, refs, aspect, out, model or IMAGE_MODEL, image_size)
+    return _generate_image_seedream(prompt, refs, aspect, out, image_size)
+
+def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png", image_size="2K"):
+    """Seedream 5 Pro (bytedance/seedream/v5/pro/edit, fal.ai) — the default keyframe model as of 2026-07-09
+    (see IMAGE_PROVIDER's doctrine comment above). Same reference-image contract as the NB2 path: a list of
+    local file paths, uploaded to fal then passed as image_urls alongside the identical prompt text — the
+    prompt/reference doctrine (rule 5's appearance-non-leak law, the four-anchor-style reference stack) is
+    model-agnostic by design, so no prompt-building code changes for this swap."""
+    _need(FAL_KEY, "FAL_KEY")
+    os.environ["FAL_KEY"] = FAL_KEY
+    import fal_client
+    ref_urls = [_fal_upload(str(pathlib.Path(r))) for r in (refs or [])]
+    # FIXED 2026-07-11 (full-codebase audit): this call never sent the requested aspect ratio or resolution at
+    # all — both were silently dropped, despite generate_image()'s own public signature accepting them (and
+    # the cost sidecar already logging aspect= as if it had been honoured). fal.ai's ByteDance-family image
+    # endpoints accept "image_size" (a preset string, e.g. "square_hd"/"portrait_4_3"/"landscape_16_9", or a
+    # {width,height} object) and "aspect_ratio" — mapped here to the SAME image_size convention this module's
+    # NB2 path already uses ("2K" etc.) plus the beat's own aspect string, rather than silently omitted.
+    args = {"prompt": prompt, "image_urls": ref_urls, "image_size": image_size, "aspect_ratio": aspect}
+    result = _fal_subscribe(SEEDREAM_ENDPOINT, arguments=args, with_logs=False)
+    url = None
+    if result.get("images"):
+        url = result["images"][0].get("url")
+    elif result.get("image"):
+        url = result["image"].get("url")
+    if not url:
+        raise SystemExit(f"Seedream returned no image url: {json.dumps(result)[:900]}")
+    img = _rget(url, timeout=120)
+    outp = MEDIA / out
+    outp.write_bytes(img.content)
+    cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(provider="seedream5pro"),
+                        out=out, meta={"model": SEEDREAM_ENDPOINT, "num_refs": len(ref_urls)})
+    cb_costs.write_gen_sidecar(outp, op="keyframe_image", model=SEEDREAM_ENDPOINT, aspect=aspect,
+                                num_image_refs=len(ref_urls))
+    return str(outp)
+
+def _generate_image_nanobanana(prompt, refs=None, aspect="16:9", out="keyframe.png",
                    model=IMAGE_MODEL, image_size="2K"):  # Nano Banana 2 (latest) — 2K + best ref-hold; CB_IMAGE_MODEL overrides
     _need(GEMINI_KEY, "GEMINI_API_KEY")
     parts = [{"text": prompt}]
@@ -130,28 +222,39 @@ def generate_image(prompt, refs=None, aspect="16:9", out="keyframe.png",
         print(f"  (imageSize '{image_size}' rejected — retrying at default resolution)")
         body["generationConfig"]["imageConfig"] = {"aspectRatio": aspect}
         resp = _post(body)
-    # TRANSIENT-ERROR RETRY: the Pro image model can 429/500/503 under load — back off and retry, never crash the
-    # whole chained build on a temporary blip.
-    for attempt in range(5):
-        if resp.status_code not in (429, 500, 503):
-            break
-        wait = min(60, 8 * (2 ** attempt))   # 8, 16, 32, 60, 60s
-        print(f"  Image API {resp.status_code} (transient/high demand) — retry {attempt + 1}/5 in {wait}s...", flush=True)
-        time.sleep(wait)
-        resp = _post(body)
+    # FIXED 2026-07-12 (full-codebase audit continued): this used to hand-roll its own 429/500/503 backoff
+    # loop (8/16/32/60/60s, no jitter) — a second, already-drifted retry policy for the exact transient-failure
+    # class this file's own shared _retry()/_retryable() (lines 85-94) already exists to handle, and that
+    # every other call in this file (_rpost/_rget/_fal_upload/_fal_subscribe) already uses (cb_qa.vision_verdict
+    # independently reimplements a THIRD copy of the same policy for the identical failure class). Now routed
+    # through the shared _retry — only the bespoke "model rejects the imageSize field outright" 400 branch
+    # above stays special-cased, since that's a real request-SHAPE correction (inspecting resp.text to mutate
+    # the body before re-firing), not a transient-failure retry; _retry's own 4xx-vs-5xx/429 classifier already
+    # treats a persistent 400 as non-retryable and raises immediately, same as this bespoke branch handles it
+    # once, up front.
+    if resp.status_code in _RETRY_STATUS:
+        try:
+            resp = _retry(lambda: _checked(_post(body)), what="Image API (nanobanana)")
+        except requests.exceptions.HTTPError as e:
+            resp = e.response   # retries exhausted — fall through to the same SystemExit below, unchanged message
     if resp.status_code != 200:
         raise SystemExit(f"Image API {resp.status_code}: {resp.text[:900]}")
-    for part in resp.json()["candidates"][0]["content"]["parts"]:
+    rj = resp.json()
+    if not rj.get("candidates"):
+        raise SystemExit(f"Image API returned no candidates (likely a safety block): {json.dumps(rj)[:900]}")
+    for part in rj["candidates"][0]["content"]["parts"]:
         blob = part.get("inline_data") or part.get("inlineData")
         if blob and blob.get("data"):
             outp = MEDIA / out
             outp.write_bytes(base64.b64decode(blob["data"]))
-            cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(), out=out, meta={"model": model})
+            cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(provider="nanobanana2"), out=out, meta={"model": model})
+            cb_costs.write_gen_sidecar(outp, op="keyframe_image", model=model, aspect=aspect, image_size=image_size)
             return str(outp)
-    raise SystemExit("No image returned. Response: " + json.dumps(resp.json())[:500])
+    raise SystemExit("No image returned. Response: " + json.dumps(rj)[:500])
 
 # ── Veo 3.1 — image-to-video (Camera) ────────────────────────────────────────
-def generate_video(prompt, keyframe, aspect="16:9", resolution="720p", out="clip.mp4"):
+def generate_video(prompt, keyframe, aspect="16:9", resolution="720p", out="clip.mp4", production_route=None):
+    _require_production_route(production_route, "generate_video")
     _need(GEMINI_KEY, "GEMINI_API_KEY")
     mime, data = _b64(keyframe)
     body = {
@@ -172,6 +275,8 @@ def generate_video(prompt, keyframe, aspect="16:9", resolution="720p", out="clip
         if st.get("done"):
             break
         print("   …still rendering")
+    if st.get("error"):
+        raise SystemExit(f"Veo operation failed: {json.dumps(st['error'])[:900]}")
     uri = st["response"]["generateVideoResponse"]["generatedSamples"][0]["video"]["uri"]
     vid = _rget(uri, headers={"x-goog-api-key": GEMINI_KEY}, timeout=300)
     vid.raise_for_status()
@@ -240,7 +345,8 @@ def _seedance_json_prompt(prompt, duration=None, ref=False):
 
 # ── Seedance 2.0 — image-to-video via fal.ai (best motion + native lip-sync) ──
 def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
-                            generate_audio=True, out="clip_sd.mp4", end_image=None):
+                            generate_audio=True, out="clip_sd.mp4", end_image=None, production_route=None):
+    _require_production_route(production_route, "generate_video_seedance")
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
@@ -267,11 +373,14 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
     outp.write_bytes(vid.content)
     cb_costs.log_spend("seedance_i2v", cb_costs.estimate_video_cost("seedance_i2v_per_sec", duration),
                         out=out, meta={"resolution": resolution})
+    cb_costs.write_gen_sidecar(outp, op="seedance_i2v", endpoint="bytedance/seedance-2.0/image-to-video",
+                                resolution=resolution, duration=duration, generate_audio=generate_audio)
     return str(outp)
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────
 def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
-                                duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False):
+                                duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False, production_route=None):
+    _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video: feed reference image(s) + your OWN voice audio (≤15s);
     the character lip-syncs to your audio. Reference assets in the prompt as @图1/@Audio1.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
@@ -311,15 +420,22 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
                 else "bytedance/seedance-2.0/reference-to-video")
     print(f"  seedance ref2vid ({endpoint}): rendering…")
     result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
-    vid = _rget(result["video"]["url"], timeout=300)
+    url = (result.get("video") or {}).get("url")
+    if not url:
+        raise SystemExit(f"Seedance ref2vid returned no video url: {str(result)[:400]}")
+    vid = _rget(url, timeout=300)
     outp = MEDIA / out; outp.write_bytes(vid.content)
     _secs = 15 if str(duration) == "auto" else float(duration)   # HANDLE_TOTAL default when duration="auto"
     cb_costs.log_spend("seedance_ref2vid", cb_costs.estimate_video_cost(
         "seedance_fast_per_sec" if fast else "seedance_standard_per_sec", _secs),
         out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs})
+    cb_costs.write_gen_sidecar(outp, op="seedance_ref2vid", endpoint=endpoint, resolution=resolution,
+                                duration=str(duration), seconds=_secs, fast=fast,
+                                num_image_refs=len(image_urls), num_audio_refs=len(audio_urls or []))
     return str(outp)
 
-def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync"):
+def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync", production_route=None):
+    _require_production_route(production_route, "lipsync")
     """Drive a clip's mouth to a provided audio track (V3 acted VO) — solves timing.
     model: 'fal-ai/latentsync' (ByteDance, cheap) or 'fal-ai/sync-lipsync/v2/pro' (premium)."""
     _need(FAL_KEY, "FAL_KEY")
@@ -329,12 +445,20 @@ def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync"):
     a = _fal_upload(str(pathlib.Path(audio)))
     print(f"  lipsync ({model}): rendering…")
     result = _fal_subscribe(model, arguments={"video_url": v, "audio_url": a}, with_logs=False)
-    url = result["video"]["url"]
+    # FIXED 2026-07-12 (full-codebase audit continued): this indexed result["video"]["url"] directly, unlike
+    # every sibling video-generation function in this file (generate_video_seedance, generate_video_seedance_ref,
+    # _generate_image_seedream), which all guard against a missing/error-shaped fal response — a fal error shape
+    # (e.g. {"error": ...}, no "video" key) would raise a bare, undiagnostic KeyError here instead of a clear
+    # message naming what actually came back. Matched to the sibling pattern.
+    url = (result.get("video") or {}).get("url")
+    if not url:
+        raise SystemExit(f"lipsync returned no video url: {str(result)[:400]}")
     vid = _rget(url, timeout=300)
     outp = MEDIA / out; outp.write_bytes(vid.content); return str(outp)
 
 def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
-               stability=0.35, similarity_boost=0.9, style=0.0):
+               stability=0.35, similarity_boost=0.9, style=0.0, production_route=None):
+    _require_production_route(production_route, "eleven_tts")
     """V3 TTS with the canonical acting settings. stability MUST stay in the ~0.25-0.40 band — above ~0.40
     the [bracket] audio tags STOP FIRING and the read goes flat (CRYSTAL_BEARS_LOCKED_CANON.md:144-158).
     The tag sets the colour; the TEXT does the acting; 1-2 tags per segment. Never use_speaker_boost in v3."""
@@ -349,9 +473,13 @@ def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content)
     cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(text), out=out, meta={"model": model_id})
+    cb_costs.write_gen_sidecar(outp, op="elevenlabs_tts", model=model_id, voice_id=voice_id,
+                                stability=stability, chars=len(text or ""))
     return str(outp)
 
-def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30):
+def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
+                    generation_kind="generation", production_route=None):
+    _require_production_route(production_route, "eleven_dialogue")
     """V3 TEXT-TO-DIALOGUE — the OPTIMUM for character acting. One request weaves the WHOLE exchange TOGETHER, in
     context: turn-taking, reaction timing, and prosody matched ACROSS speakers, each turn in its own voice, taking
     cues from the [audio tags]. This beats synthesising each line in isolation (a 2-word line alone reads flat — the
@@ -365,11 +493,17 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30):
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content)
     _chars = sum(len(str(i.get("text") or "")) for i in (inputs or []))
-    cb_costs.log_spend("elevenlabs_dialogue", cb_costs.estimate_tts_cost(" " * _chars), out=out,
-                        meta={"model": model_id, "voices": len(inputs or [])})
+    _billing = cb_costs.dialogue_billing(inputs, model_id=model_id,
+                                          generation_kind=generation_kind)
+    _billing["voices"] = len(inputs or [])
+    cb_costs.log_spend("elevenlabs_dialogue", _billing["estimatedCostUsdExTax"], out=out,
+                        meta=_billing)
+    cb_costs.write_gen_sidecar(outp, op="elevenlabs_dialogue", model=model_id, stability=stability,
+                                chars=_chars, voices=len(inputs or []), billing=_billing)
     return str(outp)
 
-def eleven_music(prompt, length_ms=None, out="music.mp3"):
+def eleven_music(prompt, length_ms=None, out="music.mp3", production_route=None):
+    _require_production_route(production_route, "eleven_music")
     """ElevenLabs Music — generate an INSTRUMENTAL underscore bed (no vocals) that sits UNDER the dialogue
     (cb_post ducks it). length_ms ~ the scene's picture duration; if None the model picks a length from the prompt.
     Returns the mp3 path. If the Music API moves, THIS is the single place to update — endpoint/params verified
@@ -388,6 +522,7 @@ def eleven_music(prompt, length_ms=None, out="music.mp3"):
         raise RuntimeError(f"Music API {r.status_code}: {r.text[:300]}")
     outp = MEDIA / out; outp.write_bytes(r.content)
     cb_costs.log_spend("elevenlabs_music", cb_costs.estimate_music_cost(length_ms), out=out)
+    cb_costs.write_gen_sidecar(outp, op="elevenlabs_music", length_ms=length_ms)
     return str(outp)
 
 def voice_change(audio, voice_id, model_id="eleven_multilingual_sts_v2", out="swapped.mp3",
@@ -418,7 +553,8 @@ def voice_change(audio, voice_id, model_id="eleven_multilingual_sts_v2", out="sw
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content); return str(outp)
 
-def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False):
+def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False, production_route=None):
+    _require_production_route(production_route, "eleven_sfx")
     """Text -> sound effect / ambience bed."""
     _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
     body = {"text": text, "loop": loop}
@@ -432,6 +568,7 @@ def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False):
         raise SystemExit(f"SFX API {r.status_code}: {r.text[:300]}")
     outp = MEDIA / out; outp.write_bytes(r.content)
     cb_costs.log_spend("elevenlabs_sfx", cb_costs.RATES["elevenlabs_sfx_flat"][0], out=out)
+    cb_costs.write_gen_sidecar(outp, op="elevenlabs_sfx", duration=duration, loop=loop)
     return str(outp)
 
 def list_voices():
@@ -490,5 +627,5 @@ if __name__ == "__main__":
     elif a.cmd == "music": print("✓", eleven_music(a.prompt, a.ms, a.out))
     elif a.cmd == "lastframe": print("✓", last_frame(a.clip, a.out))
     elif a.cmd == "lipsync": print("✓", lipsync(a.video, a.audio, a.out, a.model))
-    elif a.cmd == "refvideo": print("✓", generate_video_seedance_ref(a.prompt, a.img, a.audio or None, a.res, a.duration, a.out, a.fast))
+    elif a.cmd == "refvideo": print("✓", generate_video_seedance_ref(a.prompt, a.img, audio_urls=(a.audio or None), resolution=a.res, duration=a.duration, out=a.out, fast=a.fast))
     else: ap.print_help()

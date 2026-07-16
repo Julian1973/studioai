@@ -19,6 +19,10 @@ a count, a symmetry, a position) that separates a pass from a fail; never phrase
 """
 import json, os, sys, struct, time, re, subprocess, tempfile, shutil, requests
 import cb_gen, cb_prompts as P
+import cb_segprompt as _CS   # FIXED 2026-07-12 (loose-ends pass): JUNCTION_INTENTIONAL/JUNCTION_SEAMLESS used
+# to be independently redeclared here as identical string-literal copies of cb_segprompt.py's own constants
+# (the actual authoring source of a beat's junctionType). Confirmed safe at module level: cb_segprompt.py only
+# ever imports cb_qa lazily, inside function bodies (for ManifestFieldMissing), never at its own module level.
 
 class ManifestFieldMissing(Exception):
     """THE MANIFEST (CLAUDE.md rule 37, 2026-07-06 — 'remove every generic fallback; a missing field halts with
@@ -115,8 +119,8 @@ def check_anatomy(kf, characters):
         return {"ok": None, "verdict": err}
     return {"ok": text.strip().upper().startswith("CLEAN"), "verdict": text.strip()}
 
-JUNCTION_INTENTIONAL = "intentional_next_shot"   # THE DEFAULT — a new gag arc, a fresh camera setup
-JUNCTION_SEAMLESS = "seamless_continuation"       # ONLY when the director's own cut explicitly continues
+JUNCTION_INTENTIONAL = _CS.JUNCTION_INTENTIONAL   # THE DEFAULT — a new gag arc, a fresh camera setup
+JUNCTION_SEAMLESS = _CS.JUNCTION_SEAMLESS          # ONLY when the director's own cut explicitly continues
 
 def check_join_state(prev_end_frame, next_open_frame, carry_marks=None):
     """THE STATE-CONTINUITY GATE (Julian's junction-type ruling, CLAUDE.md rule 31, 2026-07-05; extended
@@ -276,9 +280,14 @@ _TEMPORAL_MARKERS = (
 def check_endstate_still(text):
     """LAW 4 DETECTOR — endStateStill must be a static PICTURE description (subjects, poses, positions,
     expressions, setting), never directing prose with temporal verbs or imperatives — that leak is exactly
-    what rule 27 found and fixed once already (endState pasted verbatim into @图1's content clause). This
-    can't rewrite the prose the way Julian's own worked example does (rule 27 already rejected a mechanical
-    transform) — it only detects and flags, so a violation is never shipped un-reviewed."""
+    what rule 27 found and fixed once already (endState pasted verbatim into @图1's content clause).
+
+    NOTE (2026-07-15, guardrail-fidelity audit): in the current v5 pipeline, endStateStill is NOT read by
+    cb_segprompt.shipped_prompt — confirmed by grep: the only occurrence is the `prev_end_state_still`
+    parameter on shipped_prompt(), whose own docstring states it's kept "for call-signature compatibility
+    with every existing caller ... but UNUSED." So this check is presence/format hygiene on a manifest-
+    required field only; it does NOT protect anything currently shipped. A flag here is never evidence of a
+    render-time defect — do not read it that way. Kept in case a future stage re-consumes the field."""
     t = str(text or "").strip()
     if not t:
         return {"ok": True, "verdict": "(no endStateStill authored yet)"}
@@ -289,11 +298,15 @@ def check_endstate_still(text):
     return {"ok": True, "verdict": "static picture description, no temporal markers found"}
 
 def check_ambience_overlap(atmosphere, ambient_bed):
-    """LAW 7 DETECTOR — the beat's own `atmosphere` text must never restate the scene's locked `ambientBed`
-    line (the bed is the constant every beat shares word-for-word; per-beat atmosphere/soundIntent is what's
-    supposed to change). Same bug CLASS as rule 27's endState/ambience duplication, a different field pair
-    that nothing currently guards. Word-overlap heuristic against the FIRST sentence of atmosphere (the same
-    slice _v3_environment actually ships, cb_segprompt.py's `atmo` clause) — deterministic, no vision call."""
+    """LAW 7 DETECTOR — ORPHANED (2026-07-15, guardrail-fidelity audit): its cb_beats.py call site was
+    retired the same day. The beat's own `atmosphere` text was meant to never restate the scene's locked
+    `ambientBed` line, but neither field reaches the shipped v5 prompt in any single artifact (confirmed by
+    grep — `ambientBed` is never read into any generation prompt anywhere in the codebase; `atmosphere` is
+    read only by cb_prompts.build_keyframe_prompt's separate Gate-2b keyframe prompt). A "duplication"
+    between the two is architecturally impossible in current shipped output, so this check would only ever
+    false-flag legitimate content. Left defined/testable in case a future stage re-pairs beat.soundIntent
+    against scene.ambientBed (the semantically correct pairing, if the ambience block is ever restored to
+    emit_v5) — do not re-wire this exact call shape without re-checking the shipped-prompt path first."""
     a = str(atmosphere or "").strip()
     bed = str(ambient_bed or "").strip()
     if not a or not bed:
@@ -341,7 +354,31 @@ def check_camera_lock_conflict(beat):
     for i, c in enumerate(beat.get("cuts") or [], start=1):
         framing = str(c.get("framing") or "")
         has_dlg = bool(str(c.get("dialogue") or "").strip()) and not _is_motion_exempt_vocal(c)
-        moves = [w for w in _CAMERA_MOVE_WORDS if re.search(r"\b" + re.escape(w) + r"\b", framing.lower())]
+        flow = framing.lower()
+        moves = []
+        for w in _CAMERA_MOVE_WORDS:
+            for m in re.finditer(r"\b" + re.escape(w) + r"\b", flow):
+                # NEGATION EXEMPTION (2026-07-15, found live on the fresh package — three false positives in
+                # one sweep): a movement word inside an explicit negation IS the author stating Law-8
+                # compliance, not violating it — "holds her smile without pushing in" (real 3.B5), "no push
+                # or flourish" (real 8.B4), "leans with Keen rather than pushing past him" (real 10.B1).
+                lead = flow[max(0, m.start() - 24):m.start()]
+                if re.search(r"(?:\bwithout\s+|\bno\s+|\brather\s+than\s+|\bnever\s+|\bnot\s+)(?:\w+\s+){0,2}$", lead):
+                    continue
+                moves.append(w)
+                break
+        # THE TERMINAL-LOCK EXEMPTION (2026-07-15): rule 38's own worked fix for this exact law was "staging
+        # the wingman camera to lock exactly on the pose-straighten BEFORE the line lands" — i.e. movement
+        # that explicitly completes into a lock within the same cut, with the line landing on the locked
+        # frame, IS the doctrine-compliant staging, not a violation. A framing whose movement is followed by
+        # an explicit lock statement ("then locks", "and locks", "locked as", "holds still", "comes to rest")
+        # matches that precedent; the show's own delivery convention (lines land on settles/buttons) makes
+        # the line-on-the-locked-frame reading the honest one, not a loophole.
+        if has_dlg and moves:
+            last_move_pos = max(m.end() for w in moves for m in re.finditer(r"\b" + re.escape(w) + r"\b", flow))
+            tail = flow[last_move_pos:]
+            if re.search(r"\b(?:then\s+locks?|and\s+locks?|locks?\s+(?:on|for|close|to)|locked\s+as|holds?\s+still|comes?\s+to\s+rest)\b", tail):
+                moves = []
         if has_dlg and moves:
             flags.append(f"cut {i}: has dialogue but framing names camera movement ({', '.join(moves)}) — "
                          f"contradicts the beat's own camera-locked-during-dialogue rule")
@@ -386,10 +423,12 @@ def check_settle_distinctiveness(this_end_state, prev_end_state):
 # concepts (`endStateStill`'s Law 4, `atmosphere`-vs-`ambientBed` overlap for Law 7) and its own "structural"
 # dict named functions already deleted from cb_segprompt.py (`_v3_shots`, `_v3_settle`, `_v3_negatives`) —
 # stale documentation of a retired emitter, not a real check of what v5 actually ships. `check_endstate_still`/
-# `check_ambience_overlap` below is KEPT (not deleted — a full manifest-field audit against the new doctrine
-# is a separate, larger task, out of scope for this pass) but is no longer called by anything; a future
-# ticket should determine whether `endStateStill`/`atmosphere` still belong in the TECHNICAL contract at all
-# now that v5 doesn't read either field. `check_camera_lock_conflict` was ALSO left disconnected here —
+# `check_ambience_overlap` below ARE live — called by cb_beats.render_readiness (itself invoked from
+# cb_beats.run) and surfaced there as advisory checks, confirmed 2026-07-08 (full-codebase audit) after an
+# earlier, incorrect version of this comment claimed they were "no longer called by anything." A future
+# ticket should still determine whether `endStateStill`/`atmosphere` belong in the TECHNICAL contract at all
+# now that v5 doesn't read either field for the shipped prompt — that question is unrelated to whether the
+# checks are wired in. `check_camera_lock_conflict` was ALSO left disconnected here —
 # found and RE-WIRED into check_gate3_lint itself in the 2026-07-08 software-wide sign-off audit (see its
 # own call site, item 1.6, below) — it is live again, not merely kept for the record.
 _NEGATION_RE = re.compile(r"\b(no|not|never|don't|doesn't|didn't|won't|isn't|aren't|can't|cannot)\b", re.IGNORECASE)
@@ -419,26 +458,63 @@ def check_character_vocabulary(beat):
     overlap Fuzzby's banned list) are HER register, never banned for her, only ever banned from crossing
     into HIS action or the camera when it covers him.
 
-    ATTRIBUTION HEURISTIC (stated plainly, not hidden): a cut's action+framing text is checked against a
-    character's banned list whenever that character's NAME appears in the same cut's text — this is a
-    real, coarse heuristic (a cut naming both characters checks both lists against the same combined
-    text), not a grammatical-subject parse. It is what caught the two real, confirmed violations in
-    1.B1's own cuts 1-2 live (camera covering Fuzzby's zig-zag/dive described as "gently tracks"); it can
-    also flag a genuinely mixed or atmospheric two-shot (e.g. a shared reaction beat) that isn't really
-    "covering" either character's action in the chase/deadpan sense the law describes — those get
-    reported the same as any other flag, for a human to read and judge, never silently suppressed or
-    silently auto-corrected.
+    ATTRIBUTION — NEAREST-NAME, NOT WHOLE-CUT (corrected 2026-07-08, contradiction sweep): the original
+    implementation checked a character's ENTIRE banned list against a cut's WHOLE combined text whenever
+    that character was named ANYWHERE in it — so a cut naming two characters checked both lists against
+    the same shared text, and a word could be wrongly attributed to the wrong character purely because
+    both names happened to share one cut (e.g. one character's own lexicon VERB landing on a different
+    named character's BANNED list — a real, documented overlap in this cast's own data). This is the same
+    correctness principle `check_keyframe_lint` was already built around (see that function's own
+    "Scoping" docstring paragraph) — a match is only ever this character's violation if this character's
+    own name-mention is the CLOSEST one to it in the text, not merely "some name of theirs is somewhere
+    in the cut." Mechanically: every named character's occurrence position(s) in the cut's lowercased
+    text are located first; then for each named character's own banned word, every match position is
+    attributed to whichever named character's occurrence is TEXTUALLY NEAREST to it (by absolute
+    character distance) — a violation is only recorded when that nearest name is the SAME character whose
+    list is being checked. A single-character cut is unaffected (nearest trivially resolves to the one
+    name present, identical to the prior behaviour). This still caught the two real, confirmed violations
+    in 1.B1's own cuts 1-2 (camera covering Fuzzby's zig-zag/dive described as "gently tracks") — both
+    since scrubbed from the live data (rule 45's "THE SCRUB") but reproduced here by a synthetic test. It
+    can still flag a genuinely mixed or atmospheric two-shot that isn't really "covering" either
+    character in the chase/deadpan sense the law describes — those still get reported for a human to
+    read and judge, never silently suppressed or silently auto-corrected; this fix only removes the
+    cross-attribution to the WRONG character, it does not change how a genuine same-character hit is
+    reported.
 
     Returns {ok, violations: [{cut, character, word, text}]} — ok is False whenever any cut contains a
-    banned word for a character actually named in that same cut."""
+    banned word whose nearest character-name mention is the character that word is banned for."""
     import cb_segprompt as CS
     violations = []
     for i, c in enumerate(beat.get("cuts") or [], 1):
         text = f"{c.get('framing') or ''} {c.get('action') or ''}"
         low = text.lower()
-        for name in (beat.get("openingCast") or beat.get("characters") or []):
-            if name.lower() not in low:
+        cast = beat.get("openingCast") or beat.get("characters") or []
+        # Every named character's occurrence position(s) in this cut's text, across the WHOLE cast —
+        # this is the pool every banned-word match below gets attributed against, not just the one
+        # character currently being checked.
+        # FIXED 2026-07-08 (contradiction sweep, HIGH-severity): process cast names LONGEST-FIRST and
+        # skip a match whose span falls entirely inside a span already claimed by a longer name — a
+        # shorter name that is also a substring of a longer, co-present character name (e.g. "Keen"
+        # inside "Keen's Mum") used to get its own spurious position entry at the SAME offset as the
+        # real longer-name match; a tied-distance min() below then resolved to whichever was appended
+        # first (the shorter name, since it iterates earlier in the cast list), silently misattributing
+        # a violation that really belonged to the longer name's own character.
+        name_positions = []  # [(pos, name), ...]
+        claimed = []  # spans already attributed to a longer cast-name match
+        for name in sorted(cast, key=lambda n: -len(n)):
+            name_l = name.lower()
+            if name_l not in low:
                 continue
+            for m in re.finditer(re.escape(name_l), low):
+                span = m.span()
+                if any(span[0] >= cs and span[1] <= ce for cs, ce in claimed):
+                    continue  # substring occurrence inside an already-claimed longer name
+                claimed.append(span)
+                name_positions.append((span[0], name))
+        if not name_positions:
+            continue
+        present = [n for n in cast if n in {p[1] for p in name_positions}]
+        for name in present:
             # FIXED 2026-07-08 (contradiction sweep): was CS._CHARS (a snapshot frozen at cb_segprompt's own
             # import time, never re-read) — cb_director.py/cb_craft.py/cb_preflight.py all reload
             # characters.json fresh on every call; this module was the one silently stale outlier, risking
@@ -446,11 +522,15 @@ def check_character_vocabulary(beat):
             # mid-session. CS._load_chars() is the same loader, called fresh here instead.
             lex = (CS._load_chars().get(name) or {}).get("lexicon") or {}
             for banned in (lex.get("banned") or []):
-                if re.search(rf"\b{re.escape(banned)}\b", text, re.IGNORECASE):
+                for m in re.finditer(rf"\b{re.escape(banned)}\b", text, re.IGNORECASE):
+                    word_pos = m.start()
+                    nearest_name = min(name_positions, key=lambda np: abs(np[0] - word_pos))[1]
+                    if nearest_name != name:
+                        continue  # closer to a DIFFERENT named character — not this one's violation
                     violations.append({"cut": i, "character": name, "word": banned, "text": text.strip()})
     return {"ok": not violations, "violations": violations}
 
-def check_keyframe_lint(prompt, chars=None):
+def check_keyframe_lint(prompt, chars=None, economized=None):
     """THE GATE-2 SIBLING OF check_gate3_lint (found missing 2026-07-08 software-wide fix batch): every clip
     prompt (v5, cb_segprompt) is linted for the anti-slop lexicon and the Character Vocabulary Law before it
     fires; the KEYFRAME prompt (cb_prompts.build_keyframe_prompt) — the very first thing rendered for a beat,
@@ -470,7 +550,32 @@ def check_keyframe_lint(prompt, chars=None):
     CONSTRAINTS — largely locked template wording, e.g. STYLE's own "cinematic depth of field") is FLAG-only,
     since only a source edit — not a beat rewrite — could remove it.
 
+    A THIRD check, UNATTRIBUTED-CHARACTER FALLBACK (2026-07-15, Julian, live — "the guardrails... to bring
+    that beat to life... not guardrails for anything else"): a real audit found `build_keyframe_prompt`'s own
+    `_pose()` fallback ("{Name} is in frame, mid-action") silently shipping on 47% of the character blocks in
+    a real, live ensemble scene-opener (9.B1, 10.B1 — 7 of 9 named characters each) whenever its own text
+    parser can't attribute any of the beat's own authored action prose to that specific character. That's not
+    a parsing nuance, it's the beat's own storyboard never individually staging a named, present character —
+    silently replaced with identical generic boilerplate instead of forcing the gap into view. Matching this
+    file's own "block-and-recompile, never hand-patch" discipline for every other keyframe/Gate-3 check: a
+    hard BLOCK, naming the exact character, so the fix happens at the beat's own `cuts[0].action` text, not by
+    shipping a bland, undifferentiated keyframe.
+
+    FIXED 2026-07-15 (guardrail-fidelity audit, the SAME sitting this check was built in): the fallback block
+    above had zero awareness of THE FIDELITY-ALLOCATION LAW (rule 50) — the beat's own authored
+    fidelityAllocation.economized field, an explicit, deliberate statement that a present character is NOT
+    getting individual staging this beat, on purpose (the exact "declared creative intent" this check's own
+    fallback block needs to respect, per the same 2026-07-15 principle it was itself built from). Confirmed
+    live: 80 of 99 real blocker lines across 22+ beats named a character that beat's own fidelityAllocation
+    already marked economized — a real check judging a stage's output without being able to see the prior
+    stage's own declared intent, the exact calibration-example shape this whole audit was built to catch.
+    cb_craft.check_ensemble_individuation already exempts an economized character from an equivalent trace
+    requirement; this mirrors that established pattern rather than inventing a new one. An economized
+    character's generic pose still surfaces (as a FLAG, for review) — never silently dropped, just no longer
+    a hard block on the beat's own deliberate choice.
+
     Returns {ok, blockers, flags}. ok=False means this keyframe prompt must never fire as-is."""
+    economized = economized or set()
     import cb_segprompt as CS
     blockers, flags = [], []
     paras = re.split(r"\n\n+", prompt or "")
@@ -491,16 +596,144 @@ def check_keyframe_lint(prompt, chars=None):
                 if re.search(rf"\b{re.escape(banned)}\b", para, re.IGNORECASE):
                     blockers.append(f"Character Vocabulary Law: {owner}'s keyframe paragraph uses {banned!r} "
                                      f"— outside {owner}'s locked register")
+            if re.search(rf"\b{re.escape(owner)}\s+is\s+in\s+frame,\s+mid-action\b", para, re.IGNORECASE):
+                if owner in economized:
+                    flags.append(f"Unattributed-character fallback: {owner} is present but is generic this "
+                                  f"beat by the beat's OWN fidelityAllocation.economized declaration — logged "
+                                  f"for review, not a block")
+                else:
+                    blockers.append(f"Unattributed-character fallback: {owner} is present in this beat but the "
+                                     f"storyboard's own action text never names what {owner} is doing — the "
+                                     f"keyframe would ship generic boilerplate for a named character instead of "
+                                     f"the storyboard's own staging; rewrite the beat's cuts[0].action to give "
+                                     f"{owner} an explicit clause, recompile, never hand-patch the prompt text")
     return {"ok": not blockers, "blockers": blockers, "flags": flags}
+
+def check_retake_prompt(prompt_dict, characters=None):
+    """THE GATE-4 SIBLING OF check_gate3_lint/check_keyframe_lint (2026-07-14, CLAUDE.md rule 84/85 — a full
+    gate-by-gate trace + adversarial verify found cb_retake.regen_shot calls cb_gen.generate_video_seedance_ref
+    DIRECTLY with its own separately-built _shot_fix_prompt dict, entirely bypassing render_readiness() and
+    check_gate3_lint() — a retake shipped with zero word-budget, Character Vocabulary Law, camera-lock, or
+    anti-slop enforcement at all).
+
+    Neither existing lint is directly reusable here: check_gate3_lint compiles cb_segprompt.shipped_prompt's
+    six-block STRING (a shape _shot_fix_prompt's dict genuinely isn't); check_keyframe_lint expects a compiled
+    keyframe-prompt STRING with "CHARACTER N (Name):" paragraph markers _shot_fix_prompt doesn't produce
+    either. This checks _shot_fix_prompt's actual dict shape directly instead of force-fitting a mismatched
+    checker.
+
+    Scoping: `style` is pulled verbatim from the SAME locked cb_segprompt._style() constant the real v5
+    emitter uses (see _shot_fix_prompt's own docstring) — a hit there is FLAG-only, matching check_keyframe_
+    lint's own "locked template text" precedent (only a source edit, not a retake edit, could remove it).
+    `subject`/`continuity`/`action`/`camera` are all genuinely retake-specific, freely-authored text (the
+    director-checked change instruction, the continuity lock, the camera note) — a hit there is a hard BLOCK,
+    same severity as everywhere else these two laws are enforced. `negative`/`references`/`keep_unchanged`
+    are excluded (negative is itself a list of prohibitions and would trivially false-positive on its own
+    banned-word text; references/keep_unchanged are structural, not free prose).
+
+    THE WHOLE-PROMPT WORD BUDGET (cb_preflight.WORD_BUDGET_BLOCK) deliberately does NOT apply here — it is
+    calibrated to a full 15s multi-shot beat's own six-block v5 prompt, a materially different, much larger
+    shape than a single retaken shot's narrower fix prompt; applying that same numeric threshold here would
+    be a category error, not a real protection. THE CAMERA-LOCK LAW (locked during a spoken line) also does
+    not need a check here: regen_shot's own Law-5 dialogue guard already refuses outright before this point
+    for any shot carrying dialogue (the only case the Camera-Lock Law governs), so a retake this function
+    ever actually lints can never be a spoken-line shot in the first place.
+
+    Returns {ok, blockers, flags} — ok=False means this retake prompt must never fire as-is."""
+    import cb_segprompt as CS
+    blockers, flags = [], []
+    p = prompt_dict or {}
+    free_text = " ".join(str(p.get(k) or "") for k in ("subject", "continuity", "action", "camera"))
+    style_text = str(p.get("style") or "")
+
+    def _slop_hits(text):
+        return sorted(set(h.lower() for h in _ANTI_SLOP_RE.findall(text)))
+
+    free_slop = _slop_hits(free_text)
+    if free_slop:
+        blockers.append(f"anti-slop word(s) in the retake's own action/camera/continuity text: {', '.join(free_slop)}")
+    style_slop = _slop_hits(style_text)
+    if style_slop:
+        flags.append(f"anti-slop word(s) in locked style text: {', '.join(style_slop)}")
+
+    for name in (characters or []):
+        lex = (CS._load_chars().get(name) or {}).get("lexicon") or {}
+        for banned in (lex.get("banned") or []):
+            if re.search(rf"\b{re.escape(banned)}\b", free_text, re.IGNORECASE):
+                blockers.append(f"Character Vocabulary Law: {name}'s retake prompt uses {banned!r} — outside {name}'s locked register")
+    return {"ok": not blockers, "blockers": blockers, "flags": flags}
+
+# THE MOTION CONTRACT's checklist-of-poses proxy, as ONE shared helper (2026-07-15 — extracted from
+# check_gate3_lint's own inline scan the night the self-correction loop was finally closed): the identical
+# fragment count now drives BOTH the advisory lint below AND cb_director.motion_contract_pass's authoring-time
+# auto-correction, so the fixer and the flagger can never drift onto two different definitions of "checklist."
+# A computed proxy, not a semantic judge of causation — same honest limitation as ever (rule 78).
+#
+# REFINED THE SAME NIGHT (after the self-correction pass ran against all 39 flagged cuts in the real package
+# and the remaining 20 were read individually, not assumed): the raw comma count over-flagged three patterns
+# the Motion Contract's own text explicitly does NOT ban — each grounded in a real, cited case, never loosened
+# for the sake of a green report:
+#   1. ONOMATOPOEIA REPEATS ("THUP, THUP, THUP") — rule 79 already ruled this exact over-split once, by hand,
+#      on the previous package ("genuine connected physical beats the naive comma-count heuristic over-splits").
+#   2. CHAINED-CONSEQUENCE CONNECTIVES — a fragment starting with as/so/while/until/with/letting/-ing etc. is
+#      grammatically BOUND to the previous clause; it is by construction a chained consequence (the exact shape
+#      Law 15's own STRONG worked example uses), never a separately-clocked new action.
+#   3. NEW-SUBJECT ENSEMBLE ENUMERATION (cast-aware) — "Misty's Moonstone glows, Luna's Lepidolite follows,
+#      Howey's Howlite answers..." (real 6.B5) is DIFFERENT characters acting SIMULTANEOUSLY — Staging Law 4's
+#      own required simultaneous contrast, not one character's serial verb list. The Motion Contract governs
+#      one subject's serially-clocked verbs; a fragment opening on a different canon character's own name is
+#      parallel staging, not a checklist item.
+# The law's own WEAK worked example ("he bounces off, spins once, stabilizes himself, puffs out his chest,
+# and says the line" — bare serially-clocked verbs) still counts 5 under this refinement and still flags.
+CHECKLIST_FLAG_THRESHOLD = 4
+
+_CHAIN_CONNECTIVES = ("as ", "so ", "while ", "until ", "with ", "letting ", "which ", "where ",
+                       "but ", "though ", "because ", "and the ", "and that ", "and his ", "and her ",
+                       "and its ", "and their ")
+
+def checklist_fragment_count(action_text, cast=None):
+    """How many comma-separated, genuinely SEPARATELY-CLOCKED action fragments a cut's action text splits
+    into — >= CHECKLIST_FLAG_THRESHOLD reads as a checklist rather than one cause with chained consequences.
+    `cast` (optional list of canon character names) enables the new-subject ensemble exemption (pattern 3)."""
+    frags = [f.strip() for f in re.split(r",\s+", str(action_text or "").strip()) if f.strip()]
+    if not frags:
+        return 0
+    cast_first_words = {str(n).split()[0].lower() for n in (cast or []) if str(n).strip()}
+    count, prev_first = 1, frags[0].split()[0] if frags[0].split() else ""
+    for f in frags[1:]:
+        words = f.split()
+        first = words[0] if words else ""
+        low = f.lower()
+        # (1) onomatopoeia repeat — the fragment IS (or opens on) the same all-caps token as the previous one
+        if first.isupper() and len(first) > 1 and first == prev_first:
+            prev_first = first
+            continue
+        # (2) grammatically bound to the previous clause — a chained consequence, not a new clocked action
+        if any(low.startswith(c) for c in _CHAIN_CONNECTIVES) or (first and first.lower().endswith("ing") and first[0].islower()):
+            prev_first = first
+            continue
+        # (3) a DIFFERENT canon character opening the fragment — simultaneous ensemble staging (Law 4)
+        subj = first
+        if subj.lower() == "and" and len(words) > 1:
+            subj = words[1]
+        subj_stem = subj.rstrip(".;:!?").rstrip("'s’s").rstrip("'’")
+        if cast_first_words and subj_stem.lower() in cast_first_words:
+            prev_first = first
+            continue
+        count += 1
+        prev_first = first
+    return count
 
 def check_gate3_lint(pkg_path, beat_code, episode="Ep1"):
     """THE single Step-4 gate: compiles this beat's actual v5 prompt (cb_segprompt.shipped_prompt, the exact
     call cb_beats.run makes) and checks it before anything fires. Returns {ok, blockers, flags, citations,
     word_count, prompt}. ok=False means the prompt must never fire — "fix at data, recompile," never a hand
     patch to the returned prompt text.
-    Checks: (1) word budgets — 400 hard, 250 target (flag), the beat-story block's own 80-word fence
-    (re-derived independently of emit_v5's internal truncation, so a future emitter bug can't silently ship
-    an over-length story block). (2) banned vocabulary, against the SHIPPED TEXT directly (complements
+    Checks: (1) word budgets — the shared cb_preflight.WORD_BUDGET_BLOCK/TARGET pair (850 hard / 400 target,
+    raised 2026-07-07 by rule 52 to 650/400, 2026-07-14 by rule 84/85 to 700/400, and 2026-07-15 to 850/400
+    after removing the field-local caps on the physics anchor and expression line — always read live from
+    cb_preflight, never a hand-typed number here).
+    (2) banned vocabulary, against the SHIPPED TEXT directly (complements
     cb_preflight's source-field check, which reads the beat's own authored fields, not the compiled prompt).
     (3) Law 5 — no actual dialogue words leak into the text. (4) no appearance-prose leak — a character's
     own short `markers` field (its canonical visual tell, e.g. Fuzzby's "round wire-frame glasses") must
@@ -536,7 +769,7 @@ def check_gate3_lint(pkg_path, beat_code, episode="Ep1"):
 
     blockers, flags = [], []
     try:
-        prompt, _builder, _is_def = CS.shipped_prompt(beat, scene, relay=relay)
+        prompt, _builder, _is_def = CS.shipped_prompt(beat, scene, relay=relay, episode=episode)
     except ManifestFieldMissing as e:
         return {"ok": False, "blockers": [f"prompt could not compile — {e}"], "flags": [],
                 "citations": {}, "word_count": 0, "prompt": ""}
@@ -583,6 +816,47 @@ def check_gate3_lint(pkg_path, beat_code, episode="Ep1"):
     clc = check_camera_lock_conflict(beat)
     if not clc["ok"]:
         blockers.append(f"Camera-Lock Law (rule 38): {clc['verdict']}")
+
+    # (1.7) THE ARCHETYPE COMPLETENESS CONTRACT (2026-07-14, Julian, watching this exact class of gap repeat
+    # itself: "we have a structure and template and we must ensure it meets that through the storyboard...
+    # what I don't understand is you see it after the event but not before"). The wiring that makes a beat's
+    # own resolved physical archetype actually reach the shipped prompt (`_v5_physics_anchor`'s positive
+    # PHYSICS line, rule 75; `_v5_archetype_prohibited`'s negative phrases, rule 62) is exactly the machinery
+    # that silently broke earlier THIS SESSION — a one-line suppression condition in `_v5_negative_line`
+    # quietly dropped the archetype's own protective negatives from every beat with a physics anchor, and
+    # nothing caught it until Fuzzby actually vanished into a flower on real, billed footage. The archetype
+    # resolver itself never stopped working; only the WIRING from resolver to shipped text broke — silently,
+    # because nothing checked that contract. This closes it as a standing, automatic, pre-fire HARD BLOCK: it
+    # recomputes exactly what `_v5_beat_story`/`_v5_negative_line` themselves call internally to build the
+    # prompt, then verifies that computed content actually landed in the text that's about to fire. Zero
+    # judgment involved — this is not "is the beat good," it's "did the beat's own template actually reach
+    # its own prompt" — so unlike the softer heuristics elsewhere in this function (the Motion Contract's
+    # checklist-verb flag, the appearance-leak flag), a failure here is unconditionally a hard BLOCK: if the
+    # archetype system resolved a physics anchor or a set of prohibited phrases, they are contractually
+    # required to be verbatim-present in the shipped text, full stop.
+    physics_anchor = CS._v5_physics_anchor(beat, scene)
+    if physics_anchor and physics_anchor not in prompt:
+        blockers.append("Archetype Completeness Contract: this beat's own resolved physical archetype has a "
+                         "PHYSICS anchor that never reached the shipped prompt — the storyboard's template "
+                         "was not fulfilled; recompile, never hand-patch the prompt text")
+    arch_prohibited = CS._v5_archetype_prohibited(beat, scene)
+    if arch_prohibited:
+        prompt_low = prompt.lower()
+        staging_low = [str(x).strip().lower() for x in (beat.get("stagingProhibited") or []) if str(x).strip()]
+        missing = []
+        for p in arch_prohibited:
+            # `_v5_negative_line` strips a leading "a "/"an " before shipping each phrase — check for the SAME
+            # transformed form it actually ships (a raw phrase like "a clean face" ships as "no clean face";
+            # checking for the untransformed "a clean face" substring would false-positive-BLOCK on the
+            # majority of real archetype phrases, most of which open with an article).
+            shipped_form = CS._LEADING_ARTICLE_RE.sub("", p).lower()
+            if shipped_form not in prompt_low and not any(shipped_form in s or s in shipped_form for s in staging_low):
+                missing.append(p)
+        if missing:
+            blockers.append(f"Archetype Completeness Contract: this beat's own resolved physical archetype's "
+                             f"prohibited staging never reached the shipped Negative line: {'; '.join(missing)!r} "
+                             f"— the storyboard's template was not fulfilled; recompile, never hand-patch the "
+                             f"prompt text")
 
     # (2) banned vocabulary, against the shipped text.
     try:
@@ -635,6 +909,56 @@ def check_gate3_lint(pkg_path, beat_code, episode="Ep1"):
     # contain words like "hyper" ("bright hyper saturated colours") that this check must not flag).
     if story_idx >= 0 and CS._SPEED_ADJ_RE.search(parts[story_idx]):
         flags.append("a speed adjective survived stripping in the beat-story block — check _v5_strip_speed_adjectives")
+
+    # (5.5) NO ADJACENT STRIP-WORDS IN THE RAW TEXT (found live, 2026-07-13; FIXED the same night — the
+    # first version of this check scanned the ALREADY-STRIPPED text for a fixed "preposition immediately
+    # before punctuation" shape, e.g. r"\b(at|in|...)\s*[,.]" — but the real bug ("at full chaotic speed,"
+    # -> "at full,") leaves an ORPHANED WORD ("full") between the preposition and the punctuation, which
+    # that regex never matches; tested against the actual bug and it silently passed. A regex on the
+    # stripped OUTPUT can never reliably predict every broken shape stripping can produce — the robust
+    # check is upstream: does the RAW, pre-strip text contain two-or-more words from
+    # cb_segprompt._SPEED_ADJ_RE's own list within one word of each other? Two adjacent generic pace words
+    # ("chaotic speed", "wildly fast") is ALWAYS a fragile construction regardless of the exact grammar that
+    # survives stripping, so this checks the ROOT CAUSE (the raw authored text) instead of pattern-matching
+    # every possible broken RESULT. Scoped to exactly what _v5_beat_story feeds the stripper: each cut's own
+    # action/framing text, plus the beat's settle text.
+    def _adjacent_strip_risk(text):
+        words = re.findall(r"\S+", str(text or ""))
+        hit_idx = [i for i, w in enumerate(words) if CS._SPEED_ADJ_RE.fullmatch(w.strip(".,;:!?—–"))]
+        for a, b in zip(hit_idx, hit_idx[1:]):
+            if b - a <= 2:
+                return " ".join(words[max(0, a - 1):b + 2])
+        return None
+    for _c in (beat.get("cuts") or []):
+        for _fld in ("action", "framing"):
+            _hit = _adjacent_strip_risk(_c.get(_fld))
+            if _hit:
+                blockers.append(f"cut {_c.get('n')} {_fld}: two adjacent generic pace words ({_hit!r}) will "
+                                 f"both be stripped, likely leaving broken grammar — name a concrete action "
+                                 f"verb instead of stacking pace adjectives")
+    _settle_hit = _adjacent_strip_risk(beat.get("endState"))
+    if _settle_hit:
+        blockers.append(f"endState: two adjacent generic pace words ({_settle_hit!r}) will both be stripped, "
+                         f"likely leaving broken grammar — name a concrete action verb instead")
+
+    # (5.7) THE MOTION CONTRACT — CHECKLIST-OF-POSES RISK (2026-07-13, the CapCut-formula deep-dive session):
+    # confirmed by a real structural diff against tonight's own best/worst takes — the shipped Seedance-20
+    # doctrine's own Motion Contract states "one physical cause with two or three visible consequences reads
+    # stronger than three separate actions" (skills/seedance-motion/SKILL.md). A cut written as a
+    # comma-separated list of independently-clocked verbs with no causal connective between them ("bounces
+    # off, spins once, stabilizes himself, puffs out his chest, and says...") reads as choreography to hit,
+    # not physics to follow — this was the confirmed, never-yet-fixed reason a beat's comedy timing read
+    # weaker even after its continuity bug was patched. This is a COMPUTED PROXY, not a semantic judge of
+    # true causation (the same honest limitation this codebase already names for its other best-effort
+    # heuristics, e.g. the single-gag-arc check) — advisory FLAG only, never a hard block, since only a
+    # director's own rewrite can tell whether four listed actions are actually one chained event or
+    # genuinely four separate beats.
+    for _c in (beat.get("cuts") or []):
+        _n_frags = checklist_fragment_count(_c.get("action"), cast=beat.get("characters"))
+        if _n_frags >= CHECKLIST_FLAG_THRESHOLD:
+            flags.append(f"cut {_c.get('n')}: action reads as {_n_frags} separately-clocked actions "
+                          f"in a list — check whether this is one physical cause with chained consequences "
+                          f"(the Motion Contract's own bar) or genuinely needs to split into more than one cut")
 
     # (6) no negation outside the Negative line — exempt every block that legitimately quotes/derives from
     # real authored prose (style, Acting DNA, Beat Story) PLUS the references block (see below). In practice
@@ -735,10 +1059,197 @@ def check_gate3_lint(pkg_path, beat_code, episode="Ep1"):
         else:
             citations[f"actingDNA:{name}"] = "background cast — reference image only, no Acting DNA line this beat"
     citations["beat_story"] = f"beat {beat_code}.cuts[] + .endState"
-    citations["negatives"] = "GATE3_ANIMATION_DOCTRINE.md §2 standing eleven + beat.stagingProhibited"
+    # ADDED 2026-07-13: the positive companion to the negatives' archetype citation below — when the beat
+    # resolves a physical archetype, its "PHYSICS: ..." leading line (cb_segprompt._v5_physics_anchor) is
+    # itself quoted from cb_seedance.PHYSICAL_ARCHETYPES' physics_rule field, cited here so it never has the
+    # chance to go stale the way the negatives citation once did before being fixed.
+    if CS._v5_physics_anchor(beat, scene):
+        citations["beat_story:physics"] = "the beat's resolved physical_action_archetype's physics_rule (cb_seedance.PHYSICAL_ARCHETYPES)"
+    # UPDATED 2026-07-09: a third source joined the standing eleven + beat.stagingProhibited — the beat's own
+    # resolved physical archetype's prohibited_staging (cb_segprompt._v5_archetype_prohibited), wired in the
+    # same session this citation itself was corrected, so it never had a chance to go stale first.
+    # UPDATED AGAIN 2026-07-13, later the same night: the standing list grew from eleven to TWELVE (a real
+    # rendered take, 1.B3, carried hallucinated background foreign-language chatter — see
+    # `_standing_negatives`'s own docstring).
+    # REVERTED 2026-07-14 (same real-footage regression `_v5_negative_line`'s own docstring records): the
+    # 2026-07-13 conditional-suppression citation below stayed accurate for exactly one day — the underlying
+    # suppression it described was reverted the following night (Fuzzby vanishing into a flower on real
+    # footage proved the archetype's own negatives are NOT always redundant with the positive physics anchor),
+    # but this citation was never swept to match, so it kept claiming "suppressed this beat" for a phrase that
+    # was, by then, always present. This IS the exact "cites something not actually there" bug class rule 46
+    # already found and fixed once for this same function — closed the same way: the archetype's own
+    # prohibited_staging is unconditionally cited now, matching what `_v5_negative_line` unconditionally ships.
+    citations["negatives"] = ("GATE3_ANIMATION_DOCTRINE.md §2 standing twelve + beat.stagingProhibited + "
+                               "the beat's resolved physical_action_archetype's prohibited_staging (cb_seedance.PHYSICAL_ARCHETYPES)")
 
     return {"ok": not blockers, "blockers": blockers, "flags": flags, "citations": citations,
             "word_count": wc, "prompt": prompt}
+
+_PROMPT_READ_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_prompt_read_cache")
+# BUMPED 2026-07-14 (Julian, live on 1.B2's own real finding — "we have old rules against the new directors
+# storyboard... actually zenny removing it is a nice touch"): v1's settle_honors_negatives couldn't tell a
+# DELIBERATE resolution (a director's own authored ending) from an ACCIDENTAL contradiction — it flagged
+# Zenny's own clean removal of the pollen mark as a violation of the archetype's standing protection, when
+# that protection was only ever meant to guard the ACTION (Fuzzby's own failed wipe), never to forbid the
+# beat's own deliberate ending. v2 teaches the check that exact distinction (see settle_honors_negatives'
+# own field description). Version bump invalidates every v1-scored cache entry so nothing stays wrongly
+# blocked (or wrongly passed) under the old, too-blunt criterion.
+_PROMPT_READ_VERSION = "v2-2026-07-14-settle-vs-accident"
+
+def _prompt_read_schema():
+    """Lazily imported so importing cb_qa.py never requires pydantic unless this check actually runs — same
+    convention as cb_director_pass._schema()."""
+    from pydantic import BaseModel, Field
+    class PromptReadVerdict(BaseModel):
+        continuity_honored: bool = Field(description="Skip this question (answer true) if this beat has no "
+            "relay/continuity anchor (an opener beat, or the references block makes no state-carry claim). "
+            "Otherwise: does the FIRST shot's own stated action/framing plausibly begin from the state the "
+            "references block's anchor clause describes (character positions, carried marks, the world) — "
+            "or does it silently jump to a different composition, location or setup the anchor doesn't "
+            "support, with no stated transition?")
+        continuity_reason: str = Field(description="One sentence. If honored, name what carries forward. If "
+            "not, quote the specific anchor claim and the specific first-shot text that contradicts it.")
+        staging_honors_negatives: bool = Field(description="Read the full shot list AND the Negative line "
+            "together. Does ANY shot's stated action, read as an ordinary viewer would understand it, "
+            "deliver an outcome the Negative line explicitly forbids — even if worded differently (e.g. a "
+            "shot has a character diving fully into or vanishing behind something the Negative line says "
+            "must never show them disappearing into)? Answer false if you find one.")
+        staging_reason: str = Field(description="One sentence. If honored, say so plainly. If not, quote the "
+            "specific shot text and the specific Negative-line item it contradicts.")
+        settle_honors_negatives: bool = Field(description="Does the Settle line (the beat's final directed "
+            "state) describe an ACCIDENTAL or UNMOTIVATED contradiction of a Negative-line item — something "
+            "that reads as an error, not a story choice? IMPORTANT DISTINCTION: a Settle that shows a "
+            "temporary mark or state being DELIBERATELY resolved (wiped clean, fixed, removed, restored) by "
+            "a NAMED character's own action is the normal, expected shape of a settle, NOT a violation — a "
+            "Negative-line item protecting that same mark earlier in the beat (e.g. during a character's own "
+            "failed attempt to fix it) exists to protect the GAG during the action, not to forbid the beat's "
+            "own authored ending. Only answer false for a genuine accidental contradiction: the Settle "
+            "describing an outcome with no story reason behind it, or one that conflicts with something the "
+            "Negative line protects for a reason that has nothing to do with this beat's own resolution.")
+        settle_reason: str = Field(description="One sentence. If honored (including 'this is the beat's own "
+            "deliberate resolution, not an accident'), say so plainly. If a genuine accidental contradiction, "
+            "quote the Settle text and the specific Negative-line item it contradicts.")
+    return PromptReadVerdict
+
+def _prompt_read_cache_path(episode, code, prompt_hash):
+    return os.path.join(_PROMPT_READ_CACHE_DIR, f"{episode}_{code}_{prompt_hash}.json")
+
+def check_prompt_before_fire(prompt, beat_code, episode="Ep1"):
+    """THE PRE-FIRE READ (2026-07-14, Julian: "we should now with our knowledge and experience be able to read
+    a storyboard and deliver it through a template that in the main is tried and tested... if you read the
+    prompts before they go for render we wouldn't have these issues... we need to fix software wide not
+    prompt specific"). check_gate3_lint (above) catches everything a REGEX can reliably catch — word budget,
+    banned vocabulary, structural congruence, wiring contracts (the Archetype Completeness Contract). It
+    cannot catch whether the text, READ AS A WHOLE, actually holds together the way an editor reading it
+    before render would notice: does the opening honor what the beat inherited, does any shot's own plain-
+    English action contradict what the Negative line forbids, does the Settle contradict the Negative line.
+    These are exactly the two real defects tonight's 1.B2 diagnosis found (the opening ignoring the relay
+    anchor; a shot's action reading as "disappearing" without ever tripping the literal substring the
+    negative-line check looks for) — neither is a wiring/regex problem, both are a COMPREHENSION problem, and
+    the only thing that reliably catches a comprehension problem is something that reads.
+
+    Per rule 17 (concrete visual/textual criteria, never a subjective "is this good" question — a generous
+    grader waves those through every beat), each of the three questions asks for a SPECIFIC, checkable
+    contradiction and requires the model to quote the conflicting text, not just answer yes/no from vibes.
+
+    SOFTWARE-WIDE, not prompt-specific: this runs on every beat that reaches cb_beats.run(), automatically —
+    not something a human has to remember to do or a script has to be run by hand. Cached on a hash of the
+    EXACT compiled prompt text (the real, complete input to this check) — a beat whose prompt hasn't changed
+    since its last clean read never re-pays for a repeat verdict; any edit to the beat's own data, the
+    compiler, or a shared constant invalidates it automatically because the compiled text itself changes.
+
+    FAILS OPEN ONLY ON INFRA — a genuine model/API judgment (found a contradiction, or found none) is
+    authoritative; a transient network/provider failure after retries degrades to "skipped, not verified"
+    with a loud warning, never silently treated as either a pass or a block, matching vision_verdict's own
+    "never report infra as a content fault" doctrine. Returns {ok, blockers, skipped, verdict}."""
+    import hashlib
+    prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()[:16]
+    cp = _prompt_read_cache_path(episode, beat_code, prompt_hash)
+    if os.path.exists(cp):
+        try:
+            cached = json.load(open(cp))
+            if cached.get("_version") == _PROMPT_READ_VERSION:
+                return cached["result"]
+        except Exception:
+            pass
+
+    system = (
+        "You are a script editor doing the LAST read of a video-generation prompt before it fires — the one "
+        "chance to catch a contradiction on paper instead of on an expensive render. You are not judging "
+        "whether the beat is good, funny or well-directed (that is a human director's call, never yours). "
+        "You are checking three narrow, factual things: does the opening honor what it was told to inherit; "
+        "does any shot's action contradict something the prompt itself lists as forbidden; does the ending "
+        "contradict something the prompt itself lists as forbidden. Quote the exact conflicting text for any "
+        "problem you find — a vague 'this seems off' is not acceptable, name the specific words."
+    )
+    user = f"THE COMPILED PROMPT, EXACTLY AS IT WILL FIRE:\n\n{prompt}"
+
+    result = None
+    skipped_reason = None
+    try:
+        import cb_llm
+        v = cb_llm.structured(system, user, _prompt_read_schema(), label=f"prompt_read_{beat_code}")
+        blockers = []
+        if not v.continuity_honored:
+            blockers.append(f"Pre-Fire Read: opening does not honor the continuity anchor — {v.continuity_reason}")
+        if not v.staging_honors_negatives:
+            blockers.append(f"Pre-Fire Read: a shot's own action contradicts the Negative line — {v.staging_reason}")
+        if not v.settle_honors_negatives:
+            blockers.append(f"Pre-Fire Read: the Settle contradicts the Negative line — {v.settle_reason}")
+        result = {"ok": not blockers, "blockers": blockers, "skipped": False,
+                  "verdict": v.model_dump()}
+    except SystemExit as e:
+        # BOTH providers failed after retry — a genuine infra outage. Fail OPEN (never silently treated as a
+        # pass, never mistaken for a real judgment) so an unrelated API outage can't brick every future fire.
+        skipped_reason = f"both LLM providers unavailable: {str(e)[:160]}"
+        result = {"ok": True, "blockers": [], "skipped": True, "verdict": None, "skipped_reason": skipped_reason}
+    except Exception as e:
+        skipped_reason = f"{type(e).__name__}: {str(e)[:160]}"
+        result = {"ok": True, "blockers": [], "skipped": True, "verdict": None, "skipped_reason": skipped_reason}
+
+    try:
+        os.makedirs(_PROMPT_READ_CACHE_DIR, exist_ok=True)
+        json.dump({"_version": _PROMPT_READ_VERSION, "result": result}, open(cp, "w"), ensure_ascii=False, indent=1)
+    except Exception:
+        pass
+    return result
+
+def check_reference_position(beat, cast, anchor_path):
+    """THE SEAM AUDIT'S HIGH-severity finding (2026-07-15, Gate 1->2->3 handoff review): `check_prompt_before_
+    fire` (above) reads the compiled TEXT for internal contradictions — it never looks at the actual anchor
+    image `cb_beats.run` uploads as @图1. The references block's own hand-authored position claims —
+    `spatialAxis`/`relayOpeningNote` (CLAUDE.md rule 53) and the size clause (`cb_segprompt._v5_size_clause`)
+    — describe what @图1 is supposed to show but nothing ever checked them against the file this beat
+    actually fires with. Report-only, matching this module's own standing vision-QA doctrine (rule 17/28) for
+    exactly this class of spatial judgment — check_join_state/check_done_frame's own PLATE_DRIFT/SIZE_MISMATCH
+    items are the same shape: a concrete, checkable claim, surfaced as an advisory, never a hard block on a
+    vision guess. Returns {ok, verdict} — `ok` is None (skip, no vision call spent) when there is no anchor
+    image or no position/scale claim authored for this beat to check against."""
+    if not (anchor_path and os.path.exists(anchor_path)):
+        return {"ok": None, "verdict": "(no anchor image to check against)"}
+    claims = []
+    axis = str((beat or {}).get("spatialAxis") or "").strip()
+    note = str((beat or {}).get("relayOpeningNote") or "").strip()
+    if axis:
+        claims.append(f'spatialAxis: "{axis}"')
+    if note:
+        claims.append(f'relayOpeningNote: "{note}"')
+    size_clause = _CS._v5_size_clause(cast or [])
+    if size_clause:
+        claims.append(size_clause)
+    if not claims:
+        return {"ok": None, "verdict": "(no position/scale claim authored for this beat — nothing to check)"}
+    q = ("You are checking whether an image matches SPECIFIC, hand-authored claims about it — not a general "
+         "quality judgment. Here are the claims (from this beat's own Gate-3 prompt, describing what THIS "
+         "image is supposed to show):\n" + "\n".join(f"- {c}" for c in claims) +
+         "\n\nLook at the image. Does it plausibly match EVERY claim above (character screen positions, who "
+         "is doing what, relative scale)? Reply 'MATCH' on line 1 if every claim holds. Otherwise reply "
+         "'MISMATCH' then ONE line per claim the image actually contradicts, naming what the image shows "
+         "instead.")
+    text, err = vision_verdict(q, [anchor_path])
+    if err:
+        return {"ok": None, "verdict": err}
+    return {"ok": text.strip().upper().startswith("MATCH"), "verdict": text.strip()}
 
 # Canonical QA reason codes (machine-readable) + the one-line fix each implies. Merges OUR anatomy check (their DoD
 # lacks limb-counting) with the useful codes from the QA-agent spec. The fuzzy camera / staging / shot-type /
@@ -758,6 +1269,7 @@ DONE_CODES = {
     "LIGHTING_MISMATCH":      "relight to this beat's mood and colour temperature",
     "TRANSIENT_PROP_DRIFT":   "remove the temporary substance/prop not named in this shot (don't carry it from the previous frame)",
     "CRYSTAL_STATE_MISMATCH": "set the bear's crystal brightness to the expected state for this beat",
+    "WRISTBAND_STATE_MISMATCH": "set Keen's wristbands to this beat's own declared state (none/vacant/crystal)",
     "STYLE_MISMATCH":         "keep premium 3D-CGI Pixar/DreamWorks style (no 2D, painterly or photoreal)",
     "UNSAFE_FACE":            "remove any horror/distortion — faces appealing and safe for ages 4-8",
     "TEXT_IN_FRAME":          "remove all text, captions, logos, watermarks and UI",
@@ -767,6 +1279,7 @@ DONE_CODES = {
     "ACTION_STATE_MISMATCH":  "restage so the pose ACTIVELY performs the beat's own scripted action (e.g. mid-flight and already in motion, not static, posed or floating in place) — the image must show what the story says is happening",
     "BELOW_BAR":              "lift to world-class feature-film Pixar 3D-CGI — beautiful motivated lighting, polished materials, real depth, cinematic composition; not flat, dull, cheap, plasticky or AI-mushy",
     "PLATE_DRIFT":            "match the locked scene plate's environment, layout, camera and composition — do not re-invent the world or depart from its arrangement",
+    "FRAMING_MISMATCH":       "re-render at the Director's own stated shot scale for this beat's opening cut (e.g. wide vs close) — do not silently substitute a different framing",
     # ── Gate-3 CLIP QA (temporal) ─────────────────────────────────────────────────────────────────────
     "CLIP_MISSING":           "clip file missing or empty — re-render the beat",
     "CLIP_WONT_DECODE":       "clip is corrupt / has no video stream — re-render the beat",
@@ -790,14 +1303,25 @@ DONE_CODES = {
     "REMINT_DRIFT":           "the re-minted frame drifted from the harvested frame (position/state) or the "
                               "turnarounds (identity) — see check_remint()'s per-criterion verdict for which; "
                               "re-mint is a cleanup pass only, never a restage",
+    # ── COMPOSITION LOOP (2026-07-14, real footage diagnosis — 1.B3 opened and closed on the same branch
+    # composition, undetected until Julian watched it) — advisory only, never a block; see _passB's checklist.
+    "CLIP_COMPOSITION_LOOP":  "the last frame reads as a return to the first frame's own composition (same "
+                              "character position, framing and background) rather than having moved on — "
+                              "check whether the beat's action actually travels somewhere new (advisory)",
 }
-BEES = {"Zenny", "Fuzzby"}
+# FIXED 2026-07-11 (full-codebase audit, duplication finding): this used to be a hardcoded {"Zenny", "Fuzzby"}
+# literal — a second, independent source of truth from cb_seedance.py's own dynamically-derived BEES set.
+# FIXED FURTHER 2026-07-12 (loose-ends pass): this same derivation was ALSO independently recomputed here,
+# in cb_prompts.py, and in cb_seedance.py — three copies of the identical formula. cb_prompts.py (which already
+# loads CHARACTERS at import time) is now the one canonical source; both this module and cb_seedance.py just
+# reference P.BEES instead of recomputing their own copy.
+BEES = P.BEES
 
 # ── Gate-3 CLIP QA tuning ──────────────────────────────────────────────────────────────────────────────
 # A clip is a MOTION artifact: the keyframe gate's pose / sharpness / bar / crop / lighting / style checks false-fire
 # on a mid-motion frame, so a sampled clip frame is judged ONLY on these temporal-safe identity/continuity codes.
 CLIP_SAFE_CODES = {"ANATOMY_DEFECT", "WRONG_CHARACTER", "EXTRA_CHARACTER", "BEE_WITH_CRYSTAL",
-                   "SIZE_MISMATCH", "TRANSIENT_PROP_DRIFT", "CRYSTAL_STATE_MISMATCH",
+                   "SIZE_MISMATCH", "TRANSIENT_PROP_DRIFT", "CRYSTAL_STATE_MISMATCH", "WRISTBAND_STATE_MISMATCH",
                    "UNSAFE_FACE", "TEXT_IN_FRAME", "WRONG_LOCATION"}
                    # ADDED_PROP is deliberately OUT: it can't tell a legit keyframe story-state (the pollen moustache)
                    # from a newly-added prop — the keyframe is the truth and Pass B already judges identity vs it.
@@ -845,7 +1369,11 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
     refs = []; labels = []
     if plate and os.path.exists(plate) and plate != kf:
         refs.append(plate); labels.append("the SCENE reference (locked set / geometry)")
-    chars = [c for c in shot.get("characters", []) if c]; cast = ", ".join(chars) or "(none named)"
+    # FIXED 2026-07-11 (full-codebase audit): used the beat's raw `characters` field (the whole-scene cast
+    # list) instead of P.opening_cast(shot) — the field every OTHER function in this file (check_character_
+    # vocabulary, check_gate3_lint) and the keyframe GENERATOR itself already treat as "who is actually in
+    # this frame." A background character never framed in this beat's opening still got checked/referenced.
+    chars = [c for c in P.opening_cast(shot) if c]; cast = ", ".join(chars) or "(none named)"
     for c in chars:
         cc = P.CHARACTERS.get(c) or {}
         turn = next((r for r in (cc.get("refs") or []) if "turnaround" in r.lower()), None)
@@ -854,6 +1382,20 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
             refs.append(ref)
             labels.append(f"the CHARACTER reference for {c} (the TURNAROUND — judge {c}'s identity against this; the "
                           f"render shows {c} at one angle, which is fine, as long as the design matches the turnaround)")
+        # KEEN'S WRISTBAND STATE — added 2026-07-15 (guardrail-fidelity audit): Keen is an explicitly
+        # two/three-state canonical character (none/vacant/crystal, carryMarks tracks the arc across ~18
+        # beats) but the fixed turnaround picked above always shows cuffs (cb_prompts.build_keyframe_prompt
+        # already handles this correctly for GENERATION, via shot.get("keenWristbands") against
+        # CHARACTERS["Keen"]["wristband_states"] — this mirrors that same, already-proven mechanism for QA,
+        # so a wrongly-rendered premature-cuffs frame has something concrete to judge against).
+        if c == "Keen":
+            wb = shot.get("keenWristbands", "none")
+            for r in P.CHARACTERS.get("Keen", {}).get("wristband_states", {}).get(wb, []):
+                if r and os.path.exists(r) and r not in refs:
+                    refs.append(r)
+                    labels.append(f"Keen's WRISTBAND-STATE reference for this beat's declared state ({wb!r}) — "
+                                  f"judge whether the wristbands are present/absent/glowing to MATCH this, not the "
+                                  f"turnaround's own default cuffed pose")
     # scan ALL the beat's text fields, not just "action" — beat-native packages name a story-substance (the pollen
     # moustache, dirt) in storyBeat/startState, so a named state is EXPECTED and must not flag TRANSIENT_PROP_DRIFT.
     # "action" is a CUT-level field on beat-native data (there is no beat-level "action"), so shot.get("action") was
@@ -916,6 +1458,11 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
                       "(only bears and the environment have crystals)"))
     if bears and glow:
         items.append(("CRYSTAL_STATE_MISMATCH", f"the bear's crystal brightness matches the expected state (\"{glow}\")"))
+    if "Keen" in chars:
+        wb = shot.get("keenWristbands", "none")
+        items.append(("WRISTBAND_STATE_MISMATCH", f"Keen's wristbands match this beat's own declared state "
+                      f"(\"{wb}\" — none means no wristbands at all, vacant means worn but not glowing, crystal "
+                      f"means worn and glowing); flag ONLY a clear mismatch against that specific state"))
     # FOUNDATION-CRITICAL: the keyframe is what the WHOLE clip is built from — hold it to the world-class bar.
     items += [
         ("ADDED_PROP", "the character has NOTHING on its body that its turnaround reference doesn't show — no added "
@@ -973,9 +1520,34 @@ def check_done_frame(shot, kf, sc, episode="Ep1", is_end=False, clip_frame=False
         items.append(("PLATE_DRIFT", "the environment, layout, camera angle and composition MATCH the SCENE reference (the "
                       "locked plate) — same set in the same arrangement; flag if the world is re-invented or the composition "
                       "clearly departs from the plate"))
+    # FRAMING_MISMATCH (2026-07-15, seam audit — Gate 1->2->3 handoff review): PLATE_DRIFT above checks the
+    # WORLD (same set, same arrangement); nothing checked the SHOT SCALE the Director actually called for
+    # this beat's opening cut (cuts[0].framing — the same field cb_prompts.build_keyframe_prompt reads to
+    # build the COMPOSITION line, "framing = _cut0.get('framing') or ... 'Medium shot'"). A keyframe could
+    # pass every other item — correct anatomy, correct location — while still being the wrong shot scale
+    # (e.g. a close-up rendered when the beat called for a wide). Scoped to the START frame only — cuts[0]
+    # is the beat's OPENING cut, the frame this function checks when is_end is False; the end frame belongs
+    # to whichever later cut the settle lands on, which this field doesn't describe. Skipped when no framing
+    # was actually authored (nothing to check against a fallback default).
+    if not is_end:
+        cut0_framing = str((shot.get("cuts") or [{}])[0].get("framing") or "").strip()
+        if cut0_framing:
+            items.append(("FRAMING_MISMATCH", f"the frame's own shot SCALE matches the Director's stated framing "
+                          f"for this beat's opening cut — \"{cut0_framing}\" (a wide shows the full body with real "
+                          "surrounding space; a medium shows roughly waist-up; a close/medium-close fills the frame "
+                          "with the subject, tight on the face/upper body). Flag ONLY a CLEARLY different scale than "
+                          "what's named — not minor framing variation within the same stated size"))
     ranked = sorted([c for c in chars if (P.CHARACTERS.get(c) or {}).get("sizeRank") is not None],
                     key=lambda c: -((P.CHARACTERS.get(c) or {}).get("sizeRank") or 0))
-    if len(ranked) >= 2:
+    # A tied sizeRank anywhere in the chain (e.g. Keen/Squeaky both rank 4) must never assert a "largest to
+    # smallest" ordinal this QA question would then grade against — that's a stable-sort artifact of this
+    # beat's own characters[] list order, not a real size fact (same bug class as cb_prompts.
+    # build_keyframe_prompt's size_clause). Only ask the question when every adjacent pair in the ranked
+    # order genuinely differs in sizeRank — a tie anywhere skips the whole ordinal claim for this beat.
+    no_ties = len(ranked) >= 2 and all(
+        P.CHARACTERS[ranked[i]].get("sizeRank") != P.CHARACTERS[ranked[i + 1]].get("sizeRank")
+        for i in range(len(ranked) - 1))
+    if no_ties:
         items.append(("SIZE_MISMATCH", "the characters' RELATIVE sizes are correct — largest to smallest: "
                       + " > ".join(ranked) + "; flag if a smaller character renders as large as or larger than a bigger one"))
     if clip_frame:   # a MOTION frame: drop the held-keyframe pose / sharpness / bar / crop / lighting / style checks that false-fire mid-motion
@@ -1069,8 +1641,19 @@ def _motion_energy(clip, dur, n=16, w=32, h=18):
 
 def _passB(shot, ordered, comedy_big, next_beat=None):
     """ONE multi-frame continuity+weight vision call. ordered=[keyframe(TRUTH), first, mid, last]. Returns [CLIP_* codes]
-    or None if the vision call was unavailable (so the caller can mark QA_UNAVAILABLE, not a content fail)."""
-    chars = [c for c in shot.get("characters", []) if c]; cast = ", ".join(chars) or "the characters"
+    or None if the vision call was unavailable (so the caller can mark QA_UNAVAILABLE, not a content fail).
+
+    CLIP_COMPOSITION_LOOP (2026-07-14, diagnosing 1.B3's real rendered failure — the take opened and closed on
+    nearly the identical branch composition, never detected until Julian watched it): a NEW criterion added to
+    this SAME vision call (no extra frame extraction, no extra API call — reuses the first/last frames every
+    other check here already pulls). Deliberately advisory-only (never in CLIP_BLOCK_CODES, never in
+    CLIP_CORROBORATE) — this is a genuinely comparative, more subjective judgment than the identity/anatomy
+    checks above it, and the doctrine's own precedent (rule 45's degraded-harvest ruling, CLIP_CORROBORATE's
+    2-signal requirement) is to surface a signal like this for human review, never auto-fail a take on it
+    alone. Phrased against three concrete, named axes (position, framing distance, background elements) per
+    rule 17's own standing discipline — never a vague "does this feel repetitive" question."""
+    # FIXED 2026-07-11 (full-codebase audit): same fix as check_done_frame's identical pattern above.
+    chars = [c for c in P.opening_cast(shot) if c]; cast = ", ".join(chars) or "the characters"
     _start = (shot.get("startState") or "").lower()
     state = next((wd for wd in SUBSTANCE_WORDS if re.search(r"\b" + re.escape(wd) + r"\b", _start)), None)
     # "action" is a CUT-level field (there is no beat-level "action") — read every cut's action text, same fix as
@@ -1096,6 +1679,12 @@ def _passB(shot, ordered, comedy_big, next_beat=None):
         "flag a cut as flicker.",
         "[CLIP_FLOATY] Motion carries WEIGHT — feet keep ground contact, nothing slides/skates or glides with no driver. "
         "(Advisory; do not flag stylised cartoon motion, only genuinely weightless drift.)",
+        "[CLIP_COMPOSITION_LOOP] Compare the START frame against the LAST frame on three specific things: the "
+        "character's position within the frame, the camera's framing/distance, and the background elements visible "
+        "behind them. Flag ONLY if all three are near-identical between START and LAST — same character position, "
+        "same framing distance, same background — reading as the shot looping back to its own opening composition "
+        "rather than the character/camera having moved on. Do NOT flag a deliberate return-to-start button ending "
+        "(a character settling back where it began on purpose) — only an unintentional-looking loop.",
     ]
     if state and not resolves:
         lines.insert(0, f"[CLIP_STATE_DROPPED] The temporary state the beat names — \"{state}\" — is present on the FIRST "
@@ -1157,7 +1746,11 @@ def check_clip(shot, clip, keyframe=None, anchors=None, sc=None, episode="Ep1", 
         # wordlessHeld beats are DELIBERATELY a still, held moment (no dialogue) — stillness there is correct performance,
         # not a frozen-render defect, so they're exempt regardless of how much storyBeat/action text describes the moment.
         big = (shot.get("comedyMode") or "").upper() == "BIG"
-        has_action = bool((shot.get("storyBeat") or shot.get("action") or "").strip())
+        # "action" is a CUT-level field on beat-native data (there is no beat-level "action"), so
+        # shot.get("action") was always empty here — the same bug already fixed at lines ~863/1078;
+        # join every cut's own action text instead.
+        cuts_action = " ".join(str(c.get("action") or "") for c in (shot.get("cuts") or []))
+        has_action = bool((shot.get("storyBeat") or cuts_action or "").strip())
         en = _motion_energy(clip, dur)
         if en is not None and (big or has_action) and not shot.get("wordlessHeld") and max(en) < FROZEN_EPS:
             blocks.append("CLIP_FROZEN")
@@ -1189,6 +1782,12 @@ def check_clip(shot, clip, keyframe=None, anchors=None, sc=None, episode="Ep1", 
     notes = list(dict.fromkeys(n for n in notes if n not in blocks))
     if not blocks and vis_err and not notes:
         return _unavailable(vis_err)
+    # FIXED 2026-07-11 (full-codebase audit): previously, a vision-QA failure (vis_err) was silently dropped
+    # the moment ANY deterministic note already existed — the function fell straight through to `ok = True`
+    # ("PASS") with no trace that part of the check never actually ran. Now always surfaced as its own note,
+    # so a partial vision-QA outage is visible in the verdict instead of reading as a clean pass.
+    if vis_err:
+        notes.append(f"VISION_QA_PARTIAL: {vis_err}")
     ok = len(blocks) == 0
     fix_hint = "; ".join(DONE_CODES.get(c, c) for c in (blocks or notes)[:4])
     if ok:
@@ -1220,7 +1819,15 @@ def check_clips_scene(pkg, scene, episode="Ep1", only=None):
 def check_scene(pkg, scene, episode="Ep1", only=None):
     """Check every shot against the DEFINITION OF DONE — BOTH the start frame and the end frame. Returns one
     aggregated result per shot ({shot, ok, verdict}); the verdict names every failed item so the self-correct
-    loop can regenerate with the exact fix."""
+    loop can regenerate with the exact fix.
+
+    WRITES a media/{episode}_{code}_{slug}.keyframe_qa.json sidecar per beat (2026-07-14, Julian's "it needs
+    to be done in the studio" pass) — mirrors check_clips_scene's own .qa.json sidecar convention exactly,
+    given a distinct filename since .qa.json is already the CLIP QA's own name for the same beat code/slug.
+    This check calls real vision APIs (identity/anatomy/pose — see check_done_frame's own docstring); without
+    a cached sidecar, the Studio would have had to either re-spend on every page load or never show the
+    verdict at all. The sidecar is the choke-point that makes it safe and cheap for the Studio to display."""
+    import pathlib
     _pkg = json.load(open(pkg))
     shots = [s for s in (_pkg.get("beats") or _pkg.get("shots") or []) if str(s.get("sceneNumber")) == str(scene)]
     for _s in shots:
@@ -1240,11 +1847,19 @@ def check_scene(pkg, scene, episode="Ep1", only=None):
         ok = False if any(o is False for o in oks) else (True if all(o is True for o in oks) else None)
         if ok is False:
             verdict = "FLAG\n  " + "\n  ".join(f["verdict"] for f in frames if f["ok"] is False)
+            reasons = [r for f in frames if f["ok"] is False for r in f.get("reasons", [])]
         elif ok is None:
             verdict = "ERR: " + "; ".join(f["verdict"] for f in frames)
+            reasons = []
         else:
             verdict = "PASS"
-        out.append({"shot": code, "ok": ok, "verdict": verdict})
+            reasons = []
+        row = {"shot": code, "ok": ok, "verdict": verdict, "reasons": reasons}
+        try:
+            pathlib.Path(f"media/{episode}_{code}_{slug}.keyframe_qa.json").write_text(json.dumps(row, indent=2))
+        except Exception:
+            pass
+        out.append(row)
     return out
 
 _BANNED_VOCAB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shows", "crystal-bears",
@@ -1361,9 +1976,19 @@ def check_charsheet(sheet_path, characters, episode="Ep1"):
                   "\n  ANATOMY DEFECT (foundation): " + an["verdict"].replace("DEFECT", "").strip()
     return {"ok": ok, "verdict": verdict}
 
+def _default_pkg(episode):
+    """FIXED 2026-07-11 (full-codebase audit): this used to hardcode a retired filename
+    ('Ep1_The_Adventure_Begins_shot_package.json', a package shape that no longer exists anywhere in the repo —
+    the module's own documented no-argument CLI form crashed). Mirrors cb_pipeline._resolve_pkg's glob-based
+    resolution instead of a second, independently-hardcoded guess."""
+    import glob
+    cands = (glob.glob(f"../cb-output/{episode}_*beat_package.json")
+             or glob.glob(f"../cb-output/{episode}_*shot_package.json"))
+    return max(cands, key=os.path.getmtime) if cands else f"../cb-output/{episode}_The_Adventure_Begins_beat_package.json"
+
 def run(pkg=None, scene=None, episode="Ep1"):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    pkg = pkg or "../cb-output/Ep1_The_Adventure_Begins_shot_package.json"
+    pkg = pkg or _default_pkg(episode)
     res = check_scene(pkg, scene, episode)
     flags = [r for r in res if r["ok"] is False]
     print(f"VISUAL QA — scene {scene}: {len(flags)} FLAG, {sum(1 for r in res if r['ok'])} pass, {len(res)} shots", flush=True)

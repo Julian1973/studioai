@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """tools/field_audit.py — T33, the field-to-frame leak hunter.
 
-Every field the Director writes into a beat (cb_director_schemas.py's Beat/Cut/Performance/BeatContinuity/BeatCheck
-Pydantic models — read live via Pydantic introspection, so this never drifts from the schema) gets grepped across
+Every field the Director writes into a beat (cb_director_schemas.py's Beat/Cut/Performance/BeatContinuity/BeatCheck/
+OpensOn/FidelityAllocation Pydantic models — read live via Pydantic introspection, so this never drifts from the
+schema) gets grepped across
 every CONSUMER file in engine/ (everything except the write side: cb_director.py, cb_director_schemas.py,
 cb_writer.py, cb_llm.py). A field with ZERO hits outside the write side is a confirmed LEAK — the same bug class as
 the startState/shotSize find (2026-07-02): rich content the Director writes that nothing downstream ever reads.
@@ -32,7 +33,7 @@ def _load_schemas():
 def schema_fields():
     """Every leaf field name across the models the Director's beat package is built from — deduped, in schema order."""
     S = _load_schemas()
-    models = [S.Beat, S.Cut, S.Performance, S.BeatContinuity, S.BeatCheck]
+    models = [S.Beat, S.Cut, S.Performance, S.BeatContinuity, S.BeatCheck, S.OpensOn, S.FidelityAllocation]
     seen, out = set(), []
     for model in models:
         for name in model.model_fields:

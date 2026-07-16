@@ -53,6 +53,8 @@ def _clean_beat(code, scene_num, is_opener=True, characters=None, opening_cast=N
 
 
 def _clean_scene(scene_num=1):
+    # performanceThroughline is NOT set here (rule 58, 2026-07-08) — it's derived automatically from the
+    # scene's own beats' fidelityAllocation, never a hand-authored fixture value.
     return {
         "sceneNumber": scene_num,
         "ambientBed": "scratch ambient bed — not real content",
@@ -216,9 +218,9 @@ def test_word_count_relay_status_matches_relay_source_for(tmp):
         # Intercept the actual relay= value check_beat_word_count passes into shipped_prompt.
         seen = {}
         real_shipped_prompt = CS.shipped_prompt
-        def _spy(beat, scene, relay=False, prev_carry_marks=None):
+        def _spy(beat, scene, relay=False, prev_carry_marks=None, episode="Ep1"):
             seen["relay"] = relay
-            return real_shipped_prompt(beat, scene, relay=relay, prev_carry_marks=prev_carry_marks)
+            return real_shipped_prompt(beat, scene, relay=relay, prev_carry_marks=prev_carry_marks, episode=episode)
         CS.shipped_prompt = _spy
         try:
             gaps = PF.check_beat_word_count(non_opener, scene, is_scene_opener=False,

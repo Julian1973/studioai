@@ -1,0 +1,913 @@
+{
+ "episode": "Ep1",
+ "scene": "1",
+ "generatedAt": "2026-07-16T12:41:33",
+ "validation": {
+  "passed": true,
+  "issues": []
+ },
+ "shots": [
+  {
+   "shotId": "1.B1.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "input": {
+    "beatCode": "1.B1",
+    "purpose": "Establish playful work rhythm and geography.",
+    "dialogueLines": [
+     {
+      "speaker": "FUZZBY",
+      "exactText": "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+      "delivery": "with sing-song overdrive, chest already pitching forward like the work song is powering a grand mission he has only half under control",
+      "startSec": 0.8,
+      "endSec": 4.9
+     }
+    ],
+    "openingPose": "Fuzzby canted high between flowers, chest pitched forward; Zenny poised by a nearby petal."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved opening keyframe and must be matched exactly as the first frame. Begin the planned performance immediately from this pose and composition. Do not redesign, restage or introduce unexplained objects or characters. @图4 scene plate.\n\nWide bee-height chase, Fuzzby left, Zenny right: Fuzzby (@图3, larger bee) turns routine pollen collecting into overpowered mission energy, overshooting his flower path while Zenny (@图2, smaller bee)’s efficient hover silently measures the difference between his confidence and his control. Fuzzby sings through the chase without Zenny mouth movement, performing the vocal beat from @Audio1 — the words come only from the audio. Fuzzby drops too low while Zenny remains neatly on task.\n\nNegative: cross screen positions, let Zenny react broadly, resolve the crash here, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, floating or sinking through ground, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 159,
+    "referenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\nThe literal OPENING FRAME of the shot — the anticipation instant before the action, never the payoff.\n\nWide bee-height chase, Fuzzby left, Zenny right: Fuzzby (@图2, larger bee) canted high between flowers, chest pitched forward; Zenny (@图1, smaller bee) poised by a nearby petal. Frame a touch wider than the shot size alone implies — real headroom and side-room for the movement to come. @图3 scene plate holds the world, palette and light exactly.\n\nNegative: character redesign, appearance drift from the references, extra characters, the action already happening, on-screen text.",
+    "audioBrief": "SHOT 1.B1.S1 — voice-only performance for @Audio1.\nFUZZBY: \"BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…\" — with sing-song overdrive, chest already pitching forward like the work song is powering a grand mission he has only half under control. Target 0.8-4.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B1.S1_vo.mp3",
+     "exists": true,
+     "bytes": 51035,
+     "providerRequest": {
+      "ts": 1784192952.374602,
+      "recorded_at": "2026-07-16T10:09:12",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 37,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192952.3739982,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0037,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B1.S1_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B1.S1_keyframe.png",
+     "exists": true,
+     "bytes": 723396,
+     "providerRequest": {
+      "ts": 1784202075.637634,
+      "recorded_at": "2026-07-16T12:41:15",
+      "op": "keyframe_image",
+      "model": "bytedance/seedream/v5/pro/edit",
+      "aspect": "16:9",
+      "num_image_refs": 3
+     },
+     "costEntries": [
+      {
+       "ts": 1784202075.632211,
+       "op": "keyframe_image",
+       "cost_usd": 0.144,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B1.S1_keyframe.png",
+       "meta": {
+        "model": "bytedance/seedream/v5/pro/edit",
+        "num_refs": 3
+       }
+      }
+     ]
+    },
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B1.S2",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S1",
+   "input": {
+    "beatCode": "1.B1",
+    "purpose": "Land the leaf ricochet gag.",
+    "dialogueLines": [
+     {
+      "speaker": "FUZZBY",
+      "exactText": "Nailed it.",
+      "delivery": "with breathless pomp, pretending the leaf rebound was the exact finish he designed before his hover has fully recovered",
+      "startSec": 4.4,
+      "endSec": 5.3
+     }
+    ],
+    "openingPose": "Fuzzby outside the flower, angled downward; broad leaf waits across his exit path."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图3 scene plate.\n\nTight locked impact view at leaf and flower: Fuzzby (@图2) commits too hard to the dip, gathers more momentum than he can manage, strikes the waiting leaf with believable weight, then lets the rebound snap him into a claimed heroic finish. Fuzzby speaks only after rebound stabilizes, performing the vocal beat from @Audio1 — the words come only from the audio. Leaf FWIPs him into a proud superhero hover.\n\nNegative: start with Fuzzby already inside the flower, hide the leaf impact, make the rebound weightless, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, floating or sinking through ground, body inflation, full-body deflation, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 190,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Fuzzby",
+     "@图3": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B1.S2 — voice-only performance for @Audio1.\nFUZZBY: \"Nailed it.\" — with breathless pomp, pretending the leaf rebound was the exact finish he designed before his hover has fully recovered. Target 4.4-5.3s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B1.S2_vo.mp3",
+     "exists": true,
+     "bytes": 17598,
+     "providerRequest": {
+      "ts": 1784192953.317047,
+      "recorded_at": "2026-07-16T10:09:13",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 10,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192953.31685,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.001,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B1.S2_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B1.S3",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S2",
+   "input": {
+    "beatCode": "1.B1",
+    "purpose": "Let Zenny puncture the brag silently.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby already hovering proudly frame-left; Zenny approaches from frame-right in measured hover."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nLocked medium two-shot, Zenny right punctuation: Zenny (@图2, smaller bee) glides into his victory space and holds a perfectly flat stare, forcing Fuzzby (@图3, larger bee) to maintain the heroic pose one blink too long until the pose itself becomes the joke. Zenny’s flat stare outlasts Fuzzby’s pride.\n\nNegative: make Zenny laugh, let Fuzzby drop the pose, change screen sides, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 151,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B2.S1",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S3",
+   "input": {
+    "beatCode": "1.B2",
+    "purpose": "Launch the official-moustache setup.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby frame-left in proud hover; Zenny frame-right holding her stare."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nBee-height whip chase from two-shot: Zenny (@图2, smaller bee) is in frame. Fuzzby (@图3, larger bee) uses the previous proud hover as a launch pad, rockets too fast toward a fresh flower, overshoots the mouth, then turns the correction into a face-first dive. His correction becomes an unavoidable face-first dive.\n\nNegative: create moustache yet, have Zenny chase him, cross the axis, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 152,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B2.S2",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S1",
+   "input": {
+    "beatCode": "1.B2",
+    "purpose": "Reveal the pollen moustache.",
+    "dialogueLines": [
+     {
+      "speaker": "FUZZBY",
+      "exactText": "Do I look official?",
+      "delivery": "with earnest, hopeful pomp, presenting the pollen moustache as though it were an official uniform he has just been awarded",
+      "startSec": 3.6,
+      "endSec": 5.2
+     }
+    ],
+    "openingPose": "Fuzzby outside the flower mouth, face leading toward the pollen-packed center."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图3 scene plate.\n\nStatic medium close on flower mouth, snap reveal left: The flower squeeze compresses Fuzzby (@图2)’s face, forces pollen into a formal-looking mark, and springs him out into a display pose where he sincerely offers the accident as status. Fuzzby asks while holding the reveal, performing the vocal beat from @Audio1 — the words come only from the audio. Fuzzby reveals a pollen moustache and goatee mark.\n\nNegative: have the mark appear before compression, bury him invisibly inside the flower, let pollen cover the whole face yet, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, body inflation, full-body deflation, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 186,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Fuzzby",
+     "@图3": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B2.S2 — voice-only performance for @Audio1.\nFUZZBY: \"Do I look official?\" — with earnest, hopeful pomp, presenting the pollen moustache as though it were an official uniform he has just been awarded. Target 3.6-5.2s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B2.S2_vo.mp3",
+     "exists": true,
+     "bytes": 25539,
+     "providerRequest": {
+      "ts": 1784192954.132525,
+      "recorded_at": "2026-07-16T10:09:14",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 19,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192954.132239,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0019,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B2.S2_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B2.S3",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S2",
+   "input": {
+    "beatCode": "1.B2",
+    "purpose": "Let Zenny’s dry tease land.",
+    "dialogueLines": [
+     {
+      "speaker": "ZENNY",
+      "exactText": "Yes Fuzzby Officially nuts!",
+      "delivery": "as a dry, affectionate counterpunch, holding back the laugh until the very end so the tease lands warm instead of sharp",
+      "startSec": 1.8,
+      "endSec": 3.9
+     }
+    ],
+    "openingPose": "Fuzzby frame-left holding the moustache reveal; Zenny frame-right turned toward him."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nLocked medium, Zenny right, Fuzzby left profile: Zenny (@图2, smaller bee) studies Fuzzby (@图3, larger bee)’s parade posture, delays the laugh through a slow blink, then releases one affectionate verbal pinprick while Fuzzby waits for official approval. Only Zenny speaks; Fuzzby listens motionless, performing the vocal beat from @Audio1 — the words come only from the audio. Zenny’s almost-smile exposes affection behind the tease.\n\nNegative: make Fuzzby wipe yet, turn Zenny mean, alter the pollen mark, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 172,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B2.S3 — voice-only performance for @Audio1.\nZENNY: \"Yes Fuzzby Officially nuts!\" — as a dry, affectionate counterpunch, holding back the laugh until the very end so the tease lands warm instead of sharp. Target 1.8-3.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B2.S3_vo.mp3",
+     "exists": true,
+     "bytes": 54796,
+     "providerRequest": {
+      "ts": 1784192955.9748878,
+      "recorded_at": "2026-07-16T10:09:15",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 27,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192955.974632,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0027,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B2.S3_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B3.S1",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S3",
+   "input": {
+    "beatCode": "1.B3",
+    "purpose": "Make the attempted fix worse.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby frame-left with one paw lifted near the pollen mark; Zenny frame-right watching."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nTight cheek-level chaser with Zenny at right edge: Fuzzby (@图3, larger bee) reacts to Zenny (@图2, smaller bee)’s verdict by trying to erase the mark with one panicked swipe, but the drag spreads the pollen wider while Zenny’s almost-smile quietly survives. The moustache becomes a wider smeared pollen face mark.\n\nNegative: clean the pollen off, start the branch crash, make Zenny laugh aloud, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 154,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B3.S2",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S1",
+   "input": {
+    "beatCode": "1.B3",
+    "purpose": "Carry the branch-and-blossom tumble.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby frame-left outside the next flower path, body pitched forward toward a low branch."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图3 scene plate.\n\nFast vertical chase through stems toward branch: Fuzzby (@图2)’s embarrassed acceleration becomes a hazardous straight line: the smeared face leads him into a branch clip, flipping his weight through petal impacts that redirect him deeper into one final flower. Three soft impacts cup him upside down inside a blossom.\n\nNegative: teleport him between petals, hide the branch contact, make the flower swallow him completely, crystals on the bees, frozen wings airborne, floating or sinking through ground, body inflation, full-body deflation, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 164,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Fuzzby",
+     "@图3": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B3.S3",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S2",
+   "input": {
+    "beatCode": "1.B3",
+    "purpose": "Brand the crash as victory.",
+    "dialogueLines": [
+     {
+      "speaker": "FUZZBY",
+      "exactText": "Buzz Crash!!",
+      "delivery": "as a triumphant brand announcement from inside the mess, refusing to let the upside-down landing count as defeat",
+      "startSec": 2.7,
+      "endSec": 3.8
+     }
+    ],
+    "openingPose": "Fuzzby upside down in the blossom cup, legs above rim; Zenny frame-right behind."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nLow locked blossom close-up, Zenny right behind: Zenny (@图2, smaller bee) is in frame. Fuzzby (@图3, larger bee) kicks against the blossom’s hold until the compressed petals pop him upright, and he instantly converts the embarrassing landing into a triumphant self-branded announcement. Fuzzby speaks on the pop-up; Zenny remains silent, performing the vocal beat from @Audio1 — the words come only from the audio. Fuzzby pops upright and claims the crash as a brand.\n\nNegative: remove smeared pollen, overplay Zenny’s reaction, show recovery before pop, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, floating or sinking through ground, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 186,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B3.S3 — voice-only performance for @Audio1.\nFUZZBY: \"Buzz Crash!!\" — as a triumphant brand announcement from inside the mess, refusing to let the upside-down landing count as defeat. Target 2.7-3.8s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B3.S3_vo.mp3",
+     "exists": true,
+     "bytes": 23031,
+     "providerRequest": {
+      "ts": 1784192956.958614,
+      "recorded_at": "2026-07-16T10:09:16",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 12,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192956.958354,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0012,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B3.S3_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B4.S1",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S3",
+   "input": {
+    "beatCode": "1.B4",
+    "purpose": "Let Zenny’s smile crack through.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby upright in blossom cup frame-left; Zenny frame-right mid-eye-roll watching him."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nLocked two-shot at blossom height: Zenny (@图2, smaller bee)’s eye roll finally warms into a visible smile, but Fuzzby (@图3, larger bee) mistakes the attention as permission for another stunt and dives face-first into the next flower while staying readable outside it. Flower swallows only Fuzzby’s face; body remains outside.\n\nNegative: hide Fuzzby inside petals, trigger thunder yet, lose Zenny’s smile, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 152,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B4.S2",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S1",
+   "input": {
+    "beatCode": "1.B4",
+    "purpose": "Interrupt the game with thunder.",
+    "dialogueLines": [
+     {
+      "speaker": "FUZZBY",
+      "exactText": "…okay that sounded dramatic.",
+      "delivery": "with staccato bravado thinning for one syllable, as if he is trying to make the thunder part of his act before it can become real",
+      "startSec": 3.8,
+      "endSec": 5.8
+     }
+    ],
+    "openingPose": "Fuzzby frame-left outside the flower except his trapped face; Zenny frame-right watching."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nTight snap-back on Fuzzby, pull to include Zenny: Zenny (@图2, smaller bee) is in frame. Packed pollen pressure blasts Fuzzby (@图3, larger bee) back into frame even more covered, then thunder rolls under his boastful recovery, bending his proud hover into a crooked halt as the meadow light cools. Fuzzby speaks after thunder begins; Zenny only watches, performing the vocal beat from @Audio1 — the words come only from the audio. Thunder turns Fuzzby’s parade hover crooked.\n\nNegative: vanish him into the flower, reveal storm clouds yet, let thunder cause a new crash, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, body inflation, full-body deflation, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 193,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B4.S2 — voice-only performance for @Audio1.\nFUZZBY: \"…okay that sounded dramatic.\" — with staccato bravado thinning for one syllable, as if he is trying to make the thunder part of his act before it can become real. Target 3.8-5.8s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B4.S2_vo.mp3",
+     "exists": true,
+     "bytes": 29301,
+     "providerRequest": {
+      "ts": 1784192957.907386,
+      "recorded_at": "2026-07-16T10:09:17",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 28,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192957.907187,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0028,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B4.S2_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B4.S3",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S2",
+   "input": {
+    "beatCode": "1.B4",
+    "purpose": "Name the storm calmly.",
+    "dialogueLines": [
+     {
+      "speaker": "ZENNY",
+      "exactText": "A Storm’s coming.",
+      "delivery": "with low, dry certainty and a tiny protective softness under the flat delivery, not enlarging the warning beyond what the sky has already said",
+      "startSec": 1.4,
+      "endSec": 3.2
+     }
+    ],
+    "openingPose": "Zenny frame-right already glancing upward; Fuzzby frame-left holding crooked hover."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nLocked close on Zenny right, Fuzzby blurred left: Zenny (@图2, smaller bee) turns from Fuzzby (@图3, larger bee)’s crooked hover toward the unseen sky and holds her warning small, making the distant rumble feel larger because she refuses to decorate it. Only Zenny speaks; Fuzzby remains a silent listener, performing the vocal beat from @Audio1 — the words come only from the audio. Zenny’s restraint makes the warning feel bigger.\n\nNegative: show the storm yet, let Fuzzby interrupt, return to warm full light, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 179,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B4.S3 — voice-only performance for @Audio1.\nZENNY: \"A Storm’s coming.\" — with low, dry certainty and a tiny protective softness under the flat delivery, not enlarging the warning beyond what the sky has already said. Target 1.4-3.2s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B4.S3_vo.mp3",
+     "exists": true,
+     "bytes": 25539,
+     "providerRequest": {
+      "ts": 1784192958.9687302,
+      "recorded_at": "2026-07-16T10:09:18",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 17,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192958.968361,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0017,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B4.S3_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B5.S1",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S3",
+   "input": {
+    "beatCode": "1.B5",
+    "purpose": "Give Fuzzby one last boast.",
+    "dialogueLines": [
+     {
+      "speaker": "FUZZBY",
+      "exactText": "Good thing I work well under pressure.",
+      "delivery": "with overconfident parade certainty, selling the pressure as if it has personally asked for his expertise",
+      "startSec": 0.9,
+      "endSec": 3.8
+     }
+    ],
+    "openingPose": "Fuzzby frame-left crooked hover readying a chest pump; Zenny frame-right skyward."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nMedium two-shot under cooled meadow light: Fuzzby (@图3, larger bee) answers the warning by pushing only his chest forward through the pollen coating, selling pressure as his specialty while Zenny (@图2, smaller bee) refuses to move off the storm line. Fuzzby speaks; Zenny listens without mouth movement, performing the vocal beat from @Audio1 — the words come only from the audio. Fuzzby restores a fake parade chest under storm pressure.\n\nNegative: start flying until after line, brighten the light, let Zenny gesture, foreign-language speech, invented background voices, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 178,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": null,
+    "audioBrief": "SHOT 1.B5.S1 — voice-only performance for @Audio1.\nFUZZBY: \"Good thing I work well under pressure.\" — with overconfident parade certainty, selling the pressure as if it has personally asked for his expertise. Target 0.9-3.8s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B5.S1_vo.mp3",
+     "exists": true,
+     "bytes": 35570,
+     "providerRequest": {
+      "ts": 1784192960.451403,
+      "recorded_at": "2026-07-16T10:09:20",
+      "op": "elevenlabs_dialogue",
+      "model": "eleven_v3",
+      "stability": 0.3,
+      "chars": 38,
+      "voices": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1784192960.451041,
+       "op": "elevenlabs_dialogue",
+       "cost_usd": 0.0038,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_1.B5.S1_vo.mp3",
+       "meta": {
+        "model": "eleven_v3",
+        "voices": 1
+       }
+      }
+     ]
+    },
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B5.S2",
+   "sourceType": "relay",
+   "sourceShotId": "1.B5.S1",
+   "input": {
+    "beatCode": "1.B5",
+    "purpose": "Prove the boast wrong instantly.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby frame-left outside the nearest open flower, over-pitched into launch."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图3 scene plate.\n\nSnap chase into nearest blossom, stop on cup: Fuzzby (@图2) rockets from the chest-pump straight into the nearest flower, and his pollen-heavy face jams into the center so the petals clamp around his head while his body keeps trying to fly. Fuzzby is stuck head-first, body and legs out.\n\nNegative: hide his whole body inside the flower, free him in this shot, make the impact gentle, crystals on the bees, frozen wings airborne, body inflation, full-body deflation, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 161,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Fuzzby",
+     "@图3": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  },
+  {
+   "shotId": "1.B5.S3",
+   "sourceType": "relay",
+   "sourceShotId": "1.B5.S2",
+   "input": {
+    "beatCode": "1.B5",
+    "purpose": "End on Zenny’s affectionate sigh.",
+    "dialogueLines": [],
+    "openingPose": "Fuzzby stuck head-first frame-left foreground; Zenny frame-right already looking at him."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\n@图1 is the approved final frame of the previous shot and must be matched exactly as this shot's first frame only. Preserve every character position, scale, pose, expression, continuity mark, prop, lighting condition and environmental state.\n\nImmediately after the first frame, continue the story. Do not hold the previous pose unnecessarily, replay the previous action, reset the characters or introduce unexplained repositioning. @图4 scene plate.\n\nLocked reaction two-shot, Fuzzby left foreground, Zenny right: Zenny (@图2, smaller bee) takes in the stuck tableau, lowers her eyelids by the smallest amount, and releases a tiny sigh while Fuzzby (@图3, larger bee) kicks once, still refusing to let the flower win. Zenny sighs as Fuzzby remains stuck under thunder pressure.\n\nNegative: free Fuzzby, add speech to the sigh, show the storm directly, crystals on the bees, frozen wings airborne, character redesign, extra characters, on-screen text, invented voices, multiple camera cuts.",
+    "promptWords": 155,
+    "referenceSlots": {
+     "@图1": "previous shot final frame",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate"
+    },
+    "keyframePrompt": null,
+    "audioBrief": null
+   },
+   "assets": {
+    "voice": null,
+    "keyframe": null,
+    "candidates": [],
+    "take": null,
+    "harvestFrame": null
+   },
+   "state": {
+    "status": "designed",
+    "batchAttempts": 0,
+    "candidatesGenerated": 0,
+    "disclosure": null,
+    "approval": null,
+    "rejections": [],
+    "machineReview": null
+   }
+  }
+ ],
+ "timingSlate": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_Scene1_animatic.mp4",
+  "exists": true,
+  "bytes": 662565,
+  "costEntries": []
+ },
+ "stitchedOutput": null
+}

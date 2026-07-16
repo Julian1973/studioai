@@ -30,9 +30,9 @@ patch discipline this project already holds renders to (Law 3).
 import os, re, json, difflib
 from typing import List
 from pydantic import BaseModel, Field
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-CHARACTERS_PATH = os.path.join(HERE, "config", "characters.json")
+import paths as P   # FIXED 2026-07-12 (loose-ends pass): CHARACTERS_PATH used to hand-roll its own
+                     # os.path.join(..., "config", "characters.json") — now paths.CHARS (same file, via the
+                     # engine/config -> shows/crystal-bears/canon symlink).
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -217,6 +217,45 @@ def _stem_hit(verb, text):
     return bool(re.search(re.escape(v[:max(4, len(v) - 2)]), text))
 
 
+def _locate_name(name, lower_haystack, cast=None):
+    """Find where a character's name is mentioned in already-lowercased haystack text — shared by both
+    windowing loops below. Returns (pos, matched_len), or (-1, 0) if not mentioned at all.
+    FIXED 2026-07-12 (full-codebase audit continued): both loops used to independently compute
+    `name.split("'")[0]` for a possessive name like "Keen's Mum", which takes the WRONG side of the
+    apostrophe — "keen", not "mum" — so "Keen" and "Keen's Mum" resolved to the identical substring and
+    thus the identical text window, silently collapsing the two into one (e.g. a real production beat
+    where only Keen's Mum ever laughs would still flag "Keen, Keen's Mum are each given ... 'laugh'").
+    This mirrors the already-proven fix in cb_segprompt._v5_active_cast's own `_mentioned()` helper (2026-
+    07-08 audit finding): try the full name first, then — only for a possessive name — the word AFTER the
+    apostrophe, never before it. Extracted once here so the two loops below can't drift apart again.
+
+    A second, related collision surfaced verifying this fix against the real package (beat 3.B7): "Keen" is
+    a literal PREFIX of "Keen's" wherever "Keen's Mum" is mentioned, so even with the fix above, plain
+    `lower_haystack.find("keen")` still lands on the exact same position as "Keen's Mum"'s own mention,
+    reproducing the identical false "Keen, Keen's Mum share a verb" flag through a different path. `cast`
+    (optional — the beat's own cast list) lets this be resolved precisely, only when it actually applies:
+    if some OTHER cast member's name literally starts with "{name}'s" (i.e. name IS the possessive-prefix
+    of a different, real character), a bare mention of `name` immediately followed by "'s" is skipped past
+    — it belongs to that other character's own mention, not this one. Ordinary possessive use of a
+    character's own name elsewhere ("Zenny's wings", no "Zenny's X" character in the cast) is unaffected."""
+    full = name.strip().lower()
+    is_possessive_prefix_of_other = bool(cast) and any(
+        c != name and c.lower().startswith(full + "'s") for c in cast
+    )
+    pos = lower_haystack.find(full)
+    while pos >= 0 and is_possessive_prefix_of_other and lower_haystack[pos + len(full):pos + len(full) + 2] == "'s":
+        pos = lower_haystack.find(full, pos + 1)
+    if pos >= 0:
+        return pos, len(full)
+    if "'" in name:
+        tail = name.split("'", 1)[1].lstrip("sS").strip().lower()
+        if tail:
+            pos = lower_haystack.find(tail)
+            if pos >= 0:
+                return pos, len(tail)
+    return -1, 0
+
+
 def _economized_set(beat, cast):
     """Names THE FIDELITY-ALLOCATION LAW (2026-07-07) explicitly excused from individuation this beat — parsed
     from the beat's own authored `fidelityAllocation.economized` (comma-separated names, or "none"). Empty if
@@ -265,8 +304,7 @@ def check_ensemble_individuation(beat, characters):
     for name in cast:
         entry = characters.get(name) or {}
         verbs = (entry.get("lexicon") or {}).get("verbs") or []
-        first = name.split("'")[0].strip().lower()
-        pos = lower.find(first)
+        pos, _mlen = _locate_name(name, lower, cast)
         if pos < 0:
             continue   # not mentioned by name at all — NOT flagged (see note below): a background cast member
                        # correctly staying silent is the deliberate rule-46 fix, not a fresh finding to re-raise
@@ -299,12 +337,11 @@ def check_ensemble_individuation(beat, characters):
     # pair is meant to be carrying the beat).
     verb_windows = {}
     for name in cast:
-        first = name.split("'")[0].strip().lower()
-        pos = lower.find(first)
+        pos, mlen = _locate_name(name, lower, cast)
         if pos < 0:
             continue
         window = lower[pos:pos + 40]
-        m = re.search(r"\b(\w{4,})s?\b", window[len(first):].strip())
+        m = re.search(r"\b(\w{4,})s?\b", window[mlen:].strip())
         if m:
             verb_windows.setdefault(m.group(1).rstrip("s"), []).append(name)
     dup_verbs = {v: names for v, names in verb_windows.items() if len(names) >= 2}
@@ -320,7 +357,7 @@ def check_ensemble_individuation(beat, characters):
 
 def _load_characters():
     try:
-        d = json.load(open(CHARACTERS_PATH))
+        d = json.load(open(P.CHARS))
         return d.get("characters", d)
     except Exception:
         return {}
@@ -345,7 +382,15 @@ def propose_ensemble_fix(beat, flags, characters, log=print):
     per call, never a batch of candidates to pick from."""
     import cb_llm
     code = beat.get("beatCode") or beat.get("shotCode")
-    names = sorted({n for f in flags for n in re.findall(r"[A-Z][a-zA-Z']+(?:'s [A-Z][a-zA-Z']+)?",
+    # FIXED 2026-07-12 (full-codebase audit continued): the first alternative's character class used to be
+    # `[a-zA-Z']+` (apostrophe included) — greedy enough to consume "Keen's" whole before the optional
+    # `(?:'s [A-Z][a-zA-Z']+)?` group ever got a chance to fire, so "Keen's Mum" split into two separate,
+    # non-matching tokens ("Keen's", "Mum") instead of one. Neither survives the `if n in characters` filter
+    # below (the real key is "Keen's Mum"), so a flag naming both Keen and Keen's Mum silently dropped Keen's
+    # Mum from the repair request entirely, with no error or log line. Dropping the apostrophe from the
+    # FIRST character class only (never the optional second one, which still needs it for "Keen's") lets the
+    # optional group correctly claim the "'s Mum" tail instead of it being eaten by the first token.
+    names = sorted({n for f in flags for n in re.findall(r"[A-Z][a-zA-Z]+(?:'s [A-Z][a-zA-Z']+)?",
                                                           f["detail"].split(" are each given")[0].split(" cast members")[-1])
                     if n in characters})
     if not names:

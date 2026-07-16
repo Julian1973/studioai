@@ -75,6 +75,61 @@ def test_character_vocabulary():
     check("check_character_vocabulary: 'gently' near Zenny only (no Fuzzby ban) does not false-flag",
           r3["ok"], f"violations={r3['violations']}")
 
+    # FIX REGRESSION (2026-07-08/09, HIGH-severity, confirmed and fixed): a shorter cast name that is
+    # ALSO a literal substring of a longer, co-present cast name (e.g. "Keen" inside "Keen's Mum") used
+    # to get its own spurious name_positions entry at the SAME text offset as the real longer-name match.
+    # A tied-distance min() then resolved to whichever was appended FIRST — the shorter name, since it
+    # iterated earlier in the cast list — silently misattributing a violation that really belonged to
+    # the longer name's own character (here: Keen's Mum's own "anxious"/"calm down" bans, both of which
+    # happen to overlap Keen's own banned list in the real characters.json data, making this a real,
+    # not hypothetical, collision). The fix processes cast names longest-first and skips any match whose
+    # span falls entirely inside a span already claimed by a longer name.
+    keen_mum_cut = {
+        "openingCast": ["Keen", "Keen's Mum", "Zenny"],
+        "cuts": [
+            {"framing": "medium on Mum", "action": "Keen's Mum grows anxious, calm down, near the ropes."}
+        ],
+    }
+    r4 = cb_qa.check_character_vocabulary(keen_mum_cut)
+    check("check_character_vocabulary: 'Keen' substring inside 'Keen's Mum' attributes correctly to Keen's Mum, not Keen",
+          (not r4["ok"])
+          and all(v["character"] == "Keen's Mum" for v in r4["violations"])
+          and any(v["word"] == "anxious" for v in r4["violations"])
+          and any(v["word"] == "calm down" for v in r4["violations"]),
+          f"violations={r4['violations']}")
+
+    # GAP CLOSED (2026-07-09): every case above has AT MOST ONE named character in the cut's text, so
+    # the OLD whole-cut/"named anywhere" attribution logic and the NEW nearest-name-by-position logic
+    # (see the docstring's "ATTRIBUTION — NEAREST-NAME, NOT WHOLE-CUT" paragraph) produce IDENTICAL
+    # results on all of them — this suite could not actually distinguish the pre-fix and post-fix
+    # implementations, and a regression back to whole-cut attribution would have passed cleanly. These
+    # two cases both name BOTH Fuzzby and Zenny in the same cut (Zenny's own lexicon.banned is empty —
+    # she owns no banned words, only Fuzzby does), so the two implementations diverge: whole-cut logic
+    # flags Fuzzby's banned "gently" any time his name is anywhere in the cut; nearest-name logic only
+    # flags it when Fuzzby's own mention is the textually closest name to the word. Both sentences were
+    # confirmed empirically against the live implementation before being committed as permanent asserts
+    # (word choice/spacing determines which name reads "nearest" — never assumed).
+
+    # Both named, "gently" sits textually NEAREST to Zenny (who owns no banned words) -> not Fuzzby's
+    # violation; nearest-name logic passes clean where whole-cut logic would have wrongly flagged Fuzzby.
+    near_zenny = copy.deepcopy(b2)
+    near_zenny["cuts"][0]["framing"] = "wide two-shot, both bees in frame"
+    near_zenny["cuts"][0]["action"] = "Fuzzby rockets toward the next flower as Zenny gently glides in beside him."
+    r5 = cb_qa.check_character_vocabulary(near_zenny)
+    check("check_character_vocabulary: both named, 'gently' nearest Zenny -> no Fuzzby violation (nearest-name, not whole-cut)",
+          r5["ok"] and not r5["violations"], f"violations={r5['violations']}")
+
+    # Both named, "gently" sits textually NEAREST to Fuzzby despite Zenny also being present in the same
+    # cut -> still correctly Fuzzby's violation (proves the fix doesn't over-correct into never flagging
+    # a genuine same-character hit just because another name co-occurs in the cut).
+    near_fuzzby = copy.deepcopy(b2)
+    near_fuzzby["cuts"][0]["framing"] = "wide two-shot, both bees in frame"
+    near_fuzzby["cuts"][0]["action"] = "Zenny glides steadily nearby as Fuzzby gently drifts toward the next flower."
+    r6 = cb_qa.check_character_vocabulary(near_fuzzby)
+    check("check_character_vocabulary: both named, 'gently' nearest Fuzzby -> Fuzzby violation still caught",
+          (not r6["ok"]) and any(v["word"] == "gently" and v["character"] == "Fuzzby" for v in r6["violations"]),
+          f"violations={r6['violations']}")
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # check_camera_lock_conflict — LAW 8 / rule 38 (camera locked on any spoken line; hum/
@@ -83,13 +138,18 @@ def test_character_vocabulary():
 def test_camera_lock_conflict():
     d = _load_pkg()
 
-    # FAIL case: 1.B1's real cut 3 is a KNOWN, currently-live violation (confirmed via
-    # check_gate3_lint's own blockers before writing this test — "cut 3: has dialogue but framing
-    # names camera movement (push)"). Use it as-is, no mutation needed.
+    # REGRESSION GUARD (2026-07-14): 1.B1's cut 3 used to be a real, live violation ("push-in" on
+    # its own dialogue cut, "Nailed it.") — found and fixed the same night check_gate3_lint's own
+    # blockers were, for the first time, actually wired into cb_beats.run() itself (previously only
+    # cb_replicator.walk_scene enforced this check; a beat fired via cb_beats.run() directly — a
+    # scratch script, a Studio button — never saw it). Fixing that gap surfaced this real violation
+    # across 9 beats package-wide; all were fixed the same session. This assertion now guards the
+    # fix stays fixed, rather than asserting the historical bug (the synthetic FAIL case below
+    # already proves detection works, independent of this beat's own current data).
     b1 = _beat(d, "1.B1")
     r = cb_qa.check_camera_lock_conflict(b1)
-    check("check_camera_lock_conflict: real 1.B1 (known live push-in-on-dialogue bug) is caught",
-          not r["ok"] and "push" in r["verdict"].lower(), f"verdict={r['verdict']}")
+    check("check_camera_lock_conflict: real 1.B1's own camera-lock violation stays fixed (regression guard)",
+          r["ok"], f"verdict={r['verdict']}")
 
     # PASS case: strip camera-movement words from every cut's framing -> must read clean.
     fixed = copy.deepcopy(b1)
@@ -161,6 +221,66 @@ def test_keyframe_lint():
     check("check_keyframe_lint: anti-slop word in STYLE (locked text) is flag-only, not a blocker",
           r4["ok"] and any("locked" in f for f in r4["flags"]), f"ok={r4['ok']} flags={r4['flags']}")
 
+    # FAIL case 3 (2026-07-15, Julian, live — "guardrails... to bring that beat to life... not guardrails
+    # for anything else"): the `_pose()` fallback ("{Name} is in frame, mid-action") is cb_prompts.py's own
+    # unattributed-character marker — confirmed live to fire on 47% of character blocks in real ensemble
+    # scene-openers (9.B1, 10.B1). A named character shipping this generic fallback is a hard BLOCK.
+    fallback_prompt = clean_prompt.replace(
+        "CHARACTER 3 (Zenny): holds a steady working line, glides between blossoms with neat precision.",
+        "CHARACTER 3 (Zenny): Zenny is in frame, mid-action.")
+    r5 = cb_qa.check_keyframe_lint(fallback_prompt, chars=["Fuzzby", "Zenny"])
+    check("check_keyframe_lint: the unattributed-character fallback is a hard BLOCK, naming the character",
+          not r5["ok"] and any("Zenny" in b and "Unattributed" in b for b in r5["blockers"]),
+          f"blockers={r5['blockers']}")
+
+    # Sanity: real, specific staging text that merely CONTAINS the words "in frame" must never false-positive
+    # — only the EXACT fallback phrase ("{Name} is in frame, mid-action") trips this check.
+    real_staging_prompt = clean_prompt.replace(
+        "CHARACTER 3 (Zenny): holds a steady working line, glides between blossoms with neat precision.",
+        "CHARACTER 3 (Zenny): Zenny is in frame, sharply focused on the flower ahead of her.")
+    r6 = cb_qa.check_keyframe_lint(real_staging_prompt, chars=["Fuzzby", "Zenny"])
+    check("check_keyframe_lint: real staging text containing 'in frame' never false-positives on the fallback check",
+          r6["ok"], f"blockers={r6['blockers']}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# check_retake_prompt — THE GATE-4 SIBLING (2026-07-14, CLAUDE.md rule 84/85): closes the confirmed gap
+# where cb_retake.regen_shot's own _shot_fix_prompt dict shipped with zero anti-slop/Character Vocabulary
+# Law enforcement — neither check_gate3_lint nor check_keyframe_lint is directly reusable on this shape.
+# ═══════════════════════════════════════════════════════════════════════════════════
+def test_check_retake_prompt():
+    clean = {"subject": "Crystal Cove — Fuzzby, Zenny", "continuity": "Match the exact frame.",
+             "action": "Fuzzby rockets forward and slams into the leaf.", "camera": "wide tracking shot",
+             "style": "Warm saturated light, bold legible staging.", "negative": "no crystals on the bees"}
+    r = cb_qa.check_retake_prompt(clean, characters=["Fuzzby", "Zenny"])
+    check("check_retake_prompt: a clean retake prompt passes", r["ok"], f"blockers={r['blockers']}")
+
+    # anti-slop word in the freely-authored action text -> hard BLOCK
+    slop = dict(clean, action="Fuzzby rockets forward in a cinematic, epic dive into the leaf.")
+    r2 = cb_qa.check_retake_prompt(slop, characters=["Fuzzby", "Zenny"])
+    check("check_retake_prompt: anti-slop word in the retake's own action text is a hard BLOCK",
+          not r2["ok"] and any("cinematic" in b for b in r2["blockers"]), f"blockers={r2['blockers']}")
+
+    # Fuzzby's own banned lexicon word ("gently") in HIS retake action -> hard BLOCK
+    vocab = dict(clean, action="Fuzzby gently lands on the branch.")
+    r3 = cb_qa.check_retake_prompt(vocab, characters=["Fuzzby"])
+    check("check_retake_prompt: Fuzzby's own banned word in his retake action is a hard BLOCK",
+          not r3["ok"] and any("Fuzzby" in b and "Vocabulary" in b for b in r3["blockers"]),
+          f"blockers={r3['blockers']}")
+
+    # anti-slop word inside the LOCKED style field (cb_segprompt._style()'s own text) -> FLAG only
+    style_slop = dict(clean, style="A cinematic, stylised look.")
+    r4 = cb_qa.check_retake_prompt(style_slop, characters=["Fuzzby", "Zenny"])
+    check("check_retake_prompt: anti-slop word in the locked style field is flag-only, not a blocker",
+          r4["ok"] and any("locked style" in f for f in r4["flags"]), f"ok={r4['ok']} flags={r4['flags']}")
+
+    # a genuinely empty/malformed prompt dict never raises
+    try:
+        r5 = cb_qa.check_retake_prompt({}, characters=None)
+        check("check_retake_prompt: an empty/malformed prompt dict never raises", r5["ok"] is True)
+    except Exception as e:
+        check("check_retake_prompt: an empty/malformed prompt dict never raises", False, f"raised {e!r}")
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # check_gate3_lint — the unified Step-4 lint (compiles the real v5 prompt via
@@ -169,7 +289,8 @@ def test_keyframe_lint():
 def test_gate3_lint_word_budget_and_congruence():
     import cb_preflight as PF
 
-    # PASS-ish case: 1.B2 is real, currently clean (confirmed live above) and under the 650 hard cap.
+    # PASS-ish case: 1.B2 is real, currently clean (confirmed live above) and under the hard cap
+    # (PF.WORD_BUDGET_BLOCK, 700 as of 2026-07-14 rule 84/85 — read live below, never a hand-typed number).
     r = cb_qa.check_gate3_lint(PKG_PATH, "1.B2", "Ep1")
     check("check_gate3_lint: real 1.B2 compiles under the word-budget hard cap",
           r["word_count"] <= PF.WORD_BUDGET_BLOCK and not any("word budget" in b for b in r["blockers"]),
@@ -179,11 +300,12 @@ def test_gate3_lint_word_budget_and_congruence():
     check("check_gate3_lint: real 1.B2's references block matches the relay wording (§4b)",
           not any("doctrine's exact relay wording" in b for b in r["blockers"]), f"blockers={r['blockers']}")
 
-    # FAIL case: 1.B1 has a REAL, currently-live camera-lock violation (confirmed above) — the
-    # unified lint must surface it as a blocker via its own re-wired check_camera_lock_conflict call.
+    # REGRESSION GUARD (2026-07-14): 1.B1's camera-lock violation (see test_camera_lock_conflict's
+    # own note) is fixed; check_gate3_lint must report it clean via the SAME re-wired
+    # check_camera_lock_conflict call, matching that other test's own regression-guard shape.
     r2 = cb_qa.check_gate3_lint(PKG_PATH, "1.B1", "Ep1")
-    check("check_gate3_lint: real 1.B1's known camera-lock violation is caught as a blocker",
-          not r2["ok"] and any("Camera-Lock Law" in b for b in r2["blockers"]), f"blockers={r2['blockers']}")
+    check("check_gate3_lint: real 1.B1's camera-lock violation stays fixed (regression guard)",
+          not any("Camera-Lock Law" in b for b in r2["blockers"]), f"blockers={r2['blockers']}")
 
 
 def test_gate3_lint_dialogue_leak_and_anti_slop():
@@ -230,6 +352,292 @@ def test_gate3_lint_dialogue_leak_and_anti_slop():
           not r2["ok"] and any("Law 5" in b for b in r2["blockers"]), f"blockers={r2['blockers']}, words={words!r}")
 
 
+def test_gate3_lint_checklist_verb_flag():
+    """THE MOTION CONTRACT check (2026-07-13, the CapCut-formula deep-dive) — a cut whose action reads as
+    4+ comma-separated, independently-clocked verbs (a checklist of poses) should surface as an advisory
+    FLAG, never a hard block (it's a computed proxy for a real risk, not a semantic judge of true causation
+    — the same "report, never block a proxy" convention this codebase already uses elsewhere). A genuine
+    one-cause/chained-consequences sentence, even a long one, should NOT trip it — the check counts comma
+    fragments, not sentence length, so this also guards against a false-positive regression."""
+    d = _load_pkg()
+    scene1 = next(s for s in d.get("scenes", []) if str(s.get("sceneNumber")) == "1")
+    b2_real = _beat(d, "1.B2")
+
+    # --- FLAG case: 5 independently-clocked, comma-separated actions (the confirmed real-world shape) ---
+    checklist_beat = copy.deepcopy(b2_real)
+    checklist_beat["beatCode"] = "1.B2_CHECKLIST_TEST"
+    checklist_beat["cuts"][0]["action"] = (
+        "He bounces off, spins once in mid-air, stabilizes himself, puffs out his chest proudly, and lands."
+    )
+    tmp_path = _write_scratch_pkg(d, scene1, checklist_beat)
+    r = cb_qa.check_gate3_lint(tmp_path, "1.B2_CHECKLIST_TEST", "Ep1")
+    os.remove(tmp_path)
+    check("check_gate3_lint: a 5-fragment checklist action surfaces an advisory flag, never a block",
+          any("separately-clocked actions" in f for f in r["flags"]),
+          f"flags={r['flags']}")
+    check("check_gate3_lint: the checklist flag never adds to blockers (it's a proxy, not a semantic judge)",
+          not any("separately-clocked" in b for b in r["blockers"]), f"blockers={r['blockers']}")
+
+    # --- CLEAN case: one cause with chained consequences in a single sentence, no comma-listed verbs ---
+    chained_beat = copy.deepcopy(b2_real)
+    chained_beat["beatCode"] = "1.B2_CHAINED_TEST"
+    chained_beat["cuts"][0]["action"] = (
+        "His own momentum shoots him sideways into the broad leaf; the leaf snaps under the hit and the "
+        "impact spins him a full turn before he catches himself on the rebound."
+    )
+    tmp_path2 = _write_scratch_pkg(d, scene1, chained_beat)
+    r2 = cb_qa.check_gate3_lint(tmp_path2, "1.B2_CHAINED_TEST", "Ep1")
+    os.remove(tmp_path2)
+    # scoped to cut 1 specifically (the mutated one) — 1.B2's OTHER real, untouched cuts may legitimately
+    # carry their own checklist-shaped text and correctly flag on their own merits; that's not this test's
+    # concern, only whether a genuinely chained sentence in cut 1 avoids a false positive.
+    check("check_gate3_lint: a chained cause-and-consequence sentence in cut 1 does not trip the checklist flag on cut 1",
+          not any("cut 1:" in f and "separately-clocked actions" in f for f in r2["flags"]), f"flags={r2['flags']}")
+
+
+def test_gate3_lint_archetype_completeness_contract():
+    """THE ARCHETYPE COMPLETENESS CONTRACT (2026-07-14, Julian: "we have a structure and template and we
+    must ensure it meets that through the storyboard... what I don't understand is you see it after the
+    event but not before"). The exact regression this check exists to catch: a real, live bug earlier THIS
+    SESSION silently dropped the archetype's own protective negative phrases from the shipped Negative line
+    whenever a physics anchor also existed — nothing caught it until Fuzzby actually vanished into a flower
+    on real, billed footage (1.B2). This proves the check catches that EXACT regression class before any
+    prompt fires, by monkeypatching the compiler functions to reproduce the broken wiring directly (data-
+    level mutation alone can't simulate a wiring break — the bug lived in the compiler, not the beat data)."""
+    import cb_segprompt as CS
+
+    # both halves clean on the real, currently-fixed 1.B1/1.B2 (regression guard: the fix stays fixed)
+    r_b1 = cb_qa.check_gate3_lint(PKG_PATH, "1.B1", "Ep1")
+    check("check_gate3_lint: real 1.B1 passes the Archetype Completeness Contract clean",
+          not any("Archetype Completeness Contract" in b for b in r_b1["blockers"]), f"blockers={r_b1['blockers']}")
+    r_b2 = cb_qa.check_gate3_lint(PKG_PATH, "1.B2", "Ep1")
+    check("check_gate3_lint: real 1.B2 passes the Archetype Completeness Contract clean",
+          not any("Archetype Completeness Contract" in b for b in r_b2["blockers"]), f"blockers={r_b2['blockers']}")
+
+    # --- FAIL case: reproduce tonight's exact regression — the negative-line compiler silently drops the
+    # archetype's own prohibited phrases (the resolver itself still works fine; only the WIRING breaks) ---
+    _orig_neg = CS._v5_negative_line
+    def _broken_negative_line(beat, scene):
+        staging = [str(x).strip() for x in (beat.get("stagingProhibited") or []) if str(x).strip()]
+        staging = [s if CS._NEGATION_LEAD_RE.match(s) else f"no {CS._LEADING_ARTICLE_RE.sub('', s)}" for s in staging]
+        return "Negative: " + "; ".join(staging + CS._standing_negatives()) + "."
+    CS._v5_negative_line = _broken_negative_line
+    try:
+        r = cb_qa.check_gate3_lint(PKG_PATH, "1.B2", "Ep1")
+    finally:
+        CS._v5_negative_line = _orig_neg
+    check("check_gate3_lint: a silently-broken negative-line wiring is a hard BLOCK (the exact 1.B2 regression)",
+          not r["ok"] and any("Archetype Completeness Contract" in b and "prohibited staging" in b for b in r["blockers"]),
+          f"ok={r['ok']} blockers={r['blockers']}")
+
+    # --- FAIL case: the positive half — the physics anchor silently drops out of the shot-list compiler ---
+    _orig_story = CS._v5_beat_story
+    def _broken_beat_story(beat, cast, scene=None, episode="Ep1"):
+        out = _orig_story(beat, cast, scene, episode)
+        return "\n".join(l for l in out.split("\n") if not l.startswith("PHYSICS:"))
+    CS._v5_beat_story = _broken_beat_story
+    try:
+        r2 = cb_qa.check_gate3_lint(PKG_PATH, "1.B1", "Ep1")
+    finally:
+        CS._v5_beat_story = _orig_story
+    check("check_gate3_lint: a silently-dropped PHYSICS anchor is a hard BLOCK",
+          not r2["ok"] and any("Archetype Completeness Contract" in b and "PHYSICS anchor" in b for b in r2["blockers"]),
+          f"ok={r2['ok']} blockers={r2['blockers']}")
+
+    # --- NO FALSE POSITIVE: a beat-authored stagingProhibited item that already covers an archetype phrase
+    # (case-insensitive substring, mirroring _v5_negative_line's own dedup) must not be reported as missing,
+    # even though it never appears verbatim in the shipped Negative line under the archetype's own phrasing ---
+    d = _load_pkg()
+    scene1 = next(s for s in d.get("scenes", []) if str(s.get("sceneNumber")) == "1")
+    b1_real = _beat(d, "1.B1")
+    archetype_phrases = CS._v5_archetype_prohibited(b1_real, scene1)
+    if archetype_phrases:
+        covered_beat = copy.deepcopy(b1_real)
+        covered_beat["beatCode"] = "1.B1_COVERED_TEST"
+        covered_beat["stagingProhibited"] = [archetype_phrases[0]]
+        tmp_path = _write_scratch_pkg(d, scene1, covered_beat)
+        r3 = cb_qa.check_gate3_lint(tmp_path, "1.B1_COVERED_TEST", "Ep1")
+        os.remove(tmp_path)
+        check("check_gate3_lint: a beat-authored phrase already covering the archetype's own is never a false-positive BLOCK",
+              not any("Archetype Completeness Contract" in b and "prohibited staging" in b for b in r3["blockers"]),
+              f"blockers={r3['blockers']}")
+
+
+def test_prompt_before_fire_wiring():
+    """THE PRE-FIRE READ (2026-07-14, Julian: "if you read the prompts before they go for render we
+    wouldn't have these issues... we need to fix software wide not prompt specific"). The check itself
+    calls a real LLM (cb_llm.structured) — these tests prove the WIRING (caching, blocker formatting,
+    fail-open on infra failure) with cb_llm.structured monkeypatched, zero API cost. The check's actual
+    JUDGMENT QUALITY (does it correctly tell a deliberate settle resolution from an accidental
+    contradiction) was proven separately against real production data — see CLAUDE.md's own dated record
+    of the live 1.B2 finding and fix; that class of proof needs a real model call and isn't something a
+    mock can meaningfully verify (a mock only ever returns what the test tells it to)."""
+    import cb_llm, shutil
+
+    if os.path.exists(cb_qa._PROMPT_READ_CACHE_DIR):
+        shutil.rmtree(cb_qa._PROMPT_READ_CACHE_DIR)
+    orig = cb_llm.structured
+
+    class _FakeVerdict:
+        def __init__(self, **kw): self.__dict__.update(kw)
+        def model_dump(self): return dict(self.__dict__)
+
+    try:
+        # clean verdict -> ok=True, no blockers
+        cb_llm.structured = lambda system, user, schema, **kw: _FakeVerdict(
+            continuity_honored=True, continuity_reason="opens on the carried state",
+            staging_honors_negatives=True, staging_reason="no contradiction",
+            settle_honors_negatives=True, settle_reason="no contradiction")
+        r1 = cb_qa.check_prompt_before_fire("PROMPT ONE", "TEST.WIRE1", "Ep1")
+        check("check_prompt_before_fire: a clean verdict passes with no blockers",
+              r1["ok"] and not r1["blockers"] and not r1["skipped"], r1)
+
+        # a real contradiction -> ok=False, a specific, quotable blocker
+        cb_llm.structured = lambda system, user, schema, **kw: _FakeVerdict(
+            continuity_honored=False, continuity_reason="opening ignores the anchor, jumps to a wide shot",
+            staging_honors_negatives=True, staging_reason="fine",
+            settle_honors_negatives=True, settle_reason="fine")
+        r2 = cb_qa.check_prompt_before_fire("PROMPT TWO", "TEST.WIRE2", "Ep1")
+        check("check_prompt_before_fire: a real contradiction is a hard block with the specific reason quoted",
+              not r2["ok"] and any("ignores the anchor" in b for b in r2["blockers"]), r2)
+
+        # identical (prompt, beat) pair -> cached, LLM called exactly once for two calls
+        called = {"n": 0}
+        def _counting(system, user, schema, **kw):
+            called["n"] += 1
+            return _FakeVerdict(continuity_honored=True, continuity_reason="x", staging_honors_negatives=True,
+                                 staging_reason="x", settle_honors_negatives=True, settle_reason="x")
+        cb_llm.structured = _counting
+        cb_qa.check_prompt_before_fire("CACHE TEST PROMPT", "TEST.WIRE3", "Ep1")
+        cb_qa.check_prompt_before_fire("CACHE TEST PROMPT", "TEST.WIRE3", "Ep1")
+        check("check_prompt_before_fire: identical prompt+beat is cached, not re-billed",
+              called["n"] == 1, f"called {called['n']} times, expected 1")
+
+        # a genuine infra outage (both providers down) fails OPEN, never silently a pass or a block
+        def _outage(system, user, schema, **kw):
+            raise SystemExit("both providers down")
+        cb_llm.structured = _outage
+        r4 = cb_qa.check_prompt_before_fire("OUTAGE TEST PROMPT", "TEST.WIRE4", "Ep1")
+        check("check_prompt_before_fire: an infra outage fails open, marked skipped with a reason",
+              r4["ok"] and r4["skipped"] and r4.get("skipped_reason"), r4)
+    finally:
+        cb_llm.structured = orig
+        if os.path.exists(cb_qa._PROMPT_READ_CACHE_DIR):
+            shutil.rmtree(cb_qa._PROMPT_READ_CACHE_DIR)
+
+
+def test_reference_position():
+    """THE SEAM AUDIT'S HIGH-severity finding (2026-07-15, Gate 1->2->3 handoff review): check_prompt_before_
+    fire (above) reads the compiled TEXT only — nothing ever checked the references block's own hand-authored
+    position claims (spatialAxis/relayOpeningNote, CLAUDE.md rule 53) or the size clause
+    (cb_segprompt._v5_size_clause) against the actual anchor image cb_beats.run uploads as @图1. Needs
+    vision_verdict, so monkeypatched here — zero network/API cost, same convention as check_join_state's own
+    tests above."""
+    import tempfile
+    orig_vision_verdict = cb_qa.vision_verdict
+    fd, tmp = tempfile.mkstemp(suffix=".png")
+    os.close(fd)
+    try:
+        # no anchor path at all -> skip (ok=None), no vision call possible
+        r0 = cb_qa.check_reference_position({}, [], None)
+        check("check_reference_position: no anchor path -> ok=None (skip)", r0["ok"] is None, r0)
+
+        # anchor exists but no spatialAxis/relayOpeningNote and a single-character cast (no size claim
+        # either, since a size clause needs 2+ distinct sizeRanks) -> nothing to check, zero vision calls
+        called = {"n": 0}
+        def _counting(prompt, images):
+            called["n"] += 1
+            return "MATCH", None
+        cb_qa.vision_verdict = _counting
+        r1 = cb_qa.check_reference_position({}, ["Fuzzby"], tmp)
+        check("check_reference_position: no claim authored -> ok=None, zero vision calls spent",
+              r1["ok"] is None and called["n"] == 0, r1)
+
+        # a real position claim + a MATCH verdict -> ok=True
+        cb_qa.vision_verdict = lambda prompt, images: ("MATCH", None)
+        r2 = cb_qa.check_reference_position({"spatialAxis": "Fuzzby frame-left, Zenny frame-right"},
+                                             ["Fuzzby", "Zenny"], tmp)
+        check("check_reference_position: a MATCH verdict -> ok=True", r2["ok"] is True, r2)
+
+        # a real position claim + a MISMATCH verdict -> ok=False, the contradiction is surfaced
+        cb_qa.vision_verdict = lambda prompt, images: (
+            "MISMATCH\nspatialAxis: Fuzzby frame-left, Zenny frame-right — the image shows them swapped", None)
+        r3 = cb_qa.check_reference_position({"spatialAxis": "Fuzzby frame-left, Zenny frame-right"},
+                                             ["Fuzzby", "Zenny"], tmp)
+        check("check_reference_position: a MISMATCH verdict -> ok=False, the contradiction is quoted",
+              r3["ok"] is False and "swapped" in r3["verdict"], r3)
+
+        # a vision-infra error skips (ok=None) — never a false pass or a false block
+        cb_qa.vision_verdict = lambda prompt, images: (None, "(QA model error 503)")
+        r4 = cb_qa.check_reference_position({"spatialAxis": "x"}, ["Fuzzby", "Zenny"], tmp)
+        check("check_reference_position: a vision-infra error skips (ok=None)", r4["ok"] is None, r4)
+    finally:
+        cb_qa.vision_verdict = orig_vision_verdict
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def test_framing_mismatch():
+    """FRAMING_MISMATCH (2026-07-15, seam audit — Gate 1->2->3 handoff review): check_done_frame's PLATE_
+    DRIFT item checks the WORLD matches the plate; nothing checked the actual shot SCALE the Director called
+    for in cuts[0].framing (the same field cb_prompts.build_keyframe_prompt reads to build the COMPOSITION
+    line) — a keyframe could pass every other item while still being the wrong shot scale. Uses the same
+    unparseable-fake-PNG convention test_cb_beats.py already uses for a resolution-check-free fixture (the
+    deterministic LOW_RESOLUTION/BAD_ASPECT checks degrade to skipped on a file _img_size can't parse, never
+    crash), and monkeypatches vision_verdict — zero network/API cost."""
+    import tempfile
+    orig_vision_verdict = cb_qa.vision_verdict
+    fd, kf = tempfile.mkstemp(suffix=".png")
+    os.close(fd)
+    open(kf, "wb").write(b"\x89PNG\r\n\x1a\nfake")
+    try:
+        # a beat with a real cuts[0].framing -> the checklist offers FRAMING_MISMATCH, naming the exact term
+        captured = {}
+        def _capture(prompt, images):
+            captured["prompt"] = prompt
+            return "PASS", None
+        cb_qa.vision_verdict = _capture
+        shot = {"characters": [], "cuts": [{"framing": "wide shot"}]}
+        r1 = cb_qa.check_done_frame(shot, kf, {}, "Ep1", is_end=False)
+        check("check_done_frame: FRAMING_MISMATCH is offered on the START frame when cuts[0].framing is authored",
+              "FRAMING_MISMATCH" in captured.get("prompt", ""), captured.get("prompt", "")[:200])
+        check("check_done_frame: the checklist item states the actual authored framing text",
+              "wide shot" in captured.get("prompt", ""), captured.get("prompt", "")[:200])
+        check("check_done_frame: a clean PASS verdict passes (ok=True)", r1["ok"] is True, r1)
+
+        # the model actually flags FRAMING_MISMATCH -> surfaces as a real failed reason
+        cb_qa.vision_verdict = lambda prompt, images: (
+            "FAIL\nFRAMING_MISMATCH: this is a close-up, not the stated wide shot", None)
+        r2 = cb_qa.check_done_frame(shot, kf, {}, "Ep1", is_end=False)
+        check("check_done_frame: a real FRAMING_MISMATCH flag from the model surfaces as a failed reason",
+              r2["ok"] is False and "FRAMING_MISMATCH" in r2["reasons"], r2)
+
+        # no framing authored at all -> the item is never offered (nothing to check against a fallback default)
+        captured2 = {}
+        def _capture2(prompt, images):
+            captured2["prompt"] = prompt
+            return "PASS", None
+        cb_qa.vision_verdict = _capture2
+        shot_no_framing = {"characters": [], "cuts": [{}]}
+        cb_qa.check_done_frame(shot_no_framing, kf, {}, "Ep1", is_end=False)
+        check("check_done_frame: FRAMING_MISMATCH is skipped when no framing was authored",
+              "FRAMING_MISMATCH" not in captured2.get("prompt", ""), captured2.get("prompt", "")[:200])
+
+        # scoped to the START frame only — cuts[0] is the OPENING cut; the END frame check never asks it
+        captured3 = {}
+        def _capture3(prompt, images):
+            captured3["prompt"] = prompt
+            return "PASS", None
+        cb_qa.vision_verdict = _capture3
+        cb_qa.check_done_frame(shot, kf, {}, "Ep1", is_end=True)
+        check("check_done_frame: FRAMING_MISMATCH is scoped to the START frame only, never the END frame",
+              "FRAMING_MISMATCH" not in captured3.get("prompt", ""), captured3.get("prompt", "")[:200])
+    finally:
+        cb_qa.vision_verdict = orig_vision_verdict
+        if os.path.exists(kf):
+            os.remove(kf)
+
+
 def _write_scratch_pkg(real_pkg, scene1, mutated_beat):
     """Write a scratch package containing ONLY scene 1 + the mutated beat + its real scene-1 siblings
     (so relay resolution / cast lookups behave exactly as they would for a real beat), to a temp path
@@ -250,6 +658,47 @@ def _write_scratch_pkg(real_pkg, scene1, mutated_beat):
 # so we monkeypatch cb_qa.vision_verdict to avoid any network/API call and drive the
 # carryMarks-scoped STATE logic directly.
 # ═══════════════════════════════════════════════════════════════════════════════════
+def test_clip_composition_loop_advisory_only():
+    # CLIP_COMPOSITION_LOOP (2026-07-14, diagnosing 1.B3's real rendered failure — the take opened and
+    # closed on nearly the identical branch composition, undetected until watched). Two guarantees to
+    # prove: (1) the design promise that this code can NEVER block a take, checked against the actual
+    # set membership, not just trusted from reading the code; (2) _passB's own vision-call parsing
+    # correctly recognizes the code when the model reports it.
+    check("CLIP_COMPOSITION_LOOP is never in CLIP_BLOCK_CODES (design guarantee: advisory-only, never blocks)",
+          "CLIP_COMPOSITION_LOOP" not in cb_qa.CLIP_BLOCK_CODES, cb_qa.CLIP_BLOCK_CODES)
+    check("CLIP_COMPOSITION_LOOP is not in CLIP_CORROBORATE (single signal is enough to surface, since it never blocks)",
+          "CLIP_COMPOSITION_LOOP" not in cb_qa.CLIP_CORROBORATE, cb_qa.CLIP_CORROBORATE)
+    check("CLIP_COMPOSITION_LOOP has a DONE_CODES fix-hint entry",
+          "CLIP_COMPOSITION_LOOP" in cb_qa.DONE_CODES, list(cb_qa.DONE_CODES.keys()))
+
+    tmp = [os.path.join(HERE, f"_test_cb_qa_fake_passb_{i}.png") for i in range(4)]
+    for p in tmp:
+        open(p, "wb").write(b"\x89PNG\r\n\x1a\nfake")
+    orig_vision_verdict = cb_qa.vision_verdict
+    try:
+        shot = {"characters": ["Fuzzby", "Zenny"], "startState": "", "storyBeat": "", "cuts": []}
+
+        def fake_fail(prompt, images):
+            check("_passB's checklist states the composition-loop criterion concretely (position/framing/background)",
+                  "CLIP_COMPOSITION_LOOP" in prompt and "background elements" in prompt, prompt[:2000])
+            return ("FAIL\nCLIP_COMPOSITION_LOOP: last frame matches the opening branch composition exactly", None)
+        cb_qa.vision_verdict = fake_fail
+        codes = cb_qa._passB(shot, tmp, comedy_big=False)
+        check("_passB correctly parses CLIP_COMPOSITION_LOOP out of a FAIL response",
+              codes == ["CLIP_COMPOSITION_LOOP"], codes)
+
+        def fake_pass(prompt, images):
+            return ("PASS", None)
+        cb_qa.vision_verdict = fake_pass
+        codes2 = cb_qa._passB(shot, tmp, comedy_big=False)
+        check("_passB returns empty on a clean PASS (no false positive)", codes2 == [], codes2)
+    finally:
+        cb_qa.vision_verdict = orig_vision_verdict
+        for p in tmp:
+            if os.path.exists(p):
+                os.remove(p)
+
+
 def test_join_state_carry_marks_scoping():
     # Two fake (but existing) image paths — check_join_state only checks os.path.exists, never
     # decodes pixels itself; the actual "vision" step is fully monkeypatched below.
@@ -357,8 +806,15 @@ def main():
     test_character_vocabulary()
     test_camera_lock_conflict()
     test_keyframe_lint()
+    test_check_retake_prompt()
     test_gate3_lint_word_budget_and_congruence()
     test_gate3_lint_dialogue_leak_and_anti_slop()
+    test_gate3_lint_checklist_verb_flag()
+    test_gate3_lint_archetype_completeness_contract()
+    test_prompt_before_fire_wiring()
+    test_reference_position()
+    test_framing_mismatch()
+    test_clip_composition_loop_advisory_only()
     test_join_state_carry_marks_scoping()
     test_check_join_junction_routing()
 

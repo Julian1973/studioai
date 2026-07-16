@@ -1,3 +1,7 @@
+> ⚠ **SUPERSEDED PENDING CUTOVER (architecture recovery, 2026-07-16):** this document
+> governs ONLY the legacy beat pipeline until the shot pipeline's first real approved
+> shot lands. THE_DEFINITIVE_PIPELINE.md is the one authoritative specification.
+
 # THE PRODUCTION DOCTRINE — CRYSTAL BEARS, THE DEFINITIVE BUILD
 
 **Locked 2026-07-06, Julian's consolidation ruling: "consolidate, purge, prove."** This document supersedes
@@ -54,6 +58,23 @@ by every emitter function that would otherwise have invented placeholder prose (
 external review rule); his signature — `cb_pipeline.approve("1", scene)` — follows that review, every scene,
 every time. `manifest_ok()` refuses the signature while any BLOCK-kind gap remains in scope.
 
+## Stage 1.6 — The Previz Reel (Gate 1.6)
+
+**Added 2026-07-12 (full-codebase audit) — this stage was missing from the map entirely despite being a
+real, code-enforced, lock-bearing gate in the live `GATE_SEQ` since 2026-07-08 (rule 57).** Between Gate 1
+(a schema-valid storyboard, no audio, no visuals) and Gate 2a (the first real, paid generation call) sat a
+gap the Story/Editorial and Pipeline TD panel named directly: something fluid gets locked as final too early,
+before any cheap iteration happens. `cb_previz.py` closes it at near-zero cost: one cheap `eleven_flash_v2_5`
+scratch VO call PER DIALOGUE-BEARING CUT (never one merged call per beat, so a back-and-forth exchange keeps
+each line in its own speaker's voice — the whole point is judging comedic timing), a plain PIL title-card
+placeholder for any beat with no real keyframe yet, held for the beat's own duration and muxed with that VO
+or silence, hard-cut into a single `media/{episode}_Scene{N}_previz.mp4` Julian actually watches.
+This is the ONE place dialogue may be revised after Gate 1 — a human editing a line after hearing it read
+aloud and judging its timing, a creative decision, not the silent algorithmic drift the Faithful Director
+doctrine (Stage 0) exists to catch. **Gate 1.6**: Julian signs after reviewing the reel; an edit to the beat
+package via the ordinary editor re-locks both "1" and "1.6" through the same fingerprint cascade every other
+gate uses (`_relock_if_stale`), so a revised line is never shipped past a stale approval.
+
 ## Stage 2 — World (Gate 2a)
 
 The scene plate is built, then checked (`cb_qa.check_plate`) against the Crystal World Rule — natural,
@@ -69,15 +90,29 @@ paraphrased line. Fired INTO generation as `@Audio1`; Seedance generates no voic
 there is no post-generation voice swap, ever, even in a hypothetical two-step fallback (rule 29, absolute —
 `cb_post` has no swap function by design). The Voice Bible registers (per-character cadence, stability,
 delivery direction) drive `cb_voice.build_dialogue_track`, itself driven by the Director's Pass so the
-performance matches the picture. Julian's ear approves the one take, or names the single correction for the
-one permitted re-fire — the same one-render economy every other artifact in this pipeline gets.
+performance matches the picture.
+
+**CORRECTED 2026-07-12 (full-codebase audit):** this section used to promise "Julian's ear approves the one
+take, or names the single correction for the one permitted re-fire" as its own dedicated checkpoint — no such
+checkpoint exists in code. `cb_beats.run`/`cb_beats._build_voice_track_with_retry` generate the track and
+consume it into that same beat's render immediately; there is no hold-for-review step, no approval/correction
+sidecar for the voice track specifically, and no separate re-fire path scoped to audio alone (the retry logic
+that DOES exist there, rule 61, is a transient-failure retry, not a creative-correction one). The voice take
+is reviewed only as part of the finished CLIP's own Stage-5 `approval` field — if Julian rejects a beat for a
+voice problem, the correction re-fires the whole beat (voice included) under the normal one-render economy,
+not a voice-only re-take. Stated here plainly rather than describing a gate that isn't built.
 
 ## Stage 4 — Keyframes (Gate 2b)
 
-ONE generated anchor keyframe per SCENE — never per beat; a relay beat never gets its own — 2K, centre-safe,
-composited from the signed plate + character turnarounds (`cb_scene.keyframe_for`). Per-character
-action-state QA (`ACTION_STATE_MISMATCH`) checks concrete, literally-checkable criteria (wing symmetry, body
-lean), never a subjective "does this look dynamic" call (rule 17). **Gate 2b**: Julian signs.
+ONE generated anchor keyframe per SCENE — never per beat; a relay beat never gets its own — 2K, composited
+from the signed plate + character turnarounds (`cb_scene.keyframe_for`). Per-character action-state QA
+(`ACTION_STATE_MISMATCH`) checks concrete, literally-checkable criteria (wing symmetry, body lean), never a
+subjective "does this look dynamic" call (rule 17). **Gate 2b**: Julian signs.
+
+**CORRECTED 2026-07-12 (full-codebase audit):** this line previously also claimed the keyframe is
+"centre-safe" — no centre-safe composition constraint (a 9:16-crop-safe framing guarantee) exists anywhere in
+`cb_prompts.build_keyframe_prompt` or any QA check today. Dropped rather than left as an unbuilt promise; the
+9:16 derivative itself is also unbuilt (see Stage 7's own correction).
 
 ## Stage 5 — Animation, the walk (Gate 3)
 
@@ -90,10 +125,17 @@ authority — fix any drift the day it's found (rule 7).**
 
 A scene's FIRST beat fires with exactly FOUR visual references — the signed keyframe (Stage 4), each cast
 member's turnaround, and the scene plate — plus `@Audio1`. No harvest, no re-mint on any opener: there is no
-predecessor to harvest a settle frame from. This is now CODE-ENFORCED, not merely conventional:
-`cb_preflight.check_opener_stack` is a per-beat BLOCK for a scene's first beat if its actual reference plan
-would include a harvest or a re-mint — the manifest refuses to arm Gate 3 on a scene whose opener stack is
-wrong, the same choke-point every other gate check uses.
+predecessor to harvest a settle frame from.
+
+**CORRECTED 2026-07-12 (full-codebase audit):** this guarantee previously claimed to be enforced by a
+`cb_preflight.check_opener_stack` per-beat BLOCK — no such function exists anywhere in the codebase. The
+guarantee holds today only STRUCTURALLY, by construction, the same honest framing rule 35 already uses for
+the Scene Bubble Law's identical class of claim: `cb_scene.relay_source_for` can only ever resolve `"first"`
+for a scene's own opening beat (every caller filters by `sceneNumber` first, so no code path lets an opener
+relay off a different beat's settle frame), which is what actually prevents a harvest/re-mint from reaching
+an opener — not a dedicated preflight check. Building `check_opener_stack` as a real, independent BLOCK
+remains a legitimate future hardening (defense-in-depth against a future refactor breaking the
+by-construction guarantee), just not done yet.
 
 ### Every subsequent beat
 
@@ -140,30 +182,42 @@ anti-hold. These are the MACHINE half of the loop — they stop there, deliberat
 
 Julian's felt-intent verdict per beat — does it flow, is it funny, does the four-year-old watch it again — is
 the RESERVED VERDICT no machine check approximates. It is now recorded as a data field, not left implicit in
-"a clip file happens to exist": `locked.json`'s per-beat lock gains an `approval` key —
-`{"status": "approved"|"rejected"|"pending", "note": "..."}` — written by `cb_pipeline.approve_beat_take`.
-Only an `approved` take may be harvested (`cb_scene.harvest_settle_frame`) — the still-frame anchor, the only
-one that exists now that `@Video1` is retired (rule 51); a `rejected` take's clip is moved to `media/rejected/`
-with a `.REJECTED.json` sidecar (recording why, and what
-the one changed variable was on the re-fire that superseded it) and is invisible to every resume/harvest path
-— `walk_scene` treats a beat with a `rejected`-only history as `pending`, not done, and re-fires it. **This is
-the resume key**: `walk_scene` resumes on approval status read from `locked.json`, never on whether a clip
-file happens to exist on disk — a clip can exist and still be correctly treated as not-done if it was never
-approved.
+"a clip file happens to exist."
+
+**CORRECTED 2026-07-12 (full-codebase audit):** this section's mechanism names were wrong — no
+`cb_pipeline.approve_beat_take` function exists, and rejects do not move to a flat `media/rejected/`
+directory. The real, live mechanism (rule 44, built the same week this doctrine was first drafted): a
+per-take sidecar, `<code>.approval.json`, written by `cb_beats.record_approval(episode, code, slug, approved,
+correction=None, scene_num=None, reviewed_by="Julian")`; `cb_beats.beat_approval_status` reads it back. Only
+an `approved` take may be harvested (`cb_scene.harvest_settle_frame`) — the still-frame anchor, the only one
+that exists now that `@Video1` is retired (rule 51); a `rejected` take's clip and sidecars are archived to
+`media/archive/{episode}_scene{N}_rejected/{code}_{timestamp}/` with a `.REJECTED.json` marker (recording
+Julian's one-sentence correction) and are invisible to every resume/harvest path — `walk_scene` treats a beat
+with a `rejected`-only history as `pending`, not done, and re-fires it. **This is the resume key**:
+`walk_scene` resumes on approval status read from the per-take sidecar, never on whether a clip file happens
+to exist on disk — a clip can exist and still be correctly treated as not-done if it was never approved.
 
 ## Stage 6 — Gate 4: retakes by timecode
 
-The walked scene assembles into a review cut with burnt-in timecode (`cb_post.assemble_review_cut`, an
-ffmpeg `drawtext` overlay on the hard-cut assembly, never on the delivery master). Julian names corrections
-by timecode, not by beat code or file name. `cb_post.retake_at_timecode(scene, timecode, variable, value)`
-maps timecode → beat → cut (via each beat's own duration and position in the scene's running order — a
-beat's actual rendered clip is always `HANDLE_TOTAL` seconds, so the mapping is arithmetic, not guesswork),
-applies the ONE named variable to that beat's data (never more than one field per retake — the retake
-protocol), re-fires that beat only under the identical one-render economy, re-gates it, and returns it to
-Julian. An approved retake replaces the take (the old one moves to `media/rejected/` exactly as any other
-rejected take does — nothing is ever silently overwritten without a trace). Downstream beats do not
-auto-refire off a changed predecessor: the join-check re-verifies state continuity against the new
-predecessor and FLAGS a break for Julian's attention; it never blindly cascades a re-render.
+**CORRECTED 2026-07-12 (full-codebase audit):** the timecode-mapping subsystem this section originally
+described (`cb_post.assemble_review_cut`, `cb_post.retake_at_timecode`) does not exist anywhere in the
+codebase — neither function is defined. The paragraph below is kept as the INTENDED design (the still-open
+piece is tracked as `LAB_BACKLOG.md` item 0, part 4), followed by what actually runs today.
+
+*Intended:* the walked scene assembles into a review cut with burnt-in timecode. Julian names corrections by
+timecode, not by beat code or file name. A timecode→beat→cut mapping function applies the ONE named variable
+to that beat's data (never more than one field per retake — the retake protocol), re-fires that beat only
+under the identical one-render economy, re-gates it, and returns it to Julian.
+
+*What actually runs today:* `cb_post.burn_review_overlay(scene_video, windows, out)` burns per-shot
+Scene-In/Out timecode + ref labels onto the hard-cut assembly (never the delivery master), using
+`cb_address.scene_shot_windows`' address map — this is the review artifact Julian watches. `cb_retake.py`'s
+`regen_shot(pkg, ref, change, ...)` (a single shot, addressed as `"1.B4#shot7"`, not a raw timecode) and
+`process_retakes(pkg, scene, ...)` (a whole retake sheet's worth of rows) are the actual mechanism that
+applies a named change and re-fires — addressed by beat+shot reference, not by arithmetic timecode-to-beat
+mapping. Downstream beats do not auto-refire off a changed predecessor: the join-check re-verifies state
+continuity against the new predecessor and FLAGS a break for Julian's attention; it never blindly cascades a
+re-render.
 
 ## Stage 7 — Gate 5: post
 
@@ -172,6 +226,18 @@ hold-into-hold (`cb_post.assemble_conformed`, the JOIN CONTRACT). Beats stitched
 bed continuous across the whole scene (guaranteed by construction — the Scene Bubble Law). Music and grade
 pass. Two masters delivered: the 16:9 feature master and a centre-safe 9:16 derivative
 (`cb_post.export_masters`). **Gate 5**: Julian's final-cut approval.
+
+CORRECTED 2026-07-08 (CLAUDE.md contradiction sweep): the paragraph above describes the intended design;
+`cb_post.assemble_conformed` has zero live callers today (CLAUDE.md rule 46) — `cb_post.run()`/`gate5()` call
+`assemble_picture` (the raw butt-join) exclusively, so the shipped cut is currently hold-into-hold, not the
+settle-trimmed join described here. Wiring `assemble_conformed` in is a separate, undecided change (rule 46's
+own explicit deferral), not made as part of this correction.
+
+CORRECTED 2026-07-12 (full-codebase audit): the same paragraph's second claim — "Two masters delivered: the
+16:9 feature master and a centre-safe 9:16 derivative (`cb_post.export_masters`)" — is also unbuilt.
+`cb_post.export_masters` does not exist anywhere in the codebase, and no 9:16-derivative export logic exists
+in any function. Today Gate 5 delivers the single 16:9 assembled cut only; the second master and its
+export function are both a future build, not a currently-shipping deliverable.
 
 ## The gates — machine vs showrunner
 
@@ -185,6 +251,7 @@ does the four-year-old watch it again — recorded now as the `approval` field, 
 |---|---|---|
 | 0 — Script-in | Sole story source; dialogue locked including authored punctuation | — (the input) |
 | 1 — Beat package | Script → storyboard; both manifests complete, blanks BLOCK | Julian signs Gate 1 (external review first) |
+| 1.6 — Previz Reel | Cheap scratch VO + placeholder stills, hard-cut into one reel | Julian signs Gate 1.6 (added 2026-07-12; live since rule 57, 2026-07-08) |
 | 2 — World | Plate built + `check_plate`; turnarounds verified; ambient bed locked | Julian signs Gate 2a |
 | 3 — Voices | One V3 take per beat from locked text, fired into generation | Julian's ear approves, or names the one correction |
 | 4 — Keyframes | One 2K anchor per scene, action-state QA | Julian signs Gate 2b |

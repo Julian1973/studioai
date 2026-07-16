@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Crystal Bears Studio — local server. Episodes + shared Show Bible + script storage."""
-import os, re, json, http.server, socketserver, pathlib, subprocess, threading, time, zipfile, signal, sys, glob, uuid
+import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent   # Desktop/8Th Hour
 CBGEN = ROOT / "engine"
@@ -31,11 +31,19 @@ def _reexec():
     sys.stdout.flush()
     os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + sys.argv[1:])
 def _freshness_watch():
-    """Self-heal: when the source changes and NO job is running, reload with the latest code (seamless when idle)."""
+    """Self-heal: when the source changes and NO job is running, reload with the latest code (seamless when idle).
+    FIXED 2026-07-12 (full-codebase audit continued): this only ever checked PROCS (async render jobs) — several
+    handlers do real, non-trivial SYNCHRONOUS work in their own request thread and were never tracked there at
+    all (approve_gate/unapprove_gate/set_master_studio/clear_master_studio's blocking subprocess.run calls, every
+    read-only preview endpoint, _serve_static's own chunked video/range streaming loop). os.execv() replaces the
+    WHOLE process image — per POSIX every thread but the caller is killed instantly, and Python sockets are
+    close-on-exec by default — so a reload mid-request silently dropped that client's connection even if a
+    spawned subprocess went on to finish and write locked.json unseen. Now also waits for _INFLIGHT == 0 (see its
+    definition, near PROCS below), incremented/decremented around every HTTP entry point via @_tracked."""
     while True:
         time.sleep(3)
         try:
-            if _is_stale() and not PROCS:
+            if _is_stale() and not PROCS and _INFLIGHT == 0:
                 print("⟳ studio source changed — reloading with the latest code…", flush=True)
                 _reexec()
         except Exception:
@@ -146,7 +154,29 @@ def reindex_episodes():
 # ---- pipeline driver: fire/approve gates via cb_pipeline (renders run in a background thread) ----
 JOBS = {}  # jobId -> {jobId, scene, gate, status, log, started, ended}
 PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid-run)
-GATE_NAME = {"1": "Director plan", "2a": "Foundation", "2b": "DP keyframes", "3": "Camera clips", "4": "Retake/Edit", "5": "Post"}
+
+# ADDED 2026-07-12 (full-codebase audit continued, alongside the _freshness_watch fix above): PROCS only ever
+# tracked async render jobs, never a synchronous request thread doing real work of its own (a blocking
+# subprocess.run in approve_gate/set_master_studio, a preview-endpoint subprocess, _serve_static's chunked
+# streaming loop) — so the idle-reload guard could fire mid-request. _INFLIGHT counts every live HTTP request
+# (incremented/decremented by the @_tracked decorator wrapping do_GET/do_HEAD/do_POST below); _freshness_watch
+# now waits for it to hit zero too, not just PROCS.
+_INFLIGHT = 0
+_INFLIGHT_LOCK = threading.Lock()
+def _tracked(fn):
+    """Wrap an HTTP handler method so it counts toward _INFLIGHT for its ENTIRE body — including an early
+    return or a raised exception (both are common: nearly every handler below returns as soon as it matches
+    self.path). Applied to do_GET/do_HEAD/do_POST, the three real HTTP entry points."""
+    def _wrapped(self, *a, **kw):
+        global _INFLIGHT
+        with _INFLIGHT_LOCK:
+            _INFLIGHT += 1
+        try:
+            return fn(self, *a, **kw)
+        finally:
+            with _INFLIGHT_LOCK:
+                _INFLIGHT -= 1
+    return _wrapped
 
 def _jid(prefix):
     """A job ID that can NEVER collide — a second-resolution timestamp alone lets two fast fires on the same
@@ -155,8 +185,14 @@ def _jid(prefix):
 
 def _pkg_name(episode="Ep1"):
     """The current episode's beat-package FILENAME (basename only) — the default `package` for beat previews.
-    Resolved by glob so any episode title works (mirrors cb_pipeline._resolve_pkg, but returns the bare name)."""
-    cands = sorted(OUT.glob(f"{episode}_*beat_package.json")) or sorted(OUT.glob(f"{episode}_*shot_package.json"))
+    Resolved by glob so any episode title works (mirrors cb_pipeline._resolve_pkg, but returns the bare name).
+    FIXED 2026-07-12 (full-codebase audit continued): this pre-sorted candidates by filename before taking
+    max-mtime, while cb_pipeline._resolve_pkg() takes max-mtime over an UNSORTED glob() result — on a genuine
+    mtime tie, Python's max() keeps the FIRST candidate in iteration order, so the two resolvers could pick
+    different files (the exact "display != fire" class of bug this project already hit once). Dropped the
+    pre-sort so both use the same glob-order tie-break; masked in practice by the enforced
+    one-package-per-episode convention, but no longer a silent divergence risk if that's ever broken."""
+    cands = list(OUT.glob(f"{episode}_*beat_package.json")) or list(OUT.glob(f"{episode}_*shot_package.json"))
     return (max(cands, key=lambda p: p.stat().st_mtime).name if cands
             else f"{episode}_The_Adventure_Begins_beat_package.json")
 PKG_NAME = _pkg_name()
@@ -166,16 +202,45 @@ PKG_NAME = _pkg_name()
 #    the already-duplicated GATE_SEQ above). See cb_pipeline.py for the full rationale. Every read of locked_state()
 #    (the studio's ONLY path to gate-status data) re-checks every episode/scene it finds and cascade-clears a
 #    scene's "1"/"2a"/"2b"/"3"/"4"/"5" + per-beat locks the moment its Gate-1 deliverable no longer matches the
-#    fingerprint recorded when Gate 1 was approved — so the Pipeline page can never show a stale "signed off" again.
+#    fingerprint recorded when Gate 1 was approved, AND (via _relock_chain_stale_scenes below) cascade-clears
+#    any downstream per-beat keyframe/clip lock whose upstream chain source has since been retaken — so the
+#    Pipeline page can never show a stale "signed off" again, for either mechanism.
+def _beat_sort_key(code):
+    """Natural sort on the trailing beat number ('3.B10' -> 10, never a lexicographic '3.B10' < '3.B9' bug) —
+    mirrors cb_preflight._beat_sort_key (a separate process, no engine import here — same convention as
+    GATE_SEQ/_scene_beats_fingerprint above). ADDED 2026-07-12 (full-codebase audit continued): this file's
+    own beat-code sort was still the plain lexicographic form after cb_pipeline.py's identical mirror was
+    already corrected (2026-07-11) — the two had silently diverged. Used everywhere this file orders beats."""
+    m = re.search(r"[Bb](\d+)\s*$", str(code or ""))
+    return int(m.group(1)) if m else 0
+
 def _scene_beats_fingerprint(episode, scene):
-    import hashlib
-    cands = sorted(OUT.glob(f"{episode}_*beat_package.json")) or sorted(OUT.glob(f"{episode}_*shot_package.json"))
+    # NOTE: this function must stay FULLY SELF-CONTAINED (its own local `import re`, its own nested sort-key
+    # helper, never a reference to a module-level name like _beat_sort_key above) — engine/test_gate_cascade.py's
+    # test_serve_py pulls this exact function's source out via ast and execs it in a minimal namespace
+    # ({json, pathlib, hashlib, GATE_SEQ} only), so any dependency on another module-level name here raises a
+    # bare NameError the moment the test calls it directly. Confirmed live 2026-07-12 (full-codebase audit
+    # continued) when the natural-sort fix below was first written to call the shared _beat_sort_key — the test
+    # crashed immediately; this local, duplicated form is the fix.
+    import hashlib, re as _re
+    def _bkey(code):
+        m = _re.search(r"[Bb](\d+)\s*$", str(code or ""))
+        return int(m.group(1)) if m else 0
+    # FIXED 2026-07-12 (full-codebase audit continued): dropped the filename pre-sort (see _pkg_name's own
+    # note above) so this resolves the SAME candidate cb_pipeline._resolve_pkg() would on a genuine mtime tie.
+    cands = list(OUT.glob(f"{episode}_*beat_package.json")) or list(OUT.glob(f"{episode}_*shot_package.json"))
     if not cands:
         return None
     pkg = max(cands, key=lambda p: p.stat().st_mtime)
     d = json.loads(pkg.read_text())
     beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
-    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    # FIXED 2026-07-12 (full-codebase audit continued): a plain lexicographic sort misorders any scene with
+    # 10+ beats ("1.B10" sorts before "1.B2") — cb_pipeline.py's own copy of this exact function was already
+    # corrected to natural-sort (2026-07-11); this one hadn't been, so the two independently-computed hashes
+    # could diverge the moment a scene reaches 10+ beats (harmless today — no live scene is that large yet —
+    # but sd["1_fp"] is WRITTEN by cb_pipeline.approve() using its own fingerprint function and compared HERE
+    # against this one, so the two must keep producing byte-identical hashes for identical input).
+    beats.sort(key=lambda b: _bkey(b.get("beatCode") or b.get("shotCode") or ""))
     blob = json.dumps(beats, sort_keys=True, ensure_ascii=False)
     return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
 
@@ -197,10 +262,88 @@ def _relock_stale_scenes(d):
                 continue
             print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — Gate 1 deliverable changed since sign-off "
                   f"(fingerprint {current} != approved {sd['1_fp']}); every downstream gate + per-beat lock reset.", flush=True)
-            for g in ("1", "2a", "2b", "3", "4", "5", "2", "1_fp"):
+            for g in list(GATE_SEQ) + ["2", "1_fp"]:
                 sd.pop(g, None)
             sd["beats"] = {}
             changed = True
+    return changed
+
+# ── FRAME CHAIN cascade mirror (doctrine, 2026-07-02/03, Julian) — ADDED 2026-07-12 (full-codebase audit
+#    continued, HIGH severity): locked_state() cascade-cleared a scene's Gate-1 fingerprint drift (above) but
+#    never mirrored cb_pipeline.py's SEPARATE frame-chain cascade (_beat_end_frame_hash/_relock_chain_if_dirty)
+#    — a retaken upstream clip (a new harvested settle frame) left every downstream beat's per-beat
+#    "keyframe"/"clip" lock showing a stale "✓ signed off" (app.html's beatStageLocked/renderRelayPanel read
+#    these flags straight off locked_state()'s payload) until some UNRELATED gate action for that scene
+#    happened to call cb_pipeline's own _approved() and re-trigger the real cascade. Mirrors the LOGIC (not
+#    the import) of cb_pipeline._beat_end_frame_hash/_relock_chain_if_dirty — same convention as every other
+#    duplicate above.
+def _beat_end_frame_hash(episode, code, bslug):
+    """Content hash of a beat's HARVESTED SETTLE FRAME. None if it doesn't exist yet (the upstream beat hasn't
+    rendered a clip) — mirrors cb_pipeline._beat_end_frame_hash exactly."""
+    import hashlib
+    p = MEDIA / f"{episode}_{code}_{bslug}_settle.png"
+    if not p.exists():
+        return None
+    try:
+        return hashlib.sha1(p.read_bytes()).hexdigest()[:16]
+    except Exception:
+        return None
+
+def _relock_chain_stale_scenes(d):
+    """Mutates `d` in place, same pattern as _relock_stale_scenes above: for every scene with recorded
+    per-beat locks, walks its beats in order and clears "keyframe"/"clip" on the first one (and every one
+    after it) whose recorded chain_source_fp no longer matches its upstream beat's CURRENT ending-frame hash
+    — their own chain sources are now suspect too, exactly like cb_pipeline._relock_chain_if_dirty. Returns
+    True if anything changed."""
+    changed = False
+    for episode, escenes in list(d.items()):
+        if not isinstance(escenes, dict):
+            continue
+        for scene, sd in list(escenes.items()):
+            if not isinstance(sd, dict):
+                continue
+            beats_locks = sd.get("beats") or {}
+            if not beats_locks:
+                continue
+            try:
+                cands = (list(OUT.glob(f"{episode}_*beat_package.json"))
+                          or list(OUT.glob(f"{episode}_*shot_package.json")))
+                if not cands:
+                    continue
+                pkg = json.loads(max(cands, key=lambda p: p.stat().st_mtime).read_text())
+            except Exception:
+                continue
+            scene_beats = [b for b in (pkg.get("beats") or pkg.get("shots") or [])
+                           if str(b.get("sceneNumber")) == str(scene)]
+            scene_beats.sort(key=lambda b: _beat_sort_key(b.get("beatCode") or b.get("shotCode") or ""))
+            dirty_from = None
+            for i, b in enumerate(scene_beats):
+                if i == 0:
+                    continue   # the scene anchor chains off the PLATE, not a previous beat's ending frame
+                code = str(b.get("beatCode") or b.get("shotCode"))
+                bl = beats_locks.get(code)
+                if not bl or not bl.get("keyframe") or not bl.get("chain_source_fp"):
+                    continue
+                prev = scene_beats[i - 1]
+                prev_code = prev.get("beatCode") or prev.get("shotCode")
+                prev_slug = prev.get("slug", str(prev_code).replace(".", "_"))
+                current_fp = _beat_end_frame_hash(episode, prev_code, prev_slug)
+                if current_fp and current_fp != bl["chain_source_fp"]:
+                    dirty_from = i
+                    break
+            if dirty_from is None:
+                continue
+            scene_changed = False
+            for b in scene_beats[dirty_from:]:
+                code = str(b.get("beatCode") or b.get("shotCode"))
+                bl = beats_locks.get(code)
+                if bl and (bl.get("keyframe") or bl.get("clip")):
+                    bl["keyframe"] = False; bl["clip"] = False
+                    scene_changed = True
+            if scene_changed:
+                print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — an upstream ending frame changed (a retake); "
+                      f"{len(scene_beats) - dirty_from} downstream beat(s) marked needing keyframe review.", flush=True)
+                changed = True
     return changed
 
 def locked_state():
@@ -210,7 +353,12 @@ def locked_state():
     except Exception:
         return {}
     try:
-        if _relock_stale_scenes(d):
+        # FIXED 2026-07-12 (full-codebase audit continued): only _relock_stale_scenes ran here — see
+        # _relock_chain_stale_scenes's own comment above for why that left the frame-chain cascade unmirrored.
+        changed = _relock_stale_scenes(d)
+        if _relock_chain_stale_scenes(d):
+            changed = True
+        if changed:
             f.write_text(json.dumps(d, indent=1))
     except Exception:
         pass   # fail-open: a relock error must never brick gate-status reads
@@ -395,9 +543,11 @@ def stop_all():
     for jid in ids: stop_job(jid)
     return ids
 
-def approve_gate(scene, gate, episode="Ep1"):
-    p = subprocess.run(["python3", "cb_pipeline.py", "approve", str(gate), str(scene), f"--episode={episode}"],
-                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
+def approve_gate(scene, gate, episode="Ep1", reviewed_by="Julian"):
+    args = ["python3", "cb_pipeline.py", "approve", str(gate), str(scene), f"--episode={episode}"]
+    if reviewed_by:
+        args.append(f"--reviewed-by={reviewed_by}")
+    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
     return p.returncode == 0, (p.stdout + p.stderr).strip()
 
 def unapprove_gate(scene, gate, episode="Ep1"):
@@ -426,7 +576,10 @@ def clear_master_studio(scene, character, episode="Ep1"):
 # ⚠ DUPLICATED (deliberately, not shared) from engine/cb_pipeline.py's own GATE_SEQ — a separate process. If a gate
 # is ever added/renamed/reordered, update BOTH lists in the SAME change, or this HTTP-layer guard and cb_pipeline's
 # process-layer guard could silently disagree on what "the previous gate" is.
-GATE_SEQ = ["1", "2a", "2b", "3", "4", "5"]   # …3 Animation · 4 Retakes · 5 Post
+GATE_SEQ = ["1", "1.6", "2a", "2b", "3", "4", "5"]   # 1.6 = THE PREVIZ REEL (2026-07-08) · …3 Animation ·
+# 4 Retakes · 5 Post. Named "1.6" (not "1.5") to avoid colliding with the already-established "Gate 1.5" —
+# Director's Eye (cb_director_eye.py), an unrelated automatic flag-only review with no lock state of its
+# own, never a member of this list. See engine/cb_previz.py's module docstring for the full note.
 def _scene_locks(scene, episode="Ep1"):
     return locked_state().get(episode or "Ep1", {}).get(str(scene), {})
 def _gate_ready(scene, gate, episode="Ep1"):
@@ -504,13 +657,105 @@ def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
                   ["cb_pipeline.py", "relay-approve", str(scene), str(winner_code),
                    f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
 
+# ── THE SHOT PIPELINE (cb_engine.py design → cb_render.py render loop) — ADDITIVE, 2026-07-16 ──────────────────────
+# A separate, parallel surface for the shot-sized production packages (cb-output/{ep}_scene{N}_production_
+# package.json). Nothing here touches GATE_SEQ, the beat pipeline, or any existing route — the two endpoints
+# (/api/shot-package GET, /api/shot-run POST) plus these helpers are the whole footprint. Jobs run through the
+# SAME _jid/_start/_stream runner every existing gate action uses (fresh subprocess, argv list, never a shell).
+SHOT_CMDS = ("design", "voice", "animatic", "keyframe", "fire", "next", "approve", "reject", "stitch")
+# "animatic" stays the CLI verb (cb_render.py keeps it as an accepted alias) — but the ARTIFACT it builds is
+# the TIMING SLATE (Julian's 2026-07-16 reclassification: Seedance is a probabilistic candidate generator;
+# this artifact approves dialogue accuracy / voice assignment / durations / line position ONLY, never
+# staging, physical comedy or final rhythm).
+REJECT_CATEGORIES = ("identity", "geography", "action-timing", "instruction-ignored", "other")
+_SPEND_TOKEN_RE = re.compile(r"^[a-f0-9]{16,64}$")   # the SERVER-ISSUED single-use spend token (2026-07-16
+# spend-protection contract): fire/next without one stores pendingSpendAuth on the shot's ledger and REFUSES;
+# with one, the engine re-validates the binding hash (prompt/keyframe/refs/audio/duration/settings/rate/count)
+# and refuses if ANYTHING drifted. Lowercase hex only — never a path, never shell-meaningful.
+_SHOT_TOKEN = re.compile(r"^[A-Za-z0-9._-]+$")   # scene / episode / shotId — plain tokens, never a path
+
+def _shot_pkg_path(scene, episode="Ep1"):
+    """Mirrors engine/cb_render.py's _pkg_path (a separate process, no engine import here — the same
+    deliberate-duplication convention as GATE_SEQ/_scene_beats_fingerprint above)."""
+    return OUT / f"{episode}_scene{scene}_production_package.json"
+
+def shot_media_map(pkg, scene, episode="Ep1"):
+    """Server-computed existence map of every shot's media (vo / keyframe / clip / harvested final frame)
+    plus the scene-level animatic + stitched picture. Filenames mirror cb_render.py's own writers; the URLs
+    are /engine/media/... paths the existing static route already serves (shots/ is a subfolder of the
+    approved /engine/media/ root — prefix + extension both pass _static_blocked with zero policy change)."""
+    shots_dir = MEDIA / "shots"
+    def _url(p):
+        return ("/engine/media/" + p.relative_to(MEDIA).as_posix()) if p.exists() else None
+    shots = {}
+    for s in pkg.get("shots") or []:
+        sid = s.get("shotId")
+        if not sid:
+            continue
+        shots[sid] = {"vo":         _url(shots_dir / f"{episode}_{sid}_vo.mp3"),
+                      "keyframe":   _url(shots_dir / f"{episode}_{sid}_keyframe.png"),
+                      "clip":       _url(shots_dir / f"{episode}_{sid}_clip.mp4"),
+                      "finalFrame": _url(shots_dir / f"{episode}_{sid}_final_frame.png"),
+                      # THE CANDIDATE BATCH (2026-07-16): fire/next now generate 1-4 candidates per shot
+                      # ({ep}_{shotId}_c1..cN.mp4, ledger status "candidates-pending") — existence-checked
+                      # here, same as every other entry, so the UI never depends on media-index.json.
+                      "candidates": [c for c in ({"n": i, "url": _url(shots_dir / f"{episode}_{sid}_c{i}.mp4")}
+                                                 for i in range(1, 5)) if c["url"]]}
+    return {"shots": shots,
+            # THE TIMING SLATE (2026-07-16 reclassification): new filename first; the pre-reclassification
+            # animatic filename kept as a fallback so an older existing render still shows.
+            "timingSlate": (_url(MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4")
+                            or _url(MEDIA / f"{episode}_Scene{scene}_animatic.mp4")),
+            "animatic": _url(MEDIA / f"{episode}_Scene{scene}_animatic.mp4"),
+            "picture": _url(MEDIA / f"{episode}_Scene{scene}_shots_picture.mp4")}
+
+def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
+                 candidates=None, spend_token=None, category=None, candidate=None):
+    """Map one validated shot-pipeline command onto the job runner. Argument order per cb_engine.py /
+    cb_render.py's own CLIs (2026-07-16 spend-token contract — the approve-spend boolean is GONE):
+      design  -> cb_engine.py <scene> [episode]
+      fire    -> cb_render.py fire <scene> <shotId> [episode] [--candidates N] [--spend-token <token>]
+      next    -> cb_render.py next <scene> [episode] [--candidates N] [--spend-token <token>]
+      approve -> cb_render.py approve <scene> <shotId> <candidateN> [episode]
+      reject  -> cb_render.py reject <scene> <shotId> <correction> [--category X] [episode]
+      others  -> cb_render.py <cmd> <scene> [episode]
+    WITHOUT --spend-token, fire/next run fresh validation, print the SPEND DISCLOSURE, store the single-use
+    token on the shot's ledger (pendingSpendAuth) and exit 1 REFUSED — the job reports "failed" with the
+    disclosure in its log; that IS the designed step 1, not a malfunction. Re-posting with a mid-batch
+    token resumes: only the missing candidates generate (ledger batch.status == "generating").
+    Every value travels as its own argv element — never a shell string."""
+    if cmd == "design":
+        return _start(_jid(f"shotdesign_s{scene}"), "shot:design", scene,
+                      ["cb_engine.py", str(scene), str(episode)])
+    args = ["cb_render.py", cmd, str(scene)]
+    if cmd in ("fire", "keyframe", "approve", "reject"):
+        args.append(str(shot_id))
+    if cmd == "approve" and candidate is not None:
+        args.append(str(candidate))
+    if cmd == "reject":
+        args.append(str(correction))
+        if category:
+            args += ["--category", str(category)]
+    args.append(str(episode))
+    if cmd in ("fire", "next"):
+        if candidates is not None:
+            args += ["--candidates", str(candidates)]
+        if spend_token:
+            args += ["--spend-token", str(spend_token)]
+    label = "shot:" + cmd + ((":" + str(shot_id)) if shot_id else "")
+    return _start(_jid(f"shot{cmd}_s{scene}"), label, scene, args)
+
+
 # ── STATIC FILE HARDENING (security) ──────────────────────────────────────────────────────────────────────────
 # The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read engine/.env (API keys),
 # *.py source, *.bak snapshots, *.log, internal config/state, node_modules and audit/archive/unpack folders.
 # Policy = ALLOW-LIST by approved ROOT + extension: everything is BLOCKED by default; a file is served ONLY if it
 # sits under an approved root with an approved extension, OR is an explicitly-approved exact file. Blocked → 404
-# (hides existence). STATIC-SERVING ONLY: every /api route is handled in do_GET/do_POST and returns before the
-# static fall-through (super().do_GET → send_head), so no API route or gate logic is affected.
+# (hides existence). STATIC-SERVING ONLY: every /api route is handled in do_GET/do_POST and returns before any
+# static fall-through; do_GET/do_HEAD call _serve_static() directly (never super().do_GET()/do_HEAD()), and
+# _serve_static's own _static_blocked(...) call (below) is the real, single chokepoint — corrected 2026-07-08
+# (full-codebase audit) after finding a dead send_head() override that this comment used to describe as the
+# chokepoint; it was never actually reachable and has been removed.
 #
 # Approved EXACT files the UI fetches by name (case-insensitive):
 _APPROVED_FILES = {
@@ -531,7 +776,12 @@ _APPROVED_ROOTS = (
     ("/cb-studio/",      {".css", ".js", ".ico"}),  # frontend assets, if any (app.html is an exact-approved file above)
     ("/projects/",       {".json", ".md", ".txt"} | _MEDIA_EXT),  # per-project scaffold (meta/characters/bible/episodes + its own assets/media)
 )
-_DENY_NAMES = {"locked.json", "notes.json", "projects-index.json"}   # internal state / stale registry — refused even inside a root
+# "projects-index.json" is retired/dead data (kept in the deny list defensively, costs nothing). "projects.json"
+# is the LIVE project-registry filename (see the two real call sites reading it under cb-studio/data/) — it was
+# missing from this list entirely (2026-07-08 full-codebase audit fix), meaning it was servable under the
+# approved "/cb-studio/data/" root + .json extension, the exact "internal state / stale registry" class this
+# list exists to refuse.
+_DENY_NAMES = {"locked.json", "notes.json", "projects-index.json", "projects.json"}
 
 def _static_blocked(urlpath):
     """True UNLESS this static path is explicitly approved (an approved exact file, OR an approved root + extension).
@@ -571,14 +821,6 @@ class H(http.server.SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
-
-    def send_head(self):
-        # SECURITY: the single chokepoint for ALL static file serving (used by both GET and HEAD). API routes are
-        # handled in do_GET/do_POST and never reach here, so this only governs files on disk. Blocked → 404.
-        if _static_blocked(self.path):
-            self.send_error(404, "Not Found")
-            return None
-        return super().send_head()
 
     def _serve_static(self, head=False):
         """Range-aware static serving. SimpleHTTPRequestHandler sends the whole file with a 200 (no Range), so large
@@ -656,9 +898,11 @@ class H(http.server.SimpleHTTPRequestHandler):
         finally:
             f.close()
 
+    @_tracked
     def do_HEAD(self):
         return self._serve_static(head=True)
 
+    @_tracked
     def do_GET(self):
         if self.path == "/" or self.path == "":
             self.send_response(302)
@@ -666,13 +910,35 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         if self.path == "/api/pipeline":
+            # pkgMtime (2026-07-15, THE STALE-JOB-LOG ATTRIBUTION BUG): a Gate-3 job log from a PREVIOUS
+            # package (found live — a stopped job from the day before the whole-episode restart) was being
+            # parsed for per-beat lint flags and attributed to the freshly re-authored beats, purely because
+            # the beat codes matched. The client compares each job's own `ended` timestamp against this
+            # mtime and suppresses lint attribution from any job older than the current package.
+            try:
+                _pkg_mtime = (OUT / _pkg_name()).stat().st_mtime
+            except Exception:
+                _pkg_mtime = 0
             return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state(),
-                                    "visions": visions_state(), "relay": relay_state_all()})
+                                    "visions": visions_state(), "relay": relay_state_all(),
+                                    "pkgMtime": _pkg_mtime})
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
         if self.path == "/api/continuity":
             return self._json(200, {"findings": continuity_state()})
+        if self.path == "/api/masters":
+            # READ-ONLY, informational: the whole character-master library (cb_prompts.masters_index — "for
+            # the studio to display + audit", its own stated intent). Never feeds a render prompt.
+            import sys as _sys
+            try:
+                r = subprocess.run([_sys.executable, "masters_preview.py"], cwd=str(ROOT / "engine"),
+                                   capture_output=True, text=True, timeout=40, stdin=subprocess.DEVNULL)
+                out = (r.stdout or "").strip()
+                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
+                return self._json(200, obj)
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
         if self.path == "/api/loclib":
             manifest = {}
             mf = ROOT / "cb-seed" / "assets" / "locations" / "_manifest.json"
@@ -815,6 +1081,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, obj)
             except Exception as e:
                 return self._json(400, {"error": str(e)})
+        if self.path.startswith("/api/beat-sound-brief"):
+            # READ-ONLY, informational: cb_prompts._music_line/_sfx_line for one beat (a scratch music/SFX
+            # BRIEF, mirroring cb_post.music_brief's own "advisory, never fed into the render prompt" pattern —
+            # the v5 engine deliberately keeps per-beat music/SFX direction OUT of the shipped Seedance prompt,
+            # see CLAUDE.md rule 42). Never writes anything, never touches a render.
+            import sys as _sys
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            pkg = (q.get("package") or [""])[0]; beat = (q.get("beat") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not pkg or not beat or "/" in pkg or ".." in pkg:
+                return self._json(400, {"error": "package and beat required"})
+            try:
+                r = subprocess.run([_sys.executable, "sound_brief_preview.py", pkg, beat, ep],
+                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
+                                   stdin=subprocess.DEVNULL)
+                out = (r.stdout or "").strip()
+                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
+                return self._json(200, obj)
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
         if self.path.startswith("/api/relay-state"):
             # read-only: the prepared (unapproved) anchor for this scene, straight off relay_state.json — never
             # re-derives or re-calls NB2. Empty {} if nothing is waiting (no anchor prepared, or already launched).
@@ -827,6 +1113,48 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 d = {}
             return self._json(200, d.get(ep, {}).get(scene) or {})
+        if self.path.startswith("/api/keyframe-qa"):
+            # READ-ONLY, zero-cost: reads the cached media/{ep}_{code}_{slug}.keyframe_qa.json sidecars
+            # cb_qa.check_scene writes whenever Gate 2b actually runs the Definition-of-Done check (real
+            # vision API calls — never recomputed here on a bare page load/poll, only read back). Built
+            # 2026-07-14 (Julian: "we're doing this in the prompt, it needs to be done in the studio") —
+            # this flag existed and ran correctly on the backend the whole time but was never surfaced
+            # anywhere in the Studio UI Julian actually reviews from.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            out = {}
+            if scene:
+                for f in (CBGEN / "media").glob(f"{ep}_{scene}.B*.keyframe_qa.json"):
+                    try:
+                        row = json.loads(f.read_text())
+                        code = row.get("shot")
+                        if code:
+                            out[code] = row
+                    except Exception:
+                        continue
+            return self._json(200, out)
+        if self.path.startswith("/api/craft-score"):
+            # READ-ONLY, zero-cost: reads the cached media/{ep}_Scene{N}_previz.craft.json sidecar
+            # cb_previz.craft_score_for_scene writes whenever Gate 1.6's previz reel actually fires (a real,
+            # two-LLM-read cb_craft.score_scene_craft call — never recomputed here on a bare page load/poll,
+            # only read back). Built 2026-07-14 (task #315, closing the "built but orphaned" gap this whole
+            # session has repeatedly found: the craft judge existed and worked since rule 48 but had no live
+            # caller and nowhere to surface in the Studio Julian actually reviews from). {} if the previz
+            # hasn't been fired since this wiring landed, or if the LLM score itself failed (fail-soft by
+            # design — the reel still exists and is still watchable either way).
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            out = {}
+            if scene:
+                f = CBGEN / "media" / f"{ep}_Scene{scene}_previz.craft.json"
+                if f.exists():
+                    try:
+                        out = json.loads(f.read_text())
+                    except Exception:
+                        out = {}
+            return self._json(200, out)
         if self.path.startswith("/api/beat-prompt"):
             # TICKET 4 — the editable JSON the Cascade panel surfaces: kind=seedance (clip take) | keyframe (image).
             import sys as _sys
@@ -867,6 +1195,24 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 obj = {"entries": []}
             return self._json(200, obj)
+        if self.path.startswith("/api/shot-package"):
+            # THE SHOT PIPELINE (additive, 2026-07-16): read-only — the production package cb_engine.py
+            # compiled + validated, plus a server-computed media-existence map (shot_media_map above).
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene (and optional episode) required as plain tokens, "
+                                                 "e.g. /api/shot-package?scene=1&episode=Ep1"})
+            p = _shot_pkg_path(scene, ep)
+            if not p.exists():
+                return self._json(404, {"error": f"no production package for {ep} scene {scene} "
+                                                 f"({p.name}) — run Design scene (cb_engine.py) first"})
+            try:
+                pkg = json.loads(p.read_text())
+            except Exception as e:
+                return self._json(400, {"error": f"package unreadable: {e}"})
+            return self._json(200, {"package": pkg, "media": shot_media_map(pkg, scene, ep), "file": p.name})
         if "/cb-studio/data/" in self.path:
             reindex_media(); reindex_episodes()
         return self._serve_static()       # range-aware (video streams + seeks), not the no-Range super().do_GET()
@@ -875,6 +1221,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         n = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(n) or b"{}")
 
+    @_tracked
     def do_POST(self):
         if self.path == "/api/write":
             try:
@@ -952,9 +1299,31 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/export-storyboard":
+            # THE GATE-1 EXTERNAL REVIEW RULE (CLAUDE.md rule 37) — a one-click render of
+            # cb_pipeline.export_storyboard, matching this file's own fresh-subprocess convention (never a
+            # direct Python import of cb_pipeline — every fire/approve/export shells out so the Studio
+            # never runs stale engine code).
+            try:
+                d = self._body()
+                episode = d.get("episode", "Ep1")
+                args = ["python3", "cb_pipeline.py", "export"]
+                if d.get("scene") is not None:
+                    args.append(str(d["scene"]))
+                args.append(f"--episode={episode}")
+                p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True,
+                                    stdin=subprocess.DEVNULL, timeout=30)
+                if p.returncode != 0:
+                    self._json(400, {"error": (p.stdout + p.stderr).strip()[:2000]}); return
+                self._json(200, {"ok": True, "markdown": p.stdout})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/approve":
             try:
-                d = self._body(); ok, log = approve_gate(str(d["scene"]), str(d["gate"]), d.get("episode", "Ep1"))
+                d = self._body()
+                ok, log = approve_gate(str(d["scene"]), str(d["gate"]), d.get("episode", "Ep1"),
+                                        reviewed_by=str(d.get("reviewedBy") or "Julian"))
                 self._json(200, {"ok": ok, "log": log, "locked": locked_state()})
             except Exception as e:
                 self._json(400, {"error": str(e)})
@@ -1074,10 +1443,31 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/masters":
+            # THE PLATFORM MASTERS BUTTON (task #316, 2026-07-14): cb_post.build_platform_masters existed and
+            # worked (CLI-only, "python3 cb_post.py masters ..." / "cb_pipeline.py masters <scene>") but had no
+            # HTTP route and no Studio button — the same "built but orphaned" pattern this session found and
+            # closed repeatedly elsewhere. Requires Gate 5's own picture.mp4 to already exist (fire Gate 5
+            # first) — build_platform_masters itself refuses cleanly and names why if it doesn't, surfaced via
+            # the job log exactly like every other gate action.
+            try:
+                d = self._body()
+                scene = str(d["scene"]); episode = d.get("episode", "Ep1")
+                plats = d.get("platforms") or ["youtube", "netflix", "amazon"]
+                jid = _start(_jid(f"masters_s{scene}"), "masters", scene,
+                             ["cb_pipeline.py", "masters", scene, ",".join(plats), f"--episode={episode}"])
+                self._json(200, {"ok": True, "jobId": jid})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/episode":
             try:
-                n = int(self.headers.get("Content-Length", 0))
-                data = json.loads(self.rfile.read(n) or b"{}")
+                # FIXED 2026-07-12 (full-codebase audit continued): this handler re-implemented _body()'s exact
+                # Content-Length/json.loads logic inline instead of calling the shared method every other POST
+                # handler in this class already uses — a future hardening of _body() (a size cap, chunked-
+                # encoding support, a clearer malformed-header error) would silently never apply to episode
+                # uploads. Delegate instead.
+                data = self._body()
                 num = int(data.get("number"))
                 title = (data.get("title") or "").strip() or f"Episode {num}"
                 script = data.get("script") or ""
@@ -1147,7 +1537,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 src = d.get("fromFile")
                 if src:   # PULL from the library — copy an existing image to this scene's plate
                     sp = (ROOT / str(src).lstrip("/")).resolve()
-                    if not (str(sp).startswith(str(ROOT)) and sp.is_file()):
+                    if not (sp.is_relative_to(ROOT) and sp.is_file()):
                         raise ValueError("fromFile not found")
                     shutil.copy(str(sp), str(MEDIA / fname))
                 else:     # UPLOAD — decode the image data
@@ -1360,6 +1750,73 @@ class H(http.server.SimpleHTTPRequestHandler):
                 C[name] = entry
                 cpath.write_text(json.dumps(C, indent=2, ensure_ascii=False))
                 self._json(200, {"ok": True, "name": name, "character": entry})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/shot-run":
+            # THE SHOT PIPELINE, front door (additive, 2026-07-16; extended same day for the probabilistic-
+            # candidate contract, then the single-use SPEND-TOKEN contract): validates cmd against the exact
+            # allowlist, then clones the /api/fire pattern — same _jid/_start job runner, same
+            # {"ok": True, "jobId": ...} response shape. cb_render.py's own refusals (the SPEND DISCLOSURE +
+            # token issue on a no-token fire/next, a stale/consumed token, red validation, relay-before-
+            # approval, model-limited, an UNCONFIRMED billing_profile.json — which hard-blocks ALL paid
+            # generation by design until Julian confirms his plans — and Law 5/6) all surface through the
+            # job log as a failed job; for the no-token disclosure step and the billing-profile block that
+            # refusal is EXPECTED protective behaviour, not a malfunction.
+            try:
+                d = self._body()
+                cmd = str(d.get("cmd", "")).strip()
+                if cmd not in SHOT_CMDS:
+                    self._json(400, {"error": "unknown cmd %r — allowed: %s" % (cmd, ", ".join(SHOT_CMDS))}); return
+                scene = str(d.get("scene", "")).strip()
+                episode = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                shot_id = str(d.get("shotId")).strip() if d.get("shotId") not in (None, "") else None
+                correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
+                if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
+                    self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
+                if cmd in ("fire", "keyframe", "approve", "reject") and (not shot_id or not _SHOT_TOKEN.match(shot_id)):
+                    self._json(400, {"error": f"{cmd} needs a shotId (e.g. 1.B1.S1)"}); return
+                if cmd == "reject" and not correction:
+                    self._json(400, {"error": "reject needs a one-sentence correction"}); return
+                # THE PROBABILISTIC-CANDIDATE + SPEND-TOKEN CONTRACT (2026-07-16): candidates and the
+                # single-use spendToken for fire/next, category for reject, candidate index for approve —
+                # each validated, each optional.
+                candidates = d.get("candidates")
+                if candidates is not None:
+                    if cmd not in ("fire", "next"):
+                        self._json(400, {"error": "candidates applies to fire/next only"}); return
+                    try:
+                        candidates = int(candidates)
+                    except (TypeError, ValueError):
+                        candidates = -1
+                    if not (1 <= candidates <= 4):
+                        self._json(400, {"error": "candidates must be an integer 1-4"}); return
+                spend_token = str(d.get("spendToken")).strip() if d.get("spendToken") not in (None, "") else None
+                if spend_token is not None:
+                    if cmd not in ("fire", "next"):
+                        self._json(400, {"error": "spendToken applies to fire/next only"}); return
+                    if not _SPEND_TOKEN_RE.match(spend_token):
+                        self._json(400, {"error": "spendToken must be 16-64 lowercase hex characters"}); return
+                category = str(d.get("category")).strip() if d.get("category") not in (None, "") else None
+                if category is not None:
+                    if cmd != "reject":
+                        self._json(400, {"error": "category applies to reject only"}); return
+                    if category not in REJECT_CATEGORIES:
+                        self._json(400, {"error": "category must be one of: " + ", ".join(REJECT_CATEGORIES)}); return
+                candidate = d.get("candidate")
+                if candidate is not None:
+                    if cmd != "approve":
+                        self._json(400, {"error": "candidate applies to approve only"}); return
+                    try:
+                        candidate = int(candidate)
+                    except (TypeError, ValueError):
+                        candidate = -1
+                    if not (1 <= candidate <= 4):
+                        self._json(400, {"error": "candidate must be an integer 1-4"}); return
+                self._json(200, {"ok": True, "jobId": shot_run_job(cmd, scene, episode, shot_id, correction,
+                                                                    candidates=candidates,
+                                                                    spend_token=spend_token,
+                                                                    category=category, candidate=candidate)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

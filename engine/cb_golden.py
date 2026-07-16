@@ -21,8 +21,8 @@ beat story, and a Negative line (the camera/ambience paragraph named in earlier 
 this docstring was retired 2026-07-06, the thunder-leak bug — no such block exists in the current shape) —
 not v4's JSON envelope. Every assertion below reads the raw compiled string, never json.loads.
 `assertions()` checks every shipped segprompt beat:
-  1. word budget — the hard cap (whole document, cb_preflight.WORD_BUDGET_BLOCK — 650 as of 2026-07-07,
-     rule 52) is never exceeded.
+  1. word budget — the hard cap (whole document, cb_preflight.WORD_BUDGET_BLOCK — 700 as of 2026-07-14,
+     rule 84/85, raised from 650) is never exceeded.
   2. HEADER — `cb_segprompt._v5_header()` (now including fps, rule 54) opens the prompt.
   3. style law block — the show's STYLE_LAW text appears verbatim.
   4. references block — @图1 and @Audio1 both present; every ACTIVE cast member (named in this beat's own
@@ -38,9 +38,11 @@ not v4's JSON envelope. Every assertion below reads the raw compiled string, nev
      walked the beat's own cuts[] + endState since the shot-list ruling, never the retired flattened
      `storyBeat` summary field — speed adjectives and spoken words are stripped before the check, matching
      what the emitter itself strips); dialogue WORDS never leak (Law 6 — unconditional).
-  7. Negative line — the eleven standing negatives (doctrine §2) plus the beat's own stagingProhibited are
-     all present, terse, in the Negative line; `bible.dos`/`bible.donts` do NOT appear anywhere (doctrine
-     §3 — "Never in a prompt... dos/donts live at Gate 1"). No separate tech-line check — retired, rule 54.
+  7. Negative line — the twelve standing negatives (doctrine §2; a twelfth, "no invented background
+     voices," added 2026-07-13 against a real hallucinated-audio failure) plus the beat's own
+     stagingProhibited are all present, terse, in the Negative line; `bible.dos`/`bible.donts` do NOT appear
+     anywhere (doctrine §3 — "Never in a prompt... dos/donts live at Gate 1"). No separate tech-line check —
+     retired, rule 54.
   8. RELAY coverage — current_snapshot()'s plain segprompt loop always calls shipped_prompt with relay=False,
      so it never exercises the relay code path at all; a relay-only change would otherwise produce a silent
      zero-diff report. _relay_snapshot() forces relay=True for every beat after the scene's first and this
@@ -52,12 +54,23 @@ refuses to bless a snapshot that fails one — a lean or malformed prompt can ne
     python3 cb_golden.py diff       # compare current output vs the stored golden set (exit 1 on any diff or failed assertion)
     python3 cb_golden.py capture    # OVERWRITE the golden set with current output (only after Julian has seen the diff)
 """
-import os, sys, re, json, glob, difflib
+import os, sys, json, glob, difflib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLDEN_DIR = os.path.join(HERE, "goldens")
 SEGPROMPT_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4", "1.B5"]
 KEYFRAME_BEATS = ["1.B1", "1.B2", "1.B3", "1.B4", "1.B5"]
+
+# FIXED 2026-07-12 (full-codebase audit continued): SEGPROMPT_BEATS/KEYFRAME_BEATS above are ALL "1.B*" codes
+# — Ep1 Scene 1's own beats — but _resolve_pkg_path() used to glob EVERY "*beat_package.json" in cb-output/
+# with no episode filter at all, and current_snapshot() separately hardcoded a second, independent "Ep1"
+# literal at its cb_scene.keyframe_for(...) call site. A second episode's package landing in cb-output/ and
+# happening to be newest by mtime would be silently adopted by the glob, then compiled against config for the
+# WRONG episode at the keyframe_for call — the two hardcodes could never be relied on to agree, since neither
+# traced to the other. One shared `EP` constant, matching cb_pipeline.py's own `EP = "Ep1"` glob-scope
+# convention, closes both gaps: the glob scopes to Ep1's own package, and the keyframe_for call reads the SAME
+# constant instead of a second hand-typed literal.
+EP = "Ep1"
 
 
 class GoldenDormant(Exception):
@@ -67,14 +80,32 @@ class GoldenDormant(Exception):
     pass
 
 
+class GoldenPackageMismatch(Exception):
+    """FIXED 2026-07-12 (full-codebase audit continued): raised when a resolved package exists and has real
+    beats, but NONE of them match any of SEGPROMPT_BEATS/KEYFRAME_BEATS — a materially different condition
+    from GoldenDormant's "nothing exists yet." Before this fix, current_snapshot() would silently return an
+    empty snapshot in exactly this case, and diff() would go on to print "ZERO DIFFS — safe to merge" having
+    validated zero beats — the opposite of the CLAUDE.md hard rule this whole file exists to enforce.
+    Deliberately left UNCAUGHT by diff()/capture() (unlike GoldenDormant, which they do catch and report
+    cleanly) so a wrong-package resolution crashes loud instead of being swallowed into a false all-clear."""
+    pass
+
+
 def _resolve_pkg_path():
-    """Resolves the current production's beat package the SAME way cb_pipeline._resolve_pkg does — glob,
-    newest by mtime, never a hardcoded filename or episode — so the golden harness re-arms automatically
-    the moment a new package lands, whatever episode it's for. Returns None (never raises) when nothing
-    exists yet; callers that need a package call _pkg(), which turns None into GoldenDormant."""
-    cands = glob.glob(os.path.join(HERE, "..", "cb-output", "*beat_package.json"))
+    """Resolves Ep1's own beat package — glob, newest by mtime, scoped to the `EP` prefix so the golden
+    harness re-arms automatically the moment a new Ep1 package lands. FIXED 2026-07-12 (full-codebase audit
+    continued): this used to glob EVERY "*beat_package.json" in cb-output/ with no episode filter at all
+    (this docstring even claimed it was "never a hardcoded filename or episode," which was never true of the
+    "Ep1" literal hardcoded separately at current_snapshot()'s keyframe_for call) — so a second episode's
+    package landing here and happening to be newest by mtime would be silently adopted, both for the
+    segprompt/keyframe snapshots AND, worse, for a keyframe_for call still labelled "Ep1" regardless. Scoped
+    to the `EP` module constant now, matching cb_pipeline._resolve_pkg's own `EP = "Ep1"` glob-scope
+    convention, so both the glob and the keyframe_for call below can never drift out of sync with each other
+    again. Returns None (never raises) when nothing exists yet; callers that need a package call _pkg(),
+    which turns None into GoldenDormant."""
+    cands = glob.glob(os.path.join(HERE, "..", "cb-output", f"{EP}_*beat_package.json"))
     if not cands:
-        cands = glob.glob(os.path.join(HERE, "..", "cb-output", "*shot_package.json"))
+        cands = glob.glob(os.path.join(HERE, "..", "cb-output", f"{EP}_*shot_package.json"))
     return max(cands, key=os.path.getmtime) if cands else None
 
 
@@ -132,8 +163,24 @@ def current_snapshot():
     for code in KEYFRAME_BEATS:
         if code not in by_code:
             continue
-        prompt, _refs, _info = cb_scene.keyframe_for(beats, code, "Ep1")
+        # FIXED 2026-07-12 (full-codebase audit continued): was a second, independent "Ep1" literal here,
+        # unrelated to _resolve_pkg_path()'s own glob — now reads the same `EP` module constant so this call
+        # can never silently diverge from which package the glob actually resolved.
+        prompt, _refs, _info = cb_scene.keyframe_for(beats, code, EP)
         out[f"keyframe__{code}"] = prompt
+    # FIXED 2026-07-12 (full-codebase audit continued): if the resolved package has real beats but NONE of
+    # them match SEGPROMPT_BEATS/KEYFRAME_BEATS at all (e.g. the glob above picked up the wrong package, or a
+    # package whose beats aren't coded "1.B1".."1.B5"), every loop above hits `continue` every time and `out`
+    # stays empty — previously that silently flowed through to diff() printing "ZERO DIFFS — safe to merge"
+    # having validated zero beats. `beats` being non-empty but `out` staying empty is the actual mismatch
+    # signal (an empty `beats` list is the legitimate, already-handled GoldenDormant-adjacent case — nothing
+    # has been authored yet, not "the wrong thing was authored").
+    if beats and not out:
+        raise GoldenPackageMismatch(
+            f"resolved package has {len(beats)} beat(s) but none match SEGPROMPT_BEATS/KEYFRAME_BEATS "
+            f"({SEGPROMPT_BEATS!r}) — likely the wrong episode's package was resolved; refusing to report a "
+            "silent zero-diff pass against beats that were never actually checked"
+        )
     return out
 
 
@@ -201,7 +248,15 @@ def _check_segprompt_body(code, body, beat, cast, fails):
     cuts = beat.get("cuts") or []
     if cuts:
         first_action = str(cuts[0].get("action") or "").strip()
-        anchor = CS._v5_strip_speed_adjectives(CS._strip_spoken_words(first_action))[:40].rstrip()
+        # FIXED 2026-07-12 (full-codebase audit continued): this anchor never mirrored the emitter's own
+        # trailing-period normalization — cb_segprompt._v5_beat_story ships a cut's action as
+        # `action.rstrip(".") + "."`, collapsing a run of trailing periods (e.g. an authored ellipsis "...")
+        # down to one. Truncating to 40 chars BEFORE stripping trailing periods let a short ellipsis-ending
+        # action (<=40 chars) keep its "..." in the anchor while the shipped text only ever has a single
+        # ".", so the anchor was never a substring of the real body and assertions() would falsely report
+        # "none of the beat's own first-cut action survived" for a correct prompt. rstrip(".") now runs
+        # BEFORE the truncation, exactly mirroring the emitter's own order of operations.
+        anchor = CS._v5_strip_speed_adjectives(CS._strip_spoken_words(first_action)).rstrip(".")[:40].rstrip()
         if anchor and anchor not in body:
             fails.append(f"{code}: none of the beat's own first-cut action survived into the shipped prompt (looked for: {anchor!r})")
     if _has_dialogue(beat):
@@ -219,10 +274,14 @@ def _check_segprompt_body(code, body, beat, cast, fails):
     # ambientBed authored (this session's manifest-authoring pass). Ambience continuity is a Post/stitch
     # concern now (GATE3_ANIMATION_DOCTRINE.md Stage 7), not a shipped-prompt content assertion.
 
-    # (8) HEADER + Negative line — RETIRED 2026-07-08 (rule 54): the standalone tech line is gone (fps
-    # folded into the HEADER instead), so there is no separate tech-line survives-verbatim check anymore.
-    if CS._v5_header() not in body:
-        fails.append(f"{code}: the doctrine's HEADER line is missing or stale")
+    # Negative line — the standing negatives must all survive verbatim (module docstring's own item 7).
+    # FIXED 2026-07-12 (full-codebase audit continued): this block used to also re-run
+    # `if CS._v5_header() not in body:` right here, under an "(8) HEADER + Negative line — RETIRED
+    # 2026-07-08" comment. The RETIRED half (the standalone tech-line-survives-verbatim check, rule 54)
+    # really was gone, but the header re-check it was retired alongside was dead weight left behind by the
+    # same edit, not a second real check: check (2) above already asserts `body.startswith(header)`, and
+    # startswith trivially implies containment, so this could only ever re-flag a beat check (2) had already
+    # flagged — a duplicate failure message, never new coverage. Deleted.
     for neg in CS._standing_negatives():
         if neg not in body:
             fails.append(f"{code}: Negative line is missing standing item {neg!r}")
@@ -243,7 +302,6 @@ def assertions(snap=None):
     d = _pkg()
     beats = d["beats"]
     by_code = {(b.get("beatCode") or b.get("shotCode")): b for b in beats}
-    scenes = {str(s.get("sceneNumber")): s for s in (d.get("scenes") or [])}
     snap = snap if snap is not None else current_snapshot()
     fails = []
 
@@ -252,11 +310,9 @@ def assertions(snap=None):
         if not b:
             continue
         cast = b.get("openingCast") or b.get("characters") or []
-        sc = scenes.get(str(b.get("sceneNumber")))
-        b_with_scene = dict(b); b_with_scene["_scene_for_check"] = sc
 
         body = snap.get(f"segprompt__{code}", "")
-        _check_segprompt_body(code, body, b_with_scene, cast, fails)
+        _check_segprompt_body(code, body, b, cast, fails)
         if body.strip():
             # opener-specific: @图1 must be the doctrine's exact opener wording.
             if "@图1 opening keyframe — begin on this exact composition." not in body:
@@ -279,7 +335,7 @@ def assertions(snap=None):
         rkey = f"segprompt_relay__{code}"
         if rkey in snap:
             rbody = snap[rkey]
-            _check_segprompt_body(rkey, rbody, b_with_scene, cast, fails)
+            _check_segprompt_body(rkey, rbody, b, cast, fails)
             if rbody.strip():
                 # THE ANTI-HOLD-SAFE RELAY WORDING (2026-07-07, decision 1) — supersedes the earlier "start
                 # from this frame" sentence; see cb_segprompt._v5_references's docstring for the full ruling.

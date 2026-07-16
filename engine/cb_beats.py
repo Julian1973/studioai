@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
-"""Scene BEAT driver — one Seedance take per BEAT (10-12s), rendered from the beat's own signed-off opening keyframe.
+"""Scene BEAT driver — one Seedance take per BEAT (HANDLE_TOTAL, 15s: 13s action + 2s directed settle, the Handle
+Doctrine, CLAUDE.md rule 20), rendered from the beat's own signed-off opening keyframe — or, for a continuation
+beat, from its predecessor's HARVESTED SETTLE FRAME (the relay chain, rule 21), never a literal last-frame chain.
 
 THE RULE: each beat is ONE Seedance reference-to-video generation — Seedance directs its OWN internal cuts, camera and
-timing (that's where the flow comes from) — chained last-frame -> next-beat start, then the scene is assembled.
+timing (that's where the flow comes from); the scene is then assembled from the per-beat clips.
 
-THE PROMPT (Gate 3, signed off): the DEFINITIVE 6-section prose from cb_segprompt (REFERENCE LAW -> SCENE -> ACTION ->
-CAMERA -> AUDIO -> NEGATIVES) is THE prompt for any beat that has a segment — references are law, Seedance does the heavy
-lifting. Beats with no segment yet fall back to the cb_seedance compact. There is NO other builder (the old
-cb_prompts.seedance_json JSON path was removed). THE VOICE RIDES IN THE RENDER: the ElevenLabs V3 track is supplied as
-@Audio1 and the characters speak it (lip-synced) — it is NOT swapped in Post.
+THE PROMPT (Gate 3, signed off): the v5 engine's five-block plain-text prompt from cb_segprompt.shipped_prompt (STYLE ->
+REFERENCES -> ACTING DNA -> BEAT STORY -> TECH CLOSE, CLAUDE.md rule 42) is THE prompt for any beat with a compiled
+segment — references are law, Seedance does the heavy lifting. Beats with no segment yet fall back to the cb_seedance
+compact (COMPACT_TIMED_JSON) — there is no other builder; the legacy i2vPrompt field is not read by either path. THE
+VOICE RIDES IN THE RENDER: the ElevenLabs V3 track is supplied as @Audio1 and the characters speak it (lip-synced) —
+it is NOT swapped in Post.
 
-    python3 cb_beats.py <package.json> <sceneNumber> [episode=Ep1]
+    python3 cb_beats.py <package.json> <sceneNumber> [episode=Ep1] [--force]
+
+--force re-renders an already-APPROVED beat (2026-07-08 audit fix, the one-render economy, CLAUDE.md rule 28) —
+without it, an approved beat is silently SKIPPED rather than re-rendered/overwritten in place; --force archives
+the old approved clip first (record_approval(approved=False)) before firing a fresh take.
 """
-import os, sys, json, subprocess
-import cb_gen, cb_prompts as P, cb_voice, cb_seedance
+import os, sys, json, subprocess, pathlib
+import cb_gen, cb_prompts as P, cb_voice, cb_seedance, cb_post
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import tools.backup_media as _backup   # off-machine backup on approval (2026-07-08 operational-risk fix)
 
 def _audio_dur(path):
-    """Exact duration (seconds) of an audio file via ffprobe — drives the per-beat action/HOLD math (Ticket 3)."""
-    try:
-        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
-                             capture_output=True, text=True, timeout=30)
-        return round(float(out.stdout.strip()), 2)
-    except Exception:
-        return 0.0
+    """Exact duration (seconds) of an audio file via ffprobe — drives the per-beat action/HOLD math (Ticket 3).
+    FIXED 2026-07-12 (loose-ends pass): this used to hand-roll its own ffprobe subprocess call — cb_post._dur()
+    is the canonical probe (also used by cb_pipeline.py, cb_scene.py, cb_voice.py, cb_address.py); this just
+    rounds its result to match this function's own established 2-decimal contract."""
+    return round(cb_post._dur(path), 2)
 
 def _anchor(c):
     """Each character's identity reference for ref2vid lip-sync (the locked turnaround)."""
@@ -34,7 +39,22 @@ def _anchor(c):
     except Exception:
         return None
 
-def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
+def _load_scene_beats(pkg_path, scene_num, d=None):
+    """Shared load-and-filter helper (2026-07-08 dedup pass — this exact pattern used to be copy-pasted across
+    gate3_dryrun/render_readiness/run/fire_next_beat). Loads the beat package (unless an already-parsed `d` is
+    passed in — gate3_dryrun/render_readiness both look up a beat by CODE first, before they even know its
+    sceneNumber, so they already have `d` on hand and must not re-parse the file a second time for the same
+    fire) and filters its beats down to one scene, matching by the SAME str(sceneNumber)-equality every one of
+    those call sites already relied on — never change this matching logic without re-checking every caller.
+    Returns (d, beats): `d`, the full parsed package dict, is handed back too since several callers still need
+    it afterward for something unrelated to beats (e.g. d.get("scenes"))."""
+    if d is None:
+        d = json.load(open(pkg_path))
+    scene_num = str(scene_num)
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == scene_num]
+    return d, beats
+
+def gate3_prepare(pkg_path, beat, episode="Ep1"):
     """SAFE Gate-3 prompt source selector for beats WITHOUT a cb_segprompt segment — NEVER calls Seedance. The ONLY
     builder is cb_seedance (COMPACT_TIMED_JSON). The old cb_prompts.seedance_json JSON builder has been REMOVED —
     there is no way to select it. (Beats that DO have a cb_segprompt segment never reach here for their final
@@ -73,7 +93,7 @@ def gate3_prepare(pkg_path, beat, episode="Ep1", audio_dur=0.0):
         if beat.get("sceneNumber") is not None and _d.get("scenes"):
             _sn = str(beat.get("sceneNumber"))
             _scene = next((s for s in _d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
-        _, _, definitive = cb_segprompt.shipped_prompt(beat, _scene)   # THE single shipping decision — v2 first, v1 loud fallback
+        _, _, definitive = cb_segprompt.shipped_prompt(beat, _scene, episode=episode)   # THE single shipping decision — v2 first, v1 loud fallback
     except Exception:
         definitive = False
     if definitive:
@@ -94,8 +114,7 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
     d = json.load(open(pkg_path))
     beat = next(b for b in (d.get("beats") or d.get("shots") or [])
                 if (b.get("beatCode") or b.get("shotCode")) == code)
-    audio_dur = _audio_dur(os.path.join("media", f"vo_{episode}_{code}.mp3"))
-    prep = gate3_prepare(pkg_path, beat, episode, audio_dur=audio_dur)
+    prep = gate3_prepare(pkg_path, beat, episode)
     a = prep.get("authoring") or {}
     prompt, builder, raw = prep["prompt"], prep["builder"], False
     try:
@@ -105,8 +124,7 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
             _sn = str(beat.get("sceneNumber"))
             _scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
         # relay-aware (rule 21) — mirrors run()'s own check, so the preview matches what would actually fire
-        _scene_beats = [b for b in (d.get("beats") or d.get("shots") or [])
-                        if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+        _, _scene_beats = _load_scene_beats(pkg_path, beat.get("sceneNumber"), d=d)
         _, _relay_status, _relay_prev = cb_scene.relay_source_for(_scene_beats, code, episode)
         _prev_end_state, _prev_carry_marks = None, None
         if _relay_status == "relay" and _relay_prev:
@@ -115,7 +133,7 @@ def gate3_dryrun(pkg_path, code, episode="Ep1"):
             _prev_carry_marks = _prev_b.get("carryMarks") if _prev_b else None   # rules 33/34, 2026-07-05
         _def, _builder_label, _ = cb_segprompt.shipped_prompt(beat, _scene, relay=(_relay_status == "relay"),
                                                               prev_end_state_still=_prev_end_state,
-                                                              prev_carry_marks=_prev_carry_marks)
+                                                              prev_carry_marks=_prev_carry_marks, episode=episode)
         if _def:
             prompt, builder, raw = _def, _builder_label, True
     except Exception:
@@ -164,12 +182,12 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
     # fire_next_beat still reported RELAY_LAUNCHED success (it copies the stale existing official clip to the
     # seed path either way — that copy is not evidence the render happened). Same resolution gate3_dryrun (line
     # ~110) and cb_seedance.build_for_beat already use, so this can't drift from what actually ships.
-    kf_path = f"media/{episode}_{beat_code}_{slug}.png"
+    own_kf_path = f"media/{episode}_{beat_code}_{slug}.png"
+    kf_path = own_kf_path
     if beat is not None:
         try:
             import cb_scene
-            _scene_beats = [b for b in (d.get("beats") or d.get("shots") or [])
-                            if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+            _, _scene_beats = _load_scene_beats(pkg_path, beat.get("sceneNumber"), d=d)
             _relay_frame, _relay_status, _ = cb_scene.relay_source_for(_scene_beats, beat_code, episode)
             if _relay_status == "relay" and _relay_frame:
                 kf_path = _relay_frame
@@ -177,6 +195,16 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
             pass
     if not os.path.exists(kf_path):
         blockers.append("keyframe missing")
+    # FIXED 2026-07-11 (full-codebase audit — workflow gap): the Law-3 missing-identity-anchor check (see
+    # run()'s own hard assertion further down, and its docstring) used to run only AFTER a beat's V3 voice
+    # track had already been synthesized — a real, billed ElevenLabs call — instead of here, in the gate that
+    # already stops a beat BEFORE that synthesis step runs. Same check, moved earlier so a beat with dialogue
+    # but a missing/broken character reference never pays for a voice take it can't use.
+    if beat is not None:
+        _rr_chars = beat.get("openingCast") or beat.get("characters") or []
+        _rr_missing = [c for c in _rr_chars if not _anchor(c)]
+        if _rr_missing:
+            blockers.append("no resolvable identity reference for " + ", ".join(_rr_missing))
     va = [p for p in cb_voice.audit_attribution(pkg_path) if p.startswith(beat_code)]
     if va:
         blockers.append("audio attribution: " + "; ".join(va))
@@ -214,20 +242,43 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
             scene = next((s for s in d["scenes"] if str(s.get("sceneNumber")) == _sn), None)
         es = cb_qa.check_endstate_still(beat.get("endStateStill"))
         if not es["ok"]:
-            flags.append("Law 4 (endStateStill): " + es["verdict"])
-        amb = cb_qa.check_ambience_overlap(beat.get("atmosphere"), (scene or {}).get("ambientBed"))
-        if not amb["ok"]:
-            flags.append("Law 7 (ambience): " + amb["verdict"])
+            flags.append("Law 4 (endStateStill, MANIFEST FIELD ONLY — not read by the shipped prompt): " + es["verdict"])
+        # Law 7 (check_ambience_overlap) RETIRED here 2026-07-15 (guardrail-fidelity audit): neither field it
+        # compares reaches the shipped v5 prompt in any single artifact — cb_segprompt's own emit_v5 docstring
+        # states "THE CAMERA+AMBIENCE PARAGRAPH IS RETIRED... not something that needs restating as text in
+        # every beat's own generation prompt," and `ambientBed` is never read into any generation prompt
+        # anywhere in the codebase (confirmed by grep across cb_post/cb_previz/cb_address too). A "duplication"
+        # between the two is architecturally impossible in current shipped output — the check would only ever
+        # false-flag legitimate, correctly-authored atmosphere text. cb_qa.check_ambience_overlap itself is
+        # kept, testable, docstring marked ORPHANED — see its own note.
         cam = cb_qa.check_camera_lock_conflict(beat)
         if not cam["ok"]:
             flags.append("Law 8 (camera lock): " + cam["verdict"])
+        # THE KEYFRAME-QA-SILENTLY-SHIPS-ANYWAY GAP (2026-07-14, full-pipeline verification audit): 1.B1's
+        # own real keyframe sidecar (check_scene/check_done_frame's Definition-of-Done vision check, rule 16)
+        # was sitting on disk with ok:false, ACTION_STATE_MISMATCH — and the real, billed video render fired
+        # anyway, because render_readiness never once read this sidecar. Deliberately kept FLAG-only, not a
+        # BLOCK: check_done_frame is a vision-model judgment call, and this project's own established
+        # doctrine (rule 17/28) treats every vision-QA check (check_plate, check_clip, check_done_frame
+        # itself) as report-only, never an auto-block, precisely because a vision call can false-positive —
+        # Julian's own reserved verdict is the real gate. What was actually missing wasn't a block, it was
+        # visibility: nothing printed this at the moment that matters, before the expensive render fires.
+        try:
+            import pathlib
+            _kf_qa_path = pathlib.Path(f"media/{episode}_{beat_code}_{slug}.keyframe_qa.json")
+            if _kf_qa_path.exists():
+                _kf_qa = json.loads(_kf_qa_path.read_text())
+                if _kf_qa.get("ok") is False:
+                    flags.append("keyframe Definition-of-Done FAILED (" + _kf_qa_path.name + "): "
+                                 + _kf_qa.get("verdict", "").replace("\n", " ")[:200])
+        except Exception:
+            pass
         # SETTLE-AUTHORING STRENGTHENING (Julian, 2026-07-05, lock-in night) — the beat's own endState must
         # read as its own distinct moment, not a restatement of the predecessor's. Same isolated try/except
         # pattern as the relay keyframe-path lookup above; never breaks render_readiness on a lookup hiccup.
         try:
             import cb_scene
-            _scene_beats3 = [b for b in (d.get("beats") or d.get("shots") or [])
-                             if str(b.get("sceneNumber")) == str(beat.get("sceneNumber"))]
+            _, _scene_beats3 = _load_scene_beats(pkg_path, beat.get("sceneNumber"), d=d)
             _, _relay_status3, _relay_prev3 = cb_scene.relay_source_for(_scene_beats3, beat_code, episode)
             if _relay_status3 == "relay" and _relay_prev3:
                 _prev_beat3 = next((bb for bb in _scene_beats3
@@ -239,22 +290,70 @@ def render_readiness(pkg_path, beat_code, episode="Ep1"):
             pass
     return {"status": status, "blockers": blockers, "flags": flags}
 
-def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
-    """GATE 3 (beat-native) — each beat is ALREADY a 10-12s unit (the Director designed it). Render each beat as
-    ONE Seedance take from its OWN signed-off opening keyframe (Gate 2b) using the beat's i2vPrompt (the Director's
-    multi-cut take prompt — Seedance directs the internal cuts). Then stitch the scene. NOT eight per-shot clips.
+def _build_voice_track_with_retry(code, b, out, voice_direction):
+    """ONE-RENDER ECONOMY, extended to the voice sub-step (2026-07-09 — a live scene walk skipped beat 1.B2
+    when cb_voice.build_dialogue_track came back empty with no exception raised and no diagnostic printed;
+    reproducing the identical call by hand immediately afterward succeeded cleanly, pointing to a transient
+    ElevenLabs contention/rate-limit blip, most likely from a concurrent job on the same account rendering a
+    different beat at that exact moment). Every OTHER stage in this pipeline already gets one automatic retry
+    before a hard stop (rule 28) — the voice step never did, so a one-off blip permanently skipped the beat
+    for the whole scene walk instead of just retrying. Returns the same shape build_dialogue_track does
+    (a dict with a "track" key, or None/falsy on exhausted retries)."""
+    track = None
+    for attempt in (1, 2):
+        try:
+            track = cb_voice.build_dialogue_track(b, out=out, voice_direction=voice_direction)
+        except Exception as e:
+            print(f"  {code}: voice track failed ({str(e)[:120]})", flush=True)
+            track = None
+        if track and track.get("track"):
+            break
+        if attempt == 1:
+            print(f"  {code}: voice track came back empty (no exception raised) — retrying once", flush=True)
+    return track
+
+def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False, force=False):
+    """GATE 3 (beat-native) — each beat renders at HANDLE_TOTAL (15s, rule 20). Render each beat as ONE Seedance
+    take from its own signed-off opening keyframe (Gate 2b) or relay anchor, using the beat's compiled v5 prompt
+    (cb_segprompt.shipped_prompt — Seedance directs the internal cuts from the prompt's own shot list). Then
+    stitch the scene. NOT eight per-shot clips.
     fast=True is RENDER ECONOMY LAW (Julian, 2026-07-03) — fal's cheaper/quicker Seedance endpoint variant, for
-    exploratory seeds; leave False for a beat's real delivery fire."""
-    d = json.load(open(pkg_path)); scene_num = str(scene_num)
-    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == scene_num]
+    exploratory seeds; leave False for a beat's real delivery fire.
+
+    force=False (2026-07-08 audit fix — THE ONE-RENDER ECONOMY, CLAUDE.md rule 28): nothing previously checked
+    a beat's own approval status before firing, so re-running the CLI, a duplicate approve click, or a retried
+    HTTP request could silently re-render and OVERWRITE an already-approved beat's official clip, while its
+    stale .approval.json sidecar (still {"approved": true}) was left untouched — falsely certifying unreviewed
+    content as approved. An APPROVED beat is now skipped by default; force=True explicitly opts in, and first
+    archives the old approved clip via record_approval(approved=False) — never a silent overwrite in place."""
+    scene_num = str(scene_num)
+    d, beats = _load_scene_beats(pkg_path, scene_num)
     if not beats:
         print(f"BEAT driver: no beats for {episode} scene {scene_num}"); return []
+    # FIXED 2026-07-11 (full-codebase audit): this loop relied on the JSON array already being in the right
+    # order — unlike fire_next_beat in this same file, which explicitly natural-sorts after the "1.B10 sorts
+    # before 1.B2" bug was found live. Same fix, same reasoning, applied here for consistency/safety.
+    import cb_preflight
+    beats.sort(key=lambda b: cb_preflight._beat_sort_key(b.get("beatCode") or b.get("shotCode") or ""))
     print(f"BEAT driver: {episode} scene {scene_num} — {len(beats)} beats (one 10-12s take each, from its own keyframe)", flush=True)
     clips = []
     for _i, b in enumerate(beats):
         code = b.get("beatCode") or b.get("shotCode"); slug = b.get("slug", (code or "").replace(".", "_"))
         if codes and code not in codes:
             continue
+        # THE ONE-RENDER ECONOMY GUARD (2026-07-08 audit fix): an already-APPROVED beat is never silently
+        # re-rendered/overwritten. force=True is the explicit human opt-in — it archives the old approved clip
+        # (record_approval(approved=False), the same reject-then-refire doctrine every other rejection uses)
+        # BEFORE firing, so the prior official take is preserved in the archive, never clobbered in place.
+        _appr_status, _appr_data = beat_approval_status(episode, code, slug)
+        if _appr_status == "approved":
+            if not force:
+                print(f"  {code}: SKIPPED — already approved; pass force=True to re-render an approved beat "
+                      f"(this will archive the old approved clip via record_approval(approved=False) first)", flush=True)
+                continue
+            print(f"  {code}: force=True on an already-APPROVED beat — archiving the old approved clip before re-firing", flush=True)
+            record_approval(episode, code, slug, approved=False,
+                             correction="re-render requested (force=True)", scene_num=scene_num)
         # THE RELAY CHAIN (Julian, 2026-07-03, CLAUDE.md rule 21): a continuation beat whose predecessor already
         # has a rendered clip opens directly off that clip's HARVESTED SETTLE FRAME for @图1 — no Gate-2b keyframe
         # generation for THIS beat at all. Falls back to the beat's own Gate-2b keyframe (unchanged behaviour)
@@ -274,10 +373,57 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         # beat that failed authoring/compact validation or had no built keyframe could render anyway with nothing
         # to catch it. Now actually gates.
         _ready = render_readiness(pkg_path, code, episode)
-        for _fl in _ready.get("flags") or []:    # PROMPT LAWS AUDIT flags (Laws 4/7/8) — advisory, never blocks
-            print(f"  {code}: [PROMPT LAW FLAG] {_fl}", flush=True)
+        # render_readiness's own flags list is now genuinely mixed (Prompt Laws 4/7/8, settle distinctiveness,
+        # and — 2026-07-14 — the keyframe Definition-of-Done vision check) — relabeled from the old
+        # "[PROMPT LAW FLAG]" tag, which was accurate only for the first three and misleading for the fourth.
+        # All advisory, never blocks — matching this project's vision-QA report-only doctrine (rule 17/28).
+        for _fl in _ready.get("flags") or []:
+            print(f"  {code}: [READINESS FLAG] {_fl}", flush=True)
         if _ready["status"] != "READY_TO_RENDER":
             print(f"  {code}: NOT READY ({_ready['status']}) — {'; '.join(_ready['blockers'])}; skipping (no clip)", flush=True); continue
+        # THE UNIFIED GATE-3 LINT, NOW ENFORCED HERE TOO (2026-07-14, real footage diagnosis — 1.B3's own
+        # checklist-shaped cuts were flagged by cb_qa.check_gate3_lint BEFORE that beat fired, but the flag
+        # was only ever surfaced by cb_replicator.walk_scene's own pre-fire call, never by this function. A
+        # beat fired via THIS function directly — a scratch script, a Studio button, any future caller that
+        # doesn't happen to route through walk_scene — never saw the lint at all. Every path that can fire a
+        # real Seedance render now gets the identical treatment: blockers halt outright (matching
+        # walk_scene's own "Fail = the prompt never fires," GATE3_ANIMATION_DOCTRINE.md §1); flags are
+        # printed loud and unmissable — a boxed banner naming the beat, never a line that can scroll past
+        # unnoticed in a wall of render log output the way it did the night this was found.
+        import cb_qa
+        _lint = cb_qa.check_gate3_lint(pkg_path, code, episode)
+        if _lint["flags"]:
+            _bar = "!" * 78
+            print(f"\n{_bar}\n  {code}: UNRESOLVED LINT FLAG(S) — READ BEFORE TRUSTING THIS RENDER\n{_bar}", flush=True)
+            for _fl in _lint["flags"]:
+                print(f"  [LINT FLAG] {_fl}", flush=True)
+            print(f"{_bar}\n", flush=True)
+        if not _lint["ok"]:
+            print(f"  {code}: LINT BLOCK — {'; '.join(_lint['blockers'])}; skipping (no clip)", flush=True); continue
+        # THE PRE-FIRE READ (2026-07-14, Julian: "we need to fix software wide not prompt specific... if you
+        # read the prompts before they go for render we wouldn't have these issues"). check_gate3_lint above
+        # is regex/substring-based — it cannot catch a contradiction that only shows up when the text is
+        # actually READ (an opening shot that silently ignores the continuity anchor; a shot's own plain-
+        # English action delivering something the Negative line forbids without ever using the forbidden
+        # word). cb_qa.check_prompt_before_fire does that read, automatically, on every beat that reaches
+        # this function — not a manual step, not something scoped to one beat. A genuine contradiction halts
+        # the fire exactly like a lint BLOCK; an infra failure (both LLM providers down) fails OPEN with a
+        # loud warning rather than silently passing OR silently blocking every future render.
+        _read = cb_qa.check_prompt_before_fire(prompt=_lint["prompt"], beat_code=code, episode=episode)
+        if _read.get("skipped"):
+            print(f"  {code}: [PRE-FIRE READ SKIPPED] {_read.get('skipped_reason')}", flush=True)
+        elif not _read["ok"]:
+            print(f"  {code}: PRE-FIRE READ BLOCK — {'; '.join(_read['blockers'])}; skipping (no clip)", flush=True); continue
+        # THE REFERENCE-VS-ANCHOR CHECK (2026-07-15, seam audit — Gate 1->2->3 handoff review): the pre-fire
+        # read above is text-only — it reads the compiled prompt for internal contradictions, never looks at
+        # the actual anchor image `start` becomes @图1. The references block's own hand-authored position
+        # claims (spatialAxis/relayOpeningNote, rule 53) and the size clause (cb_segprompt._v5_size_clause)
+        # describe what @图1 is supposed to show but were never checked against the file this beat actually
+        # fires with. Report-only, matching this pipeline's standing vision-QA doctrine (rule 17/28) for a
+        # spatial read like this — never a hard block on a vision guess.
+        _refcheck = cb_qa.check_reference_position(b, b.get("openingCast") or b.get("characters") or [], start)
+        if _refcheck["ok"] is False:
+            print(f"  {code}: [REFERENCE/ANCHOR MISMATCH — advisory] {_refcheck['verdict']}", flush=True)
         # ── TICKET 3 — AUDIO-FIRST: build + measure THIS beat's V3 voice BEFORE the prompt, so the action/HOLD timeline is
         #    computed from its REAL audio length (per-beat, decoupled from episode runtime). Then VOICE-FLIP (Ticket 2):
         #    inject that track as @Audio1 so Seedance lip-syncs to it; generate_audio stays ON for SFX + the underscore.
@@ -290,10 +436,7 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
             track = {"track": _vo, "lines": [], "speakers": []}
             print(f"  {code}: reusing existing voice track (CB_REUSE_VOICE) — no re-synthesis", flush=True)
         else:
-            try:
-                track = cb_voice.build_dialogue_track(b, out=f"vo_{episode}_{code}.mp3", voice_direction=_vd)
-            except Exception as e:
-                print(f"  {code}: voice track failed ({str(e)[:120]})", flush=True)
+            track = _build_voice_track_with_retry(code, b, f"vo_{episode}_{code}.mp3", _vd)
         # T1 (Law 5): the voice lives IN the render. A beat WITH dialogue whose V3 track failed REFUSES to render —
         # no silent fallback to Seedance's native voice, ever. Wordless beats render fine with no track.
         _has_dlg = bool(b.get("speakers")) or any((c.get("dialogue") or "").strip() for c in (b.get("cuts") or []))
@@ -301,10 +444,11 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
             print(f"  {code}: REFUSED — beat has dialogue but no V3 @Audio1 track (Law 5: no native-voice fallback); fix the voice and re-fire", flush=True)
             continue
         audio_dur = _audio_dur(track["track"]) if (track and track.get("track")) else 0.0
-        # ── MANUAL OVERRIDE: a human-edited exact Seedance JSON ("Save & use this exact prompt") is sent VERBATIM
-        #    (mirrors how build_keyframe_prompt honors keyframePromptOverride). Otherwise build it as now.
-        # ── GATE-3 PROMPT SOURCE — the SAFE selector (default cb_seedance; old path refused unless overridden) ──
-        prep = gate3_prepare(pkg_path, b, episode, audio_dur=audio_dur)
+        # CORRECTED 2026-07-11 (full-codebase audit — doctrine drift): the "MANUAL OVERRIDE" comment that used
+        # to sit here described a seedancePromptOverride mechanism that gate3_prepare's own docstring already
+        # says was retired 2026-07-07 (the v5 recompile always overwrote it the moment gate3_prepare returned).
+        # No override path exists on this call today; gate3_prepare below is the SAFE selector it always was.
+        prep = gate3_prepare(pkg_path, b, episode)
         if prep["refuse"]:
             print(f"  {code}: Gate 3 REFUSED to render — {prep['reason']}; skipping (no clip)", flush=True); continue
         prompt = prep["prompt"]; raw = False
@@ -327,7 +471,8 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
             try:
                 _def, _builder_label, _ = cb_segprompt.shipped_prompt(b, _scene, relay=(relay_status == "relay"),
                                                                       prev_end_state_still=_prev_end_state,
-                                                                      prev_carry_marks=_prev_carry_marks)   # THE single routing point — identical to the studio preview path
+                                                                      prev_carry_marks=_prev_carry_marks,
+                                                                      episode=episode)   # THE single routing point — identical to the studio preview path
             except cb_qa.ManifestFieldMissing as _mfm:
                 # THE MANIFEST (rule 37, 2026-07-06): a missing TECHNICAL-contract field is a REFUSAL, never a
                 # reason to degrade to an older/weaker builder — the generic `except Exception` below is for a
@@ -399,8 +544,24 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
         # already composites the plate into 1.B1's own keyframe for exactly this reason — the beat's actual
         # FIRE was the one place that dropped it. Unconditional now, every beat, opener included.
         _plate = f"media/{episode}_S{scene_num}_plate.png"
-        if os.path.exists(_plate):
-            imgs.append(_plate)
+        # LAW 3, EXTENDED TO THE PLATE SLOT (2026-07-15, seam audit — Gate 1/2/3 handoff review): the same
+        # mismatch Law 3 already refuses for a missing character anchor above applies identically to the
+        # plate. cb_segprompt.emit_v5 computes `plate_n = len(cast) + 2` UNCONDITIONALLY (rule 39) and
+        # `_v5_references` always emits the "@图{plate_n} scene plate..." sentence — the compiled prompt text
+        # always claims a plate reference exists. In practice this is protected today by gate ordering (2b
+        # can't be approved before 2a signs the plate) and rule 41's "never archive the signed plate," so it
+        # is latent, not currently reachable through the normal fire()/approve() path — but nothing in THIS
+        # function enforced it, so a direct call bypassing cb_pipeline (a scratch script, a future caller)
+        # could still fire with a dangling @图N reference the model has nothing to look at. Refuse loudly
+        # instead of silently shipping a shortened `imgs` list against an unconditional prompt claim — same
+        # style as the Law 3 character-anchor refusal immediately above.
+        if not os.path.exists(_plate):
+            print(f"  {code}: REFUSED — no scene plate found at {_plate} (Law 3, extended to the plate slot: "
+                  f"the compiled prompt unconditionally claims a scene-plate reference — a missing file here "
+                  f"would leave that @图N label with no matching upload); build + sign Gate 2a first, then "
+                  f"re-fire", flush=True)
+            continue
+        imgs.append(_plate)
         # THE VIDEO REFERENCE, RETIRED (Julian, 2026-07-07, watching 1.B2's actual footage — "the video I
         # don't like it either, I think it confuses things"): rule 26's "FIFTH ANCHOR" (2026-07-04, additive
         # video-clip reference alongside the still-frame anchor) is removed. A relay beat now opens from the
@@ -438,19 +599,25 @@ def run(pkg_path, scene_num, episode="Ep1", codes=None, fast=False):
                         import cb_qa, cb_segprompt, subprocess, tempfile
                         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as _tf:
                             _first = _tf.name
-                        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"media/{out}",
-                                        "-vframes", "1", _first], capture_output=True)
-                        _junction = cb_segprompt._junction_type(b)
-                        jv = cb_qa.check_join(relay_frame, _first, junction=_junction, carry_marks=b.get("carryMarks"))
-                        print(f"  [JOIN CHECK] {code} ({_junction}): {'CONTINUOUS' if jv['ok'] else 'BROKEN'} — {jv['verdict'][:200]}", flush=True)
-                        for _fl in jv.get("flags") or []:
-                            print(f"  [JOIN CHECK] {code}: FLAG (advisory, non-blocking) — {_fl}", flush=True)
-                        os.remove(_first)
-                        # Persisted (mirrors the CLIP QA .qa.json sidecar below) so the one-render economy's
-                        # gate-check in fire_next_beat/walk_scene can read this verdict back without re-deriving
-                        # it — the join check itself stays a real vision call, run exactly once per fire.
-                        with open(f"media/{episode}_{code}_{slug}.join.json", "w") as _jf:
-                            json.dump(jv, _jf, indent=2)
+                        try:
+                            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"media/{out}",
+                                            "-vframes", "1", _first], capture_output=True)
+                            _junction = cb_segprompt._junction_type(b)
+                            jv = cb_qa.check_join(relay_frame, _first, junction=_junction, carry_marks=b.get("carryMarks"))
+                            print(f"  [JOIN CHECK] {code} ({_junction}): {'CONTINUOUS' if jv['ok'] else 'BROKEN'} — {jv['verdict'][:200]}", flush=True)
+                            for _fl in jv.get("flags") or []:
+                                print(f"  [JOIN CHECK] {code}: FLAG (advisory, non-blocking) — {_fl}", flush=True)
+                            # Persisted (mirrors the CLIP QA .qa.json sidecar below) so the one-render economy's
+                            # gate-check in fire_next_beat/walk_scene can read this verdict back without
+                            # re-deriving it — the join check itself stays a real vision call, run once per fire.
+                            with open(f"media/{episode}_{code}_{slug}.join.json", "w") as _jf:
+                                json.dump(jv, _jf, indent=2)
+                        finally:
+                            # FIXED 2026-07-11 (full-codebase audit): the temp PNG used to leak whenever
+                            # anything above raised (ffmpeg failure, a vision-API error) — os.remove sat AFTER
+                            # the join-check call with no try/finally, so the exception path never reached it.
+                            if os.path.exists(_first):
+                                os.remove(_first)
             except Exception as je:
                 print(f"  beat {code}: join check skipped ({str(je)[:120]})", flush=True)
             try:    # Gate-3 CLIP QA — automatic, advisory; NEVER let a QA hiccup kill the render loop or the stitch
@@ -547,7 +714,7 @@ def beat_approval_status(episode, code, slug):
         return "pending", None
     return ("approved" if data.get("approved") else "pending"), data
 
-def record_approval(episode, code, slug, approved, correction=None, scene_num=None):
+def record_approval(episode, code, slug, approved, correction=None, scene_num=None, reviewed_by="Julian"):
     """THE Step 7 data-recording call — the ONLY way a take's verdict becomes real. approved=True writes the
     approval sidecar in place; the clip stays exactly where it is (the official, anchorable take).
     approved=False immediately archives the clip + its .qa.json/.join.json/_settle.png/_remint.png sidecars to
@@ -556,13 +723,17 @@ def record_approval(episode, code, slug, approved, correction=None, scene_num=No
     — then the beat's own normal path is clean again (status reverts to "unrendered"), ready for the data fix
     + one re-fire the doctrine calls for. A rejected take NEVER anchors, sources or resumes anything again —
     archived, not deleted, so the full history survives for the record. Returns the status string that
-    resulted ("approved" or "unrendered")."""
+    resulted ("approved" or "unrendered").
+
+    reviewed_by (2026-07-08, Production Management panel finding): records WHO approved this specific take,
+    same reasoning as cb_pipeline.approve's own reviewed_by — infrastructure for a second reviewer before
+    one exists, not a real auth system."""
     clip = f"media/{episode}_{code}_{slug}.mp4"
     if approved:
         with open(_approval_path(episode, code, slug), "w") as f:
-            json.dump({"approved": True, "correction": None,
+            json.dump({"approved": True, "correction": None, "reviewed_by": reviewed_by,
                        "recorded_at": datetime.datetime.now().isoformat()}, f, indent=2)
-        print(f"record_approval: {code} APPROVED — official take stands at {clip}", flush=True)
+        print(f"record_approval: {code} APPROVED by {reviewed_by} — official take stands at {clip}", flush=True)
         # OFF-MACHINE BACKUP (2026-07-08 operational-risk fix): the moment a take becomes official is exactly
         # the moment it's worth protecting — copy it + its sidecars to the 5t drive backup (Julian's own
         # choice of destination) the instant it's signed, rather than relying on someone remembering to run a
@@ -600,8 +771,8 @@ def record_approval(episode, code, slug, approved, correction=None, scene_num=No
             os.replace(p, target)
             moved.append(target)
     with open(os.path.join(dest, f"{code}.REJECTED.json"), "w") as f:
-        json.dump({"beat": code, "correction": correction, "recorded_at": datetime.datetime.now().isoformat(),
-                   "archived_files": moved}, f, indent=2)
+        json.dump({"beat": code, "correction": correction, "rejected_by": reviewed_by,
+                   "recorded_at": datetime.datetime.now().isoformat(), "archived_files": moved}, f, indent=2)
     print(f"record_approval: {code} REJECTED — {correction!r}. Archived to {dest}; beat is unrendered again, "
           f"ready for the data fix + one re-fire.", flush=True)
     return "unrendered"
@@ -635,7 +806,7 @@ def _fire_gated(pkg_path, scene_num, episode, next_code, next_slug, fast):
     return clip, (not reasons), reasons
 
 
-def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, approved=False, fast=False):
+def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, approved=False, fast=False, force=False):
     """THE RELAY — the ONE serial-advance function (Julian, 2026-07-03, item ONE). Takes winner_code (the beat
     just decided) and prepares the NEXT beat's anchor from winner_code's own official clip — there is exactly
     one official clip per beat now (THE ONE-RENDER ECONOMY, Julian, 2026-07-05: one fire, one automatic re-fire
@@ -663,11 +834,18 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
     approved=True: reuses the anchor an earlier, unapproved call already produced, then fires the next beat under
     the one-render economy — ONE take, ONE automatic re-fire if either gate (Clip QA or the join-check) comes
     back non-green, then a HARD STOP naming the layer at fault (CLAUDE.md rule 3) if the re-fire fails too. Call
-    this only after you have actually looked at the anchor from the prepare call."""
-    import cb_scene, cb_segprompt, cb_qa
-    d = json.load(open(pkg_path))
-    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene_num)]
-    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    this only after you have actually looked at the anchor from the prepare call.
+
+    force=False (2026-07-08 audit fix — THE ONE-RENDER ECONOMY, CLAUDE.md rule 28): the approved=True phase
+    used to launch next_code unconditionally, with no check for whether next_code already carries an approval
+    verdict — a duplicate approve click or a retried HTTP request could silently re-render and OVERWRITE an
+    already-approved beat's official clip. Now refuses when next_code is already "approved" unless force=True,
+    which archives the old approved clip via record_approval(approved=False) first, then proceeds."""
+    import cb_scene, cb_segprompt, cb_qa, cb_preflight
+    d, beats = _load_scene_beats(pkg_path, scene_num)
+    # Natural sort on the trailing beat number (cb_preflight._beat_sort_key) — a lexicographic sort on the raw
+    # code string would misorder any scene with 10+ beats ('1.B10' < '1.B2'); found live in the 2026-07-08 audit.
+    beats.sort(key=lambda b: cb_preflight._beat_sort_key(b.get("beatCode") or b.get("shotCode") or ""))
     idx = next((i for i, b in enumerate(beats) if (b.get("beatCode") or b.get("shotCode")) == winner_code), None)
     if idx is None:
         print(f"fire_next_beat: {winner_code} not found in scene {scene_num}", flush=True); return None
@@ -699,6 +877,19 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
         # economy fires exactly once per beat, auto-retried once internally on a failed gate — so there is no
         # separate "pick a winner among candidates" step left to run here), then re-mint only when the seamless
         # rule or the quality gate calls for it, then STOP for approval.
+        # FIXED 2026-07-11 (full-codebase audit): Phase 1 never called manifest_ok anywhere in its own body,
+        # despite being able to trigger a real, billed NB2/Seedream re-mint generation call below — Phase 2
+        # already had this exact check (further down in this same function); Phase 1 was the one gap.
+        try:
+            import cb_preflight
+            _ok, _block_count, _ = cb_preflight.manifest_ok(pkg_path, scene=scene_num, episode=episode, gate="3")
+            if not _ok:
+                print(f"fire_next_beat: REFUSED — {_block_count} manifest BLOCK(s) outstanding for scene "
+                      f"{scene_num}; never arms on a red manifest, even to prepare (run: "
+                      f"python3 cb_preflight.py --scene={scene_num})", flush=True)
+                return None
+        except Exception as _e:
+            print(f"fire_next_beat: manifest check could not run ({str(_e)[:120]}) — proceeding without it; fix cb_preflight.py", flush=True)
         if not os.path.exists(official):
             print(f"fire_next_beat: {winner_code} has no official clip yet at {official} — fire it (Gate 3) first, then prepare", flush=True); return None
         if dry_run:
@@ -735,7 +926,8 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
             _scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), None)
             prompt, builder, is_v3 = cb_segprompt.shipped_prompt(next_b, _scene, relay=True,
                                                                  prev_end_state_still=wb.get("endStateStill"),
-                                                                 prev_carry_marks=wb.get("carryMarks"))
+                                                                 prev_carry_marks=wb.get("carryMarks"),
+                                                                 episode=episode)
             _chars = next_b.get("openingCast") or next_b.get("characters") or []
             imgs = [anchor] + [a for c in _chars if (a := _anchor(c))]
             _plate = f"media/{episode}_S{scene_num}_plate.png"
@@ -764,6 +956,23 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
     # a 100% reproducible UnboundLocalError on every approved=True call, i.e. every relay beat cb_replicator.
     # walk_scene launches from 1.B2 onward): re-derive the SAME decision here, reading the already-harvested
     # settle frame phase 1 left on disk (it must exist by now — phase 1 never returns without it).
+    #
+    # THE ONE-RENDER ECONOMY GUARD (2026-07-08 audit fix, same discipline as run()'s own guard above): next_code
+    # must not already carry an approval verdict — a duplicate approve click or a retried call must never
+    # silently re-render and overwrite an already-approved beat's official clip while its stale .approval.json
+    # sidecar keeps falsely certifying it as reviewed. force=True is the explicit human opt-in; it archives the
+    # old approved clip (record_approval(approved=False), the same reject-then-refire doctrine) BEFORE firing.
+    _next_appr_status, _ = beat_approval_status(episode, next_code, next_slug)
+    if _next_appr_status == "approved":
+        if not force:
+            print(f"fire_next_beat: REFUSED — {next_code} is already approved; pass force=True to re-render "
+                  f"an approved beat (this will archive the old approved clip via record_approval(approved=False) "
+                  f"first)", flush=True)
+            return None
+        print(f"fire_next_beat: force=True on an already-APPROVED {next_code} — archiving the old approved clip "
+              f"before re-firing", flush=True)
+        record_approval(episode, next_code, next_slug, approved=False,
+                         correction="re-render requested (force=True)", scene_num=scene_num)
     if not os.path.exists(settle_path):
         print(f"fire_next_beat: approved=True but no harvested settle frame at {settle_path} — call without "
               f"approved first to prepare it.", flush=True); return None
@@ -778,7 +987,11 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
     # arming path (cb_pipeline.approve, cb_replicator.walk_scene, the Studio's fire/approve endpoints) enforces.
     try:
         import cb_preflight
-        _ok, _block_count, _ = cb_preflight.manifest_ok(pkg_path, scene=scene_num, episode=episode)
+        # gate="3" (2026-07-09, cross-call-site-consistency finding): this is the Gate-3 launch step —
+        # every other manifest_ok caller passes the real production-stage gate it's arming; this one
+        # silently defaulted to gate="1" regardless. Zero behaviour change today (check_scene_technical's
+        # own docstring: the gate param doesn't change its output yet) — matters once gate-scoped checks ship.
+        _ok, _block_count, _ = cb_preflight.manifest_ok(pkg_path, scene=scene_num, episode=episode, gate="3")
         if not _ok:
             print(f"fire_next_beat: REFUSED — {_block_count} manifest BLOCK(s) outstanding for scene {scene_num}; "
                   f"never arms on a red manifest (run: python3 cb_preflight.py --scene={scene_num})", flush=True)
@@ -806,19 +1019,37 @@ def fire_next_beat(pkg_path, scene_num, episode, winner_code, dry_run=False, app
     return {"status": "OK", "next_code": next_code, "clip": clip, "attempt": attempt}
 
 def stitch(clips, out):
-    lst = cb_gen.MEDIA / "_beats_concat.txt"
-    lst.write_text("".join(f"file '{os.path.abspath(c)}'\n" for c in clips))
-    subprocess.run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
-                    "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-                    "-c:a", "aac", "-b:a", "256k", out], check=True, capture_output=True)
+    """Concat-stitches a scene's beat clips into one file. THE RACE-CONDITION FIX (2026-07-08 audit): this used
+    to always write the ffmpeg concat list to the SAME fixed shared path (cb_gen.MEDIA / "_beats_concat.txt")
+    regardless of episode/scene — if two stitch() calls were ever in flight concurrently (two scenes rendering
+    at once), the second call's write could corrupt the first call's read, silently building a stitched video
+    from the wrong mix of clips with no error. Fixed with a real unique-scratch-path (tempfile.mkstemp, this
+    file's own already-established pattern for exactly this need — see the JOIN CHECK's NamedTemporaryFile use
+    above), cleaned up in a finally so a failed ffmpeg run never leaks the scratch file."""
+    import tempfile
+    fd, lst_path = tempfile.mkstemp(suffix="_beats_concat.txt", dir=str(cb_gen.MEDIA))
+    os.close(fd)
+    lst = pathlib.Path(lst_path)
+    try:
+        lst.write_text("".join(f"file '{os.path.abspath(c)}'\n" for c in clips))
+        subprocess.run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
+                        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+                        "-c:a", "aac", "-b:a", "256k", out], check=True, capture_output=True)
+    finally:
+        lst.unlink(missing_ok=True)
     print(f"  stitched {len(clips)} beats -> {out}", flush=True)
     return out
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    if len(sys.argv) > 1 and sys.argv[1] == "dryrun":     # python3 cb_beats.py dryrun <pkg> <beatCode> [ep] — NO render
-        out = gate3_dryrun(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "Ep1")
+    # --force (2026-07-08 audit fix, THE ONE-RENDER ECONOMY): explicit human opt-in to re-render an
+    # already-APPROVED beat from the CLI — see run()'s own force= docstring. Stripped out of argv before
+    # positional parsing so it can appear anywhere on the command line.
+    _force = "--force" in sys.argv
+    _args = [a for a in sys.argv if a != "--force"]
+    if len(_args) > 1 and _args[1] == "dryrun":     # python3 cb_beats.py dryrun <pkg> <beatCode> [ep] — NO render
+        out = gate3_dryrun(_args[2], _args[3], _args[4] if len(_args) > 4 else "Ep1")
         out_print = {k: v for k, v in out.items() if k != "prompt"}
         print(json.dumps(out_print, indent=1, ensure_ascii=False))
     else:
-        run(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "Ep1")
+        run(_args[1], _args[2], _args[3] if len(_args) > 3 else "Ep1", force=_force)

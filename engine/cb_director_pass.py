@@ -46,7 +46,15 @@ def _mind_for(mode):
     return PIXAR_MINDS.get((mode or "").upper(), _DEFAULT_MIND)
 
 def _bible_brief(name):
-    """Pull the character's bible into a compact directing brief (only the fields a director acts on)."""
+    """Pull the character's bible into a compact directing brief (only the fields a director acts on).
+
+    THE ACTING-DNA FIX (2026-07-08): the acting-direction row used to read raw `bible.mannerisms` directly —
+    invisible to a character's top-level `actingNote`/`cadence` fields (the current, canonical, Julian-approved
+    acting-direction source, per THE FIDELITY LAW, rule 28) and, for at least Fuzzby, carrying forbidden
+    physical-appearance description straight into an LLM authoring call. Fixed to reuse the already-built,
+    already-approved, appearance-free source instead: `cb_segprompt._v5_acting_dna_source(name)` — prefers
+    `cadence`, falls back to a positive-slice-filtered `bible.mannerisms` only when `cadence` is missing. The
+    row is renamed ACTING DNA to match what it now actually contains."""
     b = (P.CHARACTERS.get(name) or {}).get("bible") or {}
     if not isinstance(b, dict):
         return f"{name}: (no bible — direct from the reference image only)"
@@ -55,8 +63,10 @@ def _bible_brief(name):
         if isinstance(v, list): v = " · ".join(str(x) for x in v)
         v = str(v or "").strip()
         return (v[:n] + "…") if len(v) > n else v
+    import cb_segprompt
+    acting_dna, _field = cb_segprompt._v5_acting_dna_source(name)
     rows = [("ESSENCE", g("essence")), ("WHO THEY ARE", g("whoTheyAre")), ("VULNERABILITY", g("vulnerability")),
-            ("EMOTIONAL DNA", g("emotionalDNA")), ("MANNERISMS", g("mannerisms")), ("RELATIONSHIPS", g("relationships")),
+            ("EMOTIONAL DNA", g("emotionalDNA")), ("ACTING DNA", str(acting_dna or "").strip()), ("RELATIONSHIPS", g("relationships")),
             ("STAGING", g("staging")), ("COMEDY ENGINE", g("comedyEngine")), ("VOICE", g("voice", 200)),
             ("ON-POINT TEST", g("onPoint")), ("DO", g("dos")), ("DON'T", g("donts"))]
     return f"=== {name} ===\n" + "\n".join(f"  {k}: {v}" for k, v in rows if v)
@@ -72,7 +82,7 @@ def _schema():
         point: str = Field(description="the single comic or emotional point THIS shot lands")
     class VoiceLine(BaseModel):
         speaker: str = Field(description="the character who speaks this line")
-        acted_line: str = Field(description="the LOCKED dialogue words for this line with ElevenLabs V3 audio tags placed for the CADENCE and emotional ARC — proud on one part, a whisper/wobble/crack on another, the delivery riding the beat. Use ONLY these canon tags: [proudly] [excited] [deadpan] [nervous] [calm] [cheerfully] [curious] [sorrowful] [frustrated] [tired] [playfully] [regretful] [whispers] [singing]. NEVER change, add or drop a WORD — only place tags (a tag at each point the delivery shifts).")
+        acted_line: str = Field(description="the LOCKED dialogue words for this line with ElevenLabs V3 audio tags placed for the CADENCE and emotional ARC — proud on one part, a whisper/wobble/crack on another, the delivery riding the beat. Use ONLY these canon tags: [proudly] [excited] [deadpan] [nervous] [calm] [cheerfully] [curious] [sorrowful] [frustrated] [tired] [playfully] [regretful] [whispers] [singing] [quietly]. NEVER change, add or drop a WORD — only place tags (a tag at each point the delivery shifts).")
         note: str = Field(description="one or more adjectives describing the delivery + cadence (e.g. 'proud and pompous, building, then a small swallowed wobble of doubt on the last word')")
     class DirectorPass(BaseModel):
         performance: str = Field(description="the acting truth for the lead character in THIS beat, drawn from their bible (essence/vulnerability/comedyEngine) — specific to them, never a generic mode note")
@@ -91,12 +101,23 @@ DIRECTOR_PASS_VERSION = "v4-voice-acting-2026-06-30"
 def _cache_path(episode, code):
     return os.path.join(_CACHE_DIR, f"{episode}_{code}.json")
 
-def _fingerprint(beat, mode, archetype, characters, dialogue_lines):
+def _fingerprint(beat, mode, archetype, characters, dialogue_lines, archetype_rules=""):
     """A hash of EVERYTHING the direction depends on — the version + mode + archetype + the beat's why/action/dialogue
     + each present character's FULL bible. If ANY of these changes, the cached direction is stale and is re-run, so a
-    render can never ship old directing."""
+    render can never ship old directing.
+
+    archetype_rules (2026-07-11, full-codebase audit): this used to hash only the archetype's short KEY name,
+    never the resolved rule TEXT actually shown to the LLM as the "PHYSICAL STAGING SPINE" — an edit to
+    PHYSICAL_ARCHETYPES' own rule text (visibility_rule/contact_rule/physics_rule/prohibited_staging/etc, the
+    same content rules 62/63 wired into the render path) never invalidated a cached Director's Pass. Now an
+    explicit parameter, included alongside the archetype key.
+
+    ALSO FIXED (same audit): the per-character hash below used to serialize only character[name]["bible"], but
+    _bible_brief's own "ACTING DNA" row is sourced from the SIBLING top-level field via
+    cb_segprompt._v5_acting_dna_source(name) (cadence/actingNote, not nested under bible) — editing a
+    character's cadence never invalidated the cache. Now included in the same per-character loop."""
     import hashlib
-    parts = [DIRECTOR_PASS_VERSION, str(mode), str(archetype), "|".join(characters or [])]
+    parts = [DIRECTOR_PASS_VERSION, str(mode), str(archetype), str(archetype_rules), "|".join(characters or [])]
     for k in ("want", "need", "crystalTruth", "kidRead", "adultRead", "theGame", "emotionalIntent", "pillar",
               "startState", "audience_feeling_target", "emotional_function", "storyBeat"):
         parts.append(str(beat.get(k) or ""))
@@ -105,6 +126,12 @@ def _fingerprint(beat, mode, archetype, characters, dialogue_lines):
     for n in (characters or []):
         b = (P.CHARACTERS.get(n) or {}).get("bible")
         parts.append(json.dumps(b, sort_keys=True, ensure_ascii=False) if isinstance(b, dict) else str(b))
+        try:
+            import cb_segprompt
+            acting_dna, _ = cb_segprompt._v5_acting_dna_source(n)
+            parts.append(str(acting_dna or ""))
+        except Exception:
+            pass
     return hashlib.md5("||".join(parts).encode("utf-8")).hexdigest()
 
 def cached_voice_direction(episode, code):
@@ -118,16 +145,59 @@ def cached_voice_direction(episode, code):
         pass
     return None
 
-def direct_beat(beat, sc, mode, archetype, archetype_rules, characters, duration, emotional_function, dialogue_lines, episode="Ep1"):
+def cached_expression(episode, code):
+    """Pure cache read (NO LLM): the Director's Pass's `expression` field for an already-directed beat, else
+    None. THE CLOSED GAP (2026-07-14, a full gate-by-gate trace + adversarial verify — CLAUDE.md rule 84/85):
+    direct_beat() computes real per-beat camera_approach/shots[]/expression/performance every beat via a
+    genuine LLM call, but before this fix NOTHING of it reached the shipped Seedance prompt except
+    voice_direction — the rest was computed, cached, and silently discarded, wasting a real API call's worth
+    of Glen Keane's own supervising-animator direction on every single beat. cb_segprompt._v5_expression_line
+    reads this field specifically (not the whole DirectorPass — camera_approach/shots[].camera would compete
+    with beat.cuts[].framing, the Gate-1-authored per-shot camera direction the shot list already ships; that
+    is exactly the "two signals for one job" failure class rules 24/26 already diagnosed once for reference
+    images) — `expression` is the one genuinely non-redundant field: the specific face/eye/body detail that
+    sells the beat's inner state, real "illusion of life" animator craft a story-level shot list doesn't
+    naturally specify. Mirrors cached_voice_direction's own read-only contract exactly."""
+    try:
+        cached = json.load(open(_cache_path(episode, code)))
+        if isinstance(cached, dict):
+            return (cached.get("result") or {}).get("expression")
+    except Exception:
+        pass
+    return None
+
+def direct_beat(beat, sc, mode, archetype, archetype_rules, characters, duration, emotional_function, dialogue_lines, episode="Ep1", read_only=False):
     """Run the Director's Pass for one beat. CACHED per (episode, beat) so previews/dry-runs don't re-call the LLM —
     CB_DIRECTOR_PASS_REFRESH=1 forces a fresh direction. Returns the DirectorPass dict, or None (fail-open) when off /
-    on any error (cb_seedance then falls back to the old mode-template fields)."""
-    if os.environ.get("CB_DIRECTOR_PASS", "1") in ("", "0", "false", "False", "no"):
+    on any error (cb_seedance then falls back to the old mode-template fields).
+
+    read_only=True (2026-07-15, Julian: "when i click on the card the seedance prompt doesnt load" — the real
+    bug behind it): a UI PREVIEW click (the Studio's beat-prompt/voice-prompt cards) must never pay for a live
+    LLM call just to display what a beat's compiled prompt looks like. Before this fix, `direct_beat` had
+    exactly one contract for every caller — read-only preview and real paid render alike — so the instant a
+    beat's own cuts[] text changed (any edit at all, including tonight's own Motion Contract rewrites), the
+    NEXT click on that beat's card silently fired a real, ~40-60s LLM call server-side, which then blew past
+    serve.py's 40s subprocess timeout and surfaced to the user as "nothing loads," with no error, no warning,
+    and a real API cost already spent. With read_only=True: an existing cache (fingerprint match OR stale) is
+    always returned as-is, never regenerated; with no cache at all, returns None (the same fail-open shape as
+    any other failure — cb_seedance falls back to its own mode-template fields, never a hang). The REAL render
+    path (cb_beats.run, cb_pipeline's gen-audio/render-beat) is completely unaffected — it never passes
+    read_only, so a genuine render still gets fresh, correct direction the moment content changes, exactly as
+    designed."""
+    if os.environ.get("CB_DIRECTOR_PASS", "1").strip().lower() in ("", "0", "false", "no"):
         return None
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
     cp = _cache_path(episode, code)
-    fp = _fingerprint(beat, mode, archetype, characters, dialogue_lines)
-    refresh = os.environ.get("CB_DIRECTOR_PASS_REFRESH", "") not in ("", "0", "false", "False", "no")
+    if read_only:
+        try:
+            cached = json.load(open(cp))
+            if isinstance(cached, dict):
+                return cached.get("result")            # preview: whatever's cached, fresh or stale — NEVER regenerate
+        except Exception:
+            pass
+        return None                                     # no cache at all: fail open, same shape as any other failure
+    fp = _fingerprint(beat, mode, archetype, characters, dialogue_lines, archetype_rules)
+    refresh = os.environ.get("CB_DIRECTOR_PASS_REFRESH", "").strip().lower() not in ("", "0", "false", "no")
     if os.path.exists(cp) and not refresh:
         try:
             cached = json.load(open(cp))
@@ -156,6 +226,13 @@ def direct_beat(beat, sc, mode, archetype, archetype_rules, characters, duration
             "You are the EPISODE DIRECTOR of 'The Crystal Bears' — a Pixar-grade animated comedy-with-heart for ages 4-8 "
             "(the Bluey co-watch + Inside Out emotional craft). For THIS beat you direct as:\n"
             f"  {_mind_for(mode)}\n\n"
+            "GLEN KEANE IS YOUR SUPERVISING ANIMATOR ON EVERY BEAT, REGARDLESS OF MODE (2026-07-14, restoring "
+            "the named-auteur-per-chair doctrine, CRYSTAL_BEARS_STUDIO_BIBLE.md) — appeal, weight and the "
+            "illusion of life are non-negotiable, not a comedy-only concern: a body that moves like it has real "
+            "mass and real intent, a pose that reads instantly and is worth holding on, timing that earns "
+            "anticipation before the action and follow-through after it. A quiet heart beat needs Keane's eye "
+            "as much as a physical crash does — weight is not the same thing as bigness; a still character can "
+            "carry real weight in one small, held gesture.\n\n"
             f"THE NORTH STAR: {NORTH_STAR}\n\n"
             "YOUR JOB: read the character as a real, SPECIFIC person (their bible is given) and DIRECT this beat — the "
             "acting, the expressions, the comic/emotional timing, and a real CAMERA breakdown. Make it FUNNY, ALIVE and "

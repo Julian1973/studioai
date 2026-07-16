@@ -1,57 +1,63 @@
 {
-  "_note": "",
-  "Ep1": {
-    "episode": "Episode 1",
-    "title": "The Adventure Begins",
-    "lead": "Keen",
-    "engine": "Courage",
-    "the_day_unfolds": [
-      {
-        "scenes": [
-          1,
-          2,
-          3
-        ],
-        "pillar": "spark",
-        "light": "Warm golden morning across meadow, sanctuary and pier; clear skies, soft breeze, love and play before the big water."
-      },
-      {
-        "scenes": [
-          4,
-          5
-        ],
-        "pillar": "deepening",
-        "light": "Gold drains into cold blue-grey as wind, rain and distance grow; Keen\u2019s control slips and the world becomes too large."
-      },
-      {
-        "scenes": [
-          7
-        ],
-        "pillar": "heart",
-        "light": "Darkest storm-blue and underwater grey; the vacant cuffs glow faint aqua from remembered love before any crystal is awarded."
-      },
-      {
-        "scenes": [
-          6,
-          8,
-          9
-        ],
-        "pillar": "connection",
-        "light": "Storm breaks toward warmth; the shore beacon, welcome circle and aquamarine award turn cold rain into shared light."
-      },
-      {
-        "scenes": [
-          10
-        ],
-        "pillar": "ripple",
-        "light": "Warm golden-hour calm, brighter than the start but with wet leaves and sea-memory still visible."
-      }
+ "_note": "",
+ "Ep1": {
+  "episode": "Episode 1",
+  "title": "The Adventure Begins",
+  "lead": "Keen",
+  "engine": "Courage",
+  "the_day_unfolds": [
+   {
+    "scenes": [
+     1,
+     2,
+     3
     ],
-    "wristbands": [
-      "none",
-      "transition",
-      "vacant",
-      "crystal"
-    ]
-  }
+    "pillar": "spark",
+    "light": "Warm golden morning: pollen, rose-quartz softness, bright pier water, and the safety of home before the unknown opens."
+   },
+   {
+    "scenes": [
+     4,
+     5
+    ],
+    "pillar": "deepening",
+    "light": "Gold drains into cold blue-grey as wind rises, the map is lost, and the distant sea becomes unreadable."
+   },
+   {
+    "scenes": [
+     6
+    ],
+    "pillar": "connection",
+    "light": "Storm-dark cove cut by communal crystal colour, a beacon reaching before the rescue is complete."
+   },
+   {
+    "scenes": [
+     7
+    ],
+    "pillar": "heart",
+    "light": "Darkest storm-blue underwater, with the aquamarine glow coming from Keen’s vacant cuffs before any crystal is awarded."
+   },
+   {
+    "scenes": [
+     8,
+     9
+    ],
+    "pillar": "connection",
+    "light": "Storm breaks into cool clearing light, then warm late-afternoon sun around the earned Aquamarine crystal."
+   },
+   {
+    "scenes": [
+     10
+    ],
+    "pillar": "ripple",
+    "light": "Golden-hour calm, warmer than the beginning, with wet storm traces still visible so the ache remains."
+   }
+  ],
+  "wristbands": [
+   "none",
+   "transition",
+   "vacant",
+   "crystal"
+  ]
+ }
 }

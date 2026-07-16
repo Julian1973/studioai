@@ -5,7 +5,10 @@ Usage: python3 kf_preview.py <beat_package.json> <beatCode> [episode]   (run fro
 import sys, os, json
 HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE); sys.path.insert(0, HERE)
-import cb_prompts as P, cb_scene
+# FIXED 2026-07-12 (full-codebase audit continued): `cb_prompts as P` was imported but never referenced
+# anywhere in this file — cb_scene.keyframe_for already imports cb_prompts internally where it's actually
+# needed. Dead weight, removed.
+import cb_scene
 
 def main():
     if len(sys.argv) < 3:
@@ -18,9 +21,10 @@ def main():
         b = next((x for x in beats if str(x.get("beatCode") or x.get("shotCode")) == beat), None)
         if not b:
             print(json.dumps({"error": "beat not found: " + beat})); return
-        prompt, refs, info = cb_scene.keyframe_for(beats, beat, episode)   # the SAME call generation uses → card == API
-        print(json.dumps({"kind": info.get("kind"), "prompt": prompt, "chain": info.get("chain"),
-                          "refs": [os.path.basename(str(r)) for r in refs], "refCount": len(refs)}))
+        # FIXED 2026-07-12 (loose-ends pass): was a hand-built dict from cb_scene.keyframe_for's raw return,
+        # a near-duplicate of beat_preview.py's own keyframe branch that had already drifted apart once (the
+        # lint field) — now cb_scene.keyframe_preview_payload() is the one shared builder both scripts call.
+        print(json.dumps(cb_scene.keyframe_preview_payload(beats, beat, episode)))   # card == API (WYSIWYG)
     except Exception as e:
         print(json.dumps({"error": str(e)}))
 

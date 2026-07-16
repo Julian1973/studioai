@@ -1,3 +1,7 @@
+> ⚠ **SUPERSEDED PENDING CUTOVER (architecture recovery, 2026-07-16):** this document
+> governs ONLY the legacy beat pipeline until the shot pipeline's first real approved
+> shot lands. THE_DEFINITIVE_PIPELINE.md is the one authoritative specification.
+
 # GATE 3 — THE ANIMATION DOCTRINE
 ### The Crystal Bears · Enaid Creative · Version of Record
 ### This document supersedes ALL prior Gate 3, prompt-structure, and emitter instructions. Where any older document, rule note, or session ruling conflicts with this one, THIS document wins. There is one workflow, one prompt shape, one law set. Nothing is added to any of them without a render-proven failure and Julian's explicit ruling (see CHANGE CONTROL).
@@ -25,7 +29,7 @@ Assets assembled by junction type:
 The prompt is compiled from data. No prompt text is ever hand-authored or hand-patched, by anyone, for any reason. Structure in §2; sources in §3.
 
 **STEP 4 — LINT** *(machine, zero cost — one unified gate)*
-The compiled prompt is checked before money moves: word budgets (§2), banned vocabulary, Law 5 (no dialogue words), no appearance prose, no speed adverbs, no negation outside the Negative block, structural congruence with the Reference Prompts (§4), every content line traceable to its cited source. **Fail = the prompt never fires. Fix at data, recompile.**
+The compiled prompt is checked before money moves: word budgets (§2), banned vocabulary, Law 5 (no dialogue words), no appearance prose, no speed adverbs, no negation outside the Negative block, structural congruence with the Reference Prompts (§4), every content line traceable to its cited source, the Character Vocabulary Law (a cut's action/camera text never uses a named character's banned words), the Camera-Lock Law (no camera movement described on a spoken cut), and the Anti-Slop Lexicon (generic AI-video filler — "cinematic," "stunning," "epic" — hard-blocked in the beat-story block, flagged elsewhere). **Fail = the prompt never fires. Fix at data, recompile.** *(CORRECTED 2026-07-12, full-codebase audit: this list previously omitted these three checks, which `cb_qa.check_gate3_lint` already runs live — `check_character_vocabulary`, `check_camera_lock_conflict`, `ANTI_SLOP_WORDS`.)*
 
 **STEP 5 — FIRE** *(one render)*
 Single seed. Standard tier. The one-render economy: this render is the take.
@@ -100,7 +104,7 @@ generic sentence — "where's the action... the cut saying what camera it is, wh
 story beat?" A real per-cut shot list cannot fit multiple cameras and actions in 80 words; the whole-prompt
 400-word hard cap was always the real backstop and remains the only one now.
 
-**Standing negatives (every beat, eleven — rule 43/44):** no morphing/redesign/rescale of characters · no extra characters or props · no on-screen text, subtitles, logos or watermarks · no foreign-language speech · no crystals on or attached to the bees · no frozen wings while airborne · no 2D or flat animation · no invented voices · no floating or sinking through ground · no body inflation · no full-body deflation (slumps/dips only). Beat-specific `stagingProhibited` items merge in FIRST, terse — mechanically prefixed "no " if not already a negation (rule 54, 2026-07-08) so every item in the line reads with the same cadence.
+**Standing negatives (every beat, twelve — rule 43/44, twelfth added 2026-07-13):** no morphing/redesign/rescale of characters · no extra characters or props · no on-screen text, subtitles, logos or watermarks · no foreign-language speech · no crystals on or attached to the bees · no frozen wings while airborne · no 2D or flat animation · no invented voices · no floating or sinking through ground · no body inflation · no full-body deflation (slumps/dips only) · no invented background voices (2026-07-13 — a real rendered take, 1.B3, carried hallucinated background foreign-language audio despite "no foreign-language speech" already existing; that item only ever covered the primary voice). Beat-specific `stagingProhibited` items merge in FIRST, terse — mechanically prefixed "no " if not already a negation (rule 54, 2026-07-08) so every item in the line reads with the same cadence.
 
 ---
 
@@ -122,7 +126,8 @@ story beat?" A real per-cut shot list cannot fit multiple cameras and actions in
 | Settle | The beat's endState | A living settle: pose held, life continuing — wings, breath, breeze. Never a freeze |
 | Camera | The beat's camera data | One primary move; locked during spoken lines (hums/sing-song are motion-exempt); mid-scene beats open on a new angle WITHIN the scene's space (Coverage Law); establishing wides belong to scene openers only |
 | Ambience | The scene's locked ambient bed | One line, word-for-word identical across every beat in the scene |
-| Negatives | Standing set + beat staging | The only negation in the prompt |
+| Negatives | Standing twelve (rule 43/44, twelfth added 2026-07-13) + beat's own `stagingProhibited` + the beat's resolved physical archetype's `prohibited_staging` (automatic, added 2026-07-09 — `cb_segprompt._v5_archetype_prohibited`) | The only negation in the prompt; the third source is mechanical — a beat never has to hand-author what its own archetype already forbids *(CORRECTED 2026-07-12, full-codebase audit: this row previously named only two sources)* |
+| Reference geography | @图1 matches the pickup moment ONLY (identity/scale/expressions/marks/lighting) — never an ongoing geography constraint | Rule (2026-07-13, Julian — "the stay in space is the first frame then it can go anywhere as its the continuity holder not the direction"); real footage (1.B3) showed a beat whose own story required travel instead looping back to the reference frame's own composition |
 
 **Never in a prompt:** character appearance (the reference image carries it — names are binding labels welded to references: "Fuzzby is the bee from @图2"), dialogue words, writer-room guidance (dos/donts live at Gate 1 as review criteria), internal production notes, banned vocabulary (it is the crystal cove meadow), "copy exactly"/frame-freeze language (retired canon — "begin on this exact composition" is the form).
 
@@ -163,7 +168,7 @@ Settle:
 his pose held but never still, buzzing with pride, wings a blur; her flat, fond stare
 beside him.
 
-Negative: [standing eleven + beat staging, terse].
+Negative: [standing twelve + beat staging, terse].
 ```
 
 Time ranges (`0–Ns`, etc.) are computed, never authored — a mechanical, weight-free division of the
@@ -175,11 +180,11 @@ now lives in the HEADER; the prompt ends on the Negative block directly.
 
 ```
 @图1 is the approved final frame of the previous beat and must be matched exactly as the first
-frame only. Preserve character design, scale, expressions, continuity marks, lighting and local
-geography. Immediately after the first frame, begin the new action. Do not hold the
-previous pose, replay the previous action, reset the characters or introduce unexplained
-repositioning. [beat.relayOpeningNote, if authored — who starts where, what breaks first.]
-[beat.spatialAxis, if authored — the fixed lane/blocking law for this beat.]
+frame only. Preserve character design, scale, expressions, continuity marks and lighting.
+Immediately after the first frame, begin the new action — free to travel anywhere the story
+needs. Do not hold the previous pose, replay the previous action, reset the characters or
+introduce unexplained repositioning. [beat.relayOpeningNote, if authored — who starts where,
+what breaks first.] [beat.spatialAxis, if authored — the fixed lane/blocking law for this beat.]
 ```
 
 @Video1 is RETIRED (Julian, 2026-07-07, watching 1.B2's actual footage: "I don't think we should use
@@ -212,6 +217,17 @@ intent, physical performance), never the words. Law 6 stays fully intact and un-
 is quoted the same way Acting DNA is, never paraphrased at compile time.
 
 Everything else compiles identically. CarryMarks (the moustache, the leg pollen, the light) are the hard state gate at Step 6; incidental set dressing is advisory only.
+
+FOURTH (Julian's ruling, 2026-07-13, diagnosing 1.B3's real rendered failure — "the stay in space is the
+first frame then it can go anywhere as its the continuity holder not the direction"): "local geography"
+is dropped from the preserve-list. It was never meant as a whole-shot constraint, but stating it in the
+same breath as identity attributes (character design, scale, expressions) that DO persist made it read as
+an ongoing claim rather than a fact about the pickup instant. Real footage proved the cost directly — a
+beat whose own story required travel (dive to a new flower, clip a different branch, tumble, land
+elsewhere) instead looped back to the exact composition it opened on, because the reference image was the
+one thing the model had strong, unambiguous grounding for and this clause gave it permission to keep
+returning to it. @图1's job is being the continuity holder for the pickup moment ONLY — never a director
+for where the shot travels next; that belongs to the action text and camera direction alone.
 
 **WORD-BUDGET NOTE (2026-07-07):** this wording is measurably heavier than what it replaces (+39 words on
 every relay beat before any beat-specific `relayOpeningNote`/`spatialAxis`/delivery content); see §2's

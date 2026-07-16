@@ -17,7 +17,7 @@ import cb_pipeline
 
 def sample():
     return {"Ep1": {
-        "1": {"1": True, "2a": True, "2b": True, "3": True, "4": True,
+        "1": {"1": True, "1.6": True, "2a": True, "2b": True, "3": True, "4": True,
               "beats": {"1.B1": {"audio": True, "keyframe": True, "clip": True},
                         "1.B2": {"audio": True, "keyframe": True, "clip": True}}},
         "2": {"1": True, "2a": True, "2b": True,
@@ -32,9 +32,9 @@ def run(gate, scene):
     return r
 
 CASES = {
-    "2b": dict(gone=["2b", "3", "4"], kept=["1", "2a"],            bclear=["keyframe", "clip"], bkeep=["audio"]),
-    "3":  dict(gone=["3", "4"],       kept=["1", "2a", "2b"],      bclear=["clip"],             bkeep=["audio", "keyframe"]),
-    "4":  dict(gone=["4"],            kept=["1", "2a", "2b", "3"], bclear=[],                   bkeep=["audio", "keyframe", "clip"]),
+    "2b": dict(gone=["2b", "3", "4"], kept=["1", "1.6", "2a"],            bclear=["keyframe", "clip"], bkeep=["audio"]),
+    "3":  dict(gone=["3", "4"],       kept=["1", "1.6", "2a", "2b"],      bclear=["clip"],             bkeep=["audio", "keyframe"]),
+    "4":  dict(gone=["4"],            kept=["1", "1.6", "2a", "2b", "3"], bclear=[],                   bkeep=["audio", "keyframe", "clip"]),
 }
 S2 = {"1": True, "2a": True, "2b": True, "beats": {"2.B1": {"audio": True, "keyframe": True, "clip": False}}}
 

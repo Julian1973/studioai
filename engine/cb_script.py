@@ -56,13 +56,19 @@ def _norm(s):
 
 _ALT_MARKERS = {"ALT", "ALT.", "ALTERNATE", "ALTERNATIVE", "OPTION", "OPT", "OR"}
 _CUE_SHAPE = re.compile(r"^\s*\d*\s*([A-Z][A-Z' ]{1,24})(?:\s*\(.*\))?\s*$")
-_NAME_START = re.compile(r"^([A-Z][A-Za-z']*)\b(.*)$")
 
 def parse(script_text, roster, warn=None):
     """warn(msg) is called (if given) when a line LOOKS like a speaker cue (short, ALL-CAPS, its own line) but
     doesn't match the roster — an unrecognized/misspelled character name would otherwise vanish silently into the
     surrounding action text, with nothing downstream able to detect the loss."""
     roster = {_na(r.strip().upper()) for r in roster} | {"ALL"}
+    # Built PER CALL from the actual roster (never a fixed single-token pattern) so a multi-word character name
+    # (e.g. "KEEN'S MUM") is recognized as a whole subject, not truncated to its first token at a word boundary —
+    # a fixed r"^([A-Z][A-Za-z']*)\b(.*)$" pattern can only ever capture "Keen's" out of "Keen's Mum turns away.",
+    # so it structurally could never catch a bled-in action sentence whose subject is a two-word roster name.
+    # Longest-first so "KEEN'S MUM" wins the match over the shorter "KEEN" when both are live roster names.
+    _bleed_names = sorted((roster - {"ALL"}), key=len, reverse=True)
+    _bleed_re = re.compile(r"^(" + "|".join(re.escape(n) for n in _bleed_names) + r")\b(.*)$", re.I) if _bleed_names else None
     lines = script_text.replace("\r\n", "\n").split("\n")
     scenes = []
     cur = None            # current scene
@@ -97,13 +103,38 @@ def parse(script_text, roster, warn=None):
                     tag = pm.group(1).strip().upper()
                     if not dlines:                            # a parenthetical BEFORE the words -> a delivery direction, keep it
                         paren.append(ns); i += 1; continue
-                    if tag in _ALT_MARKERS:                    # an ALT/OPTION marker mid-speech: the writer hasn't
-                        i += 1; break                          # locked ONE final line — stop here, never blend the
-                                                                # alternate text into the verbatim ground truth
+                    if tag in _ALT_MARKERS:
+                        # an ALT/OPTION marker mid-speech: the writer hasn't locked ONE final line — stop
+                        # collecting dialogue here, never blend the alternate text into the verbatim ground truth.
+                        # FIXED 2026-07-12 (full-codebase audit continued): this used to advance past only the
+                        # marker line itself (i += 1) then break — leaving `i` pointing AT the writer's rejected
+                        # alternate line(s), which the outer loop then swept up as a fresh ACTION paragraph and
+                        # shipped straight into the Director's verbatim ground truth (reproduced live on scene 9's
+                        # real (ALT) block: "Wherever you go… You'll never be alone." leaked in as action text,
+                        # already needing a hand-authored script_truth_lock workaround in the shipped package).
+                        # Now consumes every line of the rejected alternate up to the same boundary (blank line /
+                        # next cue / scene heading) this collector already uses elsewhere, and warns — matching
+                        # every other edge case this module surfaces rather than silently dropping/leaking it.
+                        i += 1
+                        _alt_start = i
+                        while i < len(lines):
+                            _al = lines[i]; _as = _al.strip()
+                            if not _as or _is_scene_heading(_al) or _cue_name(_al, roster):
+                                break
+                            i += 1
+                        if warn and i > _alt_start:
+                            warn(f"scene {cur['sceneNumber']}: dropped a writer-marked ({tag}) alternate line for "
+                                 f"{cue} — not used as dialogue or action.")
+                        break
                     i += 1; continue                           # any other mid-line direction (e.g. "(beat)") -> strip, keep collecting
-                if dlines and re.search(r"[.!?][\"'’”]*$", dlines[-1]):
-                    m = _NAME_START.match(ns)
-                    if m and _na(m.group(1).upper()) in (roster - {"ALL"}) and m.group(2).strip():
+                # FIXED 2026-07-12 (full-codebase audit continued): the terminator class only recognized literal
+                # '.', '!', '?' — never the Unicode ellipsis (…) this screenplay's dialogue uses constantly (37
+                # occurrences, 0 literal "..." in the real Ep1 script). A future ellipsis-terminated line glued
+                # (no blank line) to unseparated action prose naming a roster character would silently miss this
+                # bleed check entirely, polluting the very ground truth the verbatim gate compares against.
+                if dlines and re.search(r"[.!?…][\"'’”]*$", dlines[-1]):
+                    m = _bleed_re.match(_na(ns)) if _bleed_re else None
+                    if m and m.group(2).strip():
                         # a new sentence starting with a roster character's own name, directly after a completed
                         # line of dialogue, with NO blank line in the source to separate them — almost always
                         # third-person ACTION narration bleeding into the dialogue block (the writer's source

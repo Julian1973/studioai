@@ -25,7 +25,6 @@ import os, re, json
 from pydantic import ValidationError
 import cb_gen   # importing cb_gen loads engine/.env into os.environ (keys never leave the backend)
 
-PROVIDER = "openai"
 # models — environment first, defaults second (rule: read from env; never hardcode secrets)
 DIRECTOR_MODEL = os.environ.get("OPENAI_DIRECTOR_MODEL", "gpt-5.5")
 VALIDATOR_MODEL = os.environ.get("OPENAI_VALIDATOR_MODEL", "gpt-5.4-mini")
@@ -35,9 +34,12 @@ GEMINI_MODEL = os.environ.get("DIRECTOR_GEMINI_MODEL", "gemini-3.1-pro-preview")
 ENABLE_GEMINI_FALLBACK = os.environ.get("DIRECTOR_ENABLE_GEMINI_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 MAX_OUTPUT_TOKENS = 32000
 
-# the Director provider config, in one place (rule 2)
-DIRECTOR_PROVIDER = {"provider": PROVIDER, "director_model": DIRECTOR_MODEL, "validator_model": VALIDATOR_MODEL,
-                     "fallback": f"gemini:{GEMINI_MODEL}", "gemini_fallback_enabled": ENABLE_GEMINI_FALLBACK}
+# FIXED 2026-07-12 (full-codebase audit continued): PROVIDER + DIRECTOR_PROVIDER (a "config summary" dict built
+# from PROVIDER/DIRECTOR_MODEL/VALIDATOR_MODEL/GEMINI_MODEL/ENABLE_GEMINI_FALLBACK) had zero callers anywhere in
+# the live codebase — confirmed by grep, inert data nobody ever read. The one place that would plausibly consume
+# a provider-config summary, cb_director.py's own startup log, already builds its message from the individual
+# constants directly, bypassing this dict entirely. Removed rather than left as unread dead data; the individual
+# constants above are the real, live source of truth and are already used everywhere that needs them.
 
 
 def _openai_key():
@@ -80,18 +82,46 @@ def _openai_call(model, system, user, schema):
         raise RuntimeError(f"no parsed output (status={getattr(resp, 'status', '?')}, possible refusal)")
     return obj
 
+def repair_truncated(s):
+    """Close a JSON reply cut off by the token cap (open string, dangling comma, missing ]/}) — recover the
+    complete elements. FIXED 2026-07-12 (loose-ends pass): this was hand-duplicated in cb_writer.py as its own
+    module-private `_repair_truncated` — moved here (the shared LLM-plumbing module) as the one canonical copy;
+    cb_writer.py now imports it."""
+    stack = []; in_str = esc = False
+    for ch in s:
+        if in_str:
+            if esc: esc = False
+            elif ch == "\\": esc = True
+            elif ch == '"': in_str = False
+        else:
+            if ch == '"': in_str = True
+            elif ch in "{[": stack.append(ch)
+            elif ch in "}]" and stack: stack.pop()
+    out = (s + ('"' if in_str else "")).rstrip()
+    if out.endswith(","): out = out[:-1].rstrip()
+    for ch in reversed(stack):
+        out += "}" if ch == "{" else "]"
+    return out
+
 def _loads(text):
-    """Minimal JSON recovery for the Gemini fallback (strip code fences / decode the first complete value)."""
+    """JSON recovery for the Gemini fallback: strip code fences, decode the first complete value, then — as of
+    2026-07-12 (loose-ends pass) — also try closing a token-cap-truncated reply (repair_truncated) before giving
+    up, the same recovery tier cb_writer.py's own _loadjson already had and this function was missing."""
     t = (text or "").strip()
     if t.startswith("```"):
         t = re.sub(r"^```[a-zA-Z]*\n", "", t).rsplit("```", 1)[0].strip()
     try:
         return json.loads(t)
     except Exception:
-        i = next((k for k, c in enumerate(t) if c in "{["), -1)
-        if i < 0:
-            raise
-        return json.JSONDecoder().raw_decode(t[i:])[0]
+        pass
+    i = next((k for k, c in enumerate(t) if c in "{["), -1)
+    if i < 0:
+        raise ValueError(f"no JSON object/array found in text ({len(t)} chars)")
+    body = t[i:]
+    try:
+        return json.JSONDecoder().raw_decode(body)[0]
+    except Exception:
+        return json.loads(repair_truncated(body))
 
 def _gemini_call(system, user, schema):
     """FALLBACK ONLY — Gemini JSON mode, then re-validate against the SAME Pydantic schema (off-schema raises
@@ -107,7 +137,18 @@ def _gemini_call(system, user, schema):
                       json=body, timeout=600)
     if r.status_code != 200:
         raise RuntimeError(f"Gemini {r.status_code}: {r.text[:200]}")
-    text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    rj = r.json()
+    # FIXED 2026-07-12 (full-codebase audit continued): indexed candidates[0] with no guard for a safety-blocked
+    # or otherwise candidate-less response (HTTP 200, a bare {"promptFeedback": {...}}, or "candidates": []) —
+    # raised a bare KeyError/IndexError instead of naming the block reason, unlike this exact Gemini
+    # generateContent response shape's siblings elsewhere in this codebase (cb_gen.py's
+    # _generate_image_nanobanana, cb_writer.py's _gen()), which both guard it explicitly before indexing.
+    # structured()'s own `except Exception as e2` still catches whatever this raises and re-raises it as a
+    # SystemExit either way, so this was never a silent crash — just a worse diagnostic than every sibling caller
+    # already gives for the identical failure mode.
+    if not rj.get("candidates"):
+        raise RuntimeError(f"Gemini returned no candidates (likely a safety block): {str(rj)[:300]}")
+    text = rj["candidates"][0]["content"]["parts"][0]["text"]
     return schema.model_validate(_loads(text))
 
 def structured(system, user, schema, *, model=None, label="director", log=print):

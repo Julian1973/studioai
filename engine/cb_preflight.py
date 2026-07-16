@@ -7,7 +7,10 @@ scene, per character, per package — and prints a PASS/FAIL gap table, every ga
 REPORTS — it never fires, retakes, signs, or edits anything. `manifest_ok(pkg_path, scene, episode)` is the
 importable choke-point every gate-arming call site (cb_pipeline.approve, cb_beats.fire_next_beat,
 cb_replicator.walk_scene, cb-studio/serve.py's fire/approve endpoints) calls before proceeding — see
-MANIFEST.md's "Gate ordering in code" section.
+CLAUDE.md rule 37's own "GATE ORDERING IN CODE" paragraph. FIXED 2026-07-12 (full-codebase audit continued):
+this used to cite "MANIFEST.md's 'Gate ordering in code' section" — MANIFEST.md has no such section (that
+paragraph has only ever lived in CLAUDE.md rule 37); corrected to point at the real source rather than
+chasing the doc to grow a section it never had.
 
     python3 cb_preflight.py [package.json] [--episode=EpN] [--scene=N]
 
@@ -19,7 +22,10 @@ elsewhere in the pipeline; this tool does not re-trigger them.
 import os, sys, json, re, glob
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CHARACTERS_PATH = os.path.join(HERE, "config", "characters.json")
+# FIXED 2026-07-12 (loose-ends pass): this module's own CHARACTERS_PATH (a hand-rolled os.path.join(HERE,
+# "config", "characters.json")) was removed — every call site now reads paths.CHARS directly (imported below
+# as _paths); HERE itself stays, still genuinely needed for cb-output/media/scripts path-building elsewhere
+# in this file.
 
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 # Package resolution — same glob convention as cb_pipeline._resolve_pkg / cb_golden._resolve_pkg_path, never
@@ -56,10 +62,57 @@ def _blank(v):
     return v is None or (isinstance(v, str) and not v.strip())
 
 
+def _bool_field_names():
+    """Every Beat field the schema declares as a real bool — derived from cb_director_schemas.Beat.model_fields
+    itself (matching rule 47's own established pattern: never hand-typed, so a future bool field is
+    automatically covered). FIXED 2026-07-13 (live-fire diagnosis): wordlessHeld was found stored as the
+    JSON STRING "false" (not the boolean false) for two beats — truthy in Python, so cb_voice.build_dialogue_
+    track's `if shot.get("wordlessHeld"):` guard silently treated a non-wordless beat as the show's one
+    wordless-held beat and skipped voice generation on every fire, with no exception and no diagnostic (the
+    exact class of bug a live fire finds and a static check misses). cb_voice.py's own guard was hardened
+    the same night; THIS check closes the gap one level up — a wrong-typed value now BLOCKS at preflight,
+    before a beat is ever fired, instead of silently degrading at the one call site that happened to do a
+    bare truthiness check on it."""
+    import cb_director_schemas as _S
+    return [name for name, f in _S.Beat.model_fields.items() if f.annotation is bool]
+
+
+def check_beat_field_types(beat):
+    """Every schema-declared bool field must actually BE a Python bool, not a string/int/etc. that happens to
+    be truthy or falsy. A field simply missing is a presence gap (checked elsewhere, e.g. wordlessHeld/
+    beautyMoment are always required so json.load's own KeyError-free .get() would just return None — that's
+    reported by whichever check owns presence, not this one, which only fires when a value IS present but
+    wrong-typed)."""
+    code = beat.get("beatCode") or beat.get("shotCode") or "?"
+    gaps = []
+    for fname in _bool_field_names():
+        if fname not in beat:
+            continue
+        v = beat[fname]
+        if v is not None and not isinstance(v, bool):
+            gaps.append(Gap("beat", code, fname, "BLOCK",
+                            f"must be a real boolean — found {v!r} ({type(v).__name__}), which is truthy/"
+                            f"falsy in Python but not an actual bool, so a bare `if beat.get({fname!r}):` "
+                            f"check elsewhere in the pipeline would silently misread it"))
+    return gaps
+
+
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 # TECHNICAL CONTRACT — per beat
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
-_HOLD_RE = re.compile(r"(\d+(?:\.\d+)?)[\s-]*second")
+# FIXED 2026-07-11 (full-codebase audit, duplication finding): shared with cb_director_schemas._PAUSEHOLD_RE
+# via paths.PAUSEHOLD_RE — see that module's own comment for why.
+import paths as _paths
+_HOLD_RE = _paths.PAUSEHOLD_RE
+
+# A dialogue cut's own speaker prefix is verbatim script text (Law 4 — never rewritten, even when the script's
+# own spelling diverges from the canon character name) while speakers[]/characters[] always use the canon
+# spelling. "Howie"/"Howey" is the one recurring, already-documented case (the script itself literally cues
+# this character as HOWIE — see _script_roster's own {"HOWIE","HOWEY"} exclusion set) — resolved here so the
+# speaker-order consistency check compares like with like instead of treating a verbatim script spelling as a
+# different, unlisted character.
+_SPEAKER_NAME_ALIASES = {"Howie": "Howey"}
+
 
 def check_beat_technical(beat, is_scene_opener):
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
@@ -90,13 +143,25 @@ def check_beat_technical(beat, is_scene_opener):
         elif float(m.group(1)) > 1.5:
             gaps.append(Gap("beat", code, "pauseHold", "BLOCK", f"states {m.group(1)}s — staging law caps holds at <=1.5s"))
 
+    # opensOn — 2026-07-15 (guardrail-fidelity audit): only .who ever reaches a compiled prompt
+    # (cb_segprompt._v5_active_cast reads .get("opensOn",{}).get("who") only, as does
+    # cb_director_schemas.beat_problems's own authoring-time check). .action fed a v4-era camera
+    # sentence ("OPEN ON {NAME} mid-motion: {action}.") that was dropped in the v5 purge (rule 42) —
+    # requiring it non-blank here BLOCKed content no render stage consumes. Scoped to what's real.
     if not is_scene_opener and jt != "seamless_continuation":
         oo = beat.get("opensOn") or {}
-        if not (isinstance(oo, dict) and oo.get("who") and oo.get("action")):
-            gaps.append(Gap("beat", code, "opensOn", "BLOCK", "required for an intentional_next_shot beat (the default) — {who, action}"))
+        if not (isinstance(oo, dict) and oo.get("who")):
+            gaps.append(Gap("beat", code, "opensOn", "BLOCK", "required for an intentional_next_shot beat (the default) — who the camera opens on"))
 
+    # actingContrast — 2026-07-15 (guardrail-fidelity audit): confirmed zero downstream consumer
+    # anywhere (compiled prompt, Director's Eye, craft score, Gate-1 export doc) — its v4-era
+    # acting_rules emitter field was retired (rule 42/ACTINGDNA RETRACTION). A BLOCK here gated
+    # Gate 1 on content that never reaches anything delivered. Downgraded to FLAG (authoring-quality
+    # signal, kept per Julian's own call on whether to re-wire or drop it — not mine to decide).
     if _blank(beat.get("actingContrast")):
-        gaps.append(Gap("beat", code, "actingContrast", "BLOCK", "required on every beat"))
+        gaps.append(Gap("beat", code, "actingContrast", "FLAG",
+                        "authored but not currently consumed by any compiled prompt, QA check, or export "
+                        "document — kept as an authoring-quality signal, not a gate"))
 
     # THE DELIVERY LAW (rule 53, 2026-07-08): a cut with dialogue must have a non-blank delivery note —
     # cb_segprompt._v5_cut_speaker_note now quotes it verbatim into the shipped prompt as acting direction;
@@ -127,6 +192,7 @@ def check_beat_technical(beat, is_scene_opener):
         d = (c.get("dialogue") or "").strip()
         if d:
             sp = d.split(":", 1)[0].strip().title()
+            sp = _SPEAKER_NAME_ALIASES.get(sp, sp)
             if sp and sp.lower() != "all":   # a group_chorus line ("ALL: ...") isn't tied to one speaker's order
                 dlg_all.append(sp)
     first_order = []   # distinct speakers, in FIRST-APPEARANCE order — alternating dialogue (A, B, A) is normal
@@ -137,24 +203,39 @@ def check_beat_technical(beat, is_scene_opener):
         # speakers[] may legitimately list more names than get an individual line (a chorus participant covered
         # only by an "ALL:" line, say) — only the RELATIVE ORDER of names that DO speak individually is checked,
         # never the full list length, so a chorus-only participant listed alongside them is not a false mismatch.
-        norm_speakers = [s.strip().title() for s in speakers]
+        norm_speakers = [_SPEAKER_NAME_ALIASES.get(s.strip().title(), s.strip().title()) for s in speakers]
         speakers_subset = [s for s in norm_speakers if s in first_order]
         missing_names = [s for s in first_order if s not in norm_speakers]
         if missing_names:
             gaps.append(Gap("beat", code, "speaker order", "BLOCK",
                             f"{missing_names} speak(s) individually in cuts[] but is not listed in speakers[]={speakers}"))
         elif speakers_subset != first_order:
-            gaps.append(Gap("beat", code, "speaker order", "BLOCK",
+            # 2026-07-15 (guardrail-fidelity audit): downgraded BLOCK -> FLAG. speakers[]'s own relative
+            # order has zero live consumer — cb_voice._resolve_turns derives speaking order entirely from
+            # cuts[] dialogue text (exact-name resolution, never position), and cb_segprompt._v5_cut_speaker_note
+            # attributes each line the same way. The original BLOCK cited a v4-era "ordinal speaker-binding
+            # sentence" (rule 30/33) that the v4->v5 purge (rule 42) deleted — the check's own justification
+            # is stale. The missing-names sub-check above stays BLOCK (a real cast-completeness gap).
+            gaps.append(Gap("beat", code, "speaker order", "FLAG",
                             f"speakers={speakers} orders its individual speakers as {speakers_subset}, but cuts[] "
-                            f"has them speak in this order: {first_order}"))
+                            f"has them speak in this order: {first_order} — cosmetic only; cb_segprompt's "
+                            f"_v5_cut_speaker_note attributes every line by resolved character name per cut, "
+                            f"never by speakers[]'s ordinal position, so this does not affect the shipped prompt"))
     elif first_order and not speakers:
         gaps.append(Gap("beat", code, "speaker order", "BLOCK", f"cuts[] has dialogue ({first_order}) but speakers[] is empty"))
 
-    # single gag arc — best-effort structural heuristic only (cb_qa.py's own comments admit this cannot be
-    # a real semantic guarantee: "Law 1's other half... this lint cannot cover at all").
-    holds_stated = len(re.findall(r"\bone hold\b", str(ph or "").lower()))
+    # single gag arc — best-effort structural heuristic only: whether a pauseHold and a script_gag_lock_id are
+    # both authored to anchor on, never a real semantic check of the beat's actual content (that stays the
+    # reserved showrunner verdict, CLAUDE.md rule 28). The stale citation this comment used to carry (quoting
+    # text in cb_qa.py that no longer exists there) is removed rather than corrected to a moving target.
+    # 2026-07-15 (guardrail-fidelity audit): scoped the "no gag lock" half to comedyMode != "TRUE" — a
+    # comedyMode="TRUE" beat (the show's own doctrine-defined "small and real / heart" register) has no
+    # gag to lock BY DESIGN, so the old unconditional check fired identically on 100% of that register
+    # (28/43 real beats, confirmed live) regardless of actual quality — noise, not signal. A BIG-mode or
+    # undeclared beat missing its lock is still worth a director's eye and stays flagged.
+    comedy_mode = str(beat.get("comedyMode") or "").upper()
     gag_locks = 1 if beat.get("script_gag_lock_id") else 0
-    if _blank(ph) or gag_locks == 0:
+    if _blank(ph) or (gag_locks == 0 and comedy_mode != "TRUE"):
         gaps.append(Gap("beat", code, "single gag arc", "FLAG",
                         "heuristic only (no pauseHold and/or no script_gag_lock_id to anchor on) — cannot confirm a single arc"))
 
@@ -164,15 +245,26 @@ def check_beat_technical(beat, is_scene_opener):
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 # TECHNICAL CONTRACT — per scene
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
-def check_scene_technical(scene, episode, gate="1"):
+def check_scene_technical(scene, episode, gate="1", beats=None, pkg_path=None):
     """The plate is NEVER a manifest BLOCK, in any gate scope (Julian's ruling, 2026-07-06 — "NO plates yet —
     plates are Stage 2, after Gate 1 carries my signature"): its own crystal-shape/no-characters QA already
     runs automatically at Gate-2a build time (cb_qa.check_plate) — a SEPARATE, already-enforced mechanism —
     so the manifest only ever reports whether it exists yet, informationally, never gating a sign-off on it.
     The `gate` param is kept for forward compatibility (a future Gate-2+-only check could use it) but does not
-    currently change this function's behaviour."""
+    currently change this function's behaviour.
+
+    FIXED 2026-07-12 (full-codebase audit continued): the two file-comparison sub-checks below (scene-cache
+    staleness, banned vocabulary) used to ignore whatever `pkg_path` run() was actually handed and re-derive
+    their own via a fresh _resolve_pkg(episode) glob each — meaning an explicit/non-canonical pkg_path (a
+    backup file, a scratch-test package) was silently never what got compared against; the CURRENT canonical
+    cb-output/ file was checked instead, or — per this file's own test suite, whose scratch packages don't
+    live under cb-output/ at all — silently no-op'd. `pkg_path` is now an explicit optional parameter, used
+    directly when given and falling back to the old _resolve_pkg(episode) glob only when it isn't (so a future
+    direct call that doesn't pass one stays backward compatible) — matching the already-correct precedent in
+    cb_beats.render_readiness, which passes its own real pkg_path to both of these same two functions."""
     sn = str(scene.get("sceneNumber"))
     gaps = []
+    resolved_pkg_path = pkg_path or _resolve_pkg(episode)
 
     plate_path = os.path.join(HERE, "media", f"{episode}_S{sn}_plate.png")
     if not os.path.exists(plate_path):
@@ -199,6 +291,22 @@ def check_scene_technical(scene, episode, gate="1"):
     else:
         gaps.append(Gap("scene", sn, "sceneLook", "STRUCTURAL", "present"))
 
+    # THE PERFORMANCE THROUGHLINE (2026-07-08, Directing/Animation panel finding; CORRECTED same night by
+    # Julian — "the script and the storyboard and beat should deliver that"): the first version of this
+    # required a separately hand/LLM-authored scene-level note, which BLOCKed every scene until someone typed
+    # one. That was backwards — each beat already carries its own fidelityAllocation.primary once authored, so
+    # who carries a scene is already answerable from the beats themselves. Never a BLOCK/FLAG now: computed
+    # live via cb_director._derive_performance_throughline(beats) — zero LLM calls, nothing invented, nothing
+    # to backfill. Reported STRUCTURAL (informational) for every scene whose beats already have
+    # fidelityAllocation authored (already a separate, existing requirement on every beat).
+    try:
+        import cb_director as _CD
+        gaps.append(Gap("scene", sn, "performanceThroughline", "STRUCTURAL",
+                        _CD._derive_performance_throughline(beats or [])))
+    except Exception as e:
+        gaps.append(Gap("scene", sn, "performanceThroughline", "STRUCTURAL",
+                        f"could not be derived — {str(e)[:120]}"))
+
     # FIXED 2026-07-06 (found live during Scene 1's real walk — 1.B2 hard-stopped on a stale scene cache that
     # this manifest check had reported CLEAN moments earlier): this used to shell out to a script named
     # "sync_scenes.py" with cwd=HERE (engine/) — but the real file lives at repo-root tools/sync_scenes.py, not
@@ -210,7 +318,7 @@ def check_scene_technical(scene, episode, gate="1"):
     # shelling out to a script by a fragile relative path at all.
     try:
         import cb_prompts
-        stale = cb_prompts.scene_cache_stale(episode, sn, pkg_path=_resolve_pkg(episode))
+        stale = cb_prompts.scene_cache_stale(episode, sn, pkg_path=resolved_pkg_path)
         if stale:
             gaps.append(Gap("scene", sn, "locations cache sync", "BLOCK", stale))
     except Exception as e:
@@ -218,8 +326,7 @@ def check_scene_technical(scene, episode, gate="1"):
 
     try:
         import cb_qa
-        pkg_path = _resolve_pkg(episode)
-        vocab = cb_qa.check_scene_vocabulary(pkg_path, sn, episode)
+        vocab = cb_qa.check_scene_vocabulary(resolved_pkg_path, sn, episode)
         if not vocab["ok"]:
             gaps.append(Gap("scene", sn, "banned vocabulary", "BLOCK", vocab["verdict"]))
     except Exception as e:
@@ -246,7 +353,7 @@ def check_scene_technical(scene, episode, gate="1"):
 SCRIPTS_DIR = os.path.join(HERE, "..", "cb-studio", "data", "scripts")
 
 def _script_roster(characters=None):
-    chars = characters if characters is not None else (json.load(open(CHARACTERS_PATH)) if os.path.exists(CHARACTERS_PATH) else {})
+    chars = characters if characters is not None else (json.load(open(_paths.CHARS)) if os.path.exists(_paths.CHARS) else {})
     base = chars.get("characters", chars) if isinstance(chars, dict) else {}
     names = {k.upper() for k in (base.keys() if isinstance(base, dict) else [])}
     return names | {"ALL", "KEEN'S MUM", "HOWIE", "HOWEY"}
@@ -254,10 +361,31 @@ def _script_roster(characters=None):
 
 def _norm_dialogue_words(s):
     """Word-only normalisation — mirrors cb_director._norm_line exactly (drop [V3 tags], a leading NAME:, and
-    punctuation) so 'matches the script' means the same thing here as it does at authoring time."""
+    punctuation) so 'matches the script' means the same thing here as it does at authoring time.
+
+    Deliberately WORDS-ONLY — this alone discards which character said the line (both a script line, prefixed
+    with its own character name before normalising, and a shipped 'NAME: line' cut strip that same prefix down
+    to identical words). See _dialogue_speaker() below, added 2026-07-12, for the piece that must be compared
+    ALONGSIDE this one wherever attribution (not just wording) matters — never rely on this function alone to
+    prove a line is verbatim AND correctly spoken by the right character."""
     s = re.sub(r"\[[^\]]*\]", "", s or "")
     s = re.sub(r"^[A-Z' .]+:\s*", "", s.strip())
     return " ".join(re.sub(r"[^a-z0-9 ]", " ", s.lower()).split())
+
+
+def _dialogue_speaker(d):
+    """FIXED 2026-07-12 (full-codebase audit continued): check_scene_dialogue_verbatim/fix_scene_dialogue_
+    verbatim used to compare ONLY _norm_dialogue_words(...) on both sides — but that helper strips the leading
+    'NAME:' prefix identically whether it's the script's own character or the shipped cut's, so 'FUZZBY: Do I
+    look official?' and 'ZENNY: Do I look official?' normalised to the exact same string and a misattributed-
+    but-correctly-worded line sailed through as a match (verified: _norm_dialogue_words applied to either one
+    is identical). This extracts just the speaker label, normalised for comparison, so the two callers can
+    compare (speaker, words) together — same split the speaker-order check above (~line 132) already uses on
+    a shipped cut's own dialogue string. Returns '' for a malformed string with no ':' at all (never crashes;
+    an empty speaker can only ever fail to match a script line's real, named character, so this degrades to
+    'flag it', never to a silent false match)."""
+    d = d or ""
+    return d.split(":", 1)[0].strip().upper() if ":" in d else ""
 
 
 def _beat_sort_key(code):
@@ -273,7 +401,7 @@ def _resolve_script(episode):
     return max(cands, key=os.path.getmtime) if cands else None
 
 
-def check_scene_dialogue_verbatim(scene, scene_beats, script_scenes, roster):
+def check_scene_dialogue_verbatim(scene, scene_beats, script_scenes):
     """HARD BLOCK — compare this scene's shipped cut dialogue, IN BEAT/CUT ORDER, against the script's own
     dialogue_lines() for this scene, IN ORDER (cb_script.dialogue_lines is the deterministic ground truth — no
     LLM, so it can never itself drift).
@@ -300,6 +428,21 @@ def check_scene_dialogue_verbatim(scene, scene_beats, script_scenes, roster):
     import cb_script
     script_lines = cb_script.dialogue_lines([script_scene])   # [(sceneNumber, CHAR, line), ...] for this scene only
 
+    # THE APPROVED-DEVIATION RECORD — added 2026-07-15 (guardrail-fidelity audit): this check's own SCOPE
+    # is correctly aligned (shipped dialogue must faithfully deliver the locked script) — the gap was that
+    # a genuinely deliberate, already-approved deviation (e.g. rule 46's Scene-3 cut of Mum's "I still feel
+    # him... every day" line, replaced with a wordless hand-on-wristbands beat) had NO way to be recorded,
+    # so it BLOCKed forever, permanently re-flagging content Julian had already signed off on. A scene can
+    # now carry scene["approvedScriptDeviations"]: [{"line": "<CHAR: exact script line>", "reason": ...,
+    # "approvedBy": ..., "date": ...}, ...] — an auditable record, never a silent bypass: an UNRECORDED
+    # drift still hard-BLOCKs exactly as before; only a line matching a recorded deviation downgrades to FLAG.
+    approved_norm = set()
+    for dev in (scene.get("approvedScriptDeviations") or []):
+        ln = str(dev.get("line") or "")
+        if ln:
+            spk = ln.split(":", 1)[0].strip().upper() if ":" in ln else ""
+            approved_norm.add((spk, _norm_dialogue_words(ln)))
+
     ordered = sorted(scene_beats, key=lambda b: _beat_sort_key(b.get("beatCode") or b.get("shotCode")))
     slots = []   # (beatCode, cut_n, dialogue_str) for every cut with spoken dialogue, in true beat/cut order
     for b in ordered:
@@ -309,8 +452,19 @@ def check_scene_dialogue_verbatim(scene, scene_beats, script_scenes, roster):
             if d:
                 slots.append((code, c.get("n"), d))
 
-    script_norm = [_norm_dialogue_words(f"{ch}: {ln}") for (_sn, ch, ln) in script_lines]
-    ship_norm = [_norm_dialogue_words(d) for (_c, _n, d) in slots]
+    # FIXED 2026-07-12 (full-codebase audit continued): this used to compare _norm_dialogue_words(f"{ch}: {ln}")
+    # against _norm_dialogue_words(d) alone — but _norm_dialogue_words strips the leading "NAME:" prefix
+    # identically on BOTH sides before comparing, so a correctly-worded line shipped under the WRONG character
+    # normalised to the exact same string as the script's own line and sailed through as an "equal" opcode,
+    # zero gap raised (verified: _norm_dialogue_words('FUZZBY: Do I look official?') ==
+    # _norm_dialogue_words('ZENNY: Do I look official?')) — exactly the class of misattribution bug this
+    # project has repeatedly found and fixed elsewhere (Howey/Squeaky, rule 46), invisible to the one check
+    # built specifically to be the standing hard-block against dialogue drift. Now compares (SPEAKER, words)
+    # tuples on both sides — the script's own character name, and the shipped cut's own leading NAME: label via
+    # _dialogue_speaker() — so the LCS alignment can tell "right words, wrong speaker" apart from a genuine
+    # match instead of discarding attribution before the comparison ever runs.
+    script_norm = [(ch.strip().upper(), _norm_dialogue_words(ln)) for (_sn, ch, ln) in script_lines]
+    ship_norm = [(_dialogue_speaker(d), _norm_dialogue_words(d)) for (_c, _n, d) in slots]
 
     sm = difflib.SequenceMatcher(None, script_norm, ship_norm, autojunk=False)
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
@@ -318,27 +472,48 @@ def check_scene_dialogue_verbatim(scene, scene_beats, script_scenes, roster):
             continue
         script_slice = [f"{script_lines[k][1]}: {script_lines[k][2]}" for k in range(i1, i2)]
         ship_slice = [f"{slots[k][0]} cut {slots[k][1]}: {slots[k][2]!r}" for k in range(j1, j2)]
+        # a deviation is "approved" only when EVERY script line this opcode concerns matches a recorded
+        # entry — a partial match still BLOCKs, since only the exact recorded line was ever signed off.
+        script_side_approved = bool(script_norm[i1:i2]) and all(t in approved_norm for t in script_norm[i1:i2])
         if tag == "replace" and (i2 - i1) == (j2 - j1) == 1:
-            # a genuine 1:1 rewrite — the common, actionable case (Scene 9's "We saw you dive" class of bug).
+            # a genuine 1:1 rewrite — the common, actionable case (Scene 9's "We saw you dive" class of bug,
+            # and now also a right-words-wrong-speaker misattribution — both report identically here, since
+            # both are "the shipped cut at this position isn't the locked script line at this position").
             code, cut_n, shipped = slots[j1]
-            gaps.append(Gap("beat", code, "dialogue verbatim", "BLOCK",
-                            f"cut {cut_n} ships {shipped!r}, but the locked script line at this position is "
-                            f"{script_slice[0]!r} — a rewritten/invented line, not a verbatim one"))
+            if script_side_approved:
+                gaps.append(Gap("beat", code, "dialogue verbatim", "FLAG",
+                                f"cut {cut_n} ships {shipped!r} in place of the locked script line "
+                                f"{script_slice[0]!r} — matches an approved script deviation, not a violation"))
+            else:
+                gaps.append(Gap("beat", code, "dialogue verbatim", "BLOCK",
+                                f"cut {cut_n} ships {shipped!r}, but the locked script line at this position is "
+                                f"{script_slice[0]!r} — a rewritten/invented line, not a verbatim one"))
         elif tag == "delete":
-            gaps.append(Gap("scene", str(sn), "dialogue verbatim", "BLOCK",
-                            f"MISSING from the shipped beats — the script has {script_slice} with no matching "
-                            f"cut anywhere in this scene (a dropped line, unless deliberately cut to wordless "
-                            f"action — confirm before treating this as a bug, per this project's own T2 ruling "
-                            f"that a deliberate creative cut is not the same as an accidental drop)"))
+            if script_side_approved:
+                gaps.append(Gap("scene", str(sn), "dialogue verbatim", "FLAG",
+                                f"MISSING from the shipped beats but matches an approved script deviation — "
+                                f"the script has {script_slice} with no matching cut, recorded as intentional"))
+            else:
+                gaps.append(Gap("scene", str(sn), "dialogue verbatim", "BLOCK",
+                                f"MISSING from the shipped beats — the script has {script_slice} with no matching "
+                                f"cut anywhere in this scene (a dropped line, unless deliberately cut to wordless "
+                                f"action — confirm before treating this as a bug, per this project's own T2 ruling "
+                                f"that a deliberate creative cut is not the same as an accidental drop; record it "
+                                f"in scene['approvedScriptDeviations'] once confirmed so this never re-flags)"))
         elif tag == "insert":
             gaps.append(Gap("scene", str(sn), "dialogue verbatim", "BLOCK",
                             f"EXTRA/invented — {ship_slice} appear in the shipped beats with no corresponding "
                             f"script line anywhere in this scene"))
         else:   # an uneven replace block (a merge/split) — report both sides without over-claiming a 1:1 pairing
-            gaps.append(Gap("scene", str(sn), "dialogue verbatim", "BLOCK",
-                            f"TEXT DRIFT — script has {script_slice} where the shipped beats instead have "
-                            f"{ship_slice} (not a clean 1:1 substitution, so no single 'expected line' can be "
-                            f"named per beat — review both sides together)"))
+            if script_side_approved:
+                gaps.append(Gap("scene", str(sn), "dialogue verbatim", "FLAG",
+                                f"TEXT DRIFT but matches an approved script deviation — script has {script_slice} "
+                                f"where the shipped beats instead have {ship_slice}"))
+            else:
+                gaps.append(Gap("scene", str(sn), "dialogue verbatim", "BLOCK",
+                                f"TEXT DRIFT — script has {script_slice} where the shipped beats instead have "
+                                f"{ship_slice} (not a clean 1:1 substitution, so no single 'expected line' can be "
+                                f"named per beat — review both sides together)"))
 
     return gaps
 
@@ -368,8 +543,12 @@ def fix_scene_dialogue_verbatim(scene, scene_beats, script_scenes, log=print):
             if (c.get("dialogue") or "").strip():
                 slots.append(c)
 
-    script_norm = [_norm_dialogue_words(f"{ch}: {ln}") for (_sn, ch, ln) in script_lines]
-    ship_norm = [_norm_dialogue_words(c.get("dialogue")) for c in slots]
+    # FIXED 2026-07-12 (full-codebase audit continued): same speaker-attribution gap as check_scene_dialogue_
+    # verbatim above, and this function's own docstring says it uses "the SAME difflib alignment... deliberately"
+    # — so the same (SPEAKER, words) tuple comparison is required here too, not just in the check, or the two
+    # would silently diverge on exactly the case this docstring already promises they don't.
+    script_norm = [(ch.strip().upper(), _norm_dialogue_words(ln)) for (_sn, ch, ln) in script_lines]
+    ship_norm = [(_dialogue_speaker(c.get("dialogue")), _norm_dialogue_words(c.get("dialogue"))) for c in slots]
     sm = difflib.SequenceMatcher(None, script_norm, ship_norm, autojunk=False)
 
     fixed = 0
@@ -397,7 +576,7 @@ def check_characters_technical(all_beats):
         cast.update(b.get("characters") or [])
         cast.update(b.get("openingCast") or [])
     try:
-        chars = json.load(open(CHARACTERS_PATH))
+        chars = json.load(open(_paths.CHARS))
     except Exception:
         chars = {}
     for name in sorted(cast):
@@ -430,8 +609,31 @@ def check_characters_technical(all_beats):
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 # TECHNICAL CONTRACT — per beat, THE V5 WORD BUDGET (Julian, 2026-07-06)
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────────
-WORD_BUDGET_BLOCK = 650   # hard BLOCK — raised 2026-07-07 (rule 52) from 400
-WORD_BUDGET_TARGET = 400  # flag-only target — raised 2026-07-07 (rule 52) from 250
+WORD_BUDGET_BLOCK = 850   # hard BLOCK — raised 2026-07-07 (rule 52) from 400 -> 650 -> 700 (rule 84/85); raised
+                          # AGAIN 2026-07-15 (Julian, live — "guardrails... to bring that beat to life, not for
+                          # anything else") for the SAME underlying reason as both prior raises, finally closed
+                          # at the actual root: cb_segprompt._v5_expression_line/_v5_physics_anchor used to
+                          # field-cap Keane's expression direction and the archetype's physics_rule at 24 words
+                          # each — a mechanism BORN from the 700-word raise itself (that raise's own note above
+                          # names 1.B2 crossing 650 specifically because of the expression line landing) that
+                          # then went on to silently discard ~70 words/beat of real, already-cached Director's
+                          # Pass content on EVERY beat in the package (confirmed: 43 of 43), the exact "guardrail
+                          # working against the beat instead of for it" failure this rule's own note already
+                          # states the architecture forbids ("an emitter compiles what the data says, it never
+                          # self-censors"). Removing that field cap (the actual fix) restored the real content on
+                          # every beat and pushed the two structurally densest beats over 700 for real:
+                          # 1.B2 (the documented tightest beat in the show, three prior rules' running "silent
+                          # trap" warning) to 781, and 10.B1 (a 9-character ensemble beat) to 715 — both newly
+                          # BLOCKed, neither beat's own authored content having grown by a single invented word.
+                          # Mirrors rule 52's own precedent exactly, a third time: when genuinely non-redundant
+                          # content needs room and there is no more real redundancy left to trim (rule 76 already
+                          # extracted what existed), raise the numeric cap with real comfortable headroom (850
+                          # clears 1.B2's real 781-word compile by 69 words, matching this same rule's own
+                          # historical "comfortable" margin) rather than force-fitting genuinely authored content
+                          # back into a field-local cage or silently self-censoring the emitter.
+WORD_BUDGET_TARGET = 400  # flag-only target — raised 2026-07-07 (rule 52) from 250; UNCHANGED 2026-07-14 —
+                          # the target is advisory guidance, not the constraint this specific fix needed to
+                          # move.
 
 def check_beat_word_count(beat, scene, is_scene_opener, prev_carry_marks, scene_beats=None, episode="Ep1"):
     """Hard BLOCK / target word budget (Julian, 2026-07-06, THE V5 ENGINE — "Hard 400-word BLOCK in
@@ -468,7 +670,7 @@ def check_beat_word_count(beat, scene, is_scene_opener, prev_carry_marks, scene_
         relay = _relay_status == "relay"
     try:
         prompt, _builder, _is_def = CS.shipped_prompt(beat, scene, relay=relay,
-                                                       prev_carry_marks=prev_carry_marks)
+                                                       prev_carry_marks=prev_carry_marks, episode=episode)
     except cb_qa.ManifestFieldMissing as e:
         return [Gap("beat", code, "v5 word count", "BLOCK", f"prompt could not be compiled — {e}")]
     wc = CS._v5_word_count(prompt)
@@ -516,6 +718,11 @@ def check_beat_creative(beat):
     if _blank(beat.get("emotionMechanic")):
         gaps.append(Gap("beat", code, "emotionMechanic", "BLOCK",
                         "NEW field, not yet authored anywhere — presence-only check, same reserved-verdict caveat as humourLayer"))
+    # THREE INDEPENDENT CHECKS, NOT AN if/elif/elif CHAIN (2026-07-08 audit finding): the old elif chain meant
+    # only the FIRST blank field of the three ever got reported per beat — a beat missing all three silently
+    # showed just ONE BLOCK, then the next one only after the first was fixed, understating the real gap count
+    # and turning a single-pass fix into a multi-run whack-a-mole. Each field is now checked and reported
+    # independently, so a beat missing all three shows all three in the same run.
     fa = beat.get("fidelityAllocation") or {}
     primary = str(fa.get("primary") or "").strip()
     if not primary or primary.lower() == "none":
@@ -524,9 +731,9 @@ def check_beat_creative(beat):
                         "character name, never blank/none; the code mechanically defaults it from speakers/cast "
                         "if the Director drops it (cb_director._finalize_beat_manifest_fields), so a BLOCK here "
                         "means even that fallback found nothing to work with"))
-    elif not str(fa.get("secondary") or "").strip():
+    if not str(fa.get("secondary") or "").strip():
         gaps.append(Gap("beat", code, "fidelityAllocation.secondary", "BLOCK", "required — a name, or explicit \"none\""))
-    elif not str(fa.get("economized") or "").strip():
+    if not str(fa.get("economized") or "").strip():
         gaps.append(Gap("beat", code, "fidelityAllocation.economized", "BLOCK", "required — names, or explicit \"none\""))
     return gaps
 
@@ -610,14 +817,27 @@ def run(pkg_path, episode="Ep1", scene_filter=None, gate="1", log=print):
     """gate='1' (default): Gate 1's own manifest scope — everything except the scene plate (Stage 2, per
     Julian's 2026-07-06 ruling). gate='2' or later: the full manifest, plate included."""
     d = json.load(open(pkg_path))
-    all_beats = d.get("beats") or d.get("shots") or []
-    scenes = d.get("scenes") or []
+    all_beats_full = d.get("beats") or d.get("shots") or []
+    scenes_full = d.get("scenes") or []
+    # THE PILLAR-MATE SCOPING BUG (found 2026-07-15, live during a real Gate-1 sign-off): check_scene_creative's
+    # "laugh beat per non-Heart pillar" law is deliberately PILLAR-scoped, not scene-scoped (rule 46's own
+    # design — a pillar's laugh requirement can be satisfied by ANY scene sharing it). But scene_filter used to
+    # truncate all_beats/scenes to just the requested scene BEFORE beats_by_pillar was ever built below — so
+    # the exact call every real gate-arming path makes (manifest_ok(scene=N), the choke-point behind approve()/
+    # gate_state_report()) could never see a pillar-mate in another scene, and would BLOCK a scene whose own
+    # pillar-mate (elsewhere in the package) already has the required comedyMode=BIG beat. The whole-package
+    # call (scene_filter=None, e.g. the bare `cb_preflight.py` CLI) never showed this — only single-scene
+    # scoping did, which is exactly what real sign-off uses. Fixed: beats_by_pillar is now always built from
+    # the FULL, unfiltered package (all_beats_full/scenes_full); scene_filter only trims what actually gets
+    # iterated and reported below, never the cross-scene context that check computes against.
+    all_beats = all_beats_full
+    scenes = scenes_full
     if scene_filter:
         all_beats = [b for b in all_beats if str(b.get("sceneNumber")) == str(scene_filter)]
         scenes = [s for s in scenes if str(s.get("sceneNumber")) == str(scene_filter)]
 
     try:
-        characters = json.load(open(CHARACTERS_PATH)) if os.path.exists(CHARACTERS_PATH) else {}
+        characters = json.load(open(_paths.CHARS)) if os.path.exists(_paths.CHARS) else {}
     except Exception:
         characters = {}
     script_scenes, roster = _load_script_scenes(episode, characters, log=log)
@@ -636,6 +856,7 @@ def run(pkg_path, episode="Ep1", scene_filter=None, gate="1", log=print):
             code = b.get("beatCode") or b.get("shotCode")
             is_opener = (code == opener_code)
             gaps.extend(check_beat_technical(b, is_scene_opener=is_opener))
+            gaps.extend(check_beat_field_types(b))
             gaps.extend(check_beat_creative(b))
             prev_marks = beats[i - 1].get("carryMarks") if i > 0 else None
             gaps.extend(check_beat_word_count(b, scene_by_sn.get(sn), is_opener, prev_marks,
@@ -643,11 +864,17 @@ def run(pkg_path, episode="Ep1", scene_filter=None, gate="1", log=print):
             gaps.extend(check_beat_ensemble(b, characters))
 
     # Pillar -> every beat across every scene sharing it (rule: the laugh-per-pillar law is pillar-scoped,
-    # not scene-scoped — see check_scene_creative's own docstring).
+    # not scene-scoped — see check_scene_creative's own docstring). Built from the FULL, unfiltered package
+    # (all_beats_full/scenes_full, not the possibly scene_filter-trimmed `scenes`/`by_scene` above) so a
+    # single-scene-scoped call (every real gate-arming path) still sees pillar-mates outside the requested
+    # scene — see this function's own docstring note on the scoping bug this fixed.
+    by_scene_full = {}
+    for b in all_beats_full:
+        by_scene_full.setdefault(str(b.get("sceneNumber")), []).append(b)
     beats_by_pillar = {}
-    for s in scenes:
+    for s in scenes_full:
         sn = str(s.get("sceneNumber"))
-        beats = by_scene.get(sn, [])
+        beats = by_scene_full.get(sn, [])
         pillar = str(s.get("pillar") or (beats[0].get("pillar") if beats else "") or "").strip().lower()
         beats_by_pillar.setdefault(pillar, []).extend(beats)
 
@@ -655,10 +882,10 @@ def run(pkg_path, episode="Ep1", scene_filter=None, gate="1", log=print):
         sn = str(s.get("sceneNumber"))
         beats = by_scene.get(sn, [])
         pillar = str(s.get("pillar") or (beats[0].get("pillar") if beats else "") or "").strip().lower()
-        gaps.extend(check_scene_technical(s, episode, gate=gate))
+        gaps.extend(check_scene_technical(s, episode, gate=gate, beats=beats, pkg_path=pkg_path))
         gaps.extend(check_scene_creative(s, beats, pillar_mate_beats=beats_by_pillar.get(pillar)))
         if script_scenes is not None:
-            gaps.extend(check_scene_dialogue_verbatim(s, beats, script_scenes, roster))
+            gaps.extend(check_scene_dialogue_verbatim(s, beats, script_scenes))
         else:
             gaps.append(Gap("scene", sn, "dialogue verbatim", "FLAG",
                             f"no parsed script available for {episode} — dialogue fidelity NOT verified this run"))
@@ -731,12 +958,18 @@ def print_report(gaps, all_beats, scenes):
     print("=" * 100)
 
 
-def manifest_ok(pkg_path, scene=None, episode="Ep1", gate="1"):
-    """THE CHOKE-POINT every gate-arming call site imports and calls before proceeding (MANIFEST.md's "Gate
-    ordering in code"). Returns (ok: bool, block_count: int, gaps: list[Gap]) scoped to ONE scene if given,
+def manifest_ok(pkg_path, scene=None, episode="Ep1", gate="1", log=print):
+    """THE CHOKE-POINT every gate-arming call site imports and calls before proceeding (CLAUDE.md rule 37's own
+    "GATE ORDERING IN CODE" paragraph — FIXED 2026-07-12, full-codebase audit continued: this used to cite
+    "MANIFEST.md's 'Gate ordering in code'" too, the same stale citation as this module's own header docstring
+    above; MANIFEST.md has no such section, so it's corrected here to match). Returns (ok: bool, block_count:
+    int, gaps: list[Gap]) scoped to ONE scene if given,
     else the whole package. ok=True only when zero BLOCK-kind gaps exist in scope. gate='1' (default) is
-    Gate 1's own scope (excludes the plate, Stage 2); pass gate='2' or later once a plate is expected to exist."""
-    gaps, _, _ = run(pkg_path, episode=episode, scene_filter=scene, gate=gate)
+    Gate 1's own scope (excludes the plate, Stage 2); pass gate='2' or later once a plate is expected to exist.
+    log forwards to run()'s own log= (default print) — this choke-point used to hardcode run()'s noisy default
+    with no way for a caller to quiet or redirect it short of bypassing manifest_ok entirely and calling run()
+    directly, defeating the point of it being the shared choke-point (2026-07-08 audit finding)."""
+    gaps, _, _ = run(pkg_path, episode=episode, scene_filter=scene, gate=gate, log=log)
     blocks = [g for g in gaps if g.kind == "BLOCK"]
     return (not blocks), len(blocks), gaps
 
@@ -771,7 +1004,7 @@ if __name__ == "__main__":
         for b in beats:
             by_scene.setdefault(b.get("sceneNumber"), []).append(b)
         try:
-            characters = json.load(open(CHARACTERS_PATH)) if os.path.exists(CHARACTERS_PATH) else {}
+            characters = json.load(open(_paths.CHARS)) if os.path.exists(_paths.CHARS) else {}
         except Exception:
             characters = {}
         script_scenes, _ = _load_script_scenes(episode, characters, log=lambda *a, **k: None)

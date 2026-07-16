@@ -5,10 +5,15 @@ REPLICATOR.md itself retired into that single document, 2026-07-06, THE DEFINITI
 ONE command: walk_scene(episode, scene). It takes the show profile, the scene data and the director's cut as
 its only inputs (all resolved from episode+scene through the SAME path/config conventions cb_pipeline.py and
 cb_beats.py already use — no new lookup mechanism) and runs Gate 3 end to end for that scene under the
-ESCORTED-RUN RULES: assemble each prompt from the rule-28 skeleton, pre-fire lint (all twelve laws, hard-block
-on Law 3/5-class violations, flags on advisories), fire, QA + join-check + anti-hold (last-frame extraction),
-harvest, re-mint, drift check, thread endStateStill forward as the next beat's photograph, assemble the next
-prompt, fire — halting the instant anything comes back non-green, evidence pack to Downloads throughout.
+ESCORTED-RUN RULES: assemble each prompt from the rule-28 skeleton, pre-fire lint (cb_qa.check_gate3_lint's
+unified Step-4 checks — word budgets, banned vocabulary, Law 5 dialogue-leak, appearance-prose leak, the
+anti-slop lexicon, negation scoping, structural §4a/§4b congruence and a source citation map; hard-block on a
+blocker, flags on advisories — FIXED 2026-07-12 (full-codebase audit continued): this line used to describe the
+retired twelve-Layer-1-law check_prompt_laws lint; the code below (lines 178/250) has always called
+cb_qa.check_gate3_lint, the unified check that superseded it — only this paragraph hadn't caught up), fire, QA
++ join-check + anti-hold (last-frame extraction), harvest, re-mint, drift check, thread endStateStill forward as
+the next beat's photograph, assemble the next prompt, fire — halting the instant anything comes back non-green,
+evidence pack to Downloads throughout.
 
 ESCORTED, NOT AUTONOMOUS. "Escorted" here means: the mechanical steps run themselves for as long as every
 check is green, because a clean automated verdict is not something a human glancing at the same evidence would
@@ -32,7 +37,11 @@ was needed to guarantee this; it falls out of the existing per-scene-filtered co
     python3 cb_replicator.py <episode> <scene>
 """
 import os, sys, glob, json, shutil, subprocess
-import cb_beats, cb_scene, cb_qa, cb_segprompt
+# FIXED 2026-07-12 (full-codebase audit continued): cb_scene/cb_segprompt were imported here but never called —
+# every occurrence of either name elsewhere in this file lives in a docstring/comment describing what OTHER
+# modules (cb_beats, cb_pipeline) do internally, never an actual cb_scene.X(...)/cb_segprompt.X(...) call site.
+# Removed; cb_beats/cb_qa/cb_preflight/cb_pipeline (the four imports that DO have real call sites) are unaffected.
+import cb_beats, cb_qa, cb_preflight, cb_pipeline
 
 _ENGINE_DIR = os.path.dirname(os.path.abspath(__file__))
 _LOCK_PATH = os.path.join(_ENGINE_DIR, "locked.json")
@@ -50,20 +59,46 @@ def _resolve_pkg(episode):
         raise SystemExit(f"walk_scene: no beat package found for {episode} under cb-output/")
     return max(cands, key=os.path.getmtime)
 
-def _gate2b_signed(episode, scene):
+def _gate2b_signed(episode, scene, pkg_path):
     """Reads locked.json directly (mirrors cb_pipeline._approved / serve.py's _scene_locks) rather than calling
     cb_pipeline._approved, which reads the module-level EP global instead of taking episode as an argument —
     the same hazard _resolve_pkg's docstring names. GATES ARE HARD LOCKS (CLAUDE.md rule 1): walk_scene
-    automates Gate 3 onward; it never substitutes for a human's own Gate 2b sign-off, and never builds one."""
+    automates Gate 3 onward; it never substitutes for a human's own Gate 2b sign-off, and never builds one.
+
+    FIXED 2026-07-08 (confirmed HIGH bug): a raw read of locked.json's "2b" flag bypassed the cascade-relock
+    staleness check every OTHER gate-status read in the codebase runs first (cb_pipeline._approved calls
+    _relock_if_stale + _relock_chain_if_dirty; serve.py's locked_state() calls _relock_stale_scenes) — so a
+    Gate-1 beat-data edit made after Gate 2b was signed would leave walk_scene reading a stale "2b": true and
+    rendering off keyframes that may no longer match the current beats. Can't just call cb_pipeline._approved()
+    itself (same early-binding hazard as _resolve_pkg's docstring already names — _relock_if_stale reads
+    cb_pipeline's own module-level PKG, resolved once at import time against ITS hardcoded EP="Ep1", which would
+    fingerprint the WRONG package for any other episode). Instead, mirror _relock_if_stale's own fingerprint
+    comparison directly: cb_pipeline._scene_beats_fingerprint(pkg_path, scene) takes pkg_path explicitly, so
+    it's safe to call in isolation. If the Gate-1 fingerprint recorded at Gate-1 sign-off ("1_fp") no longer
+    matches the CURRENT beat data, _relock_if_stale would have already cleared "2b" (along with everything else
+    in GATE_SEQ) the moment any other code path read this scene's status — so we treat it as unsigned here too,
+    without ever calling that function or its EP-bound PKG global."""
     try:
         d = json.load(open(_LOCK_PATH))
     except Exception:
         d = {}
-    return bool(d.get(episode, {}).get(str(scene), {}).get("2b"))
+    sd = d.get(episode, {}).get(str(scene), {})
+    if not sd.get("2b"):
+        return False
+    stored_fp = sd.get("1_fp")
+    if sd.get("1") and stored_fp:
+        try:
+            current_fp = cb_pipeline._scene_beats_fingerprint(pkg_path, scene)
+        except Exception:
+            return bool(sd.get("2b"))   # fail-open, same as _relock_if_stale — a read error must never brick gate status
+        if stored_fp != current_fp:
+            return False   # stale — _relock_if_stale would have cleared "2b" the moment this scene's status was next read
+    return bool(sd.get("2b"))
 
-def _scene_dict(pkg, scene):
-    return next((s for s in pkg.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene)), None)
-
+# FIXED 2026-07-12 (full-codebase audit continued): _scene_dict(pkg, scene) used to live here — its only call
+# site (walk_scene's own `scene_dict = _scene_dict(d, scene)`) never used the result afterward, and grepping the
+# whole repo confirms zero other callers ever existed. Removed along with that dead assignment below, rather
+# than kept as an unused helper nobody was going to remember to wire up.
 def _copy_evidence(name, path):
     if path and os.path.exists(path):
         try:
@@ -101,9 +136,18 @@ def walk_scene(episode, scene, fast=False):
     file) is on disk, so calling walk_scene again after fixing whatever halted it picks up from the same beat,
     not from scratch — it never re-fires a beat that already has a clean, QA-passed official clip."""
     pkg_path = _resolve_pkg(episode)
-    d = json.load(open(pkg_path))
-    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
-    beats.sort(key=lambda b: str(b.get("beatCode") or b.get("shotCode") or ""))
+    # FIXED 2026-07-12 (full-codebase audit continued): this used to re-implement cb_beats._load_scene_beats'
+    # own load+filter (json.load, then filter beats by str(sceneNumber) equality) inline, byte-for-byte — a
+    # second, unreconciled copy of the exact convention cb_beats.fire_next_beat already gets from the shared
+    # helper (this module already imports cb_beats at module level, and calls its other underscore-prefixed
+    # helpers elsewhere in this file, so there was no real module-boundary reason to duplicate it here instead
+    # of calling it). `d` (the full parsed package) is discarded — nothing in this function reads it once the
+    # now-removed dead `scene_dict = _scene_dict(d, scene)` line is gone (see the `_copy_evidence` comment above).
+    _, beats = cb_beats._load_scene_beats(pkg_path, scene)
+    # Natural sort on the trailing beat number (cb_preflight._beat_sort_key) — a lexicographic sort on the raw
+    # code string would misorder any scene with 10+ beats ('1.B10' < '1.B2'); found in the 2026-07-08 audit,
+    # the same bug class as cb_beats.py/cb_director.py/cb_previz.py.
+    beats.sort(key=lambda b: cb_preflight._beat_sort_key(b.get("beatCode") or b.get("shotCode") or ""))
     if not beats:
         return _halt(scene, [], None, f"no beats found for {episode} scene {scene}", [])
 
@@ -111,9 +155,18 @@ def walk_scene(episode, scene, fast=False):
     # both manifests green"): walk_scene never arms a scene with a BLOCK-kind manifest gap outstanding, same
     # choke-point cb_pipeline.approve now enforces for the Studio's gate sign-offs.
     try:
-        import cb_preflight
+        # FIXED 2026-07-12 (full-codebase audit, adversarial verification — critical finding): this redundant
+        # local `import cb_preflight` (cb_preflight is already a module-level import, line 44) made cb_preflight
+        # a LOCAL variable for walk_scene's ENTIRE body the instant Python parsed this assignment anywhere in
+        # the function — including the lambda at line 150, which runs BEFORE this line but still resolved
+        # cb_preflight as the (not-yet-assigned) local rather than the module global, raising NameError on
+        # every real call. Removed; the module-level import already covers this whole function.
         first_code = beats[0].get("beatCode") or beats[0].get("shotCode")
-        ok, block_count, _gaps = cb_preflight.manifest_ok(pkg_path, scene=scene, episode=episode)
+        # gate="3" (2026-07-09, cross-call-site-consistency finding): walk_scene is the Gate-3 escorted walk —
+        # every other manifest_ok caller passes the real production-stage gate it's arming; this one silently
+        # defaulted to gate="1". Zero behaviour change today (check_scene_technical's own docstring: the gate
+        # param doesn't change its output yet) — matters once gate-scoped checks (e.g. plate presence) ship.
+        ok, block_count, _gaps = cb_preflight.manifest_ok(pkg_path, scene=scene, episode=episode, gate="3")
         if not ok:
             return _halt(scene, [], first_code,
                          f"MANIFEST BLOCK — {block_count} gap(s) outstanding for this scene; walk_scene never "
@@ -121,12 +174,11 @@ def walk_scene(episode, scene, fast=False):
     except Exception as e:
         print(f"walk_scene: manifest check could not run ({str(e)[:120]}) — proceeding without it; fix cb_preflight.py", flush=True)
 
-    if not _gate2b_signed(episode, scene):
+    if not _gate2b_signed(episode, scene, pkg_path):
         first_code = beats[0].get("beatCode") or beats[0].get("shotCode")
         return _halt(scene, [], first_code,
                      "Gate 2b is not signed for this scene — walk_scene never advances past an unsigned gate", [])
 
-    scene_dict = _scene_dict(d, scene)
     done, evidence = [], []
 
     # BEAT 1 — no predecessor to relay from; fires directly off its own signed Gate-2b keyframe.
@@ -148,9 +200,13 @@ def walk_scene(episode, scene, fast=False):
             print(f"walk_scene: {first_code} [LINT FLAG] {fl}", flush=True)
         if not lint["ok"]:
             return _halt(scene, done, first_code, "STEP 4 LINT BLOCK: " + "; ".join(lint["blockers"]), evidence)
-        prompt_text = lint["prompt"]
-        if not str(prompt_text or "").strip():
-            return _halt(scene, done, first_code, "assembled prompt is empty — see cb_segprompt log", evidence)
+        # FIXED 2026-07-12 (full-codebase audit continued): an "assembled prompt is empty" check used to sit
+        # here, reading lint["prompt"] after the `if not lint["ok"]` guard above already returned — but
+        # cb_qa.check_gate3_lint itself unconditionally returns ok=False with a "compiled prompt is empty"
+        # blocker the moment its own compiled prompt is blank (checked before it ever accumulates blockers/
+        # flags, and `prompt` is never reassigned between that check and its own final return). So the guard
+        # above always halts first whenever the prompt is empty — this second check could never actually fire.
+        # Removed; the relay loop's equivalent lint call (below) never had this redundant check either.
         # THE ONE-RENDER ECONOMY (rule 3 / PRODUCTION_DOCTRINE.md): one fire, one automatic re-fire on a failed
         # gate, then a hard stop naming the layer at fault — the scene's opening beat gets the identical
         # discipline every relay beat gets inside cb_beats.fire_next_beat.

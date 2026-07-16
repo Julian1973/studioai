@@ -14,6 +14,7 @@
   --spark:#f0b542;--sparkbg:#2a2419;--deep:#e8825f;--deepbg:#2c2119;--heart:#e893b5;--heartbg:#2a1e24;
   --conn:#a78bfa;--connbg:#241f36;--rip:#52c9b8;--ripbg:#1a2a28;--ok:#3ecf8e;--okbg:#16281f;--info:#6ab0e8;--infobg:#1a2430;
   --danger:#e8785a;--dangerbg:#2a1a16;
+  --warn:#e8b25a;--warnbg:#2a2318;
 }
 *{box-sizing:border-box}
 input,textarea,select{background:var(--surface2);color:var(--ink);accent-color:var(--brand)}
@@ -152,6 +153,11 @@ img.zoom:hover{filter:brightness(1.08)}
 <div class="top">
   <div class="brand" onclick="goHome()"><span class="logo">◈</span> Crystal Bears Studio</div>
   <div class="toplinks" id="toplinks"></div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--hint)">
+    Reviewed by
+    <input id="reviewer_name" value="Julian" oninput="setReviewer(this.value)"
+           style="width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:12px">
+  </div>
 </div>
 <div id="gatesbar"></div>
 <div class="shell">
@@ -170,7 +176,7 @@ let EPISODES=[],MEDIA=[],CUR=null,SHOTS=[],PREFIX="",page="episodes",MEDIA_V=0,C
 
 // ── ONE PIPE (scene-spine). Script in → the Pipeline runs each scene Storyboard→Keyframes→Animation→Post, locked
 //    until the prior stage is signed, scenes unlocking in order. Cascade + the standalone boards are gone (one door per action).
-const NAV=[["script","Script","✎"],["pipeline","Pipeline","⚙"],["__sep","",""],["continuity","Continuity","✔"]];
+const NAV=[["script","Script","✎"],["pipeline","Pipeline","⚙"],["canvas","Canvas","▦"],["shots","Shots","▶"],["__sep","",""],["continuity","Continuity","✔"]];
 
 function mediaFor(s){const codes=[s&&s.shotCode,s&&s.id].filter(x=>x!=null&&x!=="");const slug=s&&s.slug;
   // Show the keyframe/clip for the beat's CURRENT slug — NOT just the first .png matching the code. Multiple
@@ -199,6 +205,12 @@ function normBeat(b){
 }
 
 var CURRENT_PROJECT=null, PROJECTS=[], WIZ=null;
+// REVIEWER IDENTITY (2026-07-08, Production Management panel finding — "no reviewer/role concept in code
+// at all"): a persisted name sent with every sign-off, so who-approved-what is recorded before a second
+// reviewer ever joins. Not a real auth system — just an identity string on the lock.
+var REVIEWER=localStorage.getItem("cb_reviewer")||"Julian";
+function setReviewer(v){REVIEWER=(v||"Julian").trim()||"Julian";localStorage.setItem("cb_reviewer",REVIEWER);}
+{const _ri=document.getElementById("reviewer_name"); if(_ri) _ri.value=REVIEWER;}
 const ANIM_TYPES=[
   {v:"3D CGI (Pixar/Bluey)",d:"Rendered 3D — soft lighting, depth, fur/texture."},
   {v:"2D hand-drawn (cel)",d:"Traditional drawn — linework, painted frames."},
@@ -377,6 +389,8 @@ async function renderCharacterDetail(){
 async function renderCharacters(){
   let C={};
   try{C=await fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.json());}catch(e){}
+  let M={};
+  try{M=(await fetch(BASE+"/api/masters",{cache:"no-store"}).then(r=>r.json())).masters||{};}catch(e){}
   const url=p=>p?BASE+"/"+p.replace(/^\.\.\//,"")+"?v="+Date.now():"";
   const chars=Object.entries(C).filter(([k,v])=>k[0]!=="_"&&v&&typeof v==="object"&&!Array.isArray(v)&&k!=="sizeClasses");
   const card=([name,c])=>`<div class="mc" onclick='if(!event.target.closest("a"))openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})' title="Open profile" style="display:flex;gap:14px;align-items:flex-start;cursor:pointer">
@@ -390,10 +404,19 @@ async function renderCharacters(){
       ${c.states?`<div style="margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)"><div style="font-size:11px;font-weight:600;color:var(--brandink);margin-bottom:5px">States (${Object.keys(c.states).length}) — one character, switched per beat${c.canonicalState?` · canonical: ${c.canonicalState}`:''}</div><div style="display:flex;gap:14px;flex-wrap:wrap">${Object.entries(c.states).map(([sk,sv])=>`<div style="display:flex;gap:7px;align-items:center"><a href="${url(sv.turnaround)}" target="_blank"><img src="${url(sv.turnaround)}" style="height:56px;border-radius:5px;border:2px solid ${sv.canonical?'var(--brand)':'var(--line)'}" title="${(sv.note||sv.label||sk).replace(/"/g,'')}"/></a><div style="font-size:11px"><div style="font-weight:600">${sv.label||sk}</div><div style="color:var(--hint)">${sv.canonical?'canonical default':'variant'}</div></div></div>`).join('')}</div></div>`:''}
     </div></div>`;
   const I='style="padding:8px 10px;border:1px solid var(--line,#ddd);border-radius:7px;font:inherit;width:100%;box-sizing:border-box"';
+  const mastersRows=Object.values(M).sort((a,b)=>(a.character||'').localeCompare(b.character||''));
+  const mastersPanel=`<div class="mc" style="margin-top:18px">
+      <div class="lab" style="font-weight:600;color:var(--brandink)">★ Character Master library <span style="font-size:11px;color:var(--hint);font-weight:400">(read-only — set via "★ Set as master" on a beat's signed-off keyframe)</span></div>
+      ${mastersRows.length?`<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12px">
+        <tr style="text-align:left;color:var(--hint)"><th style="padding:4px 8px 4px 0">Character</th><th style="padding:4px 8px">Location</th><th style="padding:4px 8px">Status</th><th style="padding:4px 8px">Updated</th></tr>
+        ${mastersRows.map(m=>`<tr style="border-top:1px solid var(--line)"><td style="padding:4px 8px 4px 0">${_esc(m.character||'')}</td><td style="padding:4px 8px">${_esc(m.locationId||'')}${m.episode?` · ${_esc(m.episode)}`:''}</td><td style="padding:4px 8px">${m.status==='active'?'<span style="color:var(--ok)">active</span>':_esc(m.status||'')}</td><td style="padding:4px 8px;color:var(--hint)">${_esc(m.updatedAt||'')}</td></tr>`).join('')}
+      </table>`:`<div style="font-size:12px;color:var(--hint);margin-top:6px">No masters set yet — use "★ Set as master" on a signed-off solo keyframe (a beat's Keyframes panel).</div>`}
+    </div>`;
   document.getElementById("view").innerHTML=`
     <h1 class="h1">Characters · Elements</h1>
     <p class="sub">The locked character library — shared across every episode. Each element is the reference image + key features + voice + size that every shot derives from. (${chars.length} characters)</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px">${chars.map(card).join("")}</div>
+    ${mastersPanel}
     <div class="mc" style="margin-top:18px;border:1px dashed var(--brand)">
       <div class="lab" style="font-weight:600;color:var(--brandink)">＋ Add or update a character (element)</div>
       <p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Bring a character through: drop their clean front/turnaround reference and fill the template. Same name updates the existing one.</p>
@@ -557,6 +580,8 @@ function render(){
   if(page=="character")return renderCharacterDetail();
   if(page=="script")return renderScript();
   if(page=="pipeline"){renderPipeline();refreshPipe();return;}
+  if(page=="canvas")return renderCanvas();
+  if(page=="shots")return renderShots();
   if(page=="continuity")return renderContinuity();
   if(page=="characters")return renderCharacters();
   const _nm=(NAV.find(n=>n[0]==page)||[,page])[1];
@@ -755,6 +780,169 @@ async function uploadScriptHere(){
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 
+// ── CANVAS — a whole-episode, read-only pipeline visualization (added 2026-07-12). Every scene as a row: its
+//    own gate strip (1 → 1.6 → 2a → 2b → 3 → 4 → 5) plus its beats in order, colour-coded by render state, with
+//    an arrow connecting consecutive beats WITHIN a scene only — no connector crosses a scene boundary, since a
+//    scene boundary is a full, deliberate reset (the Scene Bubble Law, rule 35): no continuity is owed across
+//    it. Click a beat to see the exact reference stack it fires with (the Four-Anchor Grounding Set, rule 24).
+//    Purely a VIEW onto the same engine/data every other tab already reads — fires nothing, changes nothing;
+//    use the Pipeline tab to actually fire/approve a gate. ──
+let CV_ZOOM=1,CV_PANX=60,CV_PANY=30,CV_DRAG=null,CV_SEL=null;
+let CV_SCENEMETA_CACHE={pkg:null,data:{}};
+const CV_GATE_KEYS=["1","1.6","2a","2b","3","4","5"];
+function cvBeatNum(code){const m=/[Bb](\d+)/.exec(String(code||''));return m?parseInt(m[1],10):0;}   // "1.B10">"1.B2" fix — never a plain string sort
+function cvGatePhase(sn,gk){
+  const lk=gateState(sn);
+  if(lk[gk])return'signed';   // plain truthy — a gate value is either the new {approved,reviewed_by,at} object or (legacy) a bare true; both are truthy
+  const j=jobFor(sn,gk);
+  if(j&&j.status=="running")return'running';
+  if(j&&j.status=="failed")return'failed';
+  return'pending';
+}
+function cvGateColor(ph){return ph=='signed'?['--ok','--okbg']:ph=='running'?['--info','--infobg']:ph=='failed'?['--danger','--dangerbg']:['--hint',null];}
+function cvApply(){const p=document.getElementById('cvPlane');if(p)p.style.transform=`translate(${CV_PANX}px,${CV_PANY}px) scale(${CV_ZOOM})`;}
+function cvWheel(e){
+  e.preventDefault();
+  const vp=document.getElementById('cvViewport');if(!vp)return;
+  const r=vp.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,prev=CV_ZOOM;
+  CV_ZOOM=Math.min(2.5,Math.max(0.25,CV_ZOOM*(e.deltaY<0?1.08:0.92)));
+  CV_PANX=mx-((mx-CV_PANX)/prev)*CV_ZOOM; CV_PANY=my-((my-CV_PANY)/prev)*CV_ZOOM;
+  cvApply();
+}
+function cvPanStart(e){
+  if(e.target.closest('.cv-beat'))return;   // clicking a node selects it — don't also start a drag-pan
+  CV_DRAG={x:e.clientX,y:e.clientY,px:CV_PANX,py:CV_PANY};
+  const vp=document.getElementById('cvViewport');if(vp)vp.classList.add('panning');
+  window.addEventListener('mousemove',cvPanMove);window.addEventListener('mouseup',cvPanEnd);
+}
+function cvPanMove(e){if(!CV_DRAG)return;CV_PANX=CV_DRAG.px+(e.clientX-CV_DRAG.x);CV_PANY=CV_DRAG.py+(e.clientY-CV_DRAG.y);cvApply();}
+function cvPanEnd(){CV_DRAG=null;const vp=document.getElementById('cvViewport');if(vp)vp.classList.remove('panning');window.removeEventListener('mousemove',cvPanMove);window.removeEventListener('mouseup',cvPanEnd);}
+function cvResetView(){CV_ZOOM=1;CV_PANX=60;CV_PANY=30;cvApply();}
+
+async function renderCanvas(){
+  document.getElementById("gatesbar").innerHTML="";
+  const view=document.getElementById("view");
+  if(!SHOTS.length){view.innerHTML=`<h1 class="h1">Canvas</h1><div class="coming">No beats yet — fire Gate 1 from the Pipeline tab first.</div>`;return;}
+  const pkgFile=CUR.package||CUR.shotPackage;
+  let sceneMeta=CV_SCENEMETA_CACHE.pkg===pkgFile?CV_SCENEMETA_CACHE.data:{};
+  if(pkgFile&&CV_SCENEMETA_CACHE.pkg!==pkgFile){
+    try{
+      const d=await fetch(BASE+"/"+projPkgBase()+"/"+pkgFile).then(r=>r.json());
+      sceneMeta={};(d.scenes||[]).forEach(s=>sceneMeta[String(s.sceneNumber)]={name:s.name||"",pillar:s.pillar||""});
+      CV_SCENEMETA_CACHE={pkg:pkgFile,data:sceneMeta};
+    }catch(e){}
+  }
+  const scenes=scenesList();
+  const rows=scenes.map(sn=>{
+    const beats=SHOTS.filter(s=>s.sceneNumber==sn).sort((a,b)=>cvBeatNum(a.shotCode)-cvBeatNum(b.shotCode));
+    const meta=sceneMeta[String(sn)]||{};
+    const pc=PILL[cap(meta.pillar||"spark")]||PILL.Spark;
+    const gatePills=CV_GATE_KEYS.map(gk=>{
+      const ph=cvGatePhase(sn,gk),c=cvGateColor(ph);
+      return `<span class="cv-gpill" title="Gate ${gk} — ${ph}" style="color:${v(c[0])};border-color:${v(c[0])};background:${c[1]?v(c[1]):'transparent'}">${gk}</span>`;
+    }).join("");
+    const beatNodes=beats.map((s,i)=>{
+      const m=mediaFor(s),st=statusOf(m);
+      const raw=(s.action||"").slice(0,46);
+      const label=_esc(raw)+((s.action||"").length>46?"…":"");
+      const arrow=i<beats.length-1?`<div class="cv-arrow">→</div>`:"";
+      return `<div class="cv-beat${CV_SEL==s.shotCode?' sel':''}" style="border-color:${v(st[0])}" onclick="cvSelectBeat('${s.shotCode}',this)">
+        <div class="cv-beatcode">${s.shotCode}</div>
+        <div class="cv-beatpill" style="color:${v(st[0])};background:${st[1]?v(st[1]):'transparent'}">${st[2]}</div>
+        <div class="cv-beatlabel">${label||"(no story text yet)"}</div>
+      </div>${arrow}`;
+    }).join("");
+    return `<div class="cv-scene">
+      <div class="cv-scenehead">
+        <span class="cv-scenenum">Scene ${sn}</span>
+        ${meta.name?`<span class="cv-scenename">${_esc(meta.name)}</span>`:""}
+        ${meta.pillar?`<span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(meta.pillar)}</span>`:""}
+        <span class="cv-gates">${gatePills}</span>
+      </div>
+      <div class="cv-beatrow">${beatNodes}</div>
+    </div>`;
+  }).join("");
+  view.innerHTML=`
+  <h1 class="h1" style="margin-bottom:2px">Canvas — Ep${CUR.number} · ${_esc(CUR.title||CUR.name||"")}</h1>
+  <p class="sub">The whole episode's pipeline at a glance — every scene's gates (1 → 1.6 → 2a → 2b → 3 → 4 → 5) and every beat's render state. Read-only: click a beat for its reference stack; fire/approve from the Pipeline tab. Scroll to zoom, drag the background to pan.</p>
+  <style>
+    .cv-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+    .cv-viewport{position:relative;overflow:hidden;flex:1;min-width:0;height:calc(100vh - 250px);min-height:340px;background:var(--bg);border:1px solid var(--line);border-radius:10px;cursor:grab}
+    .cv-viewport.panning{cursor:grabbing}
+    .cv-plane{position:absolute;top:0;left:0;transform-origin:0 0}
+    .cv-scene{margin-bottom:26px;white-space:nowrap}
+    .cv-scenehead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .cv-scenenum{font:600 13px/1 'Label Sans',sans-serif;color:var(--ink)}
+    .cv-scenename{font-size:12px;color:var(--muted)}
+    .cv-gates{display:flex;gap:3px;margin-left:8px}
+    .cv-gpill{font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 5px;border-radius:4px;line-height:1.4;border:1px solid transparent}
+    .cv-beatrow{display:flex;align-items:stretch;gap:0}
+    .cv-beat{width:150px;flex:0 0 auto;border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 9px;cursor:pointer;white-space:normal}
+    .cv-beat:hover{background:var(--surface2)}
+    .cv-beat.sel{box-shadow:0 0 0 2px var(--brand)}
+    .cv-beatcode{font:600 12px 'Label Sans',sans-serif;color:var(--ink)}
+    .cv-beatpill{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin:3px 0}
+    .cv-beatlabel{font-size:10px;color:var(--hint);line-height:1.3;margin-top:2px}
+    .cv-arrow{flex:0 0 auto;width:26px;display:flex;align-items:center;justify-content:center;color:var(--hint);font-size:14px}
+    .cv-legend{font-size:10px;color:var(--hint);display:flex;gap:16px;margin:10px 2px 0;flex-wrap:wrap}
+    .cv-legend span{display:inline-flex;align-items:center;gap:4px}
+    .cv-dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+  </style>
+  <div class="cv-toolbar">
+    <button class="btn" onclick="cvResetView()">⤾ Reset view</button>
+    <span style="font-size:11px;color:var(--hint)">scroll = zoom · drag background = pan · click a beat = its reference stack</span>
+  </div>
+  <div style="display:flex;gap:12px;align-items:flex-start">
+    <div class="cv-viewport" id="cvViewport" onwheel="cvWheel(event)" onmousedown="cvPanStart(event)">
+      <div class="cv-plane" id="cvPlane">${rows}</div>
+    </div>
+    <div id="cvDetail" style="width:280px;flex:0 0 auto;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;max-height:calc(100vh - 250px);overflow:auto">
+      <div style="color:var(--hint)">Click a beat node to see its reference stack — the exact anchors (keyframe/relay, turnarounds, plate, @Audio1) it fires with.</div>
+    </div>
+  </div>
+  <div class="cv-legend">
+    <span><span class="cv-dot" style="background:${v('--ok')}"></span> keyframe or final master exists</span>
+    <span><span class="cv-dot" style="background:${v('--info')}"></span> clip rendered</span>
+    <span><span class="cv-dot" style="background:${v('--hint')}"></span> draft — nothing rendered yet</span>
+    <span>Gate pills: filled = signed off · blue = firing now · grey outline = not yet fired</span>
+    <span>No arrow between scenes — a scene boundary is a full reset (the Scene Bubble Law)</span>
+  </div>`;
+  cvApply();
+}
+
+function cvSelectBeat(code,el){
+  CV_SEL=code;
+  document.querySelectorAll('.cv-beat.sel').forEach(x=>x.classList.remove('sel'));
+  if(el)el.classList.add('sel');
+  const s=SHOTS.find(x=>x.shotCode==code);
+  const det=document.getElementById('cvDetail');
+  if(!s||!det)return;
+  const beats=SHOTS.filter(x=>x.sceneNumber==s.sceneNumber).sort((a,b)=>cvBeatNum(a.shotCode)-cvBeatNum(b.shotCode));
+  const isOpener=beats[0]&&beats[0].shotCode==code;
+  const jt=s.junctionType||(isOpener?null:'intentional_next_shot');
+  const fa=s.fidelityAllocation||{};
+  const cast=(s.openingCast||s.characters||[]).join(", ")||"(none authored)";
+  const dlg=(s._cuts||[]).some(c=>c.dialogue);
+  const anchorLine=isOpener
+    ? `this scene's own SIGNED keyframe (the opener — no harvest, no re-mint, per the Scene-Opener Stack Law)`
+    : `the relay anchor harvested from the PREVIOUS beat's settle frame — ${(jt||'').startsWith('seamless')?'used as literal first-frame pixels (seamless_continuation)':'a state reference only (identity/marks/lighting/position carry forward; camera is free — intentional_next_shot, the default)'}`;
+  det.innerHTML=`
+    <div style="font:600 14px 'Label Sans',sans-serif;color:var(--ink);margin-bottom:2px">${code}</div>
+    <div style="color:var(--hint);font-size:11px;margin-bottom:10px">Scene ${s.sceneNumber} · ${s.duration}s · ${(s._cuts||[]).length} cuts</div>
+    <div style="font-size:12px;line-height:1.5;margin-bottom:10px">${_esc(s.action||"(no storyBeat authored)")}</div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600;margin:10px 0 4px">THE REFERENCE STACK</div>
+    <div style="font-size:11px;line-height:1.6">
+      <div><b>@图1</b> — ${anchorLine}</div>
+      <div><b>Turnarounds</b> — ${_esc(cast)}</div>
+      <div><b>Scene plate</b> — this scene's locked lighting/palette/texture (standing anchor, every beat)</div>
+      <div><b>@Audio1</b> — ${dlg?"this beat's own V3 performance track":"none — no dialogue this beat"}</div>
+    </div>
+    ${s.carryMarks?`<div style="margin-top:10px;font-size:11px"><b>Carries in:</b> ${_esc(s.carryMarks)}</div>`:""}
+    ${s.endState?`<div style="margin-top:6px;font-size:11px"><b>Settles on:</b> ${_esc(s.endState)}</div>`:""}
+    ${fa.primary?`<div style="margin-top:10px;font-size:11px;color:var(--muted)">Fidelity: <b>${_esc(fa.primary)}</b> primary${fa.secondary&&fa.secondary!='none'?`, ${_esc(fa.secondary)} secondary`:''}${fa.economized&&fa.economized!='none'?`, ${_esc(fa.economized)} economized`:''}</div>`:""}
+  `;
+}
+
 async function renderContinuity(){
   const view=document.getElementById("view");
   view.innerHTML=`<h1 class="h1">Continuity</h1><p class="sub">Cross-scene checks — runs every gate. Catches wristband-state regressions, visions that no longer match the real scene they foreshadow, and recurring assets (the boat, the pier).</p><div id="cont" class="coming">Checking…</div>`;
@@ -817,8 +1005,16 @@ function keyframesFor(s){
     const prev=beats[j];
     const prevPre=PREFIX+prev.shotCode+"_", prevSlug=prev.slug;
     const remint=prevSlug?prevPre+prevSlug+"_remint.png":null;
+    const settle=prevSlug?prevPre+prevSlug+"_settle.png":null;
     const hasRemint=!!(remint&&MEDIA.includes(remint));
-    return {start:hasRemint?remint:null, awaitingRelay:!hasRemint, isAnchor:false, relayFrom:prev.shotCode};
+    // THE RE-MINT CORRECTION (CLAUDE.md rule 45): an intentional_next_shot beat (the default) skips re-mint
+    // entirely for a good-quality harvest — the raw harvested SETTLE frame anchors it directly, no remint file
+    // ever gets written. This view used to check ONLY for a remint file, so it showed "awaiting relay" for
+    // every correctly-relayed beat that never needed one (2026-07-08 audit finding) — fall back to the raw
+    // settle frame before concluding the relay anchor doesn't exist yet.
+    const hasSettle=!!(settle&&MEDIA.includes(settle));
+    const anchor=hasRemint?remint:(hasSettle?settle:null);
+    return {start:anchor, awaitingRelay:!anchor, isAnchor:false, relayFrom:prev.shotCode};
   }
   const pngs=MEDIA.filter(m=>m.startsWith(pre)&&m.endsWith(".png"));
   // prefer the beat's CURRENT slug (same fix as mediaFor — a stale duplicate must never shadow the real start frame)
@@ -831,10 +1027,43 @@ function kfCard(s){
   const cell=(src,lab,emptyLab)=>`<div style="flex:1;min-width:0"><div style="height:96px;background:var(--surface2);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center">${src?`<img class="zoom" data-cap="${s.shotCode} · ${lab}" src="${BASE}/engine/media/${src}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/>`:`<span style="color:${v(pc[0])};font-size:20px;opacity:.5">${emptyLab?'⧗':'▤'}</span>`}</div><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:3px;letter-spacing:.04em">${lab}${src?'':' · '+(emptyLab||'pending')}</div></div>`;
   const frames=s._beat?cell(kf.start,kf.isAnchor?'OPENING KEYFRAME':'RELAY ANCHOR',kf.awaitingRelay?'awaiting relay':undefined):`${cell(kf.start,'START')}<span style="color:var(--hint)">→</span>${cell(kf.end,'END')}`;
   const meta=s._beat?`Beat ${s.shotCode} · ${s.duration}s · ${(s._cuts||[]).length} cuts`:`Shot ${s.shotCode} · ${s.shotSize} · ${s.duration}s`;
+  // KEYFRAME QA FLAG (2026-07-14): cb_qa.check_scene's real Definition-of-Done verdict, cached in a sidecar
+  // and read back read-only via /api/keyframe-qa — this ran on the backend the whole time but was never shown
+  // in the Studio before now. Only ever a FLAG badge, never a hard block on the card itself — a review signal
+  // for Julian's own eye, the reserved verdict this whole pipeline already protects (never auto-decided).
+  const qa=(KFQA||{})[s.shotCode];
+  // FIXED 2026-07-14 (Julian: "there seems to be a lot of red writing on these gates is that a bad thing" —
+  // this badge is NEVER a block (see the comment above), yet it rendered in the identical --danger/--dangerbg
+  // styling as a real Gate-order refusal, so an advisory read-before-sign-off note was visually indistinguishable
+  // from "nothing generated." Now --warn/--warnbg (amber), reserved for genuine BLOCKs elsewhere on this page.
+  const qaBadge=(qa&&qa.ok===false)?`<div style="margin:0 0 6px;padding:6px 9px;border-radius:6px;background:var(--warnbg);color:var(--warn);font-size:11px;line-height:1.4" title="${_esc((qa.verdict||'').replace(/\n/g,' '))}">⚑ ${(qa.reasons||[]).join(', ')||'flagged'} — review before sign-off</div>`:'';
+  // THE GATE-2 LINT BLOCK, SURFACED (task #321, 2026-07-14, full-pipeline verification audit): cb_qa.
+  // check_keyframe_lint has correctly refused to generate this beat's keyframe (cb_scene._run_beats/
+  // build_one_beat, both fixed 2026-07-14) since the day it shipped — but a blocked beat never had a
+  // keyframe file to show, so the card just displayed a generic "pending" tile with zero visible reason.
+  // KFLINT is populated per-scene by fetchKfLintStatus() (setScene) — distinct from qaBadge above, which
+  // is a POST-generation quality flag on an image that DID render; this is a PRE-generation refusal on a
+  // beat that never got the chance to.
+  const lint=(KFLINT||{})[s.shotCode];
+  const lintBadge=(lint&&lint.ok===false)?`<div style="margin:0 0 6px;padding:6px 9px;border-radius:6px;background:var(--dangerbg);color:var(--danger);font-size:11px;line-height:1.4;font-weight:600" title="${_esc((lint.blockers||[]).join('; '))}">⛔ Gate 2 lint BLOCK — no keyframe generated: ${_esc((lint.blockers||[]).join('; ')||'blocked')}</div>`:'';
+  // LIVE REGEN STATUS ON THE CARD ITSELF (2026-07-14, Julian watching a real regen and seeing nothing move —
+  // "there is no real status on the image"). openShot()'s own modal already looks this job up (_rj/_run), but
+  // the GRID CARD — the thing actually on screen while a real, billed render is in flight — never checked
+  // PIPE.jobs at all, so it kept showing the same static old thumbnail with zero sign anything was happening,
+  // whether the job was running, had just failed, or hadn't started. PIPE is refreshed by the page's own
+  // existing poll, so this updates live without any new fetch.
+  const _rj=Object.values(PIPE.jobs||{}).filter(j=>j.gate=="regen:"+s.shotCode).sort((a,b)=>a.started-b.started).pop();
+  const _rjRunning=_rj&&_rj.status=="running";
+  const _rjFailed=_rj&&_rj.status!="running"&&_rj.log&&_rj.log.includes("BLOCK");
+  const regenBadge=_rjRunning
+    ? `<div style="margin:0 0 6px;padding:6px 9px;border-radius:6px;background:var(--infobg,rgba(70,130,220,.12));color:var(--info,#4682dc);font-size:11px;line-height:1.4;font-weight:600">⟳ Regenerating now — ${_esc(_rj.step||'working…')}</div>`
+    : _rjFailed
+      ? `<div style="margin:0 0 6px;padding:6px 9px;border-radius:6px;background:var(--dangerbg);color:var(--danger);font-size:11px;line-height:1.4;font-weight:600">⛔ Last regenerate was refused — click to see why</div>`
+      : '';
   return `<div class="card" onclick="openShot(${s.id})"><div style="padding:9px 11px">
     <div class="crow"><span class="meta" style="margin:0">${meta}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(s.intent.pillar)}</span></div>
-    <div style="display:flex;gap:8px;align-items:center;margin:6px 0">${frames}</div>
-    <div class="act">${_esc((s.action||'').length>72?s.action.slice(0,72)+'…':(s.action||''))}</div>${wb}${noteChip(s)}</div></div>`;
+    <div style="display:flex;gap:8px;align-items:center;margin:6px 0${_rjRunning?';opacity:.55':''}">${frames}</div>
+    ${regenBadge}${lintBadge}${qaBadge}<div class="act">${_esc((s.action||'').length>72?s.action.slice(0,72)+'…':(s.action||''))}</div>${wb}${noteChip(s)}</div></div>`;
 }
 function sceneComplete(sn){
   const f=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_beats\\.mp4$").test(m))||MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_animation\\.mp4$").test(m))||MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_complete\\.mp4$").test(m))||MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"\\.mp4$").test(m));
@@ -847,8 +1076,9 @@ function charTurnURL(c){
 }
 async function fireSub(sn,sub){
   if(sub=='2b' && !gateState(sn)['2a']){alert(`Sign off the Scene ${sn} foundation (Step 1) before building the keyframes.`);return;}
+  if(sub=='1.6' && !gateState(sn)['1']){alert(`Sign off the Scene ${sn} storyboard (Step 1) before building the previz reel.`);return;}
   // Reset the panel to a fresh "starting…" the INSTANT you (re-)fire, so a previous run's "beat N/N" can't linger.
-  if(sub=='2a'||sub=='2b')KF_FIRING[sn+'|'+sub]=Date.now();
+  if(sub=='2a'||sub=='2b'||sub=='1.6')KF_FIRING[sn+'|'+sub]=Date.now();
   if(page=="pipeline"){CURSCENE=sn;FOCUSGATE=null;renderPipeline();}
   try{const r=await fetch(BASE+"/api/fire",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){delete KF_FIRING[sn+'|'+sub];if(page=="pipeline")renderPipeline();alert("Couldn't build: "+(j.error||"failed"));return;}setTimeout(refreshPipe,250);}catch(e){delete KF_FIRING[sn+'|'+sub];alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
@@ -868,6 +1098,34 @@ async function fireDirectorEye(){
     }catch(e){}
   },3000);
 }
+async function exportStoryboard(scene){
+  try{
+    const r=await fetch(BASE+"/api/export-storyboard",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,episode:"Ep"+CUR.number})});
+    const j=await r.json();if(!j.ok){alert("Export failed: "+(j.error||"failed"));return;}
+    showExportModal(j.markdown,scene);
+  }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+}
+function showExportModal(md,scene){
+  let o=document.getElementById("exportModal"); if(o)o.remove();
+  o=document.createElement("div"); o.id="exportModal";
+  o.style.cssText="position:fixed;inset:0;background:rgba(20,18,40,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:30px";
+  o.innerHTML=`<div style="background:var(--surface);max-width:840px;width:100%;max-height:84vh;overflow:auto;border-radius:14px;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h2 style="margin:0;font-size:17px;color:var(--brandink)">⬇ Storyboard export — Scene ${scene}</h2>
+      <div style="display:flex;gap:8px"><button class="btn ghost" onclick="downloadStoryboard()">⬇ Download .md</button><button class="btn ghost" onclick="document.getElementById('exportModal').remove()">✕ Close</button></div></div>
+    <div style="font-size:11.5px;color:var(--hint);margin-bottom:10px">The Gate-1 external review rule (CLAUDE.md rule 37) — read this OUTSIDE the Studio before signing Gate 1.</div>
+    <pre id="exportMdText" style="white-space:pre-wrap;font-size:12.5px;line-height:1.5;color:var(--ink);font-family:ui-monospace,SFMono-Regular,monospace;margin:0">${(md||"").replace(/</g,"&lt;")}</pre>
+  </div>`;
+  o.onclick=(e)=>{if(e.target===o)o.remove();};
+  o.dataset.raw=md;
+  document.body.appendChild(o);
+}
+function downloadStoryboard(){
+  const o=document.getElementById("exportModal"); if(!o)return;
+  const blob=new Blob([o.dataset.raw||""],{type:"text/markdown"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="storyboard.md";
+  document.body.appendChild(a); a.click(); a.remove();
+}
 function showEyeReport(log){
   let o=document.getElementById("eyeModal"); if(o)o.remove();
   o=document.createElement("div"); o.id="eyeModal";
@@ -883,10 +1141,10 @@ function showEyeReport(log){
   document.body.appendChild(o);
 }
 async function signSub(sn,sub){
-  try{const r=await fetch(BASE+"/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Sign-off failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;if(page=="pipeline"){if(sub=="2b")advanceAfterSignoff(sn,2);else renderPipeline();}else render();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+  try{const r=await fetch(BASE+"/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub,episode:"Ep"+CUR.number,reviewedBy:REVIEWER})});const j=await r.json();if(!j.ok){alert("Sign-off failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;if(page=="pipeline"){if(sub=="2b")advanceAfterSignoff(sn,2);else if(sub=="1.6")advanceAfterSignoff(sn,1);else renderPipeline();}else render();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 async function unsignSub(sn,sub){
-  const lbl=sub=='1'?'Step 0 (the Director plan)':sub=='2a'?'Step 1 (the foundation)':'Step 2 (the keyframes)';
+  const lbl=sub=='1'?'Step 1 (the storyboard)':sub=='1.6'?'Step 2 (the previz reel)':sub=='2a'?'Step 1 (the foundation)':'Step 2 (the keyframes)';
   if(!confirm(`Un-sign ${lbl} for Scene ${sn}?\n\nThis removes the sign-off AND re-locks every step after it, so you can alter it and sign off again. Un-signing Step 1 also resets the locked scene shot.`))return;
   try{const r=await fetch(BASE+"/api/unapprove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Un-sign failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;render();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
@@ -922,11 +1180,15 @@ function jobLabel(j){
   if(String(j.gate).startsWith('relay-prepare'))return 'Relay — preparing '+String(j.gate).split(':')[1]+"'s anchor";
   if(String(j.gate).startsWith('relay-approve'))return 'Relay — launching the next beat off '+String(j.gate).split(':')[1];
   if(String(j.gate)=="write")return "Gate 0 · Writers' Room";
+  if(String(j.gate)=="1.6")return "Gate 1.6 · Previz Reel";   // GATE_DEF[+"1.6"-1] indexes 0.6 (non-integer) — special-case it
+  if(String(j.gate)=="masters")return "Gate 5 · Platform Masters";
   const d=GATE_DEF[+j.gate-1]; return 'Gate '+j.gate+(d?' · '+d[1]:'');
 }
 let _seenDone=null;
 async function refreshPipe(){
   try{PIPE=await (await fetch(BASE+"/api/pipeline")).json();}catch(e){}
+  if(page=="pipeline"&&CURSCENE){try{KFQA=await fetch(BASE+"/api/keyframe-qa?scene="+CURSCENE+"&episode=Ep"+((CUR&&CUR.number)||1)).then(r=>r.json());}catch(e){}
+    try{CRAFT=await fetch(BASE+"/api/craft-score?scene="+CURSCENE+"&episode=Ep"+((CUR&&CUR.number)||1)).then(r=>r.json());}catch(e){}}
   const jobs=Object.values(PIPE.jobs||{});
   if(_seenDone===null){_seenDone={};jobs.forEach(j=>{if(j.status!="running")_seenDone[j.jobId]=1;});}
   let done=false,finished=[];jobs.forEach(j=>{if(j.status!="running"&&!_seenDone[j.jobId]){_seenDone[j.jobId]=1;done=true;finished.push(j);}});
@@ -938,6 +1200,7 @@ async function refreshPipe(){
     // to exit, or an early-finished beat's keyframe stays invisible for the rest of the run.
     try{MEDIA=await fetch(BASE+"/cb-studio/data/media-index.json",{cache:"no-store"}).then(r=>r.json());MEDIA_V=Date.now();}catch(e){}
     if(page=="pipeline")renderPipeline();
+    else if(page=="canvas")renderCanvas();
   }
   finished.forEach(j=>{const st=j.status;const ic=st=="done"?'✓':st=="stopped"?'■':'✗';const tail=st=="done"?'finished — review & sign off':st=="stopped"?'stopped':'failed — see log';showToast(`${ic} ${jobLabel(j)} · Scene ${j.scene} ${tail}`,st=="done");});
   if(finished.some(j=>String(j.gate)=="write"&&j.status=="done")&&CUR){
@@ -955,7 +1218,7 @@ async function refreshPipe(){
   if(page=="pipeline"){
     // Only re-render when something actually changed. The 3s poll otherwise rebuilds the panel each tick, recreating
     // every <video> element so each reloads — that's the FLICKER. Skip it when jobs/locks/media are unchanged.
-    const _sig=JSON.stringify([jobs.map(j=>[j.jobId,j.status,j.step]),PIPE.locked,MEDIA_V,MEDIA.length,Object.keys(KF_FIRING)]);
+    const _sig=JSON.stringify([jobs.map(j=>[j.jobId,j.status,j.step]),PIPE.locked,MEDIA_V,MEDIA.length,Object.keys(KF_FIRING),KFQA]);
     if(_sig!==window._pipeSig){window._pipeSig=_sig;renderPipeline();}
   }
   else if(page=="script")renderScript();
@@ -1006,6 +1269,7 @@ async function setMaster(id,character){
 }
 async function fireGate(scene,gate,force){
   if(gate==2){const gs=gateState(scene); return fireSub(scene, gs["2a"]?"2b":"2a");}  // DP keyframes = foundation(2a) then coverage(2b)
+  if(gate==1&&!force){const gs=gateState(scene); if(gs["1"])return fireSub(scene,"1.6");}  // storyboard already signed → the previz reel is next; force (re-break) still goes through the generic path below
   // No blocking confirm on the ready path — the running panel IS the feedback. Confirm only a re-fire over existing output.
   if(force && !confirm(gate==1?`Re-break the episode? This RE-RUNS THE DIRECTOR and REPLACES all beats with a freshly-paced breakdown (your current beats are backed up).`:`Re-fire Gate ${gate} for Scene ${scene}? This re-runs the pipeline over the existing output.`))return;
   try{
@@ -1018,7 +1282,7 @@ async function fireGate(scene,gate,force){
 async function approveGate(scene,gate){
   if(gate==2){const gs=gateState(scene); return signSub(scene, gs["2a"]?"2b":"2a");}  // sign off foundation first, then keyframes
   try{
-    const r=await fetch(BASE+"/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,gate,episode:"Ep"+CUR.number})});
+    const r=await fetch(BASE+"/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,gate,episode:"Ep"+CUR.number,reviewedBy:REVIEWER})});
     const j=await r.json();if(!j.ok){alert("Sign-off failed: "+(j.log||j.error||""));return;}
     PIPE.locked=j.locked;advanceAfterSignoff(scene,gate);
   }catch(e){alert("Can't reach the studio server. Reload the page (Cmd-Shift-R), then try again.");}
@@ -1047,6 +1311,23 @@ function gateProduced(sn,g){ // has this gate's OUTPUT actually been created on 
 }
 /* ── Gate-flow spine: one state machine drives the rail + the active panel ── */
 let CURSCENE=null, FOCUSGATE=null, KF_FIRING={};   // KF_FIRING: "scene|gate" -> ts of a fresh (re-)fire, so the panel resets stale progress
+let KFQA={};   // {beatCode: {ok, verdict, reasons}} — cached keyframe Definition-of-Done QA (2026-07-14, Julian:
+                // "it needs to be done in the studio" — this flag ran correctly on the backend the whole time but
+                // was never surfaced anywhere in the UI). Read-only, zero-cost (serve.py reads a cached sidecar,
+                // never recomputes/re-bills the vision check on a page load) — see /api/keyframe-qa.
+let KFLINT={};   // {beatCode: {ok, blockers, flags}} — cached keyframe-prompt LINT status (task #321, 2026-07-14,
+                  // full-pipeline verification audit): a beat blocked by cb_qa.check_keyframe_lint never gets a
+                  // keyframe file at all, so its card used to show only a generic "pending" tile with zero visible
+                  // reason. Reuses the SAME /api/keyframe-prompt endpoint the beat modal already calls (its own
+                  // response already carries j.lint — no new backend route needed), fetched once per scene
+                  // selection (a real local compile per beat, not cheap enough for the 3s recurring poll the way
+                  // KFQA/CRAFT's cached-sidecar reads are) — see fetchKfLintStatus().
+let CRAFT={};   // {sceneNumber, criteria:{key:{score,verdict,evidence,agreement_gap}}, review:{...,oneLineToFixFirst}, skeptic:{...}}
+                // — the Pixar-craft score (task #315, 2026-07-14): cb_craft.score_scene_craft has existed and
+                // worked since rule 48 but had ZERO live caller anywhere in the pipeline until cb_pipeline.
+                // previz_reel() was wired to fire it. Read-only, cached-sidecar, same convention as KFQA above
+                // — see /api/craft-score. Always scoped to whichever scene was last fetched (CURSCENE), never
+                // scene-keyed, matching KFQA's own convention.
 const PHASE_META={
   locked:{g:'🔒',c:'var(--hint)',lab:'locked'},
   ready:{g:'▷',c:'var(--brand)',lab:'ready — press to fire'},
@@ -1061,12 +1342,12 @@ const GATE_READY_DESC={
   2:'Builds the foundation (the empty plate + each character&rsquo;s locked sheet), then the scene&rsquo;s one opening keyframe (every later beat opens from a relay anchor Gate 3 produces as it goes).',
   3:'Animates each opening keyframe into a 10&ndash;12s Seedance take — voice, SFX and timed music baked in.',
   4:'Reads the typed/CSV retakes and surgically regenerates ONLY the flagged shots — grade-matched, continuity-held — then re-conforms the scene for re-review. No full re-render; the good bits stay.',
-  5:'Curates and stitches the retaken scene — masters the mix to &minus;14 LUFS, exports the stems for CapCut.'
+  5:'Curates and stitches the retaken scene — joins on live motion (never a raw butt-join), sweetens the show&rsquo;s signature SFX cues where a real asset exists, masters the mix to &minus;14 LUFS for YouTube, exports the stems for CapCut, and automatically builds real dialogue captions (.srt/.vtt) and a 9:16 centre-safe vertical derivative alongside the 16:9 feature master. Platform-specific masters (Netflix, Amazon, EBU broadcast loudness) are a separate, optional build once this is signed off.'
 };
-function gApprovedG(sn,g){const lk=gateState(sn);return g==2?(!!(lk["2a"]&&lk["2b"])||!!lk[2]):!!lk[g];}
+function gApprovedG(sn,g){const lk=gateState(sn);if(g==2)return !!(lk["2a"]&&lk["2b"])||!!lk[2];if(g==1)return !!(lk["1"]&&lk["1.6"]);return !!lk[g];}
 function gatePhase(sn,g){
   if(gApprovedG(sn,g))return 'signed';
-  const job=(g==2)?jobsFor(sn).filter(j=>j.gate=="2a"||j.gate=="2b").pop():jobFor(sn,g);
+  const job=(g==2)?jobsFor(sn).filter(j=>j.gate=="2a"||j.gate=="2b").pop():(g==1?jobsFor(sn).filter(j=>j.gate=="1"||j.gate=="1.6").pop():jobFor(sn,g));
   if(job&&job.status=="running")return 'running';
   const fireable=(g==1)||gApprovedG(sn,g-1);
   if(!fireable)return 'locked';
@@ -1082,7 +1363,28 @@ function scenePrevSigned(sn){const sl=scenesList(),i=sl.indexOf(sn);return i<=0?
 function activeGateOf(sn){for(const d of GATE_DEF){if(gatePhase(sn,d[0])!='signed')return d[0];}return 5;}
 function panelGate(sn){return (FOCUSGATE&&gatePhase(sn,FOCUSGATE)!='locked')?FOCUSGATE:activeGateOf(sn);}
 function defaultScene(){const sl=scenesList();return sl.find(sn=>gatePhase(sn,5)!='signed')||sl[sl.length-1];}
-function setScene(sn){if(!scenePrevSigned(sn)){showToast("🔒 Sign off the previous scene first",false);return;}CURSCENE=sn;FOCUSGATE=null;renderPipeline();}
+function setScene(sn){if(!scenePrevSigned(sn)){showToast("🔒 Sign off the previous scene first",false);return;}CURSCENE=sn;FOCUSGATE=null;renderPipeline();
+  fetch(BASE+"/api/keyframe-qa?scene="+sn+"&episode=Ep"+((CUR&&CUR.number)||1)).then(r=>r.json()).then(d=>{KFQA=d;if(CURSCENE==sn&&page=="pipeline")renderPipeline();}).catch(()=>{});
+  fetch(BASE+"/api/craft-score?scene="+sn+"&episode=Ep"+((CUR&&CUR.number)||1)).then(r=>r.json()).then(d=>{CRAFT=d;if(CURSCENE==sn&&page=="pipeline")renderPipeline();}).catch(()=>{});
+  fetchKfLintStatus(sn);}
+async function fetchKfLintStatus(sn){
+  // task #321: only the scene's own ANCHOR beat(s) (the opener, or a vision beat) ever get their own Gate-2b
+  // keyframe generation step (rule 64) — a continuation beat's card correctly shows its relay anchor instead,
+  // so linting it here would be irrelevant. Only beats with no keyframe file YET are worth checking — one that
+  // already generated cleared its own lint by definition. Real local compiles (one subprocess spawn per beat,
+  // via the same /api/keyframe-prompt the modal already uses) — deliberately NOT part of the 3s recurring poll.
+  const ss=SHOTS.filter(s=>s.sceneNumber==sn);
+  const need=ss.filter(s=>{const kf=keyframesFor(s);return kf.isAnchor&&!kf.start;});
+  if(!need.length)return;
+  const ep="Ep"+((CUR&&CUR.number)||1), pkg=(CUR&&(CUR.package||CUR.shotPackage))||'';
+  await Promise.all(need.map(async s=>{
+    try{
+      const j=await fetch(BASE+"/api/keyframe-prompt?package="+encodeURIComponent(pkg)+"&beat="+encodeURIComponent(s.shotCode)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json());
+      if(j&&j.lint)KFLINT[s.shotCode]=j.lint;
+    }catch(e){}
+  }));
+  if(CURSCENE==sn&&page=="pipeline")renderPipeline();
+}
 function focusGate(sn,g){if(gatePhase(sn,g)=='locked')return;FOCUSGATE=(FOCUSGATE==g?null:g);renderPipeline();}
 function advanceAfterSignoff(sn,signedGate){
   if(String(signedGate)=='5'){            // scene complete (Gate 5 = Post) → unlock + jump to the next scene (the scene-spine)
@@ -1144,7 +1446,11 @@ function renderPipeline(){
 function renderSceneStrip(scenes){
   return `<div class="sstrip">`+scenes.map(sn=>{
     if(!scenePrevSigned(sn))return `<div class="schip" style="opacity:.4;cursor:default" title="Locked — finish & sign off the previous scene first">🔒 Scene ${sn}</div>`;
-    const done=gatePhase(sn,4)=="signed",ag=activeGateOf(sn),m=PHASE_META[done?"signed":gatePhase(sn,ag)];
+    // FIXED 2026-07-12 (full-codebase audit continued): this was checking gate 4 (Retakes), not gate 5 (Post) —
+    // every other "is this scene fully complete" check in this file (scenePrevSigned, defaultScene, advanceAfterSignoff)
+    // already gates on Gate 5 = Post being signed; a scene with Gate 4 signed but Gate 5 unfired/unsigned was showing
+    // as fully "✓✓ signed off" here, misleading the user into thinking the final mix was already done.
+    const done=gatePhase(sn,5)=="signed",ag=activeGateOf(sn),m=PHASE_META[done?"signed":gatePhase(sn,ag)];
     return `<div class="schip ${sn==CURSCENE?"on":""}" onclick="setScene(${sn})"><span style="color:${m.c}">${m.g}</span> Scene ${sn}${done?"":" · G"+ag}</div>`;
   }).join("")+`</div>`;
 }
@@ -1175,7 +1481,8 @@ function renderActiveGate(sn){
     <div class="minds" style="margin:2px 0 12px">Built to the minds of: ${d[3]}</div>`;
   if(behind)head+=`<div style="font-size:11.5px;color:var(--hint);margin:-8px 0 12px">← reviewing a signed gate · <a style="cursor:pointer;color:var(--brandink);text-decoration:underline" onclick="FOCUSGATE=null;renderPipeline()">jump to the current gate (Gate ${activeGateOf(sn)})</a></div>`;
   let body="";
-  if(g==2){ body=gate2Panel(sn); }
+  if(g==1){ body=gate1Panel(sn); }   // Storyboard (Step 1) then the Previz Reel (Step 2, gate "1.6") — same two-step shape as Gate 2
+  else if(g==2){ body=gate2Panel(sn); }
   else if(g==3){ body=gate3Panel(sn); }   // Animation — beat cards ALWAYS present (empty until each clip renders in)
   else {
     const job=jobFor(sn,g);
@@ -1186,11 +1493,69 @@ function renderActiveGate(sn){
       body=gateArtifacts(sn,g)+`<div style="display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap">`+
         (signed
           ? `<span style="color:var(--ok);font-weight:700;font-size:14px">✓✓ Gate ${g} signed off</span><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="reFire(${sn},${g})">↻ Re-fire</button><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="unsignGate(${sn},${g})">↺ Unsign</button>`
-          : `<button class="bigsign" onclick="approveGate(${sn},${g})">✓ Sign off Gate ${g} →</button><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="reFire(${sn},${g})">↻ Re-fire</button>`)+(g==1?`<button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="fireDirectorEye()" title="Director's Eye (Gate 1.5) — review every beat against the show bible. Flags only; changes nothing.">🔍 Director's Eye</button>`:``)+`</div>`;
+          : `<button class="bigsign" onclick="approveGate(${sn},${g})">✓ Sign off Gate ${g} →</button><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="reFire(${sn},${g})">↻ Re-fire</button>`)+`</div>`;
       if(job)body+=gateLog(job);
     }
   }
   return `<div class="apanel">${head}${body}</div>`;
+}
+function craftScoreBlock(){
+  // THE PIXAR-CRAFT SCORE (task #315, 2026-07-14): cb_craft.score_scene_craft's dual-read, anti-grade-
+  // inflation judgment (rule 48), now actually fired by cb_pipeline.previz_reel() and read back here —
+  // ADVISORY ONLY, never a gate of its own. Rule 28's reserved verdict ("does it fly, is it funny") stays
+  // Julian's; this is a second opinion sitting alongside the reel, not a replacement for his eye.
+  if(!CRAFT||!CRAFT.criteria)return"";
+  const LABELS={characterVoice:"Character Voice",comedyCraft:"Comedy Craft",emotionalNorthStar:"Emotional / North Star",fidelityTraceability:"Fidelity Traceability",overallPixarBenchmark:"Pixar Benchmark"};
+  const scoreColor=s=>s>=4?"var(--ok)":s==3?"var(--info)":"var(--danger)";
+  const chips=Object.entries(CRAFT.criteria).map(([k,c])=>{
+    const gap=(c.agreement_gap||0)>=2?` <span style="color:var(--hint)" title="review and skeptic reads disagree by ${c.agreement_gap} — a contested scene">⚠</span>`:"";
+    return `<div style="min-width:118px"><div style="font-size:10.5px;color:var(--hint)">${LABELS[k]||k}</div><div style="font-size:16px;font-weight:700;color:${scoreColor(c.score)}">${c.score}/5${gap}</div></div>`;
+  }).join("");
+  const fix=(CRAFT.review&&CRAFT.review.oneLineToFixFirst)||"";
+  return `<div class="mc" style="margin-top:10px"><div class="lab" style="font-weight:600">🎬 Pixar-craft score <span style="font-weight:400;color:var(--hint);font-size:11px">— advisory, a second opinion; your own eye is the real gate (rule 28)</span></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">${chips}</div>
+    ${fix?`<div style="font-size:12px;color:var(--ink);margin-top:10px;padding-top:8px;border-top:1px solid var(--line)"><b>One line to fix first:</b> ${fix.replace(/</g,"&lt;")}</div>`:""}</div>`;
+}
+function gate1Panel(sn){
+  const gs=gateState(sn), ss=SHOTS.filter(s=>s.sceneNumber==sn);
+  const storySigned=!!gs["1"], previzSigned=!!gs["1.6"];
+  const job1=jobFor(sn,"1"), running1=!!(job1&&job1.status=="running");
+  const previz=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_previz\\.mp4$").test(m));
+  const previzJob=jobsFor(sn).filter(j=>j.gate=="1.6").pop(), buildingPreviz=!!(previzJob&&previzJob.status=="running");
+  if(buildingPreviz)delete KF_FIRING[sn+'|1.6'];   // a live job is running → consume the (re-)fire marker
+  const previzStarting=!!KF_FIRING[sn+'|1.6']&&!buildingPreviz&&(Date.now()-KF_FIRING[sn+'|1.6']<20000);
+  let h=`<div style="padding:9px 0;border-bottom:1px solid var(--line)"><b style="font-size:12px">Step 1 · Storyboard</b></div>`;
+  if(running1){
+    h+=`<div class="live" style="margin-top:8px"><span class="pulse">●</span> ${(job1.step||"working…").replace(/</g,"&lt;")} <button class="btn" style="margin-left:12px;padding:3px 13px;font-size:11px;background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring('${job1.jobId}')">■ Stop</button></div>`+gateLog(job1);
+  } else if(!ss.length){
+    h+=`<p style="font-size:13px;color:var(--muted);margin:8px 0 14px;max-width:660px">${GATE_READY_DESC[1]}</p><button class="bigfire" onclick="fireGate(${sn},1)">▶ Fire Gate 1 — ${GATE_VERB[1]}</button>`;
+  } else {
+    h+=beatListReview(ss);
+    h+=`<div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">`+
+      (storySigned
+        ? `<span style="color:var(--ok);font-weight:700;font-size:14px">✓✓ Storyboard signed off</span><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="reFire(${sn},1)">↻ Re-fire</button><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="unsignSub(${sn},'1')">↺ Unsign</button>`
+        : `<button class="bigsign" onclick="signSub(${sn},'1')">✓ Sign off storyboard →</button><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="reFire(${sn},1)">↻ Re-fire</button>`)+
+      `<button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="fireDirectorEye()" title="Director's Eye (Gate 1.5) — review every beat against the show bible. Flags only; changes nothing.">🔍 Director's Eye</button><button class="btn ghost" style="padding:6px 13px;font-size:12px" onclick="exportStoryboard(${sn})" title="THE GATE-1 EXTERNAL REVIEW RULE (CLAUDE.md rule 37) — Julian reads this OUTSIDE the Studio before signing.">⬇ Export storyboard</button></div>`;
+    if(job1)h+=gateLog(job1);
+  }
+  h+=`<div style="padding:9px 0;margin-top:14px;border-top:1px solid var(--line);${storySigned?"":"opacity:.45"}"><b style="font-size:12px">Step 2 · Previz Reel</b> <span style="font-size:11px;color:var(--hint)">— scratch VO + placeholder/keyframe cards, near-zero cost — hear the dialogue timing &amp; rhythm before Gate 2a's first paid render</span></div>`;
+  if(!storySigned){
+    h+=`<div style="font-size:11px;color:var(--hint);margin-top:4px">↑ Sign off the storyboard to unlock the previz reel.</div>`;
+  } else if(buildingPreviz){
+    h+=`<div class="live" style="margin-top:8px"><span class="pulse">●</span> ${(previzJob.step||"building the previz reel…").replace(/</g,"&lt;")} <button class="btn" style="margin-left:12px;padding:3px 13px;font-size:11px;background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring('${previzJob.jobId}')">■ Stop</button></div>`;
+  } else if(previzStarting){
+    h+=`<div class="live" style="margin-top:8px"><span class="pulse">●</span> starting the previz build…</div>`;
+  } else {
+    h+=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px"><button class="btn ghost" onclick="fireSub(${sn},'1.6')">${previz?"Rebuild":"Build the previz reel"}</button>`+
+      (previzSigned
+        ? `<span style="color:var(--ok);font-weight:600">✓ signed</span> <button class="btn ghost" style="padding:4px 9px;font-size:11px" onclick="unsignSub(${sn},'1.6')">↺ Unsign</button>`
+        : `<button class="bigsign" style="padding:7px 15px;font-size:13px" ${previz?"":'disabled style="opacity:.4;cursor:default"'} onclick="signSub(${sn},'1.6')">✓ Sign off previz →</button>`)+
+      `</div>`;
+    if(previz)h+=`<div class="mc" style="border:1px solid var(--brand);margin-top:10px"><div class="lab" style="color:var(--brandink);font-weight:600">▶ Scene ${sn} — Previz Reel</div><video controls src="${BASE}/engine/media/${previz}?v=${MEDIA_V}" style="width:100%;border-radius:8px;margin-top:8px;max-height:420px"></video><div style="font-size:11px;color:var(--hint);margin-top:6px">Scratch VO + placeholder/keyframe cards — not a final take of anything. Edit a beat above if the timing or rhythm doesn't land, then rebuild.</div></div>`;
+    if(previz)h+=craftScoreBlock();
+    if(previzJob)h+=gateLog(previzJob);
+  }
+  return h;
 }
 function gate2Panel(sn){
   const gs=gateState(sn),plate=PREFIX+"S"+sn+"_plate.png",have=f=>MEDIA.includes(f);
@@ -1220,9 +1585,44 @@ function gate2Panel(sn){
     h+=kfSigned?`<span style="color:var(--ok);font-weight:600">✓ signed</span> <button class="btn ghost" style="padding:4px 9px;font-size:11px" onclick="unsignSub(${sn},'2b')">↺ Unsign</button>`:`<button class="bigsign" style="padding:7px 15px;font-size:13px" ${(fdSigned&&gate2Ready(ss))?"":'disabled style="opacity:.4;cursor:default"'} onclick="signSub(${sn},'2b')">✓ Sign off keyframes →</button>`; }
   h+=`</div>`;
   if(building||kfStarting)h+=`<div style="margin-top:4px;height:8px;background:#eee;border-radius:5px;overflow:hidden"><div class="${kfStarting?'pulse':''}" style="height:100%;width:${kfStarting?100:kfPct}%;background:var(--brand);transition:width .5s"></div></div>`;
-  if(ss.some(s=>keyframesFor(s).start))h+=`<div class="kv" style="margin-top:13px">Opening keyframes — review each (click to inspect &amp; regenerate)</div><div class="grid">${ss.map(kfCard).join("")}</div>`;
+  // WIDENED (task #321): also show the grid when a beat has been lint-BLOCKED with no keyframe file yet —
+  // otherwise a scene where NOTHING has generated yet (the common case right after Gate 2a signs off) would
+  // never show the grid at all, so a blocked opener's badge would have nowhere to render.
+  if(ss.some(s=>keyframesFor(s).start||((KFLINT||{})[s.shotCode]&&KFLINT[s.shotCode].ok===false)))h+=`<div class="kv" style="margin-top:13px">Opening keyframes — review each (click to inspect &amp; regenerate)</div><div class="grid">${ss.map(kfCard).join("")}</div>`;
   if(!fdSigned)h+=`<div style="font-size:11px;color:var(--hint);margin-top:8px">↑ Sign off the foundation to unlock the keyframes.</div>`;
   return h;
+}
+let GATE3LINT={};   // {beatCode: {blocked, reason}|{blocked:false, flags}} — task #322, 2026-07-14, full-pipeline
+                     // verification audit: cb_beats.run()/cb_replicator.walk_scene both correctly hard-block or
+                     // loudly flag a beat's own check_gate3_lint verdict (2026-07-14, task #78) — the reason was
+                     // already sitting right there in the job's own captured stdout, just never attributed to
+                     // the specific beat's card, only visible by expanding gate3Panel's collapsed whole-job log.
+                     // Zero new fetch needed — parsed straight out of the SAME job.log gate3Panel already has.
+function parseGate3LintLog(log){
+  const out={};
+  if(!log)return out;
+  const lines=log.split("\n");
+  for(let i=0;i<lines.length;i++){
+    const m=lines[i].match(/^\s*(\S+):\s*LINT BLOCK\s*—\s*(.+?);\s*skipping/);
+    if(m)out[m[1]]={blocked:true,reason:m[2]};
+  }
+  for(let i=0;i<lines.length;i++){
+    const m=lines[i].match(/^\s*(\S+):\s*UNRESOLVED LINT FLAG/);
+    if(!m)continue;
+    const code=m[1],flags=[];
+    for(let j=i+1;j<lines.length&&j<i+16;j++){
+      const fm=lines[j].match(/^\s*\[LINT FLAG\]\s*(.+)$/);
+      if(fm){flags.push(fm[1]);continue;}
+      // the real log wraps the header AND the flag block in "!"-bar banners (cb_beats.py's own _bar
+      // print) — a bar can land immediately after the header line itself, so skip bars/blank lines
+      // rather than stopping on the first one; only a genuinely different line ends the block.
+      if(/^!+$/.test(lines[j].trim()))continue;
+      if(lines[j].trim()==="")continue;
+      break;
+    }
+    if(flags.length&&!out[code])out[code]={blocked:false,flags};
+  }
+  return out;
 }
 function animCard(s){
   // Same card look as the keyframes/storyboard, but the media is EMPTY until this beat's animation clip renders in.
@@ -1231,10 +1631,75 @@ function animCard(s){
   const cell=clip
     ? `<video src="${BASE}/engine/media/${clip}?v=${MEDIA_V}" muted preload="metadata" playsinline style="width:100%;height:100%;object-fit:cover"></video><span class="play">►</span>`
     : `<span class="ph" style="color:${v(pc[0])}">🎬</span><span style="position:absolute;bottom:7px;left:0;right:0;text-align:center;font-size:9.5px;color:var(--hint);letter-spacing:.03em">awaiting animation</span>`;
+  // task #322: attribute the beat's own Gate-3 lint verdict (already computed, already in the job log) to its
+  // own card — a BLOCK explains why "awaiting animation" never becomes a clip; a FLAG is an advisory the human
+  // should read before trusting an already-rendered take, surfaced here instead of only in a collapsed log.
+  // FIXED 2026-07-14 (Julian: "there seems to be a lot of red writing on these gates is that a bad thing" — both
+  // branches used identical --danger/--dangerbg styling, so every beat's routine, non-blocking advisory flags
+  // (word budget, the Motion Contract checklist-verb lint — currently flagging on ALL 5 real Scene-1 beats,
+  // none of them blocked) read as visually identical to a hard refusal. The FLAG branch is now --warn/--warnbg
+  // (amber); only a genuine BLOCK (nothing rendered) keeps --danger/--dangerbg (red).
+  // FIXED FURTHER 2026-07-15: the FLAG branch still smashed every one of lint.flags into ONE join('; ')
+  // paragraph — a beat with several flagged cuts read as a 150+-word wall of amber text that visually said
+  // "everything about this beat is broken," even though the near-universal "word budget: N words over target"
+  // flag is expected/harmless on almost every real multi-shot beat (400 is a soft target, not the hard cap),
+  // and even the genuinely-worth-a-look checklist-verb flags (cb_qa.py's own "COMPUTED PROXY, never a semantic
+  // judge" heuristic) are advisory only. Split: the word-budget note renders as its own quiet, muted (--hint)
+  // one-liner with just the number, never amber; anything else renders as a compact itemized list (one row per
+  // flag, boilerplate trimmed to the actionable ask) inside the same --warn/--warnbg container as before — no
+  // single run-on paragraph either way.
+  const lint=(GATE3LINT||{})[s.shotCode];
+  const lintBadge=(()=>{
+    if(!lint)return '';
+    if(lint.blocked){
+      return `<div style="margin:6px 0 0;padding:6px 9px;border-radius:6px;background:var(--dangerbg);color:var(--danger);font-size:11px;line-height:1.4;font-weight:600">⛔ Gate 3 lint BLOCK — no clip rendered: ${_esc(lint.reason||'blocked')}</div>`;
+    }
+    const flags=lint.flags||[];
+    const wordFlags=flags.filter(f=>/^word budget/i.test(f));
+    const otherFlags=flags.filter(f=>!/^word budget/i.test(f));
+    const wordNote=wordFlags.length?(()=>{
+      const wm=wordFlags[0].match(/(\d+)\s*words over the (\d+)-word target/i);
+      const label=wm?`${wm[1]} words (target ${wm[2]} — normal for a multi-shot beat)`:_esc(wordFlags[0]);
+      return `<div style="margin:6px 0 0;font-size:10.5px;color:var(--hint)">ℹ ${label}</div>`;
+    })():'';
+    const otherRows=otherFlags.map(f=>{
+      const cm=f.match(/^cut (\S+):\s*action reads as (\d+) separately-clocked actions/i);
+      const text=cm?`cut ${_esc(cm[1])}: reads as ${_esc(cm[2])} separately-clocked actions — verify it's one cause, chained consequences`:_esc(f.length>140?f.slice(0,140)+'…':f);
+      return `<div style="padding:1.5px 0">▸ ${text}</div>`;
+    }).join('');
+    const otherBox=otherFlags.length?`<div style="margin:6px 0 0;padding:6px 9px;border-radius:6px;background:var(--warnbg);color:var(--warn);font-size:11px;line-height:1.5"><div style="font-weight:600;margin-bottom:2px">⚑ Gate 3 lint — worth a glance</div>${otherRows}</div>`:'';
+    return otherBox+wordNote;
+  })();
   return `<div class="card" onclick="openShot(${s.id},'clip')"><div class="thumb"><span class="badge">${s.shotCode||('Shot '+s.id)}</span>${cell}</div>
     <div class="cbody"><div class="crow"><span class="meta" style="margin:0">${meta}</span><span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap((s.intent||{}).pillar)}</span></div>
     <div class="act">${_esc((s.action||'').length>70?s.action.slice(0,70)+"…":(s.action||''))}</div>
+    ${lintBadge}
     <span class="st" style="color:${clip?'var(--ok)':'var(--hint)'}">${clip?'● clip':'○ empty'}</span>${noteChip(s)}</div></div>`;
+}
+// FIXED 2026-07-12 (full-codebase audit continued): this "prepared anchor" card (image + drift-clean/detected
+// verdict + Approve-Anchor button + drift-not-clean warning) used to be duplicated near-verbatim between
+// relayBanner() (the Gate-3 scene banner) and renderRelayPanel() (the per-beat modal) — self-acknowledged by a
+// comment in the latter ("see relayBanner()'s twin block above for why dc/clean/anchorImg are read this way")
+// rather than actually shared. The two copies had ALREADY diverged on the drift-not-clean warning text (one
+// mentioned "or hold for a ruling — check_remint's bar is untouched," the other didn't) — exactly the silent-
+// drift risk a duplicated card invites (rules 11/49/56: no silent second source of truth). Extracted into one
+// function both callers now use; visual sizing (image width/radius, button class/margin, status font size)
+// stays configurable via opts so each caller's on-page look is unchanged, but the drift logic + copy can only
+// ever live in one place from here — unified onto the fuller warning text for both.
+function renderAnchorCard(relay, launchScene, launchCode, opts){
+  opts=opts||{};
+  const imgWidth=opts.imgWidth||220, imgRadius=opts.imgRadius||8, gap=opts.gap||12;
+  const btnClass=opts.buttonClass||'bigsign', btnMargin=opts.buttonMargin||'10px', statusSize=opts.statusSize||'12.5px';
+  const dc=relay.driftCheck, clean=dc?dc.ok===true:true, anchorImg=relay.anchor||relay.remint;
+  return `<div style="display:flex;gap:${gap}px;align-items:flex-start;flex-wrap:wrap">
+    ${anchorImg?`<img class="zoom" data-cap="${_esc(launchCode)} · relay anchor${relay.remint?' (re-minted)':' (raw harvest)'}" src="${BASE}/engine/${anchorImg}?v=${MEDIA_V}" style="width:${imgWidth}px;border-radius:${imgRadius}px;background:var(--surface2)"/>`:''}
+    <div style="flex:1;min-width:220px">
+      <div style="font-size:${statusSize};font-weight:600;color:${clean?'var(--ok)':'var(--danger)'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut) — state continuity checked after firing'}</div>
+      ${dc?`<div style="font-size:11.5px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
+      <button class="${btnClass}" style="margin-top:${btnMargin}" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${launchScene}','${_esc(launchCode)}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')} (one take)</button>
+      ${clean?'':'<div style="font-size:11px;color:var(--danger);margin-top:4px">Fix the drift before approving — re-fire this beat (Gate 3 above) to retry the harvest + re-mint, or hold for a ruling. check_remint\'s bar is untouched.</div>'}
+    </div>
+  </div>`;
 }
 function relayBanner(sn){
   // THE FRONT DOOR, WHERE JULIAN ACTUALLY LOOKS FOR IT (found live, 2026-07-04 — the Approve Anchor button
@@ -1292,26 +1757,26 @@ function relayBanner(sn){
   // rule 32 (2026-07-05, RE-MINT SCOPING): driftCheck is null for an intentional_next_shot next beat (the
   // default) — no NB2 pass ran, so there's nothing to have drifted; that's not a block, it's "not applicable."
   // clean defaults to true when dc is absent — only an ACTUAL dc.ok===false disables the button. "anchor" (not
-  // "remint", which is null for this junction type) is the image to show either way.
-  const dc=relay.driftCheck,clean=dc?dc.ok===true:true,anchorImg=relay.anchor||relay.remint;
+  // "remint", which is null for this junction type) is the image to show either way. See renderAnchorCard()
+  // above for the shared card markup this and renderRelayPanel() both now render through.
   return `<div class="mc" style="border:2px solid var(--brand);margin-bottom:14px;background:var(--brandbg)">
     <div class="lab" style="color:var(--brandink);font-weight:700;font-size:13.5px">◈ RELAY — next action</div>
     <div style="font-size:12px;color:var(--hint);margin:2px 0 10px">${_esc(relay.winnerCode)}'s anchor is prepared, waiting for your approval before ${_esc(relay.nextCode||'the next beat')} can launch.</div>
-    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-      ${anchorImg?`<img class="zoom" data-cap="${_esc(relay.winnerCode)} · relay anchor${relay.remint?' (re-minted)':' (raw harvest)'}" src="${BASE}/engine/${anchorImg}?v=${MEDIA_V}" style="width:220px;border-radius:8px;background:var(--surface2)"/>`:''}
-      <div style="flex:1;min-width:220px">
-        <div style="font-size:12.5px;font-weight:600;color:${clean?'var(--ok)':'var(--danger)'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut) — state continuity checked after firing'}</div>
-        ${dc?`<div style="font-size:11.5px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
-        <button class="bigsign" style="margin-top:10px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${sn}','${_esc(relay.winnerCode)}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')} (one take)</button>
-        ${clean?'':'<div style="font-size:11px;color:var(--danger);margin-top:4px">Fix the drift before approving — re-fire this beat (Gate 3 above) to retry the harvest + re-mint.</div>'}
-      </div>
-    </div>
+    ${renderAnchorCard(relay, sn, relay.winnerCode)}
   </div>`;
 }
 function gate3Panel(sn){
   // Animation stage: the controls/status up top, then the scene's beat cards ALWAYS present (empty placeholders
   // that fill in as each clip renders) — same look as the keyframes grid.
   const ss=SHOTS.filter(s=>s.sceneNumber==sn),ph=gatePhase(sn,3),job=jobFor(sn,3);
+  // THE STALE-JOB-LOG ATTRIBUTION GUARD (2026-07-15, found live): a Gate-3 job log from a PREVIOUS beat
+  // package (a stopped job from the day before the whole-episode restart) was being parsed for per-beat
+  // lint flags and shown on the freshly re-authored beats' cards, purely because the beat codes matched —
+  // actively lying about the current data. A job whose run ENDED before the current package was last
+  // written describes beats that no longer exist in that form; its lint attributions are suppressed.
+  // A still-running job (ended==null) is always current by definition.
+  const jobIsCurrent=job&&(!job.ended||!PIPE.pkgMtime||job.ended>=PIPE.pkgMtime);
+  GATE3LINT=jobIsCurrent?parseGate3LintLog(job&&job.log):{};
   let h=relayBanner(sn);
   if(ph=="running") h+=`<div class="live"><span class="pulse">●</span> ${(job.step||"working…").replace(/</g,"&lt;")} <button class="btn" style="margin-left:12px;padding:3px 13px;font-size:11px;background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring('${job.jobId}')">■ Stop</button></div>`;
   else if(ph=="ready") h+=`<p style="font-size:13px;color:var(--muted);margin:0 0 12px;max-width:660px">${GATE_READY_DESC[3]}</p><button class="bigfire" onclick="fireGate(${sn},3)">▶ Fire Gate 3 — ${GATE_VERB[3]}</button>`;
@@ -1350,8 +1815,58 @@ function gateArtifacts(sn,g){
   const _reviewBlock=(lab)=>_rev?_player(_rev,lab,`Timecode + frame + the live BEAT / SHOT / Ref + in&ndash;out burned in &mdash; watch this, then mark up the retakes: <a href="${_csv}" download style="color:var(--brandink);text-decoration:underline">&darr; retake sheet (CSV)</a>`):`<div class="coming" style="margin-top:10px">The timecoded review copy appears here once Gate 3 (Animation) finishes.</div>`;
   if(g==3)return `${sceneComplete(sn)}<div class="grid" style="margin-top:10px">${ss.map(card).join("")}</div>`+_reviewBlock(`▶ Scene ${sn} — timecoded review copy (for retakes)`);
   if(g==4)return _reviewBlock(`▶ Scene ${sn} — review copy (read the timecode)`)+retakeForm(sn);
-  if(g==5)return _final?_player(_final,`✓ Scene ${sn} — FINAL mix`,`stitched, mastered &minus;14 LUFS · stems for CapCut`):`<div class="coming">The final mix appears here once Post (Gate 5) runs.</div>`;
+  if(g==5)return _final?_player(_final,`✓ Scene ${sn} — FINAL mix`,`stitched, mastered &minus;14 LUFS · stems for CapCut`)+mastersBlock(sn):`<div class="coming">The final mix appears here once Post (Gate 5) runs.</div>`;
   return "";
+}
+function mastersBlock(sn){
+  // DELIVERY EXTRAS (task #316, 2026-07-14): captions (.srt/.vtt) and the 9:16 vertical derivative are already
+  // built AUTOMATICALLY by cb_post.run() (Gate 5 itself) — this just surfaces them, read-only from MEDIA, the
+  // same convention as every other artifact link on this page. Platform masters (build_platform_masters) are
+  // genuinely separate — existed CLI-only ("cb_pipeline.py masters <scene>") with no Studio button until now,
+  // the same "built but orphaned" pattern this session found and closed repeatedly elsewhere.
+  const PLATS=[["youtube","YouTube"],["netflix","Netflix"],["amazon","Amazon"],["broadcast_ebu","EBU Broadcast"]];
+  const capSrt=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_captions\\.srt$").test(m));
+  const capVtt=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_captions\\.vtt$").test(m));
+  const vert=MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_vertical_9x16\\.mp4$").test(m));
+  const masterFile=k=>MEDIA.find(m=>new RegExp("^"+PREFIX+"Scene"+sn+"_master_"+k+"\\.mp4$").test(m));
+  const built=PLATS.map(([k,lab])=>{
+    const f=masterFile(k);
+    return f?`<a href="${BASE}/engine/media/${f}?v=${MEDIA_V}" target="_blank" style="color:var(--brandink);text-decoration:underline">${lab}</a>`
+             :`<span style="color:var(--hint)">${lab}</span>`;
+  }).join(" &middot; ");
+  const anyBuilt=PLATS.some(([k])=>masterFile(k));
+  const mJob=jobsFor(sn).filter(j=>j.gate=="masters").pop(), building=!!(mJob&&mJob.status=="running");
+  return `<div class="mc" style="margin-top:10px">
+    <div class="lab" style="font-weight:600">Delivery extras</div>
+    <div style="font-size:12px;margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">
+      ${capSrt?`<a href="${BASE}/engine/media/${capSrt}?v=${MEDIA_V}" download style="color:var(--brandink);text-decoration:underline">&darr; Captions (.srt)</a>`:`<span style="color:var(--hint)">Captions — appear once Gate 5 runs</span>`}
+      ${capVtt?`<a href="${BASE}/engine/media/${capVtt}?v=${MEDIA_V}" download style="color:var(--brandink);text-decoration:underline">&darr; Captions (.vtt)</a>`:""}
+      ${vert?`<a href="${BASE}/engine/media/${vert}?v=${MEDIA_V}" target="_blank" style="color:var(--brandink);text-decoration:underline">&#9654; 9:16 vertical derivative</a>`:`<span style="color:var(--hint)">9:16 vertical — appears once Gate 5 runs</span>`}
+    </div>
+    <div style="font-size:12px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">
+      <b>Platform masters</b> — separately loudness-mastered from the already-assembled picture (YouTube &minus;14 LUFS, Netflix &minus;27, Amazon &minus;24, EBU broadcast &minus;23):
+      <div style="margin-top:6px">${built}</div>
+      <div style="margin-top:9px">
+        ${building?`<span class="live"><span class="pulse">●</span> building platform masters&hellip;</span>`
+                   :`<button class="btn ghost" style="padding:5px 13px;font-size:12px" onclick="buildMasters(${sn})">${anyBuilt?"↻ Rebuild":"Build"} platform masters</button>`}
+      </div>
+      ${mJob?gateLog(mJob):""}
+    </div>
+  </div>`;
+}
+async function buildMasters(sn){
+  try{
+    // FIXED (full-pipeline verification workflow, 2026-07-14): this button's own toast already claimed
+    // "YouTube · Netflix · Amazon · EBU" but never sent a `platforms` key — serve.py's /api/masters silently
+    // defaulted to youtube/netflix/amazon only, so the advertised EBU Broadcast master was unreachable from
+    // the only UI control meant to build it (cb_post.build_platform_masters/LOUDNESS_TARGETS fully support
+    // it; only the CLI could actually reach it). Now sends all 4 explicitly, matching the toast's own claim.
+    const r=await fetch(BASE+"/api/masters",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),episode:"Ep"+((CUR&&CUR.number)||1),platforms:["youtube","netflix","amazon","broadcast_ebu"]})});
+    const j=await r.json();
+    if(!j.ok){alert("Build masters failed: "+(j.error||"failed"));return;}
+    if(typeof showToast=="function")showToast("🎚 Building platform masters (YouTube · Netflix · Amazon · EBU)…",true);
+    renderPipeline();
+  }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 function _clip(t,n){t=""+(t||"");return (t.length>n?t.slice(0,n)+"…":t).replace(/</g,"&lt;");}
 function beatListReview(ss){
@@ -1367,9 +1882,16 @@ function beatListReview(ss){
       <div style="font-size:12px;margin-top:3px">${_clip(s.storyBeat||s.action||"",128)}</div>${wn}${rd}</div>`;
   }).join("");
 }
-async function reFire(sn,g){ if(g!=1 && !confirm(`Re-fire Gate ${g} for Scene ${sn}? This re-runs the pipeline over the existing output.`))return; fireGate(sn,g,true); }
+// FIXED 2026-07-12 (full-codebase audit continued): this used to show its own confirm() here, then call
+// fireGate(sn,g,true) — whose own force-branch (line ~1071) shows the IDENTICAL confirm text a second time for
+// every gate this function is ever called with (1, 3, 4, 5 — gate 2 never reaches reFire, it goes through
+// fireSub instead). That meant one click popped two back-to-back duplicate dialogs. fireGate already confirms
+// correctly for every case (its own "Re-break the episode?" wording for gate 1, the generic re-fire wording for
+// 3/4/5) — so reFire no longer confirms at all, it just forwards force=true and lets fireGate own the one prompt.
+async function reFire(sn,g){ fireGate(sn,g,true); }
 async function unsignGate(sn,g){
   if(g==2)return unsignSub(sn,"2b");
+  if(g==1)return unsignSub(sn,"1.6");
   if(!confirm(`Un-sign Gate ${g} for Scene ${sn}?\n\nThis removes the sign-off and re-locks every gate after it, so you can alter and sign off again.`))return;
   try{const r=await fetch(BASE+"/api/unapprove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:String(g),episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){alert("Un-sign failed: "+(j.log||j.error||""));return;}PIPE.locked=j.locked;FOCUSGATE=null;renderPipeline();}catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
@@ -1395,6 +1917,17 @@ async function openShot(id,kind){
   try{PIPE=await (await fetch(BASE+"/api/pipeline")).json();}catch(e){}
   const _code=s.shotCode||s.id,_note=(PIPE.notes||{})[_code]||"",_kind=(kind=="clip")?"clip":"keyframe";  // explicit kind (page-coupling removed)
   const _rj=Object.values(PIPE.jobs||{}).filter(j=>j.gate=="regen:"+_code).sort((a,b)=>a.started-b.started).pop(),_run=_rj&&_rj.status=="running";
+  // THE REGENERATE-FEEDBACK GAP, CLOSED (task #320, 2026-07-14, full-pipeline verification audit — the
+  // HIGHEST-severity Studio UI finding: _rj was computed here but never once rendered anywhere, so a
+  // lint-blocked keyframe/clip regen — the single most-used per-beat iteration path — gave ZERO visible
+  // feedback, not even a collapsed log; a director would click Regenerate and just see nothing happen).
+  // Detects a real refusal by the two literal strings cb_scene.py/cb_beats.py actually print on a block
+  // ("REGEN BLOCKED"/"LINT BLOCK" — both contain "BLOCK"), so this stays correct if the wording is ever
+  // tightened without needing an exact-string match.
+  const _rjBlocked=!!(_rj&&_rj.status!="running"&&_rj.log&&_rj.log.includes("BLOCK"));
+  const _rjFeedback=_rjBlocked
+    ? `<div style="margin-top:6px;padding:8px 11px;border-radius:8px;background:var(--dangerbg,rgba(220,60,60,.12));border:1px solid var(--danger);font-size:12px;color:var(--danger)"><b>⛔ Regenerate was refused — nothing rendered.</b><div style="margin-top:3px;color:var(--ink);white-space:pre-wrap">${_esc((_rj.log||"").split("\n").filter(l=>l.includes("BLOCK")).join("\n"))}</div></div>`
+    : (_rj?gateLog(_rj):"");
   const isB=s._beat;
   // ALWAYS show the keyframe IMAGE at the top; if a clip/animation exists, show it BELOW it (never instead) so you can always see the still.
   // THE LOOP'S TRUTH (Julian, 2026-07-04): for a beat, never fall back to m.key (mediaFor isn't relay-aware —
@@ -1415,7 +1948,7 @@ async function openShot(id,kind){
        : `<div class="kv" style="color:var(--brandink)">★ Character Master</div><div style="font-size:11px;color:var(--hint)">Set from a SOLO keyframe (one character). This beat has ${_cast.join(", ")} — use a clean solo hero frame to master each.</div>`)
     : "";
   const cutsHtml=isB&&s._cuts&&s._cuts.length
-    ? `<div class="kv">Director's cuts (source — flattened into the single-take Seedance prompt above; not sent as cuts)</div>`+s._cuts.map((c,i)=>`<div class="srow" style="cursor:default;align-items:flex-start"><span class="num" style="min-width:46px">Cut ${c.n||i+1}</span><div style="flex:1"><div style="font-size:11px;color:var(--hint)">${(c.framing||'').replace(/</g,'&lt;')}</div><div style="font-size:12.5px;margin-top:2px">${(c.action||'').replace(/</g,'&lt;')}</div>${c.dialogue?`<div class="dlg" style="margin:5px 0 0">"${c.dialogue.replace(/^[A-Z' ]+:\s*/,'').replace(/</g,'&lt;')}"${c.delivery?` <span style="color:var(--hint);font-style:normal">— ${c.delivery.replace(/</g,'&lt;')}</span>`:''}</div>`:''}</div></div>`).join("")
+    ? `<div class="kv">Director's cuts (source — compiled into the multi-shot Seedance prompt above with its own per-shot timecodes/lenses; not sent as separate cuts)</div>`+s._cuts.map((c,i)=>`<div class="srow" style="cursor:default;align-items:flex-start"><span class="num" style="min-width:46px">Cut ${c.n||i+1}</span><div style="flex:1"><div style="font-size:11px;color:var(--hint)">${(c.framing||'').replace(/</g,'&lt;')}</div><div style="font-size:12.5px;margin-top:2px">${(c.action||'').replace(/</g,'&lt;')}</div>${c.dialogue?`<div class="dlg" style="margin:5px 0 0">"${c.dialogue.replace(/^[A-Z' ]+:\s*/,'').replace(/</g,'&lt;')}"${c.delivery?` <span style="color:var(--hint);font-style:normal">— ${c.delivery.replace(/</g,'&lt;')}</span>`:''}</div>`:''}</div></div>`).join("")
     : (s.dialogue?`<div class="kv">Dialogue${s.speaker?" · "+_esc(s.speaker):""}</div><div>${_esc(s.dialogue)}</div>`:'');
   const headMeta=isB
     ? `${cap(s.intent.pillar)} · ${s.duration}s · ${(s._cuts||[]).length} cuts · ${(s.characters||[]).join(", ")}${s.keenWristbands&&s.keenWristbands!="none"?" · Keen: "+s.keenWristbands:""}`
@@ -1442,6 +1975,7 @@ async function openShot(id,kind){
     <div class="kv">${isB?'Story beat':'Action'}</div><div>${_esc(s.action||'')}</div>
     ${cutsHtml}
     ${isB&&s.cameraArc?`<div class="kv">Camera arc</div><div style="font-size:12.5px">${s.cameraArc}</div>`:''}
+    ${isB?`<div class="kv">Sound brief <span style="font-size:10.5px;color:var(--hint);font-weight:400">(advisory, for Post's music/SFX pass — NOT sent to the render prompt)</span></div><div id="soundBrief" style="font-size:12px;line-height:1.55;color:var(--ink)">Loading…</div>`:''}
     ${!isB?`<div class="kv">Directorial intent</div><div>${s.intent.beat} — ${s.intent.emotion}; music: ${s.intent.musicMood}${s.intent.humour?"; humour: "+s.intent.humour:""}</div>`:''}
     ${isB&&(s.want||s.need||s.crystalTruth||s.kidRead||s.adultRead||s.theGame||s.wordlessHeld)?`<div class="kv" style="color:var(--brandink)">North Star — the beat's soul (the feeling, put outside)</div><div style="font-size:12.5px;line-height:1.55;border-left:3px solid var(--brand);padding-left:11px">${s.want?`<b>Wants:</b> ${(''+s.want).replace(/</g,'&lt;')}<br>`:''}${s.need?`<b>Needs</b> <span style="color:var(--hint)">(the truth under the want):</span> <b style="color:var(--brandink)">${(''+s.need).replace(/</g,'&lt;')}</b><br>`:''}${s.crystalTruth?`<b>◈ Crystal truth:</b> ${(''+s.crystalTruth).replace(/</g,'&lt;')}<br>`:''}${s.theGame?`<b>The game (the Bluey layer):</b> ${(''+s.theGame).replace(/</g,'&lt;')}<br>`:''}${s.kidRead?`<b>Kid sees:</b> ${(''+s.kidRead).replace(/</g,'&lt;')}<br>`:''}${s.adultRead?`<b>Adult feels:</b> ${(''+s.adultRead).replace(/</g,'&lt;')}<br>`:''}${s.wordlessHeld?`<b style="color:var(--brandink)">◈ Wordless-held</b> — silence carries this beat`:''}</div>`:""}
     ${s.performance?`<div class="kv">Performance intention</div><div style="font-size:12.5px"><b>Surface:</b> ${s.performance.surface||""}<br><b>Underneath:</b> ${s.performance.underneath||""}${s.performance.innerThought?`<br><b>Inner thought:</b> "${s.performance.innerThought}"`:""}</div>`:""}
@@ -1456,10 +1990,11 @@ async function openShot(id,kind){
         : `<button class="btn" ${_run?'disabled':''} style="${_run?'opacity:.5;cursor:default':''}" onclick="regenShot('${s.sceneNumber}','${_code}','clip','both')">${_run?'Regenerating…':'Regenerate clip'}</button>`}
       <span style="font-size:11.5px;color:var(--hint)">${_run?'running — this can take a minute':(_kind=="keyframe"?'your note applies to whatever you regenerate':'feeds your note into the prompt and re-renders this beat')}</span>
     </div>
+    ${_rjFeedback}
     ${masterUI}
     ${isB?`<div id="relayPanel_${_code}" style="margin-top:16px"></div>`:''}`;
   document.getElementById("modal").classList.add("show");
-  if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);fetchRelayInfo(s.sceneNumber,s.shotCode);renderShotsEdit(s);}
+  if(isB){fetchRealKfPrompt(s.shotCode);fetchRealSeedance(s.shotCode);fetchVoicePrompt(s.shotCode);fetchSoundBrief(s.shotCode);fetchRelayInfo(s.sceneNumber,s.shotCode);renderShotsEdit(s);}
 }
 // ── THE RELAY, front door (Julian, 2026-07-03; simplified for THE ONE-RENDER ECONOMY, 2026-07-05) — a beat
 // has exactly one official clip (auto-retried once internally on a failed gate — no more "pick a winner among
@@ -1500,19 +2035,11 @@ function renderRelayPanel(scene,code,relay){
     h+=`<div style="font-size:11px;color:var(--hint);border-top:2px solid var(--brand);padding-top:9px">◈ No clip yet for this beat — fire it via Gate 3 above (or approve the previous beat's anchor, if this beat is next in the relay).</div>`;
   }
   if(relay.winnerCode==code){
-    // rule 32 (2026-07-05, RE-MINT SCOPING): see relayBanner()'s twin block above for why dc/clean/anchorImg
-    // are read this way — driftCheck is null (not a fail) for an intentional_next_shot next beat.
-    const dc=relay.driftCheck,clean=dc?dc.ok===true:true,anchorImg=relay.anchor||relay.remint;
+    // rule 32 (2026-07-05, RE-MINT SCOPING): driftCheck is null (not a fail) for an intentional_next_shot next
+    // beat. FIXED 2026-07-12 (full-codebase audit continued): this card used to be a hand-duplicated copy of
+    // relayBanner()'s — see renderAnchorCard() (defined above relayBanner) for the now-shared markup/logic.
     h+=`<div class="kv" style="color:var(--brandink);margin-top:14px">◈ Prepared relay anchor — for ${_esc(relay.nextCode||'the next beat')}</div>
-      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
-        ${anchorImg?`<img class="zoom" data-cap="${_esc(code)} · relay anchor${relay.remint?' (re-minted)':' (raw harvest)'}" src="${BASE}/engine/${anchorImg}?v=${MEDIA_V}" style="width:200px;border-radius:6px;background:var(--surface2)"/>`:''}
-        <div style="flex:1;min-width:220px">
-          <div style="font-size:11.5px;font-weight:600;color:${clean?'var(--ok)':'var(--danger)'}">${dc?(clean?'✓ drift check CLEAN':'✗ DRIFT DETECTED'):'◈ no re-mint for this join (intentional cut)'}</div>
-          ${dc?`<div style="font-size:11px;color:var(--hint);white-space:pre-wrap;margin-top:3px">${_esc(dc.verdict||'')}</div>`:''}
-          <button class="btn" style="margin-top:8px" ${clean?'':'disabled'} ${clean?'':'style="opacity:.4;cursor:default"'} onclick="approveAnchor('${scene}','${code}')">✓ Approve Anchor → launch ${_esc(relay.nextCode||'next beat')} (one take)</button>
-          ${clean?'':`<div style="font-size:11px;color:var(--danger);margin-top:4px">Fix the drift before approving — re-fire this beat above (Gate 3) to retry the harvest + re-mint, or hold for a ruling. check_remint's bar is untouched.</div>`}
-        </div>
-      </div>`;
+      <div style="margin-top:6px">${renderAnchorCard(relay, scene, code, {imgWidth:200, imgRadius:6, gap:10, buttonClass:'btn', buttonMargin:'8px', statusSize:'11.5px'})}</div>`;
   }
   el.innerHTML=h;
 }
@@ -1622,8 +2149,16 @@ async function saveShots(code){
   const edited=cuts.map((c,i)=>{
     const g=id=>{const e=document.getElementById(id);return e?e.value:undefined;};
     const o={n:c.n||i+1, framing:g('shot_framing_'+i)??c.framing??'', action:g('shot_action_'+i)??c.action??''};
-    const dlg=g('shot_dialogue_'+i); if(dlg!==undefined && dlg!=='') o.dialogue=dlg; else if(c.dialogue) o.dialogue=c.dialogue;
-    const del=g('shot_delivery_'+i); if(del!==undefined && del!=='') o.delivery=del; else if(c.delivery) o.delivery=c.delivery;
+    // A field with no DOM control (dlg===undefined) keeps its prior value; a field present and deliberately
+    // cleared by the user (dlg==='') must actually clear — falling back to c.dialogue there made the field
+    // uneditable-to-blank (2026-07-08 audit finding).
+    const dlg=g('shot_dialogue_'+i); if(dlg!==undefined){ if(dlg!=='') o.dialogue=dlg; } else if(c.dialogue) o.dialogue=c.dialogue;
+    const del=g('shot_delivery_'+i); if(del!==undefined){ if(del!=='') o.delivery=del; } else if(c.delivery) o.delivery=c.delivery;
+    // chorusMembers/voiceTreatment have no UI control on this Shots-edit path — round-trip them silently so a
+    // save here doesn't strip them (the same class of gap rule 56 already fixed for the full beat editor's
+    // ebSave/editBeat path; this Shots-only path was missed by that sweep).
+    if(c.chorusMembers!=null) o.chorusMembers=c.chorusMembers;
+    if(c.voiceTreatment!=null) o.voiceTreatment=c.voiceTreatment;
     return o;
   });
   if(await _beatUpdate(code,{},edited)){
@@ -1658,6 +2193,16 @@ async function revertVoice(code){
     if(typeof showToast=="function")showToast('↺ Reverted to the auto-directed voice',true);
     await reloadBeats(); openShotByCode(code);
   }
+}
+// READ-ONLY, informational (cb_prompts._music_line/_sfx_line, orphaned-but-working functions wired up here) —
+// a scratch music/SFX brief for Post's own scoring pass. Never sent to the render prompt (see the label above).
+async function fetchSoundBrief(beatCode){
+  const el=document.getElementById('soundBrief'); if(!el)return;
+  const pkg=_beatPkg(); const ep="Ep"+((CUR&&CUR.number)||1);
+  try{const j=await fetch(BASE+"/api/beat-sound-brief?package="+encodeURIComponent(pkg)+"&beat="+encodeURIComponent(beatCode)+"&episode="+ep,{cache:"no-store"}).then(r=>r.json());
+    if(j.error){el.textContent="⚠ "+j.error;return;}
+    el.innerHTML=`<b>Music:</b> ${_esc(j.music||'')}<br><b>SFX:</b> ${_esc(j.sfx||'')}`;
+  }catch(e){el.textContent="⚠ couldn't load the sound brief — is the server running?";}
 }
 /* ---- Storyboard beat editor: edit beats, internal cuts and the Seedance side ---- */
 var EB=null;
@@ -1828,6 +2373,7 @@ function renderSceneEditor(){
     ${fld('Scene look — the atmosphere sentence appended to the style block','sceneLook','warm morning light, pollen, meadow appearance…',48)}
     ${fld('Ambient bed — the LOCKED ambient-sound line, word-for-word identical across every beat in this scene','ambientBed','',48)}
     ${fld('Parent line — this scene’s one adult-layer read (Manifest creative contract)','parentLine','',48)}
+    <div style="font-size:11px;color:var(--hint);margin-top:6px">Who carries this scene's focus (the performance throughline) is derived automatically from each beat's own fidelityAllocation — nothing to author here; see the beat list below.</div>
     <div style="display:flex;gap:8px;margin-top:16px;align-items:center"><button class="btn" onclick="esSave()">✓ Save scene</button><button class="btn ghost" onclick="EB?editBeat(EB.id):closeM()">Cancel</button><span id="es_msg" style="font-size:12px;color:var(--brandink)"></span></div>`;
 }
 async function esSave(){
@@ -1840,13 +2386,244 @@ async function esSave(){
 }
 
 
+// ══ SHOTS — the shot-pipeline surface (cb_engine.py design → cb_render.py render loop). ADDITIVE, 2026-07-16. ══
+//    Follows the Canvas-tab precedent exactly: its own NAV entry + render() dispatch + a self-contained
+//    renderer. Talks ONLY to the two additive endpoints (/api/shot-package GET, /api/shot-run POST); its job
+//    polling is its own interval (never touches refreshPipe), and finished jobs still toast through the
+//    existing global poll like every other gate action. Nothing in the beat pipeline is read or written here.
+let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=null,SH_POLL=null;
+const SH_LABEL={design:"Design scene",voice:"Voice all",animatic:"Timing slate",keyframe:"Generate keyframe",fire:"Fire candidates",next:"Fire next",approve:"Approve candidate",reject:"Reject batch",stitch:"Stitch"};
+const REJECT_CATS=["identity","geography","action-timing","instruction-ignored","other"];   // mirrors serve.py's REJECT_CATEGORIES exactly
+let SH_CANDS=3;   // candidate-batch size (1-4, default 3) — Seedance is a PROBABILISTIC candidate generator (Julian, 2026-07-16); a fire is a batch, never one deterministic take
+const shTok=x=>String(x||"").replace(/[^A-Za-z0-9._-]/g,"");   // shotId into an onclick attr — token-safe, mirrors the server's own _SHOT_TOKEN
+async function shFetchPkg(){
+  SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;
+  try{
+    const r=await fetch(BASE+"/api/shot-package?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
+    const j=await r.json();
+    if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
+    else SH_ERR=(j&&j.error)||("HTTP "+r.status);
+  }catch(e){SH_ERR="Can't reach the studio server.";}
+}
+function shLedger(sid){return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.shotId==sid)||{};}
+function shMedia(sid){return ((SH_MEDIA&&SH_MEDIA.shots)||{})[sid]||{};}
+function shRunningJob(){
+  return Object.values(PIPE.jobs||{}).filter(j=>String(j.gate).startsWith("shot:")&&String(j.scene)==String(SH_SC)&&j.status=="running").sort((a,b)=>(a.started||0)-(b.started||0)).pop();
+}
+async function shLoad(){
+  const e=document.getElementById("shEp"),s=document.getElementById("shSc");
+  if(e&&e.value.trim())SH_EP=e.value.trim();
+  if(s&&s.value.trim())SH_SC=s.value.trim();
+  await shFetchPkg();renderShots();
+}
+async function shRun(cmd,shotId,opts){
+  opts=opts||{};
+  if(cmd=="design"&&!confirm("Design scene "+SH_SC+" ("+SH_EP+")?\n\nThis fires a REAL, PAID design call (cb_engine.py) and compiles/overwrites this scene's production package."))return;
+  let correction=null;
+  if(cmd=="reject"){
+    correction=(prompt("One-sentence correction for the "+shotId+" batch (goes on record; drives the redesign — 2 rejected batches marks the shot model-limited):","")||"").trim();
+    if(!correction)return;   // cancelled or empty — a rejection always needs its correction
+  }
+  const body={cmd,scene:String(SH_SC),episode:SH_EP};
+  if(shotId)body.shotId=shotId;
+  if(correction)body.correction=correction;
+  if(opts.candidates!=null)body.candidates=opts.candidates;   // fire/next: batch size 1-4
+  if(opts.spendToken)body.spendToken=opts.spendToken;         // fire/next: the SERVER-ISSUED single-use token from the shot's ledger pendingSpendAuth — without it the engine validates, prints the SPEND DISCLOSURE, stores the token and REFUSES (the designed step 1); the same token also resumes an interrupted batch
+  if(opts.candidate!=null)body.candidate=opts.candidate;      // approve: which candidate wins (C1..CN)
+  if(opts.category)body.category=opts.category;               // reject: failure category (REJECT_CATS)
+  try{
+    const r=await fetch(BASE+"/api/shot-run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const j=await r.json();
+    if(!j.ok){alert("Couldn't start: "+(j.error||"failed"));return;}
+    SH_JOB=j.jobId;
+    if(typeof showToast=="function")showToast("▶ Shots · "+(SH_LABEL[cmd]||cmd)+(shotId?" · "+shotId:"")+" — started",true);
+    shPollStart();renderShots();
+  }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+}
+function shNextLedger(){   // the shot `next` will fire — the FIRST unapproved shot's ledger carries the spend auth
+  return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.status!="approved")||null;
+}
+function shDiscSummary(auth){   // human summary of the server-stored disclosure — defensive against field-name drift while the engine lands in parallel
+  const d=(auth&&auth.disclosure)||{};
+  if(typeof d=="string")return d.slice(0,400);
+  const pick=(...ks)=>{for(const k of ks)if(d[k]!=null&&d[k]!=="")return d[k];return "?";};
+  return "candidates: "+pick("candidates","candidateCount","count")
+       +"\ncost per candidate: $"+pick("costPerCandidateUsd","costPerCandidate","perCandidate","candidateCost")
+       +"\nmax batch cost: $"+pick("maxBatchCostUsd","maxBatchCost","maxCost","batchCost")
+       +"\nprompt version: "+pick("promptVersion","promptVer","version");
+}
+function shDiscCount(auth){   // the candidate count the token is BOUND to (null if unreadable — then omit --candidates and let the binding decide)
+  const d=(auth&&auth.disclosure)||{};
+  const n=d.candidates!=null?d.candidates:(d.candidateCount!=null?d.candidateCount:d.count);
+  return (n!=null&&isFinite(+n))?+n:null;
+}
+function shApproveSpendFire(){
+  const led=shNextLedger();
+  const auth=led&&led.pendingSpendAuth;
+  if(!auth||!auth.token){alert("No pending spend authorization on "+((led&&led.shotId)||"the next shot")+" — run “📋 Fire disclosure” first. The engine validates the batch, prints the disclosure and issues the single-use token.");return;}
+  if(!confirm("PAID BATCH — approve this exact disclosed spend for "+(led.shotId||"the next shot")+"?\n\n"+shDiscSummary(auth)+"\n\nThe token is SINGLE-USE and bound to this exact prompt/keyframe/refs/audio/duration/count — if anything has changed since the disclosure, the engine refuses and you re-run the disclosure."))return;
+  const n=shDiscCount(auth);
+  const opts={spendToken:auth.token};
+  if(n!=null)opts.candidates=n;   // send the BOUND count (a different N would just make the token stale); omit when unreadable
+  shRun('next',null,opts);
+}
+function shResumeBatch(token,shotId){
+  if(!confirm("Resume the interrupted batch for "+shotId+"?\n\nOnly the MISSING candidates are generated — same single-use token, no new spend authorization, no repay of the finished ones."))return;
+  shRun('fire',shotId,{spendToken:token});
+}
+function shRejectBatch(tok){
+  const sel=document.getElementById("shCat_"+tok);
+  shRun('reject',tok,{category:(sel&&sel.value)||"other"});
+}
+function shPollStart(){
+  if(SH_POLL)clearInterval(SH_POLL);
+  SH_POLL=setInterval(async()=>{
+    let jobs={};
+    try{jobs=(((await (await fetch(BASE+"/api/pipeline")).json())||{}).jobs)||{};}catch(e){return;}
+    const j=SH_JOB?jobs[SH_JOB]:null;
+    if(!j)return;
+    const box=document.getElementById("shJob");
+    if(box)box.innerHTML=shJobHTML(j);
+    if(j.status!="running"){
+      clearInterval(SH_POLL);SH_POLL=null;SH_JOB=null;
+      await shFetchPkg();if(page=="shots")renderShots();
+    }
+  },2500);
+}
+function shJobHTML(j){
+  // Two refusals are EXPECTED, informative behaviour, never a malfunction: the no-token spend DISCLOSURE
+  // (the designed step 1) and the unconfirmed-billing-profile hard block — both render amber, not red.
+  const raw=j.log||"";
+  const billing=/billing_profile/i.test(raw);
+  const disclosure=/SPEND DISCLOSURE|SPEND NOT APPROVED|spend token/i.test(raw)&&j.status!="running"&&j.status!="done";
+  const informative=billing||disclosure;
+  const col=j.status=="running"?"var(--info)":(j.status=="done"?"var(--ok)":(informative?"var(--warn)":"var(--danger)"));
+  const log=_esc(raw.split("\n").slice(-14).join("\n"));
+  return `<div style="border:1px solid var(--line);border-left:3px solid ${col};border-radius:8px;padding:9px 11px;margin:0 0 12px">
+    <div style="font-size:12px;font-weight:600;color:${col}">${j.status=="running"?"⟳":(j.status=="done"?"✓":(informative?"ℹ":"✗"))} ${_esc(String(j.gate))} — ${_esc(j.step||j.status||"")}</div>
+    ${log?`<pre style="font-size:10px;line-height:1.45;color:var(--hint);white-space:pre-wrap;margin:6px 0 0;max-height:150px;overflow:auto">${log}</pre>`:""}
+    ${disclosure&&!billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">ℹ This REFUSED run is the designed disclosure step — the spend token is now stored on the shot; review the numbers above, then “💳 Approve spend &amp; fire”.</div>`:""}
+    ${billing?`<div style="font-size:11px;color:var(--warn);margin-top:6px">ℹ Billing profile not confirmed — every paid generation (voice / keyframe / fire) is hard-blocked by design until Julian confirms the plan in billing_profile.json. This refusal is expected protective behaviour, not a malfunction.</div>`:""}
+  </div>`;
+}
+async function renderShots(){
+  document.getElementById("gatesbar").innerHTML="";
+  const view=document.getElementById("view");
+  if(SH_EP==null)SH_EP="Ep"+((CUR&&CUR.number)||1);
+  if(SH_PKG===null&&SH_ERR===null)await shFetchPkg();
+  const running=shRunningJob();
+  if(running&&!SH_POLL){SH_JOB=running.jobId;shPollStart();}
+  const dis=running?' disabled style="opacity:.5;pointer-events:none"':'';
+  const head=`<h1 class="h1">Shots — ${_esc(SH_EP)} · Scene ${_esc(SH_SC)}</h1>
+    <p class="sub">The shot render loop: design (cb_engine) → voice → timing slate → keyframe → fire a candidate batch (spend-approved, 1–4 takes) → approve one / reject the batch → stitch. Seedance is a probabilistic candidate generator — Julian's eye picks the winner per shot.</p>`;
+  const picker=`<div class="mc" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+    <div><div class="lab">Episode</div><input id="shEp" value="${_esc(SH_EP)}" style="width:84px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font:inherit"/></div>
+    <div><div class="lab">Scene</div><input id="shSc" value="${_esc(SH_SC)}" style="width:64px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font:inherit"/></div>
+    <button class="btn ghost" onclick="shLoad()">Load</button>
+    <span style="flex:1"></span>
+    <button class="btn"${dis} onclick="shRun('design')">✦ Design scene (paid)</button>
+  </div>`;
+  const jobBox=`<div id="shJob">${running?shJobHTML(running):""}</div>`;
+  if(!SH_PKG){
+    view.innerHTML=head+picker+jobBox+`<div class="coming">${_esc(SH_ERR||"No production package yet")} — use “✦ Design scene (paid)” to compile + validate it, then Load.</div>`;
+    return;
+  }
+  const val=SH_PKG.validation||{},issues=val.issues||[];
+  const vb=val.passed
+    ?`<span class="pill" style="color:var(--ok);background:var(--okbg)">✓ validation passed</span>`
+    :`<span class="pill" style="color:var(--danger);background:var(--dangerbg)">⛔ validation FAILED · ${issues.length} issue${issues.length==1?"":"s"}</span>`;
+  const issuesHTML=(!val.passed&&issues.length)?`<div style="margin-top:8px">${issues.map(i=>`<div style="font-size:11px;color:var(--danger);margin-top:3px">• ${_esc(typeof i=="string"?i:JSON.stringify(i))}</div>`).join("")}</div>`:"";
+  const DS=[["audienceFeeling","Audience feeling"],["whoseScene","Whose scene"],["emotionalChange","Emotional change"],["theLaugh","The laugh"],["visualSurprise","Visual surprise"],["carryForward","Carry forward"]];
+  const ds=SH_PKG.directorStatement||{};
+  const leds=SH_PKG.continuityLedger||[];
+  const nAppr=leds.filter(e=>e.status=="approved").length,allAppr=!!leds.length&&nAppr==leds.length;
+  const dsCard=`<div class="mc" style="margin-bottom:12px">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div class="lab" style="font-weight:600">Director statement — ${_esc(SH_PKG.sceneName||"")}</div>${vb}
+      <span style="font-size:11px;color:var(--hint)">${(SH_PKG.shots||[]).length} shots · ${SH_PKG.totalSec||"?"}s designed · ${nAppr}/${leds.length} approved</span>
+    </div>
+    ${DS.map(x=>`<div style="font-size:12px;line-height:1.55;margin-top:4px"><span style="color:var(--hint)">${x[1]}:</span> ${_esc(ds[x[0]]||"—")}</div>`).join("")}
+    ${issuesHTML}
+  </div>`;
+  const stitchDis=(running||!allAppr)?' disabled style="opacity:.5;pointer-events:none"':'';
+  // THE SPEND-TOKEN FLOW (2026-07-16): the approve-spend boolean is GONE. The disclosure step stores a
+  // server-issued single-use token on the FIRST unapproved shot's ledger (pendingSpendAuth); only that
+  // token fires a batch, and it dies the moment anything about the shot changes.
+  const nextLed=shNextLedger();
+  const auth=(nextLed&&nextLed.pendingSpendAuth)||null;
+  const nBound=shDiscCount(auth);
+  const batch=(nextLed&&nextLed.batch)||null;
+  const spendBtn=(auth&&auth.token)
+    ?`<button class="btn"${dis} onclick="shApproveSpendFire()" title="fires with the single-use token issued for ${_esc(nextLed.shotId)}">💳 Approve spend &amp; fire ${nBound!=null?nBound:"the disclosed"} candidate${nBound==1?"":"s"}</button>`
+    :`<button class="btn" disabled style="opacity:.5;pointer-events:none" title="run Fire disclosure first">💳 Approve spend &amp; fire</button>`;
+  const resumeBtn=(batch&&batch.status=="generating"&&batch.token&&nextLed)
+    ?`<button class="btn"${dis} onclick="shResumeBatch('${shTok(batch.token)}','${shTok(nextLed.shotId)}')" title="${_esc((batch.done||[]).length+" of "+(batch.expected!=null?batch.expected:"?")+" candidates done — generates only the missing ones, same token, no repay")}">▶ Resume batch (no repay)</button>`:"";
+  const sceneBtns=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px;align-items:center">
+    <button class="btn ghost"${dis} onclick="shRun('voice')">🎙 Voice all</button>
+    <button class="btn ghost"${dis} onclick="shRun('animatic')">▦ Timing slate</button>
+    <button class="btn ghost"${dis} onclick="shRun('next',null,{candidates:SH_CANDS})" title="No token is sent — the engine validates, prints the full spend disclosure, stores the single-use token on the shot and REFUSES. That refusal is the designed first step.">📋 Fire disclosure</button>
+    <label style="font-size:11px;color:var(--hint)">candidates <select onchange="SH_CANDS=+this.value;renderShots()" style="padding:5px 7px;border:1px solid var(--line);border-radius:7px;font:inherit">${[1,2,3,4].map(n=>`<option${n==SH_CANDS?" selected":""}>${n}</option>`).join("")}</select></label>
+    ${spendBtn}${resumeBtn}
+    <button class="btn ghost"${stitchDis} onclick="shRun('stitch')" title="every shot must be approved first">⧉ Stitch (${nAppr}/${leds.length})</button>
+  </div>
+  <div style="font-size:11px;color:var(--hint);margin:0 0 12px">Two-step fire: “📋 Fire disclosure” sends NO token — the job ends REFUSED with the batch cost, references and prompt version in its log, and the engine stores a single-use spend token on the shot (that refusal is the designed disclosure, not an error). “💳 Approve spend” then fires with that exact token — stale the moment the prompt, keyframe, refs, audio, duration or count change — and stops at candidates-pending for your eye. An interrupted batch resumes with the same token, paying only for the missing candidates.</div>`;
+  const MV=MEDIA_V||Date.now();
+  const slateURL=SH_MEDIA&&(SH_MEDIA.timingSlate||SH_MEDIA.animatic);   // new timing_slate filename first; a pre-reclassification animatic file still plays
+  const anim=slateURL?`<div class="mc" style="margin-bottom:12px"><div class="lab" style="font-weight:600">Timing slate</div><video controls src="${BASE}${slateURL}?v=${MV}" style="width:100%;max-height:340px;border-radius:8px;margin-top:6px"></video><div style="font-size:11px;color:var(--hint);margin-top:6px">Timing slate — approves dialogue accuracy, voice assignment, shot durations, scene length and line position. It does NOT prove staging, physical comedy or final rhythm.</div></div>`:"";
+  const pic=SH_MEDIA&&SH_MEDIA.picture?`<div class="mc" style="margin-bottom:12px;border:1px solid var(--brand)"><div class="lab" style="color:var(--brandink);font-weight:600">✓ Stitched scene picture</div><video controls src="${BASE}${SH_MEDIA.picture}?v=${MV}" style="width:100%;max-height:400px;border-radius:8px;margin-top:6px"></video></div>`:"";
+  const cards=(SH_PKG.shots||[]).map(s=>{
+    const led=shLedger(s.shotId),m=shMedia(s.shotId),tok=shTok(s.shotId);
+    const st=led.status||"designed";
+    const stc=st=="approved"?["--ok","--okbg"]
+             :(st=="rendered"?["--info","--infobg"]
+             :(st=="candidates-pending"?["--warn","--warnbg"]
+             :(st=="model-limited"?["--danger","--dangerbg"]
+             :["--hint",null])));
+    const stLabel=st=="model-limited"?"model-limited — human redesign required":st;   // 2 rejected batches = the model can't deliver this design; a human redesigns, never a third blind batch
+    const dlg=(s.dialogueLines||[]).map(l=>`<div style="font-size:12px;margin-top:4px"><b>${_esc(l.speaker)}:</b> “${_esc(l.exactText)}”${l.delivery?` <span style="color:var(--hint);font-size:11px">— ${_esc(l.delivery)}</span>`:""}</div>`).join("");
+    const media=[
+      m.keyframe?`<div style="flex:1;min-width:130px;max-width:220px"><img class="zoom" data-cap="${_esc(s.shotId)} · keyframe" src="${BASE}${m.keyframe}?v=${MV}" style="width:100%;border-radius:6px"/><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:2px">keyframe</div></div>`:"",
+      m.clip?`<div style="flex:2;min-width:200px"><video controls src="${BASE}${m.clip}?v=${MV}" style="width:100%;border-radius:6px;max-height:220px"></video><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:2px">take</div></div>`:"",
+      m.finalFrame?`<div style="flex:1;min-width:130px;max-width:220px"><img class="zoom" data-cap="${_esc(s.shotId)} · harvested final frame" src="${BASE}${m.finalFrame}?v=${MV}" style="width:100%;border-radius:6px"/><div style="font-size:10px;color:var(--hint);text-align:center;margin-top:2px">harvested frame</div></div>`:""
+    ].filter(Boolean).join("");
+    const vo=m.vo?`<audio controls src="${BASE}${m.vo}?v=${MV}" style="width:100%;height:30px;margin-top:6px"></audio>`:"";
+    // THE CANDIDATE BATCH REVIEW (2026-07-16): a candidates-pending shot shows its C1..CN takes side by side —
+    // approve exactly one (the others archive; its final frame harvests) or reject the whole batch with a
+    // one-sentence correction + a failure category.
+    const cands=(m.candidates||[]);
+    const candRow=(st=="candidates-pending")?(cands.length
+      ?`<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:flex-start">${cands.map(c=>`<div style="flex:1;min-width:190px;max-width:340px"><video controls src="${BASE}${c.url}?v=${MV}" style="width:100%;border-radius:6px;max-height:200px"></video><div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:4px"><span style="font-size:11px;font-weight:700">C${c.n}</span><button class="btn"${dis} onclick="shRun('approve','${tok}',{candidate:${c.n}})">✓ Approve C${c.n}</button></div></div>`).join("")}</div>
+       <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap"><span style="font-size:11px;color:var(--hint)">or reject the whole batch:</span><select id="shCat_${tok}" style="padding:5px 7px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:11px">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select><button class="btn ghost"${dis} onclick="shRejectBatch('${tok}')">✗ Reject batch…</button></div>`
+      :`<div style="font-size:11px;color:var(--warn);margin-top:8px">⚠ candidates-pending, but no candidate files found on disk yet — press Load once the batch lands.</div>`):"";
+    const btns=[
+      (s.sourceType=="opener"&&!m.keyframe)?`<button class="btn ghost"${dis} onclick="shRun('keyframe','${tok}')">◧ Generate keyframe</button>`:"",
+      st=="rendered"?`<button class="btn"${dis} onclick="shRun('approve','${tok}')">✓ Approve</button>`:"",
+      st=="rendered"?`<button class="btn ghost"${dis} onclick="shRun('reject','${tok}')">✗ Reject…</button>`:""
+    ].filter(Boolean).join(" ");
+    return `<div class="mc" style="margin-bottom:10px">
+      <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+        <span style="font-weight:700;font-size:13px">${_esc(s.shotId)}</span>
+        <span style="font-size:11px;color:var(--hint)">${s.durationSec}s · ${_esc(s.sourceType)}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}</span>
+        <span class="pill" style="color:${v(stc[0])};${stc[1]?"background:"+v(stc[1]):""}">● ${_esc(stLabel)}</span>
+        <span style="flex:1"></span>${btns}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">${_esc(s.purpose||"")}</div>
+      ${dlg}${vo}
+      ${media?`<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:flex-start">${media}</div>`:""}${candRow}
+      <details style="margin-top:7px"><summary style="cursor:pointer;font-size:11px;color:var(--hint)">Compiled Seedance prompt${s.promptWords?" · "+s.promptWords+" words":""}</summary>
+        <pre style="font-size:11px;line-height:1.5;white-space:pre-wrap;background:var(--surface2);border-radius:6px;padding:9px;margin:6px 0 0">${_esc(s.seedancePrompt||"")}</pre></details>
+    </div>`;
+  }).join("");
+  view.innerHTML=head+picker+jobBox+dsCard+sceneBtns+pic+anim+cards;
+}
+
 async function boot(){
   const epf=(CURRENT_PROJECT&&CURRENT_PROJECT.episodesFile)||"cb-studio/data/episodes.json";
   try{[EPISODES,MEDIA,CHARCFG]=await Promise.all([fetch(BASE+"/"+epf,{cache:"no-store"}).then(r=>r.json()),fetch(BASE+"/cb-studio/data/media-index.json").then(r=>r.json()).catch(()=>[]),fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.json()).catch(()=>({}))]);MEDIA_V=Date.now();}catch(e){document.getElementById("view").innerHTML='<div class="coming">Start the server: python3 cb-studio/serve.py</div>';return;}
   renderTop();renderNav();render();
 }
 if(!window._pipeTimer){window._pipeTimer=setInterval(()=>{
-  if(CUR&&(page=="pipeline"||Object.values(PIPE.jobs||{}).some(j=>j.status=="running")))refreshPipe();
+  if(CUR&&(page=="pipeline"||page=="canvas"||Object.values(PIPE.jobs||{}).some(j=>j.status=="running")))refreshPipe();
 },3000);}
 // ── click-to-enlarge lightbox: any img.zoom (keyframes + scene plate) opens an in-app graphical view ──
 function openLightbox(src,cap){var lb=document.getElementById('lightbox'),im=document.getElementById('lbimg');im.classList.remove('zoomed');im.style.transform='';im.src=src;document.getElementById('lbcaptxt').textContent=cap||'';document.getElementById('lborig').href=src;lb.classList.add('open');}

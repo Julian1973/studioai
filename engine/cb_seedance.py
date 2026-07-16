@@ -9,8 +9,12 @@ consistency, character identity, audio ownership and continuity across every BEA
   2) flattened_prompt — the clean natural-language text actually sent to Seedance, in a FIXED section order,
                         target 3,500–3,900 chars incl. negatives, under 4,000 where possible.
 
-This is ADDITIVE — it does NOT replace cb_prompts.seedance_json (kept until this builder is wired + verified) and
-touches NOTHING in the render path, voices, locks, security, UI or Gates 1/2a/2b. BEAT stays the production unit.
+STATUS (corrected 2026-07-08 — this used to claim "ADDITIVE... touches NOTHING in the render path", stale the
+moment cb_prompts.seedance_json was retired): this module is now the SOLE Seedance prompt builder for any beat
+without a cb_segprompt v5 segment — cb_prompts.seedance_json is RETIRED (raises RuntimeError; see its own
+docstring) and cb_beats.run/gate3_prepare fall back to this module's compact_seedance_prompt as their live
+second tier, per CLAUDE.md rule 10 ("the 15 minds... a KEPT intentional second validation layer, not leftover
+code"). BEAT stays the production unit.
 
     build_seedance_authoring_json(beat, scene_context, refs, continuity, episode) -> dict
     flatten_seedance_prompt(authoring_json) -> str
@@ -23,7 +27,9 @@ import cb_director_pass
 import cb_qa
 from cb_segprompt import _strip_spoken_words   # Law 6 defense-in-depth (2026-07-08) — see its call site below
 
-BEES = {k for k, v in P.CHARACTERS.items() if isinstance(v, dict) and "bee" in str(v.get("avoid", "")).lower()}
+# FIXED 2026-07-12 (full-codebase audit, duplication finding): this exact derivation used to be independently
+# recomputed here, in cb_prompts.py, and in cb_qa.py — now cb_prompts.BEES is the one canonical set.
+BEES = P.BEES
 
 # ── C. CREATIVE MODES — structure + acting rule injected into the ACTION TIMELINE ────────────────────────────
 MODE_GUIDANCE = {
@@ -183,8 +189,13 @@ def infer_director_mode(beat, sc):
     """director_mode-FIRST resolver: beat.director_mode wins; else the Episode-1 scene→mode candidates scored by the
     beat's own content keywords (storyBeat / emotionalIntent / action / dialogue / atmosphere). Replaces the
     comedy-biased creative-mode inference for emotional beats — a tender beat reads tender, a rescue reads rescue."""
-    if beat.get("director_mode"):
-        return beat["director_mode"]
+    dm = beat.get("director_mode")
+    if dm:
+        if dm in DIRECTOR_MODE_GUIDANCE:
+            return dm
+        print(f"[cb_seedance] WARNING: beat {beat.get('beatCode') or beat.get('shotCode')!r} has an "
+              f"invalid director_mode {dm!r} (not a key in DIRECTOR_MODE_GUIDANCE) — ignoring it and "
+              f"falling back to the keyword-scored resolver", flush=True)
     code = str(beat.get("beatCode") or beat.get("shotCode") or "")
     if code in _DIRECTOR_OVERRIDES:
         return _DIRECTOR_OVERRIDES[code]
@@ -228,7 +239,10 @@ def _build_shots(beat, gag, active, dur, mode):
     cuts = beat.get("cuts") or []
     speakers = [s for s in (beat.get("speakers") or []) if s]
     chars = beat.get("openingCast") or beat.get("characters") or []
-    reactors = [c for c in chars if c not in speakers]
+    # FIXED 2026-07-12 (full-codebase audit continued): a `reactors = [c for c in chars if c not in speakers]`
+    # local used to be assigned here and never read again (confirmed via AST — 1 store, 0 loads) — the real
+    # "who's reacting vs. who's speaking" coverage check lives in validate_seedance_prompt's own `reactors`,
+    # computed fresh from the compiled authoring dict, not this one. Removed.
     lead = speakers[0] if speakers else (chars[0] if chars else "")
     specs = []
     for c in cuts:
@@ -288,12 +302,15 @@ def _clean(t):
 def _probe(path):
     if not os.path.exists(path):
         return None
-    try:
-        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
-                             capture_output=True, text=True, timeout=20)
-        return round(float(out.stdout.strip()), 1)
-    except Exception:
-        return None
+    # FIXED 2026-07-12 (loose-ends pass): was a hand-rolled ffprobe subprocess call, duplicated across 6
+    # files — cb_post._dur() (lazy-imported; no module-level cb_post dependency needed elsewhere here) is
+    # the canonical probe. Preserves this function's own None-on-failure contract (distinct from cb_post._dur's
+    # own 0.0-on-failure) for every real caller, at the cost of one pathological edge case: a file that
+    # genuinely probes to exactly 0.0s duration is now indistinguishable from a probe failure and also
+    # returns None — never occurs for a real audio/video file, so not a practical regression.
+    import cb_post
+    d = cb_post._dur(path)
+    return round(d, 1) if d else None
 
 def _strip_crystal(text):
     """For a BEE-ONLY scene: remove crystal / magical-ambience language (incl. plural + 'crystals hum')."""
@@ -423,7 +440,15 @@ PHYSICAL_ARCHETYPES = {
    "visual_payoff_rule": "the over-confident crash followed instantly by a heroic 'that was scheduled' recovery pose",
    "recovery_or_escalation_rule": "RECOVERY (false dignity) — he straightens proudly; the button is the cover-up, NOT an escalation",
    "continuity_physical_rule": "ends held in the proud recovery pose; no lasting mess, no pollen disguise",
-   "prohibited_staging": "face-first contact; entering/burying inside a flower or leaf; disappearing; hidden silhouette; 'makes it worse' escalation; a pollen moustache (wrong beat)"},
+   # REFINED 2026-07-15 (live Gate-3 refusal, 1.B1 of the restarted episode): "entering/burying inside a
+   # flower or leaf" was a blanket ban that contradicted the beat's own SCRIPTED cause ("He dips low into a
+   # flower, scoops up pollen — then overdoes it and spins sideways into a leaf") — the Pre-Fire Read
+   # correctly refused the self-contradicting prompt before any spend. Rule 86 already settled the real
+   # distinction once: a brief partial pollen dip with the silhouette visible is ordinary, sanctioned bee
+   # behaviour; FULLY vanishing/burying is what this prohibition was always protecting against. "face-first
+   # contact" likewise scoped to the LEAF (the contact_rule's own "CAREENS side-first" is about the crash,
+   # never the pollen dip).
+   "prohibited_staging": "face-first leaf contact; fully vanishing or buried inside a flower or leaf (a brief partial pollen dip with the silhouette still visible is the sanctioned cause); disappearing; hidden silhouette; 'makes it worse' escalation; a pollen moustache (wrong beat)"},
  "POLLEN_FACE_PRESS_REVEAL": {
    "visibility_rule": "the bee's whole body, wings and legs stay fully visible OUTSIDE the flower at all times; the silhouette never vanishes into the bloom",
    "contact_rule": "only his FACE presses into the pollen-heavy centre; the body never enters",
@@ -562,18 +587,39 @@ PHYSICAL_ARCHETYPES = {
    "prohibited_staging": "anyone diving, acting or leaving to follow; staging the witnessed action itself; comedy that breaks the held breath"},
 }
 # Audit corrections — GUARANTEE the named beats; the resolver computes the rest.
+# "1.B3b", "7.B7", "7.B8" REMOVED (2026-07-08 full-codebase audit) — orphaned keys from an earlier Scene 1/
+# Scene 7 beat-numbering scheme; no beat-code-minting path in cb_director.py can produce a suffixed code like
+# "1.B3b" and the live 43-beat package has no "7.B7"/"7.B8" beats either, so these three were silently inert.
+# "1.B5": "FLOWER_STUCK_BUTTON" ADDED the same day — the FLOWER_STUCK_BUTTON archetype (defined above) had NO
+# override AND NO _ARCH_SIGNALS entry, so infer_physical_archetype could never select it automatically; 1.B5's
+# own storyBeat ("immediately flies into a flower and gets stuck") is exactly this archetype.
 _ARCHETYPE_OVERRIDES = {
- "1.B1": "LEAF_CRASH_REBOUND", "1.B3b": "POLLEN_FACE_PRESS_REVEAL", "1.B4": "POLLEN_SMEAR_TUMBLE",
+ "1.B1": "LEAF_CRASH_REBOUND", "1.B4": "POLLEN_SMEAR_TUMBLE", "1.B5": "FLOWER_STUCK_BUTTON",
  "3.B3": "EMOTIONAL_OBJECT_HANDOFF", "4.B3": "BOAT_LURCH_MAP_LOSS", "4.B4": "BOAT_LURCH_MAP_LOSS",
- "7.B3": "UNDERWATER_NET_PULL", "7.B6": "UNDERWATER_NET_PULL", "7.B7": "NET_TEAR_RELEASE",
- "7.B8": "DOLPHIN_RIDE_SURFACE", "9.B2": "CRYSTAL_WRISTBAND_SET", "9.B3": "CRYSTAL_WRISTBAND_SET",
+ "7.B3": "UNDERWATER_NET_PULL", "7.B6": "UNDERWATER_NET_PULL",
+ "9.B2": "CRYSTAL_WRISTBAND_SET", "9.B3": "CRYSTAL_WRISTBAND_SET",
 }
 # Signals are DISTINCTIVE phrases matched against the beat's OWN action only (not continuity carryover), so a
 # beat doesn't inherit "storm/crystal/wristband" from a neighbour. Single common words are deliberately avoided.
+# "GROUP_REACTION_WITNESS" ADDED (2026-07-08, full-codebase audit) — this archetype (defined above) had NO
+# override AND NO _ARCH_SIGNALS entry, so infer_physical_archetype could never select it automatically; the
+# same bug class already fixed once this session for "FLOWER_STUCK_BUTTON". Signals drawn straight from the
+# archetype's own rule text (visual_payoff_rule/physics_rule/continuity_physical_rule above) — but the FIRST
+# draft ("held breath", "quiet recognition", "eyes fixed", "positions held") was caught, before shipping, as
+# NOT actually distinctive: "held breath" alone is stock soundIntent vocabulary this show reuses across many
+# unrelated quiet/tense beats (2.B1/3.B2/5.B2/6.B3/7.B4), and "eyes fixed" alone false-matched 7.B2 hard enough
+# to steal it away from its own correct UNDERWATER_NET_PULL keyword resolution — a real regression the
+# purely-additive claim would have shipped silently. Verified via a live before/after resolver diff against
+# every beat in the real production package (zero diffs with the corrected phrases below; 6 diffs, including
+# one archetype-stealing regression, with the rejected first draft). Rewritten to longer, multi-word phrases
+# lifted verbatim from the archetype's own text instead of short common pairings — matching the discipline
+# every other entry in this dict already follows ("single common words are deliberately avoided").
 _ARCH_SIGNALS = {
  "LEAF_CRASH_REBOUND": ("fwip", "spins sideways into", "crashes into a leaf", "bonks", "rebounds with"),
  "POLLEN_FACE_PRESS_REVEAL": ("pollen moustache", "handlebar moustache", "presses into the pollen", "face into the pollen"),
  "POLLEN_SMEAR_TUMBLE": ("smears it worse", "smears the pollen", "corrective dive", "pollen tumble"),
+ "FLOWER_STUCK_BUTTON": ("gets stuck", "flower holds him", "wobbling petals", "comically stuck"),
+ "CRASH_ARRIVAL_HEAP": ("lands in a heap", "pinballs off", "soggy heap", "crash-landing jolts"),
  "FLOWER_HIDE_PANIC": ("ducks behind", "hides behind", "hiding spot", "peeks out"),
  "BOAT_LURCH_MAP_LOSS": ("map is lost", "map gone", "map overboard", "loses the map", "boat lurch", "capsiz"),
  "UNDERWATER_NET_PULL": ("drift net", "tangled in the net", "pulls the net", "trapped underwater", "the net holds"),
@@ -585,12 +631,17 @@ _ARCH_SIGNALS = {
  "CHARACTER_ARRIVAL_STUMBLE": ("reaches the cove", "steps onto", "stumbles ashore", "arrives at the"),
  "STORM_REACTION_SHIFT": ("a storm's coming", "storm pressure", "wind picks up", "sky darkens", "thunder rumble"),
  "DEADPAN_REACTION_HOLD": ("deadpan", "barely moves", "almost-smile", "dry topper"),
+ "GROUP_REACTION_WITNESS": ("collective held breath", "eyes fixed out to sea", "lean forward that stops", "group remains watching"),
 }
 # High-risk = IMPACT-class physical words only, WORD-BOUNDARY matched (so "gaze falls", "a tear", "pulls him close"
 # don't false-flag). The softer pull/tear/hide/press cases are covered by the explicit overrides + distinctive signals.
 _HIGH_RISK_RE = re.compile(r"\b(impact|crash(es|ed)?|plunges?|dives?|tumbles?|bonks?|slams?|wallops?|lurch(es)?|buried|capsiz\w*)\b|spins sideways")
-_LOW_RISK_ARCHES = ("DIALOGUE_HOVER_STASIS", "DEADPAN_REACTION_HOLD", "STORM_REACTION_SHIFT", "EMOTIONAL_OBJECT_HANDOFF",
-                    "CHARACTER_ARRIVAL_STUMBLE", "GROUP_HUG_SWAMP", "GROUP_REACTION_WITNESS")
+# FIXED 2026-07-12 (full-codebase audit continued): _LOW_RISK_ARCHES was a never-referenced tuple — grep across the
+# whole engine/ tree confirms zero call sites. infer_physical_archetype() below already implements the "low-risk ->
+# stasis/reaction archetype" behaviour this tuple's name/placement suggests it was meant to feed, via its own
+# dmode-keyed fallback branches (COMEDY_DEADPAN -> DEADPAN_REACTION_HOLD, RISING_UNEASE -> STORM_REACTION_SHIFT,
+# ARRIVAL_WONDER -> CHARACTER_ARRIVAL_STUMBLE, default -> DIALOGUE_HOVER_STASIS) — so wiring this tuple in would only
+# duplicate logic that already exists elsewhere in the same function. Deleted rather than wired in.
 NEEDS_EXPLICIT = "NEEDS_EXPLICIT_PHYSICAL_STAGING"
 
 def infer_physical_archetype(beat, dmode, style, gag):
@@ -605,7 +656,13 @@ def infer_physical_archetype(beat, dmode, style, gag):
         return _ARCHETYPE_OVERRIDES[code]
     if gag and beat.get("script_gag_lock_id") == "S1_FUZZBY_POLLEN_MOUSTACHE":
         return "POLLEN_FACE_PRESS_REVEAL"
-    action = " ".join((c.get("action", "") + " " + (c.get("dialogue") or "")) for c in (beat.get("cuts") or [])).lower()
+    # FIXED 2026-07-15 (guardrail-fidelity audit): dialogue used to be concatenated into this scan blob —
+    # Law-6-protected spoken content (stripped before the render ever sees it, never staged action) getting
+    # scanned for physical-staging risk. Confirmed live: 9.B1's real beat resolved to NEEDS_EXPLICIT purely
+    # because "dive" appeared inside "AIDA: We saw you dive." — reported speech about a past off-screen event
+    # in an otherwise quiet, no-stunt held-circle beat. Dropping dialogue changes exactly this one beat
+    # package-wide, zero other diffs.
+    action = " ".join(c.get("action", "") for c in (beat.get("cuts") or [])).lower()
     action += " " + " ".join(str(beat.get(k, "")) for k in ("storyBeat", "soundIntent", "physicalFeeling")).lower()
     best, best_score = None, 0
     for arch, kws in _ARCH_SIGNALS.items():
@@ -647,7 +704,7 @@ def build_physical_staging(beat, gag, archetype, lead):
     return "\n".join(body)
 
 # ── A.1 + B/E — build the AUTHORING JSON (the internal structured object) ────────────────────────────────────
-def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1"):
+def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1", read_only=False):
     code = beat.get("beatCode") or beat.get("shotCode") or "?"
     # THE HANDLE DOCTRINE (CLAUDE.md rule 20): every beat renders at HANDLE_TOTAL now, superseding the old
     # per-beat durationSec 8-15s range this used to clamp to (rule 10: this authoring/validation layer is kept
@@ -663,8 +720,14 @@ def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1"):
     active = max(float(refs.get("audio_dur") or 0), round(dur - 2.4, 1)); active = min(active, round(dur - 1.8, 1))
     oc = [c for c in (beat.get("openingCast") or beat.get("characters") or []) if c]
     bee_only = bool(oc) and set(oc) <= BEES
+    # FIXED 2026-07-12 (full-codebase audit continued): this used to also do `struct, acting =
+    # MODE_GUIDANCE.get(mode, ...)` and store creative_mode/mode_structure/mode_acting into the returned dict —
+    # confirmed via a repo-wide grep that nothing anywhere (not flatten_seedance_prompt, not
+    # compact_seedance_prompt, not the Studio UI) ever read those three keys back out; creative_mode's own one
+    # reader was a dead local in validate_seedance_prompt (see that function's own fix note below). `mode` itself
+    # is still a real, live local — it drives the STORM_TURN negative check further down this same function — so
+    # it stays computed, just no longer exposed as three now-dead output fields.
     mode = infer_creative_mode(beat, sc)                       # legacy creative mode (kept for back-compat)
-    struct, acting = MODE_GUIDANCE.get(mode, MODE_GUIDANCE["HEART_TRUE"])
     dmode = infer_director_mode(beat, sc)                       # PRIMARY — the Episode Director emotional mode
     dg = DIRECTOR_MODE_GUIDANCE.get(dmode, DIRECTOR_MODE_GUIDANCE["QUIET_KNOWING"])
     feeling = _clean(beat.get("audience_feeling_target") or dg["feeling"])
@@ -700,7 +763,7 @@ def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1"):
     # THE DIRECTOR'S PASS — a Pixar mind reads the character bibles + directs the acting/expression/camera (cached; fail-open)
     _arch_rules = "; ".join(f"{k}: {v}" for k, v in PHYSICAL_ARCHETYPES.get(archetype, {}).items())
     _dlg_lines = [d for c in cuts for d in _dialogue_lines(c, beat)]
-    director_pass = cb_director_pass.direct_beat(beat, sc, dmode, archetype, _arch_rules, oc, dur, emo_func, _dlg_lines, episode)
+    director_pass = cb_director_pass.direct_beat(beat, sc, dmode, archetype, _arch_rules, oc, dur, emo_func, _dlg_lines, episode, read_only=read_only)
     final_hold = _cap((beat.get("pauseHold") or "Settle into the final composition; only wings, breathing, antenna "
                        "settle, pollen motes and subtle environment settling.").strip(), 140)
     reveal_kf = ({"required": True, "keyframe_type": "REVEAL", "target_time": gag.get("reveal_target_time", "mid-beat"),
@@ -734,7 +797,6 @@ def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1"):
         "episode": episode, "scene_number": beat.get("sceneNumber"),
         "scene_id": f"Scene {beat.get('sceneNumber')}", "beat_id": f"Beat {code}", "beat_code": code,
         "scene_name": sc.get("name", ""), "duration": dur, "active_until": active,
-        "creative_mode": mode, "mode_structure": struct, "mode_acting": _cap(acting, 125),
         "director_mode": dmode, "audience_feeling_target": feeling,
         "director_structure": dg["structure"], "director_camera": dg["camera"], "director_music": dg["music"],
         "director_mode_summary": _cap(f"{dg['structure']}. Camera: {dg['camera']}. Music: {dg['music']}.", 330),
@@ -769,14 +831,6 @@ def build_seedance_authoring_json(beat, sc, refs, continuity, episode="Ep1"):
         "sfx": _cap(_sanitize_sfx(_clean(beat.get("soundIntent") or ""), bee_only), 200),
         "character_negatives": char_neg, "beat_negatives": beat_neg,
     }
-
-def _default_music(mode):
-    return ("Light playful comedy underscore, small and bouncy, not overpowering." if mode in ("COMEDY_BIG", "COMEDY_SMALL")
-            else "Tender, warm orchestral underscore — soft strings, light piano." if mode == "HEART_TRUE"
-            else "Low, draining tension underscore that thins out rather than swells." if mode == "STORM_TURN"
-            else "Driving but clear action underscore that keeps the geography readable." if mode == "ACTION_RESCUE"
-            else "Warm, surrendering choral-and-strings glow — gentle, never a power blast." if mode == "MAGIC_BEACON"
-            else "Warm, gentle orchestral underscore.")
 
 # ── A.2 + B — FLATTEN to the clean Seedance text (FIXED section order) ────────────────────────────────────────
 def flatten_seedance_prompt(a):
@@ -840,13 +894,14 @@ def flatten_seedance_prompt(a):
         if s["action"]:
             L.append(s["action"].rstrip(" .,;…") + ".")
         for d in s["dialogue"]:
-            # FIXED 2026-07-08 (contradiction sweep): _dialogue_lines() builds these as literal quoted
-            # dialogue ("X lip-syncs exactly to @Audio1: \"...\""); compact_seedance_prompt (the real shipping
-            # format) already strips this via _timeline_line, but this format (the review/debug FULL export,
-            # SEEDANCE_PROMPT_FORMAT=full) never did — a genuine Law 5/6 leak for any beat with zero cuts[]
-            # (the only condition that routes here instead of the v5 engine). Reuse the same stripper so both
-            # formats are equally safe rather than only one of them.
-            L.append(_timeline_line(d))
+            # FIXED 2026-07-08 (contradiction sweep, then broadened same day in the full-codebase audit):
+            # _dialogue_lines() builds FOUR possible shapes (named-speaker, group_chorus, underwater_vo, and
+            # the missing-speaker fallback) — ALL FOUR embed the literal quoted dialogue. _timeline_line only
+            # ever matched the named-speaker shape; the other three still leaked spoken words through both
+            # this format (the review/debug FULL export) and compact_seedance_prompt's own equivalent call
+            # site below. _strip_spoken_words is a second, unconditional pass that removes any quoted
+            # fragment regardless of which of the four shapes produced it.
+            L.append(_strip_spoken_words(_timeline_line(d)))
         L.append(f"Purpose: {s['purpose']}.")
     L += [""]
     L += ["PERFORMANCE TRUTH:",
@@ -895,8 +950,12 @@ def flatten_seedance_prompt(a):
 
 # ── H — deterministic VALIDATOR ─────────────────────────────────────────────────────────────────────────────
 # Cuts/internal shots are now ALLOWED — only mutation/identity/audio violations reject. (No "cut to"/"camera cuts".)
-_REJECT = ["a voice lip-syncs", "a voice says", "someone says", "a character says", "generated humming",
-           "generated singing", "vocal buzz", "extra dialogue",
+# Speaker-less / generated-voice language is ALWAYS wrong (the dialogue must name a lip-sync speaker) and is
+# checked by both _REJECT and _STALE_TERMS below — shared here (2026-07-08 full-codebase audit) so the two
+# lists can no longer silently drift apart the way a hand-duplicated pair always risks.
+_VOICE_LEAK_TERMS = ["a voice lip-syncs", "a voice says", "someone says", "a character says",
+                     "generated humming", "generated singing", "vocal buzz"]
+_REJECT = _VOICE_LEAK_TERMS + ["extra dialogue",
            "hyper-realistic", "photorealistic", "octane render", "new pendant", "new necklace", "new medallion",
            "new crystal", "fuzzby wears crystal", "zenny wears crystal", "named speaker missing"]
 
@@ -906,13 +965,17 @@ _REJECT = ["a voice lip-syncs", "a voice says", "someone says", "a character say
 _STALE_TERMS = ["continuous unbroken take", "one continuous take", "sung buzz", "tiny sung buzz", "sung buzz rhythm",
                 "ambient crystals hum", "crystals hum softly", "cinematic a dense",
                 # flower-VANISH staging (the bee comedy "disappears into a flower" violation) — scoped to flower/bloom
-                # so legit phrases ("flower meadow", Keen "plunges into the sea") are NOT false-flagged
-                "dips into a flower", "dips into the flower", "plunges into the flower", "plunges into the bloom",
+                # so legit phrases ("flower meadow", Keen "plunges into the sea") are NOT false-flagged.
+                # FIXED 2026-07-15 (guardrail-fidelity audit): "dips into a/the flower" REMOVED from this list —
+                # that's ordinary, sanctioned bee behaviour (POLLEN_FACE_PRESS_REVEAL's own contact_rule: "only
+                # his FACE presses into the pollen-heavy centre; the body never enters" — a partial dip, not a
+                # vanish), confirmed as real, previously-authored production vocabulary (an archived retake
+                # brief used this exact phrase for legitimate pollen-scooping action). The remaining seven
+                # phrases below describe a full-body vanish/burial/swallow — that state is a permanent,
+                # doctrine-mandated ban (rules 62/63) with no legitimate use, so they stay unconditional.
+                "plunges into the flower", "plunges into the bloom",
                 "buried inside the flower", "buried inside the bloom", "disappears into the flower",
-                "vanishes into the flower", "swallowed by the flower",
-                # speaker-less / generated-voice language (always wrong — the dialogue must name a lip-sync speaker)
-                "a voice says", "a voice lip-syncs", "someone says", "a character says",
-                "generated humming", "generated singing", "vocal buzz"]
+                "vanishes into the flower", "swallowed by the flower"] + _VOICE_LEAK_TERMS
 
 def detect_stale_prompt(prompt):
     """Hard-detect old-builder language / old JSON structure. `prompt` may be the flattened TEXT or a dict.
@@ -959,7 +1022,13 @@ def validate_seedance_prompt(text, a):
         if any(not _negated(m.start()) for m in re.finditer(re.escape(phrase), rlow)) and (a.get("bee_only") or not crystals_present):
             rejects.append(f'"{phrase}" requested but no crystals present in this beat'); break
     for m in re.finditer(r"(fuzzby|zenny)[^.\n]{0,28}crystal", rlow):
-        if not _negated(m.end() - 7) and "no crystal" not in rlow[m.start():m.end() + 10]:
+        # FIXED 2026-07-15 (guardrail-fidelity audit): only recognized the prefix negation "no crystal" —
+        # confirmed live false BLOCK on real beat 6.B5, whose own authored continuity_out correctly reads
+        # "...with zenny crystal-free beside them" (doctrine-compliant: a bee carrying no crystal), rejected
+        # purely because "crystal-free" doesn't contain the literal substring "no crystal". Widened the
+        # trailing window slightly and added the compound-negation suffix as an equal exemption.
+        window = rlow[m.start():m.end() + 12]
+        if not _negated(m.end() - 7) and "no crystal" not in window and "crystal-free" not in window and "crystal free" not in window:
             rejects.append("a bee appears tied to a crystal"); break
     speakers = set(a.get("speakers") or [])
     if "Zenny" not in speakers and re.search(r"zenny (speaks|lip-syncs|says|delivers)", rlow):
@@ -986,9 +1055,15 @@ def validate_seedance_prompt(text, a):
         carry = str(a["gag_carry"]).lower().split()[0]
         if carry not in (a.get("next_continuity_in") or "").lower():
             warns.append(f'gag carryover note: the next beat\'s opening does not obviously echo "{a["gag_carry"]}"')
+    # FIXED 2026-07-12 (full-codebase audit continued): this function used to re-fetch `a.get("director_mode", "")`
+    # into THREE separately-named locals (dmode_phys here, dmode_cov further down for the shot-style coverage
+    # warnings, dmode again for the Episode Director checks) — `a` is never mutated anywhere in this function
+    # (verified), so all three always held the identical value. Collapsed to one `dmode`, fetched once, used
+    # throughout — the PHYSICAL STAGING INTENT check below, the coverage warnings, and the Episode Director
+    # hard-fails/warnings all read this same variable now.
     # ── PHYSICAL STAGING INTENT enforcement (a physical gag must declare its staging, not just its emotion) ──
-    dmode_phys = a.get("director_mode", ""); bcode = a.get("beat_code", "")
-    if dmode_phys == "COMEDY_PHYSICAL" and not (a.get("physical_staging_intent") or "").strip():
+    dmode = a.get("director_mode", ""); bcode = a.get("beat_code", "")
+    if dmode == "COMEDY_PHYSICAL" and not (a.get("physical_staging_intent") or "").strip():
         rejects.append("COMEDY_PHYSICAL beat has no PHYSICAL STAGING INTENT")
     # ── PHYSICAL ACTION ARCHETYPE enforcement (scan the STAGED action, not the prohibited/boilerplate text) — these
     #    are the archetype's own reusable PHYSICS/STAGING rules (any show using this pattern needs them), not
@@ -1002,19 +1077,32 @@ def validate_seedance_prompt(text, a):
         rejects.append("LEAF_CRASH_REBOUND must not stage face-first contact, flower entry, disappearing or 'makes it worse'")
     if arch == "POLLEN_FACE_PRESS_REVEAL" and re.search(r"full[- ]body|body enters the flower|buried inside|disappears? into", staged):
         rejects.append("POLLEN_FACE_PRESS_REVEAL must not stage full-body flower entry / disappearing")
+    # FIXED 2026-07-15 (guardrail-fidelity audit), both blocks below:
+    # (a) scan `staged` (the beat's own cuts action+dialogue), not `low` (the WHOLE flattened prompt) — `low`
+    #     includes the printed archetype-name label and the director-mode's own fixed "structure" boilerplate,
+    #     both content-independent. Confirmed live: "UNDERWATER_NET_PULL" itself contains "net"+"pull",
+    #     "NET_TEAR_RELEASE" contains "tear"+"release", and RESCUE_JEOPARDY's own fixed structure string
+    #     contains "final"+"danger" — so a synthetic beat with zero relevant staged content (placeholder text
+    #     about Keen calmly sitting on a rock) passed this check clean purely from its own scaffolding. The
+    #     two archetype checks immediately above already correctly scan `staged` — this restores parity.
+    # (b) downgraded reject->warn, matching this same function's own established "report, never hard-block a
+    #     computed proxy" pattern (the gag_carry heuristic two blocks up, cb_craft.check_ensemble_individuation
+    #     elsewhere). Confirmed live: real beat 7.B1 (a genuine multi-beat rescue setup — the archetype's own
+    #     narrative elements legitimately spread across 7.B1-7.B3/7.B6, all sharing the tag) hard-BLOCKed on
+    #     "lacks: failed attempt" purely because this single-beat scan can't see a sibling beat carries it.
     if arch == "UNDERWATER_NET_PULL":
         miss = [n for n, kws in (("geography", ("geography", "readable", "where")),
                 ("trapped object", ("net", "trapped", "squeaky")),
                 ("force direction", ("current", "force", "pull", "drag")),
-                ("failed attempt", ("fail", "holds", "resist", "fading", "worsen"))) if not any(w in low for w in kws)]
+                ("failed attempt", ("fail", "holds", "resist", "fading", "worsen"))) if not any(w in staged for w in kws)]
         if miss:
-            rejects.append("UNDERWATER_NET_PULL lacks: " + ", ".join(miss))
+            warns.append("UNDERWATER_NET_PULL lacks: " + ", ".join(miss))
     if arch == "NET_TEAR_RELEASE":
         miss = [n for n, kws in (("final effort", ("final", "committed", "effort", "last pull")),
                 ("net tear", ("tear", "rips", "torn")),
-                ("danger/release", ("release", "danger", "foam", "separat", "free"))) if not any(w in low for w in kws)]
+                ("danger/release", ("release", "danger", "foam", "separat", "free"))) if not any(w in staged for w in kws)]
         if miss:
-            rejects.append("NET_TEAR_RELEASE lacks: " + ", ".join(miss))
+            warns.append("NET_TEAR_RELEASE lacks: " + ", ".join(miss))
     if arch == "CRYSTAL_WRISTBAND_SET" and scn.isdigit() and int(scn) < 9:
         rejects.append(f"CRYSTAL_WRISTBAND_SET in Scene {scn} — only valid from Scene 9 (ceremony)")
     # BEE-ONLY scenes get no crystal language at all; mixed bee+bear scenes legitimately have the BEARS' crystals —
@@ -1022,29 +1110,40 @@ def validate_seedance_prompt(text, a):
     if a.get("bee_only") and any(
             not _negated(m.start()) for m in re.finditer(r"crystal hum|crystal glow|crystal ambience|magical glow|wears a crystal|wears an accessory", rlow)):
         rejects.append("bee-only beat contains crystal hum/glow/ambience or accessory drift")
-    # ── shot-style coverage warnings ──
+    # ── shot-style coverage warnings (comedy-coverage checks key off the DIRECTOR mode, `dmode`, fetched once
+    #    above — not the legacy creative mode; this used to re-fetch a second "dmode_cov" copy of the identical
+    #    value, since removed, see the FIXED note above) ──
     shots = a.get("shots", []); roles = [s.get("role") for s in shots]
-    mode = a.get("creative_mode", ""); style = a.get("shot_style", "")
+    style = a.get("shot_style", "")
     reactors = [c for c in a.get("characters", []) if c not in speakers]
-    dmode_cov = a.get("director_mode", "")   # comedy-coverage checks key off the DIRECTOR mode, not the legacy creative mode
-    if style == "SINGLE_TAKE" and dmode_cov.startswith("COMEDY"):
+    if style == "SINGLE_TAKE" and dmode.startswith("COMEDY"):
         warns.append("comedy beat is SINGLE_TAKE — consider COMEDY_CUTS coverage")
-    if dmode_cov.startswith("COMEDY") and reactors and "react" not in roles:
+    if dmode.startswith("COMEDY") and reactors and "react" not in roles:
         warns.append("comedy beat has no reaction shot")
-    if dmode_cov == "COMEDY_PHYSICAL" and "impact" not in roles:
+    if dmode == "COMEDY_PHYSICAL" and "impact" not in roles:
         warns.append("big physical gag has no impact shot")
     if gag and "reveal" not in roles:
         warns.append("reveal gag has no close/medium reveal shot")
     if "hold" not in roles:
         warns.append("no final hold shot")
-    # ── EPISODE DIRECTOR — emotional-mode hard fails + warnings ──
-    dmode = a.get("director_mode", ""); bc = a.get("beat_code", "")
+    # ── EPISODE DIRECTOR — emotional-mode warnings ──
+    # FIXED 2026-07-15 (guardrail-fidelity audit): these three were hardcoded reject checks — an external,
+    # frozen-in-code judgment about what one SPECIFIC named beat "must" be, independent of what the beat's own
+    # current content says. Confirmed live: all three currently pass clean only because their real director_mode
+    # fields hold free-form prose that infer_director_mode() rejects and falls back to _DIRECTOR_OVERRIDES —
+    # a genuine re-authoring with a valid DIRECTOR_MODE_GUIDANCE key (exactly what rule 82 now instructs the
+    # Director to author directly) would hard-BLOCK render_readiness with no way to override short of editing
+    # this file's own source. Downgraded to warn, matching the treatment this same function already gives the
+    # generalized version of this exact check category two blocks below (STORM_PANIC/RESCUE_JEOPARDY/
+    # TENDER_LEAVING are all warns, never rejects) — same drift-detection signal, no longer a frozen hard block
+    # on a deliberate creative change.
+    bc = a.get("beat_code", "")
     if bc == "7.B6" and (dmode in ("MAGIC_BEACON", "MAGIC_CEREMONY") or style == "MAGIC_COVERAGE"):
-        rejects.append(f"7.B6 must be rescue/jeopardy, not MAGIC (got {dmode or style})")
+        warns.append(f"7.B6 must be rescue/jeopardy, not MAGIC (got {dmode or style})")
     if bc == "3.B3" and (dmode == "ACTION_RESCUE" or style == "ACTION_COVERAGE"):
-        rejects.append(f"3.B3 must be TENDER_LEAVING/HEART_COVERAGE, not action (got {dmode}/{style})")
+        warns.append(f"3.B3 must be TENDER_LEAVING/HEART_COVERAGE, not action (got {dmode}/{style})")
     if bc == "4.B4" and not re.search(r"\b(panic|fear|isolat|alone|lost|afraid|vulnerab)\b", low):
-        rejects.append("4.B4 (STORM_PANIC) lacks panic/isolation language")
+        warns.append("4.B4 (STORM_PANIC) lacks panic/isolation language")
     danger = r"\b(danger|net|trapped|current|drown|sink|strain|struggl|jeopard)\b"
     if dmode == "TENDER_LEAVING" and (style == "ACTION_COVERAGE" or re.search(r"\b(crash|crashes|tumble|slam|wallop|bonk)\b", low)):
         warns.append("TENDER_LEAVING staged as action — keep it held and gentle")
@@ -1173,7 +1272,10 @@ def compact_seedance_prompt(a):
             act = s.get("action", "").rstrip(". ")
             act = (act + ".") if act else ""
             for d in s.get("dialogue", []):
-                act += (" " if act else "") + _timeline_line(d)
+                # _strip_spoken_words is a second, unconditional pass — _timeline_line alone only sanitizes
+                # the named-speaker shape; group_chorus/underwater_vo/missing-speaker still embed quoted
+                # dialogue otherwise (same fix applied to flatten_seedance_prompt above).
+                act += (" " if act else "") + _strip_spoken_words(_timeline_line(d))
             action_timeline.append({"time": f'{_t(s["t0"])}-{_t(s["t1"])}s', "action": _cap(act, 340)})
         camera = {"coverage": a.get("shot_style", "CINEMATIC_CUTS"),
                   "movement": _cap(("wide setup, playful follow on the action, then a locked medium-wide hold"
@@ -1289,7 +1391,7 @@ def surgical_repair_metadata(beat_code="", **vals):
     m.update({k: v for k, v in vals.items() if k in m}); return m
 
 # ── convenience: gather refs for a beat and build everything ─────────────────────────────────────────────────
-def build_for_beat(pkg_path, beat_code, episode="Ep1"):
+def build_for_beat(pkg_path, beat_code, episode="Ep1", read_only=False):
     d = json.load(open(pkg_path))
     all_beats = d.get("beats") or d.get("shots") or []
     beat = next(b for b in all_beats if (b.get("beatCode") or b.get("shotCode")) == beat_code)
@@ -1331,7 +1433,7 @@ def build_for_beat(pkg_path, beat_code, episode="Ep1"):
             "audio1": f"vo_{episode}_{beat_code}.mp3", "audio_dur": audio_dur}
     continuity = {"in": (beat.get("continuity") or {}).get("opensFrom", ""),
                   "out": (beat.get("continuity") or {}).get("carryToNext", "")}
-    authoring = build_seedance_authoring_json(beat, sc, refs, continuity, episode=episode)
+    authoring = build_seedance_authoring_json(beat, sc, refs, continuity, episode=episode, read_only=read_only)
     authoring["next_continuity_in"] = next_continuity_in      # the NEXT beat's own opening — what gag_carry validates against
     prompt = flatten_seedance_prompt(authoring)               # the full bible (review/debug)
     report = validate_seedance_prompt(prompt, authoring)
@@ -1341,13 +1443,14 @@ def build_for_beat(pkg_path, beat_code, episode="Ep1"):
             "compact": compact, "compact_report": compact_report}
 
 # ── THE SINGLE SEEDANCE PROMPT ENTRY POINT — preview / copy-export / dry-run / render all go through here ─────────
-def director_voice_direction(pkg_path, beat_code, episode="Ep1"):
+def director_voice_direction(pkg_path, beat_code, episode="Ep1", read_only=False):
     """THE single source for a beat's DIRECTED ElevenLabs acting — computes (+caches) the Director's Pass and returns
     its voice_direction (the locked words with V3 tags for the cadence/arc). EVERY voice path (Gate-3 render, the
     cascade audio step, the dialogue builder, the studio voice card) pulls from here so the SAME director drives the
-    voice everywhere. Returns [] on any failure (safe -> cb_voice keyword fallback)."""
+    voice everywhere. Returns [] on any failure (safe -> cb_voice keyword fallback). read_only=True (voice_preview.py's
+    UI preview card only) — see direct_beat's own docstring; never pays for a live regeneration on a stale cache."""
     try:
-        dp = build_for_beat(pkg_path, beat_code, episode)["authoring"].get("director_pass")
+        dp = build_for_beat(pkg_path, beat_code, episode, read_only=read_only)["authoring"].get("director_pass")
         return (dp or {}).get("voice_direction") or []
     except Exception:
         return []
@@ -1363,7 +1466,14 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
     # THE ONLY builders are cb_segprompt (definitive prose, applied at the end of this function) and cb_seedance (compact,
     # for beats without a segment). The old cb_prompts.seedance_json JSON path and its SEEDANCE_ALLOW_OLD_BUILDER hatch
     # have been REMOVED — there is no way to reach an old builder from any mode (preview/export/dryrun/regen/render).
-    r = build_for_beat(pkg_path, beat_code, episode); a = r["authoring"]
+    # read_only=True for preview/export/dryrun (2026-07-15, Julian: "when i click on the card the seedance prompt
+    # doesnt load"): these three modes are just LOOKING — the Studio's beat-prompt card, a copy-export, a dry-run
+    # readiness check — never a real render. build_for_beat's own live Director's Pass call (feeding only the
+    # readiness report + the compact fallback builder, never the definitive cb_segprompt prose these Scene-1
+    # beats actually ship) has no business paying for a fresh, real, ~40-60s LLM call just to show a preview; a
+    # stale cache is fine for a look, never for the actual render. "render"/"regen" are real, paying actions and
+    # are UNCHANGED — a genuine fire still gets fresh, correct direction the instant a beat's content changes.
+    r = build_for_beat(pkg_path, beat_code, episode, read_only=(mode in ("preview", "export", "dryrun"))); a = r["authoring"]
     # COMPACT_TIMED_JSON is the ONLY shipping format for EVERY mode — UI preview = dry-run = export = regen = render.
     # The flattened production-bible prompt is REVIEW/DEBUG ONLY (explicit SEEDANCE_PROMPT_FORMAT=full).
     fmt = os.environ.get("SEEDANCE_PROMPT_FORMAT", "compact")
@@ -1428,7 +1538,8 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
                 #    Gate 3 walk (rule 11 sweep).
             _def, _builder_label, _ = cb_segprompt.shipped_prompt(_beat, _scene, relay=(_relay_status == "relay"),
                                                                    prev_end_state_still=_prev_end_state,
-                                                                   prev_carry_marks=_prev_carry_marks)
+                                                                   prev_carry_marks=_prev_carry_marks,
+                                                                   episode=episode)
     except cb_qa.ManifestFieldMissing as _mfm:
         # THE MANIFEST (rule 37, 2026-07-06): unlike a genuine crash (still a silent fall-through to the older
         # cb_seedance compact builder below, unchanged), a missing manifest field must surface as a hard
@@ -1443,16 +1554,24 @@ def get_seedance_prompt(pkg_path, beat_code, mode="render", episode="Ep1"):
     except Exception:
         _def = None
     if _def:
-        gen_status = ("NEEDS_SOURCE_DATA_FIX" if not auth_ok
-                      else "NEEDS_KEYFRAME_REVIEW" if not kf_exists
-                      else "READY_TO_RENDER")
+        # FIXED 2026-07-15 (guardrail-fidelity audit): this branch used to compute gen_status/hard_fails from
+        # auth_ok/r["report"]["rejects"] — validate_seedance_prompt's verdict on flatten_seedance_prompt's
+        # LEGACY text, which is NEVER what ships once `_def` (the real, definitive v5 prompt) exists. Confirmed
+        # live on 5 real beats (3.B6, 8.B4, 9.B1, 6.B5, 7.B1): all built a clean, fully-compiled `_def` yet
+        # reported NEEDS_SOURCE_DATA_FIX from bugs in the discarded legacy artifact — silently skipping a
+        # beat's real render despite a perfectly shippable prompt. `_def` only reaches this branch when
+        # cb_segprompt.shipped_prompt did NOT raise ManifestFieldMissing (the one case that already sets
+        # `_def = None` and correctly falls through to the legacy path below) — so a successfully-built `_def`
+        # is validator-clean by construction here; content-level correctness of what actually ships is
+        # cb_qa.check_gate3_lint's job (a separate, later gate cb_beats.run already calls on the real text).
+        gen_status = "NEEDS_KEYFRAME_REVIEW" if not kf_exists else "READY_TO_RENDER"
         return {"builder": _builder_label, "mode": mode, "format": "DEFINITIVE_PROSE",
                 "prompt": _def, "raw": True, "compact": _def, "full_prompt": _def, "authoring": a,
                 "keyframe_exists": kf_exists,
-                "authoring_validator": {"ok": auth_ok, "rejects": r["report"]["rejects"]},
+                "authoring_validator": {"ok": True, "rejects": []},
                 "compact_validator": {"ok": True, "rejects": [], "length": len(_def)},
                 "readiness_status": gen_status,
-                "hard_fails": r["report"]["rejects"], "warnings": []}
+                "hard_fails": [], "warnings": []}
     return {"builder": "cb_seedance", "mode": mode, "format": fmt_label, "prompt": chosen,
             "compact": r["compact"], "full_prompt": r["prompt"], "authoring": a,
             "keyframe_exists": kf_exists,

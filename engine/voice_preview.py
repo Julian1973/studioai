@@ -32,19 +32,28 @@ def main():
         ep = sys.argv[3] if len(sys.argv) > 3 else "Ep1"
         try:
             import cb_seedance as S
-            vd = V._voice_dir_lookup(S.director_voice_direction(os.path.join("..", "cb-output", pkg), beat, ep))
+            # read_only=True (2026-07-15): this script's own docstring already promises "NO synthesis, no API
+            # cost" — but director_voice_direction had no way to honour that promise once a beat's cuts[] text
+            # changed and its Director's Pass cache went stale: it would silently fire a real, ~40-60s LLM call
+            # to re-direct the beat just to show this preview. Never regenerate from a preview card.
+            vd = V._voice_dir_lookup(S.director_voice_direction(os.path.join("..", "cb-output", pkg), beat, ep, read_only=True))
         except Exception:
             vd = {}
-        lines = []
-        for c in [c for c in (b.get("cuts") or []) if (c.get("dialogue") or "").strip()]:
-            for lab, line in V._cut_segments(c.get("dialogue")):
-                speaker = V._resolve_speaker(lab, b)
-                if not (speaker and line):
-                    continue
-                text = vd.get((speaker.lower(), V._norm_words(line))) \
-                       or V.direct_line(speaker, shot={"performance": {"surface": c.get("delivery", "")}, "intent": {}}, raw=line)
-                if text:
-                    lines.append({"character": speaker, "text": text})
+        # FIXED 2026-07-12 (full-codebase audit continued): this used to hand-roll cut-segment iteration + speaker
+        # resolution + a stripped-down shot dict ({"performance": {"surface": ...}, "intent": {}}) straight into
+        # direct_line() — missing every BEAT-level field _is_tender()/_leak() actually read (emotionalIntent,
+        # crystalGlow, crystalTruth, need, performance.underneath/innerThought), so a genuinely tender/Crystal-Call
+        # line could never get its [quietly] tag or need-leak breath in THIS preview even though the real render
+        # (cb_voice.build_dialogue_track, via the identical _resolve_turns) gets it right — the preview silently
+        # disagreed with what actually ships. It also had no group_chorus handling at all, so a chorus cut (e.g.
+        # 8.B3's "ALL:" line) misattributed to a fabricated 'All' pseudo-character instead of showing the real
+        # GROUP_CHORUS asset the render actually builds. Now calls the SAME shared resolver
+        # (cb_voice._resolve_turns) build_dialogue_track uses in production, so the card is genuinely WYSIWYG.
+        try:
+            turns = V._resolve_turns(b, vd)
+        except SystemExit as e:                 # _resolve_turns fails loud on a speaker with no canonical voiceId
+            print(json.dumps({"error": str(e)})); return
+        lines = [{"character": t["character"], "text": t["text"]} for t in turns]
         script = "\n".join(f"{l['character']}: {l['text']}" for l in lines)
         print(json.dumps({"script": script, "lines": lines, "overridden": False, "director_led": bool(vd)}))
     except Exception as e:

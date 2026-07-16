@@ -1,7 +1,7 @@
 {
  "episode": "Ep1",
  "canonVersion": "1.0",
- "builtAt": "2026-07-16T23:54:25",
+ "builtAt": "2026-07-17T00:46:37",
  "sources": {
   "showBible": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/CRYSTAL_BEARS_LOCKED_CANON.md",
@@ -53,7 +53,7 @@
   },
   "exemplars": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/EXEMPLAR_LIBRARY.json",
-   "md5": "e49b3cd84eb9993e99b62e205ccfcccd"
+   "md5": "a513bba4b9137180c03a8a0f9ebcab48"
   },
   "script": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/cb-output/Ep1_Final_Episode_one_beat_package.json",

@@ -1,9 +1,9 @@
 {
  "episodeId": "Ep1",
  "sceneNumber": "9",
- "engineVersion": "creative-room-1.0 (2026-07-16)",
+ "engineVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
  "canonVersion": "1.0",
- "builtAt": "2026-07-16T23:49:34",
+ "builtAt": "2026-07-17T00:54:21",
  "vision": {
   "episodeId": "Ep1",
   "title": "The Adventure Begins",
@@ -34,35 +34,86 @@
    "humanRevision": null
   }
  },
+ "ambitionBrief": null,
+ "canonCompletionProposal": "Ep1_scene9_canon_completion_PROPOSED.json",
+ "directedOnEstablishedCanonOnly": true,
+ "treatments": [
+  {
+   "name": "1. The Circle Finally Reaches Him",
+   "audienceExperience": "The audience experiences the scene from inside Keen’s after-storm body: damp, shaken, trying to stand tall, then discovering the circle is not asking him to perform bravery anymore. Kids read the magic of aquamarine appearing and the giant hug; adults feel the ache of the father’s wristbands becoming full only after Keen has been frightened, helped, and welcomed. The scene should feel like a breath returning to a small chest.",
+   "emotionalPointOfView": "Keen governs the scene. Aida’s line lands not as a public award but as the first safe naming of what he has already done: “AIDA: You followed your heart… and chose courage.” The aquamarine light does not congratulate his brave face; it answers the tremor he cannot hide. His Crystal Call comes from that tremor being accepted, not erased.",
+   "comicOrDramaticMechanism": "Dramatic mechanism: surrender witnessed by community. The crystal settles only after Keen stops needing to look ready. Comic mechanism in the release: status mistiming. Fuzzby claps too early because he wants to be the official starter of joy, then covers once he realises the sacred moment has not finished. The laugh protects the emotion from becoming syrupy.",
+   "characterPerformanceStrategy": "Keen begins with one visible aftershock in the body: a tiny tremor through the paws or breath before he gathers himself. His Call is not shouted as a power pose; it is spoken with effort becoming steadiness: “KEEN: Brave and bright, with all my might — Aquamarine Crystal, shine with light!” Aida is warm stillness, quieter the more moved she is, letting the line do less than her presence. Fuzzby’s joy arrives too soon and too loudly, then instantly disguises itself as intentional ceremony. The group hug must feel like a wave of care that almost knocks Keen off balance, not a neat tableau. Aida’s final “AIDA: That’s what family does.” is small, certain, and offered after the noise has broken open.",
+   "visualGrammar": "The grammar is bodily intimacy expanding into belonging. Start close to the evidence of survival: wet fur, sand, wristbands, breathing, the washed-clean ground. The frame gradually allows more of the circle to enter, but only as Keen becomes able to receive it. Aquamarine is treated as the heart’s truth made visible: first a small impossible presence between them, then two lights choosing the empty wristbands. Rose-pink warmth from Aida and aquamarine from Keen should mingle without one swallowing the other.",
+   "cameraCharacterRelationship": "The camera stays near Keen’s height and nervous system. It does not stand safely outside the ceremony; it discovers the circle with him, allowing figures to enter as presences rather than arranged coverage. When the light appears, the camera’s allegiance remains with Keen’s registering body, not with a neutral display of magic. The camera may lose the edge of the group during the hug because the feeling briefly exceeds compositional neatness.",
+   "movementVersusStillness": "Keen is small movement trying to become still. Aida is already still, making room for him. The aquamarine light supplies the one elegant motion: appearing, dividing, settling. Fuzzby breaks the stillness too early, and that rupture becomes the release valve. The hug is the first full release of movement: not chaos, but care arriving with more force than Keen expects.",
+   "depthAndEnvironment": "Depth carries the distance Keen has crossed. The washed-clean gathering circle is foreground truth; beyond it, storm-wet leaves, glistening paths, and the far suggestion of water keep the cost present. The circle must not feel reset to perfect sunshine. The environment participates by holding rain beads and soft reflections of aquamarine, so the world itself seems to witness the new belonging.",
+   "rhythmAndEscalation": "Begin slow enough for the audience to feel Keen’s breath. Aida’s naming creates a hush. The aquamarine appearance is the lift; the split into the wristbands is the gasp. Keen’s Call begins fragile and steadies through its own wording. Then joy rushes in: Fuzzby’s premature clap, quick cover, cheers, hug, break apart. The scene exits the ache quickly through warmth and comedy while leaving the wristbands’ meaning glowing.",
+   "cutPhilosophy": "Cuts are motivated by changed inner state, not ceremony coverage. Cut when Keen’s tremor changes the meaning of the Call; cut when the light alters power from emptiness to inheritance; cut when reverence becomes comic release; cut when the hug becomes too much to hold in one emotional register. Avoid automatic reaction sampling around the circle. If a face is seen, it must add a distinct form of care, surprise, or comic punctuation.",
+   "openingImage": "Keen in the washed-clean circle, still damp from rescue, one paw near his father’s empty wristbands as Aida’s steady presence waits close enough to hold him without touching him.",
+   "closingImage": "Keen held in the loosened circle, aquamarine now living inside the once-empty wristbands, smiling toward home while rain still beads on the ground — warmer, but not wiped clean of what it cost.",
+   "cinematographerChallenge": "Do not turn this into a symmetrical award ceremony with Aida centred, Keen centred, then an insert of the bands. That would make belonging administrative. The challenge is to let the camera feel slightly vulnerable with Keen while preserving readable geography: close enough for tremor and breath, wide enough only when the circle has emotionally earned its way in."
+  },
+  {
+   "name": "2. Aida Holds the Door Open",
+   "audienceExperience": "The audience experiences the scene as a welcome held by Aida: not a prize-giving, but a safe doorway Keen can step through. Children feel the elder’s gentle certainty and the magic answering it; adults feel the parental layer — someone naming a child’s courage without taking ownership of it. The scene is calm on the surface, with emotion moving underneath like tidewater.",
+   "emotionalPointOfView": "Aida governs the scene. Her stillness is the camera’s anchor, and Keen’s transformation is understood through what it does to her: she has watched from afar, worried from the shore, and now must let the Cove receive him as family. Her line “AIDA: You followed your heart… and chose courage.” is not explanation; it is recognition. Her final “AIDA: That’s what family does.” quietly links Mum, father, Squeaky, and the Cove without naming them all.",
+   "comicOrDramaticMechanism": "Dramatic mechanism: ceremonial restraint with one emotional breach. Aida keeps the space steady until the crystal truth can arrive. Comic mechanism: restraint → release. Everyone is trying to honour the moment; Fuzzby’s joy leaks out first in an ill-timed clap, then the whole circle is permitted to become noisy love.",
+   "characterPerformanceStrategy": "Aida moves least and carries most. Her hands and breath do the work: an open palm, a slow nod, a line spoken with warmth that gets quieter at the centre. Keen does not present himself to her as a hero; he lets himself be seen with the tremor still in him. His Call is a response to her safe naming. Fuzzby’s early clap should come from genuine overflowing pride, not mockery; his cover is the joke because he cannot bear being seen as emotionally ahead of schedule. The other bears’ cheer should feel individually motivated — not identical bouncing — each entering the hug as their own version of welcome.",
+   "visualGrammar": "The visual grammar is orbit around stillness. Aida is the warm centre of gravity; characters and light gather around her steadiness. The camera does not rush her or decorate her with showy moves. The aquamarine light appears in the relational space she has made, then travels to Keen’s wristbands as if the circle’s welcome has given the father’s emptiness a place to become inheritance. Rose-pink warmth remains a foundation beneath the aquamarine arrival.",
+   "cameraCharacterRelationship": "The camera trusts Aida’s patience. It stays close enough to feel her stillness as active, not static, and lets the younger energy enter and leave around her. When Keen speaks the Call, the camera’s relationship shifts subtly from Aida holding the room to Keen being able to stand inside it. The camera should never become an announcer of spectacle; it remains a witness to recognition.",
+   "movementVersusStillness": "Stillness is the main action. Aida’s stillness makes the circle safe; Keen’s tremor proves the courage has cost him; the crystal supplies graceful motion; the group supplies release. Movement escalates only after the Call has settled. The hug breaks the ceremonial shape, and that breaking is the proof that the ceremony was always about family, not formality.",
+   "depthAndEnvironment": "Depth is arranged as belonging across distance. Aida and Keen occupy the living centre; behind and around them, the Cove bears form a loose circle, never a rigid lineup. Beyond the circle, the washed-clean Cove keeps traces of the storm. The far waterline or wet path can sit in soft depth as the world Keen survived, while the foreground circle becomes the world choosing him.",
+   "rhythmAndEscalation": "The rhythm begins with a held, elder pace. Aida names the truth; the light answers; Keen absorbs the light; the Call completes the inner settling. Only then does rhythm loosen into cheers and the giant hug. Fuzzby’s premature clap lands as a small crack in the stillness before the larger release. The final Aida line restores quiet without cancelling the joy.",
+   "cutPhilosophy": "Cuts should feel like attention shifting within a held room. No habitual two-shot pattern. Stay with Aida while her stillness is doing work; leave her only when Keen’s body changes or the crystal introduces new truth. The cut into comedy must be editorially opinionated: Fuzzby’s mistimed release matters because the room has been holding its breath. The final cut should return to the emotional centre, not to a generic group pose.",
+   "openingImage": "Aida standing steady in the washed-clean gathering circle, the others naturally drawn around her, with Keen just inside the safety she has made — not yet fully able to believe it is for him.",
+   "closingImage": "Aida watching Keen smile home from within the circle, her stillness softened because the Cove has grown by one; the aquamarine wristbands glow where emptiness used to be.",
+   "cinematographerChallenge": "The danger is reverent stiffness: a locked elder frame that mistakes lack of movement for meaning. If Aida is the anchor, the frame must prove the orbit around her — small shifts of attention, bodies leaning toward her safety, light gathering because of her. Keep her gravity without making the scene a museum display."
+  },
+  {
+   "name": "3. The Empty Wristbands Become a Home",
+   "audienceExperience": "The audience experiences the scene through the object that has carried the episode’s ache: the father’s empty wristbands. The emotional thrill is not simply that Keen gets a crystal; it is that an absence becomes a living connection. Children see magic filling the bands; adults feel memory, grief, Mum’s letting-go, and new family all occupying the same glow.",
+   "emotionalPointOfView": "The emotional point of view belongs to the wristbands and the aquamarine light. Aida and Keen are witnesses to a truth already earned by action. Aida’s line names the path; the light answers from between them; Keen’s Call lets the inheritance settle without pretending the old emptiness never existed. The final family truth lands because the wristbands now contain both memory and belonging.",
+   "comicOrDramaticMechanism": "Dramatic mechanism: object revelation. The empty bands have been a visible question all episode; now they receive an answer. Comic mechanism after the answer: sacred object timing versus impatient celebration. Fuzzby claps at the instant he thinks the object has “finished,” then discovers feelings do not obey his cue sheet.",
+   "characterPerformanceStrategy": "Keen’s performance is tactile: he feels the bands before he understands himself. His paw hovers, touches, withdraws a little at the first glow, then returns because the light is not frightening him away. Aida gives almost no physical instruction; she names what is true and lets the object complete the sentence. The Call should feel like Keen speaking to something already inside him and already older than him. Fuzzby’s cover after the early clap must be quick and bodily — a tiny attempt to convert mistake into official behaviour. The hug must avoid smothering the wristbands from view too soon; the audience needs to carry their glow into the release.",
+   "visualGrammar": "The grammar is luminous inheritance. Circles repeat: the gathering circle, the space between Aida and Keen, the wristbands, the hug enclosing him. Aquamarine appears not as a prize dropped from nowhere but as the visible note of courage finding its vessel. Reflections in rainwater and wet leaves briefly multiply the glow, suggesting the Cove itself recognises the change. The father’s absence remains present through the shape of the bands even after they are filled.",
+   "cameraCharacterRelationship": "The camera behaves as if drawn by the aquamarine note. It may begin with the bands, drift or be pulled toward the forming light, then return to the bands as they become complete. Characters are not ignored, but they are framed as hands, breath, faces, and pauses responding to the object’s transformation. The camera discovers the magic experientially, as if the light’s arrival changes where attention can go.",
+   "movementVersusStillness": "The bands begin still and empty. Keen’s tremor agitates that stillness. The aquamarine light provides the central movement: appear, divide, settle. Once settled, the movement passes into Keen’s body as steadiness, then outward into the group as cheers and hug. The scene’s motion should feel transferred from object to bear to family.",
+   "depthAndEnvironment": "Depth uses reflections and layers rather than ceremony blocking. The bands can sit in the foreground while Aida’s warm presence and the gathered bears soften behind them; then Keen’s face and the circle reclaim focus as the light settles. Wet sand, puddles, and polished stones echo small aquamarine glints, but the main glow remains personal and warm, never a fireworks show. The storm’s residue keeps the object from becoming a clean trophy.",
+   "rhythmAndEscalation": "The scene begins almost suspended, with the audience invited to notice emptiness. Aida’s line is the key that turns the silence. The aquamarine appearance should create the gasp; the split and settling create the ache. Keen’s Call is the first full rhythm after the hush, a spoken pattern that steadies him. Fuzzby’s early clap interrupts with comic timing, then the group’s joy overtakes it, and Aida’s final line lands like a soft chord after laughter.",
+   "cutPhilosophy": "Cuts are motivated by the object’s changing meaning. Cut when emptiness becomes expectation; cut when light becomes decision; cut when Keen’s touch becomes acceptance; cut when reverence can safely release into comedy. Avoid standard insert-as-proof grammar. The bands are not a prop insert; they are the emotional centre of the scene. Reactions are earned only if they reveal how each character receives the transformation differently.",
+   "openingImage": "The father’s empty wristbands damp against Keen, catching only grey stormlight at first, with Aida’s warm presence nearby but not yet filling the absence.",
+   "closingImage": "The same wristbands now carrying aquamarine light as Keen is enclosed by the new circle, their glow visible through the joy — proof that family has expanded, not replaced what was missing.",
+   "cinematographerChallenge": "Do not photograph the wristbands as a simple continuity payoff: empty, glow, filled. That is information, not feeling. The challenge is to make the audience experience absence changing state. The camera must be brave enough to let hands, breath, reflections, and partial faces carry the scene, while never losing the four-year-old’s understanding of where Keen, Aida, and the circle are."
+  }
+ ],
+ "treatmentSelection": {
+  "selectedTreatment": "Combine 1. The Circle Finally Reaches Him with the strongest object-spine from 3. The Empty Wristbands Become a Home",
+  "combinedFrom": [
+   "1. The Circle Finally Reaches Him",
+   "3. The Empty Wristbands Become a Home"
+  ],
+  "governingAudienceExperience": "The audience feels Keen’s breath come back after the storm as the once-empty wristbands fill with aquamarine light: children experience magic and a huge welcome; adults feel absence becoming inheritance without being erased.",
+  "rationale": "Treatment 1 is the governing scene because it keeps the emotional event where the episode has earned it: inside Keen’s shaken body, in relation to Aida and the waiting Cove. His courage is not awarded; it is witnessed after fear, rescue, and surrender. That is the correct truth for the finale. Treatment 3 should be folded in as the scene’s visual and emotional spine because the wristbands are the episode’s most loaded object: Mum’s letting-go, father’s absence, Keen’s fear, and the new family all meet there. But the object must serve Keen’s receiving of belonging, not replace him as the scene’s heart. The selected approach gives the scene a clean energy curve: damp hush, Aida’s recognition, aquamarine gasp, Keen’s fragile-to-steady Call, Fuzzby’s too-early joy, then the hug that nearly knocks Keen off balance. It preserves the cost through rain, wet ground, and visible wristbands while allowing comedy to release the ache before it turns syrupy.",
+  "rejectionChecks": "Treatment 2 is rejected as the governing approach because making Aida the primary anchor risks turning the scene into a calm recognition ceremony rather than Keen’s after-storm surrender into belonging. Its “orbit around stillness” can too easily become reverent stiffness, a maintained circle, and elder-centred witnessing instead of the camera discovering the welcome with Keen. Treatment 3 is rejected as a standalone because an object cannot fully govern a Crystal Bears scene: the wristbands are the emotional vessel, but the heart remains the relationship between Keen, Aida, Mum/father memory, and the new circle. The selected combination specifically rejects fixed character lanes, keeping every bear visible, safe outside-the-circle placement, habitual action → reaction coverage, repeated close-up punctuation, mechanical shot counts, generic spectacle language, and simple continuity inserts of empty/glowing/filled bands. Cuts must follow changed feeling, not coverage obligation."
+ },
  "scene": {
   "sceneId": "S9",
-  "sourceScriptRange": "9.B1-9.B3",
-  "location": "Crystal Cove gathering circle, washed clean after the storm",
-  "time": "Immediately after Keen’s arrival and rescue, storm clearing into warm afterlight",
+  "sourceScriptRange": "9.B1–9.B3",
+  "location": "The washed-clean gathering circle in Crystal Cove, still wet from the storm.",
+  "time": "Immediately after Keen’s rescue and arrival.",
   "participatingCharacters": [
    "Keen",
    "Aida",
    "Fuzzby",
-   "Zenny",
-   "Squeaky",
-   "Crystal Bears"
+   "the Crystal Cove bears"
   ],
-  "purpose": "To convert Keen’s rescue from an event into belonging: Aida names the truth he has already lived, the aquamarine crystal settles into his father’s empty wristbands, and the group receives him as family without erasing the ache of home.",
-  "dramaticQuestion": "Can Keen accept courage as something real inside him, not a brave performance he has to keep proving alone?",
-  "emotionalOwner": "Keen, with Aida as the still witness who safely names the transformation.",
-  "characterObjectives": "Keen wants to understand what has happened to him and hold himself together in front of the circle. Aida wants to welcome him without making the moment too heavy or too instructional. Fuzzby wants to be part of the ceremony and cannot keep his timing contained. The group wants to celebrate Keen as one of them. Squeaky stays close as living proof that Keen’s courage mattered.",
-  "opposition": "Keen’s body still carries the storm: tremor, wet breath, the memory of fear, and the weight of his father’s wristbands. The group’s joy risks overwhelming him. Fuzzby’s over-eager celebration risks popping the sacred stillness too soon.",
-  "subtext": "Keen is not being rewarded for being fearless; he is being witnessed for acting while afraid. Aida is not giving him courage — she is recognizing the courage already chosen. The wristbands are no longer empty grief; they become carried love.",
-  "emotionalEntry": "Relieved, breathless, tender, with the circle still listening to the storm’s absence.",
-  "emotionalExit": "Warm belonging with a visible trace of cost: Keen is held by the Cove, but the wristbands still mean Mum and Dad are present through absence.",
-  "storyTurn": "Keen’s aquamarine crystal settles into his father’s wristbands, changing them from borrowed confidence into his own truth carried with family memory.",
-  "visualIdentity": "A clean circular gathering space, damp leaves still holding rain, the characters arranged as a protective ring that opens toward Keen rather than trapping him. Light travels in circles: Aida’s warm steadiness, aquamarine emergence, the group’s embrace, then a looser family circle.",
-  "lightingAtmosphere": "Post-storm softness. Reflected water light low on faces and paws. Aquamarine glow is sincere and internal, not explosive; rose warmth from Aida steadies the frame. The scene should feel rinsed, quiet, and newly breathable.",
-  "energyShape": "Still recognition → trembling acceptance → luminous call → early comic release → full group joy → quiet family truth.",
-  "connectionFromPreviousScene": "Keen arrives after terror and rescue; the scene inherits wet breath, shaking courage, Squeaky’s returned trust, and the shore beacon’s promise that he was never alone.",
-  "handoverToNextScene": "The hug opens into belonging, preparing Keen’s first real introduction and the Cove’s welcome as chosen family rather than ceremony alone.",
-  "showrunnerNotes": "Do not stage the crystal as a prize or power-up. The glow answers what Keen already did. Aida must not preach; her line lands as naming, not teaching. Keep one idea per shot: recognition, appearance, settling, tremor, call, early clap, hug, family truth. Fuzzby’s gag must release pressure without stealing the emotional ownership from Keen.",
-  "approvalState": "director-approved"
+  "purpose": "Keen stops needing to prove he is brave and receives belonging: Aida witnesses the courage he has already lived, aquamarine light fills his father’s empty wristbands, and the circle welcomes him as family without erasing the cost of the storm or his father’s absence.",
+  "dramaticQuestion": "Can Keen let the circle see his fear and still receive courage as something already true in him, rather than something he has to perform?",
+  "emotionalOwner": "Keen",
+  "connectionFromPreviousScene": "Keen arrives damp, shaken, and alive after choosing real courage in the storm and being helped to safety; the empty wristbands still carry Mum’s letting-go and his father’s absence.",
+  "handoverToNextScene": "Keen is held by the loosened circle, aquamarine now living in the wristbands, able to smile toward home with warmth and ache both present.",
+  "approvalState": "selected treatment locked"
  },
  "beats": [
   {
@@ -73,53 +124,17 @@
     "AIDA: You followed your heart… and chose courage."
    ],
    "participatingCharacters": [
-    "Aida",
     "Keen",
-    "Crystal Bears",
-    "Squeaky"
+    "Aida",
+    "the Crystal Cove bears"
    ],
-   "objectiveByCharacter": "Aida wants to safely name the truth without handing Keen a lesson. Keen wants to know whether this impossible welcome is really for him. The circle wants to witness without crowding. Squeaky stays near Keen as the consequence of his choice made living and immediate.",
-   "opposition": "The moment is fragile: if Aida makes it ceremonial too early, it becomes award-giving; if Keen reaches for certainty too fast, it becomes performance again. The wristbands carry absence as much as protection.",
-   "subtext": "Aida is saying, in the simplest possible way, that Keen’s fear was included in his courage. Keen hears more than the words: Mum’s promise, Dad’s memory, and Squeaky’s trust all meet in the empty places on his wrists.",
-   "beginningState": "Keen stands inside the circle still damp and not fully recovered; Aida holds the centre by being still. The group’s attention is warm but restrained.",
-   "pressure": "This is the first moment after survival where Keen has to let the rescue mean something. The circle is waiting, but he cannot be pushed into belonging; he has to receive it.",
-   "actionDiscoveryOrChoice": "Aida speaks with near-whisper steadiness. On the pause after “heart,” Keen’s attention drops to the wristbands before the light appears — his thought arrives before the magic does.",
-   "reversalReleaseOrRecognition": "The single turn is the aquamarine light appearing between Aida and Keen, not as an external prize but as an answer to the space between them.",
-   "consequence": "The light splits cleanly into two and settles into the father’s empty wristbands, making the absence visibly held rather than filled over. The wristbands glow from within, low and steady.",
-   "reaction": "Keen does not celebrate yet. His breath catches; one paw almost closes over a wristband, then stops short because touching it would make it real. Aida remains still, allowing him the whole moment.",
-   "closingState": "Keen stands with aquamarine light seated in both wristbands, the circle quiet around him, and the audience understands before Keen fully does.",
-   "intendedAudienceResponse": "A small inhale: the child reads magic finally finding its home; the adult reads grief and inheritance becoming support rather than weight.",
-   "comedyOrEmotionEngine": "Emotion engine: visible contradiction resolving. The wristbands looked like borrowed confidence; now they reveal carried love. No gag in this beat.",
-   "energyCurve": "Hushed entry → named truth → luminous answer → breath-held stillness.",
-   "memorableImage": "Aquamarine light splitting between Aida and Keen and settling into the two empty wristbands as rainwater glints on the circle floor.",
-   "interpretations": [
-    {
-     "name": "Aida as conferrer",
-     "dramaticConstruction": "Aida owns the beat as the elder who names Keen’s courage and effectively grants belonging.",
-     "characterBehaviour": "Aida steps into ceremonial authority; Keen receives her judgement as validation.",
-     "audienceExperience": "The audience feels the formal arrival of a new Crystal Bear, with Aida as the gatekeeper."
-    },
-    {
-     "name": "Keen as receiver of family memory",
-     "dramaticConstruction": "Keen owns the beat; Aida’s line opens a door, but the drama is Keen realizing the wristbands are no longer empty.",
-     "characterBehaviour": "Keen’s attention travels from Aida to the wristbands; his body goes smaller before the glow makes him steadier.",
-     "audienceExperience": "The audience feels a private emotional click inside a public welcome — the crystal belongs because the feeling is true."
-    },
-    {
-     "name": "The wristbands as witness",
-     "dramaticConstruction": "The object owns the beat; Aida and Keen serve the transformation of absence into carried love.",
-     "characterBehaviour": "Both characters become still witnesses to the light answering the empty gold.",
-     "audienceExperience": "The audience reads the father’s memory as present without needing anyone to explain it."
-    }
-   ],
-   "selectedDirectorialInterpretation": "Keen as receiver of family memory, with a trace of the wristbands as witness.",
-   "selectionReason": "This keeps the scene from becoming a prize ceremony. Aida names, but Keen must receive. The emotional ownership stays with the child who has just survived the storm, while the wristbands silently carry the adult ache.",
-   "approvalState": "director-approved",
-   "rejectedApproachSummaries": [
-    "Aida as conferrer",
-    "Keen as receiver of family memory",
-    "The wristbands as witness"
-   ]
+   "whatChanges": "Keen’s empty wristbands change from absence into inheritance: the circle’s attention stops being a test of readiness and becomes a safe witnessing of what he has already survived and chosen.",
+   "whoDrives": "Aida drives by naming the truth quietly; Keen’s shaken body and the wristbands carry the emotional proof; the aquamarine light completes the change as the visible answer to his need.",
+   "audienceAnticipation": "The audience waits to see whether this will become a public award ceremony or whether the magic will answer the small tremor Keen cannot hide. Children anticipate the crystal appearing; adults anticipate what the father’s empty wristbands will become.",
+   "actionOrChoice": "Aida stays close without crowding him and offers the line as recognition, not presentation. Keen’s paw remains near the wristbands, his breath still uneven. The aquamarine light appears between them as a small impossible presence, then divides and chooses the empty places in the bands.",
+   "consequence": "The once-empty wristbands are no longer vacant; aquamarine settles into them, making father-memory, Mum’s promise, and the new Cove welcome visible in one object. Keen does not have to stand taller to earn it.",
+   "emotionalOrComicHandover": "The hush turns into a held gasp: the scene passes from Aida’s witnessed naming into Keen feeling the new light on his own body and having to speak from that truth.",
+   "approvalState": "selected treatment locked"
   },
   {
    "beatId": "9.B2",
@@ -131,51 +146,15 @@
    "participatingCharacters": [
     "Keen",
     "Aida",
-    "Crystal Bears",
-    "Squeaky"
+    "the Crystal Cove bears"
    ],
-   "objectiveByCharacter": "Keen wants to speak the call without slipping back into fake bravado. Aida wants to give him space to claim it himself. The group wants to cheer but holds back until the call has landed. Squeaky wants to stay close enough that Keen can feel their shared rescue.",
-   "opposition": "Keen’s body betrays the truth first: one tremor runs through him. The old habit would be to cover it with a big brave pose. The new choice is to let the tremor be part of the call.",
-   "subtext": "This is not Keen becoming fearless. This is Keen allowing fear, love, and action to live in the same breath.",
-   "beginningState": "The aquamarine light is newly seated; Keen is still looking at it as if it might vanish if he moves too quickly.",
-   "pressure": "Everyone is present for his first Crystal Call. The pressure is not to perform greatness, but to let the words come from what he actually felt underwater.",
-   "actionDiscoveryOrChoice": "Keen’s paw closes gently over one wristband. A visible tremor passes through the contact point; he swallows, lowers his shoulders, and chooses not to hide it. Only then does he lift his chin enough to speak.",
-   "reversalReleaseOrRecognition": "The single turn is the tremor being accepted rather than concealed. The call begins after that surrender, so the glow reads as truth settling, not magic solving.",
-   "consequence": "Aquamarine energy gathers close to Keen’s body and the wristbands, then softens outward in a warm ring that includes the circle without blasting it back. The note resolves only once the line is fully owned.",
-   "reaction": "Keen’s face opens into relief rather than triumph. Aida’s stillness warms; the group’s held excitement visibly strains at the edge but does not interrupt.",
-   "closingState": "Keen stands brighter but not bigger, steadier but still tender, with the aquamarine light settled around him.",
-   "intendedAudienceResponse": "A child feels the thrill of the call; an adult feels the cost inside the tremor that was not hidden.",
-   "comedyOrEmotionEngine": "Emotion engine: surrender before release. The physical tell is the tremor accepted, not conquered.",
-   "energyCurve": "Fragile contact → tremor → choice to stay honest → clear call → warm settling release.",
-   "memorableImage": "Keen’s paw over the glowing wristband, trembling once before the aquamarine ring breathes outward around him.",
-   "interpretations": [
-    {
-     "name": "Heroic ignition",
-     "dramaticConstruction": "The beat is built as a triumphant first use of the Crystal Call.",
-     "characterBehaviour": "Keen plants firmly and projects the line as arrival.",
-     "audienceExperience": "The audience gets excitement and spectacle, but the fear risks disappearing too fast."
-    },
-    {
-     "name": "Private tremor becomes public courage",
-     "dramaticConstruction": "The beat is built around Keen choosing not to cover the body’s fear before speaking.",
-     "characterBehaviour": "Keen gathers himself through a visible tremor, then speaks with growing steadiness rather than instant confidence.",
-     "audienceExperience": "The audience gets magic and vulnerability in the same breath; the call feels earned because it includes the storm."
-    },
-    {
-     "name": "Circle-powered belonging",
-     "dramaticConstruction": "The group’s supportive presence becomes the emotional engine that lets Keen speak.",
-     "characterBehaviour": "Keen looks around the circle for permission, receives it from the group, then calls.",
-     "audienceExperience": "The audience feels family support strongly, but Keen’s individual choice is softened."
-    }
-   ],
-   "selectedDirectorialInterpretation": "Private tremor becomes public courage.",
-   "selectionReason": "It best serves the episode theme: courage is fear felt and acted through. The call must not be a power-up before sincerity; the tremor is the hinge that makes the magic honest.",
-   "approvalState": "director-approved",
-   "rejectedApproachSummaries": [
-    "Heroic ignition",
-    "Private tremor becomes public courage",
-    "Circle-powered belonging"
-   ]
+   "whatChanges": "Keen changes from being witnessed by others to accepting the courage inside himself. The Call is not a power pose; it begins in aftershock and steadies because the fear is allowed to remain.",
+   "whoDrives": "Keen drives the beat by choosing to speak from the tremor rather than hiding it. The aquamarine energy supports him but does not perform the courage for him.",
+   "audienceAnticipation": "The audience anticipates whether Keen can say the Call without reverting to borrowed bravado. Children wait for the magic to glow; adults watch for whether his fear will be contradicted, concealed, or welcomed.",
+   "actionOrChoice": "Keen registers the warm aquamarine in the wristbands, has one visible tremor through breath or paws, then gathers himself without pretending the tremor did not happen. He speaks the Call with effort becoming steadiness across the line.",
+   "consequence": "The aquamarine light settles warmly around him, confirming the heart-truth rather than rewarding a brave mask. Keen’s body is still small and damp, but no longer alone inside the fear.",
+   "emotionalOrComicHandover": "The sacred steadiness becomes almost too full to hold; the scene is ready for joy to rush in and break the reverence before it turns syrupy.",
+   "approvalState": "selected treatment locked"
   },
   {
    "beatId": "9.B3",
@@ -188,466 +167,409 @@
     "Keen",
     "Aida",
     "Fuzzby",
-    "Zenny",
-    "Squeaky",
-    "Crystal Bears"
+    "the Crystal Cove bears"
    ],
-   "objectiveByCharacter": "Fuzzby wants to be first and official in celebrating Keen. Keen wants to survive being loved by a whole new circle. Aida wants the joy to land, then gently name what the hug already proves. Zenny wants the celebration to be allowed without letting Fuzzby inflate it into ceremony. The group wants to welcome Keen physically and immediately.",
-   "opposition": "The sacred stillness is ready to burst. Fuzzby’s timing is too fast. Keen is still tender enough that too much affection could overwhelm him, but he also needs to feel the circle close around him.",
-   "subtext": "Family is not a speech; it is the group’s bodies moving toward Keen, then making room for him to still be himself. Aida’s line names the hug, not the moral.",
-   "beginningState": "The aquamarine glow has settled; the group is suspended in the half-second before joy becomes motion.",
-   "pressure": "The episode needs release after the storm and crystal recognition, but it must not flatten the ache. The hug has to be funny, warm, and slightly too much in a way that proves belonging.",
-   "actionDiscoveryOrChoice": "Fuzzby claps before anyone else moves, hears his own clap land in the quiet, and instantly converts the mistake into an apparently intentional formal clap with over-serious posture. Zenny’s still look lets the cover-up be the joke. Then the group breaks restraint and rushes Keen.",
-   "reversalReleaseOrRecognition": "The single turn is Fuzzby’s premature clap puncturing the solemnity. It releases the circle into joy without disrespecting the emotion.",
-   "consequence": "The group hug swamps Keen in a soft, messy cluster. Keen is briefly lost inside it, then his smile appears through the crush. The circle breaks open again so Aida can land the quiet truth.",
-   "reaction": "Keen accepts the hug first as surprise, then as relief. Fuzzby maintains his cover for one beat too long. Zenny registers him with still precision. Aida waits until the laughter has softened before speaking.",
-   "closingState": "Aida’s line lands over a loosened circle, with Keen smiling toward the idea of home as well as the family around him.",
-   "intendedAudienceResponse": "A laugh on Fuzzby’s early clap, then warmth as the hug proves the line before Aida says it. The adult feels Mum’s absence inside the word “family”; the child feels Keen has people now.",
-   "comedyOrEmotionEngine": "Comic mechanism: hiding failure, sharpened by deadpan observation. Fuzzby’s cover-up is the joke; Zenny’s stillness frames it. Emotion engine: catch and release — funny breaks the pressure, then Aida quietly returns us to truth.",
-   "energyCurve": "Held glow → mistimed clap → comic cover → cheering rush → hug chaos → quiet line → warm ache.",
-   "memorableImage": "Fuzzby frozen mid-official clap as Zenny watches, followed by Keen’s small relieved smile appearing from inside the giant group hug.",
-   "interpretations": [
-    {
-     "name": "Pure celebration",
-     "dramaticConstruction": "The beat runs as immediate group joy after the Crystal Call.",
-     "characterBehaviour": "Everyone cheers at once and Keen is swept into happiness.",
-     "audienceExperience": "High warmth and release, but little character-specific comedy or bittersweet trace."
-    },
-    {
-     "name": "Fuzzby releases the room",
-     "dramaticConstruction": "Fuzzby’s premature clap breaks the solemnity and gives permission for the circle to become a family hug.",
-     "characterBehaviour": "Fuzzby overcommits, covers the mistake as official business, Zenny silently punctures him, and the group’s joy follows.",
-     "audienceExperience": "The audience laughs first, which lets the following warmth land without becoming syrupy."
-    },
-    {
-     "name": "Aida-held family truth",
-     "dramaticConstruction": "The beat delays celebration until Aida chooses the exact quiet moment to name family.",
-     "characterBehaviour": "Aida controls the release; the group responds to her timing; Keen receives the line as the emotional capstone.",
-     "audienceExperience": "Deep tenderness, but the room risks becoming too reverent after a storm-heavy climax."
-    }
-   ],
-   "selectedDirectorialInterpretation": "Fuzzby releases the room.",
-   "selectionReason": "It preserves the show’s catch-and-release law: the laugh opens the door for the lump. Fuzzby’s behaviour is specific to him, Zenny’s stillness sharpens it, and Aida’s line lands on action already proven by the hug rather than as a lesson.",
-   "approvalState": "director-approved",
-   "rejectedApproachSummaries": [
-    "Pure celebration",
-    "Fuzzby releases the room",
-    "Aida-held family truth"
-   ]
+   "whatChanges": "The circle changes from reverent witnessing into lived belonging. Keen is no longer being observed from the edge of a ceremony; he is physically caught in a family rush that nearly knocks him off balance.",
+   "whoDrives": "Fuzzby accidentally drives the release by clapping too early, then the group drives the hug as care arrives with more force than Keen expects. Aida closes the beat by naming the truth simply after the noise has opened the feeling.",
+   "audienceAnticipation": "The audience expects a solemn finish after the Call, then anticipates whether the scene can release the ache without disrespecting it. Children wait for the hug and cheer; adults feel the wristbands’ meaning still glowing inside the joy.",
+   "actionOrChoice": "Fuzzby breaks the hush with premature official joy, instantly covers as if the timing were intentional ceremony, and the circle takes permission from that rupture to cheer. The bears swamp Keen in a giant hug, then loosen enough for Aida’s small, certain line to land. Keen smiles toward home with the aquamarine still visible in the bands.",
+   "consequence": "The emotion exits through warmth and comedy instead of syrup. Keen is welcomed not as a perfect brave hero but as a damp, shaken bear who belongs. Rain beads and wet ground keep the cost present while the glowing wristbands keep the inheritance alive.",
+   "emotionalOrComicHandover": "Status mistiming gives the laugh, the hug gives the lump, and Aida’s quiet certainty leaves the closing image warmer but not wiped clean.",
+   "approvalState": "selected treatment locked"
   }
  ],
  "shots": [
   {
-   "shotId": "9.B1.S1",
-   "beatId": "9.B1",
-   "purpose": "Aida names Keen’s courage as something he has already lived, not something being awarded to him.",
-   "intendedDurationRange": "5-7s",
-   "openingComposition": "From Keen’s side of the open circle, low at his height: the damp gathering stones curve around him in a protective arc, Aida held across the circle as the calm fixed point. Keen’s lowered paws and empty wristbands sit near the bottom edge, present but not yet glowing.",
-   "openingCharacterState": "Keen stands damp and breath-held inside the listening circle, unsure whether the welcome is truly meant for him; Aida holds the centre with quiet steadiness.",
-   "blocking": "Aida does not approach or gesture broadly. She lets the circle stay open around Keen and speaks into the space between them. Squeaky remains close enough to Keen to make the rescue’s consequence present without pulling focus.",
-   "principalPerformance": "Aida gives the line as recognition, not ceremony: soft, simple, and certain, with a small pause after “heart” that lets Keen receive the first half before the second half arrives.",
-   "secondaryPerformance": "Keen’s attention stays on Aida until the pause; then his thought drops toward the wristbands before any magic appears. The circle restrains its joy, choosing stillness for him.",
-   "animationAndPhysics": "Keen’s wet breath is visible in the body: a small chest lift, a contained shiver that he tries not to turn into a brave pose. Aida’s stillness makes the smallest movement read as thought rather than presentation.",
-   "gazeAndExpression": "Aida’s gaze stays steady on Keen. Keen’s eyes search her, then break down to the wristbands as the meaning reaches him before the light does.",
-   "audiencePointOfView": "Keen’s experience governs the frame: we stand close enough to feel the words arrive in him, while Aida remains the safe witness rather than the owner of the moment.",
-   "shotSize": "Intimate medium close that includes Keen’s wristbands in the lower foreground and Aida across the circle, allowing the truth to travel between face, voice, and inherited object.",
-   "cameraHeight": "Keen-height, slightly below Aida’s eye line, so her steadiness feels sheltering but not towering.",
-   "cameraAngle": "Level and respectful, with a faint downward allowance toward the wristbands as Keen’s thought drops; no ceremonial grandeur.",
-   "lensFeeling": "Gentle portrait compression: the circle feels close and listening, but not trapped around him.",
-   "depthAndParallax": "Aida sits in clean readable depth beyond the damp ring; the restrained circle is present as soft arcs at the edges, making the space protective and communal without cluttering the line.",
-   "cameraBehaviour": "Almost still. A tiny breath-like settle follows Keen’s gaze down after Aida’s pause, motivated by his thought reaching the wristbands rather than by decoration.",
-   "lightingAndAtmosphere": "Warm afterlight returns through storm-washed air. Low reflected water light lifts faces and paws; Aida carries a soft rose steadiness, while Keen remains held in cooler dampness before the aquamarine appears.",
-   "dialoguePlacement": "AIDA: You followed your heart… and chose courage.",
-   "soundRelationship": "The storm’s absence is felt as quiet space around Aida’s voice; no celebratory sound enters yet.",
-   "closingComposition": "Keen’s face is no longer searching Aida; his gaze rests down into the lower frame where the father’s empty wristbands wait, surrounded by the open circle’s quiet.",
-   "closingCharacterState": "Keen has not accepted celebration, but he has heard the truth; his focus now rests on the father’s empty wristbands.",
-   "cutMotivation": "Changed point of view and new information: Aida’s naming has landed inside Keen, so the cut can leave the witness and move to the answering space where the light will appear.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "Inherits Keen’s wet breath, Squeaky’s returned trust, and the circle’s restrained attention after the rescue.",
-   "continuityOut": "Keen’s eyes and thought are on the wristbands, preparing the aquamarine answer to appear.",
-   "essentialProviderProtections": [
-    "Locked dialogue must remain verbatim.",
-    "Aida must not preach or turn the line into a lesson.",
-    "Keen’s courage is being recognized, not awarded as a prize."
+   "shotId": "S9.SH1",
+   "beatIds": [
+    "9.B1"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Begin inside Keen’s after-storm body and make the empty wristbands feel like absence before they become inheritance.",
+   "audienceExperience": "The audience feels the breath not fully back yet: the circle is present, but not demanding anything from him.",
+   "openingImage": "Low near Keen’s height in the washed-clean circle: his paw hovers close to the empty wristbands; Aida’s steady presence waits nearby without touching him.",
+   "principalPerformance": "Keen tries to gather himself, but one small breath catches before he can make himself look ready.",
+   "cameraRelationship": "The camera stays close and vulnerable with Keen, reading the circle through the ground, the bands, and the nearness of Aida rather than presenting a ceremony.",
+   "physicalOrEmotionalChange": "The brave front is not broken, but it is no longer believable as the whole truth.",
+   "closingImage": "Keen’s paw settles nearer the empty bands as Aida’s stillness makes room for what she is about to name.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut to Aida because the scene must shift from Keen’s bodily evidence to the first safe witness of it; staying continuous would make her line feel like part of the same nervous observation instead of a new act of recognition.",
+   "physicalPerformance": "Keen’s paw hovers over the empty wristbands with the pads not quite committing to touch; a tiny tremor travels through the paw first, then up into a caught breath. He tries to still himself by bringing the paw lower, but the stillness is worked for, not clean. Aida remains close and unpressing, her lack of movement giving his small aftershock permission to be seen.",
+   "animationTiming": "Hold the hover long enough for the audience to feel the decision not yet made. The tremor is a quick involuntary flicker, followed by a slower, careful lowering of the paw; let the breath catch sit for a beat before he gathers it back. End on a quiet near-stillness that is slightly fragile, not posed.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B1.S2",
-   "beatId": "9.B1",
-   "purpose": "The aquamarine light appears as an answer to the space between Aida and Keen.",
-   "intendedDurationRange": "4-6s",
-   "openingComposition": "A fresh low composition on the empty air between Keen’s lowered wristbands and Aida’s still presence beyond them. The circle is held only as a soft rim of bodies and damp leaves, leaving the centre visibly unclaimed until the aquamarine gathers there.",
-   "openingCharacterState": "Keen’s attention is lowered to the wristbands; Aida remains still enough to let the moment belong to him.",
-   "blocking": "No one closes in. The circle holds its distance. The light forms in the shared space rather than in anyone’s hand, so it reads as recognition arising between witness and child.",
-   "principalPerformance": "Keen does not reach for the light. He lets it appear, caught between wanting certainty and being afraid to disturb it.",
-   "secondaryPerformance": "Aida’s only action is permission through stillness. Squeaky stays tucked near Keen, alert and calm. The group’s bodies remain gathered but quiet.",
-   "animationAndPhysics": "The light gathers from a faint, low pulse into a coherent aquamarine presence. It does not burst or push the characters back; it steadies the air around them.",
-   "gazeAndExpression": "Keen’s eyes widen without a smile. Aida watches Keen more than the light, confirming that his reaction is the real event.",
-   "audiencePointOfView": "Still Keen’s inner experience, but now expressed through the space between him and Aida: the audience knows the light is an answer before Keen can fully accept what it means.",
-   "shotSize": "Close, almost object-intimate, with enough face presence to read Keen’s inhale and Aida’s witnessing calm.",
-   "cameraHeight": "Low, just above Keen’s paw height, making the empty space feel sacred without making it a stage.",
-   "cameraAngle": "Level across the space between them; the light is not presented as descending from above or being bestowed by anyone.",
-   "lensFeeling": "Soft macro intimacy with warm falloff, so the audience feels invited into a tiny, private arrival inside a public circle.",
-   "depthAndParallax": "Meaning sits in the depth gap: Keen’s wristbands near, aquamarine forming mid-plane, Aida calm beyond. The ring remains readable as a quiet boundary, not a wall.",
-   "cameraBehaviour": "Locked with only a near-imperceptible settling as the glow steadies the air; stillness is the circle’s restraint made visual.",
-   "lightingAndAtmosphere": "Post-storm greys soften into warm afterlight while the aquamarine begins as an internal low pulse, colouring moisture on leaves and paws without dazzling the space.",
-   "dialoguePlacement": "No dialogue.",
-   "soundRelationship": "A low aquamarine note begins alone and unresolved, emerging from the quiet rather than covering it.",
-   "closingComposition": "The aquamarine presence now hangs clearly in the shared space, suspended between Keen’s careful stillness and Aida’s watchful permission.",
-   "closingCharacterState": "The light is present between them; Keen is suspended in the first inhale of understanding.",
-   "cutMotivation": "New visual idea and intimacy: the spoken truth becomes visible, so the cut isolates the exact place where recognition turns into light.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "Keen has just looked to the wristbands after Aida’s line.",
-   "continuityOut": "Aquamarine light is now visibly present and ready to divide toward the empty wristbands.",
-   "essentialProviderProtections": [
-    "The crystal light is not a prize, badge, or power-up.",
-    "Keep the appearance sincere and internal-feeling, not explosive.",
-    "No character breaks the sacred stillness yet."
+   "shotId": "S9.SH2",
+   "beatIds": [
+    "9.B1"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Let Aida’s naming land as recognition, not award-giving.",
+   "audienceExperience": "The audience hears the truth offered quietly enough that Keen does not have to brace against it.",
+   "openingImage": "Aida close in Keen’s world, not centred as an official; the wet circle and Keen’s lowered attention remain felt at the edge of the frame.",
+   "principalPerformance": "AIDA: You followed your heart… and chose courage.",
+   "cameraRelationship": "Still and near, allowing Aida’s quietness to carry more care than any camera push would.",
+   "physicalOrEmotionalChange": "The circle’s attention changes from a possible test into safe witnessing.",
+   "closingImage": "Keen receives the words without standing taller; the space between them seems to wait.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut to the space between them because the line has changed what the air means; remaining continuous on Aida would make the magic feel like illustration of her speech rather than an answer to Keen’s need.",
+   "physicalPerformance": "Aida does not lean in to make the moment bigger. Her eyes stay with Keen, her shoulders soft but steady, and the line is carried by a small settling of her breath rather than a gesture. Keen receives it at the edge of the frame with no heroic lift; his body stays low enough to show the words are entering, not crowning him.",
+   "animationTiming": "Begin in stillness. Let “You followed your heart…” have a real suspended pause, as if Aida is choosing the next words with care, then let “and chose courage” land simply. No flourish after the line; hold a fraction on the quiet impact before cutting.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B1.S3",
-   "beatId": "9.B1",
-   "purpose": "The aquamarine light settles into the father’s empty wristbands, changing absence into carried love.",
-   "intendedDurationRange": "6-8s",
-   "openingComposition": "Close on Keen’s two wristbands with his hesitant paws hovering near them. The aquamarine glow hangs above the gap between bands; Aida and the circle remain softened in the background as witnesses, not sources.",
-   "openingCharacterState": "The aquamarine light hangs between Aida and Keen while Keen stands afraid to move too quickly.",
-   "blocking": "The light divides cleanly toward both wristbands. Keen’s paws lift a fraction as if to catch or protect the moment, then stop short before contact. Aida remains outside the action, witnessing rather than granting.",
-   "principalPerformance": "Keen lets the light settle without grabbing it. His near-touch shows the ache: he wants to hold what is happening, but touching it would make it real too fast.",
-   "secondaryPerformance": "The circle absorbs the sight in silence. Squeaky presses close enough to ground Keen without interrupting his discovery.",
-   "animationAndPhysics": "The two streams of light enter the wristbands and seat low inside them, causing a steady inner glow. The bands carry the illumination rather than being covered by it; the empty spaces are acknowledged, not erased.",
-   "gazeAndExpression": "Keen’s gaze follows one stream, then the other. His breath catches; his mouth starts toward a smile and cannot finish it yet. Aida’s expression stays warm and restrained.",
-   "audiencePointOfView": "Keen’s hands-and-heart point of view: the audience is asked to feel the weight of the wristbands before reading the magic, so the glow becomes carried memory rather than decoration.",
-   "shotSize": "Tight close with partial face access; the wristbands dominate, but Keen’s caught breath and unfinished smile remain readable at the frame edge.",
-   "cameraHeight": "At wristband height, intimate and grounded, as if the camera is sitting with the object rather than admiring it.",
-   "cameraAngle": "Slightly downward into Keen’s paws, gentle enough to feel careful, not clinical.",
-   "lensFeeling": "Tender close-focus with shallow edges; the world outside the wristbands softens because, for Keen, it briefly recedes.",
-   "depthAndParallax": "Depth is compressed around the bands, with Squeaky’s nearness and Aida’s stillness faintly readable behind. Absence is held in the negative space inside and around the wristbands.",
-   "cameraBehaviour": "A slow, tiny follow of the dividing light from centre to both bands, then stillness as it seats. The movement ends before emotion does, letting Keen’s breath complete the beat.",
-   "lightingAndAtmosphere": "Aquamarine glows from within the wristbands and catches in lingering rain droplets; warm afterlight stays present so the moment is emotional, not supernatural spectacle.",
-   "dialoguePlacement": "No dialogue.",
-   "soundRelationship": "The aquamarine note steadies but does not fully resolve; the circle remains quiet enough for Keen’s caught breath to matter.",
-   "closingComposition": "Both wristbands hold a low inner aquamarine glow beneath Keen’s hovering paws, with his unfinished smile barely allowed in the upper frame.",
-   "closingCharacterState": "Keen stands with aquamarine light seated in both wristbands, held by the circle but not yet ready to celebrate.",
-   "cutMotivation": "Changed information and changed emotion: the light has moved from possibility to inheritance, so the cut can move from magic entering the bands to Keen choosing how to live with it.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "Aquamarine light has appeared between Aida and Keen.",
-   "continuityOut": "Both wristbands now glow from within, setting up Keen’s first honest contact with the new light.",
-   "essentialProviderProtections": [
-    "The wristbands must still carry Mum and Dad’s absence; do not make the glow erase grief.",
-    "Keen’s reaction is breath and restraint, not triumph.",
-    "Aida must remain witness, not magical donor."
+   "shotId": "S9.SH3",
+   "beatIds": [
+    "9.B1"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Reveal aquamarine as an impossible heart-truth appearing between witness and child.",
+   "audienceExperience": "Children get the first magical lift; adults feel the answer arrive in the space where absence has been sitting.",
+   "openingImage": "The quiet space between Keen and Aida, with the empty wristbands near enough to matter.",
+   "principalPerformance": "Keen does not reach for the light; he notices it before he understands it.",
+   "cameraRelationship": "The camera discovers the light with Keen, not from a display angle.",
+   "physicalOrEmotionalChange": "The unseen courage becomes visible outside him for the first time.",
+   "closingImage": "A small aquamarine presence hangs between them, delicate and undeniable.",
+   "transitionType": "CONTINUOUS",
+   "transitionReason": "Continue into the split because the magic must feel physically continuous and trustworthy; a cut here would turn the appearance and division into separate display beats and weaken the child’s gasp of ‘it’s really choosing.’",
+   "physicalPerformance": "Keen’s attention moves before his body does: his eyes lift first, then his chin follows by only a little, as if too much movement might scare the light away. His paw stays near the wristbands but does not claim them. The aquamarine presence gathers out of the quiet air between him and Aida, small enough that his noticing is the event.",
+   "animationTiming": "Let the first glimmer arrive gently, with a soft build rather than a pop. Keen’s eye shift should precede the chin lift by a small readable delay, making thought visible. Keep the hush intact; the light reaches a delicate hover and holds just long enough to become undeniable.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B2.S1",
-   "beatId": "9.B2",
-   "purpose": "Keen accepts the tremor instead of covering it, allowing fear to remain part of the call.",
-   "intendedDurationRange": "5-7s",
-   "openingComposition": "A close frame on Keen’s glowing wristband and the paw hovering over it, with his shoulders and lower face partially visible above. The circle remains back as soft vertical presence, leaving the tremor nowhere to hide.",
-   "openingCharacterState": "The aquamarine light is newly seated in the wristbands; Keen looks at it as if it might vanish if he moves too fast.",
-   "blocking": "Keen brings one paw gently over a wristband. The circle stays back. Aida gives him the space to choose without prompting. Squeaky remains close at Keen’s side as a quiet reminder of what his courage protected.",
-   "principalPerformance": "Keen’s old habit almost starts: his shoulders prepare to lift into a brave pose. The tremor reaches his paw first. He notices it, swallows, lets the shoulders lower, and keeps his paw there instead of hiding the shake.",
-   "secondaryPerformance": "Aida’s stillness warms by a tiny softening, but she does not rescue him from the discomfort. The group’s anticipation gathers at the edge and stays contained.",
-   "animationAndPhysics": "The tremor travels through the contact point into the wristband glow, making the light flutter once before steadying. Keen’s breath catches, then releases downward as his body chooses honesty over display.",
-   "gazeAndExpression": "Keen watches his own trembling paw, then lifts his eyes just enough to stay with everyone present. His expression opens from embarrassment into fragile permission.",
-   "audiencePointOfView": "Entirely Keen’s surrender beat: the audience is close enough to see the fear stay in the body and understand that not hiding it is the brave act.",
-   "shotSize": "Close-up moving into a restrained close medium as his eyes lift, keeping paw, wristband, breath, and expression in one emotional circuit.",
-   "cameraHeight": "At Keen’s chest-and-paw height, small and honest rather than heroic.",
-   "cameraAngle": "Level, with no upward angle to turn acceptance into a victory pose.",
-   "lensFeeling": "Intimate and shallow, with a slight breathing softness that lets the tremor feel vulnerable rather than exaggerated.",
-   "depthAndParallax": "The circle is present as a held-back rim in the background; Aida’s stillness is readable but not sharp, preserving Keen’s choice as the front plane of meaning.",
-   "cameraBehaviour": "Holds through the almost-brave-pose and the tremor. A very slight rise follows Keen’s eyes only after he has chosen not to hide, making the camera earn its lift from his honesty.",
-   "lightingAndAtmosphere": "The aquamarine flicker briefly interrupts the warm afterlight, then steadies into it. Reflected water light makes the smallest shake visible on the wristband surface.",
-   "dialoguePlacement": "No dialogue.",
-   "soundRelationship": "The unresolved aquamarine note quivers with the tremor, then steadies as Keen accepts it.",
-   "closingComposition": "Keen’s paw remains on the glowing wristband; his shoulders are lowered, his eyes just high enough to meet the circle without performing for it.",
-   "closingCharacterState": "Keen has not conquered the fear; he has stopped hiding it, making the Crystal Call emotionally possible.",
-   "cutMotivation": "Changed emotion and intimacy: the light has settled, but the real transformation is Keen letting fear remain visible, requiring a frame built around the tremor.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "Both wristbands glow with newly settled aquamarine light.",
-   "continuityOut": "Keen has accepted the tremor and is ready to speak from truth rather than performance.",
-   "essentialProviderProtections": [
-    "This is the surrender beat, not a power-up preparation pose.",
-    "Do not let Keen mask the tremor with fake bravado.",
-    "The group must not interrupt before the call lands."
+   "shotId": "S9.SH4",
+   "beatIds": [
+    "9.B1"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Transform the father’s empty wristbands from vacancy into inheritance.",
+   "audienceExperience": "The gasp lands: the light does not just glow near Keen, it chooses the empty places that have carried the ache.",
+   "openingImage": "The aquamarine presence begins to divide, reflected faintly in rain beads on the ground.",
+   "principalPerformance": "Keen watches without grabbing; acceptance has not caught up with wonder yet.",
+   "cameraRelationship": "The camera stays close enough to the bands for the choice to be intimate, not an insert of a prop.",
+   "physicalOrEmotionalChange": "The wristbands stop being empty; aquamarine settles into them as a visible welcome that does not erase what was missing.",
+   "closingImage": "The once-empty bands now hold aquamarine light, warm against the storm-wet circle.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut back to Keen because the object’s change is complete and the meaning must move into his body; staying on the bands would make the inheritance decorative instead of lived.",
+   "physicalPerformance": "Keen’s paw makes the smallest forward impulse toward the dividing light, then stops itself, leaving the choice to the aquamarine. The light separates into two living threads and travels to the empty wristbands; when it settles, the bands receive it rather than flash with conquest. Keen remains careful and open, held between wanting to touch and understanding he is being touched first.",
+   "animationTiming": "The division should feel elegant and continuous: a slow draw apart, a gentle travel, then a soft settling into the bands. Place the gasp on the moment the empty spaces fill, with a tiny afterglow pulse that proves contact. Keen’s aborted reach is quick but restrained, followed by a held stillness as the light completes the choice.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B2.S2",
-   "beatId": "9.B2",
-   "purpose": "Keen speaks his Crystal Call from honest steadiness, and the aquamarine energy settles around him and the circle.",
-   "intendedDurationRange": "7-9s",
-   "openingComposition": "Keen begins small within the open circle, paw still touching the wristband, Squeaky close beside him and Aida held as the calm anchor across the ring. The frame gives him air above and around him so courage can grow without becoming a pose.",
-   "openingCharacterState": "Keen’s paw remains on the wristband after the accepted tremor; his body is small, honest, and ready.",
-   "blocking": "Keen lifts his chin only as far as he can truthfully own. He speaks into the circle without stepping away from Squeaky or toward applause. The group holds until the last word has fully landed.",
-   "principalPerformance": "Keen’s call begins with a breath that still remembers the storm. As he speaks, his steadiness grows from inside the line rather than arriving before it.",
-   "secondaryPerformance": "Aida remains the quiet anchor. The Crystal Bears visibly contain their excitement until the glow has completed its soft outward settling. Squeaky stays close, calm and trusting.",
-   "animationAndPhysics": "Aquamarine energy gathers tight around the wristbands first, then travels close around Keen’s body before widening into a warm ring that includes the circle. It does not shove or dazzle; it settles like breath finding room.",
-   "gazeAndExpression": "Keen’s eyes are clear but tender. His face opens into relief after the line, not victory. Aida’s gaze confirms that this is enough.",
-   "audiencePointOfView": "Keen’s truth remains central, while the audience is allowed to see the circle receive it. The shot proves he is included without making him perform inclusion.",
-   "shotSize": "Begins as a close medium on Keen and opens to a modest group-inclusive medium-wide as the ring widens, preserving his smallness inside belonging.",
-   "cameraHeight": "Keen-height throughout, so the circle feels like family around him rather than an audience above him.",
-   "cameraAngle": "Level and gently frontal, with Aida held across the depth line as witness; no triumphant low angle.",
-   "lensFeeling": "Warmly immersive, slightly wider than the previous surrender close so the glow can breathe outward and include others.",
-   "depthAndParallax": "Depth carries the story: wristbands and Keen in the foreground plane, Aida opposite as still witness, the circle completing itself around the widening aquamarine ring.",
-   "cameraBehaviour": "A slow, motivated drift backward begins only as the energy widens from Keen to the circle. The camera does not lead the glow; it makes room for what his honesty releases.",
-   "lightingAndAtmosphere": "Aquamarine gathers close and sincere, blending with the post-storm gold rather than overpowering it. Moist leaves and cleaned stones catch circular highlights, making the gathering space feel rinsed and newly breathable.",
-   "dialoguePlacement": "KEEN: Brave and bright, with all my might — Aquamarine Crystal, shine with light!",
-   "soundRelationship": "The aquamarine note resolves only once Keen owns the full line; the sound warms outward with the ring and leaves space for the held reaction afterward.",
-   "closingComposition": "Keen stands within a completed soft ring of aquamarine that touches the circle’s edge; Aida is still visible as quiet confirmation, and no one has yet broken the silence.",
-   "closingCharacterState": "Keen stands brighter but not bigger, steadier but still tender, surrounded by a glow that includes the circle without overwhelming him.",
-   "cutMotivation": "New visual idea and emotional release: the private surrender becomes shared light, then holds for the half-second before joy breaks, setting up comic punctuation.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "Keen has accepted the tremor and is ready to speak truthfully.",
-   "continuityOut": "The call has landed; the circle is suspended in the half-second before joy breaks loose.",
-   "essentialProviderProtections": [
-    "Locked dialogue must remain verbatim.",
-    "The glow answers the surrender; it must not precede or replace the emotional choice.",
-    "Keen stands brighter but not bigger; avoid victory-pose power-up language."
+   "shotId": "S9.SH5",
+   "beatIds": [
+    "9.B2"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Show Keen feeling the new light before he can speak from it.",
+   "audienceExperience": "The audience returns to the small chest and understands the Call will come through fear, not over it.",
+   "openingImage": "Aquamarine glows from the wristbands near Keen’s body; the circle is present but softened in depth.",
+   "principalPerformance": "Keen registers the warmth, then one visible tremor passes through him before he gathers himself.",
+   "cameraRelationship": "The camera remains allied to Keen’s nervous system, close enough that the tremor is the event.",
+   "physicalOrEmotionalChange": "He stops needing to hide that he is still shaken.",
+   "closingImage": "Keen steadies just enough to begin, with the tremor still part of him.",
+   "transitionType": "CONTINUOUS",
+   "transitionReason": "Continue into the Call because the line must grow directly out of the tremor; a cut would let him reset into a cleaner heroic posture and betray the treatment’s surrender-witnessed mechanism.",
+   "physicalPerformance": "The warmth in the wristbands reaches Keen before confidence does: his paw curls slightly toward the glow, then a tremor passes through his breath and shoulders. He does not cover it. His paws gather closer to his chest with care, not display, and his shoulders find a steadier place while still carrying the aftershock.",
+   "animationTiming": "Let the glow be felt first with a small pause before the tremor. The tremor is brief and visible, then the gather starts while the fear is still present, so steadiness grows inside the shake rather than replacing it. Move directly into the Call with no reset beat.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B3.S1",
-   "beatId": "9.B3",
-   "purpose": "Fuzzby punctures the solemnity with an early clap and immediately converts the mistake into official ceremony.",
-   "intendedDurationRange": "4-6s",
-   "openingComposition": "A comic cut to the edge of the circle: Fuzzby is held just a little too ready in the foreground, hands already near each other, while Zenny sits in clean judging depth beyond him. Keen remains readable at the far edge of the composition, still inside the glow, so the joke releases his pressure without stealing the scene.",
-   "openingCharacterState": "The aquamarine glow has settled; everyone is held in the charged quiet before celebration.",
-   "blocking": "Fuzzby claps once before anyone else moves. The sound lands alone. He freezes on the evidence of his own timing, then straightens into an over-serious formal clap posture as if this was the intended opening of proceedings.",
-   "principalPerformance": "Fuzzby’s thought is visible: first, delighted need to be first; second, instant recognition that he is alone; third, total commitment to pretending the mistake is official.",
-   "secondaryPerformance": "Zenny does not join him. Her still look supplies the punchline by refusing to rescue the cover. Keen registers the clap as surprise rather than hurt. The rest of the circle remains caught between reverence and laughter.",
-   "animationAndPhysics": "The premature clap has a crisp contact and a tiny recoil through Fuzzby’s body. His recovery overcorrects into stiffness, making the cover-up physically larger than the mistake.",
-   "gazeAndExpression": "Fuzzby’s eyes flick for confirmation that nobody noticed, then lock into solemn authority. Zenny’s gaze stays precise and unmoved. Keen’s expression loosens for the first time toward a near-laugh.",
-   "audiencePointOfView": "The camera briefly abandons Keen’s sacred stillness for the exact release valve the circle needs, then keeps Keen present enough for us to see the release help him.",
-   "shotSize": "Medium comic two-plane composition: Fuzzby large enough for the clap recoil, Zenny sharp enough for the silent verdict, Keen small but readable at the side of the circle.",
-   "cameraHeight": "Circle-member height, not heroic; we are among the group witnessing the mistimed clap.",
-   "cameraAngle": "Level, slightly squared to Fuzzby’s over-formality so his recovery looks absurdly official.",
-   "lensFeeling": "Clear and lightly compressed for timing: the isolated clap, Zenny’s refusal, and Keen’s near-laugh all land in one readable frame.",
-   "depthAndParallax": "Fuzzby in the front plane, Zenny in a judging middle plane, Keen and the aquamarine afterglow in the deeper plane. The geography of the circle remains intact while the joke changes ownership for a beat.",
-   "cameraBehaviour": "Locked through the clap and cover-up. The stillness becomes the awkward silence that exposes him; moving would rescue the joke too soon.",
-   "lightingAndAtmosphere": "The aquamarine afterglow remains low under warm afterlight. Nothing brightens into celebration yet; the lighting lets the single clap feel hilariously alone in the damp quiet.",
-   "dialoguePlacement": "No dialogue.",
-   "soundRelationship": "One isolated clap lands in the quiet, followed by a tiny held silence that lets the cover-up be heard before the group joy releases.",
-   "closingComposition": "Fuzzby is frozen in exaggerated formal-clap posture, Zenny unmoved behind him, while Keen’s loosened face confirms the pressure has safely popped.",
-   "closingCharacterState": "The solemn spell has been safely popped; Fuzzby is still pretending he meant it, and the circle is ready to move.",
-   "cutMotivation": "Comic punctuation and changed emotion: the sacred quiet has given everything it can, and Fuzzby’s mistake creates the release that permits joy.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "Keen’s Crystal Call has just settled into a shared quiet.",
-   "continuityOut": "The early clap releases permission for the full group celebration to begin.",
-   "essentialProviderProtections": [
-    "Comic mechanism: hiding failure through over-serious cover-up.",
-    "Fuzzby must not admit the mistake; the concealment is the joke.",
-    "The gag must release pressure without taking emotional ownership from Keen."
+   "shotId": "S9.SH6",
+   "beatIds": [
+    "9.B2"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Let the Crystal Call become steady because Keen accepts the fear rather than covering it.",
+   "audienceExperience": "Children feel the glow answer the words; adults feel that courage is being allowed to include aftershock.",
+   "openingImage": "Keen begins the Call from the same fragile steadiness he just found.",
+   "principalPerformance": "KEEN: Brave and bright, with all my might — Aquamarine Crystal, shine with light!",
+   "cameraRelationship": "The camera holds close with him as the light settles, resisting any triumphant display angle.",
+   "physicalOrEmotionalChange": "His voice and body move from effort into steadiness; the aquamarine confirms truth, not performance.",
+   "closingImage": "Warm aquamarine settles around Keen while he remains damp, small, and no longer alone inside the fear.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut to the rupture of joy because the sacred beat has reached fullness; remaining continuous would either over-hold sentiment or make the comic release feel accidental rather than precisely timed.",
+   "physicalPerformance": "Keen begins the Call with the words slightly worked for, paws held close as if keeping the tremor included. As the phrase continues, his chest opens a little and his chin lifts only as far as his own truth can support. The aquamarine answers after the courage is spoken, gathering around him as confirmation; he remains damp and small inside the glow, not transformed into a victory pose.",
+   "animationTiming": "The line should visibly steady across its own rhythm: tentative entrance, firmer middle, clear final phrase. Do not let the glow lead him; let it rise in response and complete just after “shine with light!” Hold the settled glow for a short breath, enough for fullness, then cut before it becomes ceremonial.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B3.S2",
-   "beatId": "9.B3",
-   "purpose": "The circle’s restrained joy becomes physical belonging as the group hug swamps Keen.",
-   "intendedDurationRange": "5-8s",
-   "openingComposition": "From just outside the loosened circle, with Keen visible at the open centre and the group poised around him. Fuzzby’s formal posture remains at one edge for a beat before the whole ring breaks inward.",
-   "openingCharacterState": "Fuzzby’s early clap has released the pressure; Keen is still tender and only partly ready for the force of everyone’s love.",
-   "blocking": "The Crystal Bears surge toward Keen as a welcoming group rather than a trap. Keen is briefly swallowed in the soft cluster. Squeaky stays close in the crush. Fuzzby keeps his official composure one beat too long before joining the mess.",
-   "principalPerformance": "Keen receives the hug in stages: surprise at the sudden contact, a tiny overwhelmed stiffening, then a release into being held when he realizes no one needs him to perform.",
-   "secondaryPerformance": "The group’s joy is generous and slightly too much. Fuzzby’s delayed transition from formal clapper to hug participant adds a small after-joke without taking the ownership from Keen. Zenny allows the celebration while keeping just enough composure to remain herself.",
-   "animationAndPhysics": "The hug has readable soft impact: bodies compress inward, Keen disappears for a beat, then the cluster rebounds enough for his face and smile to emerge through the crush. The aquamarine glow remains warm and steady inside the contact.",
-   "gazeAndExpression": "Keen’s eyes widen on impact, blink through the overwhelm, then soften into relief. The group’s faces aim toward him, not the glow, making belonging the focus.",
-   "audiencePointOfView": "Keen’s bodily experience governs the shot: the audience feels love arrive as too much at first, then understands it as safety when his face reappears.",
-   "shotSize": "Medium-wide collapsing into a compressed group close as the hug swamps him, then opening slightly on the rebound to reveal his smile.",
-   "cameraHeight": "Keen-height at the centre of the incoming hug, so bodies briefly occlude the audience the way they occlude him.",
-   "cameraAngle": "Level and embodied; the camera is in the crush, not observing from above.",
-   "lensFeeling": "A warm, slightly wider lens with close parallax, making the rush feel physical and funny while keeping the circle readable.",
-   "depthAndParallax": "The ring moves from circumference to centre in clear layers. Characters can cross and occlude, but the inward motion remains readable as welcome, not chaos.",
-   "cameraBehaviour": "The camera gives a tiny instinctive retreat on the soft impact, then settles with the rebound when Keen’s face emerges. The move is reactive to the hug’s physics, not ornamental.",
-   "lightingAndAtmosphere": "Warm afterlight and aquamarine glow mingle inside the contact. Damp leaves behind them still sparkle softly, keeping the cost of the storm visible beneath the joy.",
-   "dialoguePlacement": "No dialogue.",
-   "soundRelationship": "The held silence releases into cheers, warm overlapping sounds, and soft contact noises; the aquamarine note lingers underneath instead of turning into fanfare.",
-   "closingComposition": "Keen’s face emerges through the clustered hug, partially framed by the others, his aquamarine wristbands still glowing low within the crush.",
-   "closingCharacterState": "Keen is visibly held by the Cove, surprised into relief, with his smile finally appearing through the group hug.",
-   "cutMotivation": "Acceleration and changed emotion: the clap has opened the gate, and the ceremony must become physical belonging before anyone explains it.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "The solemnity has been punctured by Fuzzby’s early clap.",
-   "continuityOut": "The hug has proven family physically before Aida names it verbally.",
-   "essentialProviderProtections": [
-    "The hug must feel funny, warm, and slightly overwhelming, not ceremonial.",
-    "Keen’s reaction is the emotional centre; the group faces him, not the glow.",
-    "The aquamarine glow stays steady and sincere, not fanfare-like."
+   "shotId": "S9.SH7",
+   "beatIds": [
+    "9.B3"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Release the ache through Fuzzby’s status mistiming without disrespecting the sacred moment.",
+   "audienceExperience": "The audience gets permission to laugh right as the emotion risks becoming too full.",
+   "openingImage": "Fuzzby, already too ready to celebrate, breaks the hush with a clap that arrives a beat early.",
+   "principalPerformance": "Fuzzby realises the moment has not quite finished and instantly converts the mistake into solemn official ceremony.",
+   "cameraRelationship": "The camera abandons Keen’s reverent stillness for the comic interruption because Fuzzby’s mistimed joy changes the scene’s emotional register.",
+   "physicalOrEmotionalChange": "Reverence cracks into warmth; the circle is allowed to breathe out.",
+   "closingImage": "Fuzzby holds a fake-dignified cover as the others begin to take permission from the mistake.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut to the group rush because Fuzzby’s gag has done its job; staying continuous would keep the joke in charge when the meaning has moved to communal belonging.",
+   "physicalPerformance": "Fuzzby’s body is already loaded for celebration before permission exists: raised energy, paws eager, weight tipped into the clap. The clap escapes him, he freezes in full exposure, then his eyes flick just enough to realise he is early. He converts the mistake into ceremony by slowly lowering into fake dignity, as if the single clap were an official signal he absolutely meant to perform.",
+   "animationTiming": "The clap must land one beat too soon and be followed by a clean, short silence where the mistake is exposed. Freeze him long enough for the audience to catch the status drop, then let the solemn cover arrive a touch too smoothly. Keep the recovery compact so the laugh opens the room without stealing the scene.",
+   "approvalState": "selected treatment locked"
   },
   {
-   "shotId": "9.B3.S3",
-   "beatId": "9.B3",
-   "purpose": "Aida quietly names the family truth after the hug has already proved it.",
-   "intendedDurationRange": "5-7s",
-   "openingComposition": "A planned quiet reset after the crush: the hug has loosened into an open, uneven circle around Keen. Aida is positioned across the gentle gap, not elevated, while Keen’s glowing wristbands sit in the foreground line of his body as the ache still present inside the warmth.",
-   "openingCharacterState": "The hug loosens into an open circle; Keen is still carrying the warmth of being held and the ache of what the wristbands mean.",
-   "blocking": "The group eases back enough to give Keen air without abandoning him. Aida waits until the laughter softens, then speaks simply. Keen remains within the loosened circle, not at a ceremonial distance.",
-   "principalPerformance": "Aida lands the line as a gentle naming of what everyone’s bodies just did. She does not underline it or turn it into a lesson.",
-   "secondaryPerformance": "Keen receives the words through the wristbands first: one small look or touch acknowledges Mum and Dad’s presence through absence, then he lets his smile include the Cove. Fuzzby’s official cover finally drops into ordinary happiness. Zenny allows a small softening without making it a display. Squeaky stays near as living proof of the rescue that brought them here.",
-   "animationAndPhysics": "The group’s compressed hug opens with soft release and small balance recoveries. Keen’s hand contact with the wristband is light, careful, and steady now; the aquamarine glow remains low rather than flaring.",
-   "gazeAndExpression": "Aida’s gaze rests on Keen with quiet certainty. Keen’s gaze moves from the wristbands to the circle, and his smile carries both home-missing and home-found.",
-   "audiencePointOfView": "Keen’s belonging, witnessed by Aida: the audience is allowed to feel the warmth of the Cove while staying close to the wristbands’ trace of Mum and Dad.",
-   "shotSize": "Gentle medium-wide that holds Keen inside the loosened family circle, with enough closeness to read the wristband touch and Aida’s simple delivery.",
-   "cameraHeight": "Keen-height, equalizing the circle and keeping the line intimate rather than declarative.",
-   "cameraAngle": "Level, slightly open across the circle so there is visible air around Keen; family is space to breathe, not pressure closing in.",
-   "lensFeeling": "Soft natural compression, warmer and less shallow than the magic shots, letting people and place share the frame as one family environment.",
-   "depthAndParallax": "Depth carries bittersweet truth: Keen and wristbands in the near plane, Aida across the small gap, the others curved around in receding layers. The empty spaces between them remain meaningful, not filled in.",
-   "cameraBehaviour": "A quiet hold with a subtle settle toward Keen only after he touches the wristband. The camera refuses to over-push the line; it lets the family truth already proved by bodies land simply.",
-   "lightingAndAtmosphere": "Warm afterlight has fully entered the washed circle, but rain still beads on leaves and stones. Aquamarine stays low inside the wristbands, a carried glow rather than a flare; Aida’s rose warmth gently steadies the frame.",
-   "dialoguePlacement": "AIDA: That’s what family does.",
-   "soundRelationship": "The cheers soften before the line. After it, the aquamarine note lingers gently with the warmth of the circle and a trace of unresolved ache.",
-   "closingComposition": "Keen stands inside the loosened ring, one paw light on the glowing wristband, his smile shared between the Cove around him and the unseen home the bands still carry.",
-   "closingCharacterState": "Keen stands inside a loosened family circle, smiling toward home and the Cove at once; the wristbands still carry absence, now held with love.",
-   "cutMotivation": "Intimacy and changed emotion: after the physical proof of belonging, the scene needs one quieter frame where Aida names it without erasing the ache.",
-   "transitionType": "PLANNED_CUT",
-   "requiresNewKeyframe": true,
-   "continuityIn": "The group hug has physically proved belonging before words.",
-   "continuityOut": "The scene hands forward a chosen-family welcome that remains bittersweet rather than fully erased of cost.",
-   "essentialProviderProtections": [
-    "Locked dialogue must remain verbatim.",
-    "Aida names what has already happened; she must not teach or summarize the lesson.",
-    "The ending remains bittersweet: the wristbands still carry Mum and Dad’s absence, now held with love."
+   "shotId": "S9.SH8",
+   "beatIds": [
+    "9.B3"
    ],
-   "approvalState": "director-approved"
+   "purpose": "Make belonging physical: care arrives with more force than Keen expects.",
+   "audienceExperience": "Children get the giant welcome; adults feel Keen being caught as he is, not after becoming perfect.",
+   "openingImage": "The circle rushes in from Keen’s edges, entering the frame as presences rather than arranged positions.",
+   "principalPerformance": "Keen is almost knocked off balance, then lets himself be held instead of bracing alone.",
+   "cameraRelationship": "The camera stays near Keen and allows the hug to exceed neat composition for a breath, because the feeling is bigger than the frame.",
+   "physicalOrEmotionalChange": "Keen changes from observed to held; the circle becomes family through contact.",
+   "closingImage": "A crowded, loosened hug around Keen, aquamarine still visible within the squeeze.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut after the hug peaks because the emotion has become too active for Aida’s small certainty to land inside it; staying continuous would bury the line under movement and noise.",
+   "physicalPerformance": "The group enters as a wave of care, not a tidy arrangement; contact reaches Keen from the edges and carries real force. Keen rocks off balance at the first impact, plants to catch himself, then feels the hold and stops bracing against it. His body softens into the squeeze, with the aquamarine still visible through gaps and pressure rather than hidden by the pile-on.",
+   "animationTiming": "After Fuzzby’s cover, let the rush come quickly, with overlapping arrivals rather than synchronized poses. The first contact should have weight: Keen rocks, absorbs, then relaxes a beat later. Compress into a shared hold at the peak, then begin a gentle loosening so the hug breathes instead of becoming a static tableau.",
+   "approvalState": "selected treatment locked"
+  },
+  {
+   "shotId": "S9.SH9",
+   "beatIds": [
+    "9.B3"
+   ],
+   "purpose": "Close on the family truth: warmer now, with the cost still present.",
+   "audienceExperience": "The audience feels the breath return fully, but the rain beads and glowing wristbands keep the ache from being wiped clean.",
+   "openingImage": "The hug loosens enough for Aida’s quiet presence to be heard; Keen remains within the circle, not outside it.",
+   "principalPerformance": "AIDA: That’s what family does.",
+   "cameraRelationship": "The camera settles with Keen rather than presenting the whole group as a final tableau; Aida’s line is offered into his belonging, not announced over it.",
+   "physicalOrEmotionalChange": "The noisy welcome becomes a small certainty Keen can carry home.",
+   "closingImage": "Keen held in the loosened circle, aquamarine living inside the once-empty wristbands, smiling toward home while rain still beads on the ground.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cut out before the ache turns syrupy; remaining continuous would over-explain the feeling the glowing wristbands and wet ground already hold.",
+   "physicalPerformance": "As the hug loosens, Keen remains held rather than stepping out to prove he is fine. Aida’s quiet certainty reaches him inside the circle; he takes it in with a small softening around the eyes before the smile arrives. The smile keeps the after-storm cost in it: relief, dampness, glow, and the visible memory of what the empty wristbands meant.",
+   "animationTiming": "Let the group noise fall away before Aida speaks, creating a small open pocket for “That’s what family does.” Keen’s reaction should come after the line, not during it: a breath, a soft eye change, then the smile. Hold the final image only long enough for warmth and ache to coexist, then leave cleanly.",
+   "approvalState": "selected treatment locked"
+  }
+ ],
+ "productionDetail": [
+  {
+   "shotId": "S9.SH1",
+   "continuityIn": "Fresh setup after the storm in the washed-clean circle. Keen is low to the ground near the empty wristbands; Aida is close enough to witness without touching; rain-wet ground and after-storm stillness are already present.",
+   "continuityOut": "Keen’s paw has lowered nearer the empty wristbands without fully claiming them. His breath has caught and been gathered back; Aida remains still and unpressing, ready to speak from that witnessed fragility.",
+   "dialogueTiming": "No dialogue. Let the hover, tremor, caught breath, and careful lowering play before the cut to Aida.",
+   "referenceRoles": "Keen reference anchors identity and nervous-system performance; Aida reference anchors quiet witnessing presence; empty wristbands and washed-clean circle references anchor absence, post-storm environment, and inheritance space.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "Do not let Keen touch or claim the wristbands yet.",
+    "Do not make Aida intervene physically or lean the moment into ceremony.",
+    "Maintain after-storm wetness and the empty wristbands as readable absence."
+   ]
+  },
+  {
+   "shotId": "S9.SH2",
+   "continuityIn": "Cut from Keen’s fragile near-stillness to Aida close inside the same wet circle. Keen’s lowered attention and the empty wristbands remain felt at frame edge; the circle is quiet, not ceremonial.",
+   "continuityOut": "Aida has named Keen’s courage softly. Keen has received the words without rising into hero posture; the air between them is changed and waiting.",
+   "dialogueTiming": "AIDA: “You followed your heart… and chose courage.” Do not begin immediately on the cut. Allow stillness first; suspend after “heart…” long enough for care, then finish cleanly. Hold a fraction on Keen absorbing it before cutting.",
+   "referenceRoles": "Aida reference anchors the line’s calm, patient authority; Keen reference anchors non-heroic reception at the edge of frame; wet circle and wristband references preserve the safe-witnessing context.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "Dialogue must be verbatim: “You followed your heart… and chose courage.”",
+    "Do not stage Aida as awarding, presenting, or making a grand gesture.",
+    "Keen must not stand taller or become triumphant on the line."
+   ]
+  },
+  {
+   "shotId": "S9.SH3",
+   "continuityIn": "Cut to the quiet space between Keen and Aida after Aida’s line has changed the air. Empty wristbands sit near enough to matter; Keen is still low and careful, not reaching.",
+   "continuityOut": "A small aquamarine presence has gathered between Keen and Aida. Keen has noticed it with eyes first, then a slight chin lift; his paw remains near the wristbands but does not claim them.",
+   "dialogueTiming": "No dialogue. The first glimmer arrives gently after the cut; Keen’s eye shift precedes the small chin lift. Hold the delicate hover just long enough to become undeniable, then continue directly into the split.",
+   "referenceRoles": "Keen reference anchors the noticing-before-understanding performance; Aida reference anchors the witnessing side of the space; aquamarine glow, empty wristbands, and wet circle references anchor the magic as heart-truth rather than display.",
+   "requiresNewKeyframe": false,
+   "essentialProviderProtections": [
+    "Aquamarine must gather gently between Keen and Aida, not pop or flash like a trick.",
+    "Keen must not reach for or claim the light.",
+    "Maintain spatial continuity to the empty wristbands for the coming choice."
+   ]
+  },
+  {
+   "shotId": "S9.SH4",
+   "continuityIn": "Continuous from S9.SH3. The aquamarine presence is already hovering between Keen and Aida; Keen’s paw is near the wristbands but held back; the hush remains intact.",
+   "continuityOut": "The aquamarine has divided into two living threads and settled into the once-empty wristbands. Keen remains careful and open, held between wonder and acceptance; the bands now glow warmly against the wet ground.",
+   "dialogueTiming": "No dialogue. The gasp belongs on the moment the empty spaces fill. Let the afterglow pulse prove contact before cutting back to Keen.",
+   "referenceRoles": "Aquamarine glow reference anchors the divided heart-truth; wristband reference anchors the transformation from vacancy to inheritance; Keen reference anchors restrained wonder without grabbing.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "The aquamarine division and travel must remain continuous from the prior hover.",
+    "The wristbands receive a soft settling glow, not a conquest flash.",
+    "Keen’s forward impulse must stop before contact so the choice belongs to the light."
+   ]
+  },
+  {
+   "shotId": "S9.SH5",
+   "continuityIn": "Cut back to Keen after the wristbands have filled. Aquamarine now glows near his body; the circle remains present but softened in depth; he is still damp, small, and shaken.",
+   "continuityOut": "Keen has felt the warmth, allowed one tremor through breath and shoulders, and gathered his paws close without hiding the aftershock. He is steady enough to begin the Call, with fear still included.",
+   "dialogueTiming": "No dialogue within this shot. Let the glow be felt first, then the brief tremor, then the careful gather. Move directly into Keen’s Call without a reset beat.",
+   "referenceRoles": "Keen reference anchors tremor-into-steadiness performance; aquamarine wristband reference anchors warmth reaching him before confidence; after-storm circle reference preserves damp vulnerability.",
+   "requiresNewKeyframe": false,
+   "essentialProviderProtections": [
+    "Do not reset Keen into a clean heroic posture before the Call.",
+    "The tremor must remain visible and accepted, not covered.",
+    "Aquamarine warmth is felt before confidence arrives."
+   ]
+  },
+  {
+   "shotId": "S9.SH6",
+   "continuityIn": "Continuous from S9.SH5. Keen is already gathered close from the tremor, paws near his chest, aquamarine glowing in the wristbands, fear still present inside the steadiness.",
+   "continuityOut": "Keen has completed the Crystal Call. Aquamarine has risen in response and settled around him; he remains damp, small, and no longer alone inside the fear. The sacred beat is full and ready for comic release.",
+   "dialogueTiming": "KEEN: “Brave and bright, with all my might — Aquamarine Crystal, shine with light!” Start directly out of the tremor. Voice visibly steadies across the line: tentative entrance, firmer middle, clear final phrase. Let the glow rise in response during the strengthening middle and complete just after “shine with light!” Hold one short breath, then cut.",
+   "referenceRoles": "Keen reference anchors surrender-based courage, not victory posing; aquamarine crystal/wristband references anchor the Call response; wet after-storm circle reference keeps the cost visible inside the glow.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "Dialogue must be verbatim: “Brave and bright, with all my might — Aquamarine Crystal, shine with light!”",
+    "The glow must answer after the courage is spoken, not lead the performance.",
+    "Do not turn Keen into a triumphant victory pose; he stays damp and small inside the glow."
+   ]
+  },
+  {
+   "shotId": "S9.SH7",
+   "continuityIn": "Cut from Keen’s settled aquamarine glow to Fuzzby already loaded with celebration. The hush has not quite finished, making his early clap exposed.",
+   "continuityOut": "Fuzzby’s mistimed clap has cracked the reverence into warmth. He has frozen in exposure, registered the mistake, and converted it into fake-dignified ceremony as the circle begins to breathe out.",
+   "dialogueTiming": "No dialogue. The clap lands one beat too soon, followed by a short clean silence. Hold the freeze long enough for the status drop, then let the solemn cover arrive compactly before cutting to the group rush.",
+   "referenceRoles": "Fuzzby reference anchors status-mistiming and cover-up behaviour; Keen/aquamarine context reference anchors the sacred moment being interrupted; circle reference anchors the shared breath-out into laughter.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "The clap must land early, before the moment has fully released.",
+    "Fuzzby must convert the mistake into fake ceremony rather than apologize or explain.",
+    "Keep the recovery compact so the joke releases emotion without taking over the scene."
+   ]
+  },
+  {
+   "shotId": "S9.SH8",
+   "continuityIn": "Cut from Fuzzby’s fake-dignified cover to the circle rushing in around Keen. Keen is still in aquamarine glow, newly witnessed, not braced for the force of the welcome.",
+   "continuityOut": "The group hug has peaked and begun to loosen. Keen has rocked from the first contact, planted, then softened into being held; aquamarine remains visible within the squeeze.",
+   "dialogueTiming": "No dialogue. Rush comes quickly after Fuzzby’s cover with overlapping arrivals. First contact has weight; Keen rocks, absorbs, then relaxes a beat later. Let the hug compress, peak, and begin to breathe before cutting.",
+   "referenceRoles": "Keen reference anchors being caught as he is; group/circle references anchor belonging through physical contact; aquamarine wristband reference anchors the new light remaining visible inside the hug.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "The group enters as a wave of care, not a tidy posed arrangement.",
+    "First contact must visibly affect Keen’s balance before he relaxes into the hold.",
+    "Aquamarine must remain visible through the hug, not buried or lost."
+   ]
+  },
+  {
+   "shotId": "S9.SH9",
+   "continuityIn": "Cut after the hug peak as the group loosens into a quiet pocket. Keen remains held within the circle; aquamarine lives in the once-empty wristbands; rain beads remain on the ground.",
+   "continuityOut": "Aida’s line has landed inside Keen’s belonging. Keen has taken it in with a breath, a soft eye change, then a smile toward home; the final image holds warmth and the visible after-storm cost before cutting out cleanly.",
+   "dialogueTiming": "AIDA: “That’s what family does.” Start only after the rush has softened and group noise falls away. Keen reacts after the line, not during it: breath, softening around the eyes, then smile. Hold the final image just long enough for warmth and ache to coexist, then leave cleanly.",
+   "referenceRoles": "Aida reference anchors quiet certainty; Keen reference anchors held belonging and after-the-line reaction; aquamarine wristbands and rain-beaded ground references anchor warmth with cost still present.",
+   "requiresNewKeyframe": true,
+   "essentialProviderProtections": [
+    "Dialogue must be verbatim: “That’s what family does.”",
+    "Keen must remain held in the circle rather than stepping out to prove he is fine.",
+    "Rain beads and glowing once-empty wristbands must remain visible enough to keep the ache present."
+   ]
   }
  ],
  "voicePerformances": [
   {
-   "speaker": "Aida",
+   "speaker": "AIDA",
    "exactDialogue": "You followed your heart… and chose courage.",
-   "voiceIdentity": "Aida’s witnessing voice: warm, grounded, almost ceremonial but never grand. She speaks as the calm centre of the circle, making space rather than taking it.",
-   "dramaticIntention": "She wants Keen to stop measuring himself against a pretend version of bravery and recognize the courage he has already lived.",
-   "subtext": "I saw you afraid, and I am not asking you to hide that. That is why this is real.",
-   "relationshipTarget": "Keen, held gently in front of the gathered bears; the group overhears, but the line is for him alone.",
-   "emotionalEntry": "Hushed post-rescue relief; Aida has already chosen silence long enough for the moment to become Keen’s, not hers.",
-   "emotionalExit": "Quiet confirmation handed to Keen, leaving room for the crystal to answer without more explanation.",
+   "voiceIdentity": "Aida at her quietest and steadiest: close, warm, unhurried, never ceremonial. She speaks as someone witnessing Keen, not presenting him.",
+   "dramaticIntention": "To let Keen feel seen without pushing him to become bigger than he is ready to be.",
+   "subtext": "I saw the cost of that choice. You do not have to make it look easy for it to be brave.",
+   "relationshipTarget": "Keen, who is still fragile at the edge of the moment, not yet crowned or confident.",
+   "emotionalEntry": "Enters from shared stillness after Keen’s caught breath and trembling paw; she has waited for him rather than rescuing him.",
+   "emotionalExit": "Leaves him with a simple, grounded truth that can enter his body slowly.",
    "operativeWords": [
     "heart",
     "courage"
    ],
-   "pace": "Slow and intimate, but not heavy. The first half lands like a memory being named; the second half becomes slightly firmer.",
-   "rhythm": "Two balanced thoughts: ‘You followed your heart…’ is soft recognition; ‘and chose courage’ is the truth settling into place.",
-   "pauses": "Let the ellipsis breathe as Aida watching Keen absorb the word ‘heart’; it is not hesitation, it is permission.",
-   "breaths": "Begin after a small preparatory inhale, as if Aida has waited until she is sure Keen can hear it. No audible sob or tremble.",
-   "nonVerbalActions": "Aida stays still and open; her stillness supports the line. She does not lean in to persuade him — she leaves the space between them clear for the aquamarine glow.",
-   "elevenLabsV3Direction": "Start after the held silence, not on frame one. [quietly] You followed your heart… and chose courage. Keep ‘heart’ tender and ‘courage’ clean, certain, and small.",
-   "physicalActionRelationship": "Voice supports the body: still, steady, witnessing. The lack of vocal push lets Keen own the revelation himself.",
-   "expectedTiming": "Enter roughly 0.6–0.9 seconds after the shot settles on Aida’s active stillness. Total line around 3.0 seconds, with the ellipsis carrying the emotional turn.",
+   "pace": "Slow, careful, and intimate. Do not drag; let each thought arrive because she means it.",
+   "rhythm": "First phrase held in a suspended breath; second phrase lands plainer and lower, as the truth becoming safe.",
+   "pauses": "The ellipsis is the emotional hinge: a real pause after “heart…” while Aida chooses not to over-explain. No added flourish after “courage.”",
+   "breaths": "A small settling breath before the line; breath stays low and steady so Keen can borrow that steadiness.",
+   "nonVerbalActions": "Her voice should feel aligned with her still body: no lean-in, no lift, no presentation. The line is carried by stillness and breath.",
+   "elevenLabsV3Direction": "Begin from stillness after a small settling breath. [quietly] You followed your heart… and chose courage. Let “heart” hold warmth; let “courage” land simply, with no triumph.",
+   "physicalActionRelationship": "The voice supports Aida’s lack of movement: she does not make the moment bigger, which gives Keen permission to remain small while receiving it.",
+   "expectedTiming": "Do not start immediately on the cut. Allow the shot’s stillness to register first. Suspend after “heart…” long enough for care, then finish cleanly and hold a fraction on Keen absorbing it.",
    "generatedAsset": null,
-   "approvalState": "approved"
+   "approvalState": "ready_for_generation"
   },
   {
-   "speaker": "Keen",
+   "speaker": "KEEN",
    "exactDialogue": "Brave and bright, with all my might — Aquamarine Crystal, shine with light!",
-   "voiceIdentity": "Keen’s young truth-telling voice: open, earnest, newly unguarded. Not heroic-booming; the strength comes from believing himself while still feeling the wobble.",
-   "dramaticIntention": "He wants the crystal, the wristbands, and the watching circle to accept the truth he is finally allowing: he can be brave while afraid.",
-   "subtext": "This courage is mine — and his — and I do not have to squeeze the fear away to belong here.",
-   "relationshipTarget": "The aquamarine crystal and his father’s wristbands first; Aida and the gathered bears second, as witnesses rather than an audience.",
-   "emotionalEntry": "A tremor has just passed through him; he almost hides it, then lets it be seen. The first words come from surrender, not display.",
-   "emotionalExit": "Surprised relief: the Call leaves him less strained than when he began, as if courage has made room for breath instead of demanding effort.",
+   "voiceIdentity": "Keen trying to speak courage while still carrying the tremor. Young, sincere, worked-for, brightening only as the words prove true inside him.",
+   "dramaticIntention": "To ask the crystal—and the family around him—to meet him as he is, fear included, rather than as a polished hero.",
+   "subtext": "I am scared, but I am not hiding from it anymore.",
+   "relationshipTarget": "The aquamarine crystal first, then the family witnessing him; he is not performing at them, he is letting them hear him choose.",
+   "emotionalEntry": "Enters directly out of the warmth and aftershock in the wristbands, with no emotional reset. The fear is still present.",
+   "emotionalExit": "Exits steadier and clearer, not victorious; he has allowed the light to answer him.",
    "operativeWords": [
     "might",
-    "Aquamarine",
-    "light"
+    "shine"
    ],
-   "pace": "Begins gently and carefully, then gathers natural confidence through the phrase. The final words brighten, but stay sincere rather than shouted.",
-   "rhythm": "A child’s ritual discovering its truth mid-line: ‘Brave and bright’ is tender; ‘with all my might’ steadies; after the dash, the crystal name opens the sound; ‘shine with light!’ releases upward.",
-   "pauses": "Respect the em dash as the moment the feeling becomes a Call. It should be a lifted breath, not a dramatic superhero pause.",
-   "breaths": "Use one audible breath before the first word: the breath is Keen choosing not to clamp down on the tremor. No extra gasp during the line.",
-   "nonVerbalActions": "Keen touches the glow lightly, then lets his shoulders soften as the words strengthen. His body discovers that courage can be gentle.",
-   "elevenLabsV3Direction": "Do not start immediately; let the touch and tremor land first. [breathes] Brave and bright, with all my might — Aquamarine Crystal, shine with light! Begin tender, strengthen because he believes it, not because he is performing.",
-   "physicalActionRelationship": "Voice and body change together: the voice grows steadier as his shoulders ease, proving the Call is surrender rather than a power-up strain.",
-   "expectedTiming": "Enter about 0.4 seconds after Keen lets the tremor be seen. Total line around 4.2–4.8 seconds; the dash takes a living breath before the crystal name.",
+   "pace": "Begins slightly careful and weighted, then gathers momentum through the rhythm. Final phrase is clear but not shouted.",
+   "rhythm": "A visible vocal steadying across the chant: tentative first beat, firmer middle, clean final release.",
+   "pauses": "Respect the em dash as a breath-catch and commitment point before naming the crystal. No extra dramatic pauses inside the Call.",
+   "breaths": "A small audible inhale before “Brave,” as if he is including the tremor instead of swallowing it. Breath opens more freely by the final phrase.",
+   "nonVerbalActions": "Paws close at first; chest opens only as the line earns it. The voice should not arrive confident before the body does.",
+   "elevenLabsV3Direction": "Start with a small worked-for inhale. [breathes] Brave and bright, with all my might — Aquamarine Crystal, shine with light! Let the strength grow through the line; “shine” releases the clearest light, not the loudest volume.",
+   "physicalActionRelationship": "The voice tracks the body’s small journey: held close at the start, gradually opening as the crystal responds after the courage is spoken. No victory pose in the sound.",
+   "expectedTiming": "Move directly from the tremor into the Call. Let the glow rise in response during the strengthening middle and complete just after “shine with light!” Hold one short breath of settled glow, then cut before it becomes ceremonial.",
    "generatedAsset": null,
-   "approvalState": "approved"
+   "approvalState": "ready_for_generation"
   },
   {
-   "speaker": "Aida",
+   "speaker": "AIDA",
    "exactDialogue": "That’s what family does.",
-   "voiceIdentity": "Aida’s family-truth voice: plain, close, and lightly warmed by joy. She refuses ceremony here; the simplicity is the gift.",
-   "dramaticIntention": "She wants Keen to understand the welcome is not a reward for impressing them — it is what belonging does when someone is shaken.",
-   "subtext": "You do not have to earn being held. We adjust around you because you are one of us now.",
-   "relationshipTarget": "Keen, after the group’s welcome has softened to his pace; the circle is included, but Aida is anchoring his permission to receive it.",
-   "emotionalEntry": "Joy has just rushed in and then learned to quiet itself around Keen. Aida enters on that adjusted tenderness.",
-   "emotionalExit": "Warm belonging with the ache still visible; she leaves space for Keen’s smile to hold both the Cove and what the wristbands remember.",
+   "voiceIdentity": "Aida with quiet certainty: plain, protective, and almost matter-of-fact because the feeling is already in the hug.",
+   "dramaticIntention": "To tell Keen he does not have to step out of the hold to prove he is fine; belonging is allowed to carry weight.",
+   "subtext": "You are not a burden. Let yourself be held.",
+   "relationshipTarget": "Keen inside the group hug, still damp with the memory of the empty wristbands.",
+   "emotionalEntry": "Enters after the group noise falls away and the hug loosens enough for the words to find him.",
+   "emotionalExit": "Leaves Keen softened, warmed, and still carrying the ache rather than reset to cheerful.",
    "operativeWords": [
     "family",
     "does"
    ],
-   "pace": "Simple and unhurried. Almost practical, as if naming something everyone here already knows.",
-   "rhythm": "One clean sentence with no ornament: ‘That’s what’ light and low; ‘family’ warmest; ‘does’ lands with soft finality.",
-   "pauses": "No internal pause. The point is its plainness. Allow a small silence before the line so it answers the adjusted welcome rather than interrupting it.",
-   "breaths": "A tiny released breath before speaking, more warmth than sigh. Keep emotion under the words, not on top of them.",
-   "nonVerbalActions": "Aida watches Keen receive the circle. She does not present the line to the group; she lets it fall beside him like a blanket.",
-   "elevenLabsV3Direction": "Enter after the cheering has softened and Keen has begun to release. That’s what family does. Keep it plain, close, and true — no announcement, no lesson.",
-   "physicalActionRelationship": "Voice supports the softened group energy: the line lowers the celebration into belonging rather than lifting it into a speech.",
-   "expectedTiming": "Enter roughly 0.5 seconds after Keen’s compression releases into a real smile. Total line around 1.4–1.7 seconds, followed by space for the two-feeling smile.",
+   "pace": "Short, slow enough to be received, but not sentimental. One clean thought.",
+   "rhythm": "Gentle downward cadence; certainty, not announcement.",
+   "pauses": "Create a small open pocket before the line. No pause inside the sentence; it should feel like one simple truth.",
+   "breaths": "Quiet breath in before speaking; allow a tiny release after “does” so the warmth can settle without lingering too long.",
+   "nonVerbalActions": "Her voice should reach into the circle rather than over it. Keen’s reaction belongs after the line: breath, eye-softening, then smile.",
+   "elevenLabsV3Direction": "Wait for the group sound to fall away. [quietly] That’s what family does. Keep it plain and certain; let “family” carry the tenderness and “does” carry the promise.",
+   "physicalActionRelationship": "The voice supports the loosened hug: it does not pull Keen out into a lesson, it lets the hold explain the words.",
+   "expectedTiming": "Start only after the rush has softened into a quiet pocket. Keen reacts after the line, not during it. Hold the final image just long enough for warmth and ache to coexist, then leave cleanly.",
    "generatedAsset": null,
-   "approvalState": "approved"
+   "approvalState": "ready_for_generation"
   }
  ],
- "showrunnerJudgement": "Passes. The scene converts rescue into belonging without turning it into a prize ceremony. Keen remains the emotional owner: the wristbands, tremor, swallowed breath, and careful acceptance keep courage rooted in fear rather than victory. Aida’s dialogue is protected by the staging — she names what the hug and crystal have already proved, so the lines do not become a lecture. The aquamarine light has clear meaning: not spectacle, but absence becoming carried love. Fuzzby’s premature clap is exactly the right release valve after the sacred stillness; it reveals his need to be official, lets Zenny puncture him silently, and gives Keen his first loosened near-laugh without stealing the transformation. The camera has purpose throughout: low, close, and wristband-led when the meaning is internal; wider only when belonging becomes physical. The scene keeps both doors open — children read magic, glow, hug, and funny timing; adults feel a child being welcomed while still missing home. The ending warmth preserves the ache through Mum and Dad’s presence-in-absence, which is essential for this episode.",
- "internalRevisions": [
-  {
-   "role": "cinematographer",
-   "target": "9.B1.S3–9.B2.S4",
-   "issue": "Shot-overload and repeated tenderness: six consecutive intimate glow/breath/wristband/reaction shots hold the same emotional temperature before release. Combine or shorten coverage so the aquamarine settling, Keen’s tremor, and the Call read as one clean surrender sequence rather than a ceremony. Protect the catch-and-release: let the audience feel the ache, then move before it becomes solemn.",
-   "at": "2026-07-16T23:42:52"
-  },
-  {
-   "role": "director",
-   "target": "9.B3.S2–9.B3.S3 group welcome",
-   "issue": "The surrounding Crystal Bears still behave too collectively. Fuzzby and Zenny are specific, but the rest of the welcome risks becoming a generic group hug. Give each visible bear a distinct, silent, character-owned way of joining and then adjusting the hug around Keen, without adding dialogue or stealing focus. The family truth should be visible in different bodies making room for him, not just in a crowd moving inward together.",
-   "at": "2026-07-16T23:44:58"
-  }
- ],
+ "showrunnerJudgement": "Passes. I tried to reject it for becoming an award ceremony, for cutting the magic into decorative inserts, and for repeating the tremor as performance garnish; the complete scene holds. The shot sequence remains governed by Keen’s damp, after-storm body, and the circle earns its way into frame instead of arriving as arranged applause. The wristbands read as absence becoming inheritance, not as a shiny reward, and the Fuzzby rupture correctly releases the ache before it turns syrupy. The scene belongs to this show because the crystal tells the truth Keen cannot perform yet: courage still has fear inside it.",
+ "treatmentComparison": "The storyboard delivers the selected treatment’s central experience: Keen’s breath comes back as the once-empty wristbands fill with aquamarine light, and belonging expands around him from bodily intimacy into family. It follows the treatment’s visual grammar closely: low, close, vulnerable camera; Aida as warm stillness; aquamarine as a small impossible presence before it chooses the bands; the Call growing out of tremor rather than triumph; Fuzzby’s premature clap as status-mistimed release; and the hug allowed to exceed neat composition. The cuts are numerous but motivated by changes of inner state rather than automatic reaction sampling. The rain beads, dampness, and visible wristbands preserve the cost, so the ending warms without wiping the ache clean.",
+ "internalRevisions": [],
  "escalation": null,
  "provenance": {
   "showrunner": {
    "role": "showrunner",
    "model": "gpt-5.5",
-   "promptVersion": "creative-room-1.0 (2026-07-16)",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
    "canonVersion": "1.0",
-   "at": "2026-07-16T23:49:34",
+   "at": "2026-07-17T00:54:21",
    "humanRevision": null
   },
   "director": {
    "role": "director",
    "model": "gpt-5.5",
-   "promptVersion": "creative-room-1.0 (2026-07-16)",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
    "canonVersion": "1.0",
-   "at": "2026-07-16T23:49:34",
+   "at": "2026-07-17T00:54:21",
    "humanRevision": null
   },
   "cinematographer": {
    "role": "cinematographer",
    "model": "gpt-5.5",
-   "promptVersion": "creative-room-1.0 (2026-07-16)",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
    "canonVersion": "1.0",
-   "at": "2026-07-16T23:49:34",
+   "at": "2026-07-17T00:54:21",
    "humanRevision": null
   },
   "voice": {
    "role": "voice-director",
    "model": "gpt-5.5",
-   "promptVersion": "creative-room-1.0 (2026-07-16)",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
    "canonVersion": "1.0",
-   "at": "2026-07-16T23:49:34",
+   "at": "2026-07-17T00:54:21",
    "humanRevision": null
   }
  },

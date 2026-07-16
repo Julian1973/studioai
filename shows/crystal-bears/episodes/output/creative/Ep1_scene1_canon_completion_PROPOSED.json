@@ -1,0 +1,241 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "1",
+ "builtAt": "2026-07-17T00:22:40",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Fuzzby": [
+   "centreOfGravity",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Zenny": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Fuzzby",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Chest-led and forward-pitched: his body commits before his judgement catches up, with light-fast wind-up and cartoon-heavy landings. Even in recovery, the chest tries to reassert importance before the rest of him has fully recovered.",
+     "groundedIn": "\"he puffs his CHEST out and strikes a proud superhero / on-parade stance\"; \"Signature shape... (1) THE FLOURISH... (2) THE BUMBLE/BONK... full Lasseter weight\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To be seen as a flawless, important professional helper — the small bee whose grand scheme matters in the room.",
+     "groundedIn": "\"his WANT (be seen as a flawless, important professional)\"; \"trying to matter among the big crystal-powered ones\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Open, theatrical, and instantly readable in the build-up; after the crash, he snaps into over-controlled dignity with one tiny leak that betrays him.",
+     "groundedIn": "\"big proclamations delivered with total conviction, then the air going out of them\"; \"ONE micro-tell (a wobble, a single droopy antenna, a wing that won't quite fold) says he knows\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Looks for an audience or a destination with grand certainty, then registers the consequence a beat late; he is often the last to know what his body has already done.",
+     "groundedIn": "\"He IS the delayed take — always the LAST to know\"; \"he motors, she reacts\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "The largest gesture-scale in the cast: unnecessary flourishes, parade-stance pride, and full-body commitment to a small task. The gesture should always be bigger than the job.",
+     "groundedIn": "\"the BIGGEST physical comedy in the cast\"; \"an unnecessarily grand gesture, a little hover-strut\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To know he is wanted even when he crashes — that the blunder is not the price of losing his place, but part of why he belongs.",
+     "groundedIn": "\"he's wanted even when (especially when) he face-plants\"; \"You are not too much\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "Feeling small and unimportant, especially near bigger, powered figures; his pomposity is the attempt to outrun that smallness.",
+     "groundedIn": "\"His pomposity is a mask\"; \"he commits 100% to a big proud idea precisely so he doesn't have to feel small\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never appears as random noise or filler. A Fuzzby beat must buy emotional breath, crack open a new perspective, or let the scene survive a heavier feeling through laughter.",
+     "groundedIn": "\"His role is structural, never decorative — he buys the room a breath of laughter so the emotional valley can be survived\"; \"Don't use him as filler\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Over-enters and over-commits into the space around him, usually through eagerness rather than entitlement; his chaos bumps into the world, but never turns mean or predatory.",
+     "groundedIn": "\"over-eager, and he is CONSTANTLY bumping and banging into things\"; \"his chaos is warm, never sharp\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That being wrong out loud will prove he does not matter, is too much, or no longer belongs.",
+     "groundedIn": "\"being wrong out loud is its own kind of brave\"; \"For the anxious child terrified of being wrong... You are not too much\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Pompous competence: chest out, voice grand, dignity intact — a heroic performance of control that protects the dented heart underneath.",
+     "groundedIn": "\"pompous-then-undercut\"; \"His pomposity is a mask\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "Instant cover-up after impact: he reclaims the disaster with stiff dignity, a smaller stillness, and one involuntary tell before snapping proud again.",
+     "groundedIn": "\"THE COVER-UP — instant Keaton-deadpan reclaim ('Nailed it.'); the bigger the disaster, the STILLER the recovery\"; \"one-droop-tell -> snap-proud\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "Denies the embarrassment with total dignity, then lets a tiny physical leak reveal that it landed — a droop, wobble, slump, or wing that refuses to behave.",
+     "groundedIn": "\"DENIES it with total dignity\"; \"Any deflate that follows is a small slump or a dip\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Accelerates. Under pressure, he becomes more helpful, more grand, faster, higher, lower, and less accurate — trying to solve discomfort with motion and importance.",
+     "groundedIn": "\"Energy spikes high and crashes fast\"; \"His DEFAULT, baseline motion is chaotic and hyper\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Over-claims success as if he planned it: chest back up, antennae proud, and a professional finish that may be funnier than the actual achievement.",
+     "groundedIn": "\"declares himself, and crashes\"; \"the joke... is that he's clumsy WHILE performing competence, then DENIES it with total dignity\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A forward-driving, chest-first comedy shape: proud vertical parade stance before action; horizontal, over-committed travel line during action; small dignified slump after impact.",
+     "groundedIn": "\"puffs his CHEST out... chest pumped forward, shoulders back, head high\"; \"Fuzzby horizontal, chest leading, legs trailing\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Almost never still in flight. His stillness is a recovery button only: a charged, dignified freeze-after-the-bonk that lets the heart leak through before motion resumes.",
+     "groundedIn": "\"NEVER let Fuzzby fly slow, calm, graceful, serene or still-hovering\"; \"the bigger the disaster, the STILLER the recovery\""
+    }
+   ]
+  },
+  {
+   "character": "Zenny",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Low, planted, and settled; she feels like the still point the chaos orbits, not another moving part in the gag.",
+     "groundedIn": "\"Zenny is his other half — smaller, female, dry, deadpan; she is the still, unimpressed counterweight to his chaos\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "The still puncture: she lets Fuzzby's overblown performance inflate itself, then releases the laugh through a flat hold, tiny reaction, or dry line. Her joke is restraint, not attack.",
+     "groundedIn": "\"her flat hold IS the joke against his motion\"; \"Beneath her dryness is affection she won't admit\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To keep the moment honest and proportionate — not by competing with Fuzzby's energy, but by refusing to inflate it for him.",
+     "groundedIn": "\"calm, dry, smaller female counterpart\"; \"still, unimpressed counterweight\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Highly restrained: minimal facial movement, tiny calibrations, and almost-smiles that are withheld just long enough to become affectionate punctuation.",
+     "groundedIn": "\"dry, deadpan\"; \"her flat hold IS the joke\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Steady, appraising, and unhurried. She watches the mess clearly and stays with it; the hold of her gaze is often the punchline.",
+     "groundedIn": "\"she sees the mess and stays\"; \"let the camera HOLD on her flat reaction as the punchline lands\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small-scale and precise: a blink, tilt, pause, or barely-there adjustment should do the work that Fuzzby would try to do with his whole body.",
+     "groundedIn": "\"she is the still, unimpressed counterweight to his chaos\"; \"her flat hold IS the joke\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be close without having to openly adore him; her affection is protected by dryness, but the scene should feel warmer because she stayed.",
+     "groundedIn": "\"Beneath her dryness is affection she won't admit — and his bluster genuinely lands softer when she's near\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "That if she openly enjoys or needs the chaos, she may lose the useful role she plays as the calm counterweight; she protects attachment by underplaying it.",
+     "groundedIn": "\"Beneath her dryness is affection she won't admit\"; \"calm, dry... counterpart\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Slow, controlled, and economical; she should not chase Fuzzby's tempo. Her timing is a held note against his staccato buzz.",
+     "groundedIn": "\"calm, dry\"; \"Zenny's calm deadpan stillness is his counterweight\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never present just to scold. Zenny's stillness must either sharpen Fuzzby's comedy, reveal affection under restraint, or let a tonal turn land without overstatement.",
+     "groundedIn": "\"her flat hold IS the joke against his motion\"; \"Beneath her dryness is affection she won't admit\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Maintains a clean personal bubble and lets the chaos arrive at her rather than moving to meet it; her stillness frames the crash without becoming part of the thrash.",
+     "groundedIn": "\"the still, unimpressed counterweight to his chaos\"; \"he motors, she reacts\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "Being pulled into the noise so fully that no one is left to hold the room steady; her fear lives in losing the calm position that lets her witness him clearly.",
+     "groundedIn": "\"calm, dry, smaller female counterpart\"; \"she is the still, unimpressed counterweight to his chaos\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Dry unimpressed deadpan: she hides care inside judgement, warmth inside flatness, and delight inside refusal to overreact.",
+     "groundedIn": "\"dry, deadpan\"; \"Beneath her dryness is affection she won't admit\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "Returns to neutral stillness after a beat lands — a tiny reset rather than a big reaction. If she has been moved, she hides it by getting flatter.",
+     "groundedIn": "\"her flat hold IS the joke\"; \"dry, deadpan\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "Underplays it: a flatter stare, a tiny pause, or a dry redirect. She should not fluster broadly; restraint is how she keeps control.",
+     "groundedIn": "\"dry, deadpan\"; \"calm, dry... counterpart\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Gets quieter and more still, then names the practical truth plainly. Pressure does not make her bigger; it strips her down.",
+     "groundedIn": "\"Zenny goes still and says, flat and small, 'A Storm's coming.'\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Allows the smallest visible approval — a nearly hidden smile, softened gaze, or dry acknowledgement — without surrendering the deadpan completely.",
+     "groundedIn": "\"Beneath her dryness is affection she won't admit\"; \"one corner of a mouth almost lifting\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "Compact, poised, and readable in contrast: a quiet vertical hold or small settled shape that makes Fuzzby's travel line and crash read bigger.",
+     "groundedIn": "\"his momentum against her stillness reads as story before a single frame moves\"; \"the still, unimpressed counterweight to his chaos\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is her main instrument: charged, observant, and comic. It can puncture Fuzzby's pomp or let a serious shift land, but it must always be full of thought, never empty.",
+     "groundedIn": "\"her flat hold IS the joke against his motion\"; \"Zenny's calm deadpan stillness is his counterweight\""
+    }
+   ]
+  }
+ ]
+}

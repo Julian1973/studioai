@@ -51,3 +51,14 @@ No confirmed per-token OpenAI rate is on file for this billing profile — usage
 NOT invented. Order-of-magnitude judgement only: comparable to the repair-loop batch above (well under
 $1–$5 range for gpt-5.5 structured completions of this size). Zero media provider calls; zero Seedance
 tokens issued; zero fal/ElevenLabs spend.
+
+---
+
+## Creative Room process v2 rebuild + proof reruns (2026-07-17)
+
+Four real scene runs through the rebuilt 7-gate process (Scene 1 with the ambition brief;
+Scenes 2/3/9 with no hints): per scene ~8-10 gpt-5.5 structured completions (Gate 0 canon
+proposal where cast gaps exist, Gate 1 joint treatments, Gate 2 selection, Gate 3 beats,
+Gate 4 shot conference, Gate 5 performance + voice, Gate 6 adversarial review, production
+detail) ≈ **~38 completions total**. Rate unconfirmed — usage recorded, cost not invented.
+Zero media provider calls; zero Seedance tokens; zero fal/ElevenLabs spend.

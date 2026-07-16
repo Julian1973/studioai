@@ -1,0 +1,374 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "2",
+ "builtAt": "2026-07-17T00:32:37",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Aida": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Keen": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Keen's Mum": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Aida",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Low, settled, and rooted through the breath; she feels placed rather than posed, as if the room steadies around her weight.",
+     "groundedIn": "\"Stillness is her signature — she commands a scene by NOT moving while everyone orbits her\" and \"grounded, settled posture.\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Her comedy comes from serene understatement beside younger chaos: a tiny look, pause, or gentle correction that lets everyone else discover they have overfilled the moment.",
+     "groundedIn": "\"Comfortable with silence — she lets a pause do the work\" and \"Tonal counterweight to Sunny's manic brightness.\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To make the space safe and help the younger bears feel they belong before they even know how to ask for it.",
+     "groundedIn": "\"She makes a space feel safe before anyone else has spoken\" and \"You are not too much. You are exactly right.\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Open warmth at first glance, but highly restrained at depth; when moved, the face softens by millimetres rather than declares itself.",
+     "groundedIn": "\"She gets QUIETER and STILLER the more she's moved\" and \"the deepest feeling lands as a near-whisper.\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Aida holds a steady, welcoming gaze long enough to let another bear settle; when carrying too much, her eyes briefly lower or turn inward before she gathers herself back to the room.",
+     "groundedIn": "\"often answers a worry with a held look before a word\" and \"a small private breath she doesn't let anyone see.\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small, spacious, and deliberate: open palms, slow nods, gathering motions. Her largest gestures are reserved for the Crystal Call, when she lifts and opens upward.",
+     "groundedIn": "\"An open palm or a steadying hand on a shoulder; a slow, knowing nod; a gathering gesture\" and \"On the Crystal Call she lifts: upward, expansive, chest open.\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be allowed to receive care without it proving she has failed as the one who holds everyone else.",
+     "groundedIn": "\"the strong one... letting yourself be held is not weakness\" and \"the one who holds everyone is allowed to be held.\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She worries that needing support will make the cove less safe, so she mistakes silence and self-sufficiency for steadiness.",
+     "groundedIn": "\"She rarely (almost never) asks for help, mistaking self-sufficiency for strength.\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Unhurried, continuous, and weighted; no darting or sharp resets. Even transitions feel like one breath finishing before the next begins.",
+     "groundedIn": "\"Warm, measured, low, unhurried\" and \"Her robes and headdress move slowly with her — she never rushes.\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never rushes, fidgets, preaches, or asks plainly for help unless the story is specifically showing the cost of her over-functioning or the difficulty of receiving care.",
+     "groundedIn": "\"Never rush Aida\" and \"Don't let her ask for help easily or early — her whole arc is that this is HARD for her.\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "She creates a broad calm radius others naturally enter; she closes distance only to steady, bless, or gather, never to crowd.",
+     "groundedIn": "\"the contextual centre of the group\" and \"characters naturally drawn toward her.\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That if she sets the weight down, the people who rely on her will feel less held.",
+     "groundedIn": "\"She over-functions for everyone, anticipating needs and absorbing weight\" and \"Takes on too much responsibility for others.\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Warm composure: a steady smile, slower breath, and a body that stays still even when the crystal flickers first.",
+     "groundedIn": "\"Her crystal is the show's tell that the strong one is human too: watch the flicker before anyone hears the strain in her voice.\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After strain shows, she does not snap back; she lets one breath return her, then offers a quieter nod or open palm, lighter but still carrying the trace.",
+     "groundedIn": "\"BLAZES warm pink when help is received\" and \"resolves lighter... having learned belonging runs both ways.\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She absorbs embarrassment softly: a lowered gaze, a tiny amused breath, and a gracious turn that protects everyone else's dignity before her own.",
+     "groundedIn": "\"validates by naming what's true in the room without preaching\" and \"warm, protective, maternal; never stern-headmistress.\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "She grows stiller and quieter, taking on more before she admits cost; the crystal flicker and contained shoulders reveal pressure before speech does.",
+     "groundedIn": "\"When she's over-functioning, the stillness goes tight and self-contained — shoulders carrying\" and \"crystal flickering.\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "She receives success by radiating it outward: a small nod, open chest, and warm light that makes the group feel successful with her.",
+     "groundedIn": "\"Resolution: warm radiating light with the others naturally orbiting her\" and \"crystal blazes as she receives it.\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A still vertical anchor with slow outward openings: compact when carrying too much, expansive only when she accepts support or calls the crystal.",
+     "groundedIn": "\"isolate her in frame... show the weight\" and \"Crystal Call: tilt up to an expansive, chest-open posture.\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is active listening and emotional load-bearing; it must feel charged by what she is holding back, not empty or decorative.",
+     "groundedIn": "\"her stillness is what holds the whole world steady\" and \"Stillness is her signature.\""
+    }
+   ]
+  },
+  {
+   "character": "Keen",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Forward in the chest and paws, always slightly ahead of himself; when fear catches him, the weight drops for one honest gulp before he moves anyway.",
+     "groundedIn": "\"runs at the world breathless and bright\" and \"the gulp you swallow before you leap anyway.\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "His comedy is borrowed confidence outrunning his balance: he commits first, wobbles second, and tries to rename the wobble as part of the plan.",
+     "groundedIn": "\"Keen pushes off, wobbles, flails, catches himself — 'Still got it!'\" and \"he suppresses his fear to look brave.\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To prove he is brave enough for the next step, the next dune, or the next leap before anyone can see him hesitate.",
+     "groundedIn": "\"the one already three steps ahead, asking what's over the next dune\" and \"confuses true courage with fearlessness.\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Bright and open on the surface, with fear hidden in quick flashes: widened eyes, a swallowed breath, then a grin pasted back on too fast.",
+     "groundedIn": "\"electric, bold, action-forward\" and \"suppresses his fear to look brave.\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "His eyes lead before his body, scanning ahead with curiosity; when scared, he checks the danger, checks whether anyone noticed, then forces his gaze forward again.",
+     "groundedIn": "\"curiosity and bravery braided together\" and \"suppressing the very feeling that would make his bravery real.\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Big, quick, and demonstrative when performing courage; smaller and more contained when the real brave choice arrives.",
+     "groundedIn": "\"the show's most kinetic heart\" and \"real courage isn't the absence of fear but the gulp you swallow before you leap anyway.\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be loved and trusted even when his fear is visible; he needs permission for scared-and-brave to exist in the same body.",
+     "groundedIn": "\"you can be scared AND brave at the same time\" and \"letting the fear show first.\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "He worries that hesitation will cancel his courage, so he treats fear like a mistake to cover.",
+     "groundedIn": "\"He confuses true courage with fearlessness\" and \"suppresses his fear to look brave.\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Bursting, eager, stop-start kinetic energy: dashes, skids, overcorrections, then one held gulp when the feeling catches up.",
+     "groundedIn": "\"electric, bold, action-forward, the most kinetic character in the cast\" and \"the gulp you swallow before you leap anyway.\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never plays fearless as the truth; if he is boasting, moving fast, or joking off a wobble, the fear must be present underneath for the crystal to contradict or reveal.",
+     "groundedIn": "\"True courage is acknowledging fear, not erasing it\" and \"the crystal... won't perform the want and quietly holds the need.\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "He enters space quickly and enthusiastically, often closing distance before thinking; when vulnerable, he leaves a small gap as if deciding whether he is allowed to need comfort.",
+     "groundedIn": "\"runs at the world breathless and bright\" and \"letting the fear show first.\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That being scared means he is not really brave.",
+     "groundedIn": "\"He confuses true courage with fearlessness\" and \"the scared part doesn't cancel the brave part.\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Brave-boy sparkle: fast talk, chin up, action first, and a quick cover line when his body betrays him.",
+     "groundedIn": "\"suppresses his fear to look brave\" and \"wobbles, flails, catches himself — 'Still got it!'\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "He rebounds by turning the stumble into momentum, then checks for approval with a grin that is half triumph, half please-believe-me.",
+     "groundedIn": "\"wobbles, flails, catches himself — 'Still got it!'\" and \"borrowed confidence.\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "He covers embarrassment instantly with a boast, a grin, or a new action; the laugh is earned when the audience can still see the wobble underneath.",
+     "groundedIn": "\"Still got it!\" and \"suppressing the very feeling that would make his bravery real.\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "He accelerates under pressure until the fear forces a pause; the real turn is the visible gulp before he chooses to continue.",
+     "groundedIn": "\"action-forward\" and \"the gulp you swallow before you leap anyway.\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "He celebrates physically and immediately, but the truest success has a surprised softness: he realizes he was scared and still did it.",
+     "groundedIn": "\"real courage isn't the absence of fear\" and \"the bear who admits his paws don't want to move, and steps anyway, is braver.\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A forward-tilted, ready-to-launch shape: limbs and focus reaching toward the next thing, briefly compacting at fear, then extending again into the leap.",
+     "groundedIn": "\"already three steps ahead\" and \"before you leap anyway.\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is rare and therefore meaningful: the half-second gulp where performance drops and real courage begins.",
+     "groundedIn": "\"letting the fear show first\" and \"the gulp you swallow before you leap anyway.\""
+    }
+   ]
+  },
+  {
+   "character": "Keen's Mum",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Held low and close to Keen, with the body wanting to pull him back while the hands choose to let him go.",
+     "groundedIn": "\"Mum presses the empty gold bands into Keen's paws and closes her hands around his a beat too long.\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Her comedy is love trying not to fuss: a laugh that escapes through a tear when Keen performs confidence a little too loudly.",
+     "groundedIn": "\"Keen pushes off, wobbles... 'Still got it!' — and Mum laughs through a tear.\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To send Keen off feeling trusted, protected, and brave, without making him carry the cost of her goodbye.",
+     "groundedIn": "\"can Mum let him go without letting him see what it costs her?\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Restrained tenderness: she lets warmth show, but hides the full ache until he has turned away or is already moving.",
+     "groundedIn": "\"Mum's held tremble\" and \"Mum laughs through a tear.\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Her gaze stays on Keen longer than she means it to; when the ache rises, she briefly looks down to the wristbands or her paws before giving him her face back.",
+     "groundedIn": "\"closes her hands around his a beat too long\" and \"the empty gold bands.\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small, protective gestures: enclosing paws, a held touch, a lifted paw at the end. Anything larger risks making Keen manage her feeling.",
+     "groundedIn": "\"closes her hands around his a beat too long\" and \"Mum stays in frame, smaller, paw lifted.\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To keep feeling connected to her child even as she lets him become separate from her.",
+     "groundedIn": "\"I still feel him… every day\" and \"a mother letting go of her cub.\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She fears that showing too much grief or fear will weigh Keen down at the exact moment he needs to go forward.",
+     "groundedIn": "\"can Mum let him go without letting him see what it costs her?\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Careful and measured around the handoff, then arrested after departure; she moves as if any suddenness might break the goodbye open.",
+     "groundedIn": "\"presses the empty gold bands into Keen's paws\" and \"Mum stays in frame, smaller, paw lifted.\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never turns the goodbye into a speech, collapse, or clean reassurance; her feeling must stay partly unsaid so Keen receives courage, not responsibility.",
+     "groundedIn": "\"Emotion must be earned, never announced\" and \"Mum laughs through a tear.\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "She holds close for protection during the handoff, then deliberately creates distance so Keen can leave; the space between them is the story.",
+     "groundedIn": "\"Mum presses the empty gold bands into Keen's paws\" and \"Keen sails toward Squeaky.\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That letting Keen go means losing the everyday closeness she still feels and still needs.",
+     "groundedIn": "\"a mother letting go of her cub\" and \"I still feel him… every day.\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "A brave, warm smile held for Keen's sake, with the tremble displaced into the paws, the breath, and the too-long hold.",
+     "groundedIn": "\"Mum's held tremble\" and \"closes her hands around his a beat too long.\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "She recovers by letting comedy save the moment: Keen's wobble gives her permission to laugh, but the tear remains.",
+     "groundedIn": "\"Keen... 'Still got it!' — and Mum laughs through a tear\" and \"The comedy releases the goodbye's ache without erasing it.\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "If caught showing too much feeling, she softens it into a practical touch or small laugh, protecting Keen from having to comfort her.",
+     "groundedIn": "\"can Mum let him go without letting him see what it costs her?\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Under pressure she becomes more composed, more gentle, and more careful; the cost leaks out only in held contact and a smaller body after he leaves.",
+     "groundedIn": "\"Mum stays in frame, smaller, paw lifted\" and \"held tremble.\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Her success is not relief but bittersweet release: she smiles because Keen goes, and hurts because Keen goes.",
+     "groundedIn": "\"Never resolve the ache away\" and \"warmer than the beginning AND carries the visible trace of what it cost.\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A close, enclosing shape during the wristband handoff; after Keen departs, a smaller open shape with one paw lifted into the space he left.",
+     "groundedIn": "\"closes her hands around his a beat too long\" and \"Mum stays in frame, smaller, paw lifted.\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Her stillness is the held cost of letting go: a charged pause around the paws, then the quiet frame after Keen leaves.",
+     "groundedIn": "\"two whole beats of ordinary packing and borrowed bravado came first\" and \"Mum stays in frame, smaller, paw lifted.\""
+    }
+   ]
+  }
+ ]
+}

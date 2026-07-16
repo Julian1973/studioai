@@ -1,0 +1,374 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "3",
+ "builtAt": "2026-07-17T00:38:21",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Keen": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Keen's Mum": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Squeaky": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Keen",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Forward-loaded: chest, chin and attention arrive before the rest of him. In fear beats his weight briefly drops into his paws, then climbs back up through squared shoulders before he moves.",
+     "groundedIn": "\"Forward momentum incarnate — leaning in, bouncing, half-turned to the next thing\" and \"trembling paws → swallowed gulp → flattened ears → squared shoulders → lifted chin → step forward.\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "His comedy comes from bravery arriving half a second before balance, certainty or competence — then he covers the wobble as if it was part of the plan.",
+     "groundedIn": "\"breathless, eager, forward-leaning and electric\" plus the locked example: \"Keen pushes off, wobbles, flails, catches himself — 'Still got it!'\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "He wants to go first, get closer, see what is beyond the next edge, and prove he is ready for the big world.",
+     "groundedIn": "\"the one already three steps ahead, asking what's over the next dune — curiosity and bravery braided together\" and \"What's down there? Can we — can we get closer?\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Open and bright by default; when fear hits, the face tries to stay brave but leaks through a held breath, flattened ears, and a tiny crack before the leap.",
+     "groundedIn": "\"able to crack small so the gulp and wobble are audible before the leap\" and \"the courage tell lives in the body before the leap.\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "His eyes jump ahead to the next thing before his body has caught up; under fear, the gaze drops to paws or cuffs, then lifts and locks onto the obstacle when he chooses to move.",
+     "groundedIn": "\"half-turned to the next thing\" and \"Touches/turns his father's gold cuffs to gather nerve once he has them.\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Quick, eager, medium-large cub gestures: pointing, bouncing, turning, reaching. Fear compresses the gesture into paws, gulp and shoulders; courage expands it again into the step or leap.",
+     "groundedIn": "\"leaning in, bouncing\" and \"trembling paws → swallowed gulp → flattened ears → squared shoulders → lifted chin → step forward.\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "He needs permission to let the frightened part show before he acts, so the brave part can be real instead of performed.",
+     "groundedIn": "\"True courage is acknowledging fear, not erasing it\" and \"His growth edge is letting the fear show first.\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "He worries that if his wobble is visible, the bravery will not count.",
+     "groundedIn": "\"He confuses true courage with fearlessness — and so he suppresses his fear to look brave.\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Start-stop-launch: a breathless rush forward, a tiny fear-stutter, then a committed burst through it.",
+     "groundedIn": "\"Short, propulsive, run-on-eager sentences\" and \"leans in before he's ready, gulps hard, and goes anyway.\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never stage him as effortlessly brave. Every genuine brave action needs the visible fear beat first; also never ignore his Ep1 cuff state.",
+     "groundedIn": "\"Never let him be brave without first showing fear\" and \"Track his state on every Ep1 beat: keenState no-cuffs before the Scene-3 pier goodbye, cuffs after.\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "He naturally closes distance — leaning in, crowding the edge of discovery, pulled toward people and problems unless fear briefly pins him back.",
+     "groundedIn": "\"Forward momentum incarnate — leaning in\" and \"curiosity always wins the argument with his own nerves.\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "His deepest fear is not the obstacle; it is being exposed as not brave enough when the obstacle makes his paws hesitate.",
+     "groundedIn": "\"He confuses true courage with fearlessness\" and \"my paws don't want to move.\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Borrowed fearlessness: a bright, fast, 'I've got this' front that tries to outrun the gulp.",
+     "groundedIn": "\"he suppresses his fear to look brave\" and \"coolly claim he was never afraid\" is forbidden because it erases his point."
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After a stumble, he pops back up into momentum and reframes the wobble as proof he meant to keep going.",
+     "groundedIn": "\"Keen pushes off, wobbles, flails, catches himself — 'Still got it!'\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "He covers embarrassment with speed: a quick line, a too-fast reset of posture, then attention snapped to the next action.",
+     "groundedIn": "\"Short, propulsive, run-on-eager sentences\" and \"Still got it!\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure first shows in the body — paws, gulp, ears — then he gathers himself through the cuffs or a lifted chin and moves anyway.",
+     "groundedIn": "\"trembling paws → swallowed gulp → flattened ears → squared shoulders → lifted chin → step forward\" and \"Touches/turns his father's gold cuffs to gather nerve.\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Success comes out as a bright, breathless burst, but he is already leaning toward the next thing before the pride fully lands.",
+     "groundedIn": "\"electric, bold, action-forward\" and \"the one already three steps ahead.\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "An arrow of motion: upright head-tuft leading, body tipped forward, limbs ready to spring rather than settle.",
+     "groundedIn": "\"his upright pale head-tuft leading like an arrow\" and \"Keep his upright pale head-tuft present in every shot — his signature silhouette.\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is rare and must be charged: the held breath before the leap, the moment his paws will not move, or the beat he turns the cuffs to gather nerve.",
+     "groundedIn": "\"a dedicated fear shot FIRST — trembling paws, swallowed gulp, flattened ears — before he leaps\" and \"Touches/turns his father's gold cuffs to gather nerve.\""
+    }
+   ]
+  },
+  {
+   "character": "Keen's Mum",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Grounded and sheltering: her weight feels low, steady and home-like, so Keen can move away from her without the world feeling unsafe.",
+     "groundedIn": "\"The warm hearth Keen carries with him out to sea\" and \"She is the safe place the world begins from.\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Her gentle comedy comes from trying to make enormous feelings fit inside tiny practical acts — smoothing fur, fussing with paws, making the goodbye look ordinary when it is not.",
+     "groundedIn": "\"she'll straighten his fur or close his paws around the wristbands instead of explaining a feeling\" and \"not let him see the tremble.\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "She wants Keen to leave feeling loved, steady, and connected to his father — without making him carry the cost of her letting go.",
+     "groundedIn": "\"handing her cub something of his lost father and then letting him go anyway\" and \"She models the parent who does NOT transmit their fear.\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Warm face, restrained ache: the smile is real, but held carefully; when moved, she gets quieter rather than more expressive.",
+     "groundedIn": "\"When she's moved she does not get louder; she gets quieter and steadier\" and \"smile, and not let him see the tremble.\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Her gaze tends before it watches: it rests on Keen, drops to the wristbands when the father-memory rises, then returns to Keen with steadiness.",
+     "groundedIn": "\"she'll straighten his fur or close his paws around the wristbands\" and \"she carries it in the hand that lingers on the wristbands.\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small, precise, intimate gestures: smoothing, enclosing, lingering. No big declarations; the hand does the emotional work.",
+     "groundedIn": "\"Hands that tend\" and \"she'll straighten his fur or close his paws around the wristbands instead of explaining a feeling.\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "She needs to believe home can travel with Keen, even when she cannot.",
+     "groundedIn": "\"home goes with you even when you leave it\" and \"She is the emotional baseline... the warmth it returns to.\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She fears that freeing him may feel like failing to protect him.",
+     "groundedIn": "\"protecting a cub and freeing a cub are opposites\" and \"She would keep him safe forever if love let her — and it doesn't.\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Soft, unhurried, pause-filled movement; she absorbs emotion before she acts, then completes the practical task gently.",
+     "groundedIn": "\"Soft, slowed delivery — commas and gentle pauses\" and \"Warm, maternal, gentle reassurance.\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never give her a crystal, Crystal Call, lesson speech, or named grief. Her power is ordinary care, and her feeling must live in behaviour.",
+     "groundedIn": "\"She holds no crystal, no pillar and no Crystal Call of her own\" and \"She never names her grief aloud; she carries it in the hand that lingers on the wristbands.\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Close, safe, and permission-giving: she enters Keen's space to tend and bless, then lets the space open as he leaves.",
+     "groundedIn": "\"close his paws around the wristbands\" and \"letting him go anyway.\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That the big world may take Keen beyond her protection, as grief has already taught her loss is possible.",
+     "groundedIn": "\"Her grief for Keen's father lives right under the warmth\" and \"trust your child to the big world rather than shrink the world to keep them small.\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "A steady, warm, practical smile — not denial, but a chosen calm so Keen does not have to carry her fear.",
+     "groundedIn": "\"smile, and not let him see the tremble\" and \"holding the feeling so Keen doesn't have to.\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "When emotion threatens to spill, she returns to a small act of care: smoothing, holding, closing his paws, or making her voice quieter and steadier.",
+     "groundedIn": "\"When she's moved she does not get louder; she gets quieter and steadier\" and \"she'll straighten his fur or close his paws around the wristbands.\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "If caught feeling too much, she does not joke it away; she softens, redirects into a homely action, and lets warmth cover the catch.",
+     "groundedIn": "\"sensory and homely, never clinical\" and \"an honest [breath] before the goodbye.\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Under pressure she slows down, lowers the voice, and makes the next necessary act tender and exact.",
+     "groundedIn": "\"Soft, slowed delivery\" and \"When she's moved she does not get louder; she gets quieter and steadier.\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Her pride is bittersweet: warmth first, ache visible underneath, never a clean celebration that erases the cost.",
+     "groundedIn": "\"the bravest, quietest act a parent ever performs\" and \"letting him go anyway.\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A still home-shape defined by tending hands: the figure Keen moves away from, and emotionally carries with him.",
+     "groundedIn": "\"The warm hearth Keen carries with him out to sea\" and \"Hands that tend.\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Her stillness should be charged by restraint: the hand lingering on the wristbands, the smile held a beat too long, the breath she takes so Keen does not have to see the tremble.",
+     "groundedIn": "\"she carries it in the hand that lingers on the wristbands\" and \"not let him see the tremble.\""
+    }
+   ]
+  },
+  {
+   "character": "Squeaky",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "NO GROUNDED PROPOSAL YET — supplied canon only identifies Squeaky as the dolphin Keen saves, not a repeatable performance centre.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied Squeaky canon establishes how Squeaky specifically generates comedy.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "Limited proposal: in the rescue scene, Squeaky wants help/safety. Any broader want needs canon approval.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save.\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines Squeaky's facial openness or restraint.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines Squeaky's gaze behaviour.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines Squeaky's gesture scale beyond being a dolphin in a rescue beat.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save.\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "NO GROUNDED PROPOSAL YET — the supplied canon does not establish Squeaky's inner need; inventing one would be unrelated psychology.",
+     "groundedIn": "\"Use ONLY established character canon — where a performance field is unresolved, work from what exists rather than inventing deep psychology.\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon establishes an insecurity for Squeaky.",
+     "groundedIn": "\"Use ONLY established character canon — where a performance field is unresolved, work from what exists rather than inventing deep psychology.\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines Squeaky's normal rhythm outside the fact of being a dolphin Keen rescues.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save.\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Limited proposal: Squeaky should never be staged as a villain or obstacle with intent; Squeaky's function here is to draw out Keen's selfless courage.",
+     "groundedIn": "\"There is no villain, ever. The antagonist is always the feeling\" and \"the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines how Squeaky uses closeness or distance.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon establishes a primary fear for Squeaky.",
+     "groundedIn": "\"Use ONLY established character canon — where a performance field is unresolved, work from what exists rather than inventing deep psychology.\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon establishes a mask or performed self for Squeaky.",
+     "groundedIn": "\"Use ONLY established character canon — where a performance field is unresolved, work from what exists rather than inventing deep psychology.\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines how Squeaky recovers after danger.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon establishes embarrassment behaviour for Squeaky.",
+     "groundedIn": "\"Use ONLY established character canon — where a performance field is unresolved, work from what exists rather than inventing deep psychology.\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Limited proposal: in this scene, pressure should read as genuine need for rescue, not comic panic that undercuts Keen's courage. Broader pressure behaviour needs canon approval.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines Squeaky's success behaviour after rescue.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save — the selfless act through which his courage is born.\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "NO GROUNDED PROPOSAL YET — supplied canon only names Squeaky as a dolphin; no character-specific silhouette language is provided.",
+     "groundedIn": "\"Squeaky the dolphin is the one he dives to save.\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "NO GROUNDED PROPOSAL YET — no supplied canon defines Squeaky's stillness. Any charged stillness should be approved from character canon, not inferred.",
+     "groundedIn": "\"Stillness must be charged — full of something unsaid — never merely static\" and \"Use ONLY established character canon.\""
+    }
+   ]
+  }
+ ]
+}

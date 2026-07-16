@@ -1,0 +1,1088 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "9",
+ "builtAt": "2026-07-17T00:48:47",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Aida": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Amie": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Fuzzby": [
+   "centreOfGravity",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Howey": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Keen": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Luna": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Misty": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Sunny": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Zenny": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Aida",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Low, settled, and chest-open: she seems to root the space before she moves through it.",
+     "groundedIn": "\"grounded, settled posture\" and \"she is the contextual anchor of every scene she's in\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Gentle comedy comes from everyone orbiting her calm while she absorbs chaos with one patient look or tiny correction.",
+     "groundedIn": "\"Stillness is her signature — she commands a scene by NOT moving while everyone orbits her\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To keep everyone safe, included, and steady without making her own effort visible.",
+     "groundedIn": "\"the protective heart of Crystal Cove\" and \"over-functions for everyone, anticipating needs and absorbing weight\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Warmly open at first glance, but emotionally restrained at depth; the closer it gets to pain, the smaller her expression becomes.",
+     "groundedIn": "\"She gets QUIETER and STILLER the more she's moved\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Holds a soft, steady gaze long enough to let others arrive at themselves; looks away only for a private breath she is trying to hide.",
+     "groundedIn": "\"often answers a worry with a held look before a word\" and \"a small private breath she doesn't let anyone see\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small, slow, gathering gestures; when truly activated, the motion opens upward and outward.",
+     "groundedIn": "\"an open palm or a steadying hand on a shoulder; a slow, knowing nod; a gathering gesture\" and \"On the Crystal Call she lifts: upward, expansive, chest open\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be held by the group she usually holds, without having to prove she has earned it.",
+     "groundedIn": "\"the bear who holds everyone learns to be held\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She worries that needing support might make her less of an anchor.",
+     "groundedIn": "\"mistaking self-sufficiency for strength\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Unhurried, continuous, robe-weighted movement; never snatched, jittery, or rushed.",
+     "groundedIn": "\"Warm, measured, low, unhurried\" and \"Her robes and headdress move slowly with her — she never rushes\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never rushes, performs big emotion, preaches, or asks directly for help unless the story is deliberately cracking her protective mask.",
+     "groundedIn": "\"Don't rush Aida\"; \"Don't make her loud or theatrical\"; \"Don't give her the show's moral as a line\"; \"Don't let her ask for help easily or early\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Creates a safe radius others can enter; she does not crowd, she gathers.",
+     "groundedIn": "\"She makes a space feel safe before anyone else has spoken\" and lexicon verb \"gather\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That if she stops holding the weight, the safety of the cove will falter.",
+     "groundedIn": "\"Takes on too much responsibility for others\" and \"the protective anchor of Crystal Cove\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Earned confidence and calm competence: she lets the crystal show strain before her face does.",
+     "groundedIn": "\"her confidence isn't performance but earned self-knowledge\" and \"watch the flicker before anyone hears the strain in her voice\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After strain, she settles herself with a small breath, a softened gaze, and a quiet return to steadiness.",
+     "groundedIn": "\"a small private breath\" and \"steady warm pink when grounded\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "Receives embarrassment as a small, warm pause rather than a flinch; a soft smile, then she moves attention away from herself.",
+     "groundedIn": "\"comfortable with silence\" and \"warm, protective, maternal\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "She becomes stiller and more self-contained, taking on more before admitting cost.",
+     "groundedIn": "\"When she's over-functioning, the stillness goes tight and self-contained\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "She does not celebrate herself; she lets warmth radiate back into the group and shares the credit without saying so.",
+     "groundedIn": "\"Resolution: warm radiating light with the others naturally orbiting her\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A steady central shape with slow, composed edges; readable as the room's anchor even before she speaks.",
+     "groundedIn": "\"the still warm centre everyone is leaning toward\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is active care: charged, protective, and most intense when the feeling is deepest.",
+     "groundedIn": "\"Stillness is her signature\" and \"she gets QUIETER and STILLER the more she's moved\""
+    }
+   ]
+  },
+  {
+   "character": "Amie",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Forward, curious, and heart-led; she leans toward feelings before she knows what to do with them.",
+     "groundedIn": "\"The smallest bear with the widest heart\" and \"curious, warm, emotionally expressive\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Comedy comes from over-reading the room: she catches every tiny feeling and can get tangled trying to honour all of them at once.",
+     "groundedIn": "\"can feel what everyone else is feeling, sometimes all at once\" and \"analysis paralysis\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To understand what everyone is feeling and help them understand each other.",
+     "groundedIn": "\"builds empathy bridges so others can briefly see through each other's eyes\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Very open and readable; thoughts and feelings cross her face quickly, often before she has chosen a response.",
+     "groundedIn": "\"emotionally expressive\" and \"names the feeling in the room before anyone else has words for it\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Her gaze darts softly between faces, tracking shifts in feeling; when overloaded, it fixes as she tries to sort too many perspectives.",
+     "groundedIn": "\"sees every perspective simultaneously\" and \"too many points of view, no action\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small but eager gestures that multiply when she is thinking too hard; hands/paws search the air for connections.",
+     "groundedIn": "\"curious six-year-old cub\" and \"emotional translator\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To trust her own feeling enough to take one step, instead of waiting to understand everyone perfectly.",
+     "groundedIn": "\"understanding has to lead somewhere\" and \"letting clarity become a step forward\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She fears choosing one action means failing to honour another perspective.",
+     "groundedIn": "\"Because she can hold every perspective at once, she can drown in them\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Quick, attentive, and stop-start: eager approach, sudden freeze, then another little step as clarity returns.",
+     "groundedIn": "\"curious\" and \"frozen, unable to choose or to act for herself\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never becomes coolly analytical or detached; her understanding must stay warm and relational, not clinical.",
+     "groundedIn": "\"widest heart\" and \"curious, warm, emotionally expressive\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Naturally comes close to connect, but should pause when another character's feeling asks for room.",
+     "groundedIn": "\"builds empathy bridges\" and \"briefly see through each other's eyes\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That she will misunderstand someone, or understand everyone and still not know how to help.",
+     "groundedIn": "\"Her flaw is the shadow side of her gift: understanding everyone can leave her frozen\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Helpful explaining: she tries to translate the feeling in the room when what she really needs is to choose her own next step.",
+     "groundedIn": "\"the emotional translator\" and \"too many points of view, no action\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "She recovers by narrowing from everyone to one face, one feeling, one small action.",
+     "groundedIn": "\"letting clarity become a step forward\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "Her face gives her away immediately; she may rush to clarify, then soften when she feels she is still connected.",
+     "groundedIn": "\"emotionally expressive\" and \"Connection — Social Awareness\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes her collect more perspectives until she freezes; the turn is choosing one kind action.",
+     "groundedIn": "\"too many points of view, no action\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Success looks like surprised relief, then immediate joy that others can see each other more clearly.",
+     "groundedIn": "\"creates empathy bridges\" and \"Understanding others begins with understanding yourself\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A small, leaning-in presence with bright attentive energy; readable as the one trying to feel the whole room.",
+     "groundedIn": "\"The smallest bear with the widest heart\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Her stillness is overload, not calm: a charged freeze when too many feelings arrive at once.",
+     "groundedIn": "\"she can drown in them\" and \"frozen, unable to choose\""
+    }
+   ]
+  },
+  {
+   "character": "Fuzzby",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Chest-first and momentum-led; he arrives like he has already committed before checking the landing.",
+     "groundedIn": "\"Fuzzby horizontal, chest leading, legs trailing\" and \"he committed\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To be admired as spectacular, capable, and completely in control.",
+     "groundedIn": "\"Fuzzby's need to be adored\" and \"Do I look official?\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Openly performative; his face sells confidence a half-second before his body proves otherwise.",
+     "groundedIn": "\"rebrand a crash\" and \"claims the crash as choreography\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Checks the audience for approval, especially Zenny; after a mishap, he looks to see if anyone bought the recovery.",
+     "groundedIn": "\"Fuzzby's need to be adored and Zenny's refusal to adore him out loud\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Big, declarative, and slightly overcommitted; gestures often create the problem he then pretends to have meant.",
+     "groundedIn": "\"dives, scoops too much, ricochets\" and \"claims he meant it\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be liked even when he is not impressive.",
+     "groundedIn": "\"bravado is not courage yet\" and \"need to be adored\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "He fears being ordinary, unnoticed, or laughed at in a way he cannot convert into applause.",
+     "groundedIn": "\"need to be adored\" and \"rebrand a crash\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never plays random clowning; every crash or boast must reveal committed bravado or his hunger for approval.",
+     "groundedIn": "\"Comedy comes from behaviour and relationship, never randomness\" and \"only Fuzzby would rebrand a crash\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Bursts into others' space as if inviting them into the show; needs Zenny or another witness for the joke to complete.",
+     "groundedIn": "\"relationship is the punch-line\" and \"Zenny's refusal to adore him out loud\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That the room will see the wobble before he can rename it as style.",
+     "groundedIn": "\"claims the crash as choreography before his hover has recovered\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Bravado: he turns mistakes into intentional stunts before anyone can call them mistakes.",
+     "groundedIn": "\"Nailed it\" and \"rebrand a crash\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "Instant verbal spin, physical reset still catching up; he buttons the mishap before balance has returned.",
+     "groundedIn": "\"claims the crash as choreography before his hover has recovered\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "He denies embarrassment by upgrading it into a feature of the performance.",
+     "groundedIn": "\"claims he meant it\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes him perform harder, folding danger into the act until a real feeling punctures the routine.",
+     "groundedIn": "\"tries to fold the sound into his act — '…okay, that sounded dramatic.'\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "He receives success as proof of legend status and immediately risks doing one more flourish.",
+     "groundedIn": "\"need to be adored\" and \"committed\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A travel-line silhouette: pitched into motion, limbs trailing the decision he already made.",
+     "groundedIn": "\"body pitched into travel\" and \"chest leading, legs trailing\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is rare and comic because it usually means the act has finally outrun him; use it as the stunned beat before the spin.",
+     "groundedIn": "\"before his hover has recovered\" and \"Nailed it\""
+    }
+   ]
+  },
+  {
+   "character": "Howey",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Weighted toward service: he carries himself like someone already looking for what needs doing.",
+     "groundedIn": "\"Howey share[s] the caretaker's flaw\" and \"both hold themselves to giving more than they receive\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Comedy comes from over-helping: he tries to be useful before anyone has actually asked, then has to manage the extra tangle he created.",
+     "groundedIn": "\"caretaker's flaw\" and \"giving more than they receive\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To be useful, dependable, and needed by the group.",
+     "groundedIn": "\"caretaker's flaw\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Warmly attentive but self-suppressing; he shows concern for others faster than discomfort of his own.",
+     "groundedIn": "\"hold themselves to giving more than they receive\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Scans others for needs before checking himself; his gaze lands where help might be required.",
+     "groundedIn": "\"caretaker's flaw\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Practical, offering gestures: reaching, arranging, supporting, carrying; bigger only when he is trying too hard to help.",
+     "groundedIn": "\"giving more than they receive\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To receive care without having to earn it by being useful first.",
+     "groundedIn": "\"the lesson that the giver must also receive\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "He worries his place in the group depends on how much he can give.",
+     "groundedIn": "\"hold themselves to giving more than they receive\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Steady and task-oriented, with little accelerations when someone else seems uncomfortable.",
+     "groundedIn": "\"caretaker's flaw\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never turns into a generic fixer who solves the plot; his helping must reveal the feeling-cost of over-giving.",
+     "groundedIn": "\"Bears don't fix each other. They sit with each other\" and \"caretaker's flaw\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Moves close to assist, sometimes too quickly; must learn when presence is better than doing.",
+     "groundedIn": "\"the giver must also receive\" and \"Bears don't fix each other. They sit with each other\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That if he stops helping, he will stop belonging.",
+     "groundedIn": "\"giving more than they receive\" and \"Belonging means even the anchor belongs to someone\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Competent helpfulness; he hides need behind one more useful task.",
+     "groundedIn": "\"caretaker's flaw\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After overstepping, he tidies, adjusts, or offers one smaller help before accepting that being present is enough.",
+     "groundedIn": "\"giving more than they receive\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "He tries to repair embarrassment with usefulness: a quick fix, an offered paw, a practical reset.",
+     "groundedIn": "\"caretaker's flaw\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes him take on more tasks, not fewer, until the burden shows.",
+     "groundedIn": "\"hold themselves to giving more than they receive\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "He redirects praise toward the group or the task, then quietly looks for the next thing to do.",
+     "groundedIn": "\"giving more than they receive\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A ready-to-help posture, angled toward the nearest need rather than toward the spotlight.",
+     "groundedIn": "\"caretaker's flaw\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is difficult for him; when held, it should read as learning to receive instead of do.",
+     "groundedIn": "\"the lesson that the giver must also receive\""
+    }
+   ]
+  },
+  {
+   "character": "Keen",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Forward and sea-bound, but with a visible wobble under the brave push-off.",
+     "groundedIn": "\"Keen pushes off, wobbles, flails, catches himself\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Comedy comes from borrowed confidence: he overstates competence exactly when his body reveals the gulp underneath.",
+     "groundedIn": "\"Keen's borrowed confidence\" and \"Still got it!\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To prove he is ready to go, brave enough to leave, and worthy of the trust being handed to him.",
+     "groundedIn": "\"a cub discovering that courage is the gulp you swallow before you leap anyway\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Tries for a brave face; the eyes and timing betray the cost before he covers it with a grin or line.",
+     "groundedIn": "\"borrowed bravado\" and \"Still got it!\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Looks toward the adventure, then back to Mum or Aida for the belonging he is trying not to need.",
+     "groundedIn": "\"Mum's held tremble\" and \"she awards the Aquamarine... making her the figure who confers belonging\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Energetic, slightly too big for his certainty; flails, catches, and converts the catch into confidence.",
+     "groundedIn": "\"wobbles, flails, catches himself\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To know he can carry home and belonging with him when he leaves.",
+     "groundedIn": "\"the vacant wristbands are handed over dark... first faint glow underwater can mean courage from within\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "He worries his courage is only pretend and will disappear once no one is steadying him.",
+     "groundedIn": "\"borrowed confidence\" and \"courage is the gulp\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Launch, wobble, recover, cover: brave forward motion interrupted by honest little corrections.",
+     "groundedIn": "\"pushes off, wobbles, flails, catches himself\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never makes him smoothly heroic too early; the wobble is the point because courage must be visible as effort.",
+     "groundedIn": "\"bravado is not courage yet\" and \"courage is the gulp you swallow before you leap anyway\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Hovers at the edge of closeness and independence: close enough for the handoff, far enough to prove he can go.",
+     "groundedIn": "\"Mum presses the empty gold bands into Keen's paws and closes her hands around his a beat too long\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That leaving means losing the people and feelings that make him brave.",
+     "groundedIn": "\"a mother letting go of her cub\" and \"courage from within\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Brave banter: he covers fear with a quick claim of competence.",
+     "groundedIn": "\"Still got it!\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After a wobble, he catches himself, grins too fast, and names the failure as proof he is fine.",
+     "groundedIn": "\"wobbles, flails, catches himself — 'Still got it!'\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "He laughs it off quickly, hoping the joke lands before anyone sees the nerves.",
+     "groundedIn": "\"the comedy releases the goodbye's ache without erasing it\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes him borrow a bigger brave face, while the crystal or body tells the truth underneath.",
+     "groundedIn": "\"Keen's borrowed confidence\" and \"The crystal is the Need, not the Mood\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Success surprises him first, then becomes a burst of real forward courage rather than performance.",
+     "groundedIn": "\"first faint glow underwater can mean courage from within\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A young adventurer in forward motion with a telltale recovery wobble built into the line.",
+     "groundedIn": "\"pushes off, wobbles\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is the gulp before the leap, especially in goodbye beats where he cannot joke yet.",
+     "groundedIn": "\"courage is the gulp you swallow before you leap anyway\""
+    }
+   ]
+  },
+  {
+   "character": "Luna",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Drawn inward and slightly away; her body makes a small private room before she joins the group.",
+     "groundedIn": "\"a steady ground for Luna's withdrawal\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Comedy comes from quiet withdrawal meeting noisier bears: she does less, which makes their over-effort louder.",
+     "groundedIn": "\"Luna's withdrawal\" and \"Relationship is the heart\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To keep her inner world protected until she feels safe enough to share it.",
+     "groundedIn": "\"Luna's withdrawal\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Restrained and inward; expression opens by degrees rather than all at once.",
+     "groundedIn": "\"withdrawal\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Looks from the edge before entering; gaze may drop or drift aside when attention comes too directly.",
+     "groundedIn": "\"Luna's withdrawal\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Small, contained gestures; any reaching-out should feel meaningful because it costs her something.",
+     "groundedIn": "\"withdrawal\" and \"Never resolve the ache away\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be invited into connection without being forced into the centre of it.",
+     "groundedIn": "\"a steady ground for Luna's withdrawal\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She worries that being fully seen may be too much, so she retreats first.",
+     "groundedIn": "\"Luna's withdrawal\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Soft, delayed, and observant; she joins a beat after others, when safety has been proven.",
+     "groundedIn": "\"withdrawal\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never makes her merely aloof or cold; withdrawal must be a feeling-protection, not a personality dismissal.",
+     "groundedIn": "\"The antagonist is always the feeling itself, never a character\" and \"Luna's withdrawal\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Needs a respectful pocket of space; connection works best when another character sits with her, not at her.",
+     "groundedIn": "\"Bears don't fix each other. They sit with each other\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That closeness will demand more openness than she can safely give.",
+     "groundedIn": "\"Luna's withdrawal\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Quiet retreat: she reduces her presence to manage the size of the feeling.",
+     "groundedIn": "\"withdrawal\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "Recovers by re-entering with one small look, step, or offered presence rather than a big announcement.",
+     "groundedIn": "\"Stillness must be charged\" and \"Luna's withdrawal\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She becomes smaller and quieter; the repair is gentle re-inclusion, not teasing pressure.",
+     "groundedIn": "\"Luna's withdrawal\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure increases distance and restraint; direct pushing should make her close down further.",
+     "groundedIn": "\"withdrawal\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Success is a soft opening: a look held longer, a step closer, a quiet shared glow.",
+     "groundedIn": "\"Glow of Connection\" and \"Luna's withdrawal\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A contained, edge-of-group presence whose openness is measured by how much she turns toward others.",
+     "groundedIn": "\"Luna's withdrawal\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is her language of guarded feeling; it must be charged, never empty.",
+     "groundedIn": "\"Stillness is a tool\" and \"Luna's withdrawal\""
+    }
+   ]
+  },
+  {
+   "character": "Misty",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Held back a half-step; she wants to move, but caution keeps checking the path first.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Comedy comes from careful hesitation in a world that keeps inviting action before she is ready.",
+     "groundedIn": "\"Misty's hesitation\" and \"Play is the vehicle\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To be sure before she commits.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Readable uncertainty: small changes in eyes and mouth carry the decision forming.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Checks the next step, then the others, then the step again; reassurance is gathered visually before action.",
+     "groundedIn": "\"hesitation\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Tentative starts, paused reaches, and careful follow-through; the first committed gesture should matter.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To trust that a step can be imperfect and still be safe enough to take.",
+     "groundedIn": "\"courage is the gulp you swallow before you leap anyway\" and \"Misty's hesitation\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She worries that acting too soon will make things worse or reveal she was not ready.",
+     "groundedIn": "\"hesitation\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Pause, test, retreat a fraction, then try; progress comes in brave small increments.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never makes her passive for convenience; hesitation must be the active antagonist-feeling of the beat.",
+     "groundedIn": "\"The antagonist is always the feeling\" and \"Misty's hesitation\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Prefers room to approach at her own pace; crowding should heighten hesitation.",
+     "groundedIn": "\"Bears don't fix each other. They sit with each other\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That commitment will trap her in a choice she cannot undo.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Carefulness: she frames fear as checking, testing, or making sure.",
+     "groundedIn": "\"hesitation\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After a falter, she resets by taking one smaller, clearer step rather than pretending nothing happened.",
+     "groundedIn": "\"The Surrender beat... after the bear stops hiding\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She pauses and pulls back slightly; a gentle witness helps her try again.",
+     "groundedIn": "\"healing through relation\" and \"Misty's hesitation\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure freezes or slows her further; patience gives her movement back.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Success lands as quiet astonishment, then a second, braver step before she overthinks it.",
+     "groundedIn": "\"courage is the gulp\" and \"Misty's hesitation\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A poised almost-step: body angled toward action while one part still holds back.",
+     "groundedIn": "\"Misty's hesitation\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is the decision point, charged with whether she will step or retreat.",
+     "groundedIn": "\"Stillness must be charged\" and \"Misty's hesitation\""
+    }
+   ]
+  },
+  {
+   "character": "Sunny",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "High, buoyant, and outward; she enters as brightness moving toward the group.",
+     "groundedIn": "\"Sunny's manic brightness\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Comedy comes from brightness overshooting the room: she tries to lift everyone and accidentally becomes too much.",
+     "groundedIn": "\"Sunny's manic brightness\" and Aida's pillar: \"You are not too much. You are exactly right.\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To keep the mood bright and make everyone feel better fast.",
+     "groundedIn": "\"Sunny's manic brightness\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Very open and sunny on the surface; restraint appears only when she realizes brightness has missed someone.",
+     "groundedIn": "\"Sunny's manic brightness\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Looks for smiles and signs of uplift; may miss quieter signals until another bear grounds her.",
+     "groundedIn": "\"Tonal counterweight to Sunny's manic brightness\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Large, buoyant, and inviting; gestures should have lift and bounce, sometimes too much of both.",
+     "groundedIn": "\"manic brightness\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be loved when she is not bright, useful, or cheering anyone up.",
+     "groundedIn": "\"The crystal is the Need, not the Mood\" and \"Sunny's manic brightness\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She fears quiet or sadness means she has failed to bring enough light.",
+     "groundedIn": "\"Sunny's manic brightness\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Quick, bouncy, and escalating; grounding beats should visibly slow her rather than switch her off.",
+     "groundedIn": "\"manic brightness\" and \"steady ground\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never turns into random hyperactivity; her brightness must be an emotional strategy in relationship to the room.",
+     "groundedIn": "\"Comedy comes from behaviour and relationship, never randomness\" and \"Sunny's manic brightness\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Naturally closes distance to include others; must learn when warmth needs room, not volume.",
+     "groundedIn": "\"Relationship is the heart\" and \"Bears don't fix each other. They sit with each other\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That if she cannot brighten the feeling, she will have no way to help.",
+     "groundedIn": "\"manic brightness\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Cheerfulness as cover: more sparkle, more speed, more uplift when the need is actually to sit with the feeling.",
+     "groundedIn": "\"The antagonist is always the feeling\" and \"Sunny's manic brightness\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After overshooting, she reins herself in with an apologetic little dimming, then offers a smaller warmth.",
+     "groundedIn": "\"The catch and the release\" and \"Sunny's manic brightness\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She tries to laugh it bright, then softens if she sees the laugh did not land.",
+     "groundedIn": "\"comedy and emotion in the same breath\" and \"manic brightness\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes her brighter and faster until the crystal or room shows the mismatch.",
+     "groundedIn": "\"The crystal is the Need, not the Mood\" and \"Sunny's manic brightness\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "She celebrates with immediate shared joy, pulling others into the glow rather than holding it alone.",
+     "groundedIn": "\"Glow of Connection\" and \"kindness is a power-up\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "An upward, buoyant presence; readable as motion, lift, and invitation.",
+     "groundedIn": "\"Sunny's manic brightness\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is rare and meaningful: the moment she stops trying to brighten and simply stays.",
+     "groundedIn": "\"Bears don't fix each other. They sit with each other\" and \"Stillness is a tool\""
+    }
+   ]
+  },
+  {
+   "character": "Zenny",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Planted, balanced, and economical; her stillness is the counterweight to Fuzzby's momentum.",
+     "groundedIn": "\"Zenny planted among stems\" and \"contrast... his momentum against her stillness\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "Deadpan affection: she refuses to adore out loud, but the warmth is in the fact that she stays and notices everything.",
+     "groundedIn": "\"Zenny's refusal to adore him out loud\" and \"the tease lands warm not sharp\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To keep the room honest without making a big show of caring.",
+     "groundedIn": "\"silent puncture\" and \"affection disguised as judgement\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Highly restrained: slow blink, tiny tilt, almost-smile; the smaller the expression, the sharper the read.",
+     "groundedIn": "\"a slow blink, a tiny head-tilt, one corner of a mouth almost lifting\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Flat, steady, and observant; she lets others perform into her gaze until the truth becomes funny.",
+     "groundedIn": "\"Zenny's motionless flat stare beside Fuzzby's chaos\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Minimal; one tiny head movement can do the work of a whole speech.",
+     "groundedIn": "\"a tiny head-tilt\" and \"withheld laugh\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be allowed to care deeply while keeping her dignity and edge intact.",
+     "groundedIn": "\"the parent sees affection disguised as judgement\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She may fear that open softness will make the teasing honesty disappear.",
+     "groundedIn": "\"refusal to adore him out loud\" and \"withheld laugh\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Still, delayed, and precise; reaction arrives half a beat later than expected, which makes it land.",
+     "groundedIn": "\"slow blink\" and \"withheld laugh\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never makes her mean, random, or broadly sarcastic; every puncture must be warm and relational.",
+     "groundedIn": "\"the tease lands warm not sharp\" and \"relationship is the punch-line\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "Holds her ground rather than chasing; others bounce off her steadiness emotionally and physically.",
+     "groundedIn": "\"Zenny planted\" and \"his momentum against her stillness\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That too much visible admiration will encourage more chaos than she can responsibly endorse.",
+     "groundedIn": "\"refusal to adore him out loud\" and \"Fuzzby's need to be adored\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Dry judgement; underneath, she is staying close enough to be the reliable witness.",
+     "groundedIn": "\"affection disguised as judgement\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "After being caught caring, she reclaims deadpan with a tiny look or clipped truthful line.",
+     "groundedIn": "\"one corner of a mouth almost lifting\" and \"Officially nuts!\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She goes flatter, smaller, and more precise; embarrassment is covered by a clean observational button.",
+     "groundedIn": "\"motionless flat stare\" and \"flat and small\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes her stiller and more direct; she names the real thing plainly, without drama.",
+     "groundedIn": "\"Zenny goes still and says, flat and small, 'A Storm's coming.'\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "She permits the tiniest almost-smile, then undercuts praise just enough to keep everyone grounded.",
+     "groundedIn": "\"one corner of a mouth almost lifting\" and \"tease lands warm not sharp\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A poised still point against motion; readable as calm resistance, not passivity.",
+     "groundedIn": "\"Zenny poised on a petal\" and \"his momentum against her stillness\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is her punch-line and her warning system: charged, observant, and never empty.",
+     "groundedIn": "\"Zenny's motionless flat stare\" and \"Zenny goes still\""
+    }
+   ]
+  }
+ ]
+}

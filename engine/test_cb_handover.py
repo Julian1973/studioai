@@ -124,7 +124,10 @@ def test_unapproved_storyboard_cannot_alter_production():
 
 
 def test_real_awaiting_storyboard_refused_against_package_copy():
-    real_sb = HERE.parent / "cb-output" / "creative" / "Ep1_scene1_storyboard.json"
+    live = HERE.parent / "cb-output" / "creative" / "Ep1_scene1_storyboard.json"
+    archived = (HERE.parent / "cb-output" / "creative" / "archive_process_v1"
+                / "Ep1_scene1_storyboard.json")            # process-v1, rejected (EX-005)
+    real_sb = live if live.exists() else archived
     sb = json.load(open(real_sb))
     assert sb["approvalState"] != "approved"          # nothing is approved yet — by design
     _, pkg_p = _tmp()

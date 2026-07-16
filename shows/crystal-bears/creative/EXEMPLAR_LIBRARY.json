@@ -61,6 +61,18 @@
    "cinematography": null,
    "voice": null,
    "reusable": true
+  },
+  {
+   "id": "EX-005",
+   "where": "Ep1 Scene 1 — complete Authoritative Storyboard Package (creative-room process v1), archived unchanged at cb-output/creative/archive_process_v1/Ep1_scene1_storyboard.json",
+   "attempted": "5 beats / 16 shots / 8 voice performances; per-beat three-interpretation exploration with the Cinematographer authoring camera after the Director's selection",
+   "outcome": "rejected",
+   "userWords": "Process-level failure — correcting its camera instructions or shot cards manually would paper over that failure: (1) the Cinematographer entered after the dramatic approach was already selected; (2) the scene lacked a governing audience-experience and visual-grammar decision; (3) fixed left/right staging returned; (4) action -> consequence -> reaction coverage repeated across the scene; (5) the opening camera anticipated the crash from a safe position instead of discovering the action experientially; (6) mandatory shot-field completion encouraged over-direction and conventional coverage.",
+   "character": null,
+   "principle": "Cinematography is a co-author of the scene's dramatic approach, never a decorator of a finished one. A scene needs ONE governing audience-experience and visual-grammar decision before beats or shots exist. No fixed screen lanes; no automatic action/consequence/reaction coverage; the camera discovers action experientially rather than waiting for it from safety; a schema box is never a reason to direct.",
+   "cinematography": "whole-scene visual grammar decided with (not after) the dramatic approach; reaction shots only when the reaction changes meaning",
+   "voice": null,
+   "reusable": true
   }
  ]
 }

@@ -819,97 +819,7 @@ function cvPanMove(e){if(!CV_DRAG)return;CV_PANX=CV_DRAG.px+(e.clientX-CV_DRAG.x
 function cvPanEnd(){CV_DRAG=null;const vp=document.getElementById('cvViewport');if(vp)vp.classList.remove('panning');window.removeEventListener('mousemove',cvPanMove);window.removeEventListener('mouseup',cvPanEnd);}
 function cvResetView(){CV_ZOOM=1;CV_PANX=60;CV_PANY=30;cvApply();}
 
-async function renderCanvas(){
-  document.getElementById("gatesbar").innerHTML="";
-  const view=document.getElementById("view");
-  if(!SHOTS.length){view.innerHTML=`<h1 class="h1">Canvas</h1><div class="coming">No beats yet — fire Gate 1 from the Pipeline tab first.</div>`;return;}
-  const pkgFile=CUR.package||CUR.shotPackage;
-  let sceneMeta=CV_SCENEMETA_CACHE.pkg===pkgFile?CV_SCENEMETA_CACHE.data:{};
-  if(pkgFile&&CV_SCENEMETA_CACHE.pkg!==pkgFile){
-    try{
-      const d=await fetch(BASE+"/"+projPkgBase()+"/"+pkgFile).then(r=>r.json());
-      sceneMeta={};(d.scenes||[]).forEach(s=>sceneMeta[String(s.sceneNumber)]={name:s.name||"",pillar:s.pillar||""});
-      CV_SCENEMETA_CACHE={pkg:pkgFile,data:sceneMeta};
-    }catch(e){}
-  }
-  const scenes=scenesList();
-  const rows=scenes.map(sn=>{
-    const beats=SHOTS.filter(s=>s.sceneNumber==sn).sort((a,b)=>cvBeatNum(a.shotCode)-cvBeatNum(b.shotCode));
-    const meta=sceneMeta[String(sn)]||{};
-    const pc=PILL[cap(meta.pillar||"spark")]||PILL.Spark;
-    const gatePills=CV_GATE_KEYS.map(gk=>{
-      const ph=cvGatePhase(sn,gk),c=cvGateColor(ph);
-      return `<span class="cv-gpill" title="Gate ${gk} — ${ph}" style="color:${v(c[0])};border-color:${v(c[0])};background:${c[1]?v(c[1]):'transparent'}">${gk}</span>`;
-    }).join("");
-    const beatNodes=beats.map((s,i)=>{
-      const m=mediaFor(s),st=statusOf(m);
-      const raw=(s.action||"").slice(0,46);
-      const label=_esc(raw)+((s.action||"").length>46?"…":"");
-      const arrow=i<beats.length-1?`<div class="cv-arrow">→</div>`:"";
-      return `<div class="cv-beat${CV_SEL==s.shotCode?' sel':''}" style="border-color:${v(st[0])}" onclick="cvSelectBeat('${s.shotCode}',this)">
-        <div class="cv-beatcode">${s.shotCode}</div>
-        <div class="cv-beatpill" style="color:${v(st[0])};background:${st[1]?v(st[1]):'transparent'}">${st[2]}</div>
-        <div class="cv-beatlabel">${label||"(no story text yet)"}</div>
-      </div>${arrow}`;
-    }).join("");
-    return `<div class="cv-scene">
-      <div class="cv-scenehead">
-        <span class="cv-scenenum">Scene ${sn}</span>
-        ${meta.name?`<span class="cv-scenename">${_esc(meta.name)}</span>`:""}
-        ${meta.pillar?`<span class="pill" style="color:${v(pc[0])};background:${v(pc[1])}">${cap(meta.pillar)}</span>`:""}
-        <span class="cv-gates">${gatePills}</span>
-      </div>
-      <div class="cv-beatrow">${beatNodes}</div>
-    </div>`;
-  }).join("");
-  view.innerHTML=`
-  <h1 class="h1" style="margin-bottom:2px">Canvas — Ep${CUR.number} · ${_esc(CUR.title||CUR.name||"")}</h1>
-  <p class="sub">The whole episode's pipeline at a glance — every scene's gates (1 → 1.6 → 2a → 2b → 3 → 4 → 5) and every beat's render state. Read-only: click a beat for its reference stack; fire/approve from the Pipeline tab. Scroll to zoom, drag the background to pan.</p>
-  <style>
-    .cv-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:8px}
-    .cv-viewport{position:relative;overflow:hidden;flex:1;min-width:0;height:calc(100vh - 250px);min-height:340px;background:var(--bg);border:1px solid var(--line);border-radius:10px;cursor:grab}
-    .cv-viewport.panning{cursor:grabbing}
-    .cv-plane{position:absolute;top:0;left:0;transform-origin:0 0}
-    .cv-scene{margin-bottom:26px;white-space:nowrap}
-    .cv-scenehead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-    .cv-scenenum{font:600 13px/1 'Label Sans',sans-serif;color:var(--ink)}
-    .cv-scenename{font-size:12px;color:var(--muted)}
-    .cv-gates{display:flex;gap:3px;margin-left:8px}
-    .cv-gpill{font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 5px;border-radius:4px;line-height:1.4;border:1px solid transparent}
-    .cv-beatrow{display:flex;align-items:stretch;gap:0}
-    .cv-beat{width:150px;flex:0 0 auto;border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 9px;cursor:pointer;white-space:normal}
-    .cv-beat:hover{background:var(--surface2)}
-    .cv-beat.sel{box-shadow:0 0 0 2px var(--brand)}
-    .cv-beatcode{font:600 12px 'Label Sans',sans-serif;color:var(--ink)}
-    .cv-beatpill{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin:3px 0}
-    .cv-beatlabel{font-size:10px;color:var(--hint);line-height:1.3;margin-top:2px}
-    .cv-arrow{flex:0 0 auto;width:26px;display:flex;align-items:center;justify-content:center;color:var(--hint);font-size:14px}
-    .cv-legend{font-size:10px;color:var(--hint);display:flex;gap:16px;margin:10px 2px 0;flex-wrap:wrap}
-    .cv-legend span{display:inline-flex;align-items:center;gap:4px}
-    .cv-dot{width:8px;height:8px;border-radius:2px;display:inline-block}
-  </style>
-  <div class="cv-toolbar">
-    <button class="btn" onclick="cvResetView()">⤾ Reset view</button>
-    <span style="font-size:11px;color:var(--hint)">scroll = zoom · drag background = pan · click a beat = its reference stack</span>
-  </div>
-  <div style="display:flex;gap:12px;align-items:flex-start">
-    <div class="cv-viewport" id="cvViewport" onwheel="cvWheel(event)" onmousedown="cvPanStart(event)">
-      <div class="cv-plane" id="cvPlane">${rows}</div>
-    </div>
-    <div id="cvDetail" style="width:280px;flex:0 0 auto;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;max-height:calc(100vh - 250px);overflow:auto">
-      <div style="color:var(--hint)">Click a beat node to see its reference stack — the exact anchors (keyframe/relay, turnarounds, plate, @Audio1) it fires with.</div>
-    </div>
-  </div>
-  <div class="cv-legend">
-    <span><span class="cv-dot" style="background:${v('--ok')}"></span> keyframe or final master exists</span>
-    <span><span class="cv-dot" style="background:${v('--info')}"></span> clip rendered</span>
-    <span><span class="cv-dot" style="background:${v('--hint')}"></span> draft — nothing rendered yet</span>
-    <span>Gate pills: filled = signed off · blue = firing now · grey outline = not yet fired</span>
-    <span>No arrow between scenes — a scene boundary is a full reset (the Scene Bubble Law)</span>
-  </div>`;
-  cvApply();
-}
-
+async function renderCanvas(){view.innerHTML=`<h1 class="h1">Canvas</h1><div class="coming">The legacy beat/gate pipeline was permanently removed at the 2026-07-16 cutover. Production runs on the <b>Shots</b> tab: disclosure → sealed request envelope → spend approval → candidate batch → your review.</div>`;}
 function cvSelectBeat(code,el){
   CV_SEL=code;
   document.querySelectorAll('.cv-beat.sel').forEach(x=>x.classList.remove('sel'));
@@ -943,19 +853,7 @@ function cvSelectBeat(code,el){
   `;
 }
 
-async function renderContinuity(){
-  const view=document.getElementById("view");
-  view.innerHTML=`<h1 class="h1">Continuity</h1><p class="sub">Cross-scene checks — runs every gate. Catches wristband-state regressions, visions that no longer match the real scene they foreshadow, and recurring assets (the boat, the pier).</p><div id="cont" class="coming">Checking…</div>`;
-  let f=[];try{f=(await (await fetch(BASE+"/api/continuity")).json()).findings||[];}catch(e){}
-  const blocks=f.filter(x=>x.level=="BLOCK"),notes=f.filter(x=>x.level!="BLOCK");
-  const row=x=>`<div class="mc" style="margin-bottom:8px;border-left:3px solid ${x.level=="BLOCK"?"var(--danger)":"var(--line)"}">
-    <div style="display:flex;gap:8px;align-items:baseline"><span style="font-size:11px;font-weight:700;color:${x.level=="BLOCK"?"var(--danger)":"var(--hint)"}">${x.level}</span>
-    <span style="font-size:12px;color:var(--hint)">scene ${x.scene}${x.shot&&x.shot!="-"?" · shot "+x.shot:""}</span></div>
-    <div style="font-size:13px;margin-top:4px">${x.msg.replace(/</g,"&lt;")}</div></div>`;
-  document.getElementById("cont").outerHTML=`<div id="cont">
-    <div style="margin-bottom:12px;font-size:13px">${blocks.length?`<b style="color:var(--danger)">⛔ ${blocks.length} blocking issue${blocks.length>1?"s":""}</b>`:`<b style="color:var(--ok)">✓ no blocking issues</b>`} · ${notes.length} note${notes.length==1?"":"s"}</div>
-    ${blocks.map(row).join("")}${notes.map(row).join("")}</div>`;
-}
+async function renderContinuity(){view.innerHTML=`<h1 class="h1">Continuity</h1><div class="coming">The legacy beat/gate pipeline was permanently removed at the 2026-07-16 cutover. Production runs on the <b>Shots</b> tab: disclosure → sealed request envelope → spend approval → candidate batch → your review.</div>`;}
 function noteChip(s){const n=(PIPE.notes||{})[s.shotCode];if(!n)return"";const t=(n.length>92?n.slice(0,92)+"…":n).replace(/</g,"&lt;");return `<div style="margin-top:6px;font-size:11px;color:#8a6d00;background:#fdf3d0;border-radius:6px;padding:5px 7px;line-height:1.35">⚠ ${t}</div>`;}
 function card(s){
   const m=mediaFor(s),[sc,sb,slab]=statusOf(m),pc=PILL[s.intent.pillar]||PILL.Spark;
@@ -1074,14 +972,7 @@ function charTurnURL(c){
   const cc=CHARCFG[c]||{}; const p=cc.turnaround||cc.turn4||cc.anchor||(cc.refs&&cc.refs[0]);  // the LOCKED identity reference (turnaround field) wins
   return p?BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+(MEDIA_V||Date.now()):"";
 }
-async function fireSub(sn,sub){
-  if(sub=='2b' && !gateState(sn)['2a']){alert(`Sign off the Scene ${sn} foundation (Step 1) before building the keyframes.`);return;}
-  if(sub=='1.6' && !gateState(sn)['1']){alert(`Sign off the Scene ${sn} storyboard (Step 1) before building the previz reel.`);return;}
-  // Reset the panel to a fresh "starting…" the INSTANT you (re-)fire, so a previous run's "beat N/N" can't linger.
-  if(sub=='2a'||sub=='2b'||sub=='1.6')KF_FIRING[sn+'|'+sub]=Date.now();
-  if(page=="pipeline"){CURSCENE=sn;FOCUSGATE=null;renderPipeline();}
-  try{const r=await fetch(BASE+"/api/fire",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(sn),gate:sub,episode:"Ep"+CUR.number})});const j=await r.json();if(!j.ok){delete KF_FIRING[sn+'|'+sub];if(page=="pipeline")renderPipeline();alert("Couldn't build: "+(j.error||"failed"));return;}setTimeout(refreshPipe,250);}catch(e){delete KF_FIRING[sn+'|'+sub];alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
-}
+function fireSub(){alert("Removed — the legacy pipeline was permanently deleted (2026-07-16 cutover). Use the Shots tab.");}
 async function fireDirectorEye(){
   let jid;
   try{
@@ -1231,28 +1122,7 @@ async function rebuildKeyframes(scene){
   const j=await r.json();if(!j.ok){delete KF_FIRING[scene+'|2b'];if(page=="pipeline")renderPipeline();alert("Rebuild error: "+(j.error||"failed"));return;}
   if(typeof refreshPipe=="function")refreshPipe();
 }
-async function regenShot(scene,code,kind,target){
-  if(kind=='keyframe' && !gateState(scene)['2a']){alert(`Sign off the Scene ${scene} foundation (Step 1) before regenerating keyframes.`);return;}
-  if(kind=='clip' && !gateState(scene)['2b']){alert(`Sign off the Scene ${scene} keyframes (Step 2) before regenerating clips.`);return;}
-  // THE FIRE CONFIRMATION GATE (Julian, 2026-07-07 — "when you click Fire for the keyframe, it'll re-ask you
-  // whether or not you are 100% happy with the acting in the prompt"): a clip render is the expensive, hard-to-
-  // undo step, so before spending it we re-fetch the CURRENT compiled prompt (guaranteed to reflect any shot
-  // edit just saved above) and require an explicit yes on the exact text that is about to fire. Keyframe-still
-  // regen has no "shots" to read acting from, so this gate is clip-only.
-  if(kind=='clip'){
-    let promptText='(couldn\'t load the prompt — check the server)';
-    try{
-      const pkg=_beatPkg(); const ep="Ep"+((CUR&&CUR.number)||1);
-      const j=await fetch(BASE+"/api/beat-prompt?package="+encodeURIComponent(pkg)+"&scene="+encodeURIComponent(scene)+"&beat="+encodeURIComponent(code)+"&kind=seedance&episode="+ep,{cache:"no-store"}).then(r=>r.json());
-      if(!j.error){const obj=(j.prompt!=null?j.prompt:j); promptText=(typeof obj=="string")?obj:JSON.stringify(obj,null,2);}
-    }catch(e){}
-    if(!confirm("ABOUT TO FIRE "+code+" — this is the exact prompt Seedance will receive:\n\n"+promptText+"\n\n— — —\nAre you 100% happy with the acting in this prompt?"))return;
-  }
-  const note=document.getElementById("fixnote").value;
-  const r=await fetch(BASE+"/api/regen",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,shotCode:code,kind,note,target:target||"both",episode:"Ep"+CUR.number})});
-  const j=await r.json();if(!j.ok){alert("Regenerate error: "+(j.error||"failed"));return;}
-  closeM();setTimeout(refreshPipe,400);
-}
+function regenShot(){alert("Removed — the legacy pipeline was permanently deleted (2026-07-16 cutover). Use the Shots tab.");}
 async function setMaster(id,character){
   const s=SHOTS.find(x=>x.id==id); if(!s)return;
   const code=s.shotCode||s.id;
@@ -1267,18 +1137,7 @@ async function setMaster(id,character){
     alert(j2.ok?("★ Master set (forced):\n\n"+(j2.log||"")):("Still failed:\n\n"+(j2.log||j2.error||"")));
   }
 }
-async function fireGate(scene,gate,force){
-  if(gate==2){const gs=gateState(scene); return fireSub(scene, gs["2a"]?"2b":"2a");}  // DP keyframes = foundation(2a) then coverage(2b)
-  if(gate==1&&!force){const gs=gateState(scene); if(gs["1"])return fireSub(scene,"1.6");}  // storyboard already signed → the previz reel is next; force (re-break) still goes through the generic path below
-  // No blocking confirm on the ready path — the running panel IS the feedback. Confirm only a re-fire over existing output.
-  if(force && !confirm(gate==1?`Re-break the episode? This RE-RUNS THE DIRECTOR and REPLACES all beats with a freshly-paced breakdown (your current beats are backed up).`:`Re-fire Gate ${gate} for Scene ${scene}? This re-runs the pipeline over the existing output.`))return;
-  try{
-    const r=await fetch(BASE+"/api/fire",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene,gate,episode:"Ep"+CUR.number,force:!!force})});
-    const j=await r.json();if(!j.ok){alert("Couldn't fire: "+(j.error||"failed"));return;}
-    if(page=="pipeline"){CURSCENE=scene;FOCUSGATE=null;}
-    setTimeout(refreshPipe,250);
-  }catch(e){alert("Can't reach the studio server. Reload the page (Cmd-Shift-R), then try again.");}
-}
+function fireGate(){alert("Removed — the legacy pipeline was permanently deleted (2026-07-16 cutover). Use the Shots tab.");}
 async function approveGate(scene,gate){
   if(gate==2){const gs=gateState(scene); return signSub(scene, gs["2a"]?"2b":"2a");}  // sign off foundation first, then keyframes
   try{
@@ -1407,42 +1266,7 @@ async function stopFiring(jobId){
     renderPipeline();setTimeout(refreshPipe,300);
   }catch(e){alert("Can't reach the studio server to stop. Reload (Cmd-Shift-R).");}
 }
-function renderPipeline(){
-  const view=document.getElementById("view");
-  if(!SHOTS.length){
-    const djob=Object.values(PIPE.jobs||{}).filter(j=>String(j.gate)=="1").sort((a,b)=>(a.started||0)-(b.started||0)).pop();
-    const drun=djob&&djob.status=="running";
-    view.innerHTML=`<h1 class="h1" style="margin-bottom:2px">Pipeline — Ep${CUR.number} · ${_esc(CUR.title||CUR.name||"")} <span onclick="renameEp(${CUR.number})" title="Rename episode" style="cursor:pointer;font-size:14px;opacity:.5;vertical-align:middle">✏️</span></h1>
-      <p class="sub">This episode has a script but no beats yet. <b>Gate 1 is the Director</b> — it reads the script and breaks the whole episode into scenes &amp; <b>beats</b> (theme → beat map → per-scene beats → the Braintrust remake). Press to begin; every other gate unlocks after.</p>
-      <div class="grail" style="opacity:.9"><div class="gnode active"><div class="gglyph" style="color:var(--brand)">▷</div><div class="gnum">GATE 1</div><div class="gname">Storyboard</div><div class="gph" style="color:var(--brand)">ready — press to fire</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 2</div><div class="gname">Keyframes</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 3</div><div class="gname">Animation</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 4</div><div class="gname">Retake/Edit</div><div class="gph" style="color:var(--hint)">locked</div></div><div class="gconn"></div><div class="gnode locked"><div class="gglyph" style="color:var(--hint)">🔒</div><div class="gnum">GATE 5</div><div class="gname">Post</div><div class="gph" style="color:var(--hint)">locked</div></div></div>
-      <div class="scene" style="padding:16px;border:1px solid ${drun?'var(--info)':'var(--line)'}">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div style="flex:1;min-width:220px">
-            <div style="font-weight:600;font-size:14px">Gate 1 — The Director ${drun?'<span style="color:var(--info)">● running…</span>':''}</div>
-            <div style="font-size:12px;color:var(--hint);margin-top:3px">Breaks ${CUR.script?('<b>'+CUR.script+'</b>'):'the uploaded script'} down into the full beat package. A few minutes for a full episode — watch the live step below; the beats appear here automatically when it's done.</div>
-          </div>
-          ${drun?`<button class="btn" style="background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring('${djob.jobId}')">■ Stop the Director</button>`:`<button class="btn" onclick="fireGate(1,1)">▶ Fire Gate 1 — Run the Director</button>`}
-        </div>
-        ${djob?`<div class="live" style="margin-top:13px"><span class="pulse">●</span> ${(djob.step||"working…").replace(/</g,"&lt;")}</div>
-          <details ${drun?'open':''} style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:var(--muted)">Director log · ${djob.status}</summary><pre style="white-space:pre-wrap;font-size:11px;background:var(--bg);color:var(--ink);padding:11px;border-radius:8px;max-height:320px;overflow:auto;margin:6px 0 0">${(djob.log||"(starting…)").replace(/</g,"&lt;")}</pre></details>`:''}
-      </div>`;
-    return;
-  }
-  const scenes=scenesList();
-  // re-land on a valid, UNLOCKED scene (covers first paint, episode switch, and un-signing across a scene boundary)
-  if(CURSCENE==null||!scenes.includes(CURSCENE)||!scenePrevSigned(CURSCENE))CURSCENE=defaultScene();
-  const sn=CURSCENE;
-  const anyRunning=Object.values(PIPE.jobs||{}).some(j=>j.status=="running");
-  let html=`<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px">
-      <h1 class="h1" style="margin-bottom:2px">Pipeline — Ep${CUR.number} · ${_esc(CUR.title||CUR.name||"")} <span onclick="renameEp(${CUR.number})" title="Rename episode" style="cursor:pointer;font-size:14px;opacity:.5;vertical-align:middle">✏️</span></h1>
-      ${anyRunning?`<button class="btn" style="padding:5px 15px;font-size:12px;background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring()">■ STOP firing</button>`:""}
-    </div>
-    <p class="sub" style="margin-top:2px">Press to activate a gate, watch it run, review it, sign it off — the next gate unlocks. ${scenes.length>1?"Pick a scene, then walk it through all four gates.":""}</p>`;
-  if(scenes.length>1)html+=renderSceneStrip(scenes);
-  html+=renderGateRail(sn)+renderActiveGate(sn);
-  view.innerHTML=html;
-  if(document.getElementById('rt_log'))loadRetakeLog(RT_SN);   // Gate-4 retake panel is showing → fill the before/after log
-}
+async function renderPipeline(){view.innerHTML=`<h1 class="h1">Pipeline</h1><div class="coming">The legacy beat/gate pipeline was permanently removed at the 2026-07-16 cutover. Production runs on the <b>Shots</b> tab: disclosure → sealed request envelope → spend approval → candidate batch → your review.</div>`;}
 function renderSceneStrip(scenes){
   return `<div class="sstrip">`+scenes.map(sn=>{
     if(!scenePrevSigned(sn))return `<div class="schip" style="opacity:.4;cursor:default" title="Locked — finish & sign off the previous scene first">🔒 Scene ${sn}</div>`;
@@ -2479,7 +2303,7 @@ function shPollStart(){
   if(SH_POLL)clearInterval(SH_POLL);
   SH_POLL=setInterval(async()=>{
     let jobs={};
-    try{jobs=(((await (await fetch(BASE+"/api/pipeline")).json())||{}).jobs)||{};}catch(e){return;}
+    try{jobs=(((await (await fetch(BASE+"/api/jobs")).json())||{}).jobs)||{};}catch(e){return;}
     const j=SH_JOB?jobs[SH_JOB]:null;
     if(!j)return;
     const box=document.getElementById("shJob");

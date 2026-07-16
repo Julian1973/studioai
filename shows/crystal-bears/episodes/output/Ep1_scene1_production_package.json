@@ -108,8 +108,8 @@
     "@Audio1": "voice track"
    },
    "audioBrief": "SHOT 1.B1.S1 — voice-only performance for @Audio1.\nFUZZBY: \"BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…\" — with sing-song overdrive, chest already pitching forward like the work song is powering a grand mission he has only half under control. Target 0.8-4.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
-   "keyframePrompt": "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch.\n\nThe literal OPENING FRAME of the shot — the anticipation instant before the action, never the payoff.\n\nWide bee-height chase, Fuzzby left, Zenny right: Fuzzby (@图2, larger bee) canted high between flowers, chest pitched forward; Zenny (@图1, smaller bee) poised by a nearby petal. Frame a touch wider than the shot size alone implies — real headroom and side-room for the movement to come. @图3 scene plate holds the world, palette and light exactly.\n\nNegative: character redesign, appearance drift from the references, extra characters, the action already happening, on-screen text.",
-   "keyframePromptWords": 98,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot — the anticipation instant before the action, never the payoff.\n\nOne continuous wide shot at bee height, Fuzzby screen-left, Zenny screen-right: Fuzzby (@图2, larger bee) canted high between flowers, chest pitched forward; Zenny (@图1, smaller bee) perched on a nearby petal. Frame a touch wider than the shot size alone implies — real headroom and side-room for the movement to come. @图3 scene plate holds the world, palette and light exactly.\n\nNegative: character redesign, appearance drift from the references, extra characters, the action already happening, on-screen text.",
+   "keyframePromptWords": 114,
    "keyframeReferenceSlots": {
     "@图1": "Zenny",
     "@图2": "Fuzzby",

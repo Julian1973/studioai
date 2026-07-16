@@ -102,19 +102,15 @@ def test_cb_post_guarded_sites_degrade_without_old_pipeline():
     out = _run_blocked("""
         import cb_post
         assert cb_post._settle_trim() == 2.0, cb_post._settle_trim()
-        cues = cb_post.sweeten_cues_for_scene('/nonexistent/pkg.json', 1, 'EpT')
-        assert cues == [], cues
+        assert not hasattr(cb_post, 'sweeten_cues_for_scene')   # deleted at the 2026-07-16 cutover
         print('POST-OK')
     """)
     assert "POST-OK" in out
 
 
-def test_while_old_pipeline_exists_settle_trim_reads_it_live():
-    """The other half of the guard's contract: TODAY (old path present) the settle-trim
-    still reads cb_segprompt.HANDLE_SETTLE live — identical behaviour, no old-path change."""
-    import cb_post, cb_segprompt
-    assert cb_post._settle_trim() == float(cb_segprompt.HANDLE_SETTLE) == 2.0
-
+# (the old-pipeline-coexistence test was deleted at the 2026-07-16 destructive cutover —
+#  the legacy pipeline no longer exists to coexist with; the blocked-world tests above are
+#  now simply the truth of the tree)
 
 def test_deferred_item_8_no_duration_literal_dependency():
     """Item 8 (the 15s literals): the new path never sends duration='auto', so cb_gen's and

@@ -181,10 +181,16 @@ def _load_pkg(episode):
     return json.load(open(cands[-1])), cands[-1]
 
 
+def _beat_sort_key(code):
+    """Natural sort on the trailing beat number ('3.B10' -> 10) — inlined from the deleted
+    legacy cb_preflight at the 2026-07-16 cutover; the one thing cb_engine used from it."""
+    m = re.search(r"[Bb](\d+)\s*$", str(code or ""))
+    return int(m.group(1)) if m else 0
+
+
 def _scene_beats(d, scene_num):
-    import cb_preflight
     beats = [b for b in d.get("beats") or [] if str(b.get("sceneNumber")) == str(scene_num)]
-    beats.sort(key=lambda b: cb_preflight._beat_sort_key(b.get("beatCode") or ""))
+    beats.sort(key=lambda b: _beat_sort_key(b.get("beatCode") or ""))
     return beats
 
 
@@ -619,12 +625,15 @@ def _normset(values):
 # never enter these outputs: guarded by construction AND by assertion.
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _style_line(scene, shot=None):
-    # ONE consistent anchor-matching style rule (Julian, 2026-07-16, point 9 + Option D): the
-    # shot's style anchor IS its own @图1. Never "Pixar-caliber", never a global
-    # "squash-and-stretch". The keyframe IMAGE compiler (shot=None) keeps its original line
-    # untouched: the signed 1.B1.S1 keyframe was generated under it and that path is frozen.
+    # ONE consistent anchor-matching style rule (Julian, 2026-07-16, point 9 + Option D +
+    # the destructive cutover, which removed the last legacy style-scaffolding phrases
+    # scaffolding from executable source): a SHOT's style anchor IS its own @图1; a KEYFRAME
+    # (shot=None) makes the first frame, so its style anchors to the references it is given.
+    # The signed 1.B1.S1 keyframe predates this wording and stands unchanged as a file.
     if shot is None:
-        return "Original 3D CGI animation, Pixar-caliber: real weight, squash-and-stretch."
+        return ("Stylised feature-quality 3D CGI with natural weight. Preserve the exact "
+                "character designs, proportions, materials, lighting and environment from "
+                "the references.")
     return "Stylised feature-quality 3D CGI matching @图1."
 
 

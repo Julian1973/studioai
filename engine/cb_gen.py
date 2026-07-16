@@ -599,33 +599,10 @@ def keycheck():
     except Exception as e:
         print(f"  Gemini: FAIL — {e}")
 
+# THE CLI GENERATION COMMANDS ARE GONE (Julian's destructive cutover, 2026-07-16): every
+# generation call enters through cb_render's authoritative route — disclosure -> sealed
+# envelope -> spend token -> candidate batch. This module is a PROVIDER ADAPTER LIBRARY only.
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description="Crystal Bears generation module")
-    sub = ap.add_subparsers(dest="cmd")
-    sub.add_parser("keycheck")
-    sub.add_parser("voices")
-    pi = sub.add_parser("image"); pi.add_argument("prompt"); pi.add_argument("--ref", nargs="*", default=[]); pi.add_argument("--aspect", default="16:9"); pi.add_argument("--out", default="keyframe.png")
-    pv = sub.add_parser("video"); pv.add_argument("prompt"); pv.add_argument("keyframe"); pv.add_argument("--out", default="clip.mp4")
-    pd = sub.add_parser("sdvideo"); pd.add_argument("prompt"); pd.add_argument("keyframe"); pd.add_argument("--end"); pd.add_argument("--res", default="720p"); pd.add_argument("--duration", type=int, default=8); pd.add_argument("--no-audio", action="store_true"); pd.add_argument("--out", default="clip_sd.mp4")
-    pt = sub.add_parser("tts"); pt.add_argument("text"); pt.add_argument("voice_id"); pt.add_argument("--out", default="vo.mp3")
-    ps = sub.add_parser("swap"); ps.add_argument("audio"); ps.add_argument("voice_id"); ps.add_argument("--out", default="swapped.mp3")
-    px = sub.add_parser("sfx"); px.add_argument("text"); px.add_argument("--duration", type=float); px.add_argument("--loop", action="store_true"); px.add_argument("--out", default="sfx.mp3")
-    pm = sub.add_parser("music"); pm.add_argument("prompt"); pm.add_argument("--ms", type=int); pm.add_argument("--out", default="music.mp3")
-    pl = sub.add_parser("lastframe"); pl.add_argument("clip"); pl.add_argument("--out", default="lastframe.png")
-    pls = sub.add_parser("lipsync"); pls.add_argument("video"); pls.add_argument("audio"); pls.add_argument("--model", default="fal-ai/latentsync"); pls.add_argument("--out", default="lipsync.mp4")
-    prv = sub.add_parser("refvideo"); prv.add_argument("prompt"); prv.add_argument("--img", nargs="+", required=True); prv.add_argument("--audio", nargs="*", default=[]); prv.add_argument("--res", default="720p"); prv.add_argument("--duration", default="auto"); prv.add_argument("--fast", action="store_true"); prv.add_argument("--out", default="clip_ref.mp4")
-    a = ap.parse_args()
-    if a.cmd == "keycheck": keycheck()
-    elif a.cmd == "voices":
-        for vid, name in list_voices(): print(f"  {name}: {vid}")
-    elif a.cmd == "image": print("✓", generate_image(a.prompt, a.ref, a.aspect, a.out))
-    elif a.cmd == "video": print("✓", generate_video(a.prompt, a.keyframe, out=a.out))
-    elif a.cmd == "sdvideo": print("✓", generate_video_seedance(a.prompt, a.keyframe, a.res, a.duration, not a.no_audio, a.out, end_image=a.end))
-    elif a.cmd == "tts": print("✓", eleven_tts(a.text, a.voice_id, out=a.out))
-    elif a.cmd == "swap": print("✓", voice_change(a.audio, a.voice_id, out=a.out))
-    elif a.cmd == "sfx": print("✓", eleven_sfx(a.text, a.duration, a.out, a.loop))
-    elif a.cmd == "music": print("✓", eleven_music(a.prompt, a.ms, a.out))
-    elif a.cmd == "lastframe": print("✓", last_frame(a.clip, a.out))
-    elif a.cmd == "lipsync": print("✓", lipsync(a.video, a.audio, a.out, a.model))
-    elif a.cmd == "refvideo": print("✓", generate_video_seedance_ref(a.prompt, a.img, audio_urls=(a.audio or None), resolution=a.res, duration=a.duration, out=a.out, fast=a.fast))
-    else: ap.print_help()
+    print("cb_gen.py is a provider adapter library — CLI generation was removed at the "
+          "2026-07-16 cutover. Use: python3 cb_render.py (the single authoritative route).")
+    raise SystemExit(1)

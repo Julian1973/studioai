@@ -709,8 +709,27 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             "animatic": _url(MEDIA / f"{episode}_Scene{scene}_animatic.mp4"),
             "picture": _url(MEDIA / f"{episode}_Scene{scene}_shots_picture.mp4")}
 
+
+# ── THE LEGACY PIPELINE IS GONE (Julian's destructive cutover, 2026-07-16) ────────────────────
+# Every route of the old beat/gate pipeline returns 410 GONE — never a redirect, never another
+# generator. The single production path is: Studio disclosure -> sealed request envelope ->
+# spend approval -> cb_render candidate batch -> fal provider adapter (/api/shot-*).
+LEGACY_GONE_ROUTES = ['/api/fire', '/api/retakes', '/api/retake-brief', '/api/retake-csv', '/api/export-storyboard', '/api/approve', '/api/unapprove', '/api/rebuild', '/api/set-master', '/api/clear-master', '/api/regen', '/api/gen-audio', '/api/gen-keyframe', '/api/render-beat', '/api/approve-beat', '/api/relay-prepare', '/api/relay-approve', '/api/director-eye', '/api/masters', '/api/keyframe-prompt', '/api/voice-prompt', '/api/beat-sound-brief', '/api/relay-state', '/api/keyframe-qa', '/api/craft-score', '/api/beat-prompt', '/api/beat-state', '/api/retake-log', '/api/continuity', '/api/pipeline']
+
+
+def _legacy_gone(handler):
+    path = handler.path.split("?")[0]
+    for r in LEGACY_GONE_ROUTES:
+        if path == r or path.startswith(r + "/"):
+            handler._json(410, {"error": "GONE — the legacy pipeline was permanently removed "
+                                          "(2026-07-16 cutover). Use the Shots pipeline "
+                                          "(/api/shot-package, /api/shot-run)."})
+            return True
+    return False
+
 def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
-                 candidates=None, spend_token=None, category=None, candidate=None):
+                 candidates=None, spend_token=None, category=None, candidate=None,
+                 dry_run=False):
     """Map one validated shot-pipeline command onto the job runner. Argument order per cb_engine.py /
     cb_render.py's own CLIs (2026-07-16 spend-token contract — the approve-spend boolean is GONE):
       design  -> cb_engine.py <scene> [episode]
@@ -742,6 +761,8 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
             args += ["--candidates", str(candidates)]
         if spend_token:
             args += ["--spend-token", str(spend_token)]
+        if dry_run:
+            args += ["--dry-run"]      # sealed-envelope preview: no token issued, nothing stored
     label = "shot:" + cmd + ((":" + str(shot_id)) if shot_id else "")
     return _start(_jid(f"shot{cmd}_s{scene}"), label, scene, args)
 
@@ -904,41 +925,23 @@ class H(http.server.SimpleHTTPRequestHandler):
 
     @_tracked
     def do_GET(self):
+        if _legacy_gone(self):
+            return
         if self.path == "/" or self.path == "":
             self.send_response(302)
             self.send_header("Location", "/cb-studio/app.html")
             self.end_headers()
             return
-        if self.path == "/api/pipeline":
-            # pkgMtime (2026-07-15, THE STALE-JOB-LOG ATTRIBUTION BUG): a Gate-3 job log from a PREVIOUS
-            # package (found live — a stopped job from the day before the whole-episode restart) was being
-            # parsed for per-beat lint flags and attributed to the freshly re-authored beats, purely because
-            # the beat codes matched. The client compares each job's own `ended` timestamp against this
-            # mtime and suppresses lint attribution from any job older than the current package.
-            try:
-                _pkg_mtime = (OUT / _pkg_name()).stat().st_mtime
-            except Exception:
-                _pkg_mtime = 0
-            return self._json(200, {"locked": locked_state(), "jobs": JOBS, "notes": notes_state(),
-                                    "visions": visions_state(), "relay": relay_state_all(),
-                                    "pkgMtime": _pkg_mtime})
+        # [removed 2026-07-16 cutover: /api/pipeline — handled by the 410 gate above]
+        if self.path == "/api/jobs":
+            # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline
+            # route that incidentally carried JOBS is GONE; this is the clean replacement.
+            self._json(200, {"jobs": JOBS}); return
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
-        if self.path == "/api/continuity":
-            return self._json(200, {"findings": continuity_state()})
-        if self.path == "/api/masters":
-            # READ-ONLY, informational: the whole character-master library (cb_prompts.masters_index — "for
-            # the studio to display + audit", its own stated intent). Never feeds a render prompt.
-            import sys as _sys
-            try:
-                r = subprocess.run([_sys.executable, "masters_preview.py"], cwd=str(ROOT / "engine"),
-                                   capture_output=True, text=True, timeout=40, stdin=subprocess.DEVNULL)
-                out = (r.stdout or "").strip()
-                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
-                return self._json(200, obj)
-            except Exception as e:
-                return self._json(400, {"error": str(e)})
+        # [removed 2026-07-16 cutover: /api/continuity — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/masters — handled by the 410 gate above]
         if self.path == "/api/loclib":
             manifest = {}
             mf = ROOT / "cb-seed" / "assets" / "locations" / "_manifest.json"
@@ -1049,152 +1052,15 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/reindex":
             reindex_media()
             return self._json(200, {"ok": True, "episodes": reindex_episodes()})
-        if self.path.startswith("/api/keyframe-prompt"):
-            import sys as _sys
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            pkg = (q.get("package") or [""])[0]; beat = (q.get("beat") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            if not pkg or not beat or "/" in pkg or ".." in pkg:
-                return self._json(400, {"error": "package and beat required"})
-            try:
-                r = subprocess.run([_sys.executable, "kf_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
-                                   stdin=subprocess.DEVNULL)
-                out = (r.stdout or "").strip()
-                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
-                return self._json(200, obj)
-            except Exception as e:
-                return self._json(400, {"error": str(e)})
-        if self.path.startswith("/api/voice-prompt"):
-            import sys as _sys
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            pkg = (q.get("package") or [""])[0]; beat = (q.get("beat") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            if not pkg or not beat or "/" in pkg or ".." in pkg:
-                return self._json(400, {"error": "package and beat required"})
-            try:
-                r = subprocess.run([_sys.executable, "voice_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
-                                   stdin=subprocess.DEVNULL)
-                out = (r.stdout or "").strip()
-                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
-                return self._json(200, obj)
-            except Exception as e:
-                return self._json(400, {"error": str(e)})
-        if self.path.startswith("/api/beat-sound-brief"):
-            # READ-ONLY, informational: cb_prompts._music_line/_sfx_line for one beat (a scratch music/SFX
-            # BRIEF, mirroring cb_post.music_brief's own "advisory, never fed into the render prompt" pattern —
-            # the v5 engine deliberately keeps per-beat music/SFX direction OUT of the shipped Seedance prompt,
-            # see CLAUDE.md rule 42). Never writes anything, never touches a render.
-            import sys as _sys
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            pkg = (q.get("package") or [""])[0]; beat = (q.get("beat") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            if not pkg or not beat or "/" in pkg or ".." in pkg:
-                return self._json(400, {"error": "package and beat required"})
-            try:
-                r = subprocess.run([_sys.executable, "sound_brief_preview.py", pkg, beat, ep],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
-                                   stdin=subprocess.DEVNULL)
-                out = (r.stdout or "").strip()
-                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
-                return self._json(200, obj)
-            except Exception as e:
-                return self._json(400, {"error": str(e)})
-        if self.path.startswith("/api/relay-state"):
-            # read-only: the prepared (unapproved) anchor for this scene, straight off relay_state.json — never
-            # re-derives or re-calls NB2. Empty {} if nothing is waiting (no anchor prepared, or already launched).
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            f = CBGEN / "relay_state.json"
-            try:
-                d = json.loads(f.read_text()) if f.exists() else {}
-            except Exception:
-                d = {}
-            return self._json(200, d.get(ep, {}).get(scene) or {})
-        if self.path.startswith("/api/keyframe-qa"):
-            # READ-ONLY, zero-cost: reads the cached media/{ep}_{code}_{slug}.keyframe_qa.json sidecars
-            # cb_qa.check_scene writes whenever Gate 2b actually runs the Definition-of-Done check (real
-            # vision API calls — never recomputed here on a bare page load/poll, only read back). Built
-            # 2026-07-14 (Julian: "we're doing this in the prompt, it needs to be done in the studio") —
-            # this flag existed and ran correctly on the backend the whole time but was never surfaced
-            # anywhere in the Studio UI Julian actually reviews from.
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            out = {}
-            if scene:
-                for f in (CBGEN / "media").glob(f"{ep}_{scene}.B*.keyframe_qa.json"):
-                    try:
-                        row = json.loads(f.read_text())
-                        code = row.get("shot")
-                        if code:
-                            out[code] = row
-                    except Exception:
-                        continue
-            return self._json(200, out)
-        if self.path.startswith("/api/craft-score"):
-            # READ-ONLY, zero-cost: reads the cached media/{ep}_Scene{N}_previz.craft.json sidecar
-            # cb_previz.craft_score_for_scene writes whenever Gate 1.6's previz reel actually fires (a real,
-            # two-LLM-read cb_craft.score_scene_craft call — never recomputed here on a bare page load/poll,
-            # only read back). Built 2026-07-14 (task #315, closing the "built but orphaned" gap this whole
-            # session has repeatedly found: the craft judge existed and worked since rule 48 but had no live
-            # caller and nowhere to surface in the Studio Julian actually reviews from). {} if the previz
-            # hasn't been fired since this wiring landed, or if the LLM score itself failed (fail-soft by
-            # design — the reel still exists and is still watchable either way).
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            out = {}
-            if scene:
-                f = CBGEN / "media" / f"{ep}_Scene{scene}_previz.craft.json"
-                if f.exists():
-                    try:
-                        out = json.loads(f.read_text())
-                    except Exception:
-                        out = {}
-            return self._json(200, out)
-        if self.path.startswith("/api/beat-prompt"):
-            # TICKET 4 — the editable JSON the Cascade panel surfaces: kind=seedance (clip take) | keyframe (image).
-            import sys as _sys
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            scene = (q.get("scene") or [""])[0]; beat = (q.get("beat") or [""])[0]
-            kind = (q.get("kind") or ["seedance"])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            pkg = (q.get("package") or [PKG_NAME])[0]
-            if not scene or not beat or "/" in pkg or ".." in pkg:
-                return self._json(400, {"error": "scene and beat required"})
-            try:
-                r = subprocess.run([_sys.executable, "beat_preview.py", pkg, scene, beat, ep, kind],
-                                   cwd=str(ROOT / "engine"), capture_output=True, text=True, timeout=40,
-                                   stdin=subprocess.DEVNULL)
-                out = (r.stdout or "").strip()
-                obj = json.loads(out.splitlines()[-1]) if out else {"error": (r.stderr or "no output")[:400]}
-                return self._json(200, obj)
-            except Exception as e:
-                return self._json(400, {"error": str(e)})
-        if self.path.startswith("/api/beat-state"):
-            # TICKET 4 — the per-beat lock dict for a scene (drives the stage rail + cascade timeline).
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            if not scene:
-                return self._json(400, {"error": "scene required"})
-            beats = (_scene_locks(scene, ep) or {}).get("beats", {})
-            return self._json(200, {"beats": beats})
-        if self.path.startswith("/api/retake-log"):   # the before/after retake log for a scene (per-shot old-vs-new)
-            from urllib.parse import urlparse, parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
-            if not scene:
-                return self._json(400, {"error": "scene required"})
-            p = CBGEN / "media" / f"{ep}_Scene{scene}_retake_log.json"
-            try:
-                obj = json.loads(p.read_text()) if p.exists() else {"entries": []}
-            except Exception:
-                obj = {"entries": []}
-            return self._json(200, obj)
+        # [removed 2026-07-16 cutover: /api/keyframe-prompt — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/voice-prompt — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/beat-sound-brief — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/relay-state — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/keyframe-qa — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/craft-score — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/beat-prompt — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/beat-state — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retake-log — handled by the 410 gate above]
         if self.path.startswith("/api/shot-package"):
             # THE SHOT PIPELINE (additive, 2026-07-16): read-only — the production package cb_engine.py
             # compiled + validated, plus a server-computed media-existence map (shot_media_map above).
@@ -1223,6 +1089,8 @@ class H(http.server.SimpleHTTPRequestHandler):
 
     @_tracked
     def do_POST(self):
+        if _legacy_gone(self):
+            return
         if self.path == "/api/write":
             try:
                 d = self._body(); seed = d.get("seed") or {}; episode = d.get("episode", "Ep1")
@@ -1236,61 +1104,10 @@ class H(http.server.SimpleHTTPRequestHandler):
             self._json(200, {"ok": True, "reloading": True})
             threading.Thread(target=lambda: (time.sleep(0.3), _reexec()), daemon=True).start()
             return
-        if self.path == "/api/fire":
-            try:
-                d = self._body(); scene = str(d["scene"]); gate = str(d["gate"]); episode = d.get("episode", "Ep1")
-                ready, msg = _gate_ready(scene, gate, episode)
-                if not ready:
-                    self._json(409, {"error": msg}); return
-                self._json(200, {"ok": True, "jobId": fire_gate(scene, gate, bool(d.get("force")), episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/retakes":      # IN-APP retakes — save the {ref/timecode, change} run-list, then fire Gate 4
-            try:                              # (firing a retake is NOT a sign-off — iterate as many times as you like)
-                d = self._body(); scene = str(d["scene"]); episode = d.get("episode", "Ep1"); retakes = d.get("retakes") or []
-                (CBGEN / "media").mkdir(parents=True, exist_ok=True)
-                (CBGEN / "media" / f"{episode}_Scene{scene}_retakes.json").write_text(json.dumps(retakes, indent=2))
-                ready, msg = _gate_ready(scene, "4", episode)   # Gate 4 = Retakes; needs only Gate 3 (Animation) signed
-                if not ready:
-                    self._json(409, {"error": msg}); return
-                self._json(200, {"ok": True, "jobId": fire_gate(scene, "4", False, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/retake-brief":  # DIRECTOR CHECK — preview how the Director rewrites a plain note into retake wording (NO render)
-            try:
-                import sys as _sys
-                d = self._body()
-                payload = json.dumps({
-                    "pkg": _pkg_name(d.get("episode", "Ep1")),
-                    "scene": str(d.get("scene", "")),
-                    "locator": (d.get("ref") or d.get("timecode") or d.get("locator") or "").strip(),
-                    "issue": d.get("issue", ""), "change": d.get("change", ""),
-                    "episode": d.get("episode", "Ep1"),
-                })
-                r = subprocess.run([_sys.executable, "retake_preview.py"], cwd=str(ROOT / "engine"),
-                                   input=payload, capture_output=True, text=True, timeout=60)
-                out = (r.stdout or "").strip()
-                obj = json.loads(out.splitlines()[-1]) if out else {"ok": False, "error": (r.stderr or "no output")[:400]}
-                self._json(200, obj)
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/retake-csv":   # AMENDED retake sheet uploaded — save it, drop the in-app run-list, run Gate 4 off the CSV
-            try:
-                d = self._body(); scene = str(d["scene"]); episode = d.get("episode", "Ep1"); csv = d.get("csv") or ""
-                (CBGEN / "media").mkdir(parents=True, exist_ok=True)
-                (CBGEN / "media" / f"{episode}_Scene{scene}_RETAKES.csv").write_text(csv, encoding="utf-8")
-                try: (CBGEN / "media" / f"{episode}_Scene{scene}_retakes.json").unlink()   # CSV route → ignore any form run-list
-                except FileNotFoundError: pass
-                ready, msg = _gate_ready(scene, "4", episode)
-                if not ready:
-                    self._json(409, {"error": msg}); return
-                self._json(200, {"ok": True, "jobId": fire_gate(scene, "4", False, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
+        # [removed 2026-07-16 cutover: /api/fire — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retakes — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retake-brief — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retake-csv — handled by the 410 gate above]
         if self.path == "/api/stop":
             try:
                 d = self._body(); jid = d.get("jobId")
@@ -1299,167 +1116,21 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
-        if self.path == "/api/export-storyboard":
-            # THE GATE-1 EXTERNAL REVIEW RULE (CLAUDE.md rule 37) — a one-click render of
-            # cb_pipeline.export_storyboard, matching this file's own fresh-subprocess convention (never a
-            # direct Python import of cb_pipeline — every fire/approve/export shells out so the Studio
-            # never runs stale engine code).
-            try:
-                d = self._body()
-                episode = d.get("episode", "Ep1")
-                args = ["python3", "cb_pipeline.py", "export"]
-                if d.get("scene") is not None:
-                    args.append(str(d["scene"]))
-                args.append(f"--episode={episode}")
-                p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True,
-                                    stdin=subprocess.DEVNULL, timeout=30)
-                if p.returncode != 0:
-                    self._json(400, {"error": (p.stdout + p.stderr).strip()[:2000]}); return
-                self._json(200, {"ok": True, "markdown": p.stdout})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/approve":
-            try:
-                d = self._body()
-                ok, log = approve_gate(str(d["scene"]), str(d["gate"]), d.get("episode", "Ep1"),
-                                        reviewed_by=str(d.get("reviewedBy") or "Julian"))
-                self._json(200, {"ok": ok, "log": log, "locked": locked_state()})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/unapprove":
-            try:
-                d = self._body(); ok, log = unapprove_gate(str(d["scene"]), str(d["gate"]), d.get("episode", "Ep1"))
-                self._json(200, {"ok": ok, "log": log, "locked": locked_state()})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/rebuild":
-            try:
-                d = self._body(); scene = str(d["scene"]); episode = d.get("episode", "Ep1")
-                if not _scene_locks(scene, episode).get("2a"):
-                    self._json(409, {"error": f"Gate 2a (foundation) not signed off for scene {scene} — sign it off before rebuilding keyframes."}); return
-                self._json(200, {"ok": True, "jobId": rebuild_keyframes(scene, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/set-master":
-            try:
-                d = self._body()
-                ok, log = set_master_studio(str(d["scene"]), str(d["beatCode"]), str(d["character"]),
-                                            d.get("episode", "Ep1"), d.get("scope", "location"), bool(d.get("force")))
-                self._json(200, {"ok": ok, "log": log})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/clear-master":
-            try:
-                d = self._body()
-                ok, log = clear_master_studio(str(d["scene"]), str(d["character"]), d.get("episode", "Ep1"))
-                self._json(200, {"ok": ok, "log": log})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/regen":
-            try:
-                d = self._body(); scene = str(d["scene"]); kind = d.get("kind", "keyframe"); episode = d.get("episode", "Ep1")
-                need = "2b" if kind == "clip" else "2a"   # keyframe regen needs the foundation (2a); clip regen needs keyframes (2b)
-                if not _scene_locks(scene, episode).get(need):
-                    self._json(409, {"error": f"Gate {need} not signed off for scene {scene} — sign it off before regenerating."}); return
-                jobId = regen_shot(scene, str(d["shotCode"]),
-                                   kind, d.get("note", ""), d.get("target", "both"), episode)
-                self._json(200, {"ok": True, "jobId": jobId})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/gen-audio":
-            try:
-                d = self._body(); scene = str(d["scene"]); beat = str(d["beat"]); episode = d.get("episode", "Ep1")
-                if not _scene_locks(scene, episode).get("2a"):   # matches /api/rebuild's gate — per-beat cascade needs the foundation first
-                    self._json(409, {"error": f"Gate 2a (foundation) not signed off for scene {scene} — sign it off before generating audio."}); return
-                self._json(200, {"ok": True, "jobId": gen_audio_beat(scene, beat, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/gen-keyframe":
-            try:
-                d = self._body(); scene = str(d["scene"]); beat = str(d["beat"]); episode = d.get("episode", "Ep1")
-                chain_from = d.get("chain_from") or None
-                if not _scene_locks(scene, episode).get("2a"):   # matches /api/rebuild's gate — same underlying action, one beat at a time
-                    self._json(409, {"error": f"Gate 2a (foundation) not signed off for scene {scene} — sign it off before building keyframes."}); return
-                self._json(200, {"ok": True, "jobId": gen_keyframe_beat(scene, beat, chain_from, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/render-beat":
-            try:
-                d = self._body(); scene = str(d["scene"]); beat = str(d["beat"]); episode = d.get("episode", "Ep1")
-                if not _scene_locks(scene, episode).get("2b"):   # matches /api/regen's kind=clip gate — clips need signed keyframes
-                    self._json(409, {"error": f"Gate 2b (keyframes) not signed off for scene {scene} — sign it off before rendering clips."}); return
-                self._json(200, {"ok": True, "jobId": render_beat_clip(scene, beat, episode)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/approve-beat":
-            try:
-                d = self._body()
-                scene = str(d["scene"]); beat = str(d["beat"]); stage = str(d["stage"]); episode = d.get("episode", "Ep1")
-                ok, log, nxt = approve_beat(scene, beat, stage, episode, value=d.get("value", True))
-                self._json(200, {"ok": ok, "log": log, "next": nxt})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/relay-prepare":
-            # PHASE 1 (front door): "Prepare anchor" calls this. THE ONE-RENDER ECONOMY (2026-07-05) retired the
-            # seed-pick step — there is exactly one official clip per beat now, so this harvests ITS settle
-            # frame directly, re-mints it (seamless joins only), runs the drift check, then STOPS.
-            try:
-                d = self._body()
-                scene = str(d["scene"]); code = str(d["code"])
-                episode = d.get("episode", "Ep1"); fast = bool(d.get("fast", False))
-                self._json(200, {"ok": True, "jobId": relay_prepare_beat(scene, code, episode, fast=fast)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/relay-approve":
-            # PHASE 2 (front door): the Approve Anchor button — the ONLY caller of this route, which is the
-            # ONLY thing allowed to launch the next beat (fire_next_beat approved=True) — one take, one
-            # automatic re-fire on a failed gate, then a hard stop naming the layer at fault.
-            try:
-                d = self._body()
-                scene = str(d["scene"]); code = str(d["code"])
-                episode = d.get("episode", "Ep1"); fast = bool(d.get("fast", False))
-                self._json(200, {"ok": True, "jobId": relay_approve_beat(scene, code, episode, fast=fast)})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/director-eye":
-            try:
-                d = self._body(); episode = d.get("episode", "Ep1")   # episode-level review; the package is resolved engine-side
-                jid = _start(_jid("directoreye"), "1.5", "1",
-                             ["cb_pipeline.py", "director-eye", f"--episode={episode}"])
-                self._json(200, {"ok": True, "jobId": jid})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/masters":
-            # THE PLATFORM MASTERS BUTTON (task #316, 2026-07-14): cb_post.build_platform_masters existed and
-            # worked (CLI-only, "python3 cb_post.py masters ..." / "cb_pipeline.py masters <scene>") but had no
-            # HTTP route and no Studio button — the same "built but orphaned" pattern this session found and
-            # closed repeatedly elsewhere. Requires Gate 5's own picture.mp4 to already exist (fire Gate 5
-            # first) — build_platform_masters itself refuses cleanly and names why if it doesn't, surfaced via
-            # the job log exactly like every other gate action.
-            try:
-                d = self._body()
-                scene = str(d["scene"]); episode = d.get("episode", "Ep1")
-                plats = d.get("platforms") or ["youtube", "netflix", "amazon"]
-                jid = _start(_jid(f"masters_s{scene}"), "masters", scene,
-                             ["cb_pipeline.py", "masters", scene, ",".join(plats), f"--episode={episode}"])
-                self._json(200, {"ok": True, "jobId": jid})
-            except Exception as e:
-                self._json(400, {"error": str(e)})
-            return
+        # [removed 2026-07-16 cutover: /api/export-storyboard — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/approve — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/unapprove — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/rebuild — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/set-master — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/clear-master — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/regen — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/gen-audio — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/gen-keyframe — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/render-beat — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/approve-beat — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/relay-prepare — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/relay-approve — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/director-eye — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/masters — handled by the 410 gate above]
         if self.path == "/api/episode":
             try:
                 # FIXED 2026-07-12 (full-codebase audit continued): this handler re-implemented _body()'s exact
@@ -1816,7 +1487,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"ok": True, "jobId": shot_run_job(cmd, scene, episode, shot_id, correction,
                                                                     candidates=candidates,
                                                                     spend_token=spend_token,
-                                                                    category=category, candidate=candidate)})
+                                                                    category=category, candidate=candidate,
+                                                                    dry_run=bool(d.get("dryRun")))})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

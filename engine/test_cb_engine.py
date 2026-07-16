@@ -353,7 +353,8 @@ def test_one_consistent_anchor_matching_style_rule():
         assert "only for the set" in p                        # the plate has a declared job
     # the frozen keyframe IMAGE compiler is untouched by the rule
     kf, _, _ = E.compile_keyframe_prompt(d.shots[0], {}, CFG)
-    assert "Original 3D CGI animation" in kf
+    assert "Stylised feature-quality 3D CGI with natural weight" in kf
+    assert "Pixar-caliber" not in kf and "squash-and-stretch" not in kf
 
 
 def test_concise_anchors_no_antihold_boilerplate():

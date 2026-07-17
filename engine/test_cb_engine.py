@@ -285,7 +285,8 @@ def test_option_d_internal_contract_preserved_provider_brief_lean():
     # the brief carries exactly the Option-D sections
     assert E.OPENER_ANCHOR[:-1] in brief                      # exact opening anchor
     assert "Use @Audio1 as the only voice" in brief           # audio + mouth assignment
-    assert "Preserve character identity, relative scale and screen sides." in brief
+    assert "Preserve character identity and relative scale." in brief
+    assert "screen sides" not in brief          # 2026-07-17: no longer a default on every shot
     # render-critical protection derived from the gag's own visibility contract, capped small
     assert "Keep Fuzzby's whole silhouette above the petals at all times." in brief
 
@@ -434,14 +435,81 @@ def test_slot_maps_render_vs_keyframe():
     assert kf["@图1"] == "Fuzzby" and kf["@图3"] == "scene plate" and "@Audio1" not in kf
 
 
-def test_keyframe_prompt_is_anticipation_and_reference_first():
+def test_keyframe_prompt_is_reference_first_and_appearance_free():
     kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
-    assert "anticipation" in kf.lower() and "never the payoff" in kf.lower()
     assert "wider" in kf.lower()                      # the room-to-breathe law
     assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
     # rule 5: the compiler's own fixed text never describes appearance
     for banned in ("yellow", "stripe", "spectacles", "glasses", "fur", "fuzzy"):
         assert banned not in kf.lower()
+
+
+# ── THE HANDOVER-MAPPING CORRECTION (2026-07-17, Julian's audit + consolidation) ────────
+# Two genuine source defects, found via cb_handover.py's single-shot handover audit, fixed
+# HERE at source (the one narrowly-scoped exception to this file's usual protection) rather
+# than as a second compiler layered on top in cb_handover.py — see that module's own
+# consolidation note. Both compile_keyframe_prompt and compile_shot_contract are the SOLE
+# compilers for their artifacts; nothing duplicates this logic anywhere else.
+def _still_shot():
+    """A shot whose approved opening state is deliberate STILLNESS, not motion — the S1.SH6
+    real-production shape (Zenny already still, before a quiet line), built from this file's
+    own fixtures rather than a hand-typed one-off."""
+    sh = _shot(chars=("Zenny",))
+    sh.openingPose = "Zenny holds motionless on her petal, eyes closed, wings folded flat."
+    sh.continuityIn = E.ContinuityState(
+        lighting="cooler blue wash settling after the thunder tail", cameraSide="held wide",
+        characters=[E.CharacterState(character="Zenny", screenZone="frame-centre", facing="up",
+                                      pose="motionless", expression="listening",
+                                      visibleMarks=[], heldProps=[])])
+    return sh
+
+
+def test_keyframe_prompt_follows_motion_already_underway_not_a_universal_anticipation():
+    """The default fixture's own openingPose ('Fuzzby mid-launch outside the flower') already
+    describes motion underway — the compiler must state it plainly, never impose a universal
+    'anticipation instant before the action, never the payoff' framing, and never ban 'the
+    action already happening' as a negative (both were false universals, removed 2026-07-17)."""
+    kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
+    assert "mid-launch" in kf
+    assert "anticipation instant" not in kf.lower()
+    assert "never the payoff" not in kf.lower()
+    assert "action already happening" not in kf.lower()
+    assert "nearly grazes the leaf" not in kf              # visualPayoff never read
+
+
+def test_keyframe_prompt_follows_deliberate_stillness_not_forced_motion():
+    """THE SAME compiler, given an approved opening state that is deliberate stillness, must
+    never inject motion or anticipation language — proving it follows the approved shot
+    rather than imposing one posture on every shot (Julian's own S1.SH6 test case)."""
+    kf, wc, _ = E.compile_keyframe_prompt(_still_shot(), {}, CFG)
+    assert "holds motionless" in kf
+    assert "anticipation instant" not in kf.lower()
+    assert "never the payoff" not in kf.lower()
+    assert "action already happening" not in kf.lower()
+
+
+def test_keyframe_prompt_states_lighting_and_camera_side_once_when_duplicated():
+    """A caller whose own mapping has (degenerately) duplicated one prose sentence into both
+    continuityIn.lighting and continuityIn.cameraSide — cb_handover.py's own documented
+    INTEGRATION_GAPS limitation — must not see it stated twice in the compiled brief."""
+    sh = _shot(chars=("Fuzzby",))
+    sh.continuityIn = E.ContinuityState(
+        lighting="Warm corridor light, Fuzzby already at speed.",
+        cameraSide="Warm corridor light, Fuzzby already at speed.",
+        characters=[E.CharacterState(character="Fuzzby", screenZone="frame-left", facing="right",
+                                      pose="mid-hover", expression="proud",
+                                      visibleMarks=[], heldProps=[])])
+    kf, wc, _ = E.compile_keyframe_prompt(sh, {}, CFG)
+    assert kf.count("Warm corridor light, Fuzzby already at speed") == 1
+    # a genuinely distinct pair still states both
+    sh2 = _shot(chars=("Fuzzby",))
+    sh2.continuityIn = E.ContinuityState(
+        lighting="Warm corridor light.", cameraSide="Held on the left of the lane.",
+        characters=[E.CharacterState(character="Fuzzby", screenZone="frame-left", facing="right",
+                                      pose="mid-hover", expression="proud",
+                                      visibleMarks=[], heldProps=[])])
+    kf2, wc2, _ = E.compile_keyframe_prompt(sh2, {}, CFG)
+    assert "Warm corridor light" in kf2 and "Held on the left of the lane" in kf2
 
 
 def test_name_binding_never_fires_inside_longer_cast_name():

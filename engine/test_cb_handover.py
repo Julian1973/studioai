@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""test_cb_handover.py — the mocked, ZERO-SPEND storyboard→production handover proof
-(Julian's directive, 2026-07-17). Proves the creative room is not disconnected from
-production, without touching cb_engine.py, cb_render.py or the provider boundary:
-
-  1. only a HUMAN-APPROVED storyboard can be promoted;
-  2. the approved storyboard is the SOLE creative source of the new shot package;
-  3. the handover distils ONLY the six approved categories;
-  4. showrunner analysis / rejected interpretations / canons / constraint walls never
-     enter the provider brief;
-  5. promotion creates a NEW revision and makes every earlier authorisation stale;
-  6. an unapproved storyboard cannot alter the current production package;
-  7. the dry run makes no provider call, generates no media, issues no token.
+"""test_cb_handover.py — the mocked, ZERO-SPEND storyboard->production handover proof
+(Julian's directives, 2026-07-17/18). Fixtures match the CURRENT creative-room-2.0 schema
+(CreativeShotCard + separate ProductionDetail) — the earlier fixture shape (fields
+directly on the shot) was found stale by the single-shot-handover audit and corrected here
+in lockstep with cb_handover.py itself.
 
     pytest test_cb_handover.py -q
 """
@@ -33,32 +26,59 @@ REJECTED_MARKER = "ZZ-REJECTED-INTERPRETATION-MARKER-ZZ"
 CANON_MARKER = "ZZ-TASTE-CANON-MARKER-ZZ"
 
 
-def _sb_shot(shot_id, beat_id, transition, placement="", protections=None):
-    return {"shotId": shot_id, "beatId": beat_id, "transitionType": transition,
-            "requiresNewKeyframe": transition == "PLANNED_CUT",
-            "purpose": "Land the leaf gag cleanly.",
-            "intendedDurationRange": "5-8s",
-            "openingComposition": "Bee-height corridor, the broad leaf dominating foreground",
-            "openingCharacterState": "Fuzzby canted forward mid-flight; Zenny still on her petal.",
-            "blocking": "Fuzzby frame-left toward the leaf; Zenny frame-right on the petal.",
-            "principalPerformance": ("Fuzzby overshoots the flower, grazes the leaf and the "
-                                      "leaf springs him backward in a pollen burst."),
-            "secondaryPerformance": "Zenny turns her head once and holds.",
-            "animationAndPhysics": "The leaf bends under his weight, stores force, releases.",
-            "gazeAndExpression": "Fuzzby wide-eyed, Zenny level.",
-            "audiencePointOfView": "We see the mistake before he names it success.",
-            "shotSize": "Wide", "cameraHeight": "Bee height", "cameraAngle": "Corridor side",
-            "lensFeeling": "Playful width", "depthAndParallax": "Pollen cups stack into depth.",
-            "cameraBehaviour": "The camera waits at the leaf, then follows the ricochet",
-            "lightingAndAtmosphere": "Warm golden morning light with drifting pollen.",
-            "dialoguePlacement": placement, "soundRelationship": "Wingbeats under the chant.",
-            "closingComposition": "Fuzzby low in frame but airborne, leaf still trembling",
-            "closingCharacterState": "Fuzzby steadying; Zenny unmoved.",
-            "cutMotivation": "New comic point of view.",
-            "continuityIn": "Approved prose: warm light, Fuzzby left, Zenny right on petal.",
-            "continuityOut": "Approved prose: leaf trembling, pollen drifting, sides held.",
+def _sb_shot(shot_id, beat_ids, transition, protections=None):
+    return {"shotId": shot_id, "beatIds": beat_ids, "purpose": "Land the leaf gag cleanly.",
+            "audienceExperience": "We ride with him, not ahead of him.",
+            "openingImage": "Fuzzby canted forward, blur of stems resolving as he swerves.",
+            "principalPerformance": "Fuzzby overshoots the flower, grazes the leaf and the "
+                                     "leaf springs him backward in a pollen burst.",
+            "cameraRelationship": "The camera pursues and loses him, rediscovering him at "
+                                    "the leaf.",
+            "physicalOrEmotionalChange": "Confidence outruns control.",
+            "closingImage": "The leaf mid-rebound, Fuzzby low in frame but airborne.",
+            "transitionType": transition,
+            "transitionReason": "A cut here would break the experiential chase." if
+                                 transition == "CONTINUOUS" else
+                                 "Continuing would dilute the impact; the new image "
+                                 "re-scales the gag.",
+            "physicalPerformance": "Weight lands late, wings recover first, the whole body "
+                                     "reads the overcommitment before he does.",
+            "animationTiming": "Fast in, held rebound, a small settle before the next beat.",
+            "approvalState": "draft"}
+
+
+def _pd(shot_id, requires_kf, duration="5-7s", protections=None, names_speaker=True):
+    return {"shotId": shot_id,
+            "continuityIn": "Warm corridor light, Fuzzby already at speed, Zenny on her petal.",
+            "continuityOut": "Leaf still trembling, pollen drifting, Fuzzby low but airborne.",
+            "dialogueTiming": ("FUZZBY: chant runs under the whole shot, the line lands "
+                                "after the rebound.") if names_speaker else
+                               "The corridor holds its geography as the leaf settles.",
+            "referenceRoles": "Fuzzby identity anchors scale and rhythm; Zenny identity "
+                               "anchors stillness; corridor/leaf anchor bee-height geography.",
+            "requiresNewKeyframe": requires_kf, "intendedDurationRange": duration,
             "essentialProviderProtections": protections if protections is not None
                                              else ["Zenny stays on her petal"]}
+
+
+def _beat(beat_id="1.B1", dialogue=None):
+    return {"beatId": beat_id, "sceneId": "S1", "sourceScript": "x",
+            "exactDialogue": dialogue if dialogue is not None else ["FUZZBY: Nailed it."],
+            "participatingCharacters": ["Fuzzby", "Zenny"],
+            "whatChanges": "x", "whoDrives": "Fuzzby", "audienceAnticipation": "x",
+            "actionOrChoice": "x", "consequence": "x", "emotionalOrComicHandover": "x",
+            "approvalState": "redesigned_for_review"}
+
+
+def _vp(speaker, text):
+    return {"speaker": speaker, "exactDialogue": text, "voiceIdentity": "",
+            "dramaticIntention": "Claim admiration before the crash is classified.",
+            "subtext": "x", "relationshipTarget": "Zenny", "emotionalEntry": "x",
+            "emotionalExit": "x", "operativeWords": ["nailed"], "pace": "x", "rhythm": "x",
+            "pauses": "x", "breaths": "x", "nonVerbalActions": "x",
+            "elevenLabsV3Direction": "x",
+            "physicalActionRelationship": "Enters only after the rebound settles.",
+            "expectedTiming": "just after the rebound"}
 
 
 def _storyboard(state="approved"):
@@ -69,27 +89,14 @@ def _storyboard(state="approved"):
             "showrunnerJudgement": JUDGEMENT_MARKER,
             "internalRevisions": [{"note": JUDGEMENT_MARKER}],
             "escalation": None,
-            "beats": [{"beatId": "1.B1", "participatingCharacters": ["Fuzzby", "Zenny"],
-                        "exactDialogue": ["FUZZBY: Nailed it."],
-                        "selectedDirectorialInterpretation": "Self-awarded mastery",
-                        "selectionReason": "character truth first",
-                        "interpretations": [
-                            {"name": "Self-awarded mastery", "dramaticConstruction": "kept",
-                             "characterBehaviour": "kept", "audienceExperience": "kept"},
-                            {"name": "B", "dramaticConstruction": REJECTED_MARKER,
-                             "characterBehaviour": REJECTED_MARKER,
-                             "audienceExperience": REJECTED_MARKER},
-                            {"name": "C", "dramaticConstruction": REJECTED_MARKER,
-                             "characterBehaviour": REJECTED_MARKER,
-                             "audienceExperience": REJECTED_MARKER}]}],
-            "shots": [_sb_shot("1.B1.S1", "1.B1", "PLANNED_CUT"),
-                       _sb_shot("1.B1.S2", "1.B1", "CONTINUOUS",
-                                placement="Fuzzby's verdict lands after the settle.")],
-            "voicePerformances": [
-                {"speaker": "FUZZBY", "exactDialogue": "Nailed it.",
-                 "dramaticIntention": "Claim admiration before the crash is classified.",
-                 "physicalActionRelationship": "Enters only after the rebound settles.",
-                 "expectedTiming": "just after the rebound"}]}
+            "treatments": [{"name": "x", "cinematographerChallenge": REJECTED_MARKER}],
+            "treatmentSelection": {"rejectionChecks": REJECTED_MARKER},
+            "beats": [_beat("1.B1", ["FUZZBY: Nailed it."])],
+            "shots": [_sb_shot("S1.SH1", ["1.B1"], "PLANNED_CUT"),
+                       _sb_shot("S1.SH2", ["1.B1"], "CONTINUOUS")],
+            "productionDetail": [_pd("S1.SH1", True),
+                                  _pd("S1.SH2", False, names_speaker=False)],
+            "voicePerformances": [_vp("FUZZBY", "Nailed it.")]}
 
 
 def _old_pkg():
@@ -126,10 +133,11 @@ def test_unapproved_storyboard_cannot_alter_production():
 def test_real_awaiting_storyboard_refused_against_package_copy():
     live = HERE.parent / "cb-output" / "creative" / "Ep1_scene1_storyboard.json"
     archived = (HERE.parent / "cb-output" / "creative" / "archive_process_v1"
-                / "Ep1_scene1_storyboard.json")            # process-v1, rejected (EX-005)
+                / "Ep1_scene1_storyboard.json")
     real_sb = live if live.exists() else archived
     sb = json.load(open(real_sb))
-    assert sb["approvalState"] != "approved"          # nothing is approved yet — by design
+    if sb.get("approvalState") == "approved":
+        pytest.skip("real storyboard is approved this run — covered by other refusal tests")
     _, pkg_p = _tmp()
     before = _md5(pkg_p)
     with pytest.raises(H.HandoverRefused):
@@ -144,38 +152,46 @@ def test_storyboard_is_sole_creative_source():
     sb = _storyboard()
     s1 = pkg["shots"][0]
     assert s1["performanceAssignment"] == sb["shots"][0]["principalPerformance"]   # verbatim
-    assert s1["camera"] == sb["shots"][0]["cameraBehaviour"]
-    assert sb["shots"][0]["openingComposition"] in s1["openingPose"]
-    assert sb["shots"][0]["openingCharacterState"] in s1["openingPose"]
-    assert s1["visualPayoff"] == sb["shots"][0]["closingComposition"]
-    assert s1["continuityProseIn"] == sb["shots"][0]["continuityIn"]               # retained
+    assert s1["camera"] == sb["shots"][0]["cameraRelationship"]
+    assert s1["openingPose"] == sb["shots"][0]["openingImage"]
+    assert s1["visualPayoff"] == sb["shots"][0]["closingImage"]
+    assert s1["continuityProseIn"] == sb["productionDetail"][0]["continuityIn"]    # retained
     assert "OLD-CREATIVE-SOURCE-MARKER" not in json.dumps(pkg)   # nothing of rev 6 survives
     assert pkg["sourceStoryboard"]["md5"] == _md5(sb_p)          # provenance binds the source
 
 
-# ── req 3: only the six categories, structure honoured ────────────────────────────────
-def test_distils_only_the_six_categories_and_shot_structure():
+# ── req 3: only the distilled categories, structure honoured ──────────────────────────
+def test_distils_only_the_categories_and_shot_structure():
     sb_p, pkg_p = _tmp()
     pkg = H.promote(sb_p, pkg_p, log=lambda *a, **k: None)       # dry run is enough here
     s1, s2 = pkg["shots"]
     assert s1["sourceType"] == "opener" and s1.get("keyframePrompt")
-    assert s2["sourceType"] == "relay" and s2["sourceShotId"] == "1.B1.S1"
-    assert s2.get("keyframePrompt") is None or "keyframePrompt" not in s2
-    assert s1["prohibited"] == ["Zenny stays on her petal"]      # ≤3 essential protections
-    assert s1["durationSec"] == 5.0                              # low bound of "5-8s"
+    assert s2["sourceType"] == "relay" and s2["sourceShotId"] == "S1.SH1"
+    assert "keyframePrompt" not in s2 or not s2.get("keyframePrompt")
+    assert s1["prohibited"] == ["Zenny stays on her petal"]      # <=3 essential protections
+    assert s1["durationSec"] == 6.0                              # midpoint of "5-7s"
     for s in (s1, s2):                                           # Option D lean brief holds
         assert s["promptWords"] <= cb_engine.MAX_SHOT_PROMPT_WORDS
         assert "Begin exactly on @图1" in s["seedancePrompt"]
-    assert pkg["handover"]["integrationGaps"]                    # the gap is DECLARED, never silent
+    assert pkg["handover"]["integrationGaps"]                    # gaps DECLARED, never silent
 
 
 def test_protections_capped_at_three():
     sb_p, pkg_p = _tmp()
     sb = json.load(open(sb_p))
-    sb["shots"][0]["essentialProviderProtections"] = ["one", "two", "three", "four"]
+    sb["productionDetail"][0]["essentialProviderProtections"] = ["one", "two", "three", "four"]
     json.dump(sb, open(sb_p, "w"))
     pkg = H.promote(sb_p, pkg_p, log=lambda *a, **k: None)
     assert pkg["shots"][0]["prohibited"] == ["one", "two", "three"]
+
+
+def test_no_production_detail_refuses():
+    sb_p, pkg_p = _tmp()
+    sb = json.load(open(sb_p))
+    sb["productionDetail"] = []
+    json.dump(sb, open(sb_p, "w"))
+    with pytest.raises(H.HandoverRefused, match="no Production Detail"):
+        H.promote(sb_p, pkg_p, log=lambda *a, **k: None)
 
 
 # ── req 4: creative-room internals never reach production or the brief ────────────────
@@ -184,7 +200,8 @@ def test_internals_never_enter_package_or_brief():
     pkg = H.promote(sb_p, pkg_p, dry_run=False, log=lambda *a, **k: None)
     dump = json.dumps(pkg, ensure_ascii=False)
     for banned in (JUDGEMENT_MARKER, REJECTED_MARKER, CANON_MARKER, "Hard constraints:",
-                    "showrunnerJudgement", "internalRevisions", "selectionReason"):
+                    "showrunnerJudgement", "internalRevisions", "treatments",
+                    "treatmentSelection"):
         assert banned not in dump, banned
     for s in pkg["shots"]:
         for banned in (JUDGEMENT_MARKER, REJECTED_MARKER, CANON_MARKER):
@@ -199,11 +216,8 @@ def test_promotion_bumps_revision_and_stales_prior_authorisations():
     pkg = H.promote(sb_p, pkg_p, dry_run=False, log=lambda *a, **k: None)
     assert pkg["revision"] == old["revision"] + 1                # versioned, never in place
     assert pkg["voidedTokens"] == ["db660b33"]                   # void history carries forward
-    import cb_render                                             # test-only import: pure hashes
+    import cb_render
     assert cb_render._shots_hash(pkg) != cb_render._shots_hash(old)
-    # _binding_hash embeds _shots_hash + the prompt (cb_render, PROTECTION 1) — a token bound
-    # to revision 6 can never verify against the promoted shots; the fire path's existing
-    # binding-mismatch refusal enforces it with zero new provider-boundary code.
     assert pkg["shots"][0]["seedancePrompt"] != old["shots"][0]["seedancePrompt"]
     with pytest.raises(cb_render.Refused, match="VOID"):
         cb_render._verify_envelope({"token": "stale-pre-envelope"})
@@ -220,19 +234,167 @@ def test_dry_run_writes_nothing_and_module_has_no_provider_access():
     assert pkg["revision"] == 1
     src = (HERE / "cb_handover.py").read_text()
     assert "import cb_gen" not in src and "import cb_render" not in src
-    assert "_fal_" not in src and "generate_video" not in src and "eleven_" not in src
+    # no CALL syntax to any provider function — a docstring citing a confirmed provider
+    # fact (e.g. "cb_gen.generate_video_seedance's own duration=8 default") is fine and
+    # expected (Julian's audit directive); an actual call/attribute-invocation is not
+    assert not any(pat in src for pat in
+                   ("cb_gen.generate_video_seedance(", "cb_gen.generate_video(",
+                    "cb_gen.eleven_", "_fal_upload(", "_fal_subscribe("))
 
 
-def test_verbatim_dialogue_lands_once_on_the_placement_shot():
+def test_verbatim_dialogue_lands_on_the_correct_shot():
     sb_p, pkg_p = _tmp()
     pkg = H.promote(sb_p, pkg_p, log=lambda *a, **k: None)
     s1, s2 = pkg["shots"]
-    assert s1["dialogueLines"] == []                             # placement names S2
-    assert len(s2["dialogueLines"]) == 1
-    ln = s2["dialogueLines"][0]
+    lines = s1["dialogueLines"] + s2["dialogueLines"]
+    assert len(lines) == 1
+    ln = lines[0]
     assert ln["exactText"] == "Nailed it."                       # verbatim, never reworded
     assert "Nailed it" not in ln["delivery"]                     # delivery carries no words
-    assert "Nailed it" not in s2["seedancePrompt"]               # Law 6 holds through handover
+    for s in (s1, s2):
+        assert "Nailed it" not in s["seedancePrompt"]            # Law 6 holds through handover
+
+
+# ── THE HANDOVER-MAPPING CORRECTION (2026-07-17): VOICE MAPPING ────────────────────────
+# The keyframe/motion-brief corrections were CONSOLIDATED to their actual source,
+# cb_engine.compile_keyframe_prompt/compile_shot_contract (see test_cb_engine.py's own
+# 'HANDOVER-MAPPING CORRECTION' section, 2026-07-17) — the two fixture-based tests that
+# used to live here (keyframe-follows-approved-state, screen-side-conditional) exercised
+# H._keyframe_brief/H._compile_motion_brief directly; both functions were DELETED in the
+# consolidation, not relocated, so those tests moved with the logic rather than being kept
+# as dead references to code that no longer exists here. cb_handover.py's real, permanent
+# responsibility below (voice mapping) never touched cb_engine.py and is unaffected.
+def test_voice_delivery_carries_v3_direction_not_abstract_dramatic_intention():
+    """The voice-mapping correction: DialogueLine.delivery (which feeds
+    cb_engine.compile_audio_brief, the ElevenLabs-facing text) must carry the approved,
+    EXECUTABLE elevenLabsV3Direction verbatim — never the abstract dramaticIntention read
+    that used to silently replace it."""
+    vp = _vp("FUZZBY", "Nailed it.")
+    vp["elevenLabsV3Direction"] = "[proud, breathless] land the line like the stunt already worked."
+    lines = H._dialogue_lines([vp], 6.0)
+    assert lines[0]["delivery"] == vp["elevenLabsV3Direction"]
+    assert lines[0]["delivery"] != vp["dramaticIntention"]
+
+
+def test_voice_director_brief_carries_all_four_approved_fields_discretely():
+    """The production voice brief must carry exact locked dialogue, the approved
+    elevenLabsV3Direction, the approved expectedTiming and the concise
+    physicalActionRelationship — four discrete fields, never collapsed into one summary."""
+    vp = _vp("FUZZBY", "Nailed it.")
+    vp["elevenLabsV3Direction"] = "[proud] deliver it like the stunt already landed."
+    vp["expectedTiming"] = "right after the wobble settles"
+    vp["physicalActionRelationship"] = "the line contradicts the still-recovering hover"
+    brief = H._voice_director_brief_lines([vp])
+    assert len(brief) == 1
+    b = brief[0]
+    assert b["exactDialogue"] == "Nailed it."
+    assert b["elevenLabsV3Direction"] == vp["elevenLabsV3Direction"]
+    assert b["expectedTiming"] == vp["expectedTiming"]
+    assert b["physicalActionRelationship"] == vp["physicalActionRelationship"]
+
+
+def test_real_s1sh1_maps_cleanly_into_the_canonical_engine_compiler():
+    """Pinned to the REAL, approved 1.B1 data (2026-07-17): distil_shot's mapping of the
+    real approved shot/production-detail, fed into cb_engine's OWN canonical
+    compile_keyframe_prompt/compile_shot_contract (never a cb_handover-local compiler,
+    consolidated away 2026-07-17) — confirms the mapping layer produces a Shot the real
+    engine compiles cleanly, on real production content, not just a synthetic fixture.
+    Skips gracefully if the real storyboard file is absent/unapproved so this suite never
+    depends on production state to pass."""
+    real_sb_path = pathlib.Path(__file__).resolve().parent.parent / "cb-output" / "creative" / \
+        "Ep1_scene1_storyboard.json"
+    if not real_sb_path.exists():
+        pytest.skip("real storyboard not present in this environment")
+    sb = json.load(open(real_sb_path))
+    if sb.get("approvalState") != H.APPROVED_STATE:
+        pytest.skip("real storyboard not currently approved")
+    s1 = next((s for s in sb["shots"] if s["shotId"] == "S1.SH1"), None)
+    pd1 = next((p for p in sb.get("productionDetail", []) if p["shotId"] == "S1.SH1"), None)
+    if not (s1 and pd1):
+        pytest.skip("real S1.SH1 shot/production-detail not present")
+    chars_cfg = json.load(open(H.CHARS)) if H.CHARS.exists() else {}
+    shot, _ = H.distil_shot(s1, pd1, ["Fuzzby", "Zenny"], [], None, chars_cfg)
+    kf, kwc, kslots = cb_engine.compile_keyframe_prompt(
+        shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+    assert "already" in kf.lower()                                # the real, approved opening state
+    assert "anticipation instant" not in kf.lower()
+    assert "action already happening" not in kf.lower()
+    prompt, wc, slots = cb_engine.compile_shot_contract(
+        shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+    assert "screen sides" not in prompt                           # no default lane lock
+
+
+# ── THE SINGLE-SHOT ZERO-SPEND HANDOVER (2026-07-17/18 directive) ─────────────────────
+def test_promote_shot_scoped_to_one_shot_only():
+    sb_p, pkg_p = _tmp()
+    pkg = H.promote_shot(sb_p, "S1.SH1", pkg_p, log=lambda *a, **k: None)
+    assert len(pkg["shots"]) == 1 and pkg["shots"][0]["shotId"] == "S1.SH1"
+    assert pkg["scope"] == "single-shot handover: S1.SH1"
+    assert pkg["shots"][0]["sourceType"] == "opener"
+    assert pkg["shots"][0]["durationSec"] == 6.0                 # midpoint of "5-7s"
+    assert pkg["shots"][0]["dialogueLines"][0]["exactText"] == "Nailed it."
+
+
+def test_place_voices_for_beat_splits_by_line_content_not_bare_speaker_name():
+    """Pinned to the real bug found live against the actual Ep1 S1.SH1/S1.SH2 data
+    (2026-07-17): a two-line beat where BOTH shots' dialogueTiming mention the same bare
+    speaker name ('FUZZBY') by word-boundary, but only ONE shot's dialogueTiming actually
+    quotes each specific line. Speaker-name-only matching sent both lines to the
+    first-sorted shot; content-first matching must split them correctly."""
+    sb = _storyboard()
+    sb["beats"] = [_beat("1.B1", ["FUZZBY: BIZZY-BIZZY-BIZZY…", "FUZZBY: Nailed it."])]
+    sb["shots"] = [_sb_shot("S1.SH1", ["1.B1"], "CONTINUOUS"),
+                    _sb_shot("S1.SH2", ["1.B1"], "PLANNED_CUT")]
+    sb["productionDetail"] = [
+        {**_pd("S1.SH1", True), "dialogueTiming":
+            "FUZZBY chant is already underway at frame one: “BIZZY-BIZZY-BIZZY…” "
+            "in brisk pulse, carrying into the snap-away."},
+        {**_pd("S1.SH2", False), "dialogueTiming":
+            "FUZZBY: cut in after the messy recovery; hold the pose, then place "
+            "“Nailed it.” before the hover steadies."}]
+    sb["voicePerformances"] = [_vp("FUZZBY", "BIZZY-BIZZY-BIZZY…"), _vp("FUZZBY", "Nailed it.")]
+    placement = H.place_voices_for_beat(
+        "1.B1", ["S1.SH1", "S1.SH2"], sb["voicePerformances"],
+        sb["beats"][0]["exactDialogue"], {p["shotId"]: p for p in sb["productionDetail"]})
+    assert [vp["exactDialogue"] for vp in placement["S1.SH1"]] == ["BIZZY-BIZZY-BIZZY…"]
+    assert [vp["exactDialogue"] for vp in placement["S1.SH2"]] == ["Nailed it."]
+
+
+def test_promote_shot_refuses_missing_shot_or_production_detail():
+    sb_p, pkg_p = _tmp()
+    with pytest.raises(H.HandoverRefused, match="not found"):
+        H.promote_shot(sb_p, "S1.SH9", pkg_p, log=lambda *a, **k: None)
+    sb = json.load(open(sb_p))
+    sb["productionDetail"] = [p for p in sb["productionDetail"] if p["shotId"] != "S1.SH1"]
+    json.dump(sb, open(sb_p, "w"))
+    with pytest.raises(H.HandoverRefused, match="no Production Detail"):
+        H.promote_shot(sb_p, "S1.SH1", pkg_p, log=lambda *a, **k: None)
+
+
+def test_promote_shot_refuses_when_not_approved():
+    sb_p, pkg_p = _tmp("awaiting-human-storyboard-approval")
+    with pytest.raises(H.HandoverRefused, match="not 'approved'"):
+        H.promote_shot(sb_p, "S1.SH1", pkg_p, dry_run=False, log=lambda *a, **k: None)
+
+
+def test_promote_shot_never_leaks_internals_and_dry_run_writes_nothing():
+    sb_p, pkg_p = _tmp()
+    before_exists = pkg_p.exists()
+    pkg = H.promote_shot(sb_p, "S1.SH1", pkg_p, dry_run=True, log=lambda *a, **k: None)
+    dump = json.dumps(pkg, ensure_ascii=False)
+    for banned in (JUDGEMENT_MARKER, REJECTED_MARKER, CANON_MARKER):
+        assert banned not in dump
+    assert not pkg_p.exists() if not before_exists else True     # nothing new written
+
+
+def test_duration_normalized_to_midpoint_for_fixed_provider_duration():
+    assert H.normalize_duration_for_provider("5-7s") == 6.0
+    assert H.normalize_duration_for_provider("4-8s") == 6.0
+    assert H.normalize_duration_for_provider("5-6s") == 6.0       # rounds .5 up
+    with pytest.raises(H.HandoverRefused):
+        H.normalize_duration_for_provider("not a range")
+    with pytest.raises(H.HandoverRefused):
+        H.normalize_duration_for_provider("9-3s")                 # inverted, non-credible
 
 
 if __name__ == "__main__":

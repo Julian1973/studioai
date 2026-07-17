@@ -870,7 +870,21 @@ def compile_shot_contract(shot, scene, characters_cfg):
     constraints, canon/continuity rules, repair history, provenance, review requirements) lives
     in the package — preserved and enforced by validation and review, never repeated at the
     provider. 'Not sent to Seedance' is not 'dropped from the production contract'.
-    Target 90-160 words; 210 is the hard failure ceiling. Duration/AR travel as API params."""
+    Target 90-160 words; 210 is the hard failure ceiling. Duration/AR travel as API params.
+
+    2026-07-17 correction (Julian's audit, source-defect protection lifted for this one
+    line only): the closing preservation sentence no longer unconditionally locks 'screen
+    sides' on every shot — that was a false universal, since most shots have no approved
+    reason to hold a fixed lane. No separate screen-side detector was added; a genuinely
+    required lock is expected to reach the shot via shot.prohibited (an authored constraint),
+    the one existing door for this. NOTE, flagged rather than silently assumed: under this
+    module's own Option D design, shot.prohibited/hard_constraints' authored items feed
+    `internalConstraints` in the package (see compile_scene_package) — deliberately NOT
+    concatenated into THIS function's own returned prompt string. So today a genuinely
+    required screen-side lock does not yet reach the shipped Seedance brief through either
+    path; it is visible in the package for review, not in the fired prompt. Whether that
+    gap should be closed (and how) is a separate, undecided question — not addressed by
+    this fix, which only removes the false default."""
     anchor = OPENER_ANCHOR if shot.sourceType == "opener" else RELAY_ANCHOR
     camera = shot.camera.strip().rstrip(".")
     action = [f"{anchor[:-1]} — {camera[0].lower()}{camera[1:]}.",
@@ -879,7 +893,7 @@ def compile_shot_contract(shot, scene, characters_cfg):
     action.append(payoff[:1].upper() + payoff[1:] + ".")
 
     closing = [_lip_sync_sentence(shot, characters_cfg),
-               "Preserve character identity, relative scale and screen sides."]
+               "Preserve character identity and relative scale."]
     closing += _render_critical(shot)
 
     prompt = "\n\n".join([
@@ -898,19 +912,39 @@ def compile_shot_contract(shot, scene, characters_cfg):
 
 
 def compile_keyframe_prompt(shot, scene, characters_cfg):
-    """The opening-keyframe prompt for an OPENER shot — reference-first (zero appearance text),
-    the anticipation instant, framed with room to breathe (Julian's Gate-2b law)."""
+    """The opening-keyframe prompt for an OPENER shot — reference-first (zero appearance
+    text), room to breathe (Julian's Gate-2b law), compiled from: the approved opening
+    image, continuity in, identity/scale/reference bindings, and environment/lighting/
+    opening composition.
+
+    2026-07-17 correction (Julian's audit, source-defect protection lifted for this one
+    function only): this used to hardcode a universal 'the anticipation instant before the
+    action, never the payoff' framing and ban 'the action already happening' as a negative —
+    both false universals. THE APPROVED OPENING STATE DECIDES whether movement is already
+    underway (e.g. a character already pitched into travel) or the shot opens on deliberate
+    stillness (e.g. a character already still, before a quiet line) — this function states
+    only what shot.openingPose actually says, never a default posture.
+
+    shot.camera (the whole-shot camera RELATIONSHIP, which can describe movement across the
+    entire shot) is deliberately never read here — a single-frame brief has no legitimate use
+    for a whole-shot movement description, opener or not. 'Opening composition' instead comes
+    from continuityIn's own lighting/cameraSide (which side of the action line the camera
+    holds at the opening instant, plus lighting) — the world/light/framing truth for this one
+    frame. When a caller's own mapping has (degenerately) duplicated one prose sentence into
+    both continuityIn.lighting and continuityIn.cameraSide, it is stated once, not twice."""
     pose, next_slot = _inline_bindings(shot.openingPose.strip().rstrip("."), shot,
                                         characters_cfg, start=1)
+    lighting = shot.continuityIn.lighting.strip().rstrip(".")
+    camera_side = shot.continuityIn.cameraSide.strip().rstrip(".")
+    continuity = lighting if _norm(lighting) == _norm(camera_side) else f"{lighting}; {camera_side}"
     prompt = "\n\n".join([
         _style_line(scene),
-        ("The literal OPENING FRAME of the shot — the anticipation instant before the action, "
-         "never the payoff."),
-        f"{shot.camera.strip().rstrip('.')}: {pose}. Frame a touch wider than the shot size alone "
-        f"implies — real headroom and side-room for the movement to come. "
+        f"The literal OPENING FRAME of the shot, exactly as approved: {pose}.",
+        f"Continuity in: {continuity}. Frame a touch wider than the shot size alone implies — "
+        f"real headroom and side-room for whatever the shot needs. "
         f"@图{next_slot} scene plate holds the world, palette and light exactly.",
-        ("Negative: character redesign, appearance drift from the references, extra characters, "
-         "the action already happening, on-screen text."),
+        ("Negative: character redesign, appearance drift from the references, extra "
+         "characters, on-screen text."),
     ])
     wc = len(prompt.split())
     assert wc <= MAX_KEYFRAME_PROMPT_WORDS, (

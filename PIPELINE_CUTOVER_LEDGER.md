@@ -129,3 +129,134 @@ The one rule: **the old pipeline is not switched off before the new one has prod
 approved shot.** Not sentimentality — if it's archived first, there is zero working pipeline.
 The moment step 2 lands, there is no way back to the old way, because the old way is no longer
 wired to anything.
+
+---
+
+## 7. Recorded, not fixed — the S1.SH1 keyframe spend-gate checkpoint (2026-07-17)
+
+Preparing the Gate B disclosure for S1.SH1's opening keyframe (creative-room-2.0 → cb_handover
+→ cb_engine) surfaced three real gaps. None fixed here — Julian's own instruction for this
+checkpoint was record only, code/creative changes explicitly withheld.
+
+1. **Essential provider protections are not reaching the Seedance brief.** `shot.prohibited`
+   (where a CreativeShotCard's `essentialProviderProtections` land, via cb_handover's
+   `distil_shot`) only ever feeds `cb_engine.hard_constraints()`, whose output is stored as
+   `internalConstraints` in the package — deliberately never concatenated into
+   `compile_shot_contract`'s own returned prompt (Option D's own documented design). The
+   2026-07-17 consolidation's own `compile_shot_contract` docstring already names this
+   plainly rather than silently assuming otherwise. A genuinely required protection
+   (e.g. an explicit screen-side lock) does not currently reach the fired prompt through
+   ANY path. Whether/how to open a second door for this is undecided — not addressed here.
+
+2. **Dialogue ownership must be validated before a visual creative card can be approved.**
+   S1.SH6's own approved `principalPerformance` field quotes its locked dialogue verbatim
+   ("...she simply names what she knows: 'A Storm's coming.'") — a genuine Law 6 violation
+   in already-APPROVED creative-card content, caught only when `cb_engine.compile_shot_contract`
+   (unmodified) refused to compile it. This is a Gate-A-time gap: nothing checks a
+   CreativeShotCard's own prose fields (principalPerformance, openingImage, closingImage,
+   physicalOrEmotionalChange) for containing the beat's own locked dialogue text BEFORE that
+   card is approved — the check currently only fires downstream, at compile time, after the
+   human sign-off it should have preceded. Building this validation at source (Gate A, before
+   card approval) is exactly what would prevent an S1.SH6-shaped defect from ever reaching an
+   approved card again; it is the source-level fix, not a keyframe/prompt patch. NOT built
+   this checkpoint.
+
+3. **The creative-room-vNext production package has no bridge into the authorized fire
+   route** (found while preparing the disclosure itself, not one of Julian's own named two,
+   flagged here for completeness). `cb_gen.generate_image`'s `_require_production_route`
+   hard-refuses any call whose `production_route != "cb_render"` — the ONLY authorized path
+   is `cb_render.keyframe_shot()`, which reads its package from
+   `cb-output/{episode}_scene{N}_production_package.json` in the shape
+   `cb_engine.compile_scene_package()` builds (`continuityLedger`, `validation`, shot IDs
+   like `1.B1.S1`). That package already exists for Scene 1 and already has a real,
+   previously-fired keyframe (`media/shots/Ep1_1.B1.S1_keyframe.png`) — but it is a
+   COMPLETELY SEPARATE artifact from the human-approved creative-room storyboard
+   (`Ep1_scene1_storyboard.json`, shot IDs like `S1.SH1`) this whole session's work has built
+   and tested. `cb_handover.promote_shot()` has never been run with `dry_run=False`; no
+   `S1.SH1`-shaped production package exists anywhere on disk. Firing S1.SH1's keyframe for
+   real — through the one authorized route — requires writing a `cb_render`-shaped package
+   for these shots first. That is a packaging/wiring step, not a prompt or creative change;
+   named here as the actual prerequisite to literal generation, distinct from items 1-2 above.
+
+   **CLOSED 2026-07-17, same day, Julian's consolidation-checkpoint directive**:
+   `cb_handover.promote_to_canonical()` (the sole promotion boundary) now writes exactly this
+   bridge — real, on disk, at `cb-output/Ep1_scene1_production_package.json`, revision 7,
+   sole shot `S1.SH1`. The OLD revision-6 package (`1.B1.S1`...`1.B5.S3`) is archived
+   byte-identical at `cb-output/archive/Ep1_scene1_production_package_pre_S1.SH1_promotion_
+   rev6_20260717.json` — never lost, and the stable fixture home for `test_e2e_fire_route.py`'s
+   own revision-6-specific proofs going forward. `cb_render.load_pkg`/`_shot`/`_slot_paths`
+   all confirmed, live, to resolve `S1.SH1` from the new package correctly.
+
+   **A FOURTH FINDING, surfaced by actually building this bridge, not assumed away** (found
+   2026-07-17, both root causes CLOSED the same day — Julian's structural-correction
+   directive):
+   `cb_engine.validate_scene_design` — called for real, unmodified, on the promoted S1.SH1 —
+   returned `passed: False`. Two genuine, structural causes, neither fixable by inventing data
+   or altering Julian's own approved creative-room text (both forbidden): (a)
+   `CONTINUITY_CAST_INCOMPLETE` — `distil_shot`'s `continuityIn/Out.characters` list was
+   always empty (item 1's own already-documented `typed-continuity` gap, confirmed to ALSO
+   break cb_engine's own validator, not just the join-check it was originally named for); (b)
+   `FIELD_OVERBUDGET` — S1.SH1's own approved `closingImage` (18 words) exceeded
+   `cb_engine.Shot.visualPayoff`'s 15-word discipline, a budget the creative-room storyboard
+   schema had no concept of at all.
+
+   **(a) CLOSED** — `cb_creative.ProductionDetail` gained a new, typed `characterContinuity`
+   field (character ID, opening state, closing state), authored during Gate 5/6 production
+   detailing (`cb_creative.production_detail`, never inferred inside `cb_handover.py`).
+   S1.SH1's own Production Detail was regenerated with it via
+   `cb_creative.regenerate_production_detail(..., only_shot_id="S1.SH1")` — a scoped,
+   single-shot regeneration; every sibling shot's own Production Detail carried forward
+   completely untouched. S1.SH1's CreativeShotCard hash is confirmed byte-for-byte unchanged
+   across the regeneration (`19c3379cd82e…`, before == after == the hash now stored in the
+   live canonical package's `sourceStoryboard.creativeCardHashes.S1.SH1`).
+   `cb_handover.distil_shot` now maps this typed field into `cb_engine.ContinuityState.
+   characters` mechanically (a per-character state string duplicated across
+   `pose`/`expression`/`screenZone`/`facing`, since the storyboard's own typed contract
+   authors one descriptive state per direction, not cb_engine's fuller four-field shape —
+   never invented, matching this file's own established duplicated-never-invented pattern);
+   falls back to the original empty-list behaviour for any shot whose Production Detail has
+   not yet been regenerated with it.
+
+   **(b) CLOSED** — the arbitrary, isolated 15-word `visualPayoff` field budget is REMOVED
+   from `cb_engine.FIELD_WORD_BUDGETS` outright (Julian: "do not rewrite or shorten the
+   approved closing image... rely on the existing overall compiled-provider-brief budget").
+   The field still runs the `ABSTRACT_DIRECTION` safety/renderability scan, unweakened; the
+   real constraint that matters — the COMPILED provider brief's own word cap
+   (`MAX_SHOT_PROMPT_WORDS`) and the `COMPILABILITY` check (an actual `compile_shot_contract`
+   call) — is untouched and still enforced on every shot, unconditionally.
+
+   **THE PROMOTION ITSELF WAS ALSO MADE TRANSACTIONAL** (a real, separate structural
+   correction, found the same day the fourth finding above was first surfaced): the first
+   attempt at closing (a) and (b) — before either fix landed — wrote `promote_to_canonical`'s
+   candidate package to the live path UNCONDITIONALLY, regardless of `validation.passed`,
+   producing exactly one invalid revision 7 live on disk (`validation.passed: false`,
+   `CONTINUITY_CAST_INCOMPLETE` + `FIELD_OVERBUDGET`, both findings above in their raw,
+   unfixed form). `promote_to_canonical` now builds and validates the ENTIRE candidate package
+   fully in memory before touching the live path at all: a failing candidate writes nothing
+   live, returns the failures, leaves the previous valid package completely untouched, and (on
+   a real, non-dry-run attempt) preserves itself separately as rejected evidence at a
+   distinctly-named archive path — never live, never silently discarded. That original invalid
+   attempt is preserved exactly this way, at
+   `cb-output/archive/Ep1_scene1_production_package_REJECTED_S1.SH1_rev7_attempt1_validation_
+   failed_20260717.json`. `cb_handover.py`'s own import graph was corrected in the same pass —
+   it no longer imports `cb_render` (or `cb_gen`) at all; the canonical package's filename
+   convention now lives as a pure helper in `cb_engine.py`
+   (`cb_engine.canonical_package_path`), which `cb_render._pkg_path` itself delegates to — the
+   invariant test forbidding `cb_handover` from importing either rendering or provider code is
+   restored, checking both names.
+
+   **RE-PROMOTED FOR REAL, 2026-07-17**: with both root causes closed, S1.SH1 was promoted
+   again as revision 7 (superseding the restored, valid revision 6 — the earlier invalid
+   attempt was never live, so nothing needed reverting beyond restoring revision 6 as the
+   interim state) — `validation.passed: true`, 0 errors, 0 warnings.
+   `cb_render.keyframe_shot("1", "S1.SH1", "Ep1")` was run for real against this live package
+   (writes redirected to a scratch copy; only `cb_gen.generate_image` stubbed) and passed its
+   real, unstubbed `_require_valid` check, real billing gate, real opener/relay check, and real
+   character-identity + scene-plate reference resolution — no legacy `1.B1.S1` material
+   anywhere in the compiled prompt, no media written, no spend token issued. Storyboard md5 and
+   S1.SH1's own CreativeShotCard hash are unchanged throughout. `test_e2e_fire_route.py` now
+   carries this as its own explicit golden-path proof
+   (`test_golden_path_s1sh1_keyframe_passes_real_require_valid_only_provider_stubbed`, against
+   the real live package), separate from its three `test_legacy_*` regression pins against the
+   original revision-6/`1.B1.S1` content — the golden path no longer borrows the legacy
+   package as its own evidence.

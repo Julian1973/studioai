@@ -88,6 +88,9 @@ def _build_package(tmp, valid=True):
     s1 = _mkshot("1.B1.S1", "opener", None,
                  [_line("Fuzzby", "Nailed it.", 1.0, 2.5)],
                  "FUZZBY speaks with breathless pride", staging=STAGING)
+    # THE SIMPLIFICATION (2026-07-17): the scene's true first shot has nothing to
+    # inherit — typed absence (None), the same mechanical clear design_scene now applies.
+    s1.continuityIn = None
     # s2's continuityIn must carry s1's marks (pollen dust) for the validator
     s2 = _mkshot("1.B1.S2", "relay", "1.B1.S1",
                  [_line("Zenny", "Fuzzby… why are you humming?", 1.0, 3.5)],

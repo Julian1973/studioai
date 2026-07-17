@@ -47,7 +47,20 @@ def _sb_shot(shot_id, beat_ids, transition, protections=None):
             "approvalState": "draft"}
 
 
-def _pd(shot_id, requires_kf, duration="5-7s", protections=None, names_speaker=True):
+def _pd(shot_id, requires_kf, duration="5-7s", protections=None, names_speaker=True,
+        character_continuity=None):
+    """character_continuity (2026-07-17, item 3 fixture coverage): defaults to a real
+    typed Fuzzby+Zenny pair — cb_engine.validate_scene_design's CONTINUITY_CAST_INCOMPLETE
+    check reads ONLY the typed ContinuityState.characters list (never the prose), so a
+    fixture with no typed continuity legitimately fails that check whenever its cast has
+    >0 members, exactly as the real, unregenerated S1.SH2-S1.SH7 shots still do today.
+    Pass character_continuity=[] explicitly to test that still-real, still-current gap."""
+    if character_continuity is None:
+        character_continuity = [
+            {"characterId": "Fuzzby", "openingState": "already at speed in the corridor",
+             "closingState": "low but airborne after the leaf recoil"},
+            {"characterId": "Zenny", "openingState": "still on her petal",
+             "closingState": "still on her petal, unmoved by the recoil"}]
     return {"shotId": shot_id,
             "continuityIn": "Warm corridor light, Fuzzby already at speed, Zenny on her petal.",
             "continuityOut": "Leaf still trembling, pollen drifting, Fuzzby low but airborne.",
@@ -58,7 +71,8 @@ def _pd(shot_id, requires_kf, duration="5-7s", protections=None, names_speaker=T
                                "anchors stillness; corridor/leaf anchor bee-height geography.",
             "requiresNewKeyframe": requires_kf, "intendedDurationRange": duration,
             "essentialProviderProtections": protections if protections is not None
-                                             else ["Zenny stays on her petal"]}
+                                             else ["Zenny stays on her petal"],
+            "characterContinuity": character_continuity}
 
 
 def _beat(beat_id="1.B1", dialogue=None):
@@ -94,7 +108,11 @@ def _storyboard(state="approved"):
             "beats": [_beat("1.B1", ["FUZZBY: Nailed it."])],
             "shots": [_sb_shot("S1.SH1", ["1.B1"], "PLANNED_CUT"),
                        _sb_shot("S1.SH2", ["1.B1"], "CONTINUOUS")],
-            "productionDetail": [_pd("S1.SH1", True),
+            # S1.SH1 is the scene's true first shot — THE SIMPLIFICATION (2026-07-17):
+            # nothing genuinely inherits into it, so continuityIn is the schema's own
+            # existing empty-string value (typed absence), matching cb_creative.
+            # production_detail's real mechanical clear, never real prose here.
+            "productionDetail": [{**_pd("S1.SH1", True), "continuityIn": ""},
                                   _pd("S1.SH2", False, names_speaker=False)],
             "voicePerformances": [_vp("FUZZBY", "Nailed it.")]}
 
@@ -233,13 +251,24 @@ def test_dry_run_writes_nothing_and_module_has_no_provider_access():
     assert not pkg_p.exists()                                    # dry run stored NOTHING
     assert pkg["revision"] == 1
     src = (HERE / "cb_handover.py").read_text()
-    assert "import cb_gen" not in src and "import cb_render" not in src
+    # 2026-07-17 (Julian's layer-boundary correction, item 2): the invariant is RESTORED in
+    # full — neither cb_gen (the provider-calling module) nor cb_render (the renderer entry
+    # point) may be imported here, no exception. promote_to_canonical no longer needs to
+    # import cb_render even narrowly for its package-path convention: that convention now
+    # lives in cb_engine.canonical_package_path (cb_engine.py already owns the canonical
+    # package CONTRACT), a pure path helper this module calls directly — it was never a
+    # provider call, but routing it through cb_render's own module was still a real,
+    # avoidable coupling across the promotion boundary. Fixed at the source, not narrowed
+    # here at the test.
+    assert "import cb_gen" not in src
+    assert "import cb_render" not in src
     # no CALL syntax to any provider function — a docstring citing a confirmed provider
     # fact (e.g. "cb_gen.generate_video_seedance's own duration=8 default") is fine and
     # expected (Julian's audit directive); an actual call/attribute-invocation is not
     assert not any(pat in src for pat in
                    ("cb_gen.generate_video_seedance(", "cb_gen.generate_video(",
-                    "cb_gen.eleven_", "_fal_upload(", "_fal_subscribe("))
+                    "cb_gen.eleven_", "_fal_upload(", "_fal_subscribe(",
+                    "cb_gen.generate_image("))
 
 
 def test_verbatim_dialogue_lands_on_the_correct_shot():
@@ -395,6 +424,153 @@ def test_duration_normalized_to_midpoint_for_fixed_provider_duration():
         H.normalize_duration_for_provider("not a range")
     with pytest.raises(H.HandoverRefused):
         H.normalize_duration_for_provider("9-3s")                 # inverted, non-credible
+
+
+# ── THE SOURCE-LEVEL HANDOVER: creative-room storyboard -> canonical package (2026-07-17) ──
+def test_internal_leak_check_exempts_only_internalConstraints_field():
+    """2026-07-17 correction: internalConstraints legitimately starts with 'Hard
+    constraints:' (cb_engine.hard_constraints' own real text) — must not false-positive.
+    Every other field, and every other banned term, is still checked exactly as before."""
+    clean = [{"shotId": "S1.SH1", "internalConstraints": "Hard constraints: no crystals on bees."}]
+    H._assert_no_internal_leak(clean)          # must not raise
+    leaky_elsewhere = [{"shotId": "S1.SH1", "seedancePrompt": "Hard constraints: leaked here too"}]
+    with pytest.raises(H.HandoverRefused, match="Hard constraints"):
+        H._assert_no_internal_leak(leaky_elsewhere)
+    real_leak = [{"shotId": "S1.SH1", "internalConstraints": "Hard constraints: fine",
+                   "notes": "showrunnerJudgement leaked here"}]
+    with pytest.raises(H.HandoverRefused, match="showrunnerJudgement"):
+        H._assert_no_internal_leak(real_leak)
+
+
+def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
+    """Redirects cb_engine.canonical_package_path to a scratch dir so promote_to_canonical's
+    real archive/write behaviour can be proven without touching production files.
+    2026-07-17 correction (Julian's layer-boundary directive, item 2): promote_to_canonical
+    no longer resolves the canonical path via cb_render._pkg_path (removed, along with the
+    cb_render import itself) — it calls cb_engine.canonical_package_path directly, the SAME
+    function cb_render._pkg_path itself now delegates to. Patching it here at its actual
+    source correctly redirects BOTH cb_handover's own call and any test helper that still
+    reads back through cb_render._pkg_path (it delegates, so it sees the same patch)."""
+    import cb_engine
+    sb_p = tmp_path / "sb.json"
+    json.dump(_storyboard(sb_state), open(sb_p, "w"))
+    pkg_dir = tmp_path / "cb-output"
+    pkg_dir.mkdir()
+    monkeypatch.setattr(cb_engine, "canonical_package_path",
+                        lambda scene, episode="Ep1": pkg_dir / f"{episode}_scene{scene}_production_package.json")
+    return sb_p, pkg_dir
+
+
+def test_promote_to_canonical_dry_run_writes_nothing_and_reports_honest_validation(tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    new_pkg, archived = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                                 dry_run=True, log=lambda *a, **k: None)
+    assert new_pkg["shots"][0]["shotId"] == "S1.SH1"
+    assert isinstance(new_pkg["validation"]["passed"], bool)      # a REAL computed verdict,
+    #                                                                never a hardcoded True
+    assert list((pkg_dir).iterdir()) == []                        # nothing written
+    assert archived is None                                       # no prior package to archive
+
+
+def test_promote_to_canonical_writes_canonical_shape_and_archives_the_old_package(tmp_path, monkeypatch):
+    import cb_render as R
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    old_path = R._pkg_path("1", "Ep1")
+    old = {"episode": "Ep1", "sceneNumber": "1", "revision": 6,
+           "shots": [{"shotId": "1.B1.S1", "performanceAssignment": "OLD-MARKER"}],
+           "continuityLedger": [], "validation": {"passed": True}}
+    json.dump(old, open(old_path, "w"))
+    old_md5 = _md5(old_path)
+
+    new_pkg, archived = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                                 dry_run=False, log=lambda *a, **k: None)
+    assert archived.exists() and _md5(archived) == old_md5        # byte-identical, preserved
+    assert new_pkg["revision"] == 7
+    # the canonical shape cb_render.py actually reads — every key it touches, present
+    for key in ("episode", "sceneNumber", "shots", "continuityLedger", "validation", "revision"):
+        assert key in new_pkg
+    written = json.load(open(old_path))                           # same path, new content
+    assert written["revision"] == 7
+    assert [s["shotId"] for s in written["shots"]] == ["S1.SH1"]   # sole creative source
+    assert "1.B1.S1" not in json.dumps(written["shots"])           # legacy shot gone, not merged
+    ledger_ids = [e["shotId"] for e in written["continuityLedger"]]
+    assert ledger_ids == ["S1.SH1"]
+
+
+def test_promote_to_canonical_refuses_transactionally_on_invalid_candidate(tmp_path, monkeypatch):
+    """Item 1, the core transactional guarantee: a candidate that fails validation must
+    NEVER reach the live path — the previous valid package is preserved exactly, no
+    archive-of-the-superseded-package step runs (nothing is superseded), and the failed
+    candidate itself is preserved separately as REJECTED evidence, not silently discarded."""
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    old_path = pkg_dir / "Ep1_scene1_production_package.json"
+    old = {"episode": "Ep1", "sceneNumber": "1", "revision": 6,
+           "shots": [{"shotId": "1.B1.S1", "performanceAssignment": "STILL-THE-VALID-ONE"}],
+           "continuityLedger": [], "validation": {"passed": True}}
+    json.dump(old, open(old_path, "w"))
+    old_md5 = _md5(old_path)
+
+    # character_continuity=[] reproduces the real, still-current gap (CONTINUITY_CAST_
+    # INCOMPLETE) that actually made revision 7's first live attempt fail validation.
+    sb = _storyboard()
+    sb["productionDetail"][0] = {**sb["productionDetail"][0], "characterContinuity": []}
+    json.dump(sb, open(sb_p, "w"))
+
+    new_pkg, rejected = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                                 dry_run=False, log=lambda *a, **k: None)
+    assert new_pkg["validation"]["passed"] is False
+    assert new_pkg["validation"]["errors"] > 0
+    # THE LIVE PATH IS UNTOUCHED — byte-identical to what it was before this call
+    assert _md5(old_path) == old_md5
+    assert json.load(open(old_path))["shots"][0]["performanceAssignment"] == "STILL-THE-VALID-ONE"
+    # THE REJECTED CANDIDATE IS PRESERVED, SEPARATELY, NEVER LIVE
+    assert rejected is not None and rejected.exists()
+    assert rejected != old_path
+    assert "REJECTED" in rejected.name and "validation_failed" in rejected.name
+    rejected_content = json.load(open(rejected))
+    assert rejected_content["shots"][0]["shotId"] == "S1.SH1"
+    assert rejected_content["validation"]["passed"] is False
+
+
+def test_promote_to_canonical_dry_run_refusal_writes_absolutely_nothing(tmp_path, monkeypatch):
+    """A failing dry run must not even write the rejected-evidence file — dry_run=True
+    means nothing touches disk, full stop, matching this module's own standing contract."""
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    old = {"episode": "Ep1", "sceneNumber": "1", "revision": 6, "shots": [],
+           "continuityLedger": [], "validation": {"passed": True}}
+    old_path = pkg_dir / "Ep1_scene1_production_package.json"
+    json.dump(old, open(old_path, "w"))
+    old_md5 = _md5(old_path)
+
+    sb = _storyboard()
+    sb["productionDetail"][0] = {**sb["productionDetail"][0], "characterContinuity": []}
+    json.dump(sb, open(sb_p, "w"))
+
+    new_pkg, rejected = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                                 dry_run=True, log=lambda *a, **k: None)
+    assert new_pkg["validation"]["passed"] is False
+    assert rejected is None
+    assert _md5(old_path) == old_md5                              # completely untouched
+    assert set(p.name for p in pkg_dir.rglob("*")) == {"Ep1_scene1_production_package.json"}
+    #                                                    ^ no archive/ dir, no rejected file
+
+
+def test_promote_to_canonical_promotes_only_named_shots_never_a_sweep(tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    new_pkg, _ = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                          dry_run=True, log=lambda *a, **k: None)
+    ids = [s["shotId"] for s in new_pkg["shots"]]
+    assert ids == ["S1.SH1"]
+    assert "S1.SH2" not in ids                                    # the sibling is real in the
+    #                                                                storyboard but never named
+
+
+def test_promote_to_canonical_refuses_when_not_approved(tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch, sb_state="awaiting-human-storyboard-approval")
+    with pytest.raises(H.HandoverRefused, match="not 'approved'"):
+        H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                dry_run=True, log=lambda *a, **k: None)
+    assert list(pkg_dir.iterdir()) == []
 
 
 if __name__ == "__main__":

@@ -1,0 +1,2295 @@
+{
+ "episode": "Ep1",
+ "sceneNumber": "1",
+ "sceneName": "Rainforest Flower Meadow",
+ "doctrine": "THE_DEFINITIVE_PIPELINE.md (2026-07-16, hybrid contract)",
+ "directorStatement": {
+  "audienceFeeling": "Safe laughter first: the meadow feels playful and forgiving before thunder asks for bravery.",
+  "whoseScene": "Fuzzby drives the comic energy; Zenny owns the emotional temperature and the turn toward danger.",
+  "emotionalChange": "The scene moves from carefree show-off play to a lightly sobered awareness that weather is coming.",
+  "theLaugh": "Fuzzby keeps converting mistakes into heroic branding while Zenny’s restraint makes each boast funnier.",
+  "visualSurprise": "Flowers, leaves, branches, and pollen behave like spring-loaded comic partners without hiding impact or weight.",
+  "carryForward": "Fuzzby is pollen-covered and stuck; Zenny has named the storm, shifting play into concern."
+ },
+ "beatCodes": [
+  "1.B1",
+  "1.B2",
+  "1.B3",
+  "1.B4",
+  "1.B5"
+ ],
+ "shots": [
+  {
+   "shotId": "1.B1.S1",
+   "beatCode": "1.B1",
+   "durationSec": 6.0,
+   "purpose": "Establish playful work rhythm and geography.",
+   "performanceAssignment": "Over six seconds, Fuzzby flies too fast past his intended flower path, overcorrects and gradually loses altitude. Zenny stays on the petal, calmly collecting pollen with small, precise movements and no broad reaction.",
+   "camera": "One continuous wide shot at bee height, Fuzzby screen-left, Zenny screen-right",
+   "openingPose": "Fuzzby canted high between flowers, chest pitched forward; Zenny perched on a nearby petal.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": null,
+   "dialogueBinding": "Only Fuzzby sings and moves his mouth in synchrony with @Audio1; Zenny's mouth remains closed.",
+   "dialogueLines": [
+    {
+     "speaker": "FUZZBY",
+     "exactText": "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+     "delivery": "with sing-song overdrive, chest already pitching forward like the work song is powering a grand mission he has only half under control",
+     "startSec": 0.8,
+     "endSec": 4.9
+    }
+   ],
+   "visualPayoff": "He ends low in frame but remains airborne, before any impact.",
+   "physicalStaging": null,
+   "prohibited": [
+    "preserve screen geography",
+    "end before the crash"
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Bee-height corridor side; Fuzzby screen-left, Zenny screen-right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left high",
+      "facing": "traveling rightward down corridor",
+      "pose": "canted hover, chest forward",
+      "expression": "busy delight",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right on a petal",
+      "facing": "traveling rightward down corridor",
+      "pose": "perched on a petal, collecting pollen",
+      "expression": "calm focus",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Bee-height corridor side; Fuzzby screen-left, Zenny screen-right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left low",
+      "facing": "toward next flower",
+      "pose": "over-corrected dip, chest leading",
+      "expression": "thrilled concentration",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right on a petal",
+      "facing": "toward next flower",
+      "pose": "perched on the petal, mid-collection",
+      "expression": "flat focus",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved opening frame — one continuous wide shot at bee height, Fuzzby screen-left, Zenny screen-right. Over six seconds, Fuzzby flies too fast past his intended flower path, overcorrects and gradually loses altitude. Zenny stays on the petal, calmly collecting pollen with small, precise movements and no broad reaction. He ends low in frame but remains airborne, before any impact.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby; Zenny's mouth remains closed. Preserve character identity, relative scale and screen sides.",
+   "promptWords": 105,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B1.S1 — voice-only performance for @Audio1.\nFUZZBY: \"BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…\" — with sing-song overdrive, chest already pitching forward like the work song is powering a grand mission he has only half under control. Target 0.8-4.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot — the anticipation instant before the action, never the payoff.\n\nOne continuous wide shot at bee height, Fuzzby screen-left, Zenny screen-right: Fuzzby (@图2, larger bee) canted high between flowers, chest pitched forward; Zenny (@图1, smaller bee) perched on a nearby petal. Frame a touch wider than the shot size alone implies — real headroom and side-room for the movement to come. @图3 scene plate holds the world, palette and light exactly.\n\nNegative: character redesign, appearance drift from the references, extra characters, the action already happening, on-screen text.",
+   "keyframePromptWords": 114,
+   "keyframeReferenceSlots": {
+    "@图1": "Zenny",
+    "@图2": "Fuzzby",
+    "@图3": "scene plate"
+   },
+   "internalConstraints": "Hard constraints: preserve screen geography; end before the crash; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B1.S2",
+   "beatCode": "1.B1",
+   "durationSec": 6.0,
+   "purpose": "Land the leaf ricochet gag.",
+   "performanceAssignment": "Fuzzby commits too hard to the dip, gathers more momentum than he can manage, strikes the waiting leaf with believable weight, then lets the rebound snap him into a claimed heroic finish.",
+   "camera": "Tight locked impact view at leaf and flower.",
+   "openingPose": "Fuzzby outside the flower, angled downward; broad leaf waits across his exit path.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S1",
+   "cutInMotivation": "Matched action on Fuzzby’s low dip toward the flower.",
+   "dialogueBinding": "Fuzzby speaks only after rebound stabilizes.",
+   "dialogueLines": [
+    {
+     "speaker": "FUZZBY",
+     "exactText": "Nailed it.",
+     "delivery": "with breathless pomp, pretending the leaf rebound was the exact finish he designed before his hover has fully recovered",
+     "startSec": 4.4,
+     "endSec": 5.3
+    }
+   ],
+   "visualPayoff": "Leaf FWIPs him into a proud superhero hover.",
+   "physicalStaging": {
+    "staysVisible": "Fuzzby remains outside the flower before contact, then fully visible through exit, leaf impact, rebound, and pose.",
+    "contactAndWeight": "Petal exit drives sideways momentum into the leaf; the leaf bends under him, stores force, then releases him upward.",
+    "payoffShape": "The rebound snaps his chest forward into a victory hover while the leaf wobbles behind him.",
+    "prohibitedStaging": [
+     "Do not start with Fuzzby already inside the flower.",
+     "Do not hide the leaf impact.",
+     "Do not make the rebound weightless."
+    ]
+   },
+   "prohibited": [
+    "Do not add extra spins after rebound.",
+    "Do not move Zenny into the impact.",
+    "Do not smear pollen marks yet."
+   ],
+   "charactersInFrame": [
+    "Fuzzby"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; action remains left of Zenny’s lane.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left entering center",
+      "facing": "down toward flower",
+      "pose": "dive anticipation outside flower",
+      "expression": "overconfident focus",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby remains screen-left of Zenny.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left center",
+      "facing": "toward Zenny’s side",
+      "pose": "chest-out victory hover",
+      "expression": "breathless pride",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Fuzzby and @图3 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — tight locked impact view at leaf and flower. Fuzzby commits too hard to the dip, gathers more momentum than he can manage, strikes the waiting leaf with believable weight, then lets the rebound snap him into a claimed heroic finish. Leaf FWIPs him into a proud superhero hover.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby. Preserve character identity, relative scale and screen sides. Fuzzby remains outside the flower before contact, then fully visible through exit, leaf impact, rebound, and pose.",
+   "promptWords": 117,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Fuzzby",
+    "@图3": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B1.S2 — voice-only performance for @Audio1.\nFUZZBY: \"Nailed it.\" — with breathless pomp, pretending the leaf rebound was the exact finish he designed before his hover has fully recovered. Target 4.4-5.3s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not start with Fuzzby already inside the flower; Do not hide the leaf impact; Do not make the rebound weightless; Do not add extra spins after rebound; Do not move Zenny into the impact; Do not smear pollen marks yet; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B1.S3",
+   "beatCode": "1.B1",
+   "durationSec": 4.0,
+   "purpose": "Let Zenny puncture the brag silently.",
+   "performanceAssignment": "Zenny glides in from frame-right and stops opposite Fuzzby, holding a nearly still hover and level, unblinking stare. Fuzzby stays frame-left in his chest-out victory hover. After a beat, Fuzzby blinks once; Zenny’s mouth tightens into a tiny almost-smile as Fuzzby’s proud face begins to strain. No dialogue.",
+   "camera": "Locked medium two-shot, Zenny right punctuation.",
+   "openingPose": "Fuzzby already hovering proudly frame-left; Zenny approaches from frame-right in measured hover.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S2",
+   "cutInMotivation": "Reaction cut following Fuzzby’s line and held pose.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Zenny’s flat stare outlasts Fuzzby’s pride.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not make Zenny laugh.",
+    "Do not let Fuzzby drop the pose.",
+    "Do not change screen sides."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "chest-out victory hover",
+      "expression": "proud certainty",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right entering",
+      "facing": "toward Fuzzby",
+      "pose": "controlled hover",
+      "expression": "flat stare forming",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "chest-out victory hover held too long",
+      "expression": "pride starting to strain",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "nearly motionless hover",
+      "expression": "flat stare with restrained almost-smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — locked medium two-shot, Zenny right punctuation. Zenny glides in from frame-right and stops opposite Fuzzby, holding a nearly still hover and level, unblinking stare. Fuzzby stays frame-left in his chest-out victory hover. After a beat, Fuzzby blinks once; Zenny’s mouth tightens into a tiny almost-smile as Fuzzby’s proud face begins to strain. No dialogue. Zenny’s flat stare outlasts Fuzzby’s pride.\n\nPreserve character identity, relative scale and screen sides.",
+   "promptWords": 108,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate"
+   },
+   "audioBrief": null,
+   "creativeIntent": {
+    "performanceAssignment": "Zenny glides into his victory space and holds a perfectly flat stare, forcing Fuzzby to maintain the heroic pose one blink too long until the pose itself becomes the joke."
+   },
+   "internalConstraints": "Hard constraints: Do not make Zenny laugh; Do not let Fuzzby drop the pose; Do not change screen sides; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B2.S1",
+   "beatCode": "1.B2",
+   "durationSec": 5.0,
+   "purpose": "Launch the official-moustache setup.",
+   "performanceAssignment": "Fuzzby uses the previous proud hover as a launch pad, rockets too fast toward a fresh flower, overshoots the mouth, then turns the correction into a face-first dive.",
+   "camera": "Bee-height whip chase from two-shot.",
+   "openingPose": "Fuzzby frame-left in proud hover; Zenny frame-right holding her stare.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S3",
+   "cutInMotivation": "Matched action as Fuzzby breaks from the held proud pose.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "His correction becomes an unavoidable face-first dive.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not create moustache yet.",
+    "Do not have Zenny chase him.",
+    "Do not cross the axis."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward new flower",
+      "pose": "proud hover compressing into launch",
+      "expression": "renewed bravado",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "still hover",
+      "expression": "flat almost-smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left lane, Zenny right lane.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left near flower",
+      "facing": "down into flower",
+      "pose": "over-pitched dive outside flower",
+      "expression": "committed confidence",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right background",
+      "facing": "toward Fuzzby",
+      "pose": "small working hover",
+      "expression": "unimpressed attention",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — bee-height whip chase from two-shot. Fuzzby uses the previous proud hover as a launch pad, rockets too fast toward a fresh flower, overshoots the mouth, then turns the correction into a face-first dive. His correction becomes an unavoidable face-first dive.\n\nPreserve character identity, relative scale and screen sides.",
+   "promptWords": 88,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate"
+   },
+   "audioBrief": null,
+   "internalConstraints": "Hard constraints: Do not create moustache yet; Do not have Zenny chase him; Do not cross the axis; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B2.S2",
+   "beatCode": "1.B2",
+   "durationSec": 6.0,
+   "purpose": "Reveal the pollen moustache.",
+   "performanceAssignment": "First seconds: petals clamp around Fuzzby’s face but leave him visible, squashing cheeks; pollen puffs onto upper lip and chin. Petals spring open with a soft pop, bouncing him frame-left into a chest-forward parade hover toward Zenny. Hold: hopeful proud smile, clean face except pollen handlebar moustache and goatee.",
+   "camera": "Static medium close on flower mouth, snap reveal left.",
+   "openingPose": "Fuzzby outside the flower mouth, face leading toward the pollen-packed center.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S1",
+   "cutInMotivation": "Matched impact cut to the flower mouth waiting for contact.",
+   "dialogueBinding": "Fuzzby asks while holding the reveal.",
+   "dialogueLines": [
+    {
+     "speaker": "FUZZBY",
+     "exactText": "Do I look official?",
+     "delivery": "with earnest, hopeful pomp, presenting the pollen moustache as though it were an official uniform he has just been awarded",
+     "startSec": 3.6,
+     "endSec": 5.2
+    }
+   ],
+   "visualPayoff": "Fuzzby reveals a pollen moustache and goatee mark.",
+   "physicalStaging": {
+    "staysVisible": "Fuzzby begins outside the flower; the squeeze is readable at the mouth, and the reveal snaps him fully back into frame-left.",
+    "contactAndWeight": "Soft petals press inward around his face; trapped pressure redirects him outward like a spring release.",
+    "payoffShape": "He lands in a chest-forward parade hover displaying the new pollen mark.",
+    "prohibitedStaging": [
+     "Do not have the mark appear before compression.",
+     "Do not bury him invisibly inside the flower.",
+     "Do not let pollen cover the whole face yet."
+    ]
+   },
+   "prohibited": [
+    "Do not let Zenny speak here.",
+    "Do not shake camera during reveal.",
+    "Do not remove the mark after reveal."
+   ],
+   "charactersInFrame": [
+    "Fuzzby"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby remains left of Zenny.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left entering flower mouth",
+      "facing": "into flower",
+      "pose": "face-first anticipation outside petals",
+      "expression": "determined optimism",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny off right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "chest-forward parade hover",
+      "expression": "hopeful pride",
+      "visibleMarks": [
+       "pollen handlebar moustache mark",
+       "pollen goatee mark"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Fuzzby and @图3 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — static medium close on flower mouth, snap reveal left. First seconds: petals clamp around Fuzzby’s face but leave him visible, squashing cheeks; pollen puffs onto upper lip and chin. Petals spring open with a soft pop, bouncing him frame-left into a chest-forward parade hover toward Zenny. Hold: hopeful proud smile, clean face except pollen handlebar moustache and goatee. Fuzzby reveals a pollen moustache and goatee mark.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby. Preserve character identity, relative scale and screen sides. Fuzzby begins outside the flower; the squeeze is readable at the mouth, and the reveal snaps him fully back into frame-left. Keep pollen handlebar moustache mark, pollen goatee mark visible.",
+   "promptWords": 148,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Fuzzby",
+    "@图3": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B2.S2 — voice-only performance for @Audio1.\nFUZZBY: \"Do I look official?\" — with earnest, hopeful pomp, presenting the pollen moustache as though it were an official uniform he has just been awarded. Target 3.6-5.2s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "creativeIntent": {
+    "performanceAssignment": "The flower squeeze compresses Fuzzby’s face, forces pollen into a formal-looking mark, and springs him out into a display pose where he sincerely offers the accident as status."
+   },
+   "internalConstraints": "Hard constraints: Do not have the mark appear before compression; Do not bury him invisibly inside the flower; Do not let pollen cover the whole face yet; Do not let Zenny speak here; Do not shake camera during reveal; Do not remove the mark after reveal; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B2.S3",
+   "beatCode": "1.B2",
+   "durationSec": 5.0,
+   "purpose": "Let Zenny’s dry tease land.",
+   "performanceAssignment": "Zenny studies Fuzzby’s parade posture, delays the laugh through a slow blink, then releases one affectionate verbal pinprick while Fuzzby waits for official approval.",
+   "camera": "Locked medium, Zenny right, Fuzzby left profile.",
+   "openingPose": "Fuzzby frame-left holding the moustache reveal; Zenny frame-right turned toward him.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S2",
+   "cutInMotivation": "Eyeline reaction cut from Fuzzby’s question to Zenny’s answer.",
+   "dialogueBinding": "Only Zenny speaks; Fuzzby listens motionless.",
+   "dialogueLines": [
+    {
+     "speaker": "ZENNY",
+     "exactText": "Yes Fuzzby Officially nuts!",
+     "delivery": "as a dry, affectionate counterpunch, holding back the laugh until the very end so the tease lands warm instead of sharp",
+     "startSec": 1.8,
+     "endSec": 3.9
+    }
+   ],
+   "visualPayoff": "Zenny’s almost-smile exposes affection behind the tease.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not make Fuzzby wipe yet.",
+    "Do not turn Zenny mean.",
+    "Do not alter the pollen mark."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "parade hover held",
+      "expression": "waiting for approval",
+      "visibleMarks": [
+       "pollen handlebar moustache mark",
+       "pollen goatee mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "steady hover",
+      "expression": "dry restraint",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "parade hover held longer",
+      "expression": "taking verdict seriously",
+      "visibleMarks": [
+       "pollen handlebar moustache mark",
+       "pollen goatee mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "quiet hover",
+      "expression": "flat look with tiny warmth",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — locked medium, Zenny right, Fuzzby left profile. Zenny studies Fuzzby’s parade posture, delays the laugh through a slow blink, then releases one affectionate verbal pinprick while Fuzzby waits for official approval. Zenny’s almost-smile exposes affection behind the tease.\n\nUse @Audio1 as the only voice. Lip-sync Zenny; Fuzzby's mouth remains closed. Preserve character identity, relative scale and screen sides. Keep pollen handlebar moustache mark, pollen goatee mark visible.",
+   "promptWords": 107,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B2.S3 — voice-only performance for @Audio1.\nZENNY: \"Yes Fuzzby Officially nuts!\" — as a dry, affectionate counterpunch, holding back the laugh until the very end so the tease lands warm instead of sharp. Target 1.8-3.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not make Fuzzby wipe yet; Do not turn Zenny mean; Do not alter the pollen mark; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B3.S1",
+   "beatCode": "1.B3",
+   "durationSec": 5.0,
+   "purpose": "Make the attempted fix worse.",
+   "performanceAssignment": "Fuzzby reacts to Zenny’s verdict by trying to erase the mark with one panicked swipe, but the drag spreads the pollen wider while Zenny’s almost-smile quietly survives.",
+   "camera": "Tight cheek-level chaser with Zenny at right edge.",
+   "openingPose": "Fuzzby frame-left with one paw lifted near the pollen mark; Zenny frame-right watching.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S3",
+   "cutInMotivation": "Matched reaction to Zenny’s punchline, cutting with Fuzzby’s gasp.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "The moustache becomes a wider smeared pollen face mark.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not clean the pollen off.",
+    "Do not start the branch crash.",
+    "Do not make Zenny laugh aloud."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "paw lifted in wipe anticipation",
+      "expression": "alarmed dignity",
+      "visibleMarks": [
+       "pollen handlebar moustache mark",
+       "pollen goatee mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right edge",
+      "facing": "toward Fuzzby",
+      "pose": "steady hover",
+      "expression": "restrained almost-smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right edge.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward next flower",
+      "pose": "paw finishing across face, body pitching forward",
+      "expression": "urgent cover-up",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right edge",
+      "facing": "toward Fuzzby",
+      "pose": "still hover",
+      "expression": "restrained almost-smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — tight cheek-level chaser with Zenny at right edge. Fuzzby reacts to Zenny’s verdict by trying to erase the mark with one panicked swipe, but the drag spreads the pollen wider while Zenny’s almost-smile quietly survives. The moustache becomes a wider smeared pollen face mark.\n\nPreserve character identity, relative scale and screen sides. Keep pollen handlebar moustache mark, pollen goatee mark, wide smeared pollen face mark visible.",
+   "promptWords": 106,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate"
+   },
+   "audioBrief": null,
+   "internalConstraints": "Hard constraints: Do not clean the pollen off; Do not start the branch crash; Do not make Zenny laugh aloud; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B3.S2",
+   "beatCode": "1.B3",
+   "durationSec": 7.0,
+   "purpose": "Carry the branch-and-blossom tumble.",
+   "performanceAssignment": "Fuzzby’s embarrassed acceleration becomes a hazardous straight line: the smeared face leads him into a branch clip, flipping his weight through petal impacts that redirect him deeper into one final flower.",
+   "camera": "Fast vertical chase through stems toward branch.",
+   "openingPose": "Fuzzby frame-left outside the next flower path, body pitched forward toward a low branch.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S1",
+   "cutInMotivation": "Matched motion on Fuzzby’s forward pitch into the chase line.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Three soft impacts cup him upside down inside a blossom.",
+   "physicalStaging": {
+    "staysVisible": "Fuzzby stays visible from approach through branch clip and each petal redirection; the final cup shows his body position clearly.",
+    "contactAndWeight": "The branch catches just enough of his path to rotate him; each petal absorbs, compresses, and redirects his tumble.",
+    "payoffShape": "The last blossom cups him upside down, holding the crash energy in wobbling petals.",
+    "prohibitedStaging": [
+     "Do not teleport him between petals.",
+     "Do not hide the branch contact.",
+     "Do not make the flower swallow him completely."
+    ]
+   },
+   "prohibited": [
+    "Do not include Zenny in this chase.",
+    "Do not add dialogue.",
+    "Do not resolve upright in this shot."
+   ],
+   "charactersInFrame": [
+    "Fuzzby"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby remains left-lane traveling rightward.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left entering center",
+      "facing": "toward branch and flowers",
+      "pose": "accelerating dive anticipation",
+      "expression": "flustered determination",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby held left foreground for next reveal.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left inside blossom cup",
+      "facing": "upside down toward camera side",
+      "pose": "upside-down stuck position",
+      "expression": "unseen but resisting defeat",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Fuzzby and @图3 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — fast vertical chase through stems toward branch. Fuzzby’s embarrassed acceleration becomes a hazardous straight line: the smeared face leads him into a branch clip, flipping his weight through petal impacts that redirect him deeper into one final flower. Three soft impacts cup him upside down inside a blossom.\n\nPreserve character identity, relative scale and screen sides. Fuzzby stays visible from approach through branch clip and each petal redirection; the final cup shows his body position clearly. Keep wide smeared pollen face mark visible.",
+   "promptWords": 119,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Fuzzby",
+    "@图3": "scene plate"
+   },
+   "audioBrief": null,
+   "internalConstraints": "Hard constraints: Do not teleport him between petals; Do not hide the branch contact; Do not make the flower swallow him completely; Do not include Zenny in this chase; Do not add dialogue; Do not resolve upright in this shot; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne; no body inflation."
+  },
+  {
+   "shotId": "1.B3.S3",
+   "beatCode": "1.B3",
+   "durationSec": 5.0,
+   "purpose": "Brand the crash as victory.",
+   "performanceAssignment": "Fuzzby kicks against the blossom’s hold until the compressed petals pop him upright, and he instantly converts the embarrassing landing into a triumphant self-branded announcement.",
+   "camera": "Low locked blossom close-up, Zenny right behind.",
+   "openingPose": "Fuzzby upside down in the blossom cup, legs above rim; Zenny frame-right behind.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S2",
+   "cutInMotivation": "Matched position from the cupped upside-down landing.",
+   "dialogueBinding": "Fuzzby speaks on the pop-up; Zenny remains silent.",
+   "dialogueLines": [
+    {
+     "speaker": "FUZZBY",
+     "exactText": "Buzz Crash!!",
+     "delivery": "as a triumphant brand announcement from inside the mess, refusing to let the upside-down landing count as defeat",
+     "startSec": 2.7,
+     "endSec": 3.8
+    }
+   ],
+   "visualPayoff": "Fuzzby pops upright and claims the crash as a brand.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not remove smeared pollen.",
+    "Do not overplay Zenny’s reaction.",
+    "Do not show recovery before pop."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground, Zenny right background.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "upside down toward camera side",
+      "pose": "upside-down stuck, legs kicking",
+      "expression": "stubborn effort",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right background",
+      "facing": "toward Fuzzby",
+      "pose": "watching hover",
+      "expression": "dry patience",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground, Zenny right background.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "toward Zenny and camera side",
+      "pose": "upright chest-forward in blossom cup",
+      "expression": "triumphant denial",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right background",
+      "facing": "toward Fuzzby",
+      "pose": "steady hover",
+      "expression": "eye roll beginning",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — low locked blossom close-up, Zenny right behind. Fuzzby kicks against the blossom’s hold until the compressed petals pop him upright, and he instantly converts the embarrassing landing into a triumphant self-branded announcement. Fuzzby pops upright and claims the crash as a brand.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby; Zenny's mouth remains closed. Preserve character identity, relative scale and screen sides. Keep wide smeared pollen face mark visible.",
+   "promptWords": 109,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B3.S3 — voice-only performance for @Audio1.\nFUZZBY: \"Buzz Crash!!\" — as a triumphant brand announcement from inside the mess, refusing to let the upside-down landing count as defeat. Target 2.7-3.8s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not remove smeared pollen; Do not overplay Zenny’s reaction; Do not show recovery before pop; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B4.S1",
+   "beatCode": "1.B4",
+   "durationSec": 5.0,
+   "purpose": "Let Zenny’s smile crack through.",
+   "performanceAssignment": "Locked blossom-height two-shot, 5 seconds. Zenny’s rolled eyes return to Fuzzby; one mouth corner rises into a small held smile. Fuzzby turns to it, grins wider, then buzzes from the left blossom cup face-first into the next flower. Petals close around his pollen-smeared face; his body remains outside.",
+   "camera": "Locked two-shot at blossom height.",
+   "openingPose": "Fuzzby upright in blossom cup frame-left; Zenny frame-right mid-eye-roll watching him.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S3",
+   "cutInMotivation": "Reaction continuation from Zenny’s beginning eye roll.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Flower swallows only Fuzzby’s face; body remains outside.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not hide Fuzzby inside petals.",
+    "Do not trigger thunder yet.",
+    "Do not lose Zenny’s smile."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left in blossom cup",
+      "facing": "toward next flower",
+      "pose": "upright hover preparing to dive",
+      "expression": "delighted bravado",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "hover with eye roll",
+      "expression": "eye roll cracking into smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left at flower mouth",
+      "facing": "into flower",
+      "pose": "face caught in petals, body outside",
+      "expression": "muffled determination",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "hover holding position",
+      "expression": "restrained smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — locked two-shot at blossom height. Locked blossom-height two-shot, 5 seconds. Zenny’s rolled eyes return to Fuzzby; one mouth corner rises into a small held smile. Fuzzby turns to it, grins wider, then buzzes from the left blossom cup face-first into the next flower. Petals close around his pollen-smeared face; his body remains outside. Flower swallows only Fuzzby’s face; body remains outside.\n\nPreserve character identity, relative scale and screen sides. Keep wide smeared pollen face mark visible.",
+   "promptWords": 116,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate"
+   },
+   "audioBrief": null,
+   "creativeIntent": {
+    "performanceAssignment": "Zenny’s eye roll finally warms into a visible smile, but Fuzzby mistakes the attention as permission for another stunt and dives face-first into the next flower while staying readable outside it."
+   },
+   "internalConstraints": "Hard constraints: Do not hide Fuzzby inside petals; Do not trigger thunder yet; Do not lose Zenny’s smile; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B4.S2",
+   "beatCode": "1.B4",
+   "durationSec": 7.0,
+   "purpose": "Interrupt the game with thunder.",
+   "performanceAssignment": "Packed pollen pressure blasts Fuzzby back into frame even more covered, then thunder rolls under his boastful recovery, bending his proud hover into a crooked halt as the meadow light cools.",
+   "camera": "Tight snap-back on Fuzzby, pull to include Zenny.",
+   "openingPose": "Fuzzby frame-left outside the flower except his trapped face; Zenny frame-right watching.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S1",
+   "cutInMotivation": "Matched recoil from the face-held flower compression.",
+   "dialogueBinding": "Fuzzby speaks after thunder begins; Zenny only watches.",
+   "dialogueLines": [
+    {
+     "speaker": "FUZZBY",
+     "exactText": "…okay that sounded dramatic.",
+     "delivery": "with staccato bravado thinning for one syllable, as if he is trying to make the thunder part of his act before it can become real",
+     "startSec": 3.8,
+     "endSec": 5.8
+    }
+   ],
+   "visualPayoff": "Thunder turns Fuzzby’s parade hover crooked.",
+   "physicalStaging": {
+    "staysVisible": "Fuzzby’s body remains visible outside the petals before the blast and stays visible throughout the snap-back.",
+    "contactAndWeight": "Petals squeeze his face, packed pollen pushes back, and the release kicks his whole body into a backward hover stop.",
+    "payoffShape": "He emerges more pollen-covered, then stiffens crookedly as the rumble steals the swagger.",
+    "prohibitedStaging": [
+     "Do not vanish him into the flower.",
+     "Do not reveal storm clouds yet.",
+     "Do not let thunder cause a new crash."
+    ]
+   },
+   "prohibited": [
+    "Do not have Zenny speak here.",
+    "Do not clear pollen drifting off him.",
+    "Do not make the light fully dark."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Warm golden light beginning to soften; pollen drifting.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left at flower mouth",
+      "facing": "away from flower recoil path",
+      "pose": "face trapped, body braced outside",
+      "expression": "muffled bravado",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "watching hover",
+      "expression": "restrained smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light after distant thunder; shadows shifted.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny and skyward sound",
+      "pose": "crooked mid-hover halt",
+      "expression": "bravado thinning",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby then skyward sound",
+      "pose": "still hover",
+      "expression": "smile fading into alertness",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — tight snap-back on Fuzzby, pull to include Zenny. Packed pollen pressure blasts Fuzzby back into frame even more covered, then thunder rolls under his boastful recovery, bending his proud hover into a crooked halt as the meadow light cools. Thunder turns Fuzzby’s parade hover crooked.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby; Zenny's mouth remains closed. Preserve character identity, relative scale and screen sides. Fuzzby’s body remains visible outside the petals before the blast and stays visible throughout the snap-back. Keep wide smeared pollen face mark, heavy pollen face coating visible.",
+   "promptWords": 132,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B4.S2 — voice-only performance for @Audio1.\nFUZZBY: \"…okay that sounded dramatic.\" — with staccato bravado thinning for one syllable, as if he is trying to make the thunder part of his act before it can become real. Target 3.8-5.8s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not vanish him into the flower; Do not reveal storm clouds yet; Do not let thunder cause a new crash; Do not have Zenny speak here; Do not clear pollen drifting off him; Do not make the light fully dark; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B4.S3",
+   "beatCode": "1.B4",
+   "durationSec": 5.0,
+   "purpose": "Name the storm calmly.",
+   "performanceAssignment": "Zenny hovers steady at frame-right, angled to the unseen sky, calm and alert. A low distant rumble fades. From 1.4–3.2s she speaks quietly and evenly, no gesture. Fuzzby stays blurred frame-left, crooked hover facing her, pollen-coated face holding bravado as his parade posture sags.",
+   "camera": "Locked close on Zenny right, Fuzzby blurred left.",
+   "openingPose": "Zenny frame-right already glancing upward; Fuzzby frame-left holding crooked hover.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S2",
+   "cutInMotivation": "Eyeline cut from Fuzzby reacting to the rumble toward Zenny’s skyward look.",
+   "dialogueBinding": "Only Zenny speaks; Fuzzby remains a silent listener.",
+   "dialogueLines": [
+    {
+     "speaker": "ZENNY",
+     "exactText": "A Storm’s coming.",
+     "delivery": "with low, dry certainty and a tiny protective softness under the flat delivery, not enlarging the warning beyond what the sky has already said",
+     "startSec": 1.4,
+     "endSec": 3.2
+    }
+   ],
+   "visualPayoff": "Cool-lit Zenny right calmly names warning skyward; silent Fuzzby, blurred left, turns, sagging crookedly.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not show the storm yet.",
+    "Do not let Fuzzby interrupt.",
+    "Do not return to warm full light."
+   ],
+   "charactersInFrame": [
+    "Zenny",
+    "Fuzzby"
+   ],
+   "continuityIn": {
+    "lighting": "Slightly cooler meadow light after distant thunder; shadows shifted.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "up toward unseen sky",
+      "pose": "steady hover",
+      "expression": "calm alertness",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left soft background",
+      "facing": "toward Zenny and skyward sound",
+      "pose": "crooked mid-hover halt",
+      "expression": "trying to look unbothered",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light after distant thunder; shadows shifted.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward unseen sky",
+      "pose": "composed hover",
+      "expression": "protective certainty",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "crooked hover losing parade shape",
+      "expression": "forced bravado",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — locked close on Zenny right, Fuzzby blurred left. Zenny hovers steady at frame-right, angled to the unseen sky, calm and alert. A low distant rumble fades. From 1.4–3.2s she speaks quietly and evenly, no gesture. Fuzzby stays blurred frame-left, crooked hover facing her, pollen-coated face holding bravado as his parade posture sags. Cool-lit Zenny right calmly names warning skyward; silent Fuzzby, blurred left, turns, sagging crookedly.\n\nUse @Audio1 as the only voice. Lip-sync Zenny; Fuzzby's mouth remains closed. Preserve character identity, relative scale and screen sides. Keep heavy pollen face coating visible.",
+   "promptWords": 132,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B4.S3 — voice-only performance for @Audio1.\nZENNY: \"A Storm’s coming.\" — with low, dry certainty and a tiny protective softness under the flat delivery, not enlarging the warning beyond what the sky has already said. Target 1.4-3.2s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "creativeIntent": {
+    "performanceAssignment": "Zenny turns from Fuzzby’s crooked hover toward the unseen sky and holds her warning small, making the distant rumble feel larger because she refuses to decorate it.",
+    "visualPayoff": "Zenny’s restraint makes the warning feel bigger."
+   },
+   "internalConstraints": "Hard constraints: Do not show the storm yet; Do not let Fuzzby interrupt; Do not return to warm full light; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B5.S1",
+   "beatCode": "1.B5",
+   "durationSec": 5.0,
+   "purpose": "Give Fuzzby one last boast.",
+   "performanceAssignment": "In the medium two-shot, Fuzzby hovers frame-left. During his line, he thrusts his chest; pollen coating his face quivers as his chin lifts into a tight grin. Zenny remains frame-right, still, watching stormward with patient concern. After the line, Fuzzby turns to the nearest flower, chest forward, not flying.",
+   "camera": "Medium two-shot under cooled meadow light.",
+   "openingPose": "Fuzzby frame-left crooked hover readying a chest pump; Zenny frame-right skyward.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S3",
+   "cutInMotivation": "Sound bridge from Zenny’s warning into Fuzzby’s immediate bravado.",
+   "dialogueBinding": "Fuzzby speaks; Zenny listens without mouth movement.",
+   "dialogueLines": [
+    {
+     "speaker": "FUZZBY",
+     "exactText": "Good thing I work well under pressure.",
+     "delivery": "with overconfident parade certainty, selling the pressure as if it has personally asked for his expertise",
+     "startSec": 0.9,
+     "endSec": 3.8
+    }
+   ],
+   "visualPayoff": "Fuzzby restores a fake parade chest under storm pressure.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not start flying until after line.",
+    "Do not brighten the light.",
+    "Do not let Zenny gesture."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "crooked hover preparing chest pump",
+      "expression": "forced confidence",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward unseen sky",
+      "pose": "composed hover",
+      "expression": "dry concern",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left dominant",
+      "facing": "toward nearest flower",
+      "pose": "chest-forward launch anticipation",
+      "expression": "overconfident certainty",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward storm direction",
+      "pose": "still hover",
+      "expression": "patient concern",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — medium two-shot under cooled meadow light. In the medium two-shot, Fuzzby hovers frame-left. During his line, he thrusts his chest; pollen coating his face quivers as his chin lifts into a tight grin. Zenny remains frame-right, still, watching stormward with patient concern. After the line, Fuzzby turns to the nearest flower, chest forward, not flying. Fuzzby restores a fake parade chest under storm pressure.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby; Zenny's mouth remains closed. Preserve character identity, relative scale and screen sides. Keep heavy pollen face coating visible.",
+   "promptWords": 130,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 1.B5.S1 — voice-only performance for @Audio1.\nFUZZBY: \"Good thing I work well under pressure.\" — with overconfident parade certainty, selling the pressure as if it has personally asked for his expertise. Target 0.9-3.8s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "creativeIntent": {
+    "performanceAssignment": "Fuzzby answers the warning by pushing only his chest forward through the pollen coating, selling pressure as his specialty while Zenny refuses to move off the storm line."
+   },
+   "internalConstraints": "Hard constraints: Do not start flying until after line; Do not brighten the light; Do not let Zenny gesture; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  },
+  {
+   "shotId": "1.B5.S2",
+   "beatCode": "1.B5",
+   "durationSec": 6.0,
+   "purpose": "Prove the boast wrong instantly.",
+   "performanceAssignment": "Fuzzby rockets from the chest-pump straight into the nearest flower, and his pollen-heavy face jams into the center so the petals clamp around his head while his body keeps trying to fly.",
+   "camera": "Snap chase into nearest blossom, stop on cup.",
+   "openingPose": "Fuzzby frame-left outside the nearest open flower, over-pitched into launch.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B5.S1",
+   "cutInMotivation": "Matched action from Fuzzby’s chest pump into his immediate launch.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Fuzzby is stuck head-first, body and legs out.",
+   "physicalStaging": {
+    "staysVisible": "Fuzzby starts outside the flower; after impact his body, legs, and wing action remain visible outside the petals.",
+    "contactAndWeight": "His launch momentum drives his face into the center; petals compress around his head and trap the forward force.",
+    "payoffShape": "The stuck pose leaves his body protruding while frantic wing buzz fails to move him.",
+    "prohibitedStaging": [
+     "Do not hide his whole body inside the flower.",
+     "Do not free him in this shot.",
+     "Do not make the impact gentle."
+    ]
+   },
+   "prohibited": [
+    "Do not add dialogue.",
+    "Do not include Zenny’s sigh yet.",
+    "Do not remove pollen coating."
+   ],
+   "charactersInFrame": [
+    "Fuzzby"
+   ],
+   "continuityIn": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby remains left lane.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left approaching center",
+      "facing": "into nearest flower",
+      "pose": "over-pitched launch outside petals",
+      "expression": "boastful commitment",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground for reaction.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "head-first into flower",
+      "pose": "stuck with body and legs out",
+      "expression": "muffled refusal to concede",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Fuzzby and @图3 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — snap chase into nearest blossom, stop on cup. Fuzzby rockets from the chest-pump straight into the nearest flower, and his pollen-heavy face jams into the center so the petals clamp around his head while his body keeps trying to fly. Fuzzby is stuck head-first, body and legs out.\n\nPreserve character identity, relative scale and screen sides. Keep Fuzzby starts outside the flower; after impact his body, legs, and wing action remain visible outside the petals. Keep heavy pollen face coating visible.",
+   "promptWords": 117,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Fuzzby",
+    "@图3": "scene plate"
+   },
+   "audioBrief": null,
+   "internalConstraints": "Hard constraints: Do not hide his whole body inside the flower; Do not free him in this shot; Do not make the impact gentle; Do not add dialogue; Do not include Zenny’s sigh yet; Do not remove pollen coating; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne; no body inflation."
+  },
+  {
+   "shotId": "1.B5.S3",
+   "beatCode": "1.B5",
+   "durationSec": 5.0,
+   "purpose": "End on Zenny’s affectionate sigh.",
+   "performanceAssignment": "Zenny takes in the stuck tableau, lowers her eyelids by the smallest amount, and releases a tiny sigh while Fuzzby kicks once, still refusing to let the flower win.",
+   "camera": "Locked reaction two-shot, Fuzzby left foreground, Zenny right.",
+   "openingPose": "Fuzzby stuck head-first frame-left foreground; Zenny frame-right already looking at him.",
+   "sourceType": "relay",
+   "sourceShotId": "1.B5.S2",
+   "cutInMotivation": "Reaction cut from the stuck payoff to Zenny’s held assessment.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Zenny sighs as Fuzzby remains stuck under thunder pressure.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Do not free Fuzzby.",
+    "Do not add speech to the sigh.",
+    "Do not show the storm directly."
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "head-first into flower",
+      "pose": "stuck with body and legs out",
+      "expression": "muffled stubbornness",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "hovering beside tableau",
+      "expression": "dry patience",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "head-first into flower",
+      "pose": "stuck, legs settling after one kick",
+      "expression": "muffled self-maintained dignity",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "steady hover after sigh",
+      "expression": "dry affectionate resignation",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — locked reaction two-shot, Fuzzby left foreground, Zenny right. Zenny takes in the stuck tableau, lowers her eyelids by the smallest amount, and releases a tiny sigh while Fuzzby kicks once, still refusing to let the flower win. Zenny sighs as Fuzzby remains stuck under thunder pressure.\n\nPreserve character identity, relative scale and screen sides. Keep heavy pollen face coating visible.",
+   "promptWords": 100,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate"
+   },
+   "audioBrief": null,
+   "internalConstraints": "Hard constraints: Do not free Fuzzby; Do not add speech to the sigh; Do not show the storm directly; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no crystals on the bees; wings continue moving while airborne."
+  }
+ ],
+ "totalSec": 82.0,
+ "continuityLedger": [
+  {
+   "shotId": "1.B1.S1",
+   "beatCode": "1.B1",
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": null,
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Bee-height corridor side; Fuzzby screen-left, Zenny screen-right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left low",
+      "facing": "toward next flower",
+      "pose": "over-corrected dip, chest leading",
+      "expression": "thrilled concentration",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward next flower",
+      "pose": "steady working hover",
+      "expression": "flat focus",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B1.S1_vo.mp3",
+   "keyframePath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B1.S1_keyframe.png",
+   "pendingSpendAuth": null,
+   "voidedTokens": [
+    {
+     "token": "db660b33192f47e0bcdb0186e1c70d8c",
+     "voidedAt": "2026-07-16",
+     "reason": "pre-envelope token voided by the sealed-envelope protocol (cutover order §5); never consumed, never spent"
+    }
+   ]
+  },
+  {
+   "shotId": "1.B1.S2",
+   "beatCode": "1.B1",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S1",
+   "cutInMotivation": "Matched action on Fuzzby’s low dip toward the flower.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby remains screen-left of Zenny.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left center",
+      "facing": "toward Zenny’s side",
+      "pose": "chest-out victory hover",
+      "expression": "breathless pride",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B1.S2_vo.mp3"
+  },
+  {
+   "shotId": "1.B1.S3",
+   "beatCode": "1.B1",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S2",
+   "cutInMotivation": "Reaction cut following Fuzzby’s line and held pose.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "chest-out victory hover held too long",
+      "expression": "pride starting to strain",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "nearly motionless hover",
+      "expression": "flat stare with restrained almost-smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "1.B2.S1",
+   "beatCode": "1.B2",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B1.S3",
+   "cutInMotivation": "Matched action as Fuzzby breaks from the held proud pose.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left lane, Zenny right lane.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left near flower",
+      "facing": "down into flower",
+      "pose": "over-pitched dive outside flower",
+      "expression": "committed confidence",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right background",
+      "facing": "toward Fuzzby",
+      "pose": "small working hover",
+      "expression": "unimpressed attention",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "1.B2.S2",
+   "beatCode": "1.B2",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S1",
+   "cutInMotivation": "Matched impact cut to the flower mouth waiting for contact.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny off right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "chest-forward parade hover",
+      "expression": "hopeful pride",
+      "visibleMarks": [
+       "pollen handlebar moustache mark",
+       "pollen goatee mark"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B2.S2_vo.mp3"
+  },
+  {
+   "shotId": "1.B2.S3",
+   "beatCode": "1.B2",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S2",
+   "cutInMotivation": "Eyeline reaction cut from Fuzzby’s question to Zenny’s answer.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "parade hover held longer",
+      "expression": "taking verdict seriously",
+      "visibleMarks": [
+       "pollen handlebar moustache mark",
+       "pollen goatee mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "quiet hover",
+      "expression": "flat look with tiny warmth",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B2.S3_vo.mp3"
+  },
+  {
+   "shotId": "1.B3.S1",
+   "beatCode": "1.B3",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B2.S3",
+   "cutInMotivation": "Matched reaction to Zenny’s punchline, cutting with Fuzzby’s gasp.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right edge.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward next flower",
+      "pose": "paw finishing across face, body pitching forward",
+      "expression": "urgent cover-up",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right edge",
+      "facing": "toward Fuzzby",
+      "pose": "still hover",
+      "expression": "restrained almost-smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "1.B3.S2",
+   "beatCode": "1.B3",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S1",
+   "cutInMotivation": "Matched motion on Fuzzby’s forward pitch into the chase line.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby held left foreground for next reveal.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left inside blossom cup",
+      "facing": "upside down toward camera side",
+      "pose": "upside-down stuck position",
+      "expression": "unseen but resisting defeat",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "1.B3.S3",
+   "beatCode": "1.B3",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S2",
+   "cutInMotivation": "Matched position from the cupped upside-down landing.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground, Zenny right background.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "toward Zenny and camera side",
+      "pose": "upright chest-forward in blossom cup",
+      "expression": "triumphant denial",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right background",
+      "facing": "toward Fuzzby",
+      "pose": "steady hover",
+      "expression": "eye roll beginning",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B3.S3_vo.mp3"
+  },
+  {
+   "shotId": "1.B4.S1",
+   "beatCode": "1.B4",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B3.S3",
+   "cutInMotivation": "Reaction continuation from Zenny’s beginning eye roll.",
+   "continuityOut": {
+    "lighting": "Warm golden morning light with drifting pollen.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left at flower mouth",
+      "facing": "into flower",
+      "pose": "face caught in petals, body outside",
+      "expression": "muffled determination",
+      "visibleMarks": [
+       "wide smeared pollen face mark"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "hover holding position",
+      "expression": "restrained smile",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "1.B4.S2",
+   "beatCode": "1.B4",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S1",
+   "cutInMotivation": "Matched recoil from the face-held flower compression.",
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light after distant thunder; shadows shifted.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny and skyward sound",
+      "pose": "crooked mid-hover halt",
+      "expression": "bravado thinning",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby then skyward sound",
+      "pose": "still hover",
+      "expression": "smile fading into alertness",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B4.S2_vo.mp3"
+  },
+  {
+   "shotId": "1.B4.S3",
+   "beatCode": "1.B4",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S2",
+   "cutInMotivation": "Eyeline cut from Fuzzby reacting to the rumble toward Zenny’s skyward look.",
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light after distant thunder; shadows shifted.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward unseen sky",
+      "pose": "composed hover",
+      "expression": "protective certainty",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left",
+      "facing": "toward Zenny",
+      "pose": "crooked hover losing parade shape",
+      "expression": "forced bravado",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B4.S3_vo.mp3"
+  },
+  {
+   "shotId": "1.B5.S1",
+   "beatCode": "1.B5",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B4.S3",
+   "cutInMotivation": "Sound bridge from Zenny’s warning into Fuzzby’s immediate bravado.",
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left dominant",
+      "facing": "toward nearest flower",
+      "pose": "chest-forward launch anticipation",
+      "expression": "overconfident certainty",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward storm direction",
+      "pose": "still hover",
+      "expression": "patient concern",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null,
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_1.B5.S1_vo.mp3"
+  },
+  {
+   "shotId": "1.B5.S2",
+   "beatCode": "1.B5",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B5.S1",
+   "cutInMotivation": "Matched action from Fuzzby’s chest pump into his immediate launch.",
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground for reaction.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "head-first into flower",
+      "pose": "stuck with body and legs out",
+      "expression": "muffled refusal to concede",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "1.B5.S3",
+   "beatCode": "1.B5",
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "1.B5.S2",
+   "cutInMotivation": "Reaction cut from the stuck payoff to Zenny’s held assessment.",
+   "continuityOut": {
+    "lighting": "Slightly cooler meadow light; distant storm pressure present.",
+    "cameraSide": "Same corridor side; Fuzzby left foreground, Zenny right.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "frame-left foreground",
+      "facing": "head-first into flower",
+      "pose": "stuck, legs settling after one kick",
+      "expression": "muffled self-maintained dignity",
+      "visibleMarks": [
+       "heavy pollen face coating"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "frame-right",
+      "facing": "toward Fuzzby",
+      "pose": "steady hover after sigh",
+      "expression": "dry affectionate resignation",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "errors": 0,
+  "warnings": 6,
+  "issues": [
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[0](1.B1.S1).performanceAssignment",
+    "message": "5 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   },
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[2](1.B1.S3).performanceAssignment",
+    "message": "5 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   },
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[4](1.B2.S2).performanceAssignment",
+    "message": "5 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   },
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[9](1.B4.S1).performanceAssignment",
+    "message": "6 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   },
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[11](1.B4.S3).performanceAssignment",
+    "message": "6 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   },
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[12](1.B5.S1).performanceAssignment",
+    "message": "9 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   }
+  ],
+  "validatedAt": "2026-07-16",
+  "revision": 6
+ },
+ "reviewCriteria": {
+  "canon": "characters and world accurate vs references",
+  "direction": "acting, humour and emotion land",
+  "physics": "weight, contact, follow-through",
+  "continuity": "connects naturally to surrounding shots"
+ },
+ "sourceBeatPackage": "Ep1_Final_Episode_one_beat_package.json",
+ "revision": 6,
+ "revisionNote": "2026-07-16 Julian's bounded correction: constraint negation preserved, 1.B1.S1 source aligned to the locked keyframe (Zenny on petal), observable movement only. Signed keyframe unchanged.",
+ "repairLog": [
+  {
+   "shotId": "1.B1.S3",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Zenny glides into his victory space and holds a perfectly flat stare, forcing Fuzzby to maintain the heroic pose one blink too long until the pose itself becomes the joke.",
+   "replacement": "Zenny glides in from frame-right to his spot opposite Fuzzby and settles into a nearly motionless hover, eyes level in a flat, unblinking stare. Fuzzby remains frame-left in his chest-out victory hover; after a beat, he blinks once and keeps the pose held rigidly. Zenny’s mouth barely tightens into a restrained almost-smile as Fuzzby’s proud expression starts to strain without dropping the pose.",
+   "reason": "ABSTRACT_DIRECTION: becomes the joke",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.1",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B2.S2",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "The flower squeeze compresses Fuzzby’s face, forces pollen into a formal-looking mark, and springs him out into a display pose where he sincerely offers the accident as status.",
+   "replacement": "Over the first seconds, the flower petals clamp around Fuzzby’s face without hiding him, squashing his cheeks as a soft puff of pollen presses onto his upper lip and chin. The petals release with a springy pop, snapping him back frame-left into a chest-forward parade hover facing toward Zenny. The reveal holds on his hopeful proud smile, with a clear pollen handlebar moustache and small goatee visible while the rest of his face stays mostly clean.",
+   "reason": "ABSTRACT_DIRECTION: as status; offers the accident",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.1",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B4.S1",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Zenny’s eye roll finally warms into a visible smile, but Fuzzby mistakes the attention as permission for another stunt and dives face-first into the next flower while staying readable outside it.",
+   "replacement": "Over the 5-second locked two-shot, Zenny’s eye roll settles back on Fuzzby and the corner of their mouth lifts into a restrained smile. Fuzzby spots the smile, brightens into a bigger grin, then zips from the left blossom cup and dives face-first into the next flower with a proud buzz. The petals catch around his face while his body stays outside at the flower mouth, still readable, as Zenny holds position with the smile intact.",
+   "reason": "ABSTRACT_DIRECTION: mistakes the attention as; as permission",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.1",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B4.S3",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Zenny turns from Fuzzby’s crooked hover toward the unseen sky and holds her warning small, making the distant rumble feel larger because she refuses to decorate it.",
+   "replacement": "Zenny holds a steady hover at frame-right, angled up toward the unseen sky, her face calm and alert as a low distant rumble fades under the shot. Between 1.4 and 3.2 seconds, she gives her warning in a quiet, even delivery without extra gesture. Fuzzby remains blurred at frame-left in his crooked hover, pollen-coated face turned toward her, his parade posture sagging slightly by the end.",
+   "reason": "ABSTRACT_DIRECTION: feel larger; refuses to decorate",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.1",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B4.S3",
+   "field": "visualPayoff",
+   "attempt": 1,
+   "original": "Zenny’s restraint makes the warning feel bigger.",
+   "replacement": "Locked close holds Zenny frame-right in a steady hover as the cooler meadow light stays on her face; Fuzzby remains blurred frame-left in a crooked halt. At 1.4s Zenny names the warning without flinching, eyes lifted toward the unseen sky, wings beating slow and even. Fuzzby does not speak; by the end he turns more toward Zenny, his pollen-coated face keeping a forced-brave look as his hover loses its parade posture.",
+   "reason": "ABSTRACT_DIRECTION: feel bigger",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.1",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B5.S1",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Fuzzby answers the warning by pushing only his chest forward through the pollen coating, selling pressure as his specialty while Zenny refuses to move off the storm line.",
+   "replacement": "In the medium two-shot, Fuzzby hovers frame-left and, during his line, pumps his chest forward through the pollen on his face; the coating trembles while his chin lifts into a strained grin. Zenny stays frame-right in a still hover, facing the storm direction with dry, patient concern and no gesture. After the line ends, Fuzzby turns toward the nearest flower and holds a chest-forward launch-ready pose without flying.",
+   "reason": "ABSTRACT_DIRECTION: as his specialty; selling pressure as",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.1",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B1.S3",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Zenny glides in from frame-right to his spot opposite Fuzzby and settles into a nearly motionless hover, eyes level in a flat, unblinking stare. Fuzzby remains frame-left in his chest-out victory hover; after a beat, he blinks once and keeps the pose held rigidly. Zenny’s mouth barely tightens into a restrained almost-smile as Fuzzby’s proud expression starts to strain without dropping the pose.",
+   "replacement": "Zenny glides in from frame-right and stops opposite Fuzzby, holding a nearly still hover and level, unblinking stare. Fuzzby stays frame-left in his chest-out victory hover. After a beat, Fuzzby blinks once; Zenny’s mouth tightens into a tiny almost-smile as Fuzzby’s proud face begins to strain. No dialogue.",
+   "reason": "63 words against the field's 50-word budget",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.2",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B2.S2",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Over the first seconds, the flower petals clamp around Fuzzby’s face without hiding him, squashing his cheeks as a soft puff of pollen presses onto his upper lip and chin. The petals release with a springy pop, snapping him back frame-left into a chest-forward parade hover facing toward Zenny. The reveal holds on his hopeful proud smile, with a clear pollen handlebar moustache and small goatee visible while the rest of his face stays mostly clean.",
+   "replacement": "First seconds: petals clamp around Fuzzby’s face but leave him visible, squashing cheeks; pollen puffs onto upper lip and chin. Petals spring open with a soft pop, bouncing him frame-left into a chest-forward parade hover toward Zenny. Hold: hopeful proud smile, clean face except pollen handlebar moustache and goatee.",
+   "reason": "76 words against the field's 50-word budget",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.2",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B4.S1",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Over the 5-second locked two-shot, Zenny’s eye roll settles back on Fuzzby and the corner of their mouth lifts into a restrained smile. Fuzzby spots the smile, brightens into a bigger grin, then zips from the left blossom cup and dives face-first into the next flower with a proud buzz. The petals catch around his face while his body stays outside at the flower mouth, still readable, as Zenny holds position with the smile intact.",
+   "replacement": "Locked blossom-height two-shot, 5 seconds. Zenny’s rolled eyes return to Fuzzby; one mouth corner rises into a small held smile. Fuzzby turns to it, grins wider, then buzzes from the left blossom cup face-first into the next flower. Petals close around his pollen-smeared face; his body remains outside.",
+   "reason": "75 words against the field's 50-word budget",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.2",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B4.S3",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "Zenny holds a steady hover at frame-right, angled up toward the unseen sky, her face calm and alert as a low distant rumble fades under the shot. Between 1.4 and 3.2 seconds, she gives her warning in a quiet, even delivery without extra gesture. Fuzzby remains blurred at frame-left in his crooked hover, pollen-coated face turned toward her, his parade posture sagging slightly by the end.",
+   "replacement": "Zenny hovers steady at frame-right, angled to the unseen sky, calm and alert. A low distant rumble fades. From 1.4–3.2s she speaks quietly and evenly, no gesture. Fuzzby stays blurred frame-left, crooked hover facing her, pollen-coated face holding bravado as his parade posture sags.",
+   "reason": "66 words against the field's 50-word budget",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.2",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B4.S3",
+   "field": "visualPayoff",
+   "attempt": 1,
+   "original": "Locked close holds Zenny frame-right in a steady hover as the cooler meadow light stays on her face; Fuzzby remains blurred frame-left in a crooked halt. At 1.4s Zenny names the warning without flinching, eyes lifted toward the unseen sky, wings beating slow and even. Fuzzby does not speak; by the end he turns more toward Zenny, his pollen-coated face keeping a forced-brave look as his hover loses its parade posture.",
+   "replacement": "Cool-lit Zenny right calmly names warning skyward; silent Fuzzby, blurred left, turns, sagging crookedly.",
+   "reason": "71 words against the field's 15-word budget",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.2",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  },
+  {
+   "shotId": "1.B5.S1",
+   "field": "performanceAssignment",
+   "attempt": 1,
+   "original": "In the medium two-shot, Fuzzby hovers frame-left and, during his line, pumps his chest forward through the pollen on his face; the coating trembles while his chin lifts into a strained grin. Zenny stays frame-right in a still hover, facing the storm direction with dry, patient concern and no gesture. After the line ends, Fuzzby turns toward the nearest flower and holds a chest-forward launch-ready pose without flying.",
+   "replacement": "In the medium two-shot, Fuzzby hovers frame-left. During his line, he thrusts his chest; pollen coating his face quivers as his chin lifts into a tight grin. Zenny remains frame-right, still, watching stormward with patient concern. After the line, Fuzzby turns to the nearest flower, chest forward, not flying.",
+   "reason": "68 words against the field's 50-word budget",
+   "model": "gpt-5.5",
+   "promptVersion": "2026-07-16.2",
+   "protectedFields": [
+    "purpose",
+    "durationSec",
+    "camera",
+    "dialogueLines",
+    "dialogueBinding",
+    "continuityIn",
+    "continuityOut",
+    "prohibited",
+    "physicalStaging",
+    "sourceType",
+    "sourceShotId",
+    "openingPose",
+    "charactersInFrame",
+    "shotId",
+    "beatCode",
+    "cutInMotivation"
+   ],
+   "validationResult": "PASSED deterministic revalidation"
+  }
+ ]
+}

@@ -149,7 +149,14 @@ class CreativeShotCard(BaseModel):
     beatIds: List[str]                           # a continuous chain may span beats
     purpose: str
     audienceExperience: str
-    openingImage: str
+    openingImage: str = Field(description=(
+        "2026-07-17 correction (Julian's Gate-B source-contract ruling, simplified same day "
+        "after the first version read as a mandatory camera checklist): a RENDERABLE "
+        "DESCRIPTION OF THE LITERAL FIRST FRAME that makes the selected treatment visually "
+        "legible. Include only the viewpoint, spatial relationships, depth or action "
+        "direction that MATERIALLY DEFINES that image — never all four as a required list, "
+        "never a checklist. This field alone controls the compiled keyframe's composition; "
+        "no compiler-level framing instruction and no reference image may override it."))
     principalPerformance: str
     cameraRelationship: str                      # lead/pursue/lag/lose/rediscover/anticipate/
     #                                              arrive-late/still/abandon-for-another — whatever
@@ -164,12 +171,31 @@ class CreativeShotCard(BaseModel):
     approvalState: str = "draft"
 
 
+class CharacterContinuity(BaseModel):
+    """ONE character's typed continuity at a shot's boundary (2026-07-17, Julian's
+    consolidation-checkpoint directive, item 3) — authored during Gate 5/6 production
+    detailing, alongside continuityIn/Out's whole-shot prose, never inferred downstream by
+    a promotion boundary (cb_handover.py must never invent this; it only maps it).
+    Deliberately lean (id + two states, not cb_engine.CharacterState's full seven-field
+    screenZone/facing/pose/expression/visibleMarks/heldProps shape) — that richer typed
+    contract is a render-facing production-compiler concern; this is the production-detail
+    layer's own honest, single-string-per-direction account of what changed for THIS
+    character, per Julian's own literal spec (character ID; opening state; closing
+    state)."""
+    characterId: str = Field(min_length=1)
+    openingState: str = Field(min_length=1)
+    closingState: str = Field(min_length=1)
+
+
 class ProductionDetail(BaseModel):
     """Added ONLY after Gate 6 passes — the production layer, separate from the idea.
     intendedDurationRange (2026-07-17 schema checkpoint): a credible per-shot range,
     e.g. '5-8s', authored from the FROZEN Creative Shot Card's own physicalPerformance +
     animationTiming (Gate 5) and the locked dialogue timing — never invented independent
-    of the approved creative content, never a re-authoring of it."""
+    of the approved creative content, never a re-authoring of it.
+    characterContinuity (2026-07-17, item 3): OPTIONAL — populated only for a shot whose
+    Production Detail has been authored/regenerated under this field's existence; an empty
+    list is the honest, legacy state for a shot not yet touched, never an invented one."""
     shotId: str
     continuityIn: str
     continuityOut: str
@@ -178,6 +204,7 @@ class ProductionDetail(BaseModel):
     requiresNewKeyframe: bool
     intendedDurationRange: str
     essentialProviderProtections: List[str] = Field(default_factory=list, max_length=3)
+    characterContinuity: List[CharacterContinuity] = Field(default_factory=list)
 
 
 class VoicePerformance(BaseModel):
@@ -668,7 +695,17 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "changes the meaning — never as automatic punctuation. A chain may span "
               "beats (beatIds lists every beat a shot carries). Keep each card LEAN: the "
               "eight creative fields carry the idea; production detail comes later and "
-              "only if the sequence passes."),
+              "only if the sequence passes. "
+              "openingImage IS THE LITERAL FIRST FRAME (2026-07-17 correction, simplified "
+              "same day) — a renderable description of the actual opening composition that "
+              "makes THIS shot's experience visually legible, not a mood note and never a "
+              "fixed checklist. Say only what materially defines this particular frame — "
+              "viewpoint, a spatial relationship, depth, or an action direction, whichever "
+              "of those actually matters here, never all of them by default and never "
+              "reduced to character pose alone. A wide establishing view is wrong when "
+              "cameraRelationship calls for an embedded, in-the-world vantage — but the "
+              "fix is judgment about THIS shot, not a mandatory formula repeated on every "
+              "shot."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
@@ -762,39 +799,111 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # PRODUCTION DETAIL — added ONLY after the creative sequence passes
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def production_detail(episode, scene_num, sd, shots, voices, log=print):
+def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cast=None,
+                       opener_shot_id=None):
+    """opener_shot_id (2026-07-17, added alongside the continuityIn correction below):
+    identifies the scene's TRUE first shot by shotId, not by list position. Defaults to
+    shots[0].shotId — correct for the normal, whole-scene call this function has always
+    had (run_scene passes every shot, in order, so position 0 genuinely IS the opener).
+    A SCOPED call (regenerate_production_detail's only_shot_id path) must pass the real
+    scene-opener's shotId explicitly instead of relying on position-in-a-subset, or a
+    later, non-opener shot regenerated alone would be mistaken for the opener and both
+    requiresNewKeyframe and continuityIn (below) would be set wrongly for it.
+
+    shot_cast (2026-07-17, item 3, optional): {shotId: [characterName, ...]} — when
+    given, the mind is told EXACTLY which characters are in each shot and asked to author
+    typed per-character continuity (character ID; opening state; closing state) for
+    precisely that named cast, never inventing or omitting one. Omitted (None) preserves
+    the pre-existing behaviour exactly — characterContinuity is simply not requested and
+    every ProductionDetail keeps its schema-default empty list.
+
+    2026-07-17 correction #2 (Julian's ruling, same day as the openingImage simplification):
+    closes THE DUPLICATION — continuityIn was being authored as a second description of the
+    shot's own opening image, competing with openingImage inside the compiled keyframe
+    brief. Fixed at the source, not with a text-similarity/dedup engine: continuityIn now
+    means ONLY visual state genuinely INHERITED from the immediately preceding shot or
+    scene — never a restatement of this shot's own opening action.
+
+    2026-07-17 correction #3 (Julian's system-freeze checkpoint, same day — THE
+    SIMPLIFICATION): correction #2's own fix used a literal sentinel PHRASE
+    ("N/A — scene opener; no predecessor shot to inherit from.") stamped into continuityIn
+    for the scene's true first shot, duplicated byte-for-byte in cb_engine.py so its
+    compiler could recognise it. Julian's ruling: replace that duplicated string with TYPED
+    ABSENCE in the existing schema — no new field, state, helper layer or protocol.
+    continuityIn/continuityOut are already plain, unconstrained `str` fields (no
+    Field(min_length=1)) — the schema ALREADY has a natural absence value, the empty
+    string, used elsewhere in this same function as the fallback default for a shot the
+    LLM's own response omitted entirely (see the ProductionDetail(...) fallback below,
+    unchanged, always "" for both fields). For the scene's true first shot (i==0), there is
+    no predecessor to inherit from, so continuityIn is now set MECHANICALLY to "" (never
+    LLM-authored — the same structural-fact treatment requiresNewKeyframe's own i==0 case
+    already gets, one line below). cb_handover._continuity_state maps an empty
+    continuityIn to cb_engine's own typed None (Shot.continuityIn: Optional[ContinuityState]
+    = None) — the compiler (cb_engine.compile_keyframe_prompt) omits the 'Continuity in:'
+    paragraph on that None, a literal is-None check, never a string comparison."""
+    cast_block = ""
+    if shot_cast:
+        cast_block = ("\n\nSHOT CAST (author characterContinuity for EXACTLY these named "
+                       "characters, per shot — never invent a character not listed here, "
+                       "never omit one that is):\n"
+                       + "\n".join(f"{sid}: {', '.join(names)}" for sid, names in shot_cast.items()))
     pd = cb_llm.structured(
         _mind("DIRECTOR AND CINEMATOGRAPHER, PRODUCTION PASS",
               ["directorTaste", "cinematographyTaste"],
-              "The creative sequence has PASSED. Add the production layer only: exact "
-              "continuity state in/out per shot; dialogue timing within the shot; reference "
-              "roles (which references anchor identity/environment); whether the shot "
-              "requires a NEW keyframe (a PLANNED_CUT does; a CONTINUOUS chain does not); "
-              "a credible intendedDurationRange per shot (e.g. '5-8s') authored FROM the "
-              "shot's own already-approved physicalPerformance and animationTiming (the "
-              "weight and timing of the move already decided at Gate 5) and the locked "
-              "dialogue's own timing where the shot carries a line — never invented "
-              "independent of that already-approved content, and never a re-authoring of "
-              "the performance itself; and AT MOST three genuinely provider-essential "
-              "protections — only what would invalidate the shot if violated, never a "
-              "constraint wall. Add nothing creative; change nothing creative."),
+              "The creative sequence has PASSED. Add the production layer only: "
+              "continuityIn/Out; dialogue timing within the shot; reference roles (which "
+              "references anchor identity/environment); whether the shot requires a NEW "
+              "keyframe (a PLANNED_CUT does; a CONTINUOUS chain does not); a credible "
+              "intendedDurationRange per shot (e.g. '5-8s') authored FROM the shot's own "
+              "already-approved physicalPerformance and animationTiming (the weight and "
+              "timing of the move already decided at Gate 5) and the locked dialogue's own "
+              "timing where the shot carries a line — never invented independent of that "
+              "already-approved content, and never a re-authoring of the performance "
+              "itself; and AT MOST three genuinely provider-essential protections — only "
+              "what would invalidate the shot if violated, never a constraint wall. "
+              "continuityIn is ONLY what genuinely carries in from the shot immediately "
+              "before this one — a mark, a position, an environmental state left over from "
+              "what just happened. It is NEVER a second description of THIS shot's own "
+              "opening image or action; openingImage already owns that, on the creative "
+              "card, and this field must not compete with it. If nothing meaningfully "
+              "carries in (this shot opens a new beat of action clean), say so briefly "
+              "rather than inventing continuity that doesn't exist. When a SHOT CAST is "
+              "given, also author characterContinuity: for each named character, one short "
+              "opening state (their state at the shot's own first frame) and one short "
+              "closing state (their state at the shot's own last frame) — concrete, "
+              "observable, never psychological; this typed field is unaffected by the "
+              "continuityIn correction above. Add nothing creative; change nothing "
+              "creative."),
         f"THE SHOTS (physicalPerformance/animationTiming are ALREADY APPROVED — ground the "
         f"duration in them, never rewrite them):\n"
         + "\n".join(s.model_dump_json() for s in shots)
         + "\n\nVOICE TIMINGS (locked dialogue — ground dialogue-bearing shots' duration in "
           "these):\n"
-        + "\n".join(f"{v.speaker}: {v.expectedTiming}" for v in voices),
+        + "\n".join(f"{v.speaker}: {v.expectedTiming}" for v in voices)
+        + cast_block,
         ProductionPass, label=f"production_detail_s{scene_num}")
+    real_opener = opener_shot_id or (shots[0].shotId if shots else None)
     by_id = {d.shotId: d for d in pd.details}
     out = []
-    for i, s in enumerate(shots):                 # keyframe truth is structural, not stylistic
+    for s in shots:                                # keyframe truth is structural, not stylistic
+        is_opener = (s.shotId == real_opener)
         d = by_id.get(s.shotId) or ProductionDetail(
             shotId=s.shotId, continuityIn="", continuityOut="", dialogueTiming="",
             referenceRoles="", requiresNewKeyframe=(s.transitionType == "PLANNED_CUT"),
             intendedDurationRange="")
         # a scene's FIRST shot has no predecessor frame to continue from — it always
         # requires a keyframe, whatever its creative transitionType says about how it plays
-        d.requiresNewKeyframe = (i == 0) or (s.transitionType == "PLANNED_CUT")
+        d.requiresNewKeyframe = is_opener or (s.transitionType == "PLANNED_CUT")
+        if is_opener:              # mechanical, never LLM-authored — see docstring above.
+            d.continuityIn = ""    # typed absence (correction #3) — the schema's own
+                                    # existing empty-string convention, not a sentinel phrase
+        if shot_cast and s.shotId in shot_cast:
+            # mechanical guard, not authoring: drop anything the model named that isn't in
+            # the given cast, never invent a missing one — a deterministic revalidation of
+            # what the LLM returned, the same discipline _field_rejections applies elsewhere
+            allowed = set(shot_cast[s.shotId])
+            d.characterContinuity = [c for c in d.characterContinuity
+                                      if c.characterId in allowed]
         out.append(d)
     return out
 
@@ -849,22 +958,63 @@ def _shots_hash(pkg):
                                       ensure_ascii=False).encode()).hexdigest()
 
 
-def regenerate_production_detail(storyboard_path, out_path, log=print):
+def regenerate_production_detail(storyboard_path, out_path, log=print, only_shot_id=None):
     """Regenerates ONLY ProductionDetail (now including intendedDurationRange) from a
     FROZEN, already Gate-6-passed, already Gate-A-approved storyboard's Creative Shot
     Cards — never reruns Gates 0-4, never revises a shot, never generates a new
     treatment. Proves the creative cards are byte-for-byte unchanged via _shots_hash
-    before/after, and refuses (raises) if they ever differ."""
+    before/after, and refuses (raises) if they ever differ.
+
+    only_shot_id (2026-07-17, item 3): when given, regenerates a SINGLE shot's own
+    Production Detail only — every sibling shot's stored ProductionDetail is carried
+    forward completely UNCHANGED (not re-authored, not re-validated in isolation; the
+    combined durationValidation still covers the whole scene's own already-stored ranges).
+    Used for a scoped, single-shot correction (Julian's directive: "Regenerate only
+    S1.SH1's Production Detail from its unchanged approved Creative Card") without
+    re-authoring the rest of the scene's production layer as a side effect."""
     src = json.load(open(storyboard_path))
     before_hash = _shots_hash(src)
     episode, scene_num = src["episodeId"], src["sceneNumber"]
-    shots = [CreativeShotCard(**s) for s in src["shots"]]
+    all_shots = [CreativeShotCard(**s) for s in src["shots"]]
     voices = [VoicePerformance(**v) for v in src.get("voicePerformances", [])]
-    details = production_detail(episode, scene_num, None, shots, voices, log=log)
-    validation = validate_duration_ranges(details, log=log)
+    beats_all = {b["beatId"]: b for b in src.get("beats", [])}
+
+    if only_shot_id:
+        shots = [s for s in all_shots if s.shotId == only_shot_id]
+        if not shots:
+            raise ValueError(f"{only_shot_id} not found in the approved storyboard.")
+    else:
+        shots = all_shots
+
+    shot_cast = {}
+    for s in shots:
+        cast = []
+        for bid in s.beatIds:
+            for c in beats_all.get(bid, {}).get("participatingCharacters", []):
+                if c not in cast:
+                    cast.append(c)
+        shot_cast[s.shotId] = cast
+
+    # the REAL scene-opener's shotId, from the FULL shot list — never assumed from
+    # position within a possibly-scoped-down `shots` subset (only_shot_id may name a
+    # later, non-opener shot; see production_detail's own opener_shot_id docstring)
+    details = production_detail(episode, scene_num, None, shots, voices, log=log,
+                                 shot_cast=shot_cast, opener_shot_id=all_shots[0].shotId)
+    new_by_id = {d.shotId: d for d in details}
+
+    existing = [ProductionDetail(**p) for p in src.get("productionDetail", [])]
+    if only_shot_id:
+        # every sibling's own ProductionDetail passes through byte-identical; ONLY the
+        # named shot's entry is replaced by the freshly regenerated one
+        merged = [new_by_id.get(d.shotId, d) for d in existing]
+        if not any(d.shotId == only_shot_id for d in existing):
+            merged.append(new_by_id[only_shot_id])
+    else:
+        merged = details
+    validation = validate_duration_ranges(merged, log=log)
 
     out = json.loads(json.dumps(src))              # deep copy — the frozen source untouched
-    out["productionDetail"] = [d.model_dump() for d in details]
+    out["productionDetail"] = [d.model_dump() for d in merged]
     out["durationValidation"] = validation
     if "approvalState" in out.get("scene", {}):     # travels the Gate-A ambiguity fix
         out["scene"]["sourceApprovalState"] = out["scene"].pop("approvalState")
@@ -876,10 +1026,16 @@ def regenerate_production_detail(storyboard_path, out_path, log=print):
             "regeneration; this must never happen. No file written.")
     out["creativeCardHashCheck"] = {"before": before_hash, "after": after_hash,
                                      "unchanged": True}
+    if only_shot_id:
+        out["singleShotRegeneration"] = {"shotId": only_shot_id,
+                                          "siblingsUnchanged": [d.shotId for d in existing
+                                                                 if d.shotId != only_shot_id]}
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(out_path, "w"), indent=1, ensure_ascii=False)
-    log(f"PRODUCTION DETAIL REGENERATED — {out_path}; creative-card hash unchanged "
-        f"({before_hash[:12]}…); scene total {validation['sceneTotal']['formatted']}")
+    log(f"PRODUCTION DETAIL REGENERATED — {out_path}"
+        + (f" (single shot: {only_shot_id})" if only_shot_id else "")
+        + f"; creative-card hash unchanged ({before_hash[:12]}…); "
+        f"scene total {validation['sceneTotal']['formatted']}")
     return out
 
 

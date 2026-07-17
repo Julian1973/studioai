@@ -37,6 +37,19 @@ sys.path.insert(0, str(HERE))
 import cb_llm
 import paths as P
 
+
+def canonical_package_path(scene, episode="Ep1"):
+    """THE canonical production package's path (2026-07-17, Julian's layer-boundary
+    directive, item 2) — cb_engine.py already owns the canonical package CONTRACT
+    (compile_scene_package below is what shapes it); this is the one place its filename
+    convention lives. cb_render.py's own _pkg_path delegates to this pure helper (never
+    duplicates it); cb_handover.py calls it directly — a pure path computation, not a
+    render or provider entry point, so it does not violate cb_handover's own
+    never-imports-cb_render/cb_gen invariant. No new module, no new convention: this is
+    the SAME path both modules already computed independently before this correction."""
+    return HERE.parent / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+
+
 MAX_SHOT_PROMPT_WORDS = 210   # hard assertion on every compiled shot contract. Raised 170->210 on
                               # 2026-07-16: Julian's dictated @图1 anchor contracts (OPENER_ANCHOR /
                               # RELAY_ANCHOR below) are fixed continuity scaffolding of ~34/~62 words
@@ -119,7 +132,13 @@ class Shot(BaseModel):
     physicalStaging: Optional[PhysicalStaging] = None  # required somewhere in every BIG-comedy beat
     prohibited: List[str]                         # 0-3 shot-specific failure modes ONLY — never a wall
     charactersInFrame: List[str]                  # who is visible (reference bindings derive from this)
-    continuityIn: ContinuityState                 # the world as this shot opens
+    # 2026-07-17 (Julian's system-freeze checkpoint, THE SIMPLIFICATION): typed absence,
+    # replacing the old NO_INHERITED_STATE sentinel string — None means "nothing genuinely
+    # carries in," true ONLY for the scene's own first shot (mechanically cleared in
+    # design_scene, never LLM-authored; see validate_scene_design's OPENER_CONTINUITY_IN_
+    # NOT_CLEARED / CONTINUITY_IN_MISSING checks). No new field, state or helper layer —
+    # Optional on the field that already existed.
+    continuityIn: Optional[ContinuityState] = None  # the world as this shot opens (None: scene opener)
     continuityOut: ContinuityState                # the world as this shot ends — the next relay's truth
 
 
@@ -238,6 +257,16 @@ def _design_user_prompt(scene_num, scene, beats):
     )
 
 
+def _clear_opener_continuity_in(design):
+    """THE SIMPLIFICATION (2026-07-17, Julian's system-freeze checkpoint): the scene's own
+    first shot has no predecessor to inherit continuity from — cleared MECHANICALLY, never
+    trusted from the LLM (the identical structural-fact treatment
+    cb_creative.production_detail already applies to its own opener shot's continuityIn).
+    Typed absence (None), not a sentinel string. A no-op on an empty shot list."""
+    if design.shots:
+        design.shots[0].continuityIn = None
+
+
 def design_scene(episode, scene_num, log=print):
     d, pkg_path = _load_pkg(episode)
     beats = _scene_beats(d, scene_num)
@@ -253,6 +282,7 @@ def design_scene(episode, scene_num, log=print):
     log(f"ENGINE — designing scene {scene_num}: statement + shot list (one structured call)...", flush=True)
     result = cb_llm.structured(_design_mind(), user, SceneShotList,
                                 label=f"engine_design_s{scene_num}")
+    _clear_opener_continuity_in(result)
 
     # the deterministic validator, then at most ONE repair pass (same discipline as Gate 1's
     # beat_problems loop): errors go back to the same mind, verbatim, fix-only
@@ -265,6 +295,7 @@ def design_scene(episode, scene_num, log=print):
                        "design, changing ONLY what these errors require:\n" + "\n".join(issues))
         result = cb_llm.structured(_design_mind(), repair_user, SceneShotList,
                                     label=f"engine_design_s{scene_num}_repair")
+        _clear_opener_continuity_in(result)
         report = validate_scene_design(result, beats, characters_cfg)
     # THE OBSERVABLE-DIRECTION TRANSLATOR (Julian's directive, 2026-07-16): abstract direction is
     # never the user's problem to fix by hand — the Episode Director repairs it automatically,
@@ -321,11 +352,13 @@ def _repair_context(shot):
     return {
         "creativePurpose": shot.purpose,
         "shotDurationSec": shot.durationSec,
-        "openingContinuity": shot.continuityIn.model_dump(),
+        # continuityIn is None for the scene's own first shot (typed absence) — nothing to
+        # report, never an AttributeError.
+        "openingContinuity": shot.continuityIn.model_dump() if shot.continuityIn else None,
         "closingContinuity": shot.continuityOut.model_dump(),
         "characterBehaviour": {c.character: {"pose": c.pose, "expression": c.expression,
                                               "screenZone": c.screenZone}
-                                for c in shot.continuityIn.characters},
+                                for c in (shot.continuityIn.characters if shot.continuityIn else [])},
         "camera": shot.camera,
         "dialogue": [{"speaker": l.speaker, "startSec": l.startSec, "endSec": l.endSec}
                       for l in shot.dialogueLines],
@@ -442,9 +475,17 @@ def _expected_lines(beats):
     return out
 
 
-# The design mind's own per-field word discipline, enforced deterministically on the two
-# render-facing prose fields (the repair loop translates a violation, never truncates it).
-FIELD_WORD_BUDGETS = {"performanceAssignment": 50, "visualPayoff": 15}
+# The design mind's own per-field word discipline, enforced deterministically.
+# 2026-07-17 correction (Julian's consolidation-checkpoint directive, item 4): visualPayoff's
+# own 15-word cap is REMOVED — an arbitrary per-field budget that rejected S1.SH1's real,
+# already-approved 18-word closingImage for no reason tied to the actual constraint that
+# matters (whether the COMPILED provider brief fits its own hard cap). The compiled-brief
+# budgets (MAX_SHOT_PROMPT_WORDS, MAX_KEYFRAME_PROMPT_WORDS) and the COMPILABILITY check
+# below still enforce the real limit, on the real shipped text, unconditionally — this only
+# removes a SECOND, redundant, tighter cap on one field in isolation. performanceAssignment
+# keeps its own budget (not named in this correction) and visualPayoff still runs the
+# ABSTRACT_DIRECTION safety/renderability scan just below, unweakened.
+FIELD_WORD_BUDGETS = {"performanceAssignment": 50}
 
 # Known unrenderable-abstraction constructs (Julian's correction, 2026-07-16, point 3). A tight,
 # documented heuristic — high-confidence psychological-intent shapes only, so a real staging verb
@@ -514,17 +555,40 @@ def validate_scene_design(design, beats, characters_cfg):
             add("ERROR", "LINES_MISSING", f"{path}.dialogueLines",
                 "shot has a dialogue binding but no typed lines for the voice pass")
 
-        # continuity states must cover everyone in frame
+        # TYPED ABSENCE (2026-07-17, THE SIMPLIFICATION): continuityIn=None is valid ONLY
+        # for the scene's own first shot — every other shot must state what it inherits.
+        # Mechanically enforced in design_scene (_clear_opener_continuity_in); these two
+        # checks are defense-in-depth, catching a stale/hand-edited/reloaded design
+        # (repair_package reconstructs Shot objects straight from a stored package) rather
+        # than trusting the mechanical clear blindly.
+        if i == 0 and sh.continuityIn is not None:
+            add("ERROR", "OPENER_CONTINUITY_IN_NOT_CLEARED", f"{path}.continuityIn",
+                "the scene's first shot must have continuityIn=null (no predecessor) — "
+                "the mechanical clear did not run or was overwritten")
+        if i > 0 and sh.continuityIn is None:
+            add("ERROR", "CONTINUITY_IN_MISSING", f"{path}.continuityIn",
+                "only the scene's first shot may have continuityIn=null; this shot must "
+                "state what it genuinely inherits from the one before it")
+
+        # continuity states must cover everyone in frame (continuityIn skipped when None —
+        # the scene's own first shot, nothing to cover)
         for state_name, state in (("continuityIn", sh.continuityIn),
                                     ("continuityOut", sh.continuityOut)):
+            if state is None:
+                continue
             covered = {_norm(cs.character) for cs in state.characters}
             for c in sh.charactersInFrame:
                 if _norm(c) not in covered:
                     add("ERROR", "CONTINUITY_CAST_INCOMPLETE", f"{path}.{state_name}",
                         f"{c} is in frame but missing from {state_name}")
 
-        # relay join: marks and props must carry across the cut unchanged
-        if sh.sourceType == "relay" and sh.sourceShotId in shots_by_id and sh.sourceShotId != sh.shotId:
+        # relay join: marks and props must carry across the cut unchanged. sh.continuityIn
+        # is None only for a validly-cleared scene opener — never sourceType=="relay" (a
+        # relay shot with continuityIn=None already carries CONTINUITY_IN_MISSING above;
+        # skip this join check rather than crash on it, the same graceful-degrade the rest
+        # of this validator uses for every other already-reported malformed state).
+        if (sh.sourceType == "relay" and sh.sourceShotId in shots_by_id
+                and sh.sourceShotId != sh.shotId and sh.continuityIn is not None):
             src = shots_by_id[sh.sourceShotId]
             prior = {_norm(cs.character): cs for cs in src.continuityOut.characters}
             for cs in sh.continuityIn.characters:
@@ -587,12 +651,13 @@ def validate_scene_design(design, beats, characters_cfg):
                     add("ERROR", "ABSTRACT_DIRECTION", f"{path}.{field_name}",
                         f"unrenderable psychological intent — \"{m.group(0)}\" — replace with "
                         f"observable movement in the source contract (never auto-rewritten)")
-            budget = FIELD_WORD_BUDGETS[field_name]
-            n = len((field_text or "").split())
-            if n > budget:
-                add("ERROR", "FIELD_OVERBUDGET", f"{path}.{field_name}",
-                    f"{n} words against the field's own {budget}-word discipline — "
-                    f"lean direction, never micro-choreography")
+            budget = FIELD_WORD_BUDGETS.get(field_name)
+            if budget is not None:
+                n = len((field_text or "").split())
+                if n > budget:
+                    add("ERROR", "FIELD_OVERBUDGET", f"{path}.{field_name}",
+                        f"{n} words against the field's own {budget}-word discipline — "
+                        f"lean direction, never micro-choreography")
 
     # COMPILABILITY (Julian's directive, 2026-07-16, point 4's designed outcome): a shot whose
     # contract can no longer fit the word cap — authored constraints are never dropped and
@@ -855,7 +920,8 @@ def _render_critical(shot):
         else:
             out.append("Keep " + sv + ".")
     marks = list(dict.fromkeys(
-        [m for cs in shot.continuityIn.characters for m in cs.visibleMarks]
+        [m for cs in (shot.continuityIn.characters if shot.continuityIn else [])
+         for m in cs.visibleMarks]
         + [m for cs in shot.continuityOut.characters for m in cs.visibleMarks]))
     if marks:
         out.append("Keep " + ", ".join(marks) + " visible.")
@@ -913,11 +979,10 @@ def compile_shot_contract(shot, scene, characters_cfg):
 
 def compile_keyframe_prompt(shot, scene, characters_cfg):
     """The opening-keyframe prompt for an OPENER shot — reference-first (zero appearance
-    text), room to breathe (Julian's Gate-2b law), compiled from: the approved opening
-    image, continuity in, identity/scale/reference bindings, and environment/lighting/
-    opening composition.
+    text), compiled from: the approved opening image, continuity in, identity/scale/
+    reference bindings, and lighting.
 
-    2026-07-17 correction (Julian's audit, source-defect protection lifted for this one
+    2026-07-17 correction #1 (Julian's audit, source-defect protection lifted for this one
     function only): this used to hardcode a universal 'the anticipation instant before the
     action, never the payoff' framing and ban 'the action already happening' as a negative —
     both false universals. THE APPROVED OPENING STATE DECIDES whether movement is already
@@ -925,24 +990,73 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
     stillness (e.g. a character already still, before a quiet line) — this function states
     only what shot.openingPose actually says, never a default posture.
 
+    2026-07-17 correction #2 (Julian's Gate-B source-contract ruling, S1.SH1's rejected
+    keyframe): the real, generated failure — a compiled brief that drifted to a wide,
+    open-meadow landscape vista instead of the approved bee-height flower corridor — traced
+    to two compiler-level defects, both REMOVED here rather than patched per-shot:
+      (a) a UNIVERSAL 'frame a touch wider than the shot size alone implies... real
+          headroom and side-room' instruction (Julian's own 2026-07-04 'room to breathe'
+          Gate-2b law from the earlier beat pipeline, carried into this module without
+          re-examination) — this actively encouraged safe, pulled-back scenic framing on
+          every keyframe regardless of what the shot actually needed. Framing now comes
+          SOLELY from shot.openingImage (via openingPose below) — the one field the Director
+          and Cinematographer jointly authored FOR this literal frame, per CreativeShotCard.
+          openingImage's own 2026-07-17 correction (viewpoint/spatial geometry/depth/action
+          vector, not character pose alone). No compiler-level framing nudge competes with
+          it. (b) the scene plate's declared job said it 'holds the world... exactly' —
+          claiming GEOGRAPHY ownership by default. A scene plate is a STYLE reference
+          (palette, materials, lighting) unless a separate location/layout reference is
+          EXPLICITLY approved for geography — none exists in this schema yet, so the plate
+          never claims geography. This is also why Ep1_S1_plate.png specifically (a wide
+          open-meadow vista, confirmed by direct inspection) can safely anchor palette and
+          light on every Scene-1 keyframe without also pulling every composition toward its
+          own wide-landscape geometry, the way it did for S1.SH1.
+
+    2026-07-17 correction #3 (Julian's ruling, same day — THE DUPLICATION): correction #2
+    fixed composition/geography; a separate defect remained — continuityIn was being
+    authored as a SECOND description of the shot's own opening image, competing with
+    openingImage inside this compiled brief rather than describing genuinely inherited
+    state. Fixed at the SOURCE (cb_creative.production_detail's own authoring instruction
+    and its mechanical opener override — see that function's docstring), never by comparing
+    text here: for the scene's true opening shot, continuityIn carried nothing genuinely
+    inherited, and this function omitted the 'Continuity in:' paragraph rather than
+    printing a no-op sentence.
+
+    2026-07-17 correction #4 (Julian's system-freeze checkpoint, later the same day — THE
+    SIMPLIFICATION, supersedes correction #3's mechanism, not its outcome): correction #3
+    detected "nothing inherited" via a literal string comparison against a duplicated
+    sentinel constant (NO_INHERITED_STATE), stamped into continuityIn.lighting AND
+    continuityIn.cameraSide as prose text. Julian's ruling: replace that with TYPED
+    ABSENCE — shot.continuityIn is now Optional[ContinuityState] = None, and None IS "no
+    inherited state," checked with a plain `is None`, never a string. This function omits
+    the 'Continuity in:' paragraph when shot.continuityIn is None and builds it from the
+    real lighting/cameraSide otherwise — the same observable behaviour as correction #3,
+    reached without a sentinel string anywhere in either module.
+
     shot.camera (the whole-shot camera RELATIONSHIP, which can describe movement across the
     entire shot) is deliberately never read here — a single-frame brief has no legitimate use
-    for a whole-shot movement description, opener or not. 'Opening composition' instead comes
-    from continuityIn's own lighting/cameraSide (which side of the action line the camera
-    holds at the opening instant, plus lighting) — the world/light/framing truth for this one
-    frame. When a caller's own mapping has (degenerately) duplicated one prose sentence into
-    both continuityIn.lighting and continuityIn.cameraSide, it is stated once, not twice."""
+    for a whole-shot movement description, opener or not; unchanged by any correction above.
+    'Continuity in' still carries lighting/cameraSide (which side of the action line the
+    camera holds at the opening instant, plus lighting) — never composition, never geography.
+    When a caller's own mapping has (degenerately) duplicated one prose sentence into both
+    continuityIn.lighting and continuityIn.cameraSide, it is stated once, not twice."""
     pose, next_slot = _inline_bindings(shot.openingPose.strip().rstrip("."), shot,
                                         characters_cfg, start=1)
-    lighting = shot.continuityIn.lighting.strip().rstrip(".")
-    camera_side = shot.continuityIn.cameraSide.strip().rstrip(".")
-    continuity = lighting if _norm(lighting) == _norm(camera_side) else f"{lighting}; {camera_side}"
+    # correction #4: typed absence — None means nothing genuinely carries in, checked with
+    # `is None`, never a sentinel-string comparison.
+    if shot.continuityIn is None:
+        continuity_clause = ""
+    else:
+        lighting = shot.continuityIn.lighting.strip().rstrip(".")
+        camera_side = shot.continuityIn.cameraSide.strip().rstrip(".")
+        continuity = (lighting if _norm(lighting) == _norm(camera_side)
+                      else f"{lighting}; {camera_side}")
+        continuity_clause = f"Continuity in: {continuity}. "
     prompt = "\n\n".join([
         _style_line(scene),
         f"The literal OPENING FRAME of the shot, exactly as approved: {pose}.",
-        f"Continuity in: {continuity}. Frame a touch wider than the shot size alone implies — "
-        f"real headroom and side-room for whatever the shot needs. "
-        f"@图{next_slot} scene plate holds the world, palette and light exactly.",
+        f"{continuity_clause}@图{next_slot} scene plate anchors palette, materials and "
+        f"lighting only — never composition or geography.",
         ("Negative: character redesign, appearance drift from the references, extra "
          "characters, on-screen text."),
     ])
@@ -1029,7 +1143,7 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
                             "continuity": "connects naturally to surrounding shots"},
         "sourceBeatPackage": str(pkg_path.name),
     }
-    out_json = HERE.parent / "cb-output" / f"{episode}_scene{scene_num}_production_package.json"
+    out_json = canonical_package_path(scene_num, episode)
     json.dump(pkg, open(out_json, "w"), indent=1, ensure_ascii=False)
 
     # the human review document — the exact words ARE shown here (a human doc, not a render prompt)
@@ -1083,7 +1197,7 @@ def repair_package(scene_num, episode="Ep1", log=print):
     preserves each original as creativeIntent planning metadata (never compiled), records the
     full repair log, refreshes every stored seedancePrompt (the fire path ships the STORED
     prompt), revalidates deterministically and bumps the package revision. Zero media spend."""
-    pkg_file = HERE.parent / "cb-output" / f"{episode}_scene{scene_num}_production_package.json"
+    pkg_file = canonical_package_path(scene_num, episode)
     pkg = json.loads(pkg_file.read_text())
     d, _ = _load_pkg(episode)
     beats = _scene_beats(d, scene_num)

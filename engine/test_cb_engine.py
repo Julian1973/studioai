@@ -71,6 +71,10 @@ def _clean_design():
     s1 = _shot("1.B1.S1", "opener", chars=("Fuzzby", "Zenny"),
                lines=[_line()], binding="FUZZBY speaks with breathless pride",
                staging=STAGING, marks_out=["pollen dust"])
+    # THE SIMPLIFICATION (2026-07-17): the scene's true first shot has nothing to inherit —
+    # typed absence (None), matching what design_scene's mechanical clear produces. A
+    # "clean" design is one where this is already correctly cleared.
+    s1.continuityIn = None
     s2 = _shot("1.B1.S2", "relay", src_id="1.B1.S1", chars=("Fuzzby", "Zenny"),
                lines=[_line("Zenny", "Fuzzby… why are you humming?", 1.0, 3.5)],
                binding="ZENNY speaks with dry deadpan", marks_in=["pollen dust"],
@@ -163,8 +167,45 @@ def test_prop_drift_across_relay_join_blocks():
 
 def test_continuity_cast_incomplete_blocks():
     d = _clean_design()
-    d.shots[0].continuityIn.characters = d.shots[0].continuityIn.characters[:1]
+    # shots[0] is the scene's true opener (continuityIn=None, typed absence) — this check
+    # exercises a shot with real continuityIn, so it targets shots[1] instead.
+    d.shots[1].continuityIn.characters = d.shots[1].continuityIn.characters[:1]
     assert "CONTINUITY_CAST_INCOMPLETE" in _codes(E.validate_scene_design(d, BEATS, CFG))
+
+
+def test_opener_continuity_in_not_cleared_blocks():
+    """2026-07-17 (THE SIMPLIFICATION): if the scene's first shot somehow keeps a real
+    continuityIn (the mechanical clear didn't run, or a reloaded/hand-edited package
+    overwrote it), that's a hard validation error, not a silently-accepted state."""
+    d = _clean_design()
+    d.shots[0].continuityIn = _state(["Fuzzby", "Zenny"])
+    assert "OPENER_CONTINUITY_IN_NOT_CLEARED" in _codes(E.validate_scene_design(d, BEATS, CFG))
+
+
+def test_continuity_in_missing_for_non_opener_blocks():
+    """Typed absence is valid ONLY for the scene's own first shot — a later shot with
+    continuityIn=None is a real gap, not a legitimate 'nothing inherited' state."""
+    d = _clean_design()
+    d.shots[1].continuityIn = None
+    assert "CONTINUITY_IN_MISSING" in _codes(E.validate_scene_design(d, BEATS, CFG))
+    # the relay-join mark/prop check must degrade gracefully on this same malformed state,
+    # never crash with an AttributeError chasing .characters off None
+    report = E.validate_scene_design(d, BEATS, CFG)
+    assert report is not None and not report["passed"]
+
+
+def test_design_scene_mechanical_clear_is_pure_and_idempotent():
+    """_clear_opener_continuity_in (design_scene's own mechanical override, mirroring
+    cb_creative.production_detail's identical pattern) needs no LLM call — proven directly
+    against the tripwired fixture. Clears position 0 only, regardless of its prior value,
+    and is a no-op on an empty shot list."""
+    d = _clean_design()
+    d.shots[0].continuityIn = _state(["Fuzzby", "Zenny"])   # simulate an un-cleared LLM draft
+    E._clear_opener_continuity_in(d)
+    assert d.shots[0].continuityIn is None
+    assert d.shots[1].continuityIn is not None               # untouched
+    empty = E.SceneShotList(statement=d.statement, shots=[])
+    E._clear_opener_continuity_in(empty)                      # empty list: no crash
 
 
 def test_big_comedy_beat_requires_physical_staging():
@@ -435,9 +476,42 @@ def test_slot_maps_render_vs_keyframe():
     assert kf["@图1"] == "Fuzzby" and kf["@图3"] == "scene plate" and "@Audio1" not in kf
 
 
+def test_keyframe_prompt_omits_continuity_paragraph_when_nothing_inherited():
+    """2026-07-17 (THE DUPLICATION correction, then THE SIMPLIFICATION): when
+    continuityIn is None (typed absence — the scene's true opener, mechanically cleared by
+    cb_engine.design_scene, never LLM-authored), the compiled keyframe brief must OMIT the
+    'Continuity in:' paragraph entirely rather than print a no-op sentence. A plain `is
+    None` check, never a sentinel-string comparison."""
+    shot = _clean_design().shots[0]
+    shot = shot.model_copy(update={"continuityIn": None})
+    kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
+    assert "continuity in" not in kf.lower()
+    assert "never composition or geography" in kf.lower()   # the plate's job line still prints
+    assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
+
+
+def test_keyframe_prompt_prints_continuity_paragraph_when_real_state_inherited():
+    """The opposite case — genuinely inherited state (a real relay, not the sentinel)
+    still prints normally, unaffected by the correction above."""
+    shot = _clean_design().shots[0]
+    real_state = E.ContinuityState(lighting="cooler storm light now reaching the petals",
+                                    cameraSide="cooler storm light now reaching the petals",
+                                    characters=[])
+    shot = shot.model_copy(update={"continuityIn": real_state})
+    kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
+    assert "continuity in: cooler storm light" in kf.lower()
+
+
 def test_keyframe_prompt_is_reference_first_and_appearance_free():
+    """2026-07-17 correction (Julian's Gate-B source-contract ruling, S1.SH1's rejected
+    keyframe): the universal 'frame a touch wider... room to breathe' compiler nudge is
+    REMOVED — it was a real, confirmed root cause of a compiled brief drifting to a wide
+    scenic vista instead of the approved composition. Framing now comes solely from
+    shot.openingPose (openingImage); the plate is explicitly barred from claiming
+    composition or geography, only palette/materials/lighting."""
     kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
-    assert "wider" in kf.lower()                      # the room-to-breathe law
+    assert "wider" not in kf.lower()                  # the room-to-breathe law is GONE
+    assert "never composition or geography" in kf.lower()   # the plate's job is explicitly scoped
     assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
     # rule 5: the compiler's own fixed text never describes appearance
     for banned in ("yellow", "stripe", "spectacles", "glasses", "fur", "fuzzy"):

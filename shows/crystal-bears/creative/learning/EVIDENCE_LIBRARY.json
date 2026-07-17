@@ -308,6 +308,32 @@
     "engine/cb_creative.py (ProductionDetail.intendedDurationRange, validate_duration_ranges, regenerate_production_detail)",
     "cb-output/creative/archive_v2_candidate_2_schema_complete/Ep1_scene1_storyboard.json"
    ]
+  },
+  {
+   "evidenceId": "ev-36837adef4",
+   "capturedAt": "2026-07-17T10:25:35",
+   "capturedBy": "Julian (Gate B visual review)",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": "S1.SH1",
+   "sourceVersion": "cb-output/Ep1_scene1_production_package.json revision 7 (superseded); storyboard md5 8bbe5120d3c983abd51680aee03f2c0e",
+   "creativeRole": "cinematography",
+   "outcome": "rejected",
+   "userFeedbackVerbatim": "Do not animate or retry the generation. This is a source-contract failure: the approved experiential camera relationship did not become part of the literal opening composition; openingImage described character state more strongly than camera viewpoint and spatial geometry; the universal frame-a-touch-wider compiler instruction encouraged safe scenic framing; the scene plate was given ownership of the world, allowing its geography to dominate the approved flower-corridor staging.",
+   "systemClassification": "source-contract failure: openingImage field under-specified viewpoint/spatial geometry/depth/opening action vector (character-pose-only); cb_engine.compile_keyframe_prompt's universal frame-a-touch-wider instruction encouraged safe scenic framing; the scene-plate reference was declared to hold the world (geography) with no explicit approval for that ownership.",
+   "category": "production",
+   "scope": "storyboard schema",
+   "context": "Gate B visual verdict: rejected. Real, paid Seedream 5 Pro generation, $0.144, 2026-07-17. The compiled keyframe drifted to a wide open-meadow landscape vista instead of the approved bee-height flower corridor.",
+   "assetPointers": [
+    "engine/media/archive/shots_rejected/Ep1_S1.SH1_keyframe_20260717T100716_rejected.png",
+    "engine/media/archive/shots_rejected/Ep1_S1.SH1_keyframe_20260717T100716_rejected.gen.json",
+    "engine/cb_engine.py (compile_keyframe_prompt)",
+    "engine/cb_creative.py (CreativeShotCard.openingImage)",
+    "engine/media/Ep1_S1_plate.png"
+   ]
   }
  ]
 }

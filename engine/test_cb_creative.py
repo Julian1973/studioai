@@ -171,6 +171,44 @@ def test_first_shot_always_requires_keyframe(monkeypatch):
     assert details[1].requiresNewKeyframe is False    # a true continuation stays chained
 
 
+def test_continuityIn_mechanical_clear_uses_opener_shot_id_not_list_position(monkeypatch):
+    """2026-07-17 (THE DUPLICATION correction, then THE SIMPLIFICATION): a SCOPED call
+    (regenerate_production_detail's only_shot_id path) may pass a shots list whose
+    position-0 entry is NOT the scene's true opener. The mechanical clear must key off the
+    real opener_shot_id, never off list position — otherwise a later shot regenerated
+    alone would be wrongly stamped as having nothing inherited. Typed absence: the clear
+    is an empty string (the schema's own existing 'nothing here' value), never a sentinel
+    phrase."""
+    def fake(system, user, schema, label="", **k):
+        if schema is C.ProductionPass:
+            return C.ProductionPass(details=[C.ProductionDetail(
+                shotId="S1.SH2", continuityIn="Fuzzby's pollen mark still visible from the "
+                "prior shot.", continuityOut="out", dialogueTiming="", referenceRoles="",
+                requiresNewKeyframe=True, intendedDurationRange="5-7s")])
+        raise AssertionError(schema)
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    # S1.SH2 is the ONLY entry in this scoped call, but it is NOT the scene's true opener —
+    # opener_shot_id names S1.SH1 (not present in this call at all) explicitly.
+    details = C.production_detail("Ep1", 1, None, [_card("S1.SH2", "PLANNED_CUT")], [],
+                                    log=lambda *a, **k: None, opener_shot_id="S1.SH1")
+    assert details[0].continuityIn != ""
+    assert "pollen mark" in details[0].continuityIn      # the LLM's real, authored content survives
+
+
+def test_continuityIn_mechanical_clear_fires_for_the_real_opener(monkeypatch):
+    def fake(system, user, schema, label="", **k):
+        if schema is C.ProductionPass:
+            return C.ProductionPass(details=[C.ProductionDetail(
+                shotId="S1.SH1", continuityIn="a duplicate restatement of the opening image",
+                continuityOut="out", dialogueTiming="", referenceRoles="",
+                requiresNewKeyframe=True, intendedDurationRange="5-7s")])
+        raise AssertionError(schema)
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    details = C.production_detail("Ep1", 1, None, [_card("S1.SH1", "PLANNED_CUT")], [],
+                                    log=lambda *a, **k: None)
+    assert details[0].continuityIn == ""   # mechanical clear wins — typed absence, not a sentinel
+
+
 # ── THE SCHEMA CHECKPOINT (2026-07-17): duration field, hash-proven regeneration,
 #    the approvalState rename, and the sole-Gate-A-authority proof ─────────────────────
 def test_duration_field_required_and_validated():

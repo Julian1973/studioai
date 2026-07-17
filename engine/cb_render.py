@@ -47,6 +47,7 @@ approximates "is it funny").
 import os, sys, json, re, glob, pathlib, datetime, shutil, hashlib, uuid
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import cb_engine
 import cb_gen
 import cb_post
 import paths as P
@@ -69,7 +70,11 @@ def _norm(s):
 
 # ── package + ledger ────────────────────────────────────────────────────────────────────
 def _pkg_path(scene, episode="Ep1"):
-    return HERE.parent / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+    """2026-07-17 (Julian's layer-boundary directive, item 2): delegates to cb_engine's
+    canonical_package_path — the one place the canonical package's filename convention
+    lives (cb_engine.py already owns the package CONTRACT). Name and signature unchanged
+    so every existing internal caller of _pkg_path needs no changes."""
+    return cb_engine.canonical_package_path(scene, episode)
 
 
 def load_pkg(scene, episode="Ep1"):

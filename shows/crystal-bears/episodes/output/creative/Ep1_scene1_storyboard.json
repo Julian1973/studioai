@@ -346,16 +346,28 @@
  "productionDetail": [
   {
    "shotId": "S1.SH1",
-   "continuityIn": "Sequence opening: warm flower-corridor geography established at bee height; Fuzzby is already mid-travel and mid-chant on frame one, pitched diagonally through the corridor, with Zenny calm in the same readable space as the still measure he refuses to notice.",
-   "continuityOut": "Fuzzby has been kicked off his neat path by the leaf recoil and is no longer cleanly contained; the leaf is snapping back into a tiny trembling after-beat with pollen hanging where he was, while Zenny remains calm within the corridor geography.",
-   "dialogueTiming": "FUZZBY chant is already underway at frame one: “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” in brisk pulse, compressed through the over-low dip, with the final ellipsis carrying into the snap-away and trembling pollen after-beat.",
-   "referenceRoles": "Fuzzby identity/performance reference anchors his body scale, hover behaviour and overconfident wing-driven rhythm; Zenny identity/performance reference anchors her composed stillness; flower corridor, leaf and pollen references anchor bee-height scale, contact weight and warm meadow continuity.",
+   "continuityIn": "Audio and action are already in progress at the first frame: Fuzzby is mid-chant and already committed diagonally through the flower corridor at bee-height, with Zenny present as the calm still point in the corridor.",
+   "continuityOut": "The shot ends on the aftermath of the recoil: the leaf is snapping back into a tremble, pollen hangs in the space Fuzzby just crossed, and Fuzzby’s neat travel line has been kicked sideways out of order.",
+   "dialogueTiming": "Fuzzby’s “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” is already underway on frame one. Keep the first half in a brisk, even pulse; compress the chant timing as the dip goes too low; let the final ellipsis ride through the snap-away into the trembling pollen after-beat.",
+   "referenceRoles": "Fuzzby reference anchors character identity, scale, wing rhythm, and overcommitted travel; Zenny reference anchors character identity and the still-judgement contrast; flower corridor, broad leaf, and pollen references anchor bee-height geography, contact weight, recoil, and environmental reaction.",
    "requiresNewKeyframe": true,
-   "intendedDurationRange": "5-7s",
+   "intendedDurationRange": "4-6s",
    "essentialProviderProtections": [
-    "Open with Fuzzby already in motion and mid-chant; no neutral hover start.",
-    "Leaf compression, recoil and trembling pollen after-beat must prove his weight and the environmental cause.",
-    "Maintain Zenny as the still measure within readable flower-corridor geography."
+    "No neutral start: Fuzzby must already be in pitched travel and mid-chant on frame one.",
+    "The leaf contact must prove weight through visible compression before the faster recoil.",
+    "End on the trembling leaf and suspended pollen after-beat, with Fuzzby displaced from the neat path."
+   ],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Already visible in diagonal travel through the corridor, chest-forward, wings beating to the chant.",
+     "closingState": "No longer in the held leaf-pollen space; snapped off-course by the leaf recoil."
+    },
+    {
+     "characterId": "Zenny",
+     "openingState": "Calm and still in the corridor as Fuzzby rushes past.",
+     "closingState": "Not featured in the final held aftermath; the frame is on the leaf tremble and pollen cloud."
+    }
    ]
   },
   {
@@ -370,7 +382,8 @@
     "Do not show the messy recovery; the cut must arrive late to the public-relations pose.",
     "“Nailed it.” must land before Fuzzby’s hover steadies.",
     "Launch must follow almost immediately and end in the flower swallow/pollen puff, not a fully tracked flight path."
-   ]
+   ],
+   "characterContinuity": []
   },
   {
    "shotId": "S1.SH3",
@@ -384,7 +397,8 @@
     "Hold Zenny’s still frame long enough for the reveal to invade it; do not turn this into a chase continuation.",
     "Pollen moustache/goatee evidence must read clearly before Fuzzby’s question lands.",
     "Keep both locked lines verbatim and preserve Zenny’s dry processing beat before her answer."
-   ]
+   ],
+   "characterContinuity": []
   },
   {
    "shotId": "S1.SH4",
@@ -398,7 +412,8 @@
     "Keep wipe, branch clip, tumble, blossom compression and rebound as one continuous escalating cause-chain.",
     "The wipe must visibly smear the pollen wider before the forward denial carries him onward.",
     "“Buzz Crash!!” must land after the pop-up from inside the consequence, not before the physical proof is clear."
-   ]
+   ],
+   "characterContinuity": []
   },
   {
    "shotId": "S1.SH5",
@@ -412,7 +427,8 @@
     "Zenny’s smile, Fuzzby’s repeat dive and the thunder interruption must remain one continuous flow.",
     "Thunder must hit Fuzzby’s body before the line: wing-stall, dip, crooked hover, then rebrand.",
     "Preserve the first cooler storm wash so the pollen remains comic but is no longer the dominant pressure."
-   ]
+   ],
+   "characterContinuity": []
   },
   {
    "shotId": "S1.SH6",
@@ -426,7 +442,8 @@
     "The cut must transfer point of view to Zenny’s recognition, not continue Fuzzby’s jitter.",
     "Hold eye travel before the line and closing stillness after it; do not rush back to comedy.",
     "Keep “A Storm’s coming.” verbatim, small and factual rather than performed worry."
-   ]
+   ],
+   "characterContinuity": []
   },
   {
    "shotId": "S1.SH7",
@@ -440,7 +457,8 @@
     "Keep the boast setup clean, then launch immediately out of the final word with minimal anticipation.",
     "The flower must answer the boast instantly and completely enough to make escape undignified.",
     "Zenny’s sigh is nonverbal recognition, not rescue; hold the final stuck image with storm chill still present."
-   ]
+   ],
+   "characterContinuity": []
   }
  ],
  "voicePerformances": [
@@ -678,15 +696,15 @@
    "humanRevision": null
   }
  },
- "approvalState": "awaiting-human-storyboard-approval",
+ "approvalState": "approved",
  "durationValidation": {
   "perShot": [
    {
     "shotId": "S1.SH1",
-    "range": "5-7s",
+    "range": "4-6s",
     "valid": true,
-    "loSec": 5.0,
-    "hiSec": 7.0
+    "loSec": 4.0,
+    "hiSec": 6.0
    },
    {
     "shotId": "S1.SH2",
@@ -733,9 +751,9 @@
   ],
   "invalidShotIds": [],
   "sceneTotal": {
-   "loSec": 41.0,
-   "hiSec": 56.0,
-   "formatted": "41-56s",
+   "loSec": 40.0,
+   "hiSec": 55.0,
+   "formatted": "40-55s",
    "allValid": true
   }
  },
@@ -743,5 +761,17 @@
   "before": "13989dd4e63babeb9bac7e2e596ac44dcf4d5546f2e50eae995714bb9d493396",
   "after": "13989dd4e63babeb9bac7e2e596ac44dcf4d5546f2e50eae995714bb9d493396",
   "unchanged": true
+ },
+ "humanNote": "Gate A creative verdict (2026-07-17): Candidate 2's selected treatment, five-beat architecture, seven Creative Shot Cards, physical performances, camera relationships, cut decisions and Voice Director treatments are approved.",
+ "singleShotRegeneration": {
+  "shotId": "S1.SH1",
+  "siblingsUnchanged": [
+   "S1.SH2",
+   "S1.SH3",
+   "S1.SH4",
+   "S1.SH5",
+   "S1.SH6",
+   "S1.SH7"
+  ]
  }
 }

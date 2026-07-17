@@ -2,6 +2,11 @@
 """cb_engine.py — THE DIRECTOR ENGINE, HYBRID v2 (Julian's rulings, 2026-07-16 —
 THE_DEFINITIVE_PIPELINE.md at repo root is the governing document; read it first).
 
+⚠ FROZEN 2026-07-17 (Julian's system-freeze checkpoint, PIPELINE_CUTOVER_LEDGER.md §8):
+compile_keyframe_prompt, compile_shot_contract and the reference-ownership doctrine are
+LOCKED as of that day's corrections. No further compiler changes without a fresh, dated
+ruling — see the ledger for the full record.
+
 THE HYBRID (Julian: "the ultimate clean workflow... light, clean and effective"): the
 production CONTRACT and design-time VALIDATOR adopted from the Enaid Animation Studio
 reference architecture he supplied, merged with this studio's own locked laws —

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """cb_creative.py — THE CRYSTAL BEARS CREATIVE ROOM (process v2, 2026-07-17).
 
+⚠ FROZEN 2026-07-17 (Julian's system-freeze checkpoint, PIPELINE_CUTOVER_LEDGER.md §8):
+this module's Gates 0-6, ProductionDetail and CreativeShotCard are LOCKED as of the
+openingImage/reference-role/continuityIn corrections that day. No further creative or
+compiler changes without a fresh, dated ruling — see the ledger for the full record.
+
 Process v1 was rejected by Julian as a PROCESS-LEVEL failure (EX-005 in the exemplar
 library): the Cinematographer entered after the dramatic approach was already selected;
 no governing audience-experience/visual-grammar decision existed; fixed lanes and

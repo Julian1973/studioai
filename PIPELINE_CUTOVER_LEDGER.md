@@ -260,3 +260,82 @@ checkpoint was record only, code/creative changes explicitly withheld.
    the real live package), separate from its three `test_legacy_*` regression pins against the
    original revision-6/`1.B1.S1` content — the golden path no longer borrows the legacy
    package as its own evidence.
+
+---
+
+## 8. THE SYSTEM FREEZE — Creative Room + keyframe compiler architecture locked (2026-07-17)
+
+Julian's checkpoint verdict, same day as §7: the `openingImage`, reference-role and Gate
+4→6 corrections are **accepted as software-wide changes**. This section is the record of
+the last correction in that chain and the freeze that follows it.
+
+**THE SIMPLIFICATION — typed absence, not a sentinel string.** §7's own fix for THE
+DUPLICATION (continuityIn competing with openingImage for the opening composition) worked
+by stamping a literal phrase, `NO_INHERITED_STATE = "N/A — scene opener; no predecessor
+shot to inherit from."`, duplicated byte-for-byte across `cb_creative.py` and
+`cb_engine.py`, with the compiler recognising that exact string. Julian's ruling: replace
+it with typed absence in the schema that already exists — no new field, state, helper
+layer or protocol.
+
+- `cb_creative.ProductionDetail.continuityIn` is an unconstrained `str` (no
+  `Field(min_length=1)`) — the schema's own pre-existing "nothing here" value is the empty
+  string, already used as the fallback default elsewhere in `production_detail()`. The
+  mechanical clear for the scene's true first shot now writes `""`, not a sentinel phrase.
+- `cb_engine.Shot.continuityIn` is now `Optional[ContinuityState] = None`. `design_scene`
+  mechanically clears position 0 to `None` after every LLM call (mirroring
+  `cb_creative.production_detail`'s identical pattern); `validate_scene_design` gained two
+  checks — `OPENER_CONTINUITY_IN_NOT_CLEARED` (a real continuityIn survived on the scene's
+  first shot) and `CONTINUITY_IN_MISSING` (a later shot has nothing inherited, which is
+  never legitimate) — so a stale, hand-edited or reloaded package can't silently violate
+  the invariant.
+- `cb_handover._continuity_state` is the one bridge between the two shapes: an empty
+  `continuityIn` prose maps to `None`, scoped to the opening side only —
+  `continuityOut` keeps its exact pre-existing behaviour, since "nothing inherited" is
+  never a legitimate state for how a shot ends.
+- `compile_keyframe_prompt` omits the "Continuity in:" paragraph on a plain `is None`
+  check now, not a string comparison.
+
+Every downstream reader of `continuityIn` (`_render_critical`, `_repair_context`, the
+relay mark/prop-drift join check) was swept and guarded against the new `None` case —
+graceful degradation, never a crash on an already-flagged malformed state. 137 tests green
+(1 pre-existing skip), including new coverage for both new validator checks and the
+mechanical clear itself.
+
+**A known, deliberately un-touched consequence**: the LIVE canonical package
+(`cb-output/Ep1_scene1_production_package.json`, revision 7) still carries real prose in
+`shots[0].continuityIn` — written by an earlier stage of the same day's work, before this
+simplification existed. It was NOT hand-edited to match the new convention; the live,
+approved package stays untouched per Julian's own standing instruction, and this stale
+shape will be corrected as a side effect of the NEXT real promotion (§9 below), not by a
+patch applied directly to approved production data. Until then, a real fire attempt
+against revision 7 would correctly refuse at `_fresh_validation` on
+`OPENER_CONTINUITY_IN_NOT_CLEARED` — a safe, fail-closed state, not a silent risk.
+
+**THE FREEZE.** As of this checkpoint, the Creative Room (`cb_creative.py` — Gate 4 shot
+conference, Gate 5 performance/voice, Gate 6 adversarial review, `production_detail`,
+`CreativeShotCard`/`ProductionDetail`) and the keyframe/motion-brief compiler
+(`cb_engine.py` — `compile_keyframe_prompt`, `compile_shot_contract`, the reference-
+ownership doctrine, `validate_scene_design`) are **locked**. No further creative or
+compiler changes to either module without a fresh, dated ruling — matching this
+document's own established practice (§7's own dated corrections, CLAUDE.md rule 18's
+forward-only doctrine) rather than open-ended iteration. The next work against this
+system is either (a) a real approval/rejection decision on a storyboard candidate already
+built under this architecture, or (b) a genuinely new defect found on real rendered
+footage — not a speculative refinement.
+
+---
+
+## 9. Gate A candidate export (2026-07-17)
+
+The real Gate 4 → Gate 5 → Gate 6 loop run under the corrected, now-frozen source
+contract (§7/§8) converged on a 7-shot sequence for Scene 1 (6 `PLANNED_CUT`, 1
+`CONTINUOUS`), using the unchanged selected treatment and unchanged 5-beat architecture
+throughout — Gate 6 rejected an earlier 15-shot draft as over-fragmented coverage, then
+passed the 7-shot revision on genuine, specific grounds. This candidate is exported and
+held for Julian's own review — see the Studio's storyboard-candidate view for the visual,
+human-readable presentation. It is explicitly **not** merged into the live approved
+storyboard or production package; that only happens on his explicit approval, at which
+point the existing `cb_handover.promote_to_canonical` path both promotes it AND — as a
+side effect of the fix in §8 — correctly clears `continuityIn` to typed `None`/`""` for
+the scene's true opener for the first time under the live data, closing the one known
+stale-shape gap noted above.

@@ -65,3 +65,11 @@ Zero media provider calls; zero Seedance tokens; zero fal/ElevenLabs spend.
 
 ## Creative Learning System (2026-07-17): zero LLM calls — the system is deterministic
 governance code; classification proposals are mechanical. No media, no tokens.
+
+## Storyboard-schema checkpoint: production-detail-only regeneration (2026-07-17)
+
+One real Gate-5 production-detail pass (cb_llm.structured, ProductionPass schema) against
+Candidate 2's 7 frozen Creative Shot Cards, authoring intendedDurationRange per shot from
+already-approved physicalPerformance/animationTiming/dialogue timing. 1 completion. Gates
+0-4 did not run (no treatments, no beats, no shot conference, no adversarial review — proven
+by test). Zero media/provider spend.

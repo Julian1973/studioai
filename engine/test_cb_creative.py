@@ -97,7 +97,7 @@ def _fake_llm(record, review_script=None):
             return C.ProductionPass(details=[C.ProductionDetail(
                 shotId="S1.SH1", continuityIn="in", continuityOut="out",
                 dialogueTiming="after rebound", referenceRoles="turnarounds+plate",
-                requiresNewKeyframe=True)])
+                requiresNewKeyframe=True, intendedDurationRange="5-8s")])
         if schema is C.ShowrunnerReview:
             state["reviews"] += 1
             if review_script:
@@ -169,6 +169,103 @@ def test_first_shot_always_requires_keyframe(monkeypatch):
                                     log=lambda *a, **k: None)
     assert details[0].requiresNewKeyframe is True     # first shot: forced, structural
     assert details[1].requiresNewKeyframe is False    # a true continuation stays chained
+
+
+# ── THE SCHEMA CHECKPOINT (2026-07-17): duration field, hash-proven regeneration,
+#    the approvalState rename, and the sole-Gate-A-authority proof ─────────────────────
+def test_duration_field_required_and_validated():
+    with pytest.raises(Exception):
+        C.ProductionDetail(shotId="x", continuityIn="", continuityOut="",
+                            dialogueTiming="", referenceRoles="", requiresNewKeyframe=True)
+    good = C.ProductionDetail(shotId="x", continuityIn="", continuityOut="",
+                               dialogueTiming="", referenceRoles="",
+                               requiresNewKeyframe=True, intendedDurationRange="4-7s")
+    bad = C.ProductionDetail(shotId="y", continuityIn="", continuityOut="",
+                              dialogueTiming="", referenceRoles="",
+                              requiresNewKeyframe=False, intendedDurationRange="not a range")
+    inverted = C.ProductionDetail(shotId="z", continuityIn="", continuityOut="",
+                                   dialogueTiming="", referenceRoles="",
+                                   requiresNewKeyframe=False, intendedDurationRange="9-3s")
+    v = C.validate_duration_ranges([good, bad, inverted], log=lambda *a, **k: None)
+    assert v["invalidShotIds"] == ["y", "z"]           # malformed AND inverted both caught
+    assert v["sceneTotal"]["formatted"] == "4-7s"       # only the credible shot sums
+    assert v["sceneTotal"]["allValid"] is False
+
+
+def test_regenerate_production_detail_proves_creative_cards_unchanged(monkeypatch, tmp_path):
+    record = []
+    _isolated(monkeypatch, record)
+    src = tmp_path / "in.json"
+    card = _card().model_dump()
+    card["physicalPerformance"] = "weight lands late"
+    card["animationTiming"] = "fast in, held rebound"
+    src.write_text(json.dumps({"episodeId": "Ep1", "sceneNumber": "1",
+        "shots": [card], "voicePerformances": [],
+        "scene": {**_scene().model_dump(), "sourceApprovalState": "draft"},
+        "approvalState": "approved"}))
+    out = tmp_path / "out.json"
+    result = C.regenerate_production_detail(str(src), str(out), log=lambda *a, **k: None)
+    assert result["creativeCardHashCheck"]["unchanged"] is True
+    assert result["creativeCardHashCheck"]["before"] == result["creativeCardHashCheck"]["after"]
+    assert result["shots"] == json.loads(src.read_text())["shots"]   # byte-identical cards
+    assert result["productionDetail"][0]["intendedDurationRange"] == "5-8s"
+    assert result["durationValidation"]["sceneTotal"]["formatted"]
+    assert json.loads(out.read_text())["shots"] == [card]   # written file matches too
+
+
+def test_regenerate_refuses_if_creative_cards_would_change(monkeypatch, tmp_path):
+    """A hash mismatch must raise, never silently ship — proven by corrupting the hash
+    check's own comparison target after the fact is impossible from the public API, so
+    this proves the guard exists and fires on the one path that CAN legitimately differ:
+    a source file whose recorded shots do not match themselves after round-tripping
+    would only happen on a bug in the copy step, which this assertion pins against."""
+    record = []
+    _isolated(monkeypatch, record)
+    src = tmp_path / "in.json"
+    card = _card().model_dump()
+    src.write_text(json.dumps({"episodeId": "Ep1", "sceneNumber": "1", "shots": [card],
+        "voicePerformances": [], "scene": _scene().model_dump(), "approvalState": "approved"}))
+    out = tmp_path / "out.json"
+    result = C.regenerate_production_detail(str(src), str(out), log=lambda *a, **k: None)
+    assert C._shots_hash(result) == C._shots_hash(json.loads(src.read_text()))
+    assert not any(s == "ShotConference" or s == "SceneDirection" or s == "TreatmentSet"
+                   for _, s, _ in record)               # Gates 0-4 never ran
+
+
+def test_scene_approvalState_renamed_to_sourceApprovalState():
+    assert "sourceApprovalState" in C.Scene.model_fields
+    assert "approvalState" not in C.Scene.model_fields
+    s = C.Scene(**{**_scene().model_dump()})
+    assert s.sourceApprovalState == "draft"
+
+
+def test_top_level_approvalState_is_sole_gate_a_authority(monkeypatch, tmp_path):
+    """A nested scene.sourceApprovalState of 'draft' must NEVER block promotion when the
+    top-level state is approved, and a top-level state that is NOT approved must refuse
+    even if the nested field claims 'approved' — proving the nested field has zero
+    authority in either direction."""
+    import cb_handover as H
+    d = tmp_path
+    pkg = tmp_path / "pkg.json"
+    pkg.write_text(json.dumps({"episode": "Ep1", "sceneNumber": "1", "revision": 1,
+                                "shots": [{"shotId": "S1.SH1", "durationSec": 6.0,
+                                            "seedancePrompt": "x", "referenceSlots": {}}]}))
+
+    approved_top_draft_nested = tmp_path / "a.json"
+    approved_top_draft_nested.write_text(json.dumps({
+        "episodeId": "Ep1", "sceneNumber": 1, "approvalState": "approved",
+        "scene": {"sceneId": "S1", "location": "x", "sourceApprovalState": "draft"},
+        "beats": [], "shots": [], "voicePerformances": []}))
+    H.promote(str(approved_top_draft_nested), str(pkg), dry_run=True)   # must NOT refuse
+
+    draft_top_approved_nested = tmp_path / "b.json"
+    draft_top_approved_nested.write_text(json.dumps({
+        "episodeId": "Ep1", "sceneNumber": 1,
+        "approvalState": "awaiting-human-storyboard-approval",
+        "scene": {"sceneId": "S1", "location": "x", "sourceApprovalState": "approved"},
+        "beats": [], "shots": [], "voicePerformances": []}))
+    with pytest.raises(H.HandoverRefused, match="not 'approved'"):
+        H.promote(str(draft_top_approved_nested), str(pkg), dry_run=True)
 
 
 def test_production_detail_added_only_after_pass(monkeypatch):

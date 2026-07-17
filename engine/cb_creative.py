@@ -165,13 +165,18 @@ class CreativeShotCard(BaseModel):
 
 
 class ProductionDetail(BaseModel):
-    """Added ONLY after Gate 6 passes — the production layer, separate from the idea."""
+    """Added ONLY after Gate 6 passes — the production layer, separate from the idea.
+    intendedDurationRange (2026-07-17 schema checkpoint): a credible per-shot range,
+    e.g. '5-8s', authored from the FROZEN Creative Shot Card's own physicalPerformance +
+    animationTiming (Gate 5) and the locked dialogue timing — never invented independent
+    of the approved creative content, never a re-authoring of it."""
     shotId: str
     continuityIn: str
     continuityOut: str
     dialogueTiming: str
     referenceRoles: str
     requiresNewKeyframe: bool
+    intendedDurationRange: str
     essentialProviderProtections: List[str] = Field(default_factory=list, max_length=3)
 
 
@@ -198,6 +203,12 @@ class VoicePerformance(BaseModel):
 
 
 class Scene(BaseModel):
+    """sourceApprovalState (renamed from approvalState, 2026-07-17 schema checkpoint):
+    this represents Gate 3's own draft marker on the SOURCE scene material — it is NEVER
+    production authorization. The storyboard package's own top-level `approvalState` is
+    the SOLE Gate A authority (enforced by cb_handover.promote(), which reads only that
+    field); no nested field, this one included, may ever be read as authorizing
+    production. Renamed specifically so a future reader cannot confuse the two."""
     sceneId: str
     sourceScriptRange: str
     location: str
@@ -208,7 +219,7 @@ class Scene(BaseModel):
     emotionalOwner: str
     connectionFromPreviousScene: str
     handoverToNextScene: str
-    approvalState: str = "draft"
+    sourceApprovalState: str = "draft"
 
 
 class EpisodeVision(BaseModel):
@@ -759,11 +770,19 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print):
               "continuity state in/out per shot; dialogue timing within the shot; reference "
               "roles (which references anchor identity/environment); whether the shot "
               "requires a NEW keyframe (a PLANNED_CUT does; a CONTINUOUS chain does not); "
-              "and AT MOST three genuinely provider-essential protections — only what would "
-              "invalidate the shot if violated, never a constraint wall. Add nothing "
-              "creative; change nothing creative."),
-        f"THE SHOTS:\n" + "\n".join(s.model_dump_json() for s in shots)
-        + "\n\nVOICE TIMINGS:\n"
+              "a credible intendedDurationRange per shot (e.g. '5-8s') authored FROM the "
+              "shot's own already-approved physicalPerformance and animationTiming (the "
+              "weight and timing of the move already decided at Gate 5) and the locked "
+              "dialogue's own timing where the shot carries a line — never invented "
+              "independent of that already-approved content, and never a re-authoring of "
+              "the performance itself; and AT MOST three genuinely provider-essential "
+              "protections — only what would invalidate the shot if violated, never a "
+              "constraint wall. Add nothing creative; change nothing creative."),
+        f"THE SHOTS (physicalPerformance/animationTiming are ALREADY APPROVED — ground the "
+        f"duration in them, never rewrite them):\n"
+        + "\n".join(s.model_dump_json() for s in shots)
+        + "\n\nVOICE TIMINGS (locked dialogue — ground dialogue-bearing shots' duration in "
+          "these):\n"
         + "\n".join(f"{v.speaker}: {v.expectedTiming}" for v in voices),
         ProductionPass, label=f"production_detail_s{scene_num}")
     by_id = {d.shotId: d for d in pd.details}
@@ -771,11 +790,96 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print):
     for i, s in enumerate(shots):                 # keyframe truth is structural, not stylistic
         d = by_id.get(s.shotId) or ProductionDetail(
             shotId=s.shotId, continuityIn="", continuityOut="", dialogueTiming="",
-            referenceRoles="", requiresNewKeyframe=(s.transitionType == "PLANNED_CUT"))
+            referenceRoles="", requiresNewKeyframe=(s.transitionType == "PLANNED_CUT"),
+            intendedDurationRange="")
         # a scene's FIRST shot has no predecessor frame to continue from — it always
         # requires a keyframe, whatever its creative transitionType says about how it plays
         d.requiresNewKeyframe = (i == 0) or (s.transitionType == "PLANNED_CUT")
         out.append(d)
+    return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# DURATION CREDIBILITY (2026-07-17 schema checkpoint) — every shot's range validated,
+# never silently accepted; the scene total is a SUM, never invented
+# ─────────────────────────────────────────────────────────────────────────────────────────
+_DURATION_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*s\s*$")
+
+
+def _duration_bounds(rng):
+    m = _DURATION_RE.match(rng or "")
+    if not m:
+        return None
+    lo, hi = float(m.group(1)), float(m.group(2))
+    return (lo, hi) if 0 < lo <= hi else None
+
+
+def validate_duration_ranges(details, log=print):
+    """Every ProductionDetail's intendedDurationRange must parse as 'N-Ms' with a
+    credible, positive, non-inverted bound. Reports each shot plus the summed scene
+    range — never invents a total when a shot fails, and never silently accepts a
+    malformed value."""
+    rows, invalid, lo_sum, hi_sum = [], [], 0.0, 0.0
+    for d in details:
+        b = _duration_bounds(d.intendedDurationRange)
+        if b is None:
+            invalid.append(d.shotId)
+            rows.append({"shotId": d.shotId, "range": d.intendedDurationRange,
+                         "valid": False})
+            continue
+        lo, hi = b
+        lo_sum += lo
+        hi_sum += hi
+        rows.append({"shotId": d.shotId, "range": d.intendedDurationRange, "valid": True,
+                     "loSec": lo, "hiSec": hi})
+    total = {"loSec": round(lo_sum, 1), "hiSec": round(hi_sum, 1),
+             "formatted": f"{lo_sum:.0f}-{hi_sum:.0f}s", "allValid": not invalid}
+    if invalid:
+        log(f"DURATION VALIDATION — {len(invalid)} shot(s) FAILED credibility: {invalid}")
+    else:
+        log(f"DURATION VALIDATION — all {len(rows)} shot(s) credible; scene total "
+            f"{total['formatted']}")
+    return {"perShot": rows, "invalidShotIds": invalid, "sceneTotal": total}
+
+
+def _shots_hash(pkg):
+    """The Creative Shot Cards' own content hash — proves a production-detail-only
+    regeneration touched nothing creative."""
+    return hashlib.sha256(json.dumps(pkg.get("shots", []), sort_keys=True,
+                                      ensure_ascii=False).encode()).hexdigest()
+
+
+def regenerate_production_detail(storyboard_path, out_path, log=print):
+    """Regenerates ONLY ProductionDetail (now including intendedDurationRange) from a
+    FROZEN, already Gate-6-passed, already Gate-A-approved storyboard's Creative Shot
+    Cards — never reruns Gates 0-4, never revises a shot, never generates a new
+    treatment. Proves the creative cards are byte-for-byte unchanged via _shots_hash
+    before/after, and refuses (raises) if they ever differ."""
+    src = json.load(open(storyboard_path))
+    before_hash = _shots_hash(src)
+    episode, scene_num = src["episodeId"], src["sceneNumber"]
+    shots = [CreativeShotCard(**s) for s in src["shots"]]
+    voices = [VoicePerformance(**v) for v in src.get("voicePerformances", [])]
+    details = production_detail(episode, scene_num, None, shots, voices, log=log)
+    validation = validate_duration_ranges(details, log=log)
+
+    out = json.loads(json.dumps(src))              # deep copy — the frozen source untouched
+    out["productionDetail"] = [d.model_dump() for d in details]
+    out["durationValidation"] = validation
+    if "approvalState" in out.get("scene", {}):     # travels the Gate-A ambiguity fix
+        out["scene"]["sourceApprovalState"] = out["scene"].pop("approvalState")
+
+    after_hash = _shots_hash(out)
+    if before_hash != after_hash:
+        raise RuntimeError(
+            "REFUSED — creative shot cards changed during a production-detail-only "
+            "regeneration; this must never happen. No file written.")
+    out["creativeCardHashCheck"] = {"before": before_hash, "after": after_hash,
+                                     "unchanged": True}
+    pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    json.dump(out, open(out_path, "w"), indent=1, ensure_ascii=False)
+    log(f"PRODUCTION DETAIL REGENERATED — {out_path}; creative-card hash unchanged "
+        f"({before_hash[:12]}…); scene total {validation['sceneTotal']['formatted']}")
     return out
 
 

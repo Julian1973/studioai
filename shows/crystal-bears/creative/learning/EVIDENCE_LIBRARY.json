@@ -218,6 +218,96 @@
    "assetPointers": [
     "cb-output/creative/Ep1_scene2_storyboard.json"
    ]
+  },
+  {
+   "evidenceId": "ev-b3e3228516",
+   "capturedAt": "2026-07-17T06:07:54",
+   "capturedBy": "checkpoint-freeze",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": "showrunner",
+   "outcome": "selected",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "process-v2 Scene 1 candidate 1 (from the 2026-07-17 checkpoint turn) preserved before superseding run; PASS under adversarial review, 8 shots, treatments combined 1+3",
+   "category": "creative",
+   "scope": "scene",
+   "context": "Ep1 Scene 1, creative-room-2.0, candidate 1 (pre-checkpoint)",
+   "assetPointers": [
+    "cb-output/creative/archive_v2_candidate_1/Ep1_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-03ec065e2f",
+   "capturedAt": "2026-07-17T06:21:59",
+   "capturedBy": "checkpoint-freeze",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": "showrunner",
+   "outcome": "selected",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "process-v2 Scene 1 candidate 2 (unchanged source, ambition brief only, no camera/leaf/beat guidance): 1 internal revision (Gate 6 rejected 12-shot pass as 'well-behaved accident', returned to Gate 4), then PASS; 7 shots, 5 keyframes",
+   "category": "creative",
+   "scope": "scene",
+   "context": "Ep1 Scene 1, creative-room-2.0, candidate 2 (this checkpoint turn)",
+   "assetPointers": [
+    "cb-output/creative/archive_v2_candidate_2/Ep1_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-75bac01154",
+   "capturedAt": "2026-07-17T06:30:28",
+   "capturedBy": "checkpoint-freeze",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "model-limited",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "v1's Shot schema carried intendedDurationRange per shot (summable to a scene total); the v2 split contract's CreativeShotCard/ProductionDetail (commit 7d5762e) carries no duration field of any kind, not renamed, simply absent — total scene duration cannot be reported without inventing a number",
+   "category": "provider",
+   "scope": "storyboard schema",
+   "context": "found assembling the Candidate 2 review export (this turn); NOT fixed — architecture frozen per Julian's directive",
+   "assetPointers": [
+    "engine/cb_creative.py (CreativeShotCard, ProductionDetail classes)",
+    "cb-output/creative/archive_v2_candidate_2/Ep1_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-bb61ad3ce2",
+   "capturedAt": "2026-07-17T06:55:03",
+   "capturedBy": "checkpoint-freeze",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "RESOLUTION of the missing-duration-field gap (ev-75bac01154): intendedDurationRange added directly to ProductionDetail as a normal schema regression fix (not a creative learning) — Gate 5 now authors it from the already-approved physicalPerformance/animationTiming/dialogue timing. Fixed in code (engine/cb_creative.py), NOT via Active Creative Memory promotion. pat-423faadc left unpromoted, as directed.",
+   "category": "production",
+   "scope": "storyboard schema",
+   "context": "applied to Candidate 2 (frozen, hash-verified unchanged) via regenerate_production_detail(); scene total 41-56s across 7 shots, all valid",
+   "assetPointers": [
+    "engine/cb_creative.py (ProductionDetail.intendedDurationRange, validate_duration_ranges, regenerate_production_detail)",
+    "cb-output/creative/archive_v2_candidate_2_schema_complete/Ep1_scene1_storyboard.json"
+   ]
   }
  ]
 }

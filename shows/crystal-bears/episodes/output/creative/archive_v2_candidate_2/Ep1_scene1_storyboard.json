@@ -112,7 +112,7 @@
   "emotionalOwner": "Fuzzby",
   "connectionFromPreviousScene": "This is the opening comic weather-system of the episode: Fuzzby is already in motion before the scene begins, making the corridor feel alive and unstable from the first image.",
   "handoverToNextScene": "The distant thunder and cooler storm light turn meadow silliness into episode-level pressure, handing off from pretend drama to real weather and the journey ahead.",
-  "sourceApprovalState": "approved"
+  "approvalState": "approved"
  },
  "beats": [
   {
@@ -346,100 +346,93 @@
  "productionDetail": [
   {
    "shotId": "S1.SH1",
-   "continuityIn": "Sequence opening: warm flower-corridor geography established at bee height; Fuzzby is already mid-travel and mid-chant on frame one, pitched diagonally through the corridor, with Zenny calm in the same readable space as the still measure he refuses to notice.",
-   "continuityOut": "Fuzzby has been kicked off his neat path by the leaf recoil and is no longer cleanly contained; the leaf is snapping back into a tiny trembling after-beat with pollen hanging where he was, while Zenny remains calm within the corridor geography.",
-   "dialogueTiming": "FUZZBY chant is already underway at frame one: “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” in brisk pulse, compressed through the over-low dip, with the final ellipsis carrying into the snap-away and trembling pollen after-beat.",
-   "referenceRoles": "Fuzzby identity/performance reference anchors his body scale, hover behaviour and overconfident wing-driven rhythm; Zenny identity/performance reference anchors her composed stillness; flower corridor, leaf and pollen references anchor bee-height scale, contact weight and warm meadow continuity.",
+   "continuityIn": "Scene-start seed. Bee-height flower corridor; warm meadow light. Fuzzby already in diagonal travel mid-chant; Zenny calm in the corridor as fixed reference. No prior pollen impact state yet.",
+   "continuityOut": "Leaf has compressed and snapped back, still trembling. Pollen hangs in the space Fuzzby exited through. Fuzzby has been kicked off his neat path and is out of clean containment, carrying the disrupted momentum into S1.SH2; Zenny remains unhurried within the same corridor geography.",
+   "dialogueTiming": "Fuzzby chant is already underway on frame one: “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” Keep the pulse brisk and even at entry; compress timing as the dip goes too low. Let the final ellipsis smear through the leaf snap-away and into the pollen/leaf trembling after-beat.",
+   "referenceRoles": "Fuzzby character reference anchors identity and wing/body performance; Zenny character reference anchors the still witness; flower-corridor/leaf/pollen environment references anchor bee-height scale, geography, contact weight, and warm meadow light.",
    "requiresNewKeyframe": true,
-   "intendedDurationRange": "5-7s",
    "essentialProviderProtections": [
-    "Open with Fuzzby already in motion and mid-chant; no neutral hover start.",
-    "Leaf compression, recoil and trembling pollen after-beat must prove his weight and the environmental cause.",
-    "Maintain Zenny as the still measure within readable flower-corridor geography."
+    "Do not start from neutral hover; Fuzzby must already be in committed travel on frame one.",
+    "Leaf contact must visibly prove weight: bend, compression, snap-back, and trembling after-beat.",
+    "Locked chant text/timing intent must not be reworded or moved to a clean start."
    ]
   },
   {
    "shotId": "S1.SH2",
-   "continuityIn": "Planned cut into the aftermath of S1.SH1: Fuzzby has already recovered into a proud but unstable pose beside the still-trembling evidence; Zenny remains unhurried in the known corridor geography.",
-   "continuityOut": "Fuzzby has launched almost immediately out of the cover-up and vanished into the next flower; a delayed soft pollen puff marks where he disappeared, while Zenny remains unhurried in the same readable space.",
-   "dialogueTiming": "FUZZBY: cut in after the messy recovery; hold the proud pose for half a beat, then place “Nailed it.” before the hover steadies. Launch almost immediately after the line, with no leisurely button.",
-   "referenceRoles": "Fuzzby identity/performance reference anchors his proud pose, hover corrections and impulsive escape-launch; Zenny identity/performance reference anchors her unhurried presence; flower corridor, trembling leaf evidence and pollen-puff references anchor continuity from the ricochet into the next flower.",
+   "continuityIn": "Directly after S1.SH1’s ricochet, but with a planned cut to the aftermath. Same flower corridor geography; leaf evidence still implied nearby. Fuzzby has already completed the messy recovery and is holding a proud pose that is not fully stable. Zenny remains in the known corridor space.",
+   "continuityOut": "Fuzzby’s denial has turned into sudden launch; he vanishes into the next flower with a soft pollen puff. Zenny remains unhurried, preserving spatial continuity for S1.SH3’s reveal setup.",
+   "dialogueTiming": "Cut in after recovery. Hold Fuzzby’s false-authority pose for half a beat, then place “Nailed it.” before his hover steadies. Launch almost immediately after the line, with only a tight body-squeeze as anticipation; no leisurely button before impact.",
+   "referenceRoles": "Fuzzby reference anchors identity and cover-up performance; Zenny reference anchors calm geography; flower-corridor/leaf/pollen references anchor the aftermath evidence, next-flower swallow, and continued meadow light.",
    "requiresNewKeyframe": true,
-   "intendedDurationRange": "4-6s",
    "essentialProviderProtections": [
-    "Do not show the messy recovery; the cut must arrive late to the public-relations pose.",
-    "“Nailed it.” must land before Fuzzby’s hover steadies.",
-    "Launch must follow almost immediately and end in the flower swallow/pollen puff, not a fully tracked flight path."
+    "Do not show the full messy recovery; the cut must arrive late to the already-posed denial.",
+    "Locked dialogue must remain exactly “Nailed it.”",
+    "Launch must read as embarrassment escaping, not a carefully planned flight path."
    ]
   },
   {
    "shotId": "S1.SH3",
-   "continuityIn": "Planned cut from Fuzzby’s swallowed trajectory into a held bee-height frame: Zenny is composed and waiting with only her eyes active; the flower that swallowed Fuzzby trembles off to the side of the same readable corridor.",
-   "continuityOut": "Fuzzby is pulled free and suspended before Zenny wearing the pollen moustache and goatee as visible evidence; after Zenny’s restrained verdict, he is caught between pride and sting, with the pollen impossible to deny.",
-   "dialogueTiming": "FUZZBY: let the flower tremble first, then his resistant pull and release; hold a small presentation beat before “Do I look official?” ZENNY: after Fuzzby’s hopeful stillness, wait one dry processing beat, deliver “Yes Fuzzby Officially nuts!” with restraint, then allow a fractional delay before Fuzzby’s posture understands the insult.",
-   "referenceRoles": "Zenny identity/performance reference anchors the economical eye movement, dry pause and restrained verdict; Fuzzby identity/performance reference anchors his eager presentation and delayed sting; flower corridor, trembling flower and pollen-face evidence references anchor the reveal and status-change continuity.",
+   "continuityIn": "Planned cut from S1.SH2’s flower swallow. Same bee-height corridor. Zenny is composed in a held frame; the flower that swallowed Fuzzby trembles off to the side. Fuzzby is still inside the flower at shot start and has not yet revealed the pollen moustache/goatee evidence.",
+   "continuityOut": "Fuzzby is suspended in front of Zenny with pollen evidence visible and impossible to deny. His posture is caught between pride and sting after Zenny’s verdict. Zenny remains minimal and composed; the corridor has reset into still judgement.",
+   "dialogueTiming": "Let the flower tremble first, then Fuzzby pulls free with a small resistant release. Hold a brief presentation beat before Fuzzby asks, “Do I look official?” After his hopeful stillness, wait one dry Zenny processing beat. Zenny says, “Yes Fuzzby Officially nuts!” with restraint. Delay Fuzzby’s physical sting by a fraction after the line.",
+   "referenceRoles": "Fuzzby reference anchors identity and eager status performance; Zenny reference anchors restrained judgement; flower-corridor/pollen references anchor the reveal evidence, readable corridor, and same-space status trial.",
    "requiresNewKeyframe": true,
-   "intendedDurationRange": "7-9s",
    "essentialProviderProtections": [
-    "Hold Zenny’s still frame long enough for the reveal to invade it; do not turn this into a chase continuation.",
-    "Pollen moustache/goatee evidence must read clearly before Fuzzby’s question lands.",
-    "Keep both locked lines verbatim and preserve Zenny’s dry processing beat before her answer."
+    "Locked dialogue must remain exactly “Do I look official?” and “Yes Fuzzby Officially nuts!”",
+    "Do not cut away for Zenny’s reaction; the held frame must let Fuzzby invade her stillness.",
+    "Pollen face evidence must be present at reveal and remain visible through the verdict."
    ]
   },
   {
    "shotId": "S1.SH4",
-   "continuityIn": "Continuous from S1.SH3’s sting: Fuzzby is still carrying the impossible-to-deny pollen evidence and reacts with offended urgency; his paw snaps toward the pollen before he has truly absorbed Zenny’s verdict.",
-   "continuityOut": "Fuzzby has smeared the pollen wider, clipped the branch, been flipped into the blossom, and popped back up from inside the consequence with upside-down energy still in him; “Buzz Crash!!” has been sold from within the proof.",
-   "dialogueTiming": "FUZZBY: no speech during the wipe, branch clip, tumble, blossom compression hold or rebound. “Buzz Crash!!” lands just after the pop-up, before he has truly checked where he is.",
-   "referenceRoles": "Fuzzby identity/performance reference anchors wounded-status wiping, denial-driven acceleration and breathless branding; branch, blossom and pollen references anchor contact, compression, smear continuity and rebound; flower corridor reference anchors readable orientation through the brief loss of clean direction.",
+   "continuityIn": "Continuous from S1.SH3. Fuzzby begins stung by Zenny’s verdict, with pollen evidence still on his face. Zenny remains nearby in the same corridor geography. Fuzzby’s paw is already snapping toward the pollen with too much force.",
+   "continuityOut": "Fuzzby has smeared the pollen wider, clipped the branch, flipped into the blossom, and popped back up from inside the consequence. Blossom is rebounding from compression; Fuzzby is still selling the accident as authored with upside-down energy/pollen proof intact and enlarged.",
+   "dialogueTiming": "No line until after the wipe, branch clip, tumble, blossom compression hold, and rebound. “Buzz Crash!!” lands just after the pop-up, breathless and proud, before Fuzzby has truly checked where he is.",
+   "referenceRoles": "Fuzzby reference anchors wounded-status physical escalation; Zenny reference maintains nearby geography if held in frame; branch/blossom/pollen corridor references anchor contact, compression/recoil, smear continuity, and spatial readability.",
    "requiresNewKeyframe": false,
-   "intendedDurationRange": "6-8s",
    "essentialProviderProtections": [
-    "Keep wipe, branch clip, tumble, blossom compression and rebound as one continuous escalating cause-chain.",
-    "The wipe must visibly smear the pollen wider before the forward denial carries him onward.",
-    "“Buzz Crash!!” must land after the pop-up from inside the consequence, not before the physical proof is clear."
+    "The wipe, branch clip, blossom compression, and rebound must remain one continuous cause-and-consequence chain.",
+    "Pollen smear must get worse from the wipe and carry through the shot.",
+    "Locked dialogue must remain exactly “Buzz Crash!!”"
    ]
   },
   {
    "shotId": "S1.SH5",
-   "continuityIn": "Continuous from S1.SH4: Fuzzby remains fully marked by the pollen consequences and still himself; Zenny’s eye roll begins to soften into the tiny smile earned by the previous chaos, all within the same corridor space.",
-   "continuityOut": "Thunder has interrupted the live comic rhythm; Fuzzby is hovering crooked in the first cooler storm wash, pollen still comic on him but no longer the biggest thing in the frame, with his fear patched over by the line.",
-   "dialogueTiming": "FUZZBY: do not speak on the thunder hit. After the repeat dive and pollened burst-out, thunder lands in the body first with a tiny wing-stall and dip; hold the crooked hover long enough to read fear, then deliver “…okay that sounded dramatic.” as a rebrand.",
-   "referenceRoles": "Zenny identity/performance reference anchors the rationed eye-roll-to-smile release; Fuzzby identity/performance reference anchors repeat-dive confidence, wing-stall and patched-on rebrand; storm-light, thunder and flower corridor references anchor the warm-play-to-cool-pressure continuity.",
+   "continuityIn": "Continuous from S1.SH4. Same corridor, with Fuzzby still pollened after the blossom pop-up and Zenny nearby. Zenny’s prior restraint is ready to soften; the storm has not yet taken authority, but the space is about to cool.",
+   "continuityOut": "Thunder has interrupted the repeat comic cycle. Fuzzby is hovering crooked under altered, cooler light, carrying even more pollen evidence; his wing rhythm has betrayed fear before he rebrands it. Zenny’s small warmth has registered but the corridor now holds first storm pressure.",
+   "dialogueTiming": "Let Zenny’s eye-roll soften into the tiny smile for one restrained beat. Fuzzby repeats the dive rhythm and bursts back out more pollened. Do not let him speak on the thunder hit: give the wing-stall, altitude dip, and crooked hover first. Then Fuzzby says, “…okay that sounded dramatic.” as a patched-on recovery.",
+   "referenceRoles": "Fuzzby reference anchors comic rebrand and fear-betrayed hover; Zenny reference anchors rationed warmth; flower-corridor/pollen/storm-light references anchor repeated dive geography, increased pollen evidence, and warm-to-cool transition.",
    "requiresNewKeyframe": false,
-   "intendedDurationRange": "7-10s",
    "essentialProviderProtections": [
-    "Zenny’s smile, Fuzzby’s repeat dive and the thunder interruption must remain one continuous flow.",
-    "Thunder must hit Fuzzby’s body before the line: wing-stall, dip, crooked hover, then rebrand.",
-    "Preserve the first cooler storm wash so the pollen remains comic but is no longer the dominant pressure."
+    "Thunder must interrupt the live comic cycle before it settles, not arrive as a separate scheduled beat.",
+    "Fuzzby’s body reaction to thunder must precede the line.",
+    "Locked dialogue must remain exactly “…okay that sounded dramatic.”"
    ]
   },
   {
    "shotId": "S1.SH6",
-   "continuityIn": "Planned cut away from Fuzzby’s crooked hover after the thunder tail: his jitter is removed from the frame; Zenny is held under the cooler wash, eyes ready to lift toward the unseen canopy and the depth beyond her.",
-   "continuityOut": "Zenny has named the weather with small, precise authority and remains held beneath the taller flowers, looking toward the unseen storm; the corridor’s authority has shifted from Fuzzby’s performance to real shared pressure.",
-   "dialogueTiming": "ZENNY: let the cut remove Fuzzby’s jitter. Hold a quiet eye-travel beat after the thunder tail, then deliver “A Storm’s coming.” low and unhurried. Keep the closing stillness a fraction longer than comic timing would normally allow.",
-   "referenceRoles": "Zenny identity/performance reference anchors increased stillness, eye travel and flat precise naming; storm-light/thunder references anchor the tonal handoff; flower corridor depth and taller-flower references anchor her smallness beneath the unseen weather.",
+   "continuityIn": "Planned cut from Fuzzby’s crooked hover in S1.SH5. Fuzzby’s jitter is removed from frame authority. Zenny is in the same flower corridor under cooler wash; her eyes are ready to lift toward the unseen canopy after the thunder tail.",
+   "continuityOut": "Zenny is held small and precise beneath taller flowers, looking toward the unseen weather. Her stillness has shifted the scene’s authority from Fuzzby’s performance to real storm recognition; cooler storm light is now established for S1.SH7.",
+   "dialogueTiming": "Let the thunder tail settle into quiet. Hold one eye-travel beat as Zenny looks toward the unseen canopy before speaking. Zenny says, “A Storm’s coming.” low, flat, and unhurried. Hold the closing stillness a fraction longer than normal comic timing.",
+   "referenceRoles": "Zenny reference anchors identity and precise alert stillness; flower-corridor/storm-light references anchor depth beyond her, taller-flower scale, and cooler wash; Fuzzby reference only anchors offscreen continuity from the prior wobble.",
    "requiresNewKeyframe": true,
-   "intendedDurationRange": "5-7s",
    "essentialProviderProtections": [
-    "The cut must transfer point of view to Zenny’s recognition, not continue Fuzzby’s jitter.",
-    "Hold eye travel before the line and closing stillness after it; do not rush back to comedy.",
-    "Keep “A Storm’s coming.” verbatim, small and factual rather than performed worry."
+    "Locked dialogue must remain exactly “A Storm’s coming.”",
+    "Do not play Zenny’s alertness as enlarged panic; it must increase through stillness.",
+    "Cooler storm light established here must carry into the next shot."
    ]
   },
   {
    "shotId": "S1.SH7",
-   "continuityIn": "Planned cut from Zenny’s still warning to Fuzzby forcing proud altitude under the cooler storm light; he is trying to restore official control while his hover remains uneven from the prior interruption.",
-   "continuityOut": "Fuzzby is stuck in the flower under the cool storm wash, still making tiny dignity adjustments from inside the proof; Zenny’s nonverbal sigh has settled nearby, leaving comedy and storm pressure in the same closing image.",
-   "dialogueTiming": "FUZZBY: after Zenny’s still warning, give the boast a clean setup beat, then deliver “Good thing I work well under pressure.” Launch immediately out of the final word with almost no anticipation. Hold the stuck-in-flower shape after impact before Zenny’s nonverbal sigh and the final shared comedy-storm beat.",
-   "referenceRoles": "Fuzzby identity/performance reference anchors forced proud altitude, boast-stabilised hover and stuck dignity adjustments; Zenny identity/performance reference anchors the nearby sigh as recognition rather than rescue; flower, pollen and cool storm-light references anchor the instant environmental contradiction and tonal continuity.",
+   "continuityIn": "Planned cut from Zenny’s still warning. Same flower corridor now under cooler storm light. Fuzzby is back in frame attempting proud altitude after the warning; pollen evidence remains. Zenny is nearby enough for her sigh to land in the same readable space.",
+   "continuityOut": "Fuzzby is stuck in the flower under the first cool wash of storm light, still trying to arrange dignity from inside the proof. Zenny’s sigh has settled over the petals without rescuing him. Comedy and storm pressure remain together in the final image.",
+   "dialogueTiming": "Give Fuzzby one clean setup beat after Zenny’s warning. He says, “Good thing I work well under pressure.” Launch immediately out of the final word with almost no anticipation. Hold the stuck-in-flower shape after impact for one failed dignity adjustment, then place Zenny’s nonverbal sigh. Hold the final shared comedy-storm beat.",
+   "referenceRoles": "Fuzzby reference anchors forced authority, uneven hover, and stuck dignity; Zenny reference anchors sigh-as-judgement without rescue; flower-corridor/pollen/storm-light references anchor impact contradiction, petal compression, continuity of pollen, and cool weather pressure.",
    "requiresNewKeyframe": true,
-   "intendedDurationRange": "7-9s",
    "essentialProviderProtections": [
-    "Keep the boast setup clean, then launch immediately out of the final word with minimal anticipation.",
-    "The flower must answer the boast instantly and completely enough to make escape undignified.",
-    "Zenny’s sigh is nonverbal recognition, not rescue; hold the final stuck image with storm chill still present."
+    "Locked dialogue must remain exactly “Good thing I work well under pressure.”",
+    "The flower impact must immediately contradict the boast in the same readable space; do not cut before the stuck result.",
+    "Zenny’s sigh must land as recognition, not rescue."
    ]
   }
  ],
@@ -678,70 +671,5 @@
    "humanRevision": null
   }
  },
- "approvalState": "awaiting-human-storyboard-approval",
- "durationValidation": {
-  "perShot": [
-   {
-    "shotId": "S1.SH1",
-    "range": "5-7s",
-    "valid": true,
-    "loSec": 5.0,
-    "hiSec": 7.0
-   },
-   {
-    "shotId": "S1.SH2",
-    "range": "4-6s",
-    "valid": true,
-    "loSec": 4.0,
-    "hiSec": 6.0
-   },
-   {
-    "shotId": "S1.SH3",
-    "range": "7-9s",
-    "valid": true,
-    "loSec": 7.0,
-    "hiSec": 9.0
-   },
-   {
-    "shotId": "S1.SH4",
-    "range": "6-8s",
-    "valid": true,
-    "loSec": 6.0,
-    "hiSec": 8.0
-   },
-   {
-    "shotId": "S1.SH5",
-    "range": "7-10s",
-    "valid": true,
-    "loSec": 7.0,
-    "hiSec": 10.0
-   },
-   {
-    "shotId": "S1.SH6",
-    "range": "5-7s",
-    "valid": true,
-    "loSec": 5.0,
-    "hiSec": 7.0
-   },
-   {
-    "shotId": "S1.SH7",
-    "range": "7-9s",
-    "valid": true,
-    "loSec": 7.0,
-    "hiSec": 9.0
-   }
-  ],
-  "invalidShotIds": [],
-  "sceneTotal": {
-   "loSec": 41.0,
-   "hiSec": 56.0,
-   "formatted": "41-56s",
-   "allValid": true
-  }
- },
- "creativeCardHashCheck": {
-  "before": "13989dd4e63babeb9bac7e2e596ac44dcf4d5546f2e50eae995714bb9d493396",
-  "after": "13989dd4e63babeb9bac7e2e596ac44dcf4d5546f2e50eae995714bb9d493396",
-  "unchanged": true
- }
+ "approvalState": "awaiting-human-storyboard-approval"
 }

@@ -52,6 +52,23 @@
    "maturity": "observation",
    "approvalState": "awaiting-human-decision",
    "regression": null
+  },
+  {
+   "patternId": "pat-423faadc",
+   "proposedAt": "2026-07-17T06:30:28",
+   "proposedBy": "checkpoint-freeze: recorded as the next source-level issue, not fixed",
+   "lesson": "The v2 storyboard schema (CreativeShotCard + ProductionDetail) has no duration field of any kind — a real regression from v1's per-shot intendedDurationRange, which let a scene total be summed. This blocks reporting total scene duration and will block any future production-detail consumer (handover, previz timing) that needs it. Proposed fix: add a duration field back, most naturally to ProductionDetail (a production-layer concern per the split-contract doctrine) rather than the creative card.",
+   "supportingEvidence": [
+    "ev-75bac01154"
+   ],
+   "contradictingEvidence": [],
+   "scope": "storyboard schema",
+   "category": "production",
+   "confidence": "high",
+   "proposedSource": "storyboard schema",
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
   }
  ]
 }

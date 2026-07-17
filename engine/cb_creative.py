@@ -341,18 +341,20 @@ def _canon_text(key, limit=9000):
     return p.read_text()[:limit] if p and p.exists() else ""
 
 
-def _exemplar_text():
-    """Approved AND rejected exemplars — explicit human verdicts only. The rejected
-    process-v1 exemplar (EX-005) is the room's own most important anti-pattern."""
+def _canonical_exemplars(limit=6):
+    """THE SIMPLIFICATION CHECKPOINT (2026-07-17): role prompts receive ONLY the concise
+    approved canonical exemplar PRINCIPLES (EXEMPLAR_LIBRARY, reusable entries) — never
+    the raw exemplar dump (attempted/userWords prose), and never Evidence Library, Pattern
+    Library or Active Creative Memory content. Active Memory is an audit registry pointing
+    at approved source changes; its prose is never injected into a creative role."""
     p = _CANON_SOURCES["exemplars"]
     if not p.exists():
         return ""
     lib = json.load(open(p))
-    lines = []
-    for e in lib.get("exemplars", []):
-        lines.append(f"[{e['id']} · {e['outcome'].upper()}] {e.get('attempted','')} — "
-                     f"user verdict: {e.get('userWords','')} — principle: {e.get('principle','')}")
-    return "\n".join(lines)[:7000]
+    lines = [f"• [{e['id']} · {e['outcome'].upper()}] {e['principle']}"
+             for e in lib.get("exemplars", [])
+             if e.get("reusable") and e.get("principle")][:limit]
+    return "\n".join(lines)[:2200]
 
 
 def _script_beats(episode, scene_num=None):
@@ -423,22 +425,6 @@ def _unresolved_fields_for(names):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # ROLE MINDS — taste canons + the exemplar library's explicit human verdicts
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def _governed_memory(role):
-    """THE CREATIVE LEARNING SYSTEM's scoped retrieval (cb_learning) — each role receives
-    only the memory relevant to its task, in labelled categories (approved preference /
-    contextual exemplar / provider limitation / unresolved observation), never the whole
-    library and never an instruction wall. Falls back to the raw exemplar verdicts when
-    the learning stores don't exist yet."""
-    try:
-        import cb_learning
-        text = cb_learning.retrieve_for_role(role)
-        if text and "EXEMPLAR" in text or "PREFERENCE" in text:
-            return text
-    except Exception:
-        pass
-    return _exemplar_text()
-
-
 def _mind(role, taste_keys, charge):
     taste = "\n\n".join(_canon_text(k, 7000) for k in taste_keys)
     return (f"You are the {role} of the Crystal Bears creative room — a world-class family-"
@@ -446,10 +432,11 @@ def _mind(role, taste_keys, charge):
             f"name real filmmakers or studios; you apply the enduring principles below as "
             f"the show's OWN identity.\n\n{charge}\n\n"
             f"YOUR TASTE CANON:\n{taste}\n\n"
-            f"GOVERNED CREATIVE MEMORY (scoped to your role; the REJECTED verdicts are "
-            f"failures you must not repeat; do not treat any rejected artifact as a "
-            f"model, and do not reverse-engineer a 'desired shot' from them):\n"
-            + _governed_memory(role)
+            f"APPROVED CANONICAL EXEMPLAR PRINCIPLES (concise, directly relevant; the "
+            f"REJECTED verdicts are failures you must not repeat — do not treat any "
+            f"rejected artifact as a model, and do not reverse-engineer a 'desired shot' "
+            f"from them):\n"
+            + _canonical_exemplars()
             + "\n\nSHOW CANON (authoritative, never contradicted):\n"
             + _canon_text("showBible", 6000)
             + "\n\nHARD RULES: approved dialogue is verbatim-locked — never reword, drop or "

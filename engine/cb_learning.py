@@ -11,22 +11,23 @@ evidence; not every outcome changes the system. The learning sequence is:
 THREE FORMS OF MEMORY, KEPT SEPARATE:
   1. EVIDENCE LIBRARY   — every approval/rejection/candidate + reason. IMMUTABLE, append-only.
   2. PATTERN LIBRARY    — grouped evidence proposing possible lessons. Proposals, never rules.
-  3. ACTIVE CREATIVE MEMORY — only HUMAN-APPROVED principles/truths/workflow changes. Only
-     this store may influence future generation as authoritative guidance.
+  3. ACTIVE CREATIVE MEMORY — an AUDIT REGISTRY of human-approved changes, each pointing
+     at the APPLIED, versioned source change (commit/version). Its prose is NEVER injected
+     into a creative role (2026-07-17 simplification checkpoint): roles receive only the
+     concise approved canonical exemplar principles, retrieved by cb_creative itself.
 
 HARD RULES: generated prompts are immutable compiled artefacts — this module never appends a
 correction to a provider prompt and never imports cb_engine/cb_render/cb_gen. A proposal
 that cannot name the SOURCE it would change is insufficiently understood and refuses to
 activate. Promotion is never silent. One random provider failure never becomes a rule.
-Every activation records rollback information and requires a regression comparison (or the
-user's own explicit creative decision, which outranks any repetition count).
+A promotion is valid ONLY when it records the destination source, the APPLIED source
+version/commit, Julian's approval, and rollback information — promote() refuses otherwise.
 
     python3 cb_learning.py seed                 # one-time migration of the real history
     python3 cb_learning.py capture ...          # record one evidence item
     python3 cb_learning.py patterns             # list patterns awaiting decision
-    python3 cb_learning.py promote <patternId> --by "Julian" [--decision "..."]
+    python3 cb_learning.py promote <patternId> --by "Julian" --ref "<commit/version>"
     python3 cb_learning.py metrics              # improvement measures (evidence, not proof)
-    python3 cb_learning.py show <role>          # what a role would retrieve
 """
 import datetime
 import hashlib
@@ -151,19 +152,14 @@ class PromotionRefused(Exception):
     pass
 
 
-def _regression_ok(pat, explicit_user_decision):
-    """Regression-before-activation: a recorded comparison across the anchor suite — OR the
-    user's own explicit creative decision, which the directive says outranks repetition."""
-    if explicit_user_decision:
-        return True
-    reg = pat.get("regression")
-    return bool(reg and reg.get("comparisonPresented") and reg.get("humanApproved"))
-
-
-def promote(pattern_id, *, by, explicit_user_decision=None, activation_note=""):
-    """THE ONLY DOOR into Active Creative Memory. Refuses when: no named destination
-    source; a single provider failure with no user decision; or no regression comparison
-    and no explicit user decision. Never silent — returns the full activation record."""
+def promote(pattern_id, *, by, applied_source_ref, decision="", activation_note=""):
+    """THE ONLY DOOR into the Active Creative Memory AUDIT REGISTRY (2026-07-17
+    simplification checkpoint). A promotion is valid ONLY when it records all four of:
+    the destination source; the APPLIED source version or commit (applied_source_ref —
+    the change must already exist, versioned); Julian's approval (by); and rollback
+    information (recorded automatically). Missing any of these -> refusal. There is no
+    maturity/pending-state machinery beyond this. Active Memory prose is never injected
+    into a creative role — it points at approved source changes for audit."""
     pat = patterns(pattern_id)
     if not pat:
         raise PromotionRefused(f"unknown pattern {pattern_id}")
@@ -172,32 +168,33 @@ def promote(pattern_id, *, by, explicit_user_decision=None, activation_note=""):
             f"REFUSED — pattern {pattern_id} names no valid destination source "
             f"({pat.get('proposedSource')!r}); a proposal that cannot name the source it "
             f"would change is insufficiently understood and must not be activated.")
+    if not (applied_source_ref or "").strip():
+        raise PromotionRefused(
+            "REFUSED — no applied source version/commit was provided. A promotion is an "
+            "audit record of a change that ALREADY exists in a versioned source; it never "
+            "stands in for one.")
+    if not (by or "").strip():
+        raise PromotionRefused("REFUSED — a promotion records Julian's approval; 'by' is "
+                               "required.")
     ev = [evidence(e) for e in pat["supportingEvidence"]]
     ev = [e for e in ev if e]
-    if (len(ev) == 1 and ev[0]["outcome"] == "model-limited"
-            and not explicit_user_decision):
+    if len(ev) == 1 and ev[0]["outcome"] == "model-limited":
         raise PromotionRefused("REFUSED — one random provider failure may never become an "
                                "active creative rule.")
-    if not _regression_ok(pat, explicit_user_decision):
-        raise PromotionRefused(
-            "REFUSED — activation requires a presented regression comparison across the "
-            "anchor-scene suite (kinetic comedy, quiet emotion, dialogue, ensemble, "
-            "continuity) approved by the user, or the user's own explicit creative "
-            "decision. Run record_regression() first, or pass explicit_user_decision "
-            "with the user's exact words.")
 
-    active = _load(ACTIVE_P, {"note": "HUMAN-APPROVED principles only — the sole store "
-                                        "that may guide future generation.", "version": 1,
-                                "principles": []})
+    active = _load(ACTIVE_P, {"note": "AUDIT REGISTRY of human-approved source changes — "
+                                        "its prose is never injected into a creative role.",
+                                "version": 1, "principles": []})
     active["version"] = int(active.get("version", 1))
     rec = {"principleId": f"acm-{uuid.uuid4().hex[:8]}",
            "fromPattern": pattern_id, "lesson": pat["lesson"],
            "scope": pat["scope"], "category": pat["category"],
            "destinationSource": pat["proposedSource"],
+           "appliedSourceRef": applied_source_ref.strip(),
            "supportingEvidence": pat["supportingEvidence"],
            "contradictingEvidenceConsidered": pat["contradictingEvidence"],
            "promotedBy": by, "promotedAt": _now(),
-           "explicitUserDecision": explicit_user_decision,
+           "explicitUserDecision": decision or None,
            "activationNote": activation_note,
            "activationVersion": f"acm-v{active['version'] + 1}",
            "rollback": {"how": "remove this principle from ACTIVE_CREATIVE_MEMORY.json "
@@ -216,87 +213,9 @@ def promote(pattern_id, *, by, explicit_user_decision=None, activation_note=""):
     return rec
 
 
-def record_regression(pattern_id, *, comparison, human_approved, by):
-    """Attach the regression evidence to a pattern: the anchor-suite comparison (old vs
-    proposed across kinetic/quiet/dialogue/ensemble/continuity) and whether the user
-    approved it. This function records; it never runs paid scene reruns itself."""
-    plib = _load(PATTERNS_P, {"patterns": []})
-    for p in plib["patterns"]:
-        if p["patternId"] == pattern_id:
-            p["regression"] = {"comparison": comparison, "comparisonPresented": True,
-                                "humanApproved": bool(human_approved), "by": by,
-                                "at": _now()}
-    _save(PATTERNS_P, plib)
-
 
 def active_memory():
     return _load(ACTIVE_P, {"principles": []})["principles"]
-
-
-# ─────────────────────────────────────────────────────────────────────────────────────────
-# RETRIEVAL — scoped, labelled, small; never an instruction wall, never the whole library
-# ─────────────────────────────────────────────────────────────────────────────────────────
-_ROLE_KEYS = {"showrunner": ("showrunner canon", "show canon", "creative-room workflow"),
-              "director": ("director canon", "character-performance canon",
-                            "relationship canon", "creative-room workflow"),
-              "cinematographer": ("cinematography canon", "creative-room workflow"),
-              "voice": ("voice director canon", "character-performance canon")}
-
-
-def _role_key(role_string):
-    r = (role_string or "").lower()
-    if "voice" in r:
-        return "voice"
-    if "showrunner" in r:
-        return "showrunner"
-    if "cinematographer" in r and "director" not in r.split("cinematographer")[0]:
-        return "cinematographer"
-    return "director"                              # joint conferences retrieve as director+cine
-
-
-def retrieve_for_role(role_string, cast=None, max_chars=2600):
-    """The memory ONE role receives for ONE task: a few approved principles in its own
-    lanes, a small number of positive and negative exemplars, provider evidence kept
-    separate, and unresolved observations labelled as exactly that. Each block is labelled
-    so the Showrunner can distinguish canon truth / approved preference / contextual
-    exemplar / provider limitation / unresolved observation."""
-    key = _role_key(role_string)
-    lanes = _ROLE_KEYS[key] + (("cinematography canon",) if "cinematographer"
-                                in (role_string or "").lower() else ())
-    out = ["CANON TRUTH: the show/character/relationship canon in your context is "
-           "authoritative and is supplied separately — nothing below overrides it."]
-
-    prefs = [p for p in active_memory() if p["destinationSource"] in lanes][:3]
-    if prefs:
-        out.append("APPROVED CREATIVE PREFERENCES (human-promoted principles — apply them):")
-        out += [f"  • {p['lesson']} [{p['destinationSource']}, {p['activationVersion']}]"
-                for p in prefs]
-
-    evs = evidence()
-    pos = [e for e in evs if e["outcome"] in ("approved", "selected")
-           and e["category"] != "provider"][-2:]
-    neg = [e for e in evs if e["outcome"] == "rejected"
-           and e["category"] != "provider"][-3:]
-    if pos or neg:
-        out.append("CONTEXTUAL EXEMPLARS (specific past verdicts — context, not law):")
-        out += [f"  ✓ {e['context'][:110] or e['systemClassification'][:110]} — user: "
-                f"“{e['userFeedbackVerbatim'][:150]}”" for e in pos]
-        out += [f"  ✗ {e['context'][:110] or e['systemClassification'][:110]} — user: "
-                f"“{e['userFeedbackVerbatim'][:150]}”" for e in neg]
-
-    prov = [e for e in evs if e["category"] == "provider"][-2:]
-    if prov:
-        out.append("PROVIDER LIMITATION EVIDENCE (kept separate — capability, not taste):")
-        out += [f"  ⚠ {e['systemClassification'] or e['context'][:130]}" for e in prov]
-
-    unresolved = [p for p in patterns() if p["maturity"] != "approved-principle"][:2]
-    if unresolved:
-        out.append("UNRESOLVED OBSERVATIONS (not rules — awaiting the user's decision; "
-                   "do not treat as instructions):")
-        out += [f"  ? {p['lesson'][:150]}" for p in unresolved]
-
-    text = "\n".join(out)
-    return text[:max_chars]                        # never a wall
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -443,13 +362,12 @@ if __name__ == "__main__":
                   f"{p['lesson'][:110]}")
     elif cmd == "promote":
         by = sys.argv[sys.argv.index("--by") + 1] if "--by" in sys.argv else "Julian"
+        ref = sys.argv[sys.argv.index("--ref") + 1] if "--ref" in sys.argv else ""
         dec = (sys.argv[sys.argv.index("--decision") + 1]
-               if "--decision" in sys.argv else None)
-        print(json.dumps(promote(sys.argv[2], by=by, explicit_user_decision=dec),
+               if "--decision" in sys.argv else "")
+        print(json.dumps(promote(sys.argv[2], by=by, applied_source_ref=ref, decision=dec),
                           indent=1, ensure_ascii=False))
     elif cmd == "metrics":
         print(json.dumps(metrics(), indent=1))
-    elif cmd == "show":
-        print(retrieve_for_role(sys.argv[2] if len(sys.argv) > 2 else "director"))
     else:
         print(__doc__)

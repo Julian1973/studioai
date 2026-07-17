@@ -1529,7 +1529,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 d = self._body()
                 rec = cb_learning.promote(str(d.get("patternId", "")),
                                             by=str(d.get("by") or "Julian"),
-                                            explicit_user_decision=d.get("decision") or None,
+                                            applied_source_ref=str(d.get("ref") or ""),
+                                            decision=str(d.get("decision") or ""),
                                             activation_note=str(d.get("note", "")))
                 self._json(200, {"ok": True, "activated": rec})
             except Exception as e:

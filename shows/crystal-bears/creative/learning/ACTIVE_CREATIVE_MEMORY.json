@@ -1,5 +1,5 @@
 {
- "note": "HUMAN-APPROVED principles only — the sole store that may guide future generation.",
+ "note": "AUDIT REGISTRY of human-approved source changes — its prose is never injected into a creative role.",
  "version": 2,
  "principles": [
   {
@@ -21,7 +21,8 @@
    "rollback": {
     "how": "remove this principle from ACTIVE_CREATIVE_MEMORY.json (evidence and pattern remain untouched); source-file changes revert via git",
     "priorActiveVersion": 1
-   }
+   },
+   "appliedSourceRef": "7d5762e"
   }
  ]
 }

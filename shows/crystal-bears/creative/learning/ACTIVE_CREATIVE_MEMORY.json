@@ -1,0 +1,27 @@
+{
+ "note": "HUMAN-APPROVED principles only — the sole store that may guide future generation.",
+ "version": 2,
+ "principles": [
+  {
+   "principleId": "acm-213b111d",
+   "fromPattern": "pat-3db11e48",
+   "lesson": "Cinematography must co-author the scene's dramatic approach BEFORE any interpretation is selected, under one governing audience-experience/visual-grammar decision per scene; mandatory per-shot field completion drives over-direction and conventional coverage.",
+   "scope": "role process",
+   "category": "creative",
+   "destinationSource": "creative-room workflow",
+   "supportingEvidence": [
+    "ev-26abd8af0a"
+   ],
+   "contradictingEvidenceConsidered": [],
+   "promotedBy": "Julian",
+   "promotedAt": "2026-07-17T01:01:56",
+   "explicitUserDecision": "Julian's process-correction directive, 2026-07-17, verbatim: 'The current storyboard has exposed a process-level failure. Correcting its camera instructions or shot cards manually would paper over that failure... Replace the creative-room process' — the whole-scene-treatment rebuild (creative-room-2.0) IS this promotion, proven by the four rerun scenes (16->8, 8->4, 21->13 shots; scene 2's escalation independently resolved).",
+   "activationNote": "Activated as creative-room-2.0 (commit 7d5762e); rollback = git + archive_process_v1/. Scene 1's rejected package was never modified.",
+   "activationVersion": "acm-v2",
+   "rollback": {
+    "how": "remove this principle from ACTIVE_CREATIVE_MEMORY.json (evidence and pattern remain untouched); source-file changes revert via git",
+    "priorActiveVersion": 1
+   }
+  }
+ ]
+}

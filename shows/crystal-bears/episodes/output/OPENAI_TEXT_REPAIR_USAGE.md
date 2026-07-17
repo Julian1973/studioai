@@ -62,3 +62,6 @@ proposal where cast gaps exist, Gate 1 joint treatments, Gate 2 selection, Gate 
 Gate 4 shot conference, Gate 5 performance + voice, Gate 6 adversarial review, production
 detail) ≈ **~38 completions total**. Rate unconfirmed — usage recorded, cost not invented.
 Zero media provider calls; zero Seedance tokens; zero fal/ElevenLabs spend.
+
+## Creative Learning System (2026-07-17): zero LLM calls — the system is deterministic
+governance code; classification proposals are mechanical. No media, no tokens.

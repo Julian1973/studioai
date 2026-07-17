@@ -1,0 +1,57 @@
+{
+ "note": "Proposals only — a pattern influences NOTHING until a human explicitly promotes it to Active Creative Memory.",
+ "patterns": [
+  {
+   "patternId": "pat-3db11e48",
+   "proposedAt": "2026-07-17T01:01:56",
+   "proposedBy": "demonstration: EX-005 -> process improvement",
+   "lesson": "Cinematography must co-author the scene's dramatic approach BEFORE any interpretation is selected, under one governing audience-experience/visual-grammar decision per scene; mandatory per-shot field completion drives over-direction and conventional coverage.",
+   "supportingEvidence": [
+    "ev-26abd8af0a"
+   ],
+   "contradictingEvidence": [],
+   "scope": "role process",
+   "category": "creative",
+   "confidence": "high",
+   "proposedSource": "creative-room workflow",
+   "maturity": "approved-principle",
+   "approvalState": "promoted by Julian at 2026-07-17T01:01:56",
+   "regression": null
+  },
+  {
+   "patternId": "pat-6ee4b7fd",
+   "proposedAt": "2026-07-17T01:01:56",
+   "proposedBy": "paired evidence: v1 Scene-2 escalation + v2 Scene-2 4-shot pass",
+   "lesson": "A quiet/reverent scene wants a small number of near-motionless, decisive images — coverage-as-reverence dilutes it.",
+   "supportingEvidence": [
+    "ev-eeaf07ea4a",
+    "ev-f259dce73c"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "medium",
+   "proposedSource": "showrunner canon",
+   "maturity": "emerging-pattern",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-c63c3a1f",
+   "proposedAt": "2026-07-17T01:01:56",
+   "proposedBy": "seeded provider evidence",
+   "lesson": "Very long constraint-wall prompts degrade Seedance output (the rejected 634-word mega-prompt); the lean performance brief is the working shape.",
+   "supportingEvidence": [
+    "ev-4901dc35aa"
+   ],
+   "contradictingEvidence": [],
+   "scope": "provider",
+   "category": "provider",
+   "confidence": "medium",
+   "proposedSource": "provider capability profile",
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  }
+ ]
+}

@@ -933,6 +933,18 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         # [removed 2026-07-16 cutover: /api/pipeline — handled by the 410 gate above]
+        if self.path.startswith("/api/learning"):
+            # THE CREATIVE LEARNING SYSTEM, read-only view (2026-07-17): evidence counts,
+            # patterns awaiting the user's decision, active human-approved principles,
+            # and the improvement measures. Never mutates anything.
+            try:
+                import cb_learning
+                self._json(200, {"metrics": cb_learning.metrics(),
+                                   "patterns": cb_learning.patterns(),
+                                   "activeMemory": cb_learning.active_memory()})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
         if self.path.startswith("/api/storyboard"):
             # THE CREATIVE ROOM's storyboard packages (2026-07-16): read-only view of
             # cb-output/creative/. ?episode=Ep1[&scene=N] — scene omitted lists what exists.
@@ -1488,9 +1500,40 @@ class H(http.server.SimpleHTTPRequestHandler):
                                 item["humanNote"] = note
                 pkg.setdefault("approvalLog", []).append({"target": target, **stamp})
                 json.dump(pkg, open(f, "w"), indent=1, ensure_ascii=False)
-                self._json(200, {"ok": True})
+                # THE CREATIVE LEARNING SYSTEM (2026-07-17): every human review verdict is
+                # evidence. The user's plain-language note is preserved verbatim; the system
+                # proposes a classification but PROMOTES NOTHING — promotion is an explicit,
+                # separate action (/api/learning-promote). Fail-soft: learning capture never
+                # breaks the approval itself.
+                learning = None
+                try:
+                    import cb_learning
+                    learning = cb_learning.human_feedback(
+                        verdict, note, scene=sc,
+                        beat=target if ".B" in target and ".S" not in target else None,
+                        shot=target if ".SH" in target or ".S" in target else None,
+                        episode=ep, asset=f.name, by=stamp["by"])
+                    learning = {k: (v if k != "evidenceCaptured" else
+                                     {"evidenceId": v["evidenceId"], "outcome": v["outcome"]})
+                                 for k, v in learning.items()}
+                except Exception as le:
+                    learning = {"captureError": str(le)}
+                self._json(200, {"ok": True, "learning": learning})
             except Exception as e:
                 self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/learning-promote":
+            # THE EXPLICIT 'Promote to Creative Memory' ACTION — never silent, never automatic
+            try:
+                import cb_learning
+                d = self._body()
+                rec = cb_learning.promote(str(d.get("patternId", "")),
+                                            by=str(d.get("by") or "Julian"),
+                                            explicit_user_decision=d.get("decision") or None,
+                                            activation_note=str(d.get("note", "")))
+                self._json(200, {"ok": True, "activated": rec})
+            except Exception as e:
+                self._json(409, {"error": str(e)})
             return
         if self.path == "/api/shot-run":
             # THE SHOT PIPELINE, front door (additive, 2026-07-16; extended same day for the probabilistic-

@@ -423,6 +423,22 @@ def _unresolved_fields_for(names):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # ROLE MINDS — taste canons + the exemplar library's explicit human verdicts
 # ─────────────────────────────────────────────────────────────────────────────────────────
+def _governed_memory(role):
+    """THE CREATIVE LEARNING SYSTEM's scoped retrieval (cb_learning) — each role receives
+    only the memory relevant to its task, in labelled categories (approved preference /
+    contextual exemplar / provider limitation / unresolved observation), never the whole
+    library and never an instruction wall. Falls back to the raw exemplar verdicts when
+    the learning stores don't exist yet."""
+    try:
+        import cb_learning
+        text = cb_learning.retrieve_for_role(role)
+        if text and "EXEMPLAR" in text or "PREFERENCE" in text:
+            return text
+    except Exception:
+        pass
+    return _exemplar_text()
+
+
 def _mind(role, taste_keys, charge):
     taste = "\n\n".join(_canon_text(k, 7000) for k in taste_keys)
     return (f"You are the {role} of the Crystal Bears creative room — a world-class family-"
@@ -430,10 +446,10 @@ def _mind(role, taste_keys, charge):
             f"name real filmmakers or studios; you apply the enduring principles below as "
             f"the show's OWN identity.\n\n{charge}\n\n"
             f"YOUR TASTE CANON:\n{taste}\n\n"
-            f"THE EXEMPLAR LIBRARY (explicit human verdicts — the REJECTED entries are "
-            f"process failures you must not repeat; do not treat any rejected artifact as a "
+            f"GOVERNED CREATIVE MEMORY (scoped to your role; the REJECTED verdicts are "
+            f"failures you must not repeat; do not treat any rejected artifact as a "
             f"model, and do not reverse-engineer a 'desired shot' from them):\n"
-            + _exemplar_text()
+            + _governed_memory(role)
             + "\n\nSHOW CANON (authoritative, never contradicted):\n"
             + _canon_text("showBible", 6000)
             + "\n\nHARD RULES: approved dialogue is verbatim-locked — never reword, drop or "

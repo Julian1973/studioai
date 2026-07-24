@@ -1795,8 +1795,8 @@ def _check_no_dialogue_leak(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
 # (Restored 2026-07-24 same day: the Gold Build's tempo-map deletion accidentally cut this
 # adjacent block — caught immediately by the standing test suite, which is exactly its job.)
 _DRIFT_VOCAB_RE = re.compile(
-    r"\b(sunset|golden[- ]hour|dusk|twilight|late[- ]afternoon|amber (?:light|glow)|"
-    r"warm saturated)\b", re.IGNORECASE)
+    r"\b(sunset|sunrise|dawn|golden[- ]hour|dusk|twilight|late[- ]afternoon|"
+    r"amber (?:light|glow)|pink-orange|warm saturated)\b", re.IGNORECASE)
 
 
 def _check_no_drift_vocab(prompt_text, *, refuse_prefix="REFUSED"):

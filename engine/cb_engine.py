@@ -1307,100 +1307,41 @@ def compile_shot_contract(shot, scene, characters_cfg):
 
 
 def compile_keyframe_prompt(shot, scene, characters_cfg):
-    """The opening-keyframe prompt for an OPENER shot — reference-first (zero appearance
-    text), compiled from: the approved opening image, continuity in, identity/scale/
-    reference bindings, and lighting.
+    """THE GOLD SOURCE BRIEF — STILLS (2026-07-24, same ruling and same treatment as
+    compile_shot_contract the same day; closed after Julian's front-to-back audit
+    directive caught the keyframe path still carrying the old format): the old fireable
+    keyframe-prompt composition is RETIRED. This now emits labelled SOURCE MATERIAL for
+    the Cinematography register writer (cb_departments.prepare_cinematography, curriculum
+    verbatim + THE LIGHT LAW), which WRITES the opening-frame prompt. Never fireable
+    itself. Signature/return unchanged for every consumer."""
+    lines = ["SOURCE MATERIAL — storyboard-approved facts for the OPENING-FRAME card. This "
+             "is NOT a prompt and must never fire; the register still-card is written from "
+             "it at the Cinematography gate."]
 
-    2026-07-17 correction #1 (Julian's audit, source-defect protection lifted for this one
-    function only): this used to hardcode a universal 'the anticipation instant before the
-    action, never the payoff' framing and ban 'the action already happening' as a negative —
-    both false universals. THE APPROVED OPENING STATE DECIDES whether movement is already
-    underway (e.g. a character already pitched into travel) or the shot opens on deliberate
-    stillness (e.g. a character already still, before a quiet line) — this function states
-    only what shot.openingPose actually says, never a default posture.
+    def add(label, val):
+        v = ("" if val is None else str(val)).strip()
+        if v:
+            lines.append(f"{label}: {v}")
 
-    2026-07-17 correction #2 (Julian's Gate-B source-contract ruling, S1.SH1's rejected
-    keyframe): the real, generated failure — a compiled brief that drifted to a wide,
-    open-meadow landscape vista instead of the approved bee-height flower corridor — traced
-    to two compiler-level defects, both REMOVED here rather than patched per-shot:
-      (a) a UNIVERSAL 'frame a touch wider than the shot size alone implies... real
-          headroom and side-room' instruction (Julian's own 2026-07-04 'room to breathe'
-          Gate-2b law from the earlier beat pipeline, carried into this module without
-          re-examination) — this actively encouraged safe, pulled-back scenic framing on
-          every keyframe regardless of what the shot actually needed. Framing now comes
-          SOLELY from shot.openingImage (via openingPose below) — the one field the Director
-          and Cinematographer jointly authored FOR this literal frame, per CreativeShotCard.
-          openingImage's own 2026-07-17 correction (viewpoint/spatial geometry/depth/action
-          vector, not character pose alone). No compiler-level framing nudge competes with
-          it. (b) the scene plate's declared job said it 'holds the world... exactly' —
-          claiming GEOGRAPHY ownership by default. A scene plate is a STYLE reference
-          (palette, materials, lighting) unless a separate location/layout reference is
-          EXPLICITLY approved for geography — none exists in this schema yet, so the plate
-          never claims geography. This is also why Ep1_S1_plate.png specifically (a wide
-          open-meadow vista, confirmed by direct inspection) can safely anchor palette and
-          light on every Scene-1 keyframe without also pulling every composition toward its
-          own wide-landscape geometry, the way it did for S1.SH1.
-
-    2026-07-17 correction #3 (Julian's ruling, same day — THE DUPLICATION): correction #2
-    fixed composition/geography; a separate defect remained — continuityIn was being
-    authored as a SECOND description of the shot's own opening image, competing with
-    openingImage inside this compiled brief rather than describing genuinely inherited
-    state. Fixed at the SOURCE (cb_creative.production_detail's own authoring instruction
-    and its mechanical opener override — see that function's docstring), never by comparing
-    text here: for the scene's true opening shot, continuityIn carried nothing genuinely
-    inherited, and this function omitted the 'Continuity in:' paragraph rather than
-    printing a no-op sentence.
-
-    2026-07-17 correction #4 (Julian's system-freeze checkpoint, later the same day — THE
-    SIMPLIFICATION, supersedes correction #3's mechanism, not its outcome): correction #3
-    detected "nothing inherited" via a literal string comparison against a duplicated
-    sentinel constant (NO_INHERITED_STATE), stamped into continuityIn.lighting AND
-    continuityIn.cameraSide as prose text. Julian's ruling: replace that with TYPED
-    ABSENCE — shot.continuityIn is now Optional[ContinuityState] = None, and None IS "no
-    inherited state," checked with a plain `is None`, never a string. This function omits
-    the 'Continuity in:' paragraph when shot.continuityIn is None and builds it from the
-    real lighting/cameraSide otherwise — the same observable behaviour as correction #3,
-    reached without a sentinel string anywhere in either module.
-
-    shot.camera (the whole-shot camera RELATIONSHIP, which can describe movement across the
-    entire shot) is deliberately never read here — a single-frame brief has no legitimate use
-    for a whole-shot movement description, opener or not; unchanged by any correction above.
-    'Continuity in' still carries lighting/cameraSide (which side of the action line the
-    camera holds at the opening instant, plus lighting) — never composition, never geography.
-    When a caller's own mapping has (degenerately) duplicated one prose sentence into both
-    continuityIn.lighting and continuityIn.cameraSide, it is stated once, not twice."""
-    pose, next_slot = _inline_bindings(shot.openingPose.strip().rstrip("."), shot,
-                                        characters_cfg, start=1)
-    # correction #4: typed absence — None means nothing genuinely carries in, checked with
-    # `is None`, never a sentinel-string comparison.
-    if shot.continuityIn is None:
-        continuity_clause = ""
-    else:
-        lighting = shot.continuityIn.lighting.strip().rstrip(".")
-        camera_side = shot.continuityIn.cameraSide.strip().rstrip(".")
-        continuity = (lighting if _norm(lighting) == _norm(camera_side)
-                      else f"{lighting}; {camera_side}")
-        continuity_clause = f"Continuity in: {continuity}. "
-    prompt = "\n\n".join([
-        _style_line(scene),
-        f"The literal OPENING FRAME of the shot, exactly as approved: {pose}.",
-        f"{continuity_clause}@图{next_slot} scene plate anchors palette, materials and "
-        f"lighting only — never composition or geography.",
-        ("Negative: character redesign, appearance drift from the references, extra "
-         "characters, on-screen text."),
-        QUALITY_LINE,
-    ])
-    wc = len(prompt.split())
-    # THE STRAIGHTJACKET REMOVED, SWEPT HERE TOO (2026-07-21 — the same "sweep the pattern"
-    # this codebase's own standing rule requires, rule 11): compile_shot_contract's identical
-    # hard ceiling was already removed under Julian's 2026-07-21 ruling ("take all the
-    # straightjackets off") — this sibling function, adding the exact same class of real
-    # authored content (the style law, the quality line) via this same commit, would now hit
-    # its own still-live hard assert the moment either pushed a real keyframe prompt past 160
-    # words. wc stays visible for logging/display; it can no longer stop a real, authored
-    # frame from compiling.
-    _assert_no_spoken_words(prompt, shot, "keyframe prompt")
-    return prompt, wc, reference_slots(shot, characters_cfg, for_keyframe=True)
+    add("SET & LIGHT LAW (light written ONLY as concrete sky/sun/shadow states — never "
+        "time-of-day words)", _style_line(scene, shot))
+    add("THIS IS THE LITERAL OPENING FRAME — one frozen instant, no motion-over-time",
+        "yes")
+    add("OPENING POSE / STORY INSTANT", shot.openingPose)
+    add("CAMERA (storyboard-approved)", shot.camera)
+    add("CHARACTERS IN FRAME (identity from references only; scale relationship explicit)",
+        ", ".join(shot.charactersInFrame or []))
+    if shot.continuityIn is not None:
+        try:
+            add("CONTINUITY IN", shot.continuityIn.model_dump_json())
+        except Exception:
+            add("CONTINUITY IN", shot.continuityIn)
+    add("FELT INTENT (the frame's emotional read)", shot.feltIntent)
+    hc_line, _ = hard_constraints(shot, characters_cfg)
+    add("HARD CONSTRAINTS (honoured in the writing)", hc_line)
+    lines.append("REFERENCE ROLES: " + _reference_role_sentence(shot, scene, characters_cfg))
+    text = "\n".join(lines)
+    return text, len(text.split()), reference_slots(shot, characters_cfg, for_keyframe=True)
 
 
 def compile_audio_brief(shot):

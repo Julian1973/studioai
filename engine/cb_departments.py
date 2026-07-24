@@ -263,7 +263,11 @@ def prepare_look(context, *, log=print):
         _system("cinematography",
                 "Write the exact image-provider prompt for this scene's environment-only "
                 "Scene Look plate: the place itself — light, palette, material, atmosphere. "
-                "No character, no shot composition. Keep it plain and concrete."),
+                "No character, no shot composition. Keep it plain and concrete. The plate "
+                "must BE the scene canon's own stated environment (its look field) — for a "
+                "'rainforest interior at bee scale' that means INSIDE the flower corridor, "
+                "never a pulled-back open landscape.\n"
+                "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved warm-golden vocabulary drags generations to sunset; morning is written as bright/high/white-gold sun, never as warmth adjectives.\n"),
         "APPROVED SCENE CONTEXT:\n" + _j(context) +
         "\n\nReturn the provider prompt, and one plain sentence on whether this place "
         "reads true to the scene.",
@@ -271,66 +275,35 @@ def prepare_look(context, *, log=print):
 
 
 def prepare_cinematography(context, images, compiled_brief, *, log=print):
-    """THE DELIVERY-IS-COMPILATION FIX (2026-07-21), simplified the same day per Julian's
-    own framing ("the cinematographer and the director need to work on that to be able to
-    create the exact prompt that they need to do to make that key frame come to life,
-    based on the magic they've done"): compiled_brief is what the Director and
-    Cinematographer already decided together at storyboard time — cb_engine.
-    compile_keyframe_prompt's own deterministic output. This call turns that decision into
-    the exact keyframe prompt, grounded in it, never inventing a composition it doesn't
-    already contain."""
+    """THE REGISTER WRITER — STILLS (Gold Build, 2026-07-24, extended to the keyframe path
+    the same day Julian caught the pre-Gold sunrise keyframe prompt still standing: "when
+    you say you do something ensure that it is worked through front to back"). The
+    Cinematographer writes the opening-frame prompt at the same house register as the
+    Animation writer, from the same craft curriculum (loaded verbatim), using the still-
+    image half of the transfer: [shot size, lens] + subject/action frozen at the story
+    instant + depth staging + light + emotional intent. Light obeys THE LIGHT LAW — the
+    scene's own drift-safe vocabulary only."""
     return cb_llm.structured(
         _system("cinematography",
-                "The Director and Cinematographer already decided this shot together — "
-                "the brief below IS that decision, the magic already done. Your job is to "
-                "turn it into the exact keyframe prompt: real photographic language (lens, "
-                "height, light) for what's already there, nothing new invented. The "
-                "attached images are in the labelled order given in the context.") +
-                "\n\n" + load_runtime_skill("dp"),
-        "THE APPROVED BRIEF — what was already decided:\n" + compiled_brief +
-        "\n\nSHOT AND ORDERED IMAGE LABELS:\n" + _j(context) +
-        "\n\nReturn the exact keyframe prompt, bound to the labelled references, and one "
-        "plain sentence on whether this frame will land the shot.",
-        CinematographyDirection, label="department_cinematography", log=log,
-        images=images)
-
-
-_TAG = re.compile(r"\[[^\]]+\]")
-_WORD = re.compile(r"[A-Za-z0-9']+")
-
-
-def _spoken_words(text):
-    return [w.lower() for w in _WORD.findall(_TAG.sub("", text or ""))]
-
-
-def validate_voice_direction(result, locked_lines):
-    got = result.lines
-    if len(got) != len(locked_lines):
-        raise RuntimeError(f"Voice Director returned {len(got)} line(s); {len(locked_lines)} are locked")
-    for idx, (out, locked) in enumerate(zip(got, locked_lines), start=1):
-        if out.speaker.strip().lower() != str(locked["speaker"]).strip().lower():
-            raise RuntimeError(f"Voice Director changed speaker on line {idx}")
-        if _spoken_words(out.exactDialogue) != _spoken_words(locked["exactText"]):
-            raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
-        if _spoken_words(out.performedText) != _spoken_words(locked["exactText"]):
-            raise RuntimeError(f"Voice Director added, dropped or changed words on line {idx}")
-    return result
-
-
-def _voice_line_briefs(locked_lines):
-    """Each line's own already-approved direction, pulled OUT of the generic shot JSON and
-    labelled so it can't be missed. `delivery` is the storyboard's Voice Performance role's
-    own V3-tagged performance (cb_creative.gate5_voice, following VOICE_PERFORMANCE_CANON.md
-    — intention, subtext, the thought before the line, operative words, tag discipline, all
-    already decided there), mapped onto the shot's dialogueLines at promotion time
-    (cb_handover._dialogue_lines: elevenLabsV3Direction -> delivery). Before this fix this
-    sat unread inside context's buried shot JSON and the LLM re-invented a performance from
-    the bare locked words every time — the exact bug this function closes."""
-    out = []
-    for ln in locked_lines:
-        out.append(f'{ln.get("speaker")}: "{ln.get("exactText")}"\n'
-                    f'  APPROVED DIRECTION: {ln.get("delivery") or "(none authored yet)"}')
-    return "\n".join(out)
+                "You are the studio's register writer for STILL opening frames. The "
+                "attached images are the identity references and scene anchor — look at "
+                "them. Below is the house craft curriculum; it is your mind. Write "
+                "providerPrompt as one complete opening-frame prompt: shot size + focal "
+                "length first, the subjects frozen at the exact story instant (scale "
+                "relationship explicit), foreground/midground/background depth staging, "
+                "then light, then the emotional read of the frame. Rich and cinematic — "
+                "never a checklist.\n"
+                "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved warm-golden vocabulary drags generations to sunset; morning is written as bright/high/white-gold sun, never as warmth adjectives.\n"
+                "Never write any duration or motion-over-time; this is one frozen "
+                "instant. Preserve exact character identity from the references.\n\n"
+                "===== THE HOUSE CRAFT CURRICULUM (verbatim) =====\n" +
+                _craft_curriculum()),
+        "SOURCE MATERIAL — the storyboard-approved facts for this opening frame:\n" +
+        compiled_brief +
+        "\n\nSHOT AND ORDERED ATTACHMENTS:\n" + _j(context) +
+        "\n\nReturn the complete opening-frame prompt as providerPrompt, then one plain "
+        "sentence on whether this frame will land the beat.",
+        CinematographyDirection, label="department_cinematography", log=log, images=images)
 
 
 def prepare_voice(context, locked_lines, *, log=print):

@@ -33,33 +33,71 @@
  ],
  "departmentWork": {
   "look": {
-   "approved": null,
-   "candidate": {
+   "approved": {
     "department": "Look Development",
     "worker": "Cinematographer / DP",
     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "skillHash": "a3a32f9d7c85542d",
     "model": "gpt-5.5",
-    "preparedAt": "2026-07-19T00:04:24",
-    "editedAt": "2026-07-19T00:11:58",
+    "scene": "1",
+    "shotId": null,
+    "packageRevision": 40,
+    "preparedAt": "2026-07-24T15:42:50",
+    "editedAt": null,
     "preparedBy": "specialist",
-    "sourceHash": "690aff9f0476d627d2b1e8afffcc03460789a3c3aeaa4178ae2352639fabc641",
-    "output": {
-     "creativeIntent": "Define a playful bee-scale rainforest world that begins as a warm comedy playground and already carries the first atmospheric warning of a storm. The environment should feel alive, responsive, oversized, tactile, and child-legible: a place where pollen, petals, leaves, and vines can physically participate in Fuzzby’s chaos before the sky interrupts the joke.",
-     "storyOfPlace": "Deep within the rainforest, ordinary plant life becomes monumental at bee scale. Towering tropical flowers form natural corridors, platforms, and springy obstacles; curled petals, giant anthers, broad leaves, mossy bark, dangling vines, and bead-like droplets create a living play-space. The forest is lush and welcoming, but the upper canopy has begun to darken with a subtle weather shift: leaves tremble, distant grey-violet storm light seeps between the greens, and the atmosphere feels like it is holding its breath.",
-     "paletteAndLighting": "Warm saturated daytime rainforest color with golden pollen yellows, luminous leaf greens, juicy flower magentas, coral reds, turquoise shadows, and amber sun shafts. Introduce the coming storm through restrained cool grey-violet canopy shadows, slightly dimmed upper greens, and a soft contrast between cheerful foreground warmth and cooler overhead pressure. Lighting should remain bold and readable for ages 4-8: glowing pollen motes, humid volumetric sunbeams, soft bounce light under petals, and no harsh realism.",
-     "materialsAndAtmosphere": "Materials are tactile and animated-feature rich: waxy translucent petals with soft subsurface glow, fuzzy pollen clumps, powdery pollen dust suspended in air, springy rubbery leaves, damp moss, wet bark ridges, silky vine fibers, glossy dew beads, and soft rainforest haze. Atmosphere should feel humid, fragrant, and buoyant, with floating pollen and tiny moisture particles catching light. The forest must feel capable of bouncing, recoiling, shaking, and laughing along, while the darkening canopy suggests the first serious interruption.",
-     "continuityRules": [
-      "Environment-only Scene Look plate: no characters, no animals, no faces, no props belonging to characters, no text, no logos.",
-      "Maintain bee-scale perspective through oversized flowers, huge pollen grains, towering leaves, and monumental rainforest textures.",
-      "The rainforest is not generic backdrop; every plant surface should feel physically usable, springy, reactive, and comedy-ready.",
-      "Daytime remains warm and saturated, but include clear early storm cues in the upper canopy: cooler shadow, tremor energy, humid pressure, and distant grey-violet light.",
-      "No heavy rain yet; this is the warning before the storm fully arrives uses darkening canopy and atmospheric tension, not downpour imagery."
-     ],
-     "providerPrompt": "Create one environment-only Scene Look plate for an original high-end 3D CGI animated children’s series, ages 4-8, set deep within a rainforest at bee scale during daytime. Show a lush oversized rainforest interior made of monumental tropical flowers, giant curled petals, huge fuzzy anthers, pollen-dusted plant surfaces, broad springy leaves, damp moss, wet bark ridges, dangling vines, glossy dew beads, and suspended pollen motes in humid air. The world should feel playful, tactile, warm, and physically reactive, as if petals and leaves could bounce, recoil, and participate in comedy. Use a warm saturated palette of golden pollen yellow, luminous rainforest green, juicy magenta and coral flowers, amber sun shafts, turquoise bounce shadows, and soft glowing humidity. Include the first warning of an incoming storm only through the environment: subtly darkened upper canopy, cool grey-violet light filtering above, trembling leaf silhouettes, and heavier humid atmosphere, while the lower rainforest still holds cheerful warmth. Materials should be rich and legible: waxy translucent petals with soft subsurface glow, powdery pollen clumps, rubbery leaves, silky vine fibers, damp moss, and sparkling dew. Bold readable animated-feature styling, real weight, squash-and-stretch-friendly forms, warm saturated light, no photoreal harshness. Environment only: no characters, no animals, no faces, no character props, no text, no logos, no heavy rain."
+    "sourceHash": "e2a33dc5cf89e38fc2a08df6f030a42de31fcefba8abc17dc40a757af7354bf1",
+    "signatureVersion": 3,
+    "sourceFields": {
+     "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+     "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+     "sceneName": "d8c4abffa94910152456bf78903136c01083536c1f1b5a9197643ce543e3f221",
+     "approvedStoryboardScene": "a6f557be533879288f632e91703cd9bbde891a50a2cd46eeb01e3717d87ab888",
+     "selectedTreatment": "3b0b43ed063cd5fd9d4018ae6eeb06ef230f1a040d6180dc66294fa3a3defdc8",
+     "locationCanon": "cabadb7c038b574a3703811de893da72e6630741a3cd428187c7c4aee51cdfee",
+     "styleLaw": "1841b41e71d53aafe95d6abaad4e46840bfb4682b34ca15c546fc5c4e28b0797"
     },
-    "editedBy": "Julian"
+    "outputHash": "92d4e4cb8625a84a2f3f1f86f2c7e49b28afb9f7ab1bed2f672d12e4423973df",
+    "output": {
+     "providerPrompt": "Environment-only scene look plate for original 3D CGI animation, ages 4–8, Pixar-caliber material richness: inside a bee-scale rainforest flower corridor, not an open landscape. Monumental tropical blossoms form natural lanes between stems; giant curled petals, huge fuzzy pollen-heavy anthers, yellow pollen dust on plant surfaces, broad springy leaves shaped as usable paths and obstacles, one low crossing wet bark branch, damp moss pads, bark ridges, dangling vines, glossy dew beads, and suspended pollen motes in humid air. Bright clear daylight with the sun already high and white-gold; clean sun shafts through canopy gaps; crisp vivid light across petals, leaves, moss, pollen, and bark; cool turquoise bounce shadows under leaves and petals. Highest canopy leaves slightly darkened by a faint grey-violet sky filter, no rain. Palette of luminous rainforest greens, yellow pollen, juicy magenta and coral flowers, wet deep-brown bark, moss green, clear dew highlights. Every plant surface reads oversized, tactile, springy, reactive, and physically usable at bee scale. No characters, no animals, no faces, no buildings, no props, no pulled-back jungle vista, no camera angle, no shot composition.",
+     "doesItLand": "Yes — this reads true to the scene as an interior bee-scale rainforest flower corridor with bright high sun and the first faint canopy warning of storm."
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-07-24T15:43:03",
+    "reviewedBy": "auto: drift-clean + canon-environment (Julian's automation ruling, 2026-07-24)",
+    "note": "Corrected sources: rainforest interior at bee scale, morning as bright/white-gold states"
    },
-   "history": []
+   "candidate": null,
+   "history": [
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-07-19T00:04:24",
+     "editedAt": "2026-07-19T00:11:58",
+     "preparedBy": "specialist",
+     "sourceHash": "690aff9f0476d627d2b1e8afffcc03460789a3c3aeaa4178ae2352639fabc641",
+     "output": {
+      "creativeIntent": "Define a playful bee-scale rainforest world that begins as a warm comedy playground and already carries the first atmospheric warning of a storm. The environment should feel alive, responsive, oversized, tactile, and child-legible: a place where pollen, petals, leaves, and vines can physically participate in Fuzzby’s chaos before the sky interrupts the joke.",
+      "storyOfPlace": "Deep within the rainforest, ordinary plant life becomes monumental at bee scale. Towering tropical flowers form natural corridors, platforms, and springy obstacles; curled petals, giant anthers, broad leaves, mossy bark, dangling vines, and bead-like droplets create a living play-space. The forest is lush and welcoming, but the upper canopy has begun to darken with a subtle weather shift: leaves tremble, distant grey-violet storm light seeps between the greens, and the atmosphere feels like it is holding its breath.",
+      "paletteAndLighting": "Warm saturated daytime rainforest color with golden pollen yellows, luminous leaf greens, juicy flower magentas, coral reds, turquoise shadows, and amber sun shafts. Introduce the coming storm through restrained cool grey-violet canopy shadows, slightly dimmed upper greens, and a soft contrast between cheerful foreground warmth and cooler overhead pressure. Lighting should remain bold and readable for ages 4-8: glowing pollen motes, humid volumetric sunbeams, soft bounce light under petals, and no harsh realism.",
+      "materialsAndAtmosphere": "Materials are tactile and animated-feature rich: waxy translucent petals with soft subsurface glow, fuzzy pollen clumps, powdery pollen dust suspended in air, springy rubbery leaves, damp moss, wet bark ridges, silky vine fibers, glossy dew beads, and soft rainforest haze. Atmosphere should feel humid, fragrant, and buoyant, with floating pollen and tiny moisture particles catching light. The forest must feel capable of bouncing, recoiling, shaking, and laughing along, while the darkening canopy suggests the first serious interruption.",
+      "continuityRules": [
+       "Environment-only Scene Look plate: no characters, no animals, no faces, no props belonging to characters, no text, no logos.",
+       "Maintain bee-scale perspective through oversized flowers, huge pollen grains, towering leaves, and monumental rainforest textures.",
+       "The rainforest is not generic backdrop; every plant surface should feel physically usable, springy, reactive, and comedy-ready.",
+       "Daytime remains warm and saturated, but include clear early storm cues in the upper canopy: cooler shadow, tremor energy, humid pressure, and distant grey-violet light.",
+       "No heavy rain yet; this is the warning before the storm fully arrives uses darkening canopy and atmospheric tension, not downpour imagery."
+      ],
+      "providerPrompt": "Create one environment-only Scene Look plate for an original high-end 3D CGI animated children’s series, ages 4-8, set deep within a rainforest at bee scale during daytime. Show a lush oversized rainforest interior made of monumental tropical flowers, giant curled petals, huge fuzzy anthers, pollen-dusted plant surfaces, broad springy leaves, damp moss, wet bark ridges, dangling vines, glossy dew beads, and suspended pollen motes in humid air. The world should feel playful, tactile, warm, and physically reactive, as if petals and leaves could bounce, recoil, and participate in comedy. Use a warm saturated palette of golden pollen yellow, luminous rainforest green, juicy magenta and coral flowers, amber sun shafts, turquoise bounce shadows, and soft glowing humidity. Include the first warning of an incoming storm only through the environment: subtly darkened upper canopy, cool grey-violet light filtering above, trembling leaf silhouettes, and heavier humid atmosphere, while the lower rainforest still holds cheerful warmth. Materials should be rich and legible: waxy translucent petals with soft subsurface glow, powdery pollen clumps, rubbery leaves, silky vine fibers, damp moss, and sparkling dew. Bold readable animated-feature styling, real weight, squash-and-stretch-friendly forms, warm saturated light, no photoreal harshness. Environment only: no characters, no animals, no faces, no character props, no text, no logos, no heavy rain."
+     },
+     "editedBy": "Julian",
+     "outcome": "rejected",
+     "decisionAt": "2026-07-24T15:42:19",
+     "reviewedBy": "auto: Gold Build front-to-back audit (Julian's directive, 2026-07-24)",
+     "note": "Candidate carries 'warm saturated'/'amber sun shafts' — the drift-source vocabulary; also the generated plate it produced was an open mountain meadow at sunset, contradicting the canon's own 'rainforest interior at bee scale'. Re-author under the corrected locations.json light fields + Light Law."
+    }
+   ]
   }
  }
 }

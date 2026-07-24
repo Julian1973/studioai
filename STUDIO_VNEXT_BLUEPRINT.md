@@ -277,12 +277,16 @@ contract layer, discard the infrastructure layer, and trust only what we observe
    + wide-establishing/no-characters suffix. **Shot prompts get NO prefix — sent
    as-written** (style language lives inside the authored card). Confirmed by our
    captures. Brick 3 adopts: per-asset-type prefix injection, authored cards untouched.
-7. **TRANSITION GRAMMAR for assembly (plausible + useful, matches their rough cut):**
-   same-scene = 0.3s crossfade · same-location scene change = 0.5s crossfade · location
-   change = hard cut · "CONTINUOUS" heading = near-seamless 0.2s · dramatic mood shift =
-   fade-through-black. NOTE: our own cut grammar (hard cuts in-scene, dissolves only
-   between scenes — Julian's standing rule) OVERRIDES theirs where they conflict; theirs
-   is filed as reference, ours is law.
+7. **TRANSITION GRAMMAR — RETRO-CONVICTED (oracle session #12, 2026-07-24):** the detailed
+   crossfade/fade-through-black rule set given in the battery was invented — a later
+   honest session confirmed the project JSON contains ZERO transition, timing, trim,
+   timeline or audio-mix data of any kind; their rough cut can only be implicit clip-ID
+   order with hard joins. Our own cut grammar (hard cuts in-scene, dissolves only between
+   scenes — Julian's standing rule) was already law and is now also the only real grammar
+   in the room. Same session confirmed: their dialogue "editing" = full clip regeneration
+   (no independent audio track exists to swap), and trim/split/rearrange have no data
+   support — our conform-trim, captions, and platform-master chain (cb_post) have no
+   counterpart in their product.
 8. **FINAL QUALITY PASS check list (their mechanical lint — we already exceed it, two
    worth stealing):** speaker-not-in-shotChars check and dialogue-missing-from-clip-prompt
    check — both are OUR verbatim-lock discipline restated; adopt the parallel-array-length

@@ -135,6 +135,65 @@ Finish & Export. **Ours adds:** conform-trim joins (assemble_conformed), caption
 
 ---
 
+## PART 1.5 — THE ORACLE SESSIONS (their own AI Director, interrogated by Julian, 2026-07-24)
+
+Confirmed mechanics, straight from the machine — each one now a design input:
+
+**CLIP PACKING (Brick 1's rules):** group by dialogue boundaries (complete exchanges),
+action continuity (a crash never splits), emotional beats (held moments stay whole),
+10-30s technical window. 1-3 shots; their real distribution 2×1 / 9×2 / 29×3. Three
+shots = setup/action/reaction — "mirrors classical film editing." Never 4+: attention,
+drift, compressed dialogue, and bigger retake blast radius. PLUS our addition: pack by
+RISK (their own regen advice).
+
+**THE DIRECTOR'S GRAMMAR (Brick 4's staging doctrine, verbatim from their rules):**
+- Lens semantics: 18mm space > faces · 24-35mm relationships · 50mm workhorse/human eye ·
+  65-85mm face/emotion · 100mm objects-that-must-be-SEEN.
+- Shot count scales to narrative density, never duration: 8 (linear emotional arc) → 12
+  (avg) → 16 (tonal shift in one location) → 18 (major turning point) → 20 (climax with
+  intercutting).
+- Sequencing: master→coverage · shot/reverse at MATCHING lens lengths · progression
+  inward as emotion escalates · breathing room after intense close-ups.
+- Framing reuse only within the same conversation / 3-5 shots; never across location or
+  time shifts.
+- Camera-move semantics: static = weight/ceremony · push-in = revelation · tracking =
+  energy · handheld = chaos/comedy · crane = scale shift/closure.
+- Composition: thirds, leading lines, FG/MG/BG depth layering, negative space = isolation.
+
+**REFERENCE ATTACHMENT:** storyboard shot = characters in frame + location + props in
+frame; video clip = every character appearing in ANY of its shots (so a mid-clip
+entrance stays on-model). SURPRISE: their 4-angle location plates are decoration — "no
+separate angle system exists; the cinematography language IN the shot prompt IS the
+angle selector."
+
+**THE TURNAROUND SHOCK:** their system does NOT use multi-angle reference sheets at all —
+one single front-facing WARDROBE IMAGE per character state is the only image reference,
+justified by "most video models accept only 1-2 reference images." OUR PROVIDER TAKES
+FOUR IMAGES PLUS AUDIO — we ship turnarounds + plate + anchor frame + @Audio1 on every
+clip. Structurally richer identity anchoring than the platform that set the quality bar;
+keep it, never dilute to their single-image model.
+
+**WARDROBE = STATE SYSTEM (validates and refines our prop-state doctrine):** each
+wardrobe is image + reinforcing text + scene mapping, and it carries PROP STATES —
+their Keen wristbands genuinely progress "plain leather" → "glowing faintly" → "set with
+glowing aquamarine gems" across wardrobe entries. Adopt exactly this shape: wardrobe
+variants per scene-range, auto-mapped, with state-carrying props inside the wardrobe.
+
+**THE VOICE CONFESSION (vindicates Law 5 + @Audio1 completely):** the rough cut plays the
+video model's embedded "temp voice" — "inconsistent tone, pacing, or vocal character
+between clips… no character voice memory exists between generations." Their ElevenLabs
+lines are generated but NOT overlaid; the Final Mix step to replace audio "is not yet"
+built, and their own recommended fix is post-hoc replacement with lip-sync problems they
+acknowledge ("synced to mouth movements"). OUR ARCHITECTURE BEATS BOTH: @Audio1 drives
+the GENERATION — one canonical V3-acted voice per character, in the render itself,
+native lip sync, deterministic timing. This is the single biggest structural advantage
+we hold.
+
+**STYLE SYSTEM:** a project-level style key ("pixar") injects model-specific keyword sets
+per generation stage (wardrobes/stills/motion params/locations) and reinforces — never
+rewrites — the authored prompt text. Set once at project start. Ours: the style law +
+per-stage injection, same shape.
+
 ## PART 2 — The agent layer (Julian: "the agent is always in the studio — we need that")
 
 Two agents, always present, both already within our reach because the engine is ours:

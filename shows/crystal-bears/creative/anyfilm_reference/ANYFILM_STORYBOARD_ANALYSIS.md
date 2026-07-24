@@ -182,6 +182,31 @@ still arrays are empty — either stills were skipped or they live in backend st
 way the frame-handoff verdict (none) stands. This session also re-confirmed, a third time,
 that the oracle cannot see its backend — extraction stays CLOSED.
 
+## The audio verdict (oracle session #9, 2026-07-24) — their audio layer is empty
+
+Asked how dialogue/voice/mix actually work, the oracle confirmed from the project JSON:
+**nothing audio exists in their data at all.** No voice IDs, no character→voice mapping, no
+audio URLs, no timing/lip-sync metadata, no ambience/music/SFX layers, no mixing data. The
+ONLY audio-bearing artifact in their whole product is the dialogue text embedded in the
+clip prompt (with the `|` pause separator) — the video model's native voice does everything,
+exactly as the observed footage suggested. Every question beyond that came back UNKNOWN,
+with the oracle openly speculating ("LIKELY", "COULD work", pseudocode marked probable).
+
+Two consequences:
+1. **Retro-conviction:** the detailed per-character ElevenLabs voice-settings table from the
+   earlier extraction battery (stability/style values per bear, named premade voice IDs) is
+   now CONFIRMED confabulated — this session states flatly that no voice mapping exists
+   anywhere in the project data. The session-#4 discard was correct.
+2. **The full audio scoreboard:** their product = native temp voice, no memory, no acted
+   performance, no regeneration path, no mix. Ours = canonical V3 voice IDs per character,
+   acted takes approved by Julian's ear, @Audio1 driving generation with native lip sync,
+   duration-matched masters, and cb_post's mix/master/captions chain. The audio layer is
+   the single widest gap between the two products, in our favour.
+
+(Also noted: this answer described "Seedance" as a lip-sync overlay tool — factually wrong;
+Seedance is a video-generation model. One more proof the oracle invents anything outside
+its own JSON.)
+
 ## Working agreement
 
 AnyFilm is the generation engine and storyboard author; our studio is the canon authority

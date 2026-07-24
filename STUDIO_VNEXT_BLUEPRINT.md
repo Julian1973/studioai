@@ -150,6 +150,41 @@ docked right + floating scene agent. Our existing dark-neutral cinematic CSS sys
 
 ---
 
+## PART 3.4 — THE DASHBOARD (captured live, 2026-07-24)
+
+Their dashboard is a RESUME MACHINE — every element answers "where was I, and what's one
+click from here":
+
+1. **Time-of-day greeting** — "GOOD MORNING / Action, Julian." The clapperboard hello.
+2. **Four primary actions**: NEW PROJECT · CONTINUE (the hero) · PROJECTS · ASSETS.
+3. **Studio-wide stat cards**: projects / characters / scenes / locations — the asset
+   empire at a glance, across all projects.
+4. **ACTIVE PRODUCTION card** (the centerpiece): project name · PIPELINE PROGRESS 09/10
+   with bar · all 10 steps as chips with done-state lit · OPEN drops you at the current
+   step. One glance = full production state; one click = back to work.
+5. **QUICK GENERATE panel**: deep links straight to Characters / Locations / Storyboard /
+   Footage / Voice-overs — skip the rail, jump to any generation surface.
+6. **ENGINES panel with live latency**: Claude ~8s · EvoLink ~30s · ElevenLabs ~2s — "is
+   my toolchain healthy" answered before you start.
+7. **RECENT PRODUCTIONS**: resume cards with scene/char counts + relative time ("10m ago").
+8. **CAPABILITIES strip**: each studio capability + the engine powering it (Script
+   Analysis→Claude, Character Design→Nano Banana, Location Plates→4 angles, Storyboarding→
+   auto-ref, Video Gen→Kling O3, Voice→ElevenLabs, Rough Cut→timeline) — orientation and
+   honesty about what runs on what. (Note: their video engine is per-surface selectable —
+   dashboard says Kling O3, the footage page fired Seedance. Multi-provider is native.)
+9. **Header token balance**, always visible. Engine version in the footer.
+
+**OUR DASHBOARD (Brick 3's front door) — same anatomy, three upgrades they don't have:**
+- **DECISIONS WAITING** — the director's inbox, our unique advantage: "SH3 candidate
+  awaiting your review", "Gate 2 sign-off pending", "1 retake brief open". Our engine
+  already computes every one of these (approval ledger, gate states, candidate batches);
+  their dashboard has no concept of it. This becomes the FIRST card — the studio tells
+  Julian what needs his eye before anything else.
+- **REAL SPEND, not tokens** — today / this episode / per-scene actual dollars from
+  cost_ledger.jsonl, next to the estimate for the next planned batch.
+- **ENGINES = our real health checks** — the API-health verification we already built
+  (fal, ElevenLabs, OpenAI, Gemini) surfaced live with measured latency, not vibes.
+
 ## PART 3.5 — THE NO-STRAITJACKET LAW (Julian's ruling, 2026-07-24 — "their prompts have
 produced top quality AAA pixar… don't kill them with straitjackets", said twice)
 

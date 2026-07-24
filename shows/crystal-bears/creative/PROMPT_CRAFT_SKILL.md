@@ -131,6 +131,37 @@ Craft that lives ABOVE the shot — the scene- and episode-scale devices:
 126/52 — either the project was revised between sessions or the oracle is summarising a
 different revision. The craft holds either way; the numbers are not load-bearing for us.)
 
+## THE STORY ANALYSIS LAYER (the reading side, captured session #16)
+
+Upstream of all writing — how the script is READ before a single shot is authored:
+
+1. **SUBTEXT → MICRO-ACTION.** Internal state is never stated; it is externalized as
+   behaviour. "Keen checks his satchel" becomes "Adjusts the map. Moves the satchel an
+   inch. Checks the berry pouch. His paws are precise, deliberate, slightly anxious in
+   their thoroughness." Anxiety = repeated adjustment. Read the WHY behind every script
+   verb, then write the why as visible business.
+2. **THE BEAT TAXONOMY.** Each shot carries exactly one beat, and beats have types:
+   Decision · Action · Reveal · Emotional · Absorption. (Their wristband sequence: invoke
+   → reach → reveal → speak-of-the-father → receive-in-silence, one type per shot.) The
+   Absorption beat — a shot spent purely processing ("He does not look up yet") — is the
+   one amateur storyboards always cut and this craft always keeps.
+3. **ARC LANGUAGE TRACKING.** A character's arc lives in the ADJECTIVES evolving across
+   scenes: Keen goes "forced confidence" (Scene 4) → "no hesitation" (Scene 7) → "no
+   longer trying to be brave. Just… home." (Scene 9). Write the arc's word-progression
+   first; each scene's prompts then draw from that scene's register only.
+4. **TURNING-POINT TREATMENT.** At the irreversible moment: time dilates ("silhouetted
+   against a flash of lightning for one frozen instant") and ABSENCE becomes the image
+   ("He disappears beneath the surface. The boat bobs alone."). The empty frame after
+   commitment is the proof of it.
+5. **ONE LOCATION, TWO WEATHERS.** The same place is written in deliberate parallel
+   structure across moods — the cove "breathes tranquility... the ocean's rhythm the only
+   movement" in sanctuary mode, "waves crashing harder... rough and grey" in storm mode —
+   the mirrored sentence shapes make the transformation legible. Location state variants
+   are written as contrasts to each other, never independently.
+6. **THE DOUBLE SCALE SHIFT.** Establish scale, then re-shift it: the flowers that were
+   giants in shot 1 become "tiny... barely visible far below" by shot 16 — the camera now
+   sees from the THREAT's perspective. Scale is a dial to turn mid-scene, not a constant.
+
 ## THE CLOSING PRINCIPLE (theirs, verbatim — now ours)
 
 "Every frame is a painting, every shot is a poem, every scene is a song. You're not

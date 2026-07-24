@@ -359,43 +359,70 @@ def prepare_voice(context, locked_lines, *, log=print):
     return validate_voice_direction(result, locked_lines)
 
 
+_CRAFT_DIR = pathlib.Path(__file__).resolve().parent.parent / "shows" / "crystal-bears" / "creative"
+
+
+def _craft_curriculum():
+    """Loads the house craft curriculum VERBATIM (Julian's Gold Build ruling, 2026-07-24:
+    everything gold from the AnyFilm transfer goes in whole — "dont kill them with
+    straight jackets"; never summarized, never paraphrased). Read fresh on every call so
+    an edit to either doc reaches the very next authored card."""
+    parts = []
+    for name in ("PROMPT_CRAFT_STANDARD.md", "PROMPT_CRAFT_SKILL.md"):
+        p = _CRAFT_DIR / name
+        parts.append(f"===== {name} =====\n" + p.read_text(encoding="utf-8"))
+    return "\n\n".join(parts)
+
+
 def prepare_animation(context, images, compiled_brief, *, log=print):
-    """THE DELIVERY-IS-COMPILATION FIX (2026-07-21), simplified the same day per Julian's
-    own framing ("once we've built the key frame, they need to think of how, when they see
-    the key frame, they are then going to bring that to life through animation to ensure
-    that the beat lands"): compiled_brief is what the Director, Producer and
-    Cinematographer already decided together at storyboard time — cb_engine.
-    compile_shot_contract's own deterministic output. This call's real job is looking at
-    the actual approved keyframe (the first attached image) and animating it so the beat's
-    payoff actually lands — the joke hits, the feeling reads."""
+    """THE REGISTER WRITER (Julian's Gold Build ruling, 2026-07-24 — "we are going to be
+    brave... build it out properly... only the new way is being created and presented to
+    the API", and same day: "the magic is in the prompting, that has to be that way"):
+    supersedes both the 2026-07-21 delivery-is-compilation shape and the 2026-07-23
+    tempo-map law. The specialist now WRITES the complete formula cinematic prompt at the
+    house register — the craft curriculum (PROMPT_CRAFT_STANDARD.md +
+    PROMPT_CRAFT_SKILL.md, the AnyFilm-derived transfer, loaded verbatim) is its mind.
+    compiled_brief is cb_engine.compile_shot_contract's SOURCE MATERIAL (labelled
+    storyboard facts, never pre-written prose). Dialogue rides INLINE and VERBATIM — the
+    formula standard proven on S1.SH3's approved take — while @Audio1 stays attached as
+    the acted performance the render syncs to. The machine never rewrites or trims what
+    this writes; cb_render's formula gate only verifies skeleton, drift vocabulary and
+    verbatim dialogue afterward."""
     return cb_llm.structured(
         _system("animation",
-                "The first image is the approved keyframe — look at it. Everything below "
-                "is what the Director, Producer and Cinematographer already decided at "
-                "storyboard time. Your job: bring that exact frame to life so the beat "
-                "lands — ground every choice in the brief and the frame, never invent new "
-                "staging or performance. Remaining attachments follow the reference order "
-                "in the context.\n\n"
-                # THE TEMPO-MAP LAW (2026-07-23, Julian, watching a real take play at one
-                # even middle pace — "lacks the heart pace and feeling"): compared directly
-                # against the one approved take this show has, whose prompt carried
-                # explicit timestamped segments; the takes without them all rendered flat.
-                "STRUCTURE LAW — THE TEMPO MAP: the performance body of providerPrompt "
-                "MUST be broken into chronological TIMESTAMPED segments covering the full "
-                "shot duration (e.g. '0.0-4.5s:', '4.5-7.0s:', ... to the final second — "
-                "use the real fireDurationSec from the context). Each segment states its "
-                "own TEMPO explicitly — fast/brisk/accelerating vs slowed/held/near-still "
-                "— because the CONTRAST between quick chaos and a slowed-down beat IS the "
-                "comedy. Honor the brief's own 'Tempo:' design and each dialogue line's "
-                "startSec/endSec when placing segments. A prompt where every moment moves "
-                "at the same pace is a structural failure, not a style choice. Serve the "
-                "brief's 'Felt intent:' line — every camera, timing and performance choice "
-                "exists to make that one feeling land."),
-        "THE APPROVED BRIEF — what was already decided:\n" + compiled_brief +
+                "You are the studio's register writer — the cinematic-prompt author. The "
+                "first attached image is the approved opening frame: look at it, and "
+                "write the shot that brings it to life. Below is the complete house "
+                "craft curriculum — it is your mind; write at its full level.\n\n"
+                "THE FORMULA (structural law — the only fixed skeleton):\n"
+                "1. If any dialogue exists, the prompt's first line is exactly: "
+                "ENGLISH DIALOGUE ONLY, spoken in English.\n"
+                "2. Then 'Shot 1:' — and 'Cut to. Shot N:' for each internal cut, in the "
+                "source material's own order. Each shot written at full register: camera "
+                "+ lens + movement first, then subject and action as cause and visible "
+                "consequence, depth staging, light as the narrative clock, "
+                "micro-performance, render craft, and a closing emotional anchor. Rich, "
+                "cinematic, uncapped — the magic lives in this writing.\n"
+                "3. Every dialogue line in the source material appears INLINE, word for "
+                "word, as SPEAKER: line — immediately after the action that earns it. "
+                "Never reworded, never omitted, nothing invented.\n"
+                "4. End on a held look: a closing HOLD sentence bringing the clip to "
+                "stillness — '... about 2 seconds of silence, no more dialogue.' This is "
+                "the clean-frame harvest window.\n"
+                "5. NEVER write any duration into the prompt (the API parameter carries "
+                "it); the only sanctioned time phrase is the closing hold's own 'about 2 "
+                "seconds'.\n"
+                "6. Light is written ONLY in the source material's SET & LIGHT LAW "
+                "vocabulary — concrete sky/sun/shadow states; time-of-day words "
+                "(sunset, golden-hour, dusk, amber light) are banned and refuse the "
+                "save.\n\n"
+                "===== THE HOUSE CRAFT CURRICULUM (verbatim) =====\n" +
+                _craft_curriculum()),
+        "SOURCE MATERIAL — the storyboard-approved facts. Write the card FROM these: "
+        "invent cinematic craft freely, never new story facts:\n" + compiled_brief +
         "\n\nSHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
-        "\n\nReturn the exact Seedance reference-to-video prompt. Keep all spoken words out "
-        "of providerPrompt; refer to the approved track only as @Audio1. Then one plain "
-        "sentence on whether this animation will land the beat.",
+        "\n\nReturn the complete formula prompt as providerPrompt, then one plain "
+        "sentence on whether this clip will land the beat.",
         AnimationDirection, label="department_animation", log=log, images=images)
 
 

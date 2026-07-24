@@ -1786,19 +1786,14 @@ def _check_no_dialogue_leak(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
                       f"lives in @Audio1, never typed as speech for the provider to generate.")
 
 
-_TEMPO_SEGMENT_RE = re.compile(r"\b\d{1,2}(?:\.\d)?\s*[-–—]\s*\d{1,2}(?:\.\d)?\s*s\b")
-_TEMPO_WORDS_RE = re.compile(
-    r"\b(fast|brisk|quick|rapid|accelerat\w*|slow\w*|held|hold\w*|near-still|snap\w*|"
-    r"burst\w*|linger\w*|beat to register|pause)\b", re.IGNORECASE)
-
-
 # ── THE DRIFT-VOCABULARY BAN (2026-07-24, Julian — "we cannot have any dead links or old
 # prompt styles"): S1.SH3 fired a pre-house-template prompt carrying "sunset backlight"/
 # "warm saturated sunset light" — the exact vocabulary the whole S1.SH2 campaign proved
 # drags Seedance into golden-hour drift (9 takes; only the high-key/white-sun recipe held).
-# Nothing structurally stopped an old-style prompt from firing; this closes that for good.
 # Light vocabulary belongs to the shot's own SET_CONSTRAINTS (scene-authored), NEVER a
 # global constant or leftover prose — these words are banned from any prompt that ships.
+# (Restored 2026-07-24 same day: the Gold Build's tempo-map deletion accidentally cut this
+# adjacent block — caught immediately by the standing test suite, which is exactly its job.)
 _DRIFT_VOCAB_RE = re.compile(
     r"\b(sunset|golden[- ]hour|dusk|twilight|late[- ]afternoon|amber (?:light|glow)|"
     r"warm saturated)\b", re.IGNORECASE)
@@ -1818,33 +1813,84 @@ def _check_no_drift_vocab(prompt_text, *, refuse_prefix="REFUSED"):
                       f"reword at the source; no bypass exists for this check.")
 
 
-def _check_tempo_map(prompt_text, *, refuse_prefix="REFUSED"):
-    """THE TEMPO-MAP ENFORCEMENT (2026-07-23, Julian — "dont fire anything else until we
-    sort the prompting structure... lacks the heart pace and feeling"): evidence-based,
-    not theoretical — the ONE approved take this show has (S1.SH1) shipped with explicit
-    timestamped segments ('0.0-5.5s:', each with its own stated pace); the three takes
-    without them all rendered at one even middle pace. A candidate Animation Direction
-    whose providerPrompt has no timestamped segments, or names no explicit tempo words at
-    all, is refused at SAVE time — the same enforcement point and pattern as
-    _check_no_dialogue_leak, so a structurally flat prompt can never become a candidate,
-    let alone fire. Two concrete, mechanical criteria (rule-17 discipline: never a vague
-    'does this feel paced' judgment): (1) at least two timestamped segment markers
-    ('N.N-N.Ns'); (2) at least three explicit tempo words anywhere in the body."""
-    segs = _TEMPO_SEGMENT_RE.findall(prompt_text or "")
-    tempo_hits = _TEMPO_WORDS_RE.findall(prompt_text or "")
+# ── THE FORMULA GATE (Julian's Gold Build ruling, 2026-07-24 — "only the new way is
+# being created and presented to the API"): supersedes THE TEMPO-MAP LAW (2026-07-23),
+# whose enforcement machinery (_TEMPO_SEGMENT_RE/_TEMPO_WORDS_RE/_check_tempo_map) is
+# DELETED here, not kept dormant — the register's own per-shot motion writing carries pace
+# now. The fired prompt must be the house formula: header when dialogue exists, labelled
+# 'Shot N:' segments, 'Cut to.' transitions, dialogue INLINE and VERBATIM (the AnyFilm
+# standard proven on S1.SH3's approved take — dialogue-in-prompt is now the LAW, not a
+# confirmed experiment), a closing HOLD tail, and no duration text. Structure is the only
+# hard skeleton; richness is never trimmed (the No-Straitjacket Law).
+_SHOT_LABEL_RE = re.compile(r"\bShot (\d+):")
+_HOLD_TAIL_RE = re.compile(r"\bHOLD\b[\s\S]{0,200}?about 2 seconds", re.IGNORECASE)
+_HOLD_PHRASE_RE = re.compile(r"about 2 seconds(?: of silence)?", re.IGNORECASE)
+_DURATION_TEXT_RE = re.compile(r"\b\d{1,3}(?:\.\d+)?\s*(?:s|sec|secs|second|seconds)\b",
+                               re.IGNORECASE)
+
+
+def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUSED"):
+    """Hard gate: the fired prompt IS the formula, or it does not fire. Also THE STALE-
+    FORMAT DOOR — any pre-Gold prompt shape (the old lean brief, tempo-map bodies,
+    [STYLE_HEADER] experiments, source-material briefs) fails these checks by
+    construction and can never reach the provider again."""
+    text = str(prompt_text or "")
     problems = []
-    if len(segs) < 2:
-        problems.append(f"only {len(segs)} timestamped segment marker(s) found — the "
-                        f"performance body must be broken into chronological 'N.N-N.Ns:' "
-                        f"segments covering the full duration")
-    if len(tempo_hits) < 3:
-        problems.append(f"only {len(tempo_hits)} explicit tempo word(s) found — each "
-                        f"segment must state its own pace (fast/brisk vs slowed/held); "
-                        f"the contrast is the comedy")
+    has_dialogue = bool(dialogue_lines)
+    if has_dialogue and not text.lstrip().startswith("ENGLISH DIALOGUE ONLY"):
+        problems.append("dialogue present but the prompt does not open with the exact "
+                        "header 'ENGLISH DIALOGUE ONLY, spoken in English.'")
+    shots = _SHOT_LABEL_RE.findall(text)
+    if not shots:
+        problems.append("no 'Shot 1:' segment — the formula requires labelled shots")
+    n = len(set(shots))
+    if n >= 2 and text.count("Cut to.") < n - 1:
+        problems.append(f"{n} shots but only {text.count('Cut to.')} 'Cut to.' transition(s)")
+    if not _HOLD_TAIL_RE.search(text):
+        problems.append("missing the closing HOLD tail ('HOLD … about 2 seconds') — the "
+                        "clean-frame harvest window")
+    stripped = _HOLD_PHRASE_RE.sub("", text)
+    dur = _DURATION_TEXT_RE.findall(stripped)
+    if dur:
+        problems.append(f"duration text in the prompt ({', '.join(sorted(set(d.strip() for d in dur))[:3])}) "
+                        f"— duration is an API parameter, never prompt text")
+    # Verbatim check normalizes smart punctuation (curly vs straight apostrophes/quotes,
+    # en/em dashes, ellipsis) — the exactText field and the authored card legitimately
+    # differ only in typographic form; that is not a missing line. (Found live on S1.SH4's
+    # gold prompt: "A Storm\u2019s coming" vs "A Storm\u0027s coming".)
+    def _norm_punct(s):
+        s = (s.replace("\u2019", "'").replace("\u2018", "'")
+               .replace("\u201c", '"').replace("\u201d", '"')
+               .replace("\u2013", "-").replace("\u2014", "-").replace("\u2026", "..."))
+        return re.sub(r"\s+", " ", s)
+    norm = _norm_punct(text)
+    for d in dialogue_lines or []:
+        get = d.get if isinstance(d, dict) else (lambda k, _d=d: getattr(_d, k, None))
+        exact = _norm_punct(str(get("exactText") or "").strip())
+        if exact and exact not in norm:
+            problems.append(f"dialogue line missing verbatim — {get('speaker')}: "
+                            f"\"{exact[:60]}\"")
     if problems:
-        raise Refused(f"{refuse_prefix} — THE TEMPO MAP LAW: " + "; ".join(problems) +
-                      ". A prompt where every moment moves at one even pace renders flat "
-                      "— restructure, never fire this.")
+        raise Refused(f"{refuse_prefix} — THE FORMULA GATE: " + "; ".join(problems))
+
+
+def check_craft_components(prompt_text):
+    """ADVISORY ONLY — never blocks, never trims (the No-Straitjacket Law). Flags a card
+    missing one of the register's load-bearing craft components so the reviewer sees the
+    gap; the ten-component standard lives in PROMPT_CRAFT_STANDARD.md."""
+    text = str(prompt_text or "")
+    flags = []
+    if not re.search(r"\b\d{2,3}mm\b", text):
+        flags.append("no focal length (NNmm) named")
+    if not re.search(r"\b(foreground|midground|background|bokeh|soft focus)\b", text, re.I):
+        flags.append("no depth-staging language")
+    if not re.search(r"\b(light|sun|sky|shadow|rim|catchlight|glow|backlit|backlight|grey)\b",
+                     text, re.I):
+        flags.append("no light state written")
+    if not re.search(r"\b(static|locked|push|crane|tracking|handheld|orbit|pan|drift|follow)\b",
+                     text, re.I):
+        flags.append("no camera movement named")
+    return flags
 
 
 def _review_frames(video_path, max_frames=4):
@@ -2022,12 +2068,14 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             context["measuredAudioDurationSec"] = _audio_dur(led.get("voPath")) if led.get("voPath") else None
             context["fireDurationSec"] = _handle_duration(led.get("voPath"), shot.get("durationSec"))
             result = cb_departments.prepare_animation(context, images, brief, log=log)
-            _check_no_dialogue_leak(result.providerPrompt, shot.get("dialogueLines") or [],
+            # THE FORMULA GATE (Gold Build, 2026-07-24): the register writer's card must
+            # BE the formula — dialogue inline verbatim, labelled shots, the HOLD tail.
+            # Replaces the retired leak-check + tempo-map pair on this path.
+            check_formula_structure(result.providerPrompt, shot.get("dialogueLines") or [],
                                     refuse_prefix="REFUSED — Animation Director's own candidate; "
                                                   "no candidate saved")
-            _check_tempo_map(result.providerPrompt,
-                             refuse_prefix="REFUSED — Animation Director's own candidate; "
-                                           "no candidate saved")
+            for _flag in check_craft_components(result.providerPrompt):
+                log(f"  CRAFT FLAG (advisory) — {_flag}")
             # THE DRIFT-VOCABULARY BAN, at authoring (2026-07-24): the LLM can invent
             # "sunset light" from pure meadow association even with a clean context —
             # confirmed live on S1.SH1's own regeneration. A dirty candidate is refused
@@ -2145,7 +2193,9 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
             raise Refused(f"REFUSED — {stage}'s exact provider text cannot be blank")
         if stage == "animation":
             shot = _shot(pkg, shot_id)
-            _check_no_dialogue_leak(value, shot.get("dialogueLines") or [])
+            check_formula_structure(value, shot.get("dialogueLines") or [],
+                                    refuse_prefix="REFUSED — edited Animation candidate")
+            _check_no_drift_vocab(value, refuse_prefix="REFUSED — edited Animation candidate")
         output["providerPrompt"] = value
     cand["editedAt"] = _now(); cand["editedBy"] = reviewed_by
     save_extra(); _save(pkg, path)
@@ -3882,13 +3932,14 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
     text = str(prompt_text or "").strip()
     if not text:
         raise Refused(f"REFUSED — {shot_id}'s working Seedance prompt cannot be blank")
-    if dialogueInPromptConfirmed:
-        log(f"⚠⚠⚠ LAW 6 BYPASS CONFIRMED — {shot_id}'s working prompt contains the spoken "
-            f"words themselves, saved as a deliberate director-ordered experiment by "
-            f"{reviewed_by}. The model may voice these words itself over @Audio1.")
-    else:
-        _check_no_dialogue_leak(text, shot.get("dialogueLines") or [],
-                                refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
+    # THE FORMULA GATE (Gold Build, 2026-07-24): dialogue-in-prompt is now the LAW, not a
+    # confirmed experiment — the 2026-07-23 dialogueInPromptConfirmed bypass is retired
+    # (parameter kept for caller compatibility, ignored). Every working prompt must BE the
+    # formula, with every dialogue line inline and verbatim.
+    check_formula_structure(text, shot.get("dialogueLines") or [],
+                            refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
+    for _flag in check_craft_components(text):
+        log(f"  CRAFT FLAG (advisory) — {_flag}")
     # THE DRIFT-VOCABULARY BAN (2026-07-24) — refused at save, so a bad working prompt
     # never even sits on the ledger waiting to fire.
     _check_no_drift_vocab(text, refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
@@ -4010,10 +4061,12 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         # provision for timing not dialog") so a legitimate lip-sync cadence reference is
         # never mistaken for a Law 6 violation here either.
         try:
-            _check_no_dialogue_leak(resolved_prompt, shot.get("dialogueLines") or [],
-                                    refuse_prefix="LAW 6")
+            check_formula_structure(resolved_prompt, shot.get("dialogueLines") or [],
+                                    refuse_prefix="FORMULA")
         except Refused as e:
             blockers.append(str(e))
+        warnings.extend(f"craft component (advisory): {f}"
+                        for f in check_craft_components(resolved_prompt))
 
     verdict = "blocked" if blockers else ("warnings" if warnings else "passed")
     result = {"verdict": verdict, "blockers": blockers, "warnings": warnings,
@@ -4093,13 +4146,12 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     # prompt carries an explicit, on-the-record dialogueInPromptConfirmed — the same
     # confirmation save_seedance_working banner-logged and recorded; the fire re-announces
     # it rather than silently re-blocking what the director explicitly ordered.
-    _wp = led.get("workingSeedancePrompt") or {}
-    if using_working and _wp.get("dialogueInPromptConfirmed"):
-        log(f"⚠⚠⚠ LAW 6 BYPASS ACTIVE — {shot_id} fires with the spoken words in the prompt, "
-            f"per the director-confirmed experiment recorded at save ({_wp.get('savedBy')}).")
-    else:
-        _check_no_dialogue_leak(shot["seedancePrompt"], shot.get("dialogueLines") or [],
-                                refuse_prefix=f"REFUSED — {shot_id}'s compiled prompt")
+    # THE FORMULA GATE AT FIRE — the stale-format door (Gold Build, 2026-07-24): the
+    # resolved prompt must BE the house formula, unconditionally. Any pre-Gold shape (old
+    # lean brief, tempo-map body, [STYLE_HEADER] experiment, source-material brief) fails
+    # here and can never be presented to the API.
+    check_formula_structure(shot["seedancePrompt"], shot.get("dialogueLines") or [],
+                            refuse_prefix=f"REFUSED — {shot_id}'s resolved prompt")
 
     # THE HANDLE DOCTRINE, RESTORED AT SHOT LEVEL (2026-07-19, Julian: "we want 15 second
     # clips with 2 seconds at the end to have for editing" — raised after S1.SH1's real V3

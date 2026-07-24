@@ -170,15 +170,19 @@ def _mock_llm(monkeypatch, animation_prompt=None, cinematography_prompt=None,
                         images=None):
         name = schema.__name__
         if name == "AnimationDirection":
-            # THE TEMPO MAP LAW fixture (2026-07-23): _check_tempo_map refuses any animation
-            # candidate whose providerPrompt lacks timestamped segments + explicit tempo
-            # words — the default stub must satisfy the real save-time contract, exactly as
-            # a real specialist output must. Tests overriding animation_prompt with a
-            # non-compliant prompt are deliberately testing the refusal.
+            # THE FORMULA GATE fixture (Gold Build, 2026-07-24): check_formula_structure
+            # refuses any animation candidate that is not the house formula — header when
+            # dialogue exists, labelled 'Shot N:' segments, 'Cut to.' transitions, every
+            # dialogue line inline verbatim, a closing HOLD tail, no duration text. The
+            # default stub must satisfy that real save-time contract; the shot's one line
+            # is "Nailed it." (see the VoiceDirection stub below).
             return schema(shotId="1.B1.S1", doesItLand="t",
                           providerPrompt=animation_prompt or
-                          "0.0-7.0s: fast brisk opening action with real energy. "
-                          "7.0-14.0s: slowed, held closing beat, near-still and quiet.")
+                          "ENGLISH DIALOGUE ONLY, spoken in English.\n\n"
+                          "Shot 1: Close-up, 85mm, handheld drift. Fuzzby bursts up out of "
+                          "the flower, pollen haloing him in the high-key daylight, and "
+                          "puffs his chest with oblivious pride. FUZZBY: Nailed it.\n\n"
+                          "They hold the look, about 2 seconds of silence, no more dialogue.")
         if name == "CinematographyDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",
                           providerPrompt=cinematography_prompt or

@@ -207,6 +207,22 @@ Two consequences:
 Seedance is a video-generation model. One more proof the oracle invents anything outside
 its own JSON.)
 
+## The oracle's own close-out (session #10, 2026-07-24) — and the real route to backend truth
+
+Asked for the model catalogue, the oracle finally answered with a flat, structured refusal:
+"VERIFICATION IMPOSSIBLE… The project JSON contains ZERO model metadata," listing every
+absent field and labelling every model/price it then named as ESTIMATED industry guesswork
+(still repeating the wrong "Seedance = lip-sync tool" claim — its backend ignorance is now
+self-declared, not just proven by us). Extraction stands closed.
+
+THE ONE ACTIONABLE NUGGET: the oracle's own recommended method for getting the REAL answer
+is ours to execute — **capture the browser Network tab while a generation fires.** Next
+time Julian generates a clip in AnyFilm, watching DevTools/network during the fire captures
+the actual API request: true model name, true duration/resolution parameters, and exactly
+how reference images are attached — the ground truth every confabulated answer failed to
+deliver. Filed as the ONLY remaining intelligence action, to be done live during a real
+generation, not by asking the oracle anything further.
+
 ## Working agreement
 
 AnyFilm is the generation engine and storyboard author; our studio is the canon authority

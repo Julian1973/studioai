@@ -295,3 +295,27 @@ def test_image_model_label_reflects_the_live_seedream_host(monkeypatch):
     # nanobanana model family is unaffected by SEEDREAM_HOST either way
     monkeypatch.setattr(cb_gen, "IMAGE_PROVIDER", "nanobanana")
     assert R._image_model_label() == f"nanobanana:{cb_gen.IMAGE_MODEL}:2K"
+
+
+def test_drift_vocab_gate_refuses_and_passes():
+    """THE DRIFT-VOCABULARY BAN (2026-07-24, Julian — "no dead links or old prompt styles"):
+    the banned light words (proven sunset-drift triggers, S1.SH2 campaign + S1.SH3's live
+    regression) are refused at save, at prepare, and at the fire's own ship point; clean
+    house-template vocabulary passes untouched."""
+    import pytest
+    for bad in ("warm saturated sunset light", "shafts of sunset light", "golden hour glow",
+                "at dusk in the meadow", "late afternoon warmth", "amber light"):
+        with pytest.raises(R.Refused):
+            R._check_no_drift_vocab(bad)
+    # the winning vocabulary and ordinary warm words pass
+    for ok in ("Fresh, high-key daylight with a white sun high and outside the frame",
+               "a warm smile", "golden pollen moustache"):
+        R._check_no_drift_vocab(ok)  # must not raise
+
+
+def test_audit_shot_integrity_clean_on_real_scene1():
+    """Standing regression pin: the real Scene 1 package must stay free of dead links and
+    drift vocabulary in every live prompt — the exact state the 2026-07-24 purge left it in.
+    A failure here means an old prompt style or broken path re-entered the pipeline."""
+    findings = R.audit_shot_integrity(1, "Ep1", log=lambda *a, **k: None)
+    assert findings == [], f"integrity audit regressed: {findings}"

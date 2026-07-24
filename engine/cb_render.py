@@ -1792,6 +1792,32 @@ _TEMPO_WORDS_RE = re.compile(
     r"burst\w*|linger\w*|beat to register|pause)\b", re.IGNORECASE)
 
 
+# ── THE DRIFT-VOCABULARY BAN (2026-07-24, Julian — "we cannot have any dead links or old
+# prompt styles"): S1.SH3 fired a pre-house-template prompt carrying "sunset backlight"/
+# "warm saturated sunset light" — the exact vocabulary the whole S1.SH2 campaign proved
+# drags Seedance into golden-hour drift (9 takes; only the high-key/white-sun recipe held).
+# Nothing structurally stopped an old-style prompt from firing; this closes that for good.
+# Light vocabulary belongs to the shot's own SET_CONSTRAINTS (scene-authored), NEVER a
+# global constant or leftover prose — these words are banned from any prompt that ships.
+_DRIFT_VOCAB_RE = re.compile(
+    r"\b(sunset|golden[- ]hour|dusk|twilight|late[- ]afternoon|amber (?:light|glow)|"
+    r"warm saturated)\b", re.IGNORECASE)
+
+
+def _check_no_drift_vocab(prompt_text, *, refuse_prefix="REFUSED"):
+    """Raises Refused naming every banned drift word found in a prompt about to ship (or be
+    saved as a working version). The fix is always at the SOURCE — reword the prompt/scene
+    data — never an override flag; there is no legitimate reason to ship these words."""
+    hits = sorted({m.group(0).lower() for m in _DRIFT_VOCAB_RE.finditer(prompt_text or "")})
+    if hits:
+        raise Refused(f"{refuse_prefix}: banned drift vocabulary in the prompt — "
+                      f"{', '.join(hits)}. These words caused the documented sunset/"
+                      f"golden-hour drift (S1.SH2 campaign; regressed live on S1.SH3). "
+                      f"Light comes from the shot's own SET_CONSTRAINTS "
+                      f"(e.g. 'high-key daylight, white sun high, clear blue sky') — "
+                      f"reword at the source; no bypass exists for this check.")
+
+
 def _check_tempo_map(prompt_text, *, refuse_prefix="REFUSED"):
     """THE TEMPO-MAP ENFORCEMENT (2026-07-23, Julian — "dont fire anything else until we
     sort the prompting structure... lacks the heart pace and feeling"): evidence-based,
@@ -1966,6 +1992,10 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                                        key=lambda k: int(k[2:])), images)]
             brief, brief_wc, _ = _canonical_compiled_brief(pkg, shot, "cinematography", chars)
             result = cb_departments.prepare_cinematography(context, images, brief, log=log)
+            # THE DRIFT-VOCABULARY BAN, at authoring (2026-07-24) — same wall as animation's.
+            _check_no_drift_vocab(result.providerPrompt,
+                                  refuse_prefix="REFUSED — Cinematographer's own candidate; "
+                                                "no candidate saved")
         elif stage == "voice":
             result = cb_departments.prepare_voice(context, shot.get("dialogueLines") or [], log=log)
         elif stage == "animation":
@@ -1998,6 +2028,13 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             _check_tempo_map(result.providerPrompt,
                              refuse_prefix="REFUSED — Animation Director's own candidate; "
                                            "no candidate saved")
+            # THE DRIFT-VOCABULARY BAN, at authoring (2026-07-24): the LLM can invent
+            # "sunset light" from pure meadow association even with a clean context —
+            # confirmed live on S1.SH1's own regeneration. A dirty candidate is refused
+            # here, never saved, so it can never be approved and never reaches a fire.
+            _check_no_drift_vocab(result.providerPrompt,
+                                  refuse_prefix="REFUSED — Animation Director's own candidate; "
+                                                "no candidate saved")
         elif stage == "review-keyframe":
             rec = led.get("keyframeCandidate") or led.get("keyframeApproval") or {}
             media = rec.get("path")
@@ -3093,6 +3130,8 @@ def keyframe_shot(scene, shot_id, episode="Ep1", spend_token=None, dry_run=False
     # CURRENT, human-approved Cinematography direction exists for this exact shot — checked
     # BEFORE any reference is resolved or any provider call is even considered.
     prompt = _resolve_keyframe_prompt(pkg, shot, scene, episode)
+    # THE DRIFT-VOCABULARY BAN (2026-07-24) — same ship-point check as fire_shot's.
+    _check_no_drift_vocab(prompt, refuse_prefix=f"REFUSED — {shot_id} keyframe")
     characters_cfg = _characters_cfg()
     refs = _slot_paths(shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
 
@@ -3850,6 +3889,9 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
     else:
         _check_no_dialogue_leak(text, shot.get("dialogueLines") or [],
                                 refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
+    # THE DRIFT-VOCABULARY BAN (2026-07-24) — refused at save, so a bad working prompt
+    # never even sits on the ledger waiting to fire.
+    _check_no_drift_vocab(text, refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
     led["workingSeedancePrompt"] = {"text": text, "savedAt": _now(), "savedBy": reviewed_by,
                                      "dialogueInPromptConfirmed": bool(dialogueInPromptConfirmed)}
     _save(pkg, path)
@@ -4117,6 +4159,9 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                                       resolution=resolution)
         envelope, env_hash = _sealed_envelope(pkg, shot, led, imgs, anchor, candidates,
                                                 fast, per, resolution=resolution)
+        # THE DRIFT-VOCABULARY BAN, at the ship point (2026-07-24): the literal text about
+        # to be disclosed and fired — working override or compiled, no path around it.
+        _check_no_drift_vocab(envelope["prompt"], refuse_prefix=f"REFUSED — {shot_id}")
         reroll = (led.get("lastBatchBinding") == binding)
         disclosure = {"shotId": shot_id, "candidateCount": candidates,
                        "resolution": str(resolution),
@@ -4425,6 +4470,85 @@ def _shot_rejection_archives(episode, shot_id):
             found.append(rec)
     found.sort(key=lambda r: r.get("at") or "")
     return found
+
+
+def audit_shot_integrity(scene, episode="Ep1", log=print):
+    """THE STANDING DEAD-LINK + OLD-PROMPT AUDIT (2026-07-24, Julian — "we cannot have any
+    dead links or old prompt styles i asked you to do an audit and this is what you brought
+    back nothing"): the earlier Studio audit checked buttons/state/workflows and never
+    audited the CONTENT already sitting on the ledger — S1.SH3 then fired a pre-template
+    prompt with sunset vocabulary. This closes that scope gap as a permanent, re-runnable
+    command, not a one-off pass:
+      DEAD LINKS  — every file path a shot's live state references must exist on disk
+                    (voPath, harvestFrame, approvedTake, candidatePaths, keyframe approval,
+                    every resolvable reference slot).
+      OLD PROMPTS — every LIVE prompt text (compiled seedancePrompt/keyframePrompt, working
+                    overrides, APPROVED department providerPrompts — never append-only
+                    history) is scanned for the banned drift vocabulary (_DRIFT_VOCAB_RE).
+    Read-only; returns the findings list (empty == clean). CLI: `audit <scene>`."""
+    pkg, _path = load_pkg(scene, episode)
+    findings = []
+
+    def _dead(shot_id, label, p):
+        if p and not os.path.exists(str(p)):
+            findings.append(f"{shot_id}: DEAD LINK — {label}: {p}")
+
+    def _vocab(shot_id, label, text):
+        hits = sorted({m.group(0).lower() for m in _DRIFT_VOCAB_RE.finditer(text or "")})
+        if hits:
+            findings.append(f"{shot_id}: OLD PROMPT VOCAB — {label}: {', '.join(hits)}")
+
+    characters_cfg = _characters_cfg()
+    for shot in pkg["shots"]:
+        sid = shot["shotId"]
+        led = _ledger(pkg, sid)
+        _dead(sid, "voPath", led.get("voPath"))
+        _dead(sid, "harvestFrame", led.get("harvestFrame"))
+        _dead(sid, "approvedTake", led.get("approvedTake"))
+        for c in (led.get("candidatePaths") or []):
+            _dead(sid, "candidate", c)
+        _dead(sid, "keyframeApproval.path", (led.get("keyframeApproval") or {}).get("path"))
+        for slots_field in ("referenceSlots", "keyframeReferenceSlots"):
+            if shot.get(slots_field):
+                try:
+                    anchor = _anchor_for(pkg, shot) if slots_field == "referenceSlots" else None
+                    for p in _slot_paths(shot, slots_field, anchor, scene, episode, characters_cfg):
+                        _dead(sid, f"{slots_field} ref", p)
+                except Refused:
+                    # a Refused here is the pipeline's own sequencing gate speaking (e.g. a
+                    # relay shot whose predecessor isn't approved+harvested yet) — correct
+                    # order-of-operations state, never a dead link
+                    pass
+                except Exception as e:
+                    findings.append(f"{sid}: DEAD LINK — {slots_field} unresolvable: {e}")
+        _vocab(sid, "compiled seedancePrompt", shot.get("seedancePrompt"))
+        _vocab(sid, "compiled keyframePrompt", shot.get("keyframePrompt"))
+        _vocab(sid, "workingSeedancePrompt", (led.get("workingSeedancePrompt") or {}).get("text"))
+        wkf = led.get("workingKeyframePrompt")
+        _vocab(sid, "workingKeyframePrompt",
+               wkf.get("text") if isinstance(wkf, dict) else wkf)
+        for stage, work in (led.get("departmentWork") or {}).items():
+            for tier in ("approved", "candidate"):
+                out = ((work or {}).get(tier) or {}).get("output") or {}
+                if isinstance(out, dict) and out.get("providerPrompt"):
+                    _vocab(sid, f"{stage} {tier} providerPrompt", out["providerPrompt"])
+
+    # scene-level: the Scene Look's own department work (the plate prompt) gets the same scan
+    for stage, work in ((pkg.get("sceneLook") or {}).get("departmentWork") or {}).items():
+        for tier in ("approved", "candidate"):
+            out = ((work or {}).get(tier) or {}).get("output") or {}
+            if isinstance(out, dict):
+                for fld in ("providerPrompt", "paletteAndLighting"):
+                    if out.get(fld):
+                        _vocab("SCENELOOK", f"{stage} {tier} {fld}", out[fld])
+
+    if findings:
+        log(f"AUDIT — scene {scene}: {len(findings)} finding(s)")
+        for f in findings:
+            log("  ✗ " + f)
+    else:
+        log(f"AUDIT — scene {scene}: CLEAN (no dead links, no drift vocabulary in any live prompt)")
+    return findings
 
 
 def reconcile_shot_history(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
@@ -5595,6 +5719,9 @@ if __name__ == "__main__":
             metrics(pos[0], ep(1))
         elif cmd == "evidence":
             evidence_pack(pos[0], ep(1))
+        elif cmd == "audit":
+            findings = audit_shot_integrity(pos[0], ep(1))
+            sys.exit(1 if findings else 0)
         else:
             print(f"unknown command {cmd}"); sys.exit(1)
     except Refused as e:

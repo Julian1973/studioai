@@ -91,6 +91,38 @@ scale + intimacy) → write each shot as mini-cinema in the build order → add 
 callbacks → consolidate into clips (producer pass) → final edit: every shot's job named,
 redundancy cut → generate.
 
+## THE EPISODE LAYER (from the forensic self-breakdown, captured 2026-07-24)
+
+Craft that lives ABOVE the shot — the scene- and episode-scale devices:
+
+1. **THE LIGHT SCORE.** The whole episode carries a colour-temperature score, written per
+   scene before any shot is authored — Scene 1: warm→cooling edges→bruise-purple ·
+   Scene 2: rose-pink vision glow · Scene 7: storm grey → underwater blue-grey → amber
+   wristband glow → multicolour beacon · Scenes 8-10: post-storm golden resolution. Light
+   colour tells the emotional story independent of dialogue; every shot's light-clock line
+   is one bar of this score. OUR HOME for it: the scene's own look field authored as an
+   arc (start-state → turn → end-state), which every shot's component 4 then plays from.
+   (Our light vocabulary still applies at the word level.)
+2. **SHOT-PURPOSE ANNOTATION.** Their storyboard review names, per shot: TYPE · CAMERA ·
+   PURPOSE · KEY CREATIVE DECISIONS. Adopt as the storyboard review format — a shot whose
+   Purpose line can't be filled is cut before it costs anything.
+3. **THE COVERAGE TABLE.** Per scene, count shots by type (their pier scene: 1 W-est /
+   4 M / 6 MCU / 5 CU / 2 XCU) — the ratio proves the scene is editable before generation.
+4. **THE CONTEXT-SHIFT DEVICE.** One visual element, meaning changed by context: the
+   pollen is comedy in shot 5 ("absurd fuzzy moustache") and drama by shot 12 ("now looks
+   like war paint"). Cheapest emotional payoff in the toolkit — the asset is already on
+   screen; only the frame around it changes.
+5. **CLIP COMPILATION WITH STATED REASON.** Every clip grouping carries its why ("complete
+   visual gag arc," "dialogue exchange," "tonal transition needs cohesion") — the packing
+   decision is a creative decision and gets written down like one.
+6. **WARDROBE-STAGE = STORY-STAGE.** Keen's three wardrobe states map 1:1 to his arc
+   (inheritance → crisis → transformation), each with its own reference generation. State
+   changes on the BODY are the arc made visible — our prop-state doctrine, confirmed again.
+
+(Noted, unresolved: this breakdown cites 78 shots/31 clips where the earlier manifest said
+126/52 — either the project was revised between sessions or the oracle is summarising a
+different revision. The craft holds either way; the numbers are not load-bearing for us.)
+
 ## THE CLOSING PRINCIPLE (theirs, verbatim — now ours)
 
 "Every frame is a painting, every shot is a poem, every scene is a song. You're not

@@ -160,6 +160,21 @@ scratches from years of wear").
 Sequenced micro-actions ARE the animation timing. Screen direction ("frame-left") is
 spatial continuity. Light change IS the emotion.
 
+## THE ANCHOR HIERARCHY (what the model grips first, captured session #20)
+
+Priority order of what visual AI actually latches onto — write in this order of strength:
+1. SUBJECT (names = retrieval tags) · 2. CAMERA (framing before content) · 3. LIGHT
+(mood baseline) · 4. SPATIAL (the FG/MG/BG depth map) · 5. ACTION (temporal anchors) ·
+6. TEXTURE (material detail) · 7. COLOR (palette) · 8. ATMOSPHERE (weakest — the
+interpretive layer, always LAST). Poetry rides on top of anchors: "the warmth of hands
+that once wore them" works because "worn leather grain, tiny scratches" anchored the age
+first — the scratches are for the model, the warmth is for the human, in that order.
+
+THE FIRST-50-TOKENS RULE: camera setup + primary subject + key action + light quality all
+land inside the opening tokens; everything after is refinement. THE INVERTED PYRAMID:
+critical → important → refinement → flavour — "if the model stops reading halfway through,
+you still get a usable image."
+
 ## WRITING AROUND MODEL LIMITATIONS
 
 Fragile actions (paws/hands doing precise things) are decomposed into micro-action chains
@@ -167,6 +182,15 @@ with the RESULT embedded, giving the model multiple chances to land it: not "Kee
 rope" but "Keen's paws move to the rope cleat — his fingers curl around the hemp. He pulls
 the loop through. The rope slides. His paws are careful, practiced." Even if a step renders
 imperfectly, the action still reads.
+
+THE WEAKNESS WORKAROUND TABLE (session #20): complex hand poses → simplify ("paws
+clasped," never "fingers interlaced") + macro shallow DOF hides finger errors + locked-off
+camera removes tracking risk · readable text → never ("worn inscription," not "reads
+'courage'") · counting → never a number ("a cluster of flowers," not "five flowers") ·
+perfect symmetry → don't ask; write "slightly off-center" · rapid spin → "frozen instant"
+or "slight motion blur," never "spinning rapidly" (temporal coherence breaks) ·
+transparency/overlap → order the layers explicitly ("midground Y visible through
+foreground X").
 
 ## THE PHASE MAP (script → generation)
 
@@ -238,6 +262,44 @@ Upstream of all writing — how the script is READ before a single shot is autho
 6. **THE DOUBLE SCALE SHIFT.** Establish scale, then re-shift it: the flowers that were
    giants in shot 1 become "tiny... barely visible far below" by shot 16 — the camera now
    sees from the THREAT's perspective. Scale is a dial to turn mid-scene, not a constant.
+
+## REFERENCE INTEGRATION (the four source traditions — our own synthesis, 2026-07-24)
+
+The register works because it speaks four established visual traditions the model was
+trained on. Naming a tradition's technique in its OWN vocabulary retrieves that
+tradition's look:
+
+1. **PIXAR ANIMATION PRINCIPLES → prompt language.**
+   - *Appeal*: poses that read at thumbnail size — "puffs out his tiny chest proudly."
+   - *Staging*: one idea per shot, silhouette-clear — "Camera holds on the absurd image —
+     two tiny legs waving from inside a pink flower cup."
+   - *Anticipation / squash-and-stretch / follow-through*, named literally: "full
+     anticipation, hit, squash-and-stretch recovery, then right back to top speed."
+   - *Secondary action*: the world reacting to the primary action — "pollen dust halos
+     him," "loose petals spiral down," "leaves and rain swirl in his wake." The echo
+     proves the physics.
+2. **LIVE-ACTION CINEMATOGRAPHY GRAMMAR.** Real lenses, real coverage, eyelines, screen
+   direction ("looks frame-left"), OTS, shot/reverse at matching lengths, editorial rhyme.
+   Why it matters: the model trained on a century of filmed cinema — writing in film
+   grammar retrieves filmed-looking results. This is the single biggest reason their
+   footage feels SHOT rather than generated.
+3. **CLASSICAL PAINTING COMPOSITION.** Rule of thirds · leading lines ("out-of-focus
+   flower stems create vertical leading lines") · repoussoir — foreground elements framing
+   the subject ("massive dewy petals frame the shot in soft bokeh") · chiaroscuro as
+   emotion ("warm rim light still edges his silhouette, but the fill side of his face is
+   cooler now") · negative space = isolation · warm/cool complementary tension = emotional
+   polarity in one frame.
+4. **ANIMATION HISTORY REGISTERS** — three distinct voices, each summonable:
+   - *Disney timing*: comic beats conducted musically — "Beat of perfect comic stillness.
+     Then he POPS back up like a cork." The held beat before the payoff is golden-age
+     Disney, verbatim.
+   - *Miyazaki atmosphere ("ma")*: breathing room with no plot function — "A moment of
+     calm." · the environment alive and indifferent — "the flowers shiver almost
+     imperceptibly," pollen hanging suspended. The quiet IS content.
+   - *Pixar performance*: complex simultaneous emotion as visible behaviour — "disbelief
+     and admiration warring on his face," "tries to keep a straight face. Fails slightly."
+   THE CRYSTAL BEARS HOUSE BLEND: Pixar performance + Disney comic timing + Miyazaki
+   atmosphere for the world's quiet — stated here as our default mix.
 
 ## THE CLOSING PRINCIPLE (theirs, verbatim — now ours)
 

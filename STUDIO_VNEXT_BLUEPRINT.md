@@ -212,6 +212,93 @@ per-stage injection, same shape.
    music intent map (playful flute→ominous brass / tender piano / heroic rise / urgent
    percussion / warm strings) — seeds for our Giacchino-voiced Gate 5 brief.
 
+**ORACLE SESSION #4 — THE FULL EXTRACTION (Julian: "This thing will tell us anything lets
+extract everything," 2026-07-24). The complete battery fired; everything below triaged for
+credibility BEFORE adoption, because a fact-check against our own captured data proved the
+oracle confabulates when asked about backend infrastructure it never actually sees.**
+
+**THE CREDIBILITY RULE (the meta-finding, worth more than any single answer):** the oracle
+is authoritative about ITS OWN I/O contract — the commands it emits, the response envelope,
+the data schema it reads and writes, the prompt-construction algorithm whose output we
+independently captured. It CONFABULATES freely about infrastructure downstream of itself:
+we fact-checked its claimed shot-template rules against the real 126 captured prompts —
+"never under 100 words / 150-300 typical" is FALSE (real: avg 75 words, 122/126 under 100),
+"catchlights in EVERY close-up" is FALSE (7 of 58) — while its structural claims held
+(forbidden phrases "We see/Camera captures/The shot shows": 0 hits in 126; mm lens spec:
+126/126). Its video-API answer named `runway-gen3-alpha-turbo` — impossible (Runway has no
+native dialogue audio; the observed clips have native lip-synced English speech), it
+contradicts its OWN earlier voice confession, it self-flagged two models "(hypothetical)",
+claimed a fixed 10s duration (Julian used the real duration slider), and priced characters
+in "Flux Pro 1.1" in one answer and "nano-banana-xl" in another. VERDICT: adopt the
+contract layer, discard the infrastructure layer, and trust only what we observed.
+
+**ADOPTED — HIGH CREDIBILITY (the agent's own contract):**
+
+1. **THE COMPLETE COMMAND SET = BRICK 6's TOOL API, handed over verbatim.** 16 commands:
+   EDIT_SCENE (field: heading|mood|timeOfDay|directorNotes) · SWAP_LOCATION ·
+   ADD/REMOVE_CHAR_FROM_SCENE · SET_SHOT_COUNT · EDIT_SHOT_PROMPT · INSERT_SHOT (after
+   afterShotIdx, -1=start; auto-splices ALL parallel arrays + videoClips indices) ·
+   DELETE_SHOT · BATCH_REPLACE (case-sensitive find/replace across scenes' shot prompts) ·
+   REWRITE_ALL_SHOTS (natural-language direction, structure preserved) · EDIT_VIDEO_PROMPT ·
+   REWRITE_ALL_CLIPS · EDIT_CHARACTER (identity|name|desc) · EDIT_WARDROBE ·
+   EDIT_LOCATION (name|mood|prompt) · SET_STYLE. Response envelope: `{commands[],
+   summary, suggestions[]}` — suggestions are typed one-click follow-ups (REGEN_SHOTS/
+   REGEN_VIDEO/REGEN_WARDROBE/REGEN_LOCATION/AUTO_REWRITE_SHOTS/AUTO_REWRITE_CLIPS/
+   NAVIGATE/REVIEW_CONTINUITY). Ours maps 1:1 onto real engine ops — with our gates
+   (spend tokens, canon, drift vocab, verbatim dialogue) applied to every command.
+2. **THE OPERATIONAL RULES (their agent's actual system-prompt laws — adopt all six):**
+   FULL VALUE REPLACEMENT (never partial edits — write the complete new value);
+   WARDROBE SYNC (an identity change MUST fan out to every wardrobe entry — their version
+   of our sweep-the-pattern rule 11, encoded in the agent itself); CASCADING CHANGES
+   (one user intent = a command batch: "make Scene 1 night" = EDIT_SCENE + SWAP_LOCATION +
+   2× BATCH_REPLACE + REWRITE_ALL_SHOTS); QUESTIONS return empty commands + answer in
+   summary; PROACTIVE THINKING (anticipate the cascade, offer 2-5 typed suggestions);
+   pure-JSON output, all prose in `summary`.
+3. **THE PROJECT SCHEMA = BRICK 2's data model, confirmed.** Scene carries SIX parallel
+   arrays, always same length as `shots`: shotPrompts / shotImages / shotContext
+   ("INT|EXT_locationid_area") / shotChars[][] / shotProps[][] / shotDialogue (empty
+   string = silent shot). videoClips[].shots holds shot INDICES — every insert/delete
+   re-splices all six arrays + clip indices atomically. Characters: identity (THE critical
+   field, repeated verbatim inside every wardrobe desc) + wardrobes[] with sceneIds
+   mapping + per-wardrobe locked seed. Locations: state variants with lightingPreset +
+   weatherConditions. Props exist as a schema (id/desc/category/sceneIds/interactsWith)
+   even where unpopulated — our prop-state doctrine gets a real home.
+4. **CLIP CONSTRUCTION ALGORITHM — VERIFIED against all 48 captures:** prefix → for each
+   shot: "Shot N: [verbatim card]." + dialogue if present → "Cut to." between shots →
+   invariant HOLD tail. Confirmed as their literal assembly code, not a style. Brick 1
+   compiles exactly this, zero-LLM.
+5. **SCENE AGENT ROLE SPLIT:** Director = whole-project orchestration via commands; Scene
+   Agent = single-scene cinematography authoring ONLY (writes shot prompts, cannot touch
+   structure/cast/locations/dialogue). Clean two-agent boundary — ours mirrors it with
+   the added power of reading gate/QA state.
+6. **STYLE PREFIX SYSTEM (matches captured wardrobe cards exactly):** wardrobe prompt =
+   [style prefix] + [identity verbatim] + [wardrobe desc] + "Standing against plain
+   neutral grey backdrop, studio lighting." Location = [style prefix] + [location prompt]
+   + wide-establishing/no-characters suffix. **Shot prompts get NO prefix — sent
+   as-written** (style language lives inside the authored card). Confirmed by our
+   captures. Brick 3 adopts: per-asset-type prefix injection, authored cards untouched.
+7. **TRANSITION GRAMMAR for assembly (plausible + useful, matches their rough cut):**
+   same-scene = 0.3s crossfade · same-location scene change = 0.5s crossfade · location
+   change = hard cut · "CONTINUOUS" heading = near-seamless 0.2s · dramatic mood shift =
+   fade-through-black. NOTE: our own cut grammar (hard cuts in-scene, dissolves only
+   between scenes — Julian's standing rule) OVERRIDES theirs where they conflict; theirs
+   is filed as reference, ours is law.
+8. **FINAL QUALITY PASS check list (their mechanical lint — we already exceed it, two
+   worth stealing):** speaker-not-in-shotChars check and dialogue-missing-from-clip-prompt
+   check — both are OUR verbatim-lock discipline restated; adopt the parallel-array-length
+   integrity check for Brick 2's saves.
+
+**DISCARDED — CONFABULATED (recorded so nobody re-adopts them later):** the video API
+payload (Runway model name, image_weights, motion_bucket, camera_motion params, fixed 10s,
+embedded ElevenLabs voice_mapping inside the video call — contradicts the verified voice
+confession), the model-routing pseudocode (self-flagged "hypothetical" entries), the token
+pricing map (internally contradictory), the ElevenLabs per-character voice-ID table
+(plausible-looking real premade ElevenLabs IDs, but its claimed integration contradicts
+the confirmed "Final Mix not yet built" state; our own proven V3 pipeline with canonical
+voice IDs is strictly better regardless), and the shot-template's numeric rules (disproven
+by measurement above). EXTRACTION COMPLETE — further oracle answers about backend infra
+would be more confabulation; anything else we need comes from observing the UI itself.
+
 ## PART 2 — The agent layer (Julian: "the agent is always in the studio — we need that")
 
 Two agents, always present, both already within our reach because the engine is ours:

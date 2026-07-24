@@ -336,6 +336,26 @@ progress dots footer · "Continue → next step" as the only forward door · age
 docked right + floating scene agent. Our existing dark-neutral cinematic CSS system stays
 (it's already premium); we adopt their DENSITY and card anatomy, not their purple.
 
+**THE ORACLE'S CLEAN-ROOM IA (session #13, 2026-07-24 — design reference, not their real
+code):** asked to spec a rebuild, their oracle produced a full Next.js information
+architecture that quietly ADDS every governance feature we proved absent from their actual
+product (takes[], canon status, approval controls, budget tracking) — its own tacit
+admission of what the product lacks. Nuggets adopted as naming/IA reference for OUR UI
+(structure only; our engine and CSS stand):
+- **The four-verb workflow rail: CREATE → PLAN → PRODUCE → FINISH** — cleaner top-level
+  naming than gate numbers for the user-facing rail (gates stay the internal truth).
+- **THE VAULT** — a global, cross-project persistent-world asset store (characters/
+  locations/props with per-asset status incl. `canon`). This is our locations-library +
+  character-canon doctrine given a front door; adopt the name and the browser view.
+- **"FIX ONE PROBLEM"** — a floating global control that surfaces exactly one blocking
+  decision at a time; maps 1:1 onto our DECISIONS WAITING queue. Adopt the interaction.
+- **Take-comparison view + approval controls co-located with the cost estimator** on every
+  generation screen — our approval sidecars/retake ledger already hold this data; the UI
+  should show takes side by side at the decision moment.
+- **AutopilotToggle + BudgetIndicator in the header** — matches our confirmed autonomy
+  model (self-grading phases auto-advance, real spend never auto-fires) and real spend
+  ledger; surface both globally.
+
 ---
 
 ## PART 3.4 — THE DASHBOARD (captured live, 2026-07-24)

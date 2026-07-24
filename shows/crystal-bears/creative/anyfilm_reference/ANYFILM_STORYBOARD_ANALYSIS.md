@@ -155,6 +155,33 @@ What it adds:
    (all UNKNOWN) — their clips derive cast/refs at generation time from the shot arrays,
    confirming the parallel-array schema as the single source of truth. Brick 2 does the same.
 
+## The continuity scoreboard (oracle session #8, 2026-07-24 — their own 10-mechanism audit)
+
+Asked how continuity survives the Scene-1 clip-1→2 boundary, the oracle audited its own
+project against ten mechanisms and confirmed, with per-field evidence, that SEVEN are
+absent from their product. Scored against what OUR pipeline already does:
+
+| Mechanism | Theirs | Ours |
+|---|---|---|
+| Previous clip's final frame → next start | ❌ none (no endFrame field anywhere) | ✅ THE HARVEST CHAIN — SH3 fired from SH2's real final frame |
+| Storyboard/keyframe reference | ❌ `shotImages` arrays literally EMPTY | ✅ keyframe/opening-frame source choice per shot |
+| Seed consistency | ❌ no seed stored | ➖ our provider takes no seed either (known) |
+| Character reference images | ❌ text-only (and Zenny's text is off-canon, Fuzzby's blank) | ✅ turnarounds, locked canon |
+| Location reference images | ❌ text-only | ✅ the scene plate rides every fire |
+| Wardrobe/progressive state | ⚠️ text-only (pollen arc lives in prose) | ✅ face-state reference image (the 10-take-proven weapon) |
+| Camera state across boundary | ❌ untracked | ⚠️ deliberate-cut doctrine; not tracked as data (by design) |
+| Dialogue timing | ❌ plain strings, no temporal data | ✅ @Audio1 with measured durations drives generation |
+| Automated continuity inspection | ❌ none | ✅ join checks, QA sidecars, retake ledger |
+| Their verdict on themselves | "relies almost entirely on careful prompt engineering" | — |
+
+The one column where their product genuinely leads remains the AUTHORING layer (storyboard
+expansion, the footage formula, the agent UX) — which is exactly what we adopted. The
+delivery/continuity layer is ours end to end. NOTE the internal tension with the earlier
+oracle claim that "clips start from storyboard stills": in this project's actual JSON the
+still arrays are empty — either stills were skipped or they live in backend storage; either
+way the frame-handoff verdict (none) stands. This session also re-confirmed, a third time,
+that the oracle cannot see its backend — extraction stays CLOSED.
+
 ## Working agreement
 
 AnyFilm is the generation engine and storyboard author; our studio is the canon authority

@@ -378,7 +378,7 @@
    "dialogueTiming": "'Buzz Crash!!' is muffled, delivered from inside the flower immediately on impact, as Fuzzby's own cover for the crash.",
    "referenceRoles": "Fuzzby and Zenny character references anchor identity and scale; the approved rainforest/flower Scene Look anchors the corridor and the large tulip; @Audio1 anchors the muffled vocal delivery.",
    "requiresNewKeyframe": false,
-   "intendedDurationRange": "6-8s",
+   "intendedDurationRange": "8-10s",
    "essentialProviderProtections": [
     "This crash reads as genuinely graceless -- no spring-back, no accidental brilliance, a real failure landing with real weight.",
     "Fuzzby is fully swallowed by the tulip, not merely dusted or grazed by it.",
@@ -791,5 +791,5 @@
  },
  "singleShotRegeneration": null,
  "revision": 2,
- "revisionNote": "S1.SH3 retimed 8-10s -> 6-8s (fires at the 7s midpoint) on Julian's rejection of the first candidate, 2026-07-24: 'too slow... no pace'. The 9s fire wrapped ~3.3s of action in 5.7s of stillness; the tighter duration packs the gag. No other shot touched."
+ "revisionNote": "S1.SH3 retimed 6-8s -> 8-10s (9s midpoint) for the fused-formula test, Julian 2026-07-24: two shots + the 2-second hold tail need the room; the earlier 9s failure was stillness, not duration. No other shot touched."
 }

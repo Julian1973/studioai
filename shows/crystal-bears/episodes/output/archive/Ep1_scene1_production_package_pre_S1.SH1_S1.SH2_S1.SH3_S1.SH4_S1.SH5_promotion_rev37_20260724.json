@@ -290,7 +290,7 @@
   {
    "shotId": "S1.SH3",
    "beatCode": "S01-B01-POLLEN-CHAOS",
-   "durationSec": 9.0,
+   "durationSec": 7.0,
    "purpose": "Zenny tries to get back to real work; Fuzzby's haste costs him a genuinely graceless crash this time -- not a triumphant accident, an actual failure -- and he covers with the same bravado as before.",
    "performanceAssignment": "Fuzzby's flight here is careless rather than erratic -- he's not performing, he's distracted, hands full of his own face. The clip and crash happen fast and land hard: no spring-back, no graceful recovery, just a body disappearing into a flower with real weight behind it. The tulip should visibly compress and swallow him -- a genuinely different physical read from the earlier bounces.",
    "camera": "The camera stays with Zenny's focus first, then follows Fuzzby's careless pass and the crash itself -- arriving on the tulip's disturbance rather than a clean, composed impact shot, so the fall reads as genuinely graceless.",
@@ -313,7 +313,7 @@
      "exactText": "Buzz Crash!!",
      "delivery": "[gasps] Buzz Crash!!",
      "startSec": 0.0,
-     "endSec": 9.0,
+     "endSec": 7.0,
      "minOnsetSec": null
     }
    ],
@@ -404,7 +404,7 @@
     "@图4": "scene plate",
     "@Audio1": "voice track"
    },
-   "audioBrief": "SHOT S1.SH3 — voice-only performance for @Audio1.\nFuzzby: \"Buzz Crash!!\" — [gasps] Buzz Crash!!. Target 0.0-9.0s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "audioBrief": "SHOT S1.SH3 — voice-only performance for @Audio1.\nFuzzby: \"Buzz Crash!!\" — [gasps] Buzz Crash!!. Target 0.0-7.0s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
    "internalConstraints": "Hard constraints: This crash reads as genuinely graceless -- no spring-back, no accidental brilliance, a real failure landing with real weight; Fuzzby is fully swallowed by the tulip, not merely dusted or grazed by it; Fuzzby's cover-up call is audibly muffled, coming from inside the flower; no character redesign; no extra characters; no on-screen text; no invented voices; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
   },
   {
@@ -663,7 +663,7 @@
    "internalConstraints": "Hard constraints: The boast-to-crash sequence lands with no gap -- confidence immediately punished, never a beat to react first; Fuzzby's pop-out smile is entirely sincere and oblivious, never knowing or self-aware; Zenny's final sigh and head-shake read as visibly worn-down -- the beat's closing button, not another dry deadpan; no character redesign; no extra characters; no on-screen text; no invented voices; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
   }
  ],
- "totalSec": 63.0,
+ "totalSec": 61.0,
  "continuityLedger": [
   {
    "shotId": "S1.SH1",
@@ -3552,7 +3552,7 @@
   {
    "shotId": "S1.SH3",
    "beatCode": "S01-B01-POLLEN-CHAOS",
-   "status": "approved",
+   "status": "designed",
    "sourceType": "relay",
    "sourceShotId": "S1.SH2",
    "cutInMotivation": "Cutting away on the muffled line is stronger than staying for a recovery beat -- the next shot needs to open on the storm's first real warning, not another Fuzzby recovery.",
@@ -3580,8 +3580,8 @@
      }
     ]
    },
-   "approvedTake": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_c1.mp4",
-   "harvestFrame": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_final_frame.png",
+   "approvedTake": null,
+   "harvestFrame": null,
    "departmentWork": {
     "voice": {
      "approved": {
@@ -3634,34 +3634,34 @@
       "model": "gpt-5.5",
       "scene": "1",
       "shotId": "S1.SH3",
-      "packageRevision": 38,
-      "preparedAt": "2026-07-24T09:25:10",
+      "packageRevision": 37,
+      "preparedAt": "2026-07-24T08:03:24",
       "editedAt": null,
       "preparedBy": "specialist",
-      "sourceHash": "215d449464e80f7c714005db4e86824a72560615c415308e11bf05f9a62134f7",
+      "sourceHash": "8e62ea7ed00a8c0deca3459258c70c0c6ee151519c53d6cee1e16add33319109",
       "signatureVersion": 3,
       "sourceFields": {
        "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
        "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
        "shotId": "381834ec52651b48fdce175369966ada9adbff177e15a15914cd6e0c0780b690",
        "approvedAnchor": "696dc3c95cdf0bf2cfb66e1288afeca88b61a89c7a9f3dcc9046f66e86f1b610",
-       "approvedVoiceAsset": "01561615650f400427ed679ee118436b3d4bdb7eb0a0012d67b8124b67784f1f",
+       "approvedVoiceAsset": "5d0019ec0b38a47e3f6785c57bc89be6cce554113d8d946c2cb9dfe5f0fdb1f5",
        "physicalPerformance": "1801281bf6c631d8f69e86d811868f99073107e4a2821cca15b73692023715cd",
        "references": "12a59ae1f73478b2a5c7db0deaff66ec567aca939bf0e9665cd6d969265f5d20",
        "approvedSceneLookHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-       "durationSec": "b7edbb1d306a68faf170673ebef76f1dfef2045c0c190bdc1bb37837e37504a4",
-       "measuredAudioDurationSec": "b7edbb1d306a68faf170673ebef76f1dfef2045c0c190bdc1bb37837e37504a4",
-       "fireDurationSec": "b7edbb1d306a68faf170673ebef76f1dfef2045c0c190bdc1bb37837e37504a4"
+       "durationSec": "0de7cf39e1e6366122309794e86d197d025a81235881e67ec4f011c9db2df252",
+       "measuredAudioDurationSec": "0de7cf39e1e6366122309794e86d197d025a81235881e67ec4f011c9db2df252",
+       "fireDurationSec": "0de7cf39e1e6366122309794e86d197d025a81235881e67ec4f011c9db2df252"
       },
-      "outputHash": "d83a5b017fdd0bef88546b017904985699de4f8ea69272ee5bcb851ff492dd15",
+      "outputHash": "7deec708177a2c8d48b178c118bd885fc7c453758c44e3f822df8ec04edf2fc3",
       "output": {
        "shotId": "S1.SH3",
-       "providerPrompt": "Stylised feature-quality 3D CGI matching @图1. Original 3D CGI animation for ages 4-8, Pixar-caliber craft: real weight, squash-and-stretch, bold legible staging, character identity locked to reference. Begin exactly on @图1, the approved final frame of the previous shot, preserving identity, relative scale, position, warm backlit lighting, lens feel, flower-meadow set and close character relationship. Use @图2 only for Zenny, @图3 only for Fuzzby, @图4 only for the rainforest flower-meadow set. Use @Audio1 as the only voice track; do not create any other voices, narration, music cues, on-screen text, or foreign-language speech. Do not put spoken words on screen. Preserve the pollen moustache on Fuzzby at the start. No crystals on the bees. Wings continue moving while airborne.\n\nSingle continuous shot, no cuts. The camera stays with Zenny’s focus first, then follows Fuzzby’s careless pass and the crash itself, arriving on the disturbed tulip rather than staging a clean heroic impact. The comedy must read as denial after a genuine failure: this crash has no accidental glory, no spring-back, no elegant recovery, and no triumphant pose.\n\n0.0-1.8s: TEMPO slowed, calm, settled, near-still. Hold the opening frame exactly from @图1 for the first instant: Fuzzby large at left foreground with pollen caked across his moustached face and glasses, Zenny at right with her small knowing look in the same warm sunrise flower field. Zenny gently lets her attention return to work: her smile softens into focused patience, eyes drop toward nearby pollen, mouth remains closed, wings make a quiet steady flutter. Fuzzby is still preoccupied with his own face; his hands come up toward the pollen moustache, rubbing and scrubbing instead of watching where he is going. Camera remains stable and close, favoring Zenny’s attempt to reset.\n\n1.8-3.1s: TEMPO brisk, intrusive, careless. Fuzzby drifts and then flies past Zenny across the frame, both hands scrubbing at his pollen-covered moustached face and glasses, eyes distracted by the mess rather than the path ahead. His wings buzz continuously while airborne; his body has weight, roundness, and slight wobble from rubbing his own face, but he is not doing a showy stunt. Zenny stays composed and unimpressed, barely turning her eyes after him before returning to pollen work; her mouth stays closed. Camera begins a smooth pan/truck following Fuzzby’s pass, letting Zenny slide toward the edge or out of frame.\n\n3.1-4.0s: TEMPO fast and accelerating. Fuzzby’s distracted flight carries him into another flower; he clips it hard with the side of his body and wing/shoulder area while his hands are still occupied at his face. The clipped flower bends sharply and flicks pollen in a small messy burst. This is one blunt contact beat, not a chain of bounces. Fuzzby’s body pitches downward with real momentum, glasses and fur reacting with quick overlap, wings still fluttering but unable to save him.\n\n4.0-4.7s: TEMPO very fast, blunt impact. Fuzzby drops out of control and smashes down into a large tulip revealed in the flower corridor. The tulip visibly compresses under his weight, petals flexing wide then folding around him as his whole body disappears completely inside. No spring-back, no graceful recovery, no accidental brilliance. The impact lands as a heavy, graceless failure: a short squash through Fuzzby’s body on contact, then the tulip swallowing him fully. Natural motion blur on the fast fall and impact; coherent physics and tactile petal deformation.\n\n4.7-6.2s: TEMPO slowed, held comic suspension. Immediately on impact, Fuzzby’s muffled cover-up vocal performance comes from inside the tulip, synced only to @Audio1. Because he is fully swallowed, his mouth is hidden; carry the vocal timing through subtle internal tulip pulses, compressed petal vibrations, and tiny pollen puffs from the flower’s rim, making the sound feel squeezed out by the crash rather than planned. The tulip remains disturbed, bent and wobbling down from the hit. Fuzzby is not visible at all.\n\n6.2-9.0s: TEMPO held, near-still, settling. Let the chaos die quickly into an awkward quiet image: pollen motes drift in the warm backlight, the large tulip sags and quivers once or twice with Fuzzby completely swallowed inside, and the surrounding flowers slowly stop moving. Camera finishes on the tulip’s disturbance, slightly imperfect and close enough to feel the mess rather than a composed victory shot. Zenny is out of frame or barely visible at the edge/background, still focused on her own work and unimpressed by the noise, mouth closed. End on a usable continuity frame: Fuzzby fully hidden inside the large tulip, his presence only implied by the muffled @Audio1 and the disturbed flower; the meadow corridor otherwise settles under the same lighting.\n\nHard constraints: Fuzzby must be fully swallowed by the tulip, not merely dusted, grazed, or perched on it. The crash must read as genuinely graceless and heavy, with no spring-back, no pose, no recovery beat, and no accidental success. Zenny does not speak and does not open her mouth. No extra characters. No redesigns. Preserve character identity, scale, fur texture, glasses, antennae, wings, and the approved set. Richly detailed 3D textures, natural motion blur on fast action, stable feature-film-level polish throughout.",
-       "doesItLand": "Yes, this animation will land the beat because the calm reset, blunt swallowed crash, and muffled denial create the intended comic contrast."
+       "providerPrompt": "Stylised feature-quality 3D CGI matching @图1. Original 3D CGI animation for ages 4-8, feature-quality polish: real weight, squash-and-stretch, bold legible staging, richly detailed fuzzy bee textures, translucent wings, natural motion blur on fast movement, coherent physics. Begin exactly on @图1, the approved previous-shot final frame, matching character identity, scale, position, lighting, lens feel, warm backlight and flower-meadow environment. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the rainforest flower set. Preserve both bees’ designs, glasses, proportions and relative scale; no crystals, no extra characters, no on-screen text.\n\nUse @Audio1 as the only voice track. Do not add any other voices, narration, music or visual text. Fuzzby’s visible mouth action and body compression must sync to @Audio1 where visible; once he is swallowed, the voice reads as muffled from inside the flower through petal vibration and contained body movement. Zenny’s mouth remains closed throughout.\n\nSingle continuous shot, no cuts. Camera starts locked to the approved @图1 composition and Zenny’s attention, then makes one motivated follow move with Fuzzby’s careless pass, arriving on the disturbed tulip rather than a clean heroic impact angle. Keep lighting and set continuity stable unless revealed by the camera move.\n\n0.0-1.5s: TEMPO slowed/settled/near-still. Hold the opening frame’s calm aftermath. Zenny settles back into pollen work with tiny precise hand and head movements, trying to ignore the commotion beside her; her eyes soften into concentration and her mouth stays closed. Fuzzby remains close beside her with the pollen moustache still on his face, both hands beginning to scrub at it. His wings keep a light airborne flutter, but the dominant feeling is Zenny deliberately returning to focus. Camera remains close and steady, favoring Zenny’s composure.\n\n1.5-2.8s: TEMPO brisk/interrupting. Fuzzby drifts into motion across Zenny’s space, still scrubbing both hands over his moustached face and not watching where he is flying. His glasses wobble slightly; his cheeks and pollen moustache squash under his hands. Wings beat continuously while airborne. Zenny gives only the smallest unimpressed side-eye without speaking or chasing him, then stays with her work. Camera begins a smooth pan/truck with Fuzzby’s careless pass, letting Zenny slip toward the edge of frame.\n\n2.8-3.7s: TEMPO accelerating/chaotic but controlled. Fuzzby passes through the foreground/near midground with both hands still on his face, eyes partially obscured by his scrubbing and glasses. He misses the path ahead. The camera follows just behind and to the side, revealing the flower corridor and a large tulip in his flight path. His flight is careless, not triumphant: no pose, no flourish, no deliberate stunt. Add natural motion blur to wings and body travel while keeping identity readable.\n\n3.7-4.25s: TEMPO fast/blunt single beat. Fuzzby clips one nearby flower once — a sharp, simple contact that knocks his body off-line with real weight. No cascade, no elegant spin, no accidental save. His body folds forward from the clip, hands still trapped near his face for a fraction of a second, then drops hard into the large tulip. The tulip visibly compresses under him; petals buckle inward around his round body. The impact is graceless and heavy, with a short recoil of stem and leaves, not a spring-back gag.\n\n4.25-5.0s: TEMPO impact-hit then held. Fuzzby disappears completely inside the tulip; no body parts remain visible outside except a momentary wing blur that is immediately swallowed by closing petals. @Audio1 lands immediately with the impact and is clearly muffled from within the flower. The tulip petals puff outward and tremble from the contained body and voice; a small burst of pollen and loose petals drifts upward. Camera arrives slightly late on the disturbance, framing the crushed, wobbling tulip rather than a clean composed crash pose.\n\n5.0-6.2s: TEMPO slowed/held comic suspension. Hold on the large tulip, still visibly disturbed. Petals quiver in diminishing waves; the stem sags under Fuzzby’s weight, then settles crookedly. @Audio1 continues to feel trapped inside the flower, contained and muffled. Pollen motes float through the warm backlight. Zenny is now out of frame or barely visible at the far edge/background, still unimpressed and not speaking.\n\n6.2-7.0s: TEMPO near-still/settling. The corridor calms. The tulip gives one last small internal twitch, then rests with Fuzzby fully swallowed inside it. No recovery, no spring-back, no triumphant reveal. Camera holds the disturbed tulip as the final continuity frame; Zenny remains unbothered and focused if visible. End on the muffled bravado still reading as denial after a real failed crash, ready for a planned cut to the next shot.",
+       "doesItLand": "Yes — this animation will land the beat because the calm Zenny opening, blunt graceless crash, fully swallowed Fuzzby, and muffled @Audio1 denial create the intended comic contrast."
       },
       "outcome": "approved",
-      "decisionAt": "2026-07-24T09:25:10",
-      "reviewedBy": "Julian (fused-formula test directive)",
+      "decisionAt": "2026-07-24T08:03:24",
+      "reviewedBy": "Julian (drift-vocabulary purge directive, 2026-07-24 — no old prompt styles)",
       "note": ""
      },
      "candidate": null,
@@ -3743,50 +3743,11 @@
        "reviewedBy": "Julian (via rejection directive — rebuild on the winning template)",
        "note": "",
        "supersededAt": "2026-07-24T08:03:24"
-      },
-      {
-       "department": "Animation",
-       "worker": "Animation Director / Camera",
-       "skill": "skills/crystal-bears-camera/SKILL.md",
-       "skillHash": "d96af712dd75a522",
-       "model": "gpt-5.5",
-       "scene": "1",
-       "shotId": "S1.SH3",
-       "packageRevision": 37,
-       "preparedAt": "2026-07-24T08:03:24",
-       "editedAt": null,
-       "preparedBy": "specialist",
-       "sourceHash": "8e62ea7ed00a8c0deca3459258c70c0c6ee151519c53d6cee1e16add33319109",
-       "signatureVersion": 3,
-       "sourceFields": {
-        "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
-        "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
-        "shotId": "381834ec52651b48fdce175369966ada9adbff177e15a15914cd6e0c0780b690",
-        "approvedAnchor": "696dc3c95cdf0bf2cfb66e1288afeca88b61a89c7a9f3dcc9046f66e86f1b610",
-        "approvedVoiceAsset": "5d0019ec0b38a47e3f6785c57bc89be6cce554113d8d946c2cb9dfe5f0fdb1f5",
-        "physicalPerformance": "1801281bf6c631d8f69e86d811868f99073107e4a2821cca15b73692023715cd",
-        "references": "12a59ae1f73478b2a5c7db0deaff66ec567aca939bf0e9665cd6d969265f5d20",
-        "approvedSceneLookHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-        "durationSec": "0de7cf39e1e6366122309794e86d197d025a81235881e67ec4f011c9db2df252",
-        "measuredAudioDurationSec": "0de7cf39e1e6366122309794e86d197d025a81235881e67ec4f011c9db2df252",
-        "fireDurationSec": "0de7cf39e1e6366122309794e86d197d025a81235881e67ec4f011c9db2df252"
-       },
-       "outputHash": "7deec708177a2c8d48b178c118bd885fc7c453758c44e3f822df8ec04edf2fc3",
-       "output": {
-        "shotId": "S1.SH3",
-        "providerPrompt": "Stylised feature-quality 3D CGI matching @图1. Original 3D CGI animation for ages 4-8, feature-quality polish: real weight, squash-and-stretch, bold legible staging, richly detailed fuzzy bee textures, translucent wings, natural motion blur on fast movement, coherent physics. Begin exactly on @图1, the approved previous-shot final frame, matching character identity, scale, position, lighting, lens feel, warm backlight and flower-meadow environment. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the rainforest flower set. Preserve both bees’ designs, glasses, proportions and relative scale; no crystals, no extra characters, no on-screen text.\n\nUse @Audio1 as the only voice track. Do not add any other voices, narration, music or visual text. Fuzzby’s visible mouth action and body compression must sync to @Audio1 where visible; once he is swallowed, the voice reads as muffled from inside the flower through petal vibration and contained body movement. Zenny’s mouth remains closed throughout.\n\nSingle continuous shot, no cuts. Camera starts locked to the approved @图1 composition and Zenny’s attention, then makes one motivated follow move with Fuzzby’s careless pass, arriving on the disturbed tulip rather than a clean heroic impact angle. Keep lighting and set continuity stable unless revealed by the camera move.\n\n0.0-1.5s: TEMPO slowed/settled/near-still. Hold the opening frame’s calm aftermath. Zenny settles back into pollen work with tiny precise hand and head movements, trying to ignore the commotion beside her; her eyes soften into concentration and her mouth stays closed. Fuzzby remains close beside her with the pollen moustache still on his face, both hands beginning to scrub at it. His wings keep a light airborne flutter, but the dominant feeling is Zenny deliberately returning to focus. Camera remains close and steady, favoring Zenny’s composure.\n\n1.5-2.8s: TEMPO brisk/interrupting. Fuzzby drifts into motion across Zenny’s space, still scrubbing both hands over his moustached face and not watching where he is flying. His glasses wobble slightly; his cheeks and pollen moustache squash under his hands. Wings beat continuously while airborne. Zenny gives only the smallest unimpressed side-eye without speaking or chasing him, then stays with her work. Camera begins a smooth pan/truck with Fuzzby’s careless pass, letting Zenny slip toward the edge of frame.\n\n2.8-3.7s: TEMPO accelerating/chaotic but controlled. Fuzzby passes through the foreground/near midground with both hands still on his face, eyes partially obscured by his scrubbing and glasses. He misses the path ahead. The camera follows just behind and to the side, revealing the flower corridor and a large tulip in his flight path. His flight is careless, not triumphant: no pose, no flourish, no deliberate stunt. Add natural motion blur to wings and body travel while keeping identity readable.\n\n3.7-4.25s: TEMPO fast/blunt single beat. Fuzzby clips one nearby flower once — a sharp, simple contact that knocks his body off-line with real weight. No cascade, no elegant spin, no accidental save. His body folds forward from the clip, hands still trapped near his face for a fraction of a second, then drops hard into the large tulip. The tulip visibly compresses under him; petals buckle inward around his round body. The impact is graceless and heavy, with a short recoil of stem and leaves, not a spring-back gag.\n\n4.25-5.0s: TEMPO impact-hit then held. Fuzzby disappears completely inside the tulip; no body parts remain visible outside except a momentary wing blur that is immediately swallowed by closing petals. @Audio1 lands immediately with the impact and is clearly muffled from within the flower. The tulip petals puff outward and tremble from the contained body and voice; a small burst of pollen and loose petals drifts upward. Camera arrives slightly late on the disturbance, framing the crushed, wobbling tulip rather than a clean composed crash pose.\n\n5.0-6.2s: TEMPO slowed/held comic suspension. Hold on the large tulip, still visibly disturbed. Petals quiver in diminishing waves; the stem sags under Fuzzby’s weight, then settles crookedly. @Audio1 continues to feel trapped inside the flower, contained and muffled. Pollen motes float through the warm backlight. Zenny is now out of frame or barely visible at the far edge/background, still unimpressed and not speaking.\n\n6.2-7.0s: TEMPO near-still/settling. The corridor calms. The tulip gives one last small internal twitch, then rests with Fuzzby fully swallowed inside it. No recovery, no spring-back, no triumphant reveal. Camera holds the disturbed tulip as the final continuity frame; Zenny remains unbothered and focused if visible. End on the muffled bravado still reading as denial after a real failed crash, ready for a planned cut to the next shot.",
-        "doesItLand": "Yes — this animation will land the beat because the calm Zenny opening, blunt graceless crash, fully swallowed Fuzzby, and muffled @Audio1 denial create the intended comic contrast."
-       },
-       "outcome": "superseded",
-       "decisionAt": "2026-07-24T08:03:24",
-       "reviewedBy": "Julian (drift-vocabulary purge directive, 2026-07-24 — no old prompt styles)",
-       "note": "",
-       "supersededAt": "2026-07-24T09:25:10"
       }
      ]
     }
    },
-   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master9.mp3",
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master7.mp3",
    "voGeneratedFrom": [
     {
      "speaker": "Fuzzby",
@@ -3805,29 +3766,29 @@
    },
    "voiceApproval": {
     "approved": true,
-    "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master9.mp3",
-    "at": "2026-07-24T09:23:06",
-    "reviewedBy": "Claude (mechanical 9.0s pad of Julian's already-approved take, offset 5.4s — no new voice generation)"
+    "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master7.mp3",
+    "at": "2026-07-24T07:45:23",
+    "reviewedBy": "Claude (mechanical 7.0s pad of Julian's already-approved take, offset 4.4s — no new voice generation)"
    },
    "pendingSpendAuth": null,
-   "lastPromptVersion": "89505d6d",
+   "lastPromptVersion": "2bb9ca59",
    "batch": {
-    "token": "390834a346d040d1acd592aaf0084232",
-    "bindingHash": "36cf654036968a7ac4613fd0aa8ff569",
+    "token": "19621e2de8fe4f179789742bc452370a",
+    "bindingHash": "5880301b399c7c15c7d4f5c0610a1996",
     "envelope": {
      "shotId": "S1.SH3",
-     "prompt": "ENGLISH DIALOGUE ONLY, spoken in English.\n\nShot 1: Medium two-shot, 50mm, static. Zenny settles back into her pollen work, composed, eyes down — done with the nonsense. Beside her Fuzzby scrubs at his golden pollen moustache and goatee with both paws, completely absorbed, and lifts off mid-scrub without looking — drifting sideways across her airspace, wings blurring, legs trailing. She gives him one flat glance and keeps working.\n\nCut to. Shot 2: Wide shot, 35mm, loose practical follow. Fuzzby weaves down the flower corridor still wiping his face, wobbling worse with every beat — until his shoulder clips a tall stem and everything stops working at once. Wings out of rhythm, body tipping forward, he drops and SMASHES into a large pink tulip with real weight — petals buckle inward, one bright pollen puff bursts upward, and he vanishes completely inside. The tulip shudders. From deep inside, muffled: FUZZBY: Buzz Crash!! The petals vibrate with the line. High-key daylight, white sun, clear blue sky throughout.\n\nHe stays hidden. HOLD on the trembling tulip, about 2 seconds, no more dialogue.",
+     "prompt": "Stylised feature-quality 3D CGI matching @图1. Original 3D CGI animation, ages 4-8, Pixar-caliber: real weight, squash-and-stretch, warm saturated light, bold legible staging, character locked to reference. Begin exactly on @图1, the approved final frame of the previous shot, matched for identity, positions, scale, lens feel, sunset backlight, pollen moustache on Fuzzby, and Zenny’s glasses and calm presence. Use @图2 only for Zenny, @图3 only for Fuzzby, and @图4 only for the rainforest flower meadow set. Use @Audio1 as the only voice; keep all vocal performance tied to Fuzzby, muffled from inside the flower after impact. Zenny’s mouth remains closed throughout. No on-screen text, no extra characters, no invented voices, no foreign-language speech, no crystals on the bees. Wings continue moving while airborne. One continuous shot, no cuts.\n\nFelt intent: this crash has none of the earlier accidental glory. It is bigger, messier, and genuinely graceless; Fuzzby’s confident cover-up reads as denial rather than triumph. Kids should read the blunt flower crash clearly; adults should read that his bravado does not know the difference.\n\n0.0-2.4s: TEMPO slowed/settled/near-still. Hold the approved opening composition from @图1 for continuity. Zenny gently returns her attention to pollen collection, lowering her gaze away from Fuzzby and settling into quiet, focused work. Her body language is composed and unimpressed, a small controlled reset after the prior chaos. Fuzzby remains beside her with the thick pollen moustache still on his face, scrubbing at it with both hands, distracted and self-absorbed rather than performing. The camera stays calm with Zenny’s focus first, only a soft living-frame drift and natural wing shimmer; warm saturated sunset light and flower meadow detail remain stable.\n\n2.4-3.6s: TEMPO brisk/interrupting. Fuzzby’s embarrassment and impatience build into a careless takeoff. Still rubbing his moustached face with both hands, he lifts and drifts across Zenny’s space without looking where he is going. His wings beat rapidly to keep him airborne, but his hands never properly return to steering. Zenny barely reacts: a small eye-flick follows the noise, then she keeps her mouth closed and stays focused on her work. Camera begins a gentle pan/truck after Fuzzby only once he crosses past her, preserving the sense that he has crashed through her calm.\n\n3.6-4.5s: TEMPO accelerating/fast. Fuzzby passes the lens path close and messy, both hands still scrubbing his face, glasses and pollen moustache intact, eyes not watching the path. Use natural motion blur on his quick pass while keeping his identity readable. The camera follows his careless line through the flower corridor, not as a heroic chase but as a slightly late, practical follow that keeps the impending mistake legible. Zenny slips to the edge of frame or out of frame, remaining unimpressed.\n\n4.5-5.2s: TEMPO very fast/blunt single beat. Fuzzby clips the edge of another flower with his body/wing line while still not looking. The clip must be one hard, simple cause-and-effect beat, not a cascade and not a clever stunt. His body loses lift immediately: wings flutter out of rhythm, his round body tips forward, arms still near his face, and gravity takes over. No save, no flourish, no accidental brilliance.\n\n5.2-5.7s: TEMPO impact-fast/heavy. Fuzzby smashes down into a large tulip with real weight. The tulip compresses visibly under him, petals buckle inward, pollen puffs out, and he disappears completely inside it. The camera arrives on the tulip’s disturbance rather than a clean composed impact pose, so the fall reads graceless and uncontrolled. Trigger @Audio1 immediately with the impact; because Fuzzby is fully inside the tulip, the vocal performance is muffled and caused by the hit, as if squeezed out by the crash. Do not show his mouth outside the flower; his hidden body and the flower’s petal vibrations carry the lip-sync/voice relationship.\n\n5.7-7.0s: TEMPO held/comic suspension. Hold on the disturbed tulip. The petals wobble and flex from the trapped weight inside, then begin to settle unevenly. A few pollen motes drift through the warm backlight. Fuzzby remains completely swallowed, not merely dusted or grazed. No spring-back, no bounce out, no recovery beat. If Zenny is visible at all, keep her barely on the edge of frame or obscured by flowers, still closed-mouth and unimpressed by the noise.\n\n7.0-9.0s: TEMPO slowed/settling/near-still. The tulip’s last petal tremors fade into stillness, slightly crushed and visibly disturbed. Pollen continues to drift in the glowing meadow air. Fuzzby stays fully hidden inside the flower; his bravado has played from within and leaves a denial-after-failure feeling. Camera holds the final continuity frame on the large disturbed tulip in the flower corridor, with Zenny out of frame or barely visible and unbothered. End without any recovery, spring-back, extra gag, or additional action, ready to cut away on the muffled line’s aftermath.\n\nCraft: richly detailed 3D textures, soft fur and translucent wings matching the references, coherent physics, real contact weight, squash-and-stretch only on impact compression, stable feature-film polish, natural motion blur on fast movement, warm saturated rainforest meadow lighting preserved from @图1 and @图4.",
      "durationSec": 9.0,
      "provider": "byteplus",
      "model": "dreamina-seedance-2-0-260128",
      "endpoint": "https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks",
-     "resolution": "480p",
+     "resolution": "720p",
      "tier": "standard",
      "candidateCount": 1,
-     "costPerCandidateUsd": 1.2285,
-     "maxBatchCostUsd": 1.2285,
-     "packageRevision": 38,
-     "promptVersion": "89505d6d",
+     "costPerCandidateUsd": 2.7306,
+     "maxBatchCostUsd": 2.7306,
+     "packageRevision": 35,
+     "promptVersion": "2bb9ca59",
      "references": [
       {
        "slot": "@图1",
@@ -3855,12 +3816,12 @@
       }
      ],
      "audio": {
-      "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master9.mp3",
-      "md5": "fab880fe5f753714816089eb3d5982c0"
+      "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo.mp3",
+      "md5": "3bd2db038598d5003026361f4cdf3825"
      }
     },
-    "envelopeHash": "8fdaa095bb284d7684790091dfa39255f9f3dba6677e6d2c6a291043905774f2",
-    "batchId": "S1.SH3-b2-20260724T092616",
+    "envelopeHash": "0f7d4411f9b188046c99990c8f2a3091cebc99db2b8f6ee64632b071a936cd77",
+    "batchId": "S1.SH3-b1-20260723T154340",
     "expected": 1,
     "done": [
      1
@@ -3869,16 +3830,16 @@
     "disclosure": {
      "shotId": "S1.SH3",
      "candidateCount": 1,
-     "resolution": "480p",
-     "costPerCandidateUsd": 1.2285,
-     "maxBatchCostUsd": 1.2285,
-     "promptVersion": "89505d6d",
-     "usingWorkingPrompt": true,
-     "bindingHash": "36cf654036968a7ac4613fd0aa8ff569",
-     "envelopeHash": "8fdaa095bb284d7684790091dfa39255f9f3dba6677e6d2c6a291043905774f2",
-     "packageHash": "cc62932d21c23168",
+     "resolution": "720p",
+     "costPerCandidateUsd": 2.7306,
+     "maxBatchCostUsd": 2.7306,
+     "promptVersion": "2bb9ca59",
+     "usingWorkingPrompt": false,
+     "bindingHash": "5880301b399c7c15c7d4f5c0610a1996",
+     "envelopeHash": "0f7d4411f9b188046c99990c8f2a3091cebc99db2b8f6ee64632b071a936cd77",
+     "packageHash": "19ff815163d00684",
      "rerollOfUnchangedPackage": false,
-     "packageRevision": 38,
+     "packageRevision": 35,
      "referenceSlots": {
       "@图1": "previous shot final frame",
       "@图2": "Zenny",
@@ -3887,30 +3848,28 @@
       "@Audio1": "voice track"
      },
      "openingAnchor": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH2_final_frame.png",
-     "audioAsset": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master9.mp3",
+     "audioAsset": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo.mp3",
      "shotDurationSec": 9.0,
      "tier": "standard"
     },
     "status": "complete"
    },
-   "candidatePaths": [
-    "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_c1.mp4"
-   ],
-   "batchId": "S1.SH3-b2-20260724T092616",
-   "candidatesGenerated": 2,
+   "candidatePaths": null,
+   "batchId": null,
+   "candidatesGenerated": 1,
    "disclosure": {
     "shotId": "S1.SH3",
     "candidateCount": 1,
-    "resolution": "480p",
-    "costPerCandidateUsd": 1.2285,
-    "maxBatchCostUsd": 1.2285,
-    "promptVersion": "89505d6d",
-    "usingWorkingPrompt": true,
-    "bindingHash": "36cf654036968a7ac4613fd0aa8ff569",
-    "envelopeHash": "8fdaa095bb284d7684790091dfa39255f9f3dba6677e6d2c6a291043905774f2",
-    "packageHash": "cc62932d21c23168",
+    "resolution": "720p",
+    "costPerCandidateUsd": 2.7306,
+    "maxBatchCostUsd": 2.7306,
+    "promptVersion": "2bb9ca59",
+    "usingWorkingPrompt": false,
+    "bindingHash": "5880301b399c7c15c7d4f5c0610a1996",
+    "envelopeHash": "0f7d4411f9b188046c99990c8f2a3091cebc99db2b8f6ee64632b071a936cd77",
+    "packageHash": "19ff815163d00684",
     "rerollOfUnchangedPackage": false,
-    "packageRevision": 38,
+    "packageRevision": 35,
     "referenceSlots": {
      "@图1": "previous shot final frame",
      "@图2": "Zenny",
@@ -3919,12 +3878,12 @@
      "@Audio1": "voice track"
     },
     "openingAnchor": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH2_final_frame.png",
-    "audioAsset": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo_master9.mp3",
+    "audioAsset": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo.mp3",
     "shotDurationSec": 9.0,
     "tier": "standard"
    },
-   "lastBatchBinding": "36cf654036968a7ac4613fd0aa8ff569",
-   "firedAt": "2026-07-24T09:28:52",
+   "lastBatchBinding": "5880301b399c7c15c7d4f5c0610a1996",
+   "firedAt": "2026-07-23T15:48:41",
    "rejections": [
     {
      "shotId": "S1.SH3",
@@ -3938,22 +3897,14 @@
    "batchAttempts": 1,
    "voProvenance": {
     "carriedFrom": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH3_vo.mp3",
-    "md5": "fab880fe",
-    "note": "9.0s duration-matched padded master (adelay 5.4s + apad, -t 9.0) from the already-approved take, for the fused-formula test — line lands on the crash at 5.4s, hold tail follows. Audio content unaltered, no new voice generation."
+    "md5": "95db9f6d",
+    "note": "7.0s duration-matched padded master built mechanically with ffmpeg (adelay 4.4s + apad, -t 7.0) from the already-approved take; audio content unaltered, no new voice generation. Built on Julian's 2026-07-24 rejection of the 9s take (too slow, no pace) — line lands on the crash at 4.4s."
    },
    "workingSeedancePrompt": {
-    "text": "ENGLISH DIALOGUE ONLY, spoken in English.\n\nShot 1: Medium two-shot, 50mm, static. Zenny settles back into her pollen work, composed, eyes down — done with the nonsense. Beside her Fuzzby scrubs at his golden pollen moustache and goatee with both paws, completely absorbed, and lifts off mid-scrub without looking — drifting sideways across her airspace, wings blurring, legs trailing. She gives him one flat glance and keeps working.\n\nCut to. Shot 2: Wide shot, 35mm, loose practical follow. Fuzzby weaves down the flower corridor still wiping his face, wobbling worse with every beat — until his shoulder clips a tall stem and everything stops working at once. Wings out of rhythm, body tipping forward, he drops and SMASHES into a large pink tulip with real weight — petals buckle inward, one bright pollen puff bursts upward, and he vanishes completely inside. The tulip shudders. From deep inside, muffled: FUZZBY: Buzz Crash!! The petals vibrate with the line. High-key daylight, white sun, clear blue sky throughout.\n\nHe stays hidden. HOLD on the trembling tulip, about 2 seconds, no more dialogue.",
-    "savedAt": "2026-07-24T09:25:33",
-    "savedBy": "Julian (fused-formula test — AnyFilm style, our references and @Audio1)",
+    "text": "[STYLE_HEADER]\n\n7-second, 16:9, 480p trial. Stylised feature-quality 3D CGI. One continuous shot: a settled medium two-shot, then a loose practical follow along Fuzzby's careless flight line, arriving on the tulip crash and holding.\n\n[REFERENCE_LOCKS]\n\nBegin exactly on @图1 with motion starting immediately. Preserve its character identities, proportions, relative scale and lens feel. Fuzzby's golden pollen handlebar moustache and small golden pollen goatee remain exactly as @图1 shows them until he disappears into the tulip. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the flower-meadow world.\n\n@Audio1 is the complete 7-second master: silent lead, then Fuzzby's muffled line from 4.40 seconds, then a silent tail. Fuzzby's line comes only from @Audio1; Zenny's mouth stays closed throughout. Beyond @Audio1, the shot carries its own full sound design: rising uneven wing buzz, a sputter at the clip, one hard soft comedy THUMP with petal rustle and a pollen-puff poof at the crash, and a light playful pizzicato score that cuts out dead on impact and returns softly after the line. No other voices.\n\n[SET_CONSTRAINTS]\n\nFresh, high-key daylight with a white sun high and outside the frame, short soft shadows and a clear blue sky. Keep the camera inside the flower corridor, with nearby lavender and daisies filling the background throughout.\n\n[TIMELINE_SEGMENTATION — AUDIO STAGED]\n\n0.00–0.80s — Zenny lowers her gaze back to her pollen work, composed and unimpressed. Beside her Fuzzby scrubs at the golden moustache and goatee with both hands, self-absorbed. The pizzicato score ambles in under the meadow hum.\n\n0.80–3.20s — Fuzzby's impatience boils over into a careless takeoff. Still scrubbing his face with both hands, he lifts and weaves across Zenny's space without watching where he is going — his wing buzz climbs loud and uneven as he wobbles down the flower corridor. The camera follows his careless line at a practical distance. Zenny slips to the edge of frame, mouth closed, barely reacting.\n\n3.20–4.00s — His body clips the edge of a tall flower — the buzz sputters and the score stops dead. His wings flail out of rhythm, his round body tips forward with his hands still at his face, and gravity takes over. No save, no flourish.\n\n4.00–4.40s — He smashes down into a large tulip with real weight — one hard comedy THUMP, petals buckling inward, a bright pollen puff bursting out with a soft poof and petal rustle. He disappears completely inside; only the flower's shudder shows the impact.\n\n4.40–6.20s — Follow @Audio1 exactly. From inside the tulip, muffled and squeezed out by the crash, Fuzzby's \"[gasps] Buzz Crash!!\" — the petals vibrate with the muffled line. Zenny gives one flat, unimpressed glance from the frame edge, mouth closed. The score creeps back in softly, a wry little answer.\n\n6.20–7.00s — The tulip's last petal tremor settles; a few pollen motes drift in the bright air. Fuzzby stays hidden. Hold the frame, ready to cut.\n\n[SAFETY_NET]\n\nPreserve identity, scale, anatomy and spatial continuity. One continuous shot, no internal cuts, no additional characters, no on-screen text, no additional voices.",
+    "savedAt": "2026-07-24T07:47:47",
+    "savedBy": "Julian (rejection directive: rebuild on winning template — pace, buzz/crash SFX, music, 7s)",
     "dialogueInPromptConfirmed": true
-   },
-   "promptRevisions": 1,
-   "approvedCandidate": 1,
-   "approval": {
-    "approved": true,
-    "candidate": 1,
-    "reviewed_by": "Julian",
-    "at": "2026-07-24T09:33:14"
    }
   },
   {
@@ -4056,8 +4007,8 @@
    }
   ],
   "beatsScopeNote": "the verbatim-dialogue cross-check and the BIG-comedy physicalStaging requirement did not run against a real beats list (schema gap, PIPELINE_CUTOVER_LEDGER.md §7) — verbatim dialogue for this promotion is separately guaranteed by _scoped_shot's own partition-completeness assertion.",
-  "validatedAt": "2026-07-24T09:22:52",
-  "revision": 38
+  "validatedAt": "2026-07-24T08:00:38",
+  "revision": 37
  },
  "reviewCriteria": {
   "canon": "characters and world accurate vs references",
@@ -4068,7 +4019,7 @@
  "sourceBeatPackage": null,
  "sourceStoryboard": {
   "path": "../shows/crystal-bears/episodes/output/creative/Ep1_scene1_storyboard.json",
-  "md5": "f2c415b61150da365076effb2548c5e1",
+  "md5": "ccbbaab137e827ebb4503aee33f24e6c",
   "approvalState": "approved",
   "humanNote": "",
   "creativeCardHashes": {
@@ -4079,8 +4030,8 @@
    "S1.SH5": "2302eec2c5d07863687c6573d90b03eab73dcf59b1481b4e23d0e4d5d8d405fb"
   }
  },
- "revision": 38,
- "revisionNote": "Promoted S1.SH1, S1.SH2, S1.SH3, S1.SH4, S1.SH5 from human-approved storyboard Ep1_scene1_storyboard.json into the canonical package cb_render.py already reads. Revision 37's shots/ledger and every prior spend-token binding hash derived from them are stale (the package's own shots-hash changed).",
+ "revision": 37,
+ "revisionNote": "Promoted S1.SH1, S1.SH2, S1.SH3, S1.SH4, S1.SH5 from human-approved storyboard Ep1_scene1_storyboard.json into the canonical package cb_render.py already reads. Revision 36's shots/ledger and every prior spend-token binding hash derived from them are stale (the package's own shots-hash changed).",
  "repairLog": [],
  "handover": {
   "carriedForwardShots": [
@@ -4091,7 +4042,11 @@
    "S1.SH5"
   ],
   "contentChangedShots": [
-   "S1.SH3"
+   "S1.SH1",
+   "S1.SH2",
+   "S1.SH3",
+   "S1.SH4",
+   "S1.SH5"
   ],
   "rule": "the ledger (keyframe/voice/animation status) always carries forward when a prior entry exists — a content edit never resets it by itself. contentChangedShots names which carried-forward shots also had their own compiled contract or creative-card hash change; department-level directionCurrent (sourceHash-based, per-input) is the live, actionable staleness signal for those — advisory, never a forced reset."
  }

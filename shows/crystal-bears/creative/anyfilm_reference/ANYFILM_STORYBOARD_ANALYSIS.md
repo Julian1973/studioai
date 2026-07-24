@@ -64,6 +64,24 @@ all for us but putting in our learning."* This document is the analysis and the 
    doctrine — but their identity TEXT drifts (Zenny as "lavender-purple bear" is live in
    their character data). Our locked canon (characters.json + turnarounds) is the source
    of truth; their fields get overwritten from ours, never trusted.
+   **CONFIRMED VERBATIM (oracle session #7, 2026-07-24), and worse than first thought:**
+   their Zenny identity reads in full "Small anthropomorphic bear… covered in soft
+   lavender-purple fur," and her ONE wardrobe adds **"Small crystal gem visible at her
+   chest"** — a DOUBLE canon violation baked into the identity anchor itself: wrong species
+   (she is a bee) AND a worn crystal (bees never wear crystals, the Crystal World Rule).
+   Every Zenny reference image their pipeline generates from that text carries both errors.
+   Their Fuzzby, meanwhile, has a BLANK identity and desc ("", "") with one stub wardrobe
+   ("Fuzzby, everyday outfit") — no identity anchor at all. Net: for the two bees, their
+   character layer is unusable; ours replaces it wholesale, not merely "overwrites fields."
+   **REFERENCE-METADATA VERDICT (same session):** their project JSON stores ZERO reference
+   data — no image URLs, no attachment mapping, no weights/ordering, no approval flags, no
+   generation provenance. All reference handling lives in a backend layer the oracle itself
+   confirms it cannot see ("I would need… actual API request/response logs. None of these
+   exist in the current project JSON."). Two consequences: (a) the oracle is EXHAUSTED as a
+   source — it has now stated its own blindness twice; extraction formally closed; (b) our
+   provenance stack (reference lineage per fire, .gen.json sidecars, approval history,
+   spend ledger) has no equivalent anywhere in their product — a structural advantage on
+   top of the four-reference + @Audio1 one.
 3. **THE FACE-STATE REFERENCE** (our 10-take-proven weapon). For any persisting facial/body
    state (the golden moustache+goatee), a prepared image of the intended state beats any
    amount of text. Their pipeline has no equivalent — inject ours as an extra reference on

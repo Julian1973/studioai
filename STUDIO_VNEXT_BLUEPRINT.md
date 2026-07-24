@@ -110,6 +110,17 @@ per-clip cost. Dialogue-free clips drop the header and behaviour laws.
 5. **Duration honesty** — clip duration fits content (their flat 15s wastes money and pace).
 6. **One-variable retakes + the rejection ladder + scene-by-scene batching** — never a
    "Generate All · $316" button without per-scene review between batches.
+   CONFIRMED BY THEIR AI (oracle session #2): their regeneration is a blind reroll — same
+   prompt, same start frame, no seeds ("each regeneration is a fresh roll"), no record of
+   what was rejected or why. Ours keeps the full retake ledger (rejection category +
+   correction on file, one controlled reroll, then one variable changed, redesign after
+   two failed batches, rejects archived as evidence). Their own workaround advice —
+   "split shots into separate clips so you can regenerate smaller segments without losing
+   good performances" — becomes our law: **PACK BY RISK, NOT JUST DURATION.** A high-risk
+   gag beat gets its own clip so a retake never kills good neighbouring performances;
+   low-risk connective coverage packs 2-3 shots. Also confirmed: no seed control exists on
+   these models (matches our own provider findings) — the approved clip FILE is the only
+   preservation; never regenerate an approved take.
 
 ### Step 9 — Audio Studio
 Every dialogue line as a row: character · line · voice settings (stability/style sliders) ·

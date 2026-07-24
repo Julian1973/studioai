@@ -64,6 +64,35 @@ pollen dust tracked shot to shot with callbacks: "still dusted in pollen").
 - Light replaces reshoots: a whole time progression told inside one location purely by the
   stated light state per shot.
 
+## THE CAMERA GRAMMAR (movement semantics + coverage rhythm, captured session #17)
+
+Every movement MEANS something — chosen by emotional need, never by variety:
+
+| Movement | Meaning |
+|---|---|
+| Static / locked off | Observation, respect — let the performance breathe (reaction shots) |
+| Slow push-in | Intensification, entering consciousness, "look closer" — ARRIVAL |
+| Pull-back / crane up | Revelation, scale shift, "see the bigger picture" — DEPARTURE |
+| Tracking lateral | Accompaniment, empathy — "I'm with you"; alongside = companionship |
+| Handheld (subtle drift) | Energy, chaos, visceral participation — alive, never found-footage shaky |
+| Whip-pan | Sudden reaction, comic timing — the blur IS the impact |
+| Orbit (slow) | Ceremony, examination, unity — circular = completeness |
+| Crane down | Invitation — descending INTO their world |
+
+Two refinements worth their weight:
+- **Arrival vs departure:** the same sacred place is ENTERED with a push-in and LEFT with a
+  crane — movement direction states the story's relationship to the space.
+- **Telephoto compression as emotion:** a long lens during a physical separation keeps the
+  characters feeling close while they part (their pier farewell) — lens choice contradicts
+  the blocking on purpose.
+
+THE COVERAGE RHYTHM (per scene): Establish (W) → Build (M/MCU shot-reverse ping-pong) →
+Peak (CU, then XCU macro at the emotional summit) → Release (back to W). Comedy is released
+WIDE (the boat-wobble gag needs space); sacredness peaks in MACRO (the wristbands at 100mm,
+"held like sacred objects" — the ceremonial ACTION itself, donning them, also shot macro).
+MIRROR STRUCTURE: repeat the pre-climax framings after the climax — the same shot sizes,
+changed emotion, show the transformation.
+
 ## THE THREE LANGUAGES (all present in every shot)
 
 1. Writer's language (emotion, character, story): "Fuzzby is chaotic."

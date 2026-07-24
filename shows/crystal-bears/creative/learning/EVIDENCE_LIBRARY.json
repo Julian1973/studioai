@@ -334,6 +334,94 @@
     "engine/cb_creative.py (CreativeShotCard.openingImage)",
     "engine/media/Ep1_S1_plate.png"
    ]
+  },
+  {
+   "evidenceId": "ev-93706596d3",
+   "capturedAt": "2026-07-18T22:34:37",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "0",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene0_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-45c7a3d73f",
+   "capturedAt": "2026-07-18T23:28:45",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-f72da77554",
+   "capturedAt": "2026-07-18T23:29:05",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-d2c003479e",
+   "capturedAt": "2026-07-21T11:46:50",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene1_storyboard.json"
+   ]
   }
  ]
 }

@@ -74,6 +74,7 @@ def test_new_spine_imports_and_compiles_with_old_pipeline_absent():
                       camera='Wide tracking', openingPose='Fuzzby wound up outside the flower',
                       sourceType='opener', sourceShotId=None, cutInMotivation=None,
                       dialogueBinding=None, dialogueLines=[], visualPayoff='He grazes the leaf',
+                      cutPace='single_continuous_take', internalCuts=[],
                       physicalStaging=None, prohibited=[], charactersInFrame=['Fuzzby'],
                       continuityIn=E.ContinuityState(lighting='warm', cameraSide='left',
                           characters=[E.CharacterState(character='Fuzzby', screenZone='left',

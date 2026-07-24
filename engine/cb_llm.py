@@ -21,7 +21,7 @@ Calls (all schema-constrained + Pydantic-validated):
   • repair_call()            — a single repair call on the VALIDATOR model, seeded with business-rule errors.
 A Pydantic ValidationError propagates (the caller repairs / stops + reports); both providers failing → SystemExit.
 """
-import os, re, json
+import os, re, json, base64, mimetypes, pathlib
 from pydantic import ValidationError
 import cb_gen   # importing cb_gen loads engine/.env into os.environ (keys never leave the backend)
 
@@ -59,7 +59,22 @@ def _client_get():
         _client = OpenAI(api_key=_openai_key())
     return _client
 
-def _openai_call(model, system, user, schema):
+def _image_part(path):
+    """Return one local image as an OpenAI Responses input part.
+
+    Department workers use this to look at the *actual* approved frame they are directing
+    or reviewing.  Keeping the conversion here means every specialist and the paid render
+    path share one authoritative attachment order; the browser never sends provider data.
+    """
+    p = pathlib.Path(path)
+    if not p.exists() or not p.is_file():
+        raise FileNotFoundError(f"specialist image input is missing: {p}")
+    mime = mimetypes.guess_type(p.name)[0] or "image/png"
+    encoded = base64.b64encode(p.read_bytes()).decode("ascii")
+    return {"type": "input_image", "image_url": f"data:{mime};base64,{encoded}"}
+
+
+def _openai_call(model, system, user, schema, images=None):
     """A single strict-Structured-Output OpenAI call → a validated Pydantic instance (raises on refusal).
 
     FIXED 2026-07-07 (found while proving THE FIDELITY-ALLOCATION LAW's live-fire path, completely unrelated to
@@ -70,10 +85,12 @@ def _openai_call(model, system, user, schema):
     fire AT ALL until this was fixed — a real, currently-blocking regression from an SDK version drift, not a
     bug in any beat/schema logic. Verified directly against the real API (a `.parse()` call with a tiny dummy
     schema) before applying this exact fix, not guessed at."""
+    user_parts = [{"type": "input_text", "text": user}]
+    user_parts.extend(_image_part(p) for p in (images or []))
     resp = _client_get().responses.parse(
         model=model,
         input=[{"role": "system", "content": [{"type": "input_text", "text": system}]},
-               {"role": "user", "content": [{"type": "input_text", "text": user}]}],
+               {"role": "user", "content": user_parts}],
         text_format=schema,
         max_output_tokens=MAX_OUTPUT_TOKENS,
     )
@@ -123,15 +140,23 @@ def _loads(text):
     except Exception:
         return json.loads(repair_truncated(body))
 
-def _gemini_call(system, user, schema):
+def _gemini_call(system, user, schema, images=None):
     """FALLBACK ONLY — Gemini JSON mode, then re-validate against the SAME Pydantic schema (off-schema raises
     ValidationError just like the OpenAI path). Uses the existing Gemini config in cb_gen — kept, not removed."""
     import requests
     if not cb_gen.GEMINI_KEY:
         raise RuntimeError("no GEMINI_API_KEY for the Director fallback")
     url = f"{cb_gen.GLA}/v1beta/models/{GEMINI_MODEL}:generateContent"
+    parts = [{"text": user}]
+    for path in (images or []):
+        p = pathlib.Path(path)
+        if not p.exists() or not p.is_file():
+            raise FileNotFoundError(f"specialist image input is missing: {p}")
+        parts.append({"inline_data": {
+            "mime_type": mimetypes.guess_type(p.name)[0] or "image/png",
+            "data": base64.b64encode(p.read_bytes()).decode("ascii")}})
     body = {"system_instruction": {"parts": [{"text": system}]},
-            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {"temperature": 0.6, "maxOutputTokens": 65536, "responseMimeType": "application/json"}}
     r = requests.post(url, headers={"x-goog-api-key": cb_gen.GEMINI_KEY, "Content-Type": "application/json"},
                       json=body, timeout=600)
@@ -151,14 +176,14 @@ def _gemini_call(system, user, schema):
     text = rj["candidates"][0]["content"]["parts"][0]["text"]
     return schema.model_validate(_loads(text))
 
-def structured(system, user, schema, *, model=None, label="director", log=print):
+def structured(system, user, schema, *, model=None, label="director", log=print, images=None):
     """ONE structured Director call — OpenAI FIRST, then Gemini FALLBACK on a PROVIDER error. `model` is the OpenAI
     model (defaults to the Director model; pass VALIDATOR_MODEL for the validator). A Pydantic ValidationError is
     NOT a fallback case (the model answered, just off-schema) — it propagates so the caller can repair. Returns the
     validated Pydantic instance."""
     model = model or DIRECTOR_MODEL
     try:
-        return _openai_call(model, system, user, schema)
+        return _openai_call(model, system, user, schema, images=images)
     except ValidationError:
         raise
     except Exception as e:
@@ -171,7 +196,7 @@ def structured(system, user, schema, *, model=None, label="director", log=print)
         log(f"  [director] {label}: OpenAI {model} error: {str(e)[:130]} — DIRECTOR_ENABLE_GEMINI_FALLBACK=true, "
             f"falling back to Gemini {GEMINI_MODEL}", flush=True)
     try:
-        obj = _gemini_call(system, user, schema)
+        obj = _gemini_call(system, user, schema, images=images)
         log(f"  [director] {label}: served by Gemini fallback ({GEMINI_MODEL})", flush=True)
         return obj
     except ValidationError:
@@ -185,14 +210,17 @@ def _repair_user(user, errors):
             "Return the COMPLETE corrected JSON for the SAME schema (nothing else, no prose). Do NOT change any "
             "LOCKED dialogue — fix only the structural problems named here:\n" + str(errors)[:1800])
 
-def structured_with_repair(system, user, schema, *, model=None, label="director", log=print):
+def structured_with_repair(system, user, schema, *, model=None, label="director", log=print,
+                           images=None):
     """structured() + ONE Pydantic-error-driven repair call. If the repair ALSO fails validation, the
     ValidationError propagates to the caller (stop + report)."""
     try:
-        return structured(system, user, schema, model=model, label=label, log=log)
+        return structured(system, user, schema, model=model, label=label, log=log,
+                          images=images)
     except ValidationError as e:
         log(f"  [director] {label}: response failed Pydantic validation — running ONE repair call…", flush=True)
-        return structured(system, _repair_user(user, e), schema, model=model, label=label + "/repair", log=log)
+        return structured(system, _repair_user(user, e), schema, model=model,
+                          label=label + "/repair", log=log, images=images)
 
 def repair_call(system, user, schema, errors, *, label="validator", log=print):
     """A single repair call on the VALIDATOR model (OPENAI_VALIDATOR_MODEL), seeded with externally-found

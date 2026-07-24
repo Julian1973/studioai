@@ -27,8 +27,10 @@ Four proofs, zero spend:
 2. THE SEALED ROUTE (LEGACY regression pin): fire_shot against the ORIGINAL revision-6
    production package (writes redirected to a scratch copy; provider adapter mocked) —
    disclosure seals the envelope, the token binds to its hash, and the OUTGOING PROVIDER
-   REQUEST contains the exact accepted 105-word brief, duration 6.0, package revision 6, the
-   approved keyframe/references/audio — and NO legacy prompt string.
+   REQUEST contains the exact accepted 105-word brief, duration 15.0 (2026-07-19, THE HANDLE
+   DOCTRINE — this fixture's own dummy vo.mp3 has no real audio, so cb_render._handle_duration
+   floors at HANDLE_TOTAL regardless of the package's own design-time 6.0s durationSec),
+   package revision 6, the approved keyframe/references/audio — and NO legacy prompt string.
 
 3. THE SEALED ROUTE (GOLDEN PATH): the SAME sealed-envelope/token/route mechanics, proven
    against the REAL, currently-live S1.SH1 canonical package cb_handover.promote_to_canonical
@@ -109,10 +111,82 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
     for sh in pkg.get("shots", []):
         if sh.get("shotId") == "1.B1.S1":
             sh["continuityIn"] = None
+    # THE KEYFRAME/VOICE MEDIA RESTORE (2026-07-19): this snapshot's own recorded absolute
+    # media paths (engine/media/shots/Ep1_1.B1.S1_{keyframe.png,vo.mp3}) no longer exist on
+    # disk — swept away by an intervening real production media archive/reset (this project
+    # periodically archives-then-clears engine/media/ as a whole; the exact files this
+    # fixture's own 2026-07-17 comment once pointed at didn't survive that). The keyframe's
+    # own exact byte content DOES still exist though, in the whole-episode cold-storage
+    # archive, with the identical md5 the sealed-brief test below hardcodes
+    # (c02dc92cbb...) — restored here into THIS fixture's own scratch media dir (never the
+    # real engine/media/ tree) and the ledger's keyframePath/voPath repointed at these new,
+    # scratch-owned files, so this fixture never again depends on a specific real-world path
+    # surviving untouched between test runs.
+    media_dir = tmp_path / "legacy_media"
+    media_dir.mkdir(parents=True, exist_ok=True)
+    kf_src = (HERE.parent / "archive" / "Episode_1_Complete_Archive_20260718" / "media" /
+              "shots" / "Ep1_1.B1.S1_keyframe.png")
+    kf_dst = media_dir / "Ep1_1.B1.S1_keyframe.png"
+    shutil.copy(kf_src, kf_dst)
+    vo_dst = media_dir / "Ep1_1.B1.S1_vo.mp3"
+    vo_dst.write_bytes(b"ID3\x03\x00\x00\x00\x00\x00\x00legacy-scratch-vo")   # existence only,
+    #                                                                          no md5 asserted
+    # THE KEYFRAME-APPROVAL BACKFILL (2026-07-17, same checkpoint): this archived snapshot
+    # predates the approve/reject keyframe lifecycle too — it carries only the old bare
+    # `keyframePath` pointer _anchor_for() no longer trusts on its own (the exact file-
+    # existence-grants-approval bug this whole checkpoint closes). Record the restored,
+    # scratch-owned path as a real, matching-revision keyframeApproval, exactly the shape a
+    # `cb_render.py approve-keyframe` call on this content would have written had the
+    # lifecycle existed when this snapshot was taken.
+    # THE VOICE-APPROVAL BACKFILL (2026-07-19, same reasoning as the keyframe one above):
+    # this archived snapshot also predates the voice approve/reject lifecycle — fire_shot
+    # now hard-refuses a dialogue shot whose voice track hasn't been explicitly approved
+    # (Law 5). 1.B1.S1 has dialogue; record the restored voPath as an already-approved take,
+    # exactly what an `approve-voice` call on this content would have written had the
+    # lifecycle existed when this snapshot was taken.
+    for led in pkg.get("continuityLedger", []):
+        if led.get("shotId") == "1.B1.S1":
+            led["keyframePath"] = str(kf_dst)
+            led["voPath"] = str(vo_dst)
+            led["keyframeApproval"] = {"approved": True, "path": str(kf_dst),
+                                        "packageRevision": pkg.get("revision"),
+                                        "reviewedBy": "TestReviewer(legacy-backfill)"}
+            led["voiceApproval"] = {"approved": True, "path": str(vo_dst),
+                                      "at": "2026-07-19T00:00:00",
+                                      "reviewedBy": "TestReviewer(legacy-backfill)"}
     json.dump(pkg, open(scratch, "w"), indent=1, ensure_ascii=False)
     monkeypatch.setattr(cb_render, "load_pkg",
                         lambda scene, episode="Ep1": (json.load(open(scratch)), scratch))
     monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "shots")
+    # THE LINEAGE CHECK, BYPASSED HERE ON PURPOSE (2026-07-17 state-integrity checkpoint):
+    # this archived rev-6 snapshot predates the lineage doctrine entirely (it has no
+    # sourceStoryboard field at all) — a real "no package md5 recorded" package correctly
+    # reads as non-current under the new check, which would refuse this fixture before it
+    # ever reached the sealed-envelope mechanics this test actually exists to pin. That
+    # refusal would be CORRECT for live content; it is simply out of scope for a fixture
+    # whose own docstring already says it is "NOT proof the current production route works."
+    monkeypatch.setattr(cb_render, "_require_current_lineage", lambda pkg, scene, episode: None)
+    # THE SCENE LOOK GATE, ALSO OUT OF SCOPE HERE (2026-07-19, same reasoning): fire_shot's
+    # own _slot_paths call reads the REAL, LIVE scene-1 Scene Look Plate approval record via
+    # _plate_path — a live-production-state dependency this MECHANICS-only regression pin
+    # was never meant to carry (see golden_path_scratch_pkg's identical bypass below).
+    monkeypatch.setattr(cb_render, "_require_current_scenelook",
+                        lambda scene, episode="Ep1": None)
+    real_plate = (HERE.parent / "engine" / "media" / "archive" / "scenelook_rejected" /
+                  "20260719T001758" / "Ep1_S1_plate_candidate_10bfd50b.png")
+    monkeypatch.setattr(cb_render, "_plate_path", lambda scene, episode="Ep1": str(real_plate))
+    # THE FRESH-VALIDATION BYPASS, ALSO OUT OF SCOPE HERE (2026-07-20, same reasoning as the
+    # lineage/scene-look bypasses above): _fresh_validation re-derives its beats from the
+    # SHARED, LIVE beat package (cb_engine._load_pkg) — genuinely live production content
+    # that keeps evolving (e.g. comedyMode was authored onto S01-B01-POLLEN-CHAOS the same
+    # day this bypass was added), while this fixture's own shot still carries the OLD short
+    # beatCode ("1.B1") from before that beat's slug convention changed, so its physics-
+    # contract coverage can never line up with the live beat package's own beatCode keys.
+    # This fixture was never meant to track that drift — its whole point (like the lineage/
+    # scene-look bypasses beside it) is pinning sealed-envelope/token/route MECHANICS
+    # against a frozen, pre-handover content shape, not re-validating it against whatever
+    # the live beat package says today.
+    monkeypatch.setattr(cb_render, "_fresh_validation", lambda pkg, episode: None)
     return scratch
 
 
@@ -138,7 +212,63 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     monkeypatch.setattr(cb_render, "load_pkg",
                         lambda scene, episode="Ep1": (json.load(open(scratch)), scratch))
     monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "shots")
+    # THE SCENE LOOK GATE, OUT OF SCOPE HERE ON PURPOSE (2026-07-19): _require_current_
+    # scenelook reads the REAL, LIVE scene-1 Scene Look Plate record (this fixture never
+    # redirects HERE, by design — see the fixture's own docstring) — so whatever the real
+    # plate's approval status happens to be AT THE MOMENT THIS SUITE RUNS (approved, stale,
+    # rejected, mid-review...) would otherwise decide whether these tests can even reach the
+    # mechanics they're actually proving (lineage-mismatch refusal / real reference
+    # resolution). That's a live-production-state dependency this suite was never meant to
+    # carry — same, already-established call as legacy_scratch_pkg's own _require_current_
+    # lineage bypass a few tests up.
+    monkeypatch.setattr(cb_render, "_require_current_scenelook",
+                        lambda scene, episode="Ep1": None)
+    # _plate_path is a SEPARATE real-state read (the scene plate reference used by
+    # _slot_paths for the "scene plate" reference slot) — same live-state concern as above,
+    # same bypass, pointed at a real, already-existing plate PNG on disk (the archived
+    # rejected candidate) so the reference-existence assertions these tests make are
+    # honestly checking a real file, never a fabricated path.
+    real_plate = (HERE.parent / "engine" / "media" / "archive" / "scenelook_rejected" /
+                  "20260719T001758" / "Ep1_S1_plate_candidate_10bfd50b.png")
+    assert real_plate.exists(), f"expected real archived plate at {real_plate}"
+    monkeypatch.setattr(cb_render, "_plate_path", lambda scene, episode="Ep1": str(real_plate))
     return scratch
+
+
+def _seed_cinematography_department(scratch, scene, ep, shot_id):
+    """TEST-ONLY (2026-07-19), the Cinematography sibling of _seed_animation_department below
+    — seeds a CURRENT, approved Cinematography direction reusing the shot's OWN already-
+    compiled keyframePrompt as the seeded providerPrompt."""
+    pkg, path = cb_render.load_pkg(scene, ep)
+    shot = [s for s in pkg["shots"] if s["shotId"] == shot_id][0]
+    context = cb_render._department_context_for_freshness(pkg, scene, "cinematography", shot_id, ep)
+    work, _ = cb_render._department_container(pkg, scene, shot_id, "cinematography", ep)
+    work["approved"] = cb_render._department_candidate(
+        "cinematography", {"shotId": shot_id, "providerPrompt": shot["keyframePrompt"],
+                           "doesItLand": "test"},
+        context, scene=scene, shot_id=shot_id, pkg=pkg)
+    cb_render._save(pkg, path)
+
+
+def _seed_animation_department(scratch, scene, ep, shot_id):
+    """TEST-ONLY (2026-07-19, the department-gate hardening directive): seeds a CURRENT,
+    approved Animation Direction directly into the scratch ledger, reusing the shot's OWN
+    already-compiled seedancePrompt as the seeded providerPrompt — via the exact same
+    _department_container/_department_candidate/_department_context_for_freshness machinery
+    decide_department itself uses, just without a real LLM call. This file's own fixtures
+    (legacy_scratch_pkg/golden_path_scratch_pkg) exist to pin sealed-envelope/token/route
+    MECHANICS, not department preparation itself — every assertion these tests make about
+    the exact prompt text fired to the mocked adapter stays true unchanged, since the seeded
+    providerPrompt IS shot["seedancePrompt"], byte for byte."""
+    pkg, path = cb_render.load_pkg(scene, ep)
+    shot = [s for s in pkg["shots"] if s["shotId"] == shot_id][0]
+    context = cb_render._department_context_for_freshness(pkg, scene, "animation", shot_id, ep)
+    work, _ = cb_render._department_container(pkg, scene, shot_id, "animation", ep)
+    work["approved"] = cb_render._department_candidate(
+        "animation", {"shotId": shot_id, "providerPrompt": shot["seedancePrompt"],
+                      "doesItLand": "test"},
+        context, scene=scene, shot_id=shot_id, pkg=pkg)
+    cb_render._save(pkg, path)
 
 
 def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch, legacy_scratch_pkg, tmp_path):
@@ -162,6 +292,7 @@ def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch,
     monkeypatch.setattr(cb_gen, "_fal_upload", lambda p: f"file://{p}")   # no network
     monkeypatch.setattr(cb_render, "_candidate_review", lambda *a, **k: None)
     monkeypatch.setattr(cb_render, "_require_confirmed_billing", lambda prov: None)
+    _seed_animation_department(legacy_scratch_pkg, "1", "Ep1", "1.B1.S1")
 
     # 1) disclosure: no token -> REFUSED (designed), sealed envelope stored on the scratch ledger
     with pytest.raises(cb_render.Refused, match="SPEND NOT APPROVED"):
@@ -172,9 +303,15 @@ def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch,
     env = auth["envelope"]
     canon = hashlib.sha256(json.dumps(env, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     assert canon == auth["envelopeHash"]                     # token binds to the sealed envelope
-    assert env["durationSec"] == 6.0 and env["candidateCount"] == 3
+    # 2026-07-19 (THE HANDLE DOCTRINE): the sealed envelope's durationSec is no longer the
+    # package's own design-time estimate (6.0) — cb_render._handle_duration overrides it to
+    # HANDLE_TOTAL (15.0s) since this fixture's own vo.mp3 is a dummy file with no real audio.
+    assert env["durationSec"] == 15.0 and env["candidateCount"] == 3
     assert env["packageRevision"] == 6
-    assert env["maxBatchCostUsd"] == 5.4612 and env["costPerCandidateUsd"] == 1.8204
+    # 2026-07-19: cost scales with the same HANDLE_TOTAL override above (15s @ $0.3034/s
+    # standard rate = $4.551/candidate, x3 = $13.653) — the honest cost consequence of the
+    # duration fix, not a separate change.
+    assert env["maxBatchCostUsd"] == 13.653 and env["costPerCandidateUsd"] == 4.551
 
     # 2) fire with the token -> the adapter receives the ENVELOPE, verbatim
     cb_render.fire_shot("1", "1.B1.S1", "Ep1", candidates=3,
@@ -182,7 +319,9 @@ def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch,
     shot = [s for s in pkg["shots"] if s["shotId"] == "1.B1.S1"][0]
     assert sent["prompt"] == shot["seedancePrompt"] == env["prompt"]   # the accepted brief, exact
     assert 90 <= len(sent["prompt"].split()) <= 160                    # the lean Option-D band
-    assert sent["duration"] == "6" and sent["resolution"] == "720p"
+    # 2026-07-19: the same HANDLE_TOTAL override — the provider actually receives 15, not
+    # the package's own design-time 6.0 estimate.
+    assert sent["duration"] == "15" and sent["resolution"] == "720p"
     for legacy in LEGACY_STRINGS:
         assert legacy not in sent["prompt"], f"legacy string leaked: {legacy}"
     # the approved keyframe + reference order + audio travelled exactly as sealed
@@ -213,6 +352,7 @@ def test_legacy_pre_envelope_token_is_void(monkeypatch, legacy_scratch_pkg):
 def test_legacy_dry_run_issues_no_token_and_stores_nothing(monkeypatch, legacy_scratch_pkg):
     """LEGACY (item 5): pinned against the original revision-6 package."""
     monkeypatch.setattr(cb_render, "_require_confirmed_billing", lambda prov: None)
+    _seed_animation_department(legacy_scratch_pkg, "1", "Ep1", "1.B1.S1")
     with pytest.raises(cb_render.Refused, match="DRY RUN"):
         cb_render.fire_shot("1", "1.B1.S1", "Ep1", candidates=3, dry_run=True,
                              log=lambda *a, **k: None)
@@ -221,15 +361,61 @@ def test_legacy_dry_run_issues_no_token_and_stores_nothing(monkeypatch, legacy_s
     assert not led.get("pendingSpendAuth")
 
 
-def test_golden_path_s1sh1_keyframe_passes_real_require_valid_only_provider_stubbed(
+def test_golden_path_keyframe_refuses_on_the_actual_current_lineage_mismatch(
+        monkeypatch, golden_path_scratch_pkg):
+    """THE STATE-INTEGRITY CHECKPOINT'S OWN PROOF (2026-07-17, superseding the test below;
+    corrected 2026-07-19 — see below): this must REFUSE whenever the package's own recorded
+    sourceStoryboard md5 no longer matches the CURRENT live storyboard's md5. This is the
+    exact condition that let a rejected S1.SH1 keyframe read as "approved" before this
+    checkpoint existed; proving the refusal is the whole point.
+
+    CORRECTED 2026-07-19: the original version of this test asserted the mismatch by relying
+    on the real package genuinely being stale AT THE MOMENT IT WAS WRITTEN ("no lineage
+    monkeypatch at all"). The real production package has since been re-promoted and its
+    lineage is now genuinely current — so that reliance on incidental real-world drift made
+    this test flip from pass to fail the moment the very state it was pinning against got
+    fixed, which is exactly backwards for a regression test. Fixed the same way its own sibling
+    test below already proves the MATCHING case: deliberately SIMULATE the condition being
+    tested (here, a mismatch) via monkeypatch, rather than hoping live production happens to
+    still be in the state assumed years — or even hours — ago."""
+    monkeypatch.setattr(cb_render, "_current_storyboard_md5",
+                        lambda scene, episode="Ep1": "deadbeef" * 4)   # deliberately wrong
+    with pytest.raises(cb_render.Refused, match="superseded storyboard version"):
+        cb_render.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
+    written = json.load(open(golden_path_scratch_pkg))
+    led = [x for x in written["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
+    # CORRECTED 2026-07-19 (test-fixture drift, the same class this file's own docstring above
+    # already names): once S1.SH1 gets a real approved keyframe, the ledger legitimately carries
+    # an explicit "keyframeCandidate": null (present, not absent) as its normal post-approval
+    # shape — "not in led" is stricter than the real invariant being tested. The truthful check
+    # is "nothing was ever generated," i.e. falsy, whether the key is absent or explicitly null.
+    assert not led.get("keyframeCandidate")                          # nothing was ever generated
+
+
+def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_current(
         monkeypatch, golden_path_scratch_pkg, tmp_path):
-    """GOLDEN PATH (2026-07-17, item 5+6): proves cb_render.keyframe_shot('S1.SH1') against
-    the REAL, currently-live, newly-promoted canonical package — not the archived legacy
-    one. _require_valid, _require_confirmed_billing, _shot, the relay/opener check, and
-    _slot_paths (real character-identity + scene-plate reference resolution) ALL run
-    unstubbed, against the real, promoted content. ONLY cb_gen.generate_image (the actual
-    paid provider call) is stubbed — no media, no spend. Writes are redirected to a scratch
-    copy (golden_path_scratch_pkg); the real live file is never touched by this test."""
+    """GOLDEN PATH (2026-07-17, item 5+6; lineage-simulated 2026-07-17 state-integrity
+    checkpoint): proves cb_render.keyframe_shot('S1.SH1')'s own MECHANICS — reference
+    resolution, provider-call shape, no legacy leakage — against the real, currently-live,
+    newly-promoted canonical package's real content, under a lineage check DELIBERATELY
+    simulated as current (the package's own recorded storyboard md5 is fed back as the
+    "live" one) — isolating this test from whether the real storyboard has since moved on,
+    which is a separate, already-proven-refused condition (see the test above). _require_
+    valid, _require_confirmed_billing, _shot, the relay/opener check, and _slot_paths (real
+    character-identity + scene-plate reference resolution) ALL run unstubbed, against the
+    real, promoted content. ONLY cb_gen.generate_image (the actual paid provider call) is
+    stubbed — no media, no spend. Writes are redirected to a scratch copy
+    (golden_path_scratch_pkg); the real live file is never touched by this test."""
+    before = json.load(open(golden_path_scratch_pkg))
+    pkg_md5 = before["sourceStoryboard"]["md5"]
+    orig_approval = [x for x in before["continuityLedger"] if x["shotId"] == "S1.SH1"][0].get("keyframeApproval")
+    real_live = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
+    real_before_bytes = real_live.read_bytes()   # THE REAL FILE'S OWN BYTES, PRE-FIRE — the
+    # invariant this test actually protects is "the real live file is never touched by this
+    # test," not any specific field value; snapshotting whatever it genuinely holds today
+    # (2026-07-19 correction, the same fixture-drift class as the two fixes above) survives
+    # future real production state moving on, exactly like its sibling fixes.
+    monkeypatch.setattr(cb_render, "_current_storyboard_md5", lambda scene, episode="Ep1": pkg_md5)
     calls = []
 
     def fake_generate_image(prompt, refs=None, out=None, production_route=None, **k):
@@ -239,8 +425,23 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_only_provider_stub
         return out
 
     monkeypatch.setattr(cb_gen, "generate_image", fake_generate_image)
+    _seed_cinematography_department(golden_path_scratch_pkg, "1", "Ep1", "S1.SH1")
 
-    out_path = cb_render.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
+    # keyframe_shot now carries the same disclose-then-confirm spend-token seal fire_shot's
+    # video route has had since 2026-07-16 (2026-07-22, Julian's directive — see
+    # keyframe_shot's own docstring): the first call always discloses and refuses with a
+    # token; the second, presenting it, actually fires. Drives that two-step here rather
+    # than duplicating a shared test helper this file doesn't otherwise import.
+    try:
+        cb_render.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
+    except cb_render.Refused:
+        pass
+    pkg_after_disclosure = json.load(open(golden_path_scratch_pkg))
+    led_after = [x for x in pkg_after_disclosure["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
+    auth = led_after.get("pendingKeyframeSpendAuth")
+    assert auth, "keyframe_shot did not issue a spend token on its first (no-token) call"
+    out_path = cb_render.keyframe_shot("1", "S1.SH1", "Ep1", spend_token=auth["token"],
+                                       log=lambda *a, **k: None)
 
     assert len(calls) == 1                                          # exactly one provider call
     call = calls[0]
@@ -260,14 +461,20 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_only_provider_stub
     for ref in call["refs"]:
         assert pathlib.Path(ref).exists()
 
-    # the write landed on the SCRATCH copy only — the real live file is untouched
+    # THE KEYFRAME LIFECYCLE (2026-07-17): a fresh generation is a CANDIDATE, awaiting a
+    # decision — never auto-approved, never a bare keyframePath pointer on its own.
     written = json.load(open(golden_path_scratch_pkg))
     led = [x for x in written["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
-    assert led["keyframePath"] == out_path
-    real_live = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
-    real_pkg = json.load(open(real_live))
-    real_led = [x for x in real_pkg["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
-    assert real_led.get("keyframePath") is None                      # real file never touched
+    assert led["keyframeCandidate"]["path"] == out_path
+    # CORRECTED 2026-07-19 (test-fixture drift): the original assertion ("keyframeApproval" not
+    # in led) assumed a fresh generation only ever happens with no prior approval — no longer
+    # true since the Opening-Frame Source-Choice feature (task #391) added the real, legitimate
+    # "replace this approved keyframe" flow keyframe_shot's own docstring already documents:
+    # "The shot's currently-approved keyframe, if any, is left completely untouched until this
+    # new candidate is itself approved." The real invariant is UNTOUCHED, not ABSENT — compare
+    # against the value captured before this fire, whatever it was (None or a real approval).
+    assert led.get("keyframeApproval") == orig_approval
+    assert real_live.read_bytes() == real_before_bytes                # real file never touched
 
 
 def test_every_legacy_route_is_blocked_at_the_adapter():

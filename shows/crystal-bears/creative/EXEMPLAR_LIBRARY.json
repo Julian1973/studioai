@@ -73,6 +73,66 @@
    "cinematography": "whole-scene visual grammar decided with (not after) the dramatic approach; reaction shots only when the reaction changes meaning",
    "voice": null,
    "reusable": true
+  },
+  {
+   "id": "EX-006",
+   "where": "cb_director/SKILL.md runtime contract + CLAUDE.md rules 71-78 (the checklist-verb failure family)",
+   "attempted": "beat/shot action text stacking independently-clocked verbs — 'flies in, clips a stem, tumbles, lands' — to convey energy",
+   "outcome": "rejected",
+   "userWords": "reads as disconnected events to a video model, not one continuous motion",
+   "character": null,
+   "principle": "ground physical action in ONE cause with two-or-three chained, visible consequences — never a checklist of independent actions, which reads as disconnected events, not continuous motion",
+   "cinematography": null,
+   "voice": null,
+   "reusable": true
+  },
+  {
+   "id": "EX-007",
+   "where": "skills/crystal-bears-dp/SKILL.md runtime contract, 2026-07-19 edit",
+   "attempted": "an image-prompt instruction ('write it as plain, observable description, never poetic language') proposed as a flat rule with no scope statement",
+   "outcome": "rejected",
+   "userWords": "additive, not replacement",
+   "character": null,
+   "principle": "state image prompts as plain, observable description, never poetic metaphor — but this governs REGISTER only, always additive to the reference/identity rules, never a replacement for them",
+   "cinematography": "concrete over poetic, additive to the identity/reference rules, never a substitute for them",
+   "voice": null,
+   "reusable": true
+  },
+  {
+   "id": "EX-008",
+   "where": "CLAUDE.md rules 4/29 (Law 5) + skills/crystal-bears-composer/SKILL.md's now-flagged stale reference, 2026-07-19",
+   "attempted": "a post-generation identity-swap on sung/spoken vocal output (strip native audio, then re-voice via an external voice-changer pass)",
+   "outcome": "rejected",
+   "userWords": "no native-voice fallback; no post voice swap; cb_post has no swap function by design — do not add one",
+   "character": null,
+   "principle": "the voice lives IN the render — one supplied @Audio1 track, lip-synced at generation time; a failed voice track REFUSES the render, it never falls back to a native voice or gets swapped in after the fact",
+   "cinematography": null,
+   "voice": "one supplied @Audio1 track only, generation-time, never post; a failed voice track REFUSES the render rather than substituting a native or swapped voice",
+   "reusable": true
+  },
+  {
+   "id": "EX-009",
+   "where": "PIPELINE_CUTOVER_LEDGER.md §11, \"THE MISFIRE\" — real $0.144 billed Scene Look Plate generation, 2026-07-19",
+   "attempted": "firing a generation call whose fallback content path (an empty canon file) had nothing real to anchor on, so the model received almost no real content and invented an unrelated image",
+   "outcome": "corrected",
+   "userWords": "a known failure mode for an image-edit model given no real content to anchor on",
+   "character": null,
+   "principle": "a thin or generic fallback must never silently substitute for real, approved content on a billed call — refuse and name what's missing, never degrade quietly and ship what the model invents",
+   "cinematography": "never submit a generation prompt built from an empty/fallback content source without an explicit approval gate in front of it",
+   "voice": null,
+   "reusable": true
+  },
+  {
+   "id": "EX-010",
+   "where": "PIPELINE_CUTOVER_LEDGER.md §11, \"THE UNWIRED STATE-INTEGRITY CHECKPOINT\" — cb_render._require_current_lineage, 2026-07-19",
+   "attempted": "building, documenting, and testing a hard-refusal safety check in isolation, without verifying it was actually called from the real content-generation entry points",
+   "outcome": "corrected",
+   "userWords": "zero call sites anywhere in cb_render.py",
+   "character": null,
+   "principle": "a check that exists and is documented is not the same as a check that is wired in — verify real call sites, not just that the code exists, before trusting a safety mechanism is live",
+   "cinematography": null,
+   "voice": null,
+   "reusable": true
   }
  ]
 }

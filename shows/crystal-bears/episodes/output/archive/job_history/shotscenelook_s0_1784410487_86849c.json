@@ -1,0 +1,13 @@
+{
+ "jobId": "shotscenelook_s0_1784410487_86849c",
+ "scene": "0",
+ "gate": "shot:scenelook",
+ "status": "failed",
+ "step": "Failed — see log.",
+ "started": 1784410487.481928,
+ "ended": 1784410522.521371,
+ "pid": 64307,
+ "log": "  [retry] fal:edit: attempt 1/4 failed — [{'loc': ['body', 'image_urls'], 'msg': 'Sequence should have at least 1 items', 'type': 'sequence_too_short', 'url': 'https://docs.fal.ai/e; backoff 4.7s\n  [retry] fal:edit: attempt 2/4 failed — [{'loc': ['body', 'image_urls'], 'msg': 'Sequence should have at least 1 items', 'type': 'sequence_too_short', 'url': 'https://docs.fal.ai/e; backoff 8.5s\n  [retry] fal:edit: attempt 3/4 failed — [{'loc': ['body', 'image_urls'], 'msg': 'Sequence should have at least 1 items', 'type': 'sequence_too_short', 'url': 'https://docs.fal.ai/e; backoff 16.9s\nfal_client.client.FalClientHTTPError: [{'loc': ['body', 'image_urls'], 'msg': 'Sequence should have at least 1 items', 'type': 'sequence_too_short', 'url': 'https://docs.fal.ai/errors#sequence_too_short', 'ctx': {'min_length': 1}, 'input': []}]\nRoot cause: engine/cb_render.py generate_scenelook_plate() called cb_gen.generate_image(prompt, refs=[], ...) unconditionally, sending an empty image_urls list to fal.ai's Seedream EDIT endpoint (bytedance/seedream/v5/pro/edit), which requires >=1 reference image; a deterministic 422, not transient — the 3 retries above could never have succeeded. Fired against Scene 0 specifically, which was itself a mechanical-parser artefact (the screenplay's own title page, mis-tagged sceneNumber=0) removed from the canonical package the same night (see cb-output/archive/story_intake_corrections/). Fixed 2026-07-19: cb_gen.py now routes a no-reference call to a configured text-to-image endpoint (or refuses cleanly if none is configured) instead of the edit endpoint; cb_render.generate_scenelook_plate gained an optional, never-auto-selected reference_path parameter; _retryable() now reads fal_client's own real status_code instead of guessing from str(e).",
+ "preservedAt": "2026-07-18T22:50:05",
+ "preservedReason": "Scene 0 no longer exists in the canonical package (removed 2026-07-19, front-matter correction) — this job is kept as permanent history of the real production incident that led to the Scene Look provider-routing fix, removed from the live/active job view (which the server's own in-memory JOBS registry already cleared on its next restart)."
+}

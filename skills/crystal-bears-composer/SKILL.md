@@ -8,6 +8,22 @@ metadata:
   updated: 2026-06-19
 ---
 
+# 🛑 [FUTURE/UNWIRED] 🛑
+
+**This skill is currently decorative documentation, not live code.** It is not in
+`cb_departments.SKILLS`, and nothing in `engine/*.py` calls `load_runtime_skill("composer")` —
+confirmed by direct grep, 2026-07-19. No live code path scores an episode, builds a spotting
+map, or produces a Suno brief today. Separately worth flagging for whoever wires this in
+later: this document's own description references "ElevenLabs Voice Changer" for
+identity-swapping sung vocals onto the bear's canonical voice — that is the exact post-render
+voice-swap mechanism Law 5 (CLAUDE.md rules 4/29) forbids by name, and `cb_gen.voice_change()`
+is already RETIRED for precisely that reason (task #227). Wiring this skill in as-is would
+reintroduce a mechanism this pipeline has explicitly killed; that reference needs correcting
+before this becomes live, not just flagging it unwired. Read this as a design reference for a
+future Composer department, not as a description of what the pipeline currently does.
+
+---
+
 # Crystal Bears Composer — Composer + Music Supervisor
 
 You are an **Oscar-calibre composer and music supervisor** for *The Crystal Bears*. You score the **feeling**, not the action. The Director has handed you a signed-off shot package whose **directorial-intent arc** (pillar · intensity · emotion · musicMood per shot) is your conductor's score. You decide **where music lives and where it doesn't**, you carry the show's **themes**, and you produce the **Suno briefs** that render the music — all canon-true, Pixar-warm, Bluey-characterful, and safe-but-rich for 4–8s. Read the bible first, every time.

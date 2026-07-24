@@ -47,12 +47,15 @@ ALLOWED = [
     "/CRYSTAL_BEARS_LOCKED_CANON.md",
     "/cb-studio/data/episodes.json",
     "/cb-studio/data/media-index.json",
-    "/cb-studio/data/scripts/Ep1_Final_Episode_one.txt",     # FIXTURE REFRESH 2026-07-16: the branch renamed the
-    #   Ep1 script (old name deleted in the same restructure) — same stale-fixture class fixed once before
-    #   (2026-07-08 audit); a 404 on a file that no longer exists is correct serving, not a regression.
+    "/cb-studio/data/scripts/Ep1_The_Adventure_Begins_Final_v2.txt",  # FIXTURE REFRESH 2026-07-22: the prior
+    #   fixture name (Ep1_Final_Episode_one.txt) was itself already stale from an earlier rename — same
+    #   stale-fixture class fixed once before (2026-07-08 audit, 2026-07-16 refresh); this is the real,
+    #   current script filename on disk today.
     "/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
-    "/engine/media/Ep1_1.B1_bizzy-leaf-rebound.png",         # FIXTURE REFRESH 2026-07-16: current real keyframe
-    #   (the old s1-b1-bizzy-fwip-nailed-it slug was retired by the Ep1 restructure).
+    "/engine/media/Ep1_S1_plate_candidate_03138989.png",     # FIXTURE REFRESH 2026-07-22: no per-shot keyframe
+    #   has been generated yet under the current shot pipeline (S1.SH1's own real keyframe generation is
+    #   still pending, per the task tracker) — the scene plate is the real, currently-existing media/ asset
+    #   this proves is servable; update this to a real S1.SH1 keyframe path once one exists.
 ]
 
 

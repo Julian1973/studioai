@@ -19,11 +19,12 @@ source: every creative field in the promoted package traces to the storyboard's 
 scene/beat/shot/voice direction, distilling ONLY:
 
     1. the approved opening state          (openingImage + the shot's own opening state)
-    2. the principal character performance (principalPerformance, verbatim — the LEAN
-                                             Seedance-facing field; Gate 5's own richer
-                                             physicalPerformance/animationTiming detail is
-                                             retained in the package, never injected into
-                                             the compiled provider brief — Option D doctrine)
+    2. the principal character performance (physicalPerformance, verbatim — the Gate-5
+                                             body-first field, 2026-07-17 Law 6 source
+                                             correction below; Gate 4's own principalPerformance
+                                             read and Gate 5's animationTiming are both
+                                             retained in the package, never injected into the
+                                             compiled provider brief — Option D doctrine)
     3. the principal camera intention      (cameraRelationship, verbatim)
     4. the approved voice/audio relationship (assigned VoicePerformances + locked dialogue)
     5. continuity in/out                   (ProductionDetail's own prose, verbatim, plus the
@@ -71,6 +72,31 @@ THE 2026-07-17 HANDOVER-MAPPING CORRECTION, IN TWO PASSES:
   expectedTiming/physicalActionRelationship as four discrete approved fields, never
   collapsed into one abstracted string.
 
+THE 2026-07-17 LAW 6 SOURCE CORRECTION (Julian's directive, same day, the immediate S1.SH1
+promotion blocker): distil_shot() used to source performanceAssignment — the ONE field
+cb_engine.compile_shot_contract folds into the provider's visual-performance brief — from
+principalPerformance (Gate 4's own human-facing "read" of the shot). Verified directly
+against the real, currently-approved Ep1 Scene 1 storyboard, not assumed: principalPerformance
+quotes the beat's own locked dialogue verbatim on 6 of 7 shots (it carries no instruction
+telling Gate 4 to avoid it), which is exactly why cb_engine.compile_shot_contract's own
+_assert_no_spoken_words refused every one of them. physicalPerformance — Gate 5's separate,
+strictly BODY-first field, authored under cb_creative.gate5_performance's own explicit
+"physical cause and effect stays readable" instruction, which never asks for or permits
+spoken words — was checked against the identical 7 shots and carries ZERO dialogue on any
+of them. animationTiming was checked too and found NOT safe (it references locked dialogue
+on 2 of 7 shots, since timing prose legitimately describes when a line lands) — it stays
+retained-only, never a performanceAssignment source. distil_shot() now sources
+performanceAssignment from physicalPerformance; principalPerformance is retained verbatim in
+the package (never dropped, never sent to the provider) rather than being the compiled
+source. See distil_shot()'s own docstring for the full verification. A separate, genuinely
+new finding surfaced attempting a real promotion under this fix: cb_engine.validate_scene_
+design's own FIELD_OVERBUDGET check (performanceAssignment capped at 50 words — a discipline
+authored for cb_engine.design_scene's OWN direct-authoring LLM prompt, which physicalPerformance
+was never written under) now fires on all 7 shots (72-92 words each, against principalPerformance's
+24-39). NOT resolved here — reported, not silently bypassed or worked around by trimming
+approved text; see PIPELINE_CUTOVER_LEDGER.md's own record of this checkpoint for the
+disposition.
+
 dry_run=True (the default) computes and returns everything and writes NOTHING.
 """
 import datetime
@@ -115,14 +141,17 @@ INTEGRATION_GAPS = (
     "a line lands within the shot, not numeric windows; promoted DialogueLines carry the "
     "whole-shot window (0..durationSec) as the documented 'approximate window inside the "
     "shot'.",
-    "gate5-detail-not-forwarded (Option D, by design, not a gap needing a fix): a "
-    "CreativeShotCard's own physicalPerformance/animationTiming (Gate 5's richer approved "
-    "detail, ~60 words each for a real shot) are retained verbatim in the promoted record "
-    "but deliberately NOT concatenated into the compiled Seedance brief's "
-    "performanceAssignment — doing so reliably blows cb_engine.MAX_SHOT_PROMPT_WORDS (210) "
-    "on real shots. The lean brief carries principalPerformance alone; the richer detail "
-    "lives in the package, per Option D's own 'not sent to Seedance is not dropped from "
-    "the production contract' doctrine.",
+    "principal-performance-not-forwarded (2026-07-17 Law 6 source correction — supersedes "
+    "this entry's earlier 'gate5-detail-not-forwarded' wording, kept here as the dated "
+    "record of the prior, now-incorrect design): performanceAssignment now sources "
+    "physicalPerformance, not principalPerformance — principalPerformance quoted the beat's "
+    "own locked dialogue verbatim on 6 of 7 real shots checked, a genuine Law 6 violation "
+    "cb_engine.compile_shot_contract's _assert_no_spoken_words correctly refused. "
+    "principalPerformance (Gate 4's own approved read) and animationTiming (Gate 5's timing "
+    "detail — also checked and found to reference locked dialogue on 2 of 7 shots, since "
+    "timing prose legitimately describes when a line lands) are both retained verbatim in "
+    "the promoted record, never concatenated into the compiled brief — Option D's own 'not "
+    "sent to Seedance is not dropped from the production contract' doctrine, unchanged.",
 )
 
 # The provider (fal/Seedance) takes ONE integer-second duration end to end — confirmed by
@@ -224,13 +253,31 @@ def _dialogue_lines(vps, duration):
     fallback chain is exactly what silently replaced the real V3 direction with an
     abstraction. Falls back to physicalActionRelationship ONLY when a VP genuinely has no V3
     direction authored yet (DialogueLine.delivery is a required, non-blank field) — never
-    falls back to dramaticIntention."""
+    falls back to dramaticIntention.
+
+    2026-07-22 correction (Julian, real-footage diagnosis — S1.SH1): startSec/endSec used to
+    stamp EVERY line as spanning the WHOLE shot (0.0-duration), discarding each VP's own
+    already-authored expectedTiming prose entirely — informational only (voice_shot never
+    reads these two fields to drive real audio), but still a wrong, misleading record on
+    every dialogue-bearing shot in the show. Now divides the shot's duration evenly across
+    however many lines it carries, in order — still approximate (the schema's own comment),
+    but no longer a lie that every line occupies the entire shot. minOnsetSec (an OPTIONAL,
+    director-authored floor for this line's own onset, anchored to the shot's fixed
+    picture duration — see cb_engine.DialogueLine) is carried through verbatim from the
+    VP's own dict when present; None for every VP that doesn't set it, reproducing the
+    exact prior behaviour there."""
+    n = max(1, len(vps))
+    slot = float(duration) / n
     lines = []
-    for vp in vps:
+    for i, vp in enumerate(vps):
         delivery = (vp.get("elevenLabsV3Direction") or vp.get("physicalActionRelationship") or "").strip()
         text = vp["exactDialogue"].strip()
-        lines.append({"speaker": vp["speaker"], "exactText": text, "delivery": delivery,
-                      "startSec": 0.0, "endSec": float(duration)})
+        line = {"speaker": vp["speaker"], "exactText": text, "delivery": delivery,
+                "startSec": round(i * slot, 1), "endSec": round((i + 1) * slot, 1)}
+        onset = vp.get("minOnsetSec")
+        if onset:
+            line["minOnsetSec"] = float(onset)
+        lines.append(line)
     return lines
 
 
@@ -289,37 +336,163 @@ def _continuity_state(prose, char_continuity, cast, which):
     return cb_engine.ContinuityState(lighting=prose, cameraSide=prose, characters=chars)
 
 
+def _strip_quoted_dialogue(text, exact_lines):
+    """THE TEMPO-RESCUE STRIPPER (2026-07-23, Julian — "lacks the heart pace and feeling"):
+    animationTiming — the Director's own authored pace-contrast design — was being DROPPED
+    wholesale at handover because it legitimately quotes locked dialogue when describing
+    where a line LANDS ("'Do I look official?' lands flat and earnest"), a Law 6 violation
+    if shipped verbatim. Discarding the whole field threw the tempo design away with the
+    bathwater — the confirmed root cause of every rendered moment playing at one even
+    middle pace. Surgical, not naive: finds quoted spans (straight/curly quotes) and
+    replaces ONLY those whose words genuinely overlap this shot's own locked dialogueLines
+    — an apostrophe in "she's" or an unrelated quoted phrase is never touched. Each
+    stripped span becomes the neutral marker "the line", so the pace design survives and
+    the words still live only in @Audio1. Mechanical, deterministic, no LLM. cb_engine's
+    own _assert_no_spoken_words still runs downstream on the full compiled prompt as
+    defense-in-depth — this stripper is what lets that assertion pass honestly instead of
+    the field never arriving at all."""
+    if not text or not exact_lines:
+        return text
+    line_words = set()
+    for ln in exact_lines:
+        line_words.update(w for w in re.findall(r"[a-z']+", ln.lower()) if len(w) > 1)
+
+    def _is_dialogue(span):
+        words = [w for w in re.findall(r"[a-z']+", span.lower()) if len(w) > 1]
+        if not words:
+            return False
+        hits = sum(1 for w in words if w in line_words)
+        return hits / len(words) >= 0.5
+
+    def _replace(m):
+        return "the line" if _is_dialogue(m.group(1)) else m.group(0)
+
+    out = re.sub(r"[\"“‘']([^\"“”‘’]{2,80}?)[\"”’']", _replace, text)
+    out = re.sub(r"(^|[.!?]\s+)the line\b", lambda m: m.group(1) + "The line", out)
+    return re.sub(r"\s{2,}", " ", out).strip()
+
+
 def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
     """ONE storyboard Creative Shot Card + its Production Detail + its ALREADY-PLACED
     voice performances (via place_voices_for_beat) -> ONE cb_engine.Shot (the protected,
     typed production contract) + the retained approved prose. Every creative field is the
-    storyboard's own, verbatim — never re-authored, never invented."""
+    storyboard's own, verbatim — never re-authored, never invented.
+
+    2026-07-17 LAW 6 SOURCE CORRECTION (Julian's directive, same day): performanceAssignment
+    — the ONE field cb_engine.compile_shot_contract folds into the provider's visual-
+    performance brief — used to be sb_shot["principalPerformance"]. Verified directly, not
+    assumed: principalPerformance is Gate 4's own human-facing "read" of the beat, authored
+    with NO instruction to avoid the beat's locked dialogue — and, checked against the real
+    approved Ep1 Scene 1 storyboard, it quotes that dialogue verbatim on every shot that has
+    any (6 of 7 shots; the 7th has none to leak). physicalPerformance — Gate 5's own richer,
+    strictly BODY-first field ("Author each shot's PHYSICAL PERFORMANCE and ANIMATION TIMING
+    (physicalPerformance, animationTiming): performance arises from thought; physical cause
+    and effect stays readable" — cb_creative.gate5_performance's own authoring instruction,
+    which never asks for or permits spoken words) — was checked against the SAME real
+    approved storyboard and carries ZERO dialogue on any of the 7 shots. animationTiming was
+    checked too and is NOT safe (it references "Nailed it."/"Buzz Crash!!" on two shots,
+    since timing prose legitimately describes when a line LANDS) — it is not used here.
+    performanceAssignment now sources physicalPerformance; a shot whose Gate-5 pass never
+    populated it refuses loudly rather than silently falling back to the dialogue-risky
+    principalPerformance. principalPerformance itself is NOT dropped from the production
+    record — Gate 4's own approved read is retained verbatim in `retained` below, exactly as
+    physicalPerformance/animationTiming already were, so nothing approved is lost, only its
+    role as the Seedance-facing text changes."""
     duration = normalize_duration_for_provider(pd["intendedDurationRange"])
     opener = pd["requiresNewKeyframe"]
     char_continuity = pd.get("characterContinuity")
+    physical_performance = sb_shot.get("physicalPerformance")
+    if not (physical_performance or "").strip():
+        raise HandoverRefused(
+            f"REFUSED — {sb_shot['shotId']} has no Gate-5 physicalPerformance authored yet. "
+            f"principalPerformance is never used as the provider visual-performance source "
+            f"(it quotes locked dialogue verbatim — a Law 6 violation, 2026-07-17 source "
+            f"correction) — the Gate-5 performance pass must run before this shot can be "
+            f"promoted.")
+
+    # THE GAG-PHYSICS CONTRACT, RECONNECTED (2026-07-21, Julian — "how do we get the prompt
+    # to deliver the feel, the laughter, the pain"): cb_engine.compile_shot_contract has
+    # always known how to render cb_engine.PhysicalStaging into the shipped prompt text —
+    # it was hardcoded to None here because the storyboard schema had no source field to
+    # distil it from. Gate 5 (cb_creative.gate5_performance) now authors it, all-or-nothing
+    # per shot; a shot with only some of the three required strings authored is treated the
+    # same as none (never ships a half-formed contract PhysicalStaging's own min_length=1
+    # would reject anyway).
+    gag_fields = (sb_shot.get("gagStaysVisible"), sb_shot.get("gagContactAndWeight"),
+                  sb_shot.get("gagPayoffShape"))
+    physical_staging = cb_engine.PhysicalStaging(
+        staysVisible=gag_fields[0], contactAndWeight=gag_fields[1],
+        payoffShape=gag_fields[2],
+        prohibitedStaging=list(sb_shot.get("gagProhibitedStaging") or [])
+    ) if all((f or "").strip() for f in gag_fields) else None
 
     shot = cb_engine.Shot(
         shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0], durationSec=duration,
         purpose=sb_shot["purpose"],
-        performanceAssignment=sb_shot["principalPerformance"],
+        performanceAssignment=physical_performance,
         camera=sb_shot["cameraRelationship"],
         openingPose=sb_shot["openingImage"],
         sourceType="opener" if opener else "relay",
         sourceShotId=None if opener else prev,
         cutInMotivation=sb_shot.get("transitionReason"),
+        # 2026-07-21 CORRECTION (Julian's own audit): transitionType used to be computed at
+        # Gate 4 then silently dropped here — only its prose (cutInMotivation, above)
+        # survived. None for a scene's own opener (no predecessor to be continuous with or
+        # cut from); the real authored value otherwise, so compile_shot_contract finally has
+        # something to branch on.
+        transitionType=None if opener else sb_shot.get("transitionType"),
+        # cutPace/internalCuts: REQUIRED, mandatory on every shot per Julian's own ruling
+        # ("it has to fire every single time, it's not optional") — Pydantic's own Literal
+        # (no default) already refuses to construct this Shot if cutPace is missing or not
+        # one of the three real values, so a shot with no cut-pace decision authored fails
+        # loudly here rather than silently shipping at whatever the compiler happens to do
+        # by default.
+        cutPace=sb_shot["cutPace"],
+        internalCuts=list(sb_shot.get("internalCuts") or []),
         dialogueBinding=(f"{shot_voices[0]['speaker']}'s vocal beat performs per the "
                          f"approved voice design.") if shot_voices else None,
         dialogueLines=_dialogue_lines(shot_voices, duration),
         visualPayoff=sb_shot["closingImage"],
-        physicalStaging=None,
+        physicalStaging=physical_staging,
         prohibited=list(pd.get("essentialProviderProtections") or [])[:3],
         charactersInFrame=_characters_in_frame(sb_shot, cast),
         continuityIn=_continuity_state(pd["continuityIn"], char_continuity, cast, "opening"),
-        continuityOut=_continuity_state(pd["continuityOut"], char_continuity, cast, "closing"))
+        continuityOut=_continuity_state(pd["continuityOut"], char_continuity, cast, "closing"),
+        # THE HEART-PACE-AND-FEELING FIX (2026-07-23, Julian — "this is better but lacks
+        # the heart pace and feeling"): two authored, approved storyboard fields that never
+        # reached the provider. tempoDesign rescues animationTiming — previously discarded
+        # WHOLESALE here because it quotes locked dialogue (the docstring above records that
+        # decision); now the quoted words are surgically stripped (only spans matching this
+        # shot's own dialogueLines) and the pace design itself finally ships. feltIntent
+        # ships audienceExperience — what the moment should FEEL like — verbatim (checked:
+        # that field carries no dialogue by its own Gate-4 authoring shape, but the stripper
+        # runs on it too as defense-in-depth).
+        tempoDesign=_strip_quoted_dialogue(
+            sb_shot.get("animationTiming"),
+            [v["exactDialogue"] for v in (shot_voices or [])]) or None,
+        feltIntent=_strip_quoted_dialogue(
+            sb_shot.get("audienceExperience"),
+            [v["exactDialogue"] for v in (shot_voices or [])]) or None,
+        # THE SHOT-MODE VOCABULARY + SHOT-DENSITY RULE (Julian, 2026-07-23): modes are the
+        # Director's own storyboard-time selection, passed through verbatim. The density
+        # rule below is a DECISION POINT, not a new lint layer (Anti-Guardrail Principle):
+        # >2 substantially different modes requires the Director's own recorded choice —
+        # hybrid_approved (proceed as one take, on record) or split_staged (this shot is
+        # already one half of a split). Absent modes = unmigrated shot = no requirement.
+        performanceModes=list(sb_shot.get("performanceModes") or []),
+        modeDensityDecision=sb_shot.get("modeDensityDecision"))
+    if len(shot.performanceModes) > 2 and not shot.modeDensityDecision:
+        raise HandoverRefused(
+            f"REFUSED — {sb_shot['shotId']} declares {len(shot.performanceModes)} performance "
+            f"modes ({', '.join(shot.performanceModes)}). THE SHOT-DENSITY RULE (Julian, "
+            f"2026-07-23): more than two substantially different modes in one generation "
+            f"needs the Director's own explicit decision — set modeDensityDecision to "
+            f"'hybrid_approved' (proceed as one take, on record) or 'split_staged' (divide "
+            f"into connected generations). This is a creative decision, never made here.")
     retained = {"continuityProseIn": pd["continuityIn"], "continuityProseOut": pd["continuityOut"],
                 "dialogueTimingProse": pd.get("dialogueTiming"),
                 "referenceRolesProse": pd.get("referenceRoles"),
-                "physicalPerformanceApproved": sb_shot.get("physicalPerformance"),
+                "principalPerformanceApproved": sb_shot.get("principalPerformance"),
                 "animationTimingApproved": sb_shot.get("animationTiming"),
                 "transitionType": sb_shot.get("transitionType"),
                 "voiceDirectorBrief": _voice_director_brief_lines(shot_voices)}
@@ -354,9 +527,17 @@ def _assert_no_internal_leak(shots_out):
     cb_engine.compile_scene_package's own output, cb_render.py's REVIEW_CRITERIA doctrine)
     literally IS cb_engine.hard_constraints()'s own text, starting with that exact prefix —
     the LEGITIMATE Option-D internal-contract line, never a creative-room-reasoning leak.
-    Every other field, and every other banned term (including 'Hard constraints:' anywhere
-    OUTSIDE internalConstraints), is checked exactly as before — this narrows nothing else."""
-    scrubbed = [{k: v for k, v in s.items() if k != "internalConstraints"} for s in shots_out]
+
+    CORRECTED 2026-07-20 (Julian's own worked prompt — the negatives gap named "a separate,
+    undecided question" in cb_engine.compile_shot_contract's own docstring is now closed:
+    hard_constraints()'s line is deliberately concatenated into the shipped seedancePrompt
+    itself, not just internalConstraints). seedancePrompt is exempted from this check the
+    same way internalConstraints already was — its own 'Hard constraints:' line is the
+    identical, intentional, compiler-generated text, never a leak. Every other field, and
+    every other banned term (including 'Hard constraints:' anywhere OUTSIDE these two named
+    fields), is checked exactly as before — this narrows nothing else."""
+    exempt = {"internalConstraints", "seedancePrompt"}
+    scrubbed = [{k: v for k, v in s.items() if k not in exempt} for s in shots_out]
     dump = json.dumps(scrubbed, ensure_ascii=False)
     for banned in ("showrunnerJudgement", "dramaticConstruction", "audienceExperience",
                     "rejectionChecks", "cinematographerChallenge", "Hard constraints:"):
@@ -637,7 +818,27 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     for shot_id in shot_ids:
         shot, retained, card_hash = _scoped_shot(sb, shot_id, characters_cfg, prev)
         card_hashes[shot_id] = card_hash
-        rec = _compile_one(shot, retained, scene, characters_cfg)
+        # THE CLEAN-FAILURE FIX (2026-07-22, found live in the Studio — a real Law 6
+        # violation in S1.SH1's authored internalCuts tripped cb_engine's own
+        # _assert_no_spoken_words, but that raises a bare AssertionError, a class this
+        # function's only caller (advance_shot) never catches — only HandoverRefused is
+        # caught there. The raw AssertionError propagated all the way to the Studio's job
+        # runner as an unhandled crash ("shot:advance:S1.SH1 – Failed – see log", a raw
+        # traceback dump) instead of the clean "needs-story-fix" status every OTHER
+        # content problem in this same function already surfaces. The Law 6 check itself
+        # stays exactly as strict and loud as designed — nothing here silently strips or
+        # tolerates a real violation; this only converts the FAILURE MODE so a genuine
+        # content defect reads as an actionable message instead of crashing the tool that's
+        # supposed to report it.
+        try:
+            rec = _compile_one(shot, retained, scene, characters_cfg)
+        except HandoverRefused:
+            raise
+        except Exception as e:
+            raise HandoverRefused(
+                f"REFUSED — {shot_id} failed compilation ({e}) — this needs the Director/"
+                f"Producer to revise the storyboard's own authored content, not a re-"
+                f"approval; nothing was promoted for this shot.")
         # THE INTERNAL CONTRACT LINE (Option D, matching compile_scene_package's own shape
         # exactly) — the authored-constraints record, kept in the package for review,
         # deliberately not concatenated into the provider brief (PIPELINE_CUTOVER_LEDGER.md
@@ -694,8 +895,10 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     pkg_path = cb_engine.canonical_package_path(scene_num, episode)
     old_rev = 0
     old_pkg_exists = pkg_path.exists()
+    old_pkg_bytes = None
     if old_pkg_exists:
-        old_pkg = json.load(open(pkg_path))
+        old_pkg_bytes = pkg_path.read_bytes()
+        old_pkg = json.loads(old_pkg_bytes)
         old_rev = int(old_pkg.get("revision") or 0)
     new_rev = old_rev + 1
     stamp = datetime.datetime.now().strftime("%Y%m%d")
@@ -743,6 +946,55 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
             f"canonical package, completely untouched; no spend-token binding hash changed; "
             f"no authorisation issued."),
         "repairLog": [],
+    }
+
+    # DEPARTMENT HANDOVER — CONTENT EDITS NEVER WIPE PRODUCTION PROGRESS (rewritten
+    # 2026-07-20, Julian's direct ruling — "I can overrule the rules, I don't want it to
+    # feel like a straitjacket... I can change anything"): the ORIGINAL version of this
+    # block only carried the ledger forward when the shot's ENTIRE compiled contract was
+    # byte-for-byte unchanged — meaning any edit anywhere in a shot (a single word of
+    # dialogue, a closing-image tweak) silently reset that shot's keyframe/voice/animation
+    # status back to "designed" and wiped approvedTake/harvestFrame, even when the edit had
+    # nothing to do with what was actually approved. Confirmed live the same night: three
+    # separate legitimate content edits to S1.SH1 each nuked its ledger in turn — Julian's
+    # own "I lost the keyframe" complaint traced directly to this rule, not to any actual
+    # loss of the generated file (which stayed on disk throughout; only the RECORD of it
+    # being approved was being discarded).
+    #
+    # THE FIX: the ledger now ALWAYS carries forward when a prior entry exists for the shot
+    # — a creative edit is never, by itself, grounds to erase recorded render-layer state.
+    # Whether the shot's own content actually changed is still computed and recorded below
+    # (contentChanged), for full transparency, but it is advisory only — it does not gate
+    # the carry-forward. THE ACTUAL "does this still apply" SIGNAL remains exactly where it
+    # already correctly lived: cb_render.py's own department_readiness (sourceHash-based,
+    # already field-scoped — Cinematography/Voice/Animation each hash only the specific
+    # inputs THEY depend on) continues to flag directionCurrent=false whenever a real
+    # dependency changed, visible in the Studio as an advisory badge Julian can act on or
+    # ignore — never a forced wipe of work already done. This is the same "flag, never
+    # stop" principle Julian already set for department approvals (2026-07-20), extended
+    # here to the ledger layer it was never applied to before.
+    carried = []
+    changed = []
+    if old_pkg_exists:
+        old_shots = {s.get("shotId"): s for s in (old_pkg.get("shots") or [])}
+        old_ledger = {e.get("shotId"): e for e in (old_pkg.get("continuityLedger") or [])}
+        old_cards = (old_pkg.get("sourceStoryboard") or {}).get("creativeCardHashes") or {}
+        for i, rec in enumerate(shots_out):
+            sid = rec.get("shotId")
+            if sid in old_ledger:
+                ledger_out[i] = old_ledger[sid]
+                carried.append(sid)
+                if old_shots.get(sid) != rec or old_cards.get(sid) != card_hashes.get(sid):
+                    changed.append(sid)
+    new_pkg["handover"] = {
+        "carriedForwardShots": carried,
+        "contentChangedShots": changed,
+        "rule": "the ledger (keyframe/voice/animation status) always carries forward when a "
+                "prior entry exists — a content edit never resets it by itself. "
+                "contentChangedShots names which carried-forward shots also had their own "
+                "compiled contract or creative-card hash change; department-level "
+                "directionCurrent (sourceHash-based, per-input) is the live, actionable "
+                "staleness signal for those — advisory, never a forced reset."
     }
 
     # 2026-07-17 (Julian's transactional-promotion directive, item 1): the ENTIRE candidate
@@ -793,6 +1045,33 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
             f"at {pkg_path.name}; nothing written, no archive, no provider call, no token.")
         return new_pkg, archived
 
+    # THE FRESHNESS GUARD (2026-07-20, Julian's state-integrity directive, item 4): closes a
+    # real, confirmed clobber — everything above this line (the compile, the validator, and
+    # for a genuinely large scene, real wall-clock time) reads its OWN "current" state from
+    # old_pkg, captured near the very top of this function. If something else legitimately
+    # wrote to the live pkg_path in the meantime — a candidate rejection, an approval, another
+    # promotion — old_pkg is no longer current, and the ledger carry-forward above (which
+    # derives ENTIRELY from that stale snapshot) would silently overwrite whatever landed in
+    # between. Confirmed live: this exact race let a stale, pre-rejection ledger snapshot
+    # overwrite S1.SH1's real rejection history not once but twice in one evening. Rather than
+    # attempt a clever re-merge (a second, subtler way to get this wrong), this is a hard,
+    # byte-for-byte optimistic-concurrency check, immediately before the only write that can
+    # actually clobber anything: if the file changed since old_pkg was read, REFUSE — never
+    # silently overwrite newer candidate/approval/rejection/redesign-cycle/cost state. The
+    # caller re-runs the promotion, which reads the fresh state from scratch.
+    if old_pkg_exists:
+        current_bytes = pkg_path.read_bytes() if pkg_path.exists() else None
+        if current_bytes != old_pkg_bytes:
+            raise HandoverRefused(
+                f"REFUSED — the live canonical package at {pkg_path.name} (revision "
+                f"{old_rev}) changed underneath this promotion while it was being computed "
+                f"(a concurrent write — a candidate rejection, an approval, or another "
+                f"promotion — landed in between the read and this write). Never silently "
+                f"overwritten: nothing was written. Re-run the promotion so it reads the "
+                f"current, freshest state; every historical record (candidates, "
+                f"rejections, approvals, cost) that landed in the meantime is untouched "
+                f"and unaffected by this refusal.")
+
     if old_pkg_exists:
         archived = pkg_path.parent / "archive" / (
             f"{pkg_path.stem}_pre_{'_'.join(shot_ids)}_promotion_rev{old_rev}_{stamp}.json")
@@ -803,6 +1082,128 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     json.dump(new_pkg, open(pkg_path, "w"), indent=1, ensure_ascii=False)
     log(f"CANONICAL PROMOTION — {', '.join(shot_ids)} -> {pkg_path.name} revision {new_rev}.")
     return new_pkg, archived
+
+
+def override_locked_dialogue(storyboard_path, scene_num, shot_id, line_index, new_text,
+                             episode="Ep1", reviewed_by="Julian", log=print):
+    """THE SCRIPT-OVERRIDE AUTHORITY (2026-07-20, Julian — "I have the ability to override
+    the script, no one else"): the Voice Director's own line editor (voicePanelHTML /
+    save_department_candidate) is DELIBERATELY unable to change a word — that machinery
+    exists to stop drift (an LLM or a careless edit silently rewriting locked dialogue).
+    This function is the DIFFERENT thing: a deliberate, named, human decision by the one
+    person with actual authority over the script. It does not bypass the lock — it MOVES
+    the lock, at its true root, so nothing downstream is ever left disagreeing about what
+    the "locked" line actually is.
+
+    THE TRUE ROOT (traced, not guessed): a shot's dialogueLines in the canonical package are
+    NOT their own source — they're derived at promotion time by cb_handover._dialogue_lines()
+    from the storyboard's own voicePerformances[], which cb_handover._scoped_shot() in turn
+    cross-validates line-for-line against the OWNING BEAT's beats[].exactDialogue (promotion
+    hard-refuses if the two ever disagree in count). Editing only the canonical package's own
+    copy (the shallow fix) would create exactly the double-source-of-truth this whole
+    pipeline's own discipline exists to prevent — a later, unrelated single-shot promotion
+    would silently overwrite it back to the old words. This function edits BOTH roots, in
+    lockstep, then re-runs the real promotion machinery (regenerate_production_detail ->
+    promote_to_canonical) so the change lands the same way every other legitimate content
+    change in this pipeline does — archived, versioned, never silent.
+
+    Also rewrites elevenLabsV3Direction (which embeds the OLD words verbatim inside its own
+    [tag] text) by replacing just the quoted words, preserving whatever bracket tag was
+    already there — leaving it unchanged would ship a Voice Director instruction that
+    literally quotes dialogue nobody says anymore. operativeWords is intentionally NOT
+    auto-rewritten (choosing which words in a brand-new line are the "operative" ones is a
+    creative call this function has no business inventing) — flagged in the return value as
+    a real, human follow-up, never silently guessed.
+
+    Every approved/candidate Voice or Animation direction for this shot goes stale the
+    moment the package revision bumps (the same mechanism already proven live on the
+    Gemini-flagged visualPayoff fix, moments before this rule was written) — nothing extra
+    to clear here, department_readiness re-derives currency from the shot's own content hash
+    on every read."""
+    sb = json.load(open(storyboard_path))
+    sb_shot = next((s for s in sb["shots"] if s["shotId"] == shot_id), None)
+    if sb_shot is None:
+        raise HandoverRefused(f"REFUSED — {shot_id} not found in the storyboard.")
+    beat_ids = sb_shot.get("beatIds") or []
+    beats_by_id = {b["beatId"]: b for b in sb["beats"]}
+
+    # Locate the Nth dialogue line THIS SHOT owns, in the same order Voice/Animation see it
+    # (place_voices_for_beat's own per-shot ordering) — never a raw index into the whole
+    # scene's voicePerformances, which would silently touch the wrong shot's line.
+    from cb_engine import canonical_package_path
+    pkg = json.load(open(canonical_package_path(scene_num, episode)))
+    pkg_shot = next((s for s in pkg["shots"] if s["shotId"] == shot_id), None)
+    if pkg_shot is None:
+        raise HandoverRefused(f"REFUSED — {shot_id} not found in the live production package.")
+    owned = pkg_shot.get("dialogueLines") or []
+    if not (0 <= line_index < len(owned)):
+        raise HandoverRefused(
+            f"REFUSED — {shot_id} has {len(owned)} locked line(s); line_index {line_index} "
+            f"is out of range.")
+    target = owned[line_index]
+    old_text = target["exactText"]
+    old_speaker = target["speaker"]
+    new_text = str(new_text or "").strip()
+    if not new_text:
+        raise HandoverRefused("REFUSED — the new line cannot be blank.")
+
+    # Match this exact (speaker, old text) pair, once, in BOTH roots — refuse rather than
+    # guess if either root doesn't contain it (a stale package revision, a prior partial
+    # edit) or contains it more than once (ambiguous which occurrence Julian means).
+    def _rewrite_one(items, get_text, refuse_label):
+        hits = [i for i, it in enumerate(items)
+                if get_text(it)[0] == old_speaker.strip().lower()
+                and get_text(it)[1] == old_text.strip()]
+        if len(hits) != 1:
+            raise HandoverRefused(
+                f"REFUSED — {refuse_label} has {len(hits)} line(s) matching "
+                f"{old_speaker}: \"{old_text}\" (need exactly 1); refusing to guess which "
+                f"one Julian means.")
+        return hits[0]
+
+    beat_hits = [(bid, i) for bid in beat_ids for i, line in enumerate(beats_by_id[bid]["exactDialogue"])
+                 if line.strip().lower().startswith(old_speaker.strip().lower() + ":")
+                 and line.split(":", 1)[1].strip() == old_text.strip()]
+    if len(beat_hits) != 1:
+        raise HandoverRefused(
+            f"REFUSED — {len(beat_hits)} beat exactDialogue line(s) match "
+            f"{old_speaker}: \"{old_text}\" across {shot_id}'s own beats (need exactly 1).")
+    beat_id, beat_idx = beat_hits[0]
+    beats_by_id[beat_id]["exactDialogue"][beat_idx] = f"{old_speaker}: {new_text}"
+
+    vp_hits = [i for i, vp in enumerate(sb.get("voicePerformances", []))
+               if vp["speaker"].strip().lower() == old_speaker.strip().lower()
+               and vp["exactDialogue"].strip() == old_text.strip()]
+    if len(vp_hits) != 1:
+        raise HandoverRefused(
+            f"REFUSED — {len(vp_hits)} voicePerformances entr(y/ies) match "
+            f"{old_speaker}: \"{old_text}\" (need exactly 1).")
+    vp = sb["voicePerformances"][vp_hits[0]]
+    vp["exactDialogue"] = new_text
+    old_direction = vp.get("elevenLabsV3Direction") or ""
+    if old_text.strip() in old_direction:
+        vp["elevenLabsV3Direction"] = old_direction.replace(old_text.strip(), new_text, 1)
+        direction_note = None
+    else:
+        direction_note = (f"elevenLabsV3Direction did not literally contain the old words "
+                          f"(\"{old_direction}\") — left UNCHANGED; it will read stale until "
+                          f"the Voice Director re-prepares.")
+    vp["overrideHistory"] = (vp.get("overrideHistory") or []) + [
+        {"from": old_text, "to": new_text, "by": reviewed_by, "at": _now()}]
+
+    json.dump(sb, open(storyboard_path, "w"), indent=1, ensure_ascii=False)
+    log(f"SCRIPT OVERRIDE — {shot_id} line {line_index} ({old_speaker}): "
+        f"\"{old_text}\" -> \"{new_text}\" (by {reviewed_by})")
+
+    import cb_creative
+    cb_creative.regenerate_production_detail(storyboard_path, storyboard_path, log=log,
+                                             only_shot_id=shot_id)
+    new_pkg, archived = promote_to_canonical(storyboard_path, scene_num, [shot_id],
+                                             episode=episode, dry_run=False, log=log)
+    return {"shotId": shot_id, "from": old_text, "to": new_text,
+            "operativeWordsNote": ("operativeWords was left as authored for the old line — "
+                                   "review and re-author it for the new one; not auto-guessed."),
+            "directionNote": direction_note, "archived": str(archived) if archived else None}
 
 
 def _now():

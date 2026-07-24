@@ -5,8 +5,12 @@ Crystal Bears — local generation module (the app's provider layer).
 Wires the crew's prompts to the real APIs, locally (no Replit):
   - generate_image()  -> DP keyframes; dispatches to Seedream 5 Pro (fal.ai, default, 2026-07-09) or
                          Nano Banana 2 (gemini-3.1-flash-image, kept live, CB_IMAGE_PROVIDER=nanobanana)
-  - generate_video_seedance_ref() -> Seedance reference-to-video (fal.ai) — THE real production video path;
-                         every render (cb_beats.py, cb_retake.py) calls this one exclusively.
+  - generate_video_seedance_ref() -> Seedance reference-to-video — THE real production video path; every
+                         render (cb_render.py) calls this one exclusively. Dispatches by CB_VIDEO_PROVIDER
+                         (added 2026-07-22, Julian: "i want to go via byteplus model ark"): "byteplus"
+                         (default) submits to BytePlus ModelArk's own Ark API (async create/poll-task);
+                         "fal" (rollback) keeps the original fal.ai-hosted wrapper. Same underlying model
+                         either way — a different vendor for the same render, not a different model.
   - generate_video()  -> Veo 3.1 (veo-3.1-generate-preview) [Camera i2v] — unused in production; CLI/manual-only.
   - eleven_tts()      -> ElevenLabs TTS (V3 acted masters)
   - voice_change()    -> RETIRED (CLAUDE.md rules 4/29 — no post voice swap, ever); raises loud on call, kept
@@ -58,7 +62,28 @@ IMAGE_MODEL = os.environ.get("CB_IMAGE_MODEL", "gemini-3.1-flash-image")  # NB2 
 # each vendor's own pricing page the same day — see cb_costs.py's RATES, also corrected today) — accepted as
 # immaterial at episode scale (~43 keyframes).
 IMAGE_PROVIDER = os.environ.get("CB_IMAGE_PROVIDER", "seedream")  # "seedream" (default) | "nanobanana" (rollback)
+# THE SEEDREAM HOST SWITCH (Julian's ruling, 2026-07-22 — "we have to now use byte plus for both the
+# image seedream 5 pro and seedance 2"): same dispatch shape as VIDEO_PROVIDER below — IMAGE_PROVIDER
+# above still picks the MODEL FAMILY (seedream vs nanobanana); SEEDREAM_HOST picks who HOSTS Seedream
+# once that family is chosen. fal.ai's own wrapper is kept live, never deleted, for rollback.
+SEEDREAM_HOST = os.environ.get("CB_SEEDREAM_HOST", "byteplus")  # "byteplus" (default) | "fal" (rollback)
+# The model id below ("dola-seedream-5-0-pro-260628") is corroborated by BytePlus's OWN marketing
+# domain (ai.byteplus.com's own playground URL parameter, fetched directly — not a third-party mirror)
+# but NOT independently confirmed from the official API reference page itself (docs.byteplus.com is a
+# JS-rendered SPA that blocked direct scraping, the same limitation the video integration hit).
+# "dola" — not "doubao" — matches the SAME international-brand-prefix pattern as the video model
+# ("dreamina-seedance-2-0-260128", not "doubao-seedance") — BytePlus's own western-facing brand name
+# for a ByteDance China-facing ("doubao") model family. Override via CB_BYTEPLUS_SEEDREAM_MODEL if a
+# real call proves it wrong.
+BYTEPLUS_SEEDREAM_MODEL = os.environ.get("CB_BYTEPLUS_SEEDREAM_MODEL", "dola-seedream-5-0-pro-260628")
 SEEDREAM_ENDPOINT = os.environ.get("CB_SEEDREAM_ENDPOINT", "bytedance/seedream/v5/pro/edit")
+# THE SCENE LOOK PROVIDER-ROUTING FIX (2026-07-19): SEEDREAM_ENDPOINT above is an EDIT/reference
+# endpoint — fal.ai requires at least one image in image_urls for it, and rejects an empty list
+# with a deterministic 422 (found live: every Scene Look fire, which always called this endpoint
+# with refs=[]). A no-reference generation must use a genuine TEXT-TO-IMAGE endpoint instead —
+# left UNSET by default rather than guessing a plausible-looking model id (never invent an
+# endpoint); set CB_SEEDREAM_T2I_ENDPOINT to enable no-reference generation on this provider.
+SEEDREAM_T2I_ENDPOINT = os.environ.get("CB_SEEDREAM_T2I_ENDPOINT", "")
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 ELEVEN_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
@@ -66,6 +91,23 @@ GLA = "https://generativelanguage.googleapis.com"
 XI = "https://api.elevenlabs.io"
 FAL_KEY = os.environ.get("FAL_KEY", "")
 FAL = "https://queue.fal.run"
+
+# THE VIDEO PROVIDER SWITCH (Julian's ruling, 2026-07-22 — "i want to go via byteplus model ark"):
+# same dispatch shape as IMAGE_PROVIDER above — the old path is kept live, never deleted, selectable
+# via CB_VIDEO_PROVIDER=fal for rollback. BytePlus ModelArk is BytePlus's own direct hosting of the
+# identical Seedance 2.0 model fal.ai wraps (model id dreamina-seedance-2-0[-fast]-260128) — a
+# different vendor for the same underlying render, not a different model. Endpoints confirmed via
+# BytePlus's own docs + a real worked example Julian supplied: POST .../contents/generations/tasks
+# creates an async task; GET .../contents/generations/tasks/{id} polls it (status: queued/running/
+# succeeded/failed/expired; content.video_url on success). Reference assets are passed as plain
+# public HTTPS URLs, EXACTLY the same shape image_urls/audio_urls already arrive in from cb_render's
+# own upload step (cb_gen._fal_upload is reused purely as a "local file -> public URL" utility here —
+# fal's own hosting, a different job from fal's own generation endpoint) — so cb_render.py's call
+# site needed zero changes to route through this provider.
+VIDEO_PROVIDER = os.environ.get("CB_VIDEO_PROVIDER", "byteplus")  # "byteplus" (default) | "fal" (rollback)
+BYTEPLUS_ARK_KEY = os.environ.get("BYTEPLUS_ARK_API_KEY", "")
+BYTEPLUS_ARK_BASE = os.environ.get("CB_BYTEPLUS_ARK_BASE", "https://ark.ap-southeast.bytepluses.com/api/v3")
+BYTEPLUS_ARK_IMAGES_URL = BYTEPLUS_ARK_BASE.rstrip("/") + "/images/generations"
 
 def _b64(path):
     data = pathlib.Path(path).read_bytes()
@@ -87,6 +129,15 @@ def _retryable(e):
         return True
     if isinstance(e, rx.HTTPError) and getattr(e, "response", None) is not None:
         return e.response.status_code in _RETRY_STATUS
+    # FIXED 2026-07-19 (Scene Look provider-routing incident): fal_client's own FalClientHTTPError
+    # carries a REAL status_code attribute — check it directly rather than guessing from str(e).
+    # A Seedream 422 validation error's message is fal's own structured error body (e.g.
+    # "[{'loc': [...], 'msg': 'Sequence should have at least 1 items', ...}]") with no "422" or
+    # "unprocessable" substring anywhere in it — the string-matching fallback below silently missed
+    # this exact class and retried a guaranteed-to-fail request 3 times before this fix.
+    status = getattr(e, "status_code", None)
+    if isinstance(status, int):
+        return status in _RETRY_STATUS
     m = str(e).lower()
     if any(x in m for x in ("400", "401", "403", "404", "422", "invalid", "unprocessable", "bad request", "unauthor", "not found")):
         return False
@@ -112,6 +163,24 @@ def _rget(url, **kw):
 def _fal_upload(path):
     import fal_client
     return _retry(lambda: fal_client.upload_file(path), what="fal upload")
+def _as_fal_url(p):
+    """Return p unchanged if it's already a fal (or any http/https) URL; otherwise upload the
+    local path and return the resulting URL. FIXED 2026-07-19 (real, 100%-reproducible production
+    bug): every real call into generate_video_seedance_ref goes through cb_render.fire_shot, which
+    deliberately uploads each reference ONCE per invocation (its own comment: "uploaded once per
+    invocation") and reuses the resulting URLs across all N candidates in the batch loop — it would
+    be wasteful to re-upload the same image/audio file for every candidate. But generate_video_
+    seedance_ref's own body then wrapped every item in str(pathlib.Path(p)) before re-uploading it,
+    unconditionally assuming its image_urls/audio_urls were still local paths. pathlib collapses a
+    double slash that isn't at the very start of the string, so str(pathlib.Path("https://v3b.fal.
+    media/...")) silently corrupts to "https:/v3b.fal.media/..." (one slash) — fal_client.upload_file
+    then tried to open() that mangled string as a local file and raised FileNotFoundError, on every
+    single attempt (all 3 retries hit the identical bug, since the corrupted input never changes).
+    This function is the one fix, applied at every one of this file's three re-upload sites below —
+    a real local path still uploads exactly as before; an already-uploaded URL now passes through."""
+    if isinstance(p, str) and p.startswith(("http://", "https://")):
+        return p
+    return _fal_upload(str(pathlib.Path(p)))
 def _fal_subscribe(endpoint, arguments=None, with_logs=False):
     import fal_client
     return _retry(lambda: fal_client.subscribe(endpoint, arguments=arguments, with_logs=with_logs),
@@ -159,11 +228,92 @@ def generate_image(prompt, refs=None, aspect="16:9", out="keyframe.png",
     return _generate_image_seedream(prompt, refs, aspect, out, image_size)
 
 def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png", image_size="2K"):
-    """Seedream 5 Pro (bytedance/seedream/v5/pro/edit, fal.ai) — the default keyframe model as of 2026-07-09
-    (see IMAGE_PROVIDER's doctrine comment above). Same reference-image contract as the NB2 path: a list of
-    local file paths, uploaded to fal then passed as image_urls alongside the identical prompt text — the
-    prompt/reference doctrine (rule 5's appearance-non-leak law, the four-anchor-style reference stack) is
-    model-agnostic by design, so no prompt-building code changes for this swap."""
+    """Public dispatcher for the Seedream 5 Pro model family — routes to BytePlus ModelArk (default,
+    2026-07-22) or fal.ai (CB_SEEDREAM_HOST=fal, rollback) per the SEEDREAM_HOST switch above."""
+    if SEEDREAM_HOST == "fal":
+        return _generate_image_seedream_fal(prompt, refs, aspect, out, image_size)
+    return _generate_image_seedream_byteplus(prompt, refs, aspect, out, image_size)
+
+
+# ── Seedream 5 Pro sizing (BytePlus, exact-pixel "WxH" — no confirmed separate aspect_ratio field) ──
+# BytePlus's own docs confirm "1K/2K/3K/4K or exact pixel sizes" for the size field, with real
+# aspect-ratio support (including 16:9/9:16/1:1) but NO independently-confirmed separate parameter for
+# it — safest is to compute an explicit "WxH" string ourselves rather than guess a second field name,
+# matching the documented mechanism directly. Long-edge pixel counts per tier match the documented
+# [1280x720, 4096x4096] total-pixel envelope comfortably.
+_BYTEPLUS_SIZE_TIERS = {"1K": 1024, "2K": 2048, "3K": 3072, "4K": 4096}
+_BYTEPLUS_ASPECTS = {  # aspect string -> (w_ratio, h_ratio)
+    "16:9": (16, 9), "9:16": (9, 16), "1:1": (1, 1), "4:3": (4, 3), "3:4": (3, 4), "21:9": (21, 9),
+}
+
+
+def _byteplus_seedream_size(image_size, aspect):
+    """Computes an exact 'WxH' pixel string for the given resolution tier + aspect ratio, rounded to
+    an even number of pixels (a common encoder requirement) and clamped to the ~4MP-per-2K-tier scale
+    BytePlus documents. Falls back to the bare tier string (e.g. "2K") for an unrecognized aspect —
+    still a valid `size` value per BytePlus's own docs, just without precise aspect control."""
+    long_edge = _BYTEPLUS_SIZE_TIERS.get(str(image_size).upper())
+    ratio = _BYTEPLUS_ASPECTS.get(aspect)
+    if not long_edge or not ratio:
+        return str(image_size)
+    rw, rh = ratio
+    if rw >= rh:
+        w = long_edge
+        h = round(long_edge * rh / rw / 2) * 2
+    else:
+        h = long_edge
+        w = round(long_edge * rw / rh / 2) * 2
+    return f"{w}x{h}"
+
+
+def _generate_image_seedream_byteplus(prompt, refs=None, aspect="16:9", out="keyframe.png", image_size="2K"):
+    """Seedream 5 Pro via BytePlus ModelArk's own Ark API (2026-07-22, Julian: "we have to now use
+    byte plus for both the image seedream 5 pro and seedance 2") — same model fal.ai wraps, hosted
+    directly. SYNCHRONOUS endpoint (unlike the video path's async create/poll-task shape) — confirmed
+    via three independent, cross-corroborating sources against BytePlus's own OpenAI-images-compatible
+    convention (docs.byteplus.com itself is JS-rendered and blocked direct scraping, the same
+    limitation the video integration hit). See BYTEPLUS_SEEDREAM_MODEL's own comment above for the
+    model-id corroboration level. Reference assets go through _fal_upload purely as a "local file ->
+    public URL" utility (fal's own hosting, a different job from fal's own generation endpoint), the
+    exact same reasoning already accepted for the video path."""
+    _need(BYTEPLUS_ARK_KEY, "BYTEPLUS_ARK_API_KEY")
+    ref_urls = [_fal_upload(str(pathlib.Path(r))) for r in (refs or [])]
+    body = {
+        "model": BYTEPLUS_SEEDREAM_MODEL,
+        "prompt": prompt,
+        "size": _byteplus_seedream_size(image_size, aspect),
+        "watermark": False,
+    }
+    if ref_urls:
+        body["image"] = ref_urls
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {BYTEPLUS_ARK_KEY}"}
+    print(f"  seedream ({BYTEPLUS_SEEDREAM_MODEL}, via BytePlus ModelArk): rendering…")
+    resp = _rpost(BYTEPLUS_ARK_IMAGES_URL, json=body, headers=headers, timeout=120)
+    rj = resp.json()
+    url = None
+    data = rj.get("data") or []
+    if data:
+        url = data[0].get("url")
+    if not url:
+        raise SystemExit(f"BytePlus Seedream returned no image url: {json.dumps(rj)[:900]}")
+    img = _rget(url, timeout=120)
+    outp = MEDIA / out
+    outp.write_bytes(img.content)
+    cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(provider="seedream5pro_byteplus"),
+                        out=out, meta={"model": BYTEPLUS_SEEDREAM_MODEL, "num_refs": len(ref_urls),
+                                       "provider": "byteplus"})
+    cb_costs.write_gen_sidecar(outp, op="keyframe_image", model=BYTEPLUS_SEEDREAM_MODEL, aspect=aspect,
+                                num_image_refs=len(ref_urls), provider="byteplus")
+    return str(outp)
+
+
+def _generate_image_seedream_fal(prompt, refs=None, aspect="16:9", out="keyframe.png", image_size="2K"):
+    """Seedream 5 Pro (bytedance/seedream/v5/pro/edit, fal.ai) — the ORIGINAL host for this model
+    (2026-07-09 through 2026-07-22), kept live for rollback via CB_SEEDREAM_HOST=fal. Same
+    reference-image contract as the NB2 path: a list of local file paths, uploaded to fal then passed
+    as image_urls alongside the identical prompt text — the prompt/reference doctrine (rule 5's
+    appearance-non-leak law, the four-anchor-style reference stack) is model-agnostic by design, so no
+    prompt-building code changes for this swap."""
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
@@ -174,8 +324,26 @@ def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png
     # endpoints accept "image_size" (a preset string, e.g. "square_hd"/"portrait_4_3"/"landscape_16_9", or a
     # {width,height} object) and "aspect_ratio" — mapped here to the SAME image_size convention this module's
     # NB2 path already uses ("2K" etc.) plus the beat's own aspect string, rather than silently omitted.
-    args = {"prompt": prompt, "image_urls": ref_urls, "image_size": image_size, "aspect_ratio": aspect}
-    result = _fal_subscribe(SEEDREAM_ENDPOINT, arguments=args, with_logs=False)
+    #
+    # PROVIDER ROUTING (2026-07-19 fix): SEEDREAM_ENDPOINT is edit-mode-only and fal.ai deterministically
+    # 422s an empty image_urls list — never send it there. A call with real reference(s) uses the edit
+    # endpoint exactly as before; a call with none uses the configured text-to-image endpoint, or refuses
+    # loudly (no network call made) if none is configured, rather than inventing an endpoint id.
+    if ref_urls:
+        endpoint = SEEDREAM_ENDPOINT
+        args = {"prompt": prompt, "image_urls": ref_urls, "image_size": image_size, "aspect_ratio": aspect}
+    else:
+        if not SEEDREAM_T2I_ENDPOINT:
+            raise RuntimeError(
+                "REFUSED — no reference image supplied and no supported Seedream text-to-image "
+                "endpoint is configured (CB_SEEDREAM_T2I_ENDPOINT is unset). Refusing rather than "
+                f"sending an empty image_urls list to the edit endpoint ({SEEDREAM_ENDPOINT}), which "
+                "fal.ai always rejects with a 422 (confirmed 2026-07-19). Set "
+                "CB_SEEDREAM_T2I_ENDPOINT to a real fal.ai text-to-image model id, or supply a "
+                "reference image, before generating.")
+        endpoint = SEEDREAM_T2I_ENDPOINT
+        args = {"prompt": prompt, "image_size": image_size, "aspect_ratio": aspect}
+    result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
     url = None
     if result.get("images"):
         url = result["images"][0].get("url")
@@ -187,8 +355,8 @@ def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png
     outp = MEDIA / out
     outp.write_bytes(img.content)
     cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(provider="seedream5pro"),
-                        out=out, meta={"model": SEEDREAM_ENDPOINT, "num_refs": len(ref_urls)})
-    cb_costs.write_gen_sidecar(outp, op="keyframe_image", model=SEEDREAM_ENDPOINT, aspect=aspect,
+                        out=out, meta={"model": endpoint, "num_refs": len(ref_urls)})
+    cb_costs.write_gen_sidecar(outp, op="keyframe_image", model=endpoint, aspect=aspect,
                                 num_image_refs=len(ref_urls))
     return str(outp)
 
@@ -378,9 +546,8 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
     return str(outp)
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────
-def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
+def _generate_video_seedance_ref_fal(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False, production_route=None):
-    _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video: feed reference image(s) + your OWN voice audio (≤15s);
     the character lip-syncs to your audio. Reference assets in the prompt as @图1/@Audio1.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
@@ -402,7 +569,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
            _seedance_json_prompt(prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
     args = {
         "prompt": _pr,
-        "image_urls": [_fal_upload(str(pathlib.Path(p))) for p in image_urls],
+        "image_urls": [_as_fal_url(p) for p in image_urls],
         "resolution": resolution,
         "duration": str(duration),
         # generate_audio ON: Seedance natively scores music + SFX + the lip-synced @Audio1 voice in ONE pass (fal docs —
@@ -412,27 +579,136 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     }
     if audio_urls:
         if isinstance(audio_urls, str): audio_urls = [audio_urls]
-        args["audio_urls"] = [_fal_upload(str(pathlib.Path(p))) for p in audio_urls]
+        args["audio_urls"] = [_as_fal_url(p) for p in audio_urls]
     if video_urls:
         if isinstance(video_urls, str): video_urls = [video_urls]
-        args["video_urls"] = [_fal_upload(str(pathlib.Path(p))) for p in video_urls]
+        args["video_urls"] = [_as_fal_url(p) for p in video_urls]
     endpoint = ("bytedance/seedance-2.0/fast/reference-to-video" if fast
                 else "bytedance/seedance-2.0/reference-to-video")
-    print(f"  seedance ref2vid ({endpoint}): rendering…")
+    print(f"  seedance ref2vid ({endpoint}, via fal.ai): rendering…")
     result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
     url = (result.get("video") or {}).get("url")
     if not url:
-        raise SystemExit(f"Seedance ref2vid returned no video url: {str(result)[:400]}")
+        raise SystemExit(f"Seedance ref2vid (fal.ai) returned no video url: {str(result)[:400]}")
     vid = _rget(url, timeout=300)
     outp = MEDIA / out; outp.write_bytes(vid.content)
     _secs = 15 if str(duration) == "auto" else float(duration)   # HANDLE_TOTAL default when duration="auto"
     cb_costs.log_spend("seedance_ref2vid", cb_costs.estimate_video_cost(
         "seedance_fast_per_sec" if fast else "seedance_standard_per_sec", _secs),
-        out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs})
+        out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs, "provider": "fal"})
     cb_costs.write_gen_sidecar(outp, op="seedance_ref2vid", endpoint=endpoint, resolution=resolution,
-                                duration=str(duration), seconds=_secs, fast=fast,
+                                duration=str(duration), seconds=_secs, fast=fast, provider="fal",
                                 num_image_refs=len(image_urls), num_audio_refs=len(audio_urls or []))
     return str(outp)
+
+
+# THE BYTEPLUS MODELARK PATH (2026-07-22): same underlying Seedance 2.0 model fal.ai wraps
+# (dreamina-seedance-2-0[-fast]-260128), hosted directly by BytePlus's own Ark API instead. Async
+# create-task/poll-task shape, confirmed against Julian's own real worked curl example plus BytePlus's
+# published docs (via a third-party technical writeup — docs.byteplus.com itself is a JS-rendered SPA
+# that blocked direct scraping). CONFIRMED: the create endpoint, the content-array shape (text +
+# image_url/audio_url/video_url items each tagged with a role — reference_image/reference_audio/
+# reference_video), the poll endpoint (GET .../tasks/{id}), the status vocabulary (queued/running/
+# succeeded/failed/expired), and the success payload's content.video_url field. NOT independently
+# confirmed from BytePlus's own docs (JS-blocked): the exact JSON key holding the newly-created task's
+# id, and the exact shape of a failed-task's error payload — handled defensively below (tries several
+# candidate id-key names; dumps the raw response if none match, rather than guessing silently).
+BYTEPLUS_ARK_TASKS_URL = BYTEPLUS_ARK_BASE.rstrip("/") + "/contents/generations/tasks"
+_BYTEPLUS_POLL_INTERVAL_SEC = 6.0
+_BYTEPLUS_POLL_TIMEOUT_SEC = 600.0
+
+
+def _byteplus_task_id(resp_json):
+    """Defensive extraction: the exact field name for a newly-created task's id was never confirmed
+    against BytePlus's own docs (JS-rendered site blocked scraping) — try every plausible key rather
+    than assume one and fail silently on a wrong guess."""
+    for key in ("id", "task_id", "taskId", "request_id", "requestId"):
+        v = resp_json.get(key)
+        if v:
+            return v
+    raise SystemExit(f"BytePlus Ark task-create response had no recognizable id field: {str(resp_json)[:500]}")
+
+
+def _generate_video_seedance_ref_byteplus(prompt, image_urls, audio_urls=None, resolution="720p",
+                                duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False, production_route=None):
+    """Seedance reference-to-video via BytePlus ModelArk's own Ark API — same model, different host
+    to fal.ai's wrapper. image_urls/audio_urls are expected to already be public HTTPS URLs (the real
+    production call site uploads local files via cb_gen._fal_upload BEFORE calling this — that upload
+    step is just "get a public URL for this local file," reused here for convenience; it is not a
+    dependency on fal.ai's own generation service). raw_prompt matches the fal path's own contract."""
+    import requests
+    _need(BYTEPLUS_ARK_KEY, "BYTEPLUS_ARK_API_KEY")
+    if isinstance(image_urls, str): image_urls = [image_urls]
+    _pr = (str(prompt) if raw_prompt else
+           _seedance_json_prompt(prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
+    content = [{"type": "text", "text": _pr}]
+    for u in image_urls:
+        content.append({"type": "image_url", "image_url": {"url": _as_fal_url(u)}, "role": "reference_image"})
+    if audio_urls:
+        if isinstance(audio_urls, str): audio_urls = [audio_urls]
+        for u in audio_urls:
+            content.append({"type": "audio_url", "audio_url": {"url": _as_fal_url(u)}, "role": "reference_audio"})
+    _secs = 15 if str(duration) == "auto" else float(duration)   # HANDLE_TOTAL default when duration="auto"
+    body = {
+        "model": "dreamina-seedance-2-0-fast-260128" if fast else "dreamina-seedance-2-0-260128",
+        "content": content,
+        "generate_audio": True,
+        "ratio": "16:9",
+        "resolution": resolution,
+        "duration": int(round(_secs)),
+        "watermark": False,
+    }
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {BYTEPLUS_ARK_KEY}"}
+    print(f"  seedance ref2vid ({body['model']}, via BytePlus ModelArk): submitting task…")
+    # _rpost/_rget already retry + raise_for_status internally (see their definitions above) — no
+    # need to wrap them in another _retry(_checked(...)) layer here.
+    create = _rpost(BYTEPLUS_ARK_TASKS_URL, json=body, headers=headers, timeout=60)
+    task_id = _byteplus_task_id(create.json())
+    poll_url = f"{BYTEPLUS_ARK_TASKS_URL}/{task_id}"
+    waited = 0.0
+    result = None
+    while waited < _BYTEPLUS_POLL_TIMEOUT_SEC:
+        time.sleep(_BYTEPLUS_POLL_INTERVAL_SEC)
+        waited += _BYTEPLUS_POLL_INTERVAL_SEC
+        poll = _rget(poll_url, headers=headers, timeout=60)
+        pj = poll.json()
+        status = pj.get("status")
+        if status == "succeeded":
+            result = pj
+            break
+        if status in ("failed", "expired"):
+            raise SystemExit(f"BytePlus Ark video task {status}: {str(pj)[:500]}")
+        # queued / running / anything else: keep polling
+    if result is None:
+        raise SystemExit(f"BytePlus Ark video task {task_id} did not finish within "
+                          f"{_BYTEPLUS_POLL_TIMEOUT_SEC:.0f}s (still polling — check the Ark console)")
+    url = ((result.get("content") or {}).get("video_url"))
+    if not url:
+        raise SystemExit(f"BytePlus Ark task succeeded but had no content.video_url: {str(result)[:400]}")
+    vid = _rget(url, timeout=300)
+    outp = MEDIA / out; outp.write_bytes(vid.content)
+    cb_costs.log_spend("seedance_ref2vid", cb_costs.estimate_video_cost(
+        "seedance_byteplus_ark_per_sec", _secs),
+        out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs, "provider": "byteplus"})
+    cb_costs.write_gen_sidecar(outp, op="seedance_ref2vid", endpoint=body["model"], resolution=resolution,
+                                duration=str(duration), seconds=_secs, fast=fast, provider="byteplus",
+                                num_image_refs=len(image_urls), num_audio_refs=len(audio_urls or []))
+    return str(outp)
+
+
+def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
+                                duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False, production_route=None):
+    """Public dispatcher — routes to BytePlus ModelArk (default) or fal.ai (CB_VIDEO_PROVIDER=fal,
+    rollback) per the VIDEO_PROVIDER switch above. See _generate_video_seedance_ref_byteplus/_fal for
+    the real implementations; this wrapper exists so every call site (cb_render.py) stays unchanged."""
+    _require_production_route(production_route, "generate_video_seedance_ref")
+    if VIDEO_PROVIDER == "fal":
+        return _generate_video_seedance_ref_fal(prompt, image_urls, audio_urls=audio_urls, video_urls=video_urls,
+                                resolution=resolution, duration=duration, out=out, fast=fast,
+                                raw_prompt=raw_prompt, production_route=production_route)
+    return _generate_video_seedance_ref_byteplus(prompt, image_urls, audio_urls=audio_urls,
+                                resolution=resolution, duration=duration, out=out, fast=fast,
+                                raw_prompt=raw_prompt, production_route=production_route)
 
 def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync", production_route=None):
     _require_production_route(production_route, "lipsync")

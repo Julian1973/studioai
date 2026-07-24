@@ -6,6 +6,21 @@ this module's Gates 0-6, ProductionDetail and CreativeShotCard are LOCKED as of 
 openingImage/reference-role/continuityIn corrections that day. No further creative or
 compiler changes without a fresh, dated ruling — see the ledger for the full record.
 
+2026-07-19 exception, Julian's own fresh ruling ("we can be flexible if it secures the
+beat again... this is a straight jacket, that's a guide not a rule"): production_detail's
+requiresNewKeyframe was a mechanical straightjacket (forced True for every PLANNED_CUT,
+discarding whatever continuity the mind had already authored for that same shot) — fixed
+to a genuine, defaulting-to-relay creative judgment. See correction #4 in that function's
+own docstring for the full record.
+
+2026-07-21 exception, Julian's own direct ruling ("all of the producer, the director, the
+showrunner... need to fire so that when we create the storyboard, the storyboard is
+already being populated... the script-to-storyboard is actually where the magic
+happens"): a NEW gate, 6b — the Producer's own feasibility & scope review — is added
+after Gate 6 passes and Production Detail is authored. This is purely ADDITIVE, never a
+modification of any frozen Gate 0-6/ProductionDetail/CreativeShotCard content — no frozen
+field, prompt or schema above is touched. See gate6b_producer_feasibility's own docstring.
+
 Process v1 was rejected by Julian as a PROCESS-LEVEL failure (EX-005 in the exemplar
 library): the Cinematographer entered after the dramatic approach was already selected;
 no governing audience-experience/visual-grammar decision existed; fixed lanes and
@@ -64,6 +79,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 import cb_llm
+import cb_departments
 
 CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
@@ -171,8 +187,56 @@ class CreativeShotCard(BaseModel):
     transitionType: Literal["CONTINUOUS", "PLANNED_CUT"]
     transitionReason: str                        # cut: why continuous would be weaker;
     #                                              continuous: why a cut would weaken it
+    # THE CUT-PACE DECISION (2026-07-21, Julian — "you have to do what you think is right
+    # to deliver the beat, whether that's short, sharp and snappy or a longer one... that's
+    # down to you, the director, the producer... it has to fire every single time, it's not
+    # optional"): REQUIRED on every shot, no default, no exception — the pace this shot's
+    # own generation call actually cuts at is a real directorial decision, made HERE, at the
+    # same shot conference that already decides transitionType, grounded in the scene's own
+    # already-authored rhythmAndEscalation/comicOrDramaticMechanism (Gate 1) — never
+    # inherited from an unrelated reference example's own genre. A held emotional beat earns
+    # single_continuous_take; a five-hit collision earns rapid_cuts; most shots sit between.
+    cutPace: Literal["single_continuous_take", "paced_cuts", "rapid_cuts"]
+    cutPaceReason: str = Field(min_length=1, description=(
+        "Why THIS pace serves THIS beat — grounded in the scene's own rhythmAndEscalation/"
+        "comicOrDramaticMechanism, never a generic justification."))
     physicalPerformance: Optional[str] = None    # Gate 5 (Director): body + animation intent
     animationTiming: Optional[str] = None        # Gate 5 (Director): timing/weight of the move
+    # THE INTERNAL CUTS (Gate 5, authored ONLY when cutPace calls for them): each entry is
+    # ONE self-contained cut in Seedance's own real multi-shot grammar — one action + one
+    # camera move, ordered, ending on its own completed beat (never a mid-action cut). Left
+    # empty for single_continuous_take, where performanceAssignment already carries the one
+    # flowing take. Never a mechanical split of performanceAssignment's own prose — the
+    # Director authors each cut directly, the same discipline as the gag-physics fields
+    # below, because deriving cuts by slicing prose invents boundaries nobody actually chose.
+    internalCuts: List[str] = Field(default_factory=list)
+    # THE GAG-PHYSICS CONTRACT (2026-07-21, Julian — "how do we get the prompt to deliver
+    # the feel, the laughter, the pain"): cb_engine.compile_shot_contract has always known
+    # how to render cb_engine.PhysicalStaging into the shipped prompt (it's the exact fix
+    # for the old beat-pipeline's "Fuzzby vanished into the flower" lesson) — but nothing in
+    # this storyboard schema could ever populate it, so cb_handover.distil_shot hardcoded it
+    # to None for every shot promoted through the live pipeline. These four, authored
+    # alongside physicalPerformance/animationTiming at the SAME Gate 5 pass (never a new
+    # gate), are that missing source. Optional and all-or-nothing by design: only a shot
+    # that carries a big physical/comedic beat needs them; an ordinary shot leaves them
+    # null, exactly as it does today.
+    gagStaysVisible: Optional[str] = Field(default=None, description=(
+        "Only for a shot carrying a big physical/comedic beat: what must remain readable in "
+        "silhouette THROUGHOUT the gag (e.g. 'his wings and legs stay visible above the "
+        "petal line the whole time'). This is the specific guard against a gag reading as "
+        "the character simply vanishing — leave null for an ordinary shot."))
+    gagContactAndWeight: Optional[str] = Field(default=None, description=(
+        "Only for a shot carrying a big physical/comedic beat: the real cause-and-effect "
+        "chain — what touches what, where weight compresses, where it rebounds, what flies "
+        "loose. Leave null for an ordinary shot; never a restatement of physicalPerformance."))
+    gagPayoffShape: Optional[str] = Field(default=None, description=(
+        "Only for a shot carrying a big physical/comedic beat: the exact visual shape of "
+        "the gag's payoff — the one image this beat must land having delivered. Leave null "
+        "for an ordinary shot."))
+    gagProhibitedStaging: List[str] = Field(default_factory=list, description=(
+        "Only for a shot carrying a big physical/comedic beat: this gag's own specific "
+        "failure modes (e.g. 'never fully disappearing into the flower'). Empty for an "
+        "ordinary shot."))
     approvalState: str = "draft"
 
 
@@ -324,6 +388,27 @@ class ShowrunnerReview(BaseModel):
     issues: List[ReviewIssue] = Field(default_factory=list)
 
 
+class FeasibilityIssue(BaseModel):
+    """One Gate 6b finding — never a creative note, always a producibility one (a missing
+    asset, an unrealistic ask, a scope problem the storyboard's own words create)."""
+    shotId: str
+    severity: Literal["BLOCK", "NOTE"]
+    issue: str
+
+
+class ProducerFeasibilityReview(BaseModel):
+    """Gate 6b (2026-07-21) — the Producer's OWN pass, after Gate 6 passes and Production
+    Detail exists. Feasibility and scope only — never a creative opinion; the Producer
+    does not judge whether a shot is good, only whether it can actually be delivered.
+    judgement/issues are the LLM's own holistic scope read; missingCharacterReferences and
+    durationValidation (merged in by gate6b_producer_feasibility, never authored by the
+    LLM itself) are computed mechanically from what's already on disk — the LLM is shown
+    both and asked to reason from them, never to re-derive or contradict them."""
+    judgement: str
+    passes: bool
+    issues: List[FeasibilityIssue] = Field(default_factory=list)
+
+
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # CANON SOURCES + GATE 0 READINESS
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -335,6 +420,7 @@ _CANON_SOURCES = {
     "continuity": ROOT / "shows/crystal-bears/canon/continuity.json",
     "styleLaw": ROOT / "shows/crystal-bears/laws/style.txt",
     "showrunnerTaste": CREATIVE / "SHOWRUNNER_TASTE_CANON.md",
+    "producerTaste": CREATIVE / "PRODUCER_TASTE_CANON.md",
     "directorTaste": CREATIVE / "DIRECTOR_TASTE_CANON.md",
     "cinematographyTaste": CREATIVE / "CINEMATOGRAPHY_TASTE_CANON.md",
     "voiceTaste": CREATIVE / "VOICE_PERFORMANCE_CANON.md",
@@ -384,7 +470,7 @@ def _canon_text(key, limit=9000):
     return p.read_text()[:limit] if p and p.exists() else ""
 
 
-def _canonical_exemplars(limit=6):
+def _canonical_exemplars(limit=12):
     """THE SIMPLIFICATION CHECKPOINT (2026-07-17): role prompts receive ONLY the concise
     approved canonical exemplar PRINCIPLES (EXEMPLAR_LIBRARY, reusable entries) — never
     the raw exemplar dump (attempted/userWords prose), and never Evidence Library, Pattern
@@ -470,10 +556,30 @@ def _unresolved_fields_for(names):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _mind(role, taste_keys, charge):
     taste = "\n\n".join(_canon_text(k, 7000) for k in taste_keys)
+    # The Creative Room now genuinely hires the repository's specialist people.  Only the
+    # concise marked runtime contracts are loaded (not historical/superseded pipeline notes
+    # elsewhere in the long skill documents).  This remains the ONE existing Gate 0-6
+    # creative path; no parallel storyboard pipeline is introduced.
+    worker_keys = []
+    if "DIRECTOR" in role:
+        worker_keys.append("director")
+    if "CINEMATOGRAPHER" in role:
+        worker_keys.append("cinematography")
+    if "VOICE" in role:
+        worker_keys.append("voice")
+    if "PRODUCER" in role:
+        worker_keys.append("producer")
+    worker_contracts = "\n\n".join(cb_departments.load_runtime_skill(k)
+                                      for k in worker_keys)
     return (f"You are the {role} of the Crystal Bears creative room — a world-class family-"
-            f"animation voice for ages 4-8 with adult-rewarding wit. You never imitate or "
-            f"name real filmmakers or studios; you apply the enduring principles below as "
-            f"the show's OWN identity.\n\n{charge}\n\n"
+            f"animation voice for ages 4-8 with adult-rewarding wit. The show's OWN world "
+            f"never names or imitates a real filmmaker or studio — no character, line, "
+            f"on-screen reference or plot point may cite one. Separately, and only as your "
+            f"OWN private craft direction never surfaced in the show itself, your department "
+            f"contract below may cite real professional influences by name; those are "
+            f"guidance for your judgement, never content to ship.\n\n{charge}\n\n"
+            f"LIVE DEPARTMENT WORKER CONTRACT(S) LOADED FROM SKILL.md:\n"
+            f"{worker_contracts or 'Showrunner taste canon owns this pass.'}\n\n"
             f"YOUR TASTE CANON:\n{taste}\n\n"
             f"APPROVED CANONICAL EXEMPLAR PRINCIPLES (concise, directly relevant; the "
             f"REJECTED verdicts are failures you must not repeat — do not treat any "
@@ -710,7 +816,21 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "reduced to character pose alone. A wide establishing view is wrong when "
               "cameraRelationship calls for an embedded, in-the-world vantage — but the "
               "fix is judgment about THIS shot, not a mandatory formula repeated on every "
-              "shot."),
+              "shot. closingImage, like openingImage, is a purely VISUAL, PHYSICAL "
+              "description of the final frame - describe only what is SEEN (pose, "
+              "environment, the physical residue of what just happened), never a "
+              "character's spoken line, quoted or paraphrased: the audio track alone "
+              "carries dialogue, and any of a shot's own dialogue words appearing here "
+              "hard-refuses the whole scene's production handover (LAW 6). "
+              "THE CUT-PACE DECISION (mandatory, every shot, no exceptions): decide "
+              "cutPace — single_continuous_take, paced_cuts (2-3 internal cuts), or "
+              "rapid_cuts (4+ tight, fast cuts) — from what THIS shot's own beat actually "
+              "needs, grounded in the treatment's own rhythmAndEscalation and "
+              "comicOrDramaticMechanism, never a fixed default and never copied from an "
+              "unrelated reference. A held emotional beat earns single_continuous_take; a "
+              "frantic collision earns rapid_cuts; state why in cutPaceReason. Most shots "
+              "sit at paced_cuts or single_continuous_take — rapid_cuts is for the shot "
+              "that genuinely IS the scene's own bang-bang-bang moment, not a default."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
@@ -732,17 +852,58 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
               "The visual sequence now exists. Author each shot's PHYSICAL PERFORMANCE and "
               "ANIMATION TIMING (physicalPerformance, animationTiming): performance arises "
               "from thought; physical cause and effect stays readable; weight, anticipation "
-              "and follow-through are timed to the treatment's rhythm. Change NOTHING else "
-              "on the cards — the sequence design is settled."),
+              "and follow-through are timed to the treatment's rhythm. physicalPerformance "
+              "must NEVER quote or paraphrase a character's spoken line, even a fragment - "
+              "describe only the body: what the character does before, during and after "
+              "the line lands, never the words themselves (the audio track alone carries "
+              "dialogue; a shot's own dialogue words appearing here hard-refuses the whole "
+              "scene's production handover, LAW 6).\n\n"
+              "THE GAG-PHYSICS CONTRACT: for a shot that carries a BIG physical or comedic "
+              "beat — the moment where the whole gag lands, not every shot in a comedic "
+              "scene — also author gagStaysVisible / gagContactAndWeight / gagPayoffShape / "
+              "gagProhibitedStaging. gagStaysVisible is a SHORT NOUN PHRASE, never a full "
+              "sentence (e.g. 'his wings and legs above the petal line', NOT 'From the "
+              "moment he enters, his wings must remain visible') — it is spliced directly "
+              "after the word 'Keep' downstream, so a full sentence there reads broken. "
+              "gagContactAndWeight and gagPayoffShape are the real contact-and-weight chain "
+              "(what hits what, where it compresses, where it rebounds) and the exact shape "
+              "of the payoff — full sentences, same register as physicalPerformance. "
+              "gagProhibitedStaging names this gag's own failure modes (e.g. a character "
+              "disappearing entirely into a flower/prop instead of staying visible). Leave "
+              "all four null for an ordinary shot — never author them as a restatement of "
+              "physicalPerformance, and never invent a big beat that isn't already there.\n\n"
+              "If cutPace/cutPaceReason are not already set on a shot, decide them now, "
+              "here, using the SAME standard as Gate 4: grounded in the treatment's own "
+              "rhythmAndEscalation and comicOrDramaticMechanism, never a fixed default.\n\n"
+              "INTERNAL CUTS (mandatory whenever this shot's own cutPace is paced_cuts or "
+              "rapid_cuts — leave empty for single_continuous_take): author internalCuts as "
+              "an ordered list of self-contained cuts in Seedance's own real multi-shot "
+              "grammar — each entry ONE action plus ONE camera move, ending on its own "
+              "completed beat, never a mid-action cut. 2-3 entries for paced_cuts, 4 or more "
+              "for rapid_cuts, matching the count cutPace itself already commits to. Never a "
+              "restatement of physicalPerformance chopped into pieces — each cut is its own "
+              "sentence, in order, building toward visualPayoff. The SAME LAW 6 rule that "
+              "governs physicalPerformance governs every internalCuts entry too: NEVER quote "
+              "or paraphrase a character's spoken line, even a fragment, even inside quotation "
+              "marks — describe only the body and camera around the moment the line lands "
+              "(e.g. 'as he delivers his line', never the words themselves). Change NOTHING "
+              "else on the cards — the sequence design is settled."),
         f"THE SELECTED TREATMENT:\n{treatment.model_dump_json()[:3000]}\n\n"
         f"THE SHOT SEQUENCE:\n" + "\n".join(s.model_dump_json() for s in shots),
         PerformancePass, label=f"gate5_perf_s{scene_num}")
     by_id = {s.shotId: s for s in shots}
     for s in pp.shots:
         d0 = by_id.get(s.shotId)
-        if d0:                                    # only the two Gate-5 fields may change
+        if d0:                                    # only the Gate-5 fields may change
             d0.physicalPerformance = s.physicalPerformance
             d0.animationTiming = s.animationTiming
+            d0.gagStaysVisible = s.gagStaysVisible
+            d0.gagContactAndWeight = s.gagContactAndWeight
+            d0.gagPayoffShape = s.gagPayoffShape
+            d0.gagProhibitedStaging = s.gagProhibitedStaging
+            d0.cutPace = s.cutPace
+            d0.cutPaceReason = s.cutPaceReason
+            d0.internalCuts = s.internalCuts
     return shots
 
 
@@ -802,6 +963,82 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
+# GATE 6b — PRODUCER FEASIBILITY & SCOPE REVIEW (2026-07-21, purely additive — see the
+# module docstring's dated exception)
+# ─────────────────────────────────────────────────────────────────────────────────────────
+def _missing_character_references(cast):
+    """Deterministic, zero-LLM — the SAME check load_canon_envelope already runs
+    episode-wide (cb_creative.py's own conflicts list), scoped here to exactly this
+    scene's own cast, so the Producer reasons from a computed fact rather than
+    re-deriving it. Returns a sorted list of character names with no locked anchor."""
+    try:
+        chars = json.load(open(_CANON_SOURCES["characters"]))
+    except Exception:
+        return sorted(cast)
+    missing = []
+    for name in cast:
+        rec = next((v for k, v in chars.items() if _norm(k) == _norm(name)), None)
+        anchor = rec.get("anchor") if isinstance(rec, dict) else None
+        if not anchor or not (HERE / anchor).exists():
+            missing.append(name)
+    return sorted(missing)
+
+
+def gate6b_producer_feasibility(episode, scene_num, shots, details, cast, log=print):
+    """Gate 6b — feasibility and scope ONLY, never a creative opinion. Runs after Gate 6
+    passes and Production Detail is authored (intendedDurationRange only exists once
+    Production Detail has run, so this cannot fire any earlier in the sequence).
+
+    Two facts are computed MECHANICALLY, never authored by the LLM, and handed to it as
+    ground truth to reason from: missingCharacterReferences (_missing_character_
+    references, above) and durationValidation (validate_duration_ranges, already used
+    elsewhere in this module — reused verbatim, not reimplemented). The LLM's own job is
+    the holistic scope read neither of those mechanical checks can make (an oversized
+    cast crowding one frame, a physically impossible simultaneous performance) — grounded
+    in the same shots/details it's shown, never re-deriving or contradicting the two
+    mechanical facts.
+
+    Unlike Gate 6, a BLOCK here never returns the scene to an earlier creative gate for
+    automatic re-authoring — a missing reference or an unrealistic duration is not fixed
+    by different prose; it needs a real production decision, surfaced plainly in Julian's
+    own review screen before he approves the storyboard, exactly like any other BLOCK
+    finding in this studio."""
+    missing_refs = _missing_character_references(cast)
+    duration = validate_duration_ranges(details, log=log)
+    review = cb_llm.structured(
+        _mind("PRODUCER", ["producerTaste"],
+              "Gate 6b: the creative sequence has already passed Gate 6 and Production "
+              "Detail is already authored. Judge ONLY whether this scene can actually be "
+              "produced as written — never whether it's good. Two facts below are already "
+              "computed for you; reason from them, never re-derive or contradict them. "
+              "Add your own holistic scope judgement on top: does any shot ask for more "
+              "simultaneous named characters, or a scale of action, than a reference-"
+              "anchored single composition can credibly hold together. Name the specific "
+              "shot and the specific practical reason for every issue you raise."),
+        f"SHOTS:\n" + "\n".join(s.model_dump_json()[:1400] for s in shots)
+        + f"\n\nPRODUCTION DETAIL:\n" + "\n".join(d.model_dump_json()[:900] for d in details)
+        + f"\n\nMECHANICALLY COMPUTED — MISSING CHARACTER REFERENCES (each one is a real "
+          f"BLOCK on its own, already true, do not re-check): "
+        + (", ".join(missing_refs) if missing_refs else "none")
+        + f"\n\nMECHANICALLY COMPUTED — DURATION VALIDATION (already true, do not "
+          f"re-check): " + json.dumps(duration, ensure_ascii=False),
+        ProducerFeasibilityReview, label=f"gate6b_producer_s{scene_num}")
+    # Every missing reference is a real, standing BLOCK regardless of what the LLM itself
+    # returned — a mechanical fact is never something a generous specialist gets to waive.
+    issues = list(review.issues)
+    for name in missing_refs:
+        if not any(name.lower() in i.issue.lower() for i in issues):
+            issues.append(FeasibilityIssue(
+                shotId="scene", severity="BLOCK",
+                issue=f"{name} appears in this scene with no locked reference image on disk."))
+    passes = review.passes and not missing_refs and not duration.get("invalidShotIds")
+    return {"judgement": review.judgement, "passes": passes,
+            "issues": [i.model_dump() for i in issues],
+            "missingCharacterReferences": missing_refs,
+            "durationValidation": duration}
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────
 # PRODUCTION DETAIL — added ONLY after the creative sequence passes
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cast=None,
@@ -845,7 +1082,34 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
     already gets, one line below). cb_handover._continuity_state maps an empty
     continuityIn to cb_engine's own typed None (Shot.continuityIn: Optional[ContinuityState]
     = None) — the compiler (cb_engine.compile_keyframe_prompt) omits the 'Continuity in:'
-    paragraph on that None, a literal is-None check, never a string comparison."""
+    paragraph on that None, a literal is-None check, never a string comparison.
+
+    2026-07-19 correction #4 (Julian, exercising his own explicit exception to this
+    module's freeze — "we can be flexible if it secures the beat again... this is a
+    straight jacket, that's a guide not a rule"): requiresNewKeyframe used to be forced
+    True for EVERY shot whose transitionType is PLANNED_CUT, regardless of what the mind
+    actually authored for it (see the mechanical override below, pre-fix: `is_opener or
+    (transitionType == "PLANNED_CUT")`) — a real, live bug, not a hypothetical: the current
+    Scene 1 storyboard has all five shots marked PLANNED_CUT, so every one of them was
+    forced to a disconnected fresh keyframe even though four of them already carry rich,
+    genuinely-inherited continuityIn/continuityOut/characterContinuity text (pollen dust,
+    an unsettled hover, a held pose) that a relay is exactly built to preserve. transition
+    Type answers a CAMERA/EDIT question (does the shot cut or hold); requiresNewKeyframe
+    answers a DIFFERENT question (does this shot's visible world reset), and conflating them
+    is the same "any editorial cut treated as a full reset" bug independently found and
+    fixed the same day in cb_engine.py's own design_scene authoring prompt (see that
+    module's 2026-07-19 note above OPENER_ANCHOR/RELAY_ANCHOR).
+    FIXED: the mind is now asked to author requiresNewKeyframe itself as a genuine creative
+    judgment — default FALSE (this shot's opening frame anchors off the ACTUAL previous
+    shot, exactly as its own continuityIn already describes, even though the cut itself
+    changes camera/character/framing) — reserving TRUE for a genuine scene/location reset,
+    or a deliberate choice that a disconnected fresh image is what actually LANDS this
+    beat (a hard button, a hidden reveal, a scene-defining wide). This is a guide with a
+    strong default, never an absolute rule — the model's own authored value is now
+    TRUSTED, not silently overwritten by transitionType. The ONE thing that stays
+    mechanical (unchanged, still structural fact, not a stylistic choice) is the scene's
+    true first shot (is_opener): it always requires a keyframe, since there is no
+    predecessor to relay off, whatever transitionType or the mind's own answer says."""
     cast_block = ""
     if shot_cast:
         cast_block = ("\n\nSHOT CAST (author characterContinuity for EXACTLY these named "
@@ -857,9 +1121,17 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
               ["directorTaste", "cinematographyTaste"],
               "The creative sequence has PASSED. Add the production layer only: "
               "continuityIn/Out; dialogue timing within the shot; reference roles (which "
-              "references anchor identity/environment); whether the shot requires a NEW "
-              "keyframe (a PLANNED_CUT does; a CONTINUOUS chain does not); a credible "
-              "intendedDurationRange per shot (e.g. '5-8s') authored FROM the shot's own "
+              "references anchor identity/environment); whether the shot requires a NEW, "
+              "DISCONNECTED keyframe (requiresNewKeyframe) — DEFAULT FALSE for every shot "
+              "except the scene's true opener, even when the shot is a PLANNED_CUT: a cut "
+              "is a camera/edit choice, not a claim that the visible world resets, and the "
+              "continuityIn you are about to author for this same shot is exactly the kind "
+              "of carried-forward state a relay (opening off the actual previous shot) "
+              "preserves. Set it TRUE only for a genuine scene/location reset, or when a "
+              "disconnected fresh image is the deliberate choice that makes THIS beat land "
+              "(a hard button, a hidden reveal, a scene-defining wide) — a real judgment "
+              "call you are making, never a mechanical consequence of the cut itself; a "
+              "credible intendedDurationRange per shot (e.g. '5-8s') authored FROM the shot's own "
               "already-approved physicalPerformance and animationTiming (the weight and "
               "timing of the move already decided at Gate 5) and the locked dialogue's own "
               "timing where the shot carries a line — never invented independent of that "
@@ -890,15 +1162,18 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
     real_opener = opener_shot_id or (shots[0].shotId if shots else None)
     by_id = {d.shotId: d for d in pd.details}
     out = []
-    for s in shots:                                # keyframe truth is structural, not stylistic
-        is_opener = (s.shotId == real_opener)
+    for s in shots:                    # ONLY the true opener is structural; everything
+        is_opener = (s.shotId == real_opener)  # else is the mind's own authored judgment
         d = by_id.get(s.shotId) or ProductionDetail(
             shotId=s.shotId, continuityIn="", continuityOut="", dialogueTiming="",
-            referenceRoles="", requiresNewKeyframe=(s.transitionType == "PLANNED_CUT"),
+            referenceRoles="", requiresNewKeyframe=False,
             intendedDurationRange="")
-        # a scene's FIRST shot has no predecessor frame to continue from — it always
-        # requires a keyframe, whatever its creative transitionType says about how it plays
-        d.requiresNewKeyframe = is_opener or (s.transitionType == "PLANNED_CUT")
+        # 2026-07-19 correction #4 (see docstring): a scene's FIRST shot has no predecessor
+        # frame to continue from — it always requires a keyframe, whatever its creative
+        # transitionType or the mind's own answer says. Every OTHER shot keeps whatever the
+        # mind actually authored (defaulting False above if its response omitted the shot
+        # entirely) — transitionType no longer forces True regardless of that judgment.
+        d.requiresNewKeyframe = is_opener or d.requiresNewKeyframe
         if is_opener:              # mechanical, never LLM-authored — see docstring above.
             d.continuityIn = ""    # typed absence (correction #3) — the schema's own
                                     # existing empty-string convention, not a sentinel phrase
@@ -1080,7 +1355,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
         voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 
-    escalation, details = None, []
+    escalation, details, producer = None, [], None
     if review and not review.passes:
         escalation = ("UNRESOLVED after the permitted complete creative revisions — "
                       "escalated for human direction, not endlessly rewritten: "
@@ -1089,6 +1364,10 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         log("ESCALATION — " + escalation)
     else:
         details = production_detail(episode, scene_num, sd, shots, voices, log=log)
+        producer = gate6b_producer_feasibility(episode, scene_num, shots, details,
+                                               ready["cast"], log=log)
+        log(f"GATE 6b — Producer {'clears' if producer['passes'] else 'BLOCKS'}: "
+            f"{producer['judgement'][:140]}")
 
     pkg = {"episodeId": episode, "sceneNumber": str(scene_num),
            "engineVersion": ENGINE_VERSION, "canonVersion": CANON_VERSION,
@@ -1106,15 +1385,19 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "showrunnerJudgement": review.judgement if review else "",
            "treatmentComparison": review.treatmentComparison if review else "",
            "internalRevisions": revisions, "escalation": escalation,
+           "producerFeasibility": producer,
            "provenance": {"showrunner": PROV("showrunner"), "director": PROV("director"),
                            "cinematographer": PROV("cinematographer"),
-                           "voice": PROV("voice-director")},
+                           "voice": PROV("voice-director"),
+                           **({"producer": PROV("producer")} if producer else {})},
            "approvalState": "awaiting-human-storyboard-approval"}
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_scene{scene_num}_storyboard.json"
     json.dump(pkg, open(out, "w"), indent=1, ensure_ascii=False)
     log(f"STORYBOARD v2 — scene {scene_num}: {len(sd.beats)} beat(s), {len(shots)} shot(s), "
-        f"{sum(1 for s in shots if s.transitionType == 'PLANNED_CUT')} keyframe shot(s), "
+        # 2026-07-19: counts the mind's own requiresNewKeyframe verdict, not transitionType —
+        # a PLANNED_CUT no longer implies a fresh keyframe (correction #4 above).
+        f"{sum(1 for d in details if d.requiresNewKeyframe)} keyframe shot(s), "
         f"{len(voices)} voice performance(s) -> {out.name}")
     return pkg
 

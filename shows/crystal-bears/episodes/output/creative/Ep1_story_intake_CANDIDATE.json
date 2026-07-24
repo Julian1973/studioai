@@ -1,0 +1,1866 @@
+{
+ "episode": "Ep1",
+ "builtAt": "2026-07-18T20:54:21",
+ "scriptPath": "shows/crystal-bears/episodes/scripts/Ep1_The_Adventure_Begins_Final_v2.txt",
+ "scriptMd5": "48f9e3b9beecfc16f411d3d797dc38a0",
+ "director": {
+  "skill": "crystal-bears-director",
+  "loaded": true
+ },
+ "title": "The Adventure Begins",
+ "logline": "On his first solo voyage, careful young Keen is blown off course into Crystal Cove, where saving a trapped dolphin reveals his courage, awakens his Aquamarine Crystal, and helps him find a new family.",
+ "leadBear": "Keen",
+ "episodeVision": {
+  "premise": "A nervous but determined young bear leaves home for the first time, loses his way in a storm, chooses to save a dolphin friend, and is welcomed into the Crystal Bears.",
+  "dramaticQuestion": "When Keen is separated from home and caught in a dangerous storm, will he trust his heart enough to act bravely and discover he is not alone?",
+  "theme": "Courage is not the absence of fear; it is choosing love and action while fear is still there.",
+  "externalJourney": "Keen departs by sailboat, befriends Squeaky, is thrown off course by a storm, follows a beacon to Crystal Cove, rescues Squeaky from a net, reaches shore, and receives his Aquamarine Crystal.",
+  "internalJourney": "Keen begins by trying to prove he can handle everything alone. Through fear, loss, and rescue, he learns that bravery includes accepting help, honoring family, and joining a wider circle of care.",
+  "relationshipChanges": "Keen and his Mum move from protected closeness into loving separation. Keen and Squeaky become mutual rescuers. Aida moves from watcher to guide. Fuzzby shifts from comic observer to awestruck admirer. The Crystal Bears become Keen’s new found family.",
+  "emotionalCurve": "Playful opening warmth gives way to soulful anticipation, then bittersweet farewell, comic uncertainty, storm panic, heroic urgency, relief, wonder, belonging, and finally lighthearted family comedy.",
+  "comedyCurve": "Fuzzby’s pollen chaos establishes the episode’s goofy engine; Keen’s overprepared sailing and map confusion add gentle self-deprecating comedy; storm danger pauses the jokes; Fuzzby’s awe and honey fixation restore levity after the emotional landing.",
+  "setupPayoffMap": "Aida’s vision of Keen pays off when she calmly identifies him in the storm. Keen’s repeated self-reassurance pays off when he centers himself underwater. His father’s wristbands, given as a symbol of never being alone, pay off as the vessel for the Aquamarine Crystal. Squeaky guiding Keen pays off when Keen saves Squeaky, then Squeaky carries Keen safely home. Fuzzby’s chaotic bravado pays off as sincere admiration and immediate friendship hunger.",
+  "visualMotifs": "Tall flowers and drifting pollen for comic innocence; pink rose-quartz glow for intuition and care; wristbands as legacy and connection; grey storm sheets against crystal light; aquamarine glow as courage made visible; the washed-clean cove as rebirth and homecoming.",
+  "sonicMotifs": "Fuzzby’s buzzing hums, soft crystal-bowl resonance, sailboat creaks, dolphin clicks and chirps, thunder and rain escalation, muffled underwater sound, crystal hums, and finally gentle shore waves with shared laughter.",
+  "climax": "Keen dives into the storm water without hesitation, fights the net while his wristbands glow, tears Squeaky free, is overwhelmed by the wave, and is carried back through the storm by the dolphin he saved.",
+  "resolution": "Aida names Keen’s heart-led courage, the Aquamarine Crystal settles into his father’s wristbands, the Bears embrace him, and Keen understands he has gained a family while remaining connected to home.",
+  "intendedFinalFeeling": "Safe, uplifted, and warmly excited: the audience should feel that Keen has truly arrived, that courage is tender as well as bold, and that future adventures will be funny, caring, and communal."
+ },
+ "scenes": [
+  {
+   "sceneNumber": 1,
+   "headerRaw": "EXT. DEEP WITHIN THE RAINFOREST – DAY\t\t\t\t1",
+   "location": "DEEP WITHIN THE RAINFOREST",
+   "time": "DAY"
+  },
+  {
+   "sceneNumber": 2,
+   "headerRaw": "EXT. CRYSTAL COVE – AIDA’S SANCTUARY – DAY\t\t\t\t2",
+   "location": "CRYSTAL COVE",
+   "time": "DAY"
+  },
+  {
+   "sceneNumber": 3,
+   "headerRaw": "EXT. KEEN’S ISLAND – THE PIER – DAY\t\t\t\t \t3",
+   "location": "KEEN’S ISLAND",
+   "time": "DAY"
+  },
+  {
+   "sceneNumber": 4,
+   "headerRaw": "EXT. AT SEA – DAY   \t\t\t\t \t\t\t4",
+   "location": "AT SEA",
+   "time": "DAY"
+  },
+  {
+   "sceneNumber": 5,
+   "headerRaw": "EXT. RAINFOREST EDGE – CONTINUOUS\t\t\t\t\t5",
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS"
+  },
+  {
+   "sceneNumber": 6,
+   "headerRaw": "EXT. CRYSTAL COVE – STORM BUILDING  \t\t\t\t6",
+   "location": "CRYSTAL COVE",
+   "time": "STORM BUILDING"
+  },
+  {
+   "sceneNumber": 7,
+   "headerRaw": "EXT. OUT AT SEA – STORM\t  \t\t\t\t\t\t7",
+   "location": "OUT AT SEA",
+   "time": "STORM"
+  },
+  {
+   "sceneNumber": 8,
+   "headerRaw": "EXT. CRYSTAL COVE BEACH – DAY\t    \t\t\t\t\t8",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "DAY"
+  },
+  {
+   "sceneNumber": 9,
+   "headerRaw": "EXT. GATHERING AREA – DAY\t\t\t\t\t\t9",
+   "location": "GATHERING AREA",
+   "time": "DAY"
+  },
+  {
+   "sceneNumber": 10,
+   "headerRaw": "EXT. CRYSTAL COVE BEACH – CONTINUOUS\t\t\t\t10",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "CONTINUOUS"
+  }
+ ],
+ "beats": [
+  {
+   "sceneNumber": 0,
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "location": "",
+   "time": "",
+   "characters": [],
+   "storyBeat": "The episode presents itself as the beginning of the Crystal Bears world, giving the audience a clean ceremonial entry point before story action begins.",
+   "want": "The episode wants to announce the world and orient the audience.",
+   "need": "The opening needs to create trust that this is a warm, magical, emotionally safe adventure space.",
+   "kidRead": "A new show and a new adventure are starting.",
+   "adultRead": "The title cards frame this as an origin chapter with legacy and authorship clearly foregrounded.",
+   "emotionalIntent": "Gentle anticipation and storybook welcome.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "THE CRYSTAL BEARS"
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "Episode 1 – THE ADVENTURE BEGINS"
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Created by Lloyd Beau Knight & Julian Jenkins"
+    },
+    {
+     "n": 4,
+     "dialogue": null,
+     "action": "Written by Douglas Booth"
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Executive Showrunner Julian Jenkins"
+    },
+    {
+     "n": 6,
+     "dialogue": null,
+     "action": "Enaid Creative"
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "FINAL April 13, 2026"
+    }
+   ]
+  },
+  {
+   "sceneNumber": 1,
+   "beatCode": "S01-B01-POLLEN-CHAOS",
+   "location": "DEEP WITHIN THE RAINFOREST",
+   "time": "DAY",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby and Zenny gather pollen in completely opposite styles: Zenny is calm and capable, while Fuzzby turns every flower into a tiny disaster and performance opportunity.",
+   "want": "Fuzzby wants to prove he is a terrific worker and maybe impress Zenny.",
+   "need": "Fuzzby needs to be accepted even when his energy is messy and uncontrolled.",
+   "kidRead": "Fuzzby keeps crashing into flowers and it is silly.",
+   "adultRead": "The comedy defines a friendship dynamic: one character is kinetic chaos, the other affectionate patience.",
+   "emotionalIntent": "Bright, fizzy fun with an undercurrent of fondness.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Tall flowers sway gently in the warm breeze. Some stretch high above the grass, with long soft necks and bright open petals full of pollen. FUZZBY and ZENNY weave between them collecting pollen from flower to flower. Tiny pollen sacks bounce on their back legs. Zenny works with smooth calm precision — neat, efficient, graceful. Fuzzby does not. He zig-zags wildly through the air, humming loudly to himself as he works."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "He dips low into a flower, scoops up pollen — then overdoes it and spins sideways into a leaf. FWIP. He bounces back into the air and straightens up proudly."
+    },
+    {
+     "n": 4,
+     "dialogue": "Fuzzby: Nailed it.",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Zenny glides up beside him. Watches him for a beat."
+    },
+    {
+     "n": 6,
+     "dialogue": null,
+     "action": "He zooms to another flower, humming louder, and sticks his whole face into it. A beat. He pulls back out completely dusted in pollen like a fuzzy yellow moustache. Zenny tries not to laugh."
+    },
+    {
+     "n": 7,
+     "dialogue": "Fuzzby: Do I look official?",
+     "action": null
+    },
+    {
+     "n": 8,
+     "dialogue": "Zenny: Yes Fuzzby Officially nuts!",
+     "action": null
+    },
+    {
+     "n": 9,
+     "dialogue": null,
+     "action": "Fuzzby gasps. He wipes at his face. Somehow smears the pollen worse. He dives again toward another flower — clips a branch — tumbles end over end through the air. THUP. THUP. THUP. He lands upside down inside a blossom. Beat. His little legs kick. Then he pops back up."
+    },
+    {
+     "n": 10,
+     "dialogue": "Fuzzby: Buzz Crash!!",
+     "action": null
+    },
+    {
+     "n": 11,
+     "dialogue": null,
+     "action": "Zenny rolls her eyes, but she is smiling now. Fuzzby hums louder and dives into another flower. He pops back out, somehow even more covered in pollen than before."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 1,
+   "beatCode": "S01-B02-STORM-INTRUDES",
+   "location": "DEEP WITHIN THE RAINFOREST",
+   "time": "DAY",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "A distant rumble interrupts the pollen game, shifting the scene from harmless comedy to early warning as Zenny senses weather changing and Fuzzby tries to joke his way through it.",
+   "want": "Zenny wants to recognize the danger and get moving; Fuzzby wants to stay confident and funny.",
+   "need": "They need to move from play into responsibility.",
+   "kidRead": "A storm is coming, but Fuzzby is still being goofy.",
+   "adultRead": "The episode pivots from character comedy into plot threat without losing the established comic voice.",
+   "emotionalIntent": "A playful wobble into suspense.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Zenny watches him. Beat. A distant RUMBLE of thunder. Fuzzby pauses mid-hover."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: …okay that sounded dramatic.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Zenny glances toward the sky. The light has shifted slightly. Something feels different. But they do not see anything yet."
+    },
+    {
+     "n": 4,
+     "dialogue": "Zenny: A Storm’s coming.",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": "Fuzzby: Good thing I work well under pressure.",
+     "action": null
+    },
+    {
+     "n": 6,
+     "dialogue": null,
+     "action": "He immediately flies into a flower and gets stuck again. Zenny sighs."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 2,
+   "beatCode": "S02-B01-AIDA-LISTENS",
+   "location": "CRYSTAL COVE",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Keen"
+   ],
+   "storyBeat": "Aida sits in stillness at the cove, using sound and her rose quartz to open herself to something beyond the visible world.",
+   "want": "Aida wants to listen clearly to what her crystal is showing her.",
+   "need": "She needs to trust quiet intuition before anyone else sees the danger.",
+   "kidRead": "Aida is doing gentle magic by the sea.",
+   "adultRead": "Leadership is introduced as calm receptivity rather than command; she is powerful because she listens first.",
+   "emotionalIntent": "Peaceful, mystical, expectant.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Gentle waves roll onto the shore. AIDA sits in stillness beside a crystal bowl. She runs the wand softly around the rim. A low shimmering tone fills the air. The cove seems to quiet around her. She closes her eyes. Her ROSE QUARTZ PENDANT begins to glow. Soft pink light rises across her face."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 2,
+   "beatCode": "S02-B02-VISION-OF-KEEN",
+   "location": "CRYSTAL COVE",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Keen"
+   ],
+   "storyBeat": "Through Aida’s inner sight, the audience sees Keen at the pier with his Mum, preparing for departure while both pride and worry sit between them.",
+   "want": "Aida’s vision wants to identify the child whose path is about to cross the cove.",
+   "need": "The story needs to emotionally connect the coming rescue to a family bond before the danger begins.",
+   "kidRead": "Aida can see a boy getting ready for a trip.",
+   "adultRead": "The vision plants parental love, separation anxiety, and the coming test of independence.",
+   "emotionalIntent": "Tender foreknowledge.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "AIDA’S INNER VISION — THROUGH AIDA’S EYES - A wooden pier. A small sailboat waiting on bright blue water. KEEN standing beside his MUM. He checks the straps on his satchel. Then checks them again. Then one more time. His Mum watches him with a proud smile that cannot quite hide her worry."
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "BACK TO AIDA"
+    }
+   ]
+  },
+  {
+   "sceneNumber": 2,
+   "beatCode": "S02-B03-IT-IS-TIME",
+   "location": "CRYSTAL COVE",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Keen"
+   ],
+   "storyBeat": "Aida returns from the vision with certainty, rises, and heads into the forest because she knows events are now in motion.",
+   "want": "Aida wants to be in the right place when Keen’s journey reaches the cove.",
+   "need": "She needs to act on faith before proof arrives.",
+   "kidRead": "Aida knows something important is about to happen.",
+   "adultRead": "The mentor figure does not interfere with the journey; she prepares to meet it.",
+   "emotionalIntent": "Quiet resolve.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "The pink glow fades gently from her eyes. Aida places a paw over her heart. A soft knowing smile."
+    },
+    {
+     "n": 2,
+     "dialogue": "Aida: It’s time.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "She rises gracefully. The bowl’s note fades into the sound of distant wind. Aida turns and heads purposefully into the forest."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 3,
+   "beatCode": "S03-B01-LEAVING-HOME",
+   "location": "KEEN’S ISLAND",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Keen's Mum"
+   ],
+   "storyBeat": "Keen packs and repacks for his voyage while his Mum tries to be supportive through her emotion; both are pretending this step is easier than it is.",
+   "want": "Keen wants to show his Mum he is ready and capable.",
+   "need": "He needs permission to be scared without losing his bravery.",
+   "kidRead": "Keen is getting ready for a big boat trip and checking everything a lot.",
+   "adultRead": "This is a parent-child threshold moment: practical preparation masks the ache of letting go.",
+   "emotionalIntent": "Bittersweet courage with gentle humor.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "A neat little sailboat bobs beside the dock. KEEN loads his final supplies onto the boat — a rolled map, a satchel, a berry pouch, a blanket. He arranges them carefully. Then rearranges them. Then checks them one more time. His MUM stands nearby, smiling proudly, though her eyes are glassy."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen's Mum: Keen… are you sure you’ve got everything?",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": "Keen: I’ve got this, Mum.",
+     "action": null
+    },
+    {
+     "n": 4,
+     "dialogue": null,
+     "action": "He pats the satchel. Pauses. Checks one more pocket just in case. His Mum smiles despite herself."
+    },
+    {
+     "n": 5,
+     "dialogue": "Keen's Mum: I know… it’s just… this is a big step.",
+     "action": null
+    },
+    {
+     "n": 6,
+     "dialogue": null,
+     "action": "Keen looks out at the water. He swallows. He is trying very hard to be brave."
+    },
+    {
+     "n": 7,
+     "dialogue": "Keen: Like you said… it’s part of growing up.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 3,
+   "beatCode": "S03-B02-FATHER-WRISTBANDS",
+   "location": "KEEN’S ISLAND",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Keen's Mum"
+   ],
+   "storyBeat": "Keen’s Mum gives him his father’s wristbands, transforming the departure from a simple trip into an inheritance of memory, love, and promise.",
+   "want": "Keen’s Mum wants him to carry his father’s presence with him.",
+   "need": "Keen needs a tangible reminder that growing up does not mean leaving love behind.",
+   "kidRead": "Keen gets special wristbands that belonged to his dad.",
+   "adultRead": "The object carries grief, continuity, and parental blessing without overexplaining the loss.",
+   "emotionalIntent": "Reverent, intimate, heart-open.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "His Mum nods softly. She reaches into her bag and takes out two worn WRISTBANDS. She holds them carefully, like they matter. Keen sees them and stills."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen's Mum: Keen… it’s time for you to have your father’s wristbands.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "A small breeze moves through the ropes along the pier. Keen looks down at them. His expression softens."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen's Mum: I still feel him… every day.",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "She places the wristbands gently into Keen’s paws. He turns them over carefully. Feels their weight. Their meaning."
+    },
+    {
+     "n": 6,
+     "dialogue": "Keen's Mum: Promise me you’ll always wear them.",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": "Keen: I promise.",
+     "action": null
+    },
+    {
+     "n": 8,
+     "dialogue": null,
+     "action": "He slips them onto his wrists. They fit perfectly. He turns his paws, taking them in. His Mum brushes a paw gently against his cheek."
+    },
+    {
+     "n": 9,
+     "dialogue": "Keen's Mum: Wherever you go… You’ll never be alone.",
+     "action": null
+    },
+    {
+     "n": 10,
+     "dialogue": null,
+     "action": "Keen takes that in. A small, real smile."
+    },
+    {
+     "n": 11,
+     "dialogue": "Keen: I won’t be. I love you, Mum.",
+     "action": null
+    },
+    {
+     "n": 12,
+     "dialogue": "Keen's Mum: I love you… my brave boy.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 3,
+   "beatCode": "S03-B03-PUSHING-OFF",
+   "location": "KEEN’S ISLAND",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Keen's Mum"
+   ],
+   "storyBeat": "Keen finally leaves the dock, trying to look confident even when the boat wobbles and his Mum laughs through tears.",
+   "want": "Keen wants his departure to look brave and successful.",
+   "need": "He needs to discover that bravery can include awkwardness.",
+   "kidRead": "Keen sails away and almost loses his balance in a funny way.",
+   "adultRead": "The moment releases tension by allowing imperfection at the exact point of separation.",
+   "emotionalIntent": "Tender release, softened by comedy.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Keen climbs into the boat. He unties the rope. Pushes off. The boat drifts gently away from the dock. His Mum lifts a paw and waves. Keen waves back. Trying to look confident. Then the boat wobbles unexpectedly. He flails. Catches himself. Pretends that was meant to happen."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Still got it!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 3,
+   "beatCode": "S03-B04-SQUEAKY-ARRIVES",
+   "location": "KEEN’S ISLAND",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Keen's Mum"
+   ],
+   "storyBeat": "A dolphin appears beside the boat, turning Keen’s lonely first voyage into a surprising first friendship as he sails farther from his Mum.",
+   "want": "Keen wants to connect with this joyful new companion.",
+   "need": "He needs an early sign that the wider world can be friendly, not just frightening.",
+   "kidRead": "Keen meets a playful dolphin friend.",
+   "adultRead": "The story gives Keen companionship immediately after separation, easing the emotional handoff from home to adventure.",
+   "emotionalIntent": "Delight mixed with nervous possibility.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "His Mum laughs through a tear. Suddenly — SPLASH! A DOLPHIN rises beside the boat. Keen startles. Then lights up."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Whoa!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "The Dolphin chirps happily and leaps again through the sparkling water. Keen leans over the side, delighted."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: Hey there!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "The Dolphin chatters. Keen nods as though he fully understands."
+    },
+    {
+     "n": 6,
+     "dialogue": "Keen: Nice to meet you too.",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "The boat glides farther from the dock. His Mum grows smaller behind him. Keen looks ahead. A little nervous. A little excited. A lot of both."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "S04-B01-OPEN-WATER-NEW-FRIEND",
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Out on the open water, Keen names and chats with Squeaky while pretending his navigation is more certain than it really is.",
+   "want": "Keen wants to enjoy the trip and appear in control.",
+   "need": "He needs to admit uncertainty before it becomes danger.",
+   "kidRead": "Keen and Squeaky are having fun, but Keen is not great with the map.",
+   "adultRead": "The comedy keeps Keen lovable by making competence aspirational rather than assumed.",
+   "emotionalIntent": "Buoyant adventure with comic unease.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Open water. Endless blue. Keen sails confidently — or at least he tries to. The friendly DOLPHIN keeps pace beside the boat, popping up every so often."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Hi! I’m Keen! Nice to meet you, Squeaky!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "The Dolphin chatters happily. Keen nods like that settles it."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: Squeaky. Perfect. You really do sound squeaky.",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Squeaky leaps high beside the boat. Keen laughs. He looks at his map. Then ahead. Then back at his map. A little uncertain."
+    },
+    {
+     "n": 6,
+     "dialogue": "Keen: Okay… so if this is north… then I am definitely going…",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "He turns the map upside down."
+    },
+    {
+     "n": 8,
+     "dialogue": "Keen: …one of the directions.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "S04-B02-STORM-TAKES-THE-MAP",
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "The weather turns hard, the boat lurches, the map is ripped away, and Keen’s controlled adventure collapses into genuine fear.",
+   "want": "Keen wants to keep the boat steady and recover his way forward.",
+   "need": "He needs to face being lost without pretending he is fine.",
+   "kidRead": "The storm gets scary and Keen loses his map.",
+   "adultRead": "The external storm strips away the illusion of control and forces an emotional test of self-reliance.",
+   "emotionalIntent": "Sudden danger and disorientation.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "A gust of wind hits. The sail FLAPS hard. The boat lurches. Keen stumbles sideways and grabs the mast."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Oh!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: No no no no—!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "He lunges for it. Misses. The map whips through the air and vanishes into the storm. Keen stands frozen. Rainwater sloshes around his feet. The horizon disappears behind sheets of grey."
+    },
+    {
+     "n": 6,
+     "dialogue": "Keen: Oh no… I’m lost!!!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "S04-B03-KEEN-GROUNDS-HIMSELF",
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Keen grips the boat, breathes through panic, and tries to steady himself even though the storm has swallowed the horizon.",
+   "want": "Keen wants to calm down enough to survive the next choice.",
+   "need": "He needs to learn that courage begins inside the body, one breath at a time.",
+   "kidRead": "Keen is scared but tries to calm himself.",
+   "adultRead": "The scene models emotional regulation without making it instructional or preachy.",
+   "emotionalIntent": "Fear narrowing into fragile focus.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Lightning flickers far away. Keen grips the edge of the boat tighter. His breathing quickens. He closes his eyes for just a second. Breathes. Grounds himself."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: I’ve got this… I’ve got this…",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "S04-B04-FOLLOW-SQUEAKY",
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Squeaky reappears and signals a direction, forcing Keen to choose trust over isolation as he turns the boat to follow.",
+   "want": "Keen wants a way out of the storm.",
+   "need": "He needs to accept help instead of relying only on his own plan.",
+   "kidRead": "Squeaky comes back to guide Keen.",
+   "adultRead": "The relationship becomes reciprocal trust before the later rescue reverses the roles.",
+   "emotionalIntent": "Hope returning through connection.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "A familiar CLICKING CHATTER sounds nearby. Keen opens his eyes. Squeaky leaps through the storm water beside the boat. He dips and reappears, signaling insistently in one direction."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Follow you?",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Squeaky chirps. Keen looks at the rough water. Then at Squeaky. Then nods."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: Okay… lead on, Squeaky!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Squeaky surges ahead. Keen wrestles the little boat around to follow."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "S05-B01-BEES-IN-WIND",
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby and Zenny hurry through the worsening forest weather, with Fuzzby still filling the air until something stops him cold.",
+   "want": "Fuzzby wants to narrate his own bravery through the storm.",
+   "need": "He needs to stop performing long enough to notice real danger.",
+   "kidRead": "Fuzzby talks a lot while the wind gets stronger.",
+   "adultRead": "The scene uses comic momentum to make his sudden silence meaningful.",
+   "emotionalIntent": "Busy comic motion tipping toward alarm.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "The wind picks up around the trees. Leaves shiver. Branches sway harder now. Fuzzby and Zenny move quickly through the air, heading back through the forest. Fuzzby flies slightly ahead — still talking, because of course he is."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: I’m just saying, if this turns into a full storm situation, I am extremely—",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
+    },
+    {
+     "n": 4,
+     "dialogue": "Zenny: Fuzzby?",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "S05-B02-BOAT-SPOTTED",
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby and Zenny see the tiny boat far out in the storm, and the scale of the danger lands on them at once.",
+   "want": "They want to understand what they are seeing and whether someone is aboard.",
+   "need": "They need to let concern override fear and confusion.",
+   "kidRead": "They spot someone in trouble on the water.",
+   "adultRead": "The episode widens responsibility from Keen’s private crisis to the community’s moral response.",
+   "emotionalIntent": "Sharp concern.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "No response. Fuzzby slowly raises one tiny paw… Points. Zenny follows his gaze. Out beyond the trees. Through the shifting wind and rain, a tiny boat rises and falls in the distance. Barely visible in the storm. Beat. Fuzzby’s eyes go WIDE."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: …that is NOT a good place to be.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Zenny’s expression softens immediately."
+    },
+    {
+     "n": 4,
+     "dialogue": "Zenny: Someone’s in trouble.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "S05-B03-EMERGENCY-BEARS",
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby rockets off to raise the alarm, crashes, and keeps going anyway, while Zenny follows with focused urgency.",
+   "want": "Fuzzby wants to alert the Bears as fast as possible.",
+   "need": "He needs to turn his chaotic energy into useful action.",
+   "kidRead": "Fuzzby zooms to get help and bonks into a branch but does not stop.",
+   "adultRead": "His flaw becomes an asset: impulsiveness, redirected by care, becomes speed.",
+   "emotionalIntent": "Urgent comedy with real stakes.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Fuzzby snaps into action."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: BEARS! BEARS! EMERGENCY BEARS!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "He BLASTS off toward the beach at full speed. Immediately flies into a branch. BONK. He recoils. Shakes it off. Keeps going anyway. Zenny follows behind — calm, focused. This time faster."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 6,
+   "beatCode": "S06-B01-FUZZBY-ALARM-LANDING",
+   "location": "CRYSTAL COVE",
+   "time": "STORM BUILDING",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Luna",
+    "Misty",
+    "Zenny"
+   ],
+   "storyBeat": "At the stormy shore, Fuzzby arrives in a slapstick heap and struggles to deliver the emergency until Zenny calmly completes the message.",
+   "want": "Fuzzby wants to tell everyone about the danger immediately.",
+   "need": "He needs help organizing his panic into communication.",
+   "kidRead": "Fuzzby crashes in and tries to explain the emergency.",
+   "adultRead": "The ensemble balances comic incompetence with communal competence; no one needs to be perfect to help.",
+   "emotionalIntent": "Panic made funny but not dismissed.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Dark clouds gather over the cove. The Crystal Bears stand together on the shore. AIDA at the front. HOWEY, MISTY, LUNA and the others nearby. They look out at the sea as the wind moves through the grasses. Fuzzby comes HURTLING in. Too fast. He tries to stop. Fail. He pinballs off a shell, ricochets past Howey, loops around a piece of driftwood and lands in a soggy heap. Beat. One tiny paw lifts."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: I meant to do that.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Nobody reacts. He scrambles up, wild-eyed."
+    },
+    {
+     "n": 4,
+     "dialogue": "Fuzzby: BEARS! BEARS! There’s someone out there and they’re — they’re — they’re —",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "He bends over, completely out of breath. Cannot get the words out. Zenny floats in behind him, steady as ever."
+    },
+    {
+     "n": 6,
+     "dialogue": "Zenny: In trouble.",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "Fuzzby points at her gratefully."
+    },
+    {
+     "n": 8,
+     "dialogue": "Fuzzby: IN TROUBLE! YES! THAT!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 6,
+   "beatCode": "S06-B02-AIDA-TAKES-COMMAND",
+   "location": "CRYSTAL COVE",
+   "time": "STORM BUILDING",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Luna",
+    "Misty",
+    "Zenny"
+   ],
+   "storyBeat": "Aida steps to the water, sees Keen in the storm, and gathers the Bears around a shared purpose.",
+   "want": "Aida wants the group to focus their power toward the boy at sea.",
+   "need": "The Bears need to become one coordinated family in action.",
+   "kidRead": "Aida sees Keen and tells everyone to use their crystal powers.",
+   "adultRead": "Leadership here is clear, calm, and collective; Aida’s certainty steadies the group.",
+   "emotionalIntent": "Focused hope.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Aida steps forward to the water’s edge. The wind stirs her fur gently, but she remains still. She looks out across the stormy sea. Through the rain we glimpse a tiny boat rising and falling between waves."
+    },
+    {
+     "n": 2,
+     "dialogue": "Aida: There he is.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "The bears all look out. Concern. Hope. Aida turns to them."
+    },
+    {
+     "n": 4,
+     "dialogue": "Aida: Everyone — activate your crystal powers.",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "The bears gather closer."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 6,
+   "beatCode": "S06-B03-CRYSTAL-BEACON",
+   "location": "CRYSTAL COVE",
+   "time": "STORM BUILDING",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Luna",
+    "Misty",
+    "Zenny"
+   ],
+   "storyBeat": "The Crystal Bears activate their powers together, sending a bright combined beam across the dark sea as a lifeline.",
+   "want": "The Bears want to guide Keen toward safety.",
+   "need": "They need to prove that their magic is strongest when united by care.",
+   "kidRead": "The Bears make a big glowing light to help Keen.",
+   "adultRead": "The sequence externalizes community support as a visible beacon through chaos.",
+   "emotionalIntent": "Wonder, unity, rescue energy.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "CRYSTAL CALL SEQUENCE."
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "Aida touches her pendant."
+    },
+    {
+     "n": 3,
+     "dialogue": "Aida: With open heart and love so bright — Rose Quartz Crystal, shine your light!",
+     "action": null
+    },
+    {
+     "n": 4,
+     "dialogue": null,
+     "action": "Her ROSE QUARTZ glows warmly. The others touch their crystals one by one. A pulse of color from each. Misty’s crystal glows. Luna’s. Howey’s. Zenny’s. Together the bears speak as one."
+    },
+    {
+     "n": 5,
+     "dialogue": "ALL: With love and with light, together unite — Crystal Bears, shine your light!",
+     "action": null
+    },
+    {
+     "n": 6,
+     "dialogue": null,
+     "action": "A brilliant BURST OF COMBINED LIGHT shoots out across the storm-dark sea. It cuts through the rain like a beacon."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B01-BEACON-REACHES-KEEN",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "Keen sees the crystal light through the storm, and for a moment the impossible grey opens into hope.",
+   "want": "Keen wants to understand the light and find safety.",
+   "need": "He needs to believe help can reach him even when he feels lost.",
+   "kidRead": "Keen sees a magical light in the storm.",
+   "adultRead": "The rescue signal answers his isolation before it solves the physical problem.",
+   "emotionalIntent": "A small flare of awe in danger.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "The beam of crystal light reaches through the grey. Keen sees it. His face lifts with hope."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: What is that…?",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B02-SQUEAKY-TRAPPED",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "Squeaky is caught in a drift net and being pulled under, and Keen instantly chooses to help despite the violent sea.",
+   "want": "Keen wants to save Squeaky.",
+   "need": "He needs to act from love rather than self-preservation alone.",
+   "kidRead": "Squeaky is stuck, and Keen jumps in to rescue him.",
+   "adultRead": "This is the moral turn: Keen’s courage is defined by who he protects when he is also afraid.",
+   "emotionalIntent": "Alarm transforming into decisive bravery.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Then — Squeaky cries out. Keen looks down sharply. The Dolphin is struggling. A ragged drift net is wrapped tightly around his tail, dragging him under."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Squeaky!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "The boat bucks hard beneath Keen. He nearly goes overboard. Rain lashes his face. He looks at the storm. Looks at Squeaky. No hesitation."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: Hang on!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "He dives into the water."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B03-SHORE-WITNESSES-CHOICE",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "From shore, the Bears watch Keen’s selfless leap and recognize the depth of his instinctive courage.",
+   "want": "The Bears want to know whether Keen can survive what he has just attempted.",
+   "need": "They need to witness who Keen truly is before welcoming him into their circle.",
+   "kidRead": "The Bears are shocked that Keen jumped in.",
+   "adultRead": "The community’s perception of Keen changes from rescue target to heroic heart.",
+   "emotionalIntent": "Tense admiration.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "SHORE – INTERCUT"
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "The Crystal Bears watch tensely. Fuzzby’s mouth hangs open."
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "55 \tHOWIE He jumped in?!"
+    },
+    {
+     "n": 4,
+     "dialogue": "Aida: He didn’t think twice.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B04-UNDERWATER-STRUGGLE",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "Underwater, Keen reaches Squeaky and fights the tangled net, but the current, fear, and lack of strength keep defeating him.",
+   "want": "Keen wants to pull the net free before Squeaky is dragged down.",
+   "need": "He needs perseverance when bravery does not work on the first try.",
+   "kidRead": "Keen pulls and pulls, but the net will not come loose.",
+   "adultRead": "The story avoids easy heroics; love requires effort, failure, and trying again while strength drains away.",
+   "emotionalIntent": "Claustrophobic effort and rising desperation.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "UNDERWATER"
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "Everything goes muffled and blue-grey. Keen swims hard through swirling water toward Squeaky. He reaches him. The drift net is twisted tightly around the dolphin’s tail. Pulling him down. Keen grabs the net and pulls. Nothing. The current shoves them sideways. Keen slips. Reaches again."
+    },
+    {
+     "n": 3,
+     "dialogue": "Keen: I’ve got you!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B05-WRISTBANDS-AWAKEN",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "As Keen runs out of strength, he notices his father’s wristbands glowing, centers himself, and draws on the love they represent.",
+   "want": "Keen wants one more chance to free Squeaky.",
+   "need": "He needs to understand that he carries family strength with him, not as magic alone but as emotional grounding.",
+   "kidRead": "Keen’s special wristbands start glowing and help him be strong.",
+   "adultRead": "The legacy object pays off as an inner resource: grief and love become courage in action.",
+   "emotionalIntent": "Spiritual steadiness inside chaos.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Squeaky thrashes weakly. Keen pulls again. Still nothing. His eyes flick upward toward the churning light above. He is running out of strength. A beat. Keen sees his father’s wristbands on his arms. A faint glow begins inside them. Soft. Steady. He plants his feet against a submerged rock. Centers himself."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: I’ve got this… I’ve got this…",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B06-AIDA-KNOWS",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "On shore, Aida watches with calm certainty, affirming that Keen’s strength is connected to more than himself.",
+   "want": "Aida wants the others to trust what is unfolding.",
+   "need": "She needs to hold hope steady for the whole group.",
+   "kidRead": "Aida believes Keen has help even underwater.",
+   "adultRead": "The mentor articulates the emotional truth of the wristbands without taking agency away from Keen.",
+   "emotionalIntent": "Calm faith.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "SHORE – INTERCUT"
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "Aida watches with calm certainty."
+    },
+    {
+     "n": 3,
+     "dialogue": "Aida: He’s not alone.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B07-FINAL-PULL",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "Keen grips the net again as a huge wave builds above, braces himself, and commits everything to freeing Squeaky.",
+   "want": "Keen wants to break the net before the wave hits.",
+   "need": "He needs to convert fear into total, focused action.",
+   "kidRead": "Keen tries one last huge pull.",
+   "adultRead": "The climax compresses inherited love, personal will, and urgent compassion into one physical gesture.",
+   "emotionalIntent": "Peak tension and heroic exertion.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "UNDERWATER"
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "Keen grips the net with both paws. The wristbands glow brighter. He PULLS. The net strains. Still tangled. Above them, the shape of a MASSIVE WAVE gathers. Keen looks at Squeaky."
+    },
+    {
+     "n": 3,
+     "dialogue": "Keen: Come on…",
+     "action": null
+    },
+    {
+     "n": 4,
+     "dialogue": null,
+     "action": "He braces again."
+    },
+    {
+     "n": 5,
+     "dialogue": "Keen: COME ON!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B08-MUTUAL-RESCUE",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "The net tears, the wave throws Keen into chaos, and Squeaky immediately returns the rescue by carrying him toward the surface and shore.",
+   "want": "Keen and Squeaky both want to survive and reach air.",
+   "need": "Keen needs to experience that helping others can create the help that saves you back.",
+   "kidRead": "Keen saves Squeaky, then Squeaky saves Keen.",
+   "adultRead": "The rescue becomes reciprocal, completing the episode’s argument against heroic isolation.",
+   "emotionalIntent": "Explosive release into relief.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "He yanks with everything he has. SNAP! The net TEARS. In the same instant the massive wave crashes overhead. The world explodes into foam and motion. Keen is thrown sideways. He tumbles through bubbles and dark water. Disoriented. Then he sees Squeaky."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Stay with me!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Squeaky surges up beneath him. Keen grabs hold. The dolphin rockets toward the surface. They BURST out of the water. Keen gasps, coughs, then laughs from pure relief."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: You got me!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Squeaky chirps. Keen clings on as the dolphin races through the storm toward the glowing shore."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 7,
+   "beatCode": "S07-B09-RIDE-INTO-LEGEND",
+   "location": "OUT AT SEA",
+   "time": "STORM",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Misty",
+    "Squeaky",
+    "Sunny"
+   ],
+   "storyBeat": "The Bears see Keen riding Squeaky in over the waves, and terror flips into awe, joy, and a burst of storm-defying comedy.",
+   "want": "Keen wants to reach shore alive; the Bears want him safely home.",
+   "need": "Everyone needs the fear to break into communal celebration.",
+   "kidRead": "Keen rides the dolphin through the storm and everyone is amazed.",
+   "adultRead": "The image rebrands the frightened lost child as a brave new member of the mythos, while keeping him playful.",
+   "emotionalIntent": "Triumphant, funny, cathartic.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "SHORE POV"
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "The Crystal Bears watch as a shape rises over the waves. It is Keen — riding Squeaky in on the crest. Howey’s jaw drops. Misty claps a paw over her mouth."
+    },
+    {
+     "n": 3,
+     "dialogue": "Sunny: The bravest guy I’ve ever seen.",
+     "action": null
+    },
+    {
+     "n": 4,
+     "dialogue": "Misty: His boat’s gone!!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Then, as Keen comes closer, Fuzzby’s panic flips instantly into awe."
+    },
+    {
+     "n": 6,
+     "dialogue": "Fuzzby: When I grow up… I wanna be like him.",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "Keen bounces over a wave like a tiny cowboy. One paw in the air. A huge grin across his face."
+    },
+    {
+     "n": 8,
+     "dialogue": "Keen: YEEHAW!!",
+     "action": null
+    },
+    {
+     "n": 9,
+     "dialogue": null,
+     "action": "Despite the storm, everyone smiles."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 8,
+   "beatCode": "S08-B01-LANDING-ALIVE",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Amie",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Squeaky",
+    "Sunny",
+    "Zenny"
+   ],
+   "storyBeat": "Squeaky brings Keen into the shallows, and Keen stumbles onto the sand laughing, soaked, breathless, and alive.",
+   "want": "Keen wants to get his feet under him and take in what just happened.",
+   "need": "He needs immediate physical care and welcome after the ordeal.",
+   "kidRead": "Keen gets to shore and thinks the wild ride was amazing.",
+   "adultRead": "After danger, the body releases through laughter; safety arrives first as touch and steadiness.",
+   "emotionalIntent": "Relief, breath, delighted exhaustion.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Squeaky glides into the shallows. Keen hops off onto the sand, stumbling forward. Laughing. Breathless. Soaked from head to toe."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Best… ride… ever!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "His legs wobble. He nearly falls. Howey instinctively steps in and steadies him. The bears gather around him in a warm circle. SUNNY bounces excitedly. AMIE beams. Everyone curious, gentle, smiling. Keen looks around at them all."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: Hi… I’m Keen.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 8,
+   "beatCode": "S08-B02-FUZZBY-FANBOY-WELCOME",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Amie",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Squeaky",
+    "Sunny",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby rushes into Keen’s space in full admiration, Zenny gently reins him in, and the group introduces themselves as the Crystal Bears.",
+   "want": "Fuzzby wants to celebrate Keen instantly and intensely; the group wants to welcome him kindly.",
+   "need": "Keen needs warmth that does not overwhelm him.",
+   "kidRead": "Fuzzby thinks Keen is amazing, and everyone welcomes Keen.",
+   "adultRead": "The ensemble shows its social texture: enthusiasm, boundaries, and belonging all at once.",
+   "emotionalIntent": "Warm comedy and open-armed welcome.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Fuzzby zooms right into Keen’s face."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: You rode a dolphin. Into a storm. On purpose?!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Keen blinks at him."
+    },
+    {
+     "n": 4,
+     "dialogue": "Keen: …kind of?",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Fuzzby slowly turns to the others. Points at Keen like he has discovered a legend."
+    },
+    {
+     "n": 6,
+     "dialogue": "Fuzzby: He’s amazing.",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "Zenny gently drifts in and pulls Fuzzby back by one leg."
+    },
+    {
+     "n": 8,
+     "dialogue": "Zenny: Give him space.",
+     "action": null
+    },
+    {
+     "n": 9,
+     "dialogue": null,
+     "action": "The others smile. Together:"
+    },
+    {
+     "n": 10,
+     "dialogue": "ALL: Welcome to Crystal Cove! We’re the Crystal Bears!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 8,
+   "beatCode": "S08-B03-TAKING-IN-THE-COVE",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Amie",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Squeaky",
+    "Sunny",
+    "Zenny"
+   ],
+   "storyBeat": "Keen looks around Crystal Cove, absorbing the glowing place and the friendly faces that have replaced the storm.",
+   "want": "Keen wants to understand where he has landed.",
+   "need": "He needs to feel wonder before he can feel at home.",
+   "kidRead": "Keen sees the beautiful magical cove.",
+   "adultRead": "The environment itself becomes an emotional promise: shelter, community, and possibility.",
+   "emotionalIntent": "Soft wonder.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Keen looks around at the cove — glowing crystals, warm faces, the gentle shelter of the beach. He takes it all in."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Wow… this place…",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 8,
+   "beatCode": "S08-B04-MESSAGE-HOME",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Amie",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Squeaky",
+    "Sunny",
+    "Zenny"
+   ],
+   "storyBeat": "Aida silently sends Squeaky to reassure Keen’s Mum, and Keen recognizes the kindness of someone caring about the family he left behind.",
+   "want": "Aida wants Keen’s Mum to know he is safe; Keen wants to understand the gesture.",
+   "need": "Keen needs reassurance that joining this new place does not sever him from home.",
+   "kidRead": "Aida sends Squeaky to tell Keen’s Mum he is okay.",
+   "adultRead": "The story honors the parent offscreen, resolving the anxiety of separation with empathy.",
+   "emotionalIntent": "Gratitude and emotional safety.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "He turns back toward the sea. Squeaky leaps once more just beyond the shallows. Aida steps forward beside Keen. She lifts a paw and makes a small, gentle gesture to the dolphin. Squeaky watches her. Seems to understand. He dips his head once. Then dives back into the waves. Keen watches him go."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: What did you do?",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Aida smiles."
+    },
+    {
+     "n": 4,
+     "dialogue": "Aida: Just getting a message home to your Mum. To let her know you’re okay.",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Keen absorbs that. A soft grateful pause."
+    },
+    {
+     "n": 6,
+     "dialogue": "Keen: Thank you.",
+     "action": null
+    },
+    {
+     "n": 7,
+     "dialogue": null,
+     "action": "Aida gives him the smallest nod."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 9,
+   "beatCode": "S09-B01-NAMING-COURAGE",
+   "location": "GATHERING AREA",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Luna",
+    "Misty"
+   ],
+   "storyBeat": "After the storm, in a clean sunlit cove, Aida names what Keen did: he followed his heart and chose courage.",
+   "want": "Aida wants Keen and the community to understand the meaning of his actions.",
+   "need": "Keen needs his bravery reflected back to him before he can accept his place among them.",
+   "kidRead": "Aida tells Keen he was brave.",
+   "adultRead": "The mentor frames courage as values-driven choice rather than toughness.",
+   "emotionalIntent": "Clear, affirming, ceremonial.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "The storm has passed. Everything glows fresh and washed clean. Droplets cling to leaves and sparkle in the sunlight. The Crystal Bears gather in a quiet circle. Aida and Keen stand at the center. Keen still wears his father’s wristbands. Aida looks at him with warmth and certainty."
+    },
+    {
+     "n": 2,
+     "dialogue": "Aida: You followed your heart… and chose courage.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 9,
+   "beatCode": "S09-B02-AQUAMARINE-AWAKENS",
+   "location": "GATHERING AREA",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Luna",
+    "Misty"
+   ],
+   "storyBeat": "Aquamarine light appears, divides, and settles into Keen’s wristbands, joining his father’s legacy with his new Crystal Bear identity.",
+   "want": "The crystal wants to choose and bond with Keen.",
+   "need": "Keen needs his past and future to become one continuous source of strength.",
+   "kidRead": "Keen gets glowing aquamarine crystals in his wristbands.",
+   "adultRead": "The transformation does not replace the father’s gift; it completes it, making inheritance and selfhood inseparable.",
+   "emotionalIntent": "Awe, destiny, earned magic.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "A gentle AQUAMARINE LIGHT begins to shimmer in the air between them. A glowing crystal appears. Keen stares in wonder. The crystal lifts, humming softly, then splits into two smaller gems. They float toward his wrists. One settles into each wristband. Perfectly. A pulse of AZURE LIGHT runs through them. Keen feels it instantly. He lifts his paws, amazed. The light reflects in his eyes."
+    },
+    {
+     "n": 2,
+     "dialogue": "Keen: Brave and bright, with all my might — Aquamarine Crystal, shine with light!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 9,
+   "beatCode": "S09-B03-FAMILY-HUG",
+   "location": "GATHERING AREA",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Keen",
+    "Luna",
+    "Misty"
+   ],
+   "storyBeat": "The group’s celebration spills into a giant hug, and Aida echoes the promise that Keen will never be alone, making the cove feel like home.",
+   "want": "The Bears want to welcome Keen fully; Keen wants to receive it.",
+   "need": "Keen needs belonging that is physical, emotional, and unmistakable.",
+   "kidRead": "Everyone hugs Keen and he is part of the family now.",
+   "adultRead": "The episode pays off the mother’s promise through found family, expanding love rather than replacing it.",
+   "emotionalIntent": "Homecoming warmth.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "His wristbands glow brighter. The energy settles warmly around him. Fuzzby claps too early. Stops. Then starts clapping again louder to cover it. Howey cheers. Misty beams. Luna smiles softly. And suddenly the whole group surges in and SWAMPS Keen in a giant bear hug. Keen startles. Then melts into it. He hugs them back. The group slowly breaks apart. Keen looks around at all of them. No longer lost. No longer alone."
+    },
+    {
+     "n": 2,
+     "dialogue": "Aida: That’s what family does. Wherever you go… You’ll never be alone.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": null,
+     "action": "Keen smiles. A full, real, homecoming smile."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 10,
+   "beatCode": "S10-B01-HONEY-QUESTION",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Keen",
+    "Zenny"
+   ],
+   "storyBeat": "With the danger past, Fuzzby approaches Keen with grave seriousness about honey, turning the new friendship toward everyday silliness.",
+   "want": "Fuzzby wants to find out if Keen can share his favorite obsession.",
+   "need": "The episode needs to prove that belonging includes play, not just ceremony.",
+   "kidRead": "Fuzzby asks Keen if he likes honey.",
+   "adultRead": "The tag lowers the emotional intensity with character-specific comedy that signals life will continue normally.",
+   "emotionalIntent": "Light, relaxed comic reset.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "The mood has lifted. Waves lap gently at the shore. Keen and the bears walk together along the sand. Fuzzby buzzes up beside Keen, suddenly very serious."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: So… quick question.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": "Keen: Yeah?",
+     "action": null
+    },
+    {
+     "n": 4,
+     "dialogue": "Fuzzby: How do you feel about honey?",
+     "action": null
+    },
+    {
+     "n": 5,
+     "dialogue": null,
+     "action": "Keen looks at him, still catching his breath from everything."
+    },
+    {
+     "n": 6,
+     "dialogue": "Keen: Uh… I like it?",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 10,
+   "beatCode": "S10-B02-FUZZBY-PLANS-FRIENDSHIP",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Keen",
+    "Zenny"
+   ],
+   "storyBeat": "Keen’s answer sends Fuzzby into ecstatic future planning until Zenny gently manages his enthusiasm again.",
+   "want": "Fuzzby wants to launch an entire honey-based friendship immediately.",
+   "need": "He needs to learn that real friendship grows one step at a time.",
+   "kidRead": "Fuzzby gets way too excited about honey snacks and being friends.",
+   "adultRead": "Zenny’s boundary-setting keeps the comedy affectionate instead of overwhelming, mirroring the welcome-scene lesson.",
+   "emotionalIntent": "Bubbly affection and comic overdrive.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Beat. Fuzzby GASPS. His eyes sparkle. This is the best news he has heard all day."
+    },
+    {
+     "n": 2,
+     "dialogue": "Fuzzby: Oh… this is going to work out VERY well.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "dialogue": "Zenny: Fuzzby…",
+     "action": null
+    },
+    {
+     "n": 4,
+     "dialogue": null,
+     "action": "But Fuzzby is already buzzing excitedly around Keen."
+    },
+    {
+     "n": 5,
+     "dialogue": "Fuzzby: Honey cakes, honey snacks, honey naps, honey leaf drizzles, emergency honey—",
+     "action": null
+    },
+    {
+     "n": 6,
+     "dialogue": null,
+     "action": "Zenny gently catches one of his legs and pulls him back."
+    },
+    {
+     "n": 7,
+     "dialogue": "Zenny: One thing at a time.",
+     "action": null
+    },
+    {
+     "n": 8,
+     "dialogue": "Fuzzby: I have waited my whole life for this friendship!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 10,
+   "beatCode": "S10-B03-PEACEFUL-COVE-FINAL-IMAGE",
+   "location": "CRYSTAL COVE BEACH",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Keen",
+    "Zenny"
+   ],
+   "storyBeat": "Keen laughs with the Bears as they walk along the beach, and the cove rests bright and peaceful after the storm.",
+   "want": "The story wants to leave Keen inside the group, not apart from it.",
+   "need": "The final image needs to confirm safety, friendship, and a world ready for more adventures.",
+   "kidRead": "Everyone walks together happily at the beach.",
+   "adultRead": "The camera’s lingering peace seals the emotional contract: the child survived the threshold and found community.",
+   "emotionalIntent": "Contented joy and promise.",
+   "cuts": [
+    {
+     "n": 1,
+     "dialogue": null,
+     "action": "Keen laughs. The others laugh too as they continue walking together down the beach. The camera lingers on the cove, bright and peaceful now."
+    },
+    {
+     "n": 2,
+     "dialogue": null,
+     "action": "THE END"
+    }
+   ]
+  }
+ ],
+ "dialogueCoverage": {
+  "ok": true,
+  "totalDialogueLines": 85,
+  "coveredExactly": 85,
+  "candidateLines": 85,
+  "issues": []
+ },
+ "approvalState": "approved",
+ "approval": {
+  "reviewedBy": "Julian",
+  "at": "2026-07-18T21:37:51",
+  "canonicalPackage": "Ep1_The_Adventure_Begins_beat_package.json"
+ }
+}

@@ -32,6 +32,30 @@ import cb_engine as E
 import cb_render as R
 
 
+def fire_keyframe(scene, shot_id, episode, log=None):
+    """Drives cb_render.keyframe_shot's real two-phase disclose-then-confirm spend-token seal
+    (2026-07-22, Julian's directive — "ensure the prompts I see in the studio are the exact
+    prompts that go to the API... your mistakes have cost me money"; see keyframe_shot's own
+    docstring and _keyframe_binding_hash's for the full forensic reasoning) in one call, for
+    fixture code that isn't itself testing the disclosure step — mirrors this project's own
+    established convention for fire_shot's identical two-phase contract. Never used by
+    cb_render.py itself or any real Studio route; the real split stays the only path a
+    human exercises."""
+    log = log or (lambda *a, **k: None)
+    try:
+        R.keyframe_shot(scene, shot_id, episode, log=log)
+    except R.Refused:
+        pass
+    pkg, _ = R.load_pkg(scene, episode)
+    led = R._ledger(pkg, shot_id)
+    auth = led.get("pendingKeyframeSpendAuth")
+    if not auth:
+        raise AssertionError(f"keyframe_shot({shot_id!r}) did not issue a spend token — "
+                              f"it likely refused for an unrelated reason before reaching "
+                              f"the seal")
+    return R.keyframe_shot(scene, shot_id, episode, spend_token=auth["token"], log=log)
+
+
 # ── the synthetic scene: opener w/ dialogue, relay w/ dialogue, silent relay ────────────
 CFG = {"Fuzzby": {"sizeRank": 2, "avoid": "bee", "voiceId": "voice-fuzzby",
                    "anchor": "media/refs/CB_Fuzzby.jpeg"},
@@ -62,6 +86,10 @@ def _mkshot(shot_id, source, src_id, lines, binding, staging=None):
                   cutInMotivation=None if src_id is None and source == "opener" and shot_id.endswith("S1") else "matched action",
                   dialogueBinding=binding, dialogueLines=lines,
                   visualPayoff="He nearly grazes the leaf", physicalStaging=staging,
+                  # cutPace is REQUIRED (2026-07-21) — the mandatory Director/Producer pace
+                  # decision must fire on every shot; a single unbroken take is right for
+                  # this fixture's own short gag.
+                  cutPace="single_continuous_take", internalCuts=[],
                   prohibited=[], charactersInFrame=["Fuzzby", "Zenny"],
                   continuityIn=_state(["Fuzzby", "Zenny"]),
                   continuityOut=_state(["Fuzzby", "Zenny"], marks=["pollen dust"])
@@ -120,8 +148,22 @@ def _build_package(tmp, valid=True):
             rec.update(keyframePrompt=kf, keyframePromptWords=kwc,
                        keyframeReferenceSlots=kslots)
         shots_out.append(rec)
+    # THE STORYBOARD-SOURCED BEATS FIX (2026-07-22): _fresh_validation now reads its beats
+    # from pkg["sourceStoryboard"]["path"] — the real storyboard that produced the package
+    # — never a same-named-episode file discovered by an unrelated glob (see cb_render.
+    # _beats_for_fresh_validation's own docstring for the real production bug this closes).
+    # This fixture's own BEATS constant is reshaped into the storyboard's real field names
+    # (beatId/exactDialogue) and written to a real scratch storyboard file so re-validation
+    # still exercises real content, matching this suite's own stated job.
+    sb_path = tmp / "cb-output" / "creative" / "EpT_scene9_storyboard.json"
+    sb_path.parent.mkdir(parents=True, exist_ok=True)
+    sb_beats = [{"beatId": b["beatCode"], "comedyMode": b.get("comedyMode"),
+                 "exactDialogue": [c["dialogue"] for c in b.get("cuts", []) if c.get("dialogue")]}
+                for b in BEATS]
+    json.dump({"beats": sb_beats}, open(sb_path, "w"))
     pkg = {"episode": "EpT", "sceneNumber": "9", "shots": shots_out,
            "continuityLedger": [E._ledger_entry(s) for s in design.shots],
+           "sourceStoryboard": {"path": str(sb_path)},
            "validation": report if valid else {"passed": False, "issues": [
                {"severity": "ERROR", "code": "SYNTH", "path": "x", "message": "forced"}]}}
     out = tmp / "cb-output" / "EpT_scene9_production_package.json"
@@ -134,6 +176,7 @@ def _build_package(tmp, valid=True):
 class Providers:
     def __init__(self):
         self.voice_calls, self.image_calls, self.fire_calls = [], [], []
+        self.conform_calls = []
 
     def install(self, monkeypatch, tmp):
         def eleven_dialogue(inputs, out="vo.mp3", **k):
@@ -167,7 +210,77 @@ class Providers:
             pathlib.Path(out).write_bytes(b"".join(pathlib.Path(c).read_bytes() for c in clips))
             return out
         monkeypatch.setattr(R.cb_post, "assemble_picture", assemble_picture)
+        # stitch_scene (2026-07-21, JOIN ON LIVE MOTION scoped to this pipeline's own shot
+        # grammar) now calls assemble_conformed for its real multi-clip output, alongside
+        # assemble_picture for the RAW comparison baseline — same fake-concat contract as
+        # assemble_picture above; this suite's own assertions only check clip order, never
+        # real ffmpeg trim behaviour (that's cb_post's own test file's job).
+        def assemble_conformed(clips, out, settle_trim=None, edge_frames=None):
+            self.conform_calls.append({"clips": list(clips), "out": out, "settle_trim": settle_trim})
+            pathlib.Path(out).write_bytes(b"".join(pathlib.Path(c).read_bytes() for c in clips))
+            return out
+        monkeypatch.setattr(R.cb_post, "assemble_conformed", assemble_conformed)
         monkeypatch.setattr(R.cb_post, "_dur", lambda p: 6.0)
+
+
+def _seed_department_approval(scene, ep, shot_id, stage, output):
+    """TEST-ONLY (2026-07-19, the department-gate hardening directive): seeds a CURRENT,
+    approved department direction directly into the ledger — via the same
+    _department_container/_department_candidate/_department_signature machinery
+    decide_department itself uses, just without a real LLM call. This suite's own docstring
+    already states its job (orchestration, validation, spending control, state transitions),
+    never department preparation itself — that is test_cb_render_department_gate.py's job,
+    exercising the real prepare_department/decide_department routes end to end with a
+    mocked LLM. Every shot's approval is seeded once, up front, exactly the same way the
+    Scene Look plate approval above is seeded directly via _save_scenelook_rec rather than
+    through a real LLM call — matching this fixture's own already-established precedent."""
+    pkg, path = R.load_pkg(scene, ep)
+    context = R._department_context_for_freshness(pkg, scene, stage, shot_id, ep)
+    work, save_fn = R._department_container(pkg, scene, shot_id, stage, ep)
+    work["approved"] = R._department_candidate(stage, output, context, scene=scene,
+                                                 shot_id=shot_id, pkg=pkg)
+    save_fn()
+    R._save(pkg, path)
+
+
+def _seed_voice_and_cinematography(scene, ep):
+    """Seeds voice + cinematography (opener shots only) approvals for every shot in the
+    package, reusing each shot's OWN already-compiled legacy fields (keyframePrompt/
+    dialogueLines) as the seeded department output — so every existing assertion in this
+    file that checks the exact prompt/reference/audio text fired to a mocked provider still
+    holds unchanged; only WHERE that text now has to come from (an approved department
+    record, never a bare storyboard fallback) has changed, per THE CORE LAW. Animation is
+    deliberately NOT seeded here — _department_context_for_freshness's own animation branch
+    calls _anchor_for, which for an opener requires an ALREADY-APPROVED keyframe and for a
+    relay requires its source shot ALREADY approved+harvested; neither exists this early in
+    any test's own flow. See _seed_animation_for_shot below, called once that real
+    dependency is actually satisfied — matching real production order exactly."""
+    pkg, _ = R.load_pkg(scene, ep)
+    for s in pkg["shots"]:
+        shot_id = s["shotId"]
+        if s.get("dialogueLines"):
+            lines = [{"speaker": ln["speaker"], "exactDialogue": ln["exactText"],
+                      "performedText": ln["exactText"]} for ln in s["dialogueLines"]]
+            _seed_department_approval(scene, ep, shot_id, "voice",
+                                       {"shotId": shot_id, "lines": lines,
+                                        "doesItLand": "test"})
+        if s["sourceType"] == "opener":
+            _seed_department_approval(scene, ep, shot_id, "cinematography",
+                                       {"shotId": shot_id, "providerPrompt": s["keyframePrompt"],
+                                        "doesItLand": "test"})
+
+
+def _seed_animation_for_shot(scene, ep, shot_id):
+    """Seeds ONE shot's animation approval, reusing its own already-compiled seedancePrompt
+    — called only once its real anchor dependency (an approved keyframe for an opener, or
+    an approved+harvested source for a relay) is already satisfied, matching real
+    production order. Kept as its own function (not folded into _seed_voice_and_
+    cinematography) for exactly that reason."""
+    pkg, _ = R.load_pkg(scene, ep)
+    s = next(x for x in pkg["shots"] if x["shotId"] == shot_id)
+    _seed_department_approval(scene, ep, shot_id, "animation",
+                               {"shotId": shot_id, "providerPrompt": s["seedancePrompt"],
+                                "doesItLand": "test"})
 
 
 @pytest.fixture()
@@ -182,7 +295,40 @@ def world(monkeypatch, tmp_path):
     (engine / "media" / "refs").mkdir(parents=True)
     for c in CFG.values():
         (engine / c["anchor"]).write_bytes(b"REF")
-    (engine / "media" / "EpT_S9_plate.png").write_bytes(b"PLATE")
+    # NOTE (2026-07-19): a fixed-filename "EpT_S9_plate.png" used to be written here — dead
+    # since the 2026-07-18 production-safety directive moved _plate_path to read the Scene
+    # Look sidecar's own APPROVED record instead of globbing a conventional filename (never
+    # actually exercised by any test before tonight, since every test refused earlier at
+    # _require_current_scenelook before reaching _plate_path at all). The real plate file is
+    # created below, alongside the scenelook approval record it's read from.
+    # THE SCENE LOOK CANON FALLBACK (2026-07-19): _compile_scenelook_prompt reads
+    # {root}/shows/crystal-bears/canon/locations.json for episode "EpT" scene "9" — this
+    # world has no such file by default, so every path through keyframe_shot (which always
+    # calls _require_current_scenelook first) refused with "no canon environment data
+    # found," unrelated to whatever each test actually exercises downstream. A minimal,
+    # synthetic (not real-show) entry closes that gate the same way the real production
+    # shows/crystal-bears/canon/locations.json now does for Ep1.
+    canon_dir = tmp_path / "shows" / "crystal-bears" / "canon"
+    canon_dir.mkdir(parents=True, exist_ok=True)
+    json.dump({"EpT": {"9": {
+        "look": "A synthetic test meadow with oversized flowers.",
+        "lighting": "Warm test daylight.",
+        "weather": "Clear.",
+        "colorTemperature": "Warm.",
+        "definingFeature": "A single tall test flower.",
+    }}}, open(canon_dir / "locations.json", "w"))
+    # keyframe_shot also hard-refuses without a CURRENT APPROVED Scene Look Plate
+    # (_require_current_scenelook) — a separate gate from the canon-data one above. Approve
+    # a synthetic plate via the real functions (never a hand-typed signature) so it can never
+    # silently drift from what the compiler actually considers "current."
+    plate_path = engine / "media" / "EpT_S9_scenelook.png"
+    plate_path.write_bytes(b"SCENELOOK_PLATE")
+    R._save_scenelook_rec({
+        "approved": {"path": str(plate_path), "hash": R._sha256_file(plate_path),
+                     "inputSignature": R._scenelook_input_signature("9", "EpT"),
+                     "approvedAt": "2026-07-19T00:00:00", "reviewedBy": "test"},
+        "candidate": None, "history": [],
+    }, "9", "EpT")
     monkeypatch.setattr(R, "_characters_cfg", lambda: CFG)
     # confirmed billing profiles — the unconfirmed hard-block has its own dedicated test
     import cb_costs
@@ -200,6 +346,16 @@ def world(monkeypatch, tmp_path):
     import cb_engine as E2
     monkeypatch.setattr(E2, "HERE", tmp_path / "engine")
     pkg_path = _build_package(tmp_path)
+    # THE LINEAGE CHECK, OUT OF SCOPE HERE ON PURPOSE (2026-07-17 state-integrity
+    # checkpoint): _build_package hand-constructs a package directly through cb_engine's own
+    # compilers — no creative-room storyboard file, no sourceStoryboard.md5, no revision at
+    # all. This suite's own docstring already states its job: orchestration, validation,
+    # spending control and state transitions, never storyboard-promotion lineage — real
+    # lineage coverage lives in test_cb_render_lineage.py against a real storyboard/package
+    # pair. Bypassing here is the same, already-established call as legacy_scratch_pkg's own
+    # identical bypass in test_e2e_fire_route.py.
+    monkeypatch.setattr(R, "_require_current_lineage", lambda pkg, scene, episode: None)
+    _seed_voice_and_cinematography("9", "EpT")
     return prov, tmp_path, pkg_path
 
 
@@ -215,6 +371,19 @@ def _led(scene="9", ep="EpT"):
     return {e["shotId"]: e for e in pkg["continuityLedger"]}
 
 
+def _voice_and_approve(scene="9", ep="EpT", log=lambda *a, **k: None):
+    """THE VOICE APPROVAL STEP (2026-07-19): fire_shot now hard-refuses a dialogue shot
+    whose voice track exists but hasn't been explicitly approved (mirrors the pre-existing
+    keyframe-approval gate) — voice_scene() alone (generate) is no longer enough to clear
+    a dialogue shot for animation. Approves every dialogue shot's track in package order,
+    matching how a real Studio session would review-then-approve each one."""
+    R.voice_scene(scene, ep, log=log)
+    pkg, _ = R.load_pkg(scene, ep)
+    for s in pkg["shots"]:
+        if s.get("dialogueLines"):
+            R.approve_voice(scene, s["shotId"], ep, log=log)
+
+
 # ── THE GOLDEN PATH ─────────────────────────────────────────────────────────────────────
 def test_golden_path_script_to_scene_picture(world):
     prov, tmp, _ = world
@@ -225,6 +394,8 @@ def test_golden_path_script_to_scene_picture(world):
     texts = [(t["voice_id"], t["text"]) for c in prov.voice_calls for t in c["inputs"]]
     assert ("voice-fuzzby", "Nailed it.") in texts
     assert ("voice-zenny", "Fuzzby… why are you humming?") in texts
+    R.approve_voice("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.approve_voice("9", "1.B1.S2", "EpT", log=lambda *a, **k: None)
 
     # Gate 5 — the TIMING SLATE assembles from real durations + real voice, before any
     # image money (it approves timing/dialogue only — never staging or rhythm)
@@ -233,11 +404,21 @@ def test_golden_path_script_to_scene_picture(world):
     assert len(prov.image_calls) == 0          # no paid image call yet — slates only
 
     # Gate 6 — the opener keyframe, reference-first, refs in the persisted slot order
-    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    fire_keyframe("9", "1.B1.S1", "EpT")
     kf_call = prov.image_calls[-1]
     assert [os.path.basename(r) for r in kf_call["refs"]] == \
-           ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_plate.png"]
+           ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_scenelook.png"]
     assert "nailed it" not in kf_call["prompt"].lower()          # Law 6
+
+    # Gate 6b (2026-07-17 state-integrity checkpoint) — a generated-but-unapproved
+    # keyframe candidate can never anchor a fire; Julian's own review approves it first,
+    # exactly the lifecycle a real Studio session goes through before any spend.
+    R.approve_keyframe("9", "1.B1.S1", "EpT", reviewed_by="TestReviewer", log=lambda *a, **k: None)
+    # THE CORE LAW (2026-07-19): fire_shot's own paid route now hard-requires a CURRENT,
+    # approved Animation Direction for this exact shot — seeded here, now that its real
+    # anchor dependency (the just-approved keyframe) actually exists, matching real
+    # production order exactly.
+    _seed_animation_for_shot("9", "EpT", "1.B1.S1")
 
     # Gate 7 — SPEND CONTROL: no batch without a server-issued single-use token; the
     # disclosure is real, stored server-side, and bound to the exact package
@@ -264,13 +445,25 @@ def test_golden_path_script_to_scene_picture(world):
     assert len({c["prompt"] for c in batch1}) == 1                # identical prompt
     assert len({tuple(c["image_urls"]) for c in batch1}) == 1     # identical references
     f1 = batch1[0]
-    assert f1["image_urls"][0].endswith("_keyframe.png")          # anchor first
+    # anchor first: the APPROVED keyframe's own stored path (never renamed to a fixed
+    # "_keyframe.png" — approve_keyframe keeps the candidate's own unique-hash filename,
+    # matching this codebase's own "never rename an artefact, only what's approved of it
+    # changes" convention; a literal ".endswith('_keyframe.png')" was stale against that)
+    assert f1["image_urls"][0].endswith(_led()["1.B1.S1"]["keyframeApproval"]["path"])
     assert [os.path.basename(u) for u in f1["image_urls"][1:]] == \
-           ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_plate.png"]
+           ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_scenelook.png"]
     assert f1["audio_urls"] and f1["audio_urls"][0].endswith("_vo.mp3")
     assert "nailed it" not in f1["prompt"].lower()                # Law 6 at fire time
-    assert f1["duration"] == "6"      # deferred re-home item 8: always the shot's explicit
-    #                                   seconds, never 'auto' (the old 15s literals can't bite)
+    # 2026-07-19 (THE HANDLE DOCTRINE, Julian: "we want 15 second clips with 2 seconds at
+    # the end to have for editing" — raised after a real take overran its own shorter
+    # designed clip with zero warning): cb_render._handle_duration now overrides the
+    # design-time durationSec with max(HANDLE_TOTAL=15, real_vo_duration+HANDLE_SETTLE=2)
+    # before the fire ever reaches the provider — this fixture's own mocked VO is a real
+    # 1.5s silent take, so 15.0 (the floor) is what should ship. This is NOT a regression of
+    # the old "never a blind 'auto' literal" guarantee this assertion used to pin — 15 here
+    # is a genuinely computed, audio-aware value (it would stretch past 15 for a longer real
+    # take, per test_cb_render.py), never a hardcoded literal ignoring the shot's content.
+    assert f1["duration"] == "15"
     # per-candidate review sheets: human criteria all null — machine never approves quality
     led1 = _led()["1.B1.S1"]
     assert len(led1["candidatePaths"]) == 3
@@ -295,13 +488,17 @@ def test_golden_path_script_to_scene_picture(world):
     archived = [p.name for d in arch.iterdir() for p in d.iterdir()]
     assert "EpT_1.B1.S1_c1.mp4" in archived and "EpT_1.B1.S1_c3.mp4" in archived
 
-    # relay batch fires from the SELECTED candidate's harvested final frame
+    # relay batch fires from the SELECTED candidate's harvested final frame — 1.B1.S2's own
+    # animation direction can only be seeded now that its source (S1) is approved+harvested,
+    # matching _anchor_for's own real relay dependency exactly.
+    _seed_animation_for_shot("9", "EpT", "1.B1.S2")
     t2 = _token("1.B1.S2")
     R.next_shot("9", "EpT", spend_token=t2, log=lambda *a, **k: None)   # 1.B1.S2 batch
     f2 = prov.fire_calls[-1]
     assert f2["image_urls"][0].endswith("EpT_1.B1.S1_final_frame.png")   # THE relay contract
     R.approve_shot("9", "1.B1.S2", 1, "EpT", log=lambda *a, **k: None)
 
+    _seed_animation_for_shot("9", "EpT", "1.B1.S3")
     t3 = _token("1.B1.S3")
     R.next_shot("9", "EpT", spend_token=t3, log=lambda *a, **k: None)   # silent 1.B1.S3
     f3 = prov.fire_calls[-1]
@@ -315,6 +512,17 @@ def test_golden_path_script_to_scene_picture(world):
     i1 = data.find(b"1.B1.S1_c2.mp4"); i2 = data.find(b"1.B1.S2_c1.mp4")
     i3 = data.find(b"1.B1.S3_c1.mp4")
     assert -1 < i1 < i2 < i3
+
+    # JOIN ON LIVE MOTION, scoped to THIS pipeline's own 4-8s shot grammar (2026-07-21):
+    # the real, final picture goes through assemble_conformed with settle_trim PINNED to
+    # 0.0 — never the old beat-pipeline's ~2s default, which would eat a large fraction of
+    # a short shot's own content. A raw, untrimmed comparison baseline is written alongside.
+    assert len(prov.conform_calls) == 1
+    assert prov.conform_calls[0]["settle_trim"] == 0.0
+    assert len(prov.conform_calls[0]["clips"]) == 3
+    raw = pathlib.Path(pic).with_name(pathlib.Path(pic).name.replace(
+        "_shots_picture.mp4", "_shots_picture_RAW.mp4"))
+    assert raw.exists()
 
     # the evidence pack records the whole run: every shot approved, every asset present,
     # the stitched output named — nothing invented, nothing silently missing
@@ -338,8 +546,16 @@ def test_golden_path_script_to_scene_picture(world):
 
 def test_relay_refuses_before_source_is_approved(world):
     _, _, _ = world
-    R.voice_scene("9", "EpT", log=lambda *a, **k: None)
-    with pytest.raises(R.Refused, match="not approved"):
+    _voice_and_approve()
+    # THE CORE LAW (2026-07-19): under the department-gate hardening, this refusal now
+    # surfaces one step EARLIER than it used to — no Animation Direction could ever have
+    # been legitimately prepared for a relay shot whose source isn't approved+harvested yet
+    # (_anchor_for's own real relay dependency, which _seed_animation_for_shot/prepare_
+    # department both hit identically), so fire_shot refuses on THE CORE LAW's own message
+    # rather than reaching the older, deeper "source not approved" check inside _anchor_for
+    # — the underlying guarantee (a relay can never fire before its source is approved) is
+    # unchanged and, if anything, enforced earlier and more strongly than before.
+    with pytest.raises(R.Refused, match="requires an APPROVED"):
         R.fire_shot("9", "1.B1.S2", "EpT", log=lambda *a, **k: None)
 
 
@@ -354,7 +570,15 @@ def test_failed_validation_package_cannot_fire(world, monkeypatch, tmp_path):
 
 def test_dialogue_shot_refuses_to_fire_without_voice(world):
     prov, _, _ = world
-    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    fire_keyframe("9", "1.B1.S1", "EpT")
+    R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    # THE CORE LAW (2026-07-19): to isolate testing Law 5's OWN refusal (dialogue with no
+    # approved voice), the shot must otherwise be fully department-ready — an Animation
+    # Direction seeded here, matching real production order (its anchor, the keyframe, is
+    # now approved). Without this, fire_shot's own animation-direction gate would refuse
+    # first, for an unrelated reason, and this test would no longer prove what it says it
+    # proves.
+    _seed_animation_for_shot("9", "EpT", "1.B1.S1")
     with pytest.raises(R.Refused, match="Law 5"):
         R.fire_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
 
@@ -372,8 +596,10 @@ def test_failure_ladder_unchanged_reroll_then_model_limited(world):
     """§5: rejection archives the whole batch; the reroll uses the UNCHANGED package (no
     auto-appended retake note, no new negatives); two failed batches hard-stop the shot."""
     prov, tmp, _ = world
-    R.voice_scene("9", "EpT", log=lambda *a, **k: None)
-    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    _voice_and_approve()
+    fire_keyframe("9", "1.B1.S1", "EpT")
+    R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    _seed_animation_for_shot("9", "EpT", "1.B1.S1")
     t1 = _token("1.B1.S1", candidates=2)
     R.fire_shot("9", "1.B1.S1", "EpT", candidates=2, spend_token=t1,
                 log=lambda *a, **k: None)
@@ -423,8 +649,10 @@ def test_stale_token_refused_when_package_changes(world):
     """Protection 1/4: anything changing between disclosure and generation voids the token
     — a revised package needs fresh validation and a fresh approval."""
     prov, tmp, pkg_path = world
-    R.voice_scene("9", "EpT", log=lambda *a, **k: None)
-    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    _voice_and_approve()
+    fire_keyframe("9", "1.B1.S1", "EpT")
+    R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    _seed_animation_for_shot("9", "EpT", "1.B1.S1")
     tok = _token("1.B1.S1")
     # a targeted correction: the prompt text changes after the disclosure
     pkg = json.loads(pathlib.Path(pkg_path).read_text())
@@ -433,6 +661,15 @@ def test_stale_token_refused_when_package_changes(world):
     with pytest.raises(R.Refused, match="STALE"):
         R.fire_shot("9", "1.B1.S1", "EpT", spend_token=tok, log=lambda *a, **k: None)
     assert len(prov.fire_calls) == 0
+    # THE CORE LAW (2026-07-19): under the department-gate hardening, the revised storyboard
+    # prompt ALSO makes the seeded Animation Direction itself go stale (its own sourceHash
+    # was computed against the pre-revision shot dict) — a genuinely correct, stricter
+    # consequence: the Animation Director must re-review a beat whose underlying prompt
+    # changed, not just re-disclose against it. Re-seeding here (standing in for a real
+    # re-prepare + re-approve through the Studio) is what actually unblocks the next
+    # disclosure — without this, a fresh SPEND-NOT-APPROVED disclosure could never surface,
+    # since fire_shot's own animation-direction gate would keep refusing first.
+    _seed_animation_for_shot("9", "EpT", "1.B1.S1")
     # the next disclosure records the revision and re-validates from scratch
     _token("1.B1.S1")
     d = _led()["1.B1.S1"]["pendingSpendAuth"]["disclosure"]
@@ -443,8 +680,10 @@ def test_batch_resume_is_idempotent_never_repays(world):
     """Protection 2: two of three complete, the third fails -> resume generates ONLY the
     missing candidate under the ORIGINAL token; completed candidates never regenerate."""
     prov, tmp, _ = world
-    R.voice_scene("9", "EpT", log=lambda *a, **k: None)
-    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    _voice_and_approve()
+    fire_keyframe("9", "1.B1.S1", "EpT")
+    R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    _seed_animation_for_shot("9", "EpT", "1.B1.S1")
     tok = _token("1.B1.S1")
     real = R.cb_gen.generate_video_seedance_ref
     calls = {"n": 0}

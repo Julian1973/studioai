@@ -1,5 +1,0 @@
-{
-  "handAuthored": true,
-  "belowBar": false,
-  "_note": "Grandfather sidecar, re-applied 2026-07-15, Julian directly confirmed via chat that Ep1_Final_Episode_one.txt is the same locked Ep1 script re-saved under a new working title, not a new/revised draft. Verified by a real byte-for-byte diff against the last git-committed copy of Ep1_The_Adventure_Begins.txt (commit 60421fe) - zero differences, 578/578 lines match. The Studio upload flow deletes any prior .score.json on save (rule 84), which is why this needed re-applying. Not a template for future scripts - a genuinely new/revised script must go through cb_writer.write (Gate 0) for real."
-}

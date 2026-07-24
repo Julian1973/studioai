@@ -21,13 +21,23 @@ ROOT = HERE.parent
 
 # Legacy prompt fingerprints (§6): the three forensic strings, the timeline mega-prompt
 # headings, and the former long "Negative:" builder's construction.
+#
+# "Pixar-caliber" RETIRED 2026-07-21: it was banned here because a hardcoded DUPLICATE of
+# the show's style law used to live directly in prompt-building source — real duplication,
+# the destructive cutover's own target. cb_engine._style_law_text() (built the same night
+# this line was retired, Julian's own techhalla-example comparison) now reads that law from
+# its ONE canonical file (shows/crystal-bears/laws/style.txt) at compile time, every time,
+# never a hardcoded copy — so this phrase legitimately, deliberately reaches both executable
+# source (this file's own comments, unavoidably, since they have to name what they test) and
+# every real compiled prompt now. A blunt string match can't tell "hardcoded duplicate" from
+# "the one true file, read correctly" apart — the fix is a real source-of-truth change, not
+# a regression this fingerprint should keep flagging.
 FINGERPRINTS = [
     "camera already waiting at the leaf",
     "no leaf hit as the final image",
     "crash-lands into pride",
     re.compile(r"\b0[–-]5s\b"), re.compile(r"\b5[–-]10s\b"), re.compile(r"\b10[–-]15s\b"),
     '"Negative: "',
-    "Pixar-caliber",
 ]
 THIS_FILE = pathlib.Path(__file__).name
 

@@ -1,7 +1,7 @@
 {
  "episodeId": "Ep1",
  "sceneNumber": "1",
- "builtAt": "2026-07-17T06:08:33",
+ "builtAt": "2026-07-18T21:57:36",
  "approvalState": "proposed-awaiting-human-approval",
  "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
  "unresolvedFields": {
@@ -52,88 +52,188 @@
    "proposals": [
     {
      "field": "centreOfGravity",
-     "proposedText": "Forward and high in intent, then abruptly low on the undercut: he leads with a chest-pumped, head-high hover-strut, overcommits past his balance point, and recovers from a slump or dip rather than a graceful reset.",
-     "groundedIn": "\"he puffs his CHEST out and strikes a proud superhero / on-parade stance — chest pumped forward, shoulders back, head high\"; \"the proud landing that becomes a tumble\"; \"Any deflate that follows is a small slump or a dip\""
+     "proposedText": "Forward and chest-led: Fuzzby’s body commits before his judgement catches up. His balance should feel top-heavy with pride in the wind-up, then suddenly dented after impact.",
+     "groundedIn": "\"he puffs his CHEST out and strikes a proud superhero / on-parade stance\"; \"the over-committed launch, the mid-air fumble, the proud landing that becomes a tumble\""
     },
     {
      "field": "consciousDesire",
-     "proposedText": "To be seen as important, professional, and successfully helpful — the bee who arrives with the grand plan and makes everyone believe he meant to do that.",
-     "groundedIn": "\"his WANT (be seen as a flawless, important professional)\"; \"he puffs up grandly, declares himself\"; \"launches a grand confident scheme to 'help'\""
+     "proposedText": "To be seen as impressively useful — a flawless, important professional whose grand plan is exactly what the moment needs.",
+     "groundedIn": "\"his WANT (be seen as a flawless, important professional)\"; \"launches a grand confident scheme to 'help'\""
     },
     {
      "field": "facialOpennessOrRestraint",
-     "proposedText": "Open, readable, and fast-changing: big conviction on the flourish, instant sheepish leakage after impact, then a deliberately composed cover-up that cannot fully hide the dent.",
-     "groundedIn": "\"Bouncy, bumbling, self-important then sheepish\"; \"the air going out of them\"; \"one micro-tell... says he knows\""
+     "proposedText": "Highly readable during the build and crash, then briefly over-controlled in recovery: he tries to look dignified, but one tiny tell gives him away.",
+     "groundedIn": "\"then DENIES it with total dignity\"; \"ONE micro-tell (a wobble, a single droopy antenna, a wing that won't quite fold) says he knows\""
     },
     {
      "field": "gazeBehaviour",
-     "proposedText": "He looks where the triumph is supposed to be before his body has earned it; after a crash, he snaps his attention outward as if checking whether the audience bought the cover-up, with one tiny tell betraying him.",
-     "groundedIn": "\"commits 100% to every grand idea, then crashes\"; \"THE COVER-UP — instant... reclaim ('Nailed it.')\"; \"one micro-tell... says he knows\""
+     "proposedText": "Eyes chase the imagined triumph first, not the real danger; after the bonk, his look catches up late, then flicks toward whoever might have seen it before he reclaims dignity.",
+     "groundedIn": "\"He IS the delayed take — always the LAST to know\"; \"the body betrays the want\""
     },
     {
      "field": "gestureScale",
-     "proposedText": "Largest gesture scale in the cast: broad flourishes, proud parade poses, over-large launches, and heavy physical consequences — but always one clear gag idea at a time, never blurry thrashing.",
-     "groundedIn": "\"THE FLOURISH — over-confident wind-up... an unnecessarily grand gesture\"; \"CALIBRATION: the BIGGEST physical comedy in the cast\"; \"every action is a specific readable gag, never blurry movement\""
+     "proposedText": "Biggest gesture scale in the room: broad, over-declared, full-body confidence in the flourish; never tiny unless the crash has punctured him for a beat.",
+     "groundedIn": "\"CALIBRATION: the BIGGEST physical comedy in the cast\"; \"an unnecessarily grand gesture, a little hover-strut\""
     },
     {
      "field": "hiddenEmotionalNeed",
-     "proposedText": "To trust that he belongs even when he is wrong out loud — that the crash is not proof he is too much, but part of why he is wanted.",
-     "groundedIn": "\"he's wanted even when (especially when) he face-plants\"; \"You are not too much\"; \"from a bee who puffs up to earn his place, to a bee who learns he already has one\""
+     "proposedText": "To know he belongs even when he is wrong, messy, and visibly not in control.",
+     "groundedIn": "\"he's wanted even when (especially when) he face-plants\"; \"you can fall over, laugh, and still belong\""
     },
     {
      "field": "insecurity",
-     "proposedText": "Feeling small and unnecessary, especially among the bigger crystal-powered bears, so he performs importance before anyone can notice the wobble underneath.",
-     "groundedIn": "\"His pomposity is a mask... so he doesn't have to feel small\"; \"he reveres them slightly (hence the pomp — trying to matter among the big crystal-powered ones)\""
+     "proposedText": "He fears being too small or too useless to matter, so he performs importance before anyone can question his place.",
+     "groundedIn": "\"He commits 100% to a big proud idea precisely so he doesn't have to feel small\"; \"trying to matter among the big crystal-powered ones\""
     },
     {
      "field": "neverWithoutStoryReason",
-     "proposedText": "Never use Fuzzby as random motion or filler; every entrance, bonk, puff-up, or cover-up must relieve emotional weight or accidentally open a new perspective in the scene.",
-     "groundedIn": "\"His role is structural, never decorative\"; \"never a Fuzzby beat without a purpose in the arc\"; \"the crash inadvertently cracks the scene open toward the Heart or a new perspective\""
+     "proposedText": "Never use Fuzzby as ambient bustle. Every entrance, crash, or cover-up must release pressure or accidentally open the emotional path forward.",
+     "groundedIn": "\"His role is structural, never decorative\"; \"never a Fuzzby beat without a purpose in the arc\""
     },
     {
      "field": "personalSpace",
-     "proposedText": "He invades space by over-eager trajectory rather than aggression: zipping too close, overshooting, undershooting, and colliding with the environment because his helpfulness arrives before his steering does.",
-     "groundedIn": "\"over-eager, constantly bumping/banging into leaves, branches and flowers\"; \"overshooting too high then undershooting too low\"; \"his chaos is warm, never sharp\""
+     "proposedText": "He overruns space with eager confidence — too close, too fast, too high, too low — but never aggressively; his invasions are warm accidents, not domination.",
+     "groundedIn": "\"over-eager, constantly bumping/banging into leaves, branches and flowers\"; \"his chaos is warm, never sharp\""
     },
     {
      "field": "primaryFear",
-     "proposedText": "That being wrong, small, or messy will cost him his place — so he tries to look flawless before he lets anyone see the blunder.",
-     "groundedIn": "\"His pomposity is a mask\"; \"learns that the blunder isn't a failure to be ashamed of\"; \"a bee who puffs up to earn his place\""
+     "proposedText": "Being revealed as not special enough to deserve his place — a little bee whose help is only a nuisance.",
+     "groundedIn": "\"His pomposity is a mask\"; \"trying to matter among the big crystal-powered ones\""
     },
     {
      "field": "protectiveMask",
-     "proposedText": "Pompous competence: chest out, antennae proud, grand declarations, and a dignified denial immediately after disaster.",
-     "groundedIn": "\"puffs up grandly, declares himself\"; \"Pomp/pride/indignation = he puffs his CHEST out\"; \"clumsy WHILE performing competence, then DENIES it with total dignity\""
+     "proposedText": "Pompous professionalism: chest out, grand declaration, total certainty. The mask goes up fastest when he feels least sure.",
+     "groundedIn": "\"His pomposity is a mask\"; \"puffs up grandly, declares himself, and crashes\""
     },
     {
      "field": "recoveryBehaviour",
-     "proposedText": "After impact he reclaims the moment too quickly: snaps into still dignity, offers a tiny cover-up, but leaves one physical tell — a wobble, droopy antenna, or misfolded wing — so the heart leaks through.",
-     "groundedIn": "\"THE COVER-UP — instant... reclaim ('Nailed it.')\"; \"the bigger the disaster, the STILLER the recovery\"; \"ONE micro-tell (a wobble, a single droopy antenna, a wing that won't quite fold)\""
+     "proposedText": "Instant dignified reclaim after impact: he gets stiller, labels the disaster as intentional, and lets one small physical tell betray the dent underneath.",
+     "groundedIn": "\"THE COVER-UP — instant Keaton-deadpan reclaim ('Nailed it.'); the bigger the disaster, the STILLER the recovery\"; \"ONE micro-tell... says he knows\""
     },
     {
      "field": "responseToEmbarrassment",
-     "proposedText": "He covers embarrassment with ceremonial dignity, not confession: a proud little reset, a too-calm button, and one involuntary tell that admits what the line refuses.",
-     "groundedIn": "\"self-important then sheepish\"; \"then DENIES it with total dignity\"; \"one micro-tell... says he knows\""
+     "proposedText": "He covers embarrassment by upgrading the accident into a performance choice, but the cover should arrive a fraction too fast and be physically imperfect.",
+     "groundedIn": "\"crashes — and claims the crash as choreography\"; \"the joke is... clumsy WHILE performing competence, then DENIES it with total dignity\""
     },
     {
      "field": "responseToPressure",
-     "proposedText": "Pressure makes him accelerate, over-help, and grandstand harder; he launches a bigger plan instead of admitting uncertainty, which increases the chance of the useful crash.",
-     "groundedIn": "\"Energy spikes high and crashes fast\"; \"launches a grand confident scheme to 'help'\"; \"full-throttle chaotic, in EVERY scene\""
+     "proposedText": "Pressure makes him accelerate and over-elaborate. He tries harder, gets grander, and therefore becomes more crash-prone.",
+     "groundedIn": "\"Energy spikes high and crashes fast\"; \"Manic, staccato, run-on bursts that build a tower then topple it\""
     },
     {
      "field": "responseToSuccess",
-     "proposedText": "He celebrates success as if it was always inevitable: chest out, proud stance, total conviction — even when the success came from a mistake he is busily rebranding.",
-     "groundedIn": "\"Nailed it\"; \"he puffs his CHEST out and strikes a proud superhero / on-parade stance\"; \"claims the crash as choreography\""
+     "proposedText": "Success makes him immediately parade it: chest forward, antennae proud, a tiny self-congratulating flourish — which should create the next risk of overreach.",
+     "groundedIn": "\"puffs his CHEST out and strikes a proud superhero / on-parade stance\"; \"THE FLOURISH — over-confident wind-up, chest puffed... an unnecessarily grand gesture\""
     },
     {
      "field": "silhouette",
-     "proposedText": "Readable as a tiny engine of overconfidence: chest-forward parade shape, proud antennae, urgent zig-zag path, then a compact slump or still cover-up after impact.",
-     "groundedIn": "\"chest pumped forward, shoulders back, head high\"; \"ANTENNAE are his barometer: proud-erect -> whip-recoil -> one-droop-tell -> snap-proud\"; \"zig-zagging wildly\""
+     "proposedText": "A proud, forward-thrust performance shape: chest leading, head high, limbs and antennae declaring victory before the body can prove it.",
+     "groundedIn": "\"chest pumped forward, shoulders back, head high, standing tall\"; \"antennae proud-erect\""
     },
     {
      "field": "useOfStillness",
-     "proposedText": "Stillness is rare and only funny after impact: a tiny held dignity beat where he pretends the crash was intentional while one micro-tell gives him away. He must not hover calmly as a baseline.",
-     "groundedIn": "\"the bigger the disaster, the STILLER the recovery\"; \"NEVER let Fuzzby fly slow, calm, graceful, serene or still-hovering\"; \"ONE micro-tell... says he knows\"}]} ,{"
+     "proposedText": "Stillness is rare and only funny after chaos: a tiny dignified freeze after the crash, charged with the knowledge that he knows it went wrong.",
+     "groundedIn": "\"the bigger the disaster, the STILLER the recovery\"; \"the held beat after is where the heart leaks in and the co-watch fires\""
+    }
+   ]
+  },
+  {
+   "character": "Zenny",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Settled and low-activity: Zenny reads as planted, composed, and hard to knock off rhythm, especially beside Fuzzby’s over-committed travel.",
+     "groundedIn": "\"his calm, dry, smaller female counterpart is Zenny\"; \"Zenny's calm deadpan stillness is his counterweight\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "The dry puncture: she lets Fuzzby build the balloon, then pricks it with stillness, timing, and one economical line or look. Her joke is the withheld laugh, not the attack.",
+     "groundedIn": "\"Zenny's silent puncture\"; \"the joke lives in the withheld laugh, the tease lands warm not sharp\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To keep the situation sensible without making a show of herself — and to keep Fuzzby from floating too far into his own parade.",
+     "groundedIn": "\"calm, dry, smaller female counterpart\"; \"she is the still, unimpressed counterweight to his chaos\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Restrained face, tiny signals: slow blinks, minimal tilts, the smallest almost-smile. She reveals affection by nearly hiding it.",
+     "groundedIn": "\"a slow blink, a tiny head-tilt, one corner of a mouth almost lifting\"; \"Beneath her dryness is affection she won't admit\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Steady, assessing, and unhurried. She looks after the truth of the moment, not after Fuzzby’s claimed version of it.",
+     "groundedIn": "\"her flat hold IS the joke against his motion\"; \"she sees the mess and stays\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Smallest effective gesture. A blink, head-tilt, or tiny mouth shift should do more than a broad action would.",
+     "groundedIn": "\"a slow blink, a tiny head-tilt, one corner of a mouth almost lifting\"; \"calm deadpan stillness\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be allowed to care without having to perform sweetness; her loyalty is visible in staying, not in declaring.",
+     "groundedIn": "\"Beneath her dryness is affection she won't admit\"; \"she sees the mess and stays\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "She is wary of showing too much warmth, because open affection would break the dry cover that lets her feel safe beside chaos.",
+     "groundedIn": "\"Beneath her dryness is affection she won't admit\"; \"the parent sees affection disguised as judgement\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "Economical, level, and controlled: she moves only as much as needed, creating comedy by contrast with Fuzzby’s fast, erratic over-motion.",
+     "groundedIn": "\"Zenny's calm deadpan stillness is his counterweight — her stillness makes his chaos read bigger\"; \"NEVER let Fuzzby fly slow, calm, graceful, serene or still-hovering — that is Zenny's register\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "Never use Zenny as a generic reaction cutaway. Her stillness must either puncture Fuzzby’s performance, reveal affection under judgement, or steady the scene’s rhythm.",
+     "groundedIn": "\"Their double-act is the engine: he motors, she reacts; her flat hold IS the joke against his motion\"; \"the relationship is the punch-line\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "She keeps clean, calm space around herself and lets Fuzzby crash into the edge of it; she does not chase chaos, she lets it arrive.",
+     "groundedIn": "\"she is the still, unimpressed counterweight to his chaos\"; \"he motors, she reacts\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "Being forced into obvious emotional display; she would rather be useful, dry, and present than openly sentimental.",
+     "groundedIn": "\"Beneath her dryness is affection she won't admit\"; \"affection disguised as judgement\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "Dry unimpressed judgement: a flat look or clipped line that protects the affection underneath.",
+     "groundedIn": "\"dry, deadpan\"; \"the parent sees affection disguised as judgement\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "She recovers by returning to neutral faster than anyone else: still face, tiny reset, no fuss — as if the absurdity has only confirmed what she expected.",
+     "groundedIn": "\"calm, dry\"; \"her flat hold IS the joke\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She minimizes it. If embarrassed, she shrinks the reaction rather than enlarging it — a blink, a pause, a small correction, then back to composed.",
+     "groundedIn": "\"a slow blink, a tiny head-tilt\"; \"calm deadpan stillness\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "Pressure makes her quieter and more precise, not louder. Her stillness should sharpen when the scene around her gets busy.",
+     "groundedIn": "\"the thunder beat works because... Zenny goes still and says, flat and small, 'A Storm's coming.'\"; \"calm deadpan stillness\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "She does not celebrate broadly. Success earns a tiny almost-smile or a dry tag that refuses to admit how pleased she is.",
+     "groundedIn": "\"one corner of a mouth almost lifting\"; \"Beneath her dryness is affection she won't admit\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A compact, composed performance shape: minimal angles, small head-tilts, held posture — designed to read instantly against Fuzzby’s flailing outline.",
+     "groundedIn": "\"a slow blink, a tiny head-tilt\"; \"contrast in one frame: his momentum against her stillness reads as story\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is her main instrument. Hold on her long enough for Fuzzby’s chaos to finish landing, then let one tiny change deliver the joke or the care beneath it.",
+     "groundedIn": "\"let the camera HOLD on her flat reaction as the punchline lands\"; \"Zenny's calm deadpan stillness is his counterweight\""
     }
    ]
   }

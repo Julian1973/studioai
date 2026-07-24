@@ -339,3 +339,190 @@ point the existing `cb_handover.promote_to_canonical` path both promotes it AND 
 side effect of the fix in §8 — correctly clears `continuityIn` to typed `None`/`""` for
 the scene's true opener for the first time under the live data, closing the one known
 stale-shape gap noted above.
+
+---
+
+## 10. §7 item 2 CLOSED at source — and one new blocker found attempting the real promotion (2026-07-17)
+
+**§7 item 2 CLOSED.** Verified directly, not assumed: `principalPerformance` (Gate 4's own
+human-facing read) quotes the beat's own locked dialogue verbatim on 6 of the real Scene 1's
+7 shots — S1.SH1 ("BIZZY-BIZZY-BIZZY…", "Nailed it."), S1.SH2 ("Do I look official?", "Yes
+Fuzzby Officially nuts!"), S1.SH3 ("Buzz Crash!!"), S1.SH5 ("…okay that sounded dramatic."),
+S1.SH6 ("A Storm's coming."), S1.SH7 ("Good thing I work well under pressure.") — the exact
+`principalPerformance`/`compile_shot_contract` combination §7 item 2 already named for
+S1.SH6 alone, confirmed here to be systemic, not a one-shot fluke. `physicalPerformance`
+(Gate 5's separate, body-first field, authored under an explicit "physical cause and effect
+stays readable" instruction that never asks for or permits spoken words) was checked against
+the identical 7 shots and carries ZERO dialogue on any of them — `animationTiming` was also
+checked and found NOT safe (it references locked dialogue on 2 of 7 shots, since timing prose
+legitimately describes when a line lands, e.g. "then let 'Nailed it' arrive too bright and
+too soon"). `cb_handover.distil_shot` now sources `performanceAssignment` — the one field
+`cb_engine.compile_shot_contract` folds into the provider's visual-performance brief — from
+`physicalPerformance`, never `principalPerformance`; a shot with no Gate-5 physical-
+performance pass yet refuses loudly (`HandoverRefused`) rather than silently falling back to
+the dialogue-risky field. `principalPerformance` itself is retained verbatim in the promoted
+record (`principalPerformanceApproved`) — never dropped, only no longer the compiled source.
+A new general test, `test_performance_assignment_sources_physical_performance_never_
+principal_performance` (`test_cb_handover.py`), proves this across four distinct synthetic
+shots, each with its OWN locked line, including a direct regression pin confirming the OLD
+mapping would fail every one of them with a real `LAW 6 VIOLATION` from the unmodified
+`cb_engine.compile_shot_contract` — never patched to S1.SH1 alone, per instruction.
+
+**A NEW, DISTINCT BLOCKER, found attempting the real S1.SH1 promotion under this fix** (dry
+run, live storyboard, unmodified `cb_engine.py`): `cb_engine.validate_scene_design`'s
+`FIELD_OVERBUDGET` check — `performanceAssignment` capped at 50 words in
+`FIELD_WORD_BUDGETS` — now fires as a hard `ERROR` on S1.SH1 (76 words) and, checked, would
+fire identically on all 6 other dialogue-bearing shots (72-92 words each; `physicalPerformance`
+was never authored under a 50-word instruction — Gate 5's own prompt asks for "chest leading,
+wings overworking..." body detail, ~60-90 words per real shot, per §7 item 2's own
+already-recorded observation). The compiled provider brief itself is unaffected and fits
+comfortably — `compile_shot_contract`'s own real ceiling, `MAX_SHOT_PROMPT_WORDS=210`, is
+satisfied at 161-191 words across all 7 shots, and `_assert_no_spoken_words` raises nothing.
+
+This is the SAME class of problem §7 item 4(b) already found and closed for `visualPayoff`
+(an isolated per-field budget rejecting real, approved content for a reason unrelated to the
+actual constraint that matters) — but it is **NOT resolved the same way here**, and
+deliberately so: `cb_engine.py`'s own `FIELD_WORD_BUDGETS` comment, written the same day as
+that closure, states explicitly that `performanceAssignment` "keeps its own budget (not
+named in this correction)" — meaning this exact field was already considered for the same
+relief and Julian chose to keep its cap in place. Removing it now, even under a directly
+analogous rationale, would silently reverse an already-made, already-recorded decision — not
+extend a pattern. NOT done. `cb_engine.validate_scene_design`/`FIELD_WORD_BUDGETS` are
+UNTOUCHED. The promotion attempt (`dry_run=True`) confirms the live package
+(`Ep1_scene1_production_package.json`, revision 7) is untouched and nothing was written —
+`promote_to_canonical`'s own transactional guarantee (§7 item 4) held throughout. `S1.SH1`
+remains unpromoted under revision 7's existing content; no keyframe generation was attempted,
+consistent with steps 6-7 of Julian's own directive never being reachable while promotion
+itself refuses. Flagged here for his own decision: raise/remove `performanceAssignment`'s
+`FIELD_WORD_BUDGETS` entry to match `visualPayoff`'s own precedent, or hold the line and
+require Gate 5's `physicalPerformance` authoring to stay within 50 words going forward (a
+real creative-authoring constraint change, not a code one) — both are his call, neither
+decided here.
+
+---
+
+## 11. The dog-and-fox misfire, the Scene Look hard-gate, and the unwired lineage checkpoint (2026-07-19)
+
+**THE MISFIRE.** A real, billed ($0.144) Scene Look Plate generation for Scene 1 produced an
+unrelated image (a dog and fox in a flower field). Traced via the `.gen.json` sidecar, the
+cost ledger, and `_compile_scenelook_prompt`'s own code: the specialist Look Development
+candidate was correctly never used (it was still unapproved) — but the FALLBACK canon
+compiler found `shows/crystal-bears/canon/locations.json` completely empty (`{"_note": ""}`),
+so the entire submitted prompt was just the one-line global style law, paired with one
+unlabelled reference photo — a known failure mode for an image-edit model given no real
+content to anchor on.
+
+**THE BYPASS FIX (Julian's own itemized instruction, implemented and verified live in the
+Studio before this section was written).** `cb_render.approved_look_prompt(scene, episode)`
+is now the SOLE permitted source for `generate_scenelook_plate`'s submitted prompt — it reads
+`departmentWork.look.approved.output.providerPrompt` and returns `None` if no candidate has
+been explicitly approved (a pending/unapproved candidate never counts). `generate_scenelook_
+plate` hard-refuses before the billing check if this is `None`: `"REFUSED — Approve Look
+Development direction first."` The Studio's own disclosure modal (`app.html`'s `openDisclosure
+Modal`, `kind=="scenelook"` branch) mirrors this client-side, showing the exact approved
+specialist prompt text that will be submitted, or the refusal message with no Generate button
+at all if nothing is approved yet. Confirmed live: Scene 1 (no approved Look direction) shows
+the refusal; the failed dog-and-fox generation was preserved in Scene 1's own rejection
+history, left for Julian's own review, never silently discarded.
+
+**`locations.json` populated the same night**, closing the fallback's root cause too (belt and
+braces — the real live path is now the approved-specialist-prompt-only gate above, but the
+canon fallback existed and was empty, and nothing else in the codebase should ever again find
+it that way). Populated for all 10 scenes from already-authored material only — Scene 1's own
+approved specialist candidate text, archived storyboards for Scenes 2/3/9
+(`archive/Episode_1_Complete_Archive_20260718/output/creative/Ep1_scene{2,3,9}_storyboard.
+json`), and for Scenes 4-8/10 (which have never had a real storyboard built under this
+architecture) the current script plus `EP1_GATE1_STORYBOARD.md`'s 2026-07-05 export plus
+`CRYSTAL_BEARS_LOCKED_CANON.md`'s own locked light-arc-by-scene table. Two real naming
+inconsistencies found and flagged in the file's own `_provenance.namingFlags`, not silently
+resolved: Scene 3 is "KEEN'S ISLAND" in the script but "Crystal Cove pier" in both storyboard
+sources; Scene 9 is "GATHERING AREA" in the script but canon's own location list separately
+names it "The Learning Circle."
+
+**THE UNWIRED STATE-INTEGRITY CHECKPOINT — the most significant finding of the night.**
+Investigating a stale test (`test_golden_path_keyframe_refuses_on_the_actual_current_lineage_
+mismatch`, which had flipped from pass to fail purely because the real production package had
+since been re-synced) led to tracing `cb_render._require_current_lineage` — the function this
+whole test suite extensively documents as "THE STATE-INTEGRITY CHECKPOINT," a hard refusal for
+any package built from a superseded storyboard version — and finding it had **zero call sites
+anywhere in `cb_render.py`**. Neither `keyframe_shot` nor `fire_shot`, the two real content-
+generation entry points, ever called it. A package whose storyboard had moved on could
+therefore still generate a real keyframe or fire a real paid animation batch against outdated
+content — the exact condition the checkpoint's own doctrine was written to prevent, and the
+same class of failure that let a rejected S1.SH1 keyframe once read as "approved" (§7). Wired
+`_require_current_lineage(pkg, scene, episode)` into both functions, immediately after
+`_require_valid(pkg)` (the existing "cheapest, stored gate first" ordering). Verified: the full
+test suite (147 tests across 13 files, previously 133 passed/11 failed/3 errored before
+tonight) now runs 147 passed, 1 skipped, 0 failed with this wired in — including every
+already-passing suite, confirming no regression from the new gate.
+
+**Two genuinely dead helpers found in the same sweep and removed** (a project-wide grep for
+zero-reference functions, the same technique that surfaced the lineage gap — narrowed down
+from ~130 naive single-file false positives to 2 real ones by checking every `.py` file, not
+just the defining one): `cb_render._spend_disclosure` (superseded by a richer inline
+disclosure dict in `fire_shot` built the same night §7's spend-control gate was designed —
+never deleted after) and `cb_engine._continuity_summary` (a per-character continuity-state
+summarizer with no caller anywhere; `compile_keyframe_prompt` deliberately builds a narrower
+lighting/camera-side-only clause instead, per its own extensive docstring, and was never meant
+to use this). Removed both; full suite re-run clean after each removal.
+
+**Eight stale test assertions/fixtures fixed, all verified against real, current state, none
+guessed at:**
+- `test_cb_gen.py`'s two billing-confirmation assertions expected `planConfirmed`/
+  `cadenceConfirmed` as `False` — Julian confirmed his real ElevenLabs plan (Pro, monthly) on
+  2026-07-18 (`billing_profile.json`'s own `confirmedBy`/`confirmedAt` fields); both flipped to
+  `True`, matching the real, live profile.
+- `test_e2e_fire_route.py`'s `legacy_scratch_pkg` fixture pointed at an archived package
+  (`cb-output/archive/Ep1_scene1_production_package_pre_S1.SH1_promotion_rev6_20260717.json`)
+  that no longer existed at its documented canonical path — not lost, swept into a broader
+  whole-episode cold-storage archive (`archive/Episode_1_Complete_Archive_20260718/output/
+  archive/...`) during an earlier, unrelated project-wide reset. Restored the byte-identical
+  (MD5-confirmed) copy to its documented location rather than fabricating a replacement.
+- The same fixture's own recorded keyframe/voice media paths (`engine/media/shots/
+  Ep1_1.B1.S1_{keyframe.png,vo.mp3}`) had also been swept away by the same reset. The
+  keyframe's exact byte content (matching the sealed-brief test's own hardcoded md5,
+  `c02dc92c...`) was recovered from the same cold-storage archive and restored into the
+  fixture's own scratch media dir — never the real `engine/media/` tree — with `keyframePath`/
+  `voPath` repointed there, so this fixture can never again depend on a specific real-world
+  path surviving untouched between sessions.
+- Both `legacy_scratch_pkg` and `golden_path_scratch_pkg` needed the identical treatment for
+  two NEW real production gates that postdate when these fixtures were last written: the
+  voice-approval gate (`fire_shot` now refuses a dialogue shot whose voice track exists but
+  isn't explicitly approved) and the Scene Look Plate gate (`_plate_path`/
+  `_require_current_scenelook`, both reading REAL, LIVE scene-1 state these fixtures never
+  redirect). Backfilled voice/keyframe approvals the same way the fixture already did for
+  keyframes; bypassed the live-state-dependent Scene Look checks with the same documented
+  "out of scope for a mechanics-only regression pin" reasoning already established for the
+  lineage check.
+- `test_golden_path_script_to_scene_picture`'s keyframe-anchor assertion asserted a literal
+  `.endswith("_keyframe.png")` — stale against `approve_keyframe`'s own real, deliberate
+  behaviour (it keeps the candidate's own unique-hash filename, never renaming it, matching
+  this codebase's "never rename an approved artefact" convention throughout). Corrected to
+  check the real invariant: the fired anchor equals the ledger's own recorded `keyframeApproval
+  .path`.
+- `test_golden_path_keyframe_refuses_on_the_actual_current_lineage_mismatch` used to assert its
+  refusal by relying on the real production package genuinely being stale AT THE MOMENT IT WAS
+  WRITTEN — meaning the test would flip to failing the instant the very staleness it was
+  pinning against got fixed by a later re-promotion (exactly what happened). Rewritten to
+  deliberately simulate the mismatch via `monkeypatch.setattr(cb_render, "_current_storyboard_
+  md5", ...)`, the same technique its own sibling test already used to simulate the matching
+  case — a permanent regression pin, not a bet on real-world drift staying put.
+- `cb_render._resolve_keyframe_prompt` crashed with a raw `KeyError` on any relay/non-opener
+  shot (`shot["keyframePrompt"]` — only opener shots ever carry this key) — a real, pre-
+  existing crash in `evidence_pack`, which calls this for every shot in a scene, not just
+  openers. Fixed to `shot.get("keyframePrompt")`, degrading to `None` for a relay shot the same
+  honest way a silent shot's missing voice track already does elsewhere in this file.
+
+**Verified untouched**: the real, live Scene 1 Look Development state (`cb-output/
+Ep1_scenelook_scene1.json`) — still `approved: None`, the specialist candidate still present,
+still `editedBy: Julian`, exactly as he left it; the real production package
+(`cb-output/Ep1_scene1_production_package.json`) mtime unchanged; the live Studio server
+(port 8765) confirmed still healthy (`{"stale": false, ...}`) and `cb_render.py` still imports
+clean after every change. No generation call was fired by any of this work.
+
+**Left for Julian's own call, not decided unilaterally**: whether the Cinematography/Voice/
+Animation departments should get the same "must be explicitly approved before firing" hard
+gate the Look department now has (an earlier same-session audit confirmed their existing
+fallbacks are already real, shot-specific, already-Director-approved content — not the thin/
+generic kind that caused tonight's misfire — so this is a genuine design-strictness choice, not
+a bug); the Scene 3/Scene 9 naming inconsistencies named above.

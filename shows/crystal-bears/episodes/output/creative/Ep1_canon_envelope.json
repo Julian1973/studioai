@@ -1,7 +1,7 @@
 {
  "episode": "Ep1",
  "canonVersion": "1.0",
- "builtAt": "2026-07-17T06:08:01",
+ "builtAt": "2026-07-18T22:06:44",
  "sources": {
   "showBible": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/CRYSTAL_BEARS_LOCKED_CANON.md",
@@ -17,11 +17,11 @@
   },
   "locations": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/canon/locations.json",
-   "md5": "7aa80002dec8433a56b100fe54f22f11"
+   "md5": "63356fbef584fd31a3dcb028b5049735"
   },
   "continuity": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/canon/continuity.json",
-   "md5": "7924c22940aa8e15af07c498752d48bf"
+   "md5": "63356fbef584fd31a3dcb028b5049735"
   },
   "styleLaw": {
    "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/laws/style.txt",
@@ -56,8 +56,8 @@
    "md5": "a513bba4b9137180c03a8a0f9ebcab48"
   },
   "script": {
-   "path": "/Users/julianjenkins/Desktop/8Th Hour/cb-output/Ep1_Final_Episode_one_beat_package.json",
-   "md5": "00d869c01991f7c1de4e563a5c6247fb"
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/cb-output/Ep1_The_Adventure_Begins_beat_package.json",
+   "md5": "9b4a015a2bc61b89336540840978c38d"
   }
  },
  "gaps": [],

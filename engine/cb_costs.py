@@ -39,6 +39,31 @@ RATES = {
     # as a flat estimate, matching this ledger's existing single-flat-rate convention (see nanobanana2_image
     # above) rather than threading ref-count through every caller.
     "seedream5pro_image":              (0.144, "image",  "high"),
+    # BytePlus ModelArk video path (2026-07-22, Julian: "i want to go via byteplus model ark") — the NEW
+    # default video provider (cb_gen.VIDEO_PROVIDER). UNCONFIRMED PRICING: BytePlus's own pricing page was
+    # not reachable during this integration (docs.byteplus.com is a JS-rendered SPA that blocked scraping);
+    # this figure is a placeholder carried over from seedance_standard_per_sec (the fal.ai rate for the
+    # SAME underlying model) as the best available estimate, explicitly NOT a confirmed BytePlus rate.
+    # Update the moment a real invoice/pricing page is seen — do not treat spend logged under this key as
+    # accurate until then.
+    "seedance_byteplus_ark_per_sec":   (0.3034, "second", "low-unresolved — placeholder, carried from fal's seedance_standard_per_sec rate; BytePlus's own price unconfirmed"),
+    # 480p test-iteration tier (2026-07-23, Julian: "lets run the tests at the lesser amount"): Seedance
+    # bills roughly by pixel-area x seconds; 480p (864x480) is ~45% of 720p's (1280x720) pixel area, so
+    # this is the 720p placeholder rate scaled by 0.45. Same caveat as its parent — estimated, not a
+    # confirmed BytePlus figure; update both together when a real invoice is seen.
+    "seedance_byteplus_ark_480p_per_sec": (0.1365, "second", "estimated — area-proportional (480p ≈ 45% of 720p pixel area) from seedance_byteplus_ark_per_sec, itself unconfirmed"),
+    # Seedream 5 Pro via BytePlus ModelArk (2026-07-22, alongside the video-provider switch above) —
+    # a real, specific figure from a third-party pricing breakdown (atlascloud.ai, "Seedream 5.0 Pro
+    # Price: What You Really Pay Per Image in 2026"), NOT BytePlus's own official pricing page directly
+    # (docs.byteplus.com blocked scraping, same limitation as the video integration). Their own stated
+    # tiers: images at/above 2.36MP (our real 2K renders, e.g. the confirmed 2752x1536 fal-path output)
+    # bill as "2K" at $0.09; the first reference image is free, each additional is $0.003. This flat
+    # estimate assumes the common case (2K output, ~2 total references — 1 free + 1 paid), matching this
+    # ledger's own established flat-rate convention for nanobanana2_image/seedream5pro_image above,
+    # rather than threading exact ref-count through every caller. NOTABLY CHEAPER than either existing
+    # image rate (fal Seedream $0.144, NB2 $0.101) if this figure holds — worth flagging to Julian, not
+    # yet independently confirmed against a real invoice.
+    "seedream5pro_byteplus_image":     (0.096, "image",  "medium — single well-sourced third-party breakdown, not BytePlus's own pricing page directly"),
     "elevenlabs_tts_v3_per_1k_chars":  (0.165, "1000 chars", "published Pro-derived — plan unconfirmed"),  # FALLBACK ONLY: billing_profile.json is the pricing source (Julian's directive, 2026-07-16). Derived from the OFFICIAL published Pro plan ($99/600k credits, 1 credit/char on v3, elevenlabs.io/pricing) — NOT the verified account cost until Julian confirms plan + billing cadence.
     "elevenlabs_dialogue_v3_per_1k_chars": (0.165, "1000 chars", "published Pro-derived — plan unconfirmed"),  # FALLBACK ONLY — see billing_profile.json, the configured source
     "elevenlabs_voice_change_per_min": (0.12,  "minute", "medium"),      # speech-to-speech (RETIRED code path, rule 56 — kept for completeness, should never fire)
@@ -132,10 +157,17 @@ def estimate_video_cost(op_key, seconds):
 
 
 def estimate_image_cost(provider="seedream5pro"):
-    """provider: "seedream5pro" (default keyframe model, 2026-07-09) or "nanobanana2" (rollback path) —
-    picks the matching RATES key; never invents a third option, mirroring cb_gen.IMAGE_PROVIDER's own
-    two-value switch exactly."""
-    key = "nanobanana2_image" if provider == "nanobanana2" else "seedream5pro_image"
+    """provider: "seedream5pro" (fal.ai host, default 2026-07-09 - 2026-07-22), "seedream5pro_byteplus"
+    (BytePlus ModelArk host, default as of 2026-07-22 — see cb_gen.SEEDREAM_HOST), or "nanobanana2"
+    (rollback model family) — picks the matching RATES key. Three values now, not two: the SEEDREAM_HOST
+    switch added a genuine third dimension (which vendor hosts the SAME Seedream model), distinct from
+    IMAGE_PROVIDER's own two-value model-family switch (seedream vs nanobanana)."""
+    if provider == "nanobanana2":
+        key = "nanobanana2_image"
+    elif provider == "seedream5pro_byteplus":
+        key = "seedream5pro_byteplus_image"
+    else:
+        key = "seedream5pro_image"
     rate, _, _ = RATES[key]
     return rate
 

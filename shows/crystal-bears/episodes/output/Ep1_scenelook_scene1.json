@@ -1,0 +1,65 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_03138989.png",
+  "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+  "inputSignature": {
+   "briefHash": "f17c2e55d14a260d68733008d05c3018f40ab152765f01fd6f4e580da3739e5b",
+   "referenceHashes": {}
+  },
+  "referencePath": null,
+  "generatedAt": "2026-07-19T06:59:21",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+  "approvedAt": "2026-07-19T06:59:28",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_10bfd50b.png",
+   "hash": "d5e851cf7a799f121f34e0a6d257c6925ccb030830e4bdc428ef0a789e5017fa",
+   "inputSignature": {
+    "briefHash": "0b74e22b5f14d0d7aaaccaa5476f63a56b90b860cf55133a5950f5fb40495049",
+    "referenceHashes": {}
+   },
+   "referencePath": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+   "generatedAt": "2026-07-19T00:13:07",
+   "outcome": "rejected",
+   "rejectedAt": "2026-07-19T00:17:58",
+   "reviewedBy": "Julian",
+   "rejectedNote": "its awful",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260719T001758/Ep1_S1_plate_candidate_10bfd50b.png"
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-07-19T00:04:24",
+    "editedAt": "2026-07-19T00:11:58",
+    "preparedBy": "specialist",
+    "sourceHash": "690aff9f0476d627d2b1e8afffcc03460789a3c3aeaa4178ae2352639fabc641",
+    "output": {
+     "creativeIntent": "Define a playful bee-scale rainforest world that begins as a warm comedy playground and already carries the first atmospheric warning of a storm. The environment should feel alive, responsive, oversized, tactile, and child-legible: a place where pollen, petals, leaves, and vines can physically participate in Fuzzby’s chaos before the sky interrupts the joke.",
+     "storyOfPlace": "Deep within the rainforest, ordinary plant life becomes monumental at bee scale. Towering tropical flowers form natural corridors, platforms, and springy obstacles; curled petals, giant anthers, broad leaves, mossy bark, dangling vines, and bead-like droplets create a living play-space. The forest is lush and welcoming, but the upper canopy has begun to darken with a subtle weather shift: leaves tremble, distant grey-violet storm light seeps between the greens, and the atmosphere feels like it is holding its breath.",
+     "paletteAndLighting": "Warm saturated daytime rainforest color with golden pollen yellows, luminous leaf greens, juicy flower magentas, coral reds, turquoise shadows, and amber sun shafts. Introduce the coming storm through restrained cool grey-violet canopy shadows, slightly dimmed upper greens, and a soft contrast between cheerful foreground warmth and cooler overhead pressure. Lighting should remain bold and readable for ages 4-8: glowing pollen motes, humid volumetric sunbeams, soft bounce light under petals, and no harsh realism.",
+     "materialsAndAtmosphere": "Materials are tactile and animated-feature rich: waxy translucent petals with soft subsurface glow, fuzzy pollen clumps, powdery pollen dust suspended in air, springy rubbery leaves, damp moss, wet bark ridges, silky vine fibers, glossy dew beads, and soft rainforest haze. Atmosphere should feel humid, fragrant, and buoyant, with floating pollen and tiny moisture particles catching light. The forest must feel capable of bouncing, recoiling, shaking, and laughing along, while the darkening canopy suggests the first serious interruption.",
+     "continuityRules": [
+      "Environment-only Scene Look plate: no characters, no animals, no faces, no props belonging to characters, no text, no logos.",
+      "Maintain bee-scale perspective through oversized flowers, huge pollen grains, towering leaves, and monumental rainforest textures.",
+      "The rainforest is not generic backdrop; every plant surface should feel physically usable, springy, reactive, and comedy-ready.",
+      "Daytime remains warm and saturated, but include clear early storm cues in the upper canopy: cooler shadow, tremor energy, humid pressure, and distant grey-violet light.",
+      "No heavy rain yet; this is the warning before the storm fully arrives uses darkening canopy and atmospheric tension, not downpour imagery."
+     ],
+     "providerPrompt": "Create one environment-only Scene Look plate for an original high-end 3D CGI animated children’s series, ages 4-8, set deep within a rainforest at bee scale during daytime. Show a lush oversized rainforest interior made of monumental tropical flowers, giant curled petals, huge fuzzy anthers, pollen-dusted plant surfaces, broad springy leaves, damp moss, wet bark ridges, dangling vines, glossy dew beads, and suspended pollen motes in humid air. The world should feel playful, tactile, warm, and physically reactive, as if petals and leaves could bounce, recoil, and participate in comedy. Use a warm saturated palette of golden pollen yellow, luminous rainforest green, juicy magenta and coral flowers, amber sun shafts, turquoise bounce shadows, and soft glowing humidity. Include the first warning of an incoming storm only through the environment: subtly darkened upper canopy, cool grey-violet light filtering above, trembling leaf silhouettes, and heavier humid atmosphere, while the lower rainforest still holds cheerful warmth. Materials should be rich and legible: waxy translucent petals with soft subsurface glow, powdery pollen clumps, rubbery leaves, silky vine fibers, damp moss, and sparkling dew. Bold readable animated-feature styling, real weight, squash-and-stretch-friendly forms, warm saturated light, no photoreal harshness. Environment only: no characters, no animals, no faces, no character props, no text, no logos, no heavy rain."
+    },
+    "editedBy": "Julian"
+   },
+   "history": []
+  }
+ }
+}

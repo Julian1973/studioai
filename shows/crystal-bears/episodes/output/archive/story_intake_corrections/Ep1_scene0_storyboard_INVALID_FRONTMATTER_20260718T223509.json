@@ -1,0 +1,279 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "0",
+ "engineVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+ "canonVersion": "1.0",
+ "builtAt": "2026-07-18T22:09:25",
+ "vision": {
+  "episodeId": "Ep1",
+  "title": "The Adventure Begins",
+  "sourceScriptVersion": "acb9912d7476fcba9fbf1591fa01154b",
+  "canonVersion": "1.0",
+  "premise": "A nervous but determined young bear leaves home for the first time, loses his way in a storm, chooses to save a dolphin friend, and is welcomed into the Crystal Bears.",
+  "dramaticQuestion": "When Keen is separated from home and caught in a dangerous storm, will he trust his heart enough to act bravely and discover he is not alone?",
+  "theme": "Courage is not the absence of fear; it is choosing love and action while fear is still there.",
+  "externalJourney": "Keen departs by sailboat, befriends Squeaky, is thrown off course by a storm, follows a beacon to Crystal Cove, rescues Squeaky from a net, reaches shore, and receives his Aquamarine Crystal.",
+  "internalJourney": "Keen begins by trying to prove he can handle everything alone. Through fear, loss, and rescue, he learns that bravery includes accepting help, honoring family, and joining a wider circle of care.",
+  "relationshipChanges": "Keen and his Mum move from protected closeness into loving separation. Keen and Squeaky become mutual rescuers. Aida moves from watcher to guide. Fuzzby shifts from comic observer to awestruck admirer. The Crystal Bears become Keen’s new found family.",
+  "emotionalCurve": "Playful opening warmth gives way to soulful anticipation, then bittersweet farewell, comic uncertainty, storm panic, heroic urgency, relief, wonder, belonging, and finally lighthearted family comedy.",
+  "comedyCurve": "Fuzzby’s pollen chaos establishes the episode’s goofy engine; Keen’s overprepared sailing and map confusion add gentle self-deprecating comedy; storm danger pauses the jokes; Fuzzby’s awe and honey fixation restore levity after the emotional landing.",
+  "setupPayoffMap": "Aida’s vision of Keen pays off when she calmly identifies him in the storm. Keen’s repeated self-reassurance pays off when he centers himself underwater. His father’s wristbands, given as a symbol of never being alone, pay off as the vessel for the Aquamarine Crystal. Squeaky guiding Keen pays off when Keen saves Squeaky, then Squeaky carries Keen safely home. Fuzzby’s chaotic bravado pays off as sincere admiration and immediate friendship hunger.",
+  "visualMotifs": "Tall flowers and drifting pollen for comic innocence; pink rose-quartz glow for intuition and care; wristbands as legacy and connection; grey storm sheets against crystal light; aquamarine glow as courage made visible; the washed-clean cove as rebirth and homecoming.",
+  "sonicMotifs": "Fuzzby’s buzzing hums, soft crystal-bowl resonance, sailboat creaks, dolphin clicks and chirps, thunder and rain escalation, muffled underwater sound, crystal hums, and finally gentle shore waves with shared laughter.",
+  "climax": "Keen dives into the storm water without hesitation, fights the net while his wristbands glow, tears Squeaky free, is overwhelmed by the wave, and is carried back through the storm by the dolphin he saved.",
+  "resolution": "Aida names Keen’s heart-led courage, the Aquamarine Crystal settles into his father’s wristbands, the Bears embrace him, and Keen understands he has gained a family while remaining connected to home.",
+  "intendedFinalFeeling": "Safe, uplifted, and warmly excited: the audience should feel that Keen has truly arrived, that courage is tender as well as bold, and that future adventures will be funny, caring, and communal.",
+  "showrunnerJudgement": "",
+  "approvalState": "approved",
+  "provenance": {
+   "role": "director-intake",
+   "at": "2026-07-18T21:37:51",
+   "reviewedBy": "Julian"
+  }
+ },
+ "ambitionBrief": null,
+ "canonCompletionProposal": null,
+ "directedOnEstablishedCanonOnly": true,
+ "treatments": [
+  {
+   "name": "The Cove Breathes the Title",
+   "audienceExperience": "The audience feels invited into a living place before meeting anyone: not a logo slapped on top of the episode, but Crystal Cove quietly waking as if it has been waiting for them. For children, it reads as magical discovery; for adults, it carries the tender feeling of entering a story about home, leaving, and being held by something larger.",
+   "emotionalPointOfView": "The point of view belongs to the world itself. Crystal Cove is not showing off; it is offering a hand. The emotional note is gentle anticipation: warmth with a tiny ache underneath, because this beginning already contains the idea that adventure means stepping away from safety.",
+   "comicOrDramaticMechanism": "Dramatic mechanism: ceremonial invitation through emergence. The title is not announced; it is revealed as the environment’s natural response to feeling. The emotion is curiosity becoming welcome. No gag drives this version; the pleasure is the childlike surprise that the world can answer back.",
+   "characterPerformanceStrategy": "No character performance is required. The performance is environmental: pollen drifting as if it has intention, crystal resonance answering in soft pulses, water and light behaving with calm attention. If any distant life is implied, it must feel like presence in the world, not a cameo or story action before the episode begins.",
+   "visualGrammar": "Soft depth, slow revelation, and multisensory emotion made visible. The palette begins in warm natural light and allows crystal tones to enter as an inner glow rather than a graphic effect. The title should feel grown from the cove’s materials — light, water, petals, crystal shimmer — not printed over them.",
+   "cameraCharacterRelationship": "The camera is a welcomed visitor. It does not command the world from above; it moves at an intimate, child-height relationship to natural details, letting the cove reveal scale gradually. The camera discovers the title as the audience does, with curiosity rather than certainty.",
+   "movementVersusStillness": "Movement is breathlike: drifting pollen, water shimmer, a faint crystal pulse. Stillness matters because the title lands only after the world has made space for it. Nothing should rush to prove magic; the confidence is in restraint.",
+   "depthAndEnvironment": "Depth carries invitation. Foreground natural details create tactile closeness, midground light leads the eye, and background crystal glow suggests a larger home beyond what we can yet understand. The environment should feel dimensional, soft, and safe, with enough mystery to promise adventure.",
+   "rhythmAndEscalation": "Begin with quiet sensory detail, let small environmental responses gather, then allow the title to arrive as the world’s first clear sentence. Escalation is not speed; it is accumulation of attention. The title moment should feel inevitable, like a chord resolving.",
+   "cutPhilosophy": "Minimal cutting, only when the audience’s curiosity has earned a new piece of information. Cuts are motivated by discovery: a glow answering a ripple, pollen revealing depth, light gathering into the title. No coverage pattern, no mechanical logo assembly.",
+   "openingImage": "A close, tactile view of Crystal Cove waking: dew, pollen, and soft crystal light responding to the first hint of day as if the world has taken a quiet breath.",
+   "closingImage": "The title held within the living glow of the cove, with the environment still moving gently around it — not frozen branding, but a doorway the audience is about to step through.",
+   "cinematographerChallenge": "Do not make this a safe centered title card. The danger is decorative prettiness without point. The frame must state that emotion lives outside the characters in this world: light, water, and crystal must behave as feeling, and the camera must discover the title experientially rather than present it from a neutral postcard position."
+  },
+  {
+   "name": "The Heart-Note Before the Journey",
+   "audienceExperience": "The audience begins inside a feeling before knowing whose feeling it is. The title sequence becomes a small emotional promise: this story will be about courage that trembles, connection that travels, and a home-note that follows you. Children receive it as glowing magic; adults sense the farewell and legacy thread before the plot has spoken it.",
+   "emotionalPointOfView": "The point of view belongs to the episode’s central need: not being alone. The title is carried by a tender unresolved note that has not yet found its owner. The feeling is anticipation with vulnerability underneath — the adventure begins because someone will have to leave safety, not because adventure is simply exciting.",
+   "comicOrDramaticMechanism": "Dramatic mechanism: contradiction without a face. The world offers a brave, inviting title, while the sound and light underneath carry a softer uncertainty. This honors the show’s rule that the crystal tells the truth beneath the surface. No dialogue, no explanation — the contradiction is visual and sonic.",
+   "characterPerformanceStrategy": "No character is placed into action. The performance is the unseen emotional presence: a note that almost resolves, a glow that almost steadies, a rhythm that suggests courage gathering itself. Avoid miming a plot event or previewing later rescue action; this is emotional foreshadowing, not a recap.",
+   "visualGrammar": "Intimate, symbolic, and slightly compressed. Instead of presenting the whole cove first, this treatment begins with abstracted natural surfaces — crystal facets, water skin, reflected sky — that make the world feel close enough to touch. The title emerges from the meeting of reflection and glow, suggesting inside feeling made outside.",
+   "cameraCharacterRelationship": "The camera behaves like it is listening. It attends to tiny changes in light and vibration rather than chasing action. Its relationship is not to a character body but to a heart-signal moving through the world. It waits only when waiting has meaning: to let the unresolved note be felt.",
+   "movementVersusStillness": "Stillness dominates until the feeling can no longer stay hidden. Motion appears as small tremors: a ripple, a glow strengthening, a soft drift of particles. The title arrives when those tiny movements align. The restraint should make the first true glow feel emotionally earned.",
+   "depthAndEnvironment": "Depth is shallow at first, keeping the audience inside the feeling rather than touring the location. As the title forms, depth opens just enough to imply Crystal Cove beyond the frame. The environment is less geography than emotional instrument: surfaces catch and release light like held breath becoming sound.",
+   "rhythmAndEscalation": "The rhythm is a held inhale. Begin with near-silence and an unresolved crystal tone, allow small pulses to answer each other, then let the title arrive on the first gentle resolution. The escalation is from private to shared: one note becomes a place.",
+   "cutPhilosophy": "Cuts are rare and intimate, each one motivated by a changed sensory idea: sound finding light, light finding water, water finding title. Avoid cutting to explain where we are. Let the audience feel first, understand second.",
+   "openingImage": "A crystal-lit reflection trembling on water, close enough that the world is not yet fully identifiable, with a soft note hovering just shy of resolution.",
+   "closingImage": "The title settled in the reflection as the glow finally steadies, while one last unresolved shimmer remains — a promise that courage will still cost something.",
+   "cinematographerChallenge": "Resist the easy wide establishing view. If we open too geographically, we spend the scene on information instead of feeling. The challenge is to make an abstract emotional entry readable for ages 4–8: tactile surfaces, clear cause-and-response glow, and a final title image that feels discovered, not obscure."
+  },
+  {
+   "name": "A Playful Door Swings Open",
+   "audienceExperience": "The audience is invited in with lightness and delight: the title feels like a game the world is playing with us. It sets the family-comedy tone before the episode’s deeper farewell and storm journey. Children should giggle at the environment’s playful participation; adults should feel the craft underneath — this world turns emotion into action without needing to explain itself.",
+   "emotionalPointOfView": "The point of view belongs to wonder. Not solemn ceremony, not pure grandeur: a bright, curious world nudging the audience forward. The emotional center is safe excitement — the feeling of being at the start of something big while still standing in a soft place.",
+   "comicOrDramaticMechanism": "Comic mechanism: environmental participation. The natural world helps assemble the invitation with tiny over-eager contributions — a glow arriving a touch early, pollen drifting into place, water correcting the shape. The comedy stays gentle and wordless; the world is charmingly alive, not chaotic.",
+   "characterPerformanceStrategy": "No established character behavior is used. The acting belongs to the environment as a playful partner: little hesitations, corrections, and responses must read like intention without becoming a separate character. The performance should be clean and observable: a pulse starts, overshoots, settles; a drift gathers, wobbles, finds its place.",
+   "visualGrammar": "Brighter, more kinetic, and more open than the other treatments. The frame lets depth and movement create a sense of welcome. The title forms through playful environmental cause-and-effect rather than solemn glow. The look remains plush, dimensional, and softly lit, never flat graphic animation.",
+   "cameraCharacterRelationship": "The camera is a child running toward a wonderful doorway, but not recklessly. It is curious enough to be surprised by the world’s little tricks and close enough to feel included in them. It may arrive late to a small environmental payoff, letting the audience reconstruct the joke.",
+   "movementVersusStillness": "Movement leads, stillness punctuates. Drifting, bobbing, and glowing elements create a playful rhythm, then stop just long enough for the title to read. The held moments are punchlines and invitations, not safety locks.",
+   "depthAndEnvironment": "Depth is used for play. Foreground elements briefly obscure and reveal, midground light carries the title formation, background space promises the larger cove. The geography remains simple and readable: the audience always understands that these playful pieces belong to one welcoming world.",
+   "rhythmAndEscalation": "Start with a small environmental mischief, build through two or three gentle participations, then land on a clean title image. Escalation should feel like a game completing its rule: the world tries, adjusts, and finally gets the invitation just right.",
+   "cutPhilosophy": "Cuts are motivated by comic punctuation and new visual information. We can cut to an aftermath already happening if it makes the environmental joke clearer, but never into routine coverage. Each cut should either reveal a new participant in the world’s invitation or give the title its final readable landing.",
+   "openingImage": "A lively natural detail in Crystal Cove begins to glow or move with slightly too much eagerness, as if the world is excited to start before everything is arranged.",
+   "closingImage": "The title finally sits perfectly in the living cove, with one small after-movement — a last pollen drift or ripple — keeping the image playful rather than pompous.",
+   "cinematographerChallenge": "Do not let playfulness flatten into busy motion. The risk is a cute screensaver. The camera must choose what the joke belongs to each moment: the over-eager environmental movement, the correction, then the clean invitation. Movement needs weight and consequence, even in a title scene."
+  }
+ ],
+ "treatmentSelection": {
+  "selectedTreatment": "Combined treatment: “The Heart-Note Before the Journey” governed by the playful readability of “A Playful Door Swings Open”",
+  "combinedFrom": [
+   "The Heart-Note Before the Journey",
+   "A Playful Door Swings Open"
+  ],
+  "governingAudienceExperience": "The audience begins inside a small trembling feeling, then feels Crystal Cove gently play it into welcome: children read glowing magic inviting them in, while adults feel the first hint that courage will mean leaving safety but not being alone.",
+  "rationale": "This combination best serves Ep1’s truth. “The Heart-Note Before the Journey” carries the episode’s central need before plot begins: Keen’s courage will tremble, and connection will travel with him. It uses the show’s actual invention — emotion made visible and audible in the world — instead of treating the title as branding. Its unresolved note and almost-steady glow quietly plant the father/wristband/home thread without previewing story events. However, by itself it risks becoming too hushed and abstract for ages 4–8. “A Playful Door Swings Open” supplies the needed kid-door: tiny environmental over-eagerness, a glow that arrives early, pollen or ripple correcting itself, and a final readable invitation. That play keeps the opening warm and accessible before the episode moves into farewell and storm. The selected version should not become a tour of Crystal Cove or a logo reveal. It should feel like the cove has heard a heart-note, tried to answer a little too eagerly, then found a gentle shared chord — with one shimmer left unresolved so the ache is not resolved away.",
+  "rejectionChecks": "Rejected “The Cove Breathes the Title” as the sole approach because, while tasteful and safe-feeling, it leans toward ceremonial atmosphere over dramatic pressure. Its point of view is the world, but the emotional question is softer than the episode needs; it risks decorative prettiness and a centered title-card instinct unless driven by the heart-note. Rejected “A Playful Door Swings Open” as the sole approach because environmental comedy alone would set welcome and delight but not enough of Ep1’s cost: home, leaving, legacy, and fear carried inside courage. It risks becoming a cute moving screensaver if not anchored by the unresolved note. Approved combination only under these exclusions: no fixed character lanes, no requirement to keep characters visible, no action/reaction coverage pattern, no safe postcard camera, no repeated close-up punctuation, no mechanical shot count, no generic “cinematic” gloss, and no merely illustrating the script. The title must be authored from one audience experience: a trembling heart-signal becoming a playful welcome."
+ },
+ "scene": {
+  "sceneId": "S0",
+  "sourceScriptRange": "S00-B01-TITLE-INVITATION",
+  "location": "Crystal Cove — abstracted title reflection: crystal facets, water skin, reflected sky, and glow before geography is fully readable",
+  "time": "Before story action begins",
+  "participatingCharacters": [],
+  "purpose": "Give the audience a clean ceremonial entry into the Crystal Bears world by beginning inside a small trembling heart-note, then letting Crystal Cove play that feeling into a readable welcome.",
+  "dramaticQuestion": "Can a feeling that starts uncertain become an invitation without losing the little ache underneath it?",
+  "emotionalOwner": "The unseen heart-signal of not being alone — courage gathering before it has a face.",
+  "connectionFromPreviousScene": "This is the opening scene; the audience enters through sensation before plot or character action.",
+  "handoverToNextScene": "The title settles as welcoming magic, but one unresolved shimmer remains so the first story action inherits both warmth and the cost of leaving safety.",
+  "sourceApprovalState": "source-script-locked"
+ },
+ "beats": [
+  {
+   "beatId": "S00-B01-TITLE-INVITATION",
+   "sceneId": "S0",
+   "sourceScript": "The episode presents itself as the beginning of the Crystal Bears world, giving the audience a clean ceremonial entry point before story action begins.",
+   "exactDialogue": [],
+   "participatingCharacters": [],
+   "whatChanges": "A private, unresolved heart-note becomes a shared invitation into Crystal Cove. The scene moves from trembling uncertainty to gentle welcome, while keeping one small shimmer unresolved so the promise is warm but not empty.",
+   "whoDrives": "The unseen heart-signal drives the beat; Crystal Cove answers it through light, water, and tiny environmental over-eagerness.",
+   "audienceAnticipation": "Children anticipate glowing magic discovering a title; adults anticipate that this adventure will ask someone to leave safety while carrying home with them.",
+   "actionOrChoice": "A crystal-lit reflection trembles on close water as a soft note hovers just shy of resolution. Small pulses of glow answer from nearby facets and the water replies in ripples that arrive a touch too eagerly, briefly disturbing the forming reflection before settling themselves. The title is not stamped on; it is discovered where reflection and glow finally align.",
+   "consequence": "The title settles in the water-reflection as the glow steadies into a gentle shared chord. Crystal Cove feels welcoming and alive without becoming a scenic tour or a logo trick.",
+   "emotionalOrComicHandover": "A playful little correction in the ripple keeps the entry readable and friendly, then the last unresolved shimmer hands the next scene a quiet promise: courage will glow, but it will still tremble.",
+   "approvalState": "director-draft"
+  }
+ ],
+ "shots": [
+  {
+   "shotId": "S0.SH1",
+   "beatIds": [
+    "S00-B01-TITLE-INVITATION"
+   ],
+   "purpose": "Begin inside the heart-note before the audience can name the place; make uncertainty tactile, not explained.",
+   "audienceExperience": "Children see magic trembling awake; adults feel the first small catch of leaving safety before anyone has appeared.",
+   "openingImage": "A crystal-lit reflection trembles on dark water so close that the reflected world is only broken glow and liquid surface.",
+   "principalPerformance": "The unseen note holds just shy of resolution; the glow answers with a tiny quiver that cannot quite steady itself.",
+   "cameraRelationship": "The camera listens from within the surface, nearly still and shallow, letting the tremble be the subject rather than searching for geography.",
+   "physicalOrEmotionalChange": "Private uncertainty becomes active: the tremble gathers enough strength to send one soft pulse outward.",
+   "closingImage": "The broken glow stretches into a faint traveling line across the water, as if the note has found somewhere to go.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cutting to the answering facet gives the note a new sensory idea — sound finding light. Remaining continuous on the water would make the pulse feel like a water effect instead of Crystal Cove answering.",
+   "physicalPerformance": "The water skin barely holds the reflected glow together: tiny uneven tremors pull the broken shapes apart, then surface tension gathers them back into one thin, soft-moving pulse. The pulse does not burst; it presses outward with a fragile confidence, leaving the original reflection quieter behind it.",
+   "animationTiming": "Begin with a held, irregular tremble that feels like an inhale trying not to shake. Let the outward pulse arrive only after the glow has almost steadied, then travel gently with a fading tail rather than a flash.",
+   "approvalState": "director-draft"
+  },
+  {
+   "shotId": "S0.SH2",
+   "beatIds": [
+    "S00-B01-TITLE-INVITATION"
+   ],
+   "purpose": "Let Crystal Cove answer the private signal without turning the title into a scenic tour.",
+   "audienceExperience": "The world feels alive and friendly, as if small pieces of it are trying to hum along before they know the tune.",
+   "openingImage": "A close crystal facet catches the same wavering glow, with only a few suspended particles visible around its edge.",
+   "principalPerformance": "The facet answers a beat too eagerly: its glow swells, hesitates, then sends a softer echo into neighboring fragments.",
+   "cameraRelationship": "The camera stays compressed and attentive, making the facet feel like an instrument receiving the note rather than an object being displayed.",
+   "physicalOrEmotionalChange": "One note becomes call-and-response; the feeling is no longer alone, but it is not yet settled.",
+   "closingImage": "The facet’s echo spills downward as a pale ribbon of reflected light, aimed back toward the water.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "The cut follows the changed sensory handoff — light finding water. Staying continuous would over-map the space and weaken the treatment’s intimacy by turning the moment into geography.",
+   "physicalPerformance": "The facet receives the traveling line as a small internal catch: light runs through it too quickly, swells at the edge, then pulls itself back before releasing a gentler echo. The nearby suspended particles respond with a slight drift outward, as if nudged by the facet’s eager breath.",
+   "animationTiming": "Let the first glow answer a touch early, with a quick little swell that almost overfills the facet. Hold the hesitation just long enough to read as self-correction, then release the echo more softly and evenly into the neighboring fragments.",
+   "approvalState": "director-draft"
+  },
+  {
+   "shotId": "S0.SH3",
+   "beatIds": [
+    "S00-B01-TITLE-INVITATION"
+   ],
+   "purpose": "Discover the title where reflection and glow finally align, while keeping one small tremble of cost.",
+   "audienceExperience": "Children feel the magic assemble itself into welcome; adults feel the warmth land with a thread still unresolved.",
+   "openingImage": "The water surface holds a faint, almost-readable title reflection as the returning ribbon of crystal light approaches it.",
+   "principalPerformance": "The water receives the glow too enthusiastically, wrinkles the forming title for a breath, then settles itself as if trying again more carefully.",
+   "cameraRelationship": "The camera waits in place for the title to be found; its stillness lets the ripple’s over-eager correction carry the friendliness.",
+   "physicalOrEmotionalChange": "Private tremble becomes shared invitation: the title resolves into a gentle chord, but one edge-shimmer refuses to fully rest.",
+   "closingImage": "The title sits clear in the reflection, the glow steady around it, with one last unresolved shimmer trembling at the edge.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "The title has completed the ceremonial promise and must hand cleanly to story action. Remaining continuous after the shimmer would overhold the feeling and turn bittersweetness into sentiment.",
+   "physicalPerformance": "The returning ribbon touches the water and the surface overreacts, wrinkling the almost-readable title into friendly distortion. The water then dampens its own ripple, line by line, until the letters can hold; one outer edge keeps a tiny tremble, the feeling not fully put away.",
+   "animationTiming": "Let the contact ripple disturb the letters briefly before the audience can read them cleanly. The settling should arrive with the first gentle musical resolution, then keep the final edge-shimmer alive for a small half-beat after the title has become clear.",
+   "approvalState": "director-draft"
+  }
+ ],
+ "productionDetail": [
+  {
+   "shotId": "S0.SH1",
+   "continuityIn": "",
+   "continuityOut": "A fragile traveling line of glow has left the original reflection quieter behind it, moving outward across the water surface.",
+   "dialogueTiming": "No dialogue; the shot breathes on the held unresolved note, the irregular tremble, and the delayed soft pulse outward.",
+   "referenceRoles": "Crystal Cove water/glow look references anchor the liquid surface, reflected crystal light, and shallow darkness; no character identity reference is involved.",
+   "requiresNewKeyframe": true,
+   "intendedDurationRange": "4-6s",
+   "essentialProviderProtections": [
+    "Keep the frame extremely close on dark water and broken reflected glow; do not reveal geography or characters.",
+    "The pulse must press outward gently with a fading tail, never burst, flash, or behave like a shockwave.",
+    "Preserve the almost-still listening camera so the tremble itself remains the subject."
+   ],
+   "characterContinuity": []
+  },
+  {
+   "shotId": "S0.SH2",
+   "continuityIn": "The soft traveling glow from the water carries into this shot as the wavering signal the crystal facet catches.",
+   "continuityOut": "The facet has released a softer echo downward as a pale ribbon of reflected light aimed back toward the water.",
+   "dialogueTiming": "No dialogue; timing is carried by the eager early swell, the brief self-correcting hesitation, and the softer echo release.",
+   "referenceRoles": "Crystal facet/material references anchor the close crystal identity, internal glow, and suspended particles; the environment remains compressed rather than scenic.",
+   "requiresNewKeyframe": true,
+   "intendedDurationRange": "3-5s",
+   "essentialProviderProtections": [
+    "Keep the shot close and compressed on the facet; avoid turning it into a wide Crystal Cove tour.",
+    "The first glow response must feel a touch too eager, then visibly pull back before the gentler release.",
+    "Suspended particles should drift only slightly from the facet’s nudge, not become a separate magical effect."
+   ],
+   "characterContinuity": []
+  },
+  {
+   "shotId": "S0.SH3",
+   "continuityIn": "The pale ribbon of light released by the facet carries down into the water and approaches the faint title reflection.",
+   "continuityOut": "The title is clear in reflection with steady surrounding glow, while one outer edge still holds a tiny unresolved shimmer for the story handoff.",
+   "dialogueTiming": "No dialogue; the title read is timed to the contact ripple, the musical settling, and the final half-beat of edge-shimmer.",
+   "referenceRoles": "Title treatment, Crystal Cove water-reflection, and crystal-glow look references anchor the readable reflected lettering, liquid distortion, and gentle chord-light behavior.",
+   "requiresNewKeyframe": true,
+   "intendedDurationRange": "5-7s",
+   "essentialProviderProtections": [
+    "The title must resolve as a reflection in water, not as flat graphic text pasted over the image.",
+    "Let the returning ribbon briefly wrinkle the almost-readable title before it settles cleanly enough to read.",
+    "Preserve one small unresolved edge-shimmer after the title clears; do not smooth the feeling completely away."
+   ],
+   "characterContinuity": []
+  }
+ ],
+ "voicePerformances": [],
+ "showrunnerJudgement": "Pass. The scene keeps faith with the selected treatment’s central experience: we begin inside an unnamed trembling feeling, not a location or a logo, and the world answers that feeling through light, water, and sound until the title feels discovered. The restraint is doing real story work here. No character is prematurely put into action, no later rescue business is previewed, and the final unresolved shimmer preserves the promise that courage will cost something rather than turning the title into clean sparkle.",
+ "treatmentComparison": "Against “The Heart-Note Before the Journey,” the storyboard preserves the governing contract: intimate symbolic surfaces, shallow depth, rare motivated cuts, and a listening camera. The shot sequence follows a clean sensory escalation — sound finding water, water finding crystal, crystal returning to water/title — so the movement from private note to shared invitation is legible for children while carrying the adult farewell thread underneath. The small over-eager ripple gives the entry friendliness without breaking the dramatic mechanism. The only area of caution is that the facet and water both perform a version of ‘eager answer then self-correction’; in execution this must feel like one developing emotional response, not a repeated cute trick. But as a complete scene, the title treatment has not been lost.",
+ "internalRevisions": [],
+ "escalation": null,
+ "provenance": {
+  "showrunner": {
+   "role": "showrunner",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-18T22:09:25",
+   "humanRevision": null
+  },
+  "director": {
+   "role": "director",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-18T22:09:25",
+   "humanRevision": null
+  },
+  "cinematographer": {
+   "role": "cinematographer",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-18T22:09:25",
+   "humanRevision": null
+  },
+  "voice": {
+   "role": "voice-director",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-18T22:09:25",
+   "humanRevision": null
+  }
+ },
+ "approvalState": "approved",
+ "humanNote": "",
+ "approvalLog": [
+  {
+   "target": "scene",
+   "state": "approved",
+   "note": "",
+   "at": "2026-07-18T22:34:37",
+   "by": "Julian"
+  }
+ ]
+}

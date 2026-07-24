@@ -1,0 +1,204 @@
+{
+ "episode": "Ep1",
+ "sceneNumber": "1",
+ "sceneName": "DEEP WITHIN THE RAINFOREST",
+ "doctrine": "creative-room-2.0 -> cb_handover.promote_to_canonical -> the existing cb_render canonical package format (2026-07-17 source-level handover)",
+ "directorStatement": {
+  "audienceFeeling": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "whoseScene": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "emotionalChange": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "theLaugh": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "visualSurprise": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "carryForward": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene"
+ },
+ "beatCodes": [
+  "S01-B01-POLLEN-CHAOS"
+ ],
+ "shots": [
+  {
+   "shotId": "S1.SH1",
+   "beatCode": "S01-B01-POLLEN-CHAOS",
+   "durationSec": 7.0,
+   "purpose": "Launch the scene as Fuzzby’s self-appointed parade already in motion: funny because his importance is faster than his steering.",
+   "performanceAssignment": "Fuzzby’s chest and chin lead like he is announcing a parade before his eyes have chosen a route. His wings commit too hard, so every dodge becomes an overcorrection: a shoulder clips one stem, the stem whips back into nearby petals, pollen clings to him, and his attempt to shake it off only throws him into the next near-miss. He refuses to acknowledge any of it until the final pop-back, where he arrests himself in a strained official hover, the body still dusted in evidence. Lip-sync the approved @Audio1 performance exactly; no additional speech.",
+   "camera": "The camera follows and struggles to keep up with Fuzzby, briefly losing him behind stems and pollen bursts; Zenny remains readable in depth as the calm measure he keeps orbiting past.",
+   "openingPose": "Bee-height between towering flower stems, Fuzzby already slanting hard across the frame with pollen streaming from his path; Zenny is deeper among the flowers, level and undisturbed over her own work.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "Cutting to Zenny’s steadier frame is stronger than staying in the chase because remaining continuous would trap us inside Fuzzby’s self-image; the comedy needs his chaos measured against competence, not merely extended.",
+   "dialogueBinding": "Fuzzby's vocal beat performs per the approved voice design.",
+   "dialogueLines": [
+    {
+     "speaker": "Fuzzby",
+     "exactText": "this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead",
+     "delivery": "[excited] this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead",
+     "startSec": 0.0,
+     "endSec": 7.0
+    },
+    {
+     "speaker": "Fuzzby",
+     "exactText": "Nailed it.",
+     "delivery": "[breathes] Nailed it.",
+     "startSec": 0.0,
+     "endSec": 7.0
+    }
+   ],
+   "visualPayoff": "Fuzzby reappears, dusted by the task he meant to command, while pollen hangs behind him like failed parade confetti. Lip-sync the approved @Audio1 performance exactly; no additional speech.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Lip-sync the approved @Audio1 performance exactly; no additional speech or native replacement voice.",
+    "First frame must already have Fuzzby in committed slanting travel, with Zenny calm and readable deeper in the flowers.",
+    "Preserve the cause-and-effect physical chain: overcommitted dodge clips the stem, the flower environment reacts, pollen clings, and the final dust/wobble betrays “Nailed it.”"
+   ],
+   "charactersInFrame": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "continuityIn": null,
+   "continuityOut": {
+    "lighting": "Fuzzby ends visibly dusted by pollen in a strained hover, with loose pollen still drifting in the flower corridor; Zenny remains steady deeper among the flowers, unchanged by his chaos.",
+    "cameraSide": "Fuzzby ends visibly dusted by pollen in a strained hover, with loose pollen still drifting in the flower corridor; Zenny remains steady deeper among the flowers, unchanged by his chaos.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "facing": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "pose": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "expression": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "facing": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "pose": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "expression": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityProseIn": "",
+   "continuityProseOut": "Fuzzby ends visibly dusted by pollen in a strained hover, with loose pollen still drifting in the flower corridor; Zenny remains steady deeper among the flowers, unchanged by his chaos.",
+   "dialogueTimingProse": "Fuzzby’s chant begins after the first committed wingbeat, not on frame one, and stays glued to the dodge-hit-recover rhythm so the ending smears into the mishap. “Nailed it.” lands only after the pop-back and miniature held pose, followed by a short beat where pollen drift or body wobble answers him.",
+   "referenceRolesProse": "Fuzzby and Zenny character references anchor identity and scale; the shared flower-stem/pollen rainforest scene look anchors material, lighting, depth, and environment; approved @Audio1 anchors exact lip-sync and vocal timing.",
+   "principalPerformanceApproved": "Fuzzby drives the chant as exertion and self-hype — “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” — then covers an obvious mishap with “Nailed it.” as if saying it can restore authority. Zenny stays absorbed in her precise gathering, not yet granting him the stage.",
+   "animationTimingApproved": "Keep the chant on quick, effortful wingbeats: short accelerations, tiny panic-corrections, and no graceful glide. Contacts read in crisp cause-and-effect bursts — hit, spring-back, pollen bloom — with Fuzzby always recovering a fraction late. On “Nailed it.” give him a miniature held pose, just long enough for pride to appear, then let one last pollen drift or body wobble betray the cover-up.",
+   "transitionType": "PLANNED_CUT",
+   "voiceDirectorBrief": [
+    {
+     "speaker": "Fuzzby",
+     "exactDialogue": "this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead",
+     "elevenLabsV3Direction": "[excited] this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead",
+     "expectedTiming": "Begin after the first committed wingbeat, not on frame one. Keep the chant glued to the dodge-hit-recover rhythm and let the end smear into the mishap.",
+     "physicalActionRelationship": "Voice supports the body’s lie: grand public confidence riding on obviously messy exertion."
+    },
+    {
+     "speaker": "Fuzzby",
+     "exactDialogue": "Nailed it.",
+     "elevenLabsV3Direction": "[breathes] Nailed it.",
+     "expectedTiming": "Land after the pop-back and held pose. Leave a beat after the final word for pollen or wobble to answer him.",
+     "physicalActionRelationship": "Voice deliberately contradicts the body: the line says finished; the body says absolutely not."
+    }
+   ],
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Zenny, @图3 only for Fuzzby and @图4 only for the rainforest set.\n\nBegin exactly on @图1, the approved opening frame — the camera follows and struggles to keep up with Fuzzby, briefly losing him behind stems and pollen bursts; Zenny remains readable in depth as the calm measure he keeps orbiting past. Fuzzby’s chest and chin lead like he is announcing a parade before his eyes have chosen a route. His wings commit too hard, so every dodge becomes an overcorrection: a shoulder clips one stem, the stem whips back into nearby petals, pollen clings to him, and his attempt to shake it off only throws him into the next near-miss. He refuses to acknowledge any of it until the final pop-back, where he arrests himself in a strained official hover, the body still dusted in evidence. Lip-sync the approved @Audio1 performance exactly; no additional speech. Fuzzby reappears, dusted by the task he meant to command, while pollen hangs behind him like failed parade confetti. Lip-sync the approved @Audio1 performance exactly; no additional speech.\n\nUse @Audio1 as the only voice. Lip-sync Fuzzby; Zenny's mouth remains closed. Preserve character identity and relative scale.",
+   "promptWords": 202,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Zenny",
+    "@图3": "Fuzzby",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT S1.SH1 — voice-only performance for @Audio1.\nFuzzby: \"this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead\" — [excited] this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead. Target 0.0-7.0s.\nFuzzby: \"Nailed it.\" — [breathes] Nailed it.. Target 0.0-7.0s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Bee-height between towering flower stems, Fuzzby (@图2, larger bee) already slanting hard across the frame with pollen streaming from his path; Zenny (@图1, smaller bee) is deeper among the flowers, level and undisturbed over her own work.\n\n@图3 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 93,
+   "keyframeReferenceSlots": {
+    "@图1": "Zenny",
+    "@图2": "Fuzzby",
+    "@图3": "scene plate"
+   },
+   "internalConstraints": "Hard constraints: no Lip-sync the approved @Audio1 performance exactly; no additional speech or native replacement voice; no First frame must already have Fuzzby in committed slanting travel, with Zenny calm and readable deeper in the flowers; Preserve the cause-and-effect physical chain: overcommitted dodge clips the stem, the flower environment reacts, pollen clings, and the final dust/wobble betrays “Nailed it.”; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no crystals on the bees; wings continue moving while airborne."
+  }
+ ],
+ "totalSec": 7.0,
+ "continuityLedger": [
+  {
+   "shotId": "S1.SH1",
+   "beatCode": "S01-B01-POLLEN-CHAOS",
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "Cutting to Zenny’s steadier frame is stronger than staying in the chase because remaining continuous would trap us inside Fuzzby’s self-image; the comedy needs his chaos measured against competence, not merely extended.",
+   "continuityOut": {
+    "lighting": "Fuzzby ends visibly dusted by pollen in a strained hover, with loose pollen still drifting in the flower corridor; Zenny remains steady deeper among the flowers, unchanged by his chaos.",
+    "cameraSide": "Fuzzby ends visibly dusted by pollen in a strained hover, with loose pollen still drifting in the flower corridor; Zenny remains steady deeper among the flowers, unchanged by his chaos.",
+    "characters": [
+     {
+      "character": "Fuzzby",
+      "screenZone": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "facing": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "pose": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "expression": "Reappeared dusted with pollen in a strained official hover, holding pride while a wobble or drifting pollen betrays him.",
+      "visibleMarks": [],
+      "heldProps": []
+     },
+     {
+      "character": "Zenny",
+      "screenZone": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "facing": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "pose": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "expression": "Still deeper among the flowers, steady over her work and not yet granting Fuzzby the stage.",
+      "visibleMarks": [],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "errors": 0,
+  "warnings": 1,
+  "issues": [
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[0](S1.SH1).performanceAssignment",
+    "message": "8 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   }
+  ],
+  "beatsScopeNote": "the verbatim-dialogue cross-check and the BIG-comedy physicalStaging requirement did not run against a real beats list (schema gap, PIPELINE_CUTOVER_LEDGER.md §7) — verbatim dialogue for this promotion is separately guaranteed by _scoped_shot's own partition-completeness assertion.",
+  "validatedAt": "2026-07-20T20:05:15",
+  "revision": 6
+ },
+ "reviewCriteria": {
+  "canon": "characters and world accurate vs references",
+  "physics": "clip QA — identity, anatomy, frozen/morph",
+  "continuity": "join check — position/state/light vs the prior shot",
+  "direction": "does the joke land — Julian's own reserved verdict, never a machine check"
+ },
+ "sourceBeatPackage": null,
+ "sourceStoryboard": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour/cb-output/creative/Ep1_scene1_storyboard.json",
+  "md5": "0215b44177c8800e0ec87caf550be8ae",
+  "approvalState": "approved",
+  "humanNote": "CORRECTED 2026-07-19 (mechanical data fix, not a re-approval — cb_creative.py's own requiresNewKeyframe override was forcing True on every PLANNED_CUT shot regardless of its own authored continuityIn/Out, discarding real inherited state; fixed at the code level the same day, Julian's ruling: \"we can be flexible if it secures the beat again... this is a straight jacket, thats a guide not a rule\"). requiresNewKeyframe corrected from True to False for S1.SH2-S1.SH5 to match what the fixed authoring logic would now produce — each of those shots' own continuityIn/continuityOut/characterContinuity text was already describing genuine carried-forward state; only S1.SH1 (the scene's true opener, structurally forced) stays True. No creative content changed.",
+  "creativeCardHashes": {
+   "S1.SH1": "5ea9e6a3b59250d26af899ea683fe1a5777fe47cb68c2cd0d47e91713952ddbc"
+  }
+ },
+ "revision": 6,
+ "revisionNote": "Promoted S1.SH1 from human-approved storyboard Ep1_scene1_storyboard.json into the canonical package cb_render.py already reads. Revision 5's shots/ledger and every prior spend-token binding hash derived from them are stale (the package's own shots-hash changed).",
+ "repairLog": [],
+ "handover": {
+  "carriedForwardUnchangedShots": [],
+  "resetChangedShots": [
+   "S1.SH1"
+  ],
+  "rule": "full compiled shot + own creative card hash must be unchanged"
+ }
+}

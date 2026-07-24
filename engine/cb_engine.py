@@ -55,14 +55,28 @@ def canonical_package_path(scene, episode="Ep1"):
     return HERE.parent / "cb-output" / f"{episode}_scene{scene}_production_package.json"
 
 
-MAX_SHOT_PROMPT_WORDS = 210   # hard assertion on every compiled shot contract. Raised 170->210 on
-                              # 2026-07-16: Julian's dictated @图1 anchor contracts (OPENER_ANCHOR /
-                              # RELAY_ANCHOR below) are fixed continuity scaffolding of ~34/~62 words
-                              # per shot, on top of the platform-length ACTION content — which stays
-                              # capped by the mind's own 25-50-word assignment discipline. The cap
-                              # still guards against action-content bloat; it is not licence for it.
-MAX_KEYFRAME_PROMPT_WORDS = 160
-MIN_SHOT_SEC, MAX_SHOT_SEC = 4, 8
+# CORRECTED 2026-07-22 (low-priority cleanup pass): both constants below used to be described here
+# as a live "hard assertion... guards against bloat" — stale the moment Julian's 2026-07-21 ruling
+# ("take all the straightjackets off") removed the actual enforcement from both compile functions
+# (see compile_shot_contract's and compile_keyframe_prompt's own dated comments, further down this
+# file, for the real history). Neither is asserted against anywhere anymore; both stay purely as a
+# measurement/sanity threshold the test suite compares a clean fixture's word count against, and as
+# a stated point of reference for "what used to be the ceiling" in the surrounding doctrine comments.
+MAX_SHOT_PROMPT_WORDS = 210   # was: hard assertion on every compiled shot contract, raised 170->210
+                              # on 2026-07-16 for the dictated @图1 anchor contracts' fixed
+                              # continuity-scaffolding overhead (~34/~62 words per shot). Removed as
+                              # a real cap 2026-07-21; kept as the test suite's own lean-fixture bound.
+MAX_KEYFRAME_PROMPT_WORDS = 160   # was: hard assertion on every compiled keyframe brief. Removed as
+                                  # a real cap the same 2026-07-21 pass; kept for the identical reason.
+# 2026-07-21 (Julian's cut-pace mandate — every shot's own pace is a real director decision,
+# "short, sharp and snappy" or "a longer one," made every single time): the old 4-8s ceiling
+# was sized for a single continuous take only. Seedance 2.0's own real multi-shot grammar
+# (verified: [ref:multishot-grammar]) wants a budget of roughly four to five seconds PER
+# internal cut — two-to-three cuts genuinely need up to fifteen seconds total — so the
+# ceiling is raised to match, not because every shot needs the max, but so a shot the
+# Director genuinely calls rapid_cuts on isn't structurally starved of the seconds its own
+# cuts need to land clean.
+MIN_SHOT_SEC, MAX_SHOT_SEC = 4, 15
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -87,6 +101,20 @@ class DialogueLine(BaseModel):
     delivery: str = Field(min_length=1)           # acting direction: tone + physical behaviour, never words
     startSec: float                               # approximate window inside the shot
     endSec: float
+    # 2026-07-22 (Julian's directive, real-footage diagnosis — S1.SH1's "Nailed it." never
+    # landed because the shot's picture-side climax (bounce-chain/backflip/landing/
+    # confusion) takes several real seconds regardless of how long ElevenLabs happens to
+    # render the PRECEDING line): an OPTIONAL, director-authored floor (seconds INTO the
+    # shot) for when this line's own onset may begin, anchored to the FIXED picture
+    # duration — never "N seconds after wherever the previous line ends," which floats
+    # with ElevenLabs' own take-to-take variance in how long a chant/ad-lib actually runs
+    # (confirmed live: the same two-line take rendered its opening chant at 2.4s in one
+    # generation and 3.9s in another). None/0.0 for every line today except one (fully
+    # backward compatible — omitting it reproduces the exact prior behaviour).
+    # cb_render.voice_shot stretches the take's own largest pre-existing pause so this
+    # line's onset lands at or after minOnsetSec; it never touches a single word of the
+    # actual vocal performance.
+    minOnsetSec: Optional[float] = None
 
 
 class CharacterState(BaseModel):
@@ -130,6 +158,21 @@ class Shot(BaseModel):
     sourceType: Literal["opener", "relay"]        # opener = generated keyframe; relay = harvested frame
     sourceShotId: Optional[str] = None            # relay: the EARLIER shot whose final frame anchors this one
     cutInMotivation: Optional[str] = None         # §7 — matched action / reaction / eyeline / sound bridge
+    # 2026-07-21 CORRECTION (Julian's own audit — "you have to do what you think is right...
+    # it has to fire every single time, it's not optional"): transitionType used to be
+    # authored at Gate 4, then silently DISCARDED here — distil_shot kept only transitionReason's
+    # prose (cutInMotivation above), never the categorical CONTINUOUS/PLANNED_CUT value itself,
+    # so compile_shot_contract had nothing to branch on and every shot compiled identically
+    # regardless of the Director's own real decision. Restored as a real, typed field the
+    # compiler actually reads (see compile_shot_contract). None only for a scene's own true
+    # first shot, which has no predecessor to be continuous with or cut from.
+    transitionType: Optional[Literal["CONTINUOUS", "PLANNED_CUT"]] = None
+    # cutPace: REQUIRED, no default — the Director's own pace decision (single_continuous_
+    # take / paced_cuts / rapid_cuts), mandatory on every shot per Julian's own ruling.
+    # internalCuts: the ordered, self-contained cuts authored at Gate 5 when cutPace calls
+    # for them (empty for single_continuous_take — performanceAssignment carries that case).
+    cutPace: Literal["single_continuous_take", "paced_cuts", "rapid_cuts"]
+    internalCuts: List[str] = Field(default_factory=list)
     dialogueBinding: Optional[str] = None         # the prompt-facing sentence: WHO speaks + the emotional
     #                                               read — NEVER the words (the audio carries them)
     dialogueLines: List[DialogueLine]             # the typed voice data (empty when nobody speaks)
@@ -145,6 +188,33 @@ class Shot(BaseModel):
     # Optional on the field that already existed.
     continuityIn: Optional[ContinuityState] = None  # the world as this shot opens (None: scene opener)
     continuityOut: ContinuityState                # the world as this shot ends — the next relay's truth
+    # THE HEART-PACE-AND-FEELING FIX (Julian's ruling, 2026-07-23, watching S1.SH2 v3 —
+    # "this is better but lacks the heart pace and feeling"): two authored creative fields
+    # that existed in the storyboard all along but never reached the shipped prompt.
+    # tempoDesign: the Director's own Gate-5 animationTiming — the fast/slow/pause contrast
+    # map ("quick and clumsy, then slow right down for the reveal") — previously DROPPED
+    # entirely at handover because the raw field quotes locked dialogue (a Law 6 risk);
+    # now shipped with the quoted words mechanically stripped, never the whole design.
+    # feltIntent: the shot's own audienceExperience — what the moment should FEEL like —
+    # the seedance doctrine's own first rule ("name one intention and make camera, light
+    # and performance serve it") applied at last. Both optional: a shot authored before
+    # this fix simply compiles without them, never a crash.
+    tempoDesign: Optional[str] = None             # Law-6-safe pace design (dialogue stripped at handover)
+    feltIntent: Optional[str] = None              # the one intention the whole shot serves
+    # THE SHOT-MODE VOCABULARY (Julian's Option B + Anti-Guardrail Principle, 2026-07-23):
+    # a SELECTABLE CREATIVE VOCABULARY the Director chooses at storyboard time — never
+    # compulsory boilerplate, never an LLM classification at delivery time. 1-2 entries,
+    # order = primary then secondary. Compilation SELECTS and REMOVES language by mode
+    # (a dialogue shot drops physics-chain and motion-blur vocabulary; a kinetic shot
+    # drops speaker vocabulary) — it never adds mode boilerplate on top.
+    # THE SHOT-DENSITY RULE (Julian, verbatim intent): when one generation contains more
+    # than two substantially different performance modes, the Director must explicitly
+    # approve either a hybrid take or split-generation staging — recorded here as
+    # modeDensityDecision, surfaced at handover (a decision point, not a new lint layer).
+    performanceModes: List[Literal["KINETIC_ACTION", "PHYSICAL_COMEDY",
+        "DIALOGUE_PERFORMANCE", "COMEDY_REACTION", "EMOTIONAL_ACTING",
+        "WORLD_ESTABLISHING"]] = Field(default_factory=list)
+    modeDensityDecision: Optional[Literal["hybrid_approved", "split_staged"]] = None
 
 
 class SceneShotList(BaseModel):
@@ -193,6 +263,16 @@ def _design_mind():
         "Translate every intention into visible behaviour: lean, not micro-choreographed.\n"
         "WORD DISCIPLINE (hard limits): performanceAssignment 25-50 words; camera <= 15; "
         "openingPose <= 30; visualPayoff <= 15; purpose <= 12. Precision over volume.\n"
+        "10. NEVER restate the audio/lip-sync assignment inside performanceAssignment or "
+        "visualPayoff (e.g. 'Lip-sync the approved audio; no additional speech') — that "
+        "instruction is generated mechanically from dialogueLines and shipped separately, "
+        "every time. Repeating it here only burns your own word budget on something already "
+        "said; spend it on the physical action instead.\n"
+        "11. For a BIG-comedy beat, physicalStaging.contactAndWeight is the shot's REAL "
+        "cause-and-effect chain — what hits what, where it bends, where it rebounds, what "
+        "flies loose — and reaches the provider on its own, alongside performanceAssignment, "
+        "not folded into it. Keep it a concrete, staged sequence of physical events, never a "
+        "summary of the same beat performanceAssignment already covers.\n"
         "Output STRICT JSON matching the schema you are given."
     )
 
@@ -252,9 +332,13 @@ def _design_user_prompt(scene_num, scene, beats):
         "TASK 1 — the DIRECTOR'S STATEMENT for this scene (the six questions).\n"
         "TASK 2 — the SHOT LIST: convert each beat into 1-3 shots of 4-8 seconds. shotId = "
         "'{beatCode}.S{n}' (e.g. '1.B1.S1'). The FIRST shot of the scene is sourceType='opener' with "
-        "sourceShotId=null; every later shot is 'relay' (sourceShotId = the earlier shot whose final "
-        "frame it continues from, usually the previous one) when the action flows on directly, or "
-        "'opener' (sourceShotId=null) when it is a designed editorial cut to genuinely new coverage. "
+        "sourceShotId=null. EVERY LATER SHOT DEFAULTS TO 'relay' (sourceShotId = the earlier shot "
+        "whose final frame it continues from, usually the previous one) — this applies whether the "
+        "camera holds on the same coverage OR cuts to something new; a relay shot's own camera and "
+        "action are completely free to describe a new setup, relay only means this shot's opening "
+        "frame anchors identity/position/lighting off the previous shot's real final frame instead "
+        "of inventing a disconnected one. Use 'opener' (sourceShotId=null) ONLY for a genuine scene "
+        "or location reset — never merely because the shot is a cut. "
         "Every shot: ONE performance assignment, an anticipation openingPose, an exact visualPayoff, "
         "typed continuityIn/continuityOut (zone, facing, pose, expression, marks, props for every "
         "character in frame), dialogueLines copied VERBATIM with timing, at most 3 prohibited items, "
@@ -482,15 +566,26 @@ def _expected_lines(beats):
 
 # The design mind's own per-field word discipline, enforced deterministically.
 # 2026-07-17 correction (Julian's consolidation-checkpoint directive, item 4): visualPayoff's
-# own 15-word cap is REMOVED — an arbitrary per-field budget that rejected S1.SH1's real,
+# own 15-word cap was REMOVED — an arbitrary per-field budget that rejected S1.SH1's real,
 # already-approved 18-word closingImage for no reason tied to the actual constraint that
-# matters (whether the COMPILED provider brief fits its own hard cap). The compiled-brief
-# budgets (MAX_SHOT_PROMPT_WORDS, MAX_KEYFRAME_PROMPT_WORDS) and the COMPILABILITY check
-# below still enforce the real limit, on the real shipped text, unconditionally — this only
-# removes a SECOND, redundant, tighter cap on one field in isolation. performanceAssignment
-# keeps its own budget (not named in this correction) and visualPayoff still runs the
-# ABSTRACT_DIRECTION safety/renderability scan just below, unweakened.
-FIELD_WORD_BUDGETS = {"performanceAssignment": 50}
+# matters (whether the COMPILED provider brief fits its own hard cap). performanceAssignment
+# kept its own 50-word budget at that time (deliberately not named in that correction).
+#
+# 2026-07-17 SECOND CORRECTION, SAME DAY (Julian's explicit decision, PIPELINE_CUTOVER_
+# LEDGER.md §10): performanceAssignment's own 50-word cap is now ALSO removed, for the
+# identical reason — it rejected Gate 5's real, approved physicalPerformance (72-92 words on
+# every real Scene 1 dialogue-bearing shot; Gate 5's own authoring instruction was never
+# written under a 50-word discipline) purely on field-isolated length, while the ACTUAL
+# provider-facing brief it feeds compiles comfortably inside the real ceiling. This dict is
+# now EMPTY — no per-field word cap remains anywhere, and none is to be reintroduced (Julian:
+# "do not introduce a replacement field limit"). The governing constraint is, and stays, the
+# COMPILED brief's own hard cap: MAX_SHOT_PROMPT_WORDS/MAX_KEYFRAME_PROMPT_WORDS plus the
+# COMPILABILITY check below (a real compile_shot_contract call) — both fully unconditional,
+# on the real shipped text, exactly as before. Law 6 (_assert_no_spoken_words, inside that
+# same compile call) and the ABSTRACT_DIRECTION safety/renderability scan just below are
+# ALSO unweakened — this correction touches only the isolated per-field length budget, no
+# other check.
+FIELD_WORD_BUDGETS = {}
 
 # Known unrenderable-abstraction constructs (Julian's correction, 2026-07-16, point 3). A tight,
 # documented heuristic — high-confidence psychological-intent shapes only, so a real staging verb
@@ -540,6 +635,23 @@ def validate_scene_design(design, beats, characters_cfg):
         elif sh.sourceShotId:
             add("WARNING", "OPENER_WITH_SOURCE", f"{path}.sourceShotId",
                 "an opener starts from its own generated keyframe, not a harvested frame")
+
+        # THE CUT-PACE CONSISTENCY CHECK (2026-07-21, Julian's mandate — "it has to fire
+        # every single time, it's not optional"): cutPace itself is already required at the
+        # schema level (no default), so a shot missing it entirely fails at construction, not
+        # here. This catches the SECOND way "not optional" could still be silently violated —
+        # a cutPace that claims cuts but names none, or a single-take shot carrying stray
+        # internalCuts left over from an edit, either of which would compile a real, visible
+        # mismatch between the Director's stated decision and what actually ships.
+        if sh.cutPace == "single_continuous_take" and sh.internalCuts:
+            add("ERROR", "CUTPACE_MISMATCH", f"{path}.internalCuts",
+                "single_continuous_take must carry no internalCuts — performanceAssignment "
+                "alone carries that case; leftover internalCuts suggest a stale edit")
+        if sh.cutPace in ("paced_cuts", "rapid_cuts") and len(sh.internalCuts) < 2:
+            add("ERROR", "CUTPACE_MISMATCH", f"{path}.internalCuts",
+                f"cutPace={sh.cutPace!r} requires at least 2 authored internalCuts, got "
+                f"{len(sh.internalCuts)} — the Director's own pace decision has nothing to "
+                f"deliver it")
 
         # dialogue: speaker visible, timing sane, binding consistent
         in_frame = {_norm(c) for c in sh.charactersInFrame}
@@ -608,18 +720,39 @@ def validate_scene_design(design, beats, characters_cfg):
                         f"{cs.character}'s held props do not match {sh.sourceShotId}'s continuityOut")
         known_ids.append(sh.shotId)
 
-    # THE VERBATIM LOCK: every locked dialogue line assigned exactly once, word for word
+    # THE VERBATIM LOCK: every locked dialogue line assigned exactly once, word for word.
+    # THE MULTISET FIX (2026-07-22, Julian's full-audit directive — a real, confirmed bug):
+    # the original check counted matches by GLOBAL value equality, not by consuming one
+    # matched instance per expected line — so a scene where the same speaker legitimately
+    # says the exact same locked words twice (a catchphrase, an exclamation) had BOTH
+    # correctly-assigned occurrences double-count each other's match and get wrongly flagged
+    # DIALOGUE_LINE_DUPLICATED, even though the assignment was a valid 1:1 mapping. Counting
+    # by multiset (how many times this exact (speaker, text) pair is EXPECTED vs. how many
+    # times it actually GOT assigned) is the correct generalization — it agrees with the old
+    # check whenever no locked line is a value-duplicate of another (the common case) and
+    # only differs in the case the old check got wrong.
+    from collections import Counter
     expected = _expected_lines(beats)
     exp_norm = [(_norm(_canon_speaker(s, characters_cfg)), _norm(t)) for s, t in expected]
     got_norm = [(_norm(_canon_speaker(s, characters_cfg)), t) for s, t, _ in seen_norm_lines]
+    exp_counts = Counter(exp_norm)
+    got_counts = Counter(got_norm)
+    reported = set()
     for (es, et), (raw_s, raw_t) in zip(exp_norm, expected):
-        n = sum(1 for gs, gt in got_norm if gs == es and gt == et)
-        if n == 0:
+        if (es, et) in reported:
+            continue
+        reported.add((es, et))
+        exp_n, got_n = exp_counts[(es, et)], got_counts.get((es, et), 0)
+        if got_n < exp_n:
+            short = exp_n - got_n
             add("ERROR", "DIALOGUE_LINE_DROPPED", "shots",
-                f"locked line not assigned to any shot — {raw_s}: \"{raw_t}\"")
-        elif n > 1:
+                f"locked line not assigned to any shot"
+                f"{f' ({short} of {exp_n} occurrences missing)' if exp_n > 1 else ''} — "
+                f"{raw_s}: \"{raw_t}\"")
+        elif got_n > exp_n:
             add("ERROR", "DIALOGUE_LINE_DUPLICATED", "shots",
-                f"locked line assigned to {n} shots — {raw_s}: \"{raw_t}\"")
+                f"locked line assigned to {got_n} shots"
+                f"{f' (expected {exp_n})' if exp_n > 1 else ''} — {raw_s}: \"{raw_t}\"")
     for gs, gt, lp in seen_norm_lines:
         if not any(gs == es and gt == et for es, et in exp_norm):
             add("ERROR", "DIALOGUE_NOT_VERBATIM", lp,
@@ -664,16 +797,17 @@ def validate_scene_design(design, beats, characters_cfg):
                         f"{n} words against the field's own {budget}-word discipline — "
                         f"lean direction, never micro-choreography")
 
-    # COMPILABILITY (Julian's directive, 2026-07-16, point 4's designed outcome): a shot whose
-    # contract can no longer fit the word cap — authored constraints are never dropped and
-    # direction is never auto-rewritten — FAILS validation here, named, so a stale stored prompt
-    # can never fire past it. Compilation is fully deterministic now (no LLM), so this is cheap.
+    # COMPILABILITY (2026-07-21 correction — the word-ceiling ERROR this check used to
+    # raise, SHOT_OVERBUDGET, is retired: Julian's own direct ruling removed the hard word
+    # ceiling from compile_shot_contract entirely, so length can no longer make a shot
+    # uncompilable. The one real failure mode left here is a genuine COMPILE_GUARD — e.g.
+    # Law 6's spoken-words assertion — never a length count. Compilation is fully
+    # deterministic (no LLM), so this stays cheap to run on every shot regardless.
     for i, sh in enumerate(design.shots):
         try:
             compile_shot_contract(sh, {}, characters_cfg)
         except (ValueError, AssertionError) as e:
-            add("ERROR", "SHOT_OVERBUDGET" if "cap" in str(e) else "COMPILE_GUARD",
-                f"shots[{i}]({sh.shotId})", str(e))
+            add("ERROR", "COMPILE_GUARD", f"shots[{i}]({sh.shotId})", str(e))
 
     # the physical-staging contract: every BIG-comedy beat carries the gag physics somewhere
     big_beats = {b.get("beatCode") for b in beats
@@ -694,29 +828,106 @@ def _normset(values):
 # COMPILERS — mechanical, short, platform-length. Spoken words and appearance text can
 # never enter these outputs: guarded by construction AND by assertion.
 # ─────────────────────────────────────────────────────────────────────────────────────────
+_STYLE_LAW_PATH = HERE.parent / "shows/crystal-bears/laws/style.txt"
+
+
+def _style_law_text():
+    """The show's own single locked style line (rule 75, Julian's feature-caliber craft
+    rewrite) — read fresh every call. Every OTHER consumer of this file (cb_render._scene_
+    context, the department LLM prompts) already had it; this compiler's own _style_line
+    never did, shipping a thinner, disconnected hardcoded string instead (2026-07-21 audit,
+    Julian's own techhalla-example comparison — the actual gap wasn't a missing gate, it was
+    this compiler simply not quoting a law that already existed).
+
+    NEVER CACHED (2026-07-22, Julian's full-audit directive — the same bug class as the
+    long-running-server-serves-stale-logic bug fixed elsewhere tonight, reproduced here for
+    a data file instead of a .py file): a module-level cache populated once and never
+    invalidated meant an edit to style.txt mid-session was invisible for the rest of that
+    process's life — no error, no staleness flag, nothing in serve.py's freshness fingerprint
+    watches non-.py files under shows/. A single small text-file read costs nothing worth
+    caching; reading it fresh every call closes the gap outright rather than adding another
+    invalidation path to keep in sync."""
+    return _STYLE_LAW_PATH.read_text().strip() if _STYLE_LAW_PATH.exists() else ""
+
+
+# THE QUALITY LINE (2026-07-21, Julian, comparing our compiled prompts against a real
+# AAA-grade example he'd watched delivered): the example's own closing "STYLE & QUALITY
+# BOOSTERS" block — a dense, POSITIVE technical/craft line, distinct from this compiler's
+# existing "Hard constraints" (which is negative-only, prohibitions never affirmations) —
+# was the one structural piece with no equivalent here at all. Translated into THIS show's
+# own register (stylised 3D CGI, never the source example's photoreal/anamorphic-lens
+# language, which belongs to a different visual world entirely) rather than copied.
+# Deliberately does not restate anything UNIVERSAL_CONSTRAINTS/_render_critical already
+# says (no redesign/no artifacts-as-negation) — this is the positive craft bar, not a sixth
+# negatives list.
+QUALITY_LINE = ("Craft: richly detailed 3D textures, natural motion blur on fast movement, "
+                 "coherent physics throughout, feature-film-level polish and stability.")
+
+
 def _style_line(scene, shot=None):
     # ONE consistent anchor-matching style rule (Julian, 2026-07-16, point 9 + Option D +
     # the destructive cutover, which removed the last legacy style-scaffolding phrases
     # scaffolding from executable source): a SHOT's style anchor IS its own @图1; a KEYFRAME
     # (shot=None) makes the first frame, so its style anchors to the references it is given.
     # The signed 1.B1.S1 keyframe predates this wording and stands unchanged as a file.
+    law = _style_law_text()
     if shot is None:
-        return ("Stylised feature-quality 3D CGI with natural weight. Preserve the exact "
-                "character designs, proportions, materials, lighting and environment from "
-                "the references.")
-    return "Stylised feature-quality 3D CGI matching @图1."
+        base = ("Stylised feature-quality 3D CGI with natural weight. Preserve the exact "
+                 "character designs, proportions, materials, lighting and environment from "
+                 "the references.")
+        return f"{base} {law}".strip() if law else base
+    base = "Stylised feature-quality 3D CGI matching @图1."
+    return f"{base} {law}".strip() if law else base
 
 
-# THE @图1 ANCHORS — Julian's Option D ruling (2026-07-16, superseding his own same-day dictated
-# long scaffold): the provider brief carries a CONCISE anchor; the full continuity contract lives
-# internally and is enforced by validation/review, never by boilerplate. No anti-hold text is
-# compiled — the shot's observable direction determines whether a pose continues. A planned cut
-# uses a storyboard-approved NEW keyframe named as the new shot's opening composition (that shot
-# is an opener by construction — the same OPENER_ANCHOR applies to it).
-OPENER_ANCHOR = "Begin exactly on @图1, the approved opening frame."
+# THE @图1 ANCHORS — Julian's Option D ruling (2026-07-16), CORRECTED 2026-07-19 (Julian,
+# watching S1.SH1-SH3 land as three disconnected vignettes instead of one escalating gag:
+# "I want each beat to land with laughter or emotion... do what you know works").
+#
+# Option D's original design treated "opener" as the correct choice for ANY planned editorial
+# cut, reserving "relay" (a real harvested-frame anchor) for literal seamless continuation
+# only. In practice this meant every cut inside a beat generated its own disconnected fresh
+# keyframe, with continuity carried in text only (continuityIn/continuityOut) and never in
+# actual pixels — exactly the shape that read as unconnected on real rendered footage.
+#
+# This project already solved this once, on the old beat-level pipeline (rules 15/21/26/31/
+# 51/52 of this show's CLAUDE.md): a CUT and a CONTINUITY-ANCHOR are not the same choice.
+# Every shot after the scene's true first one should relay off the previous shot's actual
+# harvested final frame for STATE (identity, position, marks, lighting) — regardless of
+# whether the camera holds or cuts to new coverage. "Opener" (a fresh, unanchored keyframe)
+# is now reserved for a genuine scene/location reset (the Scene Bubble Law), never for "this
+# is an editorial cut" alone. The mechanism itself needed no new code: a relay shot has always
+# harvested its source shot's real approved final frame (cb_render._anchor_for) — only the
+# ANCHOR WORDING and the AUTHORING GUIDANCE (_design_user_prompt below) needed correcting so
+# the Director actually chooses relay for these cuts, and so relay's own wording doesn't
+# accidentally re-introduce the old anti-hold bug (a literal "continue immediately" phrasing
+# that made sense for true seamless continuation but would ask the model to freeze/repeat a
+# pose for a beat that's supposed to travel to new coverage).
+# 2026-07-20 (Julian, watching real S1.SH1 footage: "no movement no fast paced... no big
+# tumble and correction"): the bare anchor gave the model nothing telling it @图1 is a
+# LAUNCH point rather than a pose to hold — the exact anti-hold failure mode this show's
+# earlier beat-level pipeline already found and fixed multiple times (rules 26/51/76 of
+# CLAUDE.md's history). Adding the explicit instruction here, once, mechanically, covers
+# every opener shot forever rather than relying on each shot's own free-authored camera/
+# performance text to fight the model's own default read of a reference frame.
+OPENER_ANCHOR = ("Begin exactly on @图1, the approved opening frame — motion begins "
+                  "immediately, never a resting hold.")
 
-RELAY_ANCHOR = ("Begin exactly on @图1, the approved final frame of the previous shot, and "
-                "continue the new action immediately.")
+RELAY_ANCHOR = ("Begin exactly on @图1, the approved final frame of the previous shot, matched "
+                 "for identity, position and lighting.")
+# 2026-07-19, tightened same day it was first written: a first draft here also said "then move
+# into this shot's own new action, never hold/repeat that pose" — but the compiled sentence
+# already concatenates this anchor directly with the shot's OWN camera/action text right after
+# it (compile_shot_contract: f"{anchor} — {camera text}."), so stating "move into new action"
+# a second time was pure duplication, the exact camera-language-in-the-anchor mistake this
+# project's own older doctrine already found and removed once (rule 51's third pass, 2026-07-07:
+# "camera direction never appears inside the continuation-state clause... stating 'fresh camera
+# setup' a second time is pure duplication... an identity/state instruction only, camera left
+# entirely to the shot's own direction"). Dropping "continue... immediately" (which implied a
+# held/seamless pose) for a state-only "matched for identity, position and lighting" removes the
+# anti-hold risk without needing an explicit negative — and costs zero extra words over the
+# original Option D wording (both 18 words), which matters under this module's own tight 210-
+# word hard ceiling (confirmed live: the anti-hold-negative first draft pushed S1.SH5 to 219).
 
 
 def _name_pattern(name, cast):
@@ -791,13 +1002,23 @@ def _assert_no_spoken_words(prompt, shot, artifact):
 # Every machine-injected constraint has a canonical ID and ships with its negation intact (or a
 # positive, filmable formulation). Deduplication is by ID + SUBSUMES — never fuzzy text matching.
 # Authored shot constraints have no IDs: they ship VERBATIM and are never deduplicated or dropped.
-UNIVERSAL_CONSTRAINTS = [                                        # the lean five — every shot, always
+UNIVERSAL_CONSTRAINTS = [                                        # the lean four — every shot, always
     ("no_character_redesign", "no character redesign"),
     ("no_extra_characters", "no extra characters"),
     ("no_onscreen_text", "no on-screen text"),
     ("no_invented_voices", "no invented voices"),
-    ("no_camera_cut", "no camera cut"),
 ]
+# "no_camera_cut" REMOVED (2026-07-22, Julian, live, watching S1.SH1's real render — "no
+# freedom to it... no flying, zooming in and out, zigzagging... we have so many rules in
+# place that stop the creativity of Seedance"): this was one of the original "lean five"
+# (Julian's own 2026-07-16 correction) but forcing it onto EVERY shot in the show, always,
+# unconditionally, is itself the over-constraint he's naming — confirmed live in S1.SH1's
+# own real, submitted prompt ("One continuous camera relationship with no cuts... Hard
+# constraints: ...no camera cut..."), which described exactly one camera vector for the
+# full 15s and explicitly forbade anything else. A genuinely continuous, uncut chase shot
+# is still a legitimate choice — it's just not a system-wide mandate the Director can never
+# override per beat. Whether a shot cuts internally is now the Director's own authored
+# choice (camera/cutInMotivation fields), never a machine-injected universal.
 SUBSUMES = {  # subsuming ID -> IDs it makes redundant ("no invented voices" covers background too)
     "no_invented_voices": {"no_invented_background_voices"},
 }
@@ -837,8 +1058,26 @@ _POS_LEAD = re.compile(r"^(?:preserve|keep|end|hold|maintain|stay|remain|match|c
 def _explicit_constraint(item):
     """Point 1: never output a bare phrase. An authored item already carrying negation, or a
     positive filmable imperative, ships VERBATIM; anything else gets an explicit 'no ' prefix —
-    negation is added, never stripped, and the authored words are never altered."""
-    s = str(item).strip().rstrip(".")
+    negation is added, never stripped, and the authored words are never altered.
+
+    THE FULL-SENTENCE FIX (2026-07-22, found reviewing real compiled Scene-1 output —
+    Julian: "we're just going to be now iterating the prompt... see if we can get that
+    right"): a real authored essentialProviderProtections item is often a genuine, multi-
+    clause director's NOTE — e.g. "Camera must stay still with Zenny; do not grant Fuzzby a
+    clean heroic showcase." — which already states its own polarity (positive requirement,
+    embedded negation, or both) in its own words. The old check only ever looked at the
+    string's FIRST word, so a positive sentence that didn't happen to open on one of
+    _POS_LEAD's specific verbs (this one opens on "Camera", a noun) got a mechanical "no "
+    jammed in front of a whole sentence — "no Camera must stay still with Zenny", which
+    doesn't parse as English and inverts the actual instruction. A bare, unpunctuated PHRASE
+    ("extra characters", "on-screen text") still needs the synthetic "no " to read as a
+    constraint at all — the fix only exempts a genuine SENTENCE (its own terminal
+    punctuation, or an internal semicolon joining more than one clause), which always ships
+    exactly as authored, its own polarity intact, never touched."""
+    raw = str(item).strip()
+    if re.search(r"[.!?]$", raw) or ";" in raw:
+        return raw.rstrip(".")
+    s = raw.rstrip(".")
     return s if (_NEG_LEAD.match(s) or _POS_LEAD.match(s)) else "no " + s
 
 
@@ -908,6 +1147,49 @@ def _lip_sync_sentence(shot, characters_cfg):
     return s + "."
 
 
+def _strip_redundant_audio_sentence(text):
+    """2026-07-20 (Julian, real S1.SH1 footage: "no movement... no fast paced"): found while
+    diagnosing — the design LLM sometimes restates the audio/lip-sync assignment INSIDE
+    performanceAssignment/visualPayoff's own free prose ("Lip-sync the approved @Audio1
+    performance exactly; no additional speech."), even though _lip_sync_sentence already
+    generates this mechanically and authoritatively from dialogueLines every time. The result
+    was the SAME instruction shipping twice in one compiled prompt — real, wasted budget under
+    this module's own tight 210-word hard ceiling, crowding out room for the actual physical
+    action a bee-chase gag needs to read as fast and committed. Drops any WHOLE sentence
+    (split on '. ') that mentions lip-sync/lip syncing — a defense-in-depth mechanical guard;
+    the matching Law 9 addendum in _design_mind() is the permanent fix at the source."""
+    if not text or "lip" not in text.lower() or "sync" not in text.lower():
+        return text
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    kept = [s for s in sentences if "lip" not in s.lower() or "sync" not in s.lower()]
+    return " ".join(kept).strip()
+
+
+_DIALOGUE_MODES = {"DIALOGUE_PERFORMANCE", "EMOTIONAL_ACTING"}
+_KINETIC_MODES = {"KINETIC_ACTION", "PHYSICAL_COMEDY"}
+
+
+def _modes_dialogue_only(shot):
+    """True when the shot's Director-selected performance modes are purely dialogue/
+    emotional acting — the register where physics-chain and fast-motion vocabulary is
+    COMPETING language to remove (Anti-Guardrail Principle rule 3), not direction.
+    False when modes are absent (unmigrated shots keep today's exact behaviour) or when
+    any kinetic mode is present (a hybrid keeps its physics language)."""
+    modes = set(getattr(shot, "performanceModes", None) or [])
+    return bool(modes) and modes <= _DIALOGUE_MODES
+
+
+def _quality_line(shot):
+    """The closing craft line, mode-scoped (Anti-Guardrail rule 3 — remove competing
+    language): 'natural motion blur on fast movement' is real direction for a kinetic
+    shot and competing noise for a near-still dialogue/emotional shot, where it quietly
+    argues for the camera and body energy the register is trying to avoid."""
+    if _modes_dialogue_only(shot):
+        return ("Craft: richly detailed 3D textures, coherent physics throughout, "
+                "feature-film-level polish and stability.")
+    return QUALITY_LINE
+
+
 def _render_critical(shot):
     """The ≤3 genuinely render-critical protections that reach Seedance (Julian's Option D
     criteria: failure invalidates THIS shot; not already carried by keyframe/references/action;
@@ -941,7 +1223,12 @@ def compile_shot_contract(shot, scene, characters_cfg):
     constraints, canon/continuity rules, repair history, provenance, review requirements) lives
     in the package — preserved and enforced by validation and review, never repeated at the
     provider. 'Not sent to Seedance' is not 'dropped from the production contract'.
-    Target 90-160 words; 210 is the hard failure ceiling. Duration/AR travel as API params.
+    Target 90-160 words. CORRECTED 2026-07-22 (low-priority cleanup pass): this line used to also claim
+    "210 is the hard failure ceiling" — stale since Julian's 2026-07-21 ruling ("take all the
+    straightjackets off") removed that ceiling from this very function, further down (see the dated
+    comment right before its own _assert_no_spoken_words call for the real history). 210 survives only
+    as MAX_SHOT_PROMPT_WORDS, a measurement/test threshold now, never an enforced cap. Duration/AR
+    travel as API params.
 
     2026-07-17 correction (Julian's audit, source-defect protection lifted for this one
     line only): the closing preservation sentence no longer unconditionally locks 'screen
@@ -958,26 +1245,109 @@ def compile_shot_contract(shot, scene, characters_cfg):
     this fix, which only removes the false default."""
     anchor = OPENER_ANCHOR if shot.sourceType == "opener" else RELAY_ANCHOR
     camera = shot.camera.strip().rstrip(".")
-    action = [f"{anchor[:-1]} — {camera[0].lower()}{camera[1:]}.",
-              shot.performanceAssignment.strip().rstrip(".") + "."]
-    payoff = shot.visualPayoff.strip().rstrip(".").lstrip(". ")
+    performance = _strip_redundant_audio_sentence(shot.performanceAssignment).strip().rstrip(".")
+
+    # THE TRANSITION-TYPE FIX (2026-07-21, Julian's own audit — "you have to do what you
+    # think is right... it has to fire every single time, it's not optional"): transitionType
+    # was authored at Gate 4, then silently discarded before it ever reached this compiler —
+    # every shot compiled identically regardless of the Director's real CONTINUOUS/
+    # PLANNED_CUT decision. Restored: a relay shot's own opening now states which one it is.
+    # An opener has no predecessor, so transitionType is None and this stays silent.
+    transition_clause = ""
+    if shot.transitionType == "CONTINUOUS":
+        transition_clause = " Continuing directly from the previous shot's own motion, no cut."
+    elif shot.transitionType == "PLANNED_CUT" and shot.cutInMotivation:
+        cim = shot.cutInMotivation.strip().rstrip(".")
+        transition_clause = f" Cut motivated by {cim[0].lower()}{cim[1:]}."
+    opening = f"{anchor[:-1]} — {camera[0].lower()}{camera[1:]}.{transition_clause}"
+
+    # THE CUT-PACE DECISION (2026-07-21, Julian's mandate, "not optional — it has to fire
+    # every single time"): single_continuous_take is this architecture's original behaviour,
+    # unchanged — "one shot = one provider call, no internal shot list" stays literally true
+    # for that pace, so the same explicit statement still ships (it removes any risk of the
+    # model reading ambiguous camera language as license to cut within a take nobody asked
+    # for). paced_cuts/rapid_cuts build Seedance's own REAL multi-shot grammar instead
+    # (Shot 1:/Shot 2:/... labels — verified: [ref:multishot-grammar], NOT the bracketed-
+    # timestamp skeleton, which is a different surface's own convention) from the Director's
+    # own authored internalCuts — never a mechanical split of performanceAssignment's prose,
+    # which would invent cut boundaries nobody actually chose.
+    # THE FELT INTENT LINE (2026-07-23, Julian — "lacks the heart pace and feeling"): the
+    # ONE intention this shot serves, stated before any action, per the seedance doctrine's
+    # own first rule ("name one intention and make camera, light, blocking, performance
+    # serve it"). Sourced from the storyboard's own already-approved audienceExperience —
+    # never invented here.
+    intent_line = ""
+    if shot.feltIntent:
+        fi = shot.feltIntent.strip().rstrip(".")
+        intent_line = f"Felt intent: {fi[0].upper()}{fi[1:]}."
+    if shot.cutPace == "single_continuous_take":
+        action = [f"{opening} Single continuous take, no cuts.", performance + "."]
+    else:
+        action = [opening]
+        for i, cut in enumerate(shot.internalCuts, 1):
+            c = cut.strip().rstrip(".")
+            action.append(f"Shot {i}: {c[0].upper()}{c[1:]}.")
+    if intent_line:
+        action.insert(0, intent_line)
+    # THE TEMPO DESIGN LINE (same ruling): the Director's own authored pace-contrast map
+    # (Gate 5's animationTiming, dialogue-stripped at handover) — previously discarded
+    # entirely, which is exactly why every rendered moment played at one even middle pace.
+    if shot.tempoDesign:
+        td = shot.tempoDesign.strip().rstrip(".")
+        action.append(f"Tempo: {td[0].upper()}{td[1:]}.")
+    # THE CONTACT-AND-WEIGHT CHANNEL (2026-07-20, Julian's real-footage diagnosis): the gag-
+    # physics contract already carries the explicit cause-and-effect chain ("what touches
+    # what; where weight compresses/rebounds") a BIG-comedy beat needs — it was authored
+    # but never reached the provider brief; only physicalStaging.staysVisible did, via
+    # _render_critical. Wired in here, alongside the action beats it belongs with, not in
+    # the closing "render-critical protections" list — this IS the action, not a guard-rail.
+    # MODE-SCOPED (Anti-Guardrail Principle rule 3, 2026-07-23 — remove competing language
+    # before adding more): a pure dialogue/emotional shot never ships physics-chain
+    # vocabulary; it competes with the near-still acting register the shot actually needs.
+    if (shot.physicalStaging and shot.physicalStaging.contactAndWeight
+            and not _modes_dialogue_only(shot)):
+        cw = shot.physicalStaging.contactAndWeight.strip().rstrip(".")
+        action.append(cw[:1].upper() + cw[1:] + ".")
+    payoff = _strip_redundant_audio_sentence(shot.visualPayoff).strip().rstrip(".").lstrip(". ")
     action.append(payoff[:1].upper() + payoff[1:] + ".")
 
     closing = [_lip_sync_sentence(shot, characters_cfg),
                "Preserve character identity and relative scale."]
     closing += _render_critical(shot)
 
+    # THE NEGATIVE LINE, CLOSING A NAMED GAP (2026-07-20, Julian's own worked prompt: "No
+    # extra characters, additional speech, redesigns, crystals, subtitles or text."):
+    # hard_constraints() already computes exactly this set — deterministically, from the
+    # standing universal five plus the shot's own live-triggered conditionals (audio,
+    # winged cast, gag physics, ground contact) plus any genuinely authored shot-specific
+    # prohibitions — and has done so since 2026-07-16. It was stored in internalConstraints
+    # for package review but deliberately never reached the shipped brief itself (Option D's
+    # own docstring flagged this as "a separate, undecided question" the day it was written).
+    # Julian's own hand-written prompt proves the missing piece is real and affordable within
+    # budget — wiring in the SAME computed line here, not a hand-typed approximation of it.
+    hc_line, _ = hard_constraints(shot, characters_cfg)
+
     prompt = "\n\n".join([
         f"{_style_line(scene, shot)} {_reference_role_sentence(shot, scene, characters_cfg)}".strip(),
         " ".join(action),
         " ".join(s for s in closing if s),
+        hc_line,
+        _quality_line(shot),
     ])
     wc = len(prompt.split())
-    if wc > MAX_SHOT_PROMPT_WORDS:
-        raise ValueError(
-            f"shot {shot.shotId} brief is {wc} words (hard ceiling {MAX_SHOT_PROMPT_WORDS}, "
-            f"target 90-160) — tighten {shot.shotId}'s source direction; the internal contract "
-            f"is never auto-trimmed.")
+    # THE STRAIGHTJACKET REMOVED (Julian's direct ruling, 2026-07-21 — "take all the
+    # straightjackets off and allow the magic to be delivered, not flagged or
+    # straightjacketed"): a hard word ceiling used to REFUSE to compile a shot at all past
+    # MAX_SHOT_PROMPT_WORDS — confirmed live the same night to be blocking S1.SH1's own
+    # real, legitimate creative direction (224/268 words, never anything but genuine
+    # authored content — no padding, no bloat) from ever reaching the provider. Length was
+    # never actually the thing that was hurting output quality (this project's own history,
+    # e.g. the v5 engine's rules 42/74-78, found the opposite: dense OVER-SPECIFICATION —
+    # stacked negatives, micromanaged camera JSON — was the real quality problem, not raw
+    # word count). wc is still returned, still visible to anything that wants to log or
+    # display it, but it can never again stop a real, authored beat from compiling into a
+    # working prompt. The Director's/Cinematographer's actual creative direction ships,
+    # full stop — trust the crew, never the ceiling.
     _assert_no_spoken_words(prompt, shot, "Seedance brief")
     return prompt, wc, reference_slots(shot, characters_cfg)
 
@@ -1064,10 +1434,17 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         f"lighting only — never composition or geography.",
         ("Negative: character redesign, appearance drift from the references, extra "
          "characters, on-screen text."),
+        QUALITY_LINE,
     ])
     wc = len(prompt.split())
-    assert wc <= MAX_KEYFRAME_PROMPT_WORDS, (
-        f"keyframe prompt for {shot.shotId} is {wc} words (cap {MAX_KEYFRAME_PROMPT_WORDS})")
+    # THE STRAIGHTJACKET REMOVED, SWEPT HERE TOO (2026-07-21 — the same "sweep the pattern"
+    # this codebase's own standing rule requires, rule 11): compile_shot_contract's identical
+    # hard ceiling was already removed under Julian's 2026-07-21 ruling ("take all the
+    # straightjackets off") — this sibling function, adding the exact same class of real
+    # authored content (the style law, the quality line) via this same commit, would now hit
+    # its own still-live hard assert the moment either pushed a real keyframe prompt past 160
+    # words. wc stays visible for logging/display; it can no longer stop a real, authored
+    # frame from compiling.
     _assert_no_spoken_words(prompt, shot, "keyframe prompt")
     return prompt, wc, reference_slots(shot, characters_cfg, for_keyframe=True)
 
@@ -1082,15 +1459,6 @@ def compile_audio_brief(shot):
              for ln in shot.dialogueLines]
     return "\n".join([f"SHOT {shot.shotId} — voice-only performance for @Audio1."] + lines + [
         "Preserve the exact words. No narration, ad-libs, sound effects or music in the voice track."])
-
-
-def _continuity_summary(state):
-    chars = "; ".join(
-        f"{cs.character} {cs.screenZone}, facing {cs.facing}, {cs.pose}, {cs.expression}"
-        + (f", marks [{', '.join(cs.visibleMarks)}]" if cs.visibleMarks else "")
-        + (f", props [{', '.join(cs.heldProps)}]" if cs.heldProps else "")
-        for cs in state.characters)
-    return f"light {state.lighting}; camera side {state.cameraSide}; {chars}"
 
 
 def _ledger_entry(shot):
@@ -1226,9 +1594,10 @@ def repair_package(scene_num, episode="Ep1", log=print):
                 # pass over an intermediate text must never overwrite the true source
                 rec.setdefault("creativeIntent", {}).setdefault(e["field"], e["original"])
                 rec[e["field"]] = getattr(sh, e["field"])
-        # refresh the STORED prompt — the fire path ships this, never a fresh compile. An
-        # over-budget shot is REPORTED (validation carries SHOT_OVERBUDGET, blocking any fire on
-        # the stale stored prompt) — never dropped constraints, never a crashed run.
+        # refresh the STORED prompt — the fire path ships this, never a fresh compile. Word
+        # length can no longer block this (2026-07-21, the hard ceiling was removed); the
+        # only remaining failure mode is a genuine compile guard (e.g. a Law 6 leak) —
+        # reported, never a crashed run.
         try:
             prompt, wc, slots = compile_shot_contract(sh, pkg.get("scene", {}), characters_cfg)
             rec["seedancePrompt"], rec["promptWords"], rec["referenceSlots"] = prompt, wc, slots

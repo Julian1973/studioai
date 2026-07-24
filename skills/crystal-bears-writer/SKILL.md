@@ -3,6 +3,20 @@ name: crystal-bears-writer
 description: GATE 0 — THE DEFINITIVE WRITERS' ROOM SKILL. The generative front of the Crystal Bears pipeline. Takes a SEED and WRITES one artifact — a complete, funny, heartfelt, DIALOGUE-LOCKED social-emotional-learning episode SCRIPT for ages 4–8 — then self-scores it /10, remaking weak beats up to 2 times to chase 8+ on every factor (best-effort — a script still below the bar after that ships anyway, flagged "belowBar" for a human punch-up). Where the Director (Gate 1) breaks a script DOWN, the Writer WRITES it. Five internalised minds (Docter · Brumm · Stanton · Nee · Woolverton) run eight passes (Heart Lock → Lesson Lock → Game+Spine → Outline → Draft → Co-Watch Punch-up → Braintrust → Lock). Use on 'write the script', 'writers room', 'Gate 0', 'draft the episode', 'write me an episode', or whenever a seed needs to become a locked screenplay. Hands one locked screenplay down to the Director.
 ---
 
+# 🛑 [FUTURE/UNWIRED] 🛑
+
+**This skill is currently decorative documentation, not live code.** It is not in
+`cb_departments.SKILLS`, and nothing in `engine/*.py` calls `load_runtime_skill("writer")` —
+confirmed by direct grep, 2026-07-19. The live Gate 0 (`cb_intake.py`) takes an
+already-written, already-locked script and only splits it into beats; it does not write a
+script from a seed the way this document describes. Before this skill can do real work, it
+needs an actual code path in `cb_departments.py`/`cb_creative.py` that calls it — building
+that (or deciding this job now belongs to `cb_intake.py` instead) is Julian's own call, not
+made here. Read this as a design reference for what a future Writer department could do, not
+as a description of what the pipeline currently does.
+
+---
+
 # GATE 0 — THE DEFINITIVE WRITERS' ROOM SKILL
 ## The Crystal Bears · Version 1.0 — THE ROOM
 ### Pixar-Standard Seed-to-Locked-Screenplay Intelligence · Canon-Locked · North-Star-True

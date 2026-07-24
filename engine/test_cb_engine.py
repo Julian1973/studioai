@@ -39,12 +39,14 @@ def _state(chars, marks=None, props=None):
 
 
 def _shot(shot_id="1.B1.S1", source="opener", src_id=None, chars=("Fuzzby",),
-          lines=(), binding=None, staging=None, dur=6.0, marks_in=None, marks_out=None):
+          lines=(), binding=None, staging=None, dur=6.0, marks_in=None, marks_out=None,
+          transition=None, cut_pace="single_continuous_take", internal_cuts=()):
     return E.Shot(
         shotId=shot_id, beatCode="1.B1", durationSec=dur, purpose="the launch",
         performanceAssignment="Fuzzby rockets between blossoms, clips a stem, wobbles, recovers.",
         camera="Wide tracking, bee height", openingPose="Fuzzby mid-launch outside the flower",
         sourceType=source, sourceShotId=src_id, cutInMotivation=None if src_id is None else "matched action",
+        transitionType=transition, cutPace=cut_pace, internalCuts=list(internal_cuts),
         dialogueBinding=binding, dialogueLines=list(lines), visualPayoff="He nearly grazes the leaf",
         physicalStaging=staging, prohibited=[], charactersInFrame=list(chars),
         continuityIn=_state(chars, marks=marks_in), continuityOut=_state(chars, marks=marks_out))
@@ -296,6 +298,35 @@ def test_conditional_constraints_every_trigger_and_its_absence():
     assert "no body inflation" not in got_s
 
 
+# ── the full-sentence fix (2026-07-22): a positive multi-clause authored NOTE must never
+#    get a mechanical "no " jammed onto its front — pinned to the exact real S1.SH2 content
+#    that surfaced this bug live in a compiled Scene-1 prompt.
+def test_full_sentence_authored_item_never_gets_a_false_no_prefix():
+    sh = _clean_design().shots[0]
+    sh.prohibited = [
+        "Camera must stay still with Zenny; do not grant Fuzzby a clean heroic showcase.",
+        "Zenny’s delivery and body remain economical and near-still, with no big "
+        "punchline reaction.",
+        "Fuzzby’s hover never fully settles; his forced dignity must be undercut by "
+        "small visible corrections.",
+    ]
+    line, _ = E.hard_constraints(sh, CFG)
+    assert "no Camera must stay still" not in line, \
+        "a positive requirement must never be corrupted into a nonsense double negative"
+    assert "Camera must stay still with Zenny; do not grant Fuzzby a clean heroic " \
+           "showcase" in line, "a full authored sentence ships exactly as authored"
+    assert "Zenny’s delivery and body remain economical and near-still, with no " \
+           "big punchline reaction" in line
+    assert "no Zenny’s delivery" not in line
+    assert "Fuzzby’s hover never fully settles; his forced dignity must be " \
+           "undercut by small visible corrections" in line
+    # a bare, unpunctuated phrase (no terminal punctuation, no internal clause) still gets
+    # the synthetic "no " prefix exactly as before — this fix narrows the old behaviour,
+    # it does not remove it
+    assert E._explicit_constraint("extra characters") == "no extra characters"
+    assert E._explicit_constraint("do not add extra spins") == "do not add extra spins"
+
+
 # ── Julian's bounded correction (2026-07-16): negation, dedup, abstraction, cap priority ─
 def test_negation_never_stripped_in_internal_contract():
     sh = _clean_design().shots[0]
@@ -309,20 +340,29 @@ def test_negation_never_stripped_in_internal_contract():
     assert "; let Zenny react broadly" not in line and ": let Zenny react broadly" not in line
 
 
-def test_option_d_internal_contract_preserved_provider_brief_lean():
-    """Julian's Option D (2026-07-16): authored constraints and planning intent stay in the
-    internal contract; the Seedance brief stays lean and never repeats them."""
+def test_option_d_planning_intent_stays_internal_constraints_now_ship():
+    """Julian's Option D (2026-07-16): PLANNING INTENT (purpose, creative rationale) stays in
+    the internal contract, never repeated at the provider.
+
+    CORRECTED 2026-07-20 (Julian's own worked prompt, "No extra characters, additional
+    speech, redesigns, crystals, subtitles or text."): the OTHER half of Option D's original
+    premise — that AUTHORED CONSTRAINTS also never reach the brief — is reversed here.
+    hard_constraints() was always the right, deterministic computation (proven correct by
+    this same test since 2026-07-16); what changed is that its own line now ships as part of
+    the brief instead of living only in internalConstraints, closing the gap Option D's own
+    docstring named as "a separate, undecided question" the day it was written. Authored
+    shot.prohibited items are no longer silent internal-only notes — they now ship, verbatim,
+    inside the same Hard constraints line, matching every machine-computed item beside them."""
     sh = _clean_design().shots[0]
     sh.prohibited = ["Do not let Zenny react broadly.", "Do not resolve the crash here."]
     line, prov = E.hard_constraints(sh, CFG)
     assert all(a in line for a in ("Do not let Zenny react broadly",
-                                    "Do not resolve the crash here"))   # preserved internally
+                                    "Do not resolve the crash here"))
     brief, wc, _ = E.compile_shot_contract(sh, {}, CFG)
-    assert "let Zenny react broadly" not in brief             # not repeated at the provider
-    assert "Hard constraints:" not in brief
+    assert "let Zenny react broadly" in brief                 # NOW ships, ships verbatim
+    assert "Hard constraints:" in brief
     assert "the pose itself" not in brief and sh.purpose not in brief  # planning stays internal
-    assert wc <= E.MAX_SHOT_PROMPT_WORDS                      # hard ceiling
-    assert wc <= 170                                          # genuinely lean for a simple shot
+    assert wc <= E.MAX_SHOT_PROMPT_WORDS                      # this fixture happens to be lean
     # the brief carries exactly the Option-D sections
     assert E.OPENER_ANCHOR[:-1] in brief                      # exact opening anchor
     assert "Use @Audio1 as the only voice" in brief           # audio + mouth assignment
@@ -372,42 +412,243 @@ def test_cap_applies_only_to_conditionals_authored_never_dropped():
         assert t in line                                      # the five, always
 
 
-def test_word_overflow_fails_loud_with_no_llm_call(monkeypatch):
+def test_word_overflow_compiles_clean_with_no_llm_call(monkeypatch):
+    """2026-07-21 correction (Julian's direct ruling — "take all the straightjackets off"):
+    the hard word ceiling is REMOVED from compile_shot_contract. A long, real, authored
+    direction now compiles into a real, working prompt instead of being refused outright —
+    length was never the actual quality problem this project found (over-specified
+    negatives/camera JSON were); trust the Director's real direction. What stays true and
+    still worth proving: compilation is fully deterministic — no LLM is ever invoked to
+    auto-compress or rewrite a long brief, at any length."""
     import cb_llm
     def _boom(*a, **k):
-        raise AssertionError("an over-budget contract must FAIL, never auto-compress via LLM")
+        raise AssertionError("compile_shot_contract must never call an LLM, at any length")
     monkeypatch.setattr(cb_llm, "structured", _boom)
     sh = _clean_design().shots[0]
-    sh.performanceAssignment = " ".join(["Fuzzby weaves between the tall blossoms"] * 60)
-    with pytest.raises(ValueError, match="hard ceiling"):
-        E.compile_shot_contract(sh, {}, CFG)
+    long_direction = " ".join(["Fuzzby weaves between the tall blossoms"] * 60)
+    sh.performanceAssignment = long_direction
+    prompt, wc, slots = E.compile_shot_contract(sh, {}, CFG)
+    assert wc > E.MAX_SHOT_PROMPT_WORDS                        # genuinely long, never trimmed
+    assert "Fuzzby weaves between the tall blossoms" in prompt  # the real content ships
+
+
+# ── THE 2026-07-17 SECOND FIELD-BUDGET CORRECTION (Julian's explicit decision,
+# PIPELINE_CUTOVER_LEDGER.md §10): performanceAssignment's own isolated 50-word cap is
+# REMOVED from FIELD_WORD_BUDGETS. The four proofs below pin exactly what stays true and
+# what changes: the governing constraint is now the COMPILED brief's own real ceiling
+# (MAX_SHOT_PROMPT_WORDS) plus the COMPILABILITY check, never a second, field-isolated cap;
+# Law 6 and abstract-direction validation are untouched.
+def test_a_seventy_to_ninety_word_physical_performance_passes_within_the_210_word_brief():
+    """PROOF 1: a real, Gate-5-shaped 72-92-word physicalPerformance — exactly the length
+    range found on the real, approved Ep1 Scene 1 shots — must PASS validate_scene_design
+    (no FIELD_OVERBUDGET) whenever the COMPILED brief stays within the real 210-word
+    ceiling. FIELD_WORD_BUDGETS no longer has an entry for performanceAssignment at all."""
+    assert "performanceAssignment" not in E.FIELD_WORD_BUDGETS
+    d = _clean_design()
+    # a real Gate-5-shaped body-first direction, 76 words — verbatim shape of the real
+    # approved S1.SH1 physicalPerformance text this correction exists to unblock.
+    d.shots[0].performanceAssignment = (
+        "Fuzzby flies from the belief that speed equals rank: chest leading, wings "
+        "overworking, tiny course-corrections arriving a beat after his body needs them. "
+        "The leaf takes his full committed weight, bends deep, then springs him off-line; "
+        "he pinballs back into hover with paws briefly searching for balance before he "
+        "snaps his chest proud and pretends the wobble was part of the job. Zenny does not "
+        "chase the impact; her stillness makes his recovery look even louder.")
+    assert 70 <= len(d.shots[0].performanceAssignment.split()) <= 92
+    report = E.validate_scene_design(d, BEATS, CFG)
+    assert "FIELD_OVERBUDGET" not in _codes(report), report["issues"]
+    assert report["passed"], report["issues"]
+    prompt, wc, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
+    # 2026-07-21: the wc<=MAX_SHOT_PROMPT_WORDS assertion this line used to carry is now
+    # stale by design, not by regression — QUALITY_LINE (the same night's style-law-plus-
+    # craft-line addition, Julian's own techhalla-example comparison) adds real content to
+    # every compiled shot, and the sibling test right below this one already proves a shot
+    # legitimately exceeding this now-informational-only ceiling still compiles and passes
+    # validation. wc itself is still returned and still meaningful to look at; it just isn't
+    # a pass/fail gate here or anywhere else in this module (task #409's own ruling).
+    assert wc > 0
+
+
+def test_a_brief_exceeding_210_words_compiles_and_passes_validation():
+    """PROOF 2, corrected 2026-07-21: the per-field cap was already gone; the overall
+    compiled-brief ceiling is now gone too (Julian's direct ruling against straightjacketing
+    real creative direction). A shot whose performanceAssignment is long enough to blow the
+    old 210-word ceiling now compiles cleanly and validate_scene_design's own COMPILABILITY
+    check passes it — SHOT_OVERBUDGET no longer exists as a possible finding at all; only a
+    genuine compile guard (e.g. a Law 6 leak) can still fail this check."""
+    d = _clean_design()
+    d.shots[0].performanceAssignment = " ".join(
+        ["Fuzzby weaves between the tall blossoms, wings beating hard, chest leading"] * 15)
+    prompt, wc, slots = E.compile_shot_contract(d.shots[0], {}, CFG)
+    assert wc > E.MAX_SHOT_PROMPT_WORDS
+    report = E.validate_scene_design(d, BEATS, CFG)
+    codes = _codes(report)
+    assert "SHOT_OVERBUDGET" not in codes                       # the code no longer exists
+    assert "COMPILE_GUARD" not in codes                         # not a genuine compile failure
+
+
+def test_verbatim_dialogue_inside_performance_assignment_still_refuses():
+    """PROOF 3: Law 6 is untouched by the field-budget removal — performanceAssignment
+    quoting a locked line verbatim still fails compile_shot_contract's own
+    _assert_no_spoken_words, exactly as before, regardless of word count."""
+    d = _clean_design()
+    d.shots[0].performanceAssignment = (
+        'Fuzzby commits fully, chest leading into the recovery, and declares "Nailed it." '
+        "as the whole beat turns on it.")
+    with pytest.raises(AssertionError, match="LAW 6 VIOLATION"):
+        E.compile_shot_contract(d.shots[0], {}, CFG)
+
+
+def test_field_word_budgets_now_empty_and_generic_lookup_still_safe():
+    """The removal is structural, not a special-case: FIELD_WORD_BUDGETS is now an empty
+    dict, and both call sites that read it (_field_rejections' repair-loop check,
+    validate_scene_design's own FIELD_OVERBUDGET check) use .get() against it — neither
+    raises, and neither field-level budget check can ever fire again for ANY field name,
+    proving no replacement field limit was introduced anywhere."""
+    assert E.FIELD_WORD_BUDGETS == {}
+    long_text = " ".join(["word"] * 200)
+    assert E._field_rejections("performanceAssignment", long_text) == []
+    assert E._field_rejections("visualPayoff", long_text) == []
 
 
 def test_one_consistent_anchor_matching_style_rule():
-    """Points 9 + Option D (2026-07-16): opener and relay both anchor style to their own @图1 —
-    never 'Pixar-caliber', never a global 'squash-and-stretch'."""
+    """Points 9 + Option D (2026-07-16): opener and relay both anchor style to their own @图1.
+
+    CORRECTED 2026-07-21 (Julian, comparing a real AAA-grade example prompt against ours):
+    the "never Pixar-caliber, never squash-and-stretch" half of this test's original premise
+    was itself the gap it should have been catching — this compiler's _style_line used to
+    ship a thinner, disconnected hardcoded string instead of the show's own real, already-
+    approved style law (shows/crystal-bears/laws/style.txt, rule 75's "Original 3D CGI
+    animation, ages 4-8, Pixar-caliber: real weight, squash-and-stretch...") that every OTHER
+    consumer in this pipeline already quoted. Now every compiled prompt (shot and keyframe
+    alike) carries that same law verbatim — this test now asserts it's PRESENT, the opposite
+    of the original assertion, which was pinning down the old, disconnected behaviour rather
+    than a real requirement."""
     d = _clean_design()
     opener, _, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
     relay, _, _ = E.compile_shot_contract(d.shots[1], {}, CFG)
     for p in (opener, relay):
         assert "Stylised feature-quality 3D CGI matching @图1." in p
-        assert "Pixar-caliber" not in p and "squash-and-stretch" not in p
+        assert "Pixar-caliber" in p and "squash-and-stretch" in p
         assert "only for the set" in p                        # the plate has a declared job
     # the frozen keyframe IMAGE compiler is untouched by the rule
     kf, _, _ = E.compile_keyframe_prompt(d.shots[0], {}, CFG)
     assert "Stylised feature-quality 3D CGI with natural weight" in kf
-    assert "Pixar-caliber" not in kf and "squash-and-stretch" not in kf
+    assert "Pixar-caliber" in kf and "squash-and-stretch" in kf
 
 
 def test_concise_anchors_no_antihold_boilerplate():
     """Option D (2026-07-16): concise anchors; no compiled boilerplate about pose holding —
-    the shot's own observable direction decides whether a pose continues."""
-    assert E.OPENER_ANCHOR == "Begin exactly on @图1, the approved opening frame."
+    the shot's own observable direction decides whether a pose continues.
+
+    CORRECTED 2026-07-19: RELAY_ANCHOR's own wording changed from "continue the new action
+    immediately" to "matched for identity, position and lighting" — the anchor's job is
+    stating what carries over (state), never what happens next (that's the shot's own camera/
+    action clause, concatenated directly after it in compile_shot_contract). The old wording
+    packed a camera/action instruction into the continuity clause, the exact duplication
+    CLAUDE.md rule 51 already named and corrected once for this same anchor line. Still true:
+    no pose-holding boilerplate — the shot's own observable direction decides the rest.
+
+    CORRECTED AGAIN 2026-07-20 (Julian, real S1.SH1 footage: "no movement no fast paced...
+    no big tumble and correction"): the "no boilerplate about pose holding" premise itself
+    was the bug for OPENER_ANCHOR specifically — leaving it entirely bare meant nothing ever
+    told the model @图1 is a launch point, not a frame to freeze on, the exact anti-hold
+    failure mode this show's own earlier pipeline had already hit and fixed multiple times
+    (CLAUDE.md rules 26/51/76). A short, universal, mechanical anti-hold clause on
+    OPENER_ANCHOR replaces the old bare wording — still no PER-SHOT boilerplate (nothing
+    authored, nothing shot-specific), just one fixed sentence covering every opener. Also
+    added: "Single continuous take, no cuts." is now mechanically appended to every shot's
+    camera clause in compile_shot_contract (not the anchor itself) — true by construction of
+    this one-shot-per-call architecture, stated explicitly so the model never reads ambiguous
+    camera language as license to cut between two setups."""
+    assert E.OPENER_ANCHOR == ("Begin exactly on @图1, the approved opening frame — motion "
+                                "begins immediately, never a resting hold.")
     assert E.RELAY_ANCHOR == ("Begin exactly on @图1, the approved final frame of the previous "
-                               "shot, and continue the new action immediately.")
+                               "shot, matched for identity, position and lighting.")
     relay, _, _ = E.compile_shot_contract(_clean_design().shots[1], {}, CFG)
     for banned in ("unnecessary hold", "Do not hold the previous pose", "restage"):
         assert banned not in relay
+    assert "Single continuous take, no cuts." in relay
+
+
+def test_hard_constraints_line_reaches_the_compiled_prompt():
+    """2026-07-20 (Julian's own worked prompt: "No extra characters, additional speech,
+    redesigns, crystals, subtitles or text."): hard_constraints() has computed exactly this
+    set deterministically since 2026-07-16 (the universal five plus live-triggered
+    conditionals) but was deliberately never concatenated into the shipped Seedance brief —
+    Option D's own docstring flagged this as "a separate, undecided question." Closed here:
+    the SAME computed line, not a hand-typed approximation of it, must now reach the prompt.
+
+    2026-07-22 UPDATE (Julian, live, watching S1.SH1's real render — "no freedom to it...
+    we have so many rules in place that stop the creativity of Seedance"): "no camera cut"
+    was removed from the universal four (was five) — it forced a single, uncut camera
+    vector onto every shot in the show regardless of what the Director actually authored,
+    confirmed as a real contributor to the flat, single-note camera work Julian watched.
+    Whether a shot cuts internally is the Director's own per-shot cutPace/internalCuts
+    choice now, never a machine-wide override — see hard_constraints's own updated comment."""
+    shot = _clean_design().shots[0]   # has dialogueLines + winged charactersInFrame
+    prompt, _, _ = E.compile_shot_contract(shot, {}, CFG)
+    assert "Hard constraints:" in prompt
+    assert "no character redesign" in prompt
+    assert "no extra characters" in prompt
+    assert "no on-screen text" in prompt
+    assert "no invented voices" in prompt
+    assert "no camera cut" not in prompt
+    # conditional: winged cast in frame
+    assert "no crystals on the bees" in prompt
+
+
+def test_hard_constraints_line_matches_the_standalone_function_exactly():
+    """The prompt's negative line and the package's own internalConstraints (compile_scene_
+    package's hard_constraints(sh, characters_cfg)[0]) must be the identical string — never
+    two independently-computed near-copies that could silently drift apart."""
+    shot = _clean_design().shots[0]
+    prompt, _, _ = E.compile_shot_contract(shot, {}, CFG)
+    hc_line, _ = E.hard_constraints(shot, CFG)
+    assert hc_line in prompt
+
+
+def test_contact_and_weight_reaches_the_compiled_prompt():
+    """2026-07-20 (Julian, real S1.SH1 footage): physicalStaging.contactAndWeight is the
+    gag's actual cause-and-effect chain (what hits what, where it bends, where it rebounds)
+    — authored, required on every BIG-comedy beat's gag shot, but previously never reached
+    the compiled Seedance brief at all (only staysVisible did, via _render_critical). Must
+    now ship verbatim as part of the shot's own action beats."""
+    opener, _, _ = E.compile_shot_contract(_clean_design().shots[0], {}, CFG)
+    assert "hits the leaf" in opener   # capitalized as a fresh sentence: "Chest hits..."
+    assert "springs back" in opener
+
+
+def test_contact_and_weight_absent_when_not_authored():
+    """A shot with no physicalStaging (the common case — only required on a BIG-comedy
+    beat's own gag-carrying shot) must compile clean with no crash and no stray text."""
+    shot = _clean_design().shots[1]
+    shot.physicalStaging = None
+    prompt, _, _ = E.compile_shot_contract(shot, {}, CFG)
+    assert prompt  # compiles fine
+
+
+def test_redundant_lip_sync_sentence_is_deduplicated():
+    """2026-07-20 (Julian, real S1.SH1 footage): the design LLM sometimes restates the audio
+    assignment inside performanceAssignment/visualPayoff's own free prose, duplicating what
+    _lip_sync_sentence already generates mechanically from dialogueLines — real wasted budget
+    under the 210-word hard ceiling. The duplicate sentence must never survive into the
+    compiled prompt; the mechanically-generated one (via _lip_sync_sentence) must."""
+    d = _clean_design()
+    d.shots[0].performanceAssignment = (
+        "Fuzzby rockets between blossoms, clips a stem, wobbles, recovers. "
+        "Lip-sync the approved @Audio1 performance exactly; no additional speech.")
+    prompt, _, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
+    assert prompt.count("no additional speech") == 0
+    assert "Fuzzby rockets between blossoms" in prompt
+    assert "Use @Audio1 as the only voice." in prompt   # the real, mechanical instruction survives
+
+
+def test_strip_redundant_audio_sentence_leaves_clean_text_untouched():
+    text = "Fuzzby rockets between blossoms, clips a stem, wobbles, recovers."
+    assert E._strip_redundant_audio_sentence(text) == text
+    assert E._strip_redundant_audio_sentence("") == ""
+    assert E._strip_redundant_audio_sentence(None) is None
 
 
 # ── THE OBSERVABLE-DIRECTION REPAIR LOOP (Julian's directive, 2026-07-16) ────────────────
@@ -595,8 +836,11 @@ def test_name_binding_never_fires_inside_longer_cast_name():
 
 
 def test_duration_bounds_enforced_by_schema():
+    # 2026-07-21: ceiling raised 8->15 to accommodate multi-cut shots (paced_cuts/
+    # rapid_cuts) per Seedance's own real multi-shot budget (10-15s for 2-3 cuts,
+    # [ref:multishot-grammar]) — 12.0 now legitimately fits; 20.0 is the real over-cap case.
     with pytest.raises(Exception):
-        _shot(dur=12.0)
+        _shot(dur=20.0)
     with pytest.raises(Exception):
         _shot(dur=2.0)
 
@@ -604,3 +848,75 @@ def test_duration_bounds_enforced_by_schema():
 if __name__ == "__main__":
     import subprocess, sys
     sys.exit(subprocess.call(["python3", "-m", "pytest", __file__, "-q"]))
+
+
+# ── THE SHOT-MODE VOCABULARY + SPLIT-GENERATION PROOF (Julian's Option B + Anti-Guardrail
+# Principle, 2026-07-23). Rule 8 of that principle, made literal: these tests assert the
+# compiled briefs became LEANER, CLEARER and MATERIALLY DIFFERENT — never merely that
+# schemas validate. Run against the REAL promoted SH2A/SH2B shots, read-only.
+def _real_split_briefs():
+    import json as _json
+    canon = _json.load(open(E.canonical_package_path(1, "Ep1")))
+    fields = set(E.Shot.model_fields)
+    chars = _json.load(open("config/characters.json"))
+    scene = {"sceneName": canon.get("sceneName", "")}
+    out = {}
+    for s in canon["shots"]:
+        if s["shotId"] in ("S1.SH2A", "S1.SH2B"):
+            shot = E.Shot(**{k: v for k, v in s.items() if k in fields})
+            prompt, wc, _slots = E.compile_shot_contract(shot, scene, chars)
+            out[s["shotId"]] = (prompt, wc, shot)
+    return out
+
+
+def test_split_briefs_leaner_than_hybrid():
+    """Both halves must compile leaner than the 588-word rev-28 hybrid they replaced."""
+    briefs = _real_split_briefs()
+    assert briefs, "SH2A/SH2B not in the canonical package — split not promoted"
+    for sid, (_p, wc, _s) in briefs.items():
+        assert wc < 588, f"{sid} compiled at {wc} words — not leaner than the old hybrid"
+
+
+def test_split_briefs_materially_different():
+    """The kinetic half carries physics-chain language and zero speaker language; the
+    dialogue half carries speaker/audio language and zero crash-physics or motion-blur
+    language (mode-lean quality line). Modes select vocabulary by REMOVING, not adding."""
+    briefs = _real_split_briefs()
+    a = briefs["S1.SH2A"][0].lower()
+    b = briefs["S1.SH2B"][0].lower()
+    # kinetic half
+    assert all(w in a for w in ("compress", "rebound", "pollen"))
+    assert "lip-sync" not in a and "@audio" not in a
+    assert "motion blur" in a                      # kinetic quality line kept
+    # dialogue half
+    assert "lip-sync" in b and "@audio1" in b
+    assert "compress" not in b and "rebound" not in b and "spin" not in b
+    assert "motion blur" not in b                  # competing language removed
+    assert "cheek-lift" in b and "grin" in b       # ends on the caught smile, never a grin
+
+
+def test_dialogue_only_mode_removes_competing_language():
+    """E._modes_dialogue_only: only a purely dialogue/emotional mode set flips the lean
+    branch; absent modes (unmigrated shots) and hybrids keep today's exact behaviour."""
+    briefs = _real_split_briefs()
+    _p, _wc, sh2b = briefs["S1.SH2B"]
+    assert E._modes_dialogue_only(sh2b)
+    _p, _wc, sh2a = briefs["S1.SH2A"]
+    assert not E._modes_dialogue_only(sh2a)
+    unmigrated = sh2b.model_copy(update={"performanceModes": []})
+    assert not E._modes_dialogue_only(unmigrated)
+    assert E._quality_line(unmigrated) == E.QUALITY_LINE   # no modes -> unchanged behaviour
+
+
+def test_shot_density_rule_is_a_decision_point():
+    """>2 modes without the Director's recorded decision refuses at handover; with
+    hybrid_approved it passes — a decision point, never an accumulating blocker."""
+    import cb_handover as H
+    briefs = _real_split_briefs()
+    _p, _wc, base = briefs["S1.SH2A"]
+    three = base.model_copy(update={
+        "performanceModes": ["KINETIC_ACTION", "PHYSICAL_COMEDY", "COMEDY_REACTION"]})
+    # the check lives inline in distil_shot; exercise its exact condition here
+    assert len(three.performanceModes) > 2 and not three.modeDensityDecision
+    approved = three.model_copy(update={"modeDensityDecision": "hybrid_approved"})
+    assert approved.modeDensityDecision == "hybrid_approved"

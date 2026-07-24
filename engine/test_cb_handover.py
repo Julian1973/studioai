@@ -44,6 +44,9 @@ def _sb_shot(shot_id, beat_ids, transition, protections=None):
             "physicalPerformance": "Weight lands late, wings recover first, the whole body "
                                      "reads the overcommitment before he does.",
             "animationTiming": "Fast in, held rebound, a small settle before the next beat.",
+            "cutPace": "single_continuous_take",
+            "cutPaceReason": "A single unbroken take lands this gag cleanest.",
+            "internalCuts": [],
             "approvalState": "draft"}
 
 
@@ -169,13 +172,97 @@ def test_storyboard_is_sole_creative_source():
     pkg = H.promote(sb_p, pkg_p, dry_run=False, log=lambda *a, **k: None)
     sb = _storyboard()
     s1 = pkg["shots"][0]
-    assert s1["performanceAssignment"] == sb["shots"][0]["principalPerformance"]   # verbatim
+    # 2026-07-17 Law 6 source correction: performanceAssignment sources physicalPerformance
+    # (Gate 5's body-first field), never principalPerformance (Gate 4's own read, which
+    # quotes locked dialogue verbatim on real shots) — principalPerformance is retained,
+    # verbatim, as provenance, never as the compiled source. See
+    # test_performance_assignment_sources_physical_performance_never_principal_performance
+    # for the general, dialogue-leak-specific proof this correction exists to satisfy.
+    assert s1["performanceAssignment"] == sb["shots"][0]["physicalPerformance"]   # verbatim
+    assert s1["principalPerformanceApproved"] == sb["shots"][0]["principalPerformance"]  # retained, not dropped
     assert s1["camera"] == sb["shots"][0]["cameraRelationship"]
     assert s1["openingPose"] == sb["shots"][0]["openingImage"]
     assert s1["visualPayoff"] == sb["shots"][0]["closingImage"]
     assert s1["continuityProseIn"] == sb["productionDetail"][0]["continuityIn"]    # retained
     assert "OLD-CREATIVE-SOURCE-MARKER" not in json.dumps(pkg)   # nothing of rev 6 survives
     assert pkg["sourceStoryboard"]["md5"] == _md5(sb_p)          # provenance binds the source
+
+
+# ── THE 2026-07-17 LAW 6 SOURCE CORRECTION — GENERAL PROOF, EVERY SHOT ─────────────────
+# Julian's directive: principalPerformance quotes locked dialogue verbatim on real approved
+# shots (a genuine Law 6 violation cb_engine.compile_shot_contract's own _assert_no_spoken_
+# words correctly refuses); physicalPerformance was verified — every shot in the real
+# approved Ep1 Scene 1 storyboard, not just S1.SH1 — to carry the complete approved physical
+# acting direction WITHOUT any locked dialogue. This is the GENERAL fixture-driven proof of
+# that fact, deliberately shaped so it would fail on the OLD mapping and pass on the
+# corrected one, for a spread of distinct shots with distinct dialogue — never hardcoded to
+# one shot's own text.
+_LEAKY_LINES = {
+    "S1.LEAK1": ("FUZZBY", "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…"),
+    "S1.LEAK2": ("FUZZBY", "Do I look official?"),
+    "S1.LEAK3": ("ZENNY", "A Storm's coming."),
+    "S1.LEAK4": ("FUZZBY", "Good thing I work well under pressure."),
+}
+
+
+def _leaky_shot(shot_id, speaker, line):
+    """A synthetic shot whose approved principalPerformance quotes ITS OWN locked line
+    verbatim (exactly the shape found on 6 of 7 real Scene-1 shots) while physicalPerformance
+    stays strictly body-first and dialogue-free — the two fields' real, verified contract."""
+    s = _sb_shot(shot_id, [f"beat-{shot_id}"], "PLANNED_CUT")
+    s["principalPerformance"] = (f'{speaker.title()} commits to the line, delivering '
+                                  f'"{line}" as the whole beat turns on it.')
+    s["physicalPerformance"] = ("Weight shifts forward through the chest, wings hold a "
+                                 "steady beat, the whole posture leans into the moment "
+                                 "before it releases.")
+    return s
+
+
+def test_performance_assignment_sources_physical_performance_never_principal_performance():
+    """THE GENERAL PROOF (Julian's directive — 'add a general test... do not patch
+    S1.SH1'): for a spread of distinct shots, each with its OWN locked dialogue quoted in
+    its OWN principalPerformance, distil_shot()'s performanceAssignment must equal
+    physicalPerformance verbatim, must NEVER equal or contain principalPerformance, and the
+    resulting Shot must compile through the real cb_engine.compile_shot_contract with zero
+    Law 6 violation — proving physicalPerformance is genuinely dialogue-safe, not just
+    coincidentally so for one shot."""
+    chars_cfg = {"Fuzzby": {"avoid": ""}, "Zenny": {"avoid": ""}}
+    for shot_id, (speaker, line) in _LEAKY_LINES.items():
+        sb_shot = _leaky_shot(shot_id, speaker, line)
+        pd = _pd(shot_id, True, names_speaker=True)
+        vp = _vp(speaker, line)
+        shot, retained = H.distil_shot(sb_shot, pd, ["Fuzzby", "Zenny"], [vp], None, chars_cfg)
+
+        # the mapping itself: physicalPerformance, verbatim, never principalPerformance
+        assert shot.performanceAssignment == sb_shot["physicalPerformance"]
+        assert shot.performanceAssignment != sb_shot["principalPerformance"]
+        assert line not in shot.performanceAssignment
+        # principalPerformance is retained as provenance — never silently dropped
+        assert retained["principalPerformanceApproved"] == sb_shot["principalPerformance"]
+
+        # the REAL compiler: compiles clean, zero Law 6 violation
+        prompt, wc, slots = cb_engine.compile_shot_contract(
+            shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+        assert line not in prompt
+        assert wc <= cb_engine.MAX_SHOT_PROMPT_WORDS
+
+        # THE REGRESSION PIN: the OLD mapping (performanceAssignment=principalPerformance)
+        # would have failed this exact shot — proves the fix addresses a real defect, not a
+        # hypothetical one.
+        old_mapping_shot = shot.model_copy(update={"performanceAssignment": sb_shot["principalPerformance"]})
+        with pytest.raises(AssertionError, match="LAW 6 VIOLATION"):
+            cb_engine.compile_shot_contract(
+                old_mapping_shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+
+
+def test_distil_shot_refuses_when_physical_performance_not_yet_authored():
+    """A shot whose Gate-5 physical-performance pass hasn't run yet must refuse loudly,
+    never silently fall back to the dialogue-risky principalPerformance."""
+    sb_shot = _sb_shot("S1.SH9", ["1.B1"], "PLANNED_CUT")
+    sb_shot["physicalPerformance"] = ""          # not yet authored
+    pd = _pd("S1.SH9", True)
+    with pytest.raises(H.HandoverRefused, match="no Gate-5 physicalPerformance"):
+        H.distil_shot(sb_shot, pd, ["Fuzzby", "Zenny"], [], None, {})
 
 
 # ── req 3: only the distilled categories, structure honoured ──────────────────────────
@@ -216,8 +303,16 @@ def test_no_production_detail_refuses():
 def test_internals_never_enter_package_or_brief():
     sb_p, pkg_p = _tmp()
     pkg = H.promote(sb_p, pkg_p, dry_run=False, log=lambda *a, **k: None)
-    dump = json.dumps(pkg, ensure_ascii=False)
-    for banned in (JUDGEMENT_MARKER, REJECTED_MARKER, CANON_MARKER, "Hard constraints:",
+    # CORRECTED 2026-07-20 (same reasoning as _assert_no_internal_leak's own dated
+    # correction, above): "Hard constraints:" is now a deliberate, intentional substring of
+    # every shot's own seedancePrompt (cb_engine.compile_shot_contract concatenates
+    # hard_constraints()'s line into the shipped brief) — checked here at the SHOT level
+    # instead of the whole-package dump, so this test still proves the genuine creative-
+    # room-reasoning markers never leak anywhere, without false-failing on the one field
+    # that's now supposed to carry that exact text.
+    dump = json.dumps([{k: v for k, v in s.items() if k != "seedancePrompt"}
+                        for s in pkg["shots"]], ensure_ascii=False)
+    for banned in (JUDGEMENT_MARKER, REJECTED_MARKER, CANON_MARKER,
                     "showrunnerJudgement", "internalRevisions", "treatments",
                     "treatmentSelection"):
         assert banned not in dump, banned
@@ -427,13 +522,22 @@ def test_duration_normalized_to_midpoint_for_fixed_provider_duration():
 
 
 # ── THE SOURCE-LEVEL HANDOVER: creative-room storyboard -> canonical package (2026-07-17) ──
-def test_internal_leak_check_exempts_only_internalConstraints_field():
+def test_internal_leak_check_exempts_internalConstraints_and_seedancePrompt():
     """2026-07-17 correction: internalConstraints legitimately starts with 'Hard
     constraints:' (cb_engine.hard_constraints' own real text) — must not false-positive.
-    Every other field, and every other banned term, is still checked exactly as before."""
+
+    CORRECTED 2026-07-20 (Julian's own worked prompt closed the negatives gap
+    cb_engine.compile_shot_contract's own docstring had named "a separate, undecided
+    question": hard_constraints()'s line is now deliberately concatenated into the shipped
+    seedancePrompt too, not just internalConstraints). seedancePrompt is exempted the same
+    way — its own 'Hard constraints:' text is the identical, intentional, compiler-generated
+    line, never a leak. Every OTHER field, and every other banned term, is still checked
+    exactly as before."""
     clean = [{"shotId": "S1.SH1", "internalConstraints": "Hard constraints: no crystals on bees."}]
     H._assert_no_internal_leak(clean)          # must not raise
-    leaky_elsewhere = [{"shotId": "S1.SH1", "seedancePrompt": "Hard constraints: leaked here too"}]
+    clean_prompt = [{"shotId": "S1.SH1", "seedancePrompt": "...\n\nHard constraints: no crystals."}]
+    H._assert_no_internal_leak(clean_prompt)   # must not raise — the new intentional field
+    leaky_elsewhere = [{"shotId": "S1.SH1", "notes": "Hard constraints: leaked here too"}]
     with pytest.raises(H.HandoverRefused, match="Hard constraints"):
         H._assert_no_internal_leak(leaky_elsewhere)
     real_leak = [{"shotId": "S1.SH1", "internalConstraints": "Hard constraints: fine",
@@ -571,6 +675,118 @@ def test_promote_to_canonical_refuses_when_not_approved(tmp_path, monkeypatch):
         H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
                                 dry_run=True, log=lambda *a, **k: None)
     assert list(pkg_dir.iterdir()) == []
+
+
+# ── THE FRESHNESS GUARD (Julian's state-integrity directive, 2026-07-20) ────────────────
+def test_rejection_history_and_model_limited_status_survive_a_concurrent_promotion(
+        tmp_path, monkeypatch):
+    """THE EXACT REGRESSION tonight's real incident demands: pending candidates -> two real
+    reject_shot decisions -> model-limited -> a package promotion whose own old_pkg
+    snapshot was taken BEFORE those rejections landed, attempting to write AFTER they did
+    -> the rejection history and model-limited status must survive completely unchanged
+    (the promotion must REFUSE, never silently clobber). Exercises the real cb_render.
+    reject_shot and cb_handover.promote_to_canonical functions end to end against a
+    scratch package — never a hand-edited JSON standing in for either.
+
+    promote_to_canonical genuinely has no external call between its own old_pkg read and
+    its final write (pure in-memory dict construction the whole way) — there is no natural
+    seam to interleave a concurrent writer through. This proves the exact race by wrapping
+    pathlib.Path.read_bytes itself: the FIRST call on the live package path (promote_to_
+    canonical's own old_pkg_bytes capture) transparently returns the real, un-raced content
+    — then, as a side effect of having just been read, fires the two real, concurrent
+    reject_shot calls for real, mutating the live file on disk. Every LATER read_bytes call
+    (including this fix's own freshness re-check) sees the genuinely mutated file — exactly
+    what a slower promotion racing a faster concurrent writer would actually observe."""
+    import cb_render as R
+    import pathlib as _pathlib
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    old_path = pkg_dir / "Ep1_scene1_production_package.json"
+
+    cand_dir = tmp_path / "cands"
+    cand_dir.mkdir()
+    c1, c2 = cand_dir / "c1.mp4", cand_dir / "c2.mp4"
+    c1.write_bytes(b"fake mp4 one")
+    c2.write_bytes(b"fake mp4 two")
+    seed = {"episode": "Ep1", "sceneNumber": "1", "revision": 6,
+            "shots": [{"shotId": "S1.SH1", "performanceAssignment": "SEED"}],
+            "continuityLedger": [{"shotId": "S1.SH1", "status": "candidates-pending",
+                                    "candidatePaths": [str(c1), str(c2)],
+                                    "batchId": "S1.SH1-b1-RACE"}],
+            "validation": {"passed": True}}
+    json.dump(seed, open(old_path, "w"))
+
+    # reject_shot itself operates through cb_render's own load_pkg/_save (and cb_engine.
+    # canonical_package_path for path resolution) — both already patched to this scratch
+    # package by _canonical_env; only the module-level load_pkg/_save wiring needs the
+    # same scratch redirection reject_shot's own callers get in production.
+    monkeypatch.setattr(R, "load_pkg",
+                        lambda scene, episode="Ep1": (json.load(open(old_path)), old_path))
+    monkeypatch.setattr(R, "_save",
+                        lambda pkg, path: json.dump(pkg, open(path, "w"), indent=1))
+
+    real_read_bytes = _pathlib.Path.read_bytes
+    fired = []
+
+    def racy_read_bytes(self):
+        data = real_read_bytes(self)
+        if str(self) == str(old_path) and not fired:
+            fired.append(True)
+            # THE RACE: two real, concurrent rejections land on the live file immediately
+            # after promote_to_canonical's own snapshot was taken, before it ever reaches
+            # its own write.
+            R.reject_shot("1", "S1.SH1", "first failure", category="action-timing",
+                          episode="Ep1", log=lambda *a, **k: None)
+            c3 = cand_dir / "c3.mp4"
+            c3.write_bytes(b"fake mp4 three")
+            pkg2 = json.load(open(old_path))
+            R._ledger(pkg2, "S1.SH1").update({"status": "candidates-pending",
+                                                "candidatePaths": [str(c3)],
+                                                "batchId": "S1.SH1-b2-RACE"})
+            json.dump(pkg2, open(old_path, "w"), indent=1)
+            R.reject_shot("1", "S1.SH1", "second failure", category="action-timing",
+                          episode="Ep1", log=lambda *a, **k: None)
+        return data
+    monkeypatch.setattr(_pathlib.Path, "read_bytes", racy_read_bytes)
+
+    with pytest.raises(H.HandoverRefused, match="changed underneath this promotion"):
+        H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                               dry_run=False, log=lambda *a, **k: None)
+
+    assert fired == [True]                     # the race genuinely ran during this call
+    live = json.load(open(old_path))
+    assert live["revision"] == 6                # never bumped — the promotion never wrote
+    led = R._ledger(live, "S1.SH1")
+    assert led["status"] == "model-limited"
+    assert led["batchAttempts"] == 2
+    assert len(led["rejections"]) == 2
+    assert [r["correction"] for r in led["rejections"]] == ["first failure", "second failure"]
+
+
+# ── THE CLEAN-FAILURE FIX (2026-07-22): a real Law 6 leak found live in the Studio ─────
+# ("shot:advance:S1.SH1 — Failed — see log", a raw AssertionError traceback) crashed the
+# whole job because promote_to_canonical's own compile step let the compiler's bare
+# AssertionError propagate uncaught — advance_shot's only catch is HandoverRefused. This
+# must now surface as a clean, actionable refusal instead of an unhandled crash.
+def test_a_real_law6_leak_in_authored_content_refuses_cleanly_never_crashes(tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    sb = json.load(open(sb_p))
+    sh1 = next(s for s in sb["shots"] if s["shotId"] == "S1.SH1")
+    # Reproduces the exact real defect: an authored internalCuts entry quoting the beat's
+    # own locked dialogue verbatim (the beat's exactDialogue is "FUZZBY: Nailed it.",
+    # matched by _vp("FUZZBY", "Nailed it.") too) inside a multi-cut shot.
+    sh1["cutPace"] = "paced_cuts"
+    sh1["internalCuts"] = [
+        "Fuzzby overshoots the flower as the camera pursues, ending on the near-miss.",
+        "Fuzzby pops back into an official hover for “Nailed it.” as the leaf "
+        "settles, ending on the pollen betraying him.",
+    ]
+    json.dump(sb, open(sb_p, "w"))
+
+    with pytest.raises(H.HandoverRefused, match="S1.SH1 failed compilation"):
+        H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                               dry_run=True, log=lambda *a, **k: None)
+    # never a bare AssertionError reaching the caller — that's the whole point of the fix
+    assert list(pkg_dir.iterdir()) == []          # a dry run + a refusal both write nothing
 
 
 if __name__ == "__main__":

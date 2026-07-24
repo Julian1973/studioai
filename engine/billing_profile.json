@@ -3,9 +3,11 @@
  "_note": "THE BILLING PROFILE (Julian's directive, 2026-07-16): pricing is configured HERE, never hardcoded as a universal rate. Every value below is from the provider's OFFICIAL pricing page only. planConfirmed/cadenceConfirmed stay false until Julian confirms his actual plan and billing cadence \u2014 until then every derived cost is an ESTIMATED ALLOCATED COST (ex tax) under the published plan named, NEVER the verified account cost. Update this file when the plan is confirmed; every derived rate updates automatically and the ledger records the profile version used.",
  "elevenlabs": {
   "plan": "pro",
-  "planConfirmed": false,
+  "planConfirmed": true,
   "billingCadence": "monthly",
-  "cadenceConfirmed": false,
+  "cadenceConfirmed": true,
+  "confirmedBy": "Julian",
+  "confirmedAt": "2026-07-18",
   "cyclePriceUsdExTax": 99.0,
   "creditsPerCycle": 600000,
   "creditsPerCharacter": {

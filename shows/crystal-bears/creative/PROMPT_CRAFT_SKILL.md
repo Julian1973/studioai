@@ -22,6 +22,14 @@ Technical → spatial → emotional. In exactly this order, every shot:
 7. EMOTIONAL ANCHOR — close by naming what the shot MEANS. "Gives the model permission to
    make artistic choices aligned with intent." End with interpretive permission.
 
+## THE FRONT-LOADING RULE (AI-specific ordering, captured session #15)
+
+Within each layer of the build order: critical details come EARLY. Character identity
+before their action; the specific before the general; the detail that anchors generation
+before the detail that decorates it. "Not 'worried' but 'eyes widen, antenna twitches'" —
+concrete sensory language is what the model can actually execute; the abstract word is
+what it ignores.
+
 ## THE TIMING VOCABULARY (animation timing embedded in prose)
 
 - "Beat." = hold frame · "One beat. Two beats." = counted comic hold

@@ -263,6 +263,37 @@ Upstream of all writing — how the script is READ before a single shot is autho
    giants in shot 1 become "tiny... barely visible far below" by shot 16 — the camera now
    sees from the THREAT's perspective. Scale is a dial to turn mid-scene, not a constant.
 
+## THE TWELVE PRINCIPLES, PROMPTED (Thomas & Johnston applied to prompt text, session #21)
+
+The per-principle techniques not already covered elsewhere in this file:
+
+- **Pose-to-pose prompting**: each SENTENCE defines a key pose; the model fills the
+  in-betweens. "He speaks one word. Then braces. Plants his feet wider. Every muscle
+  tenses. He speaks again — STRONGER." Five sentences = five key poses = one readable
+  escalation. This is the sharpest mental model for action writing we hold.
+- **Slow in / slow out, for the CAMERA**: "slow crane down" = gradual acceleration from
+  rest; "VERY slow push-in" = deceleration into reverence. Ease curves are written as
+  adverbs on the movement.
+- **Arcs, named**: motion follows curves and the prompt says so — "smooth arcs between
+  flowers," "arcs through the air in a shower of spray." Never let a move read as a
+  straight line.
+- **Overlapping action**: body parts on different clocks — head shakes WHILE body wobbles,
+  eyes blink on their own timing — and the environment follows with a delay ("leaves and
+  rain swirl in his wake"). Simultaneous, distinguishable.
+- **Anticipation as loading**: "His body coils to dive" — the backward compression written
+  BEFORE the launch is what makes the launch feel powerful.
+- **Squash and stretch via simile**: "POPS back up like a cork" — the simile hands the
+  model a reference deformation it already knows.
+- **Exaggeration = sincerity comedy**: "This is genuinely the greatest news he has ever
+  received" (about honey). Absurd overstatement that is emotionally TRUE to the character
+  = comedy through sincerity, never mockery. THIS IS FUZZBY'S ENGINE, named at last.
+- **Solid drawing via weight cues**: "plants his feet wider" (base of support expands),
+  "the wristbands have weight" (the held object sags the paws). Mass written as its
+  consequences.
+- **STAGING'S THREE QUESTIONS** — the per-shot review test: from this one shot, does the
+  audience know (1) where to look, (2) what the character wants, (3) how they feel about
+  it? A shot that can't answer all three isn't staged yet.
+
 ## REFERENCE INTEGRATION (the four source traditions — our own synthesis, 2026-07-24)
 
 The register works because it speaks four established visual traditions the model was

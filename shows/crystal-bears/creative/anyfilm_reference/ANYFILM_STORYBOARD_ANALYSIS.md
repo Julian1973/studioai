@@ -121,6 +121,18 @@ What it adds:
    never names her grief aloud; the hand lingering on the wristbands carries it). If their
    Scene 3 storyboard is ever used, that clip's dialogue must be restaged wordless before it
    fires — same class as the Zenny-crystal flag above.
+3b. **CANON FLAG — Scene 6, clip 3 (oracle session #6, the manifest's Scene-6 extension):
+   the Crystal Call incantation is WRONG.** Their AIDA speaks "With open heart and love so
+   bright — Rose Quartz Crystal, shine your light!" — locked canon's verbatim incantation
+   (CRYSTAL_BEARS_LOCKED_CANON.md line 84) is **"With heart open wide, I stand with pride —
+   Rose Quartz, be our guide!"** A paraphrase of a Crystal Call is exactly the drift class
+   our own rule-45 sweep fixed in our package (6.B4/9.B2 snapped back to verbatim canon).
+   The same clip also has "Everyone — activate your crystal powers." — the identical
+   power-up framing our own Director once produced and rule 45 flagged (canon: the Call is
+   surrender, never activation). Their Scene 6 dialogue must be snapped to canon verbatim
+   before any of it fires. Pattern now confirmed three times: their storyboard is
+   script-faithful on ordinary dialogue but drifts on CANON-LOCKED ritual/emotion content —
+   run check_scene_dialogue_verbatim + the canon incantations over every scene before spend.
 4. Clip-level duration/characters/props/references are NOT stored in their project JSON
    (all UNKNOWN) — their clips derive cast/refs at generation time from the shot arrays,
    confirming the parallel-array schema as the single source of truth. Brick 2 does the same.

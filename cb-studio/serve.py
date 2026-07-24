@@ -2319,8 +2319,18 @@ class H(http.server.SimpleHTTPRequestHandler):
                     offset = float(d.get("offsetSec") or 0.0)
                 except (TypeError, ValueError):
                     offset = -1.0
-                if not (0.0 <= offset <= 14.0):
-                    self._json(400, {"error": "offsetSec must be a number between 0 and 14"}); return
+                # THE TARGET DURATION (2026-07-24, S1.SH3 retiming): the master's length was
+                # hardcoded 15.0 — but a shot whose own durationSec is shorter deserves a
+                # duration-MATCHED master (cb_render._handle_duration now fires exactly the
+                # master's length when it matches the shot's floor). Default stays 15.0.
+                try:
+                    target = float(d.get("targetSec") or 15.0)
+                except (TypeError, ValueError):
+                    target = -1.0
+                if not (1.0 <= target <= 15.0):
+                    self._json(400, {"error": "targetSec must be a number between 1 and 15"}); return
+                if not (0.0 <= offset <= target - 0.5):
+                    self._json(400, {"error": f"offsetSec must be a number between 0 and {target - 0.5}"}); return
                 if str(CBGEN) not in sys.path:
                     sys.path.insert(0, str(CBGEN))
                 import cb_render as _CBR
@@ -2339,14 +2349,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": f"{sid}'s approved take file is missing on disk ({vo})"}); return
                 shots_dir = MEDIA / "shots"
                 shots_dir.mkdir(parents=True, exist_ok=True)
-                out = shots_dir / f"{ep}_{sid}_vo_master15.mp3"
+                tgt_label = f"{target:g}"
+                out = shots_dir / f"{ep}_{sid}_vo_master{tgt_label}.mp3"
                 if src.resolve() == out.resolve():
-                    self._json(400, {"error": f"{sid}'s current take IS already the 15s master — "
+                    self._json(400, {"error": f"{sid}'s current take IS already the {tgt_label}s master — "
                                                f"pad from the original take (voProvenance.carriedFrom), "
                                                f"or regenerate the voice first"}); return
                 ms = int(round(offset * 1000))
                 p = subprocess.run(["ffmpeg", "-y", "-i", str(src),
-                                     "-af", f"adelay={ms}:all=1,apad", "-t", "15.0", str(out)],
+                                     "-af", f"adelay={ms}:all=1,apad", "-t", f"{target}", str(out)],
                                     capture_output=True, text=True, timeout=180)
                 if p.returncode != 0 or not out.exists():
                     self._json(500, {"error": "ffmpeg failed building the padded master: " +
@@ -2356,14 +2367,14 @@ class H(http.server.SimpleHTTPRequestHandler):
                 led["voPath"] = str(out)
                 led["voProvenance"] = {
                     "carriedFrom": str(vo), "md5": md5_8,
-                    "note": (f"15.0s padded master built mechanically with ffmpeg "
-                             f"(adelay {offset}s + apad, -t 15.0) from the already-approved take; "
+                    "note": (f"{tgt_label}s padded master built mechanically with ffmpeg "
+                             f"(adelay {offset}s + apad, -t {target}) from the already-approved take; "
                              f"audio content unaltered, no new voice generation. "
                              f"Built via the Studio by {by}.")}
                 _CBR._save(pkg, ppath)
                 approval = _CBR.approve_voice(
                     scene, sid, ep,
-                    reviewed_by=f"{by} (mechanical 15s pad of the already-approved take, "
+                    reviewed_by=f"{by} (mechanical {tgt_label}s pad of the already-approved take, "
                                  f"offset {offset}s — no new voice generation)",
                     log=lambda *a, **k: None)
                 reindex_media()

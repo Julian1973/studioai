@@ -26,14 +26,31 @@ def test_handle_duration_floors_at_handle_total_for_a_short_real_take(monkeypatc
 
 
 def test_handle_duration_stretches_past_handle_total_for_a_long_real_take(monkeypatch):
-    """A take longer than HANDLE_TOTAL - HANDLE_SETTLE must stretch the fire duration so the
-    real dialogue ALWAYS gets its full HANDLE_SETTLE (2s) of room after it ends, never less
-    — the literal ask ('2 seconds at the end to have for editing') applies even when the
-    take itself already runs past 13s."""
+    """RE-PINNED 2026-07-24: the original expectation (16.5/22.0 — unbounded stretch past
+    the take) predates THE PROVIDER CAP (2026-07-23, cb_render._handle_duration: BytePlus/
+    Seedance 400s outright on any duration > 15s, found live on a real fire). The stretch
+    principle still holds BELOW the cap; at/above it the cap wins, always."""
     monkeypatch.setattr(R, "_audio_dur", lambda p: 14.5)
-    assert R._handle_duration("vo.mp3") == 16.5
+    assert R._handle_duration("vo.mp3") == 15.0   # 14.5+2=16.5 -> provider cap clamps to 15
     monkeypatch.setattr(R, "_audio_dur", lambda p: 20.0)
-    assert R._handle_duration("vo.mp3") == 22.0
+    assert R._handle_duration("vo.mp3") == 15.0   # cap, never 22.0
+    monkeypatch.setattr(R, "_audio_dur", lambda p: 11.0)
+    assert R._handle_duration("vo.mp3") == 15.0   # below-cap floor: max(15, 11+2) = 15
+
+
+def test_handle_duration_matched_master_fires_exactly_the_master_length(monkeypatch):
+    """THE DURATION-MATCHED MASTER (2026-07-24, S1.SH3 retiming): a padded @Audio1 master
+    built to exactly the shot's own durationSec already contains its lead-in and settle
+    tail — the fire duration IS the master's length, never master+HANDLE_SETTLE (which
+    produced 2s of video past the audio's own end, an undefined tail)."""
+    monkeypatch.setattr(R, "_audio_dur", lambda p: 7.0)
+    assert R._handle_duration("vo_master7.mp3", 7.0) == 7.0      # matched -> exact
+    monkeypatch.setattr(R, "_audio_dur", lambda p: 15.0)
+    assert R._handle_duration("vo_master15.mp3", 15.0) == 15.0   # SH2's case, unchanged
+    monkeypatch.setattr(R, "_audio_dur", lambda p: 1.76)
+    assert R._handle_duration("vo.mp3", 7.0) == 7.0              # raw short take: floor wins
+    monkeypatch.setattr(R, "_audio_dur", lambda p: 6.0)
+    assert R._handle_duration("vo.mp3", 7.0) == 8.0              # NOT matched: 6+2 > floor
 
 
 def test_handle_duration_matches_the_real_s1sh1_take_end_to_end():
@@ -69,10 +86,10 @@ def test_fire_shot_overrides_durationSec_before_any_downstream_read(monkeypatch,
     monkeypatch.setattr(R, "_fresh_validation", lambda pkg, episode: None)
 
     captured = {}
-    def fake_binding_hash(pkg, shot, led, imgs, anchor, candidates, fast):
+    def fake_binding_hash(pkg, shot, led, imgs, anchor, candidates, fast, resolution="720p"):
         captured["binding_durationSec"] = shot["durationSec"]
         return "fakehash", 1.0
-    def fake_sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per):
+    def fake_sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per, resolution="720p"):
         captured["envelope_durationSec"] = shot["durationSec"]
         return {"durationSec": shot["durationSec"], "prompt": shot["seedancePrompt"]}, "fakeenvhash"
     monkeypatch.setattr(R, "_binding_hash", fake_binding_hash)
@@ -86,8 +103,12 @@ def test_fire_shot_overrides_durationSec_before_any_downstream_read(monkeypatch,
         R.fire_shot(1, "S1.SHX", episode="Ep1", candidates=1)
     except R.Refused:
         pass  # expected — this stub stops short of issuing a real spend token; the override already ran
-    assert captured.get("binding_durationSec") == 15.0
-    assert captured.get("envelope_durationSec") == 15.0
+    # RE-PINNED 2026-07-24: the original 15.0 expectation encoded the retired unconditional
+    # HANDLE_TOTAL floor. Since Julian's split-generation directive (2026-07-23), the shot's
+    # OWN durationSec (7.0 here) is the floor — the mocked 9.7s take + 2s settle = 11.7 wins.
+    # The property under test is unchanged: the override lands BEFORE binding/envelope.
+    assert captured.get("binding_durationSec") == 11.7
+    assert captured.get("envelope_durationSec") == 11.7
 
 
 def _minimal_shot(shot_id, beat_code, speaker="Fuzzby", text="Do I look official?"):

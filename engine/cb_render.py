@@ -3401,6 +3401,14 @@ def _handle_duration(vo_path, shot_duration=None):
     that don't know the shot), the previous HANDLE_TOTAL behaviour is preserved exactly."""
     real = _audio_dur(vo_path) if vo_path else 0.0
     floor = float(shot_duration) if shot_duration else float(HANDLE_TOTAL)
+    # THE DURATION-MATCHED MASTER (2026-07-24, found retiming S1.SH3 to 7s: a padded
+    # @Audio1 master built to exactly the shot's own durationSec ALREADY CONTAINS its
+    # leading silence and settle tail — adding HANDLE_SETTLE on top of it produced a video
+    # 2s longer than its own audio, an undefined tail the provider fills however it likes.
+    # SH2's 15s master only escaped this because the 15s provider cap happened to clamp
+    # the +2 back down). A master within 0.15s of the floor IS the fire duration, exactly.
+    if real and abs(real - floor) <= 0.15:
+        return round(min(floor, float(cb_engine.MAX_SHOT_SEC)), 1)
     # THE PROVIDER CAP (2026-07-23, found live: a 15.0s padded @Audio1 master + the 2s
     # settle produced duration=17, which BytePlus/Seedance rejected outright with a 400 at
     # task creation — the model's own hard ceiling is 15s, the same bound cb_engine.

@@ -123,6 +123,32 @@ Two refinements new to the file:
    scattering glows through petals."
 One language missing = the shot fails a register. All three = cinema.
 
+## THE PROSE RHYTHM LAYER (cadence mirrors motion, captured session #19)
+
+The sentence's own rhythm IS direction — the reader's pace becomes the shot's pace:
+
+- **MEDITATIVE ACTION → long flowing sentences**, comma-breaths, lingering detail: "Her paw
+  is steady, practiced, meditative. The wand traces a perfect circle." Reading speed =
+  wand speed.
+- **CHAOS → staccato fragments + verb pile-ups + onomatopoeia**: "Immediately — BONK — he
+  flies face-first into a branch. His body recoils, wobbles." No breath for the reader,
+  none for Fuzzby.
+- **BUILDING TENSION → sentences that shorten as they accelerate**: "He speaks one word.
+  Then braces. Plants his feet wider. Every muscle tenses. He speaks again — STRONGER."
+  Fragments as drum beats, CAPS as the crescendo.
+
+PUNCTUATION AS TIMING: period = beat/reset · comma = breath · em-dash = interruption
+("Then — a distant RUMBLE") · colon = anticipation ("Light shifts: warm amber dims") ·
+ellipsis = trailing uncertainty ("Okay… so if this is north…") · ALL CAPS = volume.
+The rhythm of the punctuation creates the rhythm of the scene — the calm sentence is
+interrupted BY the em-dash exactly when the calm is.
+
+SENSORY LAYERING: every important description carries multiple channels at once — visual +
+physical stance + implied sound + camera participation. And the GHOST-PRESENCE device: "the
+warmth of hands that once wore them" — touch-memory writes an absent character into an
+object without a word of exposition. History lives in texture ("worn leather grain, tiny
+scratches from years of wear").
+
 ## INSTRUCTION vs CINEMA (the 80% failure)
 
 - ❌ Instruction: "Close-up of Fuzzby. He looks worried. The storm is coming."

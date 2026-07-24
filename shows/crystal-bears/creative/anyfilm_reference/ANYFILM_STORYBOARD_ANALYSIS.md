@@ -207,6 +207,29 @@ Two consequences:
 Seedance is a video-generation model. One more proof the oracle invents anything outside
 its own JSON.)
 
+## The governance verdict (oracle session #11, 2026-07-24) — no approval layer exists at all
+
+Asked about approval/versioning/asset management, the oracle confirmed field-by-field from
+the project JSON: **their product has NO governance layer.** No approve/reject flags, no
+canon/lock system, no multi-take storage (editing a prompt OVERWRITES it — no history, no
+undo), no rollback/snapshots, no rejection tracking (a rejected asset leaves zero record and
+nothing prevents its reuse), no prompt→output provenance (prompts stored, but no generated
+asset URL is ever linked back), and zero spend/token audit of any kind. Its own summary:
+only the current/latest prompt of anything exists; everything else is gone the moment it
+changes.
+
+This is the third product layer confirmed empty (references/provenance → session #7, audio →
+session #9, governance → here), and it is the layer our studio is DEEPEST in: approval
+sidecars with reviewer identity, canon locks + gate cascade relocks, rejection archives with
+the correction on record, the retake ledger, `.gen.json` provenance per fire, and the spend
+ledger. Also retro-confirms the earlier "blind reroll" confession structurally — with no
+takes stored, comparison and one-variable retake discipline are IMPOSSIBLE in their product,
+not just unbuilt.
+
+FINAL COMPETITIVE PICTURE, one line: they win the authoring layer (storyboard expansion,
+the footage formula, agent UX — all adopted); we win everything after the prompt is written
+— identity anchoring, continuity, audio, governance, provenance, delivery.
+
 ## The oracle's own close-out (session #10, 2026-07-24) — and the real route to backend truth
 
 Asked for the model catalogue, the oracle finally answered with a flat, structured refusal:

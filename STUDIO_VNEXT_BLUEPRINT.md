@@ -194,6 +194,24 @@ per generation stage (wardrobes/stills/motion params/locations) and reinforces �
 rewrites — the authored prompt text. Set once at project start. Ours: the style law +
 per-stage injection, same shape.
 
+**FROM THE FULL WORKFLOW DOC (oracle session #3), five new nuggets:**
+1. **PIPE = PAUSE dialogue syntax**: `KEEN'S MUM: Wherever you go… | KEEN'S MUM: You'll
+   never be alone.` — splitting one speaker's line across pipe-separated repeats controls
+   pacing inside the formula. Added to the clip-prompt grammar.
+2. **3/4 VIEW is their primary character reference angle** (not front-on) — "generate 3/4
+   view for primary reference." Worth an A/B in our wardrobe/reference generation.
+3. **LOCATIONS ARE STATE VARIANTS, like wardrobes**: Crystal Cove exists three times
+   (sanctuary / storm-building / beach-arrival) with a deliberate palette arc (warm gold →
+   grey-blue → warm gold) tracking the emotional arc. Brick 2's location model: location ×
+   narrative state, palette-arc-aware — the environmental twin of wardrobe states.
+4. **THE STILL-PROMPT FORMULA**: [shot size, lens, movement] + [subject/action] +
+   [composition] + [lighting] + [emotional intent], 150-300 words — Brick 4's card shape.
+5. **THE FINAL MIX ORDER** (their unbuilt step; our cb_post already does most of it):
+   strip embedded audio → sync dialogue → SFX at action cues → music at emotional beats →
+   balance (dialogue fore, SFX mid, music back) → stereo master. Plus their per-scene
+   music intent map (playful flute→ominous brass / tender piano / heroic rise / urgent
+   percussion / warm strings) — seeds for our Giacchino-voiced Gate 5 brief.
+
 ## PART 2 — The agent layer (Julian: "the agent is always in the studio — we need that")
 
 Two agents, always present, both already within our reach because the engine is ours:

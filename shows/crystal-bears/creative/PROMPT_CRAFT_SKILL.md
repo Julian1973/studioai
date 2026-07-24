@@ -332,6 +332,32 @@ tradition's look:
    THE CRYSTAL BEARS HOUSE BLEND: Pixar performance + Disney comic timing + Miyazaki
    atmosphere for the world's quiet — stated here as our default mix.
 
+## THE WORKED MASTER EXAMPLE (Scene 1 Shot 1, deconstructed — final session, #22)
+
+Their own full deconstruction of the opening shot confirmed the six pillars (camera →
+composition → lighting → motion → materials → emotion) match our build order exactly.
+Three techniques new to this file:
+
+1. **BEAT THE DRUM.** The one relationship that matters most gets deliberate REPETITION
+   from multiple angles: "enormous… towering… massive… ant-scale… botanical giants" — five
+   scale words in one prompt, on purpose. For the load-bearing idea, redundancy is not
+   waste; it is how the model is made unable to miss it. (Scoped: one drummed idea per
+   prompt — everything else stays single-statement.)
+2. **SCALE BEFORE IDENTITY in establishing intros.** "Two tiny buzzing shapes weave
+   between flower stems — Fuzzby and Zenny" — in a world-establishing shot, characters
+   enter as SCALE FACTS first and get their names second. The establishing shot's subject
+   is the world; the characters are its measurement.
+3. **MOTION IN EVERY DEPTH PLANE.** Aliveness is distributed: stems SWAY (background),
+   pollen motes FLOAT (air), characters WEAVE (midground), pollen sacks BOUNCE (micro).
+   A static plane is a dead plane — every layer of the depth map carries its own verb.
+
+And their closing definition, kept: "The prompt is a SCREENPLAY for the AI renderer —
+every word is a direction, every comma a beat, every technical term a stage instruction."
+
+**CURRICULUM STATUS: COMPLETE (2026-07-24).** All six skill breakdowns + the master
+example captured, deduplicated, amended with our laws. This file + the STANDARD are the
+full transfer. Next: wire both verbatim into the Creative Room's authoring gates.
+
 ## THE CLOSING PRINCIPLE (theirs, verbatim — now ours)
 
 "Every frame is a painting, every shot is a poem, every scene is a song. You're not

@@ -150,6 +150,47 @@ docked right + floating scene agent. Our existing dark-neutral cinematic CSS sys
 
 ---
 
+## PART 3.5 — THE NO-STRAITJACKET LAW (Julian's ruling, 2026-07-24 — "their prompts have
+produced top quality AAA pixar… don't kill them with straitjackets", said twice)
+
+The footage formula's creative richness IS the product. This project's own history proves
+the failure mode: stacked negatives, repeated scaffolding and armor paragraphs flattened
+motion until the prompts read as contracts instead of direction. Therefore, hard law:
+
+**What is ALLOWED to touch the clip prompt text:**
+- The formula's own skeleton (header · shots · "Cut to." · behaviour tail) — as captured.
+- The writer's free creative prose: action, physics, micro-detail, light, emotion. UNBOUNDED
+  in vocabulary and style, subject only to the checks below.
+- Verbatim locked dialogue on SPEAKER: lines.
+- The scene's own light state written as CONCRETE weather/sky (the one proven word-level
+  guard: no sunset/golden-hour time-of-day words in a day-bright scene — a ~7-word
+  banned list, not a style cage).
+
+**What is FORBIDDEN from entering the prompt text (our old armor stays retired):**
+- No standing negatives pile. No eleven-item lists. Gag-specific negatives only when a
+  specific documented failure demands one, and then at most a line.
+- No injected acting-DNA blocks, camera-lock clauses, wing-law paragraphs, reference-role
+  boilerplate, or repeated constraint scaffolding.
+- No word-count ceiling enforcement inside the compiler. (The formula naturally lands
+  ~100-310 words; if a prompt runs long, a human reads it, no machine truncates it.)
+
+**Where our knowledge actually enters (outside the text):**
+- REFERENCES: turnarounds, wardrobe variants, state-aware prop plates, location angles,
+  face-state images, harvested start frames. Images carry identity and continuity — words
+  never re-describe them.
+- @Audio1: the V3 acted performance as the voice reference.
+- CHECKS THAT REVIEW, NEVER INJECT: dialogue-verbatim, drift-vocabulary, canon (bees/
+  crystals, prop states), continuity-chain presence — each returns a verdict a human sees;
+  none appends a single word to the prompt.
+- THE RETAKE PROTOCOL: quality is enforced by judging real footage and re-rolling with one
+  variable changed — not by pre-armoring the prompt against imagined failures.
+
+**THE SHOW BIBLE POPULATES THE ASSET LIBRARY** (same ruling): scenes, props, wardrobes and
+location fields are seeded mechanically from locked canon — characters.json bibles,
+locations.json, gag_locks, the script's own object list (wristbands, map, satchel, net,
+crystals, pollen sacks) — the Fidelity Law applied to Bricks 2-4: canon populates, the
+LLM enriches presentation, nothing contradicts the source.
+
 ## PART 4 — Build order (brick by brick)
 
 - **Brick 1 — THE FOOTAGE FORMULA (immediate, engine-only).** New clip-prompt compiler

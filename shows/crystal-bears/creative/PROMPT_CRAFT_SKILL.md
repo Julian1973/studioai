@@ -93,6 +93,28 @@ WIDE (the boat-wobble gag needs space); sacredness peaks in MACRO (the wristband
 MIRROR STRUCTURE: repeat the pre-climax framings after the climax — the same shot sizes,
 changed emotion, show the transformation.
 
+## THE LENS PHYSICS LAYER (why each mm works, captured session #18)
+
+The technical WHY beneath the lens ladder — what each focal length physically does and
+therefore means:
+
+| mm | Physics | Emotional effect |
+|---|---|---|
+| 18 | Heavy distortion, exaggerated depth, near objects loom huge | Epic scale, immersion, vulnerability |
+| 24-28 | Deep space, mild distortion | Context, energy, spatial clarity |
+| 35 | Comfortable, minimal distortion | Relaxed, casual, walking pace |
+| 50 | Human-eye perspective, zero distortion | Honest, present, the workhorse |
+| 65 | Slight compression, flattering | Emotional connection, beauty |
+| 85 | Compression + shallow DOF — eyes sharp, edges soft | Psychological intimacy; "alone with this choice" |
+| 100 macro | DOF in millimetres, background to pure bokeh | Sacredness through scale — the object becomes a relic |
+
+Two refinements new to the file:
+- **STATIC FRAME + CHAOTIC ACTION = CONTRAST COMEDY.** The locked-off frame is itself a
+  comedy device — chaos reads funnier inside a perfectly still window.
+- **MOVEMENT EDITORIALIZES.** On a reaction shot, a push-in reads as approval, a pull-back
+  as judgment; static is the only NEUTRAL observation. Choose movement on reaction shots
+  knowing the camera is passing comment either way.
+
 ## THE THREE LANGUAGES (all present in every shot)
 
 1. Writer's language (emotion, character, story): "Fuzzby is chaotic."

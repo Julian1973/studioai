@@ -95,6 +95,36 @@ all for us but putting in our learning."* This document is the analysis and the 
   before firing Scene 7 (in canon the crystals arrive in Scene 9; Scene 7's glow must be
   the script's own moment, not the storyboard's invention).
 
+## The project manifest (oracle session #5, 2026-07-24) — the clip-packing ledger
+
+Julian pulled the oracle's full per-clip manifest of their Ep 1. Higher credibility than the
+infrastructure answers because it reads the real project JSON — and it marked every field NOT
+in that JSON as UNKNOWN, including "Generation Models: UNKNOWN (not stored in project data)"
+— **the oracle's own direct admission that its earlier confident Runway-payload answer was
+invented.** Confabulation verdict now confirmed from inside.
+
+What it adds:
+
+1. **The real clip-packing ledger, all 10 scenes: 52 clips over 126 shots.** (We captured 48
+   footage prompts from the UI — the 4-clip gap is unresolved; likely uncaptured/regenerated
+   clips, note it, don't trust either count as gospel.) Packing shapes observed:
+   - **Scene-opening establishing shots often ride ALONE as a 1-shot, no-dialogue clip**
+     (Scene 1 clip 0 = shot 0 solo). Brick 1 rule: the establishing wide is its own clip.
+   - Dialogue exchanges pack complete (a whole back-and-forth in one clip, e.g. the four-line
+     Mum/Keen farewell), confirming the dialogue-boundary packing rule.
+   - 2-shot clips are common at scene tails/transitions; 3-shot is the workhorse.
+2. **A per-clip dialogue ledger** usable as a verbatim cross-check target: their Scene 1 lines
+   match our locked script exactly ("Do I look official?" / "Yes Fuzzby. Officially nuts!" /
+   "Buzz Crash!!" / "A Storm's coming." / "Good thing I work well under pressure.").
+3. **CANON FLAG — Scene 3, clip 3:** their storyboard has KEEN'S MUM speaking "I still feel
+   him… every day." In OUR canon that line was deliberately cut (CLAUDE.md rule 46 — Mum
+   never names her grief aloud; the hand lingering on the wristbands carries it). If their
+   Scene 3 storyboard is ever used, that clip's dialogue must be restaged wordless before it
+   fires — same class as the Zenny-crystal flag above.
+4. Clip-level duration/characters/props/references are NOT stored in their project JSON
+   (all UNKNOWN) — their clips derive cast/refs at generation time from the shot arrays,
+   confirming the parallel-array schema as the single source of truth. Brick 2 does the same.
+
 ## Working agreement
 
 AnyFilm is the generation engine and storyboard author; our studio is the canon authority

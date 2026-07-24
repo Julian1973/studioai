@@ -3988,7 +3988,81 @@
     ]
    },
    "approvedTake": null,
-   "harvestFrame": null
+   "harvestFrame": null,
+   "departmentWork": {
+    "voice": {
+     "approved": {
+      "department": "Voice",
+      "worker": "Voice Director",
+      "skill": "skills/crystal-bears-voice-director/SKILL.md",
+      "skillHash": "2a185d43670c2fd8",
+      "model": "gpt-5.5",
+      "scene": "1",
+      "shotId": "S1.SH4",
+      "packageRevision": 38,
+      "preparedAt": "2026-07-24T09:36:03",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "sourceHash": "a979337f35e278fe38f97619e2342fdbe805d8feb2a88a4293e155ff0e283f88",
+      "signatureVersion": 3,
+      "sourceFields": {
+       "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+       "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+       "shotId": "2114a2e5e56cada48c873a6d972b7cda2e61f7e021072665e12898cf73fa3c71",
+       "lockedDialogue": "b86ba63f060a57022858b622d1d52ce557f5ebd8264018289745d9d798af8e64",
+       "approvedVoiceConfig": "0093f3330be6ce67d18823cf08cae962dfc47e3c518e41cff3c601a9246b01d0"
+      },
+      "outputHash": "083ec64d5e058b81e43dd4fc0aa54a00d1ade73bd9337adb79c1bddc4f12df22",
+      "output": {
+       "shotId": "S1.SH4",
+       "lines": [
+        {
+         "speaker": "Fuzzby",
+         "exactDialogue": "…okay that sounded dramatic.",
+         "performedText": "[nervous] …okay, that sounded dramatic."
+        },
+        {
+         "speaker": "Zenny",
+         "exactDialogue": "A Storm’s coming.",
+         "performedText": "[quietly] A Storm’s coming."
+        }
+       ],
+       "doesItLand": "This performance should land the beat by letting Fuzzby’s nervous cover break the freeze, then allowing Zenny’s quiet certainty to shift the shot into real danger."
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-07-24T09:36:03",
+      "reviewedBy": "Julian (SH4 staging)",
+      "note": ""
+     },
+     "candidate": null,
+     "history": []
+    }
+   },
+   "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH4_vo.mp3",
+   "voGeneratedFrom": [
+    {
+     "speaker": "Fuzzby",
+     "text": "[nervous] …okay, that sounded dramatic."
+    },
+    {
+     "speaker": "Zenny",
+     "text": "[quietly] A Storm’s coming."
+    }
+   ],
+   "lastVoiceEnvelope": {
+    "voPath": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH4_vo.mp3",
+    "turns": [
+     {
+      "text": "[nervous] …okay, that sounded dramatic.",
+      "voice_id": "DNK8oCkkHjIyEjzlCeQq"
+     },
+     {
+      "text": "[quietly] A Storm’s coming.",
+      "voice_id": "XEiPrIitaegdirIGkODX"
+     }
+    ],
+    "firedAt": "2026-07-24T09:36:06"
+   }
   },
   {
    "shotId": "S1.SH5",

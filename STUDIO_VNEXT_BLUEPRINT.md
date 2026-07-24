@@ -91,10 +91,19 @@ per-clip cost. Dialogue-free clips drop the header and behaviour laws.
    dialogue text stays in-prompt (their formula) with @Audio1 driving the actual voice —
    the confirmed-bypass pattern we already run.
 2. **Continuity chain** (Julian: "the continuity between shots isn't great — we can improve
-   that"). Their clips generate independently — that's why their rough cut drifts. Our
-   relay/harvest doctrine (previous clip's settle frame as next clip's start frame) is the
-   fix they don't have. Start frame = harvested previous end, references = turnarounds +
-   location plate + prop-state plates + face-state image when a mark persists.
+   that"). CONFIRMED BY THEIR OWN AI DIRECTOR (2026-07-24, Julian's oracle session): each
+   clip starts from its first shot's STORYBOARD STILL, never the previous clip's last
+   frame — "if a video clip deviates significantly from its prompt in the final seconds,
+   the next clip (starting fresh from its storyboard) may have a visual discontinuity. The
+   system relies on prompt discipline… rather than direct frame-to-frame generation."
+   Our harvest chain is the structural fix they don't have — proven live the same day it
+   was confirmed: S1.SH3 fired FROM S1.SH2's harvested final frame and held continuity on
+   the first roll. THE FUSED CONTINUITY MODEL (our junction-type doctrine, kept): within a
+   scene, default = harvest-anchored (previous approved clip's final frame as the start
+   frame — the HOLD tail exists to make that frame clean); a deliberate fresh camera setup
+   or scene opener = composed start frame instead, with state carried by references and
+   prompt (their "continuity bridge" prose — carried positions, lighting keys, marks —
+   kept as the SECONDARY layer on top of the frame anchor, not the only defense).
 3. **The light law** — banned drift vocabulary enforced on every clip prompt
    (their cards carry warm-amber/golden freely; ours compile through _DRIFT_VOCAB_RE).
 4. **Verbatim dialogue gate** — every in-prompt line checked against the locked script.

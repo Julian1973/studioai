@@ -111,6 +111,20 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
     for sh in pkg.get("shots", []):
         if sh.get("shotId") == "1.B1.S1":
             sh["continuityIn"] = None
+            # THE FORMULA GATE (Gold Build, 2026-07-24): check_formula_structure now runs
+            # UNCONDITIONALLY at fire — the archived rev-6 lean-prose brief is a pre-Gold
+            # shape the stale-format door refuses BY DESIGN, so the mechanics this fixture
+            # pins (sealed envelope / token / route) could never be reached with it. Patch
+            # ONLY the scratch copy's prompt to a formula card carrying the shot's own
+            # locked line inline verbatim (the archived file itself stays byte-identical
+            # forever, same as the continuityIn patch above).
+            sh["seedancePrompt"] = (
+                "ENGLISH DIALOGUE ONLY, spoken in English.\n\n"
+                "Shot 1: Wide tracking at bee height, 24mm, handheld drift. Fuzzby flies "
+                "too fast past his intended flower, clips the stem and wobbles through the "
+                "recovery, chest already pitching forward as the work song powers him "
+                "along. FUZZBY: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…\n\n"
+                "They hold the look, about 2 seconds of silence, no more dialogue.")
     # THE KEYFRAME/VOICE MEDIA RESTORE (2026-07-19): this snapshot's own recorded absolute
     # media paths (engine/media/shots/Ep1_1.B1.S1_{keyframe.png,vo.mp3}) no longer exist on
     # disk — swept away by an intervening real production media archive/reset (this project
@@ -303,25 +317,28 @@ def test_legacy_1b1s1_outgoing_provider_request_is_the_sealed_brief(monkeypatch,
     env = auth["envelope"]
     canon = hashlib.sha256(json.dumps(env, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     assert canon == auth["envelopeHash"]                     # token binds to the sealed envelope
-    # 2026-07-19 (THE HANDLE DOCTRINE): the sealed envelope's durationSec is no longer the
-    # package's own design-time estimate (6.0) — cb_render._handle_duration overrides it to
-    # HANDLE_TOTAL (15.0s) since this fixture's own vo.mp3 is a dummy file with no real audio.
-    assert env["durationSec"] == 15.0 and env["candidateCount"] == 3
+    # RE-PINNED 2026-07-24 (matching test_cb_render.py's own re-pin): the unconditional
+    # HANDLE_TOTAL=15 floor is retired since Julian's split-generation directive
+    # (2026-07-23) — the shot's OWN design-time durationSec (6.0) is the floor now, and
+    # this fixture's dummy vo.mp3 has no real audio to stretch past it.
+    assert env["durationSec"] == 6.0 and env["candidateCount"] == 3
     assert env["packageRevision"] == 6
-    # 2026-07-19: cost scales with the same HANDLE_TOTAL override above (15s @ $0.3034/s
-    # standard rate = $4.551/candidate, x3 = $13.653) — the honest cost consequence of the
-    # duration fix, not a separate change.
-    assert env["maxBatchCostUsd"] == 13.653 and env["costPerCandidateUsd"] == 4.551
+    # cost scales with the same shot-own duration (6s @ $0.3034/s standard rate =
+    # $1.8204/candidate, x3 = $5.4612) — the honest cost consequence, not a separate change.
+    assert env["maxBatchCostUsd"] == 5.4612 and env["costPerCandidateUsd"] == 1.8204
 
     # 2) fire with the token -> the adapter receives the ENVELOPE, verbatim
     cb_render.fire_shot("1", "1.B1.S1", "Ep1", candidates=3,
                          spend_token=auth["token"], log=lambda *a, **k: None)
     shot = [s for s in pkg["shots"] if s["shotId"] == "1.B1.S1"][0]
-    assert sent["prompt"] == shot["seedancePrompt"] == env["prompt"]   # the accepted brief, exact
-    assert 90 <= len(sent["prompt"].split()) <= 160                    # the lean Option-D band
-    # 2026-07-19: the same HANDLE_TOTAL override — the provider actually receives 15, not
-    # the package's own design-time 6.0 estimate.
-    assert sent["duration"] == "15" and sent["resolution"] == "720p"
+    assert sent["prompt"] == shot["seedancePrompt"] == env["prompt"]   # the accepted card, exact
+    # GOLD BUILD (2026-07-24): the lean-Option-D word band belonged to the retired prose
+    # shape — the stronger, contract-true pin now is that the fired prompt IS the formula
+    # (check_formula_structure passes it clean against the shot's own locked lines).
+    cb_render.check_formula_structure(sent["prompt"], shot.get("dialogueLines") or [])
+    # RE-PINNED 2026-07-24: same shot-own-duration floor as the envelope assertion above —
+    # the provider receives the shot's own 6, never a retired unconditional 15.
+    assert sent["duration"] == "6" and sent["resolution"] == "720p"
     for legacy in LEGACY_STRINGS:
         assert legacy not in sent["prompt"], f"legacy string leaked: {legacy}"
     # the approved keyframe + reference order + audio travelled exactly as sealed

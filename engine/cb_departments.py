@@ -306,6 +306,44 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
         CinematographyDirection, label="department_cinematography", log=log, images=images)
 
 
+_TAG = re.compile(r"\[[^\]]+\]")
+_WORD = re.compile(r"[A-Za-z0-9']+")
+
+
+def _spoken_words(text):
+    return [w.lower() for w in _WORD.findall(_TAG.sub("", text or ""))]
+
+
+def validate_voice_direction(result, locked_lines):
+    got = result.lines
+    if len(got) != len(locked_lines):
+        raise RuntimeError(f"Voice Director returned {len(got)} line(s); {len(locked_lines)} are locked")
+    for idx, (out, locked) in enumerate(zip(got, locked_lines), start=1):
+        if out.speaker.strip().lower() != str(locked["speaker"]).strip().lower():
+            raise RuntimeError(f"Voice Director changed speaker on line {idx}")
+        if _spoken_words(out.exactDialogue) != _spoken_words(locked["exactText"]):
+            raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
+        if _spoken_words(out.performedText) != _spoken_words(locked["exactText"]):
+            raise RuntimeError(f"Voice Director added, dropped or changed words on line {idx}")
+    return result
+
+
+def _voice_line_briefs(locked_lines):
+    """Each line's own already-approved direction, pulled OUT of the generic shot JSON and
+    labelled so it can't be missed. `delivery` is the storyboard's Voice Performance role's
+    own V3-tagged performance (cb_creative.gate5_voice, following VOICE_PERFORMANCE_CANON.md
+    — intention, subtext, the thought before the line, operative words, tag discipline, all
+    already decided there), mapped onto the shot's dialogueLines at promotion time
+    (cb_handover._dialogue_lines: elevenLabsV3Direction -> delivery). Before this fix this
+    sat unread inside context's buried shot JSON and the LLM re-invented a performance from
+    the bare locked words every time — the exact bug this function closes."""
+    out = []
+    for ln in locked_lines:
+        out.append(f'{ln.get("speaker")}: "{ln.get("exactText")}"\n'
+                    f'  APPROVED DIRECTION: {ln.get("delivery") or "(none authored yet)"}')
+    return "\n".join(out)
+
+
 def prepare_voice(context, locked_lines, *, log=print):
     """THE DELIVERY-IS-COMPILATION FIX (2026-07-21), same pattern and same day as
     Cinematography/Animation, per Julian's own instruction ("they need to deliver the beat

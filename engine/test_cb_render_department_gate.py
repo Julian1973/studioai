@@ -39,6 +39,29 @@ CFG = {"Fuzzby": {"sizeRank": 2, "avoid": "bee", "voiceId": "voice-fuzzby",
                   "anchor": "media/refs/CB_Zenny.jpeg"}}
 
 
+def _formula_prompt(action, line="Nailed it.", speaker="FUZZBY"):
+    """A minimal, valid Gold-Build FORMULA prompt (2026-07-24 — the shape
+    cb_render.check_formula_structure now hard-requires at prepare/save/fire): header when
+    dialogue exists, a labelled 'Shot 1:' segment carrying the action AND the dialogue
+    inline verbatim, a closing HOLD tail, no duration text. Every seeded/mocked animation
+    prompt in this suite must be this shape or the real gates refuse it — which is exactly
+    the production contract these tests exercise."""
+    header = "ENGLISH DIALOGUE ONLY, spoken in English.\n\n" if line else ""
+    dlg = f" {speaker}: {line}" if line else ""
+    return (header
+            + f"Shot 1: Close-up, 85mm, handheld drift. {action}{dlg}\n\n"
+            + "They hold the look, about 2 seconds of silence, no more dialogue.")
+
+
+# the redesign-recovery tests change the shot's own locked line first, then re-approve a
+# genuinely different Animation Direction — the formula gate requires that NEW line inline
+# verbatim in the re-approved card, so the redesign prompt carries it.
+_REDESIGN_LINE = "A completely different line now."
+_REDESIGN_PROMPT = _formula_prompt(
+    "genuinely different approved redesign action, slowed into a held closing beat, "
+    "near-still", line=_REDESIGN_LINE)
+
+
 def _char_state(marks=()):
     return {"character": "Fuzzby", "screenZone": "frame-left", "facing": "right",
             "pose": "hover", "expression": "bright", "visibleMarks": list(marks),
@@ -260,9 +283,9 @@ def test_prepare_department_creates_a_real_candidate_and_loads_the_real_skill(wo
 #         the mocked provider unchanged
 def test_approve_unlocks_disclosure_exact_prompt_reaches_provider_unchanged(world, monkeypatch):
     calls, tmp, path = world
-    exact = ("0.0-4.0s: fast brisk THE EXACT APPROVED ANIMATION PROMPT action. "
-             "4.0-8.0s: slowed, held closing beat, near-still — must reach the "
-             "mocked provider byte for byte")
+    exact = _formula_prompt("THE EXACT APPROVED ANIMATION PROMPT — fast brisk action "
+                            "slowing into a held closing beat, which must reach the "
+                            "mocked provider byte for byte")
 
     # PRODUCTION ORDER: voice first (animation prep hard-requires it for a dialogue shot),
     # then cinematography → an approved keyframe anchor (fire_shot's own other pre-existing
@@ -552,7 +575,9 @@ def _approve_animation(monkeypatch, prompt_text, shot_id="1.B1.S1"):
 
 
 def _reach_model_limited(monkeypatch, path, shot_id="1.B1.S1",
-                         animation_prompt="0.0-7.0s: fast brisk ORIGINAL rejected animation action. 7.0-14.0s: slowed, held ORIGINAL closing beat, near-still."):
+                         animation_prompt=_formula_prompt(
+                             "fast brisk ORIGINAL rejected animation action, slowing into "
+                             "a held ORIGINAL closing beat, near-still")):
     """Walks a real shot all the way to model-limited via two real rejected batches — the
     exact decision-ladder hard stop this whole recovery action exists to recover from.
     NOTE (found live via this test, out of scope for this bounded feature — see the final
@@ -618,8 +643,7 @@ def test_current_approved_redesign_with_different_signature_enables_acknowledgem
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
     # re-approve a GENUINELY different Animation Direction reflecting the changed line
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     before_calls = {k: list(v) for k, v in calls.items()}
     elig = R.redesign_eligibility("9", "1.B1.S1", "EpT")
     assert elig["eligible"] is True, elig["blockers"]
@@ -676,8 +700,7 @@ def test_acknowledgement_event_does_not_invalidate_its_own_new_signature(world, 
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     event = R.acknowledge_redesign("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     pkg2, _ = R.load_pkg("9", "EpT")
     shot2 = R._shot(pkg2, "1.B1.S1")
@@ -696,8 +719,7 @@ def test_all_historical_batches_and_rejections_remain_intact(world, monkeypatch)
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     R.acknowledge_redesign("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     after = json.load(open(path))
     led_after = R._ledger(after, "1.B1.S1")
@@ -718,8 +740,7 @@ def test_cost_ledger_records_remain_intact(world, monkeypatch):
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     elig = R.redesign_eligibility("9", "1.B1.S1", "EpT")
     assert elig["historicalSpendUsd"] == 4.55
     R.acknowledge_redesign("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
@@ -736,8 +757,7 @@ def test_acknowledgement_makes_zero_provider_calls_and_no_spend_authorisation(wo
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     before = {k: len(v) for k, v in calls.items()}
     R.acknowledge_redesign("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     after = {k: len(v) for k, v in calls.items()}
@@ -753,8 +773,7 @@ def _acknowledged_shot(monkeypatch, path):
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     R.acknowledge_redesign("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
 
 
@@ -794,8 +813,7 @@ def test_control_unavailable_while_spend_authorisation_pending(world, monkeypatc
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     # simulate a pending disclosure — normally impossible while model-limited (fire_shot
     # refuses first), so this proves the eligibility check's own independent guard
     pkg2 = json.load(open(path))
@@ -813,8 +831,7 @@ def test_control_unavailable_while_a_generation_job_is_in_flight(world, monkeypa
     pkg = json.load(open(path))
     pkg["shots"][0]["dialogueLines"][0]["exactText"] = "A completely different line now."
     json.dump(pkg, open(path, "w"))
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    _approve_animation(monkeypatch, _REDESIGN_PROMPT, shot_id="1.B1.S1")
     pkg2 = json.load(open(path))
     led2 = R._ledger(pkg2, "1.B1.S1")
     led2["batch"] = dict(led2["batch"] or {}, status="generating")
@@ -995,7 +1012,9 @@ def test_cinematography_and_animation_receive_the_compiled_brief_not_raw_json(wo
                           providerPrompt="a real cinematography direction prompt yes yes")
         if name == "AnimationDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",
-                          providerPrompt="0.0-6.0s: fast brisk real animation direction action. 6.0-12.0s: slowed, held closing beat, near-still.")
+                          providerPrompt=_formula_prompt(
+                              "fast brisk real animation direction action, slowing into "
+                              "a held closing beat, near-still"))
         if name == "VoiceDirection":
             return cb_departments.VoiceDirection(shotId="1.B1.S1", doesItLand="t", lines=[
                 {"speaker": "Fuzzby", "exactDialogue": "Nailed it.",
@@ -1005,13 +1024,13 @@ def test_cinematography_and_animation_receive_the_compiled_brief_not_raw_json(wo
 
     R.prepare_department("9", "cinematography", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     label, system, user = next(c for c in captured if c[0] == "department_cinematography")
-    assert "THE APPROVED BRIEF" in user
-    # the compiled brief's own real, distinctive content (from openingPose/continuityIn,
-    # via cb_engine.compile_keyframe_prompt) must appear verbatim — never a raw JSON dump
-    # of the shot's own fields standing in for it.
-    assert "OPENING FRAME" in user
-    assert "already decided this shot together" in system
-    assert "nothing new invented" in system
+    # GOLD BUILD UPDATE (2026-07-24): the register writer's user prompt leads with the
+    # compiled SOURCE-MATERIAL brief (cb_engine.compile_keyframe_prompt's own labelled
+    # facts) as its definitive source — never a raw JSON dump standing in for it.
+    assert "SOURCE MATERIAL — the storyboard-approved facts for this opening frame" in user
+    assert "OPENING POSE / STORY INSTANT" in user   # real compile_keyframe_prompt output
+    assert "register writer for STILL opening frames" in system
+    assert "THE HOUSE CRAFT CURRICULUM (verbatim)" in system   # the craft docs, loaded verbatim
 
     R.decide_department("9", "cinematography", "approved", "1.B1.S1", "EpT",
                         reviewed_by="Julian", log=lambda *a, **k: None)
@@ -1032,7 +1051,11 @@ def test_cinematography_and_animation_receive_the_compiled_brief_not_raw_json(wo
 
     R.prepare_department("9", "animation", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     label2, system2, user2 = next(c for c in captured if c[0] == "department_animation")
-    assert "THE APPROVED BRIEF" in user2
+    # GOLD BUILD UPDATE (2026-07-24): the animation register writer's user prompt leads
+    # with compile_shot_contract's SOURCE-MATERIAL brief as its definitive source.
+    assert "SOURCE MATERIAL — the storyboard-approved facts. Write the card FROM these" in user2
+    assert "SOURCE MATERIAL — storyboard-approved facts" in user2   # the real compiled brief
     assert "Hard constraints:" in user2   # real cb_engine.compile_shot_contract output
     assert "look at it" in system2
-    assert "so the beat lands" in system2
+    assert "THE FORMULA (structural law" in system2
+    assert "THE HOUSE CRAFT CURRICULUM (verbatim)" in system2

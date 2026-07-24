@@ -291,7 +291,13 @@ def test_full_disposable_route_reaches_disclosure_with_zero_provider_calls_never
     monkeypatch.setattr(R, "_storyboard_path", lambda scene, episode="Ep1": sb_path)
 
     pkg_path = tmp_path / "cb-output" / "Ep1_scene1_production_package.json"
-    animation_output = {"providerPrompt": "a real animation direction prompt with plenty of words"}
+    # GOLD BUILD (2026-07-24): the approved Animation providerPrompt must BE the formula
+    # (check_formula_structure now runs unconditionally at fire) — S1.SH1 here has no
+    # dialogue, so no header is required, but the labelled Shot 1 and the HOLD tail are.
+    animation_output = {"providerPrompt": (
+        "Shot 1: Wide tracking at bee height, 24mm. Fuzzby rockets past the flower and "
+        "clips the stem, pollen bursting off the impact.\n\n"
+        "HOLD on the recovered hover, about 2 seconds of silence.")}
     shot = _build_shot("S1.SH1", "opener", None, [])
     pkg = {"episode": "Ep1", "sceneNumber": "1", "revision": 7,
            "sourceStoryboard": {"path": str(sb_path), "md5": hashlib.md5(sb_bytes).hexdigest()},

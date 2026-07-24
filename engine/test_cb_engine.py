@@ -230,11 +230,21 @@ def test_unknown_character_blocks():
 
 # ── compilers: the two locked laws, mechanically guaranteed ─────────────────────────────
 def test_law6_no_spoken_words_in_either_prompt():
+    """GOLD BUILD UPDATE (2026-07-24): compile_shot_contract now emits the SOURCE-MATERIAL
+    brief, where dialogue appears BY DESIGN as labelled material under THE VERBATIM LAW —
+    the fireability protection moved to cb_render.check_formula_structure, which must
+    REFUSE this brief (it is never a fireable prompt). The keyframe compiler is unchanged
+    and still Law-6-clean."""
+    import cb_render as R
     d = _clean_design()
     for sh in d.shots:
         prompt, _, _ = E.compile_shot_contract(sh, {}, CFG)
-        assert "nailed it" not in prompt.lower()
-        assert "why are you humming" not in prompt.lower()
+        assert prompt.startswith("SOURCE MATERIAL")
+        assert "DIALOGUE — THE VERBATIM LAW" in prompt
+        for ln in sh.dialogueLines:
+            assert ln.exactText in prompt          # material, labelled, verbatim
+        with pytest.raises(R.Refused, match="THE FORMULA GATE"):
+            R.check_formula_structure(prompt, sh.dialogueLines, refuse_prefix="REFUSED — test")
     kf, _, _ = E.compile_keyframe_prompt(d.shots[0], {}, CFG)
     assert "nailed it" not in kf.lower()
 
@@ -362,14 +372,18 @@ def test_option_d_planning_intent_stays_internal_constraints_now_ship():
     assert "let Zenny react broadly" in brief                 # NOW ships, ships verbatim
     assert "Hard constraints:" in brief
     assert "the pose itself" not in brief and sh.purpose not in brief  # planning stays internal
-    assert wc <= E.MAX_SHOT_PROMPT_WORDS                      # this fixture happens to be lean
-    # the brief carries exactly the Option-D sections
-    assert E.OPENER_ANCHOR[:-1] in brief                      # exact opening anchor
-    assert "Use @Audio1 as the only voice" in brief           # audio + mouth assignment
-    assert "Preserve character identity and relative scale." in brief
+    # GOLD BUILD UPDATE (2026-07-24): the source-material brief has no word ceiling (the
+    # 210-word Option-D lean band belonged to the retired fireable-prose shape) — the brief
+    # is labelled facts now, and the labelled sections replace the old mechanical sentences.
+    assert brief.startswith("SOURCE MATERIAL")
+    assert E.OPENER_ANCHOR[:-1] in brief and "OPENING ANCHOR" in brief   # exact opening anchor
+    assert "REFERENCES:" in brief                             # one declared job per reference
+    assert "DIALOGUE — THE VERBATIM LAW" in brief             # audio/dialogue material section
+    assert "HARD CONSTRAINTS" in brief
     assert "screen sides" not in brief          # 2026-07-17: no longer a default on every shot
-    # render-critical protection derived from the gag's own visibility contract, capped small
-    assert "Keep Fuzzby's whole silhouette above the petals at all times." in brief
+    # the gag's own visibility contract ships as its labelled fact, verbatim
+    assert ("GAG PHYSICS — stays visible: Fuzzby's whole silhouette above the petals "
+            "at all times") in brief
 
 
 def test_dedup_by_canonical_id_not_fuzzy_text():
@@ -488,15 +502,24 @@ def test_a_brief_exceeding_210_words_compiles_and_passes_validation():
 
 
 def test_verbatim_dialogue_inside_performance_assignment_still_refuses():
-    """PROOF 3: Law 6 is untouched by the field-budget removal — performanceAssignment
-    quoting a locked line verbatim still fails compile_shot_contract's own
-    _assert_no_spoken_words, exactly as before, regardless of word count."""
+    """PROOF 3, RE-POINTED FOR THE GOLD BUILD (2026-07-24): compile_shot_contract no longer
+    runs _assert_no_spoken_words — the source-material brief carries dialogue BY DESIGN
+    under THE VERBATIM LAW section, so a performanceAssignment quoting the locked line
+    compiles clean. The FIREABILITY protection now lives in cb_render.check_formula_
+    structure (plus the department layer): the source brief itself must be refused as a
+    prompt. compile_keyframe_prompt's own Law-6 guard is unchanged (proven by
+    test_law6_guard_fires_loud_on_a_leak and the keyframe tests below)."""
+    import cb_render as R
     d = _clean_design()
     d.shots[0].performanceAssignment = (
         'Fuzzby commits fully, chest leading into the recovery, and declares "Nailed it." '
         "as the whole beat turns on it.")
-    with pytest.raises(AssertionError, match="LAW 6 VIOLATION"):
-        E.compile_shot_contract(d.shots[0], {}, CFG)
+    brief, _, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
+    assert "DIALOGUE — THE VERBATIM LAW" in brief
+    assert "Nailed it." in brief                              # legitimate source material now
+    with pytest.raises(R.Refused, match="THE FORMULA GATE"):
+        R.check_formula_structure(brief, d.shots[0].dialogueLines,
+                                  refuse_prefix="REFUSED — test")
 
 
 def test_field_word_budgets_now_empty_and_generic_lookup_still_safe():
@@ -531,9 +554,11 @@ def test_one_consistent_anchor_matching_style_rule():
         assert "Stylised feature-quality 3D CGI matching @图1." in p
         assert "Pixar-caliber" in p and "squash-and-stretch" in p
         assert "only for the set" in p                        # the plate has a declared job
-    # the frozen keyframe IMAGE compiler is untouched by the rule
+    # GOLD BUILD UPDATE (2026-07-24): the keyframe compiler now emits the OPENING-FRAME
+    # source brief carrying the SAME one style law verbatim — one consistent anchor, both
+    # artifacts, no divergent second style string anywhere.
     kf, _, _ = E.compile_keyframe_prompt(d.shots[0], {}, CFG)
-    assert "Stylised feature-quality 3D CGI with natural weight" in kf
+    assert "Stylised feature-quality 3D CGI matching @图1." in kf
     assert "Pixar-caliber" in kf and "squash-and-stretch" in kf
 
 
@@ -568,7 +593,10 @@ def test_concise_anchors_no_antihold_boilerplate():
     relay, _, _ = E.compile_shot_contract(_clean_design().shots[1], {}, CFG)
     for banned in ("unnecessary hold", "Do not hold the previous pose", "restage"):
         assert banned not in relay
-    assert "Single continuous take, no cuts." in relay
+    # GOLD BUILD UPDATE (2026-07-24): the mechanically-appended camera sentence is retired
+    # with the fireable prose shape — the same fact now ships as the labelled CUT PACE fact
+    # the register writer turns into a one-Shot-1 card.
+    assert "CUT PACE: single continuous take — the card is one Shot 1 only" in relay
 
 
 def test_hard_constraints_line_reaches_the_compiled_prompt():
@@ -641,7 +669,10 @@ def test_redundant_lip_sync_sentence_is_deduplicated():
     prompt, _, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
     assert prompt.count("no additional speech") == 0
     assert "Fuzzby rockets between blossoms" in prompt
-    assert "Use @Audio1 as the only voice." in prompt   # the real, mechanical instruction survives
+    # GOLD BUILD UPDATE (2026-07-24): the mechanical "Use @Audio1..." sentence belonged to
+    # the retired fireable prose; the audio/dialogue contract now ships as the labelled
+    # VERBATIM LAW section, which is what survives instead of the stripped duplicate.
+    assert "DIALOGUE — THE VERBATIM LAW" in prompt
 
 
 def test_strip_redundant_audio_sentence_leaves_clean_text_untouched():
@@ -726,9 +757,14 @@ def test_keyframe_prompt_omits_continuity_paragraph_when_nothing_inherited():
     shot = _clean_design().shots[0]
     shot = shot.model_copy(update={"continuityIn": None})
     kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
+    # GOLD BUILD UPDATE (2026-07-24): the keyframe compiler emits the OPENING-FRAME source
+    # brief now — typed absence still means the CONTINUITY IN fact is wholly absent, never
+    # a no-op line; the plate's scoped job ships via the reference-role sentence; the old
+    # word ceiling belonged to the retired fireable prose shape.
+    assert kf.startswith("SOURCE MATERIAL")
     assert "continuity in" not in kf.lower()
-    assert "never composition or geography" in kf.lower()   # the plate's job line still prints
-    assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
+    assert "@图4 only for the set" in kf                    # the plate's declared, scoped job
+    assert wc > 0
 
 
 def test_keyframe_prompt_prints_continuity_paragraph_when_real_state_inherited():
@@ -740,7 +776,10 @@ def test_keyframe_prompt_prints_continuity_paragraph_when_real_state_inherited()
                                     characters=[])
     shot = shot.model_copy(update={"continuityIn": real_state})
     kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
-    assert "continuity in: cooler storm light" in kf.lower()
+    # GOLD BUILD UPDATE (2026-07-24): the inherited state ships as the labelled
+    # CONTINUITY IN fact carrying the real content, for the register writer to honour.
+    assert "continuity in" in kf.lower()
+    assert "cooler storm light" in kf.lower()
 
 
 def test_keyframe_prompt_is_reference_first_and_appearance_free():
@@ -752,8 +791,11 @@ def test_keyframe_prompt_is_reference_first_and_appearance_free():
     composition or geography, only palette/materials/lighting."""
     kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
     assert "wider" not in kf.lower()                  # the room-to-breathe law is GONE
-    assert "never composition or geography" in kf.lower()   # the plate's job is explicitly scoped
-    assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
+    # GOLD BUILD UPDATE (2026-07-24): the plate's scoped job now ships via the
+    # reference-role sentence ("only for the set" — never composition/geography ownership),
+    # and identity stays reference-first, stated as such in the brief's own labels.
+    assert "@图4 only for the set" in kf
+    assert "identity from references only" in kf
     # rule 5: the compiler's own fixed text never describes appearance
     for banned in ("yellow", "stripe", "spectacles", "glasses", "fur", "fuzzy"):
         assert banned not in kf.lower()
@@ -815,8 +857,12 @@ def test_keyframe_prompt_states_lighting_and_camera_side_once_when_duplicated():
                                       pose="mid-hover", expression="proud",
                                       visibleMarks=[], heldProps=[])])
     kf, wc, _ = E.compile_keyframe_prompt(sh, {}, CFG)
-    assert kf.count("Warm corridor light, Fuzzby already at speed") == 1
-    # a genuinely distinct pair still states both
+    # GOLD BUILD UPDATE (2026-07-24): the prose-paragraph dedup belonged to the retired
+    # fireable shape — inherited state now ships ONCE, as the single labelled CONTINUITY IN
+    # fact (a faithful dump of the typed state), never as two competing prose restatements.
+    assert kf.count("CONTINUITY IN") == 1
+    assert "Warm corridor light, Fuzzby already at speed" in kf
+    # a genuinely distinct pair still ships both, inside that one labelled fact
     sh2 = _shot(chars=("Fuzzby",))
     sh2.continuityIn = E.ContinuityState(
         lighting="Warm corridor light.", cameraSide="Held on the left of the lane.",
@@ -824,6 +870,7 @@ def test_keyframe_prompt_states_lighting_and_camera_side_once_when_duplicated():
                                       pose="mid-hover", expression="proud",
                                       visibleMarks=[], heldProps=[])])
     kf2, wc2, _ = E.compile_keyframe_prompt(sh2, {}, CFG)
+    assert kf2.count("CONTINUITY IN") == 1
     assert "Warm corridor light" in kf2 and "Held on the left of the lane" in kf2
 
 
@@ -850,60 +897,71 @@ if __name__ == "__main__":
     sys.exit(subprocess.call(["python3", "-m", "pytest", __file__, "-q"]))
 
 
-# ── THE SHOT-MODE VOCABULARY + SPLIT-GENERATION PROOF (Julian's Option B + Anti-Guardrail
-# Principle, 2026-07-23). Rule 8 of that principle, made literal: these tests assert the
-# compiled briefs became LEANER, CLEARER and MATERIALLY DIFFERENT — never merely that
-# schemas validate. Run against the REAL promoted SH2A/SH2B shots, read-only.
-def _real_split_briefs():
+# ── THE SHOT-MODE VOCABULARY + SOURCE-MATERIAL PROOF (originally Julian's Option B +
+# Anti-Guardrail Principle, 2026-07-23, proven on the then-promoted SH2A/SH2B split shots).
+# GOLD BUILD UPDATE (2026-07-24): the split was re-merged in production (the canonical
+# package holds S1.SH2 again, a hybrid_approved four-mode shot) and compile_shot_contract
+# now emits the SOURCE-MATERIAL brief, never a mode-lean fireable prose brief — so these
+# tests now prove (a) the real canonical shot compiles to the labelled source-material
+# shape carrying its own physics AND dialogue facts, non-fireable by construction, and
+# (b) the surviving mode-vocabulary machinery (_modes_dialogue_only/_quality_line) still
+# selects vocabulary by REMOVING, exactly as the original split proof pinned.
+def _real_canonical_shot(shot_id="S1.SH2"):
     import json as _json
     canon = _json.load(open(E.canonical_package_path(1, "Ep1")))
     fields = set(E.Shot.model_fields)
     chars = _json.load(open("config/characters.json"))
     scene = {"sceneName": canon.get("sceneName", "")}
-    out = {}
-    for s in canon["shots"]:
-        if s["shotId"] in ("S1.SH2A", "S1.SH2B"):
-            shot = E.Shot(**{k: v for k, v in s.items() if k in fields})
-            prompt, wc, _slots = E.compile_shot_contract(shot, scene, chars)
-            out[s["shotId"]] = (prompt, wc, shot)
-    return out
+    s = next(x for x in canon["shots"] if x["shotId"] == shot_id)
+    shot = E.Shot(**{k: v for k, v in s.items() if k in fields})
+    prompt, wc, _slots = E.compile_shot_contract(shot, scene, chars)
+    return prompt, wc, shot
 
 
-def test_split_briefs_leaner_than_hybrid():
-    """Both halves must compile leaner than the 588-word rev-28 hybrid they replaced."""
-    briefs = _real_split_briefs()
-    assert briefs, "SH2A/SH2B not in the canonical package — split not promoted"
-    for sid, (_p, wc, _s) in briefs.items():
-        assert wc < 588, f"{sid} compiled at {wc} words — not leaner than the old hybrid"
+def test_real_canonical_shot_compiles_to_the_source_material_shape():
+    """The real, live S1.SH2 (the re-merged hybrid) must compile to the labelled SOURCE-
+    MATERIAL brief — every storyboard-approved fact category present, dialogue verbatim as
+    material — and that brief must be REFUSED by the formula gate (never fireable)."""
+    import cb_render as R
+    prompt, wc, shot = _real_canonical_shot()
+    assert prompt.startswith("SOURCE MATERIAL")
+    for label in ("FELT INTENT", "OPENING ANCHOR", "CAMERA (storyboard-approved)",
+                  "PERFORMANCE (approved physical performance)",
+                  "DIALOGUE — THE VERBATIM LAW", "HARD CONSTRAINTS", "DURATION:"):
+        assert label in prompt, f"missing labelled fact: {label}"
+    for ln in shot.dialogueLines:
+        assert ln.exactText in prompt              # verbatim material, both lines
+    with pytest.raises(R.Refused, match="THE FORMULA GATE"):
+        R.check_formula_structure(prompt, shot.dialogueLines, refuse_prefix="REFUSED — test")
 
 
-def test_split_briefs_materially_different():
-    """The kinetic half carries physics-chain language and zero speaker language; the
-    dialogue half carries speaker/audio language and zero crash-physics or motion-blur
-    language (mode-lean quality line). Modes select vocabulary by REMOVING, not adding."""
-    briefs = _real_split_briefs()
-    a = briefs["S1.SH2A"][0].lower()
-    b = briefs["S1.SH2B"][0].lower()
-    # kinetic half
-    assert all(w in a for w in ("compress", "rebound", "pollen"))
-    assert "lip-sync" not in a and "@audio" not in a
-    assert "motion blur" in a                      # kinetic quality line kept
-    # dialogue half
-    assert "lip-sync" in b and "@audio1" in b
-    assert "compress" not in b and "rebound" not in b and "spin" not in b
-    assert "motion blur" not in b                  # competing language removed
-    assert "cheek-lift" in b and "grin" in b       # ends on the caught smile, never a grin
+def test_source_brief_carries_both_physics_and_dialogue_facts_in_their_own_sections():
+    """The materially-different guarantee, re-homed: the ONE source brief now separates the
+    kinetic material (the gag's own physics chain, under GAG PHYSICS) from the vocal
+    material (under THE VERBATIM LAW) — each labelled, neither displacing the other."""
+    prompt, _wc, shot = _real_canonical_shot()
+    low = prompt.lower()
+    # kinetic facts from the shot's own physicalStaging, labelled
+    assert "GAG PHYSICS" in prompt
+    assert "compress" in low and "pollen" in low
+    # vocal facts, labelled, never mixed into the physics lines
+    dlg_idx = prompt.index("DIALOGUE — THE VERBATIM LAW")
+    assert "Do I look official?" in prompt[dlg_idx:]
+    assert "Yes Fuzzby Officially nuts!" in prompt[dlg_idx:]
 
 
 def test_dialogue_only_mode_removes_competing_language():
     """E._modes_dialogue_only: only a purely dialogue/emotional mode set flips the lean
-    branch; absent modes (unmigrated shots) and hybrids keep today's exact behaviour."""
-    briefs = _real_split_briefs()
-    _p, _wc, sh2b = briefs["S1.SH2B"]
-    assert E._modes_dialogue_only(sh2b)
-    _p, _wc, sh2a = briefs["S1.SH2A"]
-    assert not E._modes_dialogue_only(sh2a)
-    unmigrated = sh2b.model_copy(update={"performanceModes": []})
+    branch; absent modes (unmigrated shots) and hybrids keep today's exact behaviour —
+    the surviving mode machinery still selects vocabulary by REMOVING."""
+    _p, _wc, hybrid = _real_canonical_shot()
+    assert not E._modes_dialogue_only(hybrid)      # 4-mode hybrid keeps the kinetic line
+    assert "motion blur" in E._quality_line(hybrid)
+    dialogue_only = hybrid.model_copy(update={
+        "performanceModes": ["DIALOGUE_PERFORMANCE", "EMOTIONAL_ACTING"]})
+    assert E._modes_dialogue_only(dialogue_only)
+    assert "motion blur" not in E._quality_line(dialogue_only)   # competing language removed
+    unmigrated = hybrid.model_copy(update={"performanceModes": []})
     assert not E._modes_dialogue_only(unmigrated)
     assert E._quality_line(unmigrated) == E.QUALITY_LINE   # no modes -> unchanged behaviour
 
@@ -911,11 +969,11 @@ def test_dialogue_only_mode_removes_competing_language():
 def test_shot_density_rule_is_a_decision_point():
     """>2 modes without the Director's recorded decision refuses at handover; with
     hybrid_approved it passes — a decision point, never an accumulating blocker."""
-    import cb_handover as H
-    briefs = _real_split_briefs()
-    _p, _wc, base = briefs["S1.SH2A"]
+    _p, _wc, base = _real_canonical_shot()
+    assert base.modeDensityDecision == "hybrid_approved"   # the real shot records its decision
     three = base.model_copy(update={
-        "performanceModes": ["KINETIC_ACTION", "PHYSICAL_COMEDY", "COMEDY_REACTION"]})
+        "performanceModes": ["KINETIC_ACTION", "PHYSICAL_COMEDY", "COMEDY_REACTION"],
+        "modeDensityDecision": None})
     # the check lives inline in distil_shot; exercise its exact condition here
     assert len(three.performanceModes) > 2 and not three.modeDensityDecision
     approved = three.model_copy(update={"modeDensityDecision": "hybrid_approved"})

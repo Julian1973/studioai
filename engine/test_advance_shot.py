@@ -157,8 +157,13 @@ def test_advance_shot_auto_clears_model_limited_once_genuinely_eligible(world, m
     calls, tmp, path = world
     _skip_lineage(monkeypatch)
     _reach_model_limited(monkeypatch, path)
-    _approve_animation(monkeypatch, "0.0-4.0s: fast brisk genuinely different approved action. "
-                                    "4.0-8.0s: slowed, held redesign closing beat, near-still.", shot_id="1.B1.S1")
+    # GOLD BUILD (2026-07-24): the re-approved direction must BE the formula, carrying the
+    # shot's own (unchanged) locked line inline verbatim — different ACTION text is what
+    # genuinely changes the redesign signature here, never the dialogue.
+    from test_cb_render_department_gate import _formula_prompt
+    _approve_animation(monkeypatch, _formula_prompt(
+        "genuinely different approved action, slowed into a held redesign closing beat, "
+        "near-still"), shot_id="1.B1.S1")
     _mock_llm(monkeypatch)
     result = R.advance_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     assert result["status"] != "needs-new-direction"
@@ -194,8 +199,10 @@ def test_advance_shot_never_clears_model_limited_off_a_same_call_direction_refre
     led = R._ledger(pkg, "1.B1.S1")
     led["departmentWork"]["animation"]["approved"]["sourceHash"] = "deliberately-stale-hash"
     json.dump(pkg, open(path, "w"))
-    _mock_llm(monkeypatch, animation_prompt="0.0-6.0s: fast brisk genuinely different freshly recompiled action. "
-                                            "6.0-12.0s: slowed, held closing beat, near-still, reflecting real change.")
+    from test_cb_render_department_gate import _formula_prompt
+    _mock_llm(monkeypatch, animation_prompt=_formula_prompt(
+        "genuinely different freshly recompiled action, slowed into a held closing beat, "
+        "near-still, reflecting real change"))
     logs = []
     result = R.advance_shot("9", "1.B1.S1", "EpT", log=logs.append)
     recheck_lines = [m for m in logs if "re-checking the model-limited block" in m]

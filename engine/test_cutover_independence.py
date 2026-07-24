@@ -85,7 +85,11 @@ def test_new_spine_imports_and_compiles_with_old_pipeline_absent():
                               facing='right', pose='hover', expression='bright',
                               visibleMarks=[], heldProps=[])]))
         prompt, wc, slots = E.compile_shot_contract(shot, {}, {'Fuzzby': {'sizeRank': 2, 'avoid': 'bee'}})
-        assert E.OPENER_ANCHOR[:-1] in prompt and wc <= E.MAX_SHOT_PROMPT_WORDS
+        # GOLD BUILD (2026-07-24): the compiler emits the labelled SOURCE-MATERIAL brief now
+        # (no word ceiling — the 210-word band belonged to the retired fireable prose); the
+        # anchor still ships verbatim under its own OPENING ANCHOR label.
+        assert prompt.startswith('SOURCE MATERIAL') and 'OPENING ANCHOR' in prompt
+        assert E.OPENER_ANCHOR[:-1] in prompt and wc > 0
         # deferred item 7 (resolver): self-contained, exact-match-only, no old-path code
         cfg = {'Fuzzby': {}, "Keen's Mum": {}, 'Keen': {}}
         assert R._resolve_char('FUZZBY', cfg) == 'Fuzzby'

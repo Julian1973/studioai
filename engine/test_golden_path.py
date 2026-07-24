@@ -270,16 +270,37 @@ def _seed_voice_and_cinematography(scene, ep):
                                         "doesItLand": "test"})
 
 
+def _formula_prompt_for(s):
+    """A valid Gold-Build FORMULA prompt for this shot (2026-07-24 — the register writer's
+    own output shape, which cb_render.check_formula_structure now hard-requires at fire):
+    header when the shot has dialogue, one labelled 'Shot 1:' segment carrying the action
+    and every dialogue line inline verbatim, a closing HOLD tail, no duration text.
+    Deterministic per shot, so identical-prompt/identical-reroll assertions stay exact."""
+    lines = s.get("dialogueLines") or []
+    head = "ENGLISH DIALOGUE ONLY, spoken in English.\n\n" if lines else ""
+    dlg = "".join(f" {ln['speaker'].upper()}: {ln['exactText']}" for ln in lines)
+    return (head
+            + "Shot 1: Wide tracking at bee height, 24mm, handheld drift. Fuzzby rockets "
+              "past the flower, clips the leaf, and the leaf springs him back in a pollen "
+              "burst under the high-key daylight." + dlg + "\n\n"
+            + "They HOLD the final look, about 2 seconds of silence, no more dialogue.")
+
+
 def _seed_animation_for_shot(scene, ep, shot_id):
-    """Seeds ONE shot's animation approval, reusing its own already-compiled seedancePrompt
-    — called only once its real anchor dependency (an approved keyframe for an opener, or
-    an approved+harvested source for a relay) is already satisfied, matching real
-    production order. Kept as its own function (not folded into _seed_voice_and_
-    cinematography) for exactly that reason."""
+    """Seeds ONE shot's animation approval — called only once its real anchor dependency
+    (an approved keyframe for an opener, or an approved+harvested source for a relay) is
+    already satisfied, matching real production order. Kept as its own function (not folded
+    into _seed_voice_and_cinematography) for exactly that reason.
+
+    GOLD BUILD UPDATE (2026-07-24): the shot's own compiled seedancePrompt is now the
+    SOURCE-MATERIAL brief — deliberately NOT fireable (the formula gate refuses it by
+    construction), so seeding it as the approved Animation providerPrompt would refuse
+    every fire. The seeded direction is now what the real register writer would produce: a
+    formula prompt built from the shot's own dialogue lines."""
     pkg, _ = R.load_pkg(scene, ep)
     s = next(x for x in pkg["shots"] if x["shotId"] == shot_id)
     _seed_department_approval(scene, ep, shot_id, "animation",
-                               {"shotId": shot_id, "providerPrompt": s["seedancePrompt"],
+                               {"shotId": shot_id, "providerPrompt": _formula_prompt_for(s),
                                 "doesItLand": "test"})
 
 
@@ -453,17 +474,17 @@ def test_golden_path_script_to_scene_picture(world):
     assert [os.path.basename(u) for u in f1["image_urls"][1:]] == \
            ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_scenelook.png"]
     assert f1["audio_urls"] and f1["audio_urls"][0].endswith("_vo.mp3")
-    assert "nailed it" not in f1["prompt"].lower()                # Law 6 at fire time
-    # 2026-07-19 (THE HANDLE DOCTRINE, Julian: "we want 15 second clips with 2 seconds at
-    # the end to have for editing" — raised after a real take overran its own shorter
-    # designed clip with zero warning): cb_render._handle_duration now overrides the
-    # design-time durationSec with max(HANDLE_TOTAL=15, real_vo_duration+HANDLE_SETTLE=2)
-    # before the fire ever reaches the provider — this fixture's own mocked VO is a real
-    # 1.5s silent take, so 15.0 (the floor) is what should ship. This is NOT a regression of
-    # the old "never a blind 'auto' literal" guarantee this assertion used to pin — 15 here
-    # is a genuinely computed, audio-aware value (it would stretch past 15 for a longer real
-    # take, per test_cb_render.py), never a hardcoded literal ignoring the shot's content.
-    assert f1["duration"] == "15"
+    # GOLD BUILD (2026-07-24): dialogue-in-prompt is now the LAW on the animation path —
+    # the fired prompt must BE the formula, with the locked line inline and verbatim.
+    assert f1["prompt"].lstrip().startswith("ENGLISH DIALOGUE ONLY")
+    assert "FUZZBY: Nailed it." in f1["prompt"]
+    # RE-PINNED 2026-07-24 (matching test_cb_render.py's own re-pin): since Julian's
+    # split-generation directive (2026-07-23) the unconditional HANDLE_TOTAL=15 floor is
+    # retired — the shot's OWN durationSec (6.0 here) is the floor, stretched only when the
+    # real take + the 2s settle exceeds it. This fixture's mocked VO is a real 1.5s silent
+    # take (1.5+2=3.5 < 6), so the shot's own 6 is what ships — still a genuinely computed,
+    # audio-aware value, never a blind literal.
+    assert f1["duration"] == "6"
     # per-candidate review sheets: human criteria all null — machine never approves quality
     led1 = _led()["1.B1.S1"]
     assert len(led1["candidatePaths"]) == 3

@@ -240,19 +240,23 @@ def test_performance_assignment_sources_physical_performance_never_principal_per
         # principalPerformance is retained as provenance — never silently dropped
         assert retained["principalPerformanceApproved"] == sb_shot["principalPerformance"]
 
-        # the REAL compiler: compiles clean, zero Law 6 violation
+        # the REAL compiler — GOLD BUILD UPDATE (2026-07-24): the source-material brief now
+        # carries the line BY DESIGN, labelled under THE VERBATIM LAW, while the mapped
+        # PERFORMANCE fact stays the dialogue-free physicalPerformance text verbatim. The
+        # fireability protection moved to cb_render.check_formula_structure, which must
+        # refuse this brief outright — it is source material, never a prompt.
         prompt, wc, slots = cb_engine.compile_shot_contract(
             shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
-        assert line not in prompt
-        assert wc <= cb_engine.MAX_SHOT_PROMPT_WORDS
-
-        # THE REGRESSION PIN: the OLD mapping (performanceAssignment=principalPerformance)
-        # would have failed this exact shot — proves the fix addresses a real defect, not a
-        # hypothetical one.
-        old_mapping_shot = shot.model_copy(update={"performanceAssignment": sb_shot["principalPerformance"]})
-        with pytest.raises(AssertionError, match="LAW 6 VIOLATION"):
-            cb_engine.compile_shot_contract(
-                old_mapping_shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+        assert prompt.startswith("SOURCE MATERIAL")
+        assert "DIALOGUE — THE VERBATIM LAW" in prompt
+        assert line in prompt                                    # material, verbatim
+        assert (f"PERFORMANCE (approved physical performance): "
+                f"{sb_shot['physicalPerformance']}") in prompt   # dialogue-free performance fact
+        assert sb_shot["principalPerformance"] not in prompt     # the risky field never ships
+        import cb_render
+        with pytest.raises(cb_render.Refused, match="THE FORMULA GATE"):
+            cb_render.check_formula_structure(prompt, shot.dialogueLines,
+                                              refuse_prefix="REFUSED — test")
 
 
 def test_distil_shot_refuses_when_physical_performance_not_yet_authored():
@@ -275,9 +279,9 @@ def test_distils_only_the_categories_and_shot_structure():
     assert "keyframePrompt" not in s2 or not s2.get("keyframePrompt")
     assert s1["prohibited"] == ["Zenny stays on her petal"]      # <=3 essential protections
     assert s1["durationSec"] == 6.0                              # midpoint of "5-7s"
-    for s in (s1, s2):                                           # Option D lean brief holds
-        assert s["promptWords"] <= cb_engine.MAX_SHOT_PROMPT_WORDS
-        assert "Begin exactly on @图1" in s["seedancePrompt"]
+    for s in (s1, s2):                # GOLD BUILD (2026-07-24): the source-material brief
+        assert s["seedancePrompt"].startswith("SOURCE MATERIAL")
+        assert "Begin exactly on @图1" in s["seedancePrompt"]     # anchor fact, labelled
     assert pkg["handover"]["integrationGaps"]                    # gaps DECLARED, never silent
 
 
@@ -375,8 +379,12 @@ def test_verbatim_dialogue_lands_on_the_correct_shot():
     ln = lines[0]
     assert ln["exactText"] == "Nailed it."                       # verbatim, never reworded
     assert "Nailed it" not in ln["delivery"]                     # delivery carries no words
-    for s in (s1, s2):
-        assert "Nailed it" not in s["seedancePrompt"]            # Law 6 holds through handover
+    # GOLD BUILD UPDATE (2026-07-24): the line lands as labelled source material on the ONE
+    # shot that owns it — present in s1's brief under THE VERBATIM LAW, and never bleeding
+    # into s2 (the relay shot with no dialogue of its own).
+    assert "DIALOGUE — THE VERBATIM LAW" in s1["seedancePrompt"]
+    assert "Nailed it." in s1["seedancePrompt"]
+    assert "Nailed it" not in s2["seedancePrompt"]
 
 
 # ── THE HANDOVER-MAPPING CORRECTION (2026-07-17): VOICE MAPPING ────────────────────────
@@ -768,12 +776,21 @@ def test_rejection_history_and_model_limited_status_survive_a_concurrent_promoti
 # AssertionError propagate uncaught — advance_shot's only catch is HandoverRefused. This
 # must now surface as a clean, actionable refusal instead of an unhandled crash.
 def test_a_real_law6_leak_in_authored_content_refuses_cleanly_never_crashes(tmp_path, monkeypatch):
+    """GOLD BUILD UPDATE (2026-07-24), two halves of the original intent, both kept real:
+
+    (a) dialogue quoted inside authored internalCuts is NO LONGER a compile failure — the
+        source-material brief carries dialogue by design, so this exact authored content
+        (the shape that used to crash the Studio job) now promotes cleanly and lands in the
+        brief as labelled material. The fireability protection lives downstream in
+        cb_render.check_formula_structure, not in the compiler.
+    (b) THE FIREABILITY PROTECTION now lives wholly downstream: the promoted shot's own
+        compiled seedancePrompt is source material — cb_render.check_formula_structure
+        must REFUSE it outright, so the exact content that used to crash the Studio job
+        can never reach the provider either, by construction rather than by a compiler
+        assertion."""
     sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
     sb = json.load(open(sb_p))
     sh1 = next(s for s in sb["shots"] if s["shotId"] == "S1.SH1")
-    # Reproduces the exact real defect: an authored internalCuts entry quoting the beat's
-    # own locked dialogue verbatim (the beat's exactDialogue is "FUZZBY: Nailed it.",
-    # matched by _vp("FUZZBY", "Nailed it.") too) inside a multi-cut shot.
     sh1["cutPace"] = "paced_cuts"
     sh1["internalCuts"] = [
         "Fuzzby overshoots the flower as the camera pursues, ending on the near-miss.",
@@ -782,11 +799,22 @@ def test_a_real_law6_leak_in_authored_content_refuses_cleanly_never_crashes(tmp_
     ]
     json.dump(sb, open(sb_p, "w"))
 
-    with pytest.raises(H.HandoverRefused, match="S1.SH1 failed compilation"):
-        H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
-                               dry_run=True, log=lambda *a, **k: None)
-    # never a bare AssertionError reaching the caller — that's the whole point of the fix
-    assert list(pkg_dir.iterdir()) == []          # a dry run + a refusal both write nothing
+    # (a) the authored quote is now legitimate source material — promotes clean, dry run
+    pkg, _archived = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                            dry_run=True, log=lambda *a, **k: None)
+    rec = next(s for s in pkg["shots"] if s["shotId"] == "S1.SH1")
+    assert rec["seedancePrompt"].startswith("SOURCE MATERIAL")
+    assert "INTERNAL CUTS" in rec["seedancePrompt"]
+    assert "DIALOGUE — THE VERBATIM LAW" in rec["seedancePrompt"]
+    assert list(pkg_dir.iterdir()) == []          # a dry run writes nothing
+
+    # (b) the fireability protection: the promoted source brief can never fire — the
+    # formula gate refuses it with a clean, named refusal, never a bare crash.
+    import cb_render
+    with pytest.raises(cb_render.Refused, match="THE FORMULA GATE"):
+        cb_render.check_formula_structure(rec["seedancePrompt"],
+                                          rec.get("dialogueLines") or [],
+                                          refuse_prefix="REFUSED — test")
 
 
 if __name__ == "__main__":

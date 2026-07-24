@@ -68,7 +68,12 @@ def test_fire_shot_overrides_durationSec_before_any_downstream_read(monkeypatch,
     proven by stubbing everything around the override and reading what reaches the sealed
     envelope, without ever firing a real candidate loop."""
     import json
-    shot = {"shotId": "S1.SHX", "durationSec": 7.0, "seedancePrompt": "a raw prompt",
+    # GOLD BUILD (2026-07-24): fire_shot now runs check_formula_structure on the resolved
+    # prompt BEFORE the duration override — the fixture prompt must be a valid (dialogue-
+    # free) formula card or the gate refuses before the property under test ever runs.
+    shot = {"shotId": "S1.SHX", "durationSec": 7.0,
+            "seedancePrompt": ("Shot 1: Static wide. Fuzzby hovers, wobbles, and settles."
+                                "\n\nHOLD on the settle, about 2 seconds of silence."),
             "referenceSlots": {"@图1": "opening keyframe", "@Audio1": "voice track"},
             "dialogueLines": []}
     pkg = {"shots": [shot], "continuityLedger": [{"shotId": "S1.SHX", "voPath": "vo.mp3"}],

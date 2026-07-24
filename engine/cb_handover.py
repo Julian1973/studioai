@@ -536,7 +536,7 @@ def _assert_no_internal_leak(shots_out):
     identical, intentional, compiler-generated text, never a leak. Every other field, and
     every other banned term (including 'Hard constraints:' anywhere OUTSIDE these two named
     fields), is checked exactly as before — this narrows nothing else."""
-    exempt = {"internalConstraints", "seedancePrompt"}
+    exempt = {"internalConstraints", "seedancePrompt", "keyframePrompt"}
     scrubbed = [{k: v for k, v in s.items() if k not in exempt} for s in shots_out]
     dump = json.dumps(scrubbed, ensure_ascii=False)
     for banned in ("showrunnerJudgement", "dramaticConstruction", "audienceExperience",

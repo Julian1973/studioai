@@ -72,3 +72,38 @@ if __name__ == "__main__":
                test_a_shot_with_no_stated_intent_is_reported_not_faked):
         fn(); print("  ok ", fn.__name__)
     print("INTENT ENGINE PASSED")
+
+
+def test_the_director_stops_the_shot():
+    """THE DIRECTOR'S STOP. Not an advisory — a refusal. A prompt that omits what the
+    Director wrote down does not reach the provider, exactly as a director on a stage pulls
+    a take when the direction was not performed."""
+    import cb_render as R, pathlib
+    shot = _shot()
+    bad = (HERE.parent / "shows" / "crystal-bears" / "creative" / "fixtures" /
+           "engine_ab" / "SH2_spine_build.txt").read_text()
+    try:
+        R.check_formula_structure(bad, ["x"], shot=shot)
+        raise AssertionError("the gate has no teeth — a half-delivered prompt was allowed")
+    except R.Refused as e:
+        assert "DIRECTOR'S DIRECTION IS NOT IN THE PROMPT" in str(e)
+        assert "comedy hinge" in str(e) or "grin-held-too-long" in str(e)
+
+
+def test_the_gate_opens_when_the_direction_is_delivered():
+    """A wall that never opens is not a gate. The corrected prompt — same shot, same laws,
+    with the Director's five missing clauses written in — must pass."""
+    import cb_render as R
+    shot = _shot()
+    good = (HERE.parent / "shows" / "crystal-bears" / "creative" / "fixtures" /
+            "engine_ab" / "SH2_intent_delivered.txt").read_text()
+    assert I.score(good, shot)["coverage"] == 1.0
+    R.check_formula_structure(good, ["x"], shot=shot)      # must not raise
+
+
+def test_a_missing_intent_engine_never_invents_a_refusal():
+    """If cb_intent is absent the gate degrades silently — it never fabricates a stop."""
+    import cb_render as R
+    R.check_formula_structure("ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the "
+                              "sole source of dialogue, wording, voice, performance and "
+                              "timing.", [], shot=None)

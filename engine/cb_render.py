@@ -2205,6 +2205,33 @@ def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
     # words because every one buys physics; a hypothetical 900-word prompt that also spends
     # every word on physics is not worse, and no gate can tell the difference by counting.
     # Waste is surfaced as an advisory in check_craft_components and judged by a human.
+    # THE DIRECTOR'S STOP (2026-07-25, Julian: "the prompt has to be checked against the
+    # director's vision — like it would be in real life, the director would stop it and say
+    # no, it's not right, it hasn't landed, and pull the shot").
+    #
+    # THE LINE THIS DRAWS, AND WHY IT IS NOT THE RESERVED VERDICT. This studio's standing
+    # rule is that a machine never refuses on craft — "is it funny, does it fly" is Julian's
+    # alone and no check may approximate it. That rule is untouched. This refuses something
+    # different and entirely factual: the Director WROTE DOWN what the beat is for, and the
+    # prompt does not contain it. A director pulling a take because the actor never did the
+    # thing they were directed to do is not exercising taste; they are observing that the
+    # direction was not performed. Taste is judging the performance. This judges whether it
+    # happened at all.
+    #
+    # It earned the refusal on the day it was written: a prompt built to the proven keeper
+    # shape, passing all nine recorded failure checks, scored 5/10 against S1.SH2's own
+    # stated intent — silently missing the beat the card itself names as the comedy hinge.
+    # As an advisory that gap would have been one more line in a list nobody reads.
+    if shot:
+        try:
+            import cb_intent
+            for r in (cb_intent.score(prompt_text, shot).get("missed") or []):
+                problems.append(
+                    f"THE DIRECTOR'S DIRECTION IS NOT IN THE PROMPT [{r['field']}] — she "
+                    f"asked for \u201c{r['clause'][:130]}\u201d and nothing in the prompt "
+                    f"delivers: {', '.join(r['missing'][:6])}")
+        except ImportError:
+            pass    # engine incomplete — never invent a refusal from a missing module
     if problems:
         raise Refused(f"{refuse_prefix} — THE FORMULA GATE: " + "; ".join(problems))
     # THE STASIS LOAD (2026-07-25). Advisory, like everything else here — but this is
@@ -2218,24 +2245,6 @@ def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
                 for c in (shot.get("charactersInFrame") or shot.get("characters") or [])]
         cast = [c for c in cast if c]
     advisories += check_stasis_load(prompt_text, shot=shot, characters=cast)
-    # THE INTENT GATE (2026-07-25, Julian: "every prompt has to deliver the director's
-    # direction"). Everything above this line checks the prompt against a FAILURE list —
-    # no geometry, no stasis, identity held. None of it asks whether the text delivers what
-    # the Director said the beat was FOR. A prompt passing all nine of those checks was
-    # measured at 5/10 of S1.SH2's stated intent, missing the beat the card itself calls
-    # the comedy hinge. Advisory like everything else here — the reviewer decides — but the
-    # gap is now stated in the Director's own words instead of going unseen.
-    if shot:
-        try:
-            import cb_intent
-            sc = cb_intent.score(prompt_text, shot)
-            for r in sc.get("missed") or []:
-                advisories.append(
-                    f"INTENT NOT DELIVERED [{r['field']}] — the Director asked for "
-                    f"\u201c{r['clause'][:120]}\u201d; nothing in the prompt for: "
-                    f"{', '.join(r['missing'][:6])}")
-        except Exception:
-            pass          # a missing/odd intent field never blocks a compile
     return advisories
 
 

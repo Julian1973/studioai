@@ -1,0 +1,254 @@
+[
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T135711/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T13:57:11",
+  "text": "Julian (verbatim): 'what i dont get is he has the goatte again is this a cashing issue i dont get why that would appead are you sure this is the prompt that went' \u2014 verified NOT caching (sealed envelope md5 e4645353, no 'goatee'/'moustache' in transmitted text, fresh render proven by the corrected blue sky). Diagnosis: model prior + Fuzzby's own dark chest fur under the chin supplies the goatee; images beat text 9/9. Julian's fix (verbatim): 'yeah someone said why dont we create the perfect fuzzby face with the moustache and goatee and then use that as the referecene' \u2014 a prepared face-state reference (@\u56fe6: golden moustache + golden goatee, pixel-recoloured from this take's own blue-sky frame) now fights the image prior with an image. KEEPS from this take: the white-sun/high-key sky recipe (first correct light in 9 takes) and the padded 15s audio master (dialogue landed on its windows)."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2A_20260723T090028/REJECTED.json",
+  "shot": "S1.SH2A",
+  "at": "2026-07-23T09:00:28",
+  "text": "Julian's verdict (verbatim): 'I dont like it again stale emotions and dead delivery needs fuzzbys character his energy.' Diagnosis: the prompt carried full physics/camera/tempo but thin acting direction \u2014 mild words (showy confidence, blinking sincerely) rendered as a blank face. With no @Audio1 on this mute shot, the prompt must carry the whole performance. Fix at source: concrete named acting beats from Fuzzby's own canon register \u2014 parade-marshal grin, performing for Zenny, delight holding a beat too long, and the INSTANT PROUD RECOVERY at the reveal (crash played as triumph), never a blank stare. Also: goatee must be golden pollen, never dark fur."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260722T114125/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-22T11:41:25",
+  "text": "Julian's real-footage note: crash needs to be bigger, and Zenny's repeated mid-shot appearances broke continuity (read as her teleporting rather than one coherent space). Redesigned the geography: Fuzzby now loops away from and back to Zenny's own flower, and the final crash-landing is a real, forceful gag-physics beat, not another flower-clip. Re-firing."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T072717/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:27:17",
+  "text": "A/B verdict: A was the better base but neither right \u2014 physics wrong, needs more go-away-and-come-back, better landing physics and a Zenny reaction connected to the crash. Hybrid test follows."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T064643/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T06:46:43",
+  "text": "Staging feels unnatural: Fuzzby flies far away then coincidentally lands by Zenny \u2014 the flight must stay a tight circuit around her flower patch so the crash-landing beside her is inevitable. And the Nailed-it superhero pose needs a clearly PROUD confident face \u2014 chin up, big grin \u2014 not an unsure expression."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T125631/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T12:56:31",
+  "text": "Framing-composite diagnosis, confirmed within a single take: the grey goatee and sunset-mountain drift appear ONLY in the solo shots of moustached Fuzzby (6.5s/8.5s) and vanish in the two-shots (11.5s/14.8s \u2014 clean chin, blue-sky meadow, correct lip-sync). 7/7 renders consistent: solo close-up triggers the model's 'grandpa at golden hour' composite regardless of wording. Redesign: stage the discovery IN the two-shot \u2014 Zenny in frame from crash recovery to end; the solo close-up never exists. Julian's direction (verbatim): 'lets run the tests at the lesser amount becasue i think we are nor refining the prompting strucutre' \u2014 test iterations at 480p."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T074306/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:43:06",
+  "text": "Test artifact \u2014 P2 timecoded archived for Julian's three-way comparison; file preserved in Downloads."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T121456/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T12:14:56",
+  "text": "Julian's verdict (verbatim): 'its better we still got a problem is the goattee colour and the corography of the crahs and flower is out and the goattee isnt right cant we say handle bar mustouche and goatte in pollen yellow.' Confirmed from frames: the crash rendered as a sideways graze past the flower (no dive, no compression, no rebound \u2014 the covered state appears via a jump cut, which is also where the sunset drift re-entered); goatee grey again (5/5 across all wordings). Retake approach per Julian's own direction: drastic simplification to the community simple-prompt format \u2014 one event per timed shot, zero negatives, his exact 'handlebar moustache and goatee in bright pollen-yellow' phrasing, explicit dive/stem-whip/fling choreography, slow push-in replacing the jump cut."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T055652/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T05:56:52",
+  "text": "Julian's real review: opening was far too close (inherited S1.SH1's tight dolly-in ending verbatim, wrong for a shot that needs to open wide), and the story itself was missing a beat -- Fuzzby needs to go on another flight with Zenny actually following him this time, before he crashes into the flower and gets the pollen moustache. Storyboard rewritten: camera now pulls back wide immediately after matching the previous shot's anchor point, and a real flight-and-follow sequence (Zenny trailing Fuzzby, watching him get more reckless) is staged before the crash. Not a quality rejection of the take itself -- the story it was asked to deliver was incomplete."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260725T142259/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-25T14:22:59",
+  "text": "Comparison archive \u2014 variant C (349w, stamens) preserved as SH2_C_stamens.mp4. Variant D fires next: a structural pivot to a continuous flying two-hander (Zenny never parked, lateral tracking throughout, Fuzzby crashes mid-flight and rejoins formation). Not a quality verdict on C."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T085058/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T08:50:58",
+  "text": "Julian's verdict: v2 crash-flower has the best FINISH; the final hybrid before it had the best OPENING and PACE. v3 = synthesis of both. File preserved as SH1_v2_crashflower.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T100953/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T10:09:53",
+  "text": "Julian's verdict on the 720p keeper: perfect EXCEPT the ending \u2014 Fuzzby drifts back into a hover with frozen wings during the hold (airborne + still wings, the one impossible state). One-variable fix: the pose and hold sentences now ground him explicitly (feet planted, wings folded at rest, never lifts off). File preserved as SH1_KEEPER_720p.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260722T125321/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-22T12:53:21",
+  "text": "Take itself is strong (chase, loop-return geography, bigger crash, 'Nailed it' timing all landed) -- superseding with a revision that adds a dolly-in to Zenny's deadpan head-shake during the final silent 2-3s, per Julian's direction. Not a quality rejection of this take."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T133737/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T13:37:37",
+  "text": "Two-shot staging test FALSIFIED the framing hypothesis: staging was followed exactly (two-shot held, correct lip-sync, dive landed) but the grey goatee and sunset arrived anyway \u2014 8/8 renders. Julian's direction (verbatim): 'but we have had theses laws and they are not working lets trial the exact prompt and see what happens' \u2014 trialling the externally-proposed prompt EXACTLY as written: never says 'moustache' (two symmetrical pollen curls), youthful anchor, high-key white-sun light vocabulary, padded 15s @Audio1 master, and the literal dialogue words in the prompt as a deliberate Law-6 experiment."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260720T222222/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-20T22:22:22",
+  "text": "instruction-ignored"
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260722T160334/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-22T16:03:34",
+  "text": "Julian's real review: the chant ('bizzy bizzy') does not audibly land; Zenny needs to be shown actively hovering and collecting pollen the whole time, not just idle/still; and the bounce-chain/fall reads too staged/choreographed rather than a genuine chaotic accident. Root cause found and fixed: internalCuts was left stale from an earlier edit and still said he clips flowers throughout the outbound flight while other fields said clean flight -- a real contradiction feeding the compiled prompt. Storyboard swept end-to-end: internalCuts now matches the clean-out/single-clip-on-return choreography, chant audibility called out as its own priority, Zenny's active pollen-collecting made explicit throughout, and the bounce/fall language de-mechanized to read as a genuine accident, not staged blocking."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T073750/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:37:50",
+  "text": "Test artifact \u2014 P1 full prose archived for Julian's three-way comparison; file preserved in Downloads."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T071526/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:15:26",
+  "text": "A/B TEST ARTIFACT \u2014 Test A (Julians own hand-authored prompt) archived for side-by-side comparison with Test B; not a quality verdict. Both files preserved in Downloads."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260722T123542/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-22T12:35:42",
+  "text": "Julian: the crash/geography redesign is a genuine improvement, but the 'Nailed it.' line came through as an almost-inaudible ~0.4s blip at 14.0-14.5s in the actual rendered audio (confirmed via direct waveform analysis of the delivered clip, not just the source reference) -- landing right on the shot's hard edge with no margin. Added an explicit, numbered timing anchor to the prompt ('land by ~11s, hold silent for the final 2-3s') plus pulled the reference audio's own onset target earlier (11.5s -> 10.0s) to build real margin before the 15s ceiling either way."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260722T140623/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-22T14:06:23",
+  "text": "Take was loved as-is; superseding to apply Julian's choreography note -- clean flight through the flowers on the way out, a single clip only on the way back triggers the chaotic bounce chain into the gymnastic backflip landing. Not a quality rejection."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T092519/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T09:25:19",
+  "text": "Test artifact \u2014 v4 rejected by Julian: lost the pace, the turnaround and the crash (abstract geometry replaced physical cause-and-consequence). The FINAL HYBRID is the confirmed winner and re-fires now at full production resolution (720p) as the keeper. File preserved as SH1_v4_final.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T065117/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T06:51:17",
+  "text": "Julian's own verdict on the v3 take (2026-07-23): 'this is better but lacks the heart pace and feeling' \u2014 everything plays at one even middle pace; the fast/slow contrast the Director authored (quick clumsy crash, slowed-down reveal, near-still verdict) never reached the shipped prompt. Root cause fixed at the structural level (tempo map + felt intent now compile into every brief); re-firing once under that fix per his explicit Option A authorization."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2A_20260723T092327/REJECTED.json",
+  "shot": "S1.SH2A",
+  "at": "2026-07-23T09:23:27",
+  "text": "Julian's verdict (verbatim): 'they are poor its not right.' Whole 3-candidate batch rejected. Documented mechanical failures across all 3 (and the prior take \u2014 4/4): (1) the goatee renders as dark grey fur every time despite explicit 'golden pollen, never dark, never hair' instruction \u2014 confirmed instruction-ignored pattern; (2) the world drifts mid-shot from blue-sky morning meadow to a pink sunset mountain vista that exists nowhere in the scene \u2014 geography/lighting continuity break with SH1 and with SH2B's chain; (3) pollen coverage overshoots the 'loose handlebar' spec into a full forehead coating. Performance energy itself WAS achieved this batch \u2014 the failure is no longer acting, it is world-hold and the goatee."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T080205/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T08:02:05",
+  "text": "Test artifact \u2014 timecoded horseshoe archived for Julian's final two-way comparison against the prose horseshoe; file preserved in Downloads as SH1_horseshoe.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T061520/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T06:15:20",
+  "text": "Zenny's turn-away/hidden-smile beat did not land \u2014 she grins straight at camera/Fuzzby for the final ~4s instead of staying flat, turning partly away, then only breaking into a small private smile she catches herself doing. Traced to a real self-contradiction in the fired prompt: the Camera paragraph says 'do not linger after the smile appears' (cut away fast) while the Crash-reveal paragraph describes the smile FADING as the final continuity frame (which requires lingering on it). Fixing at the storyboard source before re-firing: one unambiguous staging beat, no competing edit-timing instructions. Flower-plunge visibility was fine this take (Fuzzby stayed clear of full submersion throughout) \u2014 adding an explicit stays-visible guard anyway as a belt-and-braces safeguard for future beats, not because this take needed it."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260722T110233/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-22T11:02:33",
+  "text": "Stale candidate from before today's fixes (shot restructured to 3 internal cuts, camera line strengthened for Zenny's early visibility, voice pacing corrected so Nailed it lands on the settled pose). Re-firing against the corrected prompt+audio."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260725T141616/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-25T14:16:16",
+  "text": "Comparison archive \u2014 variant B (Julian's 437w revision) preserved as SH2_B_julian_revised.mp4. Variant C fires next: leaner still (349w) and carrying a new physical mechanic \u2014 two curved pollen-covered stamens brushing the upper lip to form the handlebar shape, plus an explicit ~2s comic beat for launch/loop/impact/rebound. Not a quality verdict on B."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T090518/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T09:05:18",
+  "text": "Test artifact \u2014 v3 pace-hybrid archived; Julian's FINAL TEST (v4: two-flower landmark, explicit 180-degree U-turn with screen-direction reversal, lag-overshoot-refind chase camera) fires next. File preserved as SH1_v3_pace_hybrid.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T075648/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:56:48",
+  "text": "Julian's 4-way verdict: hybrid = good camera/flow but Zenny appears at the end; P1 = fails, errors + two Fuzzbys; P2 timecoded = best of three but orbiting didn't work \u2014 motion too close to Zenny; P3 = same orbit issue. Winning recipe: timecoded style + fly OUT fast, bang into everything, horseshoe arc back, dramatic crash \u2014 keep the Nailed-it pose and Zenny's first-class acting. Horseshoe prompt fires next."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T070127/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T07:01:27",
+  "text": "Julian's verdict (2026-07-23): flight/chase is GREAT (tempo map validated for the kinetic half), but the crash into the flower is poor, the moustache is not great (rendered dark/groomed, not pollen residue), Fuzzby rushes his lines, and Zenny's lines aren't right. Moving in the right direction, still not there. Pattern across 4 takes: every take lands some beats and drops others \u2014 one 15s generation is being asked to carry 8 distinct beats (launch/chase/crash/reveal/question/pause/verdict/private smile)."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260725T140158/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-25T14:01:58",
+  "text": "Comparison test A/B \u2014 variant A (studio's authored 632w direction) archived for side-by-side against Julian's own leaner 437w revision. Not a quality verdict."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T083726/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T08:37:26",
+  "text": "Julian: 85% there \u2014 refining the little bits. v2 adds the dedicated crash flower beside Zenny's (never her flower), local pollen puffs per impact, speed shown only through wing blur/camera/bending stems. File preserved as SH1_final_hybrid.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH3_20260724T074043/REJECTED.json",
+  "shot": "S1.SH3",
+  "at": "2026-07-24T07:40:43",
+  "text": "Too slow with no pace \u2014 5.7 of 9 seconds are stillness; no music, no wing buzz, no crash SFX staged anywhere in the prompt; sunset light vocabulary regressed. Rebuild on the winning SH2 template at a tighter duration."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T082059/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T08:20:59",
+  "text": "Julian's final-pair verdict: the lean/prose telling wins on both occasions \u2014 credence to the AnyFilm prompting system. Final hybrid (lean prose + physical-continuity engineering: Zenny welded to one connected flower structure, petal-flower-stem as one spring, no-propulsion-trail guard) fires next. File preserved as SH1_horseshoe_prose.mp4."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260725T144436/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-25T14:44:36",
+  "text": "Comparison archive \u2014 variant D (flying two-hander) preserved as SH2_D_flying.mp4. Variant E fires next: a 3-shot multishot structure (85mm CU / 50mm two-shot / 35mm wide) with inline dialogue, testing whether internal cuts fix the pace problem. KNOWN RISK ON RECORD: 'FUZZBY: Buzz Crash!!' is not in the signed-off 15s VO, and lands where the track has Zenny speaking. Not a quality verdict on D."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T070606/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:06:06",
+  "text": "Too tight now \u2014 the orbit constrains him. He can go far away but he has to come back; testing Julian own hand-authored prompt next (A/B at 480p)."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH2_20260723T123201/REJECTED.json",
+  "shot": "S1.SH2",
+  "at": "2026-07-23T12:32:01",
+  "text": "Julian's verdict (verbatim): 'ok the movement and everything eas excallen we still got the black goattee so just do it with the handle bar mustache and ensure that the lines fall with the right people fuzzby says zennys name at the end but that is much better.' Redesign ordered: (1) MOUSTACHE ONLY \u2014 the goatee/chin element is cut from the design entirely (grey 6/6 across every wording; the one untried variant); (2) explicit lip-sync speaker attribution \u2014 the take gave Zenny's line to Fuzzby's mouth at the end; each line's mouth must belong to its speaker. Movement/choreography/performances approved as excellent \u2014 the simple prompt format stays."
+ },
+ {
+  "file": "engine/media/archive/shots_rejected/Ep1_S1.SH1_20260725T073244/REJECTED.json",
+  "shot": "S1.SH1",
+  "at": "2026-07-25T07:32:44",
+  "text": "Test artifact \u2014 superseded by Julian's own three-prompt prescription-density test (P1 prose / P2 timecoded / P3 lean); file preserved in Downloads."
+ },
+ {
+  "file": "archive/Episode_1_Complete_Archive_20260718/media/archive/Ep1_scene1_rejected/1.B1_20260716T000401/1.B1.REJECTED.json",
+  "shot": "?",
+  "at": "2026-07-16T00:04:01.287248",
+  "text": "he hits a flower, there is no real movement, then the flower disappears \u2014 static motion and an object-permanence failure"
+ },
+ {
+  "file": "archive/Episode_1_Complete_Archive_20260718/media/archive/Ep1_scene1_rejected/1.B3_20260713T220336/1.B3.REJECTED.json",
+  "shot": "?",
+  "at": "2026-07-13T22:03:36.109975",
+  "text": "Fix the checklist-shaped travel action (dive/clip-branch/tumble/land compressed into one stacked sentence) so the beat commits to real spatial travel away from the opening branch instead of looping back to it, and re-check for hallucinated background foreign-language chatter in the audio."
+ },
+ {
+  "file": "archive/Episode_1_Complete_Archive_20260718/media/archive/Ep1_scene1_rejected/1.B1_20260707T123500/1.B1.REJECTED.json",
+  "shot": "?",
+  "at": "2026-07-07T12:35:00.555975",
+  "text": "Wrong starting position vs the signed keyframe; physics show Fuzzby going fully INTO the flower body-first instead of face-only with body/wings/legs staying outside; comes out with generic pollen-on-face instead of the intended moustache shape."
+ },
+ {
+  "file": "archive/Episode_1_Complete_Archive_20260718/media/archive/Ep1_scene1_rejected/1.B2_20260707T124419/1.B2.REJECTED.json",
+  "shot": "?",
+  "at": "2026-07-07T12:44:19.810937",
+  "text": "Starting position drifted badly from the signed keyframe (extreme from-behind close-up with invented floating hearts/particle trails, not the staged wide 2-shot); Fuzzby's whole body went into the flower instead of just his face/head; pollen came out as a generic face-dusting instead of a handlebar-moustache shape. Script tightened (body/wings/legs-stay-outside + handlebar-moustache-shape now explicit) ahead of the re-fire."
+ }
+]

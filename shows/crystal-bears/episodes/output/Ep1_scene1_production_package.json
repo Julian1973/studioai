@@ -3746,7 +3746,7 @@
   {
    "shotId": "S1.SH2",
    "beatCode": "S01-B01-POLLEN-CHAOS",
-   "status": "designed",
+   "status": "candidates-pending",
    "sourceType": "relay",
    "sourceShotId": "S1.SH1",
    "cutInMotivation": "Continues directly from the previous shot's final frame -- the launch begins where the settle ended.",
@@ -3809,44 +3809,6 @@
       "scene": "1",
       "shotId": "S1.SH2",
       "packageRevision": 42,
-      "preparedAt": "2026-07-25T18:07:15",
-      "editedAt": null,
-      "preparedBy": "specialist",
-      "sourceHash": "482a2a197958b672075573811b0a59fcd8945a1cb221c34d152c8428b5f2f092",
-      "signatureVersion": 3,
-      "sourceFields": {
-       "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
-       "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
-       "shotId": "54ecde44952529616504b72c25f888629d5e04ef0e7435c7a428c15c90ee58eb",
-       "approvedAnchor": "03b52b5a9853b4b548179e984c8c850d368d18fcde05d29847ef35b05ed7a8bf",
-       "approvedVoiceAsset": "ec31ca5443c17eab7cd06188b3f3316ed7e9bceeffe0b3ed05fd0297187ef363",
-       "physicalPerformance": "5e2afbc63ab838e1671ef1a1cec896d37dfc325fbd0e69c82ecb287d73623fd2",
-       "references": "ec191c1756f672f2da25c106a4957c011ff585158e0ae66f90c00ab5103abfd1",
-       "approvedSceneLookHash": "dadbee90db7459f05b4773a6cd837bbacafad72f70650d515f723cbce8205e0c",
-       "durationSec": "c72ae9676454d7cc0014583a9d0a2e28553d5c62f087c7562b5307ebd1cc84c8",
-       "measuredAudioDurationSec": "c72ae9676454d7cc0014583a9d0a2e28553d5c62f087c7562b5307ebd1cc84c8",
-       "fireDurationSec": "c72ae9676454d7cc0014583a9d0a2e28553d5c62f087c7562b5307ebd1cc84c8"
-      },
-      "outputHash": "e01354815b7a440ee86c5c3744dffdd06d7ead1a6257aedf30ce80c316c06879",
-      "output": {
-       "shotId": "S1.SH2",
-       "providerPrompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby speaks during the opening spoken section; Zenny listens with mouth closed. Zenny speaks during the final spoken section; Fuzzby listens with mouth closed. No additional dialogue, invented voices or vocalisations.\n\nUse @图1 only for the exact opening composition, positions, camera side and lighting; Zenny is the character from @图2 only — match the reference 100%, every feature and accessory exactly as shown; Fuzzby is the character from @图3 only — match the reference 100%, every feature and accessory exactly as shown; use @图4 only for the flower-corridor world, meadow depth, distant hills, sky, sun and shadow state.\n\nShot 1: Single continuous take, bee-height camera on a 35mm lens, continuing directly from the previous motion with no cut. Begin exactly on @图1. Hold the settled frame for one instant, then pull back into a wide, readable flower-corridor view; the meadow and the bright low sun in the sky remain visible behind the bees, with soft long shadows and sun rim on petals and wings. Foreground petals pass in soft bokeh, midground holds Fuzzby, Zenny and the impact flower, background flowers and hills breathe gently in the same plate light.\n\nZenny stays physically anchored to her flower: whenever her flower head, petal or stem shifts, she travels with it. Her wings keep beating, but her body gives almost nothing away. Fuzzby launches out of the settle like a one-bee parade — chest puffed, huge grin held open, one showman wave thrown toward Zenny, then a quick glance back to make sure she is watching. That glance costs him. His wingbeats keep working, but his body starts to outrun his control; the grin hangs on one beat too long while his path wobbles, shoulders correcting late, feet bicycling under him. The camera follows at a readable distance, not chasing too close, letting the corridor show the damage his confidence is about to do.\n\nThe target flower’s petal cup, pollen-heavy centre and stem remain visibly connected as one flexible physical structure before contact. Fuzzby realizes too late. Delight snaps into wide-eyed alarm. THUP — only his face plants into the pollen-heavy centre; his body, wings, arms and legs stay outside the flower and readable. The flower compresses deep under the face contact, stem bowing with his weight, petals cupping around the hit, then the loaded stem rebounds and springs him back. A single bright pollen-yellow burst puffs outward and transfers across his upper lip as one loose, powdery handlebar moustache; nothing dark appears anywhere on his face, no goatee, no chin tuft, no extra facial mark.\n\nThe camera tightens only enough to read the contact and recoil, never into a solo close-up, then settles into a steady medium two-shot with both bees in frame and holds that two-shot unbroken through discovery, both spoken sections and the button. Fuzzby hovers back from the flower as a passenger of the rebound for one beat, wings still beating, arms loose, cheeks recovering from the squash. Zenny hovers beside him in the same frame, flat and near-motionless, mouth closed.\n\nDuring the opening spoken section of @Audio1, Fuzzby does not yet understand what the impact gave him. His hand brushes the powder on his upper lip. Instead of alarm, delight blooms through his whole body: chin lifts, chest re-inflates, eyebrows waggle, and he strokes the pollen between two fingers like a distinguished gentleman. A loose clump drops off unnoticed and falls past his body while he keeps beaming. His mouth movement belongs only to this opening spoken section; Zenny’s mouth stays closed, her stillness making his ceremony look even bigger. He never fully goes still — small hover corrections, proud shoulder lifts, one extra moustache stroke, all pretending to be official posture.\n\nAs the final spoken section of @Audio1 begins, Zenny remains in the same two-shot, flat and quiet, mouth moving only for her own section. Fuzzby listens with mouth closed, still preening through her verdict, utterly convinced the pollen has improved him. Zenny’s body refuses the joke: only a tiny eye shift, a patient pause, the smallest weight change on her flower. When her final spoken section completely finishes, she turns half away toward her flower, and only then the first private cheek-lift escapes. Fuzzby answers the silence with one more satisfied stroke of the bright pollen-yellow moustache, hovering tall under the low sun, golden clumps catching the plate light.\n\nNo extra characters, no on-screen text, no crystals on the bees, no foreign-language speech. From crash recovery to final frame, always keep Fuzzby and Zenny together in the held two-shot with the meadow and sky unchanged behind them. Hold on Zenny half-turned away with the tiny private cheek-lift just escaping, and Fuzzby beaming mid-stroke under the loose golden-pollen moustache, for about 2 seconds of silence, no more dialogue.",
-       "doesItLand": "This clip should land the beat because the crash has clear weight, the pollen moustache reads as one clean visual payoff, and Zenny’s stillness gives Fuzzby’s sincere preening room to be funny."
-      },
-      "outcome": "approved",
-      "decisionAt": "2026-07-25T18:11:42",
-      "reviewedBy": "Julian",
-      "note": ""
-     },
-     "candidate": {
-      "department": "Animation",
-      "worker": "Animation Director / Camera",
-      "skill": "skills/crystal-bears-camera/SKILL.md",
-      "skillHash": "d96af712dd75a522",
-      "model": "gpt-5.5",
-      "scene": "1",
-      "shotId": "S1.SH2",
-      "packageRevision": 42,
       "preparedAt": "2026-07-25T19:27:42",
       "editedAt": null,
       "preparedBy": "specialist",
@@ -3870,8 +3832,13 @@
        "shotId": "S1.SH2",
        "providerPrompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby speaks first, then Zenny speaks; each character lip-syncs only during their own spoken section. The listener keeps the mouth closed. No additional dialogue, vocalisations, invented voices or on-screen text.\n\nUse @图1 only for the exact opening composition, positions and lighting continuity; @图3 only for Fuzzby’s identity, proportions, features and accessories; @图2 only for Zenny’s identity, proportions, features and accessories; @图4 only for the flower-meadow world, low sun, sky and shadow plate.\n\nShot 1: Continue directly from the previous shot’s motion. Bee-height 35mm, one continuous character-led camera move that begins in the previous final framing, pulls back to a wide flower-corridor view, follows Fuzzby’s flight at readable distance, tightens for the impact, then becomes one medium two-shot with both bees in frame through the recovery, discovery, both spoken sections and final button. Begin exactly on @图1. Stylised feature-quality 3D CGI matching @图1, with the low sun visible through the meadow, soft sky colour, backlit pollen motes and long flower shadows unchanged.\n\nFuzzby and Zenny are the characters from their references — match the references 100%, every feature and accessory exactly as shown. Both wings keep beating whenever airborne. No extra characters, no character redesign, no crystals on the bees.\n\nThe camera lets the previous final frame breathe for an instant: Fuzzby still proud from his last lucky success, Zenny nearby at her flower with flat calm. The camera pulls back into the open corridor before Fuzzby launches himself into another showy pass. His joy powers the takeoff: chest pushed forward, one grand wave thrown toward Zenny, a glance back to make sure she is watching, then he flies ahead like a tiny parade leading itself.\n\nDuring the lead-in of Fuzzby’s spoken section of @Audio1, before his mouth begins the line, the camera follows him through flowers at a readable distance. His grin lasts past the point where his body has lost the path. A shoulder brushes a tall stem, the contact tilts him off balance; his feet bicycle to recover, but the recovery overcorrects; he glances back again, still trying to sell the performance, and that delayed look costs him the turn.\n\nOnly at the last instant does delight flip into wide-eyed alarm. His face, and only his face, plants into the pollen-heavy yellow centre of a flower. His body, arms, legs and wings remain outside the flower and readable. The flower centre compresses deeply under the face contact, the petals cup around the impact, and the connected stem bows with his weight. One golden pollen burst erupts outward, never hiding his body or Zenny. As the flower rebounds, it springs him backward into the two-shot, and the burst leaves a single loose powdery golden handlebar moustache across his upper lip. It is bright pollen-yellow granular material only: no goatee, no chin tuft, nothing dark anywhere on his face.\n\nFrom the crash recovery onward, keep Zenny in frame with Fuzzby. No solo close-up of Fuzzby. The meadow and the sky remain visible behind both bees. Zenny hovers beside him with tiny wing corrections, watching flatly, mouth closed. Fuzzby does not know what the crash has stamped onto him. He blinks through the recoil, regains his hover with a small wobble, then one hand accidentally brushes the pollen across his upper lip.\n\nThe touch changes everything. Instead of alarm, delight blooms through him. He pinches the loose pollen moustache between two fingers and strokes it with careful ceremony, chin lifting, eyebrows waggling, chest swelling as if the accident has awarded him a title. A small golden clump detaches and plops away unnoticed. He keeps preening, never fully motionless; each hover correction becomes part of the performance.\n\nWhen Fuzzby’s mouth begins in his own spoken section of @Audio1, lip-sync only Fuzzby. He turns toward Zenny in the same medium two-shot and delivers the spoken question with total sincerity, trying to make his hovering body look dignified while one hand keeps returning to the pollen moustache. Zenny listens with her mouth closed, almost unmoving except for wing beats and a slow, unimpressed eye shift.\n\nLet Zenny’s deciding pause play in the two-shot. Fuzzby waits with eager confidence, still beaming under the powdery golden moustache, giving it the smallest proud adjustment. As Zenny’s spoken section of @Audio1 begins, lip-sync only Zenny. Fuzzby’s mouth stays closed while he receives her flat verdict, his smile still convinced that she is confirming his triumph. Zenny’s delivery stays dry and calm; her body refuses to join his chaos.\n\nOnly after Zenny’s own spoken section is completely finished, she turns half away toward her flower. The first tiny private cheek-lift escapes, warm but hidden from Fuzzby. He misses it, gives the moustache one more satisfied stroke, and hovers tall, beaming, with loose golden clumps catching the low sun rays. Hold on the medium two-shot for two seconds after @Audio1 finishes: Zenny half-turned away with the tiny cheek-lift just escaping, Fuzzby proudly stroking the single golden-pollen moustache, meadow and sky unchanged behind them. Silence.",
        "doesItLand": "Yes — it lands the beat because the crash creates a clear physical payoff, Fuzzby sincerely celebrates the mistake, and Zenny’s restrained reaction gives the joke its button."
-      }
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-07-25T19:36:43",
+      "reviewedBy": "Julian",
+      "note": "A/B authorised in chat: fire the lean-engine prompt at 480p"
      },
+     "candidate": null,
      "history": [
       {
        "department": "Animation",
@@ -4409,6 +4376,45 @@
        },
        "outcome": "superseded_by_refire",
        "supersededAt": "2026-07-25T19:26:48"
+      },
+      {
+       "department": "Animation",
+       "worker": "Animation Director / Camera",
+       "skill": "skills/crystal-bears-camera/SKILL.md",
+       "skillHash": "d96af712dd75a522",
+       "model": "gpt-5.5",
+       "scene": "1",
+       "shotId": "S1.SH2",
+       "packageRevision": 42,
+       "preparedAt": "2026-07-25T18:07:15",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "482a2a197958b672075573811b0a59fcd8945a1cb221c34d152c8428b5f2f092",
+       "signatureVersion": 3,
+       "sourceFields": {
+        "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+        "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+        "shotId": "54ecde44952529616504b72c25f888629d5e04ef0e7435c7a428c15c90ee58eb",
+        "approvedAnchor": "03b52b5a9853b4b548179e984c8c850d368d18fcde05d29847ef35b05ed7a8bf",
+        "approvedVoiceAsset": "ec31ca5443c17eab7cd06188b3f3316ed7e9bceeffe0b3ed05fd0297187ef363",
+        "physicalPerformance": "5e2afbc63ab838e1671ef1a1cec896d37dfc325fbd0e69c82ecb287d73623fd2",
+        "references": "ec191c1756f672f2da25c106a4957c011ff585158e0ae66f90c00ab5103abfd1",
+        "approvedSceneLookHash": "dadbee90db7459f05b4773a6cd837bbacafad72f70650d515f723cbce8205e0c",
+        "durationSec": "c72ae9676454d7cc0014583a9d0a2e28553d5c62f087c7562b5307ebd1cc84c8",
+        "measuredAudioDurationSec": "c72ae9676454d7cc0014583a9d0a2e28553d5c62f087c7562b5307ebd1cc84c8",
+        "fireDurationSec": "c72ae9676454d7cc0014583a9d0a2e28553d5c62f087c7562b5307ebd1cc84c8"
+       },
+       "outputHash": "e01354815b7a440ee86c5c3744dffdd06d7ead1a6257aedf30ce80c316c06879",
+       "output": {
+        "shotId": "S1.SH2",
+        "providerPrompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby speaks during the opening spoken section; Zenny listens with mouth closed. Zenny speaks during the final spoken section; Fuzzby listens with mouth closed. No additional dialogue, invented voices or vocalisations.\n\nUse @图1 only for the exact opening composition, positions, camera side and lighting; Zenny is the character from @图2 only — match the reference 100%, every feature and accessory exactly as shown; Fuzzby is the character from @图3 only — match the reference 100%, every feature and accessory exactly as shown; use @图4 only for the flower-corridor world, meadow depth, distant hills, sky, sun and shadow state.\n\nShot 1: Single continuous take, bee-height camera on a 35mm lens, continuing directly from the previous motion with no cut. Begin exactly on @图1. Hold the settled frame for one instant, then pull back into a wide, readable flower-corridor view; the meadow and the bright low sun in the sky remain visible behind the bees, with soft long shadows and sun rim on petals and wings. Foreground petals pass in soft bokeh, midground holds Fuzzby, Zenny and the impact flower, background flowers and hills breathe gently in the same plate light.\n\nZenny stays physically anchored to her flower: whenever her flower head, petal or stem shifts, she travels with it. Her wings keep beating, but her body gives almost nothing away. Fuzzby launches out of the settle like a one-bee parade — chest puffed, huge grin held open, one showman wave thrown toward Zenny, then a quick glance back to make sure she is watching. That glance costs him. His wingbeats keep working, but his body starts to outrun his control; the grin hangs on one beat too long while his path wobbles, shoulders correcting late, feet bicycling under him. The camera follows at a readable distance, not chasing too close, letting the corridor show the damage his confidence is about to do.\n\nThe target flower’s petal cup, pollen-heavy centre and stem remain visibly connected as one flexible physical structure before contact. Fuzzby realizes too late. Delight snaps into wide-eyed alarm. THUP — only his face plants into the pollen-heavy centre; his body, wings, arms and legs stay outside the flower and readable. The flower compresses deep under the face contact, stem bowing with his weight, petals cupping around the hit, then the loaded stem rebounds and springs him back. A single bright pollen-yellow burst puffs outward and transfers across his upper lip as one loose, powdery handlebar moustache; nothing dark appears anywhere on his face, no goatee, no chin tuft, no extra facial mark.\n\nThe camera tightens only enough to read the contact and recoil, never into a solo close-up, then settles into a steady medium two-shot with both bees in frame and holds that two-shot unbroken through discovery, both spoken sections and the button. Fuzzby hovers back from the flower as a passenger of the rebound for one beat, wings still beating, arms loose, cheeks recovering from the squash. Zenny hovers beside him in the same frame, flat and near-motionless, mouth closed.\n\nDuring the opening spoken section of @Audio1, Fuzzby does not yet understand what the impact gave him. His hand brushes the powder on his upper lip. Instead of alarm, delight blooms through his whole body: chin lifts, chest re-inflates, eyebrows waggle, and he strokes the pollen between two fingers like a distinguished gentleman. A loose clump drops off unnoticed and falls past his body while he keeps beaming. His mouth movement belongs only to this opening spoken section; Zenny’s mouth stays closed, her stillness making his ceremony look even bigger. He never fully goes still — small hover corrections, proud shoulder lifts, one extra moustache stroke, all pretending to be official posture.\n\nAs the final spoken section of @Audio1 begins, Zenny remains in the same two-shot, flat and quiet, mouth moving only for her own section. Fuzzby listens with mouth closed, still preening through her verdict, utterly convinced the pollen has improved him. Zenny’s body refuses the joke: only a tiny eye shift, a patient pause, the smallest weight change on her flower. When her final spoken section completely finishes, she turns half away toward her flower, and only then the first private cheek-lift escapes. Fuzzby answers the silence with one more satisfied stroke of the bright pollen-yellow moustache, hovering tall under the low sun, golden clumps catching the plate light.\n\nNo extra characters, no on-screen text, no crystals on the bees, no foreign-language speech. From crash recovery to final frame, always keep Fuzzby and Zenny together in the held two-shot with the meadow and sky unchanged behind them. Hold on Zenny half-turned away with the tiny private cheek-lift just escaping, and Fuzzby beaming mid-stroke under the loose golden-pollen moustache, for about 2 seconds of silence, no more dialogue.",
+        "doesItLand": "This clip should land the beat because the crash has clear weight, the pollen moustache reads as one clean visual payoff, and Zenny’s stillness gives Fuzzby’s sincere preening room to be funny."
+       },
+       "outcome": "superseded",
+       "decisionAt": "2026-07-25T18:11:42",
+       "reviewedBy": "Julian",
+       "note": "",
+       "supersededAt": "2026-07-25T19:36:43"
       }
      ]
     },
@@ -4458,21 +4464,104 @@
    },
    "workingSeedancePrompt": null,
    "pendingSpendAuth": null,
-   "lastPromptVersion": "fa18e46f",
-   "batch": null,
-   "candidatePaths": null,
-   "batchId": null,
-   "candidatesGenerated": 11,
+   "lastPromptVersion": "d41aeb16",
+   "batch": {
+    "token": "b32506ea55e0481596610fdf095b519a",
+    "bindingHash": "03e8d8c391d88819bcc685ca3c194263",
+    "envelope": {
+     "shotId": "S1.SH2",
+     "prompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby speaks first, then Zenny speaks; each character lip-syncs only during their own spoken section. The listener keeps the mouth closed. No additional dialogue, vocalisations, invented voices or on-screen text.\n\nUse @图1 only for the exact opening composition, positions and lighting continuity; @图3 only for Fuzzby’s identity, proportions, features and accessories; @图2 only for Zenny’s identity, proportions, features and accessories; @图4 only for the flower-meadow world, low sun, sky and shadow plate.\n\nShot 1: Continue directly from the previous shot’s motion. Bee-height 35mm, one continuous character-led camera move that begins in the previous final framing, pulls back to a wide flower-corridor view, follows Fuzzby’s flight at readable distance, tightens for the impact, then becomes one medium two-shot with both bees in frame through the recovery, discovery, both spoken sections and final button. Begin exactly on @图1. Stylised feature-quality 3D CGI matching @图1, with the low sun visible through the meadow, soft sky colour, backlit pollen motes and long flower shadows unchanged.\n\nFuzzby and Zenny are the characters from their references — match the references 100%, every feature and accessory exactly as shown. Both wings keep beating whenever airborne. No extra characters, no character redesign, no crystals on the bees.\n\nThe camera lets the previous final frame breathe for an instant: Fuzzby still proud from his last lucky success, Zenny nearby at her flower with flat calm. The camera pulls back into the open corridor before Fuzzby launches himself into another showy pass. His joy powers the takeoff: chest pushed forward, one grand wave thrown toward Zenny, a glance back to make sure she is watching, then he flies ahead like a tiny parade leading itself.\n\nDuring the lead-in of Fuzzby’s spoken section of @Audio1, before his mouth begins the line, the camera follows him through flowers at a readable distance. His grin lasts past the point where his body has lost the path. A shoulder brushes a tall stem, the contact tilts him off balance; his feet bicycle to recover, but the recovery overcorrects; he glances back again, still trying to sell the performance, and that delayed look costs him the turn.\n\nOnly at the last instant does delight flip into wide-eyed alarm. His face, and only his face, plants into the pollen-heavy yellow centre of a flower. His body, arms, legs and wings remain outside the flower and readable. The flower centre compresses deeply under the face contact, the petals cup around the impact, and the connected stem bows with his weight. One golden pollen burst erupts outward, never hiding his body or Zenny. As the flower rebounds, it springs him backward into the two-shot, and the burst leaves a single loose powdery golden handlebar moustache across his upper lip. It is bright pollen-yellow granular material only: no goatee, no chin tuft, nothing dark anywhere on his face.\n\nFrom the crash recovery onward, keep Zenny in frame with Fuzzby. No solo close-up of Fuzzby. The meadow and the sky remain visible behind both bees. Zenny hovers beside him with tiny wing corrections, watching flatly, mouth closed. Fuzzby does not know what the crash has stamped onto him. He blinks through the recoil, regains his hover with a small wobble, then one hand accidentally brushes the pollen across his upper lip.\n\nThe touch changes everything. Instead of alarm, delight blooms through him. He pinches the loose pollen moustache between two fingers and strokes it with careful ceremony, chin lifting, eyebrows waggling, chest swelling as if the accident has awarded him a title. A small golden clump detaches and plops away unnoticed. He keeps preening, never fully motionless; each hover correction becomes part of the performance.\n\nWhen Fuzzby’s mouth begins in his own spoken section of @Audio1, lip-sync only Fuzzby. He turns toward Zenny in the same medium two-shot and delivers the spoken question with total sincerity, trying to make his hovering body look dignified while one hand keeps returning to the pollen moustache. Zenny listens with her mouth closed, almost unmoving except for wing beats and a slow, unimpressed eye shift.\n\nLet Zenny’s deciding pause play in the two-shot. Fuzzby waits with eager confidence, still beaming under the powdery golden moustache, giving it the smallest proud adjustment. As Zenny’s spoken section of @Audio1 begins, lip-sync only Zenny. Fuzzby’s mouth stays closed while he receives her flat verdict, his smile still convinced that she is confirming his triumph. Zenny’s delivery stays dry and calm; her body refuses to join his chaos.\n\nOnly after Zenny’s own spoken section is completely finished, she turns half away toward her flower. The first tiny private cheek-lift escapes, warm but hidden from Fuzzby. He misses it, gives the moustache one more satisfied stroke, and hovers tall, beaming, with loose golden clumps catching the low sun rays. Hold on the medium two-shot for two seconds after @Audio1 finishes: Zenny half-turned away with the tiny cheek-lift just escaping, Fuzzby proudly stroking the single golden-pollen moustache, meadow and sky unchanged behind them. Silence.",
+     "durationSec": 15.0,
+     "provider": "byteplus",
+     "model": "dreamina-seedance-2-0-260128",
+     "endpoint": "https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks",
+     "resolution": "480p",
+     "tier": "standard",
+     "candidateCount": 1,
+     "costPerCandidateUsd": 2.0475,
+     "maxBatchCostUsd": 2.0475,
+     "packageRevision": 42,
+     "promptVersion": "d41aeb16",
+     "references": [
+      {
+       "slot": "@图1",
+       "role": "previous shot final frame",
+       "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH1_final_frame.png",
+       "md5": "501ba5618d0b4c1e19366d5a7b552668"
+      },
+      {
+       "slot": "@图2",
+       "role": "Zenny",
+       "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/../cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+       "md5": "07bec11b4bc3ac4159d0d767c1c6fa79"
+      },
+      {
+       "slot": "@图3",
+       "role": "Fuzzby",
+       "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/../cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+       "md5": "85361ca5f3879f6e33f4c3c7db81cfb4"
+      },
+      {
+       "slot": "@图4",
+       "role": "scene plate",
+       "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_8b776492.png",
+       "md5": "29288e2d2e2ceca8d8c48f63f644c4c3"
+      }
+     ],
+     "audio": {
+      "path": "media/shots/Ep1_S1.SH2_vo_master15.mp3",
+      "md5": "4d59f3bfd3a0e70a9344723b919d133b"
+     }
+    },
+    "envelopeHash": "4ee8eeffa2797b58f2c4f941139198e9f4f798f5b6d10a5b17b9fe16833d8946",
+    "batchId": "S1.SH2-b2-20260725T194940",
+    "expected": 1,
+    "done": [
+     1
+    ],
+    "failed": [],
+    "disclosure": {
+     "shotId": "S1.SH2",
+     "candidateCount": 1,
+     "resolution": "480p",
+     "costPerCandidateUsd": 2.0475,
+     "maxBatchCostUsd": 2.0475,
+     "promptVersion": "d41aeb16",
+     "usingWorkingPrompt": false,
+     "bindingHash": "03e8d8c391d88819bcc685ca3c194263",
+     "envelopeHash": "4ee8eeffa2797b58f2c4f941139198e9f4f798f5b6d10a5b17b9fe16833d8946",
+     "packageHash": "bc2cf822d27ecab3",
+     "rerollOfUnchangedPackage": false,
+     "packageRevision": 42,
+     "referenceSlots": {
+      "@图1": "previous shot final frame",
+      "@图2": "Zenny",
+      "@图3": "Fuzzby",
+      "@图4": "scene plate",
+      "@Audio1": "voice track"
+     },
+     "openingAnchor": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH1_final_frame.png",
+     "audioAsset": "media/shots/Ep1_S1.SH2_vo_master15.mp3",
+     "shotDurationSec": 15.0,
+     "tier": "standard"
+    },
+    "status": "complete"
+   },
+   "candidatePaths": [
+    "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH2_c1.mp4"
+   ],
+   "batchId": "S1.SH2-b2-20260725T194940",
+   "candidatesGenerated": 12,
    "disclosure": {
     "shotId": "S1.SH2",
     "candidateCount": 1,
     "resolution": "480p",
     "costPerCandidateUsd": 2.0475,
     "maxBatchCostUsd": 2.0475,
-    "promptVersion": "fa18e46f",
-    "usingWorkingPrompt": true,
-    "bindingHash": "78e2c814199f3d281bfcb19c0a271145",
-    "envelopeHash": "0038e99db1b8f0113ef234a707520137fae2f5d213e9183eccf46a50960ecc00",
+    "promptVersion": "d41aeb16",
+    "usingWorkingPrompt": false,
+    "bindingHash": "03e8d8c391d88819bcc685ca3c194263",
+    "envelopeHash": "4ee8eeffa2797b58f2c4f941139198e9f4f798f5b6d10a5b17b9fe16833d8946",
     "packageHash": "bc2cf822d27ecab3",
     "rerollOfUnchangedPackage": false,
     "packageRevision": 42,
@@ -4488,8 +4577,8 @@
     "shotDurationSec": 15.0,
     "tier": "standard"
    },
-   "lastBatchBinding": "78e2c814199f3d281bfcb19c0a271145",
-   "firedAt": "2026-07-25T15:00:35",
+   "lastBatchBinding": "03e8d8c391d88819bcc685ca3c194263",
+   "firedAt": "2026-07-25T19:54:36",
    "rejections": [
     {
      "shotId": "S1.SH2",
@@ -4565,7 +4654,7 @@
     }
    ],
    "batchAttempts": 1,
-   "promptRevisions": 10,
+   "promptRevisions": 11,
    "keyframeHistory": [
     {
      "approved": true,

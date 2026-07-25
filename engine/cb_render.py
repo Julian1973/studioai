@@ -788,13 +788,51 @@ def _slot_paths(shot, slots_key, anchor_path, scene, episode, characters_cfg):
 # These records live inside the existing scene/shot ledgers.  They are not another package,
 # another compiler or another gate state.  A worker call creates only a visible candidate;
 # approving it changes which exact provider text the existing render function resolves.
+# THE CHAIRS, REALIGNED TO HOW FILM ACTUALLY WORKS (Julian's ruling, 2026-07-25):
+# "the script to storyboard has to be done by the showrunner, then the director actually
+# moves to opening frame and everything gets built from there... he needs to set the stage,
+# he needs to direct with the voice director the cadence and acting and ultimately the
+# prompt for the animation, he also needs to sit in the review."
+#
+# WHAT WAS WRONG, VISIBLE IN THE OLD TABLE: the Director owned FIVE storyboard gates and
+# ZERO delivery gates. She stated what the beat was for at Gate 3/5 and then handed to an
+# "Animation Director / Camera" who had no obligation to her intent and never saw her
+# again. That is not a lapse — nobody downstream OWNED the direction. It is the structural
+# cause of a prompt passing nine failure checks while delivering half the beat.
+#
+# A director does not write the script. She stages it, directs the performance, and judges
+# the take. The Showrunner owns script -> storyboard; the Director owns the stage, the
+# performance and the verdict — the same chair carrying one beat from canvas to cut.
+#
+# THE KEYFRAME IS THE STAGE, THE ANIMATION IS THE PERFORMANCE (Julian, same ruling). The
+# Director sets the opening frame KNOWING the performance she is about to direct, which is
+# exactly why the canvas will afford it. A DP building a canvas for a performance nobody
+# has written yet is how the archive got "far too close, wrong for a shot that needs to
+# open wide".
+#
+# The skill re-point is not cosmetic: the animation chair was loading
+# skills/crystal-bears-camera/SKILL.md, which carries five stale markers (10-12s beats, the
+# retired FRAME CHAIN doctrine) — the same live staleness already retired from
+# cb_director.py today. The director skill is clean.
 _DEPARTMENT_WORKERS = {
     "look": ("Look Development", "Cinematographer / DP", "cinematographer"),
-    "cinematography": ("Cinematography", "Cinematographer / DP", "cinematographer"),
-    "voice": ("Voice", "Voice Director", "voice-director"),
-    "animation": ("Animation", "Animation Director / Camera", "camera"),
-    "review-keyframe": ("Director Review", "Director Review / Continuity Supervisor", "continuity"),
-    "review-animation": ("Director Review", "Director Review / Continuity Supervisor", "continuity"),
+    # The Director sets the stage; the DP executes it.
+    # THE THIRD ELEMENT IS THE SKILL KEY — it decides which craft contract loads. A first
+    # pass at this restructure set it to "director" on four rows, which did not put the
+    # Director in the room with her specialists; it DELETED them — the DP's lens/light
+    # contract and the Continuity Supervisor's evidence discipline both silently replaced
+    # by the Director's own doc. A test caught it. "She sits in the review" is not "she is
+    # the only one in the review." So the LABEL names who holds authority; the SKILL stays
+    # with the craft expert. Animation is the one genuine transfer — Julian's ruling gives
+    # the Director the animation prompt outright, and the camera skill it displaces carried
+    # five stale markers anyway.
+    "cinematography": ("Cinematography", "Director (staging) / DP (execution)", "cinematographer"),
+    # The Director directs cadence and acting WITH the Voice Director.
+    "voice": ("Voice", "Director with the Voice Director", "voice-director"),
+    # The performance is the Director's. This is the chair that writes what fires.
+    "animation": ("Animation", "Director", "director"),
+    "review-keyframe": ("Director Review", "Director with Continuity", "continuity"),
+    "review-animation": ("Director Review", "Director with Continuity", "continuity"),
     "review-final": ("Final & Post", "Post Supervisor", "post"),
 }
 

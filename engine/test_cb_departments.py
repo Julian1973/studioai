@@ -15,7 +15,9 @@ def test_every_studio_department_loads_a_real_runtime_skill_contract():
     assert all(p["loaded"] for p in people)
     assert {p["worker"] for p in people} >= {
         "Director", "Cinematographer / DP", "Voice Director",
-        "Animation Director / Camera", "Director Review / Continuity Supervisor",
+        # the Director holds the animation chair too as of 2026-07-25 — she stages the
+        # shot and directs the performance in it; "Animation Director / Camera" is gone.
+        "Director Review / Continuity Supervisor",
         "Post Supervisor"}
 
 

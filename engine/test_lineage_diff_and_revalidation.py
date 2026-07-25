@@ -294,9 +294,12 @@ def test_full_disposable_route_reaches_disclosure_with_zero_provider_calls_never
     # GOLD BUILD (2026-07-24): the approved Animation providerPrompt must BE the formula
     # (check_formula_structure now runs unconditionally at fire) — S1.SH1 here has no
     # dialogue, so no header is required, but the labelled Shot 1 and the HOLD tail are.
+    # ...and since the shared _build_shot fixture now declares a feltIntent (THE INTENT
+    # PIN, 2026-07-25), THE DIRECTOR'S STOP also requires the prompt to deliver it.
     animation_output = {"providerPrompt": (
         "Shot 1: Wide tracking at bee height, 24mm. Fuzzby rockets past the flower and "
-        "clips the stem, pollen bursting off the impact.\n\n"
+        "clips the stem, pollen bursting off the impact — his pride drives the speed, "
+        "and his grin is held one beat too long: the comedy hinge.\n\n"
         "HOLD on the recovered hover, about 2 seconds of silence.")}
     shot = _build_shot("S1.SH1", "opener", None, [])
     pkg = {"episode": "Ep1", "sceneNumber": "1", "revision": 7,

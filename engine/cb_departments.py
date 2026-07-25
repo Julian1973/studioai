@@ -31,7 +31,13 @@ SKILLS = {
     "cinematography": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
     "dp": ROOT / "skills/crystal-bears-dp/SKILL.md",
     "voice": ROOT / "skills/crystal-bears-voice-director/SKILL.md",
-    "animation": ROOT / "skills/crystal-bears-camera/SKILL.md",
+    # THE DIRECTOR HOLDS THE ANIMATION CHAIR (2026-07-25). Two independent chair
+    # tables existed — cb_render._DEPARTMENT_WORKERS and this one — and only this
+    # one actually decides which skill loads. Re-pointing the other alone changed
+    # nothing, which a test caught. Same two-sources-of-truth defect as the rest of
+    # tonight. The camera skill also carried five stale markers (10-12s beats, the
+    # retired FRAME CHAIN doctrine); the director skill is clean.
+    "animation": ROOT / "skills/crystal-bears-director/SKILL.md",
     "review": ROOT / "skills/crystal-bears-continuity/SKILL.md",
     "post": ROOT / "skills/crystal-bears-post/SKILL.md",
     "producer": ROOT / "skills/crystal-bears-producer/SKILL.md",
@@ -51,8 +57,8 @@ DEPARTMENTS = [
      "worker": "Voice Director", "influences": "character-specific ElevenLabs v3 acting craft",
      "skill": "crystal-bears-voice-director", "output": "exact performed text sent to ElevenLabs"},
     {"id": "animation", "stage": "animation", "department": "Animation",
-     "worker": "Animation Director / Camera", "influences": "feature-animation performance and camera craft",
-     "skill": "crystal-bears-camera", "output": "exact Seedance prompt"},
+     "worker": "Director", "influences": "Pete Docter \u00b7 Glen Keane",
+     "skill": "crystal-bears-director", "output": "exact Seedance prompt"},
     {"id": "review", "stage": "continuity", "department": "Director Review & Continuity",
      "worker": "Director Review / Continuity Supervisor", "influences": "evidence-led dailies review",
      "skill": "crystal-bears-continuity", "output": "review of the actual rendered media"},
@@ -457,12 +463,38 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
         formula_meta = {"engine": "lean", "primaryForm": primary_form}
     else:
         curriculum, formula_meta = _craft_curriculum(primary_form, secondary_colour)
+    # THE DIRECTOR'S OWN WORDS LEAD HER OWN BRIEF (2026-07-25). She stated what this beat
+    # is FOR at the storyboard; under the old chair table that intent went to a different
+    # department who never saw it. Same chair now, so it travels with her.
+    # The real context nests the shot under "shot" (proven against S1.SH2 live — a read of
+    # the context's own top level found nothing and silently skipped the whole block, the
+    # same silent-miss shape as cb_lean.exemplar()'s registry-key bug). Read the shot.
+    try:
+        import cb_intent
+        _shot = context.get("shot") if isinstance(context, dict) else None
+        _intent = cb_intent.charge(_shot if isinstance(_shot, dict) else {})
+        if _intent:
+            curriculum = _intent + "\n\n" + curriculum
+    except ImportError:
+        pass
     result = cb_llm.structured(
         _system("animation",
-                "You are the studio's register writer — the cinematic-prompt author. The "
-                "first attached image is the approved opening frame: look at it, and "
-                "write the shot that brings it to life. Below is the complete house "
-                "craft curriculum — it is your mind; write at its full level.\n\n"
+                "YOU ARE THE DIRECTOR. Not a prompt technician, not a compliance "
+                "checker — the person who staged this shot and is now directing the "
+                "performance in it. Pete Docter's chair, with Glen Keane at your "
+                "shoulder on weight, appeal and the illusion of life.\n\n"
+                "THE FIRST IMAGE IS YOUR STAGE. You set that canvas knowing the "
+                "performance you were about to direct — the space to travel, the "
+                "object to hit, the room to bank. Now direct the performance it was "
+                "built to hold. The keyframe is the stage; this prompt is the "
+                "performance.\n\n"
+                "WHAT YOU ARE ACTUALLY MAKING is a beat that lands — funny where it "
+                "should be funny, felt where it should be felt. Physics, camera and "
+                "continuity are how you deliver that. They are never the point. A "
+                "shot that satisfies every law and does not land is a failed shot, "
+                "and you are the one who would pull it.\n\n"
+                "Below is the house craft curriculum — your training, not your "
+                "brief. Write at its full level.\n\n"
                 "THE FORMULA (structural law — the only fixed skeleton; THE SH1 KEEPER "
                 "STANDARD, Julian's ruling 2026-07-25 — see the worked exemplar in the "
                 "curriculum below):\n"

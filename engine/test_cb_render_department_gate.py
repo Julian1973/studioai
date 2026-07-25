@@ -51,7 +51,9 @@ def _formula_prompt(action, line="Nailed it.", speaker="FUZZBY"):
               "dialogue, wording, voice, performance and timing.\n\n") if line else ""
     dlg = f" {speaker.title()} performs their vocal beat from @Audio1." if line else ""
     return (header
-            + f"Shot 1: Close-up, 85mm, handheld drift. {action}{dlg}\n\n"
+            + f"Shot 1: Close-up, 85mm, handheld drift. {action}{dlg} His pride "
+            + "drives the speed of the move; his grin is held one beat too long — "
+            + "the comedy hinge.\n\n"   # delivers the fixture's declared feltIntent
             + "They hold the look, about 2 seconds of silence, no more dialogue.")
 
 
@@ -88,6 +90,12 @@ def _build_shot(shot_id, source_type, source_shot_id, dialogue):
         "keyframePrompt": "the storyboard's own compiled keyframe prose",
         "keyframePromptWords": 12,
         "visualPayoff": "He nearly grazes the leaf", "prohibited": [],
+        # THE INTENT ENGINE PIN (2026-07-25): a stated purpose on the shot must reach the
+        # Director's own animation charge. The first wiring read the context's top level,
+        # found nothing (the shot nests under "shot"), and a broad except swallowed the
+        # miss — the suite stayed green while the whole point of the engine silently never
+        # shipped. This field + the assertion below make that miss a test failure forever.
+        "feltIntent": "His pride drives the speed; the grin held too long is the comedy hinge.",
         "dialogueLines": dialogue, "charactersInFrame": ["Fuzzby", "Zenny"],
         "continuityIn": {"lighting": "warm", "cameraSide": "left",
                          "characters": [_char_state()]},
@@ -209,8 +217,15 @@ def _mock_llm(monkeypatch, animation_prompt=None, cinematography_prompt=None,
                           "timing.\n\n"
                           "Shot 1: Close-up, 85mm, handheld drift. Fuzzby bursts up out of "
                           "the flower, pollen haloing him in the high-key daylight, and "
-                          "puffs his chest with oblivious pride. Fuzzby performs his vocal "
-                          "beat from @Audio1.\n\n"
+                          # THE INTENT PIN (2026-07-25): the fixture shot declares a
+                          # feltIntent, and THE DIRECTOR'S STOP now refuses a prompt
+                          # that doesn't deliver it — so the canned GOOD candidate
+                          # delivers it: his pride drives the speed, the grin held
+                          # too long as the comedy hinge.
+                          "puffs his chest with oblivious pride — his pride drives "
+                          "the speed of every move. Fuzzby performs his vocal "
+                          "beat from @Audio1. His grin is held one beat too long — "
+                          "the comedy hinge.\n\n"
                           "They hold the look, about 2 seconds of silence, no more dialogue.")
         if name == "CinematographyDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",
@@ -1069,6 +1084,19 @@ def test_cinematography_and_animation_receive_the_compiled_brief_not_raw_json(wo
     assert "SOURCE MATERIAL — the storyboard-approved facts. Write the card FROM these" in user2
     assert "SOURCE MATERIAL — storyboard-approved facts" in user2   # the real compiled brief
     assert "Hard constraints:" in user2   # real cb_engine.compile_shot_contract output
-    assert "look at it" in system2
+    # THE DIRECTOR HOLDS THIS CHAIR (2026-07-25). This used to pin the phrase "look at
+    # it" — incidental wording from when an "Animation Director / Camera" wrote the
+    # prompt. The chair moved to the Director, so the assertion now pins the CONTRACT
+    # (whose chair it is, and that the keyframe is the stage) rather than a sentence.
+    assert "YOU ARE THE DIRECTOR" in system2
+    assert "THE FIRST IMAGE IS YOUR STAGE" in system2
+    assert "Pete Docter" in system2 and "Glen Keane" in system2
+    # and the Cinematographer keeps her own chair — the Director took ANIMATION,
+    # not the DP's job. A chair move that quietly collapsed two chairs into one
+    # would pass every assertion above and still be wrong.
+    assert "register writer for STILL opening frames" in system   # the DP's own contract, hers alone
     assert "THE FORMULA (structural law" in system2
+    # the Director's stated intent leads her own charge (see the feltIntent pin above)
+    assert "WHAT THIS BEAT IS FOR" in system2
+    assert "the grin held too long is the comedy hinge" in system2
     assert "THE HOUSE CRAFT CURRICULUM (verbatim)" in system2

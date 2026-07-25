@@ -10,6 +10,7 @@ approved provider text.  No function in this module calls cb_gen or spends media
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import re
 from typing import List, Literal, Optional
@@ -436,7 +437,26 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
     # beat's dramatic form, or an explicit "no formula yet — discover one". formula_meta
     # travels back to the caller so the fire record can say which formula produced the
     # prompt; that link is what lets the corpus answer "which formulas are working".
-    curriculum, formula_meta = _craft_curriculum(primary_form, secondary_colour)
+    # THE ENGINE SWITCH (Julian, 2026-07-25: "why am i wasting time on the old one if the
+    # new one is better"). He was right that proving the OLD author's output is the wrong
+    # test when we are replacing the author. The lean engine never needed its own fire
+    # path — the gates, the sealed envelope and the spend token are the parts that were
+    # already right and are kept. It only replaces WHO WRITES, then hands the prompt to
+    # the same door. CB_ENGINE=lean routes the charge through THE LAW (255 words + one
+    # worked exemplar) instead of the 6,711-word curriculum. Default stays the old author
+    # until real footage says otherwise — smaller is not the same as better, and the lean
+    # engine has not yet produced a single frame.
+    if os.environ.get("CB_ENGINE", "").strip().lower() == "lean":
+        import cb_lean
+        curriculum = cb_lean.law()
+        ex = cb_lean.exemplar(primary_form or "physical_comedy")
+        if ex:
+            curriculum += ("\n\n===== A REAL PROMPT THAT PRODUCED AN APPROVED TAKE ON "
+                           "THIS KIND OF MATERIAL =====\nStudy its SHAPE and its SPEND, "
+                           "then write THIS shot. Do not copy its content.\n\n" + ex)
+        formula_meta = {"engine": "lean", "primaryForm": primary_form}
+    else:
+        curriculum, formula_meta = _craft_curriculum(primary_form, secondary_colour)
     result = cb_llm.structured(
         _system("animation",
                 "You are the studio's register writer — the cinematic-prompt author. The "

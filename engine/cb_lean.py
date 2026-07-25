@@ -53,7 +53,12 @@ def exemplar(form="physical_comedy"):
     "clunky, scripted, fake". A missing exemplar costs one exploratory take; a wrong one
     silently teaches the wrong shape on every future beat of that form."""
     import cb_formulas
-    _, meta = cb_formulas.formula_block(form)
+    # A REGISTRY KEY IS NOT A DRAMATIC FORM. The library resolves free text ("physical
+    # comedy, escalating") by keyword; a registry key ("physical_comedy") matches nothing,
+    # so passing one silently returned "no exemplar" — the writer would have been told to
+    # discover a formula that already exists, on the one form we have actually proven.
+    # Caught on the first side-by-side run, before it reached a fire.
+    _, meta = cb_formulas.formula_block(str(form or "").replace("_", " "))
     if not meta.get("exemplar"):
         return None
     p = CRAFT / meta["exemplar"]

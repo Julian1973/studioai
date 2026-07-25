@@ -2218,6 +2218,24 @@ def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
                 for c in (shot.get("charactersInFrame") or shot.get("characters") or [])]
         cast = [c for c in cast if c]
     advisories += check_stasis_load(prompt_text, shot=shot, characters=cast)
+    # THE INTENT GATE (2026-07-25, Julian: "every prompt has to deliver the director's
+    # direction"). Everything above this line checks the prompt against a FAILURE list —
+    # no geometry, no stasis, identity held. None of it asks whether the text delivers what
+    # the Director said the beat was FOR. A prompt passing all nine of those checks was
+    # measured at 5/10 of S1.SH2's stated intent, missing the beat the card itself calls
+    # the comedy hinge. Advisory like everything else here — the reviewer decides — but the
+    # gap is now stated in the Director's own words instead of going unseen.
+    if shot:
+        try:
+            import cb_intent
+            sc = cb_intent.score(prompt_text, shot)
+            for r in sc.get("missed") or []:
+                advisories.append(
+                    f"INTENT NOT DELIVERED [{r['field']}] — the Director asked for "
+                    f"\u201c{r['clause'][:120]}\u201d; nothing in the prompt for: "
+                    f"{', '.join(r['missing'][:6])}")
+        except Exception:
+            pass          # a missing/odd intent field never blocks a compile
     return advisories
 
 

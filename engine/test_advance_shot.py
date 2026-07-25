@@ -171,7 +171,7 @@ def test_advance_shot_auto_clears_model_limited_once_genuinely_eligible(world, m
     assert led["status"] != "model-limited"
     assert len(led["redesignAcknowledgements"]) == 1
     # the previous rejection history is untouched — nothing here erases it
-    assert len(led["rejections"]) == 2
+    assert len(led["rejections"]) == R.MAX_BATCH_ATTEMPTS
 
 
 def test_advance_shot_never_clears_model_limited_off_a_same_call_direction_refresh(

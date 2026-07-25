@@ -397,6 +397,7 @@ GATE_SEQ = ["1", "1.6", "2a", "2b", "3", "4", "5"]
 # (/api/shot-package GET, /api/shot-run POST) plus these helpers are the whole footprint. Jobs run through the
 # SAME _jid/_start/_stream runner every existing gate action uses (fresh subprocess, argv list, never a shell).
 SHOT_CMDS = ("voice", "regen-voice", "animatic", "scenelook", "approve-scenelook", "reject-scenelook",
+             "unapprove-scenelook", "unapprove-keyframe", "unapprove-voice", "unapprove-shot",
              "keyframe", "approve-keyframe", "reject-keyframe",
              "select-upload", "select-library", "select-previous",
              "select-scenelook-upload", "select-scenelook-library",
@@ -642,7 +643,20 @@ def scenelook_status_server(scene, episode="Ep1"):
     shot_media_map's own _url helper)."""
     rec = _scenelook_load_rec_server(scene, episode)
     approved, candidate = rec.get("approved"), rec.get("candidate")
-    current_sig = _scenelook_input_signature_server(scene, episode)
+    # THE SIGNATURE AUTHORITY FIX (2026-07-25, Julian live-blocked on a phantom "stale"):
+    # the hand-mirrored _scenelook_input_signature_server had genuinely DRIFTED from
+    # cb_render._scenelook_input_signature (engine hashes the RESOLVED Look prompt;
+    # the mirror hashed a hand-built field concatenation) — so the Studio showed "stale"
+    # while the engine's own fire gate said "approved", an impossible-to-resolve
+    # disagreement for the human in the UI. The engine is the authority (its gate is what
+    # actually blocks fires) — delegate to it, same in-handler import pattern the
+    # department-status route already uses; the local mirror stays only as the
+    # never-500 fallback.
+    try:
+        import cb_render as _CBR
+        current_sig = _CBR._scenelook_input_signature(scene, episode)
+    except Exception:
+        current_sig = _scenelook_input_signature_server(scene, episode)
     history = rec.get("history", [])
     cast = _scene_cast_server(scene, episode)
 

@@ -159,6 +159,24 @@ class Beat(BaseModel):
     actionOrChoice: str
     consequence: str
     emotionalOrComicHandover: str
+    # ── THE DIFFERENTIATION DECISIONS (Julian's directive item 4, 2026-07-25) ────────
+    # Decided by the DIRECTOR at Gate 3, upstream, not inferred later by a prompt writer.
+    # Deliberately only THREE new fields: whatChanges already owns the turn, whoDrives
+    # already owns the performance leader, audienceAnticipation already owns the audience
+    # experience — restating those here would create the competing authorities item 1
+    # forbids. Optional so every existing beat still validates.
+    primaryForm: Optional[str] = Field(default=None, description=(
+        "The beat's dramatic mode: physical_comedy | character_comedy | intimate_emotion | "
+        "relationship_dialogue | action | tension | wonder | exposition | reveal | "
+        "transition. This INFORMS your judgement; it NEVER selects a camera, lens, shot "
+        "count or edit. There is no 'comedy always whip-pans' or 'emotion always "
+        "close-ups' rule — choose what THIS beat needs."))
+    secondaryColour: Optional[str] = Field(default=None, description=(
+        "An optional second form running underneath. A beat can be physical comedy AND "
+        "affection, or tension AND wonder. Null if the beat is single-toned."))
+    tempoShape: Optional[str] = Field(default=None, description=(
+        "How this beat's pace MOVES — e.g. 'fast, one hard stop, then a held deadpan', "
+        "'slow build with no release'. A SHAPE across the beat, never one flat speed."))
     approvalState: str = "draft"
 
 
@@ -210,6 +228,11 @@ class CreativeShotCard(BaseModel):
     # Director authors each cut directly, the same discipline as the gag-physics fields
     # below, because deriving cuts by slicing prose invents boundaries nobody actually chose.
     internalCuts: List[str] = Field(default_factory=list)
+    # THE CLIP/CARD SEPARATION (Julian's directive, 2026-07-25). internalCuts REDEFINE
+    # their camera shots as prose; composedOf REFERENCES other Shot Cards in this scene
+    # that this one generation renders in order, each compiled from its own card. The two
+    # are mutually exclusive. Empty (the default) = this card is its own generation clip.
+    composedOf: List[str] = Field(default_factory=list)
     # THE GAG-PHYSICS CONTRACT (2026-07-21, Julian — "how do we get the prompt to deliver
     # the feel, the laughter, the pain"): cb_engine.compile_shot_contract has always known
     # how to render cb_engine.PhysicalStaging into the shipped prompt (it's the exact fix
@@ -237,6 +260,15 @@ class CreativeShotCard(BaseModel):
         "Only for a shot carrying a big physical/comedic beat: this gag's own specific "
         "failure modes (e.g. 'never fully disappearing into the flower'). Empty for an "
         "ordinary shot."))
+    # ── THE ENDING DECISION (Julian's directive item 2, 2026-07-25) ─────────────────
+    # Chosen deliberately at Gate 4, before approval. Retires the previously-universal
+    # closing hold: only reaction_hold / living_hold require a hold tail downstream.
+    endingBehaviour: Optional[str] = Field(default=None, description=(
+        "How this shot ENDS: reaction_hold (hold on a reaction) | living_hold (held frame, "
+        "performance continues) | continue_in_motion (action carries past the cut) | "
+        "cut_on_action (edit lands mid-movement) | visual_transition (the image becomes "
+        "the way into the next shot). Do NOT default to a hold — an action beat or a "
+        "transition that stops dead is wrong."))
     approvalState: str = "draft"
 
 
@@ -761,7 +793,19 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
               "defines: what changes; who drives the change; audience anticipation; the "
               "action or choice; the consequence; and the emotional or comic handover. "
               "Beats do NOT automatically become separate shots — a physical, emotional or "
-              "comic chain remains continuous when continuity strengthens it."),
+              "comic chain remains continuous when continuity strengthens it. "
+              "THE DRAMATIC FORM DECISION (mandatory, every beat, 2026-07-25): name this "
+              "beat's primaryForm — what KIND of dramatic material it actually is (physical "
+              "comedy, quiet emotion, dialogue exchange, tension or reveal, fast action, "
+              "wonder, transition, and so on: describe what it IS, you are not picking from "
+              "a fixed menu) — its secondaryColour if a second register genuinely runs "
+              "under it, and its tempoShape: how the beat's energy actually moves across "
+              "its own length (builds, drops, holds then breaks, stutters, runs flat and "
+              "fast). These are DESCRIPTIONS OF THIS BEAT, never labels that select a "
+              "template: two beats sharing a primaryForm must still be directed "
+              "differently, because their tempo, their turn and their leader differ. A "
+              "quiet emotional beat and a crash are not the same material and must not "
+              "inherit the same shape — say plainly which this is."),
         f"THE SELECTED TREATMENT (this governs everything):\n{treatment.model_dump_json()}\n\n"
         f"THE SHOWRUNNER'S SELECTION:\n{selection.model_dump_json()}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:4000]}\n\n"
@@ -830,7 +874,27 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "unrelated reference. A held emotional beat earns single_continuous_take; a "
               "frantic collision earns rapid_cuts; state why in cutPaceReason. Most shots "
               "sit at paced_cuts or single_continuous_take — rapid_cuts is for the shot "
-              "that genuinely IS the scene's own bang-bang-bang moment, not a default."),
+              "that genuinely IS the scene's own bang-bang-bang moment, not a default. "
+              "THE CLIP UNIT (locked 2026-07-25, from AnyFilm's own measured grouping "
+              "rule): a generation clip is A COMPLETE CONVERSATIONAL OR ACTION UNIT — it "
+              "exists because it contains one finished exchange, not because a duration "
+              "ran out. Group camera setups until the dialogue exchange COMPLETES, "
+              "including the reaction that closes it. An establishing or transition shot "
+              "with no dialogue STANDS ALONE as its own clip. One to three camera setups "
+              "per clip; four is rare and needs a reason. If a clip is carrying more than "
+              "three distinct story beats, it is too dense — split it. "
+              "THE ENDING DECISION (mandatory, every shot, 2026-07-25): decide "
+              "endingBehaviour — how this shot actually STOPS. reaction_hold (settle and "
+              "hold on a reaction), living_hold (the frame holds while the performance "
+              "keeps breathing), continue_in_motion (the action carries straight past the "
+              "cut), cut_on_action (the edit lands mid-movement), or visual_transition (the "
+              "image itself becomes the way into the next shot). THERE IS NO DEFAULT AND NO "
+              "PREFERRED ENDING. A held closing beat is one legitimate ending among five, "
+              "not the house style: an action chain that stops dead to hold is wrong, and a "
+              "transition that settles instead of carrying is wrong. Decide from what THIS "
+              "shot's own dramatic form and tempo demand — the beat's primaryForm and "
+              "tempoShape are stated for you; read them. If consecutive shots keep choosing "
+              "the same ending, that is a symptom to fix, not a sequence."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
@@ -951,7 +1015,16 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
               "alone is NOT enough; if the storyboard has lost the treatment's central "
               "experience, fail it and set returnTo to 'gate3' (beat architecture is wrong) "
               "or 'gate4' (the shot sequence is wrong). Never request wording patches. Give "
-              "a WRITTEN judgement — never a score."),
+              "a WRITTEN judgement — never a score. "
+              "THE UNIVERSALS TEST (2026-07-25, run it explicitly before you judge): read "
+              "DOWN the whole sequence and look for anything that is true of EVERY shot — "
+              "one continuous-take habit, one camera move, one focal length, one shot "
+              "count, one prompt shape, one closing hold. A value that never varies across "
+              "materially different dramatic material is a template asserting itself, not a "
+              "decision, and it is grounds to fail. Check endingBehaviour first, then "
+              "cutPace: if beats of genuinely different form (a crash and a held emotional "
+              "moment) resolved to the same ending or the same pace, say so by name and "
+              "return to gate4."),
         f"THE SELECTED TREATMENT (the contract this scene must deliver):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"

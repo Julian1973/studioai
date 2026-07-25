@@ -248,7 +248,7 @@ def test_performance_assignment_sources_physical_performance_never_principal_per
         prompt, wc, slots = cb_engine.compile_shot_contract(
             shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
         assert prompt.startswith("SOURCE MATERIAL")
-        assert "DIALOGUE — THE VERBATIM LAW" in prompt
+        assert "DIALOGUE — THE AUDIO LAW" in prompt
         assert line in prompt                                    # material, verbatim
         assert (f"PERFORMANCE (approved physical performance): "
                 f"{sb_shot['physicalPerformance']}") in prompt   # dialogue-free performance fact
@@ -382,7 +382,7 @@ def test_verbatim_dialogue_lands_on_the_correct_shot():
     # GOLD BUILD UPDATE (2026-07-24): the line lands as labelled source material on the ONE
     # shot that owns it — present in s1's brief under THE VERBATIM LAW, and never bleeding
     # into s2 (the relay shot with no dialogue of its own).
-    assert "DIALOGUE — THE VERBATIM LAW" in s1["seedancePrompt"]
+    assert "DIALOGUE — THE AUDIO LAW" in s1["seedancePrompt"]
     assert "Nailed it." in s1["seedancePrompt"]
     assert "Nailed it" not in s2["seedancePrompt"]
 
@@ -753,6 +753,17 @@ def test_rejection_history_and_model_limited_status_survive_a_concurrent_promoti
             json.dump(pkg2, open(old_path, "w"), indent=1)
             R.reject_shot("1", "S1.SH1", "second failure", category="action-timing",
                           episode="Ep1", log=lambda *a, **k: None)
+            # drive the rest of the way to the CONSTANT ceiling — the point of this test
+            # is that rejection history survives a concurrent promotion, not where the
+            # ladder happens to end (raised 2 -> 7, 2026-07-25)
+            for i in range(3, R.MAX_BATCH_ATTEMPTS + 1):
+                pkgN = json.load(open(old_path))
+                R._ledger(pkgN, "S1.SH1").update(
+                    {"status": "candidates-pending", "candidatePaths": [str(c3)],
+                     "batchId": f"S1.SH1-b{i}-RACE"})
+                json.dump(pkgN, open(old_path, "w"), indent=1)
+                R.reject_shot("1", "S1.SH1", f"failure {i}", category="action-timing",
+                              episode="Ep1", log=lambda *a, **k: None)
         return data
     monkeypatch.setattr(_pathlib.Path, "read_bytes", racy_read_bytes)
 
@@ -765,9 +776,11 @@ def test_rejection_history_and_model_limited_status_survive_a_concurrent_promoti
     assert live["revision"] == 6                # never bumped — the promotion never wrote
     led = R._ledger(live, "S1.SH1")
     assert led["status"] == "model-limited"
-    assert led["batchAttempts"] == 2
-    assert len(led["rejections"]) == 2
-    assert [r["correction"] for r in led["rejections"]] == ["first failure", "second failure"]
+    assert led["batchAttempts"] == R.MAX_BATCH_ATTEMPTS
+    assert len(led["rejections"]) == R.MAX_BATCH_ATTEMPTS
+    corrections = [r["correction"] for r in led["rejections"]]
+    assert corrections[:2] == ["first failure", "second failure"]
+    assert len(corrections) == R.MAX_BATCH_ATTEMPTS
 
 
 # ── THE CLEAN-FAILURE FIX (2026-07-22): a real Law 6 leak found live in the Studio ─────
@@ -805,7 +818,7 @@ def test_a_real_law6_leak_in_authored_content_refuses_cleanly_never_crashes(tmp_
     rec = next(s for s in pkg["shots"] if s["shotId"] == "S1.SH1")
     assert rec["seedancePrompt"].startswith("SOURCE MATERIAL")
     assert "INTERNAL CUTS" in rec["seedancePrompt"]
-    assert "DIALOGUE — THE VERBATIM LAW" in rec["seedancePrompt"]
+    assert "DIALOGUE — THE AUDIO LAW" in rec["seedancePrompt"]
     assert list(pkg_dir.iterdir()) == []          # a dry run writes nothing
 
     # (b) the fireability protection: the promoted source brief can never fire — the

@@ -40,13 +40,15 @@ def _state(chars, marks=None, props=None):
 
 def _shot(shot_id="1.B1.S1", source="opener", src_id=None, chars=("Fuzzby",),
           lines=(), binding=None, staging=None, dur=6.0, marks_in=None, marks_out=None,
-          transition=None, cut_pace="single_continuous_take", internal_cuts=()):
+          transition=None, cut_pace="single_continuous_take", internal_cuts=(),
+          composed_of=()):
     return E.Shot(
         shotId=shot_id, beatCode="1.B1", durationSec=dur, purpose="the launch",
         performanceAssignment="Fuzzby rockets between blossoms, clips a stem, wobbles, recovers.",
         camera="Wide tracking, bee height", openingPose="Fuzzby mid-launch outside the flower",
         sourceType=source, sourceShotId=src_id, cutInMotivation=None if src_id is None else "matched action",
         transitionType=transition, cutPace=cut_pace, internalCuts=list(internal_cuts),
+        composedOf=list(composed_of),
         dialogueBinding=binding, dialogueLines=list(lines), visualPayoff="He nearly grazes the leaf",
         physicalStaging=staging, prohibited=[], charactersInFrame=list(chars),
         continuityIn=_state(chars, marks=marks_in), continuityOut=_state(chars, marks=marks_out))
@@ -240,7 +242,7 @@ def test_law6_no_spoken_words_in_either_prompt():
     for sh in d.shots:
         prompt, _, _ = E.compile_shot_contract(sh, {}, CFG)
         assert prompt.startswith("SOURCE MATERIAL")
-        assert "DIALOGUE — THE VERBATIM LAW" in prompt
+        assert "DIALOGUE — THE AUDIO LAW" in prompt
         for ln in sh.dialogueLines:
             assert ln.exactText in prompt          # material, labelled, verbatim
         with pytest.raises(R.Refused, match="THE FORMULA GATE"):
@@ -378,7 +380,7 @@ def test_option_d_planning_intent_stays_internal_constraints_now_ship():
     assert brief.startswith("SOURCE MATERIAL")
     assert E.OPENER_ANCHOR[:-1] in brief and "OPENING ANCHOR" in brief   # exact opening anchor
     assert "REFERENCES:" in brief                             # one declared job per reference
-    assert "DIALOGUE — THE VERBATIM LAW" in brief             # audio/dialogue material section
+    assert "DIALOGUE — THE AUDIO LAW" in brief             # audio/dialogue material section
     assert "HARD CONSTRAINTS" in brief
     assert "screen sides" not in brief          # 2026-07-17: no longer a default on every shot
     # the gag's own visibility contract ships as its labelled fact, verbatim
@@ -515,7 +517,7 @@ def test_verbatim_dialogue_inside_performance_assignment_still_refuses():
         'Fuzzby commits fully, chest leading into the recovery, and declares "Nailed it." '
         "as the whole beat turns on it.")
     brief, _, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
-    assert "DIALOGUE — THE VERBATIM LAW" in brief
+    assert "DIALOGUE — THE AUDIO LAW" in brief
     assert "Nailed it." in brief                              # legitimate source material now
     with pytest.raises(R.Refused, match="THE FORMULA GATE"):
         R.check_formula_structure(brief, d.shots[0].dialogueLines,
@@ -672,7 +674,7 @@ def test_redundant_lip_sync_sentence_is_deduplicated():
     # GOLD BUILD UPDATE (2026-07-24): the mechanical "Use @Audio1..." sentence belonged to
     # the retired fireable prose; the audio/dialogue contract now ships as the labelled
     # VERBATIM LAW section, which is what survives instead of the stripped duplicate.
-    assert "DIALOGUE — THE VERBATIM LAW" in prompt
+    assert "DIALOGUE — THE AUDIO LAW" in prompt
 
 
 def test_strip_redundant_audio_sentence_leaves_clean_text_untouched():
@@ -927,7 +929,7 @@ def test_real_canonical_shot_compiles_to_the_source_material_shape():
     assert prompt.startswith("SOURCE MATERIAL")
     for label in ("FELT INTENT", "OPENING ANCHOR", "CAMERA (storyboard-approved)",
                   "PERFORMANCE (approved physical performance)",
-                  "DIALOGUE — THE VERBATIM LAW", "HARD CONSTRAINTS", "DURATION:"):
+                  "DIALOGUE — THE AUDIO LAW", "HARD CONSTRAINTS", "DURATION:"):
         assert label in prompt, f"missing labelled fact: {label}"
     for ln in shot.dialogueLines:
         assert ln.exactText in prompt              # verbatim material, both lines
@@ -945,7 +947,7 @@ def test_source_brief_carries_both_physics_and_dialogue_facts_in_their_own_secti
     assert "GAG PHYSICS" in prompt
     assert "compress" in low and "pollen" in low
     # vocal facts, labelled, never mixed into the physics lines
-    dlg_idx = prompt.index("DIALOGUE — THE VERBATIM LAW")
+    dlg_idx = prompt.index("DIALOGUE — THE AUDIO LAW")
     assert "Do I look official?" in prompt[dlg_idx:]
     assert "Yes Fuzzby Officially nuts!" in prompt[dlg_idx:]
 
@@ -978,3 +980,90 @@ def test_shot_density_rule_is_a_decision_point():
     assert len(three.performanceModes) > 2 and not three.modeDensityDecision
     approved = three.model_copy(update={"modeDensityDecision": "hybrid_approved"})
     assert approved.modeDensityDecision == "hybrid_approved"
+
+
+# ══ THE FOUR-LEVEL MODEL: beat / camera shot / generation clip / editorial output ══
+# (Julian's directive, 2026-07-25). Levels 2 and 3 were conflated — one Shot Card was
+# always exactly one generation. composedOf is the reference form; these tests pin down
+# that it resolves member cards WITHOUT redefining them, and that the 1:1 default is
+# byte-identically unchanged for every package that does not use it.
+
+def test_clip_defaults_to_itself_byte_identically():
+    """No composedOf → the clip IS the card. The compiled brief must not shift by a byte."""
+    sh = _shot()
+    members, prov = E.resolve_clip_members(sh)
+    assert prov == "self" and [m.shotId for m in members] == [sh.shotId]
+    # siblings=None and siblings=[...] must produce the identical brief for a 1:1 clip
+    a, _, _ = E.compile_shot_contract(sh, {}, CFG)
+    b, _, _ = E.compile_shot_contract(sh, {}, CFG, siblings=[sh])
+    assert a == b, "supplying siblings changed a self-contained clip's compiled brief"
+    assert "MEMBER SHOT CARDS" not in a
+
+
+def test_clip_references_member_cards_without_redefining_them():
+    """The whole point: the member's OWN authored camera/first frame/performance reach the
+    brief, cited by shotId — no prose restatement of them on the parent."""
+    m1 = _shot(shot_id="1.B1.S2")
+    m1.camera = "Tight two-shot, locked"
+    m1.openingPose = "Zenny already settled on the petal"
+    m1.performanceAssignment = "Zenny holds still; only her antennae move."
+    m1.visualPayoff = "She does not blink"
+    m1.endingBehaviour = "cut_on_action"
+    m2 = _shot(shot_id="1.B1.S3")
+    m2.camera = "Low push, ground level"
+    m2.openingPose = "Fuzzby's shadow crossing the stem"
+    parent = _shot(shot_id="1.B1.S1", cut_pace="paced_cuts",
+                   composed_of=("1.B1.S3", "1.B1.S2"))   # deliberately NOT sorted order
+    sibs = [parent, m1, m2]
+
+    members, prov = E.resolve_clip_members(parent, sibs)
+    assert prov == "composed"
+    assert [m.shotId for m in members] == ["1.B1.S3", "1.B1.S2"], "authored order not held"
+
+    brief, _, _ = E.compile_shot_contract(parent, {}, CFG, siblings=sibs)
+    assert "MEMBER SHOT CARDS" in brief
+    assert brief.index("[1.B1.S3]") < brief.index("[1.B1.S2]")
+    for fragment in ("Low push, ground level", "Zenny already settled on the petal",
+                     "only her antennae move", "cut_on_action"):
+        assert fragment in brief, f"member card's own {fragment!r} never reached the clip"
+    assert "INTERNAL CUTS" not in brief, "prose form must not also fire"
+
+
+def test_clip_members_resolve_from_a_package_dict_too():
+    """The canonical package on disk holds dicts, not typed Shots (the as_shot boundary)."""
+    m = _shot(shot_id="1.B1.S2")
+    parent = _shot(shot_id="1.B1.S1", cut_pace="paced_cuts", composed_of=("1.B1.S2",))
+    pkg = {"shots": [parent.model_dump(), m.model_dump()]}
+    members, prov = E.resolve_clip_members(parent, pkg)
+    assert prov == "composed" and [x.shotId for x in members] == ["1.B1.S2"]
+
+
+def test_unresolvable_members_raise_rather_than_silently_dropping():
+    parent = _shot(shot_id="1.B1.S1", cut_pace="paced_cuts", composed_of=("1.B1.S9",))
+    for siblings, why in ((None, "no siblings supplied"), ([parent], "ref not in scene")):
+        try:
+            E.resolve_clip_members(parent, siblings)
+        except E.ClipMemberError:
+            continue
+        raise AssertionError(f"{why}: resolved silently instead of raising")
+    # self-reference and nesting are both refused
+    a = _shot(shot_id="1.B1.S1", cut_pace="paced_cuts", composed_of=("1.B1.S1",))
+    try:
+        E.resolve_clip_members(a, [a]); raise AssertionError("self-reference accepted")
+    except E.ClipMemberError:
+        pass
+    inner = _shot(shot_id="1.B1.S2", cut_pace="paced_cuts", composed_of=("1.B1.S3",))
+    outer = _shot(shot_id="1.B1.S1", cut_pace="paced_cuts", composed_of=("1.B1.S2",))
+    try:
+        E.resolve_clip_members(outer, [outer, inner, _shot(shot_id="1.B1.S3")])
+        raise AssertionError("nested clip accepted")
+    except E.ClipMemberError:
+        pass
+
+
+def test_clip_owner_identifies_a_member_card():
+    m = _shot(shot_id="1.B1.S2")
+    parent = _shot(shot_id="1.B1.S1", cut_pace="paced_cuts", composed_of=("1.B1.S2",))
+    sibs = [parent, m]
+    assert E.clip_owner_of("1.B1.S2", sibs) == "1.B1.S1"
+    assert E.clip_owner_of("1.B1.S1", sibs) is None       # a clip owns itself, not "owned"

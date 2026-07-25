@@ -526,3 +526,47 @@ gate the Look department now has (an earlier same-session audit confirmed their 
 fallbacks are already real, shot-specific, already-Director-approved content — not the thin/
 generic kind that caused tonight's misfire — so this is a genuine design-strictness choice, not
 a bug); the Scene 3/Scene 9 naming inconsistencies named above.
+
+---
+
+## THE FOUR-LEVEL MODEL — beat / camera shot / generation clip / editorial output
+(Julian's directive, 2026-07-25: "verify whether the canonical model clearly separates a
+dramatic beat, a cinematic camera shot, a Seedance generation clip and an editorial output.")
+
+**What was found.** Three of the four levels were already genuinely separate:
+
+| Level | Object | Where it lives |
+|---|---|---|
+| 1 — dramatic beat | `cb_creative.Beat` (`beatId`), `Shot.beatCode` | Gate 3 |
+| 2 — cinematic camera shot | `CreativeShotCard` / `cb_engine.Shot` (`shotId`) | Gate 4 |
+| 3 — Seedance generation clip | *was not its own concept* | `cb_render.fire_shot` |
+| 4 — editorial output | `cb_post` picture / conformed / masters | Gate 5 |
+
+**The conflict, precisely.** Levels 2 and 3 were conflated. `fire_shot(scene, shot_id)`
+renders exactly one `Shot`, and the render ledger, batch state, candidates, rejection
+history and cost all key on `shotId` — so one Shot Card *was* one generation clip, always,
+with no clip identity of its own. When a generation genuinely needed several ordered camera
+shots inside it, the only available expression was `internalCuts: List[str]` — free prose.
+Those extra camera shots were therefore **redefined inside the clip**, not referenced: no
+`shotId`, no `openingPose`, no `endingBehaviour`, no continuity, no approval of their own,
+and the compiler emitted them as bare numbered lines. The production workaround (SH2 →
+SH2A/SH2B) went the other way — two Shots, two generations, an editorial join — which is
+valid but forces a real cut where a continuous generation may be wanted.
+
+**The smallest compatible separation.** One optional field, not a parallel schema tree:
+`composedOf: List[str]` on `CreativeShotCard` and `cb_engine.Shot` — the ordered shotIds of
+other Shot Cards that this one generation renders. `cb_engine.resolve_clip_members(shot,
+siblings)` is the single place the distinction is read; the compiler emits one segment per
+member built from **that member card's own authored fields**, never retyped prose.
+
+Guarantees, each pinned by a permanent test:
+- **Empty is the default and changes nothing.** All 5 real Scene-1 shots compile
+  byte-identically with and without the new path (verified against the live package,
+  md5 `108782ab…`, unchanged).
+- **Mutually exclusive with `internalCuts`** — two authorities for the same segments is
+  exactly what this field exists to end (`CLIP_MEMBER_CONFLICT`).
+- **Unresolvable members raise, never silently drop** — self-reference, nesting, a missing
+  ref, duplicate membership and a member claimed by two clips are all validator errors.
+- **A member card is not independently fireable** — `_require_own_clip` refuses at both
+  paid entry points (`keyframe_shot`, `fire_shot`), naming the clip to fire instead;
+  firing a member alone would render and bill the same camera shot twice.

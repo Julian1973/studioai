@@ -145,6 +145,120 @@ class PhysicalStaging(BaseModel):
     prohibitedStaging: List[str]                  # this gag's own specific failure modes
 
 
+# ─────────────────────────────────────────────────────────────────────────────────────
+# THE PRODUCTION-DIRECTION UPGRADE (Julian's directive, 2026-07-25)
+#
+# Three additions, all OPTIONAL so every existing canonical package still validates
+# unchanged (backward compatibility is a hard requirement of the directive):
+#
+#   DramaticForm    — the scene's dramatic mode. The directive's central creative ask:
+#                     "Different dramatic forms must produce genuinely different direction,
+#                     shot structure, camera behaviour, editing, tempo and performance...
+#                     There must be no universal continuous take, camera move, focal
+#                     length, shot count, prompt length or closing hold."
+#   FirstFramePlan  — the SOURCE OF TRUTH for keyframe generation, replacing the two
+#                     free-text strings (openingImage/openingPose) that carried it before.
+#   MotionPlan      — the SOURCE OF TRUTH for animation prompt translation.
+#
+# Neither plan REPLACES the existing prose fields; they sit alongside them so a package
+# authored before this upgrade still compiles through the identical path.
+# ─────────────────────────────────────────────────────────────────────────────────────
+
+DramaticForm = Literal[
+    "physical_comedy", "character_comedy", "intimate_emotion", "relationship_dialogue",
+    "action", "tension", "wonder", "exposition", "reveal", "transition",
+]
+
+# ── ENDING BEHAVIOUR — the real vocabulary, not a binary ────────────────────────────
+# (Julian's directive item 2, 2026-07-25.) A first pass modelled this as settle-vs-motion;
+# that is too coarse for the endings real production needs. Five kinds, of which only the
+# two genuine HOLDS require a hold tail — the others legitimately end while still moving.
+#
+#   reaction_hold     — the camera holds on a reaction/emotional beat. HOLD required.
+#   living_hold       — held frame, performance continues (breath, idle life). HOLD required.
+#   continue_in_motion— action carries on past the cut point.               no HOLD.
+#   cut_on_action     — the edit lands mid-movement, deliberately.          no HOLD.
+#   visual_transition — the image itself becomes the way into the next shot.no HOLD.
+EndingBehaviour = Literal[
+    "reaction_hold", "living_hold", "continue_in_motion", "cut_on_action", "visual_transition",
+]
+
+# The two endings that genuinely need the clean-frame harvest window. Everything else is
+# allowed — and expected — to finish in movement.
+HOLD_REQUIRING_ENDINGS = ("reaction_hold", "living_hold")
+
+
+class DramaticIntent(BaseModel):
+    """WHAT THIS BEAT IS, DRAMATICALLY — and explicitly NOT a template selector.
+
+    Julian's directive item 3 (2026-07-25) is emphatic: "DramaticForm should inform the
+    Director's judgement, not prescribe the result... Do not implement rules such as:
+    comedy always uses whip-pans; emotion always uses close-ups; action always uses
+    handheld movement; wonder always uses wide lenses."
+
+    So nothing downstream may map a form to a camera, lens, shot count or edit. This
+    model exists to make the beat's dramatic identity EXPLICIT and reviewable — the
+    Director still chooses the camera, editing, staging and performance that serve this
+    particular story beat. A beat can be physical comedy AND affection at once, or
+    tension AND wonder: hence primary + optional secondary, never one exclusive bucket."""
+    primaryForm: DramaticForm
+    secondaryColour: Optional[DramaticForm] = None
+    audienceExperience: str = Field(min_length=1, description=
+        "What the audience should FEEL/understand — not what the camera does.")
+    emotionalOrPhysicalTurn: str = Field(min_length=1, description=
+        "The change this beat delivers. If nothing turns, the beat has no dramatic function.")
+    performanceLeader: str = Field(min_length=1, description=
+        "Which character carries this beat. Not necessarily the speaker.")
+    tempoShape: str = Field(min_length=1, description=
+        "How the beat's pace MOVES — e.g. 'fast then a held stop', 'slow build, no release'. "
+        "A shape, never a single speed.")
+
+
+class FirstFramePlan(BaseModel):
+    """The approved opening instant — the source of truth for keyframe generation.
+    Cinematography may enrich composition/depth/focus/light/atmosphere/material; it may
+    NOT change the story instant, identity, scale, costume, position, prop state or
+    continuity recorded here."""
+    storyInstant: str = Field(min_length=1)      # the exact moment, not a range
+    shotSize: str = Field(min_length=1)
+    cameraPosition: str = Field(min_length=1)    # height + angle + distance relationship
+    characterPositions: str = Field(min_length=1)
+    scaleRelationship: Optional[str] = None      # relative size, when two+ characters share frame
+    pose: str = Field(min_length=1)
+    gaze: str = Field(min_length=1)
+    expression: str = Field(min_length=1)
+    actionPhase: str = Field(min_length=1)       # anticipation / mid-action / recovery / at rest
+    foreground: Optional[str] = None
+    midground: Optional[str] = None
+    background: Optional[str] = None
+    propState: Optional[str] = None
+    environmentState: Optional[str] = None
+    lightState: Optional[str] = None
+    referenceRoles: Optional[str] = None
+    incomingContinuity: Optional[str] = None
+
+
+class MotionPlan(BaseModel):
+    """The approved motion design — the source of truth for animation prompt translation.
+    prepare_animation may enrich the EXECUTION (precise physical wording, micro-performance,
+    secondary motion, depth, environmental reaction, light and material response); it may
+    NOT change dramatic function, performance leader, objectives, shot count, editing
+    strategy, tempo, camera strategy, physical outcome, payoff or continuity."""
+    entryState: str = Field(min_length=1)
+    cameraBehaviour: str = Field(min_length=1)
+    orderedActions: List[str] = Field(default_factory=list, description=
+        "The character actions IN ORDER. Each is a physical cause with its visible consequence.")
+    characterObjectives: Optional[str] = None
+    performanceProgression: Optional[str] = None
+    environmentalResponse: Optional[str] = None
+    tempoChanges: Optional[str] = None           # where the shot speeds up / slows / holds
+    dialogueSections: Optional[str] = None       # which audio section carries which performance
+    listenerBehaviour: Optional[str] = None
+    payoff: str = Field(min_length=1)
+    exitState: str = Field(min_length=1)
+    nextShotHandoff: Optional[str] = None
+
+
 class Shot(BaseModel):
     """ONE camera view of one beat — ONE controlled performance assignment (§5)."""
     shotId: str                                   # e.g. "1.B1.S1"
@@ -173,6 +287,29 @@ class Shot(BaseModel):
     # for them (empty for single_continuous_take — performanceAssignment carries that case).
     cutPace: Literal["single_continuous_take", "paced_cuts", "rapid_cuts"]
     internalCuts: List[str] = Field(default_factory=list)
+    # ── THE CLIP/CARD SEPARATION (Julian's directive, 2026-07-25) ───────────────────
+    # Until this field existed, a Seedance generation clip and a cinematic camera shot
+    # were the SAME object: fire_shot() renders exactly one Shot, so the only way to put
+    # several ordered camera shots inside one generation was internalCuts — free prose,
+    # which REDEFINES those camera shots instead of referencing them (no shotId, no
+    # openingPose, no endingBehaviour, no continuity, no approval of their own).
+    # composedOf is the reference form: an ordered list of OTHER Shot Cards in this same
+    # scene that this one generation renders in sequence. The compiler reads each member
+    # card's own authored fields — nothing is re-typed. Empty (the default, and every
+    # existing package) means exactly what it always meant: this clip is this one card.
+    composedOf: List[str] = Field(default_factory=list)
+    # ── THE PRODUCTION-DIRECTION UPGRADE (2026-07-25) ───────────────────────────────
+    # packageVersion is the V1/V2 discriminator the precedence rule turns on. A shot
+    # WITHOUT it is a legacy V1 shot: the compatibility adapter fills its plans and a
+    # missing ending decision stays valid. A shot declaring "v2" is held to the full
+    # contract — plans present, ending behaviour explicitly chosen — or it is REFUSED.
+    packageVersion: Optional[Literal["v2"]] = None
+    dramaticIntent: Optional[DramaticIntent] = None
+    # endingBehaviour retires the universal closing hold. REQUIRED on a v2 shot (the
+    # Director/Editor must choose); absent is valid ONLY for a legacy package.
+    endingBehaviour: Optional[EndingBehaviour] = None
+    firstFramePlan: Optional[FirstFramePlan] = None
+    motionPlan: Optional[MotionPlan] = None
     dialogueBinding: Optional[str] = None         # the prompt-facing sentence: WHO speaks + the emotional
     #                                               read — NEVER the words (the audio carries them)
     dialogueLines: List[DialogueLine]             # the typed voice data (empty when nobody speaks)
@@ -647,11 +784,46 @@ def validate_scene_design(design, beats, characters_cfg):
             add("ERROR", "CUTPACE_MISMATCH", f"{path}.internalCuts",
                 "single_continuous_take must carry no internalCuts — performanceAssignment "
                 "alone carries that case; leftover internalCuts suggest a stale edit")
-        if sh.cutPace in ("paced_cuts", "rapid_cuts") and len(sh.internalCuts) < 2:
+        if sh.cutPace in ("paced_cuts", "rapid_cuts") and len(sh.internalCuts) < 2 \
+                and not sh.composedOf:
             add("ERROR", "CUTPACE_MISMATCH", f"{path}.internalCuts",
                 f"cutPace={sh.cutPace!r} requires at least 2 authored internalCuts, got "
                 f"{len(sh.internalCuts)} — the Director's own pace decision has nothing to "
                 f"deliver it")
+
+        # THE CLIP/CARD SEPARATION CHECK (2026-07-25). composedOf is the reference form
+        # of internal cutting: this generation renders these other Shot Cards in order,
+        # reading their own authored fields. The two forms are mutually exclusive — a
+        # clip that both references cards AND retypes prose cuts has two competing
+        # authorities for the same segments, which is exactly what this field exists to
+        # end. Membership itself is resolved (and its own errors raised) below.
+        if sh.composedOf:
+            if sh.internalCuts:
+                add("ERROR", "CLIP_MEMBER_CONFLICT", f"{path}.composedOf",
+                    "a clip may reference member Shot Cards OR author prose internalCuts, "
+                    "never both — two authorities for the same segments")
+            if sh.cutPace == "single_continuous_take":
+                add("ERROR", "CUTPACE_MISMATCH", f"{path}.composedOf",
+                    "single_continuous_take renders one camera shot — it cannot compose "
+                    "several member cards")
+            if len(set(sh.composedOf)) != len(sh.composedOf):
+                add("ERROR", "CLIP_MEMBER_CONFLICT", f"{path}.composedOf",
+                    "the same member card is listed twice in one clip")
+            try:
+                resolve_clip_members(sh, design.shots)
+            except ClipMemberError as e:
+                add("ERROR", "CLIP_MEMBER_UNRESOLVED", f"{path}.composedOf", str(e))
+        owner = clip_owner_of(sh.shotId, design.shots)
+        if owner and sh.composedOf:
+            add("ERROR", "CLIP_MEMBER_CONFLICT", f"{path}.composedOf",
+                f"{sh.shotId} is already a member of clip {owner} — a member card is a "
+                f"camera shot, never itself a clip")
+        owners = [s.shotId for s in design.shots
+                  if s.shotId != sh.shotId and sh.shotId in (getattr(s, "composedOf", None) or [])]
+        if len(owners) > 1:
+            add("ERROR", "CLIP_MEMBER_CONFLICT", f"{path}.shotId",
+                f"{sh.shotId} is claimed as a member by more than one clip "
+                f"({', '.join(owners)}) — it would render twice")
 
         # dialogue: speaker visible, timing sane, binding consistent
         in_frame = {_norm(c) for c in sh.charactersInFrame}
@@ -805,7 +977,7 @@ def validate_scene_design(design, beats, characters_cfg):
     # deterministic (no LLM), so this stays cheap to run on every shot regardless.
     for i, sh in enumerate(design.shots):
         try:
-            compile_shot_contract(sh, {}, characters_cfg)
+            compile_shot_contract(sh, {}, characters_cfg, siblings=design.shots)
         except (ValueError, AssertionError) as e:
             add("ERROR", "COMPILE_GUARD", f"shots[{i}]({sh.shotId})", str(e))
 
@@ -1215,7 +1387,7 @@ def _render_critical(shot):
     return out[:2]   # + the standing identity/scale/sides line = never more than three
 
 
-def compile_shot_contract(shot, scene, characters_cfg):
+def compile_shot_contract(shot, scene, characters_cfg, siblings=None):
     """THE GOLD SOURCE BRIEF (Julian's Gold Build ruling, 2026-07-24 — "we are going to be
     brave... build it out properly... ensure all the old code is taken out and that only
     the new way is being created and presented to the API"): this function's OLD job —
@@ -1231,6 +1403,7 @@ def compile_shot_contract(shot, scene, characters_cfg):
     Signature and return contract unchanged (text, word_count, reference_slots) so every
     consumer — compile_scene_package, repair_package, cb_handover._compile_one,
     cb_render._canonical_compiled_brief — keeps working untouched."""
+    shot = as_shot(shot)   # boundary normalisation (dicts OR typed)
     lines = ["SOURCE MATERIAL — storyboard-approved facts for the cinematic card. This is "
              "NOT a prompt and must never fire; the register card is written from it at "
              "the Animation gate."]
@@ -1256,6 +1429,24 @@ def compile_shot_contract(shot, scene, characters_cfg):
         _strip_redundant_audio_sentence(shot.performanceAssignment))
     if shot.cutPace == "single_continuous_take":
         add("CUT PACE", "single continuous take — the card is one Shot 1 only, no internal cuts")
+    elif shot.composedOf:
+        # THE REFERENCE FORM (2026-07-25): this generation renders other Shot Cards in
+        # order. Each segment is compiled FROM THE MEMBER CARD'S OWN authored fields —
+        # nothing here is re-typed, so a member's camera, first frame, performance and
+        # ending remain the single authority for that segment.
+        members, _prov = resolve_clip_members(shot, siblings)
+        lines.append("MEMBER SHOT CARDS (each becomes its own 'Shot N:' segment of this "
+                     "clip, in this order — compiled from that card, not restated here):")
+        for i, m in enumerate(members, 1):
+            lines.append(f"  {i}. [{m.shotId}] camera: {str(m.camera).strip()}")
+            lines.append(f"      first frame: {str(m.openingPose).strip()}")
+            lines.append(f"      performance: "
+                         f"{_strip_redundant_audio_sentence(m.performanceAssignment).strip()}")
+            if m.visualPayoff:
+                lines.append(f"      closes on: "
+                             f"{_strip_redundant_audio_sentence(m.visualPayoff).strip()}")
+            if m.endingBehaviour:
+                lines.append(f"      ends by: {str(m.endingBehaviour).strip()}")
     elif shot.internalCuts:
         lines.append("INTERNAL CUTS (each becomes its own 'Shot N:' segment of the card, "
                      "in this order):")
@@ -1273,20 +1464,23 @@ def compile_shot_contract(shot, scene, characters_cfg):
         _strip_redundant_audio_sentence(shot.visualPayoff))
     if shot.continuityIn is not None:
         try:
-            add("CONTINUITY IN", shot.continuityIn.model_dump_json())
+            add("CONTINUITY IN", _continuity_line(shot.continuityIn))
         except Exception:
             add("CONTINUITY IN", shot.continuityIn)
     if shot.continuityOut is not None:
         try:
-            add("CONTINUITY OUT", shot.continuityOut.model_dump_json())
+            add("CONTINUITY OUT", _continuity_line(shot.continuityOut))
         except Exception:
             add("CONTINUITY OUT", shot.continuityOut)
     dl = shot.dialogueLines or []
     if dl:
-        lines.append("DIALOGUE — THE VERBATIM LAW (the formula standard): each line below "
-                     "MUST appear word-for-word inline in the card, immediately after the "
-                     "action that earns it, as SPEAKER: line — never reworded, never "
-                     "omitted, nothing invented beyond this list:")
+        lines.append("DIALOGUE — THE AUDIO LAW (THE SH1 KEEPER STANDARD, Julian's ruling "
+                     "2026-07-25, superseding the earlier inline-verbatim formula): the "
+                     "spoken WORDS below are context for staging and timing ONLY and must "
+                     "NEVER be written into the card. @Audio1 is the sole source of "
+                     "dialogue, wording, voice, performance and timing; the card names who "
+                     "speaks, who stays silent, and times the performance by the audio's "
+                     "own spoken sections. Nothing invented beyond this list:")
         for d in dl:
             spk = str(getattr(d, "speaker", "") or "").upper()
             txt = str(getattr(d, "exactText", "") or "")
@@ -1306,6 +1500,243 @@ def compile_shot_contract(shot, scene, characters_cfg):
     return text, len(text.split()), reference_slots(shot, characters_cfg)
 
 
+class PlanIncomplete(ValueError):
+    """A v2 shot that fails the plan contract. Never raised for a legacy package."""
+
+
+def _legacy_first_frame_plan(shot):
+    """THE ONE COMPATIBILITY ADAPTER (v1 → FirstFramePlan). Julian's directive item 1:
+    "create ONE explicit compatibility adapter that maps the old fields into the new
+    plans. Do not scatter fallback precedence across multiple compilers." This is that
+    one place; no compiler may implement its own fallback."""
+    return FirstFramePlan(
+        storyInstant=shot.openingPose,
+        shotSize=(shot.camera.split(",")[0].strip() or "as directed"),
+        cameraPosition=shot.camera,
+        characterPositions=(shot.continuityIn.cameraSide if shot.continuityIn
+                            else "as established by the opening frame"),
+        pose=shot.openingPose,
+        gaze="as the opening pose implies",           # v1 never recorded gaze separately
+        expression="as the opening pose implies",     # v1 never recorded expression separately
+        actionPhase="anticipation",                   # v1's openingPose IS the anticipation instant
+        lightState=(shot.continuityIn.lighting if shot.continuityIn else None),
+        incomingContinuity=(shot.cutInMotivation or None),
+        referenceRoles=None,
+    )
+
+
+def _legacy_motion_plan(shot):
+    """THE ONE COMPATIBILITY ADAPTER (v1 → MotionPlan). Same single-location rule."""
+    actions = list(shot.internalCuts) if shot.internalCuts else [shot.performanceAssignment]
+    return MotionPlan(
+        entryState=shot.openingPose,
+        cameraBehaviour=shot.camera,
+        orderedActions=actions,
+        performanceProgression=shot.performanceAssignment,
+        tempoChanges=shot.tempoDesign,
+        dialogueSections=shot.dialogueBinding,
+        payoff=shot.visualPayoff,
+        exitState=(shot.continuityOut.cameraSide if shot.continuityOut else shot.visualPayoff),
+        nextShotHandoff=None,
+    )
+
+
+def resolve_plans(shot):
+    """THE PRECEDENCE RULE, in exactly one function (directive item 1):
+
+        approved typed plan  →  legacy adapter for an old package  →  REFUSAL if a
+        declared-v2 package is incomplete.
+
+    Returns (FirstFramePlan, MotionPlan, provenance) where provenance is "approved" or
+    "legacy_adapted", so every consumer can report WHICH authority it used. The same
+    creative decision therefore never exists in two conflicting authoritative places:
+    when an approved plan exists it wins outright and the legacy prose is not consulted."""
+    shot = as_shot(shot)
+    is_v2 = shot.packageVersion == "v2"
+    missing = []
+    if is_v2:
+        if not shot.firstFramePlan:  missing.append("firstFramePlan")
+        if not shot.motionPlan:      missing.append("motionPlan")
+        if not shot.endingBehaviour: missing.append("endingBehaviour")
+        if not shot.dramaticIntent:  missing.append("dramaticIntent")
+        if missing:
+            raise PlanIncomplete(
+                f"REFUSED — {shot.shotId} declares packageVersion='v2' but is missing "
+                f"{', '.join(missing)}. A v2 shot must carry its approved plans and an "
+                f"explicit ending decision; the legacy adapter is NOT applied to a v2 "
+                f"package (that would silently invent direction nobody approved).")
+        return shot.firstFramePlan, shot.motionPlan, "approved"
+    # legacy package: an approved plan still wins per-field if one happens to be present
+    ffp = shot.firstFramePlan or _legacy_first_frame_plan(shot)
+    mp = shot.motionPlan or _legacy_motion_plan(shot)
+    prov = "approved" if (shot.firstFramePlan and shot.motionPlan) else "legacy_adapted"
+    return ffp, mp, prov
+
+
+def ending_requires_hold(shot):
+    """Does this shot's own approved ending need the clean-frame harvest window?
+    Legacy (no decision) keeps the historical hold requirement — nothing loosens by
+    accident. Only reaction_hold / living_hold require it.
+
+    Reads the ONE field directly rather than validating an entire Shot: a caller may
+    legitimately hold a partial record (the render gate does), and a validation error
+    on some unrelated field must never be able to flip a hold decision. An unrecognised
+    value is treated as hold-required — unknown input is never a silent bypass."""
+    if shot is None:
+        return True
+    if isinstance(shot, Shot):
+        eb = shot.endingBehaviour
+    elif isinstance(shot, dict):
+        eb = shot.get("endingBehaviour")
+    else:
+        eb = getattr(shot, "endingBehaviour", None)
+    if eb is None:
+        return True                      # legacy default: unchanged behaviour
+    return eb in HOLD_REQUIRING_ENDINGS
+
+
+def _continuity_line(cs):
+    """DE-DUPLICATED continuity rendering (Julian's directive item 9, 2026-07-25 —
+    "inspect it for duplicated or conflicting representations of the same direction...
+    The final writer should receive complete production truth ONCE, with clear authority,
+    rather than several slightly different versions").
+
+    MEASURED on the real S1.SH2 record: every per-character field (screenZone / facing /
+    pose / expression) held the IDENTICAL string, and lighting == cameraSide — ~13% of the
+    compiled brief was literal repetition of the same decision. Dumping the raw JSON told
+    the writer the same thing up to four times per character, which dilutes authority
+    rather than adding truth.
+
+    Emits each distinct value ONCE, naming which aspects it covers. Nothing is dropped:
+    when the values genuinely differ they are all still stated, separately."""
+    if cs is None:
+        return None
+    get = cs.get if isinstance(cs, dict) else (lambda k, d=None: getattr(cs, k, d))
+    parts = []
+    light, side = get("lighting"), get("cameraSide")
+    if light and side and light.strip() == side.strip():
+        parts.append(f"world (lighting + camera side): {light.strip()}")
+    else:
+        if light: parts.append(f"lighting: {light.strip()}")
+        if side:  parts.append(f"camera side: {side.strip()}")
+    for ch in (get("characters") or []):
+        cg = ch.get if isinstance(ch, dict) else (lambda k, d=None: getattr(ch, k, d))
+        name = cg("character") or "character"
+        fields = {k: (cg(k) or "").strip() for k in ("screenZone", "facing", "pose", "expression")}
+        distinct = {}
+        for k, v in fields.items():
+            if v: distinct.setdefault(v, []).append(k)
+        for value, aspects in distinct.items():
+            parts.append(f"{name} ({'/'.join(aspects)}): {value}")
+        for extra in ("visibleMarks", "heldProps"):
+            v = cg(extra)
+            if v: parts.append(f"{name} {extra}: {', '.join(str(x) for x in v)}")
+    return " | ".join(parts) if parts else None
+
+
+def as_shot(shot):
+    """THE PACKAGE BOUNDARY NORMALISER (Julian's directive, 2026-07-25 — "Fix the current
+    fragility where canonical package dictionaries can reach a compiler expecting typed
+    Pydantic objects. Normalise data into the canonical typed models at the package
+    boundary").
+
+    The canonical package on disk holds plain dicts; the compilers were written against
+    typed Shot objects and reach for attributes (shot.openingPose). Calling a compiler
+    with real package data therefore raised AttributeError — confirmed live, and only
+    invisible in production because prepare_cinematography happens to pass typed objects.
+
+    Accepts either shape and always returns a typed Shot. Unknown/legacy keys are dropped
+    rather than raising, so a package authored before any schema addition still normalises
+    cleanly (backward compatibility is a hard requirement of the directive)."""
+    if isinstance(shot, Shot):
+        return shot
+    if not isinstance(shot, dict):
+        raise TypeError(f"as_shot: expected Shot or dict, got {type(shot).__name__}")
+    known = {k: v for k, v in shot.items() if k in Shot.model_fields}
+    return Shot.model_validate(known)
+
+
+# ── THE FOUR-LEVEL MODEL (Julian's directive, 2026-07-25) ──────────────────────────
+# 1 DRAMATIC BEAT      cb_creative.Beat / Shot.beatCode — what changes in the story.
+# 2 CINEMATIC SHOT     a Shot Card (this module's Shot) — one camera/performance idea.
+# 3 GENERATION CLIP    what ONE provider call renders. Addressed by the shotId that
+#                      fire_shot() is given; its members are resolved below.
+# 4 EDITORIAL OUTPUT   cb_post assembles rendered clips into picture/conformed/masters.
+#
+# Levels 1, 3 and 4 were already separate. Levels 2 and 3 were CONFLATED: one Shot was
+# always exactly one generation, so several ordered camera shots inside one generation
+# could only be expressed as internalCuts — prose, which redefines those camera shots
+# instead of referencing them. composedOf is the reference form; this resolver is the
+# one place the distinction is read. A clip with no composedOf resolves to itself,
+# byte-identically to the behaviour every existing package already has.
+
+class ClipMemberError(ValueError):
+    """Raised when a clip's composedOf cannot be resolved to real Shot Cards."""
+
+
+def resolve_clip_members(shot, siblings=None):
+    """Return (members, provenance) for a generation clip.
+
+    members    — ordered list of typed Shot Cards this ONE generation renders.
+    provenance — "self" (the 1:1 default) or "composed" (references resolved).
+
+    siblings may be the package dict, its shots list, or None. Passing None with a
+    composedOf present is an error rather than a silent fallback: quietly rendering
+    only the parent would drop authored camera shots without a word."""
+    shot = as_shot(shot)
+    refs = list(shot.composedOf or [])
+    if not refs:
+        return [shot], "self"
+    if siblings is None:
+        raise ClipMemberError(
+            f"{shot.shotId}: composedOf names {len(refs)} member card(s) but no sibling "
+            f"shots were supplied to resolve them against")
+    if isinstance(siblings, dict):
+        siblings = siblings.get("shots") or []
+    by_id = {}
+    for s in siblings:
+        s = as_shot(s)
+        by_id[s.shotId] = s
+    members = []
+    for ref in refs:
+        if ref == shot.shotId:
+            raise ClipMemberError(f"{shot.shotId}: composedOf may not reference itself")
+        if ref not in by_id:
+            raise ClipMemberError(
+                f"{shot.shotId}: composedOf references {ref!r}, which is not a shot in "
+                f"this scene")
+        member = by_id[ref]
+        if member.composedOf:
+            raise ClipMemberError(
+                f"{shot.shotId}: member {ref} itself declares composedOf — a clip's "
+                f"members are camera shots, never nested clips")
+        members.append(member)
+    return members, "composed"
+
+
+def clip_owner_of(shot_id, siblings):
+    """The shotId of the generation clip that renders this card, or None if it is its
+    own clip. A member card is NOT independently fireable — firing it would render the
+    same camera shot twice, once alone and once inside its owner."""
+    if isinstance(siblings, dict):
+        siblings = siblings.get("shots") or []
+
+    # Read the TWO fields directly rather than validating a whole Shot. Same lesson as
+    # ending_requires_hold's own 2026-07-25 correction: normalising an entire record to
+    # read one field turns any unrelated schema gap into a raised error inside a guard —
+    # and a guard that raises on a partial record refuses fires it has no business
+    # refusing. Membership is a claim made BY the owner, so a malformed sibling can only
+    # ever fail to claim; it can never wrongly capture this shot.
+    def _get(s, key):
+        return s.get(key) if isinstance(s, dict) else getattr(s, key, None)
+
+    for s in siblings:
+        sid = _get(s, "shotId")
+        if sid and sid != shot_id and shot_id in (_get(s, "composedOf") or []):
+            return sid
+    return None
+
+
 def compile_keyframe_prompt(shot, scene, characters_cfg):
     """THE GOLD SOURCE BRIEF — STILLS (2026-07-24, same ruling and same treatment as
     compile_shot_contract the same day; closed after Julian's front-to-back audit
@@ -1314,6 +1745,7 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
     the Cinematography register writer (cb_departments.prepare_cinematography, curriculum
     verbatim + THE LIGHT LAW), which WRITES the opening-frame prompt. Never fireable
     itself. Signature/return unchanged for every consumer."""
+    shot = as_shot(shot)   # boundary normalisation (dicts OR typed)
     lines = ["SOURCE MATERIAL — storyboard-approved facts for the OPENING-FRAME card. This "
              "is NOT a prompt and must never fire; the register still-card is written from "
              "it at the Cinematography gate."]
@@ -1333,7 +1765,7 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         ", ".join(shot.charactersInFrame or []))
     if shot.continuityIn is not None:
         try:
-            add("CONTINUITY IN", shot.continuityIn.model_dump_json())
+            add("CONTINUITY IN", _continuity_line(shot.continuityIn))
         except Exception:
             add("CONTINUITY IN", shot.continuityIn)
     add("FELT INTENT (the frame's emotional read)", shot.feltIntent)
@@ -1383,7 +1815,8 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
 
     shots_out, total_sec = [], 0.0
     for sh in design.shots:
-        prompt, wc, slots = compile_shot_contract(sh, scene, characters_cfg)
+        prompt, wc, slots = compile_shot_contract(sh, scene, characters_cfg,
+                                                   siblings=design.shots)
         rec = sh.model_dump()
         rec["seedancePrompt"] = prompt
         rec["promptWords"] = wc
@@ -1494,7 +1927,9 @@ def repair_package(scene_num, episode="Ep1", log=print):
         # only remaining failure mode is a genuine compile guard (e.g. a Law 6 leak) —
         # reported, never a crashed run.
         try:
-            prompt, wc, slots = compile_shot_contract(sh, pkg.get("scene", {}), characters_cfg)
+            prompt, wc, slots = compile_shot_contract(sh, pkg.get("scene", {}),
+                                                     characters_cfg,
+                                                     siblings=pkg.get("shots"))
             rec["seedancePrompt"], rec["promptWords"], rec["referenceSlots"] = prompt, wc, slots
             rec.pop("promptStale", None)
             # THE INTERNAL CONTRACT LINE (Option D): the full negation-safe constraints record,

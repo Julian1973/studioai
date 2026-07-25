@@ -70,8 +70,10 @@ approximates "is it funny").
     python3 cb_render.py status   <scene> [episode]
 """
 import os, sys, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile
+from collections import Counter
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import cb_corpus
 import cb_engine
 import cb_gen
 import cb_post
@@ -132,6 +134,39 @@ def _require_valid(pkg):
     if not (pkg.get("validation") or {}).get("passed"):
         raise Refused("REFUSED — the production package failed design validation; "
                       "fix the design, never fire past a red validator")
+
+
+
+def _approved_formula_meta(pkg, scene, shot_id, episode):
+    """Which formula was in the writer's mind when this shot's animation prompt was
+    authored. Stored on the approved department output at prepare time; read back here so
+    the corpus can answer "which formulas are actually working" rather than guessing from
+    the beat's form after the fact. Best-effort by design — a fire is never blocked
+    because its provenance could not be read."""
+    try:
+        dept = ((pkg.get("departments") or {}).get(shot_id) or {}).get("animation") or {}
+        meta = (dept.get("output") or {}).get("_formula")
+        if meta:
+            return meta
+        shot = next((s for s in pkg.get("shots", []) if s.get("shotId") == shot_id), {})
+        di = shot.get("dramaticIntent") or {}
+        import cb_formulas
+        _, m = cb_formulas.formula_block(di.get("primaryForm"), di.get("secondaryColour"))
+        return m
+    except Exception:
+        return {}
+
+
+def _require_own_clip(pkg, shot_id):
+    """THE CLIP/CARD SEPARATION AT THE FIRE DOOR (2026-07-25). A Shot Card named by
+    another card's composedOf is a MEMBER of that generation clip, not a clip of its own —
+    firing it alone would render the same camera shot twice and pay for it twice. Fire the
+    owning clip instead. No-op for every existing package (nothing declares composedOf)."""
+    owner = cb_engine.clip_owner_of(shot_id, pkg.get("shots") or [])
+    if owner:
+        raise Refused(f"REFUSED — {shot_id} is a member Shot Card of generation clip "
+                      f"{owner}; fire {owner}, which renders it in order. Firing a member "
+                      f"alone would render and bill the same camera shot twice.")
 
 
 # ── LINEAGE — the current storyboard version → matching canonical package revision ──────
@@ -529,6 +564,27 @@ def approve_scenelook(scene, episode="Ep1", reviewed_by="Julian", log=print):
     rec = _load_scenelook_rec(scene, episode)
     cand = rec.get("candidate")
     if not cand:
+        # THE STALE RE-BLESS (2026-07-25, Julian live-blocked — "then i cant move forward
+        # becasue scene look isnt approved"): an approved plate whose own input brief
+        # (locations.json/style.txt) changed after approval reads as 'stale', and the
+        # Studio's own stale-state button ("Apply (current brief)") lands HERE — where the
+        # old candidate-only contract could only refuse, leaving no path to say "the same
+        # image still holds under the new brief." Re-approving with no candidate now
+        # re-stamps the approved plate's signature to the CURRENT brief — the human's own
+        # explicit re-bless of the identical, unchanged image; never a silent auto-heal.
+        appr = rec.get("approved")
+        if appr and os.path.exists(appr.get("path") or ""):
+            cur_sig = _scenelook_input_signature(scene, episode)
+            if appr.get("inputSignature") == cur_sig:
+                raise Refused(f"REFUSED — Scene Look for scene {scene} is already approved "
+                              f"and current; nothing awaits approval")
+            appr["inputSignature"] = cur_sig
+            appr["reapprovedAt"] = _now()
+            appr["reviewedBy"] = reviewed_by
+            _save_scenelook_rec(rec, scene, episode)
+            log(f"SCENE LOOK RE-BLESSED — {os.path.basename(appr['path'])} re-approved by "
+                f"{reviewed_by} against the current brief (same image, signature re-stamped)")
+            return appr["path"]
         raise Refused(f"REFUSED — Scene Look for scene {scene} has no candidate awaiting approval")
     old = rec.get("approved")
     if old and old.get("path") and os.path.exists(old["path"]):
@@ -572,6 +628,34 @@ def reject_scenelook(scene, note, episode="Ep1", reviewed_by="Julian", log=print
     log(f"SCENE LOOK REJECTED — {note}\n  archived -> {archived_rel or '(no file was present)'}"
         f"\n  the previously-approved plate (if any) is unaffected")
     return archived_rel
+
+
+def unapprove_scenelook(scene, episode="Ep1", note="", reviewed_by="Julian", log=print):
+    """UNDO THE SCENE LOOK APPROVAL — Julian's own redo door (2026-07-25, his direct ask:
+    "I should be able to unassign and do that phase again"). The approved plate moves BACK
+    to being the pending CANDIDATE (awaiting a fresh decision) — never deleted, never
+    archived by this call; re-approving it restores it unchanged, rejecting/replacing it
+    follows the existing candidate flow. Mirrors unapprove_department's reversible-action
+    semantics: un-approving is always safe and never destroys work."""
+    rec = _load_scenelook_rec(scene, episode)
+    appr = rec.get("approved")
+    if not appr:
+        raise Refused(f"REFUSED — Scene Look for scene {scene} has no approval to undo")
+    if rec.get("candidate"):
+        raise Refused(f"REFUSED — Scene Look for scene {scene} already has a candidate "
+                      f"awaiting a decision; decide that first (approve/reject), then "
+                      f"un-approve if still needed")
+    rec.setdefault("history", []).append({**appr, "outcome": "unapproved",
+                                           "unapprovedAt": _now(), "reviewedBy": reviewed_by,
+                                           "unapprovedNote": (note or "").strip() or None})
+    cand = {k: v for k, v in appr.items() if k not in ("approvedAt", "reviewedBy")}
+    rec["candidate"] = cand
+    rec["approved"] = None
+    _save_scenelook_rec(rec, scene, episode)
+    log(f"SCENE LOOK UN-APPROVED by {reviewed_by} — {os.path.basename(appr.get('path',''))} "
+        f"is back to AWAITING your decision (re-approve, reject, upload, pick from library, "
+        f"or generate fresh); nothing was deleted")
+    return True
 
 
 def select_scenelook_source(scene, mode, episode="Ep1", upload_path=None, library_path=None,
@@ -801,6 +885,28 @@ def _scene_context(pkg, scene, episode):
 # rerunning the specialist over creative content that never actually changed.
 _DEPT_SIGNATURE_VERSION = 3
 
+# ── THE CHARGE VERSION (2026-07-25) ────────────────────────────────────────────────────
+# THE GAP THIS CLOSES, found by Julian asking a plain question — "is shot 2 now the right
+# direction and prompt?" It was not, and nothing in the system could tell: the freshness
+# signature is built from SHOT DATA (keyframe, audio, references, staging fields), so it
+# correctly answers "did the material change?" and is structurally blind to "did the
+# INSTRUCTIONS we gave the writer change?". Tonight's uncaging rewrote the animation
+# writer's entire charge — ceilings gone, vocabulary bans lifted, the brief reframed
+# around what the shot does to the viewer — and every previously-approved direction still
+# read `current`, because its inputs genuinely hadn't moved. It would have fired
+# pre-uncaging text under a post-uncaging engine and nobody would have known.
+#
+# Bumping this marks every existing animation/cinematography direction STALE, which forces
+# an ordinary re-prepare + re-approve under the new charge. That is the correct semantic —
+# NOT _DEPT_SIGNATURE_VERSION, whose own doctrine reserves a bump for "the signature
+# FORMULA changed" and routes it to legacy revalidation specifically to avoid rerunning a
+# specialist over creative content that never changed. Here the content didn't change but
+# the instructions did, and rerunning the specialist is exactly what we want.
+#
+# BUMP THIS whenever a department's system prompt / craft curriculum / formula gate
+# materially changes what the writer is being asked to do.
+_DEPT_CHARGE_VERSION = 3      # v2 = the no-straitjacket charge (2026-07-25)
+
 
 def _shot_context(pkg, shot, led, scene, episode, stage=None, legacy_version=None):
     """THE SELF-REFERENCE FIX (2026-07-19, found while seeding a test fixture for the
@@ -979,6 +1085,20 @@ def _animation_dependency_context(pkg, shot, led, scene, episode):
         # go completely undetected by this freshness check — the exact "an upstream input
         # changed without staling the approval" bug class this whole dependency-graph system
         # exists to prevent. Added here, never widened further than what's actually read.
+        # THE CHARGE IS AN INPUT. What we ASK the writer to do is as much a dependency of
+        # its output as the material it writes about.
+        #
+        # ⚠ PLACEMENT IS WRONG AND MUST NOT BE "TIDIED" CASUALLY (2026-07-25). This belongs
+        # at the context's TOP level, not nested inside physicalPerformance — it is not a
+        # performance field. It is left here deliberately: S1.SH2's approved direction was
+        # signed with it in exactly this position, and moving it changes the signature,
+        # which silently stales that approval. Removing it did exactly that, live, while
+        # Julian was mid-fire — the third such invalidation in one session, each one
+        # landing as "the prompt is unavailable again" on his screen with no cause he could
+        # see. Relocating it is a real migration: bump _DEPT_SIGNATURE_VERSION in the same
+        # commit so existing approvals route through revalidate_department_signature
+        # instead of silently going stale, and prove it with a test first.
+        "chargeVersion": _DEPT_CHARGE_VERSION,
         "camera": shot.get("camera"), "visualPayoff": shot.get("visualPayoff"),
         "prohibited": shot.get("prohibited") or [],
         "charactersInFrame": shot.get("charactersInFrame") or [],
@@ -1046,6 +1166,18 @@ def _department_skill_hash(stage):
         return None
 
 
+def _engine_path(p):
+    """Resolve a possibly-relative media path against the ENGINE directory, never the
+    caller's cwd. Every relative "media/..." path in this codebase is written relative to
+    engine/, but the Studio server runs from cb-studio/ — so any os.path.isfile/ffprobe on
+    a bare relative path silently answers differently depending on WHICH process asks.
+    That made department sourceHashes cwd-dependent: a direction approved in one process
+    was permanently STALE to the other, on byte-identical data. See _walk_for_signature."""
+    if not p or not isinstance(p, str):
+        return p
+    return p if os.path.isabs(p) else os.path.join(str(HERE), p)
+
+
 def _walk_for_signature(v):
     """Shared recursive walk for both _department_signature (whole-context hash) and
     _department_signature_fields (per-key breakdown, below) — any string value that is a
@@ -1057,8 +1189,23 @@ def _walk_for_signature(v):
         return {k: _walk_for_signature(x) for k, x in v.items()}
     if isinstance(v, list):
         return [_walk_for_signature(x) for x in v]
-    if isinstance(v, str) and os.path.isfile(v):
-        return {"path": v, "contentMd5": _file_md5(v)}
+    if isinstance(v, str):
+        # CWD-INDEPENDENT PATH RESOLUTION (2026-07-25). A bare os.path.isfile() on a
+        # RELATIVE path silently makes this whole signature depend on the calling process's
+        # working directory: engine/ resolves "media/shots/x.mp3" and hashes its bytes;
+        # cb-studio/ (where serve.py actually runs) does not, and hashes the bare string
+        # instead. Same package, same approval, two different sourceHashes — so a direction
+        # approved through one process was PERMANENTLY STALE to the other, with the UI
+        # reporting only "an upstream input changed" and no way to see that nothing had.
+        # Found live, costing an evening: S1.SH2's approved 810-word Animation direction
+        # read as current in-process and refused at the server on the identical data.
+        # Resolving against HERE (the engine dir every relative media/ path in this codebase
+        # is written relative to) makes the signature a property of the DATA, never of who
+        # happens to be asking — and reproduces the engine-cwd hash, so approvals signed
+        # before this fix stay valid instead of being invalidated by it.
+        cand = _engine_path(v)
+        if os.path.isfile(cand):
+            return {"path": v, "contentMd5": _file_md5(cand)}
     return v
 
 
@@ -1800,28 +1947,54 @@ _DRIFT_VOCAB_RE = re.compile(
 
 
 def _check_no_drift_vocab(prompt_text, *, refuse_prefix="REFUSED"):
-    """Raises Refused naming every banned drift word found in a prompt about to ship (or be
-    saved as a working version). The fix is always at the SOURCE — reword the prompt/scene
-    data — never an override flag; there is no legitimate reason to ship these words."""
+    """ADVISORY (demoted from a hard refusal, 2026-07-25, Julian's no-straitjacket ruling).
+
+    These eleven words were banned outright after a real, documented drift campaign
+    (S1.SH2, regressed on S1.SH3) — that evidence stands and this WARNS loudly. But the
+    real protection against a shot drifting off the locked look was never a word blacklist:
+    it is the scene plate reference plus the scene's own authored lighting field, both of
+    which still ship on every prompt. Banning "dusk", "twilight" and "amber glow" outright
+    also bans eleven legitimate pieces of cinematic light vocabulary from a children's
+    adventure that literally contains a storm at sea and a sunrise.
+
+    ⚠ FLAGGED FOR JULIAN: this is the one demotion tonight that reverses a ruling you made
+    from watching real footage. It is a warning now, not a refusal. Every fire is recorded
+    in the verdict corpus, so if drift returns we will see it in your own verdicts and can
+    restore the block WITH the new evidence rather than on memory. Say the word and it goes
+    straight back to a refusal."""
     hits = sorted({m.group(0).lower() for m in _DRIFT_VOCAB_RE.finditer(prompt_text or "")})
     if hits:
-        raise Refused(f"{refuse_prefix}: banned drift vocabulary in the prompt — "
-                      f"{', '.join(hits)}. These words caused the documented sunset/"
-                      f"golden-hour drift (S1.SH2 campaign; regressed live on S1.SH3). "
-                      f"Light comes from the shot's own SET_CONSTRAINTS "
-                      f"(e.g. 'high-key daylight, white sun high, clear blue sky') — "
-                      f"reword at the source; no bypass exists for this check.")
+        print(f"  ⚠ DRIFT-VOCAB WARNING ({refuse_prefix}): {', '.join(hits)} — these words "
+              f"caused the documented sunset/golden-hour drift. The plate and the scene's "
+              f"own lighting field are what actually hold the look; check this shot's light "
+              f"reads as the scene states it before approving.")
+    return hits
+
+def _ending_requires_hold(shot):
+    """Does this shot's approved ending need the clean-frame harvest window?
+
+    THE UNIVERSAL-HOLD RETIREMENT (Julian's directive, 2026-07-25): "Closing holds are
+    required only when approved by the Shot Card." check_formula_structure previously
+    demanded a HOLD tail on EVERY prompt — a literal universal enforced in code, which
+    refused a real action variant purely for finishing in movement.
+
+    DELEGATES to cb_engine.ending_requires_hold rather than re-deciding here: the
+    directive requires one authority per decision, and the ending vocabulary belongs to
+    the schema module. A shot with no decision (legacy) keeps the historical requirement,
+    so nothing loosens by accident."""
+    if not shot:
+        return True
+    try:
+        import cb_engine as _E
+        return _E.ending_requires_hold(shot)
+    except Exception:
+        # never let a schema-side problem turn into a silent bypass of the hold check
+        return True
 
 
-# ── THE FORMULA GATE (Julian's Gold Build ruling, 2026-07-24 — "only the new way is
-# being created and presented to the API"): supersedes THE TEMPO-MAP LAW (2026-07-23),
-# whose enforcement machinery (_TEMPO_SEGMENT_RE/_TEMPO_WORDS_RE/_check_tempo_map) is
-# DELETED here, not kept dormant — the register's own per-shot motion writing carries pace
-# now. The fired prompt must be the house formula: header when dialogue exists, labelled
-# 'Shot N:' segments, 'Cut to.' transitions, dialogue INLINE and VERBATIM (the AnyFilm
-# standard proven on S1.SH3's approved take — dialogue-in-prompt is now the LAW, not a
-# confirmed experiment), a closing HOLD tail, and no duration text. Structure is the only
-# hard skeleton; richness is never trimmed (the No-Straitjacket Law).
+# Inline "SPEAKER: line" dialogue — forbidden under Law 6 whenever @Audio1 carries the
+# voice. Same pattern check_craft_components uses for its own advisory.
+_INLINE_SPEAKER_RE = re.compile(r"^[A-Z][A-Z'’ ]{1,30}: \S", re.M)
 _SHOT_LABEL_RE = re.compile(r"\bShot (\d+):")
 _HOLD_TAIL_RE = re.compile(r"\bHOLD\b[\s\S]{0,200}?about 2 seconds", re.IGNORECASE)
 _HOLD_PHRASE_RE = re.compile(r"about 2 seconds(?: of silence)?", re.IGNORECASE)
@@ -1829,30 +2002,169 @@ _DURATION_TEXT_RE = re.compile(r"\b\d{1,3}(?:\.\d+)?\s*(?:s|sec|secs|second|seco
                                re.IGNORECASE)
 
 
-def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUSED"):
-    """Hard gate: the fired prompt IS the formula, or it does not fire. Also THE STALE-
-    FORMAT DOOR — any pre-Gold prompt shape (the old lean brief, tempo-map bodies,
+# THE STASIS LOAD CHECK (2026-07-25, from an external craft review of S1.SH2's shipped
+# prompt: "technically detailed and continuity-conscious, but dramatically immobilised...
+# the prompt repeatedly tells Seedance to settle, anchor and hold. The model is therefore
+# doing exactly what it is being asked to do.").
+#
+# CALIBRATED ON REAL DATA, NOT AN INVENTED NUMBER — the discipline rule 17 demands. The
+# APPROVED SH1 keeper runs at 1.94 stasis terms per 100 words; the rejected-as-laboured
+# SH2 runs at 3.21, 65% higher, and leans on "two-shot" four times — a word the proven
+# keeper never uses once. So the threshold sits between two measured real prompts, one
+# known good and one known laboured, instead of being guessed.
+#
+# ADVISORY, NEVER A BLOCK. Julian removed the suffocating guardrails deliberately; a
+# machine refusing a prompt on rhythm is exactly how a pipeline produces compliant work
+# nobody wants to watch. This names what it measured and lets the reviewer decide.
+STASIS_TERMS = ("hold", "holds", "holding", "held", "settle", "settles", "settled",
+                "settling", "anchor", "anchors", "anchored", "still", "stillness",
+                "motionless", "steady", "static", "freeze", "frozen", "remains", "remain",
+                "stays", "stay", "stationary", "two-shot", "locked", "unmoving", "fixed")
+STASIS_PER_100_KEEPER = 1.94      # measured: SH1_KEEPER_EXEMPLAR.txt, the approved take
+STASIS_PER_100_ADVISE = 2.60      # between the keeper and the laboured SH2 (3.21)
+_FIXED_RE = r"\b(anchored|welded|rooted|stationary|never leaves)\b"
+# INDEPENDENT travel only. "travels WITH the flower" is the anchor doing its job,
+# not a contradiction — the approved SH1 keeper says exactly that, and the first
+# draft of this check flagged the proven winner because of it. A check that fails
+# the known-good take is worse than none: it teaches everyone to ignore it.
+_TRAVEL_RE = (r"\b(hovers beside|hovering beside|flies beside|flying beside|"
+              r"flies alongside|falls into formation|leaves the flower|"
+              r"crosses the meadow|travels through)\b")
+_TRAVEL_WITH_RE = r"\btravels?\s+(?:physically\s+)?with\b"
+
+
+def check_stasis_load(prompt_text, shot=None, characters=()):
+    """READ-ONLY, zero cost. Returns a list of advisory strings — never blocks.
+
+    Four concrete, checkable things (never "does this feel laboured", which a generous
+    grader waves through every time):
+
+      1. stasis density against the measured keeper baseline;
+      2. one framing noun repeated enough to read as a lock ("two-shot" x4);
+      3. a character told BOTH to stay fixed AND to travel — the spatial contradiction
+         that makes keeping everyone close and slow the model's safest available answer;
+      4. camera leadership conflict: the camera follows one character while another is
+         pinned, with both required to stay readable.
+    """
+    out = []
+    txt = prompt_text or ""
+    words = len(txt.split()) or 1
+    low = txt.lower()
+
+    hits = [w for w in STASIS_TERMS
+            for _ in re.findall(r"\b" + re.escape(w) + r"\b", low)]
+    density = len(hits) / words * 100
+    if density > STASIS_PER_100_ADVISE:
+        common = ", ".join(f"{w} x{n}" for w, n in Counter(hits).most_common(5))
+        out.append(
+            f"STASIS LOAD {density:.2f} settle/hold terms per 100 words — the approved SH1 "
+            f"keeper runs at {STASIS_PER_100_KEEPER}. Heaviest: {common}. Every one of these "
+            f"is an instruction the model will obey; a shot told repeatedly to settle will "
+            f"settle.")
+
+    for term in ("two-shot", "held", "hold", "anchored", "motionless"):
+        n = len(re.findall(r"\b" + re.escape(term) + r"\b", low))
+        if n >= 3:
+            out.append(f"REPEATED SAFEGUARD '{term}' x{n} — restating the same lock does not "
+                       f"make it safer, it makes it the shot's dominant instruction.")
+
+    for name in (characters or ()):
+        if not name:
+            continue
+        sents = [x for x in re.split(r"(?<=[.;])\s+", txt) if name.lower() in x.lower()]
+        fixed = [x for x in sents if re.search(_FIXED_RE, x.lower())]
+        travel = [x for x in sents
+                  if re.search(_TRAVEL_RE, x.lower())
+                  and not re.search(_TRAVEL_WITH_RE, x.lower())]
+        # Must be DIFFERENT sentences, or it is one coherent instruction counted twice.
+        if fixed and travel and any(f is not t for f in fixed for t in travel):
+            out.append(
+                f"GEOGRAPHY CONTRADICTION on {name} — described as fixed in one place and "
+                f"travelling in another. Fixed: \u201c{fixed[0].strip()[:90]}\u2026\u201d "
+                f"Travelling: \u201c{travel[0].strip()[:90]}\u2026\u201d The model resolves "
+                f"a contradiction by choosing the safest reading, which is usually less motion.")
+
+    # A REAL CAST NAME ONLY. The first draft matched "the camera follows at a readable
+    # distance" and reported the leader as "at" — a preposition shown to Julian as a
+    # character. Match against the actual cast, never a bare \\w+.
+    names = [n for n in (characters or ()) if n]
+    led = next((n for n in names if re.search(
+        r"camera (?:follows|tracks|chases)\s+" + re.escape(n.lower()), low)), None)
+    if led:
+        pinned = [n for n in names
+                  if n.lower() != led.lower() and re.search(
+                      _FIXED_RE, " ".join(x for x in re.split(r"(?<=[.;])\s+", txt)
+                                          if n.lower() in x.lower()).lower())]
+        if pinned:
+            out.append(
+                f"CAMERA LEADERSHIP CONFLICT — the camera follows {led} while "
+                f"{', '.join(pinned)} is pinned in place, and both must stay readable. The "
+                f"cheapest way for the model to satisfy that is to keep them close together "
+                f"and reduce travel.")
+    return out
+
+
+def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUSED", shot=None):
+    """THE THREE LAWS THAT STILL BLOCK, AND NOTHING ELSE (Julian's ruling, 2026-07-25 —
+    "remove a lot of the guardrails that suffocate the creative prompting"). What remains
+    a hard refusal is exactly the voice pipeline, which is the one place this studio is
+    measurably ahead of the field and the one place a mistake is unrecoverable:
+
+        1. dialogue present -> the audio-law header opens the prompt
+        2. dialogue present -> @Audio1 declared the sole source of voice and timing
+        3. dialogue words NEVER inline (Law 6)
+
+    Everything else this gate used to refuse — shot labelling, Cut-to bookkeeping, the
+    closing hold, duration prose, an 800-word ceiling — is now RETURNED AS ADVISORY. Those
+    were form and taste, and a machine refusing a prompt on taste is how a pipeline ends up
+    producing compliant work that no one wants to watch. The reviewer sees the advisories;
+    the writer is not caged by them.
+
+    Also THE STALE-FORMAT DOOR — any pre-Gold prompt shape (the old lean brief, tempo-map bodies,
     [STYLE_HEADER] experiments, source-material briefs) fails these checks by
-    construction and can never reach the provider again."""
+    construction and can never reach the provider again.
+
+    THE SH1 KEEPER STANDARD (Julian's ruling, 2026-07-25, proven over eleven live A/B
+    fires — see PROMPT_CRAFT_STANDARD.md's dated section + SH1_KEEPER_EXEMPLAR.txt):
+    dialogue is satisfied by declaring @Audio1 the sole source (words never inline);
+    the HOLD tail accepts the keeper's own 'for two seconds after the audio finishes'
+    wording; the size refusal is the 800-word backstop (spend, not count — the AnyFilm
+    band stays the advisory target in check_craft_components). The legacy inline-
+    verbatim Gold form remains valid for prompts that never reference @Audio1."""
     text = str(prompt_text or "")
-    problems = []
+    problems, advisories = [], []
     has_dialogue = bool(dialogue_lines)
     if has_dialogue and not text.lstrip().startswith("ENGLISH DIALOGUE ONLY"):
         problems.append("dialogue present but the prompt does not open with the exact "
                         "header 'ENGLISH DIALOGUE ONLY, spoken in English.'")
+    # THE NO-STRAITJACKET PASS (Julian's ruling, 2026-07-25 — "remove a lot of the
+    # guardrails that suffocate the creative prompting"). Shot labelling and Cut-to
+    # bookkeeping are FORM, not law: a single unbroken take is a legitimate, sometimes
+    # superior answer, and refusing it because it carries no "Shot 1:" heading forces
+    # every shot in the show into one skeleton. Advisory now — the reviewer sees it, the
+    # writer is not caged by it.
     shots = _SHOT_LABEL_RE.findall(text)
-    if not shots:
-        problems.append("no 'Shot 1:' segment — the formula requires labelled shots")
     n = len(set(shots))
+    if not shots:
+        advisories.append("no 'Shot 1:' labelling — fine for a single continuous take, "
+                          "worth a look if this shot was meant to cut internally")
     if n >= 2 and text.count("Cut to.") < n - 1:
-        problems.append(f"{n} shots but only {text.count('Cut to.')} 'Cut to.' transition(s)")
-    if not _HOLD_TAIL_RE.search(text):
-        problems.append("missing the closing HOLD tail ('HOLD … about 2 seconds') — the "
-                        "clean-frame harvest window")
+        advisories.append(f"{n} labelled shots but {text.count('Cut to.')} 'Cut to.' "
+                          f"transition(s) — check the cuts read as intended")
+    # THE UNIVERSAL-HOLD RETIREMENT (2026-07-25): a hold is demanded only when the SHOT
+    # CARD asks for one. A shot that declares endingBehaviour="continue_in_motion" — an
+    # action beat, a transition — is expected to finish moving and is not refused for it.
+    if _ending_requires_hold(shot) and not _HOLD_TAIL_RE.search(text):
+        advisories.append("missing the closing HOLD tail ('Hold ... for two seconds after "
+                        "the audio finishes' or 'HOLD … about 2 seconds') — the "
+                        "clean-frame harvest window. If this shot is MEANT to finish in "
+                        "movement, declare its real ending on the Shot "
+                        "Card (continue_in_motion / cut_on_action / visual_transition) "
+                        "rather than bypassing this check")
     stripped = _HOLD_PHRASE_RE.sub("", text)
     dur = _DURATION_TEXT_RE.findall(stripped)
     if dur:
-        problems.append(f"duration text in the prompt ({', '.join(sorted(set(d.strip() for d in dur))[:3])}) "
+        advisories.append(f"duration text in the prompt ({', '.join(sorted(set(d.strip() for d in dur))[:3])}) "
                         f"— duration is an API parameter, never prompt text")
     # Verbatim check normalizes smart punctuation (curly vs straight apostrophes/quotes,
     # en/em dashes, ellipsis) — the exactText field and the authored card legitimately
@@ -1863,15 +2175,50 @@ def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
                .replace("\u201c", '"').replace("\u201d", '"')
                .replace("\u2013", "-").replace("\u2014", "-").replace("\u2026", "..."))
         return re.sub(r"\s+", " ", s)
+    # THE SH1 KEEPER STANDARD (Julian's ruling, 2026-07-25 — "use this as the standard
+    # for all our prompts"): dialogue words NEVER appear in the prompt; @Audio1 is
+    # declared the sole source of dialogue, wording, voice, performance and timing, and
+    # the performance is timed by naming the audio's own spoken sections. A prompt that
+    # references @Audio1 satisfies the dialogue law with ZERO inline lines. The LEGACY
+    # inline-verbatim form (the S1.SH3-era Gold formula) remains valid for prompts that
+    # don't reference @Audio1 — those must still carry every locked line word for word.
     norm = _norm_punct(text)
-    for d in dialogue_lines or []:
-        get = d.get if isinstance(d, dict) else (lambda k, _d=d: getattr(_d, k, None))
-        exact = _norm_punct(str(get("exactText") or "").strip())
-        if exact and exact not in norm:
-            problems.append(f"dialogue line missing verbatim — {get('speaker')}: "
-                            f"\"{exact[:60]}\"")
+    if has_dialogue and "@Audio1" not in text:
+        problems.append("dialogue exists but the prompt never declares @Audio1 as the sole "
+                        "source of dialogue, wording, voice, performance and timing — THE "
+                        "SH1 KEEPER STANDARD (and Law 5: the voice lives in the render, "
+                        "never a native-voice fallback). The retired inline-verbatim form "
+                        "is no longer accepted")
+    if has_dialogue and _INLINE_SPEAKER_RE.search(text):
+        problems.append("inline SPEAKER: dialogue in the prompt — under the keeper standard "
+                        "the spoken words never appear; @Audio1 carries them and the prompt "
+                        "times the performance by naming the audio's own spoken sections")
+    # THE SIZE LAW, AS SPEND (Julian's rulings, 2026-07-25 — first "look at the other
+    # prompts from AnyFilm" (420-word hard cap), then THE SH1 KEEPER STANDARD the same
+    # day: the proven keeper prompt is 722 words and every one buys physics — leanness is
+    # zero WASTED words, not a number. The AnyFilm band (~250-350, delivered average 244)
+    # stays the TARGET, surfaced as an advisory flag in check_craft_components; the hard
+    # refusal moves to 800 as the real backstop against genuine runaway scaffolding.
+    # THE SIZE CEILING IS RETIRED (2026-07-25). Every numeric ceiling this project has
+    # ever set was later found to be cutting the wrong thing — most recently a physics
+    # description truncated to its flatter half to fit a budget. The proven keeper is 722
+    # words because every one buys physics; a hypothetical 900-word prompt that also spends
+    # every word on physics is not worse, and no gate can tell the difference by counting.
+    # Waste is surfaced as an advisory in check_craft_components and judged by a human.
     if problems:
         raise Refused(f"{refuse_prefix} — THE FORMULA GATE: " + "; ".join(problems))
+    # THE STASIS LOAD (2026-07-25). Advisory, like everything else here — but this is
+    # the one that catches a prompt that is technically perfect and dramatically
+    # immobilised, the exact failure an external craft review found in S1.SH2.
+    cast = []
+    if shot:
+        # charactersInFrame is a plain list of names in the real package; tolerate the
+        # dict shape too rather than assuming either (checked live before writing this).
+        cast = [c if isinstance(c, str) else (c.get("name") if isinstance(c, dict) else None)
+                for c in (shot.get("charactersInFrame") or shot.get("characters") or [])]
+        cast = [c for c in cast if c]
+    advisories += check_stasis_load(prompt_text, shot=shot, characters=cast)
+    return advisories
 
 
 def check_craft_components(prompt_text):
@@ -1887,9 +2234,31 @@ def check_craft_components(prompt_text):
     if not re.search(r"\b(light|sun|sky|shadow|rim|catchlight|glow|backlit|backlight|grey)\b",
                      text, re.I):
         flags.append("no light state written")
-    if not re.search(r"\b(static|locked|push|crane|tracking|handheld|orbit|pan|drift|follow)\b",
+    if not re.search(r"\b(static|locked|push(?:es|ing)?|crane|tracking|handheld|orbit(?:s|ing)?"
+                     r"|pan|drift(?:s|ing)?|follow(?:s|ing)?|bank(?:s|ing)?|swings?|races?)\b",
                      text, re.I):
         flags.append("no camera movement named")
+    # THE SH1 KEEPER STANDARD advisories (2026-07-25) — never block, only inform:
+    wc = len(text.split())
+    if wc > 420:
+        # THE ESCAPE CLAUSE IS GONE (2026-07-25). This used to end "...fine for a
+        # multi-beat physical chain ONLY if every word buys physics" — a test no
+        # prompt has ever failed, because any sentence can be argued to buy physics.
+        # It licensed 810 words of continuity safeguards on a shot an external craft
+        # review then called dramatically immobilised. State the measured gap instead
+        # and name what actually fills it.
+        flags.append(f"{wc} words — AnyFilm DELIVERS 244 per clip; our own run "
+                     f"716-810. Measured, that gap is not extra physics: it is "
+                     f"continuity safeguards, restated framing locks and repeated "
+                     f"stillness language. Ask which sentences were added out of "
+                     f"worry, and cut those.")
+    if "@Audio1" in text and re.search(r"^[A-Z][A-Z'’ ]{1,30}: \S", text, re.M):
+        flags.append("inline SPEAKER: dialogue alongside @Audio1 — the keeper standard "
+                     "is audio-only (dialogue words never in the prompt)")
+    if re.search(r"\b\d{1,3}[-–]degree\b|\bscreen direction\b", text, re.I):
+        flags.append("abstract geometry language (degrees / screen direction) — the "
+                     "model acts on physical cause-and-consequence, never a compass "
+                     "(v4's confirmed failure mode)")
     return flags
 
 
@@ -2071,7 +2440,7 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             # THE FORMULA GATE (Gold Build, 2026-07-24): the register writer's card must
             # BE the formula — dialogue inline verbatim, labelled shots, the HOLD tail.
             # Replaces the retired leak-check + tempo-map pair on this path.
-            check_formula_structure(result.providerPrompt, shot.get("dialogueLines") or [],
+            check_formula_structure(result.providerPrompt, shot.get("dialogueLines") or [], shot=shot,
                                     refuse_prefix="REFUSED — Animation Director's own candidate; "
                                                   "no candidate saved")
             for _flag in check_craft_components(result.providerPrompt):
@@ -2193,7 +2562,7 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
             raise Refused(f"REFUSED — {stage}'s exact provider text cannot be blank")
         if stage == "animation":
             shot = _shot(pkg, shot_id)
-            check_formula_structure(value, shot.get("dialogueLines") or [],
+            check_formula_structure(value, shot.get("dialogueLines") or [], shot=shot,
                                     refuse_prefix="REFUSED — edited Animation candidate")
             _check_no_drift_vocab(value, refuse_prefix="REFUSED — edited Animation candidate")
         output["providerPrompt"] = value
@@ -2799,6 +3168,25 @@ def approve_voice(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print
     return led["voiceApproval"]
 
 
+def unapprove_voice(scene, shot_id, episode="Ep1", note="", reviewed_by="Julian", log=print):
+    """UNDO A VOICE APPROVAL (2026-07-25, same ruling as unapprove_keyframe) — clears the
+    approval only; the take itself stays on disk exactly as it was, back to awaiting your
+    ear (re-approve, reject with a note, or regenerate)."""
+    pkg, path = load_pkg(scene, episode)
+    led = _ledger(pkg, shot_id)
+    appr = led.get("voiceApproval")
+    if not appr or not appr.get("approved"):
+        raise Refused(f"REFUSED — {shot_id} has no voice approval to undo")
+    led.setdefault("voiceHistory", []).append({**appr, "outcome": "unapproved",
+                                                "unapprovedAt": _now(), "reviewedBy": reviewed_by,
+                                                "unapprovedNote": (note or "").strip() or None})
+    led["voiceApproval"] = None
+    _save(pkg, path)
+    log(f"VOICE UN-APPROVED — {shot_id} by {reviewed_by}; the take stays on disk, back to "
+        f"AWAITING your decision")
+    return True
+
+
 def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian", log=print):
     """Archives the current take (moved, never deleted — the same discipline every other
     stage's rejection already follows) and clears voPath/voiceApproval so the shot can be
@@ -2923,7 +3311,10 @@ def _slate(shot, episode):
 
 
 def _audio_dur(p):
-    return cb_post._dur(p) or 0.0
+    # _engine_path, not the bare path: measuring 0.0 from cb-studio/ and the real duration
+    # from engine/ put a different measuredAudioDurationSec into the department signature
+    # depending on which process asked — the second half of the same cwd bug.
+    return cb_post._dur(_engine_path(p)) or 0.0
 
 
 def _hold(img, dur, audio, out):
@@ -3160,6 +3551,7 @@ def keyframe_shot(scene, shot_id, episode="Ep1", spend_token=None, dry_run=False
     untouched until this new candidate is itself approved."""
     pkg, path = load_pkg(scene, episode)
     _require_valid(pkg)
+    _require_own_clip(pkg, shot_id)     # a member card is not its own clip
     _require_current_lineage(pkg, scene, episode)           # THE STATE-INTEGRITY CHECKPOINT
     # (2026-07-19 fix — confirmed via test_e2e_fire_route.py that this was defined and
     # extensively tested but had ZERO real call sites anywhere in this file; a package built
@@ -3419,6 +3811,35 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     return cand["path"]
 
 
+def unapprove_keyframe(scene, shot_id, episode="Ep1", note="", reviewed_by="Julian", log=print):
+    """UNDO A KEYFRAME APPROVAL (2026-07-25, Julian: "i need to be able to unapprove each
+    section") — the approved frame moves BACK to being the pending CANDIDATE (awaiting a
+    fresh decision: re-approve, reject with a note, or replace). Nothing is deleted or
+    archived by this call; the same reversible-action semantics as unapprove_scenelook/
+    unapprove_department."""
+    pkg, path = load_pkg(scene, episode)
+    led = _ledger(pkg, shot_id)
+    appr = led.get("keyframeApproval")
+    if not appr or not appr.get("approved"):
+        raise Refused(f"REFUSED — {shot_id} has no keyframe approval to undo")
+    if led.get("keyframeCandidate"):
+        raise Refused(f"REFUSED — {shot_id} already has a keyframe candidate awaiting a "
+                      f"decision; decide that first, then un-approve if still needed")
+    led.setdefault("keyframeHistory", []).append({**appr, "outcome": "unapproved",
+                                                    "unapprovedAt": _now(),
+                                                    "reviewedBy": reviewed_by,
+                                                    "unapprovedNote": (note or "").strip() or None})
+    led["keyframeCandidate"] = {"path": appr["path"], "source": appr.get("source", "generated"),
+                                 "inputSignature": appr.get("inputSignature"),
+                                 "generatedAt": appr.get("at")}
+    led["keyframeApproval"] = None
+    led["keyframePath"] = None
+    _save(pkg, path)
+    log(f"KEYFRAME UN-APPROVED — {shot_id} by {reviewed_by}; the frame is back to AWAITING "
+        f"your decision (re-approve, reject, or regenerate); nothing was deleted")
+    return True
+
+
 def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian", log=print):
     """Rejection ARCHIVES the CANDIDATE only (moved, never copied) — never a previously-
     approved keyframe, which stays live, approved and current exactly as it was. The next
@@ -3460,7 +3881,27 @@ def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Juli
 # from candidates, not a "perfect prompt".
 DEFAULT_CANDIDATES = 3
 MAX_CANDIDATES = 4
-MAX_BATCH_ATTEMPTS = 2      # the failure ladder's hard stop — never an endless patch loop
+# THE ITERATION BUDGET (Julian's ruling, 2026-07-25 — "I just want it to be locked down,
+# I don't care about cost"). Raised from 2 after benchmarking the AnyFilm pipeline's own
+# honest numbers: 2-3 generations per approved clip as BASELINE, 5-7 for complex physics
+# (underwater, storms, multi-character coordination), ~108 video generations for a
+# 44-clip episode. Our previous ceiling of 2 was stricter than the practice we were
+# measuring ourselves against — it was calibrated for cost control at a moment when a
+# fire was expensive and learning was cheap. That trade is now reversed: learning is the
+# bottleneck. 7 still ends the loop; it is not an endless patch loop, just an honest one.
+MAX_BATCH_ATTEMPTS = 7
+
+# THE FIX LADDER (same ruling, from AnyFilm's own measured distribution of what actually
+# fixes a rejected clip):
+#     30%  re-roll the IDENTICAL prompt      — ~60% success; generation variance alone
+#     45%  edit ONE element                  — a named continuity/eyeline/lighting fix
+#     20%  rewrite the clip                  — structural: blocking, pacing, tone
+#      5%  split the clip                    — too many story beats in one generation
+# The first tier is the one we never had. Treating every failure as a diagnosis problem
+# means roughly a third of our re-fires were solving nothing — the same prompt would have
+# landed on the next roll. `reject_shot(category=...)` records which tier was used so the
+# corpus can tell us whether that 30/45/20/5 split holds for THIS show.
+FIX_TIERS = ("reroll_identical", "edit_one_element", "rewrite_clip", "split_clip")
 
 # THE HANDLE DOCTRINE, RESTORED AT SHOT LEVEL (2026-07-19, Julian: "we want 15 second clips
 # with 2 seconds at the end to have for editing"). The old beat-level pipeline (archived,
@@ -3516,7 +3957,12 @@ REVIEW_CRITERIA = ["characterIdentity", "relativeScale", "startingGeography",
 # cb-studio/app.html's REJECT_CATS AND cb-studio/serve.py's REJECT_CATEGORIES, both of
 # which only cross-referenced each other before this — this copy, under a different name,
 # was never accounted for by either comment.
-FAILURE_CATEGORIES = ["identity", "geography", "action-timing", "instruction-ignored", "other"]
+# "variance" added 2026-07-25: the take is not WRONG, the roll was unlucky (timing a
+# beat early, an expression a shade off, placement inside tolerance but not ideal). It
+# routes to the reroll_identical fix tier — the same prompt again, which lands ~60% of
+# the time. Every other category names a real defect that needs a real change.
+FAILURE_CATEGORIES = ["variance", "identity", "geography", "action-timing",
+                      "instruction-ignored", "other"]
 
 DECISION_LADDER = """THE FAILURE DECISION LADDER (after reviewing a candidate set):
   1. One candidate succeeds            -> approve it (approve <scene> <shotId> <N>)
@@ -3936,15 +4382,34 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
     # confirmed experiment — the 2026-07-23 dialogueInPromptConfirmed bypass is retired
     # (parameter kept for caller compatibility, ignored). Every working prompt must BE the
     # formula, with every dialogue line inline and verbatim.
-    check_formula_structure(text, shot.get("dialogueLines") or [],
-                            refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
+    # THE FORMULA-EXPERIMENT DOOR (2026-07-25, Julian's directed test — "here is a prompt i
+    # have put togehter run it as is... lets do a couple of tests"): the Gold Build retired
+    # the old dialogueInPromptConfirmed bypass, but the DIRECTOR'S OWN hand-authored
+    # experiment is the one lawful exception the confirmation pattern has always existed
+    # for (keyframePromptOverrideConfirmed / voiceScriptConfirmed). formulaExperimentConfirmed
+    # downgrades FORMULA failures to banner-logged, ledger-recorded ACCEPTED RISKS — never
+    # silent, never a default; the drift-vocabulary ban below stays a hard refusal always.
+    formula_experiment = bool(dialogueInPromptConfirmed)
+    experiment_risks = []
+    try:
+        check_formula_structure(text, shot.get("dialogueLines") or [], shot=shot,
+                                refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
+    except Refused as e:
+        if not formula_experiment:
+            raise
+        experiment_risks.append(str(e))
+        log(f"⚠⚠⚠ FORMULA EXPERIMENT ACTIVE — {shot_id}'s working prompt deviates from the "
+            f"formula, per the director-confirmed experiment ({reviewed_by}). Accepted risks:")
+        for r in experiment_risks:
+            log(f"  | {r}")
     for _flag in check_craft_components(text):
         log(f"  CRAFT FLAG (advisory) — {_flag}")
     # THE DRIFT-VOCABULARY BAN (2026-07-24) — refused at save, so a bad working prompt
     # never even sits on the ledger waiting to fire.
     _check_no_drift_vocab(text, refuse_prefix=f"REFUSED — {shot_id}'s working Seedance prompt")
     led["workingSeedancePrompt"] = {"text": text, "savedAt": _now(), "savedBy": reviewed_by,
-                                     "dialogueInPromptConfirmed": bool(dialogueInPromptConfirmed)}
+                                     "dialogueInPromptConfirmed": bool(dialogueInPromptConfirmed),
+                                     "formulaExperimentRisks": experiment_risks or None}
     _save(pkg, path)
     log(f"ANIMATION WORKING PROMPT SAVED — {shot_id} ({len(text.split())} words, no "
         f"animation generated)")
@@ -4061,7 +4526,7 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         # provision for timing not dialog") so a legitimate lip-sync cadence reference is
         # never mistaken for a Law 6 violation here either.
         try:
-            check_formula_structure(resolved_prompt, shot.get("dialogueLines") or [],
+            check_formula_structure(resolved_prompt, shot.get("dialogueLines") or [], shot=shot,
                                     refuse_prefix="FORMULA")
         except Refused as e:
             blockers.append(str(e))
@@ -4088,6 +4553,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     (6) every candidate and every failure is persisted, nothing deleted."""
     pkg, path = load_pkg(scene, episode)
     _require_valid(pkg)                                     # the stored gate, cheapest first
+    _require_own_clip(pkg, shot_id)     # a member card is not its own clip
     _require_current_lineage(pkg, scene, episode)           # THE STATE-INTEGRITY CHECKPOINT —
     # see keyframe_shot's identical fix (2026-07-19) for why this call was missing entirely.
     _require_confirmed_billing("fal")                       # protection 5 — block, not warn
@@ -4150,8 +4616,26 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     # resolved prompt must BE the house formula, unconditionally. Any pre-Gold shape (old
     # lean brief, tempo-map body, [STYLE_HEADER] experiment, source-material brief) fails
     # here and can never be presented to the API.
-    check_formula_structure(shot["seedancePrompt"], shot.get("dialogueLines") or [],
-                            refuse_prefix=f"REFUSED — {shot_id}'s resolved prompt")
+    # (2026-07-25) THE FORMULA-EXPERIMENT DOOR, HONOURED AT FIRE: a working prompt saved
+    # with the director's explicit on-the-record confirmation (save_seedance_working's
+    # dialogueInPromptConfirmed + recorded formulaExperimentRisks) is RE-ANNOUNCED here,
+    # never silently re-blocked — exactly the contract the comment above already states
+    # for the original 2026-07-23 experiment. Only the exact saved text qualifies; any
+    # other deviation still refuses hard.
+    _wk = led.get("workingSeedancePrompt") or {}
+    _confirmed_exp = (bool(_wk.get("dialogueInPromptConfirmed"))
+                      and (_wk.get("text") or "").strip() == str(shot["seedancePrompt"]).strip())
+    try:
+        check_formula_structure(shot["seedancePrompt"], shot.get("dialogueLines") or [], shot=shot,
+                                refuse_prefix=f"REFUSED — {shot_id}'s resolved prompt")
+    except Refused as _fe:
+        if not _confirmed_exp:
+            raise
+        log(f"⚠⚠⚠ FORMULA EXPERIMENT ACTIVE — {shot_id} fires with a director-confirmed "
+            f"off-formula prompt (saved by {_wk.get('savedBy','?')} on {_wk.get('savedAt','?')}). "
+            f"Accepted risks re-announced:")
+        for _line in str(_fe).split("; "):
+            log(f"  | {_line}")
 
     # THE HANDLE DOCTRINE, RESTORED AT SHOT LEVEL (2026-07-19, Julian: "we want 15 second
     # clips with 2 seconds at the end to have for editing" — raised after S1.SH1's real V3
@@ -4343,6 +4827,25 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                 "disclosure": batch["disclosure"],
                 "lastBatchBinding": batch["bindingHash"], "firedAt": _now()})
     _save(pkg, path)
+
+    # THE VERDICT CORPUS (2026-07-25): every real fire is recorded whole — prompt + hash,
+    # reference and audio hashes, provider/model/resolution, the formula that was in the
+    # writer's mind, cost and the clips. Julian's verdict lands against it at approve/
+    # reject. This pairing is the asset the SH1 formula was found from; nothing survived
+    # to make the next one cheaper until now. Never raises — evidence-keeping must not be
+    # able to fail a fire it is only observing.
+    cb_corpus.record_fire(
+        episode=episode, scene=scene, shot_id=shot_id, prompt=prompt,
+        refs=[{"role": (shot.get("referenceSlots") or {}).get(pth) or f"slot{i}",
+               "path": pth} for i, pth in enumerate(imgs, 1)],
+        audio_path=led.get("voPath"),
+        provider=(batch.get("disclosure") or {}).get("provider"),
+        model=(batch.get("disclosure") or {}).get("model"),
+        resolution=resolution, candidates=len(paths),
+        expected_cost=(batch.get("disclosure") or {}).get("maxBatchCost"),
+        clips=paths,
+        formula=_approved_formula_meta(pkg, scene, shot_id, episode))
+
     log(f"FIRE — {shot_id}: {len(paths)} candidate(s) rendered · STOPPED for Julian's "
         f"review. Approve ONE (approve {scene} {shot_id} <n>) or reject the batch. "
         f"No candidate is ever auto-approved.")
@@ -4389,6 +4892,34 @@ def next_shot(scene, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
 
 
 # ── Gate 8 — Julian selects ONE candidate; approval harvests the relay anchor ───────────
+def unapprove_shot(scene, shot_id, episode="Ep1", note="", reviewed_by="Julian", log=print):
+    """UNDO AN ANIMATION-TAKE APPROVAL (2026-07-25, same ruling) — the approved take goes
+    BACK to being a pending candidate batch of one (re-approve it, or reject the batch and
+    re-fire). The take file and its harvested final frame stay on disk untouched; nothing
+    is deleted. NOTE: any LATER shot already fired off this take's harvested frame is not
+    rewound by this call — un-approve those separately if their anchor must change."""
+    pkg, path = load_pkg(scene, episode)
+    led = _ledger(pkg, shot_id)
+    appr = led.get("approval")
+    if led.get("status") != "approved" or not appr or not appr.get("approved"):
+        raise Refused(f"REFUSED — {shot_id} has no approved animation take to undo")
+    take = led.get("approvedTake")
+    if not take or not os.path.exists(take):
+        raise Refused(f"REFUSED — {shot_id}'s approved take file is missing on disk; "
+                      f"cannot return it to a reviewable candidate state")
+    led.setdefault("approvalHistory", []).append({**appr, "outcome": "unapproved",
+                                                   "unapprovedAt": _now(),
+                                                   "reviewedBy": reviewed_by,
+                                                   "unapprovedNote": (note or "").strip() or None,
+                                                   "take": take})
+    led.update({"status": "candidates-pending", "candidatePaths": [take],
+                "approvedTake": None, "approvedCandidate": None, "approval": None})
+    _save(pkg, path)
+    log(f"ANIMATION UN-APPROVED — {shot_id} by {reviewed_by}; the take is back as candidate "
+        f"1 of 1 AWAITING your decision (approve 1, or reject the batch); nothing deleted")
+    return True
+
+
 def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian", log=print):
     """Select ONE candidate from the pending batch. The unselected candidates are archived
     (never deleted); the selected take's literal final frame is harvested as the next
@@ -4404,6 +4935,8 @@ def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian
     selected = cands[candidate - 1]
 
     # archive the unselected candidates + their review sheets (never deleted)
+    cb_corpus.record_verdict(shot_id=shot_id, kept=True, episode=episode, scene=scene,
+                             verdict=f"approved candidate {candidate}", reviewed_by=reviewed_by)
     arch = HERE / "media" / "archive" / "shots_candidates" / led["batchId"]
     arch.mkdir(parents=True, exist_ok=True)
     for i, c in enumerate(cands, 1):
@@ -4448,15 +4981,36 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
         raise Refused(f"REFUSED — {shot_id} has no candidate batch pending review")
     if category not in FAILURE_CATEGORIES:
         raise Refused(f"REFUSED — category must be one of {FAILURE_CATEGORIES}")
+    # Second-resolution timestamps collide when two rejections land in the same second —
+    # the second would archive INTO the first's directory and its REJECTED.json would
+    # overwrite the first correction, losing a real verdict. Same bug class already fixed
+    # for cb_beats.record_approval; closed here too now that the iteration budget makes
+    # rapid successive rejections normal rather than rare.
     ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-    arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_{ts}"
+    base = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_{ts}"
+    arch, n = base, 1
+    while arch.exists():
+        arch = base.with_name(f"{base.name}_{n}")
+        n += 1
     arch.mkdir(parents=True, exist_ok=True)
     for c in led["candidatePaths"]:
         for ext in ("", ".review.json"):
             if os.path.exists(c + ext):
                 shutil.move(c + ext, arch / os.path.basename(c + ext))
+    # A rejection is worth more to the corpus than an approval — it names what went wrong
+    # in Julian's own words, against the exact prompt that produced it.
+    cb_corpus.record_verdict(shot_id=shot_id, kept=False, episode=episode, scene=scene,
+                             verdict=correction, category=category, reviewed_by=reviewed_by)
+    # WHICH FIX TIER THIS REJECTION CALLS FOR (2026-07-25). Recorded, not enforced —
+    # the corpus needs it to tell us whether AnyFilm's measured 30/45/20/5 distribution
+    # holds for THIS show. `variance` is the tier we never had: nothing is wrong with the
+    # prompt, the roll was unlucky, and the correct next action is the identical prompt
+    # again. Treating that as a diagnosis problem is how a third of re-fires solve nothing.
+    tier = ("reroll_identical" if category == "variance" else
+            "edit_one_element" if category in ("identity", "geography") else
+            "rewrite_clip" if category == "action-timing" else "edit_one_element")
     rejection = {"shotId": shot_id, "batchId": led.get("batchId"),
-                 "correction": correction, "category": category,
+                 "correction": correction, "category": category, "fixTier": tier,
                  "reviewed_by": reviewed_by, "at": _now()}
     with open(arch / "REJECTED.json", "w") as f:
         json.dump(rejection, f, indent=1)
@@ -4502,7 +5056,10 @@ def _shot_rejection_archives(episode, shot_id):
     if not root.exists():
         return []
     prefix = f"{episode}_{shot_id}_"
-    ts_re = re.compile(r"^\d{8}T\d{6}$")
+    # optional _N disambiguator: two rejections in the same second get _1, _2 ...
+    # (added with the archive-collision fix, 2026-07-25 — without it this scan
+    # silently skipped every collided archive and under-reported real evidence)
+    ts_re = re.compile(r"^\d{8}T\d{6}(?:_\d+)?$")
     found = []
     for d in sorted(root.iterdir()):
         if not d.is_dir() or not d.name.startswith(prefix):
@@ -4878,6 +5435,15 @@ def _current_redesign_components(pkg, shot, scene, episode="Ep1"):
             pkg, scene, "animation", shot["shotId"], episode,
             action_label=f"{shot['shotId']}'s redesign-signature check")
         anim_prompt_sha = _sha256_text(anim_output.get("providerPrompt"))
+        # THE WORKING-OVERRIDE SIGNATURE FIX (2026-07-25, found live blocking Julian's own
+        # hand-authored redesign test): the historical side hashes the sealed envelope's
+        # ACTUAL fired prompt, so the current side must hash what would ACTUALLY fire now —
+        # a saved working override replaces the approved output at fire time, and a director
+        # rewriting the whole prompt by hand is the clearest possible "genuinely changed
+        # input." Hashing only the approved department output made that invisible.
+        working = led.get("workingSeedancePrompt")
+        if working and (working.get("text") or "").strip():
+            anim_prompt_sha = _sha256_text(working["text"].strip())
     except Refused as e:
         missing.append(f"Animation Direction is not currently approved: {e}")
 
@@ -5692,6 +6258,8 @@ if __name__ == "__main__":
             approve_scenelook(pos[0], ep(1))
         elif cmd == "reject-scenelook":
             reject_scenelook(pos[0], pos[1], episode=ep(2))
+        elif cmd == "unapprove-scenelook":
+            unapprove_scenelook(pos[0], ep(1))
         elif cmd == "scenelook-library":
             print(json.dumps(scenelook_reference_library(pos[0], ep(1)), indent=1))
         elif cmd == "select-scenelook-upload":
@@ -5701,6 +6269,8 @@ if __name__ == "__main__":
         elif cmd == "keyframe":
             keyframe_shot(pos[0], pos[1], ep(2), spend_token=flags["spend_token"],
                           dry_run=flags["dry_run"])
+        elif cmd == "unapprove-keyframe":
+            unapprove_keyframe(pos[0], pos[1], ep(2))
         elif cmd == "approve-keyframe":
             approve_keyframe(pos[0], pos[1], ep(2))
         elif cmd == "reject-keyframe":
@@ -5723,6 +6293,8 @@ if __name__ == "__main__":
             restore_previous_voice_take(pos[0], pos[1], episode=ep(2))
         elif cmd == "regen-voice":
             regen_voice_shot(pos[0], pos[1], episode=ep(2))
+        elif cmd == "unapprove-voice":
+            unapprove_voice(pos[0], pos[1], ep(2))
         elif cmd == "approve-voice":
             approve_voice(pos[0], pos[1], ep(2))
         elif cmd == "reject-voice":
@@ -5748,6 +6320,8 @@ if __name__ == "__main__":
             fire_shot(pos[0], pos[1], ep(2), candidates=flags["candidates"],
                        spend_token=flags["spend_token"], dry_run=flags["dry_run"],
                        resolution=flags["resolution"])
+        elif cmd == "unapprove-shot":
+            unapprove_shot(pos[0], pos[1], ep(2))
         elif cmd == "approve":
             approve_shot(pos[0], pos[1], int(pos[2]) if len(pos) > 2 else 1, ep(3))
         elif cmd == "reject":

@@ -16,6 +16,7 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
+import cb_formulas
 import cb_llm
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -264,10 +265,11 @@ def prepare_look(context, *, log=print):
                 "Write the exact image-provider prompt for this scene's environment-only "
                 "Scene Look plate: the place itself — light, palette, material, atmosphere. "
                 "No character, no shot composition. Keep it plain and concrete. The plate "
-                "must BE the scene canon's own stated environment (its look field) — for a "
-                "'rainforest interior at bee scale' that means INSIDE the flower corridor, "
-                "never a pulled-back open landscape.\n"
-                "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved warm-golden vocabulary drags generations to sunset; morning is written as bright/high/white-gold sun, never as warmth adjectives.\n"),
+                "must BE the scene canon's own stated environment (its look field), at the "
+                "scale and vantage that field states — never a re-imagined alternative to it. "
+                "When the scene has a LOCKED library plate (Julian's own lock), that image is "
+                "the visual law and this prompt only ever describes THAT world.\n"
+                "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved time-of-day mood words drag generations away from the locked look; state the light EXACTLY as the scene's own authored lighting field words it (e.g. Scene 1's locked 'low sun just above the hills, long gold light raking the flower tops') and let the plate reference carry the rest — never restate a competing sun position or colour the plate does not show.\n"),
         "APPROVED SCENE CONTEXT:\n" + _j(context) +
         "\n\nReturn the provider prompt, and one plain sentence on whether this place "
         "reads true to the scene.",
@@ -291,13 +293,24 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
                 "providerPrompt as one complete opening-frame prompt: shot size + focal "
                 "length first, the subjects frozen at the exact story instant (scale "
                 "relationship explicit), foreground/midground/background depth staging, "
-                "then light, then the emotional read of the frame. Rich and cinematic — "
-                "never a checklist.\n"
-                "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved warm-golden vocabulary drags generations to sunset; morning is written as bright/high/white-gold sun, never as warmth adjectives.\n"
+                "then light, then the emotional read of the frame.\n"
+                "THE IDENTITY LAW (Julian's ruling, 2026-07-25 — the proven reference-first "
+                "style that produced our best keyframes; reinstated after a described-identity "
+                "prompt drifted both characters off-model): NEVER describe a character's "
+                "appearance — no body shape, colours, stripes, glasses, cheeks, wings, "
+                "features, ever. A name is a label welded to its reference slot, nothing "
+                "more. For each character write exactly one identity clause of this shape: "
+                "'{Name} is the character from @图N — match the reference 100%, every "
+                "feature and accessory exactly as shown' — then spend your words ONLY on "
+                "pose, position, action-instant, staging, depth and light. The reference "
+                "images carry identity; your text carries the moment. KEEP IT LEAN: the "
+                "whole prompt under ~170 words — every word describing what a reference "
+                "already shows is a word pulling the render away from that reference.\n"
+                "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved time-of-day mood words drag generations away from the locked look; state the light EXACTLY as the scene's own authored lighting field words it (e.g. Scene 1's locked 'low sun just above the hills, long gold light raking the flower tops') and let the plate reference carry the rest — never restate a competing sun position or colour the plate does not show.\n"
                 "Never write any duration or motion-over-time; this is one frozen "
                 "instant. Preserve exact character identity from the references.\n\n"
                 "===== THE HOUSE CRAFT CURRICULUM (verbatim) =====\n" +
-                _craft_curriculum()),
+                _craft_curriculum(None)[0]),
         "SOURCE MATERIAL — the storyboard-approved facts for this opening frame:\n" +
         compiled_brief +
         "\n\nSHOT AND ORDERED ATTACHMENTS:\n" + _j(context) +
@@ -373,19 +386,37 @@ def prepare_voice(context, locked_lines, *, log=print):
 _CRAFT_DIR = pathlib.Path(__file__).resolve().parent.parent / "shows" / "crystal-bears" / "creative"
 
 
-def _craft_curriculum():
+def _craft_curriculum(primary_form=None, secondary_colour=None):
     """Loads the house craft curriculum VERBATIM (Julian's Gold Build ruling, 2026-07-24:
     everything gold from the AnyFilm transfer goes in whole — "dont kill them with
     straight jackets"; never summarized, never paraphrased). Read fresh on every call so
-    an edit to either doc reaches the very next authored card."""
+    an edit to any doc reaches the very next authored card.
+
+    THE EXEMPLAR IS PART OF THE CURRICULUM (Julian's ruling, 2026-07-25 — "ensure that the
+    direction and prompts are fired from the right place so we get the level of quality and
+    consistency of the lean prompt we had"): SH1_KEEPER_EXEMPLAR.txt is the REAL, verbatim
+    prompt that produced the show's first keeper take, proven over eleven live A/B fires.
+    Until this ruling the writer was given the LAWS but never the WINNER — rules without a
+    worked example, which is exactly how output drifts below the standard it complies with.
+    A missing exemplar file degrades gracefully (laws still load) rather than breaking every
+    authoring call — but it is loaded whenever present, and it is present."""
     parts = []
     for name in ("PROMPT_CRAFT_STANDARD.md", "PROMPT_CRAFT_SKILL.md"):
         p = _CRAFT_DIR / name
         parts.append(f"===== {name} =====\n" + p.read_text(encoding="utf-8"))
-    return "\n\n".join(parts)
+    # THE FORMULA LIBRARY (Julian's ruling, 2026-07-25, superseding the unconditional
+    # SH1 attachment): the writer gets the proven formula FOR THE FORM IT IS WRITING, or
+    # an honest "no formula exists yet, discover one" — never a shape proven on different
+    # material. SH1 is a physical-comedy/action-chain formula; attaching it to a quiet
+    # interior beat teaches the writer to fill stillness with impacts, which is precisely
+    # the "clunky, scripted, fake" failure this library exists to end.
+    block, meta = cb_formulas.formula_block(primary_form, secondary_colour)
+    parts.append(block)
+    return "\n\n".join(parts), meta
 
 
-def prepare_animation(context, images, compiled_brief, *, log=print):
+def prepare_animation(context, images, compiled_brief, *, primary_form=None,
+                      secondary_colour=None, log=print):
     """THE REGISTER WRITER (Julian's Gold Build ruling, 2026-07-24 — "we are going to be
     brave... build it out properly... only the new way is being created and presented to
     the API", and same day: "the magic is in the prompting, that has to be that way"):
@@ -394,47 +425,145 @@ def prepare_animation(context, images, compiled_brief, *, log=print):
     house register — the craft curriculum (PROMPT_CRAFT_STANDARD.md +
     PROMPT_CRAFT_SKILL.md, the AnyFilm-derived transfer, loaded verbatim) is its mind.
     compiled_brief is cb_engine.compile_shot_contract's SOURCE MATERIAL (labelled
-    storyboard facts, never pre-written prose). Dialogue rides INLINE and VERBATIM — the
-    formula standard proven on S1.SH3's approved take — while @Audio1 stays attached as
-    the acted performance the render syncs to. The machine never rewrites or trims what
-    this writes; cb_render's formula gate only verifies skeleton, drift vocabulary and
-    verbatim dialogue afterward."""
-    return cb_llm.structured(
+    storyboard facts, never pre-written prose). THE SH1 KEEPER STANDARD (Julian's ruling,
+    2026-07-25, superseding the S1.SH3-era inline-verbatim-dialogue formula): dialogue
+    words NEVER appear in the prompt — @Audio1 is declared the sole source of dialogue,
+    wording, voice, performance and timing, and performance is timed by naming the
+    audio's own spoken sections. The machine never rewrites or trims what this writes;
+    cb_render's formula gate only verifies skeleton, drift vocabulary and the audio-law
+    header afterward."""
+    # THE FORMULA LIBRARY (2026-07-25): the writer gets the proven formula for THIS
+    # beat's dramatic form, or an explicit "no formula yet — discover one". formula_meta
+    # travels back to the caller so the fire record can say which formula produced the
+    # prompt; that link is what lets the corpus answer "which formulas are working".
+    curriculum, formula_meta = _craft_curriculum(primary_form, secondary_colour)
+    result = cb_llm.structured(
         _system("animation",
                 "You are the studio's register writer — the cinematic-prompt author. The "
                 "first attached image is the approved opening frame: look at it, and "
                 "write the shot that brings it to life. Below is the complete house "
                 "craft curriculum — it is your mind; write at its full level.\n\n"
-                "THE FORMULA (structural law — the only fixed skeleton):\n"
-                "1. If any dialogue exists, the prompt's first line is exactly: "
-                "ENGLISH DIALOGUE ONLY, spoken in English.\n"
-                "2. Then 'Shot 1:' — and 'Cut to. Shot N:' for each internal cut, in the "
-                "source material's own order. Each shot written at full register: camera "
-                "+ lens + movement first, then subject and action as cause and visible "
-                "consequence, depth staging, light as the narrative clock, "
-                "micro-performance, render craft, and a closing emotional anchor. Rich, "
-                "cinematic, uncapped — the magic lives in this writing.\n"
-                "3. Every dialogue line in the source material appears INLINE, word for "
-                "word, as SPEAKER: line — immediately after the action that earns it. "
-                "Never reworded, never omitted, nothing invented.\n"
-                "4. End on a held look: a closing HOLD sentence bringing the clip to "
-                "stillness — '... about 2 seconds of silence, no more dialogue.' This is "
-                "the clean-frame harvest window.\n"
+                "THE FORMULA (structural law — the only fixed skeleton; THE SH1 KEEPER "
+                "STANDARD, Julian's ruling 2026-07-25 — see the worked exemplar in the "
+                "curriculum below):\n"
+                "1. If any dialogue exists, the prompt OPENS with the audio law: "
+                "'ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole "
+                "source of dialogue, wording, voice, performance and timing.' Name who "
+                "speaks and who stays silent (mouth closed); ban additional dialogue or "
+                "vocalisations. DIALOGUE WORDS NEVER APPEAR IN THE PROMPT — time the "
+                "performance by naming the audio's own sections ('During the opening "
+                "spoken section of @Audio1...', 'As the final spoken section of @Audio1 "
+                "begins...').\n"
+                "2. Then THE REFERENCE-ROLE LINE — one sentence scoping every reference "
+                "to a single job with 'only': @图1 only for the exact opening "
+                "composition and positions; one @图N only for each character's identity, "
+                "proportions, features and accessories; one only for the world.\n"
+                "3. Then 'Shot 1:' — and 'Cut to. Shot N:' for each internal cut, in the "
+                "source material's own order. Each shot: camera + lens + one continuous "
+                "movement concept first ('Begin exactly on @图1.'), then action as "
+                "PHYSICAL CAUSE AND VISIBLE CONSEQUENCE — named contacts, objects acting "
+                "on characters, connected structures declared one flexible physical unit "
+                "before they flex, involuntary motion stated as involuntary ('a "
+                "passenger, not a performer'). NEVER abstract geometry (degrees, screen "
+                "direction, spatial bookkeeping) and never scaffolding that restates the "
+                "world — speed is proven by consequences, never asserted. THE ANCHOR "
+                "LAW: a stationary character is welded to a named physical object "
+                "('whenever her flower bends or moves, she travels physically with it'), "
+                "never a position — BUT ONLY FOR A CHARACTER THE BEAT HAS DECIDED IS "
+                "STAYING PUT. It was being applied as a default safety measure and "
+                "pinned characters the story needed travelling (S1.SH2, 2026-07-25). When "
+                "the beat moves a character, they MOVE. Never anchor anyone merely to "
+                "keep them safely in frame.\n"
+                "3b. ONE GEOGRAPHY PER CHARACTER. A character is either held to a named "
+                "object or travelling — never written as both. 'Anchored to her flower' "
+                "plus 'hovers beside him' is a contradiction, and a model resolves a "
+                "contradiction by taking the safest reading, which is always less motion. "
+                "Decide, then say it once.\n"
+                "3c. STASIS VERBS ARE COMMANDS, NOT SAFETY. settle, hold, anchor, steady, "
+                "still, motionless, remain, stay, locked, two-shot — the model obeys every "
+                "one literally. Write them ONLY where stillness is the actual dramatic "
+                "intent. Repeating a framing lock does not make a shot safer; it makes "
+                "stillness its dominant instruction. The approved keeper runs about 2 such "
+                "terms per 100 words; at 3+ you are directing a held pose no matter what "
+                "your action sentences say.\n"
+                "4. End on a held look — the FINAL two seconds ONLY, never the "
+                "clip's prevailing character; the shot stays in motion right up "
+                "to it. A closing HOLD sentence bringing the clip to "
+                "stillness — 'Hold on ... for two seconds after the audio finishes ... "
+                "Silence.' (or the older '... about 2 seconds of silence, no more "
+                "dialogue.'). This is the clean-frame harvest window.\n"
                 "5. NEVER write any duration into the prompt (the API parameter carries "
-                "it); the only sanctioned time phrase is the closing hold's own 'about 2 "
-                "seconds'.\n"
+                "it); the only sanctioned time phrase is the closing hold's own 'two "
+                "seconds' (either wording in rule 4).\n"
                 "6. Light is written ONLY in the source material's SET & LIGHT LAW "
                 "vocabulary — concrete sky/sun/shadow states; time-of-day words "
                 "(sunset, golden-hour, dusk, amber light) are banned and refuse the "
-                "save.\n\n"
+                "save.\n"
+                "7. THE IDENTITY LAW (Julian's ruling, 2026-07-25 — the proven "
+                "reference-first style; a described-identity prompt drifted both "
+                "characters off-model): NEVER describe a character's appearance — no "
+                "body shape, colours, fur, stripes, glasses, goggles, cheeks, wing "
+                "look, features, ever. Declare identity ONCE per character as a "
+                "reference lock — '{Name} is the character from @图N — match the "
+                "reference 100%, every feature and accessory exactly as shown' — then "
+                "write ONLY action, physicality-in-motion (squash, stretch, momentum, "
+                "recovery), staging, depth, light and performance. The references carry "
+                "what they look like; your words carry what they DO.\n"
+                "8. THE SIZE LAW, AS SPEND (Julian's rulings, 2026-07-25 — 'look at the "
+                "other prompts from AnyFilm', then the SH1 keeper): leanness is zero "
+                "wasted words, not a number. The AnyFilm band (~250-350 per clip, "
+                "delivered average 244; ~90-120 per shot) is the TARGET for a "
+                "single-gag shot. A multi-beat physical-chain shot with dialogue-sync "
+                "sections may run longer — but know the real numbers before you "
+                "spend: AnyFilm DELIVERS 244 words per clip; this studio's own run "
+                "722-810. Measured, that gap is not extra physics — it is "
+                "continuity safeguards, restated framing locks and repeated "
+                "stillness language, the exact material that made a shot read as "
+                "immobilised. Past ~350 words the question is no longer 'does this "
+                "buy physics' (anything passes that) but 'which of these sentences "
+                "did I add because I was worried'. Cut those.\n"
+                "THERE IS NO WORD CEILING (2026-07-25, Julian: \"remove a lot of the "
+                "guardrails that suffocate the creative prompting\"). Every numeric cap "
+                "this studio ever set was later found cutting the wrong thing — most "
+                "recently a physics description truncated to its flatter half to fit a "
+                "budget. The proven keeper is 722 words — the best take so far, not "
+                "the ceiling of the craft, and still 3x what AnyFilm delivers. No "
+                "cap; no prize for length either. "
+                "Write what the shot needs.\n"
+                "USE ANY CAMERA OR LIGHT VOCABULARY THE SHOT ACTUALLY CALLS FOR — focal "
+                "length, lens character, rim light, backlight, depth, atmosphere. Nothing "
+                "is banned. Reach for a technical term when it is the most precise way to "
+                "say what you mean, and plain physical description when that is; the test "
+                "is always whether the word makes the image more specific, never whether "
+                "it appears on some approved list.\n\n"
+                "NOW THE ONLY THING THAT ACTUALLY MATTERS. You are not filling in a "
+                "template — you are the last filmmaker between a storyboard and a "
+                "finished shot, and this is the only place the audience will ever meet "
+                "this moment. Before you write a word, answer for yourself: what does "
+                "this shot DO to someone watching it? What do they feel at the first "
+                "frame, what changes in them by the last, and which single physical "
+                "moment carries that change? Then write the shot that delivers exactly "
+                "that — the performance with real weight and real timing, the camera "
+                "behaving like someone who cares what happens, light that belongs to this "
+                "moment and no other. The Showrunner, the Director and the DP have "
+                "already decided WHAT this shot is. Your job is to make it ARRIVE — with "
+                "the specificity and the nerve of someone who has watched it in their "
+                "head and knows precisely why it lands.\n\n"
                 "===== THE HOUSE CRAFT CURRICULUM (verbatim) =====\n" +
-                _craft_curriculum()),
+                curriculum),
         "SOURCE MATERIAL — the storyboard-approved facts. Write the card FROM these: "
         "invent cinematic craft freely, never new story facts:\n" + compiled_brief +
         "\n\nSHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
         "\n\nReturn the complete formula prompt as providerPrompt, then one plain "
         "sentence on whether this clip will land the beat.",
         AnimationDirection, label="department_animation", log=log, images=images)
+    # Attach the provenance without touching the schema: which formula (if any) was in the
+    # writer's mind for this card. Read back by cb_render at fire time for the corpus.
+    try:
+        setattr(result, "_formula", formula_meta)
+    except Exception:
+        pass
+    return result
 
 
 def review_media(artifact_type, context, images, *, log=print):

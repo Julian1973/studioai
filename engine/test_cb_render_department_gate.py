@@ -42,12 +42,14 @@ CFG = {"Fuzzby": {"sizeRank": 2, "avoid": "bee", "voiceId": "voice-fuzzby",
 def _formula_prompt(action, line="Nailed it.", speaker="FUZZBY"):
     """A minimal, valid Gold-Build FORMULA prompt (2026-07-24 — the shape
     cb_render.check_formula_structure now hard-requires at prepare/save/fire): header when
-    dialogue exists, a labelled 'Shot 1:' segment carrying the action AND the dialogue
-    inline verbatim, a closing HOLD tail, no duration text. Every seeded/mocked animation
+    dialogue exists (@Audio1 declared the sole source — the spoken WORDS never appear,
+    THE SH1 KEEPER STANDARD, 2026-07-25), a labelled 'Shot 1:' segment carrying the action
+    and a performance note naming @Audio1, a closing HOLD tail, no duration text. Every seeded/mocked animation
     prompt in this suite must be this shape or the real gates refuse it — which is exactly
     the production contract these tests exercise."""
-    header = "ENGLISH DIALOGUE ONLY, spoken in English.\n\n" if line else ""
-    dlg = f" {speaker}: {line}" if line else ""
+    header = ("ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of "
+              "dialogue, wording, voice, performance and timing.\n\n") if line else ""
+    dlg = f" {speaker.title()} performs their vocal beat from @Audio1." if line else ""
     return (header
             + f"Shot 1: Close-up, 85mm, handheld drift. {action}{dlg}\n\n"
             + "They hold the look, about 2 seconds of silence, no more dialogue.")
@@ -195,16 +197,20 @@ def _mock_llm(monkeypatch, animation_prompt=None, cinematography_prompt=None,
         if name == "AnimationDirection":
             # THE FORMULA GATE fixture (Gold Build, 2026-07-24): check_formula_structure
             # refuses any animation candidate that is not the house formula — header when
-            # dialogue exists, labelled 'Shot N:' segments, 'Cut to.' transitions, every
-            # dialogue line inline verbatim, a closing HOLD tail, no duration text. The
-            # default stub must satisfy that real save-time contract; the shot's one line
-            # is "Nailed it." (see the VoiceDirection stub below).
+            # dialogue exists (THE SH1 KEEPER STANDARD, 2026-07-25: @Audio1 declared the
+            # sole source of dialogue/wording/voice/performance/timing, the spoken WORDS
+            # never present), labelled 'Shot N:' segments, 'Cut to.' transitions, a closing
+            # HOLD tail, no duration text. The default stub must satisfy that real
+            # save-time contract.
             return schema(shotId="1.B1.S1", doesItLand="t",
                           providerPrompt=animation_prompt or
-                          "ENGLISH DIALOGUE ONLY, spoken in English.\n\n"
+                          "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the "
+                          "sole source of dialogue, wording, voice, performance and "
+                          "timing.\n\n"
                           "Shot 1: Close-up, 85mm, handheld drift. Fuzzby bursts up out of "
                           "the flower, pollen haloing him in the high-key daylight, and "
-                          "puffs his chest with oblivious pride. FUZZBY: Nailed it.\n\n"
+                          "puffs his chest with oblivious pride. Fuzzby performs his vocal "
+                          "beat from @Audio1.\n\n"
                           "They hold the look, about 2 seconds of silence, no more dialogue.")
         if name == "CinematographyDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",
@@ -590,13 +596,13 @@ def _reach_model_limited(monkeypatch, path, shot_id="1.B1.S1",
     out-of-scope bug rather than papering over it in production code."""
     _seed_animation_prereqs(monkeypatch, path, shot_id)
     _approve_animation(monkeypatch, animation_prompt, shot_id)
-    _fire_one_candidate(shot_id, path)
-    R.reject_shot("9", shot_id, "first failure", category="action-timing",
-                  episode="EpT", log=lambda *a, **k: None)
-    time.sleep(1.1)
-    _fire_one_candidate(shot_id, path)
-    R.reject_shot("9", shot_id, "second failure", category="action-timing",
-                  episode="EpT", log=lambda *a, **k: None)
+    # Drive to the ceiling by CONSTANT, never a hardcoded count — the iteration budget is
+    # a policy number (raised 2 -> 7 on 2026-07-25) and a test that pins it breaks every
+    # time the policy moves. What matters is that the ladder ENDS, not where.
+    for i in range(R.MAX_BATCH_ATTEMPTS):
+        _fire_one_candidate(shot_id, path)
+        R.reject_shot("9", shot_id, f"failure {i + 1}", category="action-timing",
+                      episode="EpT", log=lambda *a, **k: None)
     led = R._ledger(json.load(open(path)), shot_id)
     assert led["status"] == "model-limited", "setup must genuinely reach model-limited"
     return led["batch"]["batchId"]
@@ -651,7 +657,7 @@ def test_current_approved_redesign_with_different_signature_enables_acknowledgem
     assert elig["oldSignature"] != elig["newSignature"]
     assert "animationPromptSha256" in elig["changedInputs"]
     assert elig["previousCycleId"] == prev_batch_id
-    assert len(elig["rejectedBatchIds"]) == 2
+    assert len(elig["rejectedBatchIds"]) == R.MAX_BATCH_ATTEMPTS
     assert elig["nextCandidateLimit"] == R.REDESIGN_CANDIDATE_LIMIT == 1
 
     event = R.acknowledge_redesign("9", "1.B1.S1", "EpT", reviewed_by="Julian",
@@ -944,7 +950,8 @@ def test_reconcile_shot_history_recovers_clobbered_rejection_state(world, monkey
     led_before = R._ledger(before, "1.B1.S1")
     real_rejections = json.loads(json.dumps(led_before["rejections"]))
     last_batch_id = led_before["batch"]["batchId"]
-    assert len(real_rejections) == 2 and led_before["status"] == "model-limited"
+    assert (len(real_rejections) == R.MAX_BATCH_ATTEMPTS
+            and led_before["status"] == "model-limited")
 
     # SIMULATE THE CLOBBER: exactly what the promotion race left behind live tonight —
     # candidatePaths pointing at a file reject_shot has already archived, zero rejections
@@ -958,13 +965,19 @@ def test_reconcile_shot_history_recovers_clobbered_rejection_state(world, monkey
 
     audit = R.reconcile_shot_history("9", "1.B1.S1", episode="EpT", reviewed_by="Julian",
                                      log=lambda *a, **k: None)
-    assert audit["recoveredRejections"] and len(audit["recoveredRejections"]) == 2
+    # EVERY rejection on record before the clobber is recovered — the invariant is
+    # completeness, not a count. (batchAttempts counts DISTINCT rejected batchIds, which
+    # is deliberately not the same as the raw number of reject_shot calls, so pinning
+    # either to MAX_BATCH_ATTEMPTS would assert the wrong thing.)
+    assert audit["recoveredRejections"]
+    recovered_batches = {r["batchId"] for r in audit["recoveredRejections"]}
+    assert recovered_batches == {r["batchId"] for r in real_rejections}
 
     after = json.load(open(path))
     led_after = R._ledger(after, "1.B1.S1")
     assert led_after["status"] == "model-limited"
     assert led_after["candidatePaths"] is None and led_after["batchId"] is None
-    assert led_after["batchAttempts"] == 2
+    assert led_after["batchAttempts"] == len(recovered_batches)
     assert led_after["rejections"] == real_rejections            # recovered VERBATIM
     assert led_after["batch"] == led_before["batch"]              # untouched
     assert len(led_after["stateReconciliationLog"]) == 1

@@ -449,6 +449,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
         # by default.
         cutPace=sb_shot["cutPace"],
         internalCuts=list(sb_shot.get("internalCuts") or []),
+        composedOf=list(sb_shot.get("composedOf") or []),
         dialogueBinding=(f"{shot_voices[0]['speaker']}'s vocal beat performs per the "
                          f"approved voice design.") if shot_voices else None,
         dialogueLines=_dialogue_lines(shot_voices, duration),
@@ -499,7 +500,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
     return shot, retained
 
 
-def _compile_one(shot, retained, scene, characters_cfg):
+def _compile_one(shot, retained, scene, characters_cfg, siblings=None):
     """2026-07-17 CONSOLIDATION (Julian's correction): the two prior handover-mapping fixes
     were built as a second compiler inside this module (a duplicate _keyframe_brief and a
     _compile_motion_brief post-processor) — real, correct output, but duplicate compiler
@@ -509,7 +510,8 @@ def _compile_one(shot, retained, scene, characters_cfg):
     cb_engine.compile_keyframe_prompt/compile_shot_contract — see those functions' own
     2026-07-17 correction notes. This function goes back to calling them directly; there is
     exactly ONE keyframe compiler and ONE motion compiler in this codebase again."""
-    prompt, wc, slots = cb_engine.compile_shot_contract(shot, scene, characters_cfg)
+    prompt, wc, slots = cb_engine.compile_shot_contract(shot, scene, characters_cfg,
+                                                        siblings=siblings)
     rec = shot.model_dump()
     rec.update(retained)
     rec["seedancePrompt"], rec["promptWords"], rec["referenceSlots"] = prompt, wc, slots
@@ -580,6 +582,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
 
     shots_sorted = sorted(sb["shots"], key=lambda s: s["shotId"])
     shots_out, total, prev, line_count = [], 0.0, None, 0
+    distilled = []
     for sb_shot in shots_sorted:
         pd = pd_by_shot.get(sb_shot["shotId"])
         if pd is None:
@@ -588,11 +591,19 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
         cast = _cast_for_shot(sb_shot, beats)
         shot, retained = distil_shot(sb_shot, pd, cast, placement.get(sb_shot["shotId"], []),
                                        prev, characters_cfg)
-        rec = _compile_one(shot, retained, scene, characters_cfg)
+        distilled.append((shot, retained))
         line_count += len(shot.dialogueLines)
-        shots_out.append(rec)
         total += shot.durationSec
         prev = shot.shotId
+
+    # TWO PASS (2026-07-25, the clip/card separation): every shot is distilled first, then
+    # compiled with the full sibling set, so a clip that REFERENCES member Shot Cards
+    # (composedOf) can resolve them regardless of their order in the scene. Distillation is
+    # unchanged and still strictly sequential — `prev` is threaded exactly as before.
+    siblings = [sh for sh, _ in distilled]
+    for shot, retained in distilled:
+        shots_out.append(_compile_one(shot, retained, scene, characters_cfg,
+                                      siblings=siblings))
 
     expected = sum(len(b["exactDialogue"]) for b in sb["beats"])
     if line_count != expected:

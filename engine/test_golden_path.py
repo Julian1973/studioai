@@ -271,18 +271,22 @@ def _seed_voice_and_cinematography(scene, ep):
 
 
 def _formula_prompt_for(s):
-    """A valid Gold-Build FORMULA prompt for this shot (2026-07-24 — the register writer's
-    own output shape, which cb_render.check_formula_structure now hard-requires at fire):
-    header when the shot has dialogue, one labelled 'Shot 1:' segment carrying the action
-    and every dialogue line inline verbatim, a closing HOLD tail, no duration text.
+    """A valid FORMULA prompt for this shot under THE SH1 KEEPER STANDARD (Julian's ruling,
+    2026-07-25, superseding the 2026-07-24 inline-verbatim Gold shape): the audio-law
+    header when the shot has dialogue — @Audio1 declared the sole source, the spoken WORDS
+    never present — one labelled 'Shot 1:' segment carrying the action as physical cause
+    and consequence, performance timed by naming the audio's own spoken sections, a closing
+    HOLD tail, no duration text. check_formula_structure hard-requires this at fire.
     Deterministic per shot, so identical-prompt/identical-reroll assertions stay exact."""
     lines = s.get("dialogueLines") or []
-    head = "ENGLISH DIALOGUE ONLY, spoken in English.\n\n" if lines else ""
-    dlg = "".join(f" {ln['speaker'].upper()}: {ln['exactText']}" for ln in lines)
+    head = ("ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of "
+            "dialogue, wording, voice, performance and timing.\n\n") if lines else ""
+    perf = ("".join(f" {ln['speaker']} performs their vocal beat from @Audio1."
+                    for ln in lines))
     return (head
             + "Shot 1: Wide tracking at bee height, 24mm, handheld drift. Fuzzby rockets "
               "past the flower, clips the leaf, and the leaf springs him back in a pollen "
-              "burst under the high-key daylight." + dlg + "\n\n"
+              "burst under the high-key daylight." + perf + "\n\n"
             + "They HOLD the final look, about 2 seconds of silence, no more dialogue.")
 
 
@@ -474,10 +478,14 @@ def test_golden_path_script_to_scene_picture(world):
     assert [os.path.basename(u) for u in f1["image_urls"][1:]] == \
            ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_scenelook.png"]
     assert f1["audio_urls"] and f1["audio_urls"][0].endswith("_vo.mp3")
-    # GOLD BUILD (2026-07-24): dialogue-in-prompt is now the LAW on the animation path —
-    # the fired prompt must BE the formula, with the locked line inline and verbatim.
+    # THE SH1 KEEPER STANDARD (Julian's ruling, 2026-07-25, superseding the 2026-07-24
+    # dialogue-in-prompt Gold law): the fired prompt must BE the formula, declaring @Audio1
+    # the sole source of dialogue — and the spoken WORDS must NEVER appear in it. Proven on
+    # eleven live A/B fires; the winning take is the one this standard is named for.
     assert f1["prompt"].lstrip().startswith("ENGLISH DIALOGUE ONLY")
-    assert "FUZZBY: Nailed it." in f1["prompt"]
+    assert "@Audio1 as the sole source" in f1["prompt"]
+    assert "FUZZBY: Nailed it." not in f1["prompt"]      # the retired inline form
+    assert "Nailed it." not in f1["prompt"]              # no spoken words, anywhere
     # RE-PINNED 2026-07-24 (matching test_cb_render.py's own re-pin): since Julian's
     # split-generation directive (2026-07-23) the unconditional HANDLE_TOTAL=15 floor is
     # retired — the shot's OWN durationSec (6.0 here) is the floor, stretched only when the
@@ -644,10 +652,19 @@ def test_failure_ladder_unchanged_reroll_then_model_limited(world):
     R.fire_shot("9", "1.B1.S1", "EpT", candidates=2, spend_token=t1b,
                 log=lambda *a, **k: None)
     assert prov.fire_calls[-1]["prompt"] == first_prompt
-    # second failed batch -> MODEL-LIMITED; a third fire refuses by name
+    # keep rejecting to the CONSTANT ceiling -> MODEL-LIMITED; the next fire refuses by
+    # name. Driven by MAX_BATCH_ATTEMPTS, never a hardcoded count (raised 2 -> 7 on
+    # 2026-07-25 after benchmarking real iteration rates) — this proves the ladder ends,
+    # which is the invariant, without pinning the policy number.
     R.reject_shot("9", "1.B1.S1", "still no readable impact",
                   category="action-timing", episode="EpT", log=lambda *a, **k: None)
-    assert _led()["1.B1.S1"]["status"] == "model-limited"
+    while _led()["1.B1.S1"]["status"] != "model-limited":
+        t = _token("1.B1.S1", candidates=2)
+        R.fire_shot("9", "1.B1.S1", "EpT", candidates=2, spend_token=t,
+                    log=lambda *a, **k: None)
+        R.reject_shot("9", "1.B1.S1", "still no readable impact",
+                      category="action-timing", episode="EpT", log=lambda *a, **k: None)
+    assert _led()["1.B1.S1"]["batchAttempts"] == R.MAX_BATCH_ATTEMPTS
     with pytest.raises(R.Refused, match="MODEL-LIMITED"):
         R.fire_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     # and the walk refuses at it too — a model-limited shot blocks, never silently skipped

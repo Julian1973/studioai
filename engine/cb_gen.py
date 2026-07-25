@@ -288,7 +288,11 @@ def _generate_image_seedream_byteplus(prompt, refs=None, aspect="16:9", out="key
         body["image"] = ref_urls
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {BYTEPLUS_ARK_KEY}"}
     print(f"  seedream ({BYTEPLUS_SEEDREAM_MODEL}, via BytePlus ModelArk): rendering…")
-    resp = _rpost(BYTEPLUS_ARK_IMAGES_URL, json=body, headers=headers, timeout=120)
+    # 2026-07-24: 300s read window — BytePlus 2K Seedream renders regularly exceed 120s,
+    # and a read-timeout on a synchronous generations call may abandon (and still be billed
+    # for) a render that completes server-side moments later. A longer single wait beats
+    # retrying a possibly-duplicating render.
+    resp = _rpost(BYTEPLUS_ARK_IMAGES_URL, json=body, headers=headers, timeout=300)
     rj = resp.json()
     url = None
     data = rj.get("data") or []

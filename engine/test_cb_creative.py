@@ -531,3 +531,71 @@ def test_missing_character_references_reads_real_characters_json():
 if __name__ == "__main__":
     import subprocess
     raise SystemExit(subprocess.call([sys.executable, "-m", "pytest", __file__, "-q"]))
+
+
+# ══ THE DIFFERENTIATION ORIGINATES IN THE ROOM, NOT THE PROMPT WRITER ══════════════
+# (Julian's directive, 2026-07-25: "ensure the differentiation originates inside the
+# actual Creative Room minds — not only in schemas or the final animation writer.")
+# These read the REAL system prompts the real gates send. Zero provider calls: cb_llm.
+# structured is replaced by a capture stub. If a future edit quietly drops one of these
+# decisions from a gate's charge, the gate stops asking for it and every scene silently
+# converges back on one house shape — which is the exact failure these pin down.
+
+def _capture(monkeypatch, schema_value):
+    seen = {}
+    def fake(system, user, schema, label="", **k):
+        seen["system"], seen["user"], seen["label"] = system, user, label
+        return schema_value
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    return seen
+
+
+def test_gate3_charge_demands_the_dramatic_form_decision(monkeypatch):
+    sd = C.SceneDirection(scene=_scene(), beats=[_beat()])
+    seen = _capture(monkeypatch, sd)
+    ready = {"beats": [{"beatCode": "1.B1", "storyBeat": "s", "cuts": [], "location": "l",
+                        "time": "t"}], "cast": ["Fuzzby"], "brief": ""}
+    C.gate3_beats("Ep1", 1, {}, _selection(), _treatment("T"), ready, log=lambda *a, **k: None)
+    charge = seen["system"]
+    for phrase in ("primaryForm", "secondaryColour", "tempoShape",
+                   "never labels that select a template"):
+        assert phrase in charge, f"Gate 3 no longer asks the Director for {phrase!r}"
+    assert "must still be directed" in charge, \
+        "Gate 3 lost the rule that a shared form does not mean a shared treatment"
+
+
+def test_gate4_charge_demands_an_ending_with_no_default(monkeypatch):
+    seen = _capture(monkeypatch, C.ShotConference(shots=[_card()]))
+    sd = C.SceneDirection(scene=_scene(), beats=[_beat()])
+    C.gate4_shot_conference("Ep1", 1, _selection(), _treatment("T"), sd, log=lambda *a, **k: None)
+    charge = seen["system"]
+    for kind in ("reaction_hold", "living_hold", "continue_in_motion",
+                 "cut_on_action", "visual_transition"):
+        assert kind in charge, f"Gate 4 no longer offers {kind} as an ending"
+    assert "NO DEFAULT AND NO PREFERRED ENDING" in charge, \
+        "Gate 4 lost the anti-universal clause — a house closing hold will reassert itself"
+
+
+def test_gate4_actually_sees_each_beats_form_and_tempo(monkeypatch):
+    """The charge tells Gate 4 to read the beat's primaryForm/tempoShape. That is only
+    honest if those values genuinely reach the call — prove it from the real user text."""
+    beat = _beat()
+    beat.primaryForm = "physical comedy, escalating"
+    beat.tempoShape = "runs fast, then stops dead on the verdict"
+    sd = C.SceneDirection(scene=_scene(), beats=[beat])
+    seen = _capture(monkeypatch, C.ShotConference(shots=[_card()]))
+    C.gate4_shot_conference("Ep1", 1, _selection(), _treatment("T"), sd, log=lambda *a, **k: None)
+    assert "physical comedy, escalating" in seen["user"]
+    assert "stops dead on the verdict" in seen["user"]
+
+
+def test_gate6_charge_runs_an_explicit_universals_test(monkeypatch):
+    seen = _capture(monkeypatch, C.ShowrunnerReview(
+        judgement="ok", treatmentComparison="held", passes=True, returnTo=None, issues=[]))
+    sd = C.SceneDirection(scene=_scene(), beats=[_beat()])
+    C.gate6_adversarial_review({}, _selection(), _treatment("T"), sd, [_card()], [],
+                               log=lambda *a, **k: None)
+    charge = seen["system"]
+    assert "UNIVERSALS TEST" in charge
+    for target in ("endingBehaviour", "cutPace", "true of EVERY shot"):
+        assert target in charge, f"the universals test no longer names {target!r}"

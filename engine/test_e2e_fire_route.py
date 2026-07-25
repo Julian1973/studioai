@@ -119,11 +119,12 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
             # locked line inline verbatim (the archived file itself stays byte-identical
             # forever, same as the continuityIn patch above).
             sh["seedancePrompt"] = (
-                "ENGLISH DIALOGUE ONLY, spoken in English.\n\n"
+                "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole "
+                "source of dialogue, wording, voice, performance and timing.\n\n"
                 "Shot 1: Wide tracking at bee height, 24mm, handheld drift. Fuzzby flies "
                 "too fast past his intended flower, clips the stem and wobbles through the "
                 "recovery, chest already pitching forward as the work song powers him "
-                "along. FUZZBY: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…\n\n"
+                "along. Fuzzby performs his vocal beat from @Audio1.\n\n"
                 "They hold the look, about 2 seconds of silence, no more dialogue.")
     # THE KEYFRAME/VOICE MEDIA RESTORE (2026-07-19): this snapshot's own recorded absolute
     # media paths (engine/media/shots/Ep1_1.B1.S1_{keyframe.png,vo.mp3}) no longer exist on

@@ -2654,6 +2654,7 @@ function renderSceneLookStage(){
     } else if(sl.status=="approved"){
       decVersion="Approved · current";
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+        `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-scenelook')">↩ Un-approve — redo this phase</button>`,
         `<div style="margin-top:8px">${slSourceChoices(`Refire — ${GEN_LABEL.replace('◈ ','')}`,true)}</div>`];
     } else if(sl.status=="stale"){
       // (2026-07-18 direct-input-lineage correction): "stale" no longer means the
@@ -3582,6 +3583,10 @@ function renderShotRunner(){
         <div class="runmedia"><img class="zoom" data-cap="${_esc(s.shotId)} · opening frame, inherited from ${_esc(s.sourceShotId||"previous shot")}" src="${BASE}${anchorUrl}?v=${MEDIA_V}"/></div>`+body;
       else if(pst.kf!="waitingPrev") body=`<div class="runempty">The inherited frame resolves from ${_esc(s.sourceShotId||"the previous shot")}'s approved take at fire time — its preview is loading…</div>`+body;
     } else if(pst.sceneLookGated){
+      // EVERY BLOCKED ROW NAMES ITS FIX (2026-07-25, the rule the Prompt row now
+      // follows). This one names it but carries no button: there is no phase-navigation
+      // helper in this file to call, and a button that throws is worse than none. The
+      // jump-to-Scene-Look control is a real, separate piece of work — not faked here.
       st="blocked";lab="Held";sum=pst.label;
       body=`<div class="runempty">${_esc(pst.sub||"Approve the Scene Look plate first — the world anchor gates every keyframe.")}</div>`;
     } else if(pst.kf=="awaiting"){
@@ -3751,12 +3756,33 @@ function renderShotRunner(){
   {
     const sw=SH_SEEDANCE_CACHE[s.shotId];
     const wp=led.workingSeedancePrompt||null;
+    let promptActs=[];
     const dlgConfirmed=!!(wp&&wp.dialogueInPromptConfirmed);
     let st,lab,sum;
     // A resolvable prompt is INFORMATION, not a decision — it never claims the "NOW"
     // slot (2026-07-23 fix: with candidates awaiting review, NOW wrongly read PROMPT).
     // The editor stays fully accessible; only the chip semantics changed.
-    if(sw&&sw.error){ st="blocked";lab="Unavailable";sum=sw.error; }
+    // THE BLOCKED ROW MUST NAME ITS OWN FIX (2026-07-25, Julian live: "i have clicked the
+    // prepare direction and the prompt is saying unavailable and it cant fire... we make
+    // this ux so complicated"). The prompt was blocked by a stale/missing Animation
+    // Direction — which is a DIFFERENT row further up the page — and this row just
+    // printed the raw server refusal, a wall of doctrine, with no button. The fix lives
+    // one click away and the screen never said so. Now it says exactly what is missing
+    // and carries the button that resolves it.
+    const _aRec=shDeptRec('animation',s.shotId)||animRec;
+    const _aCand=_aRec&&_aRec.candidate;
+    if(sw&&sw.error){
+      st="blocked";lab="Unavailable";
+      if(_aCand){
+        sum="Waiting on you: the Animation Direction is prepared but not approved yet. "
+           +"Approve it and the prompt appears here, ready to fire.";
+        promptActs=[`<button class="btn" onclick="shApproveStageAll('${tok}','animation')">Approve the direction</button>`];
+      } else {
+        sum="No current Animation Direction for this shot — prepare one (text-only, no "
+           +"spend) and the prompt compiles from it.";
+        promptActs=[`<button class="btn" onclick="deptRun('animation','${tok}')">Prepare the direction</button>`];
+      }
+    }
     else if(sw&&sw.currentPrompt){
       st="done";
       lab=sw.isWorking?"Working copy":"Compiled";
@@ -3778,8 +3804,9 @@ function renderShotRunner(){
          <button class="btn ghost" onclick="shRestoreSeedanceWork('${tok}')">Restore compiled</button>
        </div>`
        +structurePanelHTML(s.shotId,SH_STRUCTURE_CACHE[s.shotId]),tok+"|prompt")
-      :`<div class="runempty">${sw&&sw.error?_esc(sw.error):"The complete Seedance prompt appears here once the Animation Direction is approved — then it can be reviewed, edited and saved as a working version before any spend."}</div>`);
-    rows.push({id:"prompt",title:"Prompt",state:st,stateLabel:lab,summary:sum,body,actions:[]});
+      :`<div class="runempty">${_esc(sum)}</div>`
+        +((sw&&sw.error)?`<details style="margin-top:8px"><summary class="dec-caption" style="cursor:pointer">Technical detail</summary><pre class="techpre">${_esc(sw.error)}</pre></details>`:""));
+    rows.push({id:"prompt",title:"Prompt",state:st,stateLabel:lab,summary:sum,body,actions:promptActs});
   }
 
   // ── 7 · FIRE ──
@@ -3802,7 +3829,12 @@ function renderShotRunner(){
     if(led.status=="approved"){ st="done";lab="Fired";sum="A take is approved — reject it in Review to re-fire."; }
     else if(led.status=="candidates-pending"){ st="done";lab="Batch fired";sum="Candidates rendered — decide in Review below."; }
     else if(led.status=="model-limited"){
-      st="blocked";lab="Blocked";sum="Two batches rejected — human redesign required before any re-fire.";
+      // Never restate the attempt ceiling as a literal — it is a policy number in
+      // cb_render.MAX_BATCH_ATTEMPTS (raised 2 -> 7, 2026-07-25) and this copy said
+      // "Two batches" for hours after it moved. Describe the state, not the count.
+      st="blocked";lab="Blocked";
+      sum="The attempt limit for this shot was reached — a human redesign is required "
+         +"before any re-fire. The redesign panel is below.";
       body=redesignPanelHTML(s.shotId,SH_REDESIGN_CACHE[s.shotId]);
     } else if(batch&&batch.status=="generating"){
       // THE VISIBLE RENDERING STATE (2026-07-23, Julian — "when you fire be good to see
@@ -3858,6 +3890,18 @@ function renderShotRunner(){
     } else if(!pst.readyToAnimate){
       st="pending";lab="Waiting";sum=pst.label+(pst.sub?" — "+pst.sub:"");
       body=`<div class="runempty">Unlocks when the opening frame${talky?", voice":""} and Animation Direction are approved. The spend itself always stays a two-step, token-sealed decision.</div>`;
+    } else if(animRec&&animRec.readiness&&animRec.readiness.applicable!==false
+              &&!animRec.readiness.readyForDisclosure){
+      // TELL THE TRUTH ON THE ROW, NOT JUST THE BUTTON (2026-07-25, Julian: "how am i able
+      // to fire when i dont have a prompt"). deptLocksGeneration already disabled the
+      // button in this exact case, but the row still read READY / "Everything upstream is
+      // approved" — so the summary line and the control disagreed, and the row won the
+      // argument visually. Same fact, stated once, in the place the eye lands first.
+      const why=(animRec.readiness.reasons&&(animRec.readiness.reasons.ready
+                 ||animRec.readiness.reasons.inputs))
+                ||"The Animation Direction is not ready for disclosure.";
+      st="pending";lab="Blocked";sum=why;
+      body=`<div class="runempty">${_esc(why)}<br><br>The prompt is compiled from the approved Animation Direction — until that resolves, there is nothing to fire.</div>`;
     } else {
       st="ready";lab="Ready";sum="Everything upstream is approved — firing discloses the sealed envelope, then the bound token spends.";
       body=seg+`<div style="margin-top:12px">${candCountPickerHTML(shCap)}</div>`;
@@ -4152,7 +4196,8 @@ function renderShotStage(mode){
           ${pst.sub?`<div class="dec-caption" style="margin-top:8px;color:var(--warn)">${_esc(pst.sub)}</div>`:""}
           <div class="dec-caption" style="margin-top:16px">Replace this opening frame:</div>${shOpeningFrameChoices(tok,s)}`;
         decVersion="Approved";
-        decActions=[`<span class="dec-caption">${badge("approved")}</span>`];
+        decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+          `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-keyframe','${tok}')">↩ Un-approve — redo this phase</button>`];
       } else if(pst.kf=="rejected"){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected — see History below. Ready to regenerate.</div></div>${shOpeningFrameChoices(tok,s)}`;
         decVersion="Rejected";
@@ -4200,6 +4245,7 @@ function renderShotStage(mode){
       } else if(voApproved){
         decVersion="Approved";
         decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+          `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-voice','${tok}')">↩ Un-approve — redo this phase</button>`,
           `<button class="btn ghost" style="margin-top:8px" onclick="shRun('reject-voice','${tok}')">Reject (allow refiring)</button>`];
       } else {
         decVersion="Awaiting your decision";
@@ -4247,7 +4293,8 @@ function renderShotStage(mode){
     } else if(m.clip||m.finalFrame){
       body=twoCol(m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}" style="width:100%;border-radius:10px"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}" style="width:100%"/>`);
       decVersion="Approved take";
-      decActions=[`<span class="dec-caption">${badge("approved")}</span>`];
+      decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+        `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-shot','${tok}')">↩ Un-approve — redo this phase</button>`];
       if(PSHOT_I<shots.length-1){
         // THE NEXT-SHOT HANDOFF, MADE VISIBLE (2026-07-19): confirms, rather than just
         // asserting, that approving this take is what lets the NEXT shot inherit its final
@@ -4266,7 +4313,7 @@ function renderShotStage(mode){
         shLoadRedesignEligibility(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
       }
       body=`<div class="artefact-empty">
-        <div style="color:var(--danger)">Two batches rejected — this shot needs human redesign before firing again.</div>
+        <div style="color:var(--danger)">The attempt limit for this shot was reached — it needs human redesign before firing again.</div>
         ${redesignPanelHTML(s.shotId, SH_REDESIGN_CACHE[s.shotId])}
       </div>`;
       decVersion="Blocked"; decActions=[];

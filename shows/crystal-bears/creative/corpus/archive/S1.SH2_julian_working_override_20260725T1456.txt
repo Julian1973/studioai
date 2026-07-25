@@ -1,0 +1,15 @@
+# Julian's working override, saved 2026-07-25T14:56:01, 408 words.
+# Cleared 2026-07-25 because it was shadowing the newly approved 929-word direction.
+# Preserved here in full — nothing of yours was deleted.
+
+ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby performs the first spoken section; Zenny performs the second, longer spoken section. The listener's mouth stays closed. No additional dialogue or vocalisations. Match all mouth movement to @Audio1 exactly — no speech during its silent passages.
+
+Use @图1 only for the exact opening composition and positions; @图3 only for Fuzzby's identity; @图2 only for Zenny's identity; @图4 only for the flower-meadow world and its light.
+
+Shot 1: Wide, 35mm, fast lateral track. This shot plays entirely in the long silence before the first spoken section — both mouths stay closed throughout it. Begin exactly on @图1. Fuzzby bolts out of his proud pose and rockets low across the flower tops, wings hammering, chest thrown out — looking back at Zenny instead of forward. He clips a leaf. WHAP. The hit spins him sideways and drives him face-first into the open cup of a tall flower. Only his face goes in; his body, wings and legs stay outside, kicking. The flower head folds under him, its stem bowing deep, then snaps back and flings him clear. Two pollen-heavy stamens drag across his upper lip on the way out, leaving one bright yellow powder curl on each side, meeting in the middle. Nothing on his chin. Nothing dark anywhere on his face. He tumbles to a hover, still unaware.
+
+Cut to. Shot 2: Close-up, 85mm, slow push-in. His paw brushes his lip. Beat. He goes cross-eyed peering down at his own moustache — and delight detonates across his face. He strokes both curled ends between two fingers, lifts his chin and turns to present himself to Zenny with total sincerity, performing his short vocal beat from @Audio1 as though the crash had been the plan all along. One loose clump drops off, unnoticed.
+
+Cut to. Shot 3: Two-shot, 50mm, locked off. Zenny holds at her flower, mouth closed, almost perfectly still — the only stillness in the frame. She performs her whole vocal beat from @Audio1, flat and dry, riding its own internal pauses without hurrying and without stopping her work; Fuzzby beams through every second of it, mouth shut, still stroking the moustache. Only after her final word does she turn halfway back toward the blossom, and once her face is nearly hidden one tiny private smile escapes.
+
+HOLD the two-shot, about 2 seconds of silence, no more dialogue.

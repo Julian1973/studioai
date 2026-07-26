@@ -844,7 +844,24 @@ def _department_container(pkg, scene, shot_id, stage, episode="Ep1"):
         rec = _load_scenelook_rec(scene, episode)
         work = rec.setdefault("departmentWork", {}).setdefault(stage,
             {"approved": None, "candidate": None, "history": []})
-        return work, lambda: _save_scenelook_rec(rec, scene, episode)
+
+        def _save_look():
+            # RE-READ AT WRITE TIME (2026-07-26, found live). This record is loaded BEFORE a
+            # multi-second LLM call and saved AFTER it, and the whole in-memory copy used to
+            # be written back — so anything that touched the same file during that window was
+            # silently erased. Reproduced from real job timings: the Look department ran
+            # 21:01:00 -> 21:01:13, Julian picked a plate from the library at 21:01:11, and
+            # the department's own save two seconds later restored the file to its 21:01:00
+            # state. His selection vanished with no error anywhere — the pick had genuinely
+            # succeeded and logged "SCENE LOOK SELECTED".
+            # This function owns exactly ONE key, departmentWork[stage]. It now grafts that
+            # onto a FRESH read instead of overwriting keys it never authored, so a
+            # concurrent plate pick, approval or rejection survives.
+            fresh = _load_scenelook_rec(scene, episode)
+            fresh.setdefault("departmentWork", {})[stage] = work
+            _save_scenelook_rec(fresh, scene, episode)
+
+        return work, _save_look
     if stage == "review-final":
         work = pkg.setdefault("departmentWork", {}).setdefault(stage,
             {"approved": None, "candidate": None, "history": []})

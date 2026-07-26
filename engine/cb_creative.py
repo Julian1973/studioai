@@ -1741,6 +1741,56 @@ if __name__ == "__main__":
         ep = next((a for a in sys.argv[3:] if not a.startswith("--")
                     and a != brief), "Ep1")
         run_scene(sys.argv[2], ep, brief=brief)
+    elif cmd == "scenes":
+        # AUTOMATE THE WORK, NEVER THE VERDICT (2026-07-26, Julian: "shouldn't the story
+        # boards run automatically?"). Running the ten gates on scene 4 is not a decision —
+        # it is the same room doing the same job it just did on scene 1, and nothing is
+        # approved by running it. Every scene's storyboard still waits for his eyes exactly
+        # as before; this only removes ten button presses from producing work he was always
+        # going to review.
+        #
+        # THREE DELIBERATE LIMITS, each one a reason this is not simply a loop:
+        #  - REQUIRES A PROVEN SCENE FIRST. The batch refuses unless at least one scene has
+        #    already produced a storyboard, so a broken configuration is found on ONE scene
+        #    rather than on ten with the spend already gone. That is the whole argument for
+        #    why per-scene was right to begin with, kept rather than discarded.
+        #  - HALTS ON THE FIRST FAILURE. A refusal stops the run and names the scene. A
+        #    batch that carries on past a refusal turns one fixable problem into nine.
+        #  - SKIPS WHAT IS ALREADY BUILT unless --force, so re-running after a fix costs
+        #    only the scenes that still need it.
+        eps = next((a for a in sys.argv[2:] if not a.startswith("--")), "Ep1")
+        force = "--force" in sys.argv
+        # _script_package returns the PATH to the canonical package, not its contents —
+        # a real trap, since .get() on a PosixPath fails loudly but only at run time.
+        pkg = json.loads(pathlib.Path(_script_package(eps)).read_text(encoding="utf-8"))
+        nums = sorted({int(b["sceneNumber"]) for b in pkg.get("beats", [])
+                       if b.get("sceneNumber") is not None})
+        built = [n for n in nums if (OUT / f"{eps}_scene{n}_storyboard.json").exists()]
+        if not built and not force:
+            print(f"REFUSED — no scene has a storyboard yet. Fire ONE scene first "
+                  f"(python3 cb_creative.py scene {nums[0]} {eps}) and read it: a batch is "
+                  f"for repeating a configuration that has been proven, never for proving "
+                  f"one. Override with --force if you mean it.")
+            sys.exit(1)
+        todo = nums if force else [n for n in nums if n not in built]
+        if not todo:
+            print(f"nothing to do — all {len(nums)} scenes already have a storyboard "
+                  f"(--force to rebuild)")
+            sys.exit(0)
+        print(f"{len(todo)} scene(s) to build: {todo}"
+              f"{'  (already built: ' + str(built) + ')' if built else ''}", flush=True)
+        for n in todo:
+            print(f"\n=========== SCENE {n} ===========", flush=True)
+            try:
+                run_scene(str(n), eps)
+            except Exception as e:
+                print(f"\nHALTED at scene {n} — {type(e).__name__}: {e}\n"
+                      f"Scenes {[x for x in todo if x < n]} built; "
+                      f"{[x for x in todo if x > n]} not attempted. Fix and re-run; "
+                      f"already-built scenes are skipped.", flush=True)
+                sys.exit(1)
+        print(f"\nall {len(todo)} scene(s) built. Every one still needs your own review "
+              f"and sign-off — running the gates approved nothing.", flush=True)
     elif cmd == "migrate":
         migrate(sys.argv[2] if len(sys.argv) > 2 else "Ep1")
     else:

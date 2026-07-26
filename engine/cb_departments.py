@@ -474,9 +474,30 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
                 "'{Name} is the character from @图N — match the reference 100%, every "
                 "feature and accessory exactly as shown' — then spend your words ONLY on "
                 "pose, position, action-instant, staging, depth and light. The reference "
-                "images carry identity; your text carries the moment. KEEP IT LEAN: the "
-                "whole prompt under ~170 words — every word describing what a reference "
-                "already shows is a word pulling the render away from that reference.\n"
+                # THE LAST NUMERIC CAP ON THE STAGE, DELETED (2026-07-26, Julian: "now we
+                # have the level of directing that gets delivered without the guardrails").
+                # The performance chair retired its own ceiling on evidence — the approved
+                # SH1 keeper runs 722 words and a rejected take runs 716, six words apart
+                # with opposite verdicts, so length never separated them; stop-command
+                # density did. This chair kept "~170 words" and was the only numeric cap
+                # left on the direction -> image -> video path, which is the exact stage
+                # Julian names as the weak one. Honest limit, stated rather than papered
+                # over: that measurement came from MOTION prompts, so it does not by itself
+                # prove a still-image cap wrong. What decides it is his own standing ruling
+                # — the stage exists to AFFORD the performance, and a frame that is correct
+                # and leaves the performance nowhere to go is a failed frame. A number
+                # cannot tell you which words those were. The DISCIPLINE is kept verbatim;
+                # only the number is gone.
+                "images carry identity; your text carries the moment. LEANNESS IS ZERO "
+                "WASTED WORDS, NOT A NUMBER — there is no word ceiling here. Every word "
+                "describing what a reference already shows is a word pulling the render "
+                "away from that reference, so cut those without mercy; but never cut a word "
+                "that is doing real work on pose, position, action-instant, staging, depth "
+                "or light to hit a length. The frame has to AFFORD the performance that "
+                "lands on it: room to travel where the action travels, the object the beat "
+                "needs actually present, both characters placed so the moment can play. A "
+                "frame that is beautiful, correct and leaves the performance nowhere to go "
+                "is a failed frame, however few words built it.\n"
                 "THE LIGHT LAW (drift-safe vocabulary, 2026-07-24): write light ONLY as concrete sky/sun/shadow states from the scene own authored lighting fields - never time-of-day mood words (sunset, sunrise, dawn, golden-hour, dusk, amber light, pink-orange, warm saturated are banned and refuse the save). The 9-take drift campaign proved time-of-day mood words drag generations away from the locked look; state the light EXACTLY as the scene's own authored lighting field words it (e.g. Scene 1's locked 'low sun just above the hills, long gold light raking the flower tops') and let the plate reference carry the rest — never restate a competing sun position or colour the plate does not show.\n"
                 "Never write any duration or motion-over-time; this is one frozen "
                 "instant. Preserve exact character identity from the references.\n\n"

@@ -2283,10 +2283,32 @@ def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
                 msg = (f"THE DIRECTOR'S DIRECTION IS NOT IN THE PROMPT [{r['field']}] — she "
                        f"asked for \u201c{r['clause'][:130]}\u201d and nothing in the prompt "
                        f"delivers: {', '.join(r['missing'][:6])}")
-                if intent_advisory:
-                    print(f"  ⚠ INTENT ADVISORY — {msg}")
-                else:
-                    problems.append(msg)
+                # ADVISORY EVERYWHERE (Julian, 2026-07-26: "do whatever delivers the
+                # creative bear"). This was a hard refusal at authoring. It is not any
+                # more, and the reason is measured, not argued.
+                #
+                # TWO INDEPENDENT MECHANISMS WERE TRIED AND BOTH INVERTED. Word overlap
+                # refused the SH1 keeper Julian approved, then refused the cause-chain
+                # build — the best prompt in the corpus — on clauses it plainly delivers
+                # in better words ("the smallest private smile" IS "the tiny cheek-lift").
+                # So a semantic reader was built (cb_intent.judge, given a real schema the
+                # same day — it had never once run). It scored the two REJECTED prompts
+                # highest, 10/10 DELIVERED each, and the APPROVED keeper lowest at 5
+                # DELIVERED / 5 ABSENT.
+                #
+                # WHY, AND WHY THIS IS STRUCTURAL. Both mechanisms reward RESTATEMENT.
+                # A prompt that echoes the Director's words scores higher by any
+                # text-to-text measure — and restatement is exactly what makes a prompt
+                # laboured and its footage static. The measure is inverted from the
+                # outcome, so it is not a threshold to tune.
+                #
+                # The intent stays where it demonstrably works: LEADING THE WRITER'S
+                # CHARGE, before a word is written (cb_departments._intent_charge — the
+                # keyframe took the same injection and got better at zero word cost).
+                # It is reported here, never refused. Julian's eye is the gate on whether
+                # the beat landed; that was always true and no check should pretend
+                # otherwise.
+                print(f"  ⚠ INTENT NOTE — {msg}")
         except ImportError:
             pass    # engine incomplete — never invent a refusal from a missing module
     if problems:
@@ -2546,8 +2568,13 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                                         refuse_prefix="REFUSED — the Director's own candidate; "
                                                       "no candidate saved")
             except Refused as first_refusal:
-                if "DIRECTION IS NOT IN THE PROMPT" not in str(first_refusal):
-                    raise      # a structural/formula fault is not repairable by re-asking
+                # The intent miss no longer refuses (see check_formula_structure), so this
+                # repair now fires only on a real STRUCTURAL fault — a missing @Audio1
+                # header, an unlabelled shot, a lost HOLD tail. Those are worth one
+                # re-ask: they are mechanical, and the writer fixes them without touching
+                # the creative content. Kept for exactly that.
+                if "DIRECTION IS NOT IN THE PROMPT" in str(first_refusal):
+                    raise      # cannot happen now; if it does, something re-armed the gate
                 log("  THE DIRECTOR'S STOP — the direction is not in the prompt. Handing it "
                     "back to the writer once, in her own words.")
                 repair = ("\n\n===== THE DIRECTOR PULLED THIS TAKE =====\n"
@@ -6533,12 +6560,19 @@ def retire_superseded_directions(scene, episode="Ep1", reviewed_by="Julian",
                 continue    # a stage this build no longer defines — leave it entirely alone
             if stage not in AUTHORING_CHANGED:
                 continue    # relabelled only — see AUTHORING_CHANGED
+            # THE SLUG-VS-PATH BUG (found 2026-07-26, before it fired a second time).
+            # _department_candidate stores skill as a PATH ("skills/crystal-bears-
+            # director/SKILL.md"); this built a bare slug ("crystal-bears-director"),
+            # so the equality never held and EVERY record classified as superseded —
+            # including ones written by the current chair table. A second apply=True
+            # would have destroyed exactly the new-world directions this function was
+            # written to protect. Compare on containment of the slug instead.
             want_worker, want_skill = want[1], f"crystal-bears-{want[2]}"
             for slot in ("approved", "candidate"):
                 rec = (dw.get(stage) or {}).get(slot)
                 if not rec:
                     continue
-                current = (rec.get("worker") == want_worker and rec.get("skill") == want_skill)
+                current = (rec.get("worker") == want_worker and want_skill in str(rec.get("skill") or ""))
                 (kept if current else retired).append({
                     "shotId": sid, "stage": stage, "slot": slot,
                     "worker": rec.get("worker"), "skill": rec.get("skill"),
@@ -6574,12 +6608,19 @@ def retire_superseded_directions(scene, episode="Ep1", reviewed_by="Julian",
             want = _DEPARTMENT_WORKERS.get(stage)
             if not want or stage not in AUTHORING_CHANGED:
                 continue
+            # THE SLUG-VS-PATH BUG (found 2026-07-26, before it fired a second time).
+            # _department_candidate stores skill as a PATH ("skills/crystal-bears-
+            # director/SKILL.md"); this built a bare slug ("crystal-bears-director"),
+            # so the equality never held and EVERY record classified as superseded —
+            # including ones written by the current chair table. A second apply=True
+            # would have destroyed exactly the new-world directions this function was
+            # written to protect. Compare on containment of the slug instead.
             want_worker, want_skill = want[1], f"crystal-bears-{want[2]}"
             d = dw[stage]
             for slot in ("approved", "candidate"):
                 rec = d.get(slot)
                 if rec and not (rec.get("worker") == want_worker
-                                and rec.get("skill") == want_skill):
+                                and want_skill in str(rec.get("skill") or "")):
                     d[slot] = None
             d["history"] = []
             d["retiredAt"] = ts

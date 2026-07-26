@@ -90,6 +90,23 @@ def intent_of(shot):
             if shot.get(k) and str(shot.get(k)).strip()}
 
 
+def _cast_words(shot):
+    """The shot's OWN cast names — never a demand a prompt can fail.
+
+    Every reference-anchored prompt binds each character by name by construction
+    ("Fuzzby is the character from @图3"), so a clause term of "Fuzzby" or "Fuzzby's" is a
+    GUARANTEED hit that discriminates nothing and dilutes the clause's real demands. On a
+    4-term clause it is worth 25% — enough to tip a genuinely rejected prompt over the 0.5
+    threshold on an exact tie, which is exactly how SH2_LABOURED started passing
+    (measured, 2026-07-26).
+    """
+    out = set()
+    for n in (shot.get("charactersInFrame") or []):
+        for w in re.findall(r"[a-z][a-z'-]{2,}", str(n).lower()):
+            out.add(w.rstrip("'s"))
+    return out
+
+
 def clauses(shot):
     """The purpose, decomposed into individually checkable requirements.
 
@@ -112,7 +129,7 @@ def clauses(shot):
             if len(c.split()) < 3 or (field != "visualPayoff" and not _DEMAND.search(c)):
                 continue
             terms = [w for w in re.findall(r"[a-z][a-z'-]{2,}", c.lower())
-                     if w not in _STOP]
+                     if w not in _STOP and w.rstrip("'s") not in _cast_words(shot)]
             if terms:
                 out.append({"field": field, "clause": c, "terms": terms,
                             "gated": field in GATED_FIELDS and not _AUDIENCE.search(c)})
@@ -265,7 +282,29 @@ def judge(prompt_text, shot, model=None):
              "of an event without its intended feeling is PARTIAL at best.")
     usr = ("DIRECTOR'S INTENT:\n" + "\n".join(f"[{k}] {v}" for k, v in it.items())
            + "\n\nTHE PROMPT:\n" + (prompt_text or ""))
-    return cb_llm.structured(sys_p, usr, model=model) if hasattr(cb_llm, "structured") else None
+    # THE RECEIPT SCHEMA (2026-07-26). judge() had never been run — it called
+    # cb_llm.structured without the required `schema` argument and would have crashed.
+    # The point of this call is not a score; it is that the reader must POINT AT the
+    # sentence carrying each of the Director's clauses. A verdict with no quotable
+    # sentence is an admission the beat is not there, and one with a quote is something
+    # Julian can check in two seconds. That is the whole difference from word-matching:
+    # wrong here is VISIBLE.
+    from pydantic import BaseModel, Field
+    from typing import List, Literal
+
+    class ClauseVerdict(BaseModel):
+        clause: str = Field(description="the Director's clause, quoted from her own words")
+        verdict: Literal["DELIVERED", "PARTIAL", "ABSENT"]
+        deliveringSentence: str = Field(
+            description="the EXACT sentence from the prompt that delivers it, verbatim; "
+                        "empty string if no sentence does")
+
+    class IntentReceipt(BaseModel):
+        clauses: List[ClauseVerdict]
+        absentCount: int
+        oneLineVerdict: str = Field(description="does this prompt land the beat — one sentence")
+
+    return cb_llm.structured(sys_p, usr, IntentReceipt, model=model, label="intent_judge")
 
 
 if __name__ == "__main__":

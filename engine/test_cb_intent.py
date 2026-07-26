@@ -74,26 +74,51 @@ if __name__ == "__main__":
     print("INTENT ENGINE PASSED")
 
 
-def test_the_director_stops_the_shot():
-    """THE DIRECTOR'S STOP. Not an advisory — a refusal. A prompt that omits what the
-    Director wrote down does not reach the provider, exactly as a director on a stage pulls
-    a take when the direction was not performed."""
-    import cb_render as R, pathlib
+def test_intent_is_reported_never_refused():
+    """THE STOP WAS RETIRED, ON EVIDENCE (2026-07-26).
+
+    This test used to assert the opposite — that a half-delivered prompt is REFUSED. That
+    was the right instinct and the wrong mechanism, and two independent measurements killed
+    it:
+
+    1. WORD OVERLAP refused the SH1 keeper Julian approved, and then refused the cause-chain
+       build — the best prompt in the corpus — on clauses it plainly delivers in better
+       words ("the smallest private smile" IS "the tiny cheek-lift").
+    2. A SEMANTIC READER (cb_intent.judge, finally given a working schema — it had never
+       once run) scored the two REJECTED prompts highest at 10/10 DELIVERED each, and the
+       APPROVED keeper lowest at 5 DELIVERED / 5 ABSENT.
+
+    Both reward RESTATEMENT, because echoing the Director's words IS higher textual
+    fidelity — and restatement is exactly what makes a prompt laboured and its footage
+    static. The measure is inverted from the outcome, so it was never a threshold to tune.
+
+    The intent stays where it works: leading the writer's charge BEFORE they write
+    (cb_departments._intent_charge). Here it is reported and never refused."""
+    import cb_render as R
     shot = _shot()
-    bad = (HERE.parent / "shows" / "crystal-bears" / "creative" / "fixtures" /
-           "engine_ab" / "SH2_spine_build.txt").read_text()
-    try:
-        R.check_formula_structure(bad, ["x"], shot=shot)
-        raise AssertionError("the gate has no teeth — a half-delivered prompt was allowed")
-    except R.Refused as e:
-        assert "DIRECTOR'S DIRECTION IS NOT IN THE PROMPT" in str(e)
-        # The refusal names the Director's own words. It used to pin the comedy-hinge
-        # clause specifically; since the gate was calibrated to visualPayoff + feltIntent
-        # (2026-07-25, against four prompts with real verdicts) the FIRST clause reported
-        # is a different, equally real feltIntent miss. Pin the substance — that a named,
-        # quoted clause of hers is reported missing — not which one sorts first.
-        assert "she asked for" in str(e)
-        assert any(w in str(e) for w in ("feltIntent", "visualPayoff"))
+    half = (HERE.parent / "shows" / "crystal-bears" / "creative" / "fixtures" /
+            "engine_ab" / "SH2_spine_build.txt").read_text()
+    # a half-delivered prompt must NOT be refused on intent grounds any more
+    R.check_formula_structure(half, ["x"], shot=shot)
+
+    # ...and the scoring still WORKS — it is a report, not a dead call
+    s = I.score(half, shot)
+    assert s["total"] >= 8
+    assert s["missed"], "the report has nothing to say about a known half-delivered prompt"
+
+
+def test_the_approved_and_the_best_prompt_both_pass():
+    """THE REGRESSION GUARD. Whatever anyone builds here next, these two must never be
+    refused again: the take Julian approved, and the cause-chain build the research
+    produced. Both were blocked by the gate this file used to defend."""
+    import cb_render as R
+    CR = HERE.parent / "shows" / "crystal-bears" / "creative"
+    for name, path, sid in (("the approved keeper", CR / "SH1_KEEPER_EXEMPLAR.txt", "S1.SH1"),
+                            ("the cause-chain build",
+                             CR / "fixtures" / "SH2_C_causechain.txt", "S1.SH2")):
+        shot = _shot(sid)
+        R.check_formula_structure(path.read_text(),
+                                  shot.get("dialogueLines") or [], shot=shot)
 
 
 def test_the_gate_opens_when_the_direction_is_delivered():

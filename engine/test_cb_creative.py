@@ -19,6 +19,10 @@ import cb_llm
 
 
 # ── fixtures ───────────────────────────────────────────────────────────────────────────
+# DORMANT-SAFE WHEN THE EPISODE IS RESET TO SCRIPT (2026-07-26) — see _live_package.py.
+from _live_package import require_live_beat_package
+pytestmark = require_live_beat_package()
+
 def _treatment(name):
     f = {k: f"{name}:{k}" for k in ("audienceExperience", "emotionalPointOfView",
          "comicOrDramaticMechanism", "characterPerformanceStrategy", "visualGrammar",

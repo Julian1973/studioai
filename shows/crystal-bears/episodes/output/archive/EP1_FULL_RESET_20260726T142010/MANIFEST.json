@@ -1,0 +1,66 @@
+{
+ "archivedAt": "20260726T142010",
+ "reason": "EPISODE 1, FULL RESET \u2014 Julian, 2026-07-26: \"we need to archive episode 1 completely, we will start afresh from script.\" Everything Gate 1 and downstream is archived: the beat package, both storyboards (including the PRE_JULIAN_RESTAGE snapshot), the story intake, the episode vision, the canon envelope and the proposed canon completion. The run begins again at the SCRIPT under the new system (Director holds delivery; both prompts engineered from her intent; the intent Stop retired on evidence; the cause-chain method installed; the card's own framing locks now disobeyable \u2014 that last one matters most here, because the old storyboard's camera field literally ordered 'holds that two-shot, unbroken... camera locked... near-motionless and flat', which is what the new run must not inherit).",
+ "nothingDeleted": true,
+ "theRunStartsHere": "shows/crystal-bears/episodes/scripts/Ep1_The_Adventure_Begins_Final_v2.txt",
+ "kept": {
+  "episodes/scripts/": "the script and title \u2014 Gate 0, the clean run's only input",
+  "canon/": "characters, locations, LOCKED_CANON, banned vocabulary",
+  "cb-seed/assets/": "44 turnaround references + 6 locked \u2014 identity source",
+  "creative/": "TASTE CANONs, CAUSE_CHAIN_METHOD, SH1_KEEPER_EXEMPLAR, LEAN_LAW, RETROSPECTIVE_THE_SPINE \u2014 the learning from 594 renders and 42 verdicts",
+  "engine/ + cb-studio/": "the new system",
+  "engine/media/archive/ (369MB)": "prior render evidence, untouched"
+ },
+ "fileCount": 7,
+ "files": [
+  {
+   "file": "Ep1_The_Adventure_Begins_beat_package.json",
+   "was": "shows/crystal-bears/episodes/output/Ep1_The_Adventure_Begins_beat_package.json",
+   "now": "output/Ep1_The_Adventure_Begins_beat_package.json",
+   "bytes": 57555,
+   "md5": "b0486405b59fc55a1061afcd2963a111"
+  },
+  {
+   "file": "Ep1_canon_envelope.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_canon_envelope.json",
+   "now": "creative/Ep1_canon_envelope.json",
+   "bytes": 2492,
+   "md5": "32f4439a61a02a58aba94382cca16fca"
+  },
+  {
+   "file": "Ep1_episode_vision.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_episode_vision.json",
+   "now": "creative/Ep1_episode_vision.json",
+   "bytes": 3648,
+   "md5": "7bd917b7bb6b77716001a2d697885dc9"
+  },
+  {
+   "file": "Ep1_scene1_canon_completion_PROPOSED.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_scene1_canon_completion_PROPOSED.json",
+   "now": "creative/Ep1_scene1_canon_completion_PROPOSED.json",
+   "bytes": 13546,
+   "md5": "a643a281cb67eedb957f06b2eded11f1"
+  },
+  {
+   "file": "Ep1_scene1_storyboard.PRE_JULIAN_RESTAGE_20260722.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_scene1_storyboard.PRE_JULIAN_RESTAGE_20260722.json",
+   "now": "creative/Ep1_scene1_storyboard.PRE_JULIAN_RESTAGE_20260722.json",
+   "bytes": 79629,
+   "md5": "460e974947168733e576c37b12ad6431"
+  },
+  {
+   "file": "Ep1_scene1_storyboard.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_scene1_storyboard.json",
+   "now": "creative/Ep1_scene1_storyboard.json",
+   "bytes": 87724,
+   "md5": "f2c415b61150da365076effb2548c5e1"
+  },
+  {
+   "file": "Ep1_story_intake_CANDIDATE.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_story_intake_CANDIDATE.json",
+   "now": "creative/Ep1_story_intake_CANDIDATE.json",
+   "bytes": 64353,
+   "md5": "2b5bbd4bca6006f915da1851a7114008"
+  }
+ ]
+}

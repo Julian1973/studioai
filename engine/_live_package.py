@@ -25,6 +25,32 @@ _CANDIDATES = (
     HERE.parent / "cb-output" / "Ep1_scene1_production_package.json",
 )
 
+# THE BEAT PACKAGE IS A SECOND, EARLIER DEPENDENCY (2026-07-26). The Ep1 FULL RESET archived
+# Gate 1 and everything downstream, so the Creative Room's own tests lost their input too —
+# eight of them, all raising "no approved script/beat package for Ep1". Same rule: skip.
+_BEAT_CANDIDATES = (
+    HERE.parent / "shows" / "crystal-bears" / "episodes" / "output"
+    / "Ep1_The_Adventure_Begins_beat_package.json",
+    HERE.parent / "cb-output" / "Ep1_The_Adventure_Begins_beat_package.json",
+)
+
+
+def live_beat_package_path():
+    """The canonical Ep1 beat package, or None when the episode has been reset to script."""
+    for p in _BEAT_CANDIDATES:
+        if p.exists():
+            return p
+    return None
+
+
+def require_live_beat_package():
+    """Skip, never fail, when the episode has been archived back to its script."""
+    if live_beat_package_path() is None:
+        return pytest.mark.skip(reason="no live Ep1 beat package — the episode has been "
+                                       "archived for a fresh run from script; these "
+                                       "assertions need a real Gate 1 artifact")
+    return pytest.mark.skipif(False, reason="")
+
 
 def live_package_path():
     """The canonical Scene 1 package, or None when the scene has been reset."""

@@ -1948,8 +1948,19 @@ function storyIntakePanelHTML(d){
     const beats=byScene[sc.sceneNumber]||[];
     return `<div class="stagerow"><span class="stagerow-name">Scene ${_esc(sc.sceneNumber)} — ${_esc(sc.location)} (${_esc(sc.time)})</span>
       <span style="color:var(--muted);font-size:12px">${beats.length} beat${beats.length==1?"":"s"}</span></div>
-      ${beats.map(b=>`<div style="margin:4px 0 10px 14px;font-size:12px;color:var(--muted)">
-        <b>${_esc(b.beatCode)}</b> — ${_esc(b.storyBeat)}</div>`).join("")}`;
+      ${beats.map(b=>`<div style="margin:6px 0 14px 14px;font-size:12px;color:var(--muted)">
+        <div><b style="color:var(--text)">${_esc(b.beatCode)}</b> — ${_esc(b.storyBeat)}</div>
+        ${b.boundaryReason?`<div style="margin-top:4px;padding-left:10px;border-left:2px solid var(--accent,#3d8)">
+          <span style="opacity:.7">why the beat turns here:</span> ${_esc(b.boundaryReason)}</div>`:""}
+        ${(b.want||b.need)?`<div style="margin-top:4px;padding-left:10px">
+          <span style="opacity:.7">wants</span> ${_esc(b.want||"—")} &nbsp;·&nbsp;
+          <span style="opacity:.7">needs</span> ${_esc(b.need||"—")}</div>`:""}
+        ${(b.kidRead||b.adultRead)?`<div style="margin-top:4px;padding-left:10px">
+          <span style="opacity:.7">kids see</span> ${_esc(b.kidRead||"—")}<br>
+          <span style="opacity:.7">adults see</span> ${_esc(b.adultRead||"—")}</div>`:""}
+        ${b.emotionalIntent?`<div style="margin-top:4px;padding-left:10px">
+          <span style="opacity:.7">felt intent:</span> ${_esc(b.emotionalIntent)}</div>`:""}
+      </div>`).join("")}`;
   }).join("");
   const approved=c.approvalState=="approved";
   return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>

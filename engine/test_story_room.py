@@ -65,10 +65,20 @@ def test_step_one_convenes_the_whole_room():
             ("SHOW CANON", "the show bible"),
             ("TASTE CANON", "the taste canons"),
             ("APPROVED CANONICAL EXEMPLAR", "the approved exemplars"),
-            ("verbatim-locked", "the dialogue lock")):
+            ("verbatim-locked", "the dialogue lock"),
+            ("Cinematographer", "the DP — a beat with no visual event cannot be staged"),
+            ("why the story turns HERE", "the demand that the boundary justify itself")):
         assert needed in m, (
             f"step 1 lost {what}. This pass sets the episode's emotional architecture; a beat "
             f"boundary or an adultRead authored without it cannot be recovered downstream.")
+    # and the one structural decision this pass makes must still be forced to justify itself
+    import cb_departments as _D
+    assert "boundaryReason" in _D.BeatSplit.model_fields, (
+        "BeatSplit lost boundaryReason — the beat boundary is the single most consequential "
+        "structural decision in the pipeline and it would once again be unreviewable")
+    assert _D.BeatSplit.model_fields["boundaryReason"].is_required(), (
+        "boundaryReason became optional — an unjustified boundary is an invisible one")
+
     assert len(m) > 20000, (
         f"step 1's charge collapsed to {len(m)} chars — it was ~2,000 when it ran on the "
         f"Director alone and ~36,000 with the room. Something stopped assembling.")

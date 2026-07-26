@@ -198,6 +198,14 @@ class BeatSplit(BaseModel):
     scene's last event. Dialogue text is never authored here — see cb_intake.py."""
     sceneNumber: int
     firstEventIndex: int = Field(ge=0)
+    # THE WHY, RECORDED (2026-07-26, Julian: "all agree how it breaks down AND WHY").
+    # firstEventIndex is the single most consequential structural decision in the entire
+    # pipeline — every later chair designs INSIDE the beats it creates — and it was the only
+    # structural decision in this studio that never had to justify itself. The shot
+    # conference has transitionReason and cutPaceReason for far smaller calls. An
+    # unjustified boundary is also unreviewable: Julian could see WHAT each beat was and
+    # never why it started there, so a wrong cut was invisible until the footage failed.
+    boundaryReason: str = Field(min_length=1)
     beatCode: str = Field(min_length=1)
     storyBeat: str = Field(min_length=1)
     want: str = Field(min_length=1)
@@ -265,8 +273,8 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
     # Imported lazily inside the function: at module scope it would be a cycle.
     from cb_creative import _mind
     return cb_llm.structured(
-        _mind("DIRECTOR, WITH THE SHOWRUNNER IN THE ROOM",
-              ["directorTaste", "showrunnerTaste"],
+        _mind("DIRECTOR AND CINEMATOGRAPHER, WITH THE SHOWRUNNER IN THE ROOM",
+              ["directorTaste", "cinematographyTaste", "showrunnerTaste"],
                 "You are breaking a LOCKED, already-approved script into its scenes and "
                 "beats for this studio's storyboard pipeline. The script's scene order, "
                 "its characters and every spoken line are LOCKED SOURCE EVIDENCE — you "
@@ -284,7 +292,20 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
                 "show is built on), and emotionalIntent. Also suggest the episode's title, "
                 "logline and lead bear. Every scene needs at least one beat, and its first "
                 "beat's own firstEventIndex must equal that scene's own first event "
-                "index.\n\n"
+                "index. For EVERY beat, state boundaryReason: why the story turns HERE and "
+                "not one event earlier or later \u2014 what changes at this exact moment that "
+                "makes the previous beat finished. \u2018It felt like a new section\u2019 is not a "
+                "reason; \u2018his confidence breaks the instant she stops watching\u2019 is. This is "
+                "the one structural decision this pass makes and it is the one every later "
+                "chair has to design inside, so it is the one that must justify itself.\n\n"
+                "THE CINEMATOGRAPHER IS AT THIS TABLE (2026-07-26). Where a beat begins "
+                "decides what can be SEEN of it \u2014 a boundary drawn one event late buries "
+                "the visual turn inside the previous beat, and a beat with no visual event "
+                "in it cannot be staged, only narrated. He does not design shots here and "
+                "there is no camera language in this output. He is accountable for one "
+                "thing: that every beat contains something a camera could actually watch "
+                "happen, and he says so plainly when a proposed boundary would leave a beat "
+                "visually empty or hand the next one a turn that already occurred.\n\n"
                 "THE SHOWRUNNER IS IN THIS PASS AND SHE TALKS WHILE THE EPISODE IS BROKEN "
                 "DOWN (2026-07-26). This is the most consequential pass in the pipeline — "
                 "every later chair designs INSIDE the beats decided here, and a beat "

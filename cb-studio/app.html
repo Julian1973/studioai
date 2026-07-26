@@ -11,10 +11,18 @@
 :root{
   --bg:#14201a;--surface:#1c2921;--surface2:#223227;--ink:#edf4ee;--muted:#93a89b;--hint:#6b8074;--line:#33473a;
   --brand:#2f9e8f;--brandbg:#1d2f2b;--brandink:#6fe0cf;
-  --spark:#f0b542;--sparkbg:#2a2419;--deep:#e8825f;--deepbg:#2c2119;--heart:#e893b5;--heartbg:#2a1e24;
-  --conn:#a78bfa;--connbg:#241f36;--rip:#52c9b8;--ripbg:#1a2a28;--ok:#3ecf8e;--okbg:#16281f;--info:#6ab0e8;--infobg:#1a2430;
+  --spark:#f0b542;--sparkbg:#2a2419;--deep:#e8825f;--deepbg:#2c2119;
+  --ok:#3ecf8e;--okbg:#16281f;--info:#6ab0e8;--infobg:#1a2430;
   --danger:#e8785a;--dangerbg:#2a1a16;
   --warn:#e8b25a;--warnbg:#2a2318;
+  /* ONE MONO TOKEN (2026-07-26). It was retyped three times; monospace is now banned from
+     PROSE everywhere in the shot panel and survives only in raw-record wells and hashes. */
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* SIX SPACING STEPS. Hand-typed margins are the single largest source of "no rhythm". */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;
+  /* Sized for "SPECIAL REFERENCES", the longest name in cb_departments.SHOT_PANEL — one
+     edit if that table ever carries a longer one. */
+  --rowtitle-w:184px;
 }
 *{box-sizing:border-box}
 input,textarea,select{background:var(--surface2);color:var(--ink);accent-color:var(--brand)}
@@ -32,7 +40,7 @@ body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI
 .shell{display:flex;min-height:calc(100vh - 98px)}
 .nav{width:172px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);padding:10px}
 .nav a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;margin-bottom:2px}
-.nav a.active{background:var(--brandbg);color:var(--brandink);font-weight:600}.nav a:hover:not(.active){background:#f1eff8}
+.nav a.active{background:var(--brandbg);color:var(--brandink);font-weight:600}.nav a:hover:not(.active){background:var(--surface2);color:var(--ink)}
 .nav .sep{border-top:1px solid var(--line);margin:8px 6px}
 .main{flex:1;padding:22px 26px;min-width:0}
 .h1{font-size:21px;font-weight:900;margin:0 0 2px;font-family:'Display Slab',Georgia,serif}.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
@@ -69,13 +77,13 @@ body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI
 .srow{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;cursor:pointer;background:var(--surface)}
 .srow:hover{border-color:var(--brand)}.srow .num{font-size:11px;font-weight:600;color:var(--brandink);min-width:46px}
 .mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
-.mc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px}.mc[onclick]{cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .12s}.mc[onclick]:hover{border-color:var(--brand);box-shadow:0 3px 14px rgba(108,92,231,.16);transform:translateY(-1px)}.mc .lab{font-size:12px;color:var(--muted)}.mc .num{font-size:24px;font-weight:600;margin-top:3px}
+.mc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px}.mc[onclick]{cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .12s}.mc[onclick]:hover{border-color:var(--brand);box-shadow:0 3px 14px rgba(0,0,0,.28);transform:translateY(-1px)}.mc .lab{font-size:12px;color:var(--muted)}.mc .num{font-size:24px;font-weight:600;margin-top:3px}
 .bar{height:7px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-top:8px}.bar>i{display:block;height:100%;background:var(--brand)}
 .scriptbox{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px 18px;white-space:pre-wrap;font-size:13px;line-height:1.6;max-height:520px;overflow:auto}
 .bible{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 26px;max-width:820px}
 .bible h1{font-size:20px}.bible h2{font-size:17px;border-top:1px solid var(--line);padding-top:14px}.bible h3{font-size:15px}
 .bible table{border-collapse:collapse;width:100%;font-size:12.5px;margin:8px 0}.bible th,.bible td{border:1px solid var(--line);padding:5px 8px;text-align:left}
-.modal{position:fixed;inset:0;background:rgba(28,24,48,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:10}.modal.show{display:flex}
+.modal{position:fixed;inset:0;background:rgba(10,16,13,.62);display:none;align-items:center;justify-content:center;padding:24px;z-index:10}.modal.show{display:flex}
 .sheet{background:var(--surface);border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:20px 22px}
 .media{width:100%;border-radius:10px;background:var(--surface2);margin:12px 0;max-height:380px;object-fit:contain}
 .kv{font-size:12px;color:var(--muted);margin:10px 0 3px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
@@ -133,7 +141,7 @@ body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI
 .cbeat .cbact{flex:1;min-width:0;font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cbeat .cbst{font-size:10.5px;font-weight:600;border-radius:6px;padding:2px 8px;white-space:nowrap}
 .cpanel{border:1.5px solid var(--brand);border-radius:14px;padding:16px 17px;margin-top:14px;background:var(--surface)}
-.cjson{width:100%;min-height:240px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.45;padding:11px;border:1px solid var(--line);border-radius:8px;box-sizing:border-box;resize:vertical;background:var(--bg);color:var(--ink)}
+.cjson{width:100%;min-height:240px;font-family:var(--mono);font-size:11.5px;line-height:1.45;padding:11px;border:1px solid var(--line);border-radius:8px;box-sizing:border-box;resize:vertical;background:var(--bg);color:var(--ink)}
 .cgate-note{font-size:11.5px;color:var(--spark);background:var(--sparkbg);border-radius:7px;padding:8px 11px;margin:8px 0}
 /* ── click-to-enlarge lightbox (keyframes + scene plate) ── */
 img.zoom{cursor:zoom-in;transition:filter .12s ease}
@@ -149,7 +157,8 @@ img.zoom:hover{filter:brightness(1.08)}
 #lbclose:hover{opacity:1}
 /* THE PRODUCTION CONTROL ROOM (2026-07-17 UX replacement) — one sequential pipeline: */
 :root{--honey:#d9a441;--honeybg:#2e2416}
-:root{--deep:#e8825f;--deepbg:#2c2119}
+/* (2026-07-26) the byte-identical duplicate :root{--deep…} that used to sit here is gone;
+   the tokens themselves are live — STATE_COLOR.blocked / STATE_BG.blocked read them. */
 
 /* ── THE PRODUCTION OPERATING SYSTEM — Scene Board + Scene Workspace ── */
 .filterbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
@@ -300,14 +309,48 @@ img.zoom:hover{filter:brightness(1.08)}
 .shotcard:last-child{border-bottom:none}
 .shotcard-id{font-size:12.5px;font-weight:600}
 .shotcard-line{font-size:12px;color:var(--hint);margin-top:2px}
+/* ══ THE TREATMENTS (2026-07-26) ═══════════════════════════════════════════════════════
+   The creative room writes three named approaches to the scene and the reasoning that
+   welded two of them together — 21,537 + 8,958 characters for Scene 1 alone. All of it
+   was filed under a "Technical details" disclosure holding
+   `JSON.stringify(PSB).slice(0,4000)`, and `treatments` begins at character 5,966 — so
+   the slice ended before the first treatment did, and this text had never once been on
+   screen. It is the most valuable prose the product generates. It gets a real home. */
+.trt-lede{font-size:13px;line-height:1.65;color:var(--muted);max-width:78ch;margin-top:var(--s2)}
+.trt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--s3);margin-top:var(--s3)}
+.trt{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:var(--s4);min-width:0}
+.trt.is-selected{border-color:var(--honey);background:var(--honeybg)}
+.trt-tag{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--hint)}
+.trt.is-selected .trt-tag{color:var(--honey)}
+.trt-name{font-family:'Display Slab',Georgia,serif;font-size:16px;line-height:1.3;margin:var(--s1) 0 var(--s2);letter-spacing:-.2px}
+.trt-name em{display:block;font-family:inherit;font-style:normal;font-size:12.5px;font-weight:400;color:var(--muted);line-height:1.45;margin-top:var(--s1)}
+.trt-field{margin-top:var(--s3)}
+.trt-field>dt{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--hint);margin-bottom:3px}
+.trt-field>dd{margin:0;font-size:12.5px;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}
+.trt-more>summary{cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--hint);list-style:none;padding:var(--s2) 0 0}
+.trt-more>summary::-webkit-details-marker{display:none}
+.trt-more>summary::before{content:"▸ "}
+.trt-more[open]>summary::before{content:"▾ "}
+.trt-sel{border:1px solid var(--honey);border-radius:10px;background:var(--surface);padding:var(--s4);margin-top:var(--s3)}
+.trt-sel .trt-field>dd{max-width:78ch}
+.trt-from{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s2)}
+.trt-from span{font-size:10.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+/* A last-resort floor so a bare <pre> can never again typeset as an unwrapped monospace
+   slab. Every existing pre rule is a class selector and still wins on specificity — this
+   only ever catches a <pre> nobody styled. */
+pre{white-space:pre-wrap;overflow-wrap:anywhere}
 
 .techdetails{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .techdetails summary{cursor:pointer;font-size:11px;color:var(--hint)}
 .techmeta{font-size:11px;color:var(--hint);margin-top:8px}
-.techpre{font-size:10.5px;line-height:1.5;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:11px;margin:8px 0 0;max-height:260px;overflow:auto;color:var(--muted)}
+/* THE ONE PLACE MONO SURVIVES: raw records. Never prose. (2026-07-26) */
+.techpre{font-family:var(--mono);font-size:11px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--surface2);border-radius:8px;padding:11px;margin:var(--s2) 0 0;max-height:260px;overflow:auto;color:var(--muted)}
 
-.dlgline{font-size:14px;margin-bottom:10px;line-height:1.5}
-.dlgdelivery{color:var(--hint);font-size:12px;margin-top:2px}
+/* .dlgline is the plain locked-script line list (storyboard + the voice row's "the lines
+   this take performs"). The DIRECTION document's own dialogue is .vodiff — a diff, not a
+   read — and never renders through here. */
+.dlgline{font-size:15px;line-height:1.62;margin-bottom:var(--s3);overflow-wrap:anywhere}
+.dlgdelivery{color:var(--hint);font-size:11px;line-height:1.45;margin-top:2px}
 
 .candgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;width:100%}
 .cand video{width:100%;border-radius:10px;background:#000;display:block}
@@ -383,12 +426,25 @@ img.zoom:hover{filter:brightness(1.08)}
 .runhead-purpose{flex:1;min-width:200px;font-size:12.5px;color:var(--muted);padding-bottom:4px;max-width:460px}
 .runhead-nav{display:flex;gap:8px;align-items:center;padding-bottom:2px}
 .runhead-nav .btn,.runhead-nav .btn.ghost{margin:0;padding:6px 13px;font-size:12px}
-.runmeter{display:flex;gap:4px;margin-top:12px}
-.runmeter i{flex:1;height:4px;border-radius:2px;background:var(--surface2);transition:background .2s ease}
-.runmeter i.done{background:var(--ok)}
-.runmeter i.ready{background:var(--honey)}
-.runmeter i.blocked{background:var(--danger)}
-.runmeter i.generating{background:var(--info);animation:runpulse 1.4s ease-in-out infinite}
+/* THE STATUS SPINE (2026-07-26) — the same component, in better clothes. Built by mapping
+   the rows through panelSection(), so the numbers and names are always the engine's own. */
+.runmeter{display:flex;gap:var(--s1);margin-top:var(--s3);align-items:stretch}
+.runmeter button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:transparent;border:none;border-bottom:3px solid var(--line);border-radius:6px 6px 0 0;
+  padding:5px 2px 5px;font:inherit;color:var(--hint);cursor:pointer;
+  transition:border-color .2s ease,color .2s ease,background .2s ease}
+.runmeter button:hover{background:var(--surface2);color:var(--muted)}
+.runmeter .msnum{font-size:10.5px;font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums;line-height:1}
+.runmeter .msglyph{font-size:10px;line-height:1}
+.runmeter .msname{display:none;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  line-height:1.2;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.runmeter button.cur .msname{display:block}
+@media (min-width:1100px){.runmeter .msname{display:block}}
+.runmeter button.done{border-bottom-color:var(--ok);color:var(--ok)}
+.runmeter button.ready{border-bottom-color:var(--honey);color:var(--honey)}
+.runmeter button.blocked{border-bottom-color:var(--deep);color:var(--deep)}
+.runmeter button.generating{border-bottom-color:var(--info);color:var(--info);animation:runpulse 1.4s ease-in-out infinite}
+.runmeter button.cur{background:var(--surface2)}
 .rendercard{margin-top:12px;border:1px solid var(--info);border-radius:12px;background:var(--infobg);padding:14px 16px}
 .rendercard-top{display:flex;align-items:center;gap:10px}
 .rendercard-title{font-size:13.5px;font-weight:700;color:var(--info)}
@@ -405,26 +461,43 @@ img.zoom:hover{filter:brightness(1.08)}
 .runrail{position:relative;padding-left:34px}
 .runrail::before{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:2px;background:var(--line);border-radius:1px}
 .runrow{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
-.runrow-dot{position:absolute;left:-27px;top:16px;width:16px;height:16px;border-radius:50%;border:2.5px solid var(--line);background:var(--bg);z-index:1;transition:border-color .2s ease,background .2s ease}
-.runrow.done .runrow-dot{border-color:var(--ok);background:var(--ok)}
-.runrow.ready .runrow-dot{border-color:var(--honey);background:var(--honeybg)}
-.runrow.blocked .runrow-dot{border-color:var(--danger);background:var(--dangerbg)}
+/* ── THE FIVE STATE FORMS (2026-07-26) ─────────────────────────────────────────────────
+   Status by colour alone is status you cannot point at on a printout. Each state gets its
+   own SHAPE as well as its own token: settled = filled disc, your move = ring, rendering =
+   filled + pulse, held = a flat-lined bar, waiting = hollow ring.
+   `.runrow.ready .runrow-dot` is deliberately gone: it painted honey on every ready row, so
+   three or four glowed at once and the cursor ring stopped meaning anything. There is now
+   exactly ONE honey element on screen — the current row, its dot, and the NOW line. */
+.runrow-dot{position:absolute;left:-27px;top:16px;width:16px;height:16px;border-radius:50%;border:2px solid var(--line);background:var(--bg);z-index:1;opacity:.6;transition:border-color .2s ease,background .2s ease}
+.runrow.done .runrow-dot{border-color:var(--ok);background:var(--ok);opacity:1}
+.runrow.blocked .runrow-dot{border-radius:2px;height:5px;top:21px;border:none;background:var(--deep);opacity:1}
 .runrow.current{background:var(--surface2);border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg)}
-.runrow.generating .runrow-dot{border-color:var(--info);background:var(--infobg);animation:runpulse 1.4s ease-in-out infinite}
+.runrow.current .runrow-dot{border-color:var(--honey);background:var(--bg);opacity:1;box-shadow:0 0 0 3px var(--honeybg)}
+.runrow.generating .runrow-dot{border-radius:50%;height:16px;top:16px;border:2px solid var(--info);background:var(--info);opacity:1;animation:runpulse 1.4s ease-in-out infinite}
+.runrow.tier-later{opacity:.62}
+.runrow.tier-later:hover,.runrow.tier-later:focus-within{opacity:1}
 @keyframes runpulse{0%,100%{box-shadow:0 0 0 0 var(--infobg)}50%{box-shadow:0 0 0 6px var(--infobg)}}
-.runrow-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none}
-.runrow-num{font-size:10px;color:var(--hint);font-weight:700;letter-spacing:.08em}
-.runrow-title{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);white-space:nowrap}
+/* THE HEAD IS A GRID, so the columns stop jittering row to row. num | title | summary |
+   state | caret. The dot is NOT in here — it is absolutely positioned on .runrow, in the
+   34px gutter .runrail reserves. */
+.runrow-head{display:grid;grid-template-columns:26px var(--rowtitle-w) minmax(0,1fr) auto 14px;
+  align-items:center;gap:var(--s3);min-height:44px;padding:0 var(--s4);cursor:pointer;user-select:none}
+.runrow-num{font-size:10.5px;color:var(--muted);font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.runrow-title{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .runrow.done .runrow-title{color:var(--muted)}
-.runrow-sum{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.runrow-state{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
-.runrow-mini{width:52px;height:30px;object-fit:cover;border-radius:6px;flex:none;border:1px solid var(--line)}
-.runrow-caret{color:var(--hint);font-size:11px;transition:transform .18s ease}
+.runrow-sum{min-width:0;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.runrow-state{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.runrow-caret{color:var(--hint);font-size:12px;transition:transform .18s ease;justify-self:end}
 .runrow.open .runrow-caret{transform:rotate(90deg)}
-.runrow-body{padding:2px 16px 16px;border-top:1px solid var(--line);animation:runreveal .18s ease}
+.runrow-body{padding:2px var(--s4) var(--s4);border-top:1px solid var(--line);min-width:0;animation:runreveal .18s ease}
 @keyframes runreveal{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
-.runrow-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+/* THE DECISION zone. Exactly one primary per row; everything else is quiet. A row that is
+   not the cursor renders its controls quiet AND closed — a ghost button on a row you are
+   not working on is still a decision the eye has to make. */
+.runrow-actions{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center;margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line)}
 .runrow-actions .btn,.runrow-actions .btn.ghost{margin:0;padding:8px 15px;font-size:12.5px}
+.runrow-actions.quiet .btn:not([disabled]){background:transparent;color:var(--muted);border:1px solid var(--line);box-shadow:none;font-weight:600}
+.runrow-actions.quiet .btn:not([disabled]):hover{border-color:var(--brand);color:var(--ink)}
 .runmedia{margin-top:12px;max-width:520px}
 .runmedia img,.runmedia video{width:100%;border-radius:10px;display:block;background:#000;border:1px solid var(--line)}
 .runrefs{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
@@ -448,7 +521,9 @@ img.zoom:hover{filter:brightness(1.08)}
 .rundisc-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px}
 .rundisc-chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
 .rundisc-chip img{width:30px;height:18px;object-fit:cover;border-radius:3px}
-.rundisc pre{margin:0;padding:12px 14px;font-size:11.5px;line-height:1.55;color:var(--muted);white-space:pre-wrap;border-top:1px solid var(--line);max-height:300px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* This is directorial PROSE, not code — it only ever inherited monospace from the <pre>
+   that was chosen to preserve paragraph breaks. (2026-07-26) */
+.rundisc pre{margin:0;padding:var(--s3) 14px;font-size:12.5px;line-height:1.6;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid var(--line);max-height:300px;overflow:auto;font-family:inherit;max-width:62ch}
 .runmsg{margin-top:12px;padding:11px 14px;border-radius:10px;font-size:12.5px;border:1px solid var(--line)}
 .runmsg.err{border-color:var(--danger);background:var(--dangerbg);color:var(--danger)}
 .runmsg.ok{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
@@ -483,8 +558,12 @@ img.zoom:hover{filter:brightness(1.08)}
 .fcard-done{display:inline-flex;align-items:center;gap:5px;color:var(--ok);background:var(--okbg);border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;width:100%;justify-content:center}
 .rundecide{margin-top:12px;border:1px solid var(--honey);border-radius:10px;background:var(--surface);overflow:hidden}
 .rundecide-head{padding:8px 13px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--honey);background:var(--honeybg)}
-.rundecide-text{padding:11px 14px;font-size:12.5px;line-height:1.6;color:var(--ink);max-height:340px;overflow:auto}
-.rundecide-text pre{margin:0;white-space:pre-wrap;font:inherit}
+/* NO SCROLL BOX (2026-07-26). A scrollbar inside a scrolling page, holding the exact text
+   you are being asked to approve, hides content, breaks find-in-page, and makes the document
+   feel like an attachment rather than the thing you are here to judge. The document sets its
+   own length; the page scrolls. */
+.rundecide-text{padding:11px 14px;font-size:12.5px;line-height:1.6;color:var(--ink);min-width:0}
+.rundecide-text pre{margin:0;white-space:pre-wrap;font:inherit;overflow-wrap:anywhere}
 .refstrip-head{margin-top:12px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .refstrip{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .refcard{width:152px}
@@ -496,7 +575,115 @@ img.zoom:hover{filter:brightness(1.08)}
 .refaudio{margin-top:10px;max-width:430px}
 .fcard-thumb{position:relative}
 .fcard-inh{position:absolute;top:5px;left:5px;background:var(--surface2);color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:2px 6px;border:1px solid var(--line)}
-.rowmore{margin-top:10px}
+/* ══ THE DIRECTION DOCUMENT (2026-07-26) ════════════════════════════════════════════════
+   THE VISIBLE CRIME, and where it came from. `asText` returned `<pre>${prompt}</pre>`. The
+   PENDING path wrapped it in .rundecide-text, which carries `pre{white-space:pre-wrap;
+   font:inherit}` — legible. The APPROVED path wrapped it in .rowmore, which has no `pre`
+   rule at all — so it inherited the UA's monospace + `white-space:pre` inside .runrow-body,
+   which had no min-width:0, no max-width and no overflow. That is the exact horizontal
+   overflow off the right edge of Julian's screenshot. The fix is not to patch the losing
+   branch: it is to delete the split. Both states now render the SAME component.
+
+   Containment is structural, in three layers, with no `overflow` declaration anywhere:
+     .dirdoc      max-width:62ch  — 62ch at 15px ≈ 500px inside 914px of usable body width
+     .dirdoc-p    overflow-wrap:anywhere — belt-and-braces for a pathological long token
+     .runrow-body min-width:0     — so the grid/flex parent can actually shrink
+   Horizontal overflow becomes impossible rather than merely unlikely. */
+.dirdoc{margin-top:var(--s3);background:var(--surface2);border:1px solid var(--line);
+  border-radius:12px;padding:20px 22px;min-width:0;max-width:62ch}
+.dirdoc *{min-width:0}
+.dirdoc.is-pending{border-color:var(--honey)}
+.dirdoc.is-stale{opacity:.55}
+.dirdoc-deck{border-left:2px solid var(--brand);padding-left:14px;margin-bottom:var(--s5)}
+.dirdoc-deck p{font-size:16px;line-height:1.55;font-weight:500;color:var(--ink);max-width:58ch;margin:0;overflow-wrap:anywhere}
+.dirdoc-micro{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+/* Repeated standing boilerplate becomes a masthead. DEMOTED — never hidden behind a click;
+   hidden approved content is the bug this whole pass exists to fix. */
+.dirdoc-terms{font-size:12.5px;line-height:1.6;color:var(--hint);border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);padding:14px 0;margin-bottom:var(--s5)}
+.dirdoc-terms p{margin:0;overflow-wrap:anywhere}
+.dirdoc-terms p+p{margin-top:var(--s2)}
+.dirdoc-block{display:grid;grid-template-columns:132px minmax(0,1fr);gap:20px;padding:var(--s4) 0;border-top:1px solid var(--line)}
+.dirdoc-block:first-of-type{border-top:none}
+.dirdoc-block.is-cont{display:block;border-top:none;padding:0 0 var(--s4)}
+.dirdoc-label{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.3em}
+.dirdoc-num{font-variant-numeric:tabular-nums;color:var(--hint)}
+.dirdoc-qual{display:block;margin-top:5px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--hint);line-height:1.4}
+.dirdoc-p{font-size:15px;line-height:1.62;color:var(--ink);margin:0;overflow-wrap:anywhere;word-break:normal;text-wrap:pretty}
+.dirdoc-p+.dirdoc-p{margin-top:var(--s3)}
+.dirdoc-read{border-top:1px solid var(--line);padding-top:18px;margin-top:var(--s2)}
+.dirdoc-read .dirdoc-label{color:var(--brandink)}
+.dirdoc-read .dirdoc-p{font-size:16px;line-height:1.55}
+.dirdoc-colophon{margin-top:var(--s5);padding-top:14px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap;font-size:11px;color:var(--hint);font-variant-numeric:tabular-nums}
+.dirdoc-sign{margin-left:auto;display:flex;gap:var(--s2);flex-wrap:wrap}
+.dirdoc-sign .btn{margin:0;padding:8px 15px;font-size:12.5px}
+/* THE EVIDENCE LINE. worker · model · prepared · reviewed by · signature — all real, all
+   invisible until now. The five department_readiness flags are five 6px dots; all five true
+   collapse to one ✓ current chip, any false expands into the ENGINE'S OWN named reason,
+   inline. Never a tooltip, and readyForDisclosure is never re-derived here. */
+.dirmeta{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;font-size:11px;line-height:1.45;
+  font-weight:600;color:var(--hint);font-variant-numeric:tabular-nums;margin-top:var(--s3)}
+.dirmeta .sep{opacity:.5}
+.dirmeta code{font-family:var(--mono);font-size:10.5px}
+.dirmeta-flags{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+.dirmeta-flags i{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--ok)}
+.dirmeta-flags i.off{background:transparent;border:1px solid var(--deep)}
+.dirmeta-cur{color:var(--ok);background:var(--okbg);border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:700;letter-spacing:.06em}
+.dirmeta-why{color:var(--deep);font-weight:600}
+/* 04 · VOICE — A DIFF, NOT A READ. Today only performedText renders, so the reviewer
+   literally cannot see what changed. Locked left in --muted, performed right in --ink. */
+.vodiff{display:grid;grid-template-columns:88px minmax(0,1fr) minmax(0,1fr);gap:var(--s3) 20px;align-items:start}
+.vodiff-spk{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.25em}
+.vodiff-locked{font-size:13px;line-height:1.55;color:var(--muted);overflow-wrap:anywhere}
+.vodiff-perf{font-size:15px;line-height:1.55;color:var(--ink);overflow-wrap:anywhere}
+.vodiff-tag{display:inline-block;border-radius:6px;padding:1px 6px;font-size:11.5px;color:var(--brandink);background:var(--brandbg)}
+.vodiff-h{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--hint)}
+@media (max-width:720px){
+  .dirdoc{padding:16px}
+  .dirdoc-block{grid-template-columns:1fr;gap:var(--s2)}
+  .dirdoc-label{margin-top:0}
+  .vodiff{grid-template-columns:1fr}
+  .runrow-head{grid-template-columns:26px minmax(0,1fr) auto;gap:var(--s2)}
+  .runrow-sum{display:none}
+  .runrow-caret{display:none}
+}
+/* ══ STATE AS FORM, AND THE REFUSAL AS INTERFACE ═══════════════════════════════════════ */
+.st-chip{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:2.5px 8px;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.st-chip[data-st="approved"]  {color:var(--ok);      background:var(--okbg)}
+.st-chip[data-st="awaiting"]  {color:var(--honey);   background:var(--honeybg)}
+.st-chip[data-st="ready"]     {color:var(--brandink);background:var(--brandbg)}
+.st-chip[data-st="generating"]{color:var(--info);    background:var(--infobg)}
+.st-chip[data-st="blocked"]   {color:var(--deep);    background:var(--deepbg)}
+.st-chip[data-st="rejected"]  {color:var(--danger);  background:var(--dangerbg)}
+.st-chip[data-st="stale"]     {color:var(--warn);    background:var(--warnbg)}
+.st-chip[data-st="locked"],
+.st-chip[data-st="pending"]   {color:var(--hint);    background:transparent}
+/* Eight filled chips are eight competing chips: a settled or a not-yet row states its word
+   with no fill at all. */
+.runrow.tier-done .st-chip,.runrow.tier-later .st-chip{background:transparent}
+/* THE DISABLED BUTTON LOOKS DISABLED. This one rule also fixes the Story-Intake button that
+   renders fully enabled-looking while disabled, for free. NOTHING HERE WEAKENS A GATE — the
+   button stays disabled, the backend refusal stays the protection. */
+.btn[disabled]{background:var(--surface2);color:var(--hint);border:1px solid var(--line);
+  cursor:not-allowed;box-shadow:none;opacity:1}
+/* A tooltip is not an explanation: invisible on touch, invisible to the keyboard, invisible
+   to anyone who does not hover. The engine's own reason renders on the page. */
+.gatewrap{display:flex;flex-direction:column;gap:var(--s2);flex-basis:100%;min-width:0}
+.gatewhy{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;font-size:11.5px;font-weight:600;
+  color:var(--deep);background:var(--deepbg);border-radius:8px;padding:var(--s2) var(--s3);max-width:62ch}
+.gatewhy .bar{flex:none;width:10px;height:3px;border-radius:2px;background:var(--deep)}
+.gatewhy .jump{color:var(--brandink);text-decoration:underline;cursor:pointer;background:none;border:none;font:inherit;font-weight:700;padding:0;margin-left:auto;white-space:nowrap}
+/* COST MUST BE LEGIBLE. Prepare is free; fire spends — and both rendered as identical teal
+   buttons. Exactly one primary per row, ever; everything else ghost. */
+.btn.spend{background:transparent;border:1px solid var(--honey);color:var(--honey)}
+.btn.spend:hover:not([disabled]){background:var(--honeybg)}
+/* FOCUS, WHICH DID NOT EXIST: zero :focus/:focus-visible/outline rules across 5,722 lines.
+   This is the house 0 0 0 3px <tint> ring idiom, already used eight times. */
+:where(.btn,.rowmore>summary,.runmore>summary,.techdetails>summary,.runrow-head,.runmeter button,.gatewhy .jump,input,textarea,select,.filterchip):focus-visible{
+  outline:none;box-shadow:0 0 0 3px var(--brandbg),0 0 0 1px var(--brand);border-radius:8px}
+.rowmore{margin-top:var(--s3)}
 .rowmore>summary{cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--hint);list-style:none;padding:9px 8px;margin:0 -8px;border-radius:8px;display:block}
 .rowmore>summary:hover{background:var(--surface2);color:var(--muted)}
 .rowmore>summary::-webkit-details-marker{display:none}
@@ -511,9 +698,9 @@ img.zoom:hover{filter:brightness(1.08)}
 .scenecard-dots i{width:7px;height:7px;border-radius:50%;background:var(--surface2);border:1px solid var(--line)}
 .scenecard-tick{position:absolute;top:8px;left:8px;background:var(--okbg);color:var(--ok);font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px}
 @media (prefers-reduced-motion: reduce){
-  .runrow,.runrow-dot,.runrow-caret,.runmeter i,.runseg-card{transition:none}
+  .runrow,.runrow-dot,.runrow-caret,.runmeter button,.runseg-card{transition:none}
   .runrow-body{animation:none}
-  .runrow.generating .runrow-dot,.runmeter i.generating,.fcard-dots i.rendering,.runrow.arrived{animation:none}
+  .runrow.generating .runrow-dot,.runmeter button.generating,.fcard-dots i.rendering,.runrow.arrived{animation:none}
   .runseg-card:hover{transform:none}
 }
 .pqueue{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;margin-top:16px}
@@ -813,7 +1000,7 @@ async function renderCharacterDetail(){
   const url=p=>p?BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now():"";
   const esc=s=>(''+s).replace(/</g,'&lt;');
   const row=(label,val)=>val?`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)"><div style="width:140px;flex:none;font-size:12px;color:var(--hint);font-weight:600">${label}</div><div style="font-size:13px;line-height:1.5">${val}</div></div>`:'';
-  const voice=c.voiceId?`<span style="font-family:monospace;background:#f1eff8;border-radius:5px;padding:2px 8px">${c.voiceId}</span> <button class="btn ghost" style="padding:2px 8px;font-size:11px" onclick="navigator.clipboard&&navigator.clipboard.writeText('${c.voiceId}');this.textContent='✓ copied'">copy</button>`:'<span style="color:var(--danger)">⚠ no voice set</span>';
+  const voice=c.voiceId?`<span style="font-family:var(--mono);background:var(--surface2);color:var(--muted);border-radius:5px;padding:2px 8px">${c.voiceId}</span> <button class="btn ghost" style="padding:2px 8px;font-size:11px" onclick="navigator.clipboard&&navigator.clipboard.writeText('${c.voiceId}');this.textContent='✓ copied'">copy</button>`:'<span style="color:var(--danger)">⚠ no voice set</span>';
   const states=c.states?`<div class="mc" style="margin-top:14px"><div class="lab" style="font-weight:600;color:var(--brandink)">States — one character, switched per beat${c.canonicalState?' · canonical: '+c.canonicalState:''}</div><div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:10px">`+Object.entries(c.states).map(([k,s])=>`<div style="width:150px"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;border:2px solid ${s.canonical?'var(--brand)':'var(--line)'}"><a href="${url(s.turnaround)}" target="_blank"><img src="${url(s.turnaround)}" style="width:100%;height:100%;object-fit:cover"/></a></div><div style="font-size:12px;font-weight:600;margin-top:4px">${esc(s.label||k)}</div><div style="font-size:11px;color:var(--hint);line-height:1.4">${esc(s.note||'')}</div></div>`).join('')+`</div>`+(c.episodeArc?`<div style="font-size:12px;color:var(--hint);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px">`+Object.entries(c.episodeArc).map(([ep,a])=>`<b>${esc(ep)} arc:</b> ${esc(a.note||(a.startState+' → '+((a.transition&&a.transition.toState)||'')))}`).join('<br>')+`</div>`:'')+`</div>`:'';
   const wbents=c.wristband_states?Object.entries(c.wristband_states).filter(([k,v])=>Array.isArray(v)&&v.length):[];
   const wb=wbents.length?`<div class="mc" style="margin-top:14px"><div class="lab" style="font-weight:600">Wristband states</div><div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">`+wbents.map(([k,arr])=>`<div style="width:110px"><div style="aspect-ratio:1;background:var(--surface2);border-radius:8px;overflow:hidden"><a href="${url(arr[0])}" target="_blank"><img src="${url(arr[0])}" style="width:100%;height:100%;object-fit:cover"/></a></div><div style="font-size:12px;text-align:center;margin-top:3px">${esc(k)}</div></div>`).join('')+`</div></div>`:'';
@@ -942,7 +1129,7 @@ async function renderScenes(){
       <div style="width:170px;flex:none"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${s.plate?`<img class="zoom" data-cap="Scene ${s.scene} plate" src="${img(s.plate)}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no scene shot yet</span>'}</div></div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:15px">Scene ${s.scene} · ${s.name||s.locationId}</div>
-        <div style="font-size:11px;color:var(--hint);margin:3px 0 6px"><span style="font-family:monospace;background:#f1eff8;border-radius:5px;padding:1px 6px">${s.locationId||'—'}</span> · ${status}</div>
+        <div style="font-size:11px;color:var(--hint);margin:3px 0 6px"><span style="font-family:var(--mono);background:var(--surface2);color:var(--muted);border-radius:5px;padding:1px 6px">${s.locationId||'—'}</span> · ${status}</div>
         ${s.location?`<div style="font-size:12px;line-height:1.5">${(''+s.location).replace(/</g,'&lt;')}</div>`:''}
         ${s.look?`<div style="font-size:11px;color:var(--hint);margin-top:6px">${(''+s.look).slice(0,260).replace(/</g,'&lt;')}${(''+s.look).length>260?'…':''}</div>`:''}
         ${reused?`<div style="margin-top:8px">${reused}</div>`:''}
@@ -2905,13 +3092,55 @@ function deptChecklistHTML(readiness){
 // is true, otherwise a disabled look-alike naming why. Callers pass the REAL button HTML
 // (already wired to its own onclick) — this only ever adds a disabled+title overlay, it
 // never removes the backend's own refusal as the actual protection.
-function deptLocksGeneration(buttonHTML,readiness,disabledLabel){
+// THE REFUSAL IS THE INTERFACE (2026-07-26). Nothing here weakens, removes or bypasses a
+// gate: the disabled button stays disabled, the backend refusal stays the protection, and
+// there is no "approve anyway", no force, no override affordance anywhere. Three things
+// changed, and all three make the gate EASIER TO SATISFY and HARDER TO MISREAD:
+//   1. it keeps the CALLER'S OWN label and marks it disabled, instead of replacing the word
+//      "Generate" with "Locked — …" so you can no longer tell what is locked;
+//   2. the reason moves out of `title=` — invisible to touch and to the keyboard — and onto
+//      the page as a rendered .gatewhy line, naming the blocking section in JULIAN'S OWN
+//      number and name via panelLabelForStage(), never an engine stage key, with one click
+//      to get there;
+//   3. it is PESSIMISTIC WHILE THE READINESS RECORD IS STILL LOADING. Previously an absent
+//      readiness object made `readiness&&…` falsy and returned the ENABLED button — a gate
+//      that is momentarily open is a gate. This is a tightening, not a loosening.
+function deptLocksGeneration(buttonHTML,readiness,disabledLabel,stage){
+  const secLabel=stage?panelLabelForStage(stage):null;
+  const jump=stage?`<button type="button" class="jump" onclick="shJumpToStage('${_esc(stage)}')">↳ Go</button>`:"";
+  const held=(why)=>{
+    // keep the caller's own button, exactly as written, and disable it
+    const wid="gatewhy_"+String(stage||"x").replace(/[^a-z0-9]/gi,"");
+    const btn=String(buttonHTML).replace(/<button\b/,'<button disabled aria-describedby="'+wid+'"');
+    return `<div class="gatewrap">${btn}`
+      +`<div class="gatewhy" id="${wid}"><span class="bar"></span><span>${_esc(why)}</span>${jump}</div></div>`;
+  };
+  if(stage&&(!readiness||readiness.loading))
+    return held("Checking "+(secLabel||"the department")+"'s direction…");
   if(readiness&&readiness.applicable!==false&&!readiness.readyForDisclosure){
     const why=(readiness.reasons&&(readiness.reasons.ready||readiness.reasons.inputs))||
-      "Department direction not yet ready for disclosure.";
-    return `<button class="btn ghost" disabled title="${_esc(why)}" style="opacity:.5;cursor:not-allowed">${_esc(disabledLabel||"Locked — department direction required")}</button>`;
+      (secLabel?("Held — "+secLabel+" isn't approved yet."):"Department direction not yet ready for disclosure.");
+    return held(why);
   }
   return buttonHTML;
+}
+// ONE CLICK TO THE SECTION THAT CLEARS THE GATE. The section is resolved from the engine's
+// own panel table, never a hardcoded list.
+function shJumpToStage(stage){
+  const s=(SH_PANEL||[]).find(x=>x.stage==stage&&x.authorises);
+  if(s) shOpenSection(s.rowId);
+}
+function shOpenSection(rowId){
+  try{
+    const shots=pShots(), sh=shots&&shots[PSHOT_I];
+    if(sh) SH_RUN_OPEN[shTok(sh.shotId)+"|"+rowId]=true;
+  }catch(e){}
+  renderWorkspaceBody();
+  setTimeout(function(){
+    const el=document.getElementById("runrow_"+rowId);
+    if(el){ el.scrollIntoView({behavior:"smooth",block:"center"});
+      const h=el.querySelector(".runrow-head"); if(h&&h.focus) h.focus(); }
+  },60);
 }
 // AUTO-PREPARE, ONCE PER SHOT/STAGE (2026-07-20, Julian — "surely this... needs to fire
 // automatically when the image etc comes into this gate, it shouldn't be left to me to
@@ -3313,8 +3542,32 @@ function shGoToShot(i){
 // underlying helper, endpoint and gate is REUSED unchanged; this is presentation, never a
 // new spend path. Completed rows collapse to a slim line (click to expand); the current
 // actionable row is expanded and lifted.
-const RUN_CHIP={done:["✓","--ok"],ready:["●","--honey"],blocked:["✕","--danger"],
+const RUN_CHIP={done:["✓","--ok"],ready:["●","--honey"],blocked:["▬","--deep"],
                 pending:["○","--hint"],generating:["●","--info"]};
+// One row state -> one st-chip key, so STATE_COLOR/STATE_BG's already-correct token choices
+// are DELIVERED as classes instead of inline style= (2026-07-26). Two deliberate corrections
+// ride here: `blocked` moves onto --deep (it is not an error — the engine is holding, not
+// failing), and a stale direction is --warn, not the red it used to render as. A REJECTED
+// take is not a row state at all — it is a fact inside a YOUR MOVE row, and stays .runmsg err
+// in the body, because you still have to decide again.
+const RUN_ST={done:"approved",ready:"awaiting",blocked:"blocked",
+              pending:"pending",generating:"generating"};
+// EXACTLY ONE PRIMARY PER ROW, EVER. A row that is not the cursor renders its controls quiet
+// via a class on the container — never by rewriting the button strings, which is how a
+// primary silently became a ghost. On the cursor row the FIRST primary stays primary and any
+// later one is demoted, so two teal buttons can never argue for the eye.
+function runActionsHTML(actions,tier){
+  const html=(actions&&actions.length)?actions.filter(Boolean).join(""):"";
+  if(!html) return "";
+  if(tier!=="now") return `<div class="runrow-actions quiet">${html}</div>`;
+  let seen=false;
+  const out=html.replace(/class="btn(?![\w-])([^"]*)"/g,function(m,rest){
+    if(/\bghost\b/.test(rest)) return m;
+    if(seen) return 'class="btn ghost'+rest+'"';
+    seen=true; return m;
+  });
+  return `<div class="runrow-actions">${out}</div>`;
+}
 const SH_RES_KEY="cbstudio_fireRes";
 // THE RESOLUTION CHOICE (2026-07-23): 480p is the cheap test tier, 720p the final tier —
 // persisted like SH_CANDS so the preference carries across the walk. The engine's own
@@ -3422,12 +3675,13 @@ async function shBuildVoMaster(tok){
 // re-render; and a stage asking for a DECISION renders the decided content OPEN, outside
 // any disclosure (see the .rundecide blocks below).
 let SH_MORE_OPEN={};
-function rowMore(inner,key){
-  // a stage row's default view stays one line + one button + the media; everything else
-  // lives behind this disclosure — whose state now persists across background re-renders.
+// A DISCLOSURE THAT DOES NOT NAME WHAT IS BEHIND IT IS A LOCKED DRAWER (2026-07-26). The
+// literal word "Details" is retired: every caller now passes what the drawer actually holds.
+// A disclosure that would be empty is not rendered at all.
+function rowMore(inner,label,key){
   if(!inner)return "";
   const open=key&&SH_MORE_OPEN[key];
-  return `<details class="rowmore"${open?" open":""}${key?` ontoggle="SH_MORE_OPEN['${_esc(key)}']=this.open"`:""}><summary>Details</summary>${inner}</details>`;
+  return `<details class="rowmore"${open?" open":""}${key?` ontoggle="SH_MORE_OPEN['${_esc(key)}']=this.open"`:""}><summary>${_esc(label||"Supporting detail")}</summary>${inner}</details>`;
 }
 // THE DECIDED-CONTENT BLOCK: what an Approve button approves, always visible, never behind
 // a click — "an approval without visible content is meaningless."
@@ -3470,6 +3724,150 @@ function panelLabelForStage(stage){
   const s=(SH_PANEL||[]).find(x=>x.stage==stage&&x.authorises);
   return s?(s.number+" · "+s.name):stage;
 }
+// ══ THE DIRECTION DOCUMENT (2026-07-26) ═══════════════════════════════════════════════════
+// Julian, on the screenshot of S1.SH1's approved 02 · OPENING FRAME: a wall of raw unwrapped
+// monospace prose running off the right edge of the page.
+//
+// One component now renders the specialist's direction in BOTH states — pending and approved
+// — because the two states genuinely disagreed and only one of them was legible. Same
+// typeface, same measure, same everything. The prose survives VERBATIM: it is wrapped and
+// escaped, never re-flowed and never re-worded. Nothing here invents a heading.
+//
+// Every helper below is a top-level `function` on purpose: engine/test_studio_chair_table.py
+// runs the shared block for real in node and extracts functions by text slice, so a
+// `const foo = …` would be invisible to it.
+function dirLabelledCount(out){
+  return dirBlocks(out&&out.providerPrompt).filter(b=>b.label).length;
+}
+// MODE IS CHOSEN BY THE SHAPE OF THE PAYLOAD, NEVER BY A STAGE KEY. This is what deleted the
+// last `stage=="voice"` branch out of the panel's prose path — a future department gets the
+// right renderer for free.
+function dirMode(out){
+  if(out&&out.lines&&out.lines.length) return "lines";     // 04's structured payload
+  if(dirLabelledCount(out)>=2)         return "labelled";  // 02's spatial stack
+  return "chain";                                          // 05's cause-chain
+}
+// CONSERVATIVE, AND IT INVENTS NOTHING. A block that does not match cleanly stays a plain
+// paragraph. Fabricating a "STYLE" or "IDENTITY" heading over an unlabelled block is
+// authoring, and it will eventually be wrong.
+function dirBlocks(text){
+  const RE=/^([A-Z][A-Z0-9'’&\/\-\. ]{2,38}?)(?:,\s*([^:\n]{1,90}))?:\s+/;
+  return String(text||"").split(/\n\s*\n/).map(function(raw){
+    var b=String(raw).trim(); if(!b) return null;
+    var m=b.match(RE);
+    if(!m) return {label:"",qual:"",body:b};
+    return {label:m[1].trim(),qual:(m[2]||"").trim(),body:b.slice(m[0].length).trim()};
+  }).filter(Boolean);
+}
+// THE EVIDENCE LINE. worker · model · prepared · reviewed by · signature, then the engine's
+// own five readiness flags as five dots. Fresh-vs-stale is the most consequential hidden fact
+// in the panel and it had no representation at all. readyForDisclosure is never re-derived
+// here — a false flag prints the ENGINE'S OWN named reason, inline, never a tooltip.
+function dirMetaHTML(rec,record){
+  if(!rec) return "";
+  const rd=rec.readiness||{}, r=record||{}, o=r.output||{};
+  const bits=[];
+  const worker=rec.worker||rec.department||"";
+  if(worker) bits.push(_esc(worker));
+  const model=r.model||o.model||rec.model||"";
+  if(model) bits.push(`<code>${_esc(model)}</code>`);
+  const prep=(r.preparedAt||r.createdAt||rec.preparedAt||"");
+  if(prep) bits.push("prepared "+_esc(String(prep).slice(0,16).replace("T"," ")));
+  const by=r.reviewedBy||r.decidedBy||"";
+  if(by) bits.push("approved by "+_esc(by));
+  const at=(r.decisionAt||r.approvedAt||"");
+  if(at) bits.push("signed "+_esc(String(at).slice(0,16).replace("T"," ")));
+  const sig=r.signatureVersion||rec.signatureVersion||"";
+  if(sig) bits.push("sig "+_esc(String(sig)));
+  const flags=[["prepared",rd.prepared],["direction current",rd.directionCurrent],
+               ["approval current",rd.approvalCurrent],["inputs current",rd.inputsCurrent],
+               ["ready for disclosure",rd.readyForDisclosure]];
+  const known=flags.filter(f=>f[1]!==undefined&&f[1]!==null);
+  const allOK=known.length&&known.every(f=>!!f[1]);
+  const why=(rd.reasons&&(rd.reasons.ready||rd.reasons.inputs))||"";
+  const dots=known.length
+    ? `<span class="dirmeta-flags" title="${_esc(known.map(f=>f[0]+": "+(f[1]?"yes":"no")).join(" · "))}">`
+      +known.map(f=>`<i class="${f[1]?"":"off"}"></i>`).join("")
+      +(allOK?`<span class="dirmeta-cur">✓ current</span>`
+             :(why?`<span class="dirmeta-why">${_esc(why)}</span>`:`<span class="dirmeta-why">not current</span>`))
+      +`</span>`
+    : "";
+  if(!bits.length&&!dots) return "";
+  return `<div class="dirmeta">${bits.join('<span class="sep">·</span>')}${dots}</div>`;
+}
+// 04 · VOICE IS A DIFF, NOT A READ. Only performedText used to render, so the reviewer
+// literally could not see what changed — a content bug as real as the monospace one. Locked
+// left, performed right, [tags] as chips, CAPS left exactly as authored.
+function voDiffHTML(lines){
+  const rows=(lines||[]).map(function(ln){
+    const locked=ln.exactDialogue||ln.exactText||"";
+    const perf=ln.performedText||ln.exactDialogue||ln.exactText||"";
+    const tagged=_esc(perf).replace(/\[([^\]\n]{1,40})\]/g,'<span class="vodiff-tag">[$1]</span>');
+    return `<div class="vodiff-spk">${_esc(ln.speaker||"")}</div>`
+      +`<div class="vodiff-locked">${locked?_esc(locked):"<i>—</i>"}</div>`
+      +`<div class="vodiff-perf">${tagged}</div>`;
+  }).join("");
+  if(!rows) return "";
+  return `<div class="vodiff"><div class="vodiff-h"></div><div class="vodiff-h">Locked line</div>`
+    +`<div class="vodiff-h">As performed</div>${rows}</div>`;
+}
+// THE FOLIO: deck → standing terms → labelled body (in SOURCE ORDER — that order is the
+// writer's Z-order stack) → the read → colophon and signature. You sign at the end of what
+// you read, which is why the pending state must never be a scroll box.
+function dirDocHTML(out,opts){
+  opts=opts||{};
+  out=out||{};
+  const mode=dirMode(out);
+  let core="";
+  if(mode=="lines"){
+    core=voDiffHTML(out.lines);
+  }else{
+    const blocks=dirBlocks(out.providerPrompt);
+    // leading unlabelled blocks are standing terms — demoted to a masthead, never hidden
+    let i=0; const terms=[];
+    if(mode=="labelled"){ while(i<blocks.length&&!blocks[i].label){ terms.push(blocks[i]); i++; } }
+    const rest=blocks.slice(i);
+    const readIdx=rest.findIndex(b=>/^THE READ\b/.test(b.label||""));
+    let ord=0;
+    const bodyBlocks=rest.map(function(b,n){
+      if(n===readIdx) return "";
+      let lab="",cont=false;
+      if(b.label){
+        lab=_esc(b.label)+(b.qual?`<span class="dirdoc-qual">${_esc(b.qual)}</span>`:"");
+      }else if(mode=="chain"){
+        // Sequence becomes visible at zero authoring cost. Adjacent paragraphs are NEVER
+        // merged — collapsing a join destroys the cause-chain.
+        ord++; lab=`<span class="dirdoc-num">${String(ord).padStart(2,"0")}</span>`;
+      }else{
+        // An unlabelled paragraph inside a labelled document is a CONTINUATION. It runs the
+        // full measure with no rail cell and no rule above it — which is honest: it claims no
+        // heading of its own, and none is invented for it.
+        cont=true;
+      }
+      const paras=String(b.body).split(/\n+/).filter(x=>x.trim())
+        .map(x=>`<p class="dirdoc-p">${_esc(x.trim())}</p>`).join("");
+      if(cont) return `<div class="dirdoc-block is-cont">${paras}</div>`;
+      return `<div class="dirdoc-block"><div class="dirdoc-label">${lab}</div><div>${paras}</div></div>`;
+    }).join("");
+    const readHTML=(readIdx>=0)?`<div class="dirdoc-read"><div class="dirdoc-label">${_esc(rest[readIdx].label)}</div>`
+      +String(rest[readIdx].body).split(/\n+/).filter(x=>x.trim())
+        .map(x=>`<p class="dirdoc-p">${_esc(x.trim())}</p>`).join("")+`</div>`:"";
+    const termsHTML=terms.length?`<div class="dirdoc-terms">`
+      +terms.map(t=>`<p>${_esc(t.body)}</p>`).join("")+`</div>`:"";
+    core=termsHTML+bodyBlocks+readHTML;
+  }
+  // THE DECK, PROMOTED TO THE TOP. doesItLand is the specialist's own claim and the fastest
+  // route to "is this even the right shot" — it used to render as 12px grey BELOW the wall
+  // it summarises.
+  const deck=out.doesItLand?`<div class="dirdoc-deck"><div class="dirdoc-micro">Does it land</div>`
+    +`<p>${_esc(out.doesItLand)}</p></div>`:"";
+  if(!core&&!deck)
+    core=`<div class="dec-caption">The specialist returned no text — open Departments below to inspect the raw record.</div>`;
+  const foot=(opts.meta||opts.sign)
+    ?`<div class="dirdoc-colophon">${opts.meta||""}${opts.sign?`<div class="dirdoc-sign">${opts.sign}</div>`:""}</div>`
+    :"";
+  return `<div class="dirdoc${opts.cls?" "+opts.cls:""}">${deck}${core}${foot}</div>`;
+}
 function authBlockHTML(stage,shotId,opts){
   opts=opts||{};
   const key=deptKey(stage,shotId), raw=SH_DEPT_CACHE[key], d=shDeptRec(stage,shotId);
@@ -3478,6 +3876,10 @@ function authBlockHTML(stage,shotId,opts){
   const rePrepBtn=`<button class="btn ghost" onclick="deptRun('${_esc(stage)}','${_esc(shotId)}')">↻ Prepare again — free</button>`;
   const approveBtn=`<button class="btn" onclick="shApproveStageAll('${_esc(shotId)}','${_esc(stage)}')">Approve this direction</button>`;
   const rejectBtn=`<button class="btn ghost" onclick="deptDecide('${_esc(stage)}','${_esc(shotId)}','rejected')">Reject with reason</button>`;
+  // YOU SIGN AT THE END OF WHAT YOU READ. Decisions about the DOCUMENT live in the document's
+  // own signature line, after its last word; COMMANDS (prepare, generate, fire) live in the
+  // row's decision zone. This is why the pending state must not be a scroll box.
+  const signHTML=approveBtn+rejectBtn;
   // ONE FLAG, TWO CAUSES — SAY BOTH (2026-07-26). {loading:true} is set both by the read-only
   // fetch (shLoadDept) and by a real prepare (deptRun); nothing distinguishes them. Claiming
   // "preparing" during a plain read would be the screen stating something untrue, which is the
@@ -3498,35 +3900,53 @@ function authBlockHTML(stage,shotId,opts){
   // THE DECIDED CONTENT IS ALWAYS VISIBLE (the standing 2026-07-23 rule, Julian: "its asking
   // me to approve direction but i cant see it") — an Approve button sits directly under the
   // full text it approves, open, no clicks.
-  const asText=out=>{
-    if(!out)return "";
-    if(stage=="voice")
-      return (out.lines||[]).map(ln=>`<div class="dlgline"><b>${_esc(ln.speaker)}:</b> ${_esc(ln.performedText||ln.exactDialogue||"")}</div>`).join("");
-    return out.providerPrompt?`<pre>${_esc(out.providerPrompt)}</pre>`:"";
-  };
+  // ONE COMPONENT, BOTH STATES (2026-07-26). asText used to return a bare `<pre>` and the
+  // two wrappers disagreed about how to typeset it: the pending path inherited
+  // `.rundecide-text pre{white-space:pre-wrap;font:inherit}` and read fine, the approved path
+  // landed in `.rowmore` with no `pre` rule at all and inherited UA monospace +
+  // `white-space:pre` — the horizontal overflow in Julian's screenshot. Deleting the split is
+  // the fix; patching the losing branch is not. The `stage=="voice"` branch went with it —
+  // dirMode() picks the renderer from the SHAPE of the payload, never from an engine key.
   if(cand){
     const out=cand.output||{};
+    // THE CANDIDATE IS THE TASK: full document, open, no click, honey hairline, and the
+    // signature line at the foot of what you just read.
     return {phase:"approve",ready,
       body:runDecideBlock("The direction you're approving",
-        (asText(out)||`<div class="dec-caption">The specialist returned no text — open Departments below to inspect the raw record.</div>`)
-        +(out.doesItLand?`<div class="ccref" style="padding:0 2px 6px">Does it land: ${_esc(out.doesItLand)}</div>`:"")),
-      actions:[approveBtn,rejectBtn,rePrepBtn]};
+        dirDocHTML(out,{cls:"is-pending",meta:dirMetaHTML(d,cand),sign:signHTML})),
+      actions:[rePrepBtn]};
   }
   if(appr&&rd.directionCurrent===false){
-    // Approved once, but something it depends on has changed since. The engine treats this
-    // as no approval at all, and so does this row — prepare and approve again.
+    // Approved once, but something it depends on has changed since. The engine treats this as
+    // no approval at all, and so does this row. Out of date is a WARNING, not an error — a
+    // direction going stale is not a failure, and colouring it like one teaches the director
+    // to distrust red. The last approved text stays visible underneath: you cannot re-prepare
+    // sensibly without seeing what you are re-preparing against.
     const why=(rd.reasons&&(rd.reasons.ready||rd.reasons.inputs))||"Something it depends on changed since it was approved.";
+    const last=appr.output||null;
     return {phase:"stale",ready,
-      body:`<div class="runmsg err">This direction was approved, but it is now out of date. ${_esc(why)}</div>`,
+      body:`<div class="runmsg" style="border-color:var(--warn);background:var(--warnbg);color:var(--warn)">`
+           +`<b>Out of date.</b> ${_esc(why)}</div>`
+           +(last?`<div class="dirdoc-micro" style="margin-top:var(--s4)">Last approved direction — shown for comparison only</div>`
+                  +dirDocHTML(last,{cls:"is-stale",meta:dirMetaHTML(d,appr)}):""),
       actions:[rePrepBtn]};
   }
   if(appr){
     const out=appr.output||{};
+    // APPROVED AND CURRENT: the deck and the evidence line stay visible; the full document is
+    // one NAMED click away. This is not re-committing today's sin — today's approved state
+    // sits behind a disclosure whose summary is the bare word "Details", and is unreadable
+    // when opened.
+    const blocks=dirBlocks(out.providerPrompt);
+    const words=String(out.providerPrompt||"").split(/\s+/).filter(Boolean).length;
+    const nsec=(dirMode(out)=="lines")?((out.lines||[]).length):blocks.length;
+    const label="Read the direction"
+      +(nsec?" · "+nsec+((dirMode(out)=="lines")?(" line"+(nsec==1?"":"s")):(" section"+(nsec==1?"":"s"))):"")
+      +(words?" · "+words+" words":"");
     return {phase:"approved",ready,
-      body:rowMore(`<div class="dec-caption" style="margin-top:8px;font-weight:600">The approved direction</div>`
-        +(asText(out)||`<div class="dec-caption">—</div>`)
-        +(out.doesItLand?`<div class="ccref" style="padding:6px 2px 0">Does it land: ${_esc(out.doesItLand)}</div>`:""),
-        shotId+"|auth|"+stage),
+      body:(out.doesItLand?`<div class="dirdoc-deck" style="margin:var(--s3) 0 0"><div class="dirdoc-micro">Does it land</div><p>${_esc(out.doesItLand)}</p></div>`:"")
+        +dirMetaHTML(d,appr)
+        +rowMore(dirDocHTML(out,{}),label,shotId+"|auth|"+stage),
       actions:[rePrepBtn]};
   }
   return {phase:"prepare",ready,
@@ -3692,10 +4112,16 @@ function renderShotRunner(){
     const frameStage=isOpener?panelAuthStage("frame"):null;
     const auth=frameStage?authBlockHTML(frameStage,tok):null;
     const authOK=!auth||auth.ready;
+    // COST IS LEGIBLE (2026-07-26): prepare is free, this one SPENDS, and both used to render
+    // as identical teal buttons. The label never changes when it is locked — you must be able
+    // to see WHAT is locked.
     const genBtn=deptLocksGeneration(
-      `<button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${tok}'})">◈ Generate</button>`,
+      `<button class="btn spend" onclick="openDisclosureModal('keyframe',{shotId:'${tok}'})">◈ Generate · spends</button>`,
       cinRec&&cinRec.readiness,
-      "◈ Locked — prepare & approve the direction above first");
+      null,
+      // frameStage is null for a relay shot, which has no cinematography record of its own —
+      // passing null keeps the pre-existing behaviour there rather than inventing a gate.
+      frameStage);
     const uploadBtn=`<button class="btn ghost" onclick="document.getElementById('ofcUpload_${tok}').click()">⇧ Upload</button>
       <input type="file" id="ofcUpload_${tok}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${tok}',this)"/>`;
     const libBtn=`<button class="btn ghost" onclick="shOpenFrameLibrary('${tok}')">▤ Library</button>`;
@@ -3783,7 +4209,7 @@ function renderShotRunner(){
           <span class="histmeta">${_esc((led.keyframeRejected.rejectedAt||"").slice(0,16))}</span>
           <div class="histnote">${_esc(led.keyframeRejected.reason||"")}</div></div>`;
       }
-      body+=rowMore(more,tok+"|frame");
+      body+=rowMore(more,"Keyframe workbench & history",tok+"|frame");
     }
     rows.push({id:"frame",title:"Opening frame",state:st,stateLabel:lab,summary:sum,
                mini:(m.keyframeCandidateUrl||m.keyframe||refAnchorUrl(s.shotId)),body,actions:acts});
@@ -3841,7 +4267,7 @@ function renderShotRunner(){
       // in full above the button, never behind Details.
       const vRec=shDeptRec('voice',s.shotId);
       const vOut=((vRec&&vRec.candidate)||{}).output||((vRec&&vRec.approved)||{}).output||null;
-      const vLines=(vOut&&vOut.lines||[]).map(ln=>`<div class="dlgline"><b>${_esc(ln.speaker)}:</b> ${_esc(ln.performedText||ln.exactDialogue||"")}</div>`).join("");
+      const vLines=voDiffHTML((vOut&&vOut.lines)||[]);
       if(!hasTake){
         if(!dirCurrent){
           // THE SAME ROW SHAPE AS EVERY OTHER GATED SECTION (2026-07-26). This branch used
@@ -3865,23 +4291,23 @@ function renderShotRunner(){
                 :"No voice direction prepared yet. Prepare it (free, text only), read the performed lines, approve them — then the paid take unlocks.";
           body=vAuth.body
             +(vAuth.phase=="prepare"?"":runDecideBlock("The locked lines it performs",dlg))
-            +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,tok+"|voice");
+            +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"Voice workbench & history",tok+"|voice");
           acts=vAuth.actions;
         } else {
           st="ready";lab="Generate";
           sum="Direction approved — no take on the ledger yet; generating voices these exact lines (paid ElevenLabs call).";
           body=runDecideBlock("The lines this will voice",vLines||dlg)
-            +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,tok+"|voice");
+            +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"Voice workbench & history",tok+"|voice");
           acts=[`<button class="btn" onclick="openDisclosureModal('voice-regen',{shotId:'${tok}'})">🎙 Generate voice for this shot</button>`];
         }
       }
       else if(voApproved){ st="done";lab="Approved";sum="Take approved"+(isMaster?" — padded to the 15s master":"")+".";
-        body=player+rowMore(dlg+padCtl+voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,tok+"|voice");
+        body=player+rowMore(dlg+padCtl+voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"The locked lines, the 15s master, and history",tok+"|voice");
         acts=[`<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Reject this take (allow refiring)</button>`]; }
       else { st="ready";lab="Your call";sum="The take you're approving plays below — one click approves direction + take together.";
         body=(player||`<div class="runmsg err">The ledger records a take but its file could not be resolved — check the Voice job log.</div>`)
           +runDecideBlock("The locked lines this take performs",dlg)
-          +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,tok+"|voice");
+          +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"Voice workbench & history",tok+"|voice");
         acts=[`<button class="btn" onclick="shApproveStageAll('${tok}','voice')">Approve voice</button>`,
               `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Reject with reason</button>`]; }
     }
@@ -3905,6 +4331,11 @@ function renderShotRunner(){
       // never re-presents as needing direction over a stale record behind it.
       st="done";lab="Directed";
       sum="Take already approved — the direction record behind it is stale/pending; see Departments below if you re-fire.";
+      // RENDER IT OR DON'T COMPUTE IT (2026-07-26): this was the one branch in the panel that
+      // had a direction in hand and showed nothing at all. The terminality pass below may
+      // still blank it on a landed shot — that is deliberate — but the row no longer throws
+      // the document away on its own.
+      body=dAuth.body;
       acts=[`<button class="btn ghost" onclick="deptRun('animation','${tok}')">↻ Refire direction</button>`];
     }
     else if(anim.approvalCurrent){ st="done";lab="Directed";sum=panelLabelForStage("animation")+" approved and current.";
@@ -3912,7 +4343,7 @@ function renderShotRunner(){
       acts=dAuth.actions; }
     else if(aCand){ st="ready";lab="Your call";sum="The Director's animation brief is below, in full — approve it, or reject with a reason.";
       body=dAuth.body
-        +rowMore(`<div class="dec-caption" style="margin-top:8px">To EDIT the brief before approving, use the Animation panel in Departments below (Save edit, then Approve).</div>`,tok+"|dir");
+        +rowMore(`<div class="dec-caption" style="margin-top:8px">To EDIT the brief before approving, use the Animation panel in Departments below (Save edit, then Approve).</div>`,"How to edit this brief before approving",tok+"|dir");
       acts=dAuth.actions; }
     else {
       // NOTHING PREPARED YET: never "approve" content that doesn't exist on screen —
@@ -3973,7 +4404,7 @@ function renderShotRunner(){
     // as real thumbnails, whatever stage the shot is in — only @图1 can be pending.
     const body=refStripHTML(tok)+((sw&&sw.currentPrompt)?
       rowMore(`<div class="dec-caption" style="margin-top:10px">Exactly as it will be submitted. Edit action, timing, physical comedy, camera and performance direction directly.</div>
-       <textarea id="swPrompt_${tok}" class="ccta" style="min-height:220px;font-size:12.5px;margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">${_esc(sw.currentPrompt)}</textarea>
+       <textarea id="swPrompt_${tok}" class="ccta" style="min-height:220px;font-size:13.5px;line-height:1.6;margin-top:8px">${_esc(sw.currentPrompt)}</textarea>
        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:12px;color:var(--warn);cursor:pointer">
          <input type="checkbox" id="swDlg_${tok}" ${dlgConfirmed?"checked":""} style="margin-top:2px"/>
          <span>Dialogue words in prompt (director-confirmed Law-6 bypass) — the model may voice these words itself over @Audio1. Saved on the record with your name; never a default.</span>
@@ -3982,7 +4413,7 @@ function renderShotRunner(){
          <button class="btn ghost" onclick="shSaveSeedanceWork('${tok}')">Save as working version</button>
          <button class="btn ghost" onclick="shRestoreSeedanceWork('${tok}')">Restore compiled</button>
        </div>`
-       +structurePanelHTML(s.shotId,SH_STRUCTURE_CACHE[s.shotId]),tok+"|prompt")
+       +structurePanelHTML(s.shotId,SH_STRUCTURE_CACHE[s.shotId]),"Edit the prompt & run the free structure check",tok+"|prompt")
       :`<div class="runempty">${_esc(sum)}</div>`
         +((sw&&sw.error)?`<details style="margin-top:8px"><summary class="dec-caption" style="cursor:pointer">Technical detail</summary><pre class="techpre">${_esc(sw.error)}</pre></details>`:""));
     rows.push({id:"prompt",title:"Prompt",state:st,stateLabel:lab,summary:sum,body,actions:promptActs});
@@ -4086,8 +4517,8 @@ function renderShotRunner(){
       body=seg+`<div style="margin-top:12px">${candCountPickerHTML(shCap)}</div>`;
       const fn=Math.min(SH_CANDS,shCap), fc=shResCost(SH_RES,fireDur);
       acts=[deptLocksGeneration(
-        `<button class="btn runfirebtn" onclick="shRun('fire','${tok}',{candidates:Math.min(SH_CANDS,${shCap}),resolution:SH_RES})">► Generate ${fn} candidate${fn==1?"":"s"}${fc!=null?` — est. <span class="tnum">$${(fc*fn).toFixed(2)}</span> (${SH_RES})`:` (${SH_RES})`}</button>`,
-        animRec&&animRec.readiness,"Locked — prepare & approve "+panelLabelForStage("animation")+" first")];
+        `<button class="btn spend runfirebtn" onclick="shRun('fire','${tok}',{candidates:Math.min(SH_CANDS,${shCap}),resolution:SH_RES})">◈ Generate ${fn} candidate${fn==1?"":"s"} · spends${fc!=null?` — est. <span class="tnum">$${(fc*fn).toFixed(2)}</span> (${SH_RES})`:` (${SH_RES})`}</button>`,
+        animRec&&animRec.readiness,null,"animation")];
     }
     rows.push({id:"fire",title:"Fire",state:st,stateLabel:lab,summary:sum,body,actions:acts});
   }
@@ -4127,7 +4558,7 @@ function renderShotRunner(){
     if((led.rejections||[]).length){
       body+=rowMore(`<div class="dec-caption" style="margin-top:4px;font-weight:600">Rejection history</div>`+
         led.rejections.slice().reverse().map(r=>`<div class="histrow"><span class="stbadge" style="color:var(--danger);background:var(--dangerbg)">rejected</span>
-          <span class="histmeta">${_esc((r.at||"").slice(0,16))} · ${_esc(r.category||"")}</span><div class="histnote">${_esc(r.correction||"")}</div></div>`).join(""),tok+"|review");
+          <span class="histmeta">${_esc((r.at||"").slice(0,16))} · ${_esc(r.category||"")}</span><div class="histnote">${_esc(r.correction||"")}</div></div>`).join(""),"Rejection history",tok+"|review");
     }
     rows.push({id:"review",title:"Review",state:st,stateLabel:lab,summary:sum,body,actions:acts});
   }
@@ -4163,7 +4594,43 @@ function renderShotRunner(){
   // as "the next step" on a landed shot.
   const current=(led.status=="approved")?null
     :(rows.find(r=>r.state=="ready"||r.state=="blocked"||r.state=="generating")||null);
-  const meter=rows.map(r=>`<i class="${r.state=="done"?"done":r.state=="generating"?"generating":r.state=="ready"?"ready":r.state=="blocked"?"blocked":""}" title="${_esc(rowHeading(r))}"></i>`).join("");
+  // THE ROW MODEL — THREE TIERS AND ONE OVERRIDE (2026-07-26).
+  // Engine states (done|ready|blocked|generating|pending) are the truth and do not change.
+  // They render into three TIERS, because the reviewer asks exactly one question of every
+  // row: is this row my problem right now?
+  //    DONE  — settled; closed; its controls are quiet and behind the caret
+  //    NOW   — the one cursor row; open; one primary; honey ring
+  //    LATER — everything else; closed; quiet; whole row at .62
+  // THE ONE OVERRIDE — a row that is genuinely RENDERING keeps its --info pulse and its
+  // "Rendering · …" summary regardless of tier, because a machine really is working and
+  // quieting that is a lie.
+  // Openness and quietness are properties of the row OBJECT, decided here — not a regex over
+  // generated HTML afterwards. That is what let the two post-processing passes (the blind
+  // `class="btn"`->`class="btn ghost"` sweep and the force-open `<details>` rewrite) be
+  // DELETED rather than tuned.
+  // When the take is approved there is no `current`, and REVIEW carries the one action that
+  // reopens the shot — so it holds the cursor instead of being quieted into unreachability.
+  const focusId=current?current.id:"review";
+  rows.forEach(r=>{
+    r.tier=(r.id==focusId)?"now":(r.state=="done"?"done":"later");
+    r.bodyOpen=(r.tier=="now")||r.state=="generating";
+  });
+  // THE STATUS SPINE. The same component as before, in better clothes — number and name from
+  // the engine's own SHOT_PANEL via panelSection(), never a literal, so
+  // test_the_studio_holds_no_stage_list_of_its_own stays green by construction. It is the
+  // panel's table of contents and the structural answer to "I'm lost".
+  const meter=rows.map(r=>{
+    const sec=panelSection(r.id);
+    const num=sec?sec.number:"";
+    const name=sec?sec.name:(r.title||"");
+    const cls=r.state=="done"?"done":r.state=="generating"?"generating":r.state=="ready"?"ready":r.state=="blocked"?"blocked":"";
+    const glyph=r.state=="done"?"✓":r.state=="generating"?"▮":r.state=="blocked"?"▬":(r.id==focusId?"◉":"○");
+    const word=_esc(r.stateLabel||r.state);
+    return `<button type="button" class="${cls}${r.id==focusId?" cur":""}" onclick="shOpenSection('${_esc(r.id)}')"`
+      +` aria-label="${_esc(num)} ${_esc(name)} — ${word}" title="${_esc(num)} · ${_esc(name)} — ${word}">`
+      +`<span class="msnum">${_esc(num)}</span><span class="msglyph">${glyph}</span>`
+      +`<span class="msname">${_esc(name)}</span></button>`;
+  }).join("");
   const lastDisc=(led.batch&&led.batch.disclosure)||led.disclosure||null;
   const estN=Math.min(SH_CANDS,shCap), estCost=shResCost(SH_RES,fireDur);
   const spendBits=[
@@ -4178,23 +4645,19 @@ function renderShotRunner(){
   // departmentWork / batch / pendingSpendAuth / rejections) — never from what the UI last
   // did, and never from file existence alone (the one file-only case is labelled as such).
   const rowsHTML=rows.map((r,i)=>{
-    const isCur=!!(current&&r.id==current.id);
+    const isCur=(r.tier=="now");
     const k=tok+"|"+r.id;
-    const def=isCur||r.state=="blocked"||r.state=="generating"||(!current&&r.id=="review");
+    const def=r.bodyOpen;
     SH_RUN_DEFAULT[k]=def;
     const open=(SH_RUN_OPEN[k]!==undefined)?SH_RUN_OPEN[k]:def;
     const chip=RUN_CHIP[r.state]||RUN_CHIP.pending;
-    let actionsHTML=(r.actions&&r.actions.length)?r.actions.join(""):"";
-    let bodyHTML=r.body||"";
-    if(!isCur){
-      actionsHTML=actionsHTML.replace(/class="btn runfirebtn"/g,'class="btn ghost"')
-                             .replace(/class="btn"/g,'class="btn ghost"');
-    } else {
-      // the CURRENT stage shows everything reviewable without extra clicks — its own
-      // Details disclosure opens by default (the decided content itself is already
-      // rendered OUTSIDE any disclosure, this just opens the supporting editors too)
-      bodyHTML=bodyHTML.replace(/<details class="rowmore"(?! open)/g,'<details class="rowmore" open');
-    }
+    // ACTIONS ARE RENDERED BY HIERARCHY, NOT REWRITTEN BY REGEX. The cursor row gets its own
+    // decision zone with exactly one primary; every other row's controls are QUIET (a CSS
+    // class on the container, never surgery on the button strings) and, because those rows
+    // are closed, they are not competing for the eye at all. Nothing is made unreachable:
+    // opening the row still shows every control it always had.
+    const actionsHTML=runActionsHTML(r.actions,r.tier);
+    const bodyHTML=r.body||"";
     // THE NUMBER AND THE NAME COME FROM THE ENGINE'S PANEL TABLE (2026-07-26). The number
     // used to be this loop's own array position and the name a string typed into each row —
     // which is why a document could describe "stage 3 Cinematography" while the screen said
@@ -4205,17 +4668,23 @@ function renderShotRunner(){
     const sec=panelSection(r.id);
     const num=sec?sec.number:String(i+1).padStart(2,"0");
     const title=sec?sec.name:r.title;
-    return `<div class="runrow ${r.state} ${isCur?"current":""} ${open?"open":""}">
+    // The state word is delivered as a class-driven chip, not an inline style — one
+    // data-st attribute, three consumers (the chip, the dot, the meter segment).
+    const st=RUN_ST[r.state]||"pending";
+    // The 52x30 head thumbnail is gone (2026-07-26): the head's job is state and next
+    // action, and the artefact is already rendered full size in the body one click away.
+    return `<div class="runrow ${r.state} tier-${r.tier} ${isCur?"current":""} ${open?"open":""}" id="runrow_${_esc(r.id)}">
       <span class="runrow-dot"></span>
-      <div class="runrow-head" onclick="shRowToggle('${tok}','${r.id}')">
+      <div class="runrow-head" role="button" tabindex="0" aria-expanded="${open?"true":"false"}"
+           onclick="shRowToggle('${tok}','${r.id}')"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();shRowToggle('${tok}','${r.id}')}">
         <span class="runrow-num">${_esc(num)}</span>
         <span class="runrow-title">${_esc(title)}</span>
         <span class="runrow-sum">${_esc(r.summary||"")}</span>
-        ${(!open&&r.mini)?`<img class="runrow-mini" src="${BASE}${r.mini}?v=${MEDIA_V}"/>`:""}
-        <span class="runrow-state" style="color:var(${chip[1]})">${chip[0]} ${_esc(r.stateLabel||r.state)}</span>
-        <span class="runrow-caret">▶</span>
+        <span class="runrow-state st-chip" data-st="${st}">${chip[0]} ${_esc(r.stateLabel||r.state)}</span>
+        <span class="runrow-caret" aria-hidden="true">▶</span>
       </div>
-      ${open?`<div class="runrow-body">${bodyHTML}${actionsHTML?`<div class="runrow-actions">${actionsHTML}</div>`:""}</div>`:""}
+      ${open?`<div class="runrow-body">${bodyHTML}${actionsHTML}</div>`:""}
     </div>`;
   }).join("");
   const terminal=(led.status=="approved");
@@ -4250,7 +4719,7 @@ function renderShotRunner(){
           <div class="runhead-id">${_esc(s.shotId)}</div></div>
         <div class="runhead-purpose">${_esc(purpose)}</div>
       </div>
-      <div class="runmeter">${meter}</div>
+      <div class="runmeter" role="group" aria-label="Section status">${meter}</div>
       <div class="runnow">${nowLine}</div>
       ${spendBits?`<div class="runspend">${spendBits}</div>`:""}
     </div>

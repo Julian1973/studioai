@@ -276,9 +276,14 @@ const fs=require("fs"), app=fs.readFileSync(process.argv[2],"utf8");
 function fn(name){const i=app.indexOf("function "+name+"(");
   if(i<0)throw new Error("not found: "+name);
   const j=app.indexOf("\nfunction ",i+10);return app.slice(i,j<0?app.length:j);}
-const src=["panelSection","rowHeading","panelAuthStage","panelLabelForStage","authBlockHTML"].map(fn).join("\n");
+// Every top-level helper authBlockHTML calls has to be listed here, or the block evals with
+// a ReferenceError and it looks like the panel broke. They are declared as `function name(…)`
+// in app.html for exactly this reason — fn() cannot find a `const name = …`.
+const src=["panelSection","rowHeading","panelAuthStage","panelLabelForStage",
+           "dirLabelledCount","dirMode","dirBlocks","dirMetaHTML","voDiffHTML","dirDocHTML",
+           "authBlockHTML"].map(fn).join("\n");
 const _esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const runDecideBlock=(h,i)=>`<DECIDE>${i}</DECIDE>`, rowMore=(i,k)=>i?`<MORE>${i}</MORE>`:"";
+const runDecideBlock=(h,i)=>`<DECIDE>${i}</DECIDE>`, rowMore=(i,l,k)=>i?`<MORE label="${l}">${i}</MORE>`:"";
 const deptKey=(st,sid)=>"K|"+st+"|"+sid;
 let SH_DEPT_CACHE={},SH_DEPT_LAST={};
 const shDeptRec=(st,sid)=>{const k=deptKey(st,sid),d=SH_DEPT_CACHE[k];
@@ -294,16 +299,44 @@ for(const row of SH_PANEL.filter(s=>s.authorises&&s.stage)){
   must(panelAuthStage(row.rowId)===stage, tag+": row does not resolve to its engine stage");
   const out=o=>stage==="voice"?{lines:[{speaker:"F",performedText:o}]}:{providerPrompt:o};
   set(stage,{worker:"W",readiness:{readyForDisclosure:false,prepared:false,directionCurrent:false}});
-  let b=authBlockHTML(stage,SHOT), a=()=>b.actions.join("");
+  // 2026-07-26: the Approve/Reject pair moved OUT of the row's command strip and INTO the
+  // document's own signature line — you sign at the end of what you read. So "does this row
+  // offer a way through" is now asked of body+actions together, which is the whole row.
+  let b=authBlockHTML(stage,SHOT), a=()=>b.actions.join(""), all=()=>b.body+b.actions.join("");
   must(b.phase==="prepare",tag+": nothing prepared should offer PREPARE, got "+b.phase);
-  must(a().includes("deptRun("),tag+": NO PREPARE BUTTON with nothing prepared — the original 02 defect");
-  must(!a().includes("shApproveStageAll("),tag+": offers Approve over content that does not exist");
+  must(all().includes("deptRun("),tag+": NO PREPARE BUTTON with nothing prepared — the original 02 defect");
+  must(!all().includes("shApproveStageAll("),tag+": offers Approve over content that does not exist");
   set(stage,{worker:"W",candidate:{output:out("THE TEXT")},
     readiness:{readyForDisclosure:false,prepared:true,directionCurrent:false}});
   b=authBlockHTML(stage,SHOT);
   must(b.phase==="approve",tag+": a pending candidate should be approvable, got "+b.phase);
-  must(a().includes("shApproveStageAll("),tag+": NO APPROVE BUTTON over a pending candidate");
+  must(all().includes("shApproveStageAll("),tag+": NO APPROVE BUTTON over a pending candidate");
   must(b.body.includes("THE TEXT"),tag+": the direction being approved is not on screen");
+  // THE MONOSPACE WALL, BOUND SHUT. The prose used to ship as a bare <pre>, which in the
+  // approved path inherited UA monospace + white-space:pre and ran off the right of the page.
+  must(!b.body.includes("<pre>"),tag+": the direction is back inside a <pre> — the overflow bug");
+  must(b.body.includes("dirdoc"),tag+": the direction no longer renders through the shared document");
+  // The prose survives VERBATIM through the new renderer — wrapped and escaped, never
+  // re-flowed and never re-worded — for a real multi-paragraph, multi-label document.
+  const FIX="STYLE, the register: line one of the style.\n\nMIDGROUND, the story instant: a "
+    +"much longer sentence that would previously have run clean off the right hand edge of "
+    +"the page in an unwrapped monospace pre element.\n\nTHE READ: the closing claim.";
+  set(stage,{worker:"W",candidate:{output:stage==="voice"
+      ?{lines:[{speaker:"F",exactDialogue:"LOCKED LINE",performedText:"[excited] PERFORMED LINE"}]}
+      :{providerPrompt:FIX,doesItLand:"THE DECK"}},
+    readiness:{readyForDisclosure:false,prepared:true,directionCurrent:false}});
+  b=authBlockHTML(stage,SHOT);
+  must(!b.body.includes("<pre>"),tag+": multi-paragraph prose fell back to a <pre>");
+  if(stage==="voice"){
+    must(b.body.includes("LOCKED LINE")&&b.body.includes("PERFORMED LINE"),
+      tag+": 04 renders only one side of the performance — it is a diff, not a read");
+    must(b.body.includes("vodiff-tag"),tag+": a [tag] is not typeset as a chip");
+  }else{
+    for(const frag of ["line one of the style","much longer sentence","right hand edge",
+                       "the closing claim","THE DECK"])
+      must(b.body.includes(frag),tag+": the approved prose lost \""+frag+"\" on the way to screen");
+    must(b.body.includes("dirdoc-label"),tag+": a labelled document rendered with no label rail");
+  }
   set(stage,{worker:"W",approved:{output:out("APPROVED")},
     readiness:{readyForDisclosure:true,prepared:true,directionCurrent:true,approvalCurrent:true}});
   b=authBlockHTML(stage,SHOT);
@@ -329,6 +362,154 @@ def test_the_shared_block_behaves_identically_for_every_gated_section():
     assert out.returncode == 0, f"harness crashed: {out.stderr[-1500:]}"
     fails = json.loads(out.stdout.strip().splitlines()[-1])
     assert not fails, "the gated sections no longer share one row shape:\n  " + "\n  ".join(fails)
+
+
+# ── THE SHOT PANEL READS LIKE A DOCUMENT (2026-07-26) ────────────────────────────────────
+# Julian's screenshot of S1.SH1, section 02 · OPENING FRAME: the APPROVED direction rendered
+# as a wall of raw unwrapped monospace prose running off the right edge of the page. The
+# cause was a missing selector, not a missing feature — the pending path inherited
+# `.rundecide-text pre{white-space:pre-wrap;font:inherit}` and read fine; the approved path
+# landed in `.rowmore`, which has no `pre` rule at all. The tests below make the fix
+# structural rather than incidental.
+
+def test_the_direction_document_never_sets_a_monospace_face():
+    """Monospace is banned from prose in this panel, in every state. There is not one line of
+    code, JSON or fixed-width data in any of the three artefacts; the mono was only ever
+    inherited from a <pre> chosen to preserve paragraph breaks — a job \\n\\n -> <p> does
+    properly."""
+    app = _app()
+    for sel, decls in re.findall(r"(\.(?:dirdoc|vodiff)[\w-]*[^{}\n]*)\{([^}]*)\}", app):
+        fam = re.search(r"font-family\s*:\s*([^;]*)", decls)
+        if fam:
+            assert "mono" not in fam.group(1).lower(), (
+                f"the direction document selector {sel.strip()!r} sets a monospace face — "
+                f"that is the wall Julian photographed")
+
+
+def test_the_direction_document_cannot_overflow_horizontally():
+    """Containment is structural, in three layers, and needs no `overflow` declaration."""
+    app = _app()
+    doc = app[app.index(".dirdoc{"):app.index(".dirdoc{") + 400]
+    assert "max-width:62ch" in doc, ".dirdoc lost its measure — long prose will run wide again"
+    assert "min-width:0" in doc, ".dirdoc lost min-width:0 — a grid/flex parent cannot shrink it"
+    assert "overflow-wrap:anywhere" in app[app.index(".dirdoc-p{"):app.index(".dirdoc-p{") + 300], (
+        ".dirdoc-p lost overflow-wrap — one pathological unbroken token wins again")
+    body = app[app.index(".runrow-body{"):app.index(".runrow-body{") + 220]
+    assert "min-width:0" in body, (
+        ".runrow-body lost min-width:0 — the container the document sits in can grow past the page")
+
+
+def test_no_disclosure_in_the_shot_panel_is_called_details():
+    """A disclosure that does not name what is behind it is a locked drawer. The approved
+    direction used to live behind the literal word 'Details'."""
+    app = _app()
+    block = app[app.index("function rowMore("):]
+    block = block[:block.index("\nfunction ")]
+    assert "<summary>Details</summary>" not in block, (
+        "rowMore has gone back to an unnamed disclosure")
+    assert "label" in block, "rowMore no longer takes the name of what it hides"
+    assert "<summary>Details</summary>" not in app, (
+        "some disclosure in the Studio still calls itself 'Details' and names nothing")
+
+
+def test_the_gate_refuses_visibly_and_keeps_the_callers_own_label():
+    """THE REFUSAL IS THE INTERFACE. Nothing here weakens the gate — the button stays
+    disabled and the backend refusal stays the protection. What changed is that the reason is
+    rendered on the page instead of hiding in a title=, that it names the blocking section in
+    Julian's own number and name, and that the button keeps its own name so you can still see
+    WHAT is locked."""
+    app = _app()
+    block = app[app.index("function deptLocksGeneration("):]
+    block = block[:block.index("\nfunction ")]
+    assert "gatewhy" in block, "the engine's refusal is invisible again — back inside a tooltip"
+    assert "panelLabelForStage(" in block, (
+        "the refusal no longer names the blocking section by Julian's number and name")
+    assert "shJumpToStage(" in block, "the refusal names a section with no way to get to it"
+    assert '"Locked' not in block and "'Locked" not in block, (
+        "the disabled button has gone back to replacing the caller's own label with 'Locked' — "
+        "you can no longer tell what is locked")
+    assert "disabled" in block, "THE GATE: the held button must still render disabled"
+    # and no override affordance was smuggled in with it
+    for smell in ("force", "override", "anyway", "bypass"):
+        assert smell not in block.lower(), (
+            f"deptLocksGeneration grew a {smell!r} affordance — the gate may only ever become "
+            f"easier to SATISFY, never easier to skip")
+
+
+def test_no_paid_control_is_offered_without_naming_its_cost():
+    """prepare is free, fire spends — and both rendered as identical teal buttons."""
+    app = _app()
+    assert ".btn.spend{" in app, "the spend tier is gone; free and paid look identical again"
+    for src in (_row_source(app, "frame"), _row_source(app, "review")):
+        for call in re.findall(r"deptLocksGeneration\(\s*\n?\s*`([^`]*)`", src):
+            assert "spend" in call, f"a gated paid control is not marked as spending: {call[:90]}"
+
+
+_ROW_BEHAVIOUR = r"""
+const fs=require("fs"), app=fs.readFileSync(process.argv[2],"utf8");
+// brace-matching extractor: unlike the row harness's fn(), this never drags in whatever
+// top-level statements happen to follow the function it wants.
+function fn(name){const i=app.indexOf("function "+name+"(");
+  if(i<0)throw new Error("not found: "+name);
+  let j=app.indexOf("{",i),d=0;
+  for(let k=j;k<app.length;k++){const c=app[k];
+    if(c==="{")d++; else if(c==="}"){d--; if(!d)return app.slice(i,k+1);}}
+  throw new Error("unbalanced: "+name);}
+const _esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let SH_PANEL=JSON.parse(process.argv[3]);
+let SH_RUN_OPEN={},PSHOT_I=0;
+const pShots=()=>[],shTok=x=>x,renderWorkspaceBody=()=>{};
+eval(["panelLabelForStage","runActionsHTML","deptLocksGeneration","shJumpToStage","shOpenSection"].map(fn).join("\n"));
+let fails=[]; const must=(c,m)=>{if(!c)fails.push(m);};
+const PRIMARY='<button class="btn" onclick="a()">Generate</button>';
+const GHOST='<button class="btn ghost" onclick="b()">Prepare again</button>';
+// 1 · at most ONE non-ghost .btn per .runrow-actions, on the cursor row
+const now=runActionsHTML([PRIMARY,PRIMARY,GHOST],"now");
+must((now.match(/class="btn"/g)||[]).length===1,
+  "the cursor row renders more than one primary button: "+now);
+must(!/runrow-actions quiet/.test(now),"the cursor row's own controls were quieted");
+// 2 · no row that is not the cursor renders a primary
+for(const tier of ["done","later"]){
+  const h=runActionsHTML([PRIMARY,GHOST],tier);
+  must(/class="runrow-actions quiet"/.test(h),tier+" row does not render its controls quiet");
+}
+must(runActionsHTML([],"now")==="","an empty action list still renders a decision strip");
+// 3 · THE PESSIMISTIC LOAD. A gate that is momentarily open is a gate.
+for(const readiness of [undefined,null,{loading:true}]){
+  const h=deptLocksGeneration(PRIMARY,readiness,null,"animation");
+  must(/<button disabled/.test(h),"an unloaded readiness record returns an ENABLED paid button");
+  must(/gatewhy/.test(h),"a held button carries no visible reason");
+}
+// 4 · a real refusal keeps the caller's own label and states the engine's own reason
+const held=deptLocksGeneration(PRIMARY,{applicable:true,readyForDisclosure:false,
+  reasons:{ready:"BECAUSE 05 IS NOT APPROVED"}},null,"animation");
+must(/<button disabled/.test(held),"a not-ready readiness returns an ENABLED paid button");
+must(held.includes("Generate"),"the held button lost the caller's own label");
+must(!/Locked/.test(held),"the held button replaced the caller's label with 'Locked'");
+must(held.includes("BECAUSE 05 IS NOT APPROVED"),"the engine's own reason is not on the page");
+must(held.indexOf("gatewhy")>held.indexOf("<button"),
+  "the .gatewhy does not follow the disabled button it explains");
+// 5 · ready means ready: the caller's button comes back untouched
+const free=deptLocksGeneration(PRIMARY,{applicable:true,readyForDisclosure:true},null,"animation");
+must(free===PRIMARY,"a ready department still holds the button: "+free);
+const na=deptLocksGeneration(PRIMARY,{applicable:false},null,"animation");
+must(na===PRIMARY,"a non-applicable department holds the button: "+na);
+console.log(JSON.stringify(fails));
+"""
+
+
+@pytest.mark.skipif(_NODE is None, reason="node not installed")
+def test_the_row_renders_one_primary_and_the_gate_refuses_visibly():
+    """Runs the row's own action/gate logic for real. Static text checks prove the code is
+    called; only this proves the human is offered one clear move and told, on the page, what
+    is holding a paid one."""
+    harness = pathlib.Path(tempfile.gettempdir()) / "cb_rowbehaviour_harness.js"
+    harness.write_text(_ROW_BEHAVIOUR, encoding="utf-8")
+    out = subprocess.run([_NODE, str(harness), str(APP), json.dumps(D.SHOT_PANEL)],
+                         capture_output=True, text=True, timeout=60)
+    assert out.returncode == 0, f"harness crashed: {out.stderr[-1500:]}"
+    fails = json.loads(out.stdout.strip().splitlines()[-1])
+    assert not fails, "the row's decision layer has drifted:\n  " + "\n  ".join(fails)
 
 
 def test_base_url_follows_the_page_origin():

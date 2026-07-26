@@ -3434,6 +3434,105 @@ function rowMore(inner,key){
 function runDecideBlock(head,innerHTML){
   return `<div class="rundecide"><div class="rundecide-head">${_esc(head)}</div><div class="rundecide-text">${innerHTML}</div></div>`;
 }
+// ── THE SAME ROW SHAPE, EVERY GATED SECTION ────────────────────────────────────────────
+// (2026-07-26, UI_MUST_MATCH_THE_PROCESS.md — Julian: "The ux ui has to match the new
+// process.")
+//
+// THE DEFECT. The engine hard-gates three stages behind an approved specialist direction
+// (cb_render._require_approved_department). Two of the three sections had grown their own
+// inline prepare/approve controls over time; 02 · OPENING FRAME never did — it showed a
+// Generate button and nothing else, so the only control that section offered could only ever
+// refuse. Julian hit that wall twice and was unblocked from a command line. Three sections,
+// three different shapes, because each was patched on its own day.
+//
+// THE FIX. One function builds the authorisation half of EVERY gated section: prepare (free,
+// text only) -> read what came back -> approve -> and only then the section's own paid
+// button. Which sections are gated, and by what, is not decided here — it is read from the
+// engine's own panel table (SH_PANEL, served by /api/shot-departments). A hardcoded stage
+// list in this file is precisely how the two sides drifted apart; there isn't one.
+//
+// Returns {phase, body, actions, ready}. `ready` is the engine's own readyForDisclosure —
+// never a second, looser UI-side opinion of whether the paid step may run.
+function panelSection(rowId){
+  return (SH_PANEL||[]).find(s=>s.rowId==rowId)||null;
+}
+// The heading a human reads for one row — the engine table's own number and name where
+// it knows the row, the row's own title otherwise.
+function rowHeading(r){
+  const s=r&&panelSection(r.id);
+  return s?(s.number+" · "+s.name):((r&&r.title)||"");
+}
+function panelAuthStage(rowId){
+  const s=panelSection(rowId);
+  return (s&&s.authorises&&s.stage)?s.stage:null;
+}
+function panelLabelForStage(stage){
+  const s=(SH_PANEL||[]).find(x=>x.stage==stage&&x.authorises);
+  return s?(s.number+" · "+s.name):stage;
+}
+function authBlockHTML(stage,shotId,opts){
+  opts=opts||{};
+  const key=deptKey(stage,shotId), raw=SH_DEPT_CACHE[key], d=shDeptRec(stage,shotId);
+  const label=panelLabelForStage(stage);
+  const prepBtn=`<button class="btn" onclick="deptRun('${_esc(stage)}','${_esc(shotId)}')">Prepare direction — free, no spend</button>`;
+  const rePrepBtn=`<button class="btn ghost" onclick="deptRun('${_esc(stage)}','${_esc(shotId)}')">↻ Prepare again — free</button>`;
+  const approveBtn=`<button class="btn" onclick="shApproveStageAll('${_esc(shotId)}','${_esc(stage)}')">Approve this direction</button>`;
+  const rejectBtn=`<button class="btn ghost" onclick="deptDecide('${_esc(stage)}','${_esc(shotId)}','rejected')">Reject with reason</button>`;
+  // ONE FLAG, TWO CAUSES — SAY BOTH (2026-07-26). {loading:true} is set both by the read-only
+  // fetch (shLoadDept) and by a real prepare (deptRun); nothing distinguishes them. Claiming
+  // "preparing" during a plain read would be the screen stating something untrue, which is the
+  // class of defect this whole pass exists to end. What IS true either way is the last
+  // sentence, and it is the one that matters.
+  if(raw&&raw.loading)
+    return {phase:"loading",ready:false,actions:[],
+      body:`<div class="dec-caption">Working on ${_esc(label)}'s direction — reading it, or preparing a new one. Either way this is text only: no media is being generated and nothing is being spent.</div>`};
+  if(!d)
+    return {phase:"loading",ready:false,actions:[],
+      body:`<div class="dec-caption">Loading the direction for ${_esc(label)}…</div>`};
+  if(d.error)
+    return {phase:"error",ready:false,
+      body:`<div class="runmsg err">${_esc(d.error)}</div>`,
+      actions:[rePrepBtn]};
+  const rd=d.readiness||{}, cand=d.candidate, appr=d.approved;
+  const ready=!!rd.readyForDisclosure;
+  // THE DECIDED CONTENT IS ALWAYS VISIBLE (the standing 2026-07-23 rule, Julian: "its asking
+  // me to approve direction but i cant see it") — an Approve button sits directly under the
+  // full text it approves, open, no clicks.
+  const asText=out=>{
+    if(!out)return "";
+    if(stage=="voice")
+      return (out.lines||[]).map(ln=>`<div class="dlgline"><b>${_esc(ln.speaker)}:</b> ${_esc(ln.performedText||ln.exactDialogue||"")}</div>`).join("");
+    return out.providerPrompt?`<pre>${_esc(out.providerPrompt)}</pre>`:"";
+  };
+  if(cand){
+    const out=cand.output||{};
+    return {phase:"approve",ready,
+      body:runDecideBlock("The direction you're approving",
+        (asText(out)||`<div class="dec-caption">The specialist returned no text — open Departments below to inspect the raw record.</div>`)
+        +(out.doesItLand?`<div class="ccref" style="padding:0 2px 6px">Does it land: ${_esc(out.doesItLand)}</div>`:"")),
+      actions:[approveBtn,rejectBtn,rePrepBtn]};
+  }
+  if(appr&&rd.directionCurrent===false){
+    // Approved once, but something it depends on has changed since. The engine treats this
+    // as no approval at all, and so does this row — prepare and approve again.
+    const why=(rd.reasons&&(rd.reasons.ready||rd.reasons.inputs))||"Something it depends on changed since it was approved.";
+    return {phase:"stale",ready,
+      body:`<div class="runmsg err">This direction was approved, but it is now out of date. ${_esc(why)}</div>`,
+      actions:[rePrepBtn]};
+  }
+  if(appr){
+    const out=appr.output||{};
+    return {phase:"approved",ready,
+      body:rowMore(`<div class="dec-caption" style="margin-top:8px;font-weight:600">The approved direction</div>`
+        +(asText(out)||`<div class="dec-caption">—</div>`)
+        +(out.doesItLand?`<div class="ccref" style="padding:6px 2px 0">Does it land: ${_esc(out.doesItLand)}</div>`:""),
+        shotId+"|auth|"+stage),
+      actions:[rePrepBtn]};
+  }
+  return {phase:"prepare",ready,
+    body:`<div class="runempty">Nothing prepared yet. Prepare asks the ${_esc(d.worker||"specialist")} for one written direction — a text-only consult that spends nothing and generates no media. It renders here in full for you to read, then approve. Only after that does anything paid become available.</div>`,
+    actions:[prepBtn]};
+}
 // THE VISIBLE REFERENCE STACK (2026-07-23, Julian — "I also want to see the references
 // that are being used on the prompt"): the shot's real resolved reference slots, as images,
 // from the read-only /api/shot-references mirror of the fire path's own _slot_paths logic.
@@ -3539,6 +3638,13 @@ function renderShotRunner(){
       shLoadDept('animation',s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
     if(talky&&!SH_DEPT_CACHE[deptKey('voice',s.shotId)])
       shLoadDept('voice',s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
+    // CINEMATOGRAPHY LOADS WITH THE OTHER TWO (2026-07-26). It never did — the record only
+    // arrived when the collapsed Departments section mounted, AFTER this row had already
+    // rendered. Two consequences, both real: 02 · OPENING FRAME could not show its own
+    // direction state, and deptLocksGeneration was handed an undefined readiness on first
+    // paint, so Generate rendered ENABLED on a shot the engine would refuse.
+    if(isOpener&&!SH_DEPT_CACHE[deptKey('cinematography',s.shotId)])
+      shLoadDept('cinematography',s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
   }
   if(!SH_REFS_CACHE[s.shotId])
     shLoadRefs(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
@@ -3576,9 +3682,20 @@ function renderShotRunner(){
 
   // ── 2 · OPENING FRAME ──
   {
+    // THE AUTHORISATION PATH THIS SECTION NEVER HAD (2026-07-26, UI_MUST_MATCH_THE_PROCESS.md).
+    // Before this, the row offered exactly one control — Generate — behind an engine gate
+    // (cb_render._require_approved_department, stage cinematography) that nothing on this
+    // screen could satisfy. The only button it showed could only ever refuse, and Julian was
+    // unblocked from a command line instead. Now it carries the same shape as every other
+    // gated section: prepare (free) -> read -> approve -> fire. Which stage gates it is read
+    // from the engine's own panel table, not asserted here.
+    const frameStage=isOpener?panelAuthStage("frame"):null;
+    const auth=frameStage?authBlockHTML(frameStage,tok):null;
+    const authOK=!auth||auth.ready;
     const genBtn=deptLocksGeneration(
       `<button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${tok}'})">◈ Generate</button>`,
-      cinRec&&cinRec.readiness,"◈ Locked — approve Cinematography direction first");
+      cinRec&&cinRec.readiness,
+      "◈ Locked — prepare & approve the direction above first");
     const uploadBtn=`<button class="btn ghost" onclick="document.getElementById('ofcUpload_${tok}').click()">⇧ Upload</button>
       <input type="file" id="ofcUpload_${tok}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${tok}',this)"/>`;
     const libBtn=`<button class="btn ghost" onclick="shOpenFrameLibrary('${tok}')">▤ Library</button>`;
@@ -3629,6 +3746,31 @@ function renderShotRunner(){
       st="ready";lab="Choose source";sum=pst.label||"No opening frame yet — choose its source.";
       body=`<div class="runempty">Four ways to an opening frame — generate (paid), upload, pick from this shot's own asset library, or carry the previous shot's approved final frame. Selection is never approval.</div>`;
       acts=[genBtn,uploadBtn,libBtn,prevBtn].filter(Boolean);
+    }
+    // THE AUTHORISATION HALF, IN THE SAME ROW AS THE BUTTON IT UNLOCKS. Only where a paid
+    // Generate is actually on offer — the inherited/relay and Scene-Look-held branches have
+    // no keyframe generation of their own, so they need no direction either.
+    if(auth&&acts.indexOf(genBtn)>=0){
+      body=auth.body+body;
+      acts=auth.actions.concat(acts);
+      // An ALREADY-APPROVED opening frame stays done: its direction only matters again for a
+      // REPLACEMENT, and re-opening a landed row over that would be the same "summary and
+      // controls disagree" bug pointed the other way.
+      if(!authOK&&st!="done"){
+        // The row states the true next step, not the one further down the page. A row whose
+        // summary and whose controls disagree is the exact defect this pass exists to end.
+        st="ready";
+        lab=(auth.phase=="approve")?"Approve direction"
+           :(auth.phase=="stale")?"Re-prepare direction"
+           :(auth.phase=="loading")?"Working…":"Prepare direction";
+        sum=(auth.phase=="approve")
+              ?"The direction for this frame is below, in full — approve it and Generate unlocks. Approving spends nothing."
+           :(auth.phase=="stale")
+              ?"This frame's approved direction is out of date — prepare and approve it again before generating."
+           :(auth.phase=="loading")
+              ?"Preparing this frame's direction — a text-only consult, nothing is being spent."
+              :"No direction prepared for this frame yet. Prepare it (free, text only), read it, approve it — then Generate unlocks.";
+      }
     }
     {
       let more="";
@@ -3702,11 +3844,29 @@ function renderShotRunner(){
       const vLines=(vOut&&vOut.lines||[]).map(ln=>`<div class="dlgline"><b>${_esc(ln.speaker)}:</b> ${_esc(ln.performedText||ln.exactDialogue||"")}</div>`).join("");
       if(!hasTake){
         if(!dirCurrent){
-          st="ready";lab="Approve direction";
-          sum="The Voice Director's performed lines are below, in full — approving never generates; the paid take is the separate step after.";
-          body=runDecideBlock("The performance you're approving",vLines||dlg||`<div class="dec-caption">Loading the Voice Director's lines…</div>`)
+          // THE SAME ROW SHAPE AS EVERY OTHER GATED SECTION (2026-07-26). This branch used
+          // to offer Approve and nothing else — which reads fine while something has already
+          // been auto-prepared, and is a dead end the moment nothing has: an Approve button
+          // over an empty box, with no way to fill it. Now it goes through the shared
+          // prepare -> read -> approve block, so "nothing prepared yet" produces a Prepare
+          // button instead of a decision the human cannot make.
+          const vStage=panelAuthStage("voice")||"voice";
+          const vAuth=authBlockHTML(vStage,tok);
+          st="ready";
+          lab=(vAuth.phase=="approve")?"Approve direction"
+             :(vAuth.phase=="stale")?"Re-prepare direction"
+             :(vAuth.phase=="loading")?"Working…":"Prepare direction";
+          sum=(vAuth.phase=="approve")
+                ?"The Voice Director's performed lines are below, in full — approving never generates; the paid take is the separate step after."
+             :(vAuth.phase=="stale")
+                ?"This shot's approved voice direction is out of date — prepare and approve it again before generating."
+             :(vAuth.phase=="loading")
+                ?"Preparing the voice direction — a text-only consult, nothing is being spent."
+                :"No voice direction prepared yet. Prepare it (free, text only), read the performed lines, approve them — then the paid take unlocks.";
+          body=vAuth.body
+            +(vAuth.phase=="prepare"?"":runDecideBlock("The locked lines it performs",dlg))
             +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,tok+"|voice");
-          acts=[`<button class="btn" onclick="shApproveStageAll('${tok}','voice')">Approve voice direction</button>`];
+          acts=vAuth.actions;
         } else {
           st="ready";lab="Generate";
           sum="Direction approved — no take on the ledger yet; generating voices these exact lines (paid ElevenLabs call).";
@@ -3735,9 +3895,11 @@ function renderShotRunner(){
     let st,lab,sum,body="",acts=[];
     const aRec=shDeptRec('animation',s.shotId)||animRec;
     const aCand=aRec&&aRec.candidate;
-    const aAppr=aRec&&aRec.approved;
-    const candText=aCand&&aCand.output&&(aCand.output.providerPrompt||"");
-    const candLand=aCand&&aCand.output&&aCand.output.doesItLand;
+    // THE SHARED BLOCK (2026-07-26): this row is where the prepare -> read -> approve shape
+    // was first built, one row at a time, and never carried to 02 or 04. It now renders from
+    // the same function they do, so the three cannot drift apart again.
+    const dStage=panelAuthStage("direction")||"animation";
+    const dAuth=authBlockHTML(dStage,tok);
     if(led.status=="approved"&&!anim.approvalCurrent){
       // THE APPROVAL IS THE DELIVERABLE (the standing 2026-07-21 doctrine): a landed shot
       // never re-presents as needing direction over a stale record behind it.
@@ -3745,26 +3907,26 @@ function renderShotRunner(){
       sum="Take already approved — the direction record behind it is stale/pending; see Departments below if you re-fire.";
       acts=[`<button class="btn ghost" onclick="deptRun('animation','${tok}')">↻ Refire direction</button>`];
     }
-    else if(anim.approvalCurrent){ st="done";lab="Directed";sum="Animation Direction approved and current.";
-      const apprText=aAppr&&aAppr.output&&(aAppr.output.providerPrompt||"");
-      body=rowMore(apprText?`<div class="dec-caption" style="margin-top:8px;font-weight:600">The approved direction</div><pre class="techpre">${_esc(apprText)}</pre>`:"",tok+"|dir");
-      acts=[`<button class="btn ghost" onclick="deptRun('animation','${tok}')">↻ Refire direction</button>`]; }
+    else if(anim.approvalCurrent){ st="done";lab="Directed";sum=panelLabelForStage("animation")+" approved and current.";
+      body=dAuth.body;
+      acts=dAuth.actions; }
     else if(aCand){ st="ready";lab="Your call";sum="The Director's animation brief is below, in full — approve it, or reject with a reason.";
-      body=runDecideBlock("The direction you're approving",
-          (candText?`<pre>${_esc(candText)}</pre>`:`<div class="dec-caption">The specialist returned no prompt text — open Departments below to inspect the raw record.</div>`)
-          +(candLand?`<div class="ccref" style="padding:0 2px 6px">Does it land: ${_esc(candLand)}</div>`:""))
+      body=dAuth.body
         +rowMore(`<div class="dec-caption" style="margin-top:8px">To EDIT the brief before approving, use the Animation panel in Departments below (Save edit, then Approve).</div>`,tok+"|dir");
-      acts=[`<button class="btn" onclick="shApproveStageAll('${tok}','animation')">Approve this direction</button>`,
-            `<button class="btn ghost" onclick="deptDecide('animation','${tok}','rejected')">Reject with reason</button>`]; }
+      acts=dAuth.actions; }
     else {
       // NOTHING PREPARED YET: never "approve" content that doesn't exist on screen —
       // prepare first (text-only consult, no spend), then the brief renders above a real,
       // informed Approve.
-      const loading=SH_DEPT_CACHE[deptKey('animation',s.shotId)]&&SH_DEPT_CACHE[deptKey('animation',s.shotId)].loading;
-      st="ready";lab="Prepare";
-      sum=loading?"Loading the Director's animation record…"
-         :"Prepare the Director's animation brief (text-only specialist consult, no spend) — it renders here in full for your approval.";
-      acts=loading?[]:[`<button class="btn" onclick="deptRun('animation','${tok}')">Prepare direction — no spend</button>`];
+      st="ready";
+      lab=(dAuth.phase=="loading")?"Working…":(dAuth.phase=="stale")?"Re-prepare":"Prepare";
+      sum=(dAuth.phase=="loading")
+            ?"Preparing the Director's animation brief — a text-only consult, nothing is being spent."
+         :(dAuth.phase=="stale")
+            ?"This shot's approved direction is out of date — prepare and approve it again before firing."
+            :"Prepare the Director's animation brief (text-only specialist consult, no spend) — it renders here in full for your approval.";
+      body=dAuth.body;
+      acts=dAuth.actions;
     }
     rows.push({id:"direction",title:"Direction",state:st,stateLabel:lab,summary:sum,body,actions:acts});
   }
@@ -3791,11 +3953,11 @@ function renderShotRunner(){
     if(sw&&sw.error){
       st="blocked";lab="Unavailable";
       if(_aCand){
-        sum="Waiting on you: the Animation Direction is prepared but not approved yet. "
+        sum="Waiting on you: the direction in "+panelLabelForStage("animation")+" is prepared but not approved yet. "
            +"Approve it and the prompt appears here, ready to fire.";
         promptActs=[`<button class="btn" onclick="shApproveStageAll('${tok}','animation')">Approve the direction</button>`];
       } else {
-        sum="No current Animation Direction for this shot — prepare one (text-only, no "
+        sum="No current direction in "+panelLabelForStage("animation")+" for this shot — prepare one (text-only, no "
            +"spend) and the prompt compiles from it.";
         promptActs=[`<button class="btn" onclick="deptRun('animation','${tok}')">Prepare the direction</button>`];
       }
@@ -3805,7 +3967,7 @@ function renderShotRunner(){
       lab=sw.isWorking?"Working copy":"Compiled";
       sum=sw.isWorking?("Working version saved"+(sw.savedAt?" · "+sw.savedAt.slice(0,16).replace("T"," "):"")+(dlgConfirmed?" · ⚠ Law-6 bypass on record":""))
                       :"Compiled from the approved direction — exactly what will be submitted.";
-    } else { st="pending";lab="Waiting";sum="Compiles once the Animation Direction is approved."; }
+    } else { st="pending";lab="Waiting";sum="Compiles once the direction in "+panelLabelForStage("animation")+" is approved."; }
     // THE REFERENCE STRIP RENDERS HERE UNCONDITIONALLY (2026-07-23, Julian — "no
     // references in the prompt"): what the @图N handles in the text actually point at,
     // as real thumbnails, whatever stage the shot is in — only @图1 can be pending.
@@ -3906,7 +4068,7 @@ function renderShotRunner(){
       acts=[`<button class="btn runfirebtn" onclick="shFireWithAuth('${tok}')">✦ Approve spend &amp; fire${disc.maxBatchCostUsd!=null?` — <span class="tnum">$${disc.maxBatchCostUsd}</span>`:""}</button>`];
     } else if(!pst.readyToAnimate){
       st="pending";lab="Waiting";sum=pst.label+(pst.sub?" — "+pst.sub:"");
-      body=`<div class="runempty">Unlocks when the opening frame${talky?", voice":""} and Animation Direction are approved. The spend itself always stays a two-step, token-sealed decision.</div>`;
+      body=`<div class="runempty">Unlocks when ${_esc(panelLabelForStage("cinematography"))}${talky?", "+_esc(panelLabelForStage("voice")):""} and ${_esc(panelLabelForStage("animation"))} are approved. The spend itself always stays a two-step, token-sealed decision.</div>`;
     } else if(animRec&&animRec.readiness&&animRec.readiness.applicable!==false
               &&!animRec.readiness.readyForDisclosure){
       // TELL THE TRUTH ON THE ROW, NOT JUST THE BUTTON (2026-07-25, Julian: "how am i able
@@ -3916,16 +4078,16 @@ function renderShotRunner(){
       // argument visually. Same fact, stated once, in the place the eye lands first.
       const why=(animRec.readiness.reasons&&(animRec.readiness.reasons.ready
                  ||animRec.readiness.reasons.inputs))
-                ||"The Animation Direction is not ready for disclosure.";
+                ||("The direction in "+panelLabelForStage("animation")+" is not ready for disclosure.");
       st="pending";lab="Blocked";sum=why;
-      body=`<div class="runempty">${_esc(why)}<br><br>The prompt is compiled from the approved Animation Direction — until that resolves, there is nothing to fire.</div>`;
+      body=`<div class="runempty">${_esc(why)}<br><br>The prompt is compiled from the direction approved in ${_esc(panelLabelForStage("animation"))} — until that resolves, there is nothing to fire.</div>`;
     } else {
       st="ready";lab="Ready";sum="Everything upstream is approved — firing discloses the sealed envelope, then the bound token spends.";
       body=seg+`<div style="margin-top:12px">${candCountPickerHTML(shCap)}</div>`;
       const fn=Math.min(SH_CANDS,shCap), fc=shResCost(SH_RES,fireDur);
       acts=[deptLocksGeneration(
         `<button class="btn runfirebtn" onclick="shRun('fire','${tok}',{candidates:Math.min(SH_CANDS,${shCap}),resolution:SH_RES})">► Generate ${fn} candidate${fn==1?"":"s"}${fc!=null?` — est. <span class="tnum">$${(fc*fn).toFixed(2)}</span> (${SH_RES})`:` (${SH_RES})`}</button>`,
-        animRec&&animRec.readiness,"Locked — prepare & approve Animation Direction first")];
+        animRec&&animRec.readiness,"Locked — prepare & approve "+panelLabelForStage("animation")+" first")];
     }
     rows.push({id:"fire",title:"Fire",state:st,stateLabel:lab,summary:sum,body,actions:acts});
   }
@@ -4001,7 +4163,7 @@ function renderShotRunner(){
   // as "the next step" on a landed shot.
   const current=(led.status=="approved")?null
     :(rows.find(r=>r.state=="ready"||r.state=="blocked"||r.state=="generating")||null);
-  const meter=rows.map(r=>`<i class="${r.state=="done"?"done":r.state=="generating"?"generating":r.state=="ready"?"ready":r.state=="blocked"?"blocked":""}" title="${_esc(r.title)}"></i>`).join("");
+  const meter=rows.map(r=>`<i class="${r.state=="done"?"done":r.state=="generating"?"generating":r.state=="ready"?"ready":r.state=="blocked"?"blocked":""}" title="${_esc(rowHeading(r))}"></i>`).join("");
   const lastDisc=(led.batch&&led.batch.disclosure)||led.disclosure||null;
   const estN=Math.min(SH_CANDS,shCap), estCost=shResCost(SH_RES,fireDur);
   const spendBits=[
@@ -4033,11 +4195,21 @@ function renderShotRunner(){
       // rendered OUTSIDE any disclosure, this just opens the supporting editors too)
       bodyHTML=bodyHTML.replace(/<details class="rowmore"(?! open)/g,'<details class="rowmore" open');
     }
+    // THE NUMBER AND THE NAME COME FROM THE ENGINE'S PANEL TABLE (2026-07-26). The number
+    // used to be this loop's own array position and the name a string typed into each row —
+    // which is why a document could describe "stage 3 Cinematography" while the screen said
+    // "02 · OPENING FRAME" and nobody could tell which was wrong. One table now decides what
+    // a human calls each section, and the same table tells the engine what to put in its
+    // refusals. A section the table doesn't know falls back to the row's own title rather
+    // than rendering blank.
+    const sec=panelSection(r.id);
+    const num=sec?sec.number:String(i+1).padStart(2,"0");
+    const title=sec?sec.name:r.title;
     return `<div class="runrow ${r.state} ${isCur?"current":""} ${open?"open":""}">
       <span class="runrow-dot"></span>
       <div class="runrow-head" onclick="shRowToggle('${tok}','${r.id}')">
-        <span class="runrow-num">${String(i+1).padStart(2,"0")}</span>
-        <span class="runrow-title">${_esc(r.title)}</span>
+        <span class="runrow-num">${_esc(num)}</span>
+        <span class="runrow-title">${_esc(title)}</span>
         <span class="runrow-sum">${_esc(r.summary||"")}</span>
         ${(!open&&r.mini)?`<img class="runrow-mini" src="${BASE}${r.mini}?v=${MEDIA_V}"/>`:""}
         <span class="runrow-state" style="color:var(${chip[1]})">${chip[0]} ${_esc(r.stateLabel||r.state)}</span>
@@ -4048,7 +4220,7 @@ function renderShotRunner(){
   }).join("");
   const terminal=(led.status=="approved");
   const nowLine=current
-    ?`<span style="color:var(${(RUN_CHIP[current.state]||RUN_CHIP.pending)[1]})">● NOW · ${_esc(current.title.toUpperCase())}</span> — ${_esc(current.summary||"")}`
+    ?`<span style="color:var(${(RUN_CHIP[current.state]||RUN_CHIP.pending)[1]})">● NOW · ${_esc(rowHeading(current).toUpperCase())}</span> — ${_esc(current.summary||"")}`
     :`<span style="color:var(--ok)">✓ COMPLETE</span> — approved take on record; it plays in Review below. Rejecting the take is the only action that reopens this shot.`;
   const techPrompt=isOpener?s.keyframePrompt:null;
   // THE INLINE DEPARTMENT SECTION (2026-07-23, Julian's pipeline-layout direction, item 6):
@@ -4412,13 +4584,13 @@ function renderShotStage(mode){
         // fires the first hop exactly as before; the poll auto-completes the second.
         decActions=[auth&&auth.token
           ?deptLocksGeneration(`<button class="btn" onclick="shApproveSpendFire()">Generate animation candidates</button>`,
-              animRec&&animRec.readiness,"Locked — prepare & approve Animation Direction first")
+              animRec&&animRec.readiness,"Locked — prepare & approve "+panelLabelForStage("animation")+" first")
           // the picker only applies BEFORE a token exists — once a disclosure is issued the
           // count is already sealed into that envelope (§5, THE SEAL); changing SH_CANDS here
           // wouldn't touch the pending auth, so it's shown only on the free, pre-disclosure path
           :candCountPickerHTML(shCap)+deptLocksGeneration(
               `<button class="btn" onclick="shRun('next',null,{candidates:Math.min(SH_CANDS,${shCap})})">Generate animation candidates</button>`,
-              animRec&&animRec.readiness,"Locked — prepare & approve Animation Direction first")];
+              animRec&&animRec.readiness,"Locked — prepare & approve "+panelLabelForStage("animation")+" first")];
       }
     }
     // THE ANIMATION WORKING PROMPT + THE FREE STRUCTURE CHECK (2026-07-19, contained inside
@@ -4585,6 +4757,13 @@ function renderFinalStage(){
 
 
 let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=null,SH_POLL=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_DEPARTMENTS=null;
+// THE PANEL TABLE COMES FROM THE ENGINE, NEVER FROM HERE (2026-07-26, the UI/engine
+// reconciliation): cb_departments.SHOT_PANEL, served by /api/shot-departments. It decides
+// each section's number, its name and which engine stage that section authorises. Null until
+// the first load — every reader falls back to the row's own hardcoded title rather than
+// rendering an empty heading, so a server that hasn't answered yet degrades to the old
+// labels instead of a blank panel.
+let SH_PANEL=null;
 // SH_LAST_JOB (2026-07-19 correction): renderJobBanner()/jobFor() only ever surface a job
 // while status=="running" — the instant a job finishes (success OR a fast, informative
 // refusal like "billing profile unconfirmed", which typically completes before the very
@@ -4958,6 +5137,7 @@ async function shFetchPkg(){
     SH_SCENELOOK = slr ? await slr.json().catch(()=>({status:"none"})) : {status:"none"};
     SH_REASSESS = rar ? await rar.json().catch(()=>({shots:{}})) : {shots:{}};
     SH_DEPARTMENTS = depr ? await depr.json().catch(()=>({shots:{}})) : {shots:{}};
+    if(SH_DEPARTMENTS&&Array.isArray(SH_DEPARTMENTS.panel)) SH_PANEL=SH_DEPARTMENTS.panel;
   }catch(e){SH_ERR="Can't reach the studio server.";}
 }
 function shLedger(sid){return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.shotId==sid)||{};}
@@ -5048,7 +5228,7 @@ function shOpeningFrameChoices(tok,s){
   const cinRec=SH_DEPT_CACHE[deptKey('cinematography',tok)];
   const genBtn=deptLocksGeneration(
     `<button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}',refs:(${JSON.stringify((s.referenceSlots||[]).length||3)})})">◈ Generate new keyframe</button>`,
-    cinRec&&cinRec.readiness,"◈ Locked — prepare & approve Cinematography direction first");
+    cinRec&&cinRec.readiness,"◈ Locked — prepare & approve "+panelLabelForStage("cinematography")+" first");
   return `<div class="ofc">
     <div class="ofc-row">${genBtn}</div>
     <div class="ofc-row"><button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">⇧ Upload image — no generation cost</button>

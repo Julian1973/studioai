@@ -19,6 +19,7 @@ call") is now structurally impossible to bypass.
 """
 import json
 import pathlib
+import re
 import shutil
 import sys
 import time
@@ -484,15 +485,49 @@ def test_scenelook_generation_refuses_without_its_own_approved_look_direction(wo
 
 def test_keyframe_generation_refuses_without_its_own_approved_cinematography(world):
     calls, tmp, path = world
-    with pytest.raises(R.DepartmentNotApproved, match="Cinematography"):
+    # 2026-07-26 (UI/engine reconciliation): this used to match the DEPARTMENT name,
+    # "Cinematography". The refusal now names the section a human actually has to open on his
+    # own screen — "02 · OPENING FRAME" — because this same string is what department_readiness
+    # returns as readiness.reasons.ready and the Studio prints straight onto the row, and
+    # sending someone to a section that does not exist on their screen is what this whole
+    # reconciliation was about. The gate itself is untouched: it still refuses, and still
+    # spends nothing. Read from cb_departments so the assertion cannot drift from the table.
+    with pytest.raises(R.DepartmentNotApproved,
+                       match=re.escape(cb_departments.panel_label("cinematography"))):
         R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     assert calls["image"] == []
+
+
+def test_the_readiness_reason_names_julians_section(world):
+    """THE STRING JULIAN ACTUALLY READS (2026-07-26, the UI/engine reconciliation).
+
+    department_readiness's reasons.ready is not developer text: the Studio prints it verbatim
+    onto the shot row and into the disabled Generate button's tooltip. It used to be labelled
+    "voice readiness check" / "cinematography readiness check" — the engine's own stage keys,
+    on his screen, inside the very sentence telling him what to do about it, while his panel
+    calls those sections 04 · VOICE and 02 · OPENING FRAME. Run against the real readiness
+    path on the scratch world, not a hand-built message."""
+    calls, tmp, path = world
+    pkg, _p = R.load_pkg("9", "EpT")
+    for stage in cb_departments.authorising_stages():
+        rd = R.department_readiness(pkg, "9", stage, "1.B1.S1", "EpT")
+        if rd.get("applicable") is False:
+            continue
+        reason = (rd.get("reasons") or {}).get("ready") or ""
+        assert reason, f"{stage} is not ready but gives no reason"
+        assert f"{stage} readiness check" not in reason, (
+            f"the readiness reason for {stage} still names the engine's own stage key")
+        assert cb_departments.panel_label(stage) in reason, (
+            f"the readiness reason for {stage} never names the section "
+            f"{cb_departments.panel_label(stage)!r} the human has to open")
+    assert calls["image"] == [] and calls["voice"] == []
 
 
 def test_voice_generation_refuses_without_its_own_approved_voice_direction(world):
     calls, tmp, path = world
     pkg, p = R.load_pkg("9", "EpT")
-    with pytest.raises(R.DepartmentNotApproved, match="Voice"):
+    with pytest.raises(R.DepartmentNotApproved,
+                       match=re.escape(cb_departments.panel_label("voice"))):
         R.voice_shot(pkg, p, "1.B1.S1", "EpT", log=lambda *a, **k: None)
     assert calls["voice"] == []
 

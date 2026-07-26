@@ -1806,7 +1806,7 @@ def _require_approved_department(pkg, scene, stage, shot_id=None, episode="Ep1",
     preparing and re-approving is the only path forward, never a silent reuse."""
     if stage not in _DEPARTMENT_WORKERS:
         raise Refused(f"REFUSED — unknown department stage '{stage}'")
-    dep, worker, _skill = _DEPARTMENT_WORKERS[stage]
+    _dep, worker, _skill = _DEPARTMENT_WORKERS[stage]
     label = action_label or f"generation on stage '{stage}'"
     work, _save_fn = _department_container(pkg, scene, shot_id, stage, episode)
     approved = work.get("approved")
@@ -1820,18 +1820,27 @@ def _require_approved_department(pkg, scene, stage, shot_id=None, episode="Ep1",
     # one in the "has real content" check itself, not the staleness comparison.
     has_content = bool(output.get("lines")) if stage == "voice" else bool(
         (output.get("providerPrompt") or "").strip())
+    # JULIAN'S OWN NUMBER AND NAME, NEVER THE ENGINE KEY (2026-07-26, his own correction:
+    # "please refer to the numbers and the real stage names, stage three is opening frame").
+    # These two strings are not only exception text — department_readiness returns them as
+    # readiness.reasons.ready, which the Studio prints straight onto the row. So every time
+    # this message said "stage 'cinematography'" it was telling a human to go and do
+    # something to a section that does not exist on his screen. The section is where he
+    # actually has to click, so the section is what it names.
+    section = cb_departments.panel_label(stage)
     if not approved or not has_content:
         raise DepartmentNotApproved(
-            f"REFUSED — {label} requires an APPROVED {dep} direction from the {worker} "
-            f"first. CORE LAW: no approved department direction = no disclosure "
-            f"authorisation = no provider call. Prepare the {worker}'s specialist consult "
-            f"for stage '{stage}', then approve it, before firing.")
+            f"REFUSED — {label} requires an APPROVED direction from the {worker}, prepared "
+            f"and approved in section {section} on this shot's panel. CORE LAW: no approved "
+            f"department direction = no disclosure authorisation = no provider call. Open "
+            f"{section}, press Prepare (free, text only), read what comes back, then Approve "
+            f"it — the paid step is the one after that.")
     fresh = department_freshness(pkg, scene, stage, shot_id, episode, _approved=approved)
     if not fresh["current"]:
         raise DepartmentNotApproved(
-            f"REFUSED — {label}'s approved {dep} direction is STALE ("
-            f"{'; '.join(fresh['changed'])}). Re-prepare and re-approve before firing; a "
-            f"stale direction is never silently reused.")
+            f"REFUSED — {label}'s approved direction in section {section} is STALE ("
+            f"{'; '.join(fresh['changed'])}). Prepare and approve it again in {section} "
+            f"before firing; a stale direction is never silently reused.")
     return approved, output
 
 
@@ -1897,8 +1906,12 @@ def department_readiness(pkg, scene, stage, shot_id=None, episode="Ep1"):
     direction_current = bool(fresh["hasApproval"] and fresh["current"])
     ready, ready_reason = False, None
     try:
-        _require_approved_department(pkg, scene, stage, shot_id, episode,
-                                     action_label=f"{stage} readiness check")
+        # The Studio prints this refusal verbatim onto the row (readiness.reasons.ready), so
+        # its label is read by a human, not a developer — "voice readiness check" put the
+        # engine's own stage key on Julian's screen (2026-07-26, the reconciliation).
+        _require_approved_department(
+            pkg, scene, stage, shot_id, episode,
+            action_label=f"the paid step in {cb_departments.panel_label(stage)}")
         ready = True
     except Refused as e:
         ready_reason = str(e)

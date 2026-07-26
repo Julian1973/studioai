@@ -76,6 +76,79 @@ DEPARTMENTS = [
 ]
 
 
+# THE SHOT PANEL — JULIAN'S OWN NUMBERS AND NAMES, AND WHICH SECTION AUTHORISES WHAT
+# (2026-07-26, the UI/engine reconciliation; UI_MUST_MATCH_THE_PROCESS.md).
+#
+# THE DEFECT THIS CLOSES. The engine was restructured over weeks and cb-studio/app.html was
+# patched at its edges instead of reconciled with it. Section "02 · OPENING FRAME" offered a
+# Generate (fire) button and NO prepare/approve path for the direction the engine demands
+# behind it — so the only button that section showed could only ever refuse. Julian hit that
+# wall twice ("im lost", "i cant go back") and was unblocked from the command line, which is
+# a workaround, not a fix. Sections 04 and 05 had grown their own inline authorisation rows;
+# 02 never did. Three sections, three different shapes.
+#
+# WHY THIS TABLE IS IN THE ENGINE AND NOT IN app.html. The last time this project shipped two
+# tables for one truth (the chair tables) they drifted apart within a day and a test had to be
+# written to bind them — test_studio_chair_table.py exists because of it. A hardcoded stage
+# list in app.html is exactly that mistake again. This is the one table; the panel reads it,
+# the refusal messages read it, and the test binds both to it.
+#
+# THE NAMES ARE JULIAN'S, NOT THE ENGINE'S (his own correction: "please refer to the numbers
+# and the real stage names, stage three is opening frame"). `stage` here is an implementation
+# detail — an engine key — and it must never reach a human. Everything a person reads comes
+# from `number` and `name`.
+#
+#   stage      — the engine department key this section is gated by (None = no gate).
+#   authorises — this is THE section where that stage's direction is prepared and approved.
+#                A section may be gated by a stage it does not authorise (07 · FIRE spends on
+#                the animation direction that 05 · DIRECTION authorises); such a section must
+#                send the human to the authorising one by NAME, never leave them guessing.
+SHOT_PANEL = [
+    {"number": "01", "name": "STORYBOARD", "rowId": "storyboard",
+     "stage": None, "authorises": False},
+    {"number": "02", "name": "OPENING FRAME", "rowId": "frame",
+     "stage": "cinematography", "authorises": True},
+    {"number": "03", "name": "SPECIAL REFERENCES", "rowId": "refs",
+     "stage": None, "authorises": False},
+    {"number": "04", "name": "VOICE", "rowId": "voice",
+     "stage": "voice", "authorises": True},
+    {"number": "05", "name": "DIRECTION", "rowId": "direction",
+     "stage": "animation", "authorises": True},
+    {"number": "06", "name": "PROMPT", "rowId": "prompt",
+     "stage": None, "authorises": False},
+    {"number": "07", "name": "FIRE", "rowId": "fire",
+     "stage": "animation", "authorises": False},
+    {"number": "08", "name": "REVIEW", "rowId": "review",
+     "stage": None, "authorises": False},
+]
+
+
+def panel_section(stage):
+    """The ONE section a human prepares and approves `stage` in, or None."""
+    for sec in SHOT_PANEL:
+        if sec["stage"] == stage and sec["authorises"]:
+            return sec
+    return None
+
+
+def panel_label(stage):
+    """What a human calls this stage on their own screen — '02 · OPENING FRAME'.
+
+    Falls back to the engine key only when a stage has no section at all, which is itself a
+    reconciliation failure the studio-chair test refuses to let ship."""
+    sec = panel_section(stage)
+    return f'{sec["number"]} · {sec["name"]}' if sec else str(stage)
+
+
+def authorising_stages():
+    """Every engine stage a shot panel section actually authorises, in panel order.
+
+    The one list any caller may iterate — serve.py's endpoints and the Studio's own rows all
+    read this rather than re-typing ('cinematography', 'voice', 'animation') for the fourth
+    time, which is how the two sides drifted apart in the first place."""
+    return [s["stage"] for s in SHOT_PANEL if s["authorises"] and s["stage"]]
+
+
 def roster():
     """The people shown in Studio.  `loaded` proves the running source can open the skill."""
     out = []

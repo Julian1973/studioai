@@ -1307,13 +1307,19 @@ class H(http.server.SimpleHTTPRequestHandler):
             if str(CBGEN) not in sys.path:
                 sys.path.insert(0, str(CBGEN))
             import cb_render as _CBR
+            import cb_departments as _CBD
             out = {}
             for s in pkg.get("shots") or []:
                 sid = s.get("shotId")
                 if not sid:
                     continue
                 per_stage = {}
-                for stage in ("cinematography", "voice", "animation"):
+                # THE STAGE LIST COMES FROM THE ENGINE (2026-07-26, the UI/engine
+                # reconciliation): this was a fourth hand-typed copy of the same three
+                # strings. A stage the engine starts gating that nobody remembers to add
+                # here is invisible in the Studio — which is exactly how 02 · OPENING FRAME
+                # ended up with a fire button and no authorisation path.
+                for stage in _CBD.authorising_stages():
                     try:
                         r = _CBR.department_readiness(pkg, scene, stage, sid, ep)
                         per_stage[stage] = {"applicable": r["applicable"],
@@ -1323,7 +1329,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                         per_stage[stage] = {"applicable": True, "prepared": False,
                                             "approvalCurrent": False, "error": str(e)[:200]}
                 out[sid] = per_stage
-            return self._json(200, {"shots": out})
+            # THE PANEL TABLE TRAVELS WITH THE STATE (2026-07-26): the Studio's rows read
+            # their number, their name and which stage each section authorises from HERE, so
+            # a section can never again show a fire button whose authorisation path nobody
+            # wired up. app.html holds no stage list of its own.
+            return self._json(200, {"shots": out, "panel": _CBD.SHOT_PANEL})
         if self.path.startswith("/api/shot-keyframe-library"):
             # THE OPENING-FRAME LIBRARY/HISTORY, READ-ONLY, ZERO SPEND (2026-07-18, Julian's
             # source-choice directive): every prior opening-frame artefact for ONE shot the
@@ -1978,8 +1988,14 @@ class H(http.server.SimpleHTTPRequestHandler):
                 cmd = str(d.get("cmd", "")).strip()
                 scene = str(d.get("scene", "")).strip()
                 ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
-                if cmd not in ("vision", "scene", "envelope", "migrate"):
-                    self._json(400, {"error": "cmd must be vision|scene|envelope|migrate"}); return
+                # "scenes" (2026-07-26) builds every scene that has no storyboard yet, in
+                # order, halting on the first failure. It automates the WORK, never the
+                # VERDICT — each scene still waits for Julian's own sign-off exactly as
+                # before, and cb_creative's own guard refuses the batch outright until at
+                # least one scene has been built and read, so a bad configuration is found
+                # on one scene rather than ten.
+                if cmd not in ("vision", "scene", "scenes", "envelope", "migrate"):
+                    self._json(400, {"error": "cmd must be vision|scene|scenes|envelope|migrate"}); return
                 if cmd == "scene" and not re.match(r"^\w+$", scene):
                     self._json(400, {"error": "scene must be a plain token"}); return
                 args = ["cb_creative.py", cmd] + ([scene, ep] if cmd == "scene" else [ep])
@@ -2132,9 +2148,10 @@ class H(http.server.SimpleHTTPRequestHandler):
             #               (voPath — a file on disk is never a take). No take -> the chain
             #               STOPS and says so; the paid generation is never auto-fired by an
             #               approve click.
-            #   animation:  prepare the direction first if nothing is prepared (a text-only
+            #   every other authorising section (02 · OPENING FRAME, 05 · DIRECTION):
+            #               prepare the direction first if nothing is prepared (a text-only
             #               specialist consult, no media spend), then approve the pending
-            #               candidate.
+            #               candidate. Same shape for both — 2026-07-26, the reconciliation.
             try:
                 d = self._body()
                 scene = str(d.get("scene", "")).strip(); sid = str(d.get("shotId", "")).strip()
@@ -2144,17 +2161,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if not scene or not sid or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) \
                    or not _SHOT_TOKEN.match(ep):
                     self._json(400, {"error": "scene, shotId (and optional episode) required as plain tokens"}); return
-                if stage not in ("voice", "animation"):
-                    self._json(400, {"error": "stage must be voice or animation"}); return
                 if str(CBGEN) not in sys.path:
                     sys.path.insert(0, str(CBGEN))
                 import cb_render as _CBR
+                import cb_departments as _CBD
+                # EVERY AUTHORISING SECTION USES THIS DOOR (2026-07-26, the UI/engine
+                # reconciliation). This list was hardcoded to ("voice", "animation") — the
+                # two sections that had grown inline approve rows — so 02 · OPENING FRAME
+                # could not be approved from its own row even if the row had offered to.
+                # That is the whole defect in one line: the endpoint knew about the sections
+                # somebody had already built, not about the stages the engine actually
+                # gates. It now reads the engine's own panel table.
+                allowed = _CBD.authorising_stages()
+                if stage not in allowed:
+                    self._json(400, {"error": "stage must be one of: " + ", ".join(allowed)}); return
                 _quiet = lambda *a, **k: None
                 steps = []
                 pkg, _p = _CBR.load_pkg(scene, ep)
                 work, _sv = _CBR._department_container(pkg, scene, sid, stage, ep)
                 has_cand = bool(work.get("candidate")); has_appr = bool(work.get("approved"))
-                if stage == "animation" and not has_cand and not has_appr:
+                if stage != "voice" and not has_cand and not has_appr:
                     _CBR.prepare_department(scene, stage, sid, ep, log=_quiet)
                     steps.append("direction prepared (specialist consult — no media, no spend)")
                     has_cand = True
@@ -2182,7 +2208,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                                "it is never auto-fired by an approve click.")
                 else:
                     complete = True
-                    msg = "Animation Direction approved."
+                    # Julian's own section name, never the engine's stage key.
+                    msg = _CBD.panel_label(stage) + " — direction approved."
                 self._json(200, {"ok": True, "stage": stage, "steps": steps,
                                   "complete": complete, "message": msg})
             except Exception as e:

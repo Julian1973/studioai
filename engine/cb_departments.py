@@ -271,7 +271,7 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
     # exemplars with rejected work marked as failures not to imitate. Reusing it here means
     # ONE room builder for the whole creative pipeline rather than two that drift apart.
     # Imported lazily inside the function: at module scope it would be a cycle.
-    from cb_creative import _mind
+    from cb_creative import _mind, _characters_for
     return cb_llm.structured(
         _mind("DIRECTOR AND CINEMATOGRAPHER, WITH THE SHOWRUNNER IN THE ROOM",
               ["directorTaste", "cinematographyTaste", "showrunnerTaste"],
@@ -328,6 +328,19 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
         + json.dumps(script_events, ensure_ascii=False, indent=1) +
         "\n\nCAST PRESENT PER SCENE (mechanically detected from the script text):\n"
         + json.dumps(cast_by_scene, ensure_ascii=False, indent=1) +
+        # THE PEOPLE THEMSELVES (2026-07-26). Step 1 knew every character's NAME and nothing
+        # else about them. It authors want and need for every beat in the episode, and the
+        # Showrunner at this table is charged with running the substitution test on exactly
+        # those two fields — "would this emotional engine work unchanged in a different
+        # children's series" — which is unrunnable without the register it substitutes
+        # against. Same empty chair as gate5_performance, one pass earlier and far more
+        # consequential: a want authored generically here is inherited by every chair
+        # downstream and no amount of craft recovers it.
+        "\n\nCHARACTER CANON FOR THE EPISODE'S CAST (acting canon first — these are the "
+        "people whose wants and needs you are authoring; the substitution test runs "
+        "against THIS):\n"
+        + _characters_for(sorted({c for v in (cast_by_scene or {}).values()
+                                  for c in (v or [])})) +
         "\n\nReturn the episode vision, a suggested title/logline/leadBear, and the "
         "ordered beat split with creative content for every beat, across every scene.",
         StoryIntakeDirection, label="department_story", log=log)

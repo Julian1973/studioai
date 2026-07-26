@@ -553,6 +553,17 @@ def _locked_dialogue(beats):
     return out
 
 
+def _scene_cast(sd):
+    """Every named character the scene's own approved beats actually carry.
+
+    The three rooms downstream of Gate 3 (shot conference, voice, adversarial review) all
+    receive `sd` and none of them received a cast, so none of them received the character
+    canon — this is the one derivation they were each missing, in one place instead of
+    three copies that can drift."""
+    return sorted({c for b in getattr(sd, "beats", []) or []
+                   for c in (getattr(b, "participatingCharacters", None) or [])})
+
+
 def _characters_for(names):
     try:
         chars = json.load(open(_CANON_SOURCES["characters"]))
@@ -771,7 +782,7 @@ def gate0_readiness(episode, scene_num, brief, log=print):
                   "until the user approves it."),
             f"CAST: {', '.join(cast)}\n\nUNRESOLVED FIELDS:\n"
             + json.dumps(unresolved, ensure_ascii=False)
-            + f"\n\nESTABLISHED CANON FOR THIS CAST:\n{_characters_for(cast)[:12000]}",
+            + f"\n\nESTABLISHED CANON FOR THIS CAST:\n{_characters_for(cast)}",
             CanonCompletionProposal, label=f"gate0_canon_completion_s{scene_num}")
         doc = {"episodeId": episode, "sceneNumber": str(scene_num), "builtAt": _now(),
                "approvalState": "proposed-awaiting-human-approval",
@@ -818,7 +829,7 @@ def gate1_treatments(episode, scene_num, vision, ready, log=print):
               "thinking at this stage at all."),
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:6000]}\n\n"
         f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
-        f"CHARACTER + RELATIONSHIP CANON:\n{_characters_for(ready['cast'])[:9000]}"
+        f"CHARACTER + RELATIONSHIP CANON:\n{_characters_for(ready['cast'])}"
         + brief_line,
         TreatmentSet, label=f"gate1_treatments_s{scene_num}")
     log(f"GATE 1 — three whole-scene treatments: "
@@ -842,6 +853,8 @@ def gate2_select(vision, treatments, ready, log=print):
               "'cinematic' terminology; or merely illustrating the script — and say so in "
               "rejectionChecks. State the ONE governing audience experience the selected "
               "treatment commits the scene to."),
+        f"CHARACTER + RELATIONSHIP CANON (a treatment that does not fit these people is not the right treatment, however well it reads):\n"
+        f"{_characters_for(ready['cast'])}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:5000]}\n\n"
         + ("USER AMBITION: " + ready["brief"] + "\n\n" if ready["brief"] else "")
         + "THE THREE TREATMENTS:\n"
@@ -896,7 +909,7 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         f"THE SHOWRUNNER'S SELECTION:\n{selection.model_dump_json()}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:4000]}\n\n"
         f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
-        f"CHARACTER CANON:\n{_characters_for(ready['cast'])[:8000]}{notes}\n\n"
+        f"CHARACTER CANON:\n{_characters_for(ready['cast'])}{notes}\n\n"
         f"Return the Scene record and one Beat per script beat (beatId = the script's own "
         f"beatCode; sceneId = 'S{scene_num}'; sourceScript = the storyBeat verbatim; "
         f"exactDialogue = every locked line, verbatim, in order).",
@@ -1029,6 +1042,8 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "remains fully available and is often the right call: when you choose it, say "
               "what it is FOR and what keeps moving inside it, never how long a frame is "
               "held."),
+        f"CHARACTER CANON FOR THIS SCENE’S CAST (you are staging THESE people — whose moment a shot belongs to, who the camera can afford to lose, and what a character is still DOING inside a held frame are all answered here):\n"
+        f"{_characters_for(_scene_cast(sd))}\n\n"
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
@@ -1116,8 +1131,7 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
         # first, so it survives the slice.
         + "\n\nCHARACTER CANON FOR THIS SCENE'S CAST (acting canon first — this is the "
           "register the substitution test runs against):\n"
-        + _characters_for(sorted({c for b in sd.beats
-                                  for c in (b.participatingCharacters or [])}))[:8000],
+        + _characters_for(_scene_cast(sd)),
         PerformancePass, label=f"gate5_perf_s{scene_num}")
     by_id = {s.shotId: s for s in shots}
     for s in pp.shots:
@@ -1150,6 +1164,8 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
               "intention; where do they breathe or hesitate. Every v3 tag has a dramatic "
               "purpose. Dialogue never automatically starts at frame one — its timing may "
               "shape editorial rhythm, but never replaces the selected treatment."),
+        f"CHARACTER CANON FOR THIS SCENE’S CAST (the voice IS the character — this is the register, the lexicon and the relationship the read has to be true to):\n"
+        f"{_characters_for(_scene_cast(sd))}\n\n"
         f"THE SHOTS (body + timing to reconcile with):\n"
         + "\n".join(f"{s.shotId}: {s.principalPerformance} | body: {s.physicalPerformance} "
                      f"| timing: {s.animationTiming}" for s in shots)
@@ -1190,6 +1206,8 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
               "cutPace: if beats of genuinely different form (a crash and a held emotional "
               "moment) resolved to the same ending or the same pace, say so by name and "
               "return to gate4."),
+        f"CHARACTER CANON FOR THIS SCENE’S CAST (‘could this belong to another show’ is unanswerable without it — run the substitution test against THIS):\n"
+        f"{_characters_for(_scene_cast(sd))}\n\n"
         f"THE SELECTED TREATMENT (the contract this scene must deliver):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"
@@ -1390,6 +1408,8 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
               "observable, never psychological; this typed field is unaffected by the "
               "continuityIn correction above. Add nothing creative; change nothing "
               "creative."),
+        f"CHARACTER CANON FOR THIS SCENE’S CAST (characterContinuity’s opening and closing states are THESE people’s states — read them from here, never generically):\n"
+        f"{_characters_for(_scene_cast(sd))}\n\n"
         f"THE SHOTS (physicalPerformance/animationTiming are ALREADY APPROVED — ground the "
         f"duration in them, never rewrite them):\n"
         + "\n".join(s.model_dump_json() for s in shots)

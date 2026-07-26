@@ -82,3 +82,78 @@ def test_step_one_convenes_the_whole_room():
     assert len(m) > 20000, (
         f"step 1's charge collapsed to {len(m)} chars — it was ~2,000 when it ran on the "
         f"Director alone and ~36,000 with the room. Something stopped assembling.")
+
+
+def test_the_character_canon_reaches_every_authoring_room_whole():
+    """THE THIRD TRUNCATION (2026-07-26).
+
+    Three times in one file the same bug: craft written, approved, and eaten by a cap.
+    The taste canons lost their REJECTION QUESTIONS to a 7,000-char slice. The show
+    bible lost 81% of itself — the cut landing mid-table in the locked Crystal Power
+    System — to a 6,000-char one. And the character canon lost `bibles` (21,043 of its
+    33,595 chars for a two-character cast, 63%) to caps of 12,000 / 9,000 / 8,000, so
+    no character's own locked canon ever reached a single gate in this studio.
+
+    Six of eleven rooms had no character canon AT ALL, including the three that need it
+    most: step 1 (which authors want and need for every beat in the episode, with the
+    Showrunner charged to run the substitution test against a register she wasn't
+    given), the shot conference (staging is acting), and the voice room (the read IS
+    the character).
+
+    A cap is invisible. It never errors, never warns, and produces a confident answer
+    from a fraction of the canon — which is exactly why this needs a test and not a
+    comment.
+    """
+    import inspect
+    import cb_creative as C
+    import cb_departments as D
+
+    rooms = {"prepare_story": D.prepare_story}
+    for fn in ("gate0_readiness", "gate1_treatments", "gate2_select", "gate3_beats",
+               "gate4_shot_conference", "gate5_performance", "gate5_voice",
+               "gate6_adversarial_review", "production_detail"):
+        f = getattr(C, fn, None)
+        if f:
+            rooms[fn] = f
+    for name, f in rooms.items():
+        assert "_characters_for" in inspect.getsource(f), (
+            f"{name} authors without the character canon — it is deciding who these "
+            f"people are from their names alone")
+
+    # gate6b is deliberately absent: it judges whether a scene can be PRODUCED (reference
+    # coverage, cast count, duration), never who anyone is. Naming it here so a future
+    # reader knows it was considered, not missed.
+    assert "_characters_for" not in inspect.getsource(C.gate6b_producer_feasibility)
+
+    # No call site may re-introduce a slice. This is the assertion that would have caught
+    # all three truncations on the day each was written.
+    for path in ("cb_creative.py", "cb_departments.py"):
+        for i, line in enumerate(open(path, encoding="utf-8"), 1):
+            if "_characters_for(" in line and "[:" in line:
+                raise AssertionError(f"{path}:{i} truncates the character canon: "
+                                     f"{line.strip()[:90]}")
+
+    # The bibles block — the whole point — must actually survive to the text.
+    assert "bibles" in C._characters_for(["Fuzzby", "Zenny"])
+
+
+def test_the_show_bible_is_not_truncated():
+    """31,829 chars of locked canon, handed to every room as 6,000 until 2026-07-26.
+
+    The cut landed mid-table in section 3, so every gate authored knowing roughly two
+    bears' crystal, feeling, archetype, colour and note — and none of the other seven.
+    A room told 'SHOW CANON (authoritative, never contradicted)' and then handed a fifth
+    of it cannot keep the show on brand; it can only keep the part it was shown.
+    """
+    import cb_creative as C
+
+    src = C._CANON_SOURCES["showBible"]
+    assert src.exists()
+    full = src.read_text(encoding="utf-8")
+    got = C._mind("SHOWRUNNER", ["showrunnerTaste"], "x")
+    got = got["system"] if isinstance(got, dict) else str(got)
+    for probe in ("Crystal Power System", "Rose Quartz", "Citrine", "The Ripple"):
+        assert probe in got, f"the show bible reaches the room without {probe!r}"
+    assert len(full) < 40000, (
+        "the bible has outgrown the 40,000 backstop in _mind — raise it, and do not let "
+        "canon be cut to fit a number again")

@@ -48,7 +48,13 @@ THIS_FILE = pathlib.Path(__file__).name
 # assertions need real production data; when Scene 1 has been archived for a clean
 # run they skip honestly rather than erroring as if the engine were broken.
 from _live_package import require_live_package
-pytestmark = require_live_package()
+# NOT a module-level skip (corrected 2026-07-26). Blanketing this file silenced FOUR pure
+# source scans that need no production data at all — including the ONLY assertion that
+# cb_director.py and 21 other legacy modules stay absent and unimportable, and the ONLY
+# proof that exactly one Seedance caller exists. They matter MOST at clean zero, which is
+# exactly when the blanket switched them off. Only the one test that reads a live package
+# is guarded, at its own def below.
+_needs_live_package = require_live_package()
 
 def _executable_sources():
     """Production executable source. test_*.py files are the fingerprint POLICE — they must
@@ -70,6 +76,7 @@ def test_no_legacy_fingerprint_in_executable_source():
     assert not hits, "legacy prompt fingerprints in executable source:\n" + "\n".join(hits)
 
 
+@_needs_live_package
 def test_no_legacy_fingerprint_in_active_shot_prompts():
     pkg = json.load(open(ROOT / "cb-output" / "Ep1_scene1_production_package.json"))
     hits = []

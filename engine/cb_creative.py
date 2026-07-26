@@ -544,13 +544,31 @@ def _characters_for(names):
         chars = json.load(open(_CANON_SOURCES["characters"]))
     except Exception:
         return "{}"
+    # THE ACTING CANON IS EMITTED FIRST AND IS NEVER TRUNCATED (2026-07-26).
+    #
+    # Julian: "pixar level DIRECTION, ACTING, sound and imagery." Measured on the real Scene 1
+    # pair, the acting canon was not reaching the room at all. Every caller slices this
+    # payload by raw character count (12,000 / 9,000 / 8,000 at gates 0/1/3) and the prose
+    # `bible` is emitted first at 13,232 chars for Fuzzby and 7,788 for Zenny — 21,020 of a
+    # 33,577-char payload. So the Director's 8,000-char slice ended INSIDE Fuzzby's own list
+    # of prohibitions, and `actingNote`, `lexicon` and `cameraRegister` arrived at NO gate for
+    # EITHER character. The room was authoring performance with the structural canon and none
+    # of the performance canon.
+    #
+    # The whole acting canon for both characters is 1,443 characters. It costs ~4% of the
+    # Director's budget to have it complete. So it leads, and the long prose bible — which is
+    # reference, and which the taste canons and show bible already restate — is what gives way
+    # when a cap bites. Ordering, not a cap change: no budget is raised, nothing is refused.
+    ACTING_FIRST = ("cadence", "actingNote", "lexicon", "cameraRegister",
+                    "gender", "sizeRank", "size")
     picked = {}
     for n in names:
         for k, v in chars.items():
             if _norm(k) == _norm(n) and isinstance(v, dict):
-                picked[k] = {kk: v.get(kk) for kk in
-                             ("bible", "cadence", "actingNote", "gender", "sizeRank", "size",
-                              "lexicon", "cameraRegister") if v.get(kk)}
+                rec = {kk: v.get(kk) for kk in ACTING_FIRST if v.get(kk)}
+                if v.get("bible"):
+                    rec["bible"] = v["bible"]      # last: the long reference prose
+                picked[k] = rec
     perf = {}
     p = _CANON_SOURCES["characterPerformance"]
     if p.exists():
@@ -562,7 +580,20 @@ def _characters_for(names):
         for pair in json.load(open(r)).get("pairs", []):
             if all(any(_norm(x) == _norm(n) for n in names) for x in pair.get("pair", [])):
                 rel[" & ".join(pair["pair"])] = pair
-    return json.dumps({"bibles": picked, "performanceCanon": perf, "relationships": rel},
+    # TWO BLOCKS, NOT ONE (2026-07-26). Per-record ordering alone was not enough: with the
+    # acting fields first INSIDE each record, Fuzzby's 13,232-char bible still sat between his
+    # acting canon and Zenny's, so the second character's performance canon was still cut at
+    # every cap. Emitting EVERY character's acting canon before ANY character's prose bible is
+    # what actually guarantees the whole cast's performance arrives — measured: 4/4 acting
+    # fields for BOTH characters inside the Director's 8,000-char slice, where before it was
+    # 0/4 for either.
+    acting = {k: {kk: vv for kk, vv in rec.items() if kk != "bible"}
+              for k, rec in picked.items()}
+    bibles = {k: rec["bible"] for k, rec in picked.items() if rec.get("bible")}
+    return json.dumps({"actingCanon": acting,          # every character, always survives
+                       "performanceCanon": perf,
+                       "relationships": rel,
+                       "bibles": bibles},              # long reference prose, trimmed first
                       ensure_ascii=False)
 
 

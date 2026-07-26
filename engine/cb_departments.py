@@ -266,6 +266,23 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
         StoryIntakeDirection, label="department_story", log=log)
 
 
+def _intent_charge(context):
+    """THE DIRECTOR'S OWN WORDS, for whichever chair is about to write.
+
+    One reader, deliberately shared by the stage (prepare_cinematography) and the
+    performance (prepare_animation) — Julian's ruling is that BOTH prompts are engineered
+    from the direction, so both must read it from the same place or they will drift apart
+    the first time one is edited. Returns "" when a shot states no intent: silence is
+    correct, an invented purpose never is."""
+    try:
+        import cb_intent
+        shot = context.get("shot") if isinstance(context, dict) else None
+        return (cb_intent.charge(shot if isinstance(shot, dict) else {}) or "") and \
+               (cb_intent.charge(shot) + "\n\n")
+    except ImportError:
+        return ""
+
+
 def prepare_look(context, *, log=print):
     return cb_llm.structured(
         _system("cinematography",
@@ -294,6 +311,16 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
     scene's own drift-safe vocabulary only."""
     return cb_llm.structured(
         _system("cinematography",
+                "YOU ARE BUILDING THE STAGE (Julian, 2026-07-25: \"the keyframe gives "
+                "the stage which allows the performance to deliver and breathe — but BOTH "
+                "those prompts are engineered FROM the director, not the other way "
+                "around\"). This frame is not a pretty picture of the beat; it is the "
+                "space the performance has to happen IN. Read what the beat is FOR, below, "
+                "before you frame anything, then build a frame that AFFORDS it: room to "
+                "travel in the direction the action travels, the object the gag needs "
+                "actually present and reachable, both characters placed so the moment can "
+                "play, air where the payoff has to land. A frame that is beautiful and "
+                "leaves the performance nowhere to go is a failed frame.\n\n"
                 "You are the studio's register writer for STILL opening frames. The "
                 "attached images are the identity references and scene anchor — look at "
                 "them. Below is the house craft curriculum; it is your mind. Write "
@@ -318,6 +345,7 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
                 "instant. Preserve exact character identity from the references.\n\n"
                 "===== THE HOUSE CRAFT CURRICULUM (verbatim) =====\n" +
                 _craft_curriculum(None)[0]),
+        (_intent_charge(context) or "") +
         "SOURCE MATERIAL — the storyboard-approved facts for this opening frame:\n" +
         compiled_brief +
         "\n\nSHOT AND ORDERED ATTACHMENTS:\n" + _j(context) +
@@ -466,17 +494,9 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
     # THE DIRECTOR'S OWN WORDS LEAD HER OWN BRIEF (2026-07-25). She stated what this beat
     # is FOR at the storyboard; under the old chair table that intent went to a different
     # department who never saw it. Same chair now, so it travels with her.
-    # The real context nests the shot under "shot" (proven against S1.SH2 live — a read of
-    # the context's own top level found nothing and silently skipped the whole block, the
-    # same silent-miss shape as cb_lean.exemplar()'s registry-key bug). Read the shot.
-    try:
-        import cb_intent
-        _shot = context.get("shot") if isinstance(context, dict) else None
-        _intent = cb_intent.charge(_shot if isinstance(_shot, dict) else {})
-        if _intent:
-            curriculum = _intent + "\n\n" + curriculum
-    except ImportError:
-        pass
+    # THE SAME READER THE STAGE USES (_intent_charge) — one source, so the keyframe and
+    # the clip can never be engineered from different readings of the same direction.
+    curriculum = (_intent_charge(context) or "") + curriculum
     result = cb_llm.structured(
         _system("animation",
                 "YOU ARE THE DIRECTOR. Not a prompt technician, not a compliance "

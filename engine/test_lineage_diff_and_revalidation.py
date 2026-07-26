@@ -299,7 +299,8 @@ def test_full_disposable_route_reaches_disclosure_with_zero_provider_calls_never
     animation_output = {"providerPrompt": (
         "Shot 1: Wide tracking at bee height, 24mm. Fuzzby rockets past the flower and "
         "clips the stem, pollen bursting off the impact — his pride drives the speed, "
-        "and his grin is held one beat too long: the comedy hinge.\n\n"
+        "and his grin is held one beat too long: the comedy hinge. He nearly grazes "
+        "the leaf on the way past.\n\n"
         "HOLD on the recovered hover, about 2 seconds of silence.")}
     shot = _build_shot("S1.SH1", "opener", None, [])
     pkg = {"episode": "Ep1", "sceneNumber": "1", "revision": 7,

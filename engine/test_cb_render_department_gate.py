@@ -53,7 +53,9 @@ def _formula_prompt(action, line="Nailed it.", speaker="FUZZBY"):
     return (header
             + f"Shot 1: Close-up, 85mm, handheld drift. {action}{dlg} His pride "
             + "drives the speed of the move; his grin is held one beat too long — "
-            + "the comedy hinge.\n\n"   # delivers the fixture's declared feltIntent
+            + "the comedy hinge. He nearly grazes the leaf on the way past.\n\n"
+            # delivers the fixture's declared feltIntent AND its visualPayoff — both
+            # are gated fields, so a canned GOOD prompt has to honour both.
             + "They hold the look, about 2 seconds of silence, no more dialogue.")
 
 
@@ -225,7 +227,8 @@ def _mock_llm(monkeypatch, animation_prompt=None, cinematography_prompt=None,
                           "puffs his chest with oblivious pride — his pride drives "
                           "the speed of every move. Fuzzby performs his vocal "
                           "beat from @Audio1. His grin is held one beat too long — "
-                          "the comedy hinge.\n\n"
+                          "the comedy hinge. He nearly grazes the leaf on the way "
+                          "past.\n\n"
                           "They hold the look, about 2 seconds of silence, no more dialogue.")
         if name == "CinematographyDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",

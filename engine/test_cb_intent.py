@@ -87,7 +87,13 @@ def test_the_director_stops_the_shot():
         raise AssertionError("the gate has no teeth — a half-delivered prompt was allowed")
     except R.Refused as e:
         assert "DIRECTOR'S DIRECTION IS NOT IN THE PROMPT" in str(e)
-        assert "comedy hinge" in str(e) or "grin-held-too-long" in str(e)
+        # The refusal names the Director's own words. It used to pin the comedy-hinge
+        # clause specifically; since the gate was calibrated to visualPayoff + feltIntent
+        # (2026-07-25, against four prompts with real verdicts) the FIRST clause reported
+        # is a different, equally real feltIntent miss. Pin the substance — that a named,
+        # quoted clause of hers is reported missing — not which one sorts first.
+        assert "she asked for" in str(e)
+        assert any(w in str(e) for w in ("feltIntent", "visualPayoff"))
 
 
 def test_the_gate_opens_when_the_direction_is_delivered():
@@ -107,3 +113,30 @@ def test_a_missing_intent_engine_never_invents_a_refusal():
     R.check_formula_structure("ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the "
                               "sole source of dialogue, wording, voice, performance and "
                               "timing.", [], shot=None)
+
+
+def test_both_prompts_are_engineered_from_the_direction():
+    """JULIAN'S RULING, 2026-07-25: "the keyframe gives the stage which allows the
+    performance to deliver and breathe — but BOTH those prompts are engineered FROM the
+    director, not the other way around."
+
+    So the stage (prepare_cinematography) and the performance (prepare_animation) must
+    BOTH read the Director's stated intent, and must read it from the SAME place. Two
+    readers would drift apart the first time one was edited — which is exactly how the
+    animation chair ended up with the intent while the keyframe chair never saw it."""
+    import cb_departments as D
+    import inspect
+    stage = inspect.getsource(D.prepare_cinematography)
+    perf = inspect.getsource(D.prepare_animation)
+    assert "_intent_charge" in stage, "the STAGE is not engineered from the direction"
+    assert "_intent_charge" in perf, "the PERFORMANCE is not engineered from the direction"
+    # the stage's charge must say what a stage is FOR, not merely be pretty
+    assert "AFFORDS" in stage, "the stage's charge never asks it to afford the performance"
+
+    # and the shared reader really returns the Director's own words on a real shot
+    charge = D._intent_charge({"shot": _shot()})
+    assert "WHAT THIS BEAT IS FOR" in charge
+    assert "MUST BE VISIBLE ON SCREEN" in charge
+    # silence when a shot states nothing — an invented purpose is worse than none
+    assert D._intent_charge({"shot": {}}) == ""
+    assert D._intent_charge({}) == ""

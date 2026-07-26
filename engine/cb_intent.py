@@ -46,6 +46,37 @@ their own each every into onto while during before after between within""".split
 
 # A clause is only a real requirement if it demands something. These are the verbs and
 # qualities a Director uses to specify feel; a clause with none of them is scene-setting.
+# WHICH FIELDS THE STOP MAY REFUSE ON — calibrated 2026-07-25 against four real prompts
+# with real recorded verdicts, not chosen by argument:
+#     SH1_KEEPER_EXEMPLAR (Julian APPROVED)      must PASS
+#     SH2_intent_delivered (built to the intent)  must PASS
+#     SH2_old_engine_716w (rejected)              must STOP
+#     SH2_LABOURED_FIXTURE (rejected)             must STOP
+# Gating every field scored 3/4 — it REFUSED THE APPROVED KEEPER on five tempoDesign
+# clauses the keeper genuinely delivers in its own words ("bounce" for "uncontrolled
+# bounce", "push" for "dolly", "blink"/"proud" for "stillness before pride"). A false
+# refusal on approved work is the worst failure this gate can have: it stops the studio.
+# Gating visualPayoff + feltIntent alone scored 4/4.
+#   visualPayoff is what must be ON SCREEN, in the Director's own words — word overlap is
+#     a fair test of it, and a payoff absent from the prompt is genuinely absent.
+#   feltIntent names the beat's purpose, usually with concrete anchors ("the grin held
+#     too long").
+#   tempoDesign, dramaticIntent, emotionMechanic and doesItLand describe RHYTHM and
+#     READING — real direction, delivered through pacing a word-match cannot see. They
+#     stay in the writer's charge and in every report, marked advisory, and Julian's eye
+#     judges them. Never silently dropped; deliberately not machine-refusable.
+GATED_FIELDS = ("visualPayoff", "feltIntent")
+
+# A clause whose subject is the AUDIENCE is the Director describing the intended
+# reading — "kids get a bigger crash; adults get the joke that his bravado doesn't know
+# the difference." A prompt delivers that through the staging itself; it can never
+# contain those words, and hard-gating them would refuse every good take (proven
+# 2026-07-25: the APPROVED SH1 keeper misses every audience-read clause while landing
+# all of them on screen). These stay in the writer's charge and the report — marked
+# "judged by eye" — but the Stop never refuses on them.
+_AUDIENCE = re.compile(r"\b(the audience|audiences|kids get|adults get|kids see|"
+                       r"adults see|viewers?)\b", re.I)
+
 _DEMAND = re.compile(r"\b(drives?|lands?|held|hold|stays?|keeps?|reads?|carries|"
                      r"builds?|slows?|quickens?|breaks?|settles?|escapes?|betrays?|"
                      r"believes?|treats?|preens?|beams?|grins?|smiles?|pauses?|"
@@ -72,12 +103,19 @@ def clauses(shot):
     for field, text in intent_of(shot).items():
         for raw in re.split(r"(?<=[.;])\s+|\s+--\s+|\s+—\s+", text):
             c = raw.strip(" .;—-")
-            if len(c.split()) < 3 or not _DEMAND.search(c):
+            # visualPayoff is a demand BY DEFINITION — it is the Director's own named
+            # payoff, and every word of it is what must be on screen. The _DEMAND filter
+            # exists to drop scene-setting prose from the feeling/tempo fields; applied to
+            # the payoff it silently dropped the WHOLE payoff on real shots (S1.SH3/SH5,
+            # found 2026-07-25: "swallowed", "smiling", "sigh" weren't in the verb list, so
+            # the Stop never enforced the payoff at all). Payoff clauses always count.
+            if len(c.split()) < 3 or (field != "visualPayoff" and not _DEMAND.search(c)):
                 continue
             terms = [w for w in re.findall(r"[a-z][a-z'-]{2,}", c.lower())
                      if w not in _STOP]
             if terms:
-                out.append({"field": field, "clause": c, "terms": terms})
+                out.append({"field": field, "clause": c, "terms": terms,
+                            "gated": field in GATED_FIELDS and not _AUDIENCE.search(c)})
     return out
 
 
@@ -85,7 +123,15 @@ def _covered(term, prompt_low):
     """Is this demand present in the prompt? Stem-tolerant, so 'grins' honours 'grin' and
     'slows' honours 'slow' — a Director writing 'slows into the discovery' is satisfied by a
     prompt that decelerates, not only by one that repeats her verb."""
-    t = term.rstrip("s") if len(term) > 4 else term
+    # Stem down past plural AND participle endings — the Director writing "smiling" is
+    # satisfied by a prompt whose character "smiles", and vice versa. "smiles?" alone
+    # missed "smiling" (found on S1.SH5, 2026-07-25). Keep the stem >= 4 chars so short
+    # words never over-match.
+    t = term
+    for suf in ("ing", "ed", "es", "s"):
+        if len(t) - len(suf) >= 4 and t.endswith(suf):
+            t = t[:-len(suf)]
+            break
     return re.search(r"\b" + re.escape(t), prompt_low) is not None
 
 
@@ -104,10 +150,14 @@ def score(prompt_text, shot, threshold=0.5):
                      "missing": [t for t in c["terms"] if t not in hit],
                      "met": cov >= threshold})
     met = [r for r in rows if r["met"]]
+    missed = [r for r in rows if not r["met"]]
     return {"clauses": rows,
             "total": len(rows),
             "met": len(met),
-            "missed": [r for r in rows if not r["met"]],
+            # "missed" stays ALL misses (the report shows everything); the Stop refuses
+            # only on the gated subset — an audience-read clause is judged by eye.
+            "missed": missed,
+            "missedGated": [r for r in missed if r.get("gated", True)],
             "coverage": round(len(met) / len(rows), 2) if rows else None}
 
 

@@ -2142,7 +2142,8 @@ def check_stasis_load(prompt_text, shot=None, characters=()):
     return out
 
 
-def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUSED", shot=None):
+def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUSED",
+                            shot=None, intent_advisory=False):
     """THE THREE LAWS THAT STILL BLOCK, AND NOTHING ELSE (Julian's ruling, 2026-07-25 —
     "remove a lot of the guardrails that suffocate the creative prompting"). What remains
     a hard refusal is exactly the voice pipeline, which is the one place this studio is
@@ -2260,14 +2261,32 @@ def check_formula_structure(prompt_text, dialogue_lines, *, refuse_prefix="REFUS
     # shape, passing all nine recorded failure checks, scored 5/10 against S1.SH2's own
     # stated intent — silently missing the beat the card itself names as the comedy hinge.
     # As an advisory that gap would have been one more line in a list nobody reads.
+    #
+    # WHERE IT REFUSES, AND WHERE IT ONLY WARNS (Julian, 2026-07-25: "we must make sure
+    # that the prompts are always compliant because we build them AFTER the director has
+    # given us the scene and beat outcomes"). That is the whole design: the writer is
+    # charged with the Director's intent BEFORE writing, so compliance is produced, not
+    # policed. This gate therefore refuses at AUTHORING time — where a miss means the
+    # writer did not do the job, and a repair costs one cheap text call.
+    #
+    # At FIRE time it is ADVISORY. By then the prompt carries a HUMAN APPROVAL, and a
+    # word-overlap heuristic must never overrule Julian's own eye on work he already
+    # signed — that is this project's own forward-only doctrine (CLAUDE.md rule 18), and
+    # the practical stake is worse: a false refusal there leaves the studio unable to
+    # fire at all. The miss is printed loudly instead, so it is never silent.
     if shot:
         try:
             import cb_intent
-            for r in (cb_intent.score(prompt_text, shot).get("missed") or []):
-                problems.append(
-                    f"THE DIRECTOR'S DIRECTION IS NOT IN THE PROMPT [{r['field']}] — she "
-                    f"asked for \u201c{r['clause'][:130]}\u201d and nothing in the prompt "
-                    f"delivers: {', '.join(r['missing'][:6])}")
+            # gated misses only — an audience-read clause ("adults get the joke") is
+            # delivered through staging and judged by eye, never by words
+            for r in (cb_intent.score(prompt_text, shot).get("missedGated") or []):
+                msg = (f"THE DIRECTOR'S DIRECTION IS NOT IN THE PROMPT [{r['field']}] — she "
+                       f"asked for \u201c{r['clause'][:130]}\u201d and nothing in the prompt "
+                       f"delivers: {', '.join(r['missing'][:6])}")
+                if intent_advisory:
+                    print(f"  ⚠ INTENT ADVISORY — {msg}")
+                else:
+                    problems.append(msg)
         except ImportError:
             pass    # engine incomplete — never invent a refusal from a missing module
     if problems:
@@ -4692,6 +4711,10 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                       and (_wk.get("text") or "").strip() == str(shot["seedancePrompt"]).strip())
     try:
         check_formula_structure(shot["seedancePrompt"], shot.get("dialogueLines") or [], shot=shot,
+                                intent_advisory=True,   # fire-time: the prompt is already
+                                # human-approved; a word-match must not overrule
+                                # Julian's eye (CLAUDE.md rule 18) and must never
+                                # leave the studio unable to fire. Printed loudly.
                                 refuse_prefix=f"REFUSED — {shot_id}'s resolved prompt")
     except Refused as _fe:
         if not _confirmed_exp:

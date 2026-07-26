@@ -692,7 +692,19 @@ def _mind(role, taste_keys, charge):
             f"from them):\n"
             + _canonical_exemplars()
             + "\n\nSHOW CANON (authoritative, never contradicted):\n"
-            + _canon_text("showBible", 6000)
+            # THE SHOW BIBLE ARRIVES WHOLE (2026-07-26). The taste-canon fix above swept the
+            # line it was written on and stopped there; this line, four lines down, kept a
+            # 6,000-char slice of a 31,829-char canon — 81% of the show's own locked bible
+            # cut from every room, every gate, since the room was built. Measured, not
+            # assumed: the cut lands MID-TABLE in "3. The Crystal Power System — LOCKED",
+            # so every gate has been authoring with roughly two bears' crystal/feeling/
+            # archetype/colour/note rows and none of the other seven, none of the Five
+            # Pillars' own timing clock, and nothing below. A room told "SHOW CANON
+            # (authoritative, never contradicted)" and then handed a fifth of it cannot
+            # keep the show on brand — it can only keep the part it was shown. 40,000
+            # clears the real file by 8,171 chars. A truncation is deleted; no cap, no
+            # budget and no refusal is introduced.
+            + _canon_text("showBible", 40000)
             + "\n\nHARD RULES: approved dialogue is verbatim-locked — never reword, drop or "
               "invent a line. Character identity comes only from references; never describe "
               "physical appearance. Use ONLY established character canon — where a "
@@ -1129,7 +1141,8 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
     if not lines:
         return []
     vs = cb_llm.structured(
-        _mind("VOICE DIRECTOR", ["voiceTaste"],
+        _mind("VOICE DIRECTOR, WITH THE DIRECTOR AND THE SHOWRUNNER IN THE ROOM",
+              ["voiceTaste", "directorTaste", "showrunnerTaste"],
               "Transform each locked line into truthful, character-specific vocal acting "
               "for ElevenLabs v3, RECONCILED with the body: the physical performance below "
               "is what the character is doing while speaking. What does the character want "
@@ -1342,8 +1355,9 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
                        "never omit one that is):\n"
                        + "\n".join(f"{sid}: {', '.join(names)}" for sid, names in shot_cast.items()))
     pd = cb_llm.structured(
-        _mind("DIRECTOR AND CINEMATOGRAPHER, PRODUCTION PASS",
-              ["directorTaste", "cinematographyTaste"],
+        _mind("DIRECTOR AND CINEMATOGRAPHER, PRODUCTION PASS, "
+              "WITH THE SHOWRUNNER IN THE ROOM",
+              ["directorTaste", "cinematographyTaste", "showrunnerTaste"],
               "The creative sequence has PASSED. Add the production layer only: "
               "continuityIn/Out; dialogue timing within the shot; reference roles (which "
               "references anchor identity/environment); whether the shot requires a NEW, "

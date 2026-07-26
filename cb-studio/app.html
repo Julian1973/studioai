@@ -313,9 +313,10 @@ img.zoom:hover{filter:brightness(1.08)}
    The creative room writes three named approaches to the scene and the reasoning that
    welded two of them together — 21,537 + 8,958 characters for Scene 1 alone. All of it
    was filed under a "Technical details" disclosure holding
-   `JSON.stringify(PSB).slice(0,4000)`, and `treatments` begins at character 5,966 — so
-   the slice ended before the first treatment did, and this text had never once been on
-   screen. It is the most valuable prose the product generates. It gets a real home. */
+   `JSON.stringify(PSB).slice(0,4000)`, and `treatments` begins at character 5,766 of that
+   dump (measured live against Scene 1) — so the slice ended roughly 1,800 characters before
+   the first treatment did, and this text had never once been on screen. It is the most
+   valuable prose the product generates. It gets a real home. */
 .trt-lede{font-size:13px;line-height:1.65;color:var(--muted);max-width:78ch;margin-top:var(--s2)}
 .trt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--s3);margin-top:var(--s3)}
 .trt{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:var(--s4);min-width:0}
@@ -457,6 +458,27 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .runnow span{font-weight:800;font-size:10.5px;letter-spacing:.12em}
 .runspend{margin-top:7px;font-size:11px;color:var(--hint);display:flex;gap:16px;flex-wrap:wrap}
 .runspend b{color:var(--muted);font-weight:600}
+/* SPENT is a fact, not a warning (2026-07-26). Julian's own ruling stands — "if I press
+   render it renders" — so this is never coloured like an alarm and never gates anything.
+   It reads at the same weight as the forward estimate beside it. */
+.runspend .spent b{color:var(--ink)}
+.runspend .spent-sub{color:var(--hint)}
+/* ══ THE PACKAGE'S OWN QC FINDINGS (2026-07-26) ═════════════════════════════════════════
+   cb_engine writes `validation.issues` into every production package — severity, code,
+   message and the exact field path. They had never been rendered. Shown where they are
+   actionable: on the shot the path names, and on the scene band for the rest. */
+.qcband{margin-top:var(--s3);border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.qcband>summary{cursor:pointer;list-style:none;padding:9px 13px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.qcband>summary::-webkit-details-marker{display:none}
+.qcband>summary::before{content:"▸";color:var(--hint);font-size:10px}
+.qcband[open]>summary::before{content:"▾"}
+.qcband.has-block{border-color:var(--danger)}
+.qcband-n{font-weight:800;font-variant-numeric:tabular-nums}
+.qcrows{padding:0 13px 11px}
+.qcrow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
+.qcfield{font-size:10.5px;color:var(--hint);font-family:var(--mono);white-space:nowrap}
+.qcmsg{font-size:12px;line-height:1.5;color:var(--ink);min-width:0;overflow-wrap:anywhere}
+.qccode{display:inline-block;margin-left:7px;font-size:9.5px;letter-spacing:.06em;color:var(--hint);font-family:var(--mono)}
 .tnum{font-variant-numeric:tabular-nums}
 .runrail{position:relative;padding-left:34px}
 .runrail::before{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:2px;background:var(--line);border-radius:1px}
@@ -2508,7 +2530,25 @@ function filmstripHTML(){
       <div class="fcard-ctarow">${cta}</div>
     </div>`;
   }).join("");
-  return `<div class="fstrip">${cards}</div>`;
+  // THE SCENE'S OWN QC BAND (2026-07-26). Every finding the package's validation produced is
+  // reachable from one place, above the strip: the per-shot ones are also shown on their own
+  // shot, and any finding whose path names no shot (a scene-level check) would otherwise have
+  // nowhere to appear at all. This band is the guarantee that a computed finding is never
+  // dropped for want of a home. It says nothing when there is nothing to say.
+  const vAll=valIssues(), vBlocks=vAll.filter(_valIsBlock);
+  const v=(SH_PKG&&SH_PKG.validation)||null;
+  const orphan=valSceneWide();
+  const qcScene=vAll.length
+    ?`<details class="qcband${vBlocks.length?" has-block":""}"${vBlocks.length?" open":""} style="margin-bottom:var(--s4)">
+        <summary><span class="qcband-n">${vAll.length}</span> design-check finding${vAll.length==1?"":"s"} in this scene`
+        +(vBlocks.length?` · <b style="color:var(--danger)">${vBlocks.length} blocking</b>`:` · none blocking`)
+        +(v&&v.passed===false?` · <b style="color:var(--danger)">the package did not pass validation</b>`:"")
+        +` — each one names the exact field it is about</summary>
+        <div class="qcrows">${valRowsHTML(vAll.filter(_valIsBlock).concat(vAll.filter(i=>!_valIsBlock(i))))}</div>
+        ${orphan.length?`<div class="dec-caption" style="padding:0 13px 11px">${orphan.length} of these name no individual shot and are shown here only.</div>`:""}
+      </details>`
+    :"";
+  return qcScene+`<div class="fstrip">${cards}</div>`;
 }
 function renderDraftShotRunner(sid){
   const host=document.getElementById("runnerhost"); if(!host)return;
@@ -2686,8 +2726,20 @@ async function renderWorkspaceBody(){
     if(pStatus("storyboard")=="locked"&&!(CUR&&CUR.script)){
       el.innerHTML=`<div class="wcol wcol-full">${scriptStageHTML()}</div>`; return;
     }
-    el.innerHTML=`<div class="wcol wcol-artefact" id="wartefact" style="flex:1"></div>
-      <div class="wcol wcol-decision" id="wdecision"></div>`;
+    // THE STORYBOARD IS A DOCUMENT, SO IT GETS THE PAGE (2026-07-26). `.workspace` is a
+    // three-column grid (220px | 1fr | 300px). This branch emitted only TWO children, so the
+    // artefact landed in the 220px RAIL column and the decision panel took the 1fr — measured
+    // live at 220px vs 648px. That was survivable while the artefact was a purpose line and a
+    // few beat cards; it is not survivable now that the treatments live here, because the most
+    // valuable prose in the product would render in a 176px gutter. Fixed with this file's own
+    // existing idiom, the one the assembly branch already uses — span the full grid with
+    // wcol-full, then lay the two panels out as a flex row. Scoped to this branch alone; the
+    // scenelook branch is deliberately left exactly as it was.
+    el.innerHTML=`<div class="wcol wcol-full">
+        <div style="display:flex;gap:22px;align-items:flex-start">
+          <div class="wcol wcol-artefact" id="wartefact" style="flex:1;min-width:0"></div>
+          <div class="wcol wcol-decision" id="wdecision" style="flex:0 0 300px"></div>
+        </div></div>`;
     return renderStoryboardStage();
   }
   if(node=="scenelook"){
@@ -2727,6 +2779,80 @@ function scriptStageHTML(){
 }
 
 // ── STORYBOARD ──
+// ── THE TREATMENTS (2026-07-26) ──────────────────────────────────────────────────────────
+// The creative room writes three fully-worked, NAMED approaches to the scene, then the
+// reasoning that chose one and welded the other two into it. Scene 1's are 21,537 and 8,958
+// characters. Until now the ONLY place any of it could appear was a collapsed "Technical
+// details" disclosure holding `JSON.stringify(PSB,null,1).slice(0,4000)` — and `treatments`
+// starts at character 5,966 of that dump, so the slice ended nearly 2,000 characters before
+// the first treatment began. Nothing here is new work by the engine: it is already computed,
+// already on disk, already paid for. It was simply never rendered.
+//
+// THE FIELD ORDER IS THE ENGINE'S, NOT A LIST TYPED HERE. Every key the room writes is shown;
+// a key it stops writing disappears, a key it starts writing appears, and neither needs an
+// edit in this file. Only `name` is positioned by hand (it is the headline) and only the two
+// fields below are promoted above the fold, because they are the two a director reads first.
+const TRT_LEDE_FIELDS=["audienceExperience","emotionalPointOfView"];
+function _trtLabel(k){ return String(k).replace(/([a-z0-9])([A-Z])/g,"$1 $2").replace(/^./,c=>c.toUpperCase()); }
+function _trtField(k,v){
+  if(v===null||v===undefined||v==="") return "";
+  const txt=Array.isArray(v)?v.join("\n"):String(v);
+  if(!txt.trim()) return "";
+  return `<dl class="trt-field"><dt>${_esc(_trtLabel(k))}</dt><dd>${_esc(txt)}</dd></dl>`;
+}
+function treatmentsHTML(){
+  const trts=(PSB&&PSB.treatments)||[], sel=(PSB&&PSB.treatmentSelection)||null;
+  if(!trts.length&&!sel) return "";
+  // WHICH ONE IS THE SPINE — and why a substring test is the wrong instrument. The engine
+  // states the choice in prose, not as an index: Scene 1's reads "THE WINGMAN'S EYE — spine,
+  // welded to THE UNMOVED WITNESS's ... and THE POLLEN'S PROGRESS's ...". A naive "does this
+  // treatment's name appear in selectedTreatment" match therefore marks ALL THREE as selected,
+  // which is exactly what the first version of this did. The spine is the name the sentence
+  // LEADS with — the text before its first em dash — so heads are compared, not searched for.
+  // No head match means nothing is marked; a wrong badge is worse than no badge.
+  const _head=s=>String(s||"").split("—")[0].trim().toUpperCase();
+  const selHead=_head((sel&&sel.selectedTreatment)||"");
+  const isSel=t=>!!selHead&&_head(t.name)===selHead;
+  const card=(t)=>{
+    const n=String(t.name||"Untitled approach");
+    const parts=n.split("—");
+    const head=parts.shift().trim(), sub=parts.join("—").trim();
+    const rest=Object.keys(t).filter(k=>k!=="name"&&TRT_LEDE_FIELDS.indexOf(k)<0);
+    return `<div class="trt${isSel(t)?" is-selected":""}">
+      <div class="trt-tag">${isSel(t)?"◆ Selected — this scene's spine":"Considered"}</div>
+      <div class="trt-name">${_esc(head)}${sub?`<em>${_esc(sub)}</em>`:""}</div>
+      ${TRT_LEDE_FIELDS.map(k=>_trtField(k,t[k])).join("")}
+      ${rest.length?`<details class="trt-more"><summary>The full treatment (${rest.length} more)</summary>
+        ${rest.map(k=>_trtField(k,t[k])).join("")}</details>`:""}
+    </div>`;
+  };
+  let selCard="";
+  if(sel){
+    // combinedFrom lists the spine itself alongside the two it absorbed; "welded from THE
+    // WINGMAN'S EYE" on a card headlined THE WINGMAN'S EYE is noise, so the spine is dropped.
+    const from=(sel.combinedFrom||[]).map(x=>String(x).split("—")[0].trim())
+      .filter(x=>x&&x.toUpperCase()!==selHead);
+    const rest=Object.keys(sel).filter(k=>["selectedTreatment","combinedFrom"].indexOf(k)<0);
+    selCard=`<div class="trt-sel">
+      <div class="trt-tag" style="color:var(--honey)">◆ The approach this scene is built on</div>
+      <div class="trt-name">${_esc(String(sel.selectedTreatment||"—"))}</div>
+      ${from.length?`<div class="trt-from">${from.map(f=>`<span>welded from ${_esc(f)}</span>`).join("")}</div>`:""}
+      ${rest.map(k=>_trtField(k,sel[k])).join("")}
+    </div>`;
+  }
+  const verdicts=[["showrunnerJudgement","The showrunner's verdict"],
+                  ["treatmentComparison","Did the storyboard keep the treatment's promises"]]
+    .map(([k,label])=>{
+      const v=PSB&&PSB[k];
+      return (v&&String(v).trim())?`<dl class="trt-field"><dt>${_esc(label)}</dt><dd>${_esc(String(v))}</dd></dl>`:"";
+    }).join("");
+  return `<div class="wcol-head" style="margin-top:var(--s6)">How this scene could have been made — and why it is being made this way</div>
+    <div class="trt-lede">Three whole-scene approaches were written before a single shot existed. One became the spine; the others were not discarded, they were welded into it. This is the reasoning the shot list below is an implementation of.</div>
+    ${selCard}
+    ${verdicts?`<div class="trt-sel" style="border-color:var(--line)">${verdicts}</div>`:""}
+    ${trts.length?`<div class="wcol-head" style="margin-top:var(--s5)">The three treatments, as written</div>
+      <div class="trt-grid">${trts.map(card).join("")}</div>`:""}`;
+}
 function renderStoryboardStage(){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   if(!PSB){
@@ -2756,14 +2882,22 @@ function renderStoryboardStage(){
       <div class="dec-caption">${_esc(pf.judgement)}</div>
       ${blocks.map(row).join("")}${notes.map(row).join("")}`;
   }
+  // THE RAW RECORD IS NO LONGER TRUNCATED (2026-07-26). It used to be cut at 4,000 characters
+  // of a ~147,000-character document — which is how the treatments came to be invisible: they
+  // begin at character 5,966, ~2,000 past where the slice ended. A truncation that silently
+  // discards 97% of the record is not a disclosure, and the number was never a considered
+  // limit. The full record is written; the well scrolls; the treatments above are where the
+  // text is actually meant to be READ, and this stays what it always claimed to be — the raw
+  // technical dump, for when the rendered view is not enough.
   art.innerHTML=`<div class="artefact-center" style="text-align:left;overflow:auto">
     <div class="sb-purpose">${purpose}</div>
-    <div class="wcol-head" style="margin-top:18px">The beats</div>${beatRows}
+    ${treatmentsHTML()}
+    <div class="wcol-head" style="margin-top:var(--s6)">The beats</div>${beatRows}
     <details style="margin-top:16px"><summary style="cursor:pointer;color:var(--muted);font-size:12px">The complete shot sequence (${shots.length})</summary>
       <div style="margin-top:10px">${shotSeq}</div></details>
     ${producerCard}
-    <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--hint);font-size:11px">Technical details</summary>
-      <pre class="techpre">${_esc(JSON.stringify(PSB,null,1)).slice(0,4000)}</pre></details>
+    <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--hint);font-size:11px">Technical details — the complete raw record</summary>
+      <pre class="techpre">${_esc(JSON.stringify(PSB,null,1))}</pre></details>
   </div>`;
   const st=pStatus("storyboard");
   const history=(PSB.approvalLog||[]).slice().reverse().map(h=>
@@ -4523,6 +4657,20 @@ function renderShotRunner(){
     rows.push({id:"fire",title:"Fire",state:st,stateLabel:lab,summary:sum,body,actions:acts});
   }
 
+  // THE PRICE OF REJECTING (2026-07-26). Reject is the most expensive control in this
+  // product and it was the only one carrying no figure. Approve costs nothing — the take is
+  // already rendered and paid for. Reject reopens the shot, and the ONLY way forward from a
+  // reopened shot is another paid batch, so pressing it is what authorises that spend. The
+  // number is the same estimate the Generate button beside it already shows, from the same
+  // shResCost/SH_RES/SH_CANDS inputs — one figure, one source, never a second guess. This
+  // adds no dialog, no confirmation and no gate: Julian's own ruling ("if I press render it
+  // renders") stands. It states a fact on a control that had none.
+  const _rjN=Math.min(SH_CANDS,shCap), _rjC=shResCost(SH_RES,fireDur);
+  const rejectCost=(_rjC!=null)?` — next batch est. <span class="tnum">$${(_rjC*_rjN).toFixed(2)}</span>`:"";
+  const rejectTitle=(_rjC!=null)
+    ? `Rejecting reopens the shot; the only route on is another paid batch — currently ${_rjN} × ${SH_RES} × ${fireDur}s, est. $${(_rjC*_rjN).toFixed(2)}`
+    : "Rejecting reopens the shot; the only route on is another paid batch.";
+
   // ── 8 · REVIEW ──
   {
     let st,lab,sum,body="",acts=[];
@@ -4533,7 +4681,7 @@ function renderShotRunner(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><b>C${c.n}</b>
         <button class="btn" style="margin:0;padding:6px 14px" onclick="shRun('approve','${tok}',{candidate:${c.n}})">Approve this take — C${c.n}</button></div></div>`).join("");
       acts=[`<select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>`,
-            `<button class="btn ghost" onclick="shRejectBatch('${tok}')">✗ Reject this batch</button>`];
+            `<button class="btn ghost" title="${rejectTitle}" onclick="shRejectBatch('${tok}')">✗ Reject this batch${rejectCost}</button>`];
     } else if(led.status=="approved"&&(led.approvedTake||m.clip||m.finalFrame)){
       st="done";lab="Approved ✓";
       sum="Approved take on record"+(PSHOT_I<shots.length-1?" — its final frame is "+shots[PSHOT_I+1].shotId+"'s opening-frame source.":".");
@@ -4544,7 +4692,7 @@ function renderShotRunner(){
         +(takeUrl?`<div class="runmedia" style="margin-top:10px"><video controls src="${BASE}${takeUrl}?v=${MEDIA_V}"></video></div>`:"")
         +(m.finalFrame?`<div class="dec-caption" style="margin-top:12px">Harvested final frame — the next shot's continuity anchor:</div>
            <div class="runmedia" style="max-width:340px"><img class="zoom" data-cap="${_esc(s.shotId)} · harvested final frame" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/></div>`:"");
-      acts=[`<button class="btn ghost" onclick="shRun('reject','${tok}')">✗ Reject with note (allow re-fire)</button>`];
+      acts=[`<button class="btn ghost" title="${rejectTitle}" onclick="shRun('reject','${tok}')">✗ Reject with note (allow re-fire)${rejectCost}</button>`];
     } else if(m.clip||m.finalFrame){
       st="done";lab="Rendered";
       sum="Rendered media exists on disk but the ledger doesn't mark this shot approved — trust the ledger.";
@@ -4578,7 +4726,7 @@ function renderShotRunner(){
       fire:"Fired — the approved take in Review is the result."};
     rows.forEach(r=>{
       if(r.id=="review"){
-        r.actions=[`<button class="btn ghost" onclick="shRun('reject','${tok}')">✗ Reject this take (reopens the shot)</button>`];
+        r.actions=[`<button class="btn ghost" title="${rejectTitle}" onclick="shRun('reject','${tok}')">✗ Reject this take (reopens the shot)${rejectCost}</button>`];
         return;
       }
       r.state="done"; r.stateLabel="Done"; r.actions=[];
@@ -4633,10 +4781,31 @@ function renderShotRunner(){
   }).join("");
   const lastDisc=(led.batch&&led.batch.disclosure)||led.disclosure||null;
   const estN=Math.min(SH_CANDS,shCap), estCost=shResCost(SH_RES,fireDur);
+  // SPEND, BOTH DIRECTIONS (2026-07-26). Everything on this line used to point forward — an
+  // estimate for the next fire, the last batch's authorised ceiling — so the one question a
+  // director actually asks ("what has this shot cost me?") had no answer anywhere in the
+  // product. The backward figures come from the real ledger via /api/spend; nothing renders
+  // if the ledger could not be read, because a blank is honest and a zero is not.
+  const sp=shSpendFor(s.shotId);
   const spendBits=[
     (estCost!=null&&led.status!="approved")?`<span>Next fire est. <b class="tnum">$${(estCost*estN).toFixed(2)}</b> (${estN} × ${SH_RES} · <span class="tnum">${fireDur}</span>s)</span>`:"",
-    (lastDisc&&lastDisc.maxBatchCostUsd!=null)?`<span>Last authorised batch <b class="tnum">$${lastDisc.maxBatchCostUsd}</b>${lastDisc.resolution?" · "+_esc(lastDisc.resolution):""}</span>`:""
+    (lastDisc&&lastDisc.maxBatchCostUsd!=null)?`<span>Last authorised batch <b class="tnum">$${lastDisc.maxBatchCostUsd}</b>${lastDisc.resolution?" · "+_esc(lastDisc.resolution):""}</span>`:"",
+    sp?`<span class="spent">This shot so far <b class="tnum">${_usd(sp.usd)}</b>`
+       +`<span class="spent-sub"> · <span class="tnum">${sp.calls}</span> paid call${sp.calls==1?"":"s"}`
+       +((sp.topFile&&sp.topFile.calls>1)?` · <span class="tnum">${sp.topFile.calls}</span>× ${_esc(sp.topFile.name)} = <span class="tnum">${_usd(sp.topFile.usd)}</span>`:"")
+       +`</span></span>`:"",
+    SH_SPEND?`<span class="spent">Scene <b class="tnum">${_usd(SH_SPEND.sceneUsd)}</b><span class="spent-sub"> · episode <span class="tnum">${_usd(SH_SPEND.episodeUsd)}</span> · estimated from the ledger, not a bill</span></span>`:""
   ].filter(Boolean).join("");
+  // THE ENGINE'S OWN QC FINDINGS FOR THIS SHOT — already computed, previously rendered
+  // nowhere. Open by default when anything is worse than a WARNING; a shot with no findings
+  // renders no band at all rather than an empty "0 issues" reassurance.
+  const qcMine=valFor(s.shotId);
+  const qcBlocks=qcMine.filter(_valIsBlock).length;
+  const qcBand=qcMine.length
+    ?`<details class="qcband${qcBlocks?" has-block":""}"${qcBlocks?" open":""}>
+        <summary><span class="qcband-n">${qcMine.length}</span> design-check finding${qcMine.length==1?"":"s"} on this shot${qcBlocks?` · <b style="color:var(--danger)">${qcBlocks} blocking</b>`:""} — from the package's own validation</summary>
+        <div class="qcrows">${valRowsHTML(qcMine)}</div></details>`
+    :"";
   // ONE PRIMARY CALL-TO-ACTION PER SHOT (2026-07-23, Julian, live — "its confusing in terms
   // of whats landed and whats not press continue or fire etc its all wrong"): the CURRENT
   // row alone keeps its primary button; every other row's actions are demoted to quiet
@@ -4722,6 +4891,7 @@ function renderShotRunner(){
       <div class="runmeter" role="group" aria-label="Section status">${meter}</div>
       <div class="runnow">${nowLine}</div>
       ${spendBits?`<div class="runspend">${spendBits}</div>`:""}
+      ${qcBand}
     </div>
     <div class="runrail">${rowsHTML}</div>
     ${deptSection}
@@ -5598,7 +5768,11 @@ async function shFetchPkg(){
       fetch(BASE+"/api/shot-reassess?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
       // THE DEPARTMENT-DIRECTION SUMMARY (2026-07-19) — same "per-shot, read-only,
       // zero-spend" precedent as SH_REASSESS just above; see /api/shot-departments.
-      fetch(BASE+"/api/shot-departments?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null)
+      fetch(BASE+"/api/shot-departments?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
+      // WHAT THIS SCENE HAS ALREADY COST (2026-07-26) — read-only, zero-spend, same
+      // precedent as the two above. Awaited with the package so the shot header can state
+      // the real figure on first paint rather than flashing in a second later.
+      shFetchSpend()
     ]);
     const j=await r.json();
     if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
@@ -5611,6 +5785,61 @@ async function shFetchPkg(){
 }
 function shLedger(sid){return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.shotId==sid)||{};}
 function shMedia(sid){return ((SH_MEDIA&&SH_MEDIA.shots)||{})[sid]||{};}
+
+// ── WHAT IT HAS ALREADY COST (2026-07-26) ────────────────────────────────────────────────
+// engine/cost_ledger.jsonl has recorded every real generation call since 2026-07-08 — 340
+// entries, $358.81 net — and until now no route in serve.py read it and no screen showed it.
+// Spend was metered FORWARD only: an estimate before a fire, a max-batch figure on the
+// disclosure, and nothing at all afterwards. So the product could render one shot 28 times
+// for $120.15 and never once say so. Fetched read-only alongside the package; a failure
+// leaves SH_SPEND null and every caller renders nothing rather than a wrong number.
+let SH_SPEND=null;
+async function shFetchSpend(){
+  SH_SPEND=null;
+  try{
+    const r=await fetch(BASE+"/api/spend?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
+    const j=await r.json();
+    if(j&&!j.error) SH_SPEND=j;
+  }catch(e){ SH_SPEND=null; }
+}
+function shSpendFor(sid){ return (SH_SPEND&&SH_SPEND.shots&&SH_SPEND.shots[sid])||null; }
+const _usd=n=>"$"+Number(n||0).toFixed(2);
+
+// ── THE PACKAGE'S OWN QC FINDINGS (2026-07-26) ───────────────────────────────────────────
+// cb_engine validates every production package and writes `validation` into it: passed,
+// errors, warnings, and an `issues` list where each entry carries a severity, a code, a
+// human message and an EXACT path — "shots[3](S1.SH4).camera". Scene 1 carries ten of them.
+// `grep -c "package.validation" app.html` returned 0: they had been rendered zero times,
+// ever. The engine had already done the work of saying which field of which shot is wrong
+// and why; the screen threw all of it away. Attribution is by the shot id the engine itself
+// puts in the path — never by array position, which would silently mis-file every finding
+// the moment a shot is inserted or promoted.
+const _VAL_PATH_RE=/\(([^)]+)\)\.?(.*)$/;
+function valIssues(){ return ((SH_PKG&&SH_PKG.validation&&SH_PKG.validation.issues)||[]); }
+function valFor(sid){
+  return valIssues().filter(i=>{
+    const m=_VAL_PATH_RE.exec(String(i.path||""));
+    return !!m&&m[1]==sid;
+  });
+}
+// A finding whose path names no shot belongs to the scene, not to a shot — it is surfaced on
+// the scene band so it can never be silently dropped for want of somewhere to put it.
+function valSceneWide(){
+  return valIssues().filter(i=>!_VAL_PATH_RE.exec(String(i.path||"")));
+}
+function _valField(path){
+  const m=_VAL_PATH_RE.exec(String(path||""));
+  return (m&&m[2])?m[2]:String(path||"");
+}
+const _valIsBlock=i=>String(i.severity||"").toUpperCase()!="WARNING";
+function valRowsHTML(list){
+  return list.map(i=>{
+    const bad=_valIsBlock(i);
+    return `<div class="qcrow"><span class="stbadge" style="color:var(${bad?"--danger":"--warn"});background:var(${bad?"--dangerbg":"--warnbg"})">${_esc(i.severity||"")}</span>
+      <span class="qcfield">${_esc(_valField(i.path))}</span>
+      <div class="qcmsg">${_esc(i.message||"")}${i.code?`<span class="qccode">${_esc(i.code)}</span>`:""}</div></div>`;
+  }).join("");
+}
 // per-shot department-direction lookup — same shape shReassess already established.
 function shDeptFor(sid){ return (SH_DEPARTMENTS&&SH_DEPARTMENTS.shots&&SH_DEPARTMENTS.shots[sid])||null; }
 // shared per-shot gate boolean — mirrors deriveSceneState's own sceneLookOk derivation

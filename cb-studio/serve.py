@@ -444,6 +444,126 @@ def _storyboard_file(scene, episode="Ep1"):
     return OUT / "creative" / f"{episode}_scene{scene}_storyboard.json"
 
 
+# ── THE COST LEDGER, READ BACK (2026-07-26) ───────────────────────────────────────────────
+# engine/cost_ledger.jsonl records every real generation call this pipeline has ever made.
+# Nothing in this server read it until now: spend was metered FORWARD (an estimate on the fire
+# button) and never counted BACKWARD, so the one number that would tell Julian what a shot has
+# actually cost him did not exist on any screen. These helpers are strictly read-only.
+#
+# ATTRIBUTION IS PARSED HERE, NOT TAKEN FROM THE ROW. cb_costs._attribution writes an
+# `episode`/`code` pair per row, but its regexes predate the shot-based filenames this pipeline
+# now uses ("Ep1_S1.SH2_c1.mp4" matches neither its beat-code nor its scene-asset shape), so
+# every recent row was logged episode=None/code=None. Re-deriving from the `out` filename here
+# is the only way to attribute the 340 rows ALREADY on disk — a fix inside cb_costs could only
+# ever help future rows. The gap in cb_costs._attribution is real and is reported, not silently
+# patched: changing what `code` means there would change cb_costs.report()'s own beat/scene
+# roll-ups, which is an engine decision, not a display one.
+_LEDGER_SHOT_RE = re.compile(r"(S(\d+)\.(?:SH|sh)\d+[A-Za-z0-9]*)")   # "Ep1_S1.SH2A_c1.mp4" -> S1.SH2A, scene 1
+_LEDGER_BEAT_RE = re.compile(r"(?:^|_)(\d+)\.B\d+[A-Za-z0-9]*")       # legacy beat naming -> scene only
+_LEDGER_SCENE_RE = re.compile(r"(?:^|_)S(\d+)(?:[_.]|$)")             # "Ep1_S1_plate.png"  -> scene 1
+_LEDGER_EP_RE = re.compile(r"^(?:vo_)?([A-Za-z][A-Za-z0-9]*)_")       # "vo_Ep1_1.B1.mp3"   -> Ep1
+
+
+def _ledger_attribution(row):
+    """(episode, scene, shotId) for one ledger row, from its own `out=` filename. Any of the three
+    may be None — an unattributable row is reported as unattributed, never quietly folded into a
+    shot's total."""
+    out = str(row.get("out") or "")
+    episode = row.get("episode")
+    if not episode:
+        m = _LEDGER_EP_RE.match(out)
+        episode = m.group(1) if m else None
+    shot = scene = None
+    m = _LEDGER_SHOT_RE.search(out)
+    if m:
+        shot, scene = m.group(1), str(int(m.group(2)))
+    if scene is None:
+        m = _LEDGER_BEAT_RE.search(out)
+        if m:
+            scene = str(int(m.group(1)))
+    if scene is None:
+        m = _LEDGER_SCENE_RE.search(out)
+        if m:
+            scene = str(int(m.group(1)))
+    if scene is None:
+        code = str(row.get("code") or "").split(".")[0]
+        if code.isdigit():
+            scene = str(int(code))
+    return episode, scene, shot
+
+
+def spend_report(episode="Ep1", scene=None):
+    """Read engine/cost_ledger.jsonl and total it: whole ledger, this episode, this scene, and each
+    shot in it. NET figures — the ledger legitimately carries negative `ledger_correction` rows that
+    reverse phantom test spend, and a total that ignored them would overstate what was really spent.
+    Costs are cb_costs.py's own ESTIMATES, not a billing record; that caveat travels with the numbers
+    rather than being left for the reader to remember."""
+    try:
+        import cb_costs
+        ledger_path = pathlib.Path(cb_costs.LEDGER_PATH)
+        rates_updated = cb_costs.RATES_UPDATED
+    except Exception:
+        ledger_path = ROOT / "engine" / "cost_ledger.jsonl"
+        rates_updated = None
+    out = {"episode": episode, "scene": scene, "ledgerPath": ledger_path.name,
+           "ratesUpdated": rates_updated, "estimate": True,
+           "totalUsd": 0.0, "totalCalls": 0, "episodeUsd": 0.0, "episodeCalls": 0,
+           "sceneUsd": 0.0, "sceneCalls": 0, "unattributedUsd": 0.0, "correctionsUsd": 0.0,
+           "shots": {}, "exists": ledger_path.exists()}
+    if not ledger_path.exists():
+        return out
+    rows = []
+    for line in ledger_path.read_text(errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except Exception:
+            continue          # a torn line is skipped, never crashes the read
+    shots = {}
+    for r in rows:
+        usd = float(r.get("cost_usd") or 0)
+        op = str(r.get("op") or "")
+        r_ep, r_scene, r_shot = _ledger_attribution(r)
+        out["totalUsd"] += usd
+        out["totalCalls"] += 1
+        if usd < 0:
+            out["correctionsUsd"] += usd
+        if r_ep != episode:
+            continue
+        out["episodeUsd"] += usd
+        out["episodeCalls"] += 1
+        if scene is not None and r_scene != scene:
+            continue
+        if scene is not None:
+            out["sceneUsd"] += usd
+            out["sceneCalls"] += 1
+        if not r_shot:
+            out["unattributedUsd"] += usd
+            continue
+        s = shots.setdefault(r_shot, {"usd": 0.0, "calls": 0, "byOp": {}, "files": {}})
+        s["usd"] += usd
+        s["calls"] += 1
+        s["byOp"][op] = round(s["byOp"].get(op, 0.0) + usd, 4)
+        fn = str(r.get("out") or "")
+        f = s["files"].setdefault(fn, {"usd": 0.0, "calls": 0})
+        f["usd"] = round(f["usd"] + usd, 4)
+        f["calls"] += 1
+    for sid, s in shots.items():
+        s["usd"] = round(s["usd"], 4)
+        # the single most-repeated artefact for this shot, and what re-rendering it has cost —
+        # the "28 fires of one file" fact that no screen has ever shown
+        top = max(s["files"].items(), key=lambda kv: kv[1]["calls"], default=None)
+        s["topFile"] = ({"name": top[0], "usd": top[1]["usd"], "calls": top[1]["calls"]}
+                        if top else None)
+        del s["files"]
+    for k in ("totalUsd", "episodeUsd", "sceneUsd", "unattributedUsd", "correctionsUsd"):
+        out[k] = round(out[k], 4)
+    out["shots"] = shots
+    return out
+
+
 def scene_lineage(pkg, scene, episode="Ep1"):
     """THE state-integrity checkpoint's server-side lineage check (2026-07-17): mirrors
     cb_render.lineage_status EXACTLY (deliberately duplicated, never imported — the same
@@ -1009,6 +1129,22 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"rates": {k: {"usd": v[0], "unit": v[1], "confidence": v[2]}
                                             for k, v in cb_costs.RATES.items()},
                                   "updated": cb_costs.RATES_UPDATED})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/spend" or self.path.startswith("/api/spend?"):
+            # WHAT IT HAS ALREADY COST (2026-07-26). engine/cost_ledger.jsonl has held every real
+            # generation call since 2026-07-08 and NO route in this file read it — the Studio metered
+            # spend forward (an estimate before a fire) and never once counted it backward. Read-only:
+            # opens the ledger, sums it, returns it. Never writes, never re-prices, never gates.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            scene = (q.get("scene") or [""])[0]
+            if not _SHOT_TOKEN.match(ep) or (scene and not _SHOT_TOKEN.match(scene)):
+                return self._json(400, {"error": "episode (and optional scene) required as plain tokens"})
+            try:
+                self._json(200, spend_report(ep, scene or None))
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return

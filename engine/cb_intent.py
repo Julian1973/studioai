@@ -128,11 +128,57 @@ def _covered(term, prompt_low):
     # missed "smiling" (found on S1.SH5, 2026-07-25). Keep the stem >= 4 chars so short
     # words never over-match.
     t = term
+    # "Fuzzby's" must be satisfied by a prompt that says "Fuzzby" — found live, 2026-07-26,
+    # when a real production prepare hard-stopped twice on a clause demanding the literal
+    # token "fuzzby's". A possessive is the same word.
+    if t.endswith("'s") or t.endswith("\u2019s"):
+        t = t[:-2]
     for suf in ("ing", "ed", "es", "s"):
         if len(t) - len(suf) >= 4 and t.endswith(suf):
             t = t[:-len(suf)]
             break
     return re.search(r"\b" + re.escape(t), prompt_low) is not None
+
+
+def _staging_text(shot):
+    """Everything the beat itself says is physically STAGED — the vocabulary a writer
+    actually has to build from."""
+    bits = [str(shot.get(k) or "") for k in
+            ("performanceAssignment", "openingPose", "camera", "physicalStaging",
+             "storyBeat", "summary", "visualPayoff", "continuityProseIn")]
+    for c in (shot.get("cuts") or []):
+        if isinstance(c, dict):
+            bits += [str(c.get("action") or ""), str(c.get("framing") or "")]
+    return " ".join(bits).lower()
+
+
+def _deliverable(clause, shot):
+    """NOT WIRED INTO score() — built 2026-07-26, measured, and found not to do its job.
+
+    The idea was sound and the problem is real (below). The implementation is not: on the
+    very clause that motivated it — "Fuzzby's showmanship physically betrays him" — it
+    returns True, because "physically" happens to appear in the beat's own physics text.
+    So it exempts nothing it was built to exempt. Left here, unwired and labelled, because
+    the PROBLEM it names is real and still open; a future attempt should start from this
+    measurement rather than rediscover it. Do not wire it up without re-measuring against
+    the four-prompt calibration set in GATED_FIELDS' own note.
+
+    THE PROBLEM IT WAS FOR. Can a prompt deliver this clause AS WORDS at all?
+
+    A Director writes feltIntent in two registers at once. Some of it is staged and
+    filmable — "the crash stamps him with a ridiculous golden-pollen moustache... he
+    preens, he's delighted". Some of it states what the beat MEANS — "Fuzzby's showmanship
+    physically betrays him". The second is delivered by staging the first; no prompt
+    contains the word "betrays", and demanding it hard-stopped a real production prepare
+    twice on 2026-07-26 with the writer having done nothing wrong.
+
+    The test is mechanical and grounded in the beat's OWN data, never a word list of
+    "abstract" terms: does ANY of the clause's vocabulary appear anywhere in what this beat
+    itself describes as staged? If the Director's words for a clause appear nowhere in her
+    own staging, she is naming a meaning, not a shot — so it is advisory, and her eye
+    judges whether the staging carries it."""
+    stage = _staging_text(shot)
+    return any(_covered(t, stage) for t in clause["terms"])
 
 
 def score(prompt_text, shot, threshold=0.5):

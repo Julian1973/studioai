@@ -2524,9 +2524,46 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             # THE FORMULA GATE (Gold Build, 2026-07-24): the register writer's card must
             # BE the formula — dialogue inline verbatim, labelled shots, the HOLD tail.
             # Replaces the retired leak-check + tempo-map pair on this path.
-            check_formula_structure(result.providerPrompt, shot.get("dialogueLines") or [], shot=shot,
-                                    refuse_prefix="REFUSED — Animation Director's own candidate; "
-                                                  "no candidate saved")
+            #
+            # THE REPAIR PASS (Julian, 2026-07-26: "we must make sure that the prompts are
+            # ALWAYS COMPLIANT because we build them AFTER the director has given us the
+            # scene and beat outcomes"). Proven necessary by a real production prepare the
+            # day it was written: S1.SH2's writer dropped "Fuzzby's showmanship physically
+            # betrays him" and the gate refused to save anything at all. Refusing is
+            # correct — but stopping there leaves the studio stuck and makes the Director's
+            # intent something the writer is merely graded against, when the whole design
+            # is that it is the SPECIFICATION the prompt is built from.
+            #
+            # So a miss is handed straight back, naming her own words, and the writer gets
+            # ONE more pass. One, not many: this codebase's own one-render economy already
+            # ruled that a failed gate earns a single re-fire and then a hard stop with a
+            # diagnosis, never a third roll (CLAUDE.md rule 28). A second miss is a real
+            # signal — the beat's intent and its staging genuinely disagree — and that is
+            # Julian's call, not a loop's.
+            try:
+                check_formula_structure(result.providerPrompt, shot.get("dialogueLines") or [],
+                                        shot=shot,
+                                        refuse_prefix="REFUSED — the Director's own candidate; "
+                                                      "no candidate saved")
+            except Refused as first_refusal:
+                if "DIRECTION IS NOT IN THE PROMPT" not in str(first_refusal):
+                    raise      # a structural/formula fault is not repairable by re-asking
+                log("  THE DIRECTOR'S STOP — the direction is not in the prompt. Handing it "
+                    "back to the writer once, in her own words.")
+                repair = ("\n\n===== THE DIRECTOR PULLED THIS TAKE =====\n"
+                          "Your previous draft did not deliver what she asked for:\n\n"
+                          + str(first_refusal).split("THE FORMULA GATE: ", 1)[-1] +
+                          "\n\nWrite it again. Keep everything that worked. Put the missing "
+                          "direction ON SCREEN as real staged action — never by quoting her "
+                          "words back, and never as a line of commentary about the shot.")
+                result = cb_departments.prepare_animation(context, images, brief + repair, log=log)
+                check_formula_structure(result.providerPrompt, shot.get("dialogueLines") or [],
+                                        shot=shot,
+                                        refuse_prefix="HARD STOP — the writer missed the "
+                                                      "Director's direction twice; no candidate "
+                                                      "saved. The beat's intent and its staging "
+                                                      "disagree — that is a director's call")
+                log("  REPAIRED — the second pass delivers the direction.")
             for _flag in check_craft_components(result.providerPrompt):
                 log(f"  CRAFT FLAG (advisory) — {_flag}")
             # THE DRIFT-VOCABULARY BAN, at authoring (2026-07-24): the LLM can invent
@@ -6440,3 +6477,122 @@ if __name__ == "__main__":
             print(f"unknown command {cmd}"); sys.exit(1)
     except Refused as e:
         print(str(e)); sys.exit(1)
+
+
+# ── RETIRING DIRECTIONS AUTHORED BY A SUPERSEDED CHAIR ──────────────────────────────────
+# THE STAGES WHOSE AUTHORING ACTUALLY CHANGED (2026-07-26), which is a different and much
+# narrower question than "whose label changed". Julian's restructure renamed four chairs,
+# but only two of them had the WRITER'S JOB change: cinematography and animation now receive
+# the Director's stated intent before writing (cb_departments._intent_charge), and the stage
+# is asked to AFFORD the performance rather than merely depict the moment. Their existing
+# prompts were composed by a writer that never saw any of that, so they are genuinely stale.
+#
+# Voice and review were RELABELLED ONLY — same craft contract, same charge, same inputs. A
+# voice direction carries the acted line derived from locked dialogue; retiring it would
+# force re-preparation and orphan approved audio takes, destroying real work to fix a
+# cosmetic difference. Sweeping on the label alone would have retired 7 such records here.
+AUTHORING_CHANGED = ("cinematography", "animation")
+
+
+def retire_superseded_directions(scene, episode="Ep1", reviewed_by="Julian",
+                                 apply=False, log=print):
+    """CLEAR OUT THE PROMPTS A RETIRED CHAIR WROTE (Julian, 2026-07-26: "go into the studio
+    clean out all the stale prompts etc and re populate with the new workflow").
+
+    WHY A FUNCTION AND NOT A SCRIPT. When the chairs moved and both prompts became things
+    engineered FROM the Director's intent, every direction already on disk became stale in
+    two ways at once: authored by a chair that no longer exists, and — more importantly —
+    composed by a writer who never saw what the beat was FOR. Re-approving one would ship a
+    prompt built by the old process. That will happen again on the next restructure, so it
+    is software.
+
+    WHAT IT NEVER TOUCHES, AND THIS IS THE POINT. `rejections`, `status`, `batch`,
+    `batchAttempts` and every spend/token record stay exactly where they are. Those
+    rejections are Julian's own recorded verdicts on real footage — 37 of them across this
+    scene — and this project has already learned once, the expensive way, that they are the
+    single most valuable asset on disk (RETROSPECTIVE_THE_SPINE.md: "42 precise verdicts sat
+    in JSON sidecars nobody read"). A clean-out that swept the evidence with the artefacts
+    would be a far worse bug than the staleness it fixes.
+
+    Nothing is deleted. Every retired record is written to
+    media/archive/directions_superseded/ before the slot is cleared, and the ledger keeps a
+    dated note of what went and why. Dry-run unless apply=True.
+    """
+    pkg, path = load_pkg(scene, episode)
+    ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")   # the house stamp,
+                                                             # same as every archive here
+    arch_dir = HERE / "media" / "archive" / "directions_superseded" / f"{episode}_scene{scene}_{ts}"
+    retired, kept = [], []
+
+    for entry in pkg.get("continuityLedger") or []:
+        sid = entry.get("shotId")
+        dw = entry.get("departmentWork") or {}
+        for stage in list(dw.keys()):
+            want = _DEPARTMENT_WORKERS.get(stage)
+            if not want:
+                continue    # a stage this build no longer defines — leave it entirely alone
+            if stage not in AUTHORING_CHANGED:
+                continue    # relabelled only — see AUTHORING_CHANGED
+            want_worker, want_skill = want[1], f"crystal-bears-{want[2]}"
+            for slot in ("approved", "candidate"):
+                rec = (dw.get(stage) or {}).get(slot)
+                if not rec:
+                    continue
+                current = (rec.get("worker") == want_worker and rec.get("skill") == want_skill)
+                (kept if current else retired).append({
+                    "shotId": sid, "stage": stage, "slot": slot,
+                    "worker": rec.get("worker"), "skill": rec.get("skill"),
+                    "reviewedBy": rec.get("reviewedBy"), "record": rec})
+            hist = (dw.get(stage) or {}).get("history") or []
+            if hist:
+                retired.append({"shotId": sid, "stage": stage, "slot": f"history[{len(hist)}]",
+                                "worker": "(mixed)", "skill": "(mixed)", "record": hist})
+
+    log(f"\nSUPERSEDED-CHAIR SWEEP — scene {scene}, {episode}")
+    log(f"  retiring : {len(retired)} record(s) written by a chair this build no longer has")
+    log(f"  keeping  : {len(kept)} already on the current chair table")
+    for r in retired:
+        log(f"     {r['shotId']:9} {r['stage']:16} {r['slot']:12} was: {r['worker']}")
+    if not apply:
+        log("\n  DRY RUN — nothing written. Pass apply=True to retire these.")
+        return {"retired": [{k: v for k, v in r.items() if k != "record"} for r in retired],
+                "kept": len(kept), "applied": False}
+
+    arch_dir.mkdir(parents=True, exist_ok=True)
+    (arch_dir / "retired_directions.json").write_text(
+        json.dumps({"episode": episode, "scene": scene, "retiredAt": ts,
+                    "reviewedBy": reviewed_by,
+                    "reason": "authored by a superseded chair, and by a writer that never "
+                              "received the Director's stated intent",
+                    "currentChairTable": {k: {"worker": v[1], "skill": v[2]}
+                                          for k, v in _DEPARTMENT_WORKERS.items()},
+                    "records": retired}, indent=1, ensure_ascii=False), encoding="utf-8")
+
+    for entry in pkg.get("continuityLedger") or []:
+        dw = entry.get("departmentWork") or {}
+        for stage in list(dw.keys()):
+            want = _DEPARTMENT_WORKERS.get(stage)
+            if not want or stage not in AUTHORING_CHANGED:
+                continue
+            want_worker, want_skill = want[1], f"crystal-bears-{want[2]}"
+            d = dw[stage]
+            for slot in ("approved", "candidate"):
+                rec = d.get(slot)
+                if rec and not (rec.get("worker") == want_worker
+                                and rec.get("skill") == want_skill):
+                    d[slot] = None
+            d["history"] = []
+            d["retiredAt"] = ts
+            d["retiredReason"] = "superseded chair / pre-intent writer"
+        # the evidence is deliberately untouched: rejections, status, batch, batchAttempts
+    pkg.setdefault("repairLog", []).append(
+        {"at": ts, "action": "retire_superseded_directions", "reviewedBy": reviewed_by,
+         "retired": len(retired), "archive": str(arch_dir),
+         "note": "Chairs moved and both prompts became things engineered from the "
+                 "Director's intent; every prior direction predates that. Rejection "
+                 "history preserved in place."})
+    _save(pkg, path)
+    log(f"\n  RETIRED. Archived to {arch_dir}")
+    log(f"  Rejection history preserved in place — untouched.")
+    return {"retired": [{k: v for k, v in r.items() if k != "record"} for r in retired],
+            "kept": len(kept), "applied": True, "archive": str(arch_dir)}

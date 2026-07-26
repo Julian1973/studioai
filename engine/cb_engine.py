@@ -46,7 +46,8 @@ import paths as P
 def canonical_package_path(scene, episode="Ep1"):
     """THE canonical production package's path (2026-07-17, Julian's layer-boundary
     directive, item 2) — cb_engine.py already owns the canonical package CONTRACT
-    (compile_scene_package below is what shapes it); this is the one place its filename
+    (cb_handover.promote_to_canonical is what shapes it — compile_scene_package, the second
+    author that used to, was deleted 2026-07-26); this is the one place its filename
     convention lives. cb_render.py's own _pkg_path delegates to this pure helper (never
     duplicates it); cb_handover.py calls it directly — a pure path computation, not a
     render or provider entry point, so it does not violate cb_handover's own
@@ -338,6 +339,13 @@ class Shot(BaseModel):
     # this fix simply compiles without them, never a crash.
     tempoDesign: Optional[str] = None             # Law-6-safe pace design (dialogue stripped at handover)
     feltIntent: Optional[str] = None              # the one intention the whole shot serves
+    # THE AUDIBLE BEAT (2026-07-26, GAP 6): the Director's own Gate-5 soundDesign. Same
+    # shape and same reason as tempoDesign/feltIntent above — a real authored creative
+    # field that had no route to the shipped prompt. It matters more than either, because
+    # generate_audio is hardcoded ON (cb_gen.py:582): Seedance is scoring the music and
+    # designing every effect in this show, and until this field exists nothing anyone
+    # authors has ever told it what the take should sound like.
+    soundDesign: Optional[str] = None             # the take's audible shape (contacts, world, music, silence)
     # THE SHOT-MODE VOCABULARY (Julian's Option B + Anti-Guardrail Principle, 2026-07-23):
     # a SELECTABLE CREATIVE VOCABULARY the Director chooses at storyboard time — never
     # compulsory boilerplate, never an LLM classification at delivery time. 1-2 entries,
@@ -846,10 +854,11 @@ def validate_scene_design(design, beats, characters_cfg):
 
         # TYPED ABSENCE (2026-07-17, THE SIMPLIFICATION): continuityIn=None is valid ONLY
         # for the scene's own first shot — every other shot must state what it inherits.
-        # Mechanically enforced in design_scene (_clear_opener_continuity_in); these two
-        # checks are defense-in-depth, catching a stale/hand-edited/reloaded design
-        # (repair_package reconstructs Shot objects straight from a stored package) rather
-        # than trusting the mechanical clear blindly.
+        # Mechanically set upstream by cb_creative.production_detail (which stamps the
+        # opener's continuityIn to "", mapped to typed None at handover). Since the second
+        # author's own _clear_opener_continuity_in was deleted (2026-07-26) these two checks
+        # are no longer defense-in-depth — they ARE the enforcement, on every promoted or
+        # hand-edited package. Do not weaken them.
         if i == 0 and sh.continuityIn is not None:
             add("ERROR", "OPENER_CONTINUITY_IN_NOT_CLEARED", f"{path}.continuityIn",
                 "the scene's first shot must have continuityIn=null (no predecessor) — "

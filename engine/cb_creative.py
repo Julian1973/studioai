@@ -326,6 +326,20 @@ class VoicePerformance(BaseModel):
     elevenLabsV3Direction: str
     physicalActionRelationship: str
     expectedTiming: str
+    # THE LINE'S PLACE AGAINST THE PICTURE (2026-07-26, GAP 6). cb_engine.DialogueLine
+    # .minOnsetSec and cb_render._stretch_natural_pause are fully built for exactly the
+    # "'Nailed it.' came through as an almost-inaudible ~0.4s blip" failure, and
+    # cb_handover._dialogue_lines already reads vp.get("minOnsetSec") — but this schema
+    # had no such field, so the storyboard could never author one and the whole mechanism
+    # has never been able to fire from the live script-to-storyboard path. This is that
+    # missing source. OPTIONAL and null for almost every line: only a line the picture's
+    # own physical climax must CLEAR before it lands needs a floor.
+    minOnsetSec: Optional[float] = Field(default=None, description=(
+        "Seconds INTO the shot before this line's onset may begin — an absolute floor "
+        "against the shot's fixed picture duration, never 'N seconds after the previous "
+        "line' (ElevenLabs renders the same chant at 2.4s in one take and 3.9s in the "
+        "next). Author it ONLY when the picture has to finish something before the line "
+        "can be heard — a crash chain landing, a reveal completing. Null otherwise."))
     generatedAsset: Optional[str] = None
     approvalState: str = "draft"
 
@@ -618,7 +632,26 @@ def _unresolved_fields_for(names):
 # ROLE MINDS — taste canons + the exemplar library's explicit human verdicts
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def _mind(role, taste_keys, charge):
-    taste = "\n\n".join(_canon_text(k, 7000) for k in taste_keys)
+    # THE TASTE CANONS ARRIVE WHOLE (2026-07-26). Measured, not assumed: FOUR of the five
+    # canons are longer than the 7,000-char slice this line used to take, and in every one of
+    # them what the slice cut was the operative half.
+    #   DIRECTOR_TASTE_CANON.md        9,900 chars — ANTI-PATTERNS begins at char 7,340, so
+    #     "Checklist choreography" ("six comma-separated verbs in one sentence, each
+    #     independently clocked, none causing the next"), "Adjective chaos", "Simultaneous
+    #     everything" and ALL NINE REJECTION QUESTIONS reached NO Director gate — including
+    #     #4, "What is the one cause, and what are its visible consequences? (A verb list —
+    #     rewrite as physics.)", which is the cause-chain law this room most needed.
+    #     gate3_beats, gate4_shot_conference and gate5_performance all authored without it.
+    #   CINEMATOGRAPHY_TASTE_CANON.md  9,140 — REJECTION QUESTIONS lost.
+    #   SHOWRUNNER_TASTE_CANON.md     10,264 — "REJECTION QUESTIONS (ask every one, every
+    #     review)" has never once reached the Showrunner at gate 0, 2 or 6.
+    #   VOICE_PERFORMANCE_CANON.md    10,253 — the three WORKED EXAMPLES on real, verbatim-
+    #     locked Ep1 lines lost.
+    # This is the acting-canon finding again in a different file: the craft was written,
+    # approved, and eaten by a cap. 14,000 clears the largest canon by 3,736 chars. Cost
+    # measured on the real files: the joint Director/DP system prompt goes 26,048 -> 31,088
+    # chars. Nothing is refused and no budget is introduced — a truncation is deleted.
+    taste = "\n\n".join(_canon_text(k, 14000) for k in taste_keys)
     # The Creative Room now genuinely hires the repository's specialist people.  Only the
     # concise marked runtime contracts are loaded (not historical/superseded pipeline notes
     # elsewhere in the long skill documents).  This remains the ONE existing Gate 0-6
@@ -632,6 +665,15 @@ def _mind(role, taste_keys, charge):
         worker_keys.append("voice")
     if "PRODUCER" in role:
         worker_keys.append("producer")
+    # THE SHOWRUNNER'S BRANCH (2026-07-26). Without this the chair is inert: the SKILLS key
+    # exists and load_runtime_skill('showrunner') returns her 1,605-char contract, but _mind
+    # never asks for it, so every SHOWRUNNER pass still emitted the fallback string
+    # "Showrunner taste canon owns this pass." Checked AFTER the substring tests above,
+    # deliberately — "DIRECTOR, WITH THE SHOWRUNNER IN THE ROOM" must load BOTH contracts,
+    # and the existing joint pattern ("DIRECTOR AND CINEMATOGRAPHER") already relies on this
+    # same additive matching rather than an elif chain.
+    if "SHOWRUNNER" in role:
+        worker_keys.append("showrunner")
     worker_contracts = "\n\n".join(cb_departments.load_runtime_skill(k)
                                       for k in worker_keys)
     return (f"You are the {role} of the Crystal Bears creative room — a world-class family-"
@@ -819,7 +861,8 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (a COMPLETE re-architecture is required — "
              f"never a wording patch): {review_notes}" if review_notes else "")
     sd = cb_llm.structured(
-        _mind("DIRECTOR", ["directorTaste"],
+        _mind("DIRECTOR, WITH THE SHOWRUNNER IN THE ROOM",
+              ["directorTaste", "showrunnerTaste"],
               "Structure the beats INSIDE the selected whole-scene treatment. Every beat "
               "defines: what changes; who drives the change; audience anticipation; the "
               "action or choice; the consequence; and the emotional or comic handover. "
@@ -925,7 +968,21 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "transition that settles instead of carrying is wrong. Decide from what THIS "
               "shot's own dramatic form and tempo demand — the beat's primaryForm and "
               "tempoShape are stated for you; read them. If consecutive shots keep choosing "
-              "the same ending, that is a symptom to fix, not a sequence."),
+              "the same ending, that is a symptom to fix, not a sequence. "
+              "cameraRelationship IS READ LITERALLY BY A VIDEO MODEL (2026-07-26). "
+              "cb_handover.distil_shot copies this field verbatim into Shot.camera and it "
+              "reaches the provider as you wrote it — so a framing MECHANISM authored here "
+              "becomes a freeze command downstream, obeyed for the whole span it governs, "
+              "and that span is usually the dialogue, which is most of the clip. This is "
+              "not hypothetical: S1.SH2's own card read 'holds that two-shot, unbroken, "
+              "from the crash recovery through the discovery, both spoken lines and the "
+              "button to the final frame', and the take did exactly that, faithfully, and "
+              "was rejected for it. Author the INTENT — what must stay true and why ('both "
+              "of them have to stay readable through the exchange; her reaction is the "
+              "second half of his joke') — and leave the mechanism to the camera. Stillness "
+              "remains fully available and is often the right call: when you choose it, say "
+              "what it is FOR and what keeps moving inside it, never how long a frame is "
+              "held."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
@@ -943,7 +1000,8 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
     pp = cb_llm.structured(
-        _mind("DIRECTOR", ["directorTaste"],
+        _mind("DIRECTOR, WITH THE SHOWRUNNER IN THE ROOM",
+              ["directorTaste", "showrunnerTaste"],
               "The visual sequence now exists. Author each shot's PHYSICAL PERFORMANCE and "
               "ANIMATION TIMING (physicalPerformance, animationTiming): performance arises "
               "from thought; physical cause and effect stays readable; weight, anticipation "
@@ -982,9 +1040,38 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
               "or paraphrase a character's spoken line, even a fragment, even inside quotation "
               "marks — describe only the body and camera around the moment the line lands "
               "(e.g. 'as he delivers his line', never the words themselves). Change NOTHING "
-              "else on the cards — the sequence design is settled."),
+              "else on the cards — the sequence design is settled.\n\n"
+              "THE SHOWRUNNER IS IN THIS PASS AND SHE TALKS WHILE THE PERFORMANCE IS WRITTEN "
+              "(2026-07-26). She holds NO verdict here, no shot waits on her, and she never "
+              "rewrites your body-language, timing or gag construction. She is accountable, "
+              "on every shot, for two things. (1) THIS CAST, NOT ANY CAST: run the "
+              "substitution test on the physical performance itself — if the same body could "
+              "belong to a different character it is not authored yet, and she names what "
+              "THIS character's own register does with this exact moment, working from the "
+              "acting canon supplied below rather than a generic adjective. (2) THE CHARGED "
+              "STILL: she refuses, as written, any performance that instructs stillness as a "
+              "STATE. 'Motionless', 'flat', 'locked', 'barely moves' and 'stays still' are "
+              "freeze commands — a model obeys them literally and the performance dies on "
+              "screen. Stillness is often exactly right in this show; when it is, the "
+              "performance must name the continuous thing the character is DOING while "
+              "holding, and the small corrections that prove they are alive inside it. Where "
+              "the performance is already this cast's own she says so and gets out of the "
+              "way."),
         f"THE SELECTED TREATMENT:\n{treatment.model_dump_json()[:3000]}\n\n"
-        f"THE SHOT SEQUENCE:\n" + "\n".join(s.model_dump_json() for s in shots),
+        f"THE SHOT SEQUENCE:\n" + "\n".join(s.model_dump_json() for s in shots)
+        # THE ACTING CANON REACHES THE PERFORMANCE PASS (2026-07-26). Commit ca80b59 got the
+        # acting canon into gates 0/1/3. This pass — the one that actually AUTHORS physical
+        # performance — was never in that list because it was handed NO character canon of
+        # any kind: its user message was treatment + shots, and `sd` was an unused parameter.
+        # Seating the Showrunner here to hold character truth without the register would be
+        # an empty chair, and the substitution test she is charged with is unrunnable
+        # without it. Cast comes from the beats Gate 3 already authored; same 8,000-char
+        # slice Gate 3 uses, and _characters_for emits the acting canon for the whole cast
+        # first, so it survives the slice.
+        + "\n\nCHARACTER CANON FOR THIS SCENE'S CAST (acting canon first — this is the "
+          "register the substitution test runs against):\n"
+        + _characters_for(sorted({c for b in sd.beats
+                                  for c in (b.participatingCharacters or [])}))[:8000],
         PerformancePass, label=f"gate5_perf_s{scene_num}")
     by_id = {s.shotId: s for s in shots}
     for s in pp.shots:

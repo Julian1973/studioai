@@ -108,7 +108,8 @@ def _pkg_path(scene, episode="Ep1"):
 def load_pkg(scene, episode="Ep1"):
     p = _pkg_path(scene, episode)
     if not p.exists():
-        raise Refused(f"no production package at {p.name} — run cb_engine.py {scene} {episode} first")
+        raise Refused(f"no production package at {p.name} — approve the storyboard to hand it "
+                      f"to production")
     return json.load(open(p)), p
 
 

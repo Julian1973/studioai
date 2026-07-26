@@ -41,6 +41,14 @@ SKILLS = {
     "review": ROOT / "skills/crystal-bears-continuity/SKILL.md",
     "post": ROOT / "skills/crystal-bears-post/SKILL.md",
     "producer": ROOT / "skills/crystal-bears-producer/SKILL.md",
+    # THE SHOWRUNNER TAKES HER CHAIR (2026-07-26). This file is the only table that decides
+    # which contract loads (cb_render._DEPARTMENT_WORKERS is the render-stage table and has
+    # no showrunner row, correctly — she authors no provider prompt). Before this key,
+    # cb_creative._mind emitted the literal fallback string 'Showrunner taste canon owns
+    # this pass.' at gates 0, 2 AND 6 — measured: _mind('SHOWRUNNER', ['showrunnerTaste'])
+    # = 16,488 chars with 'Crystal Bears Showrunner' NOT in it. The one chair asked to
+    # guarantee bible fidelity was the one chair with no contract, at any gate.
+    "showrunner": ROOT / "skills/crystal-bears-showrunner/SKILL.md",
 }
 
 DEPARTMENTS = [
@@ -524,8 +532,14 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
                 "1. If any dialogue exists, the prompt OPENS with the audio law: "
                 "'ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole "
                 "source of dialogue, wording, voice, performance and timing.' Name who "
-                "speaks and who stays silent (mouth closed); ban additional dialogue or "
-                "vocalisations. DIALOGUE WORDS NEVER APPEAR IN THE PROMPT — time the "
+                "speaks and who stays silent (mouth closed); ban additional SPEECH. "
+                "NOT a ban on vocal sound (2026-07-26, GAP 6 — the deletion this audit "
+                "names): 'vocalisations' banned the show's own voice. Fuzzby hums "
+                "continuously through all of Scene 1 and the hum is not a dialogue line; "
+                "Squeaky has no voiceId at all and her entire vocal identity is 'quick "
+                "chirps and clicks', so that one word made her mute. A hum, chirp, gasp "
+                "or breath the shot's own performance calls for is DIRECTED, not "
+                "forbidden. DIALOGUE WORDS NEVER APPEAR IN THE PROMPT — time the "
                 "performance by naming the audio's own sections ('During the opening "
                 "spoken section of @Audio1...', 'As the final spoken section of @Audio1 "
                 "begins...').\n"

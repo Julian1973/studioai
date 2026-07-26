@@ -206,20 +206,6 @@ def test_continuity_in_missing_for_non_opener_blocks():
     assert report is not None and not report["passed"]
 
 
-def test_design_scene_mechanical_clear_is_pure_and_idempotent():
-    """_clear_opener_continuity_in (design_scene's own mechanical override, mirroring
-    cb_creative.production_detail's identical pattern) needs no LLM call — proven directly
-    against the tripwired fixture. Clears position 0 only, regardless of its prior value,
-    and is a no-op on an empty shot list."""
-    d = _clean_design()
-    d.shots[0].continuityIn = _state(["Fuzzby", "Zenny"])   # simulate an un-cleared LLM draft
-    E._clear_opener_continuity_in(d)
-    assert d.shots[0].continuityIn is None
-    assert d.shots[1].continuityIn is not None               # untouched
-    empty = E.SceneShotList(statement=d.statement, shots=[])
-    E._clear_opener_continuity_in(empty)                      # empty list: no crash
-
-
 def test_big_comedy_beat_requires_physical_staging():
     d = _clean_design()
     d.shots[0].physicalStaging = None
@@ -534,14 +520,15 @@ def test_verbatim_dialogue_inside_performance_assignment_still_refuses():
 
 def test_field_word_budgets_now_empty_and_generic_lookup_still_safe():
     """The removal is structural, not a special-case: FIELD_WORD_BUDGETS is now an empty
-    dict, and both call sites that read it (_field_rejections' repair-loop check,
-    validate_scene_design's own FIELD_OVERBUDGET check) use .get() against it — neither
-    raises, and neither field-level budget check can ever fire again for ANY field name,
-    proving no replacement field limit was introduced anywhere."""
+    dict, and its one surviving call site (validate_scene_design's own FIELD_OVERBUDGET check)
+    uses .get() against it — it never raises, and no field-level budget check can ever fire
+    again for ANY field name, proving no replacement field limit was introduced anywhere.
+    (The second call site, the repair loop's own, went with the second author 2026-07-26 —
+    the check that actually gates a fire is the one proved below.)"""
     assert E.FIELD_WORD_BUDGETS == {}
-    long_text = " ".join(["word"] * 200)
-    assert E._field_rejections("performanceAssignment", long_text) == []
-    assert E._field_rejections("visualPayoff", long_text) == []
+    d = _clean_design()
+    d.shots[0].performanceAssignment = " ".join(["word"] * 200)
+    assert "FIELD_OVERBUDGET" not in _codes(E.validate_scene_design(d, BEATS, CFG))
 
 
 def test_one_consistent_anchor_matching_style_rule():
@@ -692,8 +679,11 @@ def test_strip_redundant_audio_sentence_leaves_clean_text_untouched():
     assert E._strip_redundant_audio_sentence(None) is None
 
 
-# ── THE OBSERVABLE-DIRECTION REPAIR LOOP (Julian's directive, 2026-07-16) ────────────────
-# The five real rejected phrases from Ep1 Scene 1 are the permanent regression fixtures.
+# ── THE FIVE REJECTED PHRASES — kept as permanent regression fixtures ────────────────────
+# (Julian's directive, 2026-07-16.) The auto-repair LOOP that used to consume them went with
+# the second author (2026-07-26); the deterministic DETECTION they prove is validator-side and
+# fully live, so the fixtures are re-pointed at validate_scene_design's own ABSTRACT_DIRECTION
+# check rather than thrown away with the loop.
 REJECTED_PHRASE_FIXTURES = [
     ("1.B1.S3", "until the pose itself becomes the joke"),
     ("1.B2.S2", "sincerely offers the accident as status"),
@@ -705,47 +695,10 @@ REJECTED_PHRASE_FIXTURES = [
 
 def test_five_rejected_phrases_stay_caught():
     for shot_id, phrase in REJECTED_PHRASE_FIXTURES:
-        assert E._field_abstract_hits(phrase), f"{shot_id} fixture no longer caught: {phrase}"
-
-
-def test_auto_repair_field_scoped_two_attempts_then_success(monkeypatch):
-    import cb_llm
-    calls = []
-    def fake_structured(system, user, schema, label=""):
-        calls.append(label)
-        # attempt 1 returns text that is STILL abstract; attempt 2 returns clean direction
-        if len([c for c in calls if c.startswith("repair_")]) == 1:
-            return E._FieldRepair(text="He sells the moment as his specialty, chest out.")
-        return E._FieldRepair(text="Fuzzby pushes his chest forward and holds a fixed smile "
-                                     "while Zenny watches without moving.")
-    monkeypatch.setattr(cb_llm, "structured", fake_structured)
-    d = _clean_design()
-    d.shots[0].performanceAssignment = ("Fuzzby wobbles upward, "
-                                         "selling pressure as his specialty.")
-    before = {f: repr(getattr(d.shots[0], f)) for f in ("purpose", "camera", "durationSec",
-                                                          "prohibited", "openingPose")}
-    log, esc, final = E.auto_repair_abstract_directions(d, BEATS, CFG)
-    assert len(log) == 2 and esc == []                        # attempt 1 rejected, attempt 2 passed
-    assert "REJECTED" in log[0]["validationResult"] and "PASSED" in log[1]["validationResult"]
-    assert log[0]["original"].endswith("as his specialty.")   # original recorded, never silent
-    assert log[1]["model"] and log[1]["promptVersion"] == E.REPAIR_PROMPT_VERSION
-    assert "specialty" not in d.shots[0].performanceAssignment
-    for f, v in before.items():                               # protected fields untouched
-        assert repr(getattr(d.shots[0], f)) == v
-    assert not [i for i in final["issues"] if i["code"] == "ABSTRACT_DIRECTION"]
-
-
-def test_auto_repair_escalates_after_two_failed_attempts(monkeypatch):
-    import cb_llm
-    monkeypatch.setattr(cb_llm, "structured", lambda *a, **k: E._FieldRepair(
-        text="He still mistakes her look as permission."))    # abstract every time
-    d = _clean_design()
-    original = "Fuzzby mistakes the attention as permission for another stunt."
-    d.shots[0].performanceAssignment = original
-    log, esc, final = E.auto_repair_abstract_directions(d, BEATS, CFG)
-    assert len(log) == E.REPAIR_MAX_ATTEMPTS and len(esc) == 1
-    assert d.shots[0].performanceAssignment == original       # never ships a half-repair
-    assert not final["passed"]                                # honest red until a human decides
+        d = _clean_design()
+        d.shots[0].performanceAssignment = f"Fuzzby wobbles upward, {phrase}."
+        assert "ABSTRACT_DIRECTION" in _codes(E.validate_scene_design(d, BEATS, CFG)), \
+            f"{shot_id} fixture no longer caught: {phrase}"
 
 
 def test_slot_maps_render_vs_keyframe():

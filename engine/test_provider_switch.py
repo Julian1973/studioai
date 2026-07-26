@@ -56,10 +56,29 @@ class _FakeAnthropic:
     def __init__(self, sink): self.messages = _Messages(sink)
 
 
-def test_openai_is_still_the_default_so_nothing_changed_for_anyone():
-    """The switch adds a choice; it must not silently make one."""
-    assert cb_llm.DIRECTOR_PROVIDER == "openai"
-    assert cb_llm.REVIEW_PROVIDER == ""          # unset = same as the author, as before
+def test_the_casting_is_claude_authors_gpt_reviews():
+    """THE CASTING (2026-07-26), set on evidence rather than preference.
+
+    The same script was broken down by each provider and read blind by five independent
+    reviewers, in five separate applications, with no knowledge of one another. All five
+    preferred the Anthropic breakdown on craft — including one judging against its own
+    house, which is hard to explain as style affinity.
+
+    But the reason for the SPLIT is that the two fail differently, measured: 18 NEED
+    lines written as obligations the character ought to meet on one side, 4 unfalsifiable
+    audience-effect claims and 2 off-screen images on the other. The failure mode of the
+    weaker AUTHOR is the right temperament for a CRITIC.
+
+    And the part that holds whichever way the craft argument lands: the gate asked to
+    actively attempt to FAIL the work must not be the model that wrote it. A critic
+    sharing the author's blind spots is the one pattern it cannot see. If these two ever
+    drift back to the same provider, that guarantee is silently gone — which is what this
+    test exists to catch.
+    """
+    assert cb_llm.DIRECTOR_PROVIDER == "anthropic"
+    assert cb_llm.REVIEW_PROVIDER == "openai"
+    assert cb_llm.REVIEW_PROVIDER != cb_llm.DIRECTOR_PROVIDER, (
+        "the adversarial gate is reviewing work its own model authored")
 
 
 def test_anthropic_path_forces_the_schema_and_returns_a_validated_model(monkeypatch):

@@ -61,8 +61,24 @@ MAX_OUTPUT_TOKENS = 32000
 # weak critic — it shares the blind spots that produced the work. Pointing the adversarial
 # gate at a different provider than the authoring gates is better practice whichever way
 # the A/B lands.
-DIRECTOR_PROVIDER = os.environ.get("CB_DIRECTOR_PROVIDER", "openai").strip().lower()
-REVIEW_PROVIDER = os.environ.get("CB_REVIEW_PROVIDER", "").strip().lower()  # "" = same as director
+# THE CASTING, DECIDED ON EVIDENCE (2026-07-26). Both defaults changed together, and the
+# reason is not "one model is better" — it is that the two fail DIFFERENTLY, measured on
+# the same script broken down by each and read blind by five independent reviewers in five
+# separate applications with no knowledge of one another.
+#   AUTHORING -> anthropic. All five preferred it on craft; one of them was judging against
+#     its own house, which is hard to explain as style affinity. Its measured weakness is
+#     unfalsifiable audience-effect claims and off-screen images — both now addressed in
+#     the charge itself, before a word is written.
+#   REVIEW -> openai. Its measured weakness as an AUTHOR is exactly the temperament a
+#     CRITIC wants: 18 NEED lines written as obligations the character ought to meet, and
+#     the only one of the two that cited a checkable event index at all. A reviewer that
+#     reaches for the lesson is well placed to catch a beat that has drifted into one.
+# And the point that holds whichever way the craft argument lands: until now the gate asked
+# to ACTIVELY ATTEMPT to fail the work was the same model that had just written nine gates
+# of it. A critic sharing the author's blind spots is the one pattern it cannot see.
+# Override either with CB_DIRECTOR_PROVIDER / CB_REVIEW_PROVIDER.
+DIRECTOR_PROVIDER = os.environ.get("CB_DIRECTOR_PROVIDER", "anthropic").strip().lower()
+REVIEW_PROVIDER = os.environ.get("CB_REVIEW_PROVIDER", "openai").strip().lower()  # "" = same as director
 ANTHROPIC_MODEL = os.environ.get("CB_ANTHROPIC_MODEL", "claude-opus-5")
 VALID_PROVIDERS = ("openai", "anthropic")
 if DIRECTOR_PROVIDER not in VALID_PROVIDERS:

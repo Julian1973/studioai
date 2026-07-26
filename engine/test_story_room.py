@@ -157,3 +157,51 @@ def test_the_show_bible_is_not_truncated():
     assert len(full) < 40000, (
         "the bible has outgrown the 40,000 backstop in _mind — raise it, and do not let "
         "canon be cut to fit a number again")
+
+
+def test_every_beatsplit_field_the_room_authors_actually_survives_to_disk():
+    """AUTHORED, THEN DISCARDED (2026-07-26, found on the first real fire).
+
+    cb_intake builds each beat as a hand-enumerated dict. A new BeatSplit field is
+    therefore authored by the room, enforced by the schema (boundaryReason is required
+    with min_length=1 — the model literally cannot omit it), and then silently dropped
+    on the way to disk unless someone remembers to add one line.
+
+    The first real run proved it: 43/43 beats came back rich on storyBeat, want, need,
+    kidRead, adultRead and emotionalIntent — and 0/43 on boundaryReason. The Studio's
+    intake review already rendered the field, so it showed blank for every beat, and
+    nothing anywhere said why. The room did its job; the serializer ate it.
+
+    This asserts the two sides agree, so the next field added to BeatSplit cannot be
+    lost the same way.
+    """
+    import inspect
+    import cb_departments as D
+    import cb_intake
+
+    src = inspect.getsource(cb_intake)
+    start = src.find("beats_out.append({")
+    assert start != -1, "cb_intake no longer builds beats this way — re-point this test"
+    block = src[start:src.find("})", start)]
+
+    # firstEventIndex is deliberately absent: it is consumed to compute each beat's own
+    # event range and is meaningless once that range exists. Everything else must survive.
+    structural = {"firstEventIndex"}
+    for field in D.BeatSplit.model_fields:
+        if field in structural:
+            continue
+        assert f'"{field}"' in block, (
+            f"BeatSplit authors {field!r} and cb_intake never writes it to disk — the "
+            f"room's work is being discarded at serialization")
+
+
+def test_the_intake_log_reaches_the_studio_live():
+    """The Studio streams this subprocess's stdout to show the live step. Python block-
+    buffers a pipe, so without flush the whole 200s run displayed 'Starting…' and the
+    log arrived only at exit — a progress indicator that is wrong for the entire job.
+    """
+    import re
+    src = open("cb_intake.py", encoding="utf-8").read()
+    bad = [l.strip() for l in src.splitlines()
+           if re.match(r"\s*print\(", l) and "flush" not in l]
+    assert not bad, f"unflushed print() in the streamed intake path: {bad[:3]}"

@@ -415,6 +415,14 @@ def prepare_intake(episode="Ep1", log=print):
             "location": sc.get("location", ""),
             "time": sc.get("time", ""),
             "characters": cast_by_scene.get(str(scene_num), []),
+            # AUTHORED, THEN DISCARDED (2026-07-26, found on the first real fire). This
+            # dict is hand-enumerated, so a new BeatSplit field is authored by the room,
+            # validated by the schema (boundaryReason is required, min_length=1 — the
+            # model cannot omit it) and then silently dropped here unless someone
+            # remembers to add a line. The first real run came back 43/43 on every other
+            # field and 0/43 on this one. Studio's own intake review already renders it,
+            # so it displayed blank for every beat with nothing to say why.
+            "boundaryReason": b.boundaryReason,
             "storyBeat": b.storyBeat, "want": b.want, "need": b.need,
             "kidRead": b.kidRead, "adultRead": b.adultRead,
             "emotionalIntent": b.emotionalIntent,
@@ -539,9 +547,9 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
     ep = sys.argv[2] if len(sys.argv) > 2 else "Ep1"
     if cmd == "status":
-        print(json.dumps(intake_status(ep), indent=1, ensure_ascii=False))
+        print(json.dumps(intake_status(ep), indent=1, ensure_ascii=False), flush=True)
     elif cmd == "scenes":
-        print(json.dumps(scene_roster(ep), indent=1, ensure_ascii=False))
+        print(json.dumps(scene_roster(ep), indent=1, ensure_ascii=False), flush=True)
     elif cmd == "run":
         prepare_intake(ep)
     elif cmd == "decide":
@@ -549,5 +557,5 @@ if __name__ == "__main__":
         note_arg = sys.argv[4] if len(sys.argv) > 4 else ""
         decide_intake(ep, verdict_arg, note=note_arg)
     else:
-        print(__doc__)
+        print(__doc__, flush=True)
         sys.exit(1)

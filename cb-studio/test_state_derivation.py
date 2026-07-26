@@ -62,10 +62,14 @@ const document = {{
   querySelectorAll: () => [],
   querySelector: () => null,
 }};
-const window = {{}};
+// 2026-07-26: `addEventListener` on window and `pushState` on history are REQUIRED stubs now,
+// not optional politeness — app.html registers a real popstate handler at top level (the fix
+// for "I can't go back") and pushes a history entry per navigation. A stub missing either
+// makes the whole script fail to load here, which would look like a derivation bug.
+const window = {{ addEventListener: () => {{}}, removeEventListener: () => {{}} }};
 const localStorage = {{ getItem: () => null, setItem: () => {{}} }};
 const sessionStorage = {{ getItem: () => null, setItem: () => {{}} }};
-const history = {{ replaceState: () => {{}} }};
+const history = {{ replaceState: () => {{}}, pushState: () => {{}} }};
 const location = {{ hash:'', search:'', pathname:'/', href:'http://x/' }};
 function fetch(){{ return Promise.resolve({{ json: () => Promise.resolve({{}}), text: () => Promise.resolve('') }}); }}
 {script}

@@ -189,7 +189,6 @@ img.zoom:hover{filter:brightness(1.08)}
 .wtop-crumb{color:var(--muted);font-size:13px;flex:1 1 auto}
 .sceneselect{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font:inherit;font-size:13px;max-width:340px}
 
-.pstate{font-size:10.5px;font-weight:600;margin-top:3px}
 .jobbanner{background:var(--infobg);border:1px solid var(--info);border-radius:10px;padding:10px 15px;font-size:13px;color:var(--info);margin-bottom:18px}
 
 /* ── THE GLOBAL STATUS BAR (2026-07-20, Julian — "I want to see a clear action and
@@ -237,16 +236,6 @@ img.zoom:hover{filter:brightness(1.08)}
 .wcol-artefact{background:var(--surface);border-radius:14px;padding:22px;min-height:340px}
 .wcol-decision{background:var(--surface);border-radius:14px;padding:20px;position:sticky;top:16px}
 .locked-msg{color:var(--hint);text-align:center;padding:60px 20px;font-size:14px}
-
-.wtree-empty{color:var(--hint);font-size:12.5px}
-.wtree-beat{margin-bottom:12px}
-.wtree-beat-id{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.wtree-shot{padding:7px 10px;border-radius:8px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:background .1s;display:flex;flex-direction:column;gap:2px}
-.wtree-shot:hover{background:var(--surface2)}
-.wtree-shot.cur{background:var(--honeybg);color:var(--honey);font-weight:600}
-.wtree-shot.dim{color:var(--hint);cursor:default}
-.wtree-shot.dim:hover{background:transparent}
-.wtree-shot-state{font-size:10.5px;color:var(--hint);font-weight:400}
 
 .artefact-center{display:flex;flex-direction:column;align-items:center;justify-content:center}
 .artefact-center{width:100%}
@@ -377,42 +366,8 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
   .wcol-artefact{order:1}
   .wcol-decision{position:static;order:2}
 }
-.proom{max-width:1180px;margin:0 auto}
-.prail{display:flex;align-items:stretch;gap:0;margin:4px 0 22px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
-.pstage{flex:1;min-width:118px;text-align:center;padding:14px 8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
-.pstage:hover:not(.locked){border-color:var(--honey)}
-.pstage.active{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg)}
-.pstage.locked{opacity:.42;cursor:not-allowed}
-.pstage.done{border-color:var(--ok)}
-.pstage.rejected{border-color:var(--danger)}
-.pconn{align-self:center;flex:0 0 26px;height:2px;background:var(--line)}
-.pconn.fill{background:var(--ok)}
-.pglyph{font-size:19px;line-height:1}
-.pname{font-size:12px;font-weight:700;margin-top:6px;color:var(--ink)}
-.pph{font-size:10px;letter-spacing:.03em;text-transform:uppercase;margin-top:2px}
-.pstagehead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.pstagehead h1{margin:0}
-.ppanel{border:1px solid var(--line);border-radius:16px;padding:22px 24px;background:var(--surface);margin-bottom:16px}
 .pmedia{width:100%;max-height:520px;border-radius:12px;background:#000;display:block;margin:0 auto}
 .pmedia.img{object-fit:contain}
-.pshotnav{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.pshotnav .cnt{font-size:13px;color:var(--muted);font-weight:600}
-/* THE PRODUCTION WORKFLOW STEPPER (2026-07-19) — one shot's own ordered pipe: Cinematography
-   → Voice → Animation Director → Final Prompt → Generate, each labelled with whose
-   jurisdiction it falls under, the current step highlighted, future steps visibly inert. */
-.pwtrack{display:flex;align-items:stretch;gap:0;margin-bottom:18px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface2)}
-.pwstep{display:flex;flex-direction:column;gap:2px;padding:4px 12px;border-radius:8px;min-width:112px}
-.pwstep-dot{font-size:13px;font-weight:800}
-.pwstep-label{font-size:12px;font-weight:700}
-.pwstep-role{font-size:10px;color:var(--hint)}
-.pwstep-done .pwstep-dot,.pwstep-done .pwstep-label{color:var(--ok)}
-.pwstep-current{background:var(--honeybg);box-shadow:0 0 0 1.5px var(--honey) inset}
-.pwstep-current .pwstep-dot,.pwstep-current .pwstep-label{color:var(--honey)}
-.pwstep-ready .pwstep-dot,.pwstep-ready .pwstep-label{color:var(--muted)}
-.pwstep-locked{opacity:.45}
-.pwstep-locked .pwstep-dot,.pwstep-locked .pwstep-label{color:var(--hint)}
-.pwstep-skip{opacity:.35}
-.pwstep-arrow{align-self:center;color:var(--hint);font-size:14px;padding:0 2px}
 /* ══ THE SHOT RUNNER (2026-07-23, Julian: "a hybrid of the old pipeline as they was easier
    to work with" + "the UX UI to be premium") — one vertical production board per shot.
    Extends the existing dark-neutral token system: layered surface tones + hairline borders
@@ -562,6 +517,29 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .ppconn{flex:0 0 26px;height:2px;background:var(--line)}
 .ppconn.fill{background:var(--ok)}
 .fstrip{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+/* BEAT GROUPING IN THE STRIP (2026-07-26). Each beat is one column of the same horizontal
+   strip: its header above, its own shots' cards below. No new layout system and no new
+   dependency — the strip stays the same flex row it always was, so horizontal scrolling,
+   card sizing and the selected-card ring are all untouched. */
+.fstrip-beats{gap:0;align-items:stretch}
+.fbeat{flex:0 0 auto;display:flex;flex-direction:column;gap:9px;padding:2px 16px 0 0;margin-right:16px;border-right:1px dashed var(--line)}
+.fbeat:last-child{border-right:none;margin-right:0;padding-right:2px}
+/* width:0 + min-width:100% — the header contributes NOTHING to the column's intrinsic width,
+   so the beat's own cards decide how wide the column is and the header then fills it. Without
+   this a long whatChanges line would stretch a one-shot beat's column to twice its cards. */
+.fbeat-head{width:0;min-width:100%;overflow:hidden}
+.fbeat-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.fbeat-id{font-family:'Display Slab',Georgia,serif;font-size:15px;letter-spacing:-.2px;color:var(--ink)}
+.fbeat-pos{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--hint)}
+.fbeat-what{font-size:11.5px;line-height:1.45;color:var(--muted);margin-top:3px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fbeat-cards{display:flex;gap:12px;align-items:flex-start}
+.fbeat-slot{display:flex;flex-direction:column}
+.fbeat-also{font-size:10px;color:var(--hint);margin-top:4px;text-align:center}
+.fbeat-empty{flex:0 0 200px;display:flex;align-items:center;justify-content:center;text-align:center;
+  min-height:120px;border:1px dashed var(--line);border-radius:12px;color:var(--hint);font-size:11.5px;padding:10px}
+.fbeat.cur .fbeat-id{color:var(--honey)}
+.fbeat.cur .fbeat-pos{color:var(--honey)}
 .fcard{flex:0 0 200px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .15s ease}
 .fcard:hover{transform:translateY(-1px);border-color:var(--honey)}
 .fcard.sel{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg);background:var(--surface2)}
@@ -796,13 +774,38 @@ function _navHash(){
     // remembered shotId no longer exists.
     const shots=(SH_PKG&&SH_PKG.shots)||[];
     if(shots[PSHOT_I]) p.set('shot',shots[PSHOT_I].shotId);
+    // THE PIPE NODE (2026-07-26, with the history below): PPIPE is what the scene screen is
+    // actually showing — storyboard / scenelook / shots / assembly. It was the one piece of
+    // in-scene position the hash never carried, so clicking along the pipe changed the screen
+    // and left the URL identical: nothing to refresh back to, and — once Back works — nothing
+    // for Back to return to. PSTAGE alone can't stand in for it: pFocusPipe sets PPIPE without
+    // touching PSTAGE, and PIPE_OF_STAGE is many-to-one.
+    if(PPIPE) p.set('pipe',PPIPE);
   }
   return p.toString();
 }
+// ── REAL HISTORY (2026-07-26, Julian: "I CAN'T GO BACK") ────────────────────────────────
+// Measured before this change: pushState × 0, popstate × 0, replaceState × 1. Every screen in
+// the Studio replaced the same single history entry, so the browser Back button, Cmd-[ and the
+// trackpad back-swipe all did the only thing left to them — LEAVE the Studio entirely. The
+// context was already in the URL and already restorable (_restoreFromHash has existed since
+// 2026-07-17); nothing was pushing it, so the restorer had nothing to be asked to restore.
+// Now: one history entry per navigation that genuinely CHANGES where you are, and a popstate
+// handler that walks it back through the same restorer a refresh already uses. Still navigation
+// context only — never production data, which is re-fetched fresh on every render.
+let _NAV_HASH_LAST=(location.hash||"").replace(/^#/,"");
+let _NAV_RESTORING=false;    // set while _restoreFromHash rebuilds — its own renders must not push
+let _NAV_SEQ=0;              // guards against interleaved restores from rapid Back presses
 function _syncHash(){
   try{
     const h=_navHash();
-    history.replaceState(null,'',h?('#'+h):(location.pathname+location.search));
+    const url=h?('#'+h):(location.pathname+location.search);
+    // PUSH only for a REAL move. A re-render at the same place (a poll tick, a lazy department
+    // record landing, a job-status refresh) must never grow the history — otherwise Back stops
+    // meaning "the previous screen" and starts meaning "one of the last forty repaints".
+    if(h!==_NAV_HASH_LAST && !_NAV_RESTORING) history.pushState({navHash:h},'',url);
+    else history.replaceState({navHash:h},'',url);
+    _NAV_HASH_LAST=h;
     // "REMEMBER YOUR PLACE" (2026-07-19, Julian's directive): the hash alone only survives
     // a same-tab refresh — closing the tab, restarting the browser, or opening the bare
     // URL/a bookmark loses it, dropping back to Projects every time. Mirroring it into
@@ -813,35 +816,65 @@ function _syncHash(){
   }catch(e){}
 }
 // _restoreFromHash(raw) — restores from an explicit hash string when given (the localStorage
-// fallback below passes its saved value here), else from the real location.hash.
+// fallback below and the popstate handler both pass their value here), else from the real
+// location.hash.
 async function _restoreFromHash(raw){
   if(raw==null) raw=(location.hash||"").replace(/^#/,"");
   if(!raw) return false;
   const params=new URLSearchParams(raw);
   const pid=params.get('p');
   if(!pid) return false;
-  try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
-  const proj=PROJECTS.find(x=>x.id===pid);
-  if(!proj) return false;
-  CURRENT_PROJECT=proj; CUR=null; SHOTS=[]; page="episodes";
-  await boot();
-  const pg=params.get('pg')||'episodes', epNum=params.get('ep');
-  if(pg=='episodes'||!epNum) return true;   // boot() already rendered + synced the hash
-  await openEpisode(epNum);
-  const scId=params.get('sc');
-  if(pg=='sceneboard'||!scId) return true;
-  openScene(scId);
-  await pLoadAll();
-  const shotId=params.get('shot');
-  if(shotId){
-    const i=pShots().findIndex(s=>s.shotId==shotId);
-    if(i>=0) PSHOT_I=i;
+  const mySeq=++_NAV_SEQ;
+  _NAV_RESTORING=true;
+  try{
+    try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
+    if(mySeq!==_NAV_SEQ) return true;      // a later Back press has taken over
+    const proj=PROJECTS.find(x=>x.id===pid);
+    if(!proj) return false;
+    CURRENT_PROJECT=proj; CUR=null; SHOTS=[]; page="episodes";
+    await boot();
+    const pg=params.get('pg')||'episodes', epNum=params.get('ep');
+    if(pg=='episodes'||!epNum) return true;   // boot() already rendered + synced the hash
+    if(mySeq!==_NAV_SEQ) return true;
+    await openEpisode(epNum);
+    const scId=params.get('sc');
+    if(pg=='sceneboard'||!scId) return true;
+    if(mySeq!==_NAV_SEQ) return true;
+    openScene(scId);
+    await pLoadAll();
+    if(mySeq!==_NAV_SEQ) return true;
+    const shotId=params.get('shot');
+    if(shotId){
+      const i=pShots().findIndex(s=>s.shotId==shotId);
+      if(i>=0) PSHOT_I=i;
+    }
+    const st=params.get('st');
+    if(st){ PSTAGE=null; pFocusStage(st); }
+    // AFTER pFocusStage, never before: pFocusStage derives PPIPE from PIPE_OF_STAGE, so
+    // setting the remembered pipe first would be silently overwritten.
+    const pipe=params.get('pipe');
+    if(pipe) PPIPE=pipe;
+    renderControl();
+    return true;
+  } finally {
+    if(mySeq===_NAV_SEQ) _NAV_RESTORING=false;
   }
-  const st=params.get('st');
-  if(st){ PSTAGE=null; pFocusStage(st); }
-  renderControl();
-  return true;
 }
+// THE BACK BUTTON, WIRED TO THE APP INSTEAD OF THE DOOR. Back/forward now replay the same
+// restore a refresh performs. An entry with no project in it (the bare URL the first push
+// came from) correctly lands on Projects rather than doing nothing.
+window.addEventListener("popstate",function(){
+  const h=(location.hash||"").replace(/^#/,"");
+  if(h===_NAV_HASH_LAST) return;
+  _NAV_HASH_LAST=h;
+  if(!h||!new URLSearchParams(h).get('p')){
+    _NAV_SEQ++; _NAV_RESTORING=false;
+    CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects";
+    bootProjects();
+    return;
+  }
+  _restoreFromHash(h).then(function(ok){ if(!ok) bootProjects(); });
+});
 // REVIEWER IDENTITY (2026-07-08, Production Management panel finding — "no reviewer/role concept in code
 // at all"): a persisted name sent with every sign-off, so who-approved-what is recorded before a second
 // reviewer ever joins. Not a real auth system — just an identity string on the lock.
@@ -1923,7 +1956,7 @@ function deriveSceneState(bundle,scriptApproved,scene){
     // PER-SHOT GATING (2026-07-18 correction): "Keyframes"/"Voice"/"Animation"/"Continuity"
     // are now PRODUCTION SUMMARIES, never scene-wide locks — the whole stage stays reachable
     // the instant the storyboard is approved; each shot's own generate/approve action is
-    // gated by shotPipelineState alone (see renderShotStage), never by every other shot in
+    // gated by shotPipelineState alone (see renderShotRunner), never by every other shot in
     // the scene. A shot never needs to wait for every OTHER shot in the scene — only its own
     // immediately-preceding shot, exactly as the production line actually depends.
     const lineageOk=!!(bundle.media&&bundle.media.lineage&&bundle.media.lineage.current);
@@ -2386,9 +2419,10 @@ function pFocusedStage(){ return (PSTAGE&&pStatus(PSTAGE)!="locked")?PSTAGE:pAct
 // the scene reads as ONE horizontal pipe — STORYBOARD → SCENE LOOK → SHOTS → ASSEMBLY —
 // with a filmstrip of every shot (promoted or draft) under SHOTS and the Shot Runner
 // expanding INLINE beneath the strip. Two levels only: pipe+filmstrip (glance), runner
-// (work). The old 8-tab rail (renderStageRail) and 3-column workspace are superseded as
-// the scene's primary navigation; pFocusStage now maps every legacy stage id onto its
-// pipe node so every existing caller keeps working.
+// (work). The old 8-tab rail and 3-column workspace were superseded as the scene's primary
+// navigation; pFocusStage maps every legacy stage id onto its pipe node so every existing
+// caller keeps working. (renderStageRail, the rail itself, was deleted 2026-07-26 — dead
+// since this pass, and nothing had called it for three days.)
 let PPIPE=null, PASM="final";
 const PIPE_OF_STAGE={script:"storyboard",storyboard:"storyboard",scenelook:"scenelook",
   keyframe:"shots",voice:"shots",animation:"shots",continuity:"assembly",final:"assembly"};
@@ -2471,13 +2505,49 @@ async function shPromoteShot(sid){
     renderWorkspaceBody();
   }catch(e){showToast("Can't reach the studio server. Reload (Cmd-Shift-R).",false);}
 }
+// ── THE BEATS, BACK IN THE VIEW WHERE HE WORKS (2026-07-26, the assessment's C5) ─────────
+// sceneContentsHTML was built on 2026-07-22 in direct answer to Julian's own note — "i thought
+// it was strange we had the opening shot then the storm" — and was orphaned the next day when
+// filmstripHTML replaced the three-column workspace with a flat strip over shAllShotOrder().
+// The strip has been beat-blind ever since: "S1.SH4 of 10" with no view of which of the
+// scene's four beats it serves. This is that grouping, restored into the strip that is
+// actually on screen. The beats and the shot→beat filing are the storyboard's own
+// (PSB.beats / PSB.shots[].beatIds) — never a structure invented here.
+//
+// ONE DIFFERENCE FROM THE ORIGINAL, DELIBERATE: sceneContentsHTML pushed a shot into EVERY
+// beat its beatIds named, so a shot spanning two beats appeared twice. In a filmstrip that
+// would put the same card — the same thumbnail, the same Continue button — on screen twice,
+// which reads as two shots. Here a shot is filed under the FIRST beat it names, and any other
+// beat it serves is stated on the card instead.
+function shBeatGroups(order){
+  const beats=(PSB&&PSB.beats)||[];
+  if(!beats.length) return null;
+  const draftById={}; (((PSB&&PSB.shots)||[])).forEach(s=>{ if(s.shotId) draftById[s.shotId]=s; });
+  const canonById={}; pShots().forEach(s=>{ canonById[s.shotId]=s; });
+  const groups=beats.map(b=>({beat:b,items:[]}));
+  const byId={}; groups.forEach(g=>{ byId[g.beat.beatId]=g; });
+  const unfiled=[];
+  order.forEach(o=>{
+    // the storyboard's own filing first; a canonical shot the storyboard somehow lacks falls
+    // back to its own beatCode — the same two-source rule the orphaned original used.
+    let ids=((draftById[o.shotId]||{}).beatIds)||[];
+    if(!ids.length){ const c=canonById[o.shotId]; if(c&&c.beatCode) ids=[c.beatCode]; }
+    const known=ids.filter(x=>byId[x]);
+    if(known.length){ byId[known[0]].items.push({o:o,alsoIn:known.slice(1)}); }
+    else unfiled.push({o:o,alsoIn:[]});
+  });
+  return {groups:groups,unfiled:unfiled};
+}
 function filmstripHTML(){
   const order=shAllShotOrder();
   if(!order.length) return `<div class="runempty">No shots designed yet — approve the storyboard first.</div>`;
-  const cards=order.map(o=>{
+  const cardOf={};
+  let selShotId=null;
+  order.forEach(o=>{
     const sid=o.shotId, tok=shTok(sid);
     const promoted=o.idx!=null;
     const sel=promoted?(SH_DRAFT_SEL==null&&PSHOT_I==o.idx):(SH_DRAFT_SEL==sid);
+    if(sel) selShotId=sid;
     let thumb=null,dots=[],statusWord="",statusColor="--hint",cta="",inheritBadge=false;
     if(promoted){
       const shots=pShots(), led=shLedger(sid), m=shMedia(sid);
@@ -2522,14 +2592,51 @@ function filmstripHTML(){
       cta=`<button class="btn fcard-cta" onclick="event.stopPropagation();shGoToDraft('${tok}')">Promote to production</button>`;
     }
     const open=promoted?`shGoToShot(${o.idx})`:`shGoToDraft('${tok}')`;
-    return `<div class="fcard ${sel?"sel":""} ${promoted?"":"draft"}" onclick="${open}">
+    cardOf[sid]=`<div class="fcard ${sel?"sel":""} ${promoted?"":"draft"}" onclick="${open}">
       <div class="fcard-thumb">${thumb?`<img src="${BASE}${thumb}?v=${MEDIA_V}"/>${inheritBadge?`<span class="fcard-inh">inherits</span>`:""}`:`<div class="fcard-slate">${promoted?"no frame yet":"draft"}</div>`}</div>
       <div class="fcard-id">${_esc(sid)}</div>
       <div class="fcard-dots">${dots.map(d=>`<i class="${d}"></i>`).join("")}</div>
       <div class="fcard-status" style="color:var(${statusColor})">${_esc(statusWord)}</div>
       <div class="fcard-ctarow">${cta}</div>
     </div>`;
-  }).join("");
+  });
+  // THE STRIP, GROUPED BY BEAT. Falls back to the flat strip — byte-identical to what this
+  // function produced before — whenever the storyboard carries no beats to group by, so a
+  // scene without a beat structure is never worse off than it was.
+  const bg=shBeatGroups(order);
+  let strip;
+  if(!bg){
+    strip=`<div class="fstrip">${order.map(o=>cardOf[o.shotId]||"").join("")}</div>`;
+  } else {
+    const nb=bg.groups.length;
+    const groupHTML=bg.groups.map((g,i)=>{
+      const b=g.beat;
+      const cur=g.items.some(it=>it.o.shotId===selShotId);
+      const what=b.whatChanges||b.sourceScript||"";
+      const cards=g.items.length
+        ? g.items.map(it=>`<div class="fbeat-slot">${cardOf[it.o.shotId]||""}`
+            +(it.alsoIn.length?`<div class="fbeat-also">also serves ${_esc(it.alsoIn.join(", "))}</div>`:"")
+            +`</div>`).join("")
+        : `<div class="fbeat-empty">No shot designed for this beat yet.</div>`;
+      return `<div class="fbeat${cur?" cur":""}">
+        <div class="fbeat-head" title="${_esc(what)}">
+          <div class="fbeat-line"><span class="fbeat-id">${_esc(b.beatId)}</span>
+            <span class="fbeat-pos">Beat ${i+1} of ${nb} · ${g.items.length} shot${g.items.length==1?"":"s"}</span></div>
+          ${what?`<div class="fbeat-what">${_esc(what)}</div>`:""}
+        </div>
+        <div class="fbeat-cards">${cards}</div>
+      </div>`;
+    }).join("");
+    // A shot the storyboard files under no known beat is SHOWN, never dropped — the same
+    // "never silently lose one" rule the orphaned original held itself to.
+    const orphanHTML=bg.unfiled.length?`<div class="fbeat">
+        <div class="fbeat-head"><div class="fbeat-line"><span class="fbeat-id">—</span>
+          <span class="fbeat-pos">Not filed under a beat · ${bg.unfiled.length} shot${bg.unfiled.length==1?"":"s"}</span></div>
+          <div class="fbeat-what">These shots name no beat this storyboard knows about.</div></div>
+        <div class="fbeat-cards">${bg.unfiled.map(it=>cardOf[it.o.shotId]||"").join("")}</div>
+      </div>`:"";
+    strip=`<div class="fstrip fstrip-beats">${groupHTML}${orphanHTML}</div>`;
+  }
   // THE SCENE'S OWN QC BAND (2026-07-26). Every finding the package's validation produced is
   // reachable from one place, above the strip: the per-shot ones are also shown on their own
   // shot, and any finding whose path names no shot (a scene-level check) would otherwise have
@@ -2548,7 +2655,7 @@ function filmstripHTML(){
         ${orphan.length?`<div class="dec-caption" style="padding:0 13px 11px">${orphan.length} of these name no individual shot and are shown here only.</div>`:""}
       </details>`
     :"";
-  return qcScene+`<div class="fstrip">${cards}</div>`;
+  return qcScene+strip;
 }
 function renderDraftShotRunner(sid){
   const host=document.getElementById("runnerhost"); if(!host)return;
@@ -2595,22 +2702,6 @@ function pSceneName(){
   return (r&&r.name)||(SH_PKG&&SH_PKG.sceneName)||(PSB&&PSB.scene&&PSB.scene.location)||("Scene "+SH_SC);
 }
 
-function renderStageRail(){
-  const stages=currentStages();
-  const focused=pFocusedStage();
-  const parts=[];
-  PSTAGES.forEach((s,i)=>{
-    const st=stages[s.id].state;
-    const cls=[st=="locked"?"locked":"", st=="approved"?"done":"", (st=="rejected"||st=="blocked")?"rejected":"",
-               focused==s.id?"active":""].filter(Boolean).join(" ");
-    parts.push(`<div class="pstage ${cls}" onclick="pFocusStage('${s.id}')" title="${_esc(STATE_LABEL[st])}">
-      <div class="pglyph">${STATE_GLYPH[st]}</div><div class="pname">${i+1}. ${_esc(s.name)}</div>
-      <div class="pstate" style="color:var(${STATE_COLOR[st]})">${_esc(STATE_LABEL[st])}</div>
-    </div>`);
-    if(i<PSTAGES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
-  });
-  return `<div class="prail">${parts.join("")}</div>`;
-}
 
 async function renderControl(){
   const view=document.getElementById("view");
@@ -2651,62 +2742,6 @@ function renderJobBanner(){
     return;
   }
   el.innerHTML="";
-}
-
-// ── Scene contents (left column) — beats and their shots, story order, always visible ──
-// each shot's own pipeline label — the ONE place shotPipelineState is asked "what should
-// this shot's row say," reused by the beat-grouped and flat layouts below alike.
-function sceneContentsShotLabel(shots,i){
-  const mediaMap=(SH_MEDIA&&SH_MEDIA.shots)||{};
-  const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
-  try{ return shotPipelineState(shots,i,shLedger,mediaMap,lineageOk,shSceneLookOk(),shReassess,shDeptFor).label; }catch(e){ return ""; }
-}
-function sceneContentsHTML(){
-  const beats=(PSB&&PSB.beats)||[];
-  const shots=pShots();
-  const draftShots=(PSB&&PSB.shots)||[];
-  if(!beats.length&&!shots.length&&!draftShots.length) return `<div class="wtree-empty">Nothing designed yet.</div>`;
-  if(beats.length){
-    // THE FULL-STRUCTURE FIX (2026-07-22, Julian — "i want the software to represent the
-    // correct structure... i thought it was strange we had the opening shot then the
-    // storm"): the 2026-07-19 fix above only ever grouped the CANONICAL package's own
-    // promoted shots (pShots()) — with just S1.SH1 promoted so far, every other
-    // already-drafted shot (S1.SH2/SH3, also POLLEN-CHAOS; S1.SH4/SH5, STORM-INTRUDES)
-    // was silently invisible, making the scene look like it jumped straight from the
-    // opening shot to the storm with nothing between — exactly the confusion this was
-    // built to fix. The storyboard's own shot list (PSB.shots, carrying beatIds) is the
-    // real, full authored structure — every drafted shot, promoted or not — and is now
-    // the source of truth for what a beat's row shows; the canonical package is only
-    // consulted per-shot, by shotId, for its real production-state label once promoted.
-    const canonicalIdx={};
-    shots.forEach((s,i)=>{ canonicalIdx[s.shotId]=i; });
-    const shotsByBeat={};
-    const filed=new Set();
-    draftShots.forEach(s=>{
-      (s.beatIds||[]).forEach(b=>{(shotsByBeat[b]=shotsByBeat[b]||[]).push(s); filed.add(s.shotId);});
-    });
-    // a canonical shot with no matching draft entry shouldn't happen, but never silently
-    // drop it — file it under its own beatCode if the storyboard itself somehow lacks it
-    shots.forEach(s=>{
-      if(filed.has(s.shotId)) return;
-      const b=s.beatCode; if(!b) return;
-      (shotsByBeat[b]=shotsByBeat[b]||[]).push(s);
-    });
-    return beats.map(b=>{
-      const bshots=shotsByBeat[b.beatId]||[];
-      return `<div class="wtree-beat"><div class="wtree-beat-id">${_esc(b.beatId)}</div>
-        ${bshots.length?bshots.map(ds=>{
-          const i=canonicalIdx[ds.shotId];
-          const promoted=(i!==undefined);
-          const label=promoted?sceneContentsShotLabel(shots,i):"Draft — not yet promoted";
-          return promoted
-            ? `<div class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="shGoToShot(${i})"><span>${_esc(ds.shotId)}</span><span class="wtree-shot-state">${_esc(label)}</span></div>`
-            : `<div class="wtree-shot dim"><span>${_esc(ds.shotId)}</span><span class="wtree-shot-state">${_esc(label)}</span></div>`;
-        }).join(""):`<div class="wtree-shot dim">no shot yet</div>`}
-      </div>`;
-    }).join("");
-  }
-  return shots.map((s,i)=>`<div class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="shGoToShot(${i})"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></div>`).join("");
 }
 
 async function renderWorkspaceBody(){
@@ -3613,7 +3648,7 @@ function productionWorkflowStatus(shotId){
   // tell Julian a shot he already finished still needs generating.
   // THE "FINAL PROMPT" STEP, MERGED INTO "ANIMATION DIRECTOR" (2026-07-22, Julian, live —
   // "i dont see the point having this as well" on the AD review card): these were always
-  // ONE screen underneath (renderShotStage's "animation" mode already shows the department
+  // ONE screen underneath (the Direction row already shows the department
   // panel + seedancePanelHTML + structurePanelHTML together, unconditionally) — the rail
   // was the only place that counted them as two separate gated moments, which read as
   // redundant, no-value friction rather than a real second decision. Folded to one step;
@@ -3633,23 +3668,6 @@ function productionWorkflowStatus(shotId){
   for(const st of steps){ st.reachable=priorDone; if(st.applicable) priorDone=priorDone&&st.done; }
   const current=steps.find(st=>st.applicable&&!st.done)||steps[steps.length-1];
   return {steps, current, complete:steps.every(st=>!st.applicable||st.done)};
-}
-function productionWorkflowHTML(shotId){
-  const wf=productionWorkflowStatus(shotId); if(!wf) return "";
-  const rows=wf.steps.map((st,i)=>{
-    if(!st.applicable){
-      return `<div class="pwstep pwstep-skip"><span class="pwstep-dot">—</span><span class="pwstep-label">${i+1}. ${_esc(st.label)}</span><span class="pwstep-role">not needed for this shot</span></div>`;
-    }
-    const isCurrent=(st===wf.current);
-    const dot=st.done?"✓":(isCurrent?"●":"○");
-    const cls=st.done?"pwstep-done":(isCurrent?"pwstep-current":(st.reachable?"pwstep-ready":"pwstep-locked"));
-    const clickable=(st.reachable||st.done);
-    const onclick=clickable?` onclick="pFocusStage('${st.pstage}')"`:"";
-    return `<div class="pwstep ${cls}"${onclick} style="cursor:${clickable?"pointer":"default"}">
-      <span class="pwstep-dot">${dot}</span><span class="pwstep-label">${i+1}. ${_esc(st.label)}</span>
-      <span class="pwstep-role">${_esc(st.role)}</span></div>`;
-  }).join(`<span class="pwstep-arrow">→</span>`);
-  return `<div class="pwtrack">${rows}</div>`;
 }
 // AUTO-ADVANCE: switching shots (Previous/Next, sidebar click, or the URL restore) jumps
 // straight to that shot's own CURRENT actionable step — "the workflow activates ... based
@@ -3671,11 +3689,25 @@ function shGoToShot(i){
 // ONE vertical production board per shot — every stage a card row on a status spine, in
 // production order (Storyboard → Opening frame → Special references → Voice → Direction →
 // Prompt → Fire → Review), each with a status chip, a one-line human summary, inline media
-// and its primary action(s). Replaces the 3-tab renderShotStage presentation below (kept,
-// unreferenced, as the dated rollback reference for this same-day reorganisation) — every
-// underlying helper, endpoint and gate is REUSED unchanged; this is presentation, never a
-// new spend path. Completed rows collapse to a slim line (click to expand); the current
+// and its primary action(s). Replaced the 3-tab renderShotStage presentation, which was kept
+// unreferenced as a rollback reference until 2026-07-26 and then DELETED — every underlying
+// helper, endpoint and gate was REUSED unchanged; this is presentation, never a new spend
+// path. Completed rows collapse to a slim line (click to expand); the current
 // actionable row is expanded and lifted.
+// ── UN-APPROVING IS FREE AND REVERSIBLE, SO IT IS NEVER HIDDEN BEHIND A PAID ACTION
+// (2026-07-26, the UX assessment's C2 — "THE UN-APPROVE CONTROLS EXIST AND ARE UNREACHABLE").
+// cb_render.unapprove_keyframe / unapprove_voice / unapprove_shot have existed since
+// 2026-07-25 and have been reachable at the HTTP boundary that whole time (serve.py's
+// SHOT_CMDS) — but their only buttons lived inside renderShotStage, called from nowhere since
+// 2026-07-23 and deleted in this same pass once these three were harvested out of it. So from an approved opening frame the only route backwards was to
+// spend money on a new candidate. Each of these three returns its artefact to AWAITING YOUR
+// DECISION: nothing is deleted, nothing is archived, no provider is called, and the previous
+// approval stays on the record as history. The command names are the engine's own; the copy
+// says what the engine's own docstring says it does.
+function unapproveBtn(cmd,tok,what,back){
+  return `<button class="btn ghost" title="${_esc(back)} Free — nothing is generated, deleted or archived, and the approval stays on the record."`
+    +` onclick="shRun('${cmd}','${tok}')">↩ Un-approve ${_esc(what)} — free</button>`;
+}
 const RUN_CHIP={done:["✓","--ok"],ready:["●","--honey"],blocked:["▬","--deep"],
                 pending:["○","--hint"],generating:["●","--info"]};
 // One row state -> one st-chip key, so STATE_COLOR/STATE_BG's already-correct token choices
@@ -4294,10 +4326,16 @@ function renderShotRunner(){
       acts=[`<button class="btn" onclick="shRun('approve-keyframe','${tok}')">Approve this frame</button>`,
             `<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">Reject with reason</button>`];
     } else if(pst.kf=="approved"){
-      st="done";lab="Approved";sum="Opening frame approved."+(pst.sub?" ⚠ "+pst.sub:"");
+      // A SETTLED ROW COLLAPSES, so its summary is the only thing on screen until you open
+      // it — and "approved" alone reads as final. It is not: un-approving costs nothing.
+      st="done";lab="Approved";sum="Opening frame approved — un-approving it is free if you want it back."+(pst.sub?" ⚠ "+pst.sub:"");
       body=(m.keyframe?`<div class="runmedia"><img class="zoom" data-cap="${_esc(s.shotId)} · keyframe" src="${BASE}${m.keyframe}?v=${MEDIA_V}"/></div>`:"")+
-        `<div class="dec-caption" style="margin-top:12px">Replace this opening frame (the current approval is untouched until a new candidate is itself approved):</div>`;
-      acts=[genBtn,uploadBtn,libBtn,prevBtn].filter(Boolean);
+        `<div class="dec-caption" style="margin-top:12px">Change your mind about this frame — un-approving is free and puts it back in front of you; replacing it costs whatever the new source costs (only Generate spends):</div>`;
+      // UN-APPROVE FIRST, and deliberately BEFORE the four replace-sources: the cheapest way
+      // out of an approved frame must be the first one you read, not the fifth.
+      acts=[unapproveBtn('unapprove-keyframe',tok,'this frame',
+              'Puts the approved frame back to awaiting your decision — re-approve it, reject it with a reason, or replace it.'),
+            genBtn,uploadBtn,libBtn,prevBtn].filter(Boolean);
     } else if(pst.kf=="rejected"){
       st="blocked";lab="Rejected";sum="Rejected — choose a source to try again.";
       body=`<div class="runempty">The last candidate was rejected (reason in its History). Pick any source — selection is never approval.</div>`;
@@ -4435,9 +4473,16 @@ function renderShotRunner(){
           acts=[`<button class="btn" onclick="openDisclosureModal('voice-regen',{shotId:'${tok}'})">🎙 Generate voice for this shot</button>`];
         }
       }
-      else if(voApproved){ st="done";lab="Approved";sum="Take approved"+(isMaster?" — padded to the 15s master":"")+".";
+      else if(voApproved){ st="done";lab="Approved";
+        sum="Take approved"+(isMaster?" — padded to the 15s master":"")+" — un-approving it is free if you want it back.";
         body=player+rowMore(dlg+padCtl+voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"The locked lines, the 15s master, and history",tok+"|voice");
-        acts=[`<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Reject this take (allow refiring)</button>`]; }
+        // TWO WAYS BACK, AND THEY ARE NOT THE SAME (2026-07-26). Un-approve clears the
+        // approval and leaves the take on disk to listen to again — free, no reason needed,
+        // no regeneration. Reject ARCHIVES the take, demands a written reason, and the only
+        // route on from there is a fresh paid ElevenLabs call. The cheap one goes first.
+        acts=[unapproveBtn('unapprove-voice',tok,'this take',
+                'Clears the approval; the take stays on disk, back to awaiting your ear.'),
+              `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Reject this take (archives it — refiring is a paid call)</button>`]; }
       else { st="ready";lab="Your call";sum="The take you're approving plays below — one click approves direction + take together.";
         body=(player||`<div class="runmsg err">The ledger records a take but its file could not be resolved — check the Voice job log.</div>`)
           +runDecideBlock("The locked lines this take performs",dlg)
@@ -4692,7 +4737,13 @@ function renderShotRunner(){
         +(takeUrl?`<div class="runmedia" style="margin-top:10px"><video controls src="${BASE}${takeUrl}?v=${MEDIA_V}"></video></div>`:"")
         +(m.finalFrame?`<div class="dec-caption" style="margin-top:12px">Harvested final frame — the next shot's continuity anchor:</div>
            <div class="runmedia" style="max-width:340px"><img class="zoom" data-cap="${_esc(s.shotId)} · harvested final frame" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/></div>`:"");
-      acts=[`<button class="btn ghost" title="${rejectTitle}" onclick="shRun('reject','${tok}')">✗ Reject with note (allow re-fire)${rejectCost}</button>`];
+      // THE FREE WAY BACK, AHEAD OF THE PAID ONE (2026-07-26). Un-approve returns this take
+      // to being candidate 1 of 1 awaiting your decision — the file and its harvested final
+      // frame stay exactly where they are. Reject is the one that reopens the shot into
+      // another paid batch, which is why it is the one carrying a figure.
+      acts=[unapproveBtn('unapprove-shot',tok,'this take',
+              'Returns the take to candidate 1 of 1, awaiting your decision. The clip and its harvested final frame stay on disk. Any LATER shot already fired off this frame is not rewound — un-approve those separately.'),
+            `<button class="btn ghost" title="${rejectTitle}" onclick="shRun('reject','${tok}')">✗ Reject with note (allow re-fire)${rejectCost}</button>`];
     } else if(m.clip||m.finalFrame){
       st="done";lab="Rendered";
       sum="Rendered media exists on disk but the ledger doesn't mark this shot approved — trust the ledger.";
@@ -4726,7 +4777,12 @@ function renderShotRunner(){
       fire:"Fired — the approved take in Review is the result."};
     rows.forEach(r=>{
       if(r.id=="review"){
-        r.actions=[`<button class="btn ghost" title="${rejectTitle}" onclick="shRun('reject','${tok}')">✗ Reject this take (reopens the shot)${rejectCost}</button>`];
+        // A LANDED SHOT STILL HAS A FREE WAY BACK (2026-07-26). The terminality pass blanks
+        // every row's controls by design — but it must not blank the only reversible one, or
+        // an approved shot's single remaining exit is the paid one.
+        r.actions=[unapproveBtn('unapprove-shot',tok,'this take',
+                     'Returns the take to candidate 1 of 1, awaiting your decision. The clip and its harvested final frame stay on disk. Any LATER shot already fired off this frame is not rewound — un-approve those separately.'),
+                   `<button class="btn ghost" title="${rejectTitle}" onclick="shRun('reject','${tok}')">✗ Reject this take (reopens the shot)${rejectCost}</button>`];
         return;
       }
       r.state="done"; r.stateLabel="Done"; r.actions=[];
@@ -4919,372 +4975,6 @@ function renderShotRunner(){
     if(isOpener&&m.keyframe) attachDepartmentPanel(dec,"review-keyframe",s.shotId,curP=="keyframe");
     if((m.candidates||[]).length||m.clip||m.finalFrame) attachDepartmentPanel(dec,"review-animation",s.shotId,curP=="animation");
   }
-}
-// SUPERSEDED 2026-07-23 by renderShotRunner above (Julian's hybrid-UX directive) — kept,
-// unreferenced, as the same-day rollback reference for the presentation reorganisation.
-// Every helper it uses is still live (the runner reuses them); only this top-level view
-// function is no longer called from renderWorkspaceBody.
-function renderShotStage(mode){
-  const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
-  SH_RSEQ++; const mySeq=SH_RSEQ;
-  const shots=pShots();
-  if(!shots.length){
-    art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">Nothing designed yet for this scene.</div></div>`;
-    dec.innerHTML=decisionShell(PSTAGES.find(p=>p.id==(mode=="keyframe"?"keyframe":mode)).name,"—",
-      [`<div class="dec-caption">Approve the Story & Direction department's storyboard to hand it directly into production.</div>`],"");
-    return;
-  }
-  if(PSHOT_I>=shots.length)PSHOT_I=shots.length-1;
-  const s=shots[PSHOT_I], m=shMedia(s.shotId), led=shLedger(s.shotId), tok=shTok(s.shotId);
-  const nav=`<div class="pshotnav">
-    <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==0?"disabled":""} onclick="shGoToShot(PSHOT_I-1)">← Previous</button>
-    <span class="cnt">${_esc(s.shotId)} · Shot ${PSHOT_I+1} of ${shots.length}</span>
-    <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==shots.length-1?"disabled":""} onclick="shGoToShot(PSHOT_I+1)">Next →</button>
-  </div>
-  <div class="pshotadvance" style="margin:8px 0 4px">
-    <button class="btn" style="padding:7px 16px" onclick="shRun('advance','${tok}')" title="Resolves lineage, department direction, keyframe generation, voice and redesign eligibility on its own — stops only at a real creative moment: the storyboard, the keyframe, or the clip.">▶ Continue</button>
-    <span style="font-size:11px;color:var(--hint);margin-left:8px">Handles every mechanical step for this shot automatically — only stops when it's genuinely your call.</span>
-  </div>
-  ${productionWorkflowHTML(s.shotId)}`;
-  // AUTO-RUN THE FREE STRUCTURE CHECK (2026-07-19; re-keyed 2026-07-22 when the standalone
-  // "Final Prompt" rail step was merged into "Animation Director" — see the steps= comment
-  // above): the compiled prompt is fetched automatically the instant the workflow reaches
-  // the animation phase — free, zero provider call — never a manual button someone has to
-  // remember exists. Keyed off pstage=="animation" (covers both the "animation" and
-  // "generate" step ids, since both share that pstage) rather than a since-retired step id.
-  // Never re-fetches if already cached/loading.
-  {
-    const wfAuto=productionWorkflowStatus(s.shotId);
-    if(wfAuto && wfAuto.current && wfAuto.current.pstage=="animation" && !SH_STRUCTURE_CACHE[s.shotId]){
-      shRunStructureCheck(s.shotId);
-    }
-  }
-  let body="", decActions=[], decVersion="—", decHistory="";
-  if(mode=="keyframe"){
-    // PER-SHOT STATE (2026-07-18 correction): shotPipelineState is the ONE place a shot's own
-    // keyframe readiness is computed. The old code drove this whole screen off the SCENE-WIDE
-    // aggregate (currentStages().keyframe) — meaning one shot's own awaiting/approved candidate
-    // leaked into every OTHER shot's screen in the same scene (approve/reject buttons pointing
-    // at the wrong image, "No keyframe yet" hidden behind a sibling's "Awaiting your decision").
-    // (2026-07-18 correction): package/storyboard LINEAGE no longer blocks this screen at all
-    // (an unrelated shot's edit must never block every shot's keyframe screen — see
-    // shotPipelineState's own direct-input-lineage correction). The only genuinely scene-wide
-    // block left is the production package not existing yet at all.
-    const sceneKf=currentStages().keyframe||{state:"ready"};
-    const genBtn=(label)=>`<button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${tok}',refs:(${JSON.stringify((s.referenceSlots||[]).length||3)})})">${label}</button>`;
-    if(sceneKf.state=="blocked"){
-      body=`<div class="artefact-empty"><div style="color:var(--muted)">Preparing the approved storyboard for production</div></div>`;
-      decVersion="Blocked — not yet compiled";
-      decActions=[`<div class="histrow"><span class="stbadge" style="color:var(--warn);background:var(--warnbg)">Production handover</span>
-          <div class="histnote">${_esc(sceneKf.sub||"The production package has not been compiled yet.")}</div></div>`];
-    } else {
-      const mediaMap=(SH_MEDIA&&SH_MEDIA.shots)||{};
-      const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
-      const pst=shotPipelineState(shots,PSHOT_I,shLedger,mediaMap,lineageOk,shSceneLookOk(),shReassess,shDeptFor);
-      if(pst.sceneLookGated){
-        // THE SCENE LOOK GATE (2026-07-18): held here even for a shot whose own keyframe was
-        // already approved before this gate existed (S1.SH1) — the approval fact stays on
-        // record (still shown below in History if rejected later), only its downstream
-        // readiness is paused pending Scene Look's own approval.
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
-        decVersion=pst.label;
-      } else if(pst.kf=="waitingPrev"){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
-      } else if(!pst.needsKeyframe){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">Opening frame inherited — no generation and no cost. Chains from the previous shot's own approved final frame, no separate keyframe.</div></div>`;
-      } else if(pst.kf=="awaiting"){
-        // SELECTION DOES NOT EQUAL APPROVAL (2026-07-18, Julian's source-choice directive):
-        // this is the ONE approval area for every opening-frame source alike — generated,
-        // uploaded, library-picked or carried from the previous shot's final frame. "Choose
-        // another" (not "Reject") names what the button actually does regardless of source:
-        // clears this candidate back to the four-choice screen. Rejection still requires the
-        // same plain-language reason server-side (shRun's own reject-keyframe prompt).
-        const src=(led.keyframeCandidate||{}).source||"generated";
-        const srcLabel={generated:"generated",uploaded:"uploaded",library:"chosen from Library",
-                         previousFinalFrame:"carried from the previous shot's final frame"}[src]||src;
-        // THE CANDIDATE'S OWN IMAGE, NEVER m.keyframe (2026-07-20 fix): m.keyframe always
-        // prefers an existing APPROVAL over a newer candidate (correct for every other
-        // screen that just wants "the current best frame") — this is the one screen where
-        // that would silently show the OLD approved image while a genuinely different new
-        // candidate is what actually needs a decision. Falls back to m.keyframe only if
-        // the server hasn't been restarted yet to expose keyframeCandidateUrl.
-        const candSrc=m.keyframeCandidateUrl||m.keyframe;
-        body=`<img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · keyframe candidate (${_esc(srcLabel)})" src="${BASE}${candSrc}?v=${MEDIA_V}"/>
-          ${pst.sub?`<div class="dec-caption" style="margin-top:8px;color:var(--warn)">${_esc(pst.sub)}</div>`:""}`;
-        decVersion="Awaiting your decision — "+srcLabel;
-        decActions=[`<button class="btn" onclick="shRun('approve-keyframe','${tok}')">Apply</button>`,
-          `<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">Reject</button>`];
-      } else if(pst.kf=="approved"){
-        // REPLACING AN APPROVED OPENING FRAME gets the SAME four-way source choice as a
-        // first-time decision (2026-07-18) — a new candidate here is exactly as much "choose
-        // its source" as the first one; it just happens to also have something to replace.
-        // The current approved image is completely untouched until whatever's chosen next is
-        // itself approved (the two-phase lifecycle, unchanged).
-        body=`<img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · keyframe" src="${BASE}${m.keyframe}?v=${MEDIA_V}"/>
-          ${pst.sub?`<div class="dec-caption" style="margin-top:8px;color:var(--warn)">${_esc(pst.sub)}</div>`:""}
-          <div class="dec-caption" style="margin-top:16px">Replace this opening frame:</div>${shOpeningFrameChoices(tok,s)}`;
-        decVersion="Approved";
-        decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-          `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-keyframe','${tok}')">↩ Un-approve — redo this phase</button>`];
-      } else if(pst.kf=="rejected"){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected — see History below. Ready to regenerate.</div></div>${shOpeningFrameChoices(tok,s)}`;
-        decVersion="Rejected";
-        decActions=[];
-      } else {   // "ready" — THE OPENING-FRAME SOURCE CHOICE
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>${shOpeningFrameChoices(tok,s)}`;
-        decActions=[];
-      }
-      // THE KEYFRAME WORKING-PROMPT CONTROL (2026-07-19, contained inside this existing
-      // Cinematography stage): shown alongside, never replacing, whatever action is above —
-      // editing/saving here never calls cb_gen, only openDisclosureModal's own real generate/
-      // regenerate call ever spends. Relay shots have no keyframe prompt of their own
-      // (keyframePanelHTML itself renders nothing for that case).
-      if(!SH_KEYFRAME_CACHE[s.shotId]){
-        shLoadKeyframeWork(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
-      }
-      body += keyframePanelHTML(s.shotId, SH_KEYFRAME_CACHE[s.shotId]);
-    }
-    // HISTORY IS UNCONDITIONAL AND INDEPENDENT OF THE CURRENT STATE (2026-07-17): a past
-    // rejection stays visible here even once a new candidate is awaiting/approved — it is
-    // never the thing driving the artefact pane above, only a record. Thumbnail sourced from
-    // the ARCHIVED file (never the live path) — proof the rejected image lives only here.
-    if(led.keyframeRejected){
-      const rf=led.keyframeRejected.rejectedFile;
-      decHistory=`<div class="histrow">${rf?`<img class="zoom" data-cap="${_esc(s.shotId)} · rejected keyframe (History only)" src="${BASE}/engine/${_esc(rf)}?v=${MEDIA_V}" style="width:64px;height:36px;object-fit:cover;border-radius:5px;flex:none"/>`:""}
-        <span class="stbadge" style="color:var(--danger);background:var(--dangerbg)">rejected</span>
-        <span class="histmeta">${_esc((led.keyframeRejected.rejectedAt||"").slice(0,16))}</span>
-        <div class="histnote">${_esc(led.keyframeRejected.reason||"")}</div></div>`;
-    }
-  } else if(mode=="voice"){
-    const dlg=(s.dialogueLines||[]).map(l=>`<div class="dlgline"><b>${_esc(l.speaker)}:</b> "${_esc(l.exactText)}"${l.delivery?`<div class="dlgdelivery">${_esc(l.delivery)}</div>`:""}</div>`).join("");
-    if((s.dialogueLines||[]).length){
-      body=`${dlg}${m.vo?`<audio controls src="${BASE}${m.vo}?v=${MEDIA_V}" style="width:100%;margin-top:16px"></audio>`:""}`;
-      const talky=shots.filter(x=>(x.dialogueLines||[]).length).length;
-      const voApproved=!!(led.voiceApproval&&led.voiceApproval.approved);
-      // THE VOICE APPROVAL STEP (2026-07-19): once a take exists, this shot needs Julian's
-      // own explicit approve/reject before animation may anchor on it — the SAME "generated
-      // is not approved" discipline every other stage in this pipeline already holds. An
-      // approved take is never silently regenerated: the generate/regenerate action is
-      // hidden until it's rejected first (cb_render.voice_shot itself refuses this too).
-      if(!m.vo){
-        decVersion="Not generated";
-        decActions=[`<button class="btn" onclick="openDisclosureModal('voice',{talkyCount:${talky}})">🎙 Generate voice for this scene</button>`,
-          `<div class="dec-caption">All dialogue lines in the scene generate together.</div>`];
-      } else if(voApproved){
-        decVersion="Approved";
-        decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-          `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-voice','${tok}')">↩ Un-approve — redo this phase</button>`,
-          `<button class="btn ghost" style="margin-top:8px" onclick="shRun('reject-voice','${tok}')">Reject (allow refiring)</button>`];
-      } else {
-        decVersion="Awaiting your decision";
-        decActions=[`<button class="btn" onclick="shRun('approve-voice','${tok}')">Apply</button>`,
-          `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Reject</button>`,
-          `<button class="btn ghost" style="margin-top:8px" onclick="openDisclosureModal('voice-regen',{shotId:'${_esc(tok)}'})">Refire</button>`,
-          `<div class="dec-caption">Rebuilds just this shot's own take — always fires, whether or not the text has changed.</div>`];
-      }
-      if((led.voiceRejections||[]).length){
-        decHistory=led.voiceRejections.slice().reverse().map(r=>`<div class="histrow"><span class="stbadge" style="color:var(--danger);background:var(--dangerbg)">rejected</span>
-          <span class="histmeta">${_esc((r.rejectedAt||"").slice(0,16))}</span><div class="histnote">${_esc(r.reason||"")}</div></div>`).join("");
-      }
-      // THE VOICE WORKING-PROMPT CONTROL (2026-07-19, contained inside this existing Voice
-      // stage): shown alongside, never replacing, the generate/regenerate action above —
-      // editing/saving here never calls cb_gen, only the button above ever spends.
-      if(!SH_VOICE_CACHE[s.shotId]){
-        shLoadVoiceWork(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
-      }
-      body += voicePanelHTML(s.shotId, SH_VOICE_CACHE[s.shotId]);
-    } else {
-      body=`<div class="artefact-empty"><div style="color:var(--muted)">No dialogue in this shot.</div></div>`;
-    }
-  } else { // animation
-    const stLabel=led.status||"designed";
-    // THE KEYFRAME-VS-RENDER LAYOUT (2026-07-19, Julian: "keyframe image on the left and
-    // bigger, and then the candidates laid out on the right one under each other") —
-    // m.keyframe is the SAME resolved opening-frame image the Keyframe stage itself shows
-    // (generated, uploaded, library-chosen, or carried from the previous shot's own approved
-    // final frame for a relay shot — shotPipelineState's own inherited-frame path). kfPane is
-    // the left column only; each state below supplies its own right-column content and wraps
-    // both in the shared two-column shell — never a decision surface of its own, just context
-    // sitting next to whatever this shot produced.
-    const kfPane=m.keyframe?`<div style="flex:0 0 340px">
-        <div class="dec-caption" style="margin-bottom:6px">Animating from this opening frame:</div>
-        <img class="zoom" data-cap="${_esc(s.shotId)} · opening frame this shot animates from" src="${BASE}${m.keyframe}?v=${MEDIA_V}" style="width:100%;border-radius:10px;display:block"/>
-      </div>`:"";
-    const twoCol=(right)=>kfPane?`<div style="display:flex;gap:20px;align-items:flex-start;width:100%">${kfPane}<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">${right}</div></div>`:right;
-    if(stLabel=="candidates-pending"){
-      const cands=m.candidates||[];
-      body=twoCol(cands.map(c=>`<div class="cand"><video controls src="${BASE}${c.url}?v=${MEDIA_V}"></video>
-        <div class="cand-pick"><b>C${c.n}</b><button class="btn" style="margin:0;padding:6px 14px" onclick="shRun('approve','${tok}',{candidate:${c.n}})">Apply</button></div></div>`).join(""));
-      decVersion=cands.length+" candidate"+(cands.length==1?"":"s")+" awaiting a decision";
-      decActions=[`<select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>
-        <button class="btn ghost" onclick="shRejectBatch('${tok}')">✗ Reject batch</button>`];
-    } else if(stLabel=="approved"){
-      // THE APPROVED TAKE, FROM THE LEDGER (2026-07-26). This branch used to key off
-      // (m.clip||m.finalFrame) — MEDIA EXISTENCE, not approval — and play m.clip, a filename
-      // with no writer. Two consequences, both live: a genuinely approved shot showed a STILL
-      // (the harvested final frame) where the take should play, and any shot with a leftover
-      // final_frame.png was labelled "Approved take" with a live un-approve button regardless
-      // of what the ledger said. Both sides now read the ledger: the STATUS picks the branch,
-      // approvedTake picks what plays — the same rule the Review row already follows.
-      // Nothing is hidden: a rendered-but-unapproved shot still surfaces in the Review row's
-      // own "media exists but the ledger doesn't mark this approved" branch.
-      const takeUrl=shAbsUrl(led.approvedTake)||m.clip;
-      body=twoCol(takeUrl?`<video controls src="${BASE}${takeUrl}?v=${MEDIA_V}" style="width:100%;border-radius:10px"></video>`
-        :(m.finalFrame?`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}" style="width:100%"/>`
-                      :`<div class="artefact-empty"><div style="color:var(--muted)">Approved — but the take file named on the ledger is not on disk.</div></div>`));
-      decVersion="Approved take";
-      decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
-        `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-shot','${tok}')">↩ Un-approve — redo this phase</button>`];
-      if(PSHOT_I<shots.length-1){
-        // THE NEXT-SHOT HANDOFF, MADE VISIBLE (2026-07-19): confirms, rather than just
-        // asserting, that approving this take is what lets the NEXT shot inherit its final
-        // frame as an opening-frame source (shOpeningFrameChoices' own "previousFinalFrame"
-        // choice, Opening Frame Source Choice, task #391) — never a second control here, just
-        // a pointer to where that choice actually lives. Appended to decActions (always
-        // visible), never decHistory — the rejections block below unconditionally OVERWRITES
-        // decHistory, which would silently swallow this note on any shot that also has a
-        // rejection in its past.
-        decActions.push(`<div class="dec-caption" style="margin-top:8px">Once approved, this take's own final frame becomes an available opening-frame source for ${_esc(shots[PSHOT_I+1].shotId)} (Keyframe stage → "carried from the previous shot's final frame"), if that shot needs one.</div>`);
-      }
-    } else if(stLabel=="model-limited"){
-      // THE BOUNDED REDESIGN-RECOVERY ACTION (2026-07-20): shown only here, only when the
-      // shot is genuinely model-limited — never a generic reset/override anywhere else.
-      if(!SH_REDESIGN_CACHE[s.shotId]){
-        shLoadRedesignEligibility(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
-      }
-      body=`<div class="artefact-empty">
-        <div style="color:var(--danger)">The attempt limit for this shot was reached — it needs human redesign before firing again.</div>
-        ${redesignPanelHTML(s.shotId, SH_REDESIGN_CACHE[s.shotId])}
-      </div>`;
-      decVersion="Blocked"; decActions=[];
-    } else if(led.batch && led.batch.status=="generating"){
-      // THE STRANDED-BATCH FIX (2026-07-19): a candidate can fail AFTER the spend token is
-      // already consumed (single-use, spent the moment the batch was created) — e.g. the
-      // provider-upload bug this same session just fixed in cb_gen.py. The backend's own
-      // resume path (fire_shot's "RESUME PATH") correctly requires the batch's OWN token,
-      // still sitting right here on led.batch.token — but until this fix, this render
-      // function never looked for an in-flight batch at all, so it fell through to "Ready to
-      // generate" and showed the FREE next-command button, which the backend then refused
-      // ("has an in-flight batch; resuming requires its original spend token") with no
-      // resume control anywhere on screen. shResumeBatch() (below) already existed and
-      // already does the right thing — it was simply never called from here.
-      const b=led.batch, done=(b.done||[]).length, failed=b.failed||[], expected=b.expected||0;
-      // THE STALE-ERROR-DURING-A-LIVE-RESUME FIX (2026-07-19, same day): failed[] is a
-      // PERSISTED HISTORY (protection 6 — "every failure is persisted, nothing deleted"),
-      // never cleared just because a resume is now running — so the instant Julian clicked
-      // Resume, this branch kept showing the OLD failure in red with no indication a fresh
-      // attempt was already in flight, reading as if the resume had done nothing. jobFor
-      // ("shot",...) isn't shot-scoped (job records carry no shotId — only "shot:<cmd>" +
-      // scene — a real, small pre-existing gap, not introduced here), but within one scene
-      // the Studio only ever fires one shot job at a time, so it's a safe, honest proxy for
-      // "is a shot job for THIS scene running right now."
-      const liveJob=jobFor("shot",SH_SC);
-      body=twoCol(`<div class="artefact-empty"><div style="color:var(--muted)">
-        ${liveJob?`<div style="color:var(--good,#7fd88f);margin-bottom:10px"><span class="pulse">●</span> Resuming now — generating the missing candidate(s)…</div>`:""}
-        Batch ${liveJob?"":"stalled "}for ${_esc(s.shotId)}: ${done}/${expected} candidate${expected==1?"":"s"} done.
-        ${failed.length?`<div style="margin-top:10px;color:${liveJob?"var(--muted)":"var(--danger)"}"><i>${liveJob?"Previous attempt — before this resume":"Last attempt"}:</i><br>${failed.map(f=>
-          `Candidate ${_esc(String(f.candidate))} failed: ${_esc(String(f.error||"").slice(0,200))}`).join("<br>")}</div>`:""}
-        </div></div>`);
-      decVersion=liveJob?`Resuming — ${done}/${expected} done so far`:`Batch stalled — ${done}/${expected} done, ${failed.length} failed`;
-      decActions=liveJob?[]:[`<button class="btn" onclick="shResumeBatch('${_esc(b.token)}','${_esc(s.shotId)}')">↻ Resume batch (same spend token, missing candidates only)</button>`];
-    } else {
-      // PER-SHOT GATE (2026-07-18 correction): Animation unlocks INDEPENDENTLY for each
-      // shot — an approved keyframe/inherited frame + this shot's own required voice +
-      // current lineage — never gated on every other shot in the scene finishing first.
-      const mediaMap=(SH_MEDIA&&SH_MEDIA.shots)||{};
-      const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
-      const pst=shotPipelineState(shots,PSHOT_I,shLedger,mediaMap,lineageOk,shSceneLookOk(),shReassess,shDeptFor);
-      if(!pst.readyToAnimate){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
-        decVersion=pst.label; decActions=[];
-      } else {
-        body=twoCol(`<div class="artefact-empty"><div style="color:var(--muted)">No candidates fired yet for ${_esc(s.shotId)}.</div></div>`);
-        const nextLed=shNextLedger(), auth=(nextLed&&nextLed.pendingSpendAuth)||null;
-        decVersion="Ready to generate";
-        // THE PAID-GENERATION LOCK (Julian's directive, 2026-07-19, item 6 — THE CORE LAW
-        // this whole directive exists to enforce): this is the exact button the confirmed
-        // forensic bug fired through — five real Seedance candidates, $15.47, with the
-        // Animation Director never having run. Locked against the SAME animation readiness
-        // the department panel itself shows for this shot.
-        const animRec=SH_DEPT_CACHE[deptKey('animation',s.shotId)];
-        // THIS SHOT'S OWN REDESIGN-CYCLE CAP (2026-07-21, Julian — "I'm approving as I go,
-        // why do I keep hitting flags?"): a shot mid a redesign test cycle (after a rejected
-        // batch — the deliberate one-controlled-candidate-first economy) has a real, current
-        // ceiling below the global SH_CANDS preference's usual 4. Read directly off this
-        // shot's own ledger, capped into both the picker's own display AND the actual fire
-        // call — never rely on the human noticing a number that was always going to fail.
-        const shCap=(shLedger(s.shotId).redesignCycle||{}).candidateLimit||4;
-        // ONE BUTTON, NO COST REVIEW STEP (2026-07-21, Julian — "I dont want any cost flags
-        // in it, if I press render it renders"): a token sitting on the ledger from an
-        // in-flight disclosure is normally consumed automatically by _shPollTick the instant
-        // it appears (see that function), so this branch is a rare fallback (e.g. the token
-        // was issued in an earlier session before that auto-continue existed) — clicking it
-        // fires the actual batch directly, no modal, no second click. Otherwise the button
-        // fires the first hop exactly as before; the poll auto-completes the second.
-        decActions=[auth&&auth.token
-          ?deptLocksGeneration(`<button class="btn" onclick="shApproveSpendFire()">Generate animation candidates</button>`,
-              animRec&&animRec.readiness,"Locked — prepare & approve "+panelLabelForStage("animation")+" first")
-          // the picker only applies BEFORE a token exists — once a disclosure is issued the
-          // count is already sealed into that envelope (§5, THE SEAL); changing SH_CANDS here
-          // wouldn't touch the pending auth, so it's shown only on the free, pre-disclosure path
-          :candCountPickerHTML(shCap)+deptLocksGeneration(
-              `<button class="btn" onclick="shRun('next',null,{candidates:Math.min(SH_CANDS,${shCap})})">Generate animation candidates</button>`,
-              animRec&&animRec.readiness,"Locked — prepare & approve "+panelLabelForStage("animation")+" first")];
-      }
-    }
-    // THE ANIMATION WORKING PROMPT + THE FREE STRUCTURE CHECK (2026-07-19, contained inside
-    // this existing Animation stage) — 2026-07-19 FIX: this used to sit INSIDE the innermost
-    // "not yet fired" branch above, so the one place Julian actually needs it most — a shot
-    // sitting at candidates-pending, deciding whether to reject and re-fire — never showed
-    // it at all. Moved here, after the whole stLabel if/else chain, so it renders in EVERY
-    // animation-stage state (pending candidates, approved, generating, or not yet fired) —
-    // matching this block's own original comment, which already claimed "shown regardless
-    // of readiness" without actually being scoped that way. "Generate animation" stays
-    // completely separate with its own cost disclosure; nothing here spends anything —
-    // editing and saving a working prompt never calls cb_gen, only a later Reject+re-fire
-    // (or Generate) ever does, and that re-fire is what will pick up whatever's saved here
-    // as the working version.
-    // EXCLUDED for model-limited (2026-07-20, Julian: "I feel like we are miles away
-    // again" — reading a genuinely blocked, un-fireable shot's screen): a model-limited
-    // shot cannot fire at all until the redesign gate above is acknowledged, so a working-
-    // prompt editor and a "Check Seedance structure" button that only re-derives and
-    // re-prints the SAME "Animation Direction not approved" refusal the redesign panel
-    // already states (in different words, from a different check) added nothing but a
-    // second wall of red text under the first. The redesign panel's own blockers list is
-    // the single source of truth for why this shot is blocked; this pair reappears the
-    // moment the shot leaves model-limited (nothing deleted, just not shown twice).
-    if(stLabel!="model-limited"){
-      if(!SH_SEEDANCE_CACHE[s.shotId]){
-        shLoadSeedanceWork(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
-      }
-      body += seedancePanelHTML(s.shotId, SH_SEEDANCE_CACHE[s.shotId]);
-      body += structurePanelHTML(s.shotId, SH_STRUCTURE_CACHE[s.shotId]);
-    }
-    if((led.rejections||[]).length){
-      decHistory=led.rejections.slice().reverse().map(r=>`<div class="histrow"><span class="stbadge" style="color:var(--danger);background:var(--dangerbg)">rejected</span>
-        <span class="histmeta">${_esc((r.at||"").slice(0,16))} · ${_esc(r.category||"")}</span><div class="histnote">${_esc(r.correction||"")}</div></div>`).join("");
-    }
-  }
-  art.innerHTML=`${nav}<div class="artefact-center">${body}</div>`;
-  // 2026-07-17 correction: this shared tail used to show s.seedancePrompt (the VIDEO/motion
-  // brief, compile_shot_contract's output) unconditionally on EVERY mode — including
-  // Keyframes, where the actual compiled artefact cb_render.keyframe_shot() sends to the
-  // provider is s.keyframePrompt (compile_keyframe_prompt's output, a completely different,
-  // still-frame-only text). Branch by mode so "Technical details" always shows the real
-  // brief for THIS stage's own generation call, never a sibling stage's.
-  const techWords=mode=="keyframe"?s.keyframePromptWords:s.promptWords;
-  const techPrompt=mode=="keyframe"?s.keyframePrompt:s.seedancePrompt;
-  const techMeta=mode=="keyframe"
-    ?`${techWords?techWords+" words · ":""}opening frame · ${_esc(s.sourceType||"")}`
-    :`${techWords?techWords+" words · ":""}${_esc(s.durationSec||"")}s · ${_esc(s.sourceType||"")}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}`;
-  dec.innerHTML=decisionShell(PSTAGES.find(p=>p.id==mode).name, decVersion, decActions, decHistory)+
-    (techPrompt?`<details class="techdetails"><summary>Technical details</summary>
-      <div class="techmeta">${techMeta}</div>
-      <pre class="techpre">${_esc(techPrompt||"")}</pre></details>`:"");
-  attachDepartmentPanel(dec,{keyframe:"cinematography",voice:"voice",animation:"animation"}[mode],s.shotId,true);
-  if(mode=="keyframe"&&m.keyframe)attachDepartmentPanel(dec,"review-keyframe",s.shotId,true);
-  if(mode=="animation"&&((m.candidates||[]).length||m.clip||m.finalFrame))
-    attachDepartmentPanel(dec,"review-animation",s.shotId,true);
 }
 // NO COST-REVIEW STEP (2026-07-21, Julian — "I dont want any cost flags in it, if I press
 // render it renders"): this used to build a modal (title/cost rows) and wait for a second

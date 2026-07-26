@@ -2,6 +2,15 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "meadow-bloom",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite", "crystal-bears-fps", "--port", "5199", "--strictPort"
+      ],
+      "port": 5199,
+      "autoPort": false
+    },
+    {
       "name": "cb-studio",
       "runtimeExecutable": "python3",
       "runtimeArgs": [

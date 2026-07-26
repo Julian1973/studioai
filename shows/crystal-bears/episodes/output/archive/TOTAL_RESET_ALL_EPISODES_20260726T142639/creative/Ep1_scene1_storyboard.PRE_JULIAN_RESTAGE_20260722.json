@@ -1,0 +1,739 @@
+{
+  "episodeId": "Ep1",
+  "sceneNumber": "1",
+  "engineVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+  "canonVersion": "1.0",
+  "builtAt": "2026-07-18T22:06:43",
+  "vision": {
+    "episodeId": "Ep1",
+    "title": "The Adventure Begins",
+    "sourceScriptVersion": "acb9912d7476fcba9fbf1591fa01154b",
+    "canonVersion": "1.0",
+    "premise": "A nervous but determined young bear leaves home for the first time, loses his way in a storm, chooses to save a dolphin friend, and is welcomed into the Crystal Bears.",
+    "dramaticQuestion": "When Keen is separated from home and caught in a dangerous storm, will he trust his heart enough to act bravely and discover he is not alone?",
+    "theme": "Courage is not the absence of fear; it is choosing love and action while fear is still there.",
+    "externalJourney": "Keen departs by sailboat, befriends Squeaky, is thrown off course by a storm, follows a beacon to Crystal Cove, rescues Squeaky from a net, reaches shore, and receives his Aquamarine Crystal.",
+    "internalJourney": "Keen begins by trying to prove he can handle everything alone. Through fear, loss, and rescue, he learns that bravery includes accepting help, honoring family, and joining a wider circle of care.",
+    "relationshipChanges": "Keen and his Mum move from protected closeness into loving separation. Keen and Squeaky become mutual rescuers. Aida moves from watcher to guide. Fuzzby shifts from comic observer to awestruck admirer. The Crystal Bears become Keen’s new found family.",
+    "emotionalCurve": "Playful opening warmth gives way to soulful anticipation, then bittersweet farewell, comic uncertainty, storm panic, heroic urgency, relief, wonder, belonging, and finally lighthearted family comedy.",
+    "comedyCurve": "Fuzzby’s pollen chaos establishes the episode’s goofy engine; Keen’s overprepared sailing and map confusion add gentle self-deprecating comedy; storm danger pauses the jokes; Fuzzby’s awe and honey fixation restore levity after the emotional landing.",
+    "setupPayoffMap": "Aida’s vision of Keen pays off when she calmly identifies him in the storm. Keen’s repeated self-reassurance pays off when he centers himself underwater. His father’s wristbands, given as a symbol of never being alone, pay off as the vessel for the Aquamarine Crystal. Squeaky guiding Keen pays off when Keen saves Squeaky, then Squeaky carries Keen safely home. Fuzzby’s chaotic bravado pays off as sincere admiration and immediate friendship hunger.",
+    "visualMotifs": "Tall flowers and drifting pollen for comic innocence; pink rose-quartz glow for intuition and care; wristbands as legacy and connection; grey storm sheets against crystal light; aquamarine glow as courage made visible; the washed-clean cove as rebirth and homecoming.",
+    "sonicMotifs": "Fuzzby’s buzzing hums, soft crystal-bowl resonance, sailboat creaks, dolphin clicks and chirps, thunder and rain escalation, muffled underwater sound, crystal hums, and finally gentle shore waves with shared laughter.",
+    "climax": "Keen dives into the storm water without hesitation, fights the net while his wristbands glow, tears Squeaky free, is overwhelmed by the wave, and is carried back through the storm by the dolphin he saved.",
+    "resolution": "Aida names Keen’s heart-led courage, the Aquamarine Crystal settles into his father’s wristbands, the Bears embrace him, and Keen understands he has gained a family while remaining connected to home.",
+    "intendedFinalFeeling": "Safe, uplifted, and warmly excited: the audience should feel that Keen has truly arrived, that courage is tender as well as bold, and that future adventures will be funny, caring, and communal.",
+    "showrunnerJudgement": "",
+    "approvalState": "approved",
+    "provenance": {
+      "role": "director-intake",
+      "at": "2026-07-18T21:37:51",
+      "reviewedBy": "Julian"
+    }
+  },
+  "ambitionBrief": null,
+  "canonCompletionProposal": "Ep1_scene1_canon_completion_PROPOSED.json",
+  "directedOnEstablishedCanonOnly": true,
+  "treatments": [
+    {
+      "name": "Treatment 1 — Fuzzby’s Grand Parade Meets the Sky",
+      "audienceExperience": "The audience rides a tiny, breathless comedy engine through a rainforest that feels enormous at bee scale: flowers become obstacle courses, pollen becomes confetti, and Fuzzby’s self-importance keeps outrunning his steering. The fun is fast and physical until the distant rumble makes the whole space inhale. Kids laugh at the chaos; adults feel the first tonal stitch from play into danger without the scene becoming heavy too soon.",
+      "emotionalPointOfView": "The scene belongs to Fuzzby’s need to feel important, with Zenny as the fixed truth he keeps orbiting. Fuzzby wants every pollen task to prove he is an official, capable bee; he needs to accept that his blunders are still part of belonging. Zenny is not trying to puncture him cruelly — she is the calm measure of reality. When the storm intrudes, Fuzzby tries to absorb it into his performance, while Zenny’s stillness tells us the world has changed.",
+      "comicOrDramaticMechanism": "Primary comic mechanism: escalating overcommitment. Every attempt by Fuzzby to make pollen gathering look grand makes the pollen more uncontrollable, his flight more erratic, and the flowers more involved. Secondary mechanism: movement against stillness — his manic porpoising flight only becomes funny because Zenny remains composed and exact. The dramatic turn is the thunder: environmental participation stops being playful and becomes warning.",
+      "characterPerformanceStrategy": "Fuzzby performs pollen gathering like a ceremonial military operation that no one requested. His chest leads before his brain does; his wings commit before his eyes have checked the route. “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” is not a song at rest — it is exertion, self-hype, and panic disguised as productivity. “Nailed it.” is delivered after the body has plainly not nailed it; the tiny cover-up is the joke. “Do I look official?” is genuine hunger for status, not a wink. Zenny works with economical precision: one clean pollen motion, one look, one dry verdict. “Yes Fuzzby Officially nuts!” lands because she does not chase the laugh. After the rumble, Fuzzby’s hover betrays him first — a crooked dip — then he reclaims the moment with “…okay that sounded dramatic.” Zenny’s “A Storm’s coming.” is small, flat, and certain. Fuzzby’s “Good thing I work well under pressure.” is brave-sounding nonsense; his altitude should already be arguing with him.",
+      "visualGrammar": "The grammar is kinetic imbalance versus composed judgment. Fuzzby’s world is angled stems, near-miss petals, foreground pollen bursts, and frames that almost cannot contain him. Zenny’s world is level, clean, and readable. The scene should not become a habitual two-shot; when both are present, the composition states contrast, not coverage. The storm changes the grammar: vertical openness above the flowers begins to matter, and the cheerful rainforest ceiling becomes a source of threat.",
+      "cameraCharacterRelationship": "The camera follows and struggles to keep up with Fuzzby during his proud chaos, occasionally losing him behind stems or through pollen clouds so his speed exceeds containment. For Zenny, the camera stays still long enough for her judgment to become the punchline. At the thunder, the camera’s allegiance shifts: it abandons Fuzzby’s performance for the upper canopy and Zenny’s knowing stillness, letting the audience feel the warning before Fuzzby fully admits it.",
+      "movementVersusStillness": "Fuzzby never holds a clean line: his flight overshoots high, undershoots low, bangs into the environment, and recovers with pomp. Zenny’s stillness is active thought, not dead space. The storm’s first power is to make even Fuzzby pause for a fraction — not full calm, but a broken rhythm. That fracture is the tonal hinge.",
+      "depthAndEnvironment": "Depth is used as comedy first: foreground petals wipe the frame, mid-ground stems hide and reveal Fuzzby, background pollen trails show where he should have been. The rainforest participates physically — leaves bend, petals spring back, pollen clings, and the scale makes every flower a possible collision partner. When thunder arrives, depth becomes foreboding: the canopy above and behind them darkens subtly, and distant leaves tremble before rain has started.",
+      "rhythmAndEscalation": "Start in rapid, staccato bursts: Fuzzby attempts, overcorrects, crashes, recovers, boasts. Zenny’s reactions are rationed and slower, creating comic punctuation. The moustache/status beat around “Do I look official?” should feel like Fuzzby briefly believes he has achieved rank. “Buzz Crash!!” is the physical peak of the pollen game. Then the rumble cuts through the established tempo: one shared beat of altered air, Fuzzby’s joke, Zenny’s warning, and his final boast trying to restart the old rhythm against a sky that will not play along.",
+      "cutPhilosophy": "Cuts are motivated by impact, changed point of view, comic punctuation, or tonal shift only. Do not cover every action/consequence/reaction mechanically. A collision may be funnier if the camera arrives at the aftermath already in progress; a Zenny reaction may deserve a held frame because her stillness is the joke. The thunder earns a cut because it changes the scene’s power: the environment now has the upper hand.",
+      "openingImage": "Bee-height inside towering flowers: Fuzzby already pitched diagonally into travel, wings a blur, pollen streaming behind him like a badly controlled parade banner, while Zenny is visible deeper in the same floral world as a small island of composure, calmly gathering exactly what she needs.",
+      "closingImage": "Fuzzby, chest pushed out for “Good thing I work well under pressure,” hovering at an unintentionally crooked height as a darker wash passes across the leaves behind him; Zenny has already looked toward the storm, still and certain, making his boast feel tiny against the sky.",
+      "cinematographerChallenge": "Do not make this a safe comedy master with two bees trading lines. The frame must be physically endangered by Fuzzby’s momentum, then morally steadied by Zenny. I will push for the camera to be bee-height, partially occluded, and occasionally late or outpaced; if we keep both characters comfortably visible the whole time, we will flatten the double-act and lose the storm’s intrusion."
+    },
+    {
+      "name": "Treatment 2 — The Rainforest Plays Along Until It Doesn’t",
+      "audienceExperience": "The scene feels like the rainforest itself has joined the joke. Children experience a living playground where flowers pop, leaves spring, pollen poofs, and every surface has comic timing. The laugh comes from the world confirming Fuzzby’s overconfidence. Then the same responsive environment delivers the warning: the playful rustles become weather tremors, and the audience senses that nature has changed rules.",
+      "emotionalPointOfView": "The emotional point of view belongs to the environment as the honest witness to both bees. Fuzzby wants the rainforest to validate his grand productivity; Zenny already understands how to work with it. The plants do not punish Fuzzby — they answer his force truthfully. The storm is not a villain; it is the feeling of unease entering the physical world before the characters have fully named it.",
+      "comicOrDramaticMechanism": "Primary comic mechanism: environmental participation. Fuzzby’s body causes visible, weighted reactions — leaves bend under him, petals clap back, pollen coats him, stems wobble after he passes. Secondary mechanism: concealment to revelation — he disappears into a flower or pollen burst and emerges wearing the consequence, then insists “Nailed it.” The dramatic mechanism is tonal reclassification: the same living forest that made the audience laugh now warns them.",
+      "characterPerformanceStrategy": "Fuzzby treats every plant as a stage prop for his self-appointed official duties, but the plants respond with better timing than he has. He commits fully into contact; the world proves his weight and speed. “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” is his work chant as he tries to command a system that is already working fine without him. “Nailed it.” comes after a plant has visibly nailed him. “Do I look official?” is asked with ceremonial pride while pollen evidence says otherwise. Zenny’s labour is quiet cooperation with the same environment: she knows where the pollen is, how the flower moves, and how little force is needed. Her “Yes Fuzzby Officially nuts!” is not a roast from distance; it is the plain report of someone who has just watched the evidence accumulate. When “Buzz Crash!!” lands, the forest should recoil, shed pollen, and briefly settle. The thunder then makes leaves respond differently: not slapstick spring, but nervous shiver.",
+      "visualGrammar": "The visual grammar is cause-and-effect tactility. Frames prioritise contact, compression, recoil, and residue. Pollen must not be decorative atmosphere only; it is comic evidence. Leaves and petals provide readable physics for very small bodies. The camera composes through layers of stems and petals so the audience feels inside the mechanism of the rainforest, not looking at it from outside.",
+      "cameraCharacterRelationship": "The camera is an explorer inside the flowers. It may begin with a plant’s reaction before Fuzzby bursts into view, or discover him only after the pollen explosion reveals where he went. It does not simply follow a character; it follows consequences through the environment. With Zenny, the camera lets her efficient contact with plants contrast Fuzzby’s over-force. At the storm rumble, the camera listens to the forest: a tremor travels through leaves before settling on Zenny’s recognition.",
+      "movementVersusStillness": "Movement is distributed through the whole space. Fuzzby supplies the initiating force, but the environment keeps moving after him — vibrating stems, drifting pollen, wobbling petals. Zenny’s stillness is not isolation; it is alignment with the world’s rhythm. The storm introduces a new kind of movement: not bouncy recoil, but low, synchronized unease across many leaves at once.",
+      "depthAndEnvironment": "Depth carries the story. Foreground flowers hide the setup, mid-ground reactions reveal Fuzzby’s path, background canopy announces the incoming weather. The environment should have three emotional states: playful abundance at the start, chaotic over-participation during Fuzzby’s peak, then subtle collective warning when the storm arrives. Light stays day-warm but begins to drain under the canopy after the rumble.",
+      "rhythmAndEscalation": "The rhythm builds from small plant responses to a chain reaction. One flower poofs; another bends; a leaf flicks him sideways; pollen transfers from flower to bee to spectacles to face. Escalation is measured by how much of the world has been recruited into Fuzzby’s “official” work. “Buzz Crash!!” is the largest environmental punctuation. After that, the storm steals the tempo: a lower, longer sound interrupts the bouncy rhythm, and the plants stop behaving like toys.",
+      "cutPhilosophy": "Cuts follow environmental handoffs: a bent leaf springs us to a pollen cloud; a drifting pollen clump reveals Zenny; a canopy tremor redirects us toward the storm. Avoid reaction coverage by habit. If we cut to Zenny, it is because the world’s chaos has arrived at her judgment. If we cut upward, it is because the forest has felt something before Fuzzby has.",
+      "openingImage": "A close, tactile rainforest image at bee scale: a pollen-heavy flower trembles from inside before Fuzzby bursts out through the petals mid-chant, already in motion, scattering golden dust into layered shafts of daylight; Zenny’s precise pollen basket or working area sits undisturbed nearby, proving there was a calmer way.",
+      "closingImage": "The last bits of playful pollen hang in the air but no longer feel like confetti; leaves above tremble under the distant storm while Fuzzby tries to stand proud beneath them, and Zenny’s quiet certainty anchors the frame.",
+      "cinematographerChallenge": "The danger is making the rainforest a pretty backdrop. I want the plants to be performers with timing and weight. The lens should live close enough to see contact and residue, not float in a clean wide. If the environment does not physically answer Fuzzby, the comedy becomes random flailing instead of character-driven cause and consequence."
+    },
+    {
+      "name": "Treatment 3 — Zenny Hears the Weather Before Fuzzby Hears Himself",
+      "audienceExperience": "The audience enjoys Fuzzby’s chaos from the viewpoint of someone who has seen this exact kind of nonsense before and still cares. The scene is drier, more observational, and funnier because the camera trusts silence. Children still get the crashes and pollen mess; adults get the pleasure of Zenny’s restraint and the tiny shift when her attention leaves the joke for the sky.",
+      "emotionalPointOfView": "The scene belongs to Zenny’s patience. Fuzzby is the moving weather system in front of her, but the real emotional turn is when she distinguishes ordinary Fuzzby-noise from the storm that matters. Her want is to keep gathering pollen efficiently despite him; her need is to take the warning seriously without panic. Fuzzby wants to be admired; his need is to be witnessed even when he is ridiculous. Zenny witnesses him — then witnesses the storm.",
+      "comicOrDramaticMechanism": "Primary comic mechanism: deadpan observation. Fuzzby’s grand physical disasters play against Zenny’s minimal reactions, and her economy makes the jokes land. Secondary mechanism: restraint to release — she withholds response until the exact moment “Yes Fuzzby Officially nuts!” earns its snap. The dramatic mechanism is attention shift: the camera and Zenny stop granting Fuzzby the centre of importance when the thunder arrives.",
+      "characterPerformanceStrategy": "Fuzzby is allowed to be maximally busy, but we do not enter his self-myth as fully; we watch him be assessed. His “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” passes through Zenny’s working space like weather. “Nailed it.” should be heard as a familiar cover-up, not a new surprise. “Do I look official?” catches Zenny because there is a tiny vulnerability under the pomp — he really does want the title. She gives him the line “Yes Fuzzby Officially nuts!” with affectionate dryness: the wording is sharp, the intent is not. “Buzz Crash!!” is the moment his chaos exceeds even her peripheral tolerance. The thunder then changes her eyes first. Fuzzby tries to turn the sound into material with “…okay that sounded dramatic.” Zenny’s “A Storm’s coming.” is calm because panic would waste time. His “Good thing I work well under pressure.” is performed for her approval, but she is already measuring the sky.",
+      "visualGrammar": "The grammar is observational contrast. Rather than chase every piece of Fuzzby motion, the frame often holds a composed Zenny space while Fuzzby invades, exits, rebounds, and re-enters. Stillness is the active visual idea. The composition should make Fuzzby’s chaos readable as interruption, not give him automatic ownership of every frame. When the storm arrives, the frame’s attention migrates upward and outward, showing that Zenny’s perception has expanded beyond the gag.",
+      "cameraCharacterRelationship": "The camera stays close to Zenny’s calm working rhythm and lets Fuzzby cross that rhythm unpredictably. It may refuse to follow him at first, allowing crashes to happen partly off-screen or as sudden intrusions. This makes the audience complicit in Zenny’s patience. Once thunder sounds, the camera anticipates with her: her eyes lead us toward canopy and sky before Fuzzby’s words try to reclaim focus.",
+      "movementVersusStillness": "Fuzzby is a blur of intention, preparation, overcommitment, and recovery. Zenny is measured pauses, slow blinks, and exact hand or wing movements. The contrast should be so strong that even a child can tell who is chaos and who is control. The storm’s intrusion is marked by Zenny becoming even more still, while Fuzzby becomes more erratic trying not to admit the rumble affected him.",
+      "depthAndEnvironment": "Depth supports Zenny’s awareness. Fuzzby often occupies foreground or mid-ground as interruption, but Zenny’s sightline reaches past him to the background canopy when the storm begins. The rainforest around her is orderly because she knows it; around Fuzzby it becomes clutter and collision. After the rumble, background depth gains importance: distant leaves, darkening canopy gaps, and a pressure change behind the comedy.",
+      "rhythmAndEscalation": "The rhythm is not constant speed; it is contrast. Zenny’s steady pollen work establishes a quiet meter. Fuzzby repeatedly breaks that meter with manic bursts. Each break grows larger until “Buzz Crash!!” finally overwhelms the calm pattern. Then the thunder imposes a new, slower rhythm over both bees. Fuzzby’s jokes become attempts to restore the old tempo, but Zenny has moved the scene into warning.",
+      "cutPhilosophy": "Cuts are sparse and opinionated. Stay with Zenny while Fuzzby’s motion invades if her patience is the joke. Cut to Fuzzby only when his self-image changes, when impact delivers new information, or when his vulnerable need for status peeks through. The most important cut or reframing is the one that leaves Fuzzby’s performance to follow Zenny’s attention toward the storm.",
+      "openingImage": "Zenny in calm, precise pollen work at bee scale, framed with layered flowers and steady warm light; Fuzzby streaks through the edge of her order already mid-chant, not introduced politely, his pollen trail disrupting the clean space before his body fully arrives.",
+      "closingImage": "Zenny holds her gaze toward the darkening canopy after “A Storm’s coming,” while Fuzzby hovers nearby trying to look brave for “Good thing I work well under pressure”; the frame gives the final authority to her stillness, not his boast.",
+      "cinematographerChallenge": "The risky choice is to let Fuzzby’s funniest actions happen as intrusions into Zenny’s frame instead of constantly chasing him. That requires confidence: we must trust off-screen space, partial entrances, and held silence. If we pursue every crash, we make the scene only frantic; if we let Zenny govern the looking, the storm turn lands with far more meaning."
+    }
+  ],
+  "treatmentSelection": {
+    "selectedTreatment": "Combined Treatment — Fuzzby’s Grand Parade in a Forest That Stops Laughing",
+    "combinedFrom": [
+      "Treatment 1 — Fuzzby’s Grand Parade Meets the Sky",
+      "Treatment 2 — The Rainforest Plays Along Until It Doesn’t",
+      "Treatment 3 — Zenny Hears the Weather Before Fuzzby Hears Himself"
+    ],
+    "governingAudienceExperience": "The audience should feel swept into a tiny, overconfident comedy parade where Fuzzby’s momentum makes the whole rainforest laugh with him — until Zenny’s stillness and the trembling canopy make everyone inhale because the joke has just become weather.",
+    "rationale": "Treatment 1 is the spine: it has the strongest character truth, the cleanest relationship engine, and the best energy curve from play into warning. Fuzzby’s need to feel official gives every crash a reason, and Zenny’s calm judgment makes the comedy relational rather than random. Treatment 2 adds necessary tactile originality: the rainforest cannot be wallpaper; petals, leaves, pollen, recoil, residue, and tremor must physically answer Fuzzby so the comedy has cause and consequence. Treatment 3 contributes the storm turn: Zenny’s attention, not Fuzzby’s chatter, should become the scene’s authority when the thunder arrives. But Treatment 3 cannot govern the whole scene because it risks becoming too dry and observational for the opening’s required kid-forward velocity. Treatment 2 cannot govern alone because an environmental point of view can dilute the heart between Fuzzby and Zenny. The selected combination keeps the laugh loud, the relationship specific, and the tonal hinge clear: Fuzzby performs importance; Zenny sees him clearly; the forest plays along until it warns them both.",
+    "rejectionChecks": "Rejected as governing approaches: Treatment 2 alone, because making the environment the emotional point of view risks moving the scene away from relationship into clever mechanics; Treatment 3 alone, because holding too much inside Zenny’s observational frame risks fixed-centre staging and under-feeds the opening’s breathless child comedy. No selected element may depend on fixed screen lanes, keeping both characters visible, action/reaction coverage, repeated close-up punctuation, safe master-shot comedy, mechanical shot counts, or generic “cinematic” polish. The camera must not illustrate the script from safety; it must be outpaced by Fuzzby, steadied by Zenny, and then pulled upward by the storm. If staging becomes a comfortable two-character exchange or a pretty rainforest backdrop, it fails this selection."
+  },
+  "scene": {
+    "sceneId": "S1",
+    "sourceScriptRange": "S01-B01-POLLEN-CHAOS–S01-B02-STORM-INTRUDES",
+    "location": "DEEP WITHIN THE RAINFOREST",
+    "time": "DAY",
+    "participatingCharacters": [
+      "Fuzzby",
+      "Zenny"
+    ],
+    "purpose": "Open the episode with a fast, character-driven comedy engine at bee scale, then let the rainforest’s playful participation turn into the first warning of the coming storm.",
+    "dramaticQuestion": "Can Fuzzby make his pollen gathering feel important and official before the world interrupts with something genuinely bigger than his performance?",
+    "emotionalOwner": "Fuzzby",
+    "connectionFromPreviousScene": "This is the opening movement: bee-height inside towering flowers, already in motion, with Fuzzby’s overconfident parade energy contrasted against Zenny’s composed competence.",
+    "handoverToNextScene": "The comedy rhythm has been broken by weather: Zenny has recognized the storm, while Fuzzby tries to restart his bravado against a darkening canopy.",
+    "sourceApprovalState": "draft"
+  },
+  "beats": [
+    {
+      "beatId": "S01-B01-POLLEN-CHAOS",
+      "sceneId": "S1",
+      "sourceScript": "Fuzzby and Zenny gather pollen in completely opposite styles: Zenny is calm and capable, while Fuzzby turns every flower into a tiny disaster and performance opportunity.",
+      "exactDialogue": [
+        "Fuzzby: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+        "Fuzzby: Nailed it.",
+        "Fuzzby: Do I look official?",
+        "Zenny: Yes Fuzzby Officially nuts!",
+        "Fuzzby: Buzz Crash!!"
+      ],
+      "participatingCharacters": [
+        "Fuzzby",
+        "Zenny"
+      ],
+      "whatChanges": "Pollen gathering changes from a simple task into Fuzzby’s self-appointed grand parade of importance, then into visible proof that his need to look official is outrunning his steering. Zenny’s clean, economical work makes his chaos readable rather than random.",
+      "whoDrives": "Fuzzby drives the escalation through overcommitment; Zenny drives the comic truth by refusing to inflate the moment with him.",
+      "audienceAnticipation": "The audience expects each proud Fuzzby approach to go wrong in a bigger, more physical way, and waits for Zenny’s stillness to puncture his self-importance without cruelty.",
+      "actionOrChoice": "Fuzzby attacks the pollen task as if it is a ceremony: chest leading, wings already committed before his eyes have chosen a route, chanting “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” as exertion and self-hype. Flowers, leaves, and pollen answer him physically: petals wipe frame, stems interrupt his path, pollen clings where dignity should be. After an obvious mishap he covers with “Nailed it.” When pollen residue gives him a brief illusion of rank, he genuinely asks, “Do I look official?” Zenny performs one precise pollen motion, gives one measured look, and lands “Yes Fuzzby Officially nuts!” without chasing the joke. Fuzzby’s final attempt peaks in the blunt physical exclamation of “Buzz Crash!!”",
+      "consequence": "The rainforest is now an active comic partner: pollen hangs in the air like failed parade confetti, a flower bears the visible evidence of Fuzzby’s impact, and Fuzzby ends more decorated by failure than elevated by status. His cover-up has not convinced Zenny, but it has made his blunder lovable rather than shameful.",
+      "emotionalOrComicHandover": "The handover is Fuzzby at maximum puffed-up disorder against Zenny’s tiny, exact verdict. The laugh lands on the gap between how official he wants to feel and how thoroughly the world has powdered him, setting up the thunder to cut through a rhythm the audience now understands.",
+      "approvalState": "draft"
+    },
+    {
+      "beatId": "S01-B02-STORM-INTRUDES",
+      "sceneId": "S1",
+      "sourceScript": "A distant rumble interrupts the pollen game, shifting the scene from harmless comedy to early warning as Zenny senses weather changing and Fuzzby tries to joke his way through it.",
+      "exactDialogue": [
+        "Fuzzby: …okay that sounded dramatic.",
+        "Zenny: A Storm’s coming.",
+        "Fuzzby: Good thing I work well under pressure."
+      ],
+      "participatingCharacters": [
+        "Fuzzby",
+        "Zenny"
+      ],
+      "whatChanges": "The rainforest stops being only a playful obstacle course and becomes a warning system. Fuzzby’s performance loses authority for the first time; Zenny’s still attention becomes the scene’s truth.",
+      "whoDrives": "The storm drives the turn through environmental participation, but Zenny drives the meaning by recognizing it before Fuzzby can fold it into his act.",
+      "audienceAnticipation": "The audience anticipates whether Fuzzby will admit the danger or keep performing importance. Kids feel the funny wobble in his attempted recovery; adults feel the tonal inhale as the canopy becomes bigger than him.",
+      "actionOrChoice": "A distant rumble breaks the staccato pollen tempo. Leaves tremble above and behind them before rain has started. Fuzzby’s hover betrays him first: a crooked dip and a small break in rhythm, not calm, just a fracture. He tries to annex the sound into his performance with “…okay that sounded dramatic.” Zenny goes more still, eyes finding the sky before the rest of her moves, and says “A Storm’s coming.” Fuzzby answers with chest pushed out and altitude already arguing against him: “Good thing I work well under pressure.”",
+      "consequence": "The scene’s power shifts upward into the canopy. Fuzzby remains outwardly grand, but his uneven hover makes the boast tiny against the darkening leaves. Zenny has stopped being only the comic counterweight and has become the calm measure of real danger.",
+      "emotionalOrComicHandover": "The handover is a funny-brave denial sitting under a genuine weather warning: Fuzzby tries to restart the parade, but the forest no longer plays along. The next scene inherits a storm that has already entered the audience’s body before the first rain falls.",
+      "approvalState": "draft"
+    }
+  ],
+  "shots": [
+    {
+      "shotId": "S1.SH1",
+      "beatIds": [
+        "S01-B01-POLLEN-CHAOS"
+      ],
+      "purpose": "Launch the scene as Fuzzby’s self-appointed parade already in motion: funny because his importance is faster than his steering.",
+      "audienceExperience": "The audience is swept into bee-scale speed, squeezed between flowers, laughing because the frame itself seems barely able to survive Fuzzby’s productivity.",
+      "openingImage": "Bee-height between towering flower stems, Fuzzby already slanting hard across the frame with pollen streaming from his path; Zenny is deeper among the flowers, level and undisturbed over her own work.",
+      "principalPerformance": "Fuzzby drives the chant as exertion and self-hype — “BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…” — then covers an obvious mishap with “Nailed it.” as if saying it can restore authority. Zenny stays absorbed in her precise gathering, not yet granting him the stage.",
+      "cameraRelationship": "The camera follows and struggles to keep up with Fuzzby, briefly losing him behind stems and pollen; Zenny remains readable in depth, the calm measure he orbits past.",
+      "physicalOrEmotionalChange": "A simple pollen task becomes Fuzzby’s grand official mission, and the rainforest begins answering his overcommitment with physical interference.",
+      "closingImage": "Fuzzby reappears, dusted by the task he meant to command, while pollen hangs behind him like failed parade confetti. Lip-sync the approved @Audio1 performance exactly; no additional speech.",
+      "transitionType": "PLANNED_CUT",
+      "transitionReason": "Cutting to Zenny’s steadier frame is stronger than staying in the chase because remaining continuous would trap us inside Fuzzby’s self-image; the comedy needs his chaos measured against competence, not merely extended.",
+      "physicalPerformance": "Fuzzby’s chest and chin lead like he is announcing a parade before his eyes have chosen a route. His wings commit too hard, so every dodge becomes an overcorrection: a shoulder clips one stem, the stem whips back into nearby petals, pollen clings to him, and his attempt to shake it off only throws him into the next near-miss. He refuses to acknowledge any of it until the final pop-back, where he arrests himself in a strained official hover, the body still dusted in evidence. Lip-sync the approved @Audio1 performance exactly; no additional speech.",
+      "animationTiming": "Keep the chant on quick, effortful wingbeats: short accelerations, tiny panic-corrections, and no graceful glide. Contacts read in crisp cause-and-effect bursts — hit, spring-back, pollen bloom — with Fuzzby always recovering a fraction late. On “Nailed it.” give him a miniature held pose, just long enough for pride to appear, then let one last pollen drift or body wobble betray the cover-up.",
+      "approvalState": "draft",
+      "cutPace": "rapid_cuts",
+      "cutPaceReason": "The opener needs staccato overcommitment: Fuzzby is already moving faster than his steering, so the comedy comes from crisp cause-and-effect bursts of attempt, overcorrection, contact, pollen evidence, and a fake-official recovery.",
+      "internalCuts": [
+        "Fuzzby charges chest-first into his self-important pollen mission as the camera rushes backward ahead of him, ending on his route already narrowing.",
+        "His shoulder clips a stem and it snaps pollen into nearby petals as the camera whip-pans with the hit, ending on the pollen burst.",
+        "Fuzzby shakes off the pollen and overcorrects into the next near-miss as the camera snap-reframes to keep him barely centered, ending on his late recovery.",
+        "A petal rebounds beside him and dusts his body with more evidence as the camera bumps in with the recoil, ending on the visible mess sticking to him.",
+        "Fuzzby pops back into a strained official hover to deliver his line as the camera settles into a tiny hold, ending on the wobble and last drifting pollen betraying him."
+      ]
+    },
+    {
+      "shotId": "S1.SH2",
+      "beatIds": [
+        "S01-B01-POLLEN-CHAOS"
+      ],
+      "purpose": "Make the status gag live inside contrast: Fuzzby briefly believes pollen has promoted him, while Zenny’s economy punctures the fantasy without cruelty.",
+      "audienceExperience": "The laugh comes from watching stillness and precision hold their ground while Fuzzby tries to turn accidental decoration into rank.",
+      "openingImage": "A level flower-cup frame holds Zenny completing one clean pollen gather as Fuzzby’s wobbling pollen-shadow enters from above.",
+      "principalPerformance": "Fuzzby drifts into Zenny’s working space with genuine hunger for recognition and asks, “Do I look official?” Zenny gives him one measured look and lands “Yes Fuzzby Officially nuts!” without leaning into the joke.",
+      "cameraRelationship": "The camera stays still with Zenny; Fuzzby’s unstable hover invades the frame instead of being granted a clean showcase, so her stillness steadies the chaos rather than replacing it with a safe punchline setup.",
+      "physicalOrEmotionalChange": "Fuzzby converts visible failure into imagined status, and Zenny calmly names the truth in a way that keeps him lovable but not convincing.",
+      "closingImage": "Fuzzby is still trying to hold an official hover as Zenny returns to her exact pollen work, the verdict hanging in the air with the pollen.",
+      "transitionType": "PLANNED_CUT",
+      "transitionReason": "Cutting away is stronger than lingering because a continued hold would dignify the moustache/status beat into a staged reaction gag; the sequence needs to accelerate into Fuzzby’s next overcommitment before he can reset his pride.",
+      "physicalPerformance": "Zenny’s gather is a single clean decision: reach, contact, collect, release, with no wasted correction. Fuzzby enters as unstable evidence, not a posed display; he lifts his chest to present himself, notices Zenny seeing the mess, sags half an inch, then re-squares with forced dignity. His paws or body angle keep adjusting the imaginary uniform he thinks the pollen has made, while Zenny’s look simply measures him and returns to work.",
+      "animationTiming": "Zenny’s action has even, economical timing, with a small pause only when she decides he has earned a verdict. Fuzzby’s hover is never allowed to settle: quick little lifts, a sinking beat, then a rushed re-square before “Do I look official?” Zenny’s “Yes Fuzzby Officially nuts!” lands dry on near-stillness; do not add a big reaction after it — let Fuzzby’s continuing micro-wobble carry the laugh.",
+      "approvalState": "draft",
+      "cutPace": "paced_cuts",
+      "cutPaceReason": "The status gag needs contrast rather than frenzy: Zenny’s clean economy gets its own measured beat, then Fuzzby’s unstable self-presentation, then the dry verdict punctures his fantasy without a big reaction.",
+      "internalCuts": [
+        "Zenny completes one clean reach-contact-collect-release gather as the camera makes a small steady push-in, ending on her efficient release.",
+        "Fuzzby wobbles into the frame as pollen-covered evidence and tries to square his body into official posture as the camera pans to include him, ending on his forced dignity.",
+        "Zenny measures him and returns the verdict while Fuzzby keeps micro-wobbling as the camera holds a composed two-shot, ending on the dry stillness against his continuing instability."
+      ]
+    },
+    {
+      "shotId": "S1.SH3",
+      "beatIds": [
+        "S01-B01-POLLEN-CHAOS"
+      ],
+      "purpose": "Hit the pollen-game peak by arriving at the crash as an environmental event, not by covering approach-impact-reaction.",
+      "audienceExperience": "Kids get the blunt pleasure of the crash; adults get the sharper joke that Fuzzby’s ceremony has become pure consequence before he can explain it.",
+      "openingImage": "A tight bee-height flower corridor shudders as pollen bursts from behind a stem before Fuzzby is visible.",
+      "principalPerformance": "Fuzzby’s attempt has already exceeded his steering; “Buzz Crash!!” comes out as the crash naming itself, not a planned line. He is still committed to grandeur even as the flower system proves otherwise.",
+      "cameraRelationship": "The camera arrives late to the impact zone and lets the flower’s reaction reveal what happened; Fuzzby is discovered through aftermath rather than followed cleanly into it.",
+      "physicalOrEmotionalChange": "Fuzzby’s overcommitment reaches maximum physical proof: the rainforest is no longer scenery around the gag, it is the gag’s partner.",
+      "closingImage": "A flower bears the fresh evidence of Fuzzby’s impact while pollen drifts in suspended comic silence around the disturbed corridor.",
+      "transitionType": "PLANNED_CUT",
+      "transitionReason": "Cutting at the peak is stronger than staying for evidence and reaction because remaining continuous would turn the crash into coverage; the next image must let the thunder interrupt the established rhythm before the joke settles too neatly.",
+      "physicalPerformance": "Fuzzby is mostly read through what he does to the corridor: the first stem jolts, the next petal compresses and flings pollen outward, then a flower cup buckles under a body arriving too fast to stop. His recovery is delayed behind the environment’s recoil; the petals and stems spring back before he has gathered himself, his own small body dwarfed against the still-swaying wreckage he caused. If he appears in the aftermath, he is still trying to organize his dignity after the flower has already reported the truth.",
+      "animationTiming": "Let the crash be a single blunt cascade, not a series of showcased poses: one fast offscreen approach, immediate impact, then layered rebounds from stem to petal to pollen. “Buzz Crash!!” should overlap the collision already happening, as if squeezed out by the hit. After the burst, hold a short comic suspension on drifting pollen before the rhythm can reassemble.",
+      "approvalState": "draft",
+      "cutPace": "single_continuous_take",
+      "cutPaceReason": "The crash peak should read as one blunt environmental cascade, not a covered sequence of poses; holding the event in one continuous take lets the stem, petal, flower cup, pollen, and delayed recovery report the impact as a single physical fact.",
+      "internalCuts": []
+    },
+    {
+      "shotId": "S1.SH4",
+      "beatIds": [
+        "S01-B02-STORM-INTRUDES"
+      ],
+      "purpose": "Shift authority from Fuzzby’s parade to the sky: the first tonal inhale belongs to the environment, not to dialogue alternation.",
+      "audienceExperience": "The audience feels the fun air get heavier; the rainforest that was laughing with Fuzzby now seems to listen upward.",
+      "openingImage": "Above the settling pollen cloud, high leaves quiver against a subtly darker canopy before either bee has fully reacted.",
+      "principalPerformance": "The rumble breaks Fuzzby’s rhythm before he can perform through it. His hover dips crookedly, then he tries to annex the moment with “...okay that sounded dramatic.”",
+      "cameraRelationship": "The camera abandons the crash aftermath and tilts attention upward into the canopy, allowing Fuzzby to become smaller inside the changed space rather than returning him to center stage.",
+      "physicalOrEmotionalChange": "Environmental participation changes category: leaves no longer bounce back playfully, they tremble with warning. Fuzzby’s authority fails for the first visible fraction.",
+      "closingImage": "Fuzzby hangs low in the frame under the trembling canopy, his attempted joke smaller than the weather above him.",
+      "transitionType": "PLANNED_CUT",
+      "transitionReason": "Cutting to Zenny’s grounded stillness is stronger than continuing upward because the storm would remain anonymous; the warning needs a character who understands it, but not a conventional dialogue reset.",
+      "physicalPerformance": "The rumble interrupts Fuzzby before he can convert the crash into another victory. His wing rhythm skips, one side drops, and his body tilts crookedly as if the sound has knocked the parade pole out of his spine. He catches himself with a too-hard wingbeat, lifts his chest back into performance position. Lip-sync the approved @Audio1 performance exactly; no additional speech. The leaves do not bounce playfully now; they tremble in smaller, nervous vibrations that continue after his joke.",
+      "animationTiming": "Break the previous staccato tempo with a brief stolen breath: pollen still settling, canopy quiver, Fuzzby’s wingbeat falter. His recovery should come half a beat late and slightly too forceful, so the audience sees fear arrive before the line covers it. “...okay that sounded dramatic.” lands after the silence has already changed the room, not as a quick gag tag over the rumble.",
+      "approvalState": "draft",
+      "cutPace": "single_continuous_take",
+      "cutPaceReason": "The rumble is the tonal inhale that breaks the previous staccato rhythm, so it needs uninterrupted shared air: settling pollen, nervous leaves, Fuzzby’s falter, and his too-late joke all live in one changed silence.",
+      "internalCuts": []
+    },
+    {
+      "shotId": "S1.SH5",
+      "beatIds": [
+        "S01-B02-STORM-INTRUDES"
+      ],
+      "purpose": "End on the new power balance: Zenny’s certainty and the darkening canopy make Fuzzby’s brave boast feel tiny but still funny.",
+      "audienceExperience": "The audience laughs at Fuzzby trying to restart the parade, while the darker leaves make everyone feel the warning has already entered the scene’s body.",
+      "openingImage": "Zenny is held still in the flower corridor looking upward while Fuzzby hovers nearer the edge at a crooked height under the darkening leaves.",
+      "principalPerformance": "Zenny goes more still and says “A Storm’s coming.” small, flat, and certain. Fuzzby pushes his chest out against his own unstable altitude and answers, “Good thing I work well under pressure.”",
+      "cameraRelationship": "The camera stays composed enough for Zenny’s certainty to govern the frame, but keeps Fuzzby visibly unstable within it; the shot is a contrast frame, not alternating coverage.",
+      "physicalOrEmotionalChange": "Zenny stops being only the comic counterweight and becomes the measure of real danger. Fuzzby remains outwardly grand, but the world now makes his grandeur fragile.",
+      "closingImage": "Fuzzby hovers chest-out at an unintentionally crooked height as a darker wash passes across the leaves behind him; Zenny has already looked toward the storm, still and certain.",
+      "transitionType": "PLANNED_CUT",
+      "transitionReason": "Cutting out after this image is stronger than staying continuous because the scene has handed authority to the storm; holding longer would explain the warning instead of letting the funny-brave denial carry us forward.",
+      "physicalPerformance": "Zenny’s warning begins in the eyes: they find the sky, hold, then the rest of her body becomes even quieter, as if conserving motion makes the fact clearer. She does not point or dramatize; her stillness is the alarm. Fuzzby answers by inflating the parts he can control — chest out, chin up, official posture — while the part he cannot control gives him away: his hover drifts crooked, dips as the final word lands, and needs a small corrective wingbeat he pretends not to notice.",
+      "animationTiming": "Give Zenny a dry, compact hold before “A Storm’s coming.” and keep the line small, with no flourish afterward. Fuzzby jumps in quickly enough to feel like cover-up rather than confidence. Let his boast finish before the final undercut: one lingering altitude bob and a darker pass across the leaves, held just long enough for the brave shape and the frightened weather to coexist.",
+      "approvalState": "draft",
+      "cutPace": "paced_cuts",
+      "cutPaceReason": "The ending needs slower punctuation between real warning and comic cover-up: Zenny’s still certainty, Fuzzby’s quick boast, and the canopy’s darker undercut each get a completed beat so the new power balance lands.",
+      "internalCuts": [
+        "Zenny finds the sky and holds as she delivers her warning, the camera slowly pushing in on her quiet stillness, ending on her line landing.",
+        "Fuzzby inflates into official posture and answers too quickly as the camera pans from Zenny to catch his crooked hover, ending on his boast landing with a slight dip.",
+        "The leaves darken and Fuzzby corrects one small altitude bob as the camera eases upward toward the canopy, ending on the brave pose made tiny by the weather."
+      ]
+    }
+  ],
+  "productionDetail": [
+    {
+      "shotId": "S1.SH1",
+      "continuityIn": "",
+      "continuityOut": "Fuzzby ends visibly pollen-dusted in a strained official hover, with pollen still hanging/drifting behind him; Zenny remains steady deeper among the flowers, undisturbed in her work.",
+      "dialogueTiming": "Use the approved @Audio1 exactly. Fuzzby’s chant begins after the first committed wingbeat, locked to the dodge-hit-recover rhythm and smearing into the mishap. “Nailed it.” lands after the pop-back and tiny held official pose, followed by a short beat for the remaining pollen drift or body wobble to answer him.",
+      "referenceRoles": "Fuzzby and Zenny character references anchor identity and scale; the approved rainforest/flower Scene Look anchors towering stems, pollen behavior, depth and lighting; @Audio1 anchors lip-sync, pacing and vocal energy.",
+      "requiresNewKeyframe": true,
+      "intendedDurationRange": "6-8s",
+      "essentialProviderProtections": [],
+      "characterContinuity": [
+        {
+          "characterId": "Fuzzby",
+          "openingState": "Already slanting hard across the bee-height flower corridor, wings overcommitted and pollen streaming from his path.",
+          "closingState": "Arrested in a strained official hover after the pop-back, dusted with pollen, with a last wobble or pollen drift betraying the cover-up."
+        },
+        {
+          "characterId": "Zenny",
+          "openingState": "Deeper among the flowers, level and absorbed in precise gathering.",
+          "closingState": "Still deeper among the flowers, steady over her work and not pulled into Fuzzby’s stage."
+        }
+      ]
+    },
+    {
+      "shotId": "S1.SH2",
+      "continuityIn": "Fuzzby’s pollen dust and unstable pride carry in from the pop-back; the air still holds the recent pollen disturbance.",
+      "continuityOut": "Fuzzby remains in Zenny’s working space trying to maintain an official hover despite micro-wobbles; Zenny has returned to her exact pollen work after delivering the verdict.",
+      "dialogueTiming": "Fuzzby starts “Do I look official?” after the little sag and forced re-square, letting the question hover for Zenny’s measured look. Zenny’s “Yes Fuzzby Officially nuts!” lands only after her small deciding pause, with no added reaction after it; Fuzzby’s continuing micro-wobble carries the laugh.",
+      "referenceRoles": "Fuzzby and Zenny character references anchor identity; the approved flower-cup/rainforest scene look anchors the level working space, pollen in the air, and consistent warm canopy light.",
+      "requiresNewKeyframe": false,
+      "intendedDurationRange": "5-7s",
+      "essentialProviderProtections": [
+        "Camera must stay still with Zenny; do not grant Fuzzby a clean heroic showcase.",
+        "Zenny’s delivery and body remain economical and near-still, with no big punchline reaction.",
+        "Fuzzby’s hover never fully settles; his forced dignity must be undercut by small visible corrections."
+      ],
+      "characterContinuity": [
+        {
+          "characterId": "Zenny",
+          "openingState": "Level in the flower-cup frame, completing one clean pollen gather with no wasted motion.",
+          "closingState": "Returned to exact pollen work, still and composed after the dry verdict."
+        },
+        {
+          "characterId": "Fuzzby",
+          "openingState": "Entering from above as a wobbling pollen-shadow, pollen-dusted and unstable from the prior mishap.",
+          "closingState": "Still trying to hold an official hover in Zenny’s space, chest lifted but betrayed by continuing micro-wobbles."
+        }
+      ]
+    },
+    {
+      "shotId": "S1.SH3",
+      "continuityIn": "Fuzzby’s pollen-dusted overconfidence and unsettled hover carry forward from Zenny’s verdict, with pollen still present in the flower corridor.",
+      "continuityOut": "The flower corridor is freshly disturbed by Fuzzby’s impact: petals and stems have recoiled, a flower bears the hit, and pollen hangs in short comic suspension.",
+      "dialogueTiming": "Fuzzby’s “Buzz Crash!!” overlaps the immediate collision, as if squeezed out by the hit rather than announced. After the line, hold a short comic suspension on drifting pollen before the rhythm can resume.",
+      "referenceRoles": "Fuzzby character reference anchors identity if he is glimpsed in the aftermath; the approved rainforest flower-corridor scene look anchors stem recoil, petal compression, pollen burst, and bee-height scale.",
+      "requiresNewKeyframe": false,
+      "intendedDurationRange": "3-5s",
+      "essentialProviderProtections": [
+        "Arrive late to the impact zone; the flower corridor’s reaction must reveal the crash before Fuzzby is cleanly showcased.",
+        "Crash reads as one blunt cascade, not separate posed beats.",
+        "Hold briefly on drifting pollen and disturbed flowers after the impact; do not rush into reaction coverage."
+      ],
+      "characterContinuity": [
+        {
+          "characterId": "Fuzzby",
+          "openingState": "Offscreen or obscured by the flower corridor, arriving too fast for steering to catch up.",
+          "closingState": "Only partly recovered if visible, still behind the environment’s recoil while the flower has already reported the impact."
+        }
+      ]
+    },
+    {
+      "shotId": "S1.SH4",
+      "continuityIn": "The disturbed corridor and suspended pollen from the crash carry in; the scene is still settling when the rumble changes the air.",
+      "continuityOut": "The canopy remains in smaller warning tremors, and Fuzzby hangs lower and crooked under it after a late, too-forceful recovery and attempted joke.",
+      "dialogueTiming": "Do not cover the rumble. Let pollen settle, the canopy quiver, and Fuzzby’s wingbeat falter first; “...okay that sounded dramatic.” starts only after the silence has changed the room and after his late recovery beat.",
+      "referenceRoles": "Fuzzby character reference anchors identity; the approved rainforest canopy/flower-corridor scene look anchors the darkening leaves, pollen settling, and the shift from playful recoil to weather warning.",
+      "requiresNewKeyframe": false,
+      "intendedDurationRange": "5-7s",
+      "essentialProviderProtections": [
+        "The first tonal inhale belongs to the canopy and rumble, not to Fuzzby’s dialogue.",
+        "Fuzzby must become smaller under the changed space rather than re-centered as the authority.",
+        "Leaves tremble nervously after his joke; they must not bounce like the earlier playful gag mechanics."
+      ],
+      "characterContinuity": [
+        {
+          "characterId": "Fuzzby",
+          "openingState": "Near the crash aftermath as pollen settles, still poised to convert the mishap into performance.",
+          "closingState": "Low and crooked in the frame beneath trembling leaves, chest partly recovered for the joke but altitude visibly unsettled."
+        }
+      ]
+    },
+    {
+      "shotId": "S1.SH5",
+      "continuityIn": "The darker canopy and warning tremble carry in from the rumble; Fuzzby is already lower and crooked from the interruption.",
+      "continuityOut": "The scene ends with storm authority established: Zenny still and certain toward the sky, Fuzzby chest-out at a crooked hover, and a darker wash passing across the leaves behind them.",
+      "dialogueTiming": "Zenny speaks after the sky-look hold, keeping “A Storm’s coming.” small and flat enough that the darker leaves seem to speak with it. Fuzzby enters quickly after her, like a cover-up; let “Good thing I work well under pressure.” finish before the undercut of lingering altitude bob and darker pass across the leaves.",
+      "referenceRoles": "Fuzzby and Zenny character references anchor identity; the approved rainforest flower-corridor scene look anchors the darkening canopy, flower depth, pollen remnants, and consistent CGI lighting shift into storm warning.",
+      "requiresNewKeyframe": false,
+      "intendedDurationRange": "6-8s",
+      "essentialProviderProtections": [
+        "Zenny’s stillness governs the frame; do not turn the warning into dramatic pointing or flourish.",
+        "Fuzzby’s boast must be visibly undercut by a crooked hover and corrective wingbeat he pretends not to notice.",
+        "Hold the final coexistence of brave posture and frightened weather: altitude bob plus darker leaf pass."
+      ],
+      "characterContinuity": [
+        {
+          "characterId": "Zenny",
+          "openingState": "Held still in the flower corridor, eyes lifted toward the canopy before her body moves.",
+          "closingState": "Still and certain, already oriented toward the storm after the small warning."
+        },
+        {
+          "characterId": "Fuzzby",
+          "openingState": "Near the frame edge at a crooked height under the darkening leaves, recovering from the rumble’s interruption.",
+          "closingState": "Chest-out in official posture but hovering crookedly, with a final altitude bob under the darker canopy."
+        }
+      ]
+    }
+  ],
+  "voicePerformances": [
+    {
+      "speaker": "Fuzzby",
+      "exactDialogue": "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+      "voiceIdentity": "Fuzzby as tiny parade marshal of his own chaos: bright, breathy, self-hyping, with effort squeezing the rhythm tighter every time his steering fails.",
+      "dramaticIntention": "He wants Zenny to notice his speed and importance before the flowers reveal he is not in control.",
+      "subtext": "If I sound official enough, maybe this counts as skill.",
+      "relationshipTarget": "Zenny, though she is not giving him the attention he is trying to command.",
+      "emotionalEntry": "Already over-committed and excited, running on wingbeat adrenaline.",
+      "emotionalExit": "More winded and less in control, but still refusing to admit it.",
+      "operativeWords": [
+        "BIZZY",
+        "BIZZY"
+      ],
+      "pace": "Fast and clipped, tied to quick wingbeats; each triplet slightly more strained.",
+      "rhythm": "Percussive chant with tiny panic-corrections inside it; not musical smoothness, more self-propelled motor noise.",
+      "pauses": "No clean pauses; the ellipsis trails because the body is being pulled into the next near-miss.",
+      "breaths": "Snatched little nasal breaths between chant clusters, as if he cannot spare time for a full inhale.",
+      "nonVerbalActions": "Chest and chin lead; shoulders and wings overcorrect through stems and pollen while he keeps selling the parade.",
+      "elevenLabsV3Direction": "[excited] BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+      "physicalActionRelationship": "Voice supports the body’s lie: grand public confidence riding on obviously messy exertion.",
+      "expectedTiming": "Begin after the first committed wingbeat, not on frame one. Keep the chant glued to the dodge-hit-recover rhythm and let the end smear into the mishap.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio",
+      "overrideHistory": [
+        {
+          "from": "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+          "to": "this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead",
+          "by": "Julian",
+          "at": "2026-07-20T20:04:54"
+        },
+        {
+          "from": "this should be refused, not applied, because it does not match anything special — actually it WILL match since it is a real edit attempt, so use a bad lineIndex instead",
+          "to": "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+          "by": "Julian",
+          "at": "2026-07-20T20:05:39"
+        }
+      ]
+    },
+    {
+      "speaker": "Fuzzby",
+      "exactDialogue": "Nailed it.",
+      "voiceIdentity": "Fuzzby forcing a clean official stamp onto a body still covered in evidence.",
+      "dramaticIntention": "He wants Zenny to accept his version of events before she can judge the mess.",
+      "subtext": "Please let my confidence be stronger than the pollen.",
+      "relationshipTarget": "Zenny as the unimpressed witness he desperately needs to convert.",
+      "emotionalEntry": "Fresh from a near-crash, breath caught under pride.",
+      "emotionalExit": "Pride thins into exposed awkwardness when the body wobbles after the line.",
+      "operativeWords": [
+        "Nailed"
+      ],
+      "pace": "Short, deliberate, over-neat.",
+      "rhythm": "A single polished seal of authority, held just a touch too long.",
+      "pauses": "A tiny pre-line hold while he arrests the hover and assembles dignity.",
+      "breaths": "Small inhale through the nose before speaking; no sigh afterward, let the wobble undercut him physically.",
+      "nonVerbalActions": "Miniature official hover; chest lifted, body dusted in pollen, one last drift betraying the claim.",
+      "elevenLabsV3Direction": "[breathes] Nailed it.",
+      "physicalActionRelationship": "Voice deliberately contradicts the body: the line says finished; the body says absolutely not.",
+      "expectedTiming": "Land after the pop-back and held pose. Leave a beat after the final word for pollen or wobble to answer him.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    },
+    {
+      "speaker": "Fuzzby",
+      "exactDialogue": "Do I look official?",
+      "voiceIdentity": "Fuzzby seeking inspection like a decorated officer, but the question leaks neediness through the polished posture.",
+      "dramaticIntention": "He wants Zenny to admire him and certify the mess as a uniform.",
+      "subtext": "Tell me this looks impressive, not ridiculous.",
+      "relationshipTarget": "Zenny, specifically her measured eye and withheld approval.",
+      "emotionalEntry": "He enters buoyant but unstable, notices her seeing the pollen, sags, then re-squares.",
+      "emotionalExit": "Left hanging in hopeful dignity, waiting for a verdict he fears.",
+      "operativeWords": [
+        "official"
+      ],
+      "pace": "A rushed re-square into a careful question; front half slightly too quick, last word displayed.",
+      "rhythm": "Hover-jitter underneath a formal presentation rhythm.",
+      "pauses": "Brief hesitation before “official,” as he checks whether the pollen can be sold as status.",
+      "breaths": "Small preparatory inhale as he lifts his chest; breath sits high, not relaxed.",
+      "nonVerbalActions": "Paws or body angle adjust an imaginary uniform while altitude never quite settles.",
+      "elevenLabsV3Direction": "Do I look... official?",
+      "physicalActionRelationship": "Voice tries to stabilize the body; the body keeps needing corrections the line pretends are ceremonial.",
+      "expectedTiming": "Start after the little sag and forced re-square, not during the drift in. Let the question hover for Zenny’s look.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    },
+    {
+      "speaker": "Zenny",
+      "exactDialogue": "Yes Fuzzby Officially nuts!",
+      "voiceIdentity": "Zenny dry, precise, and economical; she does not perform the joke, she files the verdict.",
+      "dramaticIntention": "She wants Fuzzby to hear the truth without rewarding the spectacle too much.",
+      "subtext": "I see exactly what you are doing, and I like you better when I do not indulge it.",
+      "relationshipTarget": "Fuzzby, as the noisy disturbance inside her clean working rhythm.",
+      "emotionalEntry": "Calm focus with one measured look granted.",
+      "emotionalExit": "Already returning to work, having spent the minimum energy necessary.",
+      "operativeWords": [
+        "Officially",
+        "nuts"
+      ],
+      "pace": "Measured and compact; no bounce.",
+      "rhythm": "Clean decision rhythm: yes, name, verdict.",
+      "pauses": "A tiny judging pause after “Fuzzby” if punctuated; the pause is her look landing, not comic mugging.",
+      "breaths": "No audible breath needed; keep it dry and self-contained.",
+      "nonVerbalActions": "One look measures him, then she returns to precise gathering with no extra reaction.",
+      "elevenLabsV3Direction": "[quietly] Yes, Fuzzby. Officially nuts!",
+      "physicalActionRelationship": "Voice supports stillness: the joke lands because her body refuses to join his chaos.",
+      "expectedTiming": "Land only after her small deciding pause. Do not chase the laugh; let Fuzzby’s continuing micro-wobble carry it.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    },
+    {
+      "speaker": "Fuzzby",
+      "exactDialogue": "Buzz Crash!!",
+      "voiceIdentity": "Fuzzby’s showman voice squeezed flat by impact: still trying for a grand sound while the flower system names the truth first.",
+      "dramaticIntention": "He is not really addressing anyone; the crash forces the line out as a public label for his own disaster.",
+      "subtext": "I meant to do something big—oh no, it is big in the wrong way.",
+      "relationshipTarget": "The corridor, Zenny by accidental audience, and his own crumbling dignity.",
+      "emotionalEntry": "Over-speed and over-confidence, already past safe steering.",
+      "emotionalExit": "Stunned, smaller than the pollen cloud he caused.",
+      "operativeWords": [
+        "Crash"
+      ],
+      "pace": "Very fast, compressed by impact.",
+      "rhythm": "One blunt two-beat burst, with “Buzz” still heroic and “Crash” involuntary.",
+      "pauses": "No pause before it; it overlaps collision already happening.",
+      "breaths": "Air knocked out on “Crash,” not a clean projected shout.",
+      "nonVerbalActions": "Stem jolt, petal compression, pollen burst, delayed recovery behind the environment’s recoil.",
+      "elevenLabsV3Direction": "[gasps] Buzz Crash!!",
+      "physicalActionRelationship": "Voice is caused by the body; the hit squeezes the sound out rather than the line announcing a planned stunt.",
+      "expectedTiming": "Overlap the immediate impact. After the line, hold short comic suspension on drifting pollen before rhythm resumes.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    },
+    {
+      "speaker": "Fuzzby",
+      "exactDialogue": "…okay that sounded dramatic.",
+      "voiceIdentity": "Fuzzby trying to re-inflate the act after fear has already punctured it; the voice starts smaller than he wants and ends with a salesman’s recovery.",
+      "dramaticIntention": "He wants Zenny, and himself, to treat the rumble as part of his performance instead of a real warning.",
+      "subtext": "That scared me, so I am going to make it mine before anyone sees that.",
+      "relationshipTarget": "Zenny, plus the suddenly changed clearing he is trying to dominate with a joke.",
+      "emotionalEntry": "Rhythm broken by the rumble; hover crooked, fear visible before speech.",
+      "emotionalExit": "Half-restored bravado, but with unease still audible underneath.",
+      "operativeWords": [
+        "okay",
+        "dramatic"
+      ],
+      "pace": "Delayed start, then slightly too careful; he is rebuilding authority word by word.",
+      "rhythm": "Begins with a stolen breath, settles into a cover-up quip, but never fully regains bounce.",
+      "pauses": "The opening ellipsis is a real silence after the rumble; a tiny comma after “okay” lets him test whether his voice still works.",
+      "breaths": "Small caught inhale before “okay”; release held tension through the rest of the line.",
+      "nonVerbalActions": "One wingbeat catches too hard, chest lifts back into performance position while leaves continue nervous vibration.",
+      "elevenLabsV3Direction": "[nervous] …okay, that sounded dramatic.",
+      "physicalActionRelationship": "Voice tries to annex the moment; body and trembling leaves keep the fear present.",
+      "expectedTiming": "Do not cover the rumble. Start after the silence has changed the room and after his late, too-forceful recovery beat.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    },
+    {
+      "speaker": "Zenny",
+      "exactDialogue": "A Storm’s coming.",
+      "voiceIdentity": "Zenny at her stillest: small, flat, certain, with no ornament because the fact is heavy enough.",
+      "dramaticIntention": "She wants Fuzzby to stop performing and register the real change in the sky.",
+      "subtext": "This is not a game beat anymore.",
+      "relationshipTarget": "Fuzzby, whose bravado she is quietly cutting through.",
+      "emotionalEntry": "Eyes find the sky first; body conserves motion.",
+      "emotionalExit": "Protective stillness, making space for the seriousness to arrive.",
+      "operativeWords": [
+        "Storm"
+      ],
+      "pace": "Slow-small, not dragged; compact and final.",
+      "rhythm": "One level statement, almost weather-report plain, which makes it more alarming.",
+      "pauses": "A dry hold before the line; no flourish after it.",
+      "breaths": "Barely audible inhale before speaking; keep breath low and steady.",
+      "nonVerbalActions": "She holds the sky in her eyes; stillness becomes the alarm instead of pointing or dramatizing.",
+      "elevenLabsV3Direction": "[quietly] A Storm’s coming.",
+      "physicalActionRelationship": "Voice and body align: reduced motion, reduced volume, increased certainty.",
+      "expectedTiming": "After the sky-look hold. Let the line be small enough that the darker leaves seem to speak with it.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    },
+    {
+      "speaker": "Fuzzby",
+      "exactDialogue": "Good thing I work well under pressure.",
+      "voiceIdentity": "Fuzzby’s official-boast voice, inflated on top of a hover that cannot back it up.",
+      "dramaticIntention": "He wants Zenny to believe he is useful in a crisis before she notices his altitude dip.",
+      "subtext": "I am scared, but if I sound promoted maybe I will become ready.",
+      "relationshipTarget": "Zenny, whose certainty has made him feel exposed.",
+      "emotionalEntry": "Jumps in too quickly, using confidence as cover-up.",
+      "emotionalExit": "Bravado remains in the mouth; fear leaks out through the final bob after the line.",
+      "operativeWords": [
+        "well",
+        "pressure"
+      ],
+      "pace": "Quick entry, then slightly stretched on the last phrase to sell competence.",
+      "rhythm": "Brisk self-advertisement with a tiny strain under “pressure.”",
+      "pauses": "No big pre-pause; he cuts in because silence would reveal fear.",
+      "breaths": "A quick high inhale before “Good”; small corrective breath hidden near “under.”",
+      "nonVerbalActions": "Chest out, chin up, official posture; hover drifts crooked and dips under “pressure,” followed by a corrective wingbeat he ignores.",
+      "elevenLabsV3Direction": "Good thing I work well under pressure.",
+      "physicalActionRelationship": "Voice contradicts body by sounding certified while the hover visibly fails the stress test.",
+      "expectedTiming": "Enter quickly after Zenny, like a cover-up. Let the line finish before the undercut: lingering altitude bob and darker pass across leaves.",
+      "generatedAsset": null,
+      "approvalState": "direction_pending_audio"
+    }
+  ],
+  "showrunnerJudgement": "Pass. I tried to break this against the treatment, and the scene holds. The storyboard has one governing experience rather than a coverage habit: Fuzzby’s over-importance physically destabilises the rainforest, Zenny’s composure gives the chaos its comic measurement, and the thunder genuinely changes who owns the frame. The sequence is not merely internally consistent; it preserves the selected scene’s central pleasure — a tiny overconfident parade that becomes weather before Fuzzby can admit it. The final image keeps the laugh and the inhale together: Fuzzby is still selling competence while the canopy and Zenny have already told the truth.",
+  "treatmentComparison": "Against Treatment 1, the board preserves the required kinetic imbalance versus composed judgment. SH1 opens already in motion at bee height with Fuzzby outpacing the frame and Zenny readable deeper as calm contrast, which matches the treatment’s opening contract. SH2 correctly refuses a safe two-shot punchline and lets Fuzzby invade Zenny’s steadier world for the status gag. SH3 avoids mechanical approach-impact-reaction coverage by arriving through environmental aftermath, so the rainforest participates rather than decorates. SH4 makes the storm a grammar change, not just a sound cue: the camera gives authority to the canopy and lets Fuzzby become smaller. SH5 lands the closing image promised by the treatment — Zenny still and certain, Fuzzby crookedly boastful, leaves darkening behind him. The cut pattern is motivated by contrast, impact, and tonal turn; it does not become habitual reaction grammar or safe alternating coverage. Voice direction also serves the selected experience: Fuzzby’s lines are bodily cover-ups and Zenny’s are dry, compact truth, not performed joke-delivery.",
+  "internalRevisions": [
+    {
+      "returnTo": "gate4",
+      "notes": "[director->Whole scene / SH2–SH4 and SH7–SH9] The sequence repeatedly resolves into action-consequence-reaction coverage. Fuzzby crashes, we cut to the evidence, cut to his self-image, cut to Zenny’s verdict; then thunder, Fuzzby denial, Zenny warning, Fuzzby boast. The treatment specifically warned against habitual coverage and asked for contrast inside the experience. This shot order makes the double-act readable but not volatile.; [cinematographer->SH2–SH4] The middle of the pollen comedy becomes too fixed and presentational. The leaf-reflection status beat and dedicated Zenny judgment frame give the gag a safe stage instead of keeping us inside the unstable bee-scale corridor. Zenny’s stillness should steady Fuzzby’s chaos; here it often replaces the chaos with a clean punchline setup.; [cinematographer->SH7–SH9] The storm turn is correctly motivated but over-covered. The camera abandons Fuzzby for the canopy in SH6, which is right, but then returns to a conventional line card for Fuzzby, a separate warning card for Zenny, and a closing boast card. The world should feel as if it has taken authority; instead the scene resumes dialogue alternation under darker leaves.; [director->Rhythm and escalation] The treatment wants rapid staccato bursts building toward the pollen peak, with Zenny rationed as comic punctuation. This version spends too much time dignifying each intermediate joke. Fuzzby’s self-importance is described with many careful holds and posture resets, which softens the sense that his steering is always losing to his commitment.",
+      "at": "2026-07-18T22:02:50"
+    }
+  ],
+  "escalation": null,
+  "provenance": {
+    "showrunner": {
+      "role": "showrunner",
+      "model": "gpt-5.5",
+      "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+      "canonVersion": "1.0",
+      "at": "2026-07-18T22:06:43",
+      "humanRevision": null
+    },
+    "director": {
+      "role": "director",
+      "model": "gpt-5.5",
+      "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+      "canonVersion": "1.0",
+      "at": "2026-07-18T22:06:43",
+      "humanRevision": null
+    },
+    "cinematographer": {
+      "role": "cinematographer",
+      "model": "gpt-5.5",
+      "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+      "canonVersion": "1.0",
+      "at": "2026-07-18T22:06:43",
+      "humanRevision": null
+    },
+    "voice": {
+      "role": "voice-director",
+      "model": "gpt-5.5",
+      "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+      "canonVersion": "1.0",
+      "at": "2026-07-18T22:06:43",
+      "humanRevision": null
+    }
+  },
+  "approvalState": "approved",
+  "humanNote": "",
+  "approvalLog": [
+    {
+      "target": "scene",
+      "state": "approved",
+      "note": "",
+      "at": "2026-07-18T23:28:45",
+      "by": "Julian"
+    },
+    {
+      "target": "scene",
+      "state": "approved",
+      "note": "",
+      "at": "2026-07-18T23:29:05",
+      "by": "Julian"
+    },
+    {
+      "target": "scene",
+      "state": "awaiting-human-storyboard-approval",
+      "note": "State-integrity repair (2026-07-21): S1.SH1 productionDetail.essentialProviderProtections (3 real protections removed -> empty list) and shots.cameraRelationship (camera-direction prose reworded) changed after this storyboard was approved on 2026-07-18, with no new approval event recorded for the change -- classified Semantic per the structured field-level diff. Separately, and independent of that classification: the canonical handover route (cb_handover.promote_to_canonical) currently refuses to compile S1.SH1 at all, live or archived-approved content (224 / 268 words vs. a 210-word hard ceiling in cb_engine.compile_shot_contract) -- re-approval alone will not unblock promotion; the source content needs further trimming first. Reverted to awaiting-human-storyboard-approval so this is never silently treated as current. No creative content was changed by this action.",
+      "at": "2026-07-21T07:32:16",
+      "by": "Claude (state-integrity repair, on Julian's bounded directive, 2026-07-21)"
+    },
+    {
+      "target": "scene",
+      "state": "approved",
+      "note": "",
+      "at": "2026-07-21T11:46:50",
+      "by": "Julian"
+    }
+  ],
+  "durationValidation": {
+    "perShot": [
+      {
+        "shotId": "S1.SH1",
+        "range": "6-8s",
+        "valid": true,
+        "loSec": 6.0,
+        "hiSec": 8.0
+      },
+      {
+        "shotId": "S1.SH2",
+        "range": "5-7s",
+        "valid": true,
+        "loSec": 5.0,
+        "hiSec": 7.0
+      },
+      {
+        "shotId": "S1.SH3",
+        "range": "3-5s",
+        "valid": true,
+        "loSec": 3.0,
+        "hiSec": 5.0
+      },
+      {
+        "shotId": "S1.SH4",
+        "range": "5-7s",
+        "valid": true,
+        "loSec": 5.0,
+        "hiSec": 7.0
+      },
+      {
+        "shotId": "S1.SH5",
+        "range": "6-8s",
+        "valid": true,
+        "loSec": 6.0,
+        "hiSec": 8.0
+      }
+    ],
+    "invalidShotIds": [],
+    "sceneTotal": {
+      "loSec": 25.0,
+      "hiSec": 35.0,
+      "formatted": "25-35s",
+      "allValid": true
+    }
+  },
+  "creativeCardHashCheck": {
+    "before": "e61cc8a30d0df75e789fbb441c0ed50c0ae1dda836fa3d2c675df888cb95b245",
+    "after": "e61cc8a30d0df75e789fbb441c0ed50c0ae1dda836fa3d2c675df888cb95b245",
+    "unchanged": true
+  },
+  "singleShotRegeneration": {
+    "shotId": "S1.SH1",
+    "siblingsUnchanged": [
+      "S1.SH2",
+      "S1.SH3",
+      "S1.SH4",
+      "S1.SH5"
+    ]
+  }
+}

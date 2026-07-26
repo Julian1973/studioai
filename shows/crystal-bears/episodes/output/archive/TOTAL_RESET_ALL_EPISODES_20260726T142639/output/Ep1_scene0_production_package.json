@@ -1,0 +1,274 @@
+{
+ "episode": "Ep1",
+ "sceneNumber": "0",
+ "sceneName": "Crystal Cove — abstracted title reflection: crystal facets, water skin, reflected sky, and glow before geography is fully readable",
+ "doctrine": "creative-room-2.0 -> cb_handover.promote_to_canonical -> the existing cb_render canonical package format (2026-07-17 source-level handover)",
+ "directorStatement": {
+  "audienceFeeling": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "whoseScene": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "emotionalChange": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "theLaugh": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "visualSurprise": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene",
+  "carryForward": "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene"
+ },
+ "beatCodes": [
+  "S00-B01-TITLE-INVITATION"
+ ],
+ "shots": [
+  {
+   "shotId": "S0.SH1",
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "durationSec": 5.0,
+   "purpose": "Begin inside the heart-note before the audience can name the place; make uncertainty tactile, not explained.",
+   "performanceAssignment": "The water skin barely holds the reflected glow together: tiny uneven tremors pull the broken shapes apart, then surface tension gathers them back into one thin, soft-moving pulse. The pulse does not burst; it presses outward with a fragile confidence, leaving the original reflection quieter behind it.",
+   "camera": "The camera listens from within the surface, nearly still and shallow, letting the tremble be the subject rather than searching for geography.",
+   "openingPose": "A crystal-lit reflection trembles on dark water so close that the reflected world is only broken glow and liquid surface.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "Cutting to the answering facet gives the note a new sensory idea — sound finding light. Remaining continuous on the water would make the pulse feel like a water effect instead of Crystal Cove answering.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "The broken glow stretches into a faint traveling line across the water, as if the note has found somewhere to go.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Keep the frame extremely close on dark water and broken reflected glow; do not reveal geography or characters.",
+    "The pulse must press outward gently with a fading tail, never burst, flash, or behave like a shockwave.",
+    "Preserve the almost-still listening camera so the tremble itself remains the subject."
+   ],
+   "charactersInFrame": [],
+   "continuityIn": null,
+   "continuityOut": {
+    "lighting": "A fragile traveling line of glow has left the original reflection quieter behind it, moving outward across the water surface.",
+    "cameraSide": "A fragile traveling line of glow has left the original reflection quieter behind it, moving outward across the water surface.",
+    "characters": []
+   },
+   "continuityProseIn": "",
+   "continuityProseOut": "A fragile traveling line of glow has left the original reflection quieter behind it, moving outward across the water surface.",
+   "dialogueTimingProse": "No dialogue; the shot breathes on the held unresolved note, the irregular tremble, and the delayed soft pulse outward.",
+   "referenceRolesProse": "Crystal Cove water/glow look references anchor the liquid surface, reflected crystal light, and shallow darkness; no character identity reference is involved.",
+   "principalPerformanceApproved": "The unseen note holds just shy of resolution; the glow answers with a tiny quiver that cannot quite steady itself.",
+   "animationTimingApproved": "Begin with a held, irregular tremble that feels like an inhale trying not to shake. Let the outward pulse arrive only after the glow has almost steadied, then travel gently with a fading tail rather than a flash.",
+   "transitionType": "PLANNED_CUT",
+   "voiceDirectorBrief": [],
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for the readable set.\n\nBegin exactly on @图1, the approved opening frame — the camera listens from within the surface, nearly still and shallow, letting the tremble be the subject rather than searching for geography. The water skin barely holds the reflected glow together: tiny uneven tremors pull the broken shapes apart, then surface tension gathers them back into one thin, soft-moving pulse. The pulse does not burst; it presses outward with a fragile confidence, leaving the original reflection quieter behind it. The broken glow stretches into a faint traveling line across the water, as if the note has found somewhere to go.\n\nPreserve character identity and relative scale.",
+   "promptWords": 118,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "scene plate"
+   },
+   "audioBrief": null,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: A crystal-lit reflection trembles on dark water so close that the reflected world is only broken glow and liquid surface.\n\n@图1 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 76,
+   "keyframeReferenceSlots": {
+    "@图1": "scene plate"
+   },
+   "internalConstraints": "Hard constraints: Keep the frame extremely close on dark water and broken reflected glow; do not reveal geography or characters; no The pulse must press outward gently with a fading tail, never burst, flash, or behave like a shockwave; Preserve the almost-still listening camera so the tremble itself remains the subject; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut."
+  },
+  {
+   "shotId": "S0.SH2",
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "durationSec": 4.0,
+   "purpose": "Let Crystal Cove answer the private signal without turning the title into a scenic tour.",
+   "performanceAssignment": "The facet receives the traveling line as a small internal catch: light runs through it too quickly, swells at the edge, then pulls itself back before releasing a gentler echo. The nearby suspended particles respond with a slight drift outward, as if nudged by the facet’s eager breath.",
+   "camera": "The camera stays compressed and attentive, making the facet feel like an instrument receiving the note rather than an object being displayed.",
+   "openingPose": "A close crystal facet catches the same wavering glow, with only a few suspended particles visible around its edge.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The cut follows the changed sensory handoff — light finding water. Staying continuous would over-map the space and weaken the treatment’s intimacy by turning the moment into geography.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "The facet’s echo spills downward as a pale ribbon of reflected light, aimed back toward the water.",
+   "physicalStaging": null,
+   "prohibited": [
+    "Keep the shot close and compressed on the facet; avoid turning it into a wide Crystal Cove tour.",
+    "The first glow response must feel a touch too eager, then visibly pull back before the gentler release.",
+    "Suspended particles should drift only slightly from the facet’s nudge, not become a separate magical effect."
+   ],
+   "charactersInFrame": [],
+   "continuityIn": {
+    "lighting": "The soft traveling glow from the water carries into this shot as the wavering signal the crystal facet catches.",
+    "cameraSide": "The soft traveling glow from the water carries into this shot as the wavering signal the crystal facet catches.",
+    "characters": []
+   },
+   "continuityOut": {
+    "lighting": "The facet has released a softer echo downward as a pale ribbon of reflected light aimed back toward the water.",
+    "cameraSide": "The facet has released a softer echo downward as a pale ribbon of reflected light aimed back toward the water.",
+    "characters": []
+   },
+   "continuityProseIn": "The soft traveling glow from the water carries into this shot as the wavering signal the crystal facet catches.",
+   "continuityProseOut": "The facet has released a softer echo downward as a pale ribbon of reflected light aimed back toward the water.",
+   "dialogueTimingProse": "No dialogue; timing is carried by the eager early swell, the brief self-correcting hesitation, and the softer echo release.",
+   "referenceRolesProse": "Crystal facet/material references anchor the close crystal identity, internal glow, and suspended particles; the environment remains compressed rather than scenic.",
+   "principalPerformanceApproved": "The facet answers a beat too eagerly: its glow swells, hesitates, then sends a softer echo into neighboring fragments.",
+   "animationTimingApproved": "Let the first glow answer a touch early, with a quick little swell that almost overfills the facet. Hold the hesitation just long enough to read as self-correction, then release the echo more softly and evenly into the neighboring fragments.",
+   "transitionType": "PLANNED_CUT",
+   "voiceDirectorBrief": [],
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for the readable set.\n\nBegin exactly on @图1, the approved opening frame — the camera stays compressed and attentive, making the facet feel like an instrument receiving the note rather than an object being displayed. The facet receives the traveling line as a small internal catch: light runs through it too quickly, swells at the edge, then pulls itself back before releasing a gentler echo. The nearby suspended particles respond with a slight drift outward, as if nudged by the facet’s eager breath. The facet’s echo spills downward as a pale ribbon of reflected light, aimed back toward the water.\n\nPreserve character identity and relative scale.",
+   "promptWords": 115,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "scene plate"
+   },
+   "audioBrief": null,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: A close crystal facet catches the same wavering glow, with only a few suspended particles visible around its edge.\n\nContinuity in: The soft traveling glow from the water carries into this shot as the wavering signal the crystal facet catches. @图1 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 96,
+   "keyframeReferenceSlots": {
+    "@图1": "scene plate"
+   },
+   "internalConstraints": "Hard constraints: Keep the shot close and compressed on the facet; avoid turning it into a wide Crystal Cove tour; no The first glow response must feel a touch too eager, then visibly pull back before the gentler release; no Suspended particles should drift only slightly from the facet’s nudge, not become a separate magical effect; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut."
+  },
+  {
+   "shotId": "S0.SH3",
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "durationSec": 6.0,
+   "purpose": "Discover the title where reflection and glow finally align, while keeping one small tremble of cost.",
+   "performanceAssignment": "The returning ribbon touches the water and the surface overreacts, wrinkling the almost-readable title into friendly distortion. The water then dampens its own ripple, line by line, until the letters can hold; one outer edge keeps a tiny tremble, the feeling not fully put away.",
+   "camera": "The camera waits in place for the title to be found; its stillness lets the ripple’s over-eager correction carry the friendliness.",
+   "openingPose": "The water surface holds a faint, almost-readable title reflection as the returning ribbon of crystal light approaches it.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The title has completed the ceremonial promise and must hand cleanly to story action. Remaining continuous after the shimmer would overhold the feeling and turn bittersweetness into sentiment.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "The title sits clear in the reflection, the glow steady around it, with one last unresolved shimmer trembling at the edge.",
+   "physicalStaging": null,
+   "prohibited": [
+    "The title must resolve as a reflection in water, not as flat graphic text pasted over the image.",
+    "Let the returning ribbon briefly wrinkle the almost-readable title before it settles cleanly enough to read.",
+    "Preserve one small unresolved edge-shimmer after the title clears; do not smooth the feeling completely away."
+   ],
+   "charactersInFrame": [],
+   "continuityIn": {
+    "lighting": "The pale ribbon of light released by the facet carries down into the water and approaches the faint title reflection.",
+    "cameraSide": "The pale ribbon of light released by the facet carries down into the water and approaches the faint title reflection.",
+    "characters": []
+   },
+   "continuityOut": {
+    "lighting": "The title is clear in reflection with steady surrounding glow, while one outer edge still holds a tiny unresolved shimmer for the story handoff.",
+    "cameraSide": "The title is clear in reflection with steady surrounding glow, while one outer edge still holds a tiny unresolved shimmer for the story handoff.",
+    "characters": []
+   },
+   "continuityProseIn": "The pale ribbon of light released by the facet carries down into the water and approaches the faint title reflection.",
+   "continuityProseOut": "The title is clear in reflection with steady surrounding glow, while one outer edge still holds a tiny unresolved shimmer for the story handoff.",
+   "dialogueTimingProse": "No dialogue; the title read is timed to the contact ripple, the musical settling, and the final half-beat of edge-shimmer.",
+   "referenceRolesProse": "Title treatment, Crystal Cove water-reflection, and crystal-glow look references anchor the readable reflected lettering, liquid distortion, and gentle chord-light behavior.",
+   "principalPerformanceApproved": "The water receives the glow too enthusiastically, wrinkles the forming title for a breath, then settles itself as if trying again more carefully.",
+   "animationTimingApproved": "Let the contact ripple disturb the letters briefly before the audience can read them cleanly. The settling should arrive with the first gentle musical resolution, then keep the final edge-shimmer alive for a small half-beat after the title has become clear.",
+   "transitionType": "PLANNED_CUT",
+   "voiceDirectorBrief": [],
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for the readable set.\n\nBegin exactly on @图1, the approved opening frame — the camera waits in place for the title to be found; its stillness lets the ripple’s over-eager correction carry the friendliness. The returning ribbon touches the water and the surface overreacts, wrinkling the almost-readable title into friendly distortion. The water then dampens its own ripple, line by line, until the letters can hold; one outer edge keeps a tiny tremble, the feeling not fully put away. The title sits clear in the reflection, the glow steady around it, with one last unresolved shimmer trembling at the edge.\n\nPreserve character identity and relative scale.",
+   "promptWords": 115,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "scene plate"
+   },
+   "audioBrief": null,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: The water surface holds a faint, almost-readable title reflection as the returning ribbon of crystal light approaches it.\n\nContinuity in: The pale ribbon of light released by the facet carries down into the water and approaches the faint title reflection. @图1 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 96,
+   "keyframeReferenceSlots": {
+    "@图1": "scene plate"
+   },
+   "internalConstraints": "Hard constraints: no The title must resolve as a reflection in water, not as flat graphic text pasted over the image; no Let the returning ribbon briefly wrinkle the almost-readable title before it settles cleanly enough to read; Preserve one small unresolved edge-shimmer after the title clears; do not smooth the feeling completely away; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no floating or sinking through ground."
+  }
+ ],
+ "totalSec": 15.0,
+ "continuityLedger": [
+  {
+   "shotId": "S0.SH1",
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "Cutting to the answering facet gives the note a new sensory idea — sound finding light. Remaining continuous on the water would make the pulse feel like a water effect instead of Crystal Cove answering.",
+   "continuityOut": {
+    "lighting": "A fragile traveling line of glow has left the original reflection quieter behind it, moving outward across the water surface.",
+    "cameraSide": "A fragile traveling line of glow has left the original reflection quieter behind it, moving outward across the water surface.",
+    "characters": []
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "S0.SH2",
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The cut follows the changed sensory handoff — light finding water. Staying continuous would over-map the space and weaken the treatment’s intimacy by turning the moment into geography.",
+   "continuityOut": {
+    "lighting": "The facet has released a softer echo downward as a pale ribbon of reflected light aimed back toward the water.",
+    "cameraSide": "The facet has released a softer echo downward as a pale ribbon of reflected light aimed back toward the water.",
+    "characters": []
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "S0.SH3",
+   "beatCode": "S00-B01-TITLE-INVITATION",
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The title has completed the ceremonial promise and must hand cleanly to story action. Remaining continuous after the shimmer would overhold the feeling and turn bittersweetness into sentiment.",
+   "continuityOut": {
+    "lighting": "The title is clear in reflection with steady surrounding glow, while one outer edge still holds a tiny unresolved shimmer for the story handoff.",
+    "cameraSide": "The title is clear in reflection with steady surrounding glow, while one outer edge still holds a tiny unresolved shimmer for the story handoff.",
+    "characters": []
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "errors": 0,
+  "warnings": 2,
+  "issues": [
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[0](S0.SH1).performanceAssignment",
+    "message": "5 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   },
+   {
+    "severity": "WARNING",
+    "code": "CHECKLIST_ASSIGNMENT",
+    "path": "shots[2](S0.SH3).performanceAssignment",
+    "message": "6 comma-separated fragments — the Motion Contract wants one cause with chained consequences, not a checklist of verbs"
+   }
+  ],
+  "beatsScopeNote": "the verbatim-dialogue cross-check and the BIG-comedy physicalStaging requirement did not run against a real beats list (schema gap, PIPELINE_CUTOVER_LEDGER.md §7) — verbatim dialogue for this promotion is separately guaranteed by _scoped_shot's own partition-completeness assertion.",
+  "validatedAt": "2026-07-18T22:34:37",
+  "revision": 1
+ },
+ "reviewCriteria": {
+  "canon": "characters and world accurate vs references",
+  "physics": "clip QA — identity, anatomy, frozen/morph",
+  "continuity": "join check — position/state/light vs the prior shot",
+  "direction": "does the joke land — Julian's own reserved verdict, never a machine check"
+ },
+ "sourceBeatPackage": null,
+ "sourceStoryboard": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour/cb-output/creative/Ep1_scene0_storyboard.json",
+  "md5": "ef779fd8e507dcae61b30f30720e00ef",
+  "approvalState": "approved",
+  "humanNote": "",
+  "creativeCardHashes": {
+   "S0.SH1": "7b205e04a3b4344e8c6c0fd94c53335238aee7fad3971021782f5b46f9a13177",
+   "S0.SH2": "b8cb0f1448c1d3de0b6cdb9ffb6d1c0375e6c3a64053bf0cc8ad0b3de3ce3d09",
+   "S0.SH3": "416d2dc0e35ffa03e70446c5c09d415f8a6562fcb2b077e02ebef174a917f04e"
+  }
+ },
+ "revision": 1,
+ "revisionNote": "Promoted S0.SH1, S0.SH2, S0.SH3 from human-approved storyboard Ep1_scene0_storyboard.json into the canonical package cb_render.py already reads. Revision 0's shots/ledger and every prior spend-token binding hash derived from them are stale (the package's own shots-hash changed).",
+ "repairLog": [],
+ "handover": {
+  "carriedForwardUnchangedShots": [],
+  "resetChangedShots": [
+   "S0.SH1",
+   "S0.SH2",
+   "S0.SH3"
+  ],
+  "rule": "full compiled shot + own creative card hash must be unchanged"
+ }
+}

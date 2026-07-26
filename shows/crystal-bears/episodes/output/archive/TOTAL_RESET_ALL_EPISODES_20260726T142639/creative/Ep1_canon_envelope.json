@@ -1,0 +1,65 @@
+{
+ "episode": "Ep1",
+ "canonVersion": "1.0",
+ "builtAt": "2026-07-18T22:06:44",
+ "sources": {
+  "showBible": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/CRYSTAL_BEARS_LOCKED_CANON.md",
+   "md5": "e78b3defd3607bff59a5c2eaf87bc865"
+  },
+  "studioBible": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/CRYSTAL_BEARS_STUDIO_BIBLE.md",
+   "md5": "0ef6fdedd0daa515916dbf36b5de5083"
+  },
+  "characters": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/canon/characters.json",
+   "md5": "a19360e71a6e901fe98e7ce68f0ae766"
+  },
+  "locations": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/canon/locations.json",
+   "md5": "63356fbef584fd31a3dcb028b5049735"
+  },
+  "continuity": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/canon/continuity.json",
+   "md5": "63356fbef584fd31a3dcb028b5049735"
+  },
+  "styleLaw": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/laws/style.txt",
+   "md5": "b69c80ab60ca5a7857e923efaa22caba"
+  },
+  "showrunnerTaste": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
+   "md5": "bceaf798fd199f8f20339ed12e2cf9ad"
+  },
+  "directorTaste": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/DIRECTOR_TASTE_CANON.md",
+   "md5": "81400bd511a7cc52c0a11e6498c715e1"
+  },
+  "cinematographyTaste": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
+   "md5": "b920bcb0cce1db8f5bce27e0359fc917"
+  },
+  "voiceTaste": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/VOICE_PERFORMANCE_CANON.md",
+   "md5": "f026503be55d702f24bdfc25b2e32924"
+  },
+  "characterPerformance": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/CHARACTER_PERFORMANCE_CANON.json",
+   "md5": "ac56f0f30f10a4ad4a04916004d72930"
+  },
+  "relationships": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/RELATIONSHIP_CANON.json",
+   "md5": "29916928415653b70480aa291677b163"
+  },
+  "exemplars": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/shows/crystal-bears/creative/EXEMPLAR_LIBRARY.json",
+   "md5": "a513bba4b9137180c03a8a0f9ebcab48"
+  },
+  "script": {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/cb-output/Ep1_The_Adventure_Begins_beat_package.json",
+   "md5": "9b4a015a2bc61b89336540840978c38d"
+  }
+ },
+ "gaps": [],
+ "conflicts": []
+}

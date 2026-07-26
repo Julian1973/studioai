@@ -1,0 +1,212 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_8b776492.png",
+  "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+  "inputSignature": {
+   "briefHash": "2de2ccfd6976b570a549f6e2c2f9513057b0fd3c5842dc40cd7eff6fc94903f3",
+   "referenceHashes": {}
+  },
+  "referencePath": null,
+  "generatedAt": "2026-07-24T23:08:54",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+  "approvedAt": "2026-07-24T23:08:54",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_10bfd50b.png",
+   "hash": "d5e851cf7a799f121f34e0a6d257c6925ccb030830e4bdc428ef0a789e5017fa",
+   "inputSignature": {
+    "briefHash": "0b74e22b5f14d0d7aaaccaa5476f63a56b90b860cf55133a5950f5fb40495049",
+    "referenceHashes": {}
+   },
+   "referencePath": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+   "generatedAt": "2026-07-19T00:13:07",
+   "outcome": "rejected",
+   "rejectedAt": "2026-07-19T00:17:58",
+   "reviewedBy": "Julian",
+   "rejectedNote": "its awful",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260719T001758/Ep1_S1_plate_candidate_10bfd50b.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_03138989.png",
+   "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+   "inputSignature": {
+    "briefHash": "f17c2e55d14a260d68733008d05c3018f40ab152765f01fd6f4e580da3739e5b",
+    "referenceHashes": {}
+   },
+   "referencePath": null,
+   "generatedAt": "2026-07-19T06:59:21",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+   "approvedAt": "2026-07-19T06:59:28",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-07-24T19:08:34",
+   "archivedFile": "media/archive/scenelook_superseded/20260724T190834/Ep1_S1_plate_candidate_03138989.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_0318f1c0.png",
+   "hash": "c67cddc1cfa551bb848fa02128ddd324a3013f61a0521ad6077ae67ef79b2d0a",
+   "inputSignature": {
+    "briefHash": "2de2ccfd6976b570a549f6e2c2f9513057b0fd3c5842dc40cd7eff6fc94903f3",
+    "referenceHashes": {}
+   },
+   "referencePath": null,
+   "generatedAt": "2026-07-24T16:01:45",
+   "approvedAt": "2026-07-24T19:08:34",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-07-24T23:07:03",
+   "archivedFile": "media/archive/scenelook_superseded/20260724T230703/Ep1_S1_plate_candidate_0318f1c0.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_da46c64c.png",
+   "hash": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098",
+   "inputSignature": {
+    "briefHash": "2de2ccfd6976b570a549f6e2c2f9513057b0fd3c5842dc40cd7eff6fc94903f3",
+    "referenceHashes": {}
+   },
+   "referencePath": null,
+   "generatedAt": "2026-07-24T23:07:00",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/crystal_cove_meadow.png",
+   "approvedAt": "2026-07-24T23:07:03",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-07-24T23:07:41",
+   "archivedFile": "media/archive/scenelook_superseded/20260724T230741/Ep1_S1_plate_candidate_da46c64c.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_2fc40bb6.png",
+   "hash": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098",
+   "inputSignature": {
+    "briefHash": "2de2ccfd6976b570a549f6e2c2f9513057b0fd3c5842dc40cd7eff6fc94903f3",
+    "referenceHashes": {}
+   },
+   "referencePath": null,
+   "generatedAt": "2026-07-24T23:07:35",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_field.png",
+   "approvedAt": "2026-07-24T23:07:41",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-07-24T23:08:54",
+   "archivedFile": "media/archive/scenelook_superseded/20260724T230854/Ep1_S1_plate_candidate_2fc40bb6.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_e8da1cca.png",
+   "hash": "59099f2cc9925a4d8d94ac99cf6c5bca917553e2834ade5ab9eabdc720d19828",
+   "inputSignature": {
+    "briefHash": "2de2ccfd6976b570a549f6e2c2f9513057b0fd3c5842dc40cd7eff6fc94903f3",
+    "referenceHashes": {}
+   },
+   "referencePath": null,
+   "generatedAt": "2026-07-24T23:09:47",
+   "outcome": "rejected",
+   "rejectedAt": "2026-07-24T23:15:37",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Julian wants the original locked library plate, not a regenerated one — rejecting the stray generated candidate so the approved original stays current.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260724T231537/Ep1_S1_plate_candidate_e8da1cca.png"
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "skillHash": "a3a32f9d7c85542d",
+    "model": "gpt-5.5",
+    "scene": "1",
+    "shotId": null,
+    "packageRevision": 40,
+    "preparedAt": "2026-07-24T15:42:50",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "e2a33dc5cf89e38fc2a08df6f030a42de31fcefba8abc17dc40a757af7354bf1",
+    "signatureVersion": 3,
+    "sourceFields": {
+     "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+     "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+     "sceneName": "d8c4abffa94910152456bf78903136c01083536c1f1b5a9197643ce543e3f221",
+     "approvedStoryboardScene": "a6f557be533879288f632e91703cd9bbde891a50a2cd46eeb01e3717d87ab888",
+     "selectedTreatment": "3b0b43ed063cd5fd9d4018ae6eeb06ef230f1a040d6180dc66294fa3a3defdc8",
+     "locationCanon": "cabadb7c038b574a3703811de893da72e6630741a3cd428187c7c4aee51cdfee",
+     "styleLaw": "1841b41e71d53aafe95d6abaad4e46840bfb4682b34ca15c546fc5c4e28b0797"
+    },
+    "outputHash": "92d4e4cb8625a84a2f3f1f86f2c7e49b28afb9f7ab1bed2f672d12e4423973df",
+    "output": {
+     "providerPrompt": "Environment-only scene look plate for original 3D CGI animation, ages 4–8, Pixar-caliber material richness: inside a bee-scale rainforest flower corridor, not an open landscape. Monumental tropical blossoms form natural lanes between stems; giant curled petals, huge fuzzy pollen-heavy anthers, yellow pollen dust on plant surfaces, broad springy leaves shaped as usable paths and obstacles, one low crossing wet bark branch, damp moss pads, bark ridges, dangling vines, glossy dew beads, and suspended pollen motes in humid air. Bright clear daylight with the sun already high and white-gold; clean sun shafts through canopy gaps; crisp vivid light across petals, leaves, moss, pollen, and bark; cool turquoise bounce shadows under leaves and petals. Highest canopy leaves slightly darkened by a faint grey-violet sky filter, no rain. Palette of luminous rainforest greens, yellow pollen, juicy magenta and coral flowers, wet deep-brown bark, moss green, clear dew highlights. Every plant surface reads oversized, tactile, springy, reactive, and physically usable at bee scale. No characters, no animals, no faces, no buildings, no props, no pulled-back jungle vista, no camera angle, no shot composition.",
+     "doesItLand": "Yes — this reads true to the scene as an interior bee-scale rainforest flower corridor with bright high sun and the first faint canopy warning of storm."
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-07-24T15:43:03",
+    "reviewedBy": "auto: drift-clean + canon-environment (Julian's automation ruling, 2026-07-24)",
+    "note": "Corrected sources: rainforest interior at bee scale, morning as bright/white-gold states"
+   },
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "skillHash": "a3a32f9d7c85542d",
+    "model": "gpt-5.5",
+    "scene": "1",
+    "shotId": "None",
+    "packageRevision": 41,
+    "preparedAt": "2026-07-24T23:11:05",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "3388e830b5dfe0173b4d7d752cab70eff2e2532618ac7330b95a86a2f9a1eab4",
+    "signatureVersion": 3,
+    "sourceFields": {
+     "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+     "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+     "sceneName": "d8c4abffa94910152456bf78903136c01083536c1f1b5a9197643ce543e3f221",
+     "approvedStoryboardScene": "a6f557be533879288f632e91703cd9bbde891a50a2cd46eeb01e3717d87ab888",
+     "selectedTreatment": "3b0b43ed063cd5fd9d4018ae6eeb06ef230f1a040d6180dc66294fa3a3defdc8",
+     "locationCanon": "16b45e0cca989c1fc46136ffbf010c5ac7187ea299b472f24991d85e901dd7cd",
+     "styleLaw": "1841b41e71d53aafe95d6abaad4e46840bfb4682b34ca15c546fc5c4e28b0797"
+    },
+    "outputHash": "94cd84e0f051188c4ceceff7ee9b0ab8ede76c9f54a87dd034fb24434126ccd6",
+    "output": {
+     "providerPrompt": "Environment-only 3D CGI animation scene look plate, matching the locked reference image deep_rainforest_flower_meadow.png exactly as visual law: a Crystal Cove wildflower meadow deep within the rainforest, read at bee scale, with towering purple lavender spikes, white daisies, and pink-red clover forming low grass corridors between tall green stems; pollen-heavy blossom heads at flight height; small clear crystals resting low among the grass; soft rolling hills receding in pale haze beyond the meadow. Plant materials are soft and springy: slightly waxy petals, fuzzy clover, fine pollen dust, flexible stems, fresh grass blades, and quiet crystal glints. Lighting: clear blue sky at ground level; low bright white-gold sun just above the hills; long soft shadows across the flower tops; petal edges backlit with thin bright rims; gentle haze over the distant hills; the highest canopy slightly darker with cool grey-violet filtering through upper leaves, no rain. Palette follows the locked plate: lavender purple, daisy white, pink-red clover, leaf and grass greens, pollen yellow, clear crystal highlights, pale hazy hills. No characters, no animals, no faces, no extra props, no camera angle, no shot composition.",
+     "doesItLand": "Yes, this reads true to the scene as a bee-scale sunlit rainforest wildflower meadow with the first subtle storm warning above."
+    }
+   },
+   "history": [
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-07-19T00:04:24",
+     "editedAt": "2026-07-19T00:11:58",
+     "preparedBy": "specialist",
+     "sourceHash": "690aff9f0476d627d2b1e8afffcc03460789a3c3aeaa4178ae2352639fabc641",
+     "output": {
+      "creativeIntent": "Define a playful bee-scale rainforest world that begins as a warm comedy playground and already carries the first atmospheric warning of a storm. The environment should feel alive, responsive, oversized, tactile, and child-legible: a place where pollen, petals, leaves, and vines can physically participate in Fuzzby’s chaos before the sky interrupts the joke.",
+      "storyOfPlace": "Deep within the rainforest, ordinary plant life becomes monumental at bee scale. Towering tropical flowers form natural corridors, platforms, and springy obstacles; curled petals, giant anthers, broad leaves, mossy bark, dangling vines, and bead-like droplets create a living play-space. The forest is lush and welcoming, but the upper canopy has begun to darken with a subtle weather shift: leaves tremble, distant grey-violet storm light seeps between the greens, and the atmosphere feels like it is holding its breath.",
+      "paletteAndLighting": "Warm saturated daytime rainforest color with golden pollen yellows, luminous leaf greens, juicy flower magentas, coral reds, turquoise shadows, and amber sun shafts. Introduce the coming storm through restrained cool grey-violet canopy shadows, slightly dimmed upper greens, and a soft contrast between cheerful foreground warmth and cooler overhead pressure. Lighting should remain bold and readable for ages 4-8: glowing pollen motes, humid volumetric sunbeams, soft bounce light under petals, and no harsh realism.",
+      "materialsAndAtmosphere": "Materials are tactile and animated-feature rich: waxy translucent petals with soft subsurface glow, fuzzy pollen clumps, powdery pollen dust suspended in air, springy rubbery leaves, damp moss, wet bark ridges, silky vine fibers, glossy dew beads, and soft rainforest haze. Atmosphere should feel humid, fragrant, and buoyant, with floating pollen and tiny moisture particles catching light. The forest must feel capable of bouncing, recoiling, shaking, and laughing along, while the darkening canopy suggests the first serious interruption.",
+      "continuityRules": [
+       "Environment-only Scene Look plate: no characters, no animals, no faces, no props belonging to characters, no text, no logos.",
+       "Maintain bee-scale perspective through oversized flowers, huge pollen grains, towering leaves, and monumental rainforest textures.",
+       "The rainforest is not generic backdrop; every plant surface should feel physically usable, springy, reactive, and comedy-ready.",
+       "Daytime remains warm and saturated, but include clear early storm cues in the upper canopy: cooler shadow, tremor energy, humid pressure, and distant grey-violet light.",
+       "No heavy rain yet; this is the warning before the storm fully arrives uses darkening canopy and atmospheric tension, not downpour imagery."
+      ],
+      "providerPrompt": "Create one environment-only Scene Look plate for an original high-end 3D CGI animated children’s series, ages 4-8, set deep within a rainforest at bee scale during daytime. Show a lush oversized rainforest interior made of monumental tropical flowers, giant curled petals, huge fuzzy anthers, pollen-dusted plant surfaces, broad springy leaves, damp moss, wet bark ridges, dangling vines, glossy dew beads, and suspended pollen motes in humid air. The world should feel playful, tactile, warm, and physically reactive, as if petals and leaves could bounce, recoil, and participate in comedy. Use a warm saturated palette of golden pollen yellow, luminous rainforest green, juicy magenta and coral flowers, amber sun shafts, turquoise bounce shadows, and soft glowing humidity. Include the first warning of an incoming storm only through the environment: subtly darkened upper canopy, cool grey-violet light filtering above, trembling leaf silhouettes, and heavier humid atmosphere, while the lower rainforest still holds cheerful warmth. Materials should be rich and legible: waxy translucent petals with soft subsurface glow, powdery pollen clumps, rubbery leaves, silky vine fibers, damp moss, and sparkling dew. Bold readable animated-feature styling, real weight, squash-and-stretch-friendly forms, warm saturated light, no photoreal harshness. Environment only: no characters, no animals, no faces, no character props, no text, no logos, no heavy rain."
+     },
+     "editedBy": "Julian",
+     "outcome": "rejected",
+     "decisionAt": "2026-07-24T15:42:19",
+     "reviewedBy": "auto: Gold Build front-to-back audit (Julian's directive, 2026-07-24)",
+     "note": "Candidate carries 'warm saturated'/'amber sun shafts' — the drift-source vocabulary; also the generated plate it produced was an open mountain meadow at sunset, contradicting the canon's own 'rainforest interior at bee scale'. Re-author under the corrected locations.json light fields + Light Law."
+    }
+   ]
+  }
+ }
+}

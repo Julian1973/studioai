@@ -1,0 +1,481 @@
+{
+ "archivedAt": "20260726T142639",
+ "reason": "TOTAL RESET, ALL EPISODES \u2014 Julian, 2026-07-26: \"i need to be able to run the episode again from the start so i want every episode taken out and archived so we start a fresh.\" Every episode artifact and every rendered asset is archived. The run begins at the SCRIPT.",
+ "note": "This supersedes CLEAN_RUN_RESET_20260726T141222 and EP1_FULL_RESET_20260726T142010. Those two archives are still on disk and still valid; the content came BACK at 14:24 when Julian restored the project from an external drive, so it is archived again here. Duplicate filenames within this archive get a __dup suffix rather than overwriting \u2014 nothing is ever lost to a name collision.",
+ "scriptCheck": "Ep1_The_Adventure_Begins_Final_v3.txt is BYTE-IDENTICAL to the v2 in git (578 lines, 17,804 bytes, diff clean) \u2014 a rename, not a revision. No script content was gained or lost in the external-drive round trip.",
+ "nothingDeleted": true,
+ "theRunStartsHere": "shows/crystal-bears/episodes/scripts/Ep1_The_Adventure_Begins_Final_v3.txt",
+ "kept": {
+  "episodes/scripts/": "the script + title \u2014 Gate 0, the only input the fresh run needs",
+  "canon/": "characters, locations, LOCKED_CANON, banned vocabulary",
+  "cb-seed/assets/": "44 turnaround references + 6 locked \u2014 identity source",
+  "creative/": "TASTE CANONs, CAUSE_CHAIN_METHOD, SH1_KEEPER_EXEMPLAR, LEAN_LAW, RETROSPECTIVE_THE_SPINE \u2014 the learning from 594 renders and 42 verdicts",
+  "engine/ + cb-studio/": "the new system",
+  "engine/media/archive/ (369MB)": "prior render evidence, untouched"
+ },
+ "fileCount": 66,
+ "files": [
+  {
+   "file": "Ep1_The_Adventure_Begins_beat_package.json",
+   "was": "shows/crystal-bears/episodes/output/Ep1_The_Adventure_Begins_beat_package.json",
+   "now": "output/Ep1_The_Adventure_Begins_beat_package.json",
+   "bytes": 57555,
+   "md5": "b0486405b59fc55a1061afcd2963a111"
+  },
+  {
+   "file": "Ep1_scene0_production_package.json",
+   "was": "shows/crystal-bears/episodes/output/Ep1_scene0_production_package.json",
+   "now": "output/Ep1_scene0_production_package.json",
+   "bytes": 22234,
+   "md5": "e513c1a45b38a793c7e64000db99f42d"
+  },
+  {
+   "file": "Ep1_scene1_production_package.json",
+   "was": "shows/crystal-bears/episodes/output/Ep1_scene1_production_package.json",
+   "now": "output/Ep1_scene1_production_package.json",
+   "bytes": 257473,
+   "md5": "fd958af55ded7ff4c2367a40d0431414"
+  },
+  {
+   "file": "Ep1_scene1_production_package.json.bak-before-chair-retire-20260726T065238",
+   "was": "shows/crystal-bears/episodes/output/Ep1_scene1_production_package.json.bak-before-chair-retire-20260726T065238",
+   "now": "output/Ep1_scene1_production_package.json.bak-before-chair-retire-20260726T065238",
+   "bytes": 663690,
+   "md5": "d212af02bdbfe5797eca4f26f1100441"
+  },
+  {
+   "file": "Ep1_scene1_production_package.json.bak-before-light-fix",
+   "was": "shows/crystal-bears/episodes/output/Ep1_scene1_production_package.json.bak-before-light-fix",
+   "now": "output/Ep1_scene1_production_package.json.bak-before-light-fix",
+   "bytes": 594852,
+   "md5": "73ffcbb296305f96c000ec9bd9d1f9bc"
+  },
+  {
+   "file": "Ep1_scene1_production_package.json.bak-before-reconcile-074023",
+   "was": "shows/crystal-bears/episodes/output/Ep1_scene1_production_package.json.bak-before-reconcile-074023",
+   "now": "output/Ep1_scene1_production_package.json.bak-before-reconcile-074023",
+   "bytes": 257473,
+   "md5": "fd958af55ded7ff4c2367a40d0431414"
+  },
+  {
+   "file": "Ep1_scenelook_scene1.json",
+   "was": "shows/crystal-bears/episodes/output/Ep1_scenelook_scene1.json",
+   "now": "output/Ep1_scenelook_scene1.json",
+   "bytes": 16029,
+   "md5": "2d63ecc19c41a1a581a6f26a7b9ce8b8"
+  },
+  {
+   "file": "Ep1_canon_envelope.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_canon_envelope.json",
+   "now": "creative/Ep1_canon_envelope.json",
+   "bytes": 2492,
+   "md5": "32f4439a61a02a58aba94382cca16fca"
+  },
+  {
+   "file": "Ep1_episode_vision.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_episode_vision.json",
+   "now": "creative/Ep1_episode_vision.json",
+   "bytes": 3648,
+   "md5": "7bd917b7bb6b77716001a2d697885dc9"
+  },
+  {
+   "file": "Ep1_scene1_canon_completion_PROPOSED.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_scene1_canon_completion_PROPOSED.json",
+   "now": "creative/Ep1_scene1_canon_completion_PROPOSED.json",
+   "bytes": 13546,
+   "md5": "a643a281cb67eedb957f06b2eded11f1"
+  },
+  {
+   "file": "Ep1_scene1_storyboard.PRE_JULIAN_RESTAGE_20260722.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_scene1_storyboard.PRE_JULIAN_RESTAGE_20260722.json",
+   "now": "creative/Ep1_scene1_storyboard.PRE_JULIAN_RESTAGE_20260722.json",
+   "bytes": 79629,
+   "md5": "460e974947168733e576c37b12ad6431"
+  },
+  {
+   "file": "Ep1_scene1_storyboard.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_scene1_storyboard.json",
+   "now": "creative/Ep1_scene1_storyboard.json",
+   "bytes": 87724,
+   "md5": "f2c415b61150da365076effb2548c5e1"
+  },
+  {
+   "file": "Ep1_story_intake_CANDIDATE.json",
+   "was": "shows/crystal-bears/episodes/output/creative/Ep1_story_intake_CANDIDATE.json",
+   "now": "creative/Ep1_story_intake_CANDIDATE.json",
+   "bytes": 64353,
+   "md5": "2b5bbd4bca6006f915da1851a7114008"
+  },
+  {
+   "file": "Ep1_S1.SH1_c1.mp4",
+   "was": "engine/media/shots/Ep1_S1.SH1_c1.mp4",
+   "now": "media/shots/Ep1_S1.SH1_c1.mp4",
+   "bytes": 8399309,
+   "md5": "75351d9dcd1116d808414869e390abfa"
+  },
+  {
+   "file": "Ep1_S1.SH1_c1.mp4.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_c1.mp4.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_c1.mp4.gen.json",
+   "bytes": 296,
+   "md5": "7f182cf562998cfe89753e0dc3491e26"
+  },
+  {
+   "file": "Ep1_S1.SH1_c1.mp4.review.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_c1.mp4.review.json",
+   "now": "media/shots/Ep1_S1.SH1_c1.mp4.review.json",
+   "bytes": 535,
+   "md5": "ad4afb3190255c2f9c33dcba1ff590d5"
+  },
+  {
+   "file": "Ep1_S1.SH1_final_frame.png",
+   "was": "engine/media/shots/Ep1_S1.SH1_final_frame.png",
+   "now": "media/shots/Ep1_S1.SH1_final_frame.png",
+   "bytes": 1148636,
+   "md5": "501ba5618d0b4c1e19366d5a7b552668"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_4326fb62.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_4326fb62.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_4326fb62.png.gen.json",
+   "bytes": 208,
+   "md5": "ee4ce7d31291db63d1ddb4c7a00fa3db"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_4e19d582.png",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_4e19d582.png",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_4e19d582.png",
+   "bytes": 700789,
+   "md5": "9f64d2a89b7329e5983456507a4b62ff"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_55afbe2d.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_55afbe2d.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_55afbe2d.png.gen.json",
+   "bytes": 206,
+   "md5": "501c36879bc408db834fd0e384bca923"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_9f4178a4.png",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_9f4178a4.png",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_9f4178a4.png",
+   "bytes": 456569,
+   "md5": "d2138e74a2c27c29a93663a1351efc7d"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_9f4178a4.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_9f4178a4.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_9f4178a4.png.gen.json",
+   "bytes": 206,
+   "md5": "878bd0633c60c9dcf7622c4a660a51ba"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_c0b2e6c0.png",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_c0b2e6c0.png",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_c0b2e6c0.png",
+   "bytes": 513207,
+   "md5": "02d3592a46c0a52bc6a800cbb218a21d"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_c0b2e6c0.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_c0b2e6c0.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_c0b2e6c0.png.gen.json",
+   "bytes": 207,
+   "md5": "9019c30150a218683e4fa96be7d840cd"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_d66af669.png",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_d66af669.png",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_d66af669.png",
+   "bytes": 700789,
+   "md5": "9f64d2a89b7329e5983456507a4b62ff"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_d66af669.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_d66af669.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_d66af669.png.gen.json",
+   "bytes": 183,
+   "md5": "64623c224e7126f5930da3e0dddf7301"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_ecfe0b38.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_ecfe0b38.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_ecfe0b38.png.gen.json",
+   "bytes": 182,
+   "md5": "df90bc4702fdac2c0a2d5ac12d9c6e66"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_ee786231.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_ee786231.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_ee786231.png.gen.json",
+   "bytes": 183,
+   "md5": "0ae26785741dd3c22021eb8bf0cbce70"
+  },
+  {
+   "file": "Ep1_S1.SH1_keyframe_candidate_f6eb6081.png.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_keyframe_candidate_f6eb6081.png.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_keyframe_candidate_f6eb6081.png.gen.json",
+   "bytes": 184,
+   "md5": "d609366c5d147fd57474608e92121cff"
+  },
+  {
+   "file": "Ep1_S1.SH1_vo.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH1_vo.mp3",
+   "now": "media/shots/Ep1_S1.SH1_vo.mp3",
+   "bytes": 93012,
+   "md5": "1535b1faff4926ba90ffc7a89e0506b0"
+  },
+  {
+   "file": "Ep1_S1.SH1_vo.mp3.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH1_vo.mp3.gen.json",
+   "now": "media/shots/Ep1_S1.SH1_vo.mp3.gen.json",
+   "bytes": 779,
+   "md5": "e49a63363837e06645a3b7a3e51aeb89"
+  },
+  {
+   "file": "Ep1_S1.SH2A_effect_target.png",
+   "was": "engine/media/shots/Ep1_S1.SH2A_effect_target.png",
+   "now": "media/shots/Ep1_S1.SH2A_effect_target.png",
+   "bytes": 106856,
+   "md5": "fe8d4f99bd181886f2dbeb2db7c7e3e1"
+  },
+  {
+   "file": "Ep1_S1.SH2A_keyframe_candidate_14a0f12d.png",
+   "was": "engine/media/shots/Ep1_S1.SH2A_keyframe_candidate_14a0f12d.png",
+   "now": "media/shots/Ep1_S1.SH2A_keyframe_candidate_14a0f12d.png",
+   "bytes": 1270547,
+   "md5": "7a722ce6e1312643601d9f0ac6156074"
+  },
+  {
+   "file": "Ep1_S1.SH2A_keyframe_candidate_f33b6774.png",
+   "was": "engine/media/shots/Ep1_S1.SH2A_keyframe_candidate_f33b6774.png",
+   "now": "media/shots/Ep1_S1.SH2A_keyframe_candidate_f33b6774.png",
+   "bytes": 1270547,
+   "md5": "7a722ce6e1312643601d9f0ac6156074"
+  },
+  {
+   "file": "Ep1_S1.SH2B_vo.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH2B_vo.mp3",
+   "now": "media/shots/Ep1_S1.SH2B_vo.mp3",
+   "bytes": 113728,
+   "md5": "fd9801c262cb95a07cdd922bde3fc1bd"
+  },
+  {
+   "file": "Ep1_S1.SH2B_vo.mp3.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH2B_vo.mp3.gen.json",
+   "now": "media/shots/Ep1_S1.SH2B_vo.mp3.gen.json",
+   "bytes": 782,
+   "md5": "980f0de2b84c93e5a1450be0e5a0ebbb"
+  },
+  {
+   "file": "Ep1_S1.SH2_c1.mp4",
+   "was": "engine/media/shots/Ep1_S1.SH2_c1.mp4",
+   "now": "media/shots/Ep1_S1.SH2_c1.mp4",
+   "bytes": 3249905,
+   "md5": "0b7632610cce5109a91e1875ab844c2d"
+  },
+  {
+   "file": "Ep1_S1.SH2_c1.mp4.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH2_c1.mp4.gen.json",
+   "now": "media/shots/Ep1_S1.SH2_c1.mp4.gen.json",
+   "bytes": 295,
+   "md5": "acf595071e7b6ca6135ddab1ab15e373"
+  },
+  {
+   "file": "Ep1_S1.SH2_c1.mp4.review.json",
+   "was": "engine/media/shots/Ep1_S1.SH2_c1.mp4.review.json",
+   "now": "media/shots/Ep1_S1.SH2_c1.mp4.review.json",
+   "bytes": 535,
+   "md5": "41e6b917e820569cf651273104394f69"
+  },
+  {
+   "file": "Ep1_S1.SH2_effect_target.png",
+   "was": "engine/media/shots/Ep1_S1.SH2_effect_target.png",
+   "now": "media/shots/Ep1_S1.SH2_effect_target.png",
+   "bytes": 106856,
+   "md5": "fe8d4f99bd181886f2dbeb2db7c7e3e1"
+  },
+  {
+   "file": "Ep1_S1.SH2_face_state.png",
+   "was": "engine/media/shots/Ep1_S1.SH2_face_state.png",
+   "now": "media/shots/Ep1_S1.SH2_face_state.png",
+   "bytes": 266543,
+   "md5": "4e52ed4a5d66ae4cb1be4e2cee63b029"
+  },
+  {
+   "file": "Ep1_S1.SH2_keyframe_candidate_094553fe.png",
+   "was": "engine/media/shots/Ep1_S1.SH2_keyframe_candidate_094553fe.png",
+   "now": "media/shots/Ep1_S1.SH2_keyframe_candidate_094553fe.png",
+   "bytes": 1270547,
+   "md5": "7a722ce6e1312643601d9f0ac6156074"
+  },
+  {
+   "file": "Ep1_S1.SH2_keyframe_candidate_a3a03f5f.png",
+   "was": "engine/media/shots/Ep1_S1.SH2_keyframe_candidate_a3a03f5f.png",
+   "now": "media/shots/Ep1_S1.SH2_keyframe_candidate_a3a03f5f.png",
+   "bytes": 1148636,
+   "md5": "501ba5618d0b4c1e19366d5a7b552668"
+  },
+  {
+   "file": "Ep1_S1.SH2_vo.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH2_vo.mp3",
+   "now": "media/shots/Ep1_S1.SH2_vo.mp3",
+   "bytes": 113728,
+   "md5": "fd9801c262cb95a07cdd922bde3fc1bd"
+  },
+  {
+   "file": "Ep1_S1.SH2_vo.mp3.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH2_vo.mp3.gen.json",
+   "now": "media/shots/Ep1_S1.SH2_vo.mp3.gen.json",
+   "bytes": 780,
+   "md5": "9b604bd50e67fef0f2ca9660a96a98af"
+  },
+  {
+   "file": "Ep1_S1.SH2_vo_master15.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH2_vo_master15.mp3",
+   "now": "media/shots/Ep1_S1.SH2_vo_master15.mp3",
+   "bytes": 105508,
+   "md5": "4d59f3bfd3a0e70a9344723b919d133b"
+  },
+  {
+   "file": "Ep1_S1.SH3_vo.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH3_vo.mp3",
+   "now": "media/shots/Ep1_S1.SH3_vo.mp3",
+   "bytes": 29301,
+   "md5": "3bd2db038598d5003026361f4cdf3825"
+  },
+  {
+   "file": "Ep1_S1.SH3_vo.mp3.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH3_vo.mp3.gen.json",
+   "now": "media/shots/Ep1_S1.SH3_vo.mp3.gen.json",
+   "bytes": 779,
+   "md5": "9860c94837f8a187d25550f2075427cc"
+  },
+  {
+   "file": "Ep1_S1.SH3_vo_master7.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH3_vo_master7.mp3",
+   "now": "media/shots/Ep1_S1.SH3_vo_master7.mp3",
+   "bytes": 56441,
+   "md5": "95db9f6d6abe1ddd11fc08b4ab9bae34"
+  },
+  {
+   "file": "Ep1_S1.SH3_vo_master9.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH3_vo_master9.mp3",
+   "now": "media/shots/Ep1_S1.SH3_vo_master9.mp3",
+   "bytes": 72532,
+   "md5": "fab880fe5f753714816089eb3d5982c0"
+  },
+  {
+   "file": "Ep1_S1.SH4_vo.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH4_vo.mp3",
+   "now": "media/shots/Ep1_S1.SH4_vo.mp3",
+   "bytes": 75276,
+   "md5": "708d8b6f0e1095dbb9fbef4a8c2eb695"
+  },
+  {
+   "file": "Ep1_S1.SH4_vo.mp3.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH4_vo.mp3.gen.json",
+   "now": "media/shots/Ep1_S1.SH4_vo.mp3.gen.json",
+   "bytes": 779,
+   "md5": "c8b401840e3d751c27871c39aec63ccf"
+  },
+  {
+   "file": "Ep1_S1.SH4_vo_master14.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH4_vo_master14.mp3",
+   "now": "media/shots/Ep1_S1.SH4_vo_master14.mp3",
+   "bytes": 112448,
+   "md5": "f17813f2fab2987ee3a2643c5774e323"
+  },
+  {
+   "file": "Ep1_S1.SH5_vo.mp3",
+   "was": "engine/media/shots/Ep1_S1.SH5_vo.mp3",
+   "now": "media/shots/Ep1_S1.SH5_vo.mp3",
+   "bytes": 67753,
+   "md5": "3e8375d7e4a2410fff0d654a6f1609c0"
+  },
+  {
+   "file": "Ep1_S1.SH5_vo.mp3.gen.json",
+   "was": "engine/media/shots/Ep1_S1.SH5_vo.mp3.gen.json",
+   "now": "media/shots/Ep1_S1.SH5_vo.mp3.gen.json",
+   "bytes": 781,
+   "md5": "4dc861d8b2e234578a87bea65801b905"
+  },
+  {
+   "file": "Ep1_S1_plate_candidate_8b776492.png",
+   "was": "engine/media/Ep1_S1_plate_candidate_8b776492.png",
+   "now": "media/plates/Ep1_S1_plate_candidate_8b776492.png",
+   "bytes": 874756,
+   "md5": "29288e2d2e2ceca8d8c48f63f644c4c3"
+  },
+  {
+   "file": "Ep1_TRIAL_S1.SH1_keyframe.png",
+   "was": "engine/media/Ep1_TRIAL_S1.SH1_keyframe.png",
+   "now": "media/plates/Ep1_TRIAL_S1.SH1_keyframe.png",
+   "bytes": 460510,
+   "md5": "47d9b9108548f44b215a3fb5d6cff23e"
+  },
+  {
+   "file": "Ep999_v2.B1_opening-plate.png",
+   "was": "engine/media/Ep999_v2.B1_opening-plate.png",
+   "now": "media/plates/Ep999_v2.B1_opening-plate.png",
+   "bytes": 966710,
+   "md5": "189ed156c84431f0620068217541ea69"
+  },
+  {
+   "file": "Ep999_v2.B2_charsheet-reference.png",
+   "was": "engine/media/Ep999_v2.B2_charsheet-reference.png",
+   "now": "media/plates/Ep999_v2.B2_charsheet-reference.png",
+   "bytes": 541468,
+   "md5": "49a0be4b8535d77594ef03c0229b3e88"
+  },
+  {
+   "file": "Ep1_TRIAL_S1.SH1_clip.mp4",
+   "was": "engine/media/Ep1_TRIAL_S1.SH1_clip.mp4",
+   "now": "media/plates/Ep1_TRIAL_S1.SH1_clip.mp4",
+   "bytes": 4039843,
+   "md5": "ded6f8525a71dfa22eaa99ac3d30732d"
+  },
+  {
+   "file": "Ep999_v2.B1_full-sequence-output.mp4",
+   "was": "engine/media/Ep999_v2.B1_full-sequence-output.mp4",
+   "now": "media/plates/Ep999_v2.B1_full-sequence-output.mp4",
+   "bytes": 5665541,
+   "md5": "430eb7e208967a87049e8fdbb2cf4cf0"
+  },
+  {
+   "file": "Ep1_S1_plate_candidate_0318f1c0.png.gen.json",
+   "was": "engine/media/Ep1_S1_plate_candidate_0318f1c0.png.gen.json",
+   "now": "media/plates/Ep1_S1_plate_candidate_0318f1c0.png.gen.json",
+   "bytes": 207,
+   "md5": "ecf02f351817e7f0625866c52199d61b"
+  },
+  {
+   "file": "Ep1_S1_plate_candidate_10bfd50b.png.gen.json",
+   "was": "engine/media/Ep1_S1_plate_candidate_10bfd50b.png.gen.json",
+   "now": "media/plates/Ep1_S1_plate_candidate_10bfd50b.png.gen.json",
+   "bytes": 183,
+   "md5": "b8a873c50cfd17f0bb97bc5b16cf8afe"
+  },
+  {
+   "file": "Ep1_S1_plate_candidate_e8da1cca.png.gen.json",
+   "was": "engine/media/Ep1_S1_plate_candidate_e8da1cca.png.gen.json",
+   "now": "media/plates/Ep1_S1_plate_candidate_e8da1cca.png.gen.json",
+   "bytes": 208,
+   "md5": "8100b3bbab466cce41d38f0d802cdad4"
+  },
+  {
+   "file": "Ep1_TRIAL_S1.SH1_clip.mp4.gen.json",
+   "was": "engine/media/Ep1_TRIAL_S1.SH1_clip.mp4.gen.json",
+   "now": "media/plates/Ep1_TRIAL_S1.SH1_clip.mp4.gen.json",
+   "bytes": 293,
+   "md5": "98c9416dce879cc502b03604e0436f3f"
+  },
+  {
+   "file": "Ep1_TRIAL_S1.SH1_keyframe.png.gen.json",
+   "was": "engine/media/Ep1_TRIAL_S1.SH1_keyframe.png.gen.json",
+   "now": "media/plates/Ep1_TRIAL_S1.SH1_keyframe.png.gen.json",
+   "bytes": 207,
+   "md5": "2368b5d5552178c23bcd710ea1f3f8a9"
+  }
+ ]
+}

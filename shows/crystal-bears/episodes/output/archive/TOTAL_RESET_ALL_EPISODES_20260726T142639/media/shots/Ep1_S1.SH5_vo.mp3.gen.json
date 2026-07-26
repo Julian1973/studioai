@@ -1,0 +1,27 @@
+{
+  "ts": 1784647749.3045812,
+  "recorded_at": "2026-07-21T16:29:09",
+  "op": "elevenlabs_dialogue",
+  "model": "eleven_v3",
+  "stability": 0.3,
+  "chars": 65,
+  "voices": 2,
+  "billing": {
+    "provider": "elevenlabs",
+    "model": "eleven_v3",
+    "charactersSubmitted": 65,
+    "creditsConsumed": 65.0,
+    "billingPlan": "pro",
+    "planConfirmed": true,
+    "billingCadence": "monthly",
+    "cadenceConfirmed": true,
+    "pricingTableVersion": "2026-07-16.2",
+    "pricingEffectiveDate": "2026-07-16",
+    "pricingSource": "https://elevenlabs.io/pricing",
+    "estimatedCostUsdExTax": 0.010725,
+    "costBasis": "estimated allocated cost ex tax — published pro plan, plan CONFIRMED",
+    "generationKind": "generation",
+    "creditsWereConsumed": true,
+    "voices": 2
+  }
+}

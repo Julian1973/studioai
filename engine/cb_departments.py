@@ -244,8 +244,29 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
     trusts this call's own reproduction of it. Deliberately does NOT use the shared _j()
     truncation helper for the script content: cutting the script short here would mean
     the Director never even sees, let alone preserves, everything past the cut."""
+    # STEP 1 GETS THE WHOLE ROOM (2026-07-26, Julian: "step 1 has to be done properly...
+    # I knew when we were working further down the line the beats weren't landing and now we
+    # know why").
+    #
+    # THE ARCHITECTURAL MISTAKE THIS CORRECTS. This pass decides where EVERY beat begins and
+    # ends, and authors want / need / kidRead / adultRead / emotionalIntent for the whole
+    # episode — the emotional architecture the rest of the pipeline can only refine inside.
+    # It was running on _system("director", ...): the Director's runtime contract and the job
+    # text, and nothing else. No show bible. No taste canons. No exemplars. No Showrunner.
+    # Then the ten-gate creative room — Showrunner at gates 3, 4 and 5, adversarial review,
+    # Producer — convened to design shots INSIDE a shape it had no voice in choosing. The
+    # room got stronger as the decisions got smaller, which is backwards: if a beat boundary
+    # is wrong or an adultRead is thin, no amount of shot-conference craft recovers it.
+    #
+    # cb_creative._mind is already the correct room builder — it loads the runtime SKILL
+    # contracts for every named chair, their taste canons, the show bible, and the approved
+    # exemplars with rejected work marked as failures not to imitate. Reusing it here means
+    # ONE room builder for the whole creative pipeline rather than two that drift apart.
+    # Imported lazily inside the function: at module scope it would be a cycle.
+    from cb_creative import _mind
     return cb_llm.structured(
-        _system("director",
+        _mind("DIRECTOR, WITH THE SHOWRUNNER IN THE ROOM",
+              ["directorTaste", "showrunnerTaste"],
                 "You are breaking a LOCKED, already-approved script into its scenes and "
                 "beats for this studio's storyboard pipeline. The script's scene order, "
                 "its characters and every spoken line are LOCKED SOURCE EVIDENCE — you "
@@ -263,7 +284,24 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
                 "show is built on), and emotionalIntent. Also suggest the episode's title, "
                 "logline and lead bear. Every scene needs at least one beat, and its first "
                 "beat's own firstEventIndex must equal that scene's own first event "
-                "index."),
+                "index.\n\n"
+                "THE SHOWRUNNER IS IN THIS PASS AND SHE TALKS WHILE THE EPISODE IS BROKEN "
+                "DOWN (2026-07-26). This is the most consequential pass in the pipeline — "
+                "every later chair designs INSIDE the beats decided here, and a beat "
+                "boundary in the wrong place or a thin adultRead cannot be recovered by any "
+                "amount of craft downstream. She holds no verdict; nothing waits on her. She "
+                "is accountable for three things, on every beat. (1) THE ARC: each beat sits "
+                "somewhere on the episode's Five Pillars curve, and the curve must actually "
+                "climb, break and settle — two beats at the same energy in a row is a flat "
+                "line, and she says so while the boundaries are still movable. (2) THE TWO "
+                "DOORS: kidRead and adultRead must be the SAME moment seen twice, never two "
+                "separate beats and never parallel tracks — one door open is a note, not a "
+                "beat. (3) THIS SHOW, NOT ANY SHOW: run the substitution test on want and "
+                "need — if this beat's emotional engine would work unchanged in a different "
+                "children's series, it is not authored yet, and she names what THIS cast's "
+                "own truth makes it instead. Where a beat already lands she says so and gets "
+                "out of the way; where it does not she gives the show-true version of the "
+                "same ambition, never the safer one."),
         "SCRIPT EVENTS, IN ORDER — index : scene : type : [speaker :] text (dialogue text "
         "is LOCKED, shown for context only, never to be altered):\n"
         + json.dumps(script_events, ensure_ascii=False, indent=1) +

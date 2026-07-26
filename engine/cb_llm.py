@@ -111,9 +111,35 @@ def _anthropic_image_part(path):
     p = pathlib.Path(path)
     if not p.exists() or not p.is_file():
         raise FileNotFoundError(f"specialist image input is missing: {p}")
-    mime = mimetypes.guess_type(p.name)[0] or "image/png"
-    return {"type": "image", "source": {"type": "base64", "media_type": mime,
-                                        "data": base64.b64encode(p.read_bytes()).decode("ascii")}}
+    raw = p.read_bytes()
+    return {"type": "image", "source": {"type": "base64", "media_type": _sniff_media_type(raw, p),
+                                        "data": base64.b64encode(raw).decode("ascii")}}
+
+
+def _sniff_media_type(raw, path):
+    """The image's REAL type, from its own bytes — never its filename.
+
+    FOUND LIVE (2026-07-26, the first keyframe attempt under the Anthropic path): the DP's
+    consult refused with "specified using the image/png media type, but the image appears
+    to be a image/jpeg image". This studio's reference assets genuinely carry mismatched
+    extensions — a turnaround saved as .png that is really a JPEG, a library plate copied
+    with whatever extension it arrived with — and mimetypes.guess_type reads only the name.
+    OpenAI tolerated the wrong label; Anthropic validates it and rejects the whole call, so
+    a cosmetic filename problem became a hard stop on the direction-to-image step.
+
+    Magic bytes, in the order the formats actually appear here. Falls back to the
+    extension guess only when the signature is unrecognised — an honest last resort rather
+    than a silent default that would reproduce the same class of failure.
+    """
+    if raw[:8] == b"\x89PNG\r\n\x1a\n":
+        return "image/png"
+    if raw[:3] == b"\xff\xd8\xff":
+        return "image/jpeg"
+    if raw[:6] in (b"GIF87a", b"GIF89a"):
+        return "image/gif"
+    if raw[:4] == b"RIFF" and raw[8:12] == b"WEBP":
+        return "image/webp"
+    return mimetypes.guess_type(pathlib.Path(path).name)[0] or "image/png"
 
 
 def _anthropic_call(model, system, user, schema, images=None):

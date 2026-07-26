@@ -550,7 +550,12 @@ img.zoom:hover{filter:brightness(1.08)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script>
-const BASE="http://localhost:8765";
+// FOLLOW THE PAGE'S OWN ORIGIN (2026-07-25). This was hardcoded to localhost while the
+// studio was being browsed at 127.0.0.1 — same server, different origin, so every
+// fetch tripped CORS and the UI reported "Can't reach the studio server" over a page
+// whose data had loaded perfectly. Same-origin by construction now.
+const BASE=(location.protocol==="http:"||location.protocol==="https:")?location.origin
+                                                                       :"http://localhost:8765";
 const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
 const v=n=>getComputedStyle(document.documentElement).getPropertyValue(n);
 let EPISODES=[],MEDIA=[],CUR=null,SHOTS=[],PREFIX="",page="episodes",MEDIA_V=0,CHARCFG={},SCENELIB=null,RETAKES_DRAFT=[],RT_SN=null;
@@ -1266,7 +1271,8 @@ function _globalJobLabel(j){
   const g=String(j.gate||"");
   const m=g.match(/^department:([a-z-]+):(.*)$/);
   if(m){
-    const who={cinematography:"Cinematographer / DP",voice:"Voice Director",animation:"Animation Director / Camera",
+    // THE CHAIR TABLE (2026-07-25) — mirrors engine/cb_render.py _DEPARTMENT_WORKERS.
+  const who={cinematography:"Director (staging) / DP (execution)",voice:"Director with the Voice Director",animation:"Director",
       look:"Look Development","review-keyframe":"Director Review","review-animation":"Director Review",
       "review-final":"Post Supervisor"}[m[1]]||cap(m[1]);
     const where=m[2]&&m[2]!=="-"?" — "+m[2]:"";
@@ -3240,11 +3246,11 @@ function productionWorkflowStatus(shotId){
   // the free structure check still auto-fires the instant this step is CURRENT (see the
   // auto-run block below, now keyed off "animation" instead of the retired "promptreview").
   const steps=[
-    {id:"keyframe", pstage:"keyframe", label:"Cinematography", role:"Cinematographer / DP",
+    {id:"keyframe", pstage:"keyframe", label:"Cinematography", role:"Director (staging) / DP (execution)",
      applicable:needsKeyframe, done:!needsKeyframe||cinApproved},
-    {id:"voice", pstage:"voice", label:"Voice", role:"Voice Director",
+    {id:"voice", pstage:"voice", label:"Voice", role:"Director with the Voice Director",
      applicable:talky, done:!talky||voiceApproved},
-    {id:"animation", pstage:"animation", label:"Animation Director", role:"Animation Director / Camera",
+    {id:"animation", pstage:"animation", label:"Animation", role:"Director",
      applicable:true, done:animDirected},
     {id:"generate", pstage:"animation", label:"Generate", role:"Producer — spend authorisation",
      applicable:true, done:generated},
@@ -3732,7 +3738,7 @@ function renderShotRunner(){
       const apprText=aAppr&&aAppr.output&&(aAppr.output.providerPrompt||"");
       body=rowMore(apprText?`<div class="dec-caption" style="margin-top:8px;font-weight:600">The approved direction</div><pre class="techpre">${_esc(apprText)}</pre>`:"",tok+"|dir");
       acts=[`<button class="btn ghost" onclick="deptRun('animation','${tok}')">↻ Refire direction</button>`]; }
-    else if(aCand){ st="ready";lab="Your call";sum="The Animation Director's brief is below, in full — approve it, or reject with a reason.";
+    else if(aCand){ st="ready";lab="Your call";sum="The Director's animation brief is below, in full — approve it, or reject with a reason.";
       body=runDecideBlock("The direction you're approving",
           (candText?`<pre>${_esc(candText)}</pre>`:`<div class="dec-caption">The specialist returned no prompt text — open Departments below to inspect the raw record.</div>`)
           +(candLand?`<div class="ccref" style="padding:0 2px 6px">Does it land: ${_esc(candLand)}</div>`:""))
@@ -3745,8 +3751,8 @@ function renderShotRunner(){
       // informed Approve.
       const loading=SH_DEPT_CACHE[deptKey('animation',s.shotId)]&&SH_DEPT_CACHE[deptKey('animation',s.shotId)].loading;
       st="ready";lab="Prepare";
-      sum=loading?"Loading the Animation Director's record…"
-         :"Prepare the Animation Director's brief (text-only specialist consult, no spend) — it renders here in full for your approval.";
+      sum=loading?"Loading the Director's animation record…"
+         :"Prepare the Director's animation brief (text-only specialist consult, no spend) — it renders here in full for your approval.";
       acts=loading?[]:[`<button class="btn" onclick="deptRun('animation','${tok}')">Prepare direction — no spend</button>`];
     }
     rows.push({id:"direction",title:"Direction",state:st,stateLabel:lab,summary:sum,body,actions:acts});
@@ -4530,7 +4536,7 @@ function renderContinuityStage(){
   const rs=shots[Math.min(PSHOT_I,Math.max(0,shots.length-1))];
   if(rs){const rm=shMedia(rs.shotId),reviewStage=(rm.clip||rm.finalFrame)?"review-animation":"review-keyframe";
     if(rm.clip||rm.finalFrame||rm.keyframe)attachDepartmentPanel(dec,reviewStage,rs.shotId,true);
-    else dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptname">Director Review / Continuity Supervisor</div><div class="dec-caption">Waiting for actual rendered media. This department never reviews a prompt in place of the result.</div></div>`);}
+    else dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptname">Director with Continuity</div><div class="dec-caption">Waiting for actual rendered media. This department never reviews a prompt in place of the result.</div></div>`);}
 }
 
 // ── FINAL — the assembled scene ──

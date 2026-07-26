@@ -523,8 +523,20 @@ def shot_media_map(pkg, scene, episode="Ep1"):
                       # silently falling back to displaying the OLD approved image while a
                       # newer, different one is what's actually pending a decision.
                       "keyframeCandidateUrl": _url_from_abs((led.get("keyframeCandidate") or {}).get("path")),
-                      "clip":       _url(shots_dir / f"{episode}_{sid}_clip.mp4"),
-                      "finalFrame": _url(shots_dir / f"{episode}_{sid}_final_frame.png"),
+                      # THE CLIP URL, CORRECTED (2026-07-26) — the same fix, for the same
+                      # reason, as the KEYFRAME URL note above. "{ep}_{sid}_clip.mp4" was a
+                      # GUESSED filename with exactly one reader (this line) and ZERO writers
+                      # anywhere in the repo: the only mp4 writer is cb_render.fire_shot
+                      # ({ep}_{sid}_c{i}.mp4) and approve_shot leaves the winner AT that
+                      # candidate path, recording it on the ledger as approvedTake. clip was
+                      # therefore structurally null for every shot ever approved, so the Clip
+                      # stop could not play the take Julian had just approved. Serve the
+                      # ledger's OWN recorded path — the ledger is the truth, never a
+                      # filename convention. finalFrame reads harvestFrame the same way, with
+                      # the conventional path kept only as a fallback for a pre-ledger file.
+                      "clip":       _url_from_abs(led.get("approvedTake")),
+                      "finalFrame": (_url_from_abs(led.get("harvestFrame"))
+                                     or _url(shots_dir / f"{episode}_{sid}_final_frame.png")),
                       # THE CANDIDATE BATCH (2026-07-16): fire/next now generate 1-4 candidates per shot
                       # ({ep}_{shotId}_c1..cN.mp4, ledger status "candidates-pending") — existence-checked
                       # here, same as every other entry, so the UI never depends on media-index.json.

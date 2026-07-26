@@ -1419,3 +1419,114 @@ Baseline proof (run before and after any change that touches prompt code):
     work (`67e871828cdeda43f5a094cf685e68be`) — every fix here lives in checker/compiler code, plus two
     narrowly-scoped, factual data completions (`continuity.json`'s three `"on": "Keen"` fields, `characters.json`
     untouched) — no beat's own authored creative content was edited.
+
+87. CREATIVE OVER CONSTRAINTS — THE CHAIRS, THE ONE READER, AND THE MEASUREMENTS THAT RETIRED THE STOP
+    (Julian's standing ruling, 2026-07-26, quoted in full because every clause of it is operative): *"world
+    class DIRECTING has to get into the KEYFRAME for the stage and the SEEDANCE PROMPT for the performance.
+    CREATIVE OVER CONSTRAINTS. DELIVERY OF THE DIRECTOR'S GUIDANCE OVER CONTROL."* This rule is the written
+    law of the world that ruling created, so that nobody rebuilds what the evidence killed.
+
+    THE CHAIRS, AS THEY NOW STAND (shipped: 776ec9b, 838acf6, e0e6bd9): cinematography is **Director
+    (staging) / DP (execution)** — the Director stages the frame, the DP executes it; animation is **the
+    Director** (Docter's chair, Keane on weight); review is **the Director with Continuity**. The Director
+    holds DELIVERY, not merely authorship: the test of every chair below her is whether her intent arrived
+    on screen, never whether the artefact passed a check.
+
+    BOTH PROMPTS ARE ENGINEERED FROM HER INTENT, THROUGH ONE SHARED READER. `cb_departments._intent_charge(
+    context)` is that reader, and it is deliberately singular: it feeds `prepare_cinematography` (THE STAGE —
+    charged to AFFORD the performance) and `prepare_animation` (THE PERFORMANCE) from the same place, because
+    two readers drift apart the first time one is edited. Verified live and zero-cost against the real
+    Scene-1 production package: both chairs receive the identical 434-word S1.SH2 charge, headed "WHAT THIS
+    BEAT IS FOR — THE DIRECTOR'S OWN WORDS / This is the specification. Your prompt is an implementation of
+    it." When a shot states no intent the reader returns "" — silence is correct, an invented purpose never
+    is.
+
+    THE INTENT STOP IS RETIRED — ADVISORY EVERYWHERE, AND NOT TO BE RESURRECTED IN ANY FORM (e0e6bd9). It
+    was a hard refusal at authoring. Two independent mechanisms were built to make it work and BOTH measured
+    INVERTED against the real corpus:
+    - **Word overlap** refused the SH1 keeper Julian had APPROVED, then refused the cause-chain build — the
+      best prompt in the corpus — on clauses it plainly delivers in better words ("the smallest private
+      smile" IS "the tiny cheek-lift").
+    - **The semantic judge** (`cb_intent.judge`, which until that commit had NEVER run — it called
+      `cb_llm.structured` without a required argument and would have crashed) scored the two REJECTED
+      prompts highest, 10/10 DELIVERED each, and the APPROVED keeper lowest, 5 DELIVERED / 5 ABSENT.
+    Both reward RESTATEMENT, because echoing the Director's words IS higher textual fidelity — and
+    restatement is exactly what makes a prompt laboured and its footage static. A measure structurally
+    inverted from the outcome was never a threshold to tune. The intent stays where it demonstrably works:
+    LEADING THE WRITER'S CHARGE, BEFORE A WORD IS WRITTEN (the keyframe took the same injection and improved
+    at zero word cost). No replacement gate was shipped, deliberately: removing a gate proven to block the
+    best work does not require first proving a new one.
+
+    LENGTH IS NOT THE VARIABLE. STOP-COMMAND DENSITY IS. Measured on the real corpus, at matched length,
+    with opposite verdicts:
+
+    | prompt | words | stop/park phrases | verdict |
+    |---|---|---|---|
+    | SH1_KEEPER_EXEMPLAR | 722 | **1** | Julian APPROVED |
+    | SH2_old_engine | 716 | **9** | rejected |
+    | SH2_LABOURED | ~810 | **10** | rejected |
+
+    Six words apart, opposite outcomes. AnyFilm's 244-word average is a symptom of their economy, not the
+    cause of their quality. **Cut for what a word is DOING, never to hit a budget.**
+
+    THE AUTHORING PATH IS THE CAUSE-CHAIN COMPILE (`shows/crystal-bears/creative/CAUSE_CHAIN_METHOD.md`,
+    committed 6096169; worked exemplar `.../creative/fixtures/SH2_C_causechain.txt`, 611 words, the best
+    prompt in the corpus). Its twelve steps are the method and are not restated here; the four load-bearing
+    ones are: ONE physical cause per take, every later event its consequence and never its sibling (two
+    independent causes means two shots — split, never compress); RELAY the sentences, the object of one
+    becoming the subject of the next, with needing *then* or *meanwhile* to join two events being the proof
+    the chain is broken; the BIGGEST TRAVEL sits inside the dialogue window, never finish-the-action-then-
+    park-to-talk; and a character who is not moving gets a continuous named TASK plus micro-corrections,
+    never a state word — "flat", "near-motionless", "barely moves" are freeze commands the model obeys
+    literally. Its own diagnostics (stop phrases ≤1, longest paragraph ≤70 words, object-as-subject ≥4) are
+    SMOKE ALARMS ON A DRAFT, never gates, and nothing in this rule authorises promoting one.
+
+    THE STANDING RULE, FOR WHOEVER COMES AFTER: **CREATIVE OVER CONSTRAINTS. DELIVERY OF THE DIRECTOR'S
+    GUIDANCE OVER CONTROL.** The bar for any change to the prompt path is "does the beat land on screen",
+    never "is the prompt safe". A new gate, a new negative, a new law, a new refusal, a new word cap, a new
+    lint is NOT the answer here — that direction was tried for weeks and the footage got worse. When
+    something is wrong, the honest first question is which existing constraint must be DELETED so the beat
+    can land, and it must be named. Anything proposed in the other direction has to beat the measurements
+    above on real footage first.
+
+    WHAT WAS DELETED UNDER THIS RULE, EACH WITH THE MEASUREMENT THAT KILLED IT (three in `LEAN_LAW.md`, one
+    in `cb_lean.py`; all four are in-place replacements, so THE LAW stays at eight rules per its own
+    rule-about-rules):
+    - **LEAN_LAW rule 4's "two or three visible consequences"** — a count the best prompt in the corpus
+      exceeds. Counting consequences refuses the exemplar the same way word overlap refused the keeper.
+      Corrected to one cause RELAYED, 4-6 chained events, per the method's own Steps 1-3.
+    - **LEAN_LAW rule 5's "use them only where stillness is the point"** — the licence that authored the
+      rejections. In BOTH rejects the stillness genuinely WAS the point (Zenny's deadpan) and writing it as
+      a state is what killed them. Corrected to the measured separator plus the task-not-state fix.
+    - **LEAN_LAW rule 6's "Held to a named object, or travelling. Never both"** — the cause-chain exemplar
+      does both in one sentence ("Whenever her flower moves she travels with it, keeping her place relative
+      to its centre") and the law as literally written refuses it. Corrected to the moving anchor, which is
+      what actually stopped the teleporting.
+    - **`cb_lean._notes`' length note (`if words > 400`)** — measured against the entire verdict corpus it
+      fires on 3 of 3: the 722-word APPROVED keeper, the 611-word cause-chain build, and the 810-word
+      rejection alike. Zero discrimination, headlined by a word count — the same inversion that retired the
+      Stop, sitting live in an advisory. Deleted. The stasis-density note beside it is KEPT (1.94 and 1.96 on
+      the two good prompts vs 3.21 on the reject) with the honest caveat e0e6bd9 already recorded: across the
+      wider corpus the broad term list overlaps (GOOD 1.94-2.24, BAD 2.09-3.21), so it is a smoke alarm and
+      must never become a gate.
+
+    HONEST LIMITS, STATED PLAINLY. All of this rests on n=1 approvals and one A/B pair at matched length —
+    the best evidence this studio has, not a demonstrated law. Specifically unproven until fired: stripping
+    the standing-negatives tail (the inference that stasis verbs and prohibition lists author the
+    "immobilised" footage is strong, but the clean test is one fire of an existing shot with the tail
+    stripped and nothing else changed); the named-sound sync target (the keeper won with zero onomatopoeia,
+    so it was left out — one A/B, not a settled question); and the ≤6-event cap and 30-60-word paragraph
+    target, both derived from two rejections rather than measured. What the method CANNOT fix is on record
+    and must not be re-attempted with words: the grey goatee has lost 9/9 renders to the image prior across
+    every wording tried, both competing hypotheses tested and falsified — that is a prepared face-state
+    reference image or a design change, and any future session proposing new wording for it should be told
+    it has been tried nine times.
+
+    ONE ASYMMETRY FLAGGED, NOT RESOLVED. The animation charge states "THERE IS NO WORD CEILING... Every
+    numeric cap this studio ever set was later found cutting the wrong thing" and cites the 722-word keeper;
+    the keyframe charge, for the same shot and off the same shared reader, still carries "KEEP IT LEAN: the
+    whole prompt under ~170 words" (`cb_departments.prepare_cinematography`). Both strings were verified
+    verbatim in the live code. The length evidence above is drawn entirely from MOTION prompts, so it does
+    not by itself prove a still-image cap wrong — but Julian's own ruling charges the stage to AFFORD the
+    performance, and this is the one live numeric cap left on that chair. Named for his call, not deleted
+    unilaterally.

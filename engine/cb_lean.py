@@ -113,8 +113,12 @@ def charge(card, form="physical_comedy"):
     parts = [law()]
     if ex:
         parts.append("===== A REAL PROMPT THAT PRODUCED AN APPROVED TAKE ON THIS KIND OF "
-                     "MATERIAL =====\nStudy its SHAPE and its SPEND, then write THIS "
-                     "shot. Do not copy its content.\n\n" + ex)
+                     "MATERIAL =====\nStudy HOW IT IS JOINED — one physical cause, every "
+                     "later event a consequence of it, the object of one sentence "
+                     "becoming the subject of the next, the biggest travel inside a "
+                     "spoken section. Its length is NOT a target: a rejected prompt in "
+                     "the same corpus sits within six words of it. Match the causal "
+                     "structure, not the size. Do not copy its content.\n\n" + ex)
     else:
         parts.append("===== NO PROVEN EXEMPLAR FOR THIS FORM YET =====\nYou are "
                      "discovering one. Write what this material actually needs. If the "
@@ -156,9 +160,15 @@ def _notes(words, density, low):
         n = len(re.findall(r"\b" + re.escape(t) + r"\b", low))
         if n >= 3:
             out.append(f"'{t}' x{n} — a repeated lock becomes the shot's main instruction")
-    if words > 400:
-        out.append(f"{words} words; AnyFilm deliver {ANYFILM_DELIVERED}. Ask which "
-                   f"sentences were added out of worry, and cut those")
+    # THE LENGTH NOTE IS DELETED (2026-07-26, CREATIVE OVER CONSTRAINTS — CLAUDE.md rule 87).
+    # It fired on `words > 400`, and measured against the whole verdict corpus that is 3 of 3:
+    # the 722-word APPROVED keeper, the 611-word cause-chain build (the best prompt we have)
+    # and the 810-word rejection alike. Zero discrimination, headlined by a word count — the
+    # same inversion that retired the intent Stop, sitting live in an advisory. Length is not
+    # the variable; stop-command density is (keeper 1 stop phrase per 722w; the rejects 9 and
+    # 10 at 716w and 810w). The stasis note above KEEPS its place — it at least separates
+    # these three (1.94 / 1.96 / 3.21) — but per e0e6bd9 the broad term list overlaps across
+    # the wider corpus (GOOD 1.94-2.24, BAD 2.09-3.21), so it stays a smoke alarm, never a gate.
     return out
 
 

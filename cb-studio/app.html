@@ -4296,8 +4296,20 @@ function renderShotStage(mode){
       decVersion=cands.length+" candidate"+(cands.length==1?"":"s")+" awaiting a decision";
       decActions=[`<select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>
         <button class="btn ghost" onclick="shRejectBatch('${tok}')">✗ Reject batch</button>`];
-    } else if(m.clip||m.finalFrame){
-      body=twoCol(m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}" style="width:100%;border-radius:10px"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}" style="width:100%"/>`);
+    } else if(stLabel=="approved"){
+      // THE APPROVED TAKE, FROM THE LEDGER (2026-07-26). This branch used to key off
+      // (m.clip||m.finalFrame) — MEDIA EXISTENCE, not approval — and play m.clip, a filename
+      // with no writer. Two consequences, both live: a genuinely approved shot showed a STILL
+      // (the harvested final frame) where the take should play, and any shot with a leftover
+      // final_frame.png was labelled "Approved take" with a live un-approve button regardless
+      // of what the ledger said. Both sides now read the ledger: the STATUS picks the branch,
+      // approvedTake picks what plays — the same rule the Review row already follows.
+      // Nothing is hidden: a rendered-but-unapproved shot still surfaces in the Review row's
+      // own "media exists but the ledger doesn't mark this approved" branch.
+      const takeUrl=shAbsUrl(led.approvedTake)||m.clip;
+      body=twoCol(takeUrl?`<video controls src="${BASE}${takeUrl}?v=${MEDIA_V}" style="width:100%;border-radius:10px"></video>`
+        :(m.finalFrame?`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}" style="width:100%"/>`
+                      :`<div class="artefact-empty"><div style="color:var(--muted)">Approved — but the take file named on the ledger is not on disk.</div></div>`));
       decVersion="Approved take";
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
         `<button class="btn ghost" style="margin-top:8px" onclick="shRun('unapprove-shot','${tok}')">↩ Un-approve — redo this phase</button>`];

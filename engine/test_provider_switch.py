@@ -33,11 +33,23 @@ class _Resp:
     def __init__(self, payload): self.content = [_Block(payload)]
 
 
+class _Stream:
+    """The SDK requires STREAMING for any request whose estimated duration exceeds 10
+    minutes, and at MAX_OUTPUT_TOKENS=32000 every Director call qualifies — a plain
+    .create() raised before generating a single token on the first real fire. The stub
+    mirrors the real context-manager shape so a regression back to .create() fails here."""
+    def __init__(self, sink, kw, payload): self._sink, self._kw, self._p = sink, kw, payload
+    def __enter__(self): self._sink.append(self._kw); return self
+    def __exit__(self, *a): return False
+    def get_final_message(self): return _Resp(self._p)
+
+
 class _Messages:
-    def __init__(self, sink): self._sink = sink
+    def __init__(self, sink, payload=None):
+        self._sink = sink; self._p = payload or {"verdict": "ok"}
+    def stream(self, **kw): return _Stream(self._sink, kw, self._p)
     def create(self, **kw):
-        self._sink.append(kw)
-        return _Resp({"verdict": "ok"})
+        raise AssertionError("must use messages.stream() — .create() fails at 32k max_tokens")
 
 
 class _FakeAnthropic:
@@ -74,11 +86,8 @@ def test_an_off_schema_answer_still_raises_ValidationError_for_the_repair_loop(m
     something else, a Claude run would crash where a GPT run would self-repair."""
     from pydantic import ValidationError
 
-    class _Bad(_Messages):
-        def create(self, **kw): return _Resp({"wrong_field": 1})
-
     monkeypatch.setattr(cb_llm, "_anthropic_client_get",
-                        lambda: type("C", (), {"messages": _Bad([])})())
+                        lambda: type("C", (), {"messages": _Messages([], {"wrong_field": 1})})())
     with pytest.raises(ValidationError):
         cb_llm.structured("sys", "user", Tiny, provider="anthropic")
 
@@ -86,11 +95,11 @@ def test_an_off_schema_answer_still_raises_ValidationError_for_the_repair_loop(m
 def test_there_is_no_cross_provider_fallback(monkeypatch):
     """Silently answering a Claude call with GPT would make an A/B meaningless and a
     production run unattributable. A provider failure must STOP with its own error."""
-    class _Boom(_Messages):
-        def create(self, **kw): raise RuntimeError("provider down")
+    class _Boom:
+        def stream(self, **kw): raise RuntimeError("provider down")
 
     monkeypatch.setattr(cb_llm, "_anthropic_client_get",
-                        lambda: type("C", (), {"messages": _Boom([])})())
+                        lambda: type("C", (), {"messages": _Boom()})())
     calls = []
     monkeypatch.setattr(cb_llm, "_openai_call",
                         lambda *a, **k: calls.append(1) or Tiny(verdict="gpt"))

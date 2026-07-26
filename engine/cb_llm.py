@@ -115,10 +115,18 @@ def _anthropic_call(model, system, user, schema, images=None):
     tool = {"name": "emit",
             "description": f"Return the {schema.__name__} the brief asks for.",
             "input_schema": schema.model_json_schema()}
-    resp = _anthropic_client_get().messages.create(
-        model=model, max_tokens=MAX_OUTPUT_TOKENS, system=system,
-        messages=[{"role": "user", "content": content}],
-        tools=[tool], tool_choice={"type": "tool", "name": "emit"})
+    # STREAMING IS REQUIRED, NOT OPTIONAL (2026-07-26, found on the first real Claude fire).
+    # The SDK refuses a non-streaming request whose estimated duration exceeds 10 minutes,
+    # and at this pipeline's MAX_OUTPUT_TOKENS (32,000) every Director call qualifies —
+    # so `messages.create` raised before a single token was generated. Streaming and then
+    # taking the final message keeps the contract identical: one assembled response,
+    # validated exactly as before. The failure surfaced cleanly rather than silently
+    # falling through to GPT, which is the no-cross-provider-fallback rule working.
+    with _anthropic_client_get().messages.stream(
+            model=model, max_tokens=MAX_OUTPUT_TOKENS, system=system,
+            messages=[{"role": "user", "content": content}],
+            tools=[tool], tool_choice={"type": "tool", "name": "emit"}) as stream:
+        resp = stream.get_final_message()
     for block in resp.content:
         if getattr(block, "type", None) == "tool_use":
             return schema.model_validate(block.input)

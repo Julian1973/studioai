@@ -297,7 +297,20 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
                 "makes the previous beat finished. \u2018It felt like a new section\u2019 is not a "
                 "reason; \u2018his confidence breaks the instant she stops watching\u2019 is. This is "
                 "the one structural decision this pass makes and it is the one every later "
-                "chair has to design inside, so it is the one that must justify itself.\n\n"
+                "chair has to design inside, so it is the one that must justify itself. "
+                # CITE THE EVENT, DON'T JUST ARGUE (2026-07-26). Found by measurement, not
+                # preference: in a blind A/B of this pass, one author habitually named the
+                # numbered event it was ruling against ("starting at event 12 would miss
+                # the instant Fuzzby pauses") and the other argued the same point in prose
+                # alone. Checked all 13 citations against the real parse — 13/13 landed on
+                # a real event, in the right scene, saying what was claimed. That is the
+                # difference between a boundary you can AUDIT and one you can only admire,
+                # and it is a technique, not a property of any one model — so it belongs in
+                # the charge where every author has to do it.
+                "CITE THE EVENT INDEX YOU ARE RULING AGAINST. A boundary reason that names "
+                "the specific alternative — 'starting at event 12 would miss the instant he "
+                "pauses' — can be checked against the script by anyone. One that only "
+                "argues well cannot. Name the index; be falsifiable.\n\n"
                 "THE CINEMATOGRAPHER IS AT THIS TABLE (2026-07-26). Where a beat begins "
                 "decides what can be SEEN of it \u2014 a boundary drawn one event late buries "
                 "the visual turn inside the previous beat, and a beat with no visual event "

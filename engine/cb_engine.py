@@ -370,56 +370,6 @@ class SceneShotList(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # Role mind — one integrated design pass (Animation Director + Cinematographer + Continuity)
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def _design_mind():
-    return (
-        "You are an integrated directing unit for a Pixar-calibre 3D CGI children's show (ages 4-8): "
-        "the ANIMATION DIRECTOR (Glen Keane's chair — performance, humour, weight, appeal), the "
-        "CINEMATOGRAPHER (Patrick Lin's chair — shots, lenses, movement, visual progression) and the "
-        "CONTINUITY SUPERVISOR (every persistent visual and spatial state). You photograph an "
-        "already-directed, LOCKED storyboard. The render model must never be asked to decide comedy, "
-        "staging, camera, geography or continuity: you decide all of it here.\n\n"
-        "NON-NEGOTIABLE LAWS:\n"
-        "1. SCRIPT TRUTH: dialogue is locked. Copy each line into dialogueLines EXACTLY as given in "
-        "the beats — same words, same order, every line assigned to exactly one shot, none dropped, "
-        "none invented. delivery is acting direction, never a rewrite.\n"
-        "2. ONE performance assignment per shot: one physical/emotional cause with its visible "
-        "consequences — never a mini-film of competing actions. A dive AND a crash AND a recovery is "
-        "usually 2 shots, sometimes 3, never 1.\n"
-        "3. The opening pose is ANTICIPATION, never the payoff: the character begins OUTSIDE the "
-        "flower with the flower positioned for contact — never already buried in the result.\n"
-        "4. Every cut is DESIGNED (matched action, reaction cut, eyeline, sound bridge, foreground "
-        "wipe) — state cutInMotivation for every shot after the first. No arbitrary cuts.\n"
-        "5. Screen direction and geography stay consistent; state who is frame-left/right in every "
-        "continuity state, and keep marks/props identical across each relay join (what leaves a shot "
-        "enters the next unchanged).\n"
-        "6. NEVER describe a character's appearance anywhere — identity comes only from reference "
-        "images. Poses, positions and expressions yes; looks, colours, species features no.\n"
-        "7. Comedy physics: weight, compression, rebound, follow-through — chained cause and "
-        "consequence, never a checklist of verbs. For a BIG-comedy beat, put the full physicalStaging "
-        "contract on the shot that carries the gag's physical event; leave it null everywhere else.\n"
-        "8. Only the named speaker's mouth moves; listeners react silently. Dialogue timing must fit "
-        "inside the shot with breathing room.\n"
-        "9. OBSERVABLE DIRECTION LAW (Julian's ruling, 2026-07-16): performanceAssignment, "
-        "physicalStaging and visualPayoff are RENDER-FACING — they may contain ONLY what a camera "
-        "sees or a microphone hears: movement, pose, expression, timing, camera-visible cause and "
-        "effect, and sound. Abstract intent, judgments, metaphors and inner states ('the pose "
-        "becomes the joke', 'sells it as status', 'mistakes attention for permission') are valid "
-        "creative planning but belong ONLY in purpose — never in the three render-facing fields. "
-        "Translate every intention into visible behaviour: lean, not micro-choreographed.\n"
-        "WORD DISCIPLINE (hard limits): performanceAssignment 25-50 words; camera <= 15; "
-        "openingPose <= 30; visualPayoff <= 15; purpose <= 12. Precision over volume.\n"
-        "10. NEVER restate the audio/lip-sync assignment inside performanceAssignment or "
-        "visualPayoff (e.g. 'Lip-sync the approved audio; no additional speech') — that "
-        "instruction is generated mechanically from dialogueLines and shipped separately, "
-        "every time. Repeating it here only burns your own word budget on something already "
-        "said; spend it on the physical action instead.\n"
-        "11. For a BIG-comedy beat, physicalStaging.contactAndWeight is the shot's REAL "
-        "cause-and-effect chain — what hits what, where it bends, where it rebounds, what "
-        "flies loose — and reaches the provider on its own, alongside performanceAssignment, "
-        "not folded into it. Keep it a concrete, staged sequence of physical events, never a "
-        "summary of the same beat performanceAssignment already covers.\n"
-        "Output STRICT JSON matching the schema you are given."
-    )
 
 
 def _load_pkg(episode):
@@ -443,100 +393,15 @@ def _scene_beats(d, scene_num):
     return beats
 
 
-def _beat_digest(beats):
-    """What the design pass reads: the director's own locked creative content. Full dialogue
-    text IS included here — the design must copy it verbatim into dialogueLines; this is
-    authoring context, never render-prompt text (the Law-6 guard sits at compile time)."""
-    out = []
-    for b in beats:
-        out.append({
-            "beatCode": b.get("beatCode"),
-            "storyBeat": b.get("storyBeat"),
-            "comedyMode": b.get("comedyMode"),
-            "cuts": [{"framing": c.get("framing"), "action": c.get("action"),
-                       "dialogue": c.get("dialogue") or None,
-                       "delivery": c.get("delivery")} for c in (b.get("cuts") or [])],
-            "startState": b.get("startState"),
-            "endState": b.get("endState"),
-            "carryMarks": b.get("carryMarks"),
-            "characters": b.get("characters"),
-        })
-    return out
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # STAGE: the scene's shot design — one structured call, then validate, then ONE repair pass
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def _design_user_prompt(scene_num, scene, beats):
-    return (
-        f"SCENE {scene_num} — '{scene.get('name', '')}'\n"
-        f"Location: {scene.get('location', '')}\nLook: {scene.get('sceneLook', scene.get('lighting', ''))}\n"
-        f"Emotional core: {scene.get('emotionalCore', '')}\n\n"
-        f"THE DIRECTOR'S LOCKED BEATS (the story truth — photograph these, never rewrite them):\n"
-        f"{json.dumps(_beat_digest(beats), ensure_ascii=False, indent=1)}\n\n"
-        "TASK 1 — the DIRECTOR'S STATEMENT for this scene (the six questions).\n"
-        "TASK 2 — the SHOT LIST: convert each beat into 1-3 shots of 4-8 seconds. shotId = "
-        "'{beatCode}.S{n}' (e.g. '1.B1.S1'). The FIRST shot of the scene is sourceType='opener' with "
-        "sourceShotId=null. EVERY LATER SHOT DEFAULTS TO 'relay' (sourceShotId = the earlier shot "
-        "whose final frame it continues from, usually the previous one) — this applies whether the "
-        "camera holds on the same coverage OR cuts to something new; a relay shot's own camera and "
-        "action are completely free to describe a new setup, relay only means this shot's opening "
-        "frame anchors identity/position/lighting off the previous shot's real final frame instead "
-        "of inventing a disconnected one. Use 'opener' (sourceShotId=null) ONLY for a genuine scene "
-        "or location reset — never merely because the shot is a cut. "
-        "Every shot: ONE performance assignment, an anticipation openingPose, an exact visualPayoff, "
-        "typed continuityIn/continuityOut (zone, facing, pose, expression, marks, props for every "
-        "character in frame), dialogueLines copied VERBATIM with timing, at most 3 prohibited items, "
-        "and physicalStaging on the gag-carrying shot of each BIG-comedy beat."
-    )
 
 
-def _clear_opener_continuity_in(design):
-    """THE SIMPLIFICATION (2026-07-17, Julian's system-freeze checkpoint): the scene's own
-    first shot has no predecessor to inherit continuity from — cleared MECHANICALLY, never
-    trusted from the LLM (the identical structural-fact treatment
-    cb_creative.production_detail already applies to its own opener shot's continuityIn).
-    Typed absence (None), not a sentinel string. A no-op on an empty shot list."""
-    if design.shots:
-        design.shots[0].continuityIn = None
 
 
-def design_scene(episode, scene_num, log=print):
-    d, pkg_path = _load_pkg(episode)
-    beats = _scene_beats(d, scene_num)
-    if not beats:
-        raise ValueError(f"no beats for scene {scene_num}")
-    scene = next((s for s in d.get("scenes") or [] if str(s.get("sceneNumber")) == str(scene_num)), {})
-    try:
-        characters_cfg = json.load(open(P.CHARS))
-    except Exception:
-        characters_cfg = {}
-
-    user = _design_user_prompt(scene_num, scene, beats)
-    log(f"ENGINE — designing scene {scene_num}: statement + shot list (one structured call)...", flush=True)
-    result = cb_llm.structured(_design_mind(), user, SceneShotList,
-                                label=f"engine_design_s{scene_num}")
-    _clear_opener_continuity_in(result)
-
-    # the deterministic validator, then at most ONE repair pass (same discipline as Gate 1's
-    # beat_problems loop): errors go back to the same mind, verbatim, fix-only
-    report = validate_scene_design(result, beats, characters_cfg)
-    if not report["passed"]:
-        issues = [f"[{i['severity']}] {i['code']} at {i['path']}: {i['message']}"
-                  for i in report["issues"] if i["severity"] == "ERROR"]
-        log(f"ENGINE — design has {len(issues)} validation error(s); one repair pass...", flush=True)
-        repair_user = (user + "\n\nYOUR PREVIOUS DESIGN FAILED VALIDATION. Return the FULL corrected "
-                       "design, changing ONLY what these errors require:\n" + "\n".join(issues))
-        result = cb_llm.structured(_design_mind(), repair_user, SceneShotList,
-                                    label=f"engine_design_s{scene_num}_repair")
-        _clear_opener_continuity_in(result)
-        report = validate_scene_design(result, beats, characters_cfg)
-    # THE OBSERVABLE-DIRECTION TRANSLATOR (Julian's directive, 2026-07-16): abstract direction is
-    # never the user's problem to fix by hand — the Episode Director repairs it automatically,
-    # field-scoped, before compilation. Runs only when the deterministic validator found any.
-    if any(i["code"] in REPAIRABLE_CODES for i in report["issues"]):
-        _, _, report = auto_repair_abstract_directions(result, beats, characters_cfg, log=log)
-    return result, report, beats, scene, d, pkg_path
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -627,55 +492,6 @@ def repair_abstract_field(shot, field_name, current_text, offending, prev_failur
     return r.text.strip()
 
 
-def auto_repair_abstract_directions(design, beats, characters_cfg, log=print):
-    """Points 3-6: field-scoped automatic repair with deterministic revalidation after every
-    attempt, a two-attempt cap, loud escalation, and a full record. Returns
-    (repair_log, escalations, final_validation_report). Mutates only the rejected fields;
-    every protected field is asserted byte-identical afterwards."""
-    repair_log, escalations = [], []
-    report = validate_scene_design(design, beats, characters_cfg)
-    targets = {}
-    for i in report["issues"]:
-        if i["code"] not in REPAIRABLE_CODES:
-            continue
-        sid = i["path"].split("(")[1].split(")")[0]
-        targets.setdefault((sid, i["path"].split(".")[-1]), []).append(i["message"])
-    for (sid, fld) in targets:
-        shot = next(s for s in design.shots if s.shotId == sid)
-        protected_before = {f: json.dumps(getattr(shot, f), default=lambda o: o.model_dump(),
-                                           sort_keys=True) for f in REPAIR_PROTECTED_FIELDS}
-        original = getattr(shot, fld)
-        offending = _field_rejections(fld, original)
-        repaired, prev_failure = False, None
-        for attempt in range(1, REPAIR_MAX_ATTEMPTS + 1):
-            replacement = repair_abstract_field(shot, fld, original, offending, prev_failure)
-            problems = _field_rejections(fld, replacement)
-            entry = {"shotId": sid, "field": fld, "attempt": attempt, "original": original,
-                     "replacement": replacement,
-                     "reason": "; ".join(offending),
-                     "model": cb_llm.DIRECTOR_MODEL, "promptVersion": REPAIR_PROMPT_VERSION,
-                     "protectedFields": list(REPAIR_PROTECTED_FIELDS),
-                     "validationResult": (f"REJECTED — {'; '.join(problems)}" if problems
-                                           else "PASSED deterministic revalidation")}
-            repair_log.append(entry)
-            log(f"REPAIR — {sid}.{fld} attempt {attempt}: {entry['validationResult']}", flush=True)
-            if problems:
-                prev_failure = {"text": replacement, "rejectedFor": problems}
-                continue
-            setattr(shot, fld, replacement)
-            repaired = True
-            break
-        if not repaired:
-            escalations.append({"shotId": sid, "field": fld, "original": original,
-                                 "reason": f"both automated repair attempts still abstract — "
-                                           f"a creative decision is needed"})
-        # the repair can never touch a protected field — asserted, not assumed
-        for f in REPAIR_PROTECTED_FIELDS:
-            now = json.dumps(getattr(shot, f), default=lambda o: o.model_dump(), sort_keys=True)
-            assert now == protected_before[f], (
-                f"REPAIR VIOLATION: {sid}.{f} changed during a field-scoped repair of {fld}")
-    final = validate_scene_design(design, beats, characters_cfg)
-    return repair_log, escalations, final
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -1808,169 +1624,33 @@ def _ledger_entry(shot):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # THE PACKAGE
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def compile_scene_package(scene_num, episode="Ep1", log=print):
-    design, report, beats, scene, d, pkg_path = design_scene(episode, scene_num, log=log)
-    try:
-        characters_cfg = json.load(open(P.CHARS))
-    except Exception:
-        characters_cfg = {}
 
-    if not report["passed"]:
-        errs = [i for i in report["issues"] if i["severity"] == "ERROR"]
-        log(f"ENGINE — ⛔ design still carries {len(errs)} validation ERROR(s) after the repair "
-            f"pass — package written with validation.passed=false; it must not fire:", flush=True)
-        for i in errs:
-            log(f"   [{i['code']}] {i['path']}: {i['message']}", flush=True)
-
-    shots_out, total_sec = [], 0.0
-    for sh in design.shots:
-        prompt, wc, slots = compile_shot_contract(sh, scene, characters_cfg,
-                                                   siblings=design.shots)
-        rec = sh.model_dump()
-        rec["seedancePrompt"] = prompt
-        rec["promptWords"] = wc
-        rec["referenceSlots"] = slots
-        rec["audioBrief"] = compile_audio_brief(sh)
-        if sh.sourceType == "opener":
-            kf, kwc, kslots = compile_keyframe_prompt(sh, scene, characters_cfg)
-            rec["keyframePrompt"], rec["keyframePromptWords"] = kf, kwc
-            rec["keyframeReferenceSlots"] = kslots
-        shots_out.append(rec)
-        total_sec += sh.durationSec
-
-    pkg = {
-        "episode": episode, "sceneNumber": str(scene_num), "sceneName": scene.get("name", ""),
-        "doctrine": "THE_DEFINITIVE_PIPELINE.md (2026-07-16, hybrid contract)",
-        "directorStatement": design.statement.model_dump(),
-        "beatCodes": [b.get("beatCode") for b in beats],
-        "shots": shots_out,
-        "totalSec": round(total_sec, 1),
-        "continuityLedger": [_ledger_entry(s) for s in design.shots],
-        "validation": report,
-        "reviewCriteria": {"canon": "characters and world accurate vs references",
-                            "direction": "acting, humour and emotion land",
-                            "physics": "weight, contact, follow-through",
-                            "continuity": "connects naturally to surrounding shots"},
-        "sourceBeatPackage": str(pkg_path.name),
-    }
-    out_json = canonical_package_path(scene_num, episode)
-    json.dump(pkg, open(out_json, "w"), indent=1, ensure_ascii=False)
-
-    # the human review document — the exact words ARE shown here (a human doc, not a render prompt)
-    st = design.statement
-    md = [f"# {episode} · Scene {scene_num} — Production Package (hybrid)",
-          f"_{scene.get('name','')} · {len(design.shots)} shots · ~{round(total_sec)}s · "
-          f"validation: {'PASSED' if report['passed'] else 'FAILED'} "
-          f"({len(report['issues'])} issue(s)) · doctrine: THE_DEFINITIVE_PIPELINE.md_\n",
-          "## Director's statement",
-          f"- **Feel:** {st.audienceFeeling}",
-          f"- **Whose scene:** {st.whoseScene}",
-          f"- **Emotional change:** {st.emotionalChange}",
-          f"- **The laugh:** {st.theLaugh}",
-          f"- **Visual surprise:** {st.visualSurprise}",
-          f"- **Carries forward:** {st.carryForward}\n"]
-    if report["issues"]:
-        md.append("## Validation report")
-        for i in report["issues"]:
-            md.append(f"- **{i['severity']}** `{i['code']}` at `{i['path']}` — {i['message']}")
-        md.append("")
-    for s in shots_out:
-        md.append(f"## {s['shotId']}  ·  {s['durationSec']}s  ·  {s['sourceType']}"
-                  + (f" ← {s['sourceShotId']}" if s.get('sourceShotId') else "")
-                  + (f"  ·  cut in: {s['cutInMotivation']}" if s.get('cutInMotivation') else ""))
-        md.append(f"**Purpose:** {s['purpose']}")
-        md.append(f"**Opening pose (keyframe truth):** {s['openingPose']}")
-        for ln in s.get("dialogueLines") or []:
-            md.append(f"**{ln['speaker']}** ({ln['startSec']:.0f}-{ln['endSec']:.0f}s): "
-                      f"“{ln['exactText']}” — _{ln['delivery']}_")
-        md.append(f"**Payoff:** {s['visualPayoff']}")
-        if s.get("physicalStaging"):
-            ps = s["physicalStaging"]
-            md.append(f"**Gag physics:** stays visible — {ps['staysVisible']}; contact/weight — "
-                      f"{ps['contactAndWeight']}; payoff shape — {ps['payoffShape']}")
-        md.append(f"**Prompt ({s['promptWords']} words):**\n```\n{s['seedancePrompt']}\n```")
-        if s.get("keyframePrompt"):
-            md.append(f"**Keyframe prompt ({s['keyframePromptWords']} words):**\n```\n{s['keyframePrompt']}\n```")
-        md.append("")
-    out_md = HERE.parent / "cb-output" / f"{episode}_scene{scene_num}_production_package.md"
-    out_md.write_text("\n".join(md))
-    log(f"ENGINE — wrote {out_json.name} + {out_md.name}: {len(design.shots)} shots, "
-        f"~{round(total_sec)}s, prompts {min(s['promptWords'] for s in shots_out)}-"
-        f"{max(s['promptWords'] for s in shots_out)} words, validation "
-        f"{'PASSED' if report['passed'] else 'FAILED'}", flush=True)
-    return pkg
-
-
-def repair_package(scene_num, episode="Ep1", log=print):
-    """Run the observable-direction repair loop against an EXISTING production package (Julian's
-    directive, 2026-07-16, point 7): repairs every ABSTRACT_DIRECTION rejection field-by-field,
-    preserves each original as creativeIntent planning metadata (never compiled), records the
-    full repair log, refreshes every stored seedancePrompt (the fire path ships the STORED
-    prompt), revalidates deterministically and bumps the package revision. Zero media spend."""
-    pkg_file = canonical_package_path(scene_num, episode)
-    pkg = json.loads(pkg_file.read_text())
-    d, _ = _load_pkg(episode)
-    beats = _scene_beats(d, scene_num)
-    try:
-        characters_cfg = json.load(open(P.CHARS))
-    except Exception:
-        characters_cfg = {}
-    fields = set(Shot.model_fields)
-    shots = [Shot(**{k: v for k, v in rec.items() if k in fields}) for rec in pkg["shots"]]
-    design = SceneShotList(statement=DirectorStatement(**pkg["directorStatement"]), shots=shots)
-
-    repair_log, escalations, final = auto_repair_abstract_directions(
-        design, beats, characters_cfg, log=log)
-
-    by_id = {s.shotId: s for s in design.shots}
-    for rec in pkg["shots"]:
-        sh = by_id[rec["shotId"]]
-        for e in repair_log:
-            if e["shotId"] == rec["shotId"] and "PASSED" in e["validationResult"]:
-                # planning metadata: the FIRST original is the creative intent — a later repair
-                # pass over an intermediate text must never overwrite the true source
-                rec.setdefault("creativeIntent", {}).setdefault(e["field"], e["original"])
-                rec[e["field"]] = getattr(sh, e["field"])
-        # refresh the STORED prompt — the fire path ships this, never a fresh compile. Word
-        # length can no longer block this (2026-07-21, the hard ceiling was removed); the
-        # only remaining failure mode is a genuine compile guard (e.g. a Law 6 leak) —
-        # reported, never a crashed run.
-        try:
-            prompt, wc, slots = compile_shot_contract(sh, pkg.get("scene", {}),
-                                                     characters_cfg,
-                                                     siblings=pkg.get("shots"))
-            rec["seedancePrompt"], rec["promptWords"], rec["referenceSlots"] = prompt, wc, slots
-            rec.pop("promptStale", None)
-            # THE INTERNAL CONTRACT LINE (Option D): the full negation-safe constraints record,
-            # kept in the package for validation/review — deliberately NOT in the provider brief.
-            rec["internalConstraints"] = hard_constraints(sh, characters_cfg)[0]
-        except (ValueError, AssertionError) as e:
-            rec["promptStale"] = str(e)
-            log(f"OVERBUDGET — {rec['shotId']}: stored prompt left stale and fire-blocked "
-                f"via validation ({e})", flush=True)
-    pkg["repairLog"] = pkg.get("repairLog", []) + repair_log
-    errs = [i for i in final["issues"] if i["severity"] == "ERROR"]
-    pkg["validation"] = {"passed": final["passed"], "errors": len(errs),
-                          "warnings": len([i for i in final["issues"]
-                                            if i["severity"] == "WARNING"]),
-                          "issues": final["issues"], "validatedAt": "2026-07-16",
-                          "revision": int(pkg.get("revision", 1)) + 1}
-    pkg["revision"] = int(pkg.get("revision", 1)) + 1
-    pkg_file.write_text(json.dumps(pkg, indent=1, ensure_ascii=False))
-    log(f"REPAIR — {len([e for e in repair_log if 'PASSED' in e['validationResult']])} field(s) "
-        f"repaired, {len(escalations)} escalated; validation passed={final['passed']}; "
-        f"revision {pkg['revision']}", flush=True)
-    for esc in escalations:
-        log(f"ESCALATION — {esc['shotId']}.{esc['field']}: {esc['reason']}", flush=True)
-    return repair_log, escalations, final
-
-
-if __name__ == "__main__":
-    os.chdir(HERE)
-    if len(sys.argv) > 1 and sys.argv[1] == "repair":
-        repair_package(sys.argv[2] if len(sys.argv) > 2 else "1",
-                       sys.argv[3] if len(sys.argv) > 3 else "Ep1")
-    else:
-        scene = sys.argv[1] if len(sys.argv) > 1 else "1"
-        ep = sys.argv[2] if len(sys.argv) > 2 else "Ep1"
-        compile_scene_package(scene, ep)
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# THE SECOND STORYBOARD AUTHOR WAS DELETED HERE (2026-07-26, Julian: "do gap 5 now").
+#
+# design_scene / compile_scene_package / repair_package — plus _design_mind,
+# _design_user_prompt, _beat_digest, _clear_opener_continuity_in,
+# auto_repair_abstract_directions and the __main__ block that drove them — authored a
+# Director's statement AND a whole shot list from ONE hardcoded LLM prompt, then wrote the
+# SAME canonical production package that cb_handover writes from cb_creative's approved
+# storyboard. It saw no show bible, no taste canon, no exemplar library, no runtime SKILL
+# contract, no Showrunner, no treatments, no Gate 2 selection, no adversarial review, no
+# Producer and no Voice Director. A storyboard authored blind, at the same address as one
+# authored by the whole room.
+#
+# It had ZERO real callers — every mention across engine/ and cb-studio/ was a comment or a
+# docstring, verified by grepping for an actual invocation — but it ran from the CLI, and
+# cb_render's own refusal string used to tell the operator to run it. Money was already
+# blocked (it never wrote sourceStoryboard, so _require_current_lineage refused a fire) but
+# STATE was not: it overwrote the canonical package with no archive, where cb_handover
+# copies the old one aside first.
+#
+# Two engines that can both author a storyboard is the defect class this project has been
+# burned by repeatedly — the v1/v2 assemblers, the retired beat pipeline. cb_creative is the
+# only director. cb_engine is the CONTRACT, the COMPILER and the VALIDATOR: it defines the
+# Shot schema every stage agrees on, compiles the shot contract / keyframe prompt / audio
+# brief, and validates a design. It does not author.
+#
+# 347 lines removed, proven on a shadow copy of the whole engine tree first: every symbol a
+# live consumer imports was verified present afterwards.
+# ─────────────────────────────────────────────────────────────────────────────────────────

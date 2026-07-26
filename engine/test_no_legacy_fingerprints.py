@@ -138,3 +138,44 @@ def test_single_seedance_call_graph():
 if __name__ == "__main__":
     import subprocess, sys
     raise SystemExit(subprocess.call([sys.executable, "-m", "pytest", __file__, "-q"]))
+
+
+def test_exactly_one_storyboard_author():
+    """ONE DIRECTOR (2026-07-26, Julian: "do gap 5 now").
+
+    cb_engine used to carry a second, complete storyboard author — design_scene /
+    compile_scene_package / repair_package — that wrote the SAME canonical production package
+    cb_handover writes, from ONE hardcoded LLM prompt, with no show bible, no taste canon, no
+    exemplars, no SKILL contract, no Showrunner and no review. It had zero real callers and ran
+    from the CLI anyway.
+
+    Two engines that can both author a storyboard is the defect class that has cost this
+    project the most: the v1/v2 assemblers, the retired beat pipeline. This test is the guard.
+    cb_creative is the only director; cb_engine is the contract, compiler and validator."""
+    import cb_engine
+    for name in ("design_scene", "compile_scene_package", "repair_package",
+                 "_design_mind", "_design_user_prompt", "auto_repair_abstract_directions"):
+        assert not hasattr(cb_engine, name), (
+            f"cb_engine.{name} is back — a second storyboard author has been reintroduced. "
+            f"cb_creative is the only director.")
+
+    # ...and the live consumers must still have everything they import from it.
+    for name in ("Shot", "SceneShotList", "DirectorStatement", "ContinuityState",
+                 "CharacterState", "DialogueLine", "PhysicalStaging",
+                 "MIN_SHOT_SEC", "MAX_SHOT_SEC", "canonical_package_path",
+                 "compile_shot_contract", "compile_keyframe_prompt", "compile_audio_brief",
+                 "validate_scene_design", "hard_constraints", "ending_requires_hold",
+                 "clip_owner_of"):
+        assert hasattr(cb_engine, name), (
+            f"cb_engine.{name} is missing — the deletion took a live consumer's symbol with it")
+
+    # nobody may call the deleted entry points, in any file, ever again
+    import pathlib, re
+    root = pathlib.Path(__file__).resolve().parent.parent
+    for py in list((root / "engine").glob("*.py")) + list((root / "cb-studio").glob("*.py")):
+        if py.name in ("test_no_legacy_fingerprints.py",):
+            continue
+        txt = py.read_text(encoding="utf-8", errors="ignore")
+        for call in re.finditer(r"cb_engine\.(design_scene|compile_scene_package|"
+                                r"repair_package)\s*\(", txt):
+            raise AssertionError(f"{py.name} calls cb_engine.{call.group(1)}() — deleted path")

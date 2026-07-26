@@ -4311,9 +4311,13 @@ def _beats_for_fresh_validation(pkg, episode):
     and wrongly, called that file "a stale orphaned leftover from the retired 43-beat
     pipeline" — it is not: Ep1_The_Adventure_Begins_beat_package.json is the CURRENT,
     live, actively-maintained script→beat breakdown that cb_creative._script_package()
-    reads as Gate 0's own script input, and that cb_engine.design_scene()/repair_package()
-    still read today to author any scene that hasn't yet been promoted into its own
-    per-scene storyboard — confirmed still edited this week (its own pre-comedyMode
+    reads as Gate 0's own script input. (SUPERSEDED 2026-07-26: this sentence used to add
+    "and that cb_engine's design_scene/repair_package still read today to author any scene
+    that hasn't yet been promoted into its own per-scene storyboard". Those functions are
+    DELETED — they were a second storyboard author writing to the same canonical path with
+    no bible, no taste canon and no Showrunner. cb_creative is the only director now;
+    test_exactly_one_storyboard_author is the guard.) Confirmed still edited (its own
+    pre-comedyMode
     archive copy is dated the same day this bug was found). The real bug was a
     pipeline-STAGE mismatch, not a dead file: this whole-episode beat package is the
     EARLY, story-beat-level breakdown (one entry per story beat, e.g.

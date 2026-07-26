@@ -328,11 +328,26 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
                 "downstream toward lesson delivery. 'He needs her to keep watching' is a "
                 "lack. Test it: could this exact sentence sit in a different series with a "
                 "different cast? Then it is not authored yet.\n"
-                "(2) adultRead SAYS WHAT IS VISIBLE — IT NEVER CLAIMS HOW THE ROOM WILL "
-                "REACT. 'Every parent in the room has stood on that pier' is unfalsifiable "
-                "and it is marking your own homework. Point at the frame and say what is in "
-                "it; let the room have its own reaction. The adult door must open onto the "
-                "SAME moment the child is watching, not a thought running alongside it.\n"
+                # CORRECTED SAME DAY (2026-07-26), on the first real run under this rule.
+                # The first wording said "point at the frame and say what is IN it" and the
+                # room did precisely that — and stopped saying what the visible thing MEANS.
+                # Measured on the same moment: "Nothing glows. She hands over grief
+                # disguised as equipment" became "The bezels are empty, and she holds her
+                # paws closed around his." The second is true, checkable, and something a
+                # four-year-old already sees — the adult door had closed. The ban was always
+                # on claiming the ROOM'S REACTION, never on meaning. CREATIVE OVER
+                # CONSTRAINTS: a rule that produces a flatter beat is the wrong rule, and
+                # this one was mine.
+                "(2) adultRead IS THE SECOND DOOR ONTO THE SAME MOMENT — anchor it to "
+                "something visible, then SAY WHAT THAT VISIBLE THING MEANS. Both halves are "
+                "required. The anchor is what stops it floating free of the beat; the "
+                "meaning is the entire reason the field exists. 'Nothing glows — she is "
+                "handing over grief disguised as equipment' does both. 'The bezels are "
+                "empty' is only the anchor, and it tells an adult nothing the child has not "
+                "already seen. What you must NOT do is claim how the room will react: "
+                "'every parent watching has stood on that pier' is unfalsifiable and it is "
+                "marking your own homework. Say what the moment MEANS; let the room have its "
+                "own reaction to it.\n"
                 "(3) NEVER NAME WHAT THE CAMERA CANNOT SEE. 'A mother standing on a dock "
                 "just outside the frame' is a lovely line and a real production hazard — "
                 "somebody downstream will try to board it. If it matters, it is on screen; "

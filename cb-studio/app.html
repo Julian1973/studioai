@@ -868,12 +868,16 @@ window.addEventListener("popstate",function(){
   if(h===_NAV_HASH_LAST) return;
   _NAV_HASH_LAST=h;
   if(!h||!new URLSearchParams(h).get('p')){
-    _NAV_SEQ++; _NAV_RESTORING=false;
+    // RESTORING, not navigating. bootProjects() renders, every render calls _syncHash, and
+    // _syncHash PUSHES whenever the hash changed — so walking Back onto the bare URL used to
+    // push "pg=projects" straight back on, landing you exactly where you just left. Back on
+    // the Studio's own front door did nothing, forever. The flag makes that render REPLACE.
+    _NAV_SEQ++; _NAV_RESTORING=true;
     CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects";
-    bootProjects();
+    _bootProjectsRestoring();
     return;
   }
-  _restoreFromHash(h).then(function(ok){ if(!ok) bootProjects(); });
+  _restoreFromHash(h).then(function(ok){ if(!ok) _bootProjectsRestoring(); });
 });
 // REVIEWER IDENTITY (2026-07-08, Production Management panel finding — "no reviewer/role concept in code
 // at all"): a persisted name sent with every sign-off, so who-approved-what is recorded before a second
@@ -892,6 +896,16 @@ function _esc(s){return (''+(s==null?'':s)).replace(/[<>&]/g,function(c){return 
 async function bootProjects(){
   try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
   CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects"; renderTop(); renderNav(); renderProjects();
+}
+// bootProjects, but as a RESTORE — used only by the popstate handler. Holds _NAV_RESTORING
+// across the whole async boot (bootProjects awaits a fetch before it renders, so setting the
+// flag and returning immediately would clear it before the render that needs it), then
+// releases it. Only the latest Back press releases: a rapid second press bumps _NAV_SEQ, and
+// the older boot must not clear the newer one's flag out from under it.
+function _bootProjectsRestoring(){
+  _NAV_RESTORING=true;
+  const mySeq=_NAV_SEQ;
+  return bootProjects().finally(function(){ if(mySeq===_NAV_SEQ) _NAV_RESTORING=false; });
 }
 function renderProjects(){
   const initial=p=>_esc((p.name||"?").trim().charAt(0).toUpperCase());

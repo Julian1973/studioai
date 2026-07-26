@@ -141,6 +141,41 @@ def test_restoring_does_not_push_the_history_it_is_walking():
         "the push guard does not consult the restore flag")
 
 
+def test_back_onto_the_front_door_is_not_a_dead_end():
+    """Found 2026-07-26 by the verification pass, in the navigation fix itself.
+
+    Walking Back onto the bare URL lands on Projects — and bootProjects() renders, and every
+    render calls _syncHash, and _syncHash PUSHES when the hash changed. So the act of arriving
+    pushed "pg=projects" straight back on, returning you to the entry you had just left. Back
+    on the Studio's own front door did nothing, forever: measured idx=1/1 before this fix, on
+    every press. That is strictly worse than the behaviour being replaced — Back used to leave
+    the app; briefly, it did nothing at all.
+
+    The branch must therefore RAISE the restore guard, not lower it, and must hold it across
+    the whole async boot — bootProjects awaits a fetch before it renders, so raising the flag
+    and returning immediately would clear it before the render that needs it ever runs."""
+    code = _app_code()
+    handler = re.search(r'addEventListener\(\s*["\']popstate["\'][\s\S]*?\n\}\);', code)
+    assert handler, "the popstate handler is gone"
+    branch = re.search(r"if\s*\(\s*!h\s*\|\|[\s\S]*?\n\s*\}", handler.group(0))
+    assert branch, "the no-project branch of the popstate handler is gone"
+    body = branch.group(0)
+
+    assert not re.search(r"_NAV_RESTORING\s*=\s*false", body), (
+        "arriving at the front door lowers the restore guard, so the render it triggers pushes "
+        "the entry back on and Back becomes a permanent no-op")
+    assert re.search(r"_NAV_RESTORING\s*=\s*true", body) or "_bootProjectsRestoring" in body, (
+        "the front-door branch neither raises the guard nor delegates to something that does")
+
+    helper = _fn_body("_bootProjectsRestoring")
+    assert re.search(r"_NAV_RESTORING\s*=\s*true", helper), "the helper never raises the guard"
+    assert ".finally(" in helper or ".then(" in helper, (
+        "the helper lowers the guard synchronously — bootProjects awaits a fetch before it "
+        "renders, so the flag would be gone by the time the render needs it")
+    assert "_NAV_SEQ" in helper, (
+        "nothing stops an older boot clearing a newer Back press's guard out from under it")
+
+
 # ── 2 · THE UN-APPROVE CONTROLS, REACHABLE ───────────────────────────────────────────────
 
 def _shot_run_cmds():

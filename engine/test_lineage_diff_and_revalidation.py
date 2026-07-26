@@ -26,7 +26,15 @@ import cb_render as R
 from test_cb_render_department_gate import _build_shot, CFG as _DEPT_CFG
 
 
+
+
 # ── items 1-5: the diff/classification module itself ────────────────────────────────────
+# DORMANT-SAFE WHEN THE SCENE IS RESET (2026-07-26) — see _live_package.py. These
+# assertions need real production data; when Scene 1 has been archived for a clean
+# run they skip honestly rather than erroring as if the engine were broken.
+from _live_package import require_live_package
+pytestmark = require_live_package()
+
 def test_json_formatting_and_key_order_never_create_a_diff():
     """item 1: two dicts with different insertion order and no other change diff to
     nothing — json.load already normalises whitespace/formatting away, and this module's

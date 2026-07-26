@@ -25,6 +25,12 @@ from test_cb_render_department_gate import (
     world, _mock_llm, _build_shot, CFG, _reach_model_limited, _approve_animation,
 )
 
+# DORMANT-SAFE WHEN THE SCENE IS RESET (2026-07-26) — see _live_package.py. These
+# assertions need real production data; when Scene 1 has been archived for a clean
+# run they skip honestly rather than erroring as if the engine were broken.
+from _live_package import require_live_package
+pytestmark = require_live_package()
+
 
 @pytest.fixture(autouse=True)
 def _no_real_llm_by_default(monkeypatch):

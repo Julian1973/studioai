@@ -56,12 +56,20 @@ sys.path.insert(0, str(HERE.parent / "cb-studio"))
 import cb_gen
 import cb_render
 
+
+
 LEGACY_STRINGS = [
     "Pixar-caliber", "squash-and-stretch", "0–5s", "5–10s", "10–15s", "Negative:",
     "camera already waiting at the leaf", "no leaf hit as the final image",
     "crash-lands into pride", "frame-left lane", "15s, 16:9, 24fps",
 ]
 
+
+# DORMANT-SAFE WHEN THE SCENE IS RESET (2026-07-26) — see _live_package.py. These
+# assertions need real production data; when Scene 1 has been archived for a clean
+# run they skip honestly rather than erroring as if the engine were broken.
+from _live_package import require_live_package
+pytestmark = require_live_package()
 
 def test_studio_endpoint_builds_the_exact_fire_argv():
     """§6 step 1: the Shots tab's approve-spend click -> POST /api/shot-run ->

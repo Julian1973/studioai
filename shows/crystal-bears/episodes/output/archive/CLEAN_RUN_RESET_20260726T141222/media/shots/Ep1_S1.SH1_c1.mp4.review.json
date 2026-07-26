@@ -1,0 +1,20 @@
+{
+ "shotId": "S1.SH1",
+ "batchId": "S1.SH1-b2-20260725T100953",
+ "candidate": 1,
+ "at": "2026-07-25T10:15:22",
+ "criteria": {
+  "characterIdentity": null,
+  "relativeScale": null,
+  "startingGeography": null,
+  "actionReadability": null,
+  "physicalCauseAndEffect": null,
+  "comicOrEmotionalPerformance": null,
+  "cameraBehaviour": null,
+  "dialogueAndMouthPerformance": null,
+  "continuity": null,
+  "finalFrameUsability": null
+ },
+ "note": "human review only \u2014 the machine never approves creative quality",
+ "machineNotes": []
+}

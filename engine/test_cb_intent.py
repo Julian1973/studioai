@@ -10,6 +10,14 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_intent as I
 
+
+
+# DORMANT-SAFE WHEN THE SCENE IS RESET (2026-07-26) — see _live_package.py. These
+# assertions need real production data; when Scene 1 has been archived for a clean
+# run they skip honestly rather than erroring as if the engine were broken.
+from _live_package import require_live_package
+pytestmark = require_live_package()
+
 def _shot(sid="S1.SH2"):
     pkg = json.loads((HERE.parent / "shows" / "crystal-bears" / "episodes" / "output" /
                       "Ep1_scene1_production_package.json").read_text())

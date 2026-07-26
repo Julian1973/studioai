@@ -1,0 +1,13 @@
+{
+  "ts": 1784970922.7510972,
+  "recorded_at": "2026-07-25T10:15:22",
+  "op": "seedance_ref2vid",
+  "endpoint": "dreamina-seedance-2-0-260128",
+  "resolution": "720p",
+  "duration": "14",
+  "seconds": 14.0,
+  "fast": false,
+  "provider": "byteplus",
+  "num_image_refs": 4,
+  "num_audio_refs": 1
+}

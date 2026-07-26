@@ -6,6 +6,14 @@ import json
 import cb_render as R
 
 
+
+
+# DORMANT-SAFE WHEN THE SCENE IS RESET (2026-07-26) — see _live_package.py. These
+# assertions need real production data; when Scene 1 has been archived for a clean
+# run they skip honestly rather than erroring as if the engine were broken.
+from _live_package import require_live_package
+pytestmark = require_live_package()
+
 def test_handle_duration_floors_at_handle_total_with_no_voice(monkeypatch):
     """A shot with no voice track (None, or a path that doesn't resolve) still renders at
     the full HANDLE_TOTAL — the archived beat-level doctrine's own universal behaviour,

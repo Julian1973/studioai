@@ -20,11 +20,19 @@ sys.path.insert(0, str(HERE))
 import cb_handover as H
 import cb_engine
 
+
+
 # distinctive markers that must NEVER cross into production (req 4)
 JUDGEMENT_MARKER = "ZZ-SHOWRUNNER-ANALYSIS-MARKER-ZZ"
 REJECTED_MARKER = "ZZ-REJECTED-INTERPRETATION-MARKER-ZZ"
 CANON_MARKER = "ZZ-TASTE-CANON-MARKER-ZZ"
 
+
+# DORMANT-SAFE WHEN THE SCENE IS RESET (2026-07-26) — see _live_package.py. These
+# assertions need real production data; when Scene 1 has been archived for a clean
+# run they skip honestly rather than erroring as if the engine were broken.
+from _live_package import require_live_package
+pytestmark = require_live_package()
 
 def _sb_shot(shot_id, beat_ids, transition, protections=None):
     return {"shotId": shot_id, "beatIds": beat_ids, "purpose": "Land the leaf gag cleanly.",

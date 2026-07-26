@@ -311,6 +311,32 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
                 "the specific alternative — 'starting at event 12 would miss the instant he "
                 "pauses' — can be checked against the script by anyone. One that only "
                 "argues well cannot. Name the index; be falsifiable.\n\n"
+                # THE THREE THINGS FIVE BLIND JUDGES FOUND (2026-07-26). Two real
+                # breakdowns of this same script were read blind by five independent
+                # reviewers. The verdict mattered less than the defects: each author had a
+                # different one, and both are avoidable at authoring time, which is where
+                # compliance is PRODUCED rather than policed. Measured on the real pair:
+                # 18 instructional NEEDs in one, 4 audience-effect claims and 2 off-screen
+                # images in the other. lint_breakdown.py is the advisory backstop; this is
+                # the fix.
+                "THREE THINGS THAT WEAKEN A BEAT, AND HOW TO WRITE INSTEAD.\n"
+                "(1) NEED IS A LACK THE CHARACTER IS CARRYING, NEVER A LESSON THEY OUGHT TO "
+                "LEARN. A need a character does not yet know they have cannot be phrased as "
+                "an obligation they should meet. 'He needs to accept that a plan can fail' "
+                "is a curriculum objective wearing his name — it would work unchanged in any "
+                "preschool show, and a beat sheet written that way pushes every chair "
+                "downstream toward lesson delivery. 'He needs her to keep watching' is a "
+                "lack. Test it: could this exact sentence sit in a different series with a "
+                "different cast? Then it is not authored yet.\n"
+                "(2) adultRead SAYS WHAT IS VISIBLE — IT NEVER CLAIMS HOW THE ROOM WILL "
+                "REACT. 'Every parent in the room has stood on that pier' is unfalsifiable "
+                "and it is marking your own homework. Point at the frame and say what is in "
+                "it; let the room have its own reaction. The adult door must open onto the "
+                "SAME moment the child is watching, not a thought running alongside it.\n"
+                "(3) NEVER NAME WHAT THE CAMERA CANNOT SEE. 'A mother standing on a dock "
+                "just outside the frame' is a lovely line and a real production hazard — "
+                "somebody downstream will try to board it. If it matters, it is on screen; "
+                "if it is not on screen, it is not in the beat.\n\n"
                 "THE CINEMATOGRAPHER IS AT THIS TABLE (2026-07-26). Where a beat begins "
                 "decides what can be SEEN of it \u2014 a boundary drawn one event late buries "
                 "the visual turn inside the previous beat, and a beat with no visual event "

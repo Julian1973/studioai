@@ -42,6 +42,90 @@ MAX_OUTPUT_TOKENS = 32000
 # constants above are the real, live source of truth and are already used everywhere that needs them.
 
 
+# ── THE PROVIDER SWITCH (2026-07-26) ────────────────────────────────────────────────────
+# Julian: "why are we using gpt for that surely your opus 5 is better?" The honest answer
+# was that nobody ever chose it. There was no Anthropic path in this file at all — OpenAI
+# first, Gemini as a disabled fallback, and that was the whole list. The original reason
+# was structural, not creative: every gate in this pipeline returns a VALIDATED PYDANTIC
+# MODEL, and OpenAI's strict Structured Outputs made that guarantee cheap, so everything
+# got built on it. Claude enforces a schema too (a forced single-tool call whose
+# input_schema IS the Pydantic JSON schema), so that reason has expired.
+#
+# This adds the choice; it does not make it. OpenAI stays the DEFAULT so nothing changes
+# for anyone who does not opt in, and the decision is meant to be settled by running the
+# same script through both and reading the two breakdowns side by side — not by argument.
+#
+# CB_REVIEW_PROVIDER exists for a reason that has nothing to do with which model is
+# better: gate6_adversarial_review currently runs on the SAME model that authored the work
+# it is reviewing, and so does the repair loop. A model critiquing its own output is a
+# weak critic — it shares the blind spots that produced the work. Pointing the adversarial
+# gate at a different provider than the authoring gates is better practice whichever way
+# the A/B lands.
+DIRECTOR_PROVIDER = os.environ.get("CB_DIRECTOR_PROVIDER", "openai").strip().lower()
+REVIEW_PROVIDER = os.environ.get("CB_REVIEW_PROVIDER", "").strip().lower()  # "" = same as director
+ANTHROPIC_MODEL = os.environ.get("CB_ANTHROPIC_MODEL", "claude-opus-5")
+VALID_PROVIDERS = ("openai", "anthropic")
+if DIRECTOR_PROVIDER not in VALID_PROVIDERS:
+    raise SystemExit(f"CB_DIRECTOR_PROVIDER={DIRECTOR_PROVIDER!r} is not one of {VALID_PROVIDERS}")
+if REVIEW_PROVIDER and REVIEW_PROVIDER not in VALID_PROVIDERS:
+    raise SystemExit(f"CB_REVIEW_PROVIDER={REVIEW_PROVIDER!r} is not one of {VALID_PROVIDERS}")
+
+
+def _anthropic_key():
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not key:
+        raise SystemExit("ANTHROPIC_API_KEY is missing — add it to engine/.env (env only; never hardcode it or "
+                         "expose it to the frontend). Set CB_DIRECTOR_PROVIDER=openai to go back to the default.")
+    return key
+
+
+_anthropic_client = None
+def _anthropic_client_get():
+    global _anthropic_client
+    if _anthropic_client is None:
+        import anthropic
+        _anthropic_client = anthropic.Anthropic(api_key=_anthropic_key())
+    return _anthropic_client
+
+
+def _anthropic_image_part(path):
+    """The same local image as an Anthropic content block. Deliberately a sibling of
+    _image_part rather than a rewrite of it: the two providers disagree only about the
+    envelope, and one function trying to emit both shapes is how they drift apart."""
+    p = pathlib.Path(path)
+    if not p.exists() or not p.is_file():
+        raise FileNotFoundError(f"specialist image input is missing: {p}")
+    mime = mimetypes.guess_type(p.name)[0] or "image/png"
+    return {"type": "image", "source": {"type": "base64", "media_type": mime,
+                                        "data": base64.b64encode(p.read_bytes()).decode("ascii")}}
+
+
+def _anthropic_call(model, system, user, schema, images=None):
+    """One schema-constrained Anthropic call -> a validated Pydantic instance.
+
+    The schema is enforced the way this pipeline needs it enforced: a single tool whose
+    input_schema IS the Pydantic JSON schema, with tool_choice forcing that exact tool, so
+    the model cannot answer in prose. The result is then handed to the SAME
+    schema.model_validate() every other path uses — so a ValidationError here means
+    exactly what it means on the OpenAI path (the model answered, off-schema) and the
+    caller's existing repair loop handles it unchanged.
+    """
+    content = [{"type": "text", "text": user}]
+    content.extend(_anthropic_image_part(p) for p in (images or []))
+    tool = {"name": "emit",
+            "description": f"Return the {schema.__name__} the brief asks for.",
+            "input_schema": schema.model_json_schema()}
+    resp = _anthropic_client_get().messages.create(
+        model=model, max_tokens=MAX_OUTPUT_TOKENS, system=system,
+        messages=[{"role": "user", "content": content}],
+        tools=[tool], tool_choice={"type": "tool", "name": "emit"})
+    for block in resp.content:
+        if getattr(block, "type", None) == "tool_use":
+            return schema.model_validate(block.input)
+    raise RuntimeError(f"no tool_use block returned (stop_reason={getattr(resp, 'stop_reason', '?')}, "
+                       f"possible refusal)")
+
+
 def _openai_key():
     """The OpenAI key, from the environment ONLY. Clean, clear failure if it is missing."""
     key = os.environ.get("OPENAI_API_KEY", "")
@@ -176,11 +260,36 @@ def _gemini_call(system, user, schema, images=None):
     text = rj["candidates"][0]["content"]["parts"][0]["text"]
     return schema.model_validate(_loads(text))
 
-def structured(system, user, schema, *, model=None, label="director", log=print, images=None):
+def structured(system, user, schema, *, model=None, label="director", log=print, images=None,
+               provider=None):
     """ONE structured Director call — OpenAI FIRST, then Gemini FALLBACK on a PROVIDER error. `model` is the OpenAI
     model (defaults to the Director model; pass VALIDATOR_MODEL for the validator). A Pydantic ValidationError is
     NOT a fallback case (the model answered, just off-schema) — it propagates so the caller can repair. Returns the
-    validated Pydantic instance."""
+    validated Pydantic instance.
+
+    `provider` selects the authoring provider for THIS call, defaulting to
+    CB_DIRECTOR_PROVIDER (itself defaulting to "openai", so nothing changes unless someone
+    opts in). The Anthropic path returns the same validated Pydantic instance and raises
+    the same ValidationError on an off-schema answer, so every caller's existing repair
+    loop works against it unchanged. There is deliberately NO cross-provider fallback:
+    silently answering a Claude call with GPT (or the reverse) would make an A/B
+    meaningless and a production run unattributable — a provider failure stops with its
+    own exact error, exactly as the Gemini rule below already does.
+    """
+    provider = (provider or DIRECTOR_PROVIDER).strip().lower()
+    if provider == "anthropic":
+        # The OpenAI validator/director model split does not carry across providers — a
+        # caller passing VALIDATOR_MODEL is naming a GPT model. Honour the intent (this is
+        # the cheaper repair call) by ignoring the name rather than sending it to Claude.
+        amodel = ANTHROPIC_MODEL
+        try:
+            return _anthropic_call(amodel, system, user, schema, images=images)
+        except ValidationError:
+            raise
+        except Exception as e:
+            raise SystemExit(f"Director provider error ({label}): Anthropic ({amodel}) failed — "
+                             f"{type(e).__name__}: {e}. Set CB_DIRECTOR_PROVIDER=openai to go back to the "
+                             f"default; there is no cross-provider fallback by design.")
     model = model or DIRECTOR_MODEL
     try:
         return _openai_call(model, system, user, schema, images=images)

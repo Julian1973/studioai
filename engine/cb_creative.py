@@ -1215,7 +1215,17 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
         f"BEATS:\n" + "\n".join(b.model_dump_json()[:1600] for b in sd.beats)
         + "\n\nSHOTS:\n" + "\n".join(s.model_dump_json()[:1800] for s in shots)
         + "\n\nVOICE:\n" + "\n".join(v.model_dump_json()[:1100] for v in voices),
-        ShowrunnerReview, label="gate6_review")
+        # THE CRITIC SHOULD NOT BE THE AUTHOR (2026-07-26). This gate is asked to ACTIVELY
+        # ATTEMPT to fail work that, until now, the very same model wrote — nine gates of
+        # it. A model reviewing its own output is a weak critic: it shares the blind spots
+        # that produced the work, and the pattern it is least able to see is its own.
+        # CB_REVIEW_PROVIDER points this one gate at a different provider from the
+        # authoring gates. Unset (the default) means same-as-author — the behaviour that
+        # shipped until today — so nothing changes for anyone who does not opt in. This is
+        # true whichever provider authors; it is not an argument about which model is
+        # better.
+        ShowrunnerReview, label="gate6_review",
+        provider=cb_llm.REVIEW_PROVIDER or None)
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────

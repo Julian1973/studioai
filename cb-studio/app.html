@@ -617,7 +617,23 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
    actually gets. Nothing else about the layout changes. */
 .dirdoc{margin-top:var(--s3);background:var(--surface2);border:1px solid var(--line);
   border-radius:12px;padding:20px 22px;min-width:0;max-width:calc(62ch + 196px);
-  container-type:inline-size}
+  container-type:inline-size;
+  /* THE DOCUMENT STAYS INSIDE ITS OWN BOX (2026-07-27, Julian: "keep it inside its container
+     and i can scroll within"). A 642-word direction pushed every control below the fold and
+     made the row unreadable at a glance.
+
+     This deliberately restores a scroll box that was DELETED earlier tonight, and the reason
+     it was deleted no longer holds. It went on the principle "you sign at the end of what you
+     read" — correct at the time, because Approve lived ONLY at the document's foot, so
+     clipping the document hid the one control that mattered. Approve and Reject now sit in
+     the row's own button strip, so the document can be a document: read as much as you want,
+     sign from where you are standing. The signature at the foot stays too — both sign the
+     same one decision. */
+  max-height:min(58vh,620px); overflow-y:auto; overscroll-behavior:contain}
+/* NO FADE MASK HERE, DELIBERATELY. A bottom gradient reads as "more below" — but the
+   signature line lives at the foot of this document, and a faded Approve button reads as a
+   DISABLED Approve button. Scroll position is the honest signal; a legible control beats a
+   decorative edge. */
 /* When the container genuinely cannot hold a rail AND a readable column, the rail stops
    being a column and becomes a heading. Stacking beats squeezing — a 150px-wide paragraph
    is not a document, it is a stack of syllables. */

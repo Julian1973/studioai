@@ -221,3 +221,27 @@ def test_the_elapsed_clock_actually_moves():
     assert "runworking-el" in tick, (
         "_shPollTick no longer updates the elapsed clock — the card will freeze on the "
         "second it was painted")
+
+
+def test_a_clipped_document_still_has_a_reachable_signature():
+    """Julian, 2026-07-27: "keep it inside its container and i can scroll within."
+
+    The document is a scroll box again. It was DELETED earlier the same night on the
+    principle "you sign at the end of what you read" — correct then, because Approve lived
+    ONLY at the document's foot, so clipping it hid the one control that mattered.
+
+    These two facts are load-bearing TOGETHER: a bounded document is safe only while Approve
+    exists OUTSIDE it. Restore the clip without the strip button and the row becomes exactly
+    the trap it was this morning — a greyed-out Generate and its unlock hidden below a fold.
+    """
+    app = _app()
+    start = app.index(".dirdoc{")
+    doc = app[start:app.index("}", app.index("max-height", start))]   # the whole rule, not a guess
+    clipped = "overflow-y:auto" in doc
+    fn = app[app.index("function authBlockHTML("):]
+    fn = fn[:fn.index("\n}\n")]
+    approve_block = fn[fn.index('phase:"approve"'):] if 'phase:"approve"' in fn else ""
+    in_strip = "actions:[approveBtn" in approve_block.replace(" ", "")
+    assert not clipped or in_strip, (
+        "the direction document is clipped to a scroll box AND Approve exists only at its "
+        "foot — that is the trap Julian hit this morning, restored")

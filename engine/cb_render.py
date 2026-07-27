@@ -1353,7 +1353,10 @@ def _readback_for(stage, result, shot_id, *, images=None, intent="", log=print):
         import cb_readback
         rb = cb_readback.read_back(text, shot_id=shot_id or "", form=form,
                                    images=images, intent=intent, log=log)
-    except Exception as e:                      # noqa: BLE001 — advisory, never load-bearing
+    # SystemExit, not just Exception — see cb_readback.read_back's own note. cb_llm raises
+    # SystemExit on provider failure, it is a BaseException, and this handler was the second
+    # of two that both silently failed to cover the only error that actually occurs.
+    except (Exception, SystemExit) as e:        # noqa: BLE001 — advisory, never load-bearing
         log(f"[readback] could not read {stage} back ({e}) — this blocks nothing")
         return None
     if rb is None:
@@ -4247,6 +4250,56 @@ DECISION_LADDER = """THE FAILURE DECISION LADDER (after reviewing a candidate se
   5. Model repeatedly ignores an instruction       -> remove conflicts, shorten the prompt
   6. Two failed batches                -> STOP: shot is model-limited; human redesign or an
                                           alternative production method. No prompt-patching."""
+
+
+def fire_comparison_clip(scene, shot_id, prompt_text, *, episode="Ep1", resolution="480p",
+                         duration="12", out=None, label="", log=print):
+    """THE PROMPT BAKE-OFF ROUTE (Julian, 2026-07-27: "Can you ensure you run these prompts
+    one after another and we can test them").
+
+    He put five different authors' prompts for the same shot in front of me and asked for all
+    of them rendered so he can judge the footage. That is a real, itemised, human-authorised
+    comparison — but it is NOT a take, and it must never look like one.
+
+    WHY THIS LIVES HERE AND NOT IN A SCRIPT. cb_gen._require_production_route refuses any paid
+    provider call that does not originate in cb_render (the 2026-07-16 cutover, after a legacy
+    path fired around every spend protection at $4.57). A test harness could have passed the
+    sentinel itself and the render would have worked — and the guard would have had a hole in
+    it from then on, reusable by anything. So the call was moved to the module the rule names
+    instead of the rule being worked around. That is the whole reason this function exists.
+
+    WHAT IT DELIBERATELY DOES NOT DO: it does not touch the ledger, the package, the shot's
+    status, its candidatePaths, its batch attempts or any approval. It cannot produce a take,
+    it cannot be approved, and nothing downstream will ever see its output. The one-take-at-a-
+    time discipline, the batch counter and the redesign ladder are all untouched, because none
+    of them are consulted or written.
+
+    WHAT IT KEEPS FROM THE REAL PATH: the shot's own real references, resolved by exactly the
+    same _anchor_for/_slot_paths calls fire_shot uses, and the shot's own approved audio — so
+    the ONLY variable between clips is the prompt text, which is the entire point of the test.
+    Every fire writes a sidecar naming the prompt that produced it, because a comparison whose
+    outputs cannot be traced back to their inputs proves nothing."""
+    pkg, _path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    led = _ledger(pkg, shot_id)
+    imgs = _slot_paths(shot, "referenceSlots", _anchor_for(pkg, shot), scene, episode,
+                       _characters_cfg())
+    audio = [led["voPath"]] if led.get("voPath") else None
+    out = str(out or (MEDIA / f"{episode}_{shot_id}_compare_{uuid.uuid4().hex[:8]}.mp4"))
+    log(f"COMPARISON FIRE — {label or 'unlabelled'}: {len(prompt_text.split())} words, "
+        f"{duration}s, {resolution}. Not a take; the ledger is not touched.")
+    cb_gen.generate_video_seedance_ref(
+        prompt_text, imgs, audio_urls=audio, resolution=resolution, duration=duration,
+        out=out, fast=False, raw_prompt=True, production_route="cb_render")
+    if os.path.exists(out):
+        with open(out + ".compare.json", "w") as f:
+            json.dump({"label": label, "shotId": shot_id, "scene": str(scene),
+                       "episode": episode, "resolution": resolution, "duration": duration,
+                       "firedAt": _now(), "isTake": False,
+                       "references": [os.path.basename(p) for p in imgs],
+                       "audio": os.path.basename(audio[0]) if audio else None,
+                       "prompt": prompt_text}, f, indent=1)
+    return out
 
 
 def _anchor_for(pkg, shot):

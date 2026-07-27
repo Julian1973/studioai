@@ -226,6 +226,24 @@ rejected ones were measured against each other, and these are the findings that 
 
 Report at most three of these, only when you actually see them, in plain words. They are
 craft observations, not faults — a brief can be worth firing with all three present.
+
+TWO MORE KINDS OF CLASH, BOTH FOUND IN REAL FIRED PROMPTS — treat these as clashes, not
+craft notes, because each one has a wrong answer the render will actually pick:
+
+- SOUND AGAINST SOUND. A brief that says one sound "runs unbroken" and later says "Silence"
+  is asking for both across the same seconds. This exact pair shipped. Read every sound
+  instruction against every other one and against the hold at the end.
+- TOO MANY EVENTS FOR THE SECONDS. This is the one that matters most and it is easy to miss,
+  because no single sentence is wrong — the fault only exists in the total. COUNT the
+  distinct physical events the brief asks for: every named contact, every change of
+  direction, every camera move, every state change of a body or an object. Then divide the
+  stated duration by that count. Under half a second per event, the model cannot stage them
+  and will keep the two or three it can hold and silently drop the rest — usually the
+  middle of the chain, which is usually the joke. When you find this, say so plainly, give
+  the count and the seconds, and NAME THE EVENTS YOU WOULD CUT FIRST: always decoration
+  (lens swipes, camera flourishes, light description, a glance) before story (a contact, a
+  consequence, a physical cause). Never propose cutting WORDS — this studio measured that
+  and its own approved keeper was one of its longest briefs. Events, not length.
 """
 
 
@@ -325,7 +343,15 @@ def read_back(prompt_text, *, shot_id="", form="still", images=None, intent="",
         return cb_llm.structured(system, user, ReadBack,
                                  model=model or getattr(cb_llm, "VALIDATOR_MODEL", None),
                                  label="readback", log=log, images=seen or None)
-    except Exception as e:                      # noqa: BLE001 — advisory, never load-bearing
+    # SystemExit IS THE ONE THIS HAD TO CATCH (2026-07-27, found the hard way). cb_llm raises
+    # SystemExit on any provider failure — deliberately, so a real authoring run stops loudly
+    # rather than degrading. SystemExit inherits from BaseException, NOT Exception, so the
+    # original `except Exception` here read as total coverage and caught nothing that actually
+    # happens. A provider overload during an ADVISORY reading then took down a writer call
+    # that had already succeeded: 920 words, real money, discarded because the optional second
+    # opinion could not be obtained. That is the exact inversion this module's whole design
+    # forbids. KeyboardInterrupt is deliberately NOT caught — Ctrl-C must still stop the run.
+    except (Exception, SystemExit) as e:        # noqa: BLE001 — advisory, never load-bearing
         log(f"[readback] could not read this brief back ({e}) — this blocks nothing")
         return None
 

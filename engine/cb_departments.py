@@ -870,8 +870,29 @@ def _craft_curriculum(primary_form=None, secondary_colour=None):
     A missing exemplar file degrades gracefully (laws still load) rather than breaking every
     authoring call — but it is loaded whenever present, and it is present."""
     parts = []
-    for name in ("PROMPT_CRAFT_STANDARD.md", "PROMPT_CRAFT_SKILL.md"):
+    # THE PROMPT BIBLE GOES IN FIRST (Julian, 2026-07-27: "I need you to use the cinematography
+    # as the prompt bible — we create it as a working engine that the director feeds his shot
+    # into with the opening frame and we build out the delivery for the seedance prompt").
+    #
+    # It leads the curriculum deliberately. It is the only document here that teaches the
+    # WHOLE JOB — beat before shot, the shot-load ceiling per duration, the landing taxonomy,
+    # the reaction ladder, motivated cuts, the 180-degree axis, three-plane staging, causal
+    # physical staging, the audio contract and one job per reference. The two craft documents
+    # after it teach REGISTER: how a sentence should sound once the shot is already decided.
+    # Order matters — decide the shot, then write it well, never the reverse (its own §1:
+    # "starting with camera angles encourages pretty but empty motion").
+    #
+    # It carries a dated STUDIO AMENDMENT in its own header reconciling the one place it
+    # disagrees with this studio's measured corpus (its §11 word ranges vs the 722-word
+    # approved keeper). Verbatim in, amendment attached — never edited, never summarised,
+    # per the Gold Build rule. A missing file degrades gracefully rather than breaking every
+    # authoring call, exactly as the formula library already does.
+    for name in ("AI_CINEMATOGRAPHY_HANDBOOK.md",
+                 "PROMPT_CRAFT_STANDARD.md", "PROMPT_CRAFT_SKILL.md"):
         p = _CRAFT_DIR / name
+        if not p.exists():
+            parts.append(f"===== {name} — NOT FOUND ON DISK, this lens is missing =====")
+            continue
         parts.append(f"===== {name} =====\n" + p.read_text(encoding="utf-8"))
     # THE FORMULA LIBRARY (Julian's ruling, 2026-07-25, superseding the unconditional
     # SH1 attachment): the writer gets the proven formula FOR THE FORM IT IS WRITING, or
@@ -1004,7 +1025,29 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
                 "before they flex, involuntary motion stated as involuntary ('a "
                 "passenger, not a performer'). NEVER abstract geometry (degrees, screen "
                 "direction, spatial bookkeeping) and never scaffolding that restates the "
-                "world — speed is proven by consequences, never asserted. THE ANCHOR "
+                "world — speed is proven by consequences, never asserted. "
+                # THE PRIORITY RULE, MADE OPERATIONAL (2026-07-27). The handbook states it in
+                # §2 — "Primary event is explicit. Secondary response is concise. Ambient life
+                # is quiet. If the prompt gives all three equal verbal weight, the model may
+                # give them equal visual weight" — and it is now loaded verbatim into this
+                # writer's own curriculum. It read it and did it anyway: the same shot came
+                # back with the wake rocking her, the lavender whipping, the clover nodding
+                # and the pollen turning in the flare, none of which the storyboard asked for,
+                # each one a sentence, each one eating seconds the somersaults needed. A rule
+                # the writer has READ is not yet a rule the writer OBEYS; this is the obeying
+                # half, stated as a budget it can actually apply while writing.
+                "THE PRIORITY RULE — SPEND THE SECONDS ON THE STORY, NOT THE SCENERY. Three "
+                "tiers, and they get three different amounts of INK. The PRIMARY EVENT (the "
+                "thing the audience must not miss) is explicit and gets whole sentences. The "
+                "SECONDARY RESPONSE (the reaction or consequence that completes it) is "
+                "concise. AMBIENT LIFE — wind, drifting pollen, nodding blooms, light through "
+                "petals, foreground blur — is QUIET: a clause at most, never its own sentence, "
+                "and never more than a couple of them in the whole prompt. Give all three "
+                "equal words and the render gives them equal screen time, which is how a "
+                "physical gag quietly loses the seconds it needed and comes back as a pretty "
+                "flight. Before you finish: count what you have asked to physically HAPPEN "
+                "against the seconds available, and if the scenery is competing with the beat, "
+                "the scenery goes. THE ANCHOR "
                 "LAW: a stationary character is welded to a named physical object "
                 "('whenever her flower bends or moves, she travels physically with it'), "
                 "never a position — BUT ONLY FOR A CHARACTER THE BEAT HAS DECIDED IS "
@@ -1041,8 +1084,18 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
                 "(2026-07-25). Read the source material's own 'ends by:' line and "
                 "obey it. reaction_hold / living_hold -> write the closing HOLD "
                 "sentence: 'Hold on ... for two seconds after the audio finishes "
-                "... Silence.' — the FINAL two seconds ONLY, the shot in motion "
-                "right up to it. continue_in_motion / cut_on_action -> DO NOT write "
+                "... No further speech.' — the FINAL two seconds ONLY, the shot in "
+                # NEVER THE WORD "SILENCE" (2026-07-27, caught in a real fired prompt).
+                # This template used to end every held shot on 'Silence.' while the same
+                # prompt's own header declared the wing-buzz 'runs unbroken' — two
+                # instructions about the same two seconds, flatly opposed. It also reads to
+                # the model as a command to stop, on the exact beat this studio's own
+                # measurement says stop-words are the thing that kills a take. What the
+                # line ever meant was NO MORE DIALOGUE. It now says that.
+                "motion right up to it. Never write 'Silence' — the ambient bed and the "
+                "wing-buzz run unbroken through the hold, and this sentence is about "
+                "SPEECH ending, never sound stopping and never motion stopping. "
+                "continue_in_motion / cut_on_action -> DO NOT write "
                 "a hold at all; the clip ends mid-movement, energy unspent, and a "
                 "beat that stops dead when the card asked it to carry is a WRONG "
                 "ending. visual_transition -> the closing image becomes the way "

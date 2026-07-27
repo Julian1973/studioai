@@ -152,3 +152,46 @@ def test_the_read_names_the_four_things_that_failed():
         assert fragment in d, f"the read no longer covers: {failure}"
     assert "never the paperwork" in d, (
         "nothing resolves picture-versus-paperwork inside the read itself")
+
+
+def test_the_handbook_is_the_writers_bible_not_a_document_i_read():
+    """Julian, 2026-07-27: "I need you to use the cinematography as the prompt bible — we
+    create it as a working engine that the director feeds his shot into with the opening frame
+    and we build out the delivery for the seedance prompt."
+
+    Before this it was a .docx I read and hand-applied to one shot. That is not an engine; it
+    is me, and it does not survive me. It now loads VERBATIM into the Animation Director's own
+    curriculum on every prepare, ahead of the two craft documents — decide the shot, then write
+    it well, never the reverse."""
+    import cb_departments as D
+    curriculum, _ = D._craft_curriculum(None)
+    assert "AI_CINEMATOGRAPHY_HANDBOOK" in curriculum, (
+        "the prompt bible is not being loaded — the writer is back to guessing the shot")
+    # It leads. Its own §1: "starting with camera angles encourages pretty but empty motion."
+    assert curriculum.index("AI_CINEMATOGRAPHY_HANDBOOK") < curriculum.index("PROMPT_CRAFT_STANDARD"), \
+        "register is being taught before the shot is decided"
+    for law, why in (
+            ("EYES", "the reaction ladder — the thing that keeps failing on every face"),
+            ("BREATH", "the reaction ladder's second rung"),
+            ("Direct the change", "the book's central doctrine"),
+            ("CUT TEST", "the test that stops decorative cuts"),
+            ("PRIORITY RULE", "primary explicit, secondary concise, ambient quiet")):
+        assert law in curriculum, f"the bible lost: {why}"
+    # The one place it disagrees with this studio's own measured corpus must stay named.
+    assert "STUDIO AMENDMENT" in curriculum and "722" in curriculum, (
+        "the word-count amendment is gone — a numeric cap will creep back, and one was already "
+        "deleted once for making the footage worse")
+
+
+def test_the_priority_rule_is_obeyed_not_merely_read():
+    """The handbook states the priority rule in its own §2, and the writer read it and ignored
+    it — the very next prompt came back with the wake rocking her, the lavender whipping, the
+    clover nodding and the pollen turning in the flare, none of it asked for, each one a whole
+    sentence eating seconds the somersaults needed. A rule the writer has READ is not yet a
+    rule the writer OBEYS."""
+    import inspect, cb_departments as D
+    s = inspect.getsource(D.prepare_animation)
+    assert "THE PRIORITY RULE" in s, "the charge no longer budgets ink by tier"
+    assert "AMBIENT LIFE" in s and "QUIET" in s, "ambient life can take whole sentences again"
+    assert "count what you have asked to physically HAPPEN" in s, (
+        "the writer has no instruction to check its own event count against the seconds")

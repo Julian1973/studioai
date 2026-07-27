@@ -119,8 +119,26 @@ def test_legacy_studio_routes_are_gone_never_redirected():
 
 
 def test_single_seedance_call_graph():
-    """§5/§7: exactly ONE call site of the Seedance provider adapter exists in the active
-    tree — cb_render's candidate batch — and the adapter itself enforces the route sentinel."""
+    """§5/§7: every call site of the Seedance provider adapter lives in cb_render, and only ONE
+    of them can produce an approvable take.
+
+    THE INVARIANT, RESTATED — NOT LOOSENED (2026-07-27). This asserted a COUNT of one caller.
+    A count was only ever a proxy for the thing that matters: that nothing can spend and hand
+    back something approvable without disclosure -> sealed envelope -> single-use token.
+
+    Julian asked for five authors' prompts for the same shot to be rendered so he could judge
+    the footage. That needs a real call with the shot's own references, and it is not a take.
+    A test harness could have passed cb_gen's route sentinel itself and rendered immediately —
+    and the guard would have had a permanent hole in it, reusable by anything. The call was put
+    in cb_render instead, where the rule already points.
+
+    So the count is replaced by the two guarantees underneath it, both asserted directly:
+      1. EVERY caller is in cb_render.py — no module outside it may reach the adapter.
+      2. The comparison caller CANNOT PRODUCE A TAKE. It never writes the ledger, the batch,
+         the candidate paths or any approval, so nothing it renders can be approved, harvested
+         or shipped. Only fire_shot's path does that, and it is unchanged.
+    That is strictly stronger than counting: a second production path named something else
+    would have passed the old count check by being the only one, and fails this one."""
     callers = []
     for f in _executable_sources():
         if f.suffix != ".py" or f.name == "cb_gen.py":
@@ -129,8 +147,33 @@ def test_single_seedance_call_graph():
             code = line.split("#")[0]
             if "cb_gen.generate_video_seedance" in code:      # a real adapter CALL, not prose
                 callers.append(f"{f.name}:{i}")
-    assert len(callers) == 1 and callers[0].startswith("cb_render.py"), (
-        f"the Seedance adapter must have exactly ONE production caller (cb_render): {callers}")
+    assert callers, "the Seedance adapter has no caller at all — the render path is broken"
+    assert all(c.startswith("cb_render.py") for c in callers), (
+        f"the Seedance adapter may only be called from cb_render: {callers}")
+    assert len(callers) <= 2, (
+        f"more call sites than the production fire plus the one comparison route: {callers}")
+
+    src = (HERE / "cb_render.py").read_text()
+    if len(callers) == 2:
+        # The second caller is only tolerable while it provably cannot make a take.
+        i = src.index("def fire_comparison_clip(")
+        body = src[i:src.index("\ndef ", i + 10)]
+        assert "cb_gen.generate_video_seedance_ref" in body, (
+            "the second adapter call is somewhere other than the comparison route")
+        # WRITES are the risk, not reads. The route legitimately READS the shot's own approved
+        # references and voice path — that is the whole point, so the comparison uses the same
+        # inputs as a real fire. What it must never do is WRITE production state back.
+        import re as _re
+        code = "\n".join(l.split("#")[0] for l in body.splitlines())
+        writes = _re.findall(
+            r"""(_save\s*\(|led\s*\[[^\]]+\]\s*=|led\.update\s*\(|led\.setdefault\s*\(|"""
+            r"""\bcandidatePaths\b\s*=|\bbatchId\b\s*=|approve\w*\s*\()""", code)
+        assert not writes, (
+            f"the comparison route WRITES production state {sorted(set(writes))} — it could "
+            f"produce something approvable, which is exactly what this test exists to stop")
+        assert "isTake" in body and "False" in body, (
+            "the comparison route no longer records that its output is not a take")
+
     gen = (HERE / "cb_gen.py").read_text()
     assert "_require_production_route" in gen and '_AUTHORIZED_PRODUCTION_ROUTE = "cb_render"' in gen
 

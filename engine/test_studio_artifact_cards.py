@@ -122,3 +122,45 @@ def test_the_job_watcher_is_derived_from_the_same_table():
     assert "ARTIFACTS" in decl, (
         "STAGE_JOB_CMDS is hand-written again — it will drift from ARTIFACTS the first time "
         "one of them is edited, exactly as the chair table did")
+
+
+# ── 3 · THE CARD SHOWS WHAT IT IS BUILT FROM ─────────────────────────────────────────────
+
+def test_the_opening_frame_shows_its_reference_stack():
+    """Julian, 2026-07-27: "the opening frame doesnt have the scene plate and characters in
+    it so i can see whats what."
+
+    He was right, and the data was never the problem. `refStripHTML` has existed since
+    2026-07-23 and was called in exactly two places — the Prompt row and the Fire disclosure,
+    both about the TAKE. The opening frame is the one artifact actually COMPOSED from the
+    plate and the turnarounds, and it was the one that never showed them.
+
+    You cannot judge a frame without knowing what fed it. This binds the strip to the frame
+    row so it cannot drift back out."""
+    app = _app()
+    start = app.index("const frameStage=")
+    end = app.index("// THE AUTHORISATION HALF", start)
+    row = app[start:end]
+    assert "refStripHTML(" in row, (
+        "the opening-frame row no longer renders its reference stack — you are being asked "
+        "to judge a frame without being shown the plate and turnarounds it was composed from")
+
+
+def test_a_blocked_frame_offers_the_door_not_just_the_refusal():
+    """Julian, 2026-07-27: he wants to work "without overload or feeling stuck at a gate."
+
+    The Scene-Look-held branch used to name its fix and carry no button, on the stated
+    grounds that "there is no phase-navigation helper in this file to call." That was true
+    when written and false by the time he hit it — pFocusStage() maps "scenelook" to its own
+    pipe in PIPE_OF_STAGE.
+
+    A blocker is a link, never a message. Being told no without being shown the door is the
+    exact feeling he described."""
+    app = _app()
+    start = app.index("const frameStage=")
+    branch = app[start:app.index("} else if(pst.kf==\"awaiting\")", start)]
+    assert "sceneLookGated" in branch, "the Scene-Look-held branch is gone"
+    held = branch[branch.index("sceneLookGated"):]
+    assert "pFocusStage('scenelook')" in held, (
+        "a frame held by the Scene Look states its blocker and offers no way to it — that is "
+        "the dead end, and the navigation helper it needs already exists")

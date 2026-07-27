@@ -4388,12 +4388,15 @@ function renderShotRunner(){
         <div class="runmedia"><img class="zoom" data-cap="${_esc(s.shotId)} · opening frame, inherited from ${_esc(s.sourceShotId||"previous shot")}" src="${BASE}${anchorUrl}?v=${MEDIA_V}"/></div>`+body;
       else if(pst.kf!="waitingPrev") body=`<div class="runempty">The inherited frame resolves from ${_esc(s.sourceShotId||"the previous shot")}'s approved take at fire time — its preview is loading…</div>`+body;
     } else if(pst.sceneLookGated){
-      // EVERY BLOCKED ROW NAMES ITS FIX (2026-07-25, the rule the Prompt row now
-      // follows). This one names it but carries no button: there is no phase-navigation
-      // helper in this file to call, and a button that throws is worse than none. The
-      // jump-to-Scene-Look control is a real, separate piece of work — not faked here.
+      // A BLOCKER IS A LINK, NEVER A MESSAGE (2026-07-27, Julian: "without... feeling stuck
+      // at a gate"). This row used to name its fix and carry no button, on the stated grounds
+      // that "there is no phase-navigation helper in this file to call." That was true when
+      // written and is not true now — pFocusStage() has been here since the scene-pipeline
+      // nav landed, and PIPE_OF_STAGE maps "scenelook" to its own pipe. Being told no without
+      // being shown the door is the whole feeling he described; the door exists, so it opens.
       st="blocked";lab="Held";sum=pst.label;
       body=`<div class="runempty">${_esc(pst.sub||"Approve the Scene Look plate first — the world anchor gates every keyframe.")}</div>`;
+      acts=[`<button class="btn" onclick="pFocusStage('scenelook')">Go to the Scene Look →</button>`];
     } else if(pst.kf=="awaiting"){
       const src=(led.keyframeCandidate||{}).source||"generated";
       const srcLabel={generated:"generated",uploaded:"uploaded",library:"chosen from Library",
@@ -4424,6 +4427,18 @@ function renderShotRunner(){
       body=`<div class="runempty">Four ways to an opening frame — generate (paid), upload, pick from this shot's own asset library, or carry the previous shot's approved final frame. Selection is never approval.</div>`;
       acts=[genBtn,uploadBtn,libBtn,prevBtn].filter(Boolean);
     }
+    // WHAT THIS FRAME IS BUILT FROM (2026-07-27, Julian: "the opening frame doesnt have the
+    // scene plate and characters in it so i can see whats what").
+    //
+    // refStripHTML has existed since 2026-07-23 and was called in exactly two places — the
+    // Prompt row and the Fire disclosure. Both are about the TAKE. The opening frame, which
+    // is the one artifact actually COMPOSED from the plate and the turnarounds, never showed
+    // them. Fourth time this week the answer was computed and no screen carried it.
+    //
+    // It goes on every branch that offers or holds a real frame decision, and NOT on the
+    // relay branch — an inherited frame is resolved from the previous shot's take at fire
+    // time and has no reference stack of its own to show.
+    if(pst.needsKeyframe) body+=`<div style="margin-top:12px">${refStripHTML(tok)}</div>`;
     // THE AUTHORISATION HALF, IN THE SAME ROW AS THE BUTTON IT UNLOCKS. Only where a paid
     // Generate is actually on offer — the inherited/relay and Scene-Look-held branches have
     // no keyframe generation of their own, so they need no direction either.

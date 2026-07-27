@@ -1028,7 +1028,7 @@
   {
    "shotId": "S1.SH1",
    "beatCode": "1.B1",
-   "status": "candidates-pending",
+   "status": "designed",
    "sourceType": "opener",
    "sourceShotId": null,
    "cutInMotivation": "This is the one junction the treatment protects on meaning alone: the dip, the sideways drag and the leaf's spring are ONE cause, and a cut anywhere inside them turns a single continuous physics chain into two unrelated events — the audience would read bad luck instead of overcommitment, and the whole reversal loses its author.",
@@ -1093,7 +1093,75 @@
       "reviewedBy": "Julian",
       "note": ""
      },
-     "candidate": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Director (staging) / DP (execution)",
+      "readback": {
+       "shot_says": "Two bees at the same distance in a sunlit wildflower field — the bigger one left of centre, nose up and coiled to launch with blurred wings, the smaller one right of frame head-down in a lavender spike — with clear sky above him and low sun raking in from behind.",
+       "frame_mismatches": [
+        {
+         "prompt_says": "\"Low sun just above the hills, flaring in behind the pair\"",
+         "frame_shows": "The sun is behind the hills at the upper RIGHT of the picture, well above the flower tops, with the whole sky pink and gold.",
+         "why_it_matters": "If the brief puts the flare behind the pair and the pair are left-of-centre, the light will swing across the frame and the approved sky no longer matches.",
+         "cost": "The backlight and rim land on the wrong side of both bees, and the signed-off sunrise reads as a different time of day."
+        },
+        {
+         "prompt_says": "\"camera locked off at flower-top height, front-on\" with \"the open lane of clear air\" in the midground",
+         "frame_shows": "The picture is shot from slightly ABOVE the flower tops looking down and across the field, so the flowers fill roughly the bottom three-quarters and only the top quarter is sky.",
+         "why_it_matters": "Dropping to flower-top height changes how much sky and how much field you see, which is the whole shape of the approved frame.",
+         "cost": "The horizon and hills ride higher or lower than the approved picture and the field no longer runs away the way it does in the signed frame."
+        }
+       ],
+       "clashes": [
+        {
+         "first": "Foreground flowers \"pushing up to exactly the two bees' own height... a blossom sits within a wing's reach of Fuzzby's flank\"",
+         "second": "\"THE EXIT LANE STAYS EMPTY... no stem, no leaf, no blossom\" above and slightly behind Fuzzby",
+         "why": "You cannot crowd flower heads up to the bees' own height all across the bottom and both corners and still keep clear air directly around and above the bee on the left.",
+         "wins": "The empty-lane clause is the more absolute one and will likely win the sky, so the render will thin the foreground out; but the two instructions pull against each other and the middle result is usually a half-crowded frame with the blossom no longer near his flank.",
+         "cost": "You lose the measuring stick — the blossom close enough to his side that a parent can read his margins against it. He ends up hovering in clean air with the flowers pushed down and away."
+        },
+        {
+         "first": "\"camera locked off... no drift, no push\" and \"A still, patient window\"",
+         "second": "\"His wings are a fast pale blur\" / \"Her wings work fast\"",
+         "why": "These do not actually fight in a still frame — a locked camera can still show blurred wings.",
+         "wins": "Both are deliverable together; no conflict.",
+         "cost": "None."
+        }
+       ],
+       "craft_notes": [
+        "The brief is built almost entirely out of hold words — \"frozen already loading\", \"welded to her flower\", \"holds her place\", \"stays empty\", \"still, patient window\", \"locked off\", \"no drift\". That is a lot of stop language in one page. Zenny in particular is described as a state rather than a job; give her a continuous task — working the florets, shifting her grip as the spike nods — and she will read alive instead of glued.",
+        "Fuzzby's pose is described as an attitude rather than as the result of anything. The strongest version names one cause — he has just wound up to launch — and lets the pitched nose, the cocked legs and the driving chest all be consequences of that single thing.",
+        "The director's beat is speed and near-misses measured against flowers. The brief's own closing line calls the shot \"still\" and \"patient\", which is the opposite instruction to the one the beat is asking for."
+       ],
+       "delivers": "partly",
+       "verdict": "You'll get your two bees at one depth with the size difference reading plainly, and that's the important half. Two things to fix first: the brief puts the sun behind the pair on the left when your approved frame has it behind the hills on the right, and it can't both crowd flowers up to the bees' own height and keep the air around him clear — right now you'd lose the blossom near his flank that makes his margins readable."
+      },
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "skillHash": "59807b0e1955f8c3",
+      "model": "gpt-5.5",
+      "scene": "1",
+      "shotId": "S1.SH1",
+      "packageRevision": 1,
+      "preparedAt": "2026-07-27T09:02:15",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "sourceHash": "f1b14266b520e462ce20e93b36e58814a31a73b926983507a33a1e6947898920",
+      "signatureVersion": 3,
+      "sourceFields": {
+       "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+       "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+       "visualBrief": "04118e237d68147d87933552e2c43ee0b69487b6f03b6be9c431ec823b44147f",
+       "approvedSceneLookHash": "dadbee90db7459f05b4773a6cd837bbacafad72f70650d515f723cbce8205e0c",
+       "references": "a1f0bf5a507c77127a5b3fbc705844115191cb80c8610497cd4f5349a1c0bb51"
+      },
+      "outputHash": "6a06300aac78f3ab1e1369d8a9f0239b353cda3597476441a8007ebddcc26209",
+      "output": {
+       "shotId": "S1.SH1",
+       "frameLogic": "DIRECTOR FIRST, PLAIN WORDS.\n\n(1) WHAT IS THIS FRAME FOR? In the first half-second the audience must clock two bees together and instantly understand: the big one is about to do something stupid and fast, the little one is already working and won't be joining in. It's the set-up frame for a gag that hasn't started yet — the promise. The laugh comes twelve seconds later when the leaf spits him back out, but it only pays if the audience got, for free, in one glance: he's the bigger one, he's already fizzing, she's not watching. Nothing here should look like an accident is happening yet. It should look like a boast about to be made.\n\n(2) WHAT MUST THIS FRAME AFFORD? Everything. This is an opener with no incoming frame, and the whole twelve seconds launches out of it.\n · The size gap has to be READ, which means both bees at the SAME distance from the lens, side by side, with clean field between them. If one is deeper than the other the audience cannot tell who is bigger and the payoff line \"still plainly the smaller of the two\" has nothing to refer back to.\n · He goes UP AND AWAY FROM CAMERA into open sky. So the air directly above him and slightly behind him must be genuinely, stupidly empty — no stems crossing it, no clutter, no framing branch, nothing decorative parked in his exit lane. That empty sky above the flower tops IS the shot's most important piece of real estate. He must also sit low enough in frame that there is a real climb available above him.\n · He must NOT be able to travel frame-right: that's Zenny's ground and she holds it all twelve seconds. So he sits left of centre — but off the left edge too, with air on his left so he isn't pinned.\n · Zenny needs her ANCHOR: a specific blossom she is in physical contact with and working, one that travels with her, so she cannot drift or teleport while the camera abandons her. A lavender spike she has her legs on — she is welded to that flower, not to a spot on the canvas.\n · The flowers must crowd the bottom and near-sides at exactly their height, because \"the flowers he keeps missing by inches\" is the parent's read, and it has to be visible in frame one that these blossoms are within swiping distance of him.\n · He must not read as hovering level and controlled. Even frozen, his attitude has to be already-loading — pitched, chest driving, not parked.\n\nDP ANSWERS.\n\n(3) SHOT SIZE AND LENS. Medium-wide two-shot at bee height, 50mm, locked off, front-on. Chosen because: 50mm is honest, zero distortion, and it keeps both bees at the same depth reading at their TRUE relative sizes — a wider lens would exaggerate whichever is a hair nearer and destroy the one comparison the frame exists to make; a longer lens would compress the field out and kill the crowded flower-tops. Medium-wide, not wide: the two bees need to be big enough in frame that the size gap is a fact and not a guess, while still leaving a clear third of frame as empty sky above them for the climb. Locked off, because the camera's stillness here is the set-up — it only becomes his wingman once he's gone, and a still window makes the chaos that follows funnier.\n\n(4) WHAT IS AND IS NOT RESOLVABLE AT THAT SIZE. At a medium-wide two-shot on 50mm, these are two hand-sized characters occupying a modest part of the frame. HONESTLY RESOLVABLE: silhouette, body proportion and the size gap between them; wing blur; antenna carriage; overall posture and pitch attitude; the round shape of spectacles as a form on the face; the flowers they are in contact with; the sun flare behind them. NOT RESOLVABLE, and therefore not to be written: eye direction, iris catchlights, a specular ping on a lens rim, mouth shape mid-word, cheek colour, individual fur, expression of any kind. So my whole job on these two is silhouette, attitude, pitch and position — which is exactly right, because expression and eyeline are the performance's and it has fifteen seconds to deliver them. Both get the silhouette-grade fidelity clause. I will state that his glasses stay clear of obstruction as a STAGING fact (nothing crosses his face) rather than describing a highlight I cannot see.\n\nLIGHT: taken from the plate and the scene's authored state only — low sun just above the hills flaring in behind them, long light raking the flower tops, open sky above. No competing sun position, no time-of-day words.\n\nNothing in the prompt may add clutter to the sky above him, move Zenny off her lavender spike, put the two at different depths, or claim a facial detail. The decision above stands.",
+       "providerPrompt": "Medium-wide two-shot, 50mm, camera locked off at flower-top height, front-on to both bees — no drift, no push. Stylised feature-quality 3D CGI matching @图4: original 3D CGI animation for ages 4–8, Pixar-caliber, real weight, bold legible staging, characters locked to reference.\n\nREFERENCE ROLES: @图3 only for Fuzzby's identity, @图2 only for Zenny's identity, @图4 only for the field — its palette, materials, flowers and light.\n\nFuzzby is the character from @图3 — match the reference; at this size that is silhouette, proportion and colour, not features. Zenny is the character from @图2 — match the reference; at this size that is silhouette, proportion and colour, not features.\n\nTHE PAIR, AT ONE DEPTH. Both bees hover at exactly the same distance from the lens, a body-length apart across the frame, so their true size difference is a plain visible fact and not a trick of depth: Fuzzby left of centre and clearly the bigger of the two, Zenny to his right and clearly the smaller. Neither sits dead centre and neither touches an edge.\n\nFUZZBY, FROZEN ALREADY LOADING. He hangs nose-up and pitched off level, chest driving out ahead of his own wings, hind legs tucked and cocked under him, both antennae carried proud-erect — the attitude of a bee half a heartbeat from launching, never a level controlled hover. His wings are a fast pale blur. Nothing crosses his face or his spectacles; the air in front of his head is clear.\n\nZENNY, WELDED TO HER FLOWER. She holds her place at her own lavender spike at frame-right, her legs gripping the spike itself and her body tipped down into the florets, already at work and paying him no attention. She is physically attached to that lavender spike — wherever the spike leans or nods, she goes with it. Her wings work fast to hold her against it.\n\nDEPTH. Foreground: lavender spikes, white daisies and red clover heads crowd the bottom and both lower corners, pushing up to exactly the two bees' own height — close enough that a blossom sits within a wing's reach of Fuzzby's flank, so the audience can already measure his margins against them. Midground: the two bees, and the open lane of clear air. Background: the flower field runs away in soft focus to the low hills, with open sky above the flower tops.\n\nTHE EXIT LANE STAYS EMPTY. The upper third of frame directly above and slightly behind Fuzzby is open sky and nothing else — no stem, no leaf, no blossom, no bird, no flare crossing it. That empty air is the climb, and it is left completely clear.\n\nLIGHT. Low sun just above the hills, flaring in behind the pair, long light raking the flower tops; the two bees carry a bright rim along their backs and wings with soft bounce off the pale daisies below them. Loose pollen motes hang in the raking light.\n\nTHE READ. A still, patient window on two working bees — one already fizzing and aimed at the sky, one head-down and half his size — and all that empty air above him, promising the trouble he is about to fly into.",
+       "doesItLand": "Yes — it puts both bees at one depth so the size gap reads instantly, welds Zenny to a lavender spike she can't drift off, keeps Fuzzby pitched and loading rather than parked, and leaves the sky above him genuinely empty so the twelve-second climb, dip, leaf-spring and on-parade payoff all have somewhere to happen without breaking the frame."
+      }
+     },
      "history": [
       {
        "department": "Cinematography",
@@ -1306,44 +1374,6 @@
      "approved": {
       "department": "Animation",
       "worker": "Director",
-      "skill": "skills/crystal-bears-director/SKILL.md",
-      "skillHash": "5977e6b70cb22af1",
-      "model": "gpt-5.5",
-      "scene": "1",
-      "shotId": "S1.SH1",
-      "packageRevision": 1,
-      "preparedAt": "2026-07-27T07:48:55",
-      "editedAt": null,
-      "preparedBy": "specialist",
-      "sourceHash": "43c79db20eab3430abb25b6ef368ff3a90cd162a298b554548d3ac61082d267b",
-      "signatureVersion": 3,
-      "sourceFields": {
-       "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
-       "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
-       "shotId": "5b7dd153f54d907af4c06637c74efd09f436390b9f505ea12fb553d646620846",
-       "approvedAnchor": "736945d6bc6f834a0761c455210ac9468e8cdaf4b516b3056750e6a394f089d6",
-       "approvedVoiceAsset": "d5a0fe5919f49ebf898a57afc0f40fbe8df656c5ebefd86674b874b430f02abc",
-       "physicalPerformance": "edc53450f81ebca8e2803fc6fc627a6b63bc14d353e2687778793d6c29eccb60",
-       "references": "e057ca3493cff23ab1087af3d3e3b2db20583e38318381fa9d7379bef4da34b7",
-       "approvedSceneLookHash": "dadbee90db7459f05b4773a6cd837bbacafad72f70650d515f723cbce8205e0c",
-       "durationSec": "77c52f3feed5acdd119b1f8449d5ccc2d39be94bd0314d5b7302f36e20b6cea9",
-       "measuredAudioDurationSec": "088bf57d5c7797821f58b2e1e4e2293f5f5616fefa84f3cc11f508609e5ae374",
-       "fireDurationSec": "77c52f3feed5acdd119b1f8449d5ccc2d39be94bd0314d5b7302f36e20b6cea9"
-      },
-      "outputHash": "caf51fae1d4e6a34a51777f8d687424179a9b90275435bc432212ab111c5dcec",
-      "output": {
-       "shotId": "S1.SH1",
-       "providerPrompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby is the only character who speaks; his mouth works continuously through the opening spoken section of @Audio1 and again on the final spoken section. Zenny never speaks and her mouth stays closed throughout. No additional speech, no narration, no added words, no other language. Fuzzby's flight buzz and his working breath are part of the performance and continue freely under the audio.\n\nReference roles: @图1 only for the exact opening composition and positions; @图3 only for Fuzzby's identity, proportions, features and accessories — Fuzzby is the character from @图3, match the reference 100%, every feature and accessory exactly as shown; @图2 only for Zenny's identity, proportions, features and accessories — Zenny is the character from @图2, match the reference 100%, every feature and accessory exactly as shown; @图4 only for the world, its plants, materials and palette. Stylised feature-quality 3D CGI, real weight, squash-and-stretch, bold legible staging. High sun burns through the leaf ceiling in hard moving shafts, throwing bright bars and black leaf-shadow that strobe across his back as he climbs; the corridor floor sits in cool green shade.\n\nShot 1: 35mm handheld chase, flying bee-height behind and slightly below Fuzzby, banking with him half a beat late so the horizon rolls after he rolls. Begin exactly on @图1 with the camera already travelling — motion from the first frame. During the opening spoken section of @Audio1 his chest drives out ahead of his own wings and hauls him up a rising zig-zag; each climb overshoots what the flowers need, so gravity claims the top of it and drops him lower than he meant, and every one of those up-down beats runs a different length, tightening as the corridor narrows. His wing-wash bends the stems he passes, the bent stems whip back across the near foreground and swipe the lens, and each swipe drags the camera a little off him so it has to hunt him back. The leaf ceiling crowds his back the whole climb; a shaft of sun cuts him bright, the next leaf swallows him dark, and the strobe reads his speed. Push closer as the last climb overshoots and he pitches over the top of it. He aims his head, not his line, at the tall blossom ahead and dives — the dip loads a hair longer than every beat before it — and the dip carries him behind a broad near-field leaf that takes the frame entirely and loses him. The lost frame swings past the leaf's edge and finds him already inside the bloom, driven in past its centre, spectacles and the silhouette of his back readable against the petal wall, wings still beating.\n\nThe bloom answers him: the anthers dump their loose gold onto his braced hind legs, and the new weight hanging off his back end drags his exit sideways, so he leaves the flower flank-first and travelling wrong in a fast sideways slide he cannot steer. That slide delivers his flank into a broad leaf across the corridor — the leaf does not swing at him, he arrives at it. Reframe wider as the leaf, its stalk and the stem stay one connected flexible structure and bow heavily down under his full weight, slow-in, the whole stalk loading like a diving board with the camera dropping with it because the bend takes the frame down. Then the stalk snaps out — FWIP — and throws him back up the corridor, and the camera is thrown with him, whipped by the spring rather than choosing it, the horizon tumbling. His limbs go loose and his wings beat helpless: he is a passenger, not a performer. The throw shears the loose gold off him in a bursting cloud, and inside that cloud time stretches into one slow pocket — his drooped antenna whipping slow, the gold hanging almost still in the air, his wings still beating fast right through it, nothing frozen.\n\nFull speed returns as he arrests himself inside his own falling gold and rebuilds the on-parade stance from the chest outward: chest out first, shoulders drawing back, head lifting last, wings fast beneath a body that has decided to be dignified. As the final spoken section of @Audio1 begins he is already in the pose, gold sifting down past his spectacles and never masking his silhouette. A beat after the stance has finished, the follow-through arrives on its own timing: one antenna stands proud, the other stays folded over and fails to come up with its partner, and his eyes flick to it after the line, not during. Behind him the broad leaf is still oscillating on its stalk. Far back down the corridor, small, soft and unremarked, Zenny sits at her own blossom with full pollen sacks, head down, not looking up — the camera never goes to find her.\n\nHold on Fuzzby in his gold cloud, wings beating and gold still falling, for two seconds after the audio finishes. Silence.",
-       "doesItLand": "Yes — the chase camera and strobing stems put the audience inside his over-revved rhythm, and because the leaf never hits him but is arrived at by his own overloaded sideways slide, the throw plays as his fault and the drooped-antenna tell landing one beat late turns the proud pose into the laugh."
-      },
-      "outcome": "approved",
-      "decisionAt": "2026-07-27T07:51:25",
-      "reviewedBy": "Julian",
-      "note": ""
-     },
-     "candidate": {
-      "department": "Animation",
-      "worker": "Director",
       "readback": {
        "shot_says": "Fifteen unbroken seconds: the two bees hover facing us in the sunlit flowerbed, the big one punches up out of frame and the camera chases him through a fast crooked climb where flower heads keep swiping him, he vanishes behind a leaf, comes out sideways dusted in gold, gets slung by a bending leaf through a stretched slow beat, then rebuilds himself into a proud chest-out pose in his own falling pollen with one antenna still flopped over while she keeps working beside him.",
        "frame_mismatches": [],
@@ -1394,8 +1424,13 @@
        "openingFrameRead": "(1) WHAT KIND OF PLACE: A wide-open wildflower meadow, seen from inside it at flower-top height. No corridor, no tunnel, no leaf ceiling, no canopy — the shot's own legacy paperwork says \"corridor of tall rainforest flowers\" and \"a ceiling of leaves\"; the picture plainly shows OPEN SKY and a low sun flaring straight into the lens from upper right, with soft bright haze and floating motes above the blossoms. Underfoot/below frame: a dense crowd of lavender spikes, white daisies, magenta clover heads, yellow buttercups, a few pale crystal shards among the stems. Overhead: open, blown-out warm air and blurred green-gold distance. I write the picture, never the paperwork: this is a field with air above it. (2) WHERE IS EACH CHARACTER: Both bees hover at the same distance from the lens, front-on, at flower-top height, roughly the middle band of frame. Fuzzby is left of centre, plainly the larger of the two, legs dangling clear of the daisies below him. Zenny is to his right, noticeably smaller, at the same depth — that shared depth is what makes the size gap readable, and it is fragile; neither may be pushed into the distance. (3) WHAT THIS FRAME AFFORDS: Enormous open air directly above Fuzzby — the whole upper third is empty sky-haze, which is where a climb can live without crossing to Zenny's side or crowding the left edge. Below and immediately around him, dense blossom heads within a body-length in every direction: things to brush past, a lavender spike to graze, a blossom to drive into, and broad green leaves at the lower left and lower right close enough to be struck and to spring. Depth exists behind them for the camera to push through. (4) WHERE IT GOES: It ends somewhere this frame cannot show — the camera has left the locked front-on pair, ridden Fuzzby up into the open air, lost him behind a near leaf, found him sideways and pollen-heavy, been thrown by a bowing leaf, and settled on him hanging mid-air inside a slowly falling cloud of his own spilled gold, one antenna up and one folded over, the leaf still oscillating behind his head, Zenny a body-length off his shoulder with full sacks, head down.",
        "providerPrompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby is the only one who speaks; his mouth works in exact sync with @Audio1 and nothing else. Zenny never speaks — her mouth stays closed for the entire take. No added SPEECH, no extra words, no other voices, no on-screen text. Wing-buzz and Fuzzby's breath are welcome; spoken words come only from @Audio1.\n\n@图1 only for the exact opening composition and positions; @图3 only for Fuzzby's identity, proportions, features and accessories — match the reference 100%, every feature and accessory exactly as shown; @图2 only for Zenny's identity, proportions, features and accessories — match the reference 100%, every feature and accessory exactly as shown; @图4 only for the world's flowers, materials and palette. Stylised feature-quality 3D CGI, Pixar-caliber weight, squash-and-stretch and bold legible staging.\n\nShot 1: one continuous take, no cuts anywhere. 35mm, front-on at flower-top height, framing the pair. Begin exactly on @图1. Low sun flares straight into the lens from behind them, blossom heads crowding the bottom of frame, open bright sky-haze filling the air above them.\n\nBoth sets of wings are already working hard and never stop. For the first instant the frame does not move at all while the two of them hover side by side at the same distance from the lens — his bulk against her smallness, the gap between their sizes plainly readable — and inside that unmoving frame he is already loading: chest pumping forward ahead of his own wings, antennae driving proud-erect, hind legs bicycling under him. As the opening spoken section of @Audio1 begins, that load fires him straight UP into the open air above the flower tops, and the release of him is what starts the camera — the frame breaks its stillness only because he has left it, and it goes after him, half a beat behind, never catching up, pushing continuously closer as it climbs. He climbs away from the lens, never crossing to the side where she works, never crowding the left edge.\n\nHe porpoises inside his own zig-zag: each rise overshoots higher than the blossoms need, each drop undershoots lower than they need, no two beats the same length, quickening as he goes, and the blossom heads he keeps missing by inches punish him for it — a lavender spike whips his shoulder and knocks the next rise crooked, the crookedness drives his flank through a daisy that dumps petals into his wake, the wake drags a clover head down and it snaps back across the lens close enough to swipe it. Every one of those contacts arrives on a syllable of @Audio1, the song sounding like it is steering him while the flight is plainly steering the song. Sun strobes across his spectacles as stems cut through the flare. The camera banks late through each of his rolls, the horizon rolling after him rather than with him.\n\nHis deepest dip is the one deliberate loading beat, a hair slower than everything around it — he drops behind a near-field leaf and the leaf takes him from us completely, his wings and the silhouette of his back skimming its edge, and the camera loses him and keeps travelling anyway. It rediscovers him already sideways and in trouble: he aimed his head, not his line, and has driven past the centre of a blossom, the anthers dumping their loose gold onto his braced hind legs. That new weight hanging off his back end swings his exit, so the bloom releases him flank-first and travelling wrong — a fast sideways slide he cannot steer out of. The slide delivers his flank into a broad leaf; the leaf, its stalk and the stem below it are one connected flexible structure, and they take his full weight and bow heavy and slow-in, deep and low, the camera thrown down with the bow rather than choosing to follow it. Then the loaded stalk snaps hard out and throws him back across the open field, gold shearing off him in a sheet.\n\nTime stretches through the throw for one beat — not a freeze, everything still moving: his antenna whipping over slow, the shed gold hanging in the bright air, the leaf unloading, his wings still beating fast right through it, spectacles catching the flare, his silhouette and his glasses clear of the cloud at every moment. Then full speed returns and he arrests himself inside his own falling gold and rebuilds himself from the chest outward — shoulders drawing back, chest pushing out on parade, small mid-air corrections twitching under him, head lifting last, wings fast beneath a body that has decided to be dignified. One antenna comes up with the stance. The other stays folded over and simply does not. As the final spoken section of @Audio1 begins, the chest pushes out one notch further on the line and gold slides off his glasses; after the line, his eyes flick sideways to the folded antenna, and a beat later that antenna gives its own last small sag. Behind his head the broad leaf is still oscillating on its stalk. A body-length off his shoulder, at her own blossom, sharing his depth and still plainly the smaller of the two, Zenny works with full pollen sacks, head down, not looking up — the camera never goes to look for her; she is simply there.\n\nHold on Fuzzby's on-parade stance inside the slowly falling gold for two seconds after the audio finishes, gold drifting, leaf swaying, wings beating. Silence.\n\nThe whole shot is a body overrunning its own tempo until the world hands it back — and it insists it meant to.",
        "doesItLand": "Yes — the gag lands because the frame's one moment of stillness sells the size gap, the climb's every contact makes his speed a consequence rather than a claim, and the unbroken dip-drag-bow-spring chain arrives at a proud bee inside his own spilled cargo with one antenna refusing to salute; I chose to release the card's \"locked, no drift\" framing after his launch, as the card itself instructs, so the lock reads as set-up rather than paralysis."
-      }
+      },
+      "outcome": "approved",
+      "decisionAt": "2026-07-27T09:00:56",
+      "reviewedBy": "Julian",
+      "note": ""
      },
+     "candidate": null,
      "history": [
       {
        "department": "Animation",
@@ -1834,6 +1869,45 @@
        },
        "outcome": "superseded_by_refire",
        "supersededAt": "2026-07-27T08:54:58"
+      },
+      {
+       "department": "Animation",
+       "worker": "Director",
+       "skill": "skills/crystal-bears-director/SKILL.md",
+       "skillHash": "5977e6b70cb22af1",
+       "model": "gpt-5.5",
+       "scene": "1",
+       "shotId": "S1.SH1",
+       "packageRevision": 1,
+       "preparedAt": "2026-07-27T07:48:55",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "43c79db20eab3430abb25b6ef368ff3a90cd162a298b554548d3ac61082d267b",
+       "signatureVersion": 3,
+       "sourceFields": {
+        "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+        "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+        "shotId": "5b7dd153f54d907af4c06637c74efd09f436390b9f505ea12fb553d646620846",
+        "approvedAnchor": "736945d6bc6f834a0761c455210ac9468e8cdaf4b516b3056750e6a394f089d6",
+        "approvedVoiceAsset": "d5a0fe5919f49ebf898a57afc0f40fbe8df656c5ebefd86674b874b430f02abc",
+        "physicalPerformance": "edc53450f81ebca8e2803fc6fc627a6b63bc14d353e2687778793d6c29eccb60",
+        "references": "e057ca3493cff23ab1087af3d3e3b2db20583e38318381fa9d7379bef4da34b7",
+        "approvedSceneLookHash": "dadbee90db7459f05b4773a6cd837bbacafad72f70650d515f723cbce8205e0c",
+        "durationSec": "77c52f3feed5acdd119b1f8449d5ccc2d39be94bd0314d5b7302f36e20b6cea9",
+        "measuredAudioDurationSec": "088bf57d5c7797821f58b2e1e4e2293f5f5616fefa84f3cc11f508609e5ae374",
+        "fireDurationSec": "77c52f3feed5acdd119b1f8449d5ccc2d39be94bd0314d5b7302f36e20b6cea9"
+       },
+       "outputHash": "caf51fae1d4e6a34a51777f8d687424179a9b90275435bc432212ab111c5dcec",
+       "output": {
+        "shotId": "S1.SH1",
+        "providerPrompt": "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Fuzzby is the only character who speaks; his mouth works continuously through the opening spoken section of @Audio1 and again on the final spoken section. Zenny never speaks and her mouth stays closed throughout. No additional speech, no narration, no added words, no other language. Fuzzby's flight buzz and his working breath are part of the performance and continue freely under the audio.\n\nReference roles: @图1 only for the exact opening composition and positions; @图3 only for Fuzzby's identity, proportions, features and accessories — Fuzzby is the character from @图3, match the reference 100%, every feature and accessory exactly as shown; @图2 only for Zenny's identity, proportions, features and accessories — Zenny is the character from @图2, match the reference 100%, every feature and accessory exactly as shown; @图4 only for the world, its plants, materials and palette. Stylised feature-quality 3D CGI, real weight, squash-and-stretch, bold legible staging. High sun burns through the leaf ceiling in hard moving shafts, throwing bright bars and black leaf-shadow that strobe across his back as he climbs; the corridor floor sits in cool green shade.\n\nShot 1: 35mm handheld chase, flying bee-height behind and slightly below Fuzzby, banking with him half a beat late so the horizon rolls after he rolls. Begin exactly on @图1 with the camera already travelling — motion from the first frame. During the opening spoken section of @Audio1 his chest drives out ahead of his own wings and hauls him up a rising zig-zag; each climb overshoots what the flowers need, so gravity claims the top of it and drops him lower than he meant, and every one of those up-down beats runs a different length, tightening as the corridor narrows. His wing-wash bends the stems he passes, the bent stems whip back across the near foreground and swipe the lens, and each swipe drags the camera a little off him so it has to hunt him back. The leaf ceiling crowds his back the whole climb; a shaft of sun cuts him bright, the next leaf swallows him dark, and the strobe reads his speed. Push closer as the last climb overshoots and he pitches over the top of it. He aims his head, not his line, at the tall blossom ahead and dives — the dip loads a hair longer than every beat before it — and the dip carries him behind a broad near-field leaf that takes the frame entirely and loses him. The lost frame swings past the leaf's edge and finds him already inside the bloom, driven in past its centre, spectacles and the silhouette of his back readable against the petal wall, wings still beating.\n\nThe bloom answers him: the anthers dump their loose gold onto his braced hind legs, and the new weight hanging off his back end drags his exit sideways, so he leaves the flower flank-first and travelling wrong in a fast sideways slide he cannot steer. That slide delivers his flank into a broad leaf across the corridor — the leaf does not swing at him, he arrives at it. Reframe wider as the leaf, its stalk and the stem stay one connected flexible structure and bow heavily down under his full weight, slow-in, the whole stalk loading like a diving board with the camera dropping with it because the bend takes the frame down. Then the stalk snaps out — FWIP — and throws him back up the corridor, and the camera is thrown with him, whipped by the spring rather than choosing it, the horizon tumbling. His limbs go loose and his wings beat helpless: he is a passenger, not a performer. The throw shears the loose gold off him in a bursting cloud, and inside that cloud time stretches into one slow pocket — his drooped antenna whipping slow, the gold hanging almost still in the air, his wings still beating fast right through it, nothing frozen.\n\nFull speed returns as he arrests himself inside his own falling gold and rebuilds the on-parade stance from the chest outward: chest out first, shoulders drawing back, head lifting last, wings fast beneath a body that has decided to be dignified. As the final spoken section of @Audio1 begins he is already in the pose, gold sifting down past his spectacles and never masking his silhouette. A beat after the stance has finished, the follow-through arrives on its own timing: one antenna stands proud, the other stays folded over and fails to come up with its partner, and his eyes flick to it after the line, not during. Behind him the broad leaf is still oscillating on its stalk. Far back down the corridor, small, soft and unremarked, Zenny sits at her own blossom with full pollen sacks, head down, not looking up — the camera never goes to find her.\n\nHold on Fuzzby in his gold cloud, wings beating and gold still falling, for two seconds after the audio finishes. Silence.",
+        "doesItLand": "Yes — the chase camera and strobing stems put the audience inside his over-revved rhythm, and because the leaf never hits him but is arrived at by his own overloaded sideways slide, the throw plays as his fault and the drooped-antenna tell landing one beat late turns the proud pose into the laugh."
+       },
+       "outcome": "superseded",
+       "decisionAt": "2026-07-27T07:51:25",
+       "reviewedBy": "Julian",
+       "note": "",
+       "supersededAt": "2026-07-27T09:00:56"
       }
      ]
     }
@@ -2086,10 +2160,8 @@
     },
     "status": "complete"
    },
-   "candidatePaths": [
-    "/Users/julianjenkins/Desktop/8Th Hour/engine/media/shots/Ep1_S1.SH1_c1.mp4"
-   ],
-   "batchId": "S1.SH1-b1-20260727T075227",
+   "candidatePaths": null,
+   "batchId": null,
    "candidatesGenerated": 1,
    "disclosure": {
     "shotId": "S1.SH1",
@@ -2117,7 +2189,19 @@
     "tier": "standard"
    },
    "lastBatchBinding": "8d538f59968f5fd4e4ea03b4e0e5443e",
-   "firedAt": "2026-07-27T07:56:27"
+   "firedAt": "2026-07-27T07:56:27",
+   "rejections": [
+    {
+     "shotId": "S1.SH1",
+     "batchId": "S1.SH1-b1-20260727T075227",
+     "correction": "Superseded — fired off the old corridor storyboard before the field rewrite.",
+     "category": "geography",
+     "fixTier": "edit_one_element",
+     "reviewed_by": "Julian",
+     "at": "2026-07-27T09:07:48"
+    }
+   ],
+   "batchAttempts": 1
   },
   {
    "shotId": "S1.SH2",

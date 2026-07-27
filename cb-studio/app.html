@@ -4959,7 +4959,26 @@ function renderShotRunner(){
     </div>`;
     let st,lab,sum,body="",acts=[];
     if(led.status=="approved"){ st="done";lab="Fired";sum="A take is approved — reject it in Review to re-fire."; }
-    else if(led.status=="candidates-pending"){ st="done";lab="Batch fired";sum="Candidates rendered — decide in Review below."; }
+    // A ROW THAT SAYS "DONE" WHILE IT IS THE THING BLOCKING YOU (2026-07-27, Julian, after
+    // approving a freshly-prepared direction: "I have approved it but cant fire"). Every
+    // engine precondition passed — the prompt resolved, the anchor resolved, voice and Scene
+    // Look were current. What actually held it was an UNDECIDED BATCH from an earlier fire:
+    // fire_shot will not open a second one, correctly. But this row reported "done · Batch
+    // fired · candidates rendered", which reads as though the thing he just approved had
+    // already gone off — so the one row that knew why he was stuck was the one row claiming
+    // success, and it offered no way out. Same fact, stated as the block it is, naming the
+    // action that clears it.
+    else if(led.status=="candidates-pending"){
+      st="blocked";lab="Held";
+      sum="An earlier batch is still undecided — nothing new can fire until you approve or reject it in Review below. This is not about the direction you just approved.";
+      body=`<div class="runempty">There is already a rendered take on this shot waiting on your decision, `
+          +`in <b>08 · REVIEW</b> directly below. Approve it and the shot is done; reject it and this row `
+          +`unlocks for a fresh batch off your current direction.</div>`;
+      // Deliberately no jump button: Review is the very next row, and this panel has no
+      // row-level scroll target to call — a control that throws is worse than a sentence
+      // that points.
+      acts=[];
+    }
     else if(led.status=="model-limited"){
       // Never restate the attempt ceiling as a literal — it is a policy number in
       // cb_render.MAX_BATCH_ATTEMPTS (raised 2 -> 7, 2026-07-25) and this copy said

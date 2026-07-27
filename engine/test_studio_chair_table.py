@@ -304,8 +304,25 @@ for(const row of SH_PANEL.filter(s=>s.authorises&&s.stage)){
   // offer a way through" is now asked of body+actions together, which is the whole row.
   let b=authBlockHTML(stage,SHOT), a=()=>b.actions.join(""), all=()=>b.body+b.actions.join("");
   must(b.phase==="prepare",tag+": nothing prepared should offer PREPARE, got "+b.phase);
-  must(all().includes("deptRun("),tag+": NO PREPARE BUTTON with nothing prepared — the original 02 defect");
+  // A ROW MUST NEVER DEAD-END — but "offers a Prepare button" was only ever ONE way to
+  // satisfy that (2026-07-27, Julian: "lots of little gates... I fire approve / reject and we
+  // move"). Preparing is a free, text-only consult that generates nothing, so it now runs on
+  // open and the row says so. The invariant is unchanged and still binding: with nothing
+  // prepared, the row states that the work is under way. Silence here would be the real
+  // defect — the same dead end the original 02 had, wearing different clothes.
+  must(/prepar|asking the/i.test(all()),
+       tag+": nothing prepared and the row says NOTHING is happening — a dead end, the original 02 defect");
   must(!all().includes("shApproveStageAll("),tag+": offers Approve over content that does not exist");
+  // AFTER A REJECTION the automatic path deliberately stops — restarting from a direction you
+  // already turned down is the director's call. THERE the button must still exist, or that
+  // state really is a dead end.
+  set(stage,{worker:"W",history:[{verdict:"rejected"}],
+    readiness:{readyForDisclosure:false,prepared:false,directionCurrent:false}});
+  b=authBlockHTML(stage,SHOT);
+  must(all().includes("deptRun("),
+       tag+": NO PREPARE BUTTON after a rejection — auto-prepare stops there by design, so this row is stuck");
+  set(stage,{worker:"W",readiness:{readyForDisclosure:false,prepared:false,directionCurrent:false}});
+  b=authBlockHTML(stage,SHOT);
   set(stage,{worker:"W",candidate:{output:out("THE TEXT")},
     readiness:{readyForDisclosure:false,prepared:true,directionCurrent:false}});
   b=authBlockHTML(stage,SHOT);
@@ -354,6 +371,32 @@ console.log(JSON.stringify(fails));
 
 
 @pytest.mark.skipif(_NODE is None, reason="node not installed")
+def test_the_rows_ask_the_loader_to_prepare_not_just_to_read():
+    """The other half of "no Prepare button". Dropping the button is only safe because the
+    direction prepares itself on open; if the rows still called shLoadDept in read-only mode
+    the panel would show "asking the specialist…" forever and nothing would ever ask.
+
+    This is the exact defect that made the feature invisible for a week: maybeAutoPrepareDept
+    was built 2026-07-20 on Julian's own words and wired ONLY to attachDepartmentPanel — the
+    collapsed disclosure — while shLoadDept, which is what the 01-08 rows call, had no such
+    parameter at all. Both halves are bound here so they cannot drift apart again."""
+    app = _app()
+    sig = re.search(r"async function shLoadDept\(([^)]*)\)", app)
+    assert sig, "shLoadDept is gone"
+    assert "autoPrepare" in sig.group(1), (
+        "shLoadDept no longer takes autoPrepare — the rows are back to read-only and every "
+        "gated section will sit unprepared with no button to fix it")
+    body = app[sig.start():app.index("\nfunction shDeptRec", sig.start())]
+    assert "maybeAutoPrepareDept" in body, (
+        "shLoadDept takes the flag and never calls maybeAutoPrepareDept — it does nothing")
+    # Every gated call site must actually pass it. A row that loads read-only is a dead end.
+    calls = re.findall(r"shLoadDept\(\s*'(\w+)'\s*,\s*[^,)]+(,\s*true)?\s*\)", app)
+    missing = [stage for stage, flag in calls if not flag]
+    assert not missing, (
+        f"these gated sections load their direction WITHOUT asking for it: {missing} — "
+        f"the row will show 'asking the specialist' and never ask")
+
+
 def test_the_shared_block_behaves_identically_for_every_gated_section():
     harness = pathlib.Path(tempfile.gettempdir()) / "cb_rowshape_harness.js"
     harness.write_text(_ROW_HARNESS, encoding="utf-8")

@@ -4129,9 +4129,19 @@ function authBlockHTML(stage,shotId,opts){
         +rowMore(dirDocHTML(out,{}),label,shotId+"|auth|"+stage),
       actions:[rePrepBtn]};
   }
+  // NOTHING PREPARED — AND THIS IS NOW A TRANSIENT STATE, NOT A TASK (2026-07-27).
+  // Opening the shot prepares the direction itself (shLoadDept's autoPrepare), so on the
+  // ordinary path this renders for a second and is replaced by the real document with its
+  // Approve/Reject. It PERSISTS in exactly one case, deliberately: after a rejection, where
+  // maybeAutoPrepareDept stops on purpose — starting again from a direction you have already
+  // turned down is your call to make, not the software's. So the copy names that case instead
+  // of instructing you to press a button you should never have needed.
+  const rejected=(d.history||[]).length>0;
   return {phase:"prepare",ready,
-    body:`<div class="runempty">Nothing prepared yet. Prepare asks the ${_esc(d.worker||"specialist")} for one written direction — a text-only consult that spends nothing and generates no media. It renders here in full for you to read, then approve. Only after that does anything paid become available.</div>`,
-    actions:[prepBtn]};
+    body:`<div class="runempty">${rejected
+        ? `You rejected the last direction, so nothing has been prepared to replace it — that restart is your call, not the software's. Ask the ${_esc(d.worker||"specialist")} again when you want a fresh one.`
+        : `Asking the ${_esc(d.worker||"specialist")} for the direction now — text only, nothing generated, nothing spent. It appears here to read, with its Approve and Reject underneath.`}</div>`,
+    actions:rejected?[prepBtn]:[]};
 }
 // THE VISIBLE REFERENCE STACK (2026-07-23, Julian — "I also want to see the references
 // that are being used on the prompt"): the shot's real resolved reference slots, as images,
@@ -4167,9 +4177,25 @@ function refAnchorUrl(tok){
 }
 let SH_DEPT_LAST={};   // last-known department records — display continuity across
 // sbGatePollTick's deliberate blunt SH_DEPT_CACHE clear (the backend stays the real gate)
-async function shLoadDept(stage,sid){
+async function shLoadDept(stage,sid,autoPrepare){
+  // AUTO-PREPARE REACHES THE ROWS (2026-07-27, Julian: "there are lots of little gates that
+  // cause too many problems — we need it so I fire approve / reject and we move").
+  //
+  // maybeAutoPrepareDept has existed since 2026-07-20, built on his own words that day ("why
+  // can't you just give me the software... fire approve reject after the magic has taken
+  // place"). It was only ever wired to attachDepartmentPanel — the COLLAPSED "Departments &
+  // technical detail" disclosure. This function is what the 01-08 rows he actually works in
+  // call, and it never took the flag at all, so the direction sat unprepared until he pressed
+  // a button for it. Same shape as every other defect this week: the answer was computed and
+  // the screen threw it away.
+  //
+  // WHY IT IS SAFE TO RUN WITHOUT ASKING: prepare is a text-only LLM call. cb_departments.py
+  // makes zero cb_gen calls, and cb_gen is the only module that logs spend — so prepare
+  // cannot generate media and cannot spend the render budget. A free step that produces no
+  // picture should never be a button. maybeAutoPrepareDept's own guards still hold: one fire
+  // per (stage, shot) per session, never over a pending candidate, never over a rejection.
   const key=deptKey(stage,sid);
-  if(SH_DEPT_CACHE[key])return;
+  if(SH_DEPT_CACHE[key]){ maybeAutoPrepareDept(stage,sid,autoPrepare); return; }
   SH_DEPT_CACHE[key]={loading:true};
   try{
     const q=new URLSearchParams({scene:String(SH_SC),episode:SH_EP,stage}); if(sid)q.set("shotId",sid);
@@ -4177,6 +4203,7 @@ async function shLoadDept(stage,sid){
     SH_DEPT_CACHE[key]=r.ok?j:{error:j.error||"Department unavailable"};
     if(r.ok)SH_DEPT_LAST[key]=j;
   }catch(e){SH_DEPT_CACHE[key]={error:"Can't reach the department."};}
+  maybeAutoPrepareDept(stage,sid,autoPrepare);
 }
 function shDeptRec(stage,sid){
   const key=deptKey(stage,sid), d=SH_DEPT_CACHE[key];
@@ -4232,19 +4259,26 @@ function renderShotRunner(){
     shLoadRedesignEligibility(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
   // THE DECISION CONTENT NEEDS THE DEPARTMENT RECORDS (2026-07-23, "i cant see it"): load
   // them eagerly for a non-terminal shot so the Direction/Voice rows can render the actual
-  // brief/lines being decided — read-only GETs, zero cost, never an auto-prepare.
+  // brief/lines being decided.
+  //
+  // AND PREPARE IT, don't just read it (2026-07-27 — "I fire approve / reject and we move").
+  // The old comment here ended "read-only GETs, zero cost, never an auto-prepare" — that last
+  // clause was the whole problem. Reading a direction that does not exist yet renders an empty
+  // row with a Prepare button on it, and the button spends nothing, so it was never a decision
+  // he was making, only a keystroke he was owed. The record now prepares itself on open and a
+  // real candidate is waiting for Approve/Reject by the time he looks at the row.
   if(led.status!="approved"){
     if(!SH_DEPT_CACHE[deptKey('animation',s.shotId)])
-      shLoadDept('animation',s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
+      shLoadDept('animation',s.shotId,true).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
     if(talky&&!SH_DEPT_CACHE[deptKey('voice',s.shotId)])
-      shLoadDept('voice',s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
+      shLoadDept('voice',s.shotId,true).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
     // CINEMATOGRAPHY LOADS WITH THE OTHER TWO (2026-07-26). It never did — the record only
     // arrived when the collapsed Departments section mounted, AFTER this row had already
     // rendered. Two consequences, both real: 02 · OPENING FRAME could not show its own
     // direction state, and deptLocksGeneration was handed an undefined readiness on first
     // paint, so Generate rendered ENABLED on a shot the engine would refuse.
     if(isOpener&&!SH_DEPT_CACHE[deptKey('cinematography',s.shotId)])
-      shLoadDept('cinematography',s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
+      shLoadDept('cinematography',s.shotId,true).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });
   }
   if(!SH_REFS_CACHE[s.shotId])
     shLoadRefs(s.shotId).then(()=>{ if(SH_RSEQ===mySeq) renderWorkspaceBody(); });

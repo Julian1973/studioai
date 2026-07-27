@@ -12,14 +12,14 @@
  "Ep1": {
   "1": {
    "locationId": "deep_rainforest_flower_meadow",
-   "name": "Deep Within the Rainforest",
-   "location": "A sunlit Crystal Cove wildflower meadow at bee height: towering purple lavender spikes, white daisies and pink-red clover forming a low flight corridor between the stems, with soft rolling hills receding beyond the meadow.",
+   "name": "The Sunlit Flower Field",
+   "location": "A sunlit Crystal Cove wildflower field at bee height: towering purple lavender spikes, white daisies and pink-red clover standing in an open bed with clear sky above the flower tops, and soft rolling hills receding beyond the field.",
    "look": "An open sunlit wildflower meadow read at bee scale — purple lavender spikes, white daisies and pink-red clover loom tall and frame-filling, pollen-heavy blossom heads at flight height, grass channels winding between stems as flight lanes, small crystals resting low in the grass as quiet set dressing, rolling hills fading into soft haze in the deep background. Every plant surface reads springy, reactive, comedy-ready. (LOCKED to Julian's library plate deep_rainforest_flower_meadow.png, 2026-07-24 — the plate IMAGE is the visual law; this text describes it and never competes with it.)",
    "time": "Morning",
    "lighting": "Low bright sun sitting just above the hills, long gold light raking across the flower tops, petals backlit and haloed, soft light haze over the far hills — read from the locked plate; every prompt defers light to the plate reference and never states a competing light condition (drift-safe vocabulary kept: concrete sun/sky/shadow states only, no time-of-day mood words).",
-   "weather": "Warm breeze, clear sky at ground level; the upper canopy has begun to darken almost imperceptibly with the first atmospheric warning of the coming storm — cooler grey-violet light filtering through the highest leaves, no rain yet.",
+   "weather": "Warm breeze, clear sky; far over the hills the light has begun to cool almost imperceptibly with the first atmospheric warning of the coming storm — a faint grey-violet band low on the horizon, no rain yet.",
    "colorTemperature": "Gold-pink sky over the hills, purple-lavender and daisy-white flower field, green stems and grass, gold pollen accents — the locked plate's own palette, restated nowhere in prompts beyond what the plate itself shows.",
-   "definingFeature": "Towering pollen-heavy rainforest flowers forming natural corridors and springy obstacles at bee scale.",
+   "definingFeature": "Towering pollen-heavy flowers standing in an open bed under open sky — springy, reactive obstacles at bee scale, with nothing overhead.",
    "master": null,
    "shots": []
   },

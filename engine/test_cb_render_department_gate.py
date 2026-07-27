@@ -232,7 +232,16 @@ def _mock_llm(monkeypatch, animation_prompt=None, cinematography_prompt=None,
                           "past.\n\n"
                           "They hold the look, about 2 seconds of silence, no more dialogue.")
         if name == "CinematographyDirection":
+            # frameLogic (2026-07-27) is the STAGING DECISION the Director and DP settle
+            # before any prompt language exists — the prompt is delivery of it. Required on
+            # the real model, so the stub carries a real-shaped one rather than "x": these
+            # fixtures exist to prove the gate, and a fixture that cannot be constructed the
+            # way production constructs it proves nothing.
             return schema(shotId="1.B1.S1", doesItLand="t",
+                          frameLogic="(1) The frame promises trouble by crowding. (2) It must "
+                                     "afford a climb up-frame-left, so that lane stays empty. "
+                                     "(3) Wide, 24mm, bee-height. (4) At this size he reads as "
+                                     "silhouette and attitude, not features.",
                           providerPrompt=cinematography_prompt or
                           "a real cinematography direction prompt with plenty of words yes")
         if name == "VoiceDirection":
@@ -1075,6 +1084,9 @@ def test_cinematography_and_animation_receive_the_compiled_brief_not_raw_json(wo
         name = schema.__name__
         if name == "CinematographyDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",
+                          frameLogic="(1) Promise of trouble by crowding. (2) The climb lane "
+                                     "up-frame-left stays empty. (3) Wide, 24mm, bee-height. "
+                                     "(4) Silhouette and attitude, not features.",
                           providerPrompt="a real cinematography direction prompt yes yes")
         if name == "AnimationDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",

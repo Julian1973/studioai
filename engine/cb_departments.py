@@ -194,7 +194,56 @@ class LookDirection(BaseModel):
 
 
 class CinematographyDirection(BaseModel):
+    """WORK THE SHOT OUT BEFORE YOU WRITE IT (2026-07-27).
+
+    Julian, after I diagnosed two bad keyframes by reading their own prompts back to him:
+    "surely the prompt needs to take into it the context and outcomes with common sense and
+    creative reasoning — you just broke that prompt down as an expert and understanding the
+    demands of the shot, surely that is what fires when you take the shot direction."
+
+    He is right, and the schema was the reason it didn't. The field order WAS
+    shotId -> providerPrompt -> doesItLand: the model went straight to writing prose, and
+    `doesItLand` sat AFTER it, so whatever reflection happened arrived once the prose was
+    already committed and could not change a word of it. A real DP does not open their mouth
+    first; they work out the frame, then describe it.
+
+    Structured output is generated IN FIELD ORDER, so `frameLogic` sitting above
+    `providerPrompt` is not decoration — it forces the reasoning to happen first and then
+    constrains the prose that follows it. Both of the day's real failures were contradictions
+    this working-out cannot survive: you cannot write "at 24mm a spectacle ping is not
+    resolvable" and then ask for one four lines later.
+
+    This is not a gate (rule 87). Nothing is refused, scored or capped. The room got a
+    thinking step it never had."""
+
     shotId: str
+    frameLogic: str = Field(min_length=1, description=(
+        "THE STAGING DECISION — THE DIRECTOR AND THE DP, IN THE ROOM, BEFORE ANY PROMPT "
+        "EXISTS. This is not notes about a prompt you have already written; it is the "
+        "creative decision the prompt will then merely DELIVER. Nothing you write in "
+        "providerPrompt may contradict what you settle here.\n\n"
+        "THE DIRECTOR SPEAKS FIRST, and in plain human words — no prompt language, no "
+        "camera jargon yet:\n"
+        "(1) WHAT IS THIS FRAME FOR? What does the audience feel in the first half-second "
+        "they see it — the laugh being set up, the heart being reached for, the trouble "
+        "being promised? Say it as you would to a person, not a machine.\n"
+        "(2) WHAT MUST THIS FRAME AFFORD? The performance lands ON this stage and has "
+        "fifteen seconds to do its job. Name the room it needs: the air the action travels "
+        "into, the object it arrives at, the space the joke needs to be legible in. That "
+        "space is the point of the frame, not the background to it.\n\n"
+        "THE DP ANSWERS, and only now does craft enter:\n"
+        "(3) The shot size and focal length that SERVES (1) and (2) — chosen for them, never "
+        "chosen first and justified after.\n"
+        "(4) At that size, what is genuinely resolvable on the characters, and what is NOT. "
+        "If the honest answer is 'silhouette, posture and colour, not features', say so "
+        "plainly — that is then the whole of your job on them, and every line you write "
+        "afterwards must respect it.\n\n"
+        "Then write providerPrompt as pure DELIVERY of this decision — no new choices, "
+        "nothing invented that is not settled above. If while writing you find yourself "
+        "reaching for something you named unresolvable, do not write it and do not quietly "
+        "drop the shot size to accommodate it: the decision above is the one that stands. "
+        "A frame that is beautiful and leaves the performance nowhere to go is a failed "
+        "frame, however well it is written."))
     providerPrompt: str = Field(min_length=40)
     doesItLand: str = Field(min_length=1)
 
@@ -543,9 +592,31 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
                 "prompt drifted both characters off-model): NEVER describe a character's "
                 "appearance — no body shape, colours, stripes, glasses, cheeks, wings, "
                 "features, ever. A name is a label welded to its reference slot, nothing "
-                "more. For each character write exactly one identity clause of this shape: "
+                "more. For each character write exactly one identity clause, and SIZE THE "
+                "FIDELITY CLAIM TO YOUR OWN SHOT, because an absolute one fights your lens:\n"
+                "  · where the character is large enough in frame for features to resolve — "
                 "'{Name} is the character from @图N — match the reference 100%, every "
-                "feature and accessory exactly as shown' — then spend your words ONLY on "
+                "feature and accessory exactly as shown'\n"
+                "  · where they are NOT — a wide, a deep background, anything you have just "
+                "worked out reads as silhouette — '{Name} is the character from @图N — match "
+                "the reference; at this size that is silhouette, proportion and colour, not "
+                "features'\n"
+                # WHY THIS IS SIZED NOW (2026-07-27). The absolute form was mandated at EVERY
+                # shot size, and it is the root of the second contradiction of the day: the DP
+                # correctly worked out in frameLogic that "what is NOT resolvable is
+                # expression, eye direction, mouth shape, fur detail, or any facial read at
+                # all — so I do not write one", and then this template obliged it to demand
+                # "every feature and accessory exactly as shown" four lines later. The render
+                # obeyed the absolute over the hedge, every time, and put Fuzzby at ~45% of
+                # frame height where the brief asked for one-sixth. The model never had a
+                # choice; our own charge took it away.
+                # RULE 5 IS UNTOUCHED AND UN-REOPENABLE: identity still comes ONLY from the
+                # reference image, a name is still a label welded to its @图N slot, and
+                # describing a character's appearance is still forbidden in both branches.
+                # What changed is a claim about RESOLUTION, not about identity — and at a
+                # wide, "silhouette, proportion and colour" is not a weaker instruction, it
+                # is the true one.
+                " — then spend your words ONLY on "
                 "pose, position, action-instant, staging, depth and light. The reference "
                 # THE LAST NUMERIC CAP ON THE STAGE, DELETED (2026-07-26, Julian: "now we
                 # have the level of directing that gets delivered without the guardrails").

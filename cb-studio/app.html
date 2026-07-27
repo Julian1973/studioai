@@ -1665,13 +1665,44 @@ function _shotJobCmd(gate){
   const rest=s.slice(5), i=rest.indexOf(":");
   return i===-1?rest:rest.slice(0,i);
 }
-const STAGE_JOB_CMDS={
-  scenelook:["scenelook","approve-scenelook","reject-scenelook","select-scenelook-upload","select-scenelook-library"],
-  keyframe:["keyframe","approve-keyframe","reject-keyframe","select-upload","select-library","select-previous"],
-  voice:["voice","regen-voice","approve-voice","reject-voice"],
-  animation:["fire","next","approve","reject"],
-  final:["stitch"]
+// ── ONE ARTIFACT, ONE CARD, ONE DECISION ────────────────────────────────────────────────
+// Julian, 2026-07-27: "I want a UI and interface that allows me to generate upload or use
+// from library / agree or reject / re run / and then move... at the moment a gate can have
+// multiple things to sign off like approve director create scene plate etc etc."
+//
+// That last clause is the defect named exactly. The capability was never missing — every one
+// of these verbs already exists in cb_render and already reaches this file. What was wrong is
+// the GROUPING: the affordances for one artifact were scattered across sections, so "approve"
+// could mean two different things depending on where you clicked it.
+//
+// ARTIFACTS is the fix, and it is deliberately the same shape for every row: what MAKES this
+// artifact (generate / upload / from library), what JUDGES it (agree / reject), and what
+// REDOES it. A gate stops being a thing you sign; it is a heading over its cards. Approve
+// always means this one artifact, because a card only ever holds one.
+//
+// The engine is the authority on which verbs exist — test_studio_artifact_cards.py refuses a
+// card offering a verb cb_render does not have, and refuses an engine artifact with no card.
+const ARTIFACTS={
+  scenelook:{name:"SCENE LOOK",  make:{generate:"scenelook", upload:"select-scenelook-upload", library:"select-scenelook-library"},
+             agree:"approve-scenelook", reject:"reject-scenelook", redo:"unapprove-scenelook"},
+  keyframe: {name:"OPENING FRAME", make:{generate:"keyframe", upload:"select-upload", library:"select-library"},
+             agree:"approve-keyframe", reject:"reject-keyframe", redo:"unapprove-keyframe"},
+  voice:    {name:"VOICE",       make:{generate:"voice"},
+             agree:"approve-voice", reject:"reject-voice", redo:"regen-voice"},
+  animation:{name:"TAKE",        make:{generate:"fire", upload:"select-upload", library:"select-library"},
+             agree:"approve", reject:"reject", redo:"unapprove-shot"}
 };
+// The job-watcher's own view of the same table — every verb a card can fire, so a running job
+// still lights up its own row. Derived, never hand-listed a second time.
+const STAGE_JOB_CMDS=(()=>{
+  const t={};
+  for(const [k,a] of Object.entries(ARTIFACTS))
+    t[k]=[...Object.values(a.make||{}),a.agree,a.reject,a.redo].filter(Boolean);
+  t.keyframe.push("select-previous");   // a third library shape, keyframe only
+  t.animation.push("next");             // advance_shot's own verb, fired from the take card
+  t.final=["stitch"];
+  return t;
+})();
 function jobForStage(stageId,scene){
   const cmds=STAGE_JOB_CMDS[stageId]; if(!cmds)return null;
   return Object.values(PJOBS).filter(j=>j.status=="running"&&String(j.scene)==String(scene)&&

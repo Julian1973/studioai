@@ -38,3 +38,31 @@ def test_no_numeric_ceiling_came_back():
     it must not quietly become a rule of COUNT again."""
     s = inspect.getsource(D.prepare_cinematography)
     assert "there is no word ceiling here" in s, "a numeric cap crept back onto the stage"
+
+
+def test_the_plate_governs_the_world():
+    """Julian, 2026-07-27: "it has to be the scene plate reference" — after four keyframes
+    came back as a dark enclosed rainforest while the real plate is an open sunlit field.
+
+    Cause: the plate was scoped to PALETTE ONLY, so the picture defining the world got a vote
+    on tint while invented prose ("corridor" — 0 uses in the script, 48 in the storyboard) got
+    the vote on architecture. Architecture won every time."""
+    import inspect, cb_departments as D
+    s = inspect.getsource(D.prepare_cinematography)
+    assert "THE PLATE IS THE WORLD" in s, (
+        "the plate is a colour swatch again — words will rebuild the wrong place")
+    assert "THE PLATE WINS" in s, (
+        "nothing resolves plate-versus-paperwork, and the paperwork still says rainforest")
+
+
+def test_the_directors_view_leads_and_the_shot_stays_flexible():
+    """His words: "taking the director's view, looking at the context of the scene plate and
+    the flexibility of the shot." Lens chosen to serve the feeling, never chosen first; and
+    the frame must survive the first second of motion."""
+    import inspect, cb_departments as D
+    s = inspect.getsource(D.prepare_cinematography)
+    assert "COMES FIRST" in s and "justify" in s, "the lens may be chosen before the intent again"
+    assert "LEAVE THE SHOT FLEXIBLE" in s, "the frame may be pinned into a sculpture again"
+    assert "which of them is bigger" in s, (
+        "nothing tells the DP that two characters at wildly different depths cannot show a "
+        "size relationship — the staging fault behind every failed frame today")

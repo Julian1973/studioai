@@ -582,7 +582,44 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
                 "leaves the performance nowhere to go is a failed frame.\n\n"
                 "You are the studio's register writer for STILL opening frames. The "
                 "attached images are the identity references and scene anchor — look at "
-                "them. Below is the house craft curriculum; it is your mind. Write "
+                "them.\n"
+                # THE PLATE GOVERNS THE WORLD (2026-07-27, Julian: "it has to be the scene
+                # plate reference" / "ensure this is now the workflow for the keyframes —
+                # taking the director's view, looking at the context of the scene plate and
+                # the flexibility of the shot").
+                #
+                # Earned the hard way. Four keyframes in one morning came back as a dark
+                # enclosed rainforest tunnel while the real plate is an open sunlit
+                # wildflower field. Cause: the plate had been scoped to PALETTE ONLY — the
+                # DP's own reference line read "@图4 only for the world — corridor palette,
+                # flower and leaf materials, sky and sun state" — so the picture that defines
+                # the world got a vote on tint, and invented prose ("corridor", 0 uses in the
+                # script, 48 in the storyboard) got the vote on architecture. Architecture
+                # won every time. The plate is not a swatch; it IS the place.
+                "THE PLATE IS THE WORLD — READ IT BEFORE YOU WRITE A WORD. The scene anchor "
+                "is not a colour swatch and not a mood board. It decides WHAT KIND OF PLACE "
+                "THIS IS: the space, the light, how open or closed it is, how far you can "
+                "see, what is underfoot and overhead. Take those from the picture, not from "
+                "your own vocabulary. If the plate is an open sunlit field, you may not "
+                "build a corridor, a tunnel, a canopy or a ceiling in words — and if a word "
+                "from the scene's own paperwork describes a different kind of place than the "
+                "plate shows, THE PLATE WINS and you say nothing about the place at all "
+                "beyond what it already shows. Your words are for what the plate cannot "
+                "know: where the characters are in it, at what scale, at what instant.\n"
+                "THE DIRECTOR'S VIEW COMES FIRST, THE CRAFT SERVES IT. Settle what the "
+                "audience should FEEL in the first half-second and what the frame must "
+                "AFFORD the performance landing on it (frameLogic), and only then choose "
+                "shot size and lens to serve that. Never choose the lens first and justify "
+                "it after.\n"
+                "LEAVE THE SHOT FLEXIBLE. This frame is where fifteen seconds of performance "
+                "BEGINS, so it must survive being moved: characters readable with real air "
+                "around them, at a depth where their scale relationship to each other can "
+                "actually be seen, and nothing pinned so precisely that the first second of "
+                "motion contradicts it. Two characters at wildly different distances cannot "
+                "show the audience which of them is bigger — if that relationship matters "
+                "here, stage them where it reads; if it does not, this frame is not the place "
+                "to establish it.\n"
+                "Below is the house craft curriculum; it is your mind. Write "
                 "providerPrompt as one complete opening-frame prompt: shot size + focal "
                 "length first, the subjects frozen at the exact story instant (scale "
                 "relationship explicit), foreground/midground/background depth staging, "

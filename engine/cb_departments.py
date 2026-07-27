@@ -566,7 +566,56 @@ def prepare_cinematography(context, images, compiled_brief, *, log=print):
                 "describing what a reference already shows is a word pulling the render "
                 "away from that reference, so cut those without mercy; but never cut a word "
                 "that is doing real work on pose, position, action-instant, staging, depth "
-                "or light to hit a length. The frame has to AFFORD the performance that "
+                "or light to hit a length.\n\n"
+                # WRITE ONLY WHAT YOUR OWN LENS CAN SEE (2026-07-27). Julian, on the first
+                # keyframe fired after the ~170-word cap came off: "the image is awful...
+                # surely this shot is to narrow." Root-caused, not guessed. The cap was
+                # deleted on real evidence — but every word of that evidence came from
+                # MOTION prompts (the approved 722-word keeper is a Seedance brief with
+                # fifteen seconds to execute it), and rule 87 flagged in the same breath
+                # that it "does not by itself prove a still-image cap wrong." It didn't.
+                # A still and a take have OPPOSITE relationships with length: more words in
+                # a take buy more performance delivered over time; more words in a still buy
+                # more detail crammed into one image, and the lens collapses inward to fit
+                # them. The cap had been quietly doing a second job — with 170 words there
+                # was no ROOM to describe an eyelash, so the stage got the words by default.
+                # Removing it did not free the stage; it let the performance move in.
+                # The replacement is a rule of KIND, not COUNT, and it is self-enforcing:
+                # you cannot overspend on detail without contradicting your own lens.
+                "WRITE ONLY WHAT YOUR OWN LENS CAN ACTUALLY SEE. Name the shot size and "
+                "focal length first, then describe nothing the audience could not resolve "
+                "at that distance. A 24mm wide from bee-height CANNOT show a specular ping "
+                "on a spectacle lens, an open mouth mid-word, or the fur between a "
+                "character's wings — write those and the render will quietly abandon your "
+                "wide and come in close to deliver them, and you will get a portrait where "
+                "you asked for a corridor. If the moment genuinely needs that detail, you "
+                "chose the wrong lens; change the lens on purpose. At a wide, a character "
+                "is a SILHOUETTE, an ATTITUDE and a POSITION IN SPACE — that is the whole "
+                "of your job on them, and it is enough.\n\n"
+                "EXPRESSION, EYELINE, MOUTH SHAPE, ANTENNA CARRIAGE AND WING-BEAT ARE THE "
+                "PERFORMANCE, AND THE PERFORMANCE IS NOT YOURS. It has fifteen seconds to "
+                "arrive; you have one frame. Hand it the stage and get out of its way.\n\n"
+                # THE FORGIVING START FRAME (Julian, 2026-07-27, in his own words: "the
+                # keyframe is the stage the canvas for the animation to build on — it has to
+                # be the forgiving start frame"). This is a rule about COMMITMENT, not
+                # detail, and it is the other half of the lens rule above. A frame pinned to
+                # one hyper-specific instant — an exact roll angle, a precise mid-upstroke,
+                # antennae streaming at a stated attitude — is not a canvas, it is a
+                # sculpture, and every frame of motion after it reads as a DEPARTURE from
+                # something the model was told to honour. That is the documented anti-hold
+                # failure (rules 26/31) arriving through the still instead of the text.
+                "BUILD A FORGIVING START FRAME — A CANVAS, NOT A SCULPTURE. The animation "
+                "builds ON this frame, so it must survive being moved. Do not freeze a "
+                "once-only instant the performance then has to escape: give a READABLE "
+                "ATTITUDE the motion can continue out of, not a pinned pose it must first "
+                "undo. Leave the lane the action travels into genuinely EMPTY — if the beat "
+                "climbs frame-left, that air is not yours to decorate. Keep the character "
+                "off the very edge and out of the exact centre so there is somewhere to go "
+                "in both directions. The test is simple: could the first second of movement "
+                "start from this frame without contradicting it? If the honest answer is "
+                "no, you have composed a poster, and the performance will have to break "
+                "your frame before it can begin. "
+                "The frame has to AFFORD the performance that "
                 "lands on it: room to travel where the action travels, the object the beat "
                 "needs actually present, both characters placed so the moment can play. A "
                 "frame that is beautiful, correct and leaves the performance nowhere to go "

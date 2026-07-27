@@ -433,7 +433,18 @@ def test_the_direction_document_cannot_overflow_horizontally():
     """Containment is structural, in three layers, and needs no `overflow` declaration."""
     app = _app()
     doc = app[app.index(".dirdoc{"):app.index(".dirdoc{") + 400]
-    assert "max-width:62ch" in doc, ".dirdoc lost its measure — long prose will run wide again"
+    # THE MEASURE IS IN `ch`, AND IT BELONGS TO THE PROSE (corrected 2026-07-27). This used to
+    # pin the literal string "max-width:62ch" — which held the right idea and the wrong number.
+    # The 132px label rail and its gap live INSIDE that cap, so the real prose column was
+    # ~36ch: under the 45-75ch a person reads comfortably, and it collapsed further on a narrow
+    # container ("we have another paging issue"). The cap now adds the rail's width back. The
+    # invariant was never the literal 62 — it is that the measure exists and is expressed in
+    # CHARACTERS, because a measure in px is a guess about a font.
+    m = re.search(r"max-width:\s*(?:calc\()?\s*(\d+)ch", doc)
+    assert m, ".dirdoc lost its measure — long prose will run wide again"
+    assert 45 <= int(m.group(1)) <= 80, (
+        f".dirdoc's measure is {m.group(1)}ch — outside the 45-80ch a person reads without "
+        f"losing the line")
     assert "min-width:0" in doc, ".dirdoc lost min-width:0 — a grid/flex parent cannot shrink it"
     assert "overflow-wrap:anywhere" in app[app.index(".dirdoc-p{"):app.index(".dirdoc-p{") + 300], (
         ".dirdoc-p lost overflow-wrap — one pathological unbroken token wins again")

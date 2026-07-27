@@ -609,8 +609,22 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
      .dirdoc-p    overflow-wrap:anywhere — belt-and-braces for a pathological long token
      .runrow-body min-width:0     — so the grid/flex parent can actually shrink
    Horizontal overflow becomes impossible rather than merely unlikely. */
+/* THE MEASURE BELONGS TO THE PROSE, NOT TO PROSE PLUS FURNITURE (2026-07-27, Julian:
+   "we have another paging issue"). max-width:62ch was set as a reading measure — but the
+   132px label rail and its 20px gap live INSIDE that cap, so the actual text column was
+   ~36ch, far under the 45-75ch a person reads comfortably, and it squeezed further on any
+   narrow container. The cap now adds the rail's own width back, so 62ch is what the prose
+   actually gets. Nothing else about the layout changes. */
 .dirdoc{margin-top:var(--s3);background:var(--surface2);border:1px solid var(--line);
-  border-radius:12px;padding:20px 22px;min-width:0;max-width:62ch}
+  border-radius:12px;padding:20px 22px;min-width:0;max-width:calc(62ch + 196px);
+  container-type:inline-size}
+/* When the container genuinely cannot hold a rail AND a readable column, the rail stops
+   being a column and becomes a heading. Stacking beats squeezing — a 150px-wide paragraph
+   is not a document, it is a stack of syllables. */
+@container (max-width: 520px){
+  .dirdoc-block{grid-template-columns:minmax(0,1fr);gap:var(--s2)}
+  .dirdoc-label{margin-top:0}
+}
 .dirdoc *{min-width:0}
 .dirdoc.is-pending{border-color:var(--honey)}
 .dirdoc.is-stale{opacity:.55}

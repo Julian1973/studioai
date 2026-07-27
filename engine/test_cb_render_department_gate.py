@@ -213,7 +213,23 @@ def _mock_llm(monkeypatch, animation_prompt=None, cinematography_prompt=None,
             # never present), labelled 'Shot N:' segments, 'Cut to.' transitions, a closing
             # HOLD tail, no duration text. The default stub must satisfy that real
             # save-time contract.
+            # openingFrameRead (2026-07-27) is what the writer SEES in the approved keyframe,
+            # settled before a word of prose exists — Julian's own find: "the direction really
+            # needs to be able to look at the keyframe to be able to start the direction from
+            # that moment." Required on the real model, so the stub carries a real-shaped one
+            # rather than "x", for the same reason frameLogic's does below: a fixture that
+            # cannot be built the way production builds it proves nothing.
             return schema(shotId="1.B1.S1", doesItLand="t",
+                          openingFrameRead="(1) Open sunlit meadow, sky visible, nothing "
+                                           "overhead — the paperwork's 'corridor' is not what "
+                                           "this picture shows, so I write the picture. "
+                                           "(2) Both bees mid-frame at the same distance, "
+                                           "Fuzzby left and visibly larger, Zenny right and "
+                                           "smaller — that reads only because they share a "
+                                           "depth. (3) Open air above and to both sides; the "
+                                           "leaf is within reach frame-right. (4) It ends with "
+                                           "him grounded on the leaf, pollen settling — a "
+                                           "place this frame could not have shown.",
                           providerPrompt=animation_prompt or
                           "ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the "
                           "sole source of dialogue, wording, voice, performance and "
@@ -1090,6 +1106,10 @@ def test_cinematography_and_animation_receive_the_compiled_brief_not_raw_json(wo
                           providerPrompt="a real cinematography direction prompt yes yes")
         if name == "AnimationDirection":
             return schema(shotId="1.B1.S1", doesItLand="t",
+                          openingFrameRead="(1) Open sunlit meadow, sky above. (2) Both bees "
+                                           "at one depth, Fuzzby larger frame-left. (3) Open "
+                                           "air both sides, leaf in reach. (4) Ends grounded "
+                                           "on the leaf.",
                           providerPrompt=_formula_prompt(
                               "fast brisk real animation direction action, slowing into "
                               "a held closing beat, near-still"))

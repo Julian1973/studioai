@@ -4182,8 +4182,21 @@ function dirDocHTML(out,opts){
   // THE DECK, PROMOTED TO THE TOP. doesItLand is the specialist's own claim and the fastest
   // route to "is this even the right shot" — it used to render as 12px grey BELOW the wall
   // it summarises.
-  const deck=out.doesItLand?`<div class="dirdoc-deck"><div class="dirdoc-micro">Does it land</div>`
-    +`<p>${_esc(out.doesItLand)}</p></div>`:"";
+  // THE DECISION BEHIND THE PROSE, MADE VISIBLE (2026-07-27). frameLogic (the DP's staging
+  // decision) and openingFrameRead (what the take's writer actually SEES in the approved
+  // keyframe) are the two most readable things either specialist produces — plain English,
+  // written before a word of prompt exists — and neither had ever been rendered anywhere.
+  // Computed, stored, and thrown away from the human's view: the same defect this panel has
+  // now found four times. They go ABOVE doesItLand, because they are the reasoning and
+  // doesItLand is only the claim.
+  const reason=out.openingFrameRead||out.frameLogic||"";
+  const reasonLabel=out.openingFrameRead?"What the opening frame shows, and where this goes"
+                                        :"The staging decision";
+  const deck=(reason?`<div class="dirdoc-deck"><div class="dirdoc-micro">${reasonLabel}</div>`
+      +String(reason).split(/\n+/).filter(x=>x.trim())
+        .map(x=>`<p>${_esc(x.trim())}</p>`).join("")+`</div>`:"")
+    +(out.doesItLand?`<div class="dirdoc-deck"><div class="dirdoc-micro">Does it land</div>`
+    +`<p>${_esc(out.doesItLand)}</p></div>`:"");
   if(!core&&!deck)
     core=`<div class="dec-caption">The specialist returned no text — open Departments below to inspect the raw record.</div>`;
   const foot=(opts.meta||opts.sign)

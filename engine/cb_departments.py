@@ -269,8 +269,54 @@ class VoiceDirection(BaseModel):
     doesItLand: str = Field(min_length=1)
 
 
+# THE TAKE STARTS FROM THE PICTURE, NOT FROM THE PAPERWORK (Julian, 2026-07-27, finding the
+# thing four days of fixes had walked past): "If the direction is written before the keyframe,
+# then it's going to contradict everything it's done, and this is a perfect example. The
+# keyframe is Fuzzby and Zenny quite high up in the meadow, but obviously the direction is
+# completely different. The direction really needs to be able to look at the keyframe to be
+# able to start the direction from that moment."
+#
+# The ordering was never the bug — _anchor_for already refuses to prepare a take without an
+# APPROVED keyframe, and on the failing shot the keyframe was approved at 07:47:33 and the
+# direction at 07:51:25, four minutes later, with that exact picture attached as @图1. The
+# writer HAD it. It just had nowhere to look at it. It went straight to providerPrompt and
+# wrote from the shot's paperwork, which says rainforest and corridor, and "corridor" landed
+# in the fired prompt five times over an open sunlit meadow.
+#
+# CinematographyDirection got frameLogic on 2026-07-26 for exactly this reason — a required
+# field ABOVE the prose, because in a structured output FIELD ORDER IS REASONING ORDER: what
+# sits above providerPrompt must be resolved before a word of prose exists. The take chair
+# never got its equivalent. This is it, and it is deliberately a READ, not a plan: the writer
+# is not asked what it INTENDS, it is asked what is ACTUALLY THERE.
 class AnimationDirection(BaseModel):
     shotId: str
+    openingFrameRead: str = Field(min_length=1, description=(
+        "LOOK AT @图1 BEFORE YOU WRITE ANYTHING. This is the APPROVED opening frame — the "
+        "literal first frame of the take you are about to write, already signed off. It is "
+        "not a mood reference and not one input among several: it is where the fifteen "
+        "seconds BEGIN, and every word you write after this must be able to start from it. "
+        "Describe what you can SEE in it, in four parts, in this order:\n"
+        "(1) WHAT KIND OF PLACE IS THIS? Open or enclosed, how far you can see, what is "
+        "overhead, what is underfoot, what the light is doing. Take it from the PICTURE. If "
+        "the shot's own paperwork calls the place something the picture plainly is not — a "
+        "corridor, a rainforest, a tunnel, a canopy — say so here in plain words, and then "
+        "write the picture, never the paperwork. This is the single most common way a take "
+        "fails: the frame shows a meadow and the words build a tunnel.\n"
+        "(2) WHERE IS EACH CHARACTER IN IT? Position in frame, how high, how far from the "
+        "lens, and CRUCIALLY their size relative to each other as the frame actually shows "
+        "it. If they are at the same distance, say so — that is what makes the size "
+        "relationship readable, and it is fragile. A take that pushes one of them far into "
+        "the distance destroys it.\n"
+        "(3) WHAT DOES THIS FRAME AFFORD? The stage has to be flexible enough for the "
+        "performance to take place. Name the room that is actually there — where there is "
+        "air to move into, what is close enough to be hit or landed on, which directions are "
+        "open. You are not free to invent room the picture does not have.\n"
+        "(4) WHERE DOES IT GO? Name where the take ENDS UP — a place, a state, a position "
+        "this opening frame could not have shown you. If you cannot name one, the take has "
+        "not moved and you have written a held pose.\n"
+        "Then write providerPrompt as the fifteen seconds that begin in THIS frame and "
+        "travel to THAT ending. Nothing in the prose may contradict what you just described "
+        "seeing."))
     providerPrompt: str = Field(min_length=40)
     doesItLand: str = Field(min_length=1)
 

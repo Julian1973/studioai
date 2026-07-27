@@ -113,3 +113,42 @@ def test_the_take_has_to_go_somewhere():
     assert "could not have shown you" in s, (
         "nothing states the test for whether the take moved — an end frame that the opening "
         "frame could have shown you means nothing happened")
+
+
+def test_the_take_reads_the_approved_keyframe_before_it_writes():
+    """Julian, 2026-07-27: "The direction really needs to be able to look at the keyframe to
+    be able to start the direction from that moment, rather than it not doing so."
+
+    The ORDERING was never broken — _anchor_for refuses to prepare a take without an APPROVED
+    keyframe, and on the failing shot the keyframe was approved at 07:47:33 and the direction
+    at 07:51:25. The writer HAD the right picture attached as @图1. It had nowhere to look at
+    it: AnimationDirection went straight to providerPrompt, so the prose was written from the
+    shot's paperwork (which says rainforest and corridor) and "corridor" reached the fired
+    prompt five times over an open sunlit meadow.
+
+    In a structured output FIELD ORDER IS REASONING ORDER. This binds the read above the
+    prose, the same way frameLogic binds the staging decision above the keyframe's prose."""
+    import cb_departments as D
+    for model, first in ((D.AnimationDirection, "openingFrameRead"),
+                         (D.CinematographyDirection, "frameLogic")):
+        f = list(model.model_fields)
+        assert first in f, f"{model.__name__} can write prose with nothing decided first"
+        assert f.index(first) < f.index("providerPrompt"), (
+            f"{first} sits BELOW providerPrompt — the prose would be written before the "
+            f"thinking, which is the same as not having the field at all")
+        assert model.model_fields[first].is_required(), f"{first} is skippable"
+
+
+def test_the_read_names_the_four_things_that_failed():
+    """A read that says "looks nice" is not a read. Each part maps to a specific, named
+    failure from the real footage."""
+    import cb_departments as D
+    d = D.AnimationDirection.model_fields["openingFrameRead"].description or ""
+    for fragment, failure in (
+            ("WHAT KIND OF PLACE", "the corridor built out of vocabulary over a meadow"),
+            ("size relative to each other", "Zenny pushed to a speck so scale cannot read"),
+            ("AFFORD", "the stage has to be flexible enough for the performance"),
+            ("WHERE DOES IT GO", "a take that opens and closes on the same held pose")):
+        assert fragment in d, f"the read no longer covers: {failure}"
+    assert "never the paperwork" in d, (
+        "nothing resolves picture-versus-paperwork inside the read itself")

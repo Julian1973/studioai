@@ -1306,7 +1306,19 @@ def _output_signature(output):
 _READBACK_FORM = {"cinematography": "still", "animation": "take"}
 
 
-def _readback_for(stage, result, shot_id, *, log=print):
+def _readback_intent(context):
+    """The Director's own stated outcome for this beat, read from the SAME place both
+    authoring chairs read it (cb_departments._intent_charge). One reader — if the eyes judged
+    delivery against a different copy of the intent than the writer was charged with, they
+    would be grading a different exam."""
+    try:
+        import cb_departments
+        return cb_departments._intent_charge(context) or ""
+    except Exception:                           # noqa: BLE001 — advisory, never load-bearing
+        return ""
+
+
+def _readback_for(stage, result, shot_id, *, images=None, intent="", log=print):
     """READ THE BRIEF BACK BEFORE IT IS APPROVED, NOT AFTER IT IS PAID FOR (2026-07-27).
 
     Julian, on being shown a bad keyframe diagnosed by reading its own prompt aloud to him:
@@ -1339,16 +1351,21 @@ def _readback_for(stage, result, shot_id, *, log=print):
         return None
     try:
         import cb_readback
-        rb = cb_readback.read_back(text, shot_id=shot_id or "", form=form, log=log)
+        rb = cb_readback.read_back(text, shot_id=shot_id or "", form=form,
+                                   images=images, intent=intent, log=log)
     except Exception as e:                      # noqa: BLE001 — advisory, never load-bearing
         log(f"[readback] could not read {stage} back ({e}) — this blocks nothing")
         return None
     if rb is None:
         return None
     d = rb.model_dump()
-    n = len(d.get("clashes") or [])
-    log(f"  READBACK — {n} thing{'' if n == 1 else 's'} in this brief cannot both happen"
-        if n else "  READBACK — nothing in this brief fights itself")
+    mm, cl = len(d.get("frame_mismatches") or []), len(d.get("clashes") or [])
+    log(f"  READBACK — {d.get('delivers')}: {d.get('verdict')}")
+    if mm:
+        log(f"  READBACK — {mm} thing{'' if mm == 1 else 's'} the brief says that the "
+            f"approved picture does not show")
+    if cl:
+        log(f"  READBACK — {cl} thing{'' if cl == 1 else 's'} in this brief cannot both happen")
     return d
 
 
@@ -2611,6 +2628,7 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 raise Refused(f"REFUSED — {shot_id}'s approved voice is required before the "
                               "Animation Director enters")
             anchor = _anchor_for(pkg, shot)
+            _readback_anchor = anchor   # the signed frame zero — what the eyes look at below
             achars = _characters_cfg()
             images = _slot_paths(shot, "referenceSlots", anchor, scene, episode, achars)
             context["orderedAttachments"] = [
@@ -2740,10 +2758,30 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         sig_context = _department_context_for_freshness(pkg, scene, stage, shot_id, episode)
     else:
         sig_context = context
+    # THE EYES GET THE SAME PICTURE THE WRITER WAS GIVEN (2026-07-27, Julian: "i really need
+    # a strong pair of eyes that... ensures it delivers based on the stage, the keyframe and
+    # the desired directors outcomes"). For a TAKE that is the approved keyframe — the signed
+    # frame zero the fifteen seconds must start from, and the exact thing the corridor brief
+    # contradicted. For a STILL there is no keyframe yet by definition, so it is the world
+    # reference: the plate that decides what kind of place this is.
+    #
+    # Never the character turnarounds. Those answer "who is this", and the question here is
+    # "where does this shot start" — handing the eyes a turnaround sheet and asking what the
+    # frame shows is how a reading invents a mismatch that isn't there.
+    _rb_images = None
+    if stage == "animation":
+        _rb_images = [_readback_anchor]
+    elif stage == "cinematography":
+        _rb_images = [a["path"] for a in context.get("orderedAttachments") or []
+                      if a.get("path") and any(w in str(a.get("role", "")).lower()
+                                               for w in ("world", "plate", "scene anchor"))]
     work["candidate"] = _department_candidate(stage, result.model_dump(), sig_context,
                                                 scene=scene, shot_id=shot_id, pkg=pkg,
-                                                readback=_readback_for(stage, result, shot_id,
-                                                                       log=log))
+                                                readback=_readback_for(
+                                                    stage, result, shot_id,
+                                                    images=_rb_images,
+                                                    intent=_readback_intent(context),
+                                                    log=log))
     save_extra()
     _save(pkg, path)
     log(f"DEPARTMENT — {work['candidate']['worker']} prepared {stage} work for "

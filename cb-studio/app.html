@@ -622,7 +622,22 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
    must not be looking at something that reads like a blocker. */
 .readback{margin-top:var(--s3);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;background:var(--surface2);max-width:62ch}
-.readback.has-clash{border-color:var(--warn)}
+.readback.has-clash{border-color:var(--danger)}
+.readback.has-part{border-color:var(--warn)}
+/* The verdict is the one thing on this card he is meant to act on, so it is the one thing
+   that carries weight. The glyph does the work colour alone cannot. */
+.rb-verdict{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.rb-verdict p{margin:4px 0 0;font-size:14.5px;line-height:1.55;color:var(--text)}
+.rb-vlabel{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.rb-glyph{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font-size:14px;font-weight:700;color:#fff}
+.rb-verdict.is-go   .rb-glyph{background:var(--ok)}
+.rb-verdict.is-go   .rb-vlabel{color:var(--ok)}
+.rb-verdict.is-part .rb-glyph{background:var(--warn)}
+.rb-verdict.is-part .rb-vlabel{color:var(--warn)}
+.rb-verdict.is-stop .rb-glyph{background:var(--danger)}
+.rb-verdict.is-stop .rb-vlabel{color:var(--danger)}
+.rb-notes{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .rb-head{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--hint);
   font-weight:700;margin-bottom:6px}
 .rb-says{font-size:15.5px;line-height:1.55;color:var(--text)}
@@ -4219,25 +4234,50 @@ function dirDocHTML(out,opts){
 // renders instantly — no second call, no wait, nothing to press. It refuses nothing: a card
 // with clashes still approves on exactly the same click as a card without them. Rule 87 —
 // a reading is not a rail.
+// THE VERDICT LEADS (2026-07-27, Julian: "i dont want to be the guy reading the direction, i
+// really need a strong pair of eyes that understands the beat, the prompting lean structure,
+// and ensures it delivers based on the stage, the keyframe and the desired directors
+// outcomes"). The first version of this put "What you'll get" at the top and left him to work
+// out what to do about it — which is still reading, just of a shorter document. The
+// recommendation now sits first and in his own words; the evidence sits under it for when he
+// wants to know why. Nothing here disables Approve: he fires whatever he wants, always.
+const RB_VERDICT={
+  "delivers": {label:"Fire it",              cls:"is-go",   glyph:"✓"},
+  "partly":   {label:"It'll part-land",      cls:"is-part", glyph:"!"},
+  "will-not": {label:"Don't fire this yet",  cls:"is-stop", glyph:"✗"}
+};
 function readbackHTML(rec){
   const rb=rec&&rec.readback; if(!rb)return "";
   const says=(rb.shot_says||"").trim();
+  const mism=(rb.frame_mismatches||[]).filter(m=>m&&(m.prompt_says||m.frame_shows));
   const clashes=(rb.clashes||[]).filter(c=>c&&(c.first||c.second));
-  if(!says&&!clashes.length)return "";
-  const head=says?`<div class="rb-says">${_esc(says)}</div>`:"";
-  if(!clashes.length)
-    return `<div class="readback"><div class="rb-head">What you'll get</div>${head}
-      <div class="rb-clear">✓ Nothing in this brief fights itself.</div></div>`;
-  const n=clashes.length;
-  const body=clashes.map(c=>`<div class="rb-clash">
+  const notes=(rb.craft_notes||[]).filter(n=>String(n||"").trim());
+  const verdict=(rb.verdict||"").trim();
+  if(!says&&!verdict&&!mism.length&&!clashes.length)return "";
+  const v=RB_VERDICT[rb.delivers]||null;
+  const head=v?`<div class="rb-verdict ${v.cls}"><span class="rb-glyph">${v.glyph}</span>
+      <div><div class="rb-vlabel">${v.label}</div>${verdict?`<p>${_esc(verdict)}</p>`:""}</div></div>`
+    :(verdict?`<div class="rb-says">${_esc(verdict)}</div>`:"");
+  const gets=says?`<div class="rb-head">What you'll get</div><div class="rb-says">${_esc(says)}</div>`:"";
+  const mmHTML=mism.length?`<div class="rb-count">${mism.length} thing${mism.length==1?"":"s"} the brief says that your approved frame does not show</div>`
+    +mism.map(m=>`<div class="rb-clash">
+      <div class="rb-pair"><span>The brief says: ${_esc(m.prompt_says||"")}</span><em>but</em><span>your frame shows: ${_esc(m.frame_shows||"")}</span></div>
+      ${m.why_it_matters?`<div class="rb-why">${_esc(m.why_it_matters)}</div>`:""}
+      ${m.cost?`<div class="rb-line"><b>So you will see:</b> ${_esc(m.cost)}</div>`:""}
+    </div>`).join(""):"";
+  const clHTML=clashes.length?`<div class="rb-count">${clashes.length} thing${clashes.length==1?"":"s"} in here cannot both happen</div>`
+    +clashes.map(c=>`<div class="rb-clash">
       <div class="rb-pair"><span>“${_esc(c.first||"")}”</span><em>versus</em><span>“${_esc(c.second||"")}”</span></div>
       ${c.why?`<div class="rb-why">${_esc(c.why)}</div>`:""}
       ${c.wins?`<div class="rb-line"><b>The render will obey:</b> ${_esc(c.wins)}</div>`:""}
       ${c.cost?`<div class="rb-line"><b>So you will see:</b> ${_esc(c.cost)}</div>`:""}
-    </div>`).join("");
-  return `<div class="readback has-clash"><div class="rb-head">What you'll get</div>${head}
-    <div class="rb-count">${n} thing${n==1?"":"s"} in here cannot both happen — approving anyway is fine, this blocks nothing</div>
-    ${body}</div>`;
+    </div>`).join(""):"";
+  const clean=(!mism.length&&!clashes.length)
+    ?`<div class="rb-clear">✓ It starts from your frame, and nothing in it fights itself.</div>`:"";
+  const notesHTML=notes.length?`<div class="rb-notes"><div class="rb-head">On how it's built</div>`
+    +notes.map(n=>`<div class="rb-line">· ${_esc(n)}</div>`).join("")+`</div>`:"";
+  const cls=(rb.delivers=="will-not")?" has-clash":(rb.delivers=="partly")?" has-part":"";
+  return `<div class="readback${cls}">${head}${gets}${clean}${mmHTML}${clHTML}${notesHTML}</div>`;
 }
 function authBlockHTML(stage,shotId,opts){
   opts=opts||{};

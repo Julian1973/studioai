@@ -924,6 +924,32 @@ def prepare_animation(context, images, compiled_brief, *, primary_form=None,
                 "to a single job with 'only': @图1 only for the exact opening "
                 "composition and positions; one @图N only for each character's identity, "
                 "proportions, features and accessories; one only for the world.\n"
+                # THE SAME LAW THE KEYFRAME GOT, ARRIVING HERE ELEVEN HOURS LATE
+                # (2026-07-27, Julian, watching the first take off the fixed keyframe: "the
+                # scene doesnt deliver"). prepare_cinematography was given THE PLATE IS THE
+                # WORLD that morning; this chair — the one that writes the fifteen seconds —
+                # was not, and nothing here ever said the pictures outrank the paperwork. The
+                # take fired at 07:56 says "corridor" FIVE times and "ceiling" TWICE, off an
+                # opening frame that is an open sunlit field, and the words won: the first
+                # second of footage is a dirt path between walls of flowers. A rule that
+                # governs the still and not the motion is not a rule, it is a coin toss over
+                # which chair happens to write the sentence that survives.
+                "THE PICTURES ARE THE WORLD — READ THEM BEFORE YOU WRITE A WORD. @图1 and "
+                "the world reference are not colour swatches and not mood boards. Between "
+                "them they decide WHAT KIND OF PLACE THIS IS: the space, the light, how "
+                "open or closed it is, how far you can see, what is underfoot and overhead. "
+                "Take all of that from the pictures, never from your own vocabulary. If they "
+                "show an open sunlit field, you may not build a corridor, a tunnel, a canopy "
+                "or a ceiling in words — not once, and not as scene-setting before the "
+                "action starts. If a word from the shot's own paperwork describes a "
+                "different kind of place than the pictures show, THE PICTURES WIN and you "
+                "say nothing about the place beyond what they already show. Your words are "
+                "for what a still cannot hold: what MOVES, what it moves against, and what "
+                "that movement does to everything it touches.\n"
+                "AND THE SHOT MUST TRAVEL. @图1 is where the fifteen seconds BEGIN, never "
+                "where they live. If the frame at the end could be mistaken for the frame at "
+                "the start, nothing happened — the take has to end somewhere the opening "
+                "frame could not have shown you.\n"
                 "3. Then 'Shot 1:' — and 'Cut to. Shot N:' for each internal cut, in the "
                 "source material's own order. Each shot: camera + lens + one continuous "
                 "movement concept first ('Begin exactly on @图1.'), then action as "

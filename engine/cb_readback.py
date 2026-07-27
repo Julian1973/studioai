@@ -116,18 +116,57 @@ RULES:
   will SEE.
 """
 
+# THE TAKE'S OWN LENS (2026-07-27, Julian: "when you ask me to approve direction im not the
+# techy guy — you have the context and the rational to ensure the prompt is right and will
+# deliver the performance on the stage"). The still lens above asks "can ONE FRAME hold all
+# of this at once", and for a keyframe that is the whole question. A take is fifteen seconds
+# of MOTION, and its impossibilities are different in kind — not "does this detail resolve at
+# this distance" but "can the body be in two places", "does the camera have to be still and
+# moving in the same second", "is there time for all of this".
+#
+# A still and a take have OPPOSITE relationships with length: more words in a take buy
+# performance over time; more words in a still crowd one image until the lens collapses. So
+# this lens must never inherit the still lens's suspicion of detail — it is looking for
+# CONTRADICTION, never for abundance.
+_TAKE_LENS = """
+THIS BRIEF IS FOR A MOVING TAKE OF ABOUT FIFTEEN SECONDS, NOT A STILL. Judge it as motion.
 
-def read_back(prompt_text, *, shot_id="", log=print, model=None):
+The impossibilities you are looking for are different in kind:
+- One body asked to be in two places, or to do two things, in the same moment.
+- A camera asked to hold locked and to move at the same time.
+- More events named than can physically happen in the seconds available — not "this is a lot
+  of writing", but "these specific actions cannot fit end to end in the time given".
+- An instruction to hold a pose or stay still sitting next to an instruction to travel.
+- A physical chain whose links don't connect — an effect named before its own cause.
+
+WHAT IS NOT A CLASH, AND YOU MUST NOT REPORT IT AS ONE:
+- Length. A long brief is not a fault. More words buy performance over fifteen seconds; this
+  studio's own approved takes are among its longest briefs. Never remark on the word count.
+- Detail. Naming a small physical beat is direction, not contradiction.
+- Repetition of a character's name, or a reference tag appearing more than once.
+Report a pair only when obeying BOTH is physically impossible in one continuous take.
+"""
+
+
+def read_back(prompt_text, *, shot_id="", form="still", log=print, model=None):
     """One read. Returns a ReadBack, or None if the model is unreachable — this must never
-    be the reason a director cannot get on with their day."""
+    be the reason a director cannot get on with their day.
+
+    form="still" is the keyframe lens (shot size vs resolvable detail, the two real failures
+    quoted in _SYSTEM). form="take" swaps in the motion lens above. A form this doesn't
+    recognise falls back to the still lens rather than refusing — a reading is advisory, and
+    an unknown stage is a reason to read differently, never a reason not to read at all."""
     if not (prompt_text or "").strip():
         return None
+    take = (form or "").strip().lower() == "take"
+    system = _SYSTEM + _TAKE_LENS if take else _SYSTEM
+    unit = "one continuous take" if take else "one frame"
     user = (f"The brief below is for shot {shot_id}. It has not been rendered yet — nothing "
             f"has been spent.\n\nRead it and tell me what I will actually get, and whether "
-            f"any two instructions in it cannot both be obeyed in one frame.\n\n"
+            f"any two instructions in it cannot both be obeyed in {unit}.\n\n"
             f"--- THE BRIEF ---\n{prompt_text}\n--- END ---")
     try:
-        return cb_llm.structured(_SYSTEM, user, ReadBack,
+        return cb_llm.structured(system, user, ReadBack,
                                  model=model or getattr(cb_llm, "VALIDATOR_MODEL", None),
                                  label="readback", log=log)
     except Exception as e:                      # noqa: BLE001 — advisory, never load-bearing

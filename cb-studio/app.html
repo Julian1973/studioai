@@ -615,6 +615,26 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
    ~36ch, far under the 45-75ch a person reads comfortably, and it squeezed further on any
    narrow container. The cap now adds the rail's own width back, so 62ch is what the prose
    actually gets. Nothing else about the layout changes. */
+/* THE READING (2026-07-27) — the plain-English version of the brief, sitting ABOVE it.
+   Deliberately typeset as prose to be READ, not as a warning to be dismissed: the neutral
+   state carries no colour at all, and even the clash state uses the warn hue only on its
+   own count line, never as a filled panel. A director who is told "this blocks nothing"
+   must not be looking at something that reads like a blocker. */
+.readback{margin-top:var(--s3);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;background:var(--surface2);max-width:62ch}
+.readback.has-clash{border-color:var(--warn)}
+.rb-head{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--hint);
+  font-weight:700;margin-bottom:6px}
+.rb-says{font-size:15.5px;line-height:1.55;color:var(--text)}
+.rb-clear{margin-top:10px;font-size:13px;color:var(--ok)}
+.rb-count{margin-top:12px;font-size:12.5px;font-weight:600;color:var(--warn)}
+.rb-clash{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.rb-pair{font-size:13.5px;line-height:1.5;color:var(--text)}
+.rb-pair em{display:block;font-style:normal;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--hint);margin:2px 0}
+.rb-why{margin-top:6px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+.rb-line{margin-top:4px;font-size:13px;line-height:1.5;color:var(--muted)}
+.rb-line b{color:var(--text);font-weight:600}
 .dirdoc{margin-top:var(--s3);background:var(--surface2);border:1px solid var(--line);
   border-radius:12px;padding:20px 22px;min-width:0;max-width:calc(62ch + 196px);
   container-type:inline-size;
@@ -1732,6 +1752,13 @@ function _shotJobCmd(gate){
 //
 // The engine is the authority on which verbs exist — test_studio_artifact_cards.py refuses a
 // card offering a verb cb_render does not have, and refuses an engine artifact with no card.
+// A DISCLOSURE'S LABEL IS ITS ONLY ADVERTISEMENT (2026-07-27, Julian: "I would like to be
+// able to edit the voice prompt to see if adding the [cadence] in v3 using the brackets").
+// The editor he was asking for had existed for eight days, behind "Voice workbench & history"
+// — a name that describes where the thing lives rather than what it lets you do, so it went
+// unfound. One constant, so the three rows that open it can never again describe it three
+// different ways.
+const VOICE_EDIT_LABEL="✎ Edit the performance prompt — v3 [tags] and cadence";
 const ARTIFACTS={
   scenelook:{name:"SCENE LOOK",  make:{generate:"scenelook", upload:"select-scenelook-upload", library:"select-scenelook-library"},
              agree:"approve-scenelook", reject:"reject-scenelook", redo:"unapprove-scenelook"},
@@ -4164,6 +4191,41 @@ function dirDocHTML(out,opts){
     :"";
   return `<div class="dirdoc${opts.cls?" "+opts.cls:""}">${deck}${core}${foot}</div>`;
 }
+// THE READING — WHAT YOU ARE ACTUALLY APPROVING, IN YOUR OWN LANGUAGE (2026-07-27, Julian:
+// "when you ask me to approve direction im not the techy guy — you have the context and the
+// rational to ensure the prompt is right and will deliver the performance on the stage").
+//
+// Every approval on this page used to put a 600-word technical brief in front of a director
+// who has said, twice, that he cannot read one and should not have to. The brief stays — it
+// is the record, and it belongs under the signature — but it is no longer the FIRST thing on
+// the card. This is: one plain sentence saying what the render will actually produce, then,
+// only when there are any, the pairs of instructions that cannot both be obeyed, each with
+// the one the render will win with and what that costs on screen.
+//
+// Computed at prepare time by cb_render._readback_for and stored on the candidate, so this
+// renders instantly — no second call, no wait, nothing to press. It refuses nothing: a card
+// with clashes still approves on exactly the same click as a card without them. Rule 87 —
+// a reading is not a rail.
+function readbackHTML(rec){
+  const rb=rec&&rec.readback; if(!rb)return "";
+  const says=(rb.shot_says||"").trim();
+  const clashes=(rb.clashes||[]).filter(c=>c&&(c.first||c.second));
+  if(!says&&!clashes.length)return "";
+  const head=says?`<div class="rb-says">${_esc(says)}</div>`:"";
+  if(!clashes.length)
+    return `<div class="readback"><div class="rb-head">What you'll get</div>${head}
+      <div class="rb-clear">✓ Nothing in this brief fights itself.</div></div>`;
+  const n=clashes.length;
+  const body=clashes.map(c=>`<div class="rb-clash">
+      <div class="rb-pair"><span>“${_esc(c.first||"")}”</span><em>versus</em><span>“${_esc(c.second||"")}”</span></div>
+      ${c.why?`<div class="rb-why">${_esc(c.why)}</div>`:""}
+      ${c.wins?`<div class="rb-line"><b>The render will obey:</b> ${_esc(c.wins)}</div>`:""}
+      ${c.cost?`<div class="rb-line"><b>So you will see:</b> ${_esc(c.cost)}</div>`:""}
+    </div>`).join("");
+  return `<div class="readback has-clash"><div class="rb-head">What you'll get</div>${head}
+    <div class="rb-count">${n} thing${n==1?"":"s"} in here cannot both happen — approving anyway is fine, this blocks nothing</div>
+    ${body}</div>`;
+}
 function authBlockHTML(stage,shotId,opts){
   opts=opts||{};
   const key=deptKey(stage,shotId), raw=SH_DEPT_CACHE[key], d=shDeptRec(stage,shotId);
@@ -4214,8 +4276,10 @@ function authBlockHTML(stage,shotId,opts){
     // it below the fold — "re prepare and still no ability to refire". The document is open
     // and on screen above; a second Approve in the row's own command strip is not signing
     // blind, it is not making him hunt for the door. Both sign the same one decision.
+    // THE READING COMES FIRST, THE BRIEF STAYS UNDERNEATH (2026-07-27). He signs at the end
+    // of what he READ — and what he can actually read is the reading, not the brief.
     return {phase:"approve",ready,
-      body:runDecideBlock("The direction you're approving",
+      body:readbackHTML(cand)+runDecideBlock("The direction you're approving",
         dirDocHTML(out,{cls:"is-pending",meta:dirMetaHTML(d,cand),sign:signHTML})),
       actions:[approveBtn,rejectBtn,rePrepBtn]};
   }
@@ -4247,7 +4311,8 @@ function authBlockHTML(stage,shotId,opts){
       +(nsec?" · "+nsec+((dirMode(out)=="lines")?(" line"+(nsec==1?"":"s")):(" section"+(nsec==1?"":"s"))):"")
       +(words?" · "+words+" words":"");
     return {phase:"approved",ready,
-      body:(out.doesItLand?`<div class="dirdoc-deck" style="margin:var(--s3) 0 0"><div class="dirdoc-micro">Does it land</div><p>${_esc(out.doesItLand)}</p></div>`:"")
+      body:readbackHTML(appr)
+        +(out.doesItLand?`<div class="dirdoc-deck" style="margin:var(--s3) 0 0"><div class="dirdoc-micro">Does it land</div><p>${_esc(out.doesItLand)}</p></div>`:"")
         +dirMetaHTML(d,appr)
         +rowMore(dirDocHTML(out,{}),label,shotId+"|auth|"+stage),
       actions:[rePrepBtn]};
@@ -4650,11 +4715,23 @@ function renderShotRunner(){
           const vStage=panelAuthStage("voice")||"voice";
           const vAuth=authBlockHTML(vStage,tok);
           st="ready";
+          // THE ROW MUST NEVER DENY A DIRECTION IT IS HOLDING (2026-07-27, Julian: "we have
+          // signed this off this time — does the direction then fire automatically? i cant
+          // see what its doing nor have an approve or reject button"). This switch handled
+          // authBlockHTML's "approve" phase (a candidate awaiting him) but never its
+          // "approved" one — so the instant a direction WAS approved while dirCurrent still
+          // read false, every branch missed and the row fell through to the last else,
+          // announcing "No voice direction prepared yet" over a direction he had just signed,
+          // with a lone Prepare-again button. The screen stating the opposite of the truth,
+          // which is the one defect class this whole panel exists to end.
           lab=(vAuth.phase=="approve")?"Approve direction"
+             :(vAuth.phase=="approved")?"Directed"
              :(vAuth.phase=="stale")?"Re-prepare direction"
              :(vAuth.phase=="loading")?"Working…":"Prepare direction";
           sum=(vAuth.phase=="approve")
                 ?"The Voice Director's performed lines are below, in full — approving never generates; the paid take is the separate step after."
+             :(vAuth.phase=="approved")
+                ?"Voice direction approved. Nothing fires on its own — generating the take is the next, separate click below."
              :(vAuth.phase=="stale")
                 ?"This shot's approved voice direction is out of date — prepare and approve it again before generating."
              :(vAuth.phase=="loading")
@@ -4662,19 +4739,33 @@ function renderShotRunner(){
                 :"No voice direction prepared yet. Prepare it (free, text only), read the performed lines, approve them — then the paid take unlocks.";
           body=vAuth.body
             +(vAuth.phase=="prepare"?"":runDecideBlock("The locked lines it performs",dlg))
-            +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"Voice workbench & history",tok+"|voice");
-          acts=vAuth.actions;
+            +(vAuth.phase=="approved"
+                ?voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist
+                :rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,VOICE_EDIT_LABEL,tok+"|voice"));
+          // AN APPROVED DIRECTION MUST OFFER THE THING IT UNLOCKS. authBlockHTML's approved
+          // phase returns only "Prepare again" — correct for a row whose job ends at the
+          // signature, wrong for this one, whose whole point is the take that follows.
+          acts=(vAuth.phase=="approved")
+            ?[`<button class="btn" onclick="openDisclosureModal('voice-regen',{shotId:'${tok}'})">🎙 Generate voice for this shot</button>`].concat(vAuth.actions)
+            :vAuth.actions;
         } else {
           st="ready";lab="Generate";
           sum="Direction approved — no take on the ledger yet; generating voices these exact lines (paid ElevenLabs call).";
+          // THE LAST MOMENT TO TUNE THE TAGS IS BEFORE YOU PAY FOR THEM (2026-07-27, Julian:
+          // "I would like to be able to edit the voice prompt to see if adding the [cadence]
+          // in v3 using the brackets"). This editor has existed since 2026-07-19 and has
+          // always said, in its own words, "Edit acting direction, cadence and [bracketed] v3
+          // tags directly" — behind a disclosure labelled "Voice workbench & history", which
+          // tells a director nothing about what is inside it. Open, here, at the one moment
+          // the edit is free and the take is not yet bought.
           body=runDecideBlock("The lines this will voice",vLines||dlg)
-            +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"Voice workbench & history",tok+"|voice");
+            +voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist;
           acts=[`<button class="btn" onclick="openDisclosureModal('voice-regen',{shotId:'${tok}'})">🎙 Generate voice for this shot</button>`];
         }
       }
       else if(voApproved){ st="done";lab="Approved";
         sum="Take approved"+(isMaster?" — padded to the 15s master":"")+" — un-approving it is free if you want it back.";
-        body=player+rowMore(dlg+padCtl+voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"The locked lines, the 15s master, and history",tok+"|voice");
+        body=player+rowMore(dlg+padCtl+voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,VOICE_EDIT_LABEL+", the 15s master, and history",tok+"|voice");
         // TWO WAYS BACK, AND THEY ARE NOT THE SAME (2026-07-26). Un-approve clears the
         // approval and leaves the take on disk to listen to again — free, no reason needed,
         // no regeneration. Reject ARCHIVES the take, demands a written reason, and the only
@@ -4685,7 +4776,7 @@ function renderShotRunner(){
       else { st="ready";lab="Your call";sum="The take you're approving plays below — one click approves direction + take together.";
         body=(player||`<div class="runmsg err">The ledger records a take but its file could not be resolved — check the Voice job log.</div>`)
           +runDecideBlock("The locked lines this take performs",dlg)
-          +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,"Voice workbench & history",tok+"|voice");
+          +rowMore(voicePanelHTML(s.shotId,SH_VOICE_CACHE[s.shotId])+hist,VOICE_EDIT_LABEL,tok+"|voice");
         acts=[`<button class="btn" onclick="shApproveStageAll('${tok}','voice')">Approve voice</button>`,
               `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Reject with reason</button>`]; }
     }

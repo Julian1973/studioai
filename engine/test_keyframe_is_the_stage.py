@@ -66,3 +66,50 @@ def test_the_directors_view_leads_and_the_shot_stays_flexible():
     assert "which of them is bigger" in s, (
         "nothing tells the DP that two characters at wildly different depths cannot show a "
         "size relationship — the staging fault behind every failed frame today")
+
+
+def test_both_chairs_are_bound_to_the_pictures_not_just_the_keyframe():
+    """THE COIN-TOSS BUG (2026-07-27, Julian, watching the first take fired off the corrected
+    keyframe: "the scene doesnt deliver").
+
+    THE PLATE IS THE WORLD shipped that morning into prepare_cinematography — the chair that
+    writes the STILL. prepare_animation — the chair that writes the FIFTEEN SECONDS — never
+    got it. The take fired at 07:56 named "corridor" five times and "ceiling" twice over an
+    opening frame that is an open sunlit field, and the words beat the picture: the first
+    second of footage is a dirt path between walls of flowers.
+
+    A law that governs one chair and not the other is not a law. It is a coin toss over which
+    chair happens to write the sentence that survives into the render. This binds both."""
+    import inspect, cb_departments as D
+    still = inspect.getsource(D.prepare_cinematography)
+    take = inspect.getsource(D.prepare_animation)
+    for name, src, headline, wins in (
+            ("keyframe", still, "THE PLATE IS THE WORLD", "THE PLATE WINS"),
+            ("take", take, "THE PICTURES ARE THE WORLD", "THE PICTURES WIN")):
+        assert headline in src, (
+            f"the {name} chair may build a world out of vocabulary again — this is how "
+            f"'corridor' (0 uses in the script, 48 in the storyboard) kept winning")
+        assert wins in src, f"nothing resolves picture-versus-paperwork for the {name} chair"
+    # The specific architecture the renders kept inventing, named in both charges so neither
+    # can be read as a general plea for restraint.
+    for name, src in (("keyframe", still), ("take", take)):
+        assert "corridor" in src and "ceiling" in src, (
+            f"the {name} chair no longer names the architecture it must not build")
+
+
+def test_the_take_has_to_go_somewhere():
+    """The same take holds one hovering centred character for its whole length — it begins and
+    ends on near-identical frames. The keyframe is charged to be a FORGIVING START; nothing
+    charged the take to LEAVE it."""
+    import inspect, cb_departments as D
+    s = inspect.getsource(D.prepare_animation)
+    assert "MUST TRAVEL" in s, "a take may open and close on the same frame again"
+    # Asserted on a fragment that does not span a source line break — this charge is built
+    # from adjacent string literals, so a phrase split across two of them is present in the
+    # VALUE and absent from the SOURCE. The first draft of this test asserted the whole
+    # sentence and failed against a rule that was correctly in place.
+    assert "where they live" in s, (
+        "@图1 is not stated as a starting point only — it can still read as the pose to hold")
+    assert "could not have shown you" in s, (
+        "nothing states the test for whether the take moved — an end frame that the opening "
+        "frame could have shown you means nothing happened")

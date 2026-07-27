@@ -1303,9 +1303,65 @@ def _output_signature(output):
                                       default=str).encode()).hexdigest()
 
 
-def _department_candidate(stage, output, context, scene=None, shot_id=None, pkg=None):
+_READBACK_FORM = {"cinematography": "still", "animation": "take"}
+
+
+def _readback_for(stage, result, shot_id, *, log=print):
+    """READ THE BRIEF BACK BEFORE IT IS APPROVED, NOT AFTER IT IS PAID FOR (2026-07-27).
+
+    Julian, on being shown a bad keyframe diagnosed by reading its own prompt aloud to him:
+    "i cant nor do i have the technical ability to read the prompt, but you just did and you
+    conveyed it to me in a manner that makes sense and was right — why cant what you just
+    done be done at the point of writing the prompt... prevention is the best form of cure."
+    Then, the next morning, plainer still: "when you ask me to approve direction im not the
+    techy guy — you have the context and the rational to ensure the prompt is right and will
+    deliver the performance on the stage."
+
+    That is this function. It runs ONCE, here, at prepare — the moment the prose is written
+    and before a single decision is asked of anyone — and its plain-English result is stored
+    on the candidate so the approval card can show it instantly.
+
+    IT IS NOT A GATE, and under CLAUDE.md rule 87 it must never become one: it refuses
+    nothing, scores nothing, edits nothing and returns None on any failure. Rule 87's own
+    words — "A new gate, a new negative, a new law, a new refusal, a new word cap, a new lint
+    is NOT the answer here". A reading is not a rail. It says which two instructions fight
+    and which one the render will obey; Julian decides, exactly as he does today.
+
+    Voice is deliberately absent from _READBACK_FORM. A voice direction is already plain
+    English a director can read unaided — performed lines and their tags — and it carries its
+    own doesItLand sentence. There is nothing here a reading would add that the card does not
+    already show him in his own language."""
+    form = _READBACK_FORM.get(stage)
+    if not form:
+        return None
+    text = getattr(result, "providerPrompt", "") or ""
+    if not text.strip():
+        return None
+    try:
+        import cb_readback
+        rb = cb_readback.read_back(text, shot_id=shot_id or "", form=form, log=log)
+    except Exception as e:                      # noqa: BLE001 — advisory, never load-bearing
+        log(f"[readback] could not read {stage} back ({e}) — this blocks nothing")
+        return None
+    if rb is None:
+        return None
+    d = rb.model_dump()
+    n = len(d.get("clashes") or [])
+    log(f"  READBACK — {n} thing{'' if n == 1 else 's'} in this brief cannot both happen"
+        if n else "  READBACK — nothing in this brief fights itself")
+    return d
+
+
+def _department_candidate(stage, output, context, scene=None, shot_id=None, pkg=None,
+                          readback=None):
     dep, worker, skill = _DEPARTMENT_WORKERS[stage]
     return {"department": dep, "worker": worker,
+            # THE READING TRAVELS WITH THE CANDIDATE (2026-07-27, Julian: "im not the techy
+            # guy — you have the context and the rational to ensure the prompt is right").
+            # Computed once, at prepare, and stored — so the card renders it instantly and a
+            # director never waits on a second call to find out what he is approving. None
+            # when the reading could not be taken; the card simply shows nothing extra.
+            "readback": readback,
             "skill": f"skills/crystal-bears-{skill}/SKILL.md",
             "skillHash": _department_skill_hash(stage),
             "model": cb_departments.cb_llm.DIRECTOR_MODEL,
@@ -2685,7 +2741,9 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     else:
         sig_context = context
     work["candidate"] = _department_candidate(stage, result.model_dump(), sig_context,
-                                                scene=scene, shot_id=shot_id, pkg=pkg)
+                                                scene=scene, shot_id=shot_id, pkg=pkg,
+                                                readback=_readback_for(stage, result, shot_id,
+                                                                       log=log))
     save_extra()
     _save(pkg, path)
     log(f"DEPARTMENT — {work['candidate']['worker']} prepared {stage} work for "

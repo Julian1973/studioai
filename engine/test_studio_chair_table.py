@@ -281,7 +281,7 @@ function fn(name){const i=app.indexOf("function "+name+"(");
 // in app.html for exactly this reason — fn() cannot find a `const name = …`.
 const src=["panelSection","rowHeading","panelAuthStage","panelLabelForStage",
            "dirLabelledCount","dirMode","dirBlocks","dirMetaHTML","voDiffHTML","dirDocHTML",
-           "authBlockHTML"].map(fn).join("\n");
+           "readbackHTML","authBlockHTML"].map(fn).join("\n");
 const _esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const runDecideBlock=(h,i)=>`<DECIDE>${i}</DECIDE>`, rowMore=(i,l,k)=>i?`<MORE label="${l}">${i}</MORE>`:"";
 const deptKey=(st,sid)=>"K|"+st+"|"+sid;

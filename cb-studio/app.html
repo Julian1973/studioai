@@ -558,7 +558,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .fcard:hover{transform:translateY(-1px);border-color:var(--honey)}
 .fcard.sel{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg);background:var(--surface2)}
 .fcard.draft{border-style:dashed;opacity:.9}
-.fcard-thumb{aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000;border:1px solid var(--line)}
+/* A CARD IS A CARD, NOT A BILLBOARD (2026-07-27, Julian: "now its gone mental and big").
+   The 16/9 ratio alone lets a thumb grow to whatever width its container happens to give it —
+   on a single-card strip that is the full page, and a ~700px-tall "thumbnail" pushes the shot
+   panel and every one of its decisions below the fold. The cap is on HEIGHT so the ratio and
+   the crop are untouched; nothing about how the image is composed changes, only how much of
+   the screen it is allowed to take. */
+.fcard-thumb{aspect-ratio:16/9;max-height:min(42vh,340px);border-radius:8px;overflow:hidden;background:#000;border:1px solid var(--line);margin-inline:auto}
 .fcard-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .fcard-slate{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--hint);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--surface2)}
 .fcard-id{font-family:'Display Slab',Georgia,serif;font-size:16px;margin-top:7px;letter-spacing:-.2px}
@@ -4171,10 +4177,17 @@ function authBlockHTML(stage,shotId,opts){
     const out=cand.output||{};
     // THE CANDIDATE IS THE TASK: full document, open, no click, honey hairline, and the
     // signature line at the foot of what you just read.
+    // SIGN AT THE END OF WHAT YOU READ — AND ALSO WHERE YOU ARE STANDING (2026-07-27).
+    // The 2026-07-26 rule put Approve at the FOOT of the document, which is right: you should
+    // not sign something you have not read. But a direction runs to 600+ words, so in
+    // practice Julian sat looking at a greyed-out Generate with the only thing that unlocks
+    // it below the fold — "re prepare and still no ability to refire". The document is open
+    // and on screen above; a second Approve in the row's own command strip is not signing
+    // blind, it is not making him hunt for the door. Both sign the same one decision.
     return {phase:"approve",ready,
       body:runDecideBlock("The direction you're approving",
         dirDocHTML(out,{cls:"is-pending",meta:dirMetaHTML(d,cand),sign:signHTML})),
-      actions:[rePrepBtn]};
+      actions:[approveBtn,rejectBtn,rePrepBtn]};
   }
   if(appr&&rd.directionCurrent===false){
     // Approved once, but something it depends on has changed since. The engine treats this as

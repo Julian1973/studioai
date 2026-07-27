@@ -482,6 +482,20 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .runref img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#000;display:block}
 .runref .rl{font-size:10.5px;color:var(--hint);margin-top:4px;line-height:1.35}
 .runempty{padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--hint);font-size:12px;margin-top:12px}
+/* THE BOX SAYS IT IS WORKING (2026-07-27). Replaces the "not made yet" empty box for as long
+   as a real job for THIS artifact on THIS shot is running — because during that window the
+   empty box was stating something false. */
+.runworking{padding:14px;border:1px solid var(--honey,#E8A33D);border-radius:10px;margin-top:12px;
+  background:color-mix(in srgb,var(--honey,#E8A33D) 8%,transparent)}
+.runworking-bar{height:3px;border-radius:2px;background:color-mix(in srgb,var(--honey,#E8A33D) 22%,transparent);
+  overflow:hidden}
+.runworking-bar i{display:block;height:100%;width:34%;border-radius:2px;background:var(--honey,#E8A33D);
+  animation:runslide 1.5s ease-in-out infinite}
+@keyframes runslide{0%{transform:translateX(-100%)}100%{transform:translateX(330%)}}
+.runworking-txt{margin-top:10px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:baseline}
+.runworking-el{margin-left:auto;font-weight:500;opacity:.75}
+.runworking-sub{margin-top:3px;font-size:11.5px;color:var(--hint)}
+@media (prefers-reduced-motion:reduce){.runworking-bar i{animation:none;width:100%;opacity:.5}}
 .runseg{display:flex;gap:10px;margin-top:12px}
 .runseg-card{flex:1;max-width:220px;border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;background:var(--surface);transition:border-color .18s ease,background .18s ease,transform .15s ease}
 .runseg-card:hover{transform:translateY(-1px)}
@@ -1703,6 +1717,41 @@ const STAGE_JOB_CMDS=(()=>{
   t.final=["stitch"];
   return t;
 })();
+// ── "IS THIS ONE BEING MADE RIGHT NOW?" ──────────────────────────────────────────────────
+// Julian, 2026-07-27: "when i click generate i want something on that card to tell me that
+// is generating — maybe in the missing box section."
+//
+// He is describing a real hole. _shPollTick syncs PJOBS every tick but only REPAINTS when the
+// job ends, so for the entire run the card kept showing "not made yet" — which is not merely
+// unhelpful, it is untrue: it is being made, right now, and the screen says it isn't.
+//
+// Scoped to ONE artifact on ONE shot, from ARTIFACTS' own verb list rather than a hand-typed
+// one, so a card can never watch for a job it doesn't fire (serve.py builds the gate string
+// as "shot:<cmd>[:<shotId>]").
+function artifactJob(key,shotId){
+  const a=ARTIFACTS[key]; if(!a)return null;
+  const mine=[...Object.values(a.make||{}),a.redo].filter(Boolean);
+  return Object.values(PJOBS).filter(j=>{
+    if(j.status!="running")return false;
+    const g=String(j.gate); if(!g.startsWith("shot:"))return false;
+    const rest=g.slice(5), i=rest.indexOf(":");
+    const cmd=i===-1?rest:rest.slice(0,i), sid=i===-1?null:rest.slice(i+1);
+    return mine.includes(cmd)&&(!shotId||!sid||sid===shotId);
+  }).sort((x,y)=>(x.started||0)-(y.started||0)).pop()||null;
+}
+// The box says what is happening and for how long. The elapsed clock is not decoration: this
+// studio has shown "Starting…" for a real 17-minute run, and a number that moves is the
+// difference between waiting and wondering whether it died.
+function workingBoxHTML(job,what){
+  const el=job&&job.started?Math.max(0,Math.round(Date.now()/1000-job.started)):0;
+  const step=(job&&(job.step||job.status))||"working";
+  return `<div class="runworking" data-started="${job&&job.started||0}">
+    <div class="runworking-bar"><i></i></div>
+    <div class="runworking-txt">Generating ${_esc(what)}<span class="runworking-el tnum">${_fmtEl(el)}</span></div>
+    <div class="runworking-sub">${_esc(step)} — you can leave this page; it keeps running.</div>
+  </div>`;
+}
+function _fmtEl(s){const m=Math.floor(s/60);return m?`${m}m ${String(s%60).padStart(2,"0")}s`:`${s}s`;}
 function jobForStage(stageId,scene){
   const cmds=STAGE_JOB_CMDS[stageId]; if(!cmds)return null;
   return Object.values(PJOBS).filter(j=>j.status=="running"&&String(j.scene)==String(scene)&&
@@ -4427,6 +4476,19 @@ function renderShotRunner(){
       body=`<div class="runempty">Four ways to an opening frame — generate (paid), upload, pick from this shot's own asset library, or carry the previous shot's approved final frame. Selection is never approval.</div>`;
       acts=[genBtn,uploadBtn,libBtn,prevBtn].filter(Boolean);
     }
+    // IT IS BEING MADE, SO THE BOX SAYS SO (2026-07-27, Julian: "when i click generate i want
+    // something on that card to tell me that is generating — maybe in the missing box
+    // section"). While a real job for THIS artifact on THIS shot is running, the empty box is
+    // replaced outright: "not made yet" is not a neutral placeholder during a fire, it is the
+    // screen stating something untrue. The decision buttons go with it — there is nothing to
+    // decide until it lands, and offering Generate again mid-generate is how a shot gets
+    // rendered 28 times.
+    const kfJob=artifactJob("keyframe",tok);
+    if(kfJob&&pst.needsKeyframe&&pst.kf!="awaiting"){
+      st="running";lab="Working";sum="Generating the opening frame…";
+      body=workingBoxHTML(kfJob,"the opening frame");
+      acts=[];
+    }
     // WHAT THIS FRAME IS BUILT FROM (2026-07-27, Julian: "the opening frame doesnt have the
     // scene plate and characters in it so i can see whats what").
     //
@@ -5915,6 +5977,16 @@ async function _shPollTick(){
     return;
   }
   SH_POLL_MISSES=0;
+  // THE CLOCK MOVES (2026-07-27). This tick already ran every few seconds and already had
+  // fresh job data; it just never told the card. Updating the elapsed span in place rather
+  // than re-rendering the row: a full repaint here would re-fetch department records and
+  // fight whatever the director is reading mid-run. One number changing is the whole point —
+  // it is the difference between waiting and wondering whether it died.
+  document.querySelectorAll(".runworking").forEach(el=>{
+    const t=+el.dataset.started||0; if(!t)return;
+    const s=el.querySelector(".runworking-el");
+    if(s)s.textContent=_fmtEl(Math.max(0,Math.round(Date.now()/1000-t)));
+  });
   if(j.status!="running"){
     clearInterval(SH_POLL);SH_POLL=null;SH_JOB=null;
     // Stash the outcome so renderJobBanner() can show it — the running-only jobFor()

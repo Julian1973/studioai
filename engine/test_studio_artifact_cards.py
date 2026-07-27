@@ -164,3 +164,60 @@ def test_a_blocked_frame_offers_the_door_not_just_the_refusal():
     assert "pFocusStage('scenelook')" in held, (
         "a frame held by the Scene Look states its blocker and offers no way to it — that is "
         "the dead end, and the navigation helper it needs already exists")
+
+
+# ── 4 · THE CARD SAYS WHEN IT IS WORKING ─────────────────────────────────────────────────
+
+def test_the_card_replaces_not_made_yet_while_it_is_being_made():
+    """Julian, 2026-07-27: "when i click generate i want something on that card to tell me
+    that is generating — maybe in the missing box section."
+
+    _shPollTick already fetched fresh job data every few seconds and already synced PJOBS —
+    it just never told the card, and only repainted when the job ENDED. So for the whole run
+    the box kept saying "not made yet", which during a fire is not a neutral placeholder: it
+    is the screen stating something false."""
+    app = _app()
+    start = app.index("const frameStage=")
+    end = app.index("// THE AUTHORISATION HALF", start)
+    row = app[start:end]
+    assert 'artifactJob("keyframe"' in row, (
+        "the opening-frame card no longer asks whether it is being generated — it will show "
+        "'not made yet' for the whole run")
+    assert "workingBoxHTML(" in row, "the card asks, and then renders nothing with the answer"
+
+
+def test_the_working_card_offers_no_way_to_fire_it_again():
+    """Offering Generate again mid-generate is how one file gets rendered 28 times for
+    $120.15 — which this project's own cost ledger records actually happening."""
+    app = _app()
+    start = app.index('const kfJob=artifactJob("keyframe"')
+    branch = app[start:app.index("// WHAT THIS FRAME IS BUILT FROM", start)]
+    assert re.search(r"acts\s*=\s*\[\s*\]", branch), (
+        "the working state leaves the make-buttons on screen — Generate is live during a "
+        "generate")
+
+
+def test_a_running_job_is_scoped_to_one_artifact_on_one_shot():
+    """A blanket "shot:" prefix match once lit five pipeline stages as Generating from a
+    single fire (2026-07-19). The watch list is derived from ARTIFACTS' own verbs so a card
+    can never watch for a job it does not fire, and the shot id is compared too."""
+    app = _app()
+    fn = app[app.index("function artifactJob("):]
+    fn = fn[:fn.index("\n}") + 2]
+    assert "ARTIFACTS[key]" in fn, (
+        "artifactJob hand-lists its verbs again instead of deriving them — it will drift")
+    assert "sid===shotId" in fn or "sid === shotId" in fn, (
+        "artifactJob does not compare the shot id — one shot's fire will light up every "
+        "other shot's card, the 2026-07-19 bug again")
+
+
+def test_the_elapsed_clock_actually_moves():
+    """This studio has shown "Starting…" for a real 17-minute run. A number that moves is the
+    difference between waiting and wondering whether it died — and the tick that updates it
+    already existed and already had the data."""
+    app = _app()
+    tick = app[app.index("async function _shPollTick("):]
+    tick = tick[:tick.index("\nasync function ") + 1] if "\nasync function " in tick[10:] else tick
+    assert "runworking-el" in tick, (
+        "_shPollTick no longer updates the elapsed clock — the card will freeze on the "
+        "second it was painted")

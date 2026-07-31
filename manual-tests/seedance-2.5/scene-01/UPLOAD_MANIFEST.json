@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "manual-seedance-test/v1",
+  "episode": "Ep1",
+  "scene": "1",
+  "sceneDurationSec": 30,
+  "purpose": "Manual Seedance 2.5 capability test; never a production approval",
+  "referenceOrder": [
+    {
+      "tag": "@Image1",
+      "path": "assets/01_opening_frame.png",
+      "role": "Exact opening composition and starting state",
+      "sha256": "7ff0a0d431d4980dec030a18d7d1e93f78a2a8d1f404f2c6d0876ea82cbe6b02",
+      "dimensions": "2816x1584",
+      "status": "Human-approved in archived history, later superseded and archived; manual test only"
+    },
+    {
+      "tag": "@Image2",
+      "path": "assets/02_Fuzzby_turnaround.jpeg",
+      "role": "Fuzzby identity and larger scale only",
+      "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3",
+      "dimensions": "1376x768",
+      "status": "Locked final turnaround"
+    },
+    {
+      "tag": "@Image3",
+      "path": "assets/03_Zenny_turnaround.jpeg",
+      "role": "Zenny identity and smaller scale only",
+      "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f",
+      "dimensions": "1376x768",
+      "status": "Locked final turnaround"
+    },
+    {
+      "tag": "@Image4",
+      "path": "assets/04_scene_look.png",
+      "role": "Environment, plant materials, pollen, palette, depth and light only",
+      "sha256": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+      "dimensions": "1376x768",
+      "status": "Byte-identical to the historically approved Scene 1 look plate"
+    }
+  ],
+  "audio": [
+    {
+      "tag": "@Audio1",
+      "path": "assets/07_dialogue_guide_first_15s.wav",
+      "role": "Approved first two dialogue beats on a 15-second test timeline",
+      "sha256": "8e75168604d4e30ba815d9a14af19fc4cef1b9973d5632cc08b42fceaa27b6d3",
+      "media": "PCM 24-bit stereo, 48000 Hz, 15.0 seconds",
+      "status": "Locally assembled without provider calls from two historically approved source tracks"
+    },
+    {
+      "path": "assets/05_Fuzzby_SH1_approved_voice.mp3",
+      "role": "Source dialogue for first visual beat",
+      "sha256": "730956c31280c6282033db948bb9f320f9bf2266ac1b7b684bdfdab5f5d2cc96",
+      "status": "Historically approved source track"
+    },
+    {
+      "path": "assets/06_Fuzzby_Zenny_SH2_approved_voice.mp3",
+      "role": "Source dialogue for second visual beat",
+      "sha256": "ec16195aaf79908d7e2de6bd929c45cf257faf4601fe27eef6029e519dc7b92a",
+      "status": "Historically approved source track"
+    }
+  ],
+  "optional": [
+    {
+      "path": "optional/07_size_chart_optional.jpg",
+      "role": "Relative scale troubleshooting only; do not upload on the first test",
+      "sha256": "4738882b3532d3951d4806deea736fef8cf990300236ba53cc7ab03070831610"
+    }
+  ],
+  "excluded": [
+    "All rejected video candidates",
+    "All rejected Scene Look candidates",
+    "Unverified opening frames",
+    "Unapproved or missing dialogue for beats three through five"
+  ]
+}
+

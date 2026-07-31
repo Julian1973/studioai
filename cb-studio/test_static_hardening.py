@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""Safety test for serve.py static-file hardening (root-based allow-list).
+
+Run it AFTER restarting the studio server (the hardening only loads on restart):
+    python3 cb-studio/serve.py                   # terminal 1
+    python3 cb-studio/test_static_hardening.py   # terminal 2
+
+Policy under test: BLOCKED by default — a file is served ONLY if it sits under an approved root
+with an approved extension, or is an explicitly-approved exact file. This test proves:
+  • secrets / source / backups / logs / state / node_modules / audit dirs / dotfiles  → 404
+  • a RANDOM .json / .md / .txt OUTSIDE an approved root                                → 404
+  • the real assets the SPA fetches                                                     → 200
+Exit code 0 = all pass. Pass a base URL as arg 1 to override (default http://localhost:8765).
+"""
+import pathlib
+import sys
+import urllib.request
+import urllib.error
+
+BASE = sys.argv[1].rstrip("/") if len(sys.argv) > 1 else "http://localhost:8765"
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+# 1) Sensitive paths — must be REFUSED (404/403).
+BLOCKED_SENSITIVE = [
+    "/engine/.env", "/.env", "/engine/cb_prompts.py", "/engine/cb_gen.py", "/cb-studio/serve.py",
+    "/engine/locked.json", "/engine/notes.json", "/cb-studio/data/projects-index.json",
+    "/cb-studio/data/projects.json",
+    "/.replit", "/.DS_Store", "/node_modules/", "/_audit_unpack/", "/client/index.html",
+    "/engine/_master3.log", "/server.js.bak", "/../engine/.env",
+]
+
+# 2) THE POINT OF THIS REVISION — random JSON / MD / TXT OUTSIDE an approved root must be REFUSED (404),
+#    even when the extension itself is otherwise legitimate elsewhere.
+BLOCKED_OUTSIDE_ROOTS = [
+    "/engine/continuity.json",          # JSON in a non-approved folder
+    "/engine/config/continuity.json",   # JSON in config — only characters.json is approved there
+    "/engine/config/locations.json",    # ditto
+    "/cb-output/Ep1_theme.json",        # JSON in cb-output but NOT a *_beat_package.json
+    "/STUDIO_GATE_FLOW_SPEC.md",        # a real doc that exists at root but is not the show-bible
+    "/README.md",                       # any other markdown doc
+    "/STUDIO_WRITERS_ROOM_SPEC.md",     # ditto
+    "/random-not-real.txt",             # stray text at root
+    "/cb-studio/data/anything.md",      # MD inside the approved data root (wrong extension there)
+    "/secrets.json",                    # stray JSON at root
+]
+
+# 3) Real assets the SPA fetches — must be SERVED (200). All of these exist on disk.
+ALLOWED = [
+    "/cb-studio/app.html",
+    "/engine/config/characters.json",
+    "/CRYSTAL_BEARS_LOCKED_CANON.md",
+    "/cb-studio/data/episodes.json",
+    "/cb-studio/data/media-index.json",
+]
+
+# Production media is deliberately not part of a source-only handover. If the live Desktop
+# assets exist, the server must serve them; if absent, report an explicit skip rather than
+# misdiagnosing a secure 404 as a static-routing regression.
+OPTIONAL_LIVE_ASSETS = [
+    "/cb-studio/data/scripts/Ep1_Final_Episode_one.txt",     # FIXTURE REFRESH 2026-07-16: the branch renamed the
+    #   Ep1 script (old name deleted in the same restructure) — same stale-fixture class fixed once before
+    #   (2026-07-08 audit); a 404 on a file that no longer exists is correct serving, not a regression.
+    "/cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+    "/engine/media/Ep1_1.B1_bizzy-leaf-rebound.png",         # FIXTURE REFRESH 2026-07-16: current real keyframe
+    #   (the old s1-b1-bizzy-fwip-nailed-it slug was retired by the Ep1 restructure).
+]
+
+
+def status(path):
+    try:
+        with urllib.request.urlopen(BASE + path, timeout=6) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        return e.code
+    except Exception as e:
+        return f"ERR({e})"
+
+
+def main():
+    bad = 0
+    print(f"== static-file hardening test  →  {BASE} ==")
+    for title, paths, want_block in (
+        ("BLOCKED — sensitive (expect 404/403)", BLOCKED_SENSITIVE, True),
+        ("BLOCKED — random json/md/txt outside approved roots (expect 404/403)", BLOCKED_OUTSIDE_ROOTS, True),
+        ("ALLOWED — required SPA assets (expect 200)", ALLOWED, False),
+    ):
+        print(f"\n{title}:")
+        for p in paths:
+            s = status(p)
+            ok = (s in (404, 403)) if want_block else (s == 200)
+            bad += (not ok)
+            print(f"  {'PASS' if ok else 'FAIL'}  [{s}]  {p}")
+    print("\nALLOWED WHEN INSTALLED — live production assets:")
+    for p in OPTIONAL_LIVE_ASSETS:
+        local = ROOT / p.lstrip("/")
+        if not local.exists():
+            print(f"  SKIP  [not in source handover]  {p}")
+            continue
+        s = status(p)
+        ok = s == 200
+        bad += (not ok)
+        print(f"  {'PASS' if ok else 'FAIL'}  [{s}]  {p}")
+    print("\n" + ("ALL PASS ✓" if not bad else f"{bad} FAILURE(S) ✗"))
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,33 @@
+Create one coherent 15-second reference-to-video test for an original premium 3D CGI
+children's animation. Use @Image1 as the exact opening composition and starting state. Use
+@Image2 only for Fuzzby's identity and larger scale. Use @Image3 only for Zenny's identity
+and smaller scale. Use @Image4 only for the bee-scale flower meadow, materials, pollen,
+palette, depth and light. Use @Audio1 as the sole spoken performance and timing authority.
+Preserve every supplied word exactly. Add no dialogue, ad-libs, humming, narration or other
+voices. Fuzzby and Zenny speak only when heard in @Audio1; the listener's mouth stays closed.
+
+00:00-00:07 - Begin immediately from @Image1. A fast bee-height camera chases Fuzzby half a
+beat late through foreground stems while Zenny remains smaller, deeper, level and calmly
+working. Fuzzby's excited opening voice rides quick wingbeat pulses and late steering
+corrections. He clips a springy stem: shoulder contact, body compression, stem bend, recoil,
+petal rattle and pollen burst. Pollen sticks to his fur and glasses. He flails through the
+rebound, brakes into a tiny strained official hover, then lip-syncs the short cover-up line
+from @Audio1. Leave the final visual beat for one wobble and drifting pollen to contradict
+him. Do not make Zenny speak or react broadly in this shot.
+
+Cut at approximately 00:07 to a stable medium two-shot composed with Zenny.
+
+00:07-00:15 - Zenny performs one clean pollen gather with no wasted movement. Fuzzby enters
+her frame wearing a fuzzy yellow pollen moustache and tries to present it as an official
+uniform. Lip-sync Fuzzby's question and Zenny's dry answer exactly as they occur in @Audio1.
+While Fuzzby speaks, Zenny's mouth remains closed and her look measures him. While Zenny
+speaks, Fuzzby's mouth remains closed; he sags slightly, then tries to recover his dignity.
+Zenny contains a smile and returns to work. Fuzzby wipes his face and smears the pollen
+worse. End on his unstable hover and her quiet precision.
+
+Preserve the exact character identities, relative scale, glasses, stripes, fuzzy materials,
+wings and flower-meadow geography. Both characters remain airborne with active wings when
+flying. Natural English speech from @Audio1 only. No duplicate voice, translated voice,
+extra speech, subtitles, captions, on-screen text, crystals, magical hearts, extra
+characters, character morphing, swapped identities, random camera spin or scene change.
+

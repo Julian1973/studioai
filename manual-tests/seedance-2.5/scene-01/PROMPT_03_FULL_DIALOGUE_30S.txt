@@ -1,0 +1,78 @@
+Generate one continuous, fully edited 30-second, 16:9 audiovisual scene for an original,
+premium stylised 3D CGI children's series. Make it funny, warm, emotionally readable and
+polished for family co-viewing. Preserve the exact story, dialogue order and five-shot timing.
+
+REFERENCE LOCK
+@Image1 is the exact first frame, opening composition and meadow geography.
+@Image2 defines only FUZZBY's permanent identity, proportions, markings and accessories.
+@Image3 defines only ZENNY's permanent identity, proportions, markings and accessories.
+@Image4 defines only the visual finish: bee-scale rainforest flower meadow, tactile fur,
+translucent wings, saturated botanical colour, cinematic depth, daylight and pollen behaviour.
+
+CHARACTER, BLOCKING AND VOICE LOCK
+FUZZBY is always larger and frame-left in shared shots: plump, fuzzy yellow-and-black stripes,
+round wire-frame spectacles, bulbous tan nose, antennae and two rapidly beating translucent
+wings whenever airborne. His flight is fast, manic, clumsy and vertically erratic. His voice
+is a warm, slightly nasal, plummy adult male: bouncy, breathless and self-important, then
+suddenly sheepish. He desperately wants to look professional to Zenny.
+
+ZENNY is always smaller and frame-right in shared shots: round glasses, long eyelashes, rosy
+cheeks, antennae and two translucent wings. Her movement is smooth and economical. Her small
+adult female voice is low, even, unhurried and bone-dry, with faint affection beneath it;
+never squeaky or childish. Her near stillness is the counterpoint to Fuzzby's chaos.
+
+Lock each voice to its named character with no swaps. Speak only the exact quoted English
+dialogue below, in order. Pronounce the written name Fuzzby as FUZZ-bee. No narration, ad-libs, repeated lines,
+translated speech or singing beyond the written chant. Show thought before each line. Only
+the speaker moves their mouth; the listener stays closed-mouth. Use precise phoneme lip sync.
+
+EDIT AND PERFORMANCE TIMELINE
+
+00:00-00:07 - SHOT 1: Begin exactly on @Image1 at bee height. Meadow air and busy wings
+precede speech. Zenny works neatly in the deeper frame-right background. Large foreground-left
+Fuzzby careens between flowers like a self-appointed parade marshal, chanting in a quick,
+excited sing-song: "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY..." He dips for pollen,
+overcommits, spins into a springy leaf with a crisp FWIP, then rebounds with real compression
+and weight. He snaps into a proud hover, dusty, one antenna briefly drooping. Seeking Zenny's
+admiration, he exhales with confidence shrinking into breathless denial: "Nailed it." Hold on
+his too-still cover-up as Zenny glides beside him and silently assesses him.
+
+00:07-00:13 - HARD CUT, SHOT 2: Steady medium two-shot. Fuzzby zooms to another flower,
+pushes his face inside, then emerges with a fuzzy yellow pollen moustache. Zenny suppresses a
+smile. Fuzzby puffs his chest and asks hopefully: "Do I look official?" Zenny gives one slow
+blink and a measured look. After a dry pause she replies levelly: "Yes Fuzzby. Officially nuts!"
+Add tiny affectionate warmth only to the final word. Fuzzby stays closed-mouth, then
+silently gasps and wipes his face, smearing the pollen worse. Zenny resumes work.
+
+00:13-00:17 - HARD CUT, SHOT 3: Wide and readable. Fuzzby grandly launches, clips a branch
+and tumbles end over end through exactly three elastic, weighty impacts: THUP. THUP. THUP.
+Leaves and pollen react. He lands upside down in a blossom; hold briefly on kicking legs. He
+springs up through pollen and proudly declares: "Buzz Crash!!" Zenny rolls her eyes, smiling.
+
+00:17-00:23 - HARD CUT, SHOT 4: Fuzzby hums wordlessly, dives into another flower and emerges
+even more pollen-covered. Zenny watches. After a comic beat, distant non-frightening thunder
+rolls across the canopy. Warm light cools and dims; high leaves tremble. Fuzzby's wing rhythm
+skips, he drops slightly, catches himself too hard and looks up. His performance thins into
+real unease as he says: "...okay that sounded dramatic." Small tremors continue after it;
+Zenny's stillness now carries concern.
+
+00:23-00:30 - HARD CUT, SHOT 5: Composed medium two-shot beneath the darkening canopy. Zenny
+studies the light, becomes still and says with quiet certainty: "A Storm's coming." Concern
+for Fuzzby's safety is felt, not announced. Fuzzby processes this, pushes out only his chest,
+lifts his chin and forces a crooked hover. With bright bravado covering nerves he answers:
+"Good thing I work well under pressure." Immediately after the final word, he launches and
+flies face-first into a large flower with one soft, weighty impact, becoming stuck. Wings keep
+beating; legs kick. Zenny gives one patient closed-mouth sigh and tiny affectionate look. Hold
+the final tableau for the joke as a darker wash passes across the leaves.
+
+SOUND AND FINISH
+Synchronize meadow ambience, distinct wing buzzes, pollen poofs, leaf FWIP, three THUPs,
+blossom impact, rustle and thunder. Add a very light playful acoustic underscore with
+pizzicato and soft woodwind, well below clean centred dialogue; briefly darken it at thunder.
+Cut only at 00:07, 00:13, 00:17 and 00:23. Preserve screen direction and geography.
+
+NEGATIVE LOCK
+No identity drift, morphing, size reversal, position or voice swap, frozen airborne wings,
+extra limbs, missing glasses, changed stripes, wrong-character lip movement, simultaneous
+speech, extra characters, humans, bears, crystals, hearts, random props or camera spins,
+speed ramps, slow motion, dissolves, scene changes, text, subtitles, logos or watermarks.

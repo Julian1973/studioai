@@ -1,0 +1,3 @@
+{
+ "_note": "Per-scene BANNED VOCABULARY — words/phrases that indicate a stale, pre-correction name has crept back in. Checked by cb_qa.check_scene_vocabulary against the scene's own name/location/look/sceneShotName/definingFeature fields AND every one of its beats' scene/startState/continuity.opensFrom/shot_style text. A hit is a hard BLOCK, never a NOTE — a corrected-away name reappearing is exactly the drift this guards against, not a taste call."
+}

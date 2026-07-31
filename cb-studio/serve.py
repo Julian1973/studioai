@@ -1,0 +1,2516 @@
+#!/usr/bin/env python3
+"""Crystal Bears Studio — local server. Episodes + shared Show Bible + script storage."""
+import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac
+from http.cookies import SimpleCookie
+from urllib.parse import parse_qs, urlencode, urlsplit
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent   # Desktop/8Th Hour
+CBGEN = ROOT / "engine"
+sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint): every OTHER
+# engine-touching operation runs in its own subprocess (cwd=CBGEN), which is why THAT never
+# needed this — but /api/rates (and /api/learning, same bug) import an engine module directly
+# in-process, which raised "No module named 'cb_costs'" until now. cb_costs.py is a pure,
+# side-effect-free module at import time (constants + a path string) — safe to add once, here.
+MEDIA = ROOT / "engine" / "media"
+OUT = ROOT / "cb-output"
+DATA = ROOT / "cb-studio" / "data"
+SCRIPTS = DATA / "scripts"
+DATA.mkdir(parents=True, exist_ok=True)
+SCRIPTS.mkdir(parents=True, exist_ok=True)
+import cb_scripts
+import cb_db
+SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
+PORT = int(os.environ.get("CB_STUDIO_PORT", "8765"))
+BIND_HOST = "127.0.0.1"
+LAUNCH_TOKEN = secrets.token_urlsafe(32)
+SESSION_TOKEN = secrets.token_urlsafe(32)
+SESSION_COOKIE = "cb_studio_session"
+
+# ── SOFTWARE-FRESHNESS GUARD ──────────────────────────────────────────────────────────────────────────────────
+# The UI is the ONLY way we fire, so the server behind it must NEVER run stale code. We fingerprint every Python
+# source a fire depends on (this server + the whole engine engine — Director, prompt builder, voice, pipeline) at
+# startup. If any changes on disk the server is STALE: it REFUSES to fire (so a fire can never run old code) AND it
+# auto-reloads itself the moment it's idle, so the UI always has the latest software behind it without anyone
+# remembering to restart. (The render itself already runs in a fresh subprocess; this closes the serve.py gap.)
+def _source_fingerprint():
+    # ONLY this server's own source. engine modules are reloaded fresh by each per-render SUBPROCESS, so they never
+    # need a serve.py reload — watching them would needlessly re-exec and DROP the UI's open connections on every
+    # engine edit ("can't reach server"). serve.py is the only long-lived code, so it's the only thing to watch.
+    try: return os.path.getmtime(os.path.abspath(__file__))
+    except OSError: return 0.0
+_STARTED_FP = _source_fingerprint()
+def _is_stale():
+    return _source_fingerprint() > _STARTED_FP + 0.5      # 0.5s slop for save races
+def _reexec():
+    """Reload the studio process with the CURRENT code (idle auto-reload + the restart endpoint)."""
+    sys.stdout.flush()
+    os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + sys.argv[1:])
+def _freshness_watch():
+    """Self-heal: when the source changes and NO job is running, reload with the latest code (seamless when idle).
+    FIXED 2026-07-12 (full-codebase audit continued): this only ever checked PROCS (async render jobs) — several
+    handlers do real, non-trivial SYNCHRONOUS work in their own request thread and were never tracked there at
+    all (approve_gate/unapprove_gate/set_master_studio/clear_master_studio's blocking subprocess.run calls, every
+    read-only preview endpoint, _serve_static's own chunked video/range streaming loop). os.execv() replaces the
+    WHOLE process image — per POSIX every thread but the caller is killed instantly, and Python sockets are
+    close-on-exec by default — so a reload mid-request silently dropped that client's connection even if a
+    spawned subprocess went on to finish and write locked.json unseen. Now also waits for _INFLIGHT == 0 (see its
+    definition, near PROCS below), incremented/decremented around every HTTP entry point via @_tracked."""
+    while True:
+        time.sleep(3)
+        try:
+            if _is_stale() and not PROCS and _INFLIGHT == 0:
+                print("⟳ studio source changed — reloading with the latest code…", flush=True)
+                _reexec()
+        except Exception:
+            pass
+
+def slug(s):
+    return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_") or "Untitled"
+
+def extract_doc_text(raw, name=""):
+    """Extract plain text from an uploaded script document (base64). Supports
+    txt/md/fountain (direct), docx (built-in zip+xml), rtf (basic), pdf (if a lib is installed)."""
+    import base64, io, html as _html
+    if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
+        raw = raw.split(",", 1)[1]
+    blob = base64.b64decode(raw)
+    ext = (name.rsplit(".", 1)[-1].lower() if "." in name else "")
+    if ext in ("txt", "md", "markdown", "fountain", "text", ""):
+        return blob.decode("utf-8", "ignore")
+    if ext == "docx":
+        try:
+            z = zipfile.ZipFile(io.BytesIO(blob))
+            xml = z.read("word/document.xml").decode("utf-8", "ignore")
+            xml = (xml.replace("</w:p>", "\n").replace("<w:tab/>", "\t")
+                      .replace("<w:br/>", "\n").replace("<w:br></w:br>", "\n"))
+            return _html.unescape(re.sub(r"<[^>]+>", "", xml)).strip()
+        except Exception as e:
+            return f"[could not read .docx: {e}]"
+    if ext == "rtf":
+        t = blob.decode("latin-1", "ignore")
+        t = re.sub(r"\\par[d]?\b", "\n", t)
+        t = re.sub(r"\\'[0-9a-fA-F]{2}", "", t)
+        t = re.sub(r"\\[a-zA-Z]+-?\d* ?", "", t)
+        return t.replace("{", "").replace("}", "").strip()
+    if ext == "pdf":
+        for lib in ("pypdf", "PyPDF2"):
+            try:
+                mod = __import__(lib)
+                r = mod.PdfReader(io.BytesIO(blob))
+                return "\n".join((p.extract_text() or "") for p in r.pages).strip()
+            except Exception:
+                continue
+        try:
+            import pdfplumber
+            with pdfplumber.open(io.BytesIO(blob)) as pdf:
+                return "\n".join((pg.extract_text() or "") for pg in pdf.pages).strip()
+        except Exception:
+            return "[PDF received but no PDF text library is installed — paste the text or upload .docx/.txt instead.]"
+    return blob.decode("utf-8", "ignore")
+
+def reindex_media():
+    files = sorted(p.name for p in MEDIA.glob("*")
+                   if p.suffix.lower() in (".png", ".mp4", ".mp3")) if MEDIA.exists() else []
+    (DATA / "media-index.json").write_text(json.dumps(files))
+    return files
+
+def reindex_episodes():
+    """Merge shot packages and immutable current-script pointers into one episode list."""
+    eps = {}
+    if OUT.exists():
+        # prefer the BEAT package; fall back to a legacy shot package for older episodes.
+        # Order by MTIME (oldest first, so the NEWEST wins the per-episode update) — this MATCHES the fire path
+        # (cb_pipeline._resolve_pkg uses max-mtime), so the studio DISPLAYS the exact package it FIRES. If these two
+        # disagreed (they used to: display=alphabetical, fire=newest), a re-fire would regenerate a package the studio
+        # never shows → "the keyframes aren't repopulating." Same key on both = they can never diverge again.
+        _mt = lambda p: p.stat().st_mtime
+        for p in sorted(OUT.glob("*_beat_package.json"), key=_mt) + sorted(OUT.glob("*_shot_package.json"), key=_mt):
+            try:
+                d = json.loads(p.read_text())
+                n = d.get("episode")
+                if n is None:
+                    continue
+                e = eps.setdefault(n, {"number": n})
+                if e.get("package") and p.name.endswith("_shot_package.json"):
+                    continue   # a beat package already claimed this episode — don't overwrite with the legacy one
+                units = d.get("beats", d.get("shots", []))
+                e.update({"title": d.get("title", p.stem), "logline": d.get("logline", ""),
+                          "leadBear": d.get("leadBear", ""), "format": d.get("format", ""),
+                          "unit": d.get("unit", "shot"),
+                          "beatCount": len(units), "shotCount": len(units),
+                          "package": p.name, "shotPackage": p.name})
+            except Exception:
+                pass
+    for p in sorted(SCRIPTS.glob("Ep*.txt")):
+        m = re.match(r"Ep(\d+)_", p.name)
+        if not m:
+            continue
+        n = int(m.group(1))
+        e = eps.setdefault(n, {"number": n})
+        e.setdefault("script", p.name)
+        e.setdefault("title", p.stem.split("_", 1)[-1].replace("_", " "))
+        try:
+            ep = f"Ep{n}"
+            if SCRIPT_STORE.current(ep, required=False) is None:
+                title_path = SCRIPTS / f"{ep}.title"
+                legacy_title = (title_path.read_text().strip() if title_path.exists()
+                                else e.get("title") or ep)
+                SCRIPT_STORE.migrate_legacy(ep, p, legacy_title)
+        except Exception as exc:
+            print(f"SCRIPT VERSION MIGRATION WARNING — {p.name}: {exc}", flush=True)
+
+    # The pointer wins over filename ordering. Old immutable versions may remain forever
+    # without a scan accidentally making one active again.
+    for current in SCRIPT_STORE.list_current():
+        n = int(current["episodeId"][2:])
+        e = eps.setdefault(n, {"number": n})
+        e.update({"script": current["displayFile"],
+                  "scriptVersionId": current["scriptVersionId"],
+                  "scriptSha256": current["sha256"],
+                  "scriptActivatedAt": current["activatedAt"]})
+        e.setdefault("title", current.get("title") or f"Episode {n}")
+    out = []
+    for n in sorted(eps):
+        e = eps[n]
+        _tf = SCRIPTS / f"Ep{n}.title"                 # the EXACT user-typed title (preserves apostrophes/case) — authoritative
+        if _tf.exists():
+            try:
+                _t = _tf.read_text().strip()
+                if _t:
+                    e["title"] = _t
+            except Exception:
+                pass
+        e["status"] = (("Beats ready" if e.get("unit") == "beat" else "Shot list ready")
+                       if e.get("package") else ("Script uploaded" if e.get("script") else "New"))
+        out.append(e)
+    (DATA / "episodes.json").write_text(json.dumps(out, indent=1))
+    return out
+
+# ---- pipeline driver: fire/approve gates via cb_pipeline (renders run in a background thread) ----
+JOBS = {}  # jobId -> {jobId, scene, gate, status, log, started, ended}
+PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid-run)
+
+# ADDED 2026-07-12 (full-codebase audit continued, alongside the _freshness_watch fix above): PROCS only ever
+# tracked async render jobs, never a synchronous request thread doing real work of its own (a blocking
+# subprocess.run in approve_gate/set_master_studio, a preview-endpoint subprocess, _serve_static's chunked
+# streaming loop) — so the idle-reload guard could fire mid-request. _INFLIGHT counts every live HTTP request
+# (incremented/decremented by the @_tracked decorator wrapping do_GET/do_HEAD/do_POST below); _freshness_watch
+# now waits for it to hit zero too, not just PROCS.
+_INFLIGHT = 0
+_INFLIGHT_LOCK = threading.Lock()
+def _tracked(fn):
+    """Wrap an HTTP handler method so it counts toward _INFLIGHT for its ENTIRE body — including an early
+    return or a raised exception (both are common: nearly every handler below returns as soon as it matches
+    self.path). Applied to do_GET/do_HEAD/do_POST, the three real HTTP entry points."""
+    def _wrapped(self, *a, **kw):
+        global _INFLIGHT
+        with _INFLIGHT_LOCK:
+            _INFLIGHT += 1
+        try:
+            return fn(self, *a, **kw)
+        finally:
+            with _INFLIGHT_LOCK:
+                _INFLIGHT -= 1
+    return _wrapped
+
+def _jid(prefix):
+    """A job ID that can NEVER collide — a second-resolution timestamp alone lets two fast fires on the same
+    beat/scene overwrite each other in JOBS/PROCS, orphaning the first process with no way to track or stop it."""
+    return f"{prefix}_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+
+def _pkg_name(episode="Ep1"):
+    """The current episode's beat-package FILENAME (basename only) — the default `package` for beat previews.
+    Resolved by glob so any episode title works (mirrors cb_pipeline._resolve_pkg, but returns the bare name).
+    FIXED 2026-07-12 (full-codebase audit continued): this pre-sorted candidates by filename before taking
+    max-mtime, while cb_pipeline._resolve_pkg() takes max-mtime over an UNSORTED glob() result — on a genuine
+    mtime tie, Python's max() keeps the FIRST candidate in iteration order, so the two resolvers could pick
+    different files (the exact "display != fire" class of bug this project already hit once). Dropped the
+    pre-sort so both use the same glob-order tie-break; masked in practice by the enforced
+    one-package-per-episode convention, but no longer a silent divergence risk if that's ever broken."""
+    cands = list(OUT.glob(f"{episode}_*beat_package.json")) or list(OUT.glob(f"{episode}_*shot_package.json"))
+    return (max(cands, key=lambda p: p.stat().st_mtime).name if cands
+            else f"{episode}_The_Adventure_Begins_beat_package.json")
+PKG_NAME = _pkg_name()
+
+# ── GATE-1 CASCADE-RELOCK (bug fix, 2026-07-02, Julian) — ⚠ DUPLICATED from engine/cb_pipeline.py's
+#    _scene_beats_fingerprint/_relock_if_stale (a separate process, no engine import here — same convention as
+#    the already-duplicated GATE_SEQ above). See cb_pipeline.py for the full rationale. Every read of locked_state()
+#    (the studio's ONLY path to gate-status data) re-checks every episode/scene it finds and cascade-clears a
+#    scene's "1"/"2a"/"2b"/"3"/"4"/"5" + per-beat locks the moment its Gate-1 deliverable no longer matches the
+#    fingerprint recorded when Gate 1 was approved, AND (via _relock_chain_stale_scenes below) cascade-clears
+#    any downstream per-beat keyframe/clip lock whose upstream chain source has since been retaken — so the
+#    Pipeline page can never show a stale "signed off" again, for either mechanism.
+def _beat_sort_key(code):
+    """Natural sort on the trailing beat number ('3.B10' -> 10, never a lexicographic '3.B10' < '3.B9' bug) —
+    mirrors cb_preflight._beat_sort_key (a separate process, no engine import here — same convention as
+    GATE_SEQ/_scene_beats_fingerprint above). ADDED 2026-07-12 (full-codebase audit continued): this file's
+    own beat-code sort was still the plain lexicographic form after cb_pipeline.py's identical mirror was
+    already corrected (2026-07-11) — the two had silently diverged. Used everywhere this file orders beats."""
+    m = re.search(r"[Bb](\d+)\s*$", str(code or ""))
+    return int(m.group(1)) if m else 0
+
+def _scene_beats_fingerprint(episode, scene):
+    # NOTE: this function must stay FULLY SELF-CONTAINED (its own local `import re`, its own nested sort-key
+    # helper, never a reference to a module-level name like _beat_sort_key above) — engine/test_gate_cascade.py's
+    # test_serve_py pulls this exact function's source out via ast and execs it in a minimal namespace
+    # ({json, pathlib, hashlib, GATE_SEQ} only), so any dependency on another module-level name here raises a
+    # bare NameError the moment the test calls it directly. Confirmed live 2026-07-12 (full-codebase audit
+    # continued) when the natural-sort fix below was first written to call the shared _beat_sort_key — the test
+    # crashed immediately; this local, duplicated form is the fix.
+    import hashlib, re as _re
+    def _bkey(code):
+        m = _re.search(r"[Bb](\d+)\s*$", str(code or ""))
+        return int(m.group(1)) if m else 0
+    # FIXED 2026-07-12 (full-codebase audit continued): dropped the filename pre-sort (see _pkg_name's own
+    # note above) so this resolves the SAME candidate cb_pipeline._resolve_pkg() would on a genuine mtime tie.
+    cands = list(OUT.glob(f"{episode}_*beat_package.json")) or list(OUT.glob(f"{episode}_*shot_package.json"))
+    if not cands:
+        return None
+    pkg = max(cands, key=lambda p: p.stat().st_mtime)
+    d = json.loads(pkg.read_text())
+    beats = [b for b in (d.get("beats") or d.get("shots") or []) if str(b.get("sceneNumber")) == str(scene)]
+    # FIXED 2026-07-12 (full-codebase audit continued): a plain lexicographic sort misorders any scene with
+    # 10+ beats ("1.B10" sorts before "1.B2") — cb_pipeline.py's own copy of this exact function was already
+    # corrected to natural-sort (2026-07-11); this one hadn't been, so the two independently-computed hashes
+    # could diverge the moment a scene reaches 10+ beats (harmless today — no live scene is that large yet —
+    # but sd["1_fp"] is WRITTEN by cb_pipeline.approve() using its own fingerprint function and compared HERE
+    # against this one, so the two must keep producing byte-identical hashes for identical input).
+    beats.sort(key=lambda b: _bkey(b.get("beatCode") or b.get("shotCode") or ""))
+    blob = json.dumps(beats, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+
+def _relock_stale_scenes(d):
+    """Mutates `d` (the parsed locked.json) in place, cascade-clearing any scene whose Gate-1 fingerprint has
+    drifted. Returns True if anything changed (caller persists it back to disk)."""
+    changed = False
+    for episode, escenes in list(d.items()):
+        if not isinstance(escenes, dict):
+            continue
+        for scene, sd in list(escenes.items()):
+            if not isinstance(sd, dict) or not sd.get("1") or not sd.get("1_fp"):
+                continue
+            try:
+                current = _scene_beats_fingerprint(episode, scene)
+            except Exception:
+                continue
+            if current is None or current == sd["1_fp"]:
+                continue
+            print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — Gate 1 deliverable changed since sign-off "
+                  f"(fingerprint {current} != approved {sd['1_fp']}); every downstream gate + per-beat lock reset.", flush=True)
+            for g in list(GATE_SEQ) + ["2", "1_fp"]:
+                sd.pop(g, None)
+            sd["beats"] = {}
+            changed = True
+    return changed
+
+# ── FRAME CHAIN cascade mirror (doctrine, 2026-07-02/03, Julian) — ADDED 2026-07-12 (full-codebase audit
+#    continued, HIGH severity): locked_state() cascade-cleared a scene's Gate-1 fingerprint drift (above) but
+#    never mirrored cb_pipeline.py's SEPARATE frame-chain cascade (_beat_end_frame_hash/_relock_chain_if_dirty)
+#    — a retaken upstream clip (a new harvested settle frame) left every downstream beat's per-beat
+#    "keyframe"/"clip" lock showing a stale "✓ signed off" (app.html's beatStageLocked/renderRelayPanel read
+#    these flags straight off locked_state()'s payload) until some UNRELATED gate action for that scene
+#    happened to call cb_pipeline's own _approved() and re-trigger the real cascade. Mirrors the LOGIC (not
+#    the import) of cb_pipeline._beat_end_frame_hash/_relock_chain_if_dirty — same convention as every other
+#    duplicate above.
+def _beat_end_frame_hash(episode, code, bslug):
+    """Content hash of a beat's HARVESTED SETTLE FRAME. None if it doesn't exist yet (the upstream beat hasn't
+    rendered a clip) — mirrors cb_pipeline._beat_end_frame_hash exactly."""
+    import hashlib
+    p = MEDIA / f"{episode}_{code}_{bslug}_settle.png"
+    if not p.exists():
+        return None
+    try:
+        return hashlib.sha1(p.read_bytes()).hexdigest()[:16]
+    except Exception:
+        return None
+
+def _relock_chain_stale_scenes(d):
+    """Mutates `d` in place, same pattern as _relock_stale_scenes above: for every scene with recorded
+    per-beat locks, walks its beats in order and clears "keyframe"/"clip" on the first one (and every one
+    after it) whose recorded chain_source_fp no longer matches its upstream beat's CURRENT ending-frame hash
+    — their own chain sources are now suspect too, exactly like cb_pipeline._relock_chain_if_dirty. Returns
+    True if anything changed."""
+    changed = False
+    for episode, escenes in list(d.items()):
+        if not isinstance(escenes, dict):
+            continue
+        for scene, sd in list(escenes.items()):
+            if not isinstance(sd, dict):
+                continue
+            beats_locks = sd.get("beats") or {}
+            if not beats_locks:
+                continue
+            try:
+                cands = (list(OUT.glob(f"{episode}_*beat_package.json"))
+                          or list(OUT.glob(f"{episode}_*shot_package.json")))
+                if not cands:
+                    continue
+                pkg = json.loads(max(cands, key=lambda p: p.stat().st_mtime).read_text())
+            except Exception:
+                continue
+            scene_beats = [b for b in (pkg.get("beats") or pkg.get("shots") or [])
+                           if str(b.get("sceneNumber")) == str(scene)]
+            scene_beats.sort(key=lambda b: _beat_sort_key(b.get("beatCode") or b.get("shotCode") or ""))
+            dirty_from = None
+            for i, b in enumerate(scene_beats):
+                if i == 0:
+                    continue   # the scene anchor chains off the PLATE, not a previous beat's ending frame
+                code = str(b.get("beatCode") or b.get("shotCode"))
+                bl = beats_locks.get(code)
+                if not bl or not bl.get("keyframe") or not bl.get("chain_source_fp"):
+                    continue
+                prev = scene_beats[i - 1]
+                prev_code = prev.get("beatCode") or prev.get("shotCode")
+                prev_slug = prev.get("slug", str(prev_code).replace(".", "_"))
+                current_fp = _beat_end_frame_hash(episode, prev_code, prev_slug)
+                if current_fp and current_fp != bl["chain_source_fp"]:
+                    dirty_from = i
+                    break
+            if dirty_from is None:
+                continue
+            scene_changed = False
+            for b in scene_beats[dirty_from:]:
+                code = str(b.get("beatCode") or b.get("shotCode"))
+                bl = beats_locks.get(code)
+                if bl and (bl.get("keyframe") or bl.get("clip")):
+                    bl["keyframe"] = False; bl["clip"] = False
+                    scene_changed = True
+            if scene_changed:
+                print(f"⚠ AUTO-RELOCKED {episode} scene {scene} — an upstream ending frame changed (a retake); "
+                      f"{len(scene_beats) - dirty_from} downstream beat(s) marked needing keyframe review.", flush=True)
+                changed = True
+    return changed
+
+def locked_state():
+    f = CBGEN / "locked.json"
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+    try:
+        # FIXED 2026-07-12 (full-codebase audit continued): only _relock_stale_scenes ran here — see
+        # _relock_chain_stale_scenes's own comment above for why that left the frame-chain cascade unmirrored.
+        changed = _relock_stale_scenes(d)
+        if _relock_chain_stale_scenes(d):
+            changed = True
+        if changed:
+            f.write_text(json.dumps(d, indent=1))
+    except Exception:
+        pass   # fail-open: a relock error must never brick gate-status reads
+    return d
+
+def notes_state():
+    f = CBGEN / "notes.json"
+    try: return json.loads(f.read_text()) if f.exists() else {}
+    except Exception: return {}
+
+def relay_state_all():
+    """The FULL relay_state.json, straight off disk — {"Ep1": {"1": {winnerCode, nextCode, harvested, remint,
+    anchor, driftCheck, ...}}}. Exposed on /api/pipeline (the payload every page already fetches) so Gate 3's
+    own panel can render a pending anchor SYNCHRONOUSLY (no extra round-trip, no per-beat modal needed to
+    discover it exists). RE-MINT SCOPING (rule 32, 2026-07-05): "remint" and "driftCheck" are both null for an
+    intentional_next_shot next beat (the default) — no NB2 pass ran. "anchor" is ALWAYS populated (the re-mint
+    when one ran, the raw harvest otherwise); the UI reads "anchor", never assumes "remint" is the only shape."""
+    f = CBGEN / "relay_state.json"
+    try:
+        return json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+
+def visions_state():
+    """{"Ep1": ["2.V1", ...], ...} — every declared vision shot code per episode, straight off continuity.json.
+    Lets the Studio's relay-truth walk-back (app.html's keyframesFor) skip vision beats exactly like the
+    engine's own cb_prompts.vision_for does server-side — a vision never chains and is never chained through."""
+    f = CBGEN / "config" / "continuity.json"
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+    except Exception:
+        return {}
+    out = {}
+    for ep, block in d.items():
+        if isinstance(block, dict):
+            out[ep] = [v.get("shot") for v in (block.get("visions") or []) if isinstance(v, dict) and v.get("shot")]
+    return out
+
+def continuity_state():
+    try:
+        p = subprocess.run(["python3", "cb_continuity.py", "--json"], cwd=str(CBGEN),
+                           capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
+        return json.loads(p.stdout or "[]")
+    except Exception as e:
+        return [{"level": "NOTE", "scene": "-", "shot": "-", "msg": f"continuity check error: {e}"}]
+
+def _humanise(line):
+    """Turn a raw pipeline log line into a friendly 'current step' for the UI."""
+    l = line.strip()
+    low = l.lower()
+    if "writers' room" in low or "writers’ room" in low: return "Writers’ Room — opening the room…"
+    if "passes 0-3" in low or "heart lock" in low: return "Writers’ Room — Heart Lock · the Game · the Outline…"
+    if "passes 4-7" in low or "draft locked" in low: return "Writers’ Room — drafting · co-watch · Braintrust · lock…"
+    if "the scorecard" in low or "below the bar" in low or "scorecard —" in low: return "Writers’ Room — scoring the script /10…"
+    if "ready for gate 1" in low: return "Writers’ Room — script written + scored ✓"
+    if "the director:" in low or "reading the script" in low: return "Director — reading the script…"
+    if "stage a" in low or "beat map" in low: return "Director — beat map (scenes, Pillars, emotional cores)…"
+    if "stage b" in low or "beats: scene" in low or "coverage: scene" in low:
+        m = re.search(r"scene (\d+)", low); return f"Director — beats: scene {m.group(1)}…" if m else "Director — beat design…"
+    if "braintrust" in low: return "Director — Braintrust remake…"
+    if "director complete" in low: return "Director — plan written ✓"
+    if "pre-flight" in low or "context audit" in low: return "Checking the context is complete…"
+    if "self-correct round" in low: return "Self-correcting — " + l.split("self-correct",1)[1].strip(": ")
+    if "visual qa" in low: return "Visual QA — checking the rendered frames…"
+    if "continuity check" in low or "CONTINUITY —" in l: return "Continuity check…"
+    if "start =" in low and "master" in low: return f"Keeping the locked master ({l.split()[0]})…"
+    if "beat keyframes:" in low: return "Building the beat keyframes…"
+    if "opening keyframe ->" in low: return f"Rendering beat {l.split()[0].strip()} keyframe…"
+    if "= vision of scene" in low: return f"Rendering beat {l.split()[0].strip()} (vision keyframe)…"
+    if low.startswith("beat ") and "take" in low: return f"Rendering {l.split(':')[0].strip()} (the 10-12s take)…"
+    if "beat driver:" in low: return "Rendering the beat takes…"
+    if "scene plate (" in low or "scene plate is" in low: return "Building the scene shot (the empty plate)…"
+    if "start ->" in low: return f"Rendering keyframe {l.split()[0]} (start)…"
+    if "end ->" in low: return f"Rendering keyframe {l.split()[0]} (end)…"
+    if l.startswith("REGEN") or "regenerat" in low or "change " in low[:8]: return "Regenerating a flagged shot…"
+    if "seedance" in low or "-> Ep3_" in l and ".mp4" in l: return "Rendering the clip…"
+    if "STITCH" in l: return "Building the post master…"
+    if "POST" in l or "picture" in low or "stems" in low:
+        return "Post — conforming, mixing, captions + delivery QC…"
+    if "STRUCTURED SCENE BUILD DONE" in l: return "Keyframes done — verifying…"
+    if "CLEAN" in l: return "Clean — it stays."
+    return l[:90]
+
+def _stream(jobId, args):
+    """Run cb_pipeline streaming, so the job's current STEP is live (not blank until it finishes)."""
+    job = JOBS[jobId]
+    try:
+        p = subprocess.Popen(["python3"] + args, cwd=str(CBGEN),
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+                             stdin=subprocess.DEVNULL,   # THE STDIN-INHERITANCE BUG (2026-07-07, found while
+                             # building the Studio shots editor): without this, every render/regen/fire spawned
+                             # from here inherited serve.py's own stdin — if anything in the child's import chain
+                             # ever reads stdin, it hangs until the caller's own timeout (or forever, for this
+                             # streaming path, which sets none). Confirmed live: /api/beat-prompt's own subprocess
+                             # (same missing-stdin pattern) reproducibly hung ~40s when spawned from the running
+                             # server, but ran in <0.5s invoked directly from a terminal — the server's own stdin
+                             # is what differs. Swept to every subprocess.run/Popen call in this file (rule 11).
+                             start_new_session=True)   # own process group, so STOP kills the gate + every render it spawns
+        PROCS[jobId] = p; job["pid"] = p.pid
+        lines = []; _last_reindex = 0.0
+        for line in p.stdout:
+            line = line.rstrip()
+            if not line: continue
+            lines.append(line)
+            job["log"] = "\n".join(lines[-250:])
+            job["step"] = _humanise(line)
+            # a batch job (e.g. Gate 2b building every beat in a scene) is ONE long subprocess — without this,
+            # a beat finished early in the batch stays invisible until the WHOLE batch exits. Throttled to ~2s
+            # so a chatty subprocess doesn't turn this into a reindex-per-line hot loop.
+            now = time.time()
+            if now - _last_reindex > 2:
+                try: reindex_media()
+                except Exception: pass
+                _last_reindex = now
+        p.wait()
+        if job.get("stopped"):
+            job["status"] = "stopped"; job["step"] = "Stopped by user."
+        else:
+            job["status"] = "done" if p.returncode == 0 else "failed"
+            job["step"] = "Done." if p.returncode == 0 else "Failed — see log."
+    except Exception as e:
+        job["log"] = job.get("log", "") + f"\n{type(e).__name__}: {e}"
+        job["status"] = "failed"; job["step"] = "Failed — see log."
+    finally:
+        PROCS.pop(jobId, None)
+        # THE central completion point for every gate action fired from the studio (keyframes, clips, voice,
+        # retakes, ...) — reindex here regardless of outcome (done/failed/stopped can all have left new files
+        # on disk) so the UI's next media-index.json fetch reflects reality instead of the stale server-start snapshot.
+        try: reindex_media()
+        except Exception: pass
+    job["ended"] = time.time()
+
+def _start(jobId, gate, scene, args):
+    if _is_stale():     # NEVER fire on stale code — the studio is reloading itself to the latest; re-fire in a moment
+        JOBS[jobId] = {"jobId": jobId, "scene": str(scene), "gate": str(gate), "status": "failed",
+                       "step": "⟳ Studio is loading the latest code — re-fire in a few seconds.",
+                       "log": "The studio detected changed source and is reloading itself so every fire runs the "
+                              "current software. Wait a moment, then fire again.",
+                       "started": time.time(), "ended": time.time()}
+        return jobId
+    JOBS[jobId] = {"jobId": jobId, "scene": str(scene), "gate": str(gate),
+                   "status": "running", "step": "Starting…", "log": "", "started": time.time(), "ended": None}
+    threading.Thread(target=_stream, args=(jobId, args), daemon=True).start()
+    return jobId
+
+def fire_gate(scene, gate, force=False, episode="Ep1"):
+    # Gate 1 is idempotent (a plain re-fire just re-displays the existing beats); a FORCE re-fire runs `redirect`,
+    # which backs up + removes the package and re-authors the whole episode with the current (hardened) Director.
+    # --episode=<ep> retargets cb_pipeline.py's EP/PKG globals for THIS invocation (see cb_pipeline.py __main__) —
+    # without it every gate action silently ran against Ep1 regardless of which episode was actually selected.
+    if str(gate) == "1" and force:
+        return _start(_jid(f"g1s{scene}"), gate, scene,
+                      ["cb_pipeline.py", "redirect", str(scene), f"--episode={episode}"])
+    return _start(_jid(f"g{gate}s{scene}"), gate, scene,
+                  ["cb_pipeline.py", str(gate), str(scene), f"--episode={episode}"])
+
+def write_script(seed, episode="Ep1"):
+    """GATE 0 — the Writers' Room: turn a seed into a finished, scored, LOCKED screenplay (cb_writer)."""
+    SCRIPTS.mkdir(parents=True, exist_ok=True)
+    seedpath = SCRIPTS / f"_seed_{episode}.json"
+    seedpath.write_text(json.dumps(seed, ensure_ascii=False))
+    return _start(_jid(f"write{episode}"), "write", "0",
+                  ["cb_writer.py", str(seedpath), str(episode)])
+
+def stop_job(jobId):
+    """Hard-stop a firing gate: kill its whole process group (the pipeline + every render child it spawned)."""
+    job = JOBS.get(jobId)
+    if job: job["stopped"] = True
+    p = PROCS.get(jobId)
+    if p:
+        try: os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        except Exception:
+            try: p.kill()
+            except Exception: pass
+    if job and job.get("status") == "running":
+        job["status"] = "stopped"; job["step"] = "Stopped by user."; job["ended"] = time.time()
+    PROCS.pop(jobId, None)
+    return bool(p)
+
+def stop_all():
+    """Stop every currently-running firing."""
+    ids = [jid for jid, j in JOBS.items() if j.get("status") == "running"]
+    for jid in ids: stop_job(jid)
+    return ids
+
+def approve_gate(scene, gate, episode="Ep1", reviewed_by="Julian"):
+    args = ["python3", "cb_pipeline.py", "approve", str(gate), str(scene), f"--episode={episode}"]
+    if reviewed_by:
+        args.append(f"--reviewed-by={reviewed_by}")
+    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    return p.returncode == 0, (p.stdout + p.stderr).strip()
+
+def unapprove_gate(scene, gate, episode="Ep1"):
+    """Reverse a sign-off (un-sign a step) — clears the gate + everything downstream, and resets the scene master
+    if the foundation is un-signed (cb_pipeline.unapprove)."""
+    p = subprocess.run(["python3", "cb_pipeline.py", "unapprove", str(gate), str(scene), f"--episode={episode}"],
+                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    return p.returncode == 0, (p.stdout + p.stderr).strip()
+
+def set_master_studio(scene, beat_code, character, episode="Ep1", scope="location", force=False):
+    """★ Set a CHARACTER MASTER from a beat's keyframe (synchronous; QA-gated inside cb_pipeline). Returns (ok, log)."""
+    args = ["python3", "cb_pipeline.py", "set-master", str(scene), str(beat_code), str(character), str(episode), str(scope)]
+    if force: args.append("force")
+    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, timeout=150, stdin=subprocess.DEVNULL)
+    out = (p.stdout + p.stderr).strip()
+    return ("★ MASTER SET" in out), out
+
+def clear_master_studio(scene, character, episode="Ep1"):
+    """Retire a character's master for this scene's location (→ falls back to the Character Box). Returns (ok, log)."""
+    p = subprocess.run(["python3", "cb_pipeline.py", "clear-master", str(scene), str(character), str(episode)],
+                       cwd=str(CBGEN), capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
+    out = (p.stdout + p.stderr).strip()
+    return ("cleared" in out), out
+
+# server-side gate guard (defense in depth — the HTTP boundary itself refuses to fire/regen past an unsigned step)
+# ⚠ DUPLICATED (deliberately, not shared) from engine/cb_pipeline.py's own GATE_SEQ — a separate process. If a gate
+# is ever added/renamed/reordered, update BOTH lists in the SAME change, or this HTTP-layer guard and cb_pipeline's
+# process-layer guard could silently disagree on what "the previous gate" is.
+GATE_SEQ = ["1", "1.6", "2a", "2b", "3", "4", "5"]   # 1.6 = THE PREVIZ REEL (2026-07-08) · …3 Animation ·
+# 4 Retakes · 5 Post. Named "1.6" (not "1.5") to avoid colliding with the already-established "Gate 1.5" —
+# Director's Eye (cb_director_eye.py), an unrelated automatic flag-only review with no lock state of its
+# own, never a member of this list. See engine/cb_previz.py's module docstring for the full note.
+def _scene_locks(scene, episode="Ep1"):
+    return locked_state().get(episode or "Ep1", {}).get(str(scene), {})
+def _gate_ready(scene, gate, episode="Ep1"):
+    """(ok, msg) — is this gate fireable? Its previous gate must be signed off."""
+    g = str(gate).lower()
+    if g not in GATE_SEQ or GATE_SEQ.index(g) == 0:
+        return True, ""
+    prev = GATE_SEQ[GATE_SEQ.index(g) - 1]
+    if _scene_locks(scene, episode).get(prev):
+        return True, ""
+    return False, f"Gate {prev} not signed off for scene {scene} — sign it off first."
+
+def regen_shot(scene, shot_code, kind, note, target="both", episode="Ep1"):
+    return _start(_jid(f"regen_{kind}_{shot_code}"), f"regen:{shot_code}", scene,
+                  ["cb_pipeline.py", "regen", str(scene), str(shot_code), kind, note or "", target, f"--episode={episode}"])
+
+# ---- TICKET 4: per-beat Linear Gated Cascade drivers (mirror the gate drivers above) ----
+def gen_audio_beat(scene, beat, episode="Ep1"):
+    """Generate the dialogue track for ONE beat (job; cb_pipeline gen-audio prints AUDIO_DUR + the track path)."""
+    return _start(_jid(f"audio_{beat}"), f"audio:{beat}", scene,
+                  ["cb_pipeline.py", "gen-audio", str(scene), str(beat), f"--episode={episode}"])
+
+def gen_keyframe_beat(scene, beat, chain_from=None, episode="Ep1"):
+    """Build ONE beat's opening keyframe (job; optionally chained off the previous beat's last frame)."""
+    args = ["cb_pipeline.py", "build-beat", str(scene), str(beat)]
+    if chain_from:
+        args.append(str(chain_from))
+    args.append(f"--episode={episode}")
+    return _start(_jid(f"kf_{beat}"), f"keyframe:{beat}", scene, args)
+
+def render_beat_clip(scene, beat, episode="Ep1"):
+    """Render ONE beat's 10-12s Seedance take (job; cb_pipeline render-beat -> cb_beats.run for that beat)."""
+    return _start(_jid(f"render_{beat}"), f"render:{beat}", scene,
+                  ["cb_pipeline.py", "render-beat", str(scene), str(beat), f"--episode={episode}"])
+
+def approve_beat(scene, beat, stage, episode="Ep1", value=True):
+    """Lock (value=True) or UNLOCK (value=False) ONE beat's stage (audio|keyframe|clip) synchronously (mirror approve_gate).
+    Returns (ok, log, next). For a keyframe approval, cb_pipeline prints 'NEXT=<code>'/'NEXT=NONE' — parsed for the chain auto-fire."""
+    p = subprocess.run(["python3", "cb_pipeline.py", "approve-beat", str(scene), str(beat), str(stage),
+                        ("true" if value else "false"), f"--episode={episode}"],
+                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    out = (p.stdout + p.stderr).strip()
+    nxt = None
+    for line in out.splitlines():
+        line = line.strip()
+        if line.startswith("NEXT="):
+            val = line[len("NEXT="):].strip()
+            nxt = None if val.upper() == "NONE" or not val else val
+    return p.returncode == 0, out, nxt
+
+def rebuild_keyframes(scene, episode="Ep1"):
+    """CLEAN rebuild of ALL keyframes for a scene — deletes stale frames + re-renders every beat fresh.
+    Tagged gate '2b' so the studio shows it LIVE as a keyframe build (progress bar + storyboard populating)."""
+    return _start(_jid(f"rebuild_kf_{scene}"), "2b", scene,
+                  ["cb_pipeline.py", "rebuild", str(scene), f"--episode={episode}"])
+
+# ── THE RELAY, front door (Julian, 2026-07-03) — job-launch wrappers around cb_pipeline.relay_prepare/
+#    relay_approve. relay_approve_beat is the ONLY function in this file that may fire fire_next_beat's
+#    approved=True launch — the Approve Anchor button in app.html is the only caller of it.
+#    THE ONE-RENDER ECONOMY (Julian, 2026-07-05): both phases dropped their seed/seed-path parameters — a beat
+#    has exactly one official clip now (auto-retried once internally on a failed gate), so there is no seed to
+#    designate and no "how many candidates" choice left to make.
+def relay_prepare_beat(scene, winner_code, episode="Ep1", fast=False):
+    """PHASE 1: harvest the winner's own official clip, re-mint (seamless joins only), drift-check, STOP for
+    approval (job). fast=False default: standard tier is the production default under the one-render economy."""
+    return _start(_jid(f"relayprep_{winner_code}"), f"relay-prepare:{winner_code}", scene,
+                  ["cb_pipeline.py", "relay-prepare", str(scene), str(winner_code),
+                   f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
+
+def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
+    """PHASE 2: launch the next beat off the anchor an earlier relay_prepare_beat already produced (job) — one
+    take, one automatic re-fire on a failed gate, then a hard stop naming the layer at fault.
+    fast=False default: standard tier is the production default under the one-render economy."""
+    return _start(_jid(f"relayapprove_{winner_code}"), f"relay-approve:{winner_code}", scene,
+                  ["cb_pipeline.py", "relay-approve", str(scene), str(winner_code),
+                   f"--episode={episode}", f"--fast={str(bool(fast)).lower()}"])
+
+# ── THE SHOT PIPELINE (cb_engine.py design → cb_render.py render loop) — ADDITIVE, 2026-07-16 ──────────────────────
+# A separate, parallel surface for the shot-sized production packages (cb-output/{ep}_scene{N}_production_
+# package.json). Nothing here touches GATE_SEQ, the beat pipeline, or any existing route — the two endpoints
+# (/api/shot-package GET, /api/shot-run POST) plus these helpers are the whole footprint. Jobs run through the
+# SAME _jid/_start/_stream runner every existing gate action uses (fresh subprocess, argv list, never a shell).
+SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "scenelook", "approve-scenelook", "reject-scenelook",
+             "keyframe", "approve-keyframe", "reject-keyframe",
+             "select-upload", "select-library", "select-previous",
+             "select-scenelook-upload", "select-scenelook-library",
+             "approve-voice", "reject-voice",
+             "fire", "next", "approve", "reject", "stitch")
+# THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive): select-upload/select-library/
+# select-previous are the three NON-GENERATION opening-frame sources (cb_render.select_keyframe_source) —
+# each only ever COPIES an existing file into a new immutable candidate; none calls cb_gen. Routed through
+# the identical job runner as every other shot action for one reason: cb_render.py's own ledger-mutation
+# lock discipline (refuse-if-a-candidate-is-already-pending) lives in the engine, not the server, and the
+# job runner is the one place that already serialises shot mutations per scene.
+# "animatic" stays the CLI verb (cb_render.py keeps it as an accepted alias) — but the ARTIFACT it builds is
+# the TIMING SLATE (Julian's 2026-07-16 reclassification: Seedance is a probabilistic candidate generator;
+# this artifact approves dialogue accuracy / voice assignment / durations / line position ONLY, never
+# staging, physical comedy or final rhythm).
+REJECT_CATEGORIES = ("identity", "geography", "action-timing", "instruction-ignored", "other")
+DEPARTMENT_STAGES = ("look", "cinematography", "voice", "animation",
+                     "review-keyframe", "review-animation", "review-final")
+_SPEND_TOKEN_RE = re.compile(r"^[a-f0-9]{16,64}$")   # the SERVER-ISSUED single-use spend token (2026-07-16
+# spend-protection contract): fire/next without one stores pendingSpendAuth on the shot's ledger and REFUSES;
+# with one, the engine re-validates the binding hash (prompt/keyframe/refs/audio/duration/settings/rate/count)
+# and refuses if ANYTHING drifted. Lowercase hex only — never a path, never shell-meaningful.
+_SHOT_TOKEN = re.compile(r"^[A-Za-z0-9._-]+$")   # scene / episode / shotId — plain tokens, never a path
+
+def _shot_pkg_path(scene, episode="Ep1"):
+    """Mirrors engine/cb_render.py's _pkg_path (a separate process, no engine import here — the same
+    deliberate-duplication convention as GATE_SEQ/_scene_beats_fingerprint above)."""
+    return OUT / f"{episode}_scene{scene}_production_package.json"
+
+def _storyboard_file(scene, episode="Ep1"):
+    return OUT / "creative" / f"{episode}_scene{scene}_storyboard.json"
+
+
+def scene_lineage(pkg, scene, episode="Ep1"):
+    """THE state-integrity checkpoint's server-side lineage check (2026-07-17): mirrors
+    cb_render.lineage_status EXACTLY (deliberately duplicated, never imported — the same
+    no-engine-import convention this file already uses for GATE_SEQ/_shot_pkg_path/etc., so
+    serve.py never needs a subprocess for a plain hash comparison). Only the server can do
+    this at all: the client only ever sees pkg as already-parsed JSON, never raw file bytes,
+    so it cannot itself hash the live storyboard file to check it still matches what the
+    package claims it was built from. "current" is True ONLY when both hashes are present
+    AND equal — never inferred true by omission."""
+    sb_path = _storyboard_file(scene, episode)
+    live_md5 = None
+    if sb_path.exists():
+        import hashlib
+        live_md5 = hashlib.md5(sb_path.read_bytes()).hexdigest()
+    pkg_md5 = (pkg.get("sourceStoryboard") or {}).get("md5")
+    return {"current": bool(pkg_md5) and bool(live_md5) and pkg_md5 == live_md5,
+            "packageStoryboardMd5": pkg_md5, "liveStoryboardMd5": live_md5,
+            "packageRevision": pkg.get("revision")}
+
+
+def _url_from_abs(abs_path):
+    """Converts an ABSOLUTE filesystem path (as stored in continuityLedger's keyframeApproval/
+    keyframeCandidate 'path' fields) into a servable /engine/media/... URL, the same
+    convention shot_media_map's own _url() already uses for its conventional-filename
+    lookups. Returns None for anything missing, unresolvable, or outside the approved
+    media root (defence in depth — this must never become a path-traversal door)."""
+    if not abs_path:
+        return None
+    try:
+        p = pathlib.Path(abs_path).resolve()
+        if not p.exists() or not p.is_relative_to(MEDIA.resolve()):
+            return None
+        return "/engine/media/" + p.relative_to(MEDIA.resolve()).as_posix()
+    except Exception:
+        return None
+
+
+def shot_media_map(pkg, scene, episode="Ep1"):
+    """Server-computed existence map of every shot's media (vo / keyframe / clip / harvested final frame)
+    plus the scene-level timing slate and current QC-passed post master. Filenames mirror
+    cb_render.py's own writers; the URLs
+    are /engine/media/... paths the existing static route already serves (shots/ is a subfolder of the
+    approved /engine/media/ root — prefix + extension both pass _static_blocked with zero policy change).
+
+    FILE EXISTENCE HERE VERIFIES AN ASSET EXISTS — IT NEVER GRANTS APPROVAL OR STAGE STATE
+    (2026-07-17 state-integrity checkpoint): this map is evidence for the client's own
+    deriveSceneState, which reads the REAL approval truth from pkg.continuityLedger's
+    keyframeApproval/keyframeCandidate/keyframeRejected fields plus the "lineage" block below
+    — never from whether a file happens to sit at a conventional path.
+
+    KEYFRAME URL, CORRECTED (2026-07-18, production-safety directive): a keyframe candidate/
+    approval no longer lands at one fixed, conventional filename — the two-phase, non-
+    destructive lifecycle (cb_render.keyframe_shot) writes every candidate to its OWN
+    uniquely-named path, specifically so a fresh generation can never collide with (and
+    silently overwrite) an already-approved file at a shared name. The keyframe URL is
+    therefore read from the ledger's OWN recorded path (keyframeApproval, else
+    keyframeCandidate) via _url_from_abs, never guessed from a filename convention."""
+    shots_dir = MEDIA / "shots"
+    def _url(p):
+        return ("/engine/media/" + p.relative_to(MEDIA).as_posix()) if p.exists() else None
+    ledger_by_id = {e.get("shotId"): e for e in (pkg.get("continuityLedger") or [])}
+    shots = {}
+    for s in pkg.get("shots") or []:
+        sid = s.get("shotId")
+        if not sid:
+            continue
+        led = ledger_by_id.get(sid) or {}
+        approved_kf = (led.get("keyframeApproval") or {}).get("path")
+        candidate_kf = (led.get("keyframeCandidate") or {}).get("path")
+        # The pending candidate is the decision artefact. The approved frame remains available
+        # separately and continues anchoring downstream work until the replacement is approved.
+        kf_path = candidate_kf or approved_kf
+        shots[sid] = {"vo":         _url_from_abs(led.get("voPath")),
+                      "keyframe":   _url_from_abs(kf_path),
+                      "keyframeCandidate": _url_from_abs(candidate_kf),
+                      "keyframeApproved": _url_from_abs(approved_kf),
+                      "clip":       _url_from_abs(led.get("approvedTake")),
+                      "finalFrame": _url_from_abs(led.get("harvestFrame")),
+                      # THE CANDIDATE BATCH (2026-07-16): fire/next now generate 1-4 candidates per shot
+                      # ({ep}_{shotId}_c1..cN.mp4, ledger status "candidates-pending") — existence-checked
+                      # here, same as every other entry, so the UI never depends on media-index.json.
+                      "candidates": [c for c in ({"n": i, "url": _url_from_abs(p)}
+                                                 for i, p in enumerate(led.get("candidatePaths") or [], 1))
+                                     if c["url"]]}
+    timing_path = MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4"
+    if not timing_path.exists():
+        timing_path = MEDIA / f"{episode}_Scene{scene}_animatic.mp4"
+    try:
+        import cb_render as _CBR
+        timing_status = _CBR.timing_slate_status(scene, episode)
+        timing_current = bool(timing_status.get("current"))
+        timing_reason = timing_status.get("reason")
+        lineage = _CBR.lineage_status(pkg, scene, episode)
+        post_status = _CBR.post_status(pkg, scene, episode)
+        selected_post = (post_status["candidate"] if post_status["candidate"]["exists"] else
+                         post_status["approved"] if post_status["approved"]["exists"] else None)
+        post_manifest = selected_post.get("manifest") if selected_post else None
+        post_media = {
+            name: _url_from_abs(asset.get("path"))
+            for name, asset in ((post_manifest or {}).get("outputs") or {}).items()
+            if isinstance(asset, dict)
+        }
+        post_media["candidate"] = bool(
+            selected_post is post_status["candidate"] if selected_post else False)
+        post_media["current"] = bool(selected_post and selected_post.get("current"))
+        post_media["qc"] = (post_manifest or {}).get("qc")
+    except Exception as exc:
+        timing_current = False
+        timing_reason = str(exc)
+        lineage = {"current": False, "reasonCodes": ["state-evaluation-failed"],
+                   "error": str(exc)}
+        post_media = {}
+    return {"shots": shots,
+            # THE TIMING SLATE (2026-07-16 reclassification): new filename first; the pre-reclassification
+            # animatic filename kept as a fallback so an older existing render still shows.
+            "timingSlate": _url(timing_path),
+            "timingSlateCurrent": timing_current,
+            "timingSlateReason": timing_reason,
+            "animatic": _url(MEDIA / f"{episode}_Scene{scene}_animatic.mp4"),
+            "picture": post_media.get("master16x9"),
+            "post": post_media,
+            "lineage": lineage}
+
+
+# ── SCENE LOOK — server-side mirror of cb_render.scenelook_status (2026-07-18, Julian's
+# gate directive): deliberately duplicated, never imported — the same no-engine-import
+# convention this file already uses for GATE_SEQ/_shot_pkg_path/scene_lineage/etc. ──────────
+def _scenelook_path(scene, episode="Ep1"):
+    return OUT / f"{episode}_scenelook_scene{scene}.json"
+
+
+def _scenelook_input_signature_server(scene, episode="Ep1"):
+    """Mirrors cb_render._scenelook_input_signature exactly (deliberately duplicated, never
+    imported — see this file's own standing convention). The plate's brief is a pure
+    function of locations.json + style.txt — NEVER the storyboard — so this signature is
+    what actually decides staleness now (2026-07-18 direct-input-lineage correction),
+    replacing the old storyboard-md5 comparison below entirely."""
+    import hashlib
+    loc_path = ROOT / "shows" / "crystal-bears" / "canon" / "locations.json"
+    style_path = ROOT / "shows" / "crystal-bears" / "laws" / "style.txt"
+    locs = json.loads(loc_path.read_text()) if loc_path.exists() else {}
+    entry = (locs.get(episode) or {}).get(str(scene)) or {}
+    style = style_path.read_text().strip() if style_path.exists() else ""
+    parts = [style] if style else []
+    for key in ("look", "lighting", "weather", "colorTemperature", "definingFeature"):
+        v = (entry.get(key) or "").strip()
+        if v:
+            parts.append(v)
+    brief = " ".join(parts)
+    return {"briefHash": hashlib.sha256(brief.encode()).hexdigest(), "referenceHashes": {}}
+
+
+def _scenelook_load_rec_server(scene, episode="Ep1"):
+    """Mirrors cb_render._load_scenelook_rec's migration exactly: an old flat-shape sidecar
+    ({'status','platePath','plateHash',...}) is read as {'approved','candidate','history'}
+    in memory, never written back by a read. A legacy 'approved' entry with no recorded
+    inputSignature is backfilled with the CURRENT signature — honest, since the plate's
+    brief is a pure function of already-unchanged canon files."""
+    sc_path = _scenelook_path(scene, episode)
+    if not sc_path.exists():
+        return {"approved": None, "candidate": None, "history": []}
+    rec = json.loads(sc_path.read_text())
+    if "approved" in rec or "candidate" in rec:
+        return rec
+    approved = None
+    if rec.get("status") == "approved" and rec.get("platePath"):
+        approved = {"path": rec["platePath"], "hash": rec.get("plateHash"),
+                    "inputSignature": _scenelook_input_signature_server(scene, episode),
+                    "approvedAt": rec.get("approvedAt"), "reviewedBy": rec.get("reviewedBy")}
+    return {"approved": approved, "candidate": None, "history": list(rec.get("history") or [])}
+
+
+def scenelook_status_server(scene, episode="Ep1"):
+    """Mirrors cb_render.scenelook_status exactly (2026-07-18 correction: the two-phase,
+    non-destructive candidate lifecycle + direct-input signature, never a filename glob or
+    the storyboard md5) — but returns paths as servable URLs (never raw filesystem paths —
+    the client only ever sees already-approved /engine/media/ URLs, same discipline as
+    shot_media_map's own _url helper)."""
+    # Use the engine's one authoritative state calculation. The former server-side mirror
+    # drifted from the production rules and could make the UI disagree with paid generation.
+    import cb_render
+    raw = cb_render.scenelook_status(scene, episode)
+    approved, candidate = raw.get("approved"), raw.get("candidate")
+    history = raw.get("history", [])
+
+    def _as_url(entry):
+        if not entry:
+            return None
+        return {**entry, "url": _url_from_abs(entry.get("path"))}
+
+    if candidate:
+        return {"status": raw.get("status", "awaiting"), "current": False, "approved": _as_url(approved),
+                "candidate": _as_url(candidate), "history": history,
+                # back-compat top-level fields some older UI reads may still expect
+                "plateUrl": _as_url(candidate)["url"] if candidate else None,
+                "plateHash": candidate.get("hash")}
+    if approved:
+        status = raw.get("status", "stale")
+        au = _as_url(approved)
+        return {"status": status, "current": bool(raw.get("current")), "approved": au,
+                "candidate": None, "history": history,
+                "plateUrl": au["url"], "plateHash": approved.get("hash")}
+    status = raw.get("status", "none")
+    return {"status": status, "current": False, "approved": None, "candidate": None,
+            "history": history, "plateUrl": None, "plateHash": None}
+
+
+
+# ── THE LEGACY PIPELINE IS GONE (Julian's destructive cutover, 2026-07-16) ────────────────────
+# Every route of the old beat/gate pipeline returns 410 GONE — never a redirect, never another
+# generator. The single production path is: Studio disclosure -> sealed request envelope ->
+# spend approval -> cb_render candidate batch -> fal provider adapter (/api/shot-*).
+LEGACY_GONE_ROUTES = ['/api/fire', '/api/retakes', '/api/retake-brief', '/api/retake-csv', '/api/export-storyboard', '/api/approve', '/api/unapprove', '/api/rebuild', '/api/set-master', '/api/clear-master', '/api/regen', '/api/gen-audio', '/api/gen-keyframe', '/api/render-beat', '/api/approve-beat', '/api/relay-prepare', '/api/relay-approve', '/api/director-eye', '/api/masters', '/api/keyframe-prompt', '/api/voice-prompt', '/api/beat-sound-brief', '/api/relay-state', '/api/keyframe-qa', '/api/craft-score', '/api/beat-prompt', '/api/beat-state', '/api/retake-log', '/api/continuity', '/api/pipeline']
+
+
+def _legacy_gone(handler):
+    path = handler.path.split("?")[0]
+    for r in LEGACY_GONE_ROUTES:
+        if path == r or path.startswith(r + "/"):
+            handler._json(410, {"error": "GONE — the legacy pipeline was permanently removed "
+                                          "(2026-07-16 cutover). Use the Shots pipeline "
+                                          "(/api/shot-package, /api/shot-run)."})
+            return True
+    return False
+
+def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
+                 candidates=None, spend_token=None, category=None, candidate=None,
+                 dry_run=False, source_path=None):
+    """Map one validated shot-pipeline command onto the job runner. Argument order per cb_engine.py /
+    cb_render.py's own CLIs (2026-07-16 spend-token contract — the approve-spend boolean is GONE):
+      fire    -> cb_render.py fire <scene> <shotId> [episode] [--candidates N] [--spend-token <token>]
+      next    -> cb_render.py next <scene> [episode] [--candidates N] [--spend-token <token>]
+      approve -> cb_render.py approve <scene> <shotId> <candidateN> [episode]
+      reject  -> cb_render.py reject <scene> <shotId> <correction> [--category X] [episode]
+      others  -> cb_render.py <cmd> <scene> [episode]
+    WITHOUT --spend-token, fire/next run fresh validation, print the SPEND DISCLOSURE, store the single-use
+    token on the shot's ledger (pendingSpendAuth) and exit 1 REFUSED — the job reports "failed" with the
+    disclosure in its log; that IS the designed step 1, not a malfunction. Re-posting with a mid-batch
+    token resumes: only the missing candidates generate (ledger batch.status == "generating").
+    Every value travels as its own argv element — never a shell string."""
+    args = ["cb_render.py", cmd, str(scene)]
+    if cmd in ("fire", "voice-shot", "keyframe", "approve", "reject", "approve-keyframe", "reject-keyframe",
+               "select-upload", "select-library", "select-previous",
+               "approve-voice", "reject-voice", "regen-voice"):
+        args.append(str(shot_id))
+    if cmd == "approve" and candidate is not None:
+        args.append(str(candidate))
+    if cmd == "reject":
+        args.append(str(correction))
+        if category:
+            args += ["--category", str(category)]
+    if cmd == "reject-keyframe":
+        args.append(str(correction))
+    if cmd == "reject-scenelook":
+        args.append(str(correction))
+    if cmd == "reject-voice":
+        args.append(str(correction))
+    if cmd in ("select-upload", "select-library"):
+        # THE non-generation opening-frame sources (2026-07-18): the upload/library file's own
+        # path travels as its own argv element, matching cb_render.py's own CLI shape
+        # (select-upload/select-library <scene> <shotId> <path> [episode]) — never a shell string.
+        args.append(str(source_path))
+    if cmd in ("select-scenelook-upload", "select-scenelook-library"):
+        # THE non-generation SCENE LOOK sources (2026-07-19 — "still not letting me upload a
+        # library image, i select it then it wants to generate"): the scene-scoped mirror of
+        # select-upload/select-library above — no shotId, so the path travels right after
+        # scene, matching cb_render.py's own CLI shape (select-scenelook-upload/-library
+        # <scene> <path> [episode]) — never a shell string.
+        args.append(str(source_path))
+    args.append(str(episode))
+    if cmd == "scenelook" and source_path:
+        # THE SCENE LOOK PROVIDER-ROUTING FIX (2026-07-19): an OPTIONAL, explicitly-selected
+        # reference travels as its own trailing argv element — cb_render.py scenelook <scene>
+        # <episode> [referencePath]; omitted entirely (the normal case) means no reference at
+        # all, which now correctly routes to text-to-image rather than a guaranteed-422 edit call.
+        args.append(str(source_path))
+    if cmd in ("fire", "next"):
+        if candidates is not None:
+            args += ["--candidates", str(candidates)]
+        if spend_token:
+            args += ["--spend-token", str(spend_token)]
+        if dry_run:
+            args += ["--dry-run"]      # sealed-envelope preview: no token issued, nothing stored
+    label = "shot:" + cmd + ((":" + str(shot_id)) if shot_id else "")
+    return _start(_jid(f"shot{cmd}_s{scene}"), label, scene, args)
+
+
+class StoryboardApprovalRefused(RuntimeError):
+    pass
+
+
+def _storyboard_approval(d):
+    """Apply a storyboard decision and its production handover under one scene lease."""
+    ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+    sc = str(d.get("scene", "")).strip()
+    if not _SHOT_TOKEN.match(ep) or not _SHOT_TOKEN.match(sc):
+        raise ValueError("episode and scene must be plain tokens")
+    target = str(d.get("target", "scene"))
+    verdict = str(d.get("verdict", "approved"))
+    note = str(d.get("note", "")).strip()
+    stamp = {
+        "state": verdict,
+        "note": note,
+        "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "by": str(d.get("by") or "Julian"),
+    }
+
+    with cb_db.scene_lease(ROOT, ep, sc, "serve.storyboard-approve"):
+        path = ROOT / "cb-output" / "creative" / f"{ep}_scene{sc}_storyboard.json"
+        if not path.exists():
+            raise FileNotFoundError("no storyboard")
+        original_bytes = path.read_bytes()
+        package, original_digest = cb_db.read_json_document(ROOT, path)
+        if target == "scene":
+            package["approvalState"] = verdict
+            package["humanNote"] = note
+        else:
+            for collection in ("beats", "shots"):
+                for item in package.get(collection, []):
+                    if item.get("beatId") == target or item.get("shotId") == target:
+                        item["approvalState"] = verdict
+                        item["humanNote"] = note
+        package.setdefault("approvalLog", []).append({"target": target, **stamp})
+        decision_digest = cb_db.atomic_write_json(
+            ROOT, path, package, expected_digest=original_digest)
+
+        handover = None
+        if target == "scene" and verdict == "approved":
+            try:
+                import cb_handover
+                shot_ids = [
+                    shot.get("shotId") for shot in (package.get("shots") or [])
+                    if shot.get("shotId")
+                ]
+                preview, _ = cb_handover.promote_to_canonical(
+                    str(path), sc, shot_ids, ep, dry_run=True, log=lambda *a, **k: None)
+                if not (preview.get("validation") or {}).get("passed"):
+                    issues = [
+                        issue for issue in (preview.get("validation") or {}).get("issues", [])
+                        if issue.get("severity") == "ERROR"
+                    ]
+                    raise RuntimeError(
+                        "production handover validation failed" +
+                        (f": {issues[0].get('code')}" if issues else "")
+                    )
+                promoted, archived = cb_handover.promote_to_canonical(
+                    str(path), sc, shot_ids, ep, dry_run=False, log=lambda *a, **k: None)
+                handover = {
+                    "revision": promoted.get("revision"),
+                    "carriedForward": (promoted.get("handover") or {}).get(
+                        "carriedForwardUnchangedShots", []),
+                    "reset": (promoted.get("handover") or {}).get("resetChangedShots", []),
+                    "archivedPrevious": str(archived) if archived else None,
+                }
+            except Exception as exc:
+                cb_db.atomic_write_bytes(
+                    ROOT, path, original_bytes, expected_digest=decision_digest)
+                raise StoryboardApprovalRefused(
+                    f"Storyboard was not approved because production handover failed safely: {exc}"
+                ) from exc
+
+        learning = None
+        try:
+            import cb_learning
+            learning = cb_learning.human_feedback(
+                verdict, note, scene=sc,
+                beat=target if ".B" in target and ".S" not in target else None,
+                shot=target if ".SH" in target or ".S" in target else None,
+                episode=ep, asset=path.name, by=stamp["by"])
+            learning = {
+                key: (value if key != "evidenceCaptured" else {
+                    "evidenceId": value["evidenceId"], "outcome": value["outcome"]
+                })
+                for key, value in learning.items()
+            }
+        except Exception as exc:
+            learning = {"captureError": str(exc)}
+        return {"ok": True, "learning": learning, "handover": handover}
+
+
+# ── STATIC FILE HARDENING (security) ──────────────────────────────────────────────────────────────────────────
+# The studio serves files from the repo ROOT, so WITHOUT this guard a browser could read engine/.env (API keys),
+# *.py source, *.bak snapshots, *.log, internal config/state, node_modules and audit/archive/unpack folders.
+# Policy = ALLOW-LIST by approved ROOT + extension: everything is BLOCKED by default; a file is served ONLY if it
+# sits under an approved root with an approved extension, OR is an explicitly-approved exact file. Blocked → 404
+# (hides existence). STATIC-SERVING ONLY: every /api route is handled in do_GET/do_POST and returns before any
+# static fall-through; do_GET/do_HEAD call _serve_static() directly (never super().do_GET()/do_HEAD()), and
+# _serve_static's own _static_blocked(...) call (below) is the real, single chokepoint — corrected 2026-07-08
+# (full-codebase audit) after finding a dead send_head() override that this comment used to describe as the
+# chokepoint; it was never actually reachable and has been removed.
+#
+# Approved EXACT files the UI fetches by name (case-insensitive):
+_APPROVED_FILES = {
+    "/cb-studio/app.html",                # the SPA entry
+    "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
+    "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
+}                                         # add a new project's showBibleFile / configBase characters.json here if it differs
+_MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
+              ".mp4", ".webm", ".mov", ".m4v", ".mp3", ".wav", ".m4a", ".ogg",
+              ".csv", ".srt"}   # retake sheet (csv) + review-overlay labels (srt) download/serve
+_IMG_EXT   = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
+# Approved ROOTS (path-prefix → the extensions allowed under it). Nothing outside these is served.
+_APPROVED_ROOTS = (
+    ("/engine/media/",   _MEDIA_EXT),               # generated review media (keyframes, clips, voice)
+    ("/cb-seed/assets/", _IMG_EXT),                 # character/location reference images (turnarounds, masters)
+    ("/cb-output/",      {".json"}),                # output packages — FURTHER limited to *_beat_package.json (below)
+    ("/cb-studio/data/", {".json", ".txt"}),        # registries (episodes/media-index/projects) + scripts the UI reads
+    ("/cb-studio/",      {".css", ".js", ".ico"}),  # frontend assets, if any (app.html is an exact-approved file above)
+    ("/projects/",       {".json", ".md", ".txt"} | _MEDIA_EXT),  # per-project scaffold (meta/characters/bible/episodes + its own assets/media)
+)
+# "projects-index.json" is retired/dead data (kept in the deny list defensively, costs nothing). "projects.json"
+# is the LIVE project-registry filename (see the two real call sites reading it under cb-studio/data/) — it was
+# missing from this list entirely (2026-07-08 full-codebase audit fix), meaning it was servable under the
+# approved "/cb-studio/data/" root + .json extension, the exact "internal state / stale registry" class this
+# list exists to refuse.
+_DENY_NAMES = {"locked.json", "notes.json", "projects-index.json", "projects.json"}
+
+def _static_blocked(urlpath):
+    """True UNLESS this static path is explicitly approved (an approved exact file, OR an approved root + extension).
+    Blocked by DEFAULT: all source folders, config/state files, docs, and any JSON/MD/TXT outside an approved root,
+    plus all backup/temp/audit/archive folders, dotfiles and path traversal."""
+    import urllib.parse
+    p = urllib.parse.unquote(urllib.parse.urlparse(urlpath or "").path).split("#")[0]
+    if not p.startswith("/"):
+        p = "/" + p
+    segs = [s for s in p.split("/") if s not in ("", ".")]
+    if not segs:                              return True     # bare root / directory — no listing
+    if any(s == ".." for s in segs):          return True     # path traversal
+    if any(s.startswith(".") for s in segs):  return True     # dotfiles (.env, .git, .replit, .DS_Store)
+    pl, name = p.lower(), segs[-1].lower()
+    if name in _DENY_NAMES:                   return True     # state/stale registry, even if under an approved root
+    if pl in _APPROVED_FILES:                 return False    # explicitly-approved exact file
+    ext = os.path.splitext(name)[1]
+    for root, exts in _APPROVED_ROOTS:
+        if pl.startswith(root) and ext in exts:
+            if root == "/cb-output/" and not name.endswith("_beat_package.json"):
+                return True                                   # cb-output: ONLY the beat package the UI reads
+            return False                                      # approved
+    return True                                               # default: BLOCKED
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+class H(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+        self.send_header("Cross-Origin-Resource-Policy", "same-origin")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; "
+            "media-src 'self' blob:; connect-src 'self'; object-src 'none'; "
+            "base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+        )
+        super().end_headers()
+
+    def _valid_host(self):
+        raw = (self.headers.get("Host") or "").strip()
+        try:
+            parsed = urlsplit("//" + raw)
+            host = (parsed.hostname or "").lower().rstrip(".")
+            port = parsed.port
+        except ValueError:
+            return False
+        expected_port = int(getattr(self.server, "server_port", PORT))
+        return host in ("localhost", "127.0.0.1", "::1") and port in (None, expected_port)
+
+    def _has_session(self):
+        try:
+            cookie = SimpleCookie(self.headers.get("Cookie") or "")
+            supplied = cookie.get(SESSION_COOKIE)
+            return bool(supplied and hmac.compare_digest(supplied.value, SESSION_TOKEN))
+        except Exception:
+            return False
+
+    def _deny(self, code, message):
+        body = json.dumps({"error": message}).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def _authorize(self, allow_launch=False):
+        if not self._valid_host():
+            self._deny(421, "invalid local Host header")
+            return False
+        parsed = urlsplit(self.path)
+        launch = (parse_qs(parsed.query).get("launchToken") or [None])[0]
+        if launch is not None:
+            if not allow_launch or parsed.path != "/cb-studio/app.html" or not hmac.compare_digest(
+                    str(launch), LAUNCH_TOKEN):
+                self._deny(401, "invalid Studio launch token")
+                return False
+            clean = [(key, value) for key, values in parse_qs(
+                parsed.query, keep_blank_values=True).items() if key != "launchToken"
+                     for value in values]
+            location = parsed.path + (("?" + urlencode(clean)) if clean else "")
+            self.send_response(303)
+            self.send_header("Location", location)
+            self.send_header(
+                "Set-Cookie",
+                f"{SESSION_COOKIE}={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict",
+            )
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            return False
+        if not self._has_session():
+            self._deny(401, "Studio launch authentication required")
+            return False
+        return True
+
+    def _valid_post_origin(self):
+        origin = (self.headers.get("Origin") or "").rstrip("/")
+        expected = f"http://{self.headers.get('Host')}".rstrip("/")
+        return bool(origin and hmac.compare_digest(origin, expected))
+
+    def _json(self, code, obj):
+        body = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _serve_static(self, head=False):
+        """Range-aware static serving. SimpleHTTPRequestHandler sends the whole file with a 200 (no Range), so large
+        clips can't stream or seek and Safari/WebKit won't play them at all — the cause of buffering / 'some don't load'.
+        This honours HTTP byte ranges (206), so videos stream in chunks and seek, and (with the threaded server) many
+        load at once. Security: same _static_blocked chokepoint first."""
+        if _static_blocked(self.path):
+            return self.send_error(404, "Not Found")
+        path = self.translate_path(self.path)
+        if os.path.isdir(path) or not os.path.isfile(path):
+            return self.send_error(404, "Not Found")
+        try:
+            size = os.path.getsize(path); mtime = os.path.getmtime(path)
+        except OSError:
+            return self.send_error(404, "Not Found")
+        # FRESHNESS: media is regenerated in place (a re-fired keyframe/clip keeps its filename), so the browser must
+        # REVALIDATE, never serve a stale cached copy. no-cache = "check with the server first"; a 304 fast-path keeps
+        # it cheap when nothing changed. This kills the "it hasn't changed" stale-image problem for good.
+        ims = self.headers.get("If-Modified-Since")
+        if ims and not self.headers.get("Range"):
+            try:
+                import email.utils
+                _t = email.utils.parsedate_tz(ims)
+                if _t and int(mtime) <= email.utils.mktime_tz(_t):
+                    self.send_response(304)
+                    self.send_header("Cache-Control", "no-cache")
+                    self.send_header("Last-Modified", self.date_time_string(int(mtime)))
+                    self.end_headers(); return
+            except Exception:
+                pass
+        try:
+            f = open(path, "rb")
+        except OSError:
+            return self.send_error(404, "Not Found")
+        ext = os.path.splitext(path)[1].lower()
+        ctype = {".mp4": "video/mp4", ".webm": "video/webm", ".mov": "video/quicktime", ".m4v": "video/x-m4v",
+                 ".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4", ".ogg": "audio/ogg"}.get(ext) \
+                or (self.guess_type(path) or "application/octet-stream")
+        try:
+            start, end, partial = 0, size - 1, False
+            rng = self.headers.get("Range")
+            if rng:
+                m = re.match(r"\s*bytes=(\d*)-(\d*)\s*$", rng)
+                if m and (m.group(1) or m.group(2)):
+                    if m.group(1) == "":
+                        start = max(0, size - int(m.group(2)))
+                    else:
+                        start = int(m.group(1))
+                        if m.group(2): end = min(int(m.group(2)), size - 1)
+                    if start > end or start >= size:
+                        self.send_response(416); self.send_header("Content-Range", f"bytes */{size}")
+                        self.end_headers(); return
+                    partial = True
+            length = end - start + 1
+            self.send_response(206 if partial else 200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Content-Length", str(length))
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Last-Modified", self.date_time_string(int(mtime)))
+            if partial:
+                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+            self.end_headers()
+            if head:
+                return
+            f.seek(start); remaining = length
+            while remaining > 0:
+                chunk = f.read(min(262144, remaining))
+                if not chunk: break
+                try:
+                    self.wfile.write(chunk)
+                except (BrokenPipeError, ConnectionResetError):
+                    break
+                remaining -= len(chunk)
+        finally:
+            f.close()
+
+    @_tracked
+    def do_HEAD(self):
+        if not self._authorize(allow_launch=True):
+            return
+        return self._serve_static(head=True)
+
+    @_tracked
+    def do_GET(self):
+        if not self._authorize(allow_launch=True):
+            return
+        if _legacy_gone(self):
+            return
+        if self.path == "/" or self.path == "":
+            self.send_response(302)
+            self.send_header("Location", "/cb-studio/app.html")
+            self.end_headers()
+            return
+        # [removed 2026-07-16 cutover: /api/pipeline — handled by the 410 gate above]
+        if self.path.startswith("/api/learning"):
+            # THE CREATIVE LEARNING SYSTEM, read-only view (2026-07-17): evidence counts,
+            # patterns awaiting the user's decision, active human-approved principles,
+            # and the improvement measures. Never mutates anything.
+            try:
+                import cb_learning
+                self._json(200, {"metrics": cb_learning.metrics(),
+                                   "patterns": cb_learning.patterns(),
+                                   "activeMemory": cb_learning.active_memory()})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path.startswith("/api/storyboard"):
+            # THE CREATIVE ROOM's storyboard packages (2026-07-16): read-only view of
+            # cb-output/creative/. ?episode=Ep1[&scene=N] — scene omitted lists what exists.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            sc = (q.get("scene") or [None])[0]
+            base = ROOT / "cb-output" / "creative"
+            if sc:
+                f = base / f"{ep}_scene{sc}_storyboard.json"
+                if not f.exists():
+                    self._json(404, {"error": f"no storyboard for scene {sc} yet"}); return
+                self._json(200, json.load(open(f))); return
+            vision = base / f"{ep}_episode_vision.json"
+            scenes = sorted(x.name.split("_scene")[1].split("_")[0]
+                             for x in base.glob(f"{ep}_scene*_storyboard.json"))
+            self._json(200, {"episode": ep,
+                              "vision": json.load(open(vision)) if vision.exists() else None,
+                              "scenes": scenes}); return
+        if self.path == "/api/jobs":
+            # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline
+            # route that incidentally carried JOBS is GONE; this is the clean replacement.
+            self._json(200, {"jobs": JOBS}); return
+        if self.path == "/api/health":
+            return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
+                                    "current": _source_fingerprint(), "running": len(PROCS)})
+        if self.path == "/api/rates":
+            # Read-only, zero-risk: exposes cb_costs.py's own RATES table so the UI's pre-generation cost
+            # estimates come from the same single source of truth the real spend ledger uses, rather than a
+            # second, hand-typed copy in JS that could silently drift. Never mutates anything; not a pricing
+            # decision surface — billing_profile.json remains the actual confirmed-plan source for spend.
+            try:
+                import cb_costs
+                self._json(200, {"rates": {k: {"usd": v[0], "unit": v[1], "confidence": v[2]}
+                                            for k, v in cb_costs.RATES.items()},
+                                  "updated": cb_costs.RATES_UPDATED})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        # [removed 2026-07-16 cutover: /api/continuity — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/masters — handled by the 410 gate above]
+        if self.path == "/api/loclib":
+            manifest = {}
+            mf = ROOT / "cb-seed" / "assets" / "locations" / "_manifest.json"
+            try:
+                if mf.exists():
+                    manifest = json.loads(mf.read_text())
+            except Exception:
+                manifest = {}
+            reuse = {}
+            lf = ROOT / "engine" / "config" / "locations.json"
+            try:
+                if lf.exists():
+                    locs = json.loads(lf.read_text())
+                    block = locs.get("Ep1", {}) if isinstance(locs, dict) else {}
+                    scene_loc = {}
+                    if isinstance(block, dict):
+                        for scene, sc in block.items():
+                            lid = sc.get("locationId") if isinstance(sc, dict) else None
+                            if lid:
+                                scene_loc.setdefault(lid, []).append(scene)
+                    elif isinstance(block, list):
+                        for sc in block:
+                            if not isinstance(sc, dict):
+                                continue
+                            lid = sc.get("locationId")
+                            scn = sc.get("scene")
+                            if lid and scn is not None:
+                                scene_loc.setdefault(lid, []).append(scn)
+                    for lid, scenes in scene_loc.items():
+                        if len(scenes) >= 1:
+                            reuse[lid] = scenes
+            except Exception:
+                reuse = {}
+            # EVERY episode scene + its scene-shot plate (so the studio shows all scenes, not just approved ones)
+            scenes = []
+            try:
+                locs2 = json.loads(lf.read_text()) if lf.exists() else {}
+                block2 = locs2.get("Ep1", {}) if isinstance(locs2, dict) else {}
+                if isinstance(block2, dict):
+                    for scn, sc in sorted(block2.items(), key=lambda kv: int(kv[0]) if str(kv[0]).isdigit() else 999):
+                        if not isinstance(sc, dict):
+                            continue
+                        plate = f"Ep1_S{scn}_plate.png"
+                        scenes.append({"scene": scn, "name": sc.get("name", ""), "locationId": sc.get("locationId", ""),
+                                       "location": sc.get("location", ""), "look": sc.get("look", ""),
+                                       "time": sc.get("time", ""), "weather": sc.get("weather", ""),
+                                       "master": sc.get("master"),
+                                       "shots": sc.get("shots") or [],
+                                       "plate": (plate if (MEDIA / plate).exists() else None)})
+            except Exception:
+                scenes = []
+            # uploaded scene reference images on disk (so the studio surfaces every scene shot you've dropped in,
+            # even ones not yet linked to a scene plate)
+            refs = []
+            try:
+                ad = ROOT / "cb-seed" / "assets"
+                paths = list((ad / "ep1").glob("CB_Scene_*")) + list(ad.glob("CB_*_plate.*"))
+                for p in sorted(set(paths)):
+                    if not p.is_file():
+                        continue
+                    nm = (p.stem.replace("CB_Scene_", "").replace("CB_", "").replace("_anchor", "")
+                            .replace("_plate", "").replace("_", " ").strip())
+                    refs.append({"file": os.path.relpath(str(p), str(ROOT)), "name": nm or p.stem})
+            except Exception:
+                refs = []
+            return self._json(200, {"manifest": manifest, "reuse": reuse, "scenes": scenes, "uploadedRefs": refs})
+        if self.path == "/api/houses":
+            houses = []
+            try:
+                cf = ROOT / "engine" / "config" / "characters.json"
+                cfg = json.loads(cf.read_text()) if cf.exists() else {}
+                for char, v in cfg.items():
+                    if not isinstance(v, dict):
+                        continue
+                    h = v.get("house")
+                    if not isinstance(h, dict):
+                        continue
+                    houses.append({"character": char,
+                                   "interior": h.get("interior"), "interiorMulticam": h.get("interiorMulticam"),
+                                   "exterior": h.get("exterior"), "exteriorMulticam": h.get("exteriorMulticam"),
+                                   "interiorDesc": h.get("interiorDesc"), "exteriorDesc": h.get("exteriorDesc")})
+            except Exception:
+                houses = []
+            return self._json(200, {"houses": houses})
+        if self.path == "/api/projects":
+            projs = []
+            try:
+                pf = ROOT / "cb-studio" / "data" / "projects.json"
+                if pf.exists():
+                    d = json.loads(pf.read_text()); projs = d.get("projects", []) if isinstance(d, dict) else []
+                for p in projs:
+                    pid = p.get("id", "")
+                    cfgbase = p.get("configBase") or ("projects/" + pid)
+                    epfile = p.get("episodesFile") or ("projects/" + pid + "/episodes.json")
+                    try:
+                        epf = ROOT / epfile; ed = json.loads(epf.read_text()) if epf.exists() else []
+                        p["episodeCount"] = len(ed) if isinstance(ed, list) else len(ed.get("episodes", []))
+                    except Exception:
+                        p["episodeCount"] = 0
+                    try:
+                        cf = ROOT / cfgbase / "characters.json"; cd = json.loads(cf.read_text()) if cf.exists() else {}
+                        p["characterCount"] = len([k for k, v in cd.items() if isinstance(v, dict) and k != "sizeClasses"])
+                    except Exception:
+                        p["characterCount"] = 0
+            except Exception:
+                projs = []
+            return self._json(200, {"projects": projs})
+        if self.path == "/api/reindex":
+            reindex_media()
+            return self._json(200, {"ok": True, "episodes": reindex_episodes()})
+        # [removed 2026-07-16 cutover: /api/keyframe-prompt — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/voice-prompt — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/beat-sound-brief — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/relay-state — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/keyframe-qa — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/craft-score — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/beat-prompt — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/beat-state — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retake-log — handled by the 410 gate above]
+        if self.path.startswith("/api/departments"):
+            # The actual people behind the existing production stages. Read-only: returns
+            # their real SKILL.md load state and any awaiting/approved work from the existing
+            # scene/shot ledger. It never runs a worker or calls a provider.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            shot_id = (q.get("shotId") or [None])[0]
+            stage = (q.get("stage") or [None])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
+                    (shot_id and not _SHOT_TOKEN.match(shot_id)) or
+                    (stage and stage not in DEPARTMENT_STAGES)):
+                return self._json(400, {"error": "valid scene, optional shotId/stage and episode required"})
+            try:
+                import cb_render as _CBR
+                return self._json(200, _CBR.department_status(scene, shot_id, ep, stage))
+            except _CBR.Refused as e:
+                return self._json(400, {"error": str(e)})
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+        if self.path.startswith("/api/story-intake-status"):
+            # THE DIRECTOR'S SCRIPT INTAKE (2026-07-19): read-only status for the ONE
+            # department stage that runs before any scene package exists — a genuinely
+            # different scope from every other department (episode-wide, not scene+shot),
+            # so it is deliberately its own read route rather than reusing
+            # department_status(), which always requires a package to already exist.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "valid episode required"})
+            try:
+                import cb_intake as _CBI
+                return self._json(200, _CBI.intake_status(ep))
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+        if self.path.startswith("/api/scene-roster"):
+            # THE CANONICAL SCENE ROSTER (2026-07-19): the approved beat package is the ONLY
+            # authority for which scenes exist, their order/numbers and headings — this is
+            # deliberately NOT /api/loclib (that stays the persistent, cross-episode reusable
+            # location-asset manifest and is never touched by or used to derive scene
+            # existence). Read-only; scenes=[] until story intake has been approved.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "valid episode required"})
+            try:
+                import cb_intake as _CBI
+                return self._json(200, _CBI.scene_roster(ep))
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+        if self.path.startswith("/api/production-preflight"):
+            # One read-only, zero-spend report of every known blocker, evaluated before any
+            # paid button so failures arrive together instead of one approval click at a time.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene and episode must be plain tokens"})
+            try:
+                import cb_production_preflight
+                return self._json(200, cb_production_preflight.production_preflight(scene, ep))
+            except Exception as e:
+                return self._json(400, {"error": str(e), "zeroSpend": True})
+        if self.path.startswith("/api/production-state"):
+            # The one read-only approval/readiness policy used by the renderer, preflight and
+            # Studio. The browser displays this document; it does not reconstruct approvals.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene and episode must be plain tokens"})
+            try:
+                import cb_state
+                return self._json(200, cb_state.production_state(scene, ep))
+            except Exception as e:
+                return self._json(400, {"error": str(e), "zeroSpend": True})
+        if self.path.startswith("/api/shot-package"):
+            # THE SHOT PIPELINE (additive, 2026-07-16): read-only — the production package cb_engine.py
+            # compiled + validated, plus a server-computed media-existence map (shot_media_map above).
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene (and optional episode) required as plain tokens, "
+                                                 "e.g. /api/shot-package?scene=1&episode=Ep1"})
+            p = _shot_pkg_path(scene, ep)
+            if not p.exists():
+                return self._json(404, {"error": f"no production package for {ep} scene {scene} "
+                                                 f"({p.name}) — approve the storyboard to hand it to production"})
+            try:
+                pkg = json.loads(p.read_text())
+            except Exception as e:
+                return self._json(400, {"error": f"package unreadable: {e}"})
+            try:
+                import cb_state
+                production_state = cb_state.production_state(scene, ep)
+            except Exception as exc:
+                production_state = {"error": str(exc)}
+            return self._json(200, {"package": pkg, "media": shot_media_map(pkg, scene, ep),
+                                    "productionState": production_state, "file": p.name})
+        if self.path == "/api/scenelook" or self.path.startswith("/api/scenelook?"):
+            # THE SCENE LOOK GATE (additive, 2026-07-18): read-only status — never writes,
+            # never assumes a file's mere presence means approval (scenelook_status_server).
+            # (2026-07-19 routing fix: was a bare startswith("/api/scenelook"), which also
+            # matched /api/scenelook-library — a real prefix collision that silently shadowed
+            # the newer, more specific route below with this status endpoint's own response
+            # shape. Narrowed to an exact match or a real query string on this exact path.)
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene (and optional episode) required as plain tokens, "
+                                                 "e.g. /api/scenelook?scene=1&episode=Ep1"})
+            return self._json(200, scenelook_status_server(scene, ep))
+        if self.path.startswith("/api/shot-reassess"):
+            # DIRECT-INPUT LINEAGE, READ-ONLY, ZERO SPEND (2026-07-18 production-safety
+            # directive, item 3/4): for every opener shot in the scene, compares its
+            # existing keyframe candidate/approval's recorded input signature against what
+            # those SAME inputs (its own card, the approved plate, its own references, the
+            # compiled brief, model/settings) resolve to RIGHT NOW — never the whole
+            # storyboard/package md5. This is the one place engine code is imported directly
+            # rather than mirrored (unlike GATE_SEQ/scene_lineage/scenelook_status_server
+            # above) — reassess_keyframe is read-only and never touches cb_gen, so importing
+            # it is safe; duplicating its several helper functions here would not be.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene (and optional episode) required as plain tokens, "
+                                                 "e.g. /api/shot-reassess?scene=1&episode=Ep1"})
+            p = _shot_pkg_path(scene, ep)
+            if not p.exists():
+                return self._json(200, {"shots": {}})
+            try:
+                pkg = json.loads(p.read_text())
+            except Exception as e:
+                return self._json(400, {"error": f"package unreadable: {e}"})
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            out = {}
+            for s in pkg.get("shots") or []:
+                sid = s.get("shotId")
+                if not sid or s.get("sourceType") != "opener":
+                    continue
+                try:
+                    r = _CBR.reassess_keyframe(scene, sid, ep)
+                    out[sid] = {"verdict": r["verdict"], "changed": r["changed"]}
+                except Exception as e:
+                    out[sid] = {"verdict": "error", "changed": [], "error": str(e)[:200]}
+            return self._json(200, {"shots": out})
+        if self.path.startswith("/api/shot-keyframe-library"):
+            # THE OPENING-FRAME LIBRARY/HISTORY, READ-ONLY, ZERO SPEND (2026-07-18, Julian's
+            # source-choice directive): every prior opening-frame artefact for ONE shot the
+            # human may deliberately re-select — the currently-pending candidate (so it's
+            # never lost the moment a fresh source-choice screen opens), the currently-
+            # approved keyframe, every rejected candidate, every superseded approval. Listing
+            # never mutates anything; re-selecting a listed item is a separate, explicit
+            # select-library action. Imports cb_render directly (read-only, same precedent as
+            # /api/shot-reassess above).
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; sid = (q.get("shotId") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not sid or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) \
+               or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene, shotId (and optional episode) required as plain "
+                                                 "tokens, e.g. /api/shot-keyframe-library?scene=1&shotId=1.B1.S1&episode=Ep1"})
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                items = _CBR.keyframe_library_for_shot(scene, sid, ep)
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
+            out = [{"path": it["path"], "url": _url_from_abs(it["path"]), "at": it.get("at"),
+                    "outcome": it.get("outcome"), "note": it.get("note")} for it in items]
+            return self._json(200, {"items": out})
+        if self.path.startswith("/api/scenelook-library"):
+            # THE SCENE LOOK REFERENCE LIBRARY, READ-ONLY, ZERO SPEND (2026-07-19 UX fix —
+            # exposing the button, not a redesign): every prior Scene Look artefact for ONE
+            # scene the human may deliberately pick as a REFERENCE for a fresh generation.
+            # Unlike /api/shot-keyframe-library's items (which become the candidate
+            # directly), a picked item here is always fed to the 'scenelook' cmd's
+            # sourcePath — a real generate_scenelook_plate call still fires. Same
+            # direct-import, read-only precedent as /api/shot-keyframe-library above.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene (and optional episode) required as plain "
+                                                 "tokens, e.g. /api/scenelook-library?scene=1&episode=Ep1"})
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                items = _CBR.scenelook_reference_library(scene, ep)
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
+            out = [{"path": it["path"], "url": _url_from_abs(it["path"]), "at": it.get("at"),
+                    "outcome": it.get("outcome"), "note": it.get("note")} for it in items]
+            return self._json(200, {"items": out})
+        # ── CONTAINED CREATIVE CONTROLS — Voice/Animation working versions + the free
+        # structure check (2026-07-19, Julian's directive). All four are READ-ONLY, ZERO
+        # COST, direct in-process reads (same precedent as /api/shot-reassess and
+        # /api/shot-keyframe-library above — cb_render's own functions already guarantee
+        # no cb_gen call happens on a read).
+        if self.path.startswith("/api/shot-voice-status") or self.path.startswith("/api/shot-seedance-status") \
+           or self.path.startswith("/api/shot-check-structure"):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]; sid = (q.get("shotId") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not scene or not sid or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) \
+               or not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "scene, shotId (and optional episode) required as plain tokens"})
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                if self.path.startswith("/api/shot-voice-status"):
+                    return self._json(200, _CBR.voice_performance_status(scene, sid, ep))
+                if self.path.startswith("/api/shot-seedance-status"):
+                    return self._json(200, _CBR.seedance_working_status(scene, sid, ep))
+                return self._json(200, _CBR.check_seedance_structure(scene, sid, ep))
+            except _CBR.Refused as e:
+                return self._json(400, {"error": str(e)})
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
+        if "/cb-studio/data/" in self.path:
+            reindex_media(); reindex_episodes()
+        return self._serve_static()       # range-aware (video streams + seeks), not the no-Range super().do_GET()
+
+    def _body(self):
+        n = int(self.headers.get("Content-Length", 0))
+        return json.loads(self.rfile.read(n) or b"{}")
+
+    @_tracked
+    def do_POST(self):
+        if not self._authorize():
+            return
+        if not self._valid_post_origin():
+            self._deny(403, "same-origin POST required")
+            return
+        if _legacy_gone(self):
+            return
+        if self.path == "/api/write":
+            try:
+                d = self._body(); seed = d.get("seed") or {}; episode = d.get("episode", "Ep1")
+                self._json(200, {"ok": True, "jobId": write_script(seed, episode)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/restart":     # reload the studio with the latest code (refused if a job is running)
+            if PROCS:
+                self._json(409, {"error": "a job is running — stop it or let it finish, then restart"}); return
+            self._json(200, {"ok": True, "reloading": True})
+            threading.Thread(target=lambda: (time.sleep(0.3), _reexec()), daemon=True).start()
+            return
+        # [removed 2026-07-16 cutover: /api/fire — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retakes — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retake-brief — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/retake-csv — handled by the 410 gate above]
+        if self.path == "/api/stop":
+            try:
+                d = self._body(); jid = d.get("jobId")
+                stopped = [jid] if (jid and stop_job(jid)) else ([] if jid else stop_all())
+                self._json(200, {"ok": True, "stopped": stopped, "jobs": JOBS})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        # [removed 2026-07-16 cutover: /api/export-storyboard — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/approve — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/unapprove — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/rebuild — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/set-master — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/clear-master — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/regen — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/gen-audio — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/gen-keyframe — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/render-beat — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/approve-beat — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/relay-prepare — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/relay-approve — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/director-eye — handled by the 410 gate above]
+        # [removed 2026-07-16 cutover: /api/masters — handled by the 410 gate above]
+        if self.path == "/api/episode":
+            try:
+                # FIXED 2026-07-12 (full-codebase audit continued): this handler re-implemented _body()'s exact
+                # Content-Length/json.loads logic inline instead of calling the shared method every other POST
+                # handler in this class already uses — a future hardening of _body() (a size cap, chunked-
+                # encoding support, a clearer malformed-header error) would silently never apply to episode
+                # uploads. Delegate instead.
+                data = self._body()
+                num = int(data.get("number"))
+                title = (data.get("title") or "").strip() or f"Episode {num}"
+                script = data.get("script") or ""
+                if data.get("docData"):   # an uploaded script document — extract its text
+                    script = extract_doc_text(data["docData"], data.get("docName", "")) or script
+                current = SCRIPT_STORE.store(
+                    f"Ep{num}", script, title,
+                    source_name=str(data.get("docName") or "pasted-script"),
+                    activated_by=str(data.get("by") or "Julian"),
+                )
+                fname = current["displayFile"]
+                eps = reindex_episodes()
+                self._json(200, {"ok": True, "script": fname,
+                                  "scriptVersionId": current["scriptVersionId"],
+                                  "episodes": eps})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/episode-rename":
+            # RENAME an episode's title AFTER saving — no re-upload. The number is the stable key; only the title
+            # (and the title-slug in the script + package filenames, and the package "title" field) changes.
+            try:
+                d = self._body()
+                num = int(d.get("number"))
+                title = (d.get("title") or "").strip()
+                if not title:
+                    raise ValueError("a new name is required")
+                newslug = slug(title)
+                before = SCRIPT_STORE.current(f"Ep{num}", required=False)
+                current = SCRIPT_STORE.rename_current(f"Ep{num}", title)
+                # A Writers' Room score belongs to the same immutable script bytes. Preserve
+                # its display alias when only the episode title changes.
+                if before:
+                    old_score = SCRIPTS / before["displayFile"].replace(".txt", ".score.json")
+                    new_score = SCRIPTS / current["displayFile"].replace(".txt", ".score.json")
+                    if old_score.exists() and not new_score.exists():
+                        new_score.write_bytes(old_score.read_bytes())
+                # update the "title" field of any package + rename its file to match
+                for pk in list(OUT.glob(f"Ep{num}_*_beat_package.json")) + list(OUT.glob(f"Ep{num}_*_shot_package.json")):
+                    try:
+                        pd = json.loads(pk.read_text()); pd["title"] = title
+                        pk.write_text(json.dumps(pd, indent=1, ensure_ascii=False))
+                        kind = "_beat_package.json" if pk.name.endswith("_beat_package.json") else "_shot_package.json"
+                        newpk = OUT / f"Ep{num}_{newslug}{kind}"
+                        if pk.name != newpk.name and not newpk.exists():
+                            pk.rename(newpk)
+                    except Exception:
+                        pass
+                eps = reindex_episodes()
+                self._json(200, {"ok": True, "title": title, "episodes": eps})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/scene-shot":
+            try:
+                import base64, shutil
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                if not scene:
+                    raise ValueError("scene required")
+                episode = str(d.get("episode") or "Ep1").strip() or "Ep1"
+                fname = f"{episode}_S{scene}_plate.png"
+                MEDIA.mkdir(parents=True, exist_ok=True)
+                src = d.get("fromFile")
+                if src:   # PULL from the library — copy an existing image to this scene's plate
+                    sp = (ROOT / str(src).lstrip("/")).resolve()
+                    if not (sp.is_relative_to(ROOT) and sp.is_file()):
+                        raise ValueError("fromFile not found")
+                    shutil.copy(str(sp), str(MEDIA / fname))
+                else:     # UPLOAD — decode the image data
+                    raw = d.get("imageData") or ""
+                    if not raw:
+                        raise ValueError("imageData or fromFile required")
+                    if raw.strip().startswith("data:") and "," in raw:
+                        raw = raw.split(",", 1)[1]
+                    (MEDIA / fname).write_bytes(base64.b64decode(raw))
+                reindex_media()   # the file exists on disk now — without this, media-index.json (what the UI
+                                  # re-fetches right after this call) stays stale and the plate never appears
+                self._json(200, {"ok": True, "plate": fname})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/beat-update":
+            try:
+                d = self._body()
+                pkg = str(d.get("package", "")).strip()
+                code = str(d.get("beatCode", "")).strip()
+                if not pkg or not code:
+                    raise ValueError("package and beatCode required")
+                if "/" in pkg or ".." in pkg:
+                    raise ValueError("bad package name")
+                pf = ROOT / "cb-output" / pkg
+                if not pf.exists():
+                    raise ValueError("package not found: " + pkg)
+                data = json.loads(pf.read_text())
+                beats = data.get("beats") or data.get("shots") or []
+                target = next((b for b in beats if str(b.get("beatCode") or b.get("shotCode")) == code), None)
+                if target is None:
+                    raise ValueError("beat not found: " + code)
+                for k, v in (d.get("updates") or {}).items():
+                    if isinstance(v, dict):
+                        cur = target.get(k) if isinstance(target.get(k), dict) else {}
+                        # was `if vv not in (None, "")` — skipped every blank sub-field, so a user could never
+                        # actively CLEAR a nested field (opensOn/fidelityAllocation/performance/continuity) via
+                        # the Studio UI (found 2026-07-08). The only caller (app.html's ebSave) always sends the
+                        # FULL current state of every sub-field on every save, never a partial patch, so
+                        # excluding only None (not "") is safe — nothing relies on blank-means-leave-alone here.
+                        cur.update({kk: vv for kk, vv in v.items() if vv is not None})
+                        target[k] = cur
+                    elif v is not None:
+                        target[k] = v
+                if isinstance(d.get("cuts"), list):
+                    target["cuts"] = d["cuts"]
+                try:
+                    (ROOT / "cb-output" / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                except Exception:
+                    pass
+                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+                self._json(200, {"ok": True, "beatCode": code})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/scene-update":
+            # THE SCENE-LOOK LAW + THE SCENE BUBBLE LAW's three locked constants (sceneLook, ambientBed,
+            # parentLine) had no write path at all before this — found in the 2026-07-08 software-wide audit.
+            # Mirrors /api/beat-update's own generic merge pattern, targeting data["scenes"] instead of
+            # data["beats"]/data["shots"].
+            try:
+                d = self._body()
+                pkg = str(d.get("package", "")).strip()
+                sn = str(d.get("sceneNumber", "")).strip()
+                if not pkg or not sn:
+                    raise ValueError("package and sceneNumber required")
+                if "/" in pkg or ".." in pkg:
+                    raise ValueError("bad package name")
+                pf = ROOT / "cb-output" / pkg
+                if not pf.exists():
+                    raise ValueError("package not found: " + pkg)
+                data = json.loads(pf.read_text())
+                scenes = data.get("scenes") or []
+                target = next((s for s in scenes if str(s.get("sceneNumber")) == sn), None)
+                if target is None:
+                    raise ValueError("scene not found: " + sn)
+                for k, v in (d.get("updates") or {}).items():
+                    if isinstance(v, dict):
+                        cur = target.get(k) if isinstance(target.get(k), dict) else {}
+                        # same nested-clearing fix as /api/beat-update above (2026-07-08) — excludes only None.
+                        cur.update({kk: vv for kk, vv in v.items() if vv is not None})
+                        target[k] = cur
+                    elif v is not None:
+                        target[k] = v
+                try:
+                    (ROOT / "cb-output" / (pkg + ".bak")).write_text(pf.read_text())  # one-step undo backup
+                except Exception:
+                    pass
+                pf.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+                self._json(200, {"ok": True, "sceneNumber": sn})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/project":
+            try:
+                import base64, datetime
+                d = self._body()
+                name = str(d.get("name", "")).strip()
+                if not name:
+                    raise ValueError("project name required")
+                pid = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "project"
+                base_pid = pid; i = 2
+                while (ROOT / "projects" / pid).exists():
+                    pid = base_pid + "-" + str(i); i += 1
+                pdir = ROOT / "projects" / pid
+                (pdir / "assets").mkdir(parents=True, exist_ok=True)
+                chars = {}
+                for ch in (d.get("characters") or []):
+                    cn = str(ch.get("name", "")).strip()
+                    if not cn:
+                        continue
+                    entry = {"key_features": str(ch.get("keyFeatures", "")).strip()}
+                    raw = ch.get("imageData") or ""
+                    if raw:
+                        if raw.strip().startswith("data:") and "," in raw:
+                            raw = raw.split(",", 1)[1]
+                        safe = re.sub(r"[^A-Za-z0-9]+", "", cn) or "Char"
+                        fn = "CB_" + safe + "_anchor.png"
+                        (pdir / "assets" / fn).write_bytes(base64.b64decode(raw))
+                        rel = "../projects/" + pid + "/assets/" + fn
+                        entry["anchor"] = rel; entry["refs"] = [rel]
+                    chars[cn] = entry
+                (pdir / "characters.json").write_text(json.dumps(chars, indent=2, ensure_ascii=False))
+                (pdir / "show_bible.md").write_text(str(d.get("showBible", "")))
+                (pdir / "episodes.json").write_text("[]")
+                meta = {
+                    "id": pid, "name": name, "primary": False,
+                    "animationType": d.get("animationType", ""), "style": d.get("style", ""),
+                    "premise": d.get("premise", ""), "audience": d.get("audience", ""),
+                    "episodeLength": d.get("episodeLength", ""), "aspectRatio": d.get("aspectRatio", ""),
+                    "voiceProvider": d.get("voiceProvider", ""), "musicStyle": d.get("musicStyle", ""),
+                    "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
+                    "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
+                    "createdAt": str(datetime.date.today()),
+                }
+                (pdir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
+                pf = ROOT / "cb-studio" / "data" / "projects.json"
+                pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
+                if not isinstance(pdata, dict):
+                    pdata = {"projects": []}
+                pdata.setdefault("projects", []).append(meta)
+                pf.write_text(json.dumps(pdata, indent=2, ensure_ascii=False))
+                self._json(200, {"ok": True, "id": pid, "project": meta})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/scene-ref":
+            try:
+                import base64
+                d = self._body()
+                name = str(d.get("name", "")).strip()
+                raw = d.get("imageData") or ""
+                if not name:
+                    raise ValueError("name required")
+                if not raw:
+                    raise ValueError("imageData required")
+                if raw.strip().startswith("data:") and "," in raw:
+                    raw = raw.split(",", 1)[1]
+                safe = re.sub(r"[^A-Za-z0-9]+", "", name) or "Scene"
+                outdir = ROOT / "cb-seed" / "assets" / "ep1"
+                outdir.mkdir(parents=True, exist_ok=True)
+                fn = f"CB_Scene_{safe}_anchor.png"
+                (outdir / fn).write_bytes(base64.b64decode(raw))
+                self._json(200, {"ok": True, "file": f"cb-seed/assets/ep1/{fn}", "name": name})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/character":
+            try:
+                import base64
+                d = self._body()
+                name = (d.get("name") or "").strip()
+                if not name:
+                    raise ValueError("name required")
+                cpath = CBGEN / "config" / "characters.json"
+                C = json.loads(cpath.read_text())
+                entry = C.get(name) if isinstance(C.get(name), dict) else {}
+                if d.get("anchorData"):
+                    raw = d["anchorData"]
+                    if raw.strip().startswith("data:") and "," in raw:
+                        raw = raw.split(",", 1)[1]
+                    ext = (d.get("anchorName", "") or "").rsplit(".", 1)[-1].lower()
+                    if ext not in ("png", "jpg", "jpeg", "webp"):
+                        ext = "png"
+                    safe = "CB_" + re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + "_anchor." + ext
+                    (ROOT / "cb-seed" / "assets").mkdir(parents=True, exist_ok=True)
+                    (ROOT / "cb-seed" / "assets" / safe).write_bytes(base64.b64decode(raw))
+                    entry["anchor"] = "../cb-seed/assets/" + safe
+                if d.get("turnData"):
+                    raw = d["turnData"]
+                    if raw.strip().startswith("data:") and "," in raw:
+                        raw = raw.split(",", 1)[1]
+                    ext = (d.get("turnName", "") or "").rsplit(".", 1)[-1].lower()
+                    if ext not in ("png", "jpg", "jpeg", "webp"):
+                        ext = "png"
+                    safe = "CB_" + re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + "_turn4." + ext
+                    (ROOT / "cb-seed" / "assets").mkdir(parents=True, exist_ok=True)
+                    (ROOT / "cb-seed" / "assets" / safe).write_bytes(base64.b64decode(raw))
+                    turn_path = "../cb-seed/assets/" + safe
+                    entry["turn4"] = turn_path
+                    entry.setdefault("refs", [])
+                    if turn_path not in entry["refs"]:
+                        entry["refs"].insert(0, turn_path)
+                for k in ("key_features", "voiceId", "size", "sizeRef", "cadence",
+                          "tier", "crystal", "feeling", "colour", "note", "home"):
+                    if d.get(k) not in (None, ""):
+                        entry[k] = d[k]
+                if str(d.get("sizeRank", "")).strip().isdigit():
+                    entry["sizeRank"] = int(d["sizeRank"])
+                C[name] = entry
+                cpath.write_text(json.dumps(C, indent=2, ensure_ascii=False))
+                self._json(200, {"ok": True, "name": name, "character": entry})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/department-run":
+            # One explicit specialist thinking call. The subprocess can use the LLM but its
+            # cb_render command has no path to cb_gen: it stores an awaiting-approval brief
+            # and stops. Existing approved work remains untouched on failure.
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                stage = str(d.get("stage", "")).strip()
+                sid = str(d.get("shotId", "")).strip() or "-"
+                if (not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
+                        stage not in DEPARTMENT_STAGES or
+                        (sid != "-" and not _SHOT_TOKEN.match(sid))):
+                    self._json(400, {"error": "invalid scene, episode, stage or shotId"}); return
+                if stage not in ("look", "review-final") and sid == "-":
+                    self._json(400, {"error": f"{stage} needs a shotId"}); return
+                args = ["cb_render.py", "department-prepare", scene, stage, sid, ep]
+                job = _start(_jid(f"department_{stage}_{sid}"),
+                             f"department:{stage}:{sid}", scene, args)
+                self._json(200, {"ok": True, "jobId": job})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path in ("/api/department-save", "/api/department-decide"):
+            # Plain ledger edits/decisions: no LLM and no media provider call.
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                stage = str(d.get("stage", "")).strip()
+                sid = str(d.get("shotId", "")).strip() or None
+                if (not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
+                        stage not in DEPARTMENT_STAGES or
+                        (sid and not _SHOT_TOKEN.match(sid))):
+                    self._json(400, {"error": "invalid scene, episode, stage or shotId"}); return
+                import cb_render as _CBR
+                if self.path == "/api/department-save":
+                    rec = _CBR.save_department_candidate(
+                        scene, stage, text=d.get("text"), lines=d.get("lines"), shot_id=sid,
+                        episode=ep, reviewed_by=str(d.get("by") or "Julian"))
+                else:
+                    rec = _CBR.decide_department(
+                        scene, stage, str(d.get("verdict") or ""), shot_id=sid,
+                        note=str(d.get("note") or ""), episode=ep,
+                        reviewed_by=str(d.get("by") or "Julian"))
+                self._json(200, {"ok": True, "record": rec})
+            except _CBR.Refused as e:
+                self._json(400, {"error": str(e)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/story-intake-run":
+            # THE DIRECTOR'S SCRIPT INTAKE — one real thinking call (2026-07-19). Episode-
+            # scoped, runs BEFORE any scene package exists, so it cannot reuse
+            # /api/department-run (which always requires one). Background job, matching
+            # every other specialist-thinking call in this studio — no media provider is
+            # reachable from cb_intake.py at all.
+            try:
+                d = self._body()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                if not _SHOT_TOKEN.match(ep):
+                    self._json(400, {"error": "valid episode required"}); return
+                args = ["cb_intake.py", "run", ep]
+                job = _start(_jid(f"storyintake_{ep}"), "storyintake", "-", args)
+                self._json(200, {"ok": True, "jobId": job})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/story-intake-decide":
+            # Approve/reject the visible candidate. No LLM, no media provider — approve()
+            # is the ONLY place that writes the canonical beat package + episode vision
+            # that unlock cb_creative.py's own scene/storyboard process; reject() archives
+            # the candidate (never deletes) and leaves no canonical package.
+            try:
+                d = self._body()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                verdict = str(d.get("verdict") or "").strip()
+                if not _SHOT_TOKEN.match(ep) or verdict not in ("approve", "reject"):
+                    self._json(400, {"error": "episode and verdict (approve|reject) required"})
+                    return
+                import cb_intake as _CBI
+                rec = _CBI.decide_intake(ep, verdict, note=str(d.get("note") or ""),
+                                         reviewed_by=str(d.get("by") or "Julian"))
+                self._json(200, {"ok": True, "record": rec})
+            except _CBI.Refused as e:
+                self._json(400, {"error": str(e)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/creative-run":
+            # THE CREATIVE ROOM job runner (2026-07-16): vision / scene passes — OpenAI text
+            # calls only; no media provider, no spend token (cb_creative imports no adapter).
+            try:
+                d = self._body()
+                cmd = str(d.get("cmd", "")).strip()
+                scene = str(d.get("scene", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                if cmd not in ("vision", "scene", "envelope", "migrate"):
+                    self._json(400, {"error": "cmd must be vision|scene|envelope|migrate"}); return
+                if cmd == "scene" and not re.match(r"^\w+$", scene):
+                    self._json(400, {"error": "scene must be a plain token"}); return
+                args = ["cb_creative.py", cmd] + ([scene, ep] if cmd == "scene" else [ep])
+                self._json(200, {"ok": True,
+                                  "jobId": _start(_jid(f"creative_{cmd}_{scene or ep}"),
+                                                   "creative:" + cmd, scene or "-", args)})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/storyboard-approve":
+            # HUMAN GATE A: approve/annotate at episode/scene/beat/shot level — a plain
+            # creative note in the user's own words; no compiler fields exposed.
+            try:
+                self._json(200, _storyboard_approval(self._body()))
+            except FileNotFoundError as e:
+                self._json(404, {"error": str(e)})
+            except (StoryboardApprovalRefused, cb_db.SceneBusy, cb_db.StateConflict) as e:
+                self._json(409, {"error": str(e)})
+            except ValueError as e:
+                self._json(400, {"error": str(e)})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path == "/api/learning-promote":
+            # THE EXPLICIT 'Promote to Creative Memory' ACTION — never silent, never automatic
+            try:
+                import cb_learning
+                d = self._body()
+                rec = cb_learning.promote(str(d.get("patternId", "")),
+                                            by=str(d.get("by") or "Julian"),
+                                            applied_source_ref=str(d.get("ref") or ""),
+                                            decision=str(d.get("decision") or ""),
+                                            activation_note=str(d.get("note", "")))
+                self._json(200, {"ok": True, "activated": rec})
+            except Exception as e:
+                self._json(409, {"error": str(e)})
+            return
+        if self.path == "/api/shot-keyframe-upload":
+            # THE UPLOAD SOURCE, STEP 1 OF 2 (2026-07-18, Julian's source-choice directive):
+            # decodes a base64 image (same data-URI-or-raw convention as extract_doc_text's own
+            # script-upload path above) and writes it to a holding file under the approved
+            # engine/media tree — NOT yet a keyframe candidate. Step 2 is the client's own
+            # follow-up /api/shot-run {cmd:"select-upload", sourcePath: <this path>} call, which
+            # does the actual preserve-original + immutable-candidate-copy work in cb_render.py.
+            # This endpoint alone never touches any shot's ledger.
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip(); sid = str(d.get("shotId", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                raw = d.get("dataB64"); filename = str(d.get("filename") or "upload.png")
+                if not scene or not sid or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) \
+                   or not _SHOT_TOKEN.match(ep):
+                    self._json(400, {"error": "scene, shotId (and optional episode) required as plain tokens"}); return
+                if not raw:
+                    self._json(400, {"error": "dataB64 (the image data) is required"}); return
+                import base64
+                if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
+                    raw = raw.split(",", 1)[1]
+                blob = base64.b64decode(raw)
+                ext = ("." + filename.rsplit(".", 1)[-1].lower()) if "." in filename else ".png"
+                if ext not in (".png", ".jpg", ".jpeg", ".webp"):
+                    ext = ".png"
+                incoming = MEDIA / "uploads_incoming"
+                incoming.mkdir(parents=True, exist_ok=True)
+                out = incoming / f"{ep}_{sid}_incoming_{uuid.uuid4().hex[:8]}{ext}"
+                out.write_bytes(blob)
+                self._json(200, {"ok": True, "sourcePath": str(out)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/scenelook-upload":
+            # THE SCENE LOOK UPLOAD SOURCE (2026-07-19 UX fix): scene-scoped mirror of
+            # /api/shot-keyframe-upload above — no shotId, since Scene Look has no shot.
+            # Decodes a base64 image and writes it to the same holding tree; the client's
+            # own follow-up /api/shot-run {cmd:"scenelook", sourcePath: <this path>} call is
+            # what actually fires generate_scenelook_plate with it as reference_path. This
+            # endpoint alone never touches any ledger and never calls cb_gen.
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                raw = d.get("dataB64"); filename = str(d.get("filename") or "upload.png")
+                if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                    self._json(400, {"error": "scene (and optional episode) required as plain tokens"}); return
+                if not raw:
+                    self._json(400, {"error": "dataB64 (the image data) is required"}); return
+                import base64
+                if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
+                    raw = raw.split(",", 1)[1]
+                blob = base64.b64decode(raw)
+                ext = ("." + filename.rsplit(".", 1)[-1].lower()) if "." in filename else ".png"
+                if ext not in (".png", ".jpg", ".jpeg", ".webp"):
+                    ext = ".png"
+                incoming = MEDIA / "uploads_incoming"
+                incoming.mkdir(parents=True, exist_ok=True)
+                out = incoming / f"{ep}_S{scene}_scenelook_incoming_{uuid.uuid4().hex[:8]}{ext}"
+                out.write_bytes(blob)
+                self._json(200, {"ok": True, "sourcePath": str(out)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path in ("/api/shot-voice-save", "/api/shot-voice-restore",
+                         "/api/shot-voice-restore-take",
+                         "/api/shot-seedance-save", "/api/shot-seedance-restore"):
+            # CONTAINED CREATIVE CONTROLS, WRITE SIDE (2026-07-19): direct, synchronous,
+            # in-process calls (the same precedent as serve.py's own pre-existing
+            # approve_beat() — a quick, guaranteed-cheap mutation doesn't need the
+            # job-runner's streaming-log machinery). NONE of these call cb_gen — saving,
+            # restoring a working version, or swapping back to a superseded audio TAKE
+            # (restore-voice-take, 2026-07-19 — "show the old one and the new one... get
+            # rid of one or the other") never generates audio or animation; the latter only
+            # moves already-generated files that voice_shot itself archived on regeneration.
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip(); sid = str(d.get("shotId", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                if not scene or not sid or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) \
+                   or not _SHOT_TOKEN.match(ep):
+                    self._json(400, {"error": "scene, shotId (and optional episode) required as plain tokens"}); return
+                if str(CBGEN) not in sys.path:
+                    sys.path.insert(0, str(CBGEN))
+                import cb_render as _CBR
+                if self.path == "/api/shot-voice-save":
+                    lines = d.get("lines") or []
+                    rec = _CBR.save_voice_working(scene, sid, lines, ep)
+                    self._json(200, {"ok": True, "saved": rec})
+                elif self.path == "/api/shot-voice-restore":
+                    _CBR.restore_voice_working(scene, sid, ep)
+                    self._json(200, {"ok": True})
+                elif self.path == "/api/shot-voice-restore-take":
+                    _CBR.restore_previous_voice_take(scene, sid, ep)
+                    self._json(200, {"ok": True})
+                elif self.path == "/api/shot-seedance-save":
+                    rec = _CBR.save_seedance_working(scene, sid, str(d.get("prompt") or ""), ep)
+                    self._json(200, {"ok": True, "saved": rec})
+                else:
+                    _CBR.restore_seedance_working(scene, sid, ep)
+                    self._json(200, {"ok": True})
+            except _CBR.Refused as e:
+                self._json(400, {"error": str(e)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/shot-run":
+            # THE SHOT PIPELINE, front door (additive, 2026-07-16; extended same day for the probabilistic-
+            # candidate contract, then the single-use SPEND-TOKEN contract): validates cmd against the exact
+            # allowlist, then clones the /api/fire pattern — same _jid/_start job runner, same
+            # {"ok": True, "jobId": ...} response shape. cb_render.py's own refusals (the SPEND DISCLOSURE +
+            # token issue on a no-token fire/next, a stale/consumed token, red validation, relay-before-
+            # approval, model-limited, an UNCONFIRMED billing_profile.json — which hard-blocks ALL paid
+            # generation by design until Julian confirms his plans — and Law 5/6) all surface through the
+            # job log as a failed job; for the no-token disclosure step and the billing-profile block that
+            # refusal is EXPECTED protective behaviour, not a malfunction.
+            try:
+                d = self._body()
+                cmd = str(d.get("cmd", "")).strip()
+                if cmd not in SHOT_CMDS:
+                    self._json(400, {"error": "unknown cmd %r — allowed: %s" % (cmd, ", ".join(SHOT_CMDS))}); return
+                scene = str(d.get("scene", "")).strip()
+                episode = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                shot_id = str(d.get("shotId")).strip() if d.get("shotId") not in (None, "") else None
+                correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
+                if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
+                    self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
+                if cmd in ("fire", "voice-shot", "keyframe", "approve", "reject", "approve-keyframe", "reject-keyframe",
+                           "select-upload", "select-library", "select-previous",
+                           "approve-voice", "reject-voice", "regen-voice") \
+                   and (not shot_id or not _SHOT_TOKEN.match(shot_id)):
+                    self._json(400, {"error": f"{cmd} needs a shotId (e.g. 1.B1.S1)"}); return
+                if cmd == "reject" and not correction:
+                    self._json(400, {"error": "reject needs a one-sentence correction"}); return
+                if cmd == "reject-keyframe" and not correction:
+                    self._json(400, {"error": "reject-keyframe needs a plain-language reason"}); return
+                if cmd == "reject-scenelook" and not correction:
+                    self._json(400, {"error": "reject-scenelook needs a plain-language note"}); return
+                if cmd == "reject-voice" and not correction:
+                    self._json(400, {"error": "reject-voice needs a plain-language reason"}); return
+                # THE NON-GENERATION OPENING-FRAME SOURCES (2026-07-18): 'select-upload' needs a
+                # server-side path from a prior /api/shot-keyframe-upload call; 'select-library'
+                # needs an item's path from /api/shot-keyframe-library — both validated as real,
+                # existing files ROOTED under the approved engine/media tree (never an arbitrary
+                # client-supplied path — the same containment discipline _url_from_abs enforces
+                # in the other direction).
+                source_path = d.get("sourcePath")
+                if cmd in ("select-upload", "select-library"):
+                    if not source_path or not isinstance(source_path, str):
+                        self._json(400, {"error": f"{cmd} needs a sourcePath"}); return
+                    try:
+                        sp = pathlib.Path(source_path).resolve()
+                        if not sp.exists() or not sp.is_relative_to(MEDIA.resolve()):
+                            self._json(400, {"error": "sourcePath must be an existing file under engine/media"}); return
+                    except Exception:
+                        self._json(400, {"error": "sourcePath is not a valid path"}); return
+                    source_path = str(sp)
+                elif cmd in ("select-scenelook-upload", "select-scenelook-library"):
+                    # THE NON-GENERATION SCENE LOOK SOURCES (2026-07-19 — "still not letting me
+                    # upload a library image, i select it then it wants to generate"): the
+                    # scene-scoped mirror of select-upload/select-library above — no shotId,
+                    # and the reusable-library root (cb-seed/assets) is allowed alongside
+                    # engine/media, same as the scenelook cmd's own optional reference below.
+                    if not source_path or not isinstance(source_path, str):
+                        self._json(400, {"error": f"{cmd} needs a sourcePath"}); return
+                    try:
+                        sp = pathlib.Path(source_path).resolve()
+                        _roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                        if not sp.exists() or not any(sp.is_relative_to(r) for r in _roots):
+                            self._json(400, {"error": "sourcePath must be an existing file under "
+                                                       "engine/media or cb-seed/assets"}); return
+                    except Exception:
+                        self._json(400, {"error": "sourcePath is not a valid path"}); return
+                    source_path = str(sp)
+                elif cmd == "scenelook" and source_path is not None:
+                    # THE SCENE LOOK PROVIDER-ROUTING FIX (2026-07-19): OPTIONAL for this cmd — an
+                    # explicitly selected location/style reference, never auto-picked from the Asset
+                    # Library by this endpoint itself; omitting sourcePath entirely is the normal
+                    # no-reference case. WIDENED (2026-07-19, correction — "the library has to come
+                    # from the scenes houses etc"): a Scene Look reference legitimately comes from
+                    # the REAL reusable library (cb-seed/assets/locations/_manifest.json entries,
+                    # character house imagery, uploaded scene refs — the same sources the Scenes/
+                    # Houses nav pages and /api/loclib + /api/houses already serve), not only a
+                    # scene's own generation history under engine/media. Both roots are already
+                    # part of the trusted static-serve allowlist (see the static-file guard below);
+                    # select-upload/select-library above stay scoped to MEDIA only, since those
+                    # remain the shot-owned candidate-copy mechanism, unrelated to this reference.
+                    if not isinstance(source_path, str):
+                        self._json(400, {"error": "sourcePath must be a string"}); return
+                    try:
+                        sp = pathlib.Path(source_path).resolve()
+                        _roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                        if not sp.exists() or not any(sp.is_relative_to(r) for r in _roots):
+                            self._json(400, {"error": "sourcePath must be an existing file under "
+                                                       "engine/media or cb-seed/assets"}); return
+                    except Exception:
+                        self._json(400, {"error": "sourcePath is not a valid path"}); return
+                    source_path = str(sp)
+                elif source_path is not None:
+                    self._json(400, {"error": "sourcePath applies to select-upload/select-library/"
+                                               "select-scenelook-upload/select-scenelook-library/"
+                                               "scenelook only"}); return
+                # THE PROBABILISTIC-CANDIDATE + SPEND-TOKEN CONTRACT (2026-07-16): candidates and the
+                # single-use spendToken for fire/next, category for reject, candidate index for approve —
+                # each validated, each optional.
+                candidates = d.get("candidates")
+                if candidates is not None:
+                    if cmd not in ("fire", "next"):
+                        self._json(400, {"error": "candidates applies to fire/next only"}); return
+                    try:
+                        candidates = int(candidates)
+                    except (TypeError, ValueError):
+                        candidates = -1
+                    if not (1 <= candidates <= 4):
+                        self._json(400, {"error": "candidates must be an integer 1-4"}); return
+                spend_token = str(d.get("spendToken")).strip() if d.get("spendToken") not in (None, "") else None
+                if spend_token is not None:
+                    if cmd not in ("fire", "next"):
+                        self._json(400, {"error": "spendToken applies to fire/next only"}); return
+                    if not _SPEND_TOKEN_RE.match(spend_token):
+                        self._json(400, {"error": "spendToken must be 16-64 lowercase hex characters"}); return
+                category = str(d.get("category")).strip() if d.get("category") not in (None, "") else None
+                if category is not None:
+                    if cmd != "reject":
+                        self._json(400, {"error": "category applies to reject only"}); return
+                    if category not in REJECT_CATEGORIES:
+                        self._json(400, {"error": "category must be one of: " + ", ".join(REJECT_CATEGORIES)}); return
+                candidate = d.get("candidate")
+                if candidate is not None:
+                    if cmd != "approve":
+                        self._json(400, {"error": "candidate applies to approve only"}); return
+                    try:
+                        candidate = int(candidate)
+                    except (TypeError, ValueError):
+                        candidate = -1
+                    if not (1 <= candidate <= 4):
+                        self._json(400, {"error": "candidate must be an integer 1-4"}); return
+                self._json(200, {"ok": True, "jobId": shot_run_job(cmd, scene, episode, shot_id, correction,
+                                                                    candidates=candidates,
+                                                                    spend_token=spend_token,
+                                                                    category=category, candidate=candidate,
+                                                                    dry_run=bool(d.get("dryRun")),
+                                                                    source_path=source_path)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        self._json(404, {"error": "not found"})
+
+    def log_message(self, *a):
+        pass
+
+def main():
+    os.chdir(ROOT)
+    reindex_media()
+    episodes = reindex_episodes()
+    http.server.ThreadingHTTPServer.allow_reuse_address = True
+    threading.Thread(target=_freshness_watch, daemon=True).start()
+    with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
+        launch_url = (
+            f"http://{BIND_HOST}:{PORT}/cb-studio/app.html?launchToken={LAUNCH_TOKEN}"
+        )
+        print(f"Crystal Bears Studio launch URL -> {launch_url}", flush=True)
+        print(
+            f"Serving {ROOT} ({len(episodes)} episodes) - loopback-only, authenticated, "
+            f"threaded + byte-range; freshness guard ON (fp={_STARTED_FP:.0f})",
+            flush=True,
+        )
+        httpd.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

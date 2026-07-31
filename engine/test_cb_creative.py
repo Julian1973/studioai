@@ -181,13 +181,37 @@ def _fake_llm(record, review_script=None):
     return fake
 
 
+def _vision_for(source_pkg):
+    beat_signature = C.cb_lineage.beat_package_signature(source_pkg)
+    script_version = source_pkg["sourceScript"]["scriptVersionId"]
+    return {
+        **{name: "x" for name in C.EpisodeVision.model_fields},
+        "inputSignature": C.cb_lineage.dependency_signature(
+            "episode-vision",
+            C.cb_lineage.episode_vision_inputs(script_version, beat_signature),
+        ),
+    }
+
+
+def _set_source(monkeypatch, source_beats, source_pkg):
+    monkeypatch.setattr(C, "_script_beats", lambda *a, **k: (source_beats, source_pkg))
+    C.OUT.mkdir(parents=True, exist_ok=True)
+    source_path = C.OUT.parent / "Ep1_fixture_beat_package.json"
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_text(json.dumps(source_pkg, indent=1))
+    monkeypatch.setattr(C, "_script_package", lambda *a, **k: source_path)
+    monkeypatch.setattr(C, "episode_vision", lambda *a, **k: _vision_for(source_pkg))
+
+
 def _isolated(monkeypatch, record, review_script=None):
     monkeypatch.setattr(cb_llm, "structured", _fake_llm(record, review_script))
     monkeypatch.setattr(C, "load_canon_envelope", lambda *a, **k: {})
+    root = pathlib.Path(tempfile.mkdtemp())
+    monkeypatch.setattr(C, "ROOT", root)
+    monkeypatch.setattr(C, "OUT", root / "cb-output" / "creative")
     source_beats, source_pkg = _source_fixture()
-    monkeypatch.setattr(C, "_script_beats", lambda *a, **k: (source_beats, source_pkg))
+    _set_source(monkeypatch, source_beats, source_pkg)
     monkeypatch.setattr(C, "_locked_dialogue", lambda beats: [])
-    monkeypatch.setattr(C, "OUT", pathlib.Path(tempfile.mkdtemp()))   # never real cb-output
 
 
 # ── workflow order: treatments -> selection BEFORE any beat exists ─────────────────────
@@ -509,7 +533,7 @@ def test_verbatim_dialogue_snap_and_voice_lock(monkeypatch):
     record = []
     _isolated(monkeypatch, record)
     source_beats, source_pkg = _source_fixture("Nailed it.")
-    monkeypatch.setattr(C, "_script_beats", lambda *a, **k: (source_beats, source_pkg))
+    _set_source(monkeypatch, source_beats, source_pkg)
     pkg = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
     assert pkg["beats"][0]["exactDialogue"] == ["FUZZBY: Nailed it."]   # snapped, verbatim
 

@@ -245,6 +245,8 @@ def test_real_awaiting_storyboard_refused_against_package_copy():
     archived = (HERE.parent / "cb-output" / "creative" / "archive_process_v1"
                 / "Ep1_scene1_storyboard.json")
     real_sb = live if live.exists() else archived
+    if not real_sb.exists():
+        pytest.skip("no live or archived Ep1 storyboard is present in this checkout")
     sb = json.load(open(real_sb))
     if sb.get("approvalState") == "approved":
         pytest.skip("real storyboard is approved this run — covered by other refusal tests")

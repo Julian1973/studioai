@@ -123,3 +123,20 @@ def test_new_script_approval_archives_previous_canonical_package(tmp_path, monke
     archived = list((tmp_path / "cb-output" / "archive" / "script_versions").glob("*.json"))
     assert len(archived) == 1
     assert json.loads(archived[0].read_text())["sourceScript"]["scriptVersionId"] == first["scriptVersionId"]
+
+
+def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
+    _, current, _ = _workspace(tmp_path, monkeypatch)
+    legacy = tmp_path / "cb-output" / "Ep1_Legacy_beat_package.json"
+    legacy.write_text(json.dumps({
+        "episode": 1,
+        "title": "Legacy",
+        "sourceScript": cb_intake._script_ref(current),
+        "beats": [{"sceneNumber": 1, "beatCode": "1.B1", "cuts": []}],
+    }))
+
+    roster = cb_intake.scene_roster("Ep1")
+
+    assert roster["hasPackage"] is False
+    assert roster["scenes"] == []
+    assert roster["reason"] == "canonical-beat-package-stale"

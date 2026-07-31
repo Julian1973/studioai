@@ -11,17 +11,20 @@ def test_safety_layer_is_installed():
     assert cb_render.fire_shot.__module__ == "cb_safety"
 
 
-def test_preflight_reports_all_scene_one_blockers_without_spend():
+def test_preflight_stops_at_the_first_unapproved_canonical_contract_without_spend():
     report = cb_production_preflight.production_preflight("1", "Ep1")
     assert report["zeroSpend"] is True
     assert report["lineage"]["current"] is False
-    assert "script-version-mismatch" in report["lineage"]["reasonCodes"]
+    assert report["lineage"]["reasonCodes"] == ["story-intake-not-approved"]
     codes = {item["code"] for item in report["blockers"]}
-    assert "STALE_PRODUCTION_GRAPH" in codes
-    assert "SHOT_NOT_READY" in codes
-    assert "CONFIG_FAL_KEY" in codes
-    assert "CONFIG_ELEVENLABS_KEY" in codes
-    assert report["nextAction"] == "Promote the current approved Story & Direction package."
+    assert "STORY_INTAKE_APPROVAL_REQUIRED" in codes
+    assert "STALE_PRODUCTION_GRAPH" not in codes
+    assert "SHOT_NOT_READY" not in codes
+    assert report["shots"] == []
+    assert report["stages"]["storyboard"]["state"] == "awaiting"
+    assert report["nextAction"] == (
+        "Review and approve the current episode Story & Direction candidate."
+    )
 
 
 def test_paid_resolvers_refuse_legacy_fallbacks():

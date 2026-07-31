@@ -327,8 +327,16 @@ def production_state(scene, episode="Ep1"):
         "script": _stage("approved" if script_current else "ready",
                          None if script_current else "upload a script"),
     }
+    intake_current = bool(intake.get("canonicalCurrent"))
     if not script_current:
         stages["storyboard"] = _stage("locked")
+    elif not intake_current:
+        if intake.get("hasCandidate") and intake.get("candidateCurrent"):
+            stages["storyboard"] = _stage(
+                "awaiting", "review and approve the episode Story & Direction candidate")
+        else:
+            stages["storyboard"] = _stage(
+                "ready", "run Story & Direction for the active script")
     elif not storyboard:
         stages["storyboard"] = _stage("ready", "direct the scene from the current script")
     elif storyboard_current:
@@ -340,6 +348,33 @@ def production_state(scene, episode="Ep1"):
         stages["storyboard"] = _stage("blocked", storyboard_reason)
     else:
         stages["storyboard"] = _stage("awaiting", storyboard_reason)
+
+    if script_current and not intake_current:
+        action = (
+            "Review and approve the current episode Story & Direction candidate."
+            if intake.get("hasCandidate") and intake.get("candidateCurrent")
+            else "Run Story & Direction for the active script."
+        )
+        for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
+            stages[name] = _stage("locked")
+        return {
+            "policyVersion": POLICY_VERSION,
+            "episode": episode,
+            "scene": scene,
+            "packageExists": False,
+            "packageCurrent": False,
+            "staleBeatPackageIgnored": bool(intake.get("hasCanonicalPackage")),
+            "lineage": {"current": False, "reasonCodes": ["story-intake-not-approved"]},
+            "stages": stages,
+            "shots": [],
+            "_per": [],
+            "blockers": [{
+                "code": "STORY_INTAKE_APPROVAL_REQUIRED",
+                "stage": "storyboard",
+                "message": "The active script has no current approved episode Story & Direction package.",
+                "action": action,
+            }],
+        }
 
     try:
         pkg, _ = cb_render.load_pkg(scene, episode)

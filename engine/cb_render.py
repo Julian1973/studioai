@@ -2305,6 +2305,52 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     return result
 
 
+def prompt_readback(scene, shot_id, episode="Ep1", log=print):
+    """Ask the advisory readback lens what the approved animation brief will produce.
+
+    This is an optional text/vision model call, never a media generation call and never an
+    approval gate. It reads only a current production graph and returns a plain-language
+    recommendation that the Studio can show before spend disclosure.
+    """
+    pkg, _ = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    prompt, using_working = _resolve_seedance_prompt(pkg, shot)
+    try:
+        anchor = _anchor_for(pkg, shot)
+    except Refused:
+        anchor = None
+    intent_parts = [
+        shot.get("purpose"),
+        shot.get("performanceAssignment"),
+        shot.get("visualPayoff"),
+    ]
+    intent = " ".join(str(value).strip() for value in intent_parts if value)
+
+    import cb_readback
+
+    reading = cb_readback.read_back(
+        prompt,
+        shot_id=shot_id,
+        form="take",
+        images=[anchor] if anchor else None,
+        intent=intent,
+        log=log,
+    )
+    return {
+        "available": reading is not None,
+        "advisoryOnly": True,
+        "mediaProviderCalled": False,
+        "usingWorkingVersion": using_working,
+        "shotId": shot_id,
+        "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        "openingFrame": anchor,
+        "result": reading.model_dump(mode="json") if reading is not None else None,
+        "plainText": cb_readback.as_plain_text(reading),
+    }
+
+
 def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
               spend_token=None, dry_run=False, log=print):
     """Generate one CONTROLLED CANDIDATE BATCH behind Julian's six spend protections

@@ -139,7 +139,13 @@ def scene_roster(episode="Ep1"):
     own. Returns hasPackage=False (scenes=[]) until story intake has been approved."""
     pkgs = canonical_package_glob(episode)
     if not pkgs:
-        return {"episode": episode, "hasPackage": False, "package": None, "scenes": []}
+        return {"episode": episode, "hasPackage": False, "package": None, "scenes": [],
+                "reason": "story-intake-not-approved"}
+    status = intake_status(episode)
+    if not status.get("canonicalCurrent"):
+        return {"episode": episode, "hasPackage": False, "package": pkgs[-1].name,
+                "scenes": [], "reason": "canonical-beat-package-stale",
+                "canonicalCurrent": False}
     pkg_path = pkgs[-1]
     pkg = json.loads(pkg_path.read_text())
     by_scene = {}
@@ -160,7 +166,7 @@ def scene_roster(episode="Ep1"):
             "beatCodes": [b.get("beatCode") for b in beats],
         })
     return {"episode": episode, "hasPackage": True, "package": pkg_path.name,
-            "scenes": scenes}
+            "scenes": scenes, "reason": None, "canonicalCurrent": True}
 
 
 # ── mechanical script parser — scene order, dialogue and cast are LOCKED evidence ───────

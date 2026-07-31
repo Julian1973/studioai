@@ -314,6 +314,21 @@ img.zoom:hover{filter:brightness(1.08)}
   .wcol-artefact{order:1}
   .wcol-decision{position:static;order:2}
 }
+@media (max-width:700px){
+  .top{align-items:flex-start;flex-wrap:wrap;gap:8px;padding:10px 12px}
+  .toplinks{order:3;width:100%;overflow-x:auto;gap:4px;padding-bottom:2px}
+  .topreviewer{margin-left:0!important}
+  .tl,.epchip{flex:0 0 auto;white-space:nowrap}
+  .shell{display:block;min-height:0}
+  .nav{width:100%;display:flex!important;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px}
+  .nav a{flex:0 0 auto;white-space:nowrap;margin:0 2px 0 0}
+  .nav .sep{display:none}
+  .main{padding:16px 12px}
+  .epgrid,.projgrid,.sceneboard{grid-template-columns:minmax(0,1fr)}
+  .ccactions{flex-direction:column}
+  .ccpanel,.live,.sub,.epbody .l,.projcard-premise{overflow-wrap:anywhere}
+  .btn{max-width:100%;white-space:normal}
+}
 .proom{max-width:1180px;margin:0 auto}
 .prail{display:flex;align-items:stretch;gap:0;margin:4px 0 22px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
 .pstage{flex:1;min-width:118px;text-align:center;padding:14px 8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
@@ -352,7 +367,7 @@ img.zoom:hover{filter:brightness(1.08)}
 <div class="top">
   <div class="brand" onclick="goHome()"><span class="logo">◈</span> Crystal Bears Studio</div>
   <div class="toplinks" id="toplinks"></div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--hint)">
+  <div class="topreviewer" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--hint)">
     Reviewed by
     <input id="reviewer_name" value="Julian" oninput="setReviewer(this.value)"
            style="width:90px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:12px">
@@ -890,13 +905,20 @@ function render(){
 function renderEpisodes(){
   document.getElementById("gatesbar").innerHTML="";
   const cards=EPISODES.map(e=>{
-    const ready=e.package||e.shotPackage, isB=e.unit=="beat", ct=e.beatCount||e.shotCount;
-    const st=ready?(isB?["--ok","--okbg","Beats ready"]:["--ok","--okbg","Shot list ready"]):["--info","--infobg","Script uploaded"];
+    const legacyReady=e.package||e.shotPackage;
+    const ready=e.packageCurrent===undefined?legacyReady:!!e.packageCurrent;
+    const awaiting=e.storyIntakeState==="awaiting-review", isB=e.unit==="beat";
+    const ct=ready?(e.beatCount||e.shotCount):(awaiting?e.proposalBeatCount:null);
+    const st=ready?(isB?["--ok","--okbg","Beats ready"]:["--ok","--okbg","Shot list ready"])
+      :(awaiting?["--warn","--warnbg",e.status||"Story review needed"]:["--info","--infobg",e.status||"Script uploaded"]);
+    const summary=awaiting
+      ?`Proposed: ${_esc(e.proposedTitle||"Story & Direction")} — ${_esc(e.proposedLogline||"review the episode direction and beats")}`
+      :_esc(e.logline||"(script uploaded — not yet broken into beats)");
     return `<div class="epcard" onclick="openEpisode(${e.number})">
       <div class="epthumb">Episode ${e.number}</div>
-      <div class="epbody"><div class="n">EPISODE ${e.number}${e.leadBear?" · "+e.leadBear:""}</div>
-      <div class="t">${e.title||"(unnamed)"} <span onclick="event.stopPropagation();renameEp(${e.number})" title="Rename episode" style="cursor:pointer;font-size:12px;opacity:.5;margin-left:5px">✏️</span></div><div class="l">${e.logline||"(script uploaded — not yet broken into beats)"}</div>
-      <span class="stat" style="color:${v(st[0])};background:${v(st[1])}">${st[2]}${ct?" · "+ct+(isB?" beats":" shots"):""}</span></div></div>`;
+      <div class="epbody"><div class="n">EPISODE ${e.number}${e.leadBear?" · "+_esc(e.leadBear):""}</div>
+      <div class="t">${_esc(e.title||"(unnamed)")} <span onclick="event.stopPropagation();renameEp(${e.number})" title="Rename episode" style="cursor:pointer;font-size:12px;opacity:.5;margin-left:5px">✏️</span></div><div class="l">${summary}</div>
+      <span class="stat" style="color:${v(st[0])};background:${v(st[1])}">${_esc(st[2])}${ct?" · "+ct+(ready&&!isB?" shots":" beats"):""}${awaiting&&e.proposalSceneCount?" · "+e.proposalSceneCount+" scenes":""}</span></div></div>`;
   }).join("");
   document.getElementById("view").innerHTML=`<h1 class="h1">Episodes</h1><p class="sub">Add an episode and upload its script. The Show Bible is shared across all episodes.</p>
     <div class="epgrid">${cards}<div class="addcard" onclick="addForm()"><div style="font-size:26px">＋</div>Add episode</div></div>`;
@@ -1173,7 +1195,20 @@ async function projectStats(p){
   if(!p.primary)return {unsupported:true};
   try{
     const roster=await sceneRoster("Ep1");
-    if(!roster.length)return {empty:true};
+    if(!roster.length){
+      const intake=await fetch(BASE+"/api/story-intake-status?episode=Ep1",{cache:"no-store"}).then(r=>r.json()).catch(()=>null);
+      if(intake&&intake.hasCandidate&&intake.candidateCurrent&&!intake.canonicalCurrent){
+        const candidate=intake.candidate||{};
+        return {completion:0,decisions:1,artwork:null,
+                activity:"Story & Direction review waiting",
+                scenes:(candidate.scenes||[]).length};
+      }
+      if(intake&&intake.hasScript){
+        return {completion:0,decisions:0,artwork:null,
+                activity:"Story & Direction is ready to run",scenes:0};
+      }
+      return {empty:true};
+    }
     const bundles=await Promise.all(roster.map(r=>fetchSceneBundle(r.scene,"Ep1")));
     await fetchJobsNow();
     let doneStages=0,totalStages=0,decisions=0,artwork=null;
@@ -1611,22 +1646,25 @@ function storyIntakePanelHTML(d){
   const skillBadge=d.directorSkillLoaded
     ? `<span style="color:var(--ok)">✓ crystal-bears-director skill loaded</span>`
     : `<span style="color:var(--danger)">✗ Director skill could not be loaded</span>`;
-  if(d.hasCanonicalPackage){
+  if(d.hasCanonicalPackage&&d.canonicalCurrent){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
       <div class="live" style="color:var(--ok)">✓ Approved — <code>${_esc(d.canonicalPackage)}</code> is the
       episode's canonical input. The scene/storyboard process is unlocked.</div></div>`;
   }
+  const stalePackage=d.hasCanonicalPackage&&!d.canonicalCurrent
+    ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it is not derived from this immutable script version and cannot unlock production.</div>`:"";
   if(!d.hasCandidate){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
+      ${stalePackage}
       <p class="sub">Nothing has been generated from this script yet. Uploading and saving a
       script never runs anything automatically — this is the first, explicit step.</p>
       ${jobBanner}
       <button class="btn" ${job?"disabled":""} onclick="storyIntakeRun()">Run Story &amp; Direction — read the script, propose the episode</button>
       </div>`;
   }
-  const c=d.candidate, ev=c.episodeVision||{}, cov=c.dialogueCoverage||{};
+  const c=d.candidate, ev=c.episodeVision||{}, cov=c.dialogueCoverage||{}, srcCov=c.sourceEventCoverage||{};
   const byScene={};
   (c.beats||[]).forEach(b=>{(byScene[b.sceneNumber]=byScene[b.sceneNumber]||[]).push(b);});
   const sceneRows=(c.scenes||[]).map(sc=>{
@@ -1639,7 +1677,8 @@ function storyIntakePanelHTML(d){
   const approved=c.approvalState=="approved";
   return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
     <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
-    <div style="margin:10px 0"><b>Title:</b> ${_esc(c.title)}<br/>
+    ${stalePackage}
+    <div style="margin:10px 0"><b>Proposed episode title:</b> ${_esc(c.title)}<br/>
       <b>Logline:</b> ${_esc(c.logline)}<br/>
       <b>Lead bear:</b> ${_esc(c.leadBear)}</div>
     <details open style="margin:10px 0"><summary style="cursor:pointer;font-weight:600">Episode vision</summary>
@@ -1659,6 +1698,8 @@ function storyIntakePanelHTML(d){
       <div style="margin-top:8px">${sceneRows}</div></details>
     <p class="sub" style="color:${cov.ok?"var(--ok)":"var(--danger)"}">
       ${cov.ok?"✓":"✗"} Dialogue coverage: ${cov.coveredExactly||0}/${cov.totalDialogueLines||0} locked line(s) exact, unchanged, in order.</p>
+    <p class="sub" style="color:${srcCov.ok?"var(--ok)":"var(--danger)"}">
+      ${srcCov.ok?"✓":"✗"} Script coverage: ${srcCov.coveredExactly||0}/${srcCov.totalSourceEvents||0} action and dialogue event(s) exact, unchanged, in order.</p>
     ${approved?`<div class="live" style="color:var(--ok)">✓ Approved.</div>`:`
     <div class="ccactions">
       <button class="btn" onclick="storyIntakeDecide('approve')">Approve — unlock scene/storyboard process</button>
@@ -2312,6 +2353,25 @@ function structurePanelHTML(tok,sc){
       <pre class="techpre">${_esc(sc.finalPrompt||"")}</pre></details>
   </div>`;
 }
+function readbackPanelHTML(tok,rb){
+  const btn=`<button class="btn ghost" onclick="shRunReadback('${_esc(tok)}')">AI readback</button>`;
+  if(!rb)return `<div class="ccpanel">${btn}<div class="dec-caption" style="margin-top:8px">Uses the validator model to explain what this approved brief will put on screen. No media provider is called.</div></div>`;
+  if(rb.loading)return `<div class="ccpanel">${btn}<div class="dec-caption" style="margin-top:10px">Reading the brief and approved opening frame…</div></div>`;
+  if(rb.error)return `<div class="ccpanel">${btn}<div class="dec-caption" style="color:var(--danger);margin-top:10px">${_esc(rb.error)}</div></div>`;
+  const result=rb.result||{};
+  const vcolor={delivers:"--ok",partly:"--warn","will-not":"--danger"}[result.delivers]||"--muted";
+  const clashes=(result.clashes||[]).map(c=>`<div class="ccrow" style="color:var(--danger)"><b>${_esc(c.first)}</b> versus <b>${_esc(c.second)}</b><div class="ccref">${_esc(c.why)} ${_esc(c.cost)}</div></div>`).join("");
+  const mismatches=(result.frame_mismatches||[]).map(m=>`<div class="ccrow" style="color:var(--danger)"><b>${_esc(m.prompt_says)}</b><div class="ccref">Opening frame: ${_esc(m.frame_shows)}. ${_esc(m.cost)}</div></div>`).join("");
+  const notes=(result.craft_notes||[]).map(n=>`<div class="ccrow" style="color:var(--warn)">• ${_esc(n)}</div>`).join("");
+  return `<div class="ccpanel">
+    ${btn}
+    <div class="cchead" style="margin-top:14px">Recommendation <span class="stbadge" style="color:var(${vcolor});background:var(--surface2)">${_esc((result.delivers||"unavailable").toUpperCase())}</span></div>
+    <div class="ccrow"><b>${_esc(result.verdict||rb.plainText||"")}</b></div>
+    <div class="ccref" style="margin:6px 0 10px">${_esc(result.shot_says||"")}</div>
+    ${mismatches}${clashes}${notes}
+    <div class="ccref" style="margin-top:8px">Advisory only. It never approves, blocks or fires a render.</div>
+  </div>`;
+}
 function renderShotStage(mode){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   SH_RSEQ++; const mySeq=SH_RSEQ;
@@ -2494,6 +2554,8 @@ function renderShotStage(mode){
       // checking is useful even before every input is attached. "Generate animation" above
       // stays completely separate with its own cost disclosure; nothing here spends anything.
       body += `<div class="dec-caption" style="margin-top:14px">Animation generation uses only the approved Animation Director prompt. Legacy working-prompt overrides are disabled for production.</div>`;
+      body += structurePanelHTML(tok,SH_STRUCTURE_CACHE[tok]);
+      body += readbackPanelHTML(tok,SH_READBACK_CACHE[tok]);
     }
     if((led.rejections||[]).length){
       decHistory=led.rejections.slice().reverse().map(r=>`<div class="histrow"><span class="stbadge" style="color:var(--danger);background:var(--dangerbg)">rejected</span>
@@ -2603,7 +2665,7 @@ function openAnimationConfirmModal(shotId){
   const inp=SH_PREFLIGHT&&SH_PREFLIGHT.approvedInputs&&SH_PREFLIGHT.approvedInputs.shots&&SH_PREFLIGHT.approvedInputs.shots[shotId];
   if(!inp||!inp.animationPrompt){alert("Approve current Animation direction first.");return;}
   const pick=(...ks)=>{for(const k of ks) if(d[k]!=null&&d[k]!=="") return d[k]; return "?";};
-  const rows=[["Model","Seedance (fal.ai)"],["Shot",led.shotId||"—"],["Exact approved prompt",inp.animationPrompt],
+  const rows=[["Model","Seedance 2.0 reference-to-video (fal.ai)"],["Shot",led.shotId||"—"],["Exact approved prompt",inp.animationPrompt],
     ["Opening frame",pick("openingAnchor")],["Approved audio",pick("audioAsset")],
     ["Candidates",pick("candidates","candidateCount","count")],
     ["Cost per candidate","$"+pick("costPerCandidateUsd","costPerCandidate","perCandidate","candidateCost")],
@@ -2698,7 +2760,7 @@ let SH_LAST_JOB=null,SH_POLL_MISSES=0;
 // SH_RSEQ guards against a stale async fetch re-rendering after the user has already
 // navigated to a different shot/stage — the async loader only re-renders if its own
 // captured sequence number still matches the current one.
-let SH_VOICE_CACHE={},SH_SEEDANCE_CACHE={},SH_STRUCTURE_CACHE={},SH_RSEQ=0;
+let SH_VOICE_CACHE={},SH_SEEDANCE_CACHE={},SH_STRUCTURE_CACHE={},SH_READBACK_CACHE={},SH_RSEQ=0;
 // SH_VOICE_DIRTY (2026-07-19 correction): "add more acting into the working version, save
 // it, and it just makes what was there before" — traced to a real, confirmed race, not the
 // save/read round-trip itself (verified directly: a real save persists and reads back
@@ -2732,6 +2794,15 @@ async function shRunStructureCheck(tok){
     const r=await fetch(BASE+"/api/shot-check-structure?scene="+encodeURIComponent(SH_SC)+"&shotId="+encodeURIComponent(tok)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
     SH_STRUCTURE_CACHE[tok]=await r.json();
   }catch(e){SH_STRUCTURE_CACHE[tok]={error:"Can't reach the studio server."};}
+  renderWorkspaceBody();
+}
+async function shRunReadback(tok){
+  SH_READBACK_CACHE[tok]={loading:true};
+  renderWorkspaceBody();
+  try{
+    const r=await fetch(BASE+"/api/shot-readback?scene="+encodeURIComponent(SH_SC)+"&shotId="+encodeURIComponent(tok)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
+    SH_READBACK_CACHE[tok]=await r.json();
+  }catch(e){SH_READBACK_CACHE[tok]={error:"Can't reach the studio server."};}
   renderWorkspaceBody();
 }
 function shVoiceMarkDirty(tok,i,value){
@@ -2797,7 +2868,7 @@ async function shSaveSeedanceWork(tok){
       body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,prompt:val})});
     const j=await r.json();
     if(!j.ok){alert("Couldn't save: "+(j.error||"failed"));return;}
-    delete SH_SEEDANCE_CACHE[tok]; delete SH_STRUCTURE_CACHE[tok];
+    delete SH_SEEDANCE_CACHE[tok]; delete SH_STRUCTURE_CACHE[tok]; delete SH_READBACK_CACHE[tok];
     if(typeof showToast=="function")showToast("Animation working prompt saved — no animation generated",true);
     renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
@@ -2808,7 +2879,7 @@ async function shRestoreSeedanceWork(tok){
       body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok})});
     const j=await r.json();
     if(!j.ok){alert("Couldn't restore: "+(j.error||"failed"));return;}
-    delete SH_SEEDANCE_CACHE[tok]; delete SH_STRUCTURE_CACHE[tok];
+    delete SH_SEEDANCE_CACHE[tok]; delete SH_STRUCTURE_CACHE[tok]; delete SH_READBACK_CACHE[tok];
     if(typeof showToast=="function")showToast("Reverted to the approved storyboard's prompt",true);
     renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
@@ -3118,7 +3189,7 @@ async function _shPollTick(){
     // after the job finished, because nothing told it to re-fetch. Cleared unconditionally
     // on every completed job, not just voice ones — any fire (keyframe, animation) could
     // equally leave one of these three stale.
-    SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};
+    SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};SH_READBACK_CACHE={};
     await shFetchPkg();if(page=="pipeline")renderControl();else renderJobBanner();
     return;
   }

@@ -189,13 +189,12 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
 
 @pytest.fixture()
 def golden_path_scratch_pkg(monkeypatch, tmp_path):
-    """GOLDEN-PATH FIXTURE (2026-07-17, item 5 — Julian: "the golden-path test must use the
-    newly promoted S1.SH1 canonical package"): the REAL, currently-live canonical package —
-    the one cb_handover.promote_to_canonical actually wrote via a real (non-dry-run)
-    promotion of S1.SH1 from the human-approved creative-room storyboard — loaded read-only
-    and SAVED to a scratch copy (the real live file can never be mutated by this test). THIS
-    is the proof the current production route works end to end, on the content that is
-    actually live today, never a legacy stand-in for it."""
+    """Exercise the checked-in S1.SH1 contract without live mutable dependencies.
+
+    The production-package snapshot is copied into a scratch world. A minimal storyboard
+    source is derived from that snapshot solely to provide deterministic lineage bytes; the
+    full immutable-script-to-master proof lives in test_golden_path.py.
+    """
     real = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
     live = json.load(open(real))
     assert live["shots"][0]["shotId"] == "S1.SH1", (
@@ -210,9 +209,13 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     current_script = cb_render.SCRIPT_STORE.current("Ep1", required=True)
     source_ref = {key: current_script[key] for key in
                   ("episodeId", "scriptVersionId", "sha256", "byteLength", "contentPath")}
-    source_storyboard = HERE.parent / "cb-output" / "creative" / "Ep1_scene1_storyboard.json"
     scratch_storyboard = tmp_path / "Ep1_scene1_storyboard.json"
-    shutil.copy2(source_storyboard, scratch_storyboard)
+    scratch_storyboard.write_text(json.dumps({
+        "episodeId": "Ep1",
+        "sceneNumber": "1",
+        "approvalState": "approved",
+        "shots": scratch_pkg.get("shots") or [],
+    }, indent=1, ensure_ascii=False))
     storyboard_md5 = hashlib.md5(scratch_storyboard.read_bytes()).hexdigest()
     storyboard_sha256 = cb_lineage.sha256_file(scratch_storyboard)
     beat_pkg = json.load(open(HERE.parent / "cb-output" /
@@ -237,6 +240,8 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
         })
     first_shot = scratch_pkg["shots"][0]
     first_ledger = scratch_pkg["continuityLedger"][0]
+    for key in ("keyframeCandidate", "keyframeApproval", "keyframePath"):
+        first_ledger.pop(key, None)
     first_ledger.setdefault("departmentWork", {})["cinematography"] = {"approved": {
         "packageRevision": scratch_pkg.get("revision"),
         "output": {"providerPrompt": first_shot.get("keyframePrompt") or
@@ -408,6 +413,8 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     (golden_path_scratch_pkg); the real live file is never touched by this test."""
     pkg_md5 = json.load(open(golden_path_scratch_pkg))["sourceStoryboard"]["md5"]
     monkeypatch.setattr(cb_render, "_current_storyboard_md5", lambda scene, episode="Ep1": pkg_md5)
+    real_live = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
+    real_before = real_live.read_bytes()
     calls = []
 
     def fake_generate_image(prompt, refs=None, out=None, production_route=None, **k):
@@ -444,10 +451,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     led = [x for x in written["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
     assert led["keyframeCandidate"]["path"] == out_path
     assert "keyframeApproval" not in led
-    real_live = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
-    real_pkg = json.load(open(real_live))
-    real_led = [x for x in real_pkg["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
-    assert real_led.get("keyframePath") is None                      # real file never touched
+    assert real_live.read_bytes() == real_before                    # real file never touched
 
 
 def test_every_legacy_route_is_blocked_at_the_adapter():

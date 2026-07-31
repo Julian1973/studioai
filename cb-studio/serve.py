@@ -183,6 +183,44 @@ def reindex_episodes():
         e["status"] = (("Beats ready" if e.get("unit") == "beat" else "Shot list ready")
                        if e.get("package") else ("Script uploaded" if e.get("script") else "New"))
         out.append(e)
+    # cb_intake reads the episode registry to verify that its immutable-script pointer and
+    # the registered episode agree. Publish that pointer-only view first, then annotate the
+    # cards from cb_intake's canonical status instead of treating any old beat-package file
+    # as production-ready.
+    (DATA / "episodes.json").write_text(json.dumps(out, indent=1))
+    try:
+        import cb_intake
+        for e in out:
+            status = cb_intake.intake_status(f"Ep{e['number']}")
+            e["packageCurrent"] = bool(status.get("canonicalCurrent"))
+            if e["packageCurrent"]:
+                e["storyIntakeState"] = "approved"
+                e["status"] = ("Beats ready" if e.get("unit") == "beat"
+                               else "Shot list ready")
+                continue
+
+            if e.get("package"):
+                e["stalePackage"] = e["package"]
+                for key in ("logline", "leadBear", "format", "unit", "beatCount", "shotCount"):
+                    e.pop(key, None)
+            candidate = status.get("candidate") if status.get("candidateCurrent") else None
+            if candidate and candidate.get("approvalState") == "awaiting-human-approval":
+                e.update({
+                    "storyIntakeState": "awaiting-review",
+                    "status": "Story review needed",
+                    "proposedTitle": candidate.get("title"),
+                    "proposedLogline": candidate.get("logline"),
+                    "proposalBeatCount": len(candidate.get("beats") or []),
+                    "proposalSceneCount": len(candidate.get("scenes") or []),
+                })
+            elif status.get("hasScript"):
+                e["storyIntakeState"] = "needs-run"
+                e["status"] = "Story intake needed"
+            else:
+                e["storyIntakeState"] = "needs-script"
+                e["status"] = "New"
+    except Exception as exc:
+        print(f"STORY INTAKE INDEX WARNING — {exc}", flush=True)
     (DATA / "episodes.json").write_text(json.dumps(out, indent=1))
     return out
 
@@ -1757,6 +1795,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, _CBR.check_seedance_structure(scene, sid, ep))
             except _CBR.Refused as e:
                 return self._json(400, {"error": str(e)})
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
+        if self.path.startswith("/api/shot-readback"):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            sid = (q.get("shotId") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if (not scene or not sid or not _SHOT_TOKEN.match(scene) or
+                    not _SHOT_TOKEN.match(sid) or not _SHOT_TOKEN.match(ep)):
+                return self._json(400, {
+                    "error": "scene, shotId (and optional episode) required as plain tokens"
+                })
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                return self._json(200, _CBR.prompt_readback(scene, sid, ep))
+            except _CBR.Refused as e:
+                return self._json(409, {"error": str(e)})
             except Exception as e:
                 return self._json(400, {"error": str(e)})
         if "/cb-studio/data/" in self.path:

@@ -1,0 +1,12 @@
+{
+ "schemaVersion": 1,
+ "eventId": "33e003f91acb44bcb4c3b5ea2267bd5e",
+ "kind": "script-uploaded",
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:3ec8cfee1146b769f26c3bae7cd93f2bde4e36bfe3f7659d79ca371ca82cd7eb",
+ "previousScriptVersionId": null,
+ "title": "The Adventure Begins",
+ "displayFile": "Ep1_The_Adventure_Begins.txt",
+ "activatedAt": "2026-07-31T20:54:08+00:00",
+ "activatedBy": "Julian"
+}

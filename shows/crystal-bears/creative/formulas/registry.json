@@ -1,0 +1,57 @@
+{
+  "_doc": "THE FORMULA LIBRARY (Julian, 2026-07-25). The product is not the rulebook — it is this. One PROVEN prompt shape per dramatic form, each derived from real fires and each tagged so it is never applied to material it was not proven on. A form with status 'missing' has NO exemplar: the writer is told plainly it is DISCOVERING one, and must not borrow a shape proven on different material. Nothing here is ever fabricated — a formula earns 'proven' only when a real take was approved under it, and provenBy names the evidence.",
+  "forms": {
+    "physical_comedy": {
+      "status": "proven",
+      "label": "physical comedy / action chain",
+      "appliesTo": "a physical cause-and-consequence spine: crashes, chases, collisions, gag beats where the comedy is in weight, momentum and mistimed recovery",
+      "exemplar": "SH1_KEEPER_EXEMPLAR.txt",
+      "provenTake": "S1.SH1",
+      "provenBy": "eleven live A/B fires, 2026-07-25; Julian's verdict on the winner: \"it's perfect\"",
+      "laws": "THE SH1 KEEPER STANDARD — PROMPT_CRAFT_STANDARD.md",
+      "notes": "Word spend, not word count: ~720 words is correct here because every sentence buys physics. Do not read the length as a target for lighter material."
+    },
+    "quiet_emotion": {
+      "status": "missing",
+      "label": "quiet emotion / interior beat",
+      "appliesTo": "a held, internal moment: realisation, grief, wonder turning inward, a decision made without movement",
+      "exemplar": null,
+      "provenTake": null,
+      "provenBy": null,
+      "notes": "Physical-comedy spend is actively WRONG here — a beat whose whole point is stillness cannot be written as a chain of impacts."
+    },
+    "two_hander_dialogue": {
+      "status": "missing",
+      "label": "two-character dialogue exchange",
+      "appliesTo": "two characters talking, where the shot's job is the exchange itself — timing, listening, the beat between lines",
+      "exemplar": null, "provenTake": null, "provenBy": null,
+      "notes": "The audio track carries the words; the open question this form must answer is what the picture does while it does."
+    },
+    "tension_reveal": {
+      "status": "missing",
+      "label": "tension / reveal",
+      "appliesTo": "withheld information becoming visible: the approach, the turn, the thing seen",
+      "exemplar": null, "provenTake": null, "provenBy": null
+    },
+    "fast_action": {
+      "status": "missing",
+      "label": "fast action, non-comic",
+      "appliesTo": "urgency played straight — a rescue, a storm, a chase with stakes rather than gags",
+      "exemplar": null, "provenTake": null, "provenBy": null,
+      "notes": "Adjacent to physical_comedy but NOT the same: the recovery-into-pride beat that ends a comedy chain is wrong here."
+    },
+    "wonder_establishing": {
+      "status": "missing",
+      "label": "wonder / establishing",
+      "appliesTo": "the world presented for its own sake: scale, light, arrival somewhere",
+      "exemplar": null, "provenTake": null, "provenBy": null
+    },
+    "transition": {
+      "status": "missing",
+      "label": "transition ending in movement",
+      "appliesTo": "a shot whose job is to carry the audience into the next place or time, ending in motion rather than settling",
+      "exemplar": null, "provenTake": null, "provenBy": null,
+      "notes": "A closing hold is a failure of this form by definition."
+    }
+  }
+}

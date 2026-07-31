@@ -1,0 +1,65 @@
+# S1.SH1 — THE SUPERHERO KEEPER, 2026-07-27
+#
+# Julian, on watching it: "it is by far the best we have ever ever done."
+#
+# This supersedes SH1_KEEPER_EXEMPLAR.txt (2026-07-25, "it's perfect") as the worked example
+# for physical_comedy. The old one is KEPT on disk and in the registry's history — a formula
+# library that deletes its own evidence cannot show its working.
+#
+# WHAT CHANGED BETWEEN THE TWO, IN THE ORDER IT MATTERED:
+#
+# 1. THE BEAT ITSELF, AND IT WAS JULIAN'S REWRITE, NOT A PROMPT FIX. Five takes of the old
+#    beat failed. He watched them and said: "it doesnt work its the direction" — then wrote a
+#    new one in one sentence: pace out, hard return, clips a few flowers, triple somersault,
+#    crash beside Zenny, shake off, proud and surprised he didn't come off worse. The crash
+#    landing NEXT TO HER is what finally made the size gap read at the payoff instead of only
+#    in frame one. No amount of prompt craft was going to rescue the beat that came before it.
+#
+# 2. EVENT DENSITY, NOT WORD COUNT. The failing version asked for 42 distinct physical events
+#    in 12 seconds — under 0.3s each — and the model kept the two or three it could hold and
+#    binned the middle, which was the joke. This one asks for roughly seven. It is still ~985
+#    words. Length was never the variable; events per second was.
+#
+# 3. FRAME ZERO IS THE APPROVED KEYFRAME, AND THE PICTURES OUTRANK THE PAPERWORK. The canon
+#    said rainforest and corridors; the plate and the keyframe showed an open meadow. Until
+#    both authoring chairs were told the pictures win, "corridor" reached the fired prompt
+#    five times and the render opened in a tunnel.
+#
+# 4. THE TUMBLE STAYS AT FLOWER HEIGHT. Every prompt that said "up into the air" sent the
+#    somersault into open sky, where there are no flowers to hit and no Zenny to land beside.
+#    Grok's version never said up, anchored every beat to a bloom and to her position, and
+#    kept the meadow. That finding is now a standing prohibition on the shot.
+#
+# 5. THE REACTION LADDER, FROM THE CINEMATOGRAPHY HANDBOOK. Zenny's button was written as its
+#    own conclusion ("the smallest smile") and came back broad and warm. Written as a LADDER —
+#    shrug, then deadpan held too long, then one corner only — it came back dry. And "not a
+#    muscle moving" had to become "her FACE is still, her wings and hands keep working", or
+#    the deadpan renders as a freeze.
+#
+# 6. THE AUDIO WAS FIGHTING THE PICTURE. The approved take is 4.08 seconds; the shot is 12.
+#    Both lines were landing in the first third while the direction kept saying the final line
+#    lands on a pose at 10.5s. Julian caught it by ear — "can the bizzy come in a second or
+#    two later" — and the fix was a plain 1.6s delay on the approved take. Nothing re-voiced.
+#
+# WHAT DID NOT CHANGE: no new gate, no word cap, no lint. Every fix above is either a deletion
+# or a picture given authority over a sentence.
+#
+# --- THE PROMPT, VERBATIM AS FIRED ---
+
+ENGLISH DIALOGUE ONLY, spoken in English. Use @Audio1 as the sole source of dialogue, wording, voice, performance and timing. Only Fuzzby speaks; Zenny never speaks and her mouth stays closed for the whole take. No additional speech, no narration, no extra words beyond @Audio1 — the wing-buzz, the impacts and Fuzzby's breath are welcome and directed.
+
+@图1 only for the exact opening composition and positions; @图2 only for Zenny's identity, proportions, features and accessories; @图3 only for Fuzzby's identity, proportions, features and accessories; @图4 only for the world. Zenny is the character from @图2 — match the reference 100%, every feature and accessory exactly as shown. Fuzzby is the character from @图3 — match the reference 100%, every feature and accessory exactly as shown. Stylised feature-quality 3D CGI for ages 4–8: real weight, appealing squash-and-stretch, bold readable staging.
+
+Shot 1: front-on medium-wide at flower-top height, 35mm, one held camera position that only breathes a few inches to keep the wreck and Zenny both in frame — until the single dolly at the very end. Begin exactly on @图1 and move immediately; no resting hold. Low sun flares in behind them over the open flower tops, rimming both bees, dust motes drifting across the top of frame.
+
+Fuzzby is already loaded, and he goes: his chest drives out ahead of his own wings and the shove of it rocks the lavender spikes under him, those bending stems whipping his wake sideways as he tears away from Zenny into the depth of the field. His mouth is working — the opening spoken section of @Audio1 starts once he is away and travelling, and he sings it at full throttle, antennae proud-erect. He shrinks to a fast dot skimming the far flower tops, clearing the frame entirely off the right on a flat readable vector; the camera does not chase him and does not go looking. Zenny's eyes go with him, tracking him out to the edge — then she gives him up, drops her gaze, sinks the short distance onto the clover head directly beneath her and gets to work with her hands, head down. She stays welded to that clover for the rest of the shot: whenever it nods or is knocked, she travels physically with it, and she never leaves frame.
+
+He returns from the same right edge, at the same height, faster than he left, and he has misjudged it badly — too low. A lavender stem clips his trailing wing and the clip yaws his whole body off its line; the yaw drops his head into the path of a big clover bloom and one wing beats to correct far too late; the correction only spins his face square into the pollen centre at full speed. THE FLOWER TAKES THE FORCE — the head compresses flat under him, the stem bows most of the way to the ground, the petals splay back and a fat cloud of gold erupts out sideways, the blast knocking every neighbouring bloom nodding, the clover under Zenny among them, so she and her flower bob with it while she keeps working, head down, without once looking up. The petal, flower head and stem are one flexible connected structure: having loaded, the stem whips upright again and flings him off it, coated in thick gold and trailing it. Only his face and the front of his chest ever touch the pollen centre — his body, his wings and his spectacles stay outside the bloom and readable in silhouette throughout; he is never swallowed, never hidden inside it.
+
+The fling carries him half-blind into a second bloom, and that head turns him over. The turn becomes three fast tight somersaults, readable as three, limbs tucked, wings helpless — he is a passenger, not a performer — and all of it stays down among the blooms at flower height, never up into the open sky. He comes out of the third rotation feet-first onto a sturdy flower head and STICKS it like a gymnast finishing a routine: feet planting hard, one leg tucked back, and the head dips deep under his weight then rebounds, his balance riding the rebound with small quick corrections, wings beating fast beneath the held tension. Nothing about him stops moving.
+
+He stands up out of the finish, brushes the gold off his chest, and one quick embarrassed glance goes round the flowers to check whether anybody saw. Nobody did. So the relief snaps into a full superhero pose — chest out, fists planted on his hips, chin up, shoulders squared, dusty and delighted, gold still sifting down past him — and the final spoken section of @Audio1 lands on that pose, his chest pushing out one notch further on it, Zenny working away below with her mouth closed.
+
+As the sound of his line clears, the camera dollies smoothly off him onto Zenny alone, leaving him soft behind her still in his pose, and closes to a medium close-up of her facing the lens. FIRST she shrugs — one small shrug, straight down the lens. THEN nothing: her face goes completely deadpan, flat and unimpressed, and it lasts a beat longer than is comfortable — but she is not frozen; her wings keep going and her hands keep working the clover the whole time. Only her FACE is still. ONLY THEN, at the very end, does one corner of her mouth lift into a small wry smile — one corner only, small, never broad or toothy. Shrug, then deadpan, then the wry corner, in that order, never together, and the shot lands there. Warm backlight edges her fur, catchlights alive in her eyes, loose gold still drifting through the flare behind her. Hold on Zenny for two seconds after the audio finishes, her wings and hands still working and the pollen still falling. No further speech.
+
+No glow, sparkle trail or magic light on either bee.

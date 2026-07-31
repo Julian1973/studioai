@@ -1,0 +1,58 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_7ba326eb.png",
+  "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+  "inputSignature": {
+   "briefHash": "f40304b4c3a5334e3b121a4653645371d5a19e46196fffb9447f6fbd60d63a2d",
+   "referenceHashes": {}
+  },
+  "referencePath": null,
+  "generatedAt": "2026-07-26T21:08:08",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+  "approvedAt": "2026-07-26T21:09:54",
+  "reviewedBy": "Julian",
+  "reapprovedAt": "2026-07-26T21:10:07"
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "skillHash": "a3a32f9d7c85542d",
+    "model": "gpt-5.5",
+    "scene": "1",
+    "shotId": "None",
+    "packageRevision": 1,
+    "preparedAt": "2026-07-26T21:01:13",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "b8412b92298de80018613f755325f63f771a877f5d94c8c5b129c1460d27702a",
+    "signatureVersion": 3,
+    "sourceFields": {
+     "episode": "99463d0bdd2bd2e162131bde30cd7eb356d80699aa25a64454b0d7c43cd7d053",
+     "scene": "391552c099c101b131feaf24c5795a6a15bc8ec82015424e0d2b4274a369a0bf",
+     "sceneName": "cd180a37f2f3a464c1ccafc0f543733cadcabeed003ba9606008a4e9a56141c7",
+     "approvedStoryboardScene": "00ae68e05fc5ab0fd4a94cd8afadf0c30724680387df315a0e30be93f7e4b4c3",
+     "selectedTreatment": "f4ef7c80e6245b60bb1fdf4bf49b421226fbb8431474d3a5630e4de118c1c610",
+     "locationCanon": "16b45e0cca989c1fc46136ffbf010c5ac7187ea299b472f24991d85e901dd7cd",
+     "styleLaw": "1841b41e71d53aafe95d6abaad4e46840bfb4682b34ca15c546fc5c4e28b0797"
+    },
+    "outputHash": "2c16ab5fe09429511c7db98043521d028a12119030d4de57559ebc6afba0599e",
+    "output": {
+     "providerPrompt": "Original 3D CGI animation, Pixar-caliber ages 4-8 render quality, environment plate only — no characters, no insects, no animals. LOCKED LIBRARY PLATE deep_rainforest_flower_meadow.png is the visual law: match its world, palette, materials and light exactly, never a re-imagined alternative.\n\nAn open sunlit Crystal Cove wildflower meadow read at bee scale, camera-neutral plate at flight height between the stems. Towering purple lavender spikes, white daisies and pink-red clover loom tall and frame-filling, their pollen-heavy blossom heads sitting at flight height. Grass channels wind between the stems as open flight lanes. Small crystals rest low in the grass as quiet set dressing. Soft rolling hills recede beyond the meadow into soft haze in the deep background.\n\nLight exactly as the plate states: low bright sun sitting just above the hills, long gold light raking across the flower tops, petals backlit and haloed, soft light haze over the far hills. Defer all light to the plate reference; state no competing sun position or colour.\n\nMaterials: petals thin and translucent where the raking light passes through, fine pollen grains dusting the blossom heads with gold specks, stems and grass blades green and fibrous with visible fine hairs, every plant surface springy and reactive, built to bend and rebound. Clear sky at ground level. High above, in the topmost canopy leaves only, a faint cooler grey-violet filtering has begun — almost imperceptible, no rain, no cloud mass at meadow level, and it must not change the light on the flower field.\n\nPalette: the locked plate's own — gold-pink sky over the hills, purple-lavender and daisy-white flower field, green stems and grass, gold pollen accents.\n\nDeep bee-scale depth: sharp stem detail near, receding rows of blossom heads mid-ground, hills softening into haze far. No characters, no faces, no camera angle or lens language, no text, no watermark.",
+     "doesItLand": "Yes — it reads as the same locked bee-height wildflower meadow the scene canon states, with the raking gold light and springy comedy-ready plant surfaces the scene plays on, and the storm's first grey-violet only whispering in the highest canopy where the scene wants it unnoticed."
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-07-26T21:09:08",
+    "reviewedBy": "Julian",
+    "note": ""
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

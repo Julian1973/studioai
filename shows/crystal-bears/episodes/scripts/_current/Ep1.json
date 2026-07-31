@@ -1,0 +1,15 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:3ec8cfee1146b769f26c3bae7cd93f2bde4e36bfe3f7659d79ca371ca82cd7eb",
+ "sha256": "3ec8cfee1146b769f26c3bae7cd93f2bde4e36bfe3f7659d79ca371ca82cd7eb",
+ "byteLength": 17804,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/3ec8cfee1146b769f26c3bae7cd93f2bde4e36bfe3f7659d79ca371ca82cd7eb.txt",
+ "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/3ec8cfee1146b769f26c3bae7cd93f2bde4e36bfe3f7659d79ca371ca82cd7eb.json",
+ "displayFile": "Ep1_The_Adventure_Begins.txt",
+ "title": "The Adventure Begins",
+ "activationId": "33e003f91acb44bcb4c3b5ea2267bd5e",
+ "activatedAt": "2026-07-31T20:54:08+00:00",
+ "activatedBy": "Julian",
+ "previousScriptVersionId": null
+}

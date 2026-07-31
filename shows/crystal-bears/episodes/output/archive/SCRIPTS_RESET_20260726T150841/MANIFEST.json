@@ -1,0 +1,19 @@
+{
+ "archivedAt": "20260726T150841",
+ "reason": "SCRIPTS RESET \u2014 Julian, 2026-07-26: \"i want you to take all episodes out so we start on zero to run fresh\", and the Studio still showed Episode 1 after I had zeroed the registry twice.",
+ "theActualMechanism": "cb-studio/serve.py:192 DERIVES the episode list \u2014 it globs SCRIPTS/Ep*.txt on every page load, rebuilds episodes.json from whatever script files exist, and writes it back. The registry is a CACHE, not the source. Zeroing it was pointless: the page load at 15:07 regenerated it from Ep1_..._Final_v3.txt within milliseconds. THE SCRIPT FILE IS THE EPISODE. To reach zero, the script has to move.",
+ "restoreToRunAgain": "Copy any file from this folder back into shows/crystal-bears/episodes/scripts/ (named Ep<N>_*.txt) and the Studio re-registers the episode on the next page load. Ep<N>.title carries the exact display title.",
+ "nothingDeleted": true,
+ "files": [
+  {
+   "file": "Ep1.title",
+   "bytes": 29,
+   "md5": "66ef2351c9d407a1bc005e6d56699eb4"
+  },
+  {
+   "file": "Ep1_The_Adventure_Begins_Final_v3.txt",
+   "bytes": 17804,
+   "md5": "48f9e3b9beecfc16f411d3d797dc38a0"
+  }
+ ]
+}

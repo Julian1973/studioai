@@ -422,6 +422,28 @@
    "assetPointers": [
     "Ep1_scene1_storyboard.json"
    ]
+  },
+  {
+   "evidenceId": "ev-3cce68b169",
+   "capturedAt": "2026-07-26T21:01:00",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene1_storyboard.json"
+   ]
   }
  ]
 }

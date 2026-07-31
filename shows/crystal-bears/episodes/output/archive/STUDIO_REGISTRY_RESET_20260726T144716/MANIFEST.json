@@ -1,0 +1,23 @@
+{
+ "archivedAt": "20260726T144716",
+ "reason": "STUDIO REGISTRY RESET \u2014 Julian, 2026-07-26: \"i want you to take all episodes out so we start on zero to run fresh.\" The Studio does NOT list episodes from the output folder I had already cleared; it lists them from cb-studio/data/episodes.json. That registry still held one entry (Episode 1, script Ep1_...Final_v3.txt, status 'Script uploaded') which is why episodes were still showing. Copied here, then zeroed to [].",
+ "scriptUntouched": "shows/crystal-bears/episodes/scripts/Ep1_The_Adventure_Begins_Final_v3.txt (578 lines) is NOT archived \u2014 re-adding the episode in the Studio picks it straight back up.",
+ "deliberatelyLeftALONE": {
+  "cb-studio/data/projects.json": "the PROJECT definitions (Crystal Bears' premise, style, audience, voice provider, music). Not episode content \u2014 deleting it would erase the show's own identity, not reset a run.",
+  "projects/ep1-v2-archive/episodes.json": "a saved ARCHIVE project from June. Clearing an archive's own index makes the archive unreachable, which costs history and buys a fresh run nothing. Left intact \u2014 say the word if you want it gone too."
+ },
+ "files": [
+  {
+   "file": "episodes.json",
+   "why": "the live crystal-bears episode registry \u2014 what the Studio lists",
+   "md5": "3fe8d05d0483feff4b3ae846856eba06",
+   "before": "[\n {\n  \"number\": 1,\n  \"script\": \"Ep1_The_Adventure_Begins_Final_v3.txt\",\n  \"title\": \"The Adventure Begins Final v3\",\n  \"status\": \"Script uploaded\"\n }\n]"
+  },
+  {
+   "file": "media-index.json",
+   "why": "the media index",
+   "md5": "d751713988987e9331980363e24189ce",
+   "before": "[]"
+  }
+ ]
+}

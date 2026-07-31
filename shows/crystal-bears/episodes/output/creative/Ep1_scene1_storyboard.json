@@ -1,0 +1,1055 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "1",
+ "engineVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+ "canonVersion": "1.0",
+ "builtAt": "2026-07-26T20:58:02",
+ "vision": {
+  "episodeId": "Ep1",
+  "title": "The Adventure Begins",
+  "sourceScriptVersion": "d0b65484801f3f664166bc7c28cacbf8",
+  "canonVersion": "1.0",
+  "premise": "Keen sets out alone on his first sea voyage with his late father's vacant wristbands on his wrists; a storm strips away his map and his plan, and when Squeaky is dragged under by a drift net he dives anyway — and is carried back to a cove where a whole family is already lighting a beacon for him.",
+  "dramaticQuestion": "Can Keen stop performing bravery long enough to actually be brave — and will he find out he was never out there on his own?",
+  "theme": "Courage is not the absence of the gulp; it is the gulp swallowed and the step taken anyway — and it is never done alone. Bravado (Fuzzby's 'Nailed it.', Keen's 'Still got it!') is the same joke shape twice, and the real thing looks nothing like it.",
+  "externalJourney": "Meadow pollen-round → Aida's vision at the cove → the pier goodbye and the wristband handoff → open water, map lost, lost at sea → the bees spot the boat → the bears' combined beacon → the underwater rescue of Squeaky → the ride in on the crest → the welcome on the sand → the Aquamarine awarded and set into the vacant bands → the honey-friendship walk home.",
+  "internalJourney": "Keen begins over-checking straps because checking is what he does instead of admitting his paws are unsteady. Every prop that props him up is taken away — the map, the boat, the plan — until the only thing left is the vacant gold on his wrists and someone smaller than him who needs pulling free. He stops trying to look ready and simply pulls, and the bands answer from inside. By the end he is not braver-looking; he is held.",
+  "relationshipChanges": "Mum's hands open — she goes from closing her paws around his to lifting one in a wave as he shrinks away. Squeaky moves from playmate to rescued to rescuer, carrying him in. Fuzzby's panic converts into worship of somebody else, which is new for him; Zenny pulls him back by the leg twice and it reads as care both times. Aida, who saw Keen in a bubble before she ever met him, ends the episode putting a crystal on him and calling it family.",
+  "emotionalCurve": "Play (meadow silliness) → a hush of foreknowledge (Aida's vision) → warm ache (the pier, the empty gold) → bright then thinning confidence (open water) → fear with the horizon gone → alarm and mobilisation on land → the nadir, held and wordless underwater as his strength runs out and the bands answer → release, whoop, laughter → warmth of welcome → settled belonging with the trace of the morning still in it.",
+  "comedyCurve": "Fuzzby's three-beat overcommitment opens the show and calibrates the joke shape; Zenny's 'Officially nuts!' is the first laugh. Keen inherits the shape at the dock ('Still got it!') and again with the upside-down map. Fuzzby's beach crash-landing ('I meant to do that.') re-fires it under real stakes. After the rescue the comedy converts from cover-up to pure delight — the early clap, the honey list — so the funny at the end is honest rather than defensive.",
+  "setupPayoffMap": "Vacant wristbands pressed into his paws (S3) → faint self-glow underwater (S7) → Aquamarine gems settle into the same bezels (S9). 'Wherever you go… You'll never be alone.' from Mum (S3) → repeated by Aida to a whole circle (S9). Fuzzby's 'Nailed it.' (S1) → Keen's 'Still got it!' (S3) → Fuzzby's 'I meant to do that.' (S6). Distant thunder Zenny names (S1) → the storm that takes the map (S4). Squeaky named on the water (S4) → Squeaky carrying him home (S7). Aida's vision of the pier (S2) → Aida sending a message to Mum via Squeaky (S8), closing the loop the audience opened.",
+  "visualMotifs": "Empty gold bezels and paws closing over them; straps checked one more time than necessary; the map turned upside down then gone; a small boat between two grey waves; light as beacon versus light as glow-from-within; a circle of bodies around one bear (the bear hug echoing the beacon huddle); Mum small on the dock and, later, Keen small under a wave.",
+  "sonicMotifs": "Fuzzby's BUZZZZZZ-CRASH and Zenny's Ommmmm… ping open the world. Keen's note B sits alone and unresolved from the pier through the storm, thins to almost nothing underwater, and resolves to true pitch as the bands glow; Aida's G under the vision and the beacon; the seven notes stack into one chord on the combined Crystal Call; the singing bowl's rim-tone at the start rhymes with the crystal hum when the gems split. Rain, rope-creak and hull-knock replace all music at the nadir.",
+  "climax": "Underwater, out of strength, with a wave massing above him: Keen sees the faint glow start inside his father's vacant bands, braces on a rock and tears the net — 'COME ON!' — and the sea explodes over them.",
+  "resolution": "Aida awards the Aquamarine; it splits and settles into the two vacant bezels, Keen speaks his Crystal Call, and the group swamps him in a hug. Then the beach walk, Fuzzby's honey campaign, and everyone laughing as they go.",
+  "intendedFinalFeeling": "Warm and belonged, with the morning's goodbye still faintly in the chest — a child grinning at the honey list while an adult remembers whose hands opened at the pier to make this possible.",
+  "showrunnerJudgement": "",
+  "approvalState": "approved",
+  "provenance": {
+   "role": "director-intake",
+   "at": "2026-07-26T20:28:02",
+   "reviewedBy": "Julian"
+  }
+ },
+ "ambitionBrief": null,
+ "canonCompletionProposal": "Ep1_scene1_canon_completion_PROPOSED.json",
+ "directedOnEstablishedCanonOnly": true,
+ "treatments": [
+  {
+   "name": "THE WINGMAN'S EYE — the camera is Fuzzby's flight partner and Zenny is the wall it keeps hitting",
+   "audienceExperience": "A four-year-old feels flown, not shown. From the first frame we are travelling — banking through flower corridors at bee altitude, pollen dust smacking past, petals swelling and gone — so the audience's stomach learns Fuzzby's rhythm before it learns his face. Then, twice, the ride ends against Zenny: the frame lands on her and simply cannot move, and the child laughs at the sudden nothing. The parent laughs at something else: the ride was always trying to impress the one thing that won't budge.",
+   "emotionalPointOfView": "Fuzzby's — but Fuzzby unaware that he is the subject. We travel with his intention (the work-song, the professional sweep), never with his self-doubt, because he has not admitted any. Zenny's POV is granted only in the two arrival frames, and it is a judgement, not a feeling. When thunder comes in 1.B4 the point of view shears: the camera's own attention drifts skyward a half-beat before Fuzzby's hover goes crooked, so the audience's dread precedes his, which is the only place in the scene we know more than he does.",
+   "comicOrDramaticMechanism": "1.B1 anticipation → reversal (a professional sweep promised, a leaf-ricochet delivered) buttoned by hiding failure. 1.B2 concealment → revelation, punched from stillness. 1.B3 escalating overcommitment on ONE object — the pollen keeps getting worse the harder he treats it. 1.B4 movement against stillness plus environmental participation: the flower has the last word by closing on him.",
+   "characterPerformanceStrategy": "Fuzzby performs competence with his whole body and never once with his face-to-camera: chest pumped forward on-parade, antennae proud-erect, wings beating fast and continuous, altitude overshooting then undershooting through every zig-zag. His momentum is the cause of everything that happens to him — he dips too deep into the blossom, the blossom's weight of pollen drags his line sideways, the sideways line meets the broad leaf, the leaf bends under him and FWIPs him back into open air, and the air is where he reclaims dignity with 'Nailed it.' — one droopy antenna telling on him while the rest of him claims otherwise. Zenny does almost nothing and every unit of it is a thought: her sacks are already properly full when we find her, her eyes reach the sky before her body moves, and 'Yes Fuzzby Officially nuts!' arrives on a flat stare with one slow blink after it. On 'Do I look official?' she withholds a fraction longer than comfortable — the withholding is her acting.",
+   "visualGrammar": "Two grammars welded together and never blended. FUZZBY GRAMMAR: wide lens near his body, banking with him, horizon rolling, foreground stems whipping through the near field, frame giving him too little ceiling so he keeps threatening to leave the top of the picture. ZENNY GRAMMAR: longer lens, flatter, level with her, background reduced to soft warm green, absolutely no camera movement. The scene is built out of the collision between them, so every cut to her feels like a door shutting.",
+   "cameraCharacterRelationship": "Follows and struggles to keep up. The camera is behind him and slightly late by design; twice it loses him past a stem or a petal edge and finds him again already in trouble. On his re-launch in 1.B3 it deliberately arrives late — we cut in on legs kicking above a blossom rim before we ever see the tumble that put them there, and 'Buzz Crash!!' is the sound of the aftermath announcing itself. With Zenny the camera abandons him mid-boast, and that abandonment is the editorial opinion: her response matters more than his claim.",
+   "movementVersusStillness": "Roughly three-quarters of the scene's running time travels; the remainder does not move at all, and the ratio is the joke's engineering. Movement always has a physical cause in frame — his body pulls the lens, a bending stem pushes it, the FWIP of the leaf throws it. Stillness is only ever bought by Zenny. Nothing drifts for prettiness.",
+   "depthAndEnvironment": "Rainforest understory at bee scale, tall and open, warm golden morning shafts falling through canopy gaps. Depth carries the gag: near-field leaves and stems pass close enough to swipe the lens, mid-ground holds the target blossom, far background is bright haze so his silhouette always reads. The environment is a participant in every beat — the blossom overloads him, the leaf springs him, the branch clips him, the last flower clamps its petals on him and holds. When the sky darkens, it darkens in the deep background first, behind the play, so the audience sees weather arriving before either bee names it.",
+   "rhythmAndEscalation": "Fast, fast, faster, then a wall. Each beat is a shorter ride to a longer stop: 1.B1 is a long travelling gag; 1.B2 is a quick face-plunge and a very long hold on her; 1.B3 is two fast strikes in a row (the smear, the tumble) with the hold shortened so the audience feels denied; 1.B4 slows the whole scene from the outside — thunder lengthens the shots, the warm gold thins, and the final clamp is the only impact with no ride before it.",
+   "cutPhilosophy": "PLANNED_CUT is the default and always pays for itself with a changed point of view or comic punctuation. Cuts to Zenny buy altered power. Cuts back to Fuzzby buy acceleration. One junction stays CONTINUOUS on meaning alone: the dip into the blossom through the sideways drag into the leaf and out the other side must be felt whole, because breaking it would turn one cause into two events. Nothing in this scene cuts merely because a new beat began.",
+   "openingImage": "Bee-height inside a corridor of tall flowers, already travelling — Fuzzby's pollen-loaded body pitched forward into a rising zig-zag, wings a fast blur, a rope of gold dust trailing off his hind legs and a stem swinging back into the near foreground where he just clipped it, canopy light strobing across him as he climbs.",
+   "closingImage": "A single flower's petals closed tight around Fuzzby with only his rear half and two beating wings sticking out, gold dust settling around him in cooling grey-green light — and small, sharp, in the far background, the sky behind the canopy already the wrong colour.",
+   "cinematographerChallenge": "The DP's objection, on the record: a 'chase Fuzzby' scene is exactly where this show has previously produced busy, meaningless motion — a camera performing liveliness while the frame says nothing. The challenge was accepted on two conditions the Director agreed to. First, every camera move must be caused by something visible in the frame (his body, a bending stem, the leaf's spring) so movement can never be decoration. Second, the still frames on Zenny must be genuinely still — no consolation drift, no reassurance push-in — because if her frames breathe at all, the collision of grammars collapses and the whole treatment becomes ordinary chase coverage. The DP additionally refused the safe wide re-establish between 1.B3 and 1.B4: the weather arrives inside the existing geography, in the deep background, not in a new master."
+  },
+  {
+   "name": "THE UNMOVED WITNESS — the scene belongs to Zenny, and Fuzzby is weather passing through her frame",
+   "audienceExperience": "The audience watches from beside the one who is not impressed. We hold, at a working bee's eye level, on Zenny doing her job properly — and Fuzzby happens to the picture: he enters, wrecks the composition, exits at an unhelpful angle, comes back worse. The child laughs at the interruptions because the frame is so calm it makes them enormous. The adult, watching Zenny's eyes track a bee she pretends not to be watching, gets the other film entirely: she is keeping an eye on him.",
+   "emotionalPointOfView": "Zenny's, throughout — including the moment it costs her. Her point of view rations what we are allowed to see of Fuzzby: we get his crashes as noise and consequence more than as spectacle. On the thunder in 1.B4 her POV is what breaks the register — the camera goes where her eyes go, upward, before her body moves, and the warm morning we've been sitting in becomes something she is measuring.",
+   "comicOrDramaticMechanism": "Deadpan observation is the spine: motion meets a still witness and the stillness is the punchline, four times, escalating. Inside it, 1.B1 runs anticipation → reversal, 1.B2 concealment → revelation with a status change ('Officially nuts!'), 1.B3 escalating overcommitment, and 1.B4 environmental participation — the flower answers his boast so she doesn't have to.",
+   "characterPerformanceStrategy": "Zenny's whole performance is economy under pressure: she is grounded on a broad leaf, sacks visibly loaded, hovering low and level only when she must reposition. Her tells are a slow blink, a flat stare, a fraction of head-tilt. 'Yes Fuzzby Officially nuts!' comes out level, small, without a single accompanying gesture, and her antennae dip a hair on the word 'nuts' — a hairline crack of fondness she immediately covers by looking back at her work. 'A Storm's coming.' is even smaller than the line before it. Fuzzby stays full-throttle inside her frame: he arrives at speed, chest pumped, porpoising in altitude, and his face goes into the blossom so completely that his own thrust drives his head past the pollen sacs, packs the gold across his muzzle, and levers his whole body backward out of the flower still wearing it, arriving in front of her asking for a ruling. His entrances shove leaves, dump dust and knock stems that keep swinging after he's gone.",
+   "visualGrammar": "A near-locked camera with a defined, honest bee's-eye geography, and Fuzzby granted no compositional respect whatsoever — he crosses corners, breaks the near foreground out of focus, half-leaves the frame, hovers with his head cut by the top edge. He is allowed to be badly framed; she never is. Warm morning light lands on her leaf as the frame's one clean pool, and his passes throw shadow and pollen through it. There are no fixed screen sides across the scene — she re-anchors as the space is explored — but her relationship to the target flowers stays legible in every setup.",
+   "cameraCharacterRelationship": "Stays still, and abandons nobody — Fuzzby has to come to us. Once, and only once, the camera breaks its own rule: in 1.B3, after he re-launches to prove himself, it whips off her to catch the branch-clip, then arrives at the blossom late, finding legs already kicking above the rim. The break is the point — she made us look, and the flinch belongs to her.",
+   "movementVersusStillness": "Stillness is the default and it is charged, not safe: it is a working bee's attention, and the audience feels it as patience being tested. Movement is rationed to three events in the whole scene — the whip to the branch-clip, a small reframe when she repositions to a fuller flower, and a slow lift to the darkening canopy on the thunder. Because the camera has barely moved, that final lift lands like the floor tilting.",
+   "depthAndEnvironment": "Compressed rather than open: a longer lens keeps the flower cluster shallow and intimate, so Fuzzby's chaos has to happen inside a small, crowded space and keeps colliding with things. Foreground petal edges frame her softly; behind her, a green haze where the canopy shafts fall. The world participates through what it retains after he leaves — dust hanging in a light shaft, a stem still oscillating, a bent leaf slowly rising. On the storm, depth becomes the story: the haze behind her cools and thickens while her leaf stays warm, so we can see the day changing around a bee who hasn't moved.",
+   "rhythmAndEscalation": "Long holds broken by short violences, and the holds get longer, not shorter. 1.B1 lets his song approach from offscreen and arrive late; 1.B2 gives the beat's biggest hold to her withheld ruling; 1.B3 is the only shortened, jumpier passage, and it deliberately unsettles the pattern; 1.B4 restores the hold and then extends it past comfort — thunder, her eyes, the line, his boast, and the clamp of petals cutting him off mid-dignity.",
+   "cutPhilosophy": "Cut rarely and only for intimacy, surprise or comic punctuation. Most of Fuzzby's business is allowed to enter and exit one frame, because staying is the joke. The junction from his re-launch to the aftermath in the blossom is a hard PLANNED_CUT for surprise. The junction from the thunder to her line is CONTINUOUS because the unbroken-ness is the meaning — her eyes reaching the sky and her mouth naming it must live in one breath.",
+   "openingImage": "Bee's-eye level, shallow depth: Zenny grounded on a broad sunlit leaf mid-work, laden pollen sacks catching the gold, her gaze angled off-frame at a swinging stem still oscillating from something that just went past — the frame's only motion is that stem and dust turning in the light shaft behind her.",
+   "closingImage": "Her leaf, still warm, still — and in the soft distance behind her, a flower with two beating wings protruding from its clamped petals, thrashing tiny and silent while the green haze around it cools to grey; she does not turn to look, and her antennae dip a fraction.",
+   "cinematographerChallenge": "The DP challenged this concept hardest, because 'hold on the deadpan bee' is one keystroke from unmotivated stillness and safe TV coverage — a locked frame chosen for comfort rather than meaning. Two demands were made and met. One: the stillness must be paid for by a working world inside the frame — hanging dust, oscillating stems, rising leaves, a background cooling in real time — or it is a photograph, not a shot. Two: Fuzzby must be allowed to be genuinely badly framed, cut by edges, out of focus, half-gone, since a camera that politely composes his chaos is a camera that has taken his side and killed the treatment. The DP also refused any push-in on her ruling in 1.B2: the laugh must come from the audience leaning in, not the lens."
+  },
+  {
+   "name": "THE POLLEN'S PROGRESS — one object tells the whole scene, and the bees are what happen around it",
+   "audienceExperience": "The audience is invited to track a substance. Gold pollen is the show's protagonist here: we watch it load, spill, smear, cake and finally trap, and every laugh is the audience noticing it has got worse again. Kids get an escalating mess with a clear rule — the harder he treats it, the more it wins. Parents get the deeper joke: the thing he is wearing is the evidence of exactly the self-image he is trying to protect, and only he cannot see it.",
+   "emotionalPointOfView": "Shared and object-anchored — the camera serves the gold. Fuzzby owns the effort, Zenny owns the verdict, and the pollen owns the continuity, so the emotional point of view belongs to whichever body the gold is currently doing something to. This lets us deny Fuzzby the audience's full sympathy at exactly the moments he demands it, and lets Zenny's care surface without her ever aiming it at him — her eyes go to his caked face for half a beat too long.",
+   "comicOrDramaticMechanism": "Escalating overcommitment played on a single object, with three named punctuations inside it: hiding failure in 1.B1 ('Nailed it.'), concealment → revelation in 1.B2 (the face goes in, a beat, it comes out wearing the consequence), and status change in 1.B2's ruling. 1.B4 hands the object to the world — environmental participation, petals closing on the very body that boasted about pressure.",
+   "characterPerformanceStrategy": "Fuzzby's want is legible in his handling of the gold: he loads it like a professional, presents it like rank, and defends it like dignity. His momentum causes everything — his overloaded body swings wide of the blossom's centre, the extra weight of pollen carries the swing into the leaf, the leaf bends deep and springs him out shedding a burst of gold, and the burst is what he lands inside, straightening up on-parade with a droopy antenna he will not acknowledge. In 1.B3 his wipe is the fatal act: his own paw drags the moustache into a broad mask across his cheeks and spectacles, the mask blurs his sight, the blurred sight puts a branch in his path, the branch spins him THUP-THUP-THUP down into a blossom that swallows him upside down, and the blossom's rim is where 'Buzz Crash!!' comes out of him. Zenny stays almost motionless: her only physical action of the scene is to finish and cinch her own sacks cleanly, and the contrast between two identical jobs is the whole quiet argument. Her rolled eyes in 1.B3 arrive with a smile she does not intend and does not keep.",
+   "visualGrammar": "Texture-first, macro-leaning grammar. The scene is built from close, tactile frames of gold on fur, gold on glass, gold in air, cut against clean full-figure frames that state where the bees actually are. Light is engineered for the substance: warm morning shafts angled across the flowers so airborne pollen reads as a bright suspension, and every impact publishes a visible burst. Frame sizes change on the state of the object, never on a size-ladder — we go close when the gold changes, and wide when a body must be judged.",
+   "cameraCharacterRelationship": "Leads. The camera is at the flower, in the pollen, before either bee arrives — we know the mess is coming and Fuzzby doesn't, so the comedy runs on inevitability. It anticipates once more in 1.B4, easing toward the canopy gap before the thunder is heard, then finds the two bees already reacting in opposite directions. Twice it abandons the moving bee for the still one, and once it abandons both for the flower that is about to close.",
+   "movementVersusStillness": "Slow, deliberate camera against violently fast bodies. The lens moves little and never quickly — a short lateral through a shaft of pollen-lit air, an ease toward the canopy — while Fuzzby's speed and altitude thrash inside the composition. Stillness here is a scientist's patience, not a witness's judgement: we hold on gold because the gold is the story, and the bee blurs through it. The one exception is the drop with him into the blossom in 1.B3, where the camera commits and falls.",
+   "depthAndEnvironment": "Extremely shallow at the object, deep behind it — a rack-focus world. Pollen grains sharp in the near field, bees soft until they matter, the rainforest understory a receding warm haze of stems and light. The environment acts constantly: petals hold pollen, leaves bend and shed it, air carries it, and finally petals clamp. The storm enters as a change in the substance itself — the shafts weaken, the airborne gold stops sparkling and just hangs grey — so the audience sees weather arrive on the object they've been tracking, before anyone speaks about it.",
+   "rhythmAndEscalation": "Cumulative, not accelerating. Each beat is measured against the last state of the pollen: loaded, then spilled, then worn as a moustache, then smeared into a mask, then caked with a whole blossom's worth, then irrelevant because the flower has him. Shot lengths grow slightly as the mess grows, giving the audience time to inventory the damage — the escalation is in the frame's content, not in cutting speed, and the final clamp lands on the scene's longest frame.",
+   "cutPhilosophy": "Cuts are paid for with new information about the object, almost exclusively. A cut is earned when the gold has changed state; if the gold is the same, the frame stays. Two junctions are CONTINUOUS on meaning: the face going into the blossom and emerging wearing the moustache must be one unbroken piece of physics or the reveal becomes a trick, and the wipe-into-branch-into-tumble chain must not break at the branch, since the smear is the cause of the crash. Everything else is a PLANNED_CUT, energy already in frame.",
+   "openingImage": "Macro-close on a flower's anther heavy with gold, morning light raking across it, grains lifting and turning in the air — and the whole cluster punches downward as something bigger than it lands on it, a blur of black and yellow driving the pollen into a bright exploding cloud toward the lens.",
+   "closingImage": "The gold gone dull grey in weakening light, hanging motionless in the air around a clamped flower with two wings beating uselessly out of it; a single loose grain drifts down through the frame and settles on Zenny's cleanly cinched pollen sack in the near foreground, sharp and perfectly full.",
+   "cinematographerChallenge": "The DP raised the loudest objection to this concept: an object-led, macro-textured treatment is the one most likely to become pretty, static and characterless — beautiful pollen and no comedy, the environment posing rather than participating. Three conditions were imposed and accepted. First, no frame may exist for texture alone; every close frame must show the gold in a NEW state caused by a body, or it is cut. Second, the bees must never be reduced to blurs of pigment — each beat needs at least one clean, full-figure frame where Fuzzby's on-parade chest and Zenny's flat stare are unmistakably readable at a four-year-old's glance, or identity and geography die inside the shallow focus. Third, the DP refused to shoot the storm as a lighting change on faces; it had to arrive in the substance, on the sparkle, or the concept isn't being honoured at the one moment it matters most."
+  }
+ ],
+ "treatmentSelection": {
+  "selectedTreatment": "THE WINGMAN'S EYE — spine, welded to THE UNMOVED WITNESS's two-grammar payment terms and THE POLLEN'S PROGRESS's one-object escalation law for beats 1.B2–1.B3",
+  "combinedFrom": [
+   "THE WINGMAN'S EYE — the camera is Fuzzby's flight partner and Zenny is the wall it keeps hitting",
+   "THE UNMOVED WITNESS — the scene belongs to Zenny, and Fuzzby is weather passing through her frame",
+   "THE POLLEN'S PROGRESS — one object tells the whole scene, and the bees are what happen around it"
+  ],
+  "governingAudienceExperience": "The audience is flown at bee-height with Fuzzby's own overcommitment — and twice the ride slams to a dead stop against Zenny's unmoving frame, so the child laughs at the sudden nothing while the parent sees that every reckless mile of it was flown FOR the one bee who won't budge; the day's first cooling of the light arrives in the deep background behind the play, before either bee names it.",
+  "rationale": "Scene 1's job in the Five Pillars is the Everyday Spark: it must calibrate the episode's joke shape (three-beat overcommitment answered by one-beat deadpan) so that Keen can inherit it at the pier with \"Still got it!\" and Fuzzby can re-fire it on the beach under real stakes. Only a treatment whose grammar IS that relationship can plant that. WINGMAN'S EYE builds the scene out of a collision of two irreconcilable grammars — travelling near his body with too little ceiling, then a longer, flatter, absolutely unmoving frame on her — so the setup/payoff of the whole episode is legible in the cutting itself, not merely in the lines. It also honours the hard character canon at the level of physics: his altitude porpoises, his own momentum causes every consequence (dip → pollen weight drags his line → leaf bends → FWIP → open air → \"Nailed it.\" with one droopy antenna), and the camera register per Julian's Character Vocabulary Law is exactly right — wingman-chase for him, locked deadpan for her, never the reverse.\n\nI combined rather than took it whole for three reasons. From UNMOVED WITNESS I take its two non-negotiable payment terms, because they are what stop WINGMAN'S EYE degrading into liveliness-as-decoration: (1) the still frames on Zenny must be paid for by a working world inside them — dust turning in a shaft, a stem still oscillating from what just went past, a leaf slowly rising, and on the thunder a background that cools and thickens while her leaf stays warm — so stillness is charged attention, never a photograph; and (2) Fuzzby is granted no compositional respect at all: cut by the top edge, out of focus in the near field, half-gone at a corner. A camera that politely composes his chaos has taken his side and killed the joke. Her framing stays clean; his never is. That asymmetry is the relationship in one frame (EX-002).\n\nFrom POLLEN'S PROGRESS I take only its escalation law and its two continuity requirements, discarding its object-led point of view (which would demote both bees and risks the exact \"technically elaborate, dramatically empty\" failure the DP named). The law: each beat is measured against the last state of the gold — loaded, spilled, worn as a moustache, smeared into a mask, caked, then irrelevant because the flower has him — and every close frame must show the gold in a NEW state caused by a body or it is cut. The two continuity welds: the face going in and coming out wearing the moustache is ONE unbroken piece of physics, or the reveal is a trick rather than a consequence; and the wipe-into-branch-into-tumble chain must not break at the branch, because the smear (his own paw) is the CAUSE of the crash. That is EX-006 satisfied — one cause, chained visible consequences, never a checklist. It also gives the pollen moustache the setup it needs to be worth three escalating beats, and hands the closing image its adult door: the gold he is wearing is the evidence of the competence he is performing, and only he cannot see it.\n\nAlso carried across: the DP's refusal of a safe wide re-establish between 1.B3 and 1.B4. The weather arrives inside the existing geography, in the deep background behind the play, and the final clamp of petals is the only impact in the scene with no ride before it — the tonal pivot happens INSIDE the comedy, exactly as the thunder turn requires, with Zenny going small and flat rather than portentous. Two doors are open in the same moment throughout: kid reads a bee getting messier and then eaten by a flower; parent reads a small performer failing upward at an audience of one who is quietly watching him the whole time and dips her antennae a fraction at \"nuts\". Feasibility is high — one location, one continuous bee-scale geography, warm golden morning per the Ep3 light progression, two characters, no new assets, and the cooling happens in background haze rather than a new master.\n\nRhythm and contrast with what surrounds it: this scene must be the loudest, fastest, most physical thing in the episode, because Scene 2 (Aida's bowl) is three near-motionless cuts and Scene 3 is a quiet handoff of empty gold. Fast, fast, faster, then a wall — each beat a shorter ride to a longer stop, with 1.B3's hold deliberately shortened so the audience feels denied, and 1.B4 slowing the whole scene from outside. That curve climbs honestly, which is the only thing that earns the thunder.",
+  "rejectionChecks": "Nothing selected here depends on any of the disqualifying habits, and I am explicitly rejecting each: (1) FIXED CHARACTER LANES — rejected. The Fuzzby-left/Zenny-right lock is canon only for shots they physically SHARE, as a line-attribution safeguard; it is not a permanent screen side, and this treatment mostly does not share them in frame at all — the collision is between grammars across a cut, and Zenny re-anchors as the space is explored. No lane is assigned for the scene's duration. (2) KEEPING ALL CHARACTERS VISIBLE — rejected. Fuzzby leaves frame entirely, is lost behind stems and petal edges twice, is found already in trouble, is cut by the top edge, and ends the scene almost entirely inside a flower with only wings showing; Zenny is absent from his travelling frames and, in the closing image, does not turn to look at him. (3) HABITUAL ACTION/REACTION COVERAGE — rejected. Cuts to her buy altered POWER, not a reaction beat; her big frame in 1.B2 precedes and withholds rather than answers, and in 1.B3 the aftermath is discovered late (legs already kicking above the rim) so the audience is denied the reaction shape it was trained to expect. There is no automatic consequence-then-reaction pairing anywhere. (4) SAFE CAMERA PLACEMENT — rejected. The camera is behind him and LATE by design, loses him, drops with him into the blossom, is swiped by near-field leaves, gives him too little ceiling, and I have upheld the DP's refusal of the safe wide re-establish before the storm. (5) REPEATED CLOSE-UP PUNCTUATION — rejected. Frame size changes on the STATE OF THE GOLD or a change of power, never as a size-ladder or an emotional-beat reflex, and the DP's refusal of a push-in on her 1.B2 ruling stands: the laugh comes from the audience leaning in, not the lens. I am overriding nothing of the Director's staging here — I am upholding the constraints already accepted. (6) MECHANICAL SHOT COUNTS — rejected. No shot count is specified or implied; a cut must be paid for with changed point of view, comic punctuation, or a new state of the pollen, and two junctions are locked CONTINUOUS on meaning (the moustache reveal; the wipe→branch→tumble chain). Nothing cuts because a new beat began. (7) GENERIC 'CINEMATIC' TERMINOLOGY — rejected. Every direction above is observable: porpoising altitude, wings beating fast and continuous, chest pumped forward on-parade, one droopy antenna, a stem still oscillating, a leaf slowly rising, dust turning in a shaft, background haze cooling while her leaf stays warm, petals clamping. (8) MERELY ILLUSTRATING THE SCRIPT — rejected. The treatment authors meaning the lines do not carry: the pollen he wears is the evidence of the self-image he is defending; the sky is the wrong colour behind the play before anyone says \"A Storm's coming.\"; her antennae dip a fraction on \"nuts\" and she covers it by looking back at her work. Additionally, the two rejected concepts are rejected on their own terms and not reverse-engineered from: POLLEN'S PROGRESS as a whole demotes both bees to pigment and risks polish-on-a-vacuum, and UNMOVED WITNESS as a whole sits one keystroke from unmotivated locked-off comfort and starves Fuzzby's flight of the full-throttle travel his canon demands as this scene's opening energy. Approved dialogue is untouched and verbatim; no physical appearance is described; no rule, cap or refusal has been added to the pipeline."
+ },
+ "scene": {
+  "sceneId": "S1",
+  "sourceScriptRange": "1.B1–1.B4",
+  "location": "DEEP WITHIN THE RAINFOREST — bee-scale understory of tall flowers, the pollen round",
+  "time": "DAY — warm golden morning, gold shafts through canopy gaps (Ep3 light progression, S1–3 morning)",
+  "participatingCharacters": [
+   "Fuzzby",
+   "Zenny"
+  ],
+  "purpose": "Pillar 1, the Everyday Spark: calibrate the episode's joke shape — a three-beat overcommitment answered by one beat of deadpan — on the two smallest bodies in the show, so Keen can inherit it at the pier ('Still got it!') and Fuzzby can re-fire it on the beach under real stakes. It also plants the storm: the day's first cooling arrives in the deep background, behind the play, before anyone names it.",
+  "dramaticQuestion": "Can Fuzzby get the one bee who will not move to say he is impressive — and what does the sky do while he is busy trying?",
+  "emotionalOwner": "Fuzzby — but Fuzzby unaware that he is the subject. We travel with his intention, never with his doubt, because he has not admitted any. Zenny owns the two stops.",
+  "connectionFromPreviousScene": "Cold open — the episode's first frame is already travelling. Nothing precedes it, so the scene must supply its own momentum from frame one: we are at bee-height inside a flower corridor before we know whose ride it is.",
+  "handoverToNextScene": "The petals are shut on him, gold settling, the light cooling — and small and sharp in the far background the sky is already the wrong colour. Silliness at full climb has just been overruled by weather nobody can argue with, which hands Scene 2 (Aida's bowl, three near-motionless cuts) the hush it needs: from a world too busy to notice, to an elder who has been watching all along.",
+  "sourceApprovalState": "draft"
+ },
+ "beats": [
+  {
+   "beatId": "1.B1",
+   "sceneId": "S1",
+   "sourceScript": "The pollen round, two ways. Fuzzby zig-zags and porpoises through the tall flowers singing his own work song, dips too deep into a blossom, and his own overloaded momentum carries him sideways into a leaf that FWIPs him back into the air — where he straightens up and rebrands the ricochet as technique. Zenny, meanwhile, has been quietly filling her sacks properly the whole time. The gag runs on anticipation → reversal, buttoned with hiding failure.",
+   "exactDialogue": [
+    "Fuzzby: BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+    "Fuzzby: Nailed it."
+   ],
+   "participatingCharacters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "whatChanges": "A promised display of professional competence becomes a leaf-ricochet, and Fuzzby's answer is to bank the ricochet as technique. The pollen changes state for the first time: from tidily loaded on his hind legs to burst loose in a cloud he is now flying inside of. The audience learns the scene's grammar — we travel with him, and travelling is how he thinks.",
+   "whoDrives": "Fuzzby, and only Fuzzby's own momentum. Nothing in the world attacks him; the world simply receives more speed than it was offered.",
+   "audienceAnticipation": "From the first frame the audience is inside a ride, not watching one — stems whipping through the near field, canopy light strobing, the work song setting a tempo the body keeps overrunning. They are promised a sweep. A four-year-old is waiting for the flower he is aiming at; the parent is already reading the too-little ceiling at the top of frame as a promise of trouble.",
+   "actionOrChoice": "He commits harder than the job needs: the zig-zag climbs, overshoots its ceiling, undershoots on the way down, and he plunges deeper into the target blossom than any pollen requires — one cause, relayed. That over-deep dip loads his hind legs with more gold than his line can carry; the gold's weight drags the line sideways off his intended exit; the sideways line delivers him broadside into the broad leaf; the leaf bends hard and low under him, and the bend springs back and FWIPs him out into open air with the pollen bursting off him in a cloud. The camera is behind and late by design — it is swiped by a near-field leaf and loses him at the dip, and finds him again already sideways.",
+   "consequence": "He is airborne, wrong way up for an instant, inside his own gold cloud, with the leaf still oscillating behind him. He rights himself mid-air with the stillest, proudest chest-out on-parade stance he has, wings beating fast and continuous the whole time — and one antenna will not come back up with the other. Held wide in the deep background of the same frame, small and unremarked, Zenny is filling her sacks correctly and has not looked up.",
+   "emotionalOrComicHandover": "'Nailed it.' lands into a frame where the leaf is still moving and the gold is still falling — the world contradicting the claim in the same shot that carries it. The one droopy antenna is the tell that hands the next beat its need: he has just performed competence at nobody, and now he needs a witness. Zenny's full sacks in the background are the setup that makes her arrival a verdict rather than a hello.",
+   "primaryForm": "physical comedy — a long travelling gag built on one chained cause, buttoned by a spoken cover-up",
+   "secondaryColour": "unadmitted loneliness: the boast is delivered to empty air, and the correctly-working bee in the background is the joke's second door",
+   "tempoShape": "Fast from the first frame and still accelerating — the zig-zag climbs, the dip is the fastest thing in the scene, then the leaf's bend stretches the impact into a slow pocket (antenna whipping slow, gold hanging) before snapping back to full speed for the recovery; the boast is the first stop, short and dry, and the frame around it is still moving.",
+   "approvalState": "draft"
+  },
+  {
+   "beatId": "1.B2",
+   "sceneId": "S1",
+   "sourceScript": "Zenny glides in and holds. Fuzzby, now with an audience, escalates — he puts his entire face into the next flower, comes back out wearing a pollen moustache, and asks for a ruling on his own officialdom. Zenny gives it, barely moving: 'Officially nuts!' Concealment → revelation, with the punch delivered from stillness.",
+   "exactDialogue": [
+    "Fuzzby: Do I look official?",
+    "Zenny: Yes Fuzzby Officially nuts!"
+   ],
+   "participatingCharacters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "whatChanges": "Power changes hands. Fuzzby stops working and starts performing the moment he has a witness, and the pollen moves from cargo to costume — he is now wearing the evidence of the competence he is claiming, and he is the only one who cannot see it. Zenny's verdict re-titles him.",
+   "whoDrives": "Zenny drives it by doing almost nothing — her arrival converts his work into an audition, and her withholding is what forces him to ask out loud.",
+   "audienceAnticipation": "The ride ends against a frame that will not move: longer lens, level with her, background reduced to soft warm green, dust turning in a shaft and a stem still oscillating from what just went past. The child laughs at the sudden nothing and waits to see whether she will react at all. The parent, seeing the gold across his face before he asks the question, is waiting for a small performer to walk into his own answer.",
+   "actionOrChoice": "He escalates the only way he knows: he does not dip into the next flower, he drives his whole face into it and holds there, rear half and two beating wings sticking out of the bloom. The bloom's packed anthers coat him as he pushes deeper; his own reverse pulls him back out through the same anthers, and what they leave is a thick band of gold laid across his face — one unbroken piece of physics, in and out, never cut, because a cut would make the moustache a trick instead of a consequence. He rises out of it into a full chest-out on-parade stance and asks for a ruling.",
+   "consequence": "The frame abandons him mid-boast for hers, and hers does not move at all. She withholds a fraction longer than is comfortable — flat stare, then the ruling, then one slow blink after it, and on 'nuts' her antennae dip a fraction before she covers it by going back to her sacks. He is not corrected; he is renamed, and he keeps the moustache.",
+   "emotionalOrComicHandover": "He got his audience and it graded him. The gold is now on his face and cannot be un-worn, which arms the next beat with the one object it needs — and the fraction of an antenna-dip she covered tells the parent, and only the parent, why he keeps doing this at her.",
+   "primaryForm": "concealment → revelation, punched from stillness — two irreconcilable grammars colliding across one cut",
+   "secondaryColour": "an affection neither bee will name; her withholding is the acting",
+   "tempoShape": "One quick plunge, then a stop that outlasts the audience's patience — the hold on her runs long, the ruling arrives late and level, and the slow blink after it is the release. Fast in, very long stop.",
+   "approvalState": "draft"
+  },
+  {
+   "beatId": "1.B3",
+   "sceneId": "S1",
+   "sourceScript": "Stung, Fuzzby wipes at his face and smears the pollen wider, then re-launches to prove himself — clips a branch, tumbles THUP-THUP-THUP and lands upside down in a blossom, legs kicking, before popping up to announce his own sound effect. Zenny rolls her eyes while smiling, and his next dive brings him back somehow worse than before. The escalation stays on one object: the pollen.",
+   "exactDialogue": [
+    "Fuzzby: Buzz Crash!!"
+   ],
+   "participatingCharacters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "whatChanges": "Every attempt to fix the gold makes the gold worse, and the fixing is what crashes him — his own wiping paw is the cause of the tumble, not bad luck. The pollen goes moustache → smeared mask → caked. His status drops again and he raises the volume of the claim to match.",
+   "whoDrives": "Fuzzby, in flat denial of a verdict he cannot argue with — driven by being stung, which he will not admit is what he is.",
+   "audienceAnticipation": "The audience has just been taught that a crash is followed by a hold on her. This beat denies them the shape: two fast strikes in a row and a hold cut short. And because the camera arrives late, they are watching legs kicking above a blossom rim and working out backwards what put them there.",
+   "actionOrChoice": "He scrubs at his face with one paw and the paw does not lift the gold, it drags it — the moustache spreads out into a mask across his eyes; the masked eyes take his aim with them; the blind line clips a branch that swats him out of it; the swat spins him down through THUP-THUP-THUP contacts off stems and drops him head-first into a blossom, where his legs kick above the rim. The chain does not break at the branch, because the smear is the cause of the crash. Then he pops up out of the bloom and announces the sound effect the audience just heard.",
+   "consequence": "He is caked now — the flower he fell into has added its own load to the mask he made. He claims the noise as an announcement rather than an accident. Zenny rolls her eyes and the smile is inside the roll; she is denied a full hold this time, and so is the audience. His next dive returns him worse than he left.",
+   "emotionalOrComicHandover": "The scene is at its loudest and messiest and the hold that would normally pay it off has been withheld — the energy has nowhere left to climb. That unpaid tension is exactly what the thunder walks into, and the gold caked on him is the state the last beat will make irrelevant when the flower simply takes him.",
+   "primaryForm": "escalating overcommitment on ONE object — a self-inflicted chain of physical comedy, faster and dirtier than 1.B1",
+   "secondaryColour": "wounded pride he will not name; the volume of the claim rises exactly as far as his status falls",
+   "tempoShape": "Two hard strikes with no breath between them — the wipe accelerates into the clip, the tumble runs percussive and unbroken, the pop-up is instant and loud — and then the stop that should have paid it off is cut short. It ends hungry, not satisfied.",
+   "approvalState": "draft"
+  },
+  {
+   "beatId": "1.B4",
+   "sceneId": "S1",
+   "sourceScript": "Distant thunder arrives mid-gag. Fuzzby's hover goes crooked and he immediately annexes the sound into his act; Zenny goes the other way — her eyes reach the sky before her body moves, and she names it flat and small. He answers with a boast about pressure and flies straight into a flower and sticks. Same stimulus, opposite grammars; the world gets the last word.",
+   "exactDialogue": [
+    "Fuzzby: …okay that sounded dramatic.",
+    "Zenny: A Storm’s coming.",
+    "Fuzzby: Good thing I work well under pressure."
+   ],
+   "participatingCharacters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "whatChanges": "The scene stops being about pollen. One stimulus produces two opposite behaviours — he processes threat as material for the act, she narrows and names it — and the episode's weather is planted. The pollen becomes irrelevant because the flower takes him whole.",
+   "whoDrives": "The world drives this one. Neither bee chooses it; the sky arrives and the flower has the last word.",
+   "audienceAnticipation": "The point of view shears: the camera's attention drifts skyward a half-beat before his hover goes crooked, so the audience's dread precedes his — the only place in the scene where we know more than he does. There is no safe wide re-establish; the weather arrives inside the geography we already have, cooling in the deep background behind the play. The child, who has learned that every launch ends in a bonk, is waiting for one more. The parent is watching the colour of the sky.",
+   "actionOrChoice": "Thunder rolls in from far off and his hover goes crooked before he decides anything — the body betrays him first — and he corrects by annexing the sound into his act, chest still half-pumped because deflating would be admitting something. Zenny's eyes reach the sky before any part of her moves; her background haze cools and thickens while her own leaf stays warm; the warning comes out flat and small. He answers it with a boast about pressure, and the boast is a launch — the pumped chest drives him forward on a line he never levels, straight into the open flower ahead, and his own speed drives him past its centre so the petals fold in on the impact and clamp.",
+   "consequence": "The flower holds him. Only his rear half and two beating wings are outside it; gold dust settles around him in cooling grey-green light; the petals do not open. Zenny does not turn to look. Small and sharp in the far background, behind the canopy, the sky is already the wrong colour.",
+   "emotionalOrComicHandover": "The only impact in the scene with no ride before it, and the only one he cannot cover up from inside — the cover-up is stuck in a flower. The laugh and the cold arrive together: the child sees a bee eaten by a bloom, the parent sees the weather that nobody in this meadow is ready for. It hands Scene 2 a world that has just gone quiet.",
+   "primaryForm": "tonal pivot inside the comedy — a tension turn that keeps its gag, with the environment as the closing performer",
+   "secondaryColour": "dread, arriving in the light and the background before it arrives in either character",
+   "tempoShape": "Everything slows from the outside — the thunder lengthens the shots and thins the gold — then one last fast lunge with nothing to catch it, and the clamp stops the scene dead. Slow, slow, snap, shut.",
+   "approvalState": "draft"
+  }
+ ],
+ "shots": [
+  {
+   "shotId": "S1.SH1",
+   "beatIds": [
+    "1.B1"
+   ],
+   "purpose": "Put the audience inside Fuzzby's ride before it knows whose ride it is — establish the scene's grammar as travel, and the too-little ceiling as a promise of trouble. Carries the work song and the whole chained cause from the over-deep dip to the leaf's FWIP, unbroken, so it reads as one cause and not a list of accidents.",
+   "audienceExperience": "A four-year-old's stomach learns Fuzzby's rhythm before it learns his face: stems whipping past close enough to swipe, light strobing, a body that keeps overrunning its own tempo. When the leaf throws him back out they laugh at the surprise; the parent has been reading the crowded top of frame as a promise since the first second.",
+   "openingImage": "Bee-height inside a corridor of tall rainforest flowers, the camera already travelling forward and slightly behind Fuzzby — his pollen-loaded body pitched away from us into a rising zig-zag, wings a fast blur, a rope of gold dust trailing off his hind legs, and in the near foreground a stem swinging back across the lens where he has just clipped it. Canopy shafts strobe over him as he climbs toward a ceiling of leaves that leaves him almost no headroom.",
+   "principalPerformance": "Fuzzby sings the work song at full throttle while his body performs professionalism nobody asked for — chest driving forward, antennae proud-erect, wings fast and continuous, altitude overshooting the climb then undershooting the fall. He does not aim at the blossom so much as attack it, and he commits harder than the job needs because in his head this is a display.",
+   "cameraRelationship": "The camera is his overexcited wingman: behind him, banking with him, deliberately half a beat late, horizon rolling as he rolls, and near-field leaves passing close enough to swipe the lens. It genuinely loses him at the dip behind a near-field leaf and rediscovers him already sideways and in trouble — the loss is the point, so his speed reads as something the frame cannot contain. Through the FWIP the camera must be thrown by the leaf's spring rather than choose the move: every inch of travel here has a visible physical cause in frame. Zenny must be findable, small and unremarked, in the deep background of the recovery without the camera going to look for her.",
+   "physicalOrEmotionalChange": "One cause relayed: the overshooting zig-zag plunges him deeper into the blossom than any pollen requires — the over-deep dip loads his hind legs with more gold than his line can carry — the gold's weight drags that line sideways off his exit — the sideways line delivers him broadside into the broad leaf — the leaf bends hard and low under his weight, and its spring-back FWIPs him out into open air with the pollen bursting off him. He rights himself inside his own gold cloud into the stillest, proudest chest-out on-parade stance he owns, and one antenna will not come back up with the other.",
+   "closingImage": "Fuzzby holding a chest-out on-parade stance in mid-air inside a slowly falling cloud of his own gold, one antenna up and one still drooped, wings beating fast; behind him the broad leaf is still oscillating from the spring, and far back down the flower corridor, small and soft, Zenny sits at her own blossom with full pollen sacks, head down, not looking up.",
+   "transitionType": "CONTINUOUS",
+   "transitionReason": "This is the one junction the treatment protects on meaning alone: the dip, the sideways drag and the leaf's spring are ONE cause, and a cut anywhere inside them turns a single continuous physics chain into two unrelated events — the audience would read bad luck instead of overcommitment, and the whole reversal loses its author.",
+   "cutPace": "paced_cuts",
+   "cutPaceReason": "The beat's own tempo shape is fast and still accelerating, so the internal reframes exist to accelerate — closer on the climb, wider for the throw — but the physics chain forbids cutting through the dip-to-FWIP span, which is why this is two motivated reframes and not four.",
+   "physicalPerformance": "He flies the corridor as a display rather than a commute — chest driving ahead of his own wings, antennae carried proud-erect like rank, mouth working the work song at full throttle, and every zig-zag climbing higher than the flowers need before dropping lower than they need, so he is porpoising up and down inside his own zig-zag with the leaf ceiling threatening his back the whole way. He aims his head, not his line, at the blossom and drives it in past its centre; the anthers dump their loose gold onto his braced hind legs, and the new weight hanging off his back end swings his exit line sideways so he leaves the bloom flank-first and travelling wrong. His flank meets the broad leaf, the leaf's stalk takes him and bows low, and the bow's rebound throws him back up the corridor with the loose gold shearing off him. He arrests himself inside his own falling cloud and rebuilds the on-parade stance from the chest outward — shoulders back, head lifting last, wings still beating fast beneath a body that has decided to be dignified — while one antenna stays folded over and does not come up with its partner. The impact stretches into one slow pocket at the leaf — antenna whipping slow, gold hanging in the air, wings still beating fast through it — then snaps back to full speed for the recovery stance. Nothing freezes; the tempo runs slow and comes back.",
+   "animationTiming": "Fast and accelerating from the first frame: the zig-zag climb runs on quick, uneven up-down beats with no two the same length, tightening as he closes on the blossom. The dip is the one deliberate loading action — a hair longer than the beats around it. From the anthers' dump to the leaf's bow the chain runs continuous with no gaps at the joins: the sideways drag is a fast slide, the leaf's bow is heavy and slow-in as it takes his weight, and its rebound is a hard snap out. The impact runs in a stretched slow pocket of roughly a beat — everything moving, nothing held — then returns to full speed for the recovery, which builds over about a second and a half, the chest first, the head last. The drooped antenna's follow-through settles a beat AFTER the stance has finished, so the tell arrives on its own timing. Wings beat fast and continuous through every phase, including the slow pocket.",
+   "internalCuts": [
+    "push closer as the zig-zag climbs into its overshoot",
+    "reframe wider on the leaf's bend and spring so the throw has room to travel"
+   ],
+   "composedOf": [],
+   "gagStaysVisible": "His wings, spectacles and the silhouette of his back through the dip",
+   "gagContactAndWeight": "His body enters the blossom past its centre; the anthers dump loose gold onto his hind legs and the added weight pulls his exit line sideways; his flank, not his head, meets the broad leaf; the leaf's stalk compresses and bends low under his full weight, then rebounds and throws him back out along the corridor while the loose gold shears off him in a cloud. The leaf keeps oscillating after he has gone.",
+   "gagPayoffShape": "A proud on-parade bee hanging mid-air inside a cloud of his own spilled cargo, one antenna drooped, the leaf that threw him still shaking behind his head.",
+   "gagProhibitedStaging": [
+    "never let the leaf appear to strike him — his own sideways momentum must deliver him into it",
+    "never cut between the dip, the sideways drag and the leaf's spring",
+    "never let the gold cloud hide his silhouette or his glasses",
+    "never let his hover go level and controlled at any point in the climb"
+   ],
+   "endingBehaviour": "living_hold",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH2",
+   "beatIds": [
+    "1.B1"
+   ],
+   "purpose": "Button the ricochet with the cover-up, in a frame where the world is still visibly contradicting the claim — and let the boast land at nobody, so the beat hands over a need for a witness.",
+   "audienceExperience": "The kid hears the flattest little brag in the meadow and giggles at the nerve of it. The parent notices there is nobody in front of him to hear it, and that the drooped antenna already knows.",
+   "openingImage": "Tight on Fuzzby from slightly below, chest-out and mid-air against bright background haze, gold dust still drifting down through frame past him and the tip of the oscillating leaf clipping into the lower edge behind his shoulder.",
+   "principalPerformance": "The bigger the disaster, the stiller the recovery — he holds the proud stance and delivers the reclaim absolutely dry, chest still pumped, wings fast and continuous. His eyes flick once to the drooped antenna and back out front, which is the whole confession he will ever make, and then he corrects the antenna up by hand-free will alone and it sags again.",
+   "cameraRelationship": "The camera stops travelling and stays with him at close range because it has just been thrown here — it is out of breath, not composed. What must stay true is that the world keeps contradicting him inside his own frame: the falling gold and the leaf's dying oscillation stay in shot with him for the whole reclaim, so the boast is never allowed a clean background to be true in.",
+   "physicalOrEmotionalChange": "He converts a ricochet into technique in one breath, and the droop refuses to convert with him. The claim is made to empty air.",
+   "closingImage": "Fuzzby hanging in his proud stance with the gold nearly settled out of frame, one antenna sagging while the other stays erect, his eyes going off down the corridor toward the far blossom where the other bee is working.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Staying continuous from the FWIP would keep the audience inside his motion, and the joke needs the motion to STOP so the deadpan claim can sit in the air; the cut also changes what we know — we are now watching him rather than riding him, which is the first time the frame has an opinion about him.",
+   "cutPace": "single_continuous_take",
+   "cutPaceReason": "The cover-up is a Keaton beat: its power is that nothing moves while the falling gold makes its argument, so any internal cut would break the stillness that IS the punchline.",
+   "physicalPerformance": "He is holding a pose he has decided is a posture: chest pumped forward and shoulders pinned back, the whole upper body carried in place by effort rather than at rest, with tiny hover corrections drifting him a fraction up and down and his wings beating fast and continuous beneath the dignity. Everything he does is the work of maintaining the claim — jaw set, head high, eyes fixed out front as he delivers the reclaim without any part of the pose loosening. Once, his eyes drop to the folded antenna and come straight back out front, and the head lifts a degree higher to compensate; he flexes the antenna upward from its base, it rises halfway, then folds over again and he refuses to look at it a second time. As the last of the gold sifts past his shoulder his eyes travel off down the corridor to where the other bee is working, and the chest stays pumped while they go.",
+   "animationTiming": "Instant on the pose — no wind-up, he is already proud when the cut lands, which is the joke. Then the shot spends its time doing almost nothing at speed: hover corrections small and quick, wings continuous, while the gold takes the full length of the shot to fall past him. The eye-flick to the antenna is fast in, fast out, and the compensating head-lift arrives a beat after it, too late to help. The antenna's attempted rise is slow up and quick down — the collapse is the sharper of the two. The final eye-travel down the corridor is slow and is the last movement in the shot, arriving after the gold has cleared.",
+   "internalCuts": [],
+   "composedOf": [],
+   "gagStaysVisible": "the drooped antenna in silhouette against the bright haze",
+   "gagContactAndWeight": null,
+   "gagPayoffShape": "The proud reclaim held in a frame where the falling gold and the still-shaking leaf are calling him a liar.",
+   "gagProhibitedStaging": [
+    "he never acknowledges the crash as a crash",
+    "never let the antenna snap fully proud before he has left this frame"
+   ],
+   "endingBehaviour": "visual_transition",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH3",
+   "beatIds": [
+    "1.B2"
+   ],
+   "purpose": "Escalate the moment he has a witness — the face-plunge into the flower and the moustache it lays on him, delivered as one unbroken piece of physics so the gold is a consequence and not a trick.",
+   "audienceExperience": "The child sees a bee's whole face disappear into a flower with his bottom and wings sticking out, which is already funny, and then he comes back out WEARING it — the reveal is the laugh. The parent sees a small performer arm himself with the evidence against his own claim.",
+   "openingImage": "Bee-height alongside a wide open bloom, the camera arriving with Fuzzby as he comes in fast from behind the lens — his forward-driving silhouette crossing into frame and burying its face in the packed anthers, rear half and two beating wings left outside the petals, the bloom rocking on its stem from the hit.",
+   "principalPerformance": "He does not dip, he drives — the whole face in, pushing deeper as if depth were thoroughness, legs braced on the petal rim. Coming out he reverses hard through the same anthers and rises into the biggest on-parade stance yet, chest pumped, antennae proud-erect, and asks his question with total conviction and no idea what is on his face.",
+   "cameraRelationship": "The camera stays close alongside the bloom and follows the plunge in and the reverse out on his own body's movement, then falls back a touch as he rises so the band of gold across his face is unmistakable at the moment he speaks. It must never cut away between the plunge and the reveal — the in and the out are one physical sentence — and it must never look ahead to the other bee, because his blindness to her verdict is the setup.",
+   "physicalOrEmotionalChange": "One cause relayed: he drives his face past the anthers, pushing deeper loads them against him; his own reverse drags him back out through the same loaded anthers; what they scrape off onto him is a thick unbroken band of gold laid across his face; the pollen has gone from cargo to costume, and he rises into a proud stance wearing it.",
+   "closingImage": "Fuzzby in a full chest-out on-parade stance just clear of the bloom, a thick band of gold laid across his face under his spectacles, antennae proud-erect, the flower he came out of still rocking behind him and loose pollen sifting off his shoulders.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Remaining continuous from his boast would let the escalation read as more of the same ride; a fresh setup at the new bloom buys acceleration and a new visual idea — this is the beat where the pollen stops being cargo, and it deserves its own arrival rather than being inherited.",
+   "cutPace": "single_continuous_take",
+   "cutPaceReason": "The beat's mechanism is concealment → revelation: the in-and-out must be one unbroken piece of physics or the moustache becomes a cutting-room trick, so this shot cannot afford a single internal cut.",
+   "physicalPerformance": "He arrives already committed and buries his face in the anthers, and then keeps shoving — shoulders working the head deeper as though thoroughness were measured in depth, hind legs planting and re-planting on the petal rim for purchase while both wings beat fast outside the petals and his rear end wags with the effort. The rim gives, his own shove runs out, and he hauls back the way he came, the reverse dragging his whole face across the loaded anthers as it goes. Clear of the bloom he does not check himself; he swings the chest forward, drags the shoulders back and lifts the head last into the largest on-parade stance he has struck yet, both antennae snapping proud-erect, and puts the question out front with total conviction — eyes wide open, looking at nothing on his own face, hover holding by small quick corrections while loose gold sifts off his shoulders. Nothing in him examines the result.",
+   "animationTiming": "Fast in with no anticipation — the drive is already at full speed on the first frame. The buried section runs a beat longer than expected, filled with the small percussive shoves and the rear-end wag, so the audience is waiting before the reverse comes. The pull-out is quick and single-motion, faster than the way in. Then the rise is the slowest thing his body does — a build of about two seconds, chest first, shoulders next, head last, antennae snapping proud on the final accent — and the question lands at the top of that build with a fraction of a pause before it, which is the only pause he takes. Wings fast and continuous through all of it; the bloom's rocking continues on its own slower rhythm behind him after he is clear.",
+   "internalCuts": [],
+   "composedOf": [],
+   "gagStaysVisible": "his rear half, both beating wings and his braced legs outside the petal line",
+   "gagContactAndWeight": "His face compresses the packed anthers; pushing deeper springs them tighter against his cheeks; the reverse drag scrapes their loaded gold off in one continuous band from cheek to cheek; the bloom's stem takes his weight on the way in, bows, and rocks free when he leaves.",
+   "gagPayoffShape": "A proud bee, chest out, asking to be graded, with a thick pollen moustache lying across his face that he cannot see.",
+   "gagProhibitedStaging": [
+    "never cut between the plunge and the emergence — the moustache must be seen to be caused",
+    "never let him disappear entirely inside the bloom",
+    "never let him notice or touch the gold on his face in this shot",
+    "never let another bee enter this frame — the verdict belongs to the next cut"
+   ],
+   "endingBehaviour": "cut_on_action",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH4",
+   "beatIds": [
+    "1.B2"
+   ],
+   "purpose": "Abandon him mid-boast for her — the ride hits the wall. Her withholding, her ruling and the covered antenna-dip, in the flatter grammar that shuts the door on his momentum.",
+   "audienceExperience": "The child laughs at the sudden nothing: the picture has stopped dead and a small bee is just LOOKING. Then the ruling lands and it is the biggest laugh in the scene. The parent catches the fraction of a dip in her antennae before she covers it, and understands why he keeps performing at her.",
+   "openingImage": "Longer lens, exactly level with Zenny on her own warm leaf, the background collapsed to soft green haze — she is settled at her properly-filled pollen sacks with her flat stare already aimed off-frame at him, and behind her one stem is still oscillating from whatever just went past.",
+   "principalPerformance": "She holds and does not answer. Her whole performance is the withholding — she lets the question sit a fraction longer than is comfortable while she keeps her paws on her own work, one slow blink arriving after the ruling rather than before it, and on the last word her antennae dip a fraction before she covers it by going back to the sacks.",
+   "cameraRelationship": "This frame does not move and that is the entire editorial opinion — no drift, no reassurance push-in, no consolation reframe, because the moment it breathes the two grammars stop colliding and this becomes ordinary chase coverage. Stillness is FOR the door shutting on his momentum; what stays alive inside it is her: the aim of her stare, the delay she is choosing to impose, her paws still working the sacks, and the tiny dip she catches herself making. He must stay off-screen for her ruling — his boast bought this frame and gets none of it.",
+   "physicalOrEmotionalChange": "Power changes hands. He asked for a rank and she issues a re-title instead; he is not corrected, he is renamed, and he keeps the moustache. And for a fraction of a second the deadpan admits she is fond of him, then closes.",
+   "closingImage": "Zenny level in the unmoving frame, eyes back down on her own full pollen sacks, antennae settled level again, paws working — the green haze behind her utterly quiet and the stem that was oscillating now stopped.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "This cut buys the scene's core change — altered power and a completely new point of view — by abandoning him at the peak of his claim; keeping him in frame with her would hand us the habitual two-shot and let his motion contaminate the stillness that makes her land.",
+   "cutPace": "single_continuous_take",
+   "cutPaceReason": "The beat's tempo shape is fast in, very long stop, and the stop is the joke's engineering — an internal cut would be the frame flinching, which is exactly what the treatment says collapses the whole collision of grammars.",
+   "physicalPerformance": "She is working, and she keeps working: her forepaws are packing gold down into her own sacks in small even strokes, one sack shifting a fraction as it fills, while her flat stare stays aimed off-frame at him and does not move with the packing. The withholding is a task she performs — she lets his question go unanswered while she finishes a stroke, then another, sitting on the silence a fraction past comfortable, breathing shallow, eyelids low, one shoulder settling as her weight redistributes over the leaf. When she does answer, only her mouth moves and the stare does not adjust; her paws pause exactly on the last word, and one slow blink arrives after it, closing and opening late. On the final beat her antennae dip a fraction toward him, she catches it, brings them level, and drops her eyes back down to the sacks, the paws resuming the same small even strokes.",
+   "animationTiming": "Very slow throughout and never frozen: the packing strokes run at one unhurried rhythm that continues under everything else and gives the shot its metronome. The imposed delay is a full beat and a half of that rhythm with no facial change at all before she speaks. The line is delivered flat, on one level tempo, mouth only. The paws stop on the last word — the only sudden thing in the shot. The slow blink follows about half a second later and takes twice as long as a natural blink to close and open. The antenna dip is small, quick, and immediately corrected — the recovery faster than the dip. The eyes drop last, and the packing strokes pick up again as the shot ends, on the same rhythm they had at the start.",
+   "internalCuts": [],
+   "composedOf": [],
+   "gagStaysVisible": null,
+   "gagContactAndWeight": null,
+   "gagPayoffShape": null,
+   "gagProhibitedStaging": [],
+   "endingBehaviour": "reaction_hold",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH5",
+   "beatIds": [
+    "1.B3"
+   ],
+   "purpose": "The wipe that makes it worse — the smear across his eyes is authored here, and it is his own paw that blinds him, so the crash that follows has a visible author.",
+   "audienceExperience": "The child watches him rub the mess into a bigger mess and is already ahead of him. The parent sees a bee who cannot argue with a verdict trying to erase the evidence instead.",
+   "openingImage": "Close on Fuzzby against bright background haze, already scrubbing — the paw mid-drag across the pollen band, the gold visibly moving with the paw instead of coming off, his eyes screwed shut against his own scrubbing, wings beating fast beneath him.",
+   "principalPerformance": "Stung and denying it: the scrubbing is brisk, businesslike and utterly wrong, a bee tidying himself with total confidence. He opens his eyes into the smear, cannot see properly, and rather than stop he squares his chest and launches — he would rather fly blind than admit he is stung.",
+   "cameraRelationship": "Close and travelling with him again, pulled back into the wingman register by his body: as the paw finishes its drag and the chest squares, the camera is already being towed into the launch and loses his line as it goes wide across the corridor. It should be behind and late enough that we do not see what he is about to hit.",
+   "physicalOrEmotionalChange": "One cause relayed: the paw drags rather than lifts the gold — the drag spreads the moustache out into a mask across his eyes — the mask takes his aim with it — and he launches anyway, on a line he cannot see, out of frame.",
+   "closingImage": "The near-field flower corridor with Fuzzby already a blurred shape leaving the top corner of frame, a mask of smeared gold across his eyes, loose pollen puffing off him in his wake and a stem snapping back where he has just clipped it.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Her stillness must be broken, not eased out of — cutting hard from her settled frame into his paw already dragging buys acceleration and denies the audience the comfortable handover, which is exactly the rhythm this beat is built to withhold.",
+   "cutPace": "paced_cuts",
+   "cutPaceReason": "The beat's escalation is two hard strikes with no breath, and this shot is the wind-up to the first: one reframe as the smear completes and the chest squares gives the launch its snap without letting the wipe-to-launch cause break.",
+   "physicalPerformance": "He scrubs with the brisk efficiency of a bee tidying himself for inspection — the paw dragging flat and hard across the band, sweeping the same route twice because a second pass is obviously thoroughness, his eyes screwed shut under the scrubbing and his head turning into each stroke to meet the paw. The drag shears the gold sideways rather than lifting it, banking it up over his eye ridges until it sits across both eyes, and when he opens them he is looking through his own mess: the head makes two quick searching turns, the hover drifting off its line as he does. He does not stop and he does not wipe again. The chest swings forward and the shoulders drag back into the launch position, the hind legs tuck, and he drives forward out of frame on a line he has not looked down — clipping a stem on the way past because he never saw it, the stem snapping back behind him.",
+   "animationTiming": "The wipe runs fast and businesslike, two hard strokes on a clipped even beat with no pause between them. The moment the second stroke clears, the eyes open on a quick snap and the two searching head-turns are fast and small — a total of maybe half a second of confusion, no longer, because dwelling would be admitting. The launch has almost no anticipation: the chest-square and the drive fuse into one accelerating action, and he is at full speed within a few frames, leaving the top corner before the frame can catch up. The stem's snap-back and the puff of loose pollen land after he has gone. Wings fast and continuous throughout; nothing in this shot ever comes to rest.",
+   "internalCuts": [
+    "hold close on the paw's second drag as the gold banks up over his eyes",
+    "reframe wide across the corridor as the chest squares and he drives out of the top of frame"
+   ],
+   "composedOf": [],
+   "gagStaysVisible": "his spectacles through the smear",
+   "gagContactAndWeight": "The paw's pads press the band and shear it sideways instead of picking it up; the sheared gold banks up over his eye ridges and cheeks into a mask; a small puff of loose pollen leaves his shoulder as he squares up and drives forward.",
+   "gagPayoffShape": "A confident bee launching hard with his own smeared gold blindfolding him.",
+   "gagProhibitedStaging": [
+    "never let the wipe partly work — the gold only ever gets wider",
+    "never let him admit he is stung, in body or face",
+    "never show what he is about to hit in this shot"
+   ],
+   "endingBehaviour": "continue_in_motion",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH6",
+   "beatIds": [
+    "1.B3"
+   ],
+   "purpose": "Arrive late on the aftermath — legs kicking above a blossom rim before we ever see what put them there — then let him pop up and announce the sound effect we already heard.",
+   "audienceExperience": "The child bursts out laughing at two legs waving above a flower and then shrieks when a caked bee bursts out of it shouting his own crash noise. The parent gets the funnier joke: we never saw the accident, we are reconstructing it, and he is claiming it as an announcement.",
+   "openingImage": "Bee-height across a blossom cluster, the camera arriving into the aftermath — a branch still swinging in the mid-ground where something was swatted out of the air, and beyond it two legs kicking above a blossom rim, the rest of him buried head-first inside the bloom, gold dust still raining down through the shaft of light between us and him.",
+   "principalPerformance": "Buried, he kicks with the vigour of a bee who believes he is still winning. Then he hauls out — the caked mask now loaded with the flower's own added gold — snaps into the proud stance and announces the sound effect at full volume, antennae snapping proud, as though the noise had been scheduled.",
+   "cameraRelationship": "The camera has genuinely missed the crash and admits it: it discovers the kicking legs past a foreground petal, the swinging branch reading behind them as the only evidence of the impact, then the pop-up pushes the frame back as his body comes up. It must not swing over to her at the end — this beat's whole engineering is that the hold she would normally get is being withheld.",
+   "physicalOrEmotionalChange": "One cause relayed offscreen and read backwards: the blind line clipped the branch that swatted him out of it — the swat spun him down through percussive contacts off stems — the last one dropped him head-first into the bloom, where the bloom's own packed gold cakes onto the mask he made. He comes up worse than he went in and louder than he came down.",
+   "closingImage": "Fuzzby up out of the bloom in his proudest on-parade stance, face caked thick with gold, antennae snapped erect, wings fast — the blossom he came out of still nodding hard on its stem and the branch above still swinging, gold hanging in the air all around him.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "The cut is the gag: skipping his blind flight and landing in the aftermath makes the audience reconstruct the impact, which the treatment holds is funnier than the impact — staying continuous through the branch and the tumble would show them everything and buy nothing.",
+   "cutPace": "rapid_cuts",
+   "cutPaceReason": "This is the scene's own bang-bang-bang moment — the tumble's percussion and the instant pop-up are the loudest, messiest thing in the beat, and the treatment's rhythm demands two fast strikes with no breath; the tight internal cuts are the percussion.",
+   "physicalPerformance": "Wedged head-first, he treats being stuck as a job in progress: both legs pedal hard above the petal rim, the wings beating fast and shoving against the outside of the petals, and each shove rocks the whole flower on its stem. One leg finds the rim and braces; the brace lets his shoulders drive upward and force the rim wide, and the rim's spring-back dumps the bloom's own packed gold down over the mask he arrived with. He comes up out of it with the head already lifting, drags the chest forward and the shoulders back into the biggest stance in the scene so far, both antennae snapping erect on the accent, and puts the announcement out at full volume with the caked face turned proudly along the corridor — no dusting off, no checking himself, nothing in him treating this as a recovery.",
+   "animationTiming": "Percussive and unbroken: the kicking runs on a fast irregular rhythm, four or five hard pedals with no even beat between them, each one rocking the flower a little further. The brace is the single loading action, quick. The haul-out is one violent snap of about a third of a second, and the on-parade stance lands on the very next accent with no recovery beat between them — the announcement fires on that accent, not after it. The antennae snap erect on the same frame as the chest reaching full extension. Everything the world does arrives late: the rim's spring-back and the falling gold land after his stance is set, and the blossom keeps nodding and the branch keeps swinging on their own slower rhythms into the end of the shot. Wings fast and continuous throughout, including while he is buried.",
+   "internalCuts": [
+    "push in on the kicking legs past the foreground petal",
+    "hold tight on the flower rocking hard on its stem as a braced leg finds the rim",
+    "snap to the shoulders forcing the rim wide as the loose gold dumps down over his face",
+    "widen off his body as he hauls up into the stance"
+   ],
+   "composedOf": [],
+   "gagStaysVisible": "his legs and both beating wings above the petal line, kicking",
+   "gagContactAndWeight": "His head and shoulders are wedged past the petal rim so the bloom takes his full weight and bows on its stem; each kick rocks the whole flower; his shoulders shove the rim wide as he hauls out and the rim springs back and dumps the flower's own loose gold onto his face and chest.",
+   "gagPayoffShape": "Two legs kicking above a flower rim — the impact told entirely by its residue — paid off by a caked bee erupting into a proud stance.",
+   "gagProhibitedStaging": [
+    "never show the branch strike or the tumble — this shot begins after them",
+    "never let the flower fully swallow him",
+    "never cut to her reaction to pay this off — the hold is deliberately denied"
+   ],
+   "endingBehaviour": "cut_on_action",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH7",
+   "beatIds": [
+    "1.B3"
+   ],
+   "purpose": "Her eye-roll with the smile inside it — deliberately cut short, so the audience is denied the long hold the last one gave them and the energy has nowhere left to climb.",
+   "audienceExperience": "The child gets a flicker of the funny bee-look and it is snatched away. The parent sees the smile living inside the roll — she is enjoying him and will not be caught at it.",
+   "openingImage": "Level with Zenny in the flat, unmoving grammar, background soft green haze — the roll already in progress, her eyes travelling up and away from the direction he is in, the smile visible only at the corner of her mouth.",
+   "principalPerformance": "The roll is the smile's hiding place: eyes up and away, one corner lifting a fraction, then she puts it away and her attention returns to her sacks. Almost nothing moves except what she is thinking.",
+   "cameraRelationship": "Her frame stays flat and unmoved as before — the collision of grammars depends on her never breathing — but this time it is taken away from her early, at the moment the smile shows, so the picture leaves before the reaction has finished. What is alive inside the stillness is the roll travelling and the corner of the mouth losing the argument.",
+   "physicalOrEmotionalChange": "For a fraction of a second she is caught enjoying him, and the shot is pulled before she can compose herself — the payoff the audience was trained to expect is withheld.",
+   "closingImage": "Zenny mid-roll, eyes up and off, one corner of her mouth lifted, her paws still resting on her full pollen sacks in the flat green haze — the picture leaving her before her face has settled.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "A cut to her buys altered power and is the shape the audience has been taught to expect; the point is that this one is cut short, and that only works as a separate, deliberately brief frame — folding her into his shot would forfeit both the expectation and the denial.",
+   "cutPace": "single_continuous_take",
+   "cutPaceReason": "The whole idea is one unbroken glimpse taken away too soon — any internal cut would give this frame more architecture than the beat is willing to grant it.",
+   "physicalPerformance": "Her paws keep their light hold on the full sacks, one thumb pressing and releasing the packed gold in a slow idle rhythm she never interrupts, while her eyes travel up and away from his direction in one continuous unhurried arc — the head following a degree or two behind them and no further. As the eyes reach the top of the arc one corner of her mouth lifts a fraction and her shoulders drop the smallest amount with the breath she lets out. She begins to draw the corner back down, and the picture is taken away from her before she gets there.",
+   "animationTiming": "One slow travelling arc, about a second and a half from start to top, with the head lagging a beat behind the eyes so the roll reads as thought rather than gesture. The mouth-corner lift is late and small, arriving only at the end of the arc, and it takes longer to appear than a smile would — it is leaking, not breaking. The thumb's idle press-and-release runs underneath the whole shot at its own unhurried pace and is still going when the cut takes her, mid-correction, a beat earlier than the audience expects.",
+   "internalCuts": [],
+   "composedOf": [],
+   "gagStaysVisible": null,
+   "gagContactAndWeight": null,
+   "gagPayoffShape": null,
+   "gagProhibitedStaging": [],
+   "endingBehaviour": "cut_on_action",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH8",
+   "beatIds": [
+    "1.B4"
+   ],
+   "purpose": "The point of view shears: the camera's attention reaches the darkening sky a half-beat before Fuzzby's hover goes crooked, so the audience's dread precedes his — the one place in the scene we know more than he does. Carries his annexing of the thunder.",
+   "audienceExperience": "The parent's stomach turns first, at a colour in the deep background behind the play. The child is still waiting for the next bonk and gets a crooked hover and a bee taking credit for thunder instead — funny, but the picture has gone cooler and slower and they feel it without a word being said.",
+   "openingImage": "Bee-height inside the flower corridor with Fuzzby small in the mid-ground still mid-dive, and the frame's attention already drifting up past him toward a canopy gap where the far background haze has gone grey-green — the play continuing beneath the part of the picture we are looking at.",
+   "principalPerformance": "The body betrays him before he decides anything: the hover tilts crooked, altitude sagging then over-correcting, and then he annexes the sound into the act — chest still half-pumped, because deflating would be admitting something, the line delivered as if he had cued the weather.",
+   "cameraRelationship": "The camera anticipates for the first and only time in the scene: it goes to the weather ahead of both bees, then comes back down to Fuzzby late and finds his hover already crooked. The travel is slower and longer than anything before it — the thunder is lengthening the shots from the outside — and the cooling must live in the deep background behind the play, never in a fresh master; the treatment refuses a re-establishing wide here and so do I.",
+   "physicalOrEmotionalChange": "The scene stops being about pollen. The sky darkens in the far background, his hover goes crooked on its own, and he converts the threat into material for the act without ever registering it as a threat.",
+   "closingImage": "Fuzzby hanging at a crooked tilt in thinning gold light, chest still half-pumped, caked face turned proudly out along the corridor, with the far background behind the canopy gap noticeably cooler and greyer than the leaves around him.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Cutting away from her unfinished reaction into a frame that is already looking at the sky is what shears the point of view — continuing from her would keep us inside the comedy's rhythm at the exact moment the scene needs the audience to start looking past the play.",
+   "cutPace": "paced_cuts",
+   "cutPaceReason": "The beat's tempo shape slows the scene from the outside, so the shot needs the drift up to the weather and the late return to his crooked hover to be two distinct movements of attention — two, and slow, not four; the thunder is lengthening shots, not chopping them.",
+   "physicalPerformance": "He is still working the dive when the rumble arrives, and his body takes it before his mind does: one whole side of his flight drops away so he hangs crooked, the altitude sagging low and then over-correcting too high in a single porpoise he never asked for, the caked face swinging as the tilt swings him. The correction does not fix him — he stays canted, hunting a level he cannot find with small quick wing adjustments. Then he takes ownership of it: the chest re-inflates to half its parade extension, the shoulders drag back, the head lifts and turns proudly out along the corridor, and he puts the line out as though the weather were a cue he had given — one antenna still riding the aftershock of the tilt while the other snaps up to match the claim. He never once looks at the sky.",
+   "animationTiming": "The slowest shot in the scene so far, and deliberately so. The drift up to the weather takes its own unhurried time before anything happens to him. The tilt arrives suddenly — a fast drop of one side — then everything after it decelerates: the sag is slow, the over-correction slower, and the canted hunting continues underneath the rest of the shot rather than resolving. The chest's re-inflation builds over about a second, and the line lands at the top of it, late, after the audience has already read the sky. The lagging antenna's aftershock settles last of all, a beat behind the claim. Wings fast and continuous throughout the tilt, the sag and the hold — the hover is crooked, never stalled.",
+   "internalCuts": [
+    "drift the frame up past him to the canopy gap and hold on the grey-green far haze",
+    "come back down to find his hover already canted and hunting for a level"
+   ],
+   "composedOf": [],
+   "gagStaysVisible": null,
+   "gagContactAndWeight": null,
+   "gagPayoffShape": null,
+   "gagProhibitedStaging": [],
+   "endingBehaviour": "living_hold",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH9",
+   "beatIds": [
+    "1.B4"
+   ],
+   "purpose": "Same stimulus, opposite grammar: her eyes reach the sky before her body moves and she names it flat and small — the warning underplayed so the thunder feels bigger.",
+   "audienceExperience": "The child hears the smallest, calmest sentence in the scene and it lands heavier than any crash. The parent watches her haze cool behind her while her own leaf stays warm, and knows nobody in this meadow is ready.",
+   "openingImage": "Level with Zenny in her flat unmoving grammar, her eyes already up at the sky while the rest of her has not moved at all — her leaf and her sacks still in warm gold, and the green haze behind her cooling and thickening toward grey.",
+   "principalPerformance": "Her eyes arrive at the sky before any part of her body follows, which is her whole grammar in one gesture; then the warning comes out flat and small, no enlargement, no volume, and she does not look toward him after saying it. She goes narrower rather than bigger under pressure.",
+   "cameraRelationship": "Still level with her and still refusing to move, because her frame is the only stillness the scene ever buys and this is the moment it is worth most. Stillness here is FOR the size of the thing she is naming: the smaller and flatter the frame, the bigger the sky. What lives inside it is the cooling of the haze behind her, the dust in the shaft going dull, and her eyes holding on something above the top of frame while her paws stay on her work.",
+   "physicalOrEmotionalChange": "The weather is named for the first time, and the naming costs her nothing visible — which is what makes it land. Her warmth is going out of the background even as she stays warm in it.",
+   "closingImage": "Zenny level in the unmoved frame, eyes still up above the top of the picture, paws resting on her full sacks, her own leaf warm gold while the haze behind her has gone thick grey-green.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "The whole beat is one stimulus producing two opposite behaviours, and that comparison only exists across a cut — holding them in one travelling frame would blend the two grammars the treatment welds together and never blends.",
+   "cutPace": "single_continuous_take",
+   "cutPaceReason": "Her register is deadpan economy and the thunder has slowed the scene from outside; a cut inside this frame would add motion to the one shot whose entire value is that the picture has stopped while the sky gets bigger.",
+   "physicalPerformance": "Her eyes have already gone up above the top of frame and they stay working up there — tracking something crossing above her, one small re-aim as it moves, while every other part of her keeps doing what it was doing: her paws resting on the packed gold of her own sacks, her weight held forward on the leaf, her breathing gone shallower and slower than the shot before. The line comes out of a mouth that moves and a body that does not follow it, level and small, and her eyes never come down off the sky for it. Afterwards her forelegs draw a fraction closer to her body and the antennae angle back a degree — the whole response is a narrowing, and she never turns toward him. The leaf under her takes one small dip and recovers as her weight shifts.",
+   "animationTiming": "The stillest and longest-feeling shot in the scene, and every second of it has something small alive in it. The eyes are already up when the cut lands — no travel to watch, the movement has already happened, which is the economy. The single re-aim of the gaze comes early and is tiny. The line is delivered on one flat unhurried tempo with no accent anywhere in it, and a long beat sits after it before anything else happens. The narrowing — forelegs in, antennae back — takes place slowly across that beat, almost too slow to catch. The leaf's dip and recovery is the last motion in the shot, and behind her the haze thickens continuously from the first frame to the last, on a rate slower than any performance beat, so the world changes faster than she does.",
+   "internalCuts": [],
+   "composedOf": [],
+   "gagStaysVisible": null,
+   "gagContactAndWeight": null,
+   "gagPayoffShape": null,
+   "gagProhibitedStaging": [],
+   "endingBehaviour": "living_hold",
+   "approvalState": "draft"
+  },
+  {
+   "shotId": "S1.SH10",
+   "beatIds": [
+    "1.B4"
+   ],
+   "purpose": "The boast IS the launch — and the flower has the last word, closing on him. The only impact with no ride before it, and the only one he cannot cover up, because the cover-up is stuck inside a bloom.",
+   "audienceExperience": "The child laughs hardest here: a bee gets eaten by a flower and his bottom is still wagging. The parent is looking past him at the wrong-coloured sky and the laugh has something cold underneath it — the two doors, in the same frame.",
+   "openingImage": "Bee-height in the corridor with Fuzzby driving forward into the shot from behind the lens, chest pumped on the boast, and dead ahead of him in the mid-ground an open flower waiting wide — cooling grey-green haze filling the corridor beyond it, gold light thinning across the petals.",
+   "principalPerformance": "He answers the warning with a boast and the boast has a throttle in it — the pumped chest drives him forward on a line he never levels, straight at the bloom, because for him a claim and a launch are the same movement. There is no anticipation of impact and no correction; he is the last to know, as always.",
+   "cameraRelationship": "The camera is his wingman one final time — towed forward on his drive, close and late, and it stays with the flower after he has gone into it rather than following him inside; the petals fold across the lens's view of him and the frame simply keeps watching the closed bloom. Then it lets the far background carry the cost: the cooled sky behind the canopy stays small and sharp in the depth of the same frame, never re-established, and her leaf is never revisited — she does not turn to look and the camera does not go to ask her.",
+   "physicalOrEmotionalChange": "One cause relayed: the boast drives him forward — his own speed carries him past the flower's centre — the impact folds the petals inward — and the fold clamps and holds, so only his rear half and two beating wings stay outside. Gold dust settles around him in cooling light and the petals do not open.",
+   "closingImage": "A single flower's petals closed tight around Fuzzby with only his rear half and two beating wings sticking out, gold dust settling around him in cooling grey-green light, the stem still swaying from the hit — and small and sharp in the far background behind the canopy, the sky already the wrong colour.",
+   "transitionType": "PLANNED_CUT",
+   "transitionReason": "Her flat warning has to be allowed to finish and land before his answer arrives, and the collision of the two grammars requires the boast to begin in his moving frame, not to grow out of her still one — cutting is what makes his answer read as an interruption of the weather rather than a reply to it.",
+   "cutPace": "paced_cuts",
+   "cutPaceReason": "The tempo is slow-slow-snap-shut: one tightening reframe onto the bloom as the petals take him gives the snap its impact and then the picture has nowhere else to go, so anything more would chop a beat whose whole job is to stop the scene dead.",
+   "physicalPerformance": "The claim and the launch are one movement in him: the chest pumps forward on the answer and the pump itself is what drives him, so he is already travelling as the words go out, antennae proud-erect, hind legs trailing, the line rising and dipping under him without ever levelling. He does not slow, does not look down the line and does not brake — the head and chest drive past the bloom's centre and compress its inner petals, and his own speed rolls the outer petals inward over his shoulders until they fold shut behind him and grip at his waist. What is left outside keeps insisting: his rear half wags side to side against the closed petals as he shoves forward at something he cannot reach, and both wings beat fast and continuous outside the fold, working against a flower that has already won. The wagging gets smaller but does not stop, and the petals do not open.",
+   "animationTiming": "Slow, slow, snap, shut. The drive is the only fast thing left in the scene — no anticipation, full speed from the first frame, faster than the cooling world around it. The petal fold is heavy and quick, taking his speed out of him in a fraction of a second, and the clamp lands as a hard stop with nothing after it. Then the shot decelerates completely: the rear-half wag runs at a diminishing rhythm, the wings keep their fast continuous beat over the top of it, the stem's sway damps out slowly, and the loose gold takes the rest of the shot to settle. The last thing to change in the frame is nothing in the foreground at all — it is the far background haze continuing to cool while his bottom is still working.",
+   "internalCuts": [
+    "tighten onto the bloom as the petals fold and clamp",
+    "hold on the closed flower as the stem's sway damps out and his rear half keeps wagging"
+   ],
+   "composedOf": [],
+   "gagStaysVisible": "his rear half and both fast-beating wings outside the petal line",
+   "gagContactAndWeight": "His head and chest drive past the bloom's centre and compress its inner petals; the compression rolls the outer petals inward over his shoulders; they fold tight behind him and hold, gripping at his waist; the stem takes the whole impact and sways, shaking loose gold down over his exposed rear half and the two wings still working outside.",
+   "gagPayoffShape": "A flower with a bee's back half sticking out of it, wings still going, in light that has gone the wrong colour.",
+   "gagProhibitedStaging": [
+    "never let the petals close over him completely",
+    "never let the flower appear to attack — his own speed causes the fold",
+    "never cut away to her or to a wide re-establish for the weather",
+    "never let him wriggle free or comment from inside — the world gets the last word"
+   ],
+   "endingBehaviour": "living_hold",
+   "approvalState": "draft"
+  }
+ ],
+ "productionDetail": [
+  {
+   "shotId": "S1.SH1",
+   "continuityIn": "",
+   "continuityOut": "Loose gold hangs in the air where he was thrown, the broad leaf is still oscillating on its stalk, one of his antennae is folded over and has not come back up, and far down the corridor Zenny is already at her own blossom with full sacks, head down.",
+   "dialogueTiming": "Fuzzby's work song runs across the corridor flight and dies into the leaf — roughly 3–4 seconds of song, ending at the impact; no dialogue over the slow pocket at the leaf or over the rebuilt on-parade stance, which play in the buzz and the falling gold.",
+   "referenceRoles": "Fuzzby anchor (identity: spectacles, bulbous tan nose, translucent wings, antennae) and Zenny anchor for the deep-background bee (identity plus the size gap — Fuzzby clearly the bigger); size chart for the two-bee relationship; Buzzing Nook / wildflower scene anchor plus the scene's approved Scene Look for corridor palette, materials and canopy light.",
+   "requiresNewKeyframe": true,
+   "intendedDurationRange": "11-14s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Airborne mid-corridor, pitched away from camera into a rising zig-zag, pollen already roped off his hind legs, antennae proud-erect, wings a fast blur.",
+     "closingState": "Hovering in a chest-out on-parade stance inside his own falling gold cloud, one antenna erect and one folded over, wings still beating fast."
+    },
+    {
+     "characterId": "Zenny",
+     "openingState": "Out of frame, off down the corridor at her own blossom.",
+     "closingState": "Small and soft in the deep background, settled at her blossom with full pollen sacks, head down, not looking up."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH2",
+   "continuityIn": "His gold is still falling from the leaf's throw and the leaf tip is still oscillating into the lower edge of frame; the antenna folded in the previous shot is still down.",
+   "continuityOut": "The gold has almost entirely settled out of frame and the leaf has stopped moving; the antenna is still sagging after one failed correction, and his eyes have gone off down the corridor toward the far blossom where Zenny is working.",
+   "dialogueTiming": "Fuzzby's reclaim lands early in the shot, on the already-held pose, with the gold still falling past him; the eye-flick to the antenna and the antenna's failed rise play out in the silence after the line, and the slow eye-travel down the corridor is the last thing in the shot, well after the words.",
+   "referenceRoles": "Fuzzby anchor governs identity in close-up — spectacles, bulbous tan nose, antennae, translucent wings; the scene's Scene Look governs the bright background haze and the gold's warm morning temperature.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "6-8s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Mid-air in the proud chest-out stance, one antenna folded, gold falling past him, wings fast.",
+     "closingState": "Same pumped stance held, gold nearly gone, one antenna still sagging, eyes travelling off down the corridor."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH3",
+   "continuityIn": "He carries in the sagging antenna and the loose pollen still on his shoulders from the leaf throw, and the intent his eyes left on in the previous shot — he is arriving at the far bloom he just looked toward.",
+   "continuityOut": "A thick unbroken band of gold now lies across his face under the spectacles, the bloom is rocking on its stem, both antennae have snapped proud-erect, and loose pollen is sifting off his shoulders.",
+   "dialogueTiming": "Fuzzby's question lands at the top of the roughly two-second rise, after the fraction-beat pause — the plunge, the buried shoves and the fast pull-out all play wordless before it, and the bloom is still rocking behind him as he speaks.",
+   "referenceRoles": "Fuzzby anchor holds identity through the plunge (spectacles must read through the gold band, wings and legs outside the petal line); Scene Look and the wildflower/Nook scene anchor own the bloom's material, anther packing and the warm morning light.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "8-11s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Driving in from behind the lens, face already buried in the packed anthers, rear half and both beating wings outside the petals.",
+     "closingState": "Clear of the bloom in his largest on-parade stance, thick gold band laid across his face under the spectacles, both antennae proud-erect."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH4",
+   "continuityIn": "His boast has just been thrown down the corridor at her and is hanging unanswered in the air; a stem behind her is still oscillating from him going past earlier.",
+   "continuityOut": "The frame's green haze is completely quiet and the oscillating stem behind her has stopped; her verdict is out, her antennae are back level after their dip, and her eyes and paws are down on her own full sacks.",
+   "dialogueTiming": "Zenny's ruling arrives after a full beat and a half of unbroken packing rhythm with no facial change; her paws stop exactly on the last word, the slow blink lands about half a second after the line, and the antenna dip comes a beat after that.",
+   "referenceRoles": "Zenny anchor owns identity and scale — round glasses, long eyelashes, blush cheeks, clearly the smaller bee; Scene Look governs her warm leaf and the collapsed soft green haze behind her.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "7-10s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Zenny",
+     "openingState": "Settled on her warm leaf at properly filled pollen sacks, paws packing gold, flat stare aimed off-frame at him.",
+     "closingState": "Same seat, eyes down on the full sacks, antennae level again after their small dip, paws back to the same even packing strokes."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH5",
+   "continuityIn": "He carries in the pollen band she has just re-titled him for — her ruling has landed on him off-screen, and his own scrubbing paw is already at it when the frame arrives.",
+   "continuityOut": "The moustache is gone as a band and is now a mask of smeared gold across both eyes; he is out of the top of frame at full speed on a line he has not looked down, loose pollen puffing in his wake and a clipped stem snapping back.",
+   "dialogueTiming": "No dialogue in this shot — the two hard scrub strokes, the snap of the eyes opening into the smear and the launch all play in wing-buzz and the stem's snap-back.",
+   "referenceRoles": "Fuzzby anchor holds identity through the smear — the spectacles must stay readable inside the gold mask; Scene Look owns the bright background haze and the corridor's near-field stems.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "5-7s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Close on him mid-air, paw mid-drag across the pollen band, eyes screwed shut, wings fast beneath him.",
+     "closingState": "A blurred shape leaving the top corner of frame at full speed, both eyes masked with smeared gold, pollen puffing off him."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH6",
+   "continuityIn": "The blind line he launched on has already run its course off-screen: a branch is still swinging in the mid-ground from swatting him out of the air, gold dust is still raining down the light shaft, and the smeared mask he made with his own paw is what the bloom's gold is now caking onto.",
+   "continuityOut": "His face is caked far thicker than the smear he arrived with, both antennae are snapped erect, the bloom he came out of is nodding hard on its stem and the branch above is still swinging, with gold hanging in the air around him.",
+   "dialogueTiming": "Fuzzby's announcement fires on the stance accent immediately after the roughly third-of-a-second haul-out, with no recovery beat between them; the rim's spring-back and the falling gold arrive after the words. The kicking that opens the shot is wordless.",
+   "referenceRoles": "Fuzzby anchor holds identity under the caking — spectacles, legs and both beating wings must read above the petal line; Scene Look and the wildflower scene anchor own the blossom cluster, the light shaft and the warm morning temperature.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "7-10s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Wedged head-first in the bloom, only two legs pedalling above the petal rim and both wings beating fast against the outside of the petals.",
+     "closingState": "Up and clear in his proudest on-parade stance, face caked thick with gold, both antennae snapped erect, wings fast."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH7",
+   "continuityIn": "She has just watched the caked eruption and the announcement land down the corridor; her sacks are still full and her paws are still where the previous ruling left them.",
+   "continuityOut": "The picture leaves her mid-correction: eyes up and off, one mouth-corner still lifted, the smile not yet put away and her thumb still idling on the packed gold.",
+   "dialogueTiming": "No dialogue — the whole shot is the wordless roll, and it is taken away a beat before her face settles.",
+   "referenceRoles": "Zenny anchor owns identity and the smaller-bee scale — glasses, lashes, blush must read at this size; Scene Look owns the flat soft green haze and her leaf's warm gold.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "3-5s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Zenny",
+     "openingState": "Level on her leaf, paws on the full sacks, eye-roll already travelling up and away from his direction.",
+     "closingState": "Mid-roll at the top of the arc, one mouth-corner lifted, shoulders a fraction dropped, paws still resting on the sacks."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH8",
+   "continuityIn": "Her reaction was cut off unfinished and the corridor's play is still running; he carries in the caked face from the bloom, and the far background haze that had been warm all scene has begun to go grey-green.",
+   "continuityOut": "He hangs canted and hunting for a level with his chest half-pumped and the thunder annexed into the act; one antenna is still riding the tilt's aftershock, the corridor's gold has thinned and the far background behind the canopy gap is noticeably cooler and greyer than the leaves.",
+   "dialogueTiming": "Fuzzby's line lands late in the shot — the drift up to the weather, the sudden tilt, the slow sag and the slower over-correction all play first, and it arrives at the top of the roughly one-second chest re-inflation; the lagging antenna settles a beat after the line ends.",
+   "referenceRoles": "Fuzzby anchor holds identity with the caked face over it; Scene Look governs the corridor palette and, critically, the cooling grey-green far haze behind the canopy gap against the still-warm near leaves — the storm's arrival is a light continuity, not a new location.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "8-11s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Small in the mid-ground, still mid-dive at full manic pace, caked face, wings fast, the frame's attention drifting off him toward the canopy gap.",
+     "closingState": "Hanging at a crooked tilt in thinning gold, chest half-pumped, caked face turned proudly out along the corridor, one antenna still settling."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH9",
+   "continuityIn": "The same rumble that canted his hover a moment ago has reached her leaf; the haze behind her is already the cooled grey-green the previous frame found in the far background.",
+   "continuityOut": "The weather is named for the first time; she has narrowed rather than moved — forelegs drawn in, antennae angled back, eyes still up above the top of frame — her own leaf still warm gold while the haze behind her has thickened to grey-green.",
+   "dialogueTiming": "Zenny's warning lands after the single tiny re-aim of her gaze, flat and small on one unhurried tempo with no accent, and a long beat is held after it; the narrowing plays slowly across that beat and the leaf's dip and recovery is the last motion in the shot.",
+   "referenceRoles": "Zenny anchor owns identity and smaller-bee scale; Scene Look owns the split the shot depends on — her leaf and sacks still in warm morning gold while the haze behind her thickens toward storm grey-green.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "7-9s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Zenny",
+     "openingState": "Level on her warm leaf, paws resting on her full sacks, eyes already up above the top of frame while nothing else has moved.",
+     "closingState": "Same seat and same paws, forelegs drawn a fraction closer, antennae angled back a degree, eyes still up on the sky."
+    }
+   ]
+  },
+  {
+   "shotId": "S1.SH10",
+   "continuityIn": "Her flat warning has just finished landing down the corridor and he is answering it — he carries in the caked face and the crooked, unlevelled line from his own tilt, into a corridor whose gold has thinned and whose far haze has cooled.",
+   "continuityOut": "The petals are clamped shut around him and do not open; only his rear half and two beating wings are outside, the stem's sway damping out, gold settling in cooling light, and small and sharp in the far background the sky is already the wrong colour.",
+   "dialogueTiming": "Fuzzby's boast starts immediately on the answer with no gap after her line, and the drive is already underway as the words go out; the fold, the clamp and the diminishing wag all play in silence afterwards.",
+   "referenceRoles": "Fuzzby anchor holds identity for the rear half and the two wings left outside the fold, at honest bee scale against the bloom; Scene Look owns the thinning gold on the petals, the cooling grey-green corridor beyond and the sharp wrong-coloured sky held small in the far background.",
+   "requiresNewKeyframe": false,
+   "intendedDurationRange": "9-12s",
+   "essentialProviderProtections": [],
+   "characterContinuity": [
+    {
+     "characterId": "Fuzzby",
+     "openingState": "Driving forward into frame from behind the lens on the boast, chest pumped, antennae proud-erect, caked face, line never levelling.",
+     "closingState": "Clamped inside the closed bloom at the waist, only his rear half wagging on a diminishing rhythm and both wings still beating fast outside the petals."
+    }
+   ]
+  }
+ ],
+ "voicePerformances": [
+  {
+   "speaker": "Fuzzby",
+   "exactDialogue": "BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+   "voiceIdentity": "DNK8oCkkHjIyEjzlCeQq",
+   "dramaticIntention": "Broadcast to Zenny down the corridor that a professional is on the job — he wants her to hear the work being done before she can see it done badly.",
+   "subtext": "If I sing it loud enough it counts as competence, and she has to listen.",
+   "relationshipTarget": "Zenny, working out of sight down the flower corridor — he is singing AT her, not to himself.",
+   "emotionalEntry": "Already mid-throttle — the song is running before the shot is, self-appointed and on-parade.",
+   "emotionalExit": "The last syllable knocked sideways by the leaf, still trying to hold the tune while the world takes his exit line.",
+   "operativeWords": [
+    "BIZZY"
+   ],
+   "pace": "Fast, staccato, marching — each BIZZY clipped, faster than a bee needs to sing, chasing his own zig-zag.",
+   "rhythm": "Two identical triplets, but the second is a fraction faster and a fraction higher than the first — the climb is in the voice as well as the flight; the trailing ellipsis is the leaf taking him mid-phrase, not a fade-out.",
+   "pauses": "One breath-sized gap only, at the comma, taken on the dip toward the blossom — it is the loading action, the same beat his body uses to aim.",
+   "breaths": "A big showy intake before the first BIZZY, audible, the kind you take when someone might be listening; a scuffed half-breath on the comma; no clean breath at the end — the phrase is interrupted by impact.",
+   "nonVerbalActions": "The buzz-hum sits under the syllables continuously; a small grunt of effort compresses into the last BIZZY as the anthers dump their weight on him.",
+   "elevenLabsV3Direction": "[excited] BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…",
+   "physicalActionRelationship": "Voice and body telling the same lie together: the syllables land on the up-beats of the porpoise so the song sounds like it is steering him, when the flight is steering the song. The final trailing syllable coincides with the flank meeting the leaf, so the tune gets bent by the bow rather than finished.",
+   "expectedTiming": "Runs across the corridor flight and dies into the leaf; roughly 3–4 seconds of song, no dialogue over the slow pocket or the rebuilt stance.",
+   "minOnsetSec": null,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Fuzzby",
+   "exactDialogue": "Nailed it.",
+   "voiceIdentity": "DNK8oCkkHjIyEjzlCeQq",
+   "dramaticIntention": "Close the case before anyone opens it — issue the verdict on his own crash so Zenny inherits it as fact.",
+   "subtext": "Please let that have counted as flying.",
+   "relationshipTarget": "Zenny, down the corridor — he says it out front, not to her face, so it lands as an announcement she cannot cross-examine.",
+   "emotionalEntry": "Inherits the rebuilt parade stance from the rebound — dignity already assembled, breath not caught up with it.",
+   "emotionalExit": "Hands the next beat a bee whose eyes have started travelling toward her, chest still pumped, one antenna refusing to agree.",
+   "operativeWords": [
+    "NAILED"
+   ],
+   "pace": "Two words, dry and flat, slower than anything else he says all scene — the bigger the disaster, the stiller the recovery.",
+   "rhythm": "NAILED lands at full weight; a clean full stop; 'it.' arrives a fraction smaller and lower, the breathlessness leaking out under the pomp.",
+   "pauses": "No pause inside the line — a pause would be a doubt. The pause is BEFORE it, filled by the exhale.",
+   "breaths": "One exhale carrying the crash out of his chest and converting it into the verdict; nothing after — he does not breathe again until the eye-flick.",
+   "nonVerbalActions": "Tiny catch of air on the 'd' of NAILED, the only sound the impact left in him.",
+   "elevenLabsV3Direction": "[exhales] NAILED it.",
+   "physicalActionRelationship": "Delivered without loosening any part of the pose — jaw set, eyes out front, wings fast beneath the dignity. The eye-flick to the drooped antenna comes AFTER the line, so the confession never contaminates the claim.",
+   "expectedTiming": "Lands early in the shot, on the held pose, with the gold still falling past him; the eye-flick and the antenna's failed rise play out in the silence after.",
+   "minOnsetSec": 0.6,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Fuzzby",
+   "exactDialogue": "Do I look official?",
+   "voiceIdentity": "DNK8oCkkHjIyEjzlCeQq",
+   "dramaticIntention": "Extract admiration from Zenny on the record — he is not asking, he is inviting confirmation.",
+   "subtext": "Tell me I'm one of the important ones.",
+   "relationshipTarget": "Zenny, addressed straight down the corridor at last — the first line in the scene aimed at her face.",
+   "emotionalEntry": "Rides the two-second parade build out of the bloom, chest first, head last — the voice arrives at the top with the antennae.",
+   "emotionalExit": "Wide open, waiting, entirely unguarded — hands Zenny a bee with no defences and pollen on his face.",
+   "operativeWords": [
+    "official"
+   ],
+   "pace": "Brisk and bright, then the last word held a beat longer than the rest — he lets OFFICIAL sit in the air for her.",
+   "rhythm": "Rising all the way; the question mark is genuine but the tone underneath already assumes the answer is yes.",
+   "pauses": "A fraction of a beat before the first word — the only pause he takes in the scene, the top of the build, the intake of a bee about to be admired.",
+   "breaths": "One quick lifted intake on that fraction-beat, taken with the chest, not the mouth; no breath after — he holds it waiting for the verdict.",
+   "nonVerbalActions": "A faint pollen-clogged snuffle under 'Do' — the flower is still on his face and in his nose, and he has no idea.",
+   "elevenLabsV3Direction": "[excited] Do I look OFFICIAL?",
+   "physicalActionRelationship": "Voice sits exactly on the parade build — no wobble, total conviction, while loose gold sifts off his shoulders and nothing in him examines the result. The eyes are wide open on a face he cannot see.",
+   "expectedTiming": "Lands at the top of the roughly two-second rise, after the fraction-beat pause, with the bloom still rocking behind him.",
+   "minOnsetSec": 2.0,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Zenny",
+   "exactDialogue": "Yes Fuzzby Officially nuts!",
+   "voiceIdentity": "XEiPrIitaegdirIGkODX",
+   "dramaticIntention": "Deflate him exactly one notch and, in the same breath, let him know she is not going anywhere.",
+   "subtext": "I see the whole mess. I like the whole mess.",
+   "relationshipTarget": "Fuzzby, off-frame down the corridor — she never turns to him, which is what makes it land.",
+   "emotionalEntry": "Enters out of the withholding — she has let his question sit past comfortable while she finished a packing stroke.",
+   "emotionalExit": "Exits into a covered fondness: the antennae dip a fraction on the last word, she catches it, and goes back to the sacks.",
+   "operativeWords": [
+    "Officially"
+   ],
+   "pace": "Very slow, one level tempo, mouth only — bone-dry, no lift, no bounce anywhere.",
+   "rhythm": "'Yes Fuzz-bee' laid down flat like a dropped pebble, the ellipsis rationing the laugh; 'Officially nuts' arrives at exactly the same volume but with one single degree of warmth leaking in on the last syllable — his own word handed back to him re-titled.",
+   "pauses": "One pause, after his name, and it is the withheld laugh — the same length as one of her packing strokes. No other pause; a second one would be a joke she is telling, and she does not tell jokes.",
+   "breaths": "Shallow, low breathing throughout; a small intake before 'Yes' that is her deciding to answer at all; nothing audible after — the read gets quieter as it ends, never louder.",
+   "nonVerbalActions": "Nothing performed. The slow blink arrives half a second AFTER the last word, not during it.",
+   "elevenLabsV3Direction": "[quietly] Yes Fuzz-bee… [pause] Officially nuts!",
+   "physicalActionRelationship": "Only the mouth moves; the flat stare stays aimed off-frame and never adjusts to the line. Her paws stop dead exactly on the final word — the one sudden thing in the shot — so the body punctuates what the voice refuses to.",
+   "expectedTiming": "Arrives after a full beat and a half of packing rhythm with no facial change; the blink lands about half a second after the line, the antenna dip a beat after that.",
+   "minOnsetSec": 1.6,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Fuzzby",
+   "exactDialogue": "Buzz Crash!!",
+   "voiceIdentity": "DNK8oCkkHjIyEjzlCeQq",
+   "dramaticIntention": "Rebrand being stuck in a flower as a scheduled manoeuvre with its own trademarked sound effect — he wants Zenny to file it under 'technique'.",
+   "subtext": "If I name the noise, I meant the noise.",
+   "relationshipTarget": "Zenny, announced proudly along the corridor with a caked face pointed her way.",
+   "emotionalEntry": "Straight out of the violent haul-out — no recovery beat, the announcement fires on the same accent the stance lands on.",
+   "emotionalExit": "Full parade triumph, entirely uninspected — hands the scene the biggest unearned dignity in it.",
+   "operativeWords": [
+    "Buzz",
+    "Crash"
+   ],
+   "pace": "Loudest and fastest in the scene — two hard hits, no ramp, at full volume from the first consonant.",
+   "rhythm": "BUZZ punched out on the chest's full extension, a hair's gap, then CRASH landing harder than BUZZ — the second hit bigger than the first, like a name being stamped.",
+   "pauses": "One frame's gap between the two words — the stamp, not a breath.",
+   "breaths": "A hard grunted intake in the haul-out immediately before the words, audible, the effort of forcing the rim wide; no breath between the words.",
+   "nonVerbalActions": "A pollen-thick splutter clears just before BUZZ — the flower's gold is in his mouth and he powers straight through it.",
+   "elevenLabsV3Direction": "[excited] BUZZ — CRASH!!",
+   "physicalActionRelationship": "The two words land on the two physical accents: BUZZ on the chest reaching full extension, CRASH on the antennae snapping erect. Nothing in the voice acknowledges the mask of gold that just fell on him.",
+   "expectedTiming": "Fires on the stance accent immediately after the roughly third-of-a-second haul-out; the rim's spring-back and falling gold arrive after the words.",
+   "minOnsetSec": 1.1,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Fuzzby",
+   "exactDialogue": "…okay that sounded dramatic.",
+   "voiceIdentity": "DNK8oCkkHjIyEjzlCeQq",
+   "dramaticIntention": "Annex the thunder into his own act before Zenny can name it as weather — he wants the sky filed under his credits.",
+   "subtext": "Something just got bigger than me and I am not going to look at it.",
+   "relationshipTarget": "Zenny, out along the corridor — a claim made to her, deliberately not to the sky.",
+   "emotionalEntry": "Enters off the crooked tilt: the body has already flinched, so the voice starts a half-beat behind, catching up to a claim it has not fully made yet.",
+   "emotionalExit": "Ends thinner than it started — the word 'dramatic' arrives with the pomp still on it and the certainty gone out from underneath.",
+   "operativeWords": [
+    "dramatic"
+   ],
+   "pace": "Slower than any other line of his — the opening ellipsis is him hunting a level he cannot find, then the sentence steadies as the chest re-inflates.",
+   "rhythm": "Begins small and off-balance on 'okay', gathers through the middle as the parade posture rebuilds, and puts full showman's weight on 'dramatic' — but the last syllable thins, the bravado not quite covering what he heard.",
+   "pauses": "The leading ellipsis, and only that: it is the tilt happening in his voice. No pause before 'dramatic' — a pause there would admit he is impressed.",
+   "breaths": "An unplanned catch of breath on the tilt, before 'okay' — the body's flinch made audible; then one held breath through the line, released only after it.",
+   "nonVerbalActions": "A wobble in the buzz-hum under 'okay' matching the sag and the over-correction; it steadies by 'sounded'.",
+   "elevenLabsV3Direction": "[nervous] …okay that sounded DRAMATIC.",
+   "physicalActionRelationship": "Voice and body deliberately out of step: the body tells the truth first (crooked, canted, hunting) while the voice arrives a beat later performing ownership. The line lands at the top of the chest's roughly one-second re-inflation, late, after the audience has already read the sky he never looks at.",
+   "expectedTiming": "Late in the shot — the drift, the tilt, the sag and the over-correction all play first; the lagging antenna settles a beat after the line ends.",
+   "minOnsetSec": 2.6,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Zenny",
+   "exactDialogue": "A Storm’s coming.",
+   "voiceIdentity": "XEiPrIitaegdirIGkODX",
+   "dramaticIntention": "Put the danger on the record in the fewest possible words so he stops performing and starts moving.",
+   "subtext": "You are going to get hurt and I am not going to say that part.",
+   "relationshipTarget": "Fuzzby, off-frame — she never turns toward him, which is exactly how much she means it.",
+   "emotionalEntry": "Enters from a stillness already in progress: her eyes have been up at the sky since before the cut, breathing gone shallower and slower.",
+   "emotionalExit": "Exits into a narrowing — protectiveness handed to the next beat with no volume attached to it at all.",
+   "operativeWords": [
+    "Storm"
+   ],
+   "pace": "Flat, unhurried, one tempo end to end; three words that take longer than they need and are never pushed.",
+   "rhythm": "No accent anywhere — STORM carries by placement and by the fractional weight of the consonant, never by lift. The full stop is a lid closing. A long beat sits after it before anything in the shot moves.",
+   "pauses": "None inside the line. The pause is after it, and it is the whole warning landing — dead air here is the sound of the sky.",
+   "breaths": "Shallow and slow, taken low; the intake before 'A' is smaller than the one before her last line. Her biggest feelings get quieter, never louder.",
+   "nonVerbalActions": "None. No sigh, no swallow — any of them would be enlarging it, which is someone else's register.",
+   "elevenLabsV3Direction": "[quietly] A Storm's coming.",
+   "physicalActionRelationship": "A mouth that moves and a body that does not follow it — her eyes never come down off the sky for the line. The narrowing (forelegs in, antennae back) happens slowly in the long beat afterwards, so the body says the frightened part the voice refused.",
+   "expectedTiming": "Lands after the single tiny re-aim of the gaze, with a long beat held after it; the leaf's dip and recovery is the last motion in the shot.",
+   "minOnsetSec": 1.8,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  },
+  {
+   "speaker": "Fuzzby",
+   "exactDialogue": "Good thing I work well under pressure.",
+   "voiceIdentity": "DNK8oCkkHjIyEjzlCeQq",
+   "dramaticIntention": "Outrank her warning — turn the storm into a compliment about himself so she watches him handle it.",
+   "subtext": "Do not be frightened for me; be impressed by me.",
+   "relationshipTarget": "Zenny, thrown back over his shoulder as he is already leaving — the claim is a departure.",
+   "emotionalEntry": "Inherits her flat warning and refuses it instantly; the chest pumps on the first word and the pump is the launch.",
+   "emotionalExit": "Cut off mid-swagger by the petals — the last word still in the air as the flower shuts on him.",
+   "operativeWords": [
+    "pressure"
+   ],
+   "pace": "Fast and rising — the words accelerate exactly as his line does, no braking anywhere.",
+   "rhythm": "'Good thing I' tossed away lightly; 'work well' gathers; PRESSURE gets the full parade weight and is the word he is travelling on when he hits the bloom.",
+   "pauses": "None. A pause would be a look down the line, and he never looks down the line.",
+   "breaths": "One quick chest-driven intake before 'Good' — the same breath that powers the launch; no breath in the sentence, which is why the end runs out of air.",
+   "nonVerbalActions": "The buzz-hum climbs under the whole line; a compressed grunt takes the tail of 'pressure' as the petals close on his waist.",
+   "elevenLabsV3Direction": "[excited] Good thing I work well under PRESSURE.",
+   "physicalActionRelationship": "The claim and the launch are one movement — the words go out as he is already travelling, so the sentence is heard on a rising, dipping line that never levels. The petals take the very end of the word; nothing after it, and the wagging that follows is silent.",
+   "expectedTiming": "Starts immediately on the answer with no gap after her line; the fold, the clamp and the diminishing wag all play in silence afterwards.",
+   "minOnsetSec": null,
+   "generatedAsset": null,
+   "approvalState": "draft"
+  }
+ ],
+ "showrunnerJudgement": "PASSES. UNIVERSALS TEST run first: endingBehaviour is not templated — the leaf-ricochet cover, pollen reveal, Zenny’s long dead stop, the denied short reaction, the weather warning hold and the final flower clamp all end differently. cutPace is also not templated — 1.B1 preserves the chained physical cause, 1.B2 buys the long Zenny wall, 1.B3 withholds the expected hold, and 1.B4 lengthens under thunder. There is a shared card structure, but not a shared cinematic value asserting itself. I tried to reject this for repeated reaction grammar and safe coverage; it survives because the repetitions are the scene’s engine and each repeat changes power, duration or meaning. Fuzzby cannot be substituted out: the action is authored by his overcommitted body, his denial, and his need for Zenny’s witness. Zenny cannot be substituted out: the comedy depends on her almost-motionless withholding and the affection she refuses to confess. The scene has the Crystal Bears co-viewing shape: the child rides, crashes, laughs; the parent sees a whole performance flown for the one bee who will not budge, with the first weather ache arriving underneath the gag.",
+ "treatmentComparison": "The storyboard holds the selected treatment’s central experience: bee-height travel with Fuzzby as the camera’s reckless partner, then hard grammatical collisions into Zenny’s unmoving frame. It preserves the key treatment promises: the opening already travels; the 1.B1 dip-drag-leaf FWIP remains one continuous cause; Zenny’s first verdict is a true door-shut rather than ordinary reaction coverage; 1.B3 escalates one object, the pollen, instead of adding random business; and 1.B4 brings the storm through the existing depth of the meadow rather than cutting to a safe re-establishing master. The visual grammar remains welded, not blended: Fuzzby’s shots chase, bank, arrive late or get thrown; Zenny’s shots flatten and refuse motion. The only near-risk is density: several shot cards are packed, but the packed material is still observable cause-and-effect rather than decorative micro-expression, so it does not yet tip into generic prompt stuffing.",
+ "internalRevisions": [],
+ "escalation": null,
+ "producerFeasibility": {
+  "judgement": "Feasibility read only; no creative opinion offered on any shot. Both mechanical facts come back clean and I reason from them as given: every character named across the ten shots (Fuzzby, Zenny) has a locked anchor, so there is no missing-reference BLOCK anywhere in the scene, and all ten intended durations validate with a scene total of 71-97s. Cast scope is genuinely small — a two-character scene, never more than two named characters in one composition, and in every shot but one only one of them is actually performing, so each frame is a reference-anchored single-subject or clearly-staged two-subject composition well inside what this pipeline holds together. Fuzzby-anchor identity is carried through progressive face-covering (band in SH3, smear in SH5, cake in SH6, still caked in SH8/SH10), which is a real ask of the anchor rather than a scope problem, and the Production Detail already names the spectacles-must-read-through-the-gold requirement on each of those shots, so it is briefed rather than assumed. Two practical notes rather than blocks: SH1 asks for the largest single delivery in the scene — a 11-14s continuous corridor travel carrying a sung work-song, a chained multi-stage physical cause, and a deep-background second bee that must read at correct relative scale — and SH10 asks for a petal-fold-and-clamp practical effect that has no equivalent elsewhere in the scene to amortise against. Both are deliverable as written with the assets on disk; both are the shots where the scene's cost concentrates and are worth flagging to the schedule. Nothing here needs to stop; Gate 6b passes.",
+  "passes": true,
+  "issues": [
+   {
+    "shotId": "S1.SH1",
+    "severity": "NOTE",
+    "issue": "Longest shot in the scene (11-14s) and the heaviest single delivery: one unbroken travelling corridor flight carrying a sung work-song track, a multi-stage chained physical cause ending on the leaf FWIP, plus a deep-background second bee (Zenny) that must hold correct relative scale against Fuzzby at distance. Duration validates, and reference coverage is complete (Fuzzby anchor, Zenny anchor, size chart, Buzzing Nook/wildflower scene anchor), but this shot alone concentrates the scene's animation and take-count cost — the deep-background Zenny at small scale is the element most likely to need additional takes to hold identity and the size gap. Flagged for schedule, not for change."
+   },
+   {
+    "shotId": "S1.SH10",
+    "severity": "NOTE",
+    "issue": "Requires a petal fold-and-clamp practical — petals closing across the lens's view of Fuzzby and staying shut with only his rear half and two wings outside — with no comparable effect elsewhere in the scene to share setup cost with. Additionally the shot must hold the cooled grey-green far-background sky small and sharp in depth while the clamp plays in the mid-ground. Deliverable with the existing scene anchor and Scene Look, but it is a one-off effects cost sitting on the scene's second-longest duration (9-12s)."
+   },
+   {
+    "shotId": "S1.SH6",
+    "severity": "NOTE",
+    "issue": "The frame must carry three independent physical elements the shot itself specifies as evidence — a branch still swinging in the mid-ground, kicking legs above a blossom rim with the body buried, and gold raining down a light shaft between camera and subject — before the haul-out and stance accent. Each is simulated/animated separately and all three must read cleanly in one composition at bee scale within 7-10s. No missing assets and the duration validates; noted only as the scene's third concentration of per-shot effects work."
+   }
+  ],
+  "missingCharacterReferences": [],
+  "durationValidation": {
+   "perShot": [
+    {
+     "shotId": "S1.SH1",
+     "range": "11-14s",
+     "valid": true,
+     "loSec": 11.0,
+     "hiSec": 14.0
+    },
+    {
+     "shotId": "S1.SH2",
+     "range": "6-8s",
+     "valid": true,
+     "loSec": 6.0,
+     "hiSec": 8.0
+    },
+    {
+     "shotId": "S1.SH3",
+     "range": "8-11s",
+     "valid": true,
+     "loSec": 8.0,
+     "hiSec": 11.0
+    },
+    {
+     "shotId": "S1.SH4",
+     "range": "7-10s",
+     "valid": true,
+     "loSec": 7.0,
+     "hiSec": 10.0
+    },
+    {
+     "shotId": "S1.SH5",
+     "range": "5-7s",
+     "valid": true,
+     "loSec": 5.0,
+     "hiSec": 7.0
+    },
+    {
+     "shotId": "S1.SH6",
+     "range": "7-10s",
+     "valid": true,
+     "loSec": 7.0,
+     "hiSec": 10.0
+    },
+    {
+     "shotId": "S1.SH7",
+     "range": "3-5s",
+     "valid": true,
+     "loSec": 3.0,
+     "hiSec": 5.0
+    },
+    {
+     "shotId": "S1.SH8",
+     "range": "8-11s",
+     "valid": true,
+     "loSec": 8.0,
+     "hiSec": 11.0
+    },
+    {
+     "shotId": "S1.SH9",
+     "range": "7-9s",
+     "valid": true,
+     "loSec": 7.0,
+     "hiSec": 9.0
+    },
+    {
+     "shotId": "S1.SH10",
+     "range": "9-12s",
+     "valid": true,
+     "loSec": 9.0,
+     "hiSec": 12.0
+    }
+   ],
+   "invalidShotIds": [],
+   "sceneTotal": {
+    "loSec": 71.0,
+    "hiSec": 97.0,
+    "formatted": "71-97s",
+    "allValid": true
+   }
+  }
+ },
+ "provenance": {
+  "showrunner": {
+   "role": "showrunner",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-26T20:58:02",
+   "humanRevision": null
+  },
+  "director": {
+   "role": "director",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-26T20:58:02",
+   "humanRevision": null
+  },
+  "cinematographer": {
+   "role": "cinematographer",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-26T20:58:02",
+   "humanRevision": null
+  },
+  "voice": {
+   "role": "voice-director",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-26T20:58:02",
+   "humanRevision": null
+  },
+  "producer": {
+   "role": "producer",
+   "model": "gpt-5.5",
+   "promptVersion": "creative-room-2.0 (2026-07-17, whole-scene-treatment process)",
+   "canonVersion": "1.0",
+   "at": "2026-07-26T20:58:02",
+   "humanRevision": null
+  }
+ },
+ "approvalState": "approved",
+ "humanNote": "",
+ "approvalLog": [
+  {
+   "target": "scene",
+   "state": "approved",
+   "note": "",
+   "at": "2026-07-26T21:01:00",
+   "by": "Julian"
+  }
+ ]
+}

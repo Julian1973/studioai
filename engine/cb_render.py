@@ -4252,6 +4252,63 @@ DECISION_LADDER = """THE FAILURE DECISION LADDER (after reviewing a candidate se
                                           alternative production method. No prompt-patching."""
 
 
+# ── THE TIMED MASTER (Julian, 2026-07-27) ────────────────────────────────────────────────
+# "can the bizzy come in when he is further away and the right voice distance"
+#
+# His ear caught something no check in this pipeline was looking for. S1.SH1's approved take is
+# 4.08 SECONDS of continuous read — the work song, a breath, then "NAILED it." — and it was
+# being handed to a TWELVE second render as @Audio1. Both lines land inside the first third and
+# the remaining eight seconds carry no audio at all. Meanwhile the shot's own direction kept
+# telling the writer "the final spoken section lands on the superhero pose" at ten and a half
+# seconds, which the track physically cannot do because it ended at four.
+#
+# That mismatch is why the timing has felt wrong across every take of this beat, and it is why
+# an outside prompt that tried to assign the line to a specific shot got its audio bunched at
+# the end. Nothing measured it because nothing compared the take's LENGTH to the shot's.
+#
+# THIS IS NOT A RE-VOICE AND NOT A POST SWAP (rules 4/29 stand): the approved performance is
+# never regenerated, re-read or replaced. It is cut AT ITS OWN SILENCE and its parts are placed
+# where the beat needs them — the same mechanical adelay/apad treatment the Studio's existing
+# 15s padded-master path already applies to an approved take. Same audio, same performance,
+# same words, same order; timed to the picture instead of against it.
+def build_timed_master(src, placements, out, total=15.0, log=print):
+    """Place parts of an APPROVED take at the times the beat actually needs them.
+
+    placements: [{"from": s, "to": s, "at": s, "distance": bool}, ...]
+
+    "distance" is a real perspective mix rather than a volume trim: level down, high
+    frequencies rolled off the way air does it, and a rising ramp across the segment, because
+    a character singing while flying back toward camera should be getting closer as he sings.
+
+    Returns out, or None on any ffmpeg failure — a timing convenience must never be the reason
+    a shot cannot be voiced at all."""
+    import subprocess
+    if not (src and os.path.exists(src)) or not placements:
+        return None
+    ins, mixes = [], []
+    for i, pl in enumerate(placements):
+        f, t, at = float(pl["from"]), float(pl["to"]), float(pl["at"])
+        chain = [f"atrim=start={f}:end={t}", "asetpts=PTS-STARTPTS"]
+        if pl.get("distance"):
+            span = max(t - f, 0.01)
+            chain += ["lowpass=f=3200",
+                      f"volume='0.30+0.34*min(1,t/{span:.3f})':eval=frame"]
+        chain.append(f"adelay={int(at * 1000)}|{int(at * 1000)}")
+        ins.append(f"[0:a]{','.join(chain)}[a{i}]")
+        mixes.append(f"[a{i}]")
+    fc = (";".join(ins) + ";" + "".join(mixes) +
+          f"amix=inputs={len(mixes)}:normalize=0[m];"
+          f"[m]apad,atrim=0:{total},asetpts=PTS-STARTPTS[out]")
+    r = subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", src, "-filter_complex", fc,
+                        "-map", "[out]", "-ac", "1", "-ar", "44100", out],
+                       capture_output=True, text=True)
+    if r.returncode or not os.path.exists(out):
+        log(f"[voice] timed master failed ({r.stderr.strip()[:200]}) — approved take untouched")
+        return None
+    log(f"[voice] timed master: {len(placements)} placement(s) across {total}s -> {out}")
+    return out
+
+
 def fire_comparison_clip(scene, shot_id, prompt_text, *, episode="Ep1", resolution="480p",
                          duration="12", out=None, label="", log=print):
     """THE PROMPT BAKE-OFF ROUTE (Julian, 2026-07-27: "Can you ensure you run these prompts

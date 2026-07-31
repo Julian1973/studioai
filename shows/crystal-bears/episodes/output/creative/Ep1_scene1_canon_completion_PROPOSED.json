@@ -1,0 +1,241 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "1",
+ "builtAt": "2026-07-26T20:42:51",
+ "approvalState": "proposed-awaiting-human-approval",
+ "note": "Gate 0 canon-completion PROPOSAL — not canon, not used by this run's directing. The scene was directed on established canon only.",
+ "unresolvedFields": {
+  "Fuzzby": [
+   "centreOfGravity",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ],
+  "Zenny": [
+   "centreOfGravity",
+   "comicEngine",
+   "consciousDesire",
+   "facialOpennessOrRestraint",
+   "gazeBehaviour",
+   "gestureScale",
+   "hiddenEmotionalNeed",
+   "insecurity",
+   "movementRhythm",
+   "neverWithoutStoryReason",
+   "personalSpace",
+   "primaryFear",
+   "protectiveMask",
+   "recoveryBehaviour",
+   "responseToEmbarrassment",
+   "responseToPressure",
+   "responseToSuccess",
+   "silhouette",
+   "useOfStillness"
+  ]
+ },
+ "completions": [
+  {
+   "character": "Fuzzby",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "High and forward — chest-first. His mass leads from the puffed chest and the head, wings trailing behind to catch up, so every launch out-runs his own balance and every landing arrives ahead of his feet. Grounded, though: weight always settles onto the surface (feet/hover respect the floor, never through it); the dip after a bonk drops the chest a few centimetres, never the whole body.",
+     "groundedIn": "actingNote: \"he puffs his CHEST out and strikes a proud SUPERHERO / on-parade stance — chest pumped forward, shoulders back, head high\" + \"His feet / hover ALWAYS respect the ground\"; cadence: \"throws himself at everything wings-first\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A wide, top-heavy wedge: chest thrust out, shoulders back, head high, antennae erect above the outline, wings blurred wide either side — readable as one proud puffed triangle even at bee-scale. In the bonk it inverts for an instant (antennae whipped back, chest folded, wings splayed) then snaps back to the proud wedge on the cover-up.",
+     "groundedIn": "comicEngine: \"THE FLOURISH — over-confident wind-up, chest puffed, antennae proud-erect… ANTENNAE are his barometer: proud-erect -> whip-recoil -> one-droop-tell -> snap-proud\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Biggest in the cast and always one size too large for the job — a two-wing sweep to indicate a single flower, a full on-parade point where a nod would do, a hover-strut for an audience of one. The gesture starts before he knows what it's for and overshoots its own end point; each gesture is one clear readable shape per internal cut, never busy thrashing.",
+     "groundedIn": "comicEngine: \"an unnecessarily grand gesture, a little hover-strut… CALIBRATION: the BIGGEST physical comedy in the cast\"; staging: \"One clean motion idea per internal cut… never busy thrashing\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "Eyes go where the glory is, not where the obstacle is — he looks at his audience (usually Zenny) while flying, which is why he hits the leaf. After a bonk his gaze checks Zenny FIRST, a fraction of a second, before he assembles the proud face and looks off past camera at nothing important. He is the last to look at the mess he made.",
+     "groundedIn": "relationship wantsFromOther: Fuzzby wants \"her admiration — an audience for his heroics\"; comicEngine: \"He IS the delayed take — always the LAST to know\"; privateVulnerability: \"he fears she finds him ridiculous\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Wide open by default — everything he feels arrives on the face early and at full size, spectacles catching the light as the brows go up. The ONE exception is the cover-up: face clamps to flat Keaton dignity, and the bigger the disaster the flatter it goes, with a single droopy antenna doing the confessing his face refuses to.",
+     "groundedIn": "comicEngine: \"(3) THE COVER-UP — instant Keaton-deadpan reclaim ('Nailed it.'); the bigger the disaster, the STILLER the recovery; ONE micro-tell (a wobble, a single droopy antenna…)\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "None to speak of — he closes distance without asking, hovering in over shoulders and landing on the thing being discussed. He crowds Zenny in particular, drifting into her held frame and bumping her without noticing; he only backs off a beat after a crash, when the small dip puts a hand's width of air between them.",
+     "groundedIn": "movementRhythm: \"he is CONSTANTLY bumping and banging into things — leaves, branches, flowers, petals, each other\"; relationship misunderstands: \"reads her restraint as an invitation to try harder\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "He escalates and performs: the plan gets grander instead of smaller, the wind-up longer, the announcement louder, the flight faster and higher before it undershoots. Pressure never makes him pause — it makes him commit harder to being the professional in the room, which is exactly what causes the bonk.",
+     "groundedIn": "relationship underPressure: \"he escalates and performs; she narrows, stills and names the danger\"; comicEngine: his WANT is \"be seen as a flawless, important professional\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "Instant reclaim, never retreat: he plants the proud on-parade stance, calls the disaster choreography with total dignity, and re-brands the accident as the plan. The embarrassment shows only as ONE micro-tell he doesn't authorise — a wobble, a wing that won't fold, one antenna still down — and in the held beat afterwards where the heart leaks through before he puffs proud again.",
+     "groundedIn": "cadence: \"crash-lands into pride, never admits defeat\"; comicEngine: \"he's clumsy WHILE performing competence, then DENIES it with total dignity\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "He over-collects the credit — the hover-strut, the chest out, the announcement, a look for Zenny to confirm it. He can't leave a win alone: he immediately attempts a bigger encore of the same trick, which is usually where the next bonk comes from. Success makes him grander, never satisfied.",
+     "groundedIn": "comicEngine: his WANT (\"be seen as a flawless, important professional\") vs NEED; whoTheyAre: \"he puffs up grandly, declares himself, and crashes\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "Fast and physical, in order: peel off the surface he hit, wings back to full beat, chest re-inflates into the proud stance, one antenna snaps up late — and the flourish for the NEXT attempt begins before the last one has finished settling. Recovery is stiller than the crash; he re-launches too soon and slightly wonky rather than checking himself.",
+     "groundedIn": "comicEngine: \"the bigger the disaster, the STILLER the recovery… ANTENNAE… -> snap-proud\"; bible growth edge: \"letting the crash be okay without instantly puffing back up\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "He has exactly one kind of stillness and it is the cover-up: the held Keaton beat straight after the biggest hit, body clamped proud while the wings keep beating fast, one tell twitching. It is the only time the show holds on him instead of Zenny, and it is where the heart leaks in. Never a resting or calm stillness — his flight is never level, serene or hovering-at-peace.",
+     "groundedIn": "comicEngine: \"the held beat after is where the heart leaks in and the co-watch fires\"; motionRule: \"He is NEVER slow-paced, never calm-flying, never serenely hovering\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To be witnessed as the flawless professional of Crystal Cove — the important bee whose grand idea saves the day — and specifically to have Zenny admit, out loud, that he was magnificent.",
+     "groundedIn": "comicEngine: his WANT is \"be seen as a flawless, important professional\"; relationship wantsFromOther: \"her admiration — an audience for his heroics\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To find out that he's already wanted — the whole bumbling package, crash included — so he can stop earning his place with grand ideas and let a face-plant just be okay.",
+     "groundedIn": "bible arc: \"from a bee who puffs up to earn his place, to a bee who learns he already has one — that the cast wants the whole bumbling package, crash included\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That the one bee whose opinion he actually needs finds him ridiculous — that when Zenny holds still and says nothing, the nothing means she's stopped being impressed.",
+     "groundedIn": "relationship privateVulnerability: \"he fears she finds him ridiculous\"; emotionalLeverage: \"one slow blink from Zenny outweighs any crash\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "He is the small one with no crystal among the big crystal-powered bears — so he suspects that without a grand announcement and a spectacular idea, he'd simply not be counted.",
+     "groundedIn": "bible relationships: \"he reveres them slightly (hence the pomp — trying to matter among the big crystal-powered ones)\"; pillar note: \"he is not a crystal bear, so he holds no Crystal Power\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "The pomp: chest out, on-parade stance, the professional's announcement, the disaster claimed as choreography — competence performed at full volume so he never has to feel small.",
+     "groundedIn": "bible vulnerability: \"His pomposity is a mask. He commits 100% to a big proud idea precisely so he doesn't have to feel small\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "He never lets a crash stand as a crash (no owning it plainly unless the episode has bought that beat); never flies slow, level, graceful or serenely hovering; never delivers a dry deadpan line; never lands a gag that is random rather than built backwards from his bravado; and never turns sharp or mean — his chaos is warm, and we laugh WITH him, never at a victim.",
+     "groundedIn": "donts: \"NEVER let Fuzzby fly slow, calm, graceful, serene or still-hovering\", \"Don't give him Zenny's calm, dry, deadpan register\", \"Never random clumsiness… we laugh WITH him… NEVER AT a victim\""
+    }
+   ]
+  },
+  {
+   "character": "Zenny",
+   "proposals": [
+    {
+     "field": "centreOfGravity",
+     "proposedText": "Low and settled, directly under her — weight dropped into whatever she's sitting or hovering on, so nothing above the shoulders needs to move. When Fuzzby barrels past she doesn't brace or sway; the air moves and she doesn't. Her hover holds one altitude with wings beating fast and continuously.",
+     "groundedIn": "mannerisms: \"Hovers low and steady (she's a bee) without busy darting. Sits while Fuzzby zooms\"; lexicon verbs: \"locks, holds, settles, glides\""
+    },
+    {
+     "field": "silhouette",
+     "proposedText": "A small, compact, near-symmetrical oval — level shoulders, antennae straight and quiet, wings a tight fast blur close to the body: an unbroken outline that stays the same shape all through the shot while Fuzzby's shape is changing every second. Her tells (round glasses, lashes, blush) read at the top of that outline. The one crack is a fractional dip of both antennae, then level again.",
+     "groundedIn": "mannerisms: \"The rare tell that she cares: a beat where the flat stare softens, the antennae dip a fraction, then she catches herself\"; dos: \"Lock her smaller than Fuzzby and keep her clear tells\""
+    },
+    {
+     "field": "movementRhythm",
+     "proposedText": "One movement at a time, arriving late and finishing early. Long held nothing, then a single small precise event — a slow blink, a flat stare re-aimed, a tiny head-tilt — then held nothing again. She never gestures on her line; the line lands while she's already stopped. Travel is a straight unhurried glide from A to B at one height, no darting.",
+     "groundedIn": "cadence: \"holds still through the chaos, rationing every smile\"; actingNote: \"only the smallest movements (a slow blink, a flat stare, a tiny head-tilt)\"; mannerisms: \"Her one dry line arrives while she barely moves at all\""
+    },
+    {
+     "field": "comicEngine",
+     "proposedText": "THE HELD REACTION — the joke is what she doesn't do. Fuzzby's three-beat overcommitment is answered by her ONE beat: the camera cuts to her and stays, she does not react at the size the event deserves, and the gap between the disaster and her flat face IS the punchline. Then one short dry line, understated in inverse proportion to the chaos, delivered stone-still (\"You look dusty.\"). Never a topper, never a second line, never a gesture to sell it — the hold sells it. The engine's heart: the tease is warm, and the hairline crack where the deadpan slips and you see she actually cares is the reward the parent gets while the kid is still laughing at the moustache.",
+     "groundedIn": "emotionalEngine: \"the flat, unimpressed stillness that Fuzzby's chaos crashes against — and the reaction IS the joke… under that deadpan is a fondness for Fuzzby she'd rather die than admit\"; relationship typicalRhythm: \"his three-beat overcommitment answered by her one-beat deadpan\""
+    },
+    {
+     "field": "gestureScale",
+     "proposedText": "Micro — measured in millimetres, not arm-lengths. Her largest available gesture is a head-tilt of a few degrees or one antenna moving; she indicates things with her eyes rather than a limb. Nothing she does would be visible in a wide shot, which is why the show cuts in and holds on her.",
+     "groundedIn": "actingNote: \"never big or busy gestures\"; donts: \"Don't give her big, busy, or bouncy gestures — no flailing, no Fuzzby-style superhero stances\"; \"Don't bury her reaction in a busy wide\""
+    },
+    {
+     "field": "gazeBehaviour",
+     "proposedText": "She looks straight at the thing — usually Fuzzby — and keeps looking after everyone else would have looked away; the over-long flat stare is the pressure. She tracks him with the eyes only, head still, so his motion crosses her steady gaze. On the crack she looks away first, at nothing, then back level.",
+     "groundedIn": "mannerisms: \"a flat unimpressed stare\"; staging: \"one clear focal point on her flat face\"; \"then she catches herself and the deadpan snaps back\""
+    },
+    {
+     "field": "facialOpennessOrRestraint",
+     "proposedText": "Restraint held almost all the way — the face gives one increment where another character gives ten: if she's delighted, it's one extra blink. The truth leaks through timing and the eyes, not expression. Once per beat that matters the flat stare softens a hair — warmer, quieter, no smile — and she covers it fast; her smiles are rationed, and a corner of the mouth almost lifting is a whole performance.",
+     "groundedIn": "cadence: \"rationing every smile\"; speech: \"if she's excited, it reads as one extra blink\"; vulnerability: \"real feeling… only ever leaks out sideways, never head-on\""
+    },
+    {
+     "field": "personalSpace",
+     "proposedText": "She holds her spot and lets Fuzzby violate it — when he crowds in she doesn't retreat or lean away, she simply stays and lets him be too close, which reads as tolerance and is actually loyalty. She closes distance herself only when he's genuinely hurt or in danger: a short unhurried glide to just beside him, no fuss, no comment.",
+     "groundedIn": "relationship: Zenny wants \"his safety\"; dependence: \"he needs her as witness\"; relationships: \"the one she pretends to be unbothered by and would absolutely turn up for\""
+    },
+    {
+     "field": "responseToPressure",
+     "proposedText": "She narrows and gets smaller and quieter — movement drops to nothing, the wings tighten, the gaze locks on the danger, and she names it in the fewest possible words, flat and small, so the flatness makes it bigger. No warning gestures, no urgency in the voice; the drop in her volume IS the alarm.",
+     "groundedIn": "relationship underPressure: \"she narrows, stills and names the danger\"; canonical exemplar 1.B4: Zenny goes still and says, flat and small, \"A Storm's coming.\""
+    },
+    {
+     "field": "responseToEmbarrassment",
+     "proposedText": "She absorbs it without acknowledging it: one slow blink, gaze held a beat longer than comfortable, then she carries on with whatever her paws were doing as though nothing occurred. She never explains, never protests, never matches the fuss — refusing to give the moment a reaction is how she survives it, and the only trace is a fractionally slower next movement.",
+     "groundedIn": "vulnerability: \"Her composure is a wall. She uses dryness to keep a half-step of distance\"; actingNote: \"Deadpan STILLNESS is the comedy\""
+    },
+    {
+     "field": "responseToSuccess",
+     "proposedText": "Under-claims it entirely — she doesn't celebrate, doesn't look for credit, and hands the moment away with a short flat line while the eyes go one degree warmer. If Fuzzby takes the credit for her fix, she lets him have it and holds the stare on him a beat too long; that hold is the audience's joke and her affection at once.",
+     "groundedIn": "relationship status: \"he claims it loudly; she holds it silently — the gap IS the comedy\"; affection: \"deep and unspoken; her almost-smile is the episode's quietest reward\""
+    },
+    {
+     "field": "recoveryBehaviour",
+     "proposedText": "She resets rather than recovers: whatever slipped, she returns to the same held posture and altitude she was in before, so the audience sees the deadpan snap back into place. The recovery is one movement — antennae level, a slow blink, gaze re-aimed — and then she goes on with the task she'd already started, as if the crack never happened.",
+     "groundedIn": "mannerisms: \"then she catches herself and the deadpan snaps back\"; arc: \"a hairline crack where the deadpan slips and you see she actually cares (then she covers it, fast)\""
+    },
+    {
+     "field": "useOfStillness",
+     "proposedText": "Stillness is her whole instrument and it is always charged, never empty — she is holding a task (a pollen sac, a honeycomb seal, a leaf being straightened) with tiny micro-corrections and one small unfinished movement, and holding a reaction she is choosing not to give. The audience must be able to feel the withheld thing: the almost-laugh, the worry she won't name. When the scene needs her most, the camera pushes in slightly or lets the hold run longer so the softening is caught before she covers it. Her stillness makes Fuzzby's chaos read bigger in the same frame.",
+     "groundedIn": "actingNote: \"Deadpan STILLNESS is the comedy\"; staging: \"For the rare crack, push in slightly or let the hold run a beat longer\"; comicContrast: \"maximum motion against near-stillness in the same frame\""
+    },
+    {
+     "field": "consciousDesire",
+     "proposedText": "To get the actual work done and to keep Fuzzby from hurting himself doing the opposite — the job finished, the nook intact, and him in one piece.",
+     "groundedIn": "relationship wantsFromOther: Zenny wants \"his safety — and for the work to actually get done\""
+    },
+    {
+     "field": "hiddenEmotionalNeed",
+     "proposedText": "To be able to say the fondness out loud — to be known as someone who cares without having to hand over the composure that keeps her a half-step back.",
+     "groundedIn": "emotionalEngine: \"under that deadpan is a fondness for Fuzzby she'd rather die than admit\"; vulnerability: \"She uses dryness to keep a half-step of distance\""
+    },
+    {
+     "field": "primaryFear",
+     "proposedText": "That one of his grand ideas actually hurts him — that the crash she keeps flatly predicting will be the one she can't tease him out of.",
+     "groundedIn": "relationship privateVulnerability: \"he fears she finds him ridiculous; she fears he'll get hurt\""
+    },
+    {
+     "field": "insecurity",
+     "proposedText": "That being the quiet, unimpressed one looks like not caring — that her stillness reads as indifference and Fuzzby half-believes she doesn't want him around.",
+     "groundedIn": "emotionalDNA: \"you don't have to be loud, bouncy, or 'on' to belong… loving someone can look like teasing them and turning up anyway\"; misunderstands: \"underestimates how much of his showing-off is FOR her\""
+    },
+    {
+     "field": "protectiveMask",
+     "proposedText": "The dryness itself — flat face, level voice, one short understated line — worn so nothing lands head-on and no one gets to see the fondness underneath.",
+     "groundedIn": "vulnerability: \"Her composure is a wall. She uses dryness to keep a half-step of distance\""
+    },
+    {
+     "field": "neverWithoutStoryReason",
+     "proposedText": "She never gushes, exclaims or runs on; never uses big busy gestures or a Fuzzby-style stance; never plays serene guru wisdom or clinical feeling-words (calm down, anxious, mindful); never names a feeling outright or teaches the lesson; never lands a tease that's sharp or unkind; and never goes unbreakably composed with no crack at all — the crack is only withheld when the episode is paying it off later.",
+     "groundedIn": "donts: \"Don't play her as a serene zen master… Don't let her gush, exclaim, or run on… Don't make her unbreakably composed and cold — without the crack she goes dead… she's dry, not mean\""
+    }
+   ]
+  }
+ ]
+}

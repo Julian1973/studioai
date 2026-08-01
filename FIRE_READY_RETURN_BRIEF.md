@@ -36,23 +36,22 @@ Date: 1 August 2026
 - Static serving hides `.env`, source, state and traversal paths. Oversized, malformed and
   unqualified provider requests fail closed.
 
-## What still needs Julian
+## Human canon decisions
 
-The software is ready to guide production, but Episode 1 is correctly not marked production
-ready until these authored decisions are made:
+Julian resolved the three Episode 1 conflicts on 1 August 2026:
 
-1. The script gives Zenny a crystal while locked canon says bees have no crystals.
-2. Aida's script Crystal Call differs from the exact locked call.
-3. Squeaky's script pronouns conflict with the locked female character record.
-4. Luna's final call remains a human canon decision, and nine location masters still need
-   approved visual references.
+1. Squeaky is male.
+2. Zenny has no crystal.
+3. Aida's exact call is: "With heart open wide, I stand with pride — Rose Quartz, be our guide!"
 
-The Studio will surface these as creative decisions. It will not guess the answers.
+These decisions are encoded in locked canon and a new immutable script version. Luna's final
+call remains a future human canon decision, and nine location masters still need approved
+visual references.
 
 ## First session back
 
 1. Open the authenticated local Studio URL printed by `cb-studio/serve.py`.
-2. Resolve the three script-versus-canon conflicts in Story & Direction.
+2. Run Story & Direction against the newly aligned script and canon.
 3. Approve the exact scene treatment, emotion/comedy/power beats and character performances.
 4. Review the timing slate before committing opening frames or animation spend.
 5. Qualify a BytePlus route only with account-visible model evidence; keep fal Seedance 2.0

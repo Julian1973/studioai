@@ -1,0 +1,11 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:0a4e290677340d860ce92b859d67870d26c2c61457a77600a1269dd5e3556946",
+ "algorithm": "sha256",
+ "sha256": "0a4e290677340d860ce92b859d67870d26c2c61457a77600a1269dd5e3556946",
+ "byteLength": 17800,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/0a4e290677340d860ce92b859d67870d26c2c61457a77600a1269dd5e3556946.txt",
+ "createdAt": "2026-08-01T03:26:43+00:00",
+ "sourceName": "Julian canon decisions 2026-08-01"
+}

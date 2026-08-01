@@ -22,24 +22,23 @@ def test_show_specific_runtime_refuses_an_uninstalled_adapter(monkeypatch):
         raise AssertionError("Crystal Bears runtime accepted another show's adapter")
 
 
-def test_preflight_stops_at_the_first_unapproved_canonical_contract_without_spend():
+def test_preflight_stops_at_story_direction_for_the_new_canon_aligned_script():
     report = cb_production_preflight.production_preflight("1", "Ep1")
     assert report["zeroSpend"] is True
     assert report["lineage"]["current"] is False
-    assert report["lineage"]["reasonCodes"] == ["canon-lock-required"]
+    assert report["lineage"]["reasonCodes"] == ["story-intake-not-approved"]
     codes = {item["code"] for item in report["blockers"]}
-    assert "CANON_LOCK_REQUIRED" in codes
+    assert "STORY_INTAKE_APPROVAL_REQUIRED" in codes
+    assert "CANON_LOCK_REQUIRED" not in codes
     assert "STALE_PRODUCTION_GRAPH" not in codes
     assert "SHOT_NOT_READY" not in codes
     assert report["shots"] == []
-    assert report["stages"]["storyboard"]["state"] == "blocked"
+    assert report["stages"]["storyboard"]["state"] == "ready"
     assert report["providerCapabilities"]["selectionReady"] is True
     assert report["providerCapabilities"]["selectedVideoModelId"] == "fal-seedance-2.0"
     assert report["showProfile"]["showId"] == "crystal-bears"
     assert report["showProfile"]["adapterReady"] is True
-    assert report["nextAction"] == (
-        "Correct the script as a new immutable version or explicitly revise the show canon."
-    )
+    assert report["nextAction"] == "Run Story & Direction for the active script."
 
 
 def test_preflight_blocks_an_unqualified_selected_video_model(monkeypatch):

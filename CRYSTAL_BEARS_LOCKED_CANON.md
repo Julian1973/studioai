@@ -100,7 +100,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 - 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
 
 **Recurring guests (canon, separate tier — decided 2026-06-19):**
-- **Squeaky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+- **Squeaky** — a male dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
 - **Keen's Mum** — a bear (single reference exists). Recurring guest / family.
 - **Bo** — a cub (T6 ruling, 2026-07-02, Julian: CONFIRMED recurring-guest tier, Ep2's lead). No reference art or
   bible yet — a `characters.json` stub exists so Ep2's pipeline/canon isn't blocked, but species/appearance,

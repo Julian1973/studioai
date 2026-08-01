@@ -1,0 +1,12 @@
+{
+ "schemaVersion": 1,
+ "eventId": "33e3db5b2323476683fba78a9e11ad43",
+ "kind": "canon-decisions-applied",
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:0a4e290677340d860ce92b859d67870d26c2c61457a77600a1269dd5e3556946",
+ "previousScriptVersionId": "sha256:3ec8cfee1146b769f26c3bae7cd93f2bde4e36bfe3f7659d79ca371ca82cd7eb",
+ "title": "The Adventure Begins",
+ "displayFile": "Ep1_The_Adventure_Begins.txt",
+ "activatedAt": "2026-08-01T03:26:43+00:00",
+ "activatedBy": "Julian"
+}

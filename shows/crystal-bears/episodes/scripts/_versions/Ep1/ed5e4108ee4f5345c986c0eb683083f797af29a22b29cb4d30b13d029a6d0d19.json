@@ -1,0 +1,11 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19",
+ "algorithm": "sha256",
+ "sha256": "ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19",
+ "byteLength": 17800,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19.txt",
+ "createdAt": "2026-08-01T03:27:01+00:00",
+ "sourceName": "Julian canon decisions plus canonical cue normalisation 2026-08-01"
+}

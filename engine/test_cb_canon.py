@@ -1,9 +1,13 @@
 import json
+import pathlib
 
 import pytest
 
 import cb_canon
 import cb_intake
+
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 def _write(path, value):
@@ -29,7 +33,7 @@ def _workspace(tmp_path):
         "Squeaky": {
             "anchor": "assets/squeaky.png", "key_features": "dolphin",
             "bible": {"pillar": "playful guide"}, "cadence": "clicks",
-            "sizeRank": 2,
+            "sizeRank": 2, "gender": "Male",
         },
         "Bo": {"_status": "declared stub"},
     })
@@ -73,8 +77,8 @@ def _workspace(tmp_path):
             }],
             "pronounContracts": [{
                 "id": "pronouns", "character": "Squeaky",
-                "forbiddenPattern": "\\b(?:he|him|his)\\b",
-                "evidencePattern": "\\bhis tail\\b", "message": "Pronouns changed.",
+                "forbiddenPattern": "\\b(?:she|her|hers)\\b",
+                "evidencePattern": "\\bher tail\\b", "message": "Pronouns changed.",
             }],
         },
         "compatibilityCopies": [],
@@ -125,7 +129,7 @@ def test_script_semantics_are_checked_against_locked_contracts(tmp_path):
     policy = _workspace(tmp_path)
     report = cb_canon.validate_script(
         "1 AIDA\nA different Rose Quartz call.\n\n"
-        "Zenny's crystal glows.\n\nSqueaky is caught by his tail.\n",
+        "Zenny's crystal glows.\n\nSqueaky is caught by her tail.\n",
         policy,
     )
 
@@ -134,6 +138,12 @@ def test_script_semantics_are_checked_against_locked_contracts(tmp_path):
         "SCRIPT_CANON_CONFLICT", "LOCKED_DIALOGUE_CONFLICT",
         "CHARACTER_PRONOUN_CONFLICT",
     }
+
+    aligned = cb_canon.validate_script(
+        "Aida steps forward. She waves. Squeaky watches her. He dips his head.\n",
+        policy,
+    )
+    assert aligned["ok"] is True
 
 
 def test_script_parser_maps_declared_alias_and_refuses_unknown_cue(monkeypatch):
@@ -149,3 +159,19 @@ def test_script_parser_maps_declared_alias_and_refuses_unknown_cue(monkeypatch):
             "EXT. COVE - DAY 1\n\n2 MYSTERY\nHello.\n",
             roster=["Howey"], log=lambda *_: None,
         )
+
+
+def test_repository_ep1_human_canon_decisions_are_locked():
+    report = cb_canon.status("Ep1", root=ROOT)
+    characters = json.loads(
+        (ROOT / "shows/crystal-bears/canon/characters.json").read_text(encoding="utf-8"))
+    script = (ROOT / report["scriptPath"]).read_text(encoding="utf-8")
+
+    assert report["current"] is True
+    assert report["episodeReady"] is True
+    assert report["scriptCanon"] == {"ok": True, "blockers": [], "warnings": []}
+    assert characters["Squeaky"]["gender"] == "Male"
+    assert "With heart open wide, I stand with pride — Rose Quartz, be our guide!" in script
+    assert "With open heart and love so bright" not in script
+    assert "Zenny’s." not in script
+    assert "Zenny's crystal" not in script

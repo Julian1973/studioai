@@ -358,6 +358,7 @@ Name: Squeaky
 Alias: The Spark of Courage — Crystal Cove's Dolphin (recurring guest — no crystal)
 Role: The catalyst Keen dives to save (Ep1 Heart)
 Age: Young bottlenose dolphin
+Gender: Male
 Personality: Bright, trusting, playful, instantly affectionate — joy that needs rescuing
 Speech Accent: NON-VERBAL — playful dolphin chirps, clicks, squeaks, whistles (designed SFX/foley — no V3 voice, never words)
 Core Theme: You can be brave FOR someone before you feel brave for yourself
@@ -381,5 +382,5 @@ EXPRESSION PROGRESSION (8): Curious · Playful · Happy · Surprised · Worried 
 HEAD DETAIL: 3/4 · Side · Top · Low · Diagonal (all in/near water)
 MICRO EXPRESSIONS (5): Subtle Eye Brighten · Eye Soften · Eye Widen · Micro Fear · Held Breath (before a dive)
 POSTURE / BODY POSES (swap for hand gestures): Leap-Arc · Surface-Bob (resting) · Belly-Roll · Snout-Bump (hello) · Distress-Thrash
-SIGNATURE NOTE: She has no hands — body + eyes carry every beat. Distress is genuinely scary (urgent sharp calls); relief lands soft. Aqua shimmer is a catch-light, never a glowing crystal.
+SIGNATURE NOTE: He has no hands — body + eyes carry every beat. Distress is genuinely scary (urgent sharp calls); relief lands soft. Aqua shimmer is a catch-light, never a glowing crystal.
 ```

@@ -1,0 +1,12 @@
+{
+ "schemaVersion": 1,
+ "eventId": "beb79e960eed40119f5987363f3d612e",
+ "kind": "canonical-character-cue-normalised",
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19",
+ "previousScriptVersionId": "sha256:0a4e290677340d860ce92b859d67870d26c2c61457a77600a1269dd5e3556946",
+ "title": "The Adventure Begins",
+ "displayFile": "Ep1_The_Adventure_Begins.txt",
+ "activatedAt": "2026-08-01T03:27:01+00:00",
+ "activatedBy": "Julian"
+}

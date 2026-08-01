@@ -160,9 +160,9 @@
       {
         "id": "Squeaky-pronouns",
         "character": "Squeaky",
-        "forbiddenPattern": "\\b(?:he|him|his)\\b",
-        "evidencePattern": "\\b(?:his tail|pulling him|reaches him|watches him|he dips his head)\\b",
-        "message": "The script writes Squeaky with male pronouns, while the character bible locks Squeaky as female."
+        "forbiddenPattern": "\\b(?:she|her|hers)\\b",
+        "evidencePattern": "\\b(?:her tail|pulling her|reaches her)\\b|\\bSqueaky\\b[^.!?]*[.!?]\\s*\\bShe\\b|\\bShe\\b[^.!?]*\\bSqueaky\\b",
+        "message": "The script writes Squeaky with female pronouns, while the character bible locks Squeaky as male."
       }
     ]
   },

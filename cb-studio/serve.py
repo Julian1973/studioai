@@ -15,6 +15,7 @@ MEDIA = ROOT / "engine" / "media"
 OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
 SCRIPTS = DATA / "scripts"
+CANON_CONFIG = ROOT / "shows" / "crystal-bears" / "canon"
 DATA.mkdir(parents=True, exist_ok=True)
 SCRIPTS.mkdir(parents=True, exist_ok=True)
 import cb_scripts
@@ -1166,6 +1167,8 @@ _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
+    "/shows/crystal-bears/canon/characters.json",
+    "/shows/crystal-bears/canon/locked_canon.md",
 }                                         # add a new project's showBibleFile / configBase characters.json here if it differs
 _MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
               ".mp4", ".webm", ".mov", ".m4v", ".mp3", ".wav", ".m4a", ".ogg",
@@ -1430,6 +1433,16 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
+        if self.path.startswith("/api/canon-lock"):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            episode = (q.get("episode") or [None])[0]
+            try:
+                import cb_canon
+                return self._json(200, cb_canon.status(episode or None, root=ROOT))
+            except Exception as exc:
+                return self._json(500, {"error": str(exc), "current": False,
+                                        "episodeReady": False})
         if self.path == "/api/rates":
             # Read-only, zero-risk: exposes cb_costs.py's own RATES table so the UI's pre-generation cost
             # estimates come from the same single source of truth the real spend ledger uses, rather than a
@@ -1454,7 +1467,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 manifest = {}
             reuse = {}
-            lf = ROOT / "engine" / "config" / "locations.json"
+            lf = CANON_CONFIG / "locations.json"
             try:
                 if lf.exists():
                     locs = json.loads(lf.read_text())
@@ -1514,7 +1527,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/houses":
             houses = []
             try:
-                cf = ROOT / "engine" / "config" / "characters.json"
+                cf = CANON_CONFIG / "characters.json"
                 cfg = json.loads(cf.read_text()) if cf.exists() else {}
                 for char, v in cfg.items():
                     if not isinstance(v, dict):
@@ -1546,7 +1559,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                         p["episodeCount"] = 0
                     try:
                         cf = ROOT / cfgbase / "characters.json"; cd = json.loads(cf.read_text()) if cf.exists() else {}
-                        p["characterCount"] = len([k for k, v in cd.items() if isinstance(v, dict) and k != "sizeClasses"])
+                        p["characterCount"] = len([k for k, v in cd.items()
+                                                   if isinstance(v, dict) and not str(k).startswith("_")
+                                                   and k != "sizeClasses"])
                     except Exception:
                         p["characterCount"] = 0
             except Exception:
@@ -2123,7 +2138,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 name = (d.get("name") or "").strip()
                 if not name:
                     raise ValueError("name required")
-                cpath = CBGEN / "config" / "characters.json"
+                cpath = CANON_CONFIG / "characters.json"
                 C = json.loads(cpath.read_text())
                 entry = C.get(name) if isinstance(C.get(name), dict) else {}
                 if d.get("anchorData"):
@@ -2160,7 +2175,18 @@ class H(http.server.SimpleHTTPRequestHandler):
                     entry["sizeRank"] = int(d["sizeRank"])
                 C[name] = entry
                 cpath.write_text(json.dumps(C, indent=2, ensure_ascii=False))
-                self._json(200, {"ok": True, "name": name, "character": entry})
+                sync = subprocess.run(
+                    [sys.executable, str(ROOT / "tools" / "sync_canon.py")],
+                    cwd=str(ROOT), capture_output=True, text=True, timeout=30,
+                )
+                if sync.returncode:
+                    raise RuntimeError(sync.stderr.strip() or sync.stdout.strip() or
+                                       "canon compatibility sync failed")
+                import cb_canon
+                lock = cb_canon.status(root=ROOT)
+                self._json(200, {"ok": True, "name": name, "character": entry,
+                                 "canonLockCurrent": lock.get("current"),
+                                 "canonAction": "Review this change, then explicitly re-lock canon."})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

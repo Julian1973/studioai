@@ -12,8 +12,8 @@
       "aspectRatio": "16:9",
       "voiceProvider": "ElevenLabs (v3)",
       "musicStyle": "Warm orchestral with gentle motifs; each bear seeded to a musical note.",
-      "configBase": "engine/config",
-      "showBibleFile": "CRYSTAL_BEARS_LOCKED_CANON.md",
+      "configBase": "shows/crystal-bears/canon",
+      "showBibleFile": "shows/crystal-bears/canon/LOCKED_CANON.md",
       "episodesFile": "cb-studio/data/episodes.json",
       "mediaBase": "engine/media",
       "createdAt": "2026-06-24"

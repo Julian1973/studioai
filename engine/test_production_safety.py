@@ -15,15 +15,15 @@ def test_preflight_stops_at_the_first_unapproved_canonical_contract_without_spen
     report = cb_production_preflight.production_preflight("1", "Ep1")
     assert report["zeroSpend"] is True
     assert report["lineage"]["current"] is False
-    assert report["lineage"]["reasonCodes"] == ["story-intake-not-approved"]
+    assert report["lineage"]["reasonCodes"] == ["canon-lock-required"]
     codes = {item["code"] for item in report["blockers"]}
-    assert "STORY_INTAKE_APPROVAL_REQUIRED" in codes
+    assert "CANON_LOCK_REQUIRED" in codes
     assert "STALE_PRODUCTION_GRAPH" not in codes
     assert "SHOT_NOT_READY" not in codes
     assert report["shots"] == []
-    assert report["stages"]["storyboard"]["state"] == "awaiting"
+    assert report["stages"]["storyboard"]["state"] == "blocked"
     assert report["nextAction"] == (
-        "Review and approve the current episode Story & Direction candidate."
+        "Correct the script as a new immutable version or explicitly revise the show canon."
     )
 
 

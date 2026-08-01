@@ -1,6 +1,6 @@
 {
   "_note": "SSOT character register (derived from CRYSTAL_BEARS_LOCKED_CANON.md + the bear size chart CB_size_chart). anchor = the reference image used reference-only (never described). voiceId = ElevenLabs canonical voice. cadence = voice-direction signature. sizeRank = relative height/size, 1=smallest .. 7=largest (from the size chart: Amie<Sunny<Luna<Keen<Aida<Misty<Howey; Luna\u2248Keen\u2248Aida are CLOSE in height \u2014 Keen is NOT a tiny cub). size = human-readable. sizeRef (guests) = 'the same size as this cast member'. Keen has wristband_states. Paths relative to cb-gen/.",
-  "_sizeRule": "ADDITIONAL/GUEST characters are sized by class (Julian, locked 2026-06-22): any ADULT FEMALE = the same size as AIDA; any ADULT MALE = the same size as HOWEY; any CHILD FEMALE = the same size as AMIE; any CHILD MALE = the same size as LUNA. The 7 principal bears + Keen's Mum + Squeeky are fixed on the size chart; this rule sizes anyone new.",
+  "_sizeRule": "ADDITIONAL/GUEST characters are sized by class (Julian, locked 2026-06-22): any ADULT FEMALE = the same size as AIDA; any ADULT MALE = the same size as HOWEY; any CHILD FEMALE = the same size as AMIE; any CHILD MALE = the same size as LUNA. The 7 principal bears + Keen's Mum + Squeaky are fixed on the size chart; this rule sizes anyone new.",
   "sizeClasses": {
     "adult_female": "Aida",
     "adult_male": "Howey",
@@ -819,9 +819,7 @@
       "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_expressions-2.jpeg",
       "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_pro-turn-1.jpeg",
       "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_pro-turn-2.jpeg",
-      "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_char-sheet.jpeg",
-      "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_sheet1-identity.png",
-      "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_sheet2-expression.png"
+      "../cb-seed/assets/characters/Fuzzby/CB_Fuzzby_char-sheet.jpeg"
     ],
     "lora": {
       "triggerWord": "FUZZBYCB",
@@ -921,9 +919,7 @@
       "../cb-seed/assets/CB_Zenny_turnaround.jpeg",
       "../cb-seed/assets/CB_Zenny_expressions.jpeg",
       "../cb-seed/assets/CB_Zenny_fb.png",
-      "../cb-seed/assets/CB_Zenny_front.png",
-      "../cb-seed/assets/characters/Zenny/CB_Zenny_sheet1-identity.png",
-      "../cb-seed/assets/characters/Zenny/CB_Zenny_sheet2-expression.png"
+      "../cb-seed/assets/CB_Zenny_front.png"
     ],
     "lora": {
       "triggerWord": "ZENNYCB",

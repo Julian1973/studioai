@@ -7,10 +7,11 @@ and hash-verified. Editing a copy is drift; this script shouts and fixes.
     python3 tools/sync_canon.py            # regenerate all copies from the source
     python3 tools/sync_canon.py --check    # verify only — exit 1 on any drift (CI / Continuity)
 """
-import sys, os, glob, hashlib
+import sys, os, glob, hashlib, json, shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "shows", "crystal-bears", "canon", "LOCKED_CANON.md")
+POLICY = os.path.join(ROOT, "shows", "crystal-bears", "canon", "lock_policy.json")
 STAMP = ("<!-- AUTO-GENERATED COPY — DO NOT EDIT. The single source of truth is "
          "/shows/crystal-bears/canon/LOCKED_CANON.md. Regenerate: python3 tools/sync_canon.py -->\n\n")
 
@@ -22,6 +23,7 @@ def main():
     check = "--check" in sys.argv
     src = open(SRC, encoding="utf-8").read()
     h = hashlib.sha256(src.encode()).hexdigest()[:12]
+    policy = json.load(open(POLICY, encoding="utf-8"))
     # every crystal-bears-* skill gets a copy, whether or not references/ + the file exist yet
     skill_dirs = sorted(d for d in glob.glob(os.path.join(ROOT, "skills", "crystal-bears-*")) if os.path.isdir(d))
     copies = [os.path.join(d, "references", "CRYSTAL_BEARS_LOCKED_CANON.md") for d in skill_dirs]
@@ -32,11 +34,27 @@ def main():
             if not check:
                 os.makedirs(os.path.dirname(c), exist_ok=True)
                 open(c, "w", encoding="utf-8").write(STAMP + src)
+
+    # Runtime and legacy paths are compatibility mirrors, never independent canon.
+    raw_copies = []
+    for item in policy.get("compatibilityCopies", []):
+        source_rel = policy["sources"][item["source"]]
+        source = os.path.join(ROOT, source_rel)
+        target = os.path.join(ROOT, item["path"])
+        raw_copies.append(target)
+        matches = (os.path.exists(target) and
+                   hashlib.sha256(open(source, "rb").read()).digest() ==
+                   hashlib.sha256(open(target, "rb").read()).digest())
+        if not matches:
+            drift.append(target)
+            if not check:
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                shutil.copy2(source, target)
     if check:
         if drift:
             print("CANON DRIFT (BLOCK):"); [print("  " + d) for d in drift]; sys.exit(1)
-        print(f"canon in sync — {len(copies)} copies match source {h}"); return
-    print(f"canon source {h} -> {len(copies)} copies " + ("regenerated: " + str(len(drift)) if drift else "(all already in sync)"))
+        print(f"canon in sync — {len(copies)} stamped and {len(raw_copies)} raw copies match source {h}"); return
+    print(f"canon source {h} -> {len(copies)} stamped + {len(raw_copies)} raw copies " + ("regenerated: " + str(len(drift)) if drift else "(all already in sync)"))
 
 if __name__ == "__main__":
     main()

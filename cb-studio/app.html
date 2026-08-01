@@ -52,6 +52,7 @@ body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI
 .form input,.form textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit;background:var(--surface2);color:var(--ink)}
 .form textarea{min-height:220px;resize:vertical;font-size:13px;line-height:1.5}
 .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;margin-top:14px}
+.btn:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.35)}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-left:8px}
 .scene{margin-bottom:24px}
 .scenehd{display:flex;align-items:center;gap:10px;margin:0 0 10px}.scenehd b{font-size:14px}.scenehd .ct{font-size:12px;color:var(--hint)}
@@ -170,6 +171,9 @@ img.zoom:hover{filter:brightness(1.08)}
 .scenecard-stages{display:flex;flex-direction:column;gap:7px}
 .stagerow{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12.5px}
 .stagerow-name{color:var(--muted);flex:0 0 auto}
+.canonissue{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,360px);gap:16px;align-items:start;padding:5px 0;font-size:12px;line-height:1.45}
+.canonissue-msg{color:var(--danger);min-width:0;overflow-wrap:anywhere}
+.canonissue-action{color:var(--muted);min-width:0;overflow-wrap:anywhere}
 
 .stbadge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;border-radius:6px;padding:2.5px 8px;white-space:nowrap}
 .badgesub{display:block;font-size:10.5px;color:var(--hint);margin-top:2px;text-align:right}
@@ -319,6 +323,7 @@ img.zoom:hover{filter:brightness(1.08)}
   .toplinks{order:3;width:100%;overflow-x:auto;gap:4px;padding-bottom:2px}
   .topreviewer{margin-left:0!important}
   .tl,.epchip{flex:0 0 auto;white-space:nowrap}
+  .toplinks .tl{padding:6px 8px}
   .shell{display:block;min-height:0}
   .nav{width:100%;display:flex!important;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px}
   .nav a{flex:0 0 auto;white-space:nowrap;margin:0 2px 0 0}
@@ -328,6 +333,7 @@ img.zoom:hover{filter:brightness(1.08)}
   .ccactions{flex-direction:column}
   .ccpanel,.live,.sub,.epbody .l,.projcard-premise{overflow-wrap:anywhere}
   .btn{max-width:100%;white-space:normal}
+  .canonissue{grid-template-columns:minmax(0,1fr);gap:2px;padding:7px 0}
 }
 .proom{max-width:1180px;margin:0 auto}
 .prail{display:flex;align-items:stretch;gap:0;margin:4px 0 22px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
@@ -470,6 +476,10 @@ async function _restoreFromHash(raw){
   CURRENT_PROJECT=proj; CUR=null; SHOTS=[]; page="episodes";
   await boot();
   const pg=params.get('pg')||'episodes', epNum=params.get('ep');
+  if(pg=='characters'){showCharacters();return true;}
+  if(pg=='scenes'){showScenes();return true;}
+  if(pg=='houses'){showHouses();return true;}
+  if(pg=='bible'){showBible();return true;}
   if(pg=='episodes'||!epNum) return true;   // boot() already rendered + synced the hash
   await openEpisode(epNum);
   const scId=params.get('sc');
@@ -739,7 +749,7 @@ async function renderCharacters(){
       <div class="lab" style="font-weight:600;color:var(--brandink)">＋ Add or update a character (element)</div>
       <p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Bring a character through: drop their clean front/turnaround reference and fill the template. Same name updates the existing one.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <input id="ch_name" placeholder="Name (e.g. Squeeky)" ${I}/>
+        <input id="ch_name" placeholder="Name (e.g. Squeaky)" ${I}/>
         <input id="ch_voice" placeholder="ElevenLabs voice ID" ${I}/>
         <input id="ch_size" placeholder="Size (e.g. a small young cub)" ${I}/>
         <input id="ch_sizeref" placeholder="Same size as… (guests only, e.g. Aida)" ${I}/>
@@ -1646,22 +1656,52 @@ function storyIntakePanelHTML(d){
   const skillBadge=d.directorSkillLoaded
     ? `<span style="color:var(--ok)">✓ crystal-bears-director skill loaded</span>`
     : `<span style="color:var(--danger)">✗ Director skill could not be loaded</span>`;
+  const canonReady=!!(d.canonLockCurrent&&d.canonEpisodeReady);
+  const canonIssues=(d.canonBlockers||[]).map(x=>`<div class="canonissue"><span class="canonissue-msg">${_esc(x.message||x.code)}</span><span class="canonissue-action">${_esc(x.action||"")}</span></div>`).join("");
+  const scriptWarnings=(d.canonWarnings||[]).filter(x=>x.code==="SCRIPT_CHARACTER_ALIAS").map(x=>`<div style="font-size:12px;color:var(--warn);margin-top:7px">${_esc(x.message)}</div>`).join("");
+  const canonLine=d.canonLockCurrent
+    ? `<span style="color:${canonReady?'var(--ok)':'var(--danger)'}">${canonReady?'✓ Episode canon ready':'✗ Episode canon blocked'}</span> · lock <code>${_esc((d.canonLockDigest||"").slice(0,12))}</code>`
+    : `<span style="color:var(--danger)">✗ Canon lock missing or stale</span>`;
+  if(!canonReady){
+    return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
+      <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
+      <div class="live" style="margin:10px 0">${canonLine}</div>
+      ${canonIssues||`<div style="color:var(--danger)">Canon must be reviewed and explicitly locked before Story &amp; Direction can run.</div>`}
+      ${scriptWarnings}
+      ${d.hasCandidate?`<p class="sub" style="color:var(--warn);margin-top:10px">The earlier candidate is preserved as evidence, but it cannot be approved against these inputs.</p>`:""}
+      <div class="ccactions"><button class="btn" disabled>Run Story &amp; Direction</button>
+      ${d.hasCandidate?`<button class="btn ghost" onclick="storyIntakeDecide('reject')">Archive the earlier candidate</button>`:""}</div>
+      </div>`;
+  }
   if(d.hasCanonicalPackage&&d.canonicalCurrent){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
+      <div class="live" style="color:var(--ok)">${canonLine}</div>
       <div class="live" style="color:var(--ok)">✓ Approved — <code>${_esc(d.canonicalPackage)}</code> is the
       episode's canonical input. The scene/storyboard process is unlocked.</div></div>`;
   }
   const stalePackage=d.hasCanonicalPackage&&!d.canonicalCurrent
-    ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it is not derived from this immutable script version and cannot unlock production.</div>`:"";
+    ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it does not match this immutable script and exact canon lock.</div>`:"";
   if(!d.hasCandidate){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
+      <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
       ${stalePackage}
       <p class="sub">Nothing has been generated from this script yet. Uploading and saving a
       script never runs anything automatically — this is the first, explicit step.</p>
       ${jobBanner}
       <button class="btn" ${job?"disabled":""} onclick="storyIntakeRun()">Run Story &amp; Direction — read the script, propose the episode</button>
+      </div>`;
+  }
+  if(!d.candidateCurrent){
+    return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
+      <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
+      <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
+      ${stalePackage}
+      <div class="live" style="color:var(--warn);margin:10px 0">This candidate is preserved, but it was not authored from the active script and exact current story-canon signature.</div>
+      ${jobBanner}
+      <div class="ccactions"><button class="btn" ${job?"disabled":""} onclick="storyIntakeRun()">Run Story &amp; Direction again</button>
+      <button class="btn ghost" onclick="storyIntakeDecide('reject')">Archive stale candidate</button></div>
       </div>`;
   }
   const c=d.candidate, ev=c.episodeVision||{}, cov=c.dialogueCoverage||{}, srcCov=c.sourceEventCoverage||{};
@@ -1677,6 +1717,7 @@ function storyIntakePanelHTML(d){
   const approved=c.approvalState=="approved";
   return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
     <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
+    <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
     ${stalePackage}
     <div style="margin:10px 0"><b>Proposed episode title:</b> ${_esc(c.title)}<br/>
       <b>Logline:</b> ${_esc(c.logline)}<br/>
@@ -3228,11 +3269,33 @@ function gateLog(job){
 }
 async function renderBible(){
   const view=document.getElementById("view");
-  let C={};try{C=await fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.json());}catch(e){}
+  let C={},L={current:false,episodeReady:false,blockers:[],episodeBlockers:[],warnings:[],characters:[]};
+  try{[C,L]=await Promise.all([
+    fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.json()),
+    fetch(BASE+"/api/canon-lock?episode=Ep1",{cache:"no-store"}).then(r=>r.json())
+  ]);}catch(e){}
   const chars=Object.entries(C).filter(([k,v])=>k[0]!=="_"&&v&&typeof v==="object"&&!Array.isArray(v)&&k!=="sizeClasses");
+  const lockChars=Object.fromEntries((L.characters||[]).map(x=>[x.name,x]));
   const url=p=>p?BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now():"";
-  const chip=([name,c])=>`<div onclick='openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})' style="cursor:pointer;width:118px;text-align:center" title="Open ${name}'s bible page"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="font-size:12px;font-weight:600;margin-top:4px">${name}</div>${(c.bible&&c.bible.pillar)?`<div style="font-size:10px;color:var(--hint);line-height:1.3">${c.bible.pillar}</div>`:''}</div>`;
+  const chip=([name,c])=>{const row=lockChars[name]||{},ready=!!row.productionReady;return `<div onclick='openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})' style="cursor:pointer;width:118px;text-align:center" title="Open ${name}'s bible page"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;border:2px solid ${ready?'var(--ok)':'var(--warn)'}">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="font-size:12px;font-weight:600;margin-top:4px">${_esc(name)}</div><div style="font-size:10px;color:${ready?'var(--ok)':'var(--warn)'}">${ready?'Locked':_esc(row.status||'Incomplete')}</div>${(c.bible&&c.bible.pillar)?`<div style="font-size:10px;color:var(--hint);line-height:1.3">${_esc(c.bible.pillar)}</div>`:''}</div>`};
+  const readyCount=(L.characters||[]).filter(x=>x.productionReady).length;
+  const stubs=(L.characters||[]).filter(x=>x.status==="stub").map(x=>x.name);
+  const issues=[...(L.blockers||[]),...(L.episodeBlockers||[])];
+  const issueRows=issues.map(x=>`<div class="canonissue"><span class="canonissue-msg">${_esc(x.message||x.code)}</span><span class="canonissue-action">${_esc(x.action||"")}</span></div>`).join("");
+  const aliasWarnings=(L.warnings||[]).filter(x=>x.code==="SCRIPT_CHARACTER_ALIAS");
+  const locationPending=(L.warnings||[]).filter(x=>x.code==="LOCATION_VISUAL_MASTER_PENDING").length;
+  const creativePending=(L.warnings||[]).filter(x=>x.code==="CANON_CREATIVE_GAP"&&!String(x.message||"").includes("optional performance-overlay"));
+  const lockColour=L.current?(L.episodeReady?'var(--ok)':'var(--danger)'):'var(--danger)';
+  const lockTitle=L.current?(L.episodeReady?'Canon lock current · Episode 1 ready':'Canon lock current · Episode 1 blocked'):'Canon lock missing or stale';
+  const lockPanel=`<div style="border-top:3px solid ${lockColour};border-bottom:1px solid var(--line);padding:12px 0 14px;margin:14px 0 18px">
+    <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><div style="font-weight:700;color:${lockColour}">${lockTitle}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${L.sourceCount||0} signed sources · ${L.assetCount||0} signed assets · ${readyCount} production-ready characters${stubs.length?` · ${_esc(stubs.join(", "))} stub`:''}</div></div><code style="font-size:11px">${_esc((L.manifestDigest||"").slice(0,12))}</code></div>
+    ${issueRows?`<div style="margin-top:10px">${issueRows}</div>`:`<div style="font-size:12px;color:var(--ok);margin-top:8px">All Episode 1 cast, script and canon checks pass.</div>`}
+    ${aliasWarnings.map(x=>`<div style="font-size:12px;color:var(--warn);margin-top:7px">${_esc(x.message)}</div>`).join("")}
+    ${creativePending.map(x=>`<div style="font-size:12px;color:var(--warn);margin-top:7px">${_esc(x.character+": "+x.message)}</div>`).join("")}
+    ${locationPending?`<div style="font-size:12px;color:var(--muted);margin-top:7px">${locationPending} scene visual masters will be locked through Scene Look approval.</div>`:""}
+  </div>`;
   view.innerHTML=`<h1 class="h1">Show Bible</h1><p class="sub">Shared canon across all Crystal Bears episodes. Each character has their own page — click to open their full bible.</p>
+    ${lockPanel}
     <div class="mc"><div class="lab" style="font-weight:600;color:var(--brandink)">Characters (${chars.length}) — click for the full bible</div><div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">${chars.map(chip).join("")}</div></div>
     <div id="bb" class="bible" style="margin-top:16px">Loading canon…</div>`;
   const bibleFile=(CURRENT_PROJECT&&CURRENT_PROJECT.showBibleFile)||"CRYSTAL_BEARS_LOCKED_CANON.md";

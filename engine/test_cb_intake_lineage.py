@@ -9,6 +9,16 @@ from cb_scripts import ScriptStore
 
 SCRIPT_ONE = "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello.\n"
 SCRIPT_TWO = "INT. CRYSTAL COVE - DAY 1\n\nKEEN\nHello again.\n"
+CANON_DIGEST = "c" * 64
+
+
+def _canon_status(episode="Ep1", cast=None, root=None):
+    return {
+        "current": True, "episodeReady": True,
+        "manifestDigest": "m" * 64,
+        "profileDigests": {"story": CANON_DIGEST, "storyboard": "d" * 64},
+        "blockers": [], "episodeBlockers": [], "warnings": [],
+    }
 
 
 def _workspace(tmp_path, monkeypatch, text=SCRIPT_ONE):
@@ -33,6 +43,10 @@ def _workspace(tmp_path, monkeypatch, text=SCRIPT_ONE):
     monkeypatch.setattr(cb_intake, "STUDIO_SCRIPTS", store.studio_root)
     monkeypatch.setattr(cb_intake, "SCRIPT_STORE", store)
     monkeypatch.setattr(cb_intake, "ARCHIVE_DIR", out / "archive" / "story_intake_rejected")
+    monkeypatch.setattr(cb_intake.cb_canon, "status", _canon_status)
+    monkeypatch.setattr(cb_intake.cb_canon, "require_locked", _canon_status)
+    monkeypatch.setattr(cb_intake.cb_canon, "source_hashes",
+                        lambda profile, root=None: {"showBible": "a" * 64})
     return store, current, episodes
 
 
@@ -65,6 +79,9 @@ def _candidate(current, text=SCRIPT_ONE):
         "beats": [beat],
         "approvalState": "awaiting-human-approval",
     }
+    candidate["inputSignature"] = cb_lineage.dependency_signature(
+        "story-intake", {"scriptVersionId": current["scriptVersionId"],
+                         "canonProfileDigest": CANON_DIGEST})
     candidate["sourceContract"] = cb_lineage.beat_package_source_contract(
         current["scriptVersionId"], candidate["beats"])
     return candidate
@@ -98,7 +115,7 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     assert pkg["sourceScript"]["scriptVersionId"] == current["scriptVersionId"]
     assert pkg["contentSignature"] == cb_lineage.beat_package_signature(pkg)
     expected_inputs = cb_lineage.episode_vision_inputs(
-        current["scriptVersionId"], pkg["contentSignature"])
+        current["scriptVersionId"], pkg["contentSignature"], CANON_DIGEST)
     assert cb_lineage.signature_matches(
         vision["inputSignature"], "episode-vision", expected_inputs)
 
@@ -140,3 +157,8 @@ def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
     assert roster["hasPackage"] is False
     assert roster["scenes"] == []
     assert roster["reason"] == "canonical-beat-package-stale"
+
+
+def test_legacy_lineage_cannot_manufacture_canon_provenance():
+    with pytest.raises(cb_intake.Refused, match="cannot be retroactively signed"):
+        cb_intake.migrate_legacy_lineage("Ep1", dry_run=True, log=lambda *_: None)

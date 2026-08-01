@@ -1,7 +1,23 @@
 import json
 import pathlib
 
+import pytest
+
+import cb_safety
 import cb_render as render
+
+
+TEST_CANON_DIGEST = "c" * 64
+
+
+@pytest.fixture(autouse=True)
+def isolated_canon(monkeypatch):
+    monkeypatch.setattr(cb_safety.cb_canon, "require_locked", lambda *args, **kwargs: {
+        "manifestDigest": "m" * 64,
+        "profileDigests": {name: TEST_CANON_DIGEST for name in (
+            "story", "storyboard", "look", "cinematography", "voice",
+            "animation", "review", "post")},
+    })
 
 
 def _pkg(tmp_path):
@@ -31,7 +47,8 @@ def _pkg(tmp_path):
             "keyframeApproval": {
                 "approved": True,
                 "path": str(frame),
-                "inputSignature": {"cardHash": "card-v1"},
+                "inputSignature": {"cardHash": "card-v1",
+                                   "canonProfileDigest": TEST_CANON_DIGEST},
                 "contentHash": render._sha256_file(frame),
                 "packageRevision": 1,
             },
@@ -90,7 +107,7 @@ def test_department_approval_uses_direct_inputs_not_package_revision(tmp_path, m
 def test_keyframe_approval_survives_revision_but_not_input_or_file_change(
         tmp_path, monkeypatch):
     package, shot, frame = _pkg(tmp_path)
-    current = {"cardHash": "card-v1"}
+    current = {"cardHash": "card-v1", "canonProfileDigest": TEST_CANON_DIGEST}
     monkeypatch.setattr(
         render, "_keyframe_input_signature",
         lambda *args, **kwargs: dict(current))
@@ -111,7 +128,9 @@ def test_animation_approval_carries_forward_and_tracks_its_own_graph(
         tmp_path, monkeypatch):
     package, shot, _ = _pkg(tmp_path)
     monkeypatch.setattr(render, "_keyframe_input_signature",
-                        lambda *args, **kwargs: {"cardHash": "card-v1"})
+                        lambda *args, **kwargs: {
+                            "cardHash": "card-v1",
+                            "canonProfileDigest": TEST_CANON_DIGEST})
     _approve_department(package, shot["shotId"], "animation")
 
     take = tmp_path / "take.mp4"

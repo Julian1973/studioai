@@ -32,6 +32,35 @@ import pytest
 
 import cb_engine as E
 import cb_render as R
+import cb_canon
+
+
+TEST_CANON_DIGESTS = {name: (name[0] * 64) for name in (
+    "story", "storyboard", "look", "cinematography", "voice",
+    "animation", "review", "post")}
+
+
+def _test_canon_status(episode=None, cast=None, root=None):
+    return {
+        "current": True, "episodeReady": bool(episode),
+        "manifestDigest": "m" * 64, "profileDigests": TEST_CANON_DIGESTS,
+        "blockers": [], "episodeBlockers": [], "warnings": [],
+    }
+
+
+@pytest.fixture(autouse=True)
+def isolated_canon(monkeypatch):
+    monkeypatch.setattr(cb_canon, "status", _test_canon_status)
+    monkeypatch.setattr(cb_canon, "require_locked", _test_canon_status)
+    monkeypatch.setattr(cb_canon, "profile_digest",
+                        lambda profile, **kwargs: TEST_CANON_DIGESTS[profile])
+    monkeypatch.setattr(cb_canon, "source_hashes",
+                        lambda profile, root=None: {"fixture": TEST_CANON_DIGESTS[profile]})
+    monkeypatch.setattr(cb_canon, "story_context", lambda cast, episode, root=None: {
+        "canonProfile": "story",
+        "canonProfileDigest": TEST_CANON_DIGESTS["story"],
+        "sourceHashes": {"fixture": TEST_CANON_DIGESTS["story"]},
+    })
 
 
 # ── the synthetic scene: opener w/ dialogue, relay w/ dialogue, silent relay ────────────
@@ -735,8 +764,9 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
              "Warm pollen and springy leaves.", "Wing hum and leaf twang.",
              "The leaf rebounds.", "Fuzzby stays airborne.", "Warm amusement."))}
 
-    def prepare_story(events, cast_by_scene, log=print):
+    def prepare_story(events, cast_by_scene, canon_context, log=print):
         assert [event["type"] for event in events] == ["action", "dialogue"]
+        assert canon_context["canonProfileDigest"] == TEST_CANON_DIGESTS["story"]
         return R.cb_departments.StoryIntakeDirection.model_validate({
             "title": "Script To Master", "logline": "A boast meets a springy leaf.",
             "leadBear": "Fuzzby", "episodeVision": vision,
@@ -796,11 +826,18 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     }
     storyboard["inputSignature"] = cb_lineage.dependency_signature(
         "scene-storyboard", {
-            "scriptVersionId": current["scriptVersionId"],
-            "beatPackageDigest": beat_package["contentSignature"]["digest"],
-            "episodeVisionDigest": "test-approved-vision", "sceneNumber": "1",
-            "ambitionBrief": None, "canonSources": {},
-        })
+                "scriptVersionId": current["scriptVersionId"],
+                "beatPackageDigest": beat_package["contentSignature"]["digest"],
+                "episodeVisionDigest": "test-approved-vision", "sceneNumber": "1",
+                "ambitionBrief": None,
+                "canonProfileDigest": TEST_CANON_DIGESTS["storyboard"],
+                "canonSources": {},
+            })
+    storyboard["canonLock"] = {
+        "manifestDigest": "m" * 64,
+        "profile": "storyboard",
+        "profileDigest": TEST_CANON_DIGESTS["storyboard"],
+    }
     _refresh_dialogue_contract(storyboard)
     storyboard_path = creative / "Ep1_scene1_storyboard.json"
     storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False))

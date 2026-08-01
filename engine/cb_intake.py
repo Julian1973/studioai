@@ -43,6 +43,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 import cb_departments
+import cb_canon
 import cb_lineage
 import cb_scripts
 
@@ -193,10 +194,25 @@ def _load_roster():
             if isinstance(v, dict) and not k.startswith("_") and k != "sizeClasses"]
 
 
-def _cue_regex(names):
-    alts = sorted({_norm_apos(n).upper() for n in names} | {"ALL"}, key=len, reverse=True)
+def _character_aliases():
+    try:
+        return cb_canon.load_policy(ROOT).get("characterAliases") or {}
+    except cb_canon.CanonLockError:
+        return {}
+
+
+def _cue_regex(names, aliases=None):
+    aliases = aliases or {}
+    alts = sorted({_norm_apos(n).upper() for n in names} |
+                  {_norm_apos(n).upper() for n in aliases} | {"ALL"},
+                  key=len, reverse=True)
     return re.compile(r"^\s*(?:\d+\s*)?(" + "|".join(re.escape(a) for a in alts) +
                        r")\s*(?:\(CONT'D\))?\s*$", re.IGNORECASE)
+
+
+_NUMBERED_CUE_RE = re.compile(
+    r"^\s*\d+\s+([A-Z][A-Z'’]*(?:\s+[A-Z][A-Z'’]*){0,3})"
+    r"(?:\s+\(CONT'D\))?\s*$")
 
 
 def parse_script(text, roster=None, log=print):
@@ -215,8 +231,11 @@ def parse_script(text, roster=None, log=print):
     `events` while it's still None — front matter is collected separately (frontMatter,
     informational only) and logged, never routed into scene/beat data."""
     roster = roster or _load_roster()
-    cue_re = _cue_regex(roster)
+    aliases = _character_aliases()
+    cue_re = _cue_regex(roster, aliases)
     name_by_upper = {_norm_apos(n).upper(): n for n in roster}
+    name_by_upper.update({_norm_apos(alias).upper(): canonical
+                          for alias, canonical in aliases.items()})
     name_by_upper["ALL"] = "ALL"
     # A KNOWN, NARROW screenplay-formatting quirk in this exact script (previously found
     # and fixed the identical way in the now-retired cb_script.py, see CLAUDE.md's own
@@ -307,6 +326,12 @@ def parse_script(text, roster=None, log=print):
             events.append({"i": len(events), "scene": cur_scene, "type": "dialogue",
                            "speaker": speaker, "text": dlg})
             continue
+        unknown_cue = _NUMBERED_CUE_RE.match(_norm_apos(raw).rstrip())
+        if unknown_cue:
+            raise Refused(
+                "mechanical script parse found an unknown numbered character cue: "
+                f"{unknown_cue.group(1)}. Add an explicit canon alias or correct the script; "
+                "refusing to silently turn dialogue into action text")
         action_buf.append(raw)
         li += 1
     flush_action()
@@ -329,6 +354,8 @@ def parse_script(text, roster=None, log=print):
 def cast_per_scene(parsed, roster=None):
     roster = roster or _load_roster()
     upper_to_name = {_norm_apos(n).upper(): n for n in roster}
+    upper_to_name.update({_norm_apos(alias).upper(): canonical
+                          for alias, canonical in _character_aliases().items()})
     by_scene = {}
     for sc in parsed["scenes"]:
         by_scene[sc["sceneNumber"]] = set()
@@ -485,12 +512,30 @@ def source_event_coverage_report(events, beats):
 # ── prepare / status / decide — the visible candidate lifecycle ────────────────────────
 def prepare_intake(episode="Ep1", log=print):
     current = script_record_for(episode)
+    spath = ROOT / current["contentPath"]
+    text = spath.read_text(encoding="utf-8")
+    roster = _load_roster()
+    parsed = parse_script(text, roster, log=log)
+    _annotate_source_events(parsed["events"], current["scriptVersionId"])
+    cast_by_scene = cast_per_scene(parsed, roster)
+    episode_cast = sorted({name for names in cast_by_scene.values() for name in names})
+    try:
+        canon_lock = cb_canon.require_locked(episode, episode_cast, root=ROOT)
+        canon_context = cb_canon.story_context(episode_cast, episode, root=ROOT)
+    except cb_canon.CanonLockError as exc:
+        raise Refused(str(exc)) from exc
+    story_inputs = {
+        "scriptVersionId": current["scriptVersionId"],
+        "canonProfileDigest": canon_lock["profileDigests"]["story"],
+    }
+
     pending = candidate_path(episode)
     if pending.exists():
         prior = json.loads(pending.read_text())
-        if prior.get("scriptVersionId") == current["scriptVersionId"]:
+        if cb_lineage.signature_matches(
+                prior.get("inputSignature"), "story-intake", story_inputs):
             raise Refused(f"REFUSED — {episode} already has a story-intake candidate "
-                          "for this script version awaiting a decision")
+                          "for this exact script and canon lock awaiting a decision")
         archive = OUT / "archive" / "story_intake_superseded"
         archive.mkdir(parents=True, exist_ok=True)
         stamp = _now().replace(":", "").replace("-", "")
@@ -498,21 +543,17 @@ def prepare_intake(episode="Ep1", log=print):
         shutil.move(str(pending), archive / f"{episode}_{old_version}_{stamp}.json")
     for existing_path in canonical_package_glob(episode):
         existing = json.loads(existing_path.read_text())
-        if _package_script_version(existing) == current["scriptVersionId"]:
+        if cb_lineage.signature_matches(
+                existing.get("inputSignature"), "beat-package-input", story_inputs):
             raise Refused(f"REFUSED — {episode} already has a canonical beat package for "
-                          f"{current['scriptVersionId']}; upload a new script version to rebuild")
-    spath = ROOT / current["contentPath"]
-    text = spath.read_text(encoding="utf-8")
-    roster = _load_roster()
-    parsed = parse_script(text, roster, log=log)
-    _annotate_source_events(parsed["events"], current["scriptVersionId"])
-    cast_by_scene = cast_per_scene(parsed, roster)
+                          "this exact script and canon lock; change a versioned input to rebuild")
 
     log(f"MECHANICAL PARSE — {len(parsed['scenes'])} scene(s), "
         f"{parsed['dialogueCount']} locked dialogue line(s), "
         f"{len(parsed['events'])} event(s) total")
 
-    direction = cb_departments.prepare_story(parsed["events"], cast_by_scene, log=log)
+    direction = cb_departments.prepare_story(
+        parsed["events"], cast_by_scene, canon_context, log=log)
 
     ranged = _repair_beat_splits(direction.beats, parsed)
     scene_by_num = {s["sceneNumber"]: s for s in parsed["scenes"]}
@@ -569,8 +610,13 @@ def prepare_intake(episode="Ep1", log=print):
         "scriptSha256": current["sha256"],
         "sourceScript": _script_ref(current),
         "scriptMd5": _md5_text(text),
-        "inputSignature": cb_lineage.dependency_signature(
-            "story-intake", {"scriptVersionId": current["scriptVersionId"]}),
+        "inputSignature": cb_lineage.dependency_signature("story-intake", story_inputs),
+        "canonLock": {
+            "manifestDigest": canon_lock["manifestDigest"],
+            "profile": "story",
+            "profileDigest": canon_lock["profileDigests"]["story"],
+            "sourceHashes": canon_context["sourceHashes"],
+        },
         "director": {"skill": "crystal-bears-director",
                     "loaded": bool(cb_departments.load_runtime_skill("director"))},
         "title": direction.title, "logline": direction.logline,
@@ -602,7 +648,11 @@ def intake_status(episode="Ep1"):
           "canonicalSourceContractCurrent": None,
           "canonicalContentSignatureCurrent": None,
           "canonicalBeatPackageDigest": None,
-          "canonicalSourceContractIssues": []}
+          "canonicalSourceContractIssues": [],
+          "canonLockCurrent": False, "canonEpisodeReady": False,
+          "canonLockDigest": None, "canonProfileDigest": None,
+          "canonProfileDigests": {},
+          "canonBlockers": [], "canonWarnings": []}
     try:
         out["directorSkillLoaded"] = bool(cb_departments.load_runtime_skill("director"))
     except Exception:
@@ -615,16 +665,32 @@ def intake_status(episode="Ep1"):
         out["scriptVersionId"] = current["scriptVersionId"]
     except Refused:
         pass
+    try:
+        canon = cb_canon.status(episode, root=ROOT)
+        out.update({
+            "canonLockCurrent": bool(canon.get("current")),
+            "canonEpisodeReady": bool(canon.get("episodeReady")),
+            "canonLockDigest": canon.get("manifestDigest"),
+            "canonProfileDigest": (canon.get("profileDigests") or {}).get("story"),
+            "canonProfileDigests": canon.get("profileDigests") or {},
+            "canonBlockers": list(canon.get("blockers") or []) +
+                             list(canon.get("episodeBlockers") or []),
+            "canonWarnings": list(canon.get("warnings") or []),
+        })
+    except Exception as exc:
+        out["canonBlockers"] = [{"code": "CANON_STATUS_ERROR", "message": str(exc)}]
+    story_inputs = ({
+        "scriptVersionId": out["scriptVersionId"],
+        "canonProfileDigest": out["canonProfileDigest"],
+    } if out.get("scriptVersionId") and out.get("canonProfileDigest") else None)
     cpath = candidate_path(episode)
     if cpath.exists():
         out["hasCandidate"] = True
         out["candidate"] = json.loads(cpath.read_text())
-        candidate_version = out["candidate"].get("scriptVersionId")
-        if candidate_version is None and out["candidate"].get("scriptMd5") and out.get("hasScript"):
-            candidate_version = (out["scriptVersionId"] if
-                                 out["candidate"]["scriptMd5"] == _md5_text(spath.read_text(encoding="utf-8"))
-                                 else None)
-        out["candidateCurrent"] = candidate_version == out.get("scriptVersionId")
+        out["candidateCurrent"] = bool(
+            story_inputs and out["canonLockCurrent"] and out["canonEpisodeReady"] and
+            cb_lineage.signature_matches(
+                out["candidate"].get("inputSignature"), "story-intake", story_inputs))
     pkgs = canonical_package_glob(episode)
     if pkgs:
         pkg = json.loads(pkgs[-1].read_text())
@@ -636,7 +702,9 @@ def intake_status(episode="Ep1"):
             pkg.get("contentSignature") == expected_content)
         out["canonicalBeatPackageDigest"] = expected_content["digest"]
         out["canonicalCurrent"] = bool(
-            _package_script_version(pkg) == out.get("scriptVersionId") and
+            story_inputs and out["canonLockCurrent"] and out["canonEpisodeReady"] and
+            cb_lineage.signature_matches(
+                pkg.get("inputSignature"), "beat-package-input", story_inputs) and
             source_report["ok"] and pkg.get("contentSignature") == expected_content)
     return out
 
@@ -668,28 +736,27 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
 
     # verdict == "approve" — THE ONLY WRITE OF THE CANONICAL ARTIFACTS
     current = script_record_for(episode)
-    candidate_version = candidate.get("scriptVersionId")
-    if candidate_version is None:
-        # Compatibility for a candidate created immediately before immutable versions were
-        # introduced. Byte equality is required before adding the missing provenance.
-        current_text = (ROOT / current["contentPath"]).read_text(encoding="utf-8")
-        if candidate.get("scriptMd5") == _md5_text(current_text):
-            candidate_version = current["scriptVersionId"]
-            candidate["scriptVersionId"] = candidate_version
-            candidate["scriptSha256"] = current["sha256"]
-            candidate["sourceScript"] = _script_ref(current)
-            candidate["inputSignature"] = cb_lineage.dependency_signature(
-                "story-intake", {"scriptVersionId": candidate_version})
-    if candidate_version != current["scriptVersionId"]:
-        raise Refused(
-            f"REFUSED — this intake candidate was generated from {candidate_version or 'an unknown script'}, "
-            f"but {current['scriptVersionId']} is active; run Story & Direction again")
-
     # Reparse the immutable script at the approval boundary. A hand-edited candidate cannot
     # change, drop, duplicate or reorder even a non-dialogue event and still be approved.
     current_text = (ROOT / current["contentPath"]).read_text(encoding="utf-8")
-    parsed = parse_script(current_text, _load_roster(), log=lambda *a, **k: None)
+    roster = _load_roster()
+    parsed = parse_script(current_text, roster, log=lambda *a, **k: None)
     _annotate_source_events(parsed["events"], current["scriptVersionId"])
+    cast_by_scene = cast_per_scene(parsed, roster)
+    episode_cast = sorted({name for names in cast_by_scene.values() for name in names})
+    try:
+        canon_lock = cb_canon.require_locked(episode, episode_cast, root=ROOT)
+    except cb_canon.CanonLockError as exc:
+        raise Refused(str(exc)) from exc
+    story_inputs = {
+        "scriptVersionId": current["scriptVersionId"],
+        "canonProfileDigest": canon_lock["profileDigests"]["story"],
+    }
+    if not cb_lineage.signature_matches(
+            candidate.get("inputSignature"), "story-intake", story_inputs):
+        raise Refused(
+            "REFUSED — this intake candidate was not generated from the active immutable "
+            "script and exact current story-canon lock; run Story & Direction again")
     event_coverage = source_event_coverage_report(parsed["events"], candidate.get("beats") or [])
     dialogue_coverage = dialogue_coverage_report(parsed["events"], candidate.get("beats") or [])
     expected_contract = cb_lineage.beat_package_source_contract(
@@ -704,9 +771,10 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
     existing_paths = canonical_package_glob(episode)
     for existing_path in existing_paths:
         existing = json.loads(existing_path.read_text())
-        if _package_script_version(existing) == current["scriptVersionId"]:
+        if cb_lineage.signature_matches(
+                existing.get("inputSignature"), "beat-package-input", story_inputs):
             raise Refused(f"REFUSED — {episode} already has a canonical beat package for "
-                          f"{current['scriptVersionId']}; refusing to overwrite it")
+                          "this exact script and canon lock; refusing to overwrite it")
     slug = re.sub(r"[^A-Za-z0-9]+", "_", candidate["title"]).strip("_") or "episode"
     pkg = {
         "title": candidate["title"], "episode": int(re.sub(r"\D", "", episode) or "0"),
@@ -714,8 +782,13 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
         "format": "11-min episode", "unit": "beat",
         "sourceScript": _script_ref(current),
         "sourceContract": expected_contract,
-        "inputSignature": cb_lineage.dependency_signature(
-            "beat-package-input", {"scriptVersionId": current["scriptVersionId"]}),
+        "inputSignature": cb_lineage.dependency_signature("beat-package-input", story_inputs),
+        "canonLock": {
+            "manifestDigest": canon_lock["manifestDigest"],
+            "profile": "story",
+            "profileDigest": canon_lock["profileDigests"]["story"],
+            "sourceHashes": cb_canon.source_hashes("story", ROOT),
+        },
         "beats": candidate["beats"],
     }
     pkg["contentSignature"] = cb_lineage.beat_package_signature(pkg)
@@ -732,13 +805,15 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
     json.dump(pkg, open(pkg_path, "w"), indent=1, ensure_ascii=False)
 
     vision_inputs = cb_lineage.episode_vision_inputs(
-        current["scriptVersionId"], pkg["contentSignature"])
+        current["scriptVersionId"], pkg["contentSignature"],
+        canon_lock["profileDigests"]["story"])
     vision_pkg = {"episodeId": episode, "title": candidate["title"],
                  "sourceScriptVersion": _md5_text(json.dumps(pkg, sort_keys=True)),
                  "sourceScript": _script_ref(current),
                  "sourceBeatPackageSignature": pkg["contentSignature"],
                  "inputSignature": cb_lineage.dependency_signature(
                      "episode-vision", vision_inputs),
+                 "canonLock": pkg["canonLock"],
                  "canonVersion": "1.0", **candidate["episodeVision"],
                  "showrunnerJudgement": "", "approvalState": "approved",
                  "provenance": {"role": "director-intake", "at": _now(),
@@ -890,80 +965,16 @@ def migrate_source_occurrence_contract(episode="Ep1", reviewed_by="Julian",
 
 
 def migrate_legacy_lineage(episode="Ep1", reviewed_by="Julian", dry_run=True, log=print):
-    """Backfill only provenance that can be proven from byte-identical legacy evidence.
+    """Refuse retroactive creative provenance after the canon-lock cutover.
 
-    This intentionally does not bless an old episode vision or storyboard: their exact beat-
-    package dependency cannot be reconstructed after the fact. They remain rebuild-required.
+    Byte identity can prove which script a legacy artifact came from, but it cannot prove
+    that Story & Direction saw the current show bible, character roster, performance law,
+    or taste references. Those artifacts must be rebuilt through the signed intake route.
     """
-    current = script_record_for(episode)
-    current_text = (ROOT / current["contentPath"]).read_text(encoding="utf-8")
-    cpath = candidate_path(episode)
-    if not cpath.exists():
-        raise Refused("REFUSED — no intake candidate exists to prove the legacy package's script source")
-    candidate = json.loads(cpath.read_text())
-    if candidate.get("scriptMd5") != _md5_text(current_text):
-        raise Refused("REFUSED — legacy intake candidate bytes do not match the active script")
-    if candidate.get("approvalState") != "approved":
-        raise Refused("REFUSED — legacy intake candidate was not human-approved")
-
-    changed = []
-    candidate_new = json.loads(json.dumps(candidate))
-    if candidate_new.get("scriptVersionId") is None:
-        candidate_new.update({
-            "scriptPath": current["contentPath"],
-            "scriptVersionId": current["scriptVersionId"],
-            "scriptSha256": current["sha256"],
-            "sourceScript": _script_ref(current),
-            "inputSignature": cb_lineage.dependency_signature(
-                "story-intake", {"scriptVersionId": current["scriptVersionId"]}),
-            "lineageMigration": {"status": "byte-verified", "at": _now(),
-                                 "reviewedBy": reviewed_by},
-        })
-        changed.append((cpath, candidate_new))
-
-    for pkg_path in canonical_package_glob(episode):
-        pkg = json.loads(pkg_path.read_text())
-        existing_version = _package_script_version(pkg)
-        if existing_version and existing_version != current["scriptVersionId"]:
-            raise Refused(f"REFUSED — {pkg_path.name} already belongs to {existing_version}")
-        expected_input = cb_lineage.dependency_signature(
-            "beat-package-input", {"scriptVersionId": current["scriptVersionId"]})
-        expected_content = cb_lineage.beat_package_signature(pkg)
-        if (pkg.get("sourceScript") == _script_ref(current) and
-                pkg.get("inputSignature") == expected_input and
-                pkg.get("contentSignature") == expected_content):
-            continue
-        pkg_new = json.loads(json.dumps(pkg))
-        pkg_new.update({
-            "sourceScript": _script_ref(current),
-            "inputSignature": expected_input,
-            "contentSignature": expected_content,
-            "lineageMigration": {
-                "status": "source-script-byte-verified",
-                "at": _now(),
-                "reviewedBy": reviewed_by,
-                "note": "Existing human-approved beat adaptation retained exactly; only script provenance added.",
-            },
-        })
-        changed.append((pkg_path, pkg_new))
-
-    if dry_run:
-        log(f"LINEAGE MIGRATION DRY RUN — {episode}: {len(changed)} file(s) would be backfilled")
-        return {"episode": episode, "changed": [str(p.relative_to(ROOT)) for p, _ in changed],
-                "dryRun": True}
-
-    stamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S%f")
-    backup_dir = OUT / "archive" / "lineage_migration" / f"{episode}_{stamp}"
-    backup_dir.mkdir(parents=True, exist_ok=False)
-    for path, value in changed:
-        shutil.copy2(path, backup_dir / path.name)
-        tmp = path.with_suffix(path.suffix + ".lineage.tmp")
-        tmp.write_text(json.dumps(value, indent=1, ensure_ascii=False) + "\n")
-        tmp.replace(path)
-    log(f"LINEAGE MIGRATION — {episode}: {len(changed)} file(s) backfilled; originals -> "
-        f"{backup_dir.relative_to(ROOT)}")
-    return {"episode": episode, "changed": [str(p.relative_to(ROOT)) for p, _ in changed],
-            "backup": str(backup_dir.relative_to(ROOT)), "dryRun": False}
+    raise Refused(
+        f"REFUSED — {episode} legacy creative lineage cannot be retroactively signed after "
+        "the canon-lock cutover. Archive the old artifacts, then run Story & Direction "
+        "again from the active immutable script.")
 
 
 if __name__ == "__main__":

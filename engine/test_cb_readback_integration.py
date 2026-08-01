@@ -1,9 +1,16 @@
 import cb_readback
 import cb_render
+import cb_safety
 
 
 def test_prompt_readback_uses_current_approved_prompt_and_never_generates(
         monkeypatch, tmp_path):
+    monkeypatch.setattr(cb_safety.cb_canon, "require_locked", lambda *args, **kwargs: {
+        "manifestDigest": "m" * 64,
+        "profileDigests": {name: "c" * 64 for name in (
+            "story", "storyboard", "look", "cinematography", "voice",
+            "animation", "review", "post")},
+    })
     frame = tmp_path / "opening.png"
     frame.write_bytes(b"approved-opening-frame")
     approved_prompt = "Fuzzby rebounds from the leaf and recovers his hover."

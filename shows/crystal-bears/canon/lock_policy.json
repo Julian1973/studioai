@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "showId": "crystal-bears",
+  "showName": "Crystal Bears",
+  "sources": {
+    "showBible": "shows/crystal-bears/canon/LOCKED_CANON.md",
+    "studioBible": "CRYSTAL_BEARS_STUDIO_BIBLE.md",
+    "characters": "shows/crystal-bears/canon/characters.json",
+    "locations": "shows/crystal-bears/canon/locations.json",
+    "continuity": "shows/crystal-bears/canon/continuity.json",
+    "episodeArc": "shows/crystal-bears/canon/episode_arc.json",
+    "gagLocks": "shows/crystal-bears/canon/gag_locks.json",
+    "bannedVocabulary": "shows/crystal-bears/canon/banned_vocabulary.json",
+    "sfxLibrary": "shows/crystal-bears/canon/sfx_library.json",
+    "locationAssetManifest": "cb-seed/assets/locations/_manifest.json",
+    "characterPerformance": "shows/crystal-bears/creative/CHARACTER_PERFORMANCE_CANON.json",
+    "relationships": "shows/crystal-bears/creative/RELATIONSHIP_CANON.json",
+    "exemplars": "shows/crystal-bears/creative/EXEMPLAR_LIBRARY.json",
+    "showrunnerTaste": "shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
+    "directorTaste": "shows/crystal-bears/creative/DIRECTOR_TASTE_CANON.md",
+    "cinematographyTaste": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
+    "voicePerformance": "shows/crystal-bears/creative/VOICE_PERFORMANCE_CANON.md",
+    "styleLaw": "shows/crystal-bears/laws/style.txt",
+    "wingLaw": "shows/crystal-bears/laws/wing_law.txt",
+    "runtimeCamera": "skills/crystal-bears-camera/SKILL.md",
+    "runtimeCinematographer": "skills/crystal-bears-cinematographer/SKILL.md",
+    "runtimeComposer": "skills/crystal-bears-composer/SKILL.md",
+    "runtimeContinuity": "skills/crystal-bears-continuity/SKILL.md",
+    "runtimeDirector": "skills/crystal-bears-director/SKILL.md",
+    "runtimeDp": "skills/crystal-bears-dp/SKILL.md",
+    "runtimePost": "skills/crystal-bears-post/SKILL.md",
+    "runtimeVoice": "skills/crystal-bears-voice-director/SKILL.md",
+    "runtimeWriter": "skills/crystal-bears-writer/SKILL.md",
+    "runtimeAnimation": "skills/seedance-production-director/SKILL.md"
+  },
+  "profiles": {
+    "story": [
+      "showBible",
+      "studioBible",
+      "characters",
+      "locations",
+      "continuity",
+      "episodeArc",
+      "gagLocks",
+      "bannedVocabulary",
+      "characterPerformance",
+      "relationships",
+      "exemplars",
+      "showrunnerTaste",
+      "directorTaste",
+      "runtimeDirector"
+    ],
+    "storyboard": [
+      "showBible",
+      "studioBible",
+      "characters",
+      "locations",
+      "continuity",
+      "episodeArc",
+      "gagLocks",
+      "bannedVocabulary",
+      "characterPerformance",
+      "relationships",
+      "exemplars",
+      "showrunnerTaste",
+      "directorTaste",
+      "cinematographyTaste",
+      "voicePerformance",
+      "runtimeDirector",
+      "runtimeCinematographer",
+      "runtimeVoice"
+    ],
+    "look": [
+      "showBible",
+      "locations",
+      "styleLaw",
+      "cinematographyTaste",
+      "runtimeCinematographer",
+      "runtimeDp"
+    ],
+    "cinematography": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "cinematographyTaste",
+      "runtimeCinematographer",
+      "runtimeDp"
+    ],
+    "voice": [
+      "showBible",
+      "characters",
+      "voicePerformance",
+      "runtimeVoice"
+    ],
+    "animation": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "wingLaw",
+      "runtimeAnimation"
+    ],
+    "review": [
+      "showBible",
+      "characters",
+      "locations",
+      "continuity",
+      "styleLaw",
+      "runtimeContinuity"
+    ],
+    "post": [
+      "showBible",
+      "characters",
+      "continuity",
+      "sfxLibrary",
+      "voicePerformance",
+      "runtimeComposer",
+      "runtimePost"
+    ]
+  },
+  "roster": {
+    "Aida": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Sunny": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Luna": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Misty": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Amie": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Howey": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Keen": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Fuzzby": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Zenny": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Keen's Mum": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"},
+    "Squeaky": {"tier": "recurring-guest", "status": "locked", "voiceMode": "nonverbal-sfx"},
+    "Bo": {"tier": "recurring-guest", "status": "stub", "voiceMode": "unassigned"}
+  },
+  "characterAliases": {
+    "HOWIE": "Howey",
+    "SQUEEKY": "Squeaky"
+  },
+  "scriptChecks": {
+    "forbiddenPatterns": [
+      {
+        "id": "Zenny-has-no-crystal",
+        "pattern": "\\bZenny[\u2019']s(?:\\s+(?:crystal|gem|wristband)\\b|\\s*[.!?])",
+        "message": "The script gives Zenny a crystal, but Zenny is a bee and the locked canon forbids crystals for both bees."
+      }
+    ],
+    "lockedDialogue": [
+      {
+        "id": "Aida-crystal-call",
+        "speaker": "Aida",
+        "triggerPattern": "Rose Quartz",
+        "exactText": "With heart open wide, I stand with pride \u2014 Rose Quartz, be our guide!",
+        "message": "Aida's Crystal Call differs from the exact call locked in the show bible."
+      }
+    ],
+    "pronounContracts": [
+      {
+        "id": "Squeaky-pronouns",
+        "character": "Squeaky",
+        "forbiddenPattern": "\\b(?:he|him|his)\\b",
+        "evidencePattern": "\\b(?:his tail|pulling him|reaches him|watches him|he dips his head)\\b",
+        "message": "The script writes Squeaky with male pronouns, while the character bible locks Squeaky as female."
+      }
+    ]
+  },
+  "compatibilityCopies": [
+    {"source": "showBible", "path": "CRYSTAL_BEARS_LOCKED_CANON.md", "mode": "exact"},
+    {"source": "showBible", "path": "engine/config/LOCKED_CANON.md", "mode": "exact"},
+    {"source": "characters", "path": "engine/config/characters.json", "mode": "exact"},
+    {"source": "locations", "path": "engine/config/locations.json", "mode": "exact"},
+    {"source": "continuity", "path": "engine/config/continuity.json", "mode": "exact"},
+    {"source": "episodeArc", "path": "engine/config/episode_arc.json", "mode": "exact"},
+    {"source": "gagLocks", "path": "engine/config/gag_locks.json", "mode": "exact"},
+    {"source": "bannedVocabulary", "path": "engine/config/banned_vocabulary.json", "mode": "exact"},
+    {"source": "sfxLibrary", "path": "engine/config/sfx_library.json", "mode": "exact"}
+  ],
+  "skillCanonCopiesGlob": "skills/crystal-bears-*/references/CRYSTAL_BEARS_LOCKED_CANON.md"
+}

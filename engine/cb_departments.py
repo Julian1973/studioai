@@ -302,7 +302,7 @@ class StoryIntakeDirection(BaseModel):
     beats: List[BeatSplit] = Field(min_length=1)
 
 
-def prepare_story(script_events, cast_by_scene, *, log=print):
+def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
     """The Director's FIRST task on a newly uploaded script (2026-07-19): decide where
     each scene's own beats begin, and author the creative content around them. Scene
     order, characters and every spoken line are LOCKED SOURCE EVIDENCE, supplied here
@@ -331,7 +331,10 @@ def prepare_story(script_events, cast_by_scene, *, log=print):
                 "logline and lead bear. Every scene needs at least one beat, and its first "
                 "beat's own firstEventIndex must equal that scene's own first event "
                 "index."),
-        "SCRIPT EVENTS, IN ORDER — index : scene : type : [speaker :] text (dialogue text "
+        "SIGNED STORY CANON — these are the exact human-locked inputs for this run. "
+        "Obey them; never fill a missing fact invisibly:\n"
+        + json.dumps(canon_context, ensure_ascii=False, indent=1) +
+        "\n\nSCRIPT EVENTS, IN ORDER — index : scene : type : [speaker :] text (dialogue text "
         "is LOCKED, shown for context only, never to be altered):\n"
         + json.dumps(script_events, ensure_ascii=False, indent=1) +
         "\n\nCAST PRESENT PER SCENE (mechanically detected from the script text):\n"

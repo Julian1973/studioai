@@ -87,6 +87,7 @@ import re
 import shutil
 
 import cb_engine
+import cb_canon
 import cb_db
 import cb_lineage
 import cb_scripts
@@ -126,6 +127,23 @@ def _require_storyboard_lineage(sb, episode):
             "REFUSED — storyboard source beat package has no valid exact-event contract: "
             + ", ".join(source_report["issues"][:5]))
 
+    cast = sorted({name for beat in beat_pkg.get("beats") or []
+                   for name in beat.get("characters") or [] if name} |
+                  {name for beat in sb.get("beats") or []
+                   for name in beat.get("participatingCharacters") or [] if name})
+    try:
+        lock = cb_canon.require_locked(episode, cast, root=ROOT)
+    except cb_canon.CanonLockError as exc:
+        raise HandoverRefused(str(exc)) from exc
+    story_inputs = {
+        "scriptVersionId": current["scriptVersionId"],
+        "canonProfileDigest": lock["profileDigests"]["story"],
+    }
+    if not cb_lineage.signature_matches(
+            beat_pkg.get("inputSignature"), "beat-package-input", story_inputs):
+        raise HandoverRefused(
+            "REFUSED — source beat package was not approved from the current story-canon lock")
+
     source_beats = [beat for beat in (beat_pkg.get("beats") or [])
                     if str(beat.get("sceneNumber")) == str(sb.get("sceneNumber"))]
     storyboard_beats = list(sb.get("beats") or [])
@@ -162,9 +180,16 @@ def _require_storyboard_lineage(sb, episode):
     inputs = signature.get("inputs") or {}
     if (not cb_lineage.signature_matches(signature, "scene-storyboard", inputs) or
             inputs.get("scriptVersionId") != current["scriptVersionId"] or
-            inputs.get("beatPackageDigest") != expected_beat["digest"]):
+            inputs.get("beatPackageDigest") != expected_beat["digest"] or
+            inputs.get("canonProfileDigest") != lock["profileDigests"]["storyboard"]):
         raise HandoverRefused("REFUSED — storyboard dependency signature is missing or stale")
-    return current, expected_beat
+    storyboard_lock = sb.get("canonLock") or {}
+    if (storyboard_lock.get("manifestDigest") != lock["manifestDigest"] or
+            storyboard_lock.get("profileDigest") !=
+            lock["profileDigests"]["storyboard"]):
+        raise HandoverRefused(
+            "REFUSED — storyboard does not carry the exact current storyboard-canon lock")
+    return current, expected_beat, lock
 
 # Keys of the storyboard that are CREATIVE-ROOM INTERNAL and must never reach production:
 NEVER_PROMOTED = ("showrunnerJudgement", "internalRevisions", "escalation", "vision",
@@ -865,7 +890,8 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
             f"REFUSED — storyboard {pathlib.Path(storyboard_path).name} is "
             f"'{sb.get('approvalState')}', not '{APPROVED_STATE}'. Gate A approval is the "
             f"sole authority; nothing is promoted to the canonical package without it.")
-    current_script, source_beat_signature = _require_storyboard_lineage(sb, episode)
+    current_script, source_beat_signature, canon_lock = _require_storyboard_lineage(
+        sb, episode)
     _validate_storyboard_dialogue_contract(sb)
 
     try:
@@ -957,6 +983,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
         "beatPackageDigest": source_beat_signature["digest"],
         "storyboardSha256": storyboard_sha256,
         "creativeCardHashes": card_hashes,
+        "canonProfileDigest": canon_lock["profileDigests"]["storyboard"],
     }
     new_pkg = {
         "episode": episode, "sceneNumber": str(scene_num),
@@ -984,6 +1011,11 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                                           "never a machine check"},
         "sourceScript": sb.get("sourceScript"),
         "sourceBeatPackage": sb.get("sourceBeatPackage"),
+        "canonLock": {
+            "manifestDigest": canon_lock["manifestDigest"],
+            "profileDigests": canon_lock["profileDigests"],
+            "storyboardProfileDigest": canon_lock["profileDigests"]["storyboard"],
+        },
         "dialogueContract": sb.get("dialogueContract"),
         "sourceStoryboard": {"path": str(storyboard_path), "md5": _md5(storyboard_path),
                               "sha256": storyboard_sha256,

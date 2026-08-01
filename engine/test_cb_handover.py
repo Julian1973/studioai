@@ -26,6 +26,12 @@ from cb_scripts import ScriptStore
 JUDGEMENT_MARKER = "ZZ-SHOWRUNNER-ANALYSIS-MARKER-ZZ"
 REJECTED_MARKER = "ZZ-REJECTED-INTERPRETATION-MARKER-ZZ"
 CANON_MARKER = "ZZ-TASTE-CANON-MARKER-ZZ"
+TEST_CANON_MANIFEST = "f" * 64
+TEST_CANON_DIGESTS = {
+    profile: hashlib.sha256(f"fixture-canon:{profile}".encode()).hexdigest()
+    for profile in ("story", "storyboard", "look", "cinematography", "voice",
+                    "animation", "review", "post")
+}
 
 
 def _sb_shot(shot_id, beat_ids, transition, protections=None):
@@ -707,6 +713,11 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
                 "beats": [source_beat]}
     beat_pkg["sourceContract"] = cb_lineage.beat_package_source_contract(
         current["scriptVersionId"], beat_pkg["beats"])
+    beat_pkg["inputSignature"] = cb_lineage.dependency_signature(
+        "beat-package-input", {
+            "scriptVersionId": current["scriptVersionId"],
+            "canonProfileDigest": TEST_CANON_DIGESTS["story"],
+        })
     beat_pkg["contentSignature"] = cb_lineage.beat_package_signature(beat_pkg)
     beat_path = tmp_path / "source" / "Ep1_Fixture_beat_package.json"
     beat_path.parent.mkdir(parents=True)
@@ -739,15 +750,25 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
     storyboard_inputs = {"scriptVersionId": current["scriptVersionId"],
                          "beatPackageDigest": beat_pkg["contentSignature"]["digest"],
                          "episodeVisionDigest": "fixture", "sceneNumber": "1",
-                         "ambitionBrief": None, "canonSources": {}}
+                         "ambitionBrief": None, "canonSources": {},
+                         "canonProfileDigest": TEST_CANON_DIGESTS["storyboard"]}
     sb["inputSignature"] = cb_lineage.dependency_signature(
         "scene-storyboard", storyboard_inputs)
+    sb["canonLock"] = {
+        "manifestDigest": TEST_CANON_MANIFEST,
+        "profile": "storyboard",
+        "profileDigest": TEST_CANON_DIGESTS["storyboard"],
+    }
     sb_p = tmp_path / "sb.json"
     json.dump(sb, open(sb_p, "w"))
     pkg_dir = tmp_path / "cb-output"
     pkg_dir.mkdir()
     monkeypatch.setattr(H, "ROOT", tmp_path)
     monkeypatch.setattr(H, "SCRIPT_STORE", store)
+    monkeypatch.setattr(H.cb_canon, "require_locked", lambda *args, **kwargs: {
+        "manifestDigest": TEST_CANON_MANIFEST,
+        "profileDigests": dict(TEST_CANON_DIGESTS),
+    })
     monkeypatch.setattr(cb_engine, "canonical_package_path",
                         lambda scene, episode="Ep1": pkg_dir / f"{episode}_scene{scene}_production_package.json")
     return sb_p, pkg_dir

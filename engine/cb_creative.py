@@ -64,6 +64,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 import cb_llm
+import cb_canon
 import cb_departments
 import cb_engine
 import cb_lineage
@@ -417,7 +418,7 @@ class ShowrunnerReview(BaseModel):
 # CANON SOURCES + GATE 0 READINESS
 # ─────────────────────────────────────────────────────────────────────────────────────────
 _CANON_SOURCES = {
-    "showBible": ROOT / "CRYSTAL_BEARS_LOCKED_CANON.md",
+    "showBible": ROOT / "shows/crystal-bears/canon/LOCKED_CANON.md",
     "studioBible": ROOT / "CRYSTAL_BEARS_STUDIO_BIBLE.md",
     "characters": ROOT / "shows/crystal-bears/canon/characters.json",
     "locations": ROOT / "shows/crystal-bears/canon/locations.json",
@@ -452,8 +453,17 @@ def _script_package(episode):
             f"{current['scriptVersionId']} is active. Approve Story & Direction for the active script first.")
     if source.get("sha256") != current["sha256"]:
         raise RuntimeError(f"SCRIPT LINEAGE CORRUPT — {path.name}'s script hash does not match its version ID")
+    cast = sorted({name for beat in pkg.get("beats") or []
+                   for name in beat.get("characters") or [] if name})
+    try:
+        lock = cb_canon.require_locked(episode, cast, root=ROOT)
+    except cb_canon.CanonLockError as exc:
+        raise RuntimeError(str(exc)) from exc
     expected_input = cb_lineage.dependency_signature(
-        "beat-package-input", {"scriptVersionId": current["scriptVersionId"]})
+        "beat-package-input", {
+            "scriptVersionId": current["scriptVersionId"],
+            "canonProfileDigest": lock["profileDigests"]["story"],
+        })
     if pkg.get("inputSignature") != expected_input:
         raise RuntimeError(f"SCRIPT LINEAGE MISSING — {path.name} has no valid beat-package input signature")
     expected_content = cb_lineage.beat_package_signature(pkg)
@@ -467,17 +477,26 @@ def load_canon_envelope(episode="Ep1", log=print):
            "sources": {}, "gaps": [], "conflicts": []}
     for key, path in _CANON_SOURCES.items():
         if path.exists():
-            env["sources"][key] = {"path": str(path), "md5": _md5(path)}
+            env["sources"][key] = {"path": str(path.relative_to(ROOT)),
+                                     "sha256": cb_lineage.sha256_file(path)}
         else:
             env["gaps"].append(f"{key}: {path.name} not present (optional context)")
     spath = _script_package(episode)
-    env["sources"]["script"] = {"path": str(spath), "md5": _md5(spath)}
-    chars = json.load(open(_CANON_SOURCES["characters"]))
-    for name, rec in chars.items():
-        if isinstance(rec, dict) and rec.get("anchor"):
-            if not (HERE / rec["anchor"]).exists():
-                env["conflicts"].append(
-                    f"character reference missing on disk: {name} -> {rec['anchor']}")
+    pkg = json.loads(spath.read_text())
+    cast = sorted({name for beat in pkg.get("beats") or []
+                   for name in beat.get("characters") or [] if name})
+    try:
+        lock = cb_canon.require_locked(episode, cast, root=ROOT)
+    except cb_canon.CanonLockError as exc:
+        raise RuntimeError(str(exc)) from exc
+    env["sources"]["scriptPackage"] = {
+        "path": str(spath.relative_to(ROOT)), "sha256": cb_lineage.sha256_file(spath)}
+    env["canonLock"] = {
+        "manifestDigest": lock["manifestDigest"],
+        "profile": "storyboard",
+        "profileDigest": lock["profileDigests"]["storyboard"],
+        "sourceHashes": cb_canon.source_hashes("storyboard", ROOT),
+    }
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_canon_envelope.json"
     json.dump(env, open(out, "w"), indent=1, ensure_ascii=False)
@@ -604,17 +623,22 @@ def _characters_for(names):
 
 
 def _unresolved_fields_for(names):
-    """Which performance-canon fields are unresolved (null) for these characters."""
-    p = _CANON_SOURCES["characterPerformance"]
+    """Return only essential primary-bible gaps, never optional overlay blanks.
+
+    The immutable canon lock already refuses a participating character without these
+    fields. Null fields in CHARACTER_PERFORMANCE_CANON are advisory expansion space and
+    must not cause the system to invent psychology or claim a locked character is absent.
+    """
+    p = _CANON_SOURCES["characters"]
     if not p.exists():
         return {}
-    allp = json.load(open(p)).get("characters", {})
+    allp = json.load(open(p))
     out = {}
     for n in names:
         for k, v in allp.items():
             if _norm(k) == _norm(n) and isinstance(v, dict):
-                missing = [f for f, val in v.items()
-                           if f not in ("provenance", "cadence", "actingNote") and not val]
+                missing = [field for field in ("bible", "cadence", "key_features", "anchor")
+                           if not v.get(field)]
                 if missing:
                     out[k] = sorted(missing)
     return out
@@ -685,12 +709,18 @@ def episode_vision(episode="Ep1", log=print):
         EpisodeVision, label="creative_vision")
     beat_signature = cb_lineage.beat_package_signature(d)
     script_version = (d.get("sourceScript") or {}).get("scriptVersionId")
-    vision_inputs = cb_lineage.episode_vision_inputs(script_version, beat_signature)
+    canon_digest = cb_canon.profile_digest(
+        "story", episode=episode,
+        cast={name for beat in beats for name in beat.get("characters") or []},
+        root=ROOT)
+    vision_inputs = cb_lineage.episode_vision_inputs(
+        script_version, beat_signature, canon_digest)
     pkg = {"episodeId": episode, "title": d.get("title", episode),
            "sourceScriptVersion": _md5(_script_package(episode)),
            "sourceScript": d.get("sourceScript"),
            "sourceBeatPackageSignature": beat_signature,
            "inputSignature": cb_lineage.dependency_signature("episode-vision", vision_inputs),
+           "canonLock": {"profile": "story", "profileDigest": canon_digest},
            "canonVersion": CANON_VERSION, **v.model_dump(),
            "showrunnerJudgement": "", "approvalState": "draft",
            "provenance": PROV("showrunner")}
@@ -1461,7 +1491,10 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     vision = (json.load(open(vpath)) if vpath.exists() else episode_vision(episode, log=log))
     beat_signature = cb_lineage.beat_package_signature(source_pkg)
     script_version = (source_pkg.get("sourceScript") or {}).get("scriptVersionId")
-    vision_inputs = cb_lineage.episode_vision_inputs(script_version, beat_signature)
+    story_canon_digest = cb_canon.profile_digest(
+        "story", episode=episode, cast=ready["cast"], root=ROOT)
+    vision_inputs = cb_lineage.episode_vision_inputs(
+        script_version, beat_signature, story_canon_digest)
     if not cb_lineage.signature_matches(vision.get("inputSignature"),
                                         "episode-vision", vision_inputs):
         raise RuntimeError(
@@ -1512,6 +1545,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         "episodeVisionDigest": vision["inputSignature"]["digest"],
         "sceneNumber": str(scene_num),
         "ambitionBrief": ready["brief"],
+        "canonProfileDigest": ready["envelope"]["canonLock"]["profileDigest"],
         "canonSources": (ready.get("envelope") or {}).get("sources", {}),
     }
     pkg = {"episodeId": episode, "sceneNumber": str(scene_num),
@@ -1520,6 +1554,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "sourceScript": source_pkg.get("sourceScript"),
            "sourceBeatPackage": {"path": str(_script_package(episode).relative_to(ROOT)),
                                  "contentSignature": beat_signature},
+           "canonLock": ready["envelope"]["canonLock"],
            "inputSignature": cb_lineage.dependency_signature(
                "scene-storyboard", storyboard_inputs),
            "ambitionBrief": ready["brief"],

@@ -329,8 +329,10 @@ def validate_beat_package_source_contract(pkg: Mapping[str, Any]) -> dict:
 
 
 def episode_vision_inputs(script_version_id_value: str,
-                          beat_package_signature_value: Mapping[str, Any]) -> dict:
+                          beat_package_signature_value: Mapping[str, Any],
+                          canon_profile_digest: str) -> dict:
     return {
         "scriptVersionId": script_version_id_value,
         "beatPackageDigest": beat_package_signature_value.get("digest"),
+        "canonProfileDigest": canon_profile_digest,
     }

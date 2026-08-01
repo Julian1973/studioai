@@ -51,7 +51,7 @@ Invoked by the Producer/1st AD before each sign-off (and on demand). You read th
 
 ## 3. THE CHECK DIMENSIONS
 
-**A. Canon lock.** Bear ↔ crystal ↔ feeling ↔ colour ↔ note all correct; Crystal Call text exact; **cast lock** (only the 7 bears + Fuzzby + Zenny, plus approved guests Squeeky/Keen's Mum/Bo — no invented characters/species); locations from the canon list; names spelled right.
+**A. Canon lock.** Bear ↔ crystal ↔ feeling ↔ colour ↔ note all correct; Crystal Call text exact; **cast lock** (only the 7 bears + Fuzzby + Zenny, plus approved guests Squeaky/Keen's Mum/Bo — no invented characters/species); locations from the canon list; names spelled right.
 
 **B. Reference anchoring.** Characters and homes are **referenced, never described** ("as per the reference image of …"); the correct **anchor** is used (clean single-subject, not a contact sheet); ≤6 refs.
 
@@ -145,7 +145,7 @@ When an earlier shot shows a **vision, dream, flashback or foresight** of a plac
 ---
 
 ## ⚑ Clarifications — RESOLVED (2026-06-21)
-- **Cast tiers:** principals = 7 bears + Fuzzby + Zenny; approved GUESTS = Squeeky + Keen's Mum + Bo (Bo is a stub — no reference art/bible yet, Ep2 not producible). No ad-hoc invented characters or humans.
+- **Cast tiers:** principals = 7 bears + Fuzzby + Zenny; approved GUESTS = Squeaky + Keen's Mum + Bo (Bo is a stub — no reference art/bible yet, Ep2 not producible). No ad-hoc invented characters or humans.
 - **Crystal Call text** = canon §4 (the bible set; the Selenite/"strong and true" variant is stale).
 - **Vision↔reality:** flag the match at the vision's gate; verify it when the real scene renders (e.g. 2.2 vision pier/boat ↔ Scene 3).
 - Continuity is a **pre-gate checkpoint** (flags BLOCK/NOTE); the department fixes; the Producer signs off.
@@ -178,7 +178,7 @@ Each shot carries `props` [{name, state}] in the package: the EXACT position/sta
 An object that enters the world PERSISTS and accumulates. What Keen loads into the boat in 3.1 stays in the boat in EVERY later shot (3.2…3.6 and on into Scene 4 At Sea) — it never vanishes. Declared in `continuity.json` `persistent: [{item, in: <recurring asset>, fromShot}]`; `cb_prompts.persistent_for` appends each active item to that asset's line for every shot at/after `fromShot`. The state only grows. The check on every shot: does it reflect EVERYTHING established before it (props loaded, changes made, items carried)? Continuity runs forward, shot to shot to shot.
 
 ## ⚑ REMOVAL / loss — things that are gone stay gone (2026-06-21)
-Continuity runs both ways. When something is lost/destroyed/used up, it must NOT appear afterward. Keen loses his sailboat in the storm (Scene 7.3, diving to save Squeeky) — so the boat appears in scenes 3,4,6,7 up to 7.3, and is FORBIDDEN from 7.4 on (7.8, Scene 8, 9, 10). Declared in `continuity.json lost: [{name, atShot, reason}]`; `cb_prompts.recurring_line` stops emitting the asset after `atShot` and adds a hard negative ("NO {asset} — it was lost; must NOT appear"). Always ask: has anything been removed before this shot? If so, it can't be in frame or used.
+Continuity runs both ways. When something is lost/destroyed/used up, it must NOT appear afterward. Keen loses his sailboat in the storm (Scene 7.3, diving to save Squeaky) — so the boat appears in scenes 3,4,6,7 up to 7.3, and is FORBIDDEN from 7.4 on (7.8, Scene 8, 9, 10). Declared in `continuity.json lost: [{name, atShot, reason}]`; `cb_prompts.recurring_line` stops emitting the asset after `atShot` and adds a hard negative ("NO {asset} — it was lost; must NOT appear"). Always ask: has anything been removed before this shot? If so, it can't be in frame or used.
 
 ## ⚑ THREE checks fire on every scene (2026-06-21) — when & what
 1. **Context audit** (`cb_context.py`, PRE-FLIGHT at gate 2/3, before rendering) — proves everything is pulled in: scene + previous scene + references + bible + storyline + script; BLOCKS if the script names a hero item not reference-locked.

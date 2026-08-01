@@ -54,12 +54,23 @@ sys.path.insert(0, str(HERE.parent / "cb-studio"))
 import cb_gen
 import cb_lineage
 import cb_render
+import cb_safety
 
 LEGACY_STRINGS = [
     "Pixar-caliber", "squash-and-stretch", "0–5s", "5–10s", "10–15s", "Negative:",
     "camera already waiting at the leaf", "no leaf hit as the final image",
     "crash-lands into pride", "frame-left lane", "15s, 16:9, 24fps",
 ]
+
+
+@pytest.fixture(autouse=True)
+def isolated_canon(monkeypatch):
+    monkeypatch.setattr(cb_safety.cb_canon, "require_locked", lambda *args, **kwargs: {
+        "manifestDigest": "m" * 64,
+        "profileDigests": {name: "c" * 64 for name in (
+            "story", "storyboard", "look", "cinematography", "voice",
+            "animation", "review", "post")},
+    })
 
 
 def test_studio_endpoint_builds_the_exact_fire_argv():

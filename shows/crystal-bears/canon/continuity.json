@@ -1,3 +1,29 @@
 {
- "_note": ""
+  "_note": "Episode continuity is immutable production input. Changes require human review and a new canon lock.",
+  "Ep1": {
+    "characterStates": {
+      "Keen": [
+        {
+          "scenes": "1-2",
+          "wristbandState": "no-cuffs"
+        },
+        {
+          "scenes": "3-8",
+          "wristbandState": "vacant-wristbands"
+        },
+        {
+          "scenes": "9-10",
+          "wristbandState": "crystal-set-wristbands"
+        }
+      ]
+    },
+    "lostItems": [
+      {
+        "name": "Keen's sailboat",
+        "lostInScene": "7",
+        "forbiddenFromScene": "8",
+        "sourceEvidence": "Misty confirms that Keen's boat is gone after the storm rescue."
+      }
+    ]
+  }
 }

@@ -1,4 +1,138 @@
 {
  "_note": "Per-scene environment canon. New entries are created from the current approved episode production graph.",
- "_provenance": {}
+ "_provenance": {
+  "Ep1": "moved from '8Th Hour' 2026-07-31 — the swept flower-field canon"
+ },
+ "Ep1": {
+  "1": {
+   "locationId": "deep_rainforest_flower_meadow",
+   "name": "The Sunlit Flower Field",
+   "location": "A sunlit Crystal Cove wildflower field at bee height: towering purple lavender spikes, white daisies and pink-red clover standing in an open bed with clear sky above the flower tops, and soft rolling hills receding beyond the field.",
+   "look": "An open sunlit wildflower meadow read at bee scale — purple lavender spikes, white daisies and pink-red clover loom tall and frame-filling, pollen-heavy blossom heads at flight height, grass channels winding between stems as flight lanes, small crystals resting low in the grass as quiet set dressing, rolling hills fading into soft haze in the deep background. Every plant surface reads springy, reactive, comedy-ready. (LOCKED to Julian's library plate deep_rainforest_flower_meadow.png, 2026-07-24 — the plate IMAGE is the visual law; this text describes it and never competes with it.)",
+   "time": "Morning",
+   "lighting": "Low bright sun sitting just above the hills, long gold light raking across the flower tops, petals backlit and haloed, soft light haze over the far hills — read from the locked plate; every prompt defers light to the plate reference and never states a competing light condition (drift-safe vocabulary kept: concrete sun/sky/shadow states only, no time-of-day mood words).",
+   "weather": "Warm breeze, clear sky; far over the hills the light has begun to cool almost imperceptibly with the first atmospheric warning of the coming storm — a faint grey-violet band low on the horizon, no rain yet.",
+   "colorTemperature": "Gold-pink sky over the hills, purple-lavender and daisy-white flower field, green stems and grass, gold pollen accents — the locked plate's own palette, restated nowhere in prompts beyond what the plate itself shows.",
+   "definingFeature": "Towering pollen-heavy flowers standing in an open bed under open sky — springy, reactive obstacles at bee scale, with nothing overhead.",
+      "master": "cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+   "shots": []
+  },
+  "2": {
+   "locationId": "crystal_cove_sanctuary",
+   "name": "Crystal Cove — Aida's Sanctuary",
+   "location": "A quiet shoreline sanctuary at Crystal Cove where gentle waves meet a smooth sandy-stone shelf; Aida's crystal bowl altar sits beside the water, with the forest path rising from the cove edge.",
+   "look": "A calm, sacred shoreline clearing: soft golden sand, a smooth stone shelf worn by tide, gentle azure water, and Aida's own crystal bowl altar as the focal point beside the water's edge — quiet, warm, reverent.",
+   "time": "Morning",
+   "lighting": "Warm golden morning, soft sun, gold god-rays — continuous with the S1-3 waking-world light arc.",
+   "weather": "Morning, continuous with the warm start; clear at the cove, with a distant wind beginning to gather beyond it.",
+   "colorTemperature": "Golden sands, azure waves, warm morning light.",
+   "definingFeature": "Aida's crystal bowl altar beside the water.",
+   "master": null,
+   "shots": []
+  },
+  "3": {
+   "locationId": "crystal_cove_pier",
+   "name": "Crystal Cove Pier",
+   "location": "The wooden Crystal Cove pier at the sheltered edge of the beach: a small loading area beside a neat little sailboat tied to the dock, with open sparkling water stretching beyond for the departure. NOTE: named 'KEEN'S ISLAND' in the script slugline — see _provenance.namingFlags.",
+   "look": "A modest working pier — weathered wood planking, coiled rope, the small sailboat readied at the dock — set against a bright, open stretch of clear coastal water.",
+   "time": "Late morning",
+   "lighting": "Warm morning light continuing toward midday — still within the S1-3 waking-world light arc.",
+   "weather": "Late morning moving toward midday; clear and breezy, still safe, with the first hints of open-water wind.",
+   "colorTemperature": "Warm, clear daylight.",
+   "definingFeature": "The small sailboat tied to the dock, readied for departure.",
+   "master": null,
+   "shots": []
+  },
+  "4": {
+   "locationId": "open_water_storm",
+   "name": "At Sea",
+   "location": "Endless open water far from Crystal Cove — a lone small sailboat on a widening blue-grey sea, no land visible on any horizon.",
+   "look": "Open ocean scale: a small, solitary sailboat dwarfed by open water, the sky and sea filling the whole frame as the weather turns.",
+   "time": "Midday",
+   "lighting": "Light cools and dims through the scene — grey storm clouds building, wind rising; gold drains toward cold blue-grey (locked S4-5 Deepening light arc).",
+   "weather": "Midday, after the departure; clear blue shifts rapidly into darkening clouds, gusts, rain, then full storm.",
+   "colorTemperature": "Cooling from warm daylight to cold storm blue-grey.",
+   "definingFeature": "The lone small sailboat on a widening, darkening sea.",
+   "master": null,
+   "shots": []
+  },
+  "5": {
+   "locationId": "whispering_woods_edge",
+   "name": "Rainforest Edge",
+   "location": "The outer edge of the Whispering Woods, where dense rainforest opens toward Crystal Cove's coast — wet trees and branches framing a clear sightline out to the stormy sea.",
+   "look": "A wet, wind-lashed treeline: dripping leaves, bending branches, and a gap in the canopy opening onto the darkening sea beyond.",
+   "time": "Midday",
+   "lighting": "Cold storm-grey light — same locked S4-5 Deepening light arc as Scene 4.",
+   "weather": "Midday, continuous with the storm building; wind and rain intensify, storm now visible offshore.",
+   "colorTemperature": "Cold blue-grey storm light.",
+   "definingFeature": "Wet trees and branches framing a sightline to the stormy sea.",
+   "master": null,
+   "shots": []
+  },
+  "6": {
+   "locationId": "crystal_cove_storm_shore",
+   "name": "Crystal Cove — Storm Building",
+   "location": "The storm-lashed edge of Crystal Cove where wet sand meets rough open sea — wind-bent shore grasses behind, a clear foreground crash path leading from beach obstacles toward the waterline.",
+   "look": "A beach under real weather pressure: wind-flattened grasses, driving rain, rough dark surf breaking hard against the shore.",
+   "time": "Midday",
+   "lighting": "Dark storm clouds — the start of the locked S6/S8-9 Connection/clearing light arc, still stormy at this point.",
+   "weather": "Midday storm; dark clouds, hard wind, rain, rough surf.",
+   "colorTemperature": "Dark, cool storm light.",
+   "definingFeature": "Wind-bent shore grasses over a rough, storm-lashed sea.",
+   "master": null,
+   "shots": []
+  },
+  "7": {
+   "locationId": "crystal_cove_underwater_rescue",
+   "name": "Out at Sea — Storm",
+   "location": "Crystal Cove's storm-churned rescue water just off the beach — the empty bucking boat at the surface, the glowing crystal-lit shore beyond, and the submerged rock-and-drift-net trap below the waves.",
+   "look": "A vertical world split by the waterline: chaos and spray above, a colder muffled hush below, with the wristbands' own aqua glow as the one point of light in the deep.",
+   "time": "Midday",
+   "lighting": "Darkest point of the film — storm-dark and cold underwater; the wristbands' self-glow is the emotional light (locked S7 Heart light arc).",
+   "weather": "Midday storm, darkest point; full storm above, churning current below, a massive wave forming at the peak.",
+   "colorTemperature": "Storm-dark, cold underwater blue, pierced by the aqua wristband glow.",
+   "definingFeature": "The submerged rock-and-drift-net trap beneath the waves.",
+   "master": null,
+   "shots": []
+  },
+  "8": {
+   "locationId": "crystal_cove_beach_aftermath",
+   "name": "Crystal Cove Beach — Aftermath",
+   "location": "Crystal Cove's sheltered beach at the waterline — restless shallow surf meeting a broad sweep of wet sand beneath crystal-veined cove walls.",
+   "look": "A beach exhaling after the storm: wet sand still dark, surf calming from rough to restless, the cove's own crystal-veined rock walls beginning to catch light again.",
+   "time": "Early afternoon",
+   "lighting": "Storm easing — start of the locked S6/S8-9 clearing light arc, cool clearing toward warm, hopeful brightening.",
+   "weather": "Early afternoon, immediately after the rescue; storm easing, rain thinning, sea still restless but no longer overwhelming.",
+   "colorTemperature": "Transitioning from storm-cool to warm clearing light.",
+   "definingFeature": "Crystal-veined cove walls glowing softly behind the wet sand.",
+   "master": null,
+   "shots": []
+  },
+  "9": {
+   "locationId": "crystal_cove_gathering_circle",
+   "name": "Gathering Area",
+   "location": "The open gathering circle at Crystal Cove after the storm — a smooth rain-darkened stone clearing bordered by crystal-veined greenery and softly glowing shoreline crystals, with enough central space for a ceremony and group embrace. NOTE: canon's location list separately names this 'The Learning Circle' — see _provenance.namingFlags.",
+   "look": "A ceremonial clearing washed clean by rain: smooth dark stone underfoot, crystal-flecked greenery at the border, and shoreline crystals beginning to glow warmly as the sky clears.",
+   "time": "Afternoon",
+   "lighting": "Hopeful brightening — locked S6/S8-9 Connection/clearing light arc; the crystal award glows (locked).",
+   "weather": "Afternoon after the storm; storm passed, fresh air, lingering droplets, clouds breaking.",
+   "colorTemperature": "Warm, clearing light with glowing crystal accents.",
+   "definingFeature": "Softly glowing shoreline crystals bordering the ceremony clearing.",
+   "master": null,
+   "shots": []
+  },
+  "10": {
+   "locationId": "crystal_cove_beach_path",
+   "name": "Crystal Cove Beach — Golden Hour",
+   "location": "Crystal Cove's sandy beach path running beside calm surf — the cove wall and storm-washed greenery framing a clear walking route for a welcoming group.",
+   "look": "A settled, golden coastline: calm surf, clean rain-washed greenery, and a clear sandy path wide enough for the whole cast to walk together.",
+   "time": "Late afternoon / golden hour",
+   "lighting": "Warm golden-hour light, settled, brighter and warmer than the film's own start — belonging (locked S10 Ripple light arc).",
+   "weather": "Late afternoon into golden-hour warmth; clear after the storm, calm surf, clean air.",
+   "colorTemperature": "Warm golden-hour light.",
+   "definingFeature": "The sandy beach path beside calm, post-storm surf.",
+   "master": null,
+   "shots": []
+  }
+ }
 }

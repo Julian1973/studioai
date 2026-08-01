@@ -17,6 +17,8 @@ sys.path.insert(0, str(HERE))
 import cb_creative as C
 import cb_llm
 
+CANON_DIGEST = "c" * 64
+
 
 # ── fixtures ───────────────────────────────────────────────────────────────────────────
 def _treatment(name):
@@ -188,7 +190,8 @@ def _vision_for(source_pkg):
         **{name: "x" for name in C.EpisodeVision.model_fields},
         "inputSignature": C.cb_lineage.dependency_signature(
             "episode-vision",
-            C.cb_lineage.episode_vision_inputs(script_version, beat_signature),
+            C.cb_lineage.episode_vision_inputs(
+                script_version, beat_signature, CANON_DIGEST),
         ),
     }
 
@@ -205,7 +208,10 @@ def _set_source(monkeypatch, source_beats, source_pkg):
 
 def _isolated(monkeypatch, record, review_script=None):
     monkeypatch.setattr(cb_llm, "structured", _fake_llm(record, review_script))
-    monkeypatch.setattr(C, "load_canon_envelope", lambda *a, **k: {})
+    monkeypatch.setattr(C, "load_canon_envelope", lambda *a, **k: {
+        "sources": {}, "canonLock": {"profileDigest": CANON_DIGEST}})
+    monkeypatch.setattr(C.cb_canon, "profile_digest",
+                        lambda *a, **k: CANON_DIGEST)
     root = pathlib.Path(tempfile.mkdtemp())
     monkeypatch.setattr(C, "ROOT", root)
     monkeypatch.setattr(C, "OUT", root / "cb-output" / "creative")

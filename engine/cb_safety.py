@@ -9,7 +9,10 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import uuid
+
+import cb_canon
 
 
 def install(m):
@@ -17,16 +20,50 @@ def install(m):
         "_resolve_scenelook_prompt", "scenelook_status", "approved_look_prompt",
         "generate_scenelook_plate", "approve_scenelook", "select_scenelook_source",
         "department_status", "prepare_department", "save_department_candidate", "decide_department",
-        "_resolve_keyframe_prompt", "voice_shot", "approve_voice", "reject_voice",
+        "_resolve_keyframe_prompt", "_keyframe_input_signature", "voice_shot", "approve_voice", "reject_voice",
         "restore_previous_voice_take", "keyframe_shot", "select_keyframe_source",
         "approve_keyframe", "reassess_keyframe", "_anchor_for", "_resolve_seedance_prompt",
         "check_seedance_structure", "fire_shot", "next_shot", "approve_shot",
         "stitch_scene")}
 
+    stage_profiles = {
+        "look": "look",
+        "cinematography": "cinematography",
+        "voice": "voice",
+        "animation": "animation",
+        "review-keyframe": "review",
+        "review-animation": "review",
+        "review-final": "post",
+    }
+
+    def package_cast(pkg):
+        try:
+            roster = cb_canon.load_policy(m.ROOT).get("roster") or {}
+        except cb_canon.CanonLockError:
+            roster = {}
+        blob = json.dumps(pkg, ensure_ascii=False).lower().replace("’", "'")
+        return sorted(name for name in roster if re.search(
+            r"(?<![a-z0-9])" + re.escape(name.lower().replace("’", "'")) +
+            r"(?![a-z0-9])", blob))
+
+    def require_canon(pkg, episode, profile=None):
+        try:
+            lock = cb_canon.require_locked(
+                episode, package_cast(pkg), root=m.ROOT)
+        except cb_canon.CanonLockError as exc:
+            raise m.Refused(str(exc)) from exc
+        if profile:
+            digest = (lock.get("profileDigests") or {}).get(profile)
+            if not digest:
+                raise m.Refused(f"REFUSED — canon profile is unavailable: {profile}")
+            return digest
+        return lock
+
     def current_package(scene, episode):
         pkg, path = m.load_pkg(scene, episode)
         m._require_valid(pkg)
         m._require_current_lineage(pkg, scene, episode)
+        require_canon(pkg, episode)
         return pkg, path
 
     def json_sha256(value):
@@ -70,8 +107,9 @@ def install(m):
         reference, voice asset, worker model or runtime skill invalidates only its dependants.
         """
         runtime = stage_runtime_signature(stage)
+        canon_digest = require_canon(pkg, episode, stage_profiles[stage])
         if stage == "look":
-            return {"stage": stage, **runtime,
+            return {"stage": stage, **runtime, "canonProfileDigest": canon_digest,
                     "sceneContextHash": json_sha256(m._scene_context(pkg, scene, episode))}
 
         if stage == "review-final":
@@ -81,7 +119,7 @@ def install(m):
             if selected is None:
                 raise m.Refused("REFUSED — no current QC-passed post master exists")
             manifest = selected["manifest"]
-            return {"stage": stage, **runtime,
+            return {"stage": stage, **runtime, "canonProfileDigest": canon_digest,
                     "postManifestDigest": manifest.get("manifestDigest"),
                     "postInputSignature": manifest.get("inputSignature"),
                     "masterOutputHashes": {
@@ -90,7 +128,7 @@ def install(m):
 
         shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
-        common = {"stage": stage, **runtime,
+        common = {"stage": stage, **runtime, "canonProfileDigest": canon_digest,
                   "shotContractHash": json_sha256(shot)}
         if stage == "cinematography":
             look = scene_status(scene, episode)
@@ -175,12 +213,15 @@ def install(m):
         approved, candidate = rec.get("approved"), rec.get("candidate")
         approved_current = False
         if approved:
-            current_sig = look_input_signature(
-                scene, episode, approved.get("path"), approved.get("referencePath"))
-            approved_current = (
-                os.path.exists(approved.get("path") or "") and
-                approved.get("hash") == file_sha256(approved.get("path")) and
-                approved.get("inputSignature") == current_sig)
+            try:
+                current_sig = look_input_signature(
+                    scene, episode, approved.get("path"), approved.get("referencePath"))
+                approved_current = (
+                    os.path.exists(approved.get("path") or "") and
+                    approved.get("hash") == file_sha256(approved.get("path")) and
+                    approved.get("inputSignature") == current_sig)
+            except (m.Refused, OSError, ValueError):
+                approved_current = False
         if candidate:
             return {"status": "awaiting", "current": approved_current, "approved": approved,
                     "candidate": candidate, "history": rec.get("history", [])}
@@ -209,8 +250,10 @@ def install(m):
 
     def look_input_signature(scene, episode, plate_path=None, reference_path=None):
         """Every direct Scene Look input, including the approved specialist prompt and files."""
+        pkg, _ = m.load_pkg(scene, episode)
         prompt = look_prompt(scene, episode) or ""
-        return {"briefHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        return {"canonProfileDigest": require_canon(pkg, episode, "look"),
+                "briefHash": hashlib.sha256(prompt.encode()).hexdigest(),
                 "referenceHashes": ({pathlib.Path(reference_path).name: file_sha256(reference_path)}
                                     if reference_path else {}),
                 "plateHash": file_sha256(plate_path) if plate_path else None}
@@ -336,7 +379,9 @@ def install(m):
         characters = m._characters_cfg()
         ids = [(characters.get(m._resolve_char(line["speaker"], characters)) or {}).get("voiceId")
                for line in (shot.get("dialogueLines") or [])]
-        return {"dialogueHash": hashlib.sha256(json.dumps(
+        episode = pkg.get("episode") or pkg.get("episodeId") or "Ep1"
+        return {"canonProfileDigest": require_canon(pkg, episode, "voice"),
+                "dialogueHash": hashlib.sha256(json.dumps(
                     shot.get("dialogueLines") or [], sort_keys=True,
                     ensure_ascii=False).encode()).hexdigest(),
                 "performanceHash": hashlib.sha256(json.dumps(
@@ -386,6 +431,7 @@ def install(m):
                 f"REFUSED — {shot['shotId']}'s approved voice is missing or stale")
         voice_approval = voice["record"]
         return {
+            "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotHash": hashlib.sha256(json.dumps(
                 shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
             "openingFrameHash": file_sha256(anchor),
@@ -413,6 +459,7 @@ def install(m):
                 f"REFUSED — {shot['shotId']}'s approved voice is missing or stale")
         ledger = m._ledger(pkg, shot["shotId"])
         return {
+            "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotContractHash": json_sha256(shot),
             "animationDirectionSignature": direction.get("inputSignature"),
             "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
@@ -457,6 +504,7 @@ def install(m):
     def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
         m._require_valid(pkg)
         m._require_current_lineage(pkg, pkg.get("sceneNumber"), episode)
+        require_canon(pkg, episode, "voice")
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         if not shot.get("dialogueLines"):
             return None
@@ -527,11 +575,18 @@ def install(m):
         m._save(pkg, path)
         return result
 
+    def keyframe_input_signature(pkg, shot, scene, episode):
+        return {**original["_keyframe_input_signature"](pkg, shot, scene, episode),
+                "canonProfileDigest": require_canon(
+                    pkg, episode, "cinematography")}
+
     def keyframe_signature(pkg, shot, candidate, scene, episode):
+        canon_digest = require_canon(pkg, episode, "cinematography")
         if candidate.get("source", "generated") == "generated":
             return m._keyframe_input_signature(pkg, shot, scene, episode)
         status = scene_status(scene, episode)
         return {"cardHash": m._live_card_hash(shot["shotId"], scene, episode),
+                "canonProfileDigest": canon_digest,
                 "sceneLookHash": (status.get("approved") or {}).get("hash") if status.get("current") else None,
                 "selectedAssetHash": m._file_md5(candidate.get("path")),
                 "source": candidate.get("source")}
@@ -743,6 +798,7 @@ def install(m):
     m._department_input_signature = department_input_signature
     m._department_record_status = department_record_status
     m._resolve_keyframe_prompt = keyframe_prompt
+    m._keyframe_input_signature = keyframe_input_signature
     m._approved_voice_lines = voice_lines
     m._voice_input_signature = voice_signature
     m._voice_approval_status = voice_approval_status

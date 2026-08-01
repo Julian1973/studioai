@@ -1,0 +1,1145 @@
+{
+  "schemaVersion": 1,
+  "showId": "crystal-bears",
+  "lockedAt": "2026-07-31T23:30:02+00:00",
+  "lockedBy": "Julian",
+  "policySha256": "d657e5149518d3352b7b11fc9be6dd4f07a2d0fc0069a4f74fa1cb94ee5569b3",
+  "sources": {
+    "bannedVocabulary": {
+      "path": "shows/crystal-bears/canon/banned_vocabulary.json",
+      "sha256": "2dedb1c356b1d9b8d3a55a3a3fd658594309717f84438cf8491a99171deb6897"
+    },
+    "characterPerformance": {
+      "path": "shows/crystal-bears/creative/CHARACTER_PERFORMANCE_CANON.json",
+      "sha256": "f3307f80dddbc0800f34cf01b66e32c002171d49ff80e21fb9cdce267aacdae9"
+    },
+    "characters": {
+      "path": "shows/crystal-bears/canon/characters.json",
+      "sha256": "7dc071a8f876959241ad8cba883b6ebe1459c4bd60fb353955a41f8664e7c1ee"
+    },
+    "cinematographyTaste": {
+      "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
+      "sha256": "f780ea63c4afafa3c0c8370360f6842a6b07180bf76e14c14dc39384786f6257"
+    },
+    "continuity": {
+      "path": "shows/crystal-bears/canon/continuity.json",
+      "sha256": "8d7a5a9a2ee2429ed8e4285fea5025491f17f3bb744208420b6e0530ced3824a"
+    },
+    "directorTaste": {
+      "path": "shows/crystal-bears/creative/DIRECTOR_TASTE_CANON.md",
+      "sha256": "ae3dcfea84ca1b0c207a04e3cc7bfbc9684e298b5db34188613bf2558131e69e"
+    },
+    "episodeArc": {
+      "path": "shows/crystal-bears/canon/episode_arc.json",
+      "sha256": "7e06f051effa4eacaae41410f6170aed86772a3ed23599d599cec610d572ed2b"
+    },
+    "exemplars": {
+      "path": "shows/crystal-bears/creative/EXEMPLAR_LIBRARY.json",
+      "sha256": "241c010233906c2fd67c2f467913d06dd124e3da1aeac335a517e1458d7bf443"
+    },
+    "gagLocks": {
+      "path": "shows/crystal-bears/canon/gag_locks.json",
+      "sha256": "8693e988ca59aec4e2be24cd3357504ad281e4ed96d6300596554628d9d143d3"
+    },
+    "locationAssetManifest": {
+      "path": "cb-seed/assets/locations/_manifest.json",
+      "sha256": "3cabf35ca93454dcba61b57ed5c7a1dc04d5303dc3d52e2219eda51e749c3a52"
+    },
+    "locations": {
+      "path": "shows/crystal-bears/canon/locations.json",
+      "sha256": "700db5114d5ae703f55e76f8308a5db33fc8eaa1ecbd4a15392a639899302df0"
+    },
+    "relationships": {
+      "path": "shows/crystal-bears/creative/RELATIONSHIP_CANON.json",
+      "sha256": "92c06386fec26a7173d5fd962394e8b161f6295141a5fdf51000c9c5a6398fd0"
+    },
+    "runtimeAnimation": {
+      "path": "skills/seedance-production-director/SKILL.md",
+      "sha256": "4fac090a7ff0ea03a738cf05b8d0b93a530b5cf9a604a9f2dd41f415637cbc3e"
+    },
+    "runtimeCamera": {
+      "path": "skills/crystal-bears-camera/SKILL.md",
+      "sha256": "31fd1210c7d1c61833049ae123819e9b5becf86b49ef0543f539af9f39121d2e"
+    },
+    "runtimeCinematographer": {
+      "path": "skills/crystal-bears-cinematographer/SKILL.md",
+      "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+    },
+    "runtimeComposer": {
+      "path": "skills/crystal-bears-composer/SKILL.md",
+      "sha256": "7b359c3b9e35ef3a11aba7f9a19a93c0b5821c3ea5cbefcc4b45c82941f3cadc"
+    },
+    "runtimeContinuity": {
+      "path": "skills/crystal-bears-continuity/SKILL.md",
+      "sha256": "8b6d8668632b679538b891dd722171985f51368247d55c8449e1a97786c6d798"
+    },
+    "runtimeDirector": {
+      "path": "skills/crystal-bears-director/SKILL.md",
+      "sha256": "58bb4fabafb67bddf778357e79368c50ecb3c6cf26a8b3c2c1a6f7756d5ff9f8"
+    },
+    "runtimeDp": {
+      "path": "skills/crystal-bears-dp/SKILL.md",
+      "sha256": "7f2513d6b84f57ecb5d959d26cf81f3510b9e9c819c16884ccb9e3499ddc319e"
+    },
+    "runtimePost": {
+      "path": "skills/crystal-bears-post/SKILL.md",
+      "sha256": "c54d22b1cdc3ccc5720b7e821abc5bd5ae0512fecca1022d64e0468541254577"
+    },
+    "runtimeVoice": {
+      "path": "skills/crystal-bears-voice-director/SKILL.md",
+      "sha256": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+    },
+    "runtimeWriter": {
+      "path": "skills/crystal-bears-writer/SKILL.md",
+      "sha256": "57a999c5e0e0df3d338e54d6e5e7a37015f2125583cf402983f1c58dfa1bedb6"
+    },
+    "sfxLibrary": {
+      "path": "shows/crystal-bears/canon/sfx_library.json",
+      "sha256": "d8b002e0a893538994afe853444d59db2b7c45c01170dd3c562ba328b9782605"
+    },
+    "showBible": {
+      "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
+      "sha256": "5d52fc5ff8619362601b3ae062cb683264de3d065e9e872871baf79f908a97b3"
+    },
+    "showrunnerTaste": {
+      "path": "shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
+      "sha256": "f89cdcd52882922e24dac387a3e8801f87e59a8ebf05ca00869ea5a5e54a3855"
+    },
+    "studioBible": {
+      "path": "CRYSTAL_BEARS_STUDIO_BIBLE.md",
+      "sha256": "51b44ba88d6134f40c6e6864d13416358b9149ec945557a4fc839e578e716215"
+    },
+    "styleLaw": {
+      "path": "shows/crystal-bears/laws/style.txt",
+      "sha256": "3ae10a9dec81cc0fdee843a6dfd1a9d1b5e018f3beeb3e57b84be1d10806e113"
+    },
+    "voicePerformance": {
+      "path": "shows/crystal-bears/creative/VOICE_PERFORMANCE_CANON.md",
+      "sha256": "0adf591d9e879f2d07fe4e816f78c3b7d48bfa67fe839e53a119e430889d9d1c"
+    },
+    "wingLaw": {
+      "path": "shows/crystal-bears/laws/wing_law.txt",
+      "sha256": "8206442c4881c0a245fc41a7884a889891ba504254f36238018f1cb52b90d16d"
+    }
+  },
+  "characters": {
+    "Aida": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Aida_expressions.jpeg",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "85181f284b1b463fed212326a20fe0204818018b906e2609388db632197f47fc"
+        },
+        {
+          "path": "cb-seed/assets/CB_Aida_front-back.png",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "f735cae3de105b495cc2d09c2e1397ac8441f885fd3841b9c00be39f2ea67426"
+        },
+        {
+          "path": "cb-seed/assets/CB_Aida_poses.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "68ebf7b17fb60c16881529740945f410aee461a9c0f7ac8c9c686f4611112d58"
+        },
+        {
+          "path": "cb-seed/assets/CB_Aida_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "278642798a5deef98e50acbcaba49efa44a9d46c1550e4fe7fa17c99f8203c10"
+        },
+        {
+          "path": "cb-seed/assets/CB_Aida_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "15abc986c27851cdd9cf125170e89e0790a86d299478d175f2a3740a3978a86c"
+        },
+        {
+          "path": "cb-seed/assets/characters/Aida/CB_Aida_char-sheet.png",
+          "roles": [
+            "refs[7]"
+          ],
+          "sha256": "607198319c9217ea78b9799b32a2af649ae10505af6f643744c76055b1319a08"
+        },
+        {
+          "path": "cb-seed/assets/characters/Aida/CB_Aida_expressions-1.jpeg",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "5874634db7d3a6641450e042c3c4b30e1fabb653f0239b50a7df5775143f0251"
+        },
+        {
+          "path": "cb-seed/assets/characters/Aida/CB_Aida_expressions-2.jpeg",
+          "roles": [
+            "refs[9]"
+          ],
+          "sha256": "85181f284b1b463fed212326a20fe0204818018b906e2609388db632197f47fc"
+        },
+        {
+          "path": "cb-seed/assets/characters/Aida/CB_Aida_front-back.png",
+          "roles": [
+            "refs[8]"
+          ],
+          "sha256": "f735cae3de105b495cc2d09c2e1397ac8441f885fd3841b9c00be39f2ea67426"
+        },
+        {
+          "path": "cb-seed/assets/characters/Aida/CB_Aida_pro-turn-1.jpeg",
+          "roles": [
+            "refs[10]"
+          ],
+          "sha256": "bdd6d9b11293c66d787b13b9d2ff3d217a216ce7650365f0488f6a5057c2c377"
+        },
+        {
+          "path": "cb-seed/assets/characters/Aida/CB_Aida_render-1.png",
+          "roles": [
+            "refs[11]"
+          ],
+          "sha256": "c0f13f2e93abc386e653a0f26094584dcecce02e1da142d0ad52ffd2f91644a8"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Aida_house-ext.png",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "4b961307e846451c568276652956fa738d6a26a868ff8841d4d5f81c6830bfd4"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Aida_house-int-multicam.jpeg",
+          "roles": [
+            "house.interiorMulticam"
+          ],
+          "sha256": "c9f53b1defb442a41873634910403e7ee611c847986cb326689991e61fece75e"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Aida_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "c5fd1ccaaaf236e69bda1e3edf24b8875c88f67e8ef444c7177889986034fb1c"
+        }
+      ]
+    },
+    "Sunny": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Sunny_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "f9909f7476da87b15b7f9f20fae8686d32b0b79c381ccc15b57d31e101789238"
+        },
+        {
+          "path": "cb-seed/assets/CB_Sunny_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "ccec277fedfb22023c32ba579f31a435ca54d99b2d0ed81fa3ae4da6eb863b78"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_char-sheet.png",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "46c8471c6be677170b742a96adca2a116288b310e0cba158992ef39d1ad98467"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_expressions-1.jpeg",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "d05d7deb33b5c38ad587e104e12c3eb67b79e91319cc45737b2765820ea830da"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_expressions-2.jpeg",
+          "roles": [
+            "refs[7]"
+          ],
+          "sha256": "7c2e31be14e1554a2bd7b310a1d8ab3b72fff44057b5f620e2b7a5692af4965f"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_front-back-2.jpeg",
+          "roles": [
+            "refs[8]"
+          ],
+          "sha256": "70e0be7f82a5516e79032a6bf65aec0a3ebc16ea6323ca48fd9d49e071a1bcb9"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_front-back.png",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "f835055d56e2a656bc6acb80cb809384a292dc49bc2c636147f3df6e357ad246"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_portrait.png",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "1f6a3f588c647fbd674bb3294b361fdc1271d9b31605903d411edba50411d9d3"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_pro-turn-1.jpeg",
+          "roles": [
+            "refs[9]"
+          ],
+          "sha256": "3f01a10ab162dbae86c34635f40f88d19062bb0b431e67528d806883fa4e3c1b"
+        },
+        {
+          "path": "cb-seed/assets/characters/Sunny/CB_Sunny_pro-turn-2.jpeg",
+          "roles": [
+            "refs[10]"
+          ],
+          "sha256": "c679b1b3b6fe124da5b07d1b17027f59d5e469991e5e019bf09e22e1b74442d0"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "a77fbe8a031ed4e3f818d176b1f273a81d0fb17665d8e3f28147cdf4bec9d1ef"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Sunny_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "9a252778045b96b33c68a2b740a7eb3d59ccbd5c41de083da24a15382de0b912"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Sunny_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "b0bb0bebad6e6f8690d1a1044695070d385671238b3d28f5591455265bc3f18b"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Sunny_house-int-multicam.jpeg",
+          "roles": [
+            "house.interiorMulticam"
+          ],
+          "sha256": "47726c880f43ced21b4161069b69fed97efbe307fcc71fb1fbed63614a5f6c28"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Sunny_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "6ff9f1984725a698b80ffcc61497fc1c72031c8addb83eb82c4f392c48cb5844"
+        }
+      ]
+    },
+    "Luna": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Luna_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "8ce9520144120c7c5f3d86c4afdd5dabe065839ae3e494d45df14b36bf1f5ed6"
+        },
+        {
+          "path": "cb-seed/assets/CB_Luna_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "daea078a395d2a0d088fcacb24199fcc268d8f916fb066b70d809f95d308de91"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_char-sheet.png",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "096589722a65a3a1d5363933ee523f6e7b56ccf27b5b7fdb93461f29001aec33"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_expressions-1.jpeg",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "129683f491c1e3e61fe62cb4409efdb380f475d1b5c7717565e188102b1e12ce"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_expressions-2.jpeg",
+          "roles": [
+            "refs[7]"
+          ],
+          "sha256": "98baa5791772e8cea7bce1c7d14984d3c9cd481456d2a7ed7375772289058af3"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_front-back.png",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "ce9e88b9c1c1d19b01b08882a3bc2ffb4bdfe6b092eae79ea151c8cd22f19322"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_pro-turn-1.jpeg",
+          "roles": [
+            "refs[8]"
+          ],
+          "sha256": "f631039412b48255769bea7c66410d2c522ea67dc936b36a9f402949d6e11a6f"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_pro-turn-2.jpeg",
+          "roles": [
+            "refs[9]"
+          ],
+          "sha256": "b566318b286211eb81e40b277d02f5534b46e85e6d0a43e32cff136b18e0c66e"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_pro-turn-3.jpeg",
+          "roles": [
+            "refs[10]"
+          ],
+          "sha256": "71088ad0c88b9a8ea22092234b3f931669fdd3f73d0904fd98ecb9a83e69be8c"
+        },
+        {
+          "path": "cb-seed/assets/characters/Luna/CB_Luna_render-1.png",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "9c3c23a6147a4849f2c4573aa9b22f3b922d01d7a225be2997f0ec8e2202c7c2"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "c606b18e95fb5a02d85dbac065001b37ad37521ef9dc663d4cd0200a3cefb0a4"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Luna_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "496cb7f359998fe6e1fca90a87609aa45b5b049a2b18168bc32f04e68cacc85f"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Luna_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "799db9cfe61182852a836b397b4ba2ecf3f40721b1746a025051a83a5cec344a"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Luna_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "c3adf0190107dcfedff41c771fb6cc58ee421e4663fe9b496f8f3456a2a8d86c"
+        }
+      ]
+    },
+    "Misty": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Misty_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "bd963ae8d6e86fc24f4967e6e0cda840135d60fc653efdadd6e00fe360acd133"
+        },
+        {
+          "path": "cb-seed/assets/CB_Misty_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "b8697420287374617941867b535ac49a07d5f4072929e25d72dc7730c8f55bdf"
+        },
+        {
+          "path": "cb-seed/assets/characters/Misty/CB_Misty_char-sheet.jpeg",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "fd88c0f56f13d9fa5469a53cda93bb7f4c0b7f381c0ce46944a24df55fdee69a"
+        },
+        {
+          "path": "cb-seed/assets/characters/Misty/CB_Misty_expressions-1.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "e15cedcb293355bfd50f006ca56805254e4e2381725a4e49e4a6a8eed144356f"
+        },
+        {
+          "path": "cb-seed/assets/characters/Misty/CB_Misty_pro-turn-1.jpeg",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "617d6113a401c82d76afb3bbe889e9add7fd78300ad0914866583f13cd84a9e5"
+        },
+        {
+          "path": "cb-seed/assets/characters/Misty/CB_Misty_pro-turn-2.jpeg",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "309f67116ae8fd02c0fac4f27df0a9ebde52830296c1b4c1c0ca0288ee63acc5"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "e16d95d0182d3cc86b54d09e8f478fd8c8f912f55cc4afcc1dc641305df465b6"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Misty_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "8f6c4c69871738ce088838235da3a3a4440b2bca4b57d1b0d2536f941e22f5fd"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Misty_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "87a010792c953149d9c25949647670d0ae048cbeb665a5fc832ab9d7d0efb3de"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Misty_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "d5cf90f27e7be898fe000a36649b4f074533a14a02e7055f407a12b5602a5e53"
+        }
+      ]
+    },
+    "Amie": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Amie_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "39ab996d7b7bbf8c13a29edf0c443196fb98cb0a71b5da412849042ad2245e41"
+        },
+        {
+          "path": "cb-seed/assets/CB_Amie_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "e4c5507559f252ca05c8ddf2a6bd8939768465cd29f8c5268b16cc52bbe92c4d"
+        },
+        {
+          "path": "cb-seed/assets/characters/Amie/CB_Amie_expressions-1.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "b2d59a0cfc3926d50f83b7ebff2276789b98dd99c7afab461f943c502503c6bf"
+        },
+        {
+          "path": "cb-seed/assets/characters/Amie/CB_Amie_expressions-2.jpeg",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "5d68f634ba132c271d9cc249e8107f131da258d09ab89255524a15cc02b82a50"
+        },
+        {
+          "path": "cb-seed/assets/characters/Amie/CB_Amie_pro-turn-1.jpeg",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "c874cbce12eb8feb813b80bf3bb783decce636df0e701059d4fe5b02ceaba034"
+        },
+        {
+          "path": "cb-seed/assets/characters/Amie/CB_Amie_pro-turn-2.jpeg",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "c175d1288ae063fa10ada127dc21565257314d0006b768f54343ac6c280074d7"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "8e521c72177e835505f82edbb32f136d0240ab54492827fd94c5742a5b2171d4"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Amie_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "eacfafe93f4ad92a6095a0890251b04334687285835c1bce31287185ddd521f6"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Amie_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "990986822ec9560f6ddb99ad281aa470e93e905f161e9df7f5b43ce716dbac4d"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Amie_house-int-multicam.jpeg",
+          "roles": [
+            "house.interiorMulticam"
+          ],
+          "sha256": "7c66eee400b4e898cf0f10102df847525248907af7f8669dc3b31d2f6fe3cfe0"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Amie_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "8118ce5bcd8965b1700d185c7dd66cd293df050a654de06343391a7f1ecd3c49"
+        }
+      ]
+    },
+    "Howey": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Howey_expressions.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "277e2383fd7cb44f5f1a285bf27614f86d88e2f7d2bb730b8548a9274a7609e9"
+        },
+        {
+          "path": "cb-seed/assets/CB_Howey_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "639741d817ace54823d1fe1254000333cc2edeca1605a0f5df6d654087d646aa"
+        },
+        {
+          "path": "cb-seed/assets/CB_Howey_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "87a30df769f7ef755f6040bf26522e8503acd4826e9c2705f431be550e798b85"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_char-sheet.png",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "bf3c9c2c58c49268fa5720e1c3cdbc3fd3a2a99d2042c7f1b7e04dc1d7953dd5"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_expressions-1.jpeg",
+          "roles": [
+            "refs[7]"
+          ],
+          "sha256": "5a75eb3d9766f48fa1850ea3afb73fe2080dbded89a885dfc8a0fd61c27690f6"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_expressions-2.jpeg",
+          "roles": [
+            "refs[8]"
+          ],
+          "sha256": "47fcf3eb38fc135b4a1ffc7fea3964e639b78519714141a31272927e94431136"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_front-back.png",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "8161d8cfddce682c05cf12203b6660246e3181e885c71edbae3504e78ce308ca"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_pro-turn-1.jpeg",
+          "roles": [
+            "refs[9]"
+          ],
+          "sha256": "20bc5235c64cfc51b72adda3910b83453004b554edfe6533486155b59a089914"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_pro-turn-2.jpeg",
+          "roles": [
+            "refs[10]"
+          ],
+          "sha256": "35355b9310cb115b9fb3c0d8923265832cbeb68afb45916bb37d46b09f0e5856"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_pro-turn-3.jpeg",
+          "roles": [
+            "refs[11]"
+          ],
+          "sha256": "7208ff9a1ccfc529af6dcd54ffa1f15298e1664a21319b877fba0bcd7a6bb3a0"
+        },
+        {
+          "path": "cb-seed/assets/characters/Howey/CB_Howey_render-1.png",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "fb54f4bfb7c6edce0a71dc7486b14e491c819ba1b646168111b7a729bca9c323"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "3c32364fb292c00fc868f679d577cdc3598b9abc8e34407ae2d0e433bcf83ad3"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Howey_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "816d0df9c80ac299809720e9a233460f137f29be9f5f666ac13430dc2205b6a5"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Howey_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "fc5fab49131fc59356e347f5a043d5cb184c845a7790a0fba8da707cb3de8ab8"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Howey_house-int-multicam.jpeg",
+          "roles": [
+            "house.interiorMulticam"
+          ],
+          "sha256": "324879454f6d392e11fff2342d0f6c36d60054c85e8fb8d1eeb7a5cf471f0b89"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Howey_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "7db06b665cfb16b1c6651ad4c300fe9166a82273ef9785da9ebdcecd5d8d9171"
+        }
+      ]
+    },
+    "Keen": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Keen_turnaround_pro.jpeg",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "70762a6133a7e8b96ffa4315b8e7c2112c7ae6340d8c75b33fdc2199c9f8913f"
+        },
+        {
+          "path": "cb-seed/assets/characters/Keen/CB_Keen_char-sheet.jpeg",
+          "roles": [
+            "refs[6]",
+            "states.cuffs.turnaround"
+          ],
+          "sha256": "227b36e28c6fe3cdc6e3792ea591187f968ead0441ee0354c89e55e12cdb5621"
+        },
+        {
+          "path": "cb-seed/assets/characters/Keen/CB_Keen_expressions-1.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "376d496c5bbe87a23c3cddd48899ceaec85c0f2774b0fa7b52e26544d1200125"
+        },
+        {
+          "path": "cb-seed/assets/characters/Keen/CB_Keen_expressions-2.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "83ef2180603af5133e655ef446239f8ccb891f98aefc8afceb19308343f929fb"
+        },
+        {
+          "path": "cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+          "roles": [
+            "refs[7]",
+            "states.no-cuffs.turnaround"
+          ],
+          "sha256": "0514d405b5b72e2c6401204ac7f633785b2e6ace5794ac760d5ac1b0d29e38ed"
+        },
+        {
+          "path": "cb-seed/assets/characters/Keen/CB_Keen_pro-turn-1.jpeg",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "581fdba6dee6d4550df56124c54673e71d6bcfc9744037d9e4e38795d06b6d7a"
+        },
+        {
+          "path": "cb-seed/assets/characters/Keen/CB_Keen_pro-turn-2.jpeg",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "6e112af38983acc25f14531b314f7e4763c217165d03b7439a6a032b13865de7"
+        },
+        {
+          "path": "cb-seed/assets/ep1/CB_Keen_wristband_crystal.jpeg",
+          "roles": [
+            "wristband_states.crystal[1]"
+          ],
+          "sha256": "1fa42ccd0af19514f20260b6e8001b7b78fbaf2d418657f7c9fb85cc4790d905"
+        },
+        {
+          "path": "cb-seed/assets/ep1/CB_Keen_wristband_vacant.jpeg",
+          "roles": [
+            "wristband_states.vacant[1]"
+          ],
+          "sha256": "c17662469e556f97f86e9f4ed05a1f448741399cf95d05b334610352f0e25eef"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "6a4dc443c44eb691f2285477a7671184f78fa58b73242e965ece037419fe6781"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Keen_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "997d98e4011310078dcf5f118b2d0e163572789486dafa545d35bfcf1548d36e"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Keen_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "17326d83b5b45c3ba953e4aed8e6d1d67bf97928b892b8b505f0efd568fd8189"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Keen_house-int-multicam.jpeg",
+          "roles": [
+            "house.interiorMulticam"
+          ],
+          "sha256": "033f7d75d4db53398225cf20c6bc93755b9dea9b165b7f2f3527b2c524c8c7e5"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Keen_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "fb280ee9fd672338c963d9195ebbdb9d58da3e45a7b071728e9e4ad195fe31c3"
+        }
+      ]
+    },
+    "Fuzzby": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Fuzzby_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "bdc800f333f68b69a6c0651b0774038f9c7d0209a0c4dc8d60cc4711f9655ec6"
+        },
+        {
+          "path": "cb-seed/assets/CB_Fuzzby_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "dcd821ec339856ebc8b56eb9735873893fea8469d31cd296b0365580d3b5e8e1"
+        },
+        {
+          "path": "cb-seed/assets/characters/Fuzzby/CB_Fuzzby_char-sheet.jpeg",
+          "roles": [
+            "refs[7]"
+          ],
+          "sha256": "aacfebdfcd797b40a5356d31d98849717ce727c7ec65ffd58877d7598d311d97"
+        },
+        {
+          "path": "cb-seed/assets/characters/Fuzzby/CB_Fuzzby_expressions-1.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "0dae190dc5011b69a20ee911ca1a1bf04d3ededfbd8ac6352df6af32337d6963"
+        },
+        {
+          "path": "cb-seed/assets/characters/Fuzzby/CB_Fuzzby_expressions-2.jpeg",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "da11d9fc149babdd2fa5efbc4665d77bcad61a2f748ee873ca3dbcb94f87896c"
+        },
+        {
+          "path": "cb-seed/assets/characters/Fuzzby/CB_Fuzzby_pro-turn-1.jpeg",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "1020bace6145ad2b23058b23a1cdac71ddb58f757852615d65afebd611f17cd9"
+        },
+        {
+          "path": "cb-seed/assets/characters/Fuzzby/CB_Fuzzby_pro-turn-2.jpeg",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "f3e2c07b7efe6b05a211edc8610542511aa433ec4daeb480bd4ac1a4bd8baf46"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Fuzzby_house-ext-multicam.jpeg",
+          "roles": [
+            "house.exteriorMulticam"
+          ],
+          "sha256": "ceb60ea4c649ed5016f9db9cf74afa7c83fb4c9c875122278815c031cda2ec5e"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Fuzzby_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "aa4f6a2f72e0fc12400f150daa9b17103c04793aab496122e9e7a2a73005e7ea"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Fuzzby_house-int-multicam.jpeg",
+          "roles": [
+            "house.interiorMulticam"
+          ],
+          "sha256": "58cf5d2d0edef06a64f27833dbff2d1b750e7b8411a3eaa09f28a3450365c123"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Fuzzby_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "ac7a07a227005f3a1713eebacf7c1a94388ac5483f3a79809dbc4b5f1d258452"
+        }
+      ]
+    },
+    "Zenny": {
+      "tier": "principal",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Zenny_expressions.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "b8233e58fd03539a9f8c4e950c5b0fad0246767e53974228c71be31d26878bab"
+        },
+        {
+          "path": "cb-seed/assets/CB_Zenny_fb.png",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "4c949a569b1a88ed2368aa0fb9528dacf2c0b9938153a6b2619545a3d71c4fee"
+        },
+        {
+          "path": "cb-seed/assets/CB_Zenny_front.png",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "fc3100015a08039fdb6234fc724cf671fc9085dd2f956dded559bebcb2a4d09e"
+        },
+        {
+          "path": "cb-seed/assets/CB_Zenny_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "4c949a569b1a88ed2368aa0fb9528dacf2c0b9938153a6b2619545a3d71c4fee"
+        },
+        {
+          "path": "cb-seed/assets/CB_Zenny_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "089c46e632d21cf57802f270f118baa2c91dc48b1c839fe829b1eaedd36ba385"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Zenny_house-ext.jpeg",
+          "roles": [
+            "house.exterior"
+          ],
+          "sha256": "450980f99646e3d46f11769afd0d9d7f000ae9d52481f11bbdf9d3c5f9d32d42"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Zenny_house-int.jpeg",
+          "roles": [
+            "house.interior"
+          ],
+          "sha256": "302c9db4353a736380e723ec2c98cbcb24db0f6c290822cc03ac0cc3d9bdf79d"
+        }
+      ]
+    },
+    "Keen's Mum": {
+      "tier": "recurring-guest",
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_KeensMum_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "94b714e08862a0b60f5032d553e796f3d48bcdb9cbdc9ba0e7e08dd37f8c0b6c"
+        },
+        {
+          "path": "cb-seed/assets/characters/KeensMum/CB_KeensMum_expressions.jpeg",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "db7234e3ab0302659a4885799bb40f29a952fb230b5c6b475e19706966590d0a"
+        },
+        {
+          "path": "cb-seed/assets/characters/KeensMum/CB_KeensMum_modelsheet.jpeg",
+          "roles": [
+            "refs[4]"
+          ],
+          "sha256": "de0fed83cd465f3cf7c82464c983a414d62ef2a29b4461b6d63cdade0fc72d0d"
+        },
+        {
+          "path": "cb-seed/assets/characters/KeensMum/CB_KeensMum_turnaround.jpeg",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "606b2607d6df4b85e4305a196ee90abf254b49759ce0000f79d9c39c9c7296fb"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "fa3d70111949ef90b675419ed42c91946261f4e45d62e623bb156aac72ccc43a"
+        }
+      ]
+    },
+    "Squeaky": {
+      "tier": "recurring-guest",
+      "status": "locked",
+      "voiceMode": "nonverbal-sfx",
+      "assets": [
+        {
+          "path": "cb-seed/assets/CB_Squeaky_turn4.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "db3c223127e9babc46584bb4d233ad9f4ced734edf3a28d89b9e3b9820418e76"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "1d603e20e2b8acdb2c96850152c83f0ada89d685333882c910897f0d3ea43404"
+        }
+      ]
+    },
+    "Bo": {
+      "tier": "recurring-guest",
+      "status": "stub",
+      "voiceMode": "unassigned",
+      "assets": []
+    }
+  },
+  "locationAssets": [
+    {
+      "path": "cb-seed/assets/locations/crystal_cove_meadow.png",
+      "roles": [
+        "locationLibrary.crystal_cove_meadow"
+      ],
+      "sha256": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098"
+    },
+    {
+      "path": "cb-seed/assets/locations/deep_rainforest.png",
+      "roles": [
+        "locationLibrary.deep_rainforest"
+      ],
+      "sha256": "b6971fa06bad5527a41d6fbf10dcd3b870f0031af47aaf97dbf4c23ab6b7b87a"
+    },
+    {
+      "path": "cb-seed/assets/locations/deep_rainforest_flower_field.png",
+      "roles": [
+        "locationLibrary.deep_rainforest_flower_field"
+      ],
+      "sha256": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098"
+    },
+    {
+      "path": "cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+      "roles": [
+        "Ep1.scene1.master",
+        "locationLibrary.deep_rainforest_flower_meadow"
+      ],
+      "sha256": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
+    },
+    {
+      "path": "cb-seed/assets/locations/deep_rainforest_flowers.png",
+      "roles": [
+        "locationLibrary.deep_rainforest_flowers"
+      ],
+      "sha256": "1ba4e4e9b0929d8232e8c64e6bf99a9051251859984abb0201ddc018e8482be2"
+    },
+    {
+      "path": "cb-seed/assets/locations/rainforest_flower_meadow.png",
+      "roles": [
+        "locationLibrary.rainforest_flower_meadow"
+      ],
+      "sha256": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
+    }
+  ],
+  "manifestDigest": "b2ffc02fcdce202e5355c1c58ac1b995c85d37487865d2a68b5fce797a3db616"
+}

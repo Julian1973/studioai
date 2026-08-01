@@ -14,7 +14,7 @@
    "weather": "Warm breeze, clear sky; far over the hills the light has begun to cool almost imperceptibly with the first atmospheric warning of the coming storm — a faint grey-violet band low on the horizon, no rain yet.",
    "colorTemperature": "Gold-pink sky over the hills, purple-lavender and daisy-white flower field, green stems and grass, gold pollen accents — the locked plate's own palette, restated nowhere in prompts beyond what the plate itself shows.",
    "definingFeature": "Towering pollen-heavy flowers standing in an open bed under open sky — springy, reactive obstacles at bee scale, with nothing overhead.",
-   "master": null,
+      "master": "cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
    "shots": []
   },
   "2": {

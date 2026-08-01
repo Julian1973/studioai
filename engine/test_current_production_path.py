@@ -5,9 +5,19 @@ import pathlib
 
 import pytest
 
+import cb_canon
 import cb_render as R
 from test_golden_path import (world, _approve_animation_direction,
                               _approve_director_review)
+
+
+@pytest.fixture(autouse=True)
+def isolated_canon(monkeypatch):
+    digests = {name: "c" * 64 for name in (
+        "story", "storyboard", "look", "cinematography", "voice",
+        "animation", "review", "post")}
+    monkeypatch.setattr(cb_canon, "require_locked", lambda *args, **kwargs: {
+        "manifestDigest": "m" * 64, "profileDigests": digests})
 
 
 def _approve_specialist_inputs(pkg):

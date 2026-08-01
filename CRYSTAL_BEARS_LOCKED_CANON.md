@@ -100,7 +100,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 - 2 bees: **Fuzzby** (chaos / "The Laughter Maker", signature sound "BUZZZZZZ-CRASH!"; **bigger, male**) + **Zenny** (calm / "The Calm Keeper", signature sound "Ommmmm… ping"; **smaller, female**)
 
 **Recurring guests (canon, separate tier — decided 2026-06-19):**
-- **Squeeky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
+- **Squeaky** — a dolphin (full model sheet exists). Not a principal; appears as a recurring guest.
 - **Keen's Mum** — a bear (single reference exists). Recurring guest / family.
 - **Bo** — a cub (T6 ruling, 2026-07-02, Julian: CONFIRMED recurring-guest tier, Ep2's lead). No reference art or
   bible yet — a `characters.json` stub exists so Ep2's pipeline/canon isn't blocked, but species/appearance,
@@ -129,7 +129,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 - **Bo's Mum** — appears alongside Bo in an example episode. No assets in the library yet; needs her own stub + Julian's confirmation once Bo's entry is filled in.
 - **The Great Oak** — the world's wisdom-keeper (sentient tree). Canon environment-character; deep resonant voice.
 
-> The cast-lock check (`cb_director._script_roster`) reads `characters.json` dynamically — no hardcoded name list to amend. The `crystal-bears-continuity` skill's checklist wording ("cast lock — only the 7 bears + Fuzzby + Zenny, plus approved guests Squeeky/Keen's Mum") is updated to include Bo in the same commit as his stub.
+> The cast-lock check (`cb_director._script_roster`) reads `characters.json` dynamically — no hardcoded name list to amend. The `crystal-bears-continuity` skill's checklist wording ("cast lock — only the 7 bears + Fuzzby + Zenny, plus approved guests Squeaky/Keen's Mum") is updated to include Bo in the same commit as his stub.
 
 ---
 
@@ -209,7 +209,7 @@ Source: `…/Crystal Bears Production/archive-extracted/`. For reference-conditi
 | **Fuzzby** | `Fuzzby_turnaround_af63ed42f3.jpeg` | Fuzzby Pro Turn 1–2; Pro Exp 1–2 | Fuzzby Inside single (+ House Inside) | Fuzzby House Outside (+ Multicam) | — |
 | **Zenny** | `Zenny_turnaround_d1b69eae50.jpeg` | Zenny Pro Turn 1–2; Pro Exp 1–2 | Gemini ivqsvg | Can_you_upscale_202512021651 | only 1 each house |
 
-**Recurring guests:** Squeeky → `Squeeky_the_dolphin_1fd9d5c5fa.jpeg` (dolphin model sheet); Keen's Mum → `Keens_mum_7f1cbab053.jpeg`.
+**Recurring guests:** Squeaky → `Squeeky_the_dolphin_1fd9d5c5fa.jpeg` (dolphin model sheet); Keen's Mum → `Keens_mum_7f1cbab053.jpeg`.
 
 **Naming convention (for the app's auto-anchor):** `CB_[Character]_[type]_[NN]` where type ∈ {anchor, turnaround, expr, poses, house-int, house-ext, fav-place}. Exactly one `anchor` per character (the single clean front the edit-mode passes first). Recommend renaming/tagging on ingest so the app can deterministically pick the anchor.
 

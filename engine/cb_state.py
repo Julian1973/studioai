@@ -16,7 +16,7 @@ import cb_lineage
 import cb_render
 
 
-POLICY_VERSION = "direct-input-readiness-v1"
+POLICY_VERSION = "canon-locked-direct-input-readiness-v2"
 
 
 def _read_json(path):
@@ -86,11 +86,13 @@ def _storyboard_status(scene, episode, intake):
     source_version = (storyboard.get("sourceScript") or {}).get("scriptVersionId")
     inputs = signature.get("inputs") or {}
     active_beat_digest = intake.get("canonicalBeatPackageDigest")
+    active_canon_digest = (intake.get("canonProfileDigests") or {}).get("storyboard")
     current = bool(
         intake.get("canonicalCurrent") and
         storyboard.get("approvalState") == "approved" and signature_ok and
         source_version and source_version == intake.get("scriptVersionId") and
-        inputs.get("beatPackageDigest") == active_beat_digest)
+        inputs.get("beatPackageDigest") == active_beat_digest and
+        inputs.get("canonProfileDigest") == active_canon_digest)
     reason = None
     if not intake.get("canonicalCurrent"):
         reason = "story-intake-source-contract-missing-or-stale"
@@ -102,6 +104,8 @@ def _storyboard_status(scene, episode, intake):
         reason = "storyboard-script-version-mismatch"
     elif inputs.get("beatPackageDigest") != active_beat_digest:
         reason = "storyboard-beat-package-mismatch"
+    elif inputs.get("canonProfileDigest") != active_canon_digest:
+        reason = "storyboard-canon-lock-mismatch"
     return storyboard, current, reason
 
 
@@ -320,6 +324,16 @@ def production_state(scene, episode="Ep1"):
     scene = str(scene)
     intake = cb_intake.intake_status(episode)
     script_current = bool(intake.get("hasScript"))
+    canon_ready = bool(intake.get("canonLockCurrent") and
+                       intake.get("canonEpisodeReady"))
+    canon_summary = {
+        "current": bool(intake.get("canonLockCurrent")),
+        "episodeReady": bool(intake.get("canonEpisodeReady")),
+        "manifestDigest": intake.get("canonLockDigest"),
+        "profileDigests": intake.get("canonProfileDigests") or {},
+        "blockers": intake.get("canonBlockers") or [],
+        "warnings": intake.get("canonWarnings") or [],
+    }
     storyboard, storyboard_current, storyboard_reason = _storyboard_status(
         scene, episode, intake)
 
@@ -330,6 +344,10 @@ def production_state(scene, episode="Ep1"):
     intake_current = bool(intake.get("canonicalCurrent"))
     if not script_current:
         stages["storyboard"] = _stage("locked")
+    elif not canon_ready:
+        first = (canon_summary["blockers"] or [{}])[0]
+        stages["storyboard"] = _stage(
+            "blocked", first.get("message") or "canon lock is missing, stale or incomplete")
     elif not intake_current:
         if intake.get("hasCandidate") and intake.get("candidateCurrent"):
             stages["storyboard"] = _stage(
@@ -349,6 +367,32 @@ def production_state(scene, episode="Ep1"):
     else:
         stages["storyboard"] = _stage("awaiting", storyboard_reason)
 
+    if script_current and not canon_ready:
+        for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
+            stages[name] = _stage("locked")
+        first = (canon_summary["blockers"] or [{}])[0]
+        return {
+            "policyVersion": POLICY_VERSION,
+            "episode": episode,
+            "scene": scene,
+            "canonLock": canon_summary,
+            "packageExists": False,
+            "packageCurrent": False,
+            "staleBeatPackageIgnored": bool(intake.get("hasCanonicalPackage")),
+            "lineage": {"current": False, "reasonCodes": ["canon-lock-required"]},
+            "stages": stages,
+            "shots": [],
+            "_per": [],
+            "blockers": [{
+                "code": "CANON_LOCK_REQUIRED",
+                "stage": "storyboard",
+                "message": first.get("message") or
+                           "The approved canon snapshot is missing, stale or incomplete.",
+                "action": first.get("action") or
+                          "Resolve the listed canon issue and explicitly re-lock canon.",
+            }],
+        }
+
     if script_current and not intake_current:
         action = (
             "Review and approve the current episode Story & Direction candidate."
@@ -361,6 +405,7 @@ def production_state(scene, episode="Ep1"):
             "policyVersion": POLICY_VERSION,
             "episode": episode,
             "scene": scene,
+            "canonLock": canon_summary,
             "packageExists": False,
             "packageCurrent": False,
             "staleBeatPackageIgnored": bool(intake.get("hasCanonicalPackage")),
@@ -399,6 +444,7 @@ def production_state(scene, episode="Ep1"):
             "policyVersion": POLICY_VERSION,
             "episode": episode,
             "scene": scene,
+            "canonLock": canon_summary,
             "packageExists": package_exists,
             "packageCurrent": False,
             "lineage": lineage,
@@ -602,6 +648,7 @@ def production_state(scene, episode="Ep1"):
         "policyVersion": POLICY_VERSION,
         "episode": episode,
         "scene": scene,
+        "canonLock": canon_summary,
         "packageExists": True,
         "packageCurrent": package_current,
         "packageRevision": pkg.get("revision"),

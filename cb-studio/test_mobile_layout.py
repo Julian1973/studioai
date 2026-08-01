@@ -1,0 +1,44 @@
+from pathlib import Path
+
+
+APP = (Path(__file__).parent / "app.html").read_text(encoding="utf-8")
+
+
+def test_mobile_shell_handles_safe_areas_and_touch_targets():
+    assert 'content="width=device-width, initial-scale=1"' in APP
+    assert "html,body{max-width:100%;overflow-x:hidden" in APP
+    assert "env(safe-area-inset-left)" in APP
+    assert "env(safe-area-inset-bottom)" in APP
+    assert ".brand{min-height:44px}" in APP
+    assert ".nav a,.nav button{min-height:44px}" in APP
+    assert ".iconbtn{width:44px;height:44px" in APP
+    assert "font-size:16px!important;min-height:44px" in APP
+
+
+def test_generated_libraries_shrink_to_compact_phone_widths():
+    assert '.library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))' in APP
+    assert 'class="library-grid"' in APP
+    assert 'class="library-grid wide"' in APP
+    assert 'class="mc character-card"' in APP
+    assert 'class="mc asset-card"' in APP
+    assert 'class="mc character-detail-lead"' in APP
+    assert 'grid-template-columns:repeat(auto-fill,minmax(360px,1fr))' not in APP
+    assert 'grid-template-columns:repeat(auto-fill,minmax(440px,1fr))' not in APP
+
+
+def test_dense_forms_and_modals_reflow_on_mobile():
+    assert 'class="mobile-grid-2"' in APP
+    assert 'class="mobile-split"' in APP
+    assert 'class="wizard-character-add"' in APP
+    assert 'class="modal-actions"' in APP
+    assert ".mobile-grid-2{grid-template-columns:minmax(0,1fr)}" in APP
+    assert ".sheet{width:100%;max-height:calc(100dvh" in APP
+    assert 'class="table-scroll"' in APP
+
+
+def test_mobile_navigation_remains_reachable_without_page_overflow():
+    assert ".top{position:sticky;top:0;min-height:0" in APP
+    assert "overscroll-behavior-x:contain" in APP
+    assert "-webkit-overflow-scrolling:touch" in APP
+    assert ".toplinks{order:3;width:100%;height:46px" in APP
+    assert "#toast{left:max(12px,env(safe-area-inset-left))!important" in APP

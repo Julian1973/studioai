@@ -434,6 +434,7 @@ html{color-scheme:light;background:var(--bg)}
 html *{letter-spacing:0!important}
 body{min-height:100vh;background:var(--bg);color:var(--ink);font-size:14px}
 button,input,textarea,select{font-family:inherit}
+img,video{max-width:100%}
 
 .top{position:sticky;top:0;z-index:40;min-height:64px;padding:0 24px;gap:22px;background:#141719;border-bottom:1px solid #303538;box-shadow:0 1px 0 rgba(255,255,255,.04)}
 .brand{color:#f7f6f2;gap:11px;min-width:max-content}
@@ -565,6 +566,28 @@ button,input,textarea,select{font-family:inherit}
 .bigfire,.bigsign{border-radius:7px}
 .scriptbox,.prompt,.cjson,.ccta,.reject-cat,.pfeedback{border-radius:6px}
 
+/* Responsive primitives used by generated production views. */
+.mobile-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mobile-split{display:flex;gap:10px}
+.library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:12px}
+.library-grid.wide{grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr))}
+.character-card{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;align-items:start}
+.character-card-media{width:110px;min-width:0}
+.character-card-copy{min-width:0;overflow-wrap:anywhere}
+.character-detail-lead{display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px;align-items:start}
+.character-detail-media{width:170px;min-width:0}
+.character-detail-copy{min-width:0}
+.character-detail-row{display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}
+.character-detail-label{font-size:12px;color:var(--hint);font-weight:600}
+.asset-card{display:grid;grid-template-columns:170px minmax(0,1fr);gap:14px;align-items:start}
+.asset-card-media{width:170px;min-width:0}
+.asset-card-copy{min-width:0;overflow-wrap:anywhere}
+.asset-panes{display:flex;gap:16px;flex-wrap:wrap}
+.asset-pane{flex:1;min-width:min(230px,100%)}
+.wizard-character-add,.mobile-upload{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.modal-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
 @media (max-width:980px){
   .projgrid{grid-template-columns:minmax(0,1fr)}
   .projcard[data-primary="true"]{grid-row:auto}
@@ -572,27 +595,73 @@ button,input,textarea,select{font-family:inherit}
   .workspace{grid-template-columns:1fr}
 }
 @media (max-width:700px){
-  .top{position:relative;min-height:0;padding:10px 12px;gap:8px}
+  html,body{max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
+  .top{position:sticky;top:0;min-height:0;padding:10px max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));gap:8px}
+  .brand{min-height:44px}
   .brand-lockup{gap:4px}.brand-name{font-size:14px}.brand-studio{font-size:9px}
   .logo{width:29px;height:29px}
-  .topreviewer{margin-left:auto}.topreviewer label{display:none}.topreviewer input{width:76px}
-  .toplinks{order:3;width:100%;height:38px;border-top:1px solid #303538}
-  .tl{padding:0 10px}
-  .nav{background:#1c2022;border-color:#303538;padding:7px}
+  .topreviewer{margin-left:auto}.topreviewer label{display:none}.topreviewer input{width:76px;min-height:40px}
+  .toplinks{order:3;width:100%;height:46px;border-top:1px solid #303538;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .tl{min-height:44px;padding:0 10px}
+  .nav{background:#1c2022;border-color:#303538;padding:6px max(7px,env(safe-area-inset-right)) 6px max(7px,env(safe-area-inset-left));overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
   .nav a,.nav button{color:#a9b0b3}
-  .main{padding:24px 14px 46px}
+  .nav a,.nav button{min-height:44px}
+  .main{padding:24px max(14px,env(safe-area-inset-right)) calc(46px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));min-width:0;overflow-wrap:anywhere}
   .screenhead{margin-bottom:18px}.h1{font-size:25px}
   .screenhead--art{grid-template-columns:minmax(0,1fr);gap:12px;padding-bottom:14px}
   .screenhead-art{height:auto;aspect-ratio:16/5}
   .outcome{padding:15px;gap:14px}
   .outcome-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}
   .outcome-actions .btn{width:100%}
+  .btn,.bigfire,.bigsign,.filterchip,.backlink,.schip,.pqitem{min-height:44px}
+  .btn.ghost{margin-left:0}
+  .iconbtn{width:44px;height:44px;flex:0 0 44px}
+  input:not([type="checkbox"]):not([type="radio"]),textarea,select{font-size:16px!important;min-height:44px}
+  input[type="file"]{width:100%;max-width:100%;padding:8px 0}
   .projcard[data-primary="true"] .projcard-body,.projcard-body{padding:17px}
   .projcard[data-primary="true"] .projcard-name{font-size:23px}
+  .projcard-name{align-items:flex-start;flex-wrap:wrap}
   .projcard-artmeta{top:10px;left:10px;right:10px}
   .epgrid,.sceneboard{grid-template-columns:minmax(0,1fr)}
   .epthumb{aspect-ratio:16/9}
   .wizard-art-grid{grid-template-columns:minmax(0,1fr)}
+  .mobile-grid-2{grid-template-columns:minmax(0,1fr)}
+  .mobile-split{flex-direction:column}
+  .mobile-split>*{width:100%;min-width:0!important}
+  .library-grid,.library-grid.wide{grid-template-columns:minmax(0,1fr)}
+  .character-card{grid-template-columns:84px minmax(0,1fr);gap:10px;padding:12px}
+  .character-card-media{width:84px}
+  .character-detail-lead,.asset-card{grid-template-columns:minmax(0,1fr)}
+  .character-detail-media,.asset-card-media{width:100%}
+  .character-detail-media>div{max-height:66vh}
+  .character-detail-row{grid-template-columns:minmax(0,1fr);gap:2px}
+  .asset-panes{display:grid;grid-template-columns:minmax(0,1fr)}
+  .asset-pane{min-width:0}
+  .wizard-character-add,.mobile-upload{align-items:stretch;flex-direction:column}
+  .wizard-character-add>*,.mobile-upload>*{width:100%;min-width:0!important}
+  .modal{align-items:flex-end;padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  .sheet{width:100%;max-height:calc(100dvh - 16px - env(safe-area-inset-bottom));padding:18px 14px;overscroll-behavior:contain}
+  .x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:-10px -8px 0 8px}
+  .modal-actions .btn{min-width:0;flex:1;margin-top:0}
+  .form,.bible,.mc,.apanel,.cpanel,.ppanel,.agentpanel,.wcol-contents,.wcol-artefact,.wcol-decision{min-width:0;max-width:100%}
+  .form,.bible,.ppanel,.wcol-artefact,.wcol-decision{padding:14px}
+  .bible{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .wcol-contents{padding:12px}
+  .pdecision{align-items:stretch}
+  .pdecision .btn,.pdecision .bigfire,.pdecision .bigsign{width:100%;margin:0}
+  .pshotnav{flex-wrap:wrap}
+  .controw{align-items:flex-start;flex-direction:column}
+  .controw-id{flex:auto}
+  .controw-frames{width:100%;overflow-x:auto;padding-bottom:4px}
+  .disc-row{align-items:flex-start;flex-direction:column;gap:3px}
+  .disc-v{text-align:left}
+  .cbeat{align-items:flex-start;flex-wrap:wrap}
+  .cbeat .cbact{flex-basis:calc(100% - 90px);white-space:normal}
+  #toast{left:max(12px,env(safe-area-inset-left))!important;right:max(12px,env(safe-area-inset-right))!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
+  #toast>div{max-width:none!important}
+  #lightbox{padding:56px 12px calc(18px + env(safe-area-inset-bottom))}
+  #lbclose{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));width:44px;height:44px}
+  #lbcap{max-width:100%;flex-wrap:wrap;gap:8px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
@@ -912,14 +981,14 @@ function renderWizard(){
   const inp=(id,ph,val)=>`<input id="${id}" placeholder="${_esc(ph)}" value="${_esc(val||'')}" style="padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;width:100%;box-sizing:border-box"/>`;
   const ta=(id,ph,val,h)=>`<textarea id="${id}" placeholder="${_esc(ph)}" style="padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;width:100%;box-sizing:border-box;min-height:${h||140}px">${_esc(val||'')}</textarea>`;
   let body="";
-  if(S==1){ body=`<div class="lab" style="font-weight:600">1 · Identity &amp; format</div><div style="display:grid;gap:10px;margin-top:10px">${inp("wz_name","Project name",d.name)}${ta("wz_premise","Premise / logline — what is the show about?",d.premise,90)}${inp("wz_audience","Audience",d.audience)}<div style="display:flex;gap:10px">${inp("wz_eplen","Episode length",d.episodeLength)}${inp("wz_aspect","Aspect ratio",d.aspectRatio)}</div></div>`; }
-  else if(S==2){ const accent=safeThemeHex(d.accentColor,DEFAULT_PROJECT_THEME.accent);body=`<div class="lab" style="font-weight:600">2 · Animation type &amp; look</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Set the production medium, visual language and project identity.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${ANIM_TYPES.map(t=>`<button type="button" aria-pressed="${d.animationType===t.v}" onclick="wizCapture();wizSet('animationType','${t.v.replace(/'/g,"\\'")}');renderWizard()" style="font:inherit;color:inherit;text-align:left;cursor:pointer;border:2px solid ${d.animationType===t.v?'var(--brand)':'var(--line)'};border-radius:8px;padding:12px;background:${d.animationType===t.v?'var(--brandbg)':'var(--surface)'}"><div style="font-weight:600;font-size:13px">${_esc(t.v)}</div><div style="font-size:11px;color:var(--hint);margin-top:3px">${_esc(t.d)}</div></button>`).join("")}</div><div style="margin-top:12px">${ta("wz_style","Visual style notes & references — palette, tone, finish, reference titles…",d.style,90)}</div><div class="wizard-art-grid"><div class="wizard-art-controls"><label style="font-size:11px;color:var(--hint)">Project key art <input type="file" accept="image/png,image/jpeg,image/webp" onchange="wizKeyArt(this)"/></label>${d.coverImageData?`<button type="button" class="btn ghost" style="margin:0;width:max-content" onclick="wizRemoveKeyArt()">Remove key art</button>`:""}<label style="font-size:11px;color:var(--hint)">Project accent<div class="wizard-colour"><input id="wz_accent" type="color" value="${_attr(accent)}" oninput="wizSet('accentColor',this.value);this.nextElementSibling.textContent=this.value"/><code>${_esc(accent)}</code></div></label></div><div class="wizard-art-preview">${d.coverImageData?`<img src="${_attr(d.coverImageData)}" alt="Project key art preview"/>`:`Key art appears across the project and central production screens.`}</div></div>`; }
+  if(S==1){ body=`<div class="lab" style="font-weight:600">1 · Identity &amp; format</div><div style="display:grid;gap:10px;margin-top:10px">${inp("wz_name","Project name",d.name)}${ta("wz_premise","Premise / logline — what is the show about?",d.premise,90)}${inp("wz_audience","Audience",d.audience)}<div class="mobile-split">${inp("wz_eplen","Episode length",d.episodeLength)}${inp("wz_aspect","Aspect ratio",d.aspectRatio)}</div></div>`; }
+  else if(S==2){ const accent=safeThemeHex(d.accentColor,DEFAULT_PROJECT_THEME.accent);body=`<div class="lab" style="font-weight:600">2 · Animation type &amp; look</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Set the production medium, visual language and project identity.</p><div class="mobile-grid-2">${ANIM_TYPES.map(t=>`<button type="button" aria-pressed="${d.animationType===t.v}" onclick="wizCapture();wizSet('animationType','${t.v.replace(/'/g,"\\'")}');renderWizard()" style="font:inherit;color:inherit;text-align:left;cursor:pointer;border:2px solid ${d.animationType===t.v?'var(--brand)':'var(--line)'};border-radius:8px;padding:12px;background:${d.animationType===t.v?'var(--brandbg)':'var(--surface)'}"><div style="font-weight:600;font-size:13px">${_esc(t.v)}</div><div style="font-size:11px;color:var(--hint);margin-top:3px">${_esc(t.d)}</div></button>`).join("")}</div><div style="margin-top:12px">${ta("wz_style","Visual style notes & references — palette, tone, finish, reference titles…",d.style,90)}</div><div class="wizard-art-grid"><div class="wizard-art-controls"><label style="font-size:11px;color:var(--hint)">Project key art <input type="file" accept="image/png,image/jpeg,image/webp" onchange="wizKeyArt(this)"/></label>${d.coverImageData?`<button type="button" class="btn ghost" style="margin:0;width:max-content" onclick="wizRemoveKeyArt()">Remove key art</button>`:""}<label style="font-size:11px;color:var(--hint)">Project accent<div class="wizard-colour"><input id="wz_accent" type="color" value="${_attr(accent)}" oninput="wizSet('accentColor',this.value);this.nextElementSibling.textContent=this.value"/><code>${_esc(accent)}</code></div></label></div><div class="wizard-art-preview">${d.coverImageData?`<img src="${_attr(d.coverImageData)}" alt="Project key art preview"/>`:`Key art appears across the project and central production screens.`}</div></div>`; }
   else if(S==3){ body=`<div class="lab" style="font-weight:600">3 · Show bible</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Paste the world, tone, rules and canon — refine inside the project later.</p>${ta("wz_bible","The show bible — world, themes, tone, rules, canon…",d.showBible,200)}`; }
-  else if(S==4){ body=`<div class="lab" style="font-weight:600">4 · Characters</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Drop in each character with a reference image and key features.</p><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;border:1px dashed var(--brand);border-radius:8px;padding:10px"><div style="flex:1;min-width:130px">${inp("wz_cname","Character name",'')}</div><div style="flex:2;min-width:180px">${inp("wz_ckf","Key features",'')}</div><label style="font-size:11px;color:var(--hint)">Ref <input id="wz_cimg" type="file" accept="image/*"/></label><button class="btn" onclick="wizAddChar()">Add</button></div><div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${WIZ.chars.map((c,i)=>`<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:7px 10px"><div style="width:36px;height:46px;background:var(--surface2);border-radius:5px;overflow:hidden;flex:none">${c.imageData?`<img src="${c.imageData}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${_esc(c.name)}</div><div style="font-size:11px;color:var(--hint)">${_esc(c.keyFeatures||'')}</div></div><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="wizDelChar(${i})">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--hint)">No characters added yet.</div>'}</div>`; }
+  else if(S==4){ body=`<div class="lab" style="font-weight:600">4 · Characters</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Drop in each character with a reference image and key features.</p><div class="wizard-character-add" style="border:1px dashed var(--brand);border-radius:8px;padding:10px"><div style="flex:1;min-width:130px">${inp("wz_cname","Character name",'')}</div><div style="flex:2;min-width:180px">${inp("wz_ckf","Key features",'')}</div><label style="font-size:11px;color:var(--hint)">Ref <input id="wz_cimg" type="file" accept="image/*"/></label><button class="btn" onclick="wizAddChar()">Add</button></div><div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${WIZ.chars.map((c,i)=>`<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:7px 10px"><div style="width:36px;height:46px;background:var(--surface2);border-radius:5px;overflow:hidden;flex:none">${c.imageData?`<img src="${c.imageData}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${_esc(c.name)}</div><div style="font-size:11px;color:var(--hint)">${_esc(c.keyFeatures||'')}</div></div><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="wizDelChar(${i})">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--hint)">No characters added yet.</div>'}</div>`; }
   else if(S==5){ body=`<div class="lab" style="font-weight:600">5 · Voice &amp; audio</div><div style="display:grid;gap:10px;margin-top:10px">${inp("wz_voice","Voice provider (e.g. ElevenLabs)",d.voiceProvider)}${inp("wz_music","Music / composer style",d.musicStyle)}</div>`; }
   else if(S==6){ const accent=safeThemeHex(d.accentColor,DEFAULT_PROJECT_THEME.accent);body=`<div class="lab" style="font-weight:600">6 · Review &amp; create</div><div style="margin-top:10px;font-size:13px;line-height:1.7"><b>${_esc(d.name||'(unnamed)')}</b><br><span style="color:var(--hint)">Animation:</span> ${_esc(d.animationType||'—')}<br><span style="color:var(--hint)">Premise:</span> ${_esc(d.premise||'—')}<br><span style="color:var(--hint)">Audience:</span> ${_esc(d.audience||'—')}<br><span style="color:var(--hint)">Format:</span> ${_esc(d.episodeLength||'—')} · ${_esc(d.aspectRatio||'—')}<br><span style="color:var(--hint)">Show bible:</span> ${(d.showBible||'').length} chars<br><span style="color:var(--hint)">Characters:</span> ${WIZ.chars.length} (${_esc(WIZ.chars.map(c=>c.name).join(', '))||'none'})<br><span style="color:var(--hint)">Voice / music:</span> ${_esc(d.voiceProvider||'—')} · ${_esc(d.musicStyle||'—')}<br><span style="color:var(--hint)">Project identity:</span> <span aria-hidden="true" style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${accent};vertical-align:-1px"></span> ${_esc(accent)} · ${d.coverImageData?_esc(d.coverImageName||'key art attached'):'no key art attached'}</div><div id="wz_msg" style="font-size:12px;color:var(--brandink);margin-top:8px"></div>`; }
   const dots=[1,2,3,4,5,6].map(n=>`<span style="width:8px;height:8px;border-radius:50%;background:${n===S?'var(--brand)':(n<S?'var(--brandink)':'var(--line)')};display:inline-block"></span>`).join(' ');
-  document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button><h3>New Project</h3><div style="margin:6px 0 14px;display:flex;gap:5px;align-items:center">${dots}<span style="font-size:11px;color:var(--hint);margin-left:8px">Step ${S} of 6</span></div>${body}<div style="display:flex;justify-content:space-between;margin-top:18px;gap:10px"><button class="btn ghost" onclick="wizCapture();wizBack()" ${S==1?'disabled style="opacity:.4"':''}>← Back</button>${S<6?`<button class="btn" onclick="wizCapture();wizNext()">Next →</button>`:`<button class="btn" onclick="wizSubmit()">✓ Create project</button>`}</div>`;
+  document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button><h3>New Project</h3><div style="margin:6px 0 14px;display:flex;gap:5px;align-items:center">${dots}<span style="font-size:11px;color:var(--hint);margin-left:8px">Step ${S} of 6</span></div>${body}<div class="modal-actions"><button class="btn ghost" onclick="wizCapture();wizBack()" ${S==1?'disabled style="opacity:.4"':''}>← Back</button>${S<6?`<button class="btn" onclick="wizCapture();wizNext()">Next →</button>`:`<button class="btn" onclick="wizSubmit()">✓ Create project</button>`}</div>`;
 }
 function renderTop(){
   _syncHash();   // NAVIGATION CONTEXT ONLY (2026-07-17): the URL records where the user IS —
@@ -976,7 +1045,7 @@ function bibleBlock(c){
   const b=c.bible; if(!b)return '';
   const esc=s=>(''+s).replace(/</g,'&lt;');
   const sec=(label,val)=>val?`<div style="margin-top:11px"><div style="font-size:11px;font-weight:700;color:var(--brandink);text-transform:uppercase;letter-spacing:.5px">${label}</div><div style="font-size:13px;line-height:1.55;margin-top:3px">${esc(val)}</div></div>`:'';
-  const list=(label,arr,colr)=>(arr&&arr.length)?`<div style="margin-top:11px;flex:1;min-width:220px"><div style="font-size:11px;font-weight:700;color:${colr};text-transform:uppercase;letter-spacing:.5px">${label}</div><ul style="margin:4px 0 0;padding-left:18px;font-size:13px;line-height:1.55">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
+  const list=(label,arr,colr)=>(arr&&arr.length)?`<div style="margin-top:11px;flex:1;min-width:min(220px,100%)"><div style="font-size:11px;font-weight:700;color:${colr};text-transform:uppercase;letter-spacing:.5px">${label}</div><ul style="margin:4px 0 0;padding-left:18px;font-size:13px;line-height:1.55">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
   const meta=[b.crystal,b.colour,b.pillar,b.frequency].filter(Boolean).map(esc).join(' · ');
   return `<div class="mc" style="margin-top:14px;border-left:3px solid var(--brand)">
     <div class="lab" style="font-weight:700;color:var(--brandink);font-size:14px">Character Bible${b.title?` — ${esc(b.title)}`:''}</div>
@@ -1006,7 +1075,7 @@ async function renderCharacterDetail(){
   if(!c){view.innerHTML='<button class="btn ghost" onclick="showCharacters()">← Characters</button><div class="coming">Character not found.</div>';return;}
   const url=p=>p?BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now():"";
   const esc=s=>(''+s).replace(/</g,'&lt;');
-  const row=(label,val)=>val?`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)"><div style="width:140px;flex:none;font-size:12px;color:var(--hint);font-weight:600">${label}</div><div style="font-size:13px;line-height:1.5">${val}</div></div>`:'';
+  const row=(label,val)=>val?`<div class="character-detail-row"><div class="character-detail-label">${label}</div><div style="font-size:13px;line-height:1.5;min-width:0;overflow-wrap:anywhere">${val}</div></div>`:'';
   const voice=c.voiceId?`<span style="font-family:monospace;background:#f1eff8;border-radius:5px;padding:2px 8px">${c.voiceId}</span> <button class="btn ghost" style="padding:2px 8px;font-size:11px" onclick="navigator.clipboard&&navigator.clipboard.writeText('${c.voiceId}');this.textContent='✓ copied'">copy</button>`:'<span style="color:var(--danger)">⚠ no voice set</span>';
   const states=c.states?`<div class="mc" style="margin-top:14px"><div class="lab" style="font-weight:600;color:var(--brandink)">States — one character, switched per beat${c.canonicalState?' · canonical: '+c.canonicalState:''}</div><div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:10px">`+Object.entries(c.states).map(([k,s])=>`<div style="width:150px"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;border:2px solid ${s.canonical?'var(--brand)':'var(--line)'}"><a href="${url(s.turnaround)}" target="_blank"><img src="${url(s.turnaround)}" style="width:100%;height:100%;object-fit:cover"/></a></div><div style="font-size:12px;font-weight:600;margin-top:4px">${esc(s.label||k)}</div><div style="font-size:11px;color:var(--hint);line-height:1.4">${esc(s.note||'')}</div></div>`).join('')+`</div>`+(c.episodeArc?`<div style="font-size:12px;color:var(--hint);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px">`+Object.entries(c.episodeArc).map(([ep,a])=>`<b>${esc(ep)} arc:</b> ${esc(a.note||(a.startState+' → '+((a.transition&&a.transition.toState)||'')))}`).join('<br>')+`</div>`:'')+`</div>`:'';
   const wbents=c.wristband_states?Object.entries(c.wristband_states).filter(([k,v])=>Array.isArray(v)&&v.length):[];
@@ -1022,9 +1091,9 @@ async function renderCharacterDetail(){
     <button class="btn ghost" onclick="showCharacters()">← Characters</button>
     <h1 class="h1" style="margin-top:8px">${esc(CUR_CHAR)}${c.tier?` <span style="font-size:14px;color:var(--hint);font-weight:400">· ${esc(c.tier)}</span>`:''}</h1>
     ${callBlock(c)}
-    <div class="mc" style="display:flex;gap:18px;align-items:flex-start">
-      <div style="width:170px;flex:none"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden">${c.anchor?`<a href="${url(c.anchor)}" target="_blank"><img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/></a>`:'<span style="color:var(--hint);font-size:11px">no image</span>'}</div></div>
-      <div style="flex:1;min-width:0">
+    <div class="mc character-detail-lead">
+      <div class="character-detail-media"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden">${c.anchor?`<a href="${url(c.anchor)}" target="_blank"><img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/></a>`:'<span style="color:var(--hint);font-size:11px">no image</span>'}</div></div>
+      <div class="character-detail-copy">
         ${row('Voice (ElevenLabs)',voice)}
         ${row('Size',c.size?esc(c.size):'')}
         ${row('Height',c.height?esc(c.height)+(c.sizeRank?' · size rank '+c.sizeRank:'')+(c.sizeRef?' · same size as '+esc(c.sizeRef):''):'')}
@@ -1043,9 +1112,9 @@ async function renderCharacters(){
   try{M=(await fetch(BASE+"/api/masters",{cache:"no-store"}).then(r=>r.json())).masters||{};}catch(e){}
   const url=p=>p?BASE+"/"+p.replace(/^\.\.\//,"")+"?v="+Date.now():"";
   const chars=Object.entries(C).filter(([k,v])=>k[0]!=="_"&&v&&typeof v==="object"&&!Array.isArray(v)&&k!=="sizeClasses");
-  const card=([name,c])=>`<article class="mc" style="display:flex;gap:14px;align-items:flex-start">
-    <div style="width:110px;flex:none"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no image</span>'}</div></div>
-    <div style="flex:1;min-width:0">
+  const card=([name,c])=>`<article class="mc character-card">
+    <div class="character-card-media"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no image</span>'}</div></div>
+    <div class="character-card-copy">
       <div style="font-weight:600;font-size:15px">${name}${c.tier?` <span style="font-size:11px;color:var(--hint)">· ${c.tier}</span>`:''}</div>
       <div style="font-size:12px;color:var(--hint);margin:2px 0 6px">${[c.size,c.sizeRef?'same size as '+c.sizeRef:'',c.voiceId?'voice ✓':'⚠ no voice'].filter(Boolean).join(' · ')}</div>
       ${c.key_features?`<div style="font-size:12px;line-height:1.5">${c.key_features}</div>`:'<div style="font-size:12px;color:var(--danger)">⚠ no key features set</div>'}
@@ -1058,19 +1127,19 @@ async function renderCharacters(){
   const mastersRows=Object.values(M).sort((a,b)=>(a.character||'').localeCompare(b.character||''));
   const mastersPanel=`<div class="mc" style="margin-top:18px">
       <div class="lab" style="font-weight:600;color:var(--brandink)">★ Character Master library <span style="font-size:11px;color:var(--hint);font-weight:400">(read-only — set via "★ Set as master" on a beat's signed-off keyframe)</span></div>
-      ${mastersRows.length?`<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12px">
+      ${mastersRows.length?`<div class="table-scroll"><table style="width:100%;min-width:520px;border-collapse:collapse;margin-top:8px;font-size:12px">
         <tr style="text-align:left;color:var(--hint)"><th style="padding:4px 8px 4px 0">Character</th><th style="padding:4px 8px">Location</th><th style="padding:4px 8px">Status</th><th style="padding:4px 8px">Updated</th></tr>
         ${mastersRows.map(m=>`<tr style="border-top:1px solid var(--line)"><td style="padding:4px 8px 4px 0">${_esc(m.character||'')}</td><td style="padding:4px 8px">${_esc(m.locationId||'')}${m.episode?` · ${_esc(m.episode)}`:''}</td><td style="padding:4px 8px">${m.status==='active'?'<span style="color:var(--ok)">active</span>':_esc(m.status||'')}</td><td style="padding:4px 8px;color:var(--hint)">${_esc(m.updatedAt||'')}</td></tr>`).join('')}
-      </table>`:`<div style="font-size:12px;color:var(--hint);margin-top:6px">No masters set yet — use "★ Set as master" on a signed-off solo keyframe (a beat's Keyframes panel).</div>`}
+      </table></div>`:`<div style="font-size:12px;color:var(--hint);margin-top:6px">No masters set yet — use "★ Set as master" on a signed-off solo keyframe (a beat's Keyframes panel).</div>`}
     </div>`;
   document.getElementById("view").innerHTML=`
     ${projectScreenHeaderHTML({eyebrow:"Character library",title:"Characters · Elements",subtitle:`Locked references shared across every episode. ${chars.length} character${chars.length===1?'':'s'} in this production.`,art:CURRENT_PROJECT&&CURRENT_PROJECT.coverImage})}
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px">${chars.map(card).join("")}</div>
+    <div class="library-grid">${chars.map(card).join("")}</div>
     ${mastersPanel}
     <div class="mc" style="margin-top:18px;border:1px dashed var(--brand)">
       <div class="lab" style="font-weight:600;color:var(--brandink)">＋ Add or update a character (element)</div>
       <p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Bring a character through: drop their clean front/turnaround reference and fill the template. Same name updates the existing one.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="mobile-grid-2" style="gap:8px">
         <input id="ch_name" placeholder="Name (e.g. Squeaky)" ${I}/>
         <input id="ch_voice" placeholder="ElevenLabs voice ID" ${I}/>
         <input id="ch_size" placeholder="Size (e.g. a small young cub)" ${I}/>
@@ -1107,7 +1176,7 @@ async function renderHouses(){
   const hs=H.houses||[];
   const u=p=>BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now();
   const pane=(label,hero,mc,desc)=>`
-    <div style="flex:1;min-width:230px">
+    <div class="asset-pane">
       <div style="font-size:11px;font-weight:600;color:var(--brandink);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">${label}</div>
       <div style="aspect-ratio:16/10;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--line)">${hero?`<a href="${u(hero)}" target="_blank"><img src="${u(hero)}" style="width:100%;height:100%;object-fit:cover"/></a>`:'<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--hint);font-size:11px">none</div>'}</div>
       ${desc?`<div style="font-size:11px;color:var(--hint);margin-top:5px;line-height:1.45">${(''+desc).replace(/</g,'&lt;')}</div>`:''}
@@ -1115,13 +1184,13 @@ async function renderHouses(){
     </div>`;
   const card=(h)=>`<div class="mc">
     <div style="font-weight:600;font-size:15px;margin-bottom:8px">${h.character}'s House</div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <div class="asset-panes">
       ${pane('Inside', h.interior, h.interiorMulticam, h.interiorDesc)}
       ${pane('Outside', h.exterior, h.exteriorMulticam, h.exteriorDesc)}
     </div></div>`;
   document.getElementById("view").innerHTML=`
     ${projectScreenHeaderHTML({eyebrow:"Location library",title:"Houses · Elements",subtitle:`Reusable interiors, exteriors and multi-angle references. ${hs.length} house${hs.length===1?'':'s'} in this production.`,art:CURRENT_PROJECT&&(CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage)})}
-    ${hs.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px">${hs.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No houses are locked yet",body:"Continue with the reusable scene and character elements already available, or return to the episode workflow.",actions:[{label:"Open scenes",onclick:"showScenes()"},{label:"Open characters",onclick:"showCharacters()",kind:"secondary"},{label:"Open episodes",onclick:"goHome()",kind:"secondary"}]})}`;
+    ${hs.length?`<div class="library-grid wide">${hs.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No houses are locked yet",body:"Continue with the reusable scene and character elements already available, or return to the episode workflow.",actions:[{label:"Open scenes",onclick:"showScenes()"},{label:"Open characters",onclick:"showCharacters()",kind:"secondary"},{label:"Open episodes",onclick:"goHome()",kind:"secondary"}]})}`;
 }
 async function renderScenes(){
   let L={manifest:{},reuse:{},scenes:[]};
@@ -1133,9 +1202,9 @@ async function renderScenes(){
     const preview=s.plate?img(s.plate):(s.master?refUrl(s.master):null);
     const plateStatus=s.plate?'<span style="color:var(--info);font-weight:600">● generated scene shot available</span>':'<span style="color:var(--hint)">○ no generated scene shot</span>';
     const masterStatus=s.master?'<span style="color:var(--ok);font-weight:600">✓ location master locked (reusable)</span>':(s.masterMissing?'<span style="color:var(--danger);font-weight:600">! configured location master is missing</span>':'<span style="color:var(--hint)">○ no location master locked</span>');
-    return `<div class="mc" style="display:flex;gap:14px;align-items:flex-start">
-      <div style="width:170px;flex:none"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${preview?`<img class="zoom" data-cap="Scene ${s.scene} ${s.plate?'generated scene shot':'locked location master'}" src="${preview}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no visual asset yet</span>'}</div></div>
-      <div style="flex:1;min-width:0">
+    return `<div class="mc asset-card">
+      <div class="asset-card-media"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${preview?`<img class="zoom" data-cap="Scene ${s.scene} ${s.plate?'generated scene shot':'locked location master'}" src="${preview}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no visual asset yet</span>'}</div></div>
+      <div class="asset-card-copy">
         <div style="font-weight:600;font-size:15px">Scene ${s.scene} · ${s.name||s.locationId}</div>
         <div style="font-size:11px;color:var(--hint);margin:3px 0 2px"><span style="font-family:monospace;background:#f1eff8;border-radius:5px;padding:1px 6px">${s.locationId||'—'}</span></div>
         <div style="font-size:11px;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">${plateStatus}<span aria-hidden="true">·</span>${masterStatus}</div>
@@ -1159,11 +1228,11 @@ async function renderScenes(){
     ${projectScreenHeaderHTML({eyebrow:"Scene library",title:"Scenes · Elements",subtitle:`${SC.length} scene${SC.length===1?'':'s'} · ${built} generated scene shot${built===1?'':'s'} · ${lockedMasters} locked location master${lockedMasters===1?'':'s'} · ${UR.length} uploaded reference${UR.length===1?'':'s'}.`,art:CURRENT_PROJECT&&(CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage)})}
     ${outcomePanelHTML({tone:built||lockedMasters?"done":"ready",title:lockedMasters+" locked location master"+(lockedMasters==1?"":"s"),body:built+" generated scene shot"+(built==1?"":"s")+" currently exist. The two asset types stay separate so a master is never mistaken for a generated shot.",actions:[CURRENT_PROJECT?{label:"Continue production",onclick:`continueProject(${JSON.stringify(CURRENT_PROJECT.id)})`}:{label:"Open episodes",onclick:"goHome()"},{label:"Add scene reference",onclick:"document.getElementById('sc_name').focus()",kind:"secondary"}]})}
     ${refGallery}
-    ${SC.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px">${SC.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No production scenes exist yet",body:"Run Story & Direction for the active script, or add a reusable scene reference below.",actions:[CURRENT_PROJECT?{label:"Open Story & Direction",onclick:`continueProject(${JSON.stringify(CURRENT_PROJECT.id)})`}:{label:"Open episodes",onclick:"goHome()"},{label:"Add scene reference",onclick:"document.getElementById('sc_name').focus()",kind:"secondary"}]})}
+    ${SC.length?`<div class="library-grid wide">${SC.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No production scenes exist yet",body:"Run Story & Direction for the active script, or add a reusable scene reference below.",actions:[CURRENT_PROJECT?{label:"Open Story & Direction",onclick:`continueProject(${JSON.stringify(CURRENT_PROJECT.id)})`}:{label:"Open episodes",onclick:"goHome()"},{label:"Add scene reference",onclick:"document.getElementById('sc_name').focus()",kind:"secondary"}]})}
     <div class="mc" style="margin-top:18px;border:1px dashed var(--brand)">
       <div class="lab" style="font-weight:600;color:var(--brandink)">＋ Add a scene (element)</div>
       <p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Upload a scene image into the library — it appears in "Your uploaded scene references" above and can be used as any scene's foundation (Keyframes panel → ⬆ Upload / ▾ Library).</p>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <div class="mobile-upload">
         <input id="sc_name" placeholder="Scene name (e.g. The Pier)" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font:inherit"/>
         <label style="font-size:11px;color:var(--hint)">Scene image <input id="sc_img" type="file" accept="image/*"/></label>
         <button class="btn" onclick="addScene()">Add to library</button>
@@ -1298,7 +1367,7 @@ function addForm(){
       <label>Episode number</label><input id="f-num" type="number" placeholder="e.g. 1"/>
       <label>Title</label><input id="f-title" type="text" placeholder="e.g. The Adventure Begins"/>
       <label>Script</label><textarea id="f-script" placeholder="Paste the full script here…"></textarea>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+      <div class="mobile-upload" style="margin-top:8px">
         <label class="btn ghost" style="cursor:pointer;margin:0">📄 Upload document
           <input id="f-doc" type="file" accept=".txt,.md,.markdown,.fountain,.docx,.pdf,.rtf,text/*" style="display:none" onchange="onDoc(event)"/>
         </label>
@@ -1375,7 +1444,7 @@ function scorecardCard(sd){
     <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><div style="font-weight:700;font-size:16px">Scorecard</div>
       <div style="font-size:22px;font-weight:800;color:${col(ov)}">${ov}<span style="font-size:13px;color:var(--hint)">/10</span></div>
       <div style="font-size:12px;color:var(--hint);flex:1;min-width:140px">${((s.overall||{}).why||'').replace(/</g,'&lt;')}</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px">
+    <div class="mobile-grid-2" style="gap:14px;margin-top:12px">
       ${F.map(([k,lab])=>{const f=s[k]||{},n=Math.round((f.score||0)*10)/10;return `<div><div style="display:flex;justify-content:space-between"><span style="font-size:12.5px;font-weight:600">${lab}</span><span style="font-size:12.5px;font-weight:700;color:${col(n)}">${n}/10</span></div>${bar(n)}<div style="font-size:11px;color:var(--hint);margin-top:3px">${(f.why||'').replace(/</g,'&lt;')}</div></div>`;}).join('')}</div>
     ${sd.title?`<div style="font-size:11px;color:var(--hint);margin-top:11px"><b>${sd.title.replace(/</g,'&lt;')}</b>${sd.logline?' — '+sd.logline.replace(/</g,'&lt;'):''}${sd.pillar?' · Pillar: '+sd.pillar:''}</div>`:''}</div>`;
 }
@@ -1386,14 +1455,14 @@ function seedForm(hasScript,sd){
   const inp=(id,lab,ph,val)=>`<div style="margin-top:8px"><div class="kv">${lab}</div><input id="${id}" value="${(val||'').replace(/"/g,'&quot;')}" placeholder="${(ph||'').replace(/"/g,'&quot;')}" style="width:100%;font:inherit;font-size:12.5px;padding:8px;border:1px solid var(--line);border-radius:7px;box-sizing:border-box"/></div>`;
   const sel=(id,lab,opts,val)=>`<div style="margin-top:8px"><div class="kv">${lab}</div><select id="${id}" style="width:100%;font:inherit;font-size:12.5px;padding:8px;border:1px solid var(--line);border-radius:7px">${opts.map(o=>`<option ${o==val?'selected':''}>${o}</option>`).join('')}</select></div>`;
   const body=`${inp('ws_title','Title','e.g. The Brave-Enough Bear',seed.title)}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="margin-top:8px"><div class="kv">Runtime (minutes)</div><input id="ws_minutes" type="number" min="0.5" step="0.5" value="${mins}" style="width:100%;font:inherit;font-size:12.5px;padding:8px;border:1px solid var(--line);border-radius:7px;box-sizing:border-box"/></div>${sel('ws_pillar','Pillar',['Spark','Deepening','Heart','Connection','Ripple'],seed.pillar)}</div>
+    <div class="mobile-grid-2" style="gap:8px"><div style="margin-top:8px"><div class="kv">Runtime (minutes)</div><input id="ws_minutes" type="number" min="0.5" step="0.5" value="${mins}" style="width:100%;font:inherit;font-size:12.5px;padding:8px;border:1px solid var(--line);border-radius:7px;box-sizing:border-box"/></div>${sel('ws_pillar','Pillar',['Spark','Deepening','Heart','Connection','Ripple'],seed.pillar)}</div>
     ${inp('ws_timeSetting','Time — setting (where + when)','a canon location + time-of-day / weather',seed.timeSetting)}
     ${tf('ws_logline','Headline / logline (the situation)','one sentence — what happens, that the bears can DO and escalate',seed.logline,44)}
     ${tf('ws_purpose','Purpose — the SEL lesson (the why)','the one social-emotional truth, written as a feeling — never preachy',seed.purpose,38)}
     ${tf('ws_characters','Characters','lead bear (their Pillar) + the witness (sits-with, never fixes) + the comedy duo',seed.characters,38)}
     ${inp('ws_tone','Tone / comedy dial','Trolls-joy ↔ Bluey-quiet; any must-have gag or runner',seed.tone)}
     <details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:var(--muted)">Optional — want / need, Crystal Call, continuity</summary>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${tf('ws_want','Want (the face)','',seed.want,30)}${tf('ws_need','Need (the truth)','',seed.need,30)}</div>
+      <div class="mobile-grid-2" style="gap:8px">${tf('ws_want','Want (the face)','',seed.want,30)}${tf('ws_need','Need (the truth)','',seed.need,30)}</div>
       ${inp('ws_call','Crystal Call this episode?','earned (a peak) / omit',seed.crystalCall)}${tf('ws_continuity','Continuity / season note','',seed.continuity,28)}</details>
     <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap"><button class="bigfire" onclick="fireWrite()">✍️ Write the script</button><button class="btn ghost" onclick="suggestFromDemand()">✨ Suggest from demand</button><span style="font-size:11.5px;color:var(--hint)">the room runs the 8 passes + scores it /10 (won't ship below 8)</span></div>`;
   if(hasScript)return `<details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600;font-size:14px;color:var(--brandink)">✎ Write a new script from a seed</summary><div style="border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:8px">${body}</div></details>`;
@@ -2549,7 +2618,7 @@ function renderStoryboardStage(){
   let actions=[];
   if(st=="awaiting"||st=="rejected"){
     actions=[`<textarea id="pSbNote" class="pfeedback" placeholder="A note for the record (optional on approve, helpful on reject)"></textarea>`,
-      `<div style="display:flex;gap:10px;margin-top:10px">
+      `<div class="mobile-split" style="margin-top:10px">
         <button class="btn" onclick="pStoryboardDecide('approved')">✓ Approve</button>
         <button class="btn ghost" onclick="pStoryboardDecide('rejected')">✗ Reject</button>
       </div>`];

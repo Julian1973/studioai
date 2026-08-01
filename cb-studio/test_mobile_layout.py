@@ -9,7 +9,7 @@ def test_mobile_shell_handles_safe_areas_and_touch_targets():
     assert "html,body{max-width:100%;overflow-x:hidden" in APP
     assert "env(safe-area-inset-left)" in APP
     assert "env(safe-area-inset-bottom)" in APP
-    assert ".brand{min-height:44px}" in APP
+    assert ".brand{min-width:0;min-height:44px" in APP
     assert ".nav a,.nav button{min-height:44px}" in APP
     assert ".iconbtn{width:44px;height:44px" in APP
     assert "font-size:16px!important;min-height:44px" in APP
@@ -37,8 +37,16 @@ def test_dense_forms_and_modals_reflow_on_mobile():
 
 
 def test_mobile_navigation_remains_reachable_without_page_overflow():
-    assert ".top{position:sticky;top:0;min-height:0" in APP
-    assert "overscroll-behavior-x:contain" in APP
+    assert ".top{position:sticky;top:0;display:grid" in APP
+    assert 'class="mobile-menu-toggle"' in APP
+    assert 'aria-controls="toplinks"' in APP
+    assert ".mobile-menu-toggle{display:none;width:44px;height:44px" in APP
+    assert ".toplinks.open{display:grid}" in APP
+    assert "function toggleMobileMenu()" in APP
+    assert 'button.setAttribute("aria-expanded",String(open))' in APP
+    assert 'nav.style.removeProperty("display")' in APP
+    assert "display:flex!important" not in APP
+    assert "max-height:calc(100dvh - 70px" in APP
+    assert ".toplinks{order:3;width:100%;height:46px" not in APP
     assert "-webkit-overflow-scrolling:touch" in APP
-    assert ".toplinks{order:3;width:100%;height:46px" in APP
     assert "#toast{left:max(12px,env(safe-area-inset-left))!important" in APP

@@ -31,8 +31,9 @@ def test_primary_slate_uses_real_local_key_art():
 
 def test_premium_system_keeps_visual_rules_explicit():
     assert "PREMIUM STUDIO SYSTEM" in APP
-    assert "--bg:#edefec" in APP
-    assert "background:#141719" in APP
+    assert "--bg:#f4f2ef" in APP
+    assert "background:#211f23" in APP
+    assert "--brand:#745477" in APP
     assert "html *{letter-spacing:0!important}" in APP
     assert "linear-gradient(" not in APP
     assert ":focus-visible" in APP
@@ -71,8 +72,8 @@ def test_project_art_reaches_central_screens_and_new_project_storage():
 
 
 def test_core_cards_stay_compact_and_responsive():
-    assert '.projcard{border:1px solid #cfd4d1;border-radius:8px' in APP
-    assert '.epcard{border:1px solid #cfd4d1;border-radius:8px' in APP
-    assert '.scenecard{border:1px solid #cfd4d1;border-radius:8px' in APP
+    assert '.projcard{border:1px solid var(--line);border-radius:8px' in APP
+    assert '.epcard{border:1px solid var(--line);border-radius:8px' in APP
+    assert '.scenecard{border:1px solid var(--line);border-radius:8px' in APP
     assert '@media (max-width:980px)' in APP
     assert '@media (max-width:700px)' in APP

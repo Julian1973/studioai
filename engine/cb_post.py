@@ -27,13 +27,15 @@ right — keeps what works, trims or replaces what doesn't. For a scene Post:
      into the SAME mix() call, threaded through every platform master — see mix()'s own sfx_layers param. Best-
      effort and asset-gated: a cue with no file yet on disk (shows/crystal-bears/canon/sfx/ is currently empty)
      is silently skipped, never blocks Gate 5.
-  3) Exports STEMS (picture+voice, music, ambience) so Julian curates the final keep/trim/replace + mix in CapCut by ear.
+  3) Exports a 24-bit combined programme WAV. Generated clips do not carry separable
+     dialogue, music and effects sources, so true stems remain an upstream production task.
   4) BUILDS THE SECOND MASTER — a 9:16 centre-safe vertical derivative (build_vertical_derivative, 2026-07-14 —
      CLAUDE.md rule 28's own doctrine has always named "two masters delivered," only the 16:9 one ever actually
      got built) — a static, centre-anchored crop scaled to 1080x1920, alongside real dialogue captions
      (scene_captions/write_captions, .srt + .vtt) — both delivery-required, both non-fatal to the primary master.
 
-The clip audio is never stripped. Post is the quality filter + the seamless stitch + the stems — never the creative layer.
+The clip audio is never stripped. Post is the quality filter, seamless stitch and delivery
+mastering stage; it never pretends a combined mix is a set of isolated stems.
 
     python3 cb_post.py <package.json> <sceneNumber> [episode=Ep1]
 """
@@ -48,6 +50,21 @@ import sys
 import uuid
 
 HELD = 1.6   # held last frame (tension beat)
+DELIVERY_FPS = 24.0
+DELIVERY_AUDIO_HZ = 48000
+DELIVERY_VIDEO_CODEC = "h264"
+DELIVERY_PIXEL_FORMAT = "yuv420p"
+DELIVERY_COLOR = "bt709"
+LOUDNESS_TOLERANCE_LU = 1.0
+TRUE_PEAK_TOLERANCE_DB = 0.2
+DELIVERY_VIDEO_TAG_ARGS = [
+    "-color_primaries", DELIVERY_COLOR,
+    "-color_trc", DELIVERY_COLOR,
+    "-colorspace", DELIVERY_COLOR,
+]
+DELIVERY_X264_COLOR_ARGS = DELIVERY_VIDEO_TAG_ARGS + [
+    "-x264-params", "colorprim=bt709:transfer=bt709:colormatrix=bt709",
+]
 # FIXED 2026-07-12 (full-codebase audit continued): removed the unused `XF = 0.4` cross-dissolve-duration constant
 # — grepped clean across the whole repo, zero references anywhere outside its own definition. It was reserved for
 # a between-scenes cross-dissolve transition (per assemble_picture's/assemble_conformed's own docstrings), but no
@@ -118,8 +135,12 @@ def _ensure_audio(clip):
     if _has_audio(clip): return clip
     os.makedirs("media/_tmp", exist_ok=True)
     tmp = f"media/_tmp/{os.path.basename(clip).rsplit('.',1)[0]}_aud.mp4"
-    r = subprocess.run(["ffmpeg","-y","-i",clip,"-f","lavfi","-i","anullsrc=channel_layout=stereo:sample_rate=44100",
-                    "-shortest","-c:v","copy","-c:a","aac","-b:a","128k", tmp], capture_output=True)
+    r = subprocess.run([
+        "ffmpeg", "-y", "-i", clip, "-f", "lavfi", "-i",
+        f"anullsrc=channel_layout=stereo:sample_rate={DELIVERY_AUDIO_HZ}",
+        "-shortest", "-c:v", "copy", "-c:a", "aac", "-ar",
+        str(DELIVERY_AUDIO_HZ), "-ac", "2", "-b:a", "128k", tmp,
+    ], capture_output=True)
     if r.returncode or not os.path.exists(tmp):
         print("_ensure_audio ERROR:", (r.stderr or b"").decode(errors="replace")[-400:])
         return clip   # fall back to the original (silent) clip — surfaces immediately and clearly inside
@@ -135,22 +156,35 @@ def assemble_picture(clips, out):
     for c in clips: inputs += ["-i", c]
     fc = []
     if len(clips) == 1:
-        fc.append(f"[0:v]tpad=stop_mode=clone:stop_duration={HELD}[v]")
-        fc.append(f"[0:a]apad=pad_dur={HELD}[a]")
+        fc.append(
+            f"[0:v]fps={DELIVERY_FPS:g},setsar=1,format={DELIVERY_PIXEL_FORMAT},"
+            f"tpad=stop_mode=clone:stop_duration={HELD}[v]")
+        fc.append(
+            f"[0:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+            f"apad=pad_dur={HELD}[a]")
     else:
         # HARD CUTS within a scene — instant, shot-to-shot. NO cross-dissolves between beats; a cross-dissolve is
         # reserved ONLY for a passage-of-time transition BETWEEN scenes (a separate, episode-level assembly). We just
         # concatenate the clips end-to-end (concat filter), then hold the final frame briefly for the scene's end.
         for i in range(len(clips)):
-            fc.append(f"[{i}:v]setsar=1,format=yuv420p[v{i}]")
-            fc.append(f"[{i}:a]aformat=sample_rates=44100:channel_layouts=stereo[a{i}]")
+            fc.append(
+                f"[{i}:v]fps={DELIVERY_FPS:g},setsar=1,"
+                f"format={DELIVERY_PIXEL_FORMAT}[v{i}]")
+            fc.append(
+                f"[{i}:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:"
+                f"channel_layouts=stereo[a{i}]")
         joins = "".join(f"[v{i}][a{i}]" for i in range(len(clips)))
         fc.append(f"{joins}concat=n={len(clips)}:v=1:a=1[cv][ca]")
         fc.append(f"[cv]tpad=stop_mode=clone:stop_duration={HELD}[v]")
         fc.append(f"[ca]apad=pad_dur={HELD}[a]")
-    cmd = ["ffmpeg","-y"] + inputs + ["-filter_complex", ";".join(fc),
-           "-map","[v]","-map","[a]","-c:v","libx264","-preset","medium","-crf","18","-pix_fmt","yuv420p",
-           "-c:a","aac","-b:a","256k","-movflags","+faststart", out]   # +faststart: moov up front so browsers stream it (no stall)
+    cmd = ["ffmpeg", "-y"] + inputs + [
+        "-filter_complex", ";".join(fc), "-map", "[v]", "-map", "[a]",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-r",
+        f"{DELIVERY_FPS:g}", "-pix_fmt", DELIVERY_PIXEL_FORMAT,
+    ] + DELIVERY_X264_COLOR_ARGS + [
+        "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
+        "-b:a", "256k", "-movflags", "+faststart", out,
+    ]   # +faststart: moov up front so browsers stream it (no stall)
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode or not os.path.exists(out):
         # FIXED 2026-07-12 (full-codebase audit continued): this used to only print an error and then return
@@ -190,9 +224,9 @@ def _settle_trim():
 EDGE_FRAMES = 4     # "3 to 5 frames" — trimmed off EVERY clip's own opening ease-in, and off the closing
                     # deceleration of what remains after the settle is removed (every clip but the last) — cutting
                     # where the motion is alive, not where it's still ramping up or ramping down.
-DEFAULT_FPS = 24.0  # fallback only if a clip's own fps can't be read; confirmed 24fps on real rendered clips.
-POST_SCHEMA_VERSION = 1
-POST_POLICY_VERSION = "scene-post-v1"
+DEFAULT_FPS = DELIVERY_FPS  # fallback only if a clip's own fps can't be read.
+POST_SCHEMA_VERSION = 2
+POST_POLICY_VERSION = "scene-post-v2-delivery-qc"
 
 def _clip_fps(clip):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
@@ -270,16 +304,23 @@ def assemble_conformed(clips, out, settle_trim=None, edge_frames=EDGE_FRAMES, pl
     for i in range(n):
         start = float(plan[i]["sourceStartSec"])
         end = float(plan[i]["sourceEndSec"])
-        fc.append(f"[{i}:v]trim=start={start:.3f}:end={end:.3f},setpts=PTS-STARTPTS,setsar=1,format=yuv420p[v{i}]")
+        fc.append(
+            f"[{i}:v]trim=start={start:.3f}:end={end:.3f},setpts=PTS-STARTPTS,"
+            f"fps={DELIVERY_FPS:g},setsar=1,format={DELIVERY_PIXEL_FORMAT}[v{i}]")
         fc.append(f"[{i}:a]atrim=start={start:.3f}:end={end:.3f},asetpts=PTS-STARTPTS,"
-                  f"aformat=sample_rates=44100:channel_layouts=stereo[a{i}]")
+                  f"aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo[a{i}]")
     joins = "".join(f"[v{i}][a{i}]" for i in range(n))
     fc.append(f"{joins}concat=n={n}:v=1:a=1[cv][ca]")
     fc.append(f"[cv]tpad=stop_mode=clone:stop_duration={HELD}[v]")
     fc.append(f"[ca]apad=pad_dur={HELD}[a]")
-    cmd = ["ffmpeg","-y"] + inputs + ["-filter_complex", ";".join(fc),
-           "-map","[v]","-map","[a]","-c:v","libx264","-preset","medium","-crf","18","-pix_fmt","yuv420p",
-           "-c:a","aac","-b:a","256k","-movflags","+faststart", out]
+    cmd = ["ffmpeg", "-y"] + inputs + [
+        "-filter_complex", ";".join(fc), "-map", "[v]", "-map", "[a]",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-r",
+        f"{DELIVERY_FPS:g}", "-pix_fmt", DELIVERY_PIXEL_FORMAT,
+    ] + DELIVERY_X264_COLOR_ARGS + [
+        "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
+        "-b:a", "256k", "-movflags", "+faststart", out,
+    ]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode or not os.path.exists(out):
         # FIXED 2026-07-14 (wiring this function into run() for the first time): this used to unconditionally
@@ -356,8 +397,9 @@ def burn_review_overlay(scene_video, windows, out, fps=24, W=1280, H=720):
     # truncated the video ~1s short of the (copied) audio, so it froze at the end. +faststart so browsers stream it.
     cmd = ["ffmpeg", "-y", "-i", scene_video, "-framerate", "1", "-i", os.path.join(tmp, "ov_%04d.png"),
            "-filter_complex", "[0:v][1:v]overlay=0:0[v]", "-map", "[v]", "-map", "0:a?",
-           "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "copy",
-           "-movflags", "+faststart", out]
+           "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-r", f"{DELIVERY_FPS:g}",
+           "-pix_fmt", DELIVERY_PIXEL_FORMAT] + DELIVERY_X264_COLOR_ARGS + [
+           "-c:a", "copy", "-movflags", "+faststart", out]
     r = subprocess.run(cmd, capture_output=True, text=True)
     shutil.rmtree(tmp, ignore_errors=True)
     if r.returncode:
@@ -410,8 +452,10 @@ def mix(picture, music, ambience, out, platform=DEFAULT_PLATFORM, sfx_layers=Non
     if have_mus: inputs += ["-i", music]
     if have_amb: inputs += ["-i", ambience]
     for layer in sfx_layers: inputs += ["-i", layer["file"]]
-    fc = (["[0:a]aformat=sample_rates=44100:channel_layouts=stereo,asplit=2[vmix][vsc]"] if have_mus
-          else ["[0:a]aformat=sample_rates=44100:channel_layouts=stereo[vmix]"])
+    fc = ([f"[0:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+           "asplit=2[vmix][vsc]"] if have_mus
+          else [f"[0:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:"
+                "channel_layouts=stereo[vmix]"])
     mix_in = ["[vmix]"]; idx = 1
     if have_mus:
         fc.append(f"[{idx}]atrim=0:{T},afade=t=in:st=0:d=1.2,afade=t=out:st={fo}:d=1.0,volume=0.30[mus]")
@@ -423,16 +467,43 @@ def mix(picture, music, ambience, out, platform=DEFAULT_PLATFORM, sfx_layers=Non
     for si, layer in enumerate(sfx_layers):
         delay_ms = max(0, int(round(float(layer.get("at_sec") or 0) * 1000)))
         tag = f"sfx{si}"
-        fc.append(f"[{idx}]aformat=sample_rates=44100:channel_layouts=stereo,"
+        fc.append(f"[{idx}]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
                    f"adelay={delay_ms}|{delay_ms},atrim=0:{T}[{tag}]")
         mix_in.append(f"[{tag}]"); idx += 1
     n = len(mix_in)
     fc.append("".join(mix_in) + f"amix=inputs={n}:normalize=0,highpass=f=35,"
               "equalizer=f=3000:t=q:w=2:g=1.2,highshelf=f=9000:g=1.5,"
-              "acompressor=threshold=-16dB:ratio=2:attack=25:release=250:makeup=2,"
-              f"loudnorm=I={tgt['I']}:TP={tgt['TP']}:LRA={tgt['LRA']},alimiter=limit=0.89:level=false[aout]")
-    cmd = ["ffmpeg","-y"] + inputs + ["-filter_complex", ";".join(fc),
-           "-map","0:v:0","-map","[aout]","-c:v","copy","-c:a","aac","-b:a","256k","-movflags","+faststart", out]
+              "acompressor=threshold=-16dB:ratio=2:attack=25:release=250:makeup=2[apre]")
+    measure_fc = list(fc) + [
+        f"[apre]loudnorm=I={tgt['I']}:TP={tgt['TP']}:LRA={tgt['LRA']}:"
+        "print_format=json[measure]"
+    ]
+    measure = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-nostats"] + inputs + [
+            "-filter_complex", ";".join(measure_fc), "-map", "[measure]",
+            "-f", "null", "-",
+        ], capture_output=True, text=True)
+    stats = _parse_loudnorm_stats(measure.stderr) if not measure.returncode else None
+    if not stats or any(stats.get(key) is None for key in (
+            "integratedLufs", "truePeakDbtp", "loudnessRangeLu", "thresholdLufs",
+            "targetOffsetLu")):
+        print("mix ERROR: loudness analysis failed:", (measure.stderr or "")[-400:])
+        return None
+    normalize = (
+        f"[apre]loudnorm=I={tgt['I']}:TP={tgt['TP']}:LRA={tgt['LRA']}:"
+        f"measured_I={stats['integratedLufs']}:measured_TP={stats['truePeakDbtp']}:"
+        f"measured_LRA={stats['loudnessRangeLu']}:measured_thresh={stats['thresholdLufs']}:"
+        f"offset={stats['targetOffsetLu']}:linear=true,"
+        "alimiter=limit=0.89:level=false[aout]"
+    )
+    fc.append(normalize)
+    cmd = ["ffmpeg", "-y"] + inputs + [
+        "-filter_complex", ";".join(fc), "-map", "0:v:0", "-map", "[aout]",
+        "-c:v", "copy",
+    ] + DELIVERY_VIDEO_TAG_ARGS + [
+        "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
+        "-b:a", "256k", "-movflags", "+faststart", out,
+    ]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode or not os.path.exists(out):
         # FIXED 2026-07-12 (full-codebase audit continued): this used to unconditionally return `out` even when
@@ -459,9 +530,11 @@ def build_vertical_derivative(src, out, target_w=1080, target_h=1920):
     was fed in stays as mastered."""
     if not os.path.exists(src):
         print(f"build_vertical_derivative: source not found: {src}"); return None
-    vf = f"crop=ih*9/16:ih:(iw-ih*9/16)/2:0,scale={target_w}:{target_h},setsar=1"
+    vf = (f"crop=ih*9/16:ih:(iw-ih*9/16)/2:0,scale={target_w}:{target_h},"
+          f"fps={DELIVERY_FPS:g},setsar=1")
     cmd = ["ffmpeg", "-y", "-i", src, "-vf", vf,
-           "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+           "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-r",
+           f"{DELIVERY_FPS:g}", "-pix_fmt", DELIVERY_PIXEL_FORMAT] + DELIVERY_X264_COLOR_ARGS + [
            "-c:a", "copy", "-movflags", "+faststart", out]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode or not os.path.exists(out):
@@ -548,7 +621,7 @@ def extract_program_audio(master, out):
     """Export the mastered combined programme audio honestly; generated clips do not carry
     separable dialogue/music/SFX stems, so this is never labelled as isolated stems."""
     cmd = ["ffmpeg", "-y", "-i", str(master), "-map", "0:a:0", "-vn",
-           "-c:a", "pcm_s24le", str(out)]
+           "-c:a", "pcm_s24le", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2", str(out)]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode or not os.path.exists(out):
         print("extract_program_audio ERROR:", result.stderr[-400:])
@@ -568,15 +641,107 @@ def _probe_media(path):
         return None
     streams = data.get("streams") or []
     video = next((stream for stream in streams if stream.get("codec_type") == "video"), {})
-    duration = (data.get("format") or {}).get("duration") or video.get("duration")
+    audio = next((stream for stream in streams if stream.get("codec_type") == "audio"), {})
+    duration = ((data.get("format") or {}).get("duration") or video.get("duration") or
+                audio.get("duration"))
     try:
         duration = float(duration)
     except (TypeError, ValueError):
         duration = 0.0
-    return {"durationSec": duration, "width": int(video.get("width") or 0),
-            "height": int(video.get("height") or 0),
-            "hasVideo": bool(video),
-            "hasAudio": any(stream.get("codec_type") == "audio" for stream in streams)}
+
+    def rate(value):
+        try:
+            if "/" in str(value):
+                numerator, denominator = str(value).split("/", 1)
+                return float(numerator) / float(denominator)
+            return float(value)
+        except (TypeError, ValueError, ZeroDivisionError):
+            return 0.0
+
+    try:
+        sample_rate = int(audio.get("sample_rate") or 0)
+    except (TypeError, ValueError):
+        sample_rate = 0
+    return {
+        "durationSec": duration,
+        "width": int(video.get("width") or 0),
+        "height": int(video.get("height") or 0),
+        "hasVideo": bool(video),
+        "hasAudio": bool(audio),
+        "videoCodec": video.get("codec_name"),
+        "pixelFormat": video.get("pix_fmt"),
+        "fps": rate(video.get("avg_frame_rate") or video.get("r_frame_rate")),
+        "colorPrimaries": video.get("color_primaries"),
+        "colorTransfer": video.get("color_transfer"),
+        "colorSpace": video.get("color_space"),
+        "audioCodec": audio.get("codec_name"),
+        "audioSampleRate": sample_rate,
+        "audioChannels": int(audio.get("channels") or 0),
+        "audioChannelLayout": audio.get("channel_layout"),
+        "audioSampleFormat": audio.get("sample_fmt"),
+        "audioBitsPerRawSample": int(audio.get("bits_per_raw_sample") or 0),
+    }
+
+
+def _parse_loudnorm_stats(stderr):
+    decoder = json.JSONDecoder()
+    measured = None
+    for position, character in enumerate(stderr or ""):
+        if character != "{":
+            continue
+        try:
+            candidate, _ = decoder.raw_decode(stderr[position:])
+        except ValueError:
+            continue
+        if isinstance(candidate, dict) and "input_i" in candidate:
+            measured = candidate
+    if measured is None:
+        return None
+
+    def numeric(key):
+        try:
+            value = float(measured[key])
+            return value if value not in (float("inf"), float("-inf")) else None
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    return {
+        "integratedLufs": numeric("input_i"),
+        "truePeakDbtp": numeric("input_tp"),
+        "loudnessRangeLu": numeric("input_lra"),
+        "thresholdLufs": numeric("input_thresh"),
+        "targetOffsetLu": numeric("target_offset"),
+    }
+
+
+def _measure_loudness(path, target):
+    """Measure the finished programme; mastering intent alone is not delivery evidence."""
+    filter_spec = (
+        f"loudnorm=I={target['I']}:TP={target['TP']}:LRA={target['LRA']}:"
+        "print_format=json")
+    result = subprocess.run([
+        "ffmpeg", "-hide_banner", "-nostats", "-i", str(path),
+        "-map", "0:a:0", "-af", filter_spec, "-f", "null", "-",
+    ], capture_output=True, text=True)
+    if result.returncode:
+        return None
+    return _parse_loudnorm_stats(result.stderr)
+
+
+def _video_delivery_checks(probe, width, height):
+    probe = probe or {}
+    return {
+        "dimensions": probe.get("width") == width and probe.get("height") == height,
+        "videoCodecH264": probe.get("videoCodec") == DELIVERY_VIDEO_CODEC,
+        "pixelFormatYuv420p": probe.get("pixelFormat") == DELIVERY_PIXEL_FORMAT,
+        "frameRate24": abs(float(probe.get("fps") or 0) - DELIVERY_FPS) <= 0.02,
+        "colorPrimariesBt709": probe.get("colorPrimaries") == DELIVERY_COLOR,
+        "colorTransferBt709": probe.get("colorTransfer") == DELIVERY_COLOR,
+        "colorSpaceBt709": probe.get("colorSpace") == DELIVERY_COLOR,
+        "audioCodecAac": probe.get("audioCodec") == "aac",
+        "audioSampleRate48k": probe.get("audioSampleRate") == DELIVERY_AUDIO_HZ,
+        "audioStereo": probe.get("audioChannels") == 2,
+    }
 
 
 def _sha256(path):
@@ -649,6 +814,8 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
         picture_probe = _probe_media(temp["conformedPicture"])
         master_probe = _probe_media(temp["master16x9"])
         vertical_probe = _probe_media(temp["master9x16"])
+        program_audio_probe = _probe_media(temp["programAudio"])
+        loudness = _measure_loudness(temp["master16x9"], LOUDNESS_TARGETS[platform])
         expected_occurrences = [
             line.get("dialogueOccurrenceId") for shot in shots
             for line in (shot.get("dialogueLines") or [])]
@@ -670,7 +837,40 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
             "dialogueOccurrenceCoverage": caption_occurrences == expected_occurrences,
             "programAudioPresent": temp["programAudio"].exists() and
                 temp["programAudio"].stat().st_size > 0,
+            "programAudioPcm24": bool(
+                program_audio_probe and program_audio_probe["audioCodec"] == "pcm_s24le" and
+                program_audio_probe["audioBitsPerRawSample"] == 24),
+            "programAudioSampleRate48k": bool(
+                program_audio_probe and
+                program_audio_probe["audioSampleRate"] == DELIVERY_AUDIO_HZ),
+            "programAudioStereo": bool(
+                program_audio_probe and program_audio_probe["audioChannels"] == 2),
+            "loudnessMeasured": bool(
+                loudness and loudness["integratedLufs"] is not None and
+                loudness["truePeakDbtp"] is not None),
+            "integratedLoudnessOnTarget": bool(
+                loudness and loudness["integratedLufs"] is not None and
+                abs(loudness["integratedLufs"] - LOUDNESS_TARGETS[platform]["I"])
+                <= LOUDNESS_TOLERANCE_LU),
+            "truePeakWithinLimit": bool(
+                loudness and loudness["truePeakDbtp"] is not None and
+                loudness["truePeakDbtp"] <=
+                LOUDNESS_TARGETS[platform]["TP"] + TRUE_PEAK_TOLERANCE_DB),
         }
+        picture_tech = _video_delivery_checks(
+            picture_probe, picture_probe.get("width", 0) if picture_probe else 0,
+            picture_probe.get("height", 0) if picture_probe else 0)
+        master_tech = _video_delivery_checks(
+            master_probe, picture_probe.get("width", 0) if picture_probe else 0,
+            picture_probe.get("height", 0) if picture_probe else 0)
+        vertical_tech = _video_delivery_checks(vertical_probe, 1080, 1920)
+        for prefix, technical in (
+                ("picture", picture_tech), ("master16x9", master_tech),
+                ("master9x16", vertical_tech)):
+            checks.update({
+                f"{prefix}{name[0].upper()}{name[1:]}": bool(passed)
+                for name, passed in technical.items()
+            })
         if not all(checks.values()):
             failed = [name for name, passed in checks.items() if not passed]
             raise RuntimeError(f"post QC failed: {failed}")
@@ -682,7 +882,8 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
             "master9x16": _asset_record(temp["master9x16"], final["master9x16"], probe=True),
             "captionsSrt": _asset_record(temp["captionsSrt"], final["captionsSrt"]),
             "captionsVtt": _asset_record(temp["captionsVtt"], final["captionsVtt"]),
-            "programAudio": _asset_record(temp["programAudio"], final["programAudio"]),
+            "programAudio": _asset_record(
+                temp["programAudio"], final["programAudio"], probe=True),
         }
         manifest = {
             "schemaVersion": POST_SCHEMA_VERSION,
@@ -691,6 +892,16 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
             "builtAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "masteringPlatform": platform,
             "loudnessTarget": LOUDNESS_TARGETS[platform],
+            "measuredLoudness": loudness,
+            "deliveryProfile": {
+                "videoCodec": "H.264", "pixelFormat": DELIVERY_PIXEL_FORMAT,
+                "frameRate": DELIVERY_FPS, "color": "Rec.709",
+                "programAudioCodec": "AAC", "programAudioSampleRateHz": DELIVERY_AUDIO_HZ,
+                "programAudioChannels": 2,
+                "archiveAudioCodec": "PCM 24-bit", "archiveAudioSampleRateHz": DELIVERY_AUDIO_HZ,
+                "master16x9": {"aspectRatio": "16:9"},
+                "master9x16": {"width": 1080, "height": 1920},
+            },
             "manifestPath": str(final["manifest"]),
             "inputSignature": input_signature,
             "orderedShots": [{"shotId": shot["shotId"],
@@ -699,7 +910,12 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                               for shot in shots],
             "conformPlan": plan, "captionWindows": caption_windows,
             "outputs": outputs,
-            "qc": {"passed": True, "checks": checks},
+            "qc": {
+                "passed": True,
+                "scope": "deterministic technical and lineage checks only",
+                "humanCreativeApprovalRequired": True,
+                "checks": checks,
+            },
         }
         manifest["manifestDigest"] = hashlib.sha256(json.dumps(
             manifest, sort_keys=True, ensure_ascii=False,

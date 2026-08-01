@@ -11,6 +11,17 @@ def test_safety_layer_is_installed():
     assert cb_render.fire_shot.__module__ == "cb_safety"
 
 
+def test_show_specific_runtime_refuses_an_uninstalled_adapter(monkeypatch):
+    monkeypatch.setattr(cb_render.P, "ENGINE_ADAPTER", "another-show-v1")
+    try:
+        cb_render._require_show_adapter()
+    except cb_render.Refused as exc:
+        assert "not supported" in str(exc)
+        assert "no provider was contacted" in str(exc)
+    else:
+        raise AssertionError("Crystal Bears runtime accepted another show's adapter")
+
+
 def test_preflight_stops_at_the_first_unapproved_canonical_contract_without_spend():
     report = cb_production_preflight.production_preflight("1", "Ep1")
     assert report["zeroSpend"] is True
@@ -22,9 +33,23 @@ def test_preflight_stops_at_the_first_unapproved_canonical_contract_without_spen
     assert "SHOT_NOT_READY" not in codes
     assert report["shots"] == []
     assert report["stages"]["storyboard"]["state"] == "blocked"
+    assert report["providerCapabilities"]["selectionReady"] is True
+    assert report["providerCapabilities"]["selectedVideoModelId"] == "fal-seedance-2.0"
+    assert report["showProfile"]["showId"] == "crystal-bears"
+    assert report["showProfile"]["adapterReady"] is True
     assert report["nextAction"] == (
         "Correct the script as a new immutable version or explicitly revise the show canon."
     )
+
+
+def test_preflight_blocks_an_unqualified_selected_video_model(monkeypatch):
+    monkeypatch.setenv("CB_VIDEO_MODEL_ID", "byteplus-seedance-2.5")
+    report = cb_production_preflight.production_preflight("1", "Ep1")
+
+    blockers = {item["code"]: item for item in report["blockers"]}
+    assert "VIDEO_PROVIDER_NOT_QUALIFIED" in blockers
+    assert "disabled" in blockers["VIDEO_PROVIDER_NOT_QUALIFIED"]["message"]
+    assert report["providerCapabilities"]["selectionReady"] is False
 
 
 def test_paid_resolvers_refuse_legacy_fallbacks():

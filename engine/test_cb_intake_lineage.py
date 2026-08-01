@@ -22,7 +22,8 @@ def _canon_status(episode="Ep1", cast=None, root=None):
 
 
 def _workspace(tmp_path, monkeypatch, text=SCRIPT_ONE):
-    store = ScriptStore(tmp_path)
+    store = ScriptStore(
+        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
     current = store.store("Ep1", text, "Pilot", activated_at="2026-01-01T00:00:00+00:00")
     episodes = tmp_path / "cb-studio" / "data" / "episodes.json"
     episodes.parent.mkdir(parents=True, exist_ok=True)

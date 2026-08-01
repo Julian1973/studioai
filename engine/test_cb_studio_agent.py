@@ -150,7 +150,7 @@ def test_canon_conflict_is_a_human_decision_not_a_proven_fact(monkeypatch):
 
     brief = agent.studio_agent_brief("1", "Ep1")
 
-    assert brief["headline"] == "Scene 1 is blocked at Story & Direction."
+    assert brief["headline"] == "Scene 1 needs attention in Story & Direction."
     assert brief["nextAction"]["type"] == "resolve-blocker"
     assert brief["nextAction"]["blockerCode"] == "CANON_LOCK_REQUIRED"
     assert len(brief["decisions"]) == 1
@@ -208,3 +208,45 @@ def test_missing_script_is_always_the_first_action(monkeypatch):
         "Upload and register the script as an immutable version."
     )
     assert brief["nextAction"]["execution"]["canSpend"] is False
+
+
+def test_plan_mode_prepares_work_without_resolving_canon_or_spending(monkeypatch):
+    _, state, _ = _install(monkeypatch)
+    state["qualityCompass"] = {
+        "overall": "attention",
+        "dimensions": [{
+            "id": "story",
+            "state": "attention",
+            "directorQuestion": "Which signed source should govern this conflict?",
+        }],
+    }
+
+    brief = agent.studio_agent_brief("1", "Ep1", mode="PLAN")
+
+    assert brief["mode"] == "PLAN"
+    assert brief["plan"]["objective"].startswith(
+        "Reconcile the named canon/script conflict")
+    assert brief["plan"]["humanDecisions"] == brief["decisions"]
+    assert brief["plan"]["qualityQuestions"] == [
+        "Which signed source should govern this conflict?",
+    ]
+    assert brief["plan"]["execution"] == {
+        "available": False,
+        "mode": "PLAN",
+        "changesData": False,
+        "canSpend": False,
+        "reason": "PLAN mode can prepare a creative plan, but cannot execute work.",
+    }
+    assert "draft-zero-spend-plan" in brief["authority"]["may"]
+    assert "change-canon" in brief["authority"]["mayNot"]
+
+
+def test_agent_rejects_unknown_mode_before_any_provider_path(monkeypatch):
+    _install(monkeypatch)
+
+    try:
+        agent.studio_agent_brief("1", "Ep1", mode="EXECUTE")
+    except ValueError as exc:
+        assert "HELP, PLAN" in str(exc)
+    else:
+        raise AssertionError("unknown agent mode should be rejected")

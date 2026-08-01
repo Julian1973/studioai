@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cb_handover.py — HUMAN GATE A -> PRODUCTION (2026-07-17, corrected for creative-room-2.0).
+"""cb_handover.py — HUMAN GATE A -> PRODUCTION (creative-room-2.2 handover).
 
 READ-ONLY AUDIT FINDING (2026-07-17, single-shot handover directive): this module's
 distil_shot()/promote() were built against an EARLIER storyboard field shape (fields
@@ -191,7 +191,9 @@ def _require_storyboard_lineage(sb, episode):
             "REFUSED — storyboard does not carry the exact current storyboard-canon lock")
     return current, expected_beat, lock
 
-# Keys of the storyboard that are CREATIVE-ROOM INTERNAL and must never reach production:
+# Raw room deliberation never reaches production. A compact creativeIntent projection is
+# deliberately distilled below so the approved audience, character, emotion, comedy and
+# cinematography decisions survive the handoff without leaking rejected alternatives.
 NEVER_PROMOTED = ("showrunnerJudgement", "internalRevisions", "escalation", "vision",
                    "interpretations", "treatments", "treatmentSelection",
                    "rejectedApproachSummaries", "canonCompletionProposal")
@@ -199,12 +201,7 @@ NEVER_PROMOTED = ("showrunnerJudgement", "internalRevisions", "escalation", "vis
 # Genuinely essential protections: provider-facing. rejectionChecks/audienceExperience/
 # transitionReason etc. are creative reasoning, not protections, and are never promoted.
 
-INTEGRATION_GAPS = (
-    "physical-staging: CreativeShotCard does not yet carry cb_engine.PhysicalStaging's "
-    "four-field BIG-comedy gag contract. Typed performance cause/effect and landing data "
-    "are preserved, but a scene explicitly classified BIG comedy still requires a separate "
-    "authored physical-staging contract before validation can pass.",
-)
+INTEGRATION_GAPS = ()
 
 # The provider (fal/Seedance) takes ONE integer-second duration end to end — confirmed by
 # direct code read, not assumed: cb_gen.generate_video_seedance's own `duration=8` default is
@@ -223,6 +220,85 @@ def normalize_duration_for_provider(rng):
 
 class HandoverRefused(Exception):
     """Raised BEFORE any write when the storyboard is not human-approved (or malformed)."""
+
+
+def _clean_text(value, fallback):
+    text = str(value or "").strip()
+    return text or fallback
+
+
+def _selected_treatment_record(storyboard):
+    treatments = storyboard.get("treatments") or []
+    selection = storyboard.get("treatmentSelection") or {}
+    selected = re.sub(
+        r"[^a-z0-9]+", " ", str(selection.get("selectedTreatment") or "").lower()).strip()
+    for treatment in treatments:
+        name = re.sub(
+            r"[^a-z0-9]+", " ", str(treatment.get("name") or "").lower()).strip()
+        if name and (name == selected or name in selected):
+            return treatment
+    return treatments[0] if treatments else {}
+
+
+def _creative_intent(storyboard):
+    """Distil the approved creative room result without carrying rejected alternatives."""
+    treatment = _selected_treatment_record(storyboard)
+    selection = storyboard.get("treatmentSelection") or {}
+    scene = storyboard.get("scene") or {}
+    vision = storyboard.get("vision") or {}
+    beat_contracts = []
+    for beat in storyboard.get("beats") or []:
+        beat_contracts.append({
+            "beatId": beat.get("beatId"),
+            "emotion": beat.get("emotionContract"),
+            "comedy": beat.get("comedyContract"),
+            "power": beat.get("powerMoment"),
+        })
+    return {
+        "schemaVersion": 2,
+        "selectedTreatment": selection.get("selectedTreatment"),
+        "governingAudienceExperience": selection.get("governingAudienceExperience"),
+        "scenePurpose": scene.get("purpose"),
+        "emotionalOwner": scene.get("emotionalOwner"),
+        "emotionalPointOfView": treatment.get("emotionalPointOfView"),
+        "comicOrDramaticMechanism": treatment.get("comicOrDramaticMechanism"),
+        "characterPerformanceStrategy": treatment.get("characterPerformanceStrategy"),
+        "visualGrammar": treatment.get("visualGrammar"),
+        "cameraCharacterRelationship": treatment.get("cameraCharacterRelationship"),
+        "movementVersusStillness": treatment.get("movementVersusStillness"),
+        "depthAndEnvironment": treatment.get("depthAndEnvironment"),
+        "rhythmAndEscalation": treatment.get("rhythmAndEscalation"),
+        "cutPhilosophy": treatment.get("cutPhilosophy"),
+        "openingImage": treatment.get("openingImage"),
+        "closingImage": treatment.get("closingImage"),
+        "handoverToNextScene": scene.get("handoverToNextScene"),
+        "intendedFinalFeeling": vision.get("intendedFinalFeeling"),
+        "beatExperienceContracts": beat_contracts,
+    }
+
+
+def _director_statement(storyboard):
+    intent = _creative_intent(storyboard)
+    opening = _clean_text(intent.get("openingImage"), "opening image not stated")
+    closing = _clean_text(intent.get("closingImage"), "closing image not stated")
+    return {
+        "audienceFeeling": _clean_text(
+            intent.get("governingAudienceExperience"),
+            "Legacy storyboard did not carry a governing audience experience."),
+        "whoseScene": _clean_text(
+            intent.get("emotionalOwner"),
+            "Legacy storyboard did not carry an emotional owner."),
+        "emotionalChange": _clean_text(
+            intent.get("emotionalPointOfView") or intent.get("scenePurpose"),
+            "Legacy storyboard did not carry the emotional change."),
+        "theLaugh": _clean_text(
+            intent.get("comicOrDramaticMechanism"),
+            "No comic mechanism is claimed for this scene."),
+        "visualSurprise": f"{opening} -> {closing}",
+        "carryForward": _clean_text(
+            intent.get("handoverToNextScene") or intent.get("intendedFinalFeeling"),
+            "Legacy storyboard did not carry the scene handoff."),
+    }
 
 
 def _md5(path):
@@ -339,6 +415,86 @@ def _validate_storyboard_dialogue_contract(storyboard):
         raise HandoverRefused(
             "REFUSED — storyboard dialogue occurrence signature is missing or stale")
     return occurrences
+
+
+def _validate_supervision_contracts(storyboard):
+    """Refuse a handoff that has lost story, comedy, power or gag ownership."""
+    emotion_keys = {"owner", "entryState", "pressure", "choiceOrRealisation",
+                    "exitState", "observableEvidence", "audienceAlignment",
+                    "heldAfterBeat"}
+    comedy_keys = {"mode", "mechanism", "comicOwner", "straightCharacter", "setup",
+                   "expectation", "disruption", "button", "hold", "physicalStaging"}
+    power_keys = {"bearer", "canonRule", "trigger", "exactCallOccurrenceId",
+                  "emotionalMeaning", "visibleManifestation", "costOrConsequence",
+                  "continuityResult", "prohibitedInventions"}
+    big_beats = {}
+    for beat in storyboard.get("beats") or []:
+        beat_id = beat.get("beatId")
+        participants = set(beat.get("participatingCharacters") or [])
+        emotion = beat.get("emotionContract")
+        comedy = beat.get("comedyContract")
+        if not isinstance(emotion, dict) or set(emotion) != emotion_keys:
+            raise HandoverRefused(
+                f"REFUSED - {beat_id} has no complete typed emotionContract")
+        if (emotion.get("owner") not in participants or
+                emotion.get("audienceAlignment") not in ("ahead", "with", "behind") or
+                any(not str(emotion.get(key) or "").strip() for key in emotion_keys)):
+            raise HandoverRefused(
+                f"REFUSED - {beat_id}.emotionContract is incomplete or names an unknown owner")
+        if not isinstance(comedy, dict) or set(comedy) != comedy_keys:
+            raise HandoverRefused(
+                f"REFUSED - {beat_id} has no complete typed comedyContract")
+        mode = comedy.get("mode")
+        if mode not in ("NONE", "SMALL", "BIG") or not str(comedy.get("mechanism") or "").strip():
+            raise HandoverRefused(
+                f"REFUSED - {beat_id}.comedyContract has no valid mode or mechanism")
+        if mode != "NONE":
+            required = ("comicOwner", "setup", "expectation", "disruption", "button", "hold")
+            if (comedy.get("comicOwner") not in participants or
+                    any(not str(comedy.get(key) or "").strip() for key in required)):
+                raise HandoverRefused(
+                    f"REFUSED - {beat_id}.comedyContract has no playable comic shape")
+        if comedy.get("straightCharacter") and comedy["straightCharacter"] not in participants:
+            raise HandoverRefused(
+                f"REFUSED - {beat_id}.comedyContract names an unknown straight character")
+        if mode == "BIG":
+            if not isinstance(comedy.get("physicalStaging"), dict):
+                raise HandoverRefused(
+                    f"REFUSED - {beat_id} BIG comedy has no physical staging")
+            big_beats[beat_id] = comedy["physicalStaging"]
+        elif comedy.get("physicalStaging") is not None:
+            raise HandoverRefused(
+                f"REFUSED - {beat_id} carries physical staging without BIG comedy")
+        power = beat.get("powerMoment")
+        if power is not None:
+            occurrence_ids = {item.get("dialogueOccurrenceId")
+                              for item in beat.get("dialogueOccurrences") or []}
+            if (not isinstance(power, dict) or set(power) != power_keys or
+                    power.get("bearer") not in participants or
+                    (power.get("exactCallOccurrenceId") and
+                     power["exactCallOccurrenceId"] not in occurrence_ids)):
+                raise HandoverRefused(
+                    f"REFUSED - {beat_id}.powerMoment is malformed or breaks canon identity")
+
+    carrier_by_beat = {beat_id: [] for beat_id in big_beats}
+    for shot in storyboard.get("shots") or []:
+        contract = shot.get("performanceContract") or {}
+        staging = contract.get("comedyStaging")
+        if staging is None:
+            continue
+        matching = [beat_id for beat_id in shot.get("beatIds") or [] if beat_id in big_beats]
+        if len(matching) != 1 or (shot.get("beatIds") or [None])[0] != matching[0]:
+            raise HandoverRefused(
+                f"REFUSED - {shot.get('shotId')} comedy staging does not own one BIG beat")
+        beat_id = matching[0]
+        if staging != big_beats[beat_id]:
+            raise HandoverRefused(
+                f"REFUSED - {shot.get('shotId')} changed the approved BIG comedy staging")
+        carrier_by_beat[beat_id].append(shot.get("shotId"))
+    for beat_id, carriers in carrier_by_beat.items():
+        if len(carriers) != 1:
+            raise HandoverRefused(
+                f"REFUSED - {beat_id} BIG comedy needs exactly one staging carrier; got {carriers}")
 
 
 def _characters_in_frame(sb_shot, participants):
@@ -491,7 +647,8 @@ def _performance_assignment(contract, beat_ids, cast, shot_id):
             f"REFUSED - {shot_id} has no typed Gate-5 performanceContract")
     expected_keys = {"beatOwner", "playableIntention", "phases",
                      "physicalCauseAndEffect", "visibleEmotionalTurn",
-                     "requiredLanding", "performanceFreedom"}
+                     "requiredLanding", "performanceFreedom", "characterTruths",
+                     "comedyStaging"}
     if set(contract) != expected_keys:
         raise HandoverRefused(
             f"REFUSED - {shot_id}.performanceContract fields are incomplete or unknown")
@@ -516,10 +673,65 @@ def _performance_assignment(contract, beat_ids, cast, shot_id):
         if set(phase) != expected_phase_keys or phase.get("performer") not in allowed:
             raise HandoverRefused(
                 f"REFUSED - {shot_id}.performanceContract has an unknown performer or field")
+    truths = contract.get("characterTruths")
+    truth_keys = {"character", "canonTrait", "playableWant", "pressureResponse",
+                  "observableSignature", "substitutionTest"}
+    if not isinstance(truths, list) or len(truths) > 4:
+        raise HandoverRefused(
+            f"REFUSED - {shot_id}.performanceContract characterTruths must be a list of four or fewer")
+    truth_names = []
+    for truth in truths:
+        if (not isinstance(truth, dict) or set(truth) != truth_keys or
+                truth.get("character") not in set(cast or []) or
+                any(not str(truth.get(key) or "").strip() for key in truth_keys)):
+            raise HandoverRefused(
+                f"REFUSED - {shot_id}.performanceContract has incomplete or unknown character truth")
+        truth_names.append(truth["character"])
+    if len(truth_names) != len(set(truth_names)):
+        raise HandoverRefused(
+            f"REFUSED - {shot_id}.performanceContract duplicates a character truth")
+    performers = {phase["performer"] for phase in phases if phase["performer"] != "ENVIRONMENT"}
+    if performers - set(truth_names):
+        raise HandoverRefused(
+            f"REFUSED - {shot_id}.performanceContract is missing character-specific truth")
+    comedy_staging = contract.get("comedyStaging")
+    if comedy_staging is not None:
+        staging_keys = {"staysVisible", "contactAndWeight", "payoffShape",
+                        "prohibitedStaging"}
+        if not isinstance(comedy_staging, dict) or set(comedy_staging) != staging_keys:
+            raise HandoverRefused(
+                f"REFUSED - {shot_id}.performanceContract has malformed comedy staging")
+        try:
+            cb_engine.PhysicalStaging(**comedy_staging)
+        except (TypeError, ValueError) as exc:
+            raise HandoverRefused(
+                f"REFUSED - {shot_id}.performanceContract has invalid comedy staging: {exc}") from exc
     try:
         return cb_engine.compile_performance_contract(contract)
     except ValueError as exc:
         raise HandoverRefused(f"REFUSED - {shot_id}: {exc}") from exc
+
+
+def _cinematography_instruction(contract, shot_id):
+    """Validate Gate 4 camera intent before reducing it to the provider line."""
+    expected = {"storyPointOfView", "shotScale", "lensIntent", "cameraHeight",
+                "composition", "depthStrategy", "cameraBehavior", "focusStrategy",
+                "lightingFunction", "paletteFunction", "providerInstruction"}
+    if not isinstance(contract, dict) or set(contract) != expected:
+        raise HandoverRefused(
+            f"REFUSED - {shot_id} has no complete typed cinematographyContract")
+    if any(not str(contract.get(key) or "").strip() for key in expected):
+        raise HandoverRefused(
+            f"REFUSED - {shot_id}.cinematographyContract contains an empty field")
+    instruction = str(contract["providerInstruction"]).strip()
+    if len(instruction) > 240:
+        raise HandoverRefused(
+            f"REFUSED - {shot_id}.cinematographyContract providerInstruction is too long")
+    normalized = re.sub(r"[^a-z0-9]+", " ", instruction.lower()).strip()
+    if any(label in normalized for label in ("cinematic", "beautiful", "award winning", "pixar")):
+        raise HandoverRefused(
+            f"REFUSED - {shot_id}.cinematographyContract uses an empty quality label")
+    return instruction
 
 
 def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
@@ -531,6 +743,16 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
     performance_contract = sb_shot.get("performanceContract")
     performance_assignment = _performance_assignment(
         performance_contract, sb_shot.get("beatIds") or [], cast, sb_shot["shotId"])
+    cinematography_contract = sb_shot.get("cinematographyContract")
+    camera_instruction = _cinematography_instruction(
+        cinematography_contract, sb_shot["shotId"])
+    comedy_staging = (performance_contract or {}).get("comedyStaging")
+    try:
+        physical_staging = (
+            cb_engine.PhysicalStaging(**comedy_staging) if comedy_staging else None)
+    except (TypeError, ValueError) as exc:
+        raise HandoverRefused(
+            f"REFUSED - {sb_shot['shotId']} has an invalid comedyStaging contract: {exc}") from exc
     continuity_in = _continuity_state(
         pd.get("continuityInState"), cast, f"{sb_shot['shotId']}.continuityInState")
     continuity_out = _continuity_state(
@@ -543,7 +765,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
         shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0], durationSec=duration,
         purpose=sb_shot["purpose"],
         performanceAssignment=performance_assignment,
-        camera=sb_shot["cameraRelationship"],
+        camera=camera_instruction,
         openingPose=sb_shot["openingImage"],
         sourceType="opener" if opener else "relay",
         sourceShotId=None if opener else prev,
@@ -552,7 +774,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
                          f"approved voice design.") if shot_voices else None,
         dialogueLines=_dialogue_lines(shot_voices, pd.get("dialogueTimings"), duration),
         visualPayoff=sb_shot["closingImage"],
-        physicalStaging=None,
+        physicalStaging=physical_staging,
         prohibited=list(pd.get("essentialProviderProtections") or [])[:3],
         charactersInFrame=_characters_in_frame(sb_shot, cast),
         continuityIn=continuity_in,
@@ -565,6 +787,10 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
                 "physicalPerformanceApproved": sb_shot.get("physicalPerformance"),
                 "animationTimingApproved": sb_shot.get("animationTiming"),
                 "performanceContractApproved": performance_contract,
+                "characterTruthsApproved": (performance_contract or {}).get(
+                    "characterTruths") or [],
+                "comedyStagingApproved": comedy_staging,
+                "cinematographyContractApproved": cinematography_contract or None,
                 "transitionType": sb_shot.get("transitionType"),
                 "voiceDirectorBrief": _voice_director_brief_lines(shot_voices)}
     return shot, retained
@@ -628,6 +854,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             f"REFUSED — {missing_details[0]} has no Production Detail; the "
             "schema-checkpoint pass must run before handover.")
     occurrences = _validate_storyboard_dialogue_contract(sb)
+    _validate_supervision_contracts(sb)
 
     pkg_path = pathlib.Path(pkg_path)
     old = json.load(open(pkg_path)) if pkg_path.exists() else {}
@@ -683,6 +910,8 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
            "sceneName": scene["sceneName"],
            "doctrine": "CREATIVE ROOM vNEXT handover — the approved storyboard is the sole "
                         "creative source (cb_handover.py)",
+           "directorStatement": _director_statement(sb),
+           "creativeIntent": _creative_intent(sb),
            "revision": new_rev,
            "revisionNote": f"Promoted from human-approved storyboard "
                             f"{pathlib.Path(storyboard_path).name}; every prior disclosure, "
@@ -692,7 +921,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
                                  "humanNote": sb.get("humanNote", "")},
            "handover": {"distilled": ["opening state", "principal performance",
                                         "principal camera intention", "voice/audio relationship",
-                                        "continuity in/out (prose verbatim + declared typed gap)",
+                                        "typed continuity in/out", "typed creative intent",
                                         "<=3 essential protections"],
                          "integrationGaps": list(INTEGRATION_GAPS)},
            "dialogueContract": sb.get("dialogueContract"),
@@ -731,6 +960,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
         raise HandoverRefused(f"REFUSED — {shot_id} has no Production Detail; the "
                               f"schema-checkpoint pass must run before handover.")
     _validate_storyboard_dialogue_contract(sb)
+    _validate_supervision_contracts(sb)
 
     pkg_path = pathlib.Path(pkg_path)
     old = json.load(open(pkg_path)) if pkg_path.exists() else {}
@@ -775,6 +1005,8 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
            "sceneName": scene["sceneName"], "scope": f"single-shot handover: {shot_id}",
            "doctrine": "CREATIVE ROOM vNEXT single-shot handover — the approved storyboard "
                         "is the sole creative source (cb_handover.promote_shot)",
+           "directorStatement": _director_statement(sb),
+           "creativeIntent": _creative_intent(sb),
            "revision": new_rev,
            "revisionNote": f"Promoted {shot_id} from human-approved storyboard "
                             f"{pathlib.Path(storyboard_path).name}; every prior disclosure, "
@@ -784,7 +1016,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
                                  "humanNote": sb.get("humanNote", "")},
            "handover": {"distilled": ["opening state", "principal performance",
                                         "principal camera intention", "voice/audio relationship",
-                                        "continuity in/out (prose verbatim + declared typed gap)",
+                                        "typed continuity in/out", "typed creative intent",
                                         "<=3 essential protections"],
                          "integrationGaps": list(INTEGRATION_GAPS)},
            "dialogueContract": sb.get("dialogueContract"),
@@ -893,6 +1125,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     current_script, source_beat_signature, canon_lock = _require_storyboard_lineage(
         sb, episode)
     _validate_storyboard_dialogue_contract(sb)
+    _validate_supervision_contracts(sb)
 
     try:
         characters_cfg = json.load(open(CHARS))
@@ -934,28 +1167,36 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     # is accounted for ACROSS THAT BEAT'S SIBLING SHOTS is a whole-scene-promotion question,
     # not this checkpoint's — S1.SH1's sibling S1.SH2 is not being promoted here, on purpose.
     #
-    # MISSING_PHYSICAL_STAGING still cannot fire meaningfully — the creative-room storyboard
-    # schema has no comedyMode/physicalStaging-equivalent fields at all (distil_shot always
-    # sets physicalStaging=None; a genuine, permanent schema gap, not fixable by reshaping
-    # data that doesn't exist — PIPELINE_CUTOVER_LEDGER.md §7). Every OTHER check —
-    # UNKNOWN_CHARACTER, dialogue timing/overrun, continuity cast completeness, relay-source
-    # integrity, the COMPILABILITY check (a REAL compile_shot_contract call), the
-    # camera-lock/checklist/abstract-direction WARNINGs — runs exactly as it would for any
-    # other package.
+    # BIG physical comedy now reaches the real validator through the approved beat comedy
+    # contract and its single selected shot's performanceContract.comedyStaging. Every other
+    # check — UNKNOWN_CHARACTER, dialogue timing/overrun, continuity cast completeness,
+    # relay-source integrity, the COMPILABILITY check (a real compile_shot_contract call),
+    # and camera/checklist/abstract-direction warnings — runs on the same canonical types.
     fields = set(cb_engine.Shot.model_fields)
     design_shots = [cb_engine.Shot(**{k: v for k, v in rec.items() if k in fields})
                     for rec in shots_out]
-    validation_beats = [{"cuts": [{
-        "dialogue": f"{line['speaker']}: {line['exactText']}",
-        "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
-        "sourceEventId": line.get("sourceEventId"),
-        "speaker": line["speaker"],
-        "exactText": line["exactText"],
-    } for rec in shots_out for line in rec["dialogueLines"]]}]
-    na = {k: "n/a — promoted via cb_handover from creative-room-2.0, not cb_engine.design_scene"
-          for k in ("audienceFeeling", "whoseScene", "emotionalChange", "theLaugh",
-                     "visualSurprise", "carryForward")}
-    design = cb_engine.SceneShotList(statement=cb_engine.DirectorStatement(**na), shots=design_shots)
+    storyboard_beats = {beat.get("beatId"): beat for beat in sb.get("beats") or []}
+    validation_beats = []
+    for beat_code in dict.fromkeys(rec["beatCode"] for rec in shots_out):
+        source_beat = storyboard_beats.get(beat_code) or {}
+        comedy = source_beat.get("comedyContract") or {}
+        lines = [line for rec in shots_out if rec["beatCode"] == beat_code
+                 for line in rec["dialogueLines"]]
+        validation_beats.append({
+            "beatCode": beat_code,
+            "comedyMode": comedy.get("mode"),
+            "cuts": [{
+                "dialogue": f"{line['speaker']}: {line['exactText']}",
+                "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
+                "sourceEventId": line.get("sourceEventId"),
+                "speaker": line["speaker"],
+                "exactText": line["exactText"],
+            } for line in lines],
+        })
+    director_statement = _director_statement(sb)
+    creative_intent = _creative_intent(sb)
+    design = cb_engine.SceneShotList(
+        statement=cb_engine.DirectorStatement(**director_statement), shots=design_shots)
     report = cb_engine.validate_scene_design(design, validation_beats, characters_cfg)
 
     # 2026-07-17 (Julian's layer-boundary directive, item 2): the canonical package path
@@ -988,9 +1229,10 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     new_pkg = {
         "episode": episode, "sceneNumber": str(scene_num),
         "sceneName": scene["sceneName"],
-        "doctrine": "creative-room-2.0 -> cb_handover.promote_to_canonical -> the existing "
+        "doctrine": "creative-room-2.2 -> cb_handover.promote_to_canonical -> the existing "
                      "cb_render canonical package format (2026-07-17 source-level handover)",
-        "directorStatement": na,
+        "directorStatement": director_statement,
+        "creativeIntent": creative_intent,
         "beatCodes": sorted({rec["beatCode"] for rec in shots_out}),
         "shots": shots_out,
         "totalSec": round(sum(rec["durationSec"] for rec in shots_out), 1),
@@ -1001,14 +1243,22 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                         "issues": report["issues"],
                         "beatsScopeNote": "dialogue occurrence identity, exact payload and "
                             "order are validated against this promotion's exact shot scope; "
-                            "the BIG-comedy physicalStaging requirement remains a separate "
-                            "creative-room schema gap (PIPELINE_CUTOVER_LEDGER.md §7).",
+                            "BIG-comedy physical staging is carried by the typed performance "
+                            "contract and validated on its selected gag shot.",
                         "validatedAt": _now(), "revision": new_rev},
-        "reviewCriteria": {"canon": "characters and world accurate vs references",
-                            "physics": "clip QA — identity, anatomy, frozen/morph",
-                            "continuity": "join check — position/state/light vs the prior shot",
-                            "direction": "does the joke land — Julian's own reserved verdict, "
-                                          "never a machine check"},
+        "reviewCriteria": {
+            "story": "approved audience experience and beat change remain legible",
+            "character": "performance is canon-grounded and fails the substitution test",
+            "emotion": "the approved entry-pressure-turn-exit is visible in actual media",
+            "comedy": "setup, disruption, reaction, button and hold land at scene rhythm",
+            "canon": "characters, powers and world are accurate vs locked references",
+            "physics": "identity, anatomy, weight, contact, follow-through and drift",
+            "cinematography": "camera, composition, depth, light and cut serve story intent",
+            "continuity": "join check - position, state, marks, props and light vs prior shot",
+            "sound": "exact dialogue, performance, perspective, effects and score function",
+            "direction": "does the scene make the child feel the intended change - the "
+                         "human director's reserved verdict, never a machine check",
+        },
         "sourceScript": sb.get("sourceScript"),
         "sourceBeatPackage": sb.get("sourceBeatPackage"),
         "canonLock": {

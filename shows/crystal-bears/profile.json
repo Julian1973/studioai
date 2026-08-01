@@ -1,8 +1,9 @@
 {
   "showId": "crystal-bears",
   "name": "Crystal Bears",
-  "animationType": "3D CGI (Pixar/Bluey)",
+  "animationType": "Premium stylized 3D CGI",
   "aspectRatio": "16:9",
+  "engineAdapter": "crystal-bears-v1",
   "canon": {
     "lockedCanon": "canon/LOCKED_CANON.md",
     "characters": "canon/characters.json",
@@ -22,7 +23,8 @@
     "scripts": "episodes/scripts",
     "output": "episodes/output"
   },
+  "creativeRoot": "creative",
   "docs": "docs",
   "chairs": "chairs",
-  "_note": "T30 Phase 3 manifest — describes where this show's tenant content lives under shows/crystal-bears/. The engine currently reads these paths via engine/paths.py's hardcoded SHOW resolution (env STUDIO_SHOW, default crystal-bears), not by parsing this file at runtime yet — this profile documents the contract paths.py implements and is the target for a future profile-loader (Phase 3's full acceptance criterion: STUDIO_SHOW=<other> starts the engine and fails only on missing content, never on Crystal-Bears assumptions baked into code). That full genericization (removing bee/crystal/Five-Pillars vocabulary from the engine's prompt-building logic itself, not just its file paths) is deliberately NOT done in this pass — it is real creative-logic surgery across cb_director.py/cb_prompts.py/cb_qa.py, a materially bigger and riskier undertaking than relocating files, scoped as future work."
+  "_note": "Authoritative tenant manifest. engineAdapter makes show-specific creative logic explicit; an unrecognized adapter blocks production instead of inheriting Crystal Bears assumptions."
 }

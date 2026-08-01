@@ -12,6 +12,7 @@ import uuid
 from typing import Any
 
 import cb_lineage
+import studio_profile
 
 
 _EPISODE_RE = re.compile(r"^Ep([1-9][0-9]*)$")
@@ -51,10 +52,26 @@ def _atomic_json(path: pathlib.Path, value: Any) -> None:
 class ScriptStore:
     """Store immutable script bytes separately from the mutable active-version pointer."""
 
-    def __init__(self, root: str | pathlib.Path):
+    def __init__(self, root: str | pathlib.Path, *, show_id: str | None = None,
+                 script_root: str | pathlib.Path | None = None):
         self.root = pathlib.Path(root).resolve()
-        self.script_root = self.root / "shows" / "crystal-bears" / "episodes" / "scripts"
-        self.studio_root = self.root / "cb-studio" / "data" / "scripts"
+        if script_root is None:
+            loaded = studio_profile.load_show_profile(self.root, show_id=show_id)
+            self.show_id = loaded.profile.showId
+            self.script_root = loaded.scripts_path
+        else:
+            self.show_id = studio_profile.validate_show_id(
+                show_id or studio_profile.DEFAULT_SHOW_ID)
+            self.script_root = pathlib.Path(script_root).resolve()
+            try:
+                self.script_root.relative_to(self.root)
+            except ValueError as exc:
+                raise ScriptStoreError("script_root must remain inside the repository") from exc
+        self.studio_root = (
+            self.root / "cb-studio" / "data" / "scripts"
+            if self.show_id == studio_profile.DEFAULT_SHOW_ID
+            else self.root / "cb-studio" / "data" / "shows" / self.show_id / "scripts"
+        )
         self.versions_root = self.script_root / "_versions"
         self.current_root = self.script_root / "_current"
         self.events_root = self.script_root / "_events"
@@ -72,6 +89,14 @@ class ScriptStore:
 
     def _current_path(self, episode: str) -> pathlib.Path:
         return self.current_root / f"{episode}.json"
+
+    def _recorded_content_path(self, relative: str) -> pathlib.Path:
+        candidate = (self.root / str(relative or "")).resolve()
+        try:
+            candidate.relative_to(self.script_root.resolve())
+        except ValueError as exc:
+            raise ScriptStoreError("script pointer escapes the active show's script store") from exc
+        return candidate
 
     def _version_paths(self, episode: str, digest: str) -> tuple[pathlib.Path, pathlib.Path]:
         base = self.versions_root / episode
@@ -166,7 +191,7 @@ class ScriptStore:
         if current.get("episodeId") != episode_id:
             raise ScriptStoreError(f"script pointer belongs to another episode: {pointer_path}")
         digest = cb_lineage.parse_script_version_id(current.get("scriptVersionId"))
-        content_path = self.root / str(current.get("contentPath") or "")
+        content_path = self._recorded_content_path(current.get("contentPath"))
         if verify:
             if not content_path.is_file():
                 raise ScriptStoreError(f"immutable script content is missing: {content_path}")
@@ -177,11 +202,11 @@ class ScriptStore:
 
     def content_path(self, episode: str | int) -> pathlib.Path:
         current = self.current(episode, verify=True, required=True)
-        return self.root / current["contentPath"]
+        return self._recorded_content_path(current["contentPath"])
 
     def rename_current(self, episode: str | int, title: str, *, changed_by: str = "Julian") -> dict:
         current = self.current(episode, verify=True, required=True)
-        text = (self.root / current["contentPath"]).read_text(encoding="utf-8")
+        text = self._recorded_content_path(current["contentPath"]).read_text(encoding="utf-8")
         return self.store(
             current["episodeId"], text, title,
             source_name=current.get("displayFile", ""),
@@ -216,4 +241,3 @@ class ScriptStore:
             except (OSError, ValueError, ScriptStoreError, cb_lineage.LineageError):
                 continue
         return records
-

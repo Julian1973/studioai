@@ -49,6 +49,20 @@ def _sb_shot(shot_id, beat_ids, transition, protections=None):
                                  transition == "CONTINUOUS" else
                                  "Continuing would dilute the impact; the new image "
                                  "re-scales the gag.",
+            "cinematographyContract": {
+                "storyPointOfView": "ride with Fuzzby's confidence",
+                "shotScale": "medium-wide retains Fuzzby and the leaf",
+                "lensIntent": "moderate perspective keeps speed readable",
+                "cameraHeight": "at Fuzzby's eye line inside the stems",
+                "composition": "open travel space closes at the leaf",
+                "depthStrategy": "foreground stems wipe across a readable contact plane",
+                "cameraBehavior": "pursue, briefly lose, then settle on the rebound",
+                "focusStrategy": "hold Fuzzby and leaf together through contact",
+                "lightingFunction": "warm side light reveals leaf compression",
+                "paletteFunction": "green corridor separates Fuzzby's silhouette",
+                "providerInstruction": (
+                    "Eye-level medium-wide pursuit through foreground stems; hold Fuzzby "
+                    "and the leaf sharp together, then settle on the rebound.")},
             "physicalPerformance": "Weight lands late, wings recover first, the whole body "
                                      "reads the overcommitment before he does.",
             "animationTiming": "Fast in, held rebound, a small settle before the next beat.",
@@ -65,7 +79,15 @@ def _sb_shot(shot_id, beat_ids, transition, protections=None):
                 "physicalCauseAndEffect": "His late weight compresses the leaf and releases him backward",
                 "visibleEmotionalTurn": "His confident chest closes into a private flinch",
                 "requiredLanding": "Fuzzby hangs low but airborne beside the trembling leaf",
-                "performanceFreedom": "Keep secondary wing beats and the size of the flinch natural"},
+                "performanceFreedom": "Keep secondary wing beats and the size of the flinch natural",
+                "characterTruths": [{
+                    "character": "Fuzzby",
+                    "canonTrait": "buoyant confidence survives mishaps",
+                    "playableWant": "make the arrival look intentional",
+                    "pressureResponse": "recovers his social pose before his balance",
+                    "observableSignature": "wings reset first and grin returns one beat late",
+                    "substitutionTest": "Zenny would acknowledge the evidence"}],
+                "comedyStaging": None},
             "approvalState": "draft"}
 
 
@@ -145,6 +167,21 @@ def _beat(beat_id="1.B1", dialogue=None):
             "participatingCharacters": ["Fuzzby", "Zenny"],
             "whatChanges": "x", "whoDrives": "Fuzzby", "audienceAnticipation": "x",
             "actionOrChoice": "x", "consequence": "x", "emotionalOrComicHandover": "x",
+            "emotionContract": {
+                "owner": "Fuzzby", "entryState": "buoyant certainty",
+                "pressure": "the leaf exposes his late steering",
+                "choiceOrRealisation": "he preserves the performance",
+                "exitState": "confidence covering a private flinch",
+                "observableEvidence": "his grin returns after the rebound",
+                "audienceAlignment": "ahead",
+                "heldAfterBeat": "the trembling leaf remains visible"},
+            "comedyContract": {
+                "mode": "SMALL", "mechanism": "confidence outlives evidence",
+                "comicOwner": "Fuzzby", "straightCharacter": "Zenny",
+                "setup": "he enters at speed", "expectation": "he owns the route",
+                "disruption": "the leaf rebounds him", "button": "his pose resets",
+                "hold": "the leaf trembles", "physicalStaging": None},
+            "powerMoment": None,
             "approvalState": "redesigned_for_review"}
 
 
@@ -193,13 +230,31 @@ def _storyboard(state="approved"):
     occurrence = beat["dialogueOccurrences"][0]
     storyboard = {"episodeId": "Ep1", "sceneNumber": 1, "approvalState": state,
             "humanNote": "lovely — go",
-            "scene": {"sceneId": "S1", "location": "Crystal Cove meadow"},
-            "vision": {"theme": CANON_MARKER},
+            "scene": {"sceneId": "S1", "location": "Crystal Cove meadow",
+                      "purpose": "turn confidence into connection", "emotionalOwner": "Fuzzby",
+                      "handoverToNextScene": "the trembling leaf points toward the storm"},
+            "vision": {"theme": CANON_MARKER,
+                       "intendedFinalFeeling": "delight with a warm aftertaste"},
             "showrunnerJudgement": JUDGEMENT_MARKER,
             "internalRevisions": [{"note": JUDGEMENT_MARKER}],
             "escalation": None,
-            "treatments": [{"name": "x", "cinematographerChallenge": REJECTED_MARKER}],
-            "treatmentSelection": {"rejectionChecks": REJECTED_MARKER},
+            "treatments": [{
+                "name": "x", "cinematographerChallenge": REJECTED_MARKER,
+                "emotionalPointOfView": "Fuzzby's confidence becomes briefly transparent",
+                "comicOrDramaticMechanism": "confidence outlives physical evidence",
+                "characterPerformanceStrategy": "body recovers before pride concedes",
+                "visualGrammar": "pursuit compresses into a held two-character result",
+                "cameraCharacterRelationship": "ride with, lose and rediscover Fuzzby",
+                "movementVersusStillness": "Fuzzby moves; Zenny's stillness lands the truth",
+                "depthAndEnvironment": "stems streak until the leaf becomes the contact plane",
+                "rhythmAndEscalation": "fast approach, elastic impact, generous hold",
+                "cutPhilosophy": "cut only when the audience needs a new relationship",
+                "openingImage": "Fuzzby drives through a corridor of stems",
+                "closingImage": "Fuzzby and the trembling leaf share the held frame"}],
+            "treatmentSelection": {
+                "selectedTreatment": "x",
+                "governingAudienceExperience": "ride with Fuzzby, then catch his bluff",
+                "rejectionChecks": REJECTED_MARKER},
             "beats": [beat],
             "shots": [_sb_shot("S1.SH1", ["1.B1"], "PLANNED_CUT"),
                        _sb_shot("S1.SH2", ["1.B1"], "CONTINUOUS")],
@@ -273,10 +328,14 @@ def test_storyboard_is_sole_creative_source():
         sb["shots"][0]["performanceContract"])
     assert s1["principalPerformanceApproved"] == sb["shots"][0]["principalPerformance"]  # retained, not dropped
     assert s1["physicalPerformanceApproved"] == sb["shots"][0]["physicalPerformance"]
-    assert s1["camera"] == sb["shots"][0]["cameraRelationship"]
+    assert s1["camera"] == sb["shots"][0]["cinematographyContract"]["providerInstruction"]
     assert s1["openingPose"] == sb["shots"][0]["openingImage"]
     assert s1["visualPayoff"] == sb["shots"][0]["closingImage"]
     assert s1["continuityProseIn"] == sb["productionDetail"][0]["continuityIn"]    # retained
+    assert s1["characterTruthsApproved"] == (
+        sb["shots"][0]["performanceContract"]["characterTruths"])
+    assert s1["cinematographyContractApproved"] == (
+        sb["shots"][0]["cinematographyContract"])
     assert "OLD-CREATIVE-SOURCE-MARKER" not in json.dumps(pkg)   # nothing of rev 6 survives
     assert pkg["sourceStoryboard"]["md5"] == _md5(sb_p)          # provenance binds the source
 
@@ -355,6 +414,19 @@ def test_distil_shot_refuses_when_typed_performance_contract_is_missing():
         H.distil_shot(sb_shot, pd, ["Fuzzby", "Zenny"], [], None, {})
 
 
+def test_distil_shot_refuses_missing_character_truth_or_cinematography():
+    pd = _pd("S1.SH9", True)
+    no_truth = _sb_shot("S1.SH9", ["1.B1"], "PLANNED_CUT")
+    no_truth["performanceContract"]["characterTruths"] = []
+    with pytest.raises(H.HandoverRefused, match="missing character-specific truth"):
+        H.distil_shot(no_truth, pd, ["Fuzzby", "Zenny"], [], None, {})
+
+    no_camera = _sb_shot("S1.SH9", ["1.B1"], "PLANNED_CUT")
+    no_camera["cinematographyContract"] = None
+    with pytest.raises(H.HandoverRefused, match="no complete typed cinematographyContract"):
+        H.distil_shot(no_camera, pd, ["Fuzzby", "Zenny"], [], None, {})
+
+
 # ── req 3: only the distilled categories, structure honoured ──────────────────────────
 def test_distils_only_the_categories_and_shot_structure():
     sb_p, pkg_p = _tmp()
@@ -368,7 +440,11 @@ def test_distils_only_the_categories_and_shot_structure():
     for s in (s1, s2):                                           # Option D lean brief holds
         assert s["promptWords"] <= cb_engine.MAX_SHOT_PROMPT_WORDS
         assert "Begin exactly on @图1" in s["seedancePrompt"]
-    assert pkg["handover"]["integrationGaps"]                    # gaps DECLARED, never silent
+    assert pkg["handover"]["integrationGaps"] == []
+    assert pkg["creativeIntent"]["schemaVersion"] == 2
+    assert pkg["creativeIntent"]["beatExperienceContracts"][0]["emotion"]["owner"] == "Fuzzby"
+    assert pkg["directorStatement"]["audienceFeeling"] == (
+        "ride with Fuzzby, then catch his bluff")
 
 
 def test_protections_capped_at_three():
@@ -682,7 +758,8 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
     source correctly redirects BOTH cb_handover's own call and any test helper that still
     reads back through cb_render._pkg_path (it delegates, so it sees the same patch)."""
     import cb_engine
-    store = ScriptStore(tmp_path)
+    store = ScriptStore(
+        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
     current = store.store("Ep1", "fixture script\n", "Fixture",
                           activated_at="2026-01-01T00:00:00+00:00")
     event = {"i": 0, "scene": 1, "type": "dialogue",

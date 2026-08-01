@@ -725,7 +725,8 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     script = ("INT. CRYSTAL COVE - DAY 1\n\n"
               "Fuzzby rockets toward a springy leaf as Zenny watches from her petal.\n\n"
               "FUZZBY\nNailed it.\n")
-    store = ScriptStore(tmp_path)
+    store = ScriptStore(
+        tmp_path, script_root=tmp_path / "shows/crystal-bears/episodes/scripts")
     current = store.store(
         "Ep1", script, "Script To Master", source_name="script.txt",
         activated_by="TestReviewer", activated_at="2026-07-30T00:00:00+00:00")

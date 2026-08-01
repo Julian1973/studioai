@@ -85,6 +85,11 @@ def _fake_ffmpeg_ffprobe_run(cmd, capture_output=True, text=True):
     path (always cmd[-1] for every ffmpeg invocation in this module) so os.path.exists(out) checks pass."""
     if cmd and cmd[0] == "ffprobe":
         return _FakeCompleted(stdout="5.0")
+    if cmd and cmd[-1] == "-" and "loudnorm" in " ".join(cmd):
+        return _FakeCompleted(stderr=json.dumps({
+            "input_i": "-20.0", "input_tp": "-4.0", "input_lra": "3.0",
+            "input_thresh": "-30.0", "target_offset": "0.0",
+        }))
     open(cmd[-1], "w").write("x")
     return _FakeCompleted(returncode=0)
 
@@ -393,13 +398,30 @@ def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_pa
                         pathlib.Path(out).write_bytes(b"audio") or str(out))
 
     def probe(path):
+        common = {"videoCodec": "h264", "pixelFormat": "yuv420p", "fps": 24.0,
+                  "colorPrimaries": "bt709", "colorTransfer": "bt709",
+                  "colorSpace": "bt709", "audioCodec": "aac",
+                  "audioSampleRate": 48000, "audioChannels": 2,
+                  "audioChannelLayout": "stereo", "audioSampleFormat": "fltp",
+                  "audioBitsPerRawSample": 0}
+        if "program_audio" in str(path):
+            return {**common, "durationSec": 7.6, "width": 0, "height": 0,
+                    "hasVideo": False, "hasAudio": True, "videoCodec": None,
+                    "pixelFormat": None, "fps": 0, "colorPrimaries": None,
+                    "colorTransfer": None, "colorSpace": None,
+                    "audioCodec": "pcm_s24le", "audioSampleFormat": "s32",
+                    "audioBitsPerRawSample": 24}
         if "9x16" in str(path):
-            return {"durationSec": 7.6, "width": 1080, "height": 1920,
+            return {**common, "durationSec": 7.6, "width": 1080, "height": 1920,
                     "hasVideo": True, "hasAudio": True}
-        return {"durationSec": 7.6, "width": 1280, "height": 720,
+        return {**common, "durationSec": 7.6, "width": 1280, "height": 720,
                 "hasVideo": True, "hasAudio": True}
 
     monkeypatch.setattr(cb_post, "_probe_media", probe)
+    monkeypatch.setattr(cb_post, "_measure_loudness", lambda path, target: {
+        "integratedLufs": float(target["I"]), "truePeakDbtp": float(target["TP"]),
+        "loudnessRangeLu": 3.0, "thresholdLufs": -24.0, "targetOffsetLu": 0.0,
+    })
     shots = [{"shotId": "S1.SH1", "approvedTake": str(clip),
               "dialogueLines": [{"dialogueOccurrenceId": "occ:first",
                                   "sourceEventId": "event:first", "speaker": "Fuzzby",
@@ -411,6 +433,8 @@ def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_pa
     final_dir = root / "EpT_Scene9_candidate1"
     assert final_dir.exists() and not list(root.glob(".tmp_*"))
     assert manifest["qc"]["passed"] is True
+    assert manifest["qc"]["humanCreativeApprovalRequired"] is True
+    assert manifest["deliveryProfile"]["programAudioSampleRateHz"] == 48000
     assert manifest["captionWindows"][0]["dialogueOccurrenceId"] == "occ:first"
     assert (final_dir / "captions.srt").read_text().count("Again.") == 1
     assert json.loads((final_dir / "post_manifest.json").read_text()) == manifest

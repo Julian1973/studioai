@@ -25,6 +25,7 @@ Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 import os, sys, json, time, base64, mimetypes, argparse, pathlib
 import requests
 import cb_costs
+import cb_providers
 
 HERE = pathlib.Path(__file__).resolve().parent
 MEDIA = HERE / "media"
@@ -128,6 +129,12 @@ def _rget(url, **kw):
 def _fal_upload(path):
     import fal_client
     return _retry(lambda: fal_client.upload_file(path), what="fal upload")
+def _fal_asset_url(value):
+    """Keep already-uploaded fal URLs stable; upload local provider inputs once."""
+    value = str(value)
+    if value.startswith(("https://", "http://")):
+        return value
+    return _fal_upload(str(pathlib.Path(value)))
 def _fal_subscribe(endpoint, arguments=None, with_logs=False):
     import fal_client
     return _retry(lambda: fal_client.subscribe(endpoint, arguments=arguments, with_logs=with_logs),
@@ -381,23 +388,26 @@ def _seedance_json_prompt(prompt, duration=None, ref=False):
 def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
                             generate_audio=True, out="clip_sd.mp4", end_image=None, production_route=None):
     _require_production_route(production_route, "generate_video_seedance")
+    contract = cb_providers.image_to_video_contract(
+        duration=duration, resolution=resolution,
+        image_count=2 if end_image else 1)
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
     args = {
         "prompt": _seedance_json_prompt(prompt, duration=duration),
-        "image_url": _fal_upload(str(pathlib.Path(keyframe))),
+        "image_url": _fal_asset_url(keyframe),
         "resolution": resolution,
         "duration": str(duration),
         "generate_audio": generate_audio,
     }
     if end_image:
-        args["end_image_url"] = _fal_upload(str(pathlib.Path(end_image)))
+        args["end_image_url"] = _fal_asset_url(end_image)
         print("  seedance: start→end frames, animating the action between…")
     else:
         print("  seedance: submitted, rendering…")
     result = _fal_subscribe(
-        "bytedance/seedance-2.0/image-to-video", arguments=args, with_logs=False)
+        contract["endpoint"], arguments=args, with_logs=False)
     url = (result.get("video") or {}).get("url")
     if not url:
         raise SystemExit(f"Seedance returned no video url: {str(result)[:400]}")
@@ -405,10 +415,12 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
     vid.raise_for_status()
     outp = MEDIA / out
     outp.write_bytes(vid.content)
-    cb_costs.log_spend("seedance_i2v", cb_costs.estimate_video_cost("seedance_i2v_per_sec", duration),
+    cb_costs.log_spend("seedance_i2v", cb_costs.estimate_video_cost(contract["costRateKey"], duration),
                         out=out, meta={"resolution": resolution})
-    cb_costs.write_gen_sidecar(outp, op="seedance_i2v", endpoint="bytedance/seedance-2.0/image-to-video",
-                                resolution=resolution, duration=duration, generate_audio=generate_audio)
+    cb_costs.write_gen_sidecar(
+        outp, op="seedance_i2v", endpoint=contract["endpoint"],
+        providerModelId=contract["providerModelId"], modelVersion=contract["modelVersion"],
+        resolution=resolution, duration=duration, generate_audio=generate_audio)
     return str(outp)
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────
@@ -428,15 +440,33 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     cb_retake.py omits the argument entirely. The parameter stays in the signature (never removed, so a
     stale caller fails loud rather than with a silent TypeError) but must never be populated again without
     a fresh ruling."""
+    if isinstance(image_urls, str):
+        image_urls = [image_urls]
+    else:
+        image_urls = list(image_urls or [])
+    if isinstance(audio_urls, str):
+        audio_urls = [audio_urls]
+    else:
+        audio_urls = list(audio_urls or [])
+    if isinstance(video_urls, str):
+        video_urls = [video_urls]
+    else:
+        video_urls = list(video_urls or [])
+    if video_urls:
+        raise cb_providers.ProviderCapabilityError(
+            "video references are retired from the approved Crystal Bears route; "
+            "nothing was uploaded and no provider was contacted")
+    contract = cb_providers.request_contract(
+        fast=fast, duration=duration, resolution=resolution,
+        image_count=len(image_urls), audio_count=len(audio_urls), video_count=0)
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
-    if isinstance(image_urls, str): image_urls = [image_urls]
     _pr = (str(prompt) if raw_prompt else
            _seedance_json_prompt(prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
     args = {
         "prompt": _pr,
-        "image_urls": [_fal_upload(str(pathlib.Path(p))) for p in image_urls],
+        "image_urls": [_fal_asset_url(p) for p in image_urls],
         "resolution": resolution,
         "duration": str(duration),
         # generate_audio ON: Seedance natively scores music + SFX + the lip-synced @Audio1 voice in ONE pass (fal docs —
@@ -445,13 +475,8 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         "generate_audio": True,
     }
     if audio_urls:
-        if isinstance(audio_urls, str): audio_urls = [audio_urls]
-        args["audio_urls"] = [_fal_upload(str(pathlib.Path(p))) for p in audio_urls]
-    if video_urls:
-        if isinstance(video_urls, str): video_urls = [video_urls]
-        args["video_urls"] = [_fal_upload(str(pathlib.Path(p))) for p in video_urls]
-    endpoint = ("bytedance/seedance-2.0/fast/reference-to-video" if fast
-                else "bytedance/seedance-2.0/reference-to-video")
+        args["audio_urls"] = [_fal_asset_url(p) for p in audio_urls]
+    endpoint = contract["endpoint"]
     print(f"  seedance ref2vid ({endpoint}): rendering…")
     result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
     url = (result.get("video") or {}).get("url")
@@ -461,11 +486,13 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     outp = MEDIA / out; outp.write_bytes(vid.content)
     _secs = 15 if str(duration) == "auto" else float(duration)   # HANDLE_TOTAL default when duration="auto"
     cb_costs.log_spend("seedance_ref2vid", cb_costs.estimate_video_cost(
-        "seedance_fast_per_sec" if fast else "seedance_standard_per_sec", _secs),
+        contract["costRateKey"], _secs),
         out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs})
-    cb_costs.write_gen_sidecar(outp, op="seedance_ref2vid", endpoint=endpoint, resolution=resolution,
+    cb_costs.write_gen_sidecar(outp, op="seedance_ref2vid", endpoint=endpoint,
+                                providerModelId=contract["providerModelId"],
+                                modelVersion=contract["modelVersion"], resolution=resolution,
                                 duration=str(duration), seconds=_secs, fast=fast,
-                                num_image_refs=len(image_urls), num_audio_refs=len(audio_urls or []))
+                                num_image_refs=len(image_urls), num_audio_refs=len(audio_urls))
     return str(outp)
 
 def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync", production_route=None):

@@ -179,7 +179,7 @@ def test_ex005_remains_linked_to_7d5762e():
 
 def test_creative_room_2_execution_order_unchanged():
     import cb_creative as C
-    assert C.ENGINE_VERSION.startswith("creative-room-2.1")
+    assert C.ENGINE_VERSION.startswith("creative-room-2.2")
     body = (HERE / "cb_creative.py").read_text().split("def run_scene", 1)[1]
     order = [body.index(s) for s in ("gate0_readiness(", "gate1_treatments(",
                                        "gate2_select(", "gate3_beats(",

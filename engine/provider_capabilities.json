@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "defaultVideoModelId": "fal-seedance-2.0",
+  "models": [
+    {
+      "modelId": "fal-seedance-2.0",
+      "provider": "fal",
+      "displayName": "Seedance 2.0 via fal",
+      "modelVersion": "2.0",
+      "transport": "fal-subscribe",
+      "enabled": true,
+      "status": "production",
+      "verifiedAt": "2026-07-31",
+      "sourceUrl": "https://fal.ai/models/bytedance/seedance-2.0/reference-to-video/api",
+      "endpoints": {
+        "image-to-video": "bytedance/seedance-2.0/image-to-video",
+        "reference-to-video": "bytedance/seedance-2.0/reference-to-video",
+        "reference-to-video-fast": "bytedance/seedance-2.0/fast/reference-to-video"
+      },
+      "modes": [
+        "image-to-video",
+        "reference-to-video",
+        "reference-to-video-fast"
+      ],
+      "duration": {
+        "minSec": 4,
+        "maxSec": 15,
+        "supportsAuto": true
+      },
+      "referenceLimits": {
+        "images": 9,
+        "audio": 3,
+        "video": 0,
+        "recommendedCombined": 5
+      },
+      "resolutions": [
+        "480p",
+        "720p",
+        "1080p"
+      ],
+      "nativeAudio": true,
+      "costRateKeys": {
+        "reference-to-video": "seedance_standard_per_sec",
+        "reference-to-video-fast": "seedance_fast_per_sec",
+        "image-to-video": "seedance_i2v_per_sec"
+      },
+      "fallbackModelId": null,
+      "disableReason": null
+    },
+    {
+      "modelId": "byteplus-seedance-2.0",
+      "provider": "byteplus",
+      "displayName": "Seedance 2.0 via BytePlus ModelArk",
+      "modelVersion": "2.0",
+      "transport": "byteplus-async",
+      "enabled": false,
+      "status": "qualification-required",
+      "verifiedAt": "2026-07-31",
+      "sourceUrl": "https://docs.byteplus.com/en/docs/modelark/1520757",
+      "endpoints": {},
+      "modes": [
+        "image-to-video",
+        "reference-to-video"
+      ],
+      "duration": {
+        "minSec": 4,
+        "maxSec": 15,
+        "supportsAuto": true
+      },
+      "referenceLimits": {
+        "images": 9,
+        "audio": 3,
+        "video": 3,
+        "recommendedCombined": 5
+      },
+      "resolutions": [
+        "480p",
+        "720p",
+        "1080p"
+      ],
+      "nativeAudio": true,
+      "costRateKeys": {},
+      "fallbackModelId": "fal-seedance-2.0",
+      "disableReason": "Account model ID, price, terms and asynchronous job contract are not yet qualified."
+    },
+    {
+      "modelId": "byteplus-seedance-2.5",
+      "provider": "byteplus",
+      "displayName": "Seedance 2.5 via BytePlus ModelArk",
+      "modelVersion": "2.5",
+      "transport": "unknown",
+      "enabled": false,
+      "status": "unverified",
+      "verifiedAt": "2026-08-01",
+      "sourceUrl": "https://docs.byteplus.com/en/docs/modelark/1520757",
+      "endpoints": {},
+      "modes": [],
+      "duration": {
+        "minSec": null,
+        "maxSec": null,
+        "supportsAuto": false
+      },
+      "referenceLimits": {
+        "images": null,
+        "audio": null,
+        "video": null,
+        "recommendedCombined": null
+      },
+      "resolutions": [],
+      "nativeAudio": null,
+      "costRateKeys": {},
+      "fallbackModelId": "fal-seedance-2.0",
+      "disableReason": "No current official BytePlus 2.5 model ID, request schema, price or account-level route is verified."
+    }
+  ]
+}

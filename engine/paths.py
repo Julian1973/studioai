@@ -22,6 +22,7 @@ grepping for zero remaining references to the old paths.
 """
 import os
 import re
+import studio_profile
 
 # FIXED 2026-07-11 (full-codebase audit, duplication finding): this exact pattern used to be hand-duplicated as
 # cb_director_schemas._PAUSEHOLD_RE and cb_preflight._HOLD_RE (a beat's pauseHold field must state a concrete
@@ -32,17 +33,20 @@ PAUSEHOLD_RE = re.compile(r"(\d+(?:\.\d+)?)[\s-]*second")
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(ENGINE)
 
-SHOW_ID = os.environ.get("STUDIO_SHOW", "crystal-bears")
-SHOW = os.path.join(ROOT, "shows", SHOW_ID)
+SHOW_PROFILE = studio_profile.load_show_profile(ROOT)
+SHOW_ID = SHOW_PROFILE.profile.showId
+ENGINE_ADAPTER = SHOW_PROFILE.profile.engineAdapter
+SHOW = str(SHOW_PROFILE.show_root)
 
-CANON = os.path.join(SHOW, "canon", "LOCKED_CANON.md")
-CONFIG = os.path.join(SHOW, "canon")
-CHARS = os.path.join(CONFIG, "characters.json")
-LOCATIONS = os.path.join(CONFIG, "locations.json")
+_CANON_PATHS = SHOW_PROFILE.canon_paths
+CANON = str(_CANON_PATHS["lockedCanon"])
+CHARS = str(_CANON_PATHS["characters"])
+LOCATIONS = str(_CANON_PATHS["locations"])
+CONFIG = os.path.dirname(CHARS)
 
 MEDIA = os.path.join(ENGINE, "media")
-OUTPUT = os.path.join(SHOW, "episodes", "output")
-SCRIPTS = os.path.join(SHOW, "episodes", "scripts")
+OUTPUT = str(SHOW_PROFILE.output_path)
+SCRIPTS = str(SHOW_PROFILE.scripts_path)
 
 LOCKED = os.path.join(ENGINE, "locked.json")
 NOTES = os.path.join(ENGINE, "notes.json")

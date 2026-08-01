@@ -2,8 +2,9 @@
 """Read-only Studio Agent projection over the authoritative production pipeline.
 
 The Studio Agent is deliberately not another workflow engine. It compiles the current
-canon, script, approval/readiness policy and preflight evidence into one selection-aware
-HELP brief. It has no write path and cannot import or call a media provider.
+canon, script, approval/readiness policy, quality compass and preflight evidence into one
+selection-aware HELP or PLAN brief. It has no write path and cannot import or call a
+media provider.
 """
 from __future__ import annotations
 
@@ -16,8 +17,9 @@ import cb_production_preflight
 import cb_state
 
 
-AGENT_VERSION = "studio-agent-help-v1"
-BRIEF_SCHEMA_VERSION = 1
+AGENT_VERSION = "studio-agent-context-v2"
+BRIEF_SCHEMA_VERSION = 2
+VALID_MODES = ("HELP", "PLAN")
 STAGE_ORDER = (
     "script",
     "storyboard",
@@ -62,7 +64,7 @@ def _first_open_stage(stages):
     return "final", "approved"
 
 
-def _action_for(intake, state, preflight, shot_id=None):
+def _action_for(intake, state, preflight, shot_id=None, mode="HELP"):
     """Choose one navigation-only action without reconstructing readiness policy."""
     stages = state.get("stages") or {}
     if not intake.get("hasScript"):
@@ -109,10 +111,14 @@ def _action_for(intake, state, preflight, shot_id=None):
         "navigation": {"stage": stage, **({"shotId": target_shot} if target_shot else {})},
         "execution": {
             "available": False,
-            "mode": "HELP",
+            "mode": mode,
             "changesData": False,
             "canSpend": False,
-            "reason": "HELP mode can navigate and explain, but cannot execute work.",
+            "reason": (
+                "HELP mode can navigate and explain, but cannot execute work."
+                if mode == "HELP"
+                else "PLAN mode can prepare a creative plan, but cannot execute work."
+            ),
         },
     }
 
@@ -203,19 +209,120 @@ def _headline(scene, state, next_action):
     status = (stages.get(stage) or {}).get("state")
     label = next_action["stageName"]
     if status == "blocked" or next_action["type"] == "resolve-blocker":
-        return f"Scene {scene} is blocked at {label}."
+        return f"Scene {scene} needs attention in {label}."
     if status == "awaiting":
         return f"Scene {scene} needs your decision at {label}."
     if all((stages.get(item) or {}).get("state") == "approved" for item in STAGE_ORDER):
-        return f"Scene {scene} has cleared every production gate."
+        return f"Scene {scene} has a current approved master."
     return f"Scene {scene} is ready at {label}."
 
 
-def studio_agent_brief(scene, episode="Ep1", shot_id=None):
-    """Compile one deterministic HELP brief from authoritative, zero-spend reads."""
+def _plan_for(state, next_action, decisions):
+    """Build a concise creative plan without inventing canon or changing state."""
+    stage = next_action["stage"]
+    plans = {
+        "script": {
+            "objective": "Establish the screenplay as an immutable creative source.",
+            "deliverables": [
+                "Registered script version and source hash",
+                "Scene and exact dialogue-occurrence inventory",
+            ],
+            "preserve": ["Every authored line, beat and scene boundary"],
+        },
+        "storyboard": {
+            "objective": "Direct the scene as an audience experience before media spend.",
+            "deliverables": [
+                "Scene treatment with audience alignment and emotional turn",
+                "Beat contracts for emotion, comedy and any canon-supported crystal power",
+                "Shot design with performance, continuity and cinematography contracts",
+            ],
+            "preserve": [
+                "Signed canon and exact dialogue occurrences",
+                "Character-specific wants, pressure responses and comic roles",
+            ],
+        },
+        "scenelook": {
+            "objective": "Prove one coherent world, palette, lighting idea and material language.",
+            "deliverables": [
+                "Approved scene look plate",
+                "Character, prop and location identity checks against locked references",
+            ],
+            "preserve": ["Approved story point of view and continuity state"],
+        },
+        "voice": {
+            "objective": "Make the exact words feel thought, heard and answered in real time.",
+            "deliverables": [
+                "Character-specific voice direction and approved performances",
+                "Timing slate with breath, silence, reactions and joke holds",
+            ],
+            "preserve": ["Exact words, speaker, listener and occurrence identity"],
+        },
+        "keyframe": {
+            "objective": "Prove composition, lens intent, staging, depth and light before motion.",
+            "deliverables": [
+                "Current opening frame for each opener shot",
+                "Camera and screen-direction check against the approved shot contract",
+            ],
+            "preserve": ["Character identity, geography and emotional point of view"],
+        },
+        "animation": {
+            "objective": "Create readable thought, weight, contact, reaction and change over time.",
+            "deliverables": [
+                "Current animation candidates tied to approved direct inputs",
+                "Picture, voice/lip-sync, identity drift and physical-comedy inspection",
+            ],
+            "preserve": [
+                "Approved performance truth and comedy staging",
+                "Opening-frame, voice, continuity and cinematography signatures",
+            ],
+        },
+        "continuity": {
+            "objective": "Judge the rendered scene as a cut, not as isolated generated clips.",
+            "deliverables": [
+                "Shot-level director decisions on story, acting, camera, physics and continuity",
+                "Precise notes that identify picture, performance, voice or drift causes",
+            ],
+            "preserve": ["Approved takes and their complete dependency evidence"],
+        },
+        "final": {
+            "objective": "Finish and approve one broadcast-ready scene master.",
+            "deliverables": [
+                "Conform, mix, captions, color-managed master and delivery derivatives",
+                "Automated QC manifest plus uninterrupted human final viewing",
+            ],
+            "preserve": ["Approved picture, timing, audio and source lineage"],
+        },
+        "configuration": {
+            "objective": "Restore a valid, secure and spend-safe production configuration.",
+            "deliverables": ["Passing zero-spend preflight with explicit provider readiness"],
+            "preserve": ["Secrets, signed approvals and current production artifacts"],
+        },
+    }
+    plan = dict(plans.get(stage) or plans["configuration"])
+    compass = state.get("qualityCompass") or {}
+    plan["qualityQuestions"] = [
+        item["directorQuestion"]
+        for item in (compass.get("dimensions") or [])
+        if item.get("directorQuestion") and item.get("state") != "clear"
+    ]
+    plan["humanDecisions"] = list(decisions)
+    if decisions:
+        plan["objective"] = (
+            "Reconcile the named canon/script conflict against signed source evidence; "
+            "do not choose or rewrite canon automatically."
+        )
+    plan["execution"] = next_action["execution"]
+    return plan
+
+
+def studio_agent_brief(scene, episode="Ep1", shot_id=None, mode="HELP"):
+    """Compile one deterministic, read-only brief from authoritative zero-spend reads."""
     scene = str(scene)
     episode = str(episode)
     shot_id = str(shot_id) if shot_id else None
+    mode = str(mode or "HELP").upper()
+    if mode not in VALID_MODES:
+        raise ValueError(f"mode must be one of: {', '.join(VALID_MODES)}")
 
     intake = cb_intake.intake_status(episode)
     state = cb_state.production_state(scene, episode, intake=intake)
@@ -223,12 +330,14 @@ def studio_agent_brief(scene, episode="Ep1", shot_id=None):
         scene, episode, state=state)
     shots = state.get("shots") or []
     selected_shot = next((shot for shot in shots if shot.get("shotId") == shot_id), None)
-    next_action = _action_for(intake, state, preflight, shot_id if selected_shot else None)
+    next_action = _action_for(
+        intake, state, preflight, shot_id if selected_shot else None, mode=mode)
     facts = _facts(intake, state, next_action)
     canon = state.get("canonLock") or {}
 
     dependencies = {
         "agentVersion": AGENT_VERSION,
+        "mode": mode,
         "policyVersion": state.get("policyVersion"),
         "episode": episode,
         "scene": scene,
@@ -260,6 +369,10 @@ def studio_agent_brief(scene, episode="Ep1", shot_id=None):
             }
             for item in (preflight.get("blockers") or [])
         ],
+        "qualityStates": {
+            item.get("id"): item.get("state")
+            for item in ((state.get("qualityCompass") or {}).get("dimensions") or [])
+        },
     }
     signature = cb_lineage.dependency_signature("studio-agent-context", dependencies)
     canon_blockers = canon.get("blockers") or []
@@ -278,7 +391,7 @@ def studio_agent_brief(scene, episode="Ep1", shot_id=None):
         "schemaVersion": BRIEF_SCHEMA_VERSION,
         "agentVersion": AGENT_VERSION,
         "briefId": f"studio-brief:sha256:{signature['digest']}",
-        "mode": "HELP",
+        "mode": mode,
         "zeroSpend": True,
         "readOnly": True,
         "episode": episode,
@@ -294,6 +407,8 @@ def studio_agent_brief(scene, episode="Ep1", shot_id=None):
         "decisions": decisions,
         "blockers": preflight.get("blockers") or [],
         "warnings": preflight.get("warnings") or [],
+        "qualityCompass": state.get("qualityCompass") or {},
+        "plan": _plan_for(state, next_action, decisions) if mode == "PLAN" else None,
         "context": {
             "show": {
                 "canonCurrent": bool(canon.get("current")),
@@ -313,10 +428,11 @@ def studio_agent_brief(scene, episode="Ep1", shot_id=None):
                 "packageRevision": state.get("packageRevision"),
                 "lineage": state.get("lineage") or {},
                 "stages": state.get("stages") or {},
+                "qualityCompass": state.get("qualityCompass") or {},
             },
             "shot": selected_shot,
             "task": {
-                "mode": "HELP",
+                "mode": mode,
                 "stage": next_action["stage"],
                 "actionId": next_action["actionId"],
             },
@@ -329,6 +445,7 @@ def studio_agent_brief(scene, episode="Ep1", shot_id=None):
                 "identify-blockers",
                 "recommend-one-next-action",
                 "navigate-to-existing-workspace",
+                *(["draft-zero-spend-plan"] if mode == "PLAN" else []),
             ],
             "mayNot": [
                 "change-canon",
@@ -350,4 +467,5 @@ if __name__ == "__main__":
         sys.argv[1],
         sys.argv[2] if len(sys.argv) > 2 else "Ep1",
         sys.argv[3] if len(sys.argv) > 3 else None,
+        sys.argv[4] if len(sys.argv) > 4 else "HELP",
     ), indent=1, ensure_ascii=False))

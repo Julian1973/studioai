@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """cb_creative.py — THE CRYSTAL BEARS CREATIVE ROOM (process v2, 2026-07-17).
 
-The 2026-07-17 freeze was superseded by Julian's 2026-07-30 architecture rebuild: Gate 5
-now emits a typed performance contract, and ProductionDetail owns typed continuity
-boundaries plus numeric per-occurrence dialogue windows. Historical prose remains review
-context but is no longer executable.
+The 2026-07-17 freeze was superseded by Julian's 2026-07-30 architecture rebuild: Gate 3
+now owns typed emotion, comedy and optional crystal-power intent; Gate 4 owns typed
+cinematography; Gate 5 emits typed character-specific performance and physical-comedy
+contracts; and ProductionDetail owns typed continuity boundaries plus numeric
+per-occurrence dialogue windows. Historical prose remains review context but is no longer
+executable.
 
 Process v1 was rejected by Julian as a PROCESS-LEVEL failure (EX-005 in the exemplar
 library): the Cinematographer entered after the dramatic approach was already selected;
@@ -73,7 +75,7 @@ import cb_scripts
 CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
-ENGINE_VERSION = "creative-room-2.1 (2026-07-30, typed execution contracts)"
+ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
 MAX_INTERNAL_REVISIONS = 2
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
@@ -146,6 +148,76 @@ class DialogueOccurrence(BaseModel):
     exactText: str = Field(min_length=1)
 
 
+class BeatEmotionContract(BaseModel):
+    """The emotional event the audience experiences, expressed without invented psychology."""
+    model_config = ConfigDict(extra="forbid")
+
+    owner: str = Field(min_length=1)
+    entryState: str = Field(min_length=1)
+    pressure: str = Field(min_length=1)
+    choiceOrRealisation: str = Field(min_length=1)
+    exitState: str = Field(min_length=1)
+    observableEvidence: str = Field(min_length=1)
+    audienceAlignment: Literal["ahead", "with", "behind"]
+    heldAfterBeat: str = Field(min_length=1)
+
+
+class PhysicalComedyStaging(BaseModel):
+    """Readable physics for the one shot that carries a BIG physical gag."""
+    model_config = ConfigDict(extra="forbid")
+
+    staysVisible: str = Field(min_length=1)
+    contactAndWeight: str = Field(min_length=1)
+    payoffShape: str = Field(min_length=1)
+    prohibitedStaging: List[str] = Field(default_factory=list, max_length=3)
+
+
+class BeatComedyContract(BaseModel):
+    """Character-led comic structure. NONE is an explicit rhythm decision, not an omission."""
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["NONE", "SMALL", "BIG"]
+    mechanism: str = Field(min_length=1)
+    comicOwner: Optional[str] = None
+    straightCharacter: Optional[str] = None
+    setup: str = ""
+    expectation: str = ""
+    disruption: str = ""
+    button: str = ""
+    hold: str = ""
+    physicalStaging: Optional[PhysicalComedyStaging] = None
+
+    @model_validator(mode="after")
+    def active_comedy_has_a_playable_shape(self):
+        if self.mode != "NONE":
+            required = (self.comicOwner, self.setup, self.expectation,
+                        self.disruption, self.button, self.hold)
+            if any(not str(value or "").strip() for value in required):
+                raise ValueError(
+                    "SMALL/BIG comedy needs an owner, setup, expectation, disruption, "
+                    "button and hold")
+        if self.mode == "BIG" and self.physicalStaging is None:
+            raise ValueError("BIG comedy needs a physicalStaging contract")
+        if self.mode == "NONE" and self.physicalStaging is not None:
+            raise ValueError("NONE comedy cannot carry physicalStaging")
+        return self
+
+
+class CrystalPowerMoment(BaseModel):
+    """A story-level power event. Exact spoken words remain owned by dialogue occurrences."""
+    model_config = ConfigDict(extra="forbid")
+
+    bearer: str = Field(min_length=1)
+    canonRule: str = Field(min_length=1)
+    trigger: str = Field(min_length=1)
+    exactCallOccurrenceId: Optional[str] = None
+    emotionalMeaning: str = Field(min_length=1)
+    visibleManifestation: str = Field(min_length=1)
+    costOrConsequence: str = Field(min_length=1)
+    continuityResult: str = Field(min_length=1)
+    prohibitedInventions: List[str] = Field(default_factory=list, max_length=3)
+
+
 class Beat(BaseModel):
     """Gate 3 — beat architecture INSIDE the selected treatment. Beats do not
     automatically become separate shots."""
@@ -165,6 +237,9 @@ class Beat(BaseModel):
     actionOrChoice: str
     consequence: str
     emotionalOrComicHandover: str
+    emotionContract: Optional[BeatEmotionContract] = None
+    comedyContract: Optional[BeatComedyContract] = None
+    powerMoment: Optional[CrystalPowerMoment] = None
     approvalState: str = "draft"
 
 
@@ -175,6 +250,18 @@ class PerformancePhase(BaseModel):
     phase: Literal["anticipation", "action", "reaction", "settle"]
     performer: str = Field(min_length=1)
     observableAction: str = Field(min_length=1)
+
+
+class CharacterPerformanceTruth(BaseModel):
+    """Why this performance can belong only to this locked character."""
+    model_config = ConfigDict(extra="forbid")
+
+    character: str = Field(min_length=1)
+    canonTrait: str = Field(min_length=1)
+    playableWant: str = Field(min_length=1)
+    pressureResponse: str = Field(min_length=1)
+    observableSignature: str = Field(min_length=1)
+    substitutionTest: str = Field(min_length=1)
 
 
 class ShotPerformanceContract(BaseModel):
@@ -190,6 +277,9 @@ class ShotPerformanceContract(BaseModel):
     visibleEmotionalTurn: str = Field(min_length=1)
     requiredLanding: str = Field(min_length=1)
     performanceFreedom: str = Field(min_length=1)
+    characterTruths: List[CharacterPerformanceTruth] = Field(
+        default_factory=list, max_length=4)
+    comedyStaging: Optional[PhysicalComedyStaging] = None
 
     @model_validator(mode="after")
     def phases_are_unique_and_ordered(self):
@@ -200,6 +290,23 @@ class ShotPerformanceContract(BaseModel):
         if names != sorted(names, key=order.__getitem__):
             raise ValueError("performance phases must follow anticipation/action/reaction/settle order")
         return self
+
+
+class ShotCinematographyContract(BaseModel):
+    """The story reason and observable design of one camera view."""
+    model_config = ConfigDict(extra="forbid")
+
+    storyPointOfView: str = Field(min_length=1)
+    shotScale: str = Field(min_length=1)
+    lensIntent: str = Field(min_length=1)
+    cameraHeight: str = Field(min_length=1)
+    composition: str = Field(min_length=1)
+    depthStrategy: str = Field(min_length=1)
+    cameraBehavior: str = Field(min_length=1)
+    focusStrategy: str = Field(min_length=1)
+    lightingFunction: str = Field(min_length=1)
+    paletteFunction: str = Field(min_length=1)
+    providerInstruction: str = Field(min_length=1, max_length=240)
 
 
 class CreativeShotCard(BaseModel):
@@ -227,6 +334,7 @@ class CreativeShotCard(BaseModel):
     transitionType: Literal["CONTINUOUS", "PLANNED_CUT"]
     transitionReason: str                        # cut: why continuous would be weaker;
     #                                              continuous: why a cut would weaken it
+    cinematographyContract: Optional[ShotCinematographyContract] = None
     physicalPerformance: Optional[str] = None    # Gate 5 (Director): body + animation intent
     animationTiming: Optional[str] = None        # Gate 5 (Director): timing/weight of the move
     performanceContract: Optional[ShotPerformanceContract] = None
@@ -879,7 +987,20 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
               "defines: what changes; who drives the change; audience anticipation; the "
               "action or choice; the consequence; and the emotional or comic handover. "
               "Beats do NOT automatically become separate shots — a physical, emotional or "
-              "comic chain remains continuous when continuity strengthens it."),
+              "comic chain remains continuous when continuity strengthens it. Every beat "
+              "also needs an emotionContract and a comedyContract. emotionContract names "
+              "the participating character who owns the beat, entry state, pressure, "
+              "choice or realisation, exit state, observable evidence, whether the audience "
+              "is ahead/with/behind them, and what remains held after the beat. Never invent "
+              "hidden psychology: use the selected treatment, established character canon "
+              "and visible script event. comedyContract explicitly says NONE, SMALL or BIG. "
+              "For comedy, preserve setup, expectation, disruption, button and the hold that "
+              "lets the audience catch up. BIG comedy must include one readable physical "
+              "staging contract: what stays visible, contact and weight, payoff shape and no "
+              "more than three specific staging failures. powerMoment is null unless the "
+              "approved script and canon genuinely contain a Crystal power event; when it "
+              "exists, bind any spoken call by dialogueOccurrenceId rather than copying or "
+              "rewriting its words."),
         f"THE SELECTED TREATMENT (this governs everything):\n{treatment.model_dump_json()}\n\n"
         f"THE SHOWRUNNER'S SELECTION:\n{selection.model_dump_json()}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:4000]}\n\n"
@@ -916,6 +1037,31 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         beat.dialogueOccurrences = _beat_dialogue_occurrences(src)
         beat.exactDialogue = [
             f"{occ.speaker}: {occ.exactText}" for occ in beat.dialogueOccurrences]
+        if not beat.emotionContract or not beat.comedyContract:
+            raise RuntimeError(
+                f"SUPERVISION CONTRACT MISSING - {beat.beatId} needs typed emotion and "
+                "comedy intent")
+        participant_names = {_norm(name) for name in beat.participatingCharacters}
+        if _norm(beat.emotionContract.owner) not in participant_names:
+            raise RuntimeError(
+                f"EMOTION CONTRACT UNKNOWN OWNER - {beat.beatId} names "
+                f"{beat.emotionContract.owner}")
+        for field, name in (("comicOwner", beat.comedyContract.comicOwner),
+                            ("straightCharacter", beat.comedyContract.straightCharacter)):
+            if name and _norm(name) not in participant_names:
+                raise RuntimeError(
+                    f"COMEDY CONTRACT UNKNOWN {field} - {beat.beatId} names {name}")
+        if beat.powerMoment:
+            if _norm(beat.powerMoment.bearer) not in participant_names:
+                raise RuntimeError(
+                    f"POWER CONTRACT UNKNOWN BEARER - {beat.beatId} names "
+                    f"{beat.powerMoment.bearer}")
+            occurrence_ids = {
+                occurrence.dialogueOccurrenceId for occurrence in beat.dialogueOccurrences}
+            call_id = beat.powerMoment.exactCallOccurrenceId
+            if call_id and call_id not in occurrence_ids:
+                raise RuntimeError(
+                    f"POWER CONTRACT UNKNOWN CALL - {beat.beatId} names {call_id}")
     return sd
 
 
@@ -958,13 +1104,28 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "environment, the physical residue of what just happened), never a "
               "character's spoken line, quoted or paraphrased: the audio track alone "
               "carries dialogue, and any of a shot's own dialogue words appearing here "
-              "hard-refuses the whole scene's production handover (LAW 6)."),
+              "hard-refuses the whole scene's production handover (LAW 6). Every card also "
+              "needs a cinematographyContract. It records story point of view, shot scale, "
+              "lens intent, camera height, composition, depth, camera behaviour, focus, "
+              "lighting function and palette function before reducing them to one concise, "
+              "observable providerInstruction. These are choices for this story beat, never "
+              "a lens checklist. providerInstruction must not contain empty quality labels "
+              "such as cinematic, beautiful, award-winning or Pixar."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"THE BEATS:\n" + "\n".join(b.model_dump_json() for b in sd.beats)
         + f"{notes}\n\nshotId = 'S{scene_num}.SH<n>' in sequence order.",
         ShotConference, label=f"gate4_shots_s{scene_num}")
+    for shot in sc.shots:
+        if not shot.cinematographyContract:
+            raise RuntimeError(
+                f"CINEMATOGRAPHY CONTRACT MISSING for {shot.shotId}")
+        provider_line = _norm(shot.cinematographyContract.providerInstruction)
+        empty_labels = ("cinematic", "beautiful", "award winning", "pixar")
+        if any(label in provider_line for label in empty_labels):
+            raise RuntimeError(
+                f"CINEMATOGRAPHY CONTRACT USES AN EMPTY QUALITY LABEL in {shot.shotId}")
     log(f"GATE 4 — {len(sc.shots)} shot(s): "
         + " ".join(f"{s.shotId}[{'C' if s.transitionType=='CONTINUOUS' else 'K'}]"
                     for s in sc.shots))
@@ -986,7 +1147,11 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
               "readable mechanics, visibleEmotionalTurn states what visibly changes, "
               "requiredLanding defines the final readable result, performanceFreedom leaves "
               "room for cadence, micro-reactions and secondary motion, and playableIntention "
-              "records the acting thought for review. Never use frame-by-frame timestamps. "
+              "records the acting thought for review. characterTruths records, for every "
+              "named character who performs a phase, the locked canon trait under pressure, "
+              "their playable want, pressure response, observable signature and why another "
+              "character could not be substituted. Ground it in supplied canon and never "
+              "invent backstory. Never use frame-by-frame timestamps. "
               "Performance arises from thought; physical cause and effect stays readable; "
               "weight, anticipation and follow-through are timed to the treatment's rhythm. "
               "physicalPerformance and animationTiming remain concise human review context. "
@@ -998,9 +1163,17 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
               "every provider-executable performanceContract field (the audio track alone "
               "carries dialogue; a shot's own dialogue words appearing here hard-refuses the "
               "whole scene's production handover, LAW 6). Change NOTHING else on the cards - "
-              "the sequence design is settled."),
+              "the sequence design is settled. A BIG comedy beat's physicalStaging must be "
+              "copied exactly into comedyStaging on exactly ONE shot carrying that beat. "
+              "No other shot receives comedyStaging."),
         f"THE SELECTED TREATMENT:\n{treatment.model_dump_json()[:3000]}\n\n"
-        f"THE SHOT SEQUENCE:\n" + "\n".join(s.model_dump_json() for s in shots),
+        f"THE BEAT EMOTION, COMEDY AND POWER CONTRACTS:\n"
+        + "\n".join(b.model_dump_json() for b in sd.beats)
+        + f"\n\nCHARACTER CANON:\n"
+        + _characters_for(sorted({name for beat in sd.beats
+                                  for name in beat.participatingCharacters}))[:10000]
+        + f"\n\nTHE SHOT SEQUENCE:\n"
+        + "\n".join(s.model_dump_json() for s in shots),
         PerformancePass, label=f"gate5_perf_s{scene_num}")
     expected_ids = [shot.shotId for shot in shots]
     returned_ids = [shot.shotId for shot in pp.shots]
@@ -1032,6 +1205,22 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
                 if character not in allowed:
                     allowed.append(character)
         allowed_norm = {_norm(character) for character in allowed}
+        truth_names = [truth.character for truth in contract.characterTruths]
+        if len(truth_names) != len({_norm(name) for name in truth_names}):
+            raise RuntimeError(
+                f"PERFORMANCE CONTRACT DUPLICATED CHARACTER TRUTH in {s.shotId}")
+        for truth in contract.characterTruths:
+            if _norm(truth.character) not in allowed_norm:
+                raise RuntimeError(
+                    f"PERFORMANCE CONTRACT UNKNOWN CHARACTER TRUTH - {s.shotId} names "
+                    f"{truth.character}")
+        performing_characters = {
+            _norm(phase.performer) for phase in contract.phases
+            if _norm(phase.performer) != "environment"
+        }
+        if performing_characters - {_norm(name) for name in truth_names}:
+            raise RuntimeError(
+                f"PERFORMANCE CONTRACT MISSING CHARACTER TRUTH for {s.shotId}")
         for phase in contract.phases:
             if (_norm(phase.performer) not in allowed_norm and
                     _norm(phase.performer) != "environment"):
@@ -1050,6 +1239,34 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
         d0.physicalPerformance = s.physicalPerformance
         d0.animationTiming = s.animationTiming
         d0.performanceContract = contract
+
+    big_beats = {
+        beat.beatId: beat.comedyContract.physicalStaging
+        for beat in sd.beats
+        if beat.comedyContract and beat.comedyContract.mode == "BIG"
+    }
+    for beat_id, staging in big_beats.items():
+        carriers = [
+            shot for shot in shots
+            if beat_id in shot.beatIds and shot.performanceContract and
+            shot.performanceContract.comedyStaging
+        ]
+        if len(carriers) != 1:
+            raise RuntimeError(
+                f"BIG COMEDY STAGING NEEDS ONE CARRIER - {beat_id} has {len(carriers)}")
+        if carriers[0].beatIds[0] != beat_id:
+            raise RuntimeError(
+                f"BIG COMEDY STAGING MUST OWN ITS SHOT - {carriers[0].shotId} starts on "
+                f"{carriers[0].beatIds[0]}, not {beat_id}")
+        if carriers[0].performanceContract.comedyStaging.model_dump() != staging.model_dump():
+            raise RuntimeError(
+                f"BIG COMEDY STAGING CHANGED DURING PERFORMANCE PASS - {beat_id}")
+    for shot in shots:
+        if not (shot.performanceContract and shot.performanceContract.comedyStaging):
+            continue
+        if not any(beat_id in big_beats for beat_id in shot.beatIds):
+            raise RuntimeError(
+                f"COMEDY STAGING HAS NO BIG BEAT - {shot.shotId}")
     return shots
 
 

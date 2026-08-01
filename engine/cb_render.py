@@ -77,6 +77,7 @@ import cb_departments
 import cb_lineage
 import cb_scripts
 import cb_db
+import cb_providers
 import paths as P
 
 MEDIA = HERE / "media" / "shots"
@@ -87,6 +88,13 @@ DUR_TOLERANCE_SEC = 1.5          # rendered clip may differ from designed durati
 
 class Refused(RuntimeError):
     """A named, deliberate refusal — never a crash, never a silent skip."""
+
+
+def _require_show_adapter():
+    if P.ENGINE_ADAPTER != "crystal-bears-v1":
+        raise Refused(
+            f"REFUSED — show adapter {P.ENGINE_ADAPTER!r} is not supported by the "
+            "Crystal Bears production runtime; no provider was contacted")
 
 
 def _now():
@@ -1511,11 +1519,11 @@ def _hold(img, dur, audio, out):
     if audio:
         cmd += ["-i", audio]
     else:
-        cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
+        cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
     cmd += ["-t", f"{dur:.2f}", "-r", "24", "-pix_fmt", "yuv420p",
             "-vf", "scale=1280:720:force_original_aspect_ratio=decrease,"
                    "pad=1280:720:(ow-iw)/2:(oh-ih)/2",
-            "-af", "apad", "-c:a", "aac", out]
+            "-af", "apad", "-c:a", "aac", "-ar", "48000", "-ac", "2", out]
     import subprocess as sp
     r = sp.run(cmd, capture_output=True)
     if r.returncode != 0:
@@ -1921,6 +1929,15 @@ def _shots_hash(pkg):
                                       ensure_ascii=False).encode()).hexdigest()[:16]
 
 
+def _animation_provider_contract(shot, imgs, led, fast):
+    try:
+        return cb_providers.request_contract(
+            fast=fast, duration=int(round(shot["durationSec"])), resolution="720p",
+            image_count=len(imgs), audio_count=1 if led.get("voPath") else 0)
+    except cb_providers.ProviderCapabilityError as exc:
+        raise Refused(f"REFUSED — provider capability: {exc}") from exc
+
+
 def _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast):
     """Everything the spend approval is bound to.
 
@@ -1929,13 +1946,18 @@ def _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast):
     token while any changed prompt, media byte, duration, tier, count or rate still does.
     """
     import cb_costs
-    key = "seedance_fast_per_sec" if fast else "seedance_standard_per_sec"
+    contract = _animation_provider_contract(shot, imgs, led, fast)
+    key = contract["costRateKey"]
     rate, _, _ = cb_costs.RATES[key]
     per = round(cb_costs.estimate_video_cost(key, int(round(shot["durationSec"]))), 4)
     payload = {"shotContractHash": hashlib.sha256(json.dumps(
                    shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
                "shotId": shot["shotId"],
-               "provider": "fal", "model": f"seedance-ref2vid-{'fast' if fast else 'standard'}",
+               "provider": contract["provider"],
+               "providerModelId": contract["providerModelId"],
+               "modelVersion": contract["modelVersion"],
+               "endpoint": contract["endpoint"],
+               "resolution": contract["resolution"],
                "candidates": candidates, "ratePerSecUsd": rate,
                "maxBatchCostUsd": round(per * candidates, 4),
                "prompt": shot["seedancePrompt"],
@@ -1981,11 +2003,15 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per):
     img_slots = [t for t in shot["referenceSlots"] if t != "@Audio1"]
     refs = [{"slot": t, "role": shot["referenceSlots"][t], "path": p, "md5": _file_md5(p)}
             for t, p in zip(img_slots, imgs)]
+    contract = _animation_provider_contract(shot, imgs, led, fast)
     env = {"shotId": shot["shotId"], "prompt": shot["seedancePrompt"],
-           "durationSec": shot["durationSec"], "provider": "fal",
-           "model": "bytedance/seedance-2.0",
-           "endpoint": ("bytedance/seedance-2.0/fast/reference-to-video" if fast
-                         else "bytedance/seedance-2.0/reference-to-video"),
+           "durationSec": shot["durationSec"], "provider": contract["provider"],
+           "providerModelId": contract["providerModelId"],
+           "modelVersion": contract["modelVersion"],
+           "transport": contract["transport"],
+           "endpoint": contract["endpoint"],
+           "costRateKey": contract["costRateKey"],
+           "capabilityVerifiedAt": contract["capabilityVerifiedAt"],
            "resolution": "720p", "tier": "fast" if fast else "standard",
            "candidateCount": candidates, "costPerCandidateUsd": per,
            "maxBatchCostUsd": round(per * candidates, 4),
@@ -2200,6 +2226,7 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         blockers.append(str(e)); checks["billingConfirmed"] = {"ok": False, "detail": str(e)}
 
     anchor = None
+    imgs = []
     try:
         anchor = _anchor_for(pkg, shot)
         checks["openingFrameAttached"] = {"ok": True, "path": anchor}
@@ -2256,7 +2283,17 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     checks["durationSec"] = shot.get("durationSec")
     checks["resolution"] = "720p"
     checks["aspectRatio"] = "16:9"
-    checks["model"] = "bytedance/seedance-2.0"
+    try:
+        provider_contract = cb_providers.request_contract(
+            duration=int(round(shot.get("durationSec") or 0)), resolution="720p",
+            image_count=len(imgs),
+            audio_count=1 if shot.get("dialogueLines") else 0)
+        checks["providerContract"] = provider_contract
+        checks["model"] = provider_contract["providerModelId"]
+    except cb_providers.ProviderCapabilityError as exc:
+        blockers.append(f"provider capability: {exc}")
+        checks["providerContract"] = {"ok": False, "detail": str(exc)}
+        checks["model"] = cb_providers.selected_video_model_id()
 
     resolved_prompt, using_working = _resolve_seedance_prompt(pkg, shot)
     specialist = _approved_department_output(pkg, shot_id, "animation") or {}

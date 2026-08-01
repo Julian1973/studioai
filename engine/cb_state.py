@@ -13,6 +13,7 @@ import pathlib
 
 import cb_intake
 import cb_lineage
+import cb_quality
 import cb_render
 
 
@@ -28,6 +29,12 @@ def _read_json(path):
 
 def _stage(state, sub=None, **extra):
     return {"state": state, **({"sub": sub} if sub else {}), **extra}
+
+
+def _with_quality(payload, pkg=None):
+    """Attach one quality view derived from this exact state/package snapshot."""
+    payload["qualityCompass"] = cb_quality.quality_compass(payload, pkg)
+    return payload
 
 
 def _candidate_current(pkg, stage, shot_id, scene, episode, candidate):
@@ -371,7 +378,7 @@ def production_state(scene, episode="Ep1", intake=None):
         for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
             stages[name] = _stage("locked")
         first = (canon_summary["blockers"] or [{}])[0]
-        return {
+        return _with_quality({
             "policyVersion": POLICY_VERSION,
             "episode": episode,
             "scene": scene,
@@ -391,7 +398,7 @@ def production_state(scene, episode="Ep1", intake=None):
                 "action": first.get("action") or
                           "Resolve the listed canon issue and explicitly re-lock canon.",
             }],
-        }
+        })
 
     if script_current and not intake_current:
         action = (
@@ -401,7 +408,7 @@ def production_state(scene, episode="Ep1", intake=None):
         )
         for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
             stages[name] = _stage("locked")
-        return {
+        return _with_quality({
             "policyVersion": POLICY_VERSION,
             "episode": episode,
             "scene": scene,
@@ -419,7 +426,7 @@ def production_state(scene, episode="Ep1", intake=None):
                 "message": "The active script has no current approved episode Story & Direction package.",
                 "action": action,
             }],
-        }
+        })
 
     try:
         pkg, _ = cb_render.load_pkg(scene, episode)
@@ -440,7 +447,7 @@ def production_state(scene, episode="Ep1", intake=None):
             if storyboard_current else _stage("locked"))
         for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
             stages[name] = dict(downstream)
-        return {
+        return _with_quality({
             "policyVersion": POLICY_VERSION,
             "episode": episode,
             "scene": scene,
@@ -457,7 +464,7 @@ def production_state(scene, episode="Ep1", intake=None):
                 "message": "No current production handover exists for this scene.",
                 "action": "Approve and promote Story & Direction.",
             }],
-        }
+        })
 
     if not package_current:
         production_block = _stage(
@@ -644,7 +651,7 @@ def production_state(scene, episode="Ep1", intake=None):
                 "action": shot.get("sub") or "Resolve the named direct-input dependency.",
             })
 
-    return {
+    return _with_quality({
         "policyVersion": POLICY_VERSION,
         "episode": episode,
         "scene": scene,
@@ -675,7 +682,7 @@ def production_state(scene, episode="Ep1", intake=None):
         "shots": shots,
         "_per": shots,
         "blockers": blockers,
-    }
+    }, pkg)
 
 
 if __name__ == "__main__":

@@ -336,17 +336,17 @@ img.zoom:hover{filter:brightness(1.08)}
   .canonissue{grid-template-columns:minmax(0,1fr);gap:2px;padding:7px 0}
 }
 .proom{max-width:1180px;margin:0 auto}
-.prail{display:flex;align-items:stretch;gap:0;margin:4px 0 22px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
-.pstage{flex:1;min-width:118px;text-align:center;padding:14px 8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
+.prail{display:flex;align-items:stretch;gap:0;margin:4px 0 14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
+.pstage{flex:1;min-width:104px;text-align:center;padding:10px 7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
 .pstage:hover:not(.locked){border-color:var(--honey)}
 .pstage.active{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg)}
-.pstage.locked{opacity:.42;cursor:not-allowed}
+.pstage.locked{opacity:.7;cursor:not-allowed;background:var(--surface2)}
 .pstage.done{border-color:var(--ok)}
-.pstage.rejected{border-color:var(--danger)}
-.pconn{align-self:center;flex:0 0 26px;height:2px;background:var(--line)}
+.pstage.rejected{border-color:var(--warn)}
+.pconn{align-self:center;flex:0 0 16px;height:2px;background:var(--line)}
 .pconn.fill{background:var(--ok)}
 .pglyph{font-size:19px;line-height:1}
-.pname{font-size:12px;font-weight:700;margin-top:6px;color:var(--ink)}
+.pname{font-size:11.5px;line-height:1.25;font-weight:700;margin-top:6px;color:var(--ink);overflow-wrap:anywhere}
 .pph{font-size:10px;letter-spacing:.03em;text-transform:uppercase;margin-top:2px}
 .pstagehead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .pstagehead h1{margin:0}
@@ -372,9 +372,13 @@ img.zoom:hover{filter:brightness(1.08)}
 .agentmark{width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none;border-radius:6px;background:var(--brandink);color:var(--bg);font-size:11px;font-weight:800}
 .agentidentity{min-width:0;flex:1}
 .agentname{font-size:13px;font-weight:700;color:var(--ink)}
-.agentmeta{font-size:11px;color:var(--hint);margin-top:1px}
+.agentmeta{font-size:11px;color:var(--hint);margin-top:1px;overflow-wrap:anywhere}
 .agenttags{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .agenttag{border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface)}
+.agentmode{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.agentmode button{border:0;border-left:1px solid var(--line);border-radius:0;background:transparent;color:var(--muted);font:inherit;font-size:10px;font-weight:700;padding:5px 8px;cursor:pointer}
+.agentmode button:first-child{border-left:0}
+.agentmode button.active{background:var(--brandink);color:var(--bg)}
 .agentbody{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px}
 .agentheadline{font-size:15px;font-weight:700;color:var(--ink);line-height:1.35}
 .agentreason{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px}
@@ -386,7 +390,20 @@ img.zoom:hover{filter:brightness(1.08)}
 .agentfact-row{font-size:11px;color:var(--muted);line-height:1.4;margin-top:5px}
 .agentdecision{font-size:11px;line-height:1.45;padding:7px 0;border-top:1px solid var(--line)}
 .agentdecision:first-child{border-top:0}
-@media(max-width:760px){.agentbody{grid-template-columns:1fr}.agentbody .btn{width:100%}.agentfacts{grid-template-columns:1fr}.agenttags{justify-content:flex-start}}
+.qualitystrip{display:flex;overflow-x:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.qualityitem{min-width:138px;flex:1;padding:8px 10px;border-left:1px solid var(--line)}
+.qualityitem:first-child{border-left:0}
+.qualitylabel{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--ink)}
+.qualitydot{width:7px;height:7px;border-radius:50%;background:var(--hint);flex:none}
+.qualitydot.clear{background:var(--ok)}
+.qualitydot.attention{background:var(--warn)}
+.qualitydot.unassessed{background:var(--info)}
+.qualitysummary{font-size:10px;line-height:1.35;color:var(--hint);margin-top:3px}
+.agentplan{border-top:1px solid var(--line);padding:10px 12px;background:var(--surface2)}
+.agentplan-objective{font-size:12px;font-weight:700;line-height:1.45;color:var(--ink)}
+.agentplan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:9px}
+.agentplan-row{font-size:11px;color:var(--muted);line-height:1.4;margin-top:4px}
+@media(max-width:760px){.agentbody{grid-template-columns:1fr}.agentbody .btn{width:100%}.agentfacts,.agentplan-grid{grid-template-columns:1fr}.agenttags{justify-content:flex-start}.agenthead{flex-wrap:wrap}.agentmode{order:3}}
 </style>
 </head>
 <body>
@@ -501,7 +518,7 @@ async function _restoreFromHash(raw){
   if(pg=='houses'){showHouses();return true;}
   if(pg=='bible'){showBible();return true;}
   if(pg=='episodes'||!epNum) return true;   // boot() already rendered + synced the hash
-  await openEpisode(epNum);
+  if(!(await openEpisode(epNum))) return false;
   const scId=params.get('sc');
   if(pg=='sceneboard'||!scId) return true;
   openScene(scId);
@@ -523,7 +540,7 @@ var REVIEWER=localStorage.getItem("cb_reviewer")||"Julian";
 function setReviewer(v){REVIEWER=(v||"Julian").trim()||"Julian";localStorage.setItem("cb_reviewer",REVIEWER);}
 {const _ri=document.getElementById("reviewer_name"); if(_ri) _ri.value=REVIEWER;}
 const ANIM_TYPES=[
-  {v:"3D CGI (Pixar/Bluey)",d:"Rendered 3D — soft lighting, depth, fur/texture."},
+  {v:"Premium stylized 3D CGI",d:"Rendered 3D — tactile materials, expressive staging and motivated light."},
   {v:"2D hand-drawn (cel)",d:"Traditional drawn — linework, painted frames."},
   {v:"2D vector / flat",d:"Modern flat / motion-graphic — clean bold shapes."},
   {v:"Stop-motion / claymation",d:"Tactile — clay, puppets, real-set lighting."}
@@ -910,11 +927,15 @@ async function addScene(){
 }
 
 async function openEpisode(num){
-  CUR=EPISODES.find(e=>e.number==num);PREFIX="Ep"+num+"_";SHOTS=[];
-  SH_EP="Ep"+num;SH_SC="1";SH_PKG=null;SH_MEDIA=null;PSB=null;PSHOT_I=0;
+  const epNum=Number(num);
+  CUR=EPISODES.find(e=>Number(e.number)===epNum);
+  if(!CUR){page="episodes";renderTop();renderNav();renderEpisodes();return false;}
+  PREFIX="Ep"+epNum+"_";SHOTS=[];
+  SH_EP="Ep"+epNum;SH_SC="1";SH_PKG=null;SH_MEDIA=null;PSB=null;PSHOT_I=0;
   BOARD_SCENES=null;SCENE_ROSTER=null;
   page="sceneboard";renderTop();renderNav();document.getElementById("gatesbar").innerHTML="";
   render();
+  return true;
 }
 
 function render(){
@@ -1173,13 +1194,13 @@ const PSTAGES=[
   {id:"continuity",name:"Director Review",glyph:"⇄"},
   {id:"final",name:"Final Master",glyph:"✓"}
 ];
-const STATE_LABEL={ready:"Ready to generate",generating:"Generating",awaiting:"Awaiting approval",
-                    approved:"Approved",rejected:"Rejected",blocked:"Blocked",locked:"Locked"};
+const STATE_LABEL={ready:"Ready",generating:"Working",awaiting:"Ready for review",
+                    approved:"Current",rejected:"Needs attention",blocked:"Needs attention",locked:"Waiting"};
 const STATE_COLOR={ready:"--brandink",generating:"--info",awaiting:"--honey",approved:"--ok",
-                    rejected:"--danger",blocked:"--deep",locked:"--hint"};
+                    rejected:"--warn",blocked:"--warn",locked:"--hint"};
 const STATE_BG   ={ready:"--brandbg",generating:"--infobg",awaiting:"--honeybg",approved:"--okbg",
-                    rejected:"--dangerbg",blocked:"--deepbg",locked:"--surface2"};
-const STATE_GLYPH={ready:"○",generating:"●",awaiting:"◐",approved:"✓",rejected:"✗",blocked:"⛔",locked:"🔒"};
+                    rejected:"--warnbg",blocked:"--warnbg",locked:"--surface2"};
+const STATE_GLYPH={ready:"○",generating:"●",awaiting:"◐",approved:"✓",rejected:"!",blocked:"!",locked:"–"};
 
 let RATES=null;
 async function fetchRates(){if(RATES)return RATES;try{RATES=(await (await fetch(BASE+"/api/rates")).json()).rates||{};}catch(e){RATES={};}return RATES;}
@@ -1226,16 +1247,27 @@ async function projectStats(p){
   try{
     const roster=await sceneRoster("Ep1");
     if(!roster.length){
-      const intake=await fetch(BASE+"/api/story-intake-status?episode=Ep1",{cache:"no-store"}).then(r=>r.json()).catch(()=>null);
+      const [intake,state]=await Promise.all([
+        fetch(BASE+"/api/story-intake-status?episode=Ep1",{cache:"no-store"}).then(r=>r.json()).catch(()=>null),
+        fetch(BASE+"/api/production-state?scene=1&episode=Ep1",{cache:"no-store"}).then(r=>r.json()).catch(()=>null),
+      ]);
+      const candidate=intake&&intake.candidate||{};
+      const canonDecisions=state&&state.canonLock&&Array.isArray(state.canonLock.blockers)
+        ? state.canonLock.blockers.length : 0;
+      if(canonDecisions){
+        return {completion:0,decisions:canonDecisions,artwork:null,
+                activity:canonDecisions+" Story & Direction decision"+(canonDecisions==1?"":"s")+" waiting",
+                scenes:(candidate.scenes||[]).length};
+      }
       if(intake&&intake.hasCandidate&&intake.candidateCurrent&&!intake.canonicalCurrent){
-        const candidate=intake.candidate||{};
         return {completion:0,decisions:1,artwork:null,
                 activity:"Story & Direction review waiting",
                 scenes:(candidate.scenes||[]).length};
       }
       if(intake&&intake.hasScript){
         return {completion:0,decisions:0,artwork:null,
-                activity:"Story & Direction is ready to run",scenes:0};
+                activity:"Story & Direction is ready to run",
+                scenes:(candidate.scenes||[]).length};
       }
       return {empty:true};
     }
@@ -1946,23 +1978,58 @@ function agentFactRows(items){
   return (items||[]).map(x=>`<div class="agentfact-row">${_esc(x.label||x.id)}</div>`).join("")||
     `<div class="agentfact-row">None in this scope.</div>`;
 }
+function agentModeControl(mode){
+  return `<div class="agentmode" role="tablist" aria-label="Studio Agent mode">
+    <button role="tab" aria-selected="${mode=="HELP"}" class="${mode=="HELP"?"active":""}" onclick="setStudioAgentMode('HELP')">Help</button>
+    <button role="tab" aria-selected="${mode=="PLAN"}" class="${mode=="PLAN"?"active":""}" onclick="setStudioAgentMode('PLAN')">Plan</button>
+  </div>`;
+}
+function qualityCompassHTML(compass){
+  const dims=(compass||{}).dimensions||[];if(!dims.length)return "";
+  const label={clear:"Current",attention:"Needs attention",waiting:"Waiting",unassessed:"Not reviewed yet"};
+  return `<div class="qualitystrip" aria-label="Creative quality compass">${dims.map(x=>
+    `<div class="qualityitem" title="${_esc(x.summary||'')}"><div class="qualitylabel"><span class="qualitydot ${_esc(x.state)}"></span>${_esc(x.label)}</div><div class="qualitysummary">${_esc(label[x.state]||x.state)}</div></div>`
+  ).join("")}</div>`;
+}
+function agentPlanHTML(plan){
+  if(!plan)return "";
+  const rows=(items)=>((items||[]).map(x=>`<div class="agentplan-row">${_esc(x)}</div>`).join("")||`<div class="agentplan-row">None in this scope.</div>`);
+  return `<div class="agentplan"><div class="agentfact-title">Current creative plan</div>
+    <div class="agentplan-objective">${_esc(plan.objective||"")}</div>
+    <div class="agentplan-grid">
+      <div><div class="agentfact-title">Prepare</div>${rows(plan.deliverables)}</div>
+      <div><div class="agentfact-title">Preserve</div>${rows(plan.preserve)}</div>
+      <div><div class="agentfact-title">Director questions</div>${rows(plan.qualityQuestions)}</div>
+    </div></div>`;
+}
 function renderStudioAgent(){
   const el=document.getElementById("studioagent");if(!el)return;
   const a=SH_AGENT;
   if(!a){el.innerHTML="";return;}
+  if(a.loading){
+    const mode=a.mode||SH_AGENT_MODE;
+    el.innerHTML=`<section class="agentpanel" aria-label="Studio Agent ${_esc(mode)} brief"><div class="agenthead">
+      <div class="agentmark">AI</div><div class="agentidentity"><div class="agentname">Studio Agent</div><div class="agentmeta">Reading the current creative context…</div></div>
+      ${agentModeControl(mode)}<div class="agenttags"><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div>
+    </div></section>`;return;
+  }
   if(a.error){el.innerHTML="";return;}
   const n=a.nextAction||{}, facts=a.facts||{}, decisions=a.decisions||[];
+  const mode=a.mode||SH_AGENT_MODE;
   const canOpen=PSTAGES.some(x=>x.id==n.stage)&&pStatus(n.stage)!="locked";
   const digest=String(a.briefId||"").split(":").pop().slice(0,12);
   const scoped=(a.selection||{}).type=="shot"&&a.selection.resolved&&a.selection.shotId
     ?`Shot ${_esc(a.selection.shotId)}`:`Scene ${_esc(a.scene)}`;
   const decisionHTML=decisions.length?`<div style="margin-top:10px"><div class="agentfact-title">Human decisions (${decisions.length})</div>
     ${decisions.map(x=>`<div class="agentdecision"><b>${_esc(x.message||x.code)}</b>${x.action?`<div style="color:var(--hint);margin-top:2px">${_esc(x.action)}</div>`:""}</div>`).join("")}</div>`:"";
-  el.innerHTML=`<section class="agentpanel" aria-label="Studio Agent HELP brief">
+  const qualityDetails=((a.qualityCompass||{}).dimensions||[]).map(x=>
+    `<div class="agentdecision"><b>${_esc(x.label)} · ${_esc(x.state)}</b><div style="color:var(--hint);margin-top:2px">${_esc(x.summary||"")}</div></div>`).join("");
+  el.innerHTML=`<section class="agentpanel" aria-label="Studio Agent ${_esc(mode)} brief">
     <div class="agenthead">
       <div class="agentmark">AI</div>
       <div class="agentidentity"><div class="agentname">Studio Agent</div><div class="agentmeta">${scoped} · context ${_esc(digest)}</div></div>
-      <div class="agenttags"><span class="agenttag">HELP</span><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div>
+      ${agentModeControl(mode)}
+      <div class="agenttags"><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div>
     </div>
     <div class="agentbody">
       <div><div class="agentheadline">${_esc(a.headline||"Current production state")}</div>
@@ -1971,14 +2038,20 @@ function renderStudioAgent(){
       </div>
       ${canOpen?`<button class="btn" onclick="studioAgentOpen()">Open ${_esc(n.stageName||n.stage)}</button>`:""}
     </div>
+    ${qualityCompassHTML(a.qualityCompass)}
+    ${agentPlanHTML(a.plan)}
     <details class="agentdetails"><summary>Evidence and decisions</summary>
       <div class="agentfacts">
         <div><div class="agentfact-title">Built</div>${agentFactRows(facts.built)}</div>
         <div><div class="agentfact-title">Proven current</div>${agentFactRows(facts.proven)}</div>
         <div><div class="agentfact-title">Proposed</div>${agentFactRows(facts.proposed)}</div>
-      </div>${decisionHTML}
+      </div>${decisionHTML}${qualityDetails?`<div style="margin-top:10px"><div class="agentfact-title">Quality evidence</div>${qualityDetails}</div>`:""}
     </details>
   </section>`;
+}
+function setStudioAgentMode(mode){
+  mode=String(mode||"").toUpperCase();if(!["HELP","PLAN"].includes(mode)||mode==SH_AGENT_MODE)return;
+  SH_AGENT_MODE=mode;SH_AGENT_KEY=null;SH_AGENT={loading:true,mode};renderStudioAgent();shEnsureAgentSelection();
 }
 function studioAgentOpen(){
   const nav=((SH_AGENT||{}).nextAction||{}).navigation||{};
@@ -2054,7 +2127,7 @@ async function renderWorkspaceBody(){
   shEnsureAgentSelection();
   const stage=pFocusedStage();
   if(pStatus(stage)=="locked"){
-    el.innerHTML=`<div class="wcol wcol-full"><div class="locked-msg">🔒 Locked — approve the previous stage first.</div></div>`;
+    el.innerHTML=`<div class="wcol wcol-full"><div class="locked-msg">Waiting for the previous creative decision.</div></div>`;
     return;
   }
   if(stage=="script"){
@@ -2859,6 +2932,7 @@ function renderFinalStage(){
 
 
 let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=null,SH_POLL=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null,SH_AGENT=null;
+let SH_AGENT_MODE="HELP";
 let SH_AGENT_KEY=null,SH_AGENT_SEQ=0,SH_AGENT_CACHE={};
 // SH_LAST_JOB (2026-07-19 correction): renderJobBanner()/jobFor() only ever surface a job
 // while status=="running" — the instant a job finishes (success OR a fast, informative
@@ -3021,7 +3095,7 @@ async function shFetchPkg(){
       fetch(BASE+"/api/shot-reassess?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
       fetch(BASE+"/api/production-preflight?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
       fetch(BASE+"/api/production-state?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
-      fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null)
+      fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP)+"&mode="+encodeURIComponent(SH_AGENT_MODE),{cache:"no-store"}).catch(()=>null)
     ]);
     const j=await r.json();
     if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
@@ -3032,19 +3106,19 @@ async function shFetchPkg(){
     const state=psr ? await psr.json().catch(()=>null) : null;
     SH_STATE = state&&!state.error ? state : (j&&j.productionState)||null;
     SH_AGENT = sar ? await sar.json().catch(()=>null) : null;
-    if(SH_AGENT&&!SH_AGENT.error){SH_AGENT_KEY="__scene__";SH_AGENT_CACHE[SH_AGENT_KEY]=SH_AGENT;}
+    if(SH_AGENT&&!SH_AGENT.error){SH_AGENT_KEY=SH_AGENT_MODE+":__scene__";SH_AGENT_CACHE[SH_AGENT_KEY]=SH_AGENT;}
   }catch(e){SH_ERR="Can't reach the studio server.";}
 }
 async function shEnsureAgentSelection(){
   const shot=(pShots()[PSHOT_I]||{}).shotId||null;
-  const key=shot||"__scene__";
+  const key=SH_AGENT_MODE+":"+(shot||"__scene__");
   if(SH_AGENT_KEY===key)return;
   SH_AGENT_KEY=key;
   if(SH_AGENT_CACHE[key]){SH_AGENT=SH_AGENT_CACHE[key];renderStudioAgent();return;}
   const seq=++SH_AGENT_SEQ, scene=String(SH_SC), episode=String(SH_EP);
   const shotQuery=shot?"&shotId="+encodeURIComponent(shot):"";
   try{
-    const r=await fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(scene)+"&episode="+encodeURIComponent(episode)+shotQuery,{cache:"no-store"});
+    const r=await fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(scene)+"&episode="+encodeURIComponent(episode)+shotQuery+"&mode="+encodeURIComponent(SH_AGENT_MODE),{cache:"no-store"});
     const brief=await r.json();
     if(seq!==SH_AGENT_SEQ||scene!==String(SH_SC)||episode!==String(SH_EP)||key!==SH_AGENT_KEY)return;
     SH_AGENT=brief;SH_AGENT_CACHE[key]=brief;renderStudioAgent();renderPreflightBanner();

@@ -14,18 +14,52 @@ sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint)
 MEDIA = ROOT / "engine" / "media"
 OUT = ROOT / "cb-output"
 DATA = ROOT / "cb-studio" / "data"
-SCRIPTS = DATA / "scripts"
-CANON_CONFIG = ROOT / "shows" / "crystal-bears" / "canon"
 DATA.mkdir(parents=True, exist_ok=True)
-SCRIPTS.mkdir(parents=True, exist_ok=True)
 import cb_scripts
 import cb_db
-SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
+import studio_profile
+ACTIVE_SHOW = studio_profile.load_show_profile(ROOT)
+SHOW_PROFILE_STATUS = studio_profile.capability_report(ACTIVE_SHOW)
+CANON_CONFIG = ACTIVE_SHOW.canon_paths["characters"].parent
+SCRIPTS = (
+    DATA / "scripts" if ACTIVE_SHOW.profile.showId == studio_profile.DEFAULT_SHOW_ID
+    else DATA / "shows" / ACTIVE_SHOW.profile.showId / "scripts"
+)
+SCRIPTS.mkdir(parents=True, exist_ok=True)
+SCRIPT_STORE = cb_scripts.ScriptStore(ROOT, show_id=ACTIVE_SHOW.profile.showId)
 PORT = int(os.environ.get("CB_STUDIO_PORT", "8765"))
 BIND_HOST = "127.0.0.1"
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
 SESSION_TOKEN = secrets.token_urlsafe(32)
 SESSION_COOKIE = "cb_studio_session"
+MAX_REQUEST_BYTES = 64 * 1024 * 1024
+MAX_DOCUMENT_BYTES = 20 * 1024 * 1024
+MAX_DOCX_XML_BYTES = 12 * 1024 * 1024
+MAX_IMAGE_BYTES = 25 * 1024 * 1024
+MAX_IMAGE_PIXELS = 100_000_000
+
+
+class RequestTooLarge(ValueError):
+    pass
+
+
+def _validated_content_length(headers):
+    transfer = (headers.get("Transfer-Encoding") or "").strip().lower()
+    if transfer and transfer != "identity":
+        raise ValueError("chunked request bodies are not accepted by the local Studio")
+    raw = headers.get("Content-Length")
+    if raw in (None, ""):
+        return 0
+    try:
+        size = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Content-Length must be a non-negative integer") from exc
+    if size < 0:
+        raise ValueError("Content-Length must be a non-negative integer")
+    if size > MAX_REQUEST_BYTES:
+        raise RequestTooLarge(
+            f"request body exceeds the {MAX_REQUEST_BYTES // (1024 * 1024)} MB local limit")
+    return size
 
 # ── SOFTWARE-FRESHNESS GUARD ──────────────────────────────────────────────────────────────────────────────────
 # The UI is the ONLY way we fire, so the server behind it must NEVER run stale code. We fingerprint every Python
@@ -74,14 +108,23 @@ def extract_doc_text(raw, name=""):
     import base64, io, html as _html
     if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
         raw = raw.split(",", 1)[1]
-    blob = base64.b64decode(raw)
+    try:
+        blob = base64.b64decode(raw, validate=True)
+    except Exception as exc:
+        raise ValueError("uploaded document is not valid base64") from exc
+    if len(blob) > MAX_DOCUMENT_BYTES:
+        raise RequestTooLarge(
+            f"script document exceeds the {MAX_DOCUMENT_BYTES // (1024 * 1024)} MB limit")
     ext = (name.rsplit(".", 1)[-1].lower() if "." in name else "")
     if ext in ("txt", "md", "markdown", "fountain", "text", ""):
         return blob.decode("utf-8", "ignore")
     if ext == "docx":
         try:
             z = zipfile.ZipFile(io.BytesIO(blob))
-            xml = z.read("word/document.xml").decode("utf-8", "ignore")
+            info = z.getinfo("word/document.xml")
+            if info.file_size > MAX_DOCX_XML_BYTES:
+                raise ValueError("the DOCX document XML is unreasonably large")
+            xml = z.read(info).decode("utf-8", "ignore")
             xml = (xml.replace("</w:p>", "\n").replace("<w:tab/>", "\t")
                       .replace("<w:br/>", "\n").replace("<w:br></w:br>", "\n"))
             return _html.unescape(re.sub(r"<[^>]+>", "", xml)).strip()
@@ -98,16 +141,54 @@ def extract_doc_text(raw, name=""):
             try:
                 mod = __import__(lib)
                 r = mod.PdfReader(io.BytesIO(blob))
+                if len(r.pages) > 500:
+                    raise ValueError("the uploaded PDF has more than 500 pages")
                 return "\n".join((p.extract_text() or "") for p in r.pages).strip()
             except Exception:
                 continue
         try:
             import pdfplumber
             with pdfplumber.open(io.BytesIO(blob)) as pdf:
+                if len(pdf.pages) > 500:
+                    raise ValueError("the uploaded PDF has more than 500 pages")
                 return "\n".join((pg.extract_text() or "") for pg in pdf.pages).strip()
         except Exception:
             return "[PDF received but no PDF text library is installed — paste the text or upload .docx/.txt instead.]"
     return blob.decode("utf-8", "ignore")
+
+
+def decode_image_upload(raw):
+    """Decode and verify a bounded raster upload before it reaches the media tree."""
+    import base64
+    import io
+    from PIL import Image
+
+    if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
+        raw = raw.split(",", 1)[1]
+    try:
+        blob = base64.b64decode(raw, validate=True)
+    except Exception as exc:
+        raise ValueError("image upload is not valid base64") from exc
+    if not blob:
+        raise ValueError("image upload is empty")
+    if len(blob) > MAX_IMAGE_BYTES:
+        raise RequestTooLarge(
+            f"image exceeds the {MAX_IMAGE_BYTES // (1024 * 1024)} MB decoded limit")
+    try:
+        with Image.open(io.BytesIO(blob)) as image:
+            width, height = image.size
+            image_format = str(image.format or "").upper()
+            if width <= 0 or height <= 0 or width * height > MAX_IMAGE_PIXELS:
+                raise ValueError("image dimensions exceed the safe local limit")
+            image.verify()
+    except ValueError:
+        raise
+    except Exception as exc:
+        raise ValueError("upload is not a readable PNG, JPEG or WebP image") from exc
+    extension = {"PNG": ".png", "JPEG": ".jpg", "WEBP": ".webp"}.get(image_format)
+    if extension is None:
+        raise ValueError("only PNG, JPEG and WebP image uploads are accepted")
+    return blob, extension
 
 def reindex_media():
     files = sorted(p.name for p in MEDIA.glob("*")
@@ -909,8 +990,8 @@ def _scenelook_input_signature_server(scene, episode="Ep1"):
     what actually decides staleness now (2026-07-18 direct-input-lineage correction),
     replacing the old storyboard-md5 comparison below entirely."""
     import hashlib
-    loc_path = ROOT / "shows" / "crystal-bears" / "canon" / "locations.json"
-    style_path = ROOT / "shows" / "crystal-bears" / "laws" / "style.txt"
+    loc_path = ACTIVE_SHOW.canon_paths["locations"]
+    style_path = ACTIVE_SHOW.resolve(ACTIVE_SHOW.profile.laws["style"], "laws.style")
     locs = json.loads(loc_path.read_text()) if loc_path.exists() else {}
     entry = (locs.get(episode) or {}).get(str(scene)) or {}
     style = style_path.read_text().strip() if style_path.exists() else ""
@@ -1167,8 +1248,8 @@ _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
-    "/shows/crystal-bears/canon/characters.json",
-    "/shows/crystal-bears/canon/locked_canon.md",
+    f"/shows/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
+    f"/shows/{ACTIVE_SHOW.profile.showId}/canon/locked_canon.md",
 }                                         # add a new project's showBibleFile / configBase characters.json here if it differs
 _MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico",
               ".mp4", ".webm", ".mov", ".m4v", ".mp3", ".wav", ".m4a", ".ogg",
@@ -1298,6 +1379,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
@@ -1394,6 +1476,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.send_header("Location", "/cb-studio/app.html")
             self.end_headers()
             return
+        if self.path == "/api/show-profile":
+            return self._json(200, SHOW_PROFILE_STATUS)
         # [removed 2026-07-16 cutover: /api/pipeline — handled by the 410 gate above]
         if self.path.startswith("/api/learning"):
             # THE CREATIVE LEARNING SYSTEM, read-only view (2026-07-17): evidence counts,
@@ -1646,25 +1730,31 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 return self._json(400, {"error": str(e), "zeroSpend": True})
         if self.path.startswith("/api/studio-agent"):
-            # The conversational front door starts as a strictly read-only HELP projection.
-            # It composes the authoritative policy and preflight evidence; it owns no approval,
-            # mutation, job-runner or provider route of its own.
+            # The creative front door is a strictly read-only HELP/PLAN projection. It
+            # composes authoritative policy, quality and preflight evidence; it owns no
+            # approval, mutation, job-runner or provider route of its own.
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
             scene = (q.get("scene") or [""])[0]
             ep = (q.get("episode") or ["Ep1"])[0]
             shot_id = (q.get("shotId") or [None])[0]
+            mode = (q.get("mode") or ["HELP"])[0].upper()
             if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
-                    (shot_id and not _SHOT_TOKEN.match(shot_id))):
+                    (shot_id and not _SHOT_TOKEN.match(shot_id)) or
+                    mode not in ("HELP", "PLAN")):
                 return self._json(400, {
-                    "error": "scene, episode and optional shotId must be plain tokens",
+                    "error": (
+                        "scene, episode and optional shotId must be plain tokens; "
+                        "mode must be HELP or PLAN"
+                    ),
                     "zeroSpend": True,
                     "readOnly": True,
                 })
             try:
                 import cb_studio_agent
                 return self._json(
-                    200, cb_studio_agent.studio_agent_brief(scene, ep, shot_id))
+                    200, cb_studio_agent.studio_agent_brief(
+                        scene, ep, shot_id, mode=mode))
             except Exception as e:
                 return self._json(400, {
                     "error": str(e),
@@ -1863,8 +1953,11 @@ class H(http.server.SimpleHTTPRequestHandler):
         return self._serve_static()       # range-aware (video streams + seeks), not the no-Range super().do_GET()
 
     def _body(self):
-        n = int(self.headers.get("Content-Length", 0))
-        return json.loads(self.rfile.read(n) or b"{}")
+        n = _validated_content_length(self.headers)
+        payload = self.rfile.read(n)
+        if len(payload) != n:
+            raise ValueError("request body ended before Content-Length bytes were received")
+        return json.loads(payload or b"{}")
 
     @_tracked
     def do_POST(self):
@@ -1872,6 +1965,14 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if not self._valid_post_origin():
             self._deny(403, "same-origin POST required")
+            return
+        try:
+            _validated_content_length(self.headers)
+        except RequestTooLarge as exc:
+            self._deny(413, str(exc))
+            return
+        except ValueError as exc:
+            self._deny(400, str(exc))
             return
         if _legacy_gone(self):
             return
@@ -2370,13 +2471,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "scene, shotId (and optional episode) required as plain tokens"}); return
                 if not raw:
                     self._json(400, {"error": "dataB64 (the image data) is required"}); return
-                import base64
-                if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
-                    raw = raw.split(",", 1)[1]
-                blob = base64.b64decode(raw)
-                ext = ("." + filename.rsplit(".", 1)[-1].lower()) if "." in filename else ".png"
-                if ext not in (".png", ".jpg", ".jpeg", ".webp"):
-                    ext = ".png"
+                blob, ext = decode_image_upload(raw)
                 incoming = MEDIA / "uploads_incoming"
                 incoming.mkdir(parents=True, exist_ok=True)
                 out = incoming / f"{ep}_{sid}_incoming_{uuid.uuid4().hex[:8]}{ext}"
@@ -2401,13 +2496,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "scene (and optional episode) required as plain tokens"}); return
                 if not raw:
                     self._json(400, {"error": "dataB64 (the image data) is required"}); return
-                import base64
-                if isinstance(raw, str) and raw.strip().startswith("data:") and "," in raw:
-                    raw = raw.split(",", 1)[1]
-                blob = base64.b64decode(raw)
-                ext = ("." + filename.rsplit(".", 1)[-1].lower()) if "." in filename else ".png"
-                if ext not in (".png", ".jpg", ".jpeg", ".webp"):
-                    ext = ".png"
+                blob, ext = decode_image_upload(raw)
                 incoming = MEDIA / "uploads_incoming"
                 incoming.mkdir(parents=True, exist_ok=True)
                 out = incoming / f"{ep}_S{scene}_scenelook_incoming_{uuid.uuid4().hex[:8]}{ext}"

@@ -13,6 +13,7 @@ import re
 import uuid
 
 import cb_canon
+import cb_providers
 
 
 def install(m):
@@ -60,6 +61,7 @@ def install(m):
         return lock
 
     def current_package(scene, episode):
+        m._require_show_adapter()
         pkg, path = m.load_pkg(scene, episode)
         m._require_valid(pkg)
         m._require_current_lineage(pkg, scene, episode)
@@ -458,6 +460,13 @@ def install(m):
             raise m.Refused(
                 f"REFUSED — {shot['shotId']}'s approved voice is missing or stale")
         ledger = m._ledger(pkg, shot["shotId"])
+        try:
+            provider = cb_providers.request_contract(
+                fast=fast, duration=int(round(shot.get("durationSec") or 0)),
+                resolution="720p", image_count=max(1, len(refs)),
+                audio_count=1 if shot.get("dialogueLines") else 0)
+        except cb_providers.ProviderCapabilityError as exc:
+            raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotContractHash": json_sha256(shot),
@@ -468,11 +477,13 @@ def install(m):
             "audioHash": (file_sha256(ledger.get("voPath"))
                           if shot.get("dialogueLines") else None),
             "durationSec": shot.get("durationSec"),
-            "provider": "fal",
-            "model": "bytedance/seedance-2.0",
-            "endpoint": ("bytedance/seedance-2.0/fast/reference-to-video" if fast
-                         else "bytedance/seedance-2.0/reference-to-video"),
-            "resolution": "720p",
+            "provider": provider["provider"],
+            "providerModelId": provider["providerModelId"],
+            "modelVersion": provider["modelVersion"],
+            "transport": provider["transport"],
+            "endpoint": provider["endpoint"],
+            "resolution": provider["resolution"],
+            "capabilityVerifiedAt": provider["capabilityVerifiedAt"],
             "tier": "fast" if fast else "standard",
         }
 

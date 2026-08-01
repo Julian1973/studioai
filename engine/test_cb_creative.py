@@ -36,7 +36,39 @@ def _beat():
                   whatChanges="a crash becomes a claimed triumph", whoDrives="Fuzzby",
                   audienceAnticipation="we see the leaf before he does",
                   actionOrChoice="he overshoots", consequence="the leaf springs him back",
-                  emotionalOrComicHandover="his verdict hangs for Zenny to puncture")
+                  emotionalOrComicHandover="his verdict hangs for Zenny to puncture",
+                  emotionContract=C.BeatEmotionContract(
+                      owner="Fuzzby", entryState="buoyant certainty",
+                      pressure="the leaf exposes his late steering",
+                      choiceOrRealisation="he chooses to preserve the performance",
+                      exitState="confidence covering a private flinch",
+                      observableEvidence="he recovers his grin after the rebound",
+                      audienceAlignment="ahead",
+                      heldAfterBeat="the trembling leaf remains visible"),
+                  comedyContract=C.BeatComedyContract(
+                      mode="SMALL", mechanism="confidence outlives the evidence",
+                      comicOwner="Fuzzby", setup="he enters at confident speed",
+                      expectation="he appears to own the route",
+                      disruption="the leaf rebounds him",
+                      button="he restores his confident pose",
+                      hold="the leaf trembles beside him"))
+
+
+def _cinematography_contract():
+    return C.ShotCinematographyContract(
+        storyPointOfView="the audience rides with Fuzzby's confidence",
+        shotScale="medium-wide enough to retain the leaf and flight path",
+        lensIntent="moderate perspective keeps speed readable without distortion",
+        cameraHeight="at Fuzzby's eye line inside the stems",
+        composition="Fuzzby drives into open space that closes at the leaf",
+        depthStrategy="foreground stems wipe while the collision plane stays readable",
+        cameraBehavior="pursue, lose him for an instant, then settle on the rebound",
+        focusStrategy="hold Fuzzby and leaf together through contact",
+        lightingFunction="warm side light keeps the leaf compression legible",
+        paletteFunction="green corridor gives Fuzzby's pink silhouette clean separation",
+        providerInstruction=(
+            "Eye-level medium-wide pursuit through foreground stems; keep Fuzzby and the "
+            "leaf sharp together, then settle as the compressed leaf rebounds him."))
 
 
 def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
@@ -51,7 +83,8 @@ def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
         transitionType=transition,
         transitionReason="a cut here would break the experiential chase" if
                           transition == "CONTINUOUS" else
-                          "continuing would dilute the impact; the new image re-scales the gag")
+                          "continuing would dilute the impact; the new image re-scales the gag",
+        cinematographyContract=_cinematography_contract())
 
 
 def _performance_contract(beat_id="1.B1"):
@@ -68,7 +101,13 @@ def _performance_contract(beat_id="1.B1"):
         physicalCauseAndEffect="His late weight compresses the leaf and releases him backward",
         visibleEmotionalTurn="His open confidence closes into a private flinch",
         requiredLanding="Fuzzby hangs low beside the trembling leaf",
-        performanceFreedom="Keep secondary wing beats and the flinch size natural")
+        performanceFreedom="Keep secondary wing beats and the flinch size natural",
+        characterTruths=[C.CharacterPerformanceTruth(
+            character="Fuzzby", canonTrait="buoyant confidence survives mishaps",
+            playableWant="make the arrival look entirely intentional",
+            pressureResponse="recovers his social pose before his balance",
+            observableSignature="wings reset first, grin returns one beat late",
+            substitutionTest="Zenny would acknowledge the evidence instead of performing past it")])
 
 
 def _boundary(closing=False):

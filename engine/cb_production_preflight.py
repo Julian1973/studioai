@@ -7,8 +7,10 @@ import pathlib
 import shutil
 
 import cb_gen
+import cb_providers
 import cb_render
 import cb_state
+import studio_profile
 
 
 def _hash_text(value):
@@ -319,6 +321,31 @@ def production_preflight(scene, episode="Ep1", state=None):
     except cb_render.Refused:
         pass
 
+    provider_capabilities = cb_providers.capability_report()
+    if not provider_capabilities["selectionReady"]:
+        block("VIDEO_PROVIDER_NOT_QUALIFIED", "configuration",
+              provider_capabilities["selectionError"],
+              "Select a verified production model or qualify the requested provider route.")
+
+    try:
+        show_profile = studio_profile.capability_report(
+            studio_profile.load_show_profile(cb_render.ROOT))
+    except studio_profile.ShowProfileError as exc:
+        show_profile = {
+            "productionReady": False, "adapterReady": False,
+            "error": str(exc), "zeroSpend": True,
+        }
+    if not show_profile.get("adapterReady"):
+        block("SHOW_ADAPTER_NOT_SUPPORTED", "configuration",
+              show_profile.get("error") or
+              f"Engine adapter {show_profile.get('engineAdapter')} is not installed.",
+              "Install and test this show's creative adapter before production.")
+    if show_profile.get("missingRequiredContent"):
+        block("SHOW_PROFILE_CONTENT_MISSING", "configuration",
+              "Show profile content is missing: " +
+              ", ".join(show_profile["missingRequiredContent"]),
+              "Restore the named tenant files before production.")
+
     for provider in ("fal", "elevenlabs"):
         if (provider == "elevenlabs" and package and
                 not any(shot.get("dialogueLines") for shot in package.get("shots") or [])):
@@ -328,7 +355,11 @@ def production_preflight(scene, episode="Ep1", state=None):
         except cb_render.Refused as exc:
             block("BILLING_NOT_CONFIRMED", "configuration", str(exc),
                   f"Confirm the {provider} plan and billing cadence in billing_profile.json.")
-    if cb_gen.IMAGE_PROVIDER == "seedream" and not cb_gen.FAL_KEY:
+    selected_video = next(
+        (row for row in provider_capabilities["models"] if row["selected"]), {})
+    fal_required = (
+        cb_gen.IMAGE_PROVIDER == "seedream" or selected_video.get("provider") == "fal")
+    if fal_required and not cb_gen.FAL_KEY:
         block("CONFIG_FAL_KEY", "configuration", "FAL_KEY is not configured.",
               "Preserve the Desktop .env or add the fal.ai key before paid work.")
     if (package and any(shot.get("dialogueLines") for shot in package.get("shots") or []) and
@@ -363,6 +394,8 @@ def production_preflight(scene, episode="Ep1", state=None):
         "timingSlate": timing,
         "shots": state.get("shots") or [],
         "stages": state.get("stages") or {},
+        "providerCapabilities": provider_capabilities,
+        "showProfile": show_profile,
     }
 
 

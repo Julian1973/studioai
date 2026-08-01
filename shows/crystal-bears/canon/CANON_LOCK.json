@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "showId": "crystal-bears",
-  "lockedAt": "2026-08-01T03:27:09+00:00",
+  "lockedAt": "2026-08-01T17:37:02+00:00",
   "lockedBy": "Julian",
-  "policySha256": "c8a8ab1b8520bd12e701b9b5b60d7f051d780eecc14af1e3a4165045029c2776",
+  "policySha256": "a1c7283552ea9217a48a0e600fbe3c101d9f9ca5e0e1de7d1b061a7b99596679",
   "sources": {
     "bannedVocabulary": {
       "path": "shows/crystal-bears/canon/banned_vocabulary.json",
@@ -15,7 +15,7 @@
     },
     "characters": {
       "path": "shows/crystal-bears/canon/characters.json",
-      "sha256": "d5d8b6d5007db3cc42bb91d835b9c5c05eb88b8ed4742c461634f90c1cce6d1d"
+      "sha256": "e0fbdd875b9b2c5c2c1884a243f8cc597671989807913c8633d1bf15e1db0b66"
     },
     "cinematographyTaste": {
       "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
@@ -99,7 +99,7 @@
     },
     "showBible": {
       "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
-      "sha256": "191b7f80efdcce299a8546b2a797569c6cdefa28dc891fc750dca994f7a8523f"
+      "sha256": "12c85aea9dfeae83d35e90a90d7ff2a9584478b86da4f343a27a6b870dcf21c7"
     },
     "showrunnerTaste": {
       "path": "shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
@@ -1141,5 +1141,5 @@
       "sha256": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
     }
   ],
-  "manifestDigest": "9113bb6c2d3b4c133c8854bc44a16c005558a8966e30579c02fa2e59232f88cd"
+  "manifestDigest": "3579a57cf556b782c5d29e67ea48d1974f575049528184b76712881a9720178d"
 }

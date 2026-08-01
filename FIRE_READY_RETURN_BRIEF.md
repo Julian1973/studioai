@@ -38,15 +38,15 @@ Date: 1 August 2026
 
 ## Human canon decisions
 
-Julian resolved the three Episode 1 conflicts on 1 August 2026:
+Julian resolved the Episode 1 conflicts and Luna's outstanding Crystal Call on 1 August 2026:
 
 1. Squeaky is male.
 2. Zenny has no crystal.
 3. Aida's exact call is: "With heart open wide, I stand with pride — Rose Quartz, be our guide!"
+4. Luna's exact call is: "With quiet and might, I trust my sight — Lepidolite, reveal what’s right!"
 
-These decisions are encoded in locked canon and a new immutable script version. Luna's final
-call remains a future human canon decision, and nine location masters still need approved
-visual references.
+These decisions are encoded in locked canon and a new immutable script version. Nine location
+masters still need approved visual references.
 
 ## First session back
 

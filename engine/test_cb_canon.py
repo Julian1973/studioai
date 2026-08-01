@@ -165,12 +165,25 @@ def test_repository_ep1_human_canon_decisions_are_locked():
     report = cb_canon.status("Ep1", root=ROOT)
     characters = json.loads(
         (ROOT / "shows/crystal-bears/canon/characters.json").read_text(encoding="utf-8"))
+    policy = json.loads(
+        (ROOT / "shows/crystal-bears/canon/lock_policy.json").read_text(encoding="utf-8"))
     script = (ROOT / report["scriptPath"]).read_text(encoding="utf-8")
 
     assert report["current"] is True
     assert report["episodeReady"] is True
     assert report["scriptCanon"] == {"ok": True, "blockers": [], "warnings": []}
     assert characters["Squeaky"]["gender"] == "Male"
+    assert characters["Luna"]["crystalCall"]["call"] == (
+        "With quiet and might, I trust my sight — Lepidolite, reveal what’s right!"
+    )
+    assert characters["Luna"]["crystalCall"]["callStatus"] == "locked"
+    luna_status = next(row for row in report["characters"] if row["name"] == "Luna")
+    assert "Crystal Call is proposed and still needs human approval" not in luna_status["creativeGaps"]
+    luna_contract = next(
+        item for item in policy["scriptChecks"]["lockedDialogue"]
+        if item["id"] == "Luna-crystal-call"
+    )
+    assert luna_contract["exactText"] == characters["Luna"]["crystalCall"]["call"]
     assert "With heart open wide, I stand with pride — Rose Quartz, be our guide!" in script
     assert "With open heart and love so bright" not in script
     assert "Zenny’s." not in script

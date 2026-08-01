@@ -154,6 +154,13 @@
         "triggerPattern": "Rose Quartz",
         "exactText": "With heart open wide, I stand with pride \u2014 Rose Quartz, be our guide!",
         "message": "Aida's Crystal Call differs from the exact call locked in the show bible."
+      },
+      {
+        "id": "Luna-crystal-call",
+        "speaker": "Luna",
+        "triggerPattern": "Lepidolite",
+        "exactText": "With quiet and might, I trust my sight \u2014 Lepidolite, reveal what\u2019s right!",
+        "message": "Luna's Crystal Call differs from the exact call locked in the show bible."
       }
     ],
     "pronounContracts": [

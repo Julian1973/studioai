@@ -87,7 +87,7 @@ These are the canonical Crystal Calls (from the Show Bible). They are declaratio
 - **Howey:** "Steady and bright, with peaceful might — Howlite, guide us right!"
 - **Keen:** "Brave and bright, with all my might — Aquamarine, shine with light!"
 - **Misty:** "Feeling deep and true, seeing old and new — Moonstone, help us through!"
-- **Luna:** *(exists — Julian to provide; not captured in the bible deck. Lepidolite/Calm theme.)*
+- **Luna:** "With quiet and might, I trust my sight — Lepidolite, reveal what’s right!"
 
 > A second, conflicting Crystal Call set exists in a `crystal-bears-voice` variant ("Strong and true, in all we do…", "Calm and clear, the moon is near — Selenite…"). That set is **stale** — see §9.
 
@@ -241,7 +241,7 @@ The management tool must let Julian **upload scenery and add characters** into t
 - ✅ **ElevenLabs voice IDs** — collected; see §5 Voice Cast. **Action:** fix the Zenny / Keen's Mum duplicate ID.
 - ✅ **Aida palette** — RESOLVED (Julian): Aida is Rose Quartz but "also everything," so her colour is *not* a strict constraint — her purple/regal design is intentional. Don't force pink; just keep the three purple-family bears (Aida/Luna/Amie) visually distinct.
 - ✅ **Keen** — RESOLVED: male, Courage.
-- **Luna's Crystal Call** — exists; Julian to provide (add when found).
+- ✅ **Luna's Crystal Call** — RESOLVED (Julian): "With quiet and might, I trust my sight — Lepidolite, reveal what’s right!"
 - **Anchor crops** — Misty/Amie/Keen lack a clean front portrait (Misty thinnest). Low priority — Julian: *"can add other shots later."* Use best existing turnaround as anchor for now.
 - **Scenery anchors missing** — the 5 shared locations have no reference images (see §10 Scenery); generate + upload so backgrounds lock like the cast. Plus "Favourite Place" empty for all 9.
 - **Management tool** — round out scenery + character upload (see §10 Management-tool requirement).

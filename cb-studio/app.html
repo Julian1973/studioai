@@ -20,10 +20,10 @@
 input,textarea,select{background:var(--surface2);color:var(--ink);accent-color:var(--brand)}
 body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
 .top{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;cursor:pointer;font-family:'Label Sans',sans-serif}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;cursor:pointer;font-family:'Label Sans',sans-serif;background:transparent;color:var(--ink);border:0;padding:0}
 .logo{width:28px;height:28px;border-radius:8px;background:var(--brandbg);color:var(--brand);display:flex;align-items:center;justify-content:center}
 .toplinks{display:flex;gap:8px;align-items:center}
-.tl{font-size:13px;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer}
+.tl{font:inherit;font-size:13px;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;background:transparent;border:0}
 .tl:hover{background:var(--brandbg);color:var(--brandink)}
 .tl.on{background:var(--brandbg);color:var(--brandink);font-weight:600}
 .epchip{font-size:12px;color:var(--brandink);background:var(--brandbg);border-radius:8px;padding:5px 12px}
@@ -31,21 +31,25 @@ body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI
 .gates .on{color:var(--brandink);font-weight:600}.gates .done{color:var(--ok)}
 .shell{display:flex;min-height:calc(100vh - 98px)}
 .nav{width:172px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);padding:10px}
-.nav a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;margin-bottom:2px}
-.nav a.active{background:var(--brandbg);color:var(--brandink);font-weight:600}.nav a:hover:not(.active){background:#f1eff8}
+.nav a,.nav button{display:flex;width:100%;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;color:var(--muted);text-decoration:none;cursor:pointer;margin-bottom:2px;background:transparent;border:0;font:inherit;text-align:left}
+.nav a.active,.nav button.active{background:var(--brandbg);color:var(--brandink);font-weight:600}.nav a:hover:not(.active),.nav button:hover:not(.active){background:var(--surface2)}
 .nav .sep{border-top:1px solid var(--line);margin:8px 6px}
 .main{flex:1;padding:22px 26px;min-width:0}
 .h1{font-size:21px;font-weight:900;margin:0 0 2px;font-family:'Display Slab',Georgia,serif}.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
 .epgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
-.epcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .12s}
+.epcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;transition:border-color .12s;display:flex;flex-direction:column}
 .epcard:hover{border-color:var(--brand)}
 .epthumb{height:96px;background:#1a2b24;display:flex;align-items:center;justify-content:center;color:#7fd4c1;font-size:13px}
-.epbody{padding:12px 14px}
+.epbody{padding:12px 14px;display:flex;flex-direction:column;flex:1}
 .epbody .n{font-size:11px;color:var(--hint);font-weight:600}
 .epbody .t{font-size:15px;font-weight:900;margin:2px 0 6px;font-family:'Display Slab',Georgia,serif}
 .epbody .l{font-size:12px;color:var(--muted);line-height:1.4;height:50px;overflow:hidden}
 .stat{display:inline-flex;align-items:center;gap:5px;font-size:10px;border-radius:6px;padding:3px 8px;margin-top:8px}
-.addcard{border:1.5px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand);cursor:pointer;min-height:170px;font-weight:500}
+.epactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:auto;padding-top:12px}
+.epactions .btn{margin:0;padding:8px 12px;font-size:12px}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font:inherit}
+.iconbtn:hover{background:var(--surface2);color:var(--ink)}
+.addcard{border:1.5px dashed var(--line);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand);cursor:pointer;min-height:170px;font:inherit;font-weight:500;background:transparent}
 .addcard:hover{border-color:var(--brand);background:var(--brandbg)}
 .form{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;max-width:640px}
 .form label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:12px 0 4px}
@@ -146,7 +150,7 @@ img.zoom:hover{filter:brightness(1.08)}
 #lbimg.zoomed{cursor:zoom-out}
 #lbcap{color:var(--ink);font-size:12.5px;margin-top:13px;display:flex;gap:16px;align-items:center;max-width:94vw}
 #lbcap a{color:var(--brandink);text-decoration:none}#lbcap a:hover{text-decoration:underline}
-#lbclose{position:absolute;top:14px;right:22px;color:#fff;font-size:28px;line-height:1;cursor:pointer;opacity:.8}
+#lbclose{position:absolute;top:14px;right:22px;color:#fff;background:none;border:0;padding:0;font:inherit;font-size:28px;line-height:1;cursor:pointer;opacity:.8}
 #lbclose:hover{opacity:1}
 /* THE PRODUCTION CONTROL ROOM (2026-07-17 UX replacement) — one sequential pipeline: */
 :root{--honey:#d9a441;--honeybg:#2e2416}
@@ -180,7 +184,7 @@ img.zoom:hover{filter:brightness(1.08)}
 
 /* ── Scene Workspace ── */
 .wtop{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-.backlink{color:var(--honey);cursor:pointer;font-size:13px;flex:0 0 auto}
+.backlink{color:var(--honey);background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:13px;flex:0 0 auto}
 .wtop-crumb{color:var(--muted);font-size:13px;flex:1 1 auto}
 .sceneselect{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font:inherit;font-size:13px;max-width:340px}
 
@@ -210,6 +214,19 @@ img.zoom:hover{filter:brightness(1.08)}
 .projcard-decisions{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
 .projcard-activity{font-size:11px;color:var(--hint)}
 .projcard-cta{margin-top:auto;padding-top:10px}
+.projcard-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:10px}
+.projcard-actions .btn{margin:0;padding:8px 12px;font-size:12px}
+.outcome{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 14px;border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:8px;background:var(--surface);margin:0 0 16px}
+.outcome-copy{min-width:0}
+.outcome-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--hint);font-weight:700}
+.outcome-title{font-size:14px;font-weight:700;margin-top:2px;color:var(--ink)}
+.outcome-body{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+.outcome-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
+.outcome-actions .btn{margin:0;padding:8px 12px;font-size:12px;white-space:nowrap}
+.outcome.review{border-left-color:var(--honey)}
+.outcome.blocked{border-left-color:var(--warn)}
+.outcome.done{border-left-color:var(--ok)}
+.outcome.working{border-left-color:var(--info)}
 
 .workspace{display:grid;grid-template-columns:220px 1fr 300px;gap:24px;align-items:start}
 .wcol{min-width:0}
@@ -223,7 +240,7 @@ img.zoom:hover{filter:brightness(1.08)}
 .wtree-empty{color:var(--hint);font-size:12.5px}
 .wtree-beat{margin-bottom:12px}
 .wtree-beat-id{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.wtree-shot{padding:7px 10px;border-radius:8px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:background .1s;display:flex;flex-direction:column;gap:2px}
+.wtree-shot{width:100%;padding:7px 10px;border:0;border-radius:8px;background:transparent;text-align:left;font:inherit;font-size:12.5px;cursor:pointer;color:var(--muted);transition:background .1s;display:flex;flex-direction:column;gap:2px}
 .wtree-shot:hover{background:var(--surface2)}
 .wtree-shot.cur{background:var(--honeybg);color:var(--honey);font-weight:600}
 .wtree-shot.dim{color:var(--hint);cursor:default}
@@ -326,7 +343,7 @@ img.zoom:hover{filter:brightness(1.08)}
   .toplinks .tl{padding:6px 8px}
   .shell{display:block;min-height:0}
   .nav{width:100%;display:flex!important;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px}
-  .nav a{flex:0 0 auto;white-space:nowrap;margin:0 2px 0 0}
+  .nav a,.nav button{width:auto;flex:0 0 auto;white-space:nowrap;margin:0 2px 0 0}
   .nav .sep{display:none}
   .main{padding:16px 12px}
   .epgrid,.projgrid,.sceneboard{grid-template-columns:minmax(0,1fr)}
@@ -334,10 +351,12 @@ img.zoom:hover{filter:brightness(1.08)}
   .ccpanel,.live,.sub,.epbody .l,.projcard-premise{overflow-wrap:anywhere}
   .btn{max-width:100%;white-space:normal}
   .canonissue{grid-template-columns:minmax(0,1fr);gap:2px;padding:7px 0}
+  .outcome{align-items:flex-start;flex-direction:column}
+  .outcome-actions{width:100%;justify-content:flex-start}
 }
 .proom{max-width:1180px;margin:0 auto}
 .prail{display:flex;align-items:stretch;gap:0;margin:4px 0 14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
-.pstage{flex:1;min-width:104px;text-align:center;padding:10px 7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
+.pstage{flex:1;min-width:104px;text-align:center;padding:10px 7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
 .pstage:hover:not(.locked){border-color:var(--honey)}
 .pstage.active{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg)}
 .pstage.locked{opacity:.7;cursor:not-allowed;background:var(--surface2)}
@@ -408,7 +427,7 @@ img.zoom:hover{filter:brightness(1.08)}
 </head>
 <body>
 <div class="top">
-  <div class="brand" onclick="goHome()"><span class="logo">◈</span> Crystal Bears Studio</div>
+  <button type="button" class="brand" onclick="CURRENT_PROJECT?goHome():bootProjects()" aria-label="Crystal Bears Studio home"><span class="logo">◈</span> Crystal Bears Studio</button>
   <div class="toplinks" id="toplinks"></div>
   <div class="topreviewer" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--hint)">
     Reviewed by
@@ -548,13 +567,36 @@ const ANIM_TYPES=[
 function projConfig(){return (CURRENT_PROJECT&&CURRENT_PROJECT.configBase)||"engine/config";}
 function projPkgBase(){return (CURRENT_PROJECT&&CURRENT_PROJECT.packageBase)||"cb-output";}
 function _esc(s){return (''+(s==null?'':s)).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+function _attr(s){return _esc(s).replace(/"/g,"&quot;");}
+function actionButtonHTML(action){
+  if(!action||!action.label||!action.onclick)return "";
+  const cls=action.kind==="secondary"?"btn ghost":"btn";
+  return `<button type="button" class="${cls}" onclick="${_attr(action.onclick)}"${action.disabled?" disabled":""}>${_esc(action.label)}</button>`;
+}
+function outcomePanelHTML(opts){
+  opts=opts||{};
+  let actions=(opts.actions||[]).filter(a=>a&&a.label&&a.onclick);
+  if(!actions.length){
+    actions=[CURRENT_PROJECT
+      ?{label:CUR?"Open production":"Open episodes",onclick:CUR?"go('sceneboard')":"goHome()"}
+      :{label:"Open projects",onclick:"bootProjects()"}];
+  }
+  return `<section class="outcome ${_esc(opts.tone||"ready")}" aria-label="Current outcome">
+    <div class="outcome-copy">
+      <div class="outcome-kicker">${_esc(opts.kicker||"Outcome")}</div>
+      <div class="outcome-title">${_esc(opts.title||"Choose the next action")}</div>
+      ${opts.body?`<div class="outcome-body">${_esc(opts.body)}</div>`:""}
+    </div>
+    <div class="outcome-actions">${actions.map(actionButtonHTML).join("")}</div>
+  </section>`;
+}
 async function bootProjects(){
   try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
   CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects"; renderTop(); renderNav(); renderProjects();
 }
 function renderProjects(){
   const initial=p=>_esc((p.name||"?").trim().charAt(0).toUpperCase());
-  const card=p=>`<div class="projcard" id="pc_${_esc(p.id)}" onclick='enterProject(${JSON.stringify(p.id)})' title="Open ${_esc(p.name)}">
+  const card=p=>`<article class="projcard" id="pc_${_esc(p.id)}">
     <div class="projcard-art" id="pcart_${_esc(p.id)}">${p.archived?`<span class="archtag">Archived</span>`:''}<div class="initial">${initial(p)}</div></div>
     <div class="projcard-body">
       <div class="projcard-name">${_esc(p.name)}${p.primary?' <span style="font-size:10px;color:var(--hint);font-weight:400">· primary</span>':''}</div>
@@ -562,14 +604,19 @@ function renderProjects(){
       ${p.premise?`<div class="projcard-premise">${_esc((p.premise||'').slice(0,140))}${(p.premise||'').length>140?'…':''}</div>`:''}
       <div class="projcard-meta">${p.episodeCount||0} episode${p.episodeCount==1?'':'s'} · ${p.characterCount||0} characters${p.aspectRatio?' · '+_esc(p.aspectRatio):''}</div>
       <div id="pcstats_${_esc(p.id)}" class="projcard-stats"><div class="projcard-activity">Loading production status…</div></div>
-      <div class="projcard-cta"><span class="tl on" style="font-size:12px">Continue Production →</span></div>
+      <div class="projcard-actions">
+        <button type="button" class="btn" onclick='${p.archived?"enterProject":"continueProject"}(${JSON.stringify(p.id)})'>${p.archived?"Open archive":"Continue production"}</button>
+        ${p.archived?"":`<button type="button" class="btn ghost" onclick='enterProject(${JSON.stringify(p.id)})'>Episodes</button>`}
+      </div>
     </div>
-  </div>`;
+  </article>`;
+  const primary=PROJECTS.find(p=>p.primary&&!p.archived)||PROJECTS.find(p=>!p.archived);
   document.getElementById("view").innerHTML=`
     <h1 class="h1">Projects</h1>
     <p class="sub">Each project is a self-contained show — its own bible, characters, animation type and episodes. Drop in a new show bible + character references to spin up a project that drives animation.</p>
+    ${primary?outcomePanelHTML({title:"Continue "+primary.name,body:"Open the live episode at its next authoritative production action.",actions:[{label:"Continue production",onclick:`continueProject(${JSON.stringify(primary.id)})`}]}):outcomePanelHTML({title:"Create the first project",body:"A project is required before an episode can enter production.",actions:[{label:"New project",onclick:"openProjectWizard()"}]})}
     <div class="projgrid">${PROJECTS.map(card).join("")}
-      <div class="projcard" onclick="openProjectWizard()" style="align-items:center;justify-content:center;border-style:dashed;border-color:var(--brand);min-height:220px"><div style="text-align:center;color:var(--brandink)"><div style="font-size:30px;line-height:1">＋</div><div style="font-weight:600;margin-top:4px">New Project</div></div></div>
+      <button type="button" class="addcard" onclick="openProjectWizard()"><span style="font-size:30px;line-height:1">＋</span><span>New Project</span></button>
     </div>`;
   PROJECTS.forEach(p=>{
     projectStats(p).then(s=>{
@@ -580,14 +627,16 @@ function renderProjects(){
       } else if(s.unsupported||s.empty||s.error){
         statsEl.innerHTML=`<div class="projcard-activity">${s.empty?'No scenes yet — open to begin.':'Open to view production status.'}</div>`;
       } else {
-        const decLabel=s.decisions>0?`${s.decisions} decision${s.decisions==1?'':'s'} waiting`:'All caught up';
-        const decColor=s.decisions>0?'var(--honey)':'var(--ok)';
+        const decLabel=s.decisions>0?`${s.decisions} decision${s.decisions==1?'':'s'} waiting`
+          :s.outcome==="complete"?"Episode complete"
+          :s.outcome==="working"?"Work in progress":"Next action ready";
+        const decColor=s.decisions>0?'var(--honey)':s.outcome==="complete"?'var(--ok)':'var(--brandink)';
         statsEl.innerHTML=`
           <div class="projcard-progress">
             <div class="projcard-progress-row"><span>${s.completion}% complete</span><span>${s.scenes} scene${s.scenes==1?'':'s'}</span></div>
             <div class="projcard-bar"><i style="width:${s.completion}%"></i></div>
           </div>
-          <div class="projcard-decisions" style="color:${decColor}">${s.decisions>0?'◐':'✓'} ${decLabel}</div>
+          <div class="projcard-decisions" style="color:${decColor}">${s.decisions>0?'◐':s.outcome==="complete"?'✓':'○'} ${decLabel}</div>
           <div class="projcard-activity">${_esc(s.activity)}</div>`;
         if(artEl&&s.artwork)artEl.innerHTML=`<img src="${BASE}${s.artwork}?v=${Date.now()}"/>`;
       }
@@ -596,7 +645,14 @@ function renderProjects(){
 }
 async function enterProject(id){
   const p=PROJECTS.find(x=>x.id===id); if(!p){alert("Project not found");return;}
-  CURRENT_PROJECT=p; CUR=null; SHOTS=[]; page="episodes"; boot();
+  CURRENT_PROJECT=p; CUR=null; SHOTS=[]; page="episodes"; await boot(); return true;
+}
+async function continueProject(id){
+  const p=PROJECTS.find(x=>x.id===id); if(!p){alert("Project not found");return;}
+  if(!(await enterProject(id)))return;
+  if(p.archived)return;
+  const episode=EPISODES.find(e=>e.script)||EPISODES[0];
+  if(episode)await openEpisode(episode.number); else addForm();
 }
 function exitProject(){ bootProjects(); }
 /* ---- New Project wizard ---- */
@@ -629,7 +685,7 @@ function renderWizard(){
   const ta=(id,ph,val,h)=>`<textarea id="${id}" placeholder="${_esc(ph)}" style="padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit;width:100%;box-sizing:border-box;min-height:${h||140}px">${_esc(val||'')}</textarea>`;
   let body="";
   if(S==1){ body=`<div class="lab" style="font-weight:600">1 · Identity &amp; format</div><div style="display:grid;gap:10px;margin-top:10px">${inp("wz_name","Project name (e.g. Crystal Bears)",d.name)}${ta("wz_premise","Premise / logline — what is the show about?",d.premise,90)}${inp("wz_audience","Audience (e.g. Kids 3–7 + co-viewing parents)",d.audience)}<div style="display:flex;gap:10px">${inp("wz_eplen","Episode length",d.episodeLength)}${inp("wz_aspect","Aspect ratio",d.aspectRatio)}</div></div>`; }
-  else if(S==2){ body=`<div class="lab" style="font-weight:600">2 · Animation type &amp; look</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">This drives the whole look &amp; feel — the image-generation style.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${ANIM_TYPES.map(t=>`<div onclick="wizCapture();wizSet('animationType','${t.v.replace(/'/g,"\\'")}');renderWizard()" style="cursor:pointer;border:2px solid ${d.animationType===t.v?'var(--brand)':'var(--line)'};border-radius:10px;padding:12px;background:${d.animationType===t.v?'var(--brandbg)':'var(--surface)'}"><div style="font-weight:600;font-size:13px">${t.v}</div><div style="font-size:11px;color:var(--hint);margin-top:3px">${t.d}</div></div>`).join("")}</div><div style="margin-top:12px">${ta("wz_style","Visual style notes & references — palette, tone, finish, reference titles…",d.style,90)}</div>`; }
+  else if(S==2){ body=`<div class="lab" style="font-weight:600">2 · Animation type &amp; look</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">This drives the whole look &amp; feel — the image-generation style.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${ANIM_TYPES.map(t=>`<button type="button" aria-pressed="${d.animationType===t.v}" onclick="wizCapture();wizSet('animationType','${t.v.replace(/'/g,"\\'")}');renderWizard()" style="font:inherit;color:inherit;text-align:left;cursor:pointer;border:2px solid ${d.animationType===t.v?'var(--brand)':'var(--line)'};border-radius:8px;padding:12px;background:${d.animationType===t.v?'var(--brandbg)':'var(--surface)'}"><div style="font-weight:600;font-size:13px">${_esc(t.v)}</div><div style="font-size:11px;color:var(--hint);margin-top:3px">${_esc(t.d)}</div></button>`).join("")}</div><div style="margin-top:12px">${ta("wz_style","Visual style notes & references — palette, tone, finish, reference titles…",d.style,90)}</div>`; }
   else if(S==3){ body=`<div class="lab" style="font-weight:600">3 · Show bible</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Paste the world, tone, rules and canon — refine inside the project later.</p>${ta("wz_bible","The show bible — world, themes, tone, rules, canon…",d.showBible,200)}`; }
   else if(S==4){ body=`<div class="lab" style="font-weight:600">4 · Characters</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Drop in each character with a reference image and key features.</p><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;border:1px dashed var(--brand);border-radius:8px;padding:10px"><div style="flex:1;min-width:130px">${inp("wz_cname","Character name",'')}</div><div style="flex:2;min-width:180px">${inp("wz_ckf","Key features",'')}</div><label style="font-size:11px;color:var(--hint)">Ref <input id="wz_cimg" type="file" accept="image/*"/></label><button class="btn" onclick="wizAddChar()">Add</button></div><div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${WIZ.chars.map((c,i)=>`<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:7px 10px"><div style="width:36px;height:46px;background:var(--surface2);border-radius:5px;overflow:hidden;flex:none">${c.imageData?`<img src="${c.imageData}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${_esc(c.name)}</div><div style="font-size:11px;color:var(--hint)">${_esc(c.keyFeatures||'')}</div></div><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="wizDelChar(${i})">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--hint)">No characters added yet.</div>'}</div>`; }
   else if(S==5){ body=`<div class="lab" style="font-weight:600">5 · Voice &amp; audio</div><div style="display:grid;gap:10px;margin-top:10px">${inp("wz_voice","Voice provider (e.g. ElevenLabs)",d.voiceProvider)}${inp("wz_music","Music / composer style",d.musicStyle)}</div>`; }
@@ -644,16 +700,16 @@ function renderTop(){
   // is the single place the hash needs syncing (pFocusStage syncs separately for in-scene
   // stage focus, which doesn't touch the top bar).
   const t=document.getElementById("toplinks");
-  if(!CURRENT_PROJECT){t.innerHTML=`<span class="tl on">Projects</span>`;return;}
-  const ph=`<span class="tl" onclick="exitProject()">← Projects</span><span class="epchip">${_esc(CURRENT_PROJECT.name)}</span>`;
-  if(CUR){t.innerHTML=ph+`<span class="tl" onclick="showCharacters()">Characters</span><span class="tl" onclick="showScenes()">Scenes</span><span class="tl" onclick="showHouses()">Houses</span><span class="tl" onclick="showBible()">Show Bible</span><span class="tl" onclick="goHome()">← Episodes</span>`;}
-  else{t.innerHTML=ph+`<span class="tl ${page=='episodes'?'on':''}" onclick="goHome()">Episodes</span><span class="tl ${page=='characters'?'on':''}" onclick="showCharacters()">Characters</span><span class="tl ${page=='scenes'?'on':''}" onclick="showScenes()">Scenes</span><span class="tl ${page=='houses'?'on':''}" onclick="showHouses()">Houses</span><span class="tl ${page=='bible'?'on':''}" onclick="showBible()">Show Bible</span>`;}
+  if(!CURRENT_PROJECT){t.innerHTML=`<button type="button" class="tl on" onclick="bootProjects()">Projects</button>`;return;}
+  const ph=`<button type="button" class="tl" onclick="exitProject()">← Projects</button><span class="epchip">${_esc(CURRENT_PROJECT.name)}</span>`;
+  if(CUR){t.innerHTML=ph+`<button type="button" class="tl" onclick="showCharacters()">Characters</button><button type="button" class="tl" onclick="showScenes()">Scenes</button><button type="button" class="tl" onclick="showHouses()">Houses</button><button type="button" class="tl" onclick="showBible()">Show Bible</button><button type="button" class="tl" onclick="goHome()">← Episodes</button>`;}
+  else{t.innerHTML=ph+`<button type="button" class="tl ${page=='episodes'?'on':''}" onclick="goHome()">Episodes</button><button type="button" class="tl ${page=='characters'?'on':''}" onclick="showCharacters()">Characters</button><button type="button" class="tl ${page=='scenes'?'on':''}" onclick="showScenes()">Scenes</button><button type="button" class="tl ${page=='houses'?'on':''}" onclick="showHouses()">Houses</button><button type="button" class="tl ${page=='bible'?'on':''}" onclick="showBible()">Show Bible</button>`;}
 }
 function renderNav(){
   const nav=document.getElementById("nav");
   if(!CUR){nav.style.display="none";return;}
   nav.style.display="block";
-  nav.innerHTML=NAV.map(n=>n[0]=="__sep"?'<div class="sep"></div>':`<a class="${(n[0]==page||(n[0]=="sceneboard"&&page=="pipeline"))?'active':''}" onclick="go('${n[0]}')"><span style="width:16px;display:inline-block;text-align:center">${n[2]}</span>${n[1]}</a>`).join("");
+  nav.innerHTML=NAV.map(n=>n[0]=="__sep"?'<div class="sep"></div>':`<button type="button" class="${(n[0]==page||(n[0]=="sceneboard"&&page=="pipeline"))?'active':''}" onclick="go('${n[0]}')"><span style="width:16px;display:inline-block;text-align:center">${n[2]}</span>${n[1]}</button>`).join("");
 }
 function renderGates(){
   const g=document.getElementById("gatesbar");
@@ -665,7 +721,7 @@ function renderGates(){
 
 async function boot(){
   const epf=(CURRENT_PROJECT&&CURRENT_PROJECT.episodesFile)||"cb-studio/data/episodes.json";
-  try{[EPISODES,MEDIA,CHARCFG]=await Promise.all([fetch(BASE+"/"+epf,{cache:"no-store"}).then(r=>r.json()),fetch(BASE+"/cb-studio/data/media-index.json").then(r=>r.json()).catch(()=>[]),fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.json()).catch(()=>({}))]);MEDIA_V=Date.now();}catch(e){document.getElementById("view").innerHTML='<div class="coming">Start the server: python3 cb-studio/serve.py</div>';return;}
+  try{[EPISODES,MEDIA,CHARCFG]=await Promise.all([fetch(BASE+"/"+epf,{cache:"no-store"}).then(r=>r.json()),fetch(BASE+"/cb-studio/data/media-index.json").then(r=>r.json()).catch(()=>[]),fetch(BASE+"/"+projConfig()+"/characters.json",{cache:"no-store"}).then(r=>r.json()).catch(()=>({}))]);MEDIA_V=Date.now();}catch(e){document.getElementById("view").innerHTML=outcomePanelHTML({tone:"blocked",title:"Studio server unavailable",body:"Reconnect to the local Studio server, then retry this screen.",actions:[{label:"Retry",onclick:"boot()"},{label:"Projects",onclick:"bootProjects()",kind:"secondary"}]});return;}
   renderTop();renderNav();render();
 }
 function goHome(){CUR=null;SHOTS=[];page="episodes";boot();}
@@ -758,16 +814,17 @@ async function renderCharacters(){
   try{M=(await fetch(BASE+"/api/masters",{cache:"no-store"}).then(r=>r.json())).masters||{};}catch(e){}
   const url=p=>p?BASE+"/"+p.replace(/^\.\.\//,"")+"?v="+Date.now():"";
   const chars=Object.entries(C).filter(([k,v])=>k[0]!=="_"&&v&&typeof v==="object"&&!Array.isArray(v)&&k!=="sizeClasses");
-  const card=([name,c])=>`<div class="mc" onclick='if(!event.target.closest("a"))openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})' title="Open profile" style="display:flex;gap:14px;align-items:flex-start;cursor:pointer">
+  const card=([name,c])=>`<article class="mc" style="display:flex;gap:14px;align-items:flex-start">
     <div style="width:110px;flex:none"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no image</span>'}</div></div>
     <div style="flex:1;min-width:0">
-      <div style="font-weight:600;font-size:15px">${name}${c.tier?` <span style="font-size:11px;color:var(--hint)">· ${c.tier}</span>`:''} <span style="font-size:11px;color:var(--brandink);font-weight:400">open profile →</span></div>
+      <div style="font-weight:600;font-size:15px">${name}${c.tier?` <span style="font-size:11px;color:var(--hint)">· ${c.tier}</span>`:''}</div>
       <div style="font-size:12px;color:var(--hint);margin:2px 0 6px">${[c.size,c.sizeRef?'same size as '+c.sizeRef:'',c.voiceId?'voice ✓':'⚠ no voice'].filter(Boolean).join(' · ')}</div>
       ${c.key_features?`<div style="font-size:12px;line-height:1.5">${c.key_features}</div>`:'<div style="font-size:12px;color:var(--danger)">⚠ no key features set</div>'}
       ${[c.crystal,c.feeling,c.colour].some(Boolean)?`<div style="font-size:11px;color:var(--hint);margin-top:6px">${[c.crystal,c.feeling,c.colour].filter(Boolean).join(' · ')}</div>`:''}
       ${(c.refs&&c.refs.length)?`<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center">${c.refs.map(r=>`<a href="${url(r)}" target="_blank"><img src="${url(r)}" style="height:46px;border-radius:4px;border:1px solid #ddd" title="${r.split('/').pop()}"/></a>`).join('')}<span style="font-size:11px;color:var(--brandink)">${c.refs.length} reference${c.refs.length>1?'s':''} (incl. turnaround) · LoRA-ready</span></div>`:'<div style="font-size:11px;color:var(--hint);margin-top:8px">only the single anchor — no turnaround/expression set yet</div>'}
       ${c.states?`<div style="margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)"><div style="font-size:11px;font-weight:600;color:var(--brandink);margin-bottom:5px">States (${Object.keys(c.states).length}) — one character, switched per beat${c.canonicalState?` · canonical: ${c.canonicalState}`:''}</div><div style="display:flex;gap:14px;flex-wrap:wrap">${Object.entries(c.states).map(([sk,sv])=>`<div style="display:flex;gap:7px;align-items:center"><a href="${url(sv.turnaround)}" target="_blank"><img src="${url(sv.turnaround)}" style="height:56px;border-radius:5px;border:2px solid ${sv.canonical?'var(--brand)':'var(--line)'}" title="${(sv.note||sv.label||sk).replace(/"/g,'')}"/></a><div style="font-size:11px"><div style="font-weight:600">${sv.label||sk}</div><div style="color:var(--hint)">${sv.canonical?'canonical default':'variant'}</div></div></div>`).join('')}</div></div>`:''}
-    </div></div>`;
+      <button type="button" class="btn ghost" style="margin-top:10px" onclick='openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})'>Open profile</button>
+    </div></article>`;
   const I='style="padding:8px 10px;border:1px solid var(--line,#ddd);border-radius:7px;font:inherit;width:100%;box-sizing:border-box"';
   const mastersRows=Object.values(M).sort((a,b)=>(a.character||'').localeCompare(b.character||''));
   const mastersPanel=`<div class="mc" style="margin-top:18px">
@@ -837,7 +894,7 @@ async function renderHouses(){
   document.getElementById("view").innerHTML=`
     <h1 class="h1">Houses · Elements</h1>
     <p class="sub">Every character's home — interior and exterior, with multi-angle sheets where available. These are reusable location elements: pick one as any scene's foundation from a scene's Keyframes panel (▾ Library). (${hs.length} houses)</p>
-    ${hs.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px">${hs.map(card).join("")}</div>`:`<div class="coming">No houses imported yet.</div>`}`;
+    ${hs.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px">${hs.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No houses are locked yet",body:"Continue with the reusable scene and character elements already available, or return to the episode workflow.",actions:[{label:"Open scenes",onclick:"showScenes()"},{label:"Open characters",onclick:"showCharacters()",kind:"secondary"},{label:"Open episodes",onclick:"goHome()",kind:"secondary"}]})}`;
 }
 async function renderScenes(){
   let L={manifest:{},reuse:{},scenes:[]};
@@ -846,12 +903,15 @@ async function renderScenes(){
   const img=p=>BASE+"/engine/media/"+p+"?v="+Date.now();
   const card=(s)=>{
     const reused=(RE[s.locationId]||[]).length>1?`<span style="font-size:11px;color:var(--brandink);background:var(--brandbg);border-radius:6px;padding:2px 8px">↻ reused in scenes ${RE[s.locationId].join(", ")}</span>`:'';
-    const status=s.master?'<span style="color:var(--ok);font-weight:600">✓ approved &amp; stored (reusable)</span>':(s.plate?'<span style="color:var(--info);font-weight:600">● scene shot built — sign off Step 1 to store it</span>':'<span style="color:var(--hint)">○ no scene shot yet</span>');
+    const preview=s.plate?img(s.plate):(s.master?refUrl(s.master):null);
+    const plateStatus=s.plate?'<span style="color:var(--info);font-weight:600">● generated scene shot available</span>':'<span style="color:var(--hint)">○ no generated scene shot</span>';
+    const masterStatus=s.master?'<span style="color:var(--ok);font-weight:600">✓ location master locked (reusable)</span>':(s.masterMissing?'<span style="color:var(--danger);font-weight:600">! configured location master is missing</span>':'<span style="color:var(--hint)">○ no location master locked</span>');
     return `<div class="mc" style="display:flex;gap:14px;align-items:flex-start">
-      <div style="width:170px;flex:none"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${s.plate?`<img class="zoom" data-cap="Scene ${s.scene} plate" src="${img(s.plate)}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no scene shot yet</span>'}</div></div>
+      <div style="width:170px;flex:none"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center">${preview?`<img class="zoom" data-cap="Scene ${s.scene} ${s.plate?'generated scene shot':'locked location master'}" src="${preview}" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="color:var(--hint);font-size:11px">no visual asset yet</span>'}</div></div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:15px">Scene ${s.scene} · ${s.name||s.locationId}</div>
-        <div style="font-size:11px;color:var(--hint);margin:3px 0 6px"><span style="font-family:monospace;background:#f1eff8;border-radius:5px;padding:1px 6px">${s.locationId||'—'}</span> · ${status}</div>
+        <div style="font-size:11px;color:var(--hint);margin:3px 0 2px"><span style="font-family:monospace;background:#f1eff8;border-radius:5px;padding:1px 6px">${s.locationId||'—'}</span></div>
+        <div style="font-size:11px;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">${plateStatus}<span aria-hidden="true">·</span>${masterStatus}</div>
         ${s.location?`<div style="font-size:12px;line-height:1.5">${(''+s.location).replace(/</g,'&lt;')}</div>`:''}
         ${s.look?`<div style="font-size:11px;color:var(--hint);margin-top:6px">${(''+s.look).slice(0,260).replace(/</g,'&lt;')}${(''+s.look).length>260?'…':''}</div>`:''}
         ${reused?`<div style="margin-top:8px">${reused}</div>`:''}
@@ -859,6 +919,7 @@ async function renderScenes(){
       </div></div>`;
   };
   const built=SC.filter(s=>s.plate).length;
+  const lockedMasters=SC.filter(s=>s.master).length;
   const UR=L.uploadedRefs||[];
   const refUrl=p=>BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now();
   const refGallery=UR.length?`
@@ -869,9 +930,10 @@ async function renderScenes(){
     </div>`:'';
   document.getElementById("view").innerHTML=`
     <h1 class="h1">Scenes · Elements</h1>
-    <p class="sub">Every scene in the episode and its scene shot, plus every scene image you've uploaded. A scene shot is stored as a reusable element when its foundation is signed off, and reused whenever the location recurs. (${SC.length} scenes · ${built} with a scene shot · ${UR.length} uploaded references)</p>
+    <p class="sub">Every scene in the episode, its generated scene shot, and its independently locked reusable location master. (${SC.length} scenes · ${built} generated scene shot${built==1?'':'s'} · ${lockedMasters} locked location master${lockedMasters==1?'':'s'} · ${UR.length} uploaded references)</p>
+    ${outcomePanelHTML({tone:built||lockedMasters?"done":"ready",title:lockedMasters+" locked location master"+(lockedMasters==1?"":"s"),body:built+" generated scene shot"+(built==1?"":"s")+" currently exist. The two asset types stay separate so a master is never mistaken for a generated shot.",actions:[CURRENT_PROJECT?{label:"Continue production",onclick:`continueProject(${JSON.stringify(CURRENT_PROJECT.id)})`}:{label:"Open episodes",onclick:"goHome()"},{label:"Add scene reference",onclick:"document.getElementById('sc_name').focus()",kind:"secondary"}]})}
     ${refGallery}
-    ${SC.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px">${SC.map(card).join("")}</div>`:`<div class="coming">No scenes yet — run the Director (Gate 1) to break the script into scenes.</div>`}
+    ${SC.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px">${SC.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No production scenes exist yet",body:"Run Story & Direction for the active script, or add a reusable scene reference below.",actions:[CURRENT_PROJECT?{label:"Open Story & Direction",onclick:`continueProject(${JSON.stringify(CURRENT_PROJECT.id)})`}:{label:"Open episodes",onclick:"goHome()"},{label:"Add scene reference",onclick:"document.getElementById('sc_name').focus()",kind:"secondary"}]})}
     <div class="mc" style="margin-top:18px;border:1px dashed var(--brand)">
       <div class="lab" style="font-weight:600;color:var(--brandink)">＋ Add a scene (element)</div>
       <p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Upload a scene image into the library — it appears in "Your uploaded scene references" above and can be used as any scene's foundation (Keyframes panel → ⬆ Upload / ▾ Library).</p>
@@ -908,7 +970,7 @@ async function openScenePicker(sn){
   (HS.houses||[]).forEach(h=>{ if(h.interior)opts.push({file:h.interior,name:h.character+"'s House — Inside"}); if(h.exterior)opts.push({file:h.exterior,name:h.character+"'s House — Outside"}); });
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button><h3>Pick a scene shot for Scene ${sn}</h3>
     <p class="sub" style="margin:0 0 10px">Choose a stored or uploaded scene image to use as Scene ${sn}'s foundation.</p>
-    ${opts.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">${opts.map(o=>`<div onclick="useSceneFromLib(${sn},'${o.file.replace(/'/g,"\\'")}')" style="cursor:pointer"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--line)"><img src="${u(o.file)}" style="width:100%;height:100%;object-fit:cover"/></div><div style="font-size:11px;color:var(--hint);text-align:center;margin-top:4px">${o.name}</div></div>`).join("")}</div>`:`<div class="coming">No scene images in the library yet — upload one, or add a scene in the Scenes tab.</div>`}`;
+    ${opts.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">${opts.map(o=>`<button type="button" aria-label="Use ${_attr(o.name)}" onclick="useSceneFromLib(${sn},'${o.file.replace(/'/g,"\\'")}')" style="font:inherit;color:inherit;text-align:left;background:none;border:0;padding:0;cursor:pointer"><div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--line)"><img src="${u(o.file)}" style="width:100%;height:100%;object-fit:cover"/></div><div style="font-size:11px;color:var(--hint);text-align:center;margin-top:4px">${_esc(o.name)}</div></button>`).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No reusable scene images yet",body:"Add a scene reference, then return here to choose it as this scene's foundation.",actions:[{label:"Open Scenes",onclick:"closeM();showScenes()"},{label:"Cancel",onclick:"closeM()",kind:"secondary"}]})}`;
   document.getElementById("modal").classList.add("show");
 }
 async function useSceneFromLib(sn,file){
@@ -946,11 +1008,12 @@ function render(){
   if(page=="scenes")return renderScenes();
   if(page=="houses")return renderHouses();
   if(page=="character")return renderCharacterDetail();
+  if(page=="script")return renderScript();
   if(page=="pipeline")return renderControl();
   if(page=="sceneboard")return renderSceneBoard();
   if(page=="characters")return renderCharacters();
   const _nm=(NAV.find(n=>n[0]==page)||[,page])[1];
-  view.innerHTML=`<h1 class="h1">${_nm}</h1><div class="coming">This view has moved into the Pipeline — use the sidebar.</div>`;
+  view.innerHTML=`<h1 class="h1">${_nm}</h1>${outcomePanelHTML({title:"Continue in the production workspace",body:"This view now lives inside the scene pipeline.",actions:[{label:CUR?"Open all scenes":"Open episodes",onclick:CUR?"backToBoard()":"goHome()"},{label:"Open projects",onclick:"bootProjects()",kind:"secondary"}]})}`;
 }
 
 function renderEpisodes(){
@@ -965,15 +1028,23 @@ function renderEpisodes(){
     const summary=awaiting
       ?`Proposed: ${_esc(e.proposedTitle||"Story & Direction")} — ${_esc(e.proposedLogline||"review the episode direction and beats")}`
       :_esc(e.logline||"(script uploaded — not yet broken into beats)");
-    return `<div class="epcard" onclick="openEpisode(${e.number})">
+    const actionLabel=ready?"Open scenes":awaiting?"Review Story & Direction":e.script?"Run Story & Direction":"Add script";
+    return `<article class="epcard">
       <div class="epthumb">Episode ${e.number}</div>
       <div class="epbody"><div class="n">EPISODE ${e.number}${e.leadBear?" · "+_esc(e.leadBear):""}</div>
-      <div class="t">${_esc(e.title||"(unnamed)")} <span onclick="event.stopPropagation();renameEp(${e.number})" title="Rename episode" style="cursor:pointer;font-size:12px;opacity:.5;margin-left:5px">✏️</span></div><div class="l">${summary}</div>
-      <span class="stat" style="color:${v(st[0])};background:${v(st[1])}">${_esc(st[2])}${ct?" · "+ct+(ready&&!isB?" shots":" beats"):""}${awaiting&&e.proposalSceneCount?" · "+e.proposalSceneCount+" scenes":""}</span></div></div>`;
+      <div class="t">${_esc(e.title||"(unnamed)")} <button type="button" class="iconbtn" onclick="renameEp(${e.number})" title="Rename episode" aria-label="Rename Episode ${e.number}">✎</button></div><div class="l">${summary}</div>
+      <span class="stat" style="color:${v(st[0])};background:${v(st[1])}">${_esc(st[2])}${ct?" · "+ct+(ready&&!isB?" shots":" beats"):""}${awaiting&&e.proposalSceneCount?" · "+e.proposalSceneCount+" scenes":""}</span>
+      <div class="epactions"><button type="button" class="btn" onclick="openEpisode(${e.number})">${_esc(actionLabel)}</button>
+        ${e.script?`<button type="button" class="btn ghost" onclick="openEpisodeScript(${e.number})">Script</button>`:""}</div></div></article>`;
   }).join("");
+  const next=EPISODES.find(e=>e.storyIntakeState==="awaiting-review")||EPISODES.find(e=>e.packageCurrent)||EPISODES.find(e=>e.script)||EPISODES[0];
+  const screenOutcome=next
+    ?outcomePanelHTML({tone:next.storyIntakeState==="awaiting-review"?"review":"ready",title:next.storyIntakeState==="awaiting-review"?"Story & Direction needs your decision":next.packageCurrent?"Continue scene production":"Run Story & Direction",body:"Episode "+next.number+" · "+(next.title||"Untitled"),actions:[{label:next.storyIntakeState==="awaiting-review"?"Review candidate":next.packageCurrent?"Open scenes":"Open Story & Direction",onclick:`openEpisode(${next.number})`}]})
+    :outcomePanelHTML({title:"Create the first episode",body:"Upload a script to begin Story & Direction.",actions:[{label:"Add episode",onclick:"addForm()"}]});
   document.getElementById("view").innerHTML=`<h1 class="h1">Episodes</h1><p class="sub">Add an episode and upload its script. The Show Bible is shared across all episodes.</p>
-    <div class="epgrid">${cards}<div class="addcard" onclick="addForm()"><div style="font-size:26px">＋</div>Add episode</div></div>`;
+    ${screenOutcome}<div class="epgrid">${cards}<button type="button" class="addcard" onclick="addForm()"><span style="font-size:26px">＋</span><span>Add episode</span></button></div>`;
 }
+async function openEpisodeScript(num){if(await openEpisode(num))go("script");}
 
 async function renameEp(num){
   const ep=EPISODES.find(e=>e.number==num); const cur=(ep&&ep.title)||"";
@@ -1048,7 +1119,7 @@ async function renderScript(){
   const wj=Object.values(PJOBS).filter(j=>String(j.gate)=="write").sort((a,b)=>(a.started||0)-(b.started||0)).pop();
   const writing=wj&&wj.status=="running";
   const hasScript=!!(CUR.script&&raw&&raw.trim());
-  view.innerHTML=`<div style="margin-bottom:14px"><a onclick="go('sceneboard')" style="cursor:pointer;color:var(--honey);font-size:13px">← Back to Production</a></div>
+  view.innerHTML=`<div style="margin-bottom:14px"><button type="button" class="backlink" onclick="go('sceneboard')">← Back to Production</button></div>
     <h1 class="h1">Script — Gate 0 · Writers' Room</h1>
     <p class="sub">Seed it — a time, a headline, the why, the characters — and the room writes the world-class, funny, SEL episode, scores it /10, then hands the locked script to the Director. <span class="minds">Docter · Brumm · Stanton · Nee · Woolverton</span></p>
     <div id="sc"></div>`;
@@ -1102,7 +1173,7 @@ function seedForm(hasScript,sd){
   return `<div class="apanel">${body}</div>`;
 }
 function scriptOutline(){
-  return `<div class="coming" style="margin-top:18px">The scene-by-scene breakdown lives at the Storyboard stage. <a onclick="go('sceneboard')" style="cursor:pointer;color:var(--honey)">← Back to Production</a></div>`;
+  return `<div class="coming" style="margin-top:18px">The scene-by-scene breakdown lives at the Storyboard stage. <button type="button" class="backlink" onclick="go('sceneboard')">← Back to Production</button></div>`;
 }
 const DEMAND_SEEDS=[
   {title:'The Brave-Enough Bear',minutes:11,pillar:'Heart',timeSetting:'the Whispering Woods, dusk',logline:'When the bravest game in the woods needs someone to go into the dark hollow, the bear who acts bravest is the most scared of all.',purpose:'brave isn’t not-scared — it’s doing it scared, paw in paw',characters:'a bear who performs fearless (lead) + a quiet witness who sits with the fear; Fuzzby & Zenny for the gag',tone:'Bluey-quiet with Trolls bursts',_src:'vidIQ — "Brave/Courage" breakout (563) + low-comp "feelings for kids"'},
@@ -1255,17 +1326,17 @@ async function projectStats(p){
       const canonDecisions=state&&state.canonLock&&Array.isArray(state.canonLock.blockers)
         ? state.canonLock.blockers.length : 0;
       if(canonDecisions){
-        return {completion:0,decisions:canonDecisions,artwork:null,
+        return {completion:0,decisions:canonDecisions,outcome:"review",artwork:null,
                 activity:canonDecisions+" Story & Direction decision"+(canonDecisions==1?"":"s")+" waiting",
                 scenes:(candidate.scenes||[]).length};
       }
       if(intake&&intake.hasCandidate&&intake.candidateCurrent&&!intake.canonicalCurrent){
-        return {completion:0,decisions:1,artwork:null,
+        return {completion:0,decisions:1,outcome:"review",artwork:null,
                 activity:"Story & Direction review waiting",
                 scenes:(candidate.scenes||[]).length};
       }
       if(intake&&intake.hasScript){
-        return {completion:0,decisions:0,artwork:null,
+        return {completion:0,decisions:0,outcome:"ready",artwork:null,
                 activity:"Story & Direction is ready to run",
                 scenes:(candidate.scenes||[]).length};
       }
@@ -1290,7 +1361,9 @@ async function projectStats(p){
     const activity=latest
       ? relTime(latest.ended||latest.started)+" · "+_jobGateLabel(latest.gate)+(latest.scene&&latest.scene!="—"?" · Scene "+latest.scene:"")
       : "No activity yet";
-    return {completion:totalStages?Math.round(100*doneStages/totalStages):0, decisions, artwork, activity, scenes:roster.length};
+    const completion=totalStages?Math.round(100*doneStages/totalStages):0;
+    const outcome=completion===100?"complete":decisions?"review":latest&&latest.status==="running"?"working":"ready";
+    return {completion, decisions, outcome, artwork, activity, scenes:roster.length};
   }catch(e){ return {error:true}; }
 }
 function jobFor(kind,scene){
@@ -1700,10 +1773,10 @@ function storyIntakePanelHTML(d){
     <button class="btn ghost" style="margin-left:12px;padding:3px 13px;font-size:11px;background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring('${job.jobId}')">■ Stop</button></div>
     ${gateLog(job)}`:"";
   if(!d)return `<div class="coming">Loading Story & Direction…</div>`;
-  if(d.error)return `<div class="ccpanel"><div style="color:var(--danger)">${_esc(d.error)}</div></div>`;
+  if(d.error)return `<div class="ccpanel">${outcomePanelHTML({tone:"blocked",title:"Story & Direction could not load",body:d.error,actions:[{label:"Retry",onclick:"retryStoryIntake()"},{label:"Episodes",onclick:"goHome()",kind:"secondary"}]})}</div>`;
   if(!d.hasScript){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      <p class="sub">No script registered for this episode yet. Upload one to begin.</p></div>`;
+      ${outcomePanelHTML({tone:"blocked",title:"A script is required",body:"Upload or paste the episode script before Story & Direction can run.",actions:[{label:"Open script workspace",onclick:"go('script')"},{label:"Episodes",onclick:"goHome()",kind:"secondary"}]})}</div>`;
   }
   const skillBadge=d.directorSkillLoaded
     ? `<span style="color:var(--ok)">✓ crystal-bears-director skill loaded</span>`
@@ -1721,8 +1794,8 @@ function storyIntakePanelHTML(d){
       ${canonIssues||`<div style="color:var(--danger)">Canon must be reviewed and explicitly locked before Story &amp; Direction can run.</div>`}
       ${scriptWarnings}
       ${d.hasCandidate?`<p class="sub" style="color:var(--warn);margin-top:10px">The earlier candidate is preserved as evidence, but it cannot be approved against these inputs.</p>`:""}
-      <div class="ccactions"><button class="btn" disabled>Run Story &amp; Direction</button>
-      ${d.hasCandidate?`<button class="btn ghost" onclick="storyIntakeDecide('reject')">Archive the earlier candidate</button>`:""}</div>
+      ${outcomePanelHTML({tone:"blocked",title:"Resolve canon before running",body:"Review the source script and Show Bible, then explicitly re-lock canon.",actions:[{label:"Open Show Bible",onclick:"showBible()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
+      ${d.hasCandidate?`<button class="btn ghost" onclick="storyIntakeDecide('reject','Superseded by the active script and canon lock.')">Archive the earlier candidate</button>`:""}
       </div>`;
   }
   if(d.hasCanonicalPackage&&d.canonicalCurrent){
@@ -1730,7 +1803,8 @@ function storyIntakePanelHTML(d){
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
       <div class="live" style="color:var(--ok)">${canonLine}</div>
       <div class="live" style="color:var(--ok)">✓ Approved — <code>${_esc(d.canonicalPackage)}</code> is the
-      episode's canonical input. The scene/storyboard process is unlocked.</div></div>`;
+      episode's canonical input. The scene/storyboard process is unlocked.</div>
+      ${outcomePanelHTML({tone:"done",title:"Story & Direction approved",body:"The episode scenes are unlocked and ready for production.",actions:[{label:"Open scenes",onclick:"renderSceneBoard()"},{label:"Script",onclick:"go('script')",kind:"secondary"}]})}</div>`;
   }
   const stalePackage=d.hasCanonicalPackage&&!d.canonicalCurrent
     ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it does not match this immutable script and exact canon lock.</div>`:"";
@@ -1739,10 +1813,8 @@ function storyIntakePanelHTML(d){
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
       <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
       ${stalePackage}
-      <p class="sub">Nothing has been generated from this script yet. Uploading and saving a
-      script never runs anything automatically — this is the first, explicit step.</p>
       ${jobBanner}
-      <button class="btn" ${job?"disabled":""} onclick="storyIntakeRun()">Run Story &amp; Direction — read the script, propose the episode</button>
+      ${outcomePanelHTML({tone:job?"working":"ready",title:job?"The Director is working":"Run Story & Direction",body:job?"Stop the current run or wait for its visible candidate.":"Read the active script and propose the episode without generating image, voice or video.",actions:job?[{label:"Stop",onclick:`stopFiring('${job.jobId}')`,kind:"secondary"}]:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
       </div>`;
   }
   if(!d.candidateCurrent){
@@ -1750,10 +1822,8 @@ function storyIntakePanelHTML(d){
       <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
       <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
       ${stalePackage}
-      <div class="live" style="color:var(--warn);margin:10px 0">This candidate is preserved, but it was not authored from the active script and exact current story-canon signature.</div>
       ${jobBanner}
-      <div class="ccactions"><button class="btn" ${job?"disabled":""} onclick="storyIntakeRun()">Run Story &amp; Direction again</button>
-      <button class="btn ghost" onclick="storyIntakeDecide('reject')">Archive stale candidate</button></div>
+      ${outcomePanelHTML({tone:"review",title:"Replace the stale candidate",body:"It remains preserved as evidence, but it cannot be approved against the active script and canon.",actions:[{label:"Run Story & Direction again",onclick:"storyIntakeRun()",disabled:!!job},{label:"Archive stale candidate",onclick:"storyIntakeDecide('reject','Superseded by the active script and canon lock.')",kind:"secondary"}]})}
       </div>`;
   }
   const c=d.candidate, ev=c.episodeVision||{}, cov=c.dialogueCoverage||{}, srcCov=c.sourceEventCoverage||{};
@@ -1793,13 +1863,10 @@ function storyIntakePanelHTML(d){
       ${cov.ok?"✓":"✗"} Dialogue coverage: ${cov.coveredExactly||0}/${cov.totalDialogueLines||0} locked line(s) exact, unchanged, in order.</p>
     <p class="sub" style="color:${srcCov.ok?"var(--ok)":"var(--danger)"}">
       ${srcCov.ok?"✓":"✗"} Script coverage: ${srcCov.coveredExactly||0}/${srcCov.totalSourceEvents||0} action and dialogue event(s) exact, unchanged, in order.</p>
-    ${approved?`<div class="live" style="color:var(--ok)">✓ Approved.</div>`:`
-    <div class="ccactions">
-      <button class="btn" onclick="storyIntakeDecide('approve')">Approve — unlock scene/storyboard process</button>
-      <button class="btn ghost" onclick="storyIntakeDecide('reject')">Reject</button>
-    </div>`}
+    ${approved?outcomePanelHTML({tone:"done",title:"Candidate approved",body:"Scene production is unlocked.",actions:[{label:"Open scenes",onclick:"renderSceneBoard()"}]}):outcomePanelHTML({tone:"review",title:"Choose the Story & Direction outcome",body:"Approve to unlock the scene process, or reject with one clear revision note.",actions:[{label:"Approve",onclick:"storyIntakeDecide('approve')"},{label:"Reject",onclick:"storyIntakeDecide('reject')",kind:"secondary"}]})}
     </div>`;
 }
+async function retryStoryIntake(){SH_STORY_INTAKE=null;await fetchStoryIntake();renderBoardBody();}
 let SB_STORY_POLL=null;
 function _sbStoryPollStart(){
   if(SB_STORY_POLL)return;
@@ -1831,8 +1898,8 @@ async function storyIntakeRun(){
     renderBoardBody();
   }catch(e){alert("Can't reach the studio server.");}
 }
-async function storyIntakeDecide(verdict){
-  let note="";
+async function storyIntakeDecide(verdict,presetNote){
+  let note=presetNote||"";
   if(verdict=="reject"){ note=prompt("One-sentence reason for rejecting this candidate:")||""; if(!note.trim())return; }
   try{
     const r=await fetch(BASE+"/api/story-intake-decide",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -1863,7 +1930,7 @@ function renderBoardBody(){
     `<button class="filterchip ${BOARD_FILTER==k?'active':''}" onclick="BOARD_FILTER='${k}';renderBoardBody()">${_esc(label)}${counts[k]?` <span class="fc">${counts[k]}</span>`:''}</button>`).join("")}</div>`;
   el.className="";
   el.innerHTML=bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
-                                :`<div class="coming">No scenes match this filter.</div>`);
+                                :outcomePanelHTML({title:"No scenes match this filter",body:"Clear the filter to return to every available production outcome.",actions:[{label:"Show all scenes",onclick:"BOARD_FILTER='all';renderBoardBody()"}]}));
 }
 function sceneCardHTML(s){
   const active=nextReadyStage(s.stages);
@@ -1878,7 +1945,7 @@ function sceneCardHTML(s){
     : (active=="storyboard"&&(s.stages.storyboard||{}).state=="ready") ? "Ready for Story & Direction"
     : "Review "+activeName.toLowerCase();
   const dotColor=STATE_COLOR[(s.stages[active]||{}).state||"ready"];
-  return `<div class="scenecard" onclick="openScene('${s.scene}')">
+  return `<article class="scenecard">
     <div class="scenecard-thumb">${s.latestFrame?`<img src="${BASE}${s.latestFrame}?v=${MEDIA_V}"/>`:`<div class="scenecard-noimg">No frame yet</div>`}
       <span class="scenecard-dot" style="background:var(${dotColor})"></span></div>
     <div class="scenecard-body">
@@ -1886,7 +1953,7 @@ function sceneCardHTML(s){
       <div class="scenecard-stages">${stageRows}</div>
       <button class="btn" style="width:100%;margin-top:12px" onclick="event.stopPropagation();${active=="script"?"go('script')":`openScene('${s.scene}')`}">${_esc(ctaLabel)}</button>
     </div>
-  </div>`;
+  </article>`;
 }
 function openScene(scene){
   SH_SC=String(scene); SH_PKG=null; SH_MEDIA=null; PSB=null; PSHOT_I=0; PSTAGE=null;
@@ -1918,6 +1985,60 @@ function pStatusSub(id){ try{ return currentStages()[id].sub||null; }catch(e){ r
 function pActiveStage(){ return nextReadyStage(currentStages()); }
 function pFocusedStage(){ return (PSTAGE&&pStatus(PSTAGE)!="locked")?PSTAGE:pActiveStage(); }
 function pFocusStage(id){ if(pStatus(id)=="locked")return; PSTAGE=(PSTAGE==id?null:id); renderWorkspaceBody(); _syncHash(); }
+function openStageOutcome(id){
+  if(!PSTAGES.some(s=>s.id===id))id=pActiveStage();
+  if(pStatus(id)==="locked")id=pActiveStage();
+  PSTAGE=id;renderWorkspaceBody();_syncHash();
+}
+function prerequisiteStage(id){
+  const idx=PSTAGES.findIndex(s=>s.id===id);
+  for(let i=idx-1;i>=0;i--){const st=pStatus(PSTAGES[i].id);if(st!=="approved"&&st!=="locked")return PSTAGES[i].id;}
+  return idx>1?PSTAGES[idx-1].id:"storyboard";
+}
+function defaultDecisionAction(){
+  const current=pFocusedStage(), state=pStatus(current), idx=PSTAGES.findIndex(s=>s.id===current);
+  if(current==="final"&&state==="approved")return {label:"Back to all scenes",onclick:"backToBoard()",kind:"secondary"};
+  if(state==="blocked"||state==="rejected"){
+    const target=prerequisiteStage(current), name=(PSTAGES.find(s=>s.id===target)||{}).name||"required step";
+    if(target===current)return {label:"Open episode outcome",onclick:"backToBoard()"};
+    return {label:"Resolve in "+name,onclick:`openStageOutcome('${target}')`};
+  }
+  for(let i=idx+1;i<PSTAGES.length;i++){
+    const target=PSTAGES[i];if(pStatus(target.id)!=="locked")return {label:"Continue to "+target.name,onclick:`openStageOutcome('${target.id}')`};
+  }
+  const active=pActiveStage(), name=(PSTAGES.find(s=>s.id===active)||{}).name||"production";
+  if(active===current)return {label:"Back to all scenes",onclick:"backToBoard()",kind:"secondary"};
+  return {label:"Open "+name,onclick:`openStageOutcome('${active}')`};
+}
+function openPreviousShotOutcome(stage){
+  if(PSHOT_I>0){PSHOT_I--;PSTAGE=stage;renderWorkspaceBody();_syncHash();return;}
+  openStageOutcome(prerequisiteStage(stage));
+}
+function openShotOutcome(stage,index){
+  const shots=pShots();
+  PSHOT_I=Math.max(0,Math.min(Number(index)||0,Math.max(0,shots.length-1)));
+  PSTAGE=stage;renderWorkspaceBody();_syncHash();
+}
+function focusShotReview(index){
+  openShotOutcome("continuity",index);
+  setTimeout(()=>{const panel=document.querySelector("#wdecision .deptpanel");if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});},0);
+}
+function focusDepartmentOutcome(){
+  const panel=document.querySelector("#wdecision .deptpanel");
+  if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function shotResolutionAction(pst,tok){
+  const current=(pst&&pst.current)||{};
+  if(!pst||pst.label==="Production state unavailable")return {label:"Refresh scene state",onclick:"renderControl()"};
+  if(pst.sceneLookGated)return {label:"Open Look Development",onclick:"openStageOutcome('scenelook')"};
+  if(pst.kf==="waitingPrev")return {label:"Resolve the previous shot",onclick:"openPreviousShotOutcome('animation')"};
+  if(pst.needsKeyframe&&!current.keyframe)return {label:"Open Cinematography",onclick:"openStageOutcome('keyframe')"};
+  if(pst.talky&&!current.voice)return {label:"Open Voice & Timing",onclick:"openStageOutcome('voice')"};
+  if(!current.animationDirection||["model-limited","stale","stale-batch"].includes(pst.animState)){
+    return {label:"Prepare replacement Animation direction",onclick:`deptRun('animation','${tok}')`};
+  }
+  return {label:"Refresh this shot",onclick:"renderControl()"};
+}
 function pShots(){
   if(SH_STATE&&SH_STATE.packageCurrent===false)return [];
   return (SH_PKG&&SH_PKG.shots)||[];
@@ -1925,6 +2046,12 @@ function pShots(){
 function pSceneName(){
   const r=(SCENE_ROSTER||[]).find(s=>s.scene==SH_SC);
   return (r&&r.name)||(SH_PKG&&SH_PKG.sceneName)||(PSB&&PSB.scene&&PSB.scene.location)||("Scene "+SH_SC);
+}
+function needsEpisodeStoryDirection(){
+  const codes=((SH_STATE&&SH_STATE.lineage&&SH_STATE.lineage.reasonCodes)||[]).map(String);
+  const blockers=(SH_STATE&&SH_STATE.blockers)||[];
+  return codes.includes("story-intake-not-approved")||
+    blockers.some(x=>x&&x.code==="STORY_INTAKE_APPROVAL_REQUIRED");
 }
 
 function renderStageRail(){
@@ -1935,10 +2062,10 @@ function renderStageRail(){
     const st=stages[s.id].state;
     const cls=[st=="locked"?"locked":"", st=="approved"?"done":"", (st=="rejected"||st=="blocked")?"rejected":"",
                focused==s.id?"active":""].filter(Boolean).join(" ");
-    parts.push(`<div class="pstage ${cls}" onclick="pFocusStage('${s.id}')" title="${_esc(STATE_LABEL[st])}">
+    parts.push(`<button type="button" class="pstage ${cls}" onclick="pFocusStage('${s.id}')" title="${_esc(STATE_LABEL[st])}" ${st==="locked"?'disabled aria-disabled="true"':''}>
       <div class="pglyph">${STATE_GLYPH[st]}</div><div class="pname">${_esc(s.name)}</div>
       <div class="pstate" style="color:var(${STATE_COLOR[st]})">${_esc(STATE_LABEL[st])}</div>
-    </div>`);
+    </button>`);
     if(i<PSTAGES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
   });
   return `<div class="prail">${parts.join("")}</div>`;
@@ -1949,7 +2076,7 @@ async function renderControl(){
   view.innerHTML=`<div class="coming">Loading scene…</div>`;
   await pLoadAll();
   view.innerHTML=`<div class="wtop">
-      <a class="backlink" onclick="backToBoard()">← All scenes</a>
+      <button type="button" class="backlink" onclick="backToBoard()">← All scenes</button>
       <span class="wtop-crumb">${_esc((CUR&&CUR.title)||"Episode "+(CUR&&CUR.number))}</span>
       <span class="wtop-sel">${sceneSelectorHTML()}</span>
     </div>
@@ -1967,10 +2094,12 @@ function renderPreflightBanner(){
   const p=SH_PREFLIGHT;if(!p||p.error){el.innerHTML="";return;}
   if(p.ok){el.innerHTML=`<div style="border:1px solid var(--ok);background:var(--okbg);border-radius:8px;padding:10px 12px;margin-bottom:12px;color:var(--ok)">✓ Production preflight passed — all known inputs are current. ${_esc(p.nextAction||"")}</div>`;return;}
   const blockers=p.blockers||[], first=blockers.slice(0,4);
+  const target=(first[0]&&first[0].stage)||pActiveStage();
   el.innerHTML=`<div style="border:1px solid var(--warn);background:var(--warnbg);border-radius:8px;padding:10px 12px;margin-bottom:12px">
     <b style="color:var(--warn)">Production readiness — ${blockers.length} blocker${blockers.length==1?"":"s"} found together</b>
     <div style="margin-top:6px;color:var(--ink)">${first.map(x=>`<div>• ${_esc(x.shotId?x.shotId+": ":"")}${_esc(x.message)}</div>`).join("")}</div>
     <div style="margin-top:7px"><b>Next:</b> ${_esc(p.nextAction||"")}</div>
+    <button type="button" class="btn" style="margin-top:9px" onclick="openStageOutcome('${_esc(target)}')">Open required step</button>
     ${blockers.length>4?`<details style="margin-top:6px"><summary>Show all blockers</summary><div style="margin-top:6px">${blockers.map(x=>`<div>• ${_esc(x.stage)}${x.shotId?" · "+_esc(x.shotId):""}: ${_esc(x.message)} — ${_esc(x.action)}</div>`).join("")}</div></details>`:""}
   </div>`;
 }
@@ -2106,12 +2235,12 @@ function sceneContentsHTML(){
       return `<div class="wtree-beat"><div class="wtree-beat-id">${_esc(b.beatId)}</div>
         ${bshots.length?bshots.map(s=>{
           const i=shots.indexOf(s);
-          return `<div class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></div>`;
+          return `<button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button>`;
         }).join(""):`<div class="wtree-shot dim">no shot yet</div>`}
       </div>`;
     }).join("");
   }
-  return shots.map((s,i)=>`<div class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></div>`).join("");
+  return shots.map((s,i)=>`<button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button>`).join("");
 }
 
 async function renderWorkspaceBody(){
@@ -2127,7 +2256,8 @@ async function renderWorkspaceBody(){
   shEnsureAgentSelection();
   const stage=pFocusedStage();
   if(pStatus(stage)=="locked"){
-    el.innerHTML=`<div class="wcol wcol-full"><div class="locked-msg">Waiting for the previous creative decision.</div></div>`;
+    const action=defaultDecisionAction();
+    el.innerHTML=`<div class="wcol wcol-full">${outcomePanelHTML({tone:"blocked",title:"A previous decision is required",body:"This stage remains protected until its prerequisite has an explicit outcome.",actions:[action,{label:"All scenes",onclick:"backToBoard()",kind:"secondary"}]})}</div>`;
     return;
   }
   if(stage=="script"){
@@ -2158,10 +2288,17 @@ function renderStoryboardStage(){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   if(!PSB){
     const st=pStatus("storyboard"), sub=pStatusSub("storyboard");
+    const episodeDirection=needsEpisodeStoryDirection();
     art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">Nothing drafted yet for this scene.</div></div>`;
     const actions=st=="ready"
-      ?[`<button class="btn" onclick="pFireCreative()">Draft the storyboard</button>`]
-      :[`<span class="dec-caption">${badge(st,sub)}</span>`];
+      ?[episodeDirection
+        ?`<button class="btn" onclick="backToBoard()">Run episode Story &amp; Direction</button>`
+        :`<button class="btn" onclick="pFireCreative()">Draft the storyboard</button>`]
+      :st=="generating"
+        ?[`<span class="dec-caption">${badge(st,sub)}</span>`,`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`]
+        :[`<span class="dec-caption">${badge(st,sub)}</span>`,
+          `<button class="btn" onclick="backToBoard()">Open episode Story &amp; Direction</button>`,
+          `<button class="btn ghost" onclick="showBible()">Open Show Bible</button>`];
     dec.innerHTML=decisionShell("Storyboard","—",actions,"");
     return;
   }
@@ -2190,6 +2327,14 @@ function renderStoryboardStage(){
         <button class="btn" onclick="pStoryboardDecide('approved')">✓ Approve</button>
         <button class="btn ghost" onclick="pStoryboardDecide('rejected')">✗ Reject</button>
       </div>`];
+  } else if(st=="approved"){
+    actions=[`<span class="dec-caption">${badge("approved")}</span>`,
+      `<button class="btn" onclick="openStageOutcome('scenelook')">Continue to Look Development</button>`];
+  } else if(st=="generating"){
+    actions=[`<span class="dec-caption">${badge(st)}</span>`,`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`];
+  } else {
+    actions=[`<span class="dec-caption">${badge(st,pStatusSub("storyboard"))}</span>`,
+      `<button class="btn" onclick="backToBoard()">Resolve episode Story &amp; Direction</button>`];
   }
   dec.innerHTML=decisionShell("Storyboard", "v"+(PSB.candidateProvenance&&PSB.candidateProvenance.revision||"1"), actions, history);
   dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptperson"><div class="deptavatar">D</div><div>
@@ -2280,10 +2425,12 @@ function renderSceneLookStage(){
 
 // ── shared decision-panel shell: every stage speaks the same language ──
 function decisionShell(title,version,actionsHTML,historyHTML){
+  const actions=(actionsHTML||[]).filter(Boolean);
+  if(!actions.some(x=>/<(?:button|a)\b/i.test(x)))actions.push(actionButtonHTML(defaultDecisionAction()));
   return `<div class="wcol-head">Decision</div>
     <div class="dec-title">${_esc(title)}</div>
     <div class="dec-version">${_esc(version)}</div>
-    <div class="dec-actions">${(actionsHTML||[]).join("")}</div>
+    <div class="dec-actions">${actions.join("")}</div>
     ${historyHTML?`<details class="dec-history"><summary>View history</summary>${historyHTML}</details>`:""}`;
 }
 
@@ -2568,7 +2715,8 @@ function renderShotStage(mode){
   if(!shots.length){
     art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">Nothing designed yet for this scene.</div></div>`;
     dec.innerHTML=decisionShell(PSTAGES.find(p=>p.id==(mode=="keyframe"?"keyframe":mode)).name,"—",
-      [`<div class="dec-caption">Approve the Story & Direction department's storyboard to hand it directly into production.</div>`],"");
+      [`<div class="dec-caption">Approve the Story & Direction department's storyboard to hand it directly into production.</div>`,
+       `<button class="btn" onclick="openStageOutcome('storyboard')">Open Story &amp; Direction</button>`],"");
     return;
   }
   if(PSHOT_I>=shots.length)PSHOT_I=shots.length-1;
@@ -2591,11 +2739,12 @@ function renderShotStage(mode){
     // block left is the production package not existing yet at all.
     const sceneKf=currentStages().keyframe||{state:"ready"};
     const genBtn=(label)=>`<button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${tok}',refs:(${JSON.stringify((s.referenceSlots||[]).length||3)})})">${label}</button>`;
-    if(sceneKf.state=="blocked"){
+    if(sceneKf.state=="blocked"&&!(SH_STATE&&SH_STATE.packageCurrent)){
       body=`<div class="artefact-empty"><div style="color:var(--muted)">Preparing the approved storyboard for production</div></div>`;
       decVersion="Blocked — not yet compiled";
       decActions=[`<div class="histrow"><span class="stbadge" style="color:var(--warn);background:var(--warnbg)">Production handover</span>
-          <div class="histnote">${_esc(sceneKf.sub||"The production package has not been compiled yet.")}</div></div>`];
+          <div class="histnote">${_esc(sceneKf.sub||"The production package has not been compiled yet.")}</div></div>`,
+          `<button class="btn" onclick="backToBoard()">Resolve Story &amp; Direction handover</button>`];
     } else {
       const mediaMap=(SH_MEDIA&&SH_MEDIA.shots)||{};
       const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
@@ -2607,10 +2756,17 @@ function renderShotStage(mode){
         // readiness is paused pending Scene Look's own approval.
         body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
         decVersion=pst.label;
+        decActions=[`<button class="btn" onclick="openStageOutcome('scenelook')">Open Look Development</button>`];
       } else if(pst.kf=="waitingPrev"){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
+        decVersion=pst.label;
+        decActions=[`<button class="btn" onclick="openPreviousShotOutcome('animation')">Resolve the previous shot</button>`];
       } else if(!pst.needsKeyframe){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">Opening frame inherited — no generation and no cost. Chains from the previous shot's own approved final frame, no separate keyframe.</div></div>`;
+        decVersion="Opening frame inherited";
+        decActions=[actionButtonHTML(pst.talky&&!((pst.current||{}).voice)
+          ?{label:"Continue to Voice & Timing",onclick:"openStageOutcome('voice')"}
+          :{label:"Continue to Animation",onclick:"openStageOutcome('animation')"})];
       } else if(pst.kf=="awaiting"){
         // SELECTION DOES NOT EQUAL APPROVAL (2026-07-18, Julian's source-choice directive):
         // this is the ONE approval area for every opening-frame source alike — generated,
@@ -2634,14 +2790,18 @@ function renderShotStage(mode){
         body=`<img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · keyframe" src="${BASE}${m.keyframe}?v=${MEDIA_V}"/>
           <div class="dec-caption" style="margin-top:16px">Replace this opening frame:</div>${shOpeningFrameChoices(tok,s)}`;
         decVersion="Approved";
-        decActions=[`<span class="dec-caption">${badge("approved")}</span>`];
+        const nextKf=shots.findIndex((shot,i)=>i!=PSHOT_I&&(()=>{const state=shotPipelineState(shots,i),cur=state.current||{};return state.needsKeyframe&&!cur.keyframe;})());
+        decActions=[`<span class="dec-caption">${badge("approved")}</span>`,nextKf>=0
+          ?`<button class="btn" onclick="openShotOutcome('keyframe',${nextKf})">Open next unresolved keyframe</button>`
+          :`<button class="btn" onclick="openStageOutcome('animation')">Continue to Animation</button>`];
       } else if(pst.kf=="rejected"){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected — see History below. Ready to regenerate.</div></div>${shOpeningFrameChoices(tok,s)}`;
+        body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected — see History below. Choose the replacement source.</div></div>`;
         decVersion="Rejected";
-        decActions=[];
+        decActions=[shOpeningFrameChoices(tok,s)];
       } else {   // "ready" (or "staleInputs" falling through) — THE OPENING-FRAME SOURCE CHOICE
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>${shOpeningFrameChoices(tok,s)}`;
-        decActions=[];
+        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
+        decVersion=pst.label;
+        decActions=[shOpeningFrameChoices(tok,s)];
       }
     }
     // HISTORY IS UNCONDITIONAL AND INDEPENDENT OF THE CURRENT STATE (2026-07-17): a past
@@ -2703,6 +2863,10 @@ function renderShotStage(mode){
       body += `<div class="dec-caption" style="margin-top:14px">The paid path uses only the approved Voice specialist performance above. Legacy working-prompt overrides are disabled for production.</div>`;
     } else {
       body=`${slatePanel}<div class="artefact-empty"><div style="color:var(--muted)">No dialogue in this shot. Its duration still appears in the scene timing slate.</div></div>`;
+      decVersion=slateCurrent?"Silent timing is current":"Silent timing slate required";
+      decActions=[slateCurrent
+        ?`<button class="btn" onclick="openStageOutcome('keyframe')">Continue to Cinematography</button>`
+        :`<button class="btn" onclick="shRun('animatic')">Build silent timing slate — local, no media provider</button>`];
     }
   } else { // animation
     const stLabel=led.status||"designed";
@@ -2716,10 +2880,15 @@ function renderShotStage(mode){
     } else if(m.clip||m.finalFrame){
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
       decVersion="Approved take";
-      decActions=[`<span class="dec-caption">${badge("approved")}</span>`];
+      const nextAnim=shots.findIndex((shot,i)=>i!=PSHOT_I&&!((shotPipelineState(shots,i).current||{}).animation));
+      decActions=[`<span class="dec-caption">${badge("approved")}</span>`,nextAnim>=0
+        ?`<button class="btn" onclick="openShotOutcome('animation',${nextAnim})">Open next unfinished shot</button>`
+        :`<button class="btn" onclick="openStageOutcome('continuity')">Continue to Director Review</button>`];
     } else if(stLabel=="model-limited"){
       body=`<div class="artefact-empty"><div style="color:var(--danger)">Two batches rejected — this shot needs human redesign before firing again.</div></div>`;
-      decVersion="Blocked"; decActions=[];
+      decVersion="Blocked";
+      decActions=[`<button class="btn" onclick="deptRun('animation','${tok}')">Redesign with Animation Director — no media spend</button>`,
+        `<button class="btn ghost" onclick="openStageOutcome('storyboard')">Review Story &amp; Direction</button>`];
     } else {
       // PER-SHOT GATE (2026-07-18 correction): Animation unlocks INDEPENDENTLY for each
       // shot — an approved keyframe/inherited frame + this shot's own required voice +
@@ -2729,7 +2898,7 @@ function renderShotStage(mode){
       const pst=shotPipelineState(shots,PSHOT_I,shLedger,mediaMap,lineageOk,shSceneLookOk(),shReassess,SH_PKG&&SH_PKG.revision);
       if(!pst.readyToAnimate){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
-        decVersion=pst.label; decActions=[];
+        decVersion=pst.label; decActions=[actionButtonHTML(shotResolutionAction(pst,tok))];
       } else {
         body=`<div class="artefact-empty"><div style="color:var(--muted)">No candidates fired yet for ${_esc(s.shotId)}.</div></div>`;
         const nextLed=shNextLedger(), auth=(nextLed&&nextLed.pendingSpendAuth)||null;
@@ -2871,7 +3040,7 @@ function openAnimationConfirmModal(shotId){
   document.getElementById("modal").classList.add("show");
 }
 
-// ── CONTINUITY — report-only comparison, outgoing frame vs the next shot's incoming frame ──
+// ── DIRECTOR REVIEW — outgoing frame vs the next shot's incoming frame, one outcome per shot ──
 function renderContinuityStage(){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   const shots=pShots();
@@ -2886,18 +3055,22 @@ function renderContinuityStage(){
   }).join("");
   art.innerHTML=`<div class="artefact-center" style="text-align:left;overflow:auto">
     <div style="color:var(--muted);margin-bottom:14px">Each shot's outgoing frame beside the next shot's incoming frame.</div>${rows}</div>`;
-  // 2026-07-18 correction: this used to say continuity is "verified once EVERY shot in
-  // Animation is approved" — a scene-wide claim from the old all-or-nothing lock. Continuity
-  // is now read PER SHOT (see shotPipelineState) — a given shot reads "complete" the moment
-  // its OWN Animation is approved, independent of any other shot's own progress.
+  // Director Review is recorded per shot. The stage opens after every current animation take
+  // exists, then advances each take through its own explicit review outcome.
   const per=(SH_PKG&&SH_PKG.shots||[]).map((s,i)=>{
     const mediaMap=(SH_MEDIA&&SH_MEDIA.shots)||{};
     const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
     return shotPipelineState(SH_PKG.shots,i,shLedger,mediaMap,lineageOk,shSceneLookOk(),null,SH_PKG&&SH_PKG.revision);
   });
   const completeN=per.filter(p=>p.label=="Complete").length;
+  const incompleteI=per.findIndex(p=>!((p.current||{}).continuity));
+  const continuityAction=!per.length
+    ?`<button class="btn" onclick="openStageOutcome('storyboard')">Open Story &amp; Direction</button>`
+    :incompleteI>=0
+      ?`<button class="btn" onclick="focusShotReview(${incompleteI})">Review ${_esc((shots[incompleteI]||{}).shotId||"next shot")}</button>`
+      :`<button class="btn" onclick="openStageOutcome('final')">Continue to Final Master</button>`;
   dec.innerHTML=decisionShell("Continuity", completeN+" of "+per.length+" complete",
-    [`<div class="dec-caption">Nothing to approve separately here — a shot's continuity reads complete the moment its own Animation is approved, independent of every other shot in the scene.</div>`],"");
+    [`<div class="dec-caption">Director Review must record an outcome for every current animation take before the final master can be built.</div>`,continuityAction],"");
   const rs=shots[Math.min(PSHOT_I,Math.max(0,shots.length-1))];
   if(rs){const rm=shMedia(rs.shotId),reviewStage=(rm.clip||rm.finalFrame)?"review-animation":"review-keyframe";
     if(rm.clip||rm.finalFrame||rm.keyframe)attachDepartmentPanel(dec,reviewStage,rs.shotId);
@@ -2917,12 +3090,32 @@ function renderFinalStage(){
       .filter(([k])=>post[k]).map(([k,label])=>`<a class="btn ghost" href="${BASE}${post[k]}" download>${_esc(label)}</a>`).join("");
     art.innerHTML=`<div class="artefact-center"><video controls src="${BASE}${SH_MEDIA.picture}?v=${MEDIA_V}"></video>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn ghost" href="${BASE}${SH_MEDIA.picture}" download>16:9 master</a>${links}</div></div>`;
+    let finalActions=[];
+    if(finalState.state=="approved"){
+      finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
+        `<button class="btn" onclick="backToBoard()">Back to all scenes</button>`];
+    } else if(finalState.state=="awaiting"){
+      finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
+        `<button class="btn" onclick="focusDepartmentOutcome()">Approve or reject the final review</button>`];
+    } else if(finalState.state=="blocked"){
+      finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
+        `<button class="btn" onclick="shRun('stitch')">Rebuild current post master</button>`];
+    } else if(finalState.state=="generating"){
+      finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
+        `<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`];
+    } else {
+      finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`,
+        `<button class="btn" onclick="deptRun('review-final','')">Prepare Final &amp; Post review — no media spend</button>`];
+    }
     dec.innerHTML=decisionShell("Final Master",post.candidate?"QC passed · awaiting approval":"Approved delivery master",
-      [`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`],"");
+      finalActions,"");
   } else {
     art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(finalState.sub||`Approved shots: ${nAppr}/${leds.length}`)}</div></div>`;
-    const build=finalState.state=="ready"?`<button class="btn" onclick="shRun('stitch')">Build post master</button>`:`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`;
-    dec.innerHTML=decisionShell("Final Master","Conform · mix · captions · delivery QC",[build],"");
+    let finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`];
+    if(finalState.state=="ready"||finalState.state=="blocked")finalActions.push(`<button class="btn" onclick="shRun('stitch')">${finalState.state=="blocked"?"Rebuild current":"Build"} post master</button>`);
+    else if(finalState.state=="generating")finalActions.push(`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`);
+    else finalActions.push(`<button class="btn" onclick="openStageOutcome('continuity')">Resolve in Director Review</button>`);
+    dec.innerHTML=decisionShell("Final Master","Conform · mix · captions · delivery QC",finalActions,"");
   }
   if(has)attachDepartmentPanel(dec,"review-final",null);
   else dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptperson"><div class="deptavatar">PS</div><div>
@@ -3310,9 +3503,9 @@ async function slLibrary(){
   const body=groups.length?groups.map(([label,opts])=>`
       <div class="dec-caption" style="margin:14px 0 8px;font-weight:600">${_esc(label)}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
-        ${opts.map(o=>`<div onclick="slLibraryPick('${_esc(o.file).replace(/'/g,"\\'")}')" style="cursor:pointer">
+        ${opts.map(o=>`<button type="button" aria-label="Use ${_attr(o.name)}" onclick="slLibraryPick('${_esc(o.file).replace(/'/g,"\\'")}')" style="font:inherit;color:inherit;text-align:left;background:none;border:0;padding:0;cursor:pointer">
           <div style="aspect-ratio:16/9;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--line)"><img src="${BASE}/${_esc(o.file)}?v=${MEDIA_V}" style="width:100%;height:100%;object-fit:cover"/></div>
-          <div style="font-size:11px;color:var(--hint);text-align:center;margin-top:4px">${_esc(o.name)}</div></div>`).join("")}
+          <div style="font-size:11px;color:var(--hint);text-align:center;margin-top:4px">${_esc(o.name)}</div></button>`).join("")}
       </div>`).join("")
     : `<div class="artefact-empty"><div style="color:var(--muted)">No location, house or uploaded scene references exist yet — add one from the Scenes or Houses tab.</div></div>`;
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
@@ -3451,7 +3644,7 @@ async function renderBible(){
   const chars=Object.entries(C).filter(([k,v])=>k[0]!=="_"&&v&&typeof v==="object"&&!Array.isArray(v)&&k!=="sizeClasses");
   const lockChars=Object.fromEntries((L.characters||[]).map(x=>[x.name,x]));
   const url=p=>p?BASE+"/"+String(p).replace(/^\.\.\//,"")+"?v="+Date.now():"";
-  const chip=([name,c])=>{const row=lockChars[name]||{},ready=!!row.productionReady;return `<div onclick='openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})' style="cursor:pointer;width:118px;text-align:center" title="Open ${name}'s bible page"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;border:2px solid ${ready?'var(--ok)':'var(--warn)'}">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="font-size:12px;font-weight:600;margin-top:4px">${_esc(name)}</div><div style="font-size:10px;color:${ready?'var(--ok)':'var(--warn)'}">${ready?'Locked':_esc(row.status||'Incomplete')}</div>${(c.bible&&c.bible.pillar)?`<div style="font-size:10px;color:var(--hint);line-height:1.3">${_esc(c.bible.pillar)}</div>`:''}</div>`};
+  const chip=([name,c])=>{const row=lockChars[name]||{},ready=!!row.productionReady;return `<button type="button" onclick='openCharacter(${JSON.stringify(name).replace(/'/g,"&#39;")})' style="font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;width:118px;text-align:center" title="Open ${_attr(name)}'s bible page"><div style="aspect-ratio:3/4;background:var(--surface2);border-radius:8px;overflow:hidden;border:2px solid ${ready?'var(--ok)':'var(--warn)'}">${c.anchor?`<img src="${url(c.anchor)}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="font-size:12px;font-weight:600;margin-top:4px">${_esc(name)}</div><div style="font-size:10px;color:${ready?'var(--ok)':'var(--warn)'}">${ready?'Locked':_esc(row.status||'Incomplete')}</div>${(c.bible&&c.bible.pillar)?`<div style="font-size:10px;color:var(--hint);line-height:1.3">${_esc(c.bible.pillar)}</div>`:''}</button>`};
   const readyCount=(L.characters||[]).filter(x=>x.productionReady).length;
   const stubs=(L.characters||[]).filter(x=>x.status==="stub").map(x=>x.name);
   const issues=[...(L.blockers||[]),...(L.episodeBlockers||[])];
@@ -3495,7 +3688,7 @@ _restoreFromHash().then(restored=>{
 });
 </script>
 <div id="lightbox" onclick="if(event.target.id==='lightbox')closeLightbox()">
-  <span id="lbclose" onclick="closeLightbox()" title="Close (Esc)">✕</span>
+  <button type="button" id="lbclose" onclick="closeLightbox()" title="Close (Esc)" aria-label="Close image">✕</button>
   <img id="lbimg" src="" alt="" onclick="lbToggleZoom(event)"/>
   <div id="lbcap"><span id="lbcaptxt"></span><a id="lborig" href="#" target="_blank" rel="noopener">open original ↗</a></div>
 </div>

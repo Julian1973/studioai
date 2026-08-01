@@ -1585,10 +1585,19 @@ class H(http.server.SimpleHTTPRequestHandler):
                         if not isinstance(sc, dict):
                             continue
                         plate = f"Ep1_S{scn}_plate.png"
+                        configured_master = sc.get("master")
+                        master_path = (
+                            ROOT / str(configured_master or "").lstrip("/"))
+                        master_path = master_path.resolve()
+                        master_exists = bool(
+                            configured_master and master_path.is_relative_to(ROOT) and
+                            master_path.is_file())
                         scenes.append({"scene": scn, "name": sc.get("name", ""), "locationId": sc.get("locationId", ""),
                                        "location": sc.get("location", ""), "look": sc.get("look", ""),
                                        "time": sc.get("time", ""), "weather": sc.get("weather", ""),
-                                       "master": sc.get("master"),
+                                       "master": configured_master if master_exists else None,
+                                       "masterConfigured": configured_master,
+                                       "masterMissing": bool(configured_master and not master_exists),
                                        "shots": sc.get("shots") or [],
                                        "plate": (plate if (MEDIA / plate).exists() else None)})
             except Exception:

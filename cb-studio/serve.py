@@ -50,6 +50,7 @@ if PUBLIC_ORIGIN:
 else:
     PUBLIC_HOST = ""
     PUBLIC_PORT = None
+SERVER_KEY = f"{BIND_HOST}:{PORT}|{PUBLIC_ORIGIN or 'loopback'}"
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
 SESSION_TOKEN = secrets.token_urlsafe(32)
 SESSION_COOKIE = "cb_studio_session"
@@ -342,6 +343,24 @@ def reindex_episodes():
 # ---- pipeline driver: fire/approve gates via cb_pipeline (renders run in a background thread) ----
 JOBS = {}  # jobId -> {jobId, scene, gate, status, log, started, ended}
 PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid-run)
+_JOB_LOCK = threading.RLock()
+
+
+def _persist_job(job, required=False):
+    """Write a thread-safe snapshot of one job to the durable Studio ledger."""
+    with _JOB_LOCK:
+        snapshot = dict(job)
+    try:
+        cb_db.persist_job(ROOT, snapshot)
+    except Exception as exc:
+        print(f"STUDIO JOB PERSISTENCE ERROR - {snapshot.get('jobId')}: {exc}", flush=True)
+        if required:
+            raise
+
+
+def _jobs_snapshot():
+    with _JOB_LOCK:
+        return {job_id: dict(job) for job_id, job in JOBS.items()}
 
 # ADDED 2026-07-12 (full-codebase audit continued, alongside the _freshness_watch fix above): PROCS only ever
 # tracked async render jobs, never a synchronous request thread doing real work of its own (a blocking
@@ -634,25 +653,30 @@ def _stream(jobId, args):
     """Run cb_pipeline streaming, so the job's current STEP is live (not blank until it finishes)."""
     job = JOBS[jobId]
     try:
-        p = subprocess.Popen(["python3"] + args, cwd=str(CBGEN),
-                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
-                             stdin=subprocess.DEVNULL,   # THE STDIN-INHERITANCE BUG (2026-07-07, found while
-                             # building the Studio shots editor): without this, every render/regen/fire spawned
-                             # from here inherited serve.py's own stdin — if anything in the child's import chain
-                             # ever reads stdin, it hangs until the caller's own timeout (or forever, for this
-                             # streaming path, which sets none). Confirmed live: /api/beat-prompt's own subprocess
-                             # (same missing-stdin pattern) reproducibly hung ~40s when spawned from the running
-                             # server, but ran in <0.5s invoked directly from a terminal — the server's own stdin
-                             # is what differs. Swept to every subprocess.run/Popen call in this file (rule 11).
-                             start_new_session=True)   # own process group, so STOP kills the gate + every render it spawns
-        PROCS[jobId] = p; job["pid"] = p.pid
-        lines = []; _last_reindex = 0.0
+        with _JOB_LOCK:
+            if job.get("stopped"):
+                job["status"] = "stopped"
+                job["step"] = "Stopped by user."
+                return
+            p = subprocess.Popen(["python3", "-u"] + args, cwd=str(CBGEN),
+                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 text=True, bufsize=1, stdin=subprocess.DEVNULL,
+                                 # Own process group, so STOP kills the gate and every
+                                 # render child it spawns without inheriting server stdin.
+                                 start_new_session=True)
+            PROCS[jobId] = p
+            job["pid"] = p.pid
+        _persist_job(job)
+        lines = []
+        _last_reindex = 0.0
+        _last_persist = 0.0
         for line in p.stdout:
             line = line.rstrip()
             if not line: continue
             lines.append(line)
-            job["log"] = "\n".join(lines[-250:])
-            job["step"] = _humanise(line)
+            with _JOB_LOCK:
+                job["log"] = "\n".join(lines[-250:])
+                job["step"] = _humanise(line)
             # a batch job (e.g. Gate 2b building every beat in a scene) is ONE long subprocess — without this,
             # a beat finished early in the batch stays invisible until the WHOLE batch exits. Throttled to ~2s
             # so a chatty subprocess doesn't turn this into a reindex-per-line hot loop.
@@ -661,34 +685,78 @@ def _stream(jobId, args):
                 try: reindex_media()
                 except Exception: pass
                 _last_reindex = now
+            if now - _last_persist > 1:
+                _persist_job(job)
+                _last_persist = now
         p.wait()
-        if job.get("stopped"):
-            job["status"] = "stopped"; job["step"] = "Stopped by user."
-        else:
-            job["status"] = "done" if p.returncode == 0 else "failed"
-            job["step"] = "Done." if p.returncode == 0 else "Failed — see log."
+        with _JOB_LOCK:
+            if job.get("stopped"):
+                job["status"] = "stopped"; job["step"] = "Stopped by user."
+            else:
+                job["status"] = "done" if p.returncode == 0 else "failed"
+                job["step"] = "Done." if p.returncode == 0 else "Failed — see log."
     except Exception as e:
-        job["log"] = job.get("log", "") + f"\n{type(e).__name__}: {e}"
-        job["status"] = "failed"; job["step"] = "Failed — see log."
+        with _JOB_LOCK:
+            if job.get("stopped"):
+                job["status"] = "stopped"; job["step"] = "Stopped by user."
+            else:
+                job["log"] = job.get("log", "") + f"\n{type(e).__name__}: {e}"
+                job["status"] = "failed"; job["step"] = "Failed — see log."
     finally:
-        PROCS.pop(jobId, None)
+        with _JOB_LOCK:
+            PROCS.pop(jobId, None)
         # THE central completion point for every gate action fired from the studio (keyframes, clips, voice,
         # retakes, ...) — reindex here regardless of outcome (done/failed/stopped can all have left new files
         # on disk) so the UI's next media-index.json fetch reflects reality instead of the stale server-start snapshot.
         try: reindex_media()
         except Exception: pass
-    job["ended"] = time.time()
+        # Story intake changes episode readiness without creating scene media. Refreshing
+        # both indexes here means a completed candidate or lock is visible immediately.
+        try: reindex_episodes()
+        except Exception: pass
+        with _JOB_LOCK:
+            job["ended"] = time.time()
+        _persist_job(job)
 
 def _start(jobId, gate, scene, args):
-    if _is_stale():     # NEVER fire on stale code — the studio is reloading itself to the latest; re-fire in a moment
-        JOBS[jobId] = {"jobId": jobId, "scene": str(scene), "gate": str(gate), "status": "failed",
-                       "step": "⟳ Studio is loading the latest code — re-fire in a few seconds.",
-                       "log": "The studio detected changed source and is reloading itself so every fire runs the "
-                              "current software. Wait a moment, then fire again.",
-                       "started": time.time(), "ended": time.time()}
+    args = list(args)
+    operation_key = cb_db.job_operation_key(gate, scene, args)
+    stale = _is_stale()
+    with _JOB_LOCK:
+        duplicate = next((existing for existing in JOBS.values()
+                          if existing.get("status") == "running" and
+                          existing.get("operationKey") == operation_key), None)
+        if duplicate:
+            return duplicate["jobId"]
+        if stale:
+            # NEVER fire on stale code — the studio is reloading itself to the latest;
+            # re-fire in a moment.
+            job = {"jobId": jobId, "scene": str(scene), "gate": str(gate), "args": args,
+                   "serverKey": SERVER_KEY, "operationKey": operation_key, "status": "failed",
+                   "step": "Studio is loading the latest code - re-fire in a few seconds.",
+                   "log": "The studio detected changed source and is reloading itself so every fire runs the "
+                          "current software. Wait a moment, then fire again.",
+                   "started": time.time(), "ended": time.time()}
+        else:
+            job = {"jobId": jobId, "scene": str(scene), "gate": str(gate), "args": args,
+                   "serverKey": SERVER_KEY, "operationKey": operation_key,
+                   "status": "running", "step": "Starting...",
+                   "log": "", "started": time.time(), "ended": None}
+        JOBS[jobId] = job
+    if stale:
+        try:
+            _persist_job(job, required=True)
+        except Exception:
+            with _JOB_LOCK:
+                JOBS.pop(jobId, None)
+            raise
         return jobId
-    JOBS[jobId] = {"jobId": jobId, "scene": str(scene), "gate": str(gate),
-                   "status": "running", "step": "Starting…", "log": "", "started": time.time(), "ended": None}
+    try:
+        _persist_job(job, required=True)
+    except Exception:
+        with _JOB_LOCK:
+            JOBS.pop(jobId, None)
+        raise
     threading.Thread(target=_stream, args=(jobId, args), daemon=True).start()
     return jobId
 
@@ -713,22 +781,27 @@ def write_script(seed, episode="Ep1"):
 
 def stop_job(jobId):
     """Hard-stop a firing gate: kill its whole process group (the pipeline + every render child it spawned)."""
-    job = JOBS.get(jobId)
-    if job: job["stopped"] = True
-    p = PROCS.get(jobId)
+    with _JOB_LOCK:
+        job = JOBS.get(jobId)
+        if job: job["stopped"] = True
+        p = PROCS.get(jobId)
     if p:
         try: os.killpg(os.getpgid(p.pid), signal.SIGKILL)
         except Exception:
             try: p.kill()
             except Exception: pass
-    if job and job.get("status") == "running":
-        job["status"] = "stopped"; job["step"] = "Stopped by user."; job["ended"] = time.time()
-    PROCS.pop(jobId, None)
+    with _JOB_LOCK:
+        if job and job.get("status") == "running":
+            job["status"] = "stopped"; job["step"] = "Stopped by user."; job["ended"] = time.time()
+        PROCS.pop(jobId, None)
+    if job:
+        _persist_job(job)
     return bool(p)
 
 def stop_all():
     """Stop every currently-running firing."""
-    ids = [jid for jid, j in JOBS.items() if j.get("status") == "running"]
+    with _JOB_LOCK:
+        ids = [jid for jid, j in JOBS.items() if j.get("status") == "running"]
     for jid in ids: stop_job(jid)
     return ids
 
@@ -1553,7 +1626,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if self.path == "/api/jobs":
             # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline
             # route that incidentally carried JOBS is GONE; this is the clean replacement.
-            self._json(200, {"jobs": JOBS}); return
+            self._json(200, {"jobs": _jobs_snapshot()}); return
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
@@ -2465,6 +2538,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 import cb_intake as _CBI
                 rec = _CBI.decide_intake(ep, verdict, note=str(d.get("note") or ""),
                                          reviewed_by=str(d.get("by") or "Julian"))
+                reindex_episodes()
                 self._json(200, {"ok": True, "record": rec})
             except _CBI.Refused as e:
                 self._json(400, {"error": str(e)})
@@ -2759,6 +2833,13 @@ class H(http.server.SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(ROOT)
+    # Jobs used to live only in the Python dictionary above. Restore their durable
+    # ledger first, and close any row left running by a previous process honestly.
+    interrupted = cb_db.interrupt_running_jobs(ROOT, server_key=SERVER_KEY)
+    restored_jobs = cb_db.load_jobs(ROOT, server_key=SERVER_KEY)
+    with _JOB_LOCK:
+        JOBS.clear()
+        JOBS.update(restored_jobs)
     reindex_media()
     episodes = reindex_episodes()
     http.server.ThreadingHTTPServer.allow_reuse_address = True
@@ -2770,7 +2851,8 @@ def main():
         access_mode = "HTTPS tunnel" if PUBLIC_ORIGIN else "loopback-only"
         print(
             f"Serving {ROOT} ({len(episodes)} episodes) - {access_mode}, authenticated, "
-            f"threaded + byte-range; freshness guard ON (fp={_STARTED_FP:.0f})",
+            f"threaded + byte-range; {len(restored_jobs)} durable job(s) restored, "
+            f"{interrupted} interrupted; freshness guard ON (fp={_STARTED_FP:.0f})",
             flush=True,
         )
         httpd.serve_forever()

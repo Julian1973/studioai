@@ -105,6 +105,36 @@ def test_intake_approval_refuses_candidate_from_previous_script(tmp_path, monkey
     assert not list((tmp_path / "cb-output").glob("Ep1_*beat_package.json"))
 
 
+def test_failed_replacement_keeps_the_previous_candidate(tmp_path, monkeypatch):
+    store, first, episodes = _workspace(tmp_path, monkeypatch)
+    candidate_path = cb_intake.candidate_path("Ep1")
+    previous = _candidate(first)
+    candidate_path.write_text(json.dumps(previous))
+
+    second = store.store("Ep1", SCRIPT_TWO, "Pilot",
+                         activated_at="2026-01-02T00:00:00+00:00")
+    registry = json.loads(episodes.read_text())
+    registry[0].update({"script": second["displayFile"],
+                        "scriptVersionId": second["scriptVersionId"]})
+    episodes.write_text(json.dumps(registry))
+    monkeypatch.setattr(
+        cb_intake.cb_canon, "story_context",
+        lambda cast, episode, root=None: {"sourceHashes": {"showBible": "a" * 64}},
+    )
+
+    def fail_director(*_args, **_kwargs):
+        raise RuntimeError("Director unavailable")
+
+    monkeypatch.setattr(cb_intake.cb_departments, "prepare_story", fail_director)
+
+    with pytest.raises(RuntimeError, match="Director unavailable"):
+        cb_intake.prepare_intake("Ep1", log=lambda *_: None)
+
+    assert json.loads(candidate_path.read_text()) == previous
+    superseded = tmp_path / "cb-output" / "archive" / "story_intake_superseded"
+    assert not superseded.exists()
+
+
 def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkeypatch):
     _, current, _ = _workspace(tmp_path, monkeypatch)
     cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(current)))
@@ -119,6 +149,13 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
         current["scriptVersionId"], pkg["contentSignature"], CANON_DIGEST)
     assert cb_lineage.signature_matches(
         vision["inputSignature"], "episode-vision", expected_inputs)
+    status = cb_intake.intake_status("Ep1")
+    assert status["candidateCurrent"] is True
+    assert status["canonicalCurrent"] is True
+    assert status["candidate"]["approvalState"] == "approved"
+    assert status["candidate"]["approval"]["canonicalPackage"] == (
+        result["canonicalPackage"].rsplit("/", 1)[-1]
+    )
 
 
 def test_new_script_approval_archives_previous_canonical_package(tmp_path, monkeypatch):

@@ -1,4 +1,5 @@
 """Zero-spend regression checks for the single approved production path."""
+import cb_intake
 import cb_production_preflight
 import cb_render
 import cb_safety
@@ -33,12 +34,21 @@ def test_preflight_stops_at_story_direction_for_the_new_canon_aligned_script():
     assert "STALE_PRODUCTION_GRAPH" not in codes
     assert "SHOT_NOT_READY" not in codes
     assert report["shots"] == []
-    assert report["stages"]["storyboard"]["state"] == "ready"
+    intake = cb_intake.intake_status("Ep1")
+    candidate_waiting = bool(
+        intake["candidateCurrent"] and not intake["canonicalCurrent"]
+    )
+    assert report["stages"]["storyboard"]["state"] == (
+        "awaiting" if candidate_waiting else "ready"
+    )
     assert report["providerCapabilities"]["selectionReady"] is True
     assert report["providerCapabilities"]["selectedVideoModelId"] == "fal-seedance-2.0"
     assert report["showProfile"]["showId"] == "crystal-bears"
     assert report["showProfile"]["adapterReady"] is True
-    assert report["nextAction"] == "Run Story & Direction for the active script."
+    assert report["nextAction"] == (
+        "Review and approve the current episode Story & Direction candidate."
+        if candidate_waiting else "Run Story & Direction for the active script."
+    )
 
 
 def test_preflight_blocks_an_unqualified_selected_video_model(monkeypatch):

@@ -78,3 +78,17 @@ def test_scene_asset_status_only_counts_files_proven_on_disk():
     assert "master_path.is_relative_to(ROOT)" in SERVER
     assert '"master": configured_master if master_exists else None' in SERVER
     assert '"masterMissing": bool(configured_master and not master_exists)' in SERVER
+
+
+def test_story_intake_remembers_runs_and_names_the_lock_boundary():
+    assert "function latestJobFor(kind,scene,episode)" in APP
+    assert "lastJob?shJobHTML(lastJob)" in APP
+    assert 'label:"Approve & lock"' in APP
+    assert 'title:"Story & Direction locked"' in APP
+    assert "verdict,note,by:REVIEWER" in APP
+    assert 'subprocess.Popen(["python3", "-u"] + args' in SERVER
+    assert "cb_db.interrupt_running_jobs(ROOT, server_key=SERVER_KEY)" in SERVER
+    assert "restored_jobs = cb_db.load_jobs(ROOT, server_key=SERVER_KEY)" in SERVER
+    assert '!r.ok||!Array.isArray(payload)' in APP
+    assert 'title:"Episode state could not load"' in APP
+    assert 'return await boot()' in APP

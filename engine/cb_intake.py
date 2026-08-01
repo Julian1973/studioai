@@ -44,6 +44,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 import cb_departments
 import cb_canon
+import cb_db
 import cb_lineage
 import cb_scripts
 
@@ -510,7 +511,7 @@ def source_event_coverage_report(events, beats):
 
 
 # ── prepare / status / decide — the visible candidate lifecycle ────────────────────────
-def prepare_intake(episode="Ep1", log=print):
+def _prepare_intake(episode="Ep1", log=print):
     current = script_record_for(episode)
     spath = ROOT / current["contentPath"]
     text = spath.read_text(encoding="utf-8")
@@ -530,17 +531,14 @@ def prepare_intake(episode="Ep1", log=print):
     }
 
     pending = candidate_path(episode)
+    prior = None
+    prior_digest = None
     if pending.exists():
-        prior = json.loads(pending.read_text())
+        prior, prior_digest = cb_db.read_json_document(ROOT, pending)
         if cb_lineage.signature_matches(
                 prior.get("inputSignature"), "story-intake", story_inputs):
             raise Refused(f"REFUSED — {episode} already has a story-intake candidate "
                           "for this exact script and canon lock awaiting a decision")
-        archive = OUT / "archive" / "story_intake_superseded"
-        archive.mkdir(parents=True, exist_ok=True)
-        stamp = _now().replace(":", "").replace("-", "")
-        old_version = str(prior.get("scriptVersionId") or "legacy").replace(":", "_")
-        shutil.move(str(pending), archive / f"{episode}_{old_version}_{stamp}.json")
     for existing_path in canonical_package_glob(episode):
         existing = json.loads(existing_path.read_text())
         if cb_lineage.signature_matches(
@@ -630,12 +628,30 @@ def prepare_intake(episode="Ep1", log=print):
         "approvalState": "awaiting-human-approval",
     }
     CREATIVE_OUT.mkdir(parents=True, exist_ok=True)
-    json.dump(candidate, open(candidate_path(episode), "w"), indent=1, ensure_ascii=False)
+    if prior is not None:
+        archive = OUT / "archive" / "story_intake_superseded"
+        stamp = _now().replace(":", "").replace("-", "")
+        old_version = str(prior.get("scriptVersionId") or "legacy").replace(":", "_")
+        cb_db.atomic_write_json(
+            ROOT, archive / f"{episode}_{old_version}_{stamp}_{prior_digest[:12]}.json",
+            prior)
+    cb_db.atomic_write_json(ROOT, pending, candidate, expected_digest=prior_digest)
     log(f"STORY INTAKE CANDIDATE — {len(beats_out)} beat(s) across "
         f"{len(parsed['scenes'])} scene(s); dialogue coverage exact "
         f"({coverage['totalDialogueLines']}/{coverage['totalDialogueLines']}) -> "
         f"{candidate_path(episode).name}")
     return candidate
+
+
+def prepare_intake(episode="Ep1", log=print):
+    """Build one candidate while holding the episode's Story & Direction lease."""
+    try:
+        with cb_db.scene_lease(
+                ROOT, episode, "__story_intake__", "story-intake-run",
+                lease_seconds=30.0, heartbeat_seconds=5.0):
+            return _prepare_intake(episode, log=log)
+    except cb_db.SceneBusy as exc:
+        raise Refused(str(exc)) from exc
 
 
 def intake_status(episode="Ep1"):
@@ -709,15 +725,15 @@ def intake_status(episode="Ep1"):
     return out
 
 
-def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian",
-                  log=print):
+def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian",
+                   log=print):
     if verdict not in ("approve", "reject"):
         raise Refused("REFUSED — verdict must be approve|reject")
     cpath = candidate_path(episode)
     if not cpath.exists():
         raise Refused(f"REFUSED — {episode} has no story-intake candidate awaiting a "
                       "decision")
-    candidate = json.loads(cpath.read_text())
+    candidate, candidate_digest = cb_db.read_json_document(ROOT, cpath)
 
     if verdict == "reject":
         note = str(note or "").strip()
@@ -725,10 +741,10 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
             raise Refused("REFUSED — rejection needs a plain-language note")
         ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
         stamp = _now().replace(":", "").replace("-", "")
-        dest = ARCHIVE_DIR / f"{episode}_{stamp}.json"
+        dest = ARCHIVE_DIR / f"{episode}_{stamp}_{candidate_digest[:12]}.json"
         candidate["rejection"] = {"note": note, "reviewedBy": reviewed_by, "at": _now()}
-        json.dump(candidate, open(dest, "w"), indent=1, ensure_ascii=False)
-        cpath.unlink()
+        cb_db.atomic_write_json(ROOT, dest, candidate)
+        cb_db.atomic_remove(ROOT, cpath, expected_digest=candidate_digest)
         log(f"STORY INTAKE REJECTED — {episode} by {reviewed_by}: {note} "
             f"(candidate archived to {dest.name}; no canonical package written)")
         return {"outcome": "rejected", "archivedTo": str(dest.relative_to(ROOT)),
@@ -769,8 +785,10 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
         raise Refused("REFUSED — intake candidate's signed source-event contract is stale or changed")
 
     existing_paths = canonical_package_glob(episode)
+    existing_records = []
     for existing_path in existing_paths:
-        existing = json.loads(existing_path.read_text())
+        existing, existing_digest = cb_db.read_json_document(ROOT, existing_path)
+        existing_records.append((existing_path, existing, existing_digest))
         if cb_lineage.signature_matches(
                 existing.get("inputSignature"), "beat-package-input", story_inputs):
             raise Refused(f"REFUSED — {episode} already has a canonical beat package for "
@@ -794,15 +812,21 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
     pkg["contentSignature"] = cb_lineage.beat_package_signature(pkg)
     OUT.mkdir(parents=True, exist_ok=True)
     pkg_path = OUT / f"{episode}_{slug}_beat_package.json"
-    if existing_paths:
+    if existing_records:
         archive = OUT / "archive" / "script_versions"
-        archive.mkdir(parents=True, exist_ok=True)
         stamp = _now().replace(":", "").replace("-", "")
-        for old_path in existing_paths:
-            old = json.loads(old_path.read_text())
+        for old_path, old, old_digest in existing_records:
             old_version = str(_package_script_version(old) or "legacy").replace(":", "_")
-            shutil.move(str(old_path), archive / f"{old_path.stem}_{old_version}_{stamp}.json")
-    json.dump(pkg, open(pkg_path, "w"), indent=1, ensure_ascii=False)
+            cb_db.atomic_write_json(
+                ROOT,
+                archive / f"{old_path.stem}_{old_version}_{stamp}_{old_digest[:12]}.json",
+                old)
+    pkg_digest = next((digest for path, _old, digest in existing_records
+                       if path.resolve() == pkg_path.resolve()), None)
+    cb_db.atomic_write_json(ROOT, pkg_path, pkg, expected_digest=pkg_digest)
+    for old_path, _old, old_digest in existing_records:
+        if old_path.resolve() != pkg_path.resolve():
+            cb_db.atomic_remove(ROOT, old_path, expected_digest=old_digest)
 
     vision_inputs = cb_lineage.episode_vision_inputs(
         current["scriptVersionId"], pkg["contentSignature"],
@@ -819,19 +843,34 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
                  "provenance": {"role": "director-intake", "at": _now(),
                                 "reviewedBy": reviewed_by}}
     CREATIVE_OUT.mkdir(parents=True, exist_ok=True)
-    json.dump(vision_pkg, open(episode_vision_path(episode), "w"), indent=1,
-              ensure_ascii=False)
+    vision_path = episode_vision_path(episode)
+    vision_digest = (cb_db.read_json_document(ROOT, vision_path)[1]
+                     if vision_path.exists() else None)
+    cb_db.atomic_write_json(ROOT, vision_path, vision_pkg, expected_digest=vision_digest)
 
     candidate["approvalState"] = "approved"
     candidate["approval"] = {"reviewedBy": reviewed_by, "at": _now(),
                              "canonicalPackage": pkg_path.name}
-    json.dump(candidate, open(cpath, "w"), indent=1, ensure_ascii=False)
+    cb_db.atomic_write_json(ROOT, cpath, candidate, expected_digest=candidate_digest)
 
     log(f"STORY INTAKE APPROVED — {episode} by {reviewed_by}: {pkg_path.name} + "
         f"{episode_vision_path(episode).name} written; cb_creative.py's scene/storyboard "
         f"process is now unlocked")
     return {"outcome": "approved", "canonicalPackage": str(pkg_path.relative_to(ROOT)),
             "episodeVision": str(episode_vision_path(episode).relative_to(ROOT))}
+
+
+def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian",
+                  log=print):
+    """Record one human decision while holding the episode's intake mutation lease."""
+    try:
+        with cb_db.scene_lease(
+                ROOT, episode, "__story_intake__", "story-intake-decision",
+                lease_seconds=30.0, heartbeat_seconds=5.0):
+            return _decide_intake(
+                episode, verdict, note=note, reviewed_by=reviewed_by, log=log)
+    except cb_db.SceneBusy as exc:
+        raise Refused(str(exc)) from exc
 
 
 def _backfill_source_occurrences(beats, events, script_version_id):

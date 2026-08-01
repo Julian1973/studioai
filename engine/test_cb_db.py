@@ -39,6 +39,54 @@ def test_atomic_json_compare_and_swap_blocks_lost_update(tmp_path):
     assert json.loads(path.read_text()) == {"value": 1}
 
 
+def test_atomic_remove_refuses_a_changed_document(tmp_path):
+    path = tmp_path / "candidate.json"
+    path.write_text(json.dumps({"version": 1}))
+    _, digest = cb_db.read_json_document(tmp_path, path)
+    path.write_text(json.dumps({"version": 2}))
+
+    with pytest.raises(cb_db.StateConflict, match="changed before removal"):
+        cb_db.atomic_remove(tmp_path, path, expected_digest=digest)
+    assert path.exists()
+
+
+def test_studio_jobs_survive_restart_and_orphans_become_interrupted(tmp_path):
+    job = {
+        "jobId": "storyintake_Ep1_test",
+        "serverKey": "127.0.0.1:8770|public",
+        "gate": "storyintake",
+        "scene": "-",
+        "args": ["cb_intake.py", "run", "Ep1"],
+        "status": "running",
+        "step": "Director - reading the script",
+        "log": "MECHANICAL PARSE",
+        "started": 100.0,
+        "ended": None,
+        "pid": 123,
+    }
+    cb_db.persist_job(tmp_path, job)
+    other = dict(job, jobId="storyintake_Ep1_other",
+                 serverKey="127.0.0.1:8765|loopback", started=101.0)
+    cb_db.persist_job(tmp_path, other)
+
+    restored = cb_db.load_jobs(tmp_path, server_key=job["serverKey"])
+    assert list(restored) == [job["jobId"]]
+    assert restored[job["jobId"]]["status"] == "running"
+    assert restored[job["jobId"]]["args"] == job["args"]
+    assert restored[job["jobId"]]["operationKey"] == cb_db.job_operation_key(
+        job["gate"], job["scene"], job["args"])
+
+    assert cb_db.interrupt_running_jobs(
+        tmp_path, "Restarted safely.", server_key=job["serverKey"]
+    ) == 1
+    interrupted = cb_db.load_jobs(tmp_path)[job["jobId"]]
+    assert interrupted["status"] == "interrupted"
+    assert interrupted["step"] == "Restarted safely."
+    assert interrupted["ended"] is not None
+    assert interrupted["log"].endswith("Restarted safely.")
+    assert cb_db.load_jobs(tmp_path)[other["jobId"]]["status"] == "running"
+
+
 def test_scene_lease_refuses_parallel_owner_and_is_reentrant(tmp_path):
     results = []
     with cb_db.scene_lease(tmp_path, "EpT", "1", "outer"):

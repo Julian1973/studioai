@@ -47,3 +47,53 @@ def test_static_allowlist_hides_secrets_source_and_traversal():
     assert SERVER._static_blocked("/engine/.env")
     assert SERVER._static_blocked("/engine/cb_gen.py")
     assert SERVER._static_blocked("/engine/media/../../engine/.env")
+
+
+def test_duplicate_live_job_start_reuses_the_existing_job():
+    args = ["cb_intake.py", "run", "Ep1"]
+    operation_key = SERVER.cb_db.job_operation_key("storyintake", "-", args)
+    saved = SERVER._jobs_snapshot()
+    try:
+        with SERVER._JOB_LOCK:
+            SERVER.JOBS.clear()
+            SERVER.JOBS["existing"] = {
+                "jobId": "existing",
+                "gate": "storyintake",
+                "scene": "-",
+                "args": args,
+                "operationKey": operation_key,
+                "status": "running",
+                "step": "Working",
+                "log": "",
+                "started": 1.0,
+                "ended": None,
+            }
+        assert SERVER._start("duplicate", "storyintake", "-", args) == "existing"
+        assert list(SERVER.JOBS) == ["existing"]
+    finally:
+        with SERVER._JOB_LOCK:
+            SERVER.JOBS.clear()
+            SERVER.JOBS.update(saved)
+
+
+def test_new_job_refuses_to_run_without_durable_ledger(monkeypatch):
+    saved = SERVER._jobs_snapshot()
+    try:
+        with SERVER._JOB_LOCK:
+            SERVER.JOBS.clear()
+        monkeypatch.setattr(SERVER, "_is_stale", lambda: False)
+
+        def fail_persistence(_job, required=False):
+            assert required is True
+            raise RuntimeError("ledger unavailable")
+
+        monkeypatch.setattr(SERVER, "_persist_job", fail_persistence)
+        with pytest.raises(RuntimeError, match="ledger unavailable"):
+            SERVER._start("new-job", "storyintake", "-",
+                          ["cb_intake.py", "run", "Ep1"])
+        assert "new-job" not in SERVER.JOBS
+        assert "new-job" not in SERVER.PROCS
+    finally:
+        with SERVER._JOB_LOCK:
+            SERVER.JOBS.clear()
+            SERVER.JOBS.update(saved)

@@ -19,7 +19,7 @@ import time
 import uuid
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 3
 DEFAULT_LEASE_SECONDS = 90.0
 DEFAULT_HEARTBEAT_SECONDS = 15.0
 
@@ -118,8 +118,40 @@ def _connect(root):
             error TEXT,
             PRIMARY KEY (token, candidate_index)
         );
+
+        CREATE TABLE IF NOT EXISTS studio_jobs (
+            job_id TEXT PRIMARY KEY,
+            server_key TEXT NOT NULL,
+            operation_key TEXT NOT NULL,
+            gate TEXT NOT NULL,
+            scene TEXT NOT NULL,
+            args_json TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (
+                status IN ('running', 'done', 'failed', 'stopped', 'interrupted')
+            ),
+            step TEXT NOT NULL,
+            log TEXT NOT NULL,
+            started REAL NOT NULL,
+            ended REAL,
+            pid INTEGER,
+            stopped INTEGER NOT NULL DEFAULT 0 CHECK (stopped IN (0, 1)),
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS studio_jobs_started
+        ON studio_jobs (started DESC);
+
+        CREATE INDEX IF NOT EXISTS studio_jobs_operation
+        ON studio_jobs (operation_key, status);
         """
     )
+    studio_job_columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(studio_jobs)").fetchall()
+    }
+    if "server_key" not in studio_job_columns:
+        conn.execute(
+            "ALTER TABLE studio_jobs ADD COLUMN server_key TEXT NOT NULL DEFAULT 'legacy'"
+        )
     conn.execute(
         "INSERT INTO schema_meta(key, value) VALUES('schema_version', ?) "
         "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
@@ -231,6 +263,152 @@ def atomic_write_json(root, path, value, expected_digest=None):
     """Serialize JSON and replace it through the document compare-and-swap boundary."""
     raw = json.dumps(value, indent=1, ensure_ascii=False).encode()
     return atomic_write_bytes(root, path, raw, expected_digest)
+
+
+def atomic_remove(root, path, expected_digest=None):
+    """Remove an artifact only if it is still the exact revision the caller read."""
+    path = pathlib.Path(path).resolve()
+    with transaction(root) as conn:
+        current_digest = _file_digest(path)
+        if current_digest is None:
+            return False
+        if expected_digest is not None and current_digest != expected_digest:
+            raise StateConflict(
+                f"CONCURRENT STATE CHANGE - {path.name} changed before removal"
+            )
+        path.unlink()
+        try:
+            dir_fd = os.open(path.parent, os.O_RDONLY)
+            try:
+                os.fsync(dir_fd)
+            finally:
+                os.close(dir_fd)
+        except OSError:
+            pass
+        conn.execute("DELETE FROM json_documents WHERE path=?", (str(path),))
+    return True
+
+
+_JOB_STATUSES = {"running", "done", "failed", "stopped", "interrupted"}
+
+
+def job_operation_key(gate, scene, args):
+    """Return the stable identity used to collapse duplicate live job starts."""
+    payload = {
+        "gate": str(gate or ""),
+        "scene": str(scene or ""),
+        "args": list(args or []),
+    }
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
+def persist_job(root, job):
+    """Upsert one Studio job so progress and outcomes survive a server restart."""
+    status = str(job.get("status") or "failed")
+    if status not in _JOB_STATUSES:
+        raise ValueError(f"invalid Studio job status: {status}")
+    job_id = str(job["jobId"])
+    args = list(job.get("args") or [])
+    operation_key = str(
+        job.get("operationKey")
+        or job_operation_key(job.get("gate"), job.get("scene"), args)
+    )
+    with transaction(root) as conn:
+        conn.execute(
+            """
+            INSERT INTO studio_jobs(
+                job_id, server_key, operation_key, gate, scene, args_json, status, step, log,
+                started, ended, pid, stopped, updated_at
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(job_id) DO UPDATE SET
+                server_key=excluded.server_key,
+                operation_key=excluded.operation_key,
+                gate=excluded.gate,
+                scene=excluded.scene,
+                args_json=excluded.args_json,
+                status=excluded.status,
+                step=excluded.step,
+                log=excluded.log,
+                started=excluded.started,
+                ended=excluded.ended,
+                pid=excluded.pid,
+                stopped=excluded.stopped,
+                updated_at=excluded.updated_at
+            """,
+            (
+                job_id, str(job.get("serverKey") or "legacy"), operation_key,
+                str(job.get("gate") or ""),
+                str(job.get("scene") or ""), json.dumps(args, ensure_ascii=False),
+                status, str(job.get("step") or status), str(job.get("log") or ""),
+                float(job.get("started") or time.time()),
+                float(job["ended"]) if job.get("ended") is not None else None,
+                int(job["pid"]) if job.get("pid") is not None else None,
+                1 if job.get("stopped") else 0, utc_now(),
+            ),
+        )
+    return job_id
+
+
+def load_jobs(root, limit=500, server_key=None):
+    """Return recent Studio jobs in the same JSON shape consumed by the UI."""
+    conn = _connect(root)
+    try:
+        if server_key is None:
+            rows = conn.execute(
+                "SELECT * FROM studio_jobs ORDER BY started DESC LIMIT ?", (int(limit),)
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM studio_jobs WHERE server_key=? "
+                "ORDER BY started DESC LIMIT ?",
+                (str(server_key), int(limit)),
+            ).fetchall()
+    finally:
+        conn.close()
+    jobs = {}
+    for row in rows:
+        try:
+            args = json.loads(row["args_json"])
+        except (TypeError, ValueError):
+            args = []
+        jobs[row["job_id"]] = {
+            "jobId": row["job_id"],
+            "serverKey": row["server_key"],
+            "operationKey": row["operation_key"],
+            "gate": row["gate"],
+            "scene": row["scene"],
+            "args": args,
+            "status": row["status"],
+            "step": row["step"],
+            "log": row["log"],
+            "started": row["started"],
+            "ended": row["ended"],
+            "pid": row["pid"],
+            "stopped": bool(row["stopped"]),
+        }
+    return jobs
+
+
+def interrupt_running_jobs(root, message="Studio restarted before this run completed.",
+                           server_key=None):
+    """Close orphaned in-memory runs honestly when a new server process starts."""
+    now = time.time()
+    with transaction(root) as conn:
+        sql = """
+            UPDATE studio_jobs SET
+                status='interrupted', step=?, ended=?,
+                log=CASE WHEN log='' THEN ? ELSE log || char(10) || ? END,
+                updated_at=?
+            WHERE status='running'
+        """
+        params = [str(message), now, str(message), str(message), utc_now()]
+        if server_key is not None:
+            sql += " AND server_key=?"
+            params.append(str(server_key))
+        cursor = conn.execute(sql, params)
+        return cursor.rowcount
 
 
 _LEASE_LOCAL = threading.local()

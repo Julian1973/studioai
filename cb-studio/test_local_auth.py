@@ -97,6 +97,64 @@ def test_host_origin_and_session_are_all_enforced(studio):
     assert status == 200
 
 
+def test_explicit_https_origin_supports_secure_remote_access(monkeypatch):
+    public_origin = "https://studio-test.example"
+    monkeypatch.setenv("CB_STUDIO_PUBLIC_ORIGIN", public_origin)
+    module = _load_server_module()
+    monkeypatch.chdir(ROOT)
+    server = module.http.server.ThreadingHTTPServer(("127.0.0.1", 0), module.H)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        port = server.server_port
+        remote_headers = {"Host": "studio-test.example"}
+        status, headers, _ = _request(
+            port,
+            "GET",
+            f"/cb-studio/app.html?launchToken={module.LAUNCH_TOKEN}",
+            remote_headers,
+        )
+        assert status == 303
+        assert "Secure" in headers["Set-Cookie"]
+        cookie = headers["Set-Cookie"].split(";", 1)[0]
+
+        status, _, _ = _request(
+            port, "GET", "/api/health", {**remote_headers, "Cookie": cookie})
+        assert status == 200
+
+        status, _, _ = _request(
+            port,
+            "POST",
+            "/api/stop",
+            {
+                **remote_headers,
+                "Cookie": cookie,
+                "Content-Type": "application/json",
+                "Origin": public_origin,
+            },
+            body=b"{}",
+        )
+        assert status == 200
+
+        status, _, _ = _request(
+            port,
+            "POST",
+            "/api/stop",
+            {
+                **remote_headers,
+                "Cookie": cookie,
+                "Content-Type": "application/json",
+                "Origin": "https://attacker.example",
+            },
+            body=b"{}",
+        )
+        assert status == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
+
+
 def test_frontend_uses_its_authenticated_origin_and_no_remote_script():
     html = (HERE / "app.html").read_text()
     assert "const BASE=window.location.origin" in html

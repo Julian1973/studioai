@@ -29,6 +29,27 @@ SCRIPTS.mkdir(parents=True, exist_ok=True)
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT, show_id=ACTIVE_SHOW.profile.showId)
 PORT = int(os.environ.get("CB_STUDIO_PORT", "8765"))
 BIND_HOST = "127.0.0.1"
+PUBLIC_ORIGIN = os.environ.get("CB_STUDIO_PUBLIC_ORIGIN", "").strip().rstrip("/")
+if PUBLIC_ORIGIN:
+    _public_origin = urlsplit(PUBLIC_ORIGIN)
+    if (
+        _public_origin.scheme != "https"
+        or not _public_origin.hostname
+        or _public_origin.username is not None
+        or _public_origin.password is not None
+        or _public_origin.path not in ("", "/")
+        or _public_origin.query
+        or _public_origin.fragment
+    ):
+        raise RuntimeError(
+            "CB_STUDIO_PUBLIC_ORIGIN must be a bare HTTPS origin, for example "
+            "https://studio.example.com"
+        )
+    PUBLIC_HOST = _public_origin.hostname.lower().rstrip(".")
+    PUBLIC_PORT = _public_origin.port
+else:
+    PUBLIC_HOST = ""
+    PUBLIC_PORT = None
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
 SESSION_TOKEN = secrets.token_urlsafe(32)
 SESSION_COOKIE = "cb_studio_session"
@@ -1332,7 +1353,11 @@ class H(http.server.SimpleHTTPRequestHandler):
         except ValueError:
             return False
         expected_port = int(getattr(self.server, "server_port", PORT))
-        return host in ("localhost", "127.0.0.1", "::1") and port in (None, expected_port)
+        if host in ("localhost", "127.0.0.1", "::1") and port in (None, expected_port):
+            return True
+        if not PUBLIC_HOST or not hmac.compare_digest(host, PUBLIC_HOST):
+            return False
+        return port == PUBLIC_PORT if PUBLIC_PORT is not None else port is None
 
     def _has_session(self):
         try:
@@ -1371,7 +1396,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.send_header("Location", location)
             self.send_header(
                 "Set-Cookie",
-                f"{SESSION_COOKIE}={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict",
+                f"{SESSION_COOKIE}={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict"
+                + ("; Secure" if PUBLIC_ORIGIN else ""),
             )
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
@@ -1384,7 +1410,9 @@ class H(http.server.SimpleHTTPRequestHandler):
     def _valid_post_origin(self):
         origin = (self.headers.get("Origin") or "").rstrip("/")
         expected = f"http://{self.headers.get('Host')}".rstrip("/")
-        return bool(origin and hmac.compare_digest(origin, expected))
+        if origin and hmac.compare_digest(origin, expected):
+            return True
+        return bool(PUBLIC_ORIGIN and origin and hmac.compare_digest(origin, PUBLIC_ORIGIN))
 
     def _json(self, code, obj):
         body = json.dumps(obj).encode()
@@ -2736,12 +2764,12 @@ def main():
     http.server.ThreadingHTTPServer.allow_reuse_address = True
     threading.Thread(target=_freshness_watch, daemon=True).start()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
-        launch_url = (
-            f"http://{BIND_HOST}:{PORT}/cb-studio/app.html?launchToken={LAUNCH_TOKEN}"
-        )
+        base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
+        launch_url = f"{base_url}/cb-studio/app.html?launchToken={LAUNCH_TOKEN}"
         print(f"Animation Studio launch URL -> {launch_url}", flush=True)
+        access_mode = "HTTPS tunnel" if PUBLIC_ORIGIN else "loopback-only"
         print(
-            f"Serving {ROOT} ({len(episodes)} episodes) - loopback-only, authenticated, "
+            f"Serving {ROOT} ({len(episodes)} episodes) - {access_mode}, authenticated, "
             f"threaded + byte-range; freshness guard ON (fp={_STARTED_FP:.0f})",
             flush=True,
         )

@@ -367,6 +367,26 @@ img.zoom:hover{filter:brightness(1.08)}
 .pscard{background:var(--surface2);border-radius:10px;padding:11px 13px}
 .pscard .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--hint)}
 .pscard .v{font-size:14px;font-weight:600;margin-top:3px}
+.agentpanel{border:1px solid var(--brand);background:var(--surface);border-radius:8px;margin:0 0 12px;overflow:hidden}
+.agenthead{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--brandbg)}
+.agentmark{width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none;border-radius:6px;background:var(--brandink);color:var(--bg);font-size:11px;font-weight:800}
+.agentidentity{min-width:0;flex:1}
+.agentname{font-size:13px;font-weight:700;color:var(--ink)}
+.agentmeta{font-size:11px;color:var(--hint);margin-top:1px}
+.agenttags{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.agenttag{border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface)}
+.agentbody{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px}
+.agentheadline{font-size:15px;font-weight:700;color:var(--ink);line-height:1.35}
+.agentreason{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px}
+.agentnext{font-size:12px;line-height:1.5;margin-top:9px;padding:7px 9px;border-left:3px solid var(--brand);background:var(--brandbg)}
+.agentdetails{border-top:1px solid var(--line);padding:8px 12px 10px}
+.agentdetails summary{cursor:pointer;color:var(--brandink);font-size:11px;font-weight:700}
+.agentfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:10px}
+.agentfact-title{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase}
+.agentfact-row{font-size:11px;color:var(--muted);line-height:1.4;margin-top:5px}
+.agentdecision{font-size:11px;line-height:1.45;padding:7px 0;border-top:1px solid var(--line)}
+.agentdecision:first-child{border-top:0}
+@media(max-width:760px){.agentbody{grid-template-columns:1fr}.agentbody .btn{width:100%}.agentfacts{grid-template-columns:1fr}.agenttags{justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -1866,7 +1886,10 @@ function pStatusSub(id){ try{ return currentStages()[id].sub||null; }catch(e){ r
 function pActiveStage(){ return nextReadyStage(currentStages()); }
 function pFocusedStage(){ return (PSTAGE&&pStatus(PSTAGE)!="locked")?PSTAGE:pActiveStage(); }
 function pFocusStage(id){ if(pStatus(id)=="locked")return; PSTAGE=(PSTAGE==id?null:id); renderWorkspaceBody(); _syncHash(); }
-function pShots(){ return (SH_PKG&&SH_PKG.shots)||[]; }
+function pShots(){
+  if(SH_STATE&&SH_STATE.packageCurrent===false)return [];
+  return (SH_PKG&&SH_PKG.shots)||[];
+}
 function pSceneName(){
   const r=(SCENE_ROSTER||[]).find(s=>s.scene==SH_SC);
   return (r&&r.name)||(SH_PKG&&SH_PKG.sceneName)||(PSB&&PSB.scene&&PSB.scene.location)||("Scene "+SH_SC);
@@ -1899,14 +1922,16 @@ async function renderControl(){
       <span class="wtop-sel">${sceneSelectorHTML()}</span>
     </div>
     <div id="railwrap">${renderStageRail()}</div>
+    <div id="studioagent"></div>
     <div id="readiness"></div>
     <div id="jobbanner"></div>
     <div id="workspace" class="workspace"></div>`;
-  renderPreflightBanner(); renderJobBanner();
+  renderStudioAgent(); renderPreflightBanner(); renderJobBanner();
   await renderWorkspaceBody();
 }
 function renderPreflightBanner(){
   const el=document.getElementById("readiness");if(!el)return;
+  if(SH_AGENT&&!SH_AGENT.error){el.innerHTML="";return;}
   const p=SH_PREFLIGHT;if(!p||p.error){el.innerHTML="";return;}
   if(p.ok){el.innerHTML=`<div style="border:1px solid var(--ok);background:var(--okbg);border-radius:8px;padding:10px 12px;margin-bottom:12px;color:var(--ok)">✓ Production preflight passed — all known inputs are current. ${_esc(p.nextAction||"")}</div>`;return;}
   const blockers=p.blockers||[], first=blockers.slice(0,4);
@@ -1916,6 +1941,51 @@ function renderPreflightBanner(){
     <div style="margin-top:7px"><b>Next:</b> ${_esc(p.nextAction||"")}</div>
     ${blockers.length>4?`<details style="margin-top:6px"><summary>Show all blockers</summary><div style="margin-top:6px">${blockers.map(x=>`<div>• ${_esc(x.stage)}${x.shotId?" · "+_esc(x.shotId):""}: ${_esc(x.message)} — ${_esc(x.action)}</div>`).join("")}</div></details>`:""}
   </div>`;
+}
+function agentFactRows(items){
+  return (items||[]).map(x=>`<div class="agentfact-row">${_esc(x.label||x.id)}</div>`).join("")||
+    `<div class="agentfact-row">None in this scope.</div>`;
+}
+function renderStudioAgent(){
+  const el=document.getElementById("studioagent");if(!el)return;
+  const a=SH_AGENT;
+  if(!a){el.innerHTML="";return;}
+  if(a.error){el.innerHTML="";return;}
+  const n=a.nextAction||{}, facts=a.facts||{}, decisions=a.decisions||[];
+  const canOpen=PSTAGES.some(x=>x.id==n.stage)&&pStatus(n.stage)!="locked";
+  const digest=String(a.briefId||"").split(":").pop().slice(0,12);
+  const scoped=(a.selection||{}).type=="shot"&&a.selection.resolved&&a.selection.shotId
+    ?`Shot ${_esc(a.selection.shotId)}`:`Scene ${_esc(a.scene)}`;
+  const decisionHTML=decisions.length?`<div style="margin-top:10px"><div class="agentfact-title">Human decisions (${decisions.length})</div>
+    ${decisions.map(x=>`<div class="agentdecision"><b>${_esc(x.message||x.code)}</b>${x.action?`<div style="color:var(--hint);margin-top:2px">${_esc(x.action)}</div>`:""}</div>`).join("")}</div>`:"";
+  el.innerHTML=`<section class="agentpanel" aria-label="Studio Agent HELP brief">
+    <div class="agenthead">
+      <div class="agentmark">AI</div>
+      <div class="agentidentity"><div class="agentname">Studio Agent</div><div class="agentmeta">${scoped} · context ${_esc(digest)}</div></div>
+      <div class="agenttags"><span class="agenttag">HELP</span><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div>
+    </div>
+    <div class="agentbody">
+      <div><div class="agentheadline">${_esc(a.headline||"Current production state")}</div>
+        ${n.reason?`<div class="agentreason">${_esc(n.reason)}</div>`:""}
+        <div class="agentnext"><b>Next:</b> ${_esc(n.label||"Review the current production state.")}</div>
+      </div>
+      ${canOpen?`<button class="btn" onclick="studioAgentOpen()">Open ${_esc(n.stageName||n.stage)}</button>`:""}
+    </div>
+    <details class="agentdetails"><summary>Evidence and decisions</summary>
+      <div class="agentfacts">
+        <div><div class="agentfact-title">Built</div>${agentFactRows(facts.built)}</div>
+        <div><div class="agentfact-title">Proven current</div>${agentFactRows(facts.proven)}</div>
+        <div><div class="agentfact-title">Proposed</div>${agentFactRows(facts.proposed)}</div>
+      </div>${decisionHTML}
+    </details>
+  </section>`;
+}
+function studioAgentOpen(){
+  const nav=((SH_AGENT||{}).nextAction||{}).navigation||{};
+  if(nav.shotId){const i=pShots().findIndex(s=>s.shotId==nav.shotId);if(i>=0)PSHOT_I=i;}
+  if(PSTAGES.some(x=>x.id==nav.stage)&&pStatus(nav.stage)!="locked"){
+    PSTAGE=nav.stage;renderWorkspaceBody();_syncHash();
+  }
 }
 function sceneSelectorHTML(){
   const opts=(SCENE_ROSTER||[{scene:SH_SC,name:pSceneName()}]).map(s=>
@@ -1981,6 +2051,7 @@ async function renderWorkspaceBody(){
   _syncHash();
   document.getElementById("railwrap").innerHTML=renderStageRail();
   renderJobBanner();
+  shEnsureAgentSelection();
   const stage=pFocusedStage();
   if(pStatus(stage)=="locked"){
     el.innerHTML=`<div class="wcol wcol-full"><div class="locked-msg">🔒 Locked — approve the previous stage first.</div></div>`;
@@ -2013,8 +2084,12 @@ function scriptStageHTML(){
 function renderStoryboardStage(){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   if(!PSB){
+    const st=pStatus("storyboard"), sub=pStatusSub("storyboard");
     art.innerHTML=`<div class="artefact-empty"><div style="color:var(--muted)">Nothing drafted yet for this scene.</div></div>`;
-    dec.innerHTML=decisionShell("Storyboard","—",[`<button class="btn" onclick="pFireCreative()">✦ Draft the storyboard</button>`],"");
+    const actions=st=="ready"
+      ?[`<button class="btn" onclick="pFireCreative()">Draft the storyboard</button>`]
+      :[`<span class="dec-caption">${badge(st,sub)}</span>`];
+    dec.innerHTML=decisionShell("Storyboard","—",actions,"");
     return;
   }
   const v=PSB.scene||{}, beats=PSB.beats||[], shots=PSB.shots||[];
@@ -2783,7 +2858,8 @@ function renderFinalStage(){
 }
 
 
-let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=null,SH_POLL=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null;
+let SH_EP=null,SH_SC="1",SH_PKG=null,SH_MEDIA=null,SH_FILE=null,SH_ERR=null,SH_JOB=null,SH_POLL=null,SH_SCENELOOK=null,SH_REASSESS=null,SH_PREFLIGHT=null,SH_STATE=null,SH_AGENT=null;
+let SH_AGENT_KEY=null,SH_AGENT_SEQ=0,SH_AGENT_CACHE={};
 // SH_LAST_JOB (2026-07-19 correction): renderJobBanner()/jobFor() only ever surface a job
 // while status=="running" — the instant a job finishes (success OR a fast, informative
 // refusal like "billing profile unconfirmed", which typically completes before the very
@@ -2932,9 +3008,10 @@ const REJECT_CATS=["identity","geography","action-timing","instruction-ignored",
 let SH_CANDS=3;   // candidate-batch size (1-4, default 3) — Seedance is a PROBABILISTIC candidate generator (Julian, 2026-07-16); a fire is a batch, never one deterministic take
 const shTok=x=>String(x||"").replace(/[^A-Za-z0-9._-]/g,"");   // shotId into an onclick attr — token-safe, mirrors the server's own _SHOT_TOKEN
 async function shFetchPkg(){
-  SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;SH_SCENELOOK=null;SH_REASSESS=null;SH_PREFLIGHT=null;SH_STATE=null;
+  SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;SH_SCENELOOK=null;SH_REASSESS=null;SH_PREFLIGHT=null;SH_STATE=null;SH_AGENT=null;
+  SH_AGENT_KEY=null;SH_AGENT_CACHE={};SH_AGENT_SEQ++;
   try{
-    const [r,slr,rar,pfr]=await Promise.all([
+    const [r,slr,rar,pfr,psr,sar]=await Promise.all([
       fetch(BASE+"/api/shot-package?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}),
       fetch(BASE+"/api/scenelook?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
       // DIRECT-INPUT LINEAGE (2026-07-18): per-shot, read-only, zero-spend reassessment —
@@ -2942,15 +3019,38 @@ async function shFetchPkg(){
       // now. Replaces the old blanket "package/storyboard md5 changed -> block everything"
       // gate, which invalidated every shot in the scene over an edit to just one of them.
       fetch(BASE+"/api/shot-reassess?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
-      fetch(BASE+"/api/production-preflight?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null)
+      fetch(BASE+"/api/production-preflight?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
+      fetch(BASE+"/api/production-state?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
+      fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null)
     ]);
     const j=await r.json();
-    if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;SH_STATE=j.productionState||null;}
+    if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
     else SH_ERR=(j&&j.error)||("HTTP "+r.status);
     SH_SCENELOOK = slr ? await slr.json().catch(()=>({status:"none"})) : {status:"none"};
     SH_REASSESS = rar ? await rar.json().catch(()=>({shots:{}})) : {shots:{}};
     SH_PREFLIGHT = pfr ? await pfr.json().catch(()=>null) : null;
+    const state=psr ? await psr.json().catch(()=>null) : null;
+    SH_STATE = state&&!state.error ? state : (j&&j.productionState)||null;
+    SH_AGENT = sar ? await sar.json().catch(()=>null) : null;
+    if(SH_AGENT&&!SH_AGENT.error){SH_AGENT_KEY="__scene__";SH_AGENT_CACHE[SH_AGENT_KEY]=SH_AGENT;}
   }catch(e){SH_ERR="Can't reach the studio server.";}
+}
+async function shEnsureAgentSelection(){
+  const shot=(pShots()[PSHOT_I]||{}).shotId||null;
+  const key=shot||"__scene__";
+  if(SH_AGENT_KEY===key)return;
+  SH_AGENT_KEY=key;
+  if(SH_AGENT_CACHE[key]){SH_AGENT=SH_AGENT_CACHE[key];renderStudioAgent();return;}
+  const seq=++SH_AGENT_SEQ, scene=String(SH_SC), episode=String(SH_EP);
+  const shotQuery=shot?"&shotId="+encodeURIComponent(shot):"";
+  try{
+    const r=await fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(scene)+"&episode="+encodeURIComponent(episode)+shotQuery,{cache:"no-store"});
+    const brief=await r.json();
+    if(seq!==SH_AGENT_SEQ||scene!==String(SH_SC)||episode!==String(SH_EP)||key!==SH_AGENT_KEY)return;
+    SH_AGENT=brief;SH_AGENT_CACHE[key]=brief;renderStudioAgent();renderPreflightBanner();
+  }catch(e){
+    if(seq===SH_AGENT_SEQ&&key===SH_AGENT_KEY){SH_AGENT={error:"Studio Agent unavailable"};renderStudioAgent();renderPreflightBanner();}
+  }
 }
 function shLedger(sid){return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.shotId==sid)||{};}
 function shMedia(sid){return ((SH_MEDIA&&SH_MEDIA.shots)||{})[sid]||{};}

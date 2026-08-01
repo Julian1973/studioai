@@ -242,13 +242,13 @@ def _legacy_production_preflight(scene, episode="Ep1"):
             "timingSlate": timing_slate, "shots": shot_rows}
 
 
-def production_preflight(scene, episode="Ep1"):
+def production_preflight(scene, episode="Ep1", state=None):
     """Return every known blocker from the authoritative readiness policy.
 
     Configuration checks are appended here because they concern the local machine, not an
     approval. No approval or readiness fact is re-derived in this report.
     """
-    state = cb_state.production_state(scene, episode)
+    state = state if state is not None else cb_state.production_state(scene, episode)
     blockers = list(state.get("blockers") or [])
     warnings = []
 

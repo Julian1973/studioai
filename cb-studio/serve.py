@@ -1645,6 +1645,32 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, cb_production_preflight.production_preflight(scene, ep))
             except Exception as e:
                 return self._json(400, {"error": str(e), "zeroSpend": True})
+        if self.path.startswith("/api/studio-agent"):
+            # The conversational front door starts as a strictly read-only HELP projection.
+            # It composes the authoritative policy and preflight evidence; it owns no approval,
+            # mutation, job-runner or provider route of its own.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            shot_id = (q.get("shotId") or [None])[0]
+            if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
+                    (shot_id and not _SHOT_TOKEN.match(shot_id))):
+                return self._json(400, {
+                    "error": "scene, episode and optional shotId must be plain tokens",
+                    "zeroSpend": True,
+                    "readOnly": True,
+                })
+            try:
+                import cb_studio_agent
+                return self._json(
+                    200, cb_studio_agent.studio_agent_brief(scene, ep, shot_id))
+            except Exception as e:
+                return self._json(400, {
+                    "error": str(e),
+                    "zeroSpend": True,
+                    "readOnly": True,
+                })
         if self.path.startswith("/api/production-state"):
             # The one read-only approval/readiness policy used by the renderer, preflight and
             # Studio. The browser displays this document; it does not reconstruct approvals.

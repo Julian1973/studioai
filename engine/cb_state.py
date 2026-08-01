@@ -319,10 +319,10 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
     }
 
 
-def production_state(scene, episode="Ep1"):
+def production_state(scene, episode="Ep1", intake=None):
     """Return the sole approval/readiness document for one scene."""
     scene = str(scene)
-    intake = cb_intake.intake_status(episode)
+    intake = intake if intake is not None else cb_intake.intake_status(episode)
     script_current = bool(intake.get("hasScript"))
     canon_ready = bool(intake.get("canonLockCurrent") and
                        intake.get("canonEpisodeReady"))

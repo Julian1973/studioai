@@ -1,7 +1,9 @@
 import http.client
 import importlib.util
+import json
 import pathlib
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -60,7 +62,7 @@ def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
     status, headers, body = _request(
         port, "GET", "/cb-studio/app.html", {"Cookie": cookie})
     assert status == 200
-    assert b"Crystal Bears" in body
+    assert b"Animation Studio" in body
     assert "Access-Control-Allow-Origin" not in headers
     assert headers["X-Frame-Options"] == "DENY"
     assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
@@ -100,3 +102,21 @@ def test_frontend_uses_its_authenticated_origin_and_no_remote_script():
     assert "const BASE=window.location.origin" in html
     assert "cdnjs.cloudflare.com" not in html
     assert '<script src="http' not in html
+
+
+def test_parallel_index_reads_return_complete_json(studio):
+    module, port = studio
+    _, headers, _ = _request(
+        port, "GET", f"/cb-studio/app.html?launchToken={module.LAUNCH_TOKEN}")
+    cookie = headers["Set-Cookie"].split(";", 1)[0]
+    paths = ["/cb-studio/data/episodes.json", "/cb-studio/data/media-index.json"] * 8
+
+    def read(path):
+        return _request(port, "GET", path, {"Cookie": cookie})
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(read, paths))
+
+    for status, _, body in results:
+        assert status == 200
+        assert isinstance(json.loads(body), list)

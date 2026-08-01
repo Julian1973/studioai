@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Crystal Bears Studio — local server. Episodes + shared Show Bible + script storage."""
+"""Animation Studio local server: projects, episodes, canon and media production."""
 import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, urlencode, urlsplit
@@ -190,12 +190,24 @@ def decode_image_upload(raw):
         raise ValueError("only PNG, JPEG and WebP image uploads are accepted")
     return blob, extension
 
+_REINDEX_LOCK = threading.RLock()
+
+
+def _serialized_reindex(fn):
+    def run(*args, **kwargs):
+        with _REINDEX_LOCK:
+            return fn(*args, **kwargs)
+    return run
+
+
+@_serialized_reindex
 def reindex_media():
     files = sorted(p.name for p in MEDIA.glob("*")
                    if p.suffix.lower() in (".png", ".mp4", ".mp3")) if MEDIA.exists() else []
-    (DATA / "media-index.json").write_text(json.dumps(files))
+    cb_db.atomic_write_json(ROOT, DATA / "media-index.json", files)
     return files
 
+@_serialized_reindex
 def reindex_episodes():
     """Merge shot packages and immutable current-script pointers into one episode list."""
     eps = {}
@@ -269,7 +281,7 @@ def reindex_episodes():
     # the registered episode agree. Publish that pointer-only view first, then annotate the
     # cards from cb_intake's canonical status instead of treating any old beat-package file
     # as production-ready.
-    (DATA / "episodes.json").write_text(json.dumps(out, indent=1))
+    cb_db.atomic_write_json(ROOT, DATA / "episodes.json", out)
     try:
         import cb_intake
         for e in out:
@@ -303,7 +315,7 @@ def reindex_episodes():
                 e["status"] = "New"
     except Exception as exc:
         print(f"STORY INTAKE INDEX WARNING — {exc}", flush=True)
-    (DATA / "episodes.json").write_text(json.dumps(out, indent=1))
+    cb_db.atomic_write_json(ROOT, DATA / "episodes.json", out)
     return out
 
 # ---- pipeline driver: fire/approve gates via cb_pipeline (renders run in a background thread) ----
@@ -1957,8 +1969,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(409, {"error": str(e)})
             except Exception as e:
                 return self._json(400, {"error": str(e)})
-        if "/cb-studio/data/" in self.path:
-            reindex_media(); reindex_episodes()
+        static_path = urlsplit(self.path).path
+        if static_path == "/cb-studio/data/media-index.json":
+            reindex_media()
+        elif static_path == "/cb-studio/data/episodes.json":
+            reindex_episodes()
         return self._serve_static()       # range-aware (video streams + seeks), not the no-Range super().do_GET()
 
     def _body(self):
@@ -2195,7 +2210,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/api/project":
             try:
-                import base64, datetime
+                import datetime
                 d = self._body()
                 name = str(d.get("name", "")).strip()
                 if not name:
@@ -2214,27 +2229,40 @@ class H(http.server.SimpleHTTPRequestHandler):
                     entry = {"key_features": str(ch.get("keyFeatures", "")).strip()}
                     raw = ch.get("imageData") or ""
                     if raw:
-                        if raw.strip().startswith("data:") and "," in raw:
-                            raw = raw.split(",", 1)[1]
-                        safe = re.sub(r"[^A-Za-z0-9]+", "", cn) or "Char"
-                        fn = "CB_" + safe + "_anchor.png"
-                        (pdir / "assets" / fn).write_bytes(base64.b64decode(raw))
-                        rel = "../projects/" + pid + "/assets/" + fn
+                        blob, ext = decode_image_upload(raw)
+                        safe = slug(cn).lower()
+                        fn = safe + "_anchor" + ext
+                        (pdir / "assets" / fn).write_bytes(blob)
+                        rel = "projects/" + pid + "/assets/" + fn
                         entry["anchor"] = rel; entry["refs"] = [rel]
                     chars[cn] = entry
+                cover_image = ""
+                raw_cover = d.get("coverImageData") or ""
+                if raw_cover:
+                    blob, ext = decode_image_upload(raw_cover)
+                    fn = "project_key_art" + ext
+                    (pdir / "assets" / fn).write_bytes(blob)
+                    cover_image = "/projects/" + pid + "/assets/" + fn
                 (pdir / "characters.json").write_text(json.dumps(chars, indent=2, ensure_ascii=False))
                 (pdir / "show_bible.md").write_text(str(d.get("showBible", "")))
                 (pdir / "episodes.json").write_text("[]")
+                accent = str(d.get("accentColor", "")).strip().lower()
+                if not re.fullmatch(r"#[0-9a-f]{6}", accent):
+                    accent = "#0b8f87"
                 meta = {
                     "id": pid, "name": name, "primary": False,
                     "animationType": d.get("animationType", ""), "style": d.get("style", ""),
                     "premise": d.get("premise", ""), "audience": d.get("audience", ""),
                     "episodeLength": d.get("episodeLength", ""), "aspectRatio": d.get("aspectRatio", ""),
                     "voiceProvider": d.get("voiceProvider", ""), "musicStyle": d.get("musicStyle", ""),
+                    "theme": {"accent": accent},
                     "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
                     "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
                     "createdAt": str(datetime.date.today()),
                 }
+                if cover_image:
+                    meta["coverImage"] = cover_image
+                    meta["episodeCoverImage"] = cover_image
                 (pdir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
                 pf = ROOT / "cb-studio" / "data" / "projects.json"
                 pdata = json.loads(pf.read_text()) if pf.exists() else {"projects": []}
@@ -2711,7 +2739,7 @@ def main():
         launch_url = (
             f"http://{BIND_HOST}:{PORT}/cb-studio/app.html?launchToken={LAUNCH_TOKEN}"
         )
-        print(f"Crystal Bears Studio launch URL -> {launch_url}", flush=True)
+        print(f"Animation Studio launch URL -> {launch_url}", flush=True)
         print(
             f"Serving {ROOT} ({len(episodes)} episodes) - loopback-only, authenticated, "
             f"threaded + byte-range; freshness guard ON (fp={_STARTED_FP:.0f})",

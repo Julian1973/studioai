@@ -5,6 +5,7 @@ from pathlib import Path
 STUDIO = Path(__file__).parent
 ROOT = STUDIO.parent
 APP = (STUDIO / "app.html").read_text(encoding="utf-8")
+SERVER = (STUDIO / "serve.py").read_text(encoding="utf-8")
 PROJECTS = json.loads((STUDIO / "data" / "projects.json").read_text(encoding="utf-8"))[
     "projects"
 ]
@@ -21,6 +22,7 @@ def test_primary_slate_uses_real_local_key_art():
 
     episode_cover = primary["episodeCoverImage"]
     assert (ROOT / episode_cover.lstrip("/")).is_file()
+    assert primary["theme"]["accent"].startswith("#")
     assert 'class="projcard-artmedia"' in APP
     assert 'class="epthumb-label"' in APP
     assert 'data-primary="${p.primary?' in APP
@@ -37,13 +39,35 @@ def test_premium_system_keeps_visual_rules_explicit():
     assert "@media (prefers-reduced-motion:reduce)" in APP
 
 
-def test_first_viewport_names_the_show_and_next_decision():
-    assert '<span class="brand-name">Crystal Bears</span>' in APP
+def test_platform_shell_is_ip_agnostic_and_projects_supply_identity():
+    assert "<title>Animation Studio</title>" in APP
+    assert '<span class="brand-name">Animation</span>' in APP
+    assert "Crystal Bears canon" not in APP
+    assert "function projectTheme(project)" in APP
+    assert "function applyProjectPresentation(project)" in APP
+    assert 'project.name+" · Animation Studio"' in APP
+    assert 'style="--brand:${theme.accent};--brandink:${theme.ink};--brandbg:${theme.soft}"' in APP
+
+
+def test_first_viewport_names_the_slate_and_next_decision():
     assert '<div class="screen-eyebrow">Studio slate</div>' in APP
-    assert '<div class="screen-eyebrow">Episode slate</div>' in APP
+    assert 'eyebrow:"Episode slate"' in APP
     assert 'opts.kicker||"Next decision"' in APP
     assert 'title:"Continue "+primary.name' in APP
     assert "if(EXPLICIT_START_HASH){bootProjects();return;}" in APP
+
+
+def test_project_art_reaches_central_screens_and_new_project_storage():
+    assert "function projectScreenHeaderHTML(opts)" in APP
+    assert 'class="screenhead-art"' in APP
+    assert "CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage" in APP
+    assert "function wizKeyArt(input)" in APP
+    assert 'id="wz_accent" type="color"' in APP
+    assert "coverImageData" in APP
+    assert 'fn = "project_key_art" + ext' in SERVER
+    assert 'meta["coverImage"] = cover_image' in SERVER
+    assert '"theme": {"accent": accent}' in SERVER
+    assert 'fn = "CB_" + safe + "_anchor.png"' not in SERVER
 
 
 def test_core_cards_stay_compact_and_responsive():

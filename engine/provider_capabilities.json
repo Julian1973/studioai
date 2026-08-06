@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "defaultVideoModelId": "fal-seedance-2.0",
+  "defaultVideoModelId": "dreamina-seedance-2-5-260628",
   "models": [
     {
       "modelId": "fal-seedance-2.0",
@@ -8,8 +8,8 @@
       "displayName": "Seedance 2.0 via fal",
       "modelVersion": "2.0",
       "transport": "fal-subscribe",
-      "enabled": true,
-      "status": "production",
+      "enabled": false,
+      "status": "retired",
       "verifiedAt": "2026-07-31",
       "sourceUrl": "https://fal.ai/models/bytedance/seedance-2.0/reference-to-video/api",
       "endpoints": {
@@ -45,7 +45,7 @@
         "image-to-video": "seedance_i2v_per_sec"
       },
       "fallbackModelId": null,
-      "disableReason": null
+      "disableReason": "Retired for this project. Crystal Bears is Seedance 2.5-only and must never fall back to a 2.0 paid route."
     },
     {
       "modelId": "byteplus-seedance-2.0",
@@ -80,21 +80,29 @@
       ],
       "nativeAudio": true,
       "costRateKeys": {},
-      "fallbackModelId": "fal-seedance-2.0",
+      "fallbackModelId": null,
       "disableReason": "Account model ID, price, terms and asynchronous job contract are not yet qualified."
     },
     {
-      "modelId": "byteplus-seedance-2.5",
+      "modelId": "dreamina-seedance-2-5-260628",
       "provider": "byteplus",
       "displayName": "Seedance 2.5 via BytePlus ModelArk",
-      "modelVersion": "2.5",
-      "transport": "unknown",
+      "modelVersion": "2.5-260628",
+      "transport": "byteplus-async",
       "enabled": false,
-      "status": "unverified",
-      "verifiedAt": "2026-08-01",
+      "status": "qualification-required",
+      "verifiedAt": "2026-08-04",
       "sourceUrl": "https://docs.byteplus.com/en/docs/modelark/1520757",
-      "endpoints": {},
-      "modes": [],
+      "endpoints": {
+        "reference-to-video": "/api/v3/contents/generations/tasks",
+        "video-extension": "/api/v3/contents/generations/tasks",
+        "video-editing": "/api/v3/contents/generations/tasks"
+      },
+      "modes": [
+        "reference-to-video",
+        "video-extension",
+        "video-editing"
+      ],
       "duration": {
         "minSec": null,
         "maxSec": null,
@@ -109,8 +117,8 @@
       "resolutions": [],
       "nativeAudio": null,
       "costRateKeys": {},
-      "fallbackModelId": "fal-seedance-2.0",
-      "disableReason": "No current official BytePlus 2.5 model ID, request schema, price or account-level route is verified."
+      "fallbackModelId": null,
+      "disableReason": "The authenticated BytePlus model catalogue confirms dreamina-seedance-2-5-260628 with multimodal-to-video, extension and editing task families, but this account has not activated the model. Model-specific limits, pricing, terms and a controlled paid request are not yet qualified."
     }
   ]
 }

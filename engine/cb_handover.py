@@ -91,6 +91,7 @@ import cb_canon
 import cb_db
 import cb_lineage
 import cb_scripts
+import cb_unit_packing
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -203,13 +204,10 @@ NEVER_PROMOTED = ("showrunnerJudgement", "internalRevisions", "escalation", "vis
 
 INTEGRATION_GAPS = ()
 
-# The provider (fal/Seedance) takes ONE integer-second duration end to end — confirmed by
-# direct code read, not assumed: cb_gen.generate_video_seedance's own `duration=8` default is
-# cast via str(duration), and cb_render.py's own fire call passes
-# duration=str(int(round(envelope["durationSec"]))). A creative-approved RANGE (e.g. "5-7s")
-# is normalized to its MIDPOINT, rounded to the nearest whole second — Julian's own stated
-# rule for this checkpoint (2026-07-17): "If Seedance requires a fixed duration, 6s is the
-# valid production normalization" for a 5-7s range.
+# The provider request takes one exact integer-second duration end to end. A creative-approved
+# range is normalized to its midpoint, rounded half-up, and must remain inside the project's
+# 4-30 second Seedance production-unit policy. New storyboards also bind that midpoint to the
+# CreativeShotCard's approved targetDurationSec.
 def normalize_duration_for_provider(rng):
     """Use the same exact duration policy as creative timing validation."""
     try:
@@ -476,25 +474,94 @@ def _validate_supervision_contracts(storyboard):
                 raise HandoverRefused(
                     f"REFUSED - {beat_id}.powerMoment is malformed or breaks canon identity")
 
-    carrier_by_beat = {beat_id: [] for beat_id in big_beats}
-    for shot in storyboard.get("shots") or []:
+    shots = list(storyboard.get("shots") or [])
+    carrier_by_beat = {}
+    for beat_id in big_beats:
+        eligible = [shot for shot in shots if beat_id in (shot.get("beatIds") or [])]
+        if not eligible:
+            raise HandoverRefused(
+                f"REFUSED - {beat_id} BIG comedy has no packed production unit")
+        if len(eligible) == 1:
+            carrier = eligible[0]
+        else:
+            owned = [shot for shot in eligible
+                     if ((shot.get("performanceContract") or {}).get("beatOwner") == beat_id)]
+            if len(owned) != 1:
+                raise HandoverRefused(
+                    f"REFUSED - {beat_id} BIG comedy crosses {len(eligible)} units but has "
+                    f"{len(owned)} explicit performance owners")
+            carrier = owned[0]
+        carrier_by_beat[beat_id] = carrier.get("shotId")
+
+    # The legacy singular mirror is optional execution context, never the source of truth.
+    # When present it must still match its typed owner exactly. Every BIG contract itself is
+    # compiled mechanically from the beat onto carrier_by_beat below.
+    for shot in shots:
         contract = shot.get("performanceContract") or {}
         staging = contract.get("comedyStaging")
         if staging is None:
             continue
-        matching = [beat_id for beat_id in shot.get("beatIds") or [] if beat_id in big_beats]
-        if len(matching) != 1 or (shot.get("beatIds") or [None])[0] != matching[0]:
+        owner = contract.get("beatOwner")
+        if owner not in big_beats or owner not in (shot.get("beatIds") or []):
             raise HandoverRefused(
-                f"REFUSED - {shot.get('shotId')} comedy staging does not own one BIG beat")
-        beat_id = matching[0]
-        if staging != big_beats[beat_id]:
+                f"REFUSED - {shot.get('shotId')} comedy staging owner {owner} does not "
+                "identify a BIG beat in the production unit")
+        if staging != big_beats[owner]:
             raise HandoverRefused(
                 f"REFUSED - {shot.get('shotId')} changed the approved BIG comedy staging")
-        carrier_by_beat[beat_id].append(shot.get("shotId"))
-    for beat_id, carriers in carrier_by_beat.items():
-        if len(carriers) != 1:
+        if carrier_by_beat[owner] != shot.get("shotId"):
             raise HandoverRefused(
-                f"REFUSED - {beat_id} BIG comedy needs exactly one staging carrier; got {carriers}")
+                f"REFUSED - {shot.get('shotId')} mirrors {owner} staging but its selected "
+                f"carrier is {carrier_by_beat[owner]}")
+
+
+def _owned_big_comedy_stagings(storyboard, sb_shot):
+    """Return every exact BIG-comedy contract carried by this packed provider unit."""
+    beats = {beat.get("beatId"): beat for beat in (storyboard.get("beats") or [])}
+    shots = list(storyboard.get("shots") or [])
+    owned = []
+    for beat_id in sb_shot.get("beatIds") or []:
+        comedy = (beats.get(beat_id) or {}).get("comedyContract") or {}
+        if comedy.get("mode") != "BIG":
+            continue
+        staging = comedy.get("physicalStaging")
+        if not isinstance(staging, dict):
+            raise HandoverRefused(
+                f"REFUSED - {beat_id} BIG comedy has no physical staging")
+        eligible = [shot for shot in shots if beat_id in (shot.get("beatIds") or [])]
+        if len(eligible) == 1:
+            carrier = eligible[0]
+        else:
+            carriers = [shot for shot in eligible
+                        if ((shot.get("performanceContract") or {}).get("beatOwner") == beat_id)]
+            if len(carriers) != 1:
+                raise HandoverRefused(
+                    f"REFUSED - {beat_id} BIG comedy has no unique packed-unit carrier")
+            carrier = carriers[0]
+        if carrier.get("shotId") == sb_shot.get("shotId"):
+            owned.append({"beatCode": beat_id, **staging})
+    return owned
+
+
+def _validate_unit_packing_contract(storyboard):
+    """Recompute the approved 30-second packing audit at the handover boundary."""
+    current_contract = storyboard.get("unitPackingContractVersion") == 1
+    if not current_contract and "unitPackingAudit" not in storyboard:
+        return
+    if not storyboard.get("packingPasses"):
+        raise HandoverRefused(
+            "REFUSED - the Showrunner did not approve the 30-second production-unit packing")
+    try:
+        audit = cb_unit_packing.audit_units(storyboard.get("shots") or [])
+    except (TypeError, ValueError) as exc:
+        raise HandoverRefused(f"REFUSED - invalid production-unit packing: {exc}") from exc
+    if audit["blockingIssues"]:
+        issue = audit["blockingIssues"][0]
+        raise HandoverRefused(
+            f"REFUSED - production-unit packing failed {issue['code']}: {issue['message']}")
+    if storyboard.get("unitPackingAudit") != audit:
+        raise HandoverRefused(
+            "REFUSED - the storyboard's 30-second packing audit is missing or stale")
 
 
 def _characters_in_frame(sb_shot, participants):
@@ -542,6 +609,12 @@ def place_voices_for_beat(beat_id, beat_shot_ids, voices, beat_dialogue, pd_by_s
                 f"{beat_id}; found {targets}")
         placement[targets[0]].append(voice_by_id[occurrence_id])
     return placement
+
+
+def _append_voice_placement(target, source):
+    """Append one beat's assignments without replacing earlier beats in a packed unit."""
+    for shot_id, performances in source.items():
+        target.setdefault(shot_id, []).extend(performances)
 
 
 def _dialogue_lines(vps, timing_windows, duration):
@@ -734,11 +807,17 @@ def _cinematography_instruction(contract, shot_id):
     return instruction
 
 
-def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
+def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
+                comedy_stagings=None):
     """Map one approved storyboard shot into cb_engine's production contract. Executable
     performance, continuity and dialogue timing come only from typed fields; approved prose
     is retained for provenance and review, never treated as a substitute."""
     duration = normalize_duration_for_provider(pd.get("intendedDurationRange"))
+    target_duration = sb_shot.get("targetDurationSec")
+    if target_duration is not None and duration != float(target_duration):
+        raise HandoverRefused(
+            f"REFUSED - {sb_shot['shotId']} targets {target_duration}s but its production "
+            f"range normalizes to {duration:g}s")
     opener = bool(pd.get("requiresNewKeyframe"))
     performance_contract = sb_shot.get("performanceContract")
     performance_assignment = _performance_assignment(
@@ -746,13 +825,25 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
     cinematography_contract = sb_shot.get("cinematographyContract")
     camera_instruction = _cinematography_instruction(
         cinematography_contract, sb_shot["shotId"])
-    comedy_staging = (performance_contract or {}).get("comedyStaging")
+    comedy_stagings = list(comedy_stagings or [])
+    if not comedy_stagings:
+        legacy_staging = (performance_contract or {}).get("comedyStaging")
+        if legacy_staging:
+            comedy_stagings = [{
+                "beatCode": (performance_contract or {}).get("beatOwner"),
+                **legacy_staging,
+            }]
     try:
+        physical_stagings = [cb_engine.BeatPhysicalStaging(**item)
+                             for item in comedy_stagings]
         physical_staging = (
-            cb_engine.PhysicalStaging(**comedy_staging) if comedy_staging else None)
+            cb_engine.PhysicalStaging(**{
+                key: value for key, value in comedy_stagings[0].items()
+                if key != "beatCode"
+            }) if len(comedy_stagings) == 1 else None)
     except (TypeError, ValueError) as exc:
         raise HandoverRefused(
-            f"REFUSED - {sb_shot['shotId']} has an invalid comedyStaging contract: {exc}") from exc
+            f"REFUSED - {sb_shot['shotId']} has an invalid beat-owned comedy staging: {exc}") from exc
     continuity_in = _continuity_state(
         pd.get("continuityInState"), cast, f"{sb_shot['shotId']}.continuityInState")
     continuity_out = _continuity_state(
@@ -762,7 +853,8 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
             f"REFUSED - {sb_shot['shotId']} has no continuityOutState")
 
     shot = cb_engine.Shot(
-        shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0], durationSec=duration,
+        shotId=sb_shot["shotId"], beatCode=sb_shot["beatIds"][0],
+        beatCodes=list(sb_shot["beatIds"]), durationSec=duration,
         purpose=sb_shot["purpose"],
         performanceAssignment=performance_assignment,
         camera=camera_instruction,
@@ -774,7 +866,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
                          f"approved voice design.") if shot_voices else None,
         dialogueLines=_dialogue_lines(shot_voices, pd.get("dialogueTimings"), duration),
         visualPayoff=sb_shot["closingImage"],
-        physicalStaging=physical_staging,
+        physicalStaging=physical_staging, physicalStagings=physical_stagings,
         prohibited=list(pd.get("essentialProviderProtections") or [])[:3],
         charactersInFrame=_characters_in_frame(sb_shot, cast),
         continuityIn=continuity_in,
@@ -789,9 +881,18 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg):
                 "performanceContractApproved": performance_contract,
                 "characterTruthsApproved": (performance_contract or {}).get(
                     "characterTruths") or [],
-                "comedyStagingApproved": comedy_staging,
+                "comedyStagingApproved": ((performance_contract or {}).get(
+                    "comedyStaging")),
+                "comedyStagingsApproved": comedy_stagings,
                 "cinematographyContractApproved": cinematography_contract or None,
+                "targetDurationSecApproved": sb_shot.get("targetDurationSec"),
+                "storyboardStagePlanApproved": list(sb_shot.get("stagePlan") or []),
+                "storyboardInternalShotPlanApproved": list(
+                    sb_shot.get("internalShotPlan") or []),
                 "transitionType": sb_shot.get("transitionType"),
+                "providerBoundaryReasonApproved": sb_shot.get("providerBoundaryReason"),
+                "providerBoundaryExplanationApproved": sb_shot.get(
+                    "providerBoundaryExplanation"),
                 "voiceDirectorBrief": _voice_director_brief_lines(shot_voices)}
     return shot, retained
 
@@ -855,6 +956,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             "schema-checkpoint pass must run before handover.")
     occurrences = _validate_storyboard_dialogue_contract(sb)
     _validate_supervision_contracts(sb)
+    _validate_unit_packing_contract(sb)
 
     pkg_path = pathlib.Path(pkg_path)
     old = json.load(open(pkg_path)) if pkg_path.exists() else {}
@@ -872,7 +974,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             shots_by_beat.setdefault(bid, []).append(s["shotId"])
     placement = {}
     for bid, sids in shots_by_beat.items():
-        placement.update(place_voices_for_beat(
+        _append_voice_placement(placement, place_voices_for_beat(
             bid, sorted(sids), sb.get("voicePerformances", []),
             beats[bid]["dialogueOccurrences"], pd_by_shot))
 
@@ -884,8 +986,9 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
             raise HandoverRefused(f"REFUSED — {sb_shot['shotId']} has no Production Detail; "
                                   f"the schema-checkpoint pass must run before handover.")
         cast = _cast_for_shot(sb_shot, beats)
-        shot, retained = distil_shot(sb_shot, pd, cast, placement.get(sb_shot["shotId"], []),
-                                       prev, characters_cfg)
+        shot, retained = distil_shot(
+            sb_shot, pd, cast, placement.get(sb_shot["shotId"], []), prev,
+            characters_cfg, _owned_big_comedy_stagings(sb, sb_shot))
         rec = _compile_one(shot, retained, scene, characters_cfg)
         line_count += len(shot.dialogueLines)
         shots_out.append(rec)
@@ -925,6 +1028,9 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
                                         "<=3 essential protections"],
                          "integrationGaps": list(INTEGRATION_GAPS)},
            "dialogueContract": sb.get("dialogueContract"),
+           "beatCodes": list(dict.fromkeys(
+               beat_code for rec in shots_out
+               for beat_code in (rec.get("beatCodes") or [rec["beatCode"]]))),
            "shots": shots_out, "totalSec": round(total, 1),
            "voidedTokens": list(old.get("voidedTokens") or [])}
     if dry_run:
@@ -961,6 +1067,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
                               f"schema-checkpoint pass must run before handover.")
     _validate_storyboard_dialogue_contract(sb)
     _validate_supervision_contracts(sb)
+    _validate_unit_packing_contract(sb)
 
     pkg_path = pathlib.Path(pkg_path)
     old = json.load(open(pkg_path)) if pkg_path.exists() else {}
@@ -993,10 +1100,11 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
                 f"REFUSED — verbatim dialogue partition broke in single-shot handover: beat "
                 f"{bid} has {len(beats[bid]['dialogueOccurrences'])} locked line(s), placement "
                 f"across its own shots carries {len(placed)}.")
-        placement.update(bmap)
+        _append_voice_placement(placement, bmap)
     cast = _cast_for_shot(sb_shot, beats)
-    shot, retained = distil_shot(sb_shot, pd, cast, placement.get(shot_id, []),
-                                   None, characters_cfg)
+    shot, retained = distil_shot(
+        sb_shot, pd, cast, placement.get(shot_id, []), None, characters_cfg,
+        _owned_big_comedy_stagings(sb, sb_shot))
     rec = _compile_one(shot, retained, scene, characters_cfg)
     _assert_no_internal_leak([rec])
 
@@ -1020,6 +1128,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
                                         "<=3 essential protections"],
                          "integrationGaps": list(INTEGRATION_GAPS)},
            "dialogueContract": sb.get("dialogueContract"),
+           "beatCodes": list(rec.get("beatCodes") or [rec["beatCode"]]),
            "shots": [rec], "totalSec": shot.durationSec,
            "voidedTokens": list(old.get("voidedTokens") or [])}
     if dry_run:
@@ -1058,7 +1167,7 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
                 f"REFUSED — verbatim dialogue partition broke promoting {shot_id}: beat {bid} "
                 f"has {len(beats[bid]['dialogueOccurrences'])} locked line(s), placement across its "
                 f"own shots carries {len(placed)}.")
-        placement.update(bmap)
+        _append_voice_placement(placement, bmap)
     cast = _cast_for_shot(sb_shot, beats)
     # 2026-07-17 correction: the CREATIVE CARD's own hash, alone — not combined with
     # ProductionDetail. These are two separate artifacts with two separate invariants: the
@@ -1069,7 +1178,9 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
     # ProductionDetail changed for any honest, sanctioned reason.
     card_hash = hashlib.sha256(json.dumps(
         sb_shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    shot, retained = distil_shot(sb_shot, pd, cast, placement.get(shot_id, []), prev, characters_cfg)
+    shot, retained = distil_shot(
+        sb_shot, pd, cast, placement.get(shot_id, []), prev, characters_cfg,
+        _owned_big_comedy_stagings(storyboard, sb_shot))
     return shot, retained, card_hash
 
 
@@ -1126,6 +1237,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
         sb, episode)
     _validate_storyboard_dialogue_contract(sb)
     _validate_supervision_contracts(sb)
+    _validate_unit_packing_contract(sb)
 
     try:
         characters_cfg = json.load(open(CHARS))
@@ -1177,11 +1289,17 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                     for rec in shots_out]
     storyboard_beats = {beat.get("beatId"): beat for beat in sb.get("beats") or []}
     validation_beats = []
-    for beat_code in dict.fromkeys(rec["beatCode"] for rec in shots_out):
+    selected_beat_codes = list(dict.fromkeys(
+        beat_code for rec in shots_out
+        for beat_code in (rec.get("beatCodes") or [rec["beatCode"]])))
+    for beat_code in selected_beat_codes:
         source_beat = storyboard_beats.get(beat_code) or {}
         comedy = source_beat.get("comedyContract") or {}
-        lines = [line for rec in shots_out if rec["beatCode"] == beat_code
-                 for line in rec["dialogueLines"]]
+        occurrence_ids = {
+            item.get("dialogueOccurrenceId")
+            for item in (source_beat.get("dialogueOccurrences") or [])}
+        lines = [line for rec in shots_out for line in rec["dialogueLines"]
+                 if line.get("dialogueOccurrenceId") in occurrence_ids]
         validation_beats.append({
             "beatCode": beat_code,
             "comedyMode": comedy.get("mode"),
@@ -1233,7 +1351,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                      "cb_render canonical package format (2026-07-17 source-level handover)",
         "directorStatement": director_statement,
         "creativeIntent": creative_intent,
-        "beatCodes": sorted({rec["beatCode"] for rec in shots_out}),
+        "beatCodes": selected_beat_codes,
         "shots": shots_out,
         "totalSec": round(sum(rec["durationSec"] for rec in shots_out), 1),
         "continuityLedger": ledger_out,
@@ -1243,8 +1361,8 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                         "issues": report["issues"],
                         "beatsScopeNote": "dialogue occurrence identity, exact payload and "
                             "order are validated against this promotion's exact shot scope; "
-                            "BIG-comedy physical staging is carried by the typed performance "
-                            "contract and validated on its selected gag shot.",
+                            "every BIG-comedy physical staging is compiled from its typed beat "
+                            "contract onto the selected packed production unit.",
                         "validatedAt": _now(), "revision": new_rev},
         "reviewCriteria": {
             "story": "approved audience experience and beat change remain legible",

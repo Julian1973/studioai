@@ -184,10 +184,54 @@ def _location_assets(policy: dict, locations: dict, root: pathlib.Path) -> list[
             for rel, roles in sorted(declared.items())]
 
 
+def _identity_assets(policy: dict, root: pathlib.Path) -> list[dict]:
+    """Lock every provider identity source independently from story character canon."""
+    if "identityPacks" not in policy.get("sources", {}):
+        return []
+    try:
+        source = _read_json_source(policy, "identityPacks", root)
+        packs = source.get("characters") or {}
+    except (OSError, ValueError, AttributeError) as exc:
+        raise CanonLockError("provider identity packs are unreadable") from exc
+    if source.get("schemaVersion") != 1 or not isinstance(packs, dict):
+        raise CanonLockError("provider identity packs use an unsupported schema")
+
+    declared: dict[str, set[str]] = {}
+    for character, pack in sorted(packs.items()):
+        if not isinstance(pack, dict) or pack.get("schemaVersion") != 1:
+            raise CanonLockError(f"{character}'s provider identity pack is invalid")
+        raw = pack.get("source")
+        views = pack.get("providerViews")
+        turnaround_views = pack.get("turnaroundViews")
+        if not isinstance(raw, str) or not raw.strip() or not isinstance(views, dict) or not views:
+            raise CanonLockError(
+                f"{character}'s provider identity pack needs a source and provider view")
+        if pack.get("coverage") != "360":
+            raise CanonLockError(
+                f"{character}'s provider identity pack must declare 360 coverage")
+        if not isinstance(turnaround_views, list) or len(turnaround_views) < 4:
+            raise CanonLockError(
+                f"{character}'s provider identity pack needs declared 360 turnaround "
+                "coverage")
+        view_names = set()
+        for index, view in enumerate(turnaround_views, start=1):
+            name = str((view or {}).get("view") or "").strip().casefold()
+            crop = (view or {}).get("crop")
+            if (not isinstance(view, dict) or not name or name in view_names or
+                    not isinstance(crop, list) or len(crop) != 4):
+                raise CanonLockError(
+                    f"{character}'s turnaround view {index} is invalid")
+            view_names.add(name)
+        path = resolve_declared_path(raw, root)
+        declared.setdefault(_relative(path, root), set()).add(f"{character}.source")
+    return [{"path": rel, "roles": sorted(roles), "sha256": file_sha256(root / rel)}
+            for rel, roles in sorted(declared.items())]
+
+
 def _manifest_payload(manifest: dict) -> dict:
     return {key: manifest.get(key) for key in (
         "schemaVersion", "showId", "policySha256", "sources", "characters",
-        "locationAssets",
+        "locationAssets", "identityAssets",
     )}
 
 
@@ -233,6 +277,12 @@ def build_manifest(root: str | pathlib.Path | None = None,
         raise CanonLockError("declared location assets are missing: " +
                              ", ".join(missing_locations))
 
+    identity_assets = _identity_assets(policy, base)
+    missing_identities = [asset["path"] for asset in identity_assets if asset["sha256"] is None]
+    if missing_identities:
+        raise CanonLockError("declared provider identity assets are missing: " +
+                             ", ".join(missing_identities))
+
     manifest = {
         "schemaVersion": SCHEMA_VERSION,
         "showId": policy["showId"],
@@ -242,6 +292,7 @@ def build_manifest(root: str | pathlib.Path | None = None,
         "sources": sources,
         "characters": character_manifest,
         "locationAssets": location_assets,
+        "identityAssets": identity_assets,
     }
     manifest["manifestDigest"] = _digest(_manifest_payload(manifest))
     return manifest
@@ -303,6 +354,8 @@ def _asset_integrity(manifest: dict, root: pathlib.Path) -> list:
     for name, item in (manifest.get("characters") or {}).items():
         records.extend((f"character:{name}", asset) for asset in item.get("assets") or [])
     records.extend(("location", asset) for asset in manifest.get("locationAssets") or [])
+    records.extend(("provider-identity", asset)
+                   for asset in manifest.get("identityAssets") or [])
     for owner, asset in records:
         actual = file_sha256(root / str(asset.get("path") or ""))
         if not actual or actual != asset.get("sha256"):
@@ -632,7 +685,8 @@ def status(episode: str | None = None, cast: Iterable[str] | None = None,
         "profileDigests": profile_digests,
         "sourceCount": len(source_rows),
         "assetCount": sum(row["assetCount"] for row in character_rows) +
-                      len(manifest.get("locationAssets") or []),
+                      len(manifest.get("locationAssets") or []) +
+                      len(manifest.get("identityAssets") or []),
         "sources": source_rows,
         "characters": character_rows,
         "episode": episode,

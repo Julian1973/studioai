@@ -98,12 +98,52 @@ class LookDirection(BaseModel):
     providerPrompt: str = Field(min_length=40)
 
 
+class CharacterFramePlacement(BaseModel):
+    character: str = Field(min_length=1)
+    centerX: float = Field(ge=0.08, le=0.92)
+    centerY: float = Field(ge=0.08, le=0.92)
+    apparentScale: float = Field(default=1.0, ge=0.55, le=1.8)
+    depthPlane: int = Field(default=0, ge=-2, le=2)
+    bodyAngleDegrees: float = Field(default=0.0, ge=-80.0, le=80.0)
+    facing: str = Field(min_length=1)
+    pose: str = Field(min_length=1)
+
+
+class OpeningFrameLayout(BaseModel):
+    """Machine-readable staging envelope for the literal opening frame.
+
+    Physical character height comes from canon. The DP chooses the reference subject's
+    approximate frame coverage, starting zone, depth and apparent perspective scale. This
+    is local advisory evidence, never a provider pose template or animation choreography.
+    """
+    aspectRatio: Literal["16:9"] = "16:9"
+    referenceCharacter: str = Field(min_length=1)
+    referenceHeightFraction: float = Field(ge=0.18, le=0.55)
+    sameDepth: bool
+    placements: List[CharacterFramePlacement] = Field(min_length=1, max_length=8)
+
+    @model_validator(mode="after")
+    def validate_layout(self):
+        names = [item.character for item in self.placements]
+        if len(names) != len(set(names)):
+            raise ValueError("opening-frame layout contains a duplicate character")
+        if self.referenceCharacter not in names:
+            raise ValueError("referenceCharacter must be present in placements")
+        if self.sameDepth:
+            planes = {item.depthPlane for item in self.placements}
+            if len(planes) != 1 or any(item.apparentScale != 1.0 for item in self.placements):
+                raise ValueError(
+                    "sameDepth layouts require one depth plane and apparentScale=1.0")
+        return self
+
+
 class CinematographyDirection(BaseModel):
     shotId: str
     audienceRead: str
     composition: str
     lensAndCameraRelationship: str
     lightingAndDepth: str
+    openingFrameLayout: OpeningFrameLayout
     referenceUse: List[str] = Field(default_factory=list, max_length=6)
     continuityProtections: List[str] = Field(default_factory=list, max_length=4)
     providerPrompt: str = Field(min_length=40)
@@ -128,7 +168,7 @@ class VoiceDirection(BaseModel):
 
 
 class InternalShotDirection(BaseModel):
-    shotNumber: int = Field(ge=1, le=3)
+    shotNumber: int = Field(ge=1, le=6)
     purpose: str = Field(min_length=1)
     framingLensAndCamera: str = Field(min_length=1)
     causalAction: str = Field(min_length=1)
@@ -145,8 +185,48 @@ class ReferenceDirection(BaseModel):
     scope: Literal["canon", "episode", "continuity"]
 
 
+class SeedanceStageDirection(BaseModel):
+    stageNumber: int = Field(ge=1, le=5)
+    beatIds: List[str] = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+    startSec: Optional[float] = Field(
+        default=None, ge=0,
+        description="Start time when pacingMode is timestamp; omitted for storyline pacing.")
+    endSec: Optional[float] = Field(
+        default=None, gt=0,
+        description="End time when pacingMode is timestamp; omitted for storyline pacing.")
+    initialOrCarriedState: str = Field(
+        min_length=1,
+        description="The visible state inherited at the start of this stage.")
+    primaryEvent: str = Field(
+        min_length=1,
+        description="One primary state change, written as playable cause and effect.")
+    observableEndState: str = Field(
+        min_length=1,
+        description="The directly visible state that proves this stage completed.")
+    emotionOrCameraAnalysis: str = Field(
+        min_length=1,
+        description="Why the observable action lands emotionally, comedically or through camera scheduling.")
+
+
 class AnimationDirection(BaseModel):
     shotId: str
+    durationSec: int = Field(
+        ge=4, le=30,
+        description="The exact approved story duration for this production unit.")
+    taskMode: Literal[
+        "text-to-video", "reference-to-video", "thirty-second-video",
+        "ultra-long-video", "video-edit", "extend-forward", "extend-backward",
+        "transition", "first-last-frame", "storyboard-grid", "blockout-render",
+    ] = "reference-to-video"
+    pacingMode: Literal["storyline", "timestamp"] = "storyline"
+    generationGoal: str = Field(
+        min_length=1,
+        description="A one-sentence statement of the video and central story event.")
+    deliveryPlan: str = Field(
+        min_length=1,
+        description="A concise explanation of how the prompt is built to deliver the "
+                    "director's intended audience turn.")
     dramaticBeat: str
     audienceBefore: str = Field(min_length=1)
     audienceAfter: str = Field(min_length=1)
@@ -169,10 +249,29 @@ class AnimationDirection(BaseModel):
         default_factory=list, max_length=4,
         description="Only the continuity, dialogue, safety or essential story facts that "
                     "justify precise control. Empty is valid for an open performance.")
-    shotPlan: List[InternalShotDirection] = Field(min_length=1, max_length=3)
-    referenceContract: List[ReferenceDirection] = Field(default_factory=list, max_length=9)
+    shotPlan: List[InternalShotDirection] = Field(min_length=1, max_length=6)
+    stagePlan: List[SeedanceStageDirection] = Field(min_length=1, max_length=5)
+    referenceContract: List[ReferenceDirection] = Field(default_factory=list, max_length=50)
+    consistencyContract: List[str] = Field(min_length=1, max_length=6)
+    audioContract: str = Field(
+        min_length=1,
+        description="The speaker, language, track authority and silence relationships. "
+                    "Use 'No dialogue' when the shot has no spoken line.")
     continuityFinish: str
     surgicalSafeguards: List[str] = Field(default_factory=list, max_length=3)
+    editScope: str = ""
+    contentToPreserve: List[str] = Field(default_factory=list, max_length=8)
+    extensionDirection: Literal["forward", "backward"] = "forward"
+    transitionTrigger: str = ""
+    transitionTransformation: str = ""
+    transitionArrivalState: str = ""
+    audioTransition: str = ""
+    firstFrameTag: str = "@Image 1"
+    lastFrameTag: str = "@Image 2"
+    storyboardTag: str = "@Image 1"
+    storyboardReadingOrder: str = "left to right, top to bottom"
+    blockoutKind: Literal["coarse", "fine"] = "coarse"
+    blockoutMappings: List[str] = Field(default_factory=list, max_length=20)
     providerPrompt: str = Field(min_length=40)
 
     @model_validator(mode="after")
@@ -180,6 +279,29 @@ class AnimationDirection(BaseModel):
         if self.directionDensity == "precise" and not self.precisionReasons:
             raise ValueError("precise direction requires an explicit continuity, dialogue, "
                              "safety or essential-story reason")
+        numbers = [stage.stageNumber for stage in self.stagePlan]
+        if numbers != list(range(1, len(numbers) + 1)):
+            raise ValueError("Seedance stages must be consecutive and begin at 1")
+        timed = [(stage.startSec, stage.endSec) for stage in self.stagePlan]
+        shot_numbers = [shot.shotNumber for shot in self.shotPlan]
+        if shot_numbers != list(range(1, len(shot_numbers) + 1)):
+            raise ValueError("internal shots must be consecutive and begin at 1")
+        if self.durationSec > 15 and self.pacingMode != "timestamp":
+            raise ValueError("production units over 15 seconds require timestamp pacing")
+        if self.pacingMode == "timestamp":
+            if any(start is None or end is None for start, end in timed):
+                raise ValueError("timestamp pacing requires startSec and endSec for every stage")
+            if any(start >= end for start, end in timed):
+                raise ValueError("every timestamp stage must end after it begins")
+            if abs(timed[0][0]) > 0.001:
+                raise ValueError("timestamp stages must begin at 0 seconds")
+            if any(abs(timed[index][0] - timed[index - 1][1]) > 0.001
+                   for index in range(1, len(timed))):
+                raise ValueError("timestamp stages must be consecutive without gaps or overlaps")
+            if abs(timed[-1][1] - self.durationSec) > 0.001:
+                raise ValueError("timestamp stages must end at the approved duration")
+        elif any(start is not None or end is not None for start, end in timed):
+            raise ValueError("storyline pacing must omit startSec and endSec")
         return self
 
 
@@ -244,6 +366,89 @@ class MediaReview(BaseModel):
     cheapestNextAction: CheapestNextAction
     learningTags: List[str] = Field(default_factory=list, max_length=8)
     findings: List[ReviewFinding] = Field(default_factory=list)
+
+
+class PoseConformanceDimension(BaseModel):
+    """One visible, objective check on an isolated acting-pose candidate."""
+    score: int = Field(ge=0, le=2)
+    visibleEvidence: str = Field(min_length=1)
+    correction: str = ""
+
+
+class PoseConformanceReview(BaseModel):
+    """Machine qualification for a reusable pose plate, never a human approval."""
+    verdict: Literal["pass", "revise", "block"]
+    character: str = Field(min_length=1)
+    subjectCount: int = Field(ge=0, le=8)
+    summary: str = Field(min_length=1)
+    identityAndProportions: PoseConformanceDimension
+    requestedPoseAndPerformance: PoseConformanceDimension
+    anatomyAndSilhouette: PoseConformanceDimension
+    isolationAndFraming: PoseConformanceDimension
+    forbiddenContent: PoseConformanceDimension
+    recommendedCorrection: str = ""
+
+    @model_validator(mode="after")
+    def pass_requires_objective_evidence(self):
+        dimensions = (
+            self.identityAndProportions,
+            self.requestedPoseAndPerformance,
+            self.anatomyAndSilhouette,
+            self.isolationAndFraming,
+            self.forbiddenContent,
+        )
+        if self.verdict == "pass" and (
+                self.subjectCount != 1 or any(item.score != 2 for item in dimensions)):
+            raise ValueError(
+                "a passing pose must contain exactly one subject and score 2 on every "
+                "objective dimension")
+        if self.verdict != "pass" and not self.recommendedCorrection.strip():
+            raise ValueError("a failed pose review must provide one corrective instruction")
+        return self
+
+
+class KeyframeConformanceDimension(BaseModel):
+    """One objective, visible opening-frame requirement."""
+    score: int = Field(ge=0, le=2)
+    visibleEvidence: str = Field(min_length=1)
+    correction: str = ""
+
+
+class KeyframeConformanceReview(BaseModel):
+    """Fail-closed qualification before a keyframe is exposed for human approval."""
+    verdict: Literal["pass", "revise", "block"]
+    expectedCharacters: List[str] = Field(min_length=1, max_length=8)
+    detectedCharacters: List[str] = Field(default_factory=list, max_length=8)
+    expectedSubjectCount: int = Field(ge=1, le=8)
+    subjectCount: int = Field(ge=0, le=12)
+    summary: str = Field(min_length=1)
+    identityAndDistinguishability: KeyframeConformanceDimension
+    relativeScaleAndGeography: KeyframeConformanceDimension
+    anatomyAndSilhouette: KeyframeConformanceDimension
+    actionReadyComposition: KeyframeConformanceDimension
+    forbiddenContent: KeyframeConformanceDimension
+    recommendedCorrection: str = ""
+
+    @model_validator(mode="after")
+    def pass_requires_every_objective_contract(self):
+        dimensions = (
+            self.identityAndDistinguishability,
+            self.relativeScaleAndGeography,
+            self.anatomyAndSilhouette,
+            self.actionReadyComposition,
+            self.forbiddenContent,
+        )
+        expected = sorted(name.casefold() for name in self.expectedCharacters)
+        detected = sorted(name.casefold() for name in self.detectedCharacters)
+        if self.verdict == "pass" and (
+                self.subjectCount != self.expectedSubjectCount or
+                expected != detected or any(item.score != 2 for item in dimensions)):
+            raise ValueError(
+                "a passing keyframe must contain the exact cast and score 2 on every "
+                "objective dimension")
+        if self.verdict != "pass" and not self.recommendedCorrection.strip():
+            raise ValueError("a failed keyframe review must provide one corrective instruction")
+        return self
 
 
 def _system(worker, job):
@@ -357,11 +562,26 @@ def prepare_look(context, *, log=print):
 def prepare_cinematography(context, images, *, log=print):
     return cb_llm.structured(
         _system("cinematography",
-                "Own this shot's literal opening composition. The attached images are in "
-                "the exact labelled reference order in the context.") + "\n\n" +
+                "Own this shot's performance-ready opening stage. Establish the world, "
+                "camera, light, cast identity, canon relative scale, loose starting "
+                "relationship and clear action space. Do not pre-perform or freeze the "
+                "acting that belongs to Animation. The attached images are in the exact "
+                "labelled provider-reference order in the context.") + "\n\n" +
                 load_runtime_skill("dp"),
         "APPROVED SHOT CONTRACT AND ORDERED IMAGE LABELS:\n" + _j(context) +
-        "\n\nReturn one exact keyframe-provider prompt. Bind references by their labels; "
+        "\n\nReturn one keyframe-provider direction and one machine-readable "
+        "openingFrameLayout staging envelope. Include every charactersInFrame entry exactly "
+        "once. Normalized centres indicate loose starting zones, not pixel locks. Facing and "
+        "pose describe only a playable frame-one anticipation state; do not prescribe exact "
+        "limb, wing, facial or later action choreography. Canonical physical height is "
+        "applied from the character registry: choose the reference character's approximate "
+        "frame-height fraction and use apparentScale solely for an authored depth difference. "
+        "Set sameDepth=true, one depthPlane and apparentScale=1.0 when perspective must not "
+        "alter relative size. Keep every character readable inside the 16:9 frame with lead "
+        "room and an unobstructed performance corridor. The final image call receives the "
+        "locked turnarounds and Scene Look in providerReferencePlan order. Never assign an "
+        "opening composition, sizing board or generated pose plate to an @图 label: those "
+        "remain local advisory evidence. Bind references by the labels stated in context; "
         "do not describe character identity from memory.",
         CinematographyDirection, label="department_cinematography", log=log,
         images=images)
@@ -406,11 +626,21 @@ def prepare_voice(context, locked_lines, *, log=print):
 
 
 def prepare_animation(context, images, *, log=print):
-    return cb_llm.structured(
+    shot = context.get("shot") or {}
+    raw_duration = shot.get("durationSec", shot.get("targetDurationSecApproved"))
+    try:
+        duration = int(raw_duration)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("Animation Director requires an approved integer duration") from exc
+    if float(raw_duration) != duration or not 4 <= duration <= 30:
+        raise RuntimeError(
+            f"Animation Director requires an approved 4-30s integer duration; got {raw_duration!r}")
+
+    result = cb_llm.structured(
         _system("animation",
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
                 "The first attached image is the approved opening frame; remaining attachments "
-                "follow the exact reference order in the context. Use one to three internal "
+                "follow the exact reference order in the context. Use one to six internal "
                 "shots only when each edit has a real story, performance or reaction purpose."),
         "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
         "\n\nDIRECTORIAL FREEDOM CONTRACT:\n"
@@ -423,17 +653,60 @@ def prepare_animation(context, images, *, log=print):
         "and 'precise' only for a named continuity, dialogue, safety or essential story "
         "reason recorded in precisionReasons. A surprising interpretation is welcome when "
         "it preserves truth and makes the intended audience turn land more strongly.\n\n"
-        "Return audienceBefore, audienceAfter, beatOwner, performanceFreedom, landingBreath, "
-        "directionDensity, a numbered one-to-three-shot directing plan, the "
-        "separate reference contract, the exact continuity landing, no more than three "
-        "surgical safeguards, and one paste-ready Seedance shooting script in providerPrompt. "
+        f"The approved production-unit duration is exactly {duration} seconds. Preserve it; "
+        "never pad toward 30 seconds or compress the approved story timing. Preserve the "
+        "storyboardStagePlanApproved and storyboardInternalShotPlanApproved from the shot when "
+        "present: do not add, drop, merge or reorder their stages, beat ownership or motivated "
+        "camera views. Add executable timing and detail without changing their story.\n\n"
+        "Return taskMode='reference-to-video', the exact durationSec, pacingMode, generationGoal, deliveryPlan, audienceBefore, "
+        "audienceAfter, beatOwner, performanceFreedom, landingBreath, directionDensity, a "
+        "numbered one-to-six-shot directing plan, a consecutive stagePlan in which every "
+        "stage keeps its approved beatIds, has one primary event, an emotionOrCameraAnalysis "
+        "and an observable end state, "
+        "the separate reference "
+        "contract, consistencyContract, audioContract, the exact continuity landing, no more "
+        "than three surgical safeguards, and one paste-ready Seedance shooting script in "
+        "providerPrompt. Use pacingMode='storyline' for units up to 15 seconds and "
+        "pacingMode='timestamp' for 16-30 seconds; timestamp mode requires ordered startSec "
+        "and endSec values on every stage, while storyline mode omits both. "
         "Keep every spoken word out of providerPrompt; refer to the approved track only as "
-        "@Audio1. The prompt must begin from the approved opening state and end on a usable "
-        "handoff, with causal physical action, observable performance, motivated camera, "
-        "readable composition, and established light/material behaviour. The prompt should "
-        "feel like confident direction to an exceptional actor and camera crew, not an "
-        "animation checklist.",
+        "@Audio1. Use the exact attached asset tags and bind each one separately in the prompt "
+        "to what it defines and what it must not contribute. For dialogue shots, preserve the "
+        "house audio-lock header as line one. Adapt the official ByteDance Seedance 2.5 "
+        "structure as: [Multimodal Reference Layer], [One-Sentence Summary], [Global Settings], "
+        "[Timestamp Script Storyboard], consecutive Stage N headings, [Global Supplement], "
+        "then [Audio]. In [Global Settings], cover environment and texture, visual style, "
+        "camera language, character styling, performance core and only necessary prohibited "
+        "items. Each stage must contain Initial state or Continue from the previous stage, "
+        "Action/Expression, Emotion/Camera Analysis, and End state. In timestamp mode write the "
+        "heading as 'Stage N: 0-4s [Purpose]'; in storyline mode write 'Stage N: [Purpose]'. "
+        "Keep duration, aspect ratio, resolution and model "
+        "selection out of providerPrompt because the API contract owns them. Prefer stages to "
+        "one-second micromanagement; use exact time points only for a critical handoff or "
+        "dialogue cue. Explicitly prohibit extra dialogue, subtitles and default BGM. The prompt "
+        "must begin from the approved opening state and end on a usable handoff, with causal "
+        "physical action, observable performance, motivated camera, readable composition, and "
+        "established light/material behaviour. It should feel like confident direction to an "
+        "exceptional actor and camera crew, not an animation checklist.",
         AnimationDirection, label="department_animation", log=log, images=images)
+
+    if result.durationSec != duration:
+        raise RuntimeError(
+            f"Animation Director changed approved duration from {duration}s to "
+            f"{result.durationSec}s")
+    approved_stages = shot.get("storyboardStagePlanApproved") or []
+    if approved_stages:
+        expected = [list(stage.get("beatIds") or []) for stage in approved_stages]
+        actual = [list(stage.beatIds) for stage in result.stagePlan]
+        if actual != expected:
+            raise RuntimeError(
+                "Animation Director added, dropped, merged, reordered or reassigned approved "
+                f"story stages: expected {expected}, got {actual}")
+    approved_shots = shot.get("storyboardInternalShotPlanApproved") or []
+    if approved_shots and len(result.shotPlan) != len(approved_shots):
+        raise RuntimeError(
+            "Animation Director changed the approved number of motivated internal shots")
+    return result
 
 
 def review_media(artifact_type, context, images, *, log=print):
@@ -457,3 +730,74 @@ def review_media(artifact_type, context, images, *, log=print):
         "evidence (chronological where there are several frames) from its identity and "
         "Scene Look references.",
         MediaReview, label=f"department_review_{artifact_type}", log=log, images=images)
+
+
+def review_pose_conformance(context, images, *, log=print):
+    """Compare one pose candidate with its locked identity source.
+
+    Image order is contractual: the candidate is first and the identity turnaround is
+    second. This worker qualifies an internal production input; it cannot approve media,
+    regenerate anything or silently relax a failed dimension.
+    """
+    if len(images) != 2:
+        raise ValueError("pose conformance requires candidate and identity images")
+    return cb_llm.structured_with_repair(
+        _system(
+            "review",
+            "Run an objective production check on one isolated character acting pose. "
+            "Image 1 is the ACTUAL POSE CANDIDATE. Image 2 is the LOCKED IDENTITY "
+            "TURNAROUND and is the sole authority for face, silhouette, body proportions, "
+            "limbs, wings, antennae, glasses and approved design. Judge only visible "
+            "evidence. Score each dimension 2 only when it clearly passes, 1 when "
+            "ambiguous or materially weak, and 0 when wrong. A pass requires exactly one "
+            "character, every dimension at 2, the requested pose visibly readable, the "
+            "complete silhouette uncropped, usable isolation, sound anatomy, and none of "
+            "the forbidden content. When it does not pass, return one concise, prompt-ready "
+            "correction that changes only the failed features and preserves what worked. "
+            "This is machine qualification, never human approval."),
+        "POSE CONTRACT AND ORDERED IMAGE ROLES:\n" + _j(context) +
+        "\n\nInspect Image 1 against Image 2. Do not infer missing details and do not "
+        "reward polish when identity, proportions, anatomy, acting or forbidden-content "
+        "requirements fail.",
+        PoseConformanceReview,
+        model=cb_llm.VALIDATOR_MODEL,
+        label="department_pose_conformance",
+        log=log,
+        images=images,
+    )
+
+
+def review_keyframe_conformance(context, images, *, log=print):
+    """Compare a rendered opener with its exact identity, world and staging contracts.
+
+    Image order is contractual and described in ``context['orderedImages']``.  This is a
+    narrow production safety check, not a taste score and never a creative approval.
+    """
+    if len(images) < 2:
+        raise ValueError("keyframe conformance requires a candidate and its references")
+    return cb_llm.structured_with_repair(
+        _system(
+            "review",
+            "Run an objective pre-approval check on one rendered opening keyframe. Image 1 "
+            "is the ACTUAL KEYFRAME CANDIDATE. The remaining images are the locked identity "
+            "views and Scene Look listed in orderedImages. Each identity image contains one "
+            "canonical character and is authoritative for that character only. Judge visible "
+            "evidence, not polish or personal taste. A pass requires exactly the expected cast; "
+            "each named character visibly matching its own reference without blending, swapping "
+            "or borrowed features; canonical relative size and authored screen geography; sound "
+            "anatomy and readable silhouettes; a loose performance-ready opening composition; "
+            "and no forbidden props, duplicate subjects, text, logo or watermark. Score 2 only "
+            "when the requirement clearly passes, 1 when ambiguous or materially weak, and 0 "
+            "when wrong. Any non-2 dimension makes the verdict revise or block. Return one concise "
+            "prompt-ready correction that changes only failed features and preserves what worked. "
+            "This qualification can block Accept but can never approve creative quality."),
+        "KEYFRAME CONTRACT AND ORDERED IMAGE ROLES:\n" + _j(context) +
+        "\n\nInspect Image 1 against every named reference. Do not infer hidden detail, "
+        "do not confuse two reference views with extra cast, and do not reward cinematic "
+        "finish when identity, scale, anatomy, geography or forbidden-content checks fail.",
+        KeyframeConformanceReview,
+        model=cb_llm.VALIDATOR_MODEL,
+        label="department_keyframe_conformance",
+        log=log,
+        images=images,
+    )

@@ -116,12 +116,13 @@ def test_deferred_item_8_no_duration_literal_dependency():
     """Item 8 (the 15s literals): the new path never sends duration='auto', so cb_gen's and
     cb_costs' 'auto'-fallback literals can never bite it. Proven two ways: cost estimation
     with an explicit shot duration is exact, and the fire path's source always formats the
-    shot's own seconds (asserted here against the code, pinned live by the golden path)."""
+    sealed segment's own seconds (asserted here against the code, pinned live by the golden
+    path)."""
     import cb_costs
     rate, _, _ = cb_costs.RATES["seedance_standard_per_sec"]
     assert abs(cb_costs.estimate_video_cost("seedance_standard_per_sec", 6) - rate * 6) < 1e-9
     src = (HERE / "cb_render.py").read_text()
-    assert 'duration=str(int(round(envelope["durationSec"])))' in src   # sealed envelope, 2026-07-16
+    assert 'duration=f"{int(round(segment[\'durationSec\']))}"' in src
     assert '"auto"' not in src
 
 

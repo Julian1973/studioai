@@ -1,0 +1,310 @@
+"""Local timing utilities for an approved ElevenLabs dialogue performance.
+
+The paid voice provider returns one acted conversation plus the source range for each
+dialogue input. Authored start times remain exact performance anchors. The natural take
+may extend beyond an estimated end time when it still fits before the next start anchor;
+the software never clips or time-compresses an actor to satisfy an estimate.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import pathlib
+import subprocess
+
+
+class AudioTimingError(RuntimeError):
+    """The approved performance cannot be mapped to the approved timing contract."""
+
+
+SAMPLE_RATE = 48000
+CHANNELS = 2
+WINDOW_TOLERANCE_SEC = 0.05
+EDGE_FADE_SEC = 0.012
+
+
+def file_sha256(path):
+    path = pathlib.Path(path)
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def dialogue_timing_path(audio_path):
+    return pathlib.Path(str(pathlib.Path(audio_path)) + ".dialogue.json")
+
+
+def timed_master_contract_path(audio_path):
+    return pathlib.Path(str(pathlib.Path(audio_path)) + ".timing.json")
+
+
+def _read_json(path):
+    try:
+        return json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+    except (OSError, TypeError, ValueError) as exc:
+        raise AudioTimingError(f"dialogue timing metadata is unreadable: {path}") from exc
+
+
+def _probe_duration(path):
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error", "-show_entries", "format=duration",
+            "-of", "default=nk=1:nw=1", str(path),
+        ],
+        capture_output=True, text=True,
+    )
+    try:
+        duration = float(result.stdout.strip())
+    except (TypeError, ValueError) as exc:
+        raise AudioTimingError(f"audio duration is unreadable: {path}") from exc
+    if result.returncode or duration <= 0:
+        raise AudioTimingError(f"audio duration is unreadable: {path}")
+    return duration
+
+
+def _source_ranges(timing, expected_count):
+    raw = timing.get("voiceSegments") or timing.get("voice_segments") or []
+    grouped = {}
+    for item in raw:
+        try:
+            index = int(item.get("dialogueInputIndex", item.get("dialogue_input_index")))
+            start = float(item.get("startTimeSec", item.get("start_time_seconds")))
+            end = float(item.get("endTimeSec", item.get("end_time_seconds")))
+        except (TypeError, ValueError) as exc:
+            raise AudioTimingError("ElevenLabs returned a malformed dialogue segment") from exc
+        if index < 0 or start < 0 or end <= start:
+            raise AudioTimingError("ElevenLabs returned an invalid dialogue segment range")
+        current = grouped.setdefault(index, [start, end])
+        current[0] = min(current[0], start)
+        current[1] = max(current[1], end)
+    expected = set(range(expected_count))
+    if set(grouped) != expected:
+        raise AudioTimingError(
+            "ElevenLabs timing metadata does not map one source range to every approved line"
+        )
+    return [tuple(grouped[index]) for index in range(expected_count)]
+
+
+def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
+                                 duration_sec, out):
+    """Place exact acted ranges at approved starts without clipping natural delivery."""
+    raw_audio = pathlib.Path(raw_audio).resolve()
+    timing_path = pathlib.Path(timing_path).resolve()
+    out = pathlib.Path(out).resolve()
+    duration_sec = float(duration_sec)
+    if duration_sec <= 0 or not dialogue_lines:
+        raise AudioTimingError("a timed dialogue master needs lines and a positive duration")
+    if not raw_audio.is_file():
+        raise AudioTimingError(f"raw dialogue audio is missing: {raw_audio}")
+    timing = _read_json(timing_path)
+    if timing.get("audioSha256") != file_sha256(raw_audio):
+        raise AudioTimingError("dialogue timing metadata does not match the raw audio bytes")
+    ranges = _source_ranges(timing, len(dialogue_lines))
+
+    authored = []
+    for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):
+        try:
+            target_start = float(line["startSec"])
+            target_end = float(line["endSec"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise AudioTimingError(f"dialogue line {index + 1} has no approved timing window") from exc
+        if target_start < 0 or target_end <= target_start or target_end > duration_sec + 0.001:
+            raise AudioTimingError(f"dialogue line {index + 1} falls outside the shot duration")
+        authored.append((index, line, source_range, target_start, target_end))
+
+    placements = []
+    for position, (index, line, source_range, target_start, target_end) in enumerate(authored):
+        source_start, source_end = source_range
+        source_duration = source_end - source_start
+        next_start = authored[position + 1][3] if position + 1 < len(authored) else duration_sec
+        available_duration = next_start - target_start
+        if available_duration <= 0:
+            raise AudioTimingError(
+                f"dialogue line {index + 1}'s start anchor is not before the next line"
+            )
+        if source_duration > available_duration + WINDOW_TOLERANCE_SEC:
+            raise AudioTimingError(
+                f"dialogue line {index + 1}'s approved take is {source_duration:.2f}s but only "
+                f"{available_duration:.2f}s remains before the next approved start; reject or "
+                "retime the performance"
+            )
+        placements.append({
+            "dialogueIndex": index,
+            "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
+            "sourceStartSec": source_start,
+            "sourceEndSec": source_end,
+            "targetStartSec": target_start,
+            "targetEndSec": target_start + source_duration,
+            "approvedWindowEndSec": target_end,
+            "naturalExtensionSec": max(0.0, target_start + source_duration - target_end),
+        })
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    split_labels = "".join(f"[src{index}]" for index in range(len(placements)))
+    filters = [
+        f"[0:a]asplit={len(placements)}{split_labels}",
+        f"[1:a]atrim=duration={duration_sec:.6f},asetpts=PTS-STARTPTS[silence]",
+    ]
+    mixed_labels = ["[silence]"]
+    for index, placement in enumerate(placements):
+        delay_ms = int(round(placement["targetStartSec"] * 1000))
+        line_duration = placement["sourceEndSec"] - placement["sourceStartSec"]
+        fade = min(EDGE_FADE_SEC, line_duration / 4)
+        fade_out_start = max(0.0, line_duration - fade)
+        filters.append(
+            f"[src{index}]atrim=start={placement['sourceStartSec']:.6f}:"
+            f"end={placement['sourceEndSec']:.6f},asetpts=PTS-STARTPTS,"
+            f"aformat=sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
+            f"afade=t=in:st=0:d={fade:.6f},"
+            f"afade=t=out:st={fade_out_start:.6f}:d={fade:.6f},"
+            f"adelay={delay_ms}|{delay_ms}[line{index}]"
+        )
+        placement["edgeFadeSec"] = fade
+        mixed_labels.append(f"[line{index}]")
+    filters.append(
+        "".join(mixed_labels) +
+        f"amix=inputs={len(mixed_labels)}:duration=first:dropout_transition=0:normalize=0,"
+        f"atrim=duration={duration_sec:.6f}[outa]"
+    )
+    command = [
+        "ffmpeg", "-y", "-i", str(raw_audio), "-f", "lavfi", "-t",
+        f"{duration_sec:.6f}", "-i",
+        f"anullsrc=channel_layout=stereo:sample_rate={SAMPLE_RATE}",
+        "-filter_complex", ";".join(filters), "-map", "[outa]", "-ar",
+        str(SAMPLE_RATE), "-ac", str(CHANNELS), "-c:a", "pcm_s16le", str(out),
+    ]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode or not out.is_file():
+        raise AudioTimingError(
+            "could not build the timed dialogue master: " + result.stderr[-400:]
+        )
+    actual_duration = _probe_duration(out)
+    if abs(actual_duration - duration_sec) > WINDOW_TOLERANCE_SEC:
+        raise AudioTimingError(
+            f"timed dialogue master is {actual_duration:.3f}s, expected {duration_sec:.3f}s"
+        )
+    contract = {
+        "schemaVersion": 1,
+        "rawAudioPath": str(raw_audio),
+        "rawAudioSha256": file_sha256(raw_audio),
+        "dialogueTimingPath": str(timing_path),
+        "dialogueTimingSha256": file_sha256(timing_path),
+        "durationSec": duration_sec,
+        "placements": placements,
+        "outputPath": str(out),
+        "outputSha256": file_sha256(out),
+    }
+    contract_path = timed_master_contract_path(out)
+    contract_path.write_text(json.dumps(contract, indent=2, ensure_ascii=False) + "\n",
+                             encoding="utf-8")
+    return {**contract, "contractPath": str(contract_path),
+            "contractSha256": file_sha256(contract_path)}
+
+
+def slice_timed_master(master_audio, start_sec, end_sec, out):
+    """Derive one byte-bound provider audio reference from an approved timed master."""
+    master_audio = pathlib.Path(master_audio).resolve()
+    out = pathlib.Path(out).resolve()
+    start_sec, end_sec = float(start_sec), float(end_sec)
+    if not master_audio.is_file() or start_sec < 0 or end_sec <= start_sec:
+        raise AudioTimingError("invalid timed-master slice request")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        [
+            "ffmpeg", "-y", "-i", str(master_audio), "-af",
+            f"atrim=start={start_sec:.6f}:end={end_sec:.6f},asetpts=PTS-STARTPTS",
+            "-ar", str(SAMPLE_RATE), "-ac", str(CHANNELS), "-c:a", "pcm_s16le",
+            str(out),
+        ],
+        capture_output=True, text=True,
+    )
+    if result.returncode or not out.is_file():
+        raise AudioTimingError("could not derive provider audio slice: " + result.stderr[-400:])
+    expected = end_sec - start_sec
+    actual = _probe_duration(out)
+    if abs(actual - expected) > WINDOW_TOLERANCE_SEC:
+        raise AudioTimingError(
+            f"provider audio slice is {actual:.3f}s, expected {expected:.3f}s"
+        )
+    return {
+        "path": str(out), "sha256": file_sha256(out),
+        "sourcePath": str(master_audio), "sourceSha256": file_sha256(master_audio),
+        "sourceStartSec": start_sec, "sourceEndSec": end_sec,
+        "durationSec": expected,
+    }
+
+
+def replace_timed_dialogue_segment(master_audio, replacement_audio,
+                                   replacement_timing_path, target_start_sec,
+                                   available_end_sec, old_end_sec, out):
+    """Replace one contaminated dialogue region without touching other performances."""
+    master_audio = pathlib.Path(master_audio).resolve()
+    replacement_audio = pathlib.Path(replacement_audio).resolve()
+    replacement_timing_path = pathlib.Path(replacement_timing_path).resolve()
+    out = pathlib.Path(out).resolve()
+    if not master_audio.is_file() or not replacement_audio.is_file():
+        raise AudioTimingError("segment repair source audio is missing")
+    timing = _read_json(replacement_timing_path)
+    if timing.get("audioSha256") != file_sha256(replacement_audio):
+        raise AudioTimingError("replacement timing metadata does not match its audio")
+    source_start, source_end = _source_ranges(timing, 1)[0]
+    source_duration = source_end - source_start
+    target_start_sec = float(target_start_sec)
+    available_end_sec = float(available_end_sec)
+    old_end_sec = float(old_end_sec)
+    if source_duration > available_end_sec - target_start_sec + WINDOW_TOLERANCE_SEC:
+        raise AudioTimingError(
+            f"replacement take is {source_duration:.2f}s but only "
+            f"{available_end_sec - target_start_sec:.2f}s is available")
+    master_duration = _probe_duration(master_audio)
+    if target_start_sec < 0 or old_end_sec <= target_start_sec or available_end_sec > master_duration:
+        raise AudioTimingError("invalid segment repair window")
+    fade = min(EDGE_FADE_SEC, source_duration / 4)
+    fade_out_start = max(0.0, source_duration - fade)
+    delay_ms = int(round(target_start_sec * 1000))
+    filters = (
+        f"[0:a]volume=0:enable='between(t,{target_start_sec:.6f},{old_end_sec:.6f})'[base];"
+        f"[1:a]atrim=start={source_start:.6f}:end={source_end:.6f},"
+        "asetpts=PTS-STARTPTS,"
+        f"aformat=sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
+        f"afade=t=in:st=0:d={fade:.6f},"
+        f"afade=t=out:st={fade_out_start:.6f}:d={fade:.6f},"
+        f"adelay={delay_ms}|{delay_ms}[replacement];"
+        "[base][replacement]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[outa]"
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run([
+        "ffmpeg", "-y", "-i", str(master_audio), "-i", str(replacement_audio),
+        "-filter_complex", filters, "-map", "[outa]", "-ar", str(SAMPLE_RATE),
+        "-ac", str(CHANNELS), "-c:a", "pcm_s16le", str(out),
+    ], capture_output=True, text=True)
+    if result.returncode or not out.is_file():
+        raise AudioTimingError("could not replace dialogue segment: " + result.stderr[-400:])
+    actual_duration = _probe_duration(out)
+    if abs(actual_duration - master_duration) > WINDOW_TOLERANCE_SEC:
+        raise AudioTimingError("segment repair changed the master duration")
+    contract = {
+        "schemaVersion": 1,
+        "operation": "replace-timed-dialogue-segment",
+        "masterSourcePath": str(master_audio),
+        "masterSourceSha256": file_sha256(master_audio),
+        "replacementAudioPath": str(replacement_audio),
+        "replacementAudioSha256": file_sha256(replacement_audio),
+        "replacementTimingPath": str(replacement_timing_path),
+        "replacementTimingSha256": file_sha256(replacement_timing_path),
+        "targetStartSec": target_start_sec,
+        "targetEndSec": target_start_sec + source_duration,
+        "availableEndSec": available_end_sec,
+        "replacedEndSec": old_end_sec,
+        "edgeFadeSec": fade,
+        "durationSec": master_duration,
+        "outputPath": str(out),
+        "outputSha256": file_sha256(out),
+    }
+    contract_path = timed_master_contract_path(out)
+    contract_path.write_text(json.dumps(contract, indent=2, ensure_ascii=False) + "\n",
+                             encoding="utf-8")
+    return {**contract, "contractPath": str(contract_path),
+            "contractSha256": file_sha256(contract_path)}

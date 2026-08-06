@@ -1,9 +1,11 @@
 """Runtime safety layer for the single Crystal Bears production path.
 
-Installed by cb_render after its implementation functions are defined. It makes every paid
-handoff consume only current, human-approved specialist work. Package revisions remain audit
-provenance; validity is decided from the exact inputs an artefact actually depends on. No
-provider is called from this module by itself.
+Installed by cb_render after its implementation functions are defined. Paid handoffs consume
+only current, signed specialist direction. Direction is machine-authored production input, not
+a claim that a human approved prose they cannot meaningfully judge. Human approval remains on
+observable media: keyframes, performances, animation takes and final masters. Package revisions
+remain audit provenance; validity is decided from the exact inputs an artefact actually depends
+on. No provider is called from this module by itself.
 """
 import hashlib
 import json
@@ -12,6 +14,7 @@ import pathlib
 import re
 import uuid
 
+import cb_audio_timing
 import cb_canon
 import cb_providers
 
@@ -23,7 +26,7 @@ def install(m):
         "department_status", "prepare_department", "save_department_candidate", "decide_department",
         "_resolve_keyframe_prompt", "_keyframe_input_signature", "voice_shot", "approve_voice", "reject_voice",
         "restore_previous_voice_take", "keyframe_shot", "select_keyframe_source",
-        "approve_keyframe", "reassess_keyframe", "_anchor_for", "_resolve_seedance_prompt",
+        "approve_keyframe", "reject_keyframe", "reassess_keyframe", "_anchor_for", "_resolve_seedance_prompt",
         "check_seedance_structure", "fire_shot", "next_shot", "approve_shot",
         "stitch_scene")}
 
@@ -36,6 +39,7 @@ def install(m):
         "review-animation": "review",
         "review-final": "post",
     }
+    direction_stages = {"look", "cinematography", "voice", "animation"}
 
     def package_cast(pkg):
         try:
@@ -90,16 +94,18 @@ def install(m):
             },
         }
 
-    def ordered_slot_signature(shot, slots_key, anchor, scene, episode):
-        slots = sorted(
-            (key for key in (shot.get(slots_key) or {}) if key.startswith("@图")),
-            key=lambda key: int(key[2:]),
-        )
-        paths = m._slot_paths(
-            shot, slots_key, anchor, scene, episode, m._characters_cfg())
-        return [{"slot": key, "role": shot[slots_key][key],
-                 "hash": file_sha256(path)}
-                for key, path in zip(slots, paths)]
+    def ordered_slot_signature(shot, slots_key, anchor, scene, episode,
+                               include_technical_controls=True):
+        del include_technical_controls
+        characters = m._characters_cfg()
+        plan = m._provider_attachment_plan(
+            shot, slots_key, anchor, scene, episode, characters)
+        return [{"slot": item["slot"], "sourceSlot": item["sourceSlot"],
+                 "role": item["role"], "view": item.get("view"),
+                 "sameCharacterGroup": ((item.get("identity") or {}).get(
+                     "turnaroundGroupHash")),
+                 "hash": file_sha256(item["path"])}
+                for item in plan]
 
     def department_input_signature(pkg, stage, shot_id, scene, episode):
         """The stable, direct inputs to one specialist decision.
@@ -135,10 +141,11 @@ def install(m):
         if stage == "cinematography":
             look = scene_status(scene, episode)
             return {**common,
-                    "sceneLookHash": ((look.get("approved") or {}).get("hash")
+                    "sceneLookHash": ((look.get("active") or {}).get("hash")
                                       if look.get("current") else None),
                     "references": ordered_slot_signature(
-                        shot, "keyframeReferenceSlots", None, scene, episode)}
+                        shot, "keyframeReferenceSlots", None, scene, episode,
+                        include_technical_controls=False)}
         if stage == "voice":
             characters = m._characters_cfg()
             return {**common,
@@ -171,41 +178,70 @@ def install(m):
         raise m.Refused(f"REFUSED — unknown department stage '{stage}'")
 
     def department_record_status(pkg, shot_id, stage, scene=None, episode=None):
+        """Resolve the current operational record for one department stage.
+
+        A freshly prepared direction is operational when its direct-input signature is current.
+        Review stages still require a human-approved record because they judge rendered evidence.
+        Legacy approved direction remains valid and is preferred only when there is no newer
+        current prepared record.
+        """
         scene = str(scene if scene is not None else pkg.get("sceneNumber"))
         episode = episode or pkg.get("episode", "Ep1")
         work, _ = m._department_container(pkg, scene, shot_id, stage, episode)
-        record = work.get("approved") or {}
-        if not record or not record.get("output"):
-            return {"approved": False, "current": False, "reason": "not-approved",
-                    "record": record, "expectedInputSignature": None}
         try:
             expected = department_input_signature(pkg, stage, shot_id, scene, episode)
         except (m.Refused, OSError, ValueError) as exc:
-            return {"approved": True, "current": False, "reason": str(exc),
-                    "record": record, "expectedInputSignature": None}
-        current = record.get("inputSignature") == expected
-        return {"approved": True, "current": current,
-                "reason": None if current else "direct-input-signature-mismatch",
-                "record": record, "expectedInputSignature": expected}
+            record = work.get("candidate") or work.get("approved") or {}
+            return {"approved": bool(work.get("approved")),
+                    "prepared": bool(work.get("candidate")),
+                    "current": False, "reason": str(exc), "record": record,
+                    "source": None, "expectedInputSignature": None}
 
-    def approved_record(pkg, shot_id, stage):
+        sources = ([
+            ("prepared", work.get("candidate") or {}),
+            ("approved-legacy", work.get("approved") or {}),
+        ] if stage in direction_stages else [
+            ("human-approved", work.get("approved") or {}),
+        ])
+        existing = [(source, record) for source, record in sources
+                    if record and record.get("output")]
+        current_source, current_record = next(
+            ((source, record) for source, record in existing
+             if record.get("inputSignature") == expected),
+            (None, None),
+        )
+        record = current_record or (existing[0][1] if existing else {})
+        if current_record:
+            return {"approved": bool(work.get("approved")),
+                    "prepared": bool(work.get("candidate")),
+                    "current": True, "reason": None, "record": current_record,
+                    "source": current_source, "expectedInputSignature": expected}
+        return {"approved": bool(work.get("approved")),
+                "prepared": bool(work.get("candidate")),
+                "current": False,
+                "reason": ("direct-input-signature-mismatch" if existing else
+                           "not-prepared" if stage in direction_stages else "not-approved"),
+                "record": record, "source": None,
+                "expectedInputSignature": expected}
+
+    def current_direction_record(pkg, shot_id, stage):
         state = department_record_status(pkg, shot_id, stage)
         rec = state["record"]
         if not state["current"]:
             label = {"cinematography": "Cinematography", "voice": "Voice",
                      "animation": "Animation"}.get(stage, stage.title())
-            if state["reason"] == "not-approved":
+            if state["reason"] in ("not-prepared", "not-approved"):
                 prefix, suffix = "", ""
             else:
                 prefix = f"{label} direction is stale (STALE direct inputs). "
                 suffix = f" ({state['reason']})"
             raise m.Refused(
-                f"REFUSED — {prefix}Approve current {label} specialist direction for "
+                f"REFUSED — {prefix}Prepare current {label} specialist direction for "
                 f"{shot_id} first.{suffix}")
         return rec
 
-    def approved_output(pkg, shot_id, stage):
-        return approved_record(pkg, shot_id, stage)["output"]
+    def current_direction_output(pkg, shot_id, stage):
+        return current_direction_record(pkg, shot_id, stage)["output"]
 
     def resolve_scenelook_prompt(scene, episode="Ep1"):
         return look_prompt(scene, episode) or m._compile_scenelook_prompt(scene, episode)
@@ -213,35 +249,51 @@ def install(m):
     def scene_status(scene, episode="Ep1"):
         rec = m._load_scenelook_rec(scene, episode)
         approved, candidate = rec.get("approved"), rec.get("candidate")
-        approved_current = False
-        if approved:
+        def plate_current(record):
+            if not record:
+                return False
             try:
                 current_sig = look_input_signature(
-                    scene, episode, approved.get("path"), approved.get("referencePath"))
-                approved_current = (
-                    os.path.exists(approved.get("path") or "") and
-                    approved.get("hash") == file_sha256(approved.get("path")) and
-                    approved.get("inputSignature") == current_sig)
+                    scene, episode, record.get("path"), record.get("referencePath"))
+                return bool(
+                    os.path.exists(record.get("path") or "") and
+                    record.get("hash") == file_sha256(record.get("path")) and
+                    record.get("inputSignature") == current_sig)
             except (m.Refused, OSError, ValueError):
-                approved_current = False
+                return False
+
+        approved_current = plate_current(approved)
+        candidate_current = plate_current(candidate)
         if candidate:
-            return {"status": "awaiting", "current": approved_current, "approved": approved,
-                    "candidate": candidate, "history": rec.get("history", [])}
+            active = candidate if candidate_current else approved if approved_current else None
+            return {"status": "working" if candidate_current else "awaiting",
+                    "current": bool(active), "active": active,
+                    "activeSource": ("working" if candidate_current else
+                                     "approved" if approved_current else None),
+                    "candidateCurrent": candidate_current,
+                    "approvedCurrent": approved_current,
+                    "approved": approved, "candidate": candidate,
+                    "history": rec.get("history", [])}
         if approved:
             return {"status": "approved" if approved_current else "stale",
                     "current": approved_current,
+                    "active": approved if approved_current else None,
+                    "activeSource": "approved" if approved_current else None,
+                    "candidateCurrent": False, "approvedCurrent": approved_current,
                     "approved": approved, "candidate": None,
                     "history": rec.get("history", [])}
         history = rec.get("history", [])
         status = "rejected" if history and history[-1].get("outcome") == "rejected" else "none"
         return {"status": status, "current": False, "approved": None,
-                "candidate": None, "history": history}
+                "candidate": None, "active": None, "activeSource": None,
+                "candidateCurrent": False, "approvedCurrent": False,
+                "history": history}
 
     def look_prompt(scene, episode="Ep1"):
         pkg, _ = m.load_pkg(scene, episode)
         state = department_record_status(pkg, None, "look", scene, episode)
-        approved = state["record"]
-        prompt = ((approved.get("output") or {}).get("providerPrompt") or "").strip()
+        direction = state["record"]
+        prompt = ((direction.get("output") or {}).get("providerPrompt") or "").strip()
         return prompt if state["current"] and prompt else None
 
     def file_sha256(path):
@@ -251,7 +303,7 @@ def install(m):
             return None
 
     def look_input_signature(scene, episode, plate_path=None, reference_path=None):
-        """Every direct Scene Look input, including the approved specialist prompt and files."""
+        """Every direct Scene Look input, including current signed direction and files."""
         pkg, _ = m.load_pkg(scene, episode)
         prompt = look_prompt(scene, episode) or ""
         return {"canonProfileDigest": require_canon(pkg, episode, "look"),
@@ -263,7 +315,7 @@ def install(m):
     def generate_look(scene, episode="Ep1", reference_path=None, log=print):
         pkg, _ = current_package(scene, episode)
         if not look_prompt(scene, episode):
-            raise m.Refused("REFUSED — Approve Look Development direction first.")
+            raise m.Refused("REFUSED — Prepare current Look Development direction first.")
         result = original["generate_scenelook_plate"](
             scene, episode, reference_path=reference_path, log=log)
         rec = m._load_scenelook_rec(scene, episode)
@@ -280,14 +332,14 @@ def install(m):
         expected = look_input_signature(
             scene, episode, candidate.get("path"), candidate.get("referencePath"))
         if candidate.get("inputSignature") != expected:
-            raise m.Refused("REFUSED — approved Look direction changed after this candidate was generated")
+            raise m.Refused("REFUSED — current Look direction changed after this candidate was generated")
         return original["approve_scenelook"](scene, episode, reviewed_by, log)
 
     def select_look(scene, mode, episode="Ep1", upload_path=None, library_path=None,
                     reviewed_by="Julian", log=print):
         pkg, _ = current_package(scene, episode)
         if not look_prompt(scene, episode):
-            raise m.Refused("REFUSED — Approve Look Development direction first.")
+            raise m.Refused("REFUSED — Prepare current Look Development direction first.")
         result = original["select_scenelook_source"](
             scene, mode, episode, upload_path, library_path, reviewed_by, log)
         rec = m._load_scenelook_rec(scene, episode)
@@ -298,7 +350,24 @@ def install(m):
         return result
 
     def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
-        pkg, _ = current_package(scene, episode)
+        pkg, path = current_package(scene, episode)
+        work, save_extra = m._department_container(
+            pkg, scene, shot_id, stage, episode)
+        existing = work.get("candidate") or {}
+        if existing and stage in direction_stages:
+            expected = department_input_signature(
+                pkg, stage, shot_id, scene, episode)
+            if existing.get("inputSignature") != expected:
+                work.setdefault("history", []).append({
+                    **existing,
+                    "outcome": "invalidated",
+                    "invalidatedAt": m._now(),
+                    "invalidationReason": "direct inputs changed before replacement preparation",
+                })
+                work["candidate"] = None
+                save_extra(); m._save(pkg, path)
+                log(f"DEPARTMENT INVALIDATED — archived stale {stage} direction before "
+                    "preparing its replacement (no media generated)")
         original["prepare_department"](scene, stage, shot_id, episode, log)
         pkg, path = m.load_pkg(scene, episode)
         work, save_extra = m._department_container(pkg, scene, shot_id, stage, episode)
@@ -334,9 +403,13 @@ def install(m):
                     department_input_signature(pkg, stage, shot_id, scene, episode))
             except (m.Refused, OSError, ValueError):
                 candidate_current = False
-        return {**result, "approvalCurrent": approval["current"],
+        return {**result, "approvalCurrent": bool(
+                    approval["current"] and approval.get("source") in
+                    ("approved-legacy", "human-approved")),
                 "approvalReason": approval["reason"],
-                "candidateCurrent": candidate_current}
+                "candidateCurrent": candidate_current,
+                "directionReady": approval["current"],
+                "directionSource": approval.get("source")}
 
     def save_department(scene, stage, text=None, lines=None, shot_id=None,
                         episode="Ep1", reviewed_by="Julian", log=print):
@@ -351,20 +424,24 @@ def install(m):
             scene, stage, verdict, shot_id, note, episode, reviewed_by, log)
 
     def keyframe_prompt(pkg, shot):
-        prompt = str(approved_output(pkg, shot["shotId"], "cinematography")
-                     .get("providerPrompt") or "").strip()
-        if not prompt:
-            raise m.Refused(f"REFUSED — approved Cinematography direction for {shot['shotId']} has no prompt")
-        return prompt
+        direction = current_direction_output(pkg, shot["shotId"], "cinematography")
+        return m._compile_keyframe_integration_prompt(direction, shot)
 
     def voice_lines(pkg, shot):
-        output = approved_output(pkg, shot["shotId"], "voice")
-        lines, locked = output.get("lines") or [], shot.get("dialogueLines") or []
+        # The approved Voice direction supplies acting intent, but Julian's saved working
+        # text is the exact provider payload. The former safety wrapper silently rebuilt
+        # from department output and ignored the Audio desk edits even though the UI said
+        # they would be sent to ElevenLabs.
+        output = current_direction_output(pkg, shot["shotId"], "voice")
+        directed, locked = output.get("lines") or [], shot.get("dialogueLines") or []
+        if len(directed) != len(locked):
+            raise m.Refused(f"REFUSED — current Voice direction for {shot['shotId']} has the wrong line count")
+        lines, _source = m._resolve_voice_lines(pkg, shot)
         if len(lines) != len(locked):
-            raise m.Refused(f"REFUSED — approved Voice direction for {shot['shotId']} has the wrong line count")
+            raise m.Refused(f"REFUSED — current Voice payload for {shot['shotId']} has the wrong line count")
         result = []
         for index, (item, source) in enumerate(zip(lines, locked), start=1):
-            performed = str(item.get("performedText") or "").strip()
+            performed = str(item.get("text") or item.get("performedText") or "").strip()
             if m._norm(item.get("speaker")) != m._norm(source.get("speaker")):
                 raise m.Refused(f"REFUSED — Voice direction changed the speaker on line {index}")
             if m.cb_departments._spoken_words(performed) != m.cb_departments._spoken_words(source.get("exactText")):
@@ -405,11 +482,20 @@ def install(m):
                     "current": False, "reason": str(exc), "record": approval,
                     "expectedInputSignature": None}
         path = ledger.get("voPath")
+        raw_path = ledger.get("voRawPath")
+        timing_path = ledger.get("voTimingPath")
+        placement_path = ledger.get("voPlacementPath")
         current = bool(
             approval.get("approved") and path and os.path.exists(path) and
+            raw_path and os.path.exists(raw_path) and
+            timing_path and os.path.exists(timing_path) and
+            placement_path and os.path.exists(placement_path) and
             approval.get("path") == path and
             approval.get("inputSignature") == signature and
-            approval.get("contentHash") == file_sha256(path))
+            approval.get("contentHash") == file_sha256(path) and
+            approval.get("rawContentHash") == file_sha256(raw_path) and
+            approval.get("timingContentHash") == file_sha256(timing_path) and
+            approval.get("placementContentHash") == file_sha256(placement_path))
         return {"required": True, "approved": bool(approval.get("approved")),
                 "current": current,
                 "reason": None if current else "voice-approval-input-or-content-mismatch",
@@ -424,8 +510,9 @@ def install(m):
         """
         ledger = m._ledger(pkg, shot["shotId"])
         anchor = m._anchor_for(pkg, shot)
-        refs = m._slot_paths(
+        plan = m._provider_attachment_plan(
             shot, "referenceSlots", anchor, scene, episode, m._characters_cfg())
+        refs = [item["path"] for item in plan]
         look = scene_status(scene, episode)
         voice = voice_approval_status(pkg, shot, scene, episode)
         if shot.get("dialogueLines") and not voice["current"]:
@@ -437,9 +524,15 @@ def install(m):
             "shotHash": hashlib.sha256(json.dumps(
                 shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
             "openingFrameHash": file_sha256(anchor),
-            "sceneLookHash": ((look.get("approved") or {}).get("hash")
+            "sceneLookHash": ((look.get("active") or {}).get("hash")
                               if look.get("current") else None),
-            "referenceOrder": list((shot.get("referenceSlots") or {}).keys()),
+            "referenceOrder": [item["slot"] for item in plan],
+            "referenceBindings": [
+                {"slot": item["slot"], "sourceSlot": item["sourceSlot"],
+                 "role": item["role"], "view": item.get("view"),
+                 "sameCharacterGroup": ((item.get("identity") or {}).get(
+                     "turnaroundGroupHash"))}
+                for item in plan],
             "referenceHashes": [file_sha256(path) for path in refs],
             "voiceHash": (file_sha256(ledger.get("voPath"))
                           if shot.get("dialogueLines") else None),
@@ -447,12 +540,14 @@ def install(m):
                                        if shot.get("dialogueLines") else None),
         }
 
-    def animation_generation_signature(pkg, shot, scene, episode, fast=False):
-        direction = approved_record(pkg, shot["shotId"], "animation")
+    def animation_generation_signature(pkg, shot, scene, episode, fast=False,
+                                       comparison_model_id=None,
+                                       comparison_run_id=None):
+        direction = current_direction_record(pkg, shot["shotId"], "animation")
         prompt = str((direction.get("output") or {}).get("providerPrompt") or "").strip()
         if not prompt:
             raise m.Refused(
-                f"REFUSED — approved Animation direction for {shot['shotId']} has no prompt")
+                f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
         anchor = m._anchor_for(pkg, shot)
         refs = ordered_slot_signature(shot, "referenceSlots", anchor, scene, episode)
         voice = voice_approval_status(pkg, shot, scene, episode)
@@ -461,12 +556,16 @@ def install(m):
                 f"REFUSED — {shot['shotId']}'s approved voice is missing or stale")
         ledger = m._ledger(pkg, shot["shotId"])
         try:
-            provider = cb_providers.request_contract(
-                fast=fast, duration=int(round(shot.get("durationSec") or 0)),
-                resolution="720p", image_count=max(1, len(refs)),
-                audio_count=1 if shot.get("dialogueLines") else 0)
-        except cb_providers.ProviderCapabilityError as exc:
+            plan = m._animation_execution_plan(
+                pkg, {**shot, "seedancePrompt": prompt}, ledger,
+                m._slot_paths(shot, "referenceSlots", anchor, scene, episode,
+                              m._characters_cfg()),
+                anchor, fast, comparison_model_id, comparison_run_id,
+                materialize_audio=False)
+        except (cb_providers.ProviderCapabilityError,
+                m.cb_seedance_transport.TransportPlanError) as exc:
             raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
+        provider = plan["segments"][0]["contract"]
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotContractHash": json_sha256(shot),
@@ -477,6 +576,9 @@ def install(m):
             "audioHash": (file_sha256(ledger.get("voPath"))
                           if shot.get("dialogueLines") else None),
             "durationSec": shot.get("durationSec"),
+            "comparisonModelId": comparison_model_id,
+            "comparisonRunId": comparison_run_id,
+            "executionPlanHash": json_sha256(plan),
             "provider": provider["provider"],
             "providerModelId": provider["providerModelId"],
             "modelVersion": provider["modelVersion"],
@@ -494,9 +596,13 @@ def install(m):
         approval = ledger.get("approval") or {}
         recorded = approval.get("inputSignature")
         fast = bool((recorded or {}).get("tier") == "fast")
+        comparison_model_id = (recorded or {}).get("comparisonModelId")
+        comparison_run_id = (recorded or {}).get("comparisonRunId")
         try:
             expected = animation_generation_signature(
-                pkg, shot, scene, episode, fast=fast)
+                pkg, shot, scene, episode, fast=fast,
+                comparison_model_id=comparison_model_id,
+                comparison_run_id=comparison_run_id)
         except (m.Refused, OSError, ValueError) as exc:
             return {"approved": bool(approval.get("approved")), "current": False,
                     "reason": str(exc), "record": approval,
@@ -529,20 +635,59 @@ def install(m):
                 raise m.Refused(f"REFUSED — no ElevenLabs voiceId for {source['speaker']}")
             turns.append({"text": performance["text"], "voice_id": voice_id})
         m.MEDIA.mkdir(parents=True, exist_ok=True)
-        out = m.MEDIA / f"{episode}_{shot_id}_vo_candidate_{uuid.uuid4().hex[:8]}.mp3"
+        take_id = uuid.uuid4().hex[:8]
+        raw_out = m.MEDIA / f"{episode}_{shot_id}_vo_raw_candidate_{take_id}.mp3"
+        out = m.MEDIA / f"{episode}_{shot_id}_vo_candidate_{take_id}.wav"
         previous = ledger.get("voPath")
-        m.cb_gen.eleven_dialogue(turns, out=str(out),
-                                 generation_kind="regeneration" if previous else "generation",
-                                 production_route="cb_render")
+        failed = ledger.get("voicePlacementFailure") or {}
+        reusable_raw = pathlib.Path(failed.get("rawPath") or "")
+        reusable_timing = pathlib.Path(failed.get("timingPath") or "")
+        reuse_failed_take = bool(
+            failed.get("generatedFrom") == lines and reusable_raw.is_file() and
+            reusable_timing.is_file())
+        if reuse_failed_take:
+            raw_out, timing_path = reusable_raw, reusable_timing
+            log(f"VOICE — {shot_id}: recovering the existing paid take; no provider call")
+        else:
+            m.cb_gen.eleven_dialogue(
+                turns, out=str(raw_out),
+                generation_kind="regeneration" if previous else "generation",
+                production_route="cb_render")
+            timing_path = cb_audio_timing.dialogue_timing_path(raw_out)
+        try:
+            placement = cb_audio_timing.render_timed_dialogue_master(
+                raw_out, timing_path, shot.get("dialogueLines") or [],
+                shot.get("durationSec"), out)
+        except cb_audio_timing.AudioTimingError as exc:
+            ledger["voicePlacementFailure"] = {
+                "rawPath": str(raw_out), "timingPath": str(timing_path),
+                "generatedFrom": lines,
+                "inputSignature": voice_signature(pkg, shot, lines),
+                "error": str(exc), "at": m._now(),
+            }
+            m._save(pkg, path)
+            raise m.Refused(
+                f"REFUSED — {shot_id}'s approved voice performance could not fit its "
+                f"approved timing windows: {exc}"
+            ) from exc
         if previous and os.path.exists(previous):
             try:
                 previous = str(pathlib.Path(previous).relative_to(m.HERE))
             except ValueError:
                 previous = str(previous)
-            ledger["voicePrevious"] = {"path": previous,
-                                         "generatedFrom": ledger.get("voGeneratedFrom"),
-                                         "supersededAt": m._now()}
+            ledger["voicePrevious"] = {
+                "path": previous,
+                "rawPath": ledger.get("voRawPath"),
+                "timingPath": ledger.get("voTimingPath"),
+                "placementPath": ledger.get("voPlacementPath"),
+                "generatedFrom": ledger.get("voGeneratedFrom"),
+                "supersededAt": m._now(),
+            }
         ledger.update({"voPath": str(out), "voGeneratedFrom": lines,
+                       "voRawPath": str(raw_out),
+                       "voTimingPath": str(timing_path),
+                       "voPlacementPath": placement["contractPath"],
+                       "voicePlacementFailure": None,
                        "voInputSignature": voice_signature(pkg, shot, lines),
                        "voPackageRevision": pkg.get("revision")})
         m._save(pkg, path)
@@ -554,18 +699,36 @@ def install(m):
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         signature = voice_signature(pkg, shot, voice_lines(pkg, shot))
         if ledger.get("voInputSignature") != signature:
-            raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current approved direction")
+            raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current signed direction")
+        for field in ("voPath", "voRawPath", "voTimingPath", "voPlacementPath"):
+            value = ledger.get(field)
+            if not value or not os.path.exists(value):
+                raise m.Refused(
+                    f"REFUSED — {shot_id}'s timestamped voice bundle is incomplete ({field})")
         result = original["approve_voice"](scene, shot_id, episode, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); ledger = m._ledger(pkg, shot_id)
         ledger["voiceApproval"].update({"packageRevision": pkg.get("revision"),
                                          "inputSignature": signature,
-                                         "contentHash": file_sha256(ledger.get("voPath"))})
+                                         "contentHash": file_sha256(ledger.get("voPath")),
+                                         "rawContentHash": file_sha256(ledger.get("voRawPath")),
+                                         "timingContentHash": file_sha256(
+                                             ledger.get("voTimingPath")),
+                                         "placementContentHash": file_sha256(
+                                             ledger.get("voPlacementPath"))})
         m._save(pkg, path)
         return ledger["voiceApproval"]
 
     def reject_voice(scene, shot_id, correction, episode="Ep1", reviewed_by="Julian", log=print):
+        before, _ = m.load_pkg(scene, episode)
+        bundle = {key: m._ledger(before, shot_id).get(key) for key in (
+            "voRawPath", "voTimingPath", "voPlacementPath")}
         result = original["reject_voice"](scene, shot_id, correction, episode, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); ledger = m._ledger(pkg, shot_id)
+        if ledger.get("voiceRejections"):
+            ledger["voiceRejections"][-1]["timingBundle"] = bundle
+        ledger["voRawPath"] = None
+        ledger["voTimingPath"] = None
+        ledger["voPlacementPath"] = None
         ledger["voInputSignature"] = None; ledger["voPackageRevision"] = None
         m._save(pkg, path)
         return result
@@ -573,9 +736,14 @@ def install(m):
     def restore_voice(scene, shot_id, episode="Ep1", log=print):
         """A restored take is current only when its recorded performance exactly matches."""
         current_package(scene, episode)
+        before, _ = m.load_pkg(scene, episode)
+        previous = dict(m._ledger(before, shot_id).get("voicePrevious") or {})
         result = original["restore_previous_voice_take"](scene, shot_id, episode, log)
         pkg, path = m.load_pkg(scene, episode)
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
+        ledger["voRawPath"] = previous.get("rawPath")
+        ledger["voTimingPath"] = previous.get("timingPath")
+        ledger["voPlacementPath"] = previous.get("placementPath")
         lines = voice_lines(pkg, shot)
         if ledger.get("voGeneratedFrom") == lines:
             ledger["voInputSignature"] = voice_signature(pkg, shot, lines)
@@ -598,20 +766,35 @@ def install(m):
         status = scene_status(scene, episode)
         return {"cardHash": m._live_card_hash(shot["shotId"], scene, episode),
                 "canonProfileDigest": canon_digest,
-                "sceneLookHash": (status.get("approved") or {}).get("hash") if status.get("current") else None,
+                "sceneLookHash": (status.get("active") or {}).get("hash") if status.get("current") else None,
                 "selectedAssetHash": m._file_md5(candidate.get("path")),
                 "source": candidate.get("source")}
 
     def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
         pkg, _ = current_package(scene, episode)
         result = original["keyframe_shot"](scene, shot_id, episode, log)
-        pkg, path = m.load_pkg(scene, episode); ledger = m._ledger(pkg, shot_id)
+        pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
+        ledger = m._ledger(pkg, shot_id)
         candidate = ledger["keyframeCandidate"]
         candidate["packageRevision"] = pkg.get("revision")
         candidate["inputSignature"] = keyframe_signature(
-            pkg, m._shot(pkg, shot_id), candidate, scene, episode)
+            pkg, shot, candidate, scene, episode)
         candidate["contentHash"] = file_sha256(candidate.get("path"))
+        candidate["conformanceScreening"] = m.screen_keyframe_conformance(
+            pkg, shot, candidate.get("path"), scene, episode, log)
         m._save(pkg, path)
+        screening = candidate["conformanceScreening"]
+        if screening.get("status") == "fail":
+            review = screening.get("review") or {}
+            correction = (review.get("recommendedCorrection") or
+                          screening.get("reason") or
+                          "The keyframe failed objective identity and scale checks.")
+            original["reject_keyframe"](
+                scene, shot_id,
+                "Automatic pre-approval QC: " + correction,
+                episode=episode, reviewed_by="Studio objective QC", log=log)
+            log(f"KEYFRAME HELD BACK — {shot_id}: objective identity/scale QC failed; "
+                "no automatic reroll was fired")
         return result
 
     def select_keyframe(scene, shot_id, mode, episode="Ep1", upload_path=None,
@@ -621,23 +804,107 @@ def install(m):
             scene, shot_id, mode, episode, upload_path, library_path, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
         candidate = m._ledger(pkg, shot_id)["keyframeCandidate"]
+        composition = m._load_opening_composition_master(
+            shot, scene, episode, m._characters_cfg())
+        candidate["geometryScreening"] = (
+            m.cb_layout.screen_candidate_geometry(candidate.get("path"), composition)
+            if composition else {
+                "status": "unavailable",
+                "reason": "No current local stage guide; human review owns this imported stage.",
+                "zeroSpend": True,
+                "providerCalled": False,
+            })
         candidate["packageRevision"] = pkg.get("revision")
         candidate["inputSignature"] = keyframe_signature(pkg, shot, candidate, scene, episode)
         candidate["contentHash"] = file_sha256(candidate.get("path"))
+        candidate["conformanceScreening"] = m.screen_keyframe_conformance(
+            pkg, shot, candidate.get("path"), scene, episode, log)
         m._save(pkg, path)
+        screening = candidate["conformanceScreening"]
+        if screening.get("status") != "pass":
+            log(f"KEYFRAME ADVISORY — {shot_id}: {screening.get('reason') or 'objective check did not pass'}; "
+                "the imported candidate remains available for the human Director's decision")
         return result
 
+    def rescreen_keyframe(scene, shot_id, episode="Ep1", log=print):
+        """Retry only the objective check; it never regenerates media or spends media credits."""
+        pkg, path = current_package(scene, episode)
+        shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
+        record = ledger.get("keyframeCandidate") or ledger.get("keyframeApproval")
+        if not record or not record.get("path") or not os.path.exists(record.get("path")):
+            raise m.Refused(f"REFUSED — {shot_id} has no keyframe media to screen")
+        screening = m.screen_keyframe_conformance(
+            pkg, shot, record["path"], scene, episode, log)
+        record["conformanceScreening"] = screening
+        m._save(pkg, path)
+        if (ledger.get("keyframeCandidate") is record and
+                record.get("source", "generated") == "generated" and
+                screening.get("status") == "fail"):
+            review = screening.get("review") or {}
+            correction = (review.get("recommendedCorrection") or screening.get("reason") or
+                          "The keyframe failed objective identity and scale checks.")
+            original["reject_keyframe"](
+                scene, shot_id,
+                "Automatic pre-approval QC: " + correction,
+                episode=episode, reviewed_by="Studio objective QC", log=log)
+        return screening
+
     def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
-        pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
+        pkg, path = current_package(scene, episode); shot = m._shot(pkg, shot_id)
+        composition = m._load_opening_composition_master(
+            shot, scene, episode, m._characters_cfg())
         candidate = m._ledger(pkg, shot_id).get("keyframeCandidate") or {}
+        screening = candidate.get("geometryScreening") or {
+            "status": "unavailable",
+            "reason": ("local stage guide is missing or stale" if not composition else
+                       "local stage screen was not run"),
+        }
+        # Layout screening is diagnostic evidence, not creative authority. The keyframe is
+        # intentionally a permissive stage for animation, so an explicit human Accept may
+        # override loose position/coverage warnings. Input lineage and file integrity remain
+        # hard gates below.
+        candidate["geometryScreening"] = screening
+        candidate["geometryAdvisoryDecision"] = {
+            "acceptedBy": reviewed_by,
+            "acceptedAt": m._now(),
+            "statusAtDecision": screening.get("status"),
+            "reasonAtDecision": screening.get("reason"),
+        }
+        conformance = candidate.get("conformanceScreening") or {}
+        human_selected = candidate.get("source", "generated") != "generated"
+        if human_selected:
+            # An imported/library/carried frame is an explicit human source choice. The
+            # automated screen remains visible evidence, but cannot overrule the Director's
+            # deliberate Accept. Reconstruct any metadata missing from an interrupted older
+            # selection so the approval is still content- and lineage-bound.
+            candidate["packageRevision"] = pkg.get("revision")
+            candidate["inputSignature"] = keyframe_signature(
+                pkg, shot, candidate, scene, episode)
+            candidate["contentHash"] = file_sha256(candidate.get("path"))
+            candidate["conformanceAdvisoryDecision"] = {
+                "acceptedBy": reviewed_by,
+                "acceptedAt": m._now(),
+                "statusAtDecision": conformance.get("status") or "unavailable",
+                "reasonAtDecision": (conformance.get("reason") or
+                                     "Objective identity and scale advice was unavailable."),
+            }
+        elif conformance.get("status") != "pass":
+            reason = conformance.get("reason") or "objective identity and scale check is missing"
+            raise m.Refused(
+                f"REFUSED — {shot_id} cannot be accepted: {reason}. Retry the check or "
+                "iterate the keyframe; this protection cannot be overridden.")
         expected = keyframe_signature(pkg, shot, candidate, scene, episode)
         if (candidate.get("inputSignature") != expected or
                 candidate.get("contentHash") != file_sha256(candidate.get("path"))):
             raise m.Refused(f"REFUSED — {shot_id}'s keyframe inputs changed; regenerate or reselect it")
+        m._save(pkg, path)
         result = original["approve_keyframe"](scene, shot_id, episode, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); approval = m._ledger(pkg, shot_id)["keyframeApproval"]
         approval.update({"packageRevision": pkg.get("revision"),
-                         "contentHash": file_sha256(approval.get("path"))})
+                         "contentHash": file_sha256(approval.get("path")),
+                         "conformanceScreening": conformance,
+                         "conformanceAdvisoryDecision": candidate.get(
+                             "conformanceAdvisoryDecision")})
         m._save(pkg, path)
         return result
 
@@ -653,12 +920,22 @@ def install(m):
             return {"current": False, "reason": str(exc),
                     "expectedInputSignature": None}
         path = record.get("path")
+        human_advisory_accepted = bool(
+            record.get("source", "generated") != "generated" and
+            (record.get("conformanceAdvisoryDecision") or {}).get("acceptedBy"))
+        conformance_current = bool(
+            (record.get("conformanceScreening") or {}).get("status") == "pass" or
+            human_advisory_accepted)
         current = bool(
             record.get("approved") and path and os.path.exists(path) and
             record.get("inputSignature") == expected and
-            record.get("contentHash") == file_sha256(path))
+            record.get("contentHash") == file_sha256(path) and
+            conformance_current)
         return {"current": current,
-                "reason": None if current else "keyframe-input-or-content-mismatch",
+                "reason": None if current else (
+                    "keyframe-conformance-not-passed"
+                    if not conformance_current
+                    else "keyframe-input-or-content-mismatch"),
                 "expectedInputSignature": expected}
 
     def reassess_keyframe(scene, shot_id, episode="Ep1"):
@@ -677,6 +954,12 @@ def install(m):
         changed = m._signature_diff(existing.get("inputSignature"), current_sig)
         if existing.get("contentHash") != file_sha256(existing.get("path")):
             changed.append("contentHash")
+        human_advisory_accepted = bool(
+            existing.get("source", "generated") != "generated" and
+            (existing.get("conformanceAdvisoryDecision") or {}).get("acceptedBy"))
+        if ((existing.get("conformanceScreening") or {}).get("status") != "pass" and
+                not human_advisory_accepted):
+            changed.append("conformanceScreening")
         return {"verdict": "carry_forward" if not changed else "regenerate",
                 "changed": changed, "existing": existing,
                 "currentSignature": current_sig}
@@ -695,11 +978,13 @@ def install(m):
         return result
 
     def seedance_prompt(pkg, shot):
-        prompt = str(approved_output(pkg, shot["shotId"], "animation")
+        prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
                      .get("providerPrompt") or "").strip()
         if not prompt:
-            raise m.Refused(f"REFUSED — approved Animation direction for {shot['shotId']} has no prompt")
-        return prompt, False
+            raise m.Refused(f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
+        return (m._with_character_scale_control(
+            prompt, shot, "referenceSlots", str(pkg.get("sceneNumber")),
+            pkg.get("episode") or "Ep1"), False)
 
     def check_structure(scene, shot_id, episode="Ep1", log=print):
         try:
@@ -710,12 +995,30 @@ def install(m):
                     "finalPrompt": ""}
 
     def fire_shot(scene, shot_id, episode="Ep1", candidates=3, fast=False,
-                  spend_token=None, dry_run=False, log=print):
+                  spend_token=None, dry_run=False, comparison_model_id=None,
+                  comparison_run_id=None, log=print):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
+        ledger = m._ledger(pkg, shot_id)
+        stored = ((ledger.get("batch") or {}).get("envelope") or
+                  (ledger.get("pendingSpendAuth") or {}).get("envelope") or {})
+        if stored.get("comparisonRunId"):
+            if comparison_model_id and (
+                    comparison_model_id != stored.get("providerModelId") or
+                    comparison_run_id != stored.get("comparisonRunId")):
+                raise m.Refused(
+                    "REFUSED — comparison settings differ from the sealed spend envelope")
+            comparison_model_id = stored.get("providerModelId")
+            comparison_run_id = stored.get("comparisonRunId")
         # Billing readiness is a global hard lock on every paid animation action. Surface it
         # before shot-local approvals so a disconnected or unconfirmed account can never be
         # mistaken for a creative-direction problem.
-        m._require_confirmed_billing("fal")
+        try:
+            billing_provider = (
+                "fal" if comparison_model_id else
+                cb_providers.video_model(require_enabled=False).provider)
+        except cb_providers.ProviderCapabilityError as exc:
+            raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
+        m._require_confirmed_billing(billing_provider)
         if shot.get("dialogueLines"):
             voice = voice_approval_status(pkg, shot, scene, episode)
             if not voice["current"]:
@@ -723,9 +1026,12 @@ def install(m):
                     f"REFUSED — Law 5: {shot_id}'s approved voice does not match current direction")
         seedance_prompt(pkg, shot)
         generation_signature = animation_generation_signature(
-            pkg, shot, scene, episode, fast=fast)
+            pkg, shot, scene, episode, fast=fast,
+            comparison_model_id=comparison_model_id,
+            comparison_run_id=comparison_run_id)
         result = original["fire_shot"](
-            scene, shot_id, episode, candidates, fast, spend_token, dry_run, log)
+            scene, shot_id, episode, candidates, fast, spend_token, dry_run,
+            comparison_model_id, comparison_run_id, log)
         pkg, path = m.load_pkg(scene, episode)
         ledger = m._ledger(pkg, shot_id)
         batch = ledger.get("batch") or {}
@@ -733,7 +1039,9 @@ def install(m):
             raise m.Refused(
                 f"REFUSED — {shot_id}'s provider batch did not finish with a complete contract")
         current_signature = animation_generation_signature(
-            pkg, m._shot(pkg, shot_id), scene, episode, fast=fast)
+            pkg, m._shot(pkg, shot_id), scene, episode, fast=fast,
+            comparison_model_id=comparison_model_id,
+            comparison_run_id=comparison_run_id)
         if current_signature != generation_signature:
             raise m.Refused(
                 f"REFUSED — {shot_id}'s direct generation inputs changed while its batch ran")
@@ -746,17 +1054,26 @@ def install(m):
         return result
 
     def next_shot(scene, episode="Ep1", candidates=3, fast=False,
-                  spend_token=None, dry_run=False, log=print):
+                  spend_token=None, dry_run=False, comparison_model_id=None,
+                  comparison_run_id=None, log=print):
         current_package(scene, episode)
-        return original["next_shot"](scene, episode, candidates, fast, spend_token, dry_run, log)
+        return original["next_shot"](
+            scene, episode, candidates, fast, spend_token, dry_run,
+            comparison_model_id, comparison_run_id, log)
 
     def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian", log=print):
         pkg, _ = current_package(scene, episode)
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         batch = ledger.get("batch") or {}
         fast = ((batch.get("envelope") or {}).get("tier") == "fast")
+        envelope = batch.get("envelope") or {}
+        comparison_model_id = (
+            envelope.get("providerModelId") if envelope.get("comparisonRunId") else None)
+        comparison_run_id = envelope.get("comparisonRunId")
         current_signature = animation_generation_signature(
-            pkg, shot, scene, episode, fast=fast)
+            pkg, shot, scene, episode, fast=fast,
+            comparison_model_id=comparison_model_id,
+            comparison_run_id=comparison_run_id)
         recorded_hashes = batch.get("candidateHashes") or []
         current_hashes = [
             {"path": candidate_path, "sha256": file_sha256(candidate_path)}
@@ -805,7 +1122,11 @@ def install(m):
     m.prepare_department = prepare_department
     m.save_department_candidate = save_department
     m.decide_department = decide_department
-    m._require_approved_department_output = approved_output
+    m._current_department_output = current_direction_output
+    # Compatibility aliases for older call sites. These now mean current signed direction;
+    # they never manufacture or imply a human approval.
+    m._require_approved_department_output = current_direction_output
+    m._approved_department_output = current_direction_output
     m._department_input_signature = department_input_signature
     m._department_record_status = department_record_status
     m._resolve_keyframe_prompt = keyframe_prompt
@@ -822,6 +1143,7 @@ def install(m):
     m.restore_previous_voice_take = restore_voice
     m.keyframe_shot = keyframe_shot
     m.select_keyframe_source = select_keyframe
+    m.rescreen_keyframe_conformance = rescreen_keyframe
     m.approve_keyframe = approve_keyframe
     m.reassess_keyframe = reassess_keyframe
     m._keyframe_record_input_signature = keyframe_signature

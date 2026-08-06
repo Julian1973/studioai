@@ -27,9 +27,11 @@ What the hybrid adds over v1 (each closed a named gap in PIPELINE_CUTOVER_LEDGER
   - A reference-first keyframe prompt per opener shot (anticipation, room to breathe,
     zero appearance text).
 
-A SCENE is a dramatic unit, a BEAT is a change in story/emotion/comedy, a SHOT is the
-camera's view of that beat. The render unit is the 4-8s shot, ONE performance assignment
-each; the shipped prompt stays platform-length. Zero renders are fired by this module.
+A SCENE is a dramatic unit, a BEAT is a change in story/emotion/comedy, and a production
+unit is one Seedance request with an opening anchor and continuity landing. The canonical
+Creative Room may combine consecutive beats and motivated internal camera views into a natural
+4-30s unit; its approved stage plan travels beside this compatibility schema. Zero renders are
+fired by this module.
 
     python3 cb_engine.py <scene> [episode]     # design + validate + compile one scene
 """
@@ -62,24 +64,34 @@ MAX_SHOT_PROMPT_WORDS = 210   # hard assertion on every compiled shot contract. 
                               # per shot, on top of the platform-length ACTION content — which stays
                               # capped by the mind's own 25-50-word assignment discipline. The cap
                               # still guards against action-content bloat; it is not licence for it.
+MAX_PACKED_UNIT_PROMPT_WORDS = 600  # Seedance 2.5 staged 4-30s units preserve several beats,
+                                    # internal views and beat-owned gag contracts. This applies
+                                    # only when the new explicit beatCodes contract is present;
+                                    # legacy short-shot packages retain the frozen 210-word cap.
 MAX_KEYFRAME_PROMPT_WORDS = 160
-MIN_SHOT_SEC, MAX_SHOT_SEC = 4, 8
+MIN_SHOT_SEC, MAX_SHOT_SEC = 4, 30
 
 
 def normalize_duration_range(value):
     """Turn an approved ``N-Ms`` range into the provider's exact whole-second duration.
-    Positive .5 values round up (rather than Python's banker rounding), then clamp to the
-    canonical shot bounds. This is shared by creative validation and handover so timing
-    windows and the value sent to the provider cannot disagree."""
+    Positive .5 values round up (rather than Python's banker rounding). The approved range
+    itself must fit the canonical Seedance production-unit window; out-of-range creative
+    intent is refused instead of being silently shortened. This is shared by creative
+    validation and handover so timing windows and the value sent to the provider cannot
+    disagree."""
     match = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*s\s*", str(value or ""))
     if not match:
         raise ValueError(f"un-parseable intendedDurationRange: {value!r}")
     lo, hi = float(match.group(1)), float(match.group(2))
     if not (0 < lo <= hi):
         raise ValueError(f"non-credible intendedDurationRange: {value!r}")
+    if lo < MIN_SHOT_SEC or hi > MAX_SHOT_SEC:
+        raise ValueError(
+            f"intendedDurationRange must stay within {MIN_SHOT_SEC}-{MAX_SHOT_SEC}s: "
+            f"{value!r}")
     midpoint = (lo + hi) / 2
     rounded = int(midpoint + 0.5)
-    return float(min(max(rounded, MIN_SHOT_SEC), MAX_SHOT_SEC))
+    return float(rounded)
 
 
 def compile_performance_contract(contract):
@@ -168,10 +180,20 @@ class PhysicalStaging(BaseModel):
     prohibitedStaging: List[str]                  # this gag's own specific failure modes
 
 
+class BeatPhysicalStaging(PhysicalStaging):
+    """One BIG-comedy staging contract with its immutable beat owner."""
+    beatCode: str = Field(min_length=1)
+
+
 class Shot(BaseModel):
-    """ONE camera view of one beat — ONE controlled performance assignment (§5)."""
+    """One Seedance production unit, with one controlled dramatic assignment.
+
+    The unit can contain motivated internal camera changes authored upstream, but remains one
+    continuous provider request with one opening anchor and one continuity landing.
+    """
     shotId: str                                   # e.g. "1.B1.S1"
     beatCode: str                                 # the beat this shot photographs
+    beatCodes: List[str] = Field(default_factory=list)  # every beat in a packed provider unit
     durationSec: float = Field(ge=MIN_SHOT_SEC, le=MAX_SHOT_SEC)
     purpose: str = Field(min_length=1)            # this shot's ONE job, one line
     performanceAssignment: str = Field(min_length=1)  # one cause with its visible consequences —
@@ -186,6 +208,7 @@ class Shot(BaseModel):
     dialogueLines: List[DialogueLine]             # the typed voice data (empty when nobody speaks)
     visualPayoff: str = Field(min_length=1)       # the exact image this shot must end having delivered
     physicalStaging: Optional[PhysicalStaging] = None  # required somewhere in every BIG-comedy beat
+    physicalStagings: List[BeatPhysicalStaging] = Field(default_factory=list)
     prohibited: List[str]                         # 0-3 shot-specific failure modes ONLY — never a wall
     charactersInFrame: List[str]                  # who is visible (reference bindings derive from this)
     # 2026-07-17 (Julian's system-freeze checkpoint, THE SIMPLIFICATION): typed absence,
@@ -196,6 +219,21 @@ class Shot(BaseModel):
     # Optional on the field that already existed.
     continuityIn: Optional[ContinuityState] = None  # the world as this shot opens (None: scene opener)
     continuityOut: ContinuityState                # the world as this shot ends — the next relay's truth
+
+
+def _shot_beat_codes(shot):
+    """Return every beat owned by a provider unit, with legacy single-beat fallback."""
+    return list(shot.beatCodes or [shot.beatCode])
+
+
+def _shot_physical_stagings(shot):
+    """Return beat-owned gag physics, accepting the legacy singular field read-only."""
+    if shot.physicalStagings:
+        return list(shot.physicalStagings)
+    if shot.physicalStaging:
+        return [BeatPhysicalStaging(
+            beatCode=shot.beatCode, **shot.physicalStaging.model_dump())]
+    return []
 
 
 class SceneShotList(BaseModel):
@@ -218,9 +256,9 @@ def _design_mind():
         "1. SCRIPT TRUTH: dialogue is locked. Copy each line into dialogueLines EXACTLY as given in "
         "the beats — same words, same order, every line assigned to exactly one shot, none dropped, "
         "none invented. delivery is acting direction, never a rewrite.\n"
-        "2. ONE performance assignment per shot: one physical/emotional cause with its visible "
-        "consequences — never a mini-film of competing actions. A dive AND a crash AND a recovery is "
-        "usually 2 shots, sometimes 3, never 1.\n"
+        "2. ONE dramatic throughline per production unit: a causal chain such as dive, crash and "
+        "recovery may stay together when each event causes the next and the honest performance fits "
+        "inside 30 seconds. Split competing actions or a genuine editorial boundary.\n"
         "3. The opening pose is ANTICIPATION, never the payoff: the character begins OUTSIDE the "
         "flower with the flower positioned for contact — never already buried in the result.\n"
         "4. Every cut is DESIGNED (matched action, reaction cut, eyeline, sound bridge, foreground "
@@ -301,7 +339,10 @@ def _design_user_prompt(scene_num, scene, beats):
         f"THE DIRECTOR'S LOCKED BEATS (the story truth — photograph these, never rewrite them):\n"
         f"{json.dumps(_beat_digest(beats), ensure_ascii=False, indent=1)}\n\n"
         "TASK 1 — the DIRECTOR'S STATEMENT for this scene (the six questions).\n"
-        "TASK 2 — the SHOT LIST: convert each beat into 1-3 shots of 4-8 seconds. shotId = "
+        "TASK 2 - the COMPATIBILITY UNIT LIST: use as few 4-30 second units as the story honestly "
+        "needs. Thirty seconds is available continuity capacity, never a duration target; "
+        "keep motivated internal camera cuts inside that request. Never add empty action to fill time "
+        "and never split for routine coverage. shotId = "
         "'{beatCode}.S{n}' (e.g. '1.B1.S1'). The FIRST shot of the scene is sourceType='opener' with "
         "sourceShotId=null; every later shot is 'relay' (sourceShotId = the earlier shot whose final "
         "frame it continues from, usually the previous one) when the action flows on directly, or "
@@ -376,9 +417,12 @@ REPAIR_PROMPT_VERSION = "2026-07-16.2"
 REPAIRABLE_CODES = ("ABSTRACT_DIRECTION", "FIELD_OVERBUDGET")
 REPAIR_PROTECTED_FIELDS = ("purpose", "durationSec", "camera", "dialogueLines", "dialogueBinding",
                             "continuityIn", "continuityOut", "prohibited", "physicalStaging",
+                            "physicalStagings", "beatCodes",
                             "sourceType", "sourceShotId", "openingPose", "charactersInFrame",
                             "shotId", "beatCode", "cutInMotivation")
-FEASIBILITY_LIMITS = ("One continuous 4-8 second shot, no camera cuts. Only what a camera can see "
+FEASIBILITY_LIMITS = ("One 4-30 second Seedance production unit. Internal camera changes are "
+                      "allowed only when already motivated by the approved story plan. Only what "
+                      "a camera can see "
                       "or a microphone can hear: movement, pose, expression, timing, physical "
                       "cause and effect, and sound. At most one or two clear actions per second. "
                       "No inner states, judgments, metaphors or narrative commentary.")
@@ -418,9 +462,9 @@ def _repair_context(shot):
         "camera": shot.camera,
         "dialogue": [{"speaker": l.speaker, "startSec": l.startSec, "endSec": l.endSec}
                       for l in shot.dialogueLines],
-        "authoredConstraints": (list(shot.prohibited)
-                                 + (list(shot.physicalStaging.prohibitedStaging)
-                                    if shot.physicalStaging else [])),
+        "authoredConstraints": (
+            list(shot.prohibited) + [item for staging in _shot_physical_stagings(shot)
+                                     for item in staging.prohibitedStaging]),
         "modelFeasibilityLimits": FEASIBILITY_LIMITS,
     }
 
@@ -583,6 +627,7 @@ def validate_scene_design(design, beats, characters_cfg):
     add = lambda sev, code, path, msg: issues.append(
         {"severity": sev, "code": code, "path": path, "message": msg})
 
+    source_beat_codes = {b.get("beatCode") for b in beats if b.get("beatCode")}
     known_ids, seen_lines = [], []
     shots_by_id = {}
     for i, sh in enumerate(design.shots):
@@ -590,6 +635,19 @@ def validate_scene_design(design, beats, characters_cfg):
         if sh.shotId in shots_by_id:
             add("ERROR", "DUPLICATE_SHOT_ID", path, sh.shotId)
         shots_by_id[sh.shotId] = sh
+
+        shot_beat_codes = _shot_beat_codes(sh)
+        if (not shot_beat_codes or len(shot_beat_codes) != len(set(shot_beat_codes)) or
+                sh.beatCode != shot_beat_codes[0]):
+            add("ERROR", "INVALID_BEAT_OWNERSHIP", f"{path}.beatCodes",
+                "packed beatCodes must be unique, non-empty and begin with beatCode")
+        for beat_code in shot_beat_codes:
+            if source_beat_codes and beat_code not in source_beat_codes:
+                add("ERROR", "UNKNOWN_BEAT", f"{path}.beatCodes", beat_code)
+        for staging in _shot_physical_stagings(sh):
+            if staging.beatCode not in shot_beat_codes:
+                add("ERROR", "PHYSICAL_STAGING_OWNER_MISMATCH",
+                    f"{path}.physicalStagings", staging.beatCode)
 
         for c in sh.charactersInFrame:
             if characters_cfg and _canon_speaker(c, characters_cfg) not in characters_cfg:
@@ -753,12 +811,15 @@ def validate_scene_design(design, beats, characters_cfg):
                             r"tilt|sweep|chase|barrel)\b", re.IGNORECASE)
     for i, sh in enumerate(design.shots):
         path = f"shots[{i}]({sh.shotId})"
-        if sh.dialogueLines and _CAM_MOVE.search(sh.camera or ""):
+        # Legacy short-shot proxies do not understand the explicit Seedance 2.5 stage and
+        # internal-shot contracts retained for packed units. Those plans are validated at
+        # handover and again by the Animation Director, so do not emit false warnings here.
+        if not sh.beatCodes and sh.dialogueLines and _CAM_MOVE.search(sh.camera or ""):
             add("WARNING", "CAMERA_MOVE_DURING_DIALOGUE", f"{path}.camera",
                 "the camera law prefers a locked camera while a line lands "
                 "(a hum/sing-song is exempt) — check the move is deliberate")
         frags = [f for f in re.split(r"[,;]", sh.performanceAssignment or "") if f.strip()]
-        if len(frags) >= 5:
+        if not sh.beatCodes and len(frags) >= 5:
             add("WARNING", "CHECKLIST_ASSIGNMENT", f"{path}.performanceAssignment",
                 f"{len(frags)} comma-separated fragments — the Motion Contract wants one "
                 "cause with chained consequences, not a checklist of verbs")
@@ -796,13 +857,19 @@ def validate_scene_design(design, beats, characters_cfg):
             add("ERROR", "SHOT_OVERBUDGET" if "cap" in str(e) else "COMPILE_GUARD",
                 f"shots[{i}]({sh.shotId})", str(e))
 
-    # the physical-staging contract: every BIG-comedy beat carries the gag physics somewhere
+    # The physical-staging contract: every BIG-comedy beat carries its exact gag physics once,
+    # including when several beats share one packed provider unit.
     big_beats = {b.get("beatCode") for b in beats
                  if str(b.get("comedyMode") or "").upper() == "BIG"}
-    staged = {sh.beatCode for sh in design.shots if sh.physicalStaging}
-    for bc in sorted(big_beats - staged):
+    staged = Counter(
+        staging.beatCode for sh in design.shots
+        for staging in _shot_physical_stagings(sh))
+    for bc in sorted(big_beats - set(staged)):
         add("ERROR", "MISSING_PHYSICAL_STAGING", f"beat {bc}",
             "a BIG-comedy beat needs the full physicalStaging contract on its gag-carrying shot")
+    for bc in sorted(code for code, count in staged.items() if count > 1):
+        add("ERROR", "DUPLICATE_PHYSICAL_STAGING", f"beat {bc}",
+            f"BIG-comedy staging appears {staged[bc]} times; it must have one carrier")
 
     return {"passed": all(i["severity"] != "ERROR" for i in issues), "issues": issues}
 
@@ -939,7 +1006,7 @@ def _conditional_constraints(shot, characters_cfg):
            for c in shot.charactersInFrame):                     # trigger: winged cast in frame
         out += [("no_crystals_on_bees", "no crystals on the bees"),
                 ("wings_keep_moving", "wings continue moving while airborne")]
-    if shot.physicalStaging:                                     # trigger: gag physics contract
+    if _shot_physical_stagings(shot):                            # trigger: gag physics contract
         out += [("no_body_inflation", "no body inflation"),
                 ("no_full_body_deflation", "no full-body deflation")]
     text = " ".join([shot.performanceAssignment or "", shot.openingPose or "",
@@ -970,8 +1037,8 @@ def hard_constraints(shot, characters_cfg):
     items dedup by canonical ID (SUBSUMES), conditionals cap at CONDITIONAL_CAP with the
     overflow DISCLOSED, the universal five always ship. Order: authored, universal, conditional."""
     authored = list(dict.fromkeys(               # exact-duplicate guard only — never fuzzy
-        (list(shot.physicalStaging.prohibitedStaging) if shot.physicalStaging else [])
-        + list(shot.prohibited)))
+        [item for staging in _shot_physical_stagings(shot)
+         for item in staging.prohibitedStaging] + list(shot.prohibited)))
     universal_ids = {cid for cid, _ in UNIVERSAL_CONSTRAINTS}
     conditional = _conditional_constraints(shot, characters_cfg)
     live_ids = universal_ids | {cid for cid, _ in conditional}
@@ -1036,8 +1103,10 @@ def _render_critical(shot):
     visibility guarantee and the continuity marks that must stay visible. Everything else stays
     INTERNAL — preserved, enforced by validation and review, never repeated at the provider."""
     out = []
-    if shot.physicalStaging and shot.physicalStaging.staysVisible:
-        sv = shot.physicalStaging.staysVisible.strip().rstrip(".")
+    for staging in _shot_physical_stagings(shot):
+        if not staging.staysVisible:
+            continue
+        sv = staging.staysVisible.strip().rstrip(".")
         # authored either as a noun phrase ("Fuzzby's whole silhouette above the petals") — needs
         # "Keep" — or as a full sentence ("Fuzzby begins outside the flower; ...") — ships verbatim
         if re.search(r"\b(is|are|begins?|stays?|remains?|keeps?|snaps?|holds?)\b",
@@ -1062,7 +1131,9 @@ def compile_shot_contract(shot, scene, characters_cfg):
     constraints, canon/continuity rules, repair history, provenance, review requirements) lives
     in the package — preserved and enforced by validation and review, never repeated at the
     provider. 'Not sent to Seedance' is not 'dropped from the production contract'.
-    Target 90-160 words; 210 is the hard failure ceiling. Duration/AR travel as API params.
+    Legacy target 90-160 words with a 210-word ceiling. Explicit Seedance 2.5 packed units
+    use a separate 600-word ceiling so approved multi-stage direction is never auto-trimmed.
+    Duration/AR travel as API params.
 
     2026-07-17 correction (Julian's audit, source-defect protection lifted for this one
     line only): the closing preservation sentence no longer unconditionally locks 'screen
@@ -1094,10 +1165,12 @@ def compile_shot_contract(shot, scene, characters_cfg):
         " ".join(s for s in closing if s),
     ])
     wc = len(prompt.split())
-    if wc > MAX_SHOT_PROMPT_WORDS:
+    word_limit = (MAX_PACKED_UNIT_PROMPT_WORDS
+                  if shot.beatCodes else MAX_SHOT_PROMPT_WORDS)
+    if wc > word_limit:
         raise ValueError(
-            f"shot {shot.shotId} brief is {wc} words (hard ceiling {MAX_SHOT_PROMPT_WORDS}, "
-            f"target 90-160) — tighten {shot.shotId}'s source direction; the internal contract "
+            f"shot {shot.shotId} brief is {wc} words (hard ceiling {word_limit}) — "
+            f"tighten {shot.shotId}'s source direction; the internal contract "
             f"is never auto-trimmed.")
     _assert_no_spoken_words(prompt, shot, "Seedance brief")
     return prompt, wc, reference_slots(shot, characters_cfg)
@@ -1206,7 +1279,8 @@ def compile_audio_brief(shot):
 
 
 def _ledger_entry(shot):
-    return {"shotId": shot.shotId, "beatCode": shot.beatCode, "status": "designed",
+    return {"shotId": shot.shotId, "beatCode": shot.beatCode,
+            "beatCodes": _shot_beat_codes(shot), "status": "designed",
             "sourceType": shot.sourceType, "sourceShotId": shot.sourceShotId,
             "cutInMotivation": shot.cutInMotivation,
             "continuityOut": shot.continuityOut.model_dump(),
@@ -1291,10 +1365,13 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
             md.append(f"**{ln['speaker']}** ({ln['startSec']:.0f}-{ln['endSec']:.0f}s): "
                       f"“{ln['exactText']}” — _{ln['delivery']}_")
         md.append(f"**Payoff:** {s['visualPayoff']}")
-        if s.get("physicalStaging"):
-            ps = s["physicalStaging"]
-            md.append(f"**Gag physics:** stays visible — {ps['staysVisible']}; contact/weight — "
-                      f"{ps['contactAndWeight']}; payoff shape — {ps['payoffShape']}")
+        staging_rows = s.get("physicalStagings") or []
+        if not staging_rows and s.get("physicalStaging"):
+            staging_rows = [{"beatCode": s.get("beatCode"), **s["physicalStaging"]}]
+        for ps in staging_rows:
+            md.append(f"**Gag physics ({ps['beatCode']}):** stays visible — "
+                      f"{ps['staysVisible']}; contact/weight — {ps['contactAndWeight']}; "
+                      f"payoff shape — {ps['payoffShape']}")
         md.append(f"**Prompt ({s['promptWords']} words):**\n```\n{s['seedancePrompt']}\n```")
         if s.get("keyframePrompt"):
             md.append(f"**Keyframe prompt ({s['keyframePromptWords']} words):**\n```\n{s['keyframePrompt']}\n```")

@@ -1,3 +1,9 @@
+> **Seedance 2.5 production override (2026-08-05):** script beats remain the source-truth
+> architecture, but they do not map one-to-one to renders. Package consecutive beats into natural
+> 4-30 second generation units under `engine/SEEDANCE_25_PRODUCTION_CONTRACT.md`. One unit carries
+> at most three causal stages and three motivated views. Story timing wins; 30 seconds is capacity,
+> never a padding target.
+
 <!-- RUNTIME_WORKER_START -->
 ## Runtime worker contract — Director
 

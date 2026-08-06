@@ -1,5 +1,12 @@
 # THE DEFINITIVE PIPELINE — Julian's ruling, 2026-07-16 (LOCKED)
 
+> **Seedance 2.5 execution note (2026-08-05):** the duration and provider-unit rules in
+> `engine/SEEDANCE_25_PRODUCTION_CONTRACT.md` supersede older 4-7 second clip guidance in this
+> document. The enduring rule below still governs: one generation receives one coherent
+> performance assignment, never a mini-film full of competing actions. A 4-30 second unit uses no
+> more than three causal stages and three motivated views; story timing, not the model ceiling,
+> chooses its duration.
+
 > **THIS IS THE ONE AUTHORITATIVE SPECIFICATION** (architecture recovery, 2026-07-16).
 > Every other doctrine document is subordinate: CLAUDE.md is the dated session record and
 > operating rules; PRODUCTION_DOCTRINE.md / GATE3_ANIMATION_DOCTRINE.md / MANIFEST.md govern
@@ -475,4 +482,3 @@ whether the generation or regeneration consumed credits — proven end to end by
 test_cb_gen. The three deferred re-home items are PROVEN independent of the old pipeline
 (test_cutover_independence: static AST + blocked-world subprocess + guarded-degrade +
 explicit-duration proofs).
-

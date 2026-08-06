@@ -22,6 +22,7 @@ def _profile(root, show_id="moon-lanterns", *, adapter="moon-lanterns-v1",
             "characters": characters,
             "locations": "canon/locations.json",
             "continuity": "canon/continuity.json",
+            "identityPacks": "canon/identity_packs.json",
         },
         "laws": {"style": "laws/style.txt"},
         "episodes": {
@@ -41,6 +42,7 @@ def test_profile_resolves_only_inside_selected_tenant(tmp_path):
     assert loaded.profile.showId == "moon-lanterns"
     assert loaded.scripts_path == show / "episodes" / "scripts"
     assert loaded.canon_paths["characters"] == show / "canon" / "characters.json"
+    assert loaded.canon_paths["identityPacks"] == show / "canon" / "identity_packs.json"
     report = studio_profile.capability_report(loaded)
     assert report["adapterReady"] is False
     assert report["productionReady"] is False

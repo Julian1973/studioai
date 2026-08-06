@@ -61,6 +61,7 @@ import sys
 from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic.json_schema import SkipJsonSchema
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -71,11 +72,13 @@ import cb_departments
 import cb_engine
 import cb_lineage
 import cb_scripts
+import cb_unit_packing
 
 CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
+UNIT_PACKING_CONTRACT_VERSION = 1
 MAX_INTERNAL_REVISIONS = 2
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
@@ -227,8 +230,12 @@ class Beat(BaseModel):
     exactDialogue: List[str]
     sourceBeatId: str = ""
     sourceEventIds: List[str] = Field(default_factory=list)
-    sourceEventRange: Dict = Field(default_factory=dict)
-    sourceEventSignature: Dict = Field(default_factory=dict)
+    # Source lineage is restored mechanically from the immutable beat package after the
+    # creative pass. Keeping these free-form dictionaries out of the provider response
+    # schema prevents OpenAI strict structured outputs from treating provenance as an
+    # authorable object while preserving it on the runtime model.
+    sourceEventRange: SkipJsonSchema[Dict] = Field(default_factory=dict)
+    sourceEventSignature: SkipJsonSchema[Dict] = Field(default_factory=dict)
     dialogueOccurrences: List[DialogueOccurrence] = Field(default_factory=list)
     participatingCharacters: List[str]
     whatChanges: str
@@ -279,7 +286,10 @@ class ShotPerformanceContract(BaseModel):
     performanceFreedom: str = Field(min_length=1)
     characterTruths: List[CharacterPerformanceTruth] = Field(
         default_factory=list, max_length=4)
-    comedyStaging: Optional[PhysicalComedyStaging] = None
+    # Gate 3 owns the canonical physical-comedy contract. This singular value is only a
+    # compatibility mirror for Gate 5's beatOwner; handover compiles every BIG beat's exact
+    # staging directly from the beat contract into its packed production unit.
+    comedyStaging: SkipJsonSchema[Optional[PhysicalComedyStaging]] = None
 
     @model_validator(mode="after")
     def phases_are_unique_and_ordered(self):
@@ -293,7 +303,7 @@ class ShotPerformanceContract(BaseModel):
 
 
 class ShotCinematographyContract(BaseModel):
-    """The story reason and observable design of one camera view."""
+    """The story reason and observable camera grammar of one production unit."""
     model_config = ConfigDict(extra="forbid")
 
     storyPointOfView: str = Field(min_length=1)
@@ -309,12 +319,51 @@ class ShotCinematographyContract(BaseModel):
     providerInstruction: str = Field(min_length=1, max_length=240)
 
 
-class CreativeShotCard(BaseModel):
-    """Gate 4 — the lean creative card. Detail exists because it contributes to the idea,
-    not because the schema contains a box; production data lives in ProductionDetail,
-    added only after the creative sequence passes Gate 6."""
+class StoryboardStage(BaseModel):
+    """One causal story step inside a Seedance production unit."""
+    model_config = ConfigDict(extra="forbid")
+
+    stageNumber: int = Field(ge=1, le=5)
+    beatIds: List[str] = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+    primaryEvent: str = Field(
+        min_length=1,
+        description="One primary visible state change, expressed as cause and effect.")
+    emotionalOrComicTurn: str = Field(min_length=1)
+    cameraAndTransition: str = Field(
+        min_length=1,
+        description="The motivated camera behaviour or cut that lets this stage land.")
+    observableEndState: str = Field(
+        min_length=1,
+        description="The directly visible state that proves this stage has completed.")
+
+
+class StoryboardInternalShot(BaseModel):
+    """One motivated camera view inside a single Seedance generation request."""
+    model_config = ConfigDict(extra="forbid")
+
+    shotNumber: int = Field(ge=1, le=6)
+    purpose: str = Field(min_length=1)
+    framingAndCamera: str = Field(min_length=1)
+    storyAction: str = Field(min_length=1)
+    performanceFocus: str = Field(min_length=1)
+    landingImage: str = Field(min_length=1)
+    cutReason: str = Field(
+        min_length=1,
+        description="Why this view or internal cut is stronger than remaining on the prior view.")
+
+
+class StoryboardCard(BaseModel):
+    """Gate 4's owned storyboard fields. Performance is intentionally absent so the
+    shot conference cannot author or invalidate the later Director performance pass."""
     shotId: str
     beatIds: List[str]                           # a continuous chain may span beats
+    targetDurationSec: Optional[int] = Field(
+        default=None, ge=4, le=30,
+        description="The natural approved story duration for this Seedance production unit. "
+                    "It is never padded to 30 seconds or compressed merely to fit a model limit.")
+    stagePlan: List[StoryboardStage] = Field(default_factory=list, max_length=5)
+    internalShotPlan: List[StoryboardInternalShot] = Field(default_factory=list, max_length=6)
     purpose: str
     audienceExperience: str
     openingImage: str = Field(description=(
@@ -334,11 +383,40 @@ class CreativeShotCard(BaseModel):
     transitionType: Literal["CONTINUOUS", "PLANNED_CUT"]
     transitionReason: str                        # cut: why continuous would be weaker;
     #                                              continuous: why a cut would weaken it
+    providerBoundaryReason: Literal[
+        "scene_end", "duration_limit", "location_or_time_change",
+        "reference_regime_change", "continuity_reset", "dramatic_editorial_break",
+        "complexity_protection"]
+    providerBoundaryExplanation: str = Field(
+        min_length=1,
+        description="Why the next material must start a new Seedance request instead of "
+                    "remaining inside this unit as a motivated internal cut.")
     cinematographyContract: Optional[ShotCinematographyContract] = None
-    physicalPerformance: Optional[str] = None    # Gate 5 (Director): body + animation intent
-    animationTiming: Optional[str] = None        # Gate 5 (Director): timing/weight of the move
-    performanceContract: Optional[ShotPerformanceContract] = None
     approvalState: str = "draft"
+
+    @model_validator(mode="after")
+    def production_unit_structure_is_ordered(self):
+        stage_numbers = [stage.stageNumber for stage in self.stagePlan]
+        if stage_numbers and stage_numbers != list(range(1, len(stage_numbers) + 1)):
+            raise ValueError("storyboard stages must be consecutive and begin at 1")
+        internal_numbers = [shot.shotNumber for shot in self.internalShotPlan]
+        if internal_numbers and internal_numbers != list(range(1, len(internal_numbers) + 1)):
+            raise ValueError("internal shots must be consecutive and begin at 1")
+        owned = set(self.beatIds)
+        for stage in self.stagePlan:
+            if not set(stage.beatIds).issubset(owned):
+                raise ValueError(
+                    f"stage {stage.stageNumber} names a beat outside this production unit")
+        if self.targetDurationSec and self.targetDurationSec > 15 and len(self.stagePlan) < 2:
+            raise ValueError("production units over 15 seconds require at least two story stages")
+        return self
+
+
+class CreativeShotCard(StoryboardCard):
+    """The runtime card after Gate 5 enriches the locked storyboard plan."""
+    physicalPerformance: Optional[str] = None
+    animationTiming: Optional[str] = None
+    performanceContract: Optional[ShotPerformanceContract] = None
 
 
 class BoundaryCharacterState(BaseModel):
@@ -385,10 +463,8 @@ class DialogueTimingWindow(BaseModel):
         return self
 
 
-class ProductionDetail(BaseModel):
-    """Production truth added only after Gate 6. Prose fields remain useful for human
-    review, but continuityInState/continuityOutState and dialogueTimings are the sole
-    executable continuity and timing authority."""
+class ProductionDetailDraft(BaseModel):
+    """Production-pass fields that the Director/Cinematographer may author."""
     model_config = ConfigDict(extra="forbid")
 
     shotId: str
@@ -399,10 +475,14 @@ class ProductionDetail(BaseModel):
     continuityOutState: ContinuityBoundary
     dialogueTimings: List[DialogueTimingWindow]
     referenceRoles: str
-    requiresNewKeyframe: bool
-    intendedDurationRange: str
     dialogueOccurrenceIds: List[str] = Field(default_factory=list)
     essentialProviderProtections: List[str] = Field(default_factory=list, max_length=3)
+
+
+class ProductionDetail(ProductionDetailDraft):
+    """Canonical execution truth after mechanical keyframe and duration derivation."""
+    requiresNewKeyframe: bool
+    intendedDurationRange: str
 
 
 class VoicePerformance(BaseModel):
@@ -475,11 +555,21 @@ class SceneDirection(BaseModel):
 
 
 class ShotConference(BaseModel):
-    shots: List[CreativeShotCard]
+    shots: List[StoryboardCard]
+
+
+class PerformanceCard(BaseModel):
+    """Only the fields Gate 5 may author for an existing storyboard card."""
+    model_config = ConfigDict(extra="forbid")
+
+    shotId: str = Field(min_length=1)
+    physicalPerformance: str = Field(min_length=1)
+    animationTiming: str = Field(min_length=1)
+    performanceContract: ShotPerformanceContract
 
 
 class PerformancePass(BaseModel):
-    shots: List[CreativeShotCard]
+    shots: List[PerformanceCard]
 
 
 class VoiceScript(BaseModel):
@@ -487,7 +577,7 @@ class VoiceScript(BaseModel):
 
 
 class ProductionPass(BaseModel):
-    details: List[ProductionDetail]
+    details: List[ProductionDetailDraft]
 
 
 class FieldProposal(BaseModel):
@@ -517,6 +607,8 @@ class ShowrunnerReview(BaseModel):
     judgement: str                               # a WRITTEN judgement — never a numerical score
     treatmentComparison: str                     # explicitly: does the result still deliver the
     #                                              SELECTED treatment's central experience?
+    packingJudgement: str                        # explicitly: are all avoidable provider joins gone?
+    packingPasses: bool
     passes: bool
     returnTo: Optional[Literal["gate3", "gate4"]] = None
     issues: List[ReviewIssue] = Field(default_factory=list)
@@ -1068,6 +1160,60 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # GATE 4 — DIRECTOR/CINEMATOGRAPHER SHOT CONFERENCE
 # ─────────────────────────────────────────────────────────────────────────────────────────
+def _validate_gate4_production_units(shots, beats):
+    """Refuse a storyboard that cannot become ordered 4-30s Seedance units."""
+    expected = [beat.beatId for beat in beats]
+    beat_index = {beat_id: index for index, beat_id in enumerate(expected)}
+    flattened = []
+    for shot in shots:
+        if shot.targetDurationSec is None:
+            raise RuntimeError(
+                f"PRODUCTION UNIT DURATION MISSING - {shot.shotId} needs a natural 4-30s "
+                "targetDurationSec")
+        if not shot.stagePlan:
+            raise RuntimeError(
+                f"PRODUCTION UNIT STAGES MISSING - {shot.shotId} needs 1-3 causal stages")
+        if not shot.internalShotPlan:
+            raise RuntimeError(
+                f"PRODUCTION UNIT CAMERA PLAN MISSING - {shot.shotId} needs at least one "
+                "motivated internal shot")
+        unknown = [beat_id for beat_id in shot.beatIds if beat_id not in beat_index]
+        if unknown:
+            raise RuntimeError(
+                f"PRODUCTION UNIT UNKNOWN BEAT - {shot.shotId} names {unknown[0]}")
+        stage_beats = []
+        for stage in shot.stagePlan:
+            for beat_id in stage.beatIds:
+                if beat_id not in stage_beats:
+                    stage_beats.append(beat_id)
+        if stage_beats != shot.beatIds:
+            raise RuntimeError(
+                f"PRODUCTION UNIT STAGE COVERAGE MISMATCH - {shot.shotId} carries "
+                f"{shot.beatIds}, but its stages carry {stage_beats}")
+        flattened.extend(shot.beatIds)
+
+    if not flattened and expected:
+        raise RuntimeError("PRODUCTION UNIT COVERAGE MISSING - the scene has no units")
+    indices = [beat_index[beat_id] for beat_id in flattened]
+    if indices != sorted(indices):
+        raise RuntimeError(
+            "PRODUCTION UNIT BEAT ORDER CHANGED - source beats must remain chronological")
+    covered = []
+    for beat_id in flattened:
+        if beat_id not in covered:
+            covered.append(beat_id)
+    if covered != expected:
+        raise RuntimeError(
+            "PRODUCTION UNIT BEAT COVERAGE MISMATCH - expected "
+            f"{expected}, got {covered}")
+    packing = cb_unit_packing.audit_units(shots)
+    if packing["blockingIssues"]:
+        issue = packing["blockingIssues"][0]
+        raise RuntimeError(
+            f"PRODUCTION UNIT PACKING INVALID - {issue['code']}: {issue['message']}")
+    return packing
+
+
 def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
                           review_notes="", log=print):
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (redesign the SEQUENCE — never patch "
@@ -1075,21 +1221,52 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
     sc = cb_llm.structured(
         _mind("DIRECTOR AND CINEMATOGRAPHER, IN SHOT CONFERENCE",
               ["directorTaste", "cinematographyTaste"],
-              "Design the shot sequence TOGETHER, inside the selected treatment. A shot "
-              "exists ONLY when it introduces a meaningful change in point of view, "
-              "information, scale, emotion, power, energy, spatial experience, comic timing "
-              "or visual idea — never to complete coverage. For EVERY cut, state why "
-              "remaining continuous would be weaker; for EVERY continuous shot, state why a "
-              "cut would weaken the experience (transitionReason). The camera may lead, "
+              "Design the sequence TOGETHER as Seedance 2.5 PRODUCTION UNITS, not routine "
+              "coverage shots. Each CreativeShotCard is one continuous provider request with "
+              "one opening anchor, one continuity landing and a natural targetDurationSec from "
+              "4 through 30 seconds. Thirty seconds is available continuity capacity, never a "
+              "target. Pack a complete causal arc only for the time its faithful setup, "
+              "development, escalation and payoff naturally require under one reference regime. Internal "
+              "camera cuts stay INSIDE that provider request. Never add empty action merely to "
+              "fill time and never compress an honest performance to hit the ceiling. Before "
+              "creating another provider unit, explicitly test whether its stages can fit in "
+              "the prior unit without exceeding 30 seconds. Split only where the story "
+              "needs a deliberate editorial boundary, a location/time/reference regime changes, "
+              "continuity needs a fresh anchor, or the honest performance would exceed 30 "
+              "seconds. A unit may span consecutive beats; do not create one unit per source "
+              "beat by default. Preserve every source beat and dialogue occurrence in exact "
+              "order. Inside each unit, author stagePlan with one to three consecutive causal "
+              "stages. Every stage names its beatIds, contains ONE primary visible state change, "
+              "states the emotional or comic turn, gives the motivated camera/transition "
+              "treatment and ends on an observable state. Author internalShotPlan with one to "
+              "three views. Each view exists ONLY when it introduces a meaningful change in point "
+              "of view, information, scale, emotion, power, energy, spatial experience, comic "
+              "timing or visual idea - never to complete coverage. Every internal view gives "
+              "its purpose, framing and camera, story action, performance focus, landing image "
+              "and cutReason. At production-unit boundaries, for EVERY cut state why remaining "
+              "continuous would be weaker; for EVERY continuous handoff state why a cut would "
+              "weaken the experience (transitionReason). Every card also owns the provider "
+              "boundary AFTER it. Set providerBoundaryReason to scene_end on the final card; "
+              "otherwise choose duration_limit, location_or_time_change, "
+              "reference_regime_change, continuity_reset, dramatic_editorial_break or "
+              "complexity_protection, and state the concrete providerBoundaryExplanation. "
+              "Thirty seconds is continuity capacity, not complexity capacity: never put more "
+              "than three causal stages or three motivated camera views into one provider unit. "
+              "If the faithful scene needs more, split at the strongest story-led boundary rather "
+              "than shrinking, rushing or omitting its performance. "
+              "duration_limit is truthful only when this unit plus the next unit's natural "
+              "duration exceeds 30 seconds. A dramatic or complexity split whose pair totals "
+              "30 seconds or less is exceptional and will be challenged by the Showrunner. "
+              "The camera may lead, "
               "pursue, lag, lose a character, rediscover a character, anticipate, arrive "
               "late, remain still, or abandon one character for another — NO behaviour is "
               "automatically preferred; choose what the treatment's experience demands. "
               "Geography stays understandable, but characters get no permanent screen "
               "sides. A reaction character receives a separate shot ONLY when that reaction "
               "changes the meaning — never as automatic punctuation. A chain may span "
-              "beats (beatIds lists every beat a shot carries). Keep each card LEAN: the "
-              "eight creative fields carry the idea; production detail comes later and "
-              "only if the sequence passes. "
+              "beats (beatIds lists every beat a production unit carries). Duration, causal "
+              "stages and motivated views define the approved edit; executable continuity, "
+              "reference attachment and provider protections come later. "
               "openingImage IS THE LITERAL FIRST FRAME (2026-07-17 correction, simplified "
               "same day) — a renderable description of the actual opening composition that "
               "makes THIS shot's experience visually legible, not a mood note and never a "
@@ -1105,7 +1282,8 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "character's spoken line, quoted or paraphrased: the audio track alone "
               "carries dialogue, and any of a shot's own dialogue words appearing here "
               "hard-refuses the whole scene's production handover (LAW 6). Every card also "
-              "needs a cinematographyContract. It records story point of view, shot scale, "
+              "needs a cinematographyContract. It records the production unit's governing "
+              "story point of view, scale, "
               "lens intent, camera height, composition, depth, camera behaviour, focus, "
               "lighting function and palette function before reducing them to one concise, "
               "observable providerInstruction. These are choices for this story beat, never "
@@ -1117,7 +1295,9 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
         f"THE BEATS:\n" + "\n".join(b.model_dump_json() for b in sd.beats)
         + f"{notes}\n\nshotId = 'S{scene_num}.SH<n>' in sequence order.",
         ShotConference, label=f"gate4_shots_s{scene_num}")
-    for shot in sc.shots:
+    shots = [CreativeShotCard(**shot.model_dump()) for shot in sc.shots]
+    packing = _validate_gate4_production_units(shots, sd.beats)
+    for shot in shots:
         if not shot.cinematographyContract:
             raise RuntimeError(
                 f"CINEMATOGRAPHY CONTRACT MISSING for {shot.shotId}")
@@ -1126,10 +1306,13 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
         if any(label in provider_line for label in empty_labels):
             raise RuntimeError(
                 f"CINEMATOGRAPHY CONTRACT USES AN EMPTY QUALITY LABEL in {shot.shotId}")
-    log(f"GATE 4 — {len(sc.shots)} shot(s): "
-        + " ".join(f"{s.shotId}[{'C' if s.transitionType=='CONTINUOUS' else 'K'}]"
-                    for s in sc.shots))
-    return sc.shots
+    log(f"GATE 4 - {len(shots)} Seedance production unit(s): "
+        + " ".join(f"{s.shotId}:{s.targetDurationSec}s/"
+                    f"{len(s.stagePlan)}st[{'C' if s.transitionType=='CONTINUOUS' else 'K'}]"
+                    for s in shots)
+        + f"; {len(packing['fullThirtySecondUnitIds'])} full 30s, "
+          f"{len(packing['mergeReviewRequired'])} merge review(s)")
+    return shots
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -1163,9 +1346,10 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
               "every provider-executable performanceContract field (the audio track alone "
               "carries dialogue; a shot's own dialogue words appearing here hard-refuses the "
               "whole scene's production handover, LAW 6). Change NOTHING else on the cards - "
-              "the sequence design is settled. A BIG comedy beat's physicalStaging must be "
-              "copied exactly into comedyStaging on exactly ONE shot carrying that beat. "
-              "No other shot receives comedyStaging."),
+              "the sequence design is settled. Never rewrite or copy physicalStaging. Handover "
+              "compiles every Gate 3 BIG-comedy staging mechanically into its packed unit. If "
+              "a BIG beat legitimately crosses a unit boundary, performanceContract.beatOwner "
+              "identifies the one unit carrying its physical payoff."),
         f"THE SELECTED TREATMENT:\n{treatment.model_dump_json()[:3000]}\n\n"
         f"THE BEAT EMOTION, COMEDY AND POWER CONTRACTS:\n"
         + "\n".join(b.model_dump_json() for b in sd.beats)
@@ -1183,6 +1367,11 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
             f"{expected_ids}, got {returned_ids}")
 
     beats_by_id = {beat.beatId: beat for beat in sd.beats}
+    big_beats = {
+        beat.beatId: beat.comedyContract.physicalStaging
+        for beat in sd.beats
+        if beat.comedyContract and beat.comedyContract.mode == "BIG"
+    }
     by_id = {s.shotId: s for s in shots}
     for s in pp.shots:
         d0 = by_id.get(s.shotId)
@@ -1240,33 +1429,34 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
         d0.animationTiming = s.animationTiming
         d0.performanceContract = contract
 
-    big_beats = {
-        beat.beatId: beat.comedyContract.physicalStaging
-        for beat in sd.beats
-        if beat.comedyContract and beat.comedyContract.mode == "BIG"
-    }
+    carriers_by_beat = {}
     for beat_id, staging in big_beats.items():
-        carriers = [
-            shot for shot in shots
-            if beat_id in shot.beatIds and shot.performanceContract and
-            shot.performanceContract.comedyStaging
-        ]
-        if len(carriers) != 1:
+        eligible = [shot for shot in shots if beat_id in shot.beatIds]
+        if not eligible:
             raise RuntimeError(
-                f"BIG COMEDY STAGING NEEDS ONE CARRIER - {beat_id} has {len(carriers)}")
-        if carriers[0].beatIds[0] != beat_id:
-            raise RuntimeError(
-                f"BIG COMEDY STAGING MUST OWN ITS SHOT - {carriers[0].shotId} starts on "
-                f"{carriers[0].beatIds[0]}, not {beat_id}")
-        if carriers[0].performanceContract.comedyStaging.model_dump() != staging.model_dump():
-            raise RuntimeError(
-                f"BIG COMEDY STAGING CHANGED DURING PERFORMANCE PASS - {beat_id}")
+                f"BIG COMEDY STAGING HAS NO PACKED UNIT - {beat_id}")
+        if len(eligible) == 1:
+            carrier = eligible[0]
+        else:
+            owned = [shot for shot in eligible if shot.performanceContract and
+                     shot.performanceContract.beatOwner == beat_id]
+            if len(owned) != 1:
+                raise RuntimeError(
+                    f"BIG COMEDY STAGING CARRIER AMBIGUOUS - {beat_id} crosses "
+                    f"{len(eligible)} units and has {len(owned)} performance owners")
+            carrier = owned[0]
+        carriers_by_beat[beat_id] = carrier.shotId
+
+    # Keep the legacy singular mirror honest without pretending it can represent every BIG
+    # beat in a multi-beat unit. The authoritative contracts remain on the beats above.
     for shot in shots:
-        if not (shot.performanceContract and shot.performanceContract.comedyStaging):
+        contract = shot.performanceContract
+        if not contract:
             continue
-        if not any(beat_id in big_beats for beat_id in shot.beatIds):
-            raise RuntimeError(
-                f"COMEDY STAGING HAS NO BIG BEAT - {shot.shotId}")
+        contract.comedyStaging = None
+        owner = contract.beatOwner
+        if owner in big_beats and carriers_by_beat.get(owner) == shot.shotId:
+            contract.comedyStaging = big_beats[owner].model_copy(deep=True)
     return shots
 
 
@@ -1325,7 +1515,8 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
 # GATE 6 — ADVERSARIAL SHOWRUNNER REVIEW
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, log=print):
-    return cb_llm.structured(
+    packing = cb_unit_packing.audit_units(shots)
+    review = cb_llm.structured(
         _mind("SHOWRUNNER", ["showrunnerTaste"],
               "ACTIVELY ATTEMPT TO REJECT this storyboard. Judge the COMPLETE scene, not "
               "isolated shot quality, for: repeated coverage patterns; repeated reaction-"
@@ -1336,16 +1527,32 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
               "SELECTED WHOLE-SCENE TREATMENT (treatmentComparison) — internal consistency "
               "alone is NOT enough; if the storyboard has lost the treatment's central "
               "experience, fail it and set returnTo to 'gate3' (beat architecture is wrong) "
-              "or 'gate4' (the shot sequence is wrong). Never request wording patches. Give "
-              "a WRITTEN judgement — never a score."),
+              "or 'gate4' (the shot sequence is wrong). Audit provider packing as a separate "
+              "decision. Seedance 2.5 can carry a complete 30-second arc with internal cuts, "
+              "so reject avoidable joins: if two adjacent units total 30 seconds or less, "
+              "accept the split only when its named boundary protects a real location/time, "
+              "reference, continuity, dramatic or complexity requirement. Prefer one full "
+              "30-second request when it safely carries setup, development, escalation and "
+              "payoff; never approve empty padding. State packingJudgement and packingPasses. "
+              "If packingPasses is false, passes must be false and returnTo must be gate4. "
+              "Never request wording patches. Give a WRITTEN judgement — never a score."),
         f"THE SELECTED TREATMENT (the contract this scene must deliver):\n"
         f"{treatment.model_dump_json()}\n\n"
         f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:3500]}\n\n"
         f"BEATS:\n" + "\n".join(b.model_dump_json()[:1600] for b in sd.beats)
         + "\n\nSHOTS:\n" + "\n".join(s.model_dump_json()[:1800] for s in shots)
+        + "\n\nDETERMINISTIC 30-SECOND PACKING AUDIT:\n"
+        + json.dumps(packing, ensure_ascii=False, indent=1)
         + "\n\nVOICE:\n" + "\n".join(v.model_dump_json()[:1100] for v in voices),
         ShowrunnerReview, label="gate6_review")
+    if not review.packingPasses:
+        review.passes = False
+        review.returnTo = "gate4"
+        if not any(issue.target == "unit-packing" for issue in review.issues):
+            review.issues.append(ReviewIssue(
+                role="director", target="unit-packing", issue=review.packingJudgement))
+    return review
 
 
 def _assign_dialogue_occurrences(shots, voices, details):
@@ -1446,15 +1653,14 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
               "The creative sequence has PASSED. Add the production layer only: "
               "human-readable continuityIn/Out and dialogueTiming review prose; typed "
               "continuityInState/continuityOutState; numeric dialogueTimings; reference "
-              "roles (which references anchor identity/environment); whether the shot requires a NEW "
-              "keyframe (a PLANNED_CUT does; a CONTINUOUS chain does not); a credible "
-              "intendedDurationRange per shot (e.g. '5-8s') authored FROM the shot's own "
-              "already-approved physicalPerformance and animationTiming (the weight and "
-              "timing of the move already decided at Gate 5) and the locked dialogue's own "
-              "timing where the shot carries a line — never invented independent of that "
-              "already-approved content, and never a re-authoring of the performance "
-              "itself; and AT MOST three genuinely provider-essential protections — only "
+              "roles (which references anchor identity/environment); and AT MOST three "
+              "genuinely provider-essential "
+              "protections - only "
               "what would invalidate the shot if violated, never a constraint wall. "
+              "The system derives requiresNewKeyframe from the approved transition and "
+              "intendedDurationRange from the locked targetDurationSec; never author either. "
+              "Keep every numeric dialogue window inside that card's locked duration and "
+              "never re-author the performance itself. "
               "continuityIn and continuityInState are ONLY what genuinely carry in from the shot immediately "
               "before this one — a mark, a position, an environmental state left over from "
               "what just happened. It is NEVER a second description of THIS shot's own "
@@ -1490,8 +1696,19 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
     out = []
     for s in shots:
         is_opener = (s.shotId == real_opener)
-        d = by_id[s.shotId]
-        d.requiresNewKeyframe = is_opener or (s.transitionType == "PLANNED_CUT")
+        if s.targetDurationSec is None:
+            raise RuntimeError(
+                f"PRODUCTION UNIT DURATION MISSING - {s.shotId}")
+        draft = by_id[s.shotId]
+        authored = {
+            field: getattr(draft, field)
+            for field in ProductionDetailDraft.model_fields
+        }
+        d = ProductionDetail(
+            **authored,
+            requiresNewKeyframe=is_opener or (s.transitionType == "PLANNED_CUT"),
+            intendedDurationRange=f"{s.targetDurationSec}-{s.targetDurationSec}s",
+        )
         if is_opener:
             d.continuityIn = ""
             d.continuityInState = None
@@ -1552,6 +1769,12 @@ def _validate_typed_production_contract(shots, details, shot_cast, real_opener):
             duration = cb_engine.normalize_duration_range(detail.intendedDurationRange)
         except ValueError as exc:
             raise RuntimeError(f"DURATION CONTRACT INVALID - {shot.shotId}: {exc}") from exc
+        if (shot.targetDurationSec is not None and
+                duration != float(shot.targetDurationSec)):
+            raise RuntimeError(
+                f"DURATION CONTRACT CHANGED STORY TIMING - {shot.shotId} targets "
+                f"{shot.targetDurationSec}s but {detail.intendedDurationRange!r} normalizes "
+                f"to {duration:g}s")
         for window in detail.dialogueTimings:
             if window.endSec > duration:
                 raise RuntimeError(
@@ -1765,8 +1988,10 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         "canonProfileDigest": ready["envelope"]["canonLock"]["profileDigest"],
         "canonSources": (ready.get("envelope") or {}).get("sources", {}),
     }
+    packing_audit = cb_unit_packing.audit_units(shots)
     pkg = {"episodeId": episode, "sceneNumber": str(scene_num),
            "engineVersion": ENGINE_VERSION, "canonVersion": CANON_VERSION,
+           "unitPackingContractVersion": UNIT_PACKING_CONTRACT_VERSION,
            "builtAt": _now(), "vision": vision,
            "sourceScript": source_pkg.get("sourceScript"),
            "sourceBeatPackage": {"path": str(_script_package(episode).relative_to(ROOT)),
@@ -1782,11 +2007,14 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "scene": sd.scene.model_dump(),
            "beats": [b.model_dump() for b in sd.beats],
            "shots": [s.model_dump() for s in shots],
+           "unitPackingAudit": packing_audit,
            "productionDetail": [d.model_dump() for d in details],
            "voicePerformances": [v.model_dump() for v in voices],
            "dialogueContract": _scene_dialogue_contract(sd.beats, voices, details),
            "showrunnerJudgement": review.judgement if review else "",
            "treatmentComparison": review.treatmentComparison if review else "",
+           "packingJudgement": review.packingJudgement if review else "",
+           "packingPasses": bool(review and review.packingPasses),
            "internalRevisions": revisions, "escalation": escalation,
            "provenance": {"showrunner": PROV("showrunner"), "director": PROV("director"),
                            "cinematographer": PROV("cinematographer"),
@@ -1795,7 +2023,9 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{episode}_scene{scene_num}_storyboard.json"
     json.dump(pkg, open(out, "w"), indent=1, ensure_ascii=False)
-    log(f"STORYBOARD v2 — scene {scene_num}: {len(sd.beats)} beat(s), {len(shots)} shot(s), "
+    log(f"STORYBOARD v2 — scene {scene_num}: {len(sd.beats)} beat(s), "
+        f"{len(shots)} Seedance unit(s), "
+        f"{len(packing_audit['fullThirtySecondUnitIds'])} full 30s, "
         f"{sum(1 for s in shots if s.transitionType == 'PLANNED_CUT')} keyframe shot(s), "
         f"{len(voices)} voice performance(s) -> {out.name}")
     return pkg

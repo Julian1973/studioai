@@ -34,12 +34,13 @@ def _run(bundle, script_approved, scene, extra_js=""):
     script = _extract_script()
     wrapper = f"""
 const document = {{
-  getElementById: () => ({{ classList:{{add(){{}},remove(){{}},toggle(){{}},contains(){{return false}}}}, value:'', innerHTML:'', style:{{}}, appendChild(){{}}, getAttribute(){{return null}} }}),
+  documentElement: {{ style:{{setProperty(){{}}}} }},
+  getElementById: () => ({{ classList:{{add(){{}},remove(){{}},toggle(){{}},contains(){{return false}}}}, value:'', innerHTML:'', style:{{}}, appendChild(){{}}, addEventListener(){{}}, setAttribute(){{}}, getAttribute(){{return null}} }}),
   addEventListener: () => {{}},
   querySelectorAll: () => [],
   querySelector: () => null,
 }};
-const window = {{}};
+const window = {{ location: {{ origin:'http://x' }}, innerWidth:1024, addEventListener(){{}} }};
 const localStorage = {{ getItem: () => null, setItem: () => {{}} }};
 const sessionStorage = {{ getItem: () => null, setItem: () => {{}} }};
 const history = {{ replaceState: () => {{}} }};

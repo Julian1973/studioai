@@ -41,8 +41,14 @@ approximates "is it funny").
     python3 cb_render.py scenelook-library <scene> [episode]
     python3 cb_render.py select-scenelook-upload  <scene> <uploadPath>  [episode]
     python3 cb_render.py select-scenelook-library <scene> <libraryPath> [episode]
+    python3 cb_render.py pose <scene> <shotId> <character> [episode]
+    python3 cb_render.py build-keyframe <scene> <shotId> [episode]
+    python3 cb_render.py approve-pose <scene> <shotId> <character> [episode]
+    python3 cb_render.py reject-pose <scene> <shotId> <character> "<reason>" [episode]
+    python3 cb_render.py select-pose-upload <scene> <shotId> <character> <path> [episode]
     python3 cb_render.py keyframe <scene> <shotId> [episode]
     python3 cb_render.py approve-keyframe <scene> <shotId> [episode]
+    python3 cb_render.py rescreen-keyframe <scene> <shotId> [episode]
     python3 cb_render.py reject-keyframe  <scene> <shotId> "<reason>" [episode]
     python3 cb_render.py keyframe-library <scene> <shotId> [episode]
     python3 cb_render.py select-upload  <scene> <shotId> <uploadPath> [episode]
@@ -61,13 +67,15 @@ approximates "is it funny").
     python3 cb_render.py department-status  <scene> <stage> <shotId|-> [episode]
     python3 cb_render.py next     <scene> [episode] [--candidates N] [--spend-token T]
     python3 cb_render.py fire     <scene> <shotId> [episode] [--candidates N] [--spend-token T]
+                                     [--comparison-model fal-seedance-2.0]
+                                     [--comparison-run-id <label>]
     python3 cb_render.py approve  <scene> <shotId> <candidateN> [episode]
     python3 cb_render.py reject   <scene> <shotId> "<correction>" [--category identity|geography|action-timing|instruction-ignored|other] [episode]
     python3 cb_render.py metrics  <scene> [episode]
     python3 cb_render.py stitch   <scene> [episode]
     python3 cb_render.py status   <scene> [episode]
 """
-import os, sys, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile, threading
+import os, sys, io, json, re, glob, pathlib, datetime, shutil, hashlib, uuid, subprocess, tempfile, threading
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_engine
@@ -77,13 +85,28 @@ import cb_departments
 import cb_lineage
 import cb_scripts
 import cb_db
+import cb_audio_timing
+import cb_prompt_lab
 import cb_providers
+import cb_seedance_pipeline
+import cb_seedance_transport
+import cb_layout
+import cb_identity
 import paths as P
 
 MEDIA = HERE / "media" / "shots"
 ROOT = HERE.parent
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 DUR_TOLERANCE_SEC = 1.5          # rendered clip may differ from designed duration by this much
+CHARACTER_SCALE_CONTROL_ROLE = "character scale control"
+CHARACTER_SCALE_CONTROL_MARKER = "[CANONICAL CHARACTER SCALE CONTROL]"
+OPENING_COMPOSITION_ROLE = "opening composition master"
+OPENING_COMPOSITION_MARKER = "[AUTHORITATIVE OPENING COMPOSITION]"
+POSED_INTEGRATION_ROLE = "qualified posed integration frame"
+POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
+POSE_QUALIFICATION_VERSION = 1
+POSE_LIBRARY_VERSION = 1
+MAX_KEYFRAME_INTEGRATION_WORDS = 300
 
 
 class Refused(RuntimeError):
@@ -239,6 +262,37 @@ def _characters_cfg():
         return {}
 
 
+def _identity_packs_cfg():
+    path = getattr(P, "IDENTITY_PACKS", None)
+    if not path:
+        raise Refused(
+            "REFUSED — this show has no declared provider identity-pack source; "
+            "no provider was contacted")
+    try:
+        data = json.load(open(path, encoding="utf-8"))
+    except Exception as exc:
+        raise Refused(
+            f"REFUSED — provider identity packs are unreadable: {exc}; "
+            "no provider was contacted") from exc
+    packs = data.get("characters") if isinstance(data, dict) else None
+    if (not isinstance(data, dict) or data.get("schemaVersion") != 1 or
+            not isinstance(packs, dict)):
+        raise Refused(
+            "REFUSED — provider identity packs use an unsupported schema; "
+            "no provider was contacted")
+    return packs
+
+
+def _identity_pack_for(name, characters_cfg):
+    canonical = _resolve_char(name, characters_cfg)
+    pack = _identity_packs_cfg().get(canonical)
+    if not isinstance(pack, dict):
+        raise Refused(
+            f"REFUSED — {canonical} has no locked single-subject provider identity pack; "
+            "add and canon-lock one before generation. No provider was contacted")
+    return canonical, pack
+
+
 def _resolve_char(name, characters_cfg):
     """Exact key first, then exact case-insensitive/apostrophe-normalized match ("FUZZBY" ->
     "Fuzzby") — never substring (the Keen/Keen's-Mum lesson). The design LLM authors
@@ -262,20 +316,38 @@ def _char_ref(name, characters_cfg):
     return str(path)
 
 
+def _provider_identity_record(name, characters_cfg, usage="keyframe"):
+    """Resolve one character's complete, uncropped turnaround provider attachment."""
+    canonical, pack = _identity_pack_for(name, characters_cfg)
+    try:
+        identity = cb_identity.materialize_provider_view(
+            canonical, pack, ROOT,
+            MEDIA.parent / "reference_controls" / "identity_packs",
+            usage=usage,
+        )
+    except cb_identity.IdentityPackError as exc:
+        raise Refused(f"REFUSED — {exc}; no provider was contacted") from exc
+    return identity
+
+
+def _provider_identity_records(name, characters_cfg, usage="keyframe"):
+    """Return exactly one intact turnaround attachment for one character identity."""
+    return [_provider_identity_record(name, characters_cfg, usage)]
+
+
 def _plate_path(scene, episode="Ep1"):
-    """2026-07-18 (Julian's production-safety directive, item 3 — direct-input lineage):
-    the CURRENTLY APPROVED plate is read from the Scene Look sidecar's own 'approved' record,
-    NEVER by globbing the media folder. Under the two-phase candidate lifecycle below, a
-    pending (unapproved) candidate's file sits at its OWN uniquely-named path in the SAME
-    folder — a glob would risk matching it, silently anchoring a keyframe on an unreviewed
-    candidate instead of the one genuinely approved artefact. This is also why a keyframe
-    action can never disturb the plate: it only ever READS this pointer, never writes it."""
+    """Resolve the signed current Scene Look working anchor, never by filename glob.
+
+    A current generated candidate may be used internally to prove the direction through a
+    keyframe; a legacy human-approved plate remains a valid fallback. scenelook_status owns the
+    exact hash/signature checks and returns the one active record explicitly.
+    """
     st = scenelook_status(scene, episode)
-    if not st["approved"] or not st["approved"].get("path") or not os.path.exists(st["approved"]["path"]):
-        raise Refused(f"REFUSED — no APPROVED scene plate found for {episode} scene {scene} "
-                      f"— the world anchor must be generated and approved first "
-                      f"(generate-scenelook, then approve-scenelook)")
-    return st["approved"]["path"]
+    active = st.get("active") or (st.get("approved") if st.get("current") else None)
+    if not active or not active.get("path") or not os.path.exists(active["path"]):
+        raise Refused(f"REFUSED — no current signed scene plate found for {episode} scene {scene} "
+                      "— generate the internal world anchor before the first keyframe")
+    return active["path"]
 
 
 # ── SCENE LOOK — the scene-level gate between Storyboard and Shot Production (Julian's
@@ -391,9 +463,9 @@ def _require_current_scenelook(scene, episode="Ep1"):
     against the plate's OWN direct-input signature — never the storyboard/package."""
     st = scenelook_status(scene, episode)
     if not st["current"]:
-        raise Refused(f"REFUSED — Scene Look Plate is '{st['status']}', not a current approval "
-                      f"for scene {scene} — the environment/palette/lighting anchor must be "
-                      f"approved (approve-scenelook) before any keyframe can be generated")
+        raise Refused(f"REFUSED — Scene Look Plate is '{st['status']}', not a current signed "
+                      f"working anchor for scene {scene} — prepare direction and generate the "
+                      "world plate before any keyframe can be generated")
 
 
 def _compile_scenelook_prompt(scene, episode="Ep1"):
@@ -441,10 +513,11 @@ def _resolve_scenelook_prompt(scene, episode="Ep1"):
 
 
 def approved_look_prompt(scene, episode="Ep1"):
-    """The Look Development specialist's own approved providerPrompt, verbatim, or None if
-    no direction has been approved yet (a pending/unapproved candidate never counts — the
-    exact bypass that let a near-empty canon fallback fire the 2026-07-19 dog-and-fox
-    misfire). This is the ONLY prompt source generate_scenelook_plate is now allowed to use."""
+    """Compatibility resolver for the current signed Look provider prompt.
+
+    The safety layer binds this name to current prepared direction. A legacy approved record
+    remains a valid source only while its direct-input signature is current.
+    """
     rec = _load_scenelook_rec(scene, episode)
     approved = ((rec.get("departmentWork") or {}).get("look") or {}).get("approved")
     prompt = ((approved or {}).get("output") or {}).get("providerPrompt")
@@ -452,11 +525,9 @@ def approved_look_prompt(scene, episode="Ep1"):
 
 
 def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=print):
-    """GENERATE SCENE {N} LOOK PLATE — ONE IMAGE. Generates exactly one plate CANDIDATE to
-    its own unique path; the currently-approved plate (if any) and its approval record are
-    completely untouched by this call, win or lose (2026-07-18 production-safety
-    correction). Refuses if a candidate is already pending a decision (reject it first).
-    Never auto-approved: a successful generation always lands as 'awaiting'.
+    """GENERATE SCENE {N} LOOK PLATE — ONE IMAGE. Generates exactly one working world anchor
+    to its own unique path; any legacy approved plate remains untouched by this call, win or
+    lose. Refuses if another working anchor exists until that anchor is deliberately iterated.
 
     reference_path (2026-07-19 fix): OPTIONAL, and only ever what the CALLER explicitly
     passes in — this function never looks in the Asset Library or anywhere else on its
@@ -465,23 +536,19 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
     guaranteed-422 empty edit-mode request. A real path here means a genuine, explicitly
     selected location/style reference, routed to the edit endpoint with that one image.
 
-    THE APPROVED-SPECIALIST HARD GATE (2026-07-19 — closing the bypass that produced the
-    dog-and-fox misfire): this call now REFUSES outright unless Scene {N}'s own Look
-    Development specialist direction has been APPROVED first — never a pending/unapproved
-    candidate, and never the old canon-compiled fallback (_resolve_scenelook_prompt /
-    _compile_scenelook_prompt are untouched and still used elsewhere for staleness
-    signatures, but are no longer a prompt SOURCE for a real generation call). The exact
-    approved providerPrompt is what gets submitted, verbatim — nothing rebuilt, reworded or
-    truncated on the way to cb_gen."""
+    The current-direction hard gate refuses unless Scene {N}'s own signed Look direction is
+    current. The old canon-compiled fallback is never a prompt source for a real generation
+    call. The exact signed provider prompt is submitted verbatim.
+    """
     st = scenelook_status(scene, episode)
     if st["candidate"]:
-        raise Refused(f"REFUSED — scene {scene} already has a Scene Look candidate awaiting "
-                      f"a decision; reject it first, or approve it, before generating another")
+        raise Refused(f"REFUSED — scene {scene} already has a working Scene Look anchor; "
+                      f"choose Iterate before generating another")
     if reference_path is not None and not pathlib.Path(reference_path).exists():
         raise Refused(f"REFUSED — reference_path does not exist: {reference_path}")
     prompt = approved_look_prompt(scene, episode)
     if not prompt:
-        raise Refused("REFUSED — Approve Look Development direction first.")
+        raise Refused("REFUSED — Prepare current Look Development direction first.")
     _require_confirmed_billing("fal")
     (HERE / "media").mkdir(parents=True, exist_ok=True)
     out = HERE / "media" / f"{episode}_S{scene}_plate_candidate_{uuid.uuid4().hex[:8]}.png"
@@ -496,9 +563,9 @@ def generate_scenelook_plate(scene, episode="Ep1", reference_path=None, log=prin
                         "referencePath": str(reference_path) if reference_path else None,
                         "generatedAt": _now()}
     _save_scenelook_rec(rec, scene, episode)
-    log(f"SCENE LOOK — {out.name} generated as a CANDIDATE ({'with 1 explicit reference' if reference_path else 'no reference — text-to-image'}; "
-        f"awaiting approval — the previously-approved plate, if any, is unchanged and still "
-        f"current) — approve-scenelook or reject-scenelook")
+    log(f"SCENE LOOK — {out.name} generated as the working world anchor "
+        f"({'with 1 explicit reference' if reference_path else 'no reference — text-to-image'}; "
+        f"its visual proof is the next keyframe; any legacy approved plate is unchanged)")
     return str(out)
 
 
@@ -641,21 +708,1509 @@ def scenelook_reference_library(scene, episode="Ep1"):
     return items
 
 
-def _slot_paths(shot, slots_key, anchor_path, scene, episode, characters_cfg):
-    """The image upload list, in the package's own persisted slot order — the order is the
-    contract; a fire that reorders references invalidates every inline @图N binding."""
-    out = []
-    slots = shot.get(slots_key) or {}
-    for slot in sorted((k for k in slots if k.startswith("@图")),
-                       key=lambda k: int(k[2:])):
-        role = slots[slot]
-        if role in ("opening keyframe", "previous shot final frame"):
-            out.append(anchor_path)
-        elif role == "scene plate":
-            out.append(_plate_path(scene, episode))
-        else:
-            out.append(_char_ref(role, characters_cfg))
+def _resolved_reference_path(path):
+    if not path:
+        return None
+    candidate = pathlib.Path(path)
+    if not candidate.is_absolute():
+        candidate = HERE / candidate
+    return candidate.resolve()
+
+
+def _reference_path_is_approved(path):
+    """References may come only from this Studio's media and approved asset libraries."""
+    candidate = _resolved_reference_path(path)
+    if not candidate:
+        return False
+    roots = {
+        (HERE / "media").resolve(),
+        MEDIA.resolve(),
+        MEDIA.parent.resolve(),
+        (ROOT / "cb-seed" / "assets").resolve(),
+        (ROOT / "projects").resolve(),
+    }
+    return any(candidate.is_relative_to(root) for root in roots)
+
+
+def _composition_master_record_path(scene, shot_id, episode="Ep1"):
+    safe_shot = re.sub(r"[^A-Za-z0-9._-]+", "_", str(shot_id))
+    return MEDIA.parent / "reference_controls" / (
+        f"{episode}_S{scene}_{safe_shot}_opening_composition.json")
+
+
+def _opening_composition_contract(pkg, shot, scene, episode, characters_cfg):
+    """Resolve typed DP blocking against the exact current plate and turnarounds."""
+    direction = _inspection_department_output(
+        pkg, shot.get("shotId"), "cinematography") or {}
+    raw_layout = direction.get("openingFrameLayout")
+    if not raw_layout:
+        return None
+    try:
+        layout = cb_departments.OpeningFrameLayout.model_validate(raw_layout).model_dump()
+    except Exception as exc:
+        raise Refused(
+            f"REFUSED — {shot.get('shotId')} has an invalid typed opening-frame layout: "
+            f"{exc}") from exc
+
+    cast = list(dict.fromkeys(shot.get("charactersInFrame") or []))
+    characters = {}
+    for supplied_name in cast:
+        name = _resolve_char(supplied_name, characters_cfg)
+        profile = characters_cfg.get(name) or {}
+        turnaround = _resolved_reference_path(_char_ref(name, characters_cfg))
+        characters[name] = {
+            "heightIn": profile.get("heightIn"),
+            "turnaroundPath": str(turnaround),
+            "turnaroundSha256": _sha256_file(turnaround),
+        }
+    try:
+        cb_layout.validate_layout(layout, characters)
+    except cb_layout.LayoutError as exc:
+        raise Refused(f"REFUSED — {shot.get('shotId')} layout is not renderable: {exc}") from exc
+
+    plate = _resolved_reference_path(_plate_path(scene, episode))
+    if not plate or not plate.exists():
+        raise Refused("REFUSED — the current Scene Look plate is missing")
+    core = {
+        "version": 1,
+        "shotId": shot.get("shotId"),
+        "layout": layout,
+        "scenePlateFile": plate.name,
+        "scenePlateSha256": _sha256_file(plate),
+        "characters": [{
+            "character": name,
+            "heightIn": values["heightIn"],
+            "turnaroundFile": pathlib.Path(values["turnaroundPath"]).name,
+            "turnaroundSha256": values["turnaroundSha256"],
+        } for name, values in characters.items()],
+    }
+    core["contractHash"] = hashlib.sha256(json.dumps(
+        core, sort_keys=True, ensure_ascii=False,
+        separators=(",", ":")).encode()).hexdigest()
+    return core, characters, plate
+
+
+def _load_opening_composition_master(shot, scene, episode, characters_cfg):
+    """Load only a composition proof that still matches every direct visual input."""
+    record_path = _composition_master_record_path(
+        scene, shot.get("shotId"), episode)
+    if not record_path.exists():
+        return None
+    try:
+        pkg, _ = load_pkg(scene, episode)
+        expected = _opening_composition_contract(
+            pkg, shot, scene, episode, characters_cfg)
+        if not expected:
+            return None
+        core, _, _ = expected
+        record = json.loads(record_path.read_text())
+        image_path = _resolved_reference_path(record.get("path"))
+        if (record.get("contractHash") != core.get("contractHash") or
+                not image_path or not image_path.exists() or
+                record.get("imageSha256") != _sha256_file(image_path)):
+            return None
+        return {**record, "path": str(image_path)}
+    except (OSError, ValueError, TypeError, KeyError, Refused):
+        return None
+
+
+def _ensure_opening_composition_master(pkg, shot, scene, episode, characters_cfg):
+    """Create or reuse the zero-spend full-frame blocking master for an opener."""
+    current = _load_opening_composition_master(
+        shot, scene, episode, characters_cfg)
+    if current:
+        return current
+    resolved = _opening_composition_contract(
+        pkg, shot, scene, episode, characters_cfg)
+    if not resolved:
+        raise Refused(
+            f"REFUSED — {shot.get('shotId')} has no typed opening-frame layout. "
+            "Prepare current Cinematography direction before generating a keyframe")
+    contract, characters, plate = resolved
+    try:
+        image_bytes, geometry = cb_layout.render_composition_master(
+            plate, characters, contract["layout"])
+    except cb_layout.LayoutError as exc:
+        raise Refused(
+            f"REFUSED — {shot.get('shotId')} composition proof failed: {exc}") from exc
+
+    controls = MEDIA.parent / "reference_controls"
+    image_path = controls / (
+        f"{episode}_S{scene}_{shot['shotId']}_composition_"
+        f"{contract['contractHash'][:12]}.png")
+    cb_db.atomic_write_bytes(
+        MEDIA.parent.parent.parent, image_path, image_bytes)
+    try:
+        stored_path = str(image_path.relative_to(HERE))
+    except ValueError:
+        stored_path = str(image_path.resolve())
+    record = {
+        **contract,
+        "role": OPENING_COMPOSITION_ROLE,
+        "path": stored_path,
+        "imageSha256": _sha256_file(image_path),
+        "geometry": geometry,
+        "generatedAt": _now(),
+        "zeroSpend": True,
+        "providerCalled": False,
+    }
+    cb_db.atomic_write_json(
+        MEDIA.parent.parent.parent,
+        _composition_master_record_path(scene, shot["shotId"], episode),
+        record)
+    return {**record, "path": str(image_path.resolve())}
+
+
+def prepare_opening_composition_master(scene, shot_id, episode="Ep1", log=print):
+    """Public zero-spend blocking proof, built before any image-provider request."""
+    pkg, _ = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    if shot.get("sourceType") != "opener":
+        raise Refused(
+            f"REFUSED — {shot_id} is a relay shot and inherits its opening composition")
+    control = _ensure_opening_composition_master(
+        pkg, shot, scene, episode, _characters_cfg())
+    log(f"COMPOSITION MASTER — {shot_id} -> {pathlib.Path(control['path']).name} "
+        "(zero spend; exact screen position, scale, depth and body angle)")
+    return control
+
+
+def save_opening_frame_layout(scene, shot_id, layout, episode="Ep1",
+                              reviewed_by="Julian", log=print):
+    """Edit only the typed blocking inside a pending Cinematography direction."""
+    pkg, path = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    work, save_extra = _department_container(
+        pkg, scene, shot_id, "cinematography", episode)
+    candidate = work.get("candidate")
+    if not candidate:
+        raise Refused(
+            f"REFUSED — {shot_id} has no current Cinematography direction to block")
+    try:
+        updated = cb_departments.CinematographyDirection.model_validate({
+            **candidate["output"], "openingFrameLayout": layout,
+        })
+    except Exception as exc:
+        raise Refused(f"REFUSED — invalid opening-frame layout: {exc}") from exc
+    characters_cfg = _characters_cfg()
+    character_inputs = {}
+    for supplied_name in (shot.get("charactersInFrame") or []):
+        name = _resolve_char(supplied_name, characters_cfg)
+        profile = characters_cfg.get(name) or {}
+        character_inputs[name] = {
+            "heightIn": profile.get("heightIn"),
+            "turnaroundPath": _char_ref(name, characters_cfg),
+        }
+    try:
+        cb_layout.validate_layout(
+            updated.openingFrameLayout.model_dump(), character_inputs)
+    except cb_layout.LayoutError as exc:
+        raise Refused(f"REFUSED — invalid opening-frame layout: {exc}") from exc
+    candidate["output"] = updated.model_dump()
+    candidate["editedAt"] = _now()
+    candidate["editedBy"] = reviewed_by
+    save_extra()
+    _save(pkg, path)
+    log(f"OPENING LAYOUT SAVED — {shot_id} (zero spend; composition proof can now build)")
+    return candidate["output"]["openingFrameLayout"]
+
+
+# ── Optional pose diagnostics (not part of the default keyframe path) ──────────────────
+# Retained for targeted repair experiments and legacy evidence. The production keyframe now
+# uses locked turnarounds and the Scene Look directly; generated pose plates and composites may
+# never silently replace those references or become a prerequisite for a playable stage.
+
+def _pose_placement(pkg, shot, character):
+    direction = _inspection_department_output(
+        pkg, shot.get("shotId"), "cinematography") or {}
+    layout = direction.get("openingFrameLayout") or {}
+    wanted = _resolve_char(character, _characters_cfg())
+    for placement in layout.get("placements") or []:
+        if _resolve_char(placement.get("character"), _characters_cfg()) == wanted:
+            return placement, layout
+    raise Refused(
+        f"REFUSED — {character} has no typed opening pose in current Cinematography direction")
+
+
+def _latest_pose_correction(pkg, shot, character):
+    """Return only the latest explicit correction for this character and pose contract."""
+    name = _resolve_char(character, _characters_cfg())
+    state = _pose_state(_ledger(pkg, shot["shotId"]), name)
+    for record in reversed(state.get("history") or []):
+        reason = str(record.get("reason") or "").strip()
+        if reason:
+            return reason
+        review = record.get("machineReview") or {}
+        correction = str(review.get("recommendedCorrection") or "").strip()
+        if correction:
+            return correction
+    return ""
+
+
+def _pose_prompt(pkg, shot, character):
+    characters_cfg = _characters_cfg()
+    name = _resolve_char(character, characters_cfg)
+    profile = characters_cfg.get(name) or {}
+    placement, _ = _pose_placement(pkg, shot, name)
+    features = str(profile.get("key_features") or "the exact locked character design")
+    avoid = str(profile.get("avoid") or "unapproved accessories or redesign")
+    correction = _latest_pose_correction(pkg, shot, name)
+    correction_block = (
+        "\n\n[Correction From The Previous Attempt]\n"
+        f"Correct only this observed failure: {correction}. Preserve every successful "
+        "identity, proportion, anatomy and acting feature from the locked reference."
+        if correction else "")
+    return (
+        "[Reference Role]\n"
+        f"@图1 defines {name}'s exact identity, face, silhouette, proportions, materials "
+        "and approved design. Do not use its background or neutral standing pose.\n\n"
+        "[Generation Goal]\n"
+        f"Create one isolated, full-body production pose reference of {name} alone. "
+        f"The approved design is: {features}. Preserve the reference's exact body width, "
+        "belly depth, head-to-body ratio, facial proportions, glasses, antennae, limbs "
+        "and wings; do not make the character fatter, thinner, taller or shorter.\n\n"
+        f"[Pose]\n{placement.get('pose')}. Facing: {placement.get('facing')}. "
+        f"The body axis reads at {placement.get('bodyAngleDegrees', 0):g} degrees in the "
+        "finished flight pose. Keep the complete silhouette visible with generous clear "
+        "space around every wing, antenna, hand and foot.\n\n"
+        "[Presentation]\n"
+        "Single character only, centred on a flat neutral light-grey studio background, "
+        "even soft lighting, no environment, no floor contact shadow, no scenery and no "
+        "camera crop. This is a clean pose plate for later compositing, not a finished shot."
+        f"{correction_block}\n\n"
+        f"[Forbidden]\nNo duplicate character, extra limbs, missing wings, frozen flight "
+        f"wings, identity drift, body inflation, text, logo, watermark, prop or {avoid}."
+    )
+
+
+def _pose_input_signature(pkg, shot, character):
+    characters_cfg = _characters_cfg()
+    name = _resolve_char(character, characters_cfg)
+    placement, _ = _pose_placement(pkg, shot, name)
+    identity = _resolved_reference_path(_char_ref(name, characters_cfg))
+    prompt = _pose_prompt(pkg, shot, name)
+    return {
+        "version": 2,
+        "shotId": shot.get("shotId"),
+        "character": name,
+        "cardHash": _live_card_hash(
+            shot.get("shotId"), str(pkg.get("sceneNumber")),
+            pkg.get("episode") or "Ep1"),
+        "identitySha256": _sha256_file(identity),
+        "heightIn": (characters_cfg.get(name) or {}).get("heightIn"),
+        "placement": placement,
+        "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        "provider": cb_gen.IMAGE_PROVIDER,
+        "providerModelId": (cb_gen.SEEDREAM_ENDPOINT
+                            if cb_gen.IMAGE_PROVIDER == "seedream"
+                            else cb_gen.IMAGE_MODEL),
+    }
+
+
+def _pose_library_signature(pkg, shot, character):
+    """The exact reusable acting contract, independent of shot position and episode."""
+    characters_cfg = _characters_cfg()
+    name = _resolve_char(character, characters_cfg)
+    profile = characters_cfg.get(name) or {}
+    placement, _ = _pose_placement(pkg, shot, name)
+    identity = _resolved_reference_path(_char_ref(name, characters_cfg))
+    return {
+        "version": POSE_LIBRARY_VERSION,
+        "character": name,
+        "identitySha256": _sha256_file(identity),
+        "heightIn": profile.get("heightIn"),
+        "profileHash": hashlib.sha256(json.dumps({
+            "keyFeatures": profile.get("key_features"),
+            "avoid": profile.get("avoid"),
+        }, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
+        "acting": {
+            "pose": placement.get("pose"),
+            "facing": placement.get("facing"),
+            "bodyAngleDegrees": placement.get("bodyAngleDegrees", 0),
+        },
+    }
+
+
+def _pose_library_key(pkg, shot, character):
+    signature = _pose_library_signature(pkg, shot, character)
+    digest = hashlib.sha256(json.dumps(
+        signature, sort_keys=True, ensure_ascii=False,
+        separators=(",", ":")).encode()).hexdigest()
+    return digest, signature
+
+
+def _pose_library_record_path(pkg, shot, character):
+    key, _ = _pose_library_key(pkg, shot, character)
+    name = re.sub(r"[^A-Za-z0-9._-]+", "_", _resolve_char(
+        character, _characters_cfg()))
+    return MEDIA.parent / "pose_library" / name / f"{key}.json"
+
+
+def _load_pose_library_record(pkg, shot, character):
+    """Resolve an immutable, machine-qualified exact-contract pose without mutating state."""
+    key, signature = _pose_library_key(pkg, shot, character)
+    record_path = _pose_library_record_path(pkg, shot, character)
+    if not record_path.exists():
+        return None
+    try:
+        record = json.loads(record_path.read_text())
+        asset = _resolved_reference_path(record.get("path"))
+        review = record.get("machineReview") or {}
+        if (record.get("contractHash") != key or
+                record.get("signature") != signature or
+                not asset or not asset.exists() or
+                record.get("contentHash") != _sha256_file(asset) or
+                review.get("qualified") is not True):
+            return None
+        return {**record, "path": str(asset)}
+    except (OSError, ValueError, TypeError, KeyError):
+        return None
+
+
+def _publish_pose_library_record(pkg, shot, character, source, machine_review):
+    """Copy one qualified pose into the exact-contract library; never overwrite its bytes."""
+    key, signature = _pose_library_key(pkg, shot, character)
+    name = _resolve_char(character, _characters_cfg())
+    source_path = _resolved_reference_path(source)
+    content_hash = _sha256_file(source_path)
+    library_dir = _pose_library_record_path(pkg, shot, name).parent
+    suffix = source_path.suffix.lower() or ".png"
+    asset_path = library_dir / f"{key}-{content_hash[:12]}{suffix}"
+    if not asset_path.exists():
+        cb_db.atomic_write_bytes(
+            HERE.parent, asset_path, source_path.read_bytes())
+    record = {
+        "version": POSE_LIBRARY_VERSION,
+        "contractHash": key,
+        "signature": signature,
+        "character": name,
+        "path": str(asset_path.relative_to(HERE)),
+        "contentHash": _sha256_file(asset_path),
+        "machineReview": machine_review,
+        "qualifiedAt": _now(),
+        "qualifiedBy": "Automated pose conformance gate",
+        "humanApproved": False,
+    }
+    cb_db.atomic_write_json(
+        HERE.parent, _pose_library_record_path(pkg, shot, name), record)
+    return {**record, "path": str(asset_path.resolve())}
+
+
+def _pose_state(ledger, character):
+    return ((ledger.get("keyframePoseReferences") or {}).get(character) or {})
+
+
+def _current_pose_approval(pkg, shot, character):
+    name = _resolve_char(character, _characters_cfg())
+    approval = _pose_state(_ledger(pkg, shot["shotId"]), name).get("approved") or {}
+    path = _resolved_reference_path(approval.get("path"))
+    if not path or not path.exists():
+        return None
+    try:
+        expected = _pose_input_signature(pkg, shot, name)
+    except Refused:
+        return None
+    if (approval.get("inputSignature") != expected or
+            approval.get("contentHash") != _sha256_file(path)):
+        return None
+    return {**approval, "path": str(path)}
+
+
+def _current_pose_qualification(pkg, shot, character):
+    name = _resolve_char(character, _characters_cfg())
+    qualification = _pose_state(
+        _ledger(pkg, shot["shotId"]), name).get("qualified") or {}
+    path = _resolved_reference_path(qualification.get("path"))
+    if not path or not path.exists():
+        return None
+    try:
+        expected = _pose_input_signature(pkg, shot, name)
+    except Refused:
+        return None
+    review = qualification.get("machineReview") or {}
+    if (qualification.get("inputSignature") != expected or
+            qualification.get("contentHash") != _sha256_file(path) or
+            review.get("qualified") is not True):
+        return None
+    return {**qualification, "path": str(path)}
+
+
+def _current_pose_ready(pkg, shot, character):
+    """Human approval wins; otherwise use a current machine-qualified internal pose."""
+    return (_current_pose_approval(pkg, shot, character) or
+            _current_pose_qualification(pkg, shot, character))
+
+
+def pose_reference_status(scene, shot_id, episode="Ep1"):
+    """Read-only status for every acting pose required by an opening keyframe."""
+    pkg, _ = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    items = []
+    for supplied_name in (shot.get("charactersInFrame") or []):
+        name = _resolve_char(supplied_name, _characters_cfg())
+        state = _pose_state(ledger, name)
+        approved = _current_pose_approval(pkg, shot, name)
+        qualified = _current_pose_qualification(pkg, shot, name)
+        candidate = state.get("candidate") or {}
+        candidate_path = _resolved_reference_path(candidate.get("path"))
+        candidate_current = False
+        if candidate_path and candidate_path.exists():
+            try:
+                candidate_current = (
+                    candidate.get("inputSignature") ==
+                    _pose_input_signature(pkg, shot, name) and
+                    candidate.get("contentHash") == _sha256_file(candidate_path))
+            except Refused:
+                candidate_current = False
+        placement, _ = _pose_placement(pkg, shot, name)
+        machine_review = candidate.get("machineReview") or {}
+        status = ("approved" if approved else
+                  "qualified" if qualified else
+                  "needs-correction" if candidate_current and machine_review and
+                  machine_review.get("qualified") is not True else
+                  "awaiting" if candidate_current else
+                  "stale" if candidate else "required")
+        items.append({
+            "character": name,
+            "status": status,
+            "ready": bool(approved or qualified),
+            "pose": placement.get("pose"),
+            "facing": placement.get("facing"),
+            "bodyAngleDegrees": placement.get("bodyAngleDegrees"),
+            "approvedPath": approved.get("path") if approved else None,
+            "qualifiedPath": qualified.get("path") if qualified else None,
+            "candidatePath": str(candidate_path) if candidate_path and candidate_path.exists()
+                             else None,
+            "humanApproved": bool(approved),
+            "machineQualified": bool(qualified),
+            "machineReview": machine_review or (
+                (qualified or {}).get("machineReview") or {}),
+            "reusableExactMatch": bool(_load_pose_library_record(pkg, shot, name)),
+            "message": ({
+                "approved": "Human-approved pose will be used in the assembled frame.",
+                "qualified": "Machine-qualified pose passed every identity and acting check.",
+                "needs-correction": (
+                    machine_review.get("recommendedCorrection") or
+                    "The candidate needs one precise correction before finishing."),
+                "awaiting": "Pose candidate is waiting for the conformance check.",
+                "stale": "Pose candidate no longer matches the current shot direction.",
+                "required": "The Studio will create or reuse this acting pose when you build.",
+            })[status],
+        })
+    return {
+        "ready": bool(items) and all(item["ready"] for item in items),
+        "items": items,
+        "zeroSpend": True,
+        "readOnly": True,
+    }
+
+
+def generate_pose_reference(scene, shot_id, character, episode="Ep1", log=print):
+    """Generate one isolated pose candidate; never generates the final keyframe."""
+    pkg, path = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    _require_confirmed_billing("fal")
+    shot = _shot(pkg, shot_id)
+    if shot.get("sourceType") != "opener":
+        raise Refused(f"REFUSED — {shot_id} inherits its opening frame and needs no pose pass")
+    name = _resolve_char(character, _characters_cfg())
+    cast = [_resolve_char(item, _characters_cfg())
+            for item in (shot.get("charactersInFrame") or [])]
+    if name not in cast:
+        raise Refused(f"REFUSED — {name} is not in {shot_id}'s opening cast")
+    ledger = _ledger(pkg, shot_id)
+    state = _pose_state(ledger, name)
+    if state.get("candidate"):
+        raise Refused(
+            f"REFUSED — {name}'s pose candidate is awaiting a decision; accept or reject it first")
+    prompt = _pose_prompt(pkg, shot, name)
+    identity = _char_ref(name, _characters_cfg())
+    pose_dir = MEDIA.parent / "pose_references"
+    pose_dir.mkdir(parents=True, exist_ok=True)
+    out = pose_dir / (
+        f"{episode}_{shot_id}_{re.sub(r'[^A-Za-z0-9._-]+', '_', name)}_"
+        f"pose_candidate_{uuid.uuid4().hex[:8]}.png")
+    cb_gen.generate_image(
+        prompt, refs=[identity], aspect="1:1", out=str(out),
+        production_route="cb_render")
+    record = {
+        "path": str(out),
+        "generatedAt": _now(),
+        "source": "generated",
+        "inputSignature": _pose_input_signature(pkg, shot, name),
+        "contentHash": _sha256_file(out),
+        "prompt": prompt,
+    }
+    pose_records = ledger.setdefault("keyframePoseReferences", {})
+    pose_records.setdefault(name, {"approved": None, "candidate": None, "history": []})[
+        "candidate"] = record
+    _save(pkg, path)
+    log(f"POSE CANDIDATE — {shot_id} {name} -> {out.name} (awaiting approval)")
+    return str(out)
+
+
+def _copy_pose_candidate(source_path, shot_id, character, episode):
+    ext = pathlib.Path(source_path).suffix.lower() or ".png"
+    pose_dir = MEDIA.parent / "pose_references"
+    pose_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", character)
+    out = pose_dir / (
+        f"{episode}_{shot_id}_{safe_name}_pose_candidate_{uuid.uuid4().hex[:8]}{ext}")
+    shutil.copy2(source_path, out)
     return out
+
+
+def select_pose_reference_source(scene, shot_id, character, source_path,
+                                 episode="Ep1", log=print):
+    """Stage a human-supplied pose as a candidate without contacting a provider."""
+    pkg, path = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    name = _resolve_char(character, _characters_cfg())
+    if name not in [_resolve_char(item, _characters_cfg())
+                    for item in (shot.get("charactersInFrame") or [])]:
+        raise Refused(f"REFUSED — {name} is not in {shot_id}'s opening cast")
+    source = _resolved_reference_path(source_path)
+    if not source or not source.exists() or not _reference_path_is_approved(source):
+        raise Refused("REFUSED — pose source must be inside an approved Studio asset library")
+    ledger = _ledger(pkg, shot_id)
+    state = _pose_state(ledger, name)
+    if state.get("candidate"):
+        raise Refused(
+            f"REFUSED — {name}'s pose candidate is awaiting a decision; accept or reject it first")
+    out = _copy_pose_candidate(source, shot_id, name, episode)
+    record = {
+        "path": str(out), "generatedAt": _now(), "source": "uploaded",
+        "sourcePath": str(source),
+        "inputSignature": _pose_input_signature(pkg, shot, name),
+        "contentHash": _sha256_file(out),
+    }
+    pose_records = ledger.setdefault("keyframePoseReferences", {})
+    pose_records.setdefault(name, {"approved": None, "candidate": None, "history": []})[
+        "candidate"] = record
+    _save(pkg, path)
+    log(f"POSE SELECTED — {shot_id} {name} -> {out.name} (zero spend; awaiting approval)")
+    return str(out)
+
+
+def review_pose_reference(scene, shot_id, character, episode="Ep1", log=print):
+    """Run the strict visual conformance gate on one current pose candidate."""
+    pkg, path = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    name = _resolve_char(character, _characters_cfg())
+    state = _pose_state(_ledger(pkg, shot_id), name)
+    candidate = state.get("candidate") or {}
+    candidate_path = _resolved_reference_path(candidate.get("path"))
+    if not candidate_path or not candidate_path.exists():
+        raise Refused(f"REFUSED — {name} has no pose candidate to check")
+    expected = _pose_input_signature(pkg, shot, name)
+    content_hash = _sha256_file(candidate_path)
+    if (candidate.get("inputSignature") != expected or
+            candidate.get("contentHash") != content_hash):
+        raise Refused(f"REFUSED — {name}'s pose candidate is stale or changed")
+    previous = candidate.get("machineReview") or {}
+    if (previous.get("candidateContentHash") == content_hash and
+            previous.get("reviewVersion") == POSE_QUALIFICATION_VERSION):
+        return previous
+
+    characters_cfg = _characters_cfg()
+    identity_path = _resolved_reference_path(_char_ref(name, characters_cfg))
+    placement, _ = _pose_placement(pkg, shot, name)
+    profile = characters_cfg.get(name) or {}
+    context = {
+        "shotId": shot_id,
+        "character": name,
+        "orderedImages": [
+            {"position": 1, "role": "actual isolated acting-pose candidate",
+             "path": str(candidate_path)},
+            {"position": 2, "role": "locked identity turnaround",
+             "path": str(identity_path)},
+        ],
+        "requestedPose": placement.get("pose"),
+        "facing": placement.get("facing"),
+        "bodyAngleDegrees": placement.get("bodyAngleDegrees", 0),
+        "identityRequirements": profile.get("key_features"),
+        "forbidden": profile.get("avoid"),
+        "hardRequirements": [
+            "exactly one character",
+            "complete uncropped full-body silhouette",
+            "same face, body width, belly depth and head-to-body ratio as the turnaround",
+            "correct limbs, wings, antennae, glasses and anatomy",
+            "requested acting pose reads immediately",
+            "neutral removable background with no environment or floor shadow",
+            "no props, text, logo, watermark, duplicate or redesign",
+        ],
+    }
+    result = cb_departments.review_pose_conformance(
+        context, [str(candidate_path), str(identity_path)], log=log)
+    review = {
+        **result.model_dump(),
+        "qualified": result.verdict == "pass",
+        "reviewVersion": POSE_QUALIFICATION_VERSION,
+        "candidateContentHash": content_hash,
+        "identityContentHash": _sha256_file(identity_path),
+        "reviewedAt": _now(),
+        "reviewedBy": "Automated pose conformance gate",
+        "validatorModel": cb_departments.cb_llm.VALIDATOR_MODEL,
+        "humanApproval": False,
+    }
+    candidate["machineReview"] = review
+    _save(pkg, path)
+    if review["qualified"]:
+        log(f"POSE CHECK PASSED — {shot_id} {name}: every objective dimension passed")
+    else:
+        log(f"POSE CHECK STOPPED — {shot_id} {name}: "
+            f"{review.get('recommendedCorrection') or review.get('summary')}")
+    return review
+
+
+def qualify_pose_reference(scene, shot_id, character, episode="Ep1", log=print):
+    """Promote a passing machine review without manufacturing a human approval."""
+    pkg, path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    name = _resolve_char(character, _characters_cfg())
+    ledger = _ledger(pkg, shot_id)
+    records = ledger.setdefault("keyframePoseReferences", {})
+    state = records.get(name) or {}
+    candidate = state.get("candidate") or {}
+    candidate_path = _resolved_reference_path(candidate.get("path"))
+    if not candidate_path or not candidate_path.exists():
+        raise Refused(f"REFUSED — {name} has no pose candidate to qualify")
+    expected = _pose_input_signature(pkg, shot, name)
+    content_hash = _sha256_file(candidate_path)
+    review = candidate.get("machineReview") or {}
+    if (candidate.get("inputSignature") != expected or
+            candidate.get("contentHash") != content_hash):
+        raise Refused(f"REFUSED — {name}'s pose candidate is stale or changed")
+    if (review.get("qualified") is not True or
+            review.get("candidateContentHash") != content_hash or
+            review.get("reviewVersion") != POSE_QUALIFICATION_VERSION):
+        raise Refused(f"REFUSED — {name}'s pose has not passed the conformance gate")
+
+    old = state.get("qualified")
+    history = list(state.get("history") or [])
+    if old:
+        history.append({**old, "outcome": "superseded-qualification",
+                        "supersededAt": _now()})
+    qualification = {
+        **candidate,
+        "qualified": True,
+        "qualifiedAt": _now(),
+        "qualifiedBy": "Automated pose conformance gate",
+        "machineReview": review,
+        "humanApproved": False,
+    }
+    state.update({
+        "qualified": qualification,
+        "candidate": None,
+        "history": history,
+    })
+    records[name] = state
+    _save(pkg, path)
+    _publish_pose_library_record(
+        pkg, shot, name, candidate_path, review)
+    log(f"POSE QUALIFIED — {shot_id} {name} (machine check, not human approval; reusable)")
+    return qualification
+
+
+def reuse_qualified_pose(scene, shot_id, character, episode="Ep1", log=print):
+    """Attach an exact-contract library pose to this shot without a media-provider call."""
+    pkg, path = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    name = _resolve_char(character, _characters_cfg())
+    library = _load_pose_library_record(pkg, shot, name)
+    if not library:
+        raise Refused(f"REFUSED — no exact qualified pose-library match exists for {name}")
+    records = _ledger(pkg, shot_id).setdefault("keyframePoseReferences", {})
+    state = records.setdefault(
+        name, {"approved": None, "qualified": None, "candidate": None, "history": []})
+    if state.get("candidate"):
+        raise Refused(f"REFUSED — {name} already has a pose candidate awaiting a check")
+    state["qualified"] = {
+        "path": library["path"],
+        "source": "exact-qualified-pose-library",
+        "sourceContractHash": library["contractHash"],
+        "inputSignature": _pose_input_signature(pkg, shot, name),
+        "contentHash": library["contentHash"],
+        "machineReview": library["machineReview"],
+        "qualified": True,
+        "qualifiedAt": _now(),
+        "qualifiedBy": "Exact qualified pose library",
+        "humanApproved": False,
+    }
+    _save(pkg, path)
+    log(f"POSE REUSED — {shot_id} {name}: exact qualified library match (zero media spend)")
+    return state["qualified"]
+
+
+def approve_pose_reference(scene, shot_id, character, episode="Ep1",
+                           reviewed_by="Julian", log=print):
+    pkg, path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    name = _resolve_char(character, _characters_cfg())
+    ledger = _ledger(pkg, shot_id)
+    records = ledger.setdefault("keyframePoseReferences", {})
+    state = records.get(name) or {}
+    candidate = state.get("candidate") or {}
+    candidate_path = _resolved_reference_path(candidate.get("path"))
+    if not candidate_path or not candidate_path.exists():
+        raise Refused(f"REFUSED — {name} has no pose candidate awaiting approval")
+    expected = _pose_input_signature(pkg, shot, name)
+    if (candidate.get("inputSignature") != expected or
+            candidate.get("contentHash") != _sha256_file(candidate_path)):
+        raise Refused(
+            f"REFUSED — {name}'s pose candidate is stale or changed; reject and replace it")
+    old = state.get("approved")
+    history = list(state.get("history") or [])
+    if old:
+        history.append({**old, "outcome": "superseded", "supersededAt": _now()})
+    if state.get("qualified"):
+        history.append({**state["qualified"], "outcome": "superseded-by-human-approval",
+                        "supersededAt": _now()})
+    state.update({
+        "approved": {**candidate, "approved": True, "approvedAt": _now(),
+                     "reviewedBy": reviewed_by},
+        "qualified": None,
+        "candidate": None,
+        "history": history,
+    })
+    records[name] = state
+    _save(pkg, path)
+    # The last pose approval closes the local preparation loop immediately. This writes only
+    # a deterministic composite and never contacts a provider.
+    refreshed, _ = load_pkg(scene, episode)
+    refreshed_shot = _shot(refreshed, shot_id)
+    if pose_reference_status(scene, shot_id, episode)["ready"]:
+        _ensure_posed_integration_master(
+            refreshed, refreshed_shot, scene, episode, _characters_cfg())
+    log(f"POSE APPROVED — {shot_id} {name} by {reviewed_by}")
+    return state["approved"]
+
+
+def reject_pose_reference(scene, shot_id, character, correction, episode="Ep1",
+                          reviewed_by="Julian", log=print):
+    if not str(correction or "").strip():
+        raise Refused("REFUSED — a pose rejection requires a plain-language reason")
+    pkg, path = load_pkg(scene, episode)
+    name = _resolve_char(character, _characters_cfg())
+    ledger = _ledger(pkg, shot_id)
+    records = ledger.setdefault("keyframePoseReferences", {})
+    state = records.get(name) or {}
+    candidate = state.get("candidate") or {}
+    candidate_path = _resolved_reference_path(candidate.get("path"))
+    if not candidate_path or not candidate_path.exists():
+        raise Refused(f"REFUSED — {name} has no pose candidate to reject")
+    ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+    archive = (HERE / "media" / "archive" / "pose_references_rejected" /
+               f"{episode}_{shot_id}_{re.sub(r'[^A-Za-z0-9._-]+', '_', name)}_{ts}")
+    archive.mkdir(parents=True, exist_ok=True)
+    destination = archive / candidate_path.name
+    shutil.move(candidate_path, destination)
+    rejection = {
+        **candidate,
+        "outcome": "rejected",
+        "rejectedAt": _now(),
+        "reviewedBy": reviewed_by,
+        "reason": str(correction).strip(),
+        "rejectedFile": str(destination.relative_to(HERE)),
+    }
+    state["candidate"] = None
+    state.setdefault("history", []).append(rejection)
+    records[name] = state
+    _save(pkg, path)
+    log(f"POSE REJECTED — {shot_id} {name}: {correction}")
+    return rejection
+
+
+def _posed_integration_record_path(scene, shot_id, episode="Ep1"):
+    safe_shot = re.sub(r"[^A-Za-z0-9._-]+", "_", str(shot_id))
+    return MEDIA.parent / "reference_controls" / (
+        f"{episode}_S{scene}_{safe_shot}_posed_integration.json")
+
+
+def _posed_integration_contract(pkg, shot, scene, episode, characters_cfg):
+    resolved = _opening_composition_contract(
+        pkg, shot, scene, episode, characters_cfg)
+    if not resolved:
+        return None
+    composition, characters, plate = resolved
+    poses = {}
+    pose_contract = []
+    for name in characters:
+        ready_pose = _current_pose_ready(pkg, shot, name)
+        if not ready_pose:
+            return None
+        pose_path = _resolved_reference_path(ready_pose["path"])
+        poses[name] = str(pose_path)
+        pose_contract.append({
+            "character": name,
+            "file": pose_path.name,
+            "sha256": _sha256_file(pose_path),
+            "inputSignature": ready_pose.get("inputSignature"),
+            "decisionType": ("human-approval" if ready_pose.get("approved")
+                             else "machine-qualification"),
+        })
+    core = {
+        "version": 1,
+        "shotId": shot.get("shotId"),
+        "compositionContractHash": composition.get("contractHash"),
+        "scenePlateSha256": composition.get("scenePlateSha256"),
+        "poses": pose_contract,
+    }
+    core["contractHash"] = hashlib.sha256(json.dumps(
+        core, sort_keys=True, ensure_ascii=False,
+        separators=(",", ":")).encode()).hexdigest()
+    return core, characters, plate, poses, composition["layout"]
+
+
+def _load_posed_integration_master(shot, scene, episode, characters_cfg):
+    record_path = _posed_integration_record_path(scene, shot.get("shotId"), episode)
+    if not record_path.exists():
+        return None
+    try:
+        pkg, _ = load_pkg(scene, episode)
+        expected = _posed_integration_contract(
+            pkg, shot, scene, episode, characters_cfg)
+        if not expected:
+            return None
+        core, _, _, _, _ = expected
+        record = json.loads(record_path.read_text())
+        image_path = _resolved_reference_path(record.get("path"))
+        if (record.get("contractHash") != core.get("contractHash") or
+                not image_path or not image_path.exists() or
+                record.get("imageSha256") != _sha256_file(image_path)):
+            return None
+        return {**record, "path": str(image_path)}
+    except (OSError, ValueError, TypeError, KeyError, Refused):
+        return None
+
+
+def _ensure_posed_integration_master(pkg, shot, scene, episode, characters_cfg):
+    current = _load_posed_integration_master(
+        shot, scene, episode, characters_cfg)
+    if current:
+        return current
+    resolved = _posed_integration_contract(
+        pkg, shot, scene, episode, characters_cfg)
+    if not resolved:
+        status = pose_reference_status(scene, shot["shotId"], episode)
+        missing = ", ".join(
+            item["character"] for item in status["items"] if not item["ready"])
+        raise Refused(
+            f"REFUSED — {shot['shotId']} needs qualified shot-specific pose references for "
+            f"{missing or 'its opening cast'} before the keyframe can be assembled")
+    contract, characters, plate, poses, layout = resolved
+    try:
+        image_bytes, geometry = cb_layout.render_posed_integration_frame(
+            plate, characters, layout, poses)
+    except cb_layout.LayoutError as exc:
+        raise Refused(
+            f"REFUSED — {shot.get('shotId')} posed integration failed: {exc}") from exc
+    controls = MEDIA.parent / "reference_controls"
+    image_path = controls / (
+        f"{episode}_S{scene}_{shot['shotId']}_posed_integration_"
+        f"{contract['contractHash'][:12]}.png")
+    cb_db.atomic_write_bytes(MEDIA.parent.parent.parent, image_path, image_bytes)
+    try:
+        stored_path = str(image_path.relative_to(HERE))
+    except ValueError:
+        stored_path = str(image_path.resolve())
+    record = {
+        **contract,
+        "role": POSED_INTEGRATION_ROLE,
+        "path": stored_path,
+        "imageSha256": _sha256_file(image_path),
+        "geometry": geometry,
+        "generatedAt": _now(),
+        "zeroSpend": True,
+        "providerCalled": False,
+        "providerInput": True,
+        "technicalControl": False,
+    }
+    cb_db.atomic_write_json(
+        MEDIA.parent.parent.parent,
+        _posed_integration_record_path(scene, shot["shotId"], episode), record)
+    return {**record, "path": str(image_path.resolve())}
+
+
+def prepare_posed_integration_master(scene, shot_id, episode="Ep1", log=print):
+    """Build the exact creative frame precursor after every cast pose is qualified."""
+    pkg, _ = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    control = _ensure_posed_integration_master(
+        pkg, shot, scene, episode, _characters_cfg())
+    log(f"POSED INTEGRATION — {shot_id} -> {pathlib.Path(control['path']).name} "
+        "(zero spend; this creative frame, not the sizing proof, is the provider input)")
+    return control
+
+
+def keyframe_build_status(scene, shot_id, episode="Ep1"):
+    """Read-only plan for one bounded, human-fired stage-keyframe build."""
+    pkg, _ = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    if shot.get("sourceType") != "opener":
+        return {
+            "state": "not-applicable", "buildable": False,
+            "reason": "This shot inherits its opening frame.",
+            "mediaCallsRequired": 0, "maxMediaCalls": 0,
+            "estimatedMaxUsd": 0.0, "poseCallsRequired": 0,
+            "humanDecision": "Review the inherited opening frame with the animation.",
+            "noAutomaticRetries": True,
+        }
+    if ledger.get("keyframeCandidate"):
+        return {
+            "state": "ready-for-review", "buildable": False,
+            "reason": "A finished keyframe candidate is waiting for Accept or Iterate.",
+            "mediaCallsRequired": 0, "maxMediaCalls": 0,
+            "estimatedMaxUsd": 0.0, "poseCallsRequired": 0,
+            "humanDecision": "Accept or iterate the finished keyframe.",
+            "noAutomaticRetries": True,
+        }
+
+    max_calls = 1
+    try:
+        import cb_costs
+        unit_cost = float(cb_costs.estimate_image_cost(provider="seedream5pro"))
+    except Exception:
+        unit_cost = None
+    estimated = round(unit_cost * max_calls, 4) if unit_cost is not None else None
+    return {
+        "state": "buildable",
+        "buildable": True,
+        "reason": (
+            "The Studio will build one performance-ready opening stage from the locked "
+            "plate and character references."),
+        "workflow": "direct-stage-anchor",
+        "posePlan": [],
+        "poseCallsRequired": 0,
+        "finishingCallsRequired": 1,
+        "mediaCallsRequired": max_calls,
+        "maxMediaCalls": max_calls,
+        "estimatedUnitUsd": unit_cost,
+        "estimatedMaxUsd": estimated,
+        "automatedChecks": [
+            "locked character identity and body proportions",
+            "canon relative scale and character count",
+            "approved scene world, camera relationship and lighting",
+            "clear lead room and an unobstructed performance corridor",
+        ],
+        "provider": cb_gen.IMAGE_PROVIDER,
+        "providerModelId": (cb_gen.SEEDREAM_ENDPOINT
+                            if cb_gen.IMAGE_PROVIDER == "seedream"
+                            else cb_gen.IMAGE_MODEL),
+        "validatorModel": cb_departments.cb_llm.VALIDATOR_MODEL,
+        "stopPolicy": (
+            "Generate once; never auto-reroll. Objective identity/scale QC must pass before "
+            "Accept is available."),
+        "humanDecision": "Accept or iterate the finished keyframe.",
+        "noAutomaticRetries": True,
+    }
+
+
+def build_keyframe(scene, shot_id, episode="Ep1", log=print):
+    """Build one permissive opening-stage keyframe and stop for human review.
+
+    Character turnarounds own identity and canon scale; the approved Scene Look owns the
+    world. The keyframe owns only frame-one staging, camera, light and usable action space.
+    Exact acting poses and performance development remain Animation's responsibility.
+    """
+    pkg, _ = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    _require_confirmed_billing("fal")
+    _require_current_scenelook(scene, episode)
+    shot = _shot(pkg, shot_id)
+    if shot.get("sourceType") != "opener":
+        raise Refused(f"REFUSED — {shot_id} inherits its opening frame and needs no build")
+    if _ledger(pkg, shot_id).get("keyframeCandidate"):
+        raise Refused(
+            f"REFUSED — {shot_id} already has a finished keyframe waiting for Accept or Iterate")
+
+    result = keyframe_shot(scene, shot_id, episode, log=log)
+    log(f"KEYFRAME BUILD COMPLETE — {shot_id}: one performance-ready stage is ready for "
+        "Accept or Iterate; no acting pose pass or downstream animation was fired")
+    return result
+
+
+def _scale_control_record_path(scene, shot_id, episode="Ep1"):
+    safe_shot = re.sub(r"[^A-Za-z0-9._-]+", "_", str(shot_id))
+    return MEDIA.parent / "reference_controls" / (
+        f"{episode}_S{scene}_{safe_shot}_character_scale.json")
+
+
+def _character_scale_contract(shot, characters_cfg, same_depth=False):
+    """Measured physical-height truth for a multi-character shot.
+
+    The control is derived only from canon ``heightIn`` values and the locked turnaround
+    files. It never infers a size from prose or from a generated image. A missing height
+    means no control can honestly be built; callers may then keep the existing reference
+    contract rather than inventing a relationship.
+    """
+    cast = list(dict.fromkeys(shot.get("charactersInFrame") or []))
+    if len(cast) < 2:
+        return None
+    entries = []
+    for supplied_name in cast:
+        name = _resolve_char(supplied_name, characters_cfg)
+        profile = characters_cfg.get(name) or {}
+        try:
+            height = float(profile.get("heightIn"))
+        except (TypeError, ValueError):
+            return None
+        if height <= 0:
+            return None
+        turnaround = _resolved_reference_path(_char_ref(name, characters_cfg))
+        entries.append({
+            "character": name,
+            "heightIn": int(height) if height.is_integer() else height,
+            "turnaroundFile": turnaround.name,
+            "turnaroundSha256": _sha256_file(turnaround),
+        })
+    core = {
+        "version": 1,
+        "shotId": shot.get("shotId"),
+        "screenOrder": [entry["character"] for entry in entries],
+        "sameDepth": bool(same_depth),
+        "characters": entries,
+    }
+    core["contractHash"] = hashlib.sha256(json.dumps(
+        core, sort_keys=True, ensure_ascii=False,
+        separators=(",", ":")).encode()).hexdigest()
+    return core
+
+
+def _scale_pixel_heights(contract, maximum_pixels=490):
+    """Exact integer geometry for integer-inch canon heights (14:12 remains 7:6)."""
+    heights = [float(item["heightIn"]) for item in contract["characters"]]
+    scale = max(1, int(maximum_pixels // max(heights)))
+    return {item["character"]: int(round(float(item["heightIn"]) * scale))
+            for item in contract["characters"]}
+
+
+def _write_character_scale_board(path, contract):
+    """Create a neutral measured blockout; turnarounds still own all appearance."""
+    from PIL import Image, ImageDraw
+
+    width, height = 1600, 900
+    image = Image.new("RGB", (width, height), (246, 248, 247))
+    draw = ImageDraw.Draw(image)
+    title_font = cb_post._pil_font(44)
+    label_font = cb_post._pil_font(30)
+    small_font = cb_post._pil_font(23)
+    draw.text((70, 48), "CANONICAL CHARACTER SCALE", fill=(22, 29, 31), font=title_font)
+    subtitle = ("SAME CAMERA DEPTH - MEASURED TURNAROUND HEIGHTS"
+                if contract.get("sameDepth") else
+                "MEASURED PHYSICAL HEIGHTS - APPLY SHOT PERSPECTIVE AFTER SCALE")
+    draw.text((72, 110), subtitle, fill=(35, 102, 98), font=small_font)
+    draw.text((72, 150),
+              "Use only relative full-body height and depth. Turnarounds own shape, face and materials.",
+              fill=(82, 90, 92), font=small_font)
+
+    baseline = 745
+    entries = contract["characters"]
+    pixels = _scale_pixel_heights(contract)
+    step = width / (len(entries) + 1)
+    palette = [(47, 116, 112), (190, 133, 38), (94, 93, 132), (150, 72, 87)]
+    for index, item in enumerate(entries, start=1):
+        name = item["character"]
+        full_height = pixels[name]
+        x = int(step * index)
+        top = baseline - full_height
+        colour = palette[(index - 1) % len(palette)]
+
+        # The outer bracket is the authoritative measurement. The inner capsule is only a
+        # deliberately generic blockout, so it cannot compete with the turnaround silhouette.
+        draw.line((x - 145, top, x - 145, baseline), fill=(30, 37, 39), width=4)
+        draw.line((x - 165, top, x - 125, top), fill=(30, 37, 39), width=4)
+        draw.line((x - 165, baseline, x - 125, baseline), fill=(30, 37, 39), width=4)
+        body_top = top + int(full_height * 0.14)
+        draw.rounded_rectangle(
+            (x - 92, body_top, x + 92, baseline - 22), radius=88,
+            fill=(229, 233, 232), outline=colour, width=7)
+        draw.line((x - 46, body_top + 4, x - 66, top + 10), fill=colour, width=6)
+        draw.line((x + 46, body_top + 4, x + 66, top + 10), fill=colour, width=6)
+        draw.ellipse((x - 73, top, x - 57, top + 18), fill=colour)
+        draw.ellipse((x + 57, top, x + 73, top + 18), fill=colour)
+        draw.text((x - 110, baseline + 28), name, fill=(22, 29, 31), font=label_font)
+        measure = f"{item['heightIn']:g} in full height" if isinstance(
+            item["heightIn"], float) else f"{item['heightIn']} in full height"
+        draw.text((x - 110, baseline + 68), measure, fill=colour, font=small_font)
+
+    draw.line((60, baseline, width - 60, baseline), fill=(30, 37, 39), width=5)
+    draw.text((70, 842), "ONE DEPTH PLANE" if contract.get("sameDepth") else "PHYSICAL SCALE DATUM",
+              fill=(30, 37, 39), font=small_font)
+    encoded = io.BytesIO()
+    image.save(encoded, format="PNG")
+    cb_db.atomic_write_bytes(
+        MEDIA.parent.parent.parent, path, encoded.getvalue())
+
+
+def _load_character_scale_control(shot, scene, episode, characters_cfg):
+    """Return only a current, content-verified technical control; stale means absent."""
+    record_path = _scale_control_record_path(scene, shot.get("shotId"), episode)
+    if not record_path.exists():
+        return None
+    try:
+        record = json.loads(record_path.read_text())
+        expected = _character_scale_contract(
+            shot, characters_cfg, same_depth=bool(record.get("sameDepth")))
+        image_path = _resolved_reference_path(record.get("path"))
+        if (not expected or record.get("contractHash") != expected.get("contractHash") or
+                not image_path or not image_path.exists() or
+                record.get("imageSha256") != _sha256_file(image_path)):
+            return None
+        return {**record, "path": str(image_path)}
+    except (OSError, ValueError, TypeError, KeyError):
+        return None
+
+
+def _ensure_character_scale_control(shot, scene, episode, characters_cfg,
+                                    same_depth=None):
+    """Build or reuse one immutable zero-spend board and its signed sidecar."""
+    current = _load_character_scale_control(shot, scene, episode, characters_cfg)
+    if current and (same_depth is None or bool(current.get("sameDepth")) == bool(same_depth)):
+        return current
+    depth_lock = bool(current.get("sameDepth")) if same_depth is None and current else bool(same_depth)
+    contract = _character_scale_contract(shot, characters_cfg, same_depth=depth_lock)
+    if not contract:
+        return None
+    controls = MEDIA.parent / "reference_controls"
+    image_path = controls / (
+        f"{episode}_S{scene}_{shot['shotId']}_scale_{contract['contractHash'][:12]}.png")
+    _write_character_scale_board(image_path, contract)
+    try:
+        stored_path = str(image_path.relative_to(HERE))
+    except ValueError:
+        stored_path = str(image_path.resolve())
+    record = {
+        **contract,
+        "role": CHARACTER_SCALE_CONTROL_ROLE,
+        "path": stored_path,
+        "imageSha256": _sha256_file(image_path),
+        "generatedAt": _now(),
+        "zeroSpend": True,
+        "providerCalled": False,
+    }
+    record_path = _scale_control_record_path(scene, shot["shotId"], episode)
+    cb_db.atomic_write_json(
+        MEDIA.parent.parent.parent, record_path, record)
+    return {**record, "path": str(image_path.resolve())}
+
+
+def prepare_character_scale_control(scene, shot_id, episode="Ep1", same_depth=False, log=print):
+    """Public zero-spend preparation used by Studio orchestration and targeted repairs."""
+    pkg, _ = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    control = _ensure_character_scale_control(
+        shot, scene, episode, _characters_cfg(), same_depth=same_depth)
+    if not control:
+        raise Refused(
+            f"REFUSED — {shot_id} needs at least two characters with locked canon heightIn "
+            "values before a measured scale control can be built")
+    names = ", ".join(
+        f"{item['character']} {item['heightIn']}in" for item in control["characters"])
+    log(f"SCALE CONTROL — {shot_id}: {names} -> {pathlib.Path(control['path']).name} "
+        "(zero spend; attached automatically to Keyframe and Animation)")
+    return control
+
+
+def _effective_image_slots(shot, slots_key, scene, episode, characters_cfg,
+                           include_technical_controls=True):
+    del scene, episode, characters_cfg, include_technical_controls
+    # Keyframes are built directly from the package's explicit character and Scene Look
+    # bindings. Local layout/scale boards and optional pose experiments remain inspectable
+    # evidence only; none may silently replace the locked references sent to the provider.
+    return dict(shot.get(slots_key) or {})
+
+
+_NON_IDENTITY_IMAGE_ROLES = {
+    "scene plate", "opening keyframe", "previous shot final frame",
+    OPENING_COMPOSITION_ROLE, POSED_INTEGRATION_ROLE, CHARACTER_SCALE_CONTROL_ROLE,
+}
+
+
+def _expanded_reference_blueprint(shot, slots_key, characters_cfg):
+    """Bind each logical character slot to one complete, uncropped turnaround sheet."""
+    usage = "keyframe" if slots_key == "keyframeReferenceSlots" else "animation"
+    slots = dict(shot.get(slots_key) or {})
+    expanded = []
+    for source_slot in sorted(
+            (key for key in slots if key.startswith("@图")),
+            key=lambda key: int(key[2:])):
+        role = slots[source_slot]
+        identities = ([None] if role in _NON_IDENTITY_IMAGE_ROLES else
+                      _provider_identity_records(role, characters_cfg, usage))
+        for identity in identities:
+            expanded.append({
+                "position": len(expanded) + 1,
+                "slot": f"@图{len(expanded) + 1}",
+                "sourceSlot": source_slot,
+                "role": role,
+                "usage": usage,
+                "view": (identity or {}).get("view"),
+                "identity": identity,
+            })
+    return expanded
+
+
+def _provider_attachment_plan(shot, slots_key, anchor_path, scene, episode,
+                              characters_cfg):
+    """Return the exact ordered provider attachments and their renumbered slot bindings."""
+    plan = []
+    for item in _expanded_reference_blueprint(shot, slots_key, characters_cfg):
+        identity = item.get("identity")
+        if identity:
+            path = identity.get("path")
+        else:
+            path = _slot_path_for_role(
+                item["role"], anchor_path, scene, episode, characters_cfg,
+                shot=shot, usage=item["usage"])
+        candidate = _resolved_reference_path(path)
+        if not candidate or not candidate.exists():
+            raise Refused(f"REFUSED — the {item['role']} reference file is missing")
+        if not _reference_path_is_approved(candidate):
+            raise Refused(
+                f"REFUSED — {item['role']} resolves outside this canonical Studio's "
+                f"approved asset libraries ({candidate.name}); re-select it inside the "
+                "current project")
+        plan.append({
+            **item,
+            "path": str(candidate),
+            "fileName": candidate.name,
+        })
+    return plan
+
+
+def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=None,
+                        usage="keyframe"):
+    if role in ("opening keyframe", "previous shot final frame"):
+        path = anchor_path
+        if not path:
+            raise Refused(f"REFUSED — {role} is not approved and available yet")
+    elif role == "scene plate":
+        path = _plate_path(scene, episode)
+    elif role == OPENING_COMPOSITION_ROLE:
+        raise Refused(
+            "REFUSED — the opening composition master is a local QA control and may never "
+            "be uploaded to an image provider")
+    elif role == POSED_INTEGRATION_ROLE:
+        control = _load_posed_integration_master(
+            shot or {}, scene, episode, characters_cfg)
+        path = (control or {}).get("path")
+        if not path:
+            raise Refused(
+                "REFUSED — qualified shot-specific character poses must be assembled before "
+                "the keyframe provider input is ready")
+    elif role == CHARACTER_SCALE_CONTROL_ROLE:
+        control = _load_character_scale_control(shot or {}, scene, episode, characters_cfg)
+        path = (control or {}).get("path")
+        if not path:
+            raise Refused(
+                "REFUSED — the measured character scale control is missing or stale")
+    else:
+        path = _provider_identity_record(role, characters_cfg, usage)["path"]
+    candidate = _resolved_reference_path(path)
+    if not candidate or not candidate.exists():
+        raise Refused(f"REFUSED — the {role} reference file is missing")
+    if not _reference_path_is_approved(candidate):
+        raise Refused(
+            f"REFUSED — {role} resolves outside this canonical Studio's approved asset "
+            f"libraries ({candidate.name}); re-select it inside the current project")
+    return str(candidate)
+
+
+def _slot_paths(shot, slots_key, anchor_path, scene, episode, characters_cfg,
+                include_technical_controls=True):
+    """The exact expanded image upload list in provider slot order."""
+    del include_technical_controls
+    return [item["path"] for item in _provider_attachment_plan(
+        shot, slots_key, anchor_path, scene, episode, characters_cfg)]
+
+
+def shot_reference_manifest(scene, shot_id, episode="Ep1"):
+    """Read-only, zero-spend reference truth for the Keyframe and Animation stages."""
+    pkg, _ = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    characters_cfg = _characters_cfg()
+
+    try:
+        animation_anchor = _anchor_for(pkg, shot)
+        anchor_error = None
+    except Refused as exc:
+        animation_anchor = None
+        anchor_error = str(exc)
+
+    def image_entries(slots_key, anchor_path=None):
+        entries = []
+        blueprint = _expanded_reference_blueprint(shot, slots_key, characters_cfg)
+        for attachment in blueprint:
+            position = attachment["position"]
+            slot = attachment["slot"]
+            role = attachment["role"]
+            identity = attachment.get("identity")
+            try:
+                if identity:
+                    path = identity.get("path")
+                    candidate = _resolved_reference_path(path)
+                    if not candidate or not candidate.exists():
+                        raise Refused(f"REFUSED — the {role} reference file is missing")
+                    if not _reference_path_is_approved(candidate):
+                        raise Refused(
+                            f"REFUSED — {role} resolves outside this canonical Studio's "
+                            f"approved asset libraries ({candidate.name}); re-select it "
+                            "inside the current project")
+                    path = str(candidate)
+                else:
+                    path = _slot_path_for_role(
+                        role, anchor_path, scene, episode, characters_cfg, shot=shot,
+                        usage=attachment["usage"])
+                item = {
+                    "position": position, "slot": slot,
+                    "sourceSlot": attachment["sourceSlot"], "role": role,
+                    "kind": "image", "status": "ready", "ready": True,
+                    "path": path, "fileName": pathlib.Path(path).name,
+                }
+                if identity:
+                    item["identity"] = {
+                        key: identity.get(key) for key in (
+                            "character", "view", "derived", "providerSafe",
+                            "intactTurnaround", "singleSubject",
+                            "singleCharacterIdentity", "attachmentMode", "coverage",
+                            "contractHash", "sourceSha256",
+                            "distinguishingFeatures", "mustNotBorrow",
+                            "turnaroundAuthority", "turnaroundViewIndex",
+                            "turnaroundViewCount", "turnaroundGroupHash",
+                        ) if identity.get(key) is not None
+                    }
+                entries.append(item)
+            except Refused as exc:
+                message = anchor_error if role in (
+                    "opening keyframe", "previous shot final frame") and anchor_error else str(exc)
+                entries.append({
+                    "position": position, "slot": slot,
+                    "sourceSlot": attachment["sourceSlot"], "role": role,
+                    "view": attachment.get("view"),
+                    "kind": "image",
+                    "status": "unavailable" if "outside this canonical Studio" in message else "missing",
+                    "ready": False, "path": None, "fileName": None,
+                    "message": message,
+                })
+        return entries
+
+    keyframe_entries = image_entries("keyframeReferenceSlots")
+    animation_entries = image_entries("referenceSlots", animation_anchor)
+    audio_slot = next((slot for slot in (shot.get("referenceSlots") or {})
+                       if slot.startswith("@Audio")), None)
+    if audio_slot:
+        role = shot["referenceSlots"][audio_slot]
+        raw_audio = ledger.get("voPath")
+        audio_path = _resolved_reference_path(raw_audio)
+        approved = bool((ledger.get("voiceApproval") or {}).get("approved"))
+        allowed = bool(audio_path and audio_path.exists() and
+                       _reference_path_is_approved(audio_path))
+        if allowed and approved:
+            status, message = "ready", None
+        elif audio_path and audio_path.exists() and not allowed:
+            status, message = "unavailable", (
+                "The voice track resolves outside this canonical Studio's approved asset "
+                "libraries; regenerate or re-select it here.")
+        elif audio_path and audio_path.exists():
+            status, message = "unapproved", "The voice track exists but has not been accepted."
+        else:
+            status, message = "missing", "No approved voice track is available yet."
+        animation_entries.append({
+            "position": len(animation_entries) + 1,
+            "slot": audio_slot, "role": role, "kind": "audio",
+            "status": status, "ready": status == "ready",
+            "path": str(audio_path) if allowed else None,
+            "fileName": audio_path.name if allowed else None,
+            "message": message,
+        })
+
+    keyframe_applies = shot.get("sourceType") == "opener"
+    scale_control = _load_character_scale_control(
+        shot, scene, episode, characters_cfg)
+    composition_control = _load_opening_composition_master(
+        shot, scene, episode, characters_cfg) if keyframe_applies else None
+    pose_preparation = {
+        "applies": False, "ready": True, "items": [], "zeroSpend": True,
+        "readOnly": True,
+        "reason": "Acting poses belong to animation and are not a keyframe prerequisite.",
+    }
+    build_status = (keyframe_build_status(scene, shot_id, episode)
+                    if keyframe_applies else {
+                        "state": "not-applicable", "buildable": False,
+                        "reason": "This relay shot inherits its opening frame.",
+                        "mediaCallsRequired": 0, "maxMediaCalls": 0,
+                        "estimatedMaxUsd": 0.0,
+                    })
+    return {
+        "episode": episode, "scene": str(scene), "shotId": shot_id,
+        "zeroSpend": True, "readOnly": True,
+        "technicalControls": {
+            "openingComposition": ({
+                "ready": True, "path": composition_control["path"],
+                "fileName": pathlib.Path(composition_control["path"]).name,
+                "contractHash": composition_control.get("contractHash"),
+                "providerUploaded": False,
+                "purpose": "Local staging advisory only",
+            } if composition_control else {
+                "ready": not keyframe_applies,
+                "providerUploaded": False,
+                "purpose": "Local staging advisory only",
+            }),
+            "characterScale": ({
+                "ready": True, "path": scale_control["path"],
+                "fileName": pathlib.Path(scale_control["path"]).name,
+                "contractHash": scale_control.get("contractHash"),
+                "providerUploaded": False,
+                "purpose": "Local relative-size advisory only",
+            } if scale_control else {
+                "ready": len(shot.get("charactersInFrame") or []) < 2,
+                "providerUploaded": False,
+                "purpose": "Local relative-size advisory only",
+            }),
+        },
+        "posePreparation": pose_preparation,
+        "keyframeBuild": build_status,
+        "posedIntegration": {
+            "applies": False,
+            "ready": False,
+            "providerUploaded": False,
+            "purpose": "Optional diagnostic fallback only",
+        },
+        "keyframe": {
+            "applies": keyframe_applies,
+            "ready": (not keyframe_applies) or (
+                bool(keyframe_entries) and all(item["ready"] for item in keyframe_entries)),
+            "reason": (None if keyframe_applies else
+                       "This relay shot inherits its opening frame from the previous approved shot."),
+            "references": keyframe_entries,
+        },
+        "animation": {
+            "applies": True,
+            "ready": bool(animation_entries) and all(
+                item["ready"] for item in animation_entries),
+            "references": animation_entries,
+        },
+    }
 
 
 # ── LIVE DEPARTMENTS — specialist prepares → Julian edits/approves → existing renderer ──
@@ -779,8 +2334,9 @@ def _review_frames(video_path, max_frames=4):
 def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     """Run one real specialist once and store an awaiting-approval candidate.
 
-    Existing approved work and every media asset remain untouched if the call fails or a
-    replacement candidate is prepared.  No cb_gen function is reachable from this path.
+    Existing direction and every media asset remain untouched if the call fails. A current
+    signed candidate is production-ready without pretending a human approved prose; rendered
+    outcomes retain their own explicit approval gates. No cb_gen function is reachable here.
     """
     if stage not in _DEPARTMENT_WORKERS:
         raise Refused(f"REFUSED — unknown department stage '{stage}'")
@@ -821,12 +2377,35 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
         context = _shot_context(pkg, shot, led, scene, episode)
         if stage == "cinematography":
             chars = _characters_cfg()
-            slots = shot.get("keyframeReferenceSlots") or {}
-            images = _slot_paths(shot, "keyframeReferenceSlots", None, scene, episode, chars)
+            attachment_plan = _provider_attachment_plan(
+                shot, "keyframeReferenceSlots", None, scene, episode, chars)
+            images = [item["path"] for item in attachment_plan]
             context["orderedAttachments"] = [
-                {"slot": k, "role": slots[k], "path": p}
-                for k, p in zip(sorted((k for k in slots if k.startswith("@图")),
-                                       key=lambda k: int(k[2:])), images)]
+                {"inspectionSlot": item["sourceSlot"],
+                 "providerSlot": item["slot"], "role": item["role"],
+                 "view": item.get("view"), "path": item["path"],
+                 "sameCharacterGroup": ((item.get("identity") or {}).get(
+                     "turnaroundGroupHash"))}
+                for item in attachment_plan]
+            context["providerReferencePlan"] = {
+                item["providerSlot"]: (
+                    f"{item['role']} {item['view']} turnaround view"
+                    if item.get("view") else item["role"])
+                for item in context["orderedAttachments"]}
+            context["stageAnchorWorkflow"] = {
+                "providerAttachments": context["providerReferencePlan"],
+                "localOnlyControls": [
+                    OPENING_COMPOSITION_ROLE, CHARACTER_SCALE_CONTROL_ROLE],
+                "rule": (
+                    "Build the keyframe directly from the locked character turnarounds and "
+                    "Scene Look. It establishes frame-one identity, canon relative scale, "
+                    "camera, light, loose starting zones and clear action space. It must not "
+                    "pre-perform or freeze the shot's acting. Layout and scale boards remain "
+                    "local advisory evidence and are never provider uploads."),
+            }
+            context["canonicalCharacterHeightsIn"] = {
+                name: (chars.get(_resolve_char(name, chars)) or {}).get("heightIn")
+                for name in (shot.get("charactersInFrame") or [])}
             result = cb_departments.prepare_cinematography(context, images, log=log)
         elif stage == "voice":
             result = cb_departments.prepare_voice(context, shot.get("dialogueLines") or [], log=log)
@@ -835,11 +2414,16 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 raise Refused(f"REFUSED — {shot_id}'s approved voice is required before the "
                               "Animation Director enters")
             anchor = _anchor_for(pkg, shot)
-            images = _slot_paths(shot, "referenceSlots", anchor, scene, episode, _characters_cfg())
+            attachment_plan = _provider_attachment_plan(
+                shot, "referenceSlots", anchor, scene, episode, _characters_cfg())
+            images = [item["path"] for item in attachment_plan]
             context["orderedAttachments"] = [
-                {"slot": k, "role": shot["referenceSlots"][k], "path": p}
-                for k, p in zip(sorted((k for k in shot["referenceSlots"] if k.startswith("@图")),
-                                       key=lambda k: int(k[2:])), images)]
+                {"slot": item["slot"], "sourceSlot": item["sourceSlot"],
+                 "role": item["role"], "view": item.get("view"),
+                 "path": item["path"],
+                 "sameCharacterGroup": ((item.get("identity") or {}).get(
+                     "turnaroundGroupHash"))}
+                for item in attachment_plan]
             context["approvedVoiceAsset"] = led.get("voPath")
             result = cb_departments.prepare_animation(context, images, log=log)
             rp = _norm(result.providerPrompt)
@@ -853,14 +2437,15 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             media = rec.get("path")
             if not media or not os.path.exists(media):
                 raise Refused(f"REFUSED — no actual keyframe media exists for {shot_id} to review")
-            refs = _slot_paths(shot, "keyframeReferenceSlots", None, scene, episode,
-                               _characters_cfg())
+            attachment_plan = _provider_attachment_plan(
+                shot, "keyframeReferenceSlots", None, scene, episode,
+                _characters_cfg())
+            refs = [item["path"] for item in attachment_plan]
             images = [media] + refs
             context["orderedReviewImages"] = ([{"role": "actual rendered keyframe", "path": media}] +
-                [{"role": role, "path": p} for role, p in
-                 zip((shot["keyframeReferenceSlots"][k] for k in sorted(
-                     (k for k in shot["keyframeReferenceSlots"] if k.startswith("@图")),
-                     key=lambda k: int(k[2:]))), refs)])
+                [{"role": item["role"], "view": item.get("view"),
+                  "providerSlot": item["slot"], "path": item["path"]}
+                 for item in attachment_plan])
             result = cb_departments.review_media("keyframe", context, images, log=log)
         else:
             media_paths = (
@@ -882,14 +2467,16 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                                          "candidateId": f"C{i}", "path": p}
                                         for n, p in enumerate(fs))
                 anchor = _anchor_for(pkg, shot)
-                refs = _slot_paths(shot, "referenceSlots", anchor, scene, episode,
-                                   _characters_cfg())
+                attachment_plan = _provider_attachment_plan(
+                    shot, "referenceSlots", anchor, scene, episode,
+                    _characters_cfg())
+                refs = [item["path"] for item in attachment_plan]
                 images = frames + refs
                 context["orderedReviewImages"] = (
                     frame_labels +
-                    [{"role": shot["referenceSlots"][k], "path": p} for k, p in
-                     zip(sorted((k for k in shot["referenceSlots"] if k.startswith("@图")),
-                                key=lambda k: int(k[2:])), refs)])
+                    [{"role": item["role"], "view": item.get("view"),
+                      "providerSlot": item["slot"], "path": item["path"]}
+                     for item in attachment_plan])
                 result = cb_departments.review_media("animation", context, images, log=log)
             finally:
                 for td in temp_dirs:
@@ -898,8 +2485,10 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     work["candidate"] = _department_candidate(stage, result.model_dump(), context)
     save_extra()
     _save(pkg, path)
+    disposition = ("awaiting human review" if stage.startswith("review-")
+                   else "current direction ready")
     log(f"DEPARTMENT — {work['candidate']['worker']} prepared {stage} work for "
-        f"{shot_id or 'scene '+str(scene)} (awaiting Julian; no media generated)")
+        f"{shot_id or 'scene '+str(scene)} ({disposition}; no media generated)")
     return work["candidate"]
 
 
@@ -936,7 +2525,8 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
         output["providerPrompt"] = value
     cand["editedAt"] = _now(); cand["editedBy"] = reviewed_by
     save_extra(); _save(pkg, path)
-    log(f"DEPARTMENT CANDIDATE SAVED — {stage} (no provider call, not approved)")
+    log(f"DEPARTMENT CANDIDATE SAVED — {stage} "
+        f"(no media provider call; current direction updated)")
     return cand
 
 
@@ -1022,6 +2612,276 @@ def _approved_department_output(pkg, shot_id, stage):
     return (((led.get("departmentWork") or {}).get(stage) or {}).get("approved") or {}).get("output")
 
 
+def _inspection_department_output(pkg, shot_id, stage):
+    """Best-effort current direction for zero-spend inspection and stored-contract display.
+
+    Paid resolvers use the strict safety-layer accessor directly. Prompt Lab must still be
+    able to inspect a sealed historical render or a synthetic contract when current runtime
+    dependencies are unavailable, so it degrades to no live direction instead of blocking.
+    """
+    try:
+        return _approved_department_output(pkg, shot_id, stage) or {}
+    except (Refused, KeyError, TypeError, ValueError, OSError):
+        return {}
+
+
+def _with_opening_composition_control(prompt, shot, scene, episode):
+    """Reject any attempt to turn the local geometry proof into provider artwork."""
+    prompt = str(prompt or "").strip()
+    if not prompt:
+        return prompt
+    lowered = prompt.lower()
+    if (OPENING_COMPOSITION_MARKER.lower() in lowered or
+            "opening composition master" in lowered or
+            "sizing composition" in lowered):
+        raise Refused(
+            "REFUSED — provider prompt assigns the local sizing/composition proof as an "
+            "image reference. Rebuild the prompt through the direct stage-anchor compiler")
+    return prompt
+
+
+def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
+    """Compile a bounded opening-stage prompt, never a miniature animation brief."""
+    if not direction or not direction.get("openingFrameLayout"):
+        raise Refused(
+            f"REFUSED — current Cinematography direction for {shot.get('shotId')} has no "
+            "typed opening-frame layout")
+    layout = direction["openingFrameLayout"]
+    placements = layout.get("placements") or []
+
+    def _compact(value, max_words):
+        text = re.sub(r"\s+", " ", str(value or "")).strip()
+        words = text.split()
+        if len(words) <= max_words:
+            return text.rstrip(" .;,")
+        selected = []
+        for chunk in re.split(r"(?<=[,;.])\s+", text):
+            if selected and len((" ".join(selected + [chunk])).split()) > max_words:
+                break
+            selected.append(chunk)
+            if len(" ".join(selected).split()) >= max_words:
+                break
+        compact = " ".join(selected)
+        if len(compact.split()) > max_words:
+            compact = " ".join(words[:max_words])
+        return compact.rstrip(" .;,")
+
+    reference_lines = []
+    identity_names = []
+    characters_cfg = _characters_cfg()
+    reference_plan = reference_plan or _expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", characters_cfg)
+    grouped = []
+    for attachment in reference_plan:
+        source_slot = attachment.get("sourceSlot") or attachment.get("slot")
+        if not grouped or grouped[-1][0] != source_slot:
+            grouped.append((source_slot, [attachment]))
+        else:
+            grouped[-1][1].append(attachment)
+    for _source_slot, attachments in grouped:
+        role = attachments[0]["role"]
+        if role == "scene plate":
+            slot = attachments[0]["slot"]
+            reference_lines.append(
+                f"- {slot} is the locked Scene Look plate; inherit world, viewpoint, scale, "
+                "materials, light and atmosphere only.")
+        else:
+            canonical = _resolve_char(role, characters_cfg)
+            _, identity_pack = _identity_pack_for(canonical, characters_cfg)
+            tells = list(identity_pack.get("distinguishingFeatures") or [])
+            identity_names.append(canonical)
+            if tells:
+                # The intact turnaround carries the complete design. Text reinforces only
+                # the fastest visual tells; measured scale is stated once in [Frame] below.
+                visual_tells = [
+                    item for item in tells
+                    if not re.search(r"\b\d+(?:\.\d+)?[- ]?inch\b|\bproportions?\b",
+                                     str(item), re.IGNORECASE)
+                ]
+                tells_text = _compact(", ".join(visual_tells or tells), 12)
+                if len(attachments) == 1:
+                    item = attachments[0]
+                    line = (
+                        f"- {item['slot']} is {canonical}'s complete, uncropped 360 "
+                        "turnaround sheet. Every view on this one sheet is the same character, "
+                        "not additional characters. Inherit the entire face, silhouette, "
+                        f"proportions, markings and materials. Keep {tells_text}. Do not "
+                        "omit rear/side details or add any unshown feature or accessory"
+                    )
+                else:
+                    view_bindings = ", ".join(
+                        f"{item['slot']} {item.get('view') or 'identity'}"
+                        for item in attachments)
+                    line = (
+                        f"- {canonical} turnaround: {view_bindings}. One identity; define face, silhouette, "
+                        f"proportions/materials. Keep {tells_text}. Ignore pose/background; "
+                        "add no unshown feature or accessory"
+                    )
+                reference_lines.append(line + ".")
+            else:
+                if len(attachments) == 1:
+                    item = attachments[0]
+                    reference_lines.append(
+                        f"- {item['slot']} is {canonical}'s complete, uncropped turnaround "
+                        "sheet. Every view is the same character, not additional characters. "
+                        "Inherit the entire identity, silhouette, proportions, markings and "
+                        "materials; do not omit details.")
+                else:
+                    view_bindings = ", ".join(
+                        f"{item['slot']} {item.get('view') or 'identity'}"
+                        for item in attachments)
+                    reference_lines.append(
+                        f"- {canonical} turnaround: {view_bindings}. One identity; define "
+                        "silhouette, proportions and materials "
+                        "only. Ignore background and pose.")
+
+    separation_line = ""
+    if len(identity_names) > 1:
+        separation_line = (
+            f"\n- Keep {' and '.join(identity_names)} distinct; never blend or swap traits."
+        )
+
+    def _screen_zone(item):
+        x = float(item.get("centerX", 0.5))
+        y = float(item.get("centerY", 0.5))
+        horizontal = "left" if x < 0.4 else "right" if x > 0.6 else "centre"
+        vertical = "upper" if y < 0.4 else "lower" if y > 0.6 else "middle"
+        return f"{vertical}-{horizontal} area"
+
+    def _compact_protection(value):
+        """Keep one complete continuity fact instead of clipping a clause mid-sentence."""
+        text = re.sub(r"\s+", " ", str(value or "")).strip()
+        for delimiter in ("; ", " must ", " so ", " because "):
+            head, separator, _ = text.partition(delimiter)
+            if separator and len(head.split()) >= 5:
+                text = head
+                break
+        return _compact(text, 12)
+
+    def _opening_clause(value, max_words):
+        """Keep one complete, playable clause instead of clipping performance prose."""
+        text = re.sub(r"\s+", " ", str(value or "")).strip()
+        if ":" in text and "frame" in text.split(":", 1)[0].lower():
+            text = text.split(":", 1)[1].strip()
+        text = re.split(r"[;,]", text, maxsplit=1)[0].strip()
+        compact = _compact(text, max_words)
+        dangling = {"a", "an", "the", "and", "or", "to", "with", "of", "on",
+                    "in", "toward", "towards", "beside"}
+        words = compact.split()
+        while words and words[-1].lower() in dangling:
+            words.pop()
+        return " ".join(words)
+
+    staging_lines = []
+    scale_facts = []
+    for item in placements:
+        name = item.get("character")
+        facing = _opening_clause(item.get("facing"), 8) or "the authored direction"
+        pose = _opening_clause(item.get("pose"), 12) or "a playable anticipation"
+        staging_lines.append(
+            f"- {name}: {_screen_zone(item)}; {pose}; facing {facing}. "
+            "Loose anticipation, clear silhouette and lead room.")
+        try:
+            canonical = _resolve_char(name, characters_cfg)
+            height = (characters_cfg.get(canonical) or {}).get("heightIn")
+            if height is not None:
+                scale_facts.append(f"{canonical} {height} inches")
+        except (KeyError, TypeError, ValueError):
+            pass
+    if layout.get("sameDepth") and len(scale_facts) > 1:
+        scale_rule = (
+            f"Same depth: {'; '.join(scale_facts)}. Preserve relative-size truth only.")
+    else:
+        scale_rule = (
+            "Preserve canonical relative size, modified only by the authored depth relationship.")
+
+    protections = _compact_protection(
+        next(iter(direction.get("continuityProtections") or []), "")
+    ) or "No additional shot-specific protection."
+    prompt = (
+        "[Opening Stage]\n"
+        f"Create a playable 16:9 opening for {shot.get('shotId')}: frame-one anticipation, "
+        "never portrait, pose sheet or payoff.\n\n"
+        "[References]\n" + "\n".join(reference_lines) + separation_line + "\n\n"
+        f"[Intended Read]\n{_compact(direction.get('audienceRead'), 32)}.\n\n"
+        "[Frame]\n" + "\n".join(staging_lines) + f"\n- {scale_rule}\n\n"
+        f"[Camera]\n{_compact(direction.get('lensAndCameraRelationship'), 18)}.\n\n"
+        f"[Light]\n{_compact(direction.get('lightingAndDepth'), 14)}.\n\n"
+        "[Performance Freedom]\n"
+        "Animation owns acting, wing cadence, movement, contact, recovery and camera "
+        "evolution.\n\n"
+        f"[Protect]\n{protections}.\n\n"
+        "[Forbidden]\nNo redesign, pasted turnaround, portrait, locked extreme action pose "
+        "or payoff, identity or scale "
+        "drift, inflation, duplicates, anatomy errors, extra props, text, logo or watermark; "
+        "no body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look."
+    ).strip()
+    word_count = len(re.findall(r"\S+", prompt))
+    if word_count > MAX_KEYFRAME_INTEGRATION_WORDS:
+        raise Refused(
+            f"REFUSED — compiled keyframe brief for {shot.get('shotId')} is {word_count} words; "
+            f"simplify typed direction below {MAX_KEYFRAME_INTEGRATION_WORDS} words")
+    return prompt
+
+
+def _with_character_scale_control(prompt, shot, slots_key, scene, episode):
+    """Append the measured board's exact provider role without changing creative prose."""
+    prompt = str(prompt or "").strip()
+    if not prompt or CHARACTER_SCALE_CONTROL_MARKER in prompt:
+        return prompt
+    characters_cfg = _characters_cfg()
+    control = _load_character_scale_control(
+        shot, scene, episode, characters_cfg)
+    if not control:
+        return prompt
+    slots = _effective_image_slots(
+        shot, slots_key, scene, episode, characters_cfg)
+    control_slot = next(
+        (slot for slot, role in slots.items()
+         if role == CHARACTER_SCALE_CONTROL_ROLE), None)
+    if not control_slot:
+        return prompt
+
+    identity_bindings = [
+        f"{slot} is {role}'s locked turnaround"
+        for slot, role in sorted(
+            slots.items(), key=lambda item: int(item[0][2:])
+            if item[0].startswith("@图") else 999)
+        if role in control.get("screenOrder", [])
+    ]
+    measurements = ", ".join(
+        f"{item['character']} is {item['heightIn']} inches"
+        for item in control["characters"])
+    ratio_sentence = ""
+    if len(control["characters"]) == 2:
+        from fractions import Fraction
+        shorter, taller = sorted(
+            control["characters"], key=lambda item: float(item["heightIn"]))
+        ratio = (Fraction(str(taller["heightIn"])) /
+                 Fraction(str(shorter["heightIn"]))).limit_denominator(100)
+        percent = (float(taller["heightIn"]) / float(shorter["heightIn"]) - 1) * 100
+        ratio_sentence = (
+            f" {taller['character']} is exactly {ratio.numerator}:{ratio.denominator}, "
+            f"or {percent:.1f} percent, taller than {shorter['character']}."
+        )
+    depth_subject = "Both characters" if len(control["characters"]) == 2 else "All characters"
+    depth_object = "either character" if len(control["characters"]) == 2 else "any character"
+    depth_sentence = (
+        f" {depth_subject} occupy one camera-depth plane; do not use perspective to enlarge "
+        f"{depth_object}."
+        if control.get("sameDepth") else
+        " Apply these physical heights before the shot's authored perspective."
+    )
+    clause = (
+        f"{CHARACTER_SCALE_CONTROL_MARKER} "
+        f"{'; '.join(identity_bindings)}. {control_slot} is a measured technical scale "
+        f"board generated from those locked turnarounds: {measurements}.{ratio_sentence}"
+        f"{depth_sentence} Use the board only for relative full-body height and depth; "
+        "do not copy its placeholder shapes, colours, labels, pose or background."
+    )
+    return f"{prompt}\n\n{clause}"
+
+
 def _resolve_keyframe_prompt(pkg, shot):
     """A relay/non-opener shot legitimately has no keyframePrompt at all (it opens off its
     source shot's harvested final frame, never its own keyframe — keyframe_shot itself
@@ -1031,7 +2891,9 @@ def _resolve_keyframe_prompt(pkg, shot):
     honest "no keyframe prompt" the same way it already tolerates a silent shot's "no voice
     track" — a missing value here is the truthful record, never a gap to paper over."""
     work = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
-    return work.get("providerPrompt") or shot.get("keyframePrompt")
+    plan = _expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", _characters_cfg())
+    return _compile_keyframe_integration_prompt(work, shot, plan)
 
 
 # ── Gate 4 — voice, the exact words, one in-context call per dialogue shot ──────────────
@@ -1113,11 +2975,25 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
     pkg, _ = load_pkg(scene, episode)
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
-    approved = [{"dialogueOccurrenceId": ln.get("dialogueOccurrenceId"),
-                 "sourceEventId": ln.get("sourceEventId"),
-                 "speaker": ln["speaker"], "exactText": ln["exactText"],
-                 "delivery": ln.get("delivery")}
-                for ln in (shot.get("dialogueLines") or [])]
+    directed_output = _approved_department_output(pkg, shot_id, "voice") or {}
+    direction_by_occurrence = {
+        line.get("dialogueOccurrenceId"): line
+        for line in (directed_output.get("lines") or [])
+        if line.get("dialogueOccurrenceId")
+    }
+    approved = []
+    for ln in (shot.get("dialogueLines") or []):
+        direction = direction_by_occurrence.get(ln.get("dialogueOccurrenceId"), {})
+        approved.append({
+            "dialogueOccurrenceId": ln.get("dialogueOccurrenceId"),
+            "sourceEventId": ln.get("sourceEventId"),
+            "speaker": ln["speaker"], "exactText": ln["exactText"],
+            "delivery": ln.get("delivery"),
+            "dramaticIntention": direction.get("dramaticIntention"),
+            "subtext": direction.get("subtext"),
+            "cadenceAndBreath": direction.get("cadenceAndBreath"),
+            "timingAndBody": direction.get("timingAndBody"),
+        })
     working = led.get("workingVoice")
     current, source = _resolve_voice_lines(pkg, shot)
     vo_path = led.get("voPath")
@@ -1145,7 +3021,17 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
                 os.path.getmtime(vo_path)).isoformat(timespec="seconds")
         except OSError:
             take_generated_at = None
-    return {"approvedLines": approved, "currentLines": current, "source": source,
+    current_with_direction = []
+    for line in current:
+        direction = direction_by_occurrence.get(line.get("dialogueOccurrenceId"), {})
+        current_with_direction.append({
+            **line,
+            "dramaticIntention": direction.get("dramaticIntention"),
+            "subtext": direction.get("subtext"),
+            "cadenceAndBreath": direction.get("cadenceAndBreath"),
+            "timingAndBody": direction.get("timingAndBody"),
+        })
+    return {"approvedLines": approved, "currentLines": current_with_direction, "source": source,
             "isWorking": bool(working), "savedAt": (working or {}).get("savedAt"),
             "hasTake": has_take, "takeMatchesCurrent": match,
             "takeGeneratedAt": take_generated_at, "previous": led.get("voicePrevious")}
@@ -1578,13 +3464,36 @@ def _keyframe_input_signature(pkg, shot, scene, episode="Ep1"):
     characters_cfg = _characters_cfg()
     refs = _slot_paths(shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
     st = scenelook_status(scene, episode)
-    scenelook_hash = (st["approved"] or {}).get("hash") if st["status"] == "approved" else None
+    scenelook_hash = (st.get("active") or {}).get("hash") if st.get("current") else None
     prompt = _resolve_keyframe_prompt(pkg, shot)
     return {"cardHash": _live_card_hash(shot["shotId"], scene, episode),
             "sceneLookHash": scenelook_hash,
             "referenceHashes": {os.path.basename(p): _file_md5(p) for p in refs},
             "briefHash": hashlib.sha256(prompt.encode()).hexdigest(),
             "model": f"{cb_gen.IMAGE_PROVIDER}:{cb_gen.SEEDREAM_ENDPOINT}:2K"}
+
+
+def _keyframe_prompt_contract(pkg, shot, prompt=None):
+    """Snapshot the exact image prompt and route beside the generated candidate."""
+    prompt = prompt if prompt is not None else _resolve_keyframe_prompt(pkg, shot)
+    specialist = _inspection_department_output(pkg, shot["shotId"], "cinematography")
+    if cb_gen.IMAGE_PROVIDER == "seedream":
+        provider_model_id = cb_gen.SEEDREAM_ENDPOINT
+    else:
+        provider_model_id = cb_gen.IMAGE_MODEL
+    contract = {
+        "prompt": prompt,
+        "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        "promptSource": ("direct-stage-anchor-compiler-from-current-cinematography"
+                         if specialist.get("openingFrameLayout")
+                         else "missing-current-cinematography"),
+        "provider": cb_gen.IMAGE_PROVIDER,
+        "providerModelId": provider_model_id,
+        "modelVersion": provider_model_id,
+    }
+    contract["contractHash"] = hashlib.sha256(json.dumps(
+        contract, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
+    return contract
 
 
 def _signature_diff(old, new):
@@ -1614,6 +3523,136 @@ def reassess_keyframe(scene, shot_id, episode="Ep1"):
             "changed": diff, "existing": existing, "currentSignature": current_sig}
 
 
+def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1", log=print):
+    """Run the fail-closed identity/scale/staging screen after a keyframe render.
+
+    This call never generates media.  It compares the actual candidate with the exact
+    provider attachments and typed opening layout that produced it.  Creative taste remains
+    Julian's decision; obvious contract failures never reach an enabled Accept button.
+    """
+    characters_cfg = _characters_cfg()
+    attachment_plan = _provider_attachment_plan(
+        shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
+    refs = [item["path"] for item in attachment_plan]
+    expected_cast = list(dict.fromkeys(shot.get("charactersInFrame") or []))
+    direction = _approved_department_output(
+        pkg, shot["shotId"], "cinematography") or {}
+    layout = direction.get("openingFrameLayout") or {}
+
+    identity_by_character = {}
+    ordered_images = [{
+        "imageNumber": 1, "role": "actual rendered keyframe candidate",
+        "path": str(candidate_path),
+    }]
+    forbidden = [
+        "extra or missing characters", "identity blending, swapping or cloning",
+        "incorrect relative size", "cropped or malformed anatomy",
+        "body-mounted bags, sacks, baskets or dangling loads",
+        "pendants, necklaces, medallions or crystals on either bee",
+        "text, logo or watermark",
+    ]
+    for index, attachment in enumerate(attachment_plan, start=2):
+        slot = attachment["slot"]
+        role = attachment["role"]
+        ref_path = attachment["path"]
+        ordered_images.append({
+            "imageNumber": index, "providerSlot": slot, "role": role,
+            "view": attachment.get("view"),
+            "path": ref_path,
+        })
+        if role == "scene plate":
+            continue
+        identity = attachment.get("identity")
+        if not identity:
+            continue
+        canonical = identity.get("character") or _resolve_char(role, characters_cfg)
+        record = characters_cfg.get(canonical) or {}
+        contract = identity_by_character.setdefault(canonical, {
+            "character": canonical,
+            "imageNumber": index,
+            "imageNumbers": [],
+            "providerSlot": slot,
+            "providerSlots": [],
+            "view": identity.get("view"),
+            "views": [],
+            "sameCharacterTurnaround": True,
+            "turnaroundGroupHash": identity.get("turnaroundGroupHash"),
+            "singleSubject": identity.get("singleSubject"),
+            "heightIn": record.get("heightIn"),
+            "distinguishingFeatures": identity.get("distinguishingFeatures") or [],
+            "mustNotBorrow": identity.get("mustNotBorrow") or [],
+        })
+        contract["imageNumbers"].append(index)
+        contract["providerSlots"].append(slot)
+        contract["views"].append(identity.get("view"))
+        forbidden.extend(contract["mustNotBorrow"])
+
+    identity_contracts = list(identity_by_character.values())
+
+    context = {
+        "shotId": shot["shotId"],
+        "expectedCharacters": expected_cast,
+        "expectedSubjectCount": len(expected_cast),
+        "identityContracts": identity_contracts,
+        "canonicalRelativeSize": [
+            {"character": item["character"], "heightIn": item.get("heightIn")}
+            for item in identity_contracts
+        ],
+        "sameDepth": bool(layout.get("sameDepth")),
+        "openingFrameLayout": layout,
+        "audienceRead": direction.get("audienceRead"),
+        "orderedImages": ordered_images,
+        "forbidden": list(dict.fromkeys(forbidden)),
+        "decisionBoundary": (
+            "Judge objective contract compliance only. Human review owns cinematic taste, "
+            "performance potential and final approval."),
+    }
+    try:
+        result = cb_departments.review_keyframe_conformance(
+            context, [str(candidate_path)] + refs, log=log)
+        review = result.model_dump() if hasattr(result, "model_dump") else dict(result)
+        reported_cast = sorted(
+            str(name).casefold() for name in (review.get("expectedCharacters") or []))
+        actual_contract_cast = sorted(str(name).casefold() for name in expected_cast)
+        contract_echo_valid = (
+            reported_cast == actual_contract_cast and
+            review.get("expectedSubjectCount") == len(expected_cast))
+        status = ("pass" if review.get("verdict") == "pass" and contract_echo_valid
+                  else "fail")
+        reason = review.get("summary") or (
+            "objective keyframe contract passed" if status == "pass" else
+            "objective keyframe contract failed")
+        if not contract_echo_valid:
+            reason = "The validator did not return the exact expected cast contract."
+        return {
+            "status": status,
+            "reason": reason,
+            "checkedAt": _now(),
+            "screenVersion": 1,
+            "validatorModel": cb_departments.cb_llm.VALIDATOR_MODEL,
+            "mediaProviderCalled": False,
+            "referenceHashes": {
+                pathlib.Path(path).name: _sha256_file(path) for path in refs
+            },
+            "candidateSha256": _sha256_file(candidate_path),
+            "review": review,
+        }
+    except Exception as exc:
+        log(f"KEYFRAME CONFORMANCE HOLD — {shot['shotId']}: {exc}")
+        return {
+            "status": "unavailable",
+            "reason": (
+                "The objective identity and scale check did not complete. The image is held "
+                "and cannot be accepted until the check passes."),
+            "detail": str(exc),
+            "checkedAt": _now(),
+            "screenVersion": 1,
+            "validatorModel": cb_departments.cb_llm.VALIDATOR_MODEL,
+            "mediaProviderCalled": False,
+            "candidateSha256": _sha256_file(candidate_path),
+        }
+
+
 def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
     """GENERATE {shotId} OPENING KEYFRAME — ONE IMAGE. Generates exactly one keyframe
     CANDIDATE for shot_id, to its own unique path; touches no other shot's media or ledger
@@ -1628,7 +3667,7 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
     # from a superseded storyboard could generate a real keyframe against outdated content,
     # the exact condition this checkpoint's own doctrine was written to prevent. Wired here
     # and into fire_shot below — the two real content-generation entry points.)
-    _require_confirmed_billing("fal")                       # protection 5 — block, not warn
+    _require_confirmed_billing("fal")                        # protection 5 — block, not warn
     _require_current_scenelook(scene, episode)                # no keyframe without a current approved Scene Look Plate
     shot = _shot(pkg, shot_id)
     if shot["sourceType"] != "opener":
@@ -1639,20 +3678,65 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
         raise Refused(f"REFUSED — {shot_id} already has a keyframe candidate awaiting a "
                       f"decision; reject it first (with a reason) before generating another")
     characters_cfg = _characters_cfg()
+    composition_master = _ensure_opening_composition_master(
+        pkg, shot, scene, episode, characters_cfg)
+    log(f"LOCAL STAGE QA — {shot_id}: loose position and coverage guide ready "
+        "(zero spend; advisory only; never uploaded to the provider)")
+    scale_control = _ensure_character_scale_control(
+        shot, scene, episode, characters_cfg, same_depth=None)
+    if scale_control:
+        log(f"LOCAL SCALE QA — {shot_id}: measured canon relationship ready "
+            "(zero spend; advisory only; never uploaded to the provider)")
     refs = _slot_paths(shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
+    log(f"DIRECT STAGE REFERENCES — {shot_id}: {len(refs)} locked character/Scene Look "
+        "asset(s); no generated pose or composition image is uploaded")
     MEDIA.mkdir(parents=True, exist_ok=True)
     out = MEDIA / f"{episode}_{shot_id}_keyframe_candidate_{uuid.uuid4().hex[:8]}.png"
     prompt = _resolve_keyframe_prompt(pkg, shot)
     cb_gen.generate_image(prompt, refs=refs, out=str(out), production_route="cb_render")
+    geometry_screening = cb_layout.screen_candidate_geometry(
+        out, composition_master)
     # ONLY reached on a successful generation — led["keyframeCandidate"] (and any existing
     # keyframeApproval) is never touched before this line, so a failure above leaves the
     # ledger, and any approved keyframe, byte-for-byte as they were.
-    led["keyframeCandidate"] = {"path": str(out), "generatedAt": _now(), "source": "generated",
-                                 "inputSignature": _keyframe_input_signature(pkg, shot, scene, episode)}
+    led["keyframeCandidate"] = {
+        "path": str(out), "generatedAt": _now(), "source": "generated",
+        "inputSignature": _keyframe_input_signature(pkg, shot, scene, episode),
+        "promptContract": _keyframe_prompt_contract(pkg, shot, prompt),
+        "geometryScreening": geometry_screening,
+    }
     _save(pkg, path)
+    if geometry_screening.get("status") == "fail":
+        log(f"KEYFRAME STAGE ADVISORY — {shot_id}: {geometry_screening.get('reason')} "
+            "(candidate preserved for human judgement; this check does not block Accept)")
+    elif geometry_screening.get("status") == "unavailable":
+        log(f"KEYFRAME GEOMETRY WARNING — {shot_id}: {geometry_screening.get('reason')}")
     log(f"KEYFRAME — {shot_id} -> {out.name} (awaiting approval — the current approved "
         f"keyframe, if any, is unchanged) — approve-keyframe or reject-keyframe")
     return str(out)
+
+
+def rescreen_keyframe_geometry(scene, shot_id, episode="Ep1", log=print):
+    """Repeat the local zero-spend geometry check for the pending candidate."""
+    pkg, path = load_pkg(scene, episode)
+    _require_valid(pkg)
+    _require_current_lineage(pkg, scene, episode)
+    shot = _shot(pkg, shot_id)
+    candidate = _ledger(pkg, shot_id).get("keyframeCandidate") or {}
+    candidate_path = candidate.get("path")
+    if not candidate_path or not os.path.exists(candidate_path):
+        raise Refused(f"REFUSED — {shot_id} has no visible keyframe candidate to screen")
+    composition = _load_opening_composition_master(
+        shot, scene, episode, _characters_cfg())
+    if not composition:
+        raise Refused(
+            f"REFUSED — {shot_id}'s opening composition master is missing or stale")
+    result = cb_layout.screen_candidate_geometry(candidate_path, composition)
+    candidate["geometryScreening"] = result
+    _save(pkg, path)
+    log(f"KEYFRAME GEOMETRY — {shot_id}: {result.get('status')} — {result.get('reason')} "
+        "(zero spend)")
+    return result
 
 
 # ── THE OPENING-FRAME SOURCE CHOICE (Julian's directive, 2026-07-18) ────────────────────
@@ -1804,7 +3888,8 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
                                                         "archivedFile": str(dest.relative_to(HERE))})
     led["keyframeApproval"] = {"approved": True, "path": cand["path"], "at": _now(),
                                 "reviewedBy": reviewed_by, "source": cand.get("source", "generated"),
-                                "inputSignature": cand.get("inputSignature")}
+                                "inputSignature": cand.get("inputSignature"),
+                                "promptContract": cand.get("promptContract")}
     led["keyframePath"] = cand["path"]    # back-compat pointer for any legacy reader (evidence_pack etc.)
     led["keyframeCandidate"] = None
     _save(pkg, path)
@@ -1827,14 +3912,24 @@ def reject_keyframe(scene, shot_id, correction, episode="Ep1", reviewed_by="Juli
     arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_keyframe_{ts}"
     arch.mkdir(parents=True, exist_ok=True)
     archived_rel = None
+    archived_sidecars = []
     src = cand.get("path")
     if src and os.path.exists(src):
         dest = arch / os.path.basename(src)
         shutil.move(src, dest)                      # MOVED, not copied — the candidate's own path is cleared
         archived_rel = str(dest.relative_to(HERE))
+        for suffix in (".review.json", ".gen.json"):
+            sidecar = pathlib.Path(src + suffix)
+            if sidecar.exists():
+                sidecar_dest = arch / sidecar.name
+                shutil.move(sidecar, sidecar_dest)
+                archived_sidecars.append(str(sidecar_dest.relative_to(HERE)))
     rejection = {**cand, "outcome": "rejected", "rejectedAt": _now(),
                  "reason": correction.strip(), "reviewedBy": reviewed_by,
-                 "rejectedFile": archived_rel}
+                 "rejectedFile": archived_rel,
+                 "archivedSidecars": archived_sidecars,
+                 "contentHashAtGeneration": bool(
+                     cand.get("contentHash") and cand.get("promptContract"))}
     led.setdefault("keyframeRejections", []).append(rejection)
     led["keyframeRejected"] = rejection
     led["keyframeCandidate"] = None        # cleared from the current position
@@ -1929,16 +4024,187 @@ def _shots_hash(pkg):
                                       ensure_ascii=False).encode()).hexdigest()[:16]
 
 
-def _animation_provider_contract(shot, imgs, led, fast):
+def _reference_records(shot, imgs):
+    blueprint = _expanded_reference_blueprint(
+        shot, "referenceSlots", _characters_cfg())
+    if len(blueprint) != len(imgs):
+        raise Refused(
+            "REFUSED — intact turnaround reference count does not match the sealed "
+            "provider attachments")
+    return [
+        {"slot": item["slot"], "sourceSlot": item["sourceSlot"],
+         "role": item["role"], "view": item.get("view"), "path": path,
+         "intactTurnaround": bool((item.get("identity") or {}).get(
+             "intactTurnaround")),
+         "sameCharacterGroup": ((item.get("identity") or {}).get(
+             "turnaroundGroupHash")),
+         "md5": _file_md5(path)}
+        for item, path in zip(blueprint, imgs)
+    ]
+
+
+def _with_intact_turnaround_law(prompt, references):
+    """Make the one-sheet/one-character rule explicit in every animation request."""
+    identity_refs = [item for item in references if item.get("intactTurnaround")]
+    if not identity_refs:
+        return prompt
+    lines = ["[Locked Character Turnarounds]"]
+    for item in identity_refs:
+        lines.append(
+            f"{item['slot']} is {item['role']}'s complete, uncropped 360 turnaround "
+            "sheet. Every view on this sheet is the same character identity, not an "
+            "additional character. Use the entire sheet for face, silhouette, proportions, "
+            "markings and rear/side details; render exactly one instance of this character "
+            "unless the script explicitly requires otherwise. Do not use the sheet layout "
+            "as the shot composition.")
+    return "\n".join(lines) + "\n\n" + prompt
+
+
+def _comparison_args(comparison_model_id, comparison_run_id):
+    if comparison_model_id is None and comparison_run_id is None:
+        return None, None
+    model_id = str(comparison_model_id or "").strip()
+    run_id = str(comparison_run_id or "").strip()
+    if model_id != cb_seedance_transport.COMPARISON_MODEL_ID:
+        raise Refused("REFUSED — only fal-seedance-2.0 is allowed as the comparison model")
+    if not run_id or len(run_id) > 120:
+        raise Refused("REFUSED — a bounded comparison run ID is required")
+    return model_id, run_id
+
+
+def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
+                              comparison_model_id=None, comparison_run_id=None,
+                              materialize_audio=False):
+    """Return every exact provider call that will produce one Studio candidate."""
+    import cb_costs
+    model_id, run_id = _comparison_args(comparison_model_id, comparison_run_id)
+    references = _reference_records(shot, imgs)
+    parent_prompt = _with_intact_turnaround_law(
+        shot["seedancePrompt"], references)
+    if model_id is None:
+        try:
+            contract = cb_providers.request_contract(
+                fast=fast, duration=int(round(shot["durationSec"])), resolution="720p",
+                image_count=len(imgs), audio_count=1 if led.get("voPath") else 0)
+        except cb_providers.ProviderCapabilityError as exc:
+            raise Refused(f"REFUSED — provider capability: {exc}") from exc
+        per = round(cb_costs.estimate_video_cost(
+            contract["costRateKey"], int(round(shot["durationSec"]))), 4)
+        return {
+            "schemaVersion": 1,
+            "mode": "single-qualified-provider-call",
+            "studioShotId": shot["shotId"],
+            "studioDurationSec": shot["durationSec"],
+            "providerModelId": contract["providerModelId"],
+            "comparisonRunId": None,
+            "parentPromptHash": hashlib.sha256(parent_prompt.encode()).hexdigest(),
+            "costPerStudioCandidateUsd": per,
+            "segments": [{
+                "segmentIndex": 1, "segmentCount": 1,
+                "globalStartSec": 0.0, "globalEndSec": shot["durationSec"],
+                "durationSec": shot["durationSec"], "stageNumbers": [],
+                "prompt": parent_prompt,
+                "promptHash": hashlib.sha256(parent_prompt.encode()).hexdigest(),
+                "dynamicOpeningRelay": False,
+                "references": references,
+                "audio": ({"path": led.get("voPath"),
+                           "md5": _file_md5(led.get("voPath"))}
+                          if led.get("voPath") else None),
+                "contract": contract,
+                "costUsd": per,
+            }],
+        }
+
+    specialist = _approved_department_output(pkg, shot["shotId"], "animation") or {}
+    attached = [
+        {"position": index, "assetTag": item["slot"], "role": item["role"],
+         "path": item["path"], "contentHash": _sha256_file(item["path"])}
+        for index, item in enumerate(references, start=1)
+    ]
+    if led.get("voPath"):
+        attached.append({
+            "position": len(attached) + 1, "assetTag": "@Audio1",
+            "role": "approved dialogue and performance track",
+            "path": led["voPath"], "contentHash": _sha256_file(led["voPath"]),
+        })
+    base_task = _seedance_pipeline_task(shot, specialist, attached)
     try:
-        return cb_providers.request_contract(
-            fast=fast, duration=int(round(shot["durationSec"])), resolution="720p",
-            image_count=len(imgs), audio_count=1 if led.get("voPath") else 0)
-    except cb_providers.ProviderCapabilityError as exc:
-        raise Refused(f"REFUSED — provider capability: {exc}") from exc
+        plan = cb_seedance_transport.build_comparison_plan(
+            shot=shot, approved_direction=specialist, base_task=base_task,
+            parent_prompt=parent_prompt, comparison_run_id=run_id, model_id=model_id)
+    except cb_seedance_transport.TransportPlanError as exc:
+        raise Refused(f"REFUSED — comparison transport: {exc}") from exc
+
+    audio_master = led.get("voPath")
+    audio_master_hash = _file_md5(audio_master) if audio_master else None
+    total_cost = 0.0
+    for segment in plan["segments"]:
+        segment["segmentCount"] = len(plan["segments"])
+        if segment["dynamicOpeningRelay"]:
+            segment["references"] = [{
+                "slot": references[0]["slot"],
+                "role": "literal final frame from the preceding internal segment",
+                "dynamicFromSegment": segment["segmentIndex"] - 1,
+            }, *references[1:]]
+        else:
+            segment["references"] = list(references)
+        has_dialogue = bool(segment["dialogueLineIndexes"])
+        audio = None
+        if has_dialogue:
+            if not audio_master or not os.path.exists(audio_master):
+                raise Refused("REFUSED — comparison segment needs the approved timed voice master")
+            audio = {
+                "sourcePath": audio_master, "sourceMd5": audio_master_hash,
+                "sourceStartSec": segment["globalStartSec"],
+                "sourceEndSec": segment["globalEndSec"],
+                "dialogueLineIndexes": segment["dialogueLineIndexes"],
+            }
+            if materialize_audio:
+                audio_key = hashlib.sha256(json.dumps(
+                    audio, sort_keys=True).encode()).hexdigest()[:16]
+                audio_path = (MEDIA / "transport" /
+                              f"{shot['shotId']}_{audio_key}_audio.wav")
+                try:
+                    derived = cb_audio_timing.slice_timed_master(
+                        audio_master, segment["globalStartSec"],
+                        segment["globalEndSec"], audio_path)
+                except cb_audio_timing.AudioTimingError as exc:
+                    raise Refused(f"REFUSED — comparison audio: {exc}") from exc
+                audio.update({"path": derived["path"], "md5": _file_md5(derived["path"])})
+        segment["audio"] = audio
+        try:
+            contract = cb_providers.comparison_request_contract(
+                comparison_run_id=run_id, fast=fast,
+                duration=segment["durationSec"], resolution="720p",
+                image_count=len(imgs), audio_count=1 if has_dialogue else 0,
+                video_count=0, model_id=model_id)
+        except cb_providers.ProviderCapabilityError as exc:
+            raise Refused(f"REFUSED — provider capability: {exc}") from exc
+        segment["contract"] = contract
+        segment["costUsd"] = round(cb_costs.estimate_video_cost(
+            contract["costRateKey"], segment["durationSec"]), 4)
+        total_cost += segment["costUsd"]
+        audit = cb_prompt_lab.analyze_seedance_prompt_contract(
+            segment["prompt"], task_mode="reference-to-video",
+            reference_contract=segment["referenceContract"],
+            duration_sec=segment["durationSec"],
+            dialogue_lines=[shot["dialogueLines"][index]
+                            for index in segment["dialogueLineIndexes"]],
+            stage_plan=segment["compiledStages"],
+        )
+        segment["promptAudit"] = audit
+        if audit["status"] != "ready":
+            raise Refused(
+                f"REFUSED — provider segment {segment['segmentIndex']} prompt audit is "
+                f"{audit['score']}/{audit['maximum']}; repair the current Animation direction"
+            )
+    plan["costPerStudioCandidateUsd"] = round(total_cost, 4)
+    return plan
 
 
-def _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast):
+def _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast,
+                  comparison_model_id=None, comparison_run_id=None,
+                  execution_plan=None):
     """Everything the spend approval is bound to.
 
     The binding covers this shot's exact provider inputs and cost envelope. Package revision
@@ -1946,26 +4212,24 @@ def _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast):
     token while any changed prompt, media byte, duration, tier, count or rate still does.
     """
     import cb_costs
-    contract = _animation_provider_contract(shot, imgs, led, fast)
-    key = contract["costRateKey"]
-    rate, _, _ = cb_costs.RATES[key]
-    per = round(cb_costs.estimate_video_cost(key, int(round(shot["durationSec"]))), 4)
+    execution_plan = execution_plan or _animation_execution_plan(
+        pkg, shot, led, imgs, anchor, fast, comparison_model_id,
+        comparison_run_id, materialize_audio=True)
+    per = execution_plan["costPerStudioCandidateUsd"]
     payload = {"shotContractHash": hashlib.sha256(json.dumps(
                    shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
                "shotId": shot["shotId"],
-               "provider": contract["provider"],
-               "providerModelId": contract["providerModelId"],
-               "modelVersion": contract["modelVersion"],
-               "endpoint": contract["endpoint"],
-               "resolution": contract["resolution"],
-               "candidates": candidates, "ratePerSecUsd": rate,
+               "providerModelId": execution_plan["providerModelId"],
+               "comparisonRunId": execution_plan.get("comparisonRunId"),
+               "candidates": candidates,
                "maxBatchCostUsd": round(per * candidates, 4),
                "prompt": shot["seedancePrompt"],
-               "slotOrder": shot["referenceSlots"],
+               "slotOrder": _reference_records(shot, imgs),
                "anchorMd5": _file_md5(anchor),
                "refMd5s": [_file_md5(p) for p in imgs],
                "audioMd5": _file_md5(led["voPath"]) if led.get("voPath") else None,
-               "durationSec": shot["durationSec"]}
+               "durationSec": shot["durationSec"],
+               "executionPlan": execution_plan}
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:32], per
 
 
@@ -1995,29 +4259,42 @@ def _prompt_version(shot):
     return hashlib.md5(shot["seedancePrompt"].encode()).hexdigest()[:8]
 
 
-def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per):
+def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
+                     comparison_model_id=None, comparison_run_id=None,
+                     execution_plan=None):
     """THE IMMUTABLE PROVIDER-REQUEST ENVELOPE (Julian's cutover order, 2026-07-16, §5):
     everything the provider will receive, sealed AT DISCLOSURE — exact prompt, duration, model,
     resolution, candidate count, reference order with per-file hashes, audio hash, max cost.
     The spend token binds to this envelope's hash; firing sends THIS, never a recompile."""
-    img_slots = [t for t in shot["referenceSlots"] if t != "@Audio1"]
-    refs = [{"slot": t, "role": shot["referenceSlots"][t], "path": p, "md5": _file_md5(p)}
-            for t, p in zip(img_slots, imgs)]
-    contract = _animation_provider_contract(shot, imgs, led, fast)
+    refs = _reference_records(shot, imgs)
+    execution_plan = execution_plan or _animation_execution_plan(
+        pkg, shot, led, imgs, anchor, fast, comparison_model_id,
+        comparison_run_id, materialize_audio=True)
+    first_contract = execution_plan["segments"][0]["contract"]
+    working = led.get("workingSeedancePrompt") or {}
+    specialist = _approved_department_output(pkg, shot["shotId"], "animation") or {}
+    prompt_source = (
+        "human-working" if working.get("text") == shot["seedancePrompt"] else
+        "animation-director-current" if specialist.get("providerPrompt") else
+        "legacy-approved-storyboard"
+    )
     env = {"shotId": shot["shotId"], "prompt": shot["seedancePrompt"],
-           "durationSec": shot["durationSec"], "provider": contract["provider"],
-           "providerModelId": contract["providerModelId"],
-           "modelVersion": contract["modelVersion"],
-           "transport": contract["transport"],
-           "endpoint": contract["endpoint"],
-           "costRateKey": contract["costRateKey"],
-           "capabilityVerifiedAt": contract["capabilityVerifiedAt"],
+           "promptSource": prompt_source,
+           "durationSec": shot["durationSec"], "provider": first_contract["provider"],
+           "providerModelId": first_contract["providerModelId"],
+           "modelVersion": first_contract["modelVersion"],
+           "transport": first_contract["transport"],
+           "endpoint": first_contract["endpoint"],
+           "costRateKey": first_contract["costRateKey"],
+           "capabilityVerifiedAt": first_contract["capabilityVerifiedAt"],
            "resolution": "720p", "tier": "fast" if fast else "standard",
            "candidateCount": candidates, "costPerCandidateUsd": per,
            "maxBatchCostUsd": round(per * candidates, 4),
            "promptVersion": _prompt_version(shot), "references": refs,
            "audio": {"path": led.get("voPath"),
-                      "md5": _file_md5(led["voPath"]) if led.get("voPath") else None}}
+                      "md5": _file_md5(led["voPath"]) if led.get("voPath") else None},
+           "executionPlan": execution_plan,
+           "comparisonRunId": execution_plan.get("comparisonRunId")}
     import hashlib
     h = hashlib.sha256(json.dumps(env, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     return env, h
@@ -2042,6 +4319,26 @@ def _verify_envelope(auth):
     if env["audio"]["path"] and _file_md5(env["audio"]["path"]) != env["audio"]["md5"]:
         raise Refused("REFUSED — the audio asset changed after the disclosure; the token is "
                       "STALE. Request a new disclosure.")
+    plan = env.get("executionPlan") or {}
+    segments = plan.get("segments") or []
+    if not segments:
+        raise Refused("REFUSED — the sealed envelope has no provider execution plan")
+    for segment in segments:
+        for reference in segment.get("references") or []:
+            if reference.get("dynamicFromSegment") is not None:
+                continue
+            if _file_md5(reference.get("path")) != reference.get("md5"):
+                raise Refused(
+                    f"REFUSED — segment {segment.get('segmentIndex')} reference "
+                    f"{reference.get('slot')} changed after disclosure"
+                )
+        audio = segment.get("audio") or {}
+        if audio.get("sourcePath") and _file_md5(audio["sourcePath"]) != audio.get("sourceMd5"):
+            raise Refused("REFUSED — the approved timed voice master changed after disclosure")
+        if audio.get("path") and _file_md5(audio["path"]) != audio.get("md5"):
+            raise Refused(
+                f"REFUSED — segment {segment.get('segmentIndex')} audio changed after disclosure"
+            )
     return env
 
 
@@ -2058,11 +4355,14 @@ def _resolve_seedance_prompt(pkg, shot):
     led = _ledger(pkg, shot["shotId"])
     working = led.get("workingSeedancePrompt")
     if working and working.get("text"):
-        return working["text"], True
-    output = _approved_department_output(pkg, shot["shotId"], "animation") or {}
-    if output.get("providerPrompt"):
-        return output["providerPrompt"], False
-    return shot["seedancePrompt"], False
+        base, is_working = working["text"], True
+    else:
+        output = _approved_department_output(pkg, shot["shotId"], "animation") or {}
+        base = output.get("providerPrompt") or shot["seedancePrompt"]
+        is_working = False
+    return (_with_character_scale_control(
+        base, shot, "referenceSlots", str(pkg.get("sceneNumber")),
+        pkg.get("episode") or "Ep1"), is_working)
 
 
 def seedance_working_status(scene, shot_id, episode="Ep1"):
@@ -2076,7 +4376,7 @@ def seedance_working_status(scene, shot_id, episode="Ep1"):
     working = led.get("workingSeedancePrompt")
     specialist = _approved_department_output(pkg, shot_id, "animation") or {}
     source = ("human-working" if is_working else
-              "animation-director-approved" if specialist.get("providerPrompt") else
+              "animation-director-current" if specialist.get("providerPrompt") else
               "legacy-approved-storyboard")
     baseline = specialist.get("providerPrompt") or shot["seedancePrompt"]
     return {"approvedPrompt": baseline, "currentPrompt": current,
@@ -2213,17 +4513,132 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
     }
 
 
+def _seedance_pipeline_task(shot, specialist, attached_contract):
+    """Translate current signed Studio direction into the generic zero-spend compiler contract."""
+    specialist = specialist or {}
+    approved_refs = {
+        re.sub(r"\s+", "", str(item.get("assetTag") or "")).lower(): item
+        for item in (specialist.get("referenceContract") or [])
+        if item.get("assetTag")
+    }
+    references, assets = [], {"images": [], "videos": [], "audio": []}
+    for item in attached_contract or []:
+        tag = str(item.get("assetTag") or "").strip()
+        if not tag:
+            continue
+        approved = approved_refs.get(re.sub(r"\s+", "", tag).lower(), {})
+        role = str(approved.get("role") or item.get("role") or "reference subject")
+        controls = str(approved.get("controls") or item.get("role") or role).strip()
+        role_low = role.lower()
+        if "audio" in role_low or tag.lower().startswith("@audio"):
+            exclude = "unassigned voices, music, ambience, and timing"
+            kind = "audio"
+        elif any(value in role_low for value in ("opening", "first", "closing", "last")):
+            exclude = "unapproved text labels and unrelated artifacts"
+            kind = "images"
+        elif any(value in role_low for value in ("location", "scene", "style")):
+            exclude = "people, placeholder characters, and unrelated foreground objects"
+            kind = "images"
+        elif tag.lower().startswith("@video"):
+            exclude = "the source identity, materials, and scene unless explicitly assigned"
+            kind = "videos"
+        else:
+            exclude = "the reference background, composition, text labels, and unrelated content"
+            kind = "images"
+        subject = role.replace("_", " ").strip().title() or "Reference Subject"
+        references.append({
+            "tag": tag,
+            "subject": subject,
+            "defines": controls.rstrip("."),
+            "exclude": exclude,
+        })
+        asset = {"tag": tag, "subject": subject, "path": item.get("path")}
+        if kind == "audio" and item.get("path"):
+            asset["duration_seconds"] = _audio_dur(item["path"])
+        assets[kind].append(asset)
+
+    stages = []
+    for stage in specialist.get("stagePlan") or []:
+        start, end = stage.get("startSec"), stage.get("endSec")
+        time_range = ""
+        if start is not None and end is not None:
+            time_range = f"{float(start):g}-{float(end):g} seconds"
+        stages.append({
+            "time": time_range,
+            "purpose": stage.get("purpose") or "",
+            "initial_state": stage.get("initialOrCarriedState") or "",
+            "event": stage.get("primaryEvent") or "",
+            "end_state": stage.get("observableEndState") or "",
+            "emotion_or_camera": stage.get("emotionOrCameraAnalysis") or "",
+        })
+
+    dialogue = bool(shot.get("dialogueLines"))
+    audio = specialist.get("audioContract") or (
+        "@Audio1 is the sole source of dialogue, voice, performance, and timing. "
+        "Use natural ambience and foley only; no music."
+        if dialogue else
+        "No dialogue. Use natural ambience and foley only; no music."
+    )
+    consistency = specialist.get("consistencyContract") or [
+        "Keep approved identity, character count, relative scale, prop ownership, scene geography, light direction, camera axis, and audio relationships stable."
+    ]
+    task_mode = specialist.get("taskMode") or "reference-to-video"
+    return {
+        "type": task_mode,
+        "goal": (specialist.get("generationGoal") or shot.get("purpose") or
+                 f"Generate approved shot {shot.get('shotId') or ''}.").strip(),
+        "duration_seconds": shot.get("durationSec"),
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "assets": assets,
+        "references": references,
+        "stages": stages,
+        "scene_style": " ".join(value for value in (
+            specialist.get("dramaticBeat"), specialist.get("performanceArc")) if value),
+        "camera": specialist.get("cameraBehaviour") or "",
+        "audio": audio,
+        "consistency": consistency,
+        "no_music": True,
+        "extension_direction": (
+            "backward" if task_mode == "extend-backward" else
+            specialist.get("extensionDirection") or "forward"),
+        "edit_goal": specialist.get("generationGoal") or "",
+        "edit_scope": specialist.get("editScope") or "",
+        "preserve": specialist.get("contentToPreserve") or consistency,
+        "transition_trigger": specialist.get("transitionTrigger") or "",
+        "transition_transformation": specialist.get("transitionTransformation") or "",
+        "arrival_state": specialist.get("transitionArrivalState") or "",
+        "audio_transition": specialist.get("audioTransition") or "",
+        "first_frame_tag": specialist.get("firstFrameTag") or "@Image 1",
+        "last_frame_tag": specialist.get("lastFrameTag") or "@Image 2",
+        "storyboard_tag": specialist.get("storyboardTag") or "@Image 1",
+        "storyboard_reading_order": (
+            specialist.get("storyboardReadingOrder") or "left to right, top to bottom"),
+        "blockout_kind": specialist.get("blockoutKind") or "coarse",
+        "blockout_mappings": specialist.get("blockoutMappings") or [],
+    }
+
+
 def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     pkg, _ = load_pkg(scene, episode)
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
+    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
     blockers, warnings, checks = [], [], {}
 
     try:
-        _require_confirmed_billing("fal")
-        checks["billingConfirmed"] = {"ok": True}
-    except Refused as e:
-        blockers.append(str(e)); checks["billingConfirmed"] = {"ok": False, "detail": str(e)}
+        target_model = cb_providers.video_model(require_enabled=False)
+        checks["modelTarget"] = target_model.modelId
+        if target_model.enabled:
+            _require_confirmed_billing(target_model.provider)
+            checks["billingConfirmed"] = {"ok": True, "provider": target_model.provider}
+        else:
+            checks["billingConfirmed"] = {
+                "ok": False, "provider": target_model.provider,
+                "detail": "Pending until the selected model is activated and qualified."}
+    except (Refused, cb_providers.ProviderCapabilityError) as e:
+        blockers.append(str(e))
+        checks["billingConfirmed"] = {"ok": False, "detail": str(e)}
 
     anchor = None
     imgs = []
@@ -2236,18 +4651,22 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     characters_cfg = _characters_cfg()
     if anchor:
         try:
-            imgs = _slot_paths(shot, "referenceSlots", anchor, scene, episode, characters_cfg)
-            ordered_slots = sorted(
-                (slot for slot in (shot.get("referenceSlots") or {}) if slot.startswith("@图")),
-                key=lambda slot: int(slot[2:]))
+            attachment_plan = _provider_attachment_plan(
+                shot, "referenceSlots", anchor, scene, episode, characters_cfg)
+            imgs = [item["path"] for item in attachment_plan]
+            ordered_slots = [item["slot"] for item in attachment_plan]
             checks["sceneLookAttached"] = {"ok": True}
             checks["referencesAttached"] = {"ok": True, "count": len(imgs),
                                              "order": ordered_slots}
             checks["referenceContract"] = [
-                {"position": index, "assetTag": slot,
-                 "role": shot["referenceSlots"][slot], "path": path,
-                 "contentHash": hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()}
-                for index, (slot, path) in enumerate(zip(ordered_slots, imgs), start=1)
+                {"position": item["position"], "assetTag": item["slot"],
+                 "sourceSlot": item["sourceSlot"], "role": item["role"],
+                 "view": item.get("view"), "path": item["path"],
+                 "sameCharacterGroup": ((item.get("identity") or {}).get(
+                     "turnaroundGroupHash")),
+                 "contentHash": hashlib.sha256(
+                     pathlib.Path(item["path"]).read_bytes()).hexdigest()}
+                for item in attachment_plan
             ]
         except (Refused, OSError) as e:
             blockers.append(str(e))
@@ -2284,6 +4703,10 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     checks["resolution"] = "720p"
     checks["aspectRatio"] = "16:9"
     try:
+        task_mode = specialist.get("taskMode") or "reference-to-video"
+        if task_mode != "reference-to-video":
+            raise cb_providers.ProviderCapabilityError(
+                f"no enabled provider route is qualified for {task_mode}")
         provider_contract = cb_providers.request_contract(
             duration=int(round(shot.get("durationSec") or 0)), resolution="720p",
             image_count=len(imgs),
@@ -2296,7 +4719,6 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         checks["model"] = cb_providers.selected_video_model_id()
 
     resolved_prompt, using_working = _resolve_seedance_prompt(pkg, shot)
-    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
     checks["usingWorkingVersion"] = using_working
     checks["promptSource"] = ("human-working" if using_working else
         "seedance-production-director-approved" if specialist.get("providerPrompt")
@@ -2309,6 +4731,44 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         warnings.append(
             f"craft gate scores {quality['score']}/{quality['maximum']} "
             f"(target {quality['threshold']}){detail}")
+
+    pipeline_contract = None
+    try:
+        pipeline_task = _seedance_pipeline_task(
+            shot, specialist, checks.get("referenceContract") or [])
+        pipeline_contract = cb_seedance_pipeline.SeedancePromptBuilder(
+            pipeline_task).preflight(existing_prompt=resolved_prompt)
+        checks["seedancePipeline"] = pipeline_contract
+        if not pipeline_contract["readyForPrompt"]:
+            errors = pipeline_contract["validation"]["errors"]
+            warnings.append(
+                f"Seedance compiler preflight found {len(errors)} authoring error(s): "
+                + "; ".join(errors[:3]))
+    except ValueError as exc:
+        checks["seedancePipeline"] = {
+            "zeroSpend": True, "providerCalled": False, "readyForPrompt": False,
+            "detail": str(exc),
+        }
+        warnings.append(f"Seedance compiler preflight could not type the task: {exc}")
+
+    seedance_contract = cb_prompt_lab.analyze_seedance_prompt_contract(
+        resolved_prompt,
+        task_mode=(pipeline_contract or {}).get("promptLabTaskMode") or
+                  specialist.get("taskMode") or "reference-to-video",
+        reference_contract=(checks.get("referenceContract") or [
+            {"assetTag": tag, "role": role}
+            for tag, role in (shot.get("referenceSlots") or {}).items()
+        ]),
+        duration_sec=shot.get("durationSec"),
+        dialogue_lines=shot.get("dialogueLines") or [],
+        stage_plan=specialist.get("stagePlan") or [],
+    )
+    checks["seedancePromptContract"] = seedance_contract
+    if seedance_contract["status"] != "ready":
+        warnings.append(
+            f"Seedance authoring contract scores {seedance_contract['score']}/"
+            f"{seedance_contract['maximum']}; "
+            f"{len(seedance_contract['repairActions'])} repair action(s) remain")
 
     # creative warnings — advisory only, never blocking, never rewritten
     if "relative scale" not in resolved_prompt.lower() and "identity" not in resolved_prompt.lower():
@@ -2388,8 +4848,535 @@ def prompt_readback(scene, shot_id, episode="Ep1", log=print):
     }
 
 
+# ── PROMPT LAB — exact-prompt analysis + append-only human render evidence ─────────────
+def _prompt_contract_is_exact(contract):
+    prompt = str((contract or {}).get("prompt") or "")
+    claimed = str((contract or {}).get("promptHash") or "")
+    if not (prompt and claimed and hashlib.sha256(prompt.encode()).hexdigest() == claimed):
+        return False
+    if contract.get("integrityVerified") is True:
+        return True
+    contract_hash = str(contract.get("contractHash") or "")
+    payload = {name: contract.get(name) for name in (
+        "prompt", "promptHash", "promptSource", "provider", "providerModelId", "modelVersion")}
+    actual = hashlib.sha256(json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
+    return bool(contract_hash and contract_hash == actual)
+
+
+def _current_prompt_contract(pkg, shot, artifact_type):
+    stage = "cinematography" if artifact_type == "keyframe" else "animation"
+    direction_state = None
+    checker = globals().get("_department_record_status")
+    if callable(checker):
+        try:
+            direction_state = checker(pkg, shot["shotId"], stage)
+        except (Refused, KeyError, TypeError, OSError, ValueError):
+            direction_state = None
+    if artifact_type == "keyframe":
+        specialist = _inspection_department_output(pkg, shot["shotId"], "cinematography")
+        prompt = specialist.get("providerPrompt") or shot.get("keyframePrompt")
+        return {**_keyframe_prompt_contract(pkg, shot, prompt),
+                "directionCurrent": bool(direction_state and direction_state.get("current")),
+                "directionReason": (direction_state or {}).get("reason"),
+                "attributionExact": False}
+    specialist = _inspection_department_output(pkg, shot["shotId"], "animation")
+    # The safety layer permits only current signed Animation direction to fire. A legacy
+    # working override remains inspectable history but is not presented here as the next
+    # provider prompt.
+    prompt = specialist.get("providerPrompt") or shot.get("seedancePrompt")
+    try:
+        model = cb_providers.video_model()
+        provider = model.provider
+        provider_model_id = model.modelId
+        model_version = model.modelVersion
+    except cb_providers.ProviderCapabilityError:
+        provider = None
+        provider_model_id = cb_providers.selected_video_model_id()
+        model_version = None
+    return {
+        "prompt": prompt,
+        "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        "promptSource": ("animation-director-current" if specialist.get("providerPrompt")
+                         else "legacy-approved-storyboard"),
+        "provider": provider,
+        "providerModelId": provider_model_id,
+        "modelVersion": model_version,
+        "directionCurrent": bool(direction_state and direction_state.get("current")),
+        "directionReason": (direction_state or {}).get("reason"),
+        "attributionExact": False,
+    }
+
+
+def _animation_prompt_contract(ledger):
+    batch = ledger.get("batch") or {}
+    envelope = batch.get("envelope") or {}
+    prompt = str(envelope.get("prompt") or "")
+    envelope_hash = str(batch.get("envelopeHash") or "")
+    actual_envelope_hash = hashlib.sha256(json.dumps(
+        envelope, sort_keys=True, ensure_ascii=False).encode()).hexdigest() if envelope else ""
+    if not prompt or not envelope_hash or envelope_hash != actual_envelope_hash:
+        return None
+    return {
+        "prompt": prompt,
+        "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        "promptSource": envelope.get("promptSource") or "sealed-provider-request",
+        "provider": envelope.get("provider"),
+        "providerModelId": envelope.get("providerModelId"),
+        "modelVersion": envelope.get("modelVersion"),
+        "integrityVerified": True,
+        "attributionExact": True,
+        "batchId": ledger.get("batchId") or (ledger.get("batch") or {}).get("batchId"),
+    }
+
+
+def _recorded_asset_path(record, *fields):
+    """Resolve current and legacy archive records without widening Studio file serving."""
+    raw = next((record.get(name) for name in fields if record.get(name)), None)
+    if not raw:
+        return None
+    supplied = pathlib.Path(raw)
+    candidates = [supplied]
+    if not supplied.is_absolute():
+        candidates.extend((HERE / supplied, HERE.parent / supplied))
+        original = record.get("path") or record.get("originalPath")
+        if original:
+            for parent in pathlib.Path(original).parents:
+                if parent.name == "engine":
+                    candidates.append(parent / supplied)
+                    break
+    for candidate in candidates:
+        try:
+            if candidate.is_file():
+                return str(candidate.resolve())
+        except OSError:
+            continue
+    return None
+
+
+def _prompt_lab_media_url(path):
+    """Return a preview URL only for media inside this canonical engine tree."""
+    try:
+        resolved = pathlib.Path(path).resolve()
+        media_root = (HERE / "media").resolve()
+        if resolved.is_file() and resolved.is_relative_to(media_root):
+            return "/engine/media/" + resolved.relative_to(media_root).as_posix()
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def _prompt_lab_assets(pkg, shot, ledger, artifact_type):
+    assets = []
+
+    def add(candidate_id, label, path, contract, state, expected_hash=None,
+            hash_at_generation=True):
+        if not path or not os.path.isfile(path):
+            return
+        absolute = str(pathlib.Path(path).resolve())
+        if any(item["path"] == absolute for item in assets):
+            return
+        prompt_exact = bool(contract and _prompt_contract_is_exact(contract))
+        exact = bool(prompt_exact and expected_hash and hash_at_generation)
+        grade = "exact" if exact else "prompt-only" if prompt_exact else "asset-only"
+        assets.append({
+            "candidateId": candidate_id,
+            "label": label,
+            "path": absolute,
+            "state": state,
+            "mediaUrl": _prompt_lab_media_url(absolute),
+            "promptContract": ({**contract, "attributionExact": exact}
+                               if prompt_exact else None),
+            "promptAttributionExact": prompt_exact,
+            "assetHashRecorded": bool(expected_hash),
+            "assetHashAtGeneration": bool(expected_hash and hash_at_generation),
+            "provenanceGrade": grade,
+            "attributionExact": exact,
+            "expectedAssetHash": expected_hash,
+        })
+
+    if artifact_type == "keyframe":
+        candidate = ledger.get("keyframeCandidate") or {}
+        approval = ledger.get("keyframeApproval") or {}
+        add("candidate", "Candidate", candidate.get("path"),
+            candidate.get("promptContract"),
+            ("awaiting" if (candidate.get("conformanceScreening") or {}).get("status") == "pass"
+             else "screening"), candidate.get("contentHash"))
+        add("approved", "Approved keyframe", approval.get("path"),
+            approval.get("promptContract"), "approved", approval.get("contentHash"))
+        for index, rejection in enumerate(ledger.get("keyframeRejections") or [], start=1):
+            add(f"KF-R{index}", f"Rejected keyframe {index}",
+                _recorded_asset_path(rejection, "rejectedFile", "archivedPath"),
+                rejection.get("promptContract"), "rejected", rejection.get("contentHash"),
+                bool(rejection.get("contentHashAtGeneration",
+                                   rejection.get("promptContract") and rejection.get("contentHash"))))
+        return assets
+
+    contract = _animation_prompt_contract(ledger)
+    output_hashes = {
+        str(pathlib.Path(item.get("path") or "").resolve()): item.get("sha256")
+        for item in ((ledger.get("batch") or {}).get("candidateHashes") or [])
+        if item.get("path") and item.get("sha256")
+    }
+    if ledger.get("status") == "candidates-pending":
+        for index, path in enumerate(ledger.get("candidatePaths") or [], start=1):
+            add(f"C{index}", f"Candidate C{index}", path, contract, "awaiting",
+                output_hashes.get(str(pathlib.Path(path).resolve())))
+    approved = ledger.get("approvedTake")
+    if approved:
+        number = int(ledger.get("approvedCandidate") or 1)
+        add(f"C{number}", f"Approved C{number}", approved, contract, "approved",
+            output_hashes.get(str(pathlib.Path(approved).resolve())))
+    for index, record in enumerate(ledger.get("renderHistory") or [], start=1):
+        archived_path = _recorded_asset_path(record, "archivedPath")
+        candidate_id = record.get("candidateId") or f"H{index}"
+        add(candidate_id, record.get("label") or f"Archived {candidate_id}", archived_path,
+            record.get("promptContract"), record.get("outcome") or "archived",
+            record.get("contentHash"), bool(record.get("contentHashAtGeneration")))
+    return assets
+
+
+def _prompt_lab_feedback(ledger, artifact_type):
+    """Return human-authored notes with source and scope; never infer a score from prose."""
+    items = []
+
+    def add(note, reviewer, created_at, kind, source_label, **extra):
+        note = str(note or "").strip()
+        reviewer = str(reviewer or "").strip()
+        if not note or not reviewer or reviewer.startswith("Auto-carried-forward"):
+            return
+        payload = [artifact_type, kind, source_label, created_at, reviewer, note]
+        feedback_id = hashlib.sha256(json.dumps(
+            payload, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()[:16]
+        items.append({
+            "feedbackId": feedback_id,
+            "note": note,
+            "reviewer": reviewer,
+            "createdAt": created_at,
+            "kind": kind,
+            "sourceLabel": source_label,
+            "topics": cb_prompt_lab.classify_feedback(note),
+            "scoreInferred": False,
+            **extra,
+        })
+
+    if artifact_type == "keyframe":
+        for index, record in enumerate(ledger.get("keyframeRejections") or [], start=1):
+            add(record.get("reason"), record.get("reviewedBy"), record.get("rejectedAt"),
+                "render-comment", f"Rejected keyframe {index}", outcome="rejected",
+                candidateId=f"KF-R{index}")
+        direction_stage = "cinematography"
+    else:
+        for index, record in enumerate(ledger.get("rejections") or [], start=1):
+            add(record.get("correction"), record.get("reviewed_by"), record.get("at"),
+                "render-comment", f"Rejected batch {index}", outcome="rejected",
+                batchId=record.get("batchId"), category=record.get("category"))
+        direction_stage = "animation"
+
+    for stage in (f"review-{artifact_type}", direction_stage):
+        work = ((ledger.get("departmentWork") or {}).get(stage) or {})
+        records = list(work.get("history") or [])
+        if work.get("approved"):
+            records.append(work["approved"])
+        if work.get("candidate"):
+            records.append(work["candidate"])
+        for record in records:
+            add(record.get("note"), record.get("reviewedBy"),
+                record.get("decisionAt") or record.get("preparedAt"),
+                "director-review" if stage.startswith("review-") else "direction-note",
+                "Director Review" if stage.startswith("review-") else
+                f"{direction_stage.title()} direction")
+
+    items.sort(key=lambda item: item.get("createdAt") or "", reverse=True)
+    return items
+
+
+def _latest_media_review(ledger, artifact_type):
+    stage = "review-keyframe" if artifact_type == "keyframe" else "review-animation"
+    work = ((ledger.get("departmentWork") or {}).get(stage) or {})
+    event = work.get("candidate") or work.get("approved")
+    if not event:
+        return None
+    output = event.get("output") or {}
+    return {
+        "state": "awaiting" if work.get("candidate") else "acknowledged",
+        "preparedAt": event.get("preparedAt"),
+        "reviewedAt": event.get("decisionAt"),
+        "verdict": output.get("verdict"),
+        "summary": output.get("summary"),
+        "dimensions": {name: output.get(name) for name in cb_prompt_lab.DIMENSIONS},
+        "likelyRootCause": output.get("likelyRootCause"),
+        "rootCauseReasoning": output.get("rootCauseReasoning"),
+        "cheapestNextAction": output.get("cheapestNextAction"),
+        "learningTags": output.get("learningTags") or [],
+        "advisoryOnly": True,
+    }
+
+
+def _prompt_lab_snapshot(scene, shot_id, artifact_type, episode="Ep1", candidate_id=None):
+    if artifact_type not in cb_prompt_lab.VALID_ARTIFACT_TYPES:
+        raise Refused("REFUSED — artifactType must be keyframe or animation")
+    pkg, _ = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    if artifact_type == "keyframe" and shot.get("sourceType") != "opener":
+        raise Refused(f"REFUSED — {shot_id} inherits its opening frame and has no keyframe prompt")
+    assets = _prompt_lab_assets(pkg, shot, ledger, artifact_type)
+    selected = None
+    if candidate_id:
+        selected = next((item for item in assets if item["candidateId"] == candidate_id), None)
+        if selected is None:
+            raise Refused(f"REFUSED — {candidate_id} is not a current {artifact_type} render for {shot_id}")
+    elif assets:
+        selected = assets[0]
+    selected_contract = (selected or {}).get("promptContract")
+    contract = selected_contract or _current_prompt_contract(pkg, shot, artifact_type)
+    analysis = cb_prompt_lab.analyze_prompt(
+        contract["prompt"], artifact_type, shot.get("dialogueLines") or [])
+    shot_records = cb_db.list_render_ratings(
+        HERE.parent, episode=episode, scene=scene, shot_id=shot_id,
+        artifact_type=artifact_type)
+    episode_records = cb_db.list_render_ratings(
+        HERE.parent, episode=episode, artifact_type=artifact_type)
+    feedback = _prompt_lab_feedback(ledger, artifact_type)
+    direction_stage = "cinematography" if artifact_type == "keyframe" else "animation"
+    current_direction = _inspection_department_output(pkg, shot_id, direction_stage)
+    current_direction_prompt = str(current_direction.get("providerPrompt") or "")
+    prompt_plan_summary = ""
+    if (current_direction_prompt and
+            hashlib.sha256(current_direction_prompt.encode()).hexdigest() ==
+            contract.get("promptHash")):
+        prompt_plan_summary = str(
+            current_direction.get("deliveryPlan") or
+            current_direction.get("doesItLand") or "").strip()
+        if not prompt_plan_summary:
+            stages = current_direction.get("stagePlan") or []
+            events = [str(stage.get("primaryEvent") or "").strip() for stage in stages]
+            events = [event for event in events if event]
+            prompt_plan_summary = " ".join(filter(None, [
+                str(current_direction.get("generationGoal") or "").strip(),
+                "Then ".join(events[:3]),
+                str(current_direction.get("continuityFinish") or "").strip(),
+            ])).strip()
+    seedance_contract = None
+    if artifact_type == "animation":
+        reference_contract = current_direction.get("referenceContract") or [
+            {"assetTag": tag, "role": role}
+            for tag, role in (shot.get("referenceSlots") or {}).items()
+        ]
+        seedance_contract = cb_prompt_lab.analyze_seedance_prompt_contract(
+            contract["prompt"],
+            task_mode=current_direction.get("taskMode") or "reference-to-video",
+            reference_contract=reference_contract,
+            duration_sec=shot.get("durationSec"),
+            dialogue_lines=shot.get("dialogueLines") or [],
+            stage_plan=(current_direction.get("stagePlan") or []
+                        if current_direction_prompt and
+                        hashlib.sha256(current_direction_prompt.encode()).hexdigest() ==
+                        contract.get("promptHash") else []),
+        )
+    current_asset_hash = None
+    if selected and shot_records:
+        try:
+            current_asset_hash = _sha256_file(pathlib.Path(selected["path"]))
+        except OSError:
+            current_asset_hash = None
+    correlation = cb_prompt_lab.build_direction_correlation(
+        shot,
+        analysis,
+        artifact_type,
+        selected=selected,
+        ledger=ledger,
+        feedback=feedback,
+        ratings=shot_records,
+        current_asset_hash=current_asset_hash,
+        prompt_applies_to_render=bool(selected_contract),
+        prompt_plan_summary=prompt_plan_summary,
+    )
+    return {
+        "episode": episode,
+        "scene": str(scene),
+        "shotId": shot_id,
+        "artifactType": artifact_type,
+        "shot": shot,
+        "ledger": ledger,
+        "assets": assets,
+        "selected": selected,
+        "promptContract": contract,
+        "analysisAppliesToRender": bool(selected_contract),
+        "analysis": analysis,
+        "ratings": shot_records,
+        "summary": cb_prompt_lab.summarize_ratings(
+            episode_records, current_prompt_hash=contract["promptHash"]),
+        "aiReview": _latest_media_review(ledger, artifact_type),
+        "existingFeedback": feedback,
+        "correlation": correlation,
+        "seedancePromptContract": seedance_contract,
+    }
+
+
+def prompt_lab_status(scene, shot_id, artifact_type, episode="Ep1", candidate_id=None):
+    """Free read-only Prompt Lab view. No model or provider is called."""
+    snapshot = _prompt_lab_snapshot(scene, shot_id, artifact_type, episode, candidate_id)
+    selected = snapshot["selected"]
+    contract = snapshot["promptContract"]
+    assets = [{
+        "candidateId": item["candidateId"],
+        "label": item["label"],
+        "state": item["state"],
+        "fileName": os.path.basename(item["path"]),
+        "mediaUrl": item.get("mediaUrl"),
+        "provenanceGrade": item["provenanceGrade"],
+        "promptAttributionExact": item["promptAttributionExact"],
+        "assetHashAtGeneration": item["assetHashAtGeneration"],
+        "attributionExact": item["attributionExact"],
+        "promptHash": ((item.get("promptContract") or {}).get("promptHash")),
+        "batchId": ((item.get("promptContract") or {}).get("batchId")),
+    } for item in snapshot["assets"]]
+    ratings = [{
+        "ratingId": item["ratingId"],
+        "candidateId": item["candidateId"],
+        "assetHash": item["assetHash"],
+        "promptHash": item["promptHash"],
+        "overallRead": item["overallRead"],
+        "scores": item["scores"],
+        "note": item["note"],
+        "reviewer": item["reviewer"],
+        "learningEligible": item.get("learningEligible", True),
+        "provenanceGrade": item.get("provenanceGrade", "exact"),
+        "createdAt": item["createdAt"],
+    } for item in snapshot["ratings"]]
+    return {
+        "schemaVersion": cb_prompt_lab.SCHEMA_VERSION,
+        "zeroSpend": True,
+        "mediaProviderCalled": False,
+        "approvalChanged": False,
+        "advisoryOnly": True,
+        "episode": snapshot["episode"],
+        "scene": snapshot["scene"],
+        "shotId": shot_id,
+        "artifactType": artifact_type,
+        "assets": assets,
+        "selectedCandidateId": (selected or {}).get("candidateId"),
+        "canRate": bool(selected),
+        "canTeachPrompt": bool(selected and selected["attributionExact"]),
+        "ratingMode": ("prompt-learning" if selected and selected["attributionExact"]
+                       else "quality-only" if selected else None),
+        "attributionWarning": (
+            None if not selected or selected["attributionExact"] else
+            "The exact render-to-prompt chain is incomplete. Your quality rating will be "
+            "saved against the media bytes that survive now, but excluded from prompt-wording evidence."
+        ),
+        "directionWarning": (
+            None if ((selected and selected["promptAttributionExact"]) or
+                     contract.get("directionCurrent") is not False) else
+            f"The approved {'Cinematography' if artifact_type == 'keyframe' else 'Animation'} "
+            "direction is not current. This analysis remains available, but generation "
+            "still requires a current specialist approval."
+        ),
+        "promptContract": {
+            "prompt": contract["prompt"],
+            "promptHash": contract["promptHash"],
+            "promptSource": contract.get("promptSource"),
+            "provider": contract.get("provider"),
+            "providerModelId": contract.get("providerModelId"),
+            "modelVersion": contract.get("modelVersion"),
+            "directionCurrent": contract.get("directionCurrent"),
+            "attributionExact": bool((selected or {}).get("promptAttributionExact")),
+            "analysisAppliesToRender": snapshot["analysisAppliesToRender"],
+            "batchId": contract.get("batchId"),
+        },
+        "analysis": snapshot["analysis"],
+        "ratingDimensions": [
+            {"key": name, "label": cb_prompt_lab.DIMENSIONS[name]}
+            for name in cb_prompt_lab.dimensions_for(artifact_type)
+        ],
+        "ratings": ratings,
+        "evidenceSummary": snapshot["summary"],
+        "aiReview": snapshot["aiReview"],
+        "existingFeedback": snapshot["existingFeedback"],
+        "correlation": snapshot["correlation"],
+        "seedancePromptContract": snapshot["seedancePromptContract"],
+    }
+
+
+def rate_prompt_render(scene, shot_id, artifact_type, candidate_id, scores,
+                       overall_read, note="", episode="Ep1", reviewed_by="Julian"):
+    """Append a human rating; only exact prompt+generation-hash records teach wording."""
+    clean_scores, overall_read, note = cb_prompt_lab.validate_rating(
+        artifact_type, scores, overall_read, note)
+    snapshot = _prompt_lab_snapshot(
+        scene, shot_id, artifact_type, episode, candidate_id=candidate_id)
+    selected = snapshot["selected"]
+    if not selected:
+        raise Refused("REFUSED — the selected render is no longer available")
+    reviewer = str(reviewed_by or "").strip()
+    if not reviewer or len(reviewer) > 100:
+        raise Refused("REFUSED — reviewedBy must be 1-100 characters")
+    path = pathlib.Path(selected["path"])
+    if not path.is_file():
+        raise Refused("REFUSED — the selected render no longer exists on disk")
+    actual_asset_hash = _sha256_file(path)
+    expected_asset_hash = selected.get("expectedAssetHash")
+    if expected_asset_hash and actual_asset_hash != expected_asset_hash:
+        raise Refused(
+            "REFUSED — the render bytes no longer match the immutable generation record")
+    learning_eligible = bool(selected["attributionExact"])
+    contract = selected.get("promptContract")
+    if contract:
+        analysis = cb_prompt_lab.analyze_prompt(
+            contract["prompt"], artifact_type, snapshot["shot"].get("dialogueLines") or [])
+        prompt_hash = contract["promptHash"]
+        prompt_text = contract["prompt"]
+        prompt_source = contract.get("promptSource") or "unknown"
+    else:
+        analysis = {
+            "schemaVersion": cb_prompt_lab.SCHEMA_VERSION,
+            "artifactType": artifact_type,
+            "unavailable": True,
+            "reason": "No exact generation prompt survives for this legacy render.",
+            "advisoryOnly": True,
+            "providerCalled": False,
+        }
+        prompt_hash = ""
+        prompt_text = ""
+        prompt_source = "unattributed-legacy-render"
+    record = {
+        "ratingId": uuid.uuid4().hex,
+        "episode": episode,
+        "scene": str(scene),
+        "shotId": shot_id,
+        "artifactType": artifact_type,
+        "candidateId": candidate_id,
+        "assetPath": str(path.resolve()),
+        "assetHash": actual_asset_hash,
+        "promptHash": prompt_hash,
+        "promptText": prompt_text,
+        "promptSource": prompt_source,
+        "provider": (contract or {}).get("provider"),
+        "providerModelId": (contract or {}).get("providerModelId"),
+        "modelVersion": (contract or {}).get("modelVersion"),
+        "overallRead": overall_read,
+        "scores": clean_scores,
+        "note": note,
+        "reviewer": reviewer,
+        "promptAnalysis": analysis,
+        "learningEligible": learning_eligible,
+        "provenanceGrade": selected.get(
+            "provenanceGrade", "exact" if learning_eligible else
+            "prompt-only" if contract else "asset-only"),
+        "createdAt": cb_db.utc_now(),
+    }
+    try:
+        cb_db.save_render_rating(HERE.parent, record)
+    except (ValueError, cb_db.StateConflict) as exc:
+        raise Refused(f"REFUSED — could not save render rating: {exc}") from exc
+    return record
+
+
 def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
-              spend_token=None, dry_run=False, log=print):
+              spend_token=None, dry_run=False, comparison_model_id=None,
+              comparison_run_id=None, log=print):
     """Generate one CONTROLLED CANDIDATE BATCH behind Julian's six spend protections
     (2026-07-16): (1) approval is SERVER-SIDE, SINGLE-USE and bound to the exact package
     hash + provider + model + candidate count + cost rate + max batch cost — anything that
@@ -2402,9 +5389,30 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     _require_valid(pkg)                                     # the stored gate, cheapest first
     _require_current_lineage(pkg, scene, episode)           # THE STATE-INTEGRITY CHECKPOINT —
     # see keyframe_shot's identical fix (2026-07-19) for why this call was missing entirely.
-    _require_confirmed_billing("fal")                       # protection 5 — block, not warn
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
+    _ensure_character_scale_control(
+        shot, scene, episode, _characters_cfg(), same_depth=None)
+    comparison_model_id, comparison_run_id = _comparison_args(
+        comparison_model_id, comparison_run_id)
+    existing_auth = led.get("pendingSpendAuth") or {}
+    existing_batch = led.get("batch") or {}
+    existing_envelope = (
+        existing_batch.get("envelope") if existing_batch.get("status") == "generating"
+        else existing_auth.get("envelope")
+    ) or {}
+    sealed_comparison_run = existing_envelope.get("comparisonRunId")
+    if sealed_comparison_run:
+        sealed_model = existing_envelope.get("providerModelId")
+        if comparison_model_id and (
+                comparison_model_id != sealed_model or
+                comparison_run_id != sealed_comparison_run):
+            raise Refused("REFUSED — comparison settings differ from the sealed spend envelope")
+        comparison_model_id, comparison_run_id = sealed_model, sealed_comparison_run
+    billing_provider = (
+        "fal" if comparison_model_id else
+        cb_providers.video_model(require_enabled=False).provider)
+    _require_confirmed_billing(billing_provider)             # protection 5 — block, not warn
     # THE ANIMATION WORKING PROMPT, IF SAVED, IS WHAT ACTUALLY SUBMITS (2026-07-19, Julian's
     # contained-creative-controls directive): a shallow-copied VIEW of the shot with
     # seedancePrompt swapped for the working override — every downstream read in this
@@ -2442,6 +5450,11 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     anchor = _anchor_for(pkg, shot)
     characters_cfg = _characters_cfg()
     imgs = _slot_paths(shot, "referenceSlots", anchor, scene, episode, characters_cfg)
+    execution_plan = _animation_execution_plan(
+        pkg, shot, led, imgs, anchor, fast,
+        comparison_model_id=comparison_model_id,
+        comparison_run_id=comparison_run_id,
+        materialize_audio=True)
 
     # ── RESUME PATH (protection 2): an in-flight batch completes its MISSING candidates
     # only, under its ORIGINAL token — completed candidates are never regenerated or repaid
@@ -2450,7 +5463,9 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         if spend_token != batch["token"]:
             raise Refused(f"REFUSED — {shot_id} has an in-flight batch; resuming requires its "
                           f"original spend token (nothing new is authorized)")
-        binding, _per = _binding_hash(pkg, shot, led, imgs, anchor, batch["expected"], fast)
+        binding, _per = _binding_hash(
+            pkg, shot, led, imgs, anchor, batch["expected"], fast,
+            comparison_model_id, comparison_run_id, execution_plan)
         if binding != batch["bindingHash"]:
             raise Refused(f"REFUSED — the package changed mid-batch (binding mismatch); the "
                           f"in-flight authorization is void. Request a new disclosure.")
@@ -2471,10 +5486,19 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                           f"(approve one candidate or reject the batch first)")
         # PROTECTION 4: fresh validation of the CURRENT package, every disclosure
         _fresh_validation(pkg, episode)
-        binding, per = _binding_hash(pkg, shot, led, imgs, anchor, candidates, fast)
+        binding, per = _binding_hash(
+            pkg, shot, led, imgs, anchor, candidates, fast,
+            comparison_model_id, comparison_run_id, execution_plan)
         envelope, env_hash = _sealed_envelope(pkg, shot, led, imgs, anchor, candidates,
-                                                fast, per)
+                                                fast, per, comparison_model_id,
+                                                comparison_run_id, execution_plan)
         reroll = (led.get("lastBatchBinding") == binding)
+        exact_reference_slots = {
+            item["slot"]: (
+                f"{item['role']} · {item['view']} turnaround view"
+                if item.get("view") else item["role"])
+            for item in _reference_records(shot, imgs)
+        }
         disclosure = {"shotId": shot_id, "candidateCount": candidates,
                        "costPerCandidateUsd": per,
                        "maxBatchCostUsd": round(per * candidates, 4),
@@ -2484,16 +5508,29 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                        "packageHash": _shots_hash(pkg),
                        "rerollOfUnchangedPackage": reroll,
                        "packageRevision": pkg.get("revision"),
-                       "referenceSlots": shot["referenceSlots"],
+                       "referenceSlots": exact_reference_slots,
+                       "logicalReferenceSlots": shot["referenceSlots"],
                        "openingAnchor": anchor, "audioAsset": led.get("voPath"),
                        "shotDurationSec": shot["durationSec"],
+                       "provider": envelope["provider"],
+                       "providerModelId": envelope["providerModelId"],
+                       "modelVersion": envelope["modelVersion"],
+                       "comparisonRunId": envelope.get("comparisonRunId"),
+                       "internalProviderCalls": [
+                           {"segmentIndex": item["segmentIndex"],
+                            "durationSec": item["durationSec"],
+                            "stageNumbers": item.get("stageNumbers") or []}
+                           for item in envelope["executionPlan"]["segments"]
+                       ],
                        "tier": "fast" if fast else "standard"}
         log("SPEND DISCLOSURE — review before approving:")
         for k in ("shotId", "candidateCount", "costPerCandidateUsd", "maxBatchCostUsd",
                    "promptVersion", "bindingHash", "envelopeHash", "packageRevision",
                    "rerollOfUnchangedPackage", "openingAnchor", "audioAsset",
-                   "shotDurationSec", "tier"):
+                   "shotDurationSec", "providerModelId", "comparisonRunId", "tier"):
             log(f"  {k}: {disclosure[k]}")
+        log("  internalProviderCalls: " + json.dumps(
+            disclosure["internalProviderCalls"], ensure_ascii=False))
         log(f"  referenceSlots (upload order): {json.dumps(disclosure['referenceSlots'])}")
 
         auth = led.get("pendingSpendAuth")
@@ -2554,8 +5591,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         led["batch"] = batch
         _save(pkg, path)
 
-    image_urls = [cb_gen._fal_upload(x) for x in imgs]     # uploaded once per invocation
-    audio_urls = [cb_gen._fal_upload(led["voPath"])] if led.get("voPath") else None
+    execution_plan = envelope["executionPlan"]
 
     MEDIA.mkdir(parents=True, exist_ok=True)
     for i in range(1, batch["expected"] + 1):
@@ -2573,27 +5609,116 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                 raise Refused(
                     f"REFUSED — candidate {i}'s transactionally completed artifact is "
                     "missing or changed; automatic repayment is blocked")
+            changed = False
             if i not in batch["done"]:
                 batch["done"].append(i)
+                changed = True
+            if changed:
                 _save(pkg, path)
             continue                                       # idempotent: never regenerated
-        log(f"FIRE — {shot_id} candidate {i}/{batch['expected']} ({shot['sourceType']}, "
-            f"{shot['durationSec']}s{', @Audio1' if audio_urls else ''}) ...")
+        segments = execution_plan["segments"]
+        transport = batch.setdefault("transportCandidates", {}).setdefault(
+            str(i), {"segments": [], "status": "generating"})
+        segment_paths = []
+        active_segment = None
         try:
-            cb_gen.generate_video_seedance_ref(prompt, image_urls,
-                                                audio_urls=audio_urls,
-                                                resolution=envelope["resolution"],
-                                                duration=str(int(round(envelope["durationSec"]))),
-                                                out=str(out), fast=fast, raw_prompt=True, production_route="cb_render")
-        except Exception as e:
+            for segment in segments:
+                segment_index = int(segment["segmentIndex"])
+                segment_count = int(segment["segmentCount"])
+                segment_dir = MEDIA / "transport" / batch["batchId"] / f"c{i}"
+                segment_out = (out if segment_count == 1 else
+                               segment_dir / f"segment_{segment_index}.mp4")
+                segment_out.parent.mkdir(parents=True, exist_ok=True)
+                opening_relay = None
+                if segment.get("dynamicOpeningRelay"):
+                    if not segment_paths:
+                        raise RuntimeError("dynamic opening relay has no preceding segment")
+                    opening_relay = segment_dir / f"segment_{segment_index - 1}_final.png"
+                    cb_gen.last_frame(segment_paths[-1], out=str(opening_relay))
+                    image_inputs = [str(opening_relay)] + [
+                        item["path"] for item in segment["references"]
+                        if item.get("dynamicFromSegment") is None
+                    ]
+                else:
+                    image_inputs = [item["path"] for item in segment["references"]]
+                audio_inputs = ([segment["audio"]["path"]]
+                                if (segment.get("audio") or {}).get("path") else None)
+
+                segment_claim = {"action": "generate"}
+                if segment_count > 1:
+                    segment_claim = cb_db.claim_candidate_segment(
+                        HERE.parent, batch["token"], i, segment_index, segment_count,
+                        f"{os.getpid()}:{threading.get_ident()}")
+                if segment_claim["action"] == "completed":
+                    recorded = pathlib.Path(segment_claim.get("output_path") or "")
+                    actual_hash = _sha256_file(recorded) if recorded.is_file() else None
+                    if actual_hash != segment_claim.get("output_hash"):
+                        raise RuntimeError(
+                            f"completed internal segment {segment_index} is missing or changed"
+                        )
+                    segment_out = recorded
+                else:
+                    active_segment = segment_index if segment_count > 1 else None
+                    log(
+                        f"FIRE — {shot_id} candidate {i}/{batch['expected']} · provider "
+                        f"segment {segment_index}/{segment_count} "
+                        f"({segment['durationSec']:g}s"
+                        f"{', @Audio1' if audio_inputs else ''}) ..."
+                    )
+                    cb_gen.generate_video_seedance_ref(
+                        segment["prompt"], image_inputs, audio_urls=audio_inputs,
+                        resolution=segment["contract"]["resolution"],
+                        duration=f"{int(round(segment['durationSec']))}",
+                        out=str(segment_out), fast=fast, raw_prompt=True,
+                        production_route="cb_render",
+                        model_id=segment["contract"]["providerModelId"],
+                        comparison_run_id=execution_plan.get("comparisonRunId"),
+                    )
+                    if segment_count > 1:
+                        cb_db.complete_candidate_segment(
+                            HERE.parent, batch["token"], i, segment_index, segment_out)
+                    active_segment = None
+                segment_paths.append(str(segment_out))
+                evidence = {
+                    "segmentIndex": segment_index,
+                    "durationSec": segment["durationSec"],
+                    "stageNumbers": segment.get("stageNumbers") or [],
+                    "promptHash": segment["promptHash"],
+                    "outputPath": str(segment_out),
+                    "outputHash": _sha256_file(segment_out),
+                    "audioHash": ((segment.get("audio") or {}).get("md5")),
+                    "openingRelayPath": str(opening_relay) if opening_relay else None,
+                    "openingRelayHash": (_sha256_file(opening_relay)
+                                         if opening_relay else None),
+                }
+                transport["segments"] = [
+                    item for item in transport["segments"]
+                    if item.get("segmentIndex") != segment_index
+                ] + [evidence]
+                transport["segments"].sort(key=lambda item: item["segmentIndex"])
+                _save(pkg, path)
+            if len(segment_paths) > 1:
+                cb_seedance_transport.join_segments(segment_paths, out)
+            transport["status"] = "joined"
+            transport["candidatePath"] = str(out)
+            transport["candidateHash"] = _sha256_file(out)
+            _save(pkg, path)
+        except (Exception, SystemExit) as e:
             # protection 6: the failure is PERSISTED, the batch stays resumable
+            if active_segment is not None:
+                try:
+                    cb_db.fail_candidate_segment(
+                        HERE.parent, batch["token"], i, active_segment, e)
+                except cb_db.SpendConflict:
+                    pass
             cb_db.fail_candidate(HERE.parent, batch["token"], i, e)
             batch["failed"].append({"candidate": i, "error": str(e)[:400], "at": _now()})
+            transport["status"] = "failed"
             _save(pkg, path)
-            raise Refused(f"REFUSED — candidate {i} failed at the provider "
+            raise Refused(f"REFUSED — candidate {i} failed during its sealed provider plan "
                           f"({str(e)[:160]}). The batch is saved and resumable: re-run with "
                           f"the SAME spend token to generate only the missing candidates — "
-                          f"completed candidates are never repaid.")
+                          f"completed provider segments are never repaid.")
         _candidate_review(shot, str(out), batch["batchId"], i)
         cb_db.complete_candidate(HERE.parent, batch["token"], i, out)
         batch["done"].append(i)
@@ -2636,7 +5761,8 @@ def _candidate_review(shot, clip, batch_id, index):
 
 
 def next_shot(scene, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
-              spend_token=None, dry_run=False, log=print):
+              spend_token=None, dry_run=False, comparison_model_id=None,
+              comparison_run_id=None, log=print):
     """Fire a candidate batch for the next fireable shot in order, then STOP."""
     pkg, path = load_pkg(scene, episode)
     _require_valid(pkg)
@@ -2650,9 +5776,62 @@ def next_shot(scene, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
                           f"it needs human redesign before the scene can continue")
         if led.get("status") != "approved" or (led.get("batch") or {}).get("status") == "generating":
             return fire_shot(scene, s["shotId"], episode, candidates=candidates,
-                              fast=fast, spend_token=spend_token, log=log, dry_run=dry_run)
+                              fast=fast, spend_token=spend_token, log=log,
+                              dry_run=dry_run,
+                              comparison_model_id=comparison_model_id,
+                              comparison_run_id=comparison_run_id)
     log(f"SCENE {scene} — every shot approved; ready to stitch")
     return None
+
+
+def _archive_animation_candidates(ledger, archive_dir, candidate_numbers, outcome):
+    """Move candidates and every sidecar while retaining exact review provenance."""
+    batch = ledger.get("batch") or {}
+    batch_id = ledger.get("batchId") or batch.get("batchId") or "unknown-batch"
+    prompt_contract = _animation_prompt_contract(ledger)
+    recorded_hashes = {
+        str(pathlib.Path(item.get("path") or "").resolve()): item.get("sha256")
+        for item in (batch.get("candidateHashes") or [])
+        if item.get("path") and item.get("sha256")
+    }
+    archived = []
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    for index, candidate_path in enumerate(ledger.get("candidatePaths") or [], start=1):
+        if index not in candidate_numbers:
+            continue
+        source = pathlib.Path(candidate_path)
+        actual_hash = _sha256_file(source) if source.is_file() else None
+        generation_hash = recorded_hashes.get(str(source.resolve()))
+        hash_at_generation = bool(
+            generation_hash and actual_hash and generation_hash == actual_hash)
+        archived_path = None
+        sidecars = []
+        if source.is_file():
+            destination = archive_dir / source.name
+            shutil.move(source, destination)
+            archived_path = str(destination.resolve())
+        for suffix in (".review.json", ".gen.json"):
+            sidecar = pathlib.Path(str(source) + suffix)
+            if sidecar.is_file():
+                destination = archive_dir / sidecar.name
+                shutil.move(sidecar, destination)
+                sidecars.append(str(destination.resolve()))
+        candidate_id = f"{batch_id}-C{index}"
+        archived.append({
+            "candidateId": candidate_id,
+            "label": f"Batch {batch_id} C{index}",
+            "batchId": batch_id,
+            "candidate": index,
+            "outcome": outcome,
+            "originalPath": str(source),
+            "archivedPath": archived_path,
+            "archivedSidecars": sidecars,
+            "contentHash": actual_hash,
+            "contentHashAtGeneration": hash_at_generation,
+            "promptContract": prompt_contract,
+            "archivedAt": _now(),
+        })
+    return archived
 
 
 # ── Gate 8 — Julian selects ONE candidate; approval harvests the relay anchor ───────────
@@ -2672,13 +5851,10 @@ def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian
 
     # archive the unselected candidates + their review sheets (never deleted)
     arch = HERE / "media" / "archive" / "shots_candidates" / led["batchId"]
-    arch.mkdir(parents=True, exist_ok=True)
-    for i, c in enumerate(cands, 1):
-        if i == candidate:
-            continue
-        for ext in ("", ".review.json"):
-            if os.path.exists(c + ext):
-                shutil.move(c + ext, arch / os.path.basename(c + ext))
+    history = _archive_animation_candidates(
+        led, arch, {i for i in range(1, len(cands) + 1) if i != candidate},
+        "not-selected")
+    led.setdefault("renderHistory", []).extend(history)
 
     harvest = MEDIA / f"{episode}_{shot_id}_final_frame.png"
     cb_gen.last_frame(selected, out=str(harvest))
@@ -2713,21 +5889,24 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
     led = _ledger(pkg, shot_id)
     if led.get("status") != "candidates-pending" or not led.get("candidatePaths"):
         raise Refused(f"REFUSED — {shot_id} has no candidate batch pending review")
+    correction = str(correction or "").strip()
+    if not correction:
+        raise Refused("REFUSED — a batch rejection requires a plain-language correction")
     if category not in FAILURE_CATEGORIES:
         raise Refused(f"REFUSED — category must be one of {FAILURE_CATEGORIES}")
     ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
     arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_{ts}"
-    arch.mkdir(parents=True, exist_ok=True)
-    for c in led["candidatePaths"]:
-        for ext in ("", ".review.json"):
-            if os.path.exists(c + ext):
-                shutil.move(c + ext, arch / os.path.basename(c + ext))
+    history = _archive_animation_candidates(
+        led, arch, set(range(1, len(led["candidatePaths"]) + 1)), "rejected")
     rejection = {"shotId": shot_id, "batchId": led.get("batchId"),
                  "correction": correction, "category": category,
-                 "reviewed_by": reviewed_by, "at": _now()}
+                 "reviewed_by": reviewed_by, "at": _now(),
+                 "archivedCandidates": history,
+                 "scoreInferred": False}
     with open(arch / "REJECTED.json", "w") as f:
         json.dump(rejection, f, indent=1)
     attempts = led.get("batchAttempts", 0) + 1
+    led.setdefault("renderHistory", []).extend(history)
     led.setdefault("rejections", []).append(rejection)
     led.update({"batchAttempts": attempts, "candidatePaths": None, "batchId": None})
     if attempts >= MAX_BATCH_ATTEMPTS:
@@ -2741,6 +5920,129 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
         _save(pkg, path)
         log(f"REJECTED — {shot_id} batch archived ({attempts}/{MAX_BATCH_ATTEMPTS} attempts). "
             f"Correction on record: {correction} [{category}]\n{DECISION_LADDER}")
+    return str(arch)
+
+
+def reopen_approved_shot(scene, shot_id, correction, category="other", episode="Ep1",
+                         reviewed_by="Julian", log=print):
+    """Archive an accepted take that fails later Director review and reopen the shot.
+
+    Approval remains immutable evidence: the take, harvested frame, sidecars, approval and
+    review records move into history. Only their status as the current production result is
+    cleared. Any post master derived from the take is invalidated at the same boundary.
+    """
+    correction = str(correction or "").strip()
+    if not correction:
+        raise Refused("REFUSED — reopening an accepted take requires a plain-language correction")
+    if category not in FAILURE_CATEGORIES:
+        raise Refused(f"REFUSED — category must be one of {FAILURE_CATEGORIES}")
+
+    with cb_db.scene_lease(HERE.parent, episode, str(scene),
+                           f"cb_render.reopen-approved:{shot_id}"):
+        pkg, path = load_pkg(scene, episode)
+        led = _ledger(pkg, shot_id)
+        approved_take = led.get("approvedTake")
+        if led.get("status") != "approved" or not approved_take:
+            raise Refused(f"REFUSED — {shot_id} has no accepted animation take to reopen")
+
+        stamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+        arch = (HERE / "media" / "archive" / "shots_reopened" /
+                f"{episode}_{shot_id}_{stamp}_{uuid.uuid4().hex[:6]}")
+        arch.mkdir(parents=True, exist_ok=False)
+
+        archived_assets = []
+        for source_value in (approved_take, led.get("harvestFrame")):
+            if not source_value:
+                continue
+            source = pathlib.Path(source_value)
+            content_hash = _sha256_file(source) if source.is_file() else None
+            archived_path = None
+            if source.is_file():
+                destination = arch / source.name
+                shutil.move(source, destination)
+                archived_path = str(destination.resolve())
+            archived_assets.append({
+                "originalPath": str(source),
+                "archivedPath": archived_path,
+                "contentHash": content_hash,
+            })
+            if str(source) == str(approved_take):
+                for suffix in (".review.json", ".gen.json"):
+                    sidecar = pathlib.Path(str(source) + suffix)
+                    if sidecar.is_file():
+                        destination = arch / sidecar.name
+                        shutil.move(sidecar, destination)
+
+        event = {
+            "shotId": shot_id,
+            "batchId": led.get("batchId"),
+            "approvedCandidate": led.get("approvedCandidate"),
+            "priorApproval": led.get("approval"),
+            "correction": correction,
+            "category": category,
+            "reviewed_by": reviewed_by,
+            "at": _now(),
+            "outcome": "accepted-take-reopened",
+            "archivedAssets": archived_assets,
+            "promptContract": _animation_prompt_contract(led),
+        }
+        (arch / "REOPENED.json").write_text(json.dumps(event, indent=1, ensure_ascii=False))
+        led.setdefault("renderHistory", []).append(event)
+        led.setdefault("rejections", []).append(event)
+        if led.get("batch"):
+            led.setdefault("batchHistory", []).append({
+                **led["batch"], "outcome": "accepted-take-reopened", "archivedAt": _now()
+            })
+
+        review_work = ((led.get("departmentWork") or {}).get("review-animation") or {})
+        for key in ("candidate", "approved"):
+            if review_work.get(key):
+                review_work.setdefault("history", []).append({
+                    **review_work[key],
+                    "outcome": "invalidated-by-reopened-take",
+                    "invalidatedAt": _now(),
+                })
+                review_work[key] = None
+
+        led.update({
+            "status": "designed",
+            "approvedTake": None,
+            "approvedCandidate": None,
+            "harvestFrame": None,
+            "approval": None,
+            "candidatePaths": None,
+            "batchId": None,
+            "batch": None,
+            "pendingSpendAuth": None,
+        })
+
+        post = pkg.setdefault("postProduction", {
+            "candidate": None, "approved": None, "history": []})
+        for key in ("candidate", "approved"):
+            if post.get(key):
+                post.setdefault("history", []).append({
+                    **post[key],
+                    "outcome": "invalidated-by-reopened-shot",
+                    "invalidatedAt": _now(),
+                    "shotId": shot_id,
+                })
+                post[key] = None
+        final_work = (pkg.setdefault("departmentWork", {})
+                      .setdefault("review-final", {
+                          "approved": None, "candidate": None, "history": []}))
+        for key in ("candidate", "approved"):
+            if final_work.get(key):
+                final_work.setdefault("history", []).append({
+                    **final_work[key],
+                    "outcome": "invalidated-by-reopened-shot",
+                    "invalidatedAt": _now(),
+                    "shotId": shot_id,
+                })
+                final_work[key] = None
+
+        _save(pkg, path)
+    log(f"REOPENED — {shot_id}'s accepted take archived; correction on record: "
+        f"{correction} [{category}]")
     return str(arch)
 
 
@@ -3107,7 +6409,8 @@ if __name__ == "__main__":
     try:
         # shared flags: --candidates N (1-4), --approve-spend, --category X
         flags = {"candidates": DEFAULT_CANDIDATES, "spend_token": None, "category": "other",
-                 "dry_run": False}
+                 "dry_run": False, "comparison_model": None,
+                 "comparison_run_id": None}
         pos = []
         i = 1
         while i < len(args):
@@ -3120,6 +6423,10 @@ if __name__ == "__main__":
                 flags["category"] = args[i + 1]; i += 2
             elif a == "--dry-run":
                 flags["dry_run"] = True; i += 1
+            elif a == "--comparison-model":
+                flags["comparison_model"] = args[i + 1]; i += 2
+            elif a == "--comparison-run-id":
+                flags["comparison_run_id"] = args[i + 1]; i += 2
             else:
                 pos.append(a); i += 1
         ep = lambda n: pos[n] if len(pos) > n else "Ep1"
@@ -3145,8 +6452,22 @@ if __name__ == "__main__":
             select_scenelook_source(pos[0], "library", ep(2), library_path=pos[1])
         elif cmd == "keyframe":
             keyframe_shot(pos[0], pos[1], ep(2))
+        elif cmd == "build-keyframe":
+            build_keyframe(pos[0], pos[1], ep(2))
+        elif cmd == "pose":
+            generate_pose_reference(pos[0], pos[1], pos[2], ep(3))
+        elif cmd == "approve-pose":
+            approve_pose_reference(pos[0], pos[1], pos[2], ep(3))
+        elif cmd == "reject-pose":
+            reject_pose_reference(pos[0], pos[1], pos[2], pos[3], episode=ep(4))
+        elif cmd == "select-pose-upload":
+            select_pose_reference_source(
+                pos[0], pos[1], pos[2], pos[3], episode=ep(4))
         elif cmd == "approve-keyframe":
             approve_keyframe(pos[0], pos[1], ep(2))
+        elif cmd == "rescreen-keyframe":
+            print(json.dumps(
+                rescreen_keyframe_conformance(pos[0], pos[1], ep(2)), indent=1))
         elif cmd == "reject-keyframe":
             reject_keyframe(pos[0], pos[1], pos[2], episode=ep(3))
         elif cmd == "keyframe-library":
@@ -3186,10 +6507,14 @@ if __name__ == "__main__":
                                                ep(3), pos[1]), indent=1))
         elif cmd == "next":
             next_shot(pos[0], ep(1), candidates=flags["candidates"],
-                       spend_token=flags["spend_token"], dry_run=flags["dry_run"])
+                       spend_token=flags["spend_token"], dry_run=flags["dry_run"],
+                       comparison_model_id=flags["comparison_model"],
+                       comparison_run_id=flags["comparison_run_id"])
         elif cmd == "fire":
             fire_shot(pos[0], pos[1], ep(2), candidates=flags["candidates"],
-                       spend_token=flags["spend_token"], dry_run=flags["dry_run"])
+                       spend_token=flags["spend_token"], dry_run=flags["dry_run"],
+                       comparison_model_id=flags["comparison_model"],
+                       comparison_run_id=flags["comparison_run_id"])
         elif cmd == "approve":
             approve_shot(pos[0], pos[1], int(pos[2]) if len(pos) > 2 else 1, ep(3))
         elif cmd == "reject":

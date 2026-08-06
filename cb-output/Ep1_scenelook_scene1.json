@@ -14,8 +14,63 @@
   "reviewedBy": "Julian",
   "reapprovedAt": "2026-07-26T21:10:07"
  },
- "candidate": null,
- "history": [],
+ "candidate": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_e46992d5.png",
+  "hash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9",
+  "inputSignature": {
+   "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+   "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+   "referenceHashes": {},
+   "plateHash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-08-05T11:04:37",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/archive/scenelook_rejected/20260805T110437/Ep1_S1_plate_candidate_15ffdf1e.png",
+  "packageRevision": 3
+ },
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_11848696.png",
+   "hash": "33833b01fff1febd364c68bfa51b63909c8ca6ab2d0e835edccd8984b1b9d63b",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "b834603bce6336566e6ee5b5e171d2f6af875e16ff4f1ea8f9f59eeb2a30d696",
+    "referenceHashes": {
+     "rainforest_flower_meadow.png": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
+    },
+    "plateHash": "33833b01fff1febd364c68bfa51b63909c8ca6ab2d0e835edccd8984b1b9d63b"
+   },
+   "referencePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/rainforest_flower_meadow.png",
+   "generatedAt": "2026-08-04T15:30:01",
+   "packageRevision": 2,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-04T18:30:52",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Rejected before the authorised keyframe run: the plate reads as a broad human-height meadow vista. Replace it with an embedded bee-height corridor where flowers tower four to six character-heights and dominate the frame.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260804T183052/Ep1_S1_plate_candidate_11848696.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_15ffdf1e.png",
+   "hash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7c45b02657552368801a8239b30d3732dd88c5c2e73685750151e8172b0e03c8",
+    "referenceHashes": {
+     "deep_rainforest_flowers.png": "1ba4e4e9b0929d8232e8c64e6bf99a9051251859984abb0201ddc018e8482be2"
+    },
+    "plateHash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9"
+   },
+   "referencePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/deep_rainforest_flowers.png",
+   "generatedAt": "2026-08-04T18:33:15",
+   "packageRevision": 2,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-05T11:04:37",
+   "reviewedBy": "Codex provenance migration",
+   "rejectedNote": "Archived only to refresh provenance after the immutable script and canon signatures changed; the bee-height corridor image remains the selected visual source and is immediately rebound unchanged.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260805T110437/Ep1_S1_plate_candidate_15ffdf1e.png"
+  }
+ ],
  "departmentWork": {
   "look": {
    "approved": {
@@ -51,8 +106,80 @@
     "reviewedBy": "Julian",
     "note": ""
    },
-   "candidate": null,
-   "history": []
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-05T11:04:20",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "2a1bfec206d5441d8b2f92d5d8eb213458f59ebde2ec6f08a4dc05a353b40725",
+    "output": {
+     "creativeIntent": "Create an environment-only Scene Look candidate for Ep1 Scene 1: a playful bee-scale wildflower field that feels open, springy, pollen-rich, and comedy-ready, with the first barely perceptible atmospheric warning of weather beyond the hills. The plate should establish the world’s physical rules and emotional range before any character staging: joyful motion potential in the flowers, then vulnerability implied by the distant cooling horizon.",
+     "storyOfPlace": "Deep within Crystal Cove’s rainforest, the scene opens inside a sunlit flower meadow viewed at bee scale. Lavender spikes, daisies, clover, grass channels, pollen dust, and small low crystals make the field feel like a living play corridor rather than a static backdrop. The space is bright, warm, and safe at first glance, but far beyond the flower tops the hills carry a faint grey-violet weather band that quietly prepares the later thunder turn without making the field stormy yet.",
+     "paletteAndLighting": "Use the locked deep_rainforest_flower_meadow plate as visual law: warm gold-pink sky over soft rolling hills, purple lavender, daisy white, pink-red clover, saturated greens, and gold pollen accents. Lighting is low bright sun just above the hills, raking gold light across the flower tops, backlit petal halos, soft haze over distant hills, and clear open sky above the flowers. Add only a subtle cool grey-violet band low on the far horizon; no rain, no dark storm overhead, no alternate time of day.",
+     "materialsAndAtmosphere": "Original 3D CGI animation look for ages 4–8, Pixar-caliber material richness: springy petals with soft translucency, pollen-heavy blossom heads, flexible stems, plush grass blades, tiny crystal set dressing resting low in the grass, warm airborne pollen motes, and gentle breeze-reactive plant surfaces. The environment should feel tactile, buoyant, readable, and physically responsive, with soft haze in the distance and no harsh realism or gritty texture.",
+     "continuityRules": [
+      "Environment-only plate: no Fuzzby, no Zenny, no animals, no silhouettes, no implied character action, no props carried by characters.",
+      "Do not compose a story shot or stage a character path; this is a scene-wide look plate establishing environment, palette, materials, light, and atmosphere.",
+      "Match the locked location canon: open bee-scale wildflower meadow, towering purple lavender spikes, white daisies, pink-red clover, grass channels, small low crystals, rolling hills, clear sky above flower tops, nothing overhead.",
+      "Use the locked plate’s lighting logic only: low bright sun above the hills, gold raking light, backlit petals, soft distant haze; do not introduce conflicting lighting or a different time of day.",
+      "Weather warning must remain minimal: faint grey-violet band low over the distant hills only, no rain, no lightning, no heavy storm clouds over the field, no wet surfaces."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated children’s series, ages 4–8, Pixar-caliber warmth and material appeal. Deep within Crystal Cove rainforest: an open bee-scale sunlit wildflower meadow matching the locked reference location deep_rainforest_flower_meadow.png as visual law. Towering purple lavender spikes, white daisies, and pink-red clover rise far above bee height, with pollen-heavy blossom heads, winding grass channels between flexible stems, small quiet crystals resting low in the grass, and soft rolling hills fading into haze beyond the flower field. Clear open sky above the flower tops. Low bright sun just above the hills sends long warm gold light across petals and grass, with translucent petal edges glowing, soft pollen motes in the air, saturated greens, lavender purples, daisy whites, clover pink-reds, and gold pollen accents. The plants feel springy, buoyant, and comedy-ready, as if they can recoil and sway in a warm breeze. Far low on the horizon only, add a very subtle grey-violet atmospheric band hinting at future weather; no rain, no lightning, no dark overhead storm. No characters, no animals, no silhouettes, no character props, no action staging, no text, no logos."
+    },
+    "packageRevision": 3,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+     "sceneContextHash": "562387a6fefacbece8047525e5ee4add61cbe40195b6da92cc899daf7c910cb9"
+    }
+   },
+   "history": [
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-08-04T14:40:36",
+     "editedAt": "2026-08-04T18:30:52",
+     "preparedBy": "specialist",
+     "sourceHash": "4ce0b9ea4d0b798c82812b423940713ef60053a48fb9565b326e2c43303cd288",
+     "output": {
+      "creativeIntent": "Establish Crystal Cove’s rainforest flower meadow as a joyful, tactile bee-scale world before the storm arrives: warm, springy, pollen-rich, alive with soft physical comedy potential, but with the first barely visible weather warning held in the far horizon.",
+      "storyOfPlace": "A sunlit wildflower field deep within the rainforest opens into clear sky above towering flower tops. Purple lavender spikes, white daisies, and pink-red clover rise like soft architecture at bee height, with grass channels winding between stems and small crystals resting low in the grass. Rolling hills recede beyond the flowers, where a faint grey-violet atmospheric band begins to cool the distance without yet disturbing the warm field.",
+      "paletteAndLighting": "Use the locked meadow palette: gold-pink sky glow near the hills, saturated lavender purples, daisy whites, pink-red clover, rich spring greens, and gold pollen accents. Low bright sun sits just above the hills, raking long warm light across petals and stems; flower edges catch soft backlit halos. The far horizon carries a subtle grey-violet storm warning, with no rain and no dark overhead sky.",
+      "materialsAndAtmosphere": "Everything should feel original 3D CGI for ages 4–8 with Pixar-caliber tactility: velvety clover heads, soft translucent daisy petals, clustered lavender buds, bendable green stems, springy grass, powdery pollen dust, tiny grounded crystals, and a light warm breeze. Atmosphere is clear and breathable near the flowers, with soft haze only over the distant hills.",
+      "continuityRules": [
+       "Environment-only Scene Look plate: no Fuzzby, no Zenny, no other characters, no creatures, no vehicles, no character-scale props.",
+       "Bee-height world logic: flowers loom large and frame the environment as soft, reactive obstacles; grass channels read as natural flight lanes.",
+       "Open meadow under open sky: nothing overhead, no canopy, no enclosed forest ceiling.",
+       "Weather state: warm breeze and clear sky in the field; only a faint grey-violet band low over the far hills signals the coming storm; no rain, lightning, puddles, or heavy storm clouds.",
+       "Preserve the locked location identity: towering purple lavender spikes, white daisies, pink-red clover, green stems and grass, small crystals low in the grass, rolling hills in soft haze beyond the flower field."
+      ],
+      "providerPrompt": "@Image 1 is a spatial-scale and depth reference only. Inherit its viewpoint from inside giant plant life, its frame-filling foreground vegetation, and its deep fly-through corridor. Do not inherit its trees, canopy, crystals, orange lilies, enclosed-forest setting, or palette.\n\nCreate one environment-only 16:9 Scene Look plate for an original premium 3D CGI animated children's series. Place the viewpoint approximately twelve inches above the ground, physically inside an open Crystal Cove wildflower meadow rather than looking across it. This must read as a navigable bee-height flower corridor, not a human-height panoramic landscape.\n\nScale and geography are mandatory: lavender, daisy and pink-red clover stems rise four to six character-heights; several foreground stems enter through the bottom edge and continue beyond the top edge; blossom heads are large, tactile obstacles around the upper and side thirds; broad green leaves overlap the lower corners; a clear winding flight lane passes through the centre into deep midground. Plants occupy most of the frame. Show the distant rolling hills and clear sky only through a narrow opening between the towering flowers, never as the dominant view.\n\nUse lavender purple, daisy white, clover pink-red and rich spring green. Low warm sun rakes through the corridor, backlighting translucent petals, fine stem hairs and floating pollen. Keep a faint grey-violet storm warning only in the distant gap. Surfaces are soft, springy, bendable and animation-ready. Any canon crystals are tiny, sparse and low in the deepest grass, never foreground landmarks.\n\nNo characters, insects, animals, faces, buildings, vehicles, broad aerial meadow vista, miniature flowers, tree trunks, forest canopy, oversized crystals, text, logo or watermark."
+     },
+     "packageRevision": 2,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+      "sceneContextHash": "ca0990a5ecb3fcdf617c817cef56817433998a33f76fd4d3a1f493ea6a05681b"
+     },
+     "editedBy": "Julian",
+     "outcome": "invalidated",
+     "invalidatedAt": "2026-08-05T11:03:57",
+     "invalidationReason": "direct inputs changed before replacement preparation"
+    }
+   ]
   }
  }
 }

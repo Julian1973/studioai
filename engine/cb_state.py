@@ -17,7 +17,7 @@ import cb_quality
 import cb_render
 
 
-POLICY_VERSION = "canon-locked-direct-input-readiness-v2"
+POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v4"
 
 
 def _read_json(path):
@@ -130,15 +130,26 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
 
     keyframe_approval = ledger.get("keyframeApproval") or {}
     keyframe_candidate = ledger.get("keyframeCandidate") or {}
+    keyframe_screening = (
+        keyframe_candidate.get("conformanceScreening") or
+        keyframe_approval.get("conformanceScreening") or {})
     if needs_keyframe:
         keyframe = cb_render._keyframe_record_status(
             pkg, shot, keyframe_approval, scene, episode)
         candidate_current = _keyframe_candidate_current(
             pkg, shot, keyframe_candidate, scene, episode)
         if keyframe_candidate:
-            kf = "awaiting" if candidate_current else "staleInputs"
+            if candidate_current and keyframe_screening.get("status") == "pass":
+                kf = "awaiting"
+            elif candidate_current:
+                kf = "screening"
+            else:
+                kf = "staleInputs"
         elif keyframe["current"]:
             kf = "approved"
+        elif (keyframe_approval and
+              keyframe.get("reason") == "keyframe-conformance-not-passed"):
+            kf = "screening"
         elif keyframe_approval:
             kf = "staleInputs"
         elif ledger.get("keyframeRejected"):
@@ -198,8 +209,8 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
         )
     elif scene_look_gated:
         label, sub, badge = (
-            "Waiting for current Scene Look approval",
-            "the environment, palette and lighting anchor is not current",
+            "Waiting for the scene world",
+            "the environment, palette and lighting anchor has not been generated from current direction",
             "locked",
         )
     elif kf == "staleInputs":
@@ -208,37 +219,46 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
             "generate or select a fresh candidate from current inputs",
             "blocked",
         )
+    elif kf == "screening":
+        label, sub, badge = (
+            "Opening frame held for identity check",
+            keyframe_screening.get("reason") or
+            "retry the objective identity and scale check; no media regeneration is needed",
+            "blocked",
+        )
     elif kf == "waitingPrev":
         label, sub, badge = (
             f"Waiting for {source_shot_id} final frame",
-            "the source shot needs a current approved animation take",
+            "the source shot needs a current accepted animation take",
             "locked",
         )
     elif needs_keyframe and kf == "awaiting":
-        label, sub, badge = "Keyframe awaiting approval", None, "awaiting"
+        label, sub, badge = "Keyframe awaiting your decision", None, "awaiting"
     elif needs_keyframe and not keyframe_satisfied:
         label, sub, badge = (
             "New keyframe required",
-            None if cine["current"] else "approve Cinematography direction before generation",
+            None if cine["current"] else
+            "direction will prepare automatically when you build the keyframe",
             "ready",
         )
     elif not voice_ok:
         label, sub, badge = (
             "Opening frame ready",
-            ("approve Voice direction first" if not voice_direction["current"]
-             else "generate and approve this shot's voice"),
+            ("performance direction will prepare automatically when you fire"
+             if not voice_direction["current"] else
+             "generate, listen and choose Accept or Iterate"),
             "ready",
         )
     elif not animation_direction["current"]:
         label, sub, badge = (
-            "Approve Animation direction",
-            "the specialist brief is missing or stale against current production inputs",
+            "Ready to fire animation",
+            "the Studio will prepare current Animation direction before showing the spend",
             "ready",
         )
     elif animation_state == "designed":
         label, sub, badge = "Ready to animate", None, "ready"
     elif animation_state == "candidates-pending":
-        label, sub, badge = "Animation awaiting approval", None, "awaiting"
+        label, sub, badge = "Animation awaiting your decision", None, "awaiting"
     elif animation_state == "stale-batch":
         label, sub, badge = (
             "Animation candidates are stale",
@@ -249,13 +269,13 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
         label, sub, badge = "Animation blocked", "needs human redesign", "blocked"
     elif animation_state == "stale":
         label, sub, badge = (
-            "Approved animation is stale",
+            "Accepted animation is stale",
             "a direct prompt, frame, reference, voice or media input changed",
             "blocked",
         )
     elif not continuity_current:
         label, sub, badge = (
-            "Animation approved",
+            "Animation accepted",
             "Director Review still needs a current sign-off",
             "ready",
         )
@@ -277,6 +297,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
         "sub": sub,
         "badgeState": badge,
         "sceneLookGated": scene_look_gated,
+        "keyframeScreening": keyframe_screening,
         "current": {
             "cinematographyDirection": cine["current"],
             "keyframe": keyframe_satisfied,
@@ -309,7 +330,11 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
             "generateKeyframe": bool(
                 package_current and scene_look_current and needs_keyframe and
                 cine["current"] and not keyframe_candidate),
-            "approveKeyframe": bool(keyframe_candidate and candidate_current),
+            "approveKeyframe": bool(
+                keyframe_candidate and candidate_current and
+                keyframe_screening.get("status") == "pass"),
+            "rescreenKeyframe": bool(
+                package_current and scene_look_current and kf == "screening"),
             "prepareVoice": bool(package_current and talky),
             "generateVoice": bool(
                 package_current and talky and voice_direction["current"] and
@@ -441,6 +466,36 @@ def production_state(scene, episode="Ep1", intake=None):
         package_current = False
         lineage = {"current": False, "reasonCodes": ["production-package-missing"]}
 
+    storyboard_approval = str((storyboard or {}).get("approvalState") or "")
+    if storyboard and storyboard_approval != "approved":
+        rejected = "reject" in storyboard_approval.lower()
+        action = (
+            "Run Story & Direction again from the human iteration note."
+            if rejected else
+            "Review the current Story & Direction candidate and choose Approve or Iterate."
+        )
+        for name in ("scenelook", "voice", "keyframe", "animation", "continuity", "final"):
+            stages[name] = _stage("locked", "Story & Direction needs a human decision first")
+        return _with_quality({
+            "policyVersion": POLICY_VERSION,
+            "episode": episode,
+            "scene": scene,
+            "canonLock": canon_summary,
+            "packageExists": package_exists,
+            "packageCurrent": False,
+            "packageRevision": pkg.get("revision") if pkg else None,
+            "lineage": {"current": False, "reasonCodes": ["storyboard-not-approved"]},
+            "stages": stages,
+            "shots": [],
+            "_per": [],
+            "blockers": [{
+                "code": "STORYBOARD_NOT_APPROVED",
+                "stage": "storyboard",
+                "message": "The current Story & Direction candidate needs a human decision.",
+                "action": action,
+            }],
+        })
+
     if not pkg:
         downstream = (
             _stage("blocked", "approve and promote Story & Direction into production")
@@ -477,33 +532,33 @@ def production_state(scene, episode="Ep1", intake=None):
     look_work = (look_record.get("departmentWork") or {}).get("look") or {}
     look_direction = cb_render._department_record_status(
         pkg, None, "look", scene, episode)
-    look_candidate_current = _candidate_current(
-        pkg, "look", None, scene, episode, look_work.get("candidate"))
     scene_look_current = bool(scene_look.get("current"))
 
     if production_block:
         stages["scenelook"] = production_block
-    elif look_work.get("candidate"):
+    elif look_work.get("candidate") and not look_direction["current"]:
         stages["scenelook"] = _stage(
-            "awaiting" if look_candidate_current else "blocked",
-            "Look direction awaits approval" if look_candidate_current
-            else "Look direction inputs changed")
+            "blocked", "Look direction inputs changed")
     elif not look_direction["current"]:
         stages["scenelook"] = _stage(
-            "ready", "brief and approve current Look Development direction")
+            "ready", "prepare current Look Development direction")
     elif scene_look.get("candidate"):
         stages["scenelook"] = _stage(
-            "awaiting", "a replacement plate awaits approval",
-            approvedPlateStillCurrent=scene_look_current)
+            "approved" if scene_look.get("candidateCurrent") else "awaiting",
+            ("working world anchor is current; its proof is the first keyframe"
+             if scene_look.get("candidateCurrent") else
+             "the generated world anchor no longer matches current inputs"),
+            approvedPlateStillCurrent=bool(scene_look.get("approvedCurrent")))
     elif scene_look_current:
         stages["scenelook"] = _stage("approved", "approved and current")
     elif scene_look.get("status") == "rejected":
         stages["scenelook"] = _stage("rejected", "ready for a new candidate")
     elif scene_look.get("status") == "stale":
         stages["scenelook"] = _stage(
-            "blocked", "approved plate inputs or file content changed")
+            "ready", "world inputs changed; build a fresh working anchor")
     else:
-        stages["scenelook"] = _stage("ready", "generate or select one plate candidate")
+        stages["scenelook"] = _stage(
+            "ready", "direction ready; generate or select one plate candidate")
 
     shots = [
         _shot_state(pkg, shot, scene, episode, scene_look_current, package_current)
@@ -523,17 +578,17 @@ def production_state(scene, episode="Ep1", intake=None):
             _stage("ready", "build the silent scene timing slate"))
     elif approved_voice == len(talky) and timing.get("current"):
         stages["voice"] = _stage(
-            "approved", f"{approved_voice} of {len(talky)} approved; timing current")
+            "approved", f"{approved_voice} of {len(talky)} accepted; timing current")
     elif pending_voice:
         stages["voice"] = _stage(
             "awaiting",
-            f"{approved_voice} of {len(talky)} approved; {pending_voice} awaiting review")
+            f"{approved_voice} of {len(talky)} accepted; {pending_voice} awaiting review")
     else:
         stages["voice"] = _stage(
             "ready",
-            (f"{approved_voice} performances approved; build or refresh timing"
+            (f"{approved_voice} performances accepted; build or refresh timing"
              if approved_voice == len(talky)
-             else f"{approved_voice} of {len(talky)} performances approved"))
+             else f"{approved_voice} of {len(talky)} performances accepted"))
 
     openers = [shot for shot in shots if shot["needsKeyframe"]]
     approved_keyframes = sum(
@@ -545,23 +600,23 @@ def production_state(scene, episode="Ep1", intake=None):
     if production_block:
         stages["keyframe"] = production_block
     elif not scene_look_current:
-        stages["keyframe"] = _stage("locked", "approve a current Scene Look first")
+        stages["keyframe"] = _stage("locked", "generate the current scene world first")
     elif not openers:
         stages["keyframe"] = _stage("approved", "no shot needs a separate opening frame")
     elif stale_keyframes:
         stages["keyframe"] = _stage(
             "blocked",
-            f"{approved_keyframes} approved; {stale_keyframes} have changed direct inputs")
+            f"{approved_keyframes} accepted; {stale_keyframes} have changed direct inputs")
     elif pending_keyframes:
         stages["keyframe"] = _stage(
             "awaiting",
-            f"{approved_keyframes} approved; {pending_keyframes} awaiting review")
+            f"{approved_keyframes} accepted; {pending_keyframes} awaiting review")
     elif approved_keyframes == len(openers):
         stages["keyframe"] = _stage(
-            "approved", f"{approved_keyframes} of {len(openers)} approved")
+            "approved", f"{approved_keyframes} of {len(openers)} accepted")
     else:
         stages["keyframe"] = _stage(
-            "ready", f"{approved_keyframes} of {len(openers)} approved")
+            "ready", f"{approved_keyframes} of {len(openers)} accepted")
 
     approved_animation = sum(
         1 for shot in shots if shot["current"]["animation"])
@@ -574,21 +629,21 @@ def production_state(scene, episode="Ep1", intake=None):
     if production_block:
         stages["animation"] = production_block
     elif not scene_look_current:
-        stages["animation"] = _stage("locked", "approve a current Scene Look first")
+        stages["animation"] = _stage("locked", "generate the current scene world first")
     elif blocked_animation:
         stages["animation"] = _stage(
             "blocked", f"{blocked_animation} shot(s) need intervention")
     elif pending_animation:
         stages["animation"] = _stage(
             "awaiting",
-            f"{approved_animation} approved; {pending_animation} awaiting review")
+            f"{approved_animation} accepted; {pending_animation} awaiting review")
     elif shots and approved_animation == len(shots):
         stages["animation"] = _stage(
-            "approved", f"{approved_animation} of {len(shots)} approved")
+            "approved", f"{approved_animation} of {len(shots)} accepted")
     else:
         stages["animation"] = _stage(
             "ready",
-            f"{approved_animation} approved; {ready_animation} ready; "
+            f"{approved_animation} accepted; {ready_animation} ready; "
             f"{max(0, len(shots) - approved_animation - ready_animation)} waiting")
 
     continuity_count = sum(
@@ -596,7 +651,7 @@ def production_state(scene, episode="Ep1", intake=None):
     pending_reviews = sum(
         1 for shot in shots if shot["pending"]["directorReview"])
     if stages["animation"]["state"] != "approved":
-        stages["continuity"] = _stage("locked", "approve every current animation take first")
+        stages["continuity"] = _stage("locked", "accept every current animation take first")
     elif pending_reviews:
         stages["continuity"] = _stage(
             "awaiting", f"{pending_reviews} Director Review decision(s) pending")

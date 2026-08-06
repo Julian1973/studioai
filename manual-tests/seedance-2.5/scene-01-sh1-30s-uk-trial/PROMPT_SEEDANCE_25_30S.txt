@@ -1,0 +1,39 @@
+[Generation Goal]
+Generate one coherent 30-second, 16:9 audiovisual scene for an original premium stylised 3D CGI family animation. This is Episode 1, Scene 1, production unit S1.SH1: Fuzzby's escalating pollen-work comedy with Zenny as the calm witness. Use exactly three motivated internal views in the same continuous flower corridor. Do not introduce the storm; that belongs to the following unit.
+
+[Reference Roles]
+@Image 1 is the first frame. It defines the opening composition, character positions, same-depth scale, flight direction, flower-corridor geography, camera direction and warm starting light. Begin directly from this frame.
+@Image 2 and @Image 3 are two clean views of the same character, Fuzzby. Together they define only Fuzzby's permanent identity: male face, tan bulbous nose, round wire glasses, silhouette, compact oval proportions, stripe pattern, fur and wings. Do not create two Fuzzbys and do not use their white backgrounds or neutral standing poses.
+@Image 4 and @Image 5 are two clean views of the same different character, Zenny. Together they define only Zenny's permanent identity: smaller face and body, tiny dark nose, long eyelashes, rosy cheeks, round glasses, silhouette, stripe pattern, fur and wings. Do not create two Zennys and do not use their white backgrounds or neutral standing poses.
+@Image 6 defines only the bee-height flower-corridor environment, giant flower scale, plant materials, loose pollen, palette, depth and warm lighting. Do not use it to replace the first-frame composition.
+
+Fuzzby and Zenny are two different characters. Never mix their faces, glasses, markings, voices or performance. At the same camera depth Fuzzby is 14 inches tall and Zenny is 12 inches tall, so Fuzzby is only about 17 percent taller. Preserve the body proportions in their individual turnarounds. Fuzzby has no eyelashes or rosy cheeks. Zenny retains her eyelashes, rosy cheeks and tiny dark nose.
+
+[Stage 1 | 0-9 seconds | Moving pollen problem]
+Initial state: continue directly from @Image 1. Both characters are already airborne and travelling screen right at bee height. Zenny holds a clean level glide. Fuzzby is already mid-zig-zag, chest leading, legs trailing and wings working too hard.
+Primary event: the camera follows slightly late through towering flowers. Fuzzby chants once in quick excited British English: {BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY...} He dives too hard into a flower to scoop loose pollen, spins sideways into one springy leaf, and the leaf bends then FWIPs him upright with visible compression, recoil and weight. Pollen remains loose in the air and on his fur; it is never carried in a bag. After one proud but still-wobbling recovery hold, Fuzzby says: {Nailed it.}
+End state: by 9 seconds Fuzzby is upright and chest-forward but still physically unsettled, with loose pollen drifting around him. Zenny has glided close enough to watch him. Cut because the joke passes from speed to Zenny's judgement.
+
+[Stage 2 | 9-18 seconds | The official moustache]
+Continue from the same character identities, sizes, corridor, light and screen direction.
+Primary event: in a steadier bee-height medium two-shot, Fuzzby zooms to one nearby flower, sticks his whole face inside, then pulls back wearing a fuzzy yellow pollen moustache. The pollen is a loose facial dusting, not a prop. He presents it like a badge and asks hopefully: {Do I look official?} Zenny nearly laughs but keeps her body economical. After one dry reaction beat, she replies in low, even, unhurried British English with faint affection on the last word: {Yes Fuzzby. Officially nuts!} Only the speaking character moves their mouth. Fuzzby silently wipes his face and visibly smears the pollen wider.
+End state: by 18 seconds the widened pollen moustache is readable, Fuzzby is exposed but trying to remain grand, and Zenny stays beside him with contained amusement. Cut because the grooming attempt launches the larger physical escalation.
+
+[Stage 3 | 18-30 seconds | Buzz Crash]
+Continue from the same identities, scale, pollen state, corridor geography and warm daylight.
+Primary event: use a looser bee-height chase that preserves the whole cause-and-effect path. Fuzzby overcommits into another dive, clips one flexible branch, and tumbles through exactly three crisp elastic contacts: <THUP. THUP. THUP.> Each plant compresses, bends and returns force into his next movement. He lands upside down inside one large blossom; hold briefly on his kicking legs. He springs upright through a loose pollen poof and proudly declares once: {Buzz Crash!!} Zenny gives a restrained eye-roll that softens into a smile. Fuzzby immediately dives into one final flower and pops back out more pollen-covered than before.
+End state: by 28.5 seconds Fuzzby hovers in a cloud of unsettled golden dust, messier and still proud, while Zenny's small smile anchors the chaos. Nearby stems and petals continue settling. Hold this readable final tableau through 30 seconds.
+
+[Camera And Performance]
+Three internal views only: moving chase, steadier relationship two-shot, looser environmental tumble. Camera stays at bee height and preserves screen-right travel and corridor geography. Fuzzby's comedy comes from proud intention fighting poor control: jagged path, uneven altitude, overworked wings and too-proud recovery holds that still wobble. Zenny is the deadpan counterweight: smooth travel, minimal corrections, held reactions and a small affectionate smile only at the end. Keep both characters fully readable while allowing natural wing cadence, facial micro-reactions, pollen drift and secondary plant motion.
+
+[Audio]
+Dialogue language: natural British English. Fuzzby has a warm, slightly nasal, plummy adult male voice: bouncy, breathless and self-important, then briefly sheepish. Zenny has a low, even, unhurried adult female voice with bone-dry timing and faint affection; never squeaky or childish. Speak only the five written dialogue occurrences, once each and in order. No narration, ad-libs, translated speech, repeated lines or singing beyond Fuzzby's written rhythmic opening chant. Use precise speaker-specific lip sync; the listener remains closed-mouth.
+
+Use natural meadow ambience, two distinct wing buzzes, loose pollen poofs, one leaf FWIP, exactly three THUP contacts, blossom rustle and soft settling stems. [SOUND] Strictly naturally occurring ambience, voices and foley only; no background music.
+
+[Maintain Consistency]
+Keep exactly one Fuzzby and one Zenny, the same faces, glasses, markings, fur, wing count, body proportions, relative 14:12 scale, corridor, daylight, screen direction and pollen continuity for all 30 seconds. Keep both characters as the same continuous instances throughout.
+
+[Forbidden]
+No identity or voice swap, body inflation, scale reversal, redesign, clone face, extra character, duplicate, extra limb, missing wing, frozen airborne wings, character merge, deformation, random camera spin, speed ramp, slow motion, unmotivated cut, scene change, storm, rain, thunder, crystals, magic effects, bags, baskets, sacks, harnesses, carried pollen containers, objects appearing from nowhere, subtitles, captions, written text, logos, watermarks or background music.

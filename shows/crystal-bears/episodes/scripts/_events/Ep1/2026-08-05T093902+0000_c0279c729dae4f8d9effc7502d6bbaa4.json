@@ -1,0 +1,12 @@
+{
+ "schemaVersion": 1,
+ "eventId": "c0279c729dae4f8d9effc7502d6bbaa4",
+ "kind": "script-correction-no-pollen-bags",
+ "episodeId": "Ep1",
+ "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+ "previousScriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19",
+ "title": "The Adventure Begins",
+ "displayFile": "Ep1_The_Adventure_Begins.txt",
+ "activatedAt": "2026-08-05T09:39:02+00:00",
+ "activatedBy": "Julian explicit no-pollen-bags direction, applied by Codex"
+}

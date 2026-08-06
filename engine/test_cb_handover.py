@@ -340,6 +340,91 @@ def test_storyboard_is_sole_creative_source():
     assert pkg["sourceStoryboard"]["md5"] == _md5(sb_p)          # provenance binds the source
 
 
+def _physical_comedy_staging():
+    return {
+        "staysVisible": "Fuzzby, the leaf and Zenny remain readable throughout.",
+        "contactAndWeight": "The leaf bends under contact and springs Fuzzby backward.",
+        "payoffShape": "Overconfidence becomes impact, recoil and a late proud reset.",
+        "prohibitedStaging": ["Do not hide the contact point."],
+    }
+
+
+def test_big_comedy_can_be_owned_by_a_later_beat_in_one_packed_unit():
+    storyboard = _storyboard()
+    big_beat = _beat("1.B2", [])
+    staging = _physical_comedy_staging()
+    big_beat["comedyContract"].update({
+        "mode": "BIG",
+        "physicalStaging": staging,
+    })
+    storyboard["beats"].append(big_beat)
+    shot = storyboard["shots"][0]
+    shot["beatIds"] = ["1.B1", "1.B2"]
+    shot["performanceContract"]["beatOwner"] = "1.B2"
+    shot["performanceContract"]["comedyStaging"] = staging
+
+    H._validate_supervision_contracts(storyboard)
+
+
+def test_big_comedy_in_a_packed_unit_refuses_the_wrong_typed_owner():
+    storyboard = _storyboard()
+    big_beat = _beat("1.B2", [])
+    staging = _physical_comedy_staging()
+    big_beat["comedyContract"].update({
+        "mode": "BIG",
+        "physicalStaging": staging,
+    })
+    storyboard["beats"].append(big_beat)
+    shot = storyboard["shots"][0]
+    shot["beatIds"] = ["1.B1", "1.B2"]
+    shot["performanceContract"]["beatOwner"] = "1.B1"
+    shot["performanceContract"]["comedyStaging"] = staging
+
+    with pytest.raises(H.HandoverRefused, match="does not identify a BIG beat"):
+        H._validate_supervision_contracts(storyboard)
+
+
+def test_packed_unit_handover_keeps_all_beat_dialogue_and_big_gag_contracts():
+    first = _beat("1.B1", ["FUZZBY: First."])
+    second = _beat("1.B2", ["ZENNY: Second."])
+    first_staging = _physical_comedy_staging()
+    second_staging = {
+        "staysVisible": "The pollen mark and blossom remain readable.",
+        "contactAndWeight": "The blossom cups Fuzzby and arrests his forward motion.",
+        "payoffShape": "The correction ends with Fuzzby held upside down.",
+        "prohibitedStaging": ["Do not hide the blossom contact."],
+    }
+    for beat, staging in ((first, first_staging), (second, second_staging)):
+        beat["comedyContract"].update({"mode": "BIG", "physicalStaging": staging})
+
+    shot = _sb_shot("S1.SH1", ["1.B1", "1.B2"], "PLANNED_CUT")
+    shot["performanceContract"]["beatOwner"] = "1.B2"
+    shot["performanceContract"]["comedyStaging"] = second_staging
+    occurrences = first["dialogueOccurrences"] + second["dialogueOccurrences"]
+    detail = _pd(
+        "S1.SH1", True, occurrence_ids=[item["dialogueOccurrenceId"] for item in occurrences],
+        continuity_in_state=None)
+    storyboard = _refresh_dialogue_contract({
+        "beats": [first, second],
+        "shots": [shot],
+        "productionDetail": [detail],
+        "voicePerformances": [
+            _vp("FUZZBY", "First.", occurrences[0]),
+            _vp("ZENNY", "Second.", occurrences[1]),
+        ],
+    })
+
+    H._validate_storyboard_dialogue_contract(storyboard)
+    H._validate_supervision_contracts(storyboard)
+    distilled, _retained, _hash = H._scoped_shot(
+        storyboard, "S1.SH1", {}, None)
+
+    assert distilled.beatCodes == ["1.B1", "1.B2"]
+    assert [line.exactText for line in distilled.dialogueLines] == ["First.", "Second."]
+    assert [item.beatCode for item in distilled.physicalStagings] == ["1.B1", "1.B2"]
+    assert distilled.physicalStaging is None
+
+
 # ── THE 2026-07-17 LAW 6 SOURCE CORRECTION — GENERAL PROOF, EVERY SHOT ─────────────────
 # Julian's directive: principalPerformance quotes locked dialogue verbatim on real approved
 # shots (a genuine Law 6 violation cb_engine.compile_shot_contract's own _assert_no_spoken_
@@ -642,7 +727,16 @@ def test_real_s1sh1_maps_cleanly_into_the_canonical_engine_compiler():
             "dialogueTimings" not in pd1):
         pytest.skip("real storyboard predates the typed execution contract and must be regenerated")
     chars_cfg = json.load(open(H.CHARS)) if H.CHARS.exists() else {}
-    shot, _ = H.distil_shot(s1, pd1, ["Fuzzby", "Zenny"], [], None, chars_cfg)
+    voice_by_occurrence = {
+        voice["dialogueOccurrenceId"]: voice
+        for voice in sb.get("voicePerformances", [])
+    }
+    shot_voices = [
+        voice_by_occurrence[occurrence_id]
+        for occurrence_id in pd1.get("dialogueOccurrenceIds", [])
+    ]
+    shot, _ = H.distil_shot(
+        s1, pd1, ["Fuzzby", "Zenny"], shot_voices, None, chars_cfg)
     kf, kwc, kslots = cb_engine.compile_keyframe_prompt(
         shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
     assert "already" in kf.lower()                                # the real, approved opening state
@@ -726,10 +820,15 @@ def test_duration_normalized_to_midpoint_for_fixed_provider_duration():
     assert H.normalize_duration_for_provider("4-8s") == 6.0
     assert H.normalize_duration_for_provider("5-6s") == 6.0       # rounds .5 up
     assert H.normalize_duration_for_provider("6-7s") == 7.0       # no banker rounding
+    assert H.normalize_duration_for_provider("24-30s") == 27.0    # full 2.5 unit window
     with pytest.raises(H.HandoverRefused):
         H.normalize_duration_for_provider("not a range")
     with pytest.raises(H.HandoverRefused):
         H.normalize_duration_for_provider("9-3s")                 # inverted, non-credible
+    with pytest.raises(H.HandoverRefused):
+        H.normalize_duration_for_provider("28-31s")               # never silently truncates
+    with pytest.raises(H.HandoverRefused):
+        H.normalize_duration_for_provider("1-3s")                 # never silently pads
 
 
 # ── THE SOURCE-LEVEL HANDOVER: creative-room storyboard -> canonical package (2026-07-17) ──
@@ -947,6 +1046,41 @@ def test_promote_to_canonical_refuses_when_not_approved(tmp_path, monkeypatch):
         H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
                                 dry_run=True, log=lambda *a, **k: None)
     assert list(pkg_dir.iterdir()) == []
+
+
+def test_current_packing_contract_is_recomputed_before_handover():
+    shots = [{
+        "shotId": "S1.SH1", "beatIds": ["1.B1", "1.B2"],
+        "targetDurationSec": 30, "providerBoundaryReason": "scene_end",
+        "providerBoundaryExplanation": "The causal scene arc lands here.",
+    }]
+    storyboard = {
+        "unitPackingContractVersion": 1,
+        "shots": shots,
+        "packingPasses": True,
+        "unitPackingAudit": H.cb_unit_packing.audit_units(shots),
+    }
+    H._validate_unit_packing_contract(storyboard)
+
+    storyboard["shots"][0]["targetDurationSec"] = 29
+    with pytest.raises(H.HandoverRefused, match="missing or stale"):
+        H._validate_unit_packing_contract(storyboard)
+
+
+def test_current_packing_contract_requires_showrunner_acceptance():
+    shots = [{
+        "shotId": "S1.SH1", "beatIds": ["1.B1"],
+        "targetDurationSec": 30, "providerBoundaryReason": "scene_end",
+        "providerBoundaryExplanation": "The scene ends on the approved landing image.",
+    }]
+    storyboard = {
+        "unitPackingContractVersion": 1,
+        "shots": shots,
+        "packingPasses": False,
+        "unitPackingAudit": H.cb_unit_packing.audit_units(shots),
+    }
+    with pytest.raises(H.HandoverRefused, match="Showrunner did not approve"):
+        H._validate_unit_packing_contract(storyboard)
 
 
 if __name__ == "__main__":

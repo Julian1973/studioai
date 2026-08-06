@@ -138,12 +138,12 @@ No automated score may approve creative quality or a final master.
 ### Scene-as-unit, shot-aware
 
 The new primary object should be a `GenerationUnit`, not a provider clip and not blindly an
-entire scene. A unit may contain one to four motivated cinematic shots and must end in an
+entire scene. A unit may contain one to three motivated cinematic views and must end in an
 explicit continuity state.
 
 A scene may be one 2.5 unit when all of these are true:
 
-- It is 30 seconds or shorter with a small safety margin for the verified API.
+- Its natural duration is 30 seconds or shorter within the verified API.
 - It is one continuous place and time.
 - Its action can be expressed as a clear setup, development and payoff.
 - The number of characters, actions, props and camera changes is visually manageable.

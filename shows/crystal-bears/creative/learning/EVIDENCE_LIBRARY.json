@@ -400,6 +400,50 @@
    "assetPointers": [
     "Ep1_scene1_storyboard.json"
    ]
+  },
+  {
+   "evidenceId": "ev-daaba11b5f",
+   "capturedAt": "2026-08-04T14:38:09",
+   "capturedBy": "Julian",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "Approved to begin the same-process Seedance comparison trial.",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene1_storyboard.json"
+   ]
+  },
+  {
+   "evidenceId": "ev-7bd14d9a11",
+   "capturedAt": "2026-08-05T11:01:26",
+   "capturedBy": "Julian direction applied by Codex",
+   "project": "crystal-bears",
+   "show": "Crystal Bears",
+   "episode": "Ep1",
+   "scene": "1",
+   "beat": null,
+   "shot": null,
+   "sourceVersion": null,
+   "creativeRole": null,
+   "outcome": "approved",
+   "userFeedbackVerbatim": "Approved under Julian explicit Stage brief: exact active script, 29s comedy plus 14s storm, <=3 stages/views, loose pollen only, forgiving same-depth chase opener.",
+   "systemClassification": "user approved at scene level",
+   "category": "creative",
+   "scope": "scene",
+   "context": "human review verdict: approved",
+   "assetPointers": [
+    "Ep1_scene1_storyboard.json"
+   ]
   }
  ],
  "quarantine": {

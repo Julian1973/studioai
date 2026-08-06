@@ -56,6 +56,39 @@ import cb_lineage
 import cb_render
 import cb_safety
 
+
+def _pose_first_cinematography_output(shot, existing=None):
+    existing = dict(existing or {})
+    existing.update({
+        "providerPrompt": existing.get("providerPrompt") or
+                          shot.get("keyframePrompt") or "Hold the opening frame.",
+        "audienceRead": existing.get("audienceRead") or
+                        "Fuzzby's chaos reads against Zenny's calm.",
+        "composition": existing.get("composition") or
+                       "Fuzzby frame-left and Zenny frame-right.",
+        "lensAndCameraRelationship": existing.get("lensAndCameraRelationship") or
+                                     "Bee-height camera.",
+        "lightingAndDepth": existing.get("lightingAndDepth") or
+                            "Warm daylight with layered flower depth.",
+        "openingFrameLayout": existing.get("openingFrameLayout") or {
+            "aspectRatio": "16:9", "referenceCharacter": "Fuzzby",
+            "referenceHeightFraction": 0.28, "sameDepth": True,
+            "placements": [
+                {"character": "Fuzzby", "centerX": 0.36, "centerY": 0.43,
+                 "apparentScale": 1.0, "depthPlane": 1,
+                 "bodyAngleDegrees": -24.0, "facing": "screen-right",
+                 "pose": "committed climbing flight"},
+                {"character": "Zenny", "centerX": 0.68, "centerY": 0.48,
+                 "apparentScale": 1.0, "depthPlane": 1,
+                 "bodyAngleDegrees": -3.0, "facing": "screen-right",
+                 "pose": "clean level glide"},
+            ],
+        },
+        "continuityProtections": existing.get("continuityProtections") or
+                                  ["No identity or relative-scale drift."],
+    })
+    return existing
+
 LEGACY_STRINGS = [
     "Pixar-caliber", "squash-and-stretch", "0–5s", "5–10s", "10–15s", "Negative:",
     "camera already waiting at the leaf", "no leaf hit as the final image",
@@ -251,12 +284,14 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
         })
     first_shot = scratch_pkg["shots"][0]
     first_ledger = scratch_pkg["continuityLedger"][0]
+    prior_cine = ((first_ledger.get("departmentWork") or {}).get("cinematography") or {})
+    prior_output = ((prior_cine.get("candidate") or prior_cine.get("approved") or {})
+                    .get("output") or {})
     for key in ("keyframeCandidate", "keyframeApproval", "keyframePath"):
         first_ledger.pop(key, None)
     first_ledger.setdefault("departmentWork", {})["cinematography"] = {"approved": {
         "packageRevision": scratch_pkg.get("revision"),
-        "output": {"providerPrompt": first_shot.get("keyframePrompt") or
-                   "Hold the approved opening frame exactly."}}}
+        "output": _pose_first_cinematography_output(first_shot, prior_output)}}
     json.dump(scratch_pkg, open(scratch, "w"), indent=1, ensure_ascii=False)
     monkeypatch.setattr(cb_render, "load_pkg",
                         lambda scene, episode="Ep1": (json.load(open(scratch)), scratch))
@@ -282,17 +317,68 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     scratch_plate = tmp_path / "Ep1_S1_plate.png"
     scratch_plate.write_bytes(b"SELF_CONTAINED_SCENE_LOOK_PLATE")
     monkeypatch.setattr(cb_render, "_plate_path", lambda scene, episode="Ep1": str(scratch_plate))
+    composition_path = tmp_path / "opening_composition.png"
+    composition_path.write_bytes(b"SELF_CONTAINED_OPENING_COMPOSITION")
+    composition_record = {
+        "path": str(composition_path), "contractHash": "scratch-composition",
+        "zeroSpend": True, "providerCalled": False,
+        "geometry": {"frameSize": [2048, 1152], "sameDepth": True,
+                     "characters": []},
+    }
+    monkeypatch.setattr(
+        cb_render, "_load_opening_composition_master",
+        lambda shot, scene, episode, characters: composition_record)
+    monkeypatch.setattr(
+        cb_render, "_ensure_opening_composition_master",
+        lambda pkg, shot, scene, episode, characters: composition_record)
+    posed_path = tmp_path / "approved_posed_integration.png"
+    posed_path.write_bytes(b"SELF_CONTAINED_APPROVED_POSED_INTEGRATION")
+    posed_record = {
+        "path": str(posed_path), "contractHash": "scratch-posed-integration",
+        "zeroSpend": True, "providerCalled": False, "providerInput": True,
+    }
+    monkeypatch.setattr(
+        cb_render, "_load_posed_integration_master", lambda *args, **kwargs: posed_record)
+    monkeypatch.setattr(
+        cb_render, "_ensure_posed_integration_master", lambda *args, **kwargs: posed_record)
+    monkeypatch.setattr(
+        cb_render.cb_layout, "screen_candidate_geometry",
+        lambda path, record: {
+            "status": "pass", "reason": "synthetic fixture geometry",
+            "zeroSpend": True, "providerCalled": False})
     # Character art is intentionally excluded from source-only handovers. Preserve real
     # reference resolution by giving each character slot an existing scratch-owned asset,
     # rather than depending on Julian's separate Desktop media library.
     scratch_cfg = {name: dict(value) if isinstance(value, dict) else value
                    for name, value in cb_render._characters_cfg().items()}
+    provider_refs = {}
     for name in live["shots"][0].get("charactersInFrame") or []:
         key = cb_render._resolve_char(name, scratch_cfg)
-        ref = tmp_path / f"{name}_identity.jpeg"
-        ref.write_bytes(f"IDENTITY:{name}".encode())
-        scratch_cfg[key]["anchor"] = str(ref)
+        front = tmp_path / f"{name}_identity_front.jpeg"
+        rear = tmp_path / f"{name}_identity_rear.jpeg"
+        front.write_bytes(f"IDENTITY:{name}:FRONT".encode())
+        rear.write_bytes(f"IDENTITY:{name}:REAR".encode())
+        scratch_cfg[key]["anchor"] = str(front)
+        provider_refs[key] = provider_refs[name] = {
+            "front": front, "rear": rear}
     monkeypatch.setattr(cb_render, "_characters_cfg", lambda: scratch_cfg)
+    monkeypatch.setattr(
+        cb_render, "_provider_identity_record",
+        lambda name, cfg, usage="keyframe": {
+            "path": str(provider_refs[cb_render._resolve_char(name, cfg)]["front"]),
+            "character": cb_render._resolve_char(name, cfg),
+            "view": "front", "derived": True, "providerSafe": True,
+            "singleSubject": True,
+        })
+    monkeypatch.setattr(
+        cb_render, "_provider_identity_records",
+        lambda name, cfg, usage="keyframe": [
+            {"path": str(provider_refs[cb_render._resolve_char(name, cfg)][view]),
+             "character": cb_render._resolve_char(name, cfg),
+             "view": view, "derived": True, "providerSafe": True,
+             "singleSubject": True, "turnaroundAuthority": True,
+             "turnaroundGroupHash": "fixture-" + cb_render._resolve_char(name, cfg)}
+            for view in ("front", "rear")])
     scratch_pkg = json.load(open(scratch))
     first_ledger = scratch_pkg["continuityLedger"][0]
     first_ledger["departmentWork"]["cinematography"]["approved"]["inputSignature"] = \
@@ -435,6 +521,12 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
         return out
 
     monkeypatch.setattr(cb_gen, "generate_image", fake_generate_image)
+    monkeypatch.setattr(
+        cb_render, "screen_keyframe_conformance",
+        lambda *args, **kwargs: {
+            "status": "pass", "reason": None,
+            "review": {"verdict": "pass", "summary": "Test fixture passes."},
+        })
 
     out_path = cb_render.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
 
@@ -451,8 +543,14 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     # no legacy SHOT ID crossed into the promoted content.
     assert "1.B1.S1" not in call["prompt"]                            # no legacy shot material
 
-    # the real, unstubbed reference resolution — real character identity + real scene plate
-    assert len(call["refs"]) == 3
+    # The provider receives the locked identities and Scene Look directly. Generated pose,
+    # scale and composition controls remain optional local evidence and never become inputs.
+    assert [pathlib.Path(ref).name for ref in call["refs"]] == [
+        "Zenny_identity_front.jpeg", "Zenny_identity_rear.jpeg",
+        "Fuzzby_identity_front.jpeg", "Fuzzby_identity_rear.jpeg",
+        "Ep1_S1_plate.png"]
+    assert all("posed_integration" not in pathlib.Path(ref).name for ref in call["refs"])
+    assert "[Performance Freedom]" in call["prompt"]
     for ref in call["refs"]:
         assert pathlib.Path(ref).exists()
 

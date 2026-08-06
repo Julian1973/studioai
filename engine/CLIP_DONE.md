@@ -1,4 +1,8 @@
-# CLIP_DONE — the Definition of Done for a Gate-3 clip
+# CLIP_DONE — legacy Gate-3 QA note
+
+> **Superseded for current production on 2026-08-04.** The authoritative animation contract is
+> `SEEDANCE_25_PRODUCTION_CONTRACT.md`. This file documents the retired beat renderer and must not be
+> used to infer current duration, provider, approval, or QA behaviour.
 
 The temporal sibling of `KEYFRAME_DONE.md`. A keyframe is one image; a CLIP is that image **in motion**.
 Gate 3 runs this QA **automatically** as each clip renders (`cb_qa.check_clip`, hooked in `cb_beats.py`):

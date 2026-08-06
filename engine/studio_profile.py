@@ -31,6 +31,7 @@ class CanonProfile(BaseModel):
     continuity: str = Field(min_length=1)
     episodeArc: Optional[str] = None
     gagLocks: Optional[str] = None
+    identityPacks: Optional[str] = None
 
 
 class EpisodeProfile(BaseModel):

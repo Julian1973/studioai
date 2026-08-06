@@ -115,6 +115,57 @@ def test_changed_source_and_asset_make_lock_stale(tmp_path):
     assert {"CANON_SOURCE_DRIFT", "CANON_ASSET_DRIFT"} <= codes
 
 
+def test_provider_identity_packs_are_locked_without_invalidating_story(tmp_path):
+    policy = _workspace(tmp_path)
+    baseline = cb_canon.write_lock(tmp_path, "Tester")
+    baseline_status = cb_canon.status(root=tmp_path)
+    baseline_story = baseline_status["profileDigests"]["story"]
+
+    _write(tmp_path / "assets" / "keen-provider.png", "provider-safe-keen")
+    _write(tmp_path / "shows" / "crystal-bears" / "canon" / "identity_packs.json", {
+        "schemaVersion": 1,
+        "characters": {
+            "Keen": {
+                "schemaVersion": 1,
+                "source": "assets/keen-provider.png",
+                "coverage": "360",
+                "providerViews": {
+                    "default": {"view": "front", "crop": [0, 0, 1, 1]},
+                },
+                "turnaroundViews": [
+                    {"view": "front", "crop": [0, 0, 0.25, 1]},
+                    {"view": "three-quarter", "crop": [0.25, 0, 0.5, 1]},
+                    {"view": "side", "crop": [0.5, 0, 0.75, 1]},
+                    {"view": "rear", "crop": [0.75, 0, 1, 1]},
+                ],
+            },
+        },
+    })
+    policy["sources"]["identityPacks"] = (
+        "shows/crystal-bears/canon/identity_packs.json")
+    policy["profiles"]["animation"] = ["characters", "identityPacks"]
+    _write(tmp_path / "shows" / "crystal-bears" / "canon" / "lock_policy.json", policy)
+
+    manifest = cb_canon.write_lock(tmp_path, "Tester")
+    current = cb_canon.status(root=tmp_path)
+
+    assert baseline["manifestDigest"] != manifest["manifestDigest"]
+    assert current["profileDigests"]["story"] == baseline_story
+    assert current["profileDigests"]["animation"] != baseline_story
+    assert manifest["identityAssets"] == [{
+        "path": "assets/keen-provider.png",
+        "roles": ["Keen.source"],
+        "sha256": cb_canon.file_sha256(tmp_path / "assets" / "keen-provider.png"),
+    }]
+
+    (tmp_path / "assets" / "keen-provider.png").write_text(
+        "changed-provider-identity", encoding="utf-8")
+    drift = cb_canon.status(root=tmp_path)
+    assert drift["current"] is False
+    assert any(item.get("owner") == "provider-identity"
+               for item in drift["blockers"])
+
+
 def test_stub_blocks_only_an_episode_that_casts_it(tmp_path):
     _workspace(tmp_path)
     cb_canon.write_lock(tmp_path, "Tester")
@@ -167,11 +218,19 @@ def test_repository_ep1_human_canon_decisions_are_locked():
         (ROOT / "shows/crystal-bears/canon/characters.json").read_text(encoding="utf-8"))
     policy = json.loads(
         (ROOT / "shows/crystal-bears/canon/lock_policy.json").read_text(encoding="utf-8"))
+    identity_packs = json.loads(
+        (ROOT / "shows/crystal-bears/canon/identity_packs.json").read_text(
+            encoding="utf-8"))
     script = (ROOT / report["scriptPath"]).read_text(encoding="utf-8")
 
     assert report["current"] is True
     assert report["episodeReady"] is True
     assert report["scriptCanon"] == {"ok": True, "blockers": [], "warnings": []}
+    locked_roster = {
+        name for name, record in policy["roster"].items()
+        if record.get("status") == "locked"
+    }
+    assert locked_roster <= set(identity_packs["characters"])
     assert characters["Squeaky"]["gender"] == "Male"
     assert characters["Luna"]["crystalCall"]["call"] == (
         "With quiet and might, I trust my sight — Lepidolite, reveal what’s right!"

@@ -2,7 +2,7 @@
 """Animation Studio local server: projects, episodes, canon and media production."""
 import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac
 from http.cookies import SimpleCookie
-from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent   # Desktop/8Th Hour
 CBGEN = ROOT / "engine"
@@ -612,7 +612,7 @@ def continuity_state():
     except Exception as e:
         return [{"level": "NOTE", "scene": "-", "shot": "-", "msg": f"continuity check error: {e}"}]
 
-def _humanise(line):
+def _humanise(line, gate=None):
     """Turn a raw pipeline log line into a friendly 'current step' for the UI."""
     l = line.strip()
     low = l.lower()
@@ -630,6 +630,12 @@ def _humanise(line):
     if "pre-flight" in low or "context audit" in low: return "Checking the context is complete…"
     if "self-correct round" in low: return "Self-correcting — " + l.split("self-correct",1)[1].strip(": ")
     if "visual qa" in low: return "Visual QA — checking the rendered frames…"
+    if "pose candidate" in low: return "Building the character performance pose…"
+    if "pose check" in low: return "Checking identity, proportions and acting…"
+    if "pose reused" in low or "pose ready" in low: return "Reusing a qualified performance pose…"
+    if "pose qualified" in low: return "Performance pose passed — composing the frame…"
+    if "posed integration" in low: return "Composing exact character scale and blocking…"
+    if "keyframe build complete" in low: return "Finished keyframe ready for your review ✓"
     if "continuity check" in low or "CONTINUITY —" in l: return "Continuity check…"
     if "start =" in low and "master" in low: return f"Keeping the locked master ({l.split()[0]})…"
     if "beat keyframes:" in low: return "Building the beat keyframes…"
@@ -641,6 +647,8 @@ def _humanise(line):
     if "start ->" in low: return f"Rendering keyframe {l.split()[0]} (start)…"
     if "end ->" in low: return f"Rendering keyframe {l.split()[0]} (end)…"
     if l.startswith("REGEN") or "regenerat" in low or "change " in low[:8]: return "Regenerating a flagged shot…"
+    if str(gate or "").startswith("creative") and "seedance" in low:
+        return "Story & Direction — packing production units…"
     if "seedance" in low or "-> Ep3_" in l and ".mp4" in l: return "Rendering the clip…"
     if "STITCH" in l: return "Building the post master…"
     if "POST" in l or "picture" in low or "stems" in low:
@@ -676,7 +684,7 @@ def _stream(jobId, args):
             lines.append(line)
             with _JOB_LOCK:
                 job["log"] = "\n".join(lines[-250:])
-                job["step"] = _humanise(line)
+                job["step"] = _humanise(line, job.get("gate"))
             # a batch job (e.g. Gate 2b building every beat in a scene) is ONE long subprocess — without this,
             # a beat finished early in the batch stays invisible until the WHOLE batch exits. Throttled to ~2s
             # so a chatty subprocess doesn't turn this into a reindex-per-line hot loop.
@@ -925,7 +933,8 @@ def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
 # (/api/shot-package GET, /api/shot-run POST) plus these helpers are the whole footprint. Jobs run through the
 # SAME _jid/_start/_stream runner every existing gate action uses (fresh subprocess, argv list, never a shell).
 SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "scenelook", "approve-scenelook", "reject-scenelook",
-             "keyframe", "approve-keyframe", "reject-keyframe",
+             "pose", "approve-pose", "reject-pose", "select-pose-upload",
+             "build-keyframe", "keyframe", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
              "select-upload", "select-library", "select-previous",
              "select-scenelook-upload", "select-scenelook-library",
              "approve-voice", "reject-voice",
@@ -948,6 +957,7 @@ _SPEND_TOKEN_RE = re.compile(r"^[a-f0-9]{16,64}$")   # the SERVER-ISSUED single-
 # with one, the engine re-validates the binding hash (prompt/keyframe/refs/audio/duration/settings/rate/count)
 # and refuses if ANYTHING drifted. Lowercase hex only — never a path, never shell-meaningful.
 _SHOT_TOKEN = re.compile(r"^[A-Za-z0-9._-]+$")   # scene / episode / shotId — plain tokens, never a path
+_CHARACTER_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9 .'-]{0,79}$")
 
 def _shot_pkg_path(scene, episode="Ep1"):
     """Mirrors engine/cb_render.py's _pkg_path (a separate process, no engine import here — the same
@@ -993,6 +1003,26 @@ def _url_from_abs(abs_path):
         return "/engine/media/" + p.relative_to(MEDIA.resolve()).as_posix()
     except Exception:
         return None
+
+
+def _url_from_reference(abs_path):
+    """Expose only references already covered by the static-file allow list."""
+    if not abs_path:
+        return None
+    try:
+        path = pathlib.Path(abs_path).resolve()
+        roots = (
+            (MEDIA.resolve(), "/engine/media/"),
+            ((ROOT / "cb-seed" / "assets").resolve(), "/cb-seed/assets/"),
+            ((ROOT / "projects").resolve(), "/projects/"),
+        )
+        for root, prefix in roots:
+            if path.exists() and path.is_relative_to(root):
+                url = prefix + quote(path.relative_to(root).as_posix())
+                return None if _static_blocked(url) else url
+    except Exception:
+        return None
+    return None
 
 
 def shot_media_map(pkg, scene, episode="Ep1"):
@@ -1082,6 +1112,17 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             "lineage": lineage}
 
 
+def rough_cut_projection(episode="Ep1"):
+    """Browser-safe projection of the persistent episode edit decision list."""
+    import cb_rough_cut
+    state = cb_rough_cut.status(episode)
+    for collection in (state.get("available") or [], state.get("sequence") or []):
+        for shot in collection:
+            approved_take = shot.pop("approvedTake", None)
+            shot["url"] = _url_from_abs(approved_take) if approved_take else None
+    return state
+
+
 # ── SCENE LOOK — server-side mirror of cb_render.scenelook_status (2026-07-18, Julian's
 # gate directive): deliberately duplicated, never imported — the same no-engine-import
 # convention this file already uses for GATE_SEQ/_shot_pkg_path/scene_lineage/etc. ──────────
@@ -1131,16 +1172,16 @@ def _scenelook_load_rec_server(scene, episode="Ep1"):
 
 
 def scenelook_status_server(scene, episode="Ep1"):
-    """Mirrors cb_render.scenelook_status exactly (2026-07-18 correction: the two-phase,
-    non-destructive candidate lifecycle + direct-input signature, never a filename glob or
-    the storyboard md5) — but returns paths as servable URLs (never raw filesystem paths —
-    the client only ever sees already-approved /engine/media/ URLs, same discipline as
-    shot_media_map's own _url helper)."""
+    """Return the engine's signed Scene Look state with servable media URLs.
+
+    A current working anchor may feed the first keyframe without a fabricated human approval;
+    stale candidates remain non-operational. Raw filesystem paths are never exposed.
+    """
     # Use the engine's one authoritative state calculation. The former server-side mirror
     # drifted from the production rules and could make the UI disagree with paid generation.
     import cb_render
     raw = cb_render.scenelook_status(scene, episode)
-    approved, candidate = raw.get("approved"), raw.get("candidate")
+    approved, candidate, active = raw.get("approved"), raw.get("candidate"), raw.get("active")
     history = raw.get("history", [])
 
     def _as_url(entry):
@@ -1149,11 +1190,16 @@ def scenelook_status_server(scene, episode="Ep1"):
         return {**entry, "url": _url_from_abs(entry.get("path"))}
 
     if candidate:
-        return {"status": raw.get("status", "awaiting"), "current": False, "approved": _as_url(approved),
+        shown = active or candidate
+        return {"status": raw.get("status", "awaiting"),
+                "current": bool(raw.get("current")),
+                "activeSource": raw.get("activeSource"),
+                "candidateCurrent": bool(raw.get("candidateCurrent")),
+                "approved": _as_url(approved),
                 "candidate": _as_url(candidate), "history": history,
                 # back-compat top-level fields some older UI reads may still expect
-                "plateUrl": _as_url(candidate)["url"] if candidate else None,
-                "plateHash": candidate.get("hash")}
+                "plateUrl": _as_url(shown)["url"] if shown else None,
+                "plateHash": shown.get("hash") if shown else None}
     if approved:
         status = raw.get("status", "stale")
         au = _as_url(approved)
@@ -1163,6 +1209,129 @@ def scenelook_status_server(scene, episode="Ep1"):
     status = raw.get("status", "none")
     return {"status": status, "current": False, "approved": None, "candidate": None,
             "history": history, "plateUrl": None, "plateHash": None}
+
+
+def _load_director_package(scene, episode="Ep1"):
+    path = _shot_pkg_path(scene, episode)
+    if not path.exists():
+        raise FileNotFoundError(f"no production package for {episode} scene {scene}")
+    return json.loads(path.read_text()), path
+
+
+def _director_session(scene, episode="Ep1", requested_shot_id=None):
+    """Build the single Director response from authoritative zero-spend engine reads."""
+    import cb_studio_director
+    import cb_providers
+    import cb_render
+    import cb_state
+
+    state = cb_state.production_state(scene, episode)
+    provider_capabilities = cb_providers.capability_report()
+    blockers = list(state.get("blockers") or [])
+    if not provider_capabilities.get("selectionReady"):
+        blockers.append({
+            "code": "VIDEO_PROVIDER_NOT_QUALIFIED",
+            "stage": "configuration",
+            "shotId": None,
+            "message": provider_capabilities.get("selectionError") or
+                       "The selected video route is not qualified.",
+            "action": "Select a verified production model or qualify the requested provider route.",
+        })
+    preflight = {
+        "ok": not blockers,
+        "zeroSpend": True,
+        "episode": episode,
+        "scene": str(scene),
+        "blockers": blockers,
+        "warnings": [],
+        "productionInputs": {"look": None, "shots": {}},
+        "providerCapabilities": provider_capabilities,
+        "showProfile": SHOW_PROFILE_STATUS,
+    }
+
+    package = None
+    media = {}
+    try:
+        package, _ = _load_director_package(scene, episode)
+        media = shot_media_map(package, scene, episode)
+    except (FileNotFoundError, OSError, ValueError, TypeError):
+        package = None
+        media = {}
+
+    try:
+        scene_look = scenelook_status_server(scene, episode) if package else {}
+    except Exception:
+        scene_look = {}
+
+    common = {
+        "state": state,
+        "preflight": preflight,
+        "package": package,
+        "media": media,
+        "scene_look": scene_look,
+        "jobs": _jobs_snapshot(),
+        "requested_shot_id": requested_shot_id,
+    }
+    session = cb_studio_director.build_session(**common)
+    animation_contract = None
+    selected_id = session.get("selectedShotId")
+    if selected_id and package:
+        shot = next((item for item in (package.get("shots") or [])
+                     if item.get("shotId") == selected_id), {})
+        ledger = next((item for item in (package.get("continuityLedger") or [])
+                       if item.get("shotId") == selected_id), {})
+        current = next((item.get("current") or {} for item in (state.get("shots") or [])
+                        if item.get("shotId") == selected_id), {})
+        inputs = {}
+
+        def current_output(stage):
+            work = ((ledger.get("departmentWork") or {}).get(stage) or {})
+            record = work.get("candidate") or work.get("approved") or {}
+            return (record.get("output") or {}), (
+                "prepared" if work.get("candidate") else "approved-legacy")
+
+        if session.get("phase") == "keyframe" and current.get("cinematographyDirection"):
+            output, source = current_output("cinematography")
+            prompt = cb_render._compile_keyframe_integration_prompt(output, shot)
+            inputs.update({
+                "keyframePrompt": prompt,
+                "keyframePromptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+                "keyframePromptSource": source,
+                "keyframePromptHeadline": output.get("audienceRead") or output.get("composition"),
+            })
+        if session.get("phase") == "voice" and current.get("voiceDirection"):
+            output, source = current_output("voice")
+            direction_by_occurrence = {
+                line.get("dialogueOccurrenceId"): line
+                for line in (output.get("lines") or [])
+            }
+            provider_lines = cb_render._approved_voice_lines(package, shot)
+            inputs.update({
+                "voiceLines": [{
+                    "speaker": line.get("speaker"),
+                    "performedText": line.get("text"),
+                    "dramaticIntention": (
+                        direction_by_occurrence.get(line.get("dialogueOccurrenceId"), {})
+                        .get("dramaticIntention")),
+                } for line in provider_lines],
+                "voiceDirectionSource": (
+                    "human-working" if ledger.get("workingVoice") else source),
+            })
+        if inputs:
+            preflight["productionInputs"]["shots"][selected_id] = inputs
+
+    if selected_id and session.get("phase") in ("animation", "review", "final"):
+        try:
+            animation_contract = cb_render.check_seedance_structure(
+                scene, selected_id, episode, log=lambda *_: None)
+        except Exception as exc:
+            animation_contract = {
+                "verdict": "blocked", "blockers": [str(exc)], "warnings": [],
+                "checks": {}, "finalPrompt": "",
+            }
+    session = cb_studio_director.build_session(
+        **common, animation_contract=animation_contract)
+    return session
 
 
 
@@ -1185,7 +1354,8 @@ def _legacy_gone(handler):
 
 def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
                  candidates=None, spend_token=None, category=None, candidate=None,
-                 dry_run=False, source_path=None):
+                 dry_run=False, source_path=None, character=None, comparison_model_id=None,
+                 comparison_run_id=None):
     """Map one validated shot-pipeline command onto the job runner. Argument order per cb_engine.py /
     cb_render.py's own CLIs (2026-07-16 spend-token contract — the approve-spend boolean is GONE):
       fire    -> cb_render.py fire <scene> <shotId> [episode] [--candidates N] [--spend-token <token>]
@@ -1199,10 +1369,13 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
     token resumes: only the missing candidates generate (ledger batch.status == "generating").
     Every value travels as its own argv element — never a shell string."""
     args = ["cb_render.py", cmd, str(scene)]
-    if cmd in ("fire", "voice-shot", "keyframe", "approve", "reject", "approve-keyframe", "reject-keyframe",
+    if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+               "pose", "approve-pose", "reject-pose", "select-pose-upload",
                "select-upload", "select-library", "select-previous",
                "approve-voice", "reject-voice", "regen-voice"):
         args.append(str(shot_id))
+    if cmd in ("pose", "approve-pose", "reject-pose", "select-pose-upload"):
+        args.append(str(character))
     if cmd == "approve" and candidate is not None:
         args.append(str(candidate))
     if cmd == "reject":
@@ -1210,6 +1383,8 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
         if category:
             args += ["--category", str(category)]
     if cmd == "reject-keyframe":
+        args.append(str(correction))
+    if cmd == "reject-pose":
         args.append(str(correction))
     if cmd == "reject-scenelook":
         args.append(str(correction))
@@ -1219,6 +1394,8 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
         # THE non-generation opening-frame sources (2026-07-18): the upload/library file's own
         # path travels as its own argv element, matching cb_render.py's own CLI shape
         # (select-upload/select-library <scene> <shotId> <path> [episode]) — never a shell string.
+        args.append(str(source_path))
+    if cmd == "select-pose-upload":
         args.append(str(source_path))
     if cmd in ("select-scenelook-upload", "select-scenelook-library"):
         # THE non-generation SCENE LOOK sources (2026-07-19 — "still not letting me upload a
@@ -1241,6 +1418,9 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
             args += ["--spend-token", str(spend_token)]
         if dry_run:
             args += ["--dry-run"]      # sealed-envelope preview: no token issued, nothing stored
+        if comparison_model_id:
+            args += ["--comparison-model", str(comparison_model_id),
+                     "--comparison-run-id", str(comparison_run_id)]
     label = "shot:" + cmd + ((":" + str(shot_id)) if shot_id else "")
     return _start(_jid(f"shot{cmd}_s{scene}"), label, scene, args)
 
@@ -1352,6 +1532,7 @@ def _storyboard_approval(d):
 # Approved EXACT files the UI fetches by name (case-insensitive):
 _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
+    "/cb-studio/director.html",           # outcome-first creative entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
     f"/shows/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
@@ -1457,7 +1638,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         parsed = urlsplit(self.path)
         launch = (parse_qs(parsed.query).get("launchToken") or [None])[0]
         if launch is not None:
-            if not allow_launch or parsed.path != "/cb-studio/app.html" or not hmac.compare_digest(
+            if not allow_launch or parsed.path not in (
+                    "/cb-studio/director.html", "/cb-studio/app.html") or not hmac.compare_digest(
                     str(launch), LAUNCH_TOKEN):
                 self._deny(401, "invalid Studio launch token")
                 return False
@@ -1586,7 +1768,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path == "/" or self.path == "":
             self.send_response(302)
-            self.send_header("Location", "/cb-studio/app.html")
+            self.send_header("Location", "/cb-studio/director.html")
             self.end_headers()
             return
         if self.path == "/api/show-profile":
@@ -1838,6 +2020,16 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, _CBI.scene_roster(ep))
             except Exception as e:
                 return self._json(500, {"error": str(e)})
+        if self.path.startswith("/api/rough-cut-draft"):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "valid episode required"})
+            try:
+                return self._json(200, rough_cut_projection(ep))
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
         if self.path.startswith("/api/production-preflight"):
             # One read-only, zero-spend report of every known blocker, evaluated before any
             # paid button so failures arrive together instead of one approval click at a time.
@@ -1851,6 +2043,25 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, cb_production_preflight.production_preflight(scene, ep))
             except Exception as e:
                 return self._json(400, {"error": str(e), "zeroSpend": True})
+        if urlsplit(self.path).path == "/api/director-session":
+            # The outcome-first product surface. This is a read-only projection over the
+            # same authoritative state, preflight, package and media evidence used by the
+            # renderer. It creates no parallel approval policy and never calls a provider.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            shot_id = (q.get("shotId") or [None])[0]
+            if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
+                    (shot_id and not _SHOT_TOKEN.match(shot_id))):
+                return self._json(400, {
+                    "error": "scene, episode and optional shotId must be plain tokens",
+                    "zeroSpend": True,
+                })
+            try:
+                return self._json(200, _director_session(scene, ep, shot_id))
+            except Exception as exc:
+                return self._json(400, {"error": str(exc), "zeroSpend": True})
         if self.path.startswith("/api/studio-agent"):
             # The creative front door is a strictly read-only HELP/PLAN projection. It
             # composes authoritative policy, quality and preflight evidence; it owns no
@@ -1896,6 +2107,58 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, cb_state.production_state(scene, ep))
             except Exception as e:
                 return self._json(400, {"error": str(e), "zeroSpend": True})
+        if self.path.startswith("/api/shot-references"):
+            # Read-only reference truth for the two image/video generation stages. Paths
+            # remain private; only assets inside the approved static roots receive URLs.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            sid = (q.get("shotId") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if (not scene or not sid or not _SHOT_TOKEN.match(scene) or
+                    not _SHOT_TOKEN.match(sid) or not _SHOT_TOKEN.match(ep)):
+                return self._json(400, {
+                    "error": "scene, shotId and episode must be plain tokens",
+                    "zeroSpend": True, "readOnly": True,
+                })
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                manifest = _CBR.shot_reference_manifest(scene, sid, ep)
+                for stage_name in ("keyframe", "animation"):
+                    stage = manifest.get(stage_name) or {}
+                    for item in stage.get("references") or []:
+                        path = item.pop("path", None)
+                        item["url"] = _url_from_reference(path)
+                        if item.get("ready") and not item["url"]:
+                            item.update({
+                                "ready": False,
+                                "status": "unavailable",
+                                "message": "Reference is outside the Studio's approved asset library.",
+                            })
+                    stage["ready"] = bool(stage.get("ready")) and all(
+                        item.get("ready") for item in stage.get("references") or [])
+                for control in (manifest.get("technicalControls") or {}).values():
+                    path = control.pop("path", None)
+                    control["url"] = _url_from_reference(path)
+                integration = manifest.get("posedIntegration") or {}
+                integration_path = integration.pop("path", None)
+                integration["url"] = _url_from_reference(integration_path)
+                for item in (manifest.get("posePreparation") or {}).get("items") or []:
+                    approved_path = item.pop("approvedPath", None)
+                    qualified_path = item.pop("qualifiedPath", None)
+                    candidate_path = item.pop("candidatePath", None)
+                    item["approvedUrl"] = _url_from_reference(approved_path)
+                    item["qualifiedUrl"] = _url_from_reference(qualified_path)
+                    item["candidateUrl"] = _url_from_reference(candidate_path)
+                return self._json(200, manifest)
+            except _CBR.Refused as exc:
+                return self._json(409, {
+                    "error": str(exc), "zeroSpend": True, "readOnly": True})
+            except Exception as exc:
+                return self._json(400, {
+                    "error": str(exc), "zeroSpend": True, "readOnly": True})
         if self.path.startswith("/api/shot-package"):
             # THE SHOT PIPELINE (additive, 2026-07-16): read-only — the production package cb_engine.py
             # compiled + validated, plus a server-computed media-existence map (shot_media_map above).
@@ -1918,8 +2181,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                 production_state = cb_state.production_state(scene, ep)
             except Exception as exc:
                 production_state = {"error": str(exc)}
+            try:
+                import cb_production_preflight
+                preflight = cb_production_preflight.production_preflight(
+                    scene, ep, state=production_state)
+            except Exception as exc:
+                preflight = {"error": str(exc), "zeroSpend": True}
             return self._json(200, {"package": pkg, "media": shot_media_map(pkg, scene, ep),
-                                    "productionState": production_state, "file": p.name})
+                                    "productionState": production_state,
+                                    "preflight": preflight, "file": p.name})
         if self.path == "/api/scenelook" or self.path.startswith("/api/scenelook?"):
             # THE SCENE LOOK GATE (additive, 2026-07-18): read-only status — never writes,
             # never assumes a file's mere presence means approval (scenelook_status_server).
@@ -2070,6 +2340,33 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(409, {"error": str(e)})
             except Exception as e:
                 return self._json(400, {"error": str(e)})
+        if urlsplit(self.path).path == "/api/prompt-lab":
+            # Deterministic prompt analysis plus immutable human-rating history. Read-only,
+            # zero spend: no LLM or media provider is reachable from prompt_lab_status().
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            scene = (q.get("scene") or [""])[0]
+            sid = (q.get("shotId") or [""])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            artifact_type = (q.get("artifactType") or [""])[0]
+            candidate_id = (q.get("candidateId") or [None])[0]
+            if (not scene or not sid or not _SHOT_TOKEN.match(scene) or
+                    not _SHOT_TOKEN.match(sid) or not _SHOT_TOKEN.match(ep) or
+                    artifact_type not in ("keyframe", "animation") or
+                    (candidate_id and not _SHOT_TOKEN.match(candidate_id))):
+                return self._json(400, {
+                    "error": "valid scene, shotId, artifactType and optional candidateId required"
+                })
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                return self._json(200, _CBR.prompt_lab_status(
+                    scene, sid, artifact_type, ep, candidate_id=candidate_id))
+            except _CBR.Refused as e:
+                return self._json(409, {"error": str(e), "zeroSpend": True})
+            except Exception as e:
+                return self._json(400, {"error": str(e), "zeroSpend": True})
         static_path = urlsplit(self.path).path
         if static_path == "/cb-studio/data/media-index.json":
             reindex_media()
@@ -2123,6 +2420,25 @@ class H(http.server.SimpleHTTPRequestHandler):
                 d = self._body(); jid = d.get("jobId")
                 stopped = [jid] if (jid and stop_job(jid)) else ([] if jid else stop_all())
                 self._json(200, {"ok": True, "stopped": stopped, "jobs": JOBS})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/rough-cut-draft":
+            try:
+                import cb_rough_cut
+                d = self._body()
+                episode = str(d.get("episode") or "Ep1")
+                shot_id = str(d.get("shotId") or "")
+                action = str(d.get("action") or "add")
+                if not _SHOT_TOKEN.match(episode) or not _SHOT_TOKEN.match(shot_id):
+                    raise ValueError("valid episode and shotId required")
+                if action == "add":
+                    cb_rough_cut.add_shot(episode, shot_id)
+                elif action == "remove":
+                    cb_rough_cut.remove_shot(episode, shot_id)
+                else:
+                    raise ValueError("action must be add or remove")
+                self._json(200, rough_cut_projection(episode))
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -2478,6 +2794,181 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/director-action":
+            # The Director UI submits product-level decisions only. This server translates
+            # them onto the existing engine allowlist after recomputing the current session;
+            # stale or invented actions are refused before any mutation or provider call.
+            try:
+                d = self._body()
+                scene = str(d.get("scene") or "").strip()
+                ep = str(d.get("episode") or "Ep1").strip() or "Ep1"
+                shot_id = (str(d.get("shotId")).strip()
+                           if d.get("shotId") not in (None, "") else None)
+                action = str(d.get("action") or "").strip()
+                note = str(d.get("note") or "").strip()
+                if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
+                        (shot_id and not _SHOT_TOKEN.match(shot_id))):
+                    self._json(400, {"error": "invalid Director action target"}); return
+
+                session = _director_session(scene, ep, shot_id)
+                import cb_studio_director as _CBD
+                if action not in _CBD.allowed_action_ids(session):
+                    self._json(409, {
+                        "error": "That action is no longer current. The Director view has been refreshed.",
+                        "session": session,
+                    }); return
+                target = session.get("selectedShotId")
+
+                if action in ("open-inspector", "open-provider-setup"):
+                    stage = "animation" if action == "open-provider-setup" else session.get("phase")
+                    route = ("/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=" +
+                             quote(ep) + "&sc=" + quote(scene) + "&st=" +
+                             quote(str(stage or "storyboard")) +
+                             (("&shot=" + quote(target)) if target else ""))
+                    self._json(200, {"ok": True, "navigate": route, "zeroSpend": True}); return
+                if action == "direct-scene":
+                    args = ["cb_creative.py", "scene", scene, ep]
+                    job_id = _start(_jid(f"director_scene_{scene}"),
+                                    "director:scene", scene, args)
+                elif action in ("build-keyframe", "build-voice", "prepare-render"):
+                    if not target:
+                        self._json(409, {"error": "No current shot is available"}); return
+                    command = {
+                        "build-keyframe": "build-keyframe",
+                        "build-voice": "build-voice",
+                        "prepare-render": "prepare-render",
+                    }[action]
+                    job_id = _start(
+                        _jid(f"director_{command}_{target}"),
+                        f"director:{command}:{target}", scene,
+                        ["cb_studio_director.py", command, scene, target, ep])
+                elif action == "accept-keyframe":
+                    job_id = shot_run_job("approve-keyframe", scene, ep, target)
+                elif action == "iterate-keyframe":
+                    if not note:
+                        self._json(400, {"error": "Tell the Director what must change."}); return
+                    job_id = shot_run_job("reject-keyframe", scene, ep, target, note)
+                elif action == "accept-voice":
+                    job_id = shot_run_job("approve-voice", scene, ep, target)
+                elif action == "iterate-voice":
+                    if not note:
+                        self._json(400, {"error": "Tell the Director what must change."}); return
+                    job_id = shot_run_job("reject-voice", scene, ep, target, note)
+                elif action == "approve-spend":
+                    pkg, _ = _load_director_package(scene, ep)
+                    ledger = next((item for item in (pkg.get("continuityLedger") or [])
+                                   if item.get("shotId") == target), {})
+                    token = ((ledger.get("pendingSpendAuth") or {}).get("token"))
+                    if not token:
+                        self._json(409, {"error": "The sealed spend approval is no longer current."}); return
+                    job_id = shot_run_job("fire", scene, ep, target, candidates=1,
+                                          spend_token=token)
+                elif action == "cancel-spend":
+                    self._json(200, {"ok": True, "zeroSpend": True, "noChange": True}); return
+                elif action == "accept-animation":
+                    candidate = d.get("candidate")
+                    choices = (((session.get("artifact") or {}).get("items")) or [])
+                    available = {int(item["n"]) for item in choices if item.get("n") is not None}
+                    if candidate is None and len(available) == 1:
+                        candidate = next(iter(available))
+                    try:
+                        candidate = int(candidate)
+                    except (TypeError, ValueError):
+                        candidate = -1
+                    if candidate not in available:
+                        self._json(400, {"error": "Choose a current animation candidate."}); return
+                    job_id = shot_run_job("approve", scene, ep, target, candidate=candidate)
+                elif action == "iterate-animation":
+                    if not note:
+                        self._json(400, {"error": "Tell the Director what must change."}); return
+                    job_id = shot_run_job("reject", scene, ep, target, note,
+                                          category="other")
+                elif action == "run-quality-review":
+                    job_id = _start(
+                        _jid(f"director_quality_{target}"),
+                        f"director:quality:{target}", scene,
+                        ["cb_render.py", "department-prepare", scene,
+                         "review-animation", target, ep])
+                elif action == "accept-quality":
+                    import cb_render as _CBR
+                    _CBR.decide_department(
+                        scene, "review-animation", "approved", shot_id=target,
+                        note="Accepted from the outcome-first Director review.",
+                        episode=ep, reviewed_by=str(d.get("by") or "Julian"))
+                    self._json(200, {"ok": True, "zeroSpend": True}); return
+                elif action == "reopen-shot":
+                    if not note:
+                        self._json(400, {"error": "Tell the Director what must change."}); return
+                    import cb_render as _CBR
+                    _CBR.reopen_approved_shot(
+                        scene, target, note, category="other", episode=ep,
+                        reviewed_by=str(d.get("by") or "Julian"))
+                    self._json(200, {"ok": True, "zeroSpend": True}); return
+                elif action == "build-master":
+                    job_id = shot_run_job("stitch", scene, ep)
+                elif action == "run-final-review":
+                    job_id = _start(
+                        _jid(f"director_final_review_{scene}"),
+                        "director:final-review", scene,
+                        ["cb_render.py", "department-prepare", scene,
+                         "review-final", "-", ep])
+                elif action == "accept-master":
+                    import cb_render as _CBR
+                    _CBR.decide_department(
+                        scene, "review-final", "approved", shot_id=None,
+                        note="Final master accepted in the Director review.",
+                        episode=ep, reviewed_by=str(d.get("by") or "Julian"))
+                    self._json(200, {"ok": True, "zeroSpend": True}); return
+                elif action == "iterate-master":
+                    if not note:
+                        self._json(400, {"error": "Tell the Director what must change."}); return
+                    import cb_render as _CBR
+                    _CBR.decide_department(
+                        scene, "review-final", "rejected", shot_id=None, note=note,
+                        episode=ep, reviewed_by=str(d.get("by") or "Julian"))
+                    self._json(200, {"ok": True, "zeroSpend": True}); return
+                else:
+                    self._json(409, {"error": "This Director action is not implemented yet."}); return
+                self._json(200, {"ok": True, "jobId": job_id})
+            except Exception as exc:
+                self._json(400, {"error": str(exc)})
+            return
+        if self.path == "/api/prompt-lab-rate":
+            # Append-only human evidence. This never approves/rejects media and never calls
+            # a provider; cb_render rebinds the submitted candidate ID to its live asset,
+            # exact prompt snapshot and current content hash before saving.
+            if str(CBGEN) not in sys.path:
+                sys.path.insert(0, str(CBGEN))
+            import cb_render as _CBR
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                sid = str(d.get("shotId", "")).strip()
+                ep = str(d.get("episode") or "Ep1").strip() or "Ep1"
+                artifact_type = str(d.get("artifactType", "")).strip()
+                candidate_id = str(d.get("candidateId", "")).strip()
+                if (not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) or
+                        not _SHOT_TOKEN.match(ep) or not _SHOT_TOKEN.match(candidate_id) or
+                        artifact_type not in ("keyframe", "animation")):
+                    self._json(400, {"error": "invalid Prompt Lab rating target"}); return
+                record = _CBR.rate_prompt_render(
+                    scene, sid, artifact_type, candidate_id,
+                    d.get("scores") or {}, str(d.get("overallRead") or ""),
+                    note=str(d.get("note") or ""), episode=ep,
+                    reviewed_by=str(d.get("by") or "Julian"))
+                self._json(200, {
+                    "ok": True,
+                    "rating": record,
+                    "zeroSpend": True,
+                    "approvalChanged": False,
+                })
+            except _CBR.Refused as e:
+                self._json(409, {"error": str(e), "zeroSpend": True})
+            except (ValueError, TypeError) as e:
+                self._json(400, {"error": str(e), "zeroSpend": True})
+            except Exception as e:
+                self._json(500, {"error": str(e), "zeroSpend": True})
+            return
         if self.path in ("/api/department-save", "/api/department-decide"):
             # Plain ledger edits/decisions: no LLM and no media provider call.
             try:
@@ -2704,18 +3195,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 scene = str(d.get("scene", "")).strip()
                 episode = (str(d.get("episode") or "Ep1").strip() or "Ep1")
                 shot_id = str(d.get("shotId")).strip() if d.get("shotId") not in (None, "") else None
+                character = (str(d.get("character")).strip()
+                             if d.get("character") not in (None, "") else None)
                 correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
                 if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
                     self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
-                if cmd in ("fire", "voice-shot", "keyframe", "approve", "reject", "approve-keyframe", "reject-keyframe",
+                if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+                           "pose", "approve-pose", "reject-pose", "select-pose-upload",
                            "select-upload", "select-library", "select-previous",
                            "approve-voice", "reject-voice", "regen-voice") \
                    and (not shot_id or not _SHOT_TOKEN.match(shot_id)):
                     self._json(400, {"error": f"{cmd} needs a shotId (e.g. 1.B1.S1)"}); return
+                if cmd in ("pose", "approve-pose", "reject-pose", "select-pose-upload") and (
+                        not character or not _CHARACTER_NAME.match(character)):
+                    self._json(400, {"error": f"{cmd} needs a valid character name"}); return
                 if cmd == "reject" and not correction:
                     self._json(400, {"error": "reject needs a one-sentence correction"}); return
                 if cmd == "reject-keyframe" and not correction:
                     self._json(400, {"error": "reject-keyframe needs a plain-language reason"}); return
+                if cmd == "reject-pose" and not correction:
+                    self._json(400, {"error": "reject-pose needs a plain-language reason"}); return
                 if cmd == "reject-scenelook" and not correction:
                     self._json(400, {"error": "reject-scenelook needs a plain-language note"}); return
                 if cmd == "reject-voice" and not correction:
@@ -2727,7 +3226,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # client-supplied path — the same containment discipline _url_from_abs enforces
                 # in the other direction).
                 source_path = d.get("sourcePath")
-                if cmd in ("select-upload", "select-library"):
+                if cmd in ("select-upload", "select-library", "select-pose-upload"):
                     if not source_path or not isinstance(source_path, str):
                         self._json(400, {"error": f"{cmd} needs a sourcePath"}); return
                     try:
@@ -2780,6 +3279,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     source_path = str(sp)
                 elif source_path is not None:
                     self._json(400, {"error": "sourcePath applies to select-upload/select-library/"
+                                               "select-pose-upload/"
                                                "select-scenelook-upload/select-scenelook-library/"
                                                "scenelook only"}); return
                 # THE PROBABILISTIC-CANDIDATE + SPEND-TOKEN CONTRACT (2026-07-16): candidates and the
@@ -2801,6 +3301,17 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": "spendToken applies to fire/next only"}); return
                     if not _SPEND_TOKEN_RE.match(spend_token):
                         self._json(400, {"error": "spendToken must be 16-64 lowercase hex characters"}); return
+                comparison_model_id = (str(d.get("comparisonModelId")).strip()
+                                       if d.get("comparisonModelId") not in (None, "") else None)
+                comparison_run_id = (str(d.get("comparisonRunId")).strip()
+                                     if d.get("comparisonRunId") not in (None, "") else None)
+                if comparison_model_id is not None or comparison_run_id is not None:
+                    if cmd not in ("fire", "next"):
+                        self._json(400, {"error": "comparison settings apply to fire/next only"}); return
+                    if comparison_model_id != "fal-seedance-2.0":
+                        self._json(400, {"error": "only fal-seedance-2.0 is allowed for comparison"}); return
+                    if not comparison_run_id or not _SHOT_TOKEN.match(comparison_run_id) or len(comparison_run_id) > 120:
+                        self._json(400, {"error": "comparisonRunId must be a bounded plain token"}); return
                 category = str(d.get("category")).strip() if d.get("category") not in (None, "") else None
                 if category is not None:
                     if cmd != "reject":
@@ -2822,7 +3333,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                                                                     spend_token=spend_token,
                                                                     category=category, candidate=candidate,
                                                                     dry_run=bool(d.get("dryRun")),
-                                                                    source_path=source_path)})
+                                                                    source_path=source_path,
+                                                                    character=character,
+                                                                    comparison_model_id=comparison_model_id,
+                                                                    comparison_run_id=comparison_run_id)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -2846,7 +3360,7 @@ def main():
     threading.Thread(target=_freshness_watch, daemon=True).start()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
-        launch_url = f"{base_url}/cb-studio/app.html?launchToken={LAUNCH_TOKEN}"
+        launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"
         print(f"Animation Studio launch URL -> {launch_url}", flush=True)
         access_mode = "HTTPS tunnel" if PUBLIC_ORIGIN else "loopback-only"
         print(

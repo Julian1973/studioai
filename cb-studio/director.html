@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#151918">
+  <title>Animation Studio Director</title>
+  <link rel="stylesheet" href="/cb-studio/director.css?v=audio-outcome-1">
+  <script src="/cb-studio/director.js?v=audio-outcome-1" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#view=pipeline" aria-label="Animation Studio pipeline">
+        <span class="brand-mark" aria-hidden="true">CB</span>
+        <span class="brand-name">Animation <strong>Studio</strong></span>
+      </a>
+      <div class="topbar-context">
+        <span class="project-name">Crystal Bears</span>
+        <span class="save-state" id="save-state">Current</span>
+      </div>
+      <a class="inspector-link" id="full-inspector-link" href="/cb-studio/app.html" title="Open full Inspector">Inspector</a>
+    </header>
+
+    <nav class="side-nav" aria-label="Studio views">
+      <div class="nav-group">
+        <button type="button" class="nav-button active" data-view="pipeline">
+          <span class="nav-symbol" aria-hidden="true">01</span><span>Production</span>
+        </button>
+        <button type="button" class="nav-button" data-view="episodes">
+          <span class="nav-symbol" aria-hidden="true">02</span><span>Scenes</span>
+        </button>
+        <button type="button" class="nav-button" data-view="director">
+          <span class="nav-symbol" aria-hidden="true">03</span><span>Generate</span>
+        </button>
+        <button type="button" class="nav-button" data-view="review">
+          <span class="nav-symbol" aria-hidden="true">04</span><span>Edit &amp; Master</span>
+        </button>
+      </div>
+      <div class="nav-foot">
+        <span>Episode 1</span>
+        <strong>The Adventure Begins</strong>
+      </div>
+    </nav>
+
+    <main class="workspace" id="workspace">
+      <section class="studio-view active" id="view-pipeline" aria-labelledby="pipeline-title">
+        <div class="pipeline-shell">
+          <aside class="pipeline-rail" aria-label="Production pipeline steps">
+            <div class="rail-group">
+              <span>Pre-Prod</span>
+              <button type="button" class="active" data-pipeline-step="upload">Upload</button>
+              <button type="button" data-pipeline-step="style">Style</button>
+              <button type="button" data-pipeline-step="analysis">Analysis</button>
+            </div>
+            <div class="rail-group">
+              <span>Design</span>
+              <button type="button" data-pipeline-step="characters">Characters</button>
+              <button type="button" data-pipeline-step="props">Props</button>
+              <button type="button" data-pipeline-step="locations">Locations</button>
+            </div>
+            <div class="rail-group">
+              <span>Production</span>
+              <button type="button" data-pipeline-step="storyboard">Storyboard</button>
+              <button type="button" data-pipeline-step="audio">Audio</button>
+              <button type="button" data-pipeline-step="footage">Footage</button>
+              <button type="button" data-pipeline-step="rough-cut">Rough Cut</button>
+            </div>
+          </aside>
+
+          <div class="pipeline-main">
+            <div class="pipeline-topline">
+              <div>
+                <p class="eyebrow">Project</p>
+                <h1 id="pipeline-title">Ep 1</h1>
+                <p class="pipeline-subtitle" id="pipeline-subtitle">Design · Step 4 of 10</p>
+              </div>
+              <span class="pipeline-live-state" id="pipeline-live-state">Current episode</span>
+            </div>
+
+            <div class="pipeline-progress" aria-label="Pipeline progress">
+              <span id="pipeline-progress-copy">40%</span>
+              <div class="pipeline-progress-track"><i style="width:40%"></i></div>
+            </div>
+
+            <div class="truth-rail" id="truth-rail" aria-label="Project truth status"></div>
+
+            <div class="pipeline-panel" id="pipeline-panel" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="studio-view" id="view-episodes" aria-labelledby="episodes-title" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Crystal Bears · Episode 1</p>
+            <h1 id="episodes-title">The Adventure Begins</h1>
+          </div>
+          <button type="button" class="primary compact" id="continue-directing">Continue directing</button>
+        </div>
+        <div class="episode-progress" aria-label="Episode production progress">
+          <span id="episode-progress-label">Scene 1 in production</span>
+          <div class="progress-track"><span id="episode-progress-bar"></span></div>
+        </div>
+        <div class="scene-list" id="scene-list" aria-live="polite"></div>
+      </section>
+
+      <section class="studio-view" id="view-director" aria-labelledby="director-title" hidden>
+        <div class="director-heading">
+          <div>
+            <p class="eyebrow" id="scene-kicker">Episode 1 · Scene 1</p>
+            <h1 id="director-title">Loading Director...</h1>
+          </div>
+          <div class="shot-switcher" id="shot-switcher" aria-label="Scene shots"></div>
+        </div>
+
+        <div class="media-stage" id="media-stage" aria-live="polite">
+          <div class="stage-empty">
+            <span class="loading-mark" aria-hidden="true"></span>
+            <p>Loading current production state...</p>
+          </div>
+        </div>
+
+        <div class="director-outcome">
+          <div class="outcome-copy">
+            <div class="stage-label" id="phase-label">CURRENT STEP</div>
+            <h2 id="outcome-headline">Finding the next decision</h2>
+            <p id="outcome-summary"></p>
+            <p class="quality-copy" id="quality-copy" hidden></p>
+            <p class="blocker-copy" id="blocker-copy" hidden></p>
+          </div>
+          <div class="action-area" id="action-area"></div>
+        </div>
+
+        <div class="quiet-tools">
+          <button type="button" class="text-button" id="references-button" disabled>References</button>
+          <button type="button" class="text-button" id="request-button" disabled>Exact request</button>
+          <span class="truth-note" id="truth-note">Creative quality is judged from the result.</span>
+        </div>
+      </section>
+
+      <section class="studio-view" id="view-review" aria-labelledby="review-title" hidden>
+        <div class="view-heading">
+          <div>
+            <p class="eyebrow">Episode 1 · Current cut</p>
+            <h1 id="review-title">Review</h1>
+          </div>
+          <span class="review-count" id="review-count">0 of 0 shots accepted</span>
+        </div>
+        <div class="review-reel" id="review-reel"></div>
+        <div class="master-band" id="master-band">
+          <div>
+            <span class="stage-label">FINAL MASTER</span>
+            <h2>Waiting for accepted animation</h2>
+          </div>
+          <span class="master-status">Not ready</span>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Studio views">
+      <button type="button" class="active" data-view="pipeline"><span aria-hidden="true">01</span>Production</button>
+      <button type="button" data-view="episodes"><span aria-hidden="true">02</span>Scenes</button>
+      <button type="button" data-view="director"><span aria-hidden="true">03</span>Generate</button>
+      <button type="button" data-view="review"><span aria-hidden="true">04</span>Master</button>
+    </nav>
+  </div>
+
+  <dialog class="studio-dialog" id="iterate-dialog">
+    <form method="dialog" id="iterate-form">
+      <div class="dialog-heading">
+        <div>
+          <span class="stage-label">ONE CLEAR CHANGE</span>
+          <h2>What should improve?</h2>
+        </div>
+        <button type="button" class="close-button" data-close="iterate-dialog" aria-label="Close">×</button>
+      </div>
+      <label for="iteration-note">Director note</label>
+      <textarea id="iteration-note" rows="4" maxlength="500" required placeholder="Describe the one change that matters most."></textarea>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" data-close="iterate-dialog">Cancel</button>
+        <button type="submit" class="primary">Iterate</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="studio-dialog confirm-dialog" id="confirm-dialog">
+    <form method="dialog" id="confirm-form">
+      <div class="dialog-heading">
+        <div>
+          <span class="stage-label">PROVIDER CALL</span>
+          <h2 id="confirm-title">Build result?</h2>
+        </div>
+        <button type="button" class="close-button" data-close="confirm-dialog" aria-label="Close">×</button>
+      </div>
+      <p id="confirm-copy"></p>
+      <div class="cost-line" id="confirm-cost" hidden></div>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" data-close="confirm-dialog">Not yet</button>
+        <button type="submit" class="primary" id="confirm-submit">Continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="reference-dialog" id="reference-dialog">
+    <div class="dialog-heading">
+      <div>
+        <span class="stage-label">LOCKED INPUTS</span>
+        <h2>References</h2>
+      </div>
+      <button type="button" class="close-button" data-close="reference-dialog" aria-label="Close">×</button>
+    </div>
+    <div class="reference-tabs" role="tablist" aria-label="Reference stage">
+      <button type="button" class="active" data-reference-stage="keyframe" role="tab">Opening frame</button>
+      <button type="button" data-reference-stage="animation" role="tab">Animation</button>
+    </div>
+    <div class="reference-grid" id="reference-grid"></div>
+  </dialog>
+
+  <aside class="request-drawer" id="request-drawer" aria-hidden="true" aria-labelledby="request-title">
+    <div class="drawer-heading">
+      <div>
+        <span class="stage-label">AUTHORITATIVE</span>
+        <h2 id="request-title">Exact provider request</h2>
+      </div>
+      <button type="button" class="close-button" id="request-close" aria-label="Close">×</button>
+    </div>
+    <div class="request-meta" id="request-meta"></div>
+    <pre id="request-content"></pre>
+    <a id="drawer-inspector-link" class="secondary drawer-link" href="/cb-studio/app.html">Open full Inspector</a>
+  </aside>
+  <button type="button" class="drawer-scrim" id="drawer-scrim" aria-label="Close exact request" hidden></button>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

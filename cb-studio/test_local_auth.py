@@ -35,7 +35,7 @@ def studio(monkeypatch):
 
 
 def _request(port, method, path, headers=None, body=None):
-    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=15)
     request_headers = {"Host": f"127.0.0.1:{port}", **(headers or {})}
     connection.request(method, path, body=body, headers=request_headers)
     response = connection.getresponse()
@@ -66,6 +66,47 @@ def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
     assert "Access-Control-Allow-Origin" not in headers
     assert headers["X-Frame-Options"] == "DENY"
     assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
+
+
+def test_director_entry_and_facade_share_the_authenticated_session(studio):
+    module, port = studio
+    status, _, _ = _request(port, "GET", "/cb-studio/director.html")
+    assert status == 401
+
+    status, headers, _ = _request(
+        port, "GET", f"/cb-studio/director.html?launchToken={module.LAUNCH_TOKEN}")
+    assert status == 303
+    assert headers["Location"] == "/cb-studio/director.html"
+    cookie = headers["Set-Cookie"].split(";", 1)[0]
+
+    status, _, body = _request(
+        port, "GET", "/cb-studio/director.html", {"Cookie": cookie})
+    assert status == 200
+    assert b'id="view-director"' in body
+
+    status, _, body = _request(
+        port, "GET", "/api/director-session?episode=Ep1&scene=1",
+        {"Cookie": cookie})
+    assert status == 200
+    session = json.loads(body)
+    assert session["schemaVersion"] == 1
+    assert session["selectedShotId"]
+    assert session["primaryAction"]["id"] in {
+        "build-keyframe", "build-voice", "prepare-render", "open-inspector",
+        "open-provider-setup", "run-quality-review", "build-master", "run-final-review",
+    }
+
+    origin = f"http://127.0.0.1:{port}"
+    status, _, body = _request(
+        port, "POST", "/api/director-action",
+        {"Cookie": cookie, "Content-Type": "application/json", "Origin": origin},
+        body=json.dumps({
+            "episode": "Ep1", "scene": "1", "shotId": "S1.SH1",
+            "action": "invented-action",
+        }).encode(),
+    )
+    assert status == 409
+    assert "no longer current" in json.loads(body)["error"]
 
 
 def test_host_origin_and_session_are_all_enforced(studio):

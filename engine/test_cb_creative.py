@@ -73,7 +73,21 @@ def _cinematography_contract():
 
 def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
     return C.CreativeShotCard(
-        shotId=shot_id, beatIds=["1.B1"], purpose="discover the corridor at Fuzzby's speed",
+        shotId=shot_id, beatIds=["1.B1"], targetDurationSec=7,
+        stagePlan=[C.StoryboardStage(
+            stageNumber=1, beatIds=["1.B1"], purpose="Turn speed into recoil",
+            primaryEvent="Fuzzby's late steering compresses the leaf and rebounds him",
+            emotionalOrComicTurn="His confidence survives the evidence by one beat",
+            cameraAndTransition="Pursue through the approach, then hold the recoil plane",
+            observableEndState="Fuzzby hangs beside the trembling leaf")],
+        internalShotPlan=[C.StoryboardInternalShot(
+            shotNumber=1, purpose="Carry one uninterrupted cause-and-effect gag",
+            framingAndCamera="Eye-level medium-wide pursuit through the stems",
+            storyAction="The late turn creates the collision and recoil",
+            performanceFocus="Fuzzby restores his social pose after his balance",
+            landingImage="Fuzzby hangs beside the trembling leaf",
+            cutReason="Remaining continuous preserves the authored physics chain")],
+        purpose="discover the corridor at Fuzzby's speed",
         audienceExperience="we ride with him, not ahead of him",
         openingImage="blur of stems resolving as he swerves",
         principalPerformance="Fuzzby outruns his own steering",
@@ -84,6 +98,8 @@ def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
         transitionReason="a cut here would break the experiential chase" if
                           transition == "CONTINUOUS" else
                           "continuing would dilute the impact; the new image re-scales the gag",
+        providerBoundaryReason="scene_end",
+        providerBoundaryExplanation="This fixture contains only one scene-ending unit.",
         cinematographyContract=_cinematography_contract())
 
 
@@ -207,7 +223,12 @@ def _fake_llm(record, review_script=None):
             card.physicalPerformance = "weight lands late, wings recover first"
             card.animationTiming = "fast in, held rebound"
             card.performanceContract = _performance_contract()
-            return C.PerformancePass(shots=[card])
+            return C.PerformancePass(shots=[C.PerformanceCard(
+                shotId=card.shotId,
+                physicalPerformance=card.physicalPerformance,
+                animationTiming=card.animationTiming,
+                performanceContract=card.performanceContract,
+            )])
         if schema is C.VoiceScript:
             return C.VoiceScript(performances=[])
         if schema is C.ProductionPass:
@@ -217,7 +238,9 @@ def _fake_llm(record, review_script=None):
             if review_script:
                 return review_script(state["reviews"])
             return C.ShowrunnerReview(judgement="delivers the treatment",
-                                       treatmentComparison="experience intact", passes=True)
+                                       treatmentComparison="experience intact",
+                                       packingJudgement="No avoidable provider join remains.",
+                                       packingPasses=True, passes=True)
         raise AssertionError(schema)
     return fake
 
@@ -269,6 +292,33 @@ def test_treatment_selection_precedes_beat_architecture(monkeypatch):
            < order.index("SceneDirection") < order.index("ShotConference")
 
 
+def test_scene_direction_provider_schema_excludes_mechanically_restored_lineage_dicts():
+    beat_properties = C.SceneDirection.model_json_schema()["$defs"]["Beat"]["properties"]
+    assert "sourceEventRange" not in beat_properties
+    assert "sourceEventSignature" not in beat_properties
+
+
+def test_department_response_schemas_only_expose_fields_owned_by_that_gate():
+    conference_properties = C.ShotConference.model_json_schema()["$defs"][
+        "StoryboardCard"]["properties"]
+    for performance_field in (
+            "physicalPerformance", "animationTiming", "performanceContract"):
+        assert performance_field not in conference_properties
+
+    performance_properties = C.PerformancePass.model_json_schema()["$defs"][
+        "PerformanceCard"]["properties"]
+    assert set(performance_properties) == {
+        "shotId", "physicalPerformance", "animationTiming", "performanceContract"}
+    performance_contract = C.PerformancePass.model_json_schema()["$defs"][
+        "ShotPerformanceContract"]["properties"]
+    assert "comedyStaging" not in performance_contract
+
+    production_properties = C.ProductionPass.model_json_schema()["$defs"][
+        "ProductionDetailDraft"]["properties"]
+    assert "requiresNewKeyframe" not in production_properties
+    assert "intendedDurationRange" not in production_properties
+
+
 def test_exactly_three_materially_distinct_treatments_required():
     with pytest.raises(Exception):
         C.TreatmentSet(treatments=[_treatment("only")])
@@ -287,7 +337,9 @@ def test_creative_card_is_lean_and_production_detail_is_separate():
         assert production_only not in creative_fields, production_only
     assert {"purpose", "audienceExperience", "openingImage", "principalPerformance",
             "cameraRelationship", "physicalOrEmotionalChange", "closingImage",
-            "transitionType", "transitionReason"} <= creative_fields
+            "transitionType", "transitionReason", "targetDurationSec", "stagePlan",
+            "internalShotPlan", "providerBoundaryReason",
+            "providerBoundaryExplanation"} <= creative_fields
     assert "essentialProviderProtections" in set(C.ProductionDetail.model_fields)
 
 
@@ -295,6 +347,24 @@ def test_every_transition_carries_its_justification():
     with pytest.raises(Exception):
         card = _card().model_dump()
         card.pop("transitionReason")
+        C.CreativeShotCard(**card)
+
+
+def test_storyboard_production_unit_supports_natural_30_second_structure():
+    card = _card().model_dump()
+    card["targetDurationSec"] = 30
+    card["stagePlan"] = [
+        {**card["stagePlan"][0], "stageNumber": 1,
+         "purpose": "Build the attempt", "observableEndState": "The attempt peaks"},
+        {**card["stagePlan"][0], "stageNumber": 2,
+         "purpose": "Land the reaction", "observableEndState": "The reaction holds"},
+    ]
+    unit = C.CreativeShotCard(**card)
+    assert unit.targetDurationSec == 30
+    assert [stage.stageNumber for stage in unit.stagePlan] == [1, 2]
+
+    card["targetDurationSec"] = 31
+    with pytest.raises(Exception):
         C.CreativeShotCard(**card)
 
 
@@ -306,6 +376,40 @@ def test_performance_contract_rejects_duplicate_or_reordered_phases():
     duplicated = {**base, "phases": [base["phases"][0], base["phases"][0]]}
     with pytest.raises(Exception, match="must be unique"):
         C.ShotPerformanceContract(**duplicated)
+
+
+def test_gate5_mechanically_attaches_big_comedy_staging_inside_a_packed_unit(monkeypatch):
+    staging = C.PhysicalComedyStaging(
+        staysVisible="The bent leaf remains beside Fuzzby.",
+        contactAndWeight="His late turn compresses the leaf before it rebounds him.",
+        payoffShape="He restores his proud hover beside the still-trembling leaf.",
+        prohibitedStaging=["Do not hide the contact point."])
+    beat = _beat().model_copy(deep=True)
+    beat.comedyContract = C.BeatComedyContract(
+        mode="BIG", mechanism="confidence survives visible physical evidence",
+        comicOwner="Fuzzby", straightCharacter=None,
+        setup="He enters at heroic speed.", expectation="He owns the route.",
+        disruption="The leaf rebounds him.", button="He restores his proud hover.",
+        hold="The leaf keeps trembling.", physicalStaging=staging)
+    earlier_beat = _beat().model_copy(deep=True)
+    earlier_beat.beatId = "1.B0"
+    response_contract = _performance_contract()
+    card = _card()
+    card.beatIds = ["1.B0", "1.B1"]
+
+    def fake(system, user, schema, label="", **kwargs):
+        assert schema is C.PerformancePass
+        return C.PerformancePass(shots=[C.PerformanceCard(
+            shotId="S1.SH1", physicalPerformance="The rebound folds him, then he resets.",
+            animationTiming="Fast compression, weighted rebound, one held recovery beat.",
+            performanceContract=response_contract)])
+
+    monkeypatch.setattr(cb_llm, "structured", fake)
+    result = C.gate5_performance(
+        "Ep1", 1, _treatment("A"),
+        C.SceneDirection(scene=_scene(), beats=[earlier_beat, beat]),
+        [card], log=lambda *args, **kwargs: None)
+    assert result[0].performanceContract.comedyStaging.model_dump() == staging.model_dump()
 
 
 def test_production_detail_refuses_a_missing_shot_instead_of_inventing_fallback(monkeypatch):
@@ -347,8 +451,8 @@ def test_production_detail_refuses_cast_omission_and_dialogue_overrun(monkeypatc
 
     def overrun(system, user, schema, label="", **kwargs):
         detail = _detail("S1.SH1", occurrence_ids=[occurrence])
-        detail.intendedDurationRange = "4-4s"
-        detail.dialogueTimings[0].endSec = 4.5
+        detail.intendedDurationRange = "7-7s"
+        detail.dialogueTimings[0].endSec = 7.5
         return C.ProductionPass(details=[detail])
 
     monkeypatch.setattr(cb_llm, "structured", overrun)
@@ -395,7 +499,7 @@ def test_continuityIn_mechanical_clear_uses_opener_shot_id_not_list_position(mon
             detail = _detail("S1.SH2")
             detail.continuityIn = "Fuzzby's pollen mark still visible from the prior shot."
             detail.dialogueTiming = ""
-            detail.intendedDurationRange = "5-7s"
+            detail.intendedDurationRange = "5-9s"
             return C.ProductionPass(details=[detail])
         raise AssertionError(schema)
     monkeypatch.setattr(cb_llm, "structured", fake)
@@ -415,7 +519,7 @@ def test_continuityIn_mechanical_clear_fires_for_the_real_opener(monkeypatch):
             detail = _detail("S1.SH1")
             detail.continuityIn = "a duplicate restatement of the opening image"
             detail.dialogueTiming = ""
-            detail.intendedDurationRange = "5-7s"
+            detail.intendedDurationRange = "5-9s"
             return C.ProductionPass(details=[detail])
         raise AssertionError(schema)
     monkeypatch.setattr(cb_llm, "structured", fake)
@@ -458,7 +562,7 @@ def test_regenerate_production_detail_proves_creative_cards_unchanged(monkeypatc
     assert result["creativeCardHashCheck"]["unchanged"] is True
     assert result["creativeCardHashCheck"]["before"] == result["creativeCardHashCheck"]["after"]
     assert result["shots"] == json.loads(src.read_text())["shots"]   # byte-identical cards
-    assert result["productionDetail"][0]["intendedDurationRange"] == "5-8s"
+    assert result["productionDetail"][0]["intendedDurationRange"] == "7-7s"
     assert result["durationValidation"]["sceneTotal"]["formatted"]
     assert json.loads(out.read_text())["shots"] == [card]   # written file matches too
 
@@ -528,7 +632,9 @@ def test_production_detail_added_only_after_pass(monkeypatch):
 
     record2 = []
     fail = lambda n: C.ShowrunnerReview(judgement="lost the treatment",
-                                          treatmentComparison="experience gone", passes=False,
+                                          treatmentComparison="experience gone",
+                                          packingJudgement="Packing is sound.",
+                                          packingPasses=True, passes=False,
                                           returnTo="gate4")
     _isolated(monkeypatch, record2, review_script=fail)
     pkg2 = C.run_scene(1, "Ep1", log=lambda *a, **k: None)
@@ -540,7 +646,9 @@ def test_production_detail_added_only_after_pass(monkeypatch):
 def test_review_caps_at_two_complete_revisions_then_escalates(monkeypatch):
     record = []
     fail = lambda n: C.ShowrunnerReview(judgement="still safe coverage",
-                                          treatmentComparison="drifted", passes=False,
+                                          treatmentComparison="drifted",
+                                          packingJudgement="Packing is sound.",
+                                          packingPasses=True, passes=False,
                                           returnTo="gate3")
     _isolated(monkeypatch, record, review_script=fail)
     pkg = C.run_scene(1, "Ep1", log=lambda *a, **k: None)

@@ -6,6 +6,7 @@
     "showBible": "shows/crystal-bears/canon/LOCKED_CANON.md",
     "studioBible": "CRYSTAL_BEARS_STUDIO_BIBLE.md",
     "characters": "shows/crystal-bears/canon/characters.json",
+    "identityPacks": "shows/crystal-bears/canon/identity_packs.json",
     "locations": "shows/crystal-bears/canon/locations.json",
     "continuity": "shows/crystal-bears/canon/continuity.json",
     "episodeArc": "shows/crystal-bears/canon/episode_arc.json",
@@ -81,6 +82,7 @@
     "cinematography": [
       "showBible",
       "characters",
+      "identityPacks",
       "locations",
       "continuity",
       "styleLaw",
@@ -97,6 +99,7 @@
     "animation": [
       "showBible",
       "characters",
+      "identityPacks",
       "locations",
       "continuity",
       "styleLaw",
@@ -106,6 +109,7 @@
     "review": [
       "showBible",
       "characters",
+      "identityPacks",
       "locations",
       "continuity",
       "styleLaw",

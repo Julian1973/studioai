@@ -62,3 +62,10 @@ engine/_prompt_read_cache/
 # Archived episode media from resets (723 mp4s, ~420MB, 2026-07-31) — generated output, same
 # category as engine/media/ above. Backed up on disk, never a git object.
 /episode-archives/
+.DS_Store
+__pycache__/
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.sqlite3

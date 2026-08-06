@@ -5,8 +5,9 @@ Crystal Bears — local generation module (the app's provider layer).
 Wires the crew's prompts to the real APIs, locally (no Replit):
   - generate_image()  -> DP keyframes; dispatches to Seedream 5 Pro (fal.ai, default, 2026-07-09) or
                          Nano Banana 2 (gemini-3.1-flash-image, kept live, CB_IMAGE_PROVIDER=nanobanana)
-  - generate_video_seedance_ref() -> Seedance reference-to-video (fal.ai) — THE real production video path;
-                         every render (cb_beats.py, cb_retake.py) calls this one exclusively.
+  - generate_video_seedance_ref() -> the capability-gated Seedance video adapter. Crystal Bears
+                         targets Seedance 2.5 through BytePlus ModelArk; the historical fal 2.0
+                         route is retained as code evidence but disabled in the provider registry.
   - generate_video()  -> Veo 3.1 (veo-3.1-generate-preview) [Camera i2v] — unused in production; CLI/manual-only.
   - eleven_tts()      -> ElevenLabs TTS (V3 acted masters)
   - voice_change()    -> RETIRED (CLAUDE.md rules 4/29 — no post voice swap, ever); raises loud on call, kept
@@ -74,6 +75,9 @@ GLA = "https://generativelanguage.googleapis.com"
 XI = "https://api.elevenlabs.io"
 FAL_KEY = os.environ.get("FAL_KEY", "")
 FAL = "https://queue.fal.run"
+BYTEPLUS_ARK_KEY = os.environ.get("BYTEPLUS_ARK_API_KEY", "")
+BYTEPLUS_ARK = "https://ark.ap-southeast.bytepluses.com"
+BYTEPLUS_MAX_REQUEST_BYTES = 64 * 1024 * 1024
 
 def _b64(path):
     data = pathlib.Path(path).read_bytes()
@@ -139,6 +143,111 @@ def _fal_subscribe(endpoint, arguments=None, with_logs=False):
     import fal_client
     return _retry(lambda: fal_client.subscribe(endpoint, arguments=arguments, with_logs=with_logs),
                   what="fal:" + str(endpoint).rsplit("/", 1)[-1])
+
+
+def _byteplus_asset_url(value, kind):
+    """Return a BytePlus-compatible URL/data URI without uploading to another provider."""
+    value = str(value)
+    if value.startswith(("https://", "http://", "asset://", "data:")):
+        return value
+    path = pathlib.Path(value)
+    if not path.is_file():
+        raise FileNotFoundError(f"BytePlus {kind} reference does not exist: {path}")
+    mime = (mimetypes.guess_type(path.name)[0] or "").lower()
+    allowed = {
+        "image": {"image/jpeg", "image/png", "image/webp", "image/bmp", "image/tiff",
+                  "image/gif", "image/heic", "image/heif"},
+        "audio": {"audio/wav", "audio/x-wav", "audio/mpeg", "audio/mp3"},
+    }
+    if kind not in allowed or mime not in allowed[kind]:
+        raise ValueError(f"unsupported BytePlus {kind} reference type: {mime or path.suffix}")
+    size_limit = 30 * 1024 * 1024 if kind == "image" else 15 * 1024 * 1024
+    if path.stat().st_size >= size_limit:
+        raise ValueError(
+            f"BytePlus {kind} reference is too large for an inline request: {path.name}")
+    data = base64.b64encode(path.read_bytes()).decode("ascii")
+    canonical_mime = "audio/wav" if mime == "audio/x-wav" else (
+        "audio/mpeg" if mime == "audio/mp3" else mime)
+    return f"data:{canonical_mime};base64,{data}"
+
+
+def _byteplus_task_url(endpoint):
+    endpoint = str(endpoint or "").strip()
+    if endpoint.startswith(("https://", "http://")):
+        return endpoint.rstrip("/")
+    return BYTEPLUS_ARK.rstrip("/") + "/" + endpoint.lstrip("/").rstrip("/")
+
+
+def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolution,
+                             duration, out, *, poll_interval=10, timeout=3600):
+    """Submit and retrieve one ModelArk asynchronous video task.
+
+    Provider capability, spend authorization and billing confirmation happen before this
+    transport is reachable. This function never chooses a model or fallback.
+    """
+    _need(BYTEPLUS_ARK_KEY, "BYTEPLUS_ARK_API_KEY")
+    try:
+        seconds = int(duration)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("BytePlus duration must be an integer number of seconds") from exc
+    if float(duration) != seconds:
+        raise ValueError("BytePlus duration must be an integer number of seconds")
+
+    content = [{"type": "text", "text": str(prompt)}]
+    content.extend({"type": "image_url", "image_url": {
+        "url": _byteplus_asset_url(value, "image")}, "role": "reference_image"}
+        for value in image_refs)
+    content.extend({"type": "audio_url", "audio_url": {
+        "url": _byteplus_asset_url(value, "audio")}, "role": "reference_audio"}
+        for value in audio_refs)
+    body = {
+        "model": contract["providerModelId"],
+        "content": content,
+        "generate_audio": True,
+        "resolution": resolution,
+        "ratio": "16:9",
+        "duration": seconds,
+        "watermark": False,
+        "return_last_frame": True,
+    }
+    if len(json.dumps(body, ensure_ascii=False).encode("utf-8")) > BYTEPLUS_MAX_REQUEST_BYTES:
+        raise ValueError(
+            "BytePlus request body exceeds 64 MB; use public/asset URLs for larger references")
+
+    headers = {"Authorization": f"Bearer {BYTEPLUS_ARK_KEY}",
+               "Content-Type": "application/json"}
+    task_url = _byteplus_task_url(contract["endpoint"])
+    created = _rpost(task_url, headers=headers, json=body, timeout=120).json()
+    task_id = str(created.get("id") or "").strip()
+    if not task_id:
+        raise RuntimeError("BytePlus video task creation returned no task ID")
+
+    deadline = time.monotonic() + timeout
+    task = None
+    while time.monotonic() < deadline:
+        task = _rget(f"{task_url}/{task_id}", headers=headers, timeout=120).json()
+        status = str(task.get("status") or "").lower()
+        if status == "succeeded":
+            break
+        if status in {"failed", "expired"}:
+            error = task.get("error") or {}
+            detail = error.get("message") if isinstance(error, dict) else str(error)
+            raise RuntimeError(
+                f"BytePlus video task {status}: {str(detail or 'no detail')[:300]}")
+        if status not in {"queued", "running"}:
+            raise RuntimeError(f"BytePlus video task returned unknown status: {status or 'blank'}")
+        time.sleep(poll_interval)
+    else:
+        raise TimeoutError(f"BytePlus video task did not finish within {timeout} seconds")
+
+    url = ((task or {}).get("content") or {}).get("video_url")
+    if not url:
+        raise RuntimeError("BytePlus video task succeeded without a video URL")
+    video = _rget(url, timeout=300)
+    outp = MEDIA / out
+    outp.parent.mkdir(parents=True, exist_ok=True)
+    outp.write_bytes(video.content)
+    return outp, task_id, task
 
 # ── Last-frame extractor (first/last-frame chaining for continuous flow) ──────
 def last_frame(clip, out="lastframe.png"):
@@ -384,51 +493,28 @@ def _seedance_json_prompt(prompt, duration=None, ref=False):
         obj["negative"] = obj["negative"] + ", " + LANG_NEG
     return _json.dumps(obj, ensure_ascii=False)
 
-# ── Seedance 2.0 — image-to-video via fal.ai (best motion + native lip-sync) ──
+# ── Retired pre-2.5 compatibility entry point ────────────────────────────
 def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
                             generate_audio=True, out="clip_sd.mp4", end_image=None, production_route=None):
     _require_production_route(production_route, "generate_video_seedance")
-    contract = cb_providers.image_to_video_contract(
-        duration=duration, resolution=resolution,
-        image_count=2 if end_image else 1)
-    _need(FAL_KEY, "FAL_KEY")
-    os.environ["FAL_KEY"] = FAL_KEY
-    import fal_client
-    args = {
-        "prompt": _seedance_json_prompt(prompt, duration=duration),
-        "image_url": _fal_asset_url(keyframe),
-        "resolution": resolution,
-        "duration": str(duration),
-        "generate_audio": generate_audio,
-    }
-    if end_image:
-        args["end_image_url"] = _fal_asset_url(end_image)
-        print("  seedance: start→end frames, animating the action between…")
-    else:
-        print("  seedance: submitted, rendering…")
-    result = _fal_subscribe(
-        contract["endpoint"], arguments=args, with_logs=False)
-    url = (result.get("video") or {}).get("url")
-    if not url:
-        raise SystemExit(f"Seedance returned no video url: {str(result)[:400]}")
-    vid = _rget(url, timeout=300)
-    vid.raise_for_status()
-    outp = MEDIA / out
-    outp.write_bytes(vid.content)
-    cb_costs.log_spend("seedance_i2v", cb_costs.estimate_video_cost(contract["costRateKey"], duration),
-                        out=out, meta={"resolution": resolution})
-    cb_costs.write_gen_sidecar(
-        outp, op="seedance_i2v", endpoint=contract["endpoint"],
-        providerModelId=contract["providerModelId"], modelVersion=contract["modelVersion"],
-        resolution=resolution, duration=duration, generate_audio=generate_audio)
-    return str(outp)
+    del prompt, keyframe, resolution, duration, generate_audio, out, end_image, production_route
+    raise cb_providers.ProviderCapabilityError(
+        "the legacy Seedance image-to-video entry point is retired; Crystal Bears is "
+        "Seedance 2.5-only and no provider was contacted")
 
 # ── ElevenLabs — TTS (V3 master) + Voice Changer (S2S) ───────────────────────
 def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
-                                duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False, production_route=None):
+                                duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False,
+                                production_route=None, model_id=None,
+                                comparison_run_id=None):
     _require_production_route(production_route, "generate_video_seedance_ref")
-    """Seedance reference-to-video: feed reference image(s) + your OWN voice audio (≤15s);
-    the character lip-syncs to your audio. Reference assets in the prompt as @图1/@Audio1.
+    """Seedance reference-to-video through the exact selected capability-gated transport.
+
+    Feed reference image(s) plus the approved voice audio; the character lip-syncs to that
+    audio. Reference assets in the prompt as @Image1/@Audio1. ``model_id`` is supplied from the
+    sealed spend envelope so a configuration change between disclosure and firing cannot swap
+    provider or model. ``comparison_run_id`` is accepted only for the explicitly disclosed
+    fal 2.0 comparison inside cb_render's ordinary approval and candidate path.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
     NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON.
     video_urls: RETIRED (found still describing this as a live, "additive" mechanism in the 2026-07-08
@@ -456,19 +542,53 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         raise cb_providers.ProviderCapabilityError(
             "video references are retired from the approved Crystal Bears route; "
             "nothing was uploaded and no provider was contacted")
-    contract = cb_providers.request_contract(
-        fast=fast, duration=duration, resolution=resolution,
-        image_count=len(image_urls), audio_count=len(audio_urls), video_count=0)
+    contract_builder = (cb_providers.comparison_request_contract
+                        if comparison_run_id else cb_providers.request_contract)
+    contract_kwargs = {
+        "fast": fast, "duration": duration, "resolution": resolution,
+        "image_count": len(image_urls), "audio_count": len(audio_urls),
+        "video_count": 0, "model_id": model_id,
+    }
+    if comparison_run_id:
+        contract_kwargs["comparison_run_id"] = comparison_run_id
+    contract = contract_builder(**contract_kwargs)
+    _pr = (str(prompt) if raw_prompt or contract["transport"] == "byteplus-async" else
+           _seedance_json_prompt(
+               prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
+
+    if contract["transport"] == "byteplus-async":
+        outp, task_id, task = _byteplus_generate_video(
+            contract, _pr, image_urls, audio_urls, resolution, duration, out)
+        seconds = float(duration)
+        cb_costs.log_spend(
+            "seedance_ref2vid",
+            cb_costs.estimate_video_cost(contract["costRateKey"], seconds),
+            out=out,
+            meta={"resolution": resolution, "fast": False, "seconds": seconds,
+                  "provider": "byteplus"})
+        cb_costs.write_gen_sidecar(
+            outp, op="seedance_ref2vid", endpoint=contract["endpoint"],
+            providerModelId=contract["providerModelId"], modelVersion=contract["modelVersion"],
+            transport=contract["transport"], providerTaskId=task_id,
+            resolution=resolution, duration=str(duration), seconds=seconds, fast=False,
+            num_image_refs=len(image_urls), num_audio_refs=len(audio_urls),
+            returnedDuration=(task or {}).get("duration"),
+            completionTokens=((task or {}).get("usage") or {}).get("completion_tokens"))
+        return str(outp)
+
+    if contract["transport"] != "fal-subscribe":
+        raise cb_providers.ProviderCapabilityError(
+            f"unsupported video transport: {contract['transport']}")
     _need(FAL_KEY, "FAL_KEY")
     os.environ["FAL_KEY"] = FAL_KEY
     import fal_client
-    _pr = (str(prompt) if raw_prompt else
-           _seedance_json_prompt(prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
     args = {
         "prompt": _pr,
         "image_urls": [_fal_asset_url(p) for p in image_urls],
         "resolution": resolution,
         "duration": str(duration),
+        "aspect_ratio": "16:9",
+        "bitrate_mode": "high",
         # generate_audio ON: Seedance natively scores music + SFX + the lip-synced @Audio1 voice in ONE pass (fal docs —
         # cost is identical). The prompt REFERENCES @Audio1 as the spoken line (it does NOT write the words), so Seedance
         # uses the supplied ElevenLabs voice AS the speech instead of generating a duplicate (the old "nailed it" double).
@@ -484,14 +604,17 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         raise SystemExit(f"Seedance ref2vid returned no video url: {str(result)[:400]}")
     vid = _rget(url, timeout=300)
     outp = MEDIA / out; outp.write_bytes(vid.content)
-    _secs = 15 if str(duration) == "auto" else float(duration)   # HANDLE_TOTAL default when duration="auto"
+    _secs = 15 if str(duration) == "auto" else float(duration)
     cb_costs.log_spend("seedance_ref2vid", cb_costs.estimate_video_cost(
         contract["costRateKey"], _secs),
         out=out, meta={"resolution": resolution, "fast": fast, "seconds": _secs})
     cb_costs.write_gen_sidecar(outp, op="seedance_ref2vid", endpoint=endpoint,
                                 providerModelId=contract["providerModelId"],
-                                modelVersion=contract["modelVersion"], resolution=resolution,
+                                modelVersion=contract["modelVersion"],
+                                transport=contract["transport"], resolution=resolution,
                                 duration=str(duration), seconds=_secs, fast=fast,
+                                aspectRatio="16:9", bitrateMode="high",
+                                comparisonRunId=contract.get("comparisonRunId"),
                                 num_image_refs=len(image_urls), num_audio_refs=len(audio_urls))
     return str(outp)
 
@@ -547,20 +670,69 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
     v3 guide wants context, not one-liners). `inputs` = ordered [{"text","voice_id"}] (<=2000 chars total, <=10
     voices). Lower stability = broader emotional range (0.30 = the expressive 'Creative' zone; never use_speaker_boost)."""
     _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
-    r = _rpost(f"{XI}/v1/text-to-dialogue",
+    r = _rpost(f"{XI}/v1/text-to-dialogue/with-timestamps",
                headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg", "Content-Type": "application/json"},
                json={"inputs": inputs, "model_id": model_id, "settings": {"stability": stability},
                      "apply_text_normalization": "auto"}, timeout=180)
     r.raise_for_status()
-    outp = MEDIA / out; outp.write_bytes(r.content)
+    try:
+        payload = r.json()
+        audio = base64.b64decode(payload["audio_base64"], validate=True)
+        voice_segments = payload["voice_segments"]
+    except (AttributeError, KeyError, TypeError, ValueError, base64.binascii.Error) as exc:
+        raise RuntimeError(
+            "ElevenLabs dialogue response omitted the timestamped audio contract"
+        ) from exc
+    expected_indexes = set(range(len(inputs or [])))
+    try:
+        returned_indexes = {
+            int(item["dialogue_input_index"]) for item in voice_segments
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError("ElevenLabs returned malformed dialogue timestamps") from exc
+    if not audio or returned_indexes != expected_indexes:
+        raise RuntimeError(
+            "ElevenLabs did not return timing for every submitted dialogue line"
+        )
+    outp = MEDIA / out
+    outp.parent.mkdir(parents=True, exist_ok=True)
+    outp.write_bytes(audio)
+    timing_path = pathlib.Path(str(outp) + ".dialogue.json")
+    timing_payload = {
+        "schemaVersion": 1,
+        "provider": "elevenlabs",
+        "endpoint": "/v1/text-to-dialogue/with-timestamps",
+        "model": model_id,
+        "audioPath": str(outp.resolve()),
+        "audioSha256": __import__("hashlib").sha256(audio).hexdigest(),
+        "inputCount": len(inputs or []),
+        "voiceSegments": [
+            {
+                "voiceId": item.get("voice_id"),
+                "dialogueInputIndex": int(item["dialogue_input_index"]),
+                "startTimeSec": float(item["start_time_seconds"]),
+                "endTimeSec": float(item["end_time_seconds"]),
+                "characterStartIndex": item.get("character_start_index"),
+                "characterEndIndex": item.get("character_end_index"),
+            }
+            for item in voice_segments
+        ],
+    }
+    timing_path.write_text(
+        json.dumps(timing_payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     _chars = sum(len(str(i.get("text") or "")) for i in (inputs or []))
     _billing = cb_costs.dialogue_billing(inputs, model_id=model_id,
                                           generation_kind=generation_kind)
     _billing["voices"] = len(inputs or [])
     cb_costs.log_spend("elevenlabs_dialogue", _billing["estimatedCostUsdExTax"], out=out,
                         meta=_billing)
-    cb_costs.write_gen_sidecar(outp, op="elevenlabs_dialogue", model=model_id, stability=stability,
-                                chars=_chars, voices=len(inputs or []), billing=_billing)
+    cb_costs.write_gen_sidecar(
+        outp, op="elevenlabs_dialogue", model=model_id, stability=stability,
+        chars=_chars, voices=len(inputs or []), billing=_billing,
+        timestampEndpoint=True, dialogueTimingPath=str(timing_path),
+    )
     return str(outp)
 
 def eleven_music(prompt, length_ms=None, out="music.mp3", production_route=None):

@@ -42,6 +42,8 @@ _CANON_PATHS = SHOW_PROFILE.canon_paths
 CANON = str(_CANON_PATHS["lockedCanon"])
 CHARS = str(_CANON_PATHS["characters"])
 LOCATIONS = str(_CANON_PATHS["locations"])
+IDENTITY_PACKS = (str(_CANON_PATHS["identityPacks"])
+                  if _CANON_PATHS.get("identityPacks") else None)
 CONFIG = os.path.dirname(CHARS)
 
 MEDIA = os.path.join(ENGINE, "media")

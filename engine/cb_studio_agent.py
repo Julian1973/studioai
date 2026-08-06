@@ -33,15 +33,27 @@ STAGE_ORDER = (
 STAGE_NAMES = {
     "script": "Script",
     "storyboard": "Story & Direction",
-    "scenelook": "Look Development",
+    "scenelook": "World Build",
     "voice": "Voice & Timing",
-    "keyframe": "Cinematography",
+    "keyframe": "Keyframe",
     "animation": "Animation",
     "continuity": "Director Review",
     "final": "Final Master",
     "configuration": "Configuration",
 }
 STAGE_ALIASES = {"look": "scenelook"}
+AUTO_PREP_BLOCKERS = {
+    "LOOK_DIRECTION_NOT_CURRENT",
+    "CINEMATOGRAPHY_NOT_CURRENT",
+    "VOICE_DIRECTION_NOT_CURRENT",
+    "ANIMATION_DIRECTION_NOT_CURRENT",
+}
+OUTCOME_BUILD_BLOCKERS = {
+    "SCENE_LOOK_NOT_CURRENT",
+    "KEYFRAME_NOT_CURRENT",
+    "VOICE_TAKE_NOT_CURRENT",
+    "ANIMATION_TAKE_NOT_CURRENT",
+}
 
 
 def _token(value):
@@ -85,7 +97,11 @@ def _action_for(intake, state, preflight, shot_id=None, mode="HELP"):
             message = preflight.get("nextAction") or "Review the current production state."
 
     target_shot = blocker.get("shotId") if blocker else shot_id
-    if status == "awaiting":
+    if blocker and (
+            blocker.get("code") in AUTO_PREP_BLOCKERS or
+            (blocker.get("code") in OUTCOME_BUILD_BLOCKERS and status != "awaiting")):
+        action_type = "fire-outcome"
+    elif status == "awaiting":
         action_type = "human-decision"
     elif status in ("blocked", "rejected") or blocker:
         action_type = "resolve-blocker"
@@ -186,6 +202,9 @@ def _facts(intake, state, next_action):
             label = (
                 "Active script identity is current"
                 if stage == "script"
+                else "Scene world working anchor is current"
+                if stage == "scenelook" and "working world anchor" in
+                str((stages.get(stage) or {}).get("sub") or "")
                 else f"{STAGE_NAMES[stage]} is approved against current dependencies"
             )
             proven.append(_record(
@@ -244,7 +263,7 @@ def _plan_for(state, next_action, decisions):
         "scenelook": {
             "objective": "Prove one coherent world, palette, lighting idea and material language.",
             "deliverables": [
-                "Approved scene look plate",
+                "Current signed scene-world working anchor",
                 "Character, prop and location identity checks against locked references",
             ],
             "preserve": ["Approved story point of view and continuity state"],

@@ -69,6 +69,40 @@
    "maturity": "observation",
    "approvalState": "awaiting-human-decision",
    "regression": null
+  },
+  {
+   "patternId": "pat-47bcaa6f",
+   "proposedAt": "2026-08-04T14:38:09",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 1: “Approved to begin the same-process Seedance comparison trial.”",
+   "supportingEvidence": [
+    "ev-daaba11b5f"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-1a7d8f6e",
+   "proposedAt": "2026-08-05T11:01:26",
+   "proposedBy": "human_feedback(Julian direction applied by Codex)",
+   "lesson": "User feedback on scene 1: “Approved under Julian explicit Stage brief: exact active script, 29s comedy plus 14s storm, <=3 stages/views, loose pollen only, forgiving same-depth chase opener.”",
+   "supportingEvidence": [
+    "ev-7bd14d9a11"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
   }
  ]
 }

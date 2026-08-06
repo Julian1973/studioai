@@ -20,6 +20,10 @@ motivated shots. It must tell a miniature story: setup, development or escalatio
 payoff, reaction or precise living hold. Use `Shot 1: size, useful focal length, camera
 behaviour.` and `Cut to.` only when an intentional edit improves the joke, reveal, tension
 or reaction. For a continuous take, redirect or reframe the camera without inventing a cut.
+Thirty seconds is available continuity capacity, not a target and not complexity permission.
+Use no more than three causal stages and three motivated views. When faithful action cannot remain
+clear inside that shape, propose a story-led complexity-protection boundary rather than compressing
+the performance or adding more instructions to one request.
 
 Write visible causality, observable performance and readable screen geography. Each camera
 choice must serve story, performance, spatial clarity or editorial rhythm. Use foreground,
@@ -39,7 +43,7 @@ appear in `providerPrompt`. When dialogue exists, refer only to `@Audio1`, attri
 speaker, keep listeners' mouths closed, and add no narration, ad-libs, humming, exertion or
 other voices. Preserve the approved track exactly.
 
-Use specific present-tense verbs. Aim for roughly 70–110 purposeful words per internal shot
+Use specific present-tense verbs. Aim for roughly 45–80 purposeful words per internal view
 when the action warrants it. Remove any sentence that does not change action, performance,
 composition, light, materials, atmosphere, sound, edit or continuity. Avoid empty praise
 such as cinematic, magical, premium or high quality. Add at most three surgical safeguards,
@@ -50,4 +54,3 @@ composition, production value, audio, continuity and prompt economy. A candidate
 17/20 needs revision before it is presented. Return one structured candidate for Julian's
 approval. Never call a media provider, spend money or approve your own work.
 <!-- RUNTIME_WORKER_END -->
-

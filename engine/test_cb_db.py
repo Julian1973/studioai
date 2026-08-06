@@ -154,3 +154,41 @@ def test_spend_and_candidate_claims_are_single_owner_and_idempotent(tmp_path):
         cb_db.claim_spend_authorization(
             tmp_path, auth["token"], "EpT", "1", "1.B1.S1",
             auth["bindingHash"], auth["envelopeHash"], "batch-1")
+
+
+def test_internal_provider_segments_are_individually_idempotent(tmp_path):
+    auth = _auth()
+    auth["envelope"]["candidateCount"] = 1
+    auth["disclosure"]["candidateCount"] = 1
+    cb_db.issue_spend_authorization(tmp_path, "EpT", "1", "S1.SH1", auth)
+    cb_db.claim_spend_authorization(
+        tmp_path, auth["token"], "EpT", "1", "S1.SH1",
+        auth["bindingHash"], auth["envelopeHash"], "batch-segmented")
+    cb_db.claim_candidate(tmp_path, auth["token"], 1, "worker")
+
+    first = cb_db.claim_candidate_segment(
+        tmp_path, auth["token"], 1, 1, 2, "worker")
+    assert first["action"] == "generate"
+    segment_one = tmp_path / "segment-1.mp4"
+    segment_one.write_bytes(b"segment-one")
+    cb_db.complete_candidate_segment(tmp_path, auth["token"], 1, 1, segment_one)
+    completed = cb_db.claim_candidate_segment(
+        tmp_path, auth["token"], 1, 1, 2, "worker")
+    assert completed["action"] == "completed"
+
+    cb_db.claim_candidate_segment(tmp_path, auth["token"], 1, 2, 2, "worker")
+    with pytest.raises(cb_db.SpendConflict, match="until every sealed segment"):
+        candidate = tmp_path / "candidate.mp4"
+        candidate.write_bytes(b"joined")
+        cb_db.complete_candidate(tmp_path, auth["token"], 1, candidate)
+    cb_db.fail_candidate_segment(
+        tmp_path, auth["token"], 1, 2, "provider unavailable")
+    retry = cb_db.claim_candidate_segment(
+        tmp_path, auth["token"], 1, 2, 2, "worker")
+    assert retry["action"] == "generate"
+    segment_two = tmp_path / "segment-2.mp4"
+    segment_two.write_bytes(b"segment-two")
+    cb_db.complete_candidate_segment(tmp_path, auth["token"], 1, 2, segment_two)
+    candidate = tmp_path / "candidate.mp4"
+    candidate.write_bytes(b"joined")
+    cb_db.complete_candidate(tmp_path, auth["token"], 1, candidate)

@@ -80,7 +80,7 @@ body{margin:0;font-family:'Body Sans',-apple-system,BlinkMacSystemFont,"Segoe UI
 .bible{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 26px;max-width:820px}
 .bible h1{font-size:20px}.bible h2{font-size:17px;border-top:1px solid var(--line);padding-top:14px}.bible h3{font-size:15px}
 .bible table{border-collapse:collapse;width:100%;font-size:12.5px;margin:8px 0}.bible th,.bible td{border:1px solid var(--line);padding:5px 8px;text-align:left}
-.modal{position:fixed;inset:0;background:rgba(28,24,48,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:10}.modal.show{display:flex}
+.modal{position:fixed;inset:0;background:rgba(28,24,48,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:100}.modal.show{display:flex}
 .sheet{background:var(--surface);border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:20px 22px}
 .media{width:100%;border-radius:10px;background:var(--surface2);margin:12px 0;max-height:380px;object-fit:contain}
 .kv{font-size:12px;color:var(--muted);margin:10px 0 3px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
@@ -284,6 +284,106 @@ img.zoom:hover{filter:brightness(1.08)}
 .ccactions .btn,.ccactions .btn.ghost{margin:0}
 .ccrow{font-size:12.5px;margin-top:6px;line-height:1.5}
 .ccdot{font-weight:700;margin-right:2px}
+.promptlab{width:100%;box-sizing:border-box;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.plhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pltitle{font-size:14px;font-weight:700}
+.plmeta{font-size:11px;color:var(--hint);line-height:1.45;margin-top:3px;overflow-wrap:anywhere}
+.plselect{width:100%;box-sizing:border-box;margin-top:12px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);font:inherit;font-size:12.5px}
+.plpreview{display:block;width:100%;max-height:360px;aspect-ratio:16/9;object-fit:contain;margin-top:12px;background:#090c0e;border:1px solid var(--line);border-radius:6px}
+.plheadline-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.plheadline{min-width:0;padding:12px 11px}
+.plheadline+.plheadline{border-left:1px solid var(--line)}
+.plheadline-label{font-size:10px;font-weight:750;text-transform:uppercase;color:var(--hint)}
+.plheadline-value{font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);margin-top:4px;overflow-wrap:anywhere}
+.plheadline-value.ready{color:var(--ok)}
+.plheadline-value.attention{color:var(--warn)}
+.pldirector-action{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.pldirector-action .plflow-actions{margin:0}
+.pldecision-label{font-size:11px;font-weight:750;color:var(--ink)}
+.plreview-details{margin-top:12px}
+.render-primary{min-height:44px;font-size:14px;font-weight:750}
+.refpanel{width:100%;box-sizing:border-box;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);text-align:left}
+.refhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.reftitle{font-size:13px;font-weight:750;color:var(--ink)}
+.refsummary{font-size:11px;color:var(--muted);margin-top:2px}
+.refstate{font-size:10px;font-weight:750;padding:3px 6px;border:1px solid var(--line);border-radius:4px;color:var(--ok);background:var(--surface)}
+.refstate.attention{color:var(--danger)}
+.refgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.refcard{min-width:0;border:1px solid var(--line);border-radius:6px;background:var(--surface2);overflow:hidden}
+.refcard.missing{border-color:var(--warn)}
+.refmedia{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#111}
+.refaudio{display:flex;align-items:center;min-height:84px;padding:9px;background:var(--surface)}
+.refaudio audio{width:100%;min-width:0}
+.refmissing{display:flex;align-items:center;justify-content:center;min-height:84px;padding:10px;text-align:center;font-size:11px;line-height:1.4;color:var(--warn);background:var(--warnbg)}
+.refcopy{padding:8px 9px 9px}
+.refslot{font-size:10px;font-weight:750;color:var(--hint);text-transform:uppercase}
+.refrole{font-size:12px;font-weight:700;color:var(--ink);line-height:1.35;margin-top:3px;overflow-wrap:anywhere}
+.reffile{font-size:10px;color:var(--hint);line-height:1.35;margin-top:4px;overflow-wrap:anywhere}
+.storyrefcheck{width:100%;box-sizing:border-box;margin-top:18px;padding:16px;border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:6px;background:var(--surface)}
+.storyrefhead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.storyreftitle{font-size:15px;font-weight:750;color:var(--ink);line-height:1.3}
+.storyrefmeta{font-size:11px;color:var(--muted);line-height:1.45;margin-top:4px}
+.storyrefselect{min-width:160px;max-width:220px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--ink);font:inherit;font-size:12px}
+.storyreferror{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--danger)}
+.plflow{margin-top:14px;border-top:1px solid var(--line)}
+.plflow-step{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;padding:17px 0;border-bottom:1px solid var(--line)}
+.plflow-number{font-size:12px;font-weight:800;color:var(--brand);padding-top:2px}
+.plflow-title{font-size:15px;font-weight:750;color:var(--ink);margin-bottom:5px}
+.plflow-copy{font-size:13px;line-height:1.55;color:var(--ink);overflow-wrap:anywhere}
+.plflow-sub{font-size:11.5px;line-height:1.5;color:var(--muted);margin-top:7px;overflow-wrap:anywhere}
+.plcontract{margin-top:10px;padding:9px 0 0;border-top:1px solid var(--line)}
+.plcontract-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:11.5px;line-height:1.45}
+.plcontract-score{font-weight:750;color:var(--brand);white-space:nowrap}
+.plcontract-check{display:grid;grid-template-columns:88px minmax(0,1fr);gap:9px;padding:9px 0;border-top:1px solid var(--line);font-size:11.5px;line-height:1.45}
+.plcontract-state{font-weight:750;color:var(--ok)}
+.plcontract-state.needs-work{color:var(--warn)}
+.plcontract-state.optional{color:var(--muted)}
+.plcontract-action{color:var(--ink);margin-top:3px}
+.plflow-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.plflow-actions .btn{margin:0}
+.plquick{margin-top:13px;padding-top:12px;border-top:1px solid var(--line)}
+.plquick .plseg{max-width:360px}
+.plaudit{margin-top:18px}
+.pltrace{margin-top:14px;border-top:1px solid var(--line)}
+.pltrace-scope{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface2);border-bottom:1px solid var(--line)}
+.plscope{padding:10px 11px;min-width:0}
+.plscope+.plscope{border-left:1px solid var(--line)}
+.plscope-label,.pltrace-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--hint);letter-spacing:0}
+.plscope-value{font-size:11.5px;font-weight:650;color:var(--ink);line-height:1.4;margin-top:3px;overflow-wrap:anywhere}
+.pltrace-summary{font-size:12px;line-height:1.5;padding:11px 2px;color:var(--muted)}
+.pltrace-row{border-top:1px solid var(--line);padding:12px 0 0}
+.pltrace-axis{font-size:12.5px;font-weight:700;margin:0 0 9px}
+.pltrace-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0;overflow:hidden}
+.pltrace-cell{min-width:0;padding:11px;background:var(--surface)}
+.pltrace-cell+.pltrace-cell{border-left:1px solid var(--line)}
+.pltrace-text{font-size:11.5px;line-height:1.5;color:var(--ink);margin-top:6px;overflow-wrap:anywhere;white-space:pre-wrap}
+.pltrace-more{margin-top:6px}
+.pltrace-more summary{cursor:pointer;font-size:11.5px;line-height:1.5;color:var(--ink);overflow-wrap:anywhere}
+.pltrace-more[open] summary{color:var(--muted);margin-bottom:7px}
+.pltrace-meta{font-size:10.5px;color:var(--hint);line-height:1.4;margin-top:5px;overflow-wrap:anywhere}
+.pltrace-empty{font-size:11.5px;color:var(--hint);line-height:1.5;margin-top:6px}
+.pltrace-comment{font-size:11.5px;line-height:1.5;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
+.plmatrix{display:grid;grid-template-columns:minmax(150px,1fr) 84px 72px;gap:0;margin-top:14px;border-top:1px solid var(--line)}
+.plmatrix>div{padding:7px 6px;border-bottom:1px solid var(--line);font-size:11.5px;min-width:0}
+.plmatrix .plmh{color:var(--hint);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0}
+.plmatrix .plnum{text-align:center;font-weight:700}
+.plwarn{font-size:11.5px;color:var(--warn);line-height:1.45;margin-top:7px}
+.plrating{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.pldimension{display:grid;grid-template-columns:minmax(130px,1fr) minmax(210px,auto);align-items:center;gap:10px;padding:6px 0}
+.pldimension-label{font-size:12px;color:var(--muted)}
+.plseg{display:grid;grid-template-columns:repeat(3,minmax(60px,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:210px}
+.plseg button{border:0;border-right:1px solid var(--line);background:var(--surface2);color:var(--muted);padding:7px 8px;font:inherit;font-size:11.5px;cursor:pointer;letter-spacing:0}
+.plseg button:last-child{border-right:0}
+.plseg button.active{background:var(--brandbg);color:var(--brandink);font-weight:700}
+.plsummary{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.plhistory{display:grid;grid-template-columns:auto auto 1fr;gap:6px 10px;align-items:start;font-size:11.5px;margin-top:9px}
+.plhistory-note{grid-column:1/-1;color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--line)}
+.plfeedback{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.plfeedback:last-child{border-bottom:0}
+.plfeedback-note{font-size:12px;line-height:1.45;color:var(--ink)}
+.plfeedback-meta{font-size:10.5px;color:var(--hint);margin-top:4px}
+.plfeedback .btn{align-self:start;white-space:nowrap}
+.wcol-review{grid-column:2/4;min-width:0}
 .deptpanel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .deptperson{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
 .deptavatar{width:34px;height:34px;border-radius:50%;background:var(--brandbg);color:var(--brandink);
@@ -344,23 +444,79 @@ img.zoom:hover{filter:brightness(1.08)}
   .epgrid,.projgrid,.sceneboard{grid-template-columns:minmax(0,1fr)}
   .ccactions{flex-direction:column}
   .ccpanel,.live,.sub,.epbody .l,.projcard-premise{overflow-wrap:anywhere}
+  .pldimension{grid-template-columns:minmax(0,1fr);gap:5px}
+  .plseg{width:100%;min-width:0}
+  .plmatrix{grid-template-columns:minmax(105px,1fr) 84px 68px}
+  .plfeedback{grid-template-columns:1fr}
+  .plfeedback .btn{width:100%}
+  .pltrace-scope,.pltrace-grid{grid-template-columns:minmax(0,1fr)}
+  .plscope+.plscope,.pltrace-cell+.pltrace-cell{border-left:0;border-top:1px solid var(--line)}
+  .plheadline-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .plheadline:nth-child(3){border-left:0;border-top:1px solid var(--line)}
+  .plheadline:nth-child(4){border-top:1px solid var(--line)}
+  .pldirector-action{align-items:stretch;flex-direction:column}
+  .storyrefhead{flex-direction:column}
+  .storyrefselect{width:100%;max-width:none}
+  .storyreferror{align-items:stretch;flex-direction:column}
+  .storyreferror .btn{width:100%}
+  .refgrid{grid-template-columns:minmax(0,1fr)}
+  .plflow-step{grid-template-columns:30px minmax(0,1fr);gap:8px}
+  .plflow-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  .plflow-actions .btn{width:100%}
+  .plcontract-check{grid-template-columns:minmax(0,1fr);gap:3px}
+  .wcol-review{grid-column:auto}
+  .review-workspace .wcol-contents{display:none}
   .btn{max-width:100%;white-space:normal}
   .canonissue{grid-template-columns:minmax(0,1fr);gap:2px;padding:7px 0}
   .outcome{align-items:flex-start;flex-direction:column}
   .outcome-actions{width:100%;justify-content:flex-start}
+  .praildetails>summary{grid-template-columns:minmax(0,1fr) 14px}
+  .prailsummary-state{grid-column:1/-1;grid-row:2;text-align:left}
+  .prailchevron{grid-column:2;grid-row:1}
 }
 .proom{max-width:1180px;margin:0 auto}
+.praildetails{margin:4px 0 14px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.praildetails>summary{display:grid;grid-template-columns:minmax(0,1fr) auto 14px;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;list-style:none}
+.praildetails>summary::-webkit-details-marker{display:none}
+.prailsummary-label{font-size:11px;font-weight:750;color:var(--ink)}
+.prailsummary-state{font-size:11px;color:var(--muted);text-align:right}
+.prailchevron{font-size:11px;color:var(--hint);transition:transform .15s}
+.praildetails[open] .prailchevron{transform:rotate(180deg)}
+.prailbar{grid-column:1/-1;height:3px;background:var(--surface2);overflow:hidden}
+.prailbar>i{display:block;height:100%;background:var(--ok)}
+.praildetails .prail{margin:0;padding:10px 12px 12px;border-top:1px solid var(--line)}
+.scene-path{grid-column:1/-1;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+.scene-path-title{padding:8px 12px 7px;font-size:10.5px;font-weight:750;text-transform:uppercase;color:var(--hint)}
+.scene-path-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.scene-path-step{min-width:0;min-height:66px;display:grid;grid-template-columns:26px minmax(0,1fr);grid-template-rows:auto auto;align-content:center;gap:2px 9px;padding:10px 12px;border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.scene-path-step:last-child{border-right:0}
+.scene-path-step:not(:disabled):hover{background:var(--surface2)}
+.scene-path-step:disabled{cursor:not-allowed;color:var(--hint)}
+.scene-path-step.current{box-shadow:inset 0 -3px var(--honey)}
+.scene-path-step.complete{box-shadow:inset 0 -3px var(--ok)}
+.scene-path-number{grid-row:1/3;width:24px;height:24px;display:flex;align-items:center;justify-content:center;align-self:center;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:800;color:var(--muted);background:var(--surface)}
+.scene-path-step.current .scene-path-number{border-color:var(--honey);color:var(--honey);background:var(--honeybg)}
+.scene-path-step.complete .scene-path-number{border-color:var(--ok);color:var(--ok);background:var(--okbg)}
+.scene-path-label{min-width:0;font-size:11.5px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.scene-path-state{font-size:10px;color:var(--hint)}
+@media(max-width:760px){
+  .scene-path-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .scene-path-step{border-bottom:1px solid var(--line)}
+  .scene-path-step:nth-child(2n){border-right:0}
+  .scene-path-step:nth-last-child(-n+2){border-bottom:0}
+}
 .prail{display:flex;align-items:stretch;gap:0;margin:4px 0 14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}
-.pstage{flex:1;min-width:104px;text-align:center;padding:10px 7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
+.pstage{flex:1;min-width:98px;text-align:center;padding:10px 5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:box-shadow .2s,border-color .2s,opacity .2s;position:relative}
 .pstage:hover:not(.locked){border-color:var(--honey)}
 .pstage.active{border-color:var(--honey);box-shadow:0 0 0 3px var(--honeybg)}
 .pstage.locked{opacity:.7;cursor:not-allowed;background:var(--surface2)}
 .pstage.done{border-color:var(--ok)}
 .pstage.rejected{border-color:var(--warn)}
-.pconn{align-self:center;flex:0 0 16px;height:2px;background:var(--line)}
+.pstage.reviewstage{margin-left:12px;flex:.85;border-style:dashed}
+.pconn{align-self:center;flex:0 0 12px;height:2px;background:var(--line)}
 .pconn.fill{background:var(--ok)}
 .pglyph{font-size:19px;line-height:1}
-.pname{font-size:11.5px;line-height:1.25;font-weight:700;margin-top:6px;color:var(--ink);overflow-wrap:anywhere}
+.pname{font-size:10.5px;line-height:1.25;font-weight:700;margin-top:6px;color:var(--ink);overflow-wrap:normal}
 .pph{font-size:10px;letter-spacing:.03em;text-transform:uppercase;margin-top:2px}
 .pstagehead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .pstagehead h1{margin:0}
@@ -399,6 +555,7 @@ img.zoom:hover{filter:brightness(1.08)}
 .agentnext{font-size:12px;line-height:1.5;margin-top:9px;padding:7px 9px;border-left:3px solid var(--brand);background:var(--brandbg)}
 .agentdetails{border-top:1px solid var(--line);padding:8px 12px 10px}
 .agentdetails summary{cursor:pointer;color:var(--brandink);font-size:11px;font-weight:700}
+.agentcontrols{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
 .agentfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:10px}
 .agentfact-title{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase}
 .agentfact-row{font-size:11px;color:var(--muted);line-height:1.4;margin-top:5px}
@@ -585,6 +742,45 @@ img,video{max-width:100%}
 .modal-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
 .table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 
+/* Outcome-first production view. The system remains inspectable without asking the
+   director to carry its internal state before making the current creative decision. */
+.production-context{margin:16px auto 0;max-width:780px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.production-context>summary{display:grid;grid-template-columns:minmax(0,1fr) auto 14px;align-items:center;gap:10px;padding:12px 2px;list-style:none;cursor:pointer;color:var(--muted);font-size:11.5px;font-weight:700}
+.production-context>summary::-webkit-details-marker{display:none}
+.production-context-state{color:var(--hint);font-weight:500;text-align:right}
+.production-context-chevron{transition:transform .15s}
+.production-context[open] .production-context-chevron{transform:rotate(180deg)}
+.production-context-body{padding:4px 0 14px}
+.production-context-actions{display:flex;justify-content:flex-end;margin-bottom:8px}
+.production-context .praildetails{margin:0 0 10px}
+.production-context .agentpanel{margin-bottom:10px}
+.focus-workspace{display:flex;flex-direction:column;align-items:stretch;gap:14px;max-width:780px;margin:0 auto}
+.focus-workspace>.wcol,.focus-workspace>.focus-context{width:100%;box-sizing:border-box}
+.focus-workspace .wcol-decision{order:1;padding:24px}
+.focus-workspace .wcol-artefact{order:2;padding:18px;min-height:0}
+.focus-workspace .artefact-center{align-items:stretch;justify-content:flex-start}
+.focus-workspace .pshotnav{justify-content:space-between}
+.focus-workspace.result-first .wcol-artefact{order:1}
+.focus-workspace.result-first .wcol-decision{order:2}
+.focus-workspace .dec-title{font-size:22px;line-height:1.2;margin-top:3px}
+.focus-workspace .dec-version{margin-top:5px}
+.focus-workspace .dec-actions{margin-top:18px}
+.focus-brief{max-width:650px;margin-bottom:16px;color:var(--muted);font-size:14px;line-height:1.55}
+.focus-context,.focus-evidence{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.focus-context{order:3;background:transparent}
+.focus-context>summary,.focus-evidence>summary,.ofc-alternatives>summary{padding:12px 2px;cursor:pointer;list-style:none;color:var(--muted);font-size:11.5px;font-weight:700}
+.focus-context>summary::-webkit-details-marker,.focus-evidence>summary::-webkit-details-marker,.ofc-alternatives>summary::-webkit-details-marker{display:none}
+.focus-context>summary::after,.focus-evidence>summary::after,.ofc-alternatives>summary::after{content:"+";float:right;color:var(--hint)}
+.focus-context[open]>summary::after,.focus-evidence[open]>summary::after,.ofc-alternatives[open]>summary::after{content:"\2212"}
+.focus-context-body{padding:0 0 14px}
+.focus-scene-contents{padding:14px 12px;background:var(--surface);border-bottom:1px solid var(--line)}
+.focus-evidence{margin-top:14px}
+.focus-evidence-body{padding:0 0 2px}
+.ofc-alternatives{margin-top:12px;max-width:430px}
+.ofc-alternatives-body{display:grid;gap:8px;padding:0 0 4px}
+.ofc-alternatives .ofc-row{margin:0}
+.ofc-alternatives .btn{width:100%;margin:0;text-align:left}
+
 @media (max-width:980px){
   .projgrid{grid-template-columns:minmax(0,1fr)}
   .projcard[data-primary="true"]{grid-row:auto}
@@ -648,6 +844,11 @@ img,video{max-width:100%}
   .modal-actions .btn{min-width:0;flex:1;margin-top:0}
   .form,.bible,.mc,.apanel,.cpanel,.ppanel,.agentpanel,.wcol-contents,.wcol-artefact,.wcol-decision{min-width:0;max-width:100%}
   .form,.bible,.ppanel,.wcol-artefact,.wcol-decision{padding:14px}
+  .focus-workspace .wcol-decision,.focus-workspace .wcol-artefact{padding:16px}
+  .focus-workspace .dec-title{font-size:20px}
+  .production-context>summary{grid-template-columns:minmax(0,1fr) 14px}
+  .production-context-state{grid-column:1/-1;grid-row:2;text-align:left}
+  .production-context-chevron{grid-column:2;grid-row:1}
   .bible{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .wcol-contents{padding:12px}
   .pdecision{align-items:stretch}
@@ -786,19 +987,25 @@ async function _restoreFromHash(raw){
   if(pg=='houses'){showHouses();return true;}
   if(pg=='bible'){showBible();return true;}
   if(pg=='episodes'||!epNum) return true;   // boot() already rendered + synced the hash
-  if(!(await openEpisode(epNum))) return false;
   const scId=params.get('sc');
+  // Restoring a specific scene must not first start the ten-scene board in the background.
+  // That hidden render launches one state bundle per scene and competes with the exact scene
+  // the director is waiting for. Initialise episode context only, then render the requested
+  // scene once.
+  const deferEpisodeRender=pg==='pipeline'&&!!scId;
+  if(!(await openEpisode(epNum,deferEpisodeRender))) return false;
   if(pg=='sceneboard'||!scId) return true;
-  openScene(scId);
-  await pLoadAll();
+  openScene(scId,true);
+  await renderControl();
   const shotId=params.get('shot');
   if(shotId){
     const i=pShots().findIndex(s=>s.shotId==shotId);
     if(i>=0) PSHOT_I=i;
   }
   const st=params.get('st');
-  if(st){ PSTAGE=null; pFocusStage(st); }
-  renderControl();
+  if(st==="review")PSTAGE="review";
+  else if(st&&PSTAGES.some(s=>s.id===st)&&pStatus(st)!=="locked")PSTAGE=st;
+  await renderWorkspaceBody();
   return true;
 }
 // REVIEWER IDENTITY (2026-07-08, Production Management panel finding — "no reviewer/role concept in code
@@ -1325,15 +1532,15 @@ async function addScene(){
   rd.readAsDataURL(f);
 }
 
-async function openEpisode(num){
+async function openEpisode(num,deferRender){
   const epNum=Number(num);
   CUR=EPISODES.find(e=>Number(e.number)===epNum);
   if(!CUR){page="episodes";renderTop();renderNav();renderEpisodes();return false;}
   PREFIX="Ep"+epNum+"_";SHOTS=[];
   SH_EP="Ep"+epNum;SH_SC="1";SH_PKG=null;SH_MEDIA=null;PSB=null;PSHOT_I=0;
-  BOARD_SCENES=null;SCENE_ROSTER=null;
+  BOARD_SCENES=null;SCENE_ROSTER=null;SH_STORY_INTAKE=null;resetStoryReferenceCheck();
   page="sceneboard";renderTop();renderNav();document.getElementById("gatesbar").innerHTML="";
-  render();
+  if(!deferRender)render();
   return true;
 }
 
@@ -1578,30 +1785,30 @@ function showToast(msg,ok){
 // ═══════════════════════════════════════════════════════════════════════════════════════
 // THE PRODUCTION OPERATING SYSTEM (2026-07-17): Projects → Episodes → Scene Board → Scene
 // Workspace. Story order (script) and production order (whatever the user works on next)
-// are separate — every scene carries its OWN 7-stage pipeline, computed live from the same
+// are separate — every scene carries its own signed internal pipeline, computed live from the same
 // existing endpoints every gate action already uses (/api/loclib, /api/storyboard,
 // /api/shot-package, /api/shot-run, /api/jobs, /api/rates — the last one read-only, exposing
 // cb_costs.py's own RATES table so cost numbers never drift from the real ledger). No new
 // persisted production state anywhere in this module.
 // ─────────────────────────────────────────────────────────────────────────────────────────
-// PSTAGES: Script → Storyboard → Scene Look → Voice/Timing → Cinematography →
-// Animation → Continuity → Final. Voice and the timing slate are deliberately presented
-// before final opening frames, even though silent shots and independent shot work remain
-// navigable rather than being trapped behind a scene-wide UI lock.
-// Kept as individually-navigable rail entries rather than collapsed into one "Shot
-// Production" umbrella tab — the substance (each shot's own Opening-frame/Voice-ready/
-// Animation/Final-frame-continuity dependency chain) already works correctly per shot via
-// these four; only the visual grouping into a single umbrella screen is deferred, named
-// explicitly in the same-session report rather than silently left undone.
+// PSTAGES remain the internal state-machine contract. PPHASES is the Director-facing journey:
+// Stage prepares story/world/voice/opening frame; Take creates and reviews performance; Master
+// finishes delivery. Grouping changes presentation only — every underlying approval, lineage,
+// reference and spend gate remains authoritative.
 const PSTAGES=[
   {id:"script",name:"Script",glyph:"✎"},
   {id:"storyboard",name:"Story & Direction",glyph:"▤"},
-  {id:"scenelook",name:"Look Development",glyph:"◈"},
+  {id:"scenelook",name:"World Build",glyph:"◈"},
+  {id:"keyframe",name:"Keyframe",glyph:"◧"},
   {id:"voice",name:"Voice & Timing",glyph:"♪"},
-  {id:"keyframe",name:"Cinematography",glyph:"◧"},
   {id:"animation",name:"Animation",glyph:"►"},
   {id:"continuity",name:"Director Review",glyph:"⇄"},
   {id:"final",name:"Final Master",glyph:"✓"}
+];
+const PPHASES=[
+  {id:"stage",name:"Stage",members:["storyboard","scenelook","keyframe","voice"]},
+  {id:"take",name:"Take",members:["animation","continuity"]},
+  {id:"master",name:"Master",members:["final"]}
 ];
 const STATE_LABEL={ready:"Ready",generating:"Working",awaiting:"Ready for review",
                     approved:"Current",rejected:"Needs attention",blocked:"Needs attention",locked:"Waiting"};
@@ -1610,6 +1817,39 @@ const STATE_COLOR={ready:"--brandink",generating:"--info",awaiting:"--honey",app
 const STATE_BG   ={ready:"--brandbg",generating:"--infobg",awaiting:"--honeybg",approved:"--okbg",
                     rejected:"--warnbg",blocked:"--warnbg",locked:"--surface2"};
 const STATE_GLYPH={ready:"○",generating:"●",awaiting:"◐",approved:"✓",rejected:"!",blocked:"!",locked:"–"};
+
+function productionPhase(id){return PPHASES.find(phase=>phase.id===id||phase.members.includes(id));}
+function phaseState(phase,stages){
+  phase=typeof phase==="string"?productionPhase(phase):phase;stages=stages||{};
+  const states=(phase&&phase.members||[]).map(id=>(stages[id]||{}).state||"locked");
+  if(states.includes("rejected"))return "rejected";
+  if(states.includes("blocked"))return "blocked";
+  if(states.includes("generating"))return "generating";
+  if(states.includes("awaiting"))return "awaiting";
+  if(states.length&&states.every(state=>state==="approved"))return "approved";
+  if(states.includes("ready"))return "ready";
+  return "locked";
+}
+function phaseTarget(phase,stages){
+  phase=typeof phase==="string"?productionPhase(phase):phase;stages=stages||{};
+  if(!phase)return "storyboard";
+  const actionable=phase.members.find(id=>!["approved","locked"].includes((stages[id]||{}).state));
+  if(actionable)return actionable;
+  const open=phase.members.find(id=>(stages[id]||{}).state!=="locked");
+  return open||phase.members[0];
+}
+function sceneMilestonePathHTML(active){
+  const stages=currentStages(),activePhase=productionPhase(active);
+  const steps=PPHASES;
+  const rows=steps.map((step,index)=>{
+    const state=phaseState(step,stages),complete=state==="approved",current=activePhase&&step.id===activePhase.id;
+    const stateLabel=complete?"Complete":current?"Current":state==="ready"?"Ready":state==="awaiting"?"Review":(["blocked","rejected"].includes(state)?"Needs attention":"Waiting");
+    return `<li><button type="button" class="scene-path-step ${complete?"complete":""} ${current?"current":""}" ${current?'aria-current="step"':""} onclick="openPhaseOutcome('${step.id}')">
+      <span class="scene-path-number">${index+1}</span><span class="scene-path-label">${_esc(step.name)}</span><span class="scene-path-state">${_esc(stateLabel)}</span>
+    </button></li>`;
+  }).join("");
+  return `<nav class="scene-path" aria-label="Scene creation path"><div class="scene-path-title">Scene path</div><ol class="scene-path-list">${rows}</ol></nav>`;
+}
 
 let RATES=null;
 async function fetchRates(){if(RATES)return RATES;try{RATES=(await (await fetch(BASE+"/api/rates")).json()).rates||{};}catch(e){RATES={};}return RATES;}
@@ -1840,10 +2080,10 @@ function shotPipelineStateLegacy(shots,i,ledgerFor,media,lineageOk,sceneLookOk,r
     sub=(reassess.changed||[]).length?`changed: ${reassess.changed.join(", ")}`:"this shot's own inputs no longer match its existing candidate";
     badgeState="blocked";
   } else if(sceneLookGated){
-    label="Waiting for Scene Look approval";
+    label="Waiting for the scene world";
     sub=(led.keyframeApproval&&led.keyframeApproval.approved)
-        ?"this shot's own keyframe was approved before Scene Look existed as a gate — held pending its approval"
-        :"the environment/palette/lighting anchor must be approved first";
+        ?"this shot's own keyframe predates the current scene world and is held until that world is rebuilt"
+        :"the environment, palette and lighting anchor must be built first";
     badgeState="locked";
   } else if(kf=="waitingPrev"){
     // (2026-07-18) label names the specific predecessor shot by ID, per Julian's own
@@ -1857,17 +2097,17 @@ function shotPipelineStateLegacy(shots,i,ledgerFor,media,lineageOk,sceneLookOk,r
       label="New keyframe required"+(kr?` — estimated cost $${kr.usd}`:""); }
     if(kf=="rejected") sub="rejected — ready to regenerate"; badgeState="ready";
   } else if(needsKeyframe&&kf=="awaiting"){
-    label="Keyframe awaiting approval"; badgeState="awaiting";
+    label="Keyframe awaiting your decision"; badgeState="awaiting";
   } else if(!keyframeSatisfied){
     // kf=="inherited" or "approved" already covers keyframeSatisfied==true, so this branch
     // is unreachable in practice — kept as an explicit, honest fallback, never a silent guess.
-    label=needsKeyframe?"Keyframe awaiting approval":(prev?`Waiting for ${prev.shotId} final frame`:"Waiting for previous final frame"); badgeState="locked";
+    label=needsKeyframe?"Keyframe awaiting your decision":(prev?`Waiting for ${prev.shotId} final frame`:"Waiting for previous final frame"); badgeState="locked";
   } else if(!voiceOk){
     label=needsKeyframe?"Keyframe approved":"Opening frame inherited — no generation and no cost"; sub="awaiting this shot's voice"; badgeState="ready";
   } else if(animState=="designed"){
     label="Ready to animate"; badgeState="ready";
   } else if(animState=="candidates-pending"){
-    label="Animation awaiting approval"; badgeState="awaiting";
+    label="Animation awaiting your decision"; badgeState="awaiting";
   } else if(animState=="model-limited"){
     label="Animation blocked"; sub="needs human redesign"; badgeState="blocked";
   } else {   // animState=="approved"
@@ -2053,7 +2293,7 @@ function deriveSceneState(bundle,scriptApproved,scene){
       ["scenelook","approve-scenelook","reject-scenelook",
        "select-scenelook-upload","select-scenelook-library"].includes(cmd)?"scenelook":
       ["voice","voice-shot","regen-voice","approve-voice","reject-voice","animatic"].includes(cmd)?"voice":
-      ["keyframe","approve-keyframe","reject-keyframe",
+      ["keyframe","approve-keyframe","rescreen-keyframe","reject-keyframe",
        "select-upload","select-library","select-previous"].includes(cmd)?"keyframe":
       cmd=="stitch"?"final":"animation"
     );
@@ -2116,6 +2356,63 @@ async function loadBoard(){
 // since there's nothing scene-scoped to attach it to yet.
 // ═══════════════════════════════════════════════════════════════════════════════════════
 let SH_STORY_INTAKE=null, SH_STORY_INTAKE_LOADING=false;
+let STORY_REF_CHECK=null, STORY_REF_LOADING=false, STORY_REF_SEQ=0;
+function resetStoryReferenceCheck(){
+  STORY_REF_SEQ++;STORY_REF_CHECK=null;STORY_REF_LOADING=false;
+}
+function storyHasCarriedReferences(d){
+  return !!(d&&d.hasScript&&d.hasCanonicalPackage);
+}
+function storyReferenceCheckHTML(state,intake){
+  const loading=!state||state.loading;
+  const shotIds=(state&&state.shotIds)||[];
+  const shotId=(state&&state.shotId)||shotIds[0]||"S1.SH1";
+  const selector=shotIds.length?`<select class="storyrefselect" aria-label="Reference shot" onchange="loadStoryReferenceCheck(true,this.value)">${shotIds.map(id=>`<option value="${_attr(id)}" ${id===shotId?"selected":""}>${_esc(id)}</option>`).join("")}</select>`:`<span class="refstate attention">Read only</span>`;
+  let body="";
+  if(state&&state.error){
+    body=`<div class="storyreferror"><span>${_esc(state.error)}</span><button class="btn ghost" onclick="loadStoryReferenceCheck(true)">Retry</button></div>`;
+  }else{
+    const data=(state&&state.references)||(loading?{loading:true}:null);
+    body=referenceManifestHTML(shotId,"keyframe",data)+referenceManifestHTML(shotId,"animation",data);
+  }
+  const lineage=!!(intake&&intake.canonicalCurrent)?"Current approved Scene 1 package · read only":"Carried Scene 1 package · read only · stale against the active script";
+  return `<section class="storyrefcheck" aria-label="Reference Check">
+    <div class="storyrefhead"><div><div class="storyreftitle">Reference Check · ${_esc(shotId)}</div><div class="storyrefmeta">${lineage}</div></div>${selector}</div>
+    ${body}
+  </section>`;
+}
+async function loadStoryReferenceCheck(force,requestedShot){
+  if(STORY_REF_LOADING)return;
+  const previous=STORY_REF_CHECK||{};
+  if(!force&&previous.references)return;
+  const seq=++STORY_REF_SEQ;
+  const episode=SH_EP||((CUR&&CUR.number)?("Ep"+CUR.number):"Ep1");
+  STORY_REF_LOADING=true;
+  STORY_REF_CHECK=Object.assign({},previous,{loading:true,error:null});
+  if(page==="sceneboard"&&(!BOARD_SCENES||!BOARD_SCENES.length))renderBoardBody();
+  try{
+    let shotIds=Array.isArray(previous.shotIds)?previous.shotIds.slice():[];
+    if(!shotIds.length){
+      const packageResponse=await fetch(BASE+"/api/shot-package?scene=1&episode="+encodeURIComponent(episode),{cache:"no-store"});
+      const packageData=await packageResponse.json();
+      if(!packageResponse.ok)throw new Error(packageData.error||"The carried Scene 1 package is unavailable.");
+      shotIds=((packageData.package||{}).shots||[]).map(shot=>String(shot.shotId||"")).filter(Boolean);
+    }
+    if(!shotIds.length)throw new Error("The carried Scene 1 package has no shots to inspect.");
+    const shotId=shotIds.includes(requestedShot)?requestedShot:(shotIds.includes(previous.shotId)?previous.shotId:shotIds[0]);
+    const referenceResponse=await fetch(BASE+"/api/shot-references?scene=1&shotId="+encodeURIComponent(shotId)+"&episode="+encodeURIComponent(episode),{cache:"no-store"});
+    const references=await referenceResponse.json();
+    if(!referenceResponse.ok)throw new Error(references.error||"References are unavailable.");
+    if(seq!==STORY_REF_SEQ)return;
+    STORY_REF_CHECK={loading:false,episode,scene:"1",shotIds,shotId,references};
+  }catch(error){
+    if(seq!==STORY_REF_SEQ)return;
+    STORY_REF_CHECK=Object.assign({},previous,{loading:false,error:error.message||"References are unavailable."});
+  }finally{
+    if(seq===STORY_REF_SEQ)STORY_REF_LOADING=false;
+  }
+  if(seq===STORY_REF_SEQ&&page==="sceneboard"&&(!BOARD_SCENES||!BOARD_SCENES.length))renderBoardBody();
+}
 async function fetchStoryIntake(){
   if(SH_STORY_INTAKE_LOADING)return; SH_STORY_INTAKE_LOADING=true;
   try{
@@ -2130,7 +2427,7 @@ function storyIntakePanelHTML(d){
   const lastJob=job?null:latestJobFor("storyintake","-",episode);
   const jobBanner=job?`<div class="live" style="margin:10px 0"><span class="pulse">●</span> ${_esc(job.step||"working…")}
     <button class="btn ghost" style="margin-left:12px;padding:3px 13px;font-size:11px;background:var(--danger);color:var(--bg);border-color:var(--danger)" onclick="stopFiring('${job.jobId}')">■ Stop</button></div>
-    ${gateLog(job)}`:(lastJob?shJobHTML(lastJob):"");
+    <details class="techdetails"><summary>Live run details</summary>${gateLog(job)}</details>`:(lastJob?`<details class="techdetails"><summary>Last run details</summary>${shJobHTML(lastJob)}</details>`:"");
   if(!d)return `<div class="coming">Loading Story & Direction…</div>`;
   if(d.error)return `<div class="ccpanel">${outcomePanelHTML({tone:"blocked",title:"Story & Direction could not load",body:d.error,actions:[{label:"Retry",onclick:"retryStoryIntake()"},{label:"Episodes",onclick:"goHome()",kind:"secondary"}]})}</div>`;
   if(!d.hasScript){
@@ -2146,43 +2443,37 @@ function storyIntakePanelHTML(d){
   const canonLine=d.canonLockCurrent
     ? `<span style="color:${canonReady?'var(--ok)':'var(--danger)'}">${canonReady?'✓ Episode canon ready':'✗ Episode canon blocked'}</span> · lock <code>${_esc((d.canonLockDigest||"").slice(0,12))}</code>`
     : `<span style="color:var(--danger)">✗ Canon lock missing or stale</span>`;
+  const productionChecks=(extra)=>`<details class="techdetails"><summary>Production checks</summary>
+    <p class="sub">Script: <b>${_esc(d.scriptName)}</b> · ${skillBadge}</p>
+    <div class="live" style="margin:10px 0">${canonLine}</div>${scriptWarnings}${extra||""}${jobBanner}</details>`;
+  const carriedReferences=storyHasCarriedReferences(d)?storyReferenceCheckHTML(STORY_REF_CHECK,d):"";
   if(!canonReady){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
-      <div class="live" style="margin:10px 0">${canonLine}</div>
-      ${canonIssues||`<div style="color:var(--danger)">Canon must be reviewed and explicitly locked before Story &amp; Direction can run.</div>`}
-      ${scriptWarnings}
-      ${d.hasCandidate?`<p class="sub" style="color:var(--warn);margin-top:10px">The earlier candidate is preserved as evidence, but it cannot be approved against these inputs.</p>`:""}
       ${outcomePanelHTML({tone:"blocked",title:"Resolve canon before running",body:"Review the source script and Show Bible, then explicitly re-lock canon.",actions:[{label:"Open Show Bible",onclick:"showBible()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
-      ${d.hasCandidate?`<button class="btn ghost" onclick="storyIntakeDecide('reject','Superseded by the active script and canon lock.')">Archive the earlier candidate</button>`:""}
+      ${carriedReferences}
+      ${productionChecks(`${canonIssues||`<div style="color:var(--danger)">Canon must be reviewed and explicitly locked before Story & Direction can run.</div>`}${d.hasCandidate?`<p class="sub" style="color:var(--warn);margin-top:10px">The earlier candidate is preserved as evidence, but it cannot be accepted against these inputs.</p><button class="btn ghost" onclick="storyIntakeDecide('reject','Superseded by the active script and canon lock.')">Archive earlier candidate</button>`:""}`)}
       </div>`;
   }
   if(d.hasCanonicalPackage&&d.canonicalCurrent){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
-      <div class="live" style="color:var(--ok)">${canonLine}</div>
-      <div class="live" style="color:var(--ok)">✓ Locked — <code>${_esc(d.canonicalPackage)}</code> is the
-      episode's canonical input. The scene/storyboard process is unlocked.</div>
-      ${outcomePanelHTML({tone:"done",title:"Story & Direction locked",body:"The approved script, canon signature and beat package are remembered. Episode scenes are ready for production.",actions:[{label:"Open scenes",onclick:"renderSceneBoard()"},{label:"Script",onclick:"go('script')",kind:"secondary"}]})}</div>`;
+      ${outcomePanelHTML({tone:"done",title:"Story & Direction accepted",body:"The approved script, canon signature and beat package are remembered. Episode scenes are ready for production.",actions:[{label:"Open scenes",onclick:"renderSceneBoard()"},{label:"Script",onclick:"go('script')",kind:"secondary"}]})}
+      ${carriedReferences}
+      ${productionChecks()}</div>`;
   }
   const stalePackage=d.hasCanonicalPackage&&!d.canonicalCurrent
     ?`<div class="live" style="color:var(--warn);margin:10px 0">The older beat package is preserved, but it does not match this immutable script and exact canon lock.</div>`:"";
   if(!d.hasCandidate){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
-      <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
-      ${stalePackage}
-      ${jobBanner}
       ${outcomePanelHTML({tone:job?"working":"ready",title:job?"The Director is working":"Run Story & Direction",body:job?"Stop the current run or wait for its visible candidate.":"Read the active script and propose the episode without generating image, voice or video.",actions:job?[{label:"Stop",onclick:`stopFiring('${job.jobId}')`,kind:"secondary"}]:[{label:"Run Story & Direction",onclick:"storyIntakeRun()"},{label:"Open script",onclick:"go('script')",kind:"secondary"}]})}
+      ${carriedReferences}
+      ${productionChecks(stalePackage)}
       </div>`;
   }
   if(!d.candidateCurrent){
     return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-      <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
-      <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
-      ${stalePackage}
-      ${jobBanner}
-      ${outcomePanelHTML({tone:"review",title:"Replace the stale candidate",body:"It remains preserved as evidence, but it cannot be approved against the active script and canon.",actions:[{label:"Run Story & Direction again",onclick:"storyIntakeRun()",disabled:!!job},{label:"Archive stale candidate",onclick:"storyIntakeDecide('reject','Superseded by the active script and canon lock.')",kind:"secondary"}]})}
+      ${outcomePanelHTML({tone:"review",title:"Run Story & Direction",body:"The previous candidate is safely preserved, but it does not match the active script and canon.",actions:[{label:"Run Story & Direction",onclick:"storyIntakeRun()",disabled:!!job}]})}
+      ${carriedReferences}
+      ${productionChecks(`${stalePackage}<button class="btn ghost" onclick="storyIntakeDecide('reject','Superseded by the active script and canon lock.')">Archive stale candidate</button>`)}
       </div>`;
   }
   const c=d.candidate, ev=c.episodeVision||{}, cov=c.dialogueCoverage||{}, srcCov=c.sourceEventCoverage||{};
@@ -2197,15 +2488,13 @@ function storyIntakePanelHTML(d){
   }).join("");
   const approved=c.approvalState=="approved";
   return `<div class="ccpanel"><h3>Story &amp; Direction — Director</h3>
-    <p class="sub">Script: <b>${_esc(d.scriptName)}</b> — ${skillBadge}</p>
-    <div class="live" style="color:var(--ok);margin:10px 0">${canonLine}</div>
-    ${stalePackage}
-    ${jobBanner}
-    <div style="margin:10px 0"><b>Proposed episode title:</b> ${_esc(c.title)}<br/>
-      <b>Logline:</b> ${_esc(c.logline)}<br/>
-      <b>Lead bear:</b> ${_esc(c.leadBear)}</div>
-    <details open style="margin:10px 0"><summary style="cursor:pointer;font-weight:600">Episode vision</summary>
+    ${approved
+      ?outcomePanelHTML({tone:"done",title:"Story & Direction accepted",body:"Scene production is unlocked.",actions:[{label:"Open scenes",onclick:"renderSceneBoard()"}]})
+      :outcomePanelHTML({tone:"review",title:"Review Story & Direction",body:`${c.title} — ${c.logline}`,actions:[{label:"Accept direction",onclick:"storyIntakeDecide('approve')"},{label:"Iterate",onclick:"storyIntakeDecide('reject')",kind:"secondary"}]})}
+    ${carriedReferences}
+    <details ${approved?"":"open"} style="margin:10px 0"><summary style="cursor:pointer;font-weight:600">Review episode direction</summary>
       <div style="font-size:13px;margin-top:8px">
+        <p><b>Lead bear:</b> ${_esc(c.leadBear)}</p>
         <p><b>Theme:</b> ${_esc(ev.theme)}</p>
         <p><b>Dramatic question:</b> ${_esc(ev.dramaticQuestion)}</p>
         <p><b>Premise:</b> ${_esc(ev.premise)}</p>
@@ -2219,14 +2508,10 @@ function storyIntakePanelHTML(d){
       </div></details>
     <details style="margin:10px 0"><summary style="cursor:pointer;font-weight:600">Scene &amp; beat breakdown (${(c.scenes||[]).length} scenes, ${(c.beats||[]).length} beats)</summary>
       <div style="margin-top:8px">${sceneRows}</div></details>
-    <p class="sub" style="color:${cov.ok?"var(--ok)":"var(--danger)"}">
-      ${cov.ok?"✓":"✗"} Dialogue coverage: ${cov.coveredExactly||0}/${cov.totalDialogueLines||0} locked line(s) exact, unchanged, in order.</p>
-    <p class="sub" style="color:${srcCov.ok?"var(--ok)":"var(--danger)"}">
-      ${srcCov.ok?"✓":"✗"} Script coverage: ${srcCov.coveredExactly||0}/${srcCov.totalSourceEvents||0} action and dialogue event(s) exact, unchanged, in order.</p>
-    ${approved?outcomePanelHTML({tone:"done",title:"Story & Direction locked",body:"Scene production is unlocked.",actions:[{label:"Open scenes",onclick:"renderSceneBoard()"}]}):outcomePanelHTML({tone:"review",title:"Choose the Story & Direction outcome",body:"Approve and lock this exact candidate to unlock scene production, or reject it with one clear revision note.",actions:[{label:"Approve & lock",onclick:"storyIntakeDecide('approve')"},{label:"Reject",onclick:"storyIntakeDecide('reject')",kind:"secondary"}]})}
+    ${productionChecks(`${stalePackage}<p class="sub" style="color:${cov.ok?"var(--ok)":"var(--danger)"}">${cov.ok?"✓":"✗"} Dialogue coverage: ${cov.coveredExactly||0}/${cov.totalDialogueLines||0} locked line(s) exact, unchanged, in order.</p><p class="sub" style="color:${srcCov.ok?"var(--ok)":"var(--danger)"}">${srcCov.ok?"✓":"✗"} Script coverage: ${srcCov.coveredExactly||0}/${srcCov.totalSourceEvents||0} action and dialogue event(s) exact, unchanged, in order.</p>`)}
     </div>`;
 }
-async function retryStoryIntake(){SH_STORY_INTAKE=null;await fetchStoryIntake();renderBoardBody();}
+async function retryStoryIntake(){SH_STORY_INTAKE=null;resetStoryReferenceCheck();await fetchStoryIntake();renderBoardBody();}
 let SB_STORY_POLL=null;
 function _sbStoryPollStart(){
   if(SB_STORY_POLL)return;
@@ -2238,7 +2523,7 @@ function _sbStoryPollStart(){
       // candidate (nothing scene-visible yet — a candidate never writes the canonical
       // package) — refetch its status either way, and invalidate the Scene Board's own
       // roster/bundle cache so a completed job never leaves a stale board on screen.
-      clearInterval(SB_STORY_POLL); SB_STORY_POLL=null; SH_STORY_INTAKE=null;
+      clearInterval(SB_STORY_POLL); SB_STORY_POLL=null; SH_STORY_INTAKE=null;resetStoryReferenceCheck();
       BOARD_SCENES=null; SCENE_ROSTER=null;
       await fetchStoryIntake();
       if(page=="sceneboard") await loadBoard();
@@ -2270,7 +2555,7 @@ async function storyIntakeDecide(verdict,presetNote){
     // THE STALE-CACHE FIX (2026-07-19): an approval is the one moment the canonical beat
     // package first exists — invalidate the roster/bundle cache and refetch the Scene Board
     // so its 10 (or however many) scene cards appear immediately, no manual reload needed.
-    SH_STORY_INTAKE=null; BOARD_SCENES=null; SCENE_ROSTER=null;
+    SH_STORY_INTAKE=null; BOARD_SCENES=null; SCENE_ROSTER=null;resetStoryReferenceCheck();
     if(page=="sceneboard") await loadBoard();
     renderBoardBody();
   }catch(e){alert("Can't reach the studio server.");}
@@ -2280,6 +2565,9 @@ function renderBoardBody(){
   if(!BOARD_SCENES||!BOARD_SCENES.length){
     el.className=""; el.innerHTML=storyIntakePanelHTML(SH_STORY_INTAKE);
     if(!SH_STORY_INTAKE)fetchStoryIntake().then(()=>{if(!BOARD_SCENES||!BOARD_SCENES.length)renderBoardBody();});
+    else if(storyHasCarriedReferences(SH_STORY_INTAKE)&&!STORY_REF_CHECK&&!STORY_REF_LOADING){
+      STORY_REF_CHECK={loading:true};setTimeout(()=>loadStoryReferenceCheck(false),0);
+    }
     return;
   }
   const FILTERS=[["all","All scenes"],["needs-decision","Needs my decision"],["ready","Ready to generate"],
@@ -2294,16 +2582,14 @@ function renderBoardBody(){
 }
 function sceneCardHTML(s){
   const active=nextReadyStage(s.stages);
-  const stageRows=["storyboard","scenelook","voice","keyframe","animation","continuity"].map(id=>{
-    const stage=PSTAGES.find(p=>p.id==id), st=s.stages[id];
-    return `<div class="stagerow"><span class="stagerow-name">${_esc(stage.name)}</span>${badge(st.state,st.sub)}</div>`;
+  const stageRows=PPHASES.map(phase=>{
+    const state=phaseState(phase,s.stages);
+    const target=phaseTarget(phase,s.stages),sub=((s.stages[target]||{}).sub)||null;
+    return `<div class="stagerow"><span class="stagerow-name">${_esc(phase.name)}</span>${badge(state,sub)}</div>`;
   }).join("");
-  const activeName=(PSTAGES.find(p=>p.id==active)||{}).name||"Script";
-  // an untouched scene (nothing drafted yet) reads as an explicit invitation, not a review —
-  // every other stage/state keeps its existing "Review <stage>" wording unchanged.
+  const activePhase=productionPhase(active),activeName=(activePhase&&activePhase.name)||"Script";
   const ctaLabel = active=="script" ? "Open script"
-    : (active=="storyboard"&&(s.stages.storyboard||{}).state=="ready") ? "Ready for Story & Direction"
-    : "Review "+activeName.toLowerCase();
+    : "Open "+activeName;
   const dotColor=STATE_COLOR[(s.stages[active]||{}).state||"ready"];
   return `<article class="scenecard">
     <div class="scenecard-thumb">${s.latestFrame?`<img src="${BASE}${s.latestFrame}?v=${MEDIA_V}"/>`:`<div class="scenecard-noimg">No frame yet</div>`}
@@ -2315,9 +2601,10 @@ function sceneCardHTML(s){
     </div>
   </article>`;
 }
-function openScene(scene){
+function openScene(scene,deferRender){
   SH_SC=String(scene); SH_PKG=null; SH_MEDIA=null; PSB=null; PSHOT_I=0; PSTAGE=null;
-  page="pipeline"; renderTop(); renderNav(); document.getElementById("gatesbar").innerHTML=""; renderControl();
+  page="pipeline"; renderTop(); renderNav(); document.getElementById("gatesbar").innerHTML="";
+  if(!deferRender)renderControl();
 }
 function backToBoard(){ page="sceneboard"; renderTop(); renderNav(); document.getElementById("gatesbar").innerHTML=""; renderSceneBoard(); }
 
@@ -2343,12 +2630,40 @@ function currentStages(){ return deriveSceneState(currentBundle(), !!(CUR&&CUR.s
 function pStatus(id){ try{ return currentStages()[id].state; }catch(e){ return "locked"; } }
 function pStatusSub(id){ try{ return currentStages()[id].sub||null; }catch(e){ return null; } }
 function pActiveStage(){ return nextReadyStage(currentStages()); }
-function pFocusedStage(){ return (PSTAGE&&pStatus(PSTAGE)!="locked")?PSTAGE:pActiveStage(); }
-function pFocusStage(id){ if(pStatus(id)=="locked")return; PSTAGE=(PSTAGE==id?null:id); renderWorkspaceBody(); _syncHash(); }
+function pFocusedStage(){ return PSTAGE==="review"?"review":(PSTAGE&&pStatus(PSTAGE)!="locked")?PSTAGE:pActiveStage(); }
+function pFocusStage(id){
+  if(id==="review"){PSTAGE="review";renderWorkspaceBody();_syncHash();return;}
+  if(pStatus(id)=="locked")return;PSTAGE=(PSTAGE==id?null:id);renderWorkspaceBody();_syncHash();
+}
 function openStageOutcome(id){
   if(!PSTAGES.some(s=>s.id===id))id=pActiveStage();
   if(pStatus(id)==="locked")id=pActiveStage();
   PSTAGE=id;renderWorkspaceBody();_syncHash();
+}
+function openConfigurationOutcome(){
+  const report=(SH_PREFLIGHT&&SH_PREFLIGHT.providerCapabilities)||{};
+  const selected=(report.models||[]).find(model=>model.selected)||{};
+  const official=String(selected.sourceUrl||"");
+  const officialLink=official.startsWith("https://docs.byteplus.com/")
+    ?`<a class="btn" href="${_esc(official)}" target="_blank" rel="noopener">Open official BytePlus setup</a>`:"";
+  document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
+    <h3>Connect Seedance 2.5</h3>
+    <div class="disc-rows">
+      <div class="disc-row"><span class="disc-k">Selected model</span><span class="disc-v">${_esc(selected.displayName||report.selectedVideoModelId||"Seedance 2.5")}</span></div>
+      <div class="disc-row"><span class="disc-k">Current state</span><span class="disc-v">${report.selectionReady?"Ready":"Activation required"}</span></div>
+      <div class="disc-row"><span class="disc-k">Production policy</span><span class="disc-v">No automatic Seedance 2.0 fallback</span></div>
+    </div>
+    <div class="dec-caption" style="margin-top:14px">${_esc(report.selectionError||selected.disableReason||"The provider route is ready.")}</div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:20px">
+      <button class="btn ghost" onclick="closeM()">Close</button>
+      ${officialLink}
+      <button class="btn" onclick="closeM();renderControl()">Recheck connection</button>
+    </div>`;
+  document.getElementById("modal").classList.add("show");
+}
+function openPhaseOutcome(id){
+  const stages=currentStages(),phase=productionPhase(id);
+  openStageOutcome(phaseTarget(phase,stages));
 }
 function prerequisiteStage(id){
   const idx=PSTAGES.findIndex(s=>s.id===id);
@@ -2394,7 +2709,10 @@ function shotResolutionAction(pst,tok){
   if(pst.kf==="waitingPrev")return {label:"Resolve the previous shot",onclick:"openPreviousShotOutcome('animation')"};
   if(pst.needsKeyframe&&!current.keyframe)return {label:"Open Cinematography",onclick:"openStageOutcome('keyframe')"};
   if(pst.talky&&!current.voice)return {label:"Open Voice & Timing",onclick:"openStageOutcome('voice')"};
-  if(!current.animationDirection||["model-limited","stale","stale-batch"].includes(pst.animState)){
+  if(!current.animationDirection){
+    return {label:"Fire animation",onclick:`shRender('${tok}')`};
+  }
+  if(["model-limited","stale","stale-batch"].includes(pst.animState)){
     return {label:"Prepare replacement Animation direction",onclick:`deptRun('animation','${tok}')`};
   }
   return {label:"Refresh this shot",onclick:"renderControl()"};
@@ -2417,34 +2735,54 @@ function needsEpisodeStoryDirection(){
 function renderStageRail(){
   const stages=currentStages();
   const focused=pFocusedStage();
+  const focusedPhase=productionPhase(focused);
   const parts=[];
-  PSTAGES.forEach((s,i)=>{
-    const st=stages[s.id].state;
+  PPHASES.forEach((phase,i)=>{
+    const st=phaseState(phase,stages);
     const cls=[st=="locked"?"locked":"", st=="approved"?"done":"", (st=="rejected"||st=="blocked")?"rejected":"",
-               focused==s.id?"active":""].filter(Boolean).join(" ");
-    parts.push(`<button type="button" class="pstage ${cls}" onclick="pFocusStage('${s.id}')" title="${_esc(STATE_LABEL[st])}" ${st==="locked"?'disabled aria-disabled="true"':''}>
-      <div class="pglyph">${STATE_GLYPH[st]}</div><div class="pname">${_esc(s.name)}</div>
+               focusedPhase&&focusedPhase.id===phase.id?"active":""].filter(Boolean).join(" ");
+    parts.push(`<button type="button" class="pstage ${cls}" onclick="openPhaseOutcome('${phase.id}')" title="${_esc(STATE_LABEL[st])}">
+      <div class="pglyph">${STATE_GLYPH[st]}</div><div class="pname">${_esc(phase.name)}</div>
       <div class="pstate" style="color:var(${STATE_COLOR[st]})">${_esc(STATE_LABEL[st])}</div>
     </button>`);
-    if(i<PSTAGES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
+    if(i<PPHASES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
   });
-  return `<div class="prail">${parts.join("")}</div>`;
+  parts.push(`<button type="button" class="pstage reviewstage ${focused==="review"?"active":""}" onclick="pFocusStage('review')" title="Human render ratings">
+    <div class="pglyph">★</div><div class="pname">Render Review</div><div class="pstate" style="color:var(--brandink)">Available</div>
+  </button>`);
+  const completed=PPHASES.filter(phase=>phaseState(phase,stages)==="approved").length;
+  const currentName=focused==="review"?"Render Review":((focusedPhase||{}).name||((PSTAGES.find(stage=>stage.id===focused)||{}).name||"Production"));
+  const progress=Math.round((completed/Math.max(1,PPHASES.length))*100);
+  return `<details class="praildetails"><summary aria-label="Open production progress">
+      <span class="prailsummary-label">Production progress</span>
+      <span class="prailsummary-state">Current: ${_esc(currentName)} · ${completed}/${PPHASES.length} complete</span>
+      <span class="prailchevron" aria-hidden="true">⌄</span>
+      <span class="prailbar" aria-hidden="true"><i style="width:${progress}%"></i></span>
+    </summary><div class="prail">${parts.join("")}</div></details>`;
 }
 
 async function renderControl(){
   const view=document.getElementById("view");
   view.innerHTML=`<div class="coming">Loading scene…</div>`;
   await pLoadAll();
+  const focusedStage=pFocusedStage(),focusedPhase=productionPhase(focusedStage);
+  const focusedStageName=((PSTAGES.find(item=>item.id===focusedStage)||{}).name)||"Production";
   view.innerHTML=`<div class="wtop">
       <button type="button" class="backlink" onclick="backToBoard()">← All scenes</button>
-      <span class="wtop-crumb">${_esc((CUR&&CUR.title)||"Episode "+(CUR&&CUR.number))}</span>
       <span class="wtop-sel">${sceneSelectorHTML()}</span>
     </div>
-    <div id="railwrap">${renderStageRail()}</div>
-    <div id="studioagent"></div>
-    <div id="readiness"></div>
     <div id="jobbanner"></div>
-    <div id="workspace" class="workspace"></div>`;
+    <div id="workspace" class="workspace"></div>
+    <details class="production-context"><summary>
+      <span>Production details</span>
+      <span class="production-context-state">${_esc((focusedPhase&&focusedPhase.name)||"Stage")} · ${_esc(focusedStageName)}</span>
+      <span class="production-context-chevron" aria-hidden="true">⌄</span>
+    </summary><div class="production-context-body">
+      <div class="production-context-actions"><button type="button" class="backlink" onclick="pFocusStage('review')">Render review</button></div>
+      <div id="railwrap">${renderStageRail()}</div>
+      <div id="studioagent"></div>
+      <div id="readiness"></div>
+    </div></details>`;
   renderStudioAgent(); renderPreflightBanner(); renderJobBanner();
   await renderWorkspaceBody();
 }
@@ -2453,14 +2791,16 @@ function renderPreflightBanner(){
   if(SH_AGENT&&!SH_AGENT.error){el.innerHTML="";return;}
   const p=SH_PREFLIGHT;if(!p||p.error){el.innerHTML="";return;}
   if(p.ok){el.innerHTML=`<div style="border:1px solid var(--ok);background:var(--okbg);border-radius:8px;padding:10px 12px;margin-bottom:12px;color:var(--ok)">✓ Production preflight passed — all known inputs are current. ${_esc(p.nextAction||"")}</div>`;return;}
-  const blockers=p.blockers||[], first=blockers.slice(0,4);
-  const target=(first[0]&&first[0].stage)||pActiveStage();
-  el.innerHTML=`<div style="border:1px solid var(--warn);background:var(--warnbg);border-radius:8px;padding:10px 12px;margin-bottom:12px">
-    <b style="color:var(--warn)">Production readiness — ${blockers.length} blocker${blockers.length==1?"":"s"} found together</b>
-    <div style="margin-top:6px;color:var(--ink)">${first.map(x=>`<div>• ${_esc(x.shotId?x.shotId+": ":"")}${_esc(x.message)}</div>`).join("")}</div>
-    <div style="margin-top:7px"><b>Next:</b> ${_esc(p.nextAction||"")}</div>
-    <button type="button" class="btn" style="margin-top:9px" onclick="openStageOutcome('${_esc(target)}')">Open required step</button>
-    ${blockers.length>4?`<details style="margin-top:6px"><summary>Show all blockers</summary><div style="margin-top:6px">${blockers.map(x=>`<div>• ${_esc(x.stage)}${x.shotId?" · "+_esc(x.shotId):""}: ${_esc(x.message)} — ${_esc(x.action)}</div>`).join("")}</div></details>`:""}
+  const blockers=p.blockers||[], first=blockers[0]||{};
+  const target=first.stage||pActiveStage(),configuration=target==="configuration";
+  const expected=new Set(["LOOK_DIRECTION_NOT_CURRENT","SCENE_LOOK_NOT_CURRENT","CINEMATOGRAPHY_NOT_CURRENT","KEYFRAME_NOT_CURRENT","VOICE_DIRECTION_NOT_CURRENT","VOICE_TAKE_NOT_CURRENT","ANIMATION_DIRECTION_NOT_CURRENT","ANIMATION_TAKE_NOT_CURRENT"]);
+  const actionable=!configuration&&expected.has(first.code)&&!["blocked","locked"].includes(pStatus(target));
+  const tone=actionable?"var(--brand)":"var(--warn)",bg=actionable?"var(--brandbg)":"var(--warnbg)";
+  el.innerHTML=`<div style="border:1px solid ${tone};background:${bg};border-radius:8px;padding:10px 12px;margin-bottom:12px">
+    <b style="color:${tone}">${actionable?"Ready for the next outcome":"Needs attention before production"}</b>
+    <div style="margin-top:7px"><b>Next:</b> ${_esc(p.nextAction||first.action||first.message||"Open the required production step.")}</div>
+    <button type="button" class="btn" style="margin-top:9px" onclick="${configuration?"openConfigurationOutcome()":`openStageOutcome('${_esc(target)}')`}">${configuration?"Open provider setup":actionable?"Open next outcome":"Open required step"}</button>
+    ${blockers.length?`<details style="margin-top:9px"><summary>${actionable?"Later production checks":"Why production is waiting"}</summary><div style="margin-top:6px">${blockers.map(x=>`<div>• ${_esc(x.stage)}${x.shotId?" · "+_esc(x.shotId):""}: ${_esc(x.message)}${x.action?" — "+_esc(x.action):""}</div>`).join("")}</div></details>`:""}
   </div>`;
 }
 function agentFactRows(items){
@@ -2498,14 +2838,14 @@ function renderStudioAgent(){
   if(a.loading){
     const mode=a.mode||SH_AGENT_MODE;
     el.innerHTML=`<section class="agentpanel" aria-label="Studio Agent ${_esc(mode)} brief"><div class="agenthead">
-      <div class="agentmark">AI</div><div class="agentidentity"><div class="agentname">Studio Agent</div><div class="agentmeta">Reading the current creative context…</div></div>
-      ${agentModeControl(mode)}<div class="agenttags"><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div>
+      <div class="agentmark">AI</div><div class="agentidentity"><div class="agentname">Studio Agent</div><div class="agentmeta">Preparing the next production outcome…</div></div>
     </div></section>`;return;
   }
   if(a.error){el.innerHTML="";return;}
   const n=a.nextAction||{}, facts=a.facts||{}, decisions=a.decisions||[];
   const mode=a.mode||SH_AGENT_MODE;
-  const canOpen=PSTAGES.some(x=>x.id==n.stage)&&pStatus(n.stage)!="locked";
+  const episodeDirectionTarget=n.stage==="storyboard"&&needsEpisodeStoryDirection();
+  const canOpen=PSTAGES.some(x=>x.id==n.stage)&&pStatus(n.stage)!="locked"&&(n.stage!==pFocusedStage()||episodeDirectionTarget);
   const digest=String(a.briefId||"").split(":").pop().slice(0,12);
   const scoped=(a.selection||{}).type=="shot"&&a.selection.resolved&&a.selection.shotId
     ?`Shot ${_esc(a.selection.shotId)}`:`Scene ${_esc(a.scene)}`;
@@ -2517,19 +2857,18 @@ function renderStudioAgent(){
     <div class="agenthead">
       <div class="agentmark">AI</div>
       <div class="agentidentity"><div class="agentname">Studio Agent</div><div class="agentmeta">${scoped} · context ${_esc(digest)}</div></div>
-      ${agentModeControl(mode)}
-      <div class="agenttags"><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div>
     </div>
     <div class="agentbody">
       <div><div class="agentheadline">${_esc(a.headline||"Current production state")}</div>
-        ${n.reason?`<div class="agentreason">${_esc(n.reason)}</div>`:""}
         <div class="agentnext"><b>Next:</b> ${_esc(n.label||"Review the current production state.")}</div>
       </div>
-      ${canOpen?`<button class="btn" onclick="studioAgentOpen()">Open ${_esc(n.stageName||n.stage)}</button>`:""}
+      ${canOpen?`<button class="btn" onclick="studioAgentOpen()">${episodeDirectionTarget?"Open Story & Direction":"Go to "+_esc(n.stageName||n.stage)}</button>`:""}
     </div>
-    ${qualityCompassHTML(a.qualityCompass)}
-    ${agentPlanHTML(a.plan)}
-    <details class="agentdetails"><summary>Evidence and decisions</summary>
+    <details class="agentdetails"><summary>Studio details</summary>
+      <div class="agentcontrols">${agentModeControl(mode)}<div class="agenttags"><span class="agenttag">READ ONLY</span><span class="agenttag">0 SPEND</span></div></div>
+      ${n.reason?`<div class="agentreason">${_esc(n.reason)}</div>`:""}
+      ${qualityCompassHTML(a.qualityCompass)}
+      ${agentPlanHTML(a.plan)}
       <div class="agentfacts">
         <div><div class="agentfact-title">Built</div>${agentFactRows(facts.built)}</div>
         <div><div class="agentfact-title">Proven current</div>${agentFactRows(facts.proven)}</div>
@@ -2544,6 +2883,8 @@ function setStudioAgentMode(mode){
 }
 function studioAgentOpen(){
   const nav=((SH_AGENT||{}).nextAction||{}).navigation||{};
+  const next=(SH_AGENT||{}).nextAction||{};
+  if(next.stage==="storyboard"&&needsEpisodeStoryDirection()){backToBoard();return;}
   if(nav.shotId){const i=pShots().findIndex(s=>s.shotId==nav.shotId);if(i>=0)PSHOT_I=i;}
   if(PSTAGES.some(x=>x.id==nav.stage)&&pStatus(nav.stage)!="locked"){
     PSTAGE=nav.stage;renderWorkspaceBody();_syncHash();
@@ -2587,9 +2928,17 @@ function sceneContentsHTML(){
   const beats=(PSB&&PSB.beats)||[];
   const shots=pShots();
   if(!beats.length&&!shots.length) return `<div class="wtree-empty">Nothing designed yet.</div>`;
+  if(shots.length){
+    return shots.map((s,i)=>{
+      const codes=(s.beatCodes&&s.beatCodes.length?s.beatCodes:s.beatIds&&s.beatIds.length?s.beatIds:[s.beatCode]).filter(Boolean);
+      const beatLabel=codes.length>1?codes[0]+"–"+codes[codes.length-1]:(codes[0]||"Unit "+(i+1));
+      return `<div class="wtree-beat"><div class="wtree-beat-id">${_esc(beatLabel)}</div>
+        <button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button></div>`;
+    }).join("");
+  }
   if(beats.length){
     const shotsByBeat={};
-    shots.forEach(s=>(s.beatIds||[]).forEach(b=>{(shotsByBeat[b]=shotsByBeat[b]||[]).push(s);}));
+    shots.forEach(s=>(s.beatCodes||s.beatIds||[s.beatCode]).filter(Boolean).forEach(b=>{(shotsByBeat[b]=shotsByBeat[b]||[]).push(s);}));
     return beats.map(b=>{
       const bshots=shotsByBeat[b.beatId]||[];
       return `<div class="wtree-beat"><div class="wtree-beat-id">${_esc(b.beatId)}</div>
@@ -2603,8 +2952,54 @@ function sceneContentsHTML(){
   return shots.map((s,i)=>`<button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button>`).join("");
 }
 
+function openPromptReviewShot(index){
+  const shots=(SH_PKG&&SH_PKG.shots)||[];
+  PSHOT_I=Math.max(0,Math.min(Number(index)||0,Math.max(0,shots.length-1)));
+  PSTAGE="review";renderWorkspaceBody();_syncHash();
+}
+function renderPromptReviewWorkspace(){
+  const el=document.getElementById("workspace"),shots=(SH_PKG&&SH_PKG.shots)||[];
+  if(!el)return;
+  el.classList.add("review-workspace");
+  if(!shots.length){
+    el.innerHTML=`<div class="wcol wcol-full">${outcomePanelHTML({tone:"blocked",title:"No shot records to review",body:"This scene has no render ledger yet.",actions:[{label:"Return to production",onclick:"PSTAGE=null;renderWorkspaceBody()"},{label:"All scenes",onclick:"backToBoard()",kind:"secondary"}]})}</div>`;
+    return;
+  }
+  PSHOT_I=Math.max(0,Math.min(PSHOT_I,shots.length-1));
+  const shot=shots[PSHOT_I],tok=shTok(shot.shotId);
+  const types=shot.sourceType==="opener"?["keyframe","animation"]:["animation"];
+  types.forEach(type=>{
+    const key=plCacheKey(tok,type);
+    if(!Object.prototype.hasOwnProperty.call(SH_PROMPTLAB_CACHE,key)){
+      SH_PROMPTLAB_CACHE[key]={loading:true};
+      setTimeout(()=>shLoadPromptLab(tok,type,null,false),0);
+    }
+  });
+  const referenceKey=refCacheKey(tok);
+  if(!Object.prototype.hasOwnProperty.call(SH_REFERENCE_CACHE,referenceKey)){
+    SH_REFERENCE_CACHE[referenceKey]={loading:true};
+    setTimeout(()=>shLoadReferences(tok,true),0);
+  }
+  const shotRows=shots.map((item,index)=>`<button type="button" class="wtree-shot ${index===PSHOT_I?'cur':''}" onclick="openPromptReviewShot(${index})"><span>${_esc(item.shotId)}</span><span class="wtree-shot-state">Review</span></button>`).join("");
+  const shotOptions=shots.map((item,index)=>`<option value="${index}" ${index===PSHOT_I?'selected':''}>${_esc(item.shotId)}</option>`).join("");
+  const panels=types.map(type=>referenceManifestHTML(
+    tok,type,SH_REFERENCE_CACHE[referenceKey])+promptLabPanelHTML(
+    tok,type,SH_PROMPTLAB_CACHE[plCacheKey(tok,type)])).join("");
+  el.innerHTML=`<div class="wcol wcol-contents"><div class="wcol-head">Scene renders</div><div class="wtree">${shotRows}</div></div>
+    <div class="wcol wcol-review"><div class="pstagehead"><h1>Render Review</h1><select class="plselect" style="width:auto;min-width:110px;margin:0" aria-label="Review shot" onchange="openPromptReviewShot(this.value)">${shotOptions}</select><button class="btn ghost" onclick="PSTAGE=null;renderWorkspaceBody();_syncHash()">Return to production</button></div>${panels}</div>`;
+}
+
+function storyboardStartOutcomeHTML(){
+  const state=pStatus("storyboard"),episodeDirection=needsEpisodeStoryDirection();
+  if(state==="generating")return outcomePanelHTML({tone:"working",title:"Story & Direction is working",body:"The candidate will appear here when it is ready for your review.",actions:[{label:"Refresh progress",onclick:"renderControl()"}]});
+  if(state==="ready"&&!episodeDirection)return outcomePanelHTML({title:"Storyboard is ready to draft",body:"Create the scene plan from the approved episode direction, then stop for your decision.",actions:[{label:"Draft storyboard",onclick:"pFireCreative()"}]});
+  if(episodeDirection)return outcomePanelHTML({title:"Story & Direction is next",body:"Open the episode direction, run it, then approve or iterate the visible candidate.",actions:[{label:"Open Story & Direction",onclick:"backToBoard()"}]});
+  return outcomePanelHTML({tone:"blocked",title:"Resolve Story & Direction",body:"The scene stays protected until the previous creative decision has a clear outcome.",actions:[{label:"Open Story & Direction",onclick:"backToBoard()"}]});
+}
+
 async function renderWorkspaceBody(){
   const el=document.getElementById("workspace"); if(!el)return;
+  el.classList.remove("review-workspace","focus-workspace","result-first");
   // "REMEMBER YOUR PLACE" (2026-07-19): renderWorkspaceBody is the one function every
   // shot-navigation change already calls (Previous/Next, clicking a shot in the sidebar,
   // PSHOT_I mutations generally) — the same "one shared call site" convention renderTop()
@@ -2613,8 +3008,15 @@ async function renderWorkspaceBody(){
   _syncHash();
   document.getElementById("railwrap").innerHTML=renderStageRail();
   renderJobBanner();
-  shEnsureAgentSelection();
   const stage=pFocusedStage();
+  if(stage==="review"){
+    for(const id of ["studioagent","readiness","jobbanner"]){
+      const node=document.getElementById(id);if(node)node.innerHTML="";
+    }
+    renderPromptReviewWorkspace();
+    return;
+  }
+  renderStudioAgent();renderPreflightBanner();shEnsureAgentSelection();
   if(pStatus(stage)=="locked"){
     const action=defaultDecisionAction();
     el.innerHTML=`<div class="wcol wcol-full">${outcomePanelHTML({tone:"blocked",title:"A previous decision is required",body:"This stage remains protected until its prerequisite has an explicit outcome.",actions:[action,{label:"All scenes",onclick:"backToBoard()",kind:"secondary"}]})}</div>`;
@@ -2624,9 +3026,23 @@ async function renderWorkspaceBody(){
     el.innerHTML=`<div class="wcol wcol-full">${scriptStageHTML()}</div>`;
     return;
   }
-  el.innerHTML=`<div class="wcol wcol-contents"><div class="wcol-head">Scene contents</div><div class="wtree">${sceneContentsHTML()}</div></div>
-    <div class="wcol wcol-artefact" id="wartefact"></div>
-    <div class="wcol wcol-decision" id="wdecision"></div>`;
+  if(stage==="storyboard"&&!PSB){
+    el.innerHTML=SH_AGENT&&!SH_AGENT.error&&!SH_AGENT.loading?"":`<div class="wcol wcol-full">${storyboardStartOutcomeHTML()}</div>`;
+    return;
+  }
+  if(["keyframe","voice","animation"].includes(stage)){
+    el.classList.add("focus-workspace");
+    el.innerHTML=`<div class="wcol wcol-decision" id="wdecision"></div>
+      <div class="wcol wcol-artefact" id="wartefact"></div>
+      <details class="focus-context"><summary>Scene &amp; shot map</summary><div class="focus-context-body">
+        ${sceneMilestonePathHTML(stage)}
+        <div class="focus-scene-contents"><div class="wcol-head">Scene contents</div><div class="wtree">${sceneContentsHTML()}</div></div>
+      </div></details>`;
+  }else{
+    el.innerHTML=`${sceneMilestonePathHTML(stage)}<div class="wcol wcol-contents"><div class="wcol-head">Scene contents</div><div class="wtree">${sceneContentsHTML()}</div></div>
+      <div class="wcol wcol-artefact" id="wartefact"></div>
+      <div class="wcol wcol-decision" id="wdecision"></div>`;
+  }
   if(stage=="storyboard") return renderStoryboardStage();
   if(stage=="scenelook") return renderSceneLookStage();
   if(stage=="continuity") return renderContinuityStage();
@@ -2663,16 +3079,26 @@ function renderStoryboardStage(){
     return;
   }
   const v=PSB.scene||{}, beats=PSB.beats||[], shots=PSB.shots||[];
+  const packing=PSB.unitPackingAudit||{};
+  const fullThirty=(packing.fullThirtySecondUnitIds||[]).length;
+  const mergeReviews=packing.mergeReviewRequired||[];
+  const protectedSplits=packing.protectedSplits||[];
+  const boundaryLabel=x=>String(x||"").replace(/_/g," ");
   const purpose=_esc(v.purpose||"");
+  const plannedSeconds=shots.reduce((sum,s)=>sum+Number(s.targetDurationSec||0),0);
   const beatRows=beats.map(b=>`<div class="beatcard"><div class="beatcard-id">${_esc(b.beatId)}</div>
     ${(b.exactDialogue||[]).map(l=>`<div class="beatcard-line">"${_esc(l)}"</div>`).join("")}</div>`).join("");
-  const shotSeq=shots.map((s,i)=>`<div class="shotcard"><div class="shotcard-id">${i+1}. ${_esc(s.shotId)} · ${_esc(s.sourceType||"")}</div>
-    <div class="shotcard-line">${_esc(s.purpose||"")}</div></div>`).join("");
+  const shotSeq=shots.map((s,i)=>`<div class="shotcard"><div class="shotcard-id">${i+1}. ${_esc(s.shotId)} · ${_esc(s.targetDurationSec||"?")}s · ${(s.stagePlan||[]).length} stage${(s.stagePlan||[]).length===1?"":"s"} · ${(s.internalShotPlan||[]).length} view${(s.internalShotPlan||[]).length===1?"":"s"}</div>
+    <div class="shotcard-line">${_esc(s.purpose||"")}</div>
+    ${(s.stagePlan||[]).length?`<details class="techdetails"><summary>Story stages</summary>${(s.stagePlan||[]).map(stage=>`<div class="ccrow"><b>${_esc(stage.stageNumber)}. ${_esc(stage.purpose||"")}</b><div class="ccref">${_esc(stage.observableEndState||"")}</div></div>`).join("")}<div class="ccrow"><b>Boundary after this unit</b><div class="ccref">${_esc(boundaryLabel(s.providerBoundaryReason))}: ${_esc(s.providerBoundaryExplanation||"")}</div></div></details>`:""}</div>`).join("");
   art.innerHTML=`<div class="artefact-center" style="text-align:left;overflow:auto">
     <div class="sb-purpose">${purpose}</div>
+    <div class="ccpanel" style="margin:14px 0"><div class="cchead">Seedance 2.5 production plan</div><div class="ccref">${beats.length} story beat${beats.length===1?"":"s"} → ${shots.length} production unit${shots.length===1?"":"s"} · ${fullThirty} full 30s${plannedSeconds?` · ${plannedSeconds}s planned`:""} · internal cuts stay inside each unit</div></div>
+    ${mergeReviews.length?`<div style="border:1px solid var(--warn);background:var(--warnbg);border-radius:8px;padding:10px 12px;margin-bottom:12px"><b style="color:var(--warn)">${mergeReviews.length} short provider split${mergeReviews.length===1?"":"s"} explicitly reviewed</b><div class="ccref" style="margin-top:4px">${_esc(PSB.packingJudgement||"The Showrunner must confirm why these pairs should not become one 30-second request.")}</div></div>`:""}
     <div class="wcol-head" style="margin-top:18px">The beats</div>${beatRows}
-    <details style="margin-top:16px"><summary style="cursor:pointer;color:var(--muted);font-size:12px">The complete shot sequence (${shots.length})</summary>
+    <details style="margin-top:16px" open><summary style="cursor:pointer;color:var(--muted);font-size:12px">The production units (${shots.length})</summary>
       <div style="margin-top:10px">${shotSeq}</div></details>
+    <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--hint);font-size:11px">30-second packing audit</summary><div class="ccrow"><b>Full window</b><div class="ccref">${fullThirty} exact 30s · ${(packing.nearFullUnitIds||[]).length} at 24–29s</div></div><div class="ccrow"><b>Protected joins</b><div class="ccref">${protectedSplits.length}</div></div><div class="ccrow"><b>Window use</b><div class="ccref">${_esc(packing.windowUtilizationPct==null?"n/a":packing.windowUtilizationPct+"%")} · capacity indicator, never a padding target</div></div></details>
     <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--hint);font-size:11px">Technical details</summary>
       <pre class="techpre">${_esc(JSON.stringify(PSB,null,1)).slice(0,4000)}</pre></details>
   </div>`;
@@ -2689,7 +3115,7 @@ function renderStoryboardStage(){
       </div>`];
   } else if(st=="approved"){
     actions=[`<span class="dec-caption">${badge("approved")}</span>`,
-      `<button class="btn" onclick="openStageOutcome('scenelook')">Continue to Look Development</button>`];
+      `<button class="btn" onclick="openStageOutcome('scenelook')">Build Scene World</button>`];
   } else if(st=="generating"){
     actions=[`<span class="dec-caption">${badge(st)}</span>`,`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`];
   } else {
@@ -2746,23 +3172,26 @@ function renderSceneLookStage(){
     body=`<div class="artefact-empty"><div style="color:var(--muted)">No Scene Look plate yet for this scene.</div></div>`;
     decActions=[slSourceChoices(GEN_LABEL,false)];
   } else {
-    body=`<img class="zoom pmedia img" data-cap="Scene ${_esc(SH_SC)} · Scene Look plate" src="${BASE}${sl.plateUrl}?v=${MEDIA_V}"/>`;
+    body=sl.plateUrl
+      ?`<img class="zoom pmedia img" data-cap="Scene ${_esc(SH_SC)} · Scene Look plate" src="${BASE}${sl.plateUrl}?v=${MEDIA_V}"/>`
+      :`<div class="artefact-empty"><div style="color:var(--muted)">The previous world anchor is not available in this workspace. Build a fresh one from the current signed direction.</div></div>`;
     if(sl.status=="awaiting"){
-      decVersion="Awaiting your decision";
-      decActions=[`<button class="btn" onclick="shRun('approve-scenelook')">✓ Approve</button>`,
-        `<button class="btn ghost" onclick="shRun('reject-scenelook')">✗ Reject</button>`];
+      decVersion="World anchor needs rebuilding";
+      decActions=[`<span class="dec-caption">Its signed inputs changed. Clear it, then generate from current direction.</span>`,
+        `<button class="btn" onclick="shRun('reject-scenelook')">Rebuild world anchor</button>`];
+    } else if(sl.status=="working"){
+      decVersion="Working world anchor · current";
+      decActions=[`<span class="dec-caption">Used behind the first keyframe; no prompt or plate approval required.</span>`,
+        `<button class="btn" onclick="openStageOutcome('keyframe')">Continue to First Keyframe</button>`,
+        `<button class="btn ghost" onclick="shRun('reject-scenelook')">Iterate world build</button>`];
     } else if(sl.status=="approved"){
       decVersion="Approved · current";
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+        `<button class="btn" onclick="openStageOutcome('keyframe')">Continue to First Keyframe</button>`,
         `<div style="margin-top:8px">${slSourceChoices(`↻ Regenerate — ${GEN_LABEL.replace('◈ ','')}`,true)}</div>`];
     } else if(sl.status=="stale"){
-      // (2026-07-18 direct-input-lineage correction): "stale" no longer means the
-      // STORYBOARD changed — the plate was never actually built from it. It means the
-      // plate's OWN direct inputs (locations.json/style.txt) changed since approval.
-      decVersion="Approved once — its own environment brief has since changed";
-      decActions=[`<div class="dec-caption" style="color:var(--warn)">This plate's own environment brief (location/lighting/style) has changed since it was approved — an unrelated storyboard/shot edit can never cause this. Re-approve it if the world still holds, or regenerate against the current brief.</div>`,
-        `<button class="btn" onclick="shRun('approve-scenelook')">✓ Re-approve (current brief)</button>`,
-        `<button class="btn ghost" onclick="shRun('reject-scenelook')">✗ Reject</button>`,
+      decVersion="World inputs changed";
+      decActions=[`<div class="dec-caption" style="color:var(--warn)">The location, lighting or style input changed. Rebuild the world anchor; its proof will be the next keyframe.</div>`,
         `<div style="margin-top:8px">${slSourceChoices(GEN_LABEL,true)}</div>`];
     } else if(sl.status=="rejected"){
       decVersion="Rejected — see History below";
@@ -2787,7 +3216,7 @@ function renderSceneLookStage(){
 function decisionShell(title,version,actionsHTML,historyHTML){
   const actions=(actionsHTML||[]).filter(Boolean);
   if(!actions.some(x=>/<(?:button|a)\b/i.test(x)))actions.push(actionButtonHTML(defaultDecisionAction()));
-  return `<div class="wcol-head">Decision</div>
+  return `<div class="wcol-head">Now</div>
     <div class="dec-title">${_esc(title)}</div>
     <div class="dec-version">${_esc(version)}</div>
     <div class="dec-actions">${actions.join("")}</div>
@@ -2796,12 +3225,21 @@ function decisionShell(title,version,actionsHTML,historyHTML){
 
 // ── THE PEOPLE IN THE DEPARTMENTS ─────────────────────────────────────────────────────
 // The panel is a window onto the real cb_render ledger and real SKILL.md worker. Running a
-// worker makes one LLM thinking call and stops at an editable candidate; it cannot generate
-// image/audio/video. Approve makes that exact output the existing renderer's baseline.
+// worker makes one LLM thinking call and stops at a signed current direction; it cannot
+// generate image/audio/video. Direction is tested by the rendered outcome, not by asking the
+// user to approve production prose they cannot see on screen.
 let SH_DEPT_CACHE={};
 function deptKey(stage,shotId){return (SH_EP||"Ep")+"|"+(SH_SC||"scene")+"|"+stage+"|"+(shotId||"scene");}
 function deptInitials(worker){return String(worker||"Department").split(/[ /]+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("");}
 function deptProviderText(out){return (out&&out.providerPrompt)||"";}
+function departmentHeadline(stage,out){
+  out=out||{};
+  if(stage==="look")return out.creativeIntent||out.storyOfPlace||"The scene world is defined.";
+  if(stage==="cinematography")return out.audienceRead||out.composition||"The opening composition is defined.";
+  if(stage==="voice")return out.sceneIntention||"The performance direction is defined.";
+  if(stage==="animation")return out.doesItLand||out.generationGoal||out.deliveryPlan||"The animation direction is defined.";
+  return out.summary||"The review is ready.";
+}
 function animationBlueprintHTML(out){
   if(!out)return "";
   const shots=(out.shotPlan||[]).map(s=>`<div class="ccrow"><b>Shot ${_esc(s.shotNumber)}</b> · ${_esc(s.purpose||"")}
@@ -2811,9 +3249,16 @@ function animationBlueprintHTML(out){
     <div class="ccref"><b>Landing:</b> ${_esc(s.landingImage||"")}</div></div>`).join("");
   const refs=(out.referenceContract||[]).map(r=>`<div class="ccrow"><b>${_esc(r.assetTag||"")}</b> · ${_esc(r.role||"")} · ${_esc(r.scope||"")}
     <div class="ccref">${_esc(r.controls||"")}</div></div>`).join("");
+  const stages=(out.stagePlan||[]).map(s=>`<div class="ccrow"><b>Stage ${_esc(s.stageNumber)}</b> · ${_esc(s.purpose||"")}
+    <div class="ccref"><b>Starts:</b> ${_esc(s.initialOrCarriedState||"")}</div>
+    <div>${_esc(s.primaryEvent||"")}</div>
+    <div class="ccref"><b>Ends:</b> ${_esc(s.observableEndState||"")}</div></div>`).join("");
   const safeguards=(out.surgicalSafeguards||[]).map(x=>`<span class="stbadge" style="margin:2px;color:var(--brand);background:var(--surface2)">${_esc(x)}</span>`).join("");
   return `<div class="ccpanel" style="margin:8px 0;background:var(--surface)">
     <div class="cchead">Director blueprint · separate from the provider prompt</div>
+    <div class="ccrow"><b>Seedance 2.5 unit</b><div class="ccref">${_esc(out.durationSec||"?")}s · ${_esc(out.pacingMode||"storyline")} pacing · ${(out.stagePlan||[]).length} stage${(out.stagePlan||[]).length===1?"":"s"} · ${(out.shotPlan||[]).length} motivated view${(out.shotPlan||[]).length===1?"":"s"}</div></div>
+    ${out.generationGoal?`<div class="ccrow"><b>Generation goal</b><div class="ccref">${_esc(out.generationGoal)}</div></div>`:""}
+    ${out.deliveryPlan?`<div class="ccrow"><b>Built to deliver</b><div class="ccref">${_esc(out.deliveryPlan)}</div></div>`:""}
     <div class="ccrow"><b>Dramatic beat</b><div class="ccref">${_esc(out.dramaticBeat||"")}</div></div>
     <div class="ccrow"><b>Audience turn</b><div class="ccref">${_esc(out.audienceBefore||"")} → ${_esc(out.audienceAfter||"")}</div></div>
     <div class="ccrow"><b>Beat owner</b><div class="ccref">${_esc(out.beatOwner||"")}</div></div>
@@ -2822,7 +3267,10 @@ function animationBlueprintHTML(out){
     <div class="ccrow"><b>Direction density</b> · ${_esc(out.directionDensity||"guided")}
       <div class="ccref">${_esc(out.landingBreath||"")}</div></div>
     ${shots}
+    ${stages?`<details class="techdetails"><summary>Event stages</summary>${stages}</details>`:""}
     ${refs?`<details class="techdetails"><summary>Reference contract</summary>${refs}</details>`:""}
+    ${(out.consistencyContract||[]).length?`<div class="ccrow"><b>Maintain consistency</b><div class="ccref">${_esc(out.consistencyContract.join(" · "))}</div></div>`:""}
+    ${out.audioContract?`<div class="ccrow"><b>Audio contract</b><div class="ccref">${_esc(out.audioContract)}</div></div>`:""}
     <div class="ccrow"><b>Continuity landing</b><div class="ccref">${_esc(out.continuityFinish||"")}</div></div>
     ${safeguards?`<div class="ccrow"><b>Surgical safeguards</b><div>${safeguards}</div></div>`:""}
   </div>`;
@@ -2876,9 +3324,16 @@ function departmentPanelHTML(stage,shotId,d){
     }else{
       editor=`<textarea id="deptPrompt" class="ccta">${_esc(deptProviderText(out))}</textarea>`;
     }
+    if(!stage.startsWith("review-")){
+      return `<div class="deptpanel">${person}<div class="cchead">Direction ready</div>
+        <div class="ccref">${_esc(departmentHeadline(stage,out))}</div>
+        <details class="techdetails" style="margin-top:10px"><summary>Production internals</summary>${editor}
+          <div class="ccactions"><button class="btn ghost" onclick="deptSave('${_esc(stage)}','${_esc(shotId||"")}')">Save internal edit</button></div>
+        </details>
+        <div class="deptmeta">Signed against the current canon, references and production inputs. Its proof is the next rendered outcome.</div></div>`;
+    }
     return `<div class="deptpanel">${person}<div class="cchead">Specialist candidate · awaiting you</div>${editor}
-      <div class="ccactions">${stage.startsWith("review-")?"":`<button class="btn ghost" onclick="deptSave('${_esc(stage)}','${_esc(shotId||"")}')">Save edit</button>`}
-        <button class="btn" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','approved')">${stage.startsWith("review-")?"Acknowledge review":"Approve direction"}</button>
+      <div class="ccactions"><button class="btn" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','approved')">Acknowledge review</button>
         <button class="btn ghost" onclick="deptDecide('${_esc(stage)}','${_esc(shotId||"")}','rejected')">Reject</button></div>
       <div class="deptmeta">Prepared ${_esc((cand.preparedAt||"").slice(0,16))}. Nothing has been generated or spent on media.</div></div>`;
   }
@@ -2886,21 +3341,35 @@ function departmentPanelHTML(stage,shotId,d){
     const out=approved.output||{};
     const summary=stage=="voice"?(out.lines||[]).map(x=>x.speaker+": "+x.performedText).join("\n"):
       stage.startsWith("review-")?JSON.stringify(out,null,2):deptProviderText(out);
-    const approvedOutput=stage=="animation"
-      ?`${animationBlueprintHTML(out)}<details class="techdetails"><summary>Approved provider prompt</summary><div class="deptoutput">${_esc(summary)}</div></details>`
-      :`<details class="techdetails"><summary>Approved specialist output</summary><div class="deptoutput">${_esc(summary)}</div></details>`;
-    return `<div class="deptpanel">${person}<div class="cchead">✓ Direction approved by ${_esc(approved.reviewedBy||"Julian")}</div>
+    if(!stage.startsWith("review-")){
+      const internals=stage==="animation"
+        ?`${animationBlueprintHTML(out)}<div class="deptoutput">${_esc(summary)}</div>`
+        :`<div class="deptoutput">${_esc(summary)}</div>`;
+      return `<div class="deptpanel">${person}<div class="cchead">Direction ready</div>
+        <div class="ccref">${_esc(departmentHeadline(stage,out))}</div>
+        <details class="techdetails" style="margin-top:10px"><summary>Production internals</summary>${internals}</details>
+        <button class="btn ghost" style="margin-top:10px" onclick="deptRun('${_esc(stage)}','${_esc(shotId||"")}')">Rebuild direction</button>
+        <div class="deptmeta">Legacy reviewed direction remains current until a newer signed direction is prepared.</div></div>`;
+    }
+    const approvedOutput=`<details class="techdetails"><summary>Review evidence</summary><div class="deptoutput">${_esc(summary)}</div></details>`;
+    return `<div class="deptpanel">${person}<div class="cchead">✓ Review acknowledged by ${_esc(approved.reviewedBy||"Julian")}</div>
       ${approvedOutput}
-      <button class="btn ghost" style="margin-top:10px" onclick="deptRun('${_esc(stage)}','${_esc(shotId||"")}')">Ask for a replacement</button>
-      <div class="deptmeta">A saved Studio working edit still wins until you choose “Restore approved version.”</div></div>`;
+      <button class="btn ghost" style="margin-top:10px" onclick="deptRun('${_esc(stage)}','${_esc(shotId||"")}')">Run review again</button></div>`;
   }
-  return `<div class="deptpanel">${person}<div class="dec-caption">No specialist direction prepared yet.</div>
-    <button class="btn ghost" style="margin-top:10px" onclick="deptRun('${_esc(stage)}','${_esc(shotId||"")}')">Brief ${_esc(d.worker||"specialist")} — thinking call only</button>
-    <div class="deptmeta">Creates one visible candidate. It cannot generate media or approve itself.</div></div>`;
+  if(stage.startsWith("review-")){
+    return `<div class="deptpanel">${person}<div class="cchead">Render analysis not run yet</div>
+      <div class="ccref">Analyse the visible result for story, acting, camera, physics, identity and continuity.</div>
+      <button class="btn ghost" style="margin-top:10px" onclick="deptRun('${_esc(stage)}','${_esc(shotId||"")}')">Analyse visible result</button>
+      <div class="deptmeta">Thinking call only. It cannot generate media, spend media credits or accept the result for you.</div></div>`;
+  }
+  return `<div class="deptpanel">${person}<div class="cchead">Direction prepares when you build</div>
+    <div class="ccref">The Studio will quietly build and sign the specialist brief before it shows the media cost.</div>
+    <div class="deptmeta">No separate approval is required. Your next creative decision is on the rendered result.</div></div>`;
 }
 async function attachDepartmentPanel(host,stage,shotId){
   if(!host)return; const key=deptKey(stage,shotId), id="dept_"+key.replace(/[^A-Za-z0-9]/g,"_");
-  host.insertAdjacentHTML("beforeend",`<div id="${id}">${departmentPanelHTML(stage,shotId,SH_DEPT_CACHE[key])}</div>`);
+  const label=stage.startsWith("review-")?"Specialist review":"Creative direction";
+  host.insertAdjacentHTML("beforeend",`<details class="focus-evidence"><summary>${label}</summary><div id="${id}" class="focus-evidence-body">${departmentPanelHTML(stage,shotId,SH_DEPT_CACHE[key])}</div></details>`);
   if(SH_DEPT_CACHE[key])return;
   try{
     const q=new URLSearchParams({scene:String(SH_SC),episode:SH_EP,stage}); if(shotId)q.set("shotId",shotId);
@@ -2914,7 +3383,8 @@ async function deptRun(stage,shotId){
   try{const r=await fetch(BASE+"/api/department-run",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,stage,shotId:shotId||null})});const j=await r.json();
     if(!r.ok||!j.ok){SH_DEPT_CACHE[key]={error:j.error||"Worker could not start"};renderWorkspaceBody();return;}
-    showToast("The "+stage+" specialist is working — no media generation",true);SH_DEPT_CACHE[key]=null;renderControl();
+    showToast("The "+stage+" specialist is working — no media generation",true);
+    SH_JOB=j.jobId;SH_LAST_JOB=null;SH_AFTER_JOB=null;SH_POLL_MISSES=0;shPollStart();renderControl();
   }catch(e){SH_DEPT_CACHE[key]={error:"Can't reach the department."};renderWorkspaceBody();}
 }
 async function deptSave(stage,shotId){
@@ -2930,7 +3400,7 @@ async function deptDecide(stage,shotId,verdict){
   const body={scene:String(SH_SC),episode:SH_EP,stage,shotId:shotId||null,verdict,note,by:REVIEWER};
   const r=await fetch(BASE+"/api/department-decide",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
   if(!r.ok){alert(j.error||"Could not record the decision");return;}SH_DEPT_CACHE[deptKey(stage,shotId)]=null;
-  showToast(verdict=="approved"?"Specialist direction approved":"Returned to the department",verdict=="approved");
+  showToast(verdict=="approved"?"Review acknowledged":"Review returned with notes",verdict=="approved");
   await shFetchPkg();renderWorkspaceBody();
 }
 
@@ -3003,6 +3473,86 @@ function seedancePanelHTML(tok,sw){
     </div>
   </div>`;
 }
+function refCacheKey(tok){return (SH_EP||"Ep")+"|"+(SH_SC||"scene")+"|"+tok;}
+function refSlotLabel(slot){
+  const image=String(slot||"").match(/^@图(\d+)$/),audio=String(slot||"").match(/^@Audio(\d+)$/i);
+  return image?"Image "+image[1]+" · "+slot:audio?"Audio "+audio[1]+" · "+slot:String(slot||"Reference");
+}
+function refMessage(value){return String(value||"This reference is not ready.").replace(/^REFUSED\s*[—-]\s*/i,"");}
+function posePreparationHTML(tok,data){
+  const prep=data&&data.posePreparation;
+  if(!prep||!(prep.items||[]).length)return "";
+  const ready=(prep.items||[]).filter(item=>item.ready).length;
+  const cards=(prep.items||[]).map(item=>{
+    const name=item.character||"Character",token=encodeURIComponent(name).replace(/'/g,"%27"),url=item.candidateUrl||item.qualifiedUrl||item.approvedUrl;
+    const media=url?`<img class="refmedia zoom" data-cap="${_esc(name)} · shot-specific acting pose" src="${BASE}${_esc(url)}?v=${MEDIA_V}" alt="${_esc(name)} pose" loading="lazy">`
+      :`<div class="refmissing">${_esc(item.message||"Shot-specific pose required.")}</div>`;
+    let actions="";
+    if(item.status==="awaiting")actions=`<div class="ccactions" style="padding:0 9px 9px"><button class="btn" onclick="shRun('approve-pose','${_esc(tok)}',{character:decodeURIComponent('${token}')})">Accept pose</button><button class="btn ghost" onclick="shRun('reject-pose','${_esc(tok)}',{character:decodeURIComponent('${token}')})">Iterate</button></div>`;
+    else if(item.status==="needs-correction")actions=`<div class="ccactions" style="padding:0 9px 9px"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">Correct and continue</button><button class="btn ghost" onclick="shRun('approve-pose','${_esc(tok)}',{character:decodeURIComponent('${token}')})">Use anyway</button></div>`;
+    else if(item.status==="approved")actions=`<div class="refcopy" style="padding-top:0"><span class="refstate">Human approved</span></div>`;
+    else if(item.status==="qualified")actions=`<div class="refcopy" style="padding-top:0"><span class="refstate">Machine checked · reusable</span></div>`;
+    else actions=`<div class="ccactions" style="padding:0 9px 9px"><button class="btn" onclick="openDisclosureModal('pose',{shotId:'${_esc(tok)}',character:decodeURIComponent('${token}'),pose:${_attr(JSON.stringify(item.pose||''))}})">Create pose</button><button class="btn ghost" onclick="document.getElementById('poseUpload_${_esc(tok)}_${token}').click()">Upload</button><input type="file" id="poseUpload_${_esc(tok)}_${token}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shPoseUpload('${_esc(tok)}',decodeURIComponent('${token}'),this)"></div>`;
+    const review=item.machineReview||{};
+    const reviewNote=review.summary||item.message||"";
+    return `<article class="refcard ${item.ready?"":"missing"}">${media}<div class="refcopy"><div class="refslot">${_esc((item.status||"required").replaceAll("-"," ").replace(/^./,x=>x.toUpperCase()))}</div><div class="refrole">${_esc(name)} acting pose</div><div class="reffile">${_esc(item.pose||"")}</div>${reviewNote?`<div class="reffile" style="margin-top:6px">${_esc(reviewNote)}</div>`:""}</div>${actions}</article>`;
+  }).join("");
+  return `<section id="posePrep_${_esc(tok)}" class="refpanel" aria-label="Acting pose preparation"><div class="refhead"><div><div class="reftitle">Acting poses</div><div class="refsummary">${ready}/${prep.items.length} qualified · exact matches are reused across shots</div></div><span class="refstate ${prep.ready?"":"attention"}">${prep.ready?"Ready":"Needs attention"}</span></div><div class="refgrid">${cards}</div></section>`;
+}
+function technicalControlsHTML(data){
+  const controls=Object.values((data&&data.technicalControls)||{}).filter(item=>item&&item.ready&&item.url);
+  if(!controls.length)return "";
+  return `<section class="refpanel" aria-label="Local quality controls"><div class="refhead"><div><div class="reftitle">Local quality controls</div><div class="refsummary">Visible for checking · never uploaded to the image provider</div></div><span class="refstate">QA only</span></div><div class="refgrid">${controls.map(item=>`<article class="refcard"><img class="refmedia zoom" data-cap="${_esc(item.purpose||'Local QA control')}" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}" alt="${_esc(item.purpose||'Local QA control')}" loading="lazy"><div class="refcopy"><div class="refslot">Never uploaded</div><div class="refrole">${_esc(item.purpose||'Local QA control')}</div><div class="reffile">${_esc(item.fileName||'')}</div></div></article>`).join("")}</div></section>`;
+}
+function referenceManifestHTML(tok,mode,data){
+  const title=mode==="keyframe"?"Keyframe references":"Animation references";
+  if(!data||data.loading)return `<section class="refpanel" aria-label="${title}"><div class="refhead"><div><div class="reftitle">${title}</div><div class="refsummary">Loading the exact ordered assets…</div></div></div></section>`;
+  if(data.error)return `<section class="refpanel" aria-label="${title}"><div class="refhead"><div><div class="reftitle">${title}</div><div class="refsummary" style="color:var(--danger)">${_esc(data.error)}</div></div><button class="btn ghost" onclick="shLoadReferences('${_esc(tok)}',true)">Retry</button></div></section>`;
+  const stage=data[mode]||{},refs=stage.references||[];
+  if(stage.applies===false)return `<section class="refpanel" aria-label="${title}"><div class="refhead"><div><div class="reftitle">${title}</div><div class="refsummary">${_esc(stage.reason||"No separate reference set is required for this shot.")}</div></div><span class="refstate">Inherited</span></div></section>`;
+  const ready=refs.filter(item=>item.ready).length,allReady=!!stage.ready;
+  const cards=refs.map(item=>{
+    const label=refSlotLabel(item.slot),caption=label+" · "+(item.role||"reference");
+    const identity=item.identity||{};
+    const stateLabel={ready:"Ready",missing:"Missing",unavailable:"Unavailable",unapproved:"Not accepted"}[item.status]||item.status||"Check";
+    let media="";
+    if(item.ready&&item.url&&item.kind==="audio")media=`<div class="refaudio"><audio controls preload="metadata" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}"></audio></div>`;
+    else if(item.ready&&item.url)media=`<img class="refmedia zoom" data-cap="${_esc(caption)}" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}" alt="${_esc(item.role||label)}" loading="lazy">`;
+    else media=`<div class="refmissing">${_esc(refMessage(item.message))}</div>`;
+    return `<article class="refcard ${item.ready?"":"missing"}">${media}<div class="refcopy"><div class="refslot">${_esc(label)} · ${_esc(stateLabel)}</div><div class="refrole">${_esc(item.role||"Reference")}${identity.view?` · ${_esc(identity.view)} view`:""}</div>${identity.singleSubject?`<div class="reffile">${identity.turnaroundAuthority?"Isolated turnaround view":"Single-character identity"} · provider safe</div>`:""}${item.fileName?`<div class="reffile">${_esc(item.fileName)}</div>`:""}</div></article>`;
+  }).join("");
+  const referencePanel=`<section class="refpanel" aria-label="${title}"><div class="refhead"><div><div class="reftitle">${title}</div><div class="refsummary">${ready}/${refs.length} ready · only these assets enter the provider upload</div></div><span class="refstate ${allReady?"":"attention"}">${allReady?"Ready":"Needs attention"}</span></div>${cards?`<div class="refgrid">${cards}</div>`:`<div class="refmissing">No reference contract has been attached.</div>`}</section>`;
+  if(mode!=="keyframe")return referencePanel;
+  const prep=(data&&data.posePreparation)||{},needsAttention=!!((prep.items||[]).find(item=>!item.ready&&item.status==="needs-correction"));
+  const details=`${referencePanel}${posePreparationHTML(tok,data)}${technicalControlsHTML(data)}`;
+  return `<details class="techdetails" ${needsAttention?"open":""}><summary>References &amp; checks · ${ready}/${refs.length} provider assets ready${prep.items&&prep.items.length?` · ${(prep.items||[]).filter(x=>x.ready).length}/${prep.items.length} poses qualified`:""}</summary>${details}</details>`;
+}
+async function shPoseUpload(tok,character,input){
+  const file=input.files&&input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async()=>{
+    try{
+      const r=await fetch(BASE+"/api/shot-keyframe-upload",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,filename:file.name,dataB64:reader.result})});
+      const j=await r.json();
+      if(!j.ok){alert("Upload failed: "+(j.error||"unknown error"));return;}
+      await shRun('select-pose-upload',tok,{character,sourcePath:j.sourcePath});
+    }catch(e){alert("Can't reach the studio server. Reload and try again.");}
+    input.value="";
+  };
+  reader.readAsDataURL(file);
+}
+async function shLoadReferences(tok,force){
+  const key=refCacheKey(tok);
+  if(!force&&SH_REFERENCE_CACHE[key])return;
+  SH_REFERENCE_CACHE[key]={loading:true};
+  try{
+    const r=await fetch(BASE+"/api/shot-references?scene="+encodeURIComponent(SH_SC)+"&shotId="+encodeURIComponent(tok)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
+    const data=await r.json();
+    SH_REFERENCE_CACHE[key]=r.ok?data:{error:data.error||"References are unavailable"};
+  }catch(e){SH_REFERENCE_CACHE[key]={error:"Can't reach the Studio reference service."};}
+  const current=(pShots()[PSHOT_I]||{}).shotId;
+  if(page==="pipeline"&&shTok(current)===shTok(tok))renderWorkspaceBody();
+}
 function structurePanelHTML(tok,sc){
   const btn=`<button class="btn ghost" onclick="shRunStructureCheck('${_esc(tok)}')">Check structure & craft — free</button>`;
   if(!sc)return `<div class="ccpanel">${btn}</div>`;
@@ -3068,6 +3618,306 @@ function readbackPanelHTML(tok,rb){
     <div class="ccref" style="margin-top:8px">Advisory only. It never approves, blocks or fires a render.</div>
   </div>`;
 }
+function plCacheKey(tok,type){return (SH_EP||"Ep")+"|"+(SH_SC||"scene")+"|"+tok+"|"+type;}
+function plPanelId(tok,type){return "promptLab_"+String(tok+"_"+type).replace(/[^A-Za-z0-9_-]/g,"_");}
+function plDraftKey(data){return [data.episode,data.scene,data.shotId,data.artifactType,data.selectedCandidateId,(data.promptContract||{}).promptHash].join("|");}
+function plDraft(data){
+  const key=plDraftKey(data);
+  return SH_PROMPTLAB_DRAFTS[key]||(SH_PROMPTLAB_DRAFTS[key]={scores:{},overallRead:null,note:""});
+}
+function plComplete(data,draft){
+  return !!(data.canRate&&draft.overallRead&&(data.ratingDimensions||[]).every(x=>Number.isInteger(draft.scores[x.key])));
+}
+function plSegHTML(tok,type,dimension,value){
+  return `<div class="plseg" role="group" aria-label="${_esc(dimension)} rating">
+    ${[[0,"Miss"],[1,"Partial"],[2,"Lands"]].map(([score,label])=>`<button type="button" data-pl-dim="${_esc(dimension)}" data-pl-score="${score}" aria-pressed="${value===score}" class="${value===score?"active":""}" onclick="plSetScore('${_esc(tok)}','${_esc(type)}','${_esc(dimension)}',${score})">${label}</button>`).join("")}
+  </div>`;
+}
+function plOverallHTML(tok,type,value){
+  return `<div class="plseg" role="group" aria-label="Overall result">
+    ${[["miss","Miss"],["partial","Almost"],["lands","Lands"]].map(([score,label])=>`<button type="button" data-pl-overall="${score}" aria-pressed="${value===score}" class="${value===score?"active":""}" onclick="plSetOverall('${_esc(tok)}','${_esc(type)}','${score}')">${label}</button>`).join("")}
+  </div>`;
+}
+function plTraceExcerpt(text){
+  const value=String(text||"").trim();
+  if(!value)return `<div class="pltrace-empty">Not recorded.</div>`;
+  if(value.length<=260)return `<div class="pltrace-text">${_esc(value)}</div>`;
+  const preview=value.slice(0,220).replace(/\s+\S*$/,"").trim();
+  return `<details class="pltrace-more"><summary>${_esc(preview)}...</summary><div class="pltrace-text">${_esc(value)}</div></details>`;
+}
+function plTraceBadge(status){
+  const map={lands:["Lands","--ok"],partial:["Partial","--warn"],miss:["Miss","--danger"],commented:["Comment recorded","--warn"],"not-rated":["Not rated","--hint"]};
+  const item=map[status]||[String(status||"Not recorded").replaceAll("-"," "),"--hint"];
+  return `<span class="stbadge" style="color:var(${item[1]});background:var(--surface2)">${_esc(item[0])}</span>`;
+}
+function plAuditTraceHTML(data){
+  const correlation=data.correlation||{},scope=correlation.scope||{},approval=correlation.approval||{};
+  const promptLabels={"sealed-batch-prompt":"Sealed batch prompt","recorded-prompt":"Recorded prompt","current-direction-only":"Current direction only"};
+  const assetLabels={"generation-hash":"Generation media hash locked","surviving-media-only":"Legacy media · no generation hash","no-media":"No rendered media"};
+  const outcomeLabels={rated:"Human rating recorded",commented:"Written outcome recorded","approved-unrated":"Approved · detailed outcome not rated","not-recorded":"No outcome recorded","no-render":"No render to review"};
+  const rows=(correlation.rows||[]).map(row=>{
+    const wish=row.directorWish||{},instruction=row.promptInstruction||{},result=row.observedResult||{};
+    const wishHTML=(wish.sources||[]).map(source=>`<div class="pltrace-meta">${_esc(source.label||source.field||"Director source")}</div>${plTraceExcerpt(source.text)}`).join("")||`<div class="pltrace-empty">No signed directing wish is recorded for this axis.</div>`;
+    const promptHTML=(instruction.clauses||[]).map(clause=>`${plTraceExcerpt(clause.text)}<div class="pltrace-meta">Prompt clause ${_esc(clause.index)}${(clause.matchedTags||[]).length?` · ${_esc(clause.matchedTags.join(" · "))}`:""}</div>`).join("")||`<div class="pltrace-empty">${instruction.status==="direction-only"?"The visible prompt is current direction, not proven as this render's generation prompt.":"No matching instruction was located in this prompt."}</div>`;
+    let outcomeHTML=`${plTraceBadge(result.status)}`;
+    if(Number.isInteger(result.score))outcomeHTML+=`<div class="pltrace-meta">${_esc(result.score)}/2 · ${_esc(result.reviewer||"")} · ${_esc((result.createdAt||"").slice(0,16).replace("T"," "))}</div>`;
+    if(result.ratingNote)outcomeHTML+=plTraceExcerpt(result.ratingNote);
+    (result.comments||[]).forEach(comment=>{outcomeHTML+=`<div class="pltrace-comment">${_esc(comment.note||"")}<div class="pltrace-meta">${_esc(comment.sourceLabel||"Render comment")} · ${_esc(comment.reviewer||"")}</div></div>`;});
+    if(!Number.isInteger(result.score)&&!(result.comments||[]).length)outcomeHTML+=`<div class="pltrace-empty">No visible result has been recorded for this selected take and axis.</div>`;
+    return `<section class="pltrace-row"><div class="pltrace-axis">${_esc(row.label)}</div><div class="pltrace-grid">
+      <div class="pltrace-cell"><div class="pltrace-label">Director wanted</div>${wishHTML}</div>
+      <div class="pltrace-cell"><div class="pltrace-label">Prompt instruction</div>${promptHTML}</div>
+      <div class="pltrace-cell"><div class="pltrace-label">Observed result</div><div style="margin-top:7px">${outcomeHTML}</div></div>
+    </div></section>`;
+  }).join("");
+  return `<div class="pltrace">
+    <div class="pltrace-scope">
+      <div class="plscope"><div class="plscope-label">Prompt lineage</div><div class="plscope-value">${_esc(promptLabels[scope.promptBinding]||scope.promptBinding||"Unknown")}</div><div class="pltrace-meta">${_esc(scope.batchId||"No batch ID")}</div></div>
+      <div class="plscope"><div class="plscope-label">Media lineage</div><div class="plscope-value">${_esc(assetLabels[scope.assetBinding]||scope.assetBinding||"Unknown")}</div><div class="pltrace-meta">${_esc(scope.candidateId||"No take selected")}</div></div>
+      <div class="plscope"><div class="plscope-label">Outcome evidence</div><div class="plscope-value">${_esc(outcomeLabels[scope.outcomeBinding]||scope.outcomeBinding||"Unknown")}</div>${approval.approved?`<div class="pltrace-meta">${_esc(approval.reviewer||"Approved")}${approval.createdAt?` · ${_esc(approval.createdAt.slice(0,16).replace("T"," "))}`:""}</div>`:""}</div>
+    </div>
+    <div class="pltrace-summary">${_esc(correlation.summary||"")}</div>
+    ${rows||`<div class="pltrace-empty">No directing trace is available.</div>`}
+  </div>`;
+}
+function plNextActionHTML(tok,type,data){
+  const selected=data.selectedCandidateId;
+  const asset=(data.assets||[]).find(item=>item.candidateId===selected)||{};
+  const draft=plDraft(data),latest=(((data.correlation||{}).creativeLoop||{}).whatHappened||{}).latestRating||{};
+  const result=draft.overallRead||latest.overallRead||null;
+  const needsWork=result==="miss"||result==="partial";
+  const directionStage=type==="keyframe"?"keyframe":"animation";
+  const directionLabel=type==="keyframe"?"Iterate keyframe":"Iterate animation";
+  const prepareLabel=type==="keyframe"?"Prepare keyframe":"Prepare animation";
+  const continueStage=type==="keyframe"?"animation":"continuity";
+  const continueLabel="Accept and continue";
+  if(asset.state==="awaiting"){
+    if(type==="keyframe")return `<div class="plflow-actions"><button class="btn" onclick="shRun('approve-keyframe','${_esc(tok)}')">Accept keyframe</button><button class="btn ghost" onclick="shRun('reject-keyframe','${_esc(tok)}')">Iterate</button></div>`;
+    const candidate=Number(String(selected||"").replace(/^C/,""))||1;
+    return `<div class="plflow-actions"><button class="btn" onclick="shRun('approve','${_esc(tok)}',{candidate:${candidate}})">Accept take</button><button class="btn ghost" onclick="shRun('reject','${_esc(tok)}',{category:'other'})">Iterate</button></div>`;
+  }
+  if(asset.state==="screening"){
+    return `<div class="plflow-actions"><button class="btn" onclick="shRun('rescreen-keyframe','${_esc(tok)}')">Retry identity check</button><button class="btn ghost" onclick="shRun('reject-keyframe','${_esc(tok)}')">Iterate</button></div>`;
+  }
+  if(asset.state==="rejected"){
+    const replacementLabel=type==="keyframe"?"Build replacement keyframe":"Prepare replacement animation";
+    return `<div class="plflow-actions"><button class="btn" onclick="openStageOutcome('${directionStage}')">${replacementLabel}</button></div>`;
+  }
+  if(!selected)return `<div class="plflow-actions"><button class="btn" onclick="openStageOutcome('${directionStage}')">${prepareLabel}</button></div>`;
+  return `<div class="plflow-actions">
+    ${needsWork?`<button class="btn" onclick="openStageOutcome('${directionStage}')">Iterate</button><button class="btn ghost" onclick="openStageOutcome('${continueStage}')">Accept anyway</button>`
+      :`<button class="btn" onclick="openStageOutcome('${continueStage}')">${continueLabel}</button><button class="btn ghost" onclick="openStageOutcome('${directionStage}')">${directionLabel}</button>`}
+  </div>`;
+}
+function plSeedanceContractSummaryHTML(data){
+  const r=data.seedancePromptContract;if(!r)return "";
+  const ready=r.status==="ready",remaining=Math.max(0,(r.maximum||0)-(r.score||0));
+  const groups=r.authorityScores||{},guide=groups["official-guide"]||{},studio=groups["studio-policy"]||{};
+  const split=(guide.maximum||studio.maximum)?`<div class="plflow-sub" style="margin-top:4px">Official guide ${_esc(guide.score||0)}/${_esc(guide.maximum||0)} · Studio production policy ${_esc(studio.score||0)}/${_esc(studio.maximum||0)}</div>`:"";
+  return `<div class="plcontract"><div class="plcontract-head"><b>Seedance prompt structure</b><span class="plcontract-score">${_esc(r.score)}/${_esc(r.maximum)}</span></div>
+    <div class="plflow-sub">${ready?"Ready against the official guide and Studio production policy.":`${_esc(remaining)} precise repair${remaining===1?"":"s"} before the next prompt approval.`} Existing approvals are unchanged.</div>${split}</div>`;
+}
+function plSeedanceContractAuditHTML(data){
+  const r=data.seedancePromptContract;if(!r)return "";
+  const model=((data.promptContract||{}).providerModelId)||"checked at fire preflight";
+  const renderChecks=(authority)=>(r.checks||[]).filter(check=>(check.authority||"official-guide")===authority).map(check=>{const optional=check.required===false,state=check.status==="pass"?"Ready":optional?"Optional":"Needs work",stateClass=check.status==="pass"?"":optional?"optional":"needs-work";return `<div class="plcontract-check"><div class="plcontract-state ${stateClass}">${state}</div><div><b>${_esc(check.label||check.code||"")}</b><div class="plflow-sub" style="margin-top:2px">${_esc(check.detail||"")}</div>${check.nextAction?`<div class="plcontract-action"><b>${optional?"Improve":"Next"}:</b> ${_esc(check.nextAction)}</div>`:""}</div></div>`}).join("");
+  const guideChecks=renderChecks("official-guide"),studioChecks=renderChecks("studio-policy");
+  const source=r.source||{},sourceUrl=String(source.url||"");
+  const sourceLine=sourceUrl.startsWith("https://bytedance.larkoffice.com/")?`<a href="${_esc(sourceUrl)}" target="_blank" rel="noopener">${_esc(source.title||"Official Seedance 2.5 guide")}</a> · updated ${_esc(source.lastUpdated||"")}`:_esc(r.profile||"");
+  return `<details class="techdetails"><summary>Seedance authoring contract · ${_esc(r.score)}/${_esc(r.maximum)}</summary>
+    <div class="plmeta">${sourceLine} · ${_esc(r.taskMode||"")} · authoring analysis only</div>
+    <div class="plmeta">${_esc(source.scope||"Dreamina product guidance only")}. Recorded render route: ${_esc(model)}. Provider access, executable limits and spend are checked separately.</div>
+    ${guideChecks?`<div class="plflow-sub" style="margin:12px 0 4px"><b>Official guide</b></div>${guideChecks}`:""}
+    ${studioChecks?`<div class="plflow-sub" style="margin:12px 0 4px"><b>Studio production policy</b></div>${studioChecks}`:""}</details>`;
+}
+function plHeadlineText(value,fallback,limit){
+  const text=String(value||fallback||"").replace(/\s+/g," ").trim(),max=limit||88;
+  return text.length>max?text.slice(0,max-3).trimEnd()+"...":text;
+}
+function plTraceHTML(tok,type,data,preview){
+  const loop=((data.correlation||{}).creativeLoop)||{},director=loop.directorWants||{},plan=loop.promptBuiltToDeliver||{},happened=loop.whatHappened||{};
+  const latest=happened.latestRating||{},draft=plDraft(data);
+  const result=latest.overallRead||null;
+  const resultLabel={lands:"Lands",partial:"Almost",miss:"Misses"}[result]||null;
+  const comments=happened.comments||[];
+  const selected=data.selectedCandidateId,asset=(data.assets||[]).find(item=>item.candidateId===selected)||{};
+  const approval=((data.correlation||{}).approval)||{},needsWork=result==="miss"||result==="partial";
+  const seedance=data.seedancePromptContract||{},repairs=Math.max(0,(seedance.maximum||0)-(seedance.score||0));
+  const promptReady=type==="animation"?seedance.status==="ready":!!data.promptContract;
+  const promptHeadline=type==="animation"
+    ?(promptReady?"Ready":"Needs "+repairs+" fix"+(repairs===1?"":"es"))
+    :(data.promptContract?"Locked":"Needs direction");
+  const resultHeadline=asset.state==="rejected"?"Rejected":resultLabel||(approval.approved?"Accepted, not rated":selected?"Ready to review":"Not rendered");
+  const nextHeadline=asset.state==="awaiting"?"Accept or iterate":asset.state==="rejected"?"Build replacement":!selected?(type==="keyframe"?"Build keyframe":"Prepare direction"):needsWork?"Iterate":"Accept and continue";
+  const quick=data.selectedCandidateId&&data.canRate?`<div class="plquick">
+    <div class="plflow-sub" style="margin:0 0 7px"><b>Your call</b></div>
+    ${plOverallHTML(tok,type,draft.overallRead)}
+    <textarea class="ccta" style="min-height:68px;margin-top:9px" maxlength="2000" placeholder="What landed, what missed, and what should change?" oninput="plNote('${_esc(tok)}','${_esc(type)}',this.value)">${_esc(draft.note)}</textarea>
+    <div class="plflow-actions"><button id="plQuickSave_${plPanelId(tok,type)}" class="btn" ${draft.overallRead?"":"disabled"} onclick="plSaveRating('${_esc(tok)}','${_esc(type)}')">Save what happened</button></div>
+    <div class="plflow-sub">${data.canTeachPrompt?"Prompt-linked evidence":"Quality review only"} · no generation or approval change</div>
+  </div>`:"";
+  const observed=result?`<div style="margin-top:8px">${plTraceBadge(result)} <span class="plflow-sub">${_esc(resultLabel)} · ${_esc(latest.reviewer||"")} · ${_esc((latest.createdAt||"").slice(0,16).replace("T"," "))}</span></div>${latest.note?plTraceExcerpt(latest.note):""}`
+    :`<div class="plflow-sub">${_esc(happened.summary||"No result has been recorded yet.")}</div>`;
+  const currentComment=comments.length?`<div class="plflow-sub"><b>Current comment:</b> ${_esc(comments[0].note||"")}</div>`:"";
+  return `<div class="plheadline-grid" aria-label="Director headlines">
+      <div class="plheadline"><div class="plheadline-label">Story</div><div class="plheadline-value">${_esc(plHeadlineText(director.text,"Story intent ready"))}</div></div>
+      <div class="plheadline"><div class="plheadline-label">Prompt</div><div class="plheadline-value ${promptReady?"ready":"attention"}">${_esc(promptHeadline)}</div></div>
+      <div class="plheadline"><div class="plheadline-label">Result</div><div class="plheadline-value">${_esc(resultHeadline)}</div></div>
+      <div class="plheadline"><div class="plheadline-label">Next</div><div class="plheadline-value">${_esc(nextHeadline)}</div></div>
+    </div>
+    <div class="pldirector-action"><div class="pldecision-label">Your decision</div>${plNextActionHTML(tok,type,data)}</div>
+    <details class="techdetails plreview-details" ${asset.state==="awaiting"?"open":""}><summary>Review result</summary>${preview||""}${observed}${currentComment}${quick}</details>`;
+}
+function plFeedbackRow(tok,type,item,selected){
+  return `<div class="plfeedback"><div><div class="plfeedback-note">${_esc(item.note||"")}</div><div class="plfeedback-meta">${_esc(item.sourceLabel||"Review note")} · ${_esc((item.createdAt||"").slice(0,16).replace("T"," "))} · ${_esc(item.reviewer||"")}${item.batchId?` · ${_esc(item.batchId)}`:""}${(item.topics||[]).length?` · ${_esc(item.topics.join(" · "))}`:""}</div></div>${selected?`<button class="btn ghost" type="button" onclick="plUseFeedback('${_esc(tok)}','${_esc(type)}','${_esc(item.feedbackId)}')">Use in result</button>`:""}</div>`;
+}
+function promptLabPanelHTML(tok,type,data){
+  const id=plPanelId(tok,type);
+  const traceName=type==="keyframe"?"Keyframe":"Animation";
+  if(!data||data.loading)return `<div id="${id}" class="promptlab"><div class="plhead"><div><div class="pltitle">${traceName}</div><div class="plmeta">Reading director intent, prompt evidence and observed results...</div></div></div></div>`;
+  if(data.error)return `<div id="${id}" class="promptlab"><div class="plhead"><div><div class="pltitle">${traceName}</div><div class="plmeta" style="color:var(--danger)">${_esc(data.error)}</div></div>
+    <button class="btn ghost" onclick="shLoadPromptLab('${_esc(tok)}','${_esc(type)}',null,true)">Try again</button></div></div>`;
+  const contract=data.promptContract||{},analysis=data.analysis||{},ai=data.aiReview||{},ev=data.evidenceSummary||{};
+  const selected=data.selectedCandidateId;
+  const selectedAsset=(data.assets||[]).find(a=>a.candidateId===selected)||null;
+  const selector=(data.assets||[]).length?`<select class="plselect" aria-label="Rendered take" onchange="shLoadPromptLab('${_esc(tok)}','${_esc(type)}',this.value,true)">
+    ${(data.assets||[]).map(a=>`<option value="${_esc(a.candidateId)}" ${a.candidateId===selected?"selected":""}>${_esc(a.label)}${a.provenanceGrade==="exact"?" · exact evidence":" · quality review only"}</option>`).join("")}</select>`:"";
+  const preview=selectedAsset&&selectedAsset.mediaUrl
+    ?(type==="animation"?`<video class="plpreview" controls playsinline preload="metadata" src="${_esc(selectedAsset.mediaUrl)}"></video>`:`<img class="plpreview" alt="Selected keyframe render" src="${_esc(selectedAsset.mediaUrl)}">`)
+    :(selectedAsset?`<div class="plwarn">This legacy render record survives, but its media is outside the canonical Studio library, so it is not exposed through the public preview.</div>`:"");
+  const dims=data.ratingDimensions||[];
+  const matrix=dims.map(item=>{
+    const promptDim=(analysis.dimensions||{})[item.key]||{};
+    const aiDim=(ai.dimensions||{})[item.key]||{};
+    return `<div>${_esc(item.label)}</div><div class="plnum" style="color:var(${promptDim.score===2?"--ok":promptDim.score===1?"--warn":"--danger"})">${promptDim.score==null?"n/a":_esc(promptDim.score)+"/2"}</div><div class="plnum" style="color:var(${aiDim.score===2?"--ok":aiDim.score===1?"--warn":aiDim.score===0?"--danger":"--hint"})">${aiDim.score==null?"not run":_esc(aiDim.score)+"/2"}</div>`;
+  }).join("");
+  const warnings=(analysis.warnings||[]).map(w=>`<div class="plwarn">${_esc(w.message||w.code||"")}</div>`).join("");
+  const clauses=(analysis.clauses||[]).map(c=>`<div class="ccrow"><b>${_esc(c.index)}.</b> ${_esc(c.text)}<div class="ccref">${_esc((c.tags||[]).join(" · ")||"unclassified")}</div></div>`).join("");
+  let rating="";
+  if(selected&&data.canRate){
+    const draft=plDraft(data),complete=plComplete(data,draft);
+    rating=`<div class="plrating"><div class="cchead">Detailed craft rating</div>
+      ${data.canTeachPrompt?`<div class="plmeta">Exact prompt and generation-time media hash · eligible for wording evidence</div>`:`<div class="plwarn">${_esc(data.attributionWarning||"Quality rating only; not prompt-learning evidence.")}</div>`}
+      ${dims.map(item=>`<div class="pldimension"><div class="pldimension-label">${_esc(item.label)}</div>${plSegHTML(tok,type,item.key,draft.scores[item.key])}</div>`).join("")}
+      <div class="pldimension"><div class="pldimension-label"><b>Overall result</b></div>${plOverallHTML(tok,type,draft.overallRead)}</div>
+      <div class="ccactions"><button id="plSave_${id}" class="btn" ${complete?"":"disabled"} onclick="plSaveRating('${_esc(tok)}','${_esc(type)}')">Save detailed result</button></div>
+      <div class="plmeta">${data.canTeachPrompt?"Prompt-learning evidence":"Quality evidence only"} · approval unchanged · no media spend</div></div>`;
+  }else if(selected){
+    rating=`<div class="plrating"><div class="cchead">Review only</div><div class="plmeta" style="color:var(--warn)">${_esc(data.attributionWarning||"No exact prompt snapshot is available for this render.")}</div></div>`;
+  }else{
+    rating=`<div class="plrating"><div class="plmeta">Prompt analyzed · no rendered ${type==="keyframe"?"keyframe":"take"} is available to rate yet.</div></div>`;
+  }
+  const weakest=ev.weakestObservedDimension;
+  const comparison=ev.versionComparison;
+  const summary=`<div class="plsummary"><div class="cchead">Evidence signal · ${_esc(ev.ratingCount||0)} human rating${ev.ratingCount===1?"":"s"}</div>
+    <div class="plmeta">${_esc(ev.promptLearningCount||0)} exact prompt/render · ${_esc(ev.qualityOnlyCount||0)} quality-only</div>
+    <div class="plmeta">${_esc(ev.learningClaim||"")}</div>
+    ${weakest?`<div class="ccrow"><b>Weakest observed:</b> ${_esc(weakest.label)} · ${_esc(weakest.average)}/2 across ${_esc(weakest.count)}</div>`:""}
+    ${comparison?`<div class="ccrow"><b>Current prompt vs prior:</b> ${comparison.delta>0?"+":""}${_esc(comparison.delta)} points <span class="ccref">association only</span></div>`:""}
+  </div>`;
+  const history=(data.ratings||[]).slice(0,8).map(r=>`<div class="plhistory"><b>${_esc(r.candidateId)}</b><span class="stbadge" style="color:var(${r.overallRead==="lands"?"--ok":r.overallRead==="partial"?"--warn":"--danger"});background:var(--surface2)">${_esc(r.overallRead)}</span><span>${_esc((r.createdAt||"").slice(0,16).replace("T"," "))} · ${_esc(r.reviewer||"")}${r.learningEligible?"":" · quality only"}</span>${r.note?`<div class="plhistory-note">${_esc(r.note)}</div>`:""}</div>`).join("");
+  const correlation=data.correlation||{};
+  const linked=(correlation.linkedComments||[]).map(item=>plFeedbackRow(tok,type,item,selected)).join("");
+  const prior=(correlation.priorAttempts||[]).map(item=>plFeedbackRow(tok,type,item,selected)).join("");
+  const directionNotes=(data.existingFeedback||[]).filter(item=>item.kind!=="render-comment").map(item=>plFeedbackRow(tok,type,item,selected)).join("");
+  const diagnostics=`<details class="techdetails"><summary>Prompt diagnostics · structure ${_esc(analysis.score)}/${_esc(analysis.maximum)}</summary>
+    <div class="plmatrix"><div class="plmh">Craft signal</div><div class="plmh plnum">${contract.analysisAppliesToRender?"Prompt":"Direction"}</div><div class="plmh plnum">Dailies</div>${matrix}</div>
+    <div class="plmeta" style="margin-top:8px">${_esc(analysis.wordCount)} words · deterministic analysis</div>
+    ${contract.analysisAppliesToRender?"":`<div class="plwarn">This analysis is current direction, not a claimed generation prompt for this legacy render.</div>`}
+    ${warnings}</details>`;
+  const audit=`<details class="techdetails plaudit"><summary>Audit details</summary>
+    ${plAuditTraceHTML(data)}
+    ${data.directionWarning?`<div class="plwarn">${_esc(data.directionWarning)}</div>`:""}
+    ${plSeedanceContractAuditHTML(data)}
+    ${rating}
+    ${linked?`<details class="techdetails"><summary>Current take comments · ${_esc((correlation.linkedComments||[]).length)}</summary>${linked}<div class="plmeta">No score is inferred from comment wording.</div></details>`:""}
+    ${prior?`<details class="techdetails"><summary>Earlier attempt comments · ${_esc((correlation.priorAttempts||[]).length)}</summary>${prior}<div class="plmeta">Each comment remains tied to its original batch and is excluded from the selected take's result.</div></details>`:""}
+    ${directionNotes?`<details class="techdetails"><summary>Direction decision notes</summary>${directionNotes}</details>`:""}
+    <details class="techdetails"><summary>Cross-render learning · ${_esc(ev.ratingCount||0)} ratings</summary>${summary}</details>
+    ${history?`<details class="techdetails"><summary>Rating history</summary>${history}</details>`:""}
+    ${diagnostics}
+    <details class="techdetails"><summary>Prompt clauses and structure</summary>${clauses}<pre class="techpre">${_esc(contract.prompt||"")}</pre></details>
+  </details>`;
+  return `<div id="${id}" class="promptlab"><div class="plhead"><div><div class="pltitle">${traceName}</div>
+      <div class="plmeta">Story · Prompt · Result · Next</div></div>
+      <button class="btn ghost" onclick="shLoadPromptLab('${_esc(tok)}','${_esc(type)}','${_esc(selected||"")}',true)">Refresh</button></div>
+    ${selector}
+    ${plTraceHTML(tok,type,data,preview)}
+    ${audit}
+  </div>`;
+}
+function plSetScore(tok,type,dimension,score){
+  const data=SH_PROMPTLAB_CACHE[plCacheKey(tok,type)];if(!data||data.error)return;
+  const draft=plDraft(data);draft.scores[dimension]=score;
+  const panel=document.getElementById(plPanelId(tok,type));if(!panel)return;
+  panel.querySelectorAll(`button[data-pl-dim="${dimension}"]`).forEach(btn=>{const active=Number(btn.dataset.plScore)===score;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});
+  plUpdateSave(tok,type);
+}
+function plUseFeedback(tok,type,feedbackId){
+  const data=SH_PROMPTLAB_CACHE[plCacheKey(tok,type)];if(!data||data.error)return;
+  const item=(data.existingFeedback||[]).find(x=>x.feedbackId===feedbackId);if(!item)return;
+  const draft=plDraft(data),note=String(item.note||"").trim();
+  if(note&&!draft.note.includes(note))draft.note=draft.note?draft.note+"\n\n"+note:note;
+  plRenderOnly(tok,type);
+}
+function plSetOverall(tok,type,value){
+  const data=SH_PROMPTLAB_CACHE[plCacheKey(tok,type)];if(!data||data.error)return;
+  plDraft(data).overallRead=value;
+  const panel=document.getElementById(plPanelId(tok,type));if(!panel)return;
+  panel.querySelectorAll("button[data-pl-overall]").forEach(btn=>{const active=btn.dataset.plOverall===value;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});
+  plUpdateSave(tok,type);
+}
+function plNote(tok,type,value){
+  const data=SH_PROMPTLAB_CACHE[plCacheKey(tok,type)];if(data&&!data.error)plDraft(data).note=value;
+}
+function plUpdateSave(tok,type){
+  const data=SH_PROMPTLAB_CACHE[plCacheKey(tok,type)];if(!data||data.error)return;
+  const draft=plDraft(data);
+  const button=document.getElementById("plSave_"+plPanelId(tok,type));if(button)button.disabled=!plComplete(data,draft);
+  const quick=document.getElementById("plQuickSave_"+plPanelId(tok,type));if(quick)quick.disabled=!draft.overallRead;
+}
+function plRenderOnly(tok,type){
+  const old=document.getElementById(plPanelId(tok,type));
+  if(old)old.outerHTML=promptLabPanelHTML(tok,type,SH_PROMPTLAB_CACHE[plCacheKey(tok,type)]);
+  else renderWorkspaceBody();
+}
+async function shLoadPromptLab(tok,type,candidateId,showLoading){
+  const key=plCacheKey(tok,type);
+  if(showLoading){SH_PROMPTLAB_CACHE[key]={loading:true};plRenderOnly(tok,type);}
+  try{
+    const q=new URLSearchParams({scene:String(SH_SC),shotId:tok,episode:SH_EP,artifactType:type});
+    if(candidateId)q.set("candidateId",candidateId);
+    const r=await fetch(BASE+"/api/prompt-lab?"+q,{cache:"no-store"}),j=await r.json();
+    SH_PROMPTLAB_CACHE[key]=r.ok?j:{error:j.error||"Prompt Lab is unavailable"};
+  }catch(e){SH_PROMPTLAB_CACHE[key]={error:"Can't reach the studio server."};}
+  plRenderOnly(tok,type);
+}
+async function plSaveRating(tok,type){
+  const key=plCacheKey(tok,type),data=SH_PROMPTLAB_CACHE[key];if(!data||!data.canRate)return;
+  const draft=plDraft(data);if(!draft.overallRead)return;
+  const detailed=(data.ratingDimensions||[]).every(item=>Number.isInteger(draft.scores[item.key]));
+  const button=document.getElementById("plSave_"+plPanelId(tok,type));
+  const quick=document.getElementById("plQuickSave_"+plPanelId(tok,type));
+  if(button)button.disabled=true;if(quick)quick.disabled=true;
+  try{
+    const r=await fetch(BASE+"/api/prompt-lab-rate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      scene:String(SH_SC),episode:SH_EP,shotId:tok,artifactType:type,candidateId:data.selectedCandidateId,
+      scores:detailed?draft.scores:{},overallRead:draft.overallRead,note:draft.note,by:REVIEWER})}),j=await r.json();
+    if(!r.ok||!j.ok){alert(j.error||"Could not save the result");plUpdateSave(tok,type);return;}
+    delete SH_PROMPTLAB_DRAFTS[plDraftKey(data)];
+    showToast((data.canTeachPrompt?"Prompt-linked":"Quality-only")+" result saved · approval unchanged",true);
+    await shLoadPromptLab(tok,type,data.selectedCandidateId,false);
+  }catch(e){alert("Can't reach the studio server. Reload and try again.");plUpdateSave(tok,type);}
+}
+function shotFocusCopy(mode,shot){
+  shot=shot||{};
+  if(mode==="keyframe"){
+    const pose=String(shot.openingPose||"").trim(),split=pose.indexOf(";");
+    const playable=split>=0?pose.slice(split+1).trim():pose;
+    return plHeadlineText(playable||shot.purpose,"Create a performance-ready opening stage for this shot.",190);
+  }
+  return plHeadlineText(shot.purpose,mode==="voice"?"Create the character performance for this shot.":"Create the animation take for this shot.",190);
+}
 function renderShotStage(mode){
   const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
   SH_RSEQ++; const mySeq=SH_RSEQ;
@@ -3081,12 +3931,28 @@ function renderShotStage(mode){
   }
   if(PSHOT_I>=shots.length)PSHOT_I=shots.length-1;
   const s=shots[PSHOT_I], m=shMedia(s.shotId), led=shLedger(s.shotId), tok=shTok(s.shotId);
+  const promptLabType=(mode==="animation"||(mode==="keyframe"&&s.sourceType==="opener"))?mode:null;
+  const referenceMode=(mode==="keyframe"||mode==="animation")?mode:null;
+  if(promptLabType){
+    const key=plCacheKey(tok,promptLabType);
+    if(!Object.prototype.hasOwnProperty.call(SH_PROMPTLAB_CACHE,key)){
+      SH_PROMPTLAB_CACHE[key]={loading:true};
+      setTimeout(()=>shLoadPromptLab(tok,promptLabType,null,false),0);
+    }
+  }
+  if(referenceMode){
+    const key=refCacheKey(tok);
+    if(!Object.prototype.hasOwnProperty.call(SH_REFERENCE_CACHE,key)){
+      SH_REFERENCE_CACHE[key]={loading:true};
+      setTimeout(()=>shLoadReferences(tok,true),0);
+    }
+  }
   const nav=`<div class="pshotnav">
     <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==0?"disabled":""} onclick="PSHOT_I--;renderWorkspaceBody()">← Previous</button>
     <span class="cnt">${_esc(s.shotId)} · Shot ${PSHOT_I+1} of ${shots.length}</span>
     <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==shots.length-1?"disabled":""} onclick="PSHOT_I++;renderWorkspaceBody()">Next →</button>
   </div>`;
-  let body="", decActions=[], decVersion="—", decHistory="";
+  let body="", decActions=[], decVersion="—", decHistory="", resultFirst=false;
   if(mode=="keyframe"){
     // PER-SHOT STATE (2026-07-18 correction): shotPipelineState is the ONE place a shot's own
     // keyframe readiness is computed. The old code drove this whole screen off the SCENE-WIDE
@@ -3098,7 +3964,6 @@ function renderShotStage(mode){
     // shotPipelineState's own direct-input-lineage correction). The only genuinely scene-wide
     // block left is the production package not existing yet at all.
     const sceneKf=currentStages().keyframe||{state:"ready"};
-    const genBtn=(label)=>`<button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${tok}',refs:(${JSON.stringify((s.referenceSlots||[]).length||3)})})">${label}</button>`;
     if(sceneKf.state=="blocked"&&!(SH_STATE&&SH_STATE.packageCurrent)){
       body=`<div class="artefact-empty"><div style="color:var(--muted)">Preparing the approved storyboard for production</div></div>`;
       decVersion="Blocked — not yet compiled";
@@ -3121,6 +3986,13 @@ function renderShotStage(mode){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
         decVersion=pst.label;
         decActions=[`<button class="btn" onclick="openPreviousShotOutcome('animation')">Resolve the previous shot</button>`];
+      } else if(pst.kf=="screening"){
+        const qc=pst.keyframeScreening||{},pending=!!led.keyframeCandidate;
+        body=`<div class="artefact-empty"><div><b>${_esc(pst.label||"Opening frame held for identity check")}</b><div style="color:var(--muted);margin-top:8px;max-width:520px">${_esc(qc.reason||pst.sub||"The frame cannot be accepted until identity, relative scale and staging checks pass.")}</div></div></div>`;
+        decVersion="Protected · Accept disabled";
+        decActions=[`<button class="btn" onclick="shRun('rescreen-keyframe','${tok}')">Retry identity check · no media generation</button>`,
+          pending?`<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">Iterate</button>`:shOpeningFrameChoices(tok,s),
+          `<div class="dec-caption">This retries only the objective review. It cannot regenerate the image or spend image credits.</div>`];
       } else if(!pst.needsKeyframe){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">Opening frame inherited — no generation and no cost. Chains from the previous shot's own approved final frame, no separate keyframe.</div></div>`;
         decVersion="Opening frame inherited";
@@ -3128,6 +4000,7 @@ function renderShotStage(mode){
           ?{label:"Continue to Voice & Timing",onclick:"openStageOutcome('voice')"}
           :{label:"Continue to Animation",onclick:"openStageOutcome('animation')"})];
       } else if(pst.kf=="awaiting"){
+        resultFirst=true;
         // SELECTION DOES NOT EQUAL APPROVAL (2026-07-18, Julian's source-choice directive):
         // this is the ONE approval area for every opening-frame source alike — generated,
         // uploaded, library-picked or carried from the previous shot's final frame. "Choose
@@ -3139,9 +4012,10 @@ function renderShotStage(mode){
                          previousFinalFrame:"carried from the previous shot's final frame"}[src]||src;
         body=`<img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · keyframe candidate (${_esc(srcLabel)})" src="${BASE}${m.keyframe}?v=${MEDIA_V}"/>`;
         decVersion="Awaiting your decision — "+srcLabel;
-        decActions=[`<button class="btn" onclick="shRun('approve-keyframe','${tok}')">✓ Approve</button>`,
-          `<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">✗ Choose another</button>`];
+        decActions=[`<button class="btn" onclick="shRun('approve-keyframe','${tok}')">✓ Accept keyframe</button>`,
+          `<button class="btn ghost" onclick="shRun('reject-keyframe','${tok}')">Iterate</button>`];
       } else if(pst.kf=="approved"){
+        resultFirst=true;
         // REPLACING AN APPROVED OPENING FRAME gets the SAME four-way source choice as a
         // first-time decision (2026-07-18) — a new candidate here is exactly as much "choose
         // its source" as the first one; it just happens to also have something to replace.
@@ -3155,13 +4029,13 @@ function renderShotStage(mode){
           ?`<button class="btn" onclick="openShotOutcome('keyframe',${nextKf})">Open next unresolved keyframe</button>`
           :`<button class="btn" onclick="openStageOutcome('animation')">Continue to Animation</button>`];
       } else if(pst.kf=="rejected"){
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected — see History below. Choose the replacement source.</div></div>`;
+        body=`<div class="artefact-empty"><div style="color:var(--muted)">Rejected. Build a corrected keyframe below, or choose an existing replacement.</div></div>`;
         decVersion="Rejected";
-        decActions=[shOpeningFrameChoices(tok,s)];
+        decActions=[`<div class="focus-brief">${_esc(shotFocusCopy(mode,s))}</div>`,shOpeningFrameChoices(tok,s)];
       } else {   // "ready" (or "staleInputs" falling through) — THE OPENING-FRAME SOURCE CHOICE
-        body=`<div class="artefact-empty"><div style="color:var(--muted)">${_esc(pst.label)}${pst.sub?" — "+_esc(pst.sub):""}</div></div>`;
+        body="";
         decVersion=pst.label;
-        decActions=[shOpeningFrameChoices(tok,s)];
+        decActions=[`<div class="focus-brief">${_esc(shotFocusCopy(mode,s))}</div>`,shOpeningFrameChoices(tok,s)];
       }
     }
     // HISTORY IS UNCONDITIONAL AND INDEPENDENT OF THE CURRENT STATE (2026-07-17): a past
@@ -3200,16 +4074,18 @@ function renderShotStage(mode){
       // hidden until it's rejected first (cb_render.voice_shot itself refuses this too).
       if(!m.vo){
         decVersion="Not generated";
-        decActions=[`<button class="btn" onclick="openDisclosureModal('voice',{shotId:'${tok}'})">🎙 Generate this approved performance</button>`,
-          `<div class="dec-caption">Only this shot runs, using its current approved Voice specialist direction.</div>`];
+        decActions=[`<div class="focus-brief">${_esc(shotFocusCopy(mode,s))}</div>`,`<button class="btn" onclick="openDisclosureModal('voice',{shotId:'${tok}'})">Generate performance</button>`,
+          `<div class="dec-caption">Only this shot runs, using current signed performance direction.</div>`];
       } else if(voApproved){
+        resultFirst=true;
         decVersion="Approved";
         decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
           `<button class="btn ghost" style="margin-top:8px" onclick="shRun('reject-voice','${tok}')">✗ Reject (allow regenerating)</button>`];
       } else {
+        resultFirst=true;
         decVersion="Awaiting your decision";
-        decActions=[`<button class="btn" onclick="shRun('approve-voice','${tok}')">✓ Approve</button>`,
-          `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">✗ Reject</button>`,
+        decActions=[`<button class="btn" onclick="shRun('approve-voice','${tok}')">✓ Accept voice</button>`,
+          `<button class="btn ghost" onclick="shRun('reject-voice','${tok}')">Iterate</button>`,
           `<button class="btn ghost" style="margin-top:8px" onclick="openDisclosureModal('voice-regen',{shotId:'${_esc(tok)}'})">↻ Regenerate</button>`,
           `<div class="dec-caption">Rebuilds just this shot's own take — always fires, whether or not the text has changed.</div>`];
       }
@@ -3231,13 +4107,15 @@ function renderShotStage(mode){
   } else { // animation
     const stLabel=led.status||"designed";
     if(stLabel=="candidates-pending"){
+      resultFirst=true;
       const cands=m.candidates||[];
       body=`<div class="candgrid">${cands.map(c=>`<div class="cand"><video controls src="${BASE}${c.url}?v=${MEDIA_V}"></video>
-        <div class="cand-pick"><b>C${c.n}</b><button class="btn" style="margin:0;padding:6px 14px" onclick="shRun('approve','${tok}',{candidate:${c.n}})">✓ Approve</button></div></div>`).join("")}</div>`;
+        <div class="cand-pick"><b>C${c.n}</b><button class="btn" style="margin:0;padding:6px 14px" onclick="shRun('approve','${tok}',{candidate:${c.n}})">✓ Accept</button></div></div>`).join("")}</div>`;
       decVersion=cands.length+" candidate"+(cands.length==1?"":"s")+" awaiting a decision";
       decActions=[`<select id="shCat_${tok}" class="reject-cat">${REJECT_CATS.map(c=>`<option${c=="other"?" selected":""}>${c}</option>`).join("")}</select>
-        <button class="btn ghost" onclick="shRejectBatch('${tok}')">✗ Reject batch</button>`];
+        <button class="btn ghost" onclick="shRejectBatch('${tok}')">Iterate batch</button>`];
     } else if(m.clip||m.finalFrame){
+      resultFirst=true;
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
       decVersion="Approved take";
       const nextAnim=shots.findIndex((shot,i)=>i!=PSHOT_I&&!((shotPipelineState(shots,i).current||{}).animation));
@@ -3263,23 +4141,23 @@ function renderShotStage(mode){
         body=`<div class="artefact-empty"><div style="color:var(--muted)">No candidates fired yet for ${_esc(s.shotId)}.</div></div>`;
         const nextLed=shNextLedger(), auth=(nextLed&&nextLed.pendingSpendAuth)||null;
         decVersion="Ready to generate";
-        decActions=[auth&&auth.token
-          ?`<button class="btn" onclick="openAnimationConfirmModal('${tok}')">💳 Review exact request & generate</button>`
-          :`<button class="btn" onclick="shRun('fire','${tok}',{candidates:SH_CANDS})">📋 Validate & disclose cost</button>`];
+        decActions=[`<button class="btn render-primary" onclick="shRender('${tok}')">Run Seedance 2.0 comparison</button>`,
+          `<div class="dec-caption">${auth&&auth.token?"The exact comparison request and cost are ready for your confirmation.":"Same Studio process and approvals. Longer units relay internally, then return as one candidate for review."}</div>`];
       }
       // THE ANIMATION WORKING PROMPT + THE FREE STRUCTURE CHECK (2026-07-19, contained
       // inside this existing Animation stage): shown regardless of readiness — editing/
       // checking is useful even before every input is attached. "Generate animation" above
       // stays completely separate with its own cost disclosure; nothing here spends anything.
-      body += `<div class="dec-caption" style="margin-top:14px">Animation generation uses only the approved Animation Director prompt. Legacy working-prompt overrides are disabled for production.</div>`;
-      body += structurePanelHTML(tok,SH_STRUCTURE_CACHE[tok]);
-      body += readbackPanelHTML(tok,SH_READBACK_CACHE[tok]);
+      body += `<div class="dec-caption" style="margin-top:14px">Animation generation uses only current signed Animation Director direction. Legacy working-prompt overrides are disabled for production.</div>`;
+      body += `<details class="techdetails"><summary>Prompt checks</summary>${structurePanelHTML(tok,SH_STRUCTURE_CACHE[tok])}${readbackPanelHTML(tok,SH_READBACK_CACHE[tok])}</details>`;
     }
     if((led.rejections||[]).length){
       decHistory=led.rejections.slice().reverse().map(r=>`<div class="histrow"><span class="stbadge" style="color:var(--danger);background:var(--dangerbg)">rejected</span>
         <span class="histmeta">${_esc((r.at||"").slice(0,16))} · ${_esc(r.category||"")}</span><div class="histnote">${_esc(r.correction||"")}</div></div>`).join("");
     }
   }
+  if(referenceMode)body+=referenceManifestHTML(tok,referenceMode,SH_REFERENCE_CACHE[refCacheKey(tok)]);
+  if(promptLabType)body+=`<details class="focus-evidence"><summary>Direction &amp; review evidence</summary><div class="focus-evidence-body">${promptLabPanelHTML(tok,promptLabType,SH_PROMPTLAB_CACHE[plCacheKey(tok,promptLabType)])}</div></details>`;
   art.innerHTML=`${nav}<div class="artefact-center">${body}</div>`;
   // 2026-07-17 correction: this shared tail used to show s.seedancePrompt (the VIDEO/motion
   // brief, compile_shot_contract's output) unconditionally on EVERY mode — including
@@ -3292,7 +4170,10 @@ function renderShotStage(mode){
   const techMeta=mode=="keyframe"
     ?`${techWords?techWords+" words · ":""}opening frame · ${_esc(s.sourceType||"")}`
     :`${techWords?techWords+" words · ":""}${_esc(s.durationSec||"")}s · ${_esc(s.sourceType||"")}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}`;
-  dec.innerHTML=decisionShell(PSTAGES.find(p=>p.id==mode).name, decVersion, decActions, decHistory)+
+  const decisionTitle=mode==="keyframe"?(resultFirst?"Review the opening keyframe":"Build the opening keyframe"):
+    mode==="voice"?(resultFirst?"Review the performance":"Create the performance"):
+    (resultFirst?"Review the animation take":"Create the animation take");
+  dec.innerHTML=decisionShell(decisionTitle, `${tok} · ${decVersion}`, decActions, decHistory)+
     (techPrompt?`<details class="techdetails"><summary>Technical details</summary>
       <div class="techmeta">${techMeta}</div>
       <pre class="techpre">${_esc(techPrompt||"")}</pre></details>`:"");
@@ -3300,26 +4181,121 @@ function renderShotStage(mode){
   if(mode=="keyframe"&&m.keyframe)attachDepartmentPanel(dec,"review-keyframe",s.shotId);
   if(mode=="animation"&&((m.candidates||[]).length||m.clip||m.finalFrame))
     attachDepartmentPanel(dec,"review-animation",s.shotId);
+  const workspace=document.getElementById("workspace");
+  if(workspace)workspace.classList.toggle("result-first",resultFirst);
+}
+function currentProductionDirection(stage,shotId){
+  const inputs=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs;
+  if(!inputs)return null;
+  if(stage==="look")return inputs.look&&inputs.look.prompt?inputs.look:null;
+  const shot=inputs.shots&&inputs.shots[shotId];
+  if(!shot)return null;
+  if(stage==="cinematography")return shot.keyframePrompt?shot:null;
+  if(stage==="voice")return Array.isArray(shot.voiceLines)&&shot.voiceLines.length?shot:null;
+  if(stage==="animation")return shot.animationPrompt?shot:null;
+  return null;
+}
+function directionLabel(stage){
+  return {look:"scene world",cinematography:"keyframe",voice:"performance",animation:"animation"}[stage]||"production";
+}
+function directionPrepFailure(stage,message){
+  const sheet=document.getElementById("sheet");if(!sheet)return;
+  sheet.innerHTML=`<button class="x" onclick="closeM()">×</button>
+    <h3>Could not prepare the ${_esc(directionLabel(stage))}</h3>
+    <div class="dec-caption">${_esc(message||"The specialist brief did not complete. No media was generated and no media spend occurred.")}</div>
+    <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn" onclick="closeM()">Close</button></div>`;
+}
+async function prepareDirectionThen(stage,shotId,resume){
+  if(currentProductionDirection(stage,shotId)){await resume();return;}
+  if(SH_JOB){alert("The Studio is already working. Let that finish, then start this outcome again.");return;}
+  const scene=String(SH_SC),episode=String(SH_EP),label=directionLabel(stage);
+  document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
+    <h3>Preparing the ${_esc(label)}</h3>
+    <div class="dec-caption">The Studio is locking canon, references and specialist direction behind the scenes. No media is being generated and no media spend can occur in this step.</div>
+    <div class="jobbanner" style="margin-top:16px"><span class="pulse">●</span> Preparing creative target…</div>`;
+  document.getElementById("modal").classList.add("show");
+  try{
+    const r=await fetch(BASE+"/api/department-run",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({scene,episode,stage,shotId:shotId||null})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){directionPrepFailure(stage,j.error||"The specialist could not start.");return;}
+    const key=deptKey(stage,shotId);SH_DEPT_CACHE[key]={loading:true};
+    SH_JOB=j.jobId;SH_LAST_JOB=null;SH_POLL_MISSES=0;
+    SH_AFTER_JOB=async job=>{
+      SH_DEPT_CACHE[key]=null;
+      if(scene!==String(SH_SC)||episode!==String(SH_EP))return;
+      if(!job||job.status!=="done"){
+        directionPrepFailure(stage,(job&&job.log)||"The specialist brief did not complete.");return;
+      }
+      if(!currentProductionDirection(stage,shotId)){
+        directionPrepFailure(stage,"The brief completed but did not match the current production inputs. Try again after reviewing the job record.");return;
+      }
+      closeM();await resume();
+    };
+    shPollStart();renderJobBanner();
+  }catch(e){directionPrepFailure(stage,"The Studio server could not be reached. No media was generated.");}
 }
 async function openDisclosureModal(kind,ctx){
   ctx=ctx||{}; await fetchRates();
-  let title,rows,confirm;
-  if(kind=="keyframe"){
-    const inp=SH_PREFLIGHT&&SH_PREFLIGHT.approvedInputs&&SH_PREFLIGHT.approvedInputs.shots&&SH_PREFLIGHT.approvedInputs.shots[ctx.shotId];
-    if(!inp||!inp.keyframePrompt){alert("Approve current Cinematography direction first.");return;}
-    const cost=estCost("seedream5pro_image",{refs:ctx.refs||3});
-    title="Generate keyframe";
-    rows=[["Model","Seedream 5 Pro"],["Exact approved prompt",inp.keyframePrompt],["References",(ctx.refs||3)+" approved assets"],
-          ["Estimated cost",cost!=null?("~$"+cost.toFixed(3)+" (estimated)"):"unknown"],
-          ["Outputs","1 image"],["Downstream work","Nothing else will run"]];
-    confirm=()=>{closeM();shRun('keyframe',ctx.shotId);};
+  const directionStage={keyframe:"cinematography",pose:"cinematography",voice:"voice","voice-regen":"voice",scenelook:"look"}[kind];
+  if(directionStage&&!currentProductionDirection(directionStage,ctx.shotId)){
+    await prepareDirectionThen(directionStage,ctx.shotId,()=>openDisclosureModal(kind,ctx));return;
+  }
+  let title,rows,confirm,confirmLabel="Fire",extra="";
+  if(kind=="pose"){
+    const cost=estCost("seedream5pro_image",{refs:1});
+    title="Create "+(ctx.character||"character")+" acting pose";
+    rows=[["Model","Seedream 5 Pro"],["Character",ctx.character||"—"],["Acting target",ctx.pose||"The approved shot-specific pose"],
+          ["References","1 locked identity turnaround"],["Estimated cost",cost!=null?("~$"+cost.toFixed(3)+" (estimated)"):"unknown"],
+          ["Outputs","1 isolated pose candidate"],["Next decision","Accept pose or iterate"]];
+    confirmLabel="Create pose";
+    confirm=()=>{closeM();shRun('pose',ctx.shotId,{character:ctx.character});};
+  } else if(kind=="keyframe"){
+    let refsState=SH_REFERENCE_CACHE[refCacheKey(ctx.shotId)];
+    if(!refsState||refsState.loading){
+      if(ctx._referenceRetry){alert("The exact keyframe build plan is still loading. Nothing was fired.");return;}
+      await shLoadReferences(ctx.shotId,true);
+      return openDisclosureModal(kind,{...ctx,_referenceRetry:true});
+    }
+    if(refsState.error||!refsState.keyframeBuild){
+      alert("The exact keyframe build plan is unavailable. Reload the references before building; nothing was spent.");return;
+    }
+    const keyframeRefs=(refsState.keyframe&&refsState.keyframe.references)||[];
+    if(!(refsState.keyframe&&refsState.keyframe.ready)||!keyframeRefs.length){
+      alert("The exact keyframe references are not all ready. Nothing was fired or spent.");return;
+    }
+    const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId];
+    if(!inp||!inp.keyframePrompt){alert("Cinematography direction is still being prepared.");return;}
+    const build=(refsState&&refsState.keyframeBuild)||{},unit=estCost("seedream5pro_image",{refs:1});
+    const calls=Number.isFinite(Number(build.maxMediaCalls))?Number(build.maxMediaCalls):1;
+    const maximum=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(unit!=null?unit*calls:null);
+    title="Build keyframe";
+    const modelLabel=build.providerModelId||"Seedream 5 Pro";
+    rows=[["Model",modelLabel],
+          ["Format","16:9 still opening frame"],
+          ["Creative target",inp.keyframePromptHeadline||"A performance-ready opening stage"],
+          ["Provider references",keyframeRefs.length+" exact ordered assets shown below"],
+          ["Keyframe owns","Identity, canon scale, world, starting camera and light, loose staging, clear action space"],
+          ["Animation owns","Facial acting, wing cadence, exact poses, movement, contact, recovery and camera evolution"],
+          ["Maximum media calls",calls+" total"],
+          ["Maximum estimated cost",maximum!=null?("~$"+maximum.toFixed(3)+" (estimated)"):"unknown"],
+          ["Stop rule",build.stopPolicy||"One generation; no automatic rerolls"],
+          ["Output","1 finished keyframe for your review"],
+          ["Quality hold","Identity, distinction, 14:12 scale, anatomy and staging must pass before Accept appears"],
+          ["Your next decision","Accept or iterate the finished keyframe"]];
+    const refCards=keyframeRefs.map(item=>`<article class="refcard"><img class="refmedia zoom" data-cap="${_esc(refSlotLabel(item.slot)+' · '+(item.role||'reference'))}" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}" alt="${_esc(item.role||'Keyframe reference')}"><div class="refcopy"><div class="refslot">${_esc(refSlotLabel(item.slot))}</div><div class="refrole">${_esc(item.role||'Reference')}${item.identity&&item.identity.view?` · ${_esc(item.identity.view)} identity view`:""}</div><div class="reffile">${_esc(item.fileName||'')}</div></div></article>`).join("");
+    extra=`<section class="refpanel prefire-refs" aria-label="Exact keyframe references"><div class="refhead"><div><div class="reftitle">Exact references sent in this order</div><div class="refsummary">Isolated turnaround views grouped by character, plus the locked scene world</div></div><span class="refstate">${keyframeRefs.length}/${keyframeRefs.length} ready</span></div><div class="refgrid">${refCards}</div></section>
+      <details class="techdetails prefire-prompt" open><summary>Exact prompt sent to the image model</summary><pre class="techpre">${_esc(inp.keyframePrompt)}</pre></details>`;
+    confirmLabel="Build keyframe";
+    confirm=()=>{closeM();shRun('build-keyframe',ctx.shotId);};
   } else if(kind=="voice"){
-    const inp=SH_PREFLIGHT&&SH_PREFLIGHT.approvedInputs&&SH_PREFLIGHT.approvedInputs.shots&&SH_PREFLIGHT.approvedInputs.shots[ctx.shotId];
-    if(!inp||!inp.voiceLines){alert("Approve current Voice direction first.");return;}
+    const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[ctx.shotId];
+    if(!inp||!inp.voiceLines){alert("Voice direction is still being prepared.");return;}
     title="Generate voice";
-    rows=[["Model","ElevenLabs (V3 dialogue)"],["Shot",ctx.shotId],["Exact approved performance",inp.voiceLines.map(x=>x.speaker+": "+x.performedText).join("\n")],
+    rows=[["Model","ElevenLabs (V3 dialogue)"],["Shot",ctx.shotId],["Performance",inp.voiceLines.map(x=>x.speaker+": "+x.performedText).join("\n")],
           ["Cost","Priced per character — shown in the job log once it fires"],
           ["Outputs","1 audio take"],["Downstream work","Nothing else will run"]];
+    confirmLabel="Fire voice";
     confirm=()=>{closeM();shRun('voice-shot',ctx.shotId);};
   } else if(kind=="voice-regen"){
     // THE EXPLICIT PER-SHOT FORCE (2026-07-19, Julian — "I've just regenerated voice b1
@@ -3335,17 +4311,16 @@ async function openDisclosureModal(kind,ctx){
           ["Cost","Priced per character — shown in the job log once it fires"],
           ["Outputs","1 audio take (the one it replaces is archived, not deleted — compare both below)"],
           ["Downstream work","Nothing else will run"]];
+    confirmLabel="Fire new take";
     confirm=()=>{closeM();shRun('regen-voice',ctx.shotId);};
   } else if(kind=="scenelook"){
-    // THE APPROVED-SPECIALIST HARD GATE (2026-07-19 — the dog-and-fox misfire): Generate must
-    // never fire without an approved Look Development specialist direction, and — when it can
-    // fire — the disclosure must show the EXACT prompt that will be submitted, never a generic
-    // summary. Reads the SAME department cache attachDepartmentPanel already populates.
-    const approvedPrompt=SH_PREFLIGHT&&SH_PREFLIGHT.approvedInputs&&SH_PREFLIGHT.approvedInputs.look&&SH_PREFLIGHT.approvedInputs.look.prompt;
-    if(!approvedPrompt){
+    // Generation consumes signed current direction. The human judges its visible result rather
+    // than approving internal production prose.
+    const lookInput=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.look;
+    if(!lookInput||!lookInput.prompt){
       document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
-        <h3>Approve Look Development direction first.</h3>
-        <div class="dec-caption">Scene ${_esc(SH_SC)} has no approved Look Development specialist direction yet — Generate is refused until one is approved in the Cinematographer / DP panel.</div>
+        <h3>Look Development is still preparing.</h3>
+        <div class="dec-caption">Scene ${_esc(SH_SC)} needs current signed direction before a paid image can be generated.</div>
         <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn ghost" onclick="closeM()">Close</button></div>`;
       document.getElementById("modal").classList.add("show");
       return;
@@ -3356,21 +4331,23 @@ async function openDisclosureModal(kind,ctx){
     // ctx.sourceLabel are set by slUpload/slLibraryPick below; the plain Generate button
     // leaves both unset, unchanged from before.
     const cost=estCost("seedream5pro_image",{refs:ctx.sourcePath?1:0});
-    title=ctx.regenerate?"Regenerate Scene Look plate":"Generate Scene Look plate";
+    title=ctx.regenerate?"Rebuild Scene World":"Build Scene World";
     rows=[["Model","Seedream 5 Pro"],
-          ["Approved specialist prompt",approvedPrompt],
+          ["Creative target",lookInput.headline||"A canon-locked scene world"],
           ["Reference",ctx.sourcePath?_esc(ctx.sourceLabel||"1 explicitly selected reference"):"None — text-to-image"],
           ["Estimated cost",cost!=null?("~$"+cost.toFixed(3)+" (estimated)"):"unknown"],
           ["Outputs","1 image"],
-          ["Downstream work",ctx.regenerate?"The current plate is archived; every downstream keyframe held on the old plate goes stale until this one is approved":"Nothing else will run"]];
+          ["Next decision","Fire the first keyframe and judge the complete composition"]];
+    confirmLabel="Build scene world";
     confirm=()=>{closeM();shRun('scenelook',null,{sourcePath:ctx.sourcePath});};
   } else return;
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>${_esc(title)}</h3>
     <div class="disc-rows">${rows.map(([k,v])=>`<div class="disc-row"><span class="disc-k">${_esc(k)}</span><span class="disc-v">${_esc(String(v))}</span></div>`).join("")}</div>
+    ${extra}
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
       <button class="btn ghost" onclick="closeM()">Cancel</button>
-      <button class="btn" onclick="_confirmDisclosure()">Generate</button>
+      <button class="btn" onclick="_confirmDisclosure()">${_esc(confirmLabel)}</button>
     </div>`;
   _PENDING_CONFIRM=confirm;
   document.getElementById("modal").classList.add("show");
@@ -3380,10 +4357,15 @@ function openAnimationConfirmModal(shotId){
   const led=shLedger(shotId); const auth=led&&led.pendingSpendAuth;
   if(!auth||!auth.token){ alert("No disclosure on record yet — click Generate first."); return; }
   const d=auth.disclosure||{};
-  const inp=SH_PREFLIGHT&&SH_PREFLIGHT.approvedInputs&&SH_PREFLIGHT.approvedInputs.shots&&SH_PREFLIGHT.approvedInputs.shots[shotId];
-  if(!inp||!inp.animationPrompt){alert("Approve current Animation direction first.");return;}
+  const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[shotId];
+  if(!inp||!inp.animationPrompt){alert("Animation direction is still being prepared.");return;}
   const pick=(...ks)=>{for(const k of ks) if(d[k]!=null&&d[k]!=="") return d[k]; return "?";};
-  const rows=[["Model","Seedance 2.0 reference-to-video (fal.ai)"],["Shot",led.shotId||"—"],["Exact approved prompt",inp.animationPrompt],
+  const modelId=pick("providerModelId");
+  const modelLabel=modelId==="dreamina-seedance-2-5-260628"?"Seedance 2.5 via BytePlus":
+    modelId==="fal-seedance-2.0"?"Seedance 2.0 comparison via fal":modelId;
+  const calls=(d.internalProviderCalls||[]).map(x=>String(x.durationSec)+"s").join(" + ");
+  const rows=[["Model",modelLabel],["Production unit",led.shotId||"—"],["Duration",pick("shotDurationSec")+"s"],["Creative target",inp.animationPromptHeadline||"A canon-locked performance and camera plan"],
+    ["Provider delivery",calls?calls+" → one review candidate":"one provider call"],
     ["Opening frame",pick("openingAnchor")],["Approved audio",pick("audioAsset")],
     ["Candidates",pick("candidates","candidateCount","count")],
     ["Cost per candidate","$"+pick("costPerCandidateUsd","costPerCandidate","perCandidate","candidateCost")],
@@ -3394,7 +4376,7 @@ function openAnimationConfirmModal(shotId){
     <div class="disc-rows">${rows.map(([k,v])=>`<div class="disc-row"><span class="disc-k">${_esc(k)}</span><span class="disc-v">${_esc(String(v))}</span></div>`).join("")}</div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
       <button class="btn ghost" onclick="closeM()">Cancel</button>
-      <button class="btn" onclick="_confirmDisclosure()">Generate</button>
+      <button class="btn" onclick="_confirmDisclosure()">Fire candidates</button>
     </div>`;
   _PENDING_CONFIRM=()=>{closeM();shApproveSpendFire(shotId);};
   document.getElementById("modal").classList.add("show");
@@ -3497,14 +4479,14 @@ let SH_AGENT_KEY=null,SH_AGENT_SEQ=0,SH_AGENT_CACHE={};
 // outcome so renderJobBanner() can show it (color-coded, with its log) until the user either
 // dismisses it or fires the next job — matching shJobHTML's existing color/informative-note
 // logic, which was written once but never actually wired into any visible screen.
-let SH_LAST_JOB=null,SH_POLL_MISSES=0;
+let SH_LAST_JOB=null,SH_POLL_MISSES=0,SH_AFTER_JOB=null;
 // THE CONTAINED CREATIVE CONTROLS (2026-07-19, Voice + Animation working versions + the free
 // structure check): per-shot, fetched on demand (never prefetched for the whole scene — these
 // stay genuinely optional/contained, not a new eager network cost on every scene load).
 // SH_RSEQ guards against a stale async fetch re-rendering after the user has already
 // navigated to a different shot/stage — the async loader only re-renders if its own
 // captured sequence number still matches the current one.
-let SH_VOICE_CACHE={},SH_SEEDANCE_CACHE={},SH_STRUCTURE_CACHE={},SH_READBACK_CACHE={},SH_RSEQ=0;
+let SH_VOICE_CACHE={},SH_SEEDANCE_CACHE={},SH_STRUCTURE_CACHE={},SH_READBACK_CACHE={},SH_REFERENCE_CACHE={},SH_PROMPTLAB_CACHE={},SH_PROMPTLAB_DRAFTS={},SH_RSEQ=0;
 // SH_VOICE_DIRTY (2026-07-19 correction): "add more acting into the working version, save
 // it, and it just makes what was there before" — traced to a real, confirmed race, not the
 // save/read round-trip itself (verified directly: a real save persists and reads back
@@ -3613,6 +4595,7 @@ async function shSaveSeedanceWork(tok){
     const j=await r.json();
     if(!j.ok){alert("Couldn't save: "+(j.error||"failed"));return;}
     delete SH_SEEDANCE_CACHE[tok]; delete SH_STRUCTURE_CACHE[tok]; delete SH_READBACK_CACHE[tok];
+    delete SH_PROMPTLAB_CACHE[plCacheKey(tok,"animation")];
     if(typeof showToast=="function")showToast("Animation working prompt saved — no animation generated",true);
     renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
@@ -3624,42 +4607,41 @@ async function shRestoreSeedanceWork(tok){
     const j=await r.json();
     if(!j.ok){alert("Couldn't restore: "+(j.error||"failed"));return;}
     delete SH_SEEDANCE_CACHE[tok]; delete SH_STRUCTURE_CACHE[tok]; delete SH_READBACK_CACHE[tok];
+    delete SH_PROMPTLAB_CACHE[plCacheKey(tok,"animation")];
     if(typeof showToast=="function")showToast("Reverted to the approved storyboard's prompt",true);
     renderWorkspaceBody();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
-const SH_LABEL={voice:"Voice all",animatic:"Timing slate",scenelook:"Generate Scene Look plate","approve-scenelook":"Approve Scene Look","reject-scenelook":"Reject Scene Look",keyframe:"Generate keyframe",fire:"Fire candidates",next:"Fire next",approve:"Approve candidate",reject:"Reject batch",stitch:"Build post master",
+const SH_LABEL={voice:"Voice all",animatic:"Timing slate",scenelook:"Build Scene World","approve-scenelook":"Accept Scene Look","reject-scenelook":"Iterate Scene Look",keyframe:"Build keyframe",fire:"Fire candidates",next:"Fire next",approve:"Accept candidate",reject:"Iterate batch",stitch:"Build post master",
   "select-upload":"Use uploaded image","select-library":"Use library image","select-previous":"Use previous final frame",
-  "approve-voice":"Approve voice","reject-voice":"Reject voice"};
+  "approve-voice":"Accept voice","reject-voice":"Iterate voice"};
 const REJECT_CATS=["identity","geography","action-timing","instruction-ignored","other"];   // mirrors serve.py's REJECT_CATEGORIES exactly
 let SH_CANDS=3;   // candidate-batch size (1-4, default 3) — Seedance is a PROBABILISTIC candidate generator (Julian, 2026-07-16); a fire is a batch, never one deterministic take
 const shTok=x=>String(x||"").replace(/[^A-Za-z0-9._-]/g,"");   // shotId into an onclick attr — token-safe, mirrors the server's own _SHOT_TOKEN
 async function shFetchPkg(){
   SH_PKG=null;SH_MEDIA=null;SH_FILE=null;SH_ERR=null;SH_SCENELOOK=null;SH_REASSESS=null;SH_PREFLIGHT=null;SH_STATE=null;SH_AGENT=null;
+  SH_REFERENCE_CACHE={};
   SH_AGENT_KEY=null;SH_AGENT_CACHE={};SH_AGENT_SEQ++;
   try{
-    const [r,slr,rar,pfr,psr,sar]=await Promise.all([
-      fetch(BASE+"/api/shot-package?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}),
+    // One authoritative state/preflight read first. The former six-way Promise.all made
+    // production_state run repeatedly and could leave mobile on "Loading scene" while
+    // filesystem and SQLite reads competed with one another.
+    const r=await fetch(BASE+"/api/shot-package?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"});
+    const j=await r.json();
+    if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
+    else SH_ERR=(j&&j.error)||("HTTP "+r.status);
+    SH_PREFLIGHT=j&&j.preflight&&!j.preflight.error?j.preflight:null;
+    SH_STATE=j&&j.productionState&&!j.productionState.error?j.productionState:null;
+    const [slr,rar]=await Promise.all([
       fetch(BASE+"/api/scenelook?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
       // DIRECT-INPUT LINEAGE (2026-07-18): per-shot, read-only, zero-spend reassessment —
       // does THIS shot's own candidate/approval still match its own direct inputs right
       // now. Replaces the old blanket "package/storyboard md5 changed -> block everything"
       // gate, which invalidated every shot in the scene over an edit to just one of them.
-      fetch(BASE+"/api/shot-reassess?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
-      fetch(BASE+"/api/production-preflight?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
-      fetch(BASE+"/api/production-state?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null),
-      fetch(BASE+"/api/studio-agent?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP)+"&mode="+encodeURIComponent(SH_AGENT_MODE),{cache:"no-store"}).catch(()=>null)
+      fetch(BASE+"/api/shot-reassess?scene="+encodeURIComponent(SH_SC)+"&episode="+encodeURIComponent(SH_EP),{cache:"no-store"}).catch(()=>null)
     ]);
-    const j=await r.json();
-    if(j&&j.package){SH_PKG=j.package;SH_MEDIA=j.media||{};SH_FILE=j.file||null;}
-    else SH_ERR=(j&&j.error)||("HTTP "+r.status);
     SH_SCENELOOK = slr ? await slr.json().catch(()=>({status:"none"})) : {status:"none"};
     SH_REASSESS = rar ? await rar.json().catch(()=>({shots:{}})) : {shots:{}};
-    SH_PREFLIGHT = pfr ? await pfr.json().catch(()=>null) : null;
-    const state=psr ? await psr.json().catch(()=>null) : null;
-    SH_STATE = state&&!state.error ? state : (j&&j.productionState)||null;
-    SH_AGENT = sar ? await sar.json().catch(()=>null) : null;
-    if(SH_AGENT&&!SH_AGENT.error){SH_AGENT_KEY=SH_AGENT_MODE+":__scene__";SH_AGENT_CACHE[SH_AGENT_KEY]=SH_AGENT;}
   }catch(e){SH_ERR="Can't reach the studio server.";}
 }
 async function shEnsureAgentSelection(){
@@ -3683,7 +4665,7 @@ function shLedger(sid){return ((SH_PKG&&SH_PKG.continuityLedger)||[]).find(e=>e.
 function shMedia(sid){return ((SH_MEDIA&&SH_MEDIA.shots)||{})[sid]||{};}
 // shared per-shot gate boolean — mirrors deriveSceneState's own sceneLookOk derivation
 // exactly, so the Scene Workspace's own per-shot screens never disagree with the rail.
-function shSceneLookOk(){ return !!(SH_SCENELOOK&&SH_SCENELOOK.status=="approved"); }
+function shSceneLookOk(){ return !!(SH_SCENELOOK&&SH_SCENELOOK.current); }
 // per-shot direct-input reassessment (2026-07-18) — {verdict, changed}|null; null (no data
 // fetched yet, or the shot was never reassessed — e.g. a relay shot) is never treated as
 // "regenerate", only a genuinely returned "regenerate" verdict is.
@@ -3701,6 +4683,11 @@ async function shRun(cmd,shotId,opts){
     // can never approve or unlock anything again. A reason is always required, never optional.
     correction=(opts.correction!=null?opts.correction:
       (prompt("Why is this keyframe being rejected? (goes on record in History):","")||"")).trim();
+    if(!correction)return;
+  }
+  if(cmd=="reject-pose"){
+    correction=(opts.correction!=null?opts.correction:
+      (prompt("What is wrong with "+(opts.character||"this character")+"'s acting pose?","" )||"")).trim();
     if(!correction)return;
   }
   if(cmd=="reject-scenelook"){
@@ -3721,9 +4708,12 @@ async function shRun(cmd,shotId,opts){
   }
   const body={cmd,scene:String(SH_SC),episode:SH_EP};
   if(shotId)body.shotId=shotId;
+  if(opts.character)body.character=opts.character;
   if(correction)body.correction=correction;
   if(opts.candidates!=null)body.candidates=opts.candidates;   // fire/next: batch size 1-4
   if(opts.spendToken)body.spendToken=opts.spendToken;         // fire/next: the SERVER-ISSUED single-use token from the shot's ledger pendingSpendAuth — without it the engine validates, prints the SPEND DISCLOSURE, stores the token and REFUSES (the designed step 1); the same token also resumes an interrupted batch
+  if(opts.comparisonModelId)body.comparisonModelId=opts.comparisonModelId;
+  if(opts.comparisonRunId)body.comparisonRunId=opts.comparisonRunId;
   if(opts.candidate!=null)body.candidate=opts.candidate;      // approve: which candidate wins (C1..CN)
   if(opts.category)body.category=opts.category;               // reject: failure category (REJECT_CATS)
   if(opts.sourcePath)body.sourcePath=opts.sourcePath;          // select-upload/select-library: the holding/library file's own path
@@ -3732,6 +4722,7 @@ async function shRun(cmd,shotId,opts){
     const j=await r.json();
     if(!j.ok){alert("Couldn't start: "+(j.error||"failed"));return;}
     SH_JOB=j.jobId;SH_LAST_JOB=null;SH_POLL_MISSES=0;
+    SH_AFTER_JOB=typeof opts.afterJob==="function"?opts.afterJob:null;
     if(typeof showToast=="function")showToast("▶ "+cmd+(shotId?" · "+shotId:"")+" — started",true);
     shPollStart();if(page=="pipeline")renderControl();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
@@ -3746,17 +4737,21 @@ async function shRun(cmd,shotId,opts){
 // generation cost). Every one of the last three ends at the SAME approval area as
 // generation — "Approve" / "Choose another" — selection is never approval.
 function shOpeningFrameChoices(tok,s){
-  const kr=(RATES||{})["seedream5pro_image"];
-  const genCost=kr?(" — $"+kr.usd):"";
+  const refs=SH_REFERENCE_CACHE[refCacheKey(tok)]||{},build=refs.keyframeBuild||{};
+  const kr=(RATES||{})["seedream5pro_image"],fallback=kr?Number(kr.usd):null;
+  const conservativeCalls=1;
+  const maxCost=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(fallback==null?null:fallback*conservativeCalls);
+  const genCost=maxCost!=null?(" · up to $"+maxCost.toFixed(3)):"";
   const isOpener=s.sourceType=="opener";
+  const buildLabel="Build keyframe";
   return `<div class="ofc">
-    <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}',refs:(${JSON.stringify((s.referenceSlots||[]).length||3)})})">◈ Generate new keyframe${_esc(genCost)}</button></div>
-    <div class="ofc-row"><button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">⇧ Upload image — no generation cost</button>
-      <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
-    <div class="ofc-row"><button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">▤ Choose from Asset Library — no generation cost</button></div>
-    <div class="ofc-row">${isOpener
-      ? `<button class="btn ghost" disabled title="${_esc(s.shotId)} opens the scene — there is no previous shot's final frame">⟲ Use previous approved final frame — not applicable (scene opener)</button>`
-      : `<button class="btn ghost" onclick="shRun('select-previous','${_esc(tok)}')">⟲ Use previous approved final frame — no generation cost</button>`}</div>
+    <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">${_esc(buildLabel+genCost)}</button></div>
+    <details class="ofc-alternatives"><summary>Use an existing image instead</summary><div class="ofc-alternatives-body">
+      <div class="ofc-row"><button class="btn ghost" onclick="document.getElementById('ofcUpload_${_esc(tok)}').click()">Upload image · no generation cost</button>
+        <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
+      <div class="ofc-row"><button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose from Asset Library · no generation cost</button></div>
+      ${isOpener?"":`<div class="ofc-row"><button class="btn ghost" onclick="shRun('select-previous','${_esc(tok)}')">Use previous approved final frame · no generation cost</button></div>`}
+    </div></details>
   </div>`;
 }
 async function shOpenFrameUpload(tok,input){
@@ -3896,19 +4891,37 @@ function shDiscCount(auth){   // the candidate count the token is BOUND to (null
   const n=d.candidates!=null?d.candidates:(d.candidateCount!=null?d.candidateCount:d.count);
   return (n!=null&&isFinite(+n))?+n:null;
 }
+function shRender(shotId){
+  if(!currentProductionDirection("animation",shotId)){
+    prepareDirectionThen("animation",shotId,()=>shRender(shotId));return;
+  }
+  const led=shLedger(shotId),auth=led&&led.pendingSpendAuth;
+  if(auth&&auth.token){openAnimationConfirmModal(shotId);return;}
+  shRun('fire',shotId,{candidates:SH_CANDS,
+    comparisonModelId:'fal-seedance-2.0',
+    comparisonRunId:'studio-seedance20-comparison',
+    afterJob:()=>{
+      const current=shLedger(shotId),pending=current&&current.pendingSpendAuth;
+      if(pending&&pending.token)openAnimationConfirmModal(shotId);
+    }});
+}
 function shApproveSpendFire(shotId){
   const led=shLedger(shotId);
   const auth=led&&led.pendingSpendAuth;
   if(!auth||!auth.token){alert("No pending spend authorization on "+((led&&led.shotId)||"the next shot")+" — run “📋 Disclose cost & prepare batch” first. The engine validates the batch, prints the disclosure and issues the single-use token.");return;}
-  if(!confirm("PAID BATCH — approve this exact disclosed spend for "+(led.shotId||"the next shot")+"?\n\n"+shDiscSummary(auth)+"\n\nThe token is SINGLE-USE and bound to this exact prompt/keyframe/refs/audio/duration/count — if anything has changed since the disclosure, the engine refuses and you re-run the disclosure."))return;
   const n=shDiscCount(auth);
   const opts={spendToken:auth.token};
+  const d=auth.disclosure||{};
+  if(d.comparisonRunId){opts.comparisonModelId=d.providerModelId;opts.comparisonRunId=d.comparisonRunId;}
   if(n!=null)opts.candidates=n;   // send the BOUND count (a different N would just make the token stale); omit when unreadable
   shRun('fire',shotId,opts);
 }
 function shResumeBatch(token,shotId){
   if(!confirm("Resume the interrupted batch for "+shotId+"?\n\nOnly the MISSING candidates are generated — same single-use token, no new spend authorization, no repay of the finished ones."))return;
-  shRun('fire',shotId,{spendToken:token});
+  const led=shLedger(shotId),d=((led.batch||{}).disclosure)||{};
+  const opts={spendToken:token};
+  if(d.comparisonRunId){opts.comparisonModelId=d.providerModelId;opts.comparisonRunId=d.comparisonRunId;}
+  shRun('fire',shotId,opts);
 }
 function shRejectBatch(tok){
   const sel=document.getElementById("shCat_"+tok);
@@ -3937,6 +4950,7 @@ async function _shPollTick(){
     SH_POLL_MISSES++;
     if(SH_POLL_MISSES>=3){
       clearInterval(SH_POLL);SH_POLL=null;SH_JOB=null;SH_POLL_MISSES=0;
+      SH_AFTER_JOB=null;
       if(typeof showToast=="function")showToast("Lost track of that job — the studio server may have restarted mid-run. Reload to check the real status.",false);
       await shFetchPkg();if(page=="pipeline")renderControl();
     }
@@ -3957,8 +4971,16 @@ async function _shPollTick(){
     // after the job finished, because nothing told it to re-fetch. Cleared unconditionally
     // on every completed job, not just voice ones — any fire (keyframe, animation) could
     // equally leave one of these three stale.
-    SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};SH_READBACK_CACHE={};
-    await shFetchPkg();if(page=="pipeline")renderControl();else renderJobBanner();
+    SH_VOICE_CACHE={};SH_SEEDANCE_CACHE={};SH_STRUCTURE_CACHE={};SH_READBACK_CACHE={};SH_REFERENCE_CACHE={};SH_PROMPTLAB_CACHE={};SH_PROMPTLAB_DRAFTS={};
+    const afterJob=SH_AFTER_JOB;SH_AFTER_JOB=null;
+    // Complete the authoritative refresh before resuming any deferred outcome. Starting
+    // renderControl() without awaiting it lets its nested shFetchPkg() clear SH_PREFLIGHT
+    // just before prepareDirectionThen() checks the newly-signed specialist direction,
+    // falsely reporting a valid brief as stale. The deferred callback must only observe a
+    // fully-loaded, internally consistent package/state/preflight snapshot.
+    if(page=="pipeline")await renderControl();
+    else{await shFetchPkg();renderJobBanner();}
+    if(afterJob)await afterJob(j);
     return;
   }
   // STILL RUNNING — refresh the visible banner every tick so the pulsing indicator and

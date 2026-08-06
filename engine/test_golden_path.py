@@ -48,6 +48,54 @@ def _test_canon_status(episode=None, cast=None, root=None):
     }
 
 
+def _test_seedance_25_contract(**kwargs):
+    """Explicit zero-network 2.5 contract for orchestration tests only."""
+    assert kwargs.get("model_id") in (None, "dreamina-seedance-2-5-260628")
+    duration = int(kwargs["duration"])
+    assert 4 <= duration <= 30
+    return {
+        "providerModelId": "dreamina-seedance-2-5-260628",
+        "provider": "byteplus",
+        "modelVersion": "2.5-260628",
+        "transport": "byteplus-async",
+        "mode": "reference-to-video",
+        "endpoint": "/api/v3/contents/generations/tasks",
+        "resolution": kwargs.get("resolution", "720p"),
+        "duration": duration,
+        "costRateKey": "seedance_standard_per_sec",
+        "capabilityVerifiedAt": "2026-08-04-test-fixture",
+        "capabilitySource": "test-fixture",
+    }
+
+
+def _keyframe_conformance_output(context=None, verdict="pass"):
+    context = context or {}
+    expected = list(context.get("expectedCharacters") or ["Fuzzby", "Zenny"])
+    score = 2 if verdict == "pass" else 0
+    dimension = {
+        "score": score,
+        "visibleEvidence": ("The synthetic fixture passes." if score == 2 else
+                            "The synthetic fixture visibly fails."),
+        "correction": "" if score == 2 else "Restore the locked identities and 14:12 scale.",
+    }
+    return R.cb_departments.KeyframeConformanceReview.model_validate({
+        "verdict": verdict,
+        "expectedCharacters": expected,
+        "detectedCharacters": (expected if verdict == "pass" else expected[:1]),
+        "expectedSubjectCount": len(expected),
+        "subjectCount": len(expected) if verdict == "pass" else min(1, len(expected)),
+        "summary": ("Synthetic identity and scale pass." if verdict == "pass" else
+                    "Zenny is missing and relative scale is wrong."),
+        "identityAndDistinguishability": dimension,
+        "relativeScaleAndGeography": dimension,
+        "anatomyAndSilhouette": dimension,
+        "actionReadyComposition": dimension,
+        "forbiddenContent": dimension,
+        "recommendedCorrection": ("" if verdict == "pass" else
+                                  "Restore Zenny and the locked 14:12 size relationship."),
+    })
+
+
 @pytest.fixture(autouse=True)
 def isolated_canon(monkeypatch):
     monkeypatch.setattr(cb_canon, "status", _test_canon_status)
@@ -61,13 +109,59 @@ def isolated_canon(monkeypatch):
         "canonProfileDigest": TEST_CANON_DIGESTS["story"],
         "sourceHashes": {"fixture": TEST_CANON_DIGESTS["story"]},
     })
+    monkeypatch.setattr(R.cb_providers, "request_contract", _test_seedance_25_contract)
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance",
+        lambda context, images, **kwargs: _keyframe_conformance_output(context, "pass"))
 
 
 # ── the synthetic scene: opener w/ dialogue, relay w/ dialogue, silent relay ────────────
-CFG = {"Fuzzby": {"sizeRank": 2, "avoid": "bee", "voiceId": "voice-fuzzby",
+CFG = {"Fuzzby": {"sizeRank": 2, "heightIn": 14, "avoid": "bee", "voiceId": "voice-fuzzby",
                    "anchor": "media/refs/CB_Fuzzby.jpeg"},
-       "Zenny": {"sizeRank": 3, "avoid": "bee", "voiceId": "voice-zenny",
+       "Zenny": {"sizeRank": 3, "heightIn": 12, "avoid": "bee", "voiceId": "voice-zenny",
                   "anchor": "media/refs/CB_Zenny.jpeg"}}
+
+
+def _install_provider_identity_fixture(monkeypatch, engine):
+    """Keep orchestration tests isolated from the real show's provider identity art."""
+    identity_paths = {}
+    packs = {
+        "Fuzzby": {
+            "schemaVersion": 1, "source": "fixture",
+            "providerViews": {"default": {"view": "front", "crop": [0, 0, 1, 1]}},
+            "distinguishingFeatures": ["tan nose", "larger 14-inch proportions"],
+            "mustNotBorrow": ["Zenny eyelashes or blush"],
+        },
+        "Zenny": {
+            "schemaVersion": 1, "source": "fixture",
+            "providerViews": {"default": {"view": "front", "crop": [0, 0, 1, 1]}},
+            "distinguishingFeatures": ["long eyelashes", "smaller 12-inch proportions"],
+            "mustNotBorrow": ["Fuzzby's tan nose"],
+        },
+    }
+    for name in packs:
+        path = engine / "media" / "refs" / f"{name}_provider_front.png"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(("PROVIDER-SAFE-" + name).encode())
+        identity_paths[name] = path
+
+    monkeypatch.setattr(R, "_identity_packs_cfg", lambda: packs)
+
+    def provider_record(name, characters_cfg, usage="keyframe"):
+        canonical = R._resolve_char(name, characters_cfg)
+        pack = packs[canonical]
+        return {
+            "character": canonical, "usage": usage, "view": "front",
+            "path": str(identity_paths[canonical]),
+            "fileName": identity_paths[canonical].name,
+            "derived": True, "providerSafe": True, "singleSubject": True,
+            "contractHash": "fixture-" + canonical.lower(),
+            "sourceSha256": hashlib.sha256(identity_paths[canonical].read_bytes()).hexdigest(),
+            "distinguishingFeatures": pack["distinguishingFeatures"],
+            "mustNotBorrow": pack["mustNotBorrow"],
+        }
+
+    monkeypatch.setattr(R, "_provider_identity_record", provider_record)
 
 BEATS = [
     {"beatCode": "1.B1", "comedyMode": "BIG", "storyBeat": "The crash gag.",
@@ -111,6 +205,32 @@ def _line(speaker, text, start, end):
 
 STAGING = E.PhysicalStaging(staysVisible="full silhouette", contactAndWeight="chest to leaf",
                              payoffShape="upward pop", prohibitedStaging=["vanishing"])
+
+
+def _cinematography_output(shot):
+    """Typed current DP direction used by the direct stage-anchor compiler."""
+    placements = [
+        {"character": "Fuzzby", "centerX": 0.36, "centerY": 0.43,
+         "apparentScale": 1.0, "depthPlane": 1, "bodyAngleDegrees": -24.0,
+         "facing": "screen-right", "pose": "committed climbing flight"},
+        {"character": "Zenny", "centerX": 0.68, "centerY": 0.48,
+         "apparentScale": 1.0, "depthPlane": 1, "bodyAngleDegrees": -3.0,
+         "facing": "screen-right", "pose": "clean level glide"},
+    ]
+    return {
+        "providerPrompt": shot.get("keyframePrompt") or
+                          "Maintain the approved inherited opening frame exactly.",
+        "audienceRead": "Fuzzby's physical chaos is measured against Zenny's calm.",
+        "composition": "Fuzzby remains frame-left and Zenny frame-right.",
+        "lensAndCameraRelationship": "Bee-height camera preserves readable silhouettes.",
+        "lightingAndDepth": "Warm daylight and layered flower depth remain stable.",
+        "openingFrameLayout": {
+            "aspectRatio": "16:9", "referenceCharacter": "Fuzzby",
+            "referenceHeightFraction": 0.28, "sameDepth": True,
+            "placements": placements,
+        },
+        "continuityProtections": ["No identity or relative-scale drift."],
+    }
 
 
 def _build_package(tmp, valid=True):
@@ -164,8 +284,7 @@ def _build_package(tmp, valid=True):
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
                 "packageRevision": revision,
-                "output": {"providerPrompt": shot.get("keyframePrompt") or
-                           "Maintain the approved inherited opening frame exactly."}}},
+                "output": _cinematography_output(shot)}},
             "voice": {"approved": {
                 "packageRevision": revision,
                 "output": {"lines": voice_lines}}},
@@ -185,13 +304,36 @@ class Providers:
         self.voice_calls, self.image_calls, self.fire_calls = [], [], []
 
     def install(self, monkeypatch, tmp):
+        import cb_costs
+        monkeypatch.setattr(cb_costs, "load_billing_profile", lambda provider=None: {
+            "planConfirmed": True, "cadenceConfirmed": True, "plan": "test",
+            "billingCadence": "monthly", "cyclePriceUsdExTax": 99.0,
+            "creditsPerCycle": 600000,
+            "creditsPerCharacter": {"eleven_v3": 1.0},
+            "pricingSource": "test", "effectiveDate": "2026-07-16",
+        })
+
         def eleven_dialogue(inputs, out="vo.mp3", **k):
             self.voice_calls.append({"inputs": inputs, "out": out})
             # a REAL (silent) mp3 — the animatic runs genuine ffmpeg over this file, so the
             # mock must produce decodable audio, not a byte stub
             import subprocess as sp
+            total_duration = 0.5 * max(1, len(inputs))
             sp.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono",
-                    "-t", "1.5", "-q:a", "9", out], check=True, capture_output=True)
+                    "-t", str(total_duration), "-q:a", "9", out],
+                   check=True, capture_output=True)
+            duration = total_duration / max(1, len(inputs))
+            timing = {
+                "schemaVersion": 1,
+                "audioSha256": R.cb_audio_timing.file_sha256(out),
+                "voiceSegments": [{
+                    "dialogueInputIndex": index,
+                    "startTimeSec": index * duration,
+                    "endTimeSec": (index + 1) * duration,
+                } for index in range(len(inputs))],
+            }
+            pathlib.Path(str(out) + ".dialogue.json").write_text(
+                json.dumps(timing), encoding="utf-8")
             return out
         def generate_image(prompt, refs=None, out="kf.png", **k):
             self.image_calls.append({"prompt": prompt, "refs": refs, "out": out})
@@ -212,6 +354,18 @@ class Providers:
         monkeypatch.setattr(R.cb_gen, "_fal_upload", _fal_upload)
         monkeypatch.setattr(R.cb_gen, "generate_video_seedance_ref", generate_video_seedance_ref)
         monkeypatch.setattr(R.cb_gen, "last_frame", last_frame)
+        posed = tmp / "engine" / "media" / "reference_controls" / "approved_posed_integration.png"
+        posed.parent.mkdir(parents=True, exist_ok=True)
+        posed.write_bytes(b"APPROVED-POSED-INTEGRATION")
+        posed_record = {
+            "path": str(posed), "contractHash": "test-posed-integration",
+            "imageSha256": hashlib.sha256(posed.read_bytes()).hexdigest(),
+            "zeroSpend": True, "providerCalled": False, "providerInput": True,
+        }
+        monkeypatch.setattr(
+            R, "_load_posed_integration_master", lambda *args, **kwargs: posed_record)
+        monkeypatch.setattr(
+            R, "_ensure_posed_integration_master", lambda *args, **kwargs: posed_record)
         def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                              platform="youtube", candidate_id=None, music=None,
                              ambience=None):
@@ -287,6 +441,7 @@ def world(monkeypatch, tmp_path):
     (engine / "media" / "refs").mkdir(parents=True)
     for c in CFG.values():
         (engine / c["anchor"]).write_bytes(b"REF")
+    _install_provider_identity_fixture(monkeypatch, engine)
     # NOTE (2026-07-19): a fixed-filename "EpT_S9_plate.png" used to be written here — dead
     # since the 2026-07-18 production-safety directive moved _plate_path to read the Scene
     # Look sidecar's own APPROVED record instead of globbing a conventional filename (never
@@ -333,6 +488,26 @@ def world(monkeypatch, tmp_path):
                    "depth, warm daylight, oversized flowers, and no characters or text.")
     plate_path = engine / "media" / "EpT_S9_scenelook.png"
     plate_path.write_bytes(b"SCENELOOK_PLATE")
+    composition_path = engine / "media" / "reference_controls" / "opening_composition.png"
+    composition_path.parent.mkdir(parents=True, exist_ok=True)
+    composition_path.write_bytes(b"OPENING_COMPOSITION")
+    composition_record = {
+        "path": str(composition_path), "contractHash": "test-composition",
+        "zeroSpend": True, "providerCalled": False,
+        "geometry": {"frameSize": [2048, 1152], "sameDepth": True,
+                     "characters": []},
+    }
+    monkeypatch.setattr(
+        R, "_load_opening_composition_master",
+        lambda shot, scene, episode, characters: composition_record)
+    monkeypatch.setattr(
+        R, "_ensure_opening_composition_master",
+        lambda pkg, shot, scene, episode, characters: composition_record)
+    monkeypatch.setattr(
+        R.cb_layout, "screen_candidate_geometry",
+        lambda path, record: {
+            "status": "pass", "reason": "synthetic fixture geometry",
+            "zeroSpend": True, "providerCalled": False})
     plate_hash = hashlib.sha256(plate_path.read_bytes()).hexdigest()
     look_signature = {
         "briefHash": hashlib.sha256(look_prompt.encode()).hexdigest(),
@@ -499,7 +674,7 @@ def _install_shot_departments(pkg, path, scene, episode):
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
                 "packageRevision": pkg.get("revision"),
-                "output": {"providerPrompt": shot["keyframePrompt"]},
+                "output": _cinematography_output(shot),
             }},
             "voice": {"approved": {
                 "packageRevision": pkg.get("revision"),
@@ -554,12 +729,18 @@ def test_golden_path_package_to_approved_scene_master(world):
     assert R.timing_slate_status("9", "EpT")["current"] is True
     assert len(prov.image_calls) == 0          # no paid image call yet — slates only
 
-    # Gate 6 — the opener keyframe, reference-first, refs in the persisted slot order
+    # Gate 6 — the opener keyframe receives the locked identities and Scene Look directly.
+    # Generated poses and sizing/composition controls remain optional local evidence.
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     kf_call = prov.image_calls[-1]
     assert [os.path.basename(r) for r in kf_call["refs"]] == \
-           ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_scenelook.png"]
+           ["Fuzzby_provider_front.png", "Zenny_provider_front.png",
+            "EpT_S9_scenelook.png"]
+    assert all("posed_integration" not in os.path.basename(r) for r in kf_call["refs"])
+    assert "[Performance Freedom]" in kf_call["prompt"]
     assert "nailed it" not in kf_call["prompt"].lower()          # Law 6
+    assert (_led()["1.B1.S1"]["keyframeCandidate"]["conformanceScreening"]
+            ["status"] == "pass")
 
     # Gate 6b (2026-07-17 state-integrity checkpoint) — a generated-but-unapproved
     # keyframe candidate can never anchor a fire; Julian's own review approves it first,
@@ -598,9 +779,10 @@ def test_golden_path_package_to_approved_scene_master(world):
     # changes" convention; a literal ".endswith('_keyframe.png')" was stale against that)
     assert f1["image_urls"][0].endswith(_led()["1.B1.S1"]["keyframeApproval"]["path"])
     assert [os.path.basename(u) for u in f1["image_urls"][1:]] == \
-           ["CB_Fuzzby.jpeg", "CB_Zenny.jpeg", "EpT_S9_scenelook.png"]
+           ["Fuzzby_provider_front.png", "Zenny_provider_front.png",
+            "EpT_S9_scenelook.png"]
     assert f1["audio_urls"] and "_vo_candidate_" in f1["audio_urls"][0]
-    assert f1["audio_urls"][0].endswith(".mp3")
+    assert f1["audio_urls"][0].endswith(".wav")
     assert "nailed it" not in f1["prompt"].lower()                # Law 6 at fire time
     assert f1["duration"] == "6"      # deferred re-home item 8: always the shot's explicit
     #                                   seconds, never 'auto' (the old 15s literals can't bite)
@@ -627,6 +809,10 @@ def test_golden_path_package_to_approved_scene_master(world):
     arch = tmp / "engine" / "media" / "archive" / "shots_candidates"
     archived = [p.name for d in arch.iterdir() for p in d.iterdir()]
     assert "EpT_1.B1.S1_c1.mp4" in archived and "EpT_1.B1.S1_c3.mp4" in archived
+    assert len(led1["renderHistory"]) == 2
+    assert all(item["outcome"] == "not-selected" for item in led1["renderHistory"])
+    assert all(item["contentHashAtGeneration"] for item in led1["renderHistory"])
+    assert all(item["promptContract"]["integrityVerified"] for item in led1["renderHistory"])
 
     # relay batch fires from the SELECTED candidate's harvested final frame
     t2 = _token("1.B1.S2")
@@ -705,6 +891,175 @@ def test_golden_path_package_to_approved_scene_master(world):
     changed = R.post_status(pkg, "9", "EpT")["approved"]
     assert changed["current"] is False
     assert changed["reason"] == "direct-input-signature-mismatch"
+
+
+def test_failed_keyframe_identity_screen_archives_without_automatic_reroll(
+        world, monkeypatch):
+    prov, _, _ = world
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance",
+        lambda context, images, **kwargs: _keyframe_conformance_output(context, "block"))
+
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+
+    ledger = _led()["1.B1.S1"]
+    assert ledger.get("keyframeCandidate") is None
+    assert ledger["keyframeRejected"]["conformanceScreening"]["status"] == "fail"
+    assert "Automatic pre-approval QC" in ledger["keyframeRejected"]["reason"]
+    assert len(prov.image_calls) == 1
+
+
+def test_unavailable_keyframe_identity_screen_holds_candidate_and_blocks_accept(
+        world, monkeypatch):
+    prov, _, _ = world
+
+    def unavailable(*args, **kwargs):
+        raise RuntimeError("validator temporarily unavailable")
+
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance", unavailable)
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+
+    candidate = _led()["1.B1.S1"]["keyframeCandidate"]
+    assert candidate["conformanceScreening"]["status"] == "unavailable"
+    with pytest.raises(R.Refused, match="cannot be accepted"):
+        R.approve_keyframe(
+            "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
+            log=lambda *a, **k: None)
+    assert len(prov.image_calls) == 1
+
+
+def test_human_uploaded_keyframe_accepts_when_automated_advice_is_unavailable(
+        world, monkeypatch, tmp_path):
+    def unavailable(*args, **kwargs):
+        raise RuntimeError("validator temporarily unavailable")
+
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance", unavailable)
+    monkeypatch.setattr(
+        R, "_load_opening_composition_master",
+        lambda shot, scene, episode, characters: None)
+    upload = tmp_path / "human-selected-keyframe.jpeg"
+    upload.write_bytes(b"HUMAN_SELECTED_STAGE")
+
+    R.select_keyframe_source(
+        "9", "1.B1.S1", "upload", "EpT", upload_path=str(upload),
+        reviewed_by="TestReviewer", log=lambda *a, **k: None)
+
+    candidate = _led()["1.B1.S1"]["keyframeCandidate"]
+    assert candidate["source"] == "uploaded"
+    assert candidate["geometryScreening"]["status"] == "unavailable"
+    assert candidate["conformanceScreening"]["status"] == "unavailable"
+
+    R.approve_keyframe(
+        "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
+        log=lambda *a, **k: None)
+
+    approval = _led()["1.B1.S1"]["keyframeApproval"]
+    assert approval["approved"] is True
+    assert approval["source"] == "uploaded"
+    assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
+    assert R._keyframe_record_status(
+        R.load_pkg("9", "EpT")[0],
+        R._shot(R.load_pkg("9", "EpT")[0], "1.B1.S1"),
+        approval, "9", "EpT")["current"] is True
+
+
+def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay(
+        world, monkeypatch):
+    """A short-provider comparison remains one ordinary Studio review candidate."""
+    prov, _, _ = world
+    pkg, path = R.load_pkg("9", "EpT")
+    shot = R._shot(pkg, "1.B1.S1")
+    shot["durationSec"] = 28.0
+    windows = ((0, 7), (7, 15), (15, 22), (22, 28))
+    stages = [{
+        "stageNumber": index,
+        "beatIds": ["1.B1"],
+        "purpose": f"Preserve approved story purpose {index}.",
+        "startSec": start,
+        "endSec": end,
+        "initialOrCarriedState": f"Carry the approved visible state into stage {index}.",
+        "primaryEvent": f"Fuzzby completes one readable causal action in stage {index}.",
+        "observableEndState": f"Fuzzby reaches approved visible handoff {index}.",
+        "emotionOrCameraAnalysis": (
+            f"His gaze and chest recover visibly while the camera motivates stage {index}."),
+    } for index, (start, end) in enumerate(windows, start=1)]
+    ledger = R._ledger(pkg, shot["shotId"])
+    ledger["departmentWork"]["animation"]["approved"]["output"] = {
+        "providerPrompt": shot["seedancePrompt"],
+        "durationSec": 28.0,
+        "taskMode": "reference-to-video",
+        "generationGoal": (
+            "Deliver the approved pride, impact, recovery, and relationship turn in order."),
+        "stagePlan": stages,
+        "dramaticBeat": "Warm stylized 3D meadow comedy with physical cause and effect.",
+        "performanceArc": (
+            "Fuzzby's proud gaze and chest recover after each impact while Zenny remains still."),
+        "cameraBehaviour": (
+            "Use motivated bee-height tracking and readable internal cuts without changing axis."),
+        "audioContract": (
+            "@Audio1 is the sole source of English dialogue, voice, performance, and timing."),
+        "consistencyContract": [
+            "Keep identity, character count, scale, pollen marks, scene geography, light direction, and camera axis stable."
+        ],
+        "referenceContract": [{
+            "assetTag": tag, "role": role, "controls": role,
+        } for tag, role in shot["referenceSlots"].items()],
+    }
+    R._save(pkg, path)
+
+    pkg, path = R.load_pkg("9", "EpT")
+    for stage_name in ("voice", "cinematography"):
+        R._ledger(pkg, shot["shotId"])["departmentWork"][stage_name]["approved"][
+            "inputSignature"] = R._department_input_signature(
+                pkg, stage_name, shot["shotId"], "9", "EpT")
+    R._save(pkg, path)
+
+    _voice_and_approve("9", "EpT", log=lambda *a, **k: None)
+    R.animatic_scene("9", "EpT", log=lambda *a, **k: None)
+    R.keyframe_shot("9", shot["shotId"], "EpT", log=lambda *a, **k: None)
+    R.approve_keyframe("9", shot["shotId"], "EpT", reviewed_by="TestReviewer",
+                       log=lambda *a, **k: None)
+    _approve_animation_direction(shot["shotId"])
+
+    joined = []
+
+    def join_segments(segment_paths, out):
+        joined.append(list(segment_paths))
+        pathlib.Path(out).write_bytes(b"JOINED-COMPARISON-CANDIDATE")
+        return str(out)
+
+    monkeypatch.setattr(R.cb_seedance_transport, "join_segments", join_segments)
+    comparison = {
+        "comparison_model_id": "fal-seedance-2.0",
+        "comparison_run_id": "golden-same-process-comparison",
+    }
+    with pytest.raises(R.Refused, match="SPEND NOT APPROVED"):
+        R.fire_shot("9", shot["shotId"], "EpT", candidates=1,
+                    log=lambda *a, **k: None, **comparison)
+    pending = _led()[shot["shotId"]]["pendingSpendAuth"]
+    assert pending["disclosure"]["internalProviderCalls"] == [
+        {"segmentIndex": 1, "durationSec": 15.0, "stageNumbers": [1, 2]},
+        {"segmentIndex": 2, "durationSec": 13.0, "stageNumbers": [3, 4]},
+    ]
+
+    paths = R.fire_shot(
+        "9", shot["shotId"], "EpT", candidates=1, spend_token=pending["token"],
+        log=lambda *a, **k: None, **comparison)
+    calls = prov.fire_calls[-2:]
+    assert [call["duration"] for call in calls] == ["15", "13"]
+    assert all(call["comparison_run_id"] == comparison["comparison_run_id"]
+               for call in calls)
+    assert calls[1]["image_urls"][0].endswith("segment_1_final.png")
+    assert len(joined) == 1 and len(joined[0]) == 2
+    assert len(paths) == 1 and pathlib.Path(paths[0]).read_bytes() == \
+        b"JOINED-COMPARISON-CANDIDATE"
+    final_ledger = _led()[shot["shotId"]]
+    assert final_ledger["status"] == "candidates-pending"
+    assert final_ledger["batch"]["transportCandidates"]["1"]["status"] == "joined"
+    review = json.loads(pathlib.Path(paths[0] + ".review.json").read_text())
+    assert all(value is None for value in review["criteria"].values())
 
 
 def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
@@ -873,6 +1228,27 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
         ref = engine / character["anchor"]
         ref.parent.mkdir(parents=True, exist_ok=True)
         ref.write_bytes(b"IDENTITY-REFERENCE")
+    _install_provider_identity_fixture(monkeypatch, engine)
+    composition_path = engine / "media" / "reference_controls" / "opening_composition.png"
+    composition_path.parent.mkdir(parents=True, exist_ok=True)
+    composition_path.write_bytes(b"OPENING-COMPOSITION")
+    composition_record = {
+        "path": str(composition_path), "contractHash": "golden-composition",
+        "zeroSpend": True, "providerCalled": False,
+        "geometry": {"frameSize": [2048, 1152], "sameDepth": True,
+                     "characters": []},
+    }
+    monkeypatch.setattr(
+        R, "_load_opening_composition_master",
+        lambda shot, scene, episode, characters: composition_record)
+    monkeypatch.setattr(
+        R, "_ensure_opening_composition_master",
+        lambda pkg, shot, scene, episode, characters: composition_record)
+    monkeypatch.setattr(
+        R.cb_layout, "screen_candidate_geometry",
+        lambda path, record: {
+            "status": "pass", "reason": "synthetic fixture geometry",
+            "zeroSpend": True, "providerCalled": False})
     locations = tmp_path / "shows" / "crystal-bears" / "canon" / "locations.json"
     locations.write_text(json.dumps({"Ep1": {"1": {
         "look": "Crystal Cove meadow at bee scale.", "lighting": "Warm daylight.",
@@ -971,6 +1347,11 @@ def test_failure_ladder_unchanged_reroll_then_model_limited(world):
     led = _led()["1.B1.S1"]
     assert led["status"] == "designed" and led["batchAttempts"] == 1
     assert led["rejections"][0]["category"] == "action-timing"
+    assert len(led["rejections"][0]["archivedCandidates"]) == 2
+    assert all(item["contentHashAtGeneration"]
+               for item in led["rejections"][0]["archivedCandidates"])
+    assert all(item["promptContract"]["integrityVerified"]
+               for item in led["rejections"][0]["archivedCandidates"])
     arch_root = tmp / "engine" / "media" / "archive" / "shots_rejected"
     arch = [p for p in arch_root.iterdir() if p.is_dir()]
     assert arch and any(p.name == os.path.basename(take) for p in arch[0].iterdir())

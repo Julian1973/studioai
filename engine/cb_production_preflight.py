@@ -17,6 +17,65 @@ def _hash_text(value):
     return hashlib.sha256((value or "").encode()).hexdigest()
 
 
+def _current_direction(pkg, stage, scene, episode, shot_id=None):
+    """Return one signed current direction record, never an unverified prose fallback."""
+    status = cb_render._department_record_status(
+        pkg, shot_id, stage, scene, episode)
+    if not status.get("current"):
+        return None, status
+    return status.get("record") or None, status
+
+
+def _production_inputs(pkg, scene, episode):
+    """Exact internal directions used by the paid actions, with concise UI headlines."""
+    result = {"look": None, "shots": {}}
+    look, look_status = _current_direction(pkg, "look", scene, episode)
+    if look:
+        output = look.get("output") or {}
+        prompt = str(output.get("providerPrompt") or "").strip()
+        result["look"] = {
+            "source": look_status.get("source"),
+            "headline": output.get("creativeIntent") or output.get("storyOfPlace"),
+            "prompt": prompt,
+            "promptHash": _hash_text(prompt),
+        }
+
+    for shot in pkg.get("shots") or []:
+        shot_id = shot["shotId"]
+        row = {}
+        for stage, prompt_key, headline_keys in (
+                ("cinematography", "keyframePrompt",
+                 ("audienceRead", "composition")),
+                ("animation", "animationPrompt",
+                 ("doesItLand", "generationGoal", "deliveryPlan"))):
+            record, status = _current_direction(
+                pkg, stage, scene, episode, shot_id)
+            if not record:
+                continue
+            output = record.get("output") or {}
+            prompt = (cb_render._compile_keyframe_integration_prompt(output, shot)
+                      if stage == "cinematography" else
+                      str(output.get("providerPrompt") or "").strip())
+            row[prompt_key] = prompt
+            row[prompt_key + "Hash"] = _hash_text(prompt)
+            row[prompt_key + "Source"] = status.get("source")
+            row[prompt_key + "Headline"] = next(
+                (output.get(key) for key in headline_keys if output.get(key)), None)
+        voice, voice_status = _current_direction(
+            pkg, "voice", scene, episode, shot_id)
+        if voice:
+            output = voice.get("output") or {}
+            row["voiceLines"] = [{
+                "speaker": line.get("speaker"),
+                "performedText": line.get("performedText"),
+                "dramaticIntention": line.get("dramaticIntention"),
+            } for line in (output.get("lines") or [])]
+            row["voiceDirectionSource"] = voice_status.get("source")
+        if row:
+            result["shots"][shot_id] = row
+    return result
+
+
 def _department(ledger, stage):
     return (((ledger.get("departmentWork") or {}).get(stage) or {}).get("approved") or {})
 
@@ -268,11 +327,11 @@ def production_preflight(scene, episode="Ep1", state=None):
         if not scene_look.get("directionCurrent"):
             block("LOOK_DIRECTION_NOT_CURRENT", "look",
                   "Look Development direction is missing or stale.",
-                  "Prepare and approve current Look Development direction.")
+                  "Fire Scene World; the Studio will prepare current Look direction automatically.")
         if not scene_look.get("current"):
             block("SCENE_LOOK_NOT_CURRENT", "look",
-                  "No current approved Scene Look plate is available.",
-                  "Generate or select a plate from current direction, then approve it.")
+                  "No current signed Scene Look working anchor is available.",
+                  "Build Scene World; the first keyframe will be its visual proof.")
 
         for shot in state.get("shots") or []:
             sid = shot["shotId"]
@@ -280,28 +339,37 @@ def production_preflight(scene, episode="Ep1", state=None):
             if shot.get("needsKeyframe") and not current.get("cinematographyDirection"):
                 block("CINEMATOGRAPHY_NOT_CURRENT", "keyframe",
                       "Cinematography direction is missing or stale.",
-                      "Prepare and approve current Cinematography direction.", sid)
+                      "Build the keyframe; the Studio will prepare current Cinematography "
+                      "direction automatically.", sid)
             if shot.get("needsKeyframe") and not current.get("keyframe"):
+                awaiting = (shot.get("pending") or {}).get("keyframe")
                 block("KEYFRAME_NOT_CURRENT", "keyframe",
-                      "No current approved opening frame is available.",
-                      "Generate or select an opening frame, then approve it.", sid)
+                      ("A finished keyframe is waiting for your decision."
+                       if awaiting else
+                       "No current accepted opening frame is available."),
+                      ("Review the finished opening stage, then choose Accept or Iterate."
+                       if awaiting else
+                       "Build the keyframe; the Studio will use the locked Scene Look and "
+                       "character turnarounds to establish identity, canon scale, camera, "
+                       "light and clear performance space, then return one finished opening "
+                       "stage for Accept or Iterate."), sid)
             if shot.get("talky") and not current.get("voiceDirection"):
                 block("VOICE_DIRECTION_NOT_CURRENT", "voice",
                       "Voice direction is missing or stale.",
-                      "Prepare and approve current Voice direction.", sid)
+                      "Fire the performance; the Studio will prepare current Voice direction automatically.", sid)
             if shot.get("talky") and not current.get("voice"):
                 block("VOICE_TAKE_NOT_CURRENT", "voice",
-                      "No current approved voice take is available.",
-                      "Generate, listen to and approve the current performance.", sid)
+                      "No current accepted voice take is available.",
+                      "Fire the performance, listen, then choose Accept or Iterate.", sid)
             if not current.get("animationDirection"):
                 block("ANIMATION_DIRECTION_NOT_CURRENT", "animation",
                       "Animation direction is missing or stale.",
-                      "Prepare and approve direction from the current frame, references and voice.",
+                      "Fire animation; the Studio will prepare direction from the current frame, references and voice.",
                       sid)
             if not current.get("animation"):
                 block("ANIMATION_TAKE_NOT_CURRENT", "animation",
-                      "No current approved animation take is available.",
-                      "Generate a candidate batch and approve one current candidate.", sid)
+                      "No current accepted animation take is available.",
+                      "Fire a candidate batch, then choose Accept or Iterate.", sid)
             if current.get("animation") and not current.get("directorReview"):
                 block("DIRECTOR_REVIEW_NOT_CURRENT", "continuity",
                       "The approved animation has no current Director Review sign-off.",
@@ -320,6 +388,11 @@ def production_preflight(scene, episode="Ep1", state=None):
         package, _ = cb_render.load_pkg(scene, episode)
     except cb_render.Refused:
         pass
+
+    production_inputs = (
+        _production_inputs(package, str(scene), episode)
+        if package and state.get("packageCurrent") else {"look": None, "shots": {}}
+    )
 
     provider_capabilities = cb_providers.capability_report()
     if not provider_capabilities["selectionReady"]:
@@ -373,8 +446,10 @@ def production_preflight(scene, episode="Ep1", state=None):
 
     rank = {"storyboard": 0, "look": 1, "keyframe": 2, "voice": 3,
             "animation": 4, "continuity": 5, "final": 6, "configuration": 7}
+    dependency_priority = {"KEYFRAME_NOT_CURRENT": 1}
     blockers.sort(key=lambda item: (
-        rank.get(item.get("stage"), 99), item.get("shotId") or "", item.get("code") or ""))
+        rank.get(item.get("stage"), 99), item.get("shotId") or "",
+        dependency_priority.get(item.get("code"), 50), item.get("code") or ""))
     next_action = (
         blockers[0]["action"] if blockers
         else "All current approvals are ready for final assembly and post review."
@@ -390,6 +465,7 @@ def production_preflight(scene, episode="Ep1", state=None):
         "blockers": blockers,
         "warnings": warnings,
         "nextAction": next_action,
+        "productionInputs": production_inputs,
         "sceneLook": state.get("sceneLook"),
         "timingSlate": timing,
         "shots": state.get("shots") or [],

@@ -8,7 +8,9 @@ import pytest
 import cb_canon
 import cb_render as R
 from test_golden_path import (world, _approve_animation_direction,
-                              _approve_director_review)
+                              _approve_director_review,
+                              _cinematography_output,
+                              _test_seedance_25_contract)
 
 
 @pytest.fixture(autouse=True)
@@ -18,6 +20,7 @@ def isolated_canon(monkeypatch):
         "animation", "review", "post")}
     monkeypatch.setattr(cb_canon, "require_locked", lambda *args, **kwargs: {
         "manifestDigest": "m" * 64, "profileDigests": digests})
+    monkeypatch.setattr(R.cb_providers, "request_contract", _test_seedance_25_contract)
 
 
 def _approve_specialist_inputs(pkg):
@@ -32,8 +35,7 @@ def _approve_specialist_inputs(pkg):
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
                 "packageRevision": revision,
-                "output": {"providerPrompt": shot.get("keyframePrompt") or
-                           "Maintain the approved inherited opening frame exactly."}}},
+                "output": _cinematography_output(shot)}},
             "voice": {"approved": {
                 "packageRevision": revision,
                 "output": {"lines": lines}}},
@@ -88,8 +90,13 @@ def _disclose_and_fire(shot_id):
                        log=lambda *a, **k: None)
 
 
-def test_current_path_reaches_an_approved_master_without_provider_spend(world):
+def test_current_path_reaches_an_approved_master_without_provider_spend(
+        world, monkeypatch):
     providers, tmp, pkg_path = world
+    monkeypatch.setattr(R, "screen_keyframe_conformance", lambda *args, **kwargs: {
+        "status": "pass", "reason": None,
+        "review": {"verdict": "pass", "summary": "Test fixture passes."},
+    })
     pkg = json.loads(pkg_path.read_text())
     _approve_specialist_inputs(pkg)
     pkg_path.write_text(json.dumps(pkg, indent=1))

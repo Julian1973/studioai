@@ -10,6 +10,24 @@ import cb_render as render
 TEST_CANON_DIGEST = "c" * 64
 
 
+def _test_seedance_25_contract(**kwargs):
+    duration = int(kwargs["duration"])
+    assert 4 <= duration <= 30
+    return {
+        "providerModelId": "dreamina-seedance-2-5-260628",
+        "provider": "byteplus",
+        "modelVersion": "2.5-260628",
+        "transport": "byteplus-async",
+        "mode": "reference-to-video",
+        "endpoint": "/api/v3/contents/generations/tasks",
+        "resolution": kwargs.get("resolution", "720p"),
+        "duration": duration,
+        "costRateKey": "seedance_standard_per_sec",
+        "capabilityVerifiedAt": "2026-08-04-test-fixture",
+        "capabilitySource": "test-fixture",
+    }
+
+
 @pytest.fixture(autouse=True)
 def isolated_canon(monkeypatch):
     monkeypatch.setattr(cb_safety.cb_canon, "require_locked", lambda *args, **kwargs: {
@@ -51,6 +69,10 @@ def _pkg(tmp_path):
                                    "canonProfileDigest": TEST_CANON_DIGEST},
                 "contentHash": render._sha256_file(frame),
                 "packageRevision": 1,
+                "conformanceScreening": {
+                    "status": "pass", "reason": None,
+                    "review": {"verdict": "pass"},
+                },
             },
             "departmentWork": {},
         }],
@@ -75,6 +97,61 @@ def _approve_department(package, shot_id, stage):
             package, stage, shot_id, "1", "Ep1"),
     }
     return work["approved"]
+
+
+def _prepare_department(package, shot_id, stage):
+    ledger = render._ledger(package, shot_id)
+    work = ledger.setdefault("departmentWork", {}).setdefault(
+        stage, {"approved": None, "candidate": None, "history": []})
+    output = {
+        "providerPrompt": f"prepared {stage} provider direction with enough detail"
+    }
+    if stage == "voice":
+        output = {"lines": []}
+    work["candidate"] = {
+        "output": output,
+        "packageRevision": package["revision"],
+        "inputSignature": render._department_input_signature(
+            package, stage, shot_id, "1", "Ep1"),
+    }
+    return work["candidate"]
+
+
+def test_current_prepared_direction_is_operational_without_fake_human_approval(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {"cardHash": "card-v1"})
+    candidate = _prepare_department(package, shot["shotId"], "cinematography")
+
+    status = render._department_record_status(
+        package, shot["shotId"], "cinematography")
+    assert status["current"] is True
+    assert status["approved"] is False
+    assert status["source"] == "prepared"
+    assert render._current_department_output(
+        package, shot["shotId"], "cinematography") == candidate["output"]
+
+    shot["durationSec"] = 6
+    assert not render._department_record_status(
+        package, shot["shotId"], "cinematography")["current"]
+
+
+def test_review_evidence_still_requires_a_human_decision(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    work = render._ledger(package, shot["shotId"]).setdefault(
+        "departmentWork", {}).setdefault(
+            "review-keyframe", {"approved": None, "candidate": None, "history": []})
+    work["candidate"] = {
+        "output": {"summary": "The actual frame review is ready."},
+        "inputSignature": render._department_input_signature(
+            package, "review-keyframe", shot["shotId"], "1", "Ep1"),
+    }
+
+    status = render._department_record_status(
+        package, shot["shotId"], "review-keyframe")
+    assert status["current"] is False
+    assert status["reason"] == "not-approved"
 
 
 def test_department_approval_uses_direct_inputs_not_package_revision(tmp_path, monkeypatch):
@@ -127,6 +204,8 @@ def test_keyframe_approval_survives_revision_but_not_input_or_file_change(
 def test_animation_approval_carries_forward_and_tracks_its_own_graph(
         tmp_path, monkeypatch):
     package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(
+        cb_safety.cb_providers, "request_contract", _test_seedance_25_contract)
     monkeypatch.setattr(render, "_keyframe_input_signature",
                         lambda *args, **kwargs: {
                             "cardHash": "card-v1",
@@ -161,7 +240,7 @@ def test_animation_approval_carries_forward_and_tracks_its_own_graph(
     assert not render._animation_approval_status(package, shot)["current"]
 
 
-def test_pending_scene_look_does_not_disable_current_approved_plate(
+def test_current_working_scene_look_feeds_keyframes_without_plate_approval(
         tmp_path, monkeypatch):
     package, _, _ = _pkg(tmp_path)
     plate = tmp_path / "plate.png"
@@ -183,8 +262,8 @@ def test_pending_scene_look_does_not_disable_current_approved_plate(
                         lambda *args, **kwargs: record)
 
     look_work = record["departmentWork"]["look"]
-    look_work["approved"] = {
-        "output": {"providerPrompt": "approved environment prompt with enough production detail"},
+    look_work["candidate"] = {
+        "output": {"providerPrompt": "prepared environment prompt with enough production detail"},
         "inputSignature": render._department_input_signature(
             package, "look", None, "1", "Ep1"),
         "packageRevision": 1,
@@ -204,6 +283,8 @@ def test_pending_scene_look_does_not_disable_current_approved_plate(
     }
 
     state = render.scenelook_status("1", "Ep1")
-    assert state["status"] == "awaiting"
+    assert state["status"] == "working"
     assert state["current"] is True
+    assert state["active"]["path"] == str(candidate)
+    assert state["activeSource"] == "working"
     assert state["approved"]["path"] == str(plate)

@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "characters": {
+    "Aida": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.035, 0.17, 0.25, 0.9]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.035, 0.17, 0.25, 0.9]},
+        {"view": "three-quarter", "crop": [0.28, 0.17, 0.49, 0.9]},
+        {"view": "side", "crop": [0.515, 0.17, 0.74, 0.9]},
+        {"view": "rear", "crop": [0.76, 0.17, 0.98, 0.9]}
+      ],
+      "distinguishingFeatures": [
+        "long flowing lilac-purple hair",
+        "jewelled brow headdress",
+        "layered purple robes"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Sunny": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.02, 0.17, 0.27, 0.87]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.02, 0.17, 0.27, 0.87]},
+        {"view": "three-quarter", "crop": [0.28, 0.17, 0.48, 0.87]},
+        {"view": "side", "crop": [0.52, 0.17, 0.735, 0.87]},
+        {"view": "rear", "crop": [0.74, 0.17, 0.98, 0.87]}
+      ],
+      "distinguishingFeatures": [
+        "golden-orange fur",
+        "upright orange crown tuft",
+        "small jewelled gold tiara",
+        "multicoloured flower-bead collar"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Luna": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.03, 0.17, 0.27, 0.88]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.03, 0.17, 0.27, 0.88]},
+        {"view": "three-quarter", "crop": [0.26, 0.17, 0.51, 0.88]},
+        {"view": "side", "crop": [0.5, 0.17, 0.75, 0.88]},
+        {"view": "rear", "crop": [0.74, 0.17, 0.98, 0.88]}
+      ],
+      "distinguishingFeatures": [
+        "lilac-lavender fur",
+        "long pale-blonde hair",
+        "lilac gown with silver embroidery",
+        "small pale chest gem"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Misty": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.02, 0.17, 0.28, 0.9]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.02, 0.17, 0.28, 0.9]},
+        {"view": "three-quarter", "crop": [0.26, 0.17, 0.52, 0.9]},
+        {"view": "side", "crop": [0.53, 0.17, 0.74, 0.9]},
+        {"view": "rear", "crop": [0.74, 0.17, 0.99, 0.9]}
+      ],
+      "distinguishingFeatures": [
+        "white polar-bear fur",
+        "long wavy white hair",
+        "delicate silver tiara",
+        "blue teardrop pendant"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Amie": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.035, 0.17, 0.27, 0.78]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.035, 0.17, 0.27, 0.78]},
+        {"view": "three-quarter", "crop": [0.27, 0.17, 0.51, 0.78]},
+        {"view": "side", "crop": [0.5, 0.17, 0.75, 0.78]},
+        {"view": "rear", "crop": [0.74, 0.17, 0.98, 0.78]}
+      ],
+      "distinguishingFeatures": [
+        "raspberry-pink fur",
+        "pink belly and muzzle",
+        "swept magenta tuft with purple diamond gem",
+        "purple teardrop pendant"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Howey": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.02, 0.15, 0.28, 0.85]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.02, 0.15, 0.28, 0.85]},
+        {"view": "three-quarter", "crop": [0.27, 0.15, 0.52, 0.85]},
+        {"view": "side", "crop": [0.52, 0.15, 0.74, 0.85]},
+        {"view": "rear", "crop": [0.74, 0.15, 0.99, 0.85]}
+      ],
+      "distinguishingFeatures": [
+        "large broad grey body",
+        "darker-grey eye mask",
+        "pale cream chest and muzzle",
+        "silver tiara, pendant and armbands"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Keen": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.035, 0.3, 0.295, 0.92]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.035, 0.3, 0.295, 0.92]},
+        {"view": "three-quarter", "crop": [0.29, 0.3, 0.52, 0.92]},
+        {"view": "side", "crop": [0.53, 0.29, 0.715, 0.92]},
+        {"view": "rear", "crop": [0.715, 0.28, 0.985, 0.92]}
+      ],
+      "distinguishingFeatures": [
+        "aquamarine-blue fur",
+        "upright pale-white crown tuft",
+        "gold wrist cuffs with aquamarine gems"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Fuzzby": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.03, 0.15, 0.295, 0.86]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.03, 0.15, 0.295, 0.86]},
+        {"view": "three-quarter", "crop": [0.275, 0.15, 0.53, 0.86]},
+        {"view": "side", "crop": [0.525, 0.15, 0.745, 0.86]},
+        {"view": "rear", "crop": [0.74, 0.15, 0.985, 0.86]}
+      ],
+      "distinguishingFeatures": [
+        "bulbous tan nose",
+        "round wire-frame spectacles",
+        "larger 14-inch bee proportions"
+      ],
+      "mustNotBorrow": [
+        "Zenny's long eyelashes",
+        "Zenny's rosy blush cheeks",
+        "any pendant, necklace, medallion or crystal"
+      ]
+    },
+    "Zenny": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.02, 0.18, 0.27, 0.84]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.02, 0.18, 0.27, 0.84]},
+        {"view": "three-quarter", "crop": [0.27, 0.18, 0.49, 0.84]},
+        {"view": "side", "crop": [0.52, 0.18, 0.72, 0.84]},
+        {"view": "rear", "crop": [0.75, 0.18, 0.95, 0.84]}
+      ],
+      "distinguishingFeatures": [
+        "small dark nose",
+        "long eyelashes",
+        "rosy blush cheeks",
+        "smaller 12-inch bee proportions"
+      ],
+      "mustNotBorrow": [
+        "Fuzzby's bulbous tan nose",
+        "Fuzzby's larger body proportions",
+        "any pendant, necklace, medallion or crystal"
+      ]
+    },
+    "Keen's Mum": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.4, 0.19, 0.6, 0.91]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.4, 0.19, 0.6, 0.91]},
+        {"view": "three-quarter-left", "crop": [0.21, 0.19, 0.385, 0.91]},
+        {"view": "side", "crop": [0.02, 0.19, 0.2, 0.91]},
+        {"view": "three-quarter-right", "crop": [0.615, 0.19, 0.79, 0.91]},
+        {"view": "rear", "crop": [0.8, 0.19, 0.99, 0.91]}
+      ],
+      "distinguishingFeatures": [
+        "pale-blue adult-bear fur",
+        "pale-blue hair bun with matching bow",
+        "ornate gold collar"
+      ],
+      "mustNotBorrow": ["another character's fur colour, hair, crystal or clothing"]
+    },
+    "Squeaky": {
+      "schemaVersion": 1,
+      "source": "cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
+      "coverage": "360",
+      "providerViews": {
+        "default": {"view": "front", "crop": [0.01, 0.17, 0.2, 0.87]}
+      },
+      "turnaroundViews": [
+        {"view": "front", "crop": [0.01, 0.17, 0.2, 0.87]},
+        {"view": "three-quarter-front", "crop": [0.225, 0.17, 0.39, 0.87]},
+        {"view": "side", "crop": [0.42, 0.17, 0.59, 0.87]},
+        {"view": "three-quarter-rear", "crop": [0.605, 0.17, 0.805, 0.87]},
+        {"view": "top", "crop": [0.805, 0.17, 0.995, 0.87]}
+      ],
+      "distinguishingFeatures": [
+        "young bottlenose dolphin silhouette",
+        "soft grey-blue body with pale belly",
+        "rounded smiling face and warm expressive eyes"
+      ],
+      "mustNotBorrow": ["bear ears, bear limbs, clothing or another character's crystal"]
+    }
+  }
+}

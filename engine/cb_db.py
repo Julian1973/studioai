@@ -19,7 +19,7 @@ import time
 import uuid
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 6
 DEFAULT_LEASE_SECONDS = 90.0
 DEFAULT_HEARTBEAT_SECONDS = 15.0
 
@@ -119,6 +119,22 @@ def _connect(root):
             PRIMARY KEY (token, candidate_index)
         );
 
+        CREATE TABLE IF NOT EXISTS spend_segment_claims (
+            token TEXT NOT NULL REFERENCES spend_authorizations(token),
+            candidate_index INTEGER NOT NULL CHECK (candidate_index > 0),
+            segment_index INTEGER NOT NULL CHECK (segment_index > 0),
+            segment_count INTEGER NOT NULL CHECK (segment_count > 1),
+            status TEXT NOT NULL CHECK (status IN ('started', 'failed', 'completed')),
+            attempts INTEGER NOT NULL DEFAULT 1,
+            owner TEXT NOT NULL,
+            started_at TEXT NOT NULL,
+            finished_at TEXT,
+            output_path TEXT,
+            output_hash TEXT,
+            error TEXT,
+            PRIMARY KEY (token, candidate_index, segment_index)
+        );
+
         CREATE TABLE IF NOT EXISTS studio_jobs (
             job_id TEXT PRIMARY KEY,
             server_key TEXT NOT NULL,
@@ -143,6 +159,37 @@ def _connect(root):
 
         CREATE INDEX IF NOT EXISTS studio_jobs_operation
         ON studio_jobs (operation_key, status);
+
+        CREATE TABLE IF NOT EXISTS render_ratings (
+            rating_id TEXT PRIMARY KEY,
+            episode TEXT NOT NULL,
+            scene TEXT NOT NULL,
+            shot_id TEXT NOT NULL,
+            artifact_type TEXT NOT NULL CHECK (artifact_type IN ('keyframe', 'animation')),
+            candidate_id TEXT NOT NULL,
+            asset_path TEXT NOT NULL,
+            asset_hash TEXT NOT NULL,
+            prompt_hash TEXT NOT NULL,
+            prompt_text TEXT NOT NULL,
+            prompt_source TEXT NOT NULL,
+            provider TEXT,
+            provider_model_id TEXT,
+            model_version TEXT,
+            overall_read TEXT NOT NULL CHECK (overall_read IN ('miss', 'partial', 'lands')),
+            scores_json TEXT NOT NULL,
+            note TEXT NOT NULL,
+            reviewer TEXT NOT NULL,
+            prompt_analysis_json TEXT NOT NULL,
+            learning_eligible INTEGER NOT NULL DEFAULT 1 CHECK (learning_eligible IN (0, 1)),
+            provenance_grade TEXT NOT NULL DEFAULT 'exact',
+            created_at TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS render_ratings_shot
+        ON render_ratings (episode, scene, shot_id, artifact_type, created_at DESC);
+
+        CREATE INDEX IF NOT EXISTS render_ratings_prompt
+        ON render_ratings (prompt_hash, artifact_type, created_at DESC);
         """
     )
     studio_job_columns = {
@@ -151,6 +198,20 @@ def _connect(root):
     if "server_key" not in studio_job_columns:
         conn.execute(
             "ALTER TABLE studio_jobs ADD COLUMN server_key TEXT NOT NULL DEFAULT 'legacy'"
+        )
+    rating_columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(render_ratings)").fetchall()
+    }
+    if "learning_eligible" not in rating_columns:
+        # Every pre-v5 row passed the old strict exact-prompt/exact-hash gate.
+        conn.execute(
+            "ALTER TABLE render_ratings ADD COLUMN learning_eligible "
+            "INTEGER NOT NULL DEFAULT 1 CHECK (learning_eligible IN (0, 1))"
+        )
+    if "provenance_grade" not in rating_columns:
+        conn.execute(
+            "ALTER TABLE render_ratings ADD COLUMN provenance_grade "
+            "TEXT NOT NULL DEFAULT 'exact'"
         )
     conn.execute(
         "INSERT INTO schema_meta(key, value) VALUES('schema_version', ?) "
@@ -643,12 +704,126 @@ def fail_candidate(root, token, candidate_index, error):
             raise SpendConflict("candidate failure did not match an active provider claim")
 
 
+def claim_candidate_segment(root, token, candidate_index, segment_index,
+                            segment_count, owner):
+    """Claim one paid internal call belonging to one Studio review candidate."""
+    candidate_index = int(candidate_index)
+    segment_index = int(segment_index)
+    segment_count = int(segment_count)
+    if segment_count <= 1 or not (1 <= segment_index <= segment_count):
+        raise SpendConflict("provider segment index is outside its sealed transport plan")
+    with transaction(root) as conn:
+        candidate = conn.execute(
+            """
+            SELECT c.status AS candidate_status, a.status AS authorization_status
+            FROM spend_candidate_claims c
+            JOIN spend_authorizations a ON a.token=c.token
+            WHERE c.token=? AND c.candidate_index=?
+            """,
+            (str(token), candidate_index),
+        ).fetchone()
+        if not candidate or candidate["authorization_status"] != "claimed" or \
+                candidate["candidate_status"] != "started":
+            raise SpendConflict("provider segment has no active candidate claim")
+        row = conn.execute(
+            """
+            SELECT * FROM spend_segment_claims
+            WHERE token=? AND candidate_index=? AND segment_index=?
+            """,
+            (str(token), candidate_index, segment_index),
+        ).fetchone()
+        if row and int(row["segment_count"]) != segment_count:
+            raise SpendConflict("provider segment count changed after authorization")
+        if row and row["status"] == "completed":
+            return {"action": "completed", **dict(row)}
+        if row and row["status"] == "started":
+            raise SpendConflict(
+                f"candidate {candidate_index} segment {segment_index} has an unresolved "
+                "provider attempt; automatic repayment is blocked"
+            )
+        now = utc_now()
+        if row:
+            conn.execute(
+                """
+                UPDATE spend_segment_claims
+                SET status='started', attempts=attempts+1, owner=?, started_at=?,
+                    finished_at=NULL, output_path=NULL, output_hash=NULL, error=NULL
+                WHERE token=? AND candidate_index=? AND segment_index=? AND status='failed'
+                """,
+                (str(owner), now, str(token), candidate_index, segment_index),
+            )
+        else:
+            conn.execute(
+                """
+                INSERT INTO spend_segment_claims(
+                    token, candidate_index, segment_index, segment_count, status,
+                    attempts, owner, started_at
+                ) VALUES(?, ?, ?, ?, 'started', 1, ?, ?)
+                """,
+                (str(token), candidate_index, segment_index, segment_count,
+                 str(owner), now),
+            )
+    return {"action": "generate", "candidate_index": candidate_index,
+            "segment_index": segment_index}
+
+
+def fail_candidate_segment(root, token, candidate_index, segment_index, error):
+    with transaction(root) as conn:
+        changed = conn.execute(
+            """
+            UPDATE spend_segment_claims
+            SET status='failed', finished_at=?, error=?
+            WHERE token=? AND candidate_index=? AND segment_index=? AND status='started'
+            """,
+            (utc_now(), str(error)[:1000], str(token), int(candidate_index),
+             int(segment_index)),
+        ).rowcount
+        if changed != 1:
+            raise SpendConflict("provider segment failure did not match an active claim")
+
+
+def complete_candidate_segment(root, token, candidate_index, segment_index, output_path):
+    output_path = pathlib.Path(output_path).resolve()
+    output_hash = _file_digest(output_path)
+    if not output_hash:
+        raise SpendConflict("provider segment completed without an output artifact")
+    with transaction(root) as conn:
+        changed = conn.execute(
+            """
+            UPDATE spend_segment_claims
+            SET status='completed', finished_at=?, output_path=?, output_hash=?, error=NULL
+            WHERE token=? AND candidate_index=? AND segment_index=? AND status='started'
+            """,
+            (utc_now(), str(output_path), output_hash, str(token), int(candidate_index),
+             int(segment_index)),
+        ).rowcount
+        if changed != 1:
+            raise SpendConflict("provider segment completion did not match an active claim")
+    return output_hash
+
+
 def complete_candidate(root, token, candidate_index, output_path):
     output_path = pathlib.Path(output_path).resolve()
     output_hash = _file_digest(output_path)
     if not output_hash:
         raise SpendConflict("provider candidate completed without an output artifact")
     with transaction(root) as conn:
+        segments = conn.execute(
+            """
+            SELECT status, segment_index, segment_count FROM spend_segment_claims
+            WHERE token=? AND candidate_index=? ORDER BY segment_index
+            """,
+            (str(token), int(candidate_index)),
+        ).fetchall()
+        if segments:
+            expected = int(segments[0]["segment_count"])
+            if (len(segments) != expected or
+                    [int(row["segment_index"]) for row in segments] !=
+                    list(range(1, expected + 1)) or
+                    any(row["status"] != "completed" for row in segments)):
+                raise SpendConflict(
+                    "provider candidate cannot complete until every sealed segment completes"
+                )
         changed = conn.execute(
             """
             UPDATE spend_candidate_claims
@@ -712,3 +887,109 @@ def spend_authorization(root, token):
         return dict(row) if row else None
     finally:
         conn.close()
+
+
+_RENDER_RATING_FIELDS = (
+    "ratingId", "episode", "scene", "shotId", "artifactType", "candidateId",
+    "assetPath", "assetHash", "promptHash", "promptText", "promptSource",
+    "provider", "providerModelId", "modelVersion", "overallRead", "scores",
+    "note", "reviewer", "promptAnalysis", "learningEligible", "provenanceGrade",
+    "createdAt",
+)
+
+
+def save_render_rating(root, record):
+    """Append one immutable prompt/render outcome record."""
+    missing = [name for name in _RENDER_RATING_FIELDS
+               if name not in record or record[name] is None]
+    optional = {"provider", "providerModelId", "modelVersion"}
+    missing = [name for name in missing if name not in optional]
+    if missing:
+        raise ValueError("render rating is missing: " + ", ".join(missing))
+    if not isinstance(record["learningEligible"], bool):
+        raise ValueError("learningEligible must be a boolean")
+    if record["provenanceGrade"] not in {"exact", "prompt-only", "asset-only"}:
+        raise ValueError("provenanceGrade must be exact, prompt-only or asset-only")
+    with transaction(root) as conn:
+        try:
+            conn.execute(
+                """
+                INSERT INTO render_ratings(
+                    rating_id, episode, scene, shot_id, artifact_type, candidate_id,
+                    asset_path, asset_hash, prompt_hash, prompt_text, prompt_source,
+                    provider, provider_model_id, model_version, overall_read, scores_json,
+                    note, reviewer, prompt_analysis_json, learning_eligible,
+                    provenance_grade, created_at
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    str(record["ratingId"]), str(record["episode"]), str(record["scene"]),
+                    str(record["shotId"]), str(record["artifactType"]),
+                    str(record["candidateId"]), str(record["assetPath"]),
+                    str(record["assetHash"]), str(record["promptHash"]),
+                    str(record["promptText"]), str(record["promptSource"]),
+                    (str(record["provider"]) if record.get("provider") else None),
+                    (str(record["providerModelId"]) if record.get("providerModelId") else None),
+                    (str(record["modelVersion"]) if record.get("modelVersion") else None),
+                    str(record["overallRead"]),
+                    json.dumps(record["scores"], sort_keys=True, ensure_ascii=False),
+                    str(record.get("note") or ""), str(record["reviewer"]),
+                    json.dumps(record["promptAnalysis"], sort_keys=True, ensure_ascii=False),
+                    1 if record["learningEligible"] else 0,
+                    str(record["provenanceGrade"]),
+                    str(record["createdAt"]),
+                ),
+            )
+        except sqlite3.IntegrityError as exc:
+            raise StateConflict("render rating ID already exists") from exc
+    return dict(record)
+
+
+def list_render_ratings(root, episode=None, scene=None, shot_id=None,
+                        artifact_type=None, prompt_hash=None):
+    """Read immutable render ratings, newest first, with optional exact filters."""
+    filters = []
+    values = []
+    for column, value in (
+        ("episode", episode), ("scene", scene), ("shot_id", shot_id),
+        ("artifact_type", artifact_type), ("prompt_hash", prompt_hash),
+    ):
+        if value is not None:
+            filters.append(f"{column}=?")
+            values.append(str(value))
+    sql = "SELECT * FROM render_ratings"
+    if filters:
+        sql += " WHERE " + " AND ".join(filters)
+    sql += " ORDER BY created_at DESC, rating_id DESC"
+    conn = _connect(root)
+    try:
+        rows = conn.execute(sql, values).fetchall()
+    finally:
+        conn.close()
+    out = []
+    for row in rows:
+        out.append({
+            "ratingId": row["rating_id"],
+            "episode": row["episode"],
+            "scene": row["scene"],
+            "shotId": row["shot_id"],
+            "artifactType": row["artifact_type"],
+            "candidateId": row["candidate_id"],
+            "assetPath": row["asset_path"],
+            "assetHash": row["asset_hash"],
+            "promptHash": row["prompt_hash"],
+            "promptText": row["prompt_text"],
+            "promptSource": row["prompt_source"],
+            "provider": row["provider"],
+            "providerModelId": row["provider_model_id"],
+            "modelVersion": row["model_version"],
+            "overallRead": row["overall_read"],
+            "scores": json.loads(row["scores_json"]),
+            "note": row["note"],
+            "reviewer": row["reviewer"],
+            "promptAnalysis": json.loads(row["prompt_analysis_json"]),
+            "learningEligible": bool(row["learning_eligible"]),
+            "provenanceGrade": row["provenance_grade"],
+            "createdAt": row["created_at"],
+        })
+    return out

@@ -196,6 +196,36 @@ def test_shot_selection_cannot_bypass_an_upstream_scene_blocker(monkeypatch):
     assert brief["nextAction"]["shotId"] is None
 
 
+def test_missing_render_outcome_is_a_fire_action_not_a_fake_human_approval(monkeypatch):
+    state = _state()
+    state["canonLock"]["episodeReady"] = True
+    state["canonLock"]["blockers"] = []
+    state["packageExists"] = True
+    state["packageCurrent"] = True
+    state["packageRevision"] = 7
+    state["stages"]["storyboard"] = {"state": "approved"}
+    state["stages"]["scenelook"] = {
+        "state": "ready", "sub": "build a fresh working anchor",
+    }
+    preflight = _preflight()
+    preflight["blockers"] = [{
+        "code": "SCENE_LOOK_NOT_CURRENT",
+        "stage": "look",
+        "message": "No current signed Scene Look working anchor is available.",
+        "action": "Build Scene World; the first keyframe will be its visual proof.",
+    }]
+    intake = _intake()
+    intake["canonicalCurrent"] = True
+    _install(monkeypatch, intake, state, preflight)
+
+    brief = agent.studio_agent_brief("1", "Ep1")
+
+    assert brief["headline"] == "Scene 1 is ready at World Build."
+    assert brief["nextAction"]["type"] == "fire-outcome"
+    assert brief["nextAction"]["stage"] == "scenelook"
+    assert brief["decisions"] == []
+
+
 def test_missing_script_is_always_the_first_action(monkeypatch):
     intake = _intake()
     intake.update({"hasScript": False, "scriptName": None, "scriptVersionId": None})

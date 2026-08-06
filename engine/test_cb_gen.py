@@ -131,9 +131,18 @@ def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
     import cb_gen, cb_costs
     logged = {}
     class FakeResp:
-        content = b"MP3"
         def raise_for_status(self):
             return None
+        def json(self):
+            import base64
+            return {
+                "audio_base64": base64.b64encode(b"MP3").decode(),
+                "voice_segments": [{
+                    "voice_id": "v1", "dialogue_input_index": 0,
+                    "start_time_seconds": 0.0, "end_time_seconds": 1.0,
+                    "character_start_index": 0, "character_end_index": 18,
+                }],
+            }
     monkeypatch.setattr(cb_gen, "_rpost", lambda *a, **k: FakeResp())
     monkeypatch.setattr(cb_gen, "MEDIA", tmp_path)
     monkeypatch.setattr(cb_gen, "ELEVEN_KEY", "test-key")
@@ -154,3 +163,6 @@ def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
     import json
     side = json.load(open(tmp_path / "proof_vo.mp3.gen.json"))
     assert side["chars"] == 18 and side["billing"]["creditsConsumed"] == 18
+    timing = json.load(open(tmp_path / "proof_vo.mp3.dialogue.json"))
+    assert timing["inputCount"] == 1
+    assert timing["voiceSegments"][0]["dialogueInputIndex"] == 0

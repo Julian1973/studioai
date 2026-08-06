@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "manual-seedance-2.5-trial/v2",
+  "createdAt": "2026-08-05",
+  "episode": "Ep1",
+  "scene": "1",
+  "productionUnit": "S1.SH1",
+  "durationSeconds": 30,
+  "storyDurationSeconds": 29,
+  "purpose": "Manual UK Seedance 2.5 capability trial; never a production approval",
+  "references": [
+    {
+      "tag": "@Image 1",
+      "path": "assets/01_opening_frame_TRIAL.png",
+      "role": "First frame, opening composition, same-depth scale and screen-right flight direction",
+      "dimensions": "1672x941",
+      "sha256": "9ed8ac4a8f39572112619cc2939136111650625da58ef26e97286a17a02552f2",
+      "status": "New manual-trial candidate; not approved or locked"
+    },
+    {
+      "tag": "@Image 2",
+      "path": "assets/02_Fuzzby_front_LOCKED.jpg",
+      "role": "Fuzzby front identity view; same character as Image 3",
+      "dimensions": "330x580",
+      "sha256": "50d7c22915021607ec53dc413d794ad339bd5a4fdc6ef6f2d7e841c10c9f7133",
+      "status": "Exact pixel crop from locked final turnaround"
+    },
+    {
+      "tag": "@Image 3",
+      "path": "assets/03_Fuzzby_three_quarter_LOCKED.jpg",
+      "role": "Fuzzby three-quarter identity view; same character as Image 2",
+      "dimensions": "320x580",
+      "sha256": "11cbd728e6f0044ad0030c80d285f1be643766fbe01ccd0fc199d55df7ba7130",
+      "status": "Exact pixel crop from locked final turnaround"
+    },
+    {
+      "tag": "@Image 4",
+      "path": "assets/04_Zenny_front_LOCKED.jpg",
+      "role": "Zenny front identity view; same character as Image 5",
+      "dimensions": "350x600",
+      "sha256": "5423b9b23e69120011f1404c4bd1807f74a1d053895b77196da1db97c4b65f71",
+      "status": "Exact pixel crop from locked final turnaround"
+    },
+    {
+      "tag": "@Image 5",
+      "path": "assets/05_Zenny_three_quarter_LOCKED.jpg",
+      "role": "Zenny three-quarter identity view; same character as Image 4",
+      "dimensions": "300x580",
+      "sha256": "426721a8d61cdf0f543646b0c1e592362e77249f85b4756e78c096a8ad642694",
+      "status": "Exact pixel crop from locked final turnaround"
+    },
+    {
+      "tag": "@Image 6",
+      "path": "assets/06_bee_height_corridor_TRIAL.png",
+      "role": "Bee-height corridor world, flower scale, materials, palette, depth and lighting only",
+      "dimensions": "2816x1584",
+      "sha256": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9",
+      "status": "Current corridor candidate; manual trial only, not a production approval"
+    }
+  ],
+  "prompt": {
+    "path": "PROMPT_SEEDANCE_25_30S.txt",
+    "sha256": "fdadd83f3b4317e9dbd85b09350eb2752f6554b0a8f15698856212eeb718a9a1",
+    "dialogueMode": "Seedance native temporary voices",
+    "stageCount": 3,
+    "internalViewCount": 3
+  },
+  "excluded": [
+    "Rejected giant-Fuzzby opening frame",
+    "Character scale graphics and bear line-ups",
+    "Broad human-height meadow vista",
+    "Pollen bags, baskets, sacks and harnesses",
+    "Partial 15-second voice guide",
+    "Storm material belonging to S1.SH2"
+  ]
+}

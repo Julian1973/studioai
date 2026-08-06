@@ -40,6 +40,10 @@ def test_generic_motion_prompt_is_flagged_for_director_revision():
 def test_animation_direction_requires_declared_creative_latitude():
     base = {
         "shotId": "1.B1.S1",
+        "durationSec": 8,
+        "taskMode": "reference-to-video",
+        "generationGoal": "Generate Fuzzby's confident attempt and comic recovery.",
+        "deliveryPlan": "One causal action chain lands on the proud pose long enough to read.",
         "dramaticBeat": "Boast becomes a private wobble.",
         "audienceBefore": "Amused anticipation.",
         "audienceAfter": "A laugh with affection.",
@@ -60,7 +64,18 @@ def test_animation_direction_requires_declared_creative_latitude():
             "compositionLightAndMaterials": "Warm meadow depth and loose pollen.",
             "landingImage": "Fuzzby holds his gymnast finish."
         }],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["1.B1"],
+            "purpose": "Turn confidence into a physical wobble.",
+            "initialOrCarriedState": "Fuzzby begins in the approved pose.",
+            "primaryEvent": "The missed turn creates the collision and recovery.",
+            "observableEndState": "Fuzzby balances on the flower, chest out.",
+            "emotionOrCameraAnalysis": "The unhurried hold lets his denial become the joke."
+        }],
         "referenceContract": [],
+        "consistencyContract": ["Keep Fuzzby's identity and flower ownership stable."],
+        "audioContract": "No dialogue; retain the physical action sounds.",
         "continuityFinish": "Fuzzby balanced on the flower, chest out.",
         "surgicalSafeguards": [],
         "providerPrompt": "Begin from the approved frame and follow Fuzzby's confident attempt "
@@ -92,3 +107,63 @@ def test_animation_direction_requires_declared_creative_latitude():
         pass
     else:
         raise AssertionError("precise direction must justify why creative latitude is reduced")
+
+    try:
+        AnimationDirection.model_validate({
+            **base,
+            "durationSec": 30,
+            "performanceFreedom": "Seedance may discover the detailed performance.",
+        })
+    except ValidationError:
+        pass
+    else:
+        raise AssertionError("a 30-second unit must use a complete timestamp stage plan")
+
+
+def test_animation_direction_requires_complete_ordered_timestamp_stages():
+    stage = {
+        "stageNumber": 1,
+        "beatIds": ["1.B1"],
+        "purpose": "Land the reaction",
+        "startSec": 0,
+        "endSec": 8,
+        "initialOrCarriedState": "Fuzzby begins in the approved pose.",
+        "primaryEvent": "The flower bends and redirects him.",
+        "observableEndState": "He catches himself on the bloom.",
+        "emotionOrCameraAnalysis": "The held wide frame makes the recovery readable.",
+    }
+    base = {
+        "shotId": "1.B1.S1", "taskMode": "reference-to-video",
+        "durationSec": 8,
+        "pacingMode": "timestamp",
+        "generationGoal": "Generate the physical joke.",
+        "deliveryPlan": "A clear cause and delayed reaction land the beat.",
+        "dramaticBeat": "Confidence becomes a wobble.",
+        "audienceBefore": "Anticipation.", "audienceAfter": "Affectionate laughter.",
+        "beatOwner": "Fuzzby", "performanceFreedom": "Seedance may shape the recovery.",
+        "performanceArc": "Confidence tightens into surprise.",
+        "physicalCauseAndEffect": "The flower bends and rebounds.",
+        "cameraBehaviour": "Hold wide for the cause and reaction.",
+        "timingAndRhythm": "Fast cause, delayed read.",
+        "landingBreath": "Hold the caught pose.", "directionDensity": "guided",
+        "precisionReasons": [], "shotPlan": [{
+            "shotNumber": 1, "purpose": "Carry the joke.",
+            "framingLensAndCamera": "Held wide.", "causalAction": "Flower redirects him.",
+            "observablePerformance": "A private flinch.",
+            "compositionLightAndMaterials": "Warm meadow depth.",
+            "landingImage": "Caught on the bloom."}],
+        "stagePlan": [stage], "referenceContract": [],
+        "consistencyContract": ["Keep identity stable."],
+        "audioContract": "No dialogue; preserve ambience.",
+        "continuityFinish": "Caught on the bloom.", "surgicalSafeguards": [],
+        "providerPrompt": "A structured Seedance prompt long enough for model validation."
+    }
+    assert AnimationDirection.model_validate(base).stagePlan[0].endSec == 8
+
+    incomplete = {**base, "stagePlan": [{**stage, "endSec": None}]}
+    try:
+        AnimationDirection.model_validate(incomplete)
+    except ValidationError:
+        pass
+    else:
+        raise AssertionError("timestamp pacing must require both boundaries")

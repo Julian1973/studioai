@@ -214,6 +214,40 @@ def test_big_comedy_beat_requires_physical_staging():
     assert "MISSING_PHYSICAL_STAGING" in _codes(E.validate_scene_design(d, BEATS, CFG))
 
 
+def test_packed_unit_preserves_each_big_comedy_beats_physical_staging():
+    d = _clean_design()
+    second = E.PhysicalStaging(
+        staysVisible="The pollen mark and blossom remain visible through the tumble.",
+        contactAndWeight="The blossom cups Fuzzby and stops his forward momentum.",
+        payoffShape="The correction ends with Fuzzby held upside down.",
+        prohibitedStaging=["Do not hide the blossom contact."],
+    )
+    d.shots[0].beatCodes = ["1.B1", "1.B2"]
+    d.shots[0].physicalStaging = None
+    d.shots[0].physicalStagings = [
+        E.BeatPhysicalStaging(beatCode="1.B1", **STAGING.model_dump()),
+        E.BeatPhysicalStaging(beatCode="1.B2", **second.model_dump()),
+    ]
+    beats = BEATS + [{
+        "beatCode": "1.B2", "comedyMode": "BIG", "storyBeat": "The fix gets worse.",
+        "cuts": [],
+    }]
+
+    report = E.validate_scene_design(d, beats, CFG)
+    assert report["passed"], report["issues"]
+
+
+def test_packed_unit_refuses_duplicate_big_comedy_staging_owners():
+    d = _clean_design()
+    d.shots[0].physicalStagings = [
+        E.BeatPhysicalStaging(beatCode="1.B1", **STAGING.model_dump()),
+        E.BeatPhysicalStaging(beatCode="1.B1", **STAGING.model_dump()),
+    ]
+    d.shots[0].physicalStaging = None
+    assert "DUPLICATE_PHYSICAL_STAGING" in _codes(
+        E.validate_scene_design(d, BEATS, CFG))
+
+
 def test_binding_lines_consistency():
     d = _clean_design()
     d.shots[0].dialogueBinding = None
@@ -427,6 +461,18 @@ def test_a_brief_exceeding_210_words_still_refuses():
     codes = _codes(report)
     assert "SHOT_OVERBUDGET" in codes or "COMPILE_GUARD" in codes
     assert not report["passed"]
+
+
+def test_explicit_seedance_25_packed_unit_uses_its_bounded_long_form_ceiling():
+    d = _clean_design()
+    d.shots[0].beatCodes = ["1.B1"]
+    d.shots[0].performanceAssignment = " ".join(
+        ["Fuzzby weaves between the tall blossoms, wings beating hard, chest leading"] * 15)
+
+    _prompt, words, _slots = E.compile_shot_contract(d.shots[0], {}, CFG)
+    assert E.MAX_SHOT_PROMPT_WORDS < words <= E.MAX_PACKED_UNIT_PROMPT_WORDS
+    report = E.validate_scene_design(d, BEATS, CFG)
+    assert report["passed"], report["issues"]
 
 
 def test_verbatim_dialogue_inside_performance_assignment_still_refuses():
@@ -665,8 +711,9 @@ def test_name_binding_never_fires_inside_longer_cast_name():
 
 
 def test_duration_bounds_enforced_by_schema():
+    assert _shot(dur=30.0).durationSec == 30.0
     with pytest.raises(Exception):
-        _shot(dur=12.0)
+        _shot(dur=31.0)
     with pytest.raises(Exception):
         _shot(dur=2.0)
 

@@ -2,6 +2,8 @@
 import pytest
 
 import cb_departments as D
+import cb_render as R
+import cb_safety
 
 
 def _locked():
@@ -53,6 +55,46 @@ def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeyp
     assert "Runtime worker contract — Voice Director" in seen["system"]
 
 
+def test_prepare_direction_archives_a_stale_candidate_before_replacing_it(
+        monkeypatch, tmp_path):
+    pkg = {"episode": "EpT", "sceneNumber": "1", "revision": 2,
+           "validation": {"passed": True}, "shots": [], "continuityLedger": []}
+    record = {"approved": None, "candidate": None, "history": [],
+              "departmentWork": {"look": {
+                  "approved": None,
+                  "candidate": {"output": {"providerPrompt": "stale prompt"},
+                                "inputSignature": {"stale": True}},
+                  "history": [],
+              }}}
+
+    class LookResult:
+        def model_dump(self):
+            return {"providerPrompt": "fresh prompt"}
+
+    monkeypatch.setattr(R, "_require_show_adapter", lambda: None)
+    monkeypatch.setattr(R, "load_pkg", lambda *_args, **_kwargs: (pkg, tmp_path / "pkg.json"))
+    monkeypatch.setattr(R, "_require_valid", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(R, "_require_current_lineage", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(R, "_scene_context", lambda *_args, **_kwargs: {"scene": "1"})
+    monkeypatch.setattr(R, "_load_scenelook_rec", lambda *_args, **_kwargs: record)
+    monkeypatch.setattr(R, "_save_scenelook_rec", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(R, "_save", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(R.cb_departments, "prepare_look",
+                        lambda *_args, **_kwargs: LookResult())
+    monkeypatch.setattr(cb_safety.cb_canon, "load_policy", lambda *_args, **_kwargs: {})
+    monkeypatch.setattr(
+        cb_safety.cb_canon, "require_locked",
+        lambda *_args, **_kwargs: {"profileDigests": {"look": "canon-look"}})
+
+    replacement = R.prepare_department("1", "look", episode="EpT", log=lambda *_: None)
+    work = record["departmentWork"]["look"]
+
+    assert replacement["output"]["providerPrompt"] == "fresh prompt"
+    assert work["history"][0]["outcome"] == "invalidated"
+    assert work["history"][0]["output"]["providerPrompt"] == "stale prompt"
+    assert work["candidate"] is replacement
+
+
 def test_seedance_director_returns_shot_plan_and_separate_reference_contract(monkeypatch):
     seen = {}
 
@@ -61,6 +103,11 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
         seen["user"] = user
         return schema(
             shotId="S1.SH1",
+            durationSec=8,
+            taskMode="reference-to-video",
+            pacingMode="storyline",
+            generationGoal="Generate Fuzzby's brave recovery after the deck shifts.",
+            deliveryPlan="The planted-paw cause, restrained push and delayed flinch turn confidence into affection.",
             dramaticBeat="Fuzzby performs confidence while the wobble exposes him.",
             audienceBefore="Amused anticipation.",
             audienceAfter="A laugh with affection.",
@@ -80,24 +127,44 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
                 observablePerformance="His smile holds as his eyes flick down",
                 compositionLightAndMaterials="Layered deck depth, warm rim on tactile fur",
                 landingImage="He settles in a readable off-balance silhouette")],
+            stagePlan=[D.SeedanceStageDirection(
+                stageNumber=1, beatIds=["1.B1"], purpose="Expose the false confidence",
+                initialOrCarriedState="Fuzzby holds the approved opening pose.",
+                primaryEvent="His planted paw loads the plank and the deck kicks back.",
+                observableEndState="He holds a readable off-balance silhouette.",
+                emotionOrCameraAnalysis="The restrained push lets the private flinch land.")],
             referenceContract=[D.ReferenceDirection(
                 assetTag="@Image1", role="opening_frame",
                 controls="Exact opening state and composition", scope="continuity")],
+            consistencyContract=["Keep Fuzzby's identity, scale and deck axis stable."],
+            audioContract="No dialogue; preserve the deck creak and room ambience.",
             continuityFinish="End on the approved handoff silhouette.",
             surgicalSafeguards=["Preserve relative scale"],
             providerPrompt=(
-                "Begin on the exact approved opening frame. Medium 40mm, the camera makes "
-                "a restrained push because Fuzzby's planted paw loads the loose plank, "
-                "causing the deck to kick back. His smile holds while his eyes flick down. "
-                "Warm rim light shapes tactile fur against layered deck depth. Preserve "
-                "identity and relative scale from @Image1. Land on his readable off-balance "
-                "silhouette as the final continuity handoff."))
+                "[Multimodal Reference Layer]\n"
+                "@Image1 only defines the exact first-frame composition.\n"
+                "[One-Sentence Summary]\nGenerate Fuzzby's brave recovery after the deck shifts.\n"
+                "[Global Settings]\nWarm tactile deck; restrained 40mm push; no subtitles.\n"
+                "[Timestamp Script Storyboard]\nStage 1: [Expose the false confidence]\n"
+                "Initial state: Fuzzby holds the approved opening pose.\n"
+                "Action/Expression: his planted paw loads the plank and the deck kicks back as "
+                "the 40mm camera makes a restrained push.\nEnd state: his smile holds while "
+                "his eyes flick down in a readable off-balance silhouette.\n"
+                "Emotion/Camera Analysis: the push lets the private flinch land.\n"
+                "[Global Supplement]\nKeep identity, scale, deck axis and warm rim light.\n"
+                "[Audio]\nNo dialogue; preserve the deck creak and room ambience."))
 
     monkeypatch.setattr(D.cb_llm, "structured", fake)
     out = D.prepare_animation(
-        {"shot": {"shotId": "S1.SH1"}, "referenceSlots": {"@Image1": "opening frame"}},
+        {"shot": {"shotId": "S1.SH1", "durationSec": 8},
+         "referenceSlots": {"@Image1": "opening frame"}},
         ["opening.png"], log=lambda *a, **k: None)
     assert len(out.shotPlan) == 1
+    assert len(out.stagePlan) == 1
+    assert out.pacingMode == "storyline"
+    assert out.durationSec == 8
     assert out.referenceContract[0].assetTag == "@Image1"
     assert "Runtime worker contract — Seedance Production Director" in seen["system"]
     assert "Keep every spoken word out of providerPrompt" in seen["user"]
+    assert "[Multimodal Reference Layer]" in seen["user"]
+    assert "Stage N: 0-4s [Purpose]" in seen["user"]

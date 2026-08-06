@@ -18,6 +18,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 HERE = pathlib.Path(__file__).resolve().parent
 REGISTRY_PATH = HERE / "provider_capabilities.json"
 REGISTRY_SCHEMA_VERSION = 1
+COMPARISON_MODEL_ID = "fal-seedance-2.0"
+COMPARISON_ENDPOINT = "bytedance/seedance-2.0/reference-to-video"
 
 
 class ProviderCapabilityError(RuntimeError):
@@ -95,14 +97,14 @@ class ProviderRegistry(BaseModel):
     models: List[VideoModelCapability]
 
     @model_validator(mode="after")
-    def unique_and_default_enabled(self):
+    def unique_and_default_present(self):
         ids = [model.modelId for model in self.models]
         if len(ids) != len(set(ids)):
             raise ValueError("provider registry contains duplicate model IDs")
         default = next((model for model in self.models
                         if model.modelId == self.defaultVideoModelId), None)
-        if default is None or not default.enabled:
-            raise ValueError("default video model must exist and be enabled")
+        if default is None:
+            raise ValueError("default video model must exist")
         return self
 
 
@@ -136,10 +138,9 @@ def video_model(model_id=None, *, require_enabled=True, registry=None):
     return model
 
 
-def validate_video_request(*, mode, duration, resolution, image_count=0,
-                           audio_count=0, video_count=0, model_id=None):
-    """Validate one request before files are uploaded or a provider is contacted."""
-    model = video_model(model_id)
+def _validate_video_request_for_model(model, *, mode, duration, resolution,
+                                      image_count=0, audio_count=0, video_count=0):
+    """Validate request shape against one already-selected capability record."""
     mode = str(mode)
     if mode not in model.modes or mode not in model.endpoints:
         raise ProviderCapabilityError(
@@ -172,6 +173,15 @@ def validate_video_request(*, mode, duration, resolution, image_count=0,
     return model
 
 
+def validate_video_request(*, mode, duration, resolution, image_count=0,
+                           audio_count=0, video_count=0, model_id=None):
+    """Validate one production request before upload or provider contact."""
+    model = video_model(model_id)
+    return _validate_video_request_for_model(
+        model, mode=mode, duration=duration, resolution=resolution,
+        image_count=image_count, audio_count=audio_count, video_count=video_count)
+
+
 def request_contract(*, fast=False, duration, resolution="720p", image_count=0,
                      audio_count=0, video_count=0, model_id=None):
     mode = "reference-to-video-fast" if fast else "reference-to-video"
@@ -191,6 +201,51 @@ def request_contract(*, fast=False, duration, resolution="720p", image_count=0,
         "costRateKey": model.costRateKeys.get(mode),
         "capabilityVerifiedAt": model.verifiedAt,
         "capabilitySource": model.sourceUrl,
+    }
+
+
+def comparison_request_contract(*, comparison_run_id, fast=False, duration,
+                                resolution="720p", image_count=0,
+                                audio_count=0, video_count=0,
+                                model_id=None):
+    """Qualify one explicit 2.0 comparison call inside the canonical render path.
+
+    Normal model selection remains fail-closed on the unqualified 2.5 target. This function
+    permits only the recorded fal 2.0 evidence contract, and only when cb_render has already
+    labelled the same-process comparison. It cannot select a fallback or contact a provider.
+    """
+    comparison_run_id = str(comparison_run_id or "").strip()
+    if not comparison_run_id or len(comparison_run_id) > 120:
+        raise ProviderCapabilityError("a bounded comparison run ID is required")
+    if model_id != COMPARISON_MODEL_ID:
+        raise ProviderCapabilityError(
+            "the comparison route permits only fal-seedance-2.0")
+    model = video_model(model_id, require_enabled=False)
+    expected = (
+        not model.enabled and model.status == "retired" and model.provider == "fal" and
+        model.modelVersion == "2.0" and model.transport == "fal-subscribe" and
+        model.endpoints.get("reference-to-video") == COMPARISON_ENDPOINT
+    )
+    if not expected:
+        raise ProviderCapabilityError(
+            "the Seedance 2.0 evidence record changed; re-qualify the comparison route")
+    mode = "reference-to-video-fast" if fast else "reference-to-video"
+    model = _validate_video_request_for_model(
+        model, mode=mode, duration=duration, resolution=resolution,
+        image_count=image_count, audio_count=audio_count, video_count=video_count)
+    return {
+        "providerModelId": model.modelId,
+        "provider": model.provider,
+        "modelVersion": model.modelVersion,
+        "transport": model.transport,
+        "mode": mode,
+        "endpoint": model.endpoints[mode],
+        "resolution": resolution,
+        "duration": duration,
+        "costRateKey": model.costRateKeys.get(mode),
+        "capabilityVerifiedAt": model.verifiedAt,
+        "capabilitySource": model.sourceUrl,
+        "comparisonRunId": comparison_run_id,
     }
 
 

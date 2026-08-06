@@ -1,0 +1,34 @@
+SCENE 1 — CLIP B — "A STORM'S COMING"  (0:30–1:00)
+Ep1 The Adventure Begins · The Sunlit Flower Field · Fuzzby + Zenny
+Covers: the smear → the branch clip → the tumble → "Buzz Crash!!" → the thunder turn → "A Storm's coming." → stuck again
+
+────────────────────────────────────────────────────────────────────────
+30 seconds, 16:9, 24fps, one continuous take, no cuts. Stylised feature-quality 3D CGI: real weight, squash-and-stretch, warm saturated light, bold legible staging, character locked to reference.
+
+References, one job each: @图1 is the approved final frame of the previous clip and must be matched exactly as the first frame only. Do not hold the previous pose, replay the previous action, reset the characters or introduce unexplained repositioning — carry the characters, their marks and the light, then begin the new action, free to travel anywhere the story needs. @图2 is Fuzzby's identity only. @图3 is Zenny's identity only. @图4 is the world only — lighting, palette and plant texture, never a framing or pose reference. If @图1 and @图4 disagree on light, @图4 wins.
+
+CARRY: the gold pollen across Fuzzby's face comes in from the opening frame and stays on him the whole take — smearing wider and picking up more, never coming off.
+
+Audio: @Audio1 is the only voice source and the timing master. Fuzzby speaks on the pop, Fuzzby again after the thunder, then Zenny, then Fuzzby last. No added speech, no other voices generated, no invented background chatter, no music. Wing-buzz runs under everything, unbroken.
+
+SIZE: Fuzzby renders visibly larger than Zenny in every shared frame — hold that scale relationship throughout, never flattened or reversed.
+
+Camera: 35mm at flower-top height, travelling with Fuzzby as an over-eager wingman through the first half, then settling with Zenny for the turn. Locked off completely whenever a character speaks a line.
+
+0–5s: Begin exactly on @图1. Fuzzby scrubs at his own face with both front legs and only drags the gold wider across it — and the effort tips him off his hover into a dive at the next bloom.
+
+5–10s: the dive clips a low branch. The branch whips down and back under the hit, and the recoil spins him end over end through the flower tops, three tumbling contacts sounding as he goes.
+
+10–14s: he drops into an open blossom upside down, the petals folding loosely around him with his legs kicking clear above the rim — then he pops upright out of it. His line lands on the pop.
+
+14–18s: Zenny, still working her clover, rolls her eyes at him — and this time the smile gets away from her. He dives again on the strength of it and comes back out carrying even more gold than before.
+
+18–23s: thunder rolls somewhere far off. Fuzzby stops travelling and holds his hover, wings still going, antennae swinging toward the sound, and he speaks.
+
+23–27s: Zenny lifts her head from the clover toward the sky. The light across the flower tops cools and flattens as she looks, the heads leaning under a new breeze, and she answers him.
+
+27–30s: he throws his chest out at the sky and delivers his line — then flies straight into the nearest flower head, which folds over him and holds him there with his legs waving clear. Zenny's shoulders drop. Land there.
+
+Low sun rakes across the flower tops from behind, cooling through the closing beats as the cloud arrives.
+
+Negative: no morphing, redesign or rescaling of the characters; no extra characters or props; no on-screen text, subtitles, logos or watermarks; no foreign-language speech; no invented background voices; no crystals on or attached to the bees; no still or frozen wings while airborne; no 2D animation style; no flat, static-feeling rendering; no floating or sinking through ground; no body inflation; no full-body entry into a flower with no readable silhouette; no disappearing; the tumble stays among the blooms and never goes up into open sky; Zenny never leaves frame; no rain, no lightning strike, no visible storm front — the sky only cools.

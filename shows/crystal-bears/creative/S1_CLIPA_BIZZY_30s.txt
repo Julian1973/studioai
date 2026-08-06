@@ -1,0 +1,32 @@
+SCENE 1 — CLIP A — "BIZZY"  (0:00–0:30)
+Ep1 The Adventure Begins · The Sunlit Flower Field · Fuzzby + Zenny
+Covers: the bizzy hum → the leaf crash → "Nailed it." → Zenny arrives → the pollen moustache → "Officially nuts!"
+
+────────────────────────────────────────────────────────────────────────
+30 seconds, 16:9, 24fps, one continuous take, no cuts. Stylised feature-quality 3D CGI: real weight, squash-and-stretch, warm saturated light, bold legible staging, character locked to reference.
+
+References, one job each: @图1 is the exact opening frame — composition, camera side, both characters' positions, relative scale and light. @图2 is Fuzzby's identity only. @图3 is Zenny's identity only. @图4 is the world only — lighting, palette and plant texture, never a framing or pose reference. If @图1 and @图4 disagree on light, @图4 wins.
+
+Audio: @Audio1 is the only voice source and the timing master. Fuzzby carries the opening, Fuzzby speaks again on the pose, then Fuzzby asks and Zenny answers. No added speech, no other voices generated, no invented background chatter, no music. Wing-buzz runs under everything, unbroken.
+
+SIZE: Fuzzby renders visibly larger than Zenny in every shared frame — hold that scale relationship throughout, never flattened or reversed.
+
+Camera: 35mm, held at flower-top height, travelling with Fuzzby like an over-eager wingman — it chases him, banks late, arrives a half-beat behind him, and locks off completely whenever a character speaks a line.
+
+0–5s: Begin exactly on @图1. Both bees work the blossom heads. Zenny's line between flowers runs clean and unhurried, hands packing as she goes; Fuzzby's zig-zags and overshoots every mark he aims for. His hum carries the opening.
+
+5–9s: Fuzzby drops face-first into a lavender spike — the spike bows under his weight and dumps its pollen down his front, and the rebound flings him back out still travelling.
+
+9–14s: that same momentum carries him straight past the next bloom and side-on into a broad leaf. The leaf bends hard under him, holds a beat, then springs him backward, gold bursting off his body with the release.
+
+14–18s: he tumbles out of it onto a sturdy flower head, one leg tucked back beneath him, rides the head's dip and rebound, and comes up out of it chest first. His line lands on that.
+
+18–22s: Zenny glides in and settles onto the clover beside him. She keeps packing her own pollen, hands and wings working the whole time, and gives him one long look across the gap without ever stopping the work.
+
+22–26s: he rockets to a wide daisy and plants his whole face into its pollen centre. The head compresses under him, then rebounds and pushes him back out wearing the gold across his face.
+
+26–30s: he turns to her, gold-faced and delighted, and asks. She works one beat longer than is comfortable before she answers, and only on the answer does one corner of her mouth lift. Land there.
+
+Low sun rakes across the flower tops from behind, rimming wing edges and the drifting gold.
+
+Negative: no morphing, redesign or rescaling of the characters; no extra characters or props; no on-screen text, subtitles, logos or watermarks; no foreign-language speech; no invented background voices; no crystals on or attached to the bees; no still or frozen wings while airborne; no 2D animation style; no flat, static-feeling rendering; no floating or sinking through ground; no body inflation; no entering or burying inside a flower or leaf; no disappearing; no hidden silhouette; the tumble stays among the blooms and never goes up into open sky; Zenny never leaves frame.

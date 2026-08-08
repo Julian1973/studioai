@@ -1,7 +1,47 @@
 {
   "schemaVersion": 1,
-  "defaultVideoModelId": "dreamina-seedance-2-5-260628",
+  "defaultVideoModelId": "fal-seedance-2.5",
   "models": [
+    {
+      "modelId": "fal-seedance-2.5",
+      "provider": "fal",
+      "displayName": "Seedance 2.5 via fal",
+      "modelVersion": "2.5",
+      "transport": "fal-subscribe",
+      "enabled": true,
+      "status": "production",
+      "verifiedAt": "2026-08-07",
+      "sourceUrl": "https://fal.ai/models/bytedance/seedance-2.5/reference-to-video/api",
+      "endpoints": {
+        "reference-to-video": "bytedance/seedance-2.5/reference-to-video"
+      },
+      "modes": [
+        "reference-to-video"
+      ],
+      "duration": {
+        "minSec": 4,
+        "maxSec": 30,
+        "supportsAuto": true
+      },
+      "referenceLimits": {
+        "images": 30,
+        "audio": 10,
+        "video": 10,
+        "recommendedCombined": 8
+      },
+      "resolutions": [
+        "480p",
+        "720p"
+      ],
+      "nativeAudio": true,
+      "costRateKeys": {
+        "reference-to-video": "seedance_25_fal_720p_per_sec",
+        "reference-to-video:480p": "seedance_25_fal_480p_per_sec",
+        "reference-to-video:720p": "seedance_25_fal_720p_per_sec"
+      },
+      "fallbackModelId": null,
+      "disableReason": null
+    },
     {
       "modelId": "fal-seedance-2.0",
       "provider": "fal",

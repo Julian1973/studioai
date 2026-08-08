@@ -23,10 +23,10 @@ The correct decision today is:
    verified for Julian's account.
 5. Run a small, explicitly authorised A/B qualification before making 2.5 the default.
 
-This is not caution for its own sake. As of the research date, Dreamina markets Seedance
-2.5 features, but fal says 2.5 is announced and not yet live on fal, and BytePlus documents
-Seedance 2.0 model IDs rather than a 2.5 production endpoint. There is not yet enough
-verified API information to wire a paid production route honestly.
+This is not caution for its own sake. Dreamina markets the wider Seedance 2.5 product family, while
+fal now documents and serves the qualified 2.5 reference-to-video API used by the Studio. BytePlus
+remains a separate unqualified route. The fal contract is sufficient for controlled, human-approved
+production requests; output behaviour still has to be calibrated from preserved renders.
 
 ## Current Studio audit
 
@@ -64,9 +64,9 @@ script fixture and leave production state empty before and after the test.
 | Surface | Current evidence | Duration | References | Output | Price | Production conclusion |
 |---|---|---:|---:|---|---|---|
 | Dreamina Seedance 2.5 UI | Official product pages advertise it; access may vary by account and region | Up to 30s advertised; longer beta modes are also mentioned | Up to 50 multimodal inputs advertised | Native 4K and local editing advertised | Not published as an API rate | Useful for manual evaluation, not proof of an automatable production API |
-| fal Seedance 2.5 | fal's current article says announced, not yet released on fal | 30s reported | 50 reported | 4K reported; native audio not confirmed | Unannounced | Do not invent an endpoint or cost |
+| fal Seedance 2.5 | Live endpoint and schema verified 2026-08-07 | 4-30s or auto | Up to 30 images, 10 videos and 10 audio files; 50 files total | 480p or 720p on this route; native audio supported | $0.473/output-second at 720p without video input | Production route, still protected by sealed human spend approval |
 | BytePlus ModelArk Seedance 2.5 | No verified 2.5 model ID, request schema or price found in current official documentation | Unknown | Unknown | Unknown | Unknown | Capability probe must remain closed |
-| fal Seedance 2.0 reference-to-video | Live and already integrated in Crystal Bears Studio | 4-15s family limit; Studio currently constrains shots to 4-8s | Up to 9 images, 3 videos and 3 audio references on the documented family route | Current Studio route is 720p with native audio | Studio uses a confirmed upper bound of about $0.3034/output-second standard and $0.24 fast | Keep as the known fallback and comparison baseline |
+| fal Seedance 2.0 reference-to-video | Documented historical comparison route | 4-15s family limit | Up to 9 images, 3 videos and 3 audio references on the documented family route | Up to 720p/1080p by route with native audio | Historical rates only | Retired for Crystal Bears; never use as a silent paid fallback |
 | BytePlus ModelArk Seedance 2.0 | Official asynchronous API is documented | 4-15s or automatic within the model rules | 0-9 images, 0-3 videos and 0-3 audio; image or video is required | 480p, 720p, 1080p and 4K vary by model; documented 4K output is 10-bit H.265 | Token based and model specific | Viable alternative adapter only after account-level validation |
 
 ### Officially advertised 2.5 strengths
@@ -86,13 +86,9 @@ availability and account/region variation, and an embedded creation surface can 
 2.0 mini. The Studio must therefore discover capabilities from the chosen provider at
 runtime instead of encoding marketing copy as truth.
 
-### Unknowns that block production activation
+### Remaining output-qualification unknowns
 
-- Exact fal or BytePlus 2.5 model ID and endpoint.
-- Request and response schema.
-- Which input combinations are accepted.
-- Minimum and exact maximum duration per route.
-- Reference count by media type, file limits and ordering semantics.
+- BytePlus 2.5 account activation, exact model contract and price; it remains disabled.
 - Whether supplied dialogue audio is preserved, transformed or only used as guidance.
 - Native audio behavior, channels, sample rate and language behavior.
 - Exact frame rate, codec, bit depth, colour tags and keyframe interval of output.
@@ -383,8 +379,8 @@ Before a paid request, disclose and seal:
 - Maximum authorised cost including tax policy if known.
 - Request idempotency key and expiry.
 
-Never estimate 2.5 using the 2.0 rate as if it were a fact. Until an official price is
-available, the authorisation button remains disabled.
+Never estimate 2.5 using the 2.0 rate. fal's current documented 720p rate is sealed into each
+authorisation disclosure; a changed or unavailable price configuration disables submission.
 
 For the current 2.0 standard bound, one 8-second candidate is about $2.43 and a batch of
 three is about $7.28. One 15-second batch of three is about $13.65. These are useful
@@ -658,7 +654,7 @@ Exit: current production behavior works through the adapter with no provider cal
 
 ### Phase 1: 2.5 zero-spend capability gate
 
-Only when a provider publishes 2.5:
+For each newly published or materially changed 2.5 provider route:
 
 - Record exact model ID, endpoint and schema from official documentation.
 - Query model availability and price for Julian's account without generating media where
@@ -667,8 +663,8 @@ Only when a provider publishes 2.5:
 - Attach current terms and regional availability to the model-registry entry.
 - Add mocked contract tests from the real schema.
 
-Exit: the provider adapter can validate and quote an exact sealed request. Paid submission
-remains disabled.
+Exit: the provider adapter can validate and quote an exact sealed request. Paid submission remains
+disabled until the human approves that request's disclosure.
 
 ### Phase 2: explicitly authorised technical smoke test
 
@@ -707,8 +703,8 @@ script truth, identity, approval lineage or final delivery.
 
 ### Phase 4: controlled production rollout
 
-- 2.5 remains opt-in per scene at first.
-- 2.0 remains the immediate fallback.
+- 2.5 remains human-authorised per production unit during calibration.
+- 2.0 remains retired; there is no silent paid fallback.
 - Store provider choice in each immutable generation-unit approval.
 - Review the first five accepted scenes as a calibration batch.
 - Promote 2.5 to default only for scene classes where evidence shows it wins.
@@ -717,20 +713,20 @@ script truth, identity, approval lineage or final delivery.
 
 Seedance 2.5 may be enabled only when every item is true:
 
-- [ ] Official provider endpoint and exact model ID exist.
-- [ ] Account and region access are confirmed.
-- [ ] Request/response schema is captured in tests.
-- [ ] Price and successful-output billing behavior are confirmed.
-- [ ] Billing profile and spend ceiling are approved.
+- [x] Official fal endpoint and exact model ID exist.
+- [x] fal authentication and route access are confirmed.
+- [x] Request schema is captured in focused contract tests.
+- [x] Current 720p price is configured for spend disclosure.
+- [x] Billing profile and per-request human spend ceiling are enforced.
 - [ ] Terms and production rights have been reviewed.
-- [ ] Duration, reference and audio limits are verified.
+- [x] Duration, reference and audio limits are verified from the fal schema.
 - [ ] Output codec, fps, colour, audio and watermark behavior are verified.
 - [ ] Provider job IDs survive process/browser restart.
 - [ ] Submission is idempotent and transactionally spend-reserved.
 - [ ] Source output is immediately downloaded, hashed and preserved.
 - [ ] Script occurrence and continuity checks work at scene/unit level.
 - [ ] Human candidate review and final-master gates cannot be bypassed.
-- [ ] 2.0 fallback remains operational.
+- [x] Silent 2.0 fallback is disabled.
 - [ ] Golden-path test runs from a fresh script to an approved final-master candidate.
 
 ## Immediate implementation order
@@ -741,8 +737,8 @@ Seedance 2.5 may be enabled only when every item is true:
 4. Build one authoritative scene audio guide and reference manifest.
 5. Add durable asynchronous provider jobs, idempotency and transactional spend reservation.
 6. Upgrade technical ingest/QC and 48 kHz delivery profiles.
-7. Add the disabled 2.5 adapter only after an official schema exists.
-8. Run the qualification plan with explicit spend authorisation.
+7. Calibrate the live fal 2.5 adapter with explicitly authorised production units.
+8. Record render outcome, prompt, references, cost and targeted retry evidence.
 
 ## Source register
 
@@ -754,7 +750,7 @@ Primary product and API sources:
 - [Dreamina: Seedance 2.5 usage guide](https://dreamina.capcut.com/seedance/how-to-use-seedance-2-5)
 - [BytePlus ModelArk: Seedance video-generation tasks](https://docs.byteplus.com/en/docs/modelark/1520757)
 - [BytePlus ModelArk pricing](https://docs.byteplus.com/docs/ModelArk/1099320)
-- [fal: current Seedance 2.5 status](https://fal.ai/learn/tools/what-is-seedance-2-5)
+- [fal: Seedance 2.5 reference-to-video API](https://fal.ai/models/bytedance/seedance-2.5/reference-to-video/api)
 - [fal: Seedance 2.0 reference-to-video](https://fal.ai/models/bytedance/seedance-2.0/reference-to-video/api)
 - [fal: Seedance 2.0 production guide](https://fal.ai/learn/tools/how-to-use-seedance-2-0)
 - [fal: asynchronous inference](https://fal.ai/docs/documentation/model-apis/inference/queue)

@@ -182,6 +182,14 @@ def validate_video_request(*, mode, duration, resolution, image_count=0,
         image_count=image_count, audio_count=audio_count, video_count=video_count)
 
 
+def _cost_rate_key(model, mode, resolution):
+    key = model.costRateKeys.get(f"{mode}:{resolution}") or model.costRateKeys.get(mode)
+    if not key:
+        raise ProviderCapabilityError(
+            f"{model.modelId} has no verified cost rate for {mode} at {resolution}")
+    return key
+
+
 def request_contract(*, fast=False, duration, resolution="720p", image_count=0,
                      audio_count=0, video_count=0, model_id=None):
     mode = "reference-to-video-fast" if fast else "reference-to-video"
@@ -198,7 +206,7 @@ def request_contract(*, fast=False, duration, resolution="720p", image_count=0,
         "endpoint": model.endpoints[mode],
         "resolution": resolution,
         "duration": duration,
-        "costRateKey": model.costRateKeys.get(mode),
+        "costRateKey": _cost_rate_key(model, mode, resolution),
         "capabilityVerifiedAt": model.verifiedAt,
         "capabilitySource": model.sourceUrl,
     }
@@ -242,7 +250,7 @@ def comparison_request_contract(*, comparison_run_id, fast=False, duration,
         "endpoint": model.endpoints[mode],
         "resolution": resolution,
         "duration": duration,
-        "costRateKey": model.costRateKeys.get(mode),
+        "costRateKey": _cost_rate_key(model, mode, resolution),
         "capabilityVerifiedAt": model.verifiedAt,
         "capabilitySource": model.sourceUrl,
         "comparisonRunId": comparison_run_id,
@@ -263,7 +271,7 @@ def image_to_video_contract(*, duration, resolution="720p", image_count=1,
         "endpoint": model.endpoints["image-to-video"],
         "resolution": resolution,
         "duration": duration,
-        "costRateKey": model.costRateKeys["image-to-video"],
+        "costRateKey": _cost_rate_key(model, "image-to-video", resolution),
         "capabilityVerifiedAt": model.verifiedAt,
         "capabilitySource": model.sourceUrl,
     }

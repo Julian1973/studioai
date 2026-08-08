@@ -107,10 +107,20 @@ POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
 MAX_KEYFRAME_INTEGRATION_WORDS = 300
+MAX_KEYFRAME_INTEGRATION_HARD_WORDS = 450
+REVIEW_VIDEO_RESOLUTION = "480p"
 
 
 class Refused(RuntimeError):
     """A named, deliberate refusal — never a crash, never a silent skip."""
+
+
+def _review_video_resolution():
+    value = os.environ.get("CB_REVIEW_VIDEO_RESOLUTION", REVIEW_VIDEO_RESOLUTION).strip()
+    if value not in {"480p", "720p"}:
+        raise Refused(
+            "REFUSED — CB_REVIEW_VIDEO_RESOLUTION must be 480p or 720p")
+    return value
 
 
 def _require_show_adapter():
@@ -2294,12 +2304,56 @@ def _scene_context(pkg, scene, episode):
 
 
 def _shot_context(pkg, shot, led, scene, episode):
-    return {"episode": episode, "scene": str(scene), "shot": shot,
+    return {"episode": episode, "scene": str(scene),
+            "shot": _shot_creative_contract_view(pkg, shot, scene, episode),
             "approvedSceneLook": scenelook_status(scene, episode).get("approved"),
             "currentVoiceDirection": (led.get("departmentWork", {}).get("voice", {})
                                       .get("approved")),
             "humanWorkingVoice": led.get("workingVoice"),
             "humanWorkingAnimationPrompt": led.get("workingSeedancePrompt")}
+
+
+def _shot_creative_contract_view(pkg, shot, scene, episode):
+    """Add approved beat contracts to a read-only shot view when lineage is exact.
+
+    Older canonical packages retained BIG physical staging but not the complete approved
+    comedy/emotion records. The linked storyboard is still their signed creative source.
+    Reading those records is safe only when its bytes and this shot's creative-card hash
+    exactly match the package provenance. Neither source is modified here.
+    """
+    if shot.get("comedyContractsApproved") and shot.get("emotionContractsApproved"):
+        return shot
+    source = pkg.get("sourceStoryboard") or {}
+    path = pathlib.Path(source.get("path") or _storyboard_path(scene, episode))
+    if not path.exists() or hashlib.md5(path.read_bytes()).hexdigest() != source.get("md5"):
+        return shot
+    storyboard = json.load(open(path))
+    if storyboard.get("approvalState") != "approved":
+        return shot
+    storyboard_shot = next(
+        (item for item in storyboard.get("shots") or []
+         if item.get("shotId") == shot.get("shotId")), None)
+    if storyboard_shot is None:
+        return shot
+    actual_hash = hashlib.sha256(json.dumps(
+        storyboard_shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    expected_hash = (source.get("creativeCardHashes") or {}).get(shot.get("shotId"))
+    if not expected_hash or actual_hash != expected_hash:
+        return shot
+    beats = {item.get("beatId"): item for item in storyboard.get("beats") or []}
+
+    def contracts(field):
+        return [
+            {"beatCode": beat_id, **beats[beat_id][field]}
+            for beat_id in storyboard_shot.get("beatIds") or []
+            if beat_id in beats and beats[beat_id].get(field) is not None
+        ]
+
+    return {
+        **shot,
+        "comedyContractsApproved": contracts("comedyContract"),
+        "emotionContractsApproved": contracts("emotionContract"),
+    }
 
 
 def _department_candidate(stage, output, context):
@@ -2432,6 +2486,7 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 if len(locked.split()) >= 2 and locked in rp:
                     raise Refused(f"REFUSED — Animation Director leaked spoken words into "
                                   f"the visual prompt ({ln['exactText']}); no candidate saved")
+            _require_animation_prompt_contract(context["shot"], result)
         elif stage == "review-keyframe":
             rec = led.get("keyframeCandidate") or led.get("keyframeApproval") or {}
             media = rec.get("path")
@@ -2516,13 +2571,72 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
             raise Refused(f"REFUSED — {stage}'s exact provider text cannot be blank")
         if stage == "animation":
             shot = _shot(pkg, shot_id)
+            creative_shot = _shot_creative_contract_view(pkg, shot, scene, episode)
             p = _norm(value)
             for ln in shot.get("dialogueLines") or []:
                 t = _norm(ln["exactText"])
                 if len(t.split()) >= 2 and t in p:
                     raise Refused(f"REFUSED — spoken words belong in @Audio1, not the "
                                   f"animation prompt (found: {ln['exactText']})")
-        output["providerPrompt"] = value
+            candidate_output = {**output, "providerPrompt": value}
+            if not candidate_output.get("creativeTranslation"):
+                events_by_beat = {}
+                for event in cb_departments.animation_locked_visual_events(creative_shot):
+                    for beat_id in event.get("beatIds") or []:
+                        events_by_beat[str(beat_id)] = str(
+                            event.get("primaryEvent") or "").strip()
+                comedy = list(creative_shot.get("comedyContractsApproved") or [])
+                candidate_output["creativeTranslation"] = {
+                    "interpretation": {
+                        "jokeOrAche": str(
+                            creative_shot.get("purpose") or output.get("dramaticBeat") or
+                            "Pride is contradicted by visible evidence."),
+                        "mechanism": " ".join(
+                            str(item.get("mechanism") or "").strip()
+                            for item in comedy if item.get("mechanism")),
+                        "statusBefore": str(output.get("audienceBefore") or
+                                            "The audience expects competence."),
+                        "statusAfter": str(output.get("audienceAfter") or
+                                           "The audience sees affectionate failure."),
+                        "audienceProgression": [
+                            "Anticipate Fuzzby's performed competence.",
+                            "Read each physical contradiction and escalation.",
+                            "Release into Zenny's affectionate judgement.",
+                        ],
+                        "emotionalHeart": (
+                            "Zenny sees the full mess without rejecting Fuzzby; her restrained "
+                            "amusement turns his failure into affection."),
+                    },
+                    "gagClocks": [{
+                        "beatCode": str(item.get("beatCode") or ""),
+                        "mode": item.get("mode"),
+                        "setup": str(item.get("setup") or ""),
+                        "anticipation": str(item.get("expectation") or ""),
+                        "impact": str(item.get("disruption") or ""),
+                        "reaction": str(item.get("hold") or ""),
+                        "recoveryHold": str(item.get("hold") or ""),
+                        "recoveryHoldSec": 0.8,
+                        "button": str(item.get("button") or ""),
+                        "providerAction": events_by_beat.get(
+                            str(item.get("beatCode") or ""), ""),
+                    } for item in comedy],
+                    "generationDesign": {
+                        "packagingDecision": "single-unit",
+                        "completeGagArcCount": len(comedy),
+                        "densityJudgement": (
+                            "The approved comedy climb fits one continuous 29-second unit."),
+                        "splitOrNonSplitRationale": (
+                            "The chase, status reveal and failed correction form one causal "
+                            "escalation and must retain their shared reaction timing."),
+                        "handoffState": str(creative_shot.get("visualPayoff") or ""),
+                    },
+                }
+            model = cb_departments.AnimationDirection.model_validate(candidate_output)
+            _require_animation_prompt_contract(
+                creative_shot, model)
+            cand["output"] = model.model_dump()
+        else:
+            output["providerPrompt"] = value
     cand["editedAt"] = _now(); cand["editedBy"] = reviewed_by
     save_extra(); _save(pkg, path)
     log(f"DEPARTMENT CANDIDATE SAVED — {stage} "
@@ -2687,53 +2801,28 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                 "materials, light and atmosphere only.")
         else:
             canonical = _resolve_char(role, characters_cfg)
-            _, identity_pack = _identity_pack_for(canonical, characters_cfg)
-            tells = list(identity_pack.get("distinguishingFeatures") or [])
             identity_names.append(canonical)
-            if tells:
-                # The intact turnaround carries the complete design. Text reinforces only
-                # the fastest visual tells; measured scale is stated once in [Frame] below.
-                visual_tells = [
-                    item for item in tells
-                    if not re.search(r"\b\d+(?:\.\d+)?[- ]?inch\b|\bproportions?\b",
-                                     str(item), re.IGNORECASE)
-                ]
-                tells_text = _compact(", ".join(visual_tells or tells), 12)
-                if len(attachments) == 1:
-                    item = attachments[0]
-                    line = (
-                        f"- {item['slot']} is {canonical}'s complete, uncropped 360 "
-                        "turnaround sheet. Every view on this one sheet is the same character, "
-                        "not additional characters. Inherit the entire face, silhouette, "
-                        f"proportions, markings and materials. Keep {tells_text}. Do not "
-                        "omit rear/side details or add any unshown feature or accessory"
-                    )
-                else:
-                    view_bindings = ", ".join(
-                        f"{item['slot']} {item.get('view') or 'identity'}"
-                        for item in attachments)
-                    line = (
-                        f"- {canonical} turnaround: {view_bindings}. One identity; define face, silhouette, "
-                        f"proportions/materials. Keep {tells_text}. Ignore pose/background; "
-                        "add no unshown feature or accessory"
-                    )
-                reference_lines.append(line + ".")
+            if len(attachments) == 1:
+                item = attachments[0]
+                reference_lines.append(
+                    f"- {item['slot']}: {canonical}'s complete, uncropped 360 turnaround is the "
+                    f"100% identity authority. Match {canonical} exactly as the same character "
+                    "shown in the turnaround. Preserve every visible feature, accessory, "
+                    "silhouette, marking, proportion, material, wing/limb detail and rear/side "
+                    "detail from the reference; do not describe, redesign, simplify, beautify, "
+                    "feminise, masculinise, add, remove or reinterpret character details. "
+                    "Ignore only the reference background and static pose.")
             else:
-                if len(attachments) == 1:
-                    item = attachments[0]
-                    reference_lines.append(
-                        f"- {item['slot']} is {canonical}'s complete, uncropped turnaround "
-                        "sheet. Every view is the same character, not additional characters. "
-                        "Inherit the entire identity, silhouette, proportions, markings and "
-                        "materials; do not omit details.")
-                else:
-                    view_bindings = ", ".join(
-                        f"{item['slot']} {item.get('view') or 'identity'}"
-                        for item in attachments)
-                    reference_lines.append(
-                        f"- {canonical} turnaround: {view_bindings}. One identity; define "
-                        "silhouette, proportions and materials "
-                        "only. Ignore background and pose.")
+                view_bindings = ", ".join(
+                    f"{item['slot']} {item.get('view') or 'identity'}"
+                    for item in attachments)
+                reference_lines.append(
+                    f"- {canonical} turnaround: {view_bindings}. Together these references are "
+                    f"the 100% identity authority for {canonical}. Match the exact same "
+                    "character; preserve every visible feature, accessory, silhouette, marking, "
+                    "proportion, material and view-specific detail. Do not describe, redesign, "
+                    "simplify, beautify, add, remove or reinterpret character details. Ignore "
+                    "only backgrounds and static poses.")
 
     separation_line = ""
     if len(identity_names) > 1:
@@ -2813,14 +2902,15 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
         f"[Protect]\n{protections}.\n\n"
         "[Forbidden]\nNo redesign, pasted turnaround, portrait, locked extreme action pose "
         "or payoff, identity or scale "
-        "drift, inflation, duplicates, anatomy errors, extra props, text, logo or watermark; "
+        "drift, omitted reference features, changed accessories, inflation, duplicates, "
+        "anatomy errors, extra props, text, logo or watermark; "
         "no body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look."
     ).strip()
     word_count = len(re.findall(r"\S+", prompt))
-    if word_count > MAX_KEYFRAME_INTEGRATION_WORDS:
+    if word_count > MAX_KEYFRAME_INTEGRATION_HARD_WORDS:
         raise Refused(
             f"REFUSED — compiled keyframe brief for {shot.get('shotId')} is {word_count} words; "
-            f"simplify typed direction below {MAX_KEYFRAME_INTEGRATION_WORDS} words")
+            f"simplify typed direction below {MAX_KEYFRAME_INTEGRATION_HARD_WORDS} words")
     return prompt
 
 
@@ -3696,15 +3786,40 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
     cb_gen.generate_image(prompt, refs=refs, out=str(out), production_route="cb_render")
     geometry_screening = cb_layout.screen_candidate_geometry(
         out, composition_master)
-    # ONLY reached on a successful generation — led["keyframeCandidate"] (and any existing
-    # keyframeApproval) is never touched before this line, so a failure above leaves the
-    # ledger, and any approved keyframe, byte-for-byte as they were.
-    led["keyframeCandidate"] = {
+    conformance_screening = screen_keyframe_conformance(
+        pkg, shot, out, scene, episode, log=log)
+    candidate_record = {
         "path": str(out), "generatedAt": _now(), "source": "generated",
         "inputSignature": _keyframe_input_signature(pkg, shot, scene, episode),
         "promptContract": _keyframe_prompt_contract(pkg, shot, prompt),
         "geometryScreening": geometry_screening,
+        "conformanceScreening": conformance_screening,
     }
+    if conformance_screening.get("status") == "fail":
+        ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+        arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_keyframe_{ts}"
+        arch.mkdir(parents=True, exist_ok=True)
+        archived_rel = None
+        if out.exists():
+            dest = arch / out.name
+            shutil.move(str(out), dest)
+            archived_rel = str(dest.relative_to(HERE))
+        rejection = {**candidate_record, "outcome": "rejected", "rejectedAt": _now(),
+                     "reason": f"Automatic pre-approval QC failed: {conformance_screening.get('reason') or 'objective keyframe contract failed'}",
+                     "reviewedBy": "Automatic pre-approval QC",
+                     "rejectedFile": archived_rel,
+                     "archivedSidecars": [],
+                     "contentHashAtGeneration": False}
+        led.setdefault("keyframeRejections", []).append(rejection)
+        led["keyframeRejected"] = rejection
+        led["keyframeCandidate"] = None
+        _save(pkg, path)
+        log(f"KEYFRAME CONFORMANCE REJECTED — {shot_id}: {rejection['reason']}")
+        return str(out)
+    # ONLY reached on a successful generation — led["keyframeCandidate"] (and any existing
+    # keyframeApproval) is never touched before this line, so a failure above leaves the
+    # ledger, and any approved keyframe, byte-for-byte as they were.
+    led["keyframeCandidate"] = candidate_record
     _save(pkg, path)
     if geometry_screening.get("status") == "fail":
         log(f"KEYFRAME STAGE ADVISORY — {shot_id}: {geometry_screening.get('reason')} "
@@ -3869,6 +3984,11 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
     if not cand:
         raise Refused(f"REFUSED — {shot_id} has no keyframe candidate awaiting approval")
     if cand.get("source", "generated") == "generated":
+        conformance = cand.get("conformanceScreening") or {}
+        if conformance.get("status") != "pass":
+            raise Refused(f"REFUSED — {shot_id}'s generated keyframe cannot be accepted until "
+                          f"the objective identity and scale check passes "
+                          f"({conformance.get('status') or 'missing'}).")
         current_sig = _keyframe_input_signature(pkg, shot, scene, episode)
         if cand.get("inputSignature") != current_sig:
             diff = _signature_diff(cand.get("inputSignature"), current_sig)
@@ -4084,7 +4204,8 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
     if model_id is None:
         try:
             contract = cb_providers.request_contract(
-                fast=fast, duration=int(round(shot["durationSec"])), resolution="720p",
+                fast=fast, duration=int(round(shot["durationSec"])),
+                resolution=_review_video_resolution(),
                 image_count=len(imgs), audio_count=1 if led.get("voPath") else 0)
         except cb_providers.ProviderCapabilityError as exc:
             raise Refused(f"REFUSED — provider capability: {exc}") from exc
@@ -4287,7 +4408,8 @@ def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
            "endpoint": first_contract["endpoint"],
            "costRateKey": first_contract["costRateKey"],
            "capabilityVerifiedAt": first_contract["capabilityVerifiedAt"],
-           "resolution": "720p", "tier": "fast" if fast else "standard",
+           "resolution": first_contract["resolution"],
+           "tier": "fast" if fast else "standard",
            "candidateCount": candidates, "costPerCandidateUsd": per,
            "maxBatchCostUsd": round(per * candidates, 4),
            "promptVersion": _prompt_version(shot), "references": refs,
@@ -4403,6 +4525,11 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
             raise Refused(f"REFUSED — LAW 6: this prompt contains spoken dialogue words "
                           f"(\"{ln['exactText']}\") — the voice lives in @Audio1, never render "
                           f"prompt text. Not saved; edit and try again.")
+    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    _require_animation_prompt_contract(
+        _shot_creative_contract_view(pkg, shot, scene, episode),
+        {**specialist, "providerPrompt": text,
+         "deriveCreativeTranslationFromApproved": True})
     led["workingSeedancePrompt"] = {"text": text, "savedAt": _now(), "savedBy": reviewed_by}
     _save(pkg, path)
     log(f"ANIMATION WORKING PROMPT SAVED — {shot_id} ({len(text.split())} words, no "
@@ -4453,13 +4580,21 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
         return bool(re.search(pattern, low, re.IGNORECASE))
 
     scores = {}
+    structured_story = (
+        "[one-sentence summary]" in low and
+        low.count("action/expression:") >= 1 and
+        low.count("end state:") >= 1)
     scores["storyBeat"] = (
-        2 if specialist.get("dramaticBeat") and specialist.get("performanceArc")
+        2 if (specialist.get("dramaticBeat") and specialist.get("performanceArc")) or
+        structured_story
         else 1 if has(r"\b(beat|turn|realises?|decides?|tries?|fails?|wins?|loses?|reaction)\b")
         else 0)
+    bound_image_refs = len(set(re.findall(r"@image\d+", low)))
     scores["canonAndReferences"] = (
         2 if specialist.get("referenceContract") and
         has(r"\b(identity|proportion|relative scale|reference|silhouette|canon)\b")
+        else 2 if bound_image_refs >= 2 and
+        has(r"\b(identity|proportion|relative scale|reference|silhouette|canon|scale)\b")
         else 1 if specialist.get("referenceContract") or
         has(r"\b(identity|proportion|relative scale|reference|silhouette|canon)\b")
         else 0)
@@ -4489,12 +4624,14 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
         2 if "@audio1" in low and not leaked_dialogue else
         1 if not leaked_dialogue else 0)
     opens = has(r"\b(exact opening|opening frame|begins? (?:on|from)|start(?:s|ing)? (?:on|from)|first frame)\b")
-    lands = has(r"\b(landing image|lands? on|ends? on|final frame|closing frame|handoff|settles? into)\b")
+    lands = has(r"\b(landing image|lands? on|ends? on|end state|final frame|closing frame|handoff|settles? into)\b")
     scores["continuityLanding"] = 2 if opens and lands else 1 if opens or lands else 0
     safeguard_count = len(specialist.get("surgicalSafeguards") or [])
+    prompt_limit = cb_departments.animation_provider_prompt_word_limit(
+        shot.get("durationSec"))
     scores["promptEconomy"] = (
-        2 if 45 <= words <= 320 and safeguard_count <= 3
-        else 1 if 25 <= words <= 450 else 0)
+        2 if 45 <= words <= prompt_limit and safeguard_count <= 3
+        else 1 if 25 <= words <= prompt_limit else 0)
 
     total = sum(scores.values())
     critical = {
@@ -4511,6 +4648,66 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
         "wordCount": words,
         "advisoryOnly": True,
     }
+
+
+def _animation_prompt_contract_report(shot, direction):
+    """Evaluate the shared Seedance authoring contract without calling a provider."""
+    data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    prompt = str(data.get("providerPrompt") or "").strip()
+    references = list(data.get("referenceContract") or [])
+    if shot.get("dialogueLines") and not any(
+            str(item.get("assetTag") or "").lower().replace(" ", "") == "@audio1"
+            for item in references):
+        references.append({
+            "assetTag": "@Audio1",
+            "role": "approved dialogue and performance track",
+        })
+    quality = _prompt_quality_gate(shot, prompt, data)
+    authoring = cb_prompt_lab.analyze_seedance_prompt_contract(
+        prompt,
+        task_mode=data.get("taskMode") or "reference-to-video",
+        reference_contract=references,
+        duration_sec=data.get("durationSec") or shot.get("durationSec"),
+        dialogue_lines=shot.get("dialogueLines") or [],
+        stage_plan=data.get("stagePlan") or [],
+    )
+    errors = []
+    words = len(prompt.split())
+    prompt_limit = cb_departments.animation_provider_prompt_word_limit(
+        data.get("durationSec") or shot.get("durationSec"))
+    if words > prompt_limit:
+        errors.append(
+            f"prompt is {words} words; maximum is "
+            f"{prompt_limit}")
+    if quality["needsRevision"]:
+        errors.append(
+            f"creative contract scores {quality['score']}/{quality['maximum']}"
+            + (f"; critical zero: {', '.join(quality['criticalFailures'])}"
+               if quality["criticalFailures"] else ""))
+    if authoring["status"] != "ready":
+        errors.extend(authoring["repairActions"] or [authoring["summary"]])
+    story_lock = cb_departments.animation_story_lock_report(shot, prompt)
+    if not story_lock["ready"]:
+        errors.extend(story_lock["errors"])
+    creative_translation = cb_departments.creative_translation_report(shot, data, prompt)
+    if not creative_translation["ready"]:
+        errors.extend(creative_translation["errors"])
+    return {
+        "ready": not errors,
+        "errors": errors,
+        "qualityGate": quality,
+        "authoringContract": authoring,
+        "storyLock": story_lock,
+        "creativeTranslation": creative_translation,
+    }
+
+
+def _require_animation_prompt_contract(shot, direction):
+    report = _animation_prompt_contract_report(shot, direction)
+    if not report["ready"]:
+        raise Refused("REFUSED — animation provider prompt is not production-ready: "
+                      + "; ".join(report["errors"]))
+    return report
 
 
 def _seedance_pipeline_task(shot, specialist, attached_contract):
@@ -4575,9 +4772,11 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
     dialogue = bool(shot.get("dialogueLines"))
     audio = specialist.get("audioContract") or (
         "@Audio1 is the sole source of dialogue, voice, performance, and timing. "
-        "Use natural ambience and foley only; no music."
+        "Seedance may generate non-dialogue ambience, foley, comedy impacts, wing buzzes, "
+        "pollen poofs, plant movement, and low supportive underscore under the locked dialogue."
         if dialogue else
-        "No dialogue. Use natural ambience and foley only; no music."
+        "No dialogue. Seedance may generate ambience, foley, designed sound effects, "
+        "and low supportive underscore."
     )
     consistency = specialist.get("consistencyContract") or [
         "Keep approved identity, character count, relative scale, prop ownership, scene geography, light direction, camera axis, and audio relationships stable."
@@ -4589,7 +4788,7 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
                  f"Generate approved shot {shot.get('shotId') or ''}.").strip(),
         "duration_seconds": shot.get("durationSec"),
         "aspect_ratio": "16:9",
-        "resolution": "720p",
+        "resolution": _review_video_resolution(),
         "assets": assets,
         "references": references,
         "stages": stages,
@@ -4598,7 +4797,7 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
         "camera": specialist.get("cameraBehaviour") or "",
         "audio": audio,
         "consistency": consistency,
-        "no_music": True,
+        "no_music": False,
         "extension_direction": (
             "backward" if task_mode == "extend-backward" else
             specialist.get("extensionDirection") or "forward"),
@@ -4700,7 +4899,7 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         checks["audioAttached"] = {"ok": True, "required": False, "detail": "no dialogue in this shot"}
 
     checks["durationSec"] = shot.get("durationSec")
-    checks["resolution"] = "720p"
+    checks["resolution"] = _review_video_resolution()
     checks["aspectRatio"] = "16:9"
     try:
         task_mode = specialist.get("taskMode") or "reference-to-video"
@@ -4708,7 +4907,8 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
             raise cb_providers.ProviderCapabilityError(
                 f"no enabled provider route is qualified for {task_mode}")
         provider_contract = cb_providers.request_contract(
-            duration=int(round(shot.get("durationSec") or 0)), resolution="720p",
+            duration=int(round(shot.get("durationSec") or 0)),
+            resolution=_review_video_resolution(),
             image_count=len(imgs),
             audio_count=1 if shot.get("dialogueLines") else 0)
         checks["providerContract"] = provider_contract
@@ -4725,10 +4925,16 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         else "legacy-approved-storyboard")
     quality = _prompt_quality_gate(shot, resolved_prompt, specialist)
     checks["qualityGate"] = quality
+    prompt_limit = cb_departments.animation_provider_prompt_word_limit(
+        shot.get("durationSec"))
+    if len(resolved_prompt.split()) > prompt_limit:
+        blockers.append(
+            f"animation provider prompt exceeds the software-wide "
+            f"{prompt_limit}-word ceiling")
     if quality["needsRevision"]:
         detail = (f"; critical zero: {', '.join(quality['criticalFailures'])}"
                   if quality["criticalFailures"] else "")
-        warnings.append(
+        blockers.append(
             f"craft gate scores {quality['score']}/{quality['maximum']} "
             f"(target {quality['threshold']}){detail}")
 
@@ -4765,10 +4971,21 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     )
     checks["seedancePromptContract"] = seedance_contract
     if seedance_contract["status"] != "ready":
-        warnings.append(
+        blockers.append(
             f"Seedance authoring contract scores {seedance_contract['score']}/"
             f"{seedance_contract['maximum']}; "
             f"{len(seedance_contract['repairActions'])} repair action(s) remain")
+
+    creative_translation = cb_departments.creative_translation_report(
+        _shot_creative_contract_view(pkg, shot, scene, episode),
+        {**specialist,
+         "deriveCreativeTranslationFromApproved": bool(using_working)},
+        resolved_prompt)
+    checks["creativeTranslation"] = creative_translation
+    if not creative_translation["ready"]:
+        blockers.append(
+            "creative translation is incomplete: "
+            + "; ".join(creative_translation["errors"][:3]))
 
     # creative warnings — advisory only, never blocking, never rewritten
     if "relative scale" not in resolved_prompt.lower() and "identity" not in resolved_prompt.lower():

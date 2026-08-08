@@ -50,20 +50,20 @@ def _test_canon_status(episode=None, cast=None, root=None):
 
 def _test_seedance_25_contract(**kwargs):
     """Explicit zero-network 2.5 contract for orchestration tests only."""
-    assert kwargs.get("model_id") in (None, "dreamina-seedance-2-5-260628")
+    assert kwargs.get("model_id") in (None, "fal-seedance-2.5")
     duration = int(kwargs["duration"])
     assert 4 <= duration <= 30
     return {
-        "providerModelId": "dreamina-seedance-2-5-260628",
-        "provider": "byteplus",
-        "modelVersion": "2.5-260628",
-        "transport": "byteplus-async",
+        "providerModelId": "fal-seedance-2.5",
+        "provider": "fal",
+        "modelVersion": "2.5",
+        "transport": "fal-subscribe",
         "mode": "reference-to-video",
-        "endpoint": "/api/v3/contents/generations/tasks",
+        "endpoint": "bytedance/seedance-2.5/reference-to-video",
         "resolution": kwargs.get("resolution", "720p"),
         "duration": duration,
-        "costRateKey": "seedance_standard_per_sec",
-        "capabilityVerifiedAt": "2026-08-04-test-fixture",
+        "costRateKey": "seedance_25_fal_720p_per_sec",
+        "capabilityVerifiedAt": "2026-08-07-test-fixture",
         "capabilitySource": "test-fixture",
     }
 

@@ -6,7 +6,7 @@ import cb_gen
 import cb_providers
 
 
-def test_registry_targets_25_and_retires_every_20_execution_route(monkeypatch):
+def test_registry_targets_live_fal_25_and_retires_every_20_execution_route(monkeypatch):
     monkeypatch.delenv("CB_VIDEO_MODEL_ID", raising=False)
     registry = cb_providers.load_registry()
 
@@ -14,20 +14,22 @@ def test_registry_targets_25_and_retires_every_20_execution_route(monkeypatch):
     legacy = cb_providers.video_model(
         "fal-seedance-2.0", require_enabled=False, registry=registry)
 
-    assert target.modelId == "dreamina-seedance-2-5-260628"
-    assert not target.enabled
-    assert target.status == "qualification-required"
-    assert target.transport == "byteplus-async"
-    assert target.modes == [
-        "reference-to-video", "video-extension", "video-editing"]
-    assert target.verifiedAt == "2026-08-04"
-    assert target.sourceUrl.endswith("/1520757")
-    assert "has not activated the model" in target.disableReason
-    assert "pricing" in target.disableReason.lower()
+    assert target.modelId == "fal-seedance-2.5"
+    assert target.enabled
+    assert target.status == "production"
+    assert target.transport == "fal-subscribe"
+    assert target.modes == ["reference-to-video"]
+    assert target.endpoints["reference-to-video"] == (
+        "bytedance/seedance-2.5/reference-to-video")
+    assert target.duration.maxSec == 30
+    assert target.referenceLimits.images == 30
+    assert target.referenceLimits.audio == 10
+    assert target.verifiedAt == "2026-08-07"
+    assert target.sourceUrl.endswith("/reference-to-video/api")
+    assert target.disableReason is None
     assert not legacy.enabled and legacy.status == "retired"
     assert "never fall back" in legacy.disableReason
-    with pytest.raises(cb_providers.ProviderCapabilityError, match="disabled"):
-        cb_providers.video_model(registry=registry)
+    assert cb_providers.video_model(registry=registry).modelId == "fal-seedance-2.5"
 
 
 def test_disabled_or_unknown_selection_refuses_before_a_route_can_be_used(monkeypatch):
@@ -101,10 +103,27 @@ def test_capability_report_is_zero_spend_and_secret_free(monkeypatch):
     rendered = json.dumps(report)
 
     assert report["zeroSpend"] is True
-    assert report["selectedVideoModelId"] == "dreamina-seedance-2-5-260628"
-    assert report["selectionReady"] is False
-    assert "not activated" in report["selectionError"]
+    assert report["selectedVideoModelId"] == "fal-seedance-2.5"
+    assert report["selectionReady"] is True
+    assert report["selectionError"] is None
     assert "do-not-leak" not in rendered
+
+
+def test_fal_25_contract_enforces_live_limits():
+    contract = cb_providers.request_contract(
+        duration=29, resolution="720p", image_count=4, audio_count=1)
+    assert contract["providerModelId"] == "fal-seedance-2.5"
+    assert contract["endpoint"] == "bytedance/seedance-2.5/reference-to-video"
+    assert contract["costRateKey"] == "seedance_25_fal_720p_per_sec"
+
+    review_contract = cb_providers.request_contract(
+        duration=29, resolution="480p", image_count=4, audio_count=1)
+    assert review_contract["costRateKey"] == "seedance_25_fal_480p_per_sec"
+
+    with pytest.raises(cb_providers.ProviderCapabilityError, match="4-30s"):
+        cb_providers.request_contract(duration=31, image_count=1)
+    with pytest.raises(cb_providers.ProviderCapabilityError, match="at most 30"):
+        cb_providers.request_contract(duration=10, image_count=31)
 
 
 def test_retired_video_reference_fails_before_upload(monkeypatch):
@@ -128,6 +147,50 @@ def test_already_uploaded_reference_url_is_not_uploaded_again(monkeypatch):
     assert cb_gen._fal_asset_url(remote) == remote
     assert cb_gen._fal_asset_url("local.png") == "uploaded"
     assert uploads == ["local.png"]
+
+
+def test_fal_25_adapter_uses_live_schema_without_legacy_bitrate(monkeypatch, tmp_path):
+    image = tmp_path / "turnaround.png"
+    audio = tmp_path / "approved.wav"
+    output = tmp_path / "candidate.mp4"
+    image.write_bytes(b"image")
+    audio.write_bytes(b"audio")
+    monkeypatch.setattr(cb_gen, "FAL_KEY", "test-key")
+    uploads = []
+    monkeypatch.setattr(
+        cb_gen, "_fal_asset_url",
+        lambda path: uploads.append(path) or f"https://fal.media/{len(uploads)}")
+    submitted = {}
+
+    def subscribe(endpoint, arguments=None, with_logs=False):
+        submitted.update({
+            "endpoint": endpoint, "arguments": arguments, "with_logs": with_logs})
+        return {"video": {"url": "https://fal.media/candidate.mp4"}, "seed": 42}
+
+    class Response:
+        content = b"video"
+
+    monkeypatch.setattr(cb_gen, "_fal_subscribe", subscribe)
+    monkeypatch.setattr(cb_gen, "_rget", lambda *args, **kwargs: Response())
+    monkeypatch.setattr(cb_gen.cb_costs, "log_spend", lambda *args, **kwargs: None)
+    monkeypatch.setattr(cb_gen.cb_costs, "write_gen_sidecar", lambda *args, **kwargs: None)
+
+    result = cb_gen.generate_video_seedance_ref(
+        "Use @Image1 and @Audio1.", [str(image)], [str(audio)], duration=29,
+        out=str(output), raw_prompt=True, production_route="cb_render")
+
+    assert result == str(output)
+    assert output.read_bytes() == b"video"
+    assert submitted["endpoint"] == "bytedance/seedance-2.5/reference-to-video"
+    assert submitted["arguments"] == {
+        "prompt": "Use @Image1 and @Audio1.",
+        "image_urls": ["https://fal.media/1"],
+        "resolution": "720p",
+        "duration": "29",
+        "aspect_ratio": "16:9",
+        "generate_audio": True,
+        "audio_urls": ["https://fal.media/2"],
+    }
 
 
 def test_byteplus_25_adapter_builds_and_polls_the_official_async_contract(

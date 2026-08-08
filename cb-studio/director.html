@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#151918">
   <title>Animation Studio Director</title>
-  <link rel="stylesheet" href="/cb-studio/director.css?v=audio-outcome-1">
-  <script src="/cb-studio/director.js?v=audio-outcome-1" defer></script>
+  <link rel="stylesheet" href="/cb-studio/director.css?v=voice-status-live-1">
+  <script src="/cb-studio/director.js?v=voice-status-live-1" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="#view=pipeline" aria-label="Animation Studio pipeline">
+      <a class="brand" href="#view=director" aria-label="Animation Studio current shot">
         <span class="brand-mark" aria-hidden="true">CB</span>
         <span class="brand-name">Animation <strong>Studio</strong></span>
       </a>
@@ -24,17 +24,17 @@
 
     <nav class="side-nav" aria-label="Studio views">
       <div class="nav-group">
-        <button type="button" class="nav-button active" data-view="pipeline">
-          <span class="nav-symbol" aria-hidden="true">01</span><span>Production</span>
+        <button type="button" class="nav-button active" data-view="director">
+          <span class="nav-symbol" aria-hidden="true">01</span><span>Current Shot</span>
         </button>
         <button type="button" class="nav-button" data-view="episodes">
           <span class="nav-symbol" aria-hidden="true">02</span><span>Scenes</span>
         </button>
-        <button type="button" class="nav-button" data-view="director">
-          <span class="nav-symbol" aria-hidden="true">03</span><span>Generate</span>
+        <button type="button" class="nav-button" data-view="pipeline">
+          <span class="nav-symbol" aria-hidden="true">03</span><span>Pipeline</span>
         </button>
         <button type="button" class="nav-button" data-view="review">
-          <span class="nav-symbol" aria-hidden="true">04</span><span>Edit &amp; Master</span>
+          <span class="nav-symbol" aria-hidden="true">04</span><span>Master</span>
         </button>
       </div>
       <div class="nav-foot">
@@ -84,6 +84,13 @@
             </div>
 
             <div class="truth-rail" id="truth-rail" aria-label="Project truth status"></div>
+            <section class="studio-agent-panel" id="studio-agent-panel" aria-live="polite">
+              <div>
+                <span class="stage-label">Studio Agent</span>
+                <strong>Checking the current production state...</strong>
+                <p>It will explain the next action without changing data or spending.</p>
+              </div>
+            </section>
 
             <div class="pipeline-panel" id="pipeline-panel" aria-live="polite"></div>
           </div>
@@ -113,6 +120,8 @@
           </div>
           <div class="shot-switcher" id="shot-switcher" aria-label="Scene shots"></div>
         </div>
+        <div class="director-scene-strip" id="director-scene-strip" aria-label="Episode scenes"></div>
+        <section class="scene-workbench" id="scene-workbench" aria-live="polite"></section>
 
         <div class="media-stage" id="media-stage" aria-live="polite">
           <div class="stage-empty">
@@ -121,6 +130,10 @@
           </div>
         </div>
 
+        <section class="shot-inputs" id="shot-inputs" aria-live="polite">
+          <div class="shot-inputs-empty">Loading shot inputs...</div>
+        </section>
+
         <div class="director-outcome">
           <div class="outcome-copy">
             <div class="stage-label" id="phase-label">CURRENT STEP</div>
@@ -128,6 +141,7 @@
             <p id="outcome-summary"></p>
             <p class="quality-copy" id="quality-copy" hidden></p>
             <p class="blocker-copy" id="blocker-copy" hidden></p>
+            <div class="director-advisories" id="director-advisories" hidden></div>
           </div>
           <div class="action-area" id="action-area"></div>
         </div>
@@ -159,9 +173,9 @@
     </main>
 
     <nav class="mobile-nav" aria-label="Studio views">
-      <button type="button" class="active" data-view="pipeline"><span aria-hidden="true">01</span>Production</button>
+      <button type="button" class="active" data-view="director"><span aria-hidden="true">01</span>Shot</button>
       <button type="button" data-view="episodes"><span aria-hidden="true">02</span>Scenes</button>
-      <button type="button" data-view="director"><span aria-hidden="true">03</span>Generate</button>
+      <button type="button" data-view="pipeline"><span aria-hidden="true">03</span>Pipeline</button>
       <button type="button" data-view="review"><span aria-hidden="true">04</span>Master</button>
     </nav>
   </div>

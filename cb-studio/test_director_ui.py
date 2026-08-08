@@ -22,6 +22,7 @@ def test_director_includes_anyfilm_style_pipeline_plus_outcome_views():
 def test_frontend_consumes_one_authoritative_director_state_and_action_route():
     assert "/api/director-session?" in JS
     assert 'api("/api/director-action"' in JS
+    assert 'credentials: "same-origin"' in JS
     for internal_route in (
         "/api/production-preflight", "/api/production-state", "/api/shot-package",
         "/api/department-run", "/api/shot-run",
@@ -50,6 +51,7 @@ def test_references_are_available_for_keyframe_and_animation_without_clutter():
 
 def test_mobile_navigation_is_always_reachable_and_safe_area_aware():
     assert 'class="mobile-nav"' in HTML
+    assert 'data-view="director"><span aria-hidden="true">01</span>Shot' in HTML
     assert "env(safe-area-inset-bottom)" in CSS
     assert "@media (max-width: 720px)" in CSS
     assert ".mobile-nav { position: fixed" in CSS
@@ -64,6 +66,246 @@ def test_visual_system_is_neutral_premium_and_uses_real_media():
     assert "border-radius: 6px" in CSS
     assert "/engine/media/" not in HTML
     assert "renderArtifact(session)" in JS
+
+
+def test_rendering_has_persistent_honest_progress_feedback():
+    assert "renderProgress(session)" in JS
+    assert "formatRenderElapsed" in JS
+    assert "latestMessage" in JS
+    assert "does not supply a reliable completion percentage or ETA" in JS
+    assert ".render-progress-track" in CSS
+    assert "@keyframes render-scan" in CSS
+    assert ".media-stage:has(.render-progress)" in CSS
+    assert '"Submitting the approved Seedance request..."' in JS
+    assert 'const preparingRetry = action.id === "iterate-animation"' in JS
+    assert "actionActivityCopy(action, previousSession, preparingRetry)" in JS
+    assert "Keyframe build in progress" in JS
+    assert "This is the still stage. No Seedance animation render has been submitted." in JS
+    assert "No provider spend is occurring yet" in JS
+    assert "const previousSession = app.session" in JS
+    assert "renderGenerateStatus(session)" in JS
+    assert "setLocalActivity(activity)" in JS
+    assert "data-activity-elapsed" in JS
+    assert 'state: "held"' in JS
+    assert "Seedream returned a frame, but QC did not pass it." in JS
+    assert "Working..." in JS
+    assert ".generate-status" in CSS
+    assert ".generate-status.held" in CSS
+    assert "render-ready-panel" in JS
+    assert "Retry prepared" in JS
+    assert "Render 480p" in JS
+    assert ".render-ready-panel" in CSS
+
+
+def test_every_director_action_gets_immediate_visible_feedback():
+    submit_start = JS.index("async function submitAction")
+    submit_end = JS.index("async function openReferences")
+    submit_body = JS[submit_start:submit_end]
+    assert "const activity = {" in submit_body
+    assert "setLocalActivity(activity)" in submit_body
+    assert "renderDirector(app.session)" in submit_body
+    assert "if (showsGenerateStatus)" not in submit_body
+    assert 'status: "rendering"' in submit_body
+    assert "holdLocalActivity(action, previousSession, error.message, \"Action refused\")" in submit_body
+    assert "holdLocalActivity(action, previousSession, message, \"Action failed\")" in submit_body
+    assert 'app.localActivity.state === "held"' in JS
+
+
+def test_director_action_area_explains_current_outcome_before_button():
+    assert "actionGuidance(session)" in JS
+    assert "Creates one keyframe candidate for this shot." in JS
+    assert "No animation render is submitted at this stage." in JS
+    assert "Review cost, references and prompt before pressing Render." in JS
+    assert ".action-guidance" in CSS
+    assert "Current Shot" in HTML
+
+
+def test_current_shot_has_inline_creation_and_animation_inputs():
+    assert 'id="shot-inputs"' in HTML
+    assert "renderShotInputs(session)" in JS
+    assert "loadInlineShotContext(session)" in JS
+    assert "currentReferenceStage(session)" in JS
+    assert "Scene Plate" in JS
+    assert "Character Turnarounds" in JS
+    assert "Exact Prompt" in JS
+    assert "Complete uncropped turnaround · identity authority" in JS
+    assert "final accepted frame becomes the handoff truth for the next shot" in JS
+    assert "Create the still frame first" in JS
+    assert "Animation uses that approved frame" in JS
+    assert ".shot-inputs" in CSS
+    assert ".shot-prompt-panel pre" in CSS
+    assert ".shot-input-ref-grid" in CSS
+    assert "voice-status-live-1" in HTML
+
+
+def test_scene_plate_source_buttons_are_valid_and_clickable():
+    assert 'data-toggle-scene-plate-library=""' in JS
+    assert 'data-fire-scene-plate=""' in JS
+    assert 'data-toggle-scene-plate-library>${' not in JS
+    assert 'data-fire-scene-plate>Fire Scene Plate' not in JS
+    assert 'host.querySelectorAll("[data-toggle-scene-plate-library]")' in JS
+    assert 'host.querySelectorAll("[data-fire-scene-plate]")' in JS
+
+
+def test_voice_review_shows_keyframe_context_and_specific_actions():
+    assert "voice-review-stage" in JS
+    assert "Approved opening keyframe" in JS
+    assert "Approve or refire the dialogue performance only." in JS
+    assert 'action.id === "accept-voice" ? "Approve Voice"' in JS
+    assert 'action.id === "iterate-voice" ? "Refire Voice"' in JS
+    assert 'action.id === "accept-keyframe" ? "Approve Keyframe"' in JS
+    assert 'action.id === "accept-animation" ? "Approve Animation"' in JS
+    assert ".voice-review-stage" in CSS
+    assert ".voice-review-player" in CSS
+
+
+def test_scene_workbench_uses_live_audio_review_state():
+    assert 'artifact.type === "audio" && artifact.url' in JS
+    assert "workbench-artifact-frame voice" in JS
+    assert "workbench-voice-player" in JS
+    assert "Voice review active. Approve or refire the dialogue performance only." in JS
+    assert "directorActionLabel(accept)" in JS
+    assert '"Approve Shot"' not in JS
+    assert "workbenchStatusLabel(session, beat)" in JS
+    assert "VOICE REVIEW" in JS
+    assert "Voice Check" in JS
+    assert ".workbench-artifact-frame.voice" in CSS
+    assert ".workbench-voice-player" in CSS
+    assert ".workbench-status.voice" in CSS
+    assert "grid-template-columns: 34px minmax(0, 1fr) auto" not in CSS
+    assert 'document.querySelector(".director-outcome")' in JS
+    assert "legacyOutcome) legacyOutcome.hidden = true" in JS
+
+
+def test_pipeline_live_actions_use_specific_director_labels():
+    assert "function directorActionLabel(action)" in JS
+    assert "${esc(directorActionLabel(acceptAction))}" in JS
+    assert "${esc(directorActionLabel(iterateAction))}" in JS
+    assert "${esc(directorActionLabel(acceptAction))} &amp; Continue" in JS
+    assert "${esc(directorActionLabel(sendAction))}" in JS
+    assert "${esc(directorActionLabel(action))}" in JS
+
+
+def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
+    assert 'session.phase === "voice"' in JS
+    assert "Voice performance" in JS
+    assert "Review the approved keyframe context, the current ElevenLabs acting prompt and the generated take." in JS
+    assert "directorActionLabel(session.primaryAction)" in JS
+    assert "directorActionLabel((session.decisionActions || [])[0])" in JS
+    assert "Loading locked references..." in JS
+    assert "Reference load failed:" in JS
+    assert "References failed" in JS
+
+
+def test_director_first_scene_workbench_matches_build_brief():
+    assert 'id="scene-workbench"' in HTML
+    assert "voice-status-live-1" in HTML
+    assert "sceneOneContract" in JS
+    assert "Script" in JS and "Direction" in JS and "Keyframes" in JS and "Generate" in JS and "Review" in JS
+    assert "Fuzzby’s Pollination Lesson" in JS
+    assert "Pollen Moustache" in JS
+    assert "Visible proof" in JS
+    assert "Director Check" in JS
+    assert "Two clear upper-lip pollen curls" in JS
+    assert "Builder Mode · prompt segment and reference roles" in JS
+    assert "Generation + Review" in JS
+    assert "Generate Draft Variants" in JS
+    assert "Refine Keyframe" in JS
+    assert ".workbench-grid" in CSS
+    assert ".workbench-gates" in CSS
+    assert ".director-check-list" in CSS
+    assert ".generation-review-strip" in CSS
+
+
+def test_scene_workbench_is_active_beat_driven():
+    assert "activeBeatId" in JS
+    assert "app.activeBeatId = params.get(\"beat\")" in JS
+    assert "app.activeBeatId = button.dataset.beat" in JS
+    assert "Keyframe Studio — ${beat.title}" in JS
+    assert "Shot: ${esc(beat.shot)} • ${esc(beat.range)} • ${esc(beat.priority)} beat" in JS
+    assert "beat.promptSegment || requestPromptText(session)" in JS
+    assert "beat.reviewNote || beat.visibleProof" in JS
+    assert "Generate Chase Keyframe" in JS
+    assert "Generate False-Triumph Anchor" in JS
+    assert "Generate Moustache Setup Keyframe" in JS
+    assert "Generate Moustache Reveal Keyframe" in JS
+    assert "Generate Zenny Reaction Keyframe" in JS
+    assert "Generate Final Payoff Keyframe" in JS
+    assert "Clear bee-height chase lane" in JS
+    assert "No moustache exists in setup frame" in JS
+    assert "Two clear upper-lip pollen curls" in JS
+    assert ".beat-card.selected" in CSS
+    assert ".workbench-beat-frame" in CSS
+    assert ".keyframe-substates" in CSS
+
+
+def test_workbench_gate_summary_is_dynamic_and_actionable():
+    assert "function workbenchGateState(session)" in JS
+    assert "${esc(gateState.activeGate)} active" in JS
+    assert "Approve the active beat keyframe before Generate unlocks." in JS
+    assert "gates passed" not in JS
+    assert ".workbench-gate-summary em" in CSS
+
+
+def test_workbench_state_is_persisted_for_project_reopen():
+    assert "/api/project-workbench-state?project=crystal-bears" in JS
+    assert 'api("/api/project-workbench-state"' in JS
+    assert "loadProjectWorkbenchState" in JS
+    assert "saveProjectWorkbenchState" in JS
+
+
+def test_audio_performance_uses_live_voice_status_take_url():
+    assert 'status.takeUrl' in JS
+    assert '/api/shot-voice-status?' in JS
+    assert 'await loadVoicePerformance(true)' in JS
+    assert 'if (action.id === "build-voice") await loadVoicePerformance(true)' in JS
+    assert 'status["takeUrl"] = _url_from_abs(led.get("voPath"))' in SERVER
+    assert "activeBeatId: app.activeBeatId" in JS
+    assert "beatState" in JS
+    assert "app.workbenchState = null" in JS
+    assert "/api/project-workbench-state" in SERVER
+    assert "WORKBENCH_STATE_FILE" in SERVER
+    assert "_save_project_workbench_state" in SERVER
+    assert "cb_db.atomic_write_json(ROOT, WORKBENCH_STATE_FILE" in SERVER
+
+
+def test_director_supports_out_of_order_scene_selection():
+    assert "director-scene-strip" in HTML
+    assert "renderDirectorSceneStrip(session)" in JS
+    assert "data-director-scene" in JS
+    assert "Creates the production shots for this scene from the locked script." in JS
+    assert "You can do this out of order" in JS
+    assert "This scene has not been directed into production shots yet." in JS
+    assert ".director-scene-strip" in CSS
+
+
+def test_studio_agent_is_visible_read_only_and_selection_aware():
+    assert 'id="studio-agent-panel"' in HTML
+    assert "/api/studio-agent?mode=HELP" in JS
+    assert "renderStudioAgent()" in JS
+    assert "loadStudioAgent()" in JS
+    assert "Read-only" in JS
+    assert "No data is changed and no provider is called" in JS
+    assert "session.headline || brief.headline" in JS
+    assert "phaseLabel(session.phase)" in JS
+    assert ".studio-agent-panel" in CSS
+    assert ".agent-meta" in CSS
+
+
+def test_dense_render_advisories_are_visible_before_provider_actions():
+    assert 'id="director-advisories"' in HTML
+    assert "renderAdvisories(session)" in JS
+    assert "session.advisories || []" in JS
+    assert "Check the split before rendering" in SERVER or "DENSE_UNIT_REVIEW" in (HERE.parent / "engine" / "cb_studio_director.py").read_text(encoding="utf-8")
+    assert ".director-advisory" in CSS
+
+
+def test_pipeline_footage_displays_reviewable_video_candidates():
+    assert "renderPipelineArtifact(step, session)" in JS
+    assert 'artifact.type === "video-set"' in JS
+    assert 'id="pipeline-candidate-video"' in JS
+    assert "data-pipeline-candidate" in JS
+    assert ".pipeline-artifact img, .pipeline-artifact video" in CSS
 
 
 def test_director_entry_is_authenticated_and_static_allowlisted():
@@ -93,6 +335,21 @@ def test_production_pipeline_uses_the_canonical_creative_path():
     assert JS.index('id: "audio"') < JS.index('id: "footage"')
     assert HTML.index('data-pipeline-step="audio"') < HTML.index('data-pipeline-step="footage"')
     assert "renderCanonicalPipelineStep(step)" in JS
+    assert 'view: "director"' in JS
+    assert '? params.get("view") : "director"' in JS
+    assert '? requestedStep : "storyboard"' in JS
+    assert "production-board" in JS
+    assert "shotPipelineRail(shot)" in JS
+    assert "Keyframe" in JS
+    assert "Voice" in JS
+    assert "Animation" in JS
+    assert "Open Current Shot" in JS
+    assert "Work This Scene" in JS
+    assert ".pipeline-rail {\n  display: none;" in CSS
+    assert ".pipeline-shell { grid-template-columns: 118px" not in CSS
+    assert ".pipeline-rail { min-height: 0; position: static; display: flex" not in CSS
+    assert ".production-board-scenes" in CSS
+    assert ".shot-pipeline" in CSS
 
 
 def test_audio_stage_is_the_editable_elevenlabs_performance_desk():
@@ -101,7 +358,7 @@ def test_audio_stage_is_the_editable_elevenlabs_performance_desk():
     assert 'api("/api/shot-voice-restore"' in JS
     assert "Acting &amp; cadence prompt" in JS
     assert "Text + audio tags sent to ElevenLabs" in JS
-    assert "Send to ElevenLabs" in JS
+    assert "directorActionLabel(sendAction)" in JS
     assert 'data-advance-step="footage"' in JS
     assert ".voice-direction-grid" in CSS
     assert '["storyboard", "footage", "rough-cut"]' in JS
@@ -109,6 +366,8 @@ def test_audio_stage_is_the_editable_elevenlabs_performance_desk():
     assert 'class="voice-take-player"' in JS
     assert 'app.session?.artifact?.type === "audio"' in JS
     assert ".voice-take-player audio" in CSS
+    assert "status.error" in JS
+    assert "recoveryAction" in JS
 
 
 def test_project_truth_layer_distinguishes_real_production_states():
@@ -122,7 +381,7 @@ def test_project_truth_layer_distinguishes_real_production_states():
 def test_pipeline_current_step_uses_real_actions_and_blocked_steps_return_to_work():
     assert "pipelineStepState(step, session)" in JS
     assert 'data-live-action=' in JS
-    assert "Approve &amp; Continue" in JS
+    assert "directorActionLabel(acceptAction))} &amp; Continue" in JS
     assert "pendingAdvance" in JS
     assert 'data-jump-current=' in JS
     assert "handleAction(action)" in JS
@@ -131,6 +390,13 @@ def test_pipeline_current_step_uses_real_actions_and_blocked_steps_return_to_wor
     assert "openEvidence(stepId)" in JS
     assert "data-open-references" in JS
     assert "data-open-request" in JS
+
+
+def test_workbench_gate_buttons_are_real_navigation_not_dead_controls():
+    assert 'data-workbench-gate=' in JS
+    assert 'host.querySelectorAll("[data-workbench-gate]")' in JS
+    assert 'generate: session.phase === "voice" ? "audio" : "footage"' in JS
+    assert 'setView("pipeline")' in JS
 
 
 def test_every_production_stage_has_persistent_scene_and_shot_navigation():

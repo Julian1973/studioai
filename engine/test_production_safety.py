@@ -48,10 +48,10 @@ def test_preflight_stops_at_episode_story_direction_approval(monkeypatch):
     assert "SHOT_NOT_READY" not in codes
     assert report["shots"] == []
     assert report["stages"]["storyboard"]["state"] == "awaiting"
-    assert report["providerCapabilities"]["selectionReady"] is False
+    assert report["providerCapabilities"]["selectionReady"] is True
     assert report["providerCapabilities"]["selectedVideoModelId"] == (
-        "dreamina-seedance-2-5-260628")
-    assert "VIDEO_PROVIDER_NOT_QUALIFIED" in codes
+        "fal-seedance-2.5")
+    assert "VIDEO_PROVIDER_NOT_QUALIFIED" not in codes
     assert report["showProfile"]["showId"] == "crystal-bears"
     assert report["showProfile"]["adapterReady"] is True
     assert report["nextAction"] == (

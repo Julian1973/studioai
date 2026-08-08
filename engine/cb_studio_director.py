@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from typing import Any
 
@@ -17,6 +18,14 @@ SCHEMA_VERSION = 1
 SESSION_STATES = {
     "preparing", "ready_to_fire", "rendering", "ready_to_review", "blocked", "complete"
 }
+_SENSITIVE_PROGRESS = re.compile(
+    r"(?:api[-_ ]?key|authorization|bearer|secret|spend[-_ ]?token|launch[-_ ]?token)\s*[:=]",
+    re.IGNORECASE,
+)
+_COMPLEXITY_SIGNALS = (
+    "chase", "tumble", "crash", "collision", "reveal", "moustache", "mustache",
+    "flower", "stamen", "gymnastic", "physical comedy", "fast", "drone",
+)
 
 
 def _action(action_id: str, label: str, *, paid: bool = False,
@@ -54,11 +63,33 @@ def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
     if not matches:
         return None
     job = max(matches, key=lambda item: float(item.get("started") or 0))
+    log_lines = [line.strip() for line in str(job.get("log") or "").splitlines()
+                 if line.strip() and not _SENSITIVE_PROGRESS.search(line)]
+    gate = str(job.get("gate") or "")
+    args_text = " ".join(str(value) for value in (job.get("args") or []))
+    operation_text = f"{gate} {args_text}".lower()
+    if "build-keyframe" in operation_text or ":keyframe" in operation_text:
+        activity_label = "Keyframe build in progress"
+        fallback_step = "Building the opening keyframe..."
+    elif "build-voice" in operation_text or "voice-shot" in operation_text:
+        activity_label = "Voice generation in progress"
+        fallback_step = "Creating the approved dialogue performance..."
+    elif "prepare-render" in operation_text:
+        activity_label = "Preparing animation request"
+        fallback_step = "Preparing the animation request for approval..."
+    elif "approve-spend" in operation_text or " cb_render.py fire " in f" {operation_text} ":
+        activity_label = "Render in progress"
+        fallback_step = "Submitting the approved Seedance render..."
+    else:
+        activity_label = "Production job in progress"
+        fallback_step = "Building the next result..."
     return {
         "jobId": job.get("jobId"),
         "status": job.get("status"),
-        "step": job.get("step") or "Preparing the next result...",
+        "activityLabel": activity_label,
+        "step": job.get("step") or fallback_step,
         "started": job.get("started"),
+        "latestMessage": log_lines[-1][:300] if log_lines else None,
     }
 
 
@@ -111,6 +142,7 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
         }
     final_prompt = str((animation_contract or {}).get("finalPrompt") or "").strip()
     if phase in ("animation", "review", "final") and final_prompt:
+        contract_checks = (animation_contract or {}).get("checks") or {}
         return {
             "kind": "animation",
             "authoritative": True,
@@ -121,6 +153,9 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
             "verdict": (animation_contract or {}).get("verdict"),
             "warnings": (animation_contract or {}).get("warnings") or [],
             "blockers": (animation_contract or {}).get("blockers") or [],
+            "durationSec": contract_checks.get("durationSec"),
+            "resolution": contract_checks.get("resolution"),
+            "providerModelId": contract_checks.get("model"),
         }
     return None
 
@@ -140,6 +175,113 @@ def _spend_disclosure(package: dict[str, Any] | None, shot_id: str | None) -> di
         "modelVersion", "tier", "internalProviderCalls",
     )
     return {key: disclosure.get(key) for key in allowed if key in disclosure}
+
+
+def _production_advisories(shot: dict[str, Any], session_phase: str,
+                           spend: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """User-facing guidance only. It never blocks an approved engine action by itself."""
+    if not shot:
+        return []
+    text = " ".join(str(shot.get(key) or "") for key in (
+        "shotId", "purpose", "visualPayoff", "providerBoundaryExplanation",
+        "splitOrNonSplitRationale", "packingJudgement"))
+    text += " " + " ".join(
+        str(stage.get(key) or "")
+        for stage in (shot.get("storyboardStagePlanApproved") or shot.get("stagePlan") or [])
+        if isinstance(stage, dict)
+        for key in ("purpose", "primaryEvent", "observableEndState"))
+    signals = sorted({signal for signal in _COMPLEXITY_SIGNALS if signal in text.casefold()})
+    duration = float(shot.get("durationSec") or 0)
+    if (session_phase == "animation" and duration > 15 and len(signals) >= 2):
+        context = (
+            "This render is sealed and ready for provider approval."
+            if spend else
+            "This dense animation result is ready for review."
+        )
+        return [{
+            "code": "DENSE_UNIT_REVIEW",
+            "severity": "warning",
+            "title": "Check the split before rendering",
+            "message": (
+                f"{context} This is a long dense comedy/action unit. It can continue, but the safer "
+                "production path is split units with held handoff frames if the current "
+                "prompt still carries chase, flower reveal and crash business in one pass."),
+            "nextAction": (
+                "If the candidate does not land every beat, Refire with protected split units "
+                "instead of rerendering the old crowded 29-second Scene 1 request."),
+            "signals": signals,
+        }]
+    return []
+
+
+def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
+                          artifact: dict[str, Any] | None) -> dict[str, Any] | None:
+    candidate = ledger.get("keyframeCandidate") or {}
+    rejected = ledger.get("keyframeRejected") or {}
+    record = candidate or rejected
+    screening = (record.get("conformanceScreening") or
+                 record.get("geometryScreening") or {})
+    reason = str(screening.get("reason") or rejected.get("reason") or "").strip()
+    if candidate:
+        if screening.get("status") == "fail":
+            return {
+                "severity": "warning",
+                "title": "Keyframe generated with QC warnings",
+                "message": reason or (
+                    "The generated keyframe is available for your review, but the automated "
+                    "checks found an issue."),
+                "nextAction": "Review the visible image, then choose Approve or Refire.",
+                "artifactVisible": bool((artifact or {}).get("url")),
+            }
+        return {
+            "severity": "info",
+            "title": "Keyframe ready for your review",
+            "message": "The generated keyframe is visible. Your decision controls whether it moves forward.",
+            "nextAction": "Choose Approve if it works, or Refire with a correction if it does not.",
+            "artifactVisible": bool((artifact or {}).get("url")),
+        }
+    if rejected:
+        return {
+            "severity": "warning",
+            "title": "Previous keyframe was rejected",
+            "message": reason or "The last keyframe was rejected and archived.",
+            "nextAction": "Build or select another keyframe before animation can continue.",
+            "artifactVisible": False,
+        }
+    if status == "ready_to_fire":
+        return {
+            "severity": "info",
+            "title": "No keyframe candidate yet",
+            "message": "This shot needs a generated or selected opening frame before animation.",
+            "nextAction": "Build the opening frame.",
+            "artifactVisible": False,
+        }
+    return None
+
+
+def _stage_comms(phase: str, status: str, ledger: dict[str, Any],
+                 artifact: dict[str, Any] | None) -> dict[str, Any] | None:
+    if phase == "keyframe":
+        return _keyframe_stage_comms(ledger, status, artifact)
+    if status == "rendering":
+        return {
+            "severity": "info",
+            "title": "Work in progress",
+            "message": "The Studio is processing this stage.",
+            "nextAction": "Wait for the result panel to update.",
+            "artifactVisible": False,
+        }
+    return None
+
+
+def _scene_plate_actions(phase: str, status: str) -> list[dict[str, Any]]:
+    if phase != "keyframe" or status == "rendering":
+        return []
+    return [
+        _action("select-scene-plate-library", "Choose scene plate from library"),
+        _action("build-scene-plate", "Fire scene plate"),
+        _action("select-scene-plate-upload", "Upload scene plate"),
+    ]
 
 
 def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
@@ -163,6 +305,16 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     spend = _spend_disclosure(package, shot_id)
     package_ledger = next((item for item in ((package or {}).get("continuityLedger") or [])
                            if item.get("shotId") == shot_id), {})
+    if running:
+        batch = package_ledger.get("batch") or {}
+        disclosure = batch.get("disclosure") or {}
+        running.update({
+            "batchId": batch.get("batchId") or package_ledger.get("batchId"),
+            "providerModelId": disclosure.get("providerModelId"),
+            "durationSec": disclosure.get("shotDurationSec") or shot.get("durationSec"),
+            "candidateCount": disclosure.get("candidateCount") or batch.get("expected"),
+            "maxBatchCostUsd": disclosure.get("maxBatchCostUsd"),
+        })
     all_state_shots = state.get("shots") or []
     all_animations_current = bool(all_state_shots) and all(
         _shot_complete(item) for item in all_state_shots)
@@ -360,18 +512,20 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     completed = sum(1 for item in all_shots if _shot_complete(item))
     shot_summaries = []
     for index, item in enumerate(all_shots, start=1):
+        item_shot_id = item.get("shotId")
         source = package_shots.get(item.get("shotId")) or {}
         shot_summaries.append({
-            "shotId": item.get("shotId"),
+            "id": item_shot_id,
+            "shotId": item_shot_id,
             "number": index,
             "durationSec": source.get("durationSec"),
             "purpose": source.get("purpose"),
             "acceptedUrl": (((media or {}).get("shots") or {}).get(
-                item.get("shotId")) or {}).get("clip"),
+                item_shot_id) or {}).get("clip"),
             "keyframeUrl": (((media or {}).get("shots") or {}).get(
-                item.get("shotId")) or {}).get("keyframeApproved"),
+                item_shot_id) or {}).get("keyframeApproved"),
             "state": "complete" if _shot_complete(item) else item.get("badgeState") or "waiting",
-            "selected": item.get("shotId") == shot_id,
+            "selected": item_shot_id == shot_id,
         })
 
     session = {
@@ -400,6 +554,10 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "blocker": blocker,
         "runningJob": running,
         "spendDisclosure": spend,
+        "sceneLook": scene_look or {},
+        "stageComms": _stage_comms(phase, status, package_ledger, artifact),
+        "scenePlateActions": _scene_plate_actions(phase, status),
+        "advisories": _production_advisories(shot, phase, spend),
         "qualityReview": quality_review,
         "stages": stages,
         "lineageCurrent": bool((state.get("lineage") or {}).get("current")),
@@ -425,7 +583,13 @@ def allowed_action_ids(session: dict[str, Any]) -> set[str]:
     if session.get("primaryAction"):
         actions.append(session["primaryAction"])
     actions.extend(session.get("decisionActions") or [])
-    return {str(action.get("id")) for action in actions if action.get("id")}
+    actions.extend(session.get("scenePlateActions") or [])
+    out = {str(action.get("id")) for action in actions if action.get("id")}
+    if (session.get("phase") == "keyframe" and
+            session.get("status") != "rendering" and
+            not (session.get("artifact") or {}).get("url")):
+        out.update({"select-keyframe-library", "select-keyframe-upload"})
+    return out
 
 
 def _direction_current(scene: str, shot_id: str, stage: str, episode: str) -> bool:

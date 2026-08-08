@@ -8,6 +8,12 @@ MAX_UNIT_SECONDS = 30
 NEAR_FULL_SECONDS = 24
 MAX_STAGES_PER_UNIT = 3
 MAX_INTERNAL_SHOTS_PER_UNIT = 3
+HANDOFF_HOLD_SECONDS = 1.0
+
+COMPLEXITY_KEYWORDS = (
+    "chase", "tumble", "crash", "collision", "reveal", "moustache", "mustache",
+    "flower", "stamen", "gymnastic", "physical comedy", "fast", "drone",
+)
 
 BOUNDARY_REASONS = {
     "scene_end",
@@ -52,12 +58,20 @@ def _seconds(unit):
 def _unit_row(unit):
     stages = list(_value(unit, "stagePlan", []) or [])
     internal_shots = list(_value(unit, "internalShotPlan", []) or [])
+    text = " ".join(str(_value(unit, key) or "") for key in (
+        "purpose", "visualPayoff", "providerBoundaryExplanation",
+        "packingJudgement", "transitionReason"))
+    text += " " + " ".join(str(_value(stage, key) or "") for stage in stages
+                            for key in ("purpose", "primaryEvent", "observableEndState"))
+    complexity_hits = sorted({word for word in COMPLEXITY_KEYWORDS
+                              if word in text.casefold()})
     return {
         "shotId": str(_value(unit, "shotId") or "").strip(),
         "beatIds": list(_value(unit, "beatIds", []) or []),
         "targetDurationSec": _seconds(unit),
         "stageCount": len(stages),
         "internalShotCount": len(internal_shots),
+        "complexitySignals": complexity_hits,
         "providerBoundaryReason": str(
             _value(unit, "providerBoundaryReason") or "").strip(),
         "providerBoundaryExplanation": str(
@@ -109,6 +123,19 @@ def audit_units(units):
             })
 
         is_last = index == len(rows) - 1
+        if (row["complexitySignals"] and row["targetDurationSec"] > 15 and
+                reason == "scene_end" and row["stageCount"] >= MAX_STAGES_PER_UNIT):
+            merge_reviews.append({
+                "fromUnit": shot_id,
+                "toUnit": None,
+                "combinedDurationSec": row["targetDurationSec"],
+                "reason": "complexity_review",
+                "explanation": (
+                    f"{shot_id} is a long single unit with complexity signals "
+                    f"{', '.join(row['complexitySignals'])}; keep it single only if one "
+                    "clear job, one camera grammar and a usable handoff frame are proven."),
+                "status": "showrunner-review",
+            })
         if is_last:
             if reason != "scene_end":
                 blocking.append({
@@ -189,10 +216,23 @@ def audit_units(units):
             "shotId": row["shotId"],
             "stageCount": row["stageCount"],
             "internalShotCount": row["internalShotCount"],
+            "complexitySignals": row["complexitySignals"],
             "withinStandard": (
                 row["stageCount"] <= MAX_STAGES_PER_UNIT and
                 row["internalShotCount"] <= MAX_INTERNAL_SHOTS_PER_UNIT),
         } for row in rows],
+        "executionPolicy": {
+            "default": "Use one 4-30s Seedance unit when it has one clear job and compact stage grammar.",
+            "splitWhen": (
+                "Split protected units for dense physical comedy, exact reveals, route-sensitive "
+                "causality, major geography changes, or more than one competing camera job."),
+            "continuity": (
+                f"Every unit must end on a usable held handoff frame of about "
+                f"{HANDOFF_HOLD_SECONDS:g}s; the next unit starts from that approved frame."),
+            "music": (
+                "For split production units, render Seedance with dialogue/foley only and generate "
+                "one ElevenLabs scene-level music cue after stitch so score continuity does not drift."),
+        },
         "protectedSplits": protected,
         "mergeReviewRequired": merge_reviews,
         "blockingIssues": blocking,

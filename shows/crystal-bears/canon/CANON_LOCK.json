@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "showId": "crystal-bears",
-  "lockedAt": "2026-08-05T17:49:31+00:00",
-  "lockedBy": "Julian",
+  "lockedAt": "2026-08-08T15:10:37+00:00",
+  "lockedBy": "Codex",
   "policySha256": "669a1222e596e90c29e9ebdfa1cab8350db75b5ad1f5c040de2e95119b7ae0ab",
   "sources": {
     "bannedVocabulary": {
@@ -43,7 +43,7 @@
     },
     "identityPacks": {
       "path": "shows/crystal-bears/canon/identity_packs.json",
-      "sha256": "fbb531a024c9c2f455610e0eaf6fe9fdcd9abd79cd68dabac2a8f5e789bd18fe"
+      "sha256": "5c7d92e3eb18bdc0b51ca14b5efd0756e3ed7696643c5d481f92e3e249d27814"
     },
     "locationAssetManifest": {
       "path": "cb-seed/assets/locations/_manifest.json",
@@ -1224,5 +1224,5 @@
       "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
     }
   ],
-  "manifestDigest": "15203fc3f9c71c9df10387ca2e52ec969cff5245ee5bc9c19243ce1ed228ed5b"
+  "manifestDigest": "b84f227e9dc28e0ff31aceaa8c3acbc53fd36999c2e15a7952c76eefeb26bbba"
 }

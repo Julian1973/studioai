@@ -1,0 +1,30 @@
+{
+  "_doc": "The studio's permanent memory. proven_paths are LAW until a render dethrones them. Edited by dailies.py on verdicts; hand-edits allowed but date them.",
+  "route": {
+    "proven": "seedance via fal.run (engine cb_gen route, as wired)",
+    "candidate": "seedance-2.5 API (fal expected ~2026-08-07) — UNVERIFIED, see crystal-bears-studio skill references/route-25-test-plan.md",
+    "rule": "Masters fire only on the proven route. Dailies may test the candidate route ONLY as the test plan's numbered checks."
+  },
+  "beat_duration_rule": {"min_s": 8, "max_s": 30, "note": "Widens to 8-30 ONLY when route-2.5 test passes checks 1-4."},
+  "failure_classes": {
+    "floaty": "Motion has no weight. Known fixes: concrete physics verbs in ACTION (momentum, settle), one action per shot, check motion-energy of the keyframe pose.",
+    "off_model": "Identity drift. Known fixes: turnarounds attached EVERY beat, strip any appearance text near names, role labels not names, re-mint the opening anchor.",
+    "clip_through": "Objects/limbs intersect. Known fixes: simplify blocking, one prop interaction per shot, explicit spatial relationships in scene text.",
+    "flat_comedy": "Gag doesn't land. Known fixes: escalation missing (raise the chaos), hold the face on the button, check comedyMode BIG vs TRUE not blended, camera static on punchline.",
+    "seam": "Cut/join mismatch. Known fixes: end-state explicit, settle harvested + re-minted, next beat opens FROM the settle, light continuity named.",
+    "audio": "Lip-sync/voice fault. Known fixes: V3 track rebuilt and measured BEFORE prompt, one combined @Audio1, silent characters named as visibly silent, never render dialogue without the track (Law 5).",
+    "continuity": "Prop/wardrobe/state drift across beats. Known fixes: carryToNext filled, transients resolved inside the take, banned-vocabulary check, cuffs never regress.",
+    "stupid_output": "Nonsense the model should never have produced (extra character, text in frame, duplicated subject). Known fixes: explicit exclusions per reference ('Do not use the people in the image'), single-subject declarations, negatives section present.",
+    "policy_refusal": "Provider refused. Known fixes: content-filter substitutions (explosion→radial light expansion, crash→impact displacement, fire→warm volumetric glow)."
+  },
+  "proven_paths": {},
+  "_proven_paths_schema": {
+    "<archetype e.g. 'two-bee-dialogue-meadow'>": {
+      "proven_on": "date + beat code",
+      "recipe": "the exact prompt shape / settings / reference set that landed",
+      "renders_won": 0,
+      "dethroned_by": null
+    }
+  },
+  "lessons": []
+}

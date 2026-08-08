@@ -23,6 +23,12 @@ ROOT = HERE.parent
 
 RUNTIME_START = "<!-- RUNTIME_WORKER_START -->"
 RUNTIME_END = "<!-- RUNTIME_WORKER_END -->"
+MAX_ANIMATION_PROVIDER_PROMPT_WORDS = 700
+
+
+def animation_provider_prompt_word_limit(duration_sec):
+    """Keep short prompts lean without forcing 16-30s story units to lose visible proof."""
+    return 450 if float(duration_sec or 0) <= 15 else MAX_ANIMATION_PROVIDER_PROMPT_WORDS
 
 SKILLS = {
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
@@ -209,6 +215,54 @@ class SeedanceStageDirection(BaseModel):
         description="Why the observable action lands emotionally, comedically or through camera scheduling.")
 
 
+class DirectorInterpretationDirection(BaseModel):
+    """The creative reason for the unit, before provider choreography begins."""
+    jokeOrAche: str = Field(min_length=1)
+    mechanism: str = Field(min_length=1)
+    statusBefore: str = Field(min_length=1)
+    statusAfter: str = Field(min_length=1)
+    audienceProgression: List[str] = Field(min_length=3, max_length=3)
+    emotionalHeart: str = Field(min_length=1)
+
+
+class GagClockDirection(BaseModel):
+    """One complete comic arc plus the exact visual sentence compiled for Seedance."""
+    beatCode: str = Field(min_length=1)
+    mode: Literal["SMALL", "BIG"]
+    setup: str = Field(min_length=1)
+    anticipation: str = Field(min_length=1)
+    impact: str = Field(min_length=1)
+    reaction: str = Field(min_length=1)
+    recoveryHold: str = Field(min_length=1)
+    recoveryHoldSec: float = Field(gt=0, le=1.5)
+    button: str = Field(min_length=1)
+    providerAction: str = Field(
+        min_length=1,
+        description="A dialogue-free, directly photographable action sentence copied "
+                    "verbatim into providerPrompt.")
+
+
+class GenerationDesignDirection(BaseModel):
+    """The approved packaging decision, made before the provider receives a prompt."""
+    packagingDecision: Literal["single-unit", "continuation-unit"]
+    completeGagArcCount: int = Field(ge=0, le=8)
+    densityJudgement: str = Field(min_length=1)
+    splitOrNonSplitRationale: str = Field(min_length=1)
+    handoffState: str = Field(min_length=1)
+
+
+class CreativeTranslationDirection(BaseModel):
+    interpretation: DirectorInterpretationDirection
+    gagClocks: List[GagClockDirection] = Field(default_factory=list, max_length=8)
+    generationDesign: GenerationDesignDirection
+
+    @model_validator(mode="after")
+    def gag_count_matches_design(self):
+        if self.generationDesign.completeGagArcCount != len(self.gagClocks):
+            raise ValueError("generationDesign.completeGagArcCount must match gagClocks")
+        return self
+
+
 class AnimationDirection(BaseModel):
     shotId: str
     durationSec: int = Field(
@@ -227,6 +281,7 @@ class AnimationDirection(BaseModel):
         min_length=1,
         description="A concise explanation of how the prompt is built to deliver the "
                     "director's intended audience turn.")
+    creativeTranslation: CreativeTranslationDirection
     dramaticBeat: str
     audienceBefore: str = Field(min_length=1)
     audienceAfter: str = Field(min_length=1)
@@ -302,6 +357,12 @@ class AnimationDirection(BaseModel):
                 raise ValueError("timestamp stages must end at the approved duration")
         elif any(start is not None or end is not None for start, end in timed):
             raise ValueError("storyline pacing must omit startSec and endSec")
+        prompt_words = len(self.providerPrompt.split())
+        prompt_limit = animation_provider_prompt_word_limit(self.durationSec)
+        if prompt_words > prompt_limit:
+            raise ValueError(
+                f"providerPrompt is {prompt_words} words; the production ceiling is "
+                f"{prompt_limit}")
         return self
 
 
@@ -614,6 +675,149 @@ def validate_voice_direction(result, locked_lines):
     return result
 
 
+def _visual_event_without_dialogue(text):
+    """Remove quoted speech while preserving the approved visible action order."""
+    value = re.sub(r"“[^”]*”|\"[^\"]*\"", "", str(text or ""))
+    value = re.sub(
+        r"\b(?:says?|calls?|hums?|humming|asks?|answers?)\s*(?=,|;|\.|\bthen\b|\band\b|$)",
+        "", value, flags=re.I)
+    value = re.sub(r"\bwith\s*(?=,|;|\.|$)", "", value, flags=re.I)
+    value = re.sub(r",\s*,", ",", value)
+    value = re.sub(r"\s+([,.;:!?])", r"\1", value)
+    value = re.sub(r",\s*(then|and)\b", r", \1", value, flags=re.I)
+    value = re.sub(r"\s{2,}", " ", value).strip(" ,")
+    return value
+
+
+def animation_locked_visual_events(shot):
+    """Return the provider-facing story facts inherited from the approved storyboard."""
+    locked = []
+    for stage in shot.get("storyboardStagePlanApproved") or []:
+        locked.append({
+            "stageNumber": stage.get("stageNumber"),
+            "beatIds": list(stage.get("beatIds") or []),
+            "primaryEvent": _visual_event_without_dialogue(stage.get("primaryEvent")),
+            "observableEndState": str(stage.get("observableEndState") or "").strip(),
+        })
+    return locked
+
+
+def animation_story_lock_report(shot, provider_prompt, stage_plan=None):
+    """Prove that every approved visual event survives into the provider request."""
+    locked = animation_locked_visual_events(shot)
+    prompt = " ".join(str(provider_prompt or "").split()).casefold()
+    actual_stages = list(stage_plan or [])
+    errors = []
+    for index, event in enumerate(locked):
+        primary = event["primaryEvent"]
+        ending = event["observableEndState"]
+        if primary and " ".join(primary.split()).casefold() not in prompt:
+            errors.append(
+                f"stage {event['stageNumber']} approved visual event is absent from providerPrompt")
+        if actual_stages:
+            if index >= len(actual_stages):
+                errors.append(f"stage {event['stageNumber']} is absent from stagePlan")
+                continue
+            actual = actual_stages[index]
+            get = (lambda key: getattr(actual, key, "")) if not isinstance(actual, dict) else actual.get
+            if str(get("primaryEvent") or "").strip() != primary:
+                errors.append(f"stage {event['stageNumber']} primaryEvent changed")
+            if str(get("observableEndState") or "").strip() != ending:
+                errors.append(f"stage {event['stageNumber']} observableEndState changed")
+    return {"ready": not errors, "errors": errors, "lockedVisualEvents": locked}
+
+
+def creative_translation_report(shot, direction, provider_prompt=None):
+    """Prove approved comedy and handoff truth survived the Animation Director.
+
+    This complements the stage story lock. The stage lock protects what happens; this
+    report protects why the gag works and the visible action sentence actually sent to the
+    provider. It is deterministic and makes no provider call.
+    """
+    data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    translation = data.get("creativeTranslation") or {}
+    clocks = list(translation.get("gagClocks") or [])
+    design = translation.get("generationDesign") or {}
+    prompt = " ".join(str(provider_prompt or data.get("providerPrompt") or "").split()).casefold()
+    approved = [
+        item for item in (shot.get("comedyContractsApproved") or [])
+        if item.get("mode") in {"SMALL", "BIG"}
+    ]
+    derived = False
+    if approved and not clocks and data.get("deriveCreativeTranslationFromApproved") is True:
+        event_by_beat = {}
+        for event in animation_locked_visual_events(shot):
+            for beat_id in event.get("beatIds") or []:
+                event_by_beat[str(beat_id)] = str(event.get("primaryEvent") or "").strip()
+        clocks = [{
+            "beatCode": str(item.get("beatCode") or ""),
+            "mode": item.get("mode"),
+            "setup": item.get("setup"),
+            "impact": item.get("disruption"),
+            "recoveryHold": item.get("hold"),
+            "button": item.get("button"),
+            "providerAction": event_by_beat.get(str(item.get("beatCode") or ""), ""),
+        } for item in approved]
+        design = {
+            "completeGagArcCount": len(clocks),
+            "handoffState": str(
+                shot.get("visualPayoff") or
+                ((shot.get("storyboardStagePlanApproved") or [{}])[-1]
+                 .get("observableEndState")) or "").strip(),
+        }
+        derived = True
+    errors = []
+
+    expected_codes = [str(item.get("beatCode") or "") for item in approved]
+    actual_codes = [str(item.get("beatCode") or "") for item in clocks]
+    if approved and actual_codes != expected_codes:
+        errors.append(
+            "gag clocks added, dropped or reordered approved comedy beats: "
+            f"expected {expected_codes}, got {actual_codes}")
+
+    for approved_clock, actual_clock in zip(approved, clocks):
+        comparisons = (
+            ("mode", "mode"),
+            ("setup", "setup"),
+            ("disruption", "impact"),
+            ("hold", "recoveryHold"),
+            ("button", "button"),
+        )
+        for approved_key, actual_key in comparisons:
+            if str(actual_clock.get(actual_key) or "").strip() != str(
+                    approved_clock.get(approved_key) or "").strip():
+                errors.append(
+                    f"{actual_clock.get('beatCode') or '?'} {actual_key} changed approved "
+                    f"{approved_key}")
+        provider_action = str(actual_clock.get("providerAction") or "").strip()
+        if provider_action and " ".join(provider_action.split()).casefold() not in prompt:
+            errors.append(
+                f"{actual_clock.get('beatCode') or '?'} providerAction is absent from providerPrompt")
+        normalized_action = " ".join(provider_action.split()).casefold()
+        for line in shot.get("dialogueLines") or []:
+            spoken = " ".join(str(line.get("exactText") or "").split()).casefold()
+            if spoken and len(spoken.split()) >= 2 and spoken in normalized_action:
+                errors.append(
+                    f"{actual_clock.get('beatCode') or '?'} providerAction contains spoken words")
+
+    if int(design.get("completeGagArcCount") or 0) != len(clocks):
+        errors.append("generation design gag count does not match its gag clocks")
+    required_handoff = str(
+        shot.get("visualPayoff") or
+        ((shot.get("storyboardStagePlanApproved") or [{}])[-1].get("observableEndState"))
+        or "").strip()
+    if required_handoff and str(design.get("handoffState") or "").strip() != required_handoff:
+        errors.append("generation design changed the approved handoff state")
+
+    return {
+        "ready": not errors,
+        "errors": errors,
+        "approvedGagBeatCodes": expected_codes,
+        "compiledGagBeatCodes": actual_codes,
+        "derivedFromApprovedContracts": derived,
+    }
+
+
 def prepare_voice(context, locked_lines, *, log=print):
     result = cb_llm.structured(
         _system("voice",
@@ -636,6 +840,7 @@ def prepare_animation(context, images, *, log=print):
         raise RuntimeError(
             f"Animation Director requires an approved 4-30s integer duration; got {raw_duration!r}")
 
+    locked_visual_events = animation_locked_visual_events(shot)
     result = cb_llm.structured(
         _system("animation",
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
@@ -657,8 +862,32 @@ def prepare_animation(context, images, *, log=print):
         "never pad toward 30 seconds or compress the approved story timing. Preserve the "
         "storyboardStagePlanApproved and storyboardInternalShotPlanApproved from the shot when "
         "present: do not add, drop, merge or reorder their stages, beat ownership or motivated "
-        "camera views. Add executable timing and detail without changing their story.\n\n"
-        "Return taskMode='reference-to-video', the exact durationSec, pacingMode, generationGoal, deliveryPlan, audienceBefore, "
+        "camera views. Add executable timing and detail without changing their story. The "
+        "LOCKED VISUAL EVENT CONTRACT below is provider-facing story truth. Copy each "
+        "primaryEvent verbatim into the matching stagePlan.primaryEvent and into that stage's "
+        "Action/Expression line in providerPrompt. Copy each observableEndState verbatim into "
+        "the matching stagePlan.observableEndState. Never move an event to another stage.\n\n"
+        "LOCKED VISUAL EVENT CONTRACT (spoken words already removed):\n" +
+        _j(locked_visual_events) + "\n\n"
+        "CREATIVE TRANSLATION CONTRACT:\n"
+        "Before compiling provider prose, return creativeTranslation.interpretation with "
+        "the joke or ache, its mechanism, status before/after, exactly three audience "
+        "progression reads and the emotional heart. For every SMALL or BIG item in the "
+        "shot's comedyContractsApproved, return one gagClock in the same order. Copy its "
+        "beatCode, mode, setup, disruption as impact, hold as recoveryHold, and button "
+        "verbatim. Add directly visible anticipation and reaction, a readable recoveryHoldSec "
+        "of no more than 1.5 seconds, and one dialogue-free providerAction sentence. Copy "
+        "that providerAction verbatim into the matching Action/Expression section of "
+        "providerPrompt. Do not copy spoken button words into providerAction. The generation "
+        "design records whether this is the approved single unit or a continuation unit, "
+        "counts the complete gag arcs, explains the density/split judgement, and copies the "
+        "shot's approved visualPayoff verbatim as handoffState. These fields describe the "
+        "already-approved packaging; Animation may not silently split or merge it. A 30-second "
+        "unit is preferred only when it has one clear job, compact causality and one camera "
+        "grammar. Dense physical comedy, exact reveal geography, route-sensitive causality or "
+        "competing camera jobs require a protected split with a held handoff frame, even when "
+        "the combined duration fits inside 30 seconds.\n\n"
+        "Return taskMode='reference-to-video', the exact durationSec, pacingMode, generationGoal, deliveryPlan, creativeTranslation, audienceBefore, "
         "audienceAfter, beatOwner, performanceFreedom, landingBreath, directionDensity, a "
         "numbered one-to-six-shot directing plan, a consecutive stagePlan in which every "
         "stage keeps its approved beatIds, has one primary event, an emotionOrCameraAnalysis "
@@ -668,7 +897,8 @@ def prepare_animation(context, images, *, log=print):
         "than three surgical safeguards, and one paste-ready Seedance shooting script in "
         "providerPrompt. Use pacingMode='storyline' for units up to 15 seconds and "
         "pacingMode='timestamp' for 16-30 seconds; timestamp mode requires ordered startSec "
-        "and endSec values on every stage, while storyline mode omits both. "
+        "and endSec values on every stage as broad budgets, not frame-accurate commands; "
+        "storyline mode omits both. "
         "Keep every spoken word out of providerPrompt; refer to the approved track only as "
         "@Audio1. Use the exact attached asset tags and bind each one separately in the prompt "
         "to what it defines and what it must not contribute. For dialogue shots, preserve the "
@@ -683,10 +913,16 @@ def prepare_animation(context, images, *, log=print):
         "Keep duration, aspect ratio, resolution and model "
         "selection out of providerPrompt because the API contract owns them. Prefer stages to "
         "one-second micromanagement; use exact time points only for a critical handoff or "
-        "dialogue cue. Explicitly prohibit extra dialogue, subtitles and default BGM. The prompt "
-        "must begin from the approved opening state and end on a usable handoff, with causal "
+        "dialogue cue. For split units, prohibit musical underscore in Seedance and keep only "
+        "dialogue/foley/ambience; scene music is generated once in post after stitching through "
+        "ElevenLabs. The prompt must begin from the approved opening state and end on a usable "
+        "held handoff frame, with causal "
         "physical action, observable performance, motivated camera, readable composition, and "
-        "established light/material behaviour. It should feel like confident direction to an "
+        "established light/material behaviour. Keep providerPrompt between 280 and 450 words "
+        "for 4-15 second units, or between 400 and 700 words for 16-30 second units: "
+        "each instruction appears once, reference bindings stay one concise line each, and stage "
+        "direction states only the action, visible performance, camera purpose and end state. "
+        "It should feel like confident direction to an "
         "exceptional actor and camera crew, not an animation checklist.",
         AnimationDirection, label="department_animation", log=log, images=images)
 
@@ -702,10 +938,21 @@ def prepare_animation(context, images, *, log=print):
             raise RuntimeError(
                 "Animation Director added, dropped, merged, reordered or reassigned approved "
                 f"story stages: expected {expected}, got {actual}")
+        lock_report = animation_story_lock_report(
+            shot, result.providerPrompt, result.stagePlan)
+        if not lock_report["ready"]:
+            raise RuntimeError(
+                "Animation Director weakened or reordered approved visual events: "
+                + "; ".join(lock_report["errors"]))
     approved_shots = shot.get("storyboardInternalShotPlanApproved") or []
     if approved_shots and len(result.shotPlan) != len(approved_shots):
         raise RuntimeError(
             "Animation Director changed the approved number of motivated internal shots")
+    translation_report = creative_translation_report(shot, result)
+    if not translation_report["ready"]:
+        raise RuntimeError(
+            "Animation Director weakened the approved creative translation: "
+            + "; ".join(translation_report["errors"]))
     return result
 
 

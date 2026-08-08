@@ -85,6 +85,7 @@ def test_thirty_seconds_does_not_excuse_an_overpacked_unit():
     assert audit["blockingIssues"][0]["code"] == "UNIT_COMPLEXITY_EXCEEDED"
     assert audit["unitComplexity"] == [{
         "shotId": "S1.SH1", "stageCount": 4, "internalShotCount": 6,
+        "complexitySignals": [],
         "withinStandard": False,
     }]
 
@@ -97,3 +98,17 @@ def test_long_unit_is_valid_when_its_story_grammar_stays_compact():
     assert audit["ready"] is True
     assert audit["maxStagesPerUnit"] == 3
     assert audit["maxInternalShotsPerUnit"] == 3
+
+
+def test_long_physical_reveal_unit_gets_showrunner_complexity_review():
+    unit = _unit("S1.SH1", 29, "scene_end", ["1.B1", "1.B2", "1.B3"])
+    unit["purpose"] = (
+        "Fast chase, crash, flower moustache reveal and physical comedy tumble.")
+    unit["visualPayoff"] = "Fuzzby lands with a flower-caused moustache."
+    audit = P.audit_units([unit])
+    assert audit["ready"] is True
+    assert audit["needsHumanMergeReview"] is True
+    assert audit["mergeReviewRequired"][0]["reason"] == "complexity_review"
+    assert "moustache" in audit["unitComplexity"][0]["complexitySignals"]
+    assert "handoff frame" in audit["executionPolicy"]["continuity"]
+    assert "ElevenLabs scene-level music cue after stitch" in audit["executionPolicy"]["music"]

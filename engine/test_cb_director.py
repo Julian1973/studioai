@@ -118,6 +118,13 @@ def test_provider_route_does_not_block_keyframe_work():
     assert not session["providerReady"]
 
 
+def test_shot_summaries_expose_stable_id_aliases():
+    session = _session()
+    selected = next(shot for shot in session["shots"] if shot["selected"])
+    assert selected["id"] == SHOT_ID
+    assert selected["shotId"] == SHOT_ID
+
+
 def test_keyframe_review_uses_current_exact_request_not_stale_package_copy():
     state = _state()
     state["shots"][0]["pending"]["keyframe"] = True
@@ -172,7 +179,12 @@ def test_spend_token_never_leaves_the_server_projection():
         animation_contract={
             "verdict": "passed",
             "finalPrompt": "CURRENT EXACT ANIMATION REQUEST",
-            "checks": {"promptSource": "animation-director-current"},
+            "checks": {
+                "promptSource": "animation-director-current",
+                "durationSec": 29,
+                "resolution": "480p",
+                "model": "fal-seedance-2.5",
+            },
         },
     )
     assert session["status"] == "ready_to_review"
@@ -181,6 +193,64 @@ def test_spend_token_never_leaves_the_server_projection():
     assert "secret-single-use-token" not in str(session)
     assert session["inspector"]["providerRequest"]["prompt"] == (
         "CURRENT EXACT ANIMATION REQUEST")
+    assert session["inspector"]["providerRequest"]["resolution"] == "480p"
+    assert session["inspector"]["providerRequest"]["durationSec"] == 29
+
+
+def test_dense_animation_spend_projection_warns_before_one_shot_render():
+    pending = {
+        "token": "secret-single-use-token",
+        "disclosure": {
+            "shotId": SHOT_ID,
+            "candidateCount": 1,
+            "maxBatchCostUsd": 1.25,
+            "providerModelId": "seedance-2.5",
+        },
+    }
+    package = _package(pending)
+    package["shots"][0].update({
+        "purpose": "Fast chase, flower moustache reveal and crash recovery.",
+        "visualPayoff": "Fuzzby pops out of the flower after the crash.",
+        "storyboardStagePlanApproved": [{
+            "primaryEvent": "Fuzzby barrels through a drone chase and crashes into a flower.",
+            "observableEndState": "The flower moustache is readable.",
+        }],
+    })
+    session = _session(
+        state=_state(keyframe=True, voice=True, animationDirection=True),
+        preflight=_preflight(provider_ready=True),
+        package=package,
+        animation_contract={
+            "verdict": "passed",
+            "finalPrompt": "CURRENT EXACT ANIMATION REQUEST",
+            "checks": {"durationSec": 29, "resolution": "480p", "model": "fal-seedance-2.5"},
+        },
+    )
+    assert session["status"] == "ready_to_review"
+    assert session["advisories"][0]["code"] == "DENSE_UNIT_REVIEW"
+    assert "protected split units" in session["advisories"][0]["nextAction"]
+    assert {"chase", "crash", "flower", "moustache"}.issubset(
+        set(session["advisories"][0]["signals"]))
+
+
+def test_dense_animation_candidate_review_also_warns_against_blind_retry():
+    package = _package()
+    package["shots"][0].update({
+        "purpose": "Fast chase, flower moustache reveal and crash recovery.",
+        "visualPayoff": "Fuzzby pops out of the flower after the crash.",
+    })
+    state = _state(keyframe=True, voice=True, animationDirection=True)
+    state["shots"][0]["pending"]["animation"] = True
+    session = _session(
+        state=state,
+        preflight=_preflight(provider_ready=True),
+        package=package,
+        media=_media(candidates=[{"n": 1, "url": "/engine/media/c1.mp4"}]),
+    )
+    assert session["status"] == "ready_to_review"
+    assert session["decisionActions"][1]["id"] == "iterate-animation"
+    assert session["advisories"][0]["code"] == "DENSE_UNIT_REVIEW"
+    assert "ready for review" in session["advisories"][0]["message"]
 
 
 def test_running_job_replaces_actions_with_one_progress_state():
@@ -191,6 +261,7 @@ def test_running_job_replaces_actions_with_one_progress_state():
         "status": "running",
         "step": "Rendering opening frame...",
         "started": 100,
+        "log": "Submitting request...\nProvider is rendering candidate 1.",
         "args": ["cb_studio_director.py", "build-keyframe", "1", SHOT_ID, "Ep1"],
     }}
     session = _session(jobs=jobs)
@@ -198,11 +269,52 @@ def test_running_job_replaces_actions_with_one_progress_state():
     assert session["primaryAction"] is None
     assert session["decisionActions"] == []
     assert session["runningJob"]["step"] == "Rendering opening frame..."
+    assert session["runningJob"]["latestMessage"] == "Provider is rendering candidate 1."
+    assert session["runningJob"]["durationSec"] == 29
+
+
+def test_running_render_exposes_safe_batch_progress_details():
+    package = _package()
+    package["continuityLedger"][0]["batch"] = {
+        "batchId": "batch-1",
+        "status": "generating",
+        "expected": 1,
+        "disclosure": {
+            "providerModelId": "fal-seedance-2.5",
+            "shotDurationSec": 29,
+            "candidateCount": 1,
+            "maxBatchCostUsd": 13.72,
+        },
+    }
+    jobs = {"job-1": {
+        "jobId": "job-1", "scene": "1", "gate": f"director:render-animation:{SHOT_ID}",
+        "status": "running", "step": "Rendering the clip...", "started": 100,
+        "args": [SHOT_ID],
+    }}
+    running = _session(package=package, jobs=jobs)["runningJob"]
+    assert running["batchId"] == "batch-1"
+    assert running["providerModelId"] == "fal-seedance-2.5"
+    assert running["candidateCount"] == 1
+    assert running["maxBatchCostUsd"] == 13.72
+
+
+def test_running_progress_does_not_expose_sensitive_log_lines():
+    jobs = {"job-1": {
+        "jobId": "job-1", "scene": "1", "gate": f"director:render-animation:{SHOT_ID}",
+        "status": "running", "step": "Rendering", "started": 100,
+        "args": [SHOT_ID], "log": "Provider accepted request\napi_key=do-not-expose",
+    }}
+    assert _session(jobs=jobs)["runningJob"]["latestMessage"] == "Provider accepted request"
 
 
 def test_allowed_actions_are_derived_from_the_current_session_only():
     session = _session()
-    assert cb_studio_director.allowed_action_ids(session) == {"build-keyframe"}
+    assert cb_studio_director.allowed_action_ids(session) == {
+        "build-keyframe",
+        "build-scene-plate",
+        "select-scene-plate-library",
+        "select-scene-plate-upload",
+    }
 
 
 def test_completed_animation_flows_to_quality_review_then_master():

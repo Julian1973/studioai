@@ -23,7 +23,7 @@ corrected above to match what the code actually does.
 Keys come from cb-gen/.env (gitignored): GEMINI_API_KEY, ELEVENLABS_API_KEY.
 Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 """
-import os, sys, json, time, base64, mimetypes, argparse, pathlib
+import os, sys, json, time, base64, mimetypes, argparse, pathlib, subprocess, tempfile
 import requests
 import cb_costs
 import cb_providers
@@ -88,6 +88,15 @@ def _need(key, name):
     if not key:
         raise SystemExit(f"{name} not set — add it to cb-gen/.env")
 
+def _need_eleven_key():
+    _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
+    if not ELEVEN_KEY.startswith("sk_"):
+        raise SystemExit(
+            "ELEVENLABS_API_KEY is not a usable ElevenLabs API key. "
+            "It looks like an API key ID; ElevenLabs API keys start with 'sk_'. "
+            "Create or reveal a valid key in ElevenLabs and update engine/.env."
+        )
+
 # ── TICKET 5 — API RESILIENCE: retry + exponential backoff on EVERY external call. A transient blip (network drop,
 #    429 rate-limit, 5xx, fal-queue hiccup) retries INSIDE the job instead of failing the whole render; a real client
 #    error (4xx except 429) raises immediately so we don't loop on a bad request. ────────────────────────────────────
@@ -123,7 +132,18 @@ def _retry(fn, what="API", tries=4, base=4.0, cap=60.0):
             print(f"  [retry] {what}: attempt {attempt}/{tries} failed — {str(e)[:140]}; backoff {wait:.1f}s", flush=True)
             time.sleep(wait)
 def _checked(r):
-    r.raise_for_status(); return r
+    try:
+        r.raise_for_status()
+    except requests.HTTPError as exc:
+        body = ""
+        try:
+            body = (r.text or "")[:800]
+        except Exception:
+            body = ""
+        raise requests.HTTPError(
+            f"{exc} — provider response: {body}", response=r
+        ) from exc
+    return r
 def _rpost(url, **kw):
     kw.setdefault("timeout", 120)
     return _retry(lambda: _checked(requests.post(url, **kw)), what="POST " + str(url).rsplit("/", 1)[-1][:24])
@@ -463,7 +483,7 @@ def _seedance_json_prompt(prompt, duration=None, ref=False):
             obj["duration_seconds"] = int(float(duration))
         except Exception:
             pass
-    # ── GUARANTEE the English lock + a music ask on EVERY path (incl. prose-wrapped / third-party prompts). Seedance
+    # ── GUARANTEE the English lock on EVERY path (incl. prose-wrapped / third-party prompts). Seedance
     #    (ByteDance) defaults to MANDARIN without this, and there is NO language API param — so the PROMPT is the lock.
     EN_LOCK = ("ALL spoken dialogue and vocals are in natural ENGLISH (en-US); no Chinese, no Mandarin, no "
                "non-English speech. 所有语音必须为英语，禁止生成中文语音。")
@@ -472,15 +492,13 @@ def _seedance_json_prompt(prompt, duration=None, ref=False):
     obj["spoken_language"] = "English (en-US) only"
     if not obj.get("audio"):
         obj["audio"] = EN_LOCK + (" Lip-synced acted dialogue from the reference voice, FORWARD, over Seedance's own "
-                                  "synchronised SFX, with a musical underscore kept low underneath."
-                                  if ref else " Seedance speaks the dialogue FORWARD plus synchronised SFX, with a "
-                                  "musical underscore kept low underneath.")
+                                  "synchronised foley and natural ambience. No musical underscore in the render."
+                                  if ref else " Seedance speaks the dialogue FORWARD plus synchronised foley and "
+                                  "natural ambience. No musical underscore in the render.")
     elif isinstance(obj["audio"], str) and "ENGLISH" not in obj["audio"].upper():
         obj["audio"] = EN_LOCK + " " + obj["audio"]
-    # the single-take structure (visual_prompt/timeline/constraints) scores music in POST — don't auto-inject a music key
-    if "visual_prompt" not in obj:
-        obj.setdefault("music", ("A musical underscore plays throughout the take, low under dialogue, swelling on the "
-                                 "action and resolving on the last frame. No sung lyrics."))
+    # Music is a post/stitch decision by default. Split Seedance units must not bake separate
+    # underscoring into each render because the score will drift across retries and clip joins.
     base_neg = ("no on-screen text, no subtitles, no watermark, no logos, no morphing, no extra limbs, no flicker, "
                 "no character drift")
     cn = obj.get("constraints")                                   # the single-take structure nests its negative here
@@ -588,12 +606,15 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         "resolution": resolution,
         "duration": str(duration),
         "aspect_ratio": "16:9",
-        "bitrate_mode": "high",
-        # generate_audio ON: Seedance natively scores music + SFX + the lip-synced @Audio1 voice in ONE pass (fal docs —
-        # cost is identical). The prompt REFERENCES @Audio1 as the spoken line (it does NOT write the words), so Seedance
-        # uses the supplied ElevenLabs voice AS the speech instead of generating a duplicate (the old "nailed it" double).
+        # generate_audio ON: Seedance carries the supplied @Audio1 dialogue timing plus synchronized foley/ambience.
+        # Music is not auto-requested here; scene-level score is generated/selected in post after approved split
+        # units are stitched, unless a deliberately approved single-shot prompt explicitly asks for native music.
         "generate_audio": True,
     }
+    # Seedance 2.0 exposed bitrate_mode; the live 2.5 schema does not. Keep the
+    # comparison request byte-compatible without sending an invalid field to 2.5.
+    if contract["modelVersion"] == "2.0":
+        args["bitrate_mode"] = "high"
     if audio_urls:
         args["audio_urls"] = [_fal_asset_url(p) for p in audio_urls]
     endpoint = contract["endpoint"]
@@ -613,7 +634,8 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
                                 modelVersion=contract["modelVersion"],
                                 transport=contract["transport"], resolution=resolution,
                                 duration=str(duration), seconds=_secs, fast=fast,
-                                aspectRatio="16:9", bitrateMode="high",
+                                aspectRatio="16:9",
+                                bitrateMode=("high" if contract["modelVersion"] == "2.0" else None),
                                 comparisonRunId=contract.get("comparisonRunId"),
                                 num_image_refs=len(image_urls), num_audio_refs=len(audio_urls))
     return str(outp)
@@ -646,7 +668,7 @@ def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
     """V3 TTS with the canonical acting settings. stability MUST stay in the ~0.25-0.40 band — above ~0.40
     the [bracket] audio tags STOP FIRING and the read goes flat (CRYSTAL_BEARS_LOCKED_CANON.md:144-158).
     The tag sets the colour; the TEXT does the acting; 1-2 tags per segment. Never use_speaker_boost in v3."""
-    _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
+    _need_eleven_key()
     url = f"{XI}/v1/text-to-speech/{voice_id}"
     r = _rpost(url, headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg",
                                     "Content-Type": "application/json"},
@@ -661,6 +683,111 @@ def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
                                 stability=stability, chars=len(text or ""))
     return str(outp)
 
+def _ffprobe_duration(path):
+    try:
+        result = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
+            check=True, text=True, capture_output=True)
+        return max(0.0, float((result.stdout or "0").strip() or 0))
+    except Exception:
+        return 0.0
+
+
+def _concat_audio_parts(parts, outp):
+    if not parts:
+        raise RuntimeError("ElevenLabs fallback produced no audio parts")
+    if len(parts) == 1:
+        outp.write_bytes(pathlib.Path(parts[0]).read_bytes())
+        return
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        concat_file = pathlib.Path(f.name)
+        for part in parts:
+            safe = str(pathlib.Path(part).resolve()).replace("'", "'\\''")
+            f.write(f"file '{safe}'\n")
+    try:
+        subprocess.run(
+            ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+             "-f", "concat", "-safe", "0", "-i", str(concat_file),
+             "-c", "copy", str(outp)],
+            check=True, capture_output=True)
+    finally:
+        try:
+            concat_file.unlink()
+        except OSError:
+            pass
+
+
+def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_text):
+    """Operational fallback for production: if Text-to-Dialogue refuses, still create
+    a usable line-ordered voice take. This is not the preferred performance route, but it
+    prevents the Studio from dead-ending on a provider validation change."""
+    parts = []
+    segments = []
+    cursor = 0.0
+    total_chars = 0
+    with tempfile.TemporaryDirectory(prefix="cb-eleven-fallback-") as tmp:
+        tmp_path = pathlib.Path(tmp)
+        for idx, item in enumerate(inputs or []):
+            text = str(item.get("text") or "").strip()
+            voice_id = item.get("voice_id")
+            if not text or not voice_id:
+                raise RuntimeError("ElevenLabs fallback requires text and voice_id for every line")
+            total_chars += len(text)
+            r = _rpost(
+                f"{XI}/v1/text-to-speech/{voice_id}",
+                headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg",
+                         "Content-Type": "application/json"},
+                json={"text": text, "model_id": model_id,
+                      "voice_settings": {"stability": 0.35, "similarity_boost": 0.75,
+                                         "style": 0.25}},
+                timeout=120)
+            part = tmp_path / f"line_{idx:02d}.mp3"
+            part.write_bytes(r.content)
+            duration = _ffprobe_duration(part)
+            segments.append({
+                "voiceId": voice_id,
+                "dialogueInputIndex": idx,
+                "startTimeSec": cursor,
+                "endTimeSec": cursor + duration,
+                "characterStartIndex": 0,
+                "characterEndIndex": len(text),
+            })
+            cursor += duration
+            parts.append(part)
+        outp = MEDIA / out
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        _concat_audio_parts(parts, outp)
+    timing_path = pathlib.Path(str(outp) + ".dialogue.json")
+    timing_path.write_text(
+        json.dumps({
+            "schemaVersion": 1,
+            "provider": "elevenlabs",
+            "endpoint": "/v1/text-to-speech fallback after text-to-dialogue refusal",
+            "model": model_id,
+            "audioPath": str(outp.resolve()),
+            "audioSha256": __import__("hashlib").sha256(outp.read_bytes()).hexdigest(),
+            "inputCount": len(inputs or []),
+            "voiceSegments": segments,
+            "fallback": True,
+            "fallbackReason": str(error_text)[:800],
+        }, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    _billing = cb_costs.dialogue_billing(inputs, model_id=model_id,
+                                          generation_kind=generation_kind)
+    _billing["voices"] = len(inputs or [])
+    _billing["fallback"] = "text-to-speech"
+    cb_costs.log_spend("elevenlabs_dialogue_fallback", _billing["estimatedCostUsdExTax"],
+                        out=out, meta=_billing)
+    cb_costs.write_gen_sidecar(
+        outp, op="elevenlabs_dialogue_fallback", model=model_id, stability=0.35,
+        chars=total_chars, voices=len(inputs or []), billing=_billing,
+        timestampEndpoint=False, dialogueTimingPath=str(timing_path),
+        fallbackReason=str(error_text)[:800],
+    )
+    return str(outp)
+
+
 def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
                     generation_kind="generation", production_route=None):
     _require_production_route(production_route, "eleven_dialogue")
@@ -669,11 +796,16 @@ def eleven_dialogue(inputs, out="vo.mp3", model_id="eleven_v3", stability=0.30,
     cues from the [audio tags]. This beats synthesising each line in isolation (a 2-word line alone reads flat — the
     v3 guide wants context, not one-liners). `inputs` = ordered [{"text","voice_id"}] (<=2000 chars total, <=10
     voices). Lower stability = broader emotional range (0.30 = the expressive 'Creative' zone; never use_speaker_boost)."""
-    _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
-    r = _rpost(f"{XI}/v1/text-to-dialogue/with-timestamps",
-               headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg", "Content-Type": "application/json"},
-               json={"inputs": inputs, "model_id": model_id, "settings": {"stability": stability},
-                     "apply_text_normalization": "auto"}, timeout=180)
+    _need_eleven_key()
+    try:
+        r = _rpost(f"{XI}/v1/text-to-dialogue/with-timestamps",
+                   headers={"xi-api-key": ELEVEN_KEY, "Content-Type": "application/json"},
+                   json={"inputs": inputs, "model_id": model_id, "settings": {"stability": stability},
+                         "apply_text_normalization": "auto"}, timeout=180)
+    except requests.HTTPError as exc:
+        if os.environ.get("CB_ELEVEN_DIALOGUE_TTS_FALLBACK", "1") != "0":
+            return _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, exc)
+        raise
     r.raise_for_status()
     try:
         payload = r.json()
@@ -742,7 +874,7 @@ def eleven_music(prompt, length_ms=None, out="music.mp3", production_route=None)
     Returns the mp3 path. If the Music API moves, THIS is the single place to update — endpoint/params verified
     against the current ElevenLabs Music docs (POST /v1/music; body: prompt, music_length_ms 3000–600000,
     force_instrumental). force_instrumental=True guarantees no sung vocals leak into the bed."""
-    _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
+    _need_eleven_key()
     body = {"prompt": prompt, "force_instrumental": True}
     if length_ms:
         body["music_length_ms"] = max(3000, min(int(length_ms), 600000))   # clamp 3s … 10 min (API range)
@@ -789,7 +921,7 @@ def voice_change(audio, voice_id, model_id="eleven_multilingual_sts_v2", out="sw
 def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False, production_route=None):
     _require_production_route(production_route, "eleven_sfx")
     """Text -> sound effect / ambience bed."""
-    _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
+    _need_eleven_key()
     body = {"text": text, "loop": loop}
     if duration:
         body["duration_seconds"] = duration
@@ -805,7 +937,7 @@ def eleven_sfx(text, duration=None, out="sfx.mp3", loop=False, production_route=
     return str(outp)
 
 def list_voices():
-    _need(ELEVEN_KEY, "ELEVENLABS_API_KEY")
+    _need_eleven_key()
     r = requests.get(f"{XI}/v1/voices", headers={"xi-api-key": ELEVEN_KEY}, timeout=30)
     r.raise_for_status()
     return [(v["voice_id"], v["name"]) for v in r.json().get("voices", [])]

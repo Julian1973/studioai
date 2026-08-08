@@ -5,21 +5,38 @@
     episode: "Ep1",
     scene: "1",
     shotId: null,
-    view: "pipeline",
+    activeBeatId: "moustache",
+    view: "director",
     pipelineStep: "upload",
     session: null,
     roster: null,
     references: null,
     referenceStage: "keyframe",
+    inlineReferences: null,
+    inlineReferencesKey: null,
+    inlineReferencesLoading: false,
+    keyframeLibrary: null,
+    keyframeLibraryKey: null,
+    keyframeLibraryLoading: false,
+    sceneAssetLibrary: null,
+    sceneAssetLibraryLoading: false,
+    scenePlateLibraryOpen: false,
+    workbenchState: null,
+    workbenchSaveTimer: null,
     selectedCandidate: null,
     pendingAction: null,
     pendingAdvance: null,
+    localActivity: null,
+    activityTimer: null,
     voiceStatus: null,
     voiceStatusKey: null,
     voiceLoading: false,
     roughCutStatus: null,
     roughCutStatusKey: null,
     roughCutLoading: false,
+    agentBrief: null,
+    agentBriefKey: null,
+    agentLoading: false,
     pollTimer: null,
     toastTimer: null,
   };
@@ -33,6 +50,7 @@
   async function api(path, options) {
     const response = await fetch(path, {
       cache: "no-store",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       ...options,
     });
@@ -225,19 +243,6 @@
     ["At Sea", "Adventurous, open, then stormy and dangerous", "4, 7", "Open ocean clean plates that move from hopeful daylight to rough storm water and low steel-grey skies."],
   ];
 
-  const sceneRoster = [
-    ["1", "EXT. DEEP WITHIN THE RAINFOREST – DAY", "3/16"],
-    ["2", "EXT. CRYSTAL COVE – AIDA'S SANCTUARY – DAY", "0/8"],
-    ["3", "EXT. KEEN'S ISLAND – THE PIER – DAY", "0/18"],
-    ["4", "EXT. AT SEA – DAY", "0/10"],
-    ["5", "EXT. RAINFOREST EDGE – CONTINUOUS", "0/8"],
-    ["6", "EXT. CRYSTAL COVE – STORM BUILDING", "0/16"],
-    ["7", "EXT. OUT AT SEA – STORM", "0/20"],
-    ["8", "EXT. CRYSTAL COVE BEACH – DAY", "0/12"],
-    ["9", "EXT. GATHERING AREA – DAY", "0/10"],
-    ["10", "EXT. CRYSTAL COVE BEACH – CONTINUOUS", "0/8"],
-  ];
-
   const storyboardShots = [
     { shot: "01", status: "Regen", refs: ["LOC", "CHAR", "SB"], title: "DEEP WITHIN", characters: ["FUZZBY", "ZENNY"], setup: "" },
     { shot: "02", status: "Regen", refs: ["SB", "CHAR", "SB"], title: "FUZZBY", characters: ["ZENNY"], setup: "" },
@@ -302,20 +307,179 @@
 
   const editorClips = ["S1 C2", "S1 C3", "S1 C4", "S1 C5", "S1 C6", "S2 C1"];
 
+  const sceneOneContract = {
+    title: "Scene 1 — Fuzzby’s Pollination Lesson",
+    promise: "Fuzzby’s joyful performance of expertise becomes increasingly visible failure, while Zenny’s restrained amusement shows that she sees and loves exactly who he is.",
+    gates: ["Script", "Direction", "Keyframes", "Generate", "Review"],
+    beats: [
+      {
+        id: "chase",
+        n: 1,
+        title: "Chase",
+        range: "00.0–04.2s",
+        priority: "required",
+        reviewStatus: "delivered",
+        shot: "SH1A",
+        keyframe: "Flower-corridor chase starting composition",
+        cta: "Generate Chase Keyframe",
+        intent: "Fuzzby pursues pollen through the corridor.",
+        scriptTruth: "Fuzzby enters as joyful chaos, trying to look expert while barely controlling the route.",
+        visibleProof: "The audience sees a clear bee-height chase lane and two escalating near-misses.",
+        startState: "Open flower corridor ahead; Fuzzby already overcommitted; Zenny clean and outside his path.",
+        actionPath: "Drone-like pursuit → two near-misses → flower contact setup.",
+        endState: "Fuzzby is still moving forward with room for the first crash.",
+        camera: "Bee-height chase camera, slightly late, no confusing cuts.",
+        checklist: [
+          "Clear bee-height chase lane",
+          "Two near-misses have room to stage",
+          "Zenny has safe parallel route",
+          "Camera axis is readable",
+        ],
+        failConditions: ["No static hovering", "No early crash", "No lost corridor route"],
+        promptSegment: "Chase prompt segment: bee-height drone pursuit, open corridor, two readable near-misses, Zenny safely parallel.",
+        reviewNote: "Chase route is readable and has room for escalation.",
+      },
+      {
+        id: "triumph",
+        n: 2,
+        title: "False Triumph",
+        range: "04.2–08.8s",
+        priority: "required",
+        reviewStatus: "delivered",
+        shot: "SH1A",
+        keyframe: "Fuzzby chest-out post-recoil hover",
+        cta: "Generate False-Triumph Anchor",
+        intent: "Fuzzby converts a crash into a proud finish.",
+        scriptTruth: "The leaf recoil accidentally gives Fuzzby a gymnast-style recovery he pretends was planned.",
+        visibleProof: "Flower scoop, springy leaf impact, recoil rotation, chest-out hover.",
+        startState: "Fuzzby dives too hard into a flower.",
+        actionPath: "Face contact → leaf bend → recoil → tucked rotation → proud hover.",
+        endState: "Fuzzby is upright, proud and physically unsettled.",
+        camera: "Hold the cause chain and settle on the false triumph.",
+        checklist: [
+          "Leaf recoil cause is visible",
+          "Fuzzby has a clear chest-forward hover",
+          "Minor instability remains readable",
+          "Space exists for later flower action",
+        ],
+        failConditions: ["No random impact", "No painful collision", "No missing leaf recoil"],
+        promptSegment: "False Triumph prompt segment: flower scoop, springy leaf recoil, tucked rotation and proud hover with residual wobble.",
+        reviewNote: "False triumph reads as accidental success rather than real competence.",
+      },
+      {
+        id: "moustache",
+        n: 3,
+        title: "Pollen Moustache",
+        range: "08.8–16.2s",
+        priority: "blocking",
+        reviewStatus: "weak",
+        shot: "SH1B",
+        keyframe: "Moustache Setup",
+        secondaryKeyframe: "Moustache Reveal",
+        cta: "Generate Moustache Setup Keyframe",
+        ctaAfterSetup: "Generate Moustache Reveal Keyframe",
+        intent: "Escalate Fuzzby’s false expertise into a readable visual joke.",
+        scriptTruth: "Fuzzby gets two pollen curls on his upper lip and presents them as authority.",
+        visibleProof: "The pollen moustache must read before Zenny reacts.",
+        startState: "Fuzzby centre-left; separate target flower centre-right; Zenny frame-left and outside his travel route.",
+        actionPath: "Forward arc → face contacts target flower → pollen transfers → same-path return → presentation hold → Zenny reacts.",
+        endState: "Two upper-lip pollen curls are visible, target flower remains visible, Fuzzby holds proudly.",
+        camera: "Medium-wide, warm corridor, target flower and return position both readable.",
+        timing: "Reveal hold around 0.8s before Zenny response.",
+        checklist: [
+          "Separate target flower visible",
+          "Fuzzby’s forward route to flower is clear",
+          "Zenny remains outside Fuzzby’s route",
+          "Camera keeps flower, Fuzzby and Zenny readable",
+          "No moustache exists in setup frame",
+        ],
+        revealChecklist: [
+          "Two clear upper-lip pollen curls",
+          "Target flower remains visible in background",
+          "Fuzzby is in planned reveal position",
+          "Fuzzby holds proudly before Zenny reacts",
+          "Zenny’s eye-line lands on moustache first",
+        ],
+        failConditions: ["Fuzzby backs into Zenny", "Full-face pollen mask", "Target flower missing", "Zenny reacts too early"],
+        recommendedFix: "Generate the Moustache Setup keyframe, then the Moustache Reveal keyframe, and use them as anchors for a dedicated 7.4-second Seedance shot.",
+        promptSegment: "Moustache Setup prompt segment: Fuzzby centre-left, separate target flower centre-right, Zenny outside route, no moustache yet. Reveal segment: same flower remains visible, two upper-lip pollen curls, proud hold before Zenny reacts.",
+        reviewNote: "Target flower and upper-lip moustache are unclear; route drifted toward Zenny instead of returning to the reveal position.",
+      },
+      {
+        id: "zenny",
+        n: 4,
+        title: "Zenny Reaction",
+        range: "14.0–16.2s",
+        priority: "required",
+        reviewStatus: "not-started",
+        shot: "SH1B",
+        keyframe: "Restrained, affectionate deadpan",
+        cta: "Generate Zenny Reaction Keyframe",
+        intent: "Zenny’s deadpan lands after the evidence.",
+        scriptTruth: "Zenny judges the accident with restraint and affection.",
+        visibleProof: "Her eyes move from moustache to Fuzzby before the response lands.",
+        startState: "Moustache visible; Fuzzby presenting; Zenny close but outside route.",
+        actionPath: "Evidence read → eye move → almost-smile → deadpan response.",
+        endState: "Zenny’s affection is visible without broad mugging.",
+        camera: "Relationship composition; no cut before the joke reads.",
+        checklist: [
+          "Moustache has already been established",
+          "Zenny remains almost still",
+          "Eye movement is directed to moustache, then Fuzzby",
+          "One mouth corner only just lifts",
+          "Reaction has no broad expression or early action",
+        ],
+        failConditions: ["Reaction before reveal", "Broad cartoon laugh", "Zenny blocking target flower"],
+        promptSegment: "Zenny Reaction prompt segment: moustache already established, Zenny almost still, eyes to moustache then Fuzzby, tiny mouth-corner lift only.",
+        reviewNote: "Reaction must wait until the moustache is visually established.",
+      },
+      {
+        id: "payoff",
+        n: 5,
+        title: "Final Warmth",
+        range: "16.2–29.0s",
+        priority: "polish",
+        reviewStatus: "not-started",
+        shot: "SH1C",
+        keyframe: "Shared final pose",
+        cta: "Generate Final Payoff Keyframe",
+        intent: "Fuzzby worsens the mess and Zenny loves him anyway.",
+        scriptTruth: "A second failure becomes a warm character button.",
+        visibleProof: "Fuzzby pops out more pollen-covered; Zenny eye-roll softens into love.",
+        startState: "Fuzzby still marked with pollen; Zenny clear of the route.",
+        actionPath: "Wipe-smear → overcommit → flower contacts → pop-up pose → softened eye-roll.",
+        endState: "Golden dust hangs between Fuzzby and Zenny’s smiling eye-roll.",
+        camera: "Follow causal tumble, then hold the final relationship frame.",
+        checklist: [
+          "Fuzzby is visibly more pollen-covered",
+          "Final pose keeps both characters readable",
+          "Zenny’s eye-roll softens into affection",
+          "Golden dust hangs between them",
+          "The shot ends on a usable handoff frame",
+        ],
+        failConditions: ["Random cuts", "No worsening", "No loving soften"],
+        promptSegment: "Final Warmth prompt segment: Fuzzby worsens the pollen mess, pops into final readable pose, Zenny eye-roll softens into love, held handoff frame.",
+        reviewNote: "Final warmth depends on a held two-character payoff, not more random chaos.",
+      },
+    ],
+  };
+
   function readHash() {
     const params = new URLSearchParams(location.hash.replace(/^#/, ""));
     app.view = ["pipeline", "episodes", "director", "review"].includes(params.get("view"))
-      ? params.get("view") : "pipeline";
+      ? params.get("view") : "director";
     app.scene = params.get("scene") || "1";
     app.shotId = params.get("shot") || null;
+    app.activeBeatId = params.get("beat") || app.activeBeatId || "moustache";
     const requestedStep = { keyframes: "storyboard", animate: "footage", stitch: "rough-cut", post: "rough-cut" }[params.get("step")] || params.get("step");
     app.pipelineStep = pipelineSteps.some((step) => step.id === requestedStep)
-      ? requestedStep : "upload";
+      ? requestedStep : "storyboard";
   }
 
   function writeHash() {
     const params = new URLSearchParams({ view: app.view, scene: app.scene });
     if (app.shotId) params.set("shot", app.shotId);
+    if (app.view === "director" && app.activeBeatId) params.set("beat", app.activeBeatId);
     if (app.view === "pipeline") params.set("step", app.pipelineStep);
     const next = `#${params.toString()}`;
     if (location.hash !== next) history.replaceState(null, "", next);
@@ -365,6 +529,30 @@
     }[state] || "Waiting";
   }
 
+  function rosterScenes() {
+    return app.roster?.scenes || [];
+  }
+
+  function currentRosterScene() {
+    return rosterScenes().find((scene) => String(scene.sceneNumber) === String(app.scene)) || null;
+  }
+
+  function sceneHeading(scene) {
+    if (!scene) return `Scene ${app.scene}`;
+    return `${scene.location || `Scene ${scene.sceneNumber}`}${scene.time ? ` - ${scene.time}` : ""}`;
+  }
+
+  function renderSceneTiles() {
+    const scenes = rosterScenes();
+    return scenes.map((scene) => {
+      const number = String(scene.sceneNumber);
+      const current = number === String(app.scene);
+      return `<button type="button" class="scene-tile ${current ? "current" : ""}" data-pipeline-scene="${esc(number)}">
+        <span>${esc(number)}</span><strong>${esc(sceneHeading(scene))}</strong><em>${Number(scene.beatCount || 0)} beats</em>
+      </button>`;
+    }).join("") || '<div class="reference-unavailable">No approved scenes yet.</div>';
+  }
+
   function renderShotSwitcher(session) {
     const host = $("#shot-switcher");
     host.innerHTML = (session.shots || []).map((shot) => `
@@ -379,12 +567,121 @@
     }));
   }
 
+  function renderDirectorSceneStrip(session) {
+    const host = $("#director-scene-strip");
+    if (!host) return;
+    const scenes = rosterScenes();
+    host.innerHTML = scenes.map((scene) => {
+      const number = String(scene.sceneNumber);
+      const current = number === String(session.scene || app.scene);
+      return `<button type="button" data-director-scene="${esc(number)}" class="${current ? "active" : ""}" aria-current="${current ? "true" : "false"}">
+        <span>Scene ${esc(number)}</span>
+        <strong>${esc(scene.location || `Scene ${number}`)}</strong>
+      </button>`;
+    }).join("") || '<span class="reference-unavailable">No approved scenes yet.</span>';
+    host.querySelectorAll("[data-director-scene]").forEach((button) => button.addEventListener("click", () => {
+      const scene = button.dataset.directorScene;
+      if (scene === String(app.scene)) return;
+      app.scene = scene;
+      app.shotId = null;
+      resetShotScopedState();
+      writeHash();
+      loadSession();
+    }));
+  }
+
   function resetShotScopedState() {
     app.voiceStatus = null;
     app.voiceStatusKey = null;
     app.voiceLoading = false;
+    app.agentBrief = null;
+    app.agentBriefKey = null;
+    app.agentLoading = false;
     app.references = null;
+    app.inlineReferences = null;
+    app.inlineReferencesKey = null;
+    app.inlineReferencesLoading = false;
+    app.workbenchState = null;
     app.selectedCandidate = null;
+  }
+
+  function agentKey(session) {
+    if (!session) return null;
+    return `${session.episode}:${session.scene}:${session.selectedShotId || "-"}`;
+  }
+
+  function renderStudioAgent() {
+    const host = $("#studio-agent-panel");
+    if (!host) return;
+    const session = app.session;
+    const expectedKey = agentKey(session);
+    if (!session) {
+      host.innerHTML = `<div><span class="stage-label">Studio Agent</span><strong>Loading production state...</strong><p>No scene is selected yet.</p></div>`;
+      return;
+    }
+    if (app.agentLoading && app.agentBriefKey !== expectedKey) {
+      host.innerHTML = `<div><span class="stage-label">Studio Agent</span><strong>Checking the current production state...</strong><p>Read-only guidance. No data is changed and no provider is called.</p></div>`;
+      return;
+    }
+    const brief = app.agentBrief;
+    if (!brief || app.agentBriefKey !== expectedKey) {
+      host.innerHTML = `<div><span class="stage-label">Studio Agent</span><strong>Ready to advise this step.</strong><p>Guidance will appear when the scene state finishes loading.</p></div>`;
+      return;
+    }
+    if (brief.error) {
+      host.innerHTML = `<div><span class="stage-label">Studio Agent</span><strong>Agent unavailable</strong><p>${esc(brief.error)}</p></div>`;
+      return;
+    }
+    const next = brief.nextAction || {};
+    const facts = brief.facts || {};
+    const proven = (facts.proven || []).length;
+    const built = (facts.built || []).length;
+    const currentAction = [session.primaryAction, ...(session.decisionActions || [])]
+      .filter(Boolean)
+      .map((action) => action.id === "approve-spend" ? "Render 480p" : action.id.startsWith("iterate-") ? "Refire" : action.id.startsWith("accept-") ? "Approve" : action.label)
+      .join(" / ");
+    host.innerHTML = `<div>
+      <span class="stage-label">Studio Agent · Read-only</span>
+      <strong>${esc(session.headline || brief.headline || "Current production guidance")}</strong>
+      <p>${esc(session.summary || next.label || "Review the current production state.")}</p>
+    </div>
+    <div class="agent-meta">
+      <span>${esc(phaseLabel(session.phase))}</span>
+      <span>${esc(currentAction || next.type || "guidance")}</span>
+      <span>${built} built</span>
+      <span>${proven} proven</span>
+    </div>`;
+  }
+
+  async function loadStudioAgent(force = false) {
+    const session = app.session;
+    const key = agentKey(session);
+    if (!key || (!force && (app.agentLoading || app.agentBriefKey === key))) return;
+    app.agentLoading = true;
+    app.agentBriefKey = key;
+    renderStudioAgent();
+    const shot = session.selectedShotId ? `&shotId=${encodeURIComponent(session.selectedShotId)}` : "";
+    try {
+      app.agentBrief = await api(`/api/studio-agent?mode=HELP&episode=${encodeURIComponent(session.episode)}&scene=${encodeURIComponent(session.scene)}${shot}`);
+    } catch (error) {
+      app.agentBrief = { error: error.message };
+    } finally {
+      app.agentLoading = false;
+      renderStudioAgent();
+    }
+  }
+
+  function renderAdvisories(session) {
+    const host = $("#director-advisories");
+    if (!host) return "";
+    const items = session.advisories || [];
+    host.hidden = !items.length;
+    host.innerHTML = items.map((item) => `<article class="director-advisory ${esc(item.severity || "info")}">
+      <strong>${esc(item.title || "Production note")}</strong>
+      <p>${esc(item.message || "")}</p>
+      ${item.nextAction ? `<em>${esc(item.nextAction)}</em>` : ""}
+      ${(item.signals || []).length ? `<span>${(item.signals || []).map(esc).join(" · ")}</span>` : ""}
+    </article>`).join("");
   }
 
   function renderProductionNavigator(step) {
@@ -414,12 +711,180 @@
     return `<div class="stage-empty">${loading ? '<span class="loading-mark" aria-hidden="true"></span>' : ""}<p>${esc(message)}</p></div>`;
   }
 
+  function formatRenderElapsed(started) {
+    const elapsed = Math.max(0, Math.floor(Date.now() / 1000 - Number(started || Date.now() / 1000)));
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function renderProgress(session) {
+    const job = session.runningJob || {};
+    const activityLabel = job.activityLabel || (session.phase === "animation" ? "Render in progress" : "Build in progress");
+    const provider = job.providerModelId || session.providerModel || "Production provider";
+    const duration = Number(job.durationSec || session.shot?.durationSec || 0);
+    const candidates = Number(job.candidateCount || 0);
+    const cost = Number(job.maxBatchCostUsd || 0);
+    const providerLabel = session.phase === "animation" ? provider : "Opening-frame build";
+    const trackLabel = session.phase === "animation" ? "Provider render is active" : "Studio build is active";
+    const fallbackMessage = session.phase === "animation"
+      ? "The request has been submitted and the provider is processing it."
+      : "The Studio is building this step. No animation render has been submitted.";
+    const details = [
+      session.phase === "animation" && duration ? `${duration}s clip` : "",
+      candidates ? `${candidates} candidate${candidates === 1 ? "" : "s"}` : "",
+      cost ? `up to $${cost.toFixed(2)}` : "",
+    ].filter(Boolean);
+    return `<div class="render-progress" role="status" aria-live="polite">
+      <div class="render-progress-head">
+        <span class="loading-mark" aria-hidden="true"></span>
+        <div><span class="render-kicker">${esc(activityLabel)}</span><strong>${esc(job.step || "Building the next result...")}</strong></div>
+        <time aria-label="Elapsed activity time">${formatRenderElapsed(job.started)}</time>
+      </div>
+      <div class="render-progress-track" aria-label="${esc(trackLabel)}"><span></span></div>
+      <div class="render-progress-meta"><span>${esc(providerLabel)}</span>${details.map((item) => `<span>${esc(item)}</span>`).join("")}</div>
+      <p>${esc(job.latestMessage || fallbackMessage)}</p>
+      <small>${esc(session.phase === "animation" ? "Live activity. The provider does not supply a reliable completion percentage or ETA." : "Live activity. This step will update automatically when the result is ready.")}</small>
+    </div>`;
+  }
+
+  function actionActivityCopy(action, session, preparingRetry) {
+    if (preparingRetry) {
+      return {
+        label: "Refire preparation",
+        step: "Archiving the rejected take and preparing the corrected request...",
+        message: "No provider spend is occurring yet. The corrected request will be shown for approval before rendering.",
+        provider: "Studio direction",
+        showDuration: false,
+      };
+    }
+    if (action.id === "build-keyframe") {
+      return {
+        label: "Keyframe build in progress",
+        step: "Building the opening frame in Seedream 5 Pro...",
+        message: "This is the still stage. No Seedance animation render has been submitted.",
+        provider: "Seedream 5 Pro",
+        showDuration: false,
+      };
+    }
+    if (action.id === "build-voice") {
+      return {
+        label: "Voice generation in progress",
+        step: "Creating the approved dialogue performance...",
+        message: "This is the ElevenLabs dialogue stage. No animation render has been submitted.",
+        provider: "ElevenLabs",
+        showDuration: false,
+      };
+    }
+    if (action.id === "prepare-render") {
+      return {
+        label: "Preparing animation request",
+        step: "Preparing the Seedance request for approval...",
+        message: "No provider spend is occurring yet. You will see the sealed request before render approval.",
+        provider: "Studio direction",
+        showDuration: false,
+      };
+    }
+    if (action.id === "approve-spend") {
+      return {
+        label: "Render in progress",
+        step: "Submitting the approved Seedance request...",
+        message: "The sealed request is being submitted to the provider.",
+        provider: session.providerModel,
+        showDuration: true,
+      };
+    }
+    return {
+      label: "Build in progress",
+      step: `${action.label || "Working"}...`,
+      message: "The Studio is working on the selected shot.",
+      provider: "Studio generation",
+      showDuration: false,
+    };
+  }
+
+  function renderGenerateStatus(session) {
+    const activity = app.localActivity;
+    if (!activity || activity.shotId !== session.selectedShotId) return "";
+    const held = activity.state === "held";
+    const details = [
+      activity.providerModelId,
+      activity.showDuration && activity.durationSec ? `${Number(activity.durationSec)}s clip` : "",
+      activity.showDuration && activity.resolution ? activity.resolution : "",
+      activity.candidateCount ? `${Number(activity.candidateCount)} candidate${Number(activity.candidateCount) === 1 ? "" : "s"}` : "",
+    ].filter(Boolean);
+    return `<div class="generate-status ${held ? "held" : ""}" role="status" aria-live="polite">
+      <div>
+        <span>${esc(activity.label)}</span>
+        <strong>${esc(activity.step)}</strong>
+      </div>
+      <time data-activity-elapsed="${esc(activity.id)}">${formatRenderElapsed(activity.started)}</time>
+      ${held ? `<p>${esc(activity.message || "The result was held back. Review the note, then build again.")}</p>` : ""}
+      ${details.length ? `<small>${details.map(esc).join(" · ")}</small>` : ""}
+    </div>`;
+  }
+
+  function refreshActivityElapsed() {
+    if (!app.localActivity) return;
+    $$(`[data-activity-elapsed="${CSS.escape(app.localActivity.id)}"]`)
+      .forEach((node) => { node.textContent = formatRenderElapsed(app.localActivity.started); });
+  }
+
+  function setLocalActivity(activity) {
+    app.localActivity = activity;
+    clearInterval(app.activityTimer);
+    if (activity) app.activityTimer = setInterval(refreshActivityElapsed, 1000);
+  }
+
+  function holdLocalActivity(action, session, message, label = "Action refused") {
+    setLocalActivity({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      actionId: action?.id || "director-action",
+      shotId: session?.selectedShotId || app.session?.selectedShotId,
+      started: Date.now() / 1000,
+      state: "held",
+      label,
+      step: message,
+      message,
+    });
+  }
+
+  function clearLocalActivityForSession(session) {
+    if (!app.localActivity || app.localActivity.shotId !== session.selectedShotId) return;
+    if (app.localActivity.state === "held") return;
+    if (session.status === "rendering") return;
+    if (!session.runningJob) {
+      if (
+        app.localActivity.actionId === "build-keyframe" &&
+        session.phase === "keyframe" &&
+        session.status === "ready_to_fire" &&
+        !(session.shots || []).find((shot) => shot.selected)?.keyframeUrl
+      ) {
+        setLocalActivity({
+          ...app.localActivity,
+          state: "held",
+          label: "Keyframe held back",
+          step: "Seedream returned a frame, but QC did not pass it.",
+          message: "No animation render was submitted. Press Build opening frame again, or use Refire when a review image is visible.",
+        });
+        return;
+      }
+      setLocalActivity(null);
+      return;
+    }
+    const activeIds = [session.primaryAction, ...(session.decisionActions || [])]
+      .filter(Boolean)
+      .map((action) => action.id);
+    if (activeIds.includes(app.localActivity.actionId)) return;
+    setLocalActivity(null);
+  }
+
   function renderArtifact(session) {
     const stage = $("#media-stage");
     const artifact = session.artifact || {};
     app.selectedCandidate = null;
     if (session.status === "rendering") {
-      stage.innerHTML = emptyStage(session.runningJob?.step || "Building the next result...", true);
+      stage.innerHTML = renderProgress(session);
       return;
     }
     if (artifact.type === "image" && artifact.url) {
@@ -427,7 +892,22 @@
       return;
     }
     if (artifact.type === "audio" && artifact.url) {
-      stage.innerHTML = `<span class="stage-badge">${esc(artifact.label || "Performance")}</span><audio controls preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></audio>`;
+      const selectedShot = (session.shots || []).find((shot) => shot.selected) || {};
+      const keyframeUrl = selectedShot.keyframeUrl || "";
+      stage.innerHTML = `<div class="voice-review-stage">
+        ${keyframeUrl ? `<figure>
+          <span>Approved opening keyframe</span>
+          <img src="${esc(keyframeUrl)}?v=${Date.now()}" alt="Approved opening keyframe for this shot">
+        </figure>` : `<figure class="missing">
+          <span>No keyframe visible</span>
+          <strong>The voice take exists, but no approved keyframe URL is available for this shot.</strong>
+        </figure>`}
+        <div class="voice-review-player">
+          <span>${esc(artifact.label || "Voice performance")}</span>
+          <strong>Approve or refire the dialogue performance only.</strong>
+          <audio controls preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></audio>
+        </div>
+      </div>`;
       return;
     }
     if (artifact.type === "video" && artifact.url) {
@@ -449,27 +929,814 @@
       }));
       return;
     }
+    if (session.spendDisclosure && (session.decisionActions || []).some((action) => action.id === "approve-spend")) {
+      const spend = session.spendDisclosure;
+      const renderAction = (session.decisionActions || []).find((action) => action.id === "approve-spend");
+      const cancelAction = (session.decisionActions || []).find((action) => action.id === "cancel-spend");
+      stage.innerHTML = `<div class="render-ready-panel" role="status" aria-live="polite">
+        <span class="render-kicker">Retry prepared</span>
+        <h3>Ready to render ${esc(spend.resolution || "480p")}</h3>
+        <p>The corrected request is sealed and waiting for approval. No new Seedance video exists until this render is submitted.</p>
+        <div class="render-ready-meta">
+          <span>${esc(spend.providerModelId || session.providerModel || "Seedance")}</span>
+          <span>${esc(Number(spend.shotDurationSec || session.shot?.durationSec || 0))}s</span>
+          <span>${esc(spend.candidateCount || 1)} candidate</span>
+          <span>max $${Number(spend.maxBatchCostUsd || 0).toFixed(2)}</span>
+        </div>
+        <div class="render-ready-actions">
+          ${renderAction ? `<button type="button" class="primary" data-stage-action="${esc(renderAction.id)}">Render ${esc(spend.resolution || "480p")}</button>` : ""}
+          ${cancelAction ? `<button type="button" class="secondary" data-stage-action="${esc(cancelAction.id)}">Not yet</button>` : ""}
+        </div>
+      </div>`;
+      stage.querySelectorAll("[data-stage-action]").forEach((button) => button.addEventListener("click", () => {
+        const actions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
+        const action = actions.find((item) => item.id === button.dataset.stageAction);
+        if (action) handleAction(action);
+      }));
+      return;
+    }
+    if (session.phase === "story") {
+      stage.innerHTML = emptyStage("This scene has not been directed into production shots yet.", false);
+      return;
+    }
     stage.innerHTML = emptyStage(session.status === "blocked" ? "No result can be built from the current route yet." : "No rendered result yet.", false);
+  }
+
+  function currentReferenceStage(session) {
+    return ["animation", "review", "final"].includes(session.phase) ? "animation" : "keyframe";
+  }
+
+  function requestPromptText(session) {
+    const request = session.inspector?.providerRequest;
+    if (!request) return "No provider request has been prepared for this phase yet.";
+    return request.prompt || (request.lines || []).map((line) => `${line.speaker}: ${line.performedText}`).join("\n") || "No provider text is required for this step.";
+  }
+
+  function renderShotInputs(session) {
+    const host = $("#shot-inputs");
+    if (!host) return;
+    const shot = (session.shots || []).find((item) => item.selected) || session.shot || {};
+    if (!session.selectedShotId) {
+      host.innerHTML = '<div class="shot-inputs-empty">Select or build a shot to see its scene plate, character references and prompt.</div>';
+      return;
+    }
+    const stage = currentReferenceStage(session);
+    const referencesCurrent = app.inlineReferencesKey === `${session.episode}:${session.scene}:${session.selectedShotId}`;
+    const stageData = referencesCurrent ? (app.inlineReferences?.[stage] || {}) : {};
+    const refs = referencesCurrent
+      ? (stageData.references || [])
+      : [];
+    const referenceMessage = app.inlineReferencesLoading
+      ? "Loading locked references..."
+      : stageData.error
+        ? `Reference load failed: ${stageData.error}`
+        : "";
+    const plateRefs = refs.filter((item) => /scene|plate|location|look|corridor|environment/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
+    const characterRefs = refs.filter((item) => item.identity?.intactTurnaround || /character|turnaround|zenny|fuzzby|aida|keen|lunar|squeaky/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
+    const otherRefs = refs.filter((item) => !plateRefs.includes(item) && !characterRefs.includes(item));
+    const renderRef = (item) => `<article class="shot-input-ref">
+      ${item.url ? `<img src="${esc(item.url)}" alt="${esc(item.role || item.label || "Shot reference")}">` : '<div class="shot-input-ref-missing">Missing</div>'}
+      <strong>${esc(item.role || item.label || item.slot || "Reference")}</strong>
+      <span>${esc(item.identity?.intactTurnaround ? "Complete uncropped turnaround · identity authority" : item.message || item.status || "Locked reference")}</span>
+    </article>`;
+    const prompt = requestPromptText(session);
+    const phaseName = session.phase === "voice"
+      ? "Voice performance"
+      : stage === "animation" ? "Animation" : "Keyframe";
+    const phaseCopy = session.phase === "voice"
+      ? "Review the approved keyframe context, the current ElevenLabs acting prompt and the generated take. No animation render is submitted at this stage."
+      : stage === "animation"
+        ? "Approve the keyframe first. Animation uses that approved frame, the same locked references and this exact Seedance request."
+        : "Create the still frame first. This image becomes the visual truth for the shot before animation is allowed.";
+    const phaseAction = session.status === "rendering"
+      ? "Working"
+      : session.primaryAction
+        ? directorActionLabel(session.primaryAction)
+        : directorActionLabel((session.decisionActions || [])[0]) || "Review";
+    host.innerHTML = `<div class="shot-inputs-head">
+      <div>
+        <span class="stage-label">${esc(phaseName)} inputs</span>
+        <h2>${esc(shot.shotId || session.selectedShotId)} · ${esc(shot.title || session.sceneName || "Current shot")}</h2>
+        <p>${esc(phaseCopy)}</p>
+      </div>
+      <div class="shot-inputs-phase">
+        <span>${esc(phaseLabel(session.phase))}</span>
+        <strong>${esc(phaseAction)}</strong>
+      </div>
+    </div>
+    <div class="shot-input-grid">
+      <section>
+        <div class="shot-input-section-head"><span>Scene Plate</span><strong>${referenceMessage ? "..." : plateRefs.length || 0}</strong></div>
+        <div class="shot-input-ref-grid">${plateRefs.map(renderRef).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || "No scene plate reference loaded yet.")}</div>`}</div>
+      </section>
+      <section>
+        <div class="shot-input-section-head"><span>Character Turnarounds</span><strong>${referenceMessage ? "..." : characterRefs.length || 0}</strong></div>
+        <div class="shot-input-ref-grid">${characterRefs.map(renderRef).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || "No character turnaround loaded yet.")}</div>`}</div>
+      </section>
+    </div>
+    ${otherRefs.length ? `<section><div class="shot-input-section-head"><span>Other Locked References</span><strong>${otherRefs.length}</strong></div><div class="shot-input-ref-grid compact">${otherRefs.map(renderRef).join("")}</div></section>` : ""}
+    <section class="shot-prompt-panel">
+      <div class="shot-input-section-head"><span>Exact Prompt</span><strong>${session.inspector?.providerRequest ? "Prepared" : "Pending"}</strong></div>
+      <pre>${esc(prompt)}</pre>
+    </section>
+    <section class="shot-handoff-rule">
+      <strong>Continuity rule</strong>
+      <p>If animation is approved, the final accepted frame becomes the handoff truth for the next shot in this scene. The next shot still uses its own scene plate, character turnarounds and prompt.</p>
+    </section>`;
+  }
+
+  async function loadInlineShotContext(session) {
+    const key = `${session.episode}:${session.scene}:${session.selectedShotId || ""}`;
+    if (!session.selectedShotId || app.inlineReferencesKey === key || app.inlineReferencesLoading) {
+      renderShotInputs(session);
+      return;
+    }
+    app.inlineReferencesLoading = true;
+    app.inlineReferencesKey = key;
+    app.inlineReferences = null;
+    renderShotInputs(session);
+    try {
+      app.inlineReferences = await api(`/api/shot-references?episode=${encodeURIComponent(session.episode)}&scene=${encodeURIComponent(session.scene)}&shotId=${encodeURIComponent(session.selectedShotId)}`);
+    } catch (error) {
+      app.inlineReferences = { keyframe: { references: [], error: error.message }, animation: { references: [], error: error.message } };
+    } finally {
+      app.inlineReferencesLoading = false;
+      if (app.session?.selectedShotId === session.selectedShotId) {
+        renderShotInputs(app.session);
+        renderSceneWorkbench(app.session);
+      }
+    }
+  }
+
+  function statusLabel(value) {
+    return {
+      delivered: "Delivered",
+      approved: "Approved",
+      review: "Review",
+      working: "Working",
+      weak: "Weak",
+      missing: "Missing",
+      contradicted: "Contradicted",
+      "not-started": "Not started",
+    }[value] || value || "Pending";
+  }
+
+  function workbenchStatusLabel(session, beat) {
+    if (session.status === "rendering") return "WORKING";
+    if (session.phase === "voice") {
+      return session.status === "ready_to_review" ? "VOICE REVIEW" : "VOICE REQUIRED";
+    }
+    if (session.phase === "animation") {
+      return session.status === "ready_to_review" ? "ANIMATION REVIEW" :
+        session.status === "ready_to_fire" ? "ANIMATION READY" : "ANIMATION";
+    }
+    if (session.phase === "review") return "SHOT REVIEW";
+    if (session.phase === "final") return session.status === "complete" ? "COMPLETE" : "MASTER REVIEW";
+    return beat.priority === "blocking" && beat.reviewStatus === "weak"
+      ? "KEYFRAME REQUIRED"
+      : statusLabel(beat.reviewStatus).toUpperCase();
+  }
+
+  function workbenchPanelStatusLabel(session, beat) {
+    if (session.phase === "voice") return "Voice review";
+    if (session.phase === "animation") return session.status === "ready_to_review" ? "Animation review" : "Generate";
+    if (session.phase === "review") return "Shot review";
+    if (session.phase === "final") return "Master";
+    return statusLabel(beat.reviewStatus);
+  }
+
+  function currentBeat() {
+    return workbenchBeats().find((beat) => beat.id === app.activeBeatId) || workbenchBeats()[2];
+  }
+
+  function persistedBeat(beat) {
+    const saved = app.workbenchState?.beatState?.[beat.id];
+    return saved && typeof saved === "object" ? { ...beat, ...saved } : beat;
+  }
+
+  function workbenchBeats() {
+    return sceneOneContract.beats.map(persistedBeat);
+  }
+
+  function shotKeyForBeat(beat) {
+    const shot = String(beat?.shot || "");
+    return shot.startsWith("S1.") ? shot : `S1.${shot}`;
+  }
+
+  function displayBeatState(beat, session) {
+    const selectedShot = session?.selectedShotId || "";
+    if (shotKeyForBeat(beat) !== selectedShot) return beat;
+    if (session.status === "rendering") {
+      return { ...beat, reviewStatus: "working" };
+    }
+    if (session.phase === "keyframe" && session.status === "ready_to_review") {
+      return { ...beat, reviewStatus: "review" };
+    }
+    if (session.phase === "keyframe" && session.status === "ready_to_fire") {
+      return { ...beat, reviewStatus: "missing" };
+    }
+    if (["voice", "animation", "review", "final"].includes(session.phase)) {
+      return { ...beat, reviewStatus: "approved" };
+    }
+    return beat;
+  }
+
+  async function loadProjectWorkbenchState() {
+    try {
+      app.workbenchState = await api(`/api/project-workbench-state?project=crystal-bears&episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`);
+      if (app.workbenchState?.activeBeatId) app.activeBeatId = app.workbenchState.activeBeatId;
+    } catch (_) {
+      app.workbenchState = null;
+    }
+  }
+
+  function saveProjectWorkbenchState(partial) {
+    clearTimeout(app.workbenchSaveTimer);
+    app.workbenchSaveTimer = setTimeout(async () => {
+      try {
+        app.workbenchState = await api("/api/project-workbench-state", {
+          method: "POST",
+          body: JSON.stringify({
+            project: "crystal-bears",
+            episode: app.episode,
+            scene: app.scene,
+            activeBeatId: app.activeBeatId,
+            ...(partial || {}),
+          }),
+        }).then((payload) => payload.state);
+        $("#save-state").textContent = "Saved";
+      } catch (error) {
+        $("#save-state").textContent = "Save failed";
+        toast(error.message, true);
+      }
+    }, 150);
+  }
+
+  function workbenchPrimaryAction(session, beat) {
+    const actions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
+    const accept = actions.find((action) => action.id.startsWith("accept-"));
+    const iterate = actions.find((action) => action.id.startsWith("iterate-"));
+    const spend = actions.find((action) => action.id === "approve-spend");
+    const hasVisibleKeyframe = session.phase !== "keyframe" ||
+      (session.artifact?.type === "image" && Boolean(session.artifact?.url));
+    if (beat.reviewStatus === "weak" && iterate) return { action: iterate, label: beat.cta || "Refine Keyframe" };
+    if (spend) return { action: spend, label: "Generate Draft Variants" };
+    if (accept && hasVisibleKeyframe) return { action: accept, label: directorActionLabel(accept) };
+    if (session.primaryAction) {
+      return {
+        action: session.primaryAction,
+        label: session.phase === "keyframe" ? (beat.cta || session.primaryAction.label) : session.primaryAction.label,
+      };
+    }
+    return null;
+  }
+
+  function renderWorkbenchRefs(session) {
+    const stageData = app.inlineReferences?.[currentReferenceStage(session)] || {};
+    const refs = stageData.references || [];
+    if (!refs.length) {
+      const message = app.inlineReferencesLoading
+        ? "References loading"
+        : stageData.error
+          ? "References failed"
+          : "References unavailable";
+      return `<div class="workbench-ref-chip locked ${stageData.error ? "error" : ""}" title="${esc(stageData.error || message)}"><span>REF</span><strong>${esc(message)}</strong><em>LOCKED</em></div>`;
+    }
+    return refs.slice(0, 6).map((item) => `<div class="workbench-ref-chip locked" title="${esc(item.message || item.status || "Locked reference")}">
+      ${item.url ? `<img src="${esc(item.url)}" alt="${esc(item.role || item.label || "Reference")}">` : "<span>REF</span>"}
+      <strong>${esc(item.role || item.label || item.slot || "Reference")}</strong>
+      <em>${esc(item.identity?.intactTurnaround ? "TURNAROUND" : "APPROVED")}</em>
+    </div>`).join("");
+  }
+
+  function hasVisibleKeyframeArtifact(session) {
+    return session?.phase === "keyframe" &&
+      session?.artifact?.type === "image" &&
+      Boolean(session.artifact.url);
+  }
+
+  function keyframeSourceLocked(session) {
+    return hasVisibleKeyframeArtifact(session) || session?.status === "rendering";
+  }
+
+  async function loadKeyframeLibrary(session) {
+    if (!session?.selectedShotId || session.phase !== "keyframe") return;
+    const key = `${session.episode}:${session.scene}:${session.selectedShotId}`;
+    if (app.keyframeLibraryKey === key || app.keyframeLibraryLoading) return;
+    app.keyframeLibraryLoading = true;
+    app.keyframeLibraryKey = key;
+    try {
+      app.keyframeLibrary = await api(`/api/shot-keyframe-library?episode=${encodeURIComponent(session.episode)}&scene=${encodeURIComponent(session.scene)}&shotId=${encodeURIComponent(session.selectedShotId)}`);
+    } catch (error) {
+      app.keyframeLibrary = { error: error.message, items: [] };
+    } finally {
+      app.keyframeLibraryLoading = false;
+      if (app.session?.selectedShotId === session.selectedShotId && app.session?.phase === "keyframe") {
+        renderSceneWorkbench(app.session);
+      }
+    }
+  }
+
+  function assetPathToUrl(path) {
+    if (!path) return "";
+    const clean = String(path).replace(/^\/+/, "");
+    if (clean.startsWith("cb-seed/assets/")) return `/${clean}`;
+    if (clean.startsWith("engine/media/")) return `/${clean}`;
+    if (clean.startsWith("projects/")) return `/${clean}`;
+    return "";
+  }
+
+  function assetPathToAbsolute(path) {
+    const clean = String(path || "").replace(/^\/+/, "");
+    return `/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/${clean}`;
+  }
+
+  async function loadSceneAssetLibrary() {
+    if (app.sceneAssetLibrary || app.sceneAssetLibraryLoading) return;
+    app.sceneAssetLibraryLoading = true;
+    try {
+      const [loclib, houses] = await Promise.all([
+        api("/api/loclib"),
+        api("/api/houses"),
+      ]);
+      const items = [];
+      const manifest = loclib.manifest || {};
+      Object.keys(manifest).forEach((key) => {
+        const item = manifest[key] || {};
+        const rel = item.file ? `cb-seed/assets/locations/${item.file}` : "";
+        if (assetPathToUrl(rel)) {
+          items.push({
+            type: "Location",
+            title: item.name || item.locationId || key,
+            subtitle: item.source || item.location || "Reusable scene plate",
+            path: assetPathToAbsolute(rel),
+            url: assetPathToUrl(rel),
+          });
+        }
+      });
+      (loclib.uploadedRefs || []).forEach((item) => {
+        const rel = item.file || "";
+        if (assetPathToUrl(rel)) {
+          items.push({
+            type: "Scene",
+            title: item.name || rel.split("/").pop(),
+            subtitle: "Uploaded scene reference",
+            path: assetPathToAbsolute(rel),
+            url: assetPathToUrl(rel),
+          });
+        }
+      });
+      (loclib.scenes || []).forEach((item) => {
+        if (item.master) {
+          const rel = String(item.master).replace(/^\/+/, "");
+          if (assetPathToUrl(rel)) {
+            items.push({
+              type: "Scene master",
+              title: item.name || item.location || `Scene ${item.scene}`,
+              subtitle: `Scene ${item.scene} · ${item.time || "scene plate"}`,
+              path: assetPathToAbsolute(rel),
+              url: assetPathToUrl(rel),
+            });
+          }
+        }
+      });
+      (houses.houses || []).forEach((house) => {
+        [
+          ["House interior", house.interior],
+          ["House interior multicam", house.interiorMulticam],
+          ["House exterior", house.exterior],
+          ["House exterior multicam", house.exteriorMulticam],
+        ].forEach(([type, rel]) => {
+          if (assetPathToUrl(rel)) {
+            items.push({
+              type,
+              title: `${house.character} ${type.replace("House ", "")}`,
+              subtitle: type.includes("interior") ? house.interiorDesc : house.exteriorDesc,
+              path: assetPathToAbsolute(rel),
+              url: assetPathToUrl(rel),
+            });
+          }
+        });
+      });
+      const seen = new Set();
+      app.sceneAssetLibrary = items.filter((item) => {
+        if (!item.path || seen.has(item.path)) return false;
+        seen.add(item.path);
+        return true;
+      });
+    } catch (error) {
+      app.sceneAssetLibrary = { error: error.message, items: [] };
+    } finally {
+      app.sceneAssetLibraryLoading = false;
+      if (app.session?.phase === "keyframe") renderSceneWorkbench(app.session);
+    }
+  }
+
+  function renderKeyframeSourcePanel(session) {
+    if (session.phase !== "keyframe") return "";
+    const locked = keyframeSourceLocked(session);
+    const items = app.keyframeLibrary?.items || [];
+    const libraryReady = app.keyframeLibraryKey === `${session.episode}:${session.scene}:${session.selectedShotId}`;
+    const sourceMessage = locked
+      ? "A keyframe candidate is already waiting. Review it, approve it, or refire it before replacing the source."
+      : "Pick a previous keyframe from this shot's library, upload your own frame, or generate a new one.";
+    const assetItems = Array.isArray(app.sceneAssetLibrary) ? app.sceneAssetLibrary : [];
+    const assetError = app.sceneAssetLibrary && !Array.isArray(app.sceneAssetLibrary) ? app.sceneAssetLibrary.error : "";
+    const sceneLook = session.sceneLook || {};
+    const scenePlateUrl = sceneLook.plateUrl || sceneLook.approved?.url || sceneLook.candidate?.url || "";
+    const scenePlateLabel = sceneLook.activeSource === "working"
+      ? "Pending scene plate"
+      : sceneLook.approved?.source
+        ? `Approved scene plate · ${sceneLook.approved.source}`
+        : "Current scene plate";
+    return `<section class="keyframe-source-panel">
+      <div class="source-panel-head">
+        <div><span>Scene plate</span><strong>Choose the world plate before keyframe work</strong></div>
+        <em>${esc(assetItems.length ? `${assetItems.length} assets` : "Ready")}</em>
+      </div>
+      <p>Use a reusable location, house or scene asset as the scene plate source, fire a fresh plate, or upload your own. This is separate from approving the current keyframe.</p>
+      ${scenePlateUrl ? `<div class="scene-plate-current">
+        <img src="${esc(scenePlateUrl)}?v=${Date.now()}" alt="Current scene plate">
+        <div><span>${esc(scenePlateLabel)}</span><strong>${esc(sceneLook.plateHash ? sceneLook.plateHash.slice(0, 12) : "scene plate")}</strong></div>
+      </div>` : `<div class="source-empty">No current scene plate preview available.</div>`}
+      <div class="source-actions">
+        <button type="button" class="secondary" data-toggle-scene-plate-library="">${esc(app.scenePlateLibraryOpen ? "Hide Library" : "From Library")}</button>
+        <button type="button" class="secondary" data-fire-scene-plate="">Fire Scene Plate</button>
+        <label class="secondary">
+          Upload Scene Plate
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-scene-plate-upload>
+        </label>
+      </div>
+      ${app.scenePlateLibraryOpen ? `<div class="source-library-row asset-library-row">
+        ${app.sceneAssetLibraryLoading || !app.sceneAssetLibrary
+          ? `<div class="source-empty">Loading scene and house library...</div>`
+          : assetError
+            ? `<div class="source-empty error">${esc(assetError)}</div>`
+            : assetItems.length
+              ? assetItems.slice(0, 24).map((item) => `<article class="source-library-card scene-asset">
+                <img src="${esc(item.url)}" alt="${esc(item.title)}">
+                <div><strong>${esc(item.title)}</strong><em>${esc(item.type)} · ${esc(item.subtitle || "")}</em></div>
+                <button type="button" data-select-scene-plate-asset="${esc(item.path)}">Use as Plate</button>
+              </article>`).join("")
+              : `<div class="source-empty">No scene or house library assets found.</div>`}
+      </div>` : ""}
+      <div class="source-panel-head">
+        <div><span>Keyframe source</span><strong>Generate, previous keyframe, or upload</strong></div>
+        <em>${esc(locked ? "Review candidate first" : "Ready")}</em>
+      </div>
+      <p>${esc(sourceMessage)}</p>
+      <div class="source-actions">
+        <label class="secondary ${locked ? "disabled" : ""}">
+          Upload Keyframe
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-keyframe-upload ${locked ? "disabled" : ""}>
+        </label>
+        <button type="button" class="secondary" data-refresh-keyframe-library>Refresh Library</button>
+      </div>
+      <div class="source-library-row">
+        ${!libraryReady || app.keyframeLibraryLoading
+          ? `<div class="source-empty">Loading keyframe library...</div>`
+          : app.keyframeLibrary?.error
+            ? `<div class="source-empty error">${esc(app.keyframeLibrary.error)}</div>`
+            : items.length
+              ? items.slice(0, 6).map((item, index) => `<article class="source-library-card">
+                ${item.url ? `<img src="${esc(item.url)}?v=${Date.now()}" alt="Keyframe library item">` : `<span>No preview</span>`}
+                <div><strong>${esc(item.outcome || "Library item")}</strong><em>${esc(item.at || item.note || `Option ${index + 1}`)}</em></div>
+                <button type="button" data-select-keyframe-library="${esc(item.path)}" ${locked ? "disabled" : ""}>Use</button>
+              </article>`).join("")
+              : `<div class="source-empty">No prior keyframes for this shot yet.</div>`}
+      </div>
+    </section>`;
+  }
+
+  function renderDirectorChecks(beat) {
+    const checks = (beat.checklist || []).map((title, index) => [
+      title,
+      index === 0 ? beat.visibleProof : beat.camera || beat.actionPath,
+      !(beat.reviewStatus === "weak" && index === Math.min(2, (beat.checklist || []).length - 1)),
+    ]);
+    return checks.map(([title, copy, pass]) => `<li class="${pass ? "pass" : "warn"}">
+      <span>${pass ? "✓" : "!"}</span>
+      <div><strong>${esc(title)}</strong><p>${esc(copy)}</p></div>
+    </li>`).join("");
+  }
+
+  function renderStageComms(session) {
+    const comms = session.stageComms;
+    if (!comms) return "";
+    const visible = comms.artifactVisible ? "Result visible" : "No visible result";
+    return `<section class="stage-comms ${esc(comms.severity || "info")}" role="status" aria-live="polite">
+      <div><span>${esc(visible)}</span><strong>${esc(comms.title || "Stage update")}</strong></div>
+      <p>${esc(comms.message || "")}</p>
+      ${comms.nextAction ? `<em>${esc(comms.nextAction)}</em>` : ""}
+    </section>`;
+  }
+
+  function artifactPreview(session, beat) {
+    if (session.status === "rendering") return renderProgress(session);
+    const artifact = session.artifact || {};
+    if (artifact.type === "image" && artifact.url) {
+      return `<div class="workbench-artifact-frame">
+        <span>${esc(artifact.label || beat.keyframe || "Current keyframe")}</span>
+        <img src="${esc(artifact.url)}?v=${Date.now()}" alt="${esc(artifact.label || "Current keyframe candidate")}">
+      </div>`;
+    }
+    if (artifact.type === "audio" && artifact.url) {
+      const selectedShot = (session.shots || []).find((shot) => shot.selected) || {};
+      const keyframeUrl = selectedShot.keyframeUrl || "";
+      return `<div class="workbench-artifact-frame voice">
+        ${keyframeUrl ? `<figure>
+          <span>Approved opening keyframe</span>
+          <img src="${esc(keyframeUrl)}?v=${Date.now()}" alt="Approved opening keyframe for this shot">
+        </figure>` : `<figure class="missing">
+          <span>No keyframe visible</span>
+          <strong>The voice take exists, but no approved keyframe URL is available for this shot.</strong>
+        </figure>`}
+        <div class="workbench-voice-player">
+          <span>${esc(artifact.label || "Voice performance")}</span>
+          <strong>Voice review active. Approve or refire the dialogue performance only.</strong>
+          <audio controls preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></audio>
+        </div>
+      </div>`;
+    }
+    if (artifact.type === "video" && artifact.url) {
+      return `<div class="workbench-artifact-frame">
+        <span>${esc(artifact.label || "Current animation")}</span>
+        <video controls playsinline preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></video>
+      </div>`;
+    }
+    if (artifact.type === "video-set" && (artifact.items || []).length) {
+      const item = artifact.items[0];
+      return `<div class="workbench-artifact-frame">
+        <span>${esc(artifact.label || "Animation candidate")}</span>
+        <video controls playsinline preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></video>
+      </div>`;
+    }
+    return `<div class="workbench-beat-frame ${esc(beat.id)}">
+      <span>${esc(beat.shot)} • ${esc(beat.range)} • ${esc(beat.priority)} beat</span>
+      <strong>${esc(beat.keyframe)}</strong>
+      <p>${esc(beat.startState)}</p>
+      <em>${esc(beat.actionPath)}</em>
+    </div>`;
+  }
+
+  function workbenchGateState(session) {
+    const activeGate = ["voice", "animation"].includes(session.phase)
+      ? "Generate"
+      : session.phase === "review" || session.phase === "final"
+        ? "Review"
+        : session.phase === "story"
+          ? "Direction"
+          : "Keyframes";
+    const completed = activeGate === "Generate" ? 3 : activeGate === "Review" ? 4 : activeGate === "Direction" ? 1 : 2;
+    const next = activeGate === "Keyframes"
+      ? "Approve the active beat keyframe before Generate unlocks."
+      : activeGate === "Generate"
+        ? session.phase === "voice"
+          ? "Create or approve the voice performance, then generate footage."
+          : "Generate and review the draft animation."
+        : activeGate === "Review"
+          ? "Approve delivered beats or create targeted fixes."
+          : "Complete direction before keyframes.";
+    return { activeGate, completed, total: sceneOneContract.gates.length, next };
+  }
+
+  function renderSceneWorkbench(session) {
+    const host = $("#scene-workbench");
+    if (!host) return;
+    const beat = displayBeatState(currentBeat(), session);
+    const beats = workbenchBeats().map((item) => displayBeatState(item, session));
+    const primary = workbenchPrimaryAction(session, beat);
+    const gateState = workbenchGateState(session);
+    const gates = sceneOneContract.gates.map((gate, index) => {
+      const active = (session.phase === "keyframe" && gate === "Keyframes") || (["voice", "animation"].includes(session.phase) && gate === "Generate") || (session.phase === "review" && gate === "Review");
+      const complete = index < 2 || (gate === "Keyframes" && ["voice", "animation", "review", "final"].includes(session.phase));
+      return `<button type="button" class="${active ? "active" : complete ? "complete" : ""}" data-workbench-gate="${esc(gate.toLowerCase())}">
+        <span>${complete ? "✓" : index + 1}</span>${esc(gate)}
+      </button>`;
+    }).join("");
+    host.innerHTML = `<div class="workbench-top">
+      <div>
+        <span class="stage-label">Crystal Bears / Episode 1 / Scene 1</span>
+        <h2>${esc(sceneOneContract.title)}</h2>
+        <p>${esc(sceneOneContract.promise)}</p>
+      </div>
+      <span class="workbench-status ${esc(session.phase || beat.reviewStatus)}">${esc(workbenchStatusLabel(session, beat))}</span>
+    </div>
+    <nav class="workbench-gates" aria-label="Scene workflow">${gates}<div class="workbench-gate-summary"><strong>${gateState.completed} / ${gateState.total}</strong><span>${esc(gateState.activeGate)} active</span><em>${esc(gateState.next)}</em></div></nav>
+    <div class="workbench-grid">
+      <aside class="beat-panel">
+        <div class="panel-title"><strong>Story / Beats</strong><span>${beats.length}</span></div>
+        ${beats.map((item) => `<button type="button" class="beat-card ${item.id === beat.id ? "selected" : ""} ${item.reviewStatus}" data-beat="${esc(item.id)}">
+          <span class="beat-number">${item.n}</span>
+          <div><strong>${esc(item.title)}</strong><p>${esc(item.intent)}</p>${item.id === beat.id ? `<dl><dt>Active beat</dt><dd>${esc(item.range)} · ${esc(statusLabel(item.reviewStatus))}</dd><dt>Visible proof</dt><dd>${esc(item.visibleProof)}</dd><dt>Fail conditions</dt><dd>${esc((item.failConditions || []).join("; "))}</dd></dl>` : ""}</div>
+          <em>${esc(item.id === beat.id ? `Active · ${item.priority}` : item.priority)}</em>
+        </button>`).join("")}
+      </aside>
+      <section class="keyframe-studio">
+        <div class="panel-title workbench-panel-title"><div><strong>${esc(["voice", "animation"].includes(session.phase) ? "Generate Studio" : `Keyframe Studio — ${beat.title}`)}</strong><p>Shot: ${esc(beat.shot)} • ${esc(beat.range)} • ${esc(beat.priority)} beat</p></div><span>${esc(beat.keyframe)}</span></div>
+        <div class="workbench-canvas">
+          ${artifactPreview(session, beat)}
+          <div class="canvas-overlay"><span>16:9</span><i></i><b></b></div>
+        </div>
+        ${beat.secondaryKeyframe ? `<div class="keyframe-substates"><button type="button" class="active">${esc(beat.keyframe)}</button><button type="button">${esc(beat.secondaryKeyframe)}</button></div>` : ""}
+        <div class="workbench-ref-row">${renderWorkbenchRefs(session)}</div>
+        ${renderKeyframeSourcePanel(session)}
+        <details class="builder-details">
+          <summary>Builder Mode · prompt segment and reference roles</summary>
+          <pre>${esc(beat.promptSegment || requestPromptText(session))}</pre>
+        </details>
+      </section>
+      <aside class="director-check-panel">
+        <div class="panel-title"><strong>${esc(session.phase === "voice" ? "Voice Check" : "Director Check")}</strong><span>${esc(workbenchPanelStatusLabel(session, beat))}</span></div>
+        <ul class="director-check-list">${renderDirectorChecks(beat)}</ul>
+        ${renderStageComms(session)}
+        <div class="visual-proof-card"><span>Visual Proof</span><p>${esc(beat.visibleProof)}</p></div>
+        ${beat.recommendedFix ? `<div class="visual-proof-card warning"><span>Recommended Fix</span><p>${esc(beat.recommendedFix)}</p></div>` : ""}
+        <div class="workbench-actions">
+          ${primary ? `<button type="button" class="primary" data-workbench-action="${esc(primary.action.id)}">${esc(primary.label)}</button>` : ""}
+          ${session.decisionActions?.some((action) => action.id.startsWith("iterate-")) ? `<button type="button" class="secondary danger" data-workbench-action="${esc(session.decisionActions.find((action) => action.id.startsWith("iterate-")).id)}">Refire</button>` : ""}
+        </div>
+      </aside>
+    </div>
+    <section class="generation-review-strip">
+      <div><strong>Generation + Review</strong><span>${esc(beat.range)} · ${esc(beat.title)} · ${esc(workbenchPanelStatusLabel(session, beat))}</span></div>
+      <div class="review-timeline">${beats.map((item) => `<button type="button" class="${item.id === beat.id ? "active" : ""} ${item.reviewStatus}" data-beat="${esc(item.id)}"><span>${esc(item.title)}</span></button>`).join("")}</div>
+      <p>${esc(beat.reviewNote || beat.visibleProof)}</p>
+    </section>`;
+    host.querySelectorAll("[data-beat]").forEach((button) => button.addEventListener("click", () => {
+      app.activeBeatId = button.dataset.beat;
+      writeHash();
+      saveProjectWorkbenchState();
+      renderSceneWorkbench(app.session || session);
+    }));
+    host.querySelectorAll("[data-workbench-action]").forEach((button) => button.addEventListener("click", () => {
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === button.dataset.workbenchAction);
+      if (action) handleAction(action);
+    }));
+    host.querySelectorAll("[data-workbench-gate]").forEach((button) => button.addEventListener("click", () => {
+      const gate = button.dataset.workbenchGate;
+      const stepByGate = {
+        script: "upload",
+        direction: "storyboard",
+        keyframes: "storyboard",
+        generate: session.phase === "voice" ? "audio" : "footage",
+        review: "rough-cut",
+      };
+      app.pipelineStep = stepByGate[gate] || livePipelineStep(session);
+      setView("pipeline");
+      renderPipeline();
+    }));
+    host.querySelectorAll("[data-refresh-keyframe-library]").forEach((button) => button.addEventListener("click", () => {
+      app.keyframeLibraryKey = null;
+      loadKeyframeLibrary(app.session || session);
+    }));
+    host.querySelectorAll("[data-select-keyframe-library]").forEach((button) => button.addEventListener("click", () => {
+      selectKeyframeFromLibrary(button.dataset.selectKeyframeLibrary);
+    }));
+    host.querySelectorAll("[data-toggle-scene-plate-library]").forEach((button) => button.addEventListener("click", () => {
+      app.scenePlateLibraryOpen = !app.scenePlateLibraryOpen;
+      renderSceneWorkbench(app.session || session);
+    }));
+    host.querySelectorAll("[data-fire-scene-plate]").forEach((button) => button.addEventListener("click", () => {
+      runScenePlateAction("build-scene-plate");
+    }));
+    host.querySelectorAll("[data-select-scene-plate-asset]").forEach((button) => button.addEventListener("click", () => {
+      runScenePlateAction("select-scene-plate-library", button.dataset.selectScenePlateAsset);
+    }));
+    host.querySelectorAll("[data-keyframe-upload]").forEach((input) => input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (file) uploadKeyframeSource(file);
+      input.value = "";
+    }));
+    host.querySelectorAll("[data-scene-plate-upload]").forEach((input) => input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (file) uploadScenePlateSource(file);
+      input.value = "";
+    }));
+    loadKeyframeLibrary(session);
+    loadSceneAssetLibrary();
+  }
+
+  function directorActionLabel(action) {
+    if (!action) return "";
+    return action.id === "approve-spend"
+      ? "Render 480p"
+      : action.id === "accept-keyframe" ? "Approve Keyframe"
+      : action.id === "accept-voice" ? "Approve Voice"
+      : action.id === "accept-animation" ? "Approve Animation"
+      : action.id === "iterate-keyframe" ? "Refire Keyframe"
+      : action.id === "iterate-voice" ? "Refire Voice"
+      : action.id === "iterate-animation" ? "Refire Animation"
+      : action.id.startsWith("accept-") ? "Approve" : action.id.startsWith("iterate-") ? "Refire" : action.label;
   }
 
   function actionButton(action, kind) {
     const className = kind === "primary" ? "primary" : `secondary${action.destructive ? " danger" : ""}`;
-    const label = action.id.startsWith("accept-") ? "Approve" : action.id.startsWith("iterate-") ? "Refire" : action.label;
-    return `<button type="button" class="${className}" data-action="${esc(action.id)}">${esc(label)}</button>`;
+    const label = directorActionLabel(action);
+    const active = app.localActivity &&
+      app.localActivity.state !== "held" &&
+      app.localActivity.shotId === app.session?.selectedShotId;
+    return `<button type="button" class="${className}" data-action="${esc(action.id)}" ${active ? "disabled" : ""}>${esc(active ? "Working..." : label)}</button>`;
+  }
+
+  function actionGuidance(session) {
+    const action = session.primaryAction || (session.decisionActions || [])[0] || {};
+    const byAction = {
+      "build-keyframe": {
+        now: "Opening frame",
+        outcome: "Creates one keyframe candidate for this shot.",
+        next: "Review the image, then Approve or Refire.",
+        guard: "No animation render is submitted at this stage.",
+      },
+      "direct-scene": {
+        now: "Scene direction",
+        outcome: "Creates the production shots for this scene from the locked script.",
+        next: "Then pick the first shot, build its keyframe, approve or iterate, and continue.",
+        guard: "You can do this out of order; continuity warnings stay visible when a prior scene is unfinished.",
+      },
+      "accept-keyframe": {
+        now: "Keyframe review",
+        outcome: "Locks this image as the stage truth.",
+        next: "Create the dialogue performance, then prepare animation.",
+        guard: "Approve only if the character scale, staging and open action space are right.",
+      },
+      "iterate-keyframe": {
+        now: "Keyframe review",
+        outcome: "Rejects this candidate and asks for a corrected opening frame.",
+        next: "A new keyframe candidate will come back for review.",
+        guard: "Use this when identity, scale, staging or action room is wrong.",
+      },
+      "build-voice": {
+        now: "Voice",
+        outcome: "Creates the approved ElevenLabs dialogue performance.",
+        next: "Review the audio, then Approve or Refire.",
+        guard: "This is dialogue only; music belongs after footage is stitched.",
+      },
+      "accept-voice": {
+        now: "Voice review",
+        outcome: "Locks the dialogue performance for animation.",
+        next: "Prepare the Seedance animation request.",
+        guard: "Approve only if timing, speaker ownership and acting cadence are right.",
+      },
+      "iterate-voice": {
+        now: "Voice review",
+        outcome: "Rejects this take and asks for a corrected performance.",
+        next: "A new dialogue take will come back for review.",
+        guard: "Use this for timing, cadence, wrong speaker or audio glitches.",
+      },
+      "prepare-render": {
+        now: "Animation setup",
+        outcome: "Builds the exact Seedance request for this shot.",
+        next: "Review cost, references and prompt before pressing Render.",
+        guard: "No video spend happens until render approval.",
+      },
+      "approve-spend": {
+        now: "Animation render",
+        outcome: "Submits the approved Seedance request at 480p.",
+        next: "Watch the result, then Approve or Refire.",
+        guard: "This is the paid render step.",
+      },
+      "accept-animation": {
+        now: "Animation review",
+        outcome: "Accepts this clip into the episode sequence.",
+        next: "Move to the next shot or rough cut when all shots are accepted.",
+        guard: "Approve only if the beat lands on screen.",
+      },
+      "iterate-animation": {
+        now: "Animation review",
+        outcome: "Rejects this clip and prepares a corrected render request.",
+        next: "Review the corrected prompt/cost before rendering again.",
+        guard: "Use this when the shot misses the beat, staging, continuity or performance.",
+      },
+    };
+    const guide = byAction[action.id] || {
+      now: phaseLabel(session.phase),
+      outcome: session.headline || "Continue the current production step.",
+      next: "The next available outcome will appear here.",
+      guard: "The Studio will keep the current shot state visible.",
+    };
+    return `<div class="action-guidance" aria-label="Current workflow guidance">
+      <span>${esc(guide.now)}</span>
+      <strong>${esc(guide.outcome)}</strong>
+      <p>${esc(guide.next)}</p>
+      <em>${esc(guide.guard)}</em>
+    </div>`;
   }
 
   function renderActions(session) {
     const host = $("#action-area");
     if (session.status === "rendering") {
-      host.innerHTML = '<button type="button" class="primary" disabled>Working...</button>';
+      host.innerHTML = `${actionGuidance(session)}${renderGenerateStatus(session)}<button type="button" class="primary" disabled>Working...</button>`;
       return;
     }
+    const status = renderGenerateStatus(session);
     if ((session.decisionActions || []).length) {
-      host.innerHTML = `<div class="decision-set">${session.decisionActions.map((action, index) => actionButton(action, index === 0 ? "primary" : "secondary")).join("")}</div>`;
+      host.innerHTML = `${actionGuidance(session)}${status}<div class="decision-set">${session.decisionActions.map((action, index) => actionButton(action, index === 0 ? "primary" : "secondary")).join("")}</div>`;
     } else if (session.primaryAction) {
-      host.innerHTML = actionButton(session.primaryAction, "primary");
+      host.innerHTML = `${actionGuidance(session)}${status}${actionButton(session.primaryAction, "primary")}`;
     } else {
-      host.innerHTML = "";
+      host.innerHTML = status;
     }
     host.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => {
       const actions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
@@ -479,6 +1746,8 @@
   }
 
   function renderDirector(session) {
+    const legacyOutcome = document.querySelector(".director-outcome");
+    if (legacyOutcome) legacyOutcome.hidden = true;
     $("#scene-kicker").textContent = `Episode 1 · Scene ${session.scene}`;
     $("#director-title").textContent = session.sceneName || `Scene ${session.scene}`;
     $("#phase-label").textContent = phaseLabel(session.phase);
@@ -492,6 +1761,7 @@
     const reviewText = review.actualRead || review.cheapestNextAction || review.verdict || "";
     quality.hidden = !reviewText;
     quality.textContent = reviewText;
+    renderAdvisories(session);
     $("#save-state").textContent = session.lineageCurrent ? "Current" : "Needs refresh";
     $("#references-button").disabled = !session.selectedShotId;
     $("#request-button").disabled = !session.inspector?.providerRequest;
@@ -499,9 +1769,13 @@
     const inspectorUrl = `/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=${encodeURIComponent(session.episode)}&sc=${encodeURIComponent(session.scene)}&st=${encodeURIComponent(session.phase)}${session.selectedShotId ? `&shot=${encodeURIComponent(session.selectedShotId)}` : ""}`;
     $("#full-inspector-link").href = inspectorUrl;
     $("#drawer-inspector-link").href = inspectorUrl;
+    renderDirectorSceneStrip(session);
     renderShotSwitcher(session);
+    renderSceneWorkbench(session);
     renderArtifact(session);
+    renderShotInputs(session);
     renderActions(session);
+    loadInlineShotContext(session);
   }
 
   function renderEpisodes() {
@@ -742,70 +2016,134 @@
   }
 
   function renderStoryboardShot(shot) {
-    return `<article class="storyboard-shot ${shot.status === "Regen" ? "ready" : ""}">
-      <div class="storyboard-frame" aria-hidden="true">
-        <span>${esc(shot.title)}</span>
-        ${shot.characters.map((character) => `<b>${esc(character)}</b>`).join("")}
+    const isReal = Boolean(shot.shotId);
+    const shotId = shot.shotId || `demo-${shot.shot}`;
+    const selected = isReal && shot.selected;
+    const state = isReal ? statusText(shot.state) : shot.status;
+    const title = isReal ? shot.shotId : shot.title;
+    const characters = isReal
+      ? (selected ? app.session?.shot?.characters || [] : [])
+      : shot.characters;
+    const purpose = isReal ? shot.purpose || "" : shot.setup || "";
+    const imageUrl = isReal ? (shot.keyframeUrl || shot.acceptedUrl || "") : "";
+    const pipeline = isReal ? shotPipelineRail(shot) : "";
+    const nextAction = selected
+      ? (app.session?.primaryAction?.label || (app.session?.decisionActions || [])[0]?.label || "Open Shot")
+      : "Open Shot";
+    return `<article class="storyboard-shot ${selected ? "selected" : ""} ${shot.state === "complete" ? "ready" : ""}">
+      <div class="storyboard-frame ${imageUrl ? "has-media" : ""}" aria-label="${esc(title)} image">
+        ${imageUrl ? `<img src="${esc(imageUrl)}?v=${Date.now()}" alt="${esc(title)}">` : `<span>${esc(title)}</span>`}
+        <div class="storyboard-tags">${characters.map((character) => `<b>${esc(character)}</b>`).join("")}</div>
       </div>
       <div class="storyboard-shot-copy">
         <div class="storyboard-shot-head">
-          <strong>Shot ${esc(shot.shot)}</strong>
-          <button type="button" class="secondary compact-control" disabled>Edit</button>
+          <strong>Shot ${esc(isReal ? (shot.number || shotId) : shot.shot)}</strong>
+          <span class="status-pill ${shot.state === "complete" ? "ok" : selected ? "ok" : ""}">${esc(state)}</span>
         </div>
-        ${shot.setup ? `<em>${esc(shot.setup)}</em>` : ""}
-        <div class="storyboard-ref-label">References (${shot.refs.length}/6) · ${shot.status === "Regen" ? "Custom · " : ""}Base for generation</div>
-        <div class="storyboard-ref-row">${shot.refs.map((ref) => `<span>${esc(ref)}</span>`).join("")}</div>
-        <div class="generation-meta"><span>Nano Banana Pro</span><span>${esc(shot.status)} · 17 tkn · $0.17</span></div>
+        ${purpose ? `<p>${esc(purpose)}</p>` : ""}
+        ${pipeline}
+        <div class="storyboard-ref-label">References · complete turnarounds and scene look stay locked</div>
+        <div class="storyboard-ref-row"><span>Scene</span><span>Character</span><span>Keyframe</span></div>
+        ${isReal ? `<button type="button" class="primary" data-production-shot="${esc(shotId)}" data-view-jump="director">${esc(nextAction)}</button>` : '<button type="button" class="secondary" disabled>Demo only</button>'}
       </div>
     </article>`;
   }
 
+  function shotPipelineRail(shot) {
+    const selected = shot.selected;
+    const currentPhase = selected ? app.session?.phase : null;
+    const complete = shot.state === "complete";
+    const keyframeDone = Boolean(shot.keyframeUrl || shot.acceptedUrl || complete);
+    const animationDone = Boolean(shot.acceptedUrl || complete);
+    const steps = [
+      { id: "keyframe", label: "Keyframe", done: keyframeDone, active: currentPhase === "keyframe" },
+      { id: "voice", label: "Voice", done: selected && ["animation", "review", "final"].includes(currentPhase), active: currentPhase === "voice" },
+      { id: "animation", label: "Animation", done: animationDone, active: currentPhase === "animation" },
+      { id: "review", label: "Review", done: complete, active: selected && ["review", "final"].includes(currentPhase) },
+    ];
+    return `<div class="shot-pipeline" aria-label="${esc(shot.shotId)} shot pipeline">
+      ${steps.map((step, index) => `<span class="${step.done ? "done" : step.active ? "active" : ""}">
+        <i>${step.done ? "✓" : String(index + 1)}</i>${esc(step.label)}
+      </span>`).join("")}
+    </div>`;
+  }
+
   function renderStoryboardPipeline() {
-    return `<div class="pipeline-heading-row">
-      <div><h2>Storyboard</h2><p>10 scenes / 126 shots</p></div>
-      <div class="pipeline-model">Image Model: <strong>Nano Banana Pro</strong></div>
-      <div class="quality-toggle" aria-label="Storyboard quality">
-        <button type="button">1K</button><button type="button" class="selected">2K</button><button type="button">4K</button>
-      </div>
+    const scenes = rosterScenes();
+    const scene = currentRosterScene();
+    const shots = app.session?.shots || [];
+    return `<div class="pipeline-heading-row production-board-head">
+      <div><h2>Storyboard</h2><p>${scenes.length || 0} scenes · ${shots.length || 0} current scene shots</p></div>
+      <div class="pipeline-model">Keyframes: <strong>Seedream 5 Pro</strong></div>
       <div class="pipeline-actions">
-        <button type="button" class="secondary" disabled>Write Prompts with AI</button>
-        <button type="button" class="secondary" disabled>Export PDF</button>
-        <button type="button" class="primary" disabled>Generate All Scenes · 1,734 tkn · $17.34</button>
+        <button type="button" class="secondary" data-view-jump="director">Open Current Shot</button>
+        <button type="button" class="primary" data-next-step="audio">Continue · Audio</button>
       </div>
     </div>
-    <div class="scene-board">
-      ${sceneRoster.map(([num, title, progress]) => `<button type="button" class="scene-tile ${num === "1" ? "current" : ""}" data-pipeline-scene="${esc(num)}">
-        <span>${esc(num)}</span><strong>${esc(title)}</strong><em>${esc(progress)} shots</em>
-      </button>`).join("")}
-    </div>
-    <section class="storyboard-detail">
-      <div class="clip-section-head">
-        <div><h3>EXT. DEEP WITHIN THE RAINFOREST - DAY</h3><span>16 shots / Fuzzby, Zenny</span></div>
-        <div class="pipeline-actions inline">
-          <button type="button" class="secondary" disabled>Reset refs</button>
-          <button type="button" class="primary" disabled>Generate Scene · 221 tkn · $2.21</button>
+    <section class="production-board">
+      <div class="production-board-scenes" aria-label="Episode scenes">
+        ${scenes.map((item) => {
+          const number = String(item.sceneNumber);
+          const open = number === String(app.scene);
+          return `<button type="button" data-pipeline-scene="${esc(number)}" class="${open ? "selected" : ""}">
+            <span>${esc(number)}</span>
+            <strong>${esc(sceneHeading(item))}</strong>
+            <em>${Number(item.beatCount || 0)} beats</em>
+          </button>`;
+        }).join("") || '<span class="production-nav-empty">No approved scenes</span>'}
+      </div>
+      <div class="storyboard-detail">
+        <div class="clip-section-head">
+          <div><h3>${esc(sceneHeading(scene))}</h3><span>${shots.length || 0} production shots${scene?.beatCount ? ` / ${Number(scene.beatCount)} story beats` : ""}</span></div>
+          <div class="pipeline-actions inline">
+            <button type="button" class="secondary" data-view-jump="episodes">Change Scene</button>
+            <button type="button" class="primary" data-view-jump="director">${shots.length ? "Work This Scene" : "Direct Scene"}</button>
+          </div>
         </div>
+        ${shots.length
+          ? `<div class="storyboard-shot-grid">${shots.map(renderStoryboardShot).join("")}</div>`
+          : `<div class="stage-empty"><p>This scene has not been directed into production shots yet. Open it, press Direct scene, then the shot cards appear here.</p><button type="button" class="primary" data-view-jump="director">Open Scene</button></div>`}
       </div>
-      <div class="storyboard-shot-grid">${storyboardShots.map(renderStoryboardShot).join("")}</div>
     </section>
-    ${renderPipelineFooter("locations", "audio", "Storyboard")}`;
+    <div class="pipeline-footer-actions">
+      <button type="button" class="secondary" data-next-step="audio">Audio</button>
+      <button type="button" class="secondary" data-next-step="footage">Footage</button>
+      <button type="button" class="primary" data-view-jump="director">Current Shot</button>
+    </div>`;
   }
 
   function renderFootagePipeline() {
+    const scenes = rosterScenes();
+    const scene = currentRosterScene();
+    const shots = app.session?.shots || [];
+    const candidateItems = app.session?.artifact?.type === "video-set" ? app.session.artifact.items || [] : [];
     return `<div class="pipeline-heading-row">
-      <div><h2>Video Clips</h2><p>48 clips · Multi-shot 15s clips</p></div>
-      <div class="pipeline-model"><strong>Seedance · 1080p</strong></div>
+      <div><h2>Video Clips</h2><p>${shots.length || 0} shots in current scene · 4-30s Seedance units; complex gags split for control</p></div>
+      <div class="pipeline-model"><strong>${esc(app.session?.providerModel || "Seedance")}</strong></div>
       <div class="pipeline-actions">
         <button type="button" class="secondary" disabled>Write Prompts with AI</button>
         <button type="button" class="primary" disabled>Generate All Videos · 27,720 tkn · $277.20</button>
       </div>
     </div>
     <div class="jump-row" aria-label="Jump to scene">
-      ${sceneRoster.map(([num], index) => `<button type="button" class="${num === "1" ? "selected" : ""}">S${esc(num)} <span>${index === 0 ? "5/6" : index === 1 ? "1/3" : "0/" + (index + 3)}</span></button>`).join("")}
+      ${scenes.map((item) => {
+        const number = String(item.sceneNumber);
+        return `<button type="button" data-pipeline-scene="${esc(number)}" class="${number === String(app.scene) ? "selected" : ""}">S${esc(number)} <span>${Number(item.beatCount || 0)} beats</span></button>`;
+      }).join("") || '<span class="production-nav-empty">No approved scenes</span>'}
     </div>
     <section class="clip-section">
-      <div class="clip-section-head"><h3>Scene 1: EXT. DEEP WITHIN THE RAINFOREST - DAY</h3><span>5/6 clips</span></div>
-      ${footageClips.map((clip) => `<article class="clip-card ${clip.state}">
+      <div class="clip-section-head"><h3>Scene ${esc(app.scene)}: ${esc(sceneHeading(scene))}</h3><span>${app.session?.progress?.complete || 0}/${app.session?.progress?.total || 0} accepted</span></div>
+      ${candidateItems.length ? renderPipelineArtifact({ id: "footage" }, app.session) : ""}
+      ${shots.length ? shots.map((shot) => `<article class="clip-card ${shot.state === "complete" ? "ready" : shot.state === "awaiting" ? "ready" : ""}">
+        <div class="clip-card-head">
+          <div><h3>${esc(shot.shotId)}</h3><span>${shot.durationSec ? `${Number(shot.durationSec)}s` : "Duration pending"}</span></div>
+          <span class="status-pill ${shot.state === "complete" ? "ok" : shot.state === "awaiting" ? "ok" : ""}">${esc(shot.state === "complete" ? "Accepted" : statusText(shot.state))}</span>
+        </div>
+        ${shot.acceptedUrl ? `<video controls playsinline preload="metadata" src="${esc(shot.acceptedUrl)}"></video>` : ""}
+        <label>Shot purpose</label>
+        <textarea rows="4" aria-label="${esc(shot.shotId)} purpose" readonly>${esc(shot.purpose || "")}</textarea>
+        <div class="generation-meta"><span>${esc(shot.shotId)}</span><span>${esc(app.session?.providerModel || "Seedance")}</span></div>
+      </article>`).join("") : footageClips.map((clip) => `<article class="clip-card ${clip.state}">
         <div class="clip-card-head">
           <div><h3>${esc(clip.id)} · ${esc(clip.shots)}</h3><span>${esc(clip.count)}</span></div>
           <span class="status-pill ${clip.state === "failed" ? "flagged" : "ok"}">${clip.state === "failed" ? "Failed" : "Ready"}</span>
@@ -876,7 +2214,7 @@
         <div class="timeline-ruler">${Array.from({ length: 10 }, (_, index) => `<span>${index * 10}s</span>`).join("")}</div>
         <div class="track"><strong>VIDEO</strong>${editorClips.map((clip) => `<span>${esc(clip)}<em>15.1s</em></span>`).join("")}</div>
         <div class="track muted"><strong>TEXT</strong><button type="button" disabled>Add text</button></div>
-        <div class="track muted"><strong>AUDIO</strong><span>No VO</span><span>No music</span></div>
+        <div class="track muted"><strong>AUDIO</strong><span>Dialogue + foley from clips</span><span>Scene music in post</span></div>
       </section>
       <aside class="shortcut-panel"><h3>Shortcuts</h3><p>Space Play/Pause · J/K/L Prev/Play/Next · S Split · T Add Text · Cmd+Z Undo</p></aside>
     </div>
@@ -983,7 +2321,14 @@
     }
     const status = app.voiceStatus || {};
     if (status.error) {
-      return `<section class="voice-desk"><div class="voice-desk-loading error-line">${esc(status.error)}</div></section>`;
+      const recoveryAction = availableActions.find((action) =>
+        /voice|performance/i.test(`${action.id} ${action.label}`));
+      return `<section class="voice-desk">
+        <div class="voice-desk-loading error-line">${esc(status.error)}</div>
+        ${recoveryAction ? `<div class="voice-desk-actions">
+          <button type="button" class="primary" data-live-action="${esc(recoveryAction.id)}">${esc(directorActionLabel(recoveryAction))}</button>
+        </div>` : ""}
+      </section>`;
     }
     const lines = status.currentLines || [];
     const approved = status.approvedLines || [];
@@ -998,7 +2343,9 @@
       "legacy-approved-storyboard": "Approved script performance",
     }[status.source] || "ElevenLabs prompt";
     const selectedShot = (app.session?.shots || []).find((shot) => shot.selected) || (app.session?.shots || [])[0];
-    const take = app.session?.artifact?.type === "audio" ? app.session.artifact : null;
+    const take = status.takeUrl
+      ? { url: status.takeUrl, label: "Current generated performance" }
+      : (app.session?.artifact?.type === "audio" ? app.session.artifact : null);
     return `<section class="voice-desk">
       <div class="voice-desk-head">
         <div><span class="stage-label">ELEVENLABS PERFORMANCE · ${esc(selectedShot?.shotId || app.shotId || "CURRENT SHOT")}${selectedShot?.durationSec ? ` · ${Number(selectedShot.durationSec)}s` : ""}</span><h3>Acting &amp; cadence prompt</h3></div>
@@ -1028,10 +2375,10 @@
       ${lines.length ? `<div class="voice-desk-actions">
         <button type="button" class="secondary" data-voice-restore ${status.isWorking ? "" : "disabled"}>Restore director prompt</button>
         <button type="button" class="secondary" data-voice-save>Save changes</button>
-        ${iterateAction ? `<button type="button" class="secondary danger" data-live-action="${esc(iterateAction.id)}">Refire</button>` : ""}
-        ${acceptAction ? `<button type="button" class="secondary" data-live-action="${esc(acceptAction.id)}">Approve</button>` : ""}
-        ${acceptAction ? `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="footage">Approve &amp; Continue</button>` : ""}
-        ${sendAction ? `<button type="button" class="primary" data-voice-send="${esc(sendAction.id)}">Send to ElevenLabs</button>` : ""}
+        ${iterateAction ? `<button type="button" class="secondary danger" data-live-action="${esc(iterateAction.id)}">${esc(directorActionLabel(iterateAction))}</button>` : ""}
+        ${acceptAction ? `<button type="button" class="secondary" data-live-action="${esc(acceptAction.id)}">${esc(directorActionLabel(acceptAction))}</button>` : ""}
+        ${acceptAction ? `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="footage">${esc(directorActionLabel(acceptAction))} &amp; Continue</button>` : ""}
+        ${sendAction ? `<button type="button" class="primary" data-voice-send="${esc(sendAction.id)}">${esc(directorActionLabel(sendAction))}</button>` : ""}
       </div>` : ""}
     </section>`;
   }
@@ -1113,7 +2460,10 @@
 
   async function sendVoicePerformance(action) {
     if (!await saveVoicePerformance(true)) return;
-    handleAction(action);
+    app.voiceStatus = null;
+    app.voiceStatusKey = null;
+    await submitAction(action);
+    await loadVoicePerformance(true);
   }
 
   function renderRoughCutDesk() {
@@ -1182,6 +2532,29 @@
     }
   }
 
+  function renderPipelineArtifact(step, session) {
+    if (!["storyboard", "footage", "rough-cut"].includes(step.id)) return "";
+    if (step.id === "footage" && session.status === "rendering") {
+      return `<div class="pipeline-render-progress">${renderProgress(session)}</div>`;
+    }
+    const artifact = session.artifact || {};
+    if (artifact.type === "video-set" && (artifact.items || []).length) {
+      const items = artifact.items;
+      return `<div class="pipeline-artifact">
+        <video id="pipeline-candidate-video" controls playsinline preload="metadata" src="${esc(items[0].url)}?v=${Date.now()}"></video>
+        <span>${esc(artifact.label || "Animation candidate")}</span>
+        <div class="candidate-strip">${items.map((item, index) => `<button type="button" data-pipeline-candidate="${item.n}" data-url="${esc(item.url)}" class="${index === 0 ? "active" : ""}">C${item.n}</button>`).join("")}</div>
+      </div>`;
+    }
+    if (artifact.type === "video" && artifact.url) {
+      return `<div class="pipeline-artifact"><video controls playsinline preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></video><span>${esc(artifact.label || "Current footage")}</span></div>`;
+    }
+    if (artifact.type === "image" && artifact.url) {
+      return `<div class="pipeline-artifact"><img src="${esc(artifact.url)}?v=${Date.now()}" alt="${esc(artifact.label || "Current production result")}"><span>${esc(artifact.label || "Current result")}</span></div>`;
+    }
+    return "";
+  }
+
   function renderCanonicalPipelineStep(step) {
     const details = {
       upload: ["Brief & script", "Import and lock the screenplay that governs every scene, line and story beat."],
@@ -1190,18 +2563,16 @@
       characters: ["Character assets", "Bind every character to approved turnarounds, structured identity traits, wardrobe, expressions and scene coverage."],
       props: ["Props & key objects", "Track canonical appearance, ownership, scene usage, allowed variations and approval for every story-critical object."],
       locations: ["Location clean plates", "Keep approved world plates, camera angles, light, weather and emotional state separate from story performance frames."],
-      storyboard: ["Storyboard & keyframes", "Package direction into natural 15-30 second shots, attach explained references, and approve the keyframe as the visual truth."],
-      footage: ["Footage", "Animate approved keyframes through the verified Seedance route, then review picture, lip sync, duration, drift and continuity separately."],
+      storyboard: ["Storyboard & keyframes", "Package direction into natural 4-30 second Seedance units: keep simple scenes long, split dense comedy/reveals, and approve the keyframe as visual truth."],
+      footage: ["Footage", "Animate approved keyframes through the verified Seedance route, then review picture, lip sync, duration, drift and continuity separately. Split units end on held handoff frames."],
       audio: ["Audio performances", "Protect exact script lines while generating, repairing and approving character performances at line level."],
-      "rough-cut": ["Rough cut & master", "Stitch accepted shots, expose missing media, complete edit, sound, score and colour, then pass the final delivery checklist."],
+      "rough-cut": ["Rough cut & master", "Stitch accepted shots, expose missing media, then generate one ElevenLabs scene-level music cue and mix score, sound and colour for delivery."],
     }[step.id];
     const session = app.session || {};
     const liveStep = livePipelineStep(session);
     const index = pipelineSteps.findIndex((item) => item.id === step.id);
     const stepState = pipelineStepState(step, session);
     const selectedShot = (session.shots || []).find((shot) => shot.selected) || (session.shots || [])[0];
-    const artifact = session.artifact || {};
-    const showArtifact = ["storyboard", "footage", "rough-cut"].includes(step.id) && artifact.url;
     const previous = pipelineSteps[index - 1];
     const next = pipelineSteps[index + 1];
     const availableActions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
@@ -1211,10 +2582,10 @@
     const voiceDesk = step.id === "audio" ? renderVoicePerformanceDesk(availableActions) : "";
     const roughCutDesk = step.id === "rough-cut" ? renderRoughCutDesk() : "";
     const liveActionButtons = [
-      acceptAction && `<button type="button" class="secondary" data-live-action="${esc(acceptAction.id)}">Approve</button>`,
-      iterateAction && `<button type="button" class="secondary danger" data-live-action="${esc(iterateAction.id)}">Refire</button>`,
-      acceptAction && next && `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="${esc(next.id)}">Approve &amp; Continue</button>`,
-      ...otherActions.map((action, actionIndex) => `<button type="button" class="${actionIndex === 0 ? "primary" : "secondary"}${action.destructive ? " danger" : ""}" data-live-action="${esc(action.id)}">${esc(action.label)}</button>`),
+      acceptAction && `<button type="button" class="secondary" data-live-action="${esc(acceptAction.id)}">${esc(directorActionLabel(acceptAction))}</button>`,
+      iterateAction && `<button type="button" class="secondary danger" data-live-action="${esc(iterateAction.id)}">${esc(directorActionLabel(iterateAction))}</button>`,
+      acceptAction && next && `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="${esc(next.id)}">${esc(directorActionLabel(acceptAction))} &amp; Continue</button>`,
+      ...otherActions.map((action, actionIndex) => `<button type="button" class="${actionIndex === 0 ? "primary" : "secondary"}${action.destructive ? " danger" : ""}" data-live-action="${esc(action.id)}">${esc(directorActionLabel(action))}</button>`),
     ].filter(Boolean).join("");
     let workflowActions = "";
     if (stepState.kind === "current") {
@@ -1236,7 +2607,7 @@
         <span class="live-badge ${stepState.kind}">${esc(stepState.label)}</span>
       </div>
       ${renderProductionNavigator(step)}
-      ${showArtifact ? `<div class="pipeline-artifact"><img src="${esc(artifact.url)}?v=${Date.now()}" alt="${esc(artifact.label || "Current production result")}"><span>${esc(artifact.label || "Current result")}</span></div>` : ""}
+      ${renderPipelineArtifact(step, session)}
       ${step.id === "audio" ? "" : `<div class="production-now">
         <div><span>Current scene</span><strong>${esc(session.sceneName || `Scene ${app.scene}`)}</strong></div>
         <div><span>Current shot</span><strong>${esc(selectedShot?.shotId || app.shotId || "Select in Director")}${selectedShot?.durationSec ? ` · ${Number(selectedShot.durationSec)}s` : ""}</strong></div>
@@ -1281,6 +2652,14 @@
       writeHash();
       loadSession();
     }));
+    panel.querySelectorAll("[data-pipeline-scene]").forEach((button) => button.addEventListener("click", () => {
+      if (button.dataset.pipelineScene === app.scene) return;
+      app.scene = button.dataset.pipelineScene;
+      app.shotId = null;
+      resetShotScopedState();
+      writeHash();
+      loadSession();
+    }));
     panel.querySelectorAll("[data-production-shot]").forEach((button) => button.addEventListener("click", () => {
       if (button.dataset.productionShot === app.shotId) return;
       app.shotId = button.dataset.productionShot;
@@ -1288,6 +2667,17 @@
       writeHash();
       loadSession();
     }));
+    const candidateButtons = panel.querySelectorAll("[data-pipeline-candidate]");
+    if (candidateButtons.length) {
+      app.selectedCandidate = Number(candidateButtons[0].dataset.pipelineCandidate);
+      candidateButtons.forEach((button) => button.addEventListener("click", () => {
+        app.selectedCandidate = Number(button.dataset.pipelineCandidate);
+        candidateButtons.forEach((item) => item.classList.toggle("active", item === button));
+        const video = $("#pipeline-candidate-video");
+        video.src = `${button.dataset.url}?v=${Date.now()}`;
+        video.play().catch(() => {});
+      }));
+    }
     panel.querySelectorAll("[data-live-action]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
       const action = actions.find((item) => item.id === button.dataset.liveAction);
@@ -1343,9 +2733,13 @@
     clearTimeout(app.pollTimer);
     const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
     try {
+      if (!app.workbenchState || app.workbenchState.scene !== app.scene || app.workbenchState.episode !== app.episode) {
+        await loadProjectWorkbenchState();
+      }
       const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`);
       app.session = session;
       app.shotId = session.selectedShotId || app.shotId;
+      clearLocalActivityForSession(session);
       let approvedAdvance = false;
       if (app.pendingAdvance && session.status !== "rendering") {
         const actionIds = [session.primaryAction, ...(session.decisionActions || [])]
@@ -1361,7 +2755,9 @@
       writeHash();
       renderDirector(session);
       renderReview(session);
+      renderStudioAgent();
       if (app.view === "pipeline") renderPipeline();
+      loadStudioAgent();
       if (approvedAdvance) toast("Approved. Moving forward.");
       if (session.status === "rendering") app.pollTimer = setTimeout(loadSession, 1600);
     } catch (error) {
@@ -1371,6 +2767,28 @@
       $("#action-area").innerHTML = '<a class="secondary" href="/cb-studio/app.html">Open Inspector</a>';
       toast(error.message, true);
     }
+  }
+
+  async function waitForDirectorJob(jobId, { maxWaitMs = 60000 } = {}) {
+    if (!jobId) return null;
+    const started = Date.now();
+    while (Date.now() - started < maxWaitMs) {
+      const payload = await api("/api/jobs");
+      const job = payload.jobs?.[jobId];
+      if (job && !["running", "queued"].includes(job.status)) return job;
+      await new Promise((resolve) => setTimeout(resolve, 900));
+    }
+    return null;
+  }
+
+  function jobFailureMessage(job) {
+    const lines = String(job?.log || "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const important = [...lines].reverse().find((line) =>
+      /REFUSED|ERROR|Error|Failed|failed|Bad Request|Client Error/i.test(line));
+    return important || job?.step || "The job failed before returning a usable result.";
   }
 
   function openConfirmation(action) {
@@ -1415,9 +2833,207 @@
     await submitAction(action);
   }
 
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read uploaded keyframe."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function setSourceSelectionActivity(label, message) {
+    if (!app.session) return;
+    const activity = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      actionId: "select-keyframe-source",
+      shotId: app.session.selectedShotId,
+      started: Date.now() / 1000,
+      label,
+      step: "Keyframe source",
+      providerModelId: "zero-spend source selection",
+    };
+    setLocalActivity(activity);
+    app.session = {
+      ...app.session,
+      status: "rendering",
+      headline: label,
+      summary: message,
+      primaryAction: null,
+      decisionActions: [],
+      runningJob: {
+        started: activity.started,
+        activityLabel: label,
+        step: activity.step,
+        providerModelId: activity.providerModelId,
+        latestMessage: message,
+      },
+    };
+    renderDirector(app.session);
+    if (app.view === "pipeline") renderPipeline();
+  }
+
+  async function runKeyframeSourceSelection(cmd, sourcePath, options = {}) {
+    if (!app.session?.selectedShotId) return;
+    if (!options.skipLockCheck && keyframeSourceLocked(app.session)) {
+      toast("Review, approve or refire the current keyframe candidate before replacing it.", true);
+      return;
+    }
+    if (!options.keepActivity) {
+      setSourceSelectionActivity(
+        cmd === "select-library" ? "Selecting library keyframe..." : "Selecting uploaded keyframe...",
+        "Creating a reviewable keyframe candidate from the chosen source. No provider render spend."
+      );
+    }
+    try {
+      await api("/api/director-action", {
+        method: "POST",
+        body: JSON.stringify({
+          action: cmd === "select-library" ? "select-keyframe-library" : "select-keyframe-upload",
+          episode: app.session.episode,
+          scene: app.session.scene,
+          shotId: app.session.selectedShotId,
+          sourcePath,
+        }),
+      });
+      toast("Keyframe source submitted.");
+      app.keyframeLibraryKey = null;
+      setTimeout(loadSession, 350);
+    } catch (error) {
+      setLocalActivity(null);
+      await loadSession();
+      toast(error.message, true);
+    }
+  }
+
+  async function selectKeyframeFromLibrary(sourcePath) {
+    await runKeyframeSourceSelection("select-library", sourcePath);
+  }
+
+  async function uploadKeyframeSource(file) {
+    if (!app.session?.selectedShotId) return;
+    if (keyframeSourceLocked(app.session)) {
+      toast("Review, approve or refire the current keyframe candidate before uploading a replacement.", true);
+      return;
+    }
+    setSourceSelectionActivity("Uploading keyframe...", "Preserving the uploaded image before creating a review candidate. No provider render spend.");
+    try {
+      const dataB64 = await readFileAsDataUrl(file);
+      const uploaded = await api("/api/shot-keyframe-upload", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode,
+          scene: app.session.scene,
+          shotId: app.session.selectedShotId,
+          filename: file.name,
+          dataB64,
+        }),
+      });
+      await runKeyframeSourceSelection("select-upload", uploaded.sourcePath, { skipLockCheck: true, keepActivity: true });
+    } catch (error) {
+      setLocalActivity(null);
+      await loadSession();
+      toast(error.message, true);
+    }
+  }
+
+  async function runScenePlateAction(actionId, sourcePath) {
+    if (!app.session) return;
+    setSourceSelectionActivity(
+      actionId === "build-scene-plate" ? "Firing scene plate..." : "Selecting scene plate...",
+      "Updating the scene plate source used by this scene. This does not approve the current keyframe."
+    );
+    try {
+      const result = await api("/api/director-action", {
+        method: "POST",
+        body: JSON.stringify({
+          action: actionId,
+          episode: app.session.episode,
+          scene: app.session.scene,
+          shotId: app.session.selectedShotId,
+          sourcePath,
+        }),
+      });
+      if (result.session) {
+        setLocalActivity(null);
+        app.session = result.session;
+        renderDirector(app.session);
+        if (app.view === "pipeline") renderPipeline();
+        toast(actionId === "build-scene-plate" ? "Scene plate generation started." : "Scene plate updated.");
+        return;
+      }
+      toast(actionId === "build-scene-plate" ? "Scene plate generation started." : "Scene plate source submitted.");
+      await loadSession();
+    } catch (error) {
+      setLocalActivity(null);
+      await loadSession();
+      toast(error.message, true);
+    }
+  }
+
+  async function uploadScenePlateSource(file) {
+    if (!app.session) return;
+    setSourceSelectionActivity("Uploading scene plate...", "Preserving the uploaded plate before assigning it to the scene.");
+    try {
+      const dataB64 = await readFileAsDataUrl(file);
+      const uploaded = await api("/api/scenelook-upload", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode,
+          scene: app.session.scene,
+          filename: file.name,
+          dataB64,
+        }),
+      });
+      await runScenePlateAction("select-scene-plate-upload", uploaded.sourcePath);
+    } catch (error) {
+      setLocalActivity(null);
+      await loadSession();
+      toast(error.message, true);
+    }
+  }
+
   async function submitAction(action, note) {
     if (!app.session) return;
+    const previousSession = app.session;
     $$("#action-area button").forEach((button) => { button.disabled = true; });
+    const preparingRetry = action.id === "iterate-animation";
+    const spend = previousSession.spendDisclosure || {};
+    const copy = actionActivityCopy(action, previousSession, preparingRetry);
+    const activity = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      actionId: action.id,
+      shotId: previousSession.selectedShotId,
+      started: Date.now() / 1000,
+      label: copy.label,
+      step: copy.step,
+      durationSec: spend.shotDurationSec || previousSession.shot?.durationSec,
+      candidateCount: spend.candidateCount,
+      providerModelId: copy.provider || spend.providerModelId || previousSession.providerModel,
+      resolution: spend.resolution,
+      showDuration: !!copy.showDuration,
+    };
+    setLocalActivity(activity);
+    app.session = {
+      ...previousSession,
+      status: "rendering",
+      headline: activity.label,
+      summary: copy.message,
+      primaryAction: null,
+      decisionActions: [],
+      runningJob: {
+        started: activity.started,
+        activityLabel: copy.label,
+        step: activity.step,
+        durationSec: activity.durationSec,
+        candidateCount: activity.candidateCount,
+        maxBatchCostUsd: spend.maxBatchCostUsd,
+        providerModelId: activity.providerModelId,
+        latestMessage: copy.message,
+      },
+    };
+    renderDirector(app.session);
+    if (app.view === "pipeline") renderPipeline();
     try {
       const result = await api("/api/director-action", {
         method: "POST",
@@ -1431,16 +3047,44 @@
         }),
       });
       if (result.navigate) {
+        setLocalActivity(null);
         location.href = result.navigate;
         return;
       }
+      if (result.session) {
+        setLocalActivity(null);
+        app.session = result.session;
+        renderDirector(app.session);
+        if (app.view === "pipeline") renderPipeline();
+        toast(result.noChange ? "Nothing changed." : "Scene plate updated.");
+        return;
+      }
       toast(result.noChange ? "Nothing changed." : "Director action started.");
+      if (result.jobId) {
+        const job = await waitForDirectorJob(result.jobId);
+        if (job && job.status === "failed") {
+          const message = jobFailureMessage(job);
+          holdLocalActivity(action, previousSession, message, "Action failed");
+          await loadSession();
+          toast(message, true);
+          return;
+        }
+        setLocalActivity(null);
+        await loadSession();
+        if (action.id === "build-voice") await loadVoicePerformance(true);
+        return;
+      }
       setTimeout(loadSession, 350);
     } catch (error) {
       app.pendingAdvance = null;
+      holdLocalActivity(action, previousSession, error.message, "Action refused");
       if (error.payload?.session) {
         app.session = error.payload.session;
         renderDirector(app.session);
+      } else {
+        app.session = previousSession;
+        renderDirector(app.session);
+        if (app.view === "pipeline") renderPipeline();
       }
       toast(error.message, true);
       $$("#action-area button").forEach((button) => { button.disabled = false; });
@@ -1505,7 +3149,10 @@
       request.kind && `<span>${esc(request.kind)}</span>`,
       request.source && `<span>${esc(request.source)}</span>`,
       request.promptHash && `<span>${esc(request.promptHash.slice(0, 12))}</span>`,
-      app.session.providerModel && request.kind === "animation" && `<span>${esc(app.session.providerModel)}</span>`,
+      request.kind === "animation" && (request.providerModelId || app.session.providerModel)
+        && `<span>${esc(request.providerModelId || app.session.providerModel)}</span>`,
+      request.durationSec && `<span>${esc(Number(request.durationSec))}s</span>`,
+      request.resolution && `<span>${esc(request.resolution)}</span>`,
     ].filter(Boolean).join("");
     $("#request-drawer").classList.add("open");
     $("#request-drawer").setAttribute("aria-hidden", "false");

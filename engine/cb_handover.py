@@ -543,6 +543,22 @@ def _owned_big_comedy_stagings(storyboard, sb_shot):
     return owned
 
 
+def _owned_beat_contracts(storyboard, sb_shot, field):
+    """Preserve the complete approved beat contracts carried by one production unit.
+
+    The provider package previously retained only BIG-comedy physical staging. That kept
+    collisions safe but discarded the approved joke mechanism, setup, disruption, button,
+    hold and emotional turn before the Animation Director saw them.
+    """
+    beats = {beat.get("beatId"): beat for beat in (storyboard.get("beats") or [])}
+    owned = []
+    for beat_id in sb_shot.get("beatIds") or []:
+        contract = (beats.get(beat_id) or {}).get(field)
+        if contract is not None:
+            owned.append({"beatCode": beat_id, **contract})
+    return owned
+
+
 def _validate_unit_packing_contract(storyboard):
     """Recompute the approved 30-second packing audit at the handover boundary."""
     current_contract = storyboard.get("unitPackingContractVersion") == 1
@@ -808,7 +824,7 @@ def _cinematography_instruction(contract, shot_id):
 
 
 def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
-                comedy_stagings=None):
+                comedy_stagings=None, comedy_contracts=None, emotion_contracts=None):
     """Map one approved storyboard shot into cb_engine's production contract. Executable
     performance, continuity and dialogue timing come only from typed fields; approved prose
     is retained for provenance and review, never treated as a substitute."""
@@ -884,6 +900,8 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
                 "comedyStagingApproved": ((performance_contract or {}).get(
                     "comedyStaging")),
                 "comedyStagingsApproved": comedy_stagings,
+                "comedyContractsApproved": list(comedy_contracts or []),
+                "emotionContractsApproved": list(emotion_contracts or []),
                 "cinematographyContractApproved": cinematography_contract or None,
                 "targetDurationSecApproved": sb_shot.get("targetDurationSec"),
                 "storyboardStagePlanApproved": list(sb_shot.get("stagePlan") or []),
@@ -988,7 +1006,9 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
         cast = _cast_for_shot(sb_shot, beats)
         shot, retained = distil_shot(
             sb_shot, pd, cast, placement.get(sb_shot["shotId"], []), prev,
-            characters_cfg, _owned_big_comedy_stagings(sb, sb_shot))
+            characters_cfg, _owned_big_comedy_stagings(sb, sb_shot),
+            _owned_beat_contracts(sb, sb_shot, "comedyContract"),
+            _owned_beat_contracts(sb, sb_shot, "emotionContract"))
         rec = _compile_one(shot, retained, scene, characters_cfg)
         line_count += len(shot.dialogueLines)
         shots_out.append(rec)
@@ -1104,7 +1124,9 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
     cast = _cast_for_shot(sb_shot, beats)
     shot, retained = distil_shot(
         sb_shot, pd, cast, placement.get(shot_id, []), None, characters_cfg,
-        _owned_big_comedy_stagings(sb, sb_shot))
+        _owned_big_comedy_stagings(sb, sb_shot),
+        _owned_beat_contracts(sb, sb_shot, "comedyContract"),
+        _owned_beat_contracts(sb, sb_shot, "emotionContract"))
     rec = _compile_one(shot, retained, scene, characters_cfg)
     _assert_no_internal_leak([rec])
 
@@ -1180,7 +1202,9 @@ def _scoped_shot(storyboard, shot_id, characters_cfg, prev):
         sb_shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     shot, retained = distil_shot(
         sb_shot, pd, cast, placement.get(shot_id, []), prev, characters_cfg,
-        _owned_big_comedy_stagings(storyboard, sb_shot))
+        _owned_big_comedy_stagings(storyboard, sb_shot),
+        _owned_beat_contracts(storyboard, sb_shot, "comedyContract"),
+        _owned_beat_contracts(storyboard, sb_shot, "emotionContract"))
     return shot, retained, card_hash
 
 

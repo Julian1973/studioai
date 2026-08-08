@@ -91,13 +91,7 @@ SEEDANCE_LIMITS = {
     },
 }
 
-DEFAULT_FORBIDDEN = (
-    "no subtitles",
-    "no morphing or deformation",
-    "no unintended extra characters",
-    "no style drift",
-    "no unintended text, watermarks, or logos",
-)
+DEFAULT_FORBIDDEN: tuple[str, ...] = ()
 
 COMMON_RETRY_ISSUES = (
     "character face changed",
@@ -259,11 +253,14 @@ class SeedanceTask(BaseModel):
         validation_alias=AliasChoices("scene_style", "sceneStyle"),
     )
     camera: str = ""
-    audio: str = "Natural ambience only."
+    audio: str = (
+        "Natural ambience, foley, designed non-dialogue sound effects, and low supportive "
+        "underscore are allowed unless the task explicitly forbids them."
+    )
     consistency: list[str] = Field(default_factory=list)
     forbidden: list[str] = Field(default_factory=list)
     no_music: bool = Field(
-        default=True,
+        default=False,
         validation_alias=AliasChoices("no_music", "noMusic"),
     )
     extension_direction: Literal["forward", "backward"] = Field(
@@ -653,7 +650,8 @@ def build_forbidden_list(task: SeedanceTask | dict[str, Any]) -> str:
         forbidden.extend(("no gray blockout materials", "no path lines or coordinate axes",
                           "no controllers or camera cones"))
     forbidden.extend(item.forbidden)
-    return ", ".join(_unique(forbidden)) + "."
+    unique = _unique(forbidden)
+    return ", ".join(unique) + "." if unique else ""
 
 
 def _strip_request_parameters(value: str) -> str:
@@ -829,7 +827,9 @@ def build_seedance_prompt(task: SeedanceTask | dict[str, Any]) -> str:
 
     if item.type not in {"seamless_transition"}:
         sections.extend(("[Audio]", item.audio))
-    sections.extend(("[Forbidden]", build_forbidden_list(item)))
+    forbidden_text = build_forbidden_list(item)
+    if forbidden_text:
+        sections.extend(("[Forbidden]", forbidden_text))
     return "\n".join(str(section).strip() for section in sections if str(section).strip())
 
 

@@ -1,5 +1,5 @@
 {
- "_version": "2026-07-16.2",
+ "_version": "2026-08-07.2",
  "_note": "THE BILLING PROFILE (Julian's directive, 2026-07-16): pricing is configured HERE, never hardcoded as a universal rate. Every value below is from the provider's OFFICIAL pricing page only. planConfirmed/cadenceConfirmed stay false until Julian confirms his actual plan and billing cadence \u2014 until then every derived cost is an ESTIMATED ALLOCATED COST (ex tax) under the published plan named, NEVER the verified account cost. Update this file when the plan is confirmed; every derived rate updates automatically and the ledger records the profile version used.",
  "elevenlabs": {
   "plan": "pro",
@@ -27,6 +27,23 @@
   "effectiveDate": "2026-07-16",
   "_note": "CONFIRMED PER MODEL by Julian, 2026-07-16 \u2014 generic provider-level confirmation is prohibited; each model below is its own confirmed entry. The $0.3024 token-derived figure and $0.3034 prose figure on fal's Seedance page are alternative expressions of the same billing basis, not cumulative; the HIGHER figure is the spending bound (his ruling).",
   "models": {
+   "bytedance/seedance-2.5/reference-to-video": {
+    "operation": "video candidate",
+    "tier": "standard",
+    "resolution": "480p review / 720p final",
+    "videoInput": false,
+    "perSecondUsd": 0.2205,
+    "resolutionRatesUsdPerSecond": {
+     "480p": 0.2205,
+     "720p": 0.473
+    },
+    "taxTreatment": "ex tax",
+    "basis": "fal published approximate 480p and 720p output rates; Studio review renders default to 480p and video reference inputs add token cost",
+    "source": "https://fal.ai/models/bytedance/seedance-2.5/reference-to-video/api",
+    "confirmed": true,
+    "confirmedBy": "Julian",
+    "confirmedAt": "2026-08-07"
+   },
    "bytedance/seedream/v5/pro/edit": {
     "operation": "keyframe",
     "mode": "auto_2K",

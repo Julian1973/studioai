@@ -11,15 +11,17 @@ import re
 from collections import OrderedDict
 
 
-SCHEMA_VERSION = 6
-SEEDANCE_GUIDE_PROFILE = "bytedance-seedance-2.5-2026-08-04"
+SCHEMA_VERSION = 7
+SEEDANCE_GUIDE_PROFILE = "bytedance-seedance-2.5-2026-08-07"
 SEEDANCE_GUIDE_SOURCE = {
     "title": "Dreamina Seedance 2.5 User Guide",
-    "url": "https://bytedance.larkoffice.com/wiki/NjnWwvf4BiFYFLk2RzrcEgaunGf",
+    "url": "https://docs.byteplus.com/en/docs/ModelArk/2607689",
+    "larkUrl": "https://bytedance.larkoffice.com/docx/A88jd0B47oAd8zxWp5ycZFMfnxh",
     "productUrl": "https://dreamina.capcut.com/seedance/seedance-2-5",
     "apiQualificationUrl": "https://docs.byteplus.com/en/docs/modelark/1159178",
-    "lastUpdated": "2026-08-04",
-    "scope": "Dreamina product guidance; API model ID, schema, pricing and account access are separate",
+    "skill": ".agents/skills/sd25-pe",
+    "lastUpdated": "2026-08-07",
+    "scope": "Official Dreamina/BytePlus prompt guidance; executable API schema, pricing and account access are separate",
 }
 SEEDANCE_GUIDE_LIMITS = {
     "standardDurationSec": {"minimum": 4, "maximum": 30},
@@ -419,7 +421,10 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             duration_numeric = True
         except (TypeError, ValueError):
             duration_numeric = False
-    timestamp_required = bool(duration_value is not None and duration_value > 15)
+    # Seedance 2.5 guidance treats stages as the default narrative control. Time ranges
+    # are useful for critical handoffs, entrances, exits, transitions or explicit audio
+    # cues, but duration alone must not force timestamped prompt copy.
+    timestamp_required = False
     staged_generation_modes = {
         "text-to-video", "reference-to-video", "thirty-second-video",
         "ultra-long-video",
@@ -553,9 +558,9 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             (f"[{global_heading}] establishes the world, look and camera language."
              if global_settings else
              "No explicit global environment, visual style and camera-language section was found."),
-            "For 16-30 second work, add [Global Settings] covering environment, visual style, "
+            "Add [Global Settings] covering environment, visual style, "
             "camera language, character styling, performance core and prohibited items.",
-            required=timestamp_required)
+            required=task_mode in {"thirty-second-video", "ultra-long-video"})
 
         stage_matches = _stage_matches(text)
         stage_numbers = [_stage_number(match) for match in stage_matches]
@@ -783,13 +788,13 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
                      abs(ranges[-1][1] - duration_value) <= 1.001)
     pacing_ok = ranges_ok and (bool(ranges) or not timestamp_required)
     add("pacing", "Pacing control", pacing_ok,
-        ("Storyline stages control pacing; timestamps are optional up to 15 seconds."
-         if not ranges and not timestamp_required else
-         "A 16-30 second unit needs timestamped stages." if not ranges else
+        ("Storyline stages control pacing; timestamps are optional unless a critical "
+         "handoff, entrance, exit, transition or dialogue cue needs timing."
+         if not ranges else
          f"{len(ranges)} time range(s) are consecutive and non-overlapping." if ranges_ok else
          "Time ranges overlap, leave gaps or run backwards."),
-        "Use storyline stages up to 15 seconds. For longer work, use consecutive official "
-        "Stage N: 0-4s-style headings that cover the full requested duration.")
+        "Use consecutive [Stage N] sections with one primary change and visible end state; "
+        "add time ranges only where critical timing needs protection.")
 
     parameter_hits = sorted(set(match.group(0) for match in _REQUEST_PARAMETER_WORDS.finditer(text)))
     add("request-parameters", "Request parameters stay outside the prompt", not parameter_hits,

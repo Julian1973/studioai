@@ -233,7 +233,7 @@ def legacy_scratch_pkg(monkeypatch, tmp_path):
 
 @pytest.fixture()
 def golden_path_scratch_pkg(monkeypatch, tmp_path):
-    """Exercise the checked-in S1.SH1 contract without live mutable dependencies.
+    """Exercise the checked-in first Scene 1 opener contract without live mutable dependencies.
 
     The production-package snapshot is copied into a scratch world. A minimal storyboard
     source is derived from that snapshot solely to provide deterministic lineage bytes; the
@@ -241,9 +241,10 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     """
     real = HERE.parent / "cb-output" / "Ep1_scene1_production_package.json"
     live = json.load(open(real))
-    assert live["shots"][0]["shotId"] == "S1.SH1", (
-        "golden_path_scratch_pkg requires the live package to actually hold S1.SH1's real "
-        "promoted content — run cb_handover.promote_to_canonical for real first.")
+    golden_shot_id = live["shots"][0]["shotId"]
+    assert golden_shot_id.startswith("S1.SH1"), (
+        "golden_path_scratch_pkg requires the live package to hold the real promoted "
+        "Scene 1 opening shot content — run cb_handover.promote_to_canonical first.")
     assert live["validation"]["passed"] is True, (
         "golden_path_scratch_pkg requires a VALID live package — an invalid one must never "
         "be treated as the golden path.")
@@ -383,7 +384,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
     first_ledger = scratch_pkg["continuityLedger"][0]
     first_ledger["departmentWork"]["cinematography"]["approved"]["inputSignature"] = \
         cb_render._department_input_signature(
-            scratch_pkg, "cinematography", "S1.SH1", "1", "Ep1")
+            scratch_pkg, "cinematography", golden_shot_id, "1", "Ep1")
     json.dump(scratch_pkg, open(scratch, "w"), indent=1, ensure_ascii=False)
     return scratch
 
@@ -487,10 +488,11 @@ def test_golden_path_keyframe_refuses_on_the_actual_current_lineage_mismatch(
     still be in the state assumed years — or even hours — ago."""
     monkeypatch.setattr(cb_render, "_current_storyboard_md5",
                         lambda scene, episode="Ep1": "deadbeef" * 4)   # deliberately wrong
+    shot_id = json.load(open(golden_path_scratch_pkg))["shots"][0]["shotId"]
     with pytest.raises(cb_render.Refused, match="storyboard-content-mismatch"):
-        cb_render.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
+        cb_render.keyframe_shot("1", shot_id, "Ep1", log=lambda *a, **k: None)
     written = json.load(open(golden_path_scratch_pkg))
-    led = [x for x in written["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
+    led = [x for x in written["continuityLedger"] if x["shotId"] == shot_id][0]
     assert "keyframeCandidate" not in led                            # nothing was ever generated
 
 
@@ -528,12 +530,13 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
             "review": {"verdict": "pass", "summary": "Test fixture passes."},
         })
 
-    out_path = cb_render.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
+    shot_id = json.load(open(golden_path_scratch_pkg))["shots"][0]["shotId"]
+    out_path = cb_render.keyframe_shot("1", shot_id, "Ep1", log=lambda *a, **k: None)
 
     assert len(calls) == 1                                          # exactly one provider call
     call = calls[0]
     assert call["out"] == out_path
-    assert "S1.SH1" in pathlib.Path(out_path).name
+    assert shot_id in pathlib.Path(out_path).name
     assert pathlib.Path(out_path).exists()
     assert pathlib.Path(out_path).read_bytes() == b"fake"            # the stub's own marker —
     #                                                                   never real media
@@ -557,7 +560,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     # THE KEYFRAME LIFECYCLE (2026-07-17): a fresh generation is a CANDIDATE, awaiting a
     # decision — never auto-approved, never a bare keyframePath pointer on its own.
     written = json.load(open(golden_path_scratch_pkg))
-    led = [x for x in written["continuityLedger"] if x["shotId"] == "S1.SH1"][0]
+    led = [x for x in written["continuityLedger"] if x["shotId"] == shot_id][0]
     assert led["keyframeCandidate"]["path"] == out_path
     assert "keyframeApproval" not in led
     assert real_live.read_bytes() == real_before                    # real file never touched

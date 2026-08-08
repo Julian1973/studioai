@@ -4,6 +4,7 @@ Seedream 5 Pro is now the default keyframe model, NB2 kept live for rollback via
 real API calls — the two provider implementations are monkeypatched, so this proves the ROUTING logic
 only, exactly matching the manual verification run before this file was written."""
 import cb_gen
+import json
 
 PASS = 0
 FAIL = 0
@@ -124,6 +125,16 @@ def test_estimate_dialogue_cost_math():
     assert cb_costs.estimate_dialogue_cost([]) == 0.0
 
 
+def test_seedance_prompt_wrapper_does_not_auto_bake_music():
+    prompt = cb_gen._seedance_json_prompt(
+        "Fuzzby flies through the flower corridor.", duration=12, ref=True)
+    obj = json.loads(prompt)
+    assert obj["duration_seconds"] == 12
+    assert "music" not in obj
+    assert "No musical underscore in the render" in obj["audio"]
+    assert "ENGLISH" in obj["audio"]
+
+
 def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
     """END-TO-END proof: a real eleven_dialogue call (network mocked) produces a ledger
     entry whose cost is EXACTLY the verified rate x the billed characters, and a sidecar
@@ -145,7 +156,7 @@ def test_dialogue_cost_reaches_the_ledger_correctly(monkeypatch, tmp_path):
             }
     monkeypatch.setattr(cb_gen, "_rpost", lambda *a, **k: FakeResp())
     monkeypatch.setattr(cb_gen, "MEDIA", tmp_path)
-    monkeypatch.setattr(cb_gen, "ELEVEN_KEY", "test-key")
+    monkeypatch.setattr(cb_gen, "ELEVEN_KEY", "sk_test_key")
     monkeypatch.setattr(cb_gen.cb_costs, "log_spend",
                          lambda op, cost, out=None, meta=None: logged.update(
                              op=op, cost=cost, out=out, meta=meta))

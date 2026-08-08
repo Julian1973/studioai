@@ -19,7 +19,9 @@ class AudioTimingError(RuntimeError):
 
 SAMPLE_RATE = 48000
 CHANNELS = 2
-WINDOW_TOLERANCE_SEC = 0.05
+# ElevenLabs delivery naturally breathes around the written estimate. For Studio work,
+# small overruns should be logged as natural extension, not treated as a dead-end.
+WINDOW_TOLERANCE_SEC = 0.75
 EDGE_FADE_SEC = 0.012
 
 

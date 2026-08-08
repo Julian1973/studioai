@@ -47,8 +47,10 @@ def _request(port, method, path, headers=None, body=None):
 
 def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
     module, port = studio
-    status, _, _ = _request(port, "GET", "/cb-studio/app.html")
-    assert status == 401
+    status, headers, _ = _request(port, "GET", "/cb-studio/app.html")
+    assert status == 303
+    assert headers["Location"] == "/cb-studio/app.html"
+    assert "HttpOnly" in headers["Set-Cookie"]
 
     status, headers, _ = _request(
         port, "GET", f"/cb-studio/app.html?launchToken={module.LAUNCH_TOKEN}")
@@ -70,8 +72,10 @@ def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
 
 def test_director_entry_and_facade_share_the_authenticated_session(studio):
     module, port = studio
-    status, _, _ = _request(port, "GET", "/cb-studio/director.html")
-    assert status == 401
+    status, headers, _ = _request(port, "GET", "/cb-studio/director.html")
+    assert status == 303
+    assert headers["Location"] == "/cb-studio/director.html"
+    assert "HttpOnly" in headers["Set-Cookie"]
 
     status, headers, _ = _request(
         port, "GET", f"/cb-studio/director.html?launchToken={module.LAUNCH_TOKEN}")
@@ -91,10 +95,18 @@ def test_director_entry_and_facade_share_the_authenticated_session(studio):
     session = json.loads(body)
     assert session["schemaVersion"] == 1
     assert session["selectedShotId"]
-    assert session["primaryAction"]["id"] in {
-        "build-keyframe", "build-voice", "prepare-render", "open-inspector",
-        "open-provider-setup", "run-quality-review", "build-master", "run-final-review",
-    }
+    if session["status"] == "rendering":
+        assert session["primaryAction"] is None
+        assert session["runningJob"]
+    elif session["primaryAction"] is None:
+        assert session["status"] in {"ready_to_review", "complete"}
+        if session["status"] == "ready_to_review":
+            assert session["decisionActions"]
+    else:
+        assert session["primaryAction"]["id"] in {
+            "build-keyframe", "build-voice", "prepare-render", "open-inspector",
+            "open-provider-setup", "run-quality-review", "build-master", "run-final-review",
+        }
 
     origin = f"http://127.0.0.1:{port}"
     status, _, body = _request(
@@ -149,6 +161,14 @@ def test_explicit_https_origin_supports_secure_remote_access(monkeypatch):
     try:
         port = server.server_port
         remote_headers = {"Host": "studio-test.example"}
+        status, _, _ = _request(
+            port,
+            "GET",
+            "/cb-studio/app.html",
+            remote_headers,
+        )
+        assert status == 401
+
         status, headers, _ = _request(
             port,
             "GET",

@@ -16,7 +16,10 @@ def _provider_identities(monkeypatch, paths):
         name: {
             "schemaVersion": 1, "source": "fixture",
             "providerViews": {"default": {"view": "front", "crop": [0, 0, 1, 1]}},
-            "distinguishingFeatures": [name + " identity"],
+            "distinguishingFeatures": (
+                ["round glasses", name + " identity"]
+                if name == "Zenny" else [name + " identity"]
+            ),
             "mustNotBorrow": ["another character's features"],
         }
         for name in paths
@@ -60,7 +63,10 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
                 {"view": "front", "crop": [0, 0, 0.5, 1]},
                 {"view": "rear", "crop": [0.5, 0, 1, 1]},
             ],
-            "distinguishingFeatures": [name + " identity"],
+            "distinguishingFeatures": (
+                ["round glasses", name + " identity"]
+                if name == "Zenny" else [name + " identity"]
+            ),
             "mustNotBorrow": ["the other character's features"],
         }
     monkeypatch.setattr(cb_render, "_identity_packs_cfg", lambda: packs)
@@ -92,10 +98,14 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
         ("@图2", "Fuzzby", "complete-turnaround"),
         ("@图3", "scene plate", None),
     ]
-    assert "@图1 is Zenny's complete, uncropped 360 turnaround sheet" in prompt
-    assert "@图2 is Fuzzby's complete, uncropped 360 turnaround sheet" in prompt
+    assert "@图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority" in prompt
+    assert "Match Zenny exactly as the same character shown in the turnaround" in prompt
+    assert "@图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority" in prompt
+    assert "round glasses" not in prompt
+    assert "rosy blush" not in prompt
     assert "@图3 is the locked Scene Look plate" in prompt
-    assert "Every view on this one sheet is the same character" in prompt
+    assert "do not describe, redesign, simplify, beautify" in prompt
+    assert "omitted reference features" in prompt
     assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_WORDS
 
 
@@ -250,8 +260,9 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
     keyframe_prompt = cb_render._compile_keyframe_integration_prompt(direction, shot)
     animation_prompt = cb_render._with_character_scale_control(
         "Animate the approved performance.", shot, "referenceSlots", "1", "Ep1")
-    assert "@图1 is Zenny's complete, uncropped 360 turnaround sheet" in keyframe_prompt
-    assert "@图2 is Fuzzby's complete, uncropped 360 turnaround sheet" in keyframe_prompt
+    assert "@图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority" in keyframe_prompt
+    assert "@图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority" in keyframe_prompt
+    assert "round glasses" not in keyframe_prompt
     assert "@图3 is the locked Scene Look plate" in keyframe_prompt
     assert "[Performance Freedom]" in keyframe_prompt
     assert cb_render.OPENING_COMPOSITION_ROLE not in keyframe_prompt

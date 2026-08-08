@@ -166,7 +166,7 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert ("[Protect]\nCarry the prior aftermath: visible pollen coating and a smeared "
             "pollen moustache." in prompt)
     assert "must already be" not in prompt
-    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_WORDS
+    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS
     assert "[Generation Goal]" not in prompt
     assert "[Starting Staging Envelope]" not in prompt
 
@@ -206,11 +206,40 @@ def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(mon
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
 
-    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_WORDS
+    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS
     assert "chest-forward overcommitted hover beginning a zig-zag entry" in prompt
     assert "compact steady hover on a clean glide line" in prompt
     assert "beginning a." not in prompt
     assert "body-mounted bags, sacks, baskets or dangling loads" in prompt
+
+
+def test_stage_prompt_allows_reasonable_over_target_tolerance(monkeypatch):
+    direction = {
+        "audienceRead": " ".join(["A readable bee-height chase lane protects comic cause and effect"] * 10),
+        "lensAndCameraRelationship": " ".join(["Drone-like bee-height pursuit camera"] * 8),
+        "lightingAndDepth": " ".join(["Locked warm scene plate with translucent flower depth"] * 8),
+        "openingFrameLayout": {"sameDepth": True, "placements": [
+            {"character": "Fuzzby", "centerX": .42, "centerY": .49,
+             "pose": "forward, unstable, playable anticipation with clear room to crash",
+             "facing": "down the flower corridor"},
+            {"character": "Zenny", "centerX": .25, "centerY": .5,
+             "pose": "steady hover, precise, composed and watching Fuzzby's path",
+             "facing": "down the flower corridor"},
+        ]},
+        "continuityProtections": [
+            "Keep exactly two bees, the corridor route readable, and the first frame before the gag payoff."],
+    }
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
+
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, {
+        "shotId": "S1.SH1A",
+        "keyframeReferenceSlots": {
+            "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
+    })
+
+    assert cb_render.MAX_KEYFRAME_INTEGRATION_WORDS < len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS
+    assert "S1.SH1A" in prompt
 
 
 def test_pose_pass_requires_one_subject_and_every_objective_dimension():

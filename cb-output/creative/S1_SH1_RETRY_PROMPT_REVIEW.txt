@@ -1,0 +1,39 @@
+AUDIO-LOCK: @Audio1 is the sole source of English dialogue, speaker performance and timing. Fuzzby owns regions 1, 2, 3 and 5; Zenny owns region 4; listeners remain silent. Add no dialogue, vocalisations or subtitles.
+
+[Multimodal Reference Layer]
+@Image1 defines only the exact opening composition, positions and camera direction; do not use it to redesign character identity, proportions, materials or later action.
+@Image2 is Zenny's complete turnaround and defines only identity, proportions, glasses, wings and scale; ignore its background.
+@Image3 is Fuzzby's complete turnaround and defines only identity, proportions, glasses, wings and scale; ignore its background.
+@Image4 defines only the flower-corridor layout, materials, warm light and bee-height scale; exclude its characters.
+@Audio1 defines all words, speakers, delivery, mouth timing and silence.
+
+[One-Sentence Summary]
+Fuzzby's joyful performance of expertise becomes increasingly visible failure, while Zenny's restrained amusement shows that she sees and loves exactly who he is.
+
+[Global Settings]
+Original feature-quality stylised 3D CGI: tactile fur, translucent wings, compressible plants and separated golden pollen. Preserve turnaround proportions at equal depth; never inflate Fuzzby or shrink Zenny. Fuzzby plays proud authority, never distress; Zenny stays precise, economical and affectionate. No pollen bags or invented equipment. Camera movement protects cause, reaction and payoff.
+
+[Timestamp Script Storyboard]
+Stage 1: 0-8.8s [Chase, impact, false triumph]
+Initial state: begin exactly from @Image1 with both bees already working at equal depth and open corridor ahead.
+Action/Expression: Fuzzby barrels through the flower corridor with two escalating near-misses; do not crash before 4.2s. Fuzzby barrels through the flower corridor, dives too hard into a flower, scoops pollen, spins sideways into a springy leaf, then is FWIPped back upright by the leaf’s recoil. His sideways weight bends and loads the leaf, causing its recoil to push him through one tucked rotation into a chest-out hover that remains wobbling around region 2.
+Emotion/Camera Analysis: follow slightly late, keeping Zenny's clean path and the complete flower-to-leaf cause visible; settle for his false triumph.
+End state: Fuzzby hovers upright and chest-forward with pollen drifting around him, still physically unsettled, as Zenny glides close enough to watch.
+
+Stage 2: 8.8-16.2s [Status reveal and loving judgement]
+Continue from the previous stage: Fuzzby carries the proud wobble forward; no moustache exists yet.
+Action/Expression: Fuzzby zooms to another flower, sticks his whole face into it, pulls back wearing a fuzzy yellow pollen moustache, and presents the accident for judgement. Keep his body outside; show stamens transferring two yellow upper-lip curls. After region 3, Zenny's eyes move from the mark to Fuzzby and one mouth corner almost escapes before her still, loving region 4 response. Fuzzby holds proudly and absorbs the re-title.
+Emotion/Camera Analysis: steady the relationship composition; the evidence must read before Zenny reacts.
+End state: Fuzzby’s pollen moustache remains fully visible as an invented badge and a visible joke, with Zenny close by and amused despite herself.
+
+Stage 3: 16.2-29s [Failed correction and warm confession]
+Continue from the previous stage: the moustache remains visible and Zenny stays outside Fuzzby's path.
+Action/Expression: Fuzzby gasps, wipes at his face and smears the pollen worse, then overcommits into another dive, clips a branch, tumbles through flower contacts, lands upside down in a blossom, kicks, pops up, then dives again and emerges even more covered in pollen. Make wipe-to-smear-to-bolt causal. Show three readable contacts, body outside the blossom, kicking legs, then a vertical pop into an on-parade pose around region 5. Only after the pose reads, Zenny gives one eye-roll that softens into a smile.
+Emotion/Camera Analysis: follow the causal tumble without random cuts; hold the final worsening and Zenny's affection together.
+End state: Fuzzby pops back out of the last flower more pollen-covered than before, with unsettled golden dust hanging between him and Zenny’s smiling eye-roll.
+
+[Global Supplement]
+Keep identity, relative scale, axis, light and plant geography continuous. No duplicates, random impacts, painful collisions, full-body flower swallowing, morphing, opaque pollen or style drift.
+
+[Audio]
+Use @Audio1 exactly. Generate light playful comedy music that ducks under speech, leaves space for Zenny's deadpan and resolves warmly. Keep wing, petal, leaf-recoil, impact and pollen foley audible; add no voices.

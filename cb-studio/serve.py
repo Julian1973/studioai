@@ -18,6 +18,31 @@ DATA.mkdir(parents=True, exist_ok=True)
 import cb_scripts
 import cb_db
 import studio_profile
+
+def _canonical_engine_module(module_name):
+    """Import an engine module from this Studio checkout, never from an older cached tree."""
+    expected_root = CBGEN.resolve()
+    current = sys.modules.get(module_name)
+    current_file = pathlib.Path(getattr(current, "__file__", "") or "").resolve() if current else None
+    if current and current_file:
+        try:
+            if current_file.is_relative_to(expected_root):
+                return current
+        except AttributeError:
+            if str(current_file).startswith(str(expected_root) + os.sep):
+                return current
+    if current:
+        sys.modules.pop(module_name, None)
+    try:
+        sys.path.remove(str(CBGEN))
+    except ValueError:
+        pass
+    sys.path.insert(0, str(CBGEN))
+    return __import__(module_name)
+
+def _canonical_cb_render():
+    return _canonical_engine_module("cb_render")
+
 ACTIVE_SHOW = studio_profile.load_show_profile(ROOT)
 SHOW_PROFILE_STATUS = studio_profile.capability_report(ACTIVE_SHOW)
 CANON_CONFIG = ACTIVE_SHOW.canon_paths["characters"].parent
@@ -344,6 +369,35 @@ def reindex_episodes():
 JOBS = {}  # jobId -> {jobId, scene, gate, status, log, started, ended}
 PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid-run)
 _JOB_LOCK = threading.RLock()
+_DIRECTOR_SESSION_CACHE = {}
+_DIRECTOR_SESSION_CACHE_LOCK = threading.RLock()
+_DIRECTOR_SESSION_CACHE_TTL_SEC = 60.0
+DIRECTOR_ACTION_IDS = {
+    "open-inspector", "open-provider-setup", "direct-scene",
+    "build-scene-plate", "select-scene-plate-library", "select-scene-plate-upload",
+    "select-keyframe-library", "select-keyframe-upload",
+    "build-keyframe", "build-voice", "prepare-render",
+    "accept-keyframe", "iterate-keyframe",
+    "accept-voice", "iterate-voice",
+    "approve-spend", "cancel-spend",
+    "accept-animation", "iterate-animation",
+    "run-quality-review", "accept-quality", "reopen-shot",
+    "build-master", "run-final-review", "accept-master", "iterate-master",
+}
+
+
+def _clear_director_session_cache(scene=None, episode=None):
+    with _DIRECTOR_SESSION_CACHE_LOCK:
+        if scene is None and episode is None:
+            _DIRECTOR_SESSION_CACHE.clear()
+            return
+        for key in list(_DIRECTOR_SESSION_CACHE):
+            key_episode, key_scene, _ = key
+            if scene is not None and key_scene != str(scene):
+                continue
+            if episode is not None and key_episode != str(episode):
+                continue
+            _DIRECTOR_SESSION_CACHE.pop(key, None)
 
 
 def _persist_job(job, required=False):
@@ -361,6 +415,69 @@ def _persist_job(job, required=False):
 def _jobs_snapshot():
     with _JOB_LOCK:
         return {job_id: dict(job) for job_id, job in JOBS.items()}
+
+
+WORKBENCH_STATE_FILE = DATA / "project-workbench-state.json"
+
+
+def _empty_workbench_state():
+    return {"projects": {}}
+
+
+def _load_workbench_state():
+    try:
+        if WORKBENCH_STATE_FILE.exists():
+            payload = json.loads(WORKBENCH_STATE_FILE.read_text())
+            if isinstance(payload, dict):
+                payload.setdefault("projects", {})
+                return payload
+    except Exception:
+        pass
+    return _empty_workbench_state()
+
+
+def _workbench_key(project, episode, scene):
+    return f"{project or 'crystal-bears'}:{episode or 'Ep1'}:{scene or '1'}"
+
+
+def _project_workbench_state(project="crystal-bears", episode="Ep1", scene="1"):
+    payload = _load_workbench_state()
+    key = _workbench_key(project, episode, scene)
+    return payload.get("projects", {}).get(key, {
+        "project": project,
+        "episode": episode,
+        "scene": scene,
+        "activeBeatId": "moustache",
+        "beatState": {},
+        "updatedAt": None,
+    })
+
+
+def _save_project_workbench_state(update):
+    project = str(update.get("project") or "crystal-bears")
+    episode = str(update.get("episode") or "Ep1")
+    scene = str(update.get("scene") or "1")
+    key = _workbench_key(project, episode, scene)
+    payload = _load_workbench_state()
+    current = payload.setdefault("projects", {}).get(key, {})
+    merged = {
+        **current,
+        "project": project,
+        "episode": episode,
+        "scene": scene,
+        "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    if update.get("activeBeatId"):
+        merged["activeBeatId"] = str(update.get("activeBeatId"))
+    if isinstance(update.get("beatState"), dict):
+        beat_state = dict(merged.get("beatState") or {})
+        for beat_id, state in update["beatState"].items():
+            if isinstance(state, dict):
+                beat_state[str(beat_id)] = {**dict(beat_state.get(str(beat_id)) or {}), **state}
+        merged["beatState"] = beat_state
+    payload["projects"][key] = merged
+    cb_db.atomic_write_json(ROOT, WORKBENCH_STATE_FILE, payload)
+    return merged
 
 # ADDED 2026-07-12 (full-codebase audit continued, alongside the _freshness_watch fix above): PROCS only ever
 # tracked async render jobs, never a synchronous request thread doing real work of its own (a blocking
@@ -724,10 +841,13 @@ def _stream(jobId, args):
         except Exception: pass
         with _JOB_LOCK:
             job["ended"] = time.time()
+            job_scene = job.get("scene")
         _persist_job(job)
+        _clear_director_session_cache(scene=job_scene)
 
 def _start(jobId, gate, scene, args):
     args = list(args)
+    _clear_director_session_cache(scene=scene, episode=args[-1] if args else None)
     operation_key = cb_db.job_operation_key(gate, scene, args)
     stale = _is_stale()
     with _JOB_LOCK:
@@ -1076,7 +1196,7 @@ def shot_media_map(pkg, scene, episode="Ep1"):
     if not timing_path.exists():
         timing_path = MEDIA / f"{episode}_Scene{scene}_animatic.mp4"
     try:
-        import cb_render as _CBR
+        _CBR = _canonical_cb_render()
         timing_status = _CBR.timing_slate_status(scene, episode)
         timing_current = bool(timing_status.get("current"))
         timing_reason = timing_status.get("reason")
@@ -1179,7 +1299,7 @@ def scenelook_status_server(scene, episode="Ep1"):
     """
     # Use the engine's one authoritative state calculation. The former server-side mirror
     # drifted from the production rules and could make the UI disagree with paid generation.
-    import cb_render
+    cb_render = _canonical_cb_render()
     raw = cb_render.scenelook_status(scene, episode)
     approved, candidate, active = raw.get("approved"), raw.get("candidate"), raw.get("active")
     history = raw.get("history", [])
@@ -1222,7 +1342,7 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
     """Build the single Director response from authoritative zero-spend engine reads."""
     import cb_studio_director
     import cb_providers
-    import cb_render
+    cb_render = _canonical_cb_render()
     import cb_state
 
     state = cb_state.production_state(scene, episode)
@@ -1332,6 +1452,26 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
     session = cb_studio_director.build_session(
         **common, animation_contract=animation_contract)
     return session
+
+
+def _cached_director_session(scene, episode="Ep1", requested_shot_id=None):
+    key = (str(episode), str(scene), str(requested_shot_id or ""))
+    now = time.time()
+    with _DIRECTOR_SESSION_CACHE_LOCK:
+        cached = _DIRECTOR_SESSION_CACHE.get(key)
+        if cached and now - cached["at"] < _DIRECTOR_SESSION_CACHE_TTL_SEC:
+            return cached["session"]
+    session = _director_session(scene, episode, requested_shot_id)
+    with _DIRECTOR_SESSION_CACHE_LOCK:
+        _DIRECTOR_SESSION_CACHE[key] = {"at": time.time(), "session": session}
+    return session
+
+
+def _prewarm_director_session_cache():
+    try:
+        _cached_director_session("1", "Ep1", "S1.SH1A")
+    except Exception as exc:
+        print(f"DIRECTOR CACHE PREWARM WARNING - {exc}", flush=True)
 
 
 
@@ -1613,6 +1753,17 @@ class H(http.server.SimpleHTTPRequestHandler):
             return False
         return port == PUBLIC_PORT if PUBLIC_PORT is not None else port is None
 
+    def _is_loopback_host(self):
+        raw = (self.headers.get("Host") or "").strip()
+        try:
+            parsed = urlsplit("//" + raw)
+            host = (parsed.hostname or "").lower().rstrip(".")
+            port = parsed.port
+        except ValueError:
+            return False
+        expected_port = int(getattr(self.server, "server_port", PORT))
+        return host in ("localhost", "127.0.0.1", "::1") and port in (None, expected_port)
+
     def _has_session(self):
         try:
             cookie = SimpleCookie(self.headers.get("Cookie") or "")
@@ -1620,6 +1771,17 @@ class H(http.server.SimpleHTTPRequestHandler):
             return bool(supplied and hmac.compare_digest(supplied.value, SESSION_TOKEN))
         except Exception:
             return False
+
+    def _issue_session_redirect(self, location):
+        self.send_response(303)
+        self.send_header("Location", location)
+        self.send_header(
+            "Set-Cookie",
+            f"{SESSION_COOKIE}={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict"
+            + ("; Secure" if PUBLIC_ORIGIN else ""),
+        )
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
 
     def _deny(self, code, message):
         body = json.dumps({"error": message}).encode()
@@ -1647,15 +1809,14 @@ class H(http.server.SimpleHTTPRequestHandler):
                 parsed.query, keep_blank_values=True).items() if key != "launchToken"
                      for value in values]
             location = parsed.path + (("?" + urlencode(clean)) if clean else "")
-            self.send_response(303)
-            self.send_header("Location", location)
-            self.send_header(
-                "Set-Cookie",
-                f"{SESSION_COOKIE}={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict"
-                + ("; Secure" if PUBLIC_ORIGIN else ""),
-            )
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
+            self._issue_session_redirect(location)
+            return False
+        if (allow_launch and self.command in ("GET", "HEAD") and not PUBLIC_ORIGIN
+                and not self._has_session()
+                and parsed.path in ("/cb-studio/director.html", "/cb-studio/app.html")
+                and self._is_loopback_host()):
+            location = parsed.path + (("?" + parsed.query) if parsed.query else "")
+            self._issue_session_redirect(location)
             return False
         if not self._has_session():
             self._deny(401, "Studio launch authentication required")
@@ -1955,6 +2116,15 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception:
                 projs = []
             return self._json(200, {"projects": projs})
+        if urlsplit(self.path).path == "/api/project-workbench-state":
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            project = (q.get("project") or ["crystal-bears"])[0]
+            ep = (q.get("episode") or ["Ep1"])[0]
+            scene = (q.get("scene") or ["1"])[0]
+            if not (_SHOT_TOKEN.match(project) and _SHOT_TOKEN.match(ep) and _SHOT_TOKEN.match(scene)):
+                return self._json(400, {"error": "project, episode and scene must be plain tokens"})
+            return self._json(200, _project_workbench_state(project, ep, scene))
         if self.path == "/api/reindex":
             reindex_media()
             return self._json(200, {"ok": True, "episodes": reindex_episodes()})
@@ -2059,7 +2229,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "zeroSpend": True,
                 })
             try:
-                return self._json(200, _director_session(scene, ep, shot_id))
+                return self._json(200, _cached_director_session(scene, ep, shot_id))
             except Exception as exc:
                 return self._json(400, {"error": str(exc), "zeroSpend": True})
         if self.path.startswith("/api/studio-agent"):
@@ -2121,9 +2291,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "error": "scene, shotId and episode must be plain tokens",
                     "zeroSpend": True, "readOnly": True,
                 })
-            if str(CBGEN) not in sys.path:
-                sys.path.insert(0, str(CBGEN))
-            import cb_render as _CBR
+            _CBR = _canonical_cb_render()
             try:
                 manifest = _CBR.shot_reference_manifest(scene, sid, ep)
                 for stage_name in ("keyframe", "animation"):
@@ -2312,7 +2480,15 @@ class H(http.server.SimpleHTTPRequestHandler):
             import cb_render as _CBR
             try:
                 if self.path.startswith("/api/shot-voice-status"):
-                    return self._json(200, _CBR.voice_performance_status(scene, sid, ep))
+                    status = _CBR.voice_performance_status(scene, sid, ep)
+                    try:
+                        pkg, _ = _CBR.load_pkg(scene, ep)
+                        led = next((item for item in (pkg.get("continuityLedger") or [])
+                                    if item.get("shotId") == sid), {})
+                        status["takeUrl"] = _url_from_abs(led.get("voPath"))
+                    except Exception:
+                        status["takeUrl"] = None
+                    return self._json(200, status)
                 if self.path.startswith("/api/shot-seedance-status"):
                     return self._json(200, _CBR.seedance_working_status(scene, sid, ep))
                 return self._json(200, _CBR.check_seedance_structure(scene, sid, ep))
@@ -2439,6 +2615,18 @@ class H(http.server.SimpleHTTPRequestHandler):
                 else:
                     raise ValueError("action must be add or remove")
                 self._json(200, rough_cut_projection(episode))
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/project-workbench-state":
+            try:
+                d = self._body()
+                project = str(d.get("project") or "crystal-bears")
+                episode = str(d.get("episode") or "Ep1")
+                scene = str(d.get("scene") or "1")
+                if not (_SHOT_TOKEN.match(project) and _SHOT_TOKEN.match(episode) and _SHOT_TOKEN.match(scene)):
+                    raise ValueError("project, episode and scene must be plain tokens")
+                self._json(200, {"ok": True, "state": _save_project_workbench_state(d)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -2809,6 +2997,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                 if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
                         (shot_id and not _SHOT_TOKEN.match(shot_id))):
                     self._json(400, {"error": "invalid Director action target"}); return
+                if action not in DIRECTOR_ACTION_IDS:
+                    self._json(409, {
+                        "error": "That action is no longer current or is not recognised. Refresh the Studio and try again.",
+                    }); return
+                _clear_director_session_cache(scene=scene, episode=ep)
 
                 session = _director_session(scene, ep, shot_id)
                 import cb_studio_director as _CBD
@@ -2830,6 +3023,55 @@ class H(http.server.SimpleHTTPRequestHandler):
                     args = ["cb_creative.py", "scene", scene, ep]
                     job_id = _start(_jid(f"director_scene_{scene}"),
                                     "director:scene", scene, args)
+                elif action in ("build-scene-plate", "select-scene-plate-library", "select-scene-plate-upload"):
+                    source_path = d.get("sourcePath")
+                    if action == "build-scene-plate":
+                        job_id = shot_run_job("scenelook", scene, ep)
+                    else:
+                        if not source_path or not isinstance(source_path, str):
+                            self._json(400, {"error": "Choose a scene plate source first."}); return
+                        try:
+                            sp = pathlib.Path(source_path).resolve()
+                            roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                            if not sp.exists() or not any(sp.is_relative_to(root) for root in roots):
+                                self._json(400, {"error": "sourcePath must be an existing file under engine/media or cb-seed/assets"}); return
+                        except Exception:
+                            self._json(400, {"error": "sourcePath is not a valid path"}); return
+                        _CBR = _canonical_cb_render()
+                        mode = "library" if action == "select-scene-plate-library" else "upload"
+                        try:
+                            st = _CBR.scenelook_status(scene, ep)
+                            if st.get("candidate"):
+                                _CBR.reject_scenelook(
+                                    scene,
+                                    "Superseded by direct Scene Plate library/upload selection in the Director workspace.",
+                                    episode=ep,
+                                    reviewed_by=str(d.get("by") or "Julian"),
+                                )
+                            _CBR.select_scenelook_source(
+                                scene, mode, ep,
+                                library_path=str(sp) if mode == "library" else None,
+                                upload_path=str(sp) if mode == "upload" else None,
+                            )
+                            _CBR.approve_scenelook(scene, ep)
+                        except _CBR.Refused as e:
+                            self._json(409, {"error": str(e), "session": session}); return
+                        job_id = None
+                elif action in ("select-keyframe-library", "select-keyframe-upload"):
+                    if not target:
+                        self._json(409, {"error": "No current shot is available"}); return
+                    source_path = d.get("sourcePath")
+                    if not source_path or not isinstance(source_path, str):
+                        self._json(400, {"error": "Choose a keyframe source first."}); return
+                    try:
+                        sp = pathlib.Path(source_path).resolve()
+                        roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                        if not sp.exists() or not any(sp.is_relative_to(root) for root in roots):
+                            self._json(400, {"error": "sourcePath must be an existing file under engine/media or cb-seed/assets"}); return
+                    except Exception:
+                        self._json(400, {"error": "sourcePath is not a valid path"}); return
+                    command = "select-library" if action == "select-keyframe-library" else "select-upload"
+                    job_id = shot_run_job(command, scene, ep, target, source_path=str(sp))
                 elif action in ("build-keyframe", "build-voice", "prepare-render"):
                     if not target:
                         self._json(409, {"error": "No current shot is available"}); return
@@ -2929,6 +3171,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(200, {"ok": True, "zeroSpend": True}); return
                 else:
                     self._json(409, {"error": "This Director action is not implemented yet."}); return
+                if job_id is None:
+                    self._json(200, {
+                        "ok": True,
+                        "zeroSpend": True,
+                        "session": _director_session(scene, ep, target),
+                    }); return
                 self._json(200, {"ok": True, "jobId": job_id})
             except Exception as exc:
                 self._json(400, {"error": str(exc)})
@@ -3358,6 +3606,7 @@ def main():
     episodes = reindex_episodes()
     http.server.ThreadingHTTPServer.allow_reuse_address = True
     threading.Thread(target=_freshness_watch, daemon=True).start()
+    threading.Thread(target=_prewarm_director_session_cache, daemon=True).start()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
         launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"

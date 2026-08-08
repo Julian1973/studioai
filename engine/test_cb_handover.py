@@ -336,6 +336,14 @@ def test_storyboard_is_sole_creative_source():
         sb["shots"][0]["performanceContract"]["characterTruths"])
     assert s1["cinematographyContractApproved"] == (
         sb["shots"][0]["cinematographyContract"])
+    assert s1["comedyContractsApproved"] == [{
+        "beatCode": sb["beats"][0]["beatId"],
+        **sb["beats"][0]["comedyContract"],
+    }]
+    assert s1["emotionContractsApproved"] == [{
+        "beatCode": sb["beats"][0]["beatId"],
+        **sb["beats"][0]["emotionContract"],
+    }]
     assert "OLD-CREATIVE-SOURCE-MARKER" not in json.dumps(pkg)   # nothing of rev 6 survives
     assert pkg["sourceStoryboard"]["md5"] == _md5(sb_p)          # provenance binds the source
 
@@ -735,8 +743,21 @@ def test_real_s1sh1_maps_cleanly_into_the_canonical_engine_compiler():
         voice_by_occurrence[occurrence_id]
         for occurrence_id in pd1.get("dialogueOccurrenceIds", [])
     ]
-    shot, _ = H.distil_shot(
-        s1, pd1, ["Fuzzby", "Zenny"], shot_voices, None, chars_cfg)
+    shot, retained = H.distil_shot(
+        s1, pd1, ["Fuzzby", "Zenny"], shot_voices, None, chars_cfg,
+        H._owned_big_comedy_stagings(sb, s1),
+        H._owned_beat_contracts(sb, s1, "comedyContract"),
+        H._owned_beat_contracts(sb, s1, "emotionContract"))
+    assert [item["beatCode"] for item in retained["comedyContractsApproved"]] == [
+        "1.B1", "1.B2", "1.B3"]
+    assert [item["mode"] for item in retained["comedyContractsApproved"]] == [
+        "BIG", "SMALL", "BIG"]
+    assert "environmental participation" in (
+        retained["comedyContractsApproved"][0]["mechanism"])
+    assert "deadpan observation" in retained["comedyContractsApproved"][1]["mechanism"]
+    assert "concealment becoming revelation" in (
+        retained["comedyContractsApproved"][2]["mechanism"])
+    assert len(retained["emotionContractsApproved"]) == 3
     kf, kwc, kslots = cb_engine.compile_keyframe_prompt(
         shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
     assert "already" in kf.lower()                                # the real, approved opening state

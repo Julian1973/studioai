@@ -44,6 +44,23 @@ def test_animation_direction_requires_declared_creative_latitude():
         "taskMode": "reference-to-video",
         "generationGoal": "Generate Fuzzby's confident attempt and comic recovery.",
         "deliveryPlan": "One causal action chain lands on the proud pose long enough to read.",
+        "creativeTranslation": {
+            "interpretation": {
+                "jokeOrAche": "Confidence survives visible evidence against it.",
+                "mechanism": "The recovery claims more control than the body has.",
+                "statusBefore": "Fuzzby performs authority.",
+                "statusAfter": "The flower quietly disproves him.",
+                "audienceProgression": ["anticipation", "impact", "affection"],
+                "emotionalHeart": "He remains lovable because he keeps trying.",
+            },
+            "gagClocks": [],
+            "generationDesign": {
+                "packagingDecision": "single-unit", "completeGagArcCount": 0,
+                "densityJudgement": "One compact causal arc.",
+                "splitOrNonSplitRationale": "The action and reaction lose force if separated.",
+                "handoffState": "Fuzzby balanced on the flower, chest out.",
+            },
+        },
         "dramaticBeat": "Boast becomes a private wobble.",
         "audienceBefore": "Amused anticipation.",
         "audienceAfter": "A laugh with affection.",
@@ -119,6 +136,46 @@ def test_animation_direction_requires_declared_creative_latitude():
     else:
         raise AssertionError("a 30-second unit must use a complete timestamp stage plan")
 
+    try:
+        AnimationDirection.model_validate({
+            **base,
+            "performanceFreedom": "Seedance may discover the detailed performance.",
+            "providerPrompt": " ".join(["direction"] * 451),
+        })
+    except ValidationError as exc:
+        assert "production ceiling is 450" in str(exc)
+    else:
+        raise AssertionError("provider prompts over 450 words must fail software-wide")
+
+    long_form = {
+        **base,
+        "durationSec": 30,
+        "pacingMode": "timestamp",
+        "stagePlan": [{
+            **base["stagePlan"][0], "startSec": 0.0, "endSec": 30.0,
+        }],
+        "performanceFreedom": "Seedance may discover the detailed performance.",
+        "providerPrompt": " ".join(["direction"] * 700),
+    }
+    AnimationDirection.model_validate(long_form)
+    try:
+        AnimationDirection.model_validate({
+            **long_form, "providerPrompt": " ".join(["direction"] * 701),
+        })
+    except ValidationError as exc:
+        assert "production ceiling is 700" in str(exc)
+    else:
+        raise AssertionError("long-form provider prompts over 700 words must fail")
+
+    incomplete = AnimationDirection.model_validate({
+        **base,
+        "performanceFreedom": "Seedance may discover the detailed performance.",
+    })
+    report = R._animation_prompt_contract_report(
+        {"dialogueLines": [], "durationSec": 8}, incomplete)
+    assert report["ready"] is False
+    assert report["authoringContract"]["status"] == "needs-work"
+
 
 def test_animation_direction_requires_complete_ordered_timestamp_stages():
     stage = {
@@ -138,6 +195,22 @@ def test_animation_direction_requires_complete_ordered_timestamp_stages():
         "pacingMode": "timestamp",
         "generationGoal": "Generate the physical joke.",
         "deliveryPlan": "A clear cause and delayed reaction land the beat.",
+        "creativeTranslation": {
+            "interpretation": {
+                "jokeOrAche": "Confidence becomes a visible wobble.",
+                "mechanism": "The flower returns the force Fuzzby gives it.",
+                "statusBefore": "Fuzzby leads.", "statusAfter": "The flower wins.",
+                "audienceProgression": ["anticipation", "impact", "release"],
+                "emotionalHeart": "The failure remains gentle and affectionate.",
+            },
+            "gagClocks": [],
+            "generationDesign": {
+                "packagingDecision": "single-unit", "completeGagArcCount": 0,
+                "densityJudgement": "One readable action and reaction.",
+                "splitOrNonSplitRationale": "The causal chain belongs in one unit.",
+                "handoffState": "Caught on the bloom.",
+            },
+        },
         "dramaticBeat": "Confidence becomes a wobble.",
         "audienceBefore": "Anticipation.", "audienceAfter": "Affectionate laughter.",
         "beatOwner": "Fuzzby", "performanceFreedom": "Seedance may shape the recovery.",

@@ -775,13 +775,16 @@ def install(m):
         result = original["keyframe_shot"](scene, shot_id, episode, log)
         pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
-        candidate = ledger["keyframeCandidate"]
+        candidate = ledger.get("keyframeCandidate")
+        if not candidate:
+            return result
         candidate["packageRevision"] = pkg.get("revision")
         candidate["inputSignature"] = keyframe_signature(
             pkg, shot, candidate, scene, episode)
         candidate["contentHash"] = file_sha256(candidate.get("path"))
-        candidate["conformanceScreening"] = m.screen_keyframe_conformance(
-            pkg, shot, candidate.get("path"), scene, episode, log)
+        candidate["conformanceScreening"] = candidate.get("conformanceScreening") or \
+            m.screen_keyframe_conformance(
+                pkg, shot, candidate.get("path"), scene, episode, log)
         m._save(pkg, path)
         screening = candidate["conformanceScreening"]
         if screening.get("status") == "fail":
@@ -789,12 +792,8 @@ def install(m):
             correction = (review.get("recommendedCorrection") or
                           screening.get("reason") or
                           "The keyframe failed objective identity and scale checks.")
-            original["reject_keyframe"](
-                scene, shot_id,
-                "Automatic pre-approval QC: " + correction,
-                episode=episode, reviewed_by="Studio objective QC", log=log)
-            log(f"KEYFRAME HELD BACK — {shot_id}: objective identity/scale QC failed; "
-                "no automatic reroll was fired")
+            log(f"KEYFRAME QC WARNING — {shot_id}: {correction}; "
+                "candidate remains available for the human Director's Accept or Refire decision")
         return result
 
     def select_keyframe(scene, shot_id, mode, episode="Ep1", upload_path=None,
@@ -843,10 +842,10 @@ def install(m):
             review = screening.get("review") or {}
             correction = (review.get("recommendedCorrection") or screening.get("reason") or
                           "The keyframe failed objective identity and scale checks.")
-            original["reject_keyframe"](
-                scene, shot_id,
-                "Automatic pre-approval QC: " + correction,
-                episode=episode, reviewed_by="Studio objective QC", log=log)
+            log(
+                f"KEYFRAME QC WARNING — {shot_id}: {correction}; "
+                "candidate remains available for the human Director's Accept or Refire decision"
+            )
         return screening
 
     def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
@@ -871,12 +870,10 @@ def install(m):
             "reasonAtDecision": screening.get("reason"),
         }
         conformance = candidate.get("conformanceScreening") or {}
-        human_selected = candidate.get("source", "generated") != "generated"
-        if human_selected:
-            # An imported/library/carried frame is an explicit human source choice. The
-            # automated screen remains visible evidence, but cannot overrule the Director's
-            # deliberate Accept. Reconstruct any metadata missing from an interrupted older
-            # selection so the approval is still content- and lineage-bound.
+        if conformance.get("status") != "pass":
+            # The automated screen is evidence, not the Director. A deliberate human Accept
+            # keeps the failed/unknown check attached to lineage instead of silently blocking
+            # or rejecting the candidate.
             candidate["packageRevision"] = pkg.get("revision")
             candidate["inputSignature"] = keyframe_signature(
                 pkg, shot, candidate, scene, episode)
@@ -888,11 +885,6 @@ def install(m):
                 "reasonAtDecision": (conformance.get("reason") or
                                      "Objective identity and scale advice was unavailable."),
             }
-        elif conformance.get("status") != "pass":
-            reason = conformance.get("reason") or "objective identity and scale check is missing"
-            raise m.Refused(
-                f"REFUSED — {shot_id} cannot be accepted: {reason}. Retry the check or "
-                "iterate the keyframe; this protection cannot be overridden.")
         expected = keyframe_signature(pkg, shot, candidate, scene, episode)
         if (candidate.get("inputSignature") != expected or
                 candidate.get("contentHash") != file_sha256(candidate.get("path"))):
@@ -921,7 +913,6 @@ def install(m):
                     "expectedInputSignature": None}
         path = record.get("path")
         human_advisory_accepted = bool(
-            record.get("source", "generated") != "generated" and
             (record.get("conformanceAdvisoryDecision") or {}).get("acceptedBy"))
         conformance_current = bool(
             (record.get("conformanceScreening") or {}).get("status") == "pass" or
@@ -955,7 +946,6 @@ def install(m):
         if existing.get("contentHash") != file_sha256(existing.get("path")):
             changed.append("contentHash")
         human_advisory_accepted = bool(
-            existing.get("source", "generated") != "generated" and
             (existing.get("conformanceAdvisoryDecision") or {}).get("acceptedBy"))
         if ((existing.get("conformanceScreening") or {}).get("status") != "pass" and
                 not human_advisory_accepted):
@@ -978,13 +968,28 @@ def install(m):
         return result
 
     def seedance_prompt(pkg, shot):
-        prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
-                     .get("providerPrompt") or "").strip()
+        led = m._ledger(pkg, shot["shotId"])
+        working = led.get("workingSeedancePrompt") or {}
+        prompt = str(working.get("text") or "").strip()
+        is_working = bool(prompt)
+        if not prompt:
+            prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
+                         .get("providerPrompt") or "").strip()
         if not prompt:
             raise m.Refused(f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
         return (m._with_character_scale_control(
             prompt, shot, "referenceSlots", str(pkg.get("sceneNumber")),
-            pkg.get("episode") or "Ep1"), False)
+            pkg.get("episode") or "Ep1"), is_working)
+
+    def approved_seedance_prompt(pkg, shot):
+        prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
+                     .get("providerPrompt") or "").strip()
+        if not prompt:
+            raise m.Refused(
+                f"REFUSED — Prepare current Animation direction for {shot['shotId']} first")
+        return m._with_character_scale_control(
+            prompt, shot, "referenceSlots", str(pkg.get("sceneNumber")),
+            pkg.get("episode") or "Ep1")
 
     def check_structure(scene, shot_id, episode="Ep1", log=print):
         try:
@@ -1150,7 +1155,7 @@ def install(m):
     m._keyframe_record_status = keyframe_record_status
     m._anchor_for = anchor_for
     m._resolve_seedance_prompt = seedance_prompt
-    m._approved_seedance_prompt = lambda pkg, shot: seedance_prompt(pkg, shot)[0]
+    m._approved_seedance_prompt = approved_seedance_prompt
     m.check_seedance_structure = check_structure
     m.fire_shot = fire_shot
     m.next_shot = next_shot

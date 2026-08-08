@@ -244,8 +244,9 @@ def _segment_task(base_task, shot_id, segment, segment_count, dialogue_speakers)
         task["audio"] = (
             "@Audio1 is the sole source of English dialogue, voice, performance, and local "
             f"timing for {speaker_names}. Preserve its silence and speaking times. Characters "
-            "who are not speaking remain silent and do not mouth words. Use natural ambience "
-            "and foley only; no music."
+            "who are not speaking remain silent and do not mouth words. Seedance may generate "
+            "only non-dialogue ambience, foley, comedy impacts, wing buzzes, plant movement, "
+            "and low supportive underscore under the locked dialogue."
         )
         task["assets"]["audio"] = [{
             "tag": "@Audio1", "subject": "approved timed dialogue",
@@ -256,8 +257,9 @@ def _segment_task(base_task, shot_id, segment, segment_count, dialogue_speakers)
                               if not _reference_tag(item).startswith("@audio")]
         task["assets"]["audio"] = []
         task["audio"] = (
-            "No dialogue occurs in this segment. Use natural ambience and foley only; "
-            "no music. Do not invent or repeat dialogue from another stage."
+            "No dialogue occurs in this segment. Seedance may generate ambience, foley, "
+            "designed non-dialogue sound effects, and low supportive underscore. Do not "
+            "invent or repeat dialogue from another stage."
         )
     task["transportContext"] = None
     task.pop("transportContext", None)

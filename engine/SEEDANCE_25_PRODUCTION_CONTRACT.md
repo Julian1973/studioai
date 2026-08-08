@@ -1,9 +1,9 @@
 # Seedance 2.5 Production Contract
 
-**Status:** authoring contract active; paid execution blocked pending BytePlus qualification  
-**Target model:** `dreamina-seedance-2-5-260628`  
-**Provider:** BytePlus ModelArk  
-**Effective:** 2026-08-04
+**Status:** production route qualified; every paid request remains human-authorised
+**Target model:** `fal-seedance-2.5`
+**Provider endpoint:** `bytedance/seedance-2.5/reference-to-video` on fal
+**Effective:** 2026-08-07
 
 ## One Creative Rule
 
@@ -56,9 +56,12 @@ Each production unit must lock:
 - exact dialogue occurrences in script order;
 - an opening state and a final handoff state for continuity.
 
-A unit longer than 15 seconds must use consecutive timestamp stages covering second 0 through the
-exact approved duration without gaps or overlaps. Split only for story grammar, a location or time
-change, a reference-set change, a continuity reset, or because the natural action exceeds 30 seconds.
+Stages are the default control language for Seedance 2.5. Use timestamp ranges only when a critical
+handoff, entrance, exit, transition, dialogue cue, or Director-locked beat needs timing protection.
+If timestamps are used, they must be consecutive and non-overlapping, and they must cover the
+approved timed span without gaps. Split only for story grammar, a location or time change, a
+reference-set change, a continuity reset, complexity protection, or because the natural action
+exceeds 30 seconds.
 
 ## Reference Contract
 
@@ -80,34 +83,41 @@ duration, references, or continuity state.
 
 ## Execution Contract
 
-The only target is Seedance 2.5 through the BytePlus asynchronous content-generation API. Seedance
-2.0 routes are retired and cannot be selected as fallbacks. A render may fire only after all of the
-following are true:
+The production target is Seedance 2.5 through fal's documented
+`bytedance/seedance-2.5/reference-to-video` endpoint. Seedance 2.0 routes are retired and cannot be
+selected as fallbacks. The executable provider registry, rather than this prose document, remains
+the authority for the live schema and limits. A render may fire only after all of the following are
+true:
 
-- the exact BytePlus model is activated for the account;
-- model-specific duration, reference, resolution, and audio limits are verified;
-- pricing and billing cadence are configured;
-- the sealed spend disclosure names the same provider, model, duration, and references;
-- all creative and human approval lineage is current.
+- fal authentication and the exact endpoint are available;
+- the request fits the verified 4-30 second, reference, resolution, and audio contract;
+- current pricing is configured and sealed into the spend disclosure;
+- the disclosure names the same provider, model, duration, prompt, references, and audio;
+- all creative and human approval lineage is current;
+- the human explicitly approves the disclosed maximum spend.
 
-Until then the system fails before upload, task creation, or spend. Storyboarding, prompt compilation,
-reference review, and zero-spend preflight continue to work.
+The adapter translates Studio reference labels to fal upload-order tags such as `@Image1` and
+`@Audio1` before submission. Any unsupported field, changed file hash, stale approval, missing audio,
+or provider mismatch fails before upload, task creation, or spend.
 
 ## Production Evidence
 
-Dreamina's current Seedance 2.5 production guidance describes one 30-second narrative request as a
-compact shot list with beat timing, camera direction, references, and a beginning-to-payoff arc. It
-also advises simplifying scene complexity when drift appears. The Studio therefore removes avoidable
-joins when continuity benefits, but keeps a named complexity-protection boundary when one request
-would become less controllable.
+Dreamina's current Seedance 2.5 production guidance describes narrative requests as staged
+progression with explicit reference roles, one primary visible change per stage, observable end
+states, and optional timing where precision matters. The Studio therefore removes avoidable joins
+when continuity benefits, but keeps a named complexity-protection boundary when one request would
+become less controllable.
 
-- https://dreamina.capcut.com/seedance/seedance-2-5-prompt
-- https://dreamina.capcut.com/seedance/seedance-2-5-best-settings
-- https://dreamina.capcut.com/seedance/how-to-use-seedance-2-5
+- https://docs.byteplus.com/en/docs/ModelArk/2607689
+- https://bytedance.larkoffice.com/docx/A88jd0B47oAd8zxWp5ycZFMfnxh
+- local prompt skill: `.agents/skills/sd25-pe`
 
-The public BytePlus ModelArk API documentation still lists Seedance 2.0 rather than the target 2.5
-model ID. Dreamina product availability is not proof that this BytePlus account can call the API.
-Paid execution therefore remains blocked until the exact route is activated and qualified.
+The fal Seedance 2.5 API documentation now provides the exact endpoint, request schema, 4-30 second
+duration range, multimodal reference limits and 720p price used by the Studio. BytePlus remains a
+separate disabled adapter until its account access, limits, terms and pricing are independently
+qualified. Dreamina product availability alone is never treated as API proof.
+
+- https://fal.ai/models/bytedance/seedance-2.5/reference-to-video/api
 
 ## Human Loop
 

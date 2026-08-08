@@ -1,7 +1,7 @@
 {
  "episode": "Ep1",
  "canonVersion": "1.0",
- "builtAt": "2026-08-05T10:53:04",
+ "builtAt": "2026-08-08T09:03:28",
  "sources": {
   "showBible": {
    "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
@@ -63,7 +63,7 @@
  "gaps": [],
  "conflicts": [],
  "canonLock": {
-  "manifestDigest": "93e40b9d3ce7c0beb02c152fc2def97e285abd953c41fd02e1aeff320a488ec7",
+  "manifestDigest": "15203fc3f9c71c9df10387ca2e52ec969cff5245ee5bc9c19243ce1ed228ed5b",
   "profile": "storyboard",
   "profileDigest": "f5ab2d425a40fa42dd3ff343ba15d3a0ee04c5b21415bf98fc8b390f698a7cb8",
   "sourceHashes": {

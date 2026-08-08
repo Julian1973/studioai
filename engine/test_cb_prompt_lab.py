@@ -145,8 +145,9 @@ Use @Audio1 exactly for Fuzzby. Zenny remains silent with her mouth closed; pres
 
     assert result["status"] == "ready"
     assert result["stageCount"] == 2
-    assert result["source"]["lastUpdated"] == "2026-08-04"
-    assert result["source"]["url"].startswith("https://bytedance.larkoffice.com/")
+    assert result["source"]["lastUpdated"] == "2026-08-07"
+    assert result["source"]["url"].startswith("https://docs.byteplus.com/")
+    assert result["source"]["larkUrl"].startswith("https://bytedance.larkoffice.com/")
     assert result["guideLimits"]["maxImages"] == 30
     assert result["guideLimits"]["maxCombinedInputs"] == 50
     assert result["guideLimits"]["betaLongVideoDurationSec"]["maximum"] == 180

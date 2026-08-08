@@ -1,34 +1,22 @@
 {
  "approved": {
-  "path": "/Users/julianjenkins/Desktop/8Th Hour/engine/media/Ep1_S1_plate_candidate_7ba326eb.png",
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_e579f60f.png",
   "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
-  "inputSignature": {
-   "briefHash": "f40304b4c3a5334e3b121a4653645371d5a19e46196fffb9447f6fbd60d63a2d",
-   "referenceHashes": {}
-  },
-  "referencePath": null,
-  "generatedAt": "2026-07-26T21:08:08",
-  "source": "library",
-  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
-  "approvedAt": "2026-07-26T21:09:54",
-  "reviewedBy": "Julian",
-  "reapprovedAt": "2026-07-26T21:10:07"
- },
- "candidate": {
-  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_e46992d5.png",
-  "hash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9",
   "inputSignature": {
    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
    "referenceHashes": {},
-   "plateHash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9"
+   "plateHash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
   },
   "referencePath": null,
-  "generatedAt": "2026-08-05T11:04:37",
+  "generatedAt": "2026-08-08T19:15:00",
   "source": "library",
-  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/archive/scenelook_rejected/20260805T110437/Ep1_S1_plate_candidate_15ffdf1e.png",
-  "packageRevision": 3
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/rainforest_flower_meadow.png",
+  "packageRevision": 4,
+  "approvedAt": "2026-08-08T19:15:00",
+  "reviewedBy": "Julian"
  },
+ "candidate": null,
  "history": [
   {
    "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_11848696.png",
@@ -69,6 +57,126 @@
    "reviewedBy": "Codex provenance migration",
    "rejectedNote": "Archived only to refresh provenance after the immutable script and canon signatures changed; the bee-height corridor image remains the selected visual source and is immediately rebound unchanged.",
    "rejectedArchivedFile": "media/archive/scenelook_rejected/20260805T110437/Ep1_S1_plate_candidate_15ffdf1e.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_e46992d5.png",
+   "hash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+    "referenceHashes": {},
+    "plateHash": "7eb63ec75d984c15a5d6db40c79313ec72ea2b9cff32abf9bce608eee38963a9"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-05T11:04:37",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/archive/scenelook_rejected/20260805T110437/Ep1_S1_plate_candidate_15ffdf1e.png",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-08T19:05:21",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Superseded by direct Scene Plate library/upload selection in the Director workspace.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260808T190521/Ep1_S1_plate_candidate_e46992d5.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_c0787e10.png",
+   "hash": "1ba4e4e9b0929d8232e8c64e6bf99a9051251859984abb0201ddc018e8482be2",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+    "referenceHashes": {},
+    "plateHash": "1ba4e4e9b0929d8232e8c64e6bf99a9051251859984abb0201ddc018e8482be2"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-08T19:05:22",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/deep_rainforest_flowers.png",
+   "packageRevision": 4,
+   "approvedAt": "2026-08-08T19:05:23",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-08T19:08:16",
+   "archivedFile": "media/archive/scenelook_superseded/20260808T190816/Ep1_S1_plate_candidate_c0787e10.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_8589ff40.png",
+   "hash": "b6971fa06bad5527a41d6fbf10dcd3b870f0031af47aaf97dbf4c23ab6b7b87a",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+    "referenceHashes": {},
+    "plateHash": "b6971fa06bad5527a41d6fbf10dcd3b870f0031af47aaf97dbf4c23ab6b7b87a"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-08T19:08:15",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/deep_rainforest.png",
+   "packageRevision": 4,
+   "approvedAt": "2026-08-08T19:08:16",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-08T19:10:31",
+   "archivedFile": "media/archive/scenelook_superseded/20260808T191031/Ep1_S1_plate_candidate_8589ff40.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_963d2762.png",
+   "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+    "referenceHashes": {},
+    "plateHash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-08T19:10:30",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/rainforest_flower_meadow.png",
+   "packageRevision": 4,
+   "approvedAt": "2026-08-08T19:10:31",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-08T19:10:45",
+   "archivedFile": "media/archive/scenelook_superseded/20260808T191045/Ep1_S1_plate_candidate_963d2762.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_c494cddd.png",
+   "hash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+    "referenceHashes": {},
+    "plateHash": "3459452c50b980fe7b42dc257678850f693bb120dd73b2f4bc38b589b4157002"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-08T19:10:45",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/rainforest_flower_meadow.png",
+   "packageRevision": 4,
+   "approvedAt": "2026-08-08T19:10:45",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-08T19:12:10",
+   "archivedFile": "media/archive/scenelook_superseded/20260808T191210/Ep1_S1_plate_candidate_c494cddd.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S1_plate_candidate_17396eb5.png",
+   "hash": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "7e82a33e499b4c1deed7cae41eb11b58475f8cba85a242c3807ddf03e8a7bc57",
+    "referenceHashes": {},
+    "plateHash": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-08T19:12:10",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/deep_rainforest_flower_field.png",
+   "packageRevision": 4,
+   "approvedAt": "2026-08-08T19:12:10",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-08T19:15:00",
+   "archivedFile": "media/archive/scenelook_superseded/20260808T191500/Ep1_S1_plate_candidate_17396eb5.png"
   }
  ],
  "departmentWork": {

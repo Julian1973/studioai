@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """cb_post.py — GENERALIZED post (replaces the ad-hoc build_scene*_post.py).
 
-POST = CURATION (the quality filter — NOT composition). The hardest creative work happens at GATE 3: Seedance
-scores each take — the acted ElevenLabs V3 voice + Seedance's own synchronised SFX and TIMED comedy/emotional
-music (its timing is the point) are ALREADY in the clip audio. Gate 5 LISTENS and decides what Seedance got
-right — keeps what works, trims or replaces what doesn't. For a scene Post:
+POST = CURATION (the quality filter — NOT composition). Production clips carry approved ElevenLabs dialogue
+and usable foley/ambience from the animation render. For split Seedance units, music is NOT baked into each
+clip because it drifts from render to render. Scene-level score is generated or selected once after the
+approved clips are stitched, then ducked under the dialogue across the whole scene. Gate 5 LISTENS and decides
+what works — keeps what works, trims or replaces what doesn't. For a scene Post:
   1) ASSEMBLES the picture via assemble_conformed — JOIN ON LIVE MOTION (Julian, 2026-07-03: "the last frame
      needs to be the start of the next frame... we need to get it to flow across") — the settle is trimmed off
      every clip but the last so cuts land mid-motion, not hold-into-hold; still HARD CUTS shot-to-shot (no
      in-scene cross-dissolves — those are reserved for BETWEEN scenes only), still keeps the clip audio (voice
-     + SFX + Seedance's timed music). WIRED IN 2026-07-14 (Julian's front-to-back wiring pass) — this function
+     + SFX/ambience). WIRED IN 2026-07-14 (Julian's front-to-back wiring pass) — this function
      was fully built (2026-07-03) and documented as Gate 5's own doctrine but had zero live callers until now
      (confirmed by rules 46/49's own audits); assemble_picture (the raw butt-join) still runs too, saved
      alongside as `_picture_RAW.mp4`, the named "deliberate comparison baseline" it always was.
   2) MASTERS to broadcast loudness -> a preview "complete" mix, defaulting to YouTube's own target (unchanged
-     behaviour). The ElevenLabs Music bed is the FALLBACK, not the default — fired ONLY if Seedance's own music
-     isn't right for a scene: a hand-supplied MUSIC.mp3 (always wins) or CB_AUTO_MUSIC_BED=1 (scratch underscore)
-     gets ducked under the voice; otherwise Post keeps the clip's score.
+     behaviour). A hand-supplied MUSIC.mp3 always wins; otherwise CB_AUTO_MUSIC_BED=1 can create an ElevenLabs
+     scene-level underscore and duck it under the voice. This is the score-continuity route for split units.
      REAL PER-PLATFORM MASTERS (2026-07-14, Julian's front-to-back wiring pass — "script to post to YouTube, to
      Amazon, Netflix"): LOUDNESS_TARGETS names each platform's own published loudness spec; mix()'s previously-
      hardcoded -14 LUFS is now an explicit, chosen default (still YouTube, still -14, nothing regresses), and
@@ -69,8 +69,8 @@ DELIVERY_X264_COLOR_ARGS = DELIVERY_VIDEO_TAG_ARGS + [
 # — grepped clean across the whole repo, zero references anywhere outside its own definition. It was reserved for
 # a between-scenes cross-dissolve transition (per assemble_picture's/assemble_conformed's own docstrings), but no
 # such episode-level assembly function exists anywhere yet; re-add it the day that feature is actually built.
-AUTO_MUSIC_BED = os.environ.get("CB_AUTO_MUSIC_BED", "") == "1"   # OFF by default — Seedance scores the clip; a bed
-                                                                 # on top is a deliberate, opt-in/CapCut decision
+AUTO_MUSIC_BED = os.environ.get("CB_AUTO_MUSIC_BED", "") == "1"   # OFF by default; enable for an ElevenLabs
+                                                                 # scene-level post cue after stitch.
 
 # ── SFX SWEETENING (2026-07-14, CLAUDE.md rule 82 — Julian: "go with those two things you flagged") ──────────
 # THE MECHANISM, NOT THE ASSETS: this closes the gap CAPCUT_README.txt itself once named as "confirmed, not

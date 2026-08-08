@@ -116,7 +116,7 @@ def test_reference_prompt_compiles_parameters_outside_the_provider_prompt():
         "durationSec": 15.0,
         "aspectRatio": "16:9",
         "resolution": "720p",
-        "modelId": "dreamina-seedance-2-5-260628",
+        "modelId": "fal-seedance-2.5",
     }
     assert preflight["zeroSpend"] is True
     assert preflight["providerCalled"] is False
@@ -129,6 +129,36 @@ def test_reference_prompt_compiles_parameters_outside_the_provider_prompt():
         stage_plan=[{}, {}, {}],
     )
     assert analysis["status"] == "ready"
+
+
+def test_forbidden_list_is_task_specific_not_blanket_boilerplate():
+    text_only = S.SeedancePromptBuilder({
+        "type": "text_to_video",
+        "goal": "A lantern rolls gently across a wooden table.",
+        "duration_seconds": 6,
+        "stages": [_stage("", "A lantern rolls gently across a wooden table.", "The lantern stops beside a cup.")],
+        "audio": "Quiet room ambience.",
+        "consistency": ["Keep the table, lantern and light direction stable."],
+    }).build()
+
+    assert "[Forbidden]" not in text_only
+    assert "no subtitles" not in text_only
+    assert "no morphing" not in text_only
+    assert "no style drift" not in text_only
+
+    referenced = S.SeedancePromptBuilder({
+        "type": "reference_based_generation",
+        "goal": "Animate the approved hero reaction.",
+        "duration_seconds": 6,
+        "references": [_image_ref("@Image 1", "Hero"), _image_ref("@Image 2", "Scene")],
+        "assets": {"images": [{}, {}]},
+        "stages": [_stage("", "The hero notices the open door.", "The hero remains by the table.")],
+        "audio": "Natural ambience.",
+        "consistency": ["Keep identity, scale, room geography and light stable."],
+    }).build()
+
+    assert "do not mix identities between references" in referenced
+    assert "do not use reference backgrounds unless explicitly assigned" in referenced
 
 
 def test_first_last_storyboard_and_blockout_templates_are_distinct():
@@ -233,7 +263,7 @@ def test_long_form_authoring_can_be_ready_while_provider_route_remains_blocked()
     assert "No enabled provider route" in result["providerQualification"]["reason"]
 
 
-def test_seedance_25_authoring_is_ready_while_unactivated_route_stays_blocked():
+def test_seedance_25_reference_authoring_uses_live_fal_route():
     ready = S.SeedancePromptBuilder({
         "type": "reference_based_generation",
         "goal": "Animate the approved hero reaction.",
@@ -245,8 +275,9 @@ def test_seedance_25_authoring_is_ready_while_unactivated_route_stays_blocked():
         "consistency": ["Keep identity, scale, set geography, and lighting stable."],
     }).preflight()
     assert ready["readyForPrompt"] is True
-    assert ready["readyForProvider"] is False
-    assert "disabled" in ready["providerQualification"]["reason"]
+    assert ready["readyForProvider"] is True
+    assert ready["providerQualification"]["providerModelId"] == "fal-seedance-2.5"
+    assert ready["providerQualification"]["provider"] == "fal"
 
     thirty = S.SeedancePromptBuilder({
         "type": "thirty_second_video",

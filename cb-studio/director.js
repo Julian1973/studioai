@@ -10,6 +10,7 @@
     pipelineStep: "upload",
     session: null,
     roster: null,
+    directorBoard: null,
     references: null,
     referenceStage: "keyframe",
     inlineReferences: null,
@@ -39,7 +40,12 @@
     agentLoading: false,
     pollTimer: null,
     toastTimer: null,
+    buildTimer: null,
+    explicitLocation: false,
   };
+
+  const STUDIO_BUILD = document.querySelector('meta[name="studio-build"]')?.content || "unknown";
+  const relayNoteTimers = new WeakMap();
 
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -48,12 +54,23 @@
     .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 
   async function api(path, options) {
-    const response = await fetch(path, {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    let response;
+    try {
+      response = await fetch(path, {
       cache: "no-store",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
       ...options,
-    });
+      });
+    } catch (error) {
+      if (error.name === "AbortError") throw new Error("The Studio took too long to respond. Retry this action.");
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
     let payload = {};
     try { payload = await response.json(); } catch (_) { payload = {}; }
     if (!response.ok) {
@@ -470,7 +487,8 @@
       ? params.get("view") : "director";
     app.scene = params.get("scene") || "1";
     app.shotId = params.get("shot") || null;
-    app.activeBeatId = params.get("beat") || app.activeBeatId || "moustache";
+    app.explicitLocation = params.has("scene") || params.has("shot");
+    app.activeBeatId = params.get("beat") || null;
     const requestedStep = { keyframes: "storyboard", animate: "footage", stitch: "rough-cut", post: "rough-cut" }[params.get("step")] || params.get("step");
     app.pipelineStep = pipelineSteps.some((step) => step.id === requestedStep)
       ? requestedStep : "storyboard";
@@ -479,7 +497,6 @@
   function writeHash() {
     const params = new URLSearchParams({ view: app.view, scene: app.scene });
     if (app.shotId) params.set("shot", app.shotId);
-    if (app.view === "director" && app.activeBeatId) params.set("beat", app.activeBeatId);
     if (app.view === "pipeline") params.set("step", app.pipelineStep);
     const next = `#${params.toString()}`;
     if (location.hash !== next) history.replaceState(null, "", next);
@@ -571,12 +588,13 @@
     const host = $("#director-scene-strip");
     if (!host) return;
     const scenes = rosterScenes();
-    host.innerHTML = scenes.map((scene) => {
+    host.innerHTML = `<button type="button" class="next-decision" data-next-decision>Back to my next decision</button>` + scenes.map((scene) => {
       const number = String(scene.sceneNumber);
       const current = number === String(session.scene || app.scene);
+      const board = (app.directorBoard?.scenes || []).find((item) => String(item.scene) === number) || {};
       return `<button type="button" data-director-scene="${esc(number)}" class="${current ? "active" : ""}" aria-current="${current ? "true" : "false"}">
         <span>Scene ${esc(number)}</span>
-        <strong>${esc(scene.location || `Scene ${number}`)}</strong>
+        <strong>${esc(scene.location || `Scene ${number}`)}</strong><em>${esc(board.statusLabel || "Not started")}</em>
       </button>`;
     }).join("") || '<span class="reference-unavailable">No approved scenes yet.</span>';
     host.querySelectorAll("[data-director-scene]").forEach((button) => button.addEventListener("click", () => {
@@ -588,6 +606,22 @@
       writeHash();
       loadSession();
     }));
+    host.querySelector("[data-next-decision]")?.addEventListener("click", openNextDecision);
+  }
+
+  function openNextDecision() {
+    const next = app.directorBoard?.nextDecision;
+    if (!next) {
+      toast("There are no sign-offs waiting. Open Scenes to start another scene.");
+      setView("episodes");
+      return;
+    }
+    app.scene = String(next.scene);
+    app.shotId = next.shotId || null;
+    resetShotScopedState();
+    writeHash();
+    setView("director");
+    loadSession();
   }
 
   function resetShotScopedState() {
@@ -805,7 +839,15 @@
 
   function renderGenerateStatus(session) {
     const activity = app.localActivity;
-    if (!activity || activity.shotId !== session.selectedShotId) return "";
+    if (!activity || activity.shotId !== session.selectedShotId) {
+      const spend = session.spendDisclosure;
+      if (!spend) return "";
+      return `<div class="generate-status sealed" role="status" aria-live="polite">
+        <div><span>Render ready</span><strong>Sealed request awaiting your approval</strong></div>
+        <p>No video is rendering yet. Review the maximum cost, then approve the render.</p>
+        <small>${esc(spend.providerModelId || session.providerModel || "Seedance")} · ${esc(spend.resolution || "480p")} · ${esc(Number(spend.shotDurationSec || 0))}s · max $${Number(spend.maxBatchCostUsd || 0).toFixed(2)}</small>
+      </div>`;
+    }
     const held = activity.state === "held";
     const details = [
       activity.providerModelId,
@@ -1063,7 +1105,6 @@
       app.inlineReferencesLoading = false;
       if (app.session?.selectedShotId === session.selectedShotId) {
         renderShotInputs(app.session);
-        renderSceneWorkbench(app.session);
       }
     }
   }
@@ -1180,7 +1221,10 @@
     const hasVisibleKeyframe = session.phase !== "keyframe" ||
       (session.artifact?.type === "image" && Boolean(session.artifact?.url));
     if (beat.reviewStatus === "weak" && iterate) return { action: iterate, label: beat.cta || "Refine Keyframe" };
-    if (spend) return { action: spend, label: "Generate Draft Variants" };
+    if (spend) {
+      const cost = Number(session.spendDisclosure?.maxBatchCostUsd || 0).toFixed(2);
+      return { action: spend, label: `Approve $${cost} & render` };
+    }
     if (accept && hasVisibleKeyframe) return { action: accept, label: directorActionLabel(accept) };
     if (session.primaryAction) {
       return {
@@ -1231,9 +1275,6 @@
       app.keyframeLibrary = { error: error.message, items: [] };
     } finally {
       app.keyframeLibraryLoading = false;
-      if (app.session?.selectedShotId === session.selectedShotId && app.session?.phase === "keyframe") {
-        renderSceneWorkbench(app.session);
-      }
     }
   }
 
@@ -1328,7 +1369,6 @@
       app.sceneAssetLibrary = { error: error.message, items: [] };
     } finally {
       app.sceneAssetLibraryLoading = false;
-      if (app.session?.phase === "keyframe") renderSceneWorkbench(app.session);
     }
   }
 
@@ -1433,6 +1473,20 @@
 
   function artifactPreview(session, beat) {
     if (session.status === "rendering") return renderProgress(session);
+    if (session.spendDisclosure && (session.decisionActions || []).some((action) => action.id === "approve-spend")) {
+      const spend = session.spendDisclosure;
+      return `<div class="render-ready-panel" role="status" aria-live="polite">
+        <span class="render-kicker">Request sealed</span>
+        <h3>Ready to render ${esc(spend.resolution || "480p")}</h3>
+        <p>No video is rendering yet. The exact prompt, opening frame, turnarounds, scene plate and approved voice are locked to this request.</p>
+        <div class="render-ready-meta">
+          <span>${esc(spend.providerModelId || session.providerModel || "Seedance")}</span>
+          <span>${esc(Number(spend.shotDurationSec || session.shot?.durationSec || 0))}s</span>
+          <span>${esc(spend.candidateCount || 1)} candidate</span>
+          <span>max $${Number(spend.maxBatchCostUsd || 0).toFixed(2)}</span>
+        </div>
+      </div>`;
+    }
     const artifact = session.artifact || {};
     if (artifact.type === "image" && artifact.url) {
       return `<div class="workbench-artifact-frame">
@@ -1500,6 +1554,192 @@
     return { activeGate, completed, total: sceneOneContract.gates.length, next };
   }
 
+  function relayStage(session) {
+    if (session.phase === "keyframe" || session.phase === "story") return 1;
+    if (session.phase === "voice") return 2;
+    return 3;
+  }
+
+  function selectedShotSummary(session) {
+    return (session.shots || []).find((shot) => shot.selected) ||
+      (session.shots || []).find((shot) => shot.shotId === session.selectedShotId) || {};
+  }
+
+  function relayMedia(stage, session) {
+    const selected = selectedShotSummary(session);
+    const artifact = session.artifact || {};
+    if (stage === 1) {
+      const url = session.phase === "keyframe" && artifact.type === "image" ? artifact.url : selected.keyframeUrl;
+      return url ? `<img src="${esc(url)}" alt="Shot keyframe for sign-off">` : `<div class="relay-empty">No keyframe has been created yet.</div>`;
+    }
+    if (stage === 2) {
+      const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
+      return url ? `<audio controls preload="metadata" src="${esc(url)}"></audio>` : `<div class="relay-empty">Voice is locked until SEE is approved.</div>`;
+    }
+    const videoUrl = artifact.type === "video" ? artifact.url :
+      artifact.type === "video-set" ? artifact.items?.[0]?.url : selected.acceptedUrl;
+    if (videoUrl) return `<video controls playsinline preload="metadata" src="${esc(videoUrl)}"></video>`;
+    return `<div class="relay-empty">${session.phase === "animation" ? "No video has been submitted yet. The approved frame and voice are ready for the 480p render." : "Animation is locked until SEE and HEAR are approved."}</div>`;
+  }
+
+  function relayCard(stage, session) {
+    const active = relayStage(session);
+    const names = { 1: "SEE", 2: "HEAR", 3: "WATCH" };
+    const descriptions = {
+      1: "Approve the exact stage and opening composition.",
+      2: "Approve the dialogue performance and timing.",
+      3: "Approve the 480p animation result.",
+    };
+    const locked = stage > active;
+    const complete = stage < active || session.status === "complete";
+    const current = stage === active && !complete;
+    const actions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
+    const accept = current ? actions.find((action) => action.id.startsWith("accept-")) : null;
+    const iterate = current ? actions.find((action) => action.id.startsWith("iterate-") || action.id === "reopen-shot") : null;
+    const primary = current ? (accept || session.primaryAction || actions.find((action) => action.id === "approve-spend")) : null;
+    const stateLabel = locked ? "Locked" : complete ? "Signed" : session.status === "rendering" ? "Working" : session.status === "ready_to_review" ? "Your decision" : "Ready";
+    const savedNote = session.savedRetakeNotes?.[`${session.selectedShotId}:${stage}`] || "";
+    return `<article class="relay-card ${current ? "current" : ""} ${locked ? "locked" : ""} ${complete ? "complete" : ""}">
+      <header><span>${stage}</span><div><strong>${names[stage]}</strong><p>${descriptions[stage]}</p></div><em>${stateLabel}</em></header>
+      <div class="relay-media">${relayMedia(stage, session)}</div>
+      ${locked ? `<p class="relay-lock">Complete ${names[stage - 1]} before this sign-off unlocks.</p>` : `
+        ${stage === 1 && current ? `<details class="relay-source-drawer">
+          <summary>Choose scene plate or keyframe source</summary>
+          ${renderKeyframeSourcePanel(session)}
+        </details>` : ""}
+        <label class="relay-notes">Retake notes<textarea data-relay-note="${stage}" placeholder="What needs to change? Plain English is enough.">${esc(savedNote)}</textarea><span class="relay-note-status" data-relay-note-status="${stage}">${savedNote ? "Saved" : ""}</span></label>
+        <div class="relay-actions">
+          ${primary ? `<button type="button" class="primary" data-relay-action="${esc(primary.id)}">${esc(primary.id === "direct-scene" ? "Start scene → generate keyframes" : primary.label)}</button>` : complete ? `<span>Approved</span>` : ""}
+          ${iterate ? `<button type="button" class="secondary danger" data-relay-retake="${esc(iterate.id)}" data-relay-stage="${stage}">Refire with notes</button>` : ""}
+        </div>`}
+    </article>`;
+  }
+
+  function renderSignoffRelay(session) {
+    const host = $("#scene-workbench");
+    if (!host) return;
+    const mediaState = Array.from(host.querySelectorAll("audio,video")).map((media) => ({
+      src: media.currentSrc || media.src,
+      currentTime: Number.isFinite(media.currentTime) ? media.currentTime : 0,
+      paused: media.paused,
+      muted: media.muted,
+      volume: media.volume,
+    }));
+    const sceneTotal = app.directorBoard?.sceneCount || rosterScenes().length || 1;
+    const selected = selectedShotSummary(session);
+    const shotNumber = selected.number || 1;
+    const stage = relayStage(session);
+    host.innerHTML = `<div class="relay-orientation">Scene ${esc(session.scene)} of ${sceneTotal} · Shot ${shotNumber} · Sign-off ${stage} of 3</div>
+      <div class="workbench-top relay-heading">
+        <div><span class="stage-label">${esc(session.sceneName || `Scene ${session.scene}`)}</span><h2>${esc(session.selectedShotId || "Scene direction")}</h2><p>${esc(session.shot?.purpose || session.summary || "")}</p></div>
+        <span class="workbench-status ${esc(session.phase)}">${esc(session.status === "ready_to_review" ? "YOUR DECISION" : session.status === "rendering" ? "WORKING" : "READY")}</span>
+      </div>
+      ${renderStageComms(session)}
+      ${renderRecentFailure(session)}
+      ${renderGenerateStatus(session)}
+      <section class="relay-grid">${[1, 2, 3].map((item) => relayCard(item, session)).join("")}</section>`;
+    host.querySelectorAll("audio,video").forEach((media) => {
+      const prior = mediaState.find((item) => item.src === (media.currentSrc || media.src));
+      if (!prior) return;
+      const restore = () => {
+        if (prior.currentTime > 0 && Math.abs(media.currentTime - prior.currentTime) > 0.25) {
+          media.currentTime = Math.min(prior.currentTime, Number.isFinite(media.duration) ? media.duration : prior.currentTime);
+        }
+        media.muted = prior.muted;
+        media.volume = prior.volume;
+        if (!prior.paused) media.play().catch(() => {});
+      };
+      if (media.readyState >= 1) restore(); else media.addEventListener("loadedmetadata", restore, { once: true });
+    });
+    host.querySelectorAll("[data-relay-action]").forEach((button) => button.addEventListener("click", () => {
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === button.dataset.relayAction);
+      if (!action) return toast("That decision changed. Refreshing current state.", true), loadSession();
+      button.disabled = true;
+      handleAction(action);
+    }));
+    host.querySelectorAll("[data-relay-retake]").forEach((button) => button.addEventListener("click", () => {
+      const note = host.querySelector(`[data-relay-note="${button.dataset.relayStage}"]`)?.value.trim();
+      if (!note) return toast("Write the retake diagnosis first.", true);
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === button.dataset.relayRetake);
+      if (!action) return toast("That retake action changed. Refreshing current state.", true), loadSession();
+      button.disabled = true;
+      submitAction(action, note);
+    }));
+    host.querySelectorAll("[data-relay-note]").forEach((textarea) => {
+      textarea.addEventListener("input", () => {
+        clearTimeout(relayNoteTimers.get(textarea));
+        const status = document.querySelector(`[data-relay-note-status="${textarea.dataset.relayNote}"]`);
+        if (status) status.textContent = "Unsaved changes";
+        relayNoteTimers.set(textarea, setTimeout(() => saveRelayNote(textarea), 500));
+      });
+      textarea.addEventListener("change", () => saveRelayNote(textarea));
+      textarea.addEventListener("blur", () => saveRelayNote(textarea));
+    });
+    host.querySelectorAll("[data-dismiss-failure]").forEach((button) => button.addEventListener("click", () => {
+      localStorage.setItem(`dismissed-failure:${button.dataset.dismissFailure}`, "1");
+      button.closest(".relay-failure")?.remove();
+    }));
+    host.querySelectorAll("[data-refresh-keyframe-library]").forEach((button) => button.addEventListener("click", async () => {
+      app.keyframeLibraryKey = null;
+      await loadKeyframeLibrary(app.session || session);
+      renderSignoffRelay(app.session || session);
+    }));
+    host.querySelectorAll("[data-select-keyframe-library]").forEach((button) => button.addEventListener("click", () => {
+      selectKeyframeFromLibrary(button.dataset.selectKeyframeLibrary);
+    }));
+    host.querySelectorAll("[data-toggle-scene-plate-library]").forEach((button) => button.addEventListener("click", () => {
+      app.scenePlateLibraryOpen = !app.scenePlateLibraryOpen;
+      renderSignoffRelay(app.session || session);
+    }));
+    host.querySelectorAll("[data-fire-scene-plate]").forEach((button) => button.addEventListener("click", () => {
+      runScenePlateAction("build-scene-plate");
+    }));
+    host.querySelectorAll("[data-select-scene-plate-asset]").forEach((button) => button.addEventListener("click", () => {
+      runScenePlateAction("select-scene-plate-library", button.dataset.selectScenePlateAsset);
+    }));
+    host.querySelectorAll("[data-keyframe-upload]").forEach((input) => input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (file) uploadKeyframeSource(file);
+      input.value = "";
+    }));
+    host.querySelectorAll("[data-scene-plate-upload]").forEach((input) => input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (file) uploadScenePlateSource(file);
+      input.value = "";
+    }));
+  }
+
+  function renderRecentFailure(session) {
+    const failure = session.recentFailure;
+    if (!failure?.jobId || localStorage.getItem(`dismissed-failure:${failure.jobId}`)) return "";
+    return `<div class="relay-failure" role="alert"><div><strong>Last action failed</strong><p>${esc(failure.error || "The provider did not return a usable result.")}</p></div><button type="button" class="secondary" data-dismiss-failure="${esc(failure.jobId)}">Dismiss</button></div>`;
+  }
+
+  async function saveRelayNote(textarea) {
+    const stage = textarea.dataset.relayNote;
+    const status = document.querySelector(`[data-relay-note-status="${stage}"]`);
+    if (status) status.textContent = "Saving...";
+    try {
+      await api("/api/director-action", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "save-retake-note", episode: app.episode, scene: app.scene,
+          shotId: app.session?.selectedShotId, stage, note: textarea.value.trim(),
+        }),
+      });
+      if (status) status.textContent = "Saved";
+      if (app.session) {
+        app.session.savedRetakeNotes ||= {};
+        app.session.savedRetakeNotes[`${app.session.selectedShotId}:${stage}`] = textarea.value.trim();
+      }
+    } catch (error) {
+      if (status) status.textContent = `Not saved: ${error.message}`;
+      toast(`Director note not saved: ${error.message}`, true);
+    }
+  }
+
   function renderSceneWorkbench(session) {
     const host = $("#scene-workbench");
     if (!host) return;
@@ -1536,7 +1776,6 @@
         <div class="panel-title workbench-panel-title"><div><strong>${esc(["voice", "animation"].includes(session.phase) ? "Generate Studio" : `Keyframe Studio — ${beat.title}`)}</strong><p>Shot: ${esc(beat.shot)} • ${esc(beat.range)} • ${esc(beat.priority)} beat</p></div><span>${esc(beat.keyframe)}</span></div>
         <div class="workbench-canvas">
           ${artifactPreview(session, beat)}
-          <div class="canvas-overlay"><span>16:9</span><i></i><b></b></div>
         </div>
         ${beat.secondaryKeyframe ? `<div class="keyframe-substates"><button type="button" class="active">${esc(beat.keyframe)}</button><button type="button">${esc(beat.secondaryKeyframe)}</button></div>` : ""}
         <div class="workbench-ref-row">${renderWorkbenchRefs(session)}</div>
@@ -1552,6 +1791,7 @@
         ${renderStageComms(session)}
         <div class="visual-proof-card"><span>Visual Proof</span><p>${esc(beat.visibleProof)}</p></div>
         ${beat.recommendedFix ? `<div class="visual-proof-card warning"><span>Recommended Fix</span><p>${esc(beat.recommendedFix)}</p></div>` : ""}
+        ${renderGenerateStatus(session)}
         <div class="workbench-actions">
           ${primary ? `<button type="button" class="primary" data-workbench-action="${esc(primary.action.id)}">${esc(primary.label)}</button>` : ""}
           ${session.decisionActions?.some((action) => action.id.startsWith("iterate-")) ? `<button type="button" class="secondary danger" data-workbench-action="${esc(session.decisionActions.find((action) => action.id.startsWith("iterate-")).id)}">Refire</button>` : ""}
@@ -1572,7 +1812,15 @@
     host.querySelectorAll("[data-workbench-action]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
       const action = actions.find((item) => item.id === button.dataset.workbenchAction);
-      if (action) handleAction(action);
+      if (!action) {
+        toast("This action is no longer current. Refreshing the shot status...", true);
+        loadSession();
+        return;
+      }
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      button.textContent = action.id === "prepare-render" ? "Preparing render..." : "Working...";
+      handleAction(action);
     }));
     host.querySelectorAll("[data-workbench-gate]").forEach((button) => button.addEventListener("click", () => {
       const gate = button.dataset.workbenchGate;
@@ -1771,7 +2019,7 @@
     $("#drawer-inspector-link").href = inspectorUrl;
     renderDirectorSceneStrip(session);
     renderShotSwitcher(session);
-    renderSceneWorkbench(session);
+    renderSignoffRelay(session);
     renderArtifact(session);
     renderShotInputs(session);
     renderActions(session);
@@ -1780,20 +2028,24 @@
 
   function renderEpisodes() {
     const scenes = app.roster?.scenes || [];
-    $("#episode-progress-label").textContent = `Scene ${app.scene} in production`;
-    $("#episode-progress-bar").style.width = `${Math.max(5, (Number(app.scene) / Math.max(1, scenes.length)) * 100)}%`;
+    const boardScenes = app.directorBoard?.scenes || [];
+    const completed = boardScenes.filter((scene) => scene.status === "complete").length;
+    $("#episode-progress-label").textContent = `${completed} of ${scenes.length} scenes complete · ${app.directorBoard?.queue?.length || 0} decisions waiting`;
+    $("#episode-progress-bar").style.width = `${Math.max(2, (completed / Math.max(1, scenes.length)) * 100)}%`;
     $("#scene-list").innerHTML = scenes.map((scene) => {
       const number = String(scene.sceneNumber);
       const current = number === app.scene;
+      const board = boardScenes.find((item) => String(item.scene) === number) || {};
       return `<button type="button" class="scene-row ${current ? "current" : ""}" data-scene="${esc(number)}">
         <span class="scene-number">${String(scene.sceneNumber).padStart(2, "0")}</span>
-        <span class="scene-copy"><strong>${esc(scene.location || `Scene ${number}`)}</strong><span>${esc(scene.time || "")} · ${scene.beatCount || 0} story beats</span></span>
-        <span class="scene-status">${current ? "In production" : "Ready for direction"}</span>
+        <span class="scene-copy"><strong>${esc(scene.location || `Scene ${number}`)}</strong><span>${esc(scene.time || "")} · ${scene.beatCount || 0} story beats${board.shotCount ? ` · ${board.completeShots || 0}/${board.shotCount} shots` : ""}</span></span>
+        <span class="scene-status ${esc(board.status || "untouched")}">${esc(board.started ? `${board.statusLabel} · ${board.nextLabel}` : "Start scene → generate keyframes")}</span>
       </button>`;
     }).join("") || '<div class="reference-unavailable">No current scenes.</div>';
     $("#scene-list").querySelectorAll("[data-scene]").forEach((button) => button.addEventListener("click", () => {
       app.scene = button.dataset.scene;
       app.shotId = null;
+      resetShotScopedState();
       app.view = "director";
       setView("director");
       loadSession();
@@ -2722,10 +2974,24 @@
 
   async function loadRoster() {
     try {
-      app.roster = await api(`/api/scene-roster?episode=${encodeURIComponent(app.episode)}`);
+      const [roster, board] = await Promise.all([
+        api(`/api/scene-roster?episode=${encodeURIComponent(app.episode)}`),
+        api(`/api/director-board?episode=${encodeURIComponent(app.episode)}`),
+      ]);
+      app.roster = roster;
+      app.directorBoard = board;
       renderEpisodes();
     } catch (error) {
       $("#scene-list").innerHTML = `<div class="reference-unavailable">${esc(error.message)}</div>`;
+    }
+  }
+
+  async function refreshDirectorBoard() {
+    try {
+      app.directorBoard = await api(`/api/director-board?episode=${encodeURIComponent(app.episode)}`);
+      renderEpisodes();
+    } catch (_) {
+      // The selected shot can still be used if the cross-scene projection is temporarily unavailable.
     }
   }
 
@@ -2738,7 +3004,10 @@
       }
       const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`);
       app.session = session;
-      app.shotId = session.selectedShotId || app.shotId;
+      if (!app.shotId) app.shotId = session.selectedShotId || null;
+      if (session.phase === "keyframe") {
+        await Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary()]);
+      }
       clearLocalActivityForSession(session);
       let approvedAdvance = false;
       if (app.pendingAdvance && session.status !== "rendering") {
@@ -2753,6 +3022,7 @@
         }
       }
       writeHash();
+      await refreshDirectorBoard();
       renderDirector(session);
       renderReview(session);
       renderStudioAgent();
@@ -2761,6 +3031,9 @@
       if (approvedAdvance) toast("Approved. Moving forward.");
       if (session.status === "rendering") app.pollTimer = setTimeout(loadSession, 1600);
     } catch (error) {
+      const workbench = $("#scene-workbench");
+      if (workbench) workbench.innerHTML = `<div class="relay-load-error"><strong>Studio state could not load</strong><p>${esc(error.message)}</p><button type="button" class="primary" data-retry-session>Retry</button></div>`;
+      workbench?.querySelector("[data-retry-session]")?.addEventListener("click", loadSession);
       $("#media-stage").innerHTML = emptyStage(error.message, false);
       $("#outcome-headline").textContent = "Director state unavailable";
       $("#outcome-summary").textContent = error.message;
@@ -2782,6 +3055,7 @@
   }
 
   function jobFailureMessage(job) {
+    if (job?.error) return String(job.error);
     const lines = String(job?.log || "")
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -3173,7 +3447,7 @@
       app.view = "pipeline";
       setView("pipeline");
     }));
-    $("#continue-directing").addEventListener("click", () => setView("director"));
+    $("#continue-directing").addEventListener("click", openNextDecision);
     $("#references-button").addEventListener("click", openReferences);
     $("#request-button").addEventListener("click", openRequest);
     $("#request-close").addEventListener("click", closeRequest);
@@ -3213,10 +3487,11 @@
     });
     window.addEventListener("hashchange", () => {
       const previousScene = app.scene;
+      const previousShot = app.shotId;
       const previousStep = app.pipelineStep;
       readHash();
       setView(app.view);
-      if (app.scene !== previousScene) loadSession();
+      if (app.scene !== previousScene || app.shotId !== previousShot) loadSession();
       if (app.view === "pipeline" && app.pipelineStep !== previousStep) renderPipeline();
     });
   }
@@ -3224,9 +3499,34 @@
   async function init() {
     readHash();
     bindEvents();
+    await loadRoster();
+    if (!app.explicitLocation && app.view === "director" && app.directorBoard?.nextDecision) {
+      app.scene = String(app.directorBoard.nextDecision.scene);
+      app.shotId = app.directorBoard.nextDecision.shotId || null;
+      writeHash();
+    }
     setView(app.view);
     renderPipeline();
-    await Promise.all([loadRoster(), loadSession()]);
+    await loadSession();
+    startBuildVersionWatch();
+  }
+
+  async function checkBuildVersion() {
+    try {
+      const current = await api("/api/studio-version");
+      if (current.version === STUDIO_BUILD) return;
+      document.body.classList.add("studio-stale");
+      $("#stale-build-banner").hidden = false;
+      clearInterval(app.buildTimer);
+    } catch (_) {
+      // Ordinary fetch recovery remains on the action that needs it.
+    }
+  }
+
+  function startBuildVersionWatch() {
+    $("#reload-studio").addEventListener("click", () => location.reload());
+    checkBuildVersion();
+    app.buildTimer = setInterval(checkBuildVersion, 10000);
   }
 
   document.addEventListener("DOMContentLoaded", init);

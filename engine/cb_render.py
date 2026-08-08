@@ -5732,6 +5732,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                        "provider": envelope["provider"],
                        "providerModelId": envelope["providerModelId"],
                        "modelVersion": envelope["modelVersion"],
+                       "resolution": envelope["executionPlan"]["segments"][0]["contract"]["resolution"],
                        "comparisonRunId": envelope.get("comparisonRunId"),
                        "internalProviderCalls": [
                            {"segmentIndex": item["segmentIndex"],

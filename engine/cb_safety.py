@@ -40,16 +40,24 @@ def install(m):
         "review-final": "post",
     }
     direction_stages = {"look", "cinematography", "voice", "animation"}
+    package_cast_cache = {}
 
     def package_cast(pkg):
+        cached = package_cast_cache.get(id(pkg))
+        if cached and cached[0] is pkg:
+            return cached[1]
         try:
             roster = cb_canon.load_policy(m.ROOT).get("roster") or {}
         except cb_canon.CanonLockError:
             roster = {}
         blob = json.dumps(pkg, ensure_ascii=False).lower().replace("’", "'")
-        return sorted(name for name in roster if re.search(
+        result = sorted(name for name in roster if re.search(
             r"(?<![a-z0-9])" + re.escape(name.lower().replace("’", "'")) +
             r"(?![a-z0-9])", blob))
+        if len(package_cast_cache) > 64:
+            package_cast_cache.clear()
+        package_cast_cache[id(pkg)] = (pkg, result)
+        return result
 
     def require_canon(pkg, episode, profile=None):
         try:

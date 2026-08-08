@@ -140,12 +140,12 @@ def test_animation_direction_requires_declared_creative_latitude():
         AnimationDirection.model_validate({
             **base,
             "performanceFreedom": "Seedance may discover the detailed performance.",
-            "providerPrompt": " ".join(["direction"] * 451),
+            "providerPrompt": " ".join(["direction"] * 521),
         })
     except ValidationError as exc:
-        assert "production ceiling is 450" in str(exc)
+        assert "production ceiling is 520" in str(exc)
     else:
-        raise AssertionError("provider prompts over 450 words must fail software-wide")
+        raise AssertionError("provider prompts over 520 words must fail software-wide")
 
     long_form = {
         **base,

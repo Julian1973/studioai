@@ -58,6 +58,69 @@ def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeyp
     assert "Runtime worker contract — Voice Director" in seen["system"]
 
 
+def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
+    shot = {
+        "dialogueLines": [
+            {"speaker": "Fuzzby", "exactText": "Nailed it."},
+            {"speaker": "Zenny", "exactText": "Officially nuts!"},
+        ]
+    }
+    prompt = (
+        "AUDIO-LOCK: incomplete\n\n"
+        "[One-Sentence Summary]\nFuzzby says Nailed it. while Zenny answers "
+        "Officially nuts!\n\n[Audio]\nUse the approved voice track."
+    )
+
+    compiled = D._apply_animation_provider_shell(prompt, shot)
+
+    assert compiled.startswith("AUDIO-LOCK: @Audio1 is the sole source of English dialogue")
+    assert "Fuzzby and Zenny perform only assigned @Audio1 regions" in compiled
+    assert "Nailed it." not in compiled
+    assert "Officially nuts!" not in compiled
+    assert "@Audio1 remains the sole English dialogue authority." in compiled
+    assert compiled.index("[Global Supplement]") < compiled.index("[Audio]")
+    for term in ("identity", "character count", "prop ownership", "camera axis",
+                 "lighting continuity", "sound relationships"):
+        assert term in compiled
+
+
+def test_animation_provider_shell_replaces_an_incomplete_supplement():
+    prompt = (
+        "[One-Sentence Summary]\nFuzzby flies.\n\n"
+        "[Global Supplement]\nKeep the flowers pretty.\n\n"
+        "[Audio]\nUse natural foley."
+    )
+
+    compiled = D._apply_animation_provider_shell(prompt, {"dialogueLines": []})
+
+    assert compiled.count("[Global Supplement]") == 1
+    assert "Keep the flowers pretty." not in compiled
+    assert compiled.index("[Global Supplement]") < compiled.index("[Audio]")
+    assert "prop ownership" in compiled
+
+
+def test_animation_provider_shell_rebuilds_reference_layer_one_asset_per_line():
+    prompt = (
+        "[Multimodal Reference Layer]\nUse all images as references.\n\n"
+        "[One-Sentence Summary]\nFuzzby flies.\n\n"
+        "[Audio]\nNatural ambience and foley."
+    )
+    references = [
+        {"assetTag": "@Image1", "role": "opening_frame",
+         "controls": "the approved opening composition", "scope": "continuity"},
+        {"assetTag": "@Image2", "role": "character_identity",
+         "controls": "Fuzzby's exact identity and proportions", "scope": "canon"},
+    ]
+
+    compiled = D._apply_animation_provider_shell(
+        prompt, {"dialogueLines": []}, references)
+
+    assert "Use all images as references." not in compiled
+    assert "@Image1 defines only the approved opening composition." in compiled
+    assert "@Image2 defines only Fuzzby's exact identity and proportions." in compiled
+    assert "Do not use its background, pose, composition" in compiled
+
+
 def test_prepare_direction_archives_a_stale_candidate_before_replacing_it(
         monkeypatch, tmp_path):
     pkg = {"episode": "EpT", "sceneNumber": "1", "revision": 2,

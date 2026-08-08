@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#151918">
   <title>Animation Studio Director</title>
-  <link rel="stylesheet" href="/cb-studio/director.css?v=voice-status-live-1">
-  <script src="/cb-studio/director.js?v=voice-status-live-1" defer></script>
+  <meta name="studio-build" content="studio-ready-20260808-4">
+  <link rel="stylesheet" href="/cb-studio/director.css?v=studio-ready-20260808-4">
+  <script src="/cb-studio/director.js?v=studio-ready-20260808-4" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -21,19 +22,23 @@
       </div>
       <a class="inspector-link" id="full-inspector-link" href="/cb-studio/app.html" title="Open full Inspector">Inspector</a>
     </header>
+    <div class="stale-build-banner" id="stale-build-banner" hidden>
+      <strong>Studio updated</strong><span>Reload to use the current production build.</span>
+      <button type="button" id="reload-studio">Reload now</button>
+    </div>
 
     <nav class="side-nav" aria-label="Studio views">
       <div class="nav-group">
-        <button type="button" class="nav-button active" data-view="director">
+        <button type="button" class="nav-button active" data-view="director" aria-label="My next decision" title="My next decision">
           <span class="nav-symbol" aria-hidden="true">01</span><span>Current Shot</span>
         </button>
-        <button type="button" class="nav-button" data-view="episodes">
+        <button type="button" class="nav-button" data-view="episodes" aria-label="Scenes" title="Scenes">
           <span class="nav-symbol" aria-hidden="true">02</span><span>Scenes</span>
         </button>
-        <button type="button" class="nav-button" data-view="pipeline">
+        <button type="button" class="nav-button" data-view="pipeline" aria-label="Pipeline status" title="Pipeline status">
           <span class="nav-symbol" aria-hidden="true">03</span><span>Pipeline</span>
         </button>
-        <button type="button" class="nav-button" data-view="review">
+        <button type="button" class="nav-button" data-view="review" aria-label="Master" title="Master">
           <span class="nav-symbol" aria-hidden="true">04</span><span>Master</span>
         </button>
       </div>

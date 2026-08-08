@@ -28,7 +28,7 @@ MAX_ANIMATION_PROVIDER_PROMPT_WORDS = 700
 
 def animation_provider_prompt_word_limit(duration_sec):
     """Keep short prompts lean without forcing 16-30s story units to lose visible proof."""
-    return 450 if float(duration_sec or 0) <= 15 else MAX_ANIMATION_PROVIDER_PROMPT_WORDS
+    return 520 if float(duration_sec or 0) <= 15 else MAX_ANIMATION_PROVIDER_PROMPT_WORDS
 
 SKILLS = {
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
@@ -829,6 +829,92 @@ def prepare_voice(context, locked_lines, *, log=print):
     return validate_voice_direction(result, locked_lines)
 
 
+def _apply_animation_provider_shell(prompt, shot, references=None):
+    """Apply the non-creative house contract around generated Seedance direction."""
+    text = str(prompt or "").strip()
+    dialogue = list(shot.get("dialogueLines") or [])
+    text = "\n".join(
+        line for line in text.splitlines()
+        if not line.strip().lower().startswith("audio-lock:")
+    ).strip()
+
+    for item in dialogue:
+        exact = str(item.get("exactText") or "").strip()
+        if exact:
+            text = re.sub(
+                re.escape(exact), "the assigned @Audio1 performance", text,
+                flags=re.IGNORECASE)
+
+    if dialogue:
+        speakers = list(dict.fromkeys(
+            str(item.get("speaker") or "").strip()
+            for item in dialogue if str(item.get("speaker") or "").strip()))
+        speaker_copy = " and ".join(speakers) or "Assigned speakers"
+        speaker_verb = "performs" if len(speakers) == 1 else "perform"
+        text = (
+            "AUDIO-LOCK: @Audio1 is the sole source of English dialogue, speaker "
+            "performance, mouth timing and silence. " + speaker_copy +
+            " " + speaker_verb + " only assigned @Audio1 regions; all listeners remain silent and "
+            "closed-mouth. Add no dialogue, vocalisations, narration, translated speech, "
+            "subtitles or captions.\n\n" + text
+        )
+
+    reference_lines = []
+    exclusions = {
+        "opening_frame": "Do not use it to redesign identity, proportions, materials or later action.",
+        "closing_frame": "Do not use it to redesign identity, materials or the preceding action.",
+        "character_identity": "Do not use its background, pose, composition or unrelated scene content.",
+        "location": "Do not use people, characters or foreground action from it.",
+        "prop": "Do not use its background, people or composition.",
+        "style": "Do not use its subject identity, text or composition.",
+        "video": "Do not use its subject identity, clothing or scene unless explicitly assigned.",
+    }
+    for reference in references or []:
+        item = reference.model_dump() if hasattr(reference, "model_dump") else dict(reference)
+        tag = str(item.get("assetTag") or "").strip()
+        role = str(item.get("role") or "").strip()
+        controls = str(item.get("controls") or "").strip().rstrip(".")
+        if not tag or not controls or role == "audio":
+            continue
+        reference_lines.append(
+            f"{tag} defines only {controls}. {exclusions.get(role, 'Do not use unrelated background or content from it.')}")
+    if reference_lines:
+        reference_section = "[Multimodal Reference Layer]\n" + "\n".join(reference_lines)
+        reference_pattern = re.compile(
+            r"(?ims)^\s*\[Multimodal Reference Layer\]\s*.*?"
+            r"(?=^\s*\[[^\]\n]+\]\s*$|\Z)")
+        if reference_pattern.search(text):
+            text = reference_pattern.sub(reference_section + "\n\n", text, count=1).strip()
+        else:
+            first_section = re.search(r"(?im)^\s*\[[^\]\n]+\]\s*$", text)
+            if first_section:
+                start = first_section.start()
+                text = (text[:start].rstrip() + "\n\n" + reference_section + "\n\n" +
+                        text[start:].lstrip())
+            else:
+                text = reference_section + "\n\n" + text
+
+    consistency = (
+        "[Global Supplement]\nMaintain identity, character count, prop ownership, "
+        "camera axis, lighting continuity and sound relationships throughout. Keep each "
+        "referenced character as one continuous instance; add no extra props or cast. "
+        + ("@Audio1 remains the sole English dialogue authority."
+           if dialogue else "Preserve the approved audio and ambience relationship.")
+    )
+    supplement_pattern = re.compile(
+        r"(?ims)^\s*\[(?:Global Supplement|Overall Supplement|Maintain Consistency)\]"
+        r"\s*.*?(?=^\s*\[[^\]\n]+\]\s*$|\Z)")
+    if supplement_pattern.search(text):
+        return supplement_pattern.sub(consistency + "\n\n", text, count=1).strip()
+
+    audio_heading = re.search(r"(?im)^\s*\[Audio\]\s*$", text)
+    if audio_heading:
+        start = audio_heading.start()
+        return (text[:start].rstrip() + "\n\n" + consistency + "\n\n" +
+                text[start:].lstrip())
+    return text.rstrip() + "\n\n" + consistency
+
+
 def prepare_animation(context, images, *, log=print):
     shot = context.get("shot") or {}
     raw_duration = shot.get("durationSec", shot.get("targetDurationSecApproved"))
@@ -918,13 +1004,17 @@ def prepare_animation(context, images, *, log=print):
         "ElevenLabs. The prompt must begin from the approved opening state and end on a usable "
         "held handoff frame, with causal "
         "physical action, observable performance, motivated camera, readable composition, and "
-        "established light/material behaviour. Keep providerPrompt between 280 and 450 words "
-        "for 4-15 second units, or between 400 and 700 words for 16-30 second units: "
+        "established light/material behaviour. Keep providerPrompt between 280 and 405 words "
+        "for 4-15 second units, or between 400 and 655 words for 16-30 second units; the "
+        "compiler adds the canonical audio and continuity shell before validation: "
         "each instruction appears once, reference bindings stay one concise line each, and stage "
         "direction states only the action, visible performance, camera purpose and end state. "
         "It should feel like confident direction to an "
         "exceptional actor and camera crew, not an animation checklist.",
         AnimationDirection, label="department_animation", log=log, images=images)
+
+    result.providerPrompt = _apply_animation_provider_shell(
+        result.providerPrompt, shot, result.referenceContract)
 
     if result.durationSec != duration:
         raise RuntimeError(

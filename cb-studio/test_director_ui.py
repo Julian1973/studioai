@@ -94,6 +94,10 @@ def test_rendering_has_persistent_honest_progress_feedback():
     assert "render-ready-panel" in JS
     assert "Retry prepared" in JS
     assert "Render 480p" in JS
+    assert "Sealed request awaiting your approval" in JS
+    assert "No video is rendering yet." in JS
+    assert "Approve $${cost} & render" in JS
+    assert "Request sealed" in JS
     assert ".render-ready-panel" in CSS
 
 
@@ -135,7 +139,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "voice-status-live-1" in HTML
+    assert "studio-ready-20260808-4" in HTML
 
 
 def test_scene_plate_source_buttons_are_valid_and_clickable():
@@ -199,7 +203,19 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "voice-status-live-1" in HTML
+    assert "studio-ready-20260808-4" in HTML
+
+
+def test_three_signoff_relay_and_parallel_scene_board_are_present():
+    assert "renderSignoffRelay(session)" in JS
+    assert '1: "SEE", 2: "HEAR", 3: "WATCH"' in JS
+    assert "Back to my next decision" in JS
+    assert "/api/director-board" in JS
+    assert "Start scene → generate keyframes" in JS
+    assert "data-relay-note" in JS
+    assert "submitAction(action, note)" in JS
+    assert ".relay-grid" in CSS
+    assert ".relay-card.locked" in CSS
     assert "sceneOneContract" in JS
     assert "Script" in JS and "Direction" in JS and "Keyframes" in JS and "Generate" in JS and "Review" in JS
     assert "Fuzzby’s Pollination Lesson" in JS
@@ -209,7 +225,7 @@ def test_director_first_scene_workbench_matches_build_brief():
     assert "Two clear upper-lip pollen curls" in JS
     assert "Builder Mode · prompt segment and reference roles" in JS
     assert "Generation + Review" in JS
-    assert "Generate Draft Variants" in JS
+    assert "Approve $${cost} & render" in JS
     assert "Refine Keyframe" in JS
     assert ".workbench-grid" in CSS
     assert ".workbench-gates" in CSS
@@ -237,6 +253,22 @@ def test_scene_workbench_is_active_beat_driven():
     assert ".beat-card.selected" in CSS
     assert ".workbench-beat-frame" in CSS
     assert ".keyframe-substates" in CSS
+
+
+def test_three_signoff_relay_exposes_real_inputs_and_source_choices():
+    assert 'scene-workbench ~ .shot-inputs' not in CSS
+    assert 'Choose scene plate or keyframe source' in JS
+    assert 'renderKeyframeSourcePanel(session)' in JS
+    assert 'data-keyframe-upload' in JS
+    assert 'data-select-keyframe-library' in JS
+    assert 'data-select-scene-plate-asset' in JS
+    assert 'if (session.phase === "keyframe")' in JS
+    assert 'Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary()])' in JS
+
+
+def test_director_hash_does_not_leak_legacy_beat_state():
+    write_hash = JS.split("function writeHash()", 1)[1].split("function setView", 1)[0]
+    assert 'params.set("beat"' not in write_hash
 
 
 def test_workbench_gate_summary_is_dynamic_and_actionable():
@@ -397,6 +429,17 @@ def test_workbench_gate_buttons_are_real_navigation_not_dead_controls():
     assert 'host.querySelectorAll("[data-workbench-gate]")' in JS
     assert 'generate: session.phase === "voice" ? "audio" : "footage"' in JS
     assert 'setView("pipeline")' in JS
+
+
+def test_workbench_preview_shows_clean_artwork_without_composition_overlay():
+    assert 'class="canvas-overlay"' not in JS
+    assert ".canvas-overlay" not in CSS
+
+
+def test_workbench_actions_show_immediate_and_persistent_activity_status():
+    assert "${renderGenerateStatus(session)}" in JS
+    assert 'button.textContent = action.id === "prepare-render" ? "Preparing render..." : "Working..."' in JS
+    assert 'button.setAttribute("aria-busy", "true")' in JS
 
 
 def test_every_production_stage_has_persistent_scene_and_shot_navigation():

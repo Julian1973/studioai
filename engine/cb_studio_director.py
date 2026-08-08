@@ -93,6 +93,33 @@ def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
     }
 
 
+def _latest_failed_job(jobs: dict[str, Any] | None, scene: str,
+                       shot_id: str | None) -> dict[str, Any] | None:
+    matches = []
+    for job in (jobs or {}).values():
+        if job.get("status") != "failed" or str(job.get("scene")) != str(scene):
+            continue
+        gate = str(job.get("gate") or "")
+        args = [str(value) for value in (job.get("args") or [])]
+        if shot_id and shot_id not in gate and shot_id not in args:
+            continue
+        matches.append(job)
+    if not matches:
+        return None
+    job = max(matches, key=lambda item: float(item.get("ended") or item.get("started") or 0))
+    lines = [line.strip() for line in str(job.get("log") or "").splitlines()
+             if line.strip() and not _SENSITIVE_PROGRESS.search(line)]
+    detail = next((line for line in reversed(lines)
+                   if "errors.pydantic.dev" not in line and
+                   re.search(r"refused|error|failed|invalid|rejected", line, re.I)), None)
+    return {
+        "jobId": job.get("jobId"),
+        "status": "failed",
+        "error": job.get("error") or detail or job.get("step") or "The provider job failed.",
+        "ended": job.get("ended"),
+    }
+
+
 def _shot_complete(shot_state: dict[str, Any]) -> bool:
     return bool((shot_state.get("current") or {}).get("animation"))
 
@@ -172,7 +199,7 @@ def _spend_disclosure(package: dict[str, Any] | None, shot_id: str | None) -> di
         "shotId", "candidateCount", "costPerCandidateUsd", "maxBatchCostUsd",
         "promptVersion", "bindingHash", "envelopeHash", "packageRevision",
         "rerollOfUnchangedPackage", "shotDurationSec", "provider", "providerModelId",
-        "modelVersion", "tier", "internalProviderCalls",
+        "modelVersion", "resolution", "tier", "internalProviderCalls",
     )
     return {key: disclosure.get(key) for key in allowed if key in disclosure}
 
@@ -300,6 +327,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     shot = package_shots.get(shot_id) or {}
     shot_media = ((media or {}).get("shots") or {}).get(shot_id) or {}
     running = _latest_running_job(jobs, scene, shot_id)
+    recent_failure = _latest_failed_job(jobs, scene, shot_id)
     stages = state.get("stages") or {}
     provider_blocker = _provider_blocker(preflight)
     spend = _spend_disclosure(package, shot_id)
@@ -508,6 +536,11 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         primary = None
         decisions = []
 
+    # A current reviewable result or sealed request supersedes an older failed attempt.
+    # Keep failures visible only while they still explain why the selected shot cannot advance.
+    if status in ("ready_to_review", "complete") and (artifact or spend):
+        recent_failure = None
+
     all_shots = state.get("shots") or []
     completed = sum(1 for item in all_shots if _shot_complete(item))
     shot_summaries = []
@@ -524,6 +557,8 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                 item_shot_id) or {}).get("clip"),
             "keyframeUrl": (((media or {}).get("shots") or {}).get(
                 item_shot_id) or {}).get("keyframeApproved"),
+            "voiceUrl": (((media or {}).get("shots") or {}).get(
+                item_shot_id) or {}).get("vo"),
             "state": "complete" if _shot_complete(item) else item.get("badgeState") or "waiting",
             "selected": item_shot_id == shot_id,
         })
@@ -553,6 +588,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "decisionActions": decisions,
         "blocker": blocker,
         "runningJob": running,
+        "recentFailure": recent_failure,
         "spendDisclosure": spend,
         "sceneLook": scene_look or {},
         "stageComms": _stage_comms(phase, status, package_ledger, artifact),
@@ -620,7 +656,7 @@ def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> No
 
 
 def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
-    """Prepare direction and seal a one-candidate spend disclosure without spending."""
+    """Prepare direction and seal the standard two-candidate 480p comedy request."""
     import cb_providers
     import cb_render
 
@@ -630,7 +666,7 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
         log("DIRECTOR — preparing current animation direction")
         cb_render.prepare_department(scene, "animation", shot_id, episode, log)
     try:
-        cb_render.fire_shot(scene, shot_id, episode, candidates=1, spend_token=None, log=log)
+        cb_render.fire_shot(scene, shot_id, episode, candidates=2, spend_token=None, log=log)
     except cb_render.Refused as exc:
         package, _ = cb_render.load_pkg(scene, episode)
         pending = (cb_render._ledger(package, shot_id).get("pendingSpendAuth") or {})

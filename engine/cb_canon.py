@@ -28,6 +28,8 @@ class CanonLockError(RuntimeError):
 
 
 _HASH_CACHE: dict[tuple[str, int, int], str] = {}
+_STATUS_CACHE: dict[tuple[str, str | None, tuple[str, ...], tuple], dict] = {}
+_WATCH_PATH_CACHE: dict[tuple[str, int | None, int | None], tuple[pathlib.Path, ...]] = {}
 
 
 def _now() -> str:
@@ -69,6 +71,42 @@ def file_sha256(path: str | pathlib.Path) -> str | None:
 
 def _root(root: str | pathlib.Path | None = None) -> pathlib.Path:
     return pathlib.Path(root or ROOT).resolve()
+
+
+def _status_fingerprint(base: pathlib.Path, episode: str | None) -> tuple:
+    """Cheap stat fingerprint for every file whose bytes can affect canon status."""
+    policy_path, manifest_path = base / POLICY_REL, base / MANIFEST_REL
+    def mtime(path):
+        try:
+            return path.stat().st_mtime_ns
+        except OSError:
+            return None
+    watch_key = (str(base), mtime(policy_path), mtime(manifest_path))
+    paths = list(_WATCH_PATH_CACHE.get(watch_key) or ())
+    if not paths:
+        paths = [policy_path, manifest_path]
+        try:
+            policy = load_policy(base)
+            manifest = load_manifest(base)
+            paths.extend(resolve_declared_path(value, base)
+                         for value in (policy.get("sources") or {}).values())
+            for collection in ("characterAssets", "locationAssets", "identityAssets"):
+                paths.extend(base / str(item.get("path"))
+                             for item in (manifest.get(collection) or []) if item.get("path"))
+        except (CanonLockError, OSError, ValueError):
+            pass
+        _WATCH_PATH_CACHE.clear()
+        _WATCH_PATH_CACHE[watch_key] = tuple(paths)
+    if episode:
+        paths.extend((base / "cb-studio" / "data" / "scripts").glob(f"{episode}*"))
+    rows = []
+    for path in paths:
+        try:
+            stat = path.stat()
+            rows.append((str(path), stat.st_mtime_ns, stat.st_size))
+        except OSError:
+            rows.append((str(path), None, None))
+    return tuple(sorted(set(rows)))
 
 
 def _inside(root: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
@@ -301,6 +339,8 @@ def build_manifest(root: str | pathlib.Path | None = None,
 def write_lock(root: str | pathlib.Path | None = None,
                locked_by: str = "Julian") -> dict:
     base = _root(root)
+    _STATUS_CACHE.clear()
+    _WATCH_PATH_CACHE.clear()
     manifest = build_manifest(base, locked_by)
     path = base / MANIFEST_REL
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -600,8 +640,8 @@ def _location_readiness(policy: dict, root: pathlib.Path, episode: str) -> list[
     return rows
 
 
-def status(episode: str | None = None, cast: Iterable[str] | None = None,
-           root: str | pathlib.Path | None = None) -> dict:
+def _status_uncached(episode: str | None = None, cast: Iterable[str] | None = None,
+                     root: str | pathlib.Path | None = None) -> dict:
     base = _root(root)
     try:
         policy = load_policy(base)
@@ -699,6 +739,32 @@ def status(episode: str | None = None, cast: Iterable[str] | None = None,
         "blockers": blockers,
         "warnings": warnings,
     }
+
+
+def status(episode: str | None = None, cast: Iterable[str] | None = None,
+           root: str | pathlib.Path | None = None) -> dict:
+    """Return canon status without repeating the same full asset audit in one request.
+
+    Production-state projection asks this question many times while calculating one
+    screen. A very short process-local cache keeps the UI responsive while retaining
+    the fail-closed audit on the next interaction after source files change.
+    """
+    base = _root(root)
+    requested_cast = tuple(sorted(str(name) for name in (cast or ())))
+    full_episode_cast = tuple(sorted(_episode_cast(base, episode))) if episode else ()
+    # Calls that explicitly pass the complete cast are equivalent to the ordinary
+    # episode status and share its cache entry. Deliberate subset checks stay distinct.
+    cast_key = () if episode and (not requested_cast or requested_cast == full_episode_cast) else requested_cast
+    key = (str(base), episode, cast_key, _status_fingerprint(base, episode))
+    cached = _STATUS_CACHE.get(key)
+    if cached:
+        return cached
+    result = _status_uncached(episode, cast_key or None, base)
+    _STATUS_CACHE[key] = result
+    if len(_STATUS_CACHE) > 32:
+        for stale_key in list(_STATUS_CACHE)[:-16]:
+            _STATUS_CACHE.pop(stale_key, None)
+    return result
 
 
 def require_locked(episode: str | None = None, cast: Iterable[str] | None = None,

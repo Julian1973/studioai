@@ -78,6 +78,7 @@ else:
 SERVER_KEY = f"{BIND_HOST}:{PORT}|{PUBLIC_ORIGIN or 'loopback'}"
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
 SESSION_TOKEN = secrets.token_urlsafe(32)
+STUDIO_BUILD_VERSION = "studio-ready-20260808-4"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024
@@ -383,6 +384,7 @@ DIRECTOR_ACTION_IDS = {
     "accept-animation", "iterate-animation",
     "run-quality-review", "accept-quality", "reopen-shot",
     "build-master", "run-final-review", "accept-master", "iterate-master",
+    "save-retake-note",
 }
 
 
@@ -475,6 +477,11 @@ def _save_project_workbench_state(update):
             if isinstance(state, dict):
                 beat_state[str(beat_id)] = {**dict(beat_state.get(str(beat_id)) or {}), **state}
         merged["beatState"] = beat_state
+    if isinstance(update.get("retakeNotes"), dict):
+        notes = dict(merged.get("retakeNotes") or {})
+        for note_key, note_value in update["retakeNotes"].items():
+            notes[str(note_key)] = str(note_value)[:1000]
+        merged["retakeNotes"] = notes
     payload["projects"][key] = merged
     cb_db.atomic_write_json(ROOT, WORKBENCH_STATE_FILE, payload)
     return merged
@@ -819,14 +826,24 @@ def _stream(jobId, args):
                 job["status"] = "stopped"; job["step"] = "Stopped by user."
             else:
                 job["status"] = "done" if p.returncode == 0 else "failed"
-                job["step"] = "Done." if p.returncode == 0 else "Failed — see log."
+                if p.returncode == 0:
+                    job["step"] = "Done."
+                    job["error"] = None
+                else:
+                    detail = next((line for line in reversed(lines)
+                                   if any(word in line.casefold() for word in
+                                          ("refused", "error", "failed", "invalid"))), None)
+                    job["error"] = (detail or lines[-1] if lines else
+                                    "The provider process ended without a usable result.")[:600]
+                    job["step"] = job["error"]
     except Exception as e:
         with _JOB_LOCK:
             if job.get("stopped"):
                 job["status"] = "stopped"; job["step"] = "Stopped by user."
             else:
-                job["log"] = job.get("log", "") + f"\n{type(e).__name__}: {e}"
-                job["status"] = "failed"; job["step"] = "Failed — see log."
+                detail = f"{type(e).__name__}: {e}"
+                job["log"] = job.get("log", "") + "\n" + detail
+                job["status"] = "failed"; job["step"] = detail; job["error"] = detail
     finally:
         with _JOB_LOCK:
             PROCS.pop(jobId, None)
@@ -1451,6 +1468,8 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
             }
     session = cb_studio_director.build_session(
         **common, animation_contract=animation_contract)
+    workbench = _project_workbench_state("crystal-bears", episode, scene)
+    session["savedRetakeNotes"] = dict(workbench.get("retakeNotes") or {})
     return session
 
 
@@ -1465,6 +1484,108 @@ def _cached_director_session(scene, episode="Ep1", requested_shot_id=None):
     with _DIRECTOR_SESSION_CACHE_LOCK:
         _DIRECTOR_SESSION_CACHE[key] = {"at": time.time(), "session": session}
     return session
+
+
+def _director_board(episode="Ep1"):
+    """Return the cross-scene decision queue without mutating production state."""
+    import cb_intake
+
+    roster = cb_intake.scene_roster(episode)
+    scenes = []
+    queue = []
+    signoff_by_phase = {"keyframe": 1, "voice": 2, "animation": 3, "review": 3, "final": 3}
+    for scene_info in roster.get("scenes") or []:
+        scene = str(scene_info.get("sceneNumber"))
+        package_path = _shot_pkg_path(scene, episode)
+        card = {
+            "scene": scene,
+            "location": scene_info.get("location") or f"Scene {scene}",
+            "time": scene_info.get("time") or "",
+            "beatCount": scene_info.get("beatCount") or 0,
+            "started": package_path.exists(),
+            "status": "untouched",
+            "statusLabel": "Not started",
+            "nextLabel": "Start scene -> generate keyframes",
+            "shotId": None,
+            "signOff": 1,
+        }
+        if package_path.exists():
+            package, _ = _load_director_package(scene, episode)
+            shots = package.get("shots") or []
+            shot_ids = [shot.get("shotId") for shot in shots if shot.get("shotId")]
+            ledgers = {item.get("shotId"): item for item in package.get("continuityLedger") or []}
+            projections = []
+            for shot in shots:
+                shot_id = shot.get("shotId")
+                ledger = ledgers.get(shot_id) or {}
+                keyframe_approved = bool((ledger.get("keyframeApproval") or {}).get("approved"))
+                voice_approved = bool((ledger.get("voiceApproval") or {}).get("approved")) or not bool(shot.get("dialogueLines"))
+                animation_approved = ledger.get("status") == "approved"
+                if ledger.get("keyframeCandidate"):
+                    phase, status, headline = "keyframe", "ready_to_review", "Keyframe waiting for your decision"
+                elif not keyframe_approved and shot.get("sourceType") == "opener":
+                    phase, status, headline = "keyframe", "ready_to_fire", "Create the shot keyframe"
+                elif ledger.get("voPath") and not voice_approved:
+                    phase, status, headline = "voice", "ready_to_review", "Voice waiting for your decision"
+                elif not voice_approved:
+                    phase, status, headline = "voice", "ready_to_fire", "Create the voice performance"
+                elif ledger.get("status") == "candidates-pending":
+                    phase, status, headline = "animation", "ready_to_review", "Animation waiting for your decision"
+                elif ledger.get("pendingSpendAuth"):
+                    phase, status, headline = "animation", "ready_to_review", "Render request waiting for approval"
+                elif not animation_approved:
+                    phase, status, headline = "animation", "ready_to_fire", "Prepare the 480p animation"
+                else:
+                    phase, status, headline = "final", "complete", "Shot complete"
+                projections.append({"selectedShotId": shot_id, "phase": phase, "status": status,
+                                    "headline": headline})
+            active = next((item for item in projections if item["status"] == "ready_to_review"), None)
+            active = active or next((item for item in projections if item["status"] != "complete"), None)
+            active = active or (projections[0] if projections else {
+                "selectedShotId": None, "phase": "story", "status": "blocked",
+                "headline": "Scene package has no shots"})
+            phase = active["phase"]
+            status = active["status"]
+            signoff = signoff_by_phase.get(phase, 1)
+            card.update({
+                "status": status,
+                "statusLabel": (
+                    "Decision waiting" if status == "ready_to_review" else
+                    "Working" if status == "rendering" else
+                    "Complete" if status == "complete" else
+                    "Ready"
+                ),
+                "nextLabel": active.get("headline") or "Open scene",
+                "shotId": active.get("selectedShotId"),
+                "signOff": signoff,
+                "phase": phase,
+                "shotCount": len(shot_ids),
+                "completeShots": sum(1 for item in projections if item["status"] == "complete"),
+            })
+            for item in projections:
+                if item.get("status") != "ready_to_review":
+                    continue
+                item_phase = item.get("phase") or "keyframe"
+                item_signoff = signoff_by_phase.get(item_phase, 1)
+                queue.append({
+                    "scene": scene,
+                    "sceneName": card["location"],
+                    "shotId": item.get("selectedShotId"),
+                    "phase": item_phase,
+                    "signOff": item_signoff,
+                    "label": {1: "SEE", 2: "HEAR", 3: "WATCH"}[item_signoff],
+                    "headline": item.get("headline") or "Decision waiting",
+                })
+        scenes.append(card)
+    queue.sort(key=lambda item: (int(item["scene"]), item.get("shotId") or "", item["signOff"]))
+    return {
+        "episode": episode,
+        "sceneCount": len(scenes),
+        "scenes": scenes,
+        "queue": queue,
+        "nextDecision": queue[0] if queue else None,
+        "zeroSpend": True,
+    }
 
 
 def _prewarm_director_session_cache():
@@ -1832,12 +1953,18 @@ class H(http.server.SimpleHTTPRequestHandler):
 
     def _json(self, code, obj):
         body = json.dumps(obj).encode()
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            # A tab navigation can cancel an in-flight response. The request's durable
+            # mutation is already complete; do not turn a client disconnect into a second
+            # error response or a misleading failed Studio action.
+            self.close_connection = True
 
     def _serve_static(self, head=False):
         """Range-aware static serving. SimpleHTTPRequestHandler sends the whole file with a 200 (no Range), so large
@@ -1970,6 +2097,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             # THE SHOT PIPELINE's own job feed (2026-07-16 cutover): the legacy /api/pipeline
             # route that incidentally carried JOBS is GONE; this is the clean replacement.
             self._json(200, {"jobs": _jobs_snapshot()}); return
+        if self.path == "/api/studio-version":
+            self._json(200, {"version": STUDIO_BUILD_VERSION}); return
         if self.path == "/api/health":
             return self._json(200, {"stale": _is_stale(), "started": _STARTED_FP,
                                     "current": _source_fingerprint(), "running": len(PROCS)})
@@ -2190,6 +2319,16 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, _CBI.scene_roster(ep))
             except Exception as e:
                 return self._json(500, {"error": str(e)})
+        if self.path.startswith("/api/director-board"):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "valid episode required"})
+            try:
+                return self._json(200, _director_board(ep))
+            except Exception as e:
+                return self._json(500, {"error": str(e), "zeroSpend": True})
         if self.path.startswith("/api/rough-cut-draft"):
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
@@ -3001,6 +3140,17 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(409, {
                         "error": "That action is no longer current or is not recognised. Refresh the Studio and try again.",
                     }); return
+                if action == "save-retake-note":
+                    stage = str(d.get("stage") or "").strip()
+                    if not shot_id or stage not in ("1", "2", "3"):
+                        self._json(400, {"error": "A shot and SEE, HEAR or WATCH stage are required."}); return
+                    state = _save_project_workbench_state({
+                        "project": "crystal-bears", "episode": ep, "scene": scene,
+                        "retakeNotes": {f"{shot_id}:{stage}": note},
+                    })
+                    self._json(200, {"ok": True, "zeroSpend": True,
+                                     "savedNote": note,
+                                     "updatedAt": state.get("updatedAt")}); return
                 _clear_director_session_cache(scene=scene, episode=ep)
 
                 session = _director_session(scene, ep, shot_id)
@@ -3103,7 +3253,10 @@ class H(http.server.SimpleHTTPRequestHandler):
                     token = ((ledger.get("pendingSpendAuth") or {}).get("token"))
                     if not token:
                         self._json(409, {"error": "The sealed spend approval is no longer current."}); return
-                    job_id = shot_run_job("fire", scene, ep, target, candidates=1,
+                    candidate_count = int((((ledger.get("pendingSpendAuth") or {})
+                                            .get("disclosure") or {})
+                                           .get("candidateCount") or 1))
+                    job_id = shot_run_job("fire", scene, ep, target, candidates=candidate_count,
                                           spend_token=token)
                 elif action == "cancel-spend":
                     self._json(200, {"ok": True, "zeroSpend": True, "noChange": True}); return
@@ -3606,7 +3759,9 @@ def main():
     episodes = reindex_episodes()
     http.server.ThreadingHTTPServer.allow_reuse_address = True
     threading.Thread(target=_freshness_watch, daemon=True).start()
-    threading.Thread(target=_prewarm_director_session_cache, daemon=True).start()
+    # Finish the authoritative projection before publishing the launch URL so
+    # the first browser click does not race a cold state audit.
+    _prewarm_director_session_cache()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
         launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"

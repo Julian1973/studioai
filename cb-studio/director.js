@@ -5,7 +5,7 @@
     episode: "Ep1",
     scene: "1",
     shotId: null,
-    activeBeatId: "moustache",
+    activeBeatId: null,
     view: "director",
     pipelineStep: "upload",
     session: null,
@@ -42,6 +42,7 @@
     toastTimer: null,
     buildTimer: null,
     explicitLocation: false,
+    explicitBeat: false,
     keyframeZoom: 1,
   };
 
@@ -490,6 +491,7 @@
     app.shotId = params.get("shot") || null;
     app.explicitLocation = params.has("scene") || params.has("shot");
     app.activeBeatId = params.get("beat") || null;
+    app.explicitBeat = params.has("beat");
     const requestedStep = { keyframes: "storyboard", animate: "footage", stitch: "rough-cut", post: "rough-cut" }[params.get("step")] || params.get("step");
     app.pipelineStep = pipelineSteps.some((step) => step.id === requestedStep)
       ? requestedStep : "storyboard";
@@ -498,6 +500,7 @@
   function writeHash() {
     const params = new URLSearchParams({ view: app.view, scene: app.scene });
     if (app.shotId) params.set("shot", app.shotId);
+    if (app.activeBeatId) params.set("beat", app.activeBeatId);
     if (app.view === "pipeline") params.set("step", app.pipelineStep);
     const next = `#${params.toString()}`;
     if (location.hash !== next) history.replaceState(null, "", next);
@@ -580,6 +583,7 @@
       </button>`).join("");
     host.querySelectorAll("[data-shot]").forEach((button) => button.addEventListener("click", () => {
       app.shotId = button.dataset.shot;
+      resetShotScopedState();
       writeHash();
       loadSession();
     }));
@@ -626,6 +630,8 @@
   }
 
   function resetShotScopedState() {
+    app.activeBeatId = null;
+    app.explicitBeat = false;
     app.voiceStatus = null;
     app.voiceStatusKey = null;
     app.voiceLoading = false;
@@ -1280,7 +1286,9 @@
   async function loadProjectWorkbenchState() {
     try {
       app.workbenchState = await api(`/api/project-workbench-state?project=crystal-bears&episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`);
-      if (app.workbenchState?.activeBeatId) app.activeBeatId = app.workbenchState.activeBeatId;
+      if (!app.explicitBeat && app.workbenchState?.activeBeatId) {
+        app.activeBeatId = app.workbenchState.activeBeatId;
+      }
     } catch (_) {
       app.workbenchState = null;
     }
@@ -1790,6 +1798,13 @@
       localStorage.setItem(`dismissed-failure:${button.dataset.dismissFailure}`, "1");
       button.closest(".relay-failure")?.remove();
     }));
+    host.querySelectorAll("[data-retry-failure]").forEach((button) => button.addEventListener("click", () => {
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === button.dataset.retryFailure);
+      if (!action) return toast("That fix is no longer current. Refreshing current state.", true), loadSession();
+      button.disabled = true;
+      handleAction(action);
+    }));
     host.querySelectorAll("[data-refresh-keyframe-library]").forEach((button) => button.addEventListener("click", async () => {
       app.keyframeLibraryKey = null;
       await loadKeyframeLibrary(app.session || session);
@@ -1823,7 +1838,8 @@
   function renderRecentFailure(session) {
     const failure = session.recentFailure;
     if (!failure?.jobId || localStorage.getItem(`dismissed-failure:${failure.jobId}`)) return "";
-    return `<div class="relay-failure" role="alert"><div><strong>Last action failed</strong><p>${esc(failure.error || "The provider did not return a usable result.")}</p></div><button type="button" class="secondary" data-dismiss-failure="${esc(failure.jobId)}">Dismiss</button></div>`;
+    const fix = session.primaryAction;
+    return `<div class="relay-failure" role="alert"><div><strong>Last action failed</strong><p>${esc(failure.error || "The provider did not return a usable result.")}</p></div><div class="relay-failure-actions">${fix ? `<button type="button" class="primary" data-retry-failure="${esc(fix.id)}">${esc(fix.label || "Retry")}</button>` : ""}<button type="button" class="secondary" data-dismiss-failure="${esc(failure.jobId)}">Dismiss</button></div></div>`;
   }
 
   async function saveRelayNote(textarea) {
@@ -1915,6 +1931,7 @@
     bindPromptCopyButtons(host);
     host.querySelectorAll("[data-beat]").forEach((button) => button.addEventListener("click", () => {
       app.activeBeatId = button.dataset.beat;
+      app.explicitBeat = true;
       writeHash();
       saveProjectWorkbenchState();
       renderSceneWorkbench(app.session || session);
@@ -3149,17 +3166,25 @@
     }
   }
 
+  function directorSessionSignature(session) {
+    if (!session) return "";
+    return JSON.stringify(session);
+  }
+
   async function pollLiveSession() {
     clearTimeout(app.pollTimer);
     const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
     try {
       const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`);
+      const changed = directorSessionSignature(session) !== directorSessionSignature(app.session);
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
       clearLocalActivityForSession(session);
-      renderDirector(session);
-      renderReview(session);
-      if (app.view === "pipeline") renderPipeline();
+      if (changed) {
+        renderDirector(session);
+        renderReview(session);
+        if (app.view === "pipeline") renderPipeline();
+      }
       app.pollTimer = setTimeout(pollLiveSession, session.status === "rendering" ? 1600 : 4500);
     } catch (_) {
       app.pollTimer = setTimeout(pollLiveSession, 4500);
@@ -3220,7 +3245,7 @@
     while (Date.now() - started < maxWaitMs) {
       const payload = await api("/api/jobs");
       const job = payload.jobs?.[jobId];
-      if (job && !["running", "queued"].includes(job.status)) return job;
+      if (job && !["running", "queued", "finalizing"].includes(job.status)) return job;
       await new Promise((resolve) => setTimeout(resolve, 900));
     }
     return null;

@@ -6,6 +6,36 @@ HTML = (HERE / "director.html").read_text(encoding="utf-8")
 CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
+UX_CONTRACT = (HERE / "UX_CONTRACT.md").read_text(encoding="utf-8")
+GOLDEN_BROWSER = (HERE / "golden_path_browser.mjs").read_text(encoding="utf-8")
+PUSH_GATE = (HERE.parent / "scripts" / "verify_push.sh").read_text(encoding="utf-8")
+PRE_PUSH = (HERE.parent / ".githooks" / "pre-push").read_text(encoding="utf-8")
+
+
+def test_seven_ux_laws_are_the_versioned_interface_contract():
+    headings = [line for line in UX_CONTRACT.splitlines() if line.startswith("## ")]
+    laws = [line for line in headings if line[3:4].isdigit()]
+    assert len(laws) == 7
+    for phrase in (
+        "One location truth", "One current decision", "Literal production state",
+        "Immediate, refresh-free acknowledgement", "human owns every sign-off",
+        "Refusals are honest and actionable", "Continuity survives time",
+    ):
+        assert phrase.lower() in UX_CONTRACT.lower()
+    assert "launch -> SEE -> HEAR -> WATCH -> verdict" in UX_CONTRACT
+
+
+def test_golden_path_browser_is_the_push_gate():
+    for evidence in (
+        "launch -> SEE -> HEAR -> WATCH -> verdict",
+        "Fix voice setup", "mainNavigations", "save-retake-note",
+        "accept-keyframe", "accept-voice", "approve-spend", "accept-animation",
+    ):
+        assert evidence in GOLDEN_BROWSER
+    assert "golden_path_browser.mjs" in PUSH_GATE
+    assert "test_local_auth.py" in PUSH_GATE
+    assert "test_director_ui.py" in PUSH_GATE
+    assert "scripts/verify_push.sh" in PRE_PUSH
 
 
 def test_director_includes_anyfilm_style_pipeline_plus_outcome_views():
@@ -142,6 +172,7 @@ def test_success_is_published_only_after_director_cache_refresh():
     clear_cache = SERVER.index("_clear_director_session_cache(scene=job_scene)", finalizing)
     done = SERVER.index('job["status"] = "done"', clear_cache)
     assert finalizing < clear_cache < done
+    assert '!["running", "queued", "finalizing"].includes(job.status)' in JS
 
 
 def test_keyframe_refire_is_one_visible_replacement_job():
@@ -176,7 +207,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "studio-ready-20260809-5" in HTML
+    assert "studio-ready-20260809-6" in HTML
 
 
 def test_visible_prompts_have_copy_controls_and_feedback():
@@ -253,7 +284,7 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "studio-ready-20260809-5" in HTML
+    assert "studio-ready-20260809-6" in HTML
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():
@@ -326,9 +357,26 @@ def test_audio_references_use_waveform_artwork_not_broken_images():
     assert '.audio-waveform-mark::before' in CSS
 
 
-def test_director_hash_does_not_leak_legacy_beat_state():
+def test_director_hash_is_the_complete_location_truth_including_beat():
     write_hash = JS.split("function writeHash()", 1)[1].split("function setView", 1)[0]
-    assert 'params.set("beat"' not in write_hash
+    assert 'params.set("beat", app.activeBeatId)' in write_hash
+    assert 'app.explicitBeat = params.has("beat")' in JS
+    assert '!app.explicitBeat && app.workbenchState?.activeBeatId' in JS
+
+
+def test_provider_failure_has_real_error_fix_and_dismiss_actions():
+    assert "failure.error" in JS
+    assert 'data-retry-failure="${esc(fix.id)}"' in JS
+    assert 'data-dismiss-failure="${esc(failure.jobId)}"' in JS
+    assert 'host.querySelectorAll("[data-retry-failure]")' in JS
+
+
+def test_unchanged_live_poll_does_not_rebuild_media_or_reset_playback():
+    assert "function directorSessionSignature(session)" in JS
+    assert "const changed = directorSessionSignature(session) !== directorSessionSignature(app.session)" in JS
+    poll = JS.split("async function pollLiveSession()", 1)[1].split("async function loadSession()", 1)[0]
+    assert "if (changed) {" in poll
+    assert "renderDirector(session)" in poll
 
 
 def test_workbench_gate_summary_is_dynamic_and_actionable():

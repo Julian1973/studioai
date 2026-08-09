@@ -12,8 +12,8 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 
 
-def _load_server_module():
-    spec = importlib.util.spec_from_file_location("cb_studio_serve_auth_test", HERE / "serve.py")
+def _load_server_module(name="cb_studio_serve_auth_test"):
+    spec = importlib.util.spec_from_file_location(name, HERE / "serve.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -59,6 +59,7 @@ def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
     assert "launchToken" not in headers["Location"]
     assert "HttpOnly" in headers["Set-Cookie"]
     assert "SameSite=Strict" in headers["Set-Cookie"]
+    assert "Max-Age=2592000" in headers["Set-Cookie"]
 
     cookie = headers["Set-Cookie"].split(";", 1)[0]
     status, headers, body = _request(
@@ -68,6 +69,36 @@ def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
     assert "Access-Control-Allow-Origin" not in headers
     assert headers["X-Frame-Options"] == "DENY"
     assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
+
+
+def test_authenticated_browser_session_survives_server_restart(monkeypatch, tmp_path):
+    secret_path = tmp_path / "studio-session-secret"
+    monkeypatch.setenv("CB_STUDIO_SESSION_SECRET_FILE", str(secret_path))
+    first = _load_server_module("cb_studio_serve_restart_first")
+    server = first.http.server.ThreadingHTTPServer(("127.0.0.1", 0), first.H)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        port = server.server_port
+        _, headers, _ = _request(
+            port, "GET", f"/cb-studio/director.html?launchToken={first.LAUNCH_TOKEN}")
+        cookie = headers["Set-Cookie"].split(";", 1)[0]
+    finally:
+        server.shutdown(); server.server_close(); thread.join(timeout=3)
+
+    second = _load_server_module("cb_studio_serve_restart_second")
+    assert second.SESSION_TOKEN == first.SESSION_TOKEN
+    assert secret_path.stat().st_mode & 0o777 == 0o600
+    restarted = second.http.server.ThreadingHTTPServer(("127.0.0.1", 0), second.H)
+    restarted_thread = threading.Thread(target=restarted.serve_forever, daemon=True)
+    restarted_thread.start()
+    try:
+        status, _, body = _request(
+            restarted.server_port, "GET", "/api/studio-version", {"Cookie": cookie})
+        assert status == 200
+        assert json.loads(body)["version"] == second.STUDIO_BUILD_VERSION
+    finally:
+        restarted.shutdown(); restarted.server_close(); restarted_thread.join(timeout=3)
 
 
 def test_director_entry_and_facade_share_the_authenticated_session(studio):

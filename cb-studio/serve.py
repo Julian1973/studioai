@@ -77,8 +77,48 @@ else:
     PUBLIC_PORT = None
 SERVER_KEY = f"{BIND_HOST}:{PORT}|{PUBLIC_ORIGIN or 'loopback'}"
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
-SESSION_TOKEN = secrets.token_urlsafe(32)
-STUDIO_BUILD_VERSION = "studio-ready-20260809-5"
+
+
+def _load_or_create_session_token():
+    """Return the durable local session secret used by browser cookies.
+
+    A process-random token logged every open Studio tab out whenever the freshness
+    guard restarted the server. Keep the secret outside source control, restrict it
+    to the current user, and allow an explicit path override for isolated tests.
+    """
+    configured = os.environ.get("CB_STUDIO_SESSION_SECRET_FILE", "").strip()
+    path = pathlib.Path(configured) if configured else OUT / "state" / ".studio_session_secret"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        token = path.read_text(encoding="utf-8").strip()
+        if len(token) >= 32:
+            try:
+                path.chmod(0o600)
+            except OSError:
+                pass
+            return token
+    except OSError:
+        pass
+    token = secrets.token_urlsafe(32)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(token + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        path.chmod(0o600)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+    return token
+
+
+SESSION_TOKEN = _load_or_create_session_token()
+STUDIO_BUILD_VERSION = "studio-ready-20260809-6"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024
@@ -1918,6 +1958,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         self.send_header(
             "Set-Cookie",
             f"{SESSION_COOKIE}={SESSION_TOKEN}; Path=/; HttpOnly; SameSite=Strict"
+            "; Max-Age=2592000"
             + ("; Secure" if PUBLIC_ORIGIN else ""),
         )
         self.send_header("Cache-Control", "no-store")
@@ -3795,7 +3836,8 @@ def main():
     threading.Thread(target=_freshness_watch, daemon=True).start()
     # Finish the authoritative projection before publishing the launch URL so
     # the first browser click does not race a cold state audit.
-    _prewarm_director_session_cache()
+    if os.environ.get("CB_STUDIO_SKIP_PREWARM") != "1":
+        _prewarm_director_session_cache()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
         launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"

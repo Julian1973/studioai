@@ -2639,6 +2639,7 @@ body.studio-stale .workspace, body.studio-stale .side-nav { pointer-events: none
 .relay-failure, .relay-load-error { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border: 1px solid #a85050; border-radius: 4px; background: #2b1719; color: #fff; }
 .relay-failure p, .relay-load-error p { margin: 4px 0 0; color: #ffd8d8; font-size: 12px; line-height: 1.45; }
 .relay-failure button { flex: 0 0 auto; }
+.relay-failure-actions { display: flex; align-items: center; gap: 8px; }
 
 @media (max-width: 900px) {
   .relay-grid { grid-template-columns: 1fr; }

@@ -118,7 +118,7 @@ def _load_or_create_session_token():
 
 
 SESSION_TOKEN = _load_or_create_session_token()
-STUDIO_BUILD_VERSION = "studio-ready-20260809-6"
+STUDIO_BUILD_VERSION = "studio-ready-20260809-7"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024

@@ -235,7 +235,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "studio-ready-20260809-6" in HTML
+    assert "studio-ready-20260809-7" in HTML
 
 
 def test_visible_prompts_have_copy_controls_and_feedback():
@@ -312,7 +312,7 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "studio-ready-20260809-6" in HTML
+    assert "studio-ready-20260809-7" in HTML
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():

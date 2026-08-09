@@ -53,9 +53,13 @@ def _connect(root):
     conn = sqlite3.connect(path, timeout=5.0, isolation_level=None)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA busy_timeout = 5000")
+    conn.execute("PRAGMA foreign_keys = ON")
+    schema_version = int(conn.execute("PRAGMA user_version").fetchone()[0])
+    if schema_version == SCHEMA_VERSION:
+        conn.execute("PRAGMA synchronous = FULL")
+        return conn
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA synchronous = FULL")
-    conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(
         """
         CREATE TABLE IF NOT EXISTS schema_meta (
@@ -218,6 +222,7 @@ def _connect(root):
         "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
         (str(SCHEMA_VERSION),),
     )
+    conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     return conn
 
 

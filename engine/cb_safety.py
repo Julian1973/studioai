@@ -50,10 +50,33 @@ def install(m):
             roster = cb_canon.load_policy(m.ROOT).get("roster") or {}
         except cb_canon.CanonLockError:
             roster = {}
-        blob = json.dumps(pkg, ensure_ascii=False).lower().replace("’", "'")
-        result = sorted(name for name in roster if re.search(
-            r"(?<![a-z0-9])" + re.escape(name.lower().replace("’", "'")) +
-            r"(?![a-z0-9])", blob))
+        declared = set()
+        for shot in pkg.get("shots") or []:
+            declared.update(str(name) for name in (shot.get("charactersInFrame") or []))
+            declared.update(
+                str(line.get("speaker")) for line in (shot.get("dialogueLines") or [])
+                if line.get("speaker")
+            )
+            declared.update(
+                str(item.get("character")) for item in (shot.get("characterTruthsApproved") or [])
+                if item.get("character")
+            )
+        if declared:
+            by_normalized = {
+                str(name).lower().replace("’", "'"): name for name in roster
+            }
+            result = sorted({
+                by_normalized[name.lower().replace("’", "'")]
+                for name in declared
+                if name.lower().replace("’", "'") in by_normalized
+            })
+        else:
+            # Compatibility for pre-contract packages only. Current production packages
+            # declare their cast structurally and never need an expensive whole-document scan.
+            blob = json.dumps(pkg, ensure_ascii=False).lower().replace("’", "'")
+            result = sorted(name for name in roster if re.search(
+                r"(?<![a-z0-9])" + re.escape(name.lower().replace("’", "'")) +
+                r"(?![a-z0-9])", blob))
         if len(package_cast_cache) > 64:
             package_cast_cache.clear()
         package_cast_cache[id(pkg)] = (pkg, result)

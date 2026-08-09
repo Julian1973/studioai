@@ -55,9 +55,9 @@
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 
-  async function api(path, options) {
+  async function api(path, options, timeoutMs = path === "/api/director-action" ? 60000 : 15000) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     let response;
     try {
       response = await fetch(path, {
@@ -68,7 +68,15 @@
       ...options,
       });
     } catch (error) {
-      if (error.name === "AbortError") throw new Error("The Studio took too long to respond. Retry this action.");
+      if (error.name === "AbortError") {
+        const timedOut = new Error(
+          path === "/api/director-action"
+            ? "The Studio is still checking this decision. Its live status will be reconciled before you can act again."
+            : "The Studio took too long to respond. Retry this action."
+        );
+        timedOut.code = path === "/api/director-action" ? "DIRECTOR_ACTION_TIMEOUT" : "REQUEST_TIMEOUT";
+        throw timedOut;
+      }
       throw error;
     } finally {
       clearTimeout(timeout);
@@ -1199,7 +1207,7 @@
     app.inlineReferences = null;
     renderShotInputs(session);
     try {
-      app.inlineReferences = await api(`/api/shot-references?episode=${encodeURIComponent(session.episode)}&scene=${encodeURIComponent(session.scene)}&shotId=${encodeURIComponent(session.selectedShotId)}`);
+      app.inlineReferences = await api(`/api/shot-references?episode=${encodeURIComponent(session.episode)}&scene=${encodeURIComponent(session.scene)}&shotId=${encodeURIComponent(session.selectedShotId)}`, undefined, 60000);
     } catch (error) {
       app.inlineReferences = { keyframe: { references: [], error: error.message }, animation: { references: [], error: error.message } };
     } finally {
@@ -3173,9 +3181,13 @@
 
   async function pollLiveSession() {
     clearTimeout(app.pollTimer);
+    if (document.visibilityState !== "visible") {
+      app.pollTimer = setTimeout(pollLiveSession, 15000);
+      return;
+    }
     const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
     try {
-      const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`);
+      const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`, undefined, 60000);
       const changed = directorSessionSignature(session) !== directorSessionSignature(app.session);
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
@@ -3198,7 +3210,7 @@
       if (!app.workbenchState || app.workbenchState.scene !== app.scene || app.workbenchState.episode !== app.episode) {
         await loadProjectWorkbenchState();
       }
-      const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`);
+      const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`, undefined, 60000);
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
       if (session.phase === "keyframe") {
@@ -3424,7 +3436,7 @@
           shotId: app.session.selectedShotId,
           sourcePath,
         }),
-      });
+      }, 60000);
       if (result.session) {
         setLocalActivity(null);
         app.session = result.session;
@@ -3556,6 +3568,15 @@
       setTimeout(loadSession, 350);
     } catch (error) {
       app.pendingAdvance = null;
+      if (error.code === "DIRECTOR_ACTION_TIMEOUT") {
+        toast(error.message);
+        // Aborting the browser wait does not cancel a server-side decision already being
+        // checked. Keep the honest in-progress card and let the normal live poll reconcile
+        // the authoritative job/decision state instead of labelling it refused or inviting
+        // a duplicate click.
+        setTimeout(loadSession, 500);
+        return;
+      }
       holdLocalActivity(action, previousSession, error.message, "Action refused");
       if (error.payload?.session) {
         app.session = error.payload.session;
@@ -3575,7 +3596,7 @@
     $("#reference-grid").innerHTML = '<div class="reference-unavailable">Loading references...</div>';
     $("#reference-dialog").showModal();
     try {
-      app.references = await api(`/api/shot-references?episode=${encodeURIComponent(app.session.episode)}&scene=${encodeURIComponent(app.session.scene)}&shotId=${encodeURIComponent(app.session.selectedShotId)}`);
+      app.references = await api(`/api/shot-references?episode=${encodeURIComponent(app.session.episode)}&scene=${encodeURIComponent(app.session.scene)}&shotId=${encodeURIComponent(app.session.selectedShotId)}`, undefined, 60000);
       renderReferences();
     } catch (error) {
       $("#reference-grid").innerHTML = `<div class="reference-unavailable">${esc(error.message)}</div>`;
@@ -3667,6 +3688,9 @@
   }
 
   function bindEvents() {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") loadSession();
+    });
     $$('[data-view]').forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
     $$("[data-pipeline-step]").forEach((button) => button.addEventListener("click", () => {
       if (button.disabled) return;

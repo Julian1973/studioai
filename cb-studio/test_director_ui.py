@@ -167,6 +167,31 @@ def test_every_director_action_gets_immediate_visible_feedback():
     assert "Keyframe accepted. HEAR is now active." in JS
 
 
+def test_director_decisions_survive_expensive_authoritative_checks():
+    assert 'async function api(path, options, timeoutMs = path === "/api/director-action" ? 60000 : 15000)' in JS
+    assert 'api("/api/director-action", {' in JS
+    assert "}, 60000);" in JS
+    assert "The Studio is still checking this decision" in JS
+    assert 'timedOut.code = path === "/api/director-action" ? "DIRECTOR_ACTION_TIMEOUT"' in JS
+    assert 'error.code === "DIRECTOR_ACTION_TIMEOUT"' in JS
+    assert "setTimeout(loadSession, 500)" in JS
+    assert JS.count("${shot}`, undefined, 60000)") == 2
+    assert JS.count("shotId=${encodeURIComponent(session.selectedShotId)}`, undefined, 60000)") == 1
+    assert JS.count("shotId=${encodeURIComponent(app.session.selectedShotId)}`, undefined, 60000)") == 1
+    action_route = SERVER[SERVER.index('if self.path == "/api/director-action"'):]
+    session_check = action_route[:action_route.index('if action in ("open-inspector"')]
+    assert "session = _cached_director_session(scene, ep, shot_id)" in session_check
+    assert "_clear_director_session_cache(scene=scene, episode=ep)" not in session_check
+
+
+def test_duplicate_and_background_session_reads_do_not_compete():
+    assert "_DIRECTOR_SESSION_BUILD_LOCKS" in SERVER
+    assert "with build_lock:" in SERVER
+    assert 'document.visibilityState !== "visible"' in JS
+    assert "setTimeout(pollLiveSession, 15000)" in JS
+    assert 'document.addEventListener("visibilitychange"' in JS
+
+
 def test_success_is_published_only_after_director_cache_refresh():
     finalizing = SERVER.index('job["status"] = "finalizing"')
     clear_cache = SERVER.index("_clear_director_session_cache(scene=job_scene)", finalizing)

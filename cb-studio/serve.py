@@ -412,6 +412,7 @@ PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid
 _JOB_LOCK = threading.RLock()
 _DIRECTOR_SESSION_CACHE = {}
 _DIRECTOR_SESSION_CACHE_LOCK = threading.RLock()
+_DIRECTOR_SESSION_BUILD_LOCKS = {}
 _DIRECTOR_SESSION_CACHE_TTL_SEC = 60.0
 DIRECTOR_ACTION_IDS = {
     "open-inspector", "open-provider-setup", "direct-scene",
@@ -1539,10 +1540,19 @@ def _cached_director_session(scene, episode="Ep1", requested_shot_id=None):
         cached = _DIRECTOR_SESSION_CACHE.get(key)
         if cached and now - cached["at"] < _DIRECTOR_SESSION_CACHE_TTL_SEC:
             return cached["session"]
-    session = _director_session(scene, episode, requested_shot_id)
-    with _DIRECTOR_SESSION_CACHE_LOCK:
-        _DIRECTOR_SESSION_CACHE[key] = {"at": time.time(), "session": session}
-    return session
+        build_lock = _DIRECTOR_SESSION_BUILD_LOCKS.setdefault(key, threading.Lock())
+    # Several open Studio tabs often ask for the same scene together. Only one thread
+    # performs the expensive authoritative build; followers recheck and share its result.
+    with build_lock:
+        now = time.time()
+        with _DIRECTOR_SESSION_CACHE_LOCK:
+            cached = _DIRECTOR_SESSION_CACHE.get(key)
+            if cached and now - cached["at"] < _DIRECTOR_SESSION_CACHE_TTL_SEC:
+                return cached["session"]
+        session = _director_session(scene, episode, requested_shot_id)
+        with _DIRECTOR_SESSION_CACHE_LOCK:
+            _DIRECTOR_SESSION_CACHE[key] = {"at": time.time(), "session": session}
+        return session
 
 
 def _director_board(episode="Ep1"):
@@ -3214,9 +3224,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(200, {"ok": True, "zeroSpend": True,
                                      "savedNote": note,
                                      "updatedAt": state.get("updatedAt")}); return
-                _clear_director_session_cache(scene=scene, episode=ep)
-
-                session = _director_session(scene, ep, shot_id)
+                # The browser has just rendered this exact authoritative session. Reuse it
+                # for action availability instead of discarding it and synchronously
+                # rebuilding the whole scene (which can take longer than an HTTP request).
+                # Every mutating engine command still performs its own current-signature,
+                # approval and spend checks; _start() clears this cache before dispatch.
+                session = _cached_director_session(scene, ep, shot_id)
                 import cb_studio_director as _CBD
                 if action not in _CBD.allowed_action_ids(session):
                     self._json(409, {

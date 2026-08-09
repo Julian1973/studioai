@@ -2727,6 +2727,7 @@
     const sourceLabel = {
       "human-working": "Edited working prompt",
       "voice-director-approved": "Director-approved prompt",
+      "voice-director-compiled": "Voice Director compiled prompt",
       "legacy-approved-storyboard": "Approved script performance",
     }[status.source] || "ElevenLabs prompt";
     const selectedShot = (app.session?.shots || []).find((shot) => shot.selected) || (app.session?.shots || [])[0];
@@ -2742,21 +2743,22 @@
         <span class="voice-source ${status.isWorking ? "working" : ""}">${esc(sourceLabel)}</span>
       </div>
       ${take?.url ? `<div class="voice-take-player">
-        <div><span>Generated performance</span><strong>${esc(take.label || "Current take")}</strong>${status.takeGeneratedAt ? `<em>${esc(status.takeGeneratedAt)}</em>` : ""}</div>
+        <div><span>COMPLETE HEAR TRACK · ${Number(status.generatedLineCount || 0)}/${Number(status.expectedLineCount || lines.length)} LINES · ${Number(status.shotDurationSec || selectedShot?.durationSec || 0)}s</span><strong>This is the full shot track you approve or refire</strong>${status.takeGeneratedAt ? `<em>Generated ${esc(status.takeGeneratedAt)}</em>` : ""}</div>
         <audio controls preload="metadata" src="${esc(take.url)}?v=${Date.now()}"></audio>
       </div>` : ""}
+      ${status.hasTake && status.takeMatchesCurrent === false ? `<div class="voice-compiler-status blocked"><strong>Do not approve this track</strong><p>The generated audio does not match the current compiled performance direction. Build the complete track again first.</p></div>` : ""}
       ${status.compiler?.error ? `<div class="voice-compiler-status blocked"><strong>Voice compiler blocked</strong><p>${esc(status.compiler.error)}</p></div>` : ""}
       ${status.compiler?.ready ? `<div class="voice-compiler-status ready"><strong>Post-Direction Audit passed</strong><p>The locked script, canon voice, performance questions, tag palette, context runway and take recipes are current.</p></div>` : ""}
       ${auditionCandidates.length ? `<section class="voice-auditions">
-        <div class="voice-auditions-head"><div><span>HEAR DECISION</span><h4>${esc(auditions.character || "Voice")} · ${esc(auditions.archetypeId || "directed takes")}</h4></div><strong>${auditionCandidates.length} files ready</strong></div>
-        <p>Listen and choose. Nothing is approved automatically. Your choice banks this character × archetype recipe${status.voiceApprovalRecorded ? ". The existing approved track stays protected until you reject it." : ", then builds the complete shot track for final HEAR approval."}</p>
+        <div class="voice-auditions-head"><div><span>DIRECTION AUDITIONS · NOT THE SHOT TRACK</span><h4>${esc(auditions.character || "Voice")} · ${esc(auditions.archetypeId || "directed takes")}</h4></div><strong>${auditionCandidates.length} short auditions</strong></div>
+        <p>Use these only to choose the acting direction for this line. Nothing is approved automatically. Your choice banks the character × archetype recipe${status.voiceApprovalRecorded ? ". The existing approved track stays protected until you reject it." : ", then builds a separate complete shot track containing every line at its approved timing."}</p>
         <div class="voice-audition-grid">${auditionCandidates.map((candidate) => {
           const chosen = selectedAudition.candidateId === candidate.candidateId;
           return `<article class="voice-audition ${chosen ? "selected" : ""}">
             <div><strong>${esc(candidate.label)}</strong><span>Take ${Number(candidate.takeNumber)}${candidate.primary ? " · Julian's primary direction" : ""}</span></div>
             <code>${esc(candidate.performedText)}</code>
             <audio controls preload="metadata" src="${esc(candidate.url || "")}"></audio>
-            <button type="button" class="${chosen ? "secondary" : "primary"}" data-voice-audition="${esc(candidate.candidateId)}" ${chosen ? "disabled" : ""}>${chosen ? "Chosen" : (status.voiceApprovalRecorded ? "Choose take" : "Choose take & build track")}</button>
+            <button type="button" class="${chosen ? "secondary" : "primary"}" data-voice-audition="${esc(candidate.candidateId)}" ${chosen ? "disabled" : ""}>${chosen ? "Direction chosen" : (status.voiceApprovalRecorded ? "Choose direction" : "Choose direction & build full track")}</button>
           </article>`;
         }).join("")}</div>
       </section>` : ""}

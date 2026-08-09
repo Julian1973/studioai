@@ -3237,6 +3237,18 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
         })
     working = led.get("workingVoice")
     current, source = _resolve_voice_lines(pkg, shot)
+    # The Voice Director compiler is authoritative once it is installed by the
+    # safety layer.  Do not let an older editable workingVoice record make the
+    # HEAR screen describe different text from the track voice_shot builds.
+    compiled_voice_lines = globals().get("_approved_voice_lines")
+    if callable(compiled_voice_lines):
+        try:
+            compiled_current = compiled_voice_lines(pkg, shot)
+        except (Refused, KeyError, TypeError, ValueError):
+            compiled_current = None
+        if compiled_current and len(compiled_current) == len(shot.get("dialogueLines") or []):
+            current = compiled_current
+            source = "voice-director-compiled"
     vo_path = led.get("voPath")
     has_take = bool(vo_path)
     generated_from = led.get("voGeneratedFrom")
@@ -3281,11 +3293,24 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
     except (cb_voice_director.VoiceContractError, Refused, KeyError, TypeError) as exc:
         compiler["error"] = str(exc)
     auditions = led.get("voiceAuditions") or None
+    placement = None
+    placement_path = led.get("voPlacementPath")
+    if placement_path:
+        try:
+            placement = json.loads(pathlib.Path(placement_path).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, TypeError):
+            placement = None
     return {"approvedLines": approved, "currentLines": current_with_direction, "source": source,
-            "isWorking": bool(working), "savedAt": (working or {}).get("savedAt"),
+            "isWorking": bool(working) and source != "voice-director-compiled",
+            "savedAt": (working or {}).get("savedAt"),
             "hasTake": has_take, "takeMatchesCurrent": match,
             "takeGeneratedAt": take_generated_at, "previous": led.get("voicePrevious"),
             "voiceApprovalRecorded": bool((led.get("voiceApproval") or {}).get("approved")),
+            "shotDurationSec": shot.get("durationSec"),
+            "expectedLineCount": len(shot.get("dialogueLines") or []),
+            "generatedLineCount": len((placement or {}).get("placements") or []),
+            "placements": (placement or {}).get("placements") or [],
+            "takeKind": "complete-shot-track" if has_take else None,
             "compiler": compiler, "auditions": auditions}
 
 

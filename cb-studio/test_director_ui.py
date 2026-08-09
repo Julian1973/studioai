@@ -428,6 +428,10 @@ def test_audio_performance_uses_live_voice_status_take_url():
     assert 'await loadVoicePerformance(true)' in JS
     assert 'if (action.id === "build-voice") await loadVoicePerformance(true)' in JS
     assert 'status["takeUrl"] = _url_from_abs(led.get("voPath"))' in SERVER
+    assert "COMPLETE HEAR TRACK" in JS
+    assert "This is the full shot track you approve or refire" in JS
+    assert "DIRECTION AUDITIONS · NOT THE SHOT TRACK" in JS
+    assert "Choose direction & build full track" in JS
     assert "activeBeatId: app.activeBeatId" in JS
     assert "beatState" in JS
     assert "app.workbenchState = null" in JS

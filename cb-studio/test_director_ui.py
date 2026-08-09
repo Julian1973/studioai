@@ -142,6 +142,19 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert "studio-ready-20260809-5" in HTML
 
 
+def test_visible_prompts_have_copy_controls_and_feedback():
+    assert "copyVisiblePrompt(button)" in JS
+    assert "bindPromptCopyButtons(host)" in JS
+    assert 'data-prompt-copy-panel' in JS
+    assert 'data-copy-prompt' in JS
+    assert 'aria-label="Copy prompt"' in JS
+    assert 'status.textContent = "Copied"' in JS
+    assert "navigator.clipboard?.writeText" in JS
+    assert 'document.execCommand("copy")' in JS
+    assert ".prompt-copy-button" in CSS
+    assert ".prompt-copy-status" in CSS
+
+
 def test_scene_plate_source_buttons_are_valid_and_clickable():
     assert 'data-toggle-scene-plate-library=""' in JS
     assert 'data-fire-scene-plate=""' in JS

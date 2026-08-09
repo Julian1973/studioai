@@ -893,7 +893,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     assert changed["reason"] == "direct-input-signature-mismatch"
 
 
-def test_failed_keyframe_identity_screen_archives_without_automatic_reroll(
+def test_failed_keyframe_identity_screen_preserves_candidate_for_human_decision(
         world, monkeypatch):
     prov, _, _ = world
     monkeypatch.setattr(
@@ -903,13 +903,21 @@ def test_failed_keyframe_identity_screen_archives_without_automatic_reroll(
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
 
     ledger = _led()["1.B1.S1"]
-    assert ledger.get("keyframeCandidate") is None
-    assert ledger["keyframeRejected"]["conformanceScreening"]["status"] == "fail"
-    assert "Automatic pre-approval QC" in ledger["keyframeRejected"]["reason"]
+    assert ledger["keyframeCandidate"]["conformanceScreening"]["status"] == "fail"
+    assert pathlib.Path(ledger["keyframeCandidate"]["path"]).exists()
+    assert ledger.get("keyframeRejected") is None
     assert len(prov.image_calls) == 1
 
+    R.reject_keyframe(
+        "9", "1.B1.S1", "The staging does not match the shot.", episode="EpT",
+        reviewed_by="TestReviewer", log=lambda *a, **k: None)
+    ledger = _led()["1.B1.S1"]
+    assert ledger.get("keyframeCandidate") is None
+    assert ledger["keyframeRejected"]["reviewedBy"] == "TestReviewer"
+    assert "The staging does not match" in ledger["keyframeRejected"]["reason"]
 
-def test_unavailable_keyframe_identity_screen_holds_candidate_and_blocks_accept(
+
+def test_unavailable_keyframe_identity_screen_preserves_candidate_for_human_accept(
         world, monkeypatch):
     prov, _, _ = world
 
@@ -922,10 +930,11 @@ def test_unavailable_keyframe_identity_screen_holds_candidate_and_blocks_accept(
 
     candidate = _led()["1.B1.S1"]["keyframeCandidate"]
     assert candidate["conformanceScreening"]["status"] == "unavailable"
-    with pytest.raises(R.Refused, match="cannot be accepted"):
-        R.approve_keyframe(
-            "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
-            log=lambda *a, **k: None)
+    R.approve_keyframe(
+        "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
+        log=lambda *a, **k: None)
+    approval = _led()["1.B1.S1"]["keyframeApproval"]
+    assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
     assert len(prov.image_calls) == 1
 
 

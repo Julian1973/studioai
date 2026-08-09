@@ -245,6 +245,40 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .shot-input-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .shot-input-section-head span { color: var(--teal); font-size: 10px; font-weight: 900; text-transform: uppercase; }
 .shot-input-section-head strong { color: var(--muted); font-size: 11px; font-weight: 900; }
+.prompt-copy-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.prompt-copy-status {
+  min-width: 42px;
+  color: var(--success) !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  text-align: right;
+  text-transform: none !important;
+}
+.prompt-copy-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border: 1px solid #46514e;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .04);
+  color: var(--text);
+  cursor: pointer;
+}
+.prompt-copy-button:hover,
+.prompt-copy-button:focus-visible { border-color: var(--teal); background: rgba(112, 217, 209, .1); outline: none; }
+.prompt-copy-button.copied { border-color: var(--success); background: rgba(52, 211, 153, .12); }
+.prompt-copy-button > span::before,
+.prompt-copy-button > span::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+.prompt-copy-button > span::before { left: 9px; top: 8px; opacity: .55; }
+.prompt-copy-button > span::after { left: 13px; top: 11px; background: #111715; }
 .shot-input-ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
 .shot-input-ref-grid.compact { grid-template-columns: repeat(auto-fit, minmax(110px, 150px)); }
 .shot-input-ref {
@@ -995,7 +1029,9 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
   color: #fecaca;
 }
 .builder-details { margin-top: 10px; border: 1px solid #334155; border-radius: 8px; background: rgba(0,0,0,.18); }
-.builder-details summary { padding: 10px 12px; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 800; }
+.builder-details summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 800; }
+.builder-details summary .prompt-copy-button { color: #dbeafe; }
+.builder-details summary .prompt-copy-button > span::after { background: #111827; }
 .builder-details pre { max-height: 260px; overflow: auto; margin: 0; padding: 12px; color: #dbeafe; white-space: pre-wrap; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .director-check-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .director-check-list li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }

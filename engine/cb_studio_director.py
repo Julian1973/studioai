@@ -97,7 +97,7 @@ def _latest_failed_job(jobs: dict[str, Any] | None, scene: str,
                        shot_id: str | None) -> dict[str, Any] | None:
     matches = []
     for job in (jobs or {}).values():
-        if job.get("status") != "failed" or str(job.get("scene")) != str(scene):
+        if str(job.get("scene")) != str(scene):
             continue
         gate = str(job.get("gate") or "")
         args = [str(value) for value in (job.get("args") or [])]
@@ -107,6 +107,11 @@ def _latest_failed_job(jobs: dict[str, Any] | None, scene: str,
     if not matches:
         return None
     job = max(matches, key=lambda item: float(item.get("ended") or item.get("started") or 0))
+    # "Last action failed" must describe the latest action for this shot. Keeping an
+    # older failure after a newer successful/refired action makes the Studio report a
+    # false current state and sends the director back into an already-resolved problem.
+    if job.get("status") != "failed":
+        return None
     lines = [line.strip() for line in str(job.get("log") or "").splitlines()
              if line.strip() and not _SENSITIVE_PROGRESS.search(line)]
     detail = next((line for line in reversed(lines)

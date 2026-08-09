@@ -3625,11 +3625,12 @@ def reassess_keyframe(scene, shot_id, episode="Ep1"):
 
 
 def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1", log=print):
-    """Run the fail-closed identity/scale/staging screen after a keyframe render.
+    """Run the advisory identity/scale/staging screen after a keyframe render.
 
     This call never generates media.  It compares the actual candidate with the exact
-    provider attachments and typed opening layout that produced it.  Creative taste remains
-    Julian's decision; obvious contract failures never reach an enabled Accept button.
+    provider attachments and typed opening layout that produced it. The result is attached
+    to the visible candidate as a recommendation; only the human Director may approve or
+    refire the keyframe.
     """
     characters_cfg = _characters_cfg()
     attachment_plan = _provider_attachment_plan(
@@ -3739,12 +3740,12 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
             "review": review,
         }
     except Exception as exc:
-        log(f"KEYFRAME CONFORMANCE HOLD — {shot['shotId']}: {exc}")
+        log(f"KEYFRAME CONFORMANCE ADVISORY UNAVAILABLE — {shot['shotId']}: {exc}")
         return {
             "status": "unavailable",
             "reason": (
-                "The objective identity and scale check did not complete. The image is held "
-                "and cannot be accepted until the check passes."),
+                "The objective identity and scale check did not complete. The generated "
+                "image remains available for the human Director's decision."),
             "detail": str(exc),
             "checkedAt": _now(),
             "screenVersion": 1,
@@ -3806,32 +3807,20 @@ def keyframe_shot(scene, shot_id, episode="Ep1", log=print):
         "geometryScreening": geometry_screening,
         "conformanceScreening": conformance_screening,
     }
-    if conformance_screening.get("status") == "fail":
-        ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        arch = HERE / "media" / "archive" / "shots_rejected" / f"{episode}_{shot_id}_keyframe_{ts}"
-        arch.mkdir(parents=True, exist_ok=True)
-        archived_rel = None
-        if out.exists():
-            dest = arch / out.name
-            shutil.move(str(out), dest)
-            archived_rel = str(dest.relative_to(HERE))
-        rejection = {**candidate_record, "outcome": "rejected", "rejectedAt": _now(),
-                     "reason": f"Automatic pre-approval QC failed: {conformance_screening.get('reason') or 'objective keyframe contract failed'}",
-                     "reviewedBy": "Automatic pre-approval QC",
-                     "rejectedFile": archived_rel,
-                     "archivedSidecars": [],
-                     "contentHashAtGeneration": False}
-        led.setdefault("keyframeRejections", []).append(rejection)
-        led["keyframeRejected"] = rejection
-        led["keyframeCandidate"] = None
-        _save(pkg, path)
-        log(f"KEYFRAME CONFORMANCE REJECTED — {shot_id}: {rejection['reason']}")
-        return str(out)
-    # ONLY reached on a successful generation — led["keyframeCandidate"] (and any existing
-    # keyframeApproval) is never touched before this line, so a failure above leaves the
-    # ledger, and any approved keyframe, byte-for-byte as they were.
+    # Every successfully rendered image reaches the human review surface. Automated checks
+    # attach evidence only; they never reject, archive, replace or advance a keyframe.
     led["keyframeCandidate"] = candidate_record
     _save(pkg, path)
+    if conformance_screening.get("status") == "fail":
+        review = conformance_screening.get("review") or {}
+        correction = (review.get("recommendedCorrection") or
+                      conformance_screening.get("reason") or
+                      "The automated identity and staging review recommends a refire.")
+        log(f"KEYFRAME QC RECOMMENDATION — {shot_id}: {correction} "
+            "(candidate preserved; only the human Director may Approve or Refire)")
+    elif conformance_screening.get("status") == "unavailable":
+        log(f"KEYFRAME QC ADVISORY UNAVAILABLE — {shot_id}: candidate preserved for the "
+            "human Director's Approve or Refire decision")
     if geometry_screening.get("status") == "fail":
         log(f"KEYFRAME STAGE ADVISORY — {shot_id}: {geometry_screening.get('reason')} "
             "(candidate preserved for human judgement; this check does not block Accept)")
@@ -3996,9 +3985,11 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
         raise Refused(f"REFUSED — {shot_id} has no keyframe candidate awaiting approval")
     if cand.get("source", "generated") == "generated":
         conformance = cand.get("conformanceScreening") or {}
-        if conformance.get("status") != "pass":
+        advisory_accepted = bool(
+            (cand.get("conformanceAdvisoryDecision") or {}).get("acceptedBy"))
+        if conformance.get("status") != "pass" and not advisory_accepted:
             raise Refused(f"REFUSED — {shot_id}'s generated keyframe cannot be accepted until "
-                          f"the objective identity and scale check passes "
+                          "the human Director explicitly accepts the attached QC advice "
                           f"({conformance.get('status') or 'missing'}).")
         current_sig = _keyframe_input_signature(pkg, shot, scene, episode)
         if cand.get("inputSignature") != current_sig:

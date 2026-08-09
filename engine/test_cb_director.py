@@ -307,6 +307,48 @@ def test_running_progress_does_not_expose_sensitive_log_lines():
     assert _session(jobs=jobs)["runningJob"]["latestMessage"] == "Provider accepted request"
 
 
+def test_older_failure_is_hidden_after_newer_completed_action():
+    jobs = {
+        "old-failure": {
+            "jobId": "old-failure", "scene": "1",
+            "gate": f"director:prepare-render:{SHOT_ID}", "status": "failed",
+            "started": 100, "ended": 120,
+            "step": "providerPrompt is over the old ceiling",
+            "log": "Value error, providerPrompt is over the old ceiling",
+            "args": [SHOT_ID],
+        },
+        "new-keyframe": {
+            "jobId": "new-keyframe", "scene": "1",
+            "gate": f"director:build-keyframe:{SHOT_ID}", "status": "done",
+            "started": 200, "ended": 240, "step": "Done.", "log": "Done.",
+            "args": [SHOT_ID],
+        },
+    }
+    session = _session(jobs=jobs)
+    assert session["recentFailure"] is None
+
+
+def test_latest_failed_action_is_still_reported():
+    jobs = {
+        "old-success": {
+            "jobId": "old-success", "scene": "1",
+            "gate": f"director:build-keyframe:{SHOT_ID}", "status": "done",
+            "started": 100, "ended": 120, "step": "Done.", "log": "Done.",
+            "args": [SHOT_ID],
+        },
+        "new-failure": {
+            "jobId": "new-failure", "scene": "1",
+            "gate": f"director:prepare-render:{SHOT_ID}", "status": "failed",
+            "started": 200, "ended": 220, "step": "Failed.",
+            "log": "REFUSED - current request could not be compiled",
+            "args": [SHOT_ID],
+        },
+    }
+    failure = _session(jobs=jobs)["recentFailure"]
+    assert failure["jobId"] == "new-failure"
+    assert "REFUSED" in failure["error"]
+
+
 def test_allowed_actions_are_derived_from_the_current_session_only():
     session = _session()
     assert cb_studio_director.allowed_action_ids(session) == {

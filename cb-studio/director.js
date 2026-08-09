@@ -1014,6 +1014,51 @@
     return request.prompt || (request.lines || []).map((line) => `${line.speaker}: ${line.performedText}`).join("\n") || "No provider text is required for this step.";
   }
 
+  async function copyVisiblePrompt(button) {
+    const panel = button.closest("[data-prompt-copy-panel]");
+    const prompt = panel?.querySelector("pre")?.textContent || "";
+    if (!prompt.trim()) {
+      toast("There is no prompt to copy yet.", true);
+      return;
+    }
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(prompt);
+      } else {
+        const fallback = document.createElement("textarea");
+        fallback.value = prompt;
+        fallback.setAttribute("readonly", "");
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.appendChild(fallback);
+        fallback.select();
+        if (!document.execCommand("copy")) throw new Error("Clipboard unavailable");
+        fallback.remove();
+      }
+      const status = panel.querySelector("[data-copy-prompt-status]");
+      if (status) status.textContent = "Copied";
+      button.classList.add("copied");
+      button.title = "Prompt copied";
+      window.setTimeout(() => {
+        if (status) status.textContent = "";
+        button.classList.remove("copied");
+        button.title = "Copy prompt";
+      }, 1800);
+    } catch (_) {
+      toast("The prompt could not be copied. Select the prompt text and copy it manually.", true);
+    }
+  }
+
+  function bindPromptCopyButtons(root) {
+    root.querySelectorAll("[data-copy-prompt]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        copyVisiblePrompt(button);
+      });
+    });
+  }
+
   function renderShotInputs(session) {
     const host = $("#shot-inputs");
     if (!host) return;
@@ -1083,14 +1128,15 @@
       </section>
     </div>
     ${otherRefs.length ? `<section><div class="shot-input-section-head"><span>Other Locked References</span><strong>${otherRefs.length}</strong></div><div class="shot-input-ref-grid compact">${otherRefs.map(renderRef).join("")}</div></section>` : ""}
-    <section class="shot-prompt-panel">
-      <div class="shot-input-section-head"><span>Exact Prompt</span><strong>${session.inspector?.providerRequest ? "Prepared" : "Pending"}</strong></div>
+    <section class="shot-prompt-panel" data-prompt-copy-panel>
+      <div class="shot-input-section-head"><span>Exact Prompt</span><div class="prompt-copy-actions"><strong>${session.inspector?.providerRequest ? "Prepared" : "Pending"}</strong><span class="prompt-copy-status" data-copy-prompt-status aria-live="polite"></span><button type="button" class="prompt-copy-button" data-copy-prompt aria-label="Copy prompt" title="Copy prompt"><span aria-hidden="true"></span></button></div></div>
       <pre>${esc(prompt)}</pre>
     </section>
     <section class="shot-handoff-rule">
       <strong>Continuity rule</strong>
       <p>If animation is approved, the final accepted frame becomes the handoff truth for the next shot in this scene. The next shot still uses its own scene plate, character turnarounds and prompt.</p>
     </section>`;
+    bindPromptCopyButtons(host);
   }
 
   async function loadInlineShotContext(session) {
@@ -1794,8 +1840,8 @@
         ${beat.secondaryKeyframe ? `<div class="keyframe-substates"><button type="button" class="active">${esc(beat.keyframe)}</button><button type="button">${esc(beat.secondaryKeyframe)}</button></div>` : ""}
         <div class="workbench-ref-row">${renderWorkbenchRefs(session)}</div>
         ${renderKeyframeSourcePanel(session)}
-        <details class="builder-details">
-          <summary>Builder Mode · prompt segment and reference roles</summary>
+        <details class="builder-details" data-prompt-copy-panel>
+          <summary><span>Builder Mode · prompt segment and reference roles</span><span class="prompt-copy-actions"><span class="prompt-copy-status" data-copy-prompt-status aria-live="polite"></span><button type="button" class="prompt-copy-button" data-copy-prompt aria-label="Copy prompt" title="Copy prompt"><span aria-hidden="true"></span></button></span></summary>
           <pre>${esc(beat.promptSegment || requestPromptText(session))}</pre>
         </details>
       </section>
@@ -1817,6 +1863,7 @@
       <div class="review-timeline">${beats.map((item) => `<button type="button" class="${item.id === beat.id ? "active" : ""} ${item.reviewStatus}" data-beat="${esc(item.id)}"><span>${esc(item.title)}</span></button>`).join("")}</div>
       <p>${esc(beat.reviewNote || beat.visibleProof)}</p>
     </section>`;
+    bindPromptCopyButtons(host);
     host.querySelectorAll("[data-beat]").forEach((button) => button.addEventListener("click", () => {
       app.activeBeatId = button.dataset.beat;
       writeHash();

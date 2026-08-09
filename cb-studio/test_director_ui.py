@@ -190,6 +190,9 @@ def test_duplicate_and_background_session_reads_do_not_compete():
     assert 'document.visibilityState !== "visible"' in JS
     assert "setTimeout(pollLiveSession, 15000)" in JS
     assert 'document.addEventListener("visibilitychange"' in JS
+    assert "Reconnecting to Studio state" in JS
+    assert "Retrying automatically..." in JS
+    assert "app.pollTimer = setTimeout(loadSession, 2000)" in JS
 
 
 def test_success_is_published_only_after_director_cache_refresh():

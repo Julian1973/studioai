@@ -3241,13 +3241,14 @@
         pollLiveSession, session.status === "rendering" ? 1600 : 4500);
     } catch (error) {
       const workbench = $("#scene-workbench");
-      if (workbench) workbench.innerHTML = `<div class="relay-load-error"><strong>Studio state could not load</strong><p>${esc(error.message)}</p><button type="button" class="primary" data-retry-session>Retry</button></div>`;
+      if (workbench) workbench.innerHTML = `<div class="relay-load-error"><strong>Reconnecting to Studio state</strong><p>${esc(error.message)} Retrying automatically...</p><button type="button" class="primary" data-retry-session>Retry now</button></div>`;
       workbench?.querySelector("[data-retry-session]")?.addEventListener("click", loadSession);
       $("#media-stage").innerHTML = emptyStage(error.message, false);
       $("#outcome-headline").textContent = "Director state unavailable";
       $("#outcome-summary").textContent = error.message;
       $("#action-area").innerHTML = '<a class="secondary" href="/cb-studio/app.html">Open Inspector</a>';
       toast(error.message, true);
+      app.pollTimer = setTimeout(loadSession, 2000);
     }
   }
 

@@ -86,11 +86,13 @@ def test_animation_direction_requires_declared_creative_latitude():
             "beatIds": ["1.B1"],
             "purpose": "Turn confidence into a physical wobble.",
             "initialOrCarriedState": "Fuzzby begins in the approved pose.",
+            "cause": "Fuzzby's missed turn drives him into the flower.",
             "primaryEvent": "The missed turn creates the collision and recovery.",
             "observableEndState": "Fuzzby balances on the flower, chest out.",
             "emotionOrCameraAnalysis": "The unhurried hold lets his denial become the joke."
         }],
         "referenceContract": [],
+        "geography": ["The flower lane runs frame-left to frame-right."],
         "consistencyContract": ["Keep Fuzzby's identity and flower ownership stable."],
         "audioContract": "No dialogue; retain the physical action sounds.",
         "continuityFinish": "Fuzzby balanced on the flower, chest out.",
@@ -140,12 +142,12 @@ def test_animation_direction_requires_declared_creative_latitude():
         AnimationDirection.model_validate({
             **base,
             "performanceFreedom": "Seedance may discover the detailed performance.",
-            "providerPrompt": " ".join(["direction"] * 521),
+            "providerPrompt": " ".join(["direction"] * 621),
         })
     except ValidationError as exc:
-        assert "production ceiling is 520" in str(exc)
+        assert "production ceiling is 620" in str(exc)
     else:
-        raise AssertionError("provider prompts over 520 words must fail software-wide")
+        raise AssertionError("provider prompts over 620 words must fail software-wide")
 
     long_form = {
         **base,
@@ -185,6 +187,7 @@ def test_animation_direction_requires_complete_ordered_timestamp_stages():
         "startSec": 0,
         "endSec": 8,
         "initialOrCarriedState": "Fuzzby begins in the approved pose.",
+        "cause": "Fuzzby's speed loads the flower stem.",
         "primaryEvent": "The flower bends and redirects him.",
         "observableEndState": "He catches himself on the bloom.",
         "emotionOrCameraAnalysis": "The held wide frame makes the recovery readable.",
@@ -226,6 +229,7 @@ def test_animation_direction_requires_complete_ordered_timestamp_stages():
             "compositionLightAndMaterials": "Warm meadow depth.",
             "landingImage": "Caught on the bloom."}],
         "stagePlan": [stage], "referenceContract": [],
+        "geography": ["The flower lane runs frame-left to frame-right."],
         "consistencyContract": ["Keep identity stable."],
         "audioContract": "No dialogue; preserve ambience.",
         "continuityFinish": "Caught on the bloom.", "surgicalSafeguards": [],

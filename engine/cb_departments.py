@@ -24,11 +24,26 @@ ROOT = HERE.parent
 RUNTIME_START = "<!-- RUNTIME_WORKER_START -->"
 RUNTIME_END = "<!-- RUNTIME_WORKER_END -->"
 MAX_ANIMATION_PROVIDER_PROMPT_WORDS = 700
+DIRECTOR_GRAMMAR_PACK = HERE / "grammar_pack.json"
+
+
+def director_grammar_pack():
+    """Load versioned Director law as data; never let a worker improvise it."""
+    return json.loads(DIRECTOR_GRAMMAR_PACK.read_text(encoding="utf-8"))
+
+
+def canonical_style_paragraph():
+    style = director_grammar_pack().get("style_paragraph") or {}
+    version = str(style.get("version") or "").strip()
+    text = str(style.get("text") or "").strip()
+    if not version or not text:
+        raise RuntimeError("Director grammar pack has no versioned canonical style paragraph")
+    return version, text
 
 
 def animation_provider_prompt_word_limit(duration_sec):
-    """Keep short prompts lean without forcing 16-30s story units to lose visible proof."""
-    return 520 if float(duration_sec or 0) <= 15 else MAX_ANIMATION_PROVIDER_PROMPT_WORDS
+    """Leave room for compiler-owned style, geography, causality and numeric holds."""
+    return 620 if float(duration_sec or 0) <= 15 else MAX_ANIMATION_PROVIDER_PROMPT_WORDS
 
 SKILLS = {
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
@@ -150,6 +165,9 @@ class CinematographyDirection(BaseModel):
     lensAndCameraRelationship: str
     lightingAndDepth: str
     openingFrameLayout: OpeningFrameLayout
+    negativeSpace: List[str] = Field(
+        min_length=1, max_length=4,
+        description="Visible empty-space reservations for later entrances, travel or reveals.")
     referenceUse: List[str] = Field(default_factory=list, max_length=6)
     continuityProtections: List[str] = Field(default_factory=list, max_length=4)
     providerPrompt: str = Field(min_length=40)
@@ -204,6 +222,9 @@ class SeedanceStageDirection(BaseModel):
     initialOrCarriedState: str = Field(
         min_length=1,
         description="The visible state inherited at the start of this stage.")
+    cause: str = Field(
+        min_length=1,
+        description="The visible cause inherited from the preceding state or stage.")
     primaryEvent: str = Field(
         min_length=1,
         description="One primary state change, written as playable cause and effect.")
@@ -234,12 +255,42 @@ class GagClockDirection(BaseModel):
     impact: str = Field(min_length=1)
     reaction: str = Field(min_length=1)
     recoveryHold: str = Field(min_length=1)
-    recoveryHoldSec: float = Field(gt=0, le=1.5)
+    recoveryHoldSec: float = Field(
+        gt=0, le=3.0,
+        description="Numeric landing hold. BIG arcs and any arc that ends the unit need "
+                    ">= 2.0s for the pose to read; SMALL mid-chain arcs may run 0.6-1.5s.")
     button: str = Field(min_length=1)
     providerAction: str = Field(
         min_length=1,
         description="A dialogue-free, directly photographable action sentence copied "
                     "verbatim into providerPrompt.")
+
+    @model_validator(mode="after")
+    def big_buttons_must_land(self):
+        if self.mode == "BIG" and self.recoveryHoldSec < 2.0:
+            raise ValueError(
+                "BIG gag hold < 2.0s truncates the landing — the button cannot read "
+                "('briefly' is not a duration; AAA Prompt Standard gag-clock law)")
+        return self
+
+
+class MotionVocabularyDirection(BaseModel):
+    """Versioned canon verbs. These are injected from grammar_pack.json."""
+    character: str = Field(min_length=1)
+    belongs: List[str] = Field(default_factory=list, max_length=20)
+    banned: List[str] = Field(default_factory=list, max_length=20)
+
+
+def canonical_motion_vocabulary():
+    characters = director_grammar_pack().get("characters") or {}
+    return [
+        MotionVocabularyDirection(
+            character=name,
+            belongs=list((rules or {}).get("belongs") or []),
+            banned=list((rules or {}).get("banned") or []))
+        for name, rules in characters.items()
+        if (rules or {}).get("belongs") or (rules or {}).get("banned")
+    ]
 
 
 class GenerationDesignDirection(BaseModel):
@@ -306,6 +357,12 @@ class AnimationDirection(BaseModel):
                     "justify precise control. Empty is valid for an open performance.")
     shotPlan: List[InternalShotDirection] = Field(min_length=1, max_length=6)
     stagePlan: List[SeedanceStageDirection] = Field(min_length=1, max_length=5)
+    geography: List[str] = Field(
+        min_length=1, max_length=8,
+        description="Scene geography ledger copied verbatim into every shot in the scene.")
+    motionVocabulary: List[MotionVocabularyDirection] = Field(
+        default_factory=canonical_motion_vocabulary,
+        description="Canonical belongs/banned motion verbs injected from versioned data.")
     referenceContract: List[ReferenceDirection] = Field(default_factory=list, max_length=50)
     consistencyContract: List[str] = Field(min_length=1, max_length=6)
     audioContract: str = Field(
@@ -357,6 +414,25 @@ class AnimationDirection(BaseModel):
                 raise ValueError("timestamp stages must end at the approved duration")
         elif any(start is not None or end is not None for start, end in timed):
             raise ValueError("storyline pacing must omit startSec and endSec")
+        canonical_vocab = {
+            item.character: item.model_dump() for item in canonical_motion_vocabulary()
+        }
+        supplied_vocab = {}
+        for item in self.motionVocabulary:
+            value = item.model_dump() if hasattr(item, "model_dump") else dict(item)
+            supplied_vocab[str(value.get("character") or "")] = value
+        if supplied_vocab != canonical_vocab:
+            raise ValueError("motionVocabulary must match the versioned Director grammar pack")
+        directed_text = "\n".join([
+            *(stage.primaryEvent for stage in self.stagePlan),
+            *(clock.providerAction for clock in self.creativeTranslation.gagClocks),
+        ])
+        for character, rules in canonical_vocab.items():
+            for verb in rules.get("banned") or []:
+                pattern = rf"\b{re.escape(character)}\b[^.\n]{{0,100}}\b{re.escape(verb)}\b"
+                if re.search(pattern, directed_text, re.I):
+                    raise ValueError(
+                        f"motion vocabulary violation: {character} cannot '{verb}'")
         prompt_words = len(self.providerPrompt.split())
         prompt_limit = animation_provider_prompt_word_limit(self.durationSec)
         if prompt_words > prompt_limit:
@@ -639,7 +715,10 @@ def prepare_cinematography(context, images, *, log=print):
         "frame-height fraction and use apparentScale solely for an authored depth difference. "
         "Set sameDepth=true, one depthPlane and apparentScale=1.0 when perspective must not "
         "alter relative size. Keep every character readable inside the 16:9 frame with lead "
-        "room and an unobstructed performance corridor. The final image call receives the "
+        "room and an unobstructed performance corridor. Return negativeSpace as one to four "
+        "explicit empty-space reservations, such as 'Hold empty space frame-right for Zenny "
+        "entering later'; never fill planned reveal space merely to balance the frame. The "
+        "final image call receives the "
         "locked turnarounds and Scene Look in providerReferencePlan order. Never assign an "
         "opening composition, sizing board or generated pose plate to an @图 label: those "
         "remain local advisory evidence. Bind references by the labels stated in context; "
@@ -755,6 +834,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
             "setup": item.get("setup"),
             "impact": item.get("disruption"),
             "recoveryHold": item.get("hold"),
+            "recoveryHoldSec": item.get("recoveryHoldSec"),
             "button": item.get("button"),
             "providerAction": event_by_beat.get(str(item.get("beatCode") or ""), ""),
         } for item in approved]
@@ -799,6 +879,16 @@ def creative_translation_report(shot, direction, provider_prompt=None):
             if spoken and len(spoken.split()) >= 2 and spoken in normalized_action:
                 errors.append(
                     f"{actual_clock.get('beatCode') or '?'} providerAction contains spoken words")
+        hold_sec = actual_clock.get("recoveryHoldSec")
+        if hold_sec is None:
+            errors.append(
+                f"{actual_clock.get('beatCode') or '?'} gag button has no numeric hold")
+        else:
+            hold_line = f"Hold: {float(hold_sec):.1f}s"
+            if hold_line.casefold() not in prompt:
+                errors.append(
+                    f"{actual_clock.get('beatCode') or '?'} explicit Hold line is absent "
+                    "from providerPrompt")
 
     if int(design.get("completeGagArcCount") or 0) != len(clocks):
         errors.append("generation design gag count does not match its gag clocks")
@@ -935,6 +1025,11 @@ def compile_animation_provider_prompt(shot, direction):
         for item in translation.get("gagClocks") or []
         if str(item.get("beatCode") or "").strip()
     }
+    gag_clocks = {
+        str(item.get("beatCode") or ""): item
+        for item in translation.get("gagClocks") or []
+        if str(item.get("beatCode") or "").strip()
+    }
 
     def concise(value, *, words=28):
         """Keep provider prose lean without rewriting locked stage events or end states."""
@@ -990,6 +1085,11 @@ def compile_animation_provider_prompt(shot, direction):
     sections.append("[One-Sentence Summary]\n" + goal)
 
     global_lines = []
+    style_version, style_text = canonical_style_paragraph()
+    global_lines.append(f"Style ({style_version}): {style_text}")
+    geography = [str(item).strip() for item in data.get("geography") or [] if str(item).strip()]
+    if geography:
+        global_lines.append("Geography: " + " ".join(geography))
     mechanism = str(interpretation.get("mechanism") or "").strip()
     heart = str(interpretation.get("emotionalHeart") or "").strip()
     short_unit = float(data.get("durationSec") or shot.get("durationSec") or 0) <= 15
@@ -1008,6 +1108,7 @@ def compile_animation_provider_prompt(shot, direction):
     sections.append("[Global Settings]\n" + "\n".join(global_lines))
 
     stage_sections = []
+    emitted_holds = set()
     for index, stage in enumerate(stages):
         item = stage.model_dump() if hasattr(stage, "model_dump") else dict(stage)
         stage_number = int(item.get("stageNumber") or index + 1)
@@ -1026,12 +1127,34 @@ def compile_animation_provider_prompt(shot, direction):
             if action and " ".join(action.split()).casefold() not in " ".join(event.split()).casefold():
                 additions.append(action)
         action = " ".join([event, *additions]).strip()
-        stage_sections.append(
-            f"{heading}\n"
-            f"{prefix}: {concise(item.get('initialOrCarriedState'), words=28)}\n"
-            f"Action/Expression: {action}\n"
-            f"Emotion/Camera Analysis: {concise(item.get('emotionOrCameraAnalysis'), words=20)}\n"
-            f"End state: {str(item.get('observableEndState') or '').strip()}")
+        hold_lines = []
+        for beat_id in item.get("beatIds") or []:
+            clock = gag_clocks.get(str(beat_id))
+            if not clock:
+                continue
+            hold_sec = clock.get("recoveryHoldSec")
+            if hold_sec is None:
+                raise ValueError(f"{beat_id} gag button has no numeric recoveryHoldSec")
+            hold_lines.append(
+                f"Hold: {float(hold_sec):.1f}s — "
+                f"{str(clock.get('recoveryHold') or '').strip()}")
+            emitted_holds.add(str(beat_id))
+        lines = [
+            heading,
+            f"{prefix}: {concise(item.get('initialOrCarriedState'), words=28)}",
+            f"Cause: {str(item.get('cause') or '').strip()}",
+            f"Action/Expression: {action}",
+            *hold_lines,
+            "Emotion/Camera Analysis: "
+            + concise(item.get("emotionOrCameraAnalysis"), words=20),
+            f"End state: {str(item.get('observableEndState') or '').strip()}",
+        ]
+        stage_sections.append("\n".join(lines))
+    missing_holds = set(gag_clocks) - emitted_holds
+    if missing_holds:
+        raise ValueError(
+            "gag button(s) are not owned by a compiled stage: "
+            + ", ".join(sorted(missing_holds)))
     sections.append("[Timestamp Script Storyboard]\n" + "\n\n".join(stage_sections))
 
     consistency = [consistency_clause(item) for item in
@@ -1052,7 +1175,9 @@ def compile_animation_provider_prompt(shot, direction):
         audio = "Use @Audio1 unchanged."
         if foley:
             audio += " " + foley.group(0).strip().capitalize() + "."
-        if re.search(r"\bno\s+(?:musical underscore|music|bgm)\b", audio_contract, re.I):
+        if re.search(
+                r"\bno\b[^.;]{0,120}\b(?:musical underscore|music|bgm)\b",
+                audio_contract, re.I):
             audio += " No music."
     else:
         audio = audio_contract
@@ -1107,7 +1232,9 @@ def prepare_animation(context, images, *, log=print):
         "shot's comedyContractsApproved, return one gagClock in the same order. Copy its "
         "beatCode, mode, setup, disruption as impact, hold as recoveryHold, and button "
         "verbatim. Add directly visible anticipation and reaction, a readable recoveryHoldSec "
-        "of no more than 1.5 seconds, and one dialogue-free providerAction sentence. Copy "
+        "(minimum 2.0 seconds for BIG arcs and any arc that ends the unit — the landing must "
+        "have air; 0.6-1.5 seconds for SMALL mid-chain arcs), and one dialogue-free "
+        "providerAction sentence. Copy "
         "that providerAction verbatim into the matching Action/Expression section of "
         "providerPrompt. Do not copy spoken button words into providerAction. The generation "
         "design records whether this is the approved single unit or a continuation unit, "
@@ -1121,8 +1248,9 @@ def prepare_animation(context, images, *, log=print):
         "Return taskMode='reference-to-video', the exact durationSec, pacingMode, generationGoal, deliveryPlan, creativeTranslation, audienceBefore, "
         "audienceAfter, beatOwner, performanceFreedom, landingBreath, directionDensity, a "
         "numbered one-to-six-shot directing plan, a consecutive stagePlan in which every "
-        "stage keeps its approved beatIds, has one primary event, an emotionOrCameraAnalysis "
-        "and an observable end state, "
+        "stage keeps its approved beatIds, has one primary event, an emotionOrCameraAnalysis, "
+        "a visible cause inherited from the prior state, and an observable end state, "
+        "plus geography copied from the approved scene geography ledger, "
         "the separate reference "
         "contract, consistencyContract, audioContract, the exact continuity landing, no more "
         "than three surgical safeguards, and one paste-ready Seedance shooting script in "
@@ -1164,6 +1292,10 @@ def prepare_animation(context, images, *, log=print):
         raise RuntimeError(
             f"Animation Director changed approved duration from {duration}s to "
             f"{result.durationSec}s")
+    approved_geography = (
+        context.get("sceneGeographyLedger") or shot.get("geographyLedgerApproved") or [])
+    if approved_geography and list(result.geography) != list(approved_geography):
+        raise RuntimeError("Animation Director changed the approved scene geography ledger")
     approved_stages = shot.get("storyboardStagePlanApproved") or []
     if approved_stages:
         expected = [list(stage.get("beatIds") or []) for stage in approved_stages]

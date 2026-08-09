@@ -1,0 +1,188 @@
+{
+  "version": "1.0.0",
+  "_doc": "The engine's knowledge as DATA. Every rule cites the AAA Prompt Standard (docs/AAA_PROMPT_STANDARD.md). Change by version bump only — verdicts farm into farmed_negatives and candidate_rules via the verdict loop, never by hand-editing mid-production.",
+  "style_paragraph": {
+    "version": "v1.0.0",
+    "status": "ADOPTED — compiler-injected into every keyframe mint and render prompt",
+    "text": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere."
+  },
+  "routes": {
+    "fal-seedance-2.5": {
+      "min_s": 4,
+      "max_s": 30,
+      "max_img": 30,
+      "max_vid": 10,
+      "max_aud": 10,
+      "resolutions": [
+        "480p",
+        "720p"
+      ],
+      "char_ceiling": 5000,
+      "status": "proven (route-25 test plan checks 1-4)"
+    },
+    "runway-seedance-2.5": {
+      "min_s": 4,
+      "max_s": 30,
+      "max_img": 30,
+      "max_vid": 10,
+      "max_aud": 10,
+      "resolutions": [
+        "480p",
+        "720p"
+      ],
+      "char_ceiling": 5000,
+      "status": "candidate — input-video surcharge on edits/extends; sketch-edit + backward-extend live here"
+    }
+  },
+  "narrative_char_note": 3500,
+  "button_hold_min_s": 2.0,
+  "characters": {
+    "Fuzzby": {
+      "belongs": [
+        "careens",
+        "overcommits",
+        "barrels",
+        "bounces",
+        "improvises",
+        "presents",
+        "rockets"
+      ],
+      "banned": [
+        "slinks",
+        "hesitates",
+        "glides",
+        "sulks",
+        "waits",
+        "creeps"
+      ],
+      "tic": "checks whether anyone saw (CANDIDATE — awaiting sign-off)"
+    },
+    "Zenny": {
+      "belongs": [
+        "glides",
+        "observes",
+        "settles",
+        "arches",
+        "softens",
+        "levels"
+      ],
+      "banned": [
+        "scrambles",
+        "flails",
+        "rushes",
+        "panics",
+        "showboats"
+      ],
+      "tic": "eye-roll that softens into a loving smile (LOCKED — from the approved spine)"
+    },
+    "Aida": {
+      "belongs": [],
+      "banned": []
+    },
+    "Sunny": {
+      "belongs": [],
+      "banned": []
+    },
+    "Luna": {
+      "belongs": [],
+      "banned": []
+    },
+    "Misty": {
+      "belongs": [],
+      "banned": []
+    },
+    "Amie": {
+      "belongs": [],
+      "banned": []
+    },
+    "Howey": {
+      "belongs": [],
+      "banned": []
+    },
+    "Keen": {
+      "belongs": [],
+      "banned": []
+    },
+    "Squeaky": {
+      "belongs": [],
+      "banned": []
+    },
+    "Bo": {
+      "belongs": [],
+      "banned": []
+    }
+  },
+  "appearance_words": "\\b(fur|furry|plush|striped?s?|yellow|golden|black|pink|rose(?:-gold)?|teal|lavender|violet|pearlescent|blue-grey|spectacles|glasses|bulbous|translucent|fuzzy|plump)\\b",
+  "brand_block": [
+    "pixar",
+    "disney",
+    "dreamworks",
+    "ghibli",
+    "hyperion",
+    "renderman",
+    "illumination",
+    "aardman",
+    "laika",
+    "unreal engine",
+    "octane"
+  ],
+  "camera_vague": [
+    "cinematic camera",
+    "epic camera",
+    "dynamic camera",
+    "beautiful camera"
+  ],
+  "camera_move_families": {
+    "dolly": [
+      "dolly",
+      "push-in",
+      "push in",
+      "pull-back",
+      "pull back"
+    ],
+    "track": [
+      "track",
+      "tracking",
+      "truck"
+    ],
+    "pan": [
+      "pan "
+    ],
+    "tilt": [
+      "tilt"
+    ],
+    "crane": [
+      "crane"
+    ],
+    "orbit": [
+      "orbit",
+      "arc "
+    ],
+    "handheld": [
+      "handheld"
+    ],
+    "zoom": [
+      "zoom"
+    ]
+  },
+  "camera_family_budget": 2,
+  "canon_blocks": [
+    {
+      "pattern": "(Fuzzby|Zenny)[^.\\n]{0,140}crystal",
+      "message": "bees have NO crystal (locked canon §3/§5)"
+    }
+  ],
+  "farmed_negatives": [
+    "no duplicated characters",
+    "no morphing",
+    "no style drift",
+    "no text, subtitles or captions in frame",
+    "no invented props"
+  ],
+  "candidate_rules": [],
+  "boilerplate": {
+    "anti_drift": "Same face, same proportions, same colours and same outfit throughout. Face stable throughout, no deformation.",
+    "music_kill": "Audio: no music, diegetic sound only.",
+    "coverage_invitation": "This montage will be cut by a human editor: load it with extra shots, alternate angles and options beyond the beats listed — invention is welcome as long as the locked subject and style hold."
+  }
+}

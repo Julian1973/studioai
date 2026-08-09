@@ -1,0 +1,102 @@
+{
+  "_doc": "GOLDEN FIXTURE — S1.SH1A from Julian's locked 8-beat spine (beats 1-2: chase chaos → crash + gymnastic finish + the 'Nailed it' button). This file IS the direction; the engine compiles it. REVIEW CANDIDATE: direction fields adjustable at SEE sign-off; reference file paths are placeholders until Codex binds real assets.",
+  "shot": "S1.SH1A",
+  "lane": "SEC",
+  "duration_s": 8.8,
+  "aspect": "16:9",
+  "resolution": "480p",
+  "route": "fal-seedance-2.5",
+  "will_edit": false,
+
+  "purpose": "Fuzzby's overcommitted flight ends in a crash he converts into an improvised gymnastic finish, sold as intentional — the first false triumph.",
+
+  "audio": {
+    "track": "@Audio1",
+    "owners": [
+      {"character": "Fuzzby", "regions": "the single line as marked, ~6.4–7.6s"}
+    ],
+    "silent": [],
+    "foley": [
+      "petal thwips",
+      "stem twang and buzz stutter",
+      "moss impacts and one mushroom-cap boing",
+      "one pollen settle under the held pose"
+    ],
+    "music": "No music."
+  },
+
+  "references": [
+    {"tag": "@Image1", "role": "first_frame", "file": "refs/S1_SH1A_opening_keyframe.png",
+     "defines": "the approved opening composition, Fuzzby's start position at the corridor's west entrance and the camera axis",
+     "ignore": "identity, materials and any action after 0.0s"},
+    {"tag": "@Image2", "role": "reference_image", "file": "refs/fuzzby_multiview.png",
+     "defines": "Fuzzby's approved identity, proportions and canonical scale — refer to it strictly",
+     "ignore": "background and poses"},
+    {"tag": "@Image3", "role": "reference_image", "file": "refs/flower_corridor_sheet.png",
+     "defines": "the flower-corridor geography, palette, materials and sunlight behaviour",
+     "ignore": "any characters or foreground action in it"},
+    {"tag": "@Audio1", "role": "reference_audio", "file": "audio/S1_SH1A_fuzzby_line.mp3",
+     "defines": "Fuzzby's performed line, its exact timing and all silences",
+     "ignore": "anything beyond it except the authorised foley"}
+  ],
+
+  "geography": [
+    "The corridor runs frame-left (west) to frame-right (east); Fuzzby travels west to east and never reverses.",
+    "The moss landing patch sits frame-right, just past the final flower.",
+    "Camera stays south of the corridor at bee height — never overhead."
+  ],
+
+  "light": "Warm afternoon sun from upper frame-right; petals cast soft moving shadows; the moss patch sits in a clean pool of light.",
+
+  "conduct": [
+    "Fuzzby plays proud authority, never distress — the crash is performed as if he meant it.",
+    "Comedy is TRUE, not BIG: the joke is the gap between poise and evidence."
+  ],
+
+  "stages": [
+    {"t": "0.0-2.4",
+     "action": "Fuzzby barrels down the corridor at full speed, clipping petal after petal; each snaps back and fires a puff of pollen behind him",
+     "cause": "overcommitted entrance at maximum confidence",
+     "camera": "low rear three-quarter track, offset left, matching his speed",
+     "sound": "rising wing-buzz, quick petal thwips in rhythm",
+     "end_state": "the final flower ahead, its gap clearly too tight for his speed"},
+
+    {"t": "2.4-4.2",
+     "action": "his trailing wing catches the last stem; it loads, bends and twangs him forward off-axis into a tumble",
+     "cause": "too much speed into too tight a gap",
+     "camera": "the track continues, keeping the stem contact in frame",
+     "sound": "buzz stutter, one clean stem twang",
+     "end_state": "airborne, tumbling toward the moss patch, pollen trailing"},
+
+    {"t": "4.2-6.0",
+     "action": "he converts the tumble into an improvised routine — two tight rolls, a bounce off a mushroom cap, a half-twist — each move slightly too big to be graceful",
+     "cause": "crash momentum he refuses to waste",
+     "camera": "the track eases wider to hold the whole routine",
+     "sound": "soft moss impacts, one mushroom-cap boing",
+     "end_state": "both feet planted on the moss, arms flung up mid-recovery"},
+
+    {"t": "6.0-8.8",
+     "action": "he snaps the recovery into a gymnast's landing pose, chest forward, chin up, and delivers his line in @Audio1 to nobody in particular",
+     "cause": "sticking a landing he never planned",
+     "camera": "locked medium at eye level",
+     "sound": "near-silence under the line",
+     "button": true,
+     "hold_s": 2.2,
+     "hold_what": "the pose held without extra movement while one pollen flake lands on his nose",
+     "end_state": "the triumphant pose held, pollen-dusted, one antenna bent — evidence contradicting triumph"}
+  ],
+
+  "camera_policy": {
+    "policy": "track the chaos from a low rear three-quarter, then lock to a medium for the landing button",
+    "exclusions": ["No cuts", "no handheld shake", "no orbit", "never overhead"]
+  },
+
+  "end_state": "Fuzzby alone in a locked medium, holding the pose on the moss patch, pollen-dusted, one antenna bent; the corridor behind shows the trail of snapped petals. Harvest this frame as the opening reference for S1.SH1B.",
+
+  "constraints": [
+    "Fuzzby is the only character — no second character enters",
+    "Maintain his canonical scale against the flowers",
+    "Nothing is damaged: petals snap back, the stem recovers, no debris",
+    "No gag after the button — once the pose lands, nothing else happens"
+  ]
+}

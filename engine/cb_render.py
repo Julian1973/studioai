@@ -106,7 +106,7 @@ POSED_INTEGRATION_ROLE = "qualified posed integration frame"
 POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
-MAX_KEYFRAME_INTEGRATION_WORDS = 300
+MAX_KEYFRAME_INTEGRATION_WORDS = 380
 MAX_KEYFRAME_INTEGRATION_HARD_WORDS = 450
 REVIEW_VIDEO_RESOLUTION = "480p"
 
@@ -2615,7 +2615,7 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
                         "impact": str(item.get("disruption") or ""),
                         "reaction": str(item.get("hold") or ""),
                         "recoveryHold": str(item.get("hold") or ""),
-                        "recoveryHoldSec": 0.8,
+                        "recoveryHoldSec": item.get("recoveryHoldSec"),
                         "button": str(item.get("button") or ""),
                         "providerAction": events_by_beat.get(
                             str(item.get("beatCode") or ""), ""),
@@ -2814,11 +2814,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                 reference_lines.append(
                     f"- {item['slot']}: {canonical}'s complete, uncropped 360 turnaround is the "
                     f"100% identity authority. Match {canonical} exactly as the same character "
-                    "shown in the turnaround. Preserve every visible feature, accessory, "
-                    "silhouette, marking, proportion, material, wing/limb detail and rear/side "
-                    "detail from the reference; do not describe, redesign, simplify, beautify, "
-                    "feminise, masculinise, add, remove or reinterpret character details. "
-                    "Ignore only the reference background and static pose.")
+                    "shown in the turnaround. Preserve all visible identity features, "
+                    "accessories and proportions; do not describe, redesign, simplify, beautify, "
+                    "add, remove or reinterpret them. Ignore background and static pose.")
             else:
                 view_bindings = ", ".join(
                     f"{item['slot']} {item.get('view') or 'identity'}"
@@ -2894,13 +2892,19 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     protections = _compact_protection(
         next(iter(direction.get("continuityProtections") or []), "")
     ) or "No additional shot-specific protection."
+    _style_version, style_text = cb_departments.canonical_style_paragraph()
+    negative_space = " ".join(
+        str(item).strip().rstrip(".") + "."
+        for item in direction.get("negativeSpace") or [] if str(item).strip())
     prompt = (
         "[Opening Stage]\n"
         f"Create a playable 16:9 opening for {shot.get('shotId')}: frame-one anticipation, "
         "never portrait, pose sheet or payoff.\n\n"
         "[References]\n" + "\n".join(reference_lines) + separation_line + "\n\n"
         f"[Intended Read]\n{_compact(direction.get('audienceRead'), 32)}.\n\n"
+        f"[Canonical Style]\n{style_text}\n\n"
         "[Frame]\n" + "\n".join(staging_lines) + f"\n- {scale_rule}\n\n"
+        f"[Negative Space]\n{negative_space}\n\n"
         f"[Camera]\n{_compact(direction.get('lensAndCameraRelationship'), 18)}.\n\n"
         f"[Light]\n{_compact(direction.get('lightingAndDepth'), 14)}.\n\n"
         "[Performance Freedom]\n"

@@ -81,6 +81,7 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
         "audienceRead": "Fuzzby chaos against Zenny calm.",
         "lensAndCameraRelationship": "Bee-height camera.",
         "lightingAndDepth": "Warm backlight.",
+        "negativeSpace": ["Hold frame-right open for the later flower reveal."],
         "openingFrameLayout": {"sameDepth": True, "placements": [
             {"character": "Fuzzby", "pose": "loose hover", "facing": "screen right"},
             {"character": "Zenny", "pose": "steady glide", "facing": "screen right"},
@@ -106,6 +107,8 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
     assert "@图3 is the locked Scene Look plate" in prompt
     assert "do not describe, redesign, simplify, beautify" in prompt
     assert "omitted reference features" in prompt
+    assert "[Canonical Style]" in prompt
+    assert "Hold frame-right open for the later flower reveal." in prompt
     assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_WORDS
 
 

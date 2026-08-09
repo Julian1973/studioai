@@ -209,12 +209,14 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
             stagePlan=[D.SeedanceStageDirection(
                 stageNumber=1, beatIds=["1.B1"], purpose="Expose the false confidence",
                 initialOrCarriedState="Fuzzby holds the approved opening pose.",
+                cause="His planted paw loads the loose plank.",
                 primaryEvent="His planted paw loads the plank and the deck kicks back.",
                 observableEndState="He holds a readable off-balance silhouette.",
                 emotionOrCameraAnalysis="The restrained push lets the private flinch land.")],
             referenceContract=[D.ReferenceDirection(
                 assetTag="@Image1", role="opening_frame",
                 controls="Exact opening state and composition", scope="continuity")],
+            geography=["The deck runs frame-left to frame-right; the camera stays south."],
             consistencyContract=["Keep Fuzzby's identity, scale and deck axis stable."],
             audioContract="No dialogue; preserve the deck creak and room ambience.",
             continuityFinish="End on the approved handoff silhouette.",
@@ -286,14 +288,16 @@ def test_creative_translation_preserves_approved_gag_clock_and_provider_action()
         "Fuzzby compresses the leaf, rebounds upright, and holds his wobbling proud pose "
         "while Zenny remains still enough for the contrast to register.")
     direction = {
-        "providerPrompt": "Action/Expression: " + provider_action,
+        "providerPrompt": (
+            "Action/Expression: " + provider_action + " Hold: 2.2s — "
+            + approved["hold"]),
         "creativeTranslation": {
             "gagClocks": [{
                 "beatCode": "1.B1", "mode": "BIG", "setup": approved["setup"],
                 "anticipation": "The leaf bends visibly before release.",
                 "impact": approved["disruption"],
                 "reaction": "Zenny gives one restrained look.",
-                "recoveryHold": approved["hold"], "recoveryHoldSec": 1.0,
+                "recoveryHold": approved["hold"], "recoveryHoldSec": 2.2,
                 "button": approved["button"], "providerAction": provider_action,
             }],
             "generationDesign": {
@@ -313,6 +317,72 @@ def test_creative_translation_preserves_approved_gag_clock_and_provider_action()
     report = D.creative_translation_report(shot, weakened)
     assert report["ready"] is False
     assert "providerAction is absent" in report["errors"][0]
+
+
+def test_big_gag_requires_numeric_two_second_landing():
+    common = {
+        "beatCode": "1.B1", "mode": "BIG", "setup": "Fuzzby enters too fast.",
+        "anticipation": "The leaf bends.", "impact": "The leaf throws him upright.",
+        "reaction": "Zenny watches.", "recoveryHold": "Hold the proud wobble.",
+        "button": "His body disproves the boast.",
+        "providerAction": "Fuzzby rebounds upright and holds the proud wobble.",
+    }
+    with pytest.raises(ValueError, match="BIG gag hold < 2.0s"):
+        D.GagClockDirection(**common, recoveryHoldSec=1.0)
+    with pytest.raises(ValueError, match="recoveryHoldSec"):
+        D.GagClockDirection(**common)
+    assert D.GagClockDirection(**common, recoveryHoldSec=2.2).recoveryHoldSec == 2.2
+
+
+def test_motion_vocabulary_blocks_out_of_character_verbs():
+    direction = {
+        "shotId": "S1.SH1A", "durationSec": 9,
+        "generationGoal": "Fuzzby converts a crash into false triumph.",
+        "deliveryPlan": "Keep the crash causal and the landing readable.",
+        "creativeTranslation": {
+            "interpretation": {
+                "jokeOrAche": "His body contradicts him.", "mechanism": "Physical evidence.",
+                "statusBefore": "Confident.", "statusAfter": "Exposed.",
+                "audienceProgression": ["expect", "see", "laugh"],
+                "emotionalHeart": "The failure stays affectionate.",
+            },
+            "gagClocks": [],
+            "generationDesign": {
+                "packagingDecision": "single-unit", "completeGagArcCount": 0,
+                "densityJudgement": "One event.",
+                "splitOrNonSplitRationale": "One causal action.",
+                "handoffState": "Fuzzby holds upright.",
+            },
+        },
+        "dramaticBeat": "False triumph.", "audienceBefore": "Expectation.",
+        "audienceAfter": "Affection.", "beatOwner": "Fuzzby",
+        "performanceFreedom": "Secondary motion remains free.",
+        "performanceArc": "Confidence becomes wobble.",
+        "physicalCauseAndEffect": "The leaf throws him upright.",
+        "cameraBehaviour": "Bee-height track.", "timingAndRhythm": "Chase then hold.",
+        "landingBreath": "The pose reads.", "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1, "purpose": "Land the contradiction.",
+            "framingLensAndCamera": "Bee-height medium.",
+            "causalAction": "The leaf recoils.", "observablePerformance": "He wobbles.",
+            "compositionLightAndMaterials": "Warm flowers.",
+            "landingImage": "He holds upright.",
+        }],
+        "stagePlan": [{
+            "stageNumber": 1, "beatIds": ["1.B1"], "purpose": "False triumph.",
+            "initialOrCarriedState": "The chase is moving.", "cause": "Too much speed.",
+            "primaryEvent": "Fuzzby glides into the flower corridor.",
+            "observableEndState": "Fuzzby holds upright.",
+            "emotionOrCameraAnalysis": "The contradiction reads.",
+        }],
+        "geography": ["The corridor runs frame-left to frame-right."],
+        "consistencyContract": ["Keep identity and geography stable."],
+        "audioContract": "No dialogue; no music.",
+        "continuityFinish": "Fuzzby holds upright.",
+        "providerPrompt": "A sufficiently complete placeholder provider prompt for validation.",
+    }
+    with pytest.raises(ValueError, match="Fuzzby cannot 'glides'"):
+        D.AnimationDirection.model_validate(direction)
 
 
 def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
@@ -340,7 +410,11 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
                 "mechanism": "His body disproves the authority he performs.",
                 "emotionalHeart": "Zenny sees the failure and stays affectionately present.",
             },
-            "gagClocks": [{"beatCode": "1.B1", "providerAction": provider_action}],
+            "gagClocks": [{
+                "beatCode": "1.B1", "providerAction": provider_action,
+                "recoveryHold": "Hold the proud wobbling recovery.",
+                "recoveryHoldSec": 2.2,
+            }],
         },
         "referenceContract": [
             {"assetTag": "@Image1", "role": "opening_frame",
@@ -355,12 +429,16 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
             "beatIds": ["1.B1"],
             "purpose": "Chase, recoil and false triumph",
             "initialOrCarriedState": "The approved chase is already moving through frame.",
+            "cause": "Fuzzby's overcommitted speed loads the springy leaf.",
             "primaryEvent": primary,
             "emotionOrCameraAnalysis": "Keep the contact readable, then settle for the lie.",
             "observableEndState": handoff,
         }],
         "consistencyContract": [
             "Fuzzby's identity, relative scale, corridor axis and light direction",
+        ],
+        "geography": [
+            "The corridor runs frame-left to frame-right; the camera stays south at bee height."
         ],
         "surgicalSafeguards": ["the leaf bend, recoil and landing remain one causal chain"],
         "continuityFinish": handoff,
@@ -376,6 +454,8 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "@Image1 defines the exact approved opening composition" in prompt
     assert "@Audio1 is the sole source" in prompt
     assert "[Timestamp Script Storyboard]" in prompt
+    assert "Hold: 2.2s" in prompt
+    assert "No music." in prompt
     assert len(prompt.split()) <= D.animation_provider_prompt_word_limit(9)
 
 
@@ -386,7 +466,8 @@ def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_ex
         "comedyContractsApproved": [{
             "beatCode": "1.B1", "mode": "BIG", "setup": "Fuzzby enters too fast.",
             "disruption": "The leaf snaps him upright.",
-            "hold": "Hold the proud wobble.", "button": "His body disproves the boast.",
+            "hold": "Hold the proud wobble.", "recoveryHoldSec": 2.2,
+            "button": "His body disproves the boast.",
         }],
         "storyboardStagePlanApproved": [{
             "stageNumber": 1, "beatIds": ["1.B1"], "primaryEvent": primary,
@@ -395,7 +476,7 @@ def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_ex
         "visualPayoff": ending,
         "dialogueLines": [{"exactText": "Nailed it."}],
     }
-    prompt = f"Action/Expression: {primary} End state: {ending}"
+    prompt = f"Action/Expression: {primary} Hold: 2.2s — Hold the proud wobble. End state: {ending}"
 
     strict = D.creative_translation_report(shot, {"providerPrompt": prompt})
     assert strict["ready"] is False

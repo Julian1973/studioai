@@ -178,9 +178,8 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert "locked extreme action pose" in prompt
     assert "body-mounted bags, sacks, baskets or dangling loads" in prompt
     assert ("[Protect]\nCarry the prior aftermath: visible pollen coating and a smeared "
-            "pollen moustache." in prompt)
-    assert "must already be" not in prompt
-    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS
+            "pollen moustache must already be present in the opening frame." in prompt)
+    assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
     assert "[Generation Goal]" not in prompt
     assert "[Starting Staging Envelope]" not in prompt
 
@@ -222,7 +221,7 @@ def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(mon
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
 
-    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS
+    assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
     assert "chest-forward overcommitted hover beginning a zig-zag entry" in prompt
     assert "compact steady hover on a clean glide line" in prompt
     assert "beginning a." not in prompt
@@ -256,7 +255,87 @@ def test_stage_prompt_allows_reasonable_over_target_tolerance(monkeypatch):
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
     assert (cb_render.MAX_KEYFRAME_INTEGRATION_WORDS < len(prompt.split()) <=
-            cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS)
+            cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS)
+
+
+def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
+    intended_read = " ".join([
+        "The audience reads Fuzzby's confidence before the physical evidence contradicts him"
+    ] * 10)
+    geography = [
+        "The flower corridor travels from the left foreground into the right middle distance.",
+        "The target flower and spring leaf remain visible on one continuous action axis.",
+    ]
+    negative_space = [
+        "Keep the right travel lane empty for Fuzzby's accelerating entrance.",
+        "Hold a clean parallel lane on the left for Zenny's restrained observation.",
+    ]
+    fuzzby_pose = (
+        "playable frame-one anticipation with chest leading, balance already uncertain, "
+        "and enough loose body rhythm to promise a later comic recovery"
+    )
+    fuzzby_facing = "down the flower corridor toward frame-right and slightly open to camera"
+    direction = {
+        **_approved_keyframe_fields(),
+        "audienceRead": intended_read,
+        "geography": geography,
+        "negativeSpace": negative_space,
+        "lensAndCameraRelationship": "Bee-height pursuit camera inside the flowers.",
+        "lightingAndDepth": "Warm approved Scene Look lighting.",
+        "openingFrameLayout": {"sameDepth": True, "placements": [
+            {"character": "Fuzzby", "centerX": .42, "centerY": .49,
+             "pose": fuzzby_pose, "facing": fuzzby_facing},
+            {"character": "Zenny", "centerX": .25, "centerY": .5,
+             "pose": "steady compact hover with quiet readiness",
+             "facing": "parallel to Fuzzby toward frame-right"},
+        ]},
+    }
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
+
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, {
+        "shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby", "Zenny"],
+        "keyframeReferenceSlots": {
+            "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
+    })
+    sections = cb_departments.prompt_sections(prompt)
+
+    assert sections["Intended Read"] == intended_read
+    assert sections["Geography"] == "\n".join(geography)
+    assert sections["Negative Space"] == (
+        "Lead room stays open frame-right for the approved direction of travel.\n" +
+        "\n".join(negative_space))
+    assert fuzzby_pose in sections["Frame"]
+    assert fuzzby_facing in sections["Frame"]
+    assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
+
+
+def test_keyframe_budget_returns_unresolved_creative_overage_to_human(monkeypatch):
+    direction = {
+        **_approved_keyframe_fields(),
+        "audienceRead": " ".join(["load-bearing-drama"] * 610),
+        "lensAndCameraRelationship": "Bee-height pursuit camera.",
+        "lightingAndDepth": "Warm approved Scene Look lighting.",
+        "openingFrameLayout": {"sameDepth": True, "placements": [
+            {"character": "Fuzzby", "pose": "playable anticipation",
+             "facing": "frame-right"},
+            {"character": "Zenny", "pose": "steady hover", "facing": "frame-right"},
+        ]},
+    }
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
+
+    with pytest.raises(cb_render.Refused) as exc:
+        cb_render._compile_keyframe_integration_prompt(direction, {
+            "shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby", "Zenny"],
+            "keyframeReferenceSlots": {
+                "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
+        })
+
+    message = str(exc.value)
+    assert "documented quality recommendation" in message
+    assert "were not trimmed" in message
+    assert "human Director must decide" in message
 
 
 def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):

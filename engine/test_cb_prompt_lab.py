@@ -206,17 +206,16 @@ def test_keyframe_prompt_contract_detects_record_tampering(monkeypatch):
         "canonicalStyleParagraph": style,
         "negativeSpace": ["Keep frame-right lead room open."],
         "openingFrameLayout": {"placements": [{
-            "character": "Fuzzby", "facing": "screen-right"}]},
+            "character": "Fuzzby", "facing": "screen-right",
+            "pose": "playable anticipation"}]},
     }
-    prompt = (
-        f"[Canonical Style]\n{style}\n\n"
-        "[Geography]\nThe corridor travels frame-left to frame-right.\n\n"
-        "[Light]\nWarm side light with layered flower depth.\n\n"
-        "[Characters In Frame]\n- Fuzzby")
     pkg = {"shots": [{"shotId": "S1"}], "continuityLedger": [{"shotId": "S1"}]}
     shot = {"shotId": "S1", "charactersInFrame": ["Fuzzby"]}
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}})
     monkeypatch.setattr(cb_render, "_approved_department_output",
                         lambda pkg, shot_id, stage: direction)
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, shot, [])
     contract = cb_render._keyframe_prompt_contract(
         pkg, shot, prompt)
     assert cb_render._prompt_contract_is_exact(contract) is True

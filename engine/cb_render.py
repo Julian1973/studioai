@@ -107,7 +107,21 @@ POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
 MAX_KEYFRAME_INTEGRATION_WORDS = 380
-MAX_KEYFRAME_INTEGRATION_HARD_WORDS = 620
+# BytePlus documents no transport maximum for Seedream 5.0 Pro prompts. Its current
+# image-generation guidance recommends staying under 600 English words because longer
+# prompts can scatter attention. fal's live endpoint schema likewise declares `prompt`
+# as a required string with no maxLength. This is therefore a documented production
+# quality target, never a claimed provider ceiling.
+#
+# Sources verified 2026-08-09:
+# https://docs.byteplus.com/api/docs/ModelArk/1541523
+# https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance%2Fseedream%2Fv5%2Fpro%2Fedit
+SEEDREAM_DOCUMENTED_PROMPT_TARGET_WORDS = 600
+# Keep roughly ten percent below the documented recommendation so provider-side counting,
+# punctuation/tokenization differences and a final human note do not push the request over
+# the quality guidance. This is a production budget derived from the documented target, not
+# a fabricated provider maximum.
+KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS = 540
 REVIEW_VIDEO_RESOLUTION = "480p"
 
 
@@ -2833,6 +2847,39 @@ def _keyframe_direction_contract(direction, shot):
     }
 
 
+def _keyframe_frame_section(direction, characters_cfg):
+    """Render the approved typed opening layout without shortening authored pose/facing."""
+    layout = direction["openingFrameLayout"]
+    staging_lines = []
+    scale_facts = []
+    for item in layout.get("placements") or []:
+        x = float(item.get("centerX", 0.5))
+        y = float(item.get("centerY", 0.5))
+        horizontal = "left" if x < 0.4 else "right" if x > 0.6 else "centre"
+        vertical = "upper" if y < 0.4 else "lower" if y > 0.6 else "middle"
+        zone = f"{vertical}-{horizontal} area"
+        name = item.get("character")
+        facing = re.sub(r"\s+", " ", str(item.get("facing") or "")).strip()
+        pose = re.sub(r"\s+", " ", str(item.get("pose") or "")).strip()
+        facing = facing or "the authored direction"
+        pose = pose or "a playable anticipation"
+        staging_lines.append(f"- {name} @ {zone}; {pose}; facing {facing}.")
+        try:
+            canonical = _resolve_char(name, characters_cfg)
+            height = (characters_cfg.get(canonical) or {}).get("heightIn")
+            if height is not None:
+                scale_facts.append(f"{canonical} {height} inches")
+        except (KeyError, TypeError, ValueError):
+            pass
+    if layout.get("sameDepth") and len(scale_facts) > 1:
+        scale_rule = (
+            f"Same depth: {'; '.join(scale_facts)}; preserve relative-size truth only.")
+    else:
+        scale_rule = (
+            "Preserve canonical relative size, modified only by the authored depth relationship.")
+    return "\n".join(staging_lines) + f"\n- {scale_rule}"
+
+
 def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     """Compile a bounded opening-stage prompt, never a miniature animation brief."""
     if not direction or not direction.get("openingFrameLayout"):
@@ -2840,8 +2887,6 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             f"REFUSED — current Cinematography direction for {shot.get('shotId')} has no "
             "typed opening-frame layout")
     contract = _keyframe_direction_contract(direction, shot)
-    layout = direction["openingFrameLayout"]
-    placements = layout.get("placements") or []
 
     def _compact(value, max_words):
         text = re.sub(r"\s+", " ", str(value or "")).strip()
@@ -2861,6 +2906,8 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
         return compact.rstrip(" .;,")
 
     reference_lines = []
+    compact_reference_lines = []
+    scene_look_slot = None
     identity_names = []
     characters_cfg = _characters_cfg()
     reference_plan = reference_plan or _expanded_reference_blueprint(
@@ -2876,9 +2923,13 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
         role = attachments[0]["role"]
         if role == "scene plate":
             slot = attachments[0]["slot"]
+            scene_look_slot = slot
             reference_lines.append(
                 f"- {slot} is the locked Scene Look plate; inherit world, viewpoint, scale, "
                 "materials, light and atmosphere only.")
+            compact_reference_lines.append(
+                f"- {slot}: approved Scene Look; world, scale, materials, light and "
+                "atmosphere only.")
         else:
             canonical = _resolve_char(role, characters_cfg)
             identity_names.append(canonical)
@@ -2890,6 +2941,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                     "shown in the turnaround. Preserve every visible feature and proportion. "
                     "Ignore background and static pose; do not describe, redesign, simplify, "
                     "beautify or reinterpret it.")
+                compact_reference_lines.append(
+                    f"- {item['slot']}: {canonical} turnaround; exact identity/proportions "
+                    "only; ignore background/pose.")
             else:
                 view_bindings = ", ".join(
                     f"{item['slot']} {item.get('view') or 'identity'}"
@@ -2899,107 +2953,112 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                     "100% identity authority. Match exactly; preserve every visible feature, "
                     "accessory, silhouette, marking, proportion, material and view detail. "
                     "Ignore backgrounds and poses; do not redesign or reinterpret.")
+                compact_reference_lines.append(
+                    f"- {canonical}: {view_bindings}; exact identity/proportions only; ignore "
+                    "backgrounds/poses.")
 
     separation_line = ""
     if len(identity_names) > 1:
         separation_line = (
             f"\n- Keep {' and '.join(identity_names)} distinct; never blend or swap traits."
         )
-
-    def _screen_zone(item):
-        x = float(item.get("centerX", 0.5))
-        y = float(item.get("centerY", 0.5))
-        horizontal = "left" if x < 0.4 else "right" if x > 0.6 else "centre"
-        vertical = "upper" if y < 0.4 else "lower" if y > 0.6 else "middle"
-        return f"{vertical}-{horizontal} area"
-
-    def _compact_protection(value):
-        """Keep one complete continuity fact instead of clipping a clause mid-sentence."""
-        text = re.sub(r"\s+", " ", str(value or "")).strip()
-        for delimiter in ("; ", " must ", " so ", " because "):
-            head, separator, _ = text.partition(delimiter)
-            if separator and len(head.split()) >= 5:
-                text = head
-                break
-        return _compact(text, 12)
-
-    def _opening_clause(value, max_words):
-        """Keep one complete, playable clause instead of clipping performance prose."""
-        text = re.sub(r"\s+", " ", str(value or "")).strip()
-        if ":" in text and "frame" in text.split(":", 1)[0].lower():
-            text = text.split(":", 1)[1].strip()
-        text = re.split(r"[;,]", text, maxsplit=1)[0].strip()
-        compact = _compact(text, max_words)
-        dangling = {"a", "an", "the", "and", "or", "to", "with", "of", "on",
-                    "in", "toward", "towards", "beside"}
-        words = compact.split()
-        while words and words[-1].lower() in dangling:
-            words.pop()
-        return " ".join(words)
-
-    staging_lines = []
-    scale_facts = []
-    for item in placements:
-        name = item.get("character")
-        facing = _opening_clause(item.get("facing"), 8) or "the authored direction"
-        pose = _opening_clause(item.get("pose"), 12) or "a playable anticipation"
-        staging_lines.append(
-            f"- {name}: {_screen_zone(item)}; {pose}; facing {facing}. "
-            "Loose anticipation, clear silhouette and lead room.")
-        try:
-            canonical = _resolve_char(name, characters_cfg)
-            height = (characters_cfg.get(canonical) or {}).get("heightIn")
-            if height is not None:
-                scale_facts.append(f"{canonical} {height} inches")
-        except (KeyError, TypeError, ValueError):
-            pass
-    if layout.get("sameDepth") and len(scale_facts) > 1:
-        scale_rule = (
-            f"Same depth: {'; '.join(scale_facts)}. Preserve relative-size truth only.")
+        compact_separation_line = (
+            f"\n- Keep {' and '.join(identity_names)} distinct; no identity blending."
+        )
     else:
-        scale_rule = (
-            "Preserve canonical relative size, modified only by the authored depth relationship.")
+        compact_separation_line = ""
 
-    protections = _compact_protection(
-        next(iter(direction.get("continuityProtections") or []), ""))
-    sections = [
-        ("Opening Stage",
-         f"Create a playable 16:9 opening for {shot.get('shotId')}; frame-one anticipation, not "
-         "portrait or payoff."),
-    ]
+    protections = [re.sub(r"\s+", " ", str(value or "")).strip()
+                   for value in direction.get("continuityProtections") or []
+                   if str(value or "").strip()]
     reference_body = ("\n".join(reference_lines) + separation_line).strip()
-    if reference_body:
-        sections.append(("References", reference_body))
-    sections.extend([
-        ("Characters In Frame", "\n".join(f"- {name}" for name in contract["cast"])),
-        ("Intended Read", _compact(direction.get("audienceRead"), 18) + "."),
-        ("Canonical Style", direction["canonicalStyleParagraph"]),
-        ("Geography", "\n".join(contract["geography"])),
-        ("Frame", "\n".join(staging_lines) + f"\n- {scale_rule}"),
-        ("Negative Space", "\n".join(contract["negativeSpace"])),
-        ("Camera", _compact(direction["lensAndCameraRelationship"], 24) + "."),
-        ("Light", str(direction["lightingAndDepth"]).strip()),
-        ("Performance Freedom",
-         "Animation owns performance, movement, recovery and camera evolution."),
-    ])
-    if protections:
-        sections.append(("Protect", protections + "."))
-    sections.append((
-        "Forbidden",
-        "No portrait, locked extreme action pose or payoff, identity or scale drift, changed "
-        "accessories, omitted reference features, duplicates, anatomy errors, extra props, "
-        "text, watermark or body-mounted bags, sacks, baskets or dangling loads. Preserve "
-        "the locked Scene Look."))
-    prompt = "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
+    compact_reference_body = (
+        "\n".join(compact_reference_lines) + compact_separation_line).strip()
+
+    protected_sections = {
+        "Intended Read": re.sub(r"\s+", " ", str(direction["audienceRead"])).strip(),
+        "Geography": "\n".join(contract["geography"]),
+        "Frame": _keyframe_frame_section(direction, characters_cfg),
+        "Negative Space": "\n".join(contract["negativeSpace"]),
+    }
+
+    scene_look_authority = (
+        f"{scene_look_slot} is the approved visual authority for world, canonical style, "
+        "materials, light and atmosphere."
+        if scene_look_slot else None)
+
+    def _emit(*, compact_controls=False, compact_references=False,
+              compact_forbidden=False, spend_scene_look=False):
+        sections = [("Opening Stage",
+                     (f"Playable 16:9 anticipation for {shot.get('shotId')}; no portrait or payoff."
+                      if compact_controls else
+                      f"Create a playable 16:9 opening for {shot.get('shotId')}; frame-one "
+                      "anticipation, not portrait or payoff."))]
+        refs = compact_reference_body if compact_references else reference_body
+        if refs:
+            sections.append(("References", refs))
+        sections.extend([
+            ("Characters In Frame", "\n".join(f"- {name}" for name in contract["cast"])),
+            ("Intended Read", protected_sections["Intended Read"]),
+        ])
+        if spend_scene_look and scene_look_authority:
+            sections.append(("Scene Look", scene_look_authority))
+        else:
+            sections.append(("Canonical Style", direction["canonicalStyleParagraph"]))
+        sections.extend([
+            ("Geography", protected_sections["Geography"]),
+            ("Frame", protected_sections["Frame"]),
+            ("Negative Space", protected_sections["Negative Space"]),
+            ("Camera", _compact(direction["lensAndCameraRelationship"], 24) + "."),
+        ])
+        if not (spend_scene_look and scene_look_authority):
+            sections.append(("Light", str(direction["lightingAndDepth"]).strip()))
+        sections.append((
+            "Performance Freedom",
+            ("Animation owns later performance and motion."
+             if compact_controls else
+             "Animation owns performance, movement, recovery and camera evolution.")))
+        if protections:
+            sections.append(("Protect", "\n".join(protections)))
+        sections.append(("Forbidden",
+                         ("No portrait/payoff, identity or scale drift, altered reference "
+                          "features, duplicates, anatomy errors, extra cast/props, text, "
+                          "watermarks or body-mounted loads."
+                          if compact_forbidden else
+                          "No portrait, locked extreme action pose or payoff, identity or scale "
+                          "drift, changed accessories, omitted reference features, duplicates, "
+                          "anatomy errors, extra props, text, watermark or body-mounted bags, "
+                          "sacks, baskets or dangling loads. Preserve the locked Scene Look.")))
+        return "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
+
+    # Budget reduction is deterministic and may touch plumbing only. The four protected
+    # sections above are reused byte-for-byte in every candidate.
+    candidates = [
+        _emit(),
+        _emit(compact_controls=True, spend_scene_look=True),
+        _emit(compact_controls=True, compact_references=True,
+              spend_scene_look=True),
+        _emit(compact_controls=True, compact_references=True,
+              compact_forbidden=True, spend_scene_look=True),
+    ]
+    prompt = next((candidate for candidate in candidates
+                   if len(re.findall(r"\S+", candidate)) <=
+                   KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS), candidates[-1])
     try:
         cb_departments.prompt_sections(prompt)
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt for {shot.get('shotId')}: {exc}")
     word_count = len(re.findall(r"\S+", prompt))
-    if word_count > MAX_KEYFRAME_INTEGRATION_HARD_WORDS:
+    if word_count > KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS:
         raise Refused(
             f"REFUSED — compiled keyframe brief for {shot.get('shotId')} is {word_count} words; "
-            f"simplify typed direction below {MAX_KEYFRAME_INTEGRATION_HARD_WORDS} words")
+            f"Seedream's documented quality recommendation is under "
+            f"{SEEDREAM_DOCUMENTED_PROMPT_TARGET_WORDS} English words and the Studio reserves "
+            f"approximately 10% headroom ({KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS}-word "
+            "production budget). Duplicated control "
+            "prose, reference boilerplate and forbidden-list redundancy are already fully "
+            "compacted; Intended Read, Geography, Frame and Negative Space were not trimmed. "
+            "A human Director must decide what creative direction changes")
     return prompt
 
 
@@ -3664,15 +3723,41 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt contract: {exc}")
     expected_sections = {
-        "Canonical Style": specialist["canonicalStyleParagraph"],
+        "Intended Read": re.sub(r"\s+", " ", str(specialist["audienceRead"])).strip(),
         "Geography": "\n".join(direction_contract["geography"]),
-        "Light": str(specialist["lightingAndDepth"]).strip(),
+        "Frame": _keyframe_frame_section(specialist, _characters_cfg()),
+        "Negative Space": "\n".join(direction_contract["negativeSpace"]),
     }
     for section_name, expected in expected_sections.items():
         if sections.get(section_name) != expected:
             raise Refused(
                 f"REFUSED — keyframe prompt [{section_name}] does not match approved "
                 "Cinematography direction verbatim")
+    if "Scene Look" in sections:
+        plan = _expanded_reference_blueprint(
+            shot, "keyframeReferenceSlots", _characters_cfg())
+        scene_slot = next((item["slot"] for item in plan
+                           if item.get("role") == "scene plate"), None)
+        expected_scene_look = (
+            f"{scene_slot} is the approved visual authority for world, canonical style, "
+            "materials, light and atmosphere."
+            if scene_slot else None)
+        if not expected_scene_look or sections["Scene Look"] != expected_scene_look:
+            raise Refused(
+                "REFUSED — keyframe prompt [Scene Look] is not bound to the approved "
+                "Scene Look reference")
+        if "Canonical Style" in sections or "Light" in sections:
+            raise Refused(
+                "REFUSED — reference-backed keyframe prompt duplicates Scene Look prose")
+    else:
+        for section_name, expected in {
+                "Canonical Style": specialist["canonicalStyleParagraph"],
+                "Light": str(specialist["lightingAndDepth"]).strip(),
+        }.items():
+            if sections.get(section_name) != expected:
+                raise Refused(
+                    f"REFUSED — keyframe prompt [{section_name}] does not match approved "
+                    "Cinematography direction verbatim")
     cast_lines = [line.removeprefix("- ").strip()
                   for line in sections.get("Characters In Frame", "").splitlines()
                   if line.strip()]
@@ -3695,6 +3780,8 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
         "modelVersion": provider_model_id,
         "directionContract": {
             "canonicalStyleVersion": direction_contract["styleVersion"],
+            "canonicalStyleParagraph": direction_contract["styleText"],
+            "lightingAndDepth": str(specialist["lightingAndDepth"]).strip(),
             "geography": direction_contract["geography"],
             "charactersInFrame": direction_contract["cast"],
             "emptySections": [],

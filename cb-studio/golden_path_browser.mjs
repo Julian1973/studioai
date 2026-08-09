@@ -165,11 +165,31 @@ async function run() {
   let mainNavigations = 0;
   page.on("framenavigated", (frame) => { if (frame === page.mainFrame()) mainNavigations += 1; });
 
-  await context.route(voiceUrl, (route) => route.fulfill({
-    status: 200,
-    contentType: "audio/wav",
-    body: Buffer.from(silentWav.split(",")[1], "base64"),
-  }));
+  const voiceBytes = Buffer.from(silentWav.split(",")[1], "base64");
+  await context.route(voiceUrl, (route) => {
+    const range = route.request().headers()["range"];
+    const match = range?.match(/^bytes=(\d+)-(\d*)$/);
+    if (!match) return route.fulfill({
+      status: 200,
+      contentType: "audio/wav",
+      headers: { "Accept-Ranges": "bytes", "Content-Length": String(voiceBytes.length) },
+      body: voiceBytes,
+    });
+    const start = Number(match[1]);
+    const requestedEnd = match[2] ? Number(match[2]) : voiceBytes.length - 1;
+    const end = Math.min(requestedEnd, voiceBytes.length - 1);
+    const body = voiceBytes.subarray(start, end + 1);
+    return route.fulfill({
+      status: 206,
+      contentType: "audio/wav",
+      headers: {
+        "Accept-Ranges": "bytes",
+        "Content-Length": String(body.length),
+        "Content-Range": `bytes ${start}-${end}/${voiceBytes.length}`,
+      },
+      body,
+    });
+  });
 
   await context.route(`${base}/api/**`, async (route) => {
     const request = route.request();
@@ -297,13 +317,13 @@ async function run() {
   const audio = mediaPage.locator(".relay-card.current audio");
   await audio.waitFor();
   const initialAudioState = await audio.evaluate((element) => new Promise((resolve) => {
-    const ready = async () => {
+    const ready = () => {
       element.dataset.pollAudit = "same-node";
-      try { await element.play(); } catch (_) {}
-      setTimeout(() => {
-        element.pause();
-        resolve({ duration: element.duration, currentTime: element.currentTime });
-      }, 600);
+      const targetTime = Math.min(0.4, Math.max(0, element.duration - 0.1));
+      const finish = () => resolve({ duration: element.duration, currentTime: element.currentTime });
+      element.addEventListener("seeked", finish, { once: true });
+      element.currentTime = targetTime;
+      setTimeout(finish, 1000);
     };
     if (element.readyState >= 1) ready(); else element.addEventListener("loadedmetadata", ready, { once: true });
   }));

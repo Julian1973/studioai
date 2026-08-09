@@ -17,6 +17,7 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
 import cb_llm
+import cb_emission_conformance as emission
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -980,6 +981,13 @@ def creative_translation_report(shot, direction, provider_prompt=None):
                     f"{actual_clock.get('beatCode') or '?'} explicit Hold line is absent "
                     "from providerPrompt")
 
+        physical_staging = approved_clock.get("physicalStaging") or {}
+        contact_and_weight = str(physical_staging.get("contactAndWeight") or "").strip()
+        if contact_and_weight and " ".join(contact_and_weight.split()).casefold() not in prompt:
+            errors.append(
+                f"{actual_clock.get('beatCode') or '?'} approved contact-and-weight staging "
+                "is absent from providerPrompt")
+
     if int(design.get("completeGagArcCount") or 0) != len(clocks):
         errors.append("generation design gag count does not match its gag clocks")
     required_handoff = str(
@@ -1107,7 +1115,10 @@ def compile_animation_provider_prompt(shot, direction):
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
     dialogue = list(shot.get("dialogueLines") or [])
     references = list(data.get("referenceContract") or [])
-    stages = list(data.get("stagePlan") or [])
+    stages = emission.time_tiles(
+        list(data.get("stagePlan") or []),
+        data.get("durationSec") or shot.get("durationSec"),
+    )
     translation = data.get("creativeTranslation") or {}
     interpretation = translation.get("interpretation") or {}
     gag_actions = {
@@ -1121,18 +1132,16 @@ def compile_animation_provider_prompt(shot, direction):
         if str(item.get("beatCode") or "").strip()
     }
 
-    def concise(value, *, words=28):
-        """Keep provider prose lean without rewriting locked stage events or end states."""
-        text = " ".join(str(value or "").split()).strip()
-        text = re.split(r";", text, maxsplit=1)[0]
-        parts = text.split()
-        return " ".join(parts[:words]).rstrip(" ,;:.")
+    def concise(value, *, words=28, context="render direction"):
+        """Keep prose lean only at authored boundaries; never cut a sentence in half."""
+        return emission.compact_complete_sentence(
+            value, max_words=words, context=context)
 
     def consistency_clause(value):
         text = " ".join(str(value or "").split()).strip().rstrip(".")
         text = re.sub(r"^(?:use|keep|maintain|preserve|protect)\s+", "", text,
                       flags=re.I)
-        return concise(text, words=22)
+        return concise(text, words=22, context="render consistency").rstrip(".")
 
     sections = []
     if dialogue:
@@ -1161,7 +1170,8 @@ def compile_animation_provider_prompt(shot, direction):
         item = reference.model_dump() if hasattr(reference, "model_dump") else dict(reference)
         tag = str(item.get("assetTag") or "").strip()
         role = str(item.get("role") or "").strip()
-        controls = concise(item.get("controls"), words=15)
+        controls = concise(item.get("controls"), words=15,
+                           context=f"{tag or 'reference'} role").rstrip(".")
         if not tag or not controls:
             continue
         if role != "audio":
@@ -1189,9 +1199,11 @@ def compile_animation_provider_prompt(shot, direction):
     ]
     if not short_unit:
         global_values.insert(1, (
-            "Performance", concise(data.get("performanceArc"), words=28)))
+            "Performance", concise(data.get("performanceArc"), words=28,
+                                    context="performance arc")))
         global_values.insert(2, (
-            "Physical causality", concise(data.get("physicalCauseAndEffect"), words=32)))
+            "Physical causality", concise(data.get("physicalCauseAndEffect"), words=32,
+                                           context="physical causality")))
     for label, value in global_values:
         if value:
             global_lines.append(f"{label}: {value}")
@@ -1199,6 +1211,20 @@ def compile_animation_provider_prompt(shot, direction):
 
     stage_sections = []
     emitted_holds = set()
+    approved_physics = {
+        str(item.get("beatCode") or ""): str(
+            (item.get("physicalStaging") or {}).get("contactAndWeight") or "").strip()
+        for item in shot.get("comedyContractsApproved") or []
+        if str((item.get("physicalStaging") or {}).get("contactAndWeight") or "").strip()
+    }
+    approved_physics.update({
+        str(item.get("beatCode") or ""): str(item.get("contactAndWeight") or "").strip()
+        for item in shot.get("physicalStagings") or []
+        if str(item.get("beatCode") or "").strip()
+        and str(item.get("contactAndWeight") or "").strip()
+    })
+    audio_cues = emission.dialogue_cues(
+        dialogue, duration_sec=data.get("durationSec") or shot.get("durationSec"))
     for index, stage in enumerate(stages):
         item = stage.model_dump() if hasattr(stage, "model_dump") else dict(stage)
         stage_number = int(item.get("stageNumber") or index + 1)
@@ -1217,6 +1243,16 @@ def compile_animation_provider_prompt(shot, direction):
             if action and " ".join(action.split()).casefold() not in " ".join(event.split()).casefold():
                 additions.append(action)
         action = " ".join([event, *additions]).strip()
+        physics_lines = []
+        for beat_id in item.get("beatIds") or []:
+            physics = approved_physics.get(str(beat_id))
+            if physics:
+                physics_lines.append(f"Physics: {emission.require_complete_sentence(physics, context=f'{beat_id} physical staging')}")
+        stage_audio = [cue for cue in audio_cues
+                       if cue["startSec"] < float(end) and cue["endSec"] > float(start)]
+        audio_line = "Audio cues: " + "; ".join(
+            f"@Audio1 {emission.format_seconds(cue['startSec'])}-{emission.format_seconds(cue['endSec'])}s — {cue['speaker']}"
+            for cue in stage_audio) + "." if stage_audio else "Audio cues: no dialogue in this stage."
         hold_lines = []
         for beat_id in item.get("beatIds") or []:
             clock = gag_clocks.get(str(beat_id))
@@ -1231,12 +1267,15 @@ def compile_animation_provider_prompt(shot, direction):
             emitted_holds.add(str(beat_id))
         lines = [
             heading,
-            f"{prefix}: {concise(item.get('initialOrCarriedState'), words=28)}",
-            f"Cause: {str(item.get('cause') or '').strip()}",
+            f"{prefix}: {concise(item.get('initialOrCarriedState'), words=28, context=f'Stage {stage_number} initial state')}",
+            f"Cause: {emission.require_complete_sentence(item.get('cause'), context=f'Stage {stage_number} cause')}",
             f"Action/Expression: {action}",
+            *physics_lines,
             *hold_lines,
             "Emotion/Camera Analysis: "
-            + concise(item.get("emotionOrCameraAnalysis"), words=20),
+            + concise(item.get("emotionOrCameraAnalysis"), words=20,
+                      context=f"Stage {stage_number} emotion/camera analysis"),
+            audio_line,
             f"End state: {str(item.get('observableEndState') or '').strip()}",
         ]
         stage_sections.append("\n".join(lines))
@@ -1259,21 +1298,30 @@ def compile_animation_provider_prompt(shot, direction):
     sections.append("[Global Supplement]\n" + " ".join(supplement))
 
     audio_contract = str(data.get("audioContract") or "").strip()
+    shot_id = str(shot.get("shotId") or "")
+    split_unit = bool(
+        (shot.get("sourceShotId") and str(shot.get("sourceShotId")) != shot_id)
+        or re.search(r"\.SH\d+[A-Z]$", shot_id))
     if dialogue:
         foley = re.search(
             r"(?:only|retain|add)\s+[^.;]*foley[^.;]*", audio_contract, re.I)
         audio = "Use @Audio1 unchanged."
         if foley:
             audio += " " + foley.group(0).strip().capitalize() + "."
-        if re.search(
+        if split_unit or re.search(
                 r"\bno\b[^.;]{0,120}\b(?:musical underscore|music|bgm)\b",
                 audio_contract, re.I):
             audio += " No music."
     else:
         audio = audio_contract
+        if split_unit and not re.search(r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b", audio, re.I):
+            audio = audio.rstrip(" .") + ". No music."
     sections.append("[Audio]\n" + audio)
     prompt = "\n\n".join(section for section in sections if section.strip())
     prompt_sections(prompt)
+    for line in prompt.splitlines():
+        if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|End state):", line):
+            emission.require_complete_sentence(line.split(":", 1)[1], context=line.split(":", 1)[0])
     return prompt
 
 

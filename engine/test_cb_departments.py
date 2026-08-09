@@ -261,6 +261,9 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     assert len(out.shotPlan) == 1
     assert len(out.stagePlan) == 1
     assert out.pacingMode == "storyline"
+    compiled = D.compile_animation_provider_prompt(
+        {"shotId": "S1.SH1", "durationSec": 8, "dialogueLines": []}, out)
+    assert "Stage 1: 0-8s [1.B1]" in compiled
     assert out.durationSec == 8
     assert out.referenceContract[0].assetTag == "@Image1"
     assert "Runtime worker contract — Seedance Production Director" in seen["system"]
@@ -423,9 +426,19 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
         "Zenny remains level on the safe parallel route.")
     handoff = "Fuzzby hovers upright in drifting pollen while Zenny watches nearby."
     shot = {
+        "comedyContractsApproved": [{
+            "beatCode": "1.B1", "mode": "BIG",
+            "physicalStaging": {"contactAndWeight": (
+                "Fuzzby's sideways momentum depresses the leaf; the leaf bends, stores "
+                "force, then snaps him upright.")},
+        }],
         "dialogueLines": [
-            {"speaker": "Fuzzby", "exactText": "Nailed it."},
+            {"speaker": "Fuzzby", "exactText": "Nailed it.",
+             "startSec": 7.2, "endSec": 8.0},
         ],
+        "durationSec": 9,
+        "shotId": "S1.SH1A",
+        "sourceShotId": "S1.SH1",
     }
     direction = {
         "providerPrompt": "Make a nice cinematic bee video.",
@@ -455,6 +468,8 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
         ],
         "stagePlan": [{
             "stageNumber": 1,
+            "startSec": 0.0,
+            "endSec": 9.0,
             "beatIds": ["1.B1"],
             "purpose": "Chase, recoil and false triumph",
             "initialOrCarriedState": "The approved chase is already moving through frame.",
@@ -484,8 +499,52 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "@Audio1 is the sole source" in prompt
     assert "[Timestamp Script Storyboard]" in prompt
     assert "Hold: 2.2s" in prompt
+    assert "Audio cues: @Audio1 7.2-8s — Fuzzby." in prompt
+    assert "Physics: Fuzzby's sideways momentum depresses the leaf" in prompt
     assert "No music." in prompt
     assert len(prompt.split()) <= D.animation_provider_prompt_word_limit(9)
+
+
+def test_physics_comes_from_general_approved_staging_registry():
+    shot = {
+        "shotId": "S9.SH2B", "durationSec": 6,
+        "dialogueLines": [],
+        "physicalStagings": [{
+            "beatCode": "9.B4",
+            "contactAndWeight": "The lantern pulls the rope taut; the post bends, stores force, then returns upright.",
+        }],
+    }
+    direction = {
+        "generationGoal": "A rope-load gag resolves into a held recovery.",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "referenceContract": [], "geography": ["The deck runs left to right."],
+        "stagePlan": [{
+            "stageNumber": 1, "beatIds": ["9.B4"], "startSec": 0, "endSec": 6,
+            "purpose": "Rope load", "initialOrCarriedState": "The lantern hangs under tension.",
+            "cause": "The character transfers weight into the rope.",
+            "primaryEvent": "The rope tightens and the post returns upright.",
+            "emotionOrCameraAnalysis": "Hold the camera until the force transfer reads.",
+            "observableEndState": "The post stands upright while the rope remains taut.",
+        }],
+        "consistencyContract": ["Keep the deck axis stable."],
+        "surgicalSafeguards": [], "continuityFinish": "The rope remains taut.",
+        "audioContract": "Natural deck and rope foley only.",
+    }
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+    assert "Physics: The lantern pulls the rope taut" in prompt
+    assert "No music." in prompt
+
+
+def test_render_compaction_never_emits_a_dangling_sentence():
+    assert D.emission.compact_complete_sentence(
+        "Keep the contact readable, then settle for the lie, while protecting the leaf "
+        "recoil and proud recovery in the final composition.",
+        max_words=10, context="camera analysis") == (
+            "Keep the contact readable, then settle for the lie.")
+    with pytest.raises(D.emission.EmissionConformanceError, match="without cutting prose"):
+        D.emission.compact_complete_sentence(
+            "Keep the leaf recoil and proud recovery visibly readable throughout",
+            max_words=5, context="camera analysis")
 
 
 def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_explicit():
@@ -505,7 +564,9 @@ def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_ex
         "visualPayoff": ending,
         "dialogueLines": [{"exactText": "Nailed it."}],
     }
-    prompt = f"Action/Expression: {primary} Hold: 2.2s — Hold the proud wobble. End state: {ending}"
+    prompt = (f"Action/Expression: {primary} Physics: Fuzzby's sideways momentum depresses "
+              f"the leaf; the leaf bends, stores force, then snaps him upright. Hold: 2.2s — "
+              f"Hold the proud wobble. End state: {ending}")
 
     strict = D.creative_translation_report(shot, {"providerPrompt": prompt})
     assert strict["ready"] is False

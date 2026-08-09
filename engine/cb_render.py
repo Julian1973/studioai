@@ -93,6 +93,7 @@ import cb_seedance_transport
 import cb_layout
 import cb_identity
 import cb_voice_director
+import cb_emission_conformance as emission
 import paths as P
 
 MEDIA = HERE / "media" / "shots"
@@ -2890,21 +2891,8 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     contract = _keyframe_direction_contract(direction, shot)
 
     def _compact(value, max_words):
-        text = re.sub(r"\s+", " ", str(value or "")).strip()
-        words = text.split()
-        if len(words) <= max_words:
-            return text.rstrip(" .;,")
-        selected = []
-        for chunk in re.split(r"(?<=[,;.])\s+", text):
-            if selected and len((" ".join(selected + [chunk])).split()) > max_words:
-                break
-            selected.append(chunk)
-            if len(" ".join(selected).split()) >= max_words:
-                break
-        compact = " ".join(selected)
-        if len(compact.split()) > max_words:
-            compact = " ".join(words[:max_words])
-        return compact.rstrip(" .;,")
+        return emission.compact_complete_sentence(
+            value, max_words=max_words, context="keyframe control prose").rstrip(".")
 
     reference_lines = []
     compact_reference_lines = []
@@ -3060,6 +3048,12 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             "prose, reference boilerplate and forbidden-list redundancy are already fully "
             "compacted; Intended Read, Geography, Frame and Negative Space were not trimmed. "
             "A human Director must decide what creative direction changes")
+    # Run the same clipping guard used by render and voice over compiler-owned prose.
+    for name, body in cb_departments.prompt_sections(prompt).items():
+        if name in {"Frame", "Camera"}:
+            for line in body.splitlines():
+                emission.require_complete_sentence(
+                    line.removeprefix("- "), context=f"keyframe [{name}]")
     return prompt
 
 

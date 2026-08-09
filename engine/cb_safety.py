@@ -19,6 +19,23 @@ import cb_canon
 import cb_providers
 
 
+def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=None):
+    """Resolve a human HEAR choice by audible recipe, not mutable audit metadata."""
+    selected_candidate = next(
+        (item for item in candidates or []
+         if item.get("candidateId") == selected.get("candidateId")), {})
+    for recipe in recipes or []:
+        if recipe.get("recipeId") != selected.get("recipeId"):
+            continue
+        same_compiler_record = selected.get("compiledHash") == current_compiled_hash
+        same_provider_text = (
+            str(selected_candidate.get("performedText") or "") ==
+            str(recipe.get("performedText") or ""))
+        if same_compiler_record or same_provider_text:
+            return recipe
+    return None
+
+
 def install(m):
     original = {name: getattr(m, name) for name in (
         "_resolve_scenelook_prompt", "scenelook_status", "approved_look_prompt",
@@ -471,12 +488,12 @@ def install(m):
             raise m.Refused(str(exc)) from exc
         ledger = m._ledger(pkg, shot["shotId"])
         selected = ((ledger.get("voiceAuditions") or {}).get("selected") or {})
+        audition_candidates = ((ledger.get("voiceAuditions") or {}).get("candidates") or [])
         result = []
         for item, source in zip(track["lines"], locked):
             recipes = item.get("takeRecipes") or []
-            recipe = next((value for value in recipes
-                           if selected.get("compiledHash") == item.get("compiledHash") and
-                           value.get("recipeId") == selected.get("recipeId")), None)
+            recipe = selected_voice_recipe(
+                recipes, selected, audition_candidates, item.get("compiledHash"))
             if len(recipes) > 1 and recipe is None:
                 raise m.Refused(
                     f"REFUSED - choose a HEAR audition for {source.get('exactText')} first")
@@ -512,6 +529,14 @@ def install(m):
                 "voiceCompilerVersion": m.cb_voice_director.COMPILER_VERSION,
                 "voiceIds": ids}
 
+    def voice_provider_projection(lines):
+        """Only fields capable of changing the audible provider request belong here."""
+        keys = (
+            "dialogueOccurrenceId", "sourceEventId", "speaker", "text", "voiceId",
+            "modelId", "voiceSettings", "previousText", "recipeId",
+        )
+        return [{key: line.get(key) for key in keys} for line in lines or []]
+
     def voice_approval_status(pkg, shot, scene=None, episode=None):
         if not shot.get("dialogueLines"):
             return {"required": False, "approved": True, "current": True, "reason": None,
@@ -530,13 +555,24 @@ def install(m):
         raw_path = ledger.get("voRawPath")
         timing_path = ledger.get("voTimingPath")
         placement_path = ledger.get("voPlacementPath")
+        approved_signature = approval.get("inputSignature") or {}
+        signature_without_performance = {
+            key: value for key, value in signature.items() if key != "performanceHash"}
+        approved_without_performance = {
+            key: value for key, value in approved_signature.items()
+            if key != "performanceHash"}
+        provider_equivalent = (
+            signature_without_performance == approved_without_performance and
+            voice_provider_projection(ledger.get("voGeneratedFrom") or []) ==
+            voice_provider_projection(voice_lines(pkg, shot)))
+        signature_matches = approved_signature == signature or provider_equivalent
         current = bool(
             approval.get("approved") and path and os.path.exists(path) and
             raw_path and os.path.exists(raw_path) and
             timing_path and os.path.exists(timing_path) and
             placement_path and os.path.exists(placement_path) and
             approval.get("path") == path and
-            approval.get("inputSignature") == signature and
+            signature_matches and
             approval.get("contentHash") == file_sha256(path) and
             approval.get("rawContentHash") == file_sha256(raw_path) and
             approval.get("timingContentHash") == file_sha256(timing_path) and
@@ -544,6 +580,7 @@ def install(m):
         return {"required": True, "approved": bool(approval.get("approved")),
                 "current": current,
                 "reason": None if current else "voice-approval-input-or-content-mismatch",
+                "providerEquivalentContract": provider_equivalent,
                 "record": approval, "expectedInputSignature": signature}
 
     def animation_input_signature(pkg, shot, scene, episode):

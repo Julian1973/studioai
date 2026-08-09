@@ -13,6 +13,8 @@ import pathlib
 import re
 from copy import deepcopy
 
+import cb_emission_conformance as emission
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 VOICE_CARDS_PATH = ROOT / "shows/crystal-bears/canon/voice_cards.json"
 REGISTERS_PATH = ROOT / "shows/crystal-bears/creative/VOICE_ARCHETYPE_REGISTERS.json"
@@ -101,6 +103,14 @@ def post_direction_audit(line, locked_line, card, register):
         _check(checks, f"script-fidelity:{recipe_id}",
                _words(text) == _words(locked_line.get("exactText")),
                f"{recipe_id} preserves every locked script word.")
+        try:
+            emission.require_complete_sentence(
+                _TAG_RE.sub("", text), context=f"voice recipe {recipe_id}")
+            sentence_complete = True
+        except emission.EmissionConformanceError:
+            sentence_complete = False
+        _check(checks, f"complete-sentence:{recipe_id}", sentence_complete,
+               f"{recipe_id} ends as a complete spoken sentence.")
         tags = _tags(text)
         illegal = sorted(set(tags) - palette)
         blocked = sorted(set(tags) & banned)

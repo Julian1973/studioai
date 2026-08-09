@@ -88,3 +88,10 @@ def test_track_refuses_an_uncovered_locked_line():
     with pytest.raises(V.VoiceContractError, match="script locks 2"):
         V.compile_track({"shotId": "S1.SH1A", "lines": [direction()]},
                         [LOCKED, {**LOCKED, "dialogueOccurrenceId": "occ-2"}])
+
+
+def test_voice_path_rejects_a_dangling_performed_sentence():
+    item = copy.deepcopy(direction())
+    item["takeRecipes"][0]["performedText"] = "[exhales][confident] Nailed it"
+    with pytest.raises(V.VoiceContractError, match="complete spoken sentence"):
+        V.compile_line(item, LOCKED)

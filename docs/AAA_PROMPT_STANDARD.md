@@ -322,8 +322,10 @@ proven-path adherence.
 **New checks from this standard (v2):**
 1. **Ending state present** — every stage and the shot itself close with an
    explicit end state.
-2. **Route envelope** — refs/duration/aspect validated against the selected
-   route, not the model.
+2. **Route envelope and time tiling** — refs/duration/aspect validated against
+   the selected route, not the model. Render stages tile the full approved
+   duration consecutively, and every approved dialogue region is placed in an
+   overlapping stage as an @Audio cue without copying spoken words.
 3. **Char budget** — narrative >3,500 chars is a NOTE; >route ceiling BLOCK.
 4. **Camera grammar conflict** — more than one dominant move family, or
    banned vague terms ("cinematic camera"), BLOCK.
@@ -343,6 +345,13 @@ proven-path adherence.
     versioned constant, BLOCK.
 14. **Music kill present** — "no music / diegetic only" (or an explicit
     post-score silence clause), BLOCK.
+15. **Complete-sentence integrity** — compiler-owned prose may compact only at
+    an authored sentence or clause boundary; empty or clipped emitted prose,
+    BLOCK on keyframe, render and voice paths.
+16. **Approved physical-staging fidelity** — every approved contact-and-weight
+    statement owned by a beat must survive verbatim in the matching render
+    stage; keyframe and voice must declare the check non-applicable rather than
+    inventing staging, BLOCK.
 
 ---
 

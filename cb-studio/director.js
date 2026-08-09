@@ -1036,11 +1036,17 @@
     const plateRefs = refs.filter((item) => /scene|plate|location|look|corridor|environment/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
     const characterRefs = refs.filter((item) => item.identity?.intactTurnaround || /character|turnaround|zenny|fuzzby|aida|keen|lunar|squeaky/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
     const otherRefs = refs.filter((item) => !plateRefs.includes(item) && !characterRefs.includes(item));
-    const renderRef = (item) => `<article class="shot-input-ref">
-      ${item.url ? `<img src="${esc(item.url)}" alt="${esc(item.role || item.label || "Shot reference")}">` : '<div class="shot-input-ref-missing">Missing</div>'}
+    const renderRef = (item) => {
+      const label = item.role || item.label || "Shot reference";
+      const isAudio = Boolean(item.url) && (
+        item.kind === "audio" || /\.(?:wav|mp3|m4a|aac|ogg)(?:\?|$)/i.test(item.url) ||
+        /audio|voice|dialogue|performance track/i.test(label));
+      return `<article class="shot-input-ref ${isAudio ? "audio-reference" : ""}">
+      ${isAudio ? audioWaveformMarkup(label) : item.url ? `<img src="${esc(item.url)}" alt="${esc(label)}">` : '<div class="shot-input-ref-missing">Missing</div>'}
       <strong>${esc(item.role || item.label || item.slot || "Reference")}</strong>
       <span>${esc(item.identity?.intactTurnaround ? "Complete uncropped turnaround · identity authority" : item.message || item.status || "Locked reference")}</span>
     </article>`;
+    };
     const prompt = requestPromptText(session);
     const phaseName = session.phase === "voice"
       ? "Voice performance"
@@ -1565,6 +1571,14 @@
       (session.shots || []).find((shot) => shot.shotId === session.selectedShotId) || {};
   }
 
+  function audioWaveformMarkup(label = "Approved audio") {
+    const heights = [22, 38, 54, 31, 68, 44, 76, 58, 34, 63, 81, 48, 72, 39, 60, 29, 51, 69, 43, 57, 33, 46, 25];
+    return `<div class="audio-waveform" role="img" aria-label="${esc(label)} waveform">
+      <span class="audio-waveform-mark" aria-hidden="true"></span>
+      <div aria-hidden="true">${heights.map((height) => `<i style="--wave-height:${height}%"></i>`).join("")}</div>
+    </div>`;
+  }
+
   function relayMedia(stage, session) {
     const selected = selectedShotSummary(session);
     const artifact = session.artifact || {};
@@ -1574,7 +1588,7 @@
     }
     if (stage === 2) {
       const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
-      return url ? `<audio controls preload="metadata" src="${esc(url)}"></audio>` : `<div class="relay-empty">Voice is locked until SEE is approved.</div>`;
+      return url ? `<div class="relay-audio-player">${audioWaveformMarkup("Approved voice performance")}<audio controls preload="metadata" src="${esc(url)}"></audio></div>` : `<div class="relay-empty">Voice is locked until SEE is approved.</div>`;
     }
     const videoUrl = artifact.type === "video" ? artifact.url :
       artifact.type === "video-set" ? artifact.items?.[0]?.url : selected.acceptedUrl;

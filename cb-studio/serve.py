@@ -78,7 +78,7 @@ else:
 SERVER_KEY = f"{BIND_HOST}:{PORT}|{PUBLIC_ORIGIN or 'loopback'}"
 LAUNCH_TOKEN = secrets.token_urlsafe(32)
 SESSION_TOKEN = secrets.token_urlsafe(32)
-STUDIO_BUILD_VERSION = "studio-ready-20260808-4"
+STUDIO_BUILD_VERSION = "studio-ready-20260809-5"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024

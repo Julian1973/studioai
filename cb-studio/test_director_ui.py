@@ -139,7 +139,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "studio-ready-20260808-4" in HTML
+    assert "studio-ready-20260809-5" in HTML
 
 
 def test_scene_plate_source_buttons_are_valid_and_clickable():
@@ -203,7 +203,7 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "studio-ready-20260808-4" in HTML
+    assert "studio-ready-20260809-5" in HTML
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():
@@ -264,6 +264,16 @@ def test_three_signoff_relay_exposes_real_inputs_and_source_choices():
     assert 'data-select-scene-plate-asset' in JS
     assert 'if (session.phase === "keyframe")' in JS
     assert 'Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary()])' in JS
+
+
+def test_audio_references_use_waveform_artwork_not_broken_images():
+    assert 'function audioWaveformMarkup' in JS
+    assert 'audio-reference' in JS
+    assert '/\\.(?:wav|mp3|m4a|aac|ogg)' in JS
+    assert 'relay-audio-player' in JS
+    assert '<audio controls preload="metadata"' in JS
+    assert '.audio-waveform' in CSS
+    assert '.audio-waveform-mark::before' in CSS
 
 
 def test_director_hash_does_not_leak_legacy_beat_state():

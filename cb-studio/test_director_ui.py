@@ -578,8 +578,14 @@ def test_workbench_preview_shows_clean_artwork_without_composition_overlay():
 
 def test_workbench_actions_show_immediate_and_persistent_activity_status():
     assert "${renderGenerateStatus(session)}" in JS
-    assert 'button.textContent = action.id === "prepare-render" ? "Preparing render..." : "Working..."' in JS
+    assert 'button.textContent = action.id === "prepare-render" ? "Compiling prompt..." : "Working..."' in JS
     assert 'button.setAttribute("aria-busy", "true")' in JS
+
+
+def test_uncompiled_animation_prompt_explains_the_separate_spend_gate():
+    assert "The Seedance prompt has not been compiled yet." in JS
+    assert "No video is generated until you separately approve spend." in JS
+    assert "This does not generate video. No spend happens until render approval." in JS
 
 
 def test_every_production_stage_has_persistent_scene_and_shot_navigation():

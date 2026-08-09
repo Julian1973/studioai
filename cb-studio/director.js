@@ -1067,7 +1067,7 @@
 
   function requestPromptText(session) {
     const request = session.inspector?.providerRequest;
-    if (!request) return "No provider request has been prepared for this phase yet.";
+    if (!request) return "The Seedance prompt has not been compiled yet. Compile it to review the exact request, references and cost. No video is generated until you separately approve spend.";
     return request.prompt || (request.lines || []).map((line) => `${line.speaker}: ${line.performedText}`).join("\n") || "No provider text is required for this step.";
   }
 
@@ -1954,7 +1954,7 @@
       }
       button.disabled = true;
       button.setAttribute("aria-busy", "true");
-      button.textContent = action.id === "prepare-render" ? "Preparing render..." : "Working...";
+      button.textContent = action.id === "prepare-render" ? "Compiling prompt..." : "Working...";
       handleAction(action);
     }));
     host.querySelectorAll("[data-workbench-gate]").forEach((button) => button.addEventListener("click", () => {
@@ -2070,9 +2070,9 @@
       },
       "prepare-render": {
         now: "Animation setup",
-        outcome: "Builds the exact Seedance request for this shot.",
+        outcome: "Compiles the exact Seedance prompt, references and cost for this shot.",
         next: "Review cost, references and prompt before pressing Render.",
-        guard: "No video spend happens until render approval.",
+        guard: "This does not generate video. No spend happens until render approval.",
       },
       "approve-spend": {
         now: "Animation render",

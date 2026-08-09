@@ -543,9 +543,12 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                 ]
             else:
                 status = "ready_to_fire"
-                headline = "Prepare the animation"
-                summary = purpose
-                primary = _action("prepare-render", "Prepare render")
+                headline = "Compile the animation prompt"
+                summary = (
+                    "Compile the exact Seedance prompt, references and cost for review. "
+                    "This does not submit a paid render."
+                )
+                primary = _action("prepare-render", "Compile prompt & show cost")
         else:
             phase = "final"
             status = "complete"

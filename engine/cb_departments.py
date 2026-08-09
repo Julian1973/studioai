@@ -446,6 +446,17 @@ class AnimationDirection(BaseModel):
     blockoutMappings: List[str] = Field(default_factory=list, max_length=20)
     providerPrompt: str = Field(min_length=40)
 
+    @model_validator(mode="before")
+    @classmethod
+    def inject_versioned_motion_vocabulary(cls, value):
+        """Keep versioned grammar under compiler control, not model control."""
+        if isinstance(value, dict):
+            value = dict(value)
+            value["motionVocabulary"] = [
+                item.model_dump() for item in canonical_motion_vocabulary()
+            ]
+        return value
+
     @model_validator(mode="after")
     def precision_must_be_earned(self):
         if self.directionDensity == "precise" and not self.precisionReasons:
@@ -1133,14 +1144,14 @@ def compile_animation_provider_prompt(shot, direction):
         sections.append(
             "AUDIO-LOCK: @Audio1 is the sole source of English dialogue, speaker "
             "performance, mouth timing and silence. " + owner + " " + verb +
-            " only assigned @Audio1 regions; all listeners remain silent and closed-mouth. "
-            "Add no dialogue, vocalisations, narration, translated speech, subtitles or captions.")
+            " assigned @Audio1 regions; listeners remain silent and closed-mouth. "
+            "Add no dialogue, vocalisations, narration, translation, subtitles or captions.")
 
     exclusions = {
-        "opening_frame": "Exclude identity redesign and later action.",
+        "opening_frame": "Exclude redesign and later action.",
         "closing_frame": "Exclude identity redesign and preceding action.",
-        "character_identity": "Exclude its background, pose and composition.",
-        "location": "Exclude its characters and foreground action.",
+        "character_identity": "Exclude background, pose and composition.",
+        "location": "Exclude characters and action.",
         "prop": "Exclude its background, people and composition.",
         "style": "Exclude its subject identity, text and composition.",
         "video": "Exclude identity, clothing and scene unless assigned.",
@@ -1150,7 +1161,7 @@ def compile_animation_provider_prompt(shot, direction):
         item = reference.model_dump() if hasattr(reference, "model_dump") else dict(reference)
         tag = str(item.get("assetTag") or "").strip()
         role = str(item.get("role") or "").strip()
-        controls = concise(item.get("controls"), words=18)
+        controls = concise(item.get("controls"), words=15)
         if not tag or not controls:
             continue
         if role != "audio":

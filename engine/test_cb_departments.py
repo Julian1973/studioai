@@ -402,6 +402,17 @@ def test_motion_vocabulary_blocks_out_of_character_verbs():
     with pytest.raises(ValueError, match="Fuzzby cannot 'glides'"):
         D.AnimationDirection.model_validate(direction)
 
+    direction["stagePlan"][0]["primaryEvent"] = (
+        "Fuzzby barrels through the flower corridor."
+    )
+    direction["motionVocabulary"] = [{
+        "character": "Fuzzby", "belongs": ["wrong"], "banned": []
+    }]
+    validated = D.AnimationDirection.model_validate(direction)
+    assert [item.model_dump() for item in validated.motionVocabulary] == [
+        item.model_dump() for item in D.canonical_motion_vocabulary()
+    ]
+
 
 def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     primary = (

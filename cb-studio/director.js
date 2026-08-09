@@ -784,6 +784,15 @@
   }
 
   function actionActivityCopy(action, session, preparingRetry) {
+    if (action.id === "accept-keyframe") {
+      return {
+        label: "Accepting keyframe",
+        step: "Locking this frame as the shot truth...",
+        message: "Your sign-off is being recorded. No provider generation or spend is occurring.",
+        provider: "Studio approval",
+        showDuration: false,
+      };
+    }
     if (action.id === "iterate-keyframe") {
       return {
         label: "Keyframe refire in progress",
@@ -3514,6 +3523,9 @@
         setLocalActivity(null);
         await loadSession();
         if (action.id === "build-voice") await loadVoicePerformance(true);
+        if (action.id === "accept-keyframe") {
+          toast("Keyframe accepted. HEAR is now active.");
+        }
         return;
       }
       setTimeout(loadSession, 350);

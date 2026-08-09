@@ -258,7 +258,9 @@ def _production_advisories(shot: dict[str, Any], session_phase: str,
 def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
                           artifact: dict[str, Any] | None) -> dict[str, Any] | None:
     candidate = ledger.get("keyframeCandidate") or {}
-    rejected = ledger.get("keyframeRejected") or {}
+    # Retained rejection history must not override a newer accepted shot truth.
+    approved = ledger.get("keyframeApproval") or {}
+    rejected = {} if approved else (ledger.get("keyframeRejected") or {})
     record = candidate or rejected
     screening = (record.get("conformanceScreening") or
                  record.get("geometryScreening") or {})
@@ -288,6 +290,14 @@ def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
             "message": reason or "The last keyframe was rejected and archived.",
             "nextAction": "Build or select another keyframe before animation can continue.",
             "artifactVisible": False,
+        }
+    if approved:
+        return {
+            "severity": "success",
+            "title": "Keyframe accepted",
+            "message": "This frame is locked as the opening truth for the shot.",
+            "nextAction": "Continue to HEAR and review the voice performance.",
+            "artifactVisible": bool((artifact or {}).get("url")),
         }
     if status == "ready_to_fire":
         return {

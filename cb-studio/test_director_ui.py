@@ -131,6 +131,17 @@ def test_every_director_action_gets_immediate_visible_feedback():
     assert 'Still working. Live status remains on this shot.' in JS
     assert "async function pollLiveSession()" in JS
     assert "session.status === \"rendering\" ? 1600 : 4500" in JS
+    assert "Accepting keyframe" in JS
+    assert "Locking this frame as the shot truth" in JS
+    assert "No provider generation or spend is occurring" in JS
+    assert "Keyframe accepted. HEAR is now active." in JS
+
+
+def test_success_is_published_only_after_director_cache_refresh():
+    finalizing = SERVER.index('job["status"] = "finalizing"')
+    clear_cache = SERVER.index("_clear_director_session_cache(scene=job_scene)", finalizing)
+    done = SERVER.index('job["status"] = "done"', clear_cache)
+    assert finalizing < clear_cache < done
 
 
 def test_keyframe_refire_is_one_visible_replacement_job():

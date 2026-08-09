@@ -142,6 +142,18 @@ def test_keyframe_review_uses_current_exact_request_not_stale_package_copy():
     assert "STALE PACKAGE PROMPT" not in request["prompt"]
 
 
+def test_approved_keyframe_suppresses_retained_rejection_history():
+    ledger = {
+        "keyframeApproval": {"approved": True, "path": "/approved.png"},
+        "keyframeRejected": {"reason": "An older candidate was wrong."},
+    }
+    comms = cb_studio_director._keyframe_stage_comms(
+        ledger, "ready_to_fire", {"url": "/approved.png"})
+    assert comms["title"] == "Keyframe accepted"
+    assert "HEAR" in comms["nextAction"]
+    assert "rejected" not in comms["message"].lower()
+
+
 def test_voice_is_the_next_visible_outcome_after_keyframe_acceptance():
     session = _session(
         state=_state(keyframe=True),

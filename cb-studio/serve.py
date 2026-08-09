@@ -827,7 +827,10 @@ def _stream(jobId, args):
             else:
                 job["status"] = "done" if p.returncode == 0 else "failed"
                 if p.returncode == 0:
-                    job["step"] = "Done."
+                    # Publish success only after indexes and the Director cache have
+                    # been refreshed. The browser reloads as soon as it sees "done".
+                    job["status"] = "finalizing"
+                    job["step"] = "Refreshing Studio state..."
                     job["error"] = None
                 else:
                     detail = next((line for line in reversed(lines)
@@ -857,10 +860,14 @@ def _stream(jobId, args):
         try: reindex_episodes()
         except Exception: pass
         with _JOB_LOCK:
-            job["ended"] = time.time()
             job_scene = job.get("scene")
-        _persist_job(job)
         _clear_director_session_cache(scene=job_scene)
+        with _JOB_LOCK:
+            if job.get("status") == "finalizing":
+                job["status"] = "done"
+                job["step"] = "Done."
+            job["ended"] = time.time()
+        _persist_job(job)
 
 def _start(jobId, gate, scene, args):
     args = list(args)

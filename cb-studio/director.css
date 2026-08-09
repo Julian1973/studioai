@@ -556,6 +556,31 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .relay-media { aspect-ratio: 16 / 9; display: grid; place-items: center; overflow: hidden; border: 1px solid #303b38; border-radius: 4px; background: #090d0c; }
 .relay-media img, .relay-media video { width: 100%; height: 100%; object-fit: contain; }
 .relay-media > audio { width: calc(100% - 24px); }
+.relay-keyframe-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.relay-keyframe-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.relay-keyframe-preview span {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 3px;
+  background: rgba(7, 10, 10, .86);
+  color: #eafffd;
+  font-size: 10px;
+  font-weight: 850;
+}
+.relay-keyframe-preview:focus-visible { outline: 2px solid #55cfc5; outline-offset: -3px; }
 .relay-empty { padding: 18px; color: #778581; font-size: 11px; line-height: 1.5; text-align: center; }
 .relay-lock { margin: 0; color: #8b9793; font-size: 11px; text-align: center; }
 .relay-notes { display: grid; gap: 6px; color: #a9b5b1; font-size: 10px; font-weight: 850; text-transform: uppercase; }
@@ -2119,7 +2144,7 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .master-band h2 { font-size: 18px; }
 .master-status { color: var(--muted); font-size: 12px; font-weight: 850; }
 
-.studio-dialog, .reference-dialog {
+.studio-dialog, .reference-dialog, .keyframe-preview-dialog {
   width: min(540px, calc(100vw - 28px));
   max-height: min(760px, calc(100vh - 28px));
   padding: 22px;
@@ -2130,7 +2155,51 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
   box-shadow: var(--shadow);
 }
 .reference-dialog { width: min(920px, calc(100vw - 28px)); }
-.studio-dialog::backdrop, .reference-dialog::backdrop { background: rgba(12, 17, 15, .64); }
+.keyframe-preview-dialog {
+  width: min(1400px, calc(100vw - 24px));
+  height: min(900px, calc(100dvh - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 16px;
+  background: #0d1110;
+  color: #f8fafc;
+  border-color: #3a4743;
+}
+.studio-dialog::backdrop, .reference-dialog::backdrop, .keyframe-preview-dialog::backdrop { background: rgba(5, 7, 7, .88); }
+.keyframe-preview-heading { align-items: center; margin-bottom: 14px; }
+.keyframe-preview-heading h2 { color: #f8fafc; }
+.keyframe-zoom-controls { display: flex; align-items: center; gap: 6px; }
+.keyframe-zoom-controls > button:not(.close-button) {
+  min-width: 38px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #46524f;
+  border-radius: 3px;
+  background: #171d1b;
+  color: #e8efed;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 850;
+}
+.keyframe-zoom-controls > button:disabled { cursor: default; opacity: .4; }
+.keyframe-preview-dialog .close-button { border-color: #46524f; color: #e8efed; }
+.keyframe-preview-viewport {
+  height: calc(100% - 66px);
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  border: 1px solid #2d3734;
+  border-radius: 4px;
+  background: #070a09;
+}
+.keyframe-preview-viewport img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
 .dialog-heading, .drawer-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; margin-bottom: 22px; }
 .dialog-heading h2, .drawer-heading h2 { font-size: 20px; }
 .close-button { width: 36px; height: 36px; flex: 0 0 36px; border: 1px solid #c4ccca; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; font-size: 24px; line-height: 1; }
@@ -2259,6 +2328,11 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
   .mobile-nav button.active { color: #76ddd5; box-shadow: inset 0 3px 0 #57cfc6; }
   .reference-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .studio-dialog, .reference-dialog { padding: 18px; }
+  .keyframe-preview-dialog { width: calc(100vw - 12px); height: calc(100dvh - 12px); padding: 10px; }
+  .keyframe-preview-heading { align-items: center; }
+  .keyframe-preview-heading h2 { font-size: 16px; }
+  .keyframe-preview-heading .stage-label { display: none; }
+  .keyframe-preview-viewport { height: calc(100% - 58px); }
   .request-drawer { width: 100vw; padding: 20px 16px calc(24px + env(safe-area-inset-bottom)); }
   .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
   .generation-card,

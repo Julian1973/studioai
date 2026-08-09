@@ -49,6 +49,20 @@ def test_references_are_available_for_keyframe_and_animation_without_clutter():
     assert "Complete uncropped 360 turnaround" in JS
 
 
+def test_generated_keyframe_can_be_enlarged_and_zoomed_before_signoff():
+    assert 'id="keyframe-preview-dialog"' in HTML
+    assert 'id="keyframe-preview-image"' in HTML
+    assert 'id="keyframe-zoom-out"' in HTML
+    assert 'id="keyframe-zoom-reset"' in HTML
+    assert 'id="keyframe-zoom-in"' in HTML
+    assert 'aria-label="Enlarge keyframe"' in JS
+    assert 'data-keyframe-preview' in JS
+    assert "openKeyframePreview(button.dataset.keyframePreview)" in JS
+    assert "Math.min(3, Math.max(.5, nextZoom))" in JS
+    assert ".relay-keyframe-preview" in CSS
+    assert ".keyframe-preview-viewport" in CSS
+
+
 def test_mobile_navigation_is_always_reachable_and_safe_area_aware():
     assert 'class="mobile-nav"' in HTML
     assert 'data-view="director"><span aria-hidden="true">01</span>Shot' in HTML

@@ -42,6 +42,7 @@
     toastTimer: null,
     buildTimer: null,
     explicitLocation: false,
+    keyframeZoom: 1,
   };
 
   const STUDIO_BUILD = document.querySelector('meta[name="studio-build"]')?.content || "unknown";
@@ -1663,7 +1664,10 @@
     const artifact = session.artifact || {};
     if (stage === 1) {
       const url = session.phase === "keyframe" && artifact.type === "image" ? artifact.url : selected.keyframeUrl;
-      return url ? `<img src="${esc(url)}" alt="Shot keyframe for sign-off">` : `<div class="relay-empty">No keyframe has been created yet.</div>`;
+      return url ? `<button type="button" class="relay-keyframe-preview" data-keyframe-preview="${esc(url)}" aria-label="Enlarge keyframe" title="Enlarge keyframe">
+        <img src="${esc(url)}" alt="Shot keyframe for sign-off">
+        <span>View full size</span>
+      </button>` : `<div class="relay-empty">No keyframe has been created yet.</div>`;
     }
     if (stage === 2) {
       const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
@@ -1744,6 +1748,9 @@
       };
       if (media.readyState >= 1) restore(); else media.addEventListener("loadedmetadata", restore, { once: true });
     });
+    host.querySelectorAll("[data-keyframe-preview]").forEach((button) => button.addEventListener("click", () => {
+      openKeyframePreview(button.dataset.keyframePreview);
+    }));
     host.querySelectorAll("[data-relay-action]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
       const action = actions.find((item) => item.id === button.dataset.relayAction);
@@ -3556,6 +3563,28 @@
     $("#drawer-scrim").hidden = true;
   }
 
+  function updateKeyframePreviewZoom(nextZoom) {
+    app.keyframeZoom = Math.min(3, Math.max(.5, nextZoom));
+    const image = $("#keyframe-preview-image");
+    const reset = $("#keyframe-zoom-reset");
+    const out = $("#keyframe-zoom-out");
+    const up = $("#keyframe-zoom-in");
+    if (image) image.style.width = `${Math.round(app.keyframeZoom * 100)}%`;
+    if (reset) reset.textContent = `${Math.round(app.keyframeZoom * 100)}%`;
+    if (out) out.disabled = app.keyframeZoom <= .5;
+    if (up) up.disabled = app.keyframeZoom >= 3;
+  }
+
+  function openKeyframePreview(url) {
+    if (!url) return;
+    const dialog = $("#keyframe-preview-dialog");
+    const image = $("#keyframe-preview-image");
+    if (!dialog || !image) return;
+    image.src = url;
+    updateKeyframePreviewZoom(1);
+    dialog.showModal();
+  }
+
   function bindEvents() {
     $$('[data-view]').forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
     $$("[data-pipeline-step]").forEach((button) => button.addEventListener("click", () => {
@@ -3569,6 +3598,9 @@
     $("#request-button").addEventListener("click", openRequest);
     $("#request-close").addEventListener("click", closeRequest);
     $("#drawer-scrim").addEventListener("click", closeRequest);
+    $("#keyframe-zoom-out").addEventListener("click", () => updateKeyframePreviewZoom(app.keyframeZoom - .25));
+    $("#keyframe-zoom-reset").addEventListener("click", () => updateKeyframePreviewZoom(1));
+    $("#keyframe-zoom-in").addEventListener("click", () => updateKeyframePreviewZoom(app.keyframeZoom + .25));
     $$('[data-close]').forEach((button) => button.addEventListener("click", () => {
       const dialog = document.getElementById(button.dataset.close);
       if (dialog?.open) dialog.close();

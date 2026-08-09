@@ -236,6 +236,24 @@
     <div class="reference-grid" id="reference-grid"></div>
   </dialog>
 
+  <dialog class="keyframe-preview-dialog" id="keyframe-preview-dialog">
+    <div class="dialog-heading keyframe-preview-heading">
+      <div>
+        <span class="stage-label">KEYFRAME INSPECTION</span>
+        <h2>Full-size keyframe</h2>
+      </div>
+      <div class="keyframe-zoom-controls" aria-label="Keyframe zoom controls">
+        <button type="button" id="keyframe-zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
+        <button type="button" id="keyframe-zoom-reset" aria-label="Reset zoom" title="Reset zoom">100%</button>
+        <button type="button" id="keyframe-zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+        <button type="button" class="close-button" data-close="keyframe-preview-dialog" aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="keyframe-preview-viewport">
+      <img id="keyframe-preview-image" alt="Full-size keyframe for inspection">
+    </div>
+  </dialog>
+
   <aside class="request-drawer" id="request-drawer" aria-hidden="true" aria-labelledby="request-title">
     <div class="drawer-heading">
       <div>

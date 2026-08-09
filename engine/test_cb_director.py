@@ -271,6 +271,22 @@ def test_running_job_replaces_actions_with_one_progress_state():
     assert session["runningJob"]["step"] == "Rendering opening frame..."
     assert session["runningJob"]["latestMessage"] == "Provider is rendering candidate 1."
     assert session["runningJob"]["durationSec"] == 29
+    assert session["stageComms"]["title"] == "Work in progress"
+
+
+def test_running_keyframe_schema_refresh_is_explained_in_plain_english():
+    jobs = {"job-1": {
+        "jobId": "job-1", "scene": "1",
+        "gate": f"director:refire-keyframe:{SHOT_ID}",
+        "status": "running",
+        "step": "DEPARTMENT REJECTED - cinematography by Studio contract migration",
+        "started": 100,
+        "log": "DEPARTMENT REJECTED - cinematography by Studio contract migration",
+        "args": ["cb_studio_director.py", "refire-keyframe", "1", SHOT_ID],
+    }}
+    running = _session(jobs=jobs)["runningJob"]
+    assert running["step"] == "Refreshing the shot direction before keyframe generation..."
+    assert "opening-frame generation follows automatically" in running["latestMessage"]
 
 
 def test_running_render_exposes_safe_batch_progress_details():
@@ -305,6 +321,67 @@ def test_running_progress_does_not_expose_sensitive_log_lines():
         "args": [SHOT_ID], "log": "Provider accepted request\napi_key=do-not-expose",
     }}
     assert _session(jobs=jobs)["runningJob"]["latestMessage"] == "Provider accepted request"
+
+
+def test_refire_keyframe_rejects_then_builds_replacement(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        cb_render, "reject_keyframe",
+        lambda scene, shot_id, correction, episode, log=print:
+            calls.append(("reject", scene, shot_id, correction, episode)))
+    monkeypatch.setattr(
+        cb_studio_director, "build_keyframe",
+        lambda scene, shot_id, episode, log=print:
+            calls.append(("build", scene, shot_id, episode)))
+
+    cb_studio_director.refire_keyframe(
+        "1", SHOT_ID, "Give Fuzzby more lead room", "Ep1", log=lambda *_: None)
+
+    assert calls == [
+        ("reject", "1", SHOT_ID, "Give Fuzzby more lead room", "Ep1"),
+        ("build", "1", SHOT_ID, "Ep1"),
+    ]
+
+
+def test_build_keyframe_refreshes_legacy_direction_before_provider_call(monkeypatch):
+    work = {
+        "approved": None,
+        "candidate": {"output": {"complete": False}},
+        "history": [],
+    }
+    ledger = {"departmentWork": {"cinematography": work}}
+    package = {"shots": [{"shotId": SHOT_ID}], "continuityLedger": [ledger]}
+    calls = []
+
+    monkeypatch.setattr(cb_render, "load_pkg", lambda *_: (package, None))
+    monkeypatch.setattr(cb_render, "_shot", lambda *_: package["shots"][0])
+    monkeypatch.setattr(cb_render, "_ledger", lambda *_: ledger)
+
+    def check_contract(direction, _shot):
+        if not direction.get("complete"):
+            raise cb_render.Refused("legacy")
+
+    def decide(_scene, _stage, verdict, **_kwargs):
+        calls.append(verdict)
+        if verdict == "rejected":
+            work["candidate"] = None
+        else:
+            work["approved"] = work["candidate"]
+            work["candidate"] = None
+
+    def prepare(*_args, **_kwargs):
+        calls.append("prepare")
+        work["candidate"] = {"output": {"complete": True}}
+
+    monkeypatch.setattr(cb_render, "_keyframe_direction_contract", check_contract)
+    monkeypatch.setattr(cb_render, "decide_department", decide)
+    monkeypatch.setattr(cb_render, "prepare_department", prepare)
+    monkeypatch.setattr(
+        cb_render, "keyframe_shot", lambda *_args, **_kwargs: calls.append("keyframe"))
+
+    cb_studio_director.build_keyframe("1", SHOT_ID, "Ep1", log=lambda *_: None)
+
+    assert calls == ["rejected", "prepare", "approved", "keyframe"]
 
 
 def test_older_failure_is_hidden_after_newer_completed_action():

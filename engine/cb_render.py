@@ -2887,20 +2887,18 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                 reference_lines.append(
                     f"- {item['slot']}: {canonical}'s complete, uncropped 360 turnaround is the "
                     f"100% identity authority. Match {canonical} exactly as the same character "
-                    "shown in the turnaround. Preserve every visible feature and proportion; "
-                    "do not describe, redesign, simplify, beautify or reinterpret it. Ignore "
-                    "background and static pose.")
+                    "shown in the turnaround. Preserve every visible feature and proportion. "
+                    "Ignore background and static pose; do not describe, redesign, simplify, "
+                    "beautify or reinterpret it.")
             else:
                 view_bindings = ", ".join(
                     f"{item['slot']} {item.get('view') or 'identity'}"
                     for item in attachments)
                 reference_lines.append(
-                    f"- {canonical} turnaround: {view_bindings}. Together these references are "
-                    f"the 100% identity authority for {canonical}. Match the exact same "
-                    "character; preserve every visible feature, accessory, silhouette, marking, "
-                    "proportion, material and view-specific detail. Do not describe, redesign, "
-                    "simplify, beautify, add, remove or reinterpret character details. Ignore "
-                    "only backgrounds and static poses.")
+                    f"- {canonical} turnaround: {view_bindings}. Together they are {canonical}'s "
+                    "100% identity authority. Match exactly; preserve every visible feature, "
+                    "accessory, silhouette, marking, proportion, material and view detail. "
+                    "Ignore backgrounds and poses; do not redesign or reinterpret.")
 
     separation_line = ""
     if len(identity_names) > 1:
@@ -2966,33 +2964,32 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
         next(iter(direction.get("continuityProtections") or []), ""))
     sections = [
         ("Opening Stage",
-         f"Create a playable 16:9 opening for {shot.get('shotId')}: frame-one anticipation, "
-         "never portrait, pose sheet or payoff."),
+         f"Create a playable 16:9 opening for {shot.get('shotId')}; frame-one anticipation, not "
+         "portrait or payoff."),
     ]
     reference_body = ("\n".join(reference_lines) + separation_line).strip()
     if reference_body:
         sections.append(("References", reference_body))
     sections.extend([
         ("Characters In Frame", "\n".join(f"- {name}" for name in contract["cast"])),
-        ("Intended Read", _compact(direction.get("audienceRead"), 32) + "."),
+        ("Intended Read", _compact(direction.get("audienceRead"), 18) + "."),
         ("Canonical Style", direction["canonicalStyleParagraph"]),
         ("Geography", "\n".join(contract["geography"])),
         ("Frame", "\n".join(staging_lines) + f"\n- {scale_rule}"),
         ("Negative Space", "\n".join(contract["negativeSpace"])),
-        ("Camera", str(direction["lensAndCameraRelationship"]).strip()),
+        ("Camera", _compact(direction["lensAndCameraRelationship"], 24) + "."),
         ("Light", str(direction["lightingAndDepth"]).strip()),
         ("Performance Freedom",
-         "Animation owns acting, wing cadence, movement, contact, recovery and camera "
-         "evolution."),
+         "Animation owns performance, movement, recovery and camera evolution."),
     ])
     if protections:
         sections.append(("Protect", protections + "."))
     sections.append((
         "Forbidden",
-        "No redesign, pasted turnaround, portrait, locked extreme action pose or payoff, "
-        "identity or scale drift, omitted reference features, changed accessories, inflation, "
-        "duplicates, anatomy errors, extra props, text or watermark; no body-mounted bags, "
-        "sacks, baskets or dangling loads. Preserve the locked Scene Look."))
+        "No portrait, locked extreme action pose or payoff, identity or scale drift, changed "
+        "accessories, omitted reference features, duplicates, anatomy errors, extra props, "
+        "text, watermark or body-mounted bags, sacks, baskets or dangling loads. Preserve "
+        "the locked Scene Look."))
     prompt = "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
     try:
         cb_departments.prompt_sections(prompt)

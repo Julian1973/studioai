@@ -68,7 +68,8 @@ def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
     gate = str(job.get("gate") or "")
     args_text = " ".join(str(value) for value in (job.get("args") or []))
     operation_text = f"{gate} {args_text}".lower()
-    if "build-keyframe" in operation_text or ":keyframe" in operation_text:
+    if ("build-keyframe" in operation_text or "refire-keyframe" in operation_text or
+            ":keyframe" in operation_text):
         activity_label = "Keyframe build in progress"
         fallback_step = "Building the opening keyframe..."
     elif "build-voice" in operation_text or "voice-shot" in operation_text:
@@ -83,13 +84,21 @@ def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
     else:
         activity_label = "Production job in progress"
         fallback_step = "Building the next result..."
+    raw_step = str(job.get("step") or "").strip()
+    latest_message = log_lines[-1][:300] if log_lines else None
+    if activity_label == "Keyframe build in progress" and raw_step.startswith("DEPARTMENT"):
+        fallback_step = "Refreshing the shot direction before keyframe generation..."
+        latest_message = (
+            "The Studio is upgrading the older direction record to the current keyframe "
+            "contract. The opening-frame generation follows automatically."
+        )
     return {
         "jobId": job.get("jobId"),
         "status": job.get("status"),
         "activityLabel": activity_label,
-        "step": job.get("step") or fallback_step,
+        "step": fallback_step if raw_step.startswith("DEPARTMENT") else raw_step or fallback_step,
         "started": job.get("started"),
-        "latestMessage": log_lines[-1][:300] if log_lines else None,
+        "latestMessage": latest_message,
     }
 
 
@@ -293,8 +302,6 @@ def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
 
 def _stage_comms(phase: str, status: str, ledger: dict[str, Any],
                  artifact: dict[str, Any] | None) -> dict[str, Any] | None:
-    if phase == "keyframe":
-        return _keyframe_stage_comms(ledger, status, artifact)
     if status == "rendering":
         return {
             "severity": "info",
@@ -303,6 +310,8 @@ def _stage_comms(phase: str, status: str, ledger: dict[str, Any],
             "nextAction": "Wait for the result panel to update.",
             "artifactVisible": False,
         }
+    if phase == "keyframe":
+        return _keyframe_stage_comms(ledger, status, artifact)
     return None
 
 
@@ -644,10 +653,53 @@ def _direction_current(scene: str, shot_id: str, stage: str, episode: str) -> bo
 def build_keyframe(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
     import cb_render
 
-    if not _direction_current(scene, shot_id, "cinematography", episode):
-        log("DIRECTOR — preparing current cinematography direction")
-        cb_render.prepare_department(scene, "cinematography", shot_id, episode, log)
+    package, _ = cb_render.load_pkg(scene, episode)
+    shot = cb_render._shot(package, shot_id)
+    ledger = cb_render._ledger(package, shot_id)
+    work = ledger.setdefault("departmentWork", {}).setdefault(
+        "cinematography", {"approved": None, "candidate": None, "history": []})
+
+    def contract_is_complete(record: dict[str, Any] | None) -> bool:
+        try:
+            cb_render._keyframe_direction_contract(
+                ((record or {}).get("output") or {}), shot)
+            return True
+        except (cb_render.Refused, KeyError, TypeError, ValueError):
+            return False
+
+    if not contract_is_complete(work.get("approved")):
+        if work.get("candidate"):
+            if contract_is_complete(work["candidate"]):
+                log("DIRECTOR — promoting the current complete cinematography contract")
+                cb_render.decide_department(
+                    scene, "cinematography", "approved", shot_id=shot_id,
+                    note="Current typed direction promoted for keyframe compilation.",
+                    episode=episode, reviewed_by="Studio contract migration", log=log)
+            else:
+                log("DIRECTOR — refreshing legacy cinematography direction to the current contract")
+                cb_render.decide_department(
+                    scene, "cinematography", "rejected", shot_id=shot_id,
+                    note="Legacy direction is missing required typed keyframe fields.",
+                    episode=episode, reviewed_by="Studio contract migration", log=log)
+        if not contract_is_complete(work.get("approved")):
+            cb_render.prepare_department(
+                scene, "cinematography", shot_id, episode, log)
+            cb_render.decide_department(
+                scene, "cinematography", "approved", shot_id=shot_id,
+                note="Refreshed to the current typed keyframe contract.", episode=episode,
+                reviewed_by="Studio contract migration", log=log)
     cb_render.keyframe_shot(scene, shot_id, episode, log)
+
+
+def refire_keyframe(scene: str, shot_id: str, correction: str,
+                    episode: str = "Ep1", log=print) -> None:
+    """Apply the human retake note and return one replacement review candidate."""
+    import cb_render
+
+    log("REFIRE — recording the Director's keyframe note and retiring this candidate")
+    cb_render.reject_keyframe(scene, shot_id, correction, episode, log=log)
+    log("REFIRE — building the corrected keyframe now")
+    build_keyframe(scene, shot_id, episode, log)
 
 
 def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
@@ -684,12 +736,26 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
 def _usage() -> str:
     return (
         "usage: cb_studio_director.py <build-keyframe|build-voice|prepare-render> "
-        "<scene> <shotId> [episode]"
+        "<scene> <shotId> [episode]\n"
+        "       cb_studio_director.py refire-keyframe <scene> <shotId> "
+        "<correction> [episode]"
     )
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "refire-keyframe":
+        if len(argv) not in (4, 5):
+            print(_usage(), file=sys.stderr)
+            return 2
+        _, scene, shot_id, correction = argv[:4]
+        episode = argv[4] if len(argv) == 5 else "Ep1"
+        try:
+            refire_keyframe(scene, shot_id, correction, episode)
+            return 0
+        except Exception as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
     if len(argv) not in (3, 4):
         print(_usage(), file=sys.stderr)
         return 2

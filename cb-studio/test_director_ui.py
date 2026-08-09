@@ -113,6 +113,18 @@ def test_every_director_action_gets_immediate_visible_feedback():
     assert "holdLocalActivity(action, previousSession, error.message, \"Action refused\")" in submit_body
     assert "holdLocalActivity(action, previousSession, message, \"Action failed\")" in submit_body
     assert 'app.localActivity.state === "held"' in JS
+    assert 'const serverJob = session.runningJob' in JS
+    assert 'Still working. Live status remains on this shot.' in JS
+    assert "async function pollLiveSession()" in JS
+    assert "session.status === \"rendering\" ? 1600 : 4500" in JS
+
+
+def test_keyframe_refire_is_one_visible_replacement_job():
+    assert 'action.id === "iterate-keyframe"' in JS
+    assert "Keyframe refire in progress" in JS
+    assert "Seedream is generating the replacement" in JS
+    assert '"cb_studio_director.py", "refire-keyframe"' in SERVER
+    assert 'f"director:refire-keyframe:{target}"' in SERVER
 
 
 def test_director_action_area_explains_current_outcome_before_button():

@@ -3251,7 +3251,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                 elif action == "iterate-keyframe":
                     if not note:
                         self._json(400, {"error": "Tell the Director what must change."}); return
-                    job_id = shot_run_job("reject-keyframe", scene, ep, target, note)
+                    job_id = _start(
+                        _jid(f"director_refire-keyframe_{target}"),
+                        f"director:refire-keyframe:{target}", scene,
+                        ["cb_studio_director.py", "refire-keyframe", scene,
+                         target, note, ep])
                 elif action == "accept-voice":
                     job_id = shot_run_job("approve-voice", scene, ep, target)
                 elif action == "iterate-voice":

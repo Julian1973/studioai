@@ -783,6 +783,24 @@
   }
 
   function actionActivityCopy(action, session, preparingRetry) {
+    if (action.id === "iterate-keyframe") {
+      return {
+        label: "Keyframe refire in progress",
+        step: "Applying your note and building a corrected opening frame...",
+        message: "Your retake note is recorded. Seedream is generating the replacement for your review.",
+        provider: "Seedream 5 Pro",
+        showDuration: false,
+      };
+    }
+    if (action.id === "iterate-voice") {
+      return {
+        label: "Voice refire in progress",
+        step: "Applying your note and preparing the corrected performance...",
+        message: "Your retake note is recorded. The replacement voice will return here for your review.",
+        provider: "ElevenLabs",
+        showDuration: false,
+      };
+    }
     if (preparingRetry) {
       return {
         label: "Refire preparation",
@@ -838,7 +856,21 @@
   }
 
   function renderGenerateStatus(session) {
-    const activity = app.localActivity;
+    const serverJob = session.runningJob;
+    const activity = app.localActivity || (serverJob ? {
+      id: serverJob.jobId || `server-job-${session.selectedShotId}`,
+      actionId: "server-job",
+      shotId: session.selectedShotId,
+      started: serverJob.started,
+      state: "running",
+      label: serverJob.activityLabel || "Studio work in progress",
+      step: serverJob.step || "Building the next result...",
+      message: serverJob.latestMessage || "The Studio is still working. This view will update automatically.",
+      providerModelId: serverJob.providerModelId,
+      durationSec: serverJob.durationSec,
+      candidateCount: serverJob.candidateCount,
+      showDuration: session.phase === "animation",
+    } : null);
     if (!activity || activity.shotId !== session.selectedShotId) {
       const spend = session.spendDisclosure;
       if (!spend) return "";
@@ -862,6 +894,7 @@
       </div>
       <time data-activity-elapsed="${esc(activity.id)}">${formatRenderElapsed(activity.started)}</time>
       ${held ? `<p>${esc(activity.message || "The result was held back. Review the note, then build again.")}</p>` : ""}
+      ${!held && activity.message ? `<p>${esc(activity.message)}</p>` : ""}
       ${details.length ? `<small>${details.map(esc).join(" · ")}</small>` : ""}
     </div>`;
   }
@@ -3056,6 +3089,23 @@
     }
   }
 
+  async function pollLiveSession() {
+    clearTimeout(app.pollTimer);
+    const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
+    try {
+      const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`);
+      app.session = session;
+      if (!app.shotId) app.shotId = session.selectedShotId || null;
+      clearLocalActivityForSession(session);
+      renderDirector(session);
+      renderReview(session);
+      if (app.view === "pipeline") renderPipeline();
+      app.pollTimer = setTimeout(pollLiveSession, session.status === "rendering" ? 1600 : 4500);
+    } catch (_) {
+      app.pollTimer = setTimeout(pollLiveSession, 4500);
+    }
+  }
+
   async function loadSession() {
     clearTimeout(app.pollTimer);
     const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
@@ -3090,7 +3140,8 @@
       if (app.view === "pipeline") renderPipeline();
       loadStudioAgent();
       if (approvedAdvance) toast("Approved. Moving forward.");
-      if (session.status === "rendering") app.pollTimer = setTimeout(loadSession, 1600);
+      app.pollTimer = setTimeout(
+        pollLiveSession, session.status === "rendering" ? 1600 : 4500);
     } catch (error) {
       const workbench = $("#scene-workbench");
       if (workbench) workbench.innerHTML = `<div class="relay-load-error"><strong>Studio state could not load</strong><p>${esc(error.message)}</p><button type="button" class="primary" data-retry-session>Retry</button></div>`;
@@ -3397,6 +3448,11 @@
       toast(result.noChange ? "Nothing changed." : "Director action started.");
       if (result.jobId) {
         const job = await waitForDirectorJob(result.jobId);
+        if (!job) {
+          await loadSession();
+          toast("Still working. Live status remains on this shot.");
+          return;
+        }
         if (job && job.status === "failed") {
           const message = jobFailureMessage(job);
           holdLocalActivity(action, previousSession, message, "Action failed");

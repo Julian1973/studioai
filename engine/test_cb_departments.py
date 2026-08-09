@@ -315,6 +315,70 @@ def test_creative_translation_preserves_approved_gag_clock_and_provider_action()
     assert "providerAction is absent" in report["errors"][0]
 
 
+def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
+    primary = (
+        "Fuzzby enters too fast, visibly loads the springy leaf with his weight, then "
+        "the leaf recoil launches him into one tucked rotation and an upright hover.")
+    provider_action = (
+        "Fuzzby holds the chest-forward recovery while his body still wobbles and "
+        "Zenny remains level on the safe parallel route.")
+    handoff = "Fuzzby hovers upright in drifting pollen while Zenny watches nearby."
+    shot = {
+        "dialogueLines": [
+            {"speaker": "Fuzzby", "exactText": "Nailed it."},
+        ],
+    }
+    direction = {
+        "providerPrompt": "Make a nice cinematic bee video.",
+        "generationGoal": "Fuzzby's apparent expertise collapses into a false triumph.",
+        "dramaticBeat": "Visible failure becomes performed success.",
+        "performanceArc": "Overcommitted speed resolves into an over-proud recovery.",
+        "physicalCauseAndEffect": "His weight bends the leaf; stored force returns him upright.",
+        "cameraBehaviour": "A bee-height chase settles to a medium hold for the button.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "His body disproves the authority he performs.",
+                "emotionalHeart": "Zenny sees the failure and stays affectionately present.",
+            },
+            "gagClocks": [{"beatCode": "1.B1", "providerAction": provider_action}],
+        },
+        "referenceContract": [
+            {"assetTag": "@Image1", "role": "opening_frame",
+             "controls": "the exact approved opening composition"},
+            {"assetTag": "@Image2", "role": "character_identity",
+             "controls": "Fuzzby's exact turnaround identity and proportions"},
+            {"assetTag": "@Audio1", "role": "audio",
+             "controls": "the approved voice performance"},
+        ],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["1.B1"],
+            "purpose": "Chase, recoil and false triumph",
+            "initialOrCarriedState": "The approved chase is already moving through frame.",
+            "primaryEvent": primary,
+            "emotionOrCameraAnalysis": "Keep the contact readable, then settle for the lie.",
+            "observableEndState": handoff,
+        }],
+        "consistencyContract": [
+            "Fuzzby's identity, relative scale, corridor axis and light direction",
+        ],
+        "surgicalSafeguards": ["the leaf bend, recoil and landing remain one causal chain"],
+        "continuityFinish": handoff,
+        "audioContract": "Use @Audio1 unchanged; retain wing, leaf and pollen foley; no music.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "Make a nice cinematic bee video" not in prompt
+    assert primary in prompt
+    assert provider_action in prompt
+    assert handoff in prompt
+    assert "@Image1 defines the exact approved opening composition" in prompt
+    assert "@Audio1 is the sole source" in prompt
+    assert "[Timestamp Script Storyboard]" in prompt
+    assert len(prompt.split()) <= D.animation_provider_prompt_word_limit(9)
+
+
 def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_explicit():
     primary = "Fuzzby hits the leaf, rebounds upright and holds a proud wobbling pose."
     ending = "Fuzzby hovers proudly while Zenny watches."

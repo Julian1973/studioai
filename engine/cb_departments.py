@@ -915,6 +915,151 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
     return text.rstrip() + "\n\n" + consistency
 
 
+def compile_animation_provider_prompt(shot, direction):
+    """Compile the provider prompt from typed, approved Animation direction.
+
+    The structured direction is the creative source of truth.  The prose returned in
+    ``providerPrompt`` by the specialist is deliberately ignored here: allowing the model
+    to describe the beat once in fields and then author it again as free prose was the
+    golden-link failure.  This compiler emits each approved stage, gag action, reference
+    role and handoff once, in the shape expected by the Seedance prompt preflight.
+    """
+    data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    dialogue = list(shot.get("dialogueLines") or [])
+    references = list(data.get("referenceContract") or [])
+    stages = list(data.get("stagePlan") or [])
+    translation = data.get("creativeTranslation") or {}
+    interpretation = translation.get("interpretation") or {}
+    gag_actions = {
+        str(item.get("beatCode") or ""): str(item.get("providerAction") or "").strip()
+        for item in translation.get("gagClocks") or []
+        if str(item.get("beatCode") or "").strip()
+    }
+
+    def concise(value, *, words=28):
+        """Keep provider prose lean without rewriting locked stage events or end states."""
+        text = " ".join(str(value or "").split()).strip()
+        text = re.split(r";", text, maxsplit=1)[0]
+        parts = text.split()
+        return " ".join(parts[:words]).rstrip(" ,;:.")
+
+    def consistency_clause(value):
+        text = " ".join(str(value or "").split()).strip().rstrip(".")
+        text = re.sub(r"^(?:use|keep|maintain|preserve|protect)\s+", "", text,
+                      flags=re.I)
+        return concise(text, words=22)
+
+    sections = []
+    if dialogue:
+        speakers = list(dict.fromkeys(
+            str(item.get("speaker") or "").strip()
+            for item in dialogue if str(item.get("speaker") or "").strip()))
+        owner = " and ".join(speakers) or "Assigned speakers"
+        verb = "performs" if len(speakers) == 1 else "perform"
+        sections.append(
+            "AUDIO-LOCK: @Audio1 is the sole source of English dialogue, speaker "
+            "performance, mouth timing and silence. " + owner + " " + verb +
+            " only assigned @Audio1 regions; all listeners remain silent and closed-mouth. "
+            "Add no dialogue, vocalisations, narration, translated speech, subtitles or captions.")
+
+    exclusions = {
+        "opening_frame": "Exclude identity redesign and later action.",
+        "closing_frame": "Exclude identity redesign and preceding action.",
+        "character_identity": "Exclude its background, pose and composition.",
+        "location": "Exclude its characters and foreground action.",
+        "prop": "Exclude its background, people and composition.",
+        "style": "Exclude its subject identity, text and composition.",
+        "video": "Exclude identity, clothing and scene unless assigned.",
+    }
+    reference_lines = []
+    for reference in references:
+        item = reference.model_dump() if hasattr(reference, "model_dump") else dict(reference)
+        tag = str(item.get("assetTag") or "").strip()
+        role = str(item.get("role") or "").strip()
+        controls = concise(item.get("controls"), words=18)
+        if not tag or not controls:
+            continue
+        if role != "audio":
+            reference_lines.append(
+                f"{tag} defines {controls}. " + exclusions.get(
+                    role, "Do not use unrelated background or content from it."))
+    if reference_lines:
+        sections.append("[Multimodal Reference Layer]\n" + "\n".join(reference_lines))
+
+    goal = str(data.get("generationGoal") or data.get("dramaticBeat") or "").strip()
+    sections.append("[One-Sentence Summary]\n" + goal)
+
+    global_lines = []
+    mechanism = str(interpretation.get("mechanism") or "").strip()
+    heart = str(interpretation.get("emotionalHeart") or "").strip()
+    short_unit = float(data.get("durationSec") or shot.get("durationSec") or 0) <= 15
+    global_values = [
+        ("Comic or emotional mechanism", mechanism),
+        ("Emotional heart", heart),
+    ]
+    if not short_unit:
+        global_values.insert(1, (
+            "Performance", concise(data.get("performanceArc"), words=28)))
+        global_values.insert(2, (
+            "Physical causality", concise(data.get("physicalCauseAndEffect"), words=32)))
+    for label, value in global_values:
+        if value:
+            global_lines.append(f"{label}: {value}")
+    sections.append("[Global Settings]\n" + "\n".join(global_lines))
+
+    stage_sections = []
+    for index, stage in enumerate(stages):
+        item = stage.model_dump() if hasattr(stage, "model_dump") else dict(stage)
+        stage_number = int(item.get("stageNumber") or index + 1)
+        beat_label = ", ".join(str(value) for value in item.get("beatIds") or [])
+        purpose = beat_label or concise(item.get("purpose") or "Story event", words=9)
+        start, end = item.get("startSec"), item.get("endSec")
+        if start is not None and end is not None:
+            heading = f"Stage {stage_number}: {start:g}-{end:g}s [{purpose}]"
+        else:
+            heading = f"Stage {stage_number}: [{purpose}]"
+        prefix = "Initial state" if index == 0 else "Continue from the previous stage"
+        event = str(item.get("primaryEvent") or "").strip()
+        additions = []
+        for beat_id in item.get("beatIds") or []:
+            action = gag_actions.get(str(beat_id))
+            if action and " ".join(action.split()).casefold() not in " ".join(event.split()).casefold():
+                additions.append(action)
+        action = " ".join([event, *additions]).strip()
+        stage_sections.append(
+            f"{heading}\n"
+            f"{prefix}: {concise(item.get('initialOrCarriedState'), words=28)}\n"
+            f"Action/Expression: {action}\n"
+            f"Emotion/Camera Analysis: {concise(item.get('emotionOrCameraAnalysis'), words=20)}\n"
+            f"End state: {str(item.get('observableEndState') or '').strip()}")
+    sections.append("[Timestamp Script Storyboard]\n" + "\n\n".join(stage_sections))
+
+    consistency = [consistency_clause(item) for item in
+                   data.get("consistencyContract") or [] if str(item).strip()]
+    safeguards = [consistency_clause(item) for item in
+                  data.get("surgicalSafeguards") or [] if str(item).strip()]
+    finish = str(data.get("continuityFinish") or "").strip().rstrip(".")
+    supplement = [*(f"Maintain {item}." for item in consistency[:1]),
+                  *(f"Safeguard: {item}." for item in safeguards[:2])]
+    if finish:
+        supplement.append(f"Final handoff: {finish}.")
+    sections.append("[Global Supplement]\n" + " ".join(supplement))
+
+    audio_contract = str(data.get("audioContract") or "").strip()
+    if dialogue:
+        foley = re.search(
+            r"(?:only|retain|add)\s+[^.;]*foley[^.;]*", audio_contract, re.I)
+        audio = "Use @Audio1 unchanged."
+        if foley:
+            audio += " " + foley.group(0).strip().capitalize() + "."
+        if re.search(r"\bno\s+(?:musical underscore|music|bgm)\b", audio_contract, re.I):
+            audio += " No music."
+    else:
+        audio = audio_contract
+    sections.append("[Audio]\n" + audio)
+    return "\n\n".join(section for section in sections if section.strip())
+
+
 def prepare_animation(context, images, *, log=print):
     shot = context.get("shot") or {}
     raw_duration = shot.get("durationSec", shot.get("targetDurationSecApproved"))
@@ -1013,8 +1158,7 @@ def prepare_animation(context, images, *, log=print):
         "exceptional actor and camera crew, not an animation checklist.",
         AnimationDirection, label="department_animation", log=log, images=images)
 
-    result.providerPrompt = _apply_animation_provider_shell(
-        result.providerPrompt, shot, result.referenceContract)
+    result.providerPrompt = compile_animation_provider_prompt(shot, result)
 
     if result.durationSec != duration:
         raise RuntimeError(

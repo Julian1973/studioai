@@ -878,6 +878,19 @@ def void_scene_authorizations(root, episode, scene, reason):
         ).rowcount
 
 
+def void_shot_authorizations(root, episode, scene, shot_id, reason):
+    """Void unspent envelopes for one shot without disturbing parallel scene work."""
+    with transaction(root) as conn:
+        return conn.execute(
+            """
+            UPDATE spend_authorizations
+            SET status='voided', voided_at=?, void_reason=?
+            WHERE episode=? AND scene=? AND shot_id=? AND status='issued'
+            """,
+            (utc_now(), str(reason), str(episode), str(scene), str(shot_id)),
+        ).rowcount
+
+
 def spend_authorization(root, token):
     conn = _connect(root)
     try:

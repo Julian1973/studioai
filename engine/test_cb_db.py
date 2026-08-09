@@ -156,6 +156,25 @@ def test_spend_and_candidate_claims_are_single_owner_and_idempotent(tmp_path):
             auth["bindingHash"], auth["envelopeHash"], "batch-1")
 
 
+def test_void_shot_authorization_preserves_other_parallel_shots(tmp_path):
+    first = _auth()
+    second = _auth()
+    second["token"] = "other-token"
+    second["bindingHash"] = "other-binding"
+    second["envelopeHash"] = "other-envelope"
+    second["envelope"] = {**second["envelope"], "shotId": "S1.SH2"}
+    second["disclosure"] = {**second["disclosure"], "shotId": "S1.SH2"}
+    cb_db.issue_spend_authorization(tmp_path, "EpT", "1", "S1.SH1", first)
+    cb_db.issue_spend_authorization(tmp_path, "EpT", "1", "S1.SH2", second)
+
+    changed = cb_db.void_shot_authorizations(
+        tmp_path, "EpT", "1", "S1.SH1", "prompt-changed")
+
+    assert changed == 1
+    assert cb_db.spend_authorization(tmp_path, first["token"])["status"] == "voided"
+    assert cb_db.spend_authorization(tmp_path, second["token"])["status"] == "issued"
+
+
 def test_internal_provider_segments_are_individually_idempotent(tmp_path):
     auth = _auth()
     auth["envelope"]["candidateCount"] = 1

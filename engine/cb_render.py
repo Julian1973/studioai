@@ -2637,6 +2637,13 @@ def save_department_candidate(scene, stage, text=None, lines=None, shot_id=None,
             cand["output"] = model.model_dump()
         else:
             output["providerPrompt"] = value
+    if stage == "animation":
+        ledger = _ledger(pkg, shot_id)
+        if ledger.get("pendingSpendAuth"):
+            cb_db.void_shot_authorizations(
+                HERE.parent, episode, scene, shot_id,
+                "animation-direction-changed-before-fire")
+            ledger["pendingSpendAuth"] = None
     cand["editedAt"] = _now(); cand["editedBy"] = reviewed_by
     save_extra(); _save(pkg, path)
     log(f"DEPARTMENT CANDIDATE SAVED — {stage} "

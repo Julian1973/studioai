@@ -5,6 +5,7 @@ import pathlib
 import pytest
 
 import cb_db
+import cb_departments
 import cb_prompt_lab
 import cb_render
 
@@ -193,14 +194,31 @@ def test_rating_contract_requires_every_applicable_dimension():
             "keyframe", {**scores, "beatDelivery": 3}, "lands")
 
 
-def test_keyframe_prompt_contract_detects_record_tampering():
-    pkg = {"continuityLedger": [{
-        "shotId": "S1", "departmentWork": {"cinematography": {"approved": {
-            "output": {"providerPrompt": "Exact approved keyframe prompt"}}}},
-    }]}
-    shot = {"shotId": "S1", "keyframePrompt": "fallback"}
+def test_keyframe_prompt_contract_detects_record_tampering(monkeypatch):
+    version, style = cb_departments.canonical_style_paragraph()
+    direction = {
+        "audienceRead": "Fuzzby starts the chase.",
+        "lensAndCameraRelationship": "Bee-height pursuit camera.",
+        "lightingAndDepth": "Warm side light with layered flower depth.",
+        "geography": ["The corridor travels frame-left to frame-right."],
+        "charactersInFrame": ["Fuzzby"],
+        "canonicalStyleVersion": version,
+        "canonicalStyleParagraph": style,
+        "negativeSpace": ["Keep frame-right lead room open."],
+        "openingFrameLayout": {"placements": [{
+            "character": "Fuzzby", "facing": "screen-right"}]},
+    }
+    prompt = (
+        f"[Canonical Style]\n{style}\n\n"
+        "[Geography]\nThe corridor travels frame-left to frame-right.\n\n"
+        "[Light]\nWarm side light with layered flower depth.\n\n"
+        "[Characters In Frame]\n- Fuzzby")
+    pkg = {"shots": [{"shotId": "S1"}], "continuityLedger": [{"shotId": "S1"}]}
+    shot = {"shotId": "S1", "charactersInFrame": ["Fuzzby"]}
+    monkeypatch.setattr(cb_render, "_approved_department_output",
+                        lambda pkg, shot_id, stage: direction)
     contract = cb_render._keyframe_prompt_contract(
-        pkg, shot, "Exact approved keyframe prompt")
+        pkg, shot, prompt)
     assert cb_render._prompt_contract_is_exact(contract) is True
 
     changed = {**contract, "promptSource": "changed-after-generation"}

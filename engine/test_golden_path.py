@@ -33,6 +33,7 @@ import pytest
 import cb_engine as E
 import cb_render as R
 import cb_canon
+import cb_departments
 
 
 TEST_CANON_DIGESTS = {name: (name[0] * 64) for name in (
@@ -209,6 +210,7 @@ STAGING = E.PhysicalStaging(staysVisible="full silhouette", contactAndWeight="ch
 
 def _cinematography_output(shot):
     """Typed current DP direction used by the direct stage-anchor compiler."""
+    cast = list(shot.get("charactersInFrame") or [])
     placements = [
         {"character": "Fuzzby", "centerX": 0.36, "centerY": 0.43,
          "apparentScale": 1.0, "depthPlane": 1, "bodyAngleDegrees": -24.0,
@@ -217,6 +219,8 @@ def _cinematography_output(shot):
          "apparentScale": 1.0, "depthPlane": 1, "bodyAngleDegrees": -3.0,
          "facing": "screen-right", "pose": "clean level glide"},
     ]
+    placements = [item for item in placements if item["character"] in cast]
+    style_version, style_text = cb_departments.canonical_style_paragraph()
     return {
         "providerPrompt": shot.get("keyframePrompt") or
                           "Maintain the approved inherited opening frame exactly.",
@@ -224,8 +228,14 @@ def _cinematography_output(shot):
         "composition": "Fuzzby remains frame-left and Zenny frame-right.",
         "lensAndCameraRelationship": "Bee-height camera preserves readable silhouettes.",
         "lightingAndDepth": "Warm daylight and layered flower depth remain stable.",
+        "geography": [
+            "The flower corridor travels frame-left to frame-right at bee height."],
+        "charactersInFrame": list(shot.get("charactersInFrame") or []),
+        "canonicalStyleVersion": style_version,
+        "canonicalStyleParagraph": style_text,
+        "negativeSpace": ["Keep frame-right lead room open for travel."],
         "openingFrameLayout": {
-            "aspectRatio": "16:9", "referenceCharacter": "Fuzzby",
+            "aspectRatio": "16:9", "referenceCharacter": cast[0],
             "referenceHeightFraction": 0.28, "sameDepth": True,
             "placements": placements,
         },

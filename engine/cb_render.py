@@ -107,7 +107,7 @@ POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
 MAX_KEYFRAME_INTEGRATION_WORDS = 380
-MAX_KEYFRAME_INTEGRATION_HARD_WORDS = 450
+MAX_KEYFRAME_INTEGRATION_HARD_WORDS = 620
 REVIEW_VIDEO_RESOLUTION = "480p"
 
 
@@ -2761,12 +2761,85 @@ def _with_opening_composition_control(prompt, shot, scene, episode):
     return prompt
 
 
+def _keyframe_direction_contract(direction, shot):
+    """Validate the one approved direction record consumed by the keyframe compiler."""
+    shot_id = shot.get("shotId")
+    required_text = (
+        "audienceRead", "lensAndCameraRelationship", "lightingAndDepth",
+        "canonicalStyleVersion", "canonicalStyleParagraph",
+    )
+    missing = [key for key in required_text if not str(direction.get(key) or "").strip()]
+    geography = [str(value).strip() for value in direction.get("geography") or []
+                 if str(value).strip()]
+    cast = [str(value).strip() for value in direction.get("charactersInFrame") or []
+            if str(value).strip()]
+    negative_space = [str(value).strip().rstrip(".") + "."
+                      for value in direction.get("negativeSpace") or []
+                      if str(value).strip()]
+    if not geography:
+        missing.append("geography")
+    if not cast:
+        missing.append("charactersInFrame")
+    if not negative_space:
+        missing.append("negativeSpace")
+    if missing:
+        raise Refused(
+            f"REFUSED — approved Cinematography direction for {shot_id} is missing "
+            + ", ".join(missing))
+
+    if len(cast) != len(set(cast)):
+        raise Refused(
+            f"REFUSED — approved charactersInFrame for {shot_id} contains duplicates")
+    approved_cast = list(dict.fromkeys(
+        str(value).strip() for value in shot.get("charactersInFrame") or []
+        if str(value).strip()))
+    if approved_cast and cast != approved_cast:
+        raise Refused(
+            f"REFUSED — approved Cinematography cast for {shot_id} does not match the "
+            f"shot contract: expected {approved_cast}, got {cast}")
+
+    placements = (direction.get("openingFrameLayout") or {}).get("placements") or []
+    placed_cast = [str(item.get("character") or "").strip() for item in placements]
+    if placed_cast != cast:
+        raise Refused(
+            f"REFUSED — opening-frame placements for {shot_id} do not name each approved "
+            "in-frame character exactly once")
+
+    style_version, style_text = cb_departments.canonical_style_paragraph()
+    if (direction.get("canonicalStyleVersion") != style_version or
+            direction.get("canonicalStyleParagraph") != style_text):
+        raise Refused(
+            f"REFUSED — approved Cinematography style for {shot_id} does not match the "
+            f"versioned canonical style {style_version}")
+
+    travel_sides = set()
+    for item in placements:
+        facing = str(item.get("facing") or "").casefold()
+        if "screen-right" in facing or "frame-right" in facing:
+            travel_sides.add("frame-right")
+        elif "screen-left" in facing or "frame-left" in facing:
+            travel_sides.add("frame-left")
+    for side in sorted(travel_sides):
+        derived = f"Lead room stays open {side} for the approved direction of travel."
+        if derived not in negative_space:
+            negative_space.insert(0, derived)
+
+    return {
+        "geography": geography,
+        "cast": cast,
+        "negativeSpace": negative_space,
+        "styleVersion": style_version,
+        "styleText": style_text,
+    }
+
+
 def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     """Compile a bounded opening-stage prompt, never a miniature animation brief."""
     if not direction or not direction.get("openingFrameLayout"):
         raise Refused(
             f"REFUSED — current Cinematography direction for {shot.get('shotId')} has no "
             "typed opening-frame layout")
+    contract = _keyframe_direction_contract(direction, shot)
     layout = direction["openingFrameLayout"]
     placements = layout.get("placements") or []
 
@@ -2814,9 +2887,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                 reference_lines.append(
                     f"- {item['slot']}: {canonical}'s complete, uncropped 360 turnaround is the "
                     f"100% identity authority. Match {canonical} exactly as the same character "
-                    "shown in the turnaround. Preserve all visible identity features, "
-                    "accessories and proportions; do not describe, redesign, simplify, beautify, "
-                    "add, remove or reinterpret them. Ignore background and static pose.")
+                    "shown in the turnaround. Preserve every visible feature and proportion; "
+                    "do not describe, redesign, simplify, beautify or reinterpret it. Ignore "
+                    "background and static pose.")
             else:
                 view_bindings = ", ".join(
                     f"{item['slot']} {item.get('view') or 'identity'}"
@@ -2890,33 +2963,41 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             "Preserve canonical relative size, modified only by the authored depth relationship.")
 
     protections = _compact_protection(
-        next(iter(direction.get("continuityProtections") or []), "")
-    ) or "No additional shot-specific protection."
-    _style_version, style_text = cb_departments.canonical_style_paragraph()
-    negative_space = " ".join(
-        str(item).strip().rstrip(".") + "."
-        for item in direction.get("negativeSpace") or [] if str(item).strip())
-    prompt = (
-        "[Opening Stage]\n"
-        f"Create a playable 16:9 opening for {shot.get('shotId')}: frame-one anticipation, "
-        "never portrait, pose sheet or payoff.\n\n"
-        "[References]\n" + "\n".join(reference_lines) + separation_line + "\n\n"
-        f"[Intended Read]\n{_compact(direction.get('audienceRead'), 32)}.\n\n"
-        f"[Canonical Style]\n{style_text}\n\n"
-        "[Frame]\n" + "\n".join(staging_lines) + f"\n- {scale_rule}\n\n"
-        f"[Negative Space]\n{negative_space}\n\n"
-        f"[Camera]\n{_compact(direction.get('lensAndCameraRelationship'), 18)}.\n\n"
-        f"[Light]\n{_compact(direction.get('lightingAndDepth'), 14)}.\n\n"
-        "[Performance Freedom]\n"
-        "Animation owns acting, wing cadence, movement, contact, recovery and camera "
-        "evolution.\n\n"
-        f"[Protect]\n{protections}.\n\n"
-        "[Forbidden]\nNo redesign, pasted turnaround, portrait, locked extreme action pose "
-        "or payoff, identity or scale "
-        "drift, omitted reference features, changed accessories, inflation, duplicates, "
-        "anatomy errors, extra props, text, logo or watermark; "
-        "no body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look."
-    ).strip()
+        next(iter(direction.get("continuityProtections") or []), ""))
+    sections = [
+        ("Opening Stage",
+         f"Create a playable 16:9 opening for {shot.get('shotId')}: frame-one anticipation, "
+         "never portrait, pose sheet or payoff."),
+    ]
+    reference_body = ("\n".join(reference_lines) + separation_line).strip()
+    if reference_body:
+        sections.append(("References", reference_body))
+    sections.extend([
+        ("Characters In Frame", "\n".join(f"- {name}" for name in contract["cast"])),
+        ("Intended Read", _compact(direction.get("audienceRead"), 32) + "."),
+        ("Canonical Style", direction["canonicalStyleParagraph"]),
+        ("Geography", "\n".join(contract["geography"])),
+        ("Frame", "\n".join(staging_lines) + f"\n- {scale_rule}"),
+        ("Negative Space", "\n".join(contract["negativeSpace"])),
+        ("Camera", str(direction["lensAndCameraRelationship"]).strip()),
+        ("Light", str(direction["lightingAndDepth"]).strip()),
+        ("Performance Freedom",
+         "Animation owns acting, wing cadence, movement, contact, recovery and camera "
+         "evolution."),
+    ])
+    if protections:
+        sections.append(("Protect", protections + "."))
+    sections.append((
+        "Forbidden",
+        "No redesign, pasted turnaround, portrait, locked extreme action pose or payoff, "
+        "identity or scale drift, omitted reference features, changed accessories, inflation, "
+        "duplicates, anatomy errors, extra props, text or watermark; no body-mounted bags, "
+        "sacks, baskets or dangling loads. Preserve the locked Scene Look."))
+    prompt = "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
+    try:
+        cb_departments.prompt_sections(prompt)
+    except ValueError as exc:
+        raise Refused(f"REFUSED — invalid keyframe prompt for {shot.get('shotId')}: {exc}")
     word_count = len(re.findall(r"\S+", prompt))
     if word_count > MAX_KEYFRAME_INTEGRATION_HARD_WORDS:
         raise Refused(
@@ -2991,6 +3072,8 @@ def _resolve_keyframe_prompt(pkg, shot):
     is a read-only report over EVERY shot (evidence_pack) that must tolerate a relay shot's
     honest "no keyframe prompt" the same way it already tolerates a silent shot's "no voice
     track" — a missing value here is the truthful record, never a gap to paper over."""
+    if shot.get("sourceType") != "opener":
+        return None
     work = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
     plan = _expanded_reference_blueprint(
         shot, "keyframeReferenceSlots", _characters_cfg())
@@ -3577,7 +3660,29 @@ def _keyframe_input_signature(pkg, shot, scene, episode="Ep1"):
 def _keyframe_prompt_contract(pkg, shot, prompt=None):
     """Snapshot the exact image prompt and route beside the generated candidate."""
     prompt = prompt if prompt is not None else _resolve_keyframe_prompt(pkg, shot)
-    specialist = _inspection_department_output(pkg, shot["shotId"], "cinematography")
+    specialist = _approved_department_output(pkg, shot["shotId"], "cinematography") or {}
+    direction_contract = _keyframe_direction_contract(specialist, shot)
+    try:
+        sections = cb_departments.prompt_sections(prompt)
+    except ValueError as exc:
+        raise Refused(f"REFUSED — invalid keyframe prompt contract: {exc}")
+    expected_sections = {
+        "Canonical Style": specialist["canonicalStyleParagraph"],
+        "Geography": "\n".join(direction_contract["geography"]),
+        "Light": str(specialist["lightingAndDepth"]).strip(),
+    }
+    for section_name, expected in expected_sections.items():
+        if sections.get(section_name) != expected:
+            raise Refused(
+                f"REFUSED — keyframe prompt [{section_name}] does not match approved "
+                "Cinematography direction verbatim")
+    cast_lines = [line.removeprefix("- ").strip()
+                  for line in sections.get("Characters In Frame", "").splitlines()
+                  if line.strip()]
+    if cast_lines != direction_contract["cast"]:
+        raise Refused(
+            "REFUSED — keyframe prompt [Characters In Frame] must name each approved "
+            "in-frame character exactly once and in order")
     if cb_gen.IMAGE_PROVIDER == "seedream":
         provider_model_id = cb_gen.SEEDREAM_ENDPOINT
     else:
@@ -3591,6 +3696,12 @@ def _keyframe_prompt_contract(pkg, shot, prompt=None):
         "provider": cb_gen.IMAGE_PROVIDER,
         "providerModelId": provider_model_id,
         "modelVersion": provider_model_id,
+        "directionContract": {
+            "canonicalStyleVersion": direction_contract["styleVersion"],
+            "geography": direction_contract["geography"],
+            "charactersInFrame": direction_contract["cast"],
+            "emptySections": [],
+        },
     }
     contract["contractHash"] = hashlib.sha256(json.dumps(
         contract, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
@@ -5076,8 +5187,11 @@ def _prompt_contract_is_exact(contract):
     if contract.get("integrityVerified") is True:
         return True
     contract_hash = str(contract.get("contractHash") or "")
-    payload = {name: contract.get(name) for name in (
-        "prompt", "promptHash", "promptSource", "provider", "providerModelId", "modelVersion")}
+    names = [
+        "prompt", "promptHash", "promptSource", "provider", "providerModelId", "modelVersion"]
+    if "directionContract" in contract:
+        names.append("directionContract")
+    payload = {name: contract.get(name) for name in names}
     actual = hashlib.sha256(json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
     return bool(contract_hash and contract_hash == actual)

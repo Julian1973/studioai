@@ -52,6 +52,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "cb-studio"))
 
 import cb_gen
+import cb_departments
 import cb_lineage
 import cb_render
 import cb_safety
@@ -59,6 +60,7 @@ import cb_safety
 
 def _pose_first_cinematography_output(shot, existing=None):
     existing = dict(existing or {})
+    style_version, style_text = cb_departments.canonical_style_paragraph()
     existing.update({
         "providerPrompt": existing.get("providerPrompt") or
                           shot.get("keyframePrompt") or "Hold the opening frame.",
@@ -70,6 +72,13 @@ def _pose_first_cinematography_output(shot, existing=None):
                                      "Bee-height camera.",
         "lightingAndDepth": existing.get("lightingAndDepth") or
                             "Warm daylight with layered flower depth.",
+        "geography": existing.get("geography") or [
+            "The flower corridor travels frame-left to frame-right at bee height."],
+        "charactersInFrame": list(shot.get("charactersInFrame") or []),
+        "canonicalStyleVersion": style_version,
+        "canonicalStyleParagraph": style_text,
+        "negativeSpace": existing.get("negativeSpace") or [
+            "Keep frame-right lead room open for travel."],
         "openingFrameLayout": existing.get("openingFrameLayout") or {
             "aspectRatio": "16:9", "referenceCharacter": "Fuzzby",
             "referenceHeightFraction": 0.28, "sameDepth": True,

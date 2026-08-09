@@ -41,6 +41,24 @@ def canonical_style_paragraph():
     return version, text
 
 
+_PROMPT_SECTION_RE = re.compile(
+    r"(?ms)^\[([^\]\n]+)\]\s*\n(.*?)(?=^\[[^\]\n]+\]\s*$|\Z)")
+
+
+def prompt_sections(prompt):
+    """Return named prompt sections and reject headers that have no body."""
+    sections = {}
+    for name, body in _PROMPT_SECTION_RE.findall(str(prompt or "")):
+        clean_name = name.strip()
+        clean_body = body.strip()
+        if not clean_body:
+            raise ValueError(f"prompt section [{clean_name}] has no body")
+        if clean_name in sections:
+            raise ValueError(f"prompt section [{clean_name}] is duplicated")
+        sections[clean_name] = clean_body
+    return sections
+
+
 def animation_provider_prompt_word_limit(duration_sec):
     """Leave room for compiler-owned style, geography, causality and numeric holds."""
     return 620 if float(duration_sec or 0) <= 15 else MAX_ANIMATION_PROVIDER_PROMPT_WORDS
@@ -164,6 +182,14 @@ class CinematographyDirection(BaseModel):
     composition: str
     lensAndCameraRelationship: str
     lightingAndDepth: str
+    geography: List[str] = Field(
+        min_length=1, max_length=8,
+        description="Shot geography statements consumed verbatim by image and video compilers.")
+    charactersInFrame: List[str] = Field(
+        default_factory=list,
+        description="Mechanically injected exact approved cast; never authored separately.")
+    canonicalStyleVersion: str = ""
+    canonicalStyleParagraph: str = ""
     openingFrameLayout: OpeningFrameLayout
     negativeSpace: List[str] = Field(
         min_length=1, max_length=4,
@@ -697,7 +723,7 @@ def prepare_look(context, *, log=print):
 
 
 def prepare_cinematography(context, images, *, log=print):
-    return cb_llm.structured(
+    result = cb_llm.structured(
         _system("cinematography",
                 "Own this shot's performance-ready opening stage. Establish the world, "
                 "camera, light, cast identity, canon relative scale, loose starting "
@@ -707,7 +733,10 @@ def prepare_cinematography(context, images, *, log=print):
                 load_runtime_skill("dp"),
         "APPROVED SHOT CONTRACT AND ORDERED IMAGE LABELS:\n" + _j(context) +
         "\n\nReturn one keyframe-provider direction and one machine-readable "
-        "openingFrameLayout staging envelope. Include every charactersInFrame entry exactly "
+        "openingFrameLayout staging envelope. Return geography as one to eight concise, "
+        "literal screen-direction, travel-axis and spatial-relation statements. It becomes "
+        "the approved geography ledger used verbatim by both image and video compilers. "
+        "Include every charactersInFrame entry exactly "
         "once. Normalized centres indicate loose starting zones, not pixel locks. Facing and "
         "pose describe only a playable frame-one anticipation state; do not prescribe exact "
         "limb, wing, facial or later action choreography. Canonical physical height is "
@@ -725,6 +754,20 @@ def prepare_cinematography(context, images, *, log=print):
         "do not describe character identity from memory.",
         CinematographyDirection, label="department_cinematography", log=log,
         images=images)
+    shot = context.get("shot") or {}
+    expected_cast = list(dict.fromkeys(
+        str(name).strip() for name in shot.get("charactersInFrame") or []
+        if str(name).strip()))
+    placed_cast = [item.character for item in result.openingFrameLayout.placements]
+    if placed_cast != expected_cast:
+        raise RuntimeError(
+            "Cinematography changed or reordered charactersInFrame: "
+            f"expected {expected_cast}, got {placed_cast}")
+    style_version, style_text = canonical_style_paragraph()
+    result.charactersInFrame = expected_cast
+    result.canonicalStyleVersion = style_version
+    result.canonicalStyleParagraph = style_text
+    return result
 
 
 _TAG = re.compile(r"\[[^\]]+\]")
@@ -1182,7 +1225,9 @@ def compile_animation_provider_prompt(shot, direction):
     else:
         audio = audio_contract
     sections.append("[Audio]\n" + audio)
-    return "\n\n".join(section for section in sections if section.strip())
+    prompt = "\n\n".join(section for section in sections if section.strip())
+    prompt_sections(prompt)
+    return prompt
 
 
 def prepare_animation(context, images, *, log=print):

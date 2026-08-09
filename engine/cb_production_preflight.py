@@ -53,9 +53,13 @@ def _production_inputs(pkg, scene, episode):
             if not record:
                 continue
             output = record.get("output") or {}
-            prompt = (cb_render._compile_keyframe_integration_prompt(output, shot)
-                      if stage == "cinematography" else
-                      str(output.get("providerPrompt") or "").strip())
+            try:
+                prompt = (cb_render._compile_keyframe_integration_prompt(output, shot)
+                          if stage == "cinematography" else
+                          str(output.get("providerPrompt") or "").strip())
+            except (cb_render.Refused, ValueError) as exc:
+                row[prompt_key + "ContractError"] = str(exc)
+                continue
             row[prompt_key] = prompt
             row[prompt_key + "Hash"] = _hash_text(prompt)
             row[prompt_key + "Source"] = status.get("source")
@@ -165,7 +169,11 @@ def _legacy_production_preflight(scene, episode="Ep1"):
         stages, input_row = {}, {}
 
         cine = _department(ledger, "cinematography")
-        cine_prompt = ((cine.get("output") or {}).get("providerPrompt") or "").strip()
+        cine_output = cine.get("output") or {}
+        try:
+            cine_prompt = cb_render._compile_keyframe_integration_prompt(cine_output, shot)
+        except (cb_render.Refused, ValueError):
+            cine_prompt = ""
         cine_ok = cine.get("packageRevision") == pkg.get("revision") and bool(cine_prompt)
         stages["cinematography"] = "approved" if cine_ok else "needed"
         if not cine_ok:

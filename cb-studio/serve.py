@@ -1429,13 +1429,25 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
 
         if session.get("phase") == "keyframe" and current.get("cinematographyDirection"):
             output, source = current_output("cinematography")
-            prompt = cb_render._compile_keyframe_integration_prompt(output, shot)
-            inputs.update({
-                "keyframePrompt": prompt,
-                "keyframePromptHash": hashlib.sha256(prompt.encode()).hexdigest(),
-                "keyframePromptSource": source,
-                "keyframePromptHeadline": output.get("audienceRead") or output.get("composition"),
-            })
+            try:
+                prompt = cb_render._compile_keyframe_integration_prompt(output, shot)
+            except (cb_render.Refused, ValueError) as exc:
+                blockers.append({
+                    "code": "KEYFRAME_PROMPT_CONTRACT",
+                    "stage": "keyframe",
+                    "shotId": selected_id,
+                    "message": str(exc),
+                    "action": "Prepare and approve current Cinematography direction.",
+                })
+                preflight["ok"] = False
+            else:
+                inputs.update({
+                    "keyframePrompt": prompt,
+                    "keyframePromptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+                    "keyframePromptSource": source,
+                    "keyframePromptHeadline": (
+                        output.get("audienceRead") or output.get("composition")),
+                })
         if session.get("phase") == "voice" and current.get("voiceDirection"):
             output, source = current_output("voice")
             direction_by_occurrence = {

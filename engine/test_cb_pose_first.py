@@ -8,6 +8,17 @@ import cb_departments
 import cb_render
 
 
+def _approved_keyframe_fields(characters=("Fuzzby", "Zenny")):
+    version, text = cb_departments.canonical_style_paragraph()
+    return {
+        "geography": ["The flower corridor runs frame-left to frame-right."],
+        "charactersInFrame": list(characters),
+        "canonicalStyleVersion": version,
+        "canonicalStyleParagraph": text,
+        "negativeSpace": ["Keep the frame-right lead room open for travel."],
+    }
+
+
 def _write(path, data=b"asset"):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
@@ -40,6 +51,7 @@ def test_stage_anchor_contract_uploads_only_locked_characters_and_scene_look(
         ],
     }
     direction = {
+        **_approved_keyframe_fields(),
         "audienceRead": "Fuzzby's chaos is measured against Zenny's calm.",
         "composition": "Fuzzby left, Zenny right, both fully visible.",
         "lensAndCameraRelationship": "Bee-height chase camera.",
@@ -130,6 +142,7 @@ def test_pose_prompt_preserves_fuzzby_silhouette_and_requests_only_one_actor(
 def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_props(
         monkeypatch):
     direction = {
+        **_approved_keyframe_fields(),
         "audienceRead": "Fuzzby's chaos is measured against Zenny's calm.",
         "composition": "Fuzzby flies with pollen sacks bouncing behind him.",
         "lensAndCameraRelationship": "Bee-height chase camera.",
@@ -151,6 +164,7 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
         "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
     prompt = cb_render._compile_keyframe_integration_prompt(direction, {
         "shotId": "S1.SH1",
+        "charactersInFrame": ["Fuzzby", "Zenny"],
         "keyframeReferenceSlots": {
             "@图1": "Fuzzby", "@图2": "Zenny", "@图3": "scene plate"},
     })
@@ -173,6 +187,7 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
 
 def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(monkeypatch):
     direction = {
+        **_approved_keyframe_fields(),
         "audienceRead": (
             "A bee-height flower corridor opens with comic contrast already visible: "
             "Fuzzby is overcommitted and unstable before the chase has even begun, while "
@@ -202,6 +217,7 @@ def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(mon
         "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
     prompt = cb_render._compile_keyframe_integration_prompt(direction, {
         "shotId": "S1.SH1",
+        "charactersInFrame": ["Fuzzby", "Zenny"],
         "keyframeReferenceSlots": {
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
@@ -215,6 +231,7 @@ def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(mon
 
 def test_stage_prompt_allows_reasonable_over_target_tolerance(monkeypatch):
     direction = {
+        **_approved_keyframe_fields(),
         "audienceRead": " ".join(["A readable bee-height chase lane protects comic cause and effect"] * 10),
         "lensAndCameraRelationship": " ".join(["Drone-like bee-height pursuit camera"] * 8),
         "lightingAndDepth": " ".join(["Locked warm scene plate with translucent flower depth"] * 8),
@@ -234,12 +251,76 @@ def test_stage_prompt_allows_reasonable_over_target_tolerance(monkeypatch):
 
     prompt = cb_render._compile_keyframe_integration_prompt(direction, {
         "shotId": "S1.SH1A",
+        "charactersInFrame": ["Fuzzby", "Zenny"],
         "keyframeReferenceSlots": {
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
+    assert (cb_render.MAX_KEYFRAME_INTEGRATION_WORDS < len(prompt.split()) <=
+            cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS)
 
-    assert cb_render.MAX_KEYFRAME_INTEGRATION_WORDS < len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_HARD_WORDS
-    assert "S1.SH1A" in prompt
+
+def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
+    direction = {
+        **_approved_keyframe_fields(),
+        "audienceRead": "Fuzzby commits to the chase while Zenny holds steady.",
+        "lensAndCameraRelationship": "Bee-height pursuit camera.",
+        "lightingAndDepth": "Warm right-side key light with cool fill.",
+        "openingFrameLayout": {"sameDepth": True, "placements": [
+            {"character": "Fuzzby", "pose": "forward hover", "facing": "screen-right"},
+            {"character": "Zenny", "pose": "steady hover", "facing": "screen-right"},
+        ]},
+    }
+    shot = {
+        "shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby", "Zenny"],
+        "keyframeReferenceSlots": {
+            "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
+    }
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
+
+    first = cb_render._compile_keyframe_integration_prompt(direction, shot)
+    sections = cb_departments.prompt_sections(first)
+    assert sections["Geography"] == direction["geography"][0]
+    assert sections["Light"] == direction["lightingAndDepth"]
+    assert sections["Canonical Style"] == direction["canonicalStyleParagraph"]
+    assert sections["Characters In Frame"].splitlines() == ["- Fuzzby", "- Zenny"]
+    assert "Lead room stays open frame-right" in sections["Negative Space"]
+
+    changed = {**direction,
+               "geography": ["The chase now travels frame-right to frame-left."],
+               "lightingAndDepth": "Cool left-side storm light with warm rim."}
+    second = cb_render._compile_keyframe_integration_prompt(changed, shot)
+    assert second != first
+    changed_sections = cb_departments.prompt_sections(second)
+    assert changed_sections["Geography"] == changed["geography"][0]
+    assert changed_sections["Light"] == changed["lightingAndDepth"]
+
+
+def test_keyframe_prompt_refuses_empty_sections_and_cast_drift(monkeypatch):
+    with pytest.raises(ValueError, match="has no body"):
+        cb_departments.prompt_sections("[Negative Space]\n\n[Light]\nWarm light")
+
+    direction = {
+        **_approved_keyframe_fields(),
+        "audienceRead": "A readable chase opening.",
+        "lensAndCameraRelationship": "Bee-height camera.",
+        "lightingAndDepth": "Warm light.",
+        "openingFrameLayout": {"placements": [
+            {"character": "Fuzzby", "pose": "hover", "facing": "screen-right"},
+            {"character": "Zenny", "pose": "glide", "facing": "screen-right"},
+        ]},
+        "negativeSpace": [],
+    }
+    shot = {"shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby", "Zenny"]}
+    monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
+        "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
+    with pytest.raises(cb_render.Refused, match="negativeSpace"):
+        cb_render._compile_keyframe_integration_prompt(direction, shot, [])
+
+    direction["negativeSpace"] = ["Keep frame-right clear."]
+    direction["charactersInFrame"] = ["Zenny", "Fuzzby"]
+    with pytest.raises(cb_render.Refused, match="does not match the shot contract"):
+        cb_render._compile_keyframe_integration_prompt(direction, shot, [])
 
 
 def test_pose_pass_requires_one_subject_and_every_objective_dimension():

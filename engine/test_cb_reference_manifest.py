@@ -1,8 +1,20 @@
 import pathlib
 
+import cb_departments
 import cb_render
 import pytest
 from PIL import Image
+
+
+def _approved_keyframe_fields():
+    version, text = cb_departments.canonical_style_paragraph()
+    return {
+        "geography": ["The flower corridor runs frame-left to frame-right."],
+        "charactersInFrame": ["Fuzzby", "Zenny"],
+        "canonicalStyleVersion": version,
+        "canonicalStyleParagraph": text,
+        "negativeSpace": ["Hold frame-right lead room open for travel."],
+    }
 
 
 def _write(path, data=b"asset"):
@@ -78,6 +90,7 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     }
     direction = {
+        **_approved_keyframe_fields(),
         "audienceRead": "Fuzzby chaos against Zenny calm.",
         "lensAndCameraRelationship": "Bee-height camera.",
         "lightingAndDepth": "Warm backlight.",
@@ -253,6 +266,7 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
         assert board.size == (1600, 900)
 
     direction = {
+        **_approved_keyframe_fields(),
         "audienceRead": "Fuzzby chaos against Zenny calm.",
         "composition": "Fuzzby left, Zenny right.",
         "lensAndCameraRelationship": "Bee-height camera.",

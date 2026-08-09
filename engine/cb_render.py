@@ -92,6 +92,7 @@ import cb_seedance_pipeline
 import cb_seedance_transport
 import cb_layout
 import cb_identity
+import cb_voice_director
 import paths as P
 
 MEDIA = HERE / "media" / "shots"
@@ -3271,10 +3272,65 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
             "cadenceAndBreath": direction.get("cadenceAndBreath"),
             "timingAndBody": direction.get("timingAndBody"),
         })
+    compiler = {"ready": False, "error": None, "track": None}
+    try:
+        current_direction = _approved_department_output(pkg, shot_id, "voice") or {}
+        compiler["track"] = cb_voice_director.compile_track(
+            current_direction, shot.get("dialogueLines") or [])
+        compiler["ready"] = True
+    except (cb_voice_director.VoiceContractError, Refused, KeyError, TypeError) as exc:
+        compiler["error"] = str(exc)
+    auditions = led.get("voiceAuditions") or None
     return {"approvedLines": approved, "currentLines": current_with_direction, "source": source,
             "isWorking": bool(working), "savedAt": (working or {}).get("savedAt"),
             "hasTake": has_take, "takeMatchesCurrent": match,
-            "takeGeneratedAt": take_generated_at, "previous": led.get("voicePrevious")}
+            "takeGeneratedAt": take_generated_at, "previous": led.get("voicePrevious"),
+            "voiceApprovalRecorded": bool((led.get("voiceApproval") or {}).get("approved")),
+            "compiler": compiler, "auditions": auditions}
+
+
+def select_voice_audition(scene, shot_id, candidate_id, episode="Ep1",
+                          reviewed_by="Julian", log=print):
+    """Record Julian's HEAR choice and bank its character/archetype recipe."""
+    pkg, path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    led = _ledger(pkg, shot_id)
+    bundle = led.get("voiceAuditions") or {}
+    candidates = bundle.get("candidates") or []
+    candidate = next((item for item in candidates
+                      if item.get("candidateId") == candidate_id), None)
+    if not candidate:
+        raise Refused("REFUSED - choose a current Voice Director audition candidate")
+    if bundle.get("compiledHash") != candidate.get("compiledHash"):
+        raise Refused("REFUSED - the selected voice audition is stale")
+    if not candidate.get("path") or not os.path.exists(candidate["path"]):
+        raise Refused("REFUSED - the selected voice audition file is missing")
+    occurrence = bundle.get("dialogueOccurrenceId")
+    direction = _approved_department_output(pkg, shot_id, "voice") or {}
+    directed_line = next((line for line in (direction.get("lines") or [])
+                          if line.get("dialogueOccurrenceId") == occurrence), None)
+    if not directed_line:
+        raise Refused("REFUSED - the selected audition has no current direction record")
+    recipe = next((item for item in (directed_line.get("takeRecipes") or [])
+                   if item.get("recipeId") == candidate.get("recipeId")), None)
+    if not recipe:
+        raise Refused("REFUSED - the selected audition recipe is no longer current")
+    selected = {
+        "candidateId": candidate_id,
+        "recipeId": candidate["recipeId"],
+        "takeNumber": candidate["takeNumber"],
+        "path": candidate["path"],
+        "selectedBy": reviewed_by,
+        "selectedAt": _now(),
+        "compiledHash": candidate["compiledHash"],
+    }
+    bundle["selected"] = selected
+    cb_voice_director.bank_recipe(
+        directed_line["character"], directed_line["archetypeId"], recipe,
+        shot_id=shot_id, candidate=candidate_id, reviewed_by=reviewed_by)
+    _save(pkg, path)
+    log(f"HEAR VERDICT - {shot_id}: {candidate_id} selected by {reviewed_by}")
+    return selected
 
 
 def save_voice_working(scene, shot_id, lines, episode="Ep1", reviewed_by="Julian", log=print):

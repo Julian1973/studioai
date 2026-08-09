@@ -2637,6 +2637,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                         led = next((item for item in (pkg.get("continuityLedger") or [])
                                     if item.get("shotId") == sid), {})
                         status["takeUrl"] = _url_from_abs(led.get("voPath"))
+                        auditions = status.get("auditions") or {}
+                        for candidate in auditions.get("candidates") or []:
+                            candidate["url"] = _url_from_abs(candidate.get("path"))
                     except Exception:
                         status["takeUrl"] = None
                     return self._json(200, status)
@@ -3554,6 +3557,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             return
         if self.path in ("/api/shot-voice-save", "/api/shot-voice-restore",
                          "/api/shot-voice-restore-take",
+                         "/api/shot-voice-select-audition",
                          "/api/shot-seedance-save", "/api/shot-seedance-restore"):
             # CONTAINED CREATIVE CONTROLS, WRITE SIDE (2026-07-19): direct, synchronous,
             # in-process calls (the same precedent as serve.py's own pre-existing
@@ -3583,6 +3587,13 @@ class H(http.server.SimpleHTTPRequestHandler):
                 elif self.path == "/api/shot-voice-restore-take":
                     _CBR.restore_previous_voice_take(scene, sid, ep)
                     self._json(200, {"ok": True})
+                elif self.path == "/api/shot-voice-select-audition":
+                    candidate_id = str(d.get("candidateId") or "").strip()
+                    if not candidate_id:
+                        raise ValueError("candidateId is required")
+                    selected = _CBR.select_voice_audition(
+                        scene, sid, candidate_id, ep, reviewed_by="Julian")
+                    self._json(200, {"ok": True, "selected": selected})
                 elif self.path == "/api/shot-seedance-save":
                     rec = _CBR.save_seedance_working(scene, sid, str(d.get("prompt") or ""), ep)
                     self._json(200, {"ok": True, "saved": rec})

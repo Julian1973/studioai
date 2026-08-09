@@ -13,6 +13,32 @@ def _locked():
     return [{"speaker": "FUZZBY", "exactText": "Nailed it."}]
 
 
+def _voice_line(**overrides):
+    values = {
+        "speaker": "FUZZBY", "character": "FUZZBY", "exactDialogue": "Nailed it.",
+        "performedText": "[nervous] NAILED... it.",
+        "dramaticIntention": "sell control", "subtext": "the body disagrees",
+        "cadenceAndBreath": "too bright", "timingAndBody": "after the rebound",
+        "archetypeId": "false-triumph-button",
+        "performanceQuestions": {
+            "intention": "convince Zenny", "subtext": "hide the crash",
+            "thoughtBefore": "hold the pose", "changeDuring": "breath becomes certainty",
+            "operativeWords": ["Nailed"]},
+        "physicalState": "wobbling hover",
+        "emotionalState": {"entry": "winded", "exit": "proud"},
+        "listener": "Zenny", "bodyVoiceRelationship": "voice covers the wobble",
+        "previousText": "BIZZY-BIZZY-BIZZY...",
+        "startsAtSec": 0.5, "estimatedDurationSec": 1.0,
+        "pauseReasons": ["The ellipsis lets the impact breath catch up."],
+        "tagPurposes": {"nervous": "Colours the false confidence."},
+        "takeRecipes": [{"recipeId": "A", "label": "primary",
+                         "performedText": "[nervous] NAILED... it.",
+                         "primary": True, "takesCount": 3}],
+    }
+    values.update(overrides)
+    return D.VoiceLineDirection(**values)
+
+
 def test_every_studio_department_loads_a_real_runtime_skill_contract():
     people = D.roster()
     assert len(people) == 7
@@ -26,11 +52,7 @@ def test_every_studio_department_loads_a_real_runtime_skill_contract():
 def test_voice_director_may_act_but_not_rewrite_locked_words():
     valid = D.VoiceDirection(
         shotId="S1.SH1", sceneIntention="cover the wobble",
-        lines=[D.VoiceLineDirection(
-            speaker="FUZZBY", exactDialogue="Nailed it.",
-            performedText="[nervous] NAILED... it.", dramaticIntention="sell control",
-            subtext="the body disagrees", cadenceAndBreath="too bright",
-            timingAndBody="after the rebound")])
+        lines=[_voice_line()])
     assert D.validate_voice_direction(valid, _locked()) is valid
 
     changed = valid.model_copy(deep=True)
@@ -46,11 +68,7 @@ def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeyp
         seen["system"] = system
         return schema(
             shotId="S1.SH1", sceneIntention="cover the wobble",
-            lines=[D.VoiceLineDirection(
-                speaker="FUZZBY", exactDialogue="Nailed it.",
-                performedText="[nervous] Nailed it.", dramaticIntention="sell control",
-                subtext="the body disagrees", cadenceAndBreath="too bright",
-                timingAndBody="after the rebound")])
+            lines=[_voice_line(performedText="[nervous] Nailed it.")])
 
     monkeypatch.setattr(D.cb_llm, "structured", fake)
     out = D.prepare_voice({"shotId": "S1.SH1"}, _locked(), log=lambda *a, **k: None)

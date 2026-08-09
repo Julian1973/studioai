@@ -663,24 +663,35 @@ def lipsync(video, audio, out="lipsync.mp4", model="fal-ai/latentsync", producti
     outp = MEDIA / out; outp.write_bytes(vid.content); return str(outp)
 
 def eleven_tts(text, voice_id, model_id="eleven_v3", out="vo.mp3",
-               stability=0.35, similarity_boost=0.9, style=0.0, production_route=None):
+               stability=0.35, similarity_boost=0.9, style=0.0, previous_text=None,
+               production_route=None):
     _require_production_route(production_route, "eleven_tts")
     """V3 TTS with the canonical acting settings. stability MUST stay in the ~0.25-0.40 band — above ~0.40
     the [bracket] audio tags STOP FIRING and the read goes flat (CRYSTAL_BEARS_LOCKED_CANON.md:144-158).
     The tag sets the colour; the TEXT does the acting; 1-2 tags per segment. Never use_speaker_boost in v3."""
     _need_eleven_key()
     url = f"{XI}/v1/text-to-speech/{voice_id}"
+    request_body = {"text": text, "model_id": model_id,
+                    "voice_settings": {"stability": stability,
+                                       "similarity_boost": similarity_boost,
+                                       "style": style}}
+    # ElevenLabs currently rejects previous_text with eleven_v3. Keep the argument at this
+    # transport boundary for models that support it, but never send an unsupported V3 field.
+    if model_id != "eleven_v3" and str(previous_text or "").strip():
+        request_body["previous_text"] = str(previous_text).strip()
     r = _rpost(url, headers={"xi-api-key": ELEVEN_KEY, "accept": "audio/mpeg",
-                                    "Content-Type": "application/json"},
-                      json={"text": text, "model_id": model_id,
-                            "voice_settings": {"stability": stability,
-                                               "similarity_boost": similarity_boost,
-                                               "style": style}}, timeout=120)
+                            "Content-Type": "application/json"},
+               json=request_body, timeout=120)
     r.raise_for_status()
     outp = MEDIA / out; outp.write_bytes(r.content)
     cb_costs.log_spend("elevenlabs_tts", cb_costs.estimate_tts_cost(text), out=out, meta={"model": model_id})
-    cb_costs.write_gen_sidecar(outp, op="elevenlabs_tts", model=model_id, voice_id=voice_id,
-                                stability=stability, chars=len(text or ""))
+    cb_costs.write_gen_sidecar(
+        outp, op="elevenlabs_tts", model=model_id, voice_id=voice_id,
+        stability=stability, similarity_boost=similarity_boost, style=style,
+        previousTextProvided=(model_id != "eleven_v3" and
+                              bool(str(previous_text or "").strip())),
+        directionContextRunwayProvided=bool(str(previous_text or "").strip()),
+        chars=len(text or ""))
     return str(outp)
 
 def _ffprobe_duration(path):

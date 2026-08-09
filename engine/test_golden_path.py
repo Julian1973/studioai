@@ -34,11 +34,50 @@ import cb_engine as E
 import cb_render as R
 import cb_canon
 import cb_departments
+import cb_voice_director
 
 
 TEST_CANON_DIGESTS = {name: (name[0] * 64) for name in (
     "story", "storyboard", "look", "cinematography", "voice",
     "animation", "review", "post")}
+
+
+def _voice_direction_output(shot):
+    lines = []
+    for line in shot.get("dialogueLines") or []:
+        exact = line["exactText"]
+        lines.append({
+            "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
+            "sourceEventId": line.get("sourceEventId"),
+            "speaker": line["speaker"], "character": line["speaker"],
+            "exactDialogue": exact, "performedText": exact,
+            "dramaticIntention": "Make the listener accept the action.",
+            "subtext": "The body carries the hidden truth.",
+            "cadenceAndBreath": "Character-specific and breath-led.",
+            "timingAndBody": "Speech follows the physical beat.",
+            "archetypeId": "false-triumph-button",
+            "performanceQuestions": {
+                "intention": "Make the listener accept the action.",
+                "subtext": "The body carries the hidden truth.",
+                "thoughtBefore": "Commit to the action.",
+                "changeDuring": "Certainty becomes exposed.",
+                "operativeWords": [exact.split()[0]],
+            },
+            "physicalState": "The approved body action is already in progress.",
+            "emotionalState": {"entry": "Committed", "exit": "Exposed"},
+            "listener": "The scene partner",
+            "bodyVoiceRelationship": "The voice follows and interprets the body action.",
+            "previousText": "The approved preceding action supplies context.",
+            "startsAtSec": 0.5, "estimatedDurationSec": 1.0,
+            "pauseReasons": (["Fixture punctuation carries a motivated thought pause."]
+                             if "…" in exact or "—" in exact else []),
+            "tagPurposes": {},
+            "takeRecipes": [{"recipeId": "fixture", "label": "Fixture",
+                             "performedText": exact, "primary": True,
+                             "takesCount": 2 if len(exact.split()) <= 4 else 1}],
+        })
+    return {"shotId": shot["shotId"], "sceneIntention": "Fixture direction.",
+            "lines": lines}
 
 
 def _test_canon_status(episode=None, cast=None, root=None):
@@ -111,6 +150,10 @@ def isolated_canon(monkeypatch):
         "sourceHashes": {"fixture": TEST_CANON_DIGESTS["story"]},
     })
     monkeypatch.setattr(R.cb_providers, "request_contract", _test_seedance_25_contract)
+    cards = cb_voice_director.voice_cards()
+    cards["characters"]["Fuzzby"]["voiceId"] = "voice-fuzzby"
+    cards["characters"]["Zenny"]["voiceId"] = "voice-zenny"
+    monkeypatch.setattr(R.cb_voice_director, "voice_cards", lambda: cards)
     monkeypatch.setattr(
         R.cb_departments, "review_keyframe_conformance",
         lambda context, images, **kwargs: _keyframe_conformance_output(context, "pass"))
@@ -289,15 +332,13 @@ def _build_package(tmp, valid=True):
     by_id = {shot["shotId"]: shot for shot in shots_out}
     for ledger in pkg["continuityLedger"]:
         shot = by_id[ledger["shotId"]]
-        voice_lines = [{"speaker": line["speaker"], "performedText": line["exactText"]}
-                       for line in shot.get("dialogueLines") or []]
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
                 "packageRevision": revision,
                 "output": _cinematography_output(shot)}},
             "voice": {"approved": {
                 "packageRevision": revision,
-                "output": {"lines": voice_lines}}},
+                "output": _voice_direction_output(shot)}},
             "animation": {"approved": {
                 "packageRevision": revision,
                 "output": {"providerPrompt": shot["seedancePrompt"]}}},
@@ -674,12 +715,6 @@ def _install_scene_look(pkg, engine, scene, episode):
 
 def _install_shot_departments(pkg, path, scene, episode):
     for shot in pkg["shots"]:
-        lines = [{
-            "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
-            "sourceEventId": line.get("sourceEventId"),
-            "speaker": line["speaker"], "exactDialogue": line["exactText"],
-            "performedText": line["exactText"],
-        } for line in shot.get("dialogueLines") or []]
         ledger = R._ledger(pkg, shot["shotId"])
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
@@ -688,7 +723,7 @@ def _install_shot_departments(pkg, path, scene, episode):
             }},
             "voice": {"approved": {
                 "packageRevision": pkg.get("revision"),
-                "output": {"lines": lines},
+                "output": _voice_direction_output(shot),
             }},
             "animation": {"approved": {
                 "packageRevision": pkg.get("revision"),

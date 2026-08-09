@@ -2699,6 +2699,9 @@
     const take = status.takeUrl
       ? { url: status.takeUrl, label: "Current generated performance" }
       : (app.session?.artifact?.type === "audio" ? app.session.artifact : null);
+    const auditions = status.auditions || {};
+    const auditionCandidates = auditions.candidates || [];
+    const selectedAudition = auditions.selected || {};
     return `<section class="voice-desk">
       <div class="voice-desk-head">
         <div><span class="stage-label">ELEVENLABS PERFORMANCE · ${esc(selectedShot?.shotId || app.shotId || "CURRENT SHOT")}${selectedShot?.durationSec ? ` · ${Number(selectedShot.durationSec)}s` : ""}</span><h3>Acting &amp; cadence prompt</h3></div>
@@ -2708,6 +2711,21 @@
         <div><span>Generated performance</span><strong>${esc(take.label || "Current take")}</strong>${status.takeGeneratedAt ? `<em>${esc(status.takeGeneratedAt)}</em>` : ""}</div>
         <audio controls preload="metadata" src="${esc(take.url)}?v=${Date.now()}"></audio>
       </div>` : ""}
+      ${status.compiler?.error ? `<div class="voice-compiler-status blocked"><strong>Voice compiler blocked</strong><p>${esc(status.compiler.error)}</p></div>` : ""}
+      ${status.compiler?.ready ? `<div class="voice-compiler-status ready"><strong>Post-Direction Audit passed</strong><p>The locked script, canon voice, performance questions, tag palette, context runway and take recipes are current.</p></div>` : ""}
+      ${auditionCandidates.length ? `<section class="voice-auditions">
+        <div class="voice-auditions-head"><div><span>HEAR DECISION</span><h4>${esc(auditions.character || "Voice")} · ${esc(auditions.archetypeId || "directed takes")}</h4></div><strong>${auditionCandidates.length} files ready</strong></div>
+        <p>Listen and choose. Nothing is approved automatically. Your choice banks this character × archetype recipe${status.voiceApprovalRecorded ? ". The existing approved track stays protected until you reject it." : ", then builds the complete shot track for final HEAR approval."}</p>
+        <div class="voice-audition-grid">${auditionCandidates.map((candidate) => {
+          const chosen = selectedAudition.candidateId === candidate.candidateId;
+          return `<article class="voice-audition ${chosen ? "selected" : ""}">
+            <div><strong>${esc(candidate.label)}</strong><span>Take ${Number(candidate.takeNumber)}${candidate.primary ? " · Julian's primary direction" : ""}</span></div>
+            <code>${esc(candidate.performedText)}</code>
+            <audio controls preload="metadata" src="${esc(candidate.url || "")}"></audio>
+            <button type="button" class="${chosen ? "secondary" : "primary"}" data-voice-audition="${esc(candidate.candidateId)}" ${chosen ? "disabled" : ""}>${chosen ? "Chosen" : (status.voiceApprovalRecorded ? "Choose take" : "Choose take & build track")}</button>
+          </article>`;
+        }).join("")}</div>
+      </section>` : ""}
       <div class="voice-prompt-lines">
         ${lines.map((line, index) => {
           const truth = approved[index] || {};
@@ -2721,13 +2739,12 @@
               <div><span>Timing &amp; body</span><p>${esc(line.timingAndBody || "-")}</p></div>
             </div>
             <label for="voice-line-${index}">Text + audio tags sent to ElevenLabs</label>
-            <textarea id="voice-line-${index}" rows="3" data-voice-line="${index}" aria-label="${esc(line.speaker)} line ${index + 1} text and audio tags sent to ElevenLabs">${esc(line.text)}</textarea>
+            <textarea id="voice-line-${index}" rows="3" data-voice-line="${index}" aria-label="${esc(line.speaker)} line ${index + 1} text and audio tags sent to ElevenLabs" ${status.compiler?.ready ? "readonly" : ""}>${esc(line.text)}</textarea>
           </article>`;
         }).join("") || '<div class="voice-desk-loading">This shot has no dialogue.</div>'}
       </div>
       ${lines.length ? `<div class="voice-desk-actions">
-        <button type="button" class="secondary" data-voice-restore ${status.isWorking ? "" : "disabled"}>Restore director prompt</button>
-        <button type="button" class="secondary" data-voice-save>Save changes</button>
+        ${status.compiler?.ready ? "" : `<button type="button" class="secondary" data-voice-restore ${status.isWorking ? "" : "disabled"}>Restore director prompt</button><button type="button" class="secondary" data-voice-save>Save changes</button>`}
         ${iterateAction ? `<button type="button" class="secondary danger" data-live-action="${esc(iterateAction.id)}">${esc(directorActionLabel(iterateAction))}</button>` : ""}
         ${acceptAction ? `<button type="button" class="secondary" data-live-action="${esc(acceptAction.id)}">${esc(directorActionLabel(acceptAction))}</button>` : ""}
         ${acceptAction ? `<button type="button" class="primary" data-live-action="${esc(acceptAction.id)}" data-advance-step="footage">${esc(directorActionLabel(acceptAction))} &amp; Continue</button>` : ""}
@@ -2790,6 +2807,32 @@
     } catch (error) {
       toast(error.message, true);
       return false;
+    }
+  }
+
+  async function selectVoiceAudition(candidateId) {
+    if (!app.session?.selectedShotId) return;
+    try {
+      await api("/api/shot-voice-select-audition", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode,
+          scene: app.session.scene,
+          shotId: app.session.selectedShotId,
+          candidateId,
+        }),
+      });
+      await loadVoicePerformance(true);
+      if (app.voiceStatus?.voiceApprovalRecorded) {
+        toast("HEAR choice saved. The existing approved track remains protected; reject it before building its replacement.");
+        return;
+      }
+      toast("HEAR choice saved. Building the complete shot track...");
+      const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);
+      const action = actions.find((item) => item.id === "build-voice");
+      if (action) await handleAction(action);
+    } catch (error) {
+      toast(error.message, true);
     }
   }
 
@@ -3054,6 +3097,7 @@
       const action = actions.find((item) => item.id === button.dataset.voiceSend);
       if (action) sendVoicePerformance(action);
     }));
+    panel.querySelectorAll("[data-voice-audition]").forEach((button) => button.addEventListener("click", () => selectVoiceAudition(button.dataset.voiceAudition)));
     panel.querySelectorAll("[data-rough-add]").forEach((button) => button.addEventListener("click", () => updateRoughCut("add", button.dataset.roughAdd)));
     panel.querySelectorAll("[data-rough-remove]").forEach((button) => button.addEventListener("click", () => updateRoughCut("remove", button.dataset.roughRemove)));
     if (step.id === "audio") loadVoicePerformance();

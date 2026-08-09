@@ -14,7 +14,10 @@ def test_voice_status_exposes_full_direction_beside_exact_provider_text(monkeypa
                 "delivery": "[proudly] Nailed it.",
             }],
         }],
-        "continuityLedger": [{"shotId": "S1.SH1"}],
+        "continuityLedger": [{
+            "shotId": "S1.SH1",
+            "voiceApproval": {"approved": True, "reviewedBy": "Julian"},
+        }],
     }
     direction = {
         "lines": [{
@@ -44,3 +47,4 @@ def test_voice_status_exposes_full_direction_beside_exact_provider_text(monkeypa
         "Compact, bright and slightly breathless.")
     assert status["currentLines"][0]["timingAndBody"] == (
         "Land after the rebound while still trembling.")
+    assert status["voiceApprovalRecorded"] is True

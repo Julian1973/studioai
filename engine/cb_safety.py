@@ -159,6 +159,10 @@ def install(m):
             return {**common,
                     "dialogueHash": json_sha256(shot.get("dialogueLines") or []),
                     "workingPerformanceHash": json_sha256(ledger.get("workingVoice")),
+                    "voiceCardsHash": file_sha256(m.cb_voice_director.VOICE_CARDS_PATH),
+                    "voiceRegistersHash": file_sha256(m.cb_voice_director.REGISTERS_PATH),
+                    "voiceRulebookHash": file_sha256(m.cb_voice_director.RULEBOOK_PATH),
+                    "voiceCompilerVersion": m.cb_voice_director.COMPILER_VERSION,
                     "voiceIds": [
                         (characters.get(m._resolve_char(line["speaker"], characters)) or {})
                         .get("voiceId")
@@ -436,29 +440,35 @@ def install(m):
         return m._compile_keyframe_integration_prompt(direction, shot)
 
     def voice_lines(pkg, shot):
-        # The approved Voice direction supplies acting intent, but Julian's saved working
-        # text is the exact provider payload. The former safety wrapper silently rebuilt
-        # from department output and ignored the Audio desk edits even though the UI said
-        # they would be sent to ElevenLabs.
         output = current_direction_output(pkg, shot["shotId"], "voice")
-        directed, locked = output.get("lines") or [], shot.get("dialogueLines") or []
-        if len(directed) != len(locked):
-            raise m.Refused(f"REFUSED — current Voice direction for {shot['shotId']} has the wrong line count")
-        lines, _source = m._resolve_voice_lines(pkg, shot)
-        if len(lines) != len(locked):
-            raise m.Refused(f"REFUSED — current Voice payload for {shot['shotId']} has the wrong line count")
+        locked = shot.get("dialogueLines") or []
+        try:
+            track = m.cb_voice_director.compile_track(output, locked)
+        except m.cb_voice_director.VoiceContractError as exc:
+            raise m.Refused(str(exc)) from exc
+        ledger = m._ledger(pkg, shot["shotId"])
+        selected = ((ledger.get("voiceAuditions") or {}).get("selected") or {})
         result = []
-        for index, (item, source) in enumerate(zip(lines, locked), start=1):
-            performed = str(item.get("text") or item.get("performedText") or "").strip()
-            if m._norm(item.get("speaker")) != m._norm(source.get("speaker")):
-                raise m.Refused(f"REFUSED — Voice direction changed the speaker on line {index}")
-            if m.cb_departments._spoken_words(performed) != m.cb_departments._spoken_words(source.get("exactText")):
-                raise m.Refused(f"REFUSED — Voice direction changed the locked words on line {index}")
+        for item, source in zip(track["lines"], locked):
+            recipes = item.get("takeRecipes") or []
+            recipe = next((value for value in recipes
+                           if selected.get("compiledHash") == item.get("compiledHash") and
+                           value.get("recipeId") == selected.get("recipeId")), None)
+            if len(recipes) > 1 and recipe is None:
+                raise m.Refused(
+                    f"REFUSED - choose a HEAR audition for {source.get('exactText')} first")
+            recipe = recipe or next((value for value in recipes if value.get("primary")), recipes[0])
             result.append({
                 "dialogueOccurrenceId": source.get("dialogueOccurrenceId"),
                 "sourceEventId": source.get("sourceEventId"),
                 "speaker": source["speaker"],
-                "text": performed,
+                "text": recipe["performedText"],
+                "voiceId": item["voiceId"],
+                "modelId": item["modelId"],
+                "voiceSettings": item["voiceSettings"],
+                "previousText": item["previousText"],
+                "compiledHash": item["compiledHash"],
+                "recipeId": recipe["recipeId"],
             })
         return result
 
@@ -473,6 +483,10 @@ def install(m):
                     ensure_ascii=False).encode()).hexdigest(),
                 "performanceHash": hashlib.sha256(json.dumps(
                     lines, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
+                "voiceCardsHash": file_sha256(m.cb_voice_director.VOICE_CARDS_PATH),
+                "voiceRegistersHash": file_sha256(m.cb_voice_director.REGISTERS_PATH),
+                "voiceRulebookHash": file_sha256(m.cb_voice_director.RULEBOOK_PATH),
+                "voiceCompilerVersion": m.cb_voice_director.COMPILER_VERSION,
                 "voiceIds": ids}
 
     def voice_approval_status(pkg, shot, scene=None, episode=None):
@@ -633,15 +647,72 @@ def install(m):
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
         if not shot.get("dialogueLines"):
             return None
-        if (ledger.get("voiceApproval") or {}).get("approved"):
-            raise m.Refused(f"REFUSED — {shot_id}'s voice is already approved; reject it first")
         m._require_confirmed_billing("elevenlabs")
-        lines, characters, turns = voice_lines(pkg, shot), m._characters_cfg(), []
-        for source, performance in zip(shot["dialogueLines"], lines):
-            voice_id = (characters.get(m._resolve_char(source["speaker"], characters)) or {}).get("voiceId")
-            if not voice_id:
-                raise m.Refused(f"REFUSED — no ElevenLabs voiceId for {source['speaker']}")
-            turns.append({"text": performance["text"], "voice_id": voice_id})
+        direction = current_direction_output(pkg, shot_id, "voice")
+        try:
+            compiled_track = m.cb_voice_director.compile_track(
+                direction, shot.get("dialogueLines") or [])
+        except m.cb_voice_director.VoiceContractError as exc:
+            raise m.Refused(str(exc)) from exc
+
+        audition_line = next((line for line in compiled_track["lines"]
+                              if len(line.get("takeRecipes") or []) > 1), None)
+        selected = ((ledger.get("voiceAuditions") or {}).get("selected") or {})
+        selection_current = bool(
+            audition_line and selected.get("compiledHash") == audition_line.get("compiledHash"))
+        if audition_line and not selection_current:
+            requests = m.cb_voice_director.emit_v3_requests(audition_line)
+            run_id = uuid.uuid4().hex[:8]
+            bundle = {
+                "status": "generating", "runId": run_id,
+                "dialogueOccurrenceId": audition_line["dialogueOccurrenceId"],
+                "character": audition_line["character"],
+                "archetypeId": audition_line["archetype"]["archetypeId"],
+                "compiledHash": audition_line["compiledHash"],
+                "postDirectionAudit": audition_line["postDirectionAudit"],
+                "candidateCount": len(requests), "candidates": [],
+                "startedAt": m._now(), "selected": None,
+            }
+            ledger["voiceAuditions"] = bundle
+            m._save(pkg, path)
+            for index, request in enumerate(requests, start=1):
+                candidate_id = f"{run_id}-{request['recipeId']}-{request['takeNumber']}"
+                out = m.MEDIA / f"{episode}_{shot_id}_hear_{candidate_id}.mp3"
+                body = request["body"]
+                log(
+                    f"VOICE DIRECTOR - {shot_id}: audition {index}/{len(requests)} "
+                    f"{request['label']} take {request['takeNumber']}")
+                m.cb_gen.eleven_tts(
+                    body["text"], request["voiceId"], model_id=body["model_id"],
+                    out=str(out), stability=body["voice_settings"]["stability"],
+                    similarity_boost=body["voice_settings"]["similarity_boost"],
+                    style=body["voice_settings"]["style"],
+                    previous_text=request.get("contextRunway"), production_route="cb_render")
+                bundle["candidates"].append({
+                    "candidateId": candidate_id,
+                    "requestId": request["requestId"],
+                    "recipeId": request["recipeId"],
+                    "label": request["label"],
+                    "primary": request["primary"],
+                    "takeNumber": request["takeNumber"],
+                    "performedText": body["text"],
+                    "path": str(out),
+                    "compiledHash": audition_line["compiledHash"],
+                })
+                m._save(pkg, path)
+            bundle["status"] = "ready_for_hear_verdict"
+            bundle["completedAt"] = m._now()
+            m._save(pkg, path)
+            log(f"VOICE DIRECTOR - {shot_id}: {len(requests)} auditions ready for Julian")
+            return str(bundle["candidates"][0]["path"])
+
+        if (ledger.get("voiceApproval") or {}).get("approved"):
+            raise m.Refused(
+                f"REFUSED - {shot_id}'s complete voice track is already approved; "
+                "auditions may be heard, but reject the approved track before replacing it")
+        lines, turns = voice_lines(pkg, shot), []
+        for performance in lines:
+            turns.append({"text": performance["text"], "voice_id": performance["voiceId"]})
         m.MEDIA.mkdir(parents=True, exist_ok=True)
         take_id = uuid.uuid4().hex[:8]
         raw_out = m.MEDIA / f"{episode}_{shot_id}_vo_raw_candidate_{take_id}.mp3"
@@ -657,8 +728,10 @@ def install(m):
             raw_out, timing_path = reusable_raw, reusable_timing
             log(f"VOICE — {shot_id}: recovering the existing paid take; no provider call")
         else:
+            stability = min(float(item.get("voiceSettings", {}).get("stability", 0.3))
+                            for item in lines)
             m.cb_gen.eleven_dialogue(
-                turns, out=str(raw_out),
+                turns, out=str(raw_out), stability=stability,
                 generation_kind="regeneration" if previous else "generation",
                 production_route="cb_render")
             timing_path = cb_audio_timing.dialogue_timing_path(raw_out)

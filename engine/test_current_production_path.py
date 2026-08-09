@@ -10,6 +10,7 @@ import cb_render as R
 from test_golden_path import (world, _approve_animation_direction,
                               _approve_director_review,
                               _cinematography_output,
+                              _voice_direction_output,
                               _test_seedance_25_contract)
 
 
@@ -29,16 +30,13 @@ def _approve_specialist_inputs(pkg):
     by_id = {s["shotId"]: s for s in pkg["shots"]}
     for ledger in pkg["continuityLedger"]:
         shot = by_id[ledger["shotId"]]
-        lines = [{"speaker": line["speaker"],
-                  "performedText": line["exactText"]}
-                 for line in shot.get("dialogueLines") or []]
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
                 "packageRevision": revision,
                 "output": _cinematography_output(shot)}},
             "voice": {"approved": {
                 "packageRevision": revision,
-                "output": {"lines": lines}}},
+                "output": _voice_direction_output(shot)}},
             "animation": {"approved": {
                 "packageRevision": revision,
                 "output": {"providerPrompt": shot["seedancePrompt"]}}},

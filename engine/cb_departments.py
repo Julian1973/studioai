@@ -203,12 +203,46 @@ class VoiceLineDirection(BaseModel):
     dialogueOccurrenceId: str = ""
     sourceEventId: str = ""
     speaker: str
+    character: str = Field(min_length=1)
     exactDialogue: str
     performedText: str
     dramaticIntention: str
     subtext: str
     cadenceAndBreath: str
     timingAndBody: str
+    archetypeId: str = Field(min_length=1)
+    performanceQuestions: "VoicePerformanceQuestions"
+    physicalState: str = Field(min_length=1)
+    emotionalState: "VoiceEmotionalState"
+    listener: str = Field(min_length=1)
+    bodyVoiceRelationship: str = Field(min_length=1)
+    previousText: str = Field(min_length=1)
+    startsAtSec: float = Field(gt=0)
+    estimatedDurationSec: float = Field(gt=0, le=15)
+    pauseReasons: List[str] = Field(default_factory=list, max_length=6)
+    tagPurposes: dict[str, str]
+    takeRecipes: List["VoiceTakeRecipe"] = Field(min_length=1, max_length=3)
+
+
+class VoicePerformanceQuestions(BaseModel):
+    intention: str = Field(min_length=1)
+    subtext: str = Field(min_length=1)
+    thoughtBefore: str = Field(min_length=1)
+    changeDuring: str = Field(min_length=1)
+    operativeWords: List[str] = Field(min_length=1, max_length=6)
+
+
+class VoiceEmotionalState(BaseModel):
+    entry: str = Field(min_length=1)
+    exit: str = Field(min_length=1)
+
+
+class VoiceTakeRecipe(BaseModel):
+    recipeId: str = Field(min_length=1)
+    label: str = Field(min_length=1)
+    performedText: str = Field(min_length=1)
+    primary: bool = False
+    takesCount: int = Field(default=1, ge=1, le=5)
 
 
 class VoiceDirection(BaseModel):
@@ -790,6 +824,8 @@ def validate_voice_direction(result, locked_lines):
                 raise RuntimeError(f"Voice Director changed source event ID on line {idx}")
         if out.speaker.strip().lower() != str(locked["speaker"]).strip().lower():
             raise RuntimeError(f"Voice Director changed speaker on line {idx}")
+        if out.character.strip().lower() != str(locked["speaker"]).strip().lower():
+            raise RuntimeError(f"Voice Director changed character on line {idx}")
         if _spoken_words(out.exactDialogue) != _spoken_words(locked["exactText"]):
             raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
         if _spoken_words(out.performedText) != _spoken_words(locked["exactText"]):

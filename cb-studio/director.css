@@ -2239,6 +2239,28 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .voice-prompt-line textarea:focus { outline: 2px solid rgba(75, 198, 183, .35); border-color: var(--teal); }
 .voice-desk-actions { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 14px; padding: 14px 0; background: var(--surface); }
 .voice-desk-loading { min-height: 140px; display: grid; place-items: center; color: var(--muted); font-size: 12px; }
+.voice-compiler-status { margin-bottom: 12px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 4px; }
+.voice-compiler-status strong { display: block; font-size: 11px; }
+.voice-compiler-status p { margin-top: 4px; color: #aeb8b4; font-size: 10px; line-height: 1.45; }
+.voice-compiler-status.ready { border-color: rgba(88, 199, 147, .38); background: rgba(88, 199, 147, .06); }
+.voice-compiler-status.ready strong { color: var(--success); }
+.voice-compiler-status.blocked { border-color: rgba(211, 120, 105, .46); background: rgba(211, 120, 105, .07); }
+.voice-compiler-status.blocked strong { color: #e29283; }
+.voice-auditions { margin: 14px 0; padding: 14px; border: 1px solid #416258; border-radius: 5px; background: #101715; }
+.voice-auditions > p { margin: 8px 0 12px; color: #aeb8b4; font-size: 11px; line-height: 1.5; }
+.voice-auditions-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.voice-auditions-head span { color: var(--teal); font-size: 9px; font-weight: 850; }
+.voice-auditions-head h4 { margin-top: 3px; color: #eef3f1; font-size: 14px; }
+.voice-auditions-head > strong { color: #e6c47d; font-size: 10px; }
+.voice-audition-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.voice-audition { min-width: 0; display: grid; gap: 8px; padding: 10px; border: 1px solid #303b38; border-radius: 4px; background: #151d1a; }
+.voice-audition.selected { border-color: var(--teal); box-shadow: 0 0 0 1px rgba(75, 198, 183, .2); }
+.voice-audition > div { display: flex; justify-content: space-between; gap: 8px; }
+.voice-audition > div strong { font-size: 11px; }
+.voice-audition > div span { color: #8d9994; font-size: 9px; text-align: right; }
+.voice-audition code { min-height: 40px; color: #cbd4d0; font: 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+.voice-audition audio { width: 100%; min-width: 0; height: 32px; }
+.voice-audition button { width: 100%; }
 
 .request-drawer { position: fixed; z-index: 50; top: 0; right: 0; width: min(600px, 92vw); height: 100vh; overflow: auto; transform: translateX(102%); transition: transform .2s ease; padding: 26px; background: #f9faf7; border-left: 1px solid #aeb8b4; box-shadow: var(--shadow); }
 .request-drawer.open { transform: translateX(0); }
@@ -2258,6 +2280,7 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
   .studio-view { padding-left: 24px; padding-right: 24px; }
   .pipeline-shell { grid-template-columns: 1fr; }
   .voice-desk-head { align-items: start; }
+  .voice-audition-grid { grid-template-columns: 1fr; }
   .pipeline-rail {
     display: none;
   }

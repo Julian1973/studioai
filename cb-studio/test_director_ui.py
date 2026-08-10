@@ -338,6 +338,10 @@ def test_director_first_scene_workbench_matches_build_brief():
     assert "watch-conformance-20260810-1" in HTML
 
 
+def test_browser_and_server_publish_the_same_studio_build_version():
+    assert 'STUDIO_BUILD_VERSION = "watch-conformance-20260810-1"' in SERVER
+
+
 def test_three_signoff_relay_and_parallel_scene_board_are_present():
     assert "renderSignoffRelay(session)" in JS
     assert '1: "SEE", 2: "HEAR", 3: "WATCH"' in JS

@@ -138,3 +138,24 @@ def dialogue_cues(dialogue_lines, *, duration_sec):
 
 def format_seconds(value):
     return f"{float(value):g}"
+
+
+def character_instance_lock(characters):
+    """Emit an exact visual subject count for multi-character image/video prompts."""
+    names = []
+    seen = set()
+    for value in characters or []:
+        name = normalize_prose(value)
+        key = name.casefold()
+        if name and key not in seen:
+            names.append(name)
+            seen.add(key)
+    if len(names) < 2:
+        return ""
+    if len(names) == 2:
+        subject_list = f"{names[0]} and one {names[1]}"
+        duplicate_scope = "either character"
+    else:
+        subject_list = ", one ".join(names[:-1]) + f" and one {names[-1]}"
+        duplicate_scope = "any character"
+    return f"Exactly one {subject_list} throughout; no duplicates of {duplicate_scope}."

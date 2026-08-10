@@ -249,6 +249,13 @@ that belongs to this character alone.
 outfit, colours, lighting style), "face stable throughout, no deformation",
 and single-subject declarations ("one Fuzzby, one Zenny only").
 
+**Instance-count compiler law:** derive the count from the approved
+`charactersInFrame` array, never from authored prompt prose. Every
+multi-character keyframe emits the exact count lock in `[Protect]`; every
+multi-character render emits the same lock in `[Global Supplement]` (for
+example, "Exactly one Fuzzby and one Zenny throughout; no duplicates of either
+character."). Voice emission declares this visual-only control non-applicable.
+
 **Stability trick:** one locked subject stays stable when everything around
 it is allowed to be loose — keep background characters simple, distant,
 silhouetted.

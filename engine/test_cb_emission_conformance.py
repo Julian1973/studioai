@@ -27,3 +27,9 @@ def test_audio_cues_reject_regions_outside_the_route():
         C.dialogue_cues([
             {"speaker": "Fuzzby", "startSec": 8.0, "endSec": 10.0},
         ], duration_sec=9)
+
+
+def test_multi_character_instance_lock_is_exact_and_deduplicated():
+    assert C.character_instance_lock(["Fuzzby", "Zenny", "fuzzby"]) == (
+        "Exactly one Fuzzby and one Zenny throughout; no duplicates of either character.")
+    assert C.character_instance_lock(["Fuzzby"]) == ""

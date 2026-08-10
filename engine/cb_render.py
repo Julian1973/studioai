@@ -2952,7 +2952,7 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             f"\n- Keep {' and '.join(identity_names)} distinct; never blend or swap traits."
         )
         compact_separation_line = (
-            f"\n- Keep {' and '.join(identity_names)} distinct; no identity blending."
+            "\n- Keep identities distinct; no blending."
         )
     else:
         compact_separation_line = ""
@@ -2960,6 +2960,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     protections = [re.sub(r"\s+", " ", str(value or "")).strip()
                    for value in direction.get("continuityProtections") or []
                    if str(value or "").strip()]
+    instance_lock = emission.character_instance_lock(contract["cast"])
+    if instance_lock:
+        protections.insert(0, instance_lock)
     reference_body = ("\n".join(reference_lines) + separation_line).strip()
     compact_reference_body = (
         "\n".join(compact_reference_lines) + compact_separation_line).strip()

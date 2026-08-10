@@ -426,6 +426,7 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
         "Zenny remains level on the safe parallel route.")
     handoff = "Fuzzby hovers upright in drifting pollen while Zenny watches nearby."
     shot = {
+        "charactersInFrame": ["Fuzzby", "Zenny"],
         "comedyContractsApproved": [{
             "beatCode": "1.B1", "mode": "BIG",
             "physicalStaging": {"contactAndWeight": (
@@ -479,7 +480,8 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
             "observableEndState": handoff,
         }],
         "consistencyContract": [
-            "Fuzzby's identity, relative scale, corridor axis and light direction",
+            "Supplied Fuzzby and Zenny references as identity and scale locks; do not "
+            "redesign, substitute species or add extra cast.",
         ],
         "geography": [
             "The corridor runs frame-left to frame-right; the camera stays south at bee height."
@@ -501,6 +503,9 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "Hold: 2.2s" in prompt
     assert "Audio cues: @Audio1 7.2-8s — Fuzzby." in prompt
     assert "Physics: Fuzzby's sideways momentum depresses the leaf" in prompt
+    assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
+            "character.") in prompt
+    assert "Maintain supplied character references as identity and scale locks." in prompt
     assert "No music." in prompt
     assert len(prompt.split()) <= D.animation_provider_prompt_word_limit(9)
 

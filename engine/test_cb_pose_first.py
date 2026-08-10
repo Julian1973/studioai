@@ -177,8 +177,11 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert "relative-size truth only" in prompt
     assert "locked extreme action pose" in prompt
     assert "body-mounted bags, sacks, baskets or dangling loads" in prompt
-    assert ("[Protect]\nCarry the prior aftermath: visible pollen coating and a smeared "
-            "pollen moustache must already be present in the opening frame." in prompt)
+    assert "[Protect]" in prompt
+    assert ("Carry the prior aftermath: visible pollen coating and a smeared pollen "
+            "moustache must already be present in the opening frame." in prompt)
+    assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
+            "character." in prompt)
     assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
     assert "[Generation Goal]" not in prompt
     assert "[Starting Staging Envelope]" not in prompt
@@ -363,6 +366,8 @@ def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
     assert sections["Light"] == direction["lightingAndDepth"]
     assert sections["Canonical Style"] == direction["canonicalStyleParagraph"]
     assert sections["Characters In Frame"].splitlines() == ["- Fuzzby", "- Zenny"]
+    assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
+            "character.") in sections["Protect"]
     assert "Lead room stays open frame-right" in sections["Negative Space"]
 
     changed = {**direction,

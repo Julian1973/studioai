@@ -1291,7 +1291,12 @@ def compile_animation_provider_prompt(shot, direction):
     safeguards = [consistency_clause(item) for item in
                   data.get("surgicalSafeguards") or [] if str(item).strip()]
     finish = str(data.get("continuityFinish") or "").strip().rstrip(".")
-    supplement = [*(f"Maintain {item}." for item in consistency[:1]),
+    instance_lock = emission.character_instance_lock(shot.get("charactersInFrame") or [])
+    if (instance_lock and consistency and
+            re.search(r"references as identity and scale locks", consistency[0], re.I)):
+        consistency[0] = "supplied character references as identity and scale locks"
+    supplement = [*(item for item in [instance_lock] if item),
+                  *(f"Maintain {item}." for item in consistency[:1]),
                   *(f"Safeguard: {item}." for item in safeguards[:2])]
     if finish:
         supplement.append(f"Final handoff: {finish}.")

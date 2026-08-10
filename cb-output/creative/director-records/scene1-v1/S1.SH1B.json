@@ -1,0 +1,258 @@
+{
+  "shotId": "S1.SH1B",
+  "durationSec": 14,
+  "taskMode": "reference-to-video",
+  "pacingMode": "storyline",
+  "generationGoal": "An overcommitted flower dive creates a pollen moustache that Fuzzby proudly presents before Zenny's affectionate deadpan verdict.",
+  "deliveryPlan": "Use transfer, reveal and verdict shots so causality, feature ownership, eye-line and the held witness payoff remain individually readable.",
+  "creativeTranslation": {
+    "interpretation": {
+      "jokeOrAche": "Fuzzby mistakes visible failure for distinguished status.",
+      "mechanism": "Unawareness meets affection: the evidence appears before Zenny judges it.",
+      "statusBefore": "Fuzzby enters face-clean and still riding his false triumph.",
+      "statusAfter": "Fuzzby proudly wears the moustache while Zenny's restraint makes the insult land as love.",
+      "audienceProgression": [
+        "His arrival looks too committed.",
+        "The reveal proves a ridiculous moustache.",
+        "Her warm verdict converts mockery into affection."
+      ],
+      "emotionalHeart": "Zenny tells the truth without rejecting him."
+    },
+    "gagClocks": [
+      {
+        "beatCode": "1.B2",
+        "mode": "BIG",
+        "setup": "Fuzzby is still riding the last triumph, face clean.",
+        "anticipation": "He launches at the flower far too hard, overshoots, swings back and arrives faster than he can stop.",
+        "impact": "The stamens load his upper lip while the cut hides the result.",
+        "reaction": "Zenny examines the moustache, suppresses a reaction and answers with warmth.",
+        "recoveryHold": "Hold on Zenny's face for a full beat after she finishes.",
+        "recoveryHoldSec": 2.0,
+        "button": "Yes Fuzzby. Officially nuts!",
+        "retroactive": false,
+        "providerAction": "Fuzzby zooms to another flower, sticks his whole face into it, pulls back wearing a fuzzy yellow pollen moustache, and presents the accident for judgement"
+      }
+    ],
+    "generationDesign": {
+      "packagingDecision": "single-unit",
+      "completeGagArcCount": 1,
+      "densityJudgement": "Three clean visual ideas need thirteen seconds: hidden transfer, reveal and verdict.",
+      "splitOrNonSplitRationale": "Three motivated cuts protect one continuous status gag.",
+      "handoffState": "Fuzzby proudly displays two curled yellow pollen moustache marks while Zenny stays composed, amused and affectionate."
+    }
+  },
+  "dramaticBeat": "The pollen moustache turns an accident into status play and Zenny's restraint defines their relationship.",
+  "audienceBefore": "The audience sees Fuzzby seeking approval while still face-clean.",
+  "audienceAfter": "The audience sees the moustache, then watches Zenny turn a truthful insult into warmth.",
+  "beatOwner": "1.B2",
+  "performanceFreedom": "Seedance may discover pollen drift, wing settling and tiny facial adjustments, but the transfer, reveal order, clean Zenny and eye-line sequence cannot change.",
+  "performanceArc": "Leftover triumph becomes overcommitted arrival, oblivious pride and a flicker of needing approval; Zenny moves from examination through a suppressed reaction into warm deadpan.",
+  "physicalCauseAndEffect": "The too-fast arrival presses stamens onto Fuzzby's upper lip while his body remains outside the petals, making the transfer visible and causal.",
+  "cameraBehaviour": "Bee-height two-shot for transfer, close reveal, then over-shoulder verdict with Fuzzby's moustache foreground and Zenny sharp.",
+  "timingAndRhythm": "Chaotic arrival, hidden transfer, slow reveal, presented pause, deliberate eye-line, micro-tell, line and long hold.",
+  "landingBreath": "Hold Zenny's almost-still face until the mouth-corner restraint and affection both read.",
+  "directionDensity": "guided",
+  "precisionReasons": [
+    "Locked dialogue must remain assigned to its named speaker.",
+    "Visible cause, ownership and outgoing continuity are essential story facts."
+  ],
+  "shotPlan": [
+    {
+      "shotNumber": 1,
+      "purpose": "Hide the causal transfer until the reveal cut.",
+      "framingLensAndCamera": "Bee-height two-shot; cut before Fuzzby withdraws and before the result is visible.",
+      "causalAction": "Face clean, Fuzzby launches too hard, overshoots, swings back and arrives faster than he can stop. His face jolts into the bloom; stamens press his upper lip while body, legs and wings stay outside.",
+      "observablePerformance": "Leftover triumph drives an arrival with no stopping distance; Zenny stays clean and outside his route.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Cut before he withdraws; the pollen result remains hidden.",
+      "dialogueLineIndexes": [],
+      "gagBeatIds": []
+    },
+    {
+      "shotNumber": 2,
+      "purpose": "Reveal and present the accidental badge.",
+      "framingLensAndCamera": "Close-up on Fuzzby withdrawing from the same flower.",
+      "causalAction": "He pulls back wearing two clear upper-lip pollen curls, lifts his chin and presents the moustache as distinguished status.",
+      "observablePerformance": "He is entirely unaware, proud but with a small hopeful need for approval.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Fuzzby holds proudly frame-left; the target flower remains visible behind him.",
+      "dialogueLineIndexes": [
+        1
+      ],
+      "gagBeatIds": []
+    },
+    {
+      "shotNumber": 3,
+      "purpose": "Let Zenny inspect, suppress and deliver the affectionate verdict.",
+      "framingLensAndCamera": "Over Fuzzby's moustache in soft foreground to Zenny sharp frame-right; hold on her after the line.",
+      "causalAction": "Zenny's face and fur remain completely clean. Her eyes travel to the moustache and back to Fuzzby; one mouth corner tightens in a micro-tell before she speaks.",
+      "observablePerformance": "Her body stays economical and the verdict remains warm, never mocking or broad.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Fuzzby proudly moustachioed frame-left, Zenny clean-faced and quietly smiling frame-right, golden pollen drifting between them. Harvest this exact frame as SH1C's opening.",
+      "dialogueLineIndexes": [
+        2
+      ],
+      "gagBeatIds": [
+        "1.B2"
+      ]
+    }
+  ],
+  "timingBeats": [
+    {
+      "type": "settle",
+      "count": 1,
+      "source": "leftover triumph"
+    },
+    {
+      "type": "business",
+      "count": 2,
+      "source": "arrival and presentation"
+    },
+    {
+      "type": "impact",
+      "count": 1,
+      "source": "stamen transfer"
+    },
+    {
+      "type": "reveal",
+      "count": 1,
+      "source": "moustache reveal"
+    },
+    {
+      "type": "reaction",
+      "count": 1,
+      "source": "Zenny inspection"
+    },
+    {
+      "type": "turn",
+      "count": 1,
+      "source": "warm verdict"
+    }
+  ],
+  "witnessStagingSides": [
+    "Fuzzby stages frame-left; Zenny holds frame-right as the witness."
+  ],
+  "stagePlan": [
+    {
+      "stageNumber": 1,
+      "beatIds": [
+        "1.B2"
+      ],
+      "purpose": "Transfer, reveal and verdict",
+      "startSec": null,
+      "endSec": null,
+      "initialOrCarriedState": "Fuzzby enters face-clean from the approved previous end state.",
+      "cause": "His leftover pride makes him attack the flower too fast.",
+      "primaryEvent": "Fuzzby zooms to another flower, sticks his whole face into it, pulls back wearing a fuzzy yellow pollen moustache, and presents the accident for judgement",
+      "observableEndState": "Fuzzby’s pollen moustache remains fully visible as an invented badge and a visible joke, with Zenny close by and amused despite herself.",
+      "emotionOrCameraAnalysis": "Evidence must read before Zenny's affectionate judgement."
+    }
+  ],
+  "geography": [
+    "The same bee-height flower corridor continues without a geography reset.",
+    "Fuzzby stages frame-left beside the target flower; Zenny witnesses from frame-right outside his route."
+  ],
+  "attributeOwnership": [
+    "The pollen moustache belongs to Fuzzby only.",
+    "Zenny's face, lip, fur and body stay completely clean; no pollen touches her."
+  ],
+  "environmentContract": [],
+  "motionVocabulary": [
+    {
+      "character": "Fuzzby",
+      "belongs": [
+        "careens",
+        "overcommits",
+        "barrels",
+        "bounces",
+        "improvises",
+        "presents",
+        "rockets"
+      ],
+      "banned": [
+        "slinks",
+        "hesitates",
+        "glides",
+        "sulks",
+        "waits",
+        "creeps"
+      ]
+    },
+    {
+      "character": "Zenny",
+      "belongs": [
+        "glides",
+        "observes",
+        "settles",
+        "arches",
+        "softens",
+        "levels"
+      ],
+      "banned": [
+        "scrambles",
+        "flails",
+        "rushes",
+        "panics",
+        "showboats"
+      ]
+    }
+  ],
+  "referenceContract": [
+    {
+      "assetTag": "@图1",
+      "role": "opening_frame",
+      "controls": "Exact final frame of the previous unit and opening continuity state only. Do not redesign identity or repeat preceding action.",
+      "scope": "continuity"
+    },
+    {
+      "assetTag": "@图2",
+      "role": "character_identity",
+      "controls": "Zenny exact identity, slender smaller proportions, clean fur, glasses and wings only. Do not use its pose or background.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@图3",
+      "role": "character_identity",
+      "controls": "Fuzzby exact identity, larger proportions, fur, spectacles and wings only. Do not use its pose or background.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@图4",
+      "role": "location",
+      "controls": "Flower-corridor geometry, bee-height scale, plant materials, light and atmospheric depth only. Do not use or invent characters.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@Audio1",
+      "role": "audio",
+      "controls": "Approved dialogue words, speakers and performance only. No alternative voices, added words, narration or ad-libs.",
+      "scope": "episode"
+    }
+  ],
+  "consistencyContract": [
+    "Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities.",
+    "Fuzzby remains larger and stages frame-left; Zenny remains smaller, clean and stages frame-right.",
+    "Keep the bee-height flower-corridor axis, tactile plant response and continuous light."
+  ],
+  "audioContract": "@Audio1 is the sole authority for dialogue identity, cadence and delivery. Named listeners stay silent and closed-mouth. Generate foley only; no music.",
+  "continuityFinish": "Fuzzby’s pollen moustache remains fully visible as an invented badge and a visible joke, with Zenny close by and amused despite herself.",
+  "surgicalSafeguards": [
+    "Do not reveal the moustache before the close-up.",
+    "Keep Fuzzby's body outside the flower.",
+    "Do not transfer pollen to Zenny."
+  ],
+  "editScope": "",
+  "contentToPreserve": [],
+  "extensionDirection": "forward",
+  "transitionTrigger": "",
+  "transitionTransformation": "",
+  "transitionArrivalState": "",
+  "audioTransition": "",
+  "firstFrameTag": "@Image 1",
+  "lastFrameTag": "@Image 2",
+  "storyboardTag": "@Image 1",
+  "storyboardReadingOrder": "left to right, top to bottom",
+  "blockoutKind": "coarse",
+  "blockoutMappings": [],
+  "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.\n\n[Multimodal Reference Layer]\nFixed slots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=location; @Audio1=audio. Never swap roles.\nAngles: @图2=one Zenny; @图3=one Fuzzby; never extra characters.\n@图1 is the opening frame — the final frame of the previous shot; defines opening composition/state; exclude repeated action and redesign.\n@图2 defines Zenny identity/scale; exclude everything else.\n@图3 defines Fuzzby identity/scale; exclude everything else.\n@图4 defines scene/layout/light; exclude characters/action.\n\n[ATTRIBUTE OWNERSHIP]\nThe pollen moustache belongs to Fuzzby only.\nZenny's face, lip, fur and body stay completely clean; no pollen touches her.\n\n[One-Sentence Summary]\nAn overcommitted flower dive creates a pollen moustache that Fuzzby proudly presents before Zenny's affectionate deadpan verdict.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: The same bee-height flower corridor continues without a geography reset. Fuzzby stages frame-left beside the target flower; Zenny witnesses from frame-right outside his route.\n\n[Shot Sequence]\nShot 1: Camera: Bee-height two-shot; cut before Fuzzby withdraws and before the result is visible. Action: Face clean, Fuzzby launches too hard, overshoots, swings back and arrives faster than he can stop. His face jolts into the bloom; stamens press his upper lip while body, legs and wings stay outside. Performance: Leftover triumph drives an arrival with no stopping distance; Zenny stays clean and outside his route. End state: Cut before he withdraws; the pollen result remains hidden.\nShot 2: Camera: Close-up on Fuzzby withdrawing from the same flower. Action: He pulls back wearing two clear upper-lip pollen curls, lifts his chin and presents the moustache as distinguished status. Performance: He is entirely unaware, proud but with a small hopeful need for approval. End state: Fuzzby holds proudly frame-left; the target flower remains visible behind him. Dialogue placement: Fuzzby speaks in English with the approved delivery: {Do I look official?}; the pose holds a full beat after the line ends.\nShot 3: Camera: Over Fuzzby's moustache in soft foreground to Zenny sharp frame-right; hold on her after the line. Action: Zenny's face and fur remain completely clean. Her eyes travel to the moustache and back to Fuzzby; one mouth corner tightens in a micro-tell before she speaks. Performance: Her body stays economical and the verdict remains warm, never mocking or broad. End state: Fuzzby proudly moustachioed frame-left, Zenny clean-faced and quietly smiling frame-right, golden pollen drifting between them. Harvest this exact frame as SH1C's opening. Dialogue placement: Zenny speaks in English with quietly delivery: {Yes Fuzzby Officially nuts!}; the pose holds a full beat after the line ends. Hold: 2.0s — Hold on Zenny's face for a full beat after she finishes.\nWitness staging: Fuzzby stages frame-left; Zenny holds frame-right as the witness. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Global Supplement]\nExactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities. Safeguard: Do not reveal the moustache before the close-up. Safeguard: Fuzzby's body outside the flower.\n\n[Audio]\nGenerated dialogue is guide audio; restore approved @Audio1 in post. No music."
+}

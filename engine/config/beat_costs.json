@@ -1,0 +1,20 @@
+{
+  "version": "beat-costs-v3",
+  "margin": 0.15,
+  "costsSec": {
+    "travel": 1.8,
+    "dodge": 1.0,
+    "impact": 0.8,
+    "load_release": 2.3,
+    "tumble": 1.2,
+    "settle": 1.0,
+    "reaction": 1.2,
+    "turn": 2.0,
+    "aerial": 1.8,
+    "self_check": 1.2,
+    "environment_turn": 2.0,
+    "reveal": 1.5,
+    "business": 1.5
+  },
+  "adjustments": []
+}

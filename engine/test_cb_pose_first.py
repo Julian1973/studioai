@@ -11,7 +11,8 @@ import cb_render
 def _approved_keyframe_fields(characters=("Fuzzby", "Zenny")):
     version, text = cb_departments.canonical_style_paragraph()
     return {
-        "geography": ["The flower corridor runs frame-left to frame-right."],
+        "geography": [
+            "The flower corridor runs frame-left to frame-right with visible depth ahead."],
         "charactersInFrame": list(characters),
         "canonicalStyleVersion": version,
         "canonicalStyleParagraph": text,
@@ -180,8 +181,7 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert "[Protect]" in prompt
     assert ("Carry the prior aftermath: visible pollen coating and a smeared pollen "
             "moustache must already be present in the opening frame." in prompt)
-    assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
-            "character." in prompt)
+    assert "Exactly one Fuzzby and one Zenny appear in this image." in prompt
     assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
     assert "[Generation Goal]" not in prompt
     assert "[Starting Staging Envelope]" not in prompt
@@ -366,12 +366,15 @@ def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
     assert sections["Light"] == direction["lightingAndDepth"]
     assert sections["Canonical Style"] == direction["canonicalStyleParagraph"]
     assert sections["Characters In Frame"].splitlines() == ["- Fuzzby", "- Zenny"]
-    assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
-            "character.") in sections["Protect"]
+    assert "Exactly one Fuzzby and one Zenny appear in this image." in sections["Protect"]
+    assert ("Keep Fuzzby and Zenny at the same distance from the camera; Fuzzby appears "
+            "about 17% taller than Zenny.") in sections["Protect"]
+    assert "apparentScale" not in first
     assert "Lead room stays open frame-right" in sections["Negative Space"]
 
     changed = {**direction,
-               "geography": ["The chase now travels frame-right to frame-left."],
+               "geography": [
+                   "The chase now travels frame-right to frame-left with visible depth ahead."],
                "lightingAndDepth": "Cool left-side storm light with warm rim."}
     second = cb_render._compile_keyframe_integration_prompt(changed, shot)
     assert second != first

@@ -12,8 +12,8 @@ provider mocked: design-package -> voice -> timing slate -> keyframe -> candidat
 select -> relay batch (off the harvested frame) -> Director Review -> post master -> final
 approval. Asserts:
 
-  1. every locked dialogue line reaches the voice provider exactly once, word for word,
-     in the right character's voice — and never reaches any render prompt (Law 6)
+  1. every locked dialogue line reaches the voice provider exactly once, and the render
+     receives one attributed placement marker while @Audio1 owns performance authority
   2. a candidate batch REFUSES without explicit spend approval, and with it generates N
      candidates from the IDENTICAL prompt/references/audio, anchor first, in slot order
   3. approval selects ONE candidate, archives the rest, harvests its final frame; a relay
@@ -272,7 +272,8 @@ def _cinematography_output(shot):
         "lensAndCameraRelationship": "Bee-height camera preserves readable silhouettes.",
         "lightingAndDepth": "Warm daylight and layered flower depth remain stable.",
         "geography": [
-            "The flower corridor travels frame-left to frame-right at bee height."],
+            "The flower corridor travels frame-left to frame-right at bee height, "
+            "with the springy leaf visible on the route."],
         "charactersInFrame": list(shot.get("charactersInFrame") or []),
         "canonicalStyleVersion": style_version,
         "canonicalStyleParagraph": style_text,
@@ -319,6 +320,9 @@ def _build_package(tmp, valid=True):
         rec = sh.model_dump()
         rec.update(seedancePrompt=prompt, promptWords=wc, referenceSlots=slots,
                    audioBrief=E.compile_audio_brief(sh))
+        rec["seedancePrompt"] = R.cb_departments._apply_animation_provider_shell(
+            rec["seedancePrompt"], rec)
+        rec["promptWords"] = len(rec["seedancePrompt"].split())
         if sh.sourceType == "opener":
             kf, kwc, kslots = E.compile_keyframe_prompt(sh, {}, CFG)
             rec.update(keyframePrompt=kf, keyframePromptWords=kwc,
@@ -620,7 +624,6 @@ def _led(scene="9", ep="EpT"):
 def _approve_animation_direction(shot_id, scene="9", ep="EpT"):
     """Test-only human approval record over the now-current direct animation inputs."""
     pkg, path = R.load_pkg(scene, ep)
-    shot = R._shot(pkg, shot_id)
     approved = R._ledger(pkg, shot_id)["departmentWork"]["animation"]["approved"]
     approved["inputSignature"] = R._department_input_signature(
         pkg, "animation", shot_id, scene, ep)
@@ -715,6 +718,9 @@ def _install_scene_look(pkg, engine, scene, episode):
 
 def _install_shot_departments(pkg, path, scene, episode):
     for shot in pkg["shots"]:
+        compiled_animation = R.cb_departments._apply_animation_provider_shell(
+            shot["seedancePrompt"], shot)
+        shot["seedancePrompt"] = compiled_animation
         ledger = R._ledger(pkg, shot["shotId"])
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
@@ -727,7 +733,7 @@ def _install_shot_departments(pkg, path, scene, episode):
             }},
             "animation": {"approved": {
                 "packageRevision": pkg.get("revision"),
-                "output": {"providerPrompt": shot["seedancePrompt"]},
+                "output": {"providerPrompt": compiled_animation},
             }},
         }
     R._save(pkg, path)
@@ -779,7 +785,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     kf_call = prov.image_calls[-1]
     assert [os.path.basename(r) for r in kf_call["refs"]] == \
-           ["Fuzzby_provider_front.png", "Zenny_provider_front.png",
+           ["Zenny_provider_front.png", "Fuzzby_provider_front.png",
             "EpT_S9_scenelook.png"]
     assert all("posed_integration" not in os.path.basename(r) for r in kf_call["refs"])
     assert "[Performance Freedom]" in kf_call["prompt"]
@@ -824,11 +830,13 @@ def test_golden_path_package_to_approved_scene_master(world):
     # changes" convention; a literal ".endswith('_keyframe.png')" was stale against that)
     assert f1["image_urls"][0].endswith(_led()["1.B1.S1"]["keyframeApproval"]["path"])
     assert [os.path.basename(u) for u in f1["image_urls"][1:]] == \
-           ["Fuzzby_provider_front.png", "Zenny_provider_front.png",
+           ["Zenny_provider_front.png", "Fuzzby_provider_front.png",
             "EpT_S9_scenelook.png"]
     assert f1["audio_urls"] and "_vo_candidate_" in f1["audio_urls"][0]
     assert f1["audio_urls"][0].endswith(".wav")
-    assert "nailed it" not in f1["prompt"].lower()                # Law 6 at fire time
+    assert f1["prompt"].count("{Nailed it.}") == 1
+    assert "@Audio1 is the sole authority" in f1["prompt"]
+    assert "no alternative performance is permitted" in f1["prompt"]
     assert f1["duration"] == "6"      # deferred re-home item 8: always the shot's explicit
     #                                   seconds, never 'auto' (the old 15s literals can't bite)
     # per-candidate review sheets: human criteria all null — machine never approves quality

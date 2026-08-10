@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Animation Studio local server: projects, episodes, canon and media production."""
-import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac
+import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac, selectors
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
@@ -822,6 +822,30 @@ def _humanise(line, gate=None):
     if "CLEAN" in l: return "Clean — it stays."
     return l[:90]
 
+
+def _process_lines_until_exit(process, timeout=0.5):
+    """Yield live stdout without waiting forever on an inherited pipe.
+
+    Provider clients can briefly leave stdout inherited by a helper process. A
+    plain ``for line in process.stdout`` then waits for that helper to close the
+    pipe even after the actual render worker has exited. Polling between readable
+    events lets the Studio publish the completed artifacts as soon as its worker
+    is done while preserving live progress output.
+    """
+    selector = selectors.DefaultSelector()
+    selector.register(process.stdout, selectors.EVENT_READ)
+    try:
+        while True:
+            if selector.select(timeout):
+                line = process.stdout.readline()
+                if line:
+                    yield line
+                    continue
+            if process.poll() is not None:
+                return
+    finally:
+        selector.close()
+
 def _stream(jobId, args):
     """Run cb_pipeline streaming, so the job's current STEP is live (not blank until it finishes)."""
     job = JOBS[jobId]
@@ -843,7 +867,7 @@ def _stream(jobId, args):
         lines = []
         _last_reindex = 0.0
         _last_persist = 0.0
-        for line in p.stdout:
+        for line in _process_lines_until_exit(p):
             line = line.rstrip()
             if not line: continue
             lines.append(line)
@@ -1245,6 +1269,16 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         # The pending candidate is the decision artefact. The approved frame remains available
         # separately and continues anchoring downstream work until the replacement is approved.
         kf_path = candidate_kf or approved_kf
+        candidate_paths = list(led.get("candidatePaths") or [])
+        if not candidate_paths:
+            batch = led.get("batch") or {}
+            transport = batch.get("transportCandidates") or {}
+            for candidate_index in sorted(
+                    {int(value) for value in (batch.get("done") or [])}):
+                candidate_path = (transport.get(str(candidate_index)) or {}).get(
+                    "candidatePath")
+                if candidate_path:
+                    candidate_paths.append(candidate_path)
         shots[sid] = {"vo":         _url_from_abs(led.get("voPath")),
                       "keyframe":   _url_from_abs(kf_path),
                       "keyframeCandidate": _url_from_abs(candidate_kf),
@@ -1255,7 +1289,7 @@ def shot_media_map(pkg, scene, episode="Ep1"):
                       # ({ep}_{shotId}_c1..cN.mp4, ledger status "candidates-pending") — existence-checked
                       # here, same as every other entry, so the UI never depends on media-index.json.
                       "candidates": [c for c in ({"n": i, "url": _url_from_abs(p)}
-                                                 for i, p in enumerate(led.get("candidatePaths") or [], 1))
+                                                 for i, p in enumerate(candidate_paths, 1))
                                      if c["url"]]}
     timing_path = MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4"
     if not timing_path.exists():

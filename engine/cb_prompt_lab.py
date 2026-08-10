@@ -10,6 +10,8 @@ import hashlib
 import re
 from collections import OrderedDict
 
+import cb_emission_conformance as emission
+
 
 SCHEMA_VERSION = 7
 SEEDANCE_GUIDE_PROFILE = "bytedance-seedance-2.5-2026-08-07"
@@ -137,7 +139,7 @@ _CAMERA_LOCK = re.compile(r"\b(locked[- ]?off|camera (?:is )?(?:locked|still|sta
 _NEGATIVE = re.compile(r"\b(no|not|never|without|avoid|do not|don't)\b", re.I)
 _REFERENCE_TOKEN = re.compile(r"@(图|image|figure|audio|video)\s*(\d+)", re.I)
 _REFERENCE_ROLE_WORDS = re.compile(
-    r"\b(only|defines?|controls?|provides?|corresponds? to|used for|sole source|"
+    r"\b(only|defines?|controls?|provides?|corresponds? to|used for|sole (?:source|authority)|"
     r"strictly (?:maintain|lock)|maintains?|locks?|"
     r"is the (?:first|last|opening|closing|source))\b", re.I)
 _REFERENCE_EXCLUSION_WORDS = re.compile(
@@ -562,53 +564,83 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             "camera language, character styling, performance core and prohibited items.",
             required=task_mode in {"thirty-second-video", "ultra-long-video"})
 
-        stage_matches = _stage_matches(text)
+        shot_sequence = _section_body(text, "Shot Sequence")
+        shot_numbers = [int(value) for value in re.findall(
+            r"(?im)^\s*Shot\s+(\d+)\s*:", shot_sequence)]
+        multi_shot = bool(shot_sequence and shot_numbers)
+        if multi_shot:
+            numbered = shot_numbers == list(range(1, len(shot_numbers) + 1))
+            shot_lines = re.findall(r"(?im)^\s*Shot\s+\d+\s*:.*$", shot_sequence)
+            directed = bool(shot_lines) and all(
+                re.search(r"\bCamera\s*:", line, re.I) and
+                re.search(r"\bAction\s*:", line, re.I) and
+                re.search(r"\bEnd state\s*:", line, re.I)
+                for line in shot_lines)
+            add("stages", "Consecutive directed shots", numbered,
+                f"{len(shot_numbers)} consecutive shot(s) carry the event progression.",
+                "Use consecutive Shot N lines inside [Shot Sequence].")
+            add("approved-stage-plan", "Approved story plan", True,
+                "The typed approved stage plan remains the compiler source behind the shot sequence.",
+                "Restore the typed story plan before compiling.",
+                required=bool(stage_plan), authority="studio-policy")
+            add("stage-direction", "Action and performance direction", directed,
+                "Every internal shot has one camera job, action and visible end state." if directed else
+                "At least one internal shot lacks camera, action or visible end state.",
+                "Give each Shot N one Camera, Action and End state.")
+            add("stage-end-states", "Visible shot handoffs", directed,
+                "Every internal shot ends on a visible handoff." if directed else
+                "At least one internal shot lacks a directly visible end state.",
+                "Add End state to every Shot N.", authority="studio-policy")
+            stage_matches = []
+        else:
+            stage_matches = _stage_matches(text)
         stage_numbers = [_stage_number(match) for match in stage_matches]
         stage_blocks = _stage_blocks(text, stage_matches)
         expected_stage_count = len(stage_plan or [])
-        numbered = bool(stage_numbers) and stage_numbers == list(range(1, len(stage_numbers) + 1))
-        add(
-            "stages", "Consecutive storyboard stages", numbered,
-            (f"{len(stage_numbers)} consecutive stage(s) carry the event progression."
-             if numbered else f"Found stages {stage_numbers or 'none'}, not a 1..N sequence."),
-            "Use consecutive [Stage N] headings or official 'Stage N: 0-3s [Phase]' headings.")
-        add(
-            "approved-stage-plan", "Approved stage count",
-            not expected_stage_count or len(stage_numbers) == expected_stage_count,
-            (f"The prompt carries all {expected_stage_count} approved stage(s)."
-             if expected_stage_count and len(stage_numbers) == expected_stage_count else
-             "No typed approved stage plan was supplied to this check."
-             if not expected_stage_count else
-             f"The prompt has {len(stage_numbers)} stage(s), but the approved plan has "
-             f"{expected_stage_count}."),
-            "Restore the exact number and order of approved stages before approval.",
-            required=bool(expected_stage_count), authority="studio-policy")
-        directed_stages = bool(stage_blocks) and all(
-            len(re.findall(
-                r"(?im)^\s*(?:Primary event|Action\s*/\s*Expression)\s*:", block)) == 1 and
-            (bool(re.search(r"(?im)^\s*Primary event\s*:", block)) or
-             bool(re.search(
-                 r"(?im)^\s*(?:Emotion(?:al)? Analysis|Emotion\s*/\s*Camera Analysis|"
-                 r"Camera Scheduling|Camera Analysis)\s*:", block)))
-            for block in stage_blocks)
-        add(
-            "stage-direction", "Action and performance direction", directed_stages,
-            ("Every stage has one primary action/expression plus emotional or camera direction."
-             if directed_stages else
-             "At least one stage lacks a single action/expression or its emotional/camera purpose."),
-            "Give each official stage one Action/Expression and one Emotion/Camera Analysis; "
-            "the legacy Primary event label remains accepted.")
-        studio_stage_shape = bool(stage_blocks) and all(
-            bool(re.search(r"(?im)^\s*(?:Initial state|Continue from the previous stage)\s*:", block)) and
-            bool(re.search(r"(?im)^\s*End state\s*:", block))
-            for block in stage_blocks)
-        add(
-            "stage-end-states", "Inherited state and visible handoff", studio_stage_shape,
-            ("Every stage begins from an inherited state and ends on an observable handoff."
-             if studio_stage_shape else
-             "At least one stage lacks its inherited start or directly visible end state."),
-            "Add Initial state (or Continue from the previous stage) and End state to every stage.",
-            authority="studio-policy")
+        if not multi_shot:
+            numbered = bool(stage_numbers) and stage_numbers == list(range(1, len(stage_numbers) + 1))
+            add(
+                "stages", "Consecutive storyboard stages", numbered,
+                (f"{len(stage_numbers)} consecutive stage(s) carry the event progression."
+                 if numbered else f"Found stages {stage_numbers or 'none'}, not a 1..N sequence."),
+                "Use consecutive [Stage N] headings or official 'Stage N: 0-3s [Phase]' headings.")
+            add(
+                "approved-stage-plan", "Approved stage count",
+                not expected_stage_count or len(stage_numbers) == expected_stage_count,
+                (f"The prompt carries all {expected_stage_count} approved stage(s)."
+                 if expected_stage_count and len(stage_numbers) == expected_stage_count else
+                 "No typed approved stage plan was supplied to this check."
+                 if not expected_stage_count else
+                 f"The prompt has {len(stage_numbers)} stage(s), but the approved plan has "
+                 f"{expected_stage_count}."),
+                "Restore the exact number and order of approved stages before approval.",
+                required=bool(expected_stage_count), authority="studio-policy")
+            directed_stages = bool(stage_blocks) and all(
+                len(re.findall(
+                    r"(?im)^\s*(?:Primary event|Action\s*/\s*Expression)\s*:", block)) == 1 and
+                (bool(re.search(r"(?im)^\s*Primary event\s*:", block)) or
+                 bool(re.search(
+                     r"(?im)^\s*(?:Emotion(?:al)? Analysis|Emotion\s*/\s*Camera Analysis|"
+                     r"Camera Scheduling|Camera Analysis)\s*:", block)))
+                for block in stage_blocks)
+            add(
+                "stage-direction", "Action and performance direction", directed_stages,
+                ("Every stage has one primary action/expression plus emotional or camera direction."
+                 if directed_stages else
+                 "At least one stage lacks a single action/expression or its emotional/camera purpose."),
+                "Give each official stage one Action/Expression and one Emotion/Camera Analysis; "
+                "the legacy Primary event label remains accepted.")
+            studio_stage_shape = bool(stage_blocks) and all(
+                bool(re.search(r"(?im)^\s*(?:Initial state|Continue from the previous stage)\s*:", block)) and
+                bool(re.search(r"(?im)^\s*End state\s*:", block))
+                for block in stage_blocks)
+            add(
+                "stage-end-states", "Inherited state and visible handoff", studio_stage_shape,
+                ("Every stage begins from an inherited state and ends on an observable handoff."
+                 if studio_stage_shape else
+                 "At least one stage lacks its inherited start or directly visible end state."),
+                "Add Initial state (or Continue from the previous stage) and End state to every stage.",
+                authority="studio-policy")
         global_supplement, supplement_heading = _first_section_body(
             text, ("Global Supplement", "Overall Supplement", "Maintain Consistency"))
         consistency_ok = bool(global_supplement and re.search(
@@ -737,33 +769,24 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             add(code, label, ok, f"{label} is explicit." if ok else f"{label} is not explicit.", action)
 
     audio_body = _section_body(text, "Audio")
-    leaked_dialogue = []
-    prompt_norm = _normalise(text)
-    for line in dialogue_lines:
-        exact = str((line or {}).get("exactText") or "").strip()
-        if len(_normalise(exact).split()) >= 2 and _normalise(exact) in prompt_norm:
-            leaked_dialogue.append(exact)
     if dialogue_lines:
         speakers = {str((line or {}).get("speaker") or "").strip().lower()
                     for line in dialogue_lines}
         speakers.discard("")
         first_line = lines[0] if lines else ""
+        synthesis = emission.validate_dialogue_synthesis(text, dialogue_lines)
         audio_ok = bool(
-            "audio:1" in used_refs and
-            re.search(r"@Audio\s*1", first_line, re.I) and
-            re.search(r"\bsole source\b", first_line, re.I) and
-            re.search(r"\benglish\b", first_line, re.I) and
+            "audio:1" in used_refs and synthesis["ready"] and
             all(speaker in text.lower() for speaker in speakers) and
-            (audio_body or re.search(r"\b(audio|voice|dialogue)\b", global_supplement, re.I)) and
-            not leaked_dialogue)
+            (audio_body or re.search(r"\b(audio|voice|dialogue)\b", global_supplement, re.I)))
         audio_detail = (
-            "The first line gives @Audio1 sole English voice and timing authority without leaking locked words."
+            "The prompt places each locked line once and gives @Audio1 sole performance authority."
             if audio_ok else
-            "The audio contract is incomplete" +
-            (" and locked dialogue appears in the prompt." if leaked_dialogue else "."))
+            "The dialogue synthesis contract is incomplete: " +
+            "; ".join(synthesis["errors"]))
         add("audio", "Dialogue and audio authority", audio_ok, audio_detail,
-            "Keep the house English audio-lock on line one, bind every speaker to @Audio1, "
-            "keep listeners silent, and remove spoken words.", authority="studio-policy")
+            "Place each exact line once in braces, bind every speaker to @Audio1 as sole "
+            "performance authority, and keep listeners silent.", authority="studio-policy")
     else:
         audio_scope = audio_body or global_supplement
         audio_ok = bool(audio_scope and re.search(
@@ -1258,16 +1281,11 @@ def analyze_prompt(prompt, artifact_type, dialogue_lines=None):
         warnings.append({"code": "missing-landing", "message":
                          "No explicit final landing or handoff was detected."})
 
-    dialogue_leaks = []
-    prompt_norm = _normalise(text)
-    for line in dialogue_lines or []:
-        exact = str((line or {}).get("exactText") or "").strip()
-        if len(_normalise(exact).split()) >= 2 and _normalise(exact) in prompt_norm:
-            dialogue_leaks.append(exact)
-    if dialogue_leaks:
-        warnings.append({"code": "dialogue-leak", "message":
-                         "Locked spoken words appear inside the visual prompt.",
-                         "dialogue": dialogue_leaks})
+    synthesis = emission.validate_dialogue_synthesis(text, dialogue_lines or [])
+    if not synthesis["ready"]:
+        warnings.append({"code": "dialogue-synthesis", "message":
+                         "Dialogue placement or @Audio1 authority is incomplete.",
+                         "errors": synthesis["errors"]})
 
     applicable = [item for item in dimensions.values() if item["applicable"]]
     score = sum(item["score"] for item in applicable)

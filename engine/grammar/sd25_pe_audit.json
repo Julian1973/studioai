@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "architectureRuling": "director-source-deterministic-compilers-only",
+  "role": "checker-and-rule-source-only",
+  "productionPromptWriter": false,
+  "vendor": {
+    "name": "sd25-pe",
+    "owner": "seedance",
+    "version": "0.3.3",
+    "source": "https://arkdocs-en.tos-ap-southeast-1.volces.com/skills/",
+    "snapshotPath": "engine/grammar/vendor/sd25-pe/0.3.3/SKILL.md",
+    "snapshotSha256": "9c73a93bf49ced5dd2dcbc54cd04ec5e2845fdda1cc7adc79983cc91d88dd84a"
+  },
+  "auditedGrammarPackVersion": "1.0.0",
+  "auditedAt": "2026-08-10",
+  "rerunTriggers": [
+    "grammar-pack-version-bump",
+    "vendored-skill-version-change",
+    "vendored-skill-hash-change"
+  ],
+  "emissionPaths": [
+    "keyframe",
+    "render",
+    "voice"
+  ],
+  "findings": [
+    {
+      "sourceRule": "intent-first-and-template-first",
+      "disposition": "implemented",
+      "compilerRule": "Typed approved Director records feed deterministic emission templates.",
+      "tests": [
+        "engine/test_cb_departments.py",
+        "engine/test_cb_pose_first.py"
+      ]
+    },
+    {
+      "sourceRule": "one-explicit-role-per-material",
+      "disposition": "implemented",
+      "compilerRule": "Each attached provider slot emits one bounded authority and exclusion line.",
+      "tests": [
+        "engine/test_cb_seedance_pipeline.py",
+        "engine/test_cb_departments.py"
+      ]
+    },
+    {
+      "sourceRule": "subject-cardinality-and-continuity",
+      "disposition": "implemented",
+      "compilerRule": "Still and video compilers emit medium-specific exact instance-count locks.",
+      "tests": [
+        "engine/test_cb_emission_conformance.py",
+        "engine/test_cb_pose_first.py",
+        "engine/test_cb_departments.py"
+      ]
+    },
+    {
+      "sourceRule": "stable-material-mapping-and-multiple-views-of-one-subject",
+      "disposition": "implemented",
+      "compilerRule": "Project policy deterministically orders provider slots and emissions state that turnaround angles collapse to one subject identity.",
+      "tests": [
+        "engine/test_cb_reference_manifest.py",
+        "engine/test_cb_emission_conformance.py",
+        "engine/test_cb_departments.py"
+      ]
+    },
+    {
+      "sourceRule": "stage-causality-and-end-state",
+      "disposition": "implemented",
+      "compilerRule": "Approved stage plans require one event, inherited state, cause and observable end state.",
+      "tests": [
+        "engine/test_cb_departments.py",
+        "engine/test_cb_prompt_lab.py"
+      ]
+    },
+    {
+      "sourceRule": "parameters-outside-prompt",
+      "disposition": "implemented",
+      "compilerRule": "Duration, aspect, resolution and provider model remain in the sealed request envelope.",
+      "tests": [
+        "engine/test_cb_seedance_pipeline.py",
+        "engine/test_e2e_fire_route.py"
+      ]
+    }
+  ]
+}

@@ -265,6 +265,38 @@ def test_dense_animation_candidate_review_also_warns_against_blind_retry():
     assert "ready for review" in session["advisories"][0]["message"]
 
 
+def test_superseded_render_candidates_remain_visible_but_not_approvable():
+    package = _package()
+    package["continuityLedger"][0]["batch"] = {
+        "status": "complete",
+        "approvalBlockedReason": "Director inputs were recompiled after these candidates were generated",
+        "supersededByDirectionAt": "2026-08-10T12:58:44Z",
+    }
+    session = _session(
+        state=_state(keyframe=True, voice=True, animationDirection=True),
+        preflight=_preflight(provider_ready=True),
+        package=package,
+        media=_media(candidates=[
+            {"n": 1, "url": "/engine/media/c1.mp4"},
+            {"n": 2, "url": "/engine/media/c2.mp4"},
+        ]),
+    )
+    assert session["status"] == "ready_to_fire"
+    assert session["artifact"] == {
+        "type": "video-set",
+        "items": [
+            {"n": 1, "url": "/engine/media/c1.mp4"},
+            {"n": 2, "url": "/engine/media/c2.mp4"},
+        ],
+        "label": "Superseded animation candidates",
+        "stale": True,
+        "notice": "Director inputs were recompiled after these candidates were generated",
+        "supersededAt": "2026-08-10T12:58:44Z",
+    }
+    assert session["primaryAction"]["id"] == "prepare-render"
+    assert session["decisionActions"] == []
+
+
 def test_running_job_replaces_actions_with_one_progress_state():
     jobs = {"job-1": {
         "jobId": "job-1",
@@ -324,6 +356,41 @@ def test_running_render_exposes_safe_batch_progress_details():
     assert running["providerModelId"] == "fal-seedance-2.5"
     assert running["candidateCount"] == 1
     assert running["maxBatchCostUsd"] == 13.72
+
+
+def test_completed_candidate_is_visible_while_remaining_candidate_renders():
+    package = _package()
+    package["continuityLedger"][0]["batch"] = {
+        "batchId": "batch-1",
+        "status": "generating",
+        "expected": 2,
+        "done": [1],
+        "disclosure": {"candidateCount": 2},
+    }
+    jobs = {"job-1": {
+        "jobId": "job-1", "scene": "1",
+        "gate": f"director:render-animation:{SHOT_ID}",
+        "status": "running", "step": "Rendering candidate 2...", "started": 100,
+        "args": [SHOT_ID],
+    }}
+    session = _session(
+        state=_state(keyframe=True, voice=True, animationDirection=True),
+        preflight=_preflight(provider_ready=True),
+        package=package,
+        media=_media(candidates=[{"n": 1, "url": "/engine/media/c1.mp4"}]),
+        jobs=jobs,
+    )
+    assert session["status"] == "rendering"
+    assert session["artifact"] == {
+        "type": "video-set",
+        "items": [{"n": 1, "url": "/engine/media/c1.mp4"}],
+        "label": "Completed render candidates",
+        "partial": True,
+    }
+    assert session["runningJob"]["completedCandidateCount"] == 1
+    assert session["stageComms"]["artifactVisible"] is True
+    assert "1 of 2" in session["stageComms"]["message"]
+    assert session["decisionActions"] == []
 
 
 def test_running_progress_does_not_expose_sensitive_log_lines():

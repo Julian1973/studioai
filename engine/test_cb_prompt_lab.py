@@ -57,12 +57,12 @@ def test_analysis_flags_conflicts_density_and_locked_dialogue_leak():
         prompt, "animation", [{"exactText": "I trust my sight"}])
     codes = {item["code"] for item in result["warnings"]}
 
-    assert {"camera-conflict", "negative-density", "dialogue-leak",
+    assert {"camera-conflict", "negative-density", "dialogue-synthesis",
             "missing-opening", "missing-landing"}.issubset(codes)
 
 
 def test_seedance_authoring_contract_accepts_role_mapped_stages_and_audio_lock():
-    prompt = """ENGLISH DIALOGUE ONLY, spoken in English. @Audio1 is the sole source of dialogue, voice, performance and timing. Fuzzby is the only speaker; Zenny's mouth stays closed.
+    prompt = """AUDIO-AUTHORITY: @Audio1 is the sole authority for English voice identity, cadence, delivery, mouth timing and silence. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Fuzzby performs only the assigned markers; listeners remain silent and closed-mouth. No narration, no extra words, and no subtitles or captions.
 [Generation Goal]
 Generate a comic reference-to-video shot in which Fuzzby's proud flight becomes a wobble and a recovered pose.
 [Reference Roles]
@@ -77,6 +77,7 @@ End state: Fuzzby hangs off balance above the bent flower while Zenny remains on
 [Stage 2]
 Continue from the previous stage: identities, positions and the bent flower remain unchanged.
 Primary event: the stem rebounds, Fuzzby recovers into a proud pose, and Zenny answers with a restrained eye movement.
+Dialogue placement: FUZZBY speaks in English: {Nailed it.}
 End state: Fuzzby holds the pose screen left while Zenny remains screen right with her mouth closed.
 [Maintain Consistency]
 Keep both identities, relative scale, flower ownership, screen direction, light direction and audio relationships stable.
@@ -103,7 +104,7 @@ Use @Audio1 exactly. Fuzzby speaks in English; Zenny remains silent and her mout
 
 
 def test_seedance_contract_accepts_official_lark_30_second_grammar_with_studio_locks():
-    prompt = """ENGLISH DIALOGUE ONLY. @Audio1 is the sole source of English dialogue, voice, performance and timing. Fuzzby is the only speaker; Zenny stays silent with her mouth closed.
+    prompt = """AUDIO-AUTHORITY: @Audio1 is the sole authority for English voice identity, cadence, delivery, mouth timing and silence. The exact braced dialogue markers place approved words only; no alternative performance is permitted. Fuzzby performs only the assigned markers; listeners remain silent and closed-mouth. No narration, no extra words, and no subtitles or captions.
 [Multimodal Reference Layer]
 @Image1 only defines the exact first-frame composition and character positions; do not use its text labels.
 @Image2 only defines Fuzzby's identity, proportions and materials; do not use its background.
@@ -126,6 +127,7 @@ End state: the bent flower holds Fuzzby visibly off balance.
 Stage 2: 8-18s [Recovery and denial]
 Continue from the previous stage: identity, bent flower and screen direction remain unchanged.
 Action/Expression: the stem rebounds, Fuzzby catches himself and converts the mistake into a proud pose.
+Dialogue placement: FUZZBY speaks in English: {Nailed it.}
 Emotion/Camera Analysis: a restrained push and delayed eye flick reveal that he knows exactly what happened.
 End state: Fuzzby holds the readable pose screen left while Zenny remains silent off his eyeline.
 [Global Supplement]

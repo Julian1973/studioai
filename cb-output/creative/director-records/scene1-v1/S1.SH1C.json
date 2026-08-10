@@ -1,0 +1,261 @@
+{
+  "shotId": "S1.SH1C",
+  "durationSec": 18,
+  "taskMode": "reference-to-video",
+  "pacingMode": "timestamp",
+  "generationGoal": "A failed moustache correction escalates through increasingly severe collisions into a blossom, a showman recovery and Zenny's loving verdict.",
+  "deliveryPlan": "Separate correction, escalation and verdict so each worsening cause, the button pose and the emotional turn receive their own readable shot.",
+  "creativeTranslation": {
+    "interpretation": {
+      "jokeOrAche": "Every attempt to hide failure creates larger evidence.",
+      "mechanism": "The confident fix worsens the mark; seeing his own paw triggers a causal bolt and escalating contacts before he performs success.",
+      "statusBefore": "Fuzzby begins embarrassed but convinced he can fix the moustache.",
+      "statusAfter": "He ends more covered and more proudly performative while Zenny openly reveals affection.",
+      "audienceProgression": [
+        "The wipe should fix it.",
+        "His own paw proves it is worse and the flight compounds it.",
+        "His claim fails, but Zenny's smile keeps him lovable."
+      ],
+      "emotionalHeart": "Zenny's eye-roll becoming love states that she adores the whole ridiculous truth."
+    },
+    "gagClocks": [
+      {
+        "beatCode": "1.B3",
+        "mode": "BIG",
+        "setup": "The intact curled moustache from the previous unit remains on Fuzzby.",
+        "anticipation": "He confidently wipes once, then stops when he sees yellow pollen on his own paw.",
+        "impact": "The wipe worsens the smear and his bolt escalates through two increasingly large contacts into the blossom.",
+        "reaction": "Zenny waits until his line finishes, then turns from eye-roll into a loving smile.",
+        "recoveryHold": "Hold until Zenny's loving smile fully reads and settles.",
+        "recoveryHoldSec": 2.0,
+        "button": "Buzz Crash!!",
+        "retroactive": false,
+        "providerAction": "Fuzzby gasps, wipes at his face and smears the pollen worse, then overcommits into another dive, clips a branch, tumbles through flower contacts, lands upside down in a blossom, kicks, pops up, then dives again and emerges even more covered in pollen."
+      }
+    ],
+    "generationDesign": {
+      "packagingDecision": "continuation-unit",
+      "completeGagArcCount": 1,
+      "densityJudgement": "Eighteen seconds protects the failed correction, escalating collision chain, button and reactor turn.",
+      "splitOrNonSplitRationale": "Three internal shots keep one causal escalation while isolating the final verdict.",
+      "handoffState": "Fuzzby pops out more pollen-covered than before in hanging gold dust, with Zenny giving an eye-roll that softens into a smile."
+    }
+  },
+  "dramaticBeat": "A grooming correction becomes a larger public failure, which Fuzzby instantly rebrands while Zenny's patience becomes visible love.",
+  "audienceBefore": "The audience sees an intact moustache and expects a simple correction.",
+  "audienceAfter": "The audience sees each correction worsen the evidence and understands Zenny's affection.",
+  "beatOwner": "1.B3",
+  "performanceFreedom": "Seedance may shape kick rhythm, pollen fall and micro-expression timing, but the self-evidence, increasing contacts, pose-before-line and delayed Zenny cut are locked.",
+  "performanceArc": "Embarrassment becomes failed confidence, self-evidence, panic and helpless escalation, then instant showmanship; Zenny's patience becomes affection.",
+  "physicalCauseAndEffect": "The wipe drags pollen wider; seeing it on his paw triggers the bolt; each contact adds rotation before the blossom catches his head and the stored body pops vertically free.",
+  "cameraBehaviour": "Steady correction medium, side tracking escalation, wide blossom silhouette, then held showman pose and delayed cut to Zenny.",
+  "timingAndRhythm": "Gasp, wipe, evidence stop, bolt, two separated increasing contacts, blossom, pop, pose, line, then slow reactor turn.",
+  "landingBreath": "Do not cut to Zenny until Fuzzby's line and held pose have fully landed; then wait for the smile to settle.",
+  "directionDensity": "guided",
+  "precisionReasons": [
+    "Locked dialogue must remain assigned to its named speaker.",
+    "Visible cause, ownership and outgoing continuity are essential story facts."
+  ],
+  "shotPlan": [
+    {
+      "shotNumber": 1,
+      "purpose": "Make the attempted correction visibly worsen the evidence.",
+      "framingLensAndCamera": "Steady medium, Fuzzby frame-left and Zenny clean frame-right.",
+      "causalAction": "Fuzzby jolts and wipes one paw across his upper lip, smearing the pollen wider and messier. He stops, looks down at the bright yellow on his own paw, then his expression drops into panic and he bolts.",
+      "observablePerformance": "Embarrassment becomes confidence for one wipe, then self-evidence turns it into status panic.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Fuzzby has left frame at speed; Zenny remains still and clean.",
+      "dialogueLineIndexes": [],
+      "gagBeatIds": []
+    },
+    {
+      "shotNumber": 2,
+      "purpose": "Escalate two readable contacts into the blossom capture.",
+      "framingLensAndCamera": "Side tracking at speed, widening for the blossom so his legs remain readable.",
+      "causalAction": "He clips a flower first and spins once. He clips a second harder and the spin doubles, visibly larger than the first. Each contact is separate. He flies headfirst into a blossom; only his head enters while body, wings and kicking legs remain outside.",
+      "observablePerformance": "He fights each spin too late but never reads as hurt or distressed.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Held wide on Fuzzby upside down in the blossom, body outside and legs kicking.",
+      "dialogueLineIndexes": [],
+      "gagBeatIds": []
+    },
+    {
+      "shotNumber": 3,
+      "purpose": "Land the showman claim before revealing Zenny's loving verdict.",
+      "framingLensAndCamera": "Hold Fuzzby frame-left for the button; only after the line ends cut to Zenny frame-right.",
+      "causalAction": "Fuzzby pops vertically out in one explosive motion. The full showman pose lands and holds before he speaks. After the line has completely finished, cut to Zenny: her eyes travel over him, one slow eye-roll softens as her eyes come down into a genuine loving smile.",
+      "observablePerformance": "He replaces panic with total conviction; her reaction moves visibly from resignation into affection.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Fuzzby is completely pollen-covered and proud frame-left; Zenny stays clean as her eye-roll softens into a genuine loving smile frame-right. Harvest this exact frame as SH2's opening.",
+      "dialogueLineIndexes": [
+        1
+      ],
+      "gagBeatIds": [
+        "1.B3"
+      ]
+    }
+  ],
+  "timingBeats": [
+    {
+      "type": "reaction",
+      "count": 1,
+      "source": "failed correction"
+    },
+    {
+      "type": "business",
+      "count": 1,
+      "source": "wipe"
+    },
+    {
+      "type": "business",
+      "count": 1,
+      "source": "panic bolt and route transfer"
+    },
+    {
+      "type": "impact",
+      "count": 2,
+      "source": "escalating contacts"
+    },
+    {
+      "type": "settle",
+      "count": 1,
+      "source": "showman pose"
+    },
+    {
+      "type": "reaction",
+      "count": 1,
+      "source": "reactor verdict"
+    },
+    {
+      "type": "turn",
+      "count": 1,
+      "source": "eye-roll to love"
+    }
+  ],
+  "witnessStagingSides": [
+    "Fuzzby stages frame-left; Zenny holds frame-right as the witness."
+  ],
+  "stagePlan": [
+    {
+      "stageNumber": 1,
+      "beatIds": [
+        "1.B3"
+      ],
+      "purpose": "Failed correction, escalation and verdict",
+      "startSec": 0.0,
+      "endSec": 18.0,
+      "initialOrCarriedState": "Carry the exact moustachioed end state from SH1B.",
+      "cause": "The confident wipe drags pollen instead of removing it and starts one causal worsening chain.",
+      "primaryEvent": "Fuzzby gasps, wipes at his face and smears the pollen worse, then overcommits into another dive, clips a branch, tumbles through flower contacts, lands upside down in a blossom, kicks, pops up, then dives again and emerges even more covered in pollen.",
+      "observableEndState": "Fuzzby pops back out of the last flower more pollen-covered than before, with unsettled golden dust hanging between him and Zenny’s smiling eye-roll.",
+      "emotionOrCameraAnalysis": "The evidence precedes panic, contacts escalate, and the pose and line land before Zenny's turn reveals love."
+    }
+  ],
+  "geography": [
+    "Continue in the same bee-height flower corridor and preserve the frame-left Fuzzby, frame-right Zenny relationship.",
+    "Keep every collision and the receiving blossom on one readable side-tracking route."
+  ],
+  "attributeOwnership": [
+    "All pollen marks, smears and dusting belong to Fuzzby only.",
+    "Zenny's face, lip, fur and body stay completely clean throughout; no pollen touches her."
+  ],
+  "environmentContract": [],
+  "motionVocabulary": [
+    {
+      "character": "Fuzzby",
+      "belongs": [
+        "careens",
+        "overcommits",
+        "barrels",
+        "bounces",
+        "improvises",
+        "presents",
+        "rockets"
+      ],
+      "banned": [
+        "slinks",
+        "hesitates",
+        "glides",
+        "sulks",
+        "waits",
+        "creeps"
+      ]
+    },
+    {
+      "character": "Zenny",
+      "belongs": [
+        "glides",
+        "observes",
+        "settles",
+        "arches",
+        "softens",
+        "levels"
+      ],
+      "banned": [
+        "scrambles",
+        "flails",
+        "rushes",
+        "panics",
+        "showboats"
+      ]
+    }
+  ],
+  "referenceContract": [
+    {
+      "assetTag": "@图1",
+      "role": "opening_frame",
+      "controls": "Exact final frame of the previous unit and opening continuity state only. Do not redesign identity or repeat preceding action.",
+      "scope": "continuity"
+    },
+    {
+      "assetTag": "@图2",
+      "role": "character_identity",
+      "controls": "Zenny exact identity, slender smaller proportions, clean fur, glasses and wings only. Do not use its pose or background.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@图3",
+      "role": "character_identity",
+      "controls": "Fuzzby exact identity, larger proportions, fur, spectacles and wings only. Do not use its pose or background.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@图4",
+      "role": "location",
+      "controls": "Flower-corridor geometry, bee-height scale, plant materials, light and atmospheric depth only. Do not use or invent characters.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@Audio1",
+      "role": "audio",
+      "controls": "Approved dialogue words, speakers and performance only. No alternative voices, added words, narration or ad-libs.",
+      "scope": "episode"
+    }
+  ],
+  "consistencyContract": [
+    "Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities.",
+    "Fuzzby remains larger and stages frame-left; Zenny remains smaller, clean and stages frame-right.",
+    "Keep the bee-height flower-corridor axis, tactile plant response and continuous light."
+  ],
+  "audioContract": "@Audio1 is the sole authority for dialogue identity, cadence and delivery. Named listeners stay silent and closed-mouth. Generate foley only; no music.",
+  "continuityFinish": "Fuzzby pops back out of the last flower more pollen-covered than before, with unsettled golden dust hanging between him and Zenny’s smiling eye-roll.",
+  "surgicalSafeguards": [
+    "Do not obscure the widening smear before the bolt.",
+    "Keep Fuzzby's body outside the blossom.",
+    "Do not cut to Zenny before the line finishes."
+  ],
+  "editScope": "",
+  "contentToPreserve": [],
+  "extensionDirection": "forward",
+  "transitionTrigger": "",
+  "transitionTransformation": "",
+  "transitionArrivalState": "",
+  "audioTransition": "",
+  "firstFrameTag": "@Image 1",
+  "lastFrameTag": "@Image 2",
+  "storyboardTag": "@Image 1",
+  "storyboardReadingOrder": "left to right, top to bottom",
+  "blockoutKind": "coarse",
+  "blockoutMappings": [],
+  "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.\n\n[Multimodal Reference Layer]\nFixed slots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=location; @Audio1=audio. Never swap roles.\nAngles: @图2=one Zenny; @图3=one Fuzzby; never extra characters.\n@图1 is the opening frame — the final frame of the previous shot; defines opening composition/state; exclude repeated action and redesign.\n@图2 defines Zenny identity/scale; exclude everything else.\n@图3 defines Fuzzby identity/scale; exclude everything else.\n@图4 defines scene/layout/light; exclude characters/action.\n\n[ATTRIBUTE OWNERSHIP]\nAll pollen marks, smears and dusting belong to Fuzzby only.\nZenny's face, lip, fur and body stay completely clean throughout; no pollen touches her.\n\n[One-Sentence Summary]\nA failed moustache correction escalates through increasingly severe collisions into a blossom, a showman recovery and Zenny's loving verdict.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: Continue in the same bee-height flower corridor and preserve the frame-left Fuzzby, frame-right Zenny relationship. Keep every collision and the receiving blossom on one readable side-tracking route.\n\n[Shot Sequence]\nShot 1: Camera: Steady medium, Fuzzby frame-left and Zenny clean frame-right. Action: Fuzzby jolts and wipes one paw across his upper lip, smearing the pollen wider and messier. He stops, looks down at the bright yellow on his own paw, then his expression drops into panic and he bolts. Performance: Embarrassment becomes confidence for one wipe, then self-evidence turns it into status panic. End state: Fuzzby has left frame at speed; Zenny remains still and clean.\nShot 2: Camera: Side tracking at speed, widening for the blossom so his legs remain readable. Action: He clips a flower first and spins once. He clips a second harder and the spin doubles, visibly larger than the first. Each contact is separate. He flies headfirst into a blossom; only his head enters while body, wings and kicking legs remain outside. Performance: He fights each spin too late but never reads as hurt or distressed. End state: Held wide on Fuzzby upside down in the blossom, body outside and legs kicking.\nShot 3: Camera: Hold Fuzzby frame-left for the button; only after the line ends cut to Zenny frame-right. Action: Fuzzby pops vertically out in one explosive motion. The full showman pose lands and holds before he speaks. After the line has completely finished, cut to Zenny: her eyes travel over him, one slow eye-roll softens as her eyes come down into a genuine loving smile. Performance: He replaces panic with total conviction; her reaction moves visibly from resignation into affection. End state: Fuzzby is completely pollen-covered and proud frame-left; Zenny stays clean as her eye-roll softens into a genuine loving smile frame-right. Harvest this exact frame as SH2's opening. Dialogue placement: Fuzzby speaks in English with gasps delivery: {Buzz Crash!!}; the pose holds a full beat after the line ends. Hold: 2.0s — Hold until Zenny's loving smile fully reads and settles.\nWitness staging: Fuzzby stages frame-left; Zenny holds frame-right as the witness. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Global Supplement]\nExactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities. Safeguard: Do not obscure the widening smear before the bolt. Safeguard: Fuzzby's body outside the blossom. Final handoff: Fuzzby pops back out of the last flower more pollen-covered than before, with unsettled golden dust hanging between him and Zenny’s smiling eye-roll.\n\n[Audio]\nGenerated dialogue is guide audio; restore approved @Audio1 in post. No music."
+}

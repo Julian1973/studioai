@@ -380,6 +380,8 @@ def test_conform_plan_protects_dialogue_from_edge_and_settle_trim(monkeypatch):
 def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_path):
     clip = tmp_path / "approved.mp4"
     clip.write_bytes(b"approved take")
+    voice = tmp_path / "approved_voice.wav"
+    voice.write_bytes(b"approved voice")
 
     def write_output(*args, **kwargs):
         out = pathlib.Path(args[1] if len(args) > 1 else kwargs["out"])
@@ -387,6 +389,8 @@ def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_pa
         return str(out)
 
     monkeypatch.setattr(cb_post, "_norm", lambda clips: clips)
+    monkeypatch.setattr(cb_post, "replace_guide_dialogue", lambda video, approved_voice, out:
+                        pathlib.Path(out).write_bytes(b"restored dialogue") or str(out))
     monkeypatch.setattr(cb_post, "_dur", lambda path: 6.0)
     monkeypatch.setattr(cb_post, "_clip_fps", lambda path: 24.0)
     monkeypatch.setattr(cb_post, "assemble_conformed", write_output)
@@ -423,6 +427,8 @@ def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_pa
         "loudnessRangeLu": 3.0, "thresholdLufs": -24.0, "targetOffsetLu": 0.0,
     })
     shots = [{"shotId": "S1.SH1", "approvedTake": str(clip),
+              "approvedVoice": str(voice),
+              "audioProvenance": {"postLaneStatus": "required"},
               "dialogueLines": [{"dialogueOccurrenceId": "occ:first",
                                   "sourceEventId": "event:first", "speaker": "Fuzzby",
                                   "exactText": "Again.", "startSec": 0.5, "endSec": 1.2}]}]

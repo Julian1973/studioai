@@ -1,4 +1,19 @@
 {
   "schemaVersion": 1,
-  "recipes": {}
+  "recipes": {
+    "Fuzzby::false-triumph-button": {
+      "character": "Fuzzby",
+      "archetypeId": "false-triumph-button",
+      "recipe": {
+        "recipeId": "C",
+        "label": "Casual cover",
+        "performedText": "[casual] Nailed it.",
+        "primary": false,
+        "takesCount": 3
+      },
+      "sourceShotId": "S1.SH1A",
+      "approvedCandidate": "0a6635c8-C-1",
+      "approvedBy": "Julian"
+    }
+  }
 }

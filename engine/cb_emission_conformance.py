@@ -73,6 +73,14 @@ def require_complete_sentence(value, *, context):
     return text
 
 
+def ensure_complete_sentence(value, *, context):
+    """Preserve the full authored sentence and add only missing terminal punctuation."""
+    text = normalize_prose(value)
+    if not text:
+        raise EmissionConformanceError(f"{context} is empty")
+    return require_complete_sentence(_with_terminal(text), context=context)
+
+
 def compact_complete_sentence(value, *, max_words, context):
     """Compact only at an authored clause/sentence boundary, never mid-phrase."""
     text = normalize_prose(value)
@@ -122,7 +130,11 @@ def time_tiles(stages, duration_sec):
 
 
 def dialogue_cues(dialogue_lines, *, duration_sec):
-    """Validate and normalize audio-region ownership without copying spoken words."""
+    """Validate and normalize dialogue ownership for stage assignment.
+
+    Times are compiler-side routing data. They decide which stage owns a line but are
+    never emitted into a Seedance prompt.
+    """
     cues = []
     duration = float(duration_sec)
     for index, line in enumerate(dialogue_lines):
@@ -132,16 +144,97 @@ def dialogue_cues(dialogue_lines, *, duration_sec):
         if not speaker or start < 0 or end <= start or end > duration + 0.001:
             raise EmissionConformanceError(
                 f"audio cue {index + 1} is outside the approved 0-{duration:g}s route")
-        cues.append({"startSec": start, "endSec": end, "speaker": speaker})
+        exact = normalize_prose(line.get("exactText"))
+        if not exact:
+            raise EmissionConformanceError(f"audio cue {index + 1} has no locked dialogue")
+        cues.append({"startSec": start, "endSec": end, "speaker": speaker,
+                     "exactText": exact,
+                     "delivery": normalize_prose(line.get("delivery")),
+                     "dialogueOccurrenceId": line.get("dialogueOccurrenceId")})
     return cues
+
+
+def dialogue_placement_line(cue):
+    """Emit words as a placement marker, not as permission to invent a performance."""
+    speaker = normalize_prose(cue.get("speaker"))
+    exact = normalize_prose(cue.get("exactText"))
+    if not speaker or not exact:
+        raise EmissionConformanceError("dialogue placement requires speaker and exact words")
+    delivery = normalize_prose(cue.get("delivery"))
+    if exact and delivery:
+        delivery = re.sub(re.escape(exact), "", delivery, flags=re.I).strip(" []{}.,;:-")
+    delivery_clause = f" with {delivery} delivery" if delivery else " with the approved delivery"
+    return (f"Dialogue placement: {speaker} speaks in English{delivery_clause}: "
+            f"{{{exact}}}; the pose holds a full beat after the line ends.")
+
+
+def validate_dialogue_synthesis(prompt, dialogue_lines):
+    """Validate the synthesis contract used by every Seedance render emission.
+
+    The provider receives the words so it can stage speech and lip sync, while the
+    approved audio reference remains the sole performance authority. Exact audio
+    passthrough is not assumed; the rendered voice is a guide track for post.
+    """
+    text = str(prompt or "")
+    low = text.casefold()
+    lines = list(dialogue_lines or [])
+    if not lines:
+        return {"ready": True, "errors": [], "markers": []}
+
+    errors = []
+    required_phrases = (
+        "@audio1",
+        "sole authority",
+        "voice identity",
+        "cadence",
+        "delivery",
+        "mouth timing",
+        "silence",
+        "no alternative performance",
+        "listeners remain silent and closed-mouth",
+        "no narration",
+        "no extra words",
+        "no subtitles or captions",
+    )
+    for phrase in required_phrases:
+        if phrase not in low:
+            errors.append(f"dialogue authority is missing {phrase!r}")
+
+    expected = []
+    for index, line in enumerate(lines):
+        speaker = normalize_prose(line.get("speaker"))
+        exact = normalize_prose(line.get("exactText"))
+        marker = "{" + exact + "}"
+        expected.append(marker)
+        if text.count(marker) != 1:
+            errors.append(
+                f"dialogue line {index + 1} must appear exactly once as {marker!r}")
+        placement = re.compile(
+            rf"Dialogue placement:\s*{re.escape(speaker)}\s+speaks in English"
+            rf"(?:\s+with\s+[^:]+\s+delivery)?:\s*{re.escape(marker)}"
+        )
+        if not placement.search(text):
+            errors.append(
+                f"dialogue line {index + 1} is not attributed to {speaker} in English")
+
+    emitted = re.findall(r"\{([^{}]+)\}", text)
+    expected_text = [normalize_prose(line.get("exactText")) for line in lines]
+    if emitted != expected_text:
+        errors.append("dialogue markers are invented, reordered or duplicated")
+    return {"ready": not errors, "errors": errors, "markers": expected}
 
 
 def format_seconds(value):
     return f"{float(value):g}"
 
 
-def character_instance_lock(characters):
-    """Emit an exact visual subject count for multi-character image/video prompts."""
+def character_instance_lock(characters, *, medium="video"):
+    """Emit an exact visual subject count for multi-character prompts.
+
+    A still owns one image, so describing subjects as persisting "throughout" is both
+    unnecessary and less direct for an image model. Video prompts retain the continuity
+    wording because duplicate instances can appear after motion or occlusion.
+    """
     names = []
     seen = set()
     for value in characters or []:
@@ -152,6 +245,13 @@ def character_instance_lock(characters):
             seen.add(key)
     if len(names) < 2:
         return ""
+    if medium == "still":
+        if len(names) == 2:
+            return f"Exactly one {names[0]} and one {names[1]} appear in this image."
+        subject_list = ", one ".join(names[:-1]) + f" and one {names[-1]}"
+        return f"Exactly one {subject_list} appear in this image."
+    if medium != "video":
+        raise ValueError("medium must be 'still' or 'video'")
     if len(names) == 2:
         subject_list = f"{names[0]} and one {names[1]}"
         duplicate_scope = "either character"
@@ -159,3 +259,42 @@ def character_instance_lock(characters):
         subject_list = ", one ".join(names[:-1]) + f" and one {names[-1]}"
         duplicate_scope = "any character"
     return f"Exactly one {subject_list} throughout; no duplicates of {duplicate_scope}."
+
+
+def reference_slot_stability_line(bindings):
+    """Emit the compact resolved slot map used for this production request."""
+    grouped = []
+    for slot, role in bindings or []:
+        slot = str(slot or "").strip()
+        role = " ".join(str(role or "").split()).strip()
+        if slot and role:
+            if grouped and grouped[-1][1] == role:
+                grouped[-1][0].append(slot)
+            else:
+                grouped.append(([slot], role))
+    if not grouped:
+        return ""
+    stable = [f"{'/'.join(slots)}={role}" for slots, role in grouped]
+    return "Project-stable slots: " + "; ".join(stable) + ". Never swap roles."
+
+
+def multi_angle_collapse_line(slot, character):
+    """State that every turnaround angle belongs to one subject instance."""
+    slot = str(slot or "").strip()
+    character = " ".join(str(character or "").split()).strip()
+    if not slot or not character:
+        return ""
+    return f"{slot}: all turnaround angles are one {character}, not extra characters."
+
+
+def multi_angle_collapse_summary(bindings):
+    identities = []
+    for slot, character in bindings or []:
+        slot = str(slot or "").strip()
+        character = " ".join(str(character or "").split()).strip()
+        if slot and character:
+            identities.append(f"{slot}=one {character}")
+    if not identities:
+        return ""
+    return ("Multi-angle collapse: " + "; ".join(identities) +
+            "; views are angles, not extra characters.")

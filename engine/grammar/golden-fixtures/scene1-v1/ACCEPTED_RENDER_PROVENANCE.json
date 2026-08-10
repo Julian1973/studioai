@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "accepted-render-provenance-v1",
+  "fixture": "beat_1_chase.txt",
+  "unit": "S1.SH1A",
+  "archetype": "false-triumph-chase",
+  "status": "director-accepted-golden",
+  "director": "Julian Jenkins",
+  "directorVerdict": "Best shot produced to date; this formula is the target.",
+  "recordedAt": "2026-08-10",
+  "providerSurface": "Flova",
+  "prompt": {
+    "path": "engine/grammar/golden-fixtures/scene1-v1/beat_1_chase.txt",
+    "sha256": "5c2fb516da98eb2effbb344938beb81b8acb792359c9c175e814156923b8d8d5",
+    "preflightScore": 9.75,
+    "manifest": "15/15"
+  },
+  "render": {
+    "canonicalLocalPath": "cb-output/golden-renders/scene1-v1/S1.SH1A_flova_accepted_20260810_1302.mp4",
+    "sourceFileName": "flova_Shot_Chase_And_False_Triumph_video_202608101302_0ecdf8.mp4",
+    "sha256": "49a715c74380f7ebf00742e7abf150462eebe7236924321aca1d90dca3b0b96d",
+    "durationSeconds": 9.056,
+    "width": 854,
+    "height": 480,
+    "framesPerSecond": 24,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "bytes": 6178681
+  },
+  "referenceAuthority": {
+    "image_1": "Element_Fuzzby exact identity and proportions",
+    "image_2": "Element_Zenny exact identity and proportions",
+    "image_3": "approved rainforest environment only"
+  },
+  "replacementRule": "Replace only when a new render performs better and Julian explicitly accepts it."
+}

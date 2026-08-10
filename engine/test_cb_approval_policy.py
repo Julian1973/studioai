@@ -1,4 +1,5 @@
 import json
+import hashlib
 import pathlib
 
 import pytest
@@ -181,6 +182,76 @@ def test_department_approval_uses_direct_inputs_not_package_revision(tmp_path, m
         package, shot["shotId"], "cinematography")["current"]
 
 
+def test_duration_only_visual_change_does_not_stale_human_approved_voice_take(
+        tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    line = {
+        "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
+        "speaker": "Fuzzby", "exactText": "Nailed it.",
+    }
+    shot["dialogueLines"] = [line]
+    ledger = render._ledger(package, shot["shotId"])
+    voice_output = {
+        "shotId": shot["shotId"], "sceneIntention": "False confidence lands cleanly.",
+        "lines": [{
+            **line, "character": "Fuzzby", "exactDialogue": "Nailed it.",
+            "performedText": "Nailed it.",
+            "dramaticIntention": "Make the listener accept the false victory.",
+            "subtext": "He believes the evidence supports him.",
+            "cadenceAndBreath": "One easy breath, then misplaced certainty.",
+            "timingAndBody": "The line follows the settled proud pose.",
+            "archetypeId": "false-triumph-button",
+            "performanceQuestions": {
+                "intention": "Make the listener accept the false victory.",
+                "subtext": "He believes the evidence supports him.",
+                "thoughtBefore": "That went exactly as planned.",
+                "changeDuring": "Pride settles into certainty.",
+                "operativeWords": ["Nailed"],
+            },
+            "physicalState": "Chest-forward hover after recovery.",
+            "emotionalState": {"entry": "Proud", "exit": "Certain"},
+            "listener": "Zenny", "bodyVoiceRelationship": "Voice buttons the pose.",
+            "previousText": "The leaf has just returned him upright.",
+            "startsAtSec": 2.0, "estimatedDurationSec": 1.0,
+            "pauseReasons": [], "tagPurposes": {},
+            "takeRecipes": [{"recipeId": "A", "label": "Primary",
+                              "performedText": "Nailed it.", "primary": True,
+                              "takesCount": 2}],
+        }],
+    }
+    work = ledger.setdefault("departmentWork", {}).setdefault("voice", {})
+    work["candidate"] = {
+        "output": voice_output,
+        "inputSignature": render._department_input_signature(
+            package, "voice", shot["shotId"], "1", "Ep1"),
+    }
+    generated = render._approved_voice_lines(package, shot)
+    paths = {}
+    for field in ("voPath", "voRawPath", "voTimingPath", "voPlacementPath"):
+        suffix = ".json" if field == "voPlacementPath" else ".wav"
+        path = tmp_path / f"{field}{suffix}"
+        path.write_bytes(field.encode())
+        ledger[field] = str(path)
+        paths[field] = path
+    ledger["voGeneratedFrom"] = generated
+    expected = render._voice_approval_status(package, shot)["expectedInputSignature"]
+    ledger["voiceApproval"] = {
+        "approved": True, "path": ledger["voPath"], "inputSignature": expected,
+        "contentHash": render._sha256_file(paths["voPath"]),
+        "rawContentHash": render._sha256_file(paths["voRawPath"]),
+        "timingContentHash": render._sha256_file(paths["voTimingPath"]),
+        "placementContentHash": render._sha256_file(paths["voPlacementPath"]),
+    }
+    assert render._voice_approval_status(package, shot)["current"] is True
+
+    shot["durationSec"] = 12
+    assert render._department_record_status(
+        package, shot["shotId"], "voice")["current"] is False
+    status = render._voice_approval_status(package, shot)
+    assert status["current"] is True
+    assert status["providerEquivalentContract"] is True
+
+
 def test_keyframe_approval_survives_revision_but_not_input_or_file_change(
         tmp_path, monkeypatch):
     package, shot, frame = _pkg(tmp_path)
@@ -198,6 +269,35 @@ def test_keyframe_approval_survives_revision_but_not_input_or_file_change(
     assert not render._keyframe_record_status(package, shot, approval)["current"]
     current["cardHash"] = "card-v1"
     frame.write_bytes(b"opening-tampered")
+    assert not render._keyframe_record_status(package, shot, approval)["current"]
+
+
+def test_approved_keyframe_keeps_historical_prompt_after_compiler_only_change(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    historical_prompt = "[Intended Read]\nThe approved opening direction."
+    historical_hash = hashlib.sha256(historical_prompt.encode()).hexdigest()
+    approval = render._ledger(package, shot["shotId"])["keyframeApproval"]
+    approval["inputSignature"] = {
+        "cardHash": "card-v1", "canonProfileDigest": TEST_CANON_DIGEST,
+        "briefHash": historical_hash,
+    }
+    approval["promptContract"] = {
+        "prompt": historical_prompt, "promptHash": historical_hash,
+    }
+    monkeypatch.setattr(render, "_keyframe_input_signature", lambda *args, **kwargs: {
+        "cardHash": "card-v1", "canonProfileDigest": TEST_CANON_DIGEST,
+        "briefHash": "new-compiler-hash",
+    })
+    monkeypatch.setattr(render, "_keyframe_prompt_contract", lambda *args, **kwargs: {
+        "directionContract": {"geography": ["unchanged"]},
+    })
+
+    assert render._keyframe_record_status(package, shot, approval)["current"]
+
+    monkeypatch.setattr(
+        render, "_keyframe_prompt_contract",
+        lambda *args, **kwargs: (_ for _ in ()).throw(render.Refused("direction changed")))
     assert not render._keyframe_record_status(package, shot, approval)["current"]
 
 

@@ -784,6 +784,16 @@
       candidates ? `${candidates} candidate${candidates === 1 ? "" : "s"}` : "",
       cost ? `up to $${cost.toFixed(2)}` : "",
     ].filter(Boolean);
+    const completedItems = session.artifact?.type === "video-set"
+      ? (session.artifact.items || [])
+      : [];
+    const completedCount = Number(job.completedCandidateCount || completedItems.length || 0);
+    const completedMedia = completedItems.length ? `<div class="render-completed-candidates">
+      ${completedItems.map((item) => `<figure>
+        <figcaption>Candidate ${esc(item.n)} complete</figcaption>
+        <video controls playsinline preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></video>
+      </figure>`).join("")}
+    </div>` : "";
     return `<div class="render-progress" role="status" aria-live="polite">
       <div class="render-progress-head">
         <span class="loading-mark" aria-hidden="true"></span>
@@ -791,8 +801,9 @@
         <time aria-label="Elapsed activity time">${formatRenderElapsed(job.started)}</time>
       </div>
       <div class="render-progress-track" aria-label="${esc(trackLabel)}"><span></span></div>
-      <div class="render-progress-meta"><span>${esc(providerLabel)}</span>${details.map((item) => `<span>${esc(item)}</span>`).join("")}</div>
+      <div class="render-progress-meta"><span>${esc(providerLabel)}</span>${details.map((item) => `<span>${esc(item)}</span>`).join("")}${candidates ? `<span>${completedCount}/${candidates} complete</span>` : ""}</div>
       <p>${esc(job.latestMessage || fallbackMessage)}</p>
+      ${completedMedia}
       <small>${esc(session.phase === "animation" ? "Live activity. The provider does not supply a reliable completion percentage or ETA." : "Live activity. This step will update automatically when the result is ready.")}</small>
     </div>`;
   }
@@ -1156,7 +1167,7 @@
     const phaseCopy = session.phase === "voice"
       ? "Review the approved keyframe context, the current ElevenLabs acting prompt and the generated take. No animation render is submitted at this stage."
       : stage === "animation"
-        ? "Approve the keyframe first. Animation uses that approved frame, the same locked references and this exact Seedance request."
+        ? "Animation uses the signed keyframe, the same locked references and this exact Seedance request."
         : "Create the still frame first. This image becomes the visual truth for the shot before animation is allowed.";
     const phaseAction = session.status === "rendering"
       ? "Working"
@@ -1698,8 +1709,34 @@
       const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
       return url ? `<div class="relay-audio-player">${audioWaveformMarkup("Approved voice performance")}<audio controls preload="metadata" src="${esc(url)}"></audio></div>` : `<div class="relay-empty">Voice is locked until SEE is approved.</div>`;
     }
-    const videoUrl = artifact.type === "video" ? artifact.url :
-      artifact.type === "video-set" ? artifact.items?.[0]?.url : selected.acceptedUrl;
+    if (session.status === "rendering") {
+      return renderProgress(session);
+    }
+    if (artifact.type === "video-set" && (artifact.items || []).length) {
+      const items = artifact.items;
+      if (artifact.stale) {
+        return `<div class="relay-stale-candidates">
+          <div class="relay-stale-notice"><strong>Previous renders — view only</strong><span>${esc(artifact.notice || "The direction changed after these renders completed, so they cannot be approved.")}</span></div>
+          <div class="relay-candidate-grid">
+            ${items.map((item) => `<article class="relay-candidate stale">
+              <header><strong>Previous candidate ${esc(item.n)}</strong><span>Superseded</span></header>
+              <video controls playsinline preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></video>
+            </article>`).join("")}
+          </div>
+        </div>`;
+      }
+      if (!items.some((item) => Number(item.n) === Number(app.selectedCandidate))) {
+        app.selectedCandidate = Number(items[0].n);
+      }
+      return `<div class="relay-candidate-grid">
+        ${items.map((item) => `<article class="relay-candidate ${Number(item.n) === Number(app.selectedCandidate) ? "selected" : ""}">
+          <header><strong>Candidate ${esc(item.n)}</strong><span>${Number(item.n) === Number(app.selectedCandidate) ? "Selected" : "Ready to compare"}</span></header>
+          <video controls playsinline preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></video>
+          <button type="button" data-relay-candidate="${esc(item.n)}">${Number(item.n) === Number(app.selectedCandidate) ? "Selected for approval" : `Select candidate ${esc(item.n)}`}</button>
+        </article>`).join("")}
+      </div>`;
+    }
+    const videoUrl = artifact.type === "video" ? artifact.url : selected.acceptedUrl;
     if (videoUrl) return `<video controls playsinline preload="metadata" src="${esc(videoUrl)}"></video>`;
     return `<div class="relay-empty">${session.phase === "animation" ? "No video has been submitted yet. The approved frame and voice are ready for the 480p render." : "Animation is locked until SEE and HEAR are approved."}</div>`;
   }
@@ -1775,6 +1812,10 @@
     });
     host.querySelectorAll("[data-keyframe-preview]").forEach((button) => button.addEventListener("click", () => {
       openKeyframePreview(button.dataset.keyframePreview);
+    }));
+    host.querySelectorAll("[data-relay-candidate]").forEach((button) => button.addEventListener("click", () => {
+      app.selectedCandidate = Number(button.dataset.relayCandidate);
+      renderSignoffRelay(app.session || session);
     }));
     host.querySelectorAll("[data-relay-action]").forEach((button) => button.addEventListener("click", () => {
       const actions = [app.session?.primaryAction, ...(app.session?.decisionActions || [])].filter(Boolean);

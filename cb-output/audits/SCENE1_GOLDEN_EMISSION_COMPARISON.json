@@ -1,0 +1,620 @@
+{
+  "standard": "emission-standard-v1",
+  "units": {
+    "S1.SH1A": {
+      "archetype": "false-triumph-chase",
+      "source": "recompiled-typed-animation-direction",
+      "typedDirectionCurrent": true,
+      "compileError": null,
+      "currentWords": 888,
+      "fixtureWords": 836,
+      "currentPreflight": {
+        "score": 9.75,
+        "verdict": "PASS",
+        "findings": [
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 5,994 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "fixturePreflight": {
+        "score": 9.75,
+        "verdict": "PASS",
+        "findings": [
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 5,123 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "currentManifest": {
+        "archetype": "false-triumph-chase",
+        "passed": 15,
+        "total": 15,
+        "ready": true,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": true
+          },
+          {
+            "name": "four shots",
+            "passed": true
+          },
+          {
+            "name": "three parallax speeds",
+            "passed": true
+          },
+          {
+            "name": "passing landmarks",
+            "passed": true
+          },
+          {
+            "name": "scale change and camera surge",
+            "passed": true
+          },
+          {
+            "name": "foreground lens wipe",
+            "passed": true
+          },
+          {
+            "name": "three escalating contacts",
+            "passed": true
+          },
+          {
+            "name": "maximum-load cut",
+            "passed": true
+          },
+          {
+            "name": "isolated full aerial",
+            "passed": true
+          },
+          {
+            "name": "self-check before pride",
+            "passed": true
+          },
+          {
+            "name": "dialogue and post-line hold",
+            "passed": true
+          },
+          {
+            "name": "held witness payoff",
+            "passed": true
+          },
+          {
+            "name": "acting left, witness right",
+            "passed": true
+          },
+          {
+            "name": "action exclusions lifted",
+            "passed": true
+          },
+          {
+            "name": "no duplicated shot action",
+            "passed": true
+          }
+        ]
+      },
+      "fixtureManifest": {
+        "archetype": "false-triumph-chase",
+        "passed": 15,
+        "total": 15,
+        "ready": true,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": true
+          },
+          {
+            "name": "four shots",
+            "passed": true
+          },
+          {
+            "name": "three parallax speeds",
+            "passed": true
+          },
+          {
+            "name": "passing landmarks",
+            "passed": true
+          },
+          {
+            "name": "scale change and camera surge",
+            "passed": true
+          },
+          {
+            "name": "foreground lens wipe",
+            "passed": true
+          },
+          {
+            "name": "three escalating contacts",
+            "passed": true
+          },
+          {
+            "name": "maximum-load cut",
+            "passed": true
+          },
+          {
+            "name": "isolated full aerial",
+            "passed": true
+          },
+          {
+            "name": "self-check before pride",
+            "passed": true
+          },
+          {
+            "name": "dialogue and post-line hold",
+            "passed": true
+          },
+          {
+            "name": "held witness payoff",
+            "passed": true
+          },
+          {
+            "name": "acting left, witness right",
+            "passed": true
+          },
+          {
+            "name": "action exclusions lifted",
+            "passed": true
+          },
+          {
+            "name": "no duplicated shot action",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "S1.SH1B": {
+      "archetype": "reveal-and-deadpan-verdict",
+      "source": "stored-package-emission-no-typed-direction",
+      "typedDirectionCurrent": false,
+      "compileError": null,
+      "currentWords": 342,
+      "fixtureWords": 746,
+      "currentPreflight": {
+        "score": 5.25,
+        "verdict": "BLOCK",
+        "findings": [
+          {
+            "severity": "FATAL",
+            "rule": "ending-state",
+            "message": "No ending state appears in the unit.",
+            "fix": "End every shot with a describable frame.",
+            "deduction": 2.0
+          },
+          {
+            "severity": "FATAL",
+            "rule": "R16",
+            "message": "A salient feature is introduced without an ownership block.",
+            "fix": "Name the feature owner and explicitly keep every other character clean.",
+            "deduction": 2.0
+          },
+          {
+            "severity": "FIX",
+            "rule": "audio-policy",
+            "message": "No music policy is absent.",
+            "fix": "State No music in the final audio block.",
+            "deduction": 0.75
+          }
+        ],
+        "clean": false
+      },
+      "fixturePreflight": {
+        "score": 9.0,
+        "verdict": "PASS",
+        "findings": [
+          {
+            "severity": "FIX",
+            "rule": "button-hold",
+            "message": "The spoken button has no protected hold after the line.",
+            "fix": "Hold the pose for a full beat after the line finishes.",
+            "deduction": 0.75
+          },
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 4,643 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "currentManifest": {
+        "archetype": "reveal-and-deadpan-verdict",
+        "passed": 0,
+        "total": 11,
+        "ready": false,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": false
+          },
+          {
+            "name": "attribute ownership",
+            "passed": false
+          },
+          {
+            "name": "feature absent in opening",
+            "passed": false
+          },
+          {
+            "name": "overcommitted arrival",
+            "passed": false
+          },
+          {
+            "name": "cut before reveal",
+            "passed": false
+          },
+          {
+            "name": "close reveal and presentation",
+            "passed": false
+          },
+          {
+            "name": "non-owner remains clean",
+            "passed": false
+          },
+          {
+            "name": "eye-line feature and back",
+            "passed": false
+          },
+          {
+            "name": "micro-tell before line",
+            "passed": false
+          },
+          {
+            "name": "hold after line",
+            "passed": false
+          },
+          {
+            "name": "harvestable end state",
+            "passed": false
+          }
+        ]
+      },
+      "fixtureManifest": {
+        "archetype": "reveal-and-deadpan-verdict",
+        "passed": 11,
+        "total": 11,
+        "ready": true,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": true
+          },
+          {
+            "name": "attribute ownership",
+            "passed": true
+          },
+          {
+            "name": "feature absent in opening",
+            "passed": true
+          },
+          {
+            "name": "overcommitted arrival",
+            "passed": true
+          },
+          {
+            "name": "cut before reveal",
+            "passed": true
+          },
+          {
+            "name": "close reveal and presentation",
+            "passed": true
+          },
+          {
+            "name": "non-owner remains clean",
+            "passed": true
+          },
+          {
+            "name": "eye-line feature and back",
+            "passed": true
+          },
+          {
+            "name": "micro-tell before line",
+            "passed": true
+          },
+          {
+            "name": "hold after line",
+            "passed": true
+          },
+          {
+            "name": "harvestable end state",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "S1.SH1C": {
+      "archetype": "escalation-into-verdict",
+      "source": "stored-package-emission-no-typed-direction",
+      "typedDirectionCurrent": false,
+      "compileError": null,
+      "currentWords": 368,
+      "fixtureWords": 747,
+      "currentPreflight": {
+        "score": 5.0,
+        "verdict": "BLOCK",
+        "findings": [
+          {
+            "severity": "FATAL",
+            "rule": "ending-state",
+            "message": "No ending state appears in the unit.",
+            "fix": "End every shot with a describable frame.",
+            "deduction": 2.0
+          },
+          {
+            "severity": "FATAL",
+            "rule": "R16",
+            "message": "A salient feature is introduced without an ownership block.",
+            "fix": "Name the feature owner and explicitly keep every other character clean.",
+            "deduction": 2.0
+          },
+          {
+            "severity": "FIX",
+            "rule": "audio-policy",
+            "message": "No music policy is absent.",
+            "fix": "State No music in the final audio block.",
+            "deduction": 0.75
+          },
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 2,507 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "fixturePreflight": {
+        "score": 9.75,
+        "verdict": "PASS",
+        "findings": [
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 4,600 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "currentManifest": {
+        "archetype": "escalation-into-verdict",
+        "passed": 1,
+        "total": 9,
+        "ready": false,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": false
+          },
+          {
+            "name": "attribute ownership",
+            "passed": false
+          },
+          {
+            "name": "opening from previous end",
+            "passed": false
+          },
+          {
+            "name": "correction worsens feature",
+            "passed": true
+          },
+          {
+            "name": "self evidence before panic",
+            "passed": false
+          },
+          {
+            "name": "contacts escalate",
+            "passed": false
+          },
+          {
+            "name": "button pose before line and hold",
+            "passed": false
+          },
+          {
+            "name": "reactor cut after line",
+            "passed": false
+          },
+          {
+            "name": "turn names both states",
+            "passed": false
+          }
+        ]
+      },
+      "fixtureManifest": {
+        "archetype": "escalation-into-verdict",
+        "passed": 9,
+        "total": 9,
+        "ready": true,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": true
+          },
+          {
+            "name": "attribute ownership",
+            "passed": true
+          },
+          {
+            "name": "opening from previous end",
+            "passed": true
+          },
+          {
+            "name": "correction worsens feature",
+            "passed": true
+          },
+          {
+            "name": "self evidence before panic",
+            "passed": true
+          },
+          {
+            "name": "contacts escalate",
+            "passed": true
+          },
+          {
+            "name": "button pose before line and hold",
+            "passed": true
+          },
+          {
+            "name": "reactor cut after line",
+            "passed": true
+          },
+          {
+            "name": "turn names both states",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "S1.SH2": {
+      "archetype": "environment-turn",
+      "source": "stored-package-emission-no-typed-direction",
+      "typedDirectionCurrent": false,
+      "compileError": null,
+      "currentWords": 417,
+      "fixtureWords": 798,
+      "currentPreflight": {
+        "score": 5.0,
+        "verdict": "BLOCK",
+        "findings": [
+          {
+            "severity": "FATAL",
+            "rule": "ending-state",
+            "message": "No ending state appears in the unit.",
+            "fix": "End every shot with a describable frame.",
+            "deduction": 2.0
+          },
+          {
+            "severity": "FATAL",
+            "rule": "R16",
+            "message": "A salient feature is introduced without an ownership block.",
+            "fix": "Name the feature owner and explicitly keep every other character clean.",
+            "deduction": 2.0
+          },
+          {
+            "severity": "FIX",
+            "rule": "audio-policy",
+            "message": "No music policy is absent.",
+            "fix": "State No music in the final audio block.",
+            "deduction": 0.75
+          },
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 2,641 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "fixturePreflight": {
+        "score": 9.75,
+        "verdict": "PASS",
+        "findings": [
+          {
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is 5,023 characters.",
+            "fix": "Compact plumbing only; preserve creative direction.",
+            "deduction": 0.25
+          }
+        ],
+        "clean": false
+      },
+      "currentManifest": {
+        "archetype": "environment-turn",
+        "passed": 1,
+        "total": 8,
+        "ready": false,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": false
+          },
+          {
+            "name": "two environment states, same geometry",
+            "passed": false
+          },
+          {
+            "name": "world changes first",
+            "passed": false
+          },
+          {
+            "name": "vegetation posture changes",
+            "passed": false
+          },
+          {
+            "name": "physical betrayal before cover line",
+            "passed": false
+          },
+          {
+            "name": "reader stills and listens",
+            "passed": true
+          },
+          {
+            "name": "hold after quiet line",
+            "passed": false
+          },
+          {
+            "name": "final still hold and fade",
+            "passed": false
+          }
+        ]
+      },
+      "fixtureManifest": {
+        "archetype": "environment-turn",
+        "passed": 8,
+        "total": 8,
+        "ready": true,
+        "checks": [
+          {
+            "name": "2-4 named shots with end states",
+            "passed": true
+          },
+          {
+            "name": "two environment states, same geometry",
+            "passed": true
+          },
+          {
+            "name": "world changes first",
+            "passed": true
+          },
+          {
+            "name": "vegetation posture changes",
+            "passed": true
+          },
+          {
+            "name": "physical betrayal before cover line",
+            "passed": true
+          },
+          {
+            "name": "reader stills and listens",
+            "passed": true
+          },
+          {
+            "name": "hold after quiet line",
+            "passed": true
+          },
+          {
+            "name": "final still hold and fade",
+            "passed": true
+          }
+        ]
+      }
+    }
+  }
+}

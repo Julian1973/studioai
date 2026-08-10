@@ -384,6 +384,10 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .render-progress-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: #c7d1ce; font-size: 11px; font-weight: 750; }
 .render-progress p { margin: 0; color: #dce5e2; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .render-progress small { color: #84918d; font-size: 10px; line-height: 1.4; }
+.render-completed-candidates { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.render-completed-candidates figure { min-width: 0; margin: 0; display: grid; gap: 7px; }
+.render-completed-candidates figcaption { color: #70d9d1; font-size: 11px; font-weight: 800; }
+.render-completed-candidates video { width: 100%; aspect-ratio: 16 / 9; display: block; background: #050606; border: 1px solid #35413d; border-radius: 4px; }
 .render-ready-panel {
   width: min(640px, calc(100% - 40px));
   display: grid;
@@ -556,6 +560,19 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .relay-media { aspect-ratio: 16 / 9; display: grid; place-items: center; overflow: hidden; border: 1px solid #303b38; border-radius: 4px; background: #090d0c; }
 .relay-media img, .relay-media video { width: 100%; height: 100%; object-fit: contain; }
 .relay-media > audio { width: calc(100% - 24px); }
+.relay-media:has(.relay-candidate-grid) { aspect-ratio: auto; overflow: visible; border: 0; background: transparent; }
+.relay-candidate-grid { width: 100%; display: grid; gap: 10px; }
+.relay-candidate { margin: 0; padding: 9px; display: grid; gap: 8px; border: 1px solid #303b38; border-radius: 4px; background: #090d0c; }
+.relay-candidate.selected { border-color: #55cfc5; box-shadow: 0 0 0 1px rgba(85, 207, 197, .2); }
+.relay-candidate > header { min-height: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.relay-candidate > header strong { color: #f8fafc; font-size: 12px; }
+.relay-candidate > header span { color: #73ddd4; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+.relay-candidate video { width: 100%; height: auto; aspect-ratio: 16 / 9; display: block; background: #050606; }
+.relay-candidate button { min-height: 34px; border: 1px solid #53615c; border-radius: 4px; background: transparent; color: #dce5e2; font-size: 11px; font-weight: 850; }
+.relay-candidate.selected button { border-color: #55cfc5; background: #55cfc5; color: #071413; }
+.relay-stale-notice { display: flex; gap: 8px; flex-direction: column; margin-bottom: 12px; padding: 10px 12px; border: 1px solid #805f32; background: #211b14; color: #f2d19b; }
+.relay-stale-notice span { color: #d4c1a3; }
+.relay-candidate.stale { border-color: #5b5145; }
 .relay-keyframe-preview {
   position: relative;
   width: 100%;

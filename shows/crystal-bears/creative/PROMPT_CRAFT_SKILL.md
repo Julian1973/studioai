@@ -348,7 +348,7 @@ Three techniques new to this file:
    enter as SCALE FACTS first and get their names second. The establishing shot's subject
    is the world; the characters are its measurement.
 3. **MOTION IN EVERY DEPTH PLANE.** Aliveness is distributed: stems SWAY (background),
-   pollen motes FLOAT (air), characters WEAVE (midground), pollen sacks BOUNCE (micro).
+   pollen motes FLOAT (air), characters WEAVE (midground), wings and antennae OVERLAP (micro).
    A static plane is a dead plane — every layer of the depth map carries its own verb.
 
 And their closing definition, kept: "The prompt is a SCREENPLAY for the AI renderer —

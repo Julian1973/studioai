@@ -100,12 +100,16 @@ def test_comparison_plan_keeps_one_studio_unit_and_derives_two_prompts():
     assert plan["segments"][1]["dialogueLineIndexes"] == [2]
     assert plan["segments"][1]["dynamicOpeningRelay"] is True
     assert plan["segments"][0]["prompt"].startswith(
-        "@Audio1 is the sole source of English dialogue")
+        "AUDIO-AUTHORITY: @Audio1 is the sole authority")
     assert "0-7 seconds" in plan["segments"][0]["prompt"]
     assert "0-7 seconds" in plan["segments"][1]["prompt"]
+    assert plan["segments"][0]["prompt"].count("{First locked line.}") == 1
+    assert plan["segments"][0]["prompt"].count("{Second locked line.}") == 1
+    assert "Final locked line" not in plan["segments"][0]["prompt"]
+    assert plan["segments"][1]["prompt"].count("{Final locked line.}") == 1
+    assert "First locked line" not in plan["segments"][1]["prompt"]
     for segment in plan["segments"]:
-        assert "First locked line" not in segment["prompt"]
-        assert "Final locked line" not in segment["prompt"]
+        assert "no alternative performance is permitted" in segment["prompt"]
 
 
 def test_comparison_translates_studio_slots_to_provider_upload_tags():

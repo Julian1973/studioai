@@ -1,0 +1,289 @@
+{
+  "shotId": "S1.SH2",
+  "durationSec": 15,
+  "taskMode": "reference-to-video",
+  "pacingMode": "storyline",
+  "generationGoal": "The unchanged flower corridor turns from warm play-space into storm warning before either bee reacts, then Fuzzby's bravado drives him directly into a flower.",
+  "deliveryPlan": "Use world turn, Zenny read and physical contradiction shots so the environment changes first and the final motionless image closes the scene.",
+  "creativeTranslation": {
+    "interpretation": {
+      "jokeOrAche": "The comedy yields to story when the world changes independently of Fuzzby's performance.",
+      "mechanism": "Light, sky, colour and flower posture turn first; his body betrays fear, Zenny listens, and his cover boast creates the final capture.",
+      "statusBefore": "Both bees share the warm pollen aftermath.",
+      "statusAfter": "The corridor is cold and wind-pressed; Fuzzby is stuck while Zenny's care remains beside him.",
+      "audienceProgression": [
+        "The warm world begins to feel wrong.",
+        "Zenny's stillness confirms a real storm.",
+        "Fuzzby's denial creates one final comic contradiction inside the warning."
+      ],
+      "emotionalHeart": "Zenny's quiet certainty asks Fuzzby to stop performing and stay close."
+    },
+    "gagClocks": [
+      {
+        "beatCode": "1.B4",
+        "mode": "SMALL",
+        "setup": "The comedy has trained us that Fuzzby turns every mishap into performance material.",
+        "anticipation": "A thunder rumble should stop the game and make everyone attend to the sky.",
+        "impact": "Fuzzby tries to annex the rumble as dramatic punctuation, while Zenny’s stillness shows it is not part of his act.",
+        "reaction": "The witness remains economical while the changed world or physical evidence settles.",
+        "recoveryHold": "Hold the contrast between Fuzzby’s wobbling rebrand and Zenny’s quiet sky-attention so the laugh thins into warning.",
+        "recoveryHoldSec": 2.0,
+        "button": "A Storm’s coming.",
+        "retroactive": false,
+        "providerAction": "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses mid-hover and tries to fold it into performance"
+      },
+      {
+        "beatCode": "1.B5",
+        "mode": "BIG",
+        "setup": "Zenny has just named the storm, giving Fuzzby a real pressure cue.",
+        "anticipation": "Fuzzby’s boast promises competence under pressure and a clean demonstration of control.",
+        "impact": "His demonstration sends him straight into a flower and gets him stuck again.",
+        "reaction": "The witness remains economical while the changed world or physical evidence settles.",
+        "recoveryHold": "Hold long enough for pollen trembling, Fuzzby’s stuck shape, and Zenny’s quiet sighing presence to share the frame with the changed sky-feel.",
+        "recoveryHoldSec": 2.0,
+        "button": "The flower-held closing image is the punchline: the pressure expert cannot move.",
+        "retroactive": false,
+        "providerAction": "Fuzzby answers the warning, accelerates as if proving it, immediately flies into a flower and gets stuck again as Zenny sighs."
+      }
+    ],
+    "generationDesign": {
+      "packagingDecision": "single-unit",
+      "completeGagArcCount": 2,
+      "densityJudgement": "Fifteen seconds protects a complete world turn, genuine listening beat, quiet line, boast, impact and final hold.",
+      "splitOrNonSplitRationale": "Three motivated shots preserve one tonal turn and its immediate physical consequence.",
+      "handoffState": "Fuzzby is stuck in the flower again, petals compressed around him and pollen trembling in the shifted light, with Zenny nearby as the sky’s dimness presses into the warm field."
+    }
+  },
+  "dramaticBeat": "The same corridor becomes warning-space before Fuzzby's denial produces a final soft capture.",
+  "audienceBefore": "The audience is still enjoying the warm pollen aftermath.",
+  "audienceAfter": "The audience believes the storm is real and sees Zenny's concern beneath the closing joke.",
+  "beatOwner": "1.B4+1.B5",
+  "performanceFreedom": "Seedance may shape wind, pollen tremble, wing hitch and Zenny's listening micro-movements, but geometry, world-first ordering, dialogue ownership and final hold cannot change.",
+  "performanceArc": "Warm aftermath cools into warning; Fuzzby's physical betrayal becomes cover, Zenny becomes genuinely still, and his overcorrection ends in fond resignation.",
+  "physicalCauseAndEffect": "Thunder trembles pollen; cooling light and wind furl the flowers; Fuzzby's wings hitch before he covers; his straight launch compresses the receiving flower around his head.",
+  "cameraBehaviour": "Medium-wide world turn, close Zenny read, then a clean straight-line launch and motionless closing hold.",
+  "timingAndRhythm": "World turns completely first, wings hitch, cover line, real listen, quiet warning and hold, then boast, crash, wind, stillness and fade.",
+  "landingBreath": "After the final capture, remove all performance movement; hold the changed world and relationship before the slow fade.",
+  "directionDensity": "guided",
+  "precisionReasons": [
+    "Locked dialogue must remain assigned to its named speaker.",
+    "Visible cause, ownership and outgoing continuity are essential story facts."
+  ],
+  "shotPlan": [
+    {
+      "shotNumber": 1,
+      "purpose": "Let the environment change before either character responds.",
+      "framingLensAndCamera": "Medium-wide holding both bees and identical corridor geometry.",
+      "causalAction": "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses mid-hover and tries to fold it into performance Before either character reacts, thunder trembles the suspended pollen; god-rays thin, sky greys, colour cools, and open flowers furl and droop in the wind. Only then Fuzzby's wings hitch twice, his hover drops, and he exhales into a breezy rebrand.",
+      "observablePerformance": "His body betrays fear before his cover line; Zenny does not react until the world turn is complete.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "The full corridor is cool and wind-pressed; Fuzzby has covered his dip and Zenny begins to attend upward.",
+      "dialogueLineIndexes": [
+        1
+      ],
+      "gagBeatIds": [
+        "1.B4"
+      ]
+    },
+    {
+      "shotNumber": 2,
+      "purpose": "Make Zenny's listening turn the weather into story.",
+      "framingLensAndCamera": "Close on Zenny frame-right with the changed corridor still present behind her.",
+      "causalAction": "Zenny becomes still, quiets her wings and genuinely listens. Her gaze travels upward to the storm sky before she names it without drama.",
+      "observablePerformance": "Concern replaces deadpan; almost no gesture makes her certainty carry weight.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Zenny remains small, still and sky-aware in the cold light; hold after the line ends.",
+      "dialogueLineIndexes": [
+        2
+      ],
+      "gagBeatIds": []
+    },
+    {
+      "shotNumber": 3,
+      "purpose": "Contradict the pressure boast and close on the motionless relationship image.",
+      "framingLensAndCamera": "Return to the two-character axis and hold the complete final tableau before fading.",
+      "causalAction": "Fuzzby answers the warning, accelerates as if proving it, immediately flies into a flower and gets stuck again as Zenny sighs. Fuzzby launches in a perfectly straight line. Fuzzby’s forward force pushes into the flower mouth; petals compress around him and hold his body, with pollen quivering from the impact instead of exploding into harmless sparkle.",
+      "observablePerformance": "His bravado remains full volume until the soft capture; Zenny's concern settles into fond resignation.",
+      "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
+      "landingImage": "Fuzzby's head remains inside the flower frame-left with body and legs outside; Zenny stays calm and clean frame-right as the cold corridor moves in the wind. No further movement; hold, then slow fade to black.",
+      "dialogueLineIndexes": [
+        3
+      ],
+      "gagBeatIds": [
+        "1.B5"
+      ]
+    }
+  ],
+  "timingBeats": [
+    {
+      "type": "environment_turn",
+      "count": 1,
+      "source": "two-state world turn"
+    },
+    {
+      "type": "reaction",
+      "count": 1,
+      "source": "physical betrayal"
+    },
+    {
+      "type": "turn",
+      "count": 1,
+      "source": "warning line"
+    },
+    {
+      "type": "settle",
+      "count": 1,
+      "source": "overcorrection"
+    },
+    {
+      "type": "impact",
+      "count": 1,
+      "source": "flower capture"
+    }
+  ],
+  "witnessStagingSides": [
+    "Fuzzby stages frame-left; Zenny holds frame-right as the witness."
+  ],
+  "stagePlan": [
+    {
+      "stageNumber": 1,
+      "beatIds": [
+        "1.B4"
+      ],
+      "purpose": "World turn and warning",
+      "startSec": null,
+      "endSec": null,
+      "initialOrCarriedState": "Carry the pollen-covered warm aftermath from SH1C.",
+      "cause": "Distant thunder changes the environment before character response.",
+      "primaryEvent": "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses mid-hover and tries to fold it into performance",
+      "observableEndState": "Zenny is small, still and sky-aware in the slightly altered light, while Fuzzby’s hover has lost its carefree certainty.",
+      "emotionOrCameraAnalysis": "The world owns the tonal turn; Zenny's stillness makes it real."
+    },
+    {
+      "stageNumber": 2,
+      "beatIds": [
+        "1.B5"
+      ],
+      "purpose": "Boast and capture",
+      "startSec": null,
+      "endSec": null,
+      "initialOrCarriedState": "Continue in the same geometry after Zenny's warning.",
+      "cause": "Fuzzby's cover performance overcommits into a straight launch.",
+      "primaryEvent": "Fuzzby answers the warning, accelerates as if proving it, immediately flies into a flower and gets stuck again as Zenny sighs.",
+      "observableEndState": "Fuzzby is held in the flower with pollen trembling around the impact, Zenny nearby, and the warm field now feeling less safe under the shifted sky.",
+      "emotionOrCameraAnalysis": "The closing joke must retain the storm unease and Zenny's care."
+    }
+  ],
+  "geography": [
+    "The location has identical geometry in both warm and storm states; Fuzzby remains frame-left and Zenny frame-right.",
+    "The receiving flower stays on Fuzzby's straight launch route while the narrow sky gap remains visible above."
+  ],
+  "attributeOwnership": [
+    "All pollen coating and smears belong to Fuzzby only.",
+    "Zenny's face, lip, fur and body stay completely clean; no pollen touches her."
+  ],
+  "environmentContract": [
+    "The location is defined in TWO states with identical geometry: warm golden and cool blue-grey storm-lit.",
+    "Geometry remains identical; only light, sky, colour, atmospheric pressure and flower posture change.",
+    "The environment changes completely before either character reacts.",
+    "Open flowers furl and droop as the wind rises; vegetation posture changes, not only illumination."
+  ],
+  "motionVocabulary": [
+    {
+      "character": "Fuzzby",
+      "belongs": [
+        "careens",
+        "overcommits",
+        "barrels",
+        "bounces",
+        "improvises",
+        "presents",
+        "rockets"
+      ],
+      "banned": [
+        "slinks",
+        "hesitates",
+        "glides",
+        "sulks",
+        "waits",
+        "creeps"
+      ]
+    },
+    {
+      "character": "Zenny",
+      "belongs": [
+        "glides",
+        "observes",
+        "settles",
+        "arches",
+        "softens",
+        "levels"
+      ],
+      "banned": [
+        "scrambles",
+        "flails",
+        "rushes",
+        "panics",
+        "showboats"
+      ]
+    }
+  ],
+  "referenceContract": [
+    {
+      "assetTag": "@图1",
+      "role": "opening_frame",
+      "controls": "Exact final frame of the previous unit and opening continuity state only. Do not redesign identity or repeat preceding action.",
+      "scope": "continuity"
+    },
+    {
+      "assetTag": "@图2",
+      "role": "character_identity",
+      "controls": "Zenny exact identity, slender smaller proportions, clean fur, glasses and wings only. Do not use its pose or background.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@图3",
+      "role": "character_identity",
+      "controls": "Fuzzby exact identity, larger proportions, fur, spectacles and wings only. Do not use its pose or background.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@图4",
+      "role": "location",
+      "controls": "Flower-corridor geometry, bee-height scale, plant materials, light and atmospheric depth only. Do not use or invent characters.",
+      "scope": "canon"
+    },
+    {
+      "assetTag": "@Audio1",
+      "role": "audio",
+      "controls": "Approved dialogue words, speakers and performance only. No alternative voices, added words, narration or ad-libs.",
+      "scope": "episode"
+    }
+  ],
+  "consistencyContract": [
+    "Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities.",
+    "Fuzzby remains larger and stages frame-left; Zenny remains smaller, clean and stages frame-right.",
+    "Keep the bee-height flower-corridor axis, tactile plant response and continuous light."
+  ],
+  "audioContract": "@Audio1 is the sole authority for dialogue identity, cadence and delivery. Named listeners stay silent and closed-mouth. Generate foley only; no music.",
+  "continuityFinish": "Fuzzby is held in the flower with pollen trembling around the impact, Zenny nearby, and the warm field now feeling less safe under the shifted sky.",
+  "surgicalSafeguards": [
+    "Do not change corridor geometry during the weather turn.",
+    "Do not let a character react before the flowers and light turn.",
+    "Add no movement after the final tableau before fade."
+  ],
+  "editScope": "",
+  "contentToPreserve": [],
+  "extensionDirection": "forward",
+  "transitionTrigger": "",
+  "transitionTransformation": "",
+  "transitionArrivalState": "",
+  "audioTransition": "",
+  "firstFrameTag": "@Image 1",
+  "lastFrameTag": "@Image 2",
+  "storyboardTag": "@Image 1",
+  "storyboardReadingOrder": "left to right, top to bottom",
+  "blockoutKind": "coarse",
+  "blockoutMappings": [],
+  "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.\n\n[Multimodal Reference Layer]\nFixed slots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=location; @Audio1=audio. Never swap roles.\nAngles: @图2=one Zenny; @图3=one Fuzzby; never extra characters.\n@图1 is the opening frame — the final frame of the previous shot; defines opening composition/state; exclude repeated action and redesign.\n@图2 defines Zenny identity/scale; exclude everything else.\n@图3 defines Fuzzby identity/scale; exclude everything else.\n@图4 defines scene/layout/light; exclude characters/action.\n\n[ATTRIBUTE OWNERSHIP]\nAll pollen coating and smears belong to Fuzzby only.\nZenny's face, lip, fur and body stay completely clean; no pollen touches her.\n\n[ENVIRONMENT CONTRACT]\nThe location is defined in TWO states with identical geometry: warm golden and cool blue-grey storm-lit.\nGeometry remains identical; only light, sky, colour, atmospheric pressure and flower posture change.\nThe environment changes completely before either character reacts.\nOpen flowers furl and droop as the wind rises; vegetation posture changes, not only illumination.\n\n[One-Sentence Summary]\nThe unchanged flower corridor turns from warm play-space into storm warning before either bee reacts, then Fuzzby's bravado drives him directly into a flower.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: The location has identical geometry in both warm and storm states; Fuzzby remains frame-left and Zenny frame-right. The receiving flower stays on Fuzzby's straight launch route while the narrow sky gap remains visible above.\n\n[Shot Sequence]\nShot 1: Camera: Medium-wide holding both bees and identical corridor geometry. Action: A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses mid-hover and tries to fold it into performance Before either character reacts, thunder trembles the suspended pollen; god-rays thin, sky greys, colour cools, and open flowers furl and droop in the wind. Only then Fuzzby's wings hitch twice, his hover drops, and he exhales into a breezy rebrand. Performance: His body betrays fear before his cover line; Zenny does not react until the world turn is complete. End state: The full corridor is cool and wind-pressed; Fuzzby has covered his dip and Zenny begins to attend upward. Dialogue placement: Fuzzby speaks in English with exhales delivery: {…okay that sounded dramatic.}; the pose holds a full beat after the line ends. Hold: 2.0s — Hold the contrast between Fuzzby’s wobbling rebrand and Zenny’s quiet sky-attention so the laugh thins into warning.\nShot 2: Camera: Close on Zenny frame-right with the changed corridor still present behind her. Action: Zenny becomes still, quiets her wings and genuinely listens. Her gaze travels upward to the storm sky before she names it without drama. Performance: Concern replaces deadpan; almost no gesture makes her certainty carry weight. End state: Zenny remains small, still and sky-aware in the cold light; hold after the line ends. Dialogue placement: Zenny speaks in English with quietly delivery: {A Storm’s coming.}; the pose holds a full beat after the line ends.\nShot 3: Camera: Return to the two-character axis and hold the complete final tableau before fading. Action: Fuzzby answers the warning, accelerates as if proving it, immediately flies into a flower and gets stuck again as Zenny sighs. Fuzzby launches in a perfectly straight line. Fuzzby’s forward force pushes into the flower mouth; petals compress around him and hold his body, with pollen quivering from the impact instead of exploding into harmless sparkle. Performance: His bravado remains full volume until the soft capture; Zenny's concern settles into fond resignation. End state: Fuzzby's head remains inside the flower frame-left with body and legs outside; Zenny stays calm and clean frame-right as the cold corridor moves in the wind. No further movement; hold, then slow fade to black. Dialogue placement: Fuzzby speaks in English with the approved delivery: {Good thing I work well under pressure.}; the pose holds a full beat after the line ends. Hold: 2.0s — Hold long enough for pollen trembling, Fuzzby’s stuck shape, and Zenny’s quiet sighing presence to share the frame with the changed sky-feel.\nWitness staging: Fuzzby stages frame-left; Zenny holds frame-right as the witness. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Global Supplement]\nExactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities. Safeguard: Do not change corridor geometry during the weather turn. Safeguard: Do not let a character react before the flowers and light turn.\n\n[Audio]\nGenerated dialogue is guide audio; restore approved @Audio1 in post. No music."
+}

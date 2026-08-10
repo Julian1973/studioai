@@ -33,3 +33,20 @@ def test_multi_character_instance_lock_is_exact_and_deduplicated():
     assert C.character_instance_lock(["Fuzzby", "Zenny", "fuzzby"]) == (
         "Exactly one Fuzzby and one Zenny throughout; no duplicates of either character.")
     assert C.character_instance_lock(["Fuzzby"]) == ""
+    assert C.character_instance_lock(
+        ["Fuzzby", "Zenny", "fuzzby"], medium="still") == (
+        "Exactly one Fuzzby and one Zenny appear in this image.")
+    with pytest.raises(ValueError, match="medium"):
+        C.character_instance_lock(["Fuzzby", "Zenny"], medium="print")
+
+
+def test_reference_slot_and_multi_angle_boilerplate_is_deterministic():
+    assert C.reference_slot_stability_line([
+        ("@图1", "opening frame"), ("@图2", "Zenny")]) == (
+        "Project-stable slots: @图1=opening frame; @图2=Zenny. Never swap roles.")
+    assert C.multi_angle_collapse_line("@图2", "Zenny") == (
+        "@图2: all turnaround angles are one Zenny, not extra characters.")
+    assert C.multi_angle_collapse_summary([
+        ("@图1", "Zenny"), ("@图2", "Fuzzby")]) == (
+        "Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, "
+        "not extra characters.")

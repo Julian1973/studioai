@@ -51,6 +51,15 @@ versioned rule. The next prompt is right because the system changed.
 unchanged is the only forbidden spend. 480p first; 720p masters only after
 the 480p candidate proves the beat.
 
+**L8 · One creative source, one prompt engine.** The approved Director layer is
+the creative source of truth. The deterministic keyframe, render and voice
+compilers are the only production prompt emitters. The official ByteDance
+`sd25-pe` skill is vendored as a read-only checker and upstream rule source: it
+may report a finding, but it never writes, rewrites or replaces a production
+prompt. Every accepted finding becomes a versioned compiler rule plus an
+executable test before it can affect production. Re-audit is mandatory whenever
+the Director grammar-pack version or the vendored skill version/hash changes.
+
 ---
 
 # PART 2 — MODEL & ROUTE FACTS (the envelope)
@@ -255,6 +264,15 @@ multi-character keyframe emits the exact count lock in `[Protect]`; every
 multi-character render emits the same lock in `[Global Supplement]` (for
 example, "Exactly one Fuzzby and one Zenny throughout; no duplicates of either
 character."). Voice emission declares this visual-only control non-applicable.
+
+**Project-stable reference slots:** provider attachment order is resolved from
+the project's versioned reference-slot policy, never dictionary insertion order
+or a one-off prompt. Keyframe and render emissions print the resolved slot map
+and must not swap those roles. When one character reference contains several
+turnaround angles, the compiler emits one collapse instruction stating that all
+views belong to the same single character and are not extra subjects. This is
+advisory boilerplate: it may use the documented prompt headroom but does not
+change creative approvals or independently block an otherwise valid request.
 
 **Stability trick:** one locked subject stays stable when everything around
 it is allowed to be loose — keep background characters simple, distant,

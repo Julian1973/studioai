@@ -2,6 +2,9 @@ import base64
 import importlib.util
 import io
 import pathlib
+import subprocess
+import sys
+import time
 
 import pytest
 from PIL import Image
@@ -11,6 +14,29 @@ SERVER_PATH = pathlib.Path(__file__).resolve().parents[1] / "cb-studio" / "serve
 SPEC = importlib.util.spec_from_file_location("cb_studio_security_test_server", SERVER_PATH)
 SERVER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(SERVER)
+
+
+def test_process_output_reader_stops_when_worker_exits_with_inherited_pipe_open():
+    worker = subprocess.Popen(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import subprocess,sys; "
+                "subprocess.Popen([sys.executable,'-c','import time; time.sleep(2)']); "
+                "print('render complete', flush=True)"
+            ),
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    started = time.monotonic()
+
+    assert [line.strip() for line in SERVER._process_lines_until_exit(worker, 0.05)] == [
+        "render complete"
+    ]
+    assert time.monotonic() - started < 1.0
 
 
 def test_request_length_is_bounded_and_chunked_bodies_are_rejected():

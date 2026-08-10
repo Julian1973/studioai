@@ -15,6 +15,7 @@ import pathlib
 import re
 import subprocess
 
+import cb_emission_conformance as emission
 import cb_post
 import cb_seedance_pipeline
 
@@ -205,7 +206,7 @@ def _provider_reference_tags(task):
     return replace(task)
 
 
-def _segment_task(base_task, shot_id, segment, segment_count, dialogue_speakers):
+def _segment_task(base_task, shot_id, segment, segment_count, dialogue_lines):
     task = _provider_reference_tags(copy.deepcopy(base_task))
     task["type"] = "reference_based_generation"
     task["duration_seconds"] = segment["durationSec"]
@@ -239,14 +240,23 @@ def _segment_task(base_task, shot_id, segment, segment_count, dialogue_speakers)
             ),
             "exclude": "nothing; this image has opening-frame authority",
         })
-    if dialogue_speakers:
+    dialogue_speakers = list(dict.fromkeys(
+        str((line or {}).get("speaker") or "").strip()
+        for line in dialogue_lines
+        if str((line or {}).get("speaker") or "").strip()
+    ))
+    if dialogue_lines:
         speaker_names = ", ".join(dialogue_speakers)
         task["audio"] = (
-            "@Audio1 is the sole source of English dialogue, voice, performance, and local "
-            f"timing for {speaker_names}. Preserve its silence and speaking times. Characters "
-            "who are not speaking remain silent and do not mouth words. Seedance may generate "
-            "only non-dialogue ambience, foley, comedy impacts, wing buzzes, plant movement, "
-            "and low supportive underscore under the locked dialogue."
+            "@Audio1 is the sole authority for English voice identity, cadence, delivery, "
+            f"mouth timing and silence for {speaker_names}. The exact braced dialogue "
+            "markers below place approved words only; no alternative performance is "
+            "permitted. Listeners remain silent and closed-mouth. No narration, no extra "
+            "words, and no subtitles or captions. The rendered dialogue is a guide track; "
+            "approved @Audio1 remains the film dialogue in post.\n" + "\n".join(
+                emission.dialogue_placement_line(line) for line in dialogue_lines
+            ) + "\nSeedance may generate only non-dialogue ambience, foley, comedy "
+            "impacts, wing buzzes, plant movement, and low supportive underscore."
         )
         task["assets"]["audio"] = [{
             "tag": "@Audio1", "subject": "approved timed dialogue",
@@ -288,8 +298,11 @@ def build_comparison_plan(*, shot, approved_direction, base_task, parent_prompt,
             for index in line_indexes
             if str((shot.get("dialogueLines") or [])[index].get("speaker") or "").strip()
         ))
+        segment_dialogue = [
+            (shot.get("dialogueLines") or [])[index] for index in line_indexes
+        ]
         task = _segment_task(
-            base_task, shot_id, segment, len(segments), dialogue_speakers)
+            base_task, shot_id, segment, len(segments), segment_dialogue)
         try:
             prompt = cb_seedance_pipeline.SeedancePromptBuilder(task).build()
         except ValueError as exc:
@@ -298,10 +311,17 @@ def build_comparison_plan(*, shot, approved_direction, base_task, parent_prompt,
             ) from exc
         if dialogue_speakers:
             prompt = (
-                "@Audio1 is the sole source of English dialogue, voice, performance, and "
-                f"timing for {', '.join(dialogue_speakers)}; all other characters remain "
-                "silent and do not mouth words.\n" + prompt
+                "AUDIO-AUTHORITY: @Audio1 is the sole authority for English voice identity, "
+                "cadence, delivery, mouth timing and silence; no alternative performance "
+                "is permitted. Listeners remain silent and closed-mouth. No narration, no "
+                "extra words, and no subtitles or captions.\n" + prompt
             )
+            synthesis = emission.validate_dialogue_synthesis(
+                prompt, segment_dialogue)
+            if not synthesis["ready"]:
+                raise TransportPlanError(
+                    "comparison dialogue synthesis contract failed: "
+                    + "; ".join(synthesis["errors"]))
         output.append({
             **segment,
             "prompt": prompt,

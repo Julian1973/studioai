@@ -545,8 +545,16 @@ def install(m):
         episode = episode or pkg.get("episode", "Ep1")
         ledger = m._ledger(pkg, shot["shotId"])
         approval = ledger.get("voiceApproval") or {}
+        # The accepted media bundle is the authority after HEAR. A later duration-only
+        # visual edit may make an unapproved Voice Director draft stale, but it cannot
+        # retroactively invalidate the exact provider request Julian heard and accepted.
+        # Rebuild freshness from that recorded request when current draft resolution fails.
         try:
-            signature = voice_signature(pkg, shot, voice_lines(pkg, shot))
+            current_lines = voice_lines(pkg, shot)
+        except (m.Refused, OSError, ValueError):
+            current_lines = ledger.get("voGeneratedFrom") or []
+        try:
+            signature = voice_signature(pkg, shot, current_lines)
         except (m.Refused, OSError, ValueError) as exc:
             return {"required": True, "approved": bool(approval.get("approved")),
                     "current": False, "reason": str(exc), "record": approval,
@@ -564,7 +572,7 @@ def install(m):
         provider_equivalent = (
             signature_without_performance == approved_without_performance and
             voice_provider_projection(ledger.get("voGeneratedFrom") or []) ==
-            voice_provider_projection(voice_lines(pkg, shot)))
+            voice_provider_projection(current_lines))
         signature_matches = approved_signature == signature or provider_equivalent
         current = bool(
             approval.get("approved") and path and os.path.exists(path) and
@@ -1058,9 +1066,32 @@ def install(m):
         conformance_current = bool(
             (record.get("conformanceScreening") or {}).get("status") == "pass" or
             human_advisory_accepted)
+        stored_signature = record.get("inputSignature") or {}
+        signatures_match = stored_signature == expected
+        # Compiler improvements must not rewrite the provenance of an image Julian already
+        # approved. If only the compiled brief hash changed, retain the historical prompt
+        # and prove that its protected Director sections still match current direction.
+        # Changes to references, canon, Scene Look, media bytes or protected creative fields
+        # continue to invalidate the approval normally.
+        if (not signatures_match and
+                record.get("source", "generated") == "generated" and
+                set(m._signature_diff(stored_signature, expected)) == {"briefHash"}):
+            prompt_contract = record.get("promptContract") or {}
+            historical_prompt = str(prompt_contract.get("prompt") or "")
+            historical_hash = hashlib.sha256(historical_prompt.encode()).hexdigest()
+            try:
+                historical_contract = m._keyframe_prompt_contract(
+                    pkg, shot, historical_prompt)
+                signatures_match = bool(
+                    historical_prompt and
+                    stored_signature.get("briefHash") == historical_hash and
+                    prompt_contract.get("promptHash") == historical_hash and
+                    historical_contract.get("directionContract"))
+            except (m.Refused, KeyError, TypeError, ValueError):
+                signatures_match = False
         current = bool(
             record.get("approved") and path and os.path.exists(path) and
-            record.get("inputSignature") == expected and
+            signatures_match and
             record.get("contentHash") == file_sha256(path) and
             conformance_current)
         return {"current": current,

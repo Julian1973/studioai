@@ -83,6 +83,10 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
         }
     monkeypatch.setattr(cb_render, "_identity_packs_cfg", lambda: packs)
     monkeypatch.setattr(cb_render, "_characters_cfg", lambda: characters)
+    monkeypatch.setattr(cb_render, "_reference_slot_policy", lambda: {
+        "characterOrder": ["Zenny", "Fuzzby"],
+        "keyframeRoleOrder": ["character_identity", "scene plate"],
+    })
     shot = {
         "shotId": "S1.SH1", "sourceType": "opener",
         "charactersInFrame": ["Fuzzby", "Zenny"],
@@ -118,11 +122,36 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
     assert "round glasses" not in prompt
     assert "rosy blush" not in prompt
     assert "@图3 is the locked Scene Look plate" in prompt
+    assert "Project-stable slots: @图1=Zenny; @图2=Fuzzby; @图3=scene plate." in prompt
+    assert ("Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, "
+            "not extra characters.") in prompt
     assert "do not describe, redesign, simplify, beautify" in prompt
     assert "omitted reference features" in prompt
     assert "[Canonical Style]" in prompt
     assert "Hold frame-right open for the later flower reveal." in prompt
     assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_WORDS
+
+
+def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monkeypatch):
+    characters = {"Zenny": {}, "Fuzzby": {}}
+    monkeypatch.setattr(cb_render, "_reference_slot_policy", lambda: {
+        "characterOrder": ["Zenny", "Fuzzby"],
+        "keyframeRoleOrder": ["character_identity", "scene plate"],
+    })
+    monkeypatch.setattr(cb_render, "_provider_identity_records", lambda role, *_: [{
+        "character": role, "view": "complete-turnaround"}])
+    first = {
+        "keyframeReferenceSlots": {
+            "@图1": "Fuzzby", "@图2": "scene plate", "@图3": "Zenny"}}
+    second = {
+        "keyframeReferenceSlots": {
+            "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"}}
+
+    roles_a = [item["role"] for item in cb_render._expanded_reference_blueprint(
+        first, "keyframeReferenceSlots", characters)]
+    roles_b = [item["role"] for item in cb_render._expanded_reference_blueprint(
+        second, "keyframeReferenceSlots", characters)]
+    assert roles_a == roles_b == ["Zenny", "Fuzzby", "scene plate"]
 
 
 def test_reference_manifest_exposes_keyframe_and_animation_in_provider_order(

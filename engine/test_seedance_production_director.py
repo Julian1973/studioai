@@ -23,6 +23,7 @@ def test_world_class_shooting_script_clears_the_advisory_craft_gate():
         "The camera holds on the reaction and lands on a clean off-balance silhouette as "
         "the final frame and continuity handoff."
     )
+    prompt = R.cb_departments._apply_animation_provider_shell(prompt, shot)
     result = R._prompt_quality_gate(shot, prompt, specialist)
     assert result["score"] >= 17
     assert result["criticalFailures"] == []
@@ -142,12 +143,12 @@ def test_animation_direction_requires_declared_creative_latitude():
         AnimationDirection.model_validate({
             **base,
             "performanceFreedom": "Seedance may discover the detailed performance.",
-            "providerPrompt": " ".join(["direction"] * 621),
+            "providerPrompt": " ".join(["direction"] * 1101),
         })
     except ValidationError as exc:
-        assert "production ceiling is 620" in str(exc)
+        assert "production ceiling is 1100" in str(exc)
     else:
-        raise AssertionError("provider prompts over 620 words must fail software-wide")
+        raise AssertionError("provider prompts over provider headroom must fail software-wide")
 
     long_form = {
         **base,
@@ -157,17 +158,17 @@ def test_animation_direction_requires_declared_creative_latitude():
             **base["stagePlan"][0], "startSec": 0.0, "endSec": 30.0,
         }],
         "performanceFreedom": "Seedance may discover the detailed performance.",
-        "providerPrompt": " ".join(["direction"] * 700),
+        "providerPrompt": " ".join(["direction"] * 1100),
     }
     AnimationDirection.model_validate(long_form)
     try:
         AnimationDirection.model_validate({
-            **long_form, "providerPrompt": " ".join(["direction"] * 701),
+            **long_form, "providerPrompt": " ".join(["direction"] * 1101),
         })
     except ValidationError as exc:
-        assert "production ceiling is 700" in str(exc)
+        assert "production ceiling is 1100" in str(exc)
     else:
-        raise AssertionError("long-form provider prompts over 700 words must fail")
+        raise AssertionError("long-form provider prompts over provider headroom must fail")
 
     incomplete = AnimationDirection.model_validate({
         **base,

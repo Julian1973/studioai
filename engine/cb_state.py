@@ -176,6 +176,9 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
     voice = cb_render._voice_approval_status(pkg, shot, scene, episode)
     talky = bool(shot.get("dialogueLines"))
     voice_ok = voice["current"]
+    # Once HEAR is signed, the immutable approved media bundle is the operational
+    # performance direction. A later unapproved draft cannot make that decision stale.
+    voice_direction_current = bool(voice_direction["current"] or voice_ok)
     animation = cb_render._animation_approval_status(
         pkg, shot, scene, episode)
     batch_current = _batch_current(pkg, shot, ledger, scene, episode)
@@ -302,7 +305,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
             "cinematographyDirection": cine["current"],
             "keyframe": keyframe_satisfied,
             "keyframeCandidate": candidate_current,
-            "voiceDirection": voice_direction["current"],
+            "voiceDirection": voice_direction_current,
             "voice": voice_ok,
             "animationDirection": animation_direction["current"],
             "animationBatch": batch_current,
@@ -313,7 +316,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
         "reasons": {
             "cinematographyDirection": cine["reason"],
             "keyframe": keyframe.get("reason"),
-            "voiceDirection": voice_direction["reason"],
+            "voiceDirection": None if voice_direction_current else voice_direction["reason"],
             "voice": voice["reason"],
             "animationDirection": animation_direction["reason"],
             "animation": animation["reason"],
@@ -337,7 +340,7 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
                 package_current and scene_look_current and kf == "screening"),
             "prepareVoice": bool(package_current and talky),
             "generateVoice": bool(
-                package_current and talky and voice_direction["current"] and
+                package_current and talky and voice_direction_current and
                 not voice["approved"]),
             "approveVoice": bool(
                 talky and ledger.get("voPath") and not voice_ok),

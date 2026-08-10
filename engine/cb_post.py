@@ -757,6 +757,30 @@ def _asset_record(actual_path, final_path, probe=False):
     return record
 
 
+def replace_guide_dialogue(video, approved_voice, out):
+    """Remove provider guide audio and restore the approved full-shot voice master.
+
+    Foley, ambience and score are separate post layers. This deliberately never mixes a
+    regenerated provider voice underneath the approved performance.
+    """
+    duration = _dur(video)
+    if duration <= 0 or not approved_voice or not os.path.exists(approved_voice):
+        return None
+    cmd = [
+        "ffmpeg", "-y", "-i", str(video), "-i", str(approved_voice),
+        "-filter_complex",
+        (f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+         f"apad,atrim=0:{duration:.6f}[dialogue]"),
+        "-map", "0:v:0", "-map", "[dialogue]", "-c:v", "copy",
+        "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
+        "-b:a", "256k", "-movflags", "+faststart", str(out),
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode or not os.path.exists(out):
+        return None
+    return str(out)
+
+
 def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                      platform=DEFAULT_PLATFORM, candidate_id=None, music=None,
                      ambience=None):
@@ -783,7 +807,37 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
         if any(not os.path.exists(clip) for clip in clips):
             missing = [clip for clip in clips if not os.path.exists(clip)]
             raise ValueError(f"approved post source is missing: {missing[0]}")
-        normalized = _norm(clips)
+        post_sources = []
+        audio_provenance = []
+        for index, (shot, clip) in enumerate(zip(shots, clips), start=1):
+            if shot.get("dialogueLines"):
+                voice = shot.get("approvedVoice")
+                provenance = shot.get("audioProvenance") or {}
+                if not voice or not os.path.exists(voice):
+                    raise ValueError(
+                        f"dialogue shot {shot.get('shotId')} has no approved voice master")
+                if provenance.get("postLaneStatus") != "required":
+                    raise ValueError(
+                        f"dialogue shot {shot.get('shotId')} has no audio provenance ledger")
+                restored = temp_dir / f"shot_{index:02d}_approved_dialogue.mp4"
+                if not replace_guide_dialogue(clip, voice, restored):
+                    raise RuntimeError(
+                        f"approved dialogue restoration failed for {shot.get('shotId')}")
+                post_sources.append(str(restored))
+                audio_provenance.append({
+                    "shotId": shot.get("shotId"),
+                    "providerGuidePath": clip,
+                    "providerGuideSha256": _sha256(clip),
+                    "approvedVoicePath": voice,
+                    "approvedVoiceSha256": _sha256(voice),
+                    "postSourcePath": str(restored),
+                    "postSourceSha256": _sha256(restored),
+                    "guideDialogueRemoved": True,
+                    "approvedDialogueRestored": True,
+                })
+            else:
+                post_sources.append(clip)
+        normalized = _norm(post_sources)
         protected = [shot.get("dialogueLines") or [] for shot in shots]
         plan = conform_plan(normalized, protected_windows=protected)
 
@@ -835,6 +889,9 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 picture_probe and master_probe and
                 abs(picture_probe["durationSec"] - master_probe["durationSec"]) <= 0.25),
             "dialogueOccurrenceCoverage": caption_occurrences == expected_occurrences,
+            "approvedDialoguePostLane": all(
+                item["guideDialogueRemoved"] and item["approvedDialogueRestored"]
+                for item in audio_provenance),
             "programAudioPresent": temp["programAudio"].exists() and
                 temp["programAudio"].stat().st_size > 0,
             "programAudioPcm24": bool(
@@ -908,6 +965,11 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                                "approvedTake": str(shot["approvedTake"]),
                                "approvedTakeHash": _sha256(shot["approvedTake"])}
                               for shot in shots],
+            "audioProvenance": [
+                {**item, "postSourcePath": str(
+                    final_dir / pathlib.Path(item["postSourcePath"]).name)}
+                for item in audio_provenance
+            ],
             "conformPlan": plan, "captionWindows": caption_windows,
             "outputs": outputs,
             "qc": {

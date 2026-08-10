@@ -1,0 +1,27 @@
+AUDIO-LOCK: @Audio1 is the sole source of English dialogue, speaker performance and timing. Add no dialogue, vocalisations or subtitles.
+
+[Multimodal Reference Layer]
+@Image1 defines only the approved opening or inherited handoff composition for S1.SH1B; do not redesign character identity, proportions, materials or later action.
+@Image2 is Zenny's complete turnaround and defines only identity, proportions, glasses, wings and scale; ignore its background.
+@Image3 is Fuzzby's complete turnaround and defines only identity, proportions, glasses, wings and scale; ignore its background.
+@Image4 defines only the flower-corridor layout, materials, warm light and bee-height scale; exclude its characters.
+@Audio1 defines all words, speakers, delivery, mouth timing and silence.
+
+[Generation Goal]
+Generate one 8-second Seedance 2.5 unit: Fuzzby accidentally earns a pollen moustache from a flower and presents it as official status while Zenny answers with loving deadpan judgement.
+
+[Performance Contract]
+Fuzzby zooms to another flower, sticks his whole face into it, pulls back wearing a fuzzy yellow pollen moustache, and presents the accident for judgement with “the assigned @Audio1 performance”
+Zenny nearly laughs but keeps her body economical, then converts his invented rank into an affectionate puncture with “the assigned @Audio1 performance”
+
+[Camera]
+Cut inside the unit to discover Zenny as the fixed witness beside his moving self-display, holding enough stillness for her dry answer to become the punchline.
+
+[End State]
+Fuzzby’s pollen moustache remains fully visible as an invented badge and a visible joke, with Zenny close by and amused despite herself. Hold the final readable handoff for about one second so the next unit can continue from it.
+
+[Global Supplement]
+Preserve turnaround scale at equal depth: Fuzzby is 14 inches, Zenny is 12 inches; Fuzzby is only about 17% taller. Preserve identity, relative scale, corridor axis, light direction, plant geography and pollen marks. Fuzzby is proud and jagged; Zenny is precise, economical and affectionate. No pollen bags or invented equipment.
+
+[Audio]
+Use @Audio1 exactly for Fuzzby region 3 and Zenny region 4. Generate synchronized wing, petal, leaf-recoil, impact and pollen foley/ambience. Do not generate musical underscore for split units; scene-level music is created after stitching.

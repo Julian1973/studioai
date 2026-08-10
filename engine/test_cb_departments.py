@@ -91,11 +91,11 @@ def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
 
     compiled = D._apply_animation_provider_shell(prompt, shot)
 
-    assert compiled.startswith("AUDIO-LOCK: @Audio1 is the sole source of English dialogue")
-    assert "Fuzzby and Zenny perform only assigned @Audio1 regions" in compiled
-    assert "Nailed it." not in compiled
-    assert "Officially nuts!" not in compiled
-    assert "@Audio1 remains the sole English dialogue authority." in compiled
+    assert compiled.startswith("AUDIO-AUTHORITY: @Audio1 is the sole authority")
+    assert "listeners remain silent and closed-mouth" in compiled
+    assert "Fuzzby speaks in English with the approved delivery: {Nailed it.}" in compiled
+    assert "Zenny speaks in English with the approved delivery: {Officially nuts!}" in compiled
+    assert "@Audio1 remains the sole English dialogue and performance authority." in compiled
     assert compiled.index("[Global Supplement]") < compiled.index("[Audio]")
     for term in ("identity", "character count", "prop ownership", "camera axis",
                  "lighting continuity", "sound relationships"):
@@ -263,11 +263,18 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     assert out.pacingMode == "storyline"
     compiled = D.compile_animation_provider_prompt(
         {"shotId": "S1.SH1", "durationSec": 8, "dialogueLines": []}, out)
-    assert "Stage 1: 0-8s [1.B1]" in compiled
+    assert "[Performance Sequence]" in compiled
+    assert "[Camera and Shot Plan]" in compiled
+    assert "Shot 1: Camera: Medium 40mm, slow motivated push" in compiled
+    assert "Action: His paw loads the plank and the deck kicks back" in compiled
+    assert "Emotion/Camera Analysis:" not in compiled
+    assert "Stage 1: [1.B1]" in compiled
+    assert "Stage 1: 0-8s" not in compiled
+    assert "Audio cues:" not in compiled
     assert out.durationSec == 8
     assert out.referenceContract[0].assetTag == "@Image1"
     assert "Runtime worker contract — Seedance Production Director" in seen["system"]
-    assert "Keep every spoken word out of providerPrompt" in seen["user"]
+    assert "Emit every scripted line exactly once inside the stage that owns it" in seen["user"]
     assert "[Multimodal Reference Layer]" in seen["user"]
     assert "Stage N: 0-4s [Purpose]" in seen["user"]
 
@@ -295,6 +302,21 @@ def test_animation_story_lock_requires_every_approved_visual_event():
     missing = D.animation_story_lock_report(shot, "Fuzzby talks beside a flower.")
     assert missing["ready"] is False
     assert "approved visual event is absent" in missing["errors"][0]
+
+    decomposed = D.animation_story_lock_report(
+        shot,
+        "Shot 1: Action: Fuzzby hits the leaf. End state: the leaf is loaded. "
+        "Shot 2: Action: The leaf rebounds him upright. End state: Fuzzby hovers.",
+        [{
+            "primaryEvent": "Fuzzby hits the leaf, and rebounds upright.",
+            "observableEndState": "Fuzzby hovers upright beside the recoiling leaf.",
+        }],
+        [
+            {"causalAction": "Fuzzby hits the leaf."},
+            {"causalAction": "The leaf rebounds him upright."},
+        ],
+    )
+    assert decomposed["ready"] is True
 
 
 def test_creative_translation_preserves_approved_gag_clock_and_provider_action():
@@ -440,6 +462,7 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
         "durationSec": 9,
         "shotId": "S1.SH1A",
         "sourceShotId": "S1.SH1",
+        "purpose": "Protect two near-misses before the flower contact and leaf recoil.",
     }
     direction = {
         "providerPrompt": "Make a nice cinematic bee video.",
@@ -497,16 +520,24 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert primary in prompt
     assert provider_action in prompt
     assert handoff in prompt
-    assert "@Image1 defines the exact approved opening composition" in prompt
-    assert "@Audio1 is the sole source" in prompt
-    assert "[Timestamp Script Storyboard]" in prompt
+    assert "@Image1 is first frame;" in prompt
+    assert "defines opening composition/state" in prompt
+    assert "Fixed slots: @Image1=opening_frame; @Image2=Fuzzby; @Audio1=audio." in prompt
+    assert "Angles: @Image2=one Fuzzby; never extra characters." in prompt
+    assert "AUDIO-AUTHORITY: @Audio1 is the sole authority" in prompt
+    assert "[Performance Sequence]" in prompt
+    assert "[Timestamp Script Storyboard]" not in prompt
+    assert "Stage 1: 0-9s" not in prompt
     assert "Hold: 2.2s" in prompt
-    assert "Audio cues: @Audio1 7.2-8s — Fuzzby." in prompt
+    assert "Dialogue placement: Fuzzby speaks in English with the approved delivery: {Nailed it.}" in prompt
+    assert "Audio cues:" not in prompt
     assert "Physics: Fuzzby's sideways momentum depresses the leaf" in prompt
+    assert "Include two readable near-misses before the first impact." in prompt
     assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
             "character.") in prompt
-    assert "Maintain supplied character references as identity and scale locks." in prompt
+    assert "@Image2 defines Fuzzby identity/scale; exclude everything else." in prompt
     assert "No music." in prompt
+    assert "Hold: 2.2s" in prompt and "approximately 2.2s" not in prompt
     assert len(prompt.split()) <= D.animation_provider_prompt_word_limit(9)
 
 
@@ -550,6 +581,54 @@ def test_render_compaction_never_emits_a_dangling_sentence():
         D.emission.compact_complete_sentence(
             "Keep the leaf recoil and proud recovery visibly readable throughout",
             max_words=5, context="camera analysis")
+
+
+def test_animation_compiler_emits_every_internal_shot_in_order():
+    shot = {
+        "shotId": "S1.SH9A", "durationSec": 12, "charactersInFrame": ["A", "B"],
+        "dialogueLines": [],
+    }
+    direction = {
+        "durationSec": 12,
+        "generationGoal": "A fast pursuit becomes a visible impact and proud recovery.",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "referenceContract": [],
+        "geography": ["The route runs left to right with visible depth ahead."],
+        "shotPlan": [
+            {"shotNumber": 1, "framingLensAndCamera": "A low pursuit camera follows slightly late.",
+             "causalAction": "A zig-zags while B holds a clean parallel line."},
+            {"shotNumber": 2, "framingLensAndCamera": "The camera holds the impact in profile.",
+             "causalAction": "A compresses the flower and loads the springy leaf."},
+            {"shotNumber": 3, "framingLensAndCamera": "The camera rises and settles for the finish.",
+             "causalAction": "The leaf recoils A into one flip and a proud wobbling hover."},
+        ],
+        "stagePlan": [{
+            "stageNumber": 1, "beatIds": ["9.B1"],
+            "initialOrCarriedState": "The pursuit is already moving through frame.",
+            "cause": "A overcommits to the route.",
+            "primaryEvent": "A crosses the route, loads the leaf and rebounds upright.",
+            "emotionOrCameraAnalysis": "The pursuit turns speed into readable physical comedy.",
+            "observableEndState": "A hovers upright while B watches.",
+        }],
+        "consistencyContract": ["Keep identity and route direction stable."],
+        "surgicalSafeguards": [], "continuityFinish": "A hovers upright.",
+        "audioContract": "Natural movement and plant foley only.",
+    }
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+    assert prompt.index("Shot 1:") < prompt.index("Shot 2:") < prompt.index("Shot 3:")
+    assert "follows slightly late" in prompt
+    assert "compresses the flower and loads the springy leaf" in prompt
+    assert "one flip and a proud wobbling hover" in prompt
+
+
+def test_dialogue_is_emitted_inside_beat_with_delivery_and_full_beat_hold():
+    cue = D.emission.dialogue_cues([{
+        "speaker": "Performer", "exactText": "Nailed it.",
+        "delivery": "[confident] Nailed it.", "startSec": 1, "endSec": 2,
+    }], duration_sec=4)[0]
+    line = D.emission.dialogue_placement_line(cue)
+    assert "Performer speaks in English with confident delivery: {Nailed it.}" in line
+    assert "pose holds a full beat after the line ends" in line
 
 
 def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_explicit():

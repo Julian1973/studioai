@@ -215,13 +215,19 @@ def _legacy_production_preflight(scene, episode="Ep1"):
             voice = _department(ledger, "voice")
             voice_lines = (voice.get("output") or {}).get("lines") or []
             voice_ok = voice.get("packageRevision") == pkg.get("revision") and bool(voice_lines)
-            if not voice_ok:
+            approved_take = cb_render._voice_approval_status(
+                pkg, shot, scene, episode)
+            if not voice_ok and not approved_take.get("current"):
                 block("VOICE_DIRECTION_NOT_APPROVED", "voice", "No current Voice direction.",
                       "Brief, review and approve Voice direction.", sid)
-            else:
+            elif voice_ok:
                 input_row["voiceLines"] = [{"speaker": x.get("speaker"),
                                              "performedText": x.get("performedText")}
                                             for x in voice_lines]
+            else:
+                input_row["voiceLines"] = [{
+                    "speaker": x.get("speaker"), "performedText": x.get("text")}
+                    for x in ledger.get("voGeneratedFrom") or []]
             missing_voice_ids = [ln["speaker"] for ln in shot.get("dialogueLines") or []
                                  if not (characters.get(cb_render._resolve_char(
                                      ln["speaker"], characters)) or {}).get("voiceId")]
@@ -230,12 +236,7 @@ def _legacy_production_preflight(scene, episode="Ep1"):
                       "Missing voiceId for: " + ", ".join(sorted(set(missing_voice_ids))),
                       "Assign the canonical ElevenLabs voice IDs.", sid)
             take = ledger.get("voiceApproval") or {}
-            take_ok = (take.get("approved") and
-                       take.get("packageRevision") == pkg.get("revision") and
-                       take.get("path") == ledger.get("voPath") and
-                       os.path.exists(take.get("path") or "") and
-                       (not take.get("contentHash") or
-                        take.get("contentHash") == cb_render._sha256_file(take.get("path"))))
+            take_ok = bool(approved_take.get("current"))
             stages["voice"] = "approved" if take_ok else (
                 "awaiting" if ledger.get("voPath") else "needed")
             if not take_ok:

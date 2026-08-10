@@ -231,7 +231,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert "Complete uncropped turnaround · identity authority" in JS
     assert "final accepted frame becomes the handoff truth for the next shot" in JS
     assert "Create the still frame first" in JS
-    assert "Animation uses that approved frame" in JS
+    assert "Animation uses the signed keyframe" in JS
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
@@ -478,6 +478,28 @@ def test_pipeline_footage_displays_reviewable_video_candidates():
     assert 'id="pipeline-candidate-video"' in JS
     assert "data-pipeline-candidate" in JS
     assert ".pipeline-artifact img, .pipeline-artifact video" in CSS
+
+
+def test_completed_render_candidates_are_visible_before_batch_finishes():
+    assert 'job.completedCandidateCount' in JS
+    assert 'class="render-completed-candidates"' in JS
+    assert "Candidate ${esc(item.n)} complete" in JS
+    assert ".render-completed-candidates video" in CSS
+    assert 'transportCandidates' in SERVER
+
+
+def test_watch_relay_shows_every_candidate_and_requires_explicit_selection():
+    assert 'class="relay-candidate-grid"' in JS
+    assert 'data-relay-candidate="${esc(item.n)}"' in JS
+    assert 'app.selectedCandidate = Number(button.dataset.relayCandidate)' in JS
+    assert '.relay-candidate.selected' in CSS
+
+
+def test_watch_relay_keeps_superseded_renders_visible_without_approval_controls():
+    assert "Previous renders — view only" in JS
+    assert "artifact.stale" in JS
+    assert 'class="relay-candidate stale"' in JS
+    assert ".relay-stale-notice" in CSS
 
 
 def test_director_entry_is_authenticated_and_static_allowlisted():

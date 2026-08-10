@@ -313,12 +313,21 @@ def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
 def _stage_comms(phase: str, status: str, ledger: dict[str, Any],
                  artifact: dict[str, Any] | None) -> dict[str, Any] | None:
     if status == "rendering":
+        completed = len((artifact or {}).get("items") or [])
+        expected = int(((ledger.get("batch") or {}).get("expected") or 0))
         return {
             "severity": "info",
             "title": "Work in progress",
-            "message": "The Studio is processing this stage.",
-            "nextAction": "Wait for the result panel to update.",
-            "artifactVisible": False,
+            "message": (
+                f"{completed} of {expected} render candidates completed. The finished "
+                "clip is visible while the remaining candidate renders."
+                if completed and expected else "The Studio is processing this stage."
+            ),
+            "nextAction": (
+                "Review is unlocked after every requested candidate has completed."
+                if completed else "Wait for the result panel to update."
+            ),
+            "artifactVisible": bool(completed),
         }
     if phase == "keyframe":
         return _keyframe_stage_comms(ledger, status, artifact)
@@ -525,8 +534,22 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             ]
         elif not current.get("animation"):
             phase = "animation"
-            artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
-                        or shot_media.get("keyframe"), "label": "Accepted opening frame"}
+            previous_candidates = shot_media.get("candidates") or []
+            stale_batch = package_ledger.get("batch") or {}
+            if previous_candidates and stale_batch.get("approvalBlockedReason"):
+                # A direction recompile must block approval of old renders, but those
+                # completed clips remain useful Director evidence and must stay visible.
+                artifact = {
+                    "type": "video-set",
+                    "items": previous_candidates,
+                    "label": "Superseded animation candidates",
+                    "stale": True,
+                    "notice": stale_batch.get("approvalBlockedReason"),
+                    "supersededAt": stale_batch.get("supersededByDirectionAt"),
+                }
+            else:
+                artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
+                            or shot_media.get("keyframe"), "label": "Accepted opening frame"}
             if provider_blocker:
                 status = "blocked"
                 headline = "Animation route needs activation"
@@ -562,6 +585,16 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         headline = running.get("step") or "Building the next result"
         primary = None
         decisions = []
+        if phase == "animation":
+            completed_candidates = shot_media.get("candidates") or []
+            running["completedCandidateCount"] = len(completed_candidates)
+            if completed_candidates:
+                artifact = {
+                    "type": "video-set",
+                    "items": completed_candidates,
+                    "label": "Completed render candidates",
+                    "partial": True,
+                }
 
     # A current reviewable result or sealed request supersedes an older failed attempt.
     # Keep failures visible only while they still explain why the selected shot cannot advance.

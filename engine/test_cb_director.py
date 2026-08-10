@@ -196,6 +196,17 @@ def test_spend_token_never_leaves_the_server_projection():
                 "durationSec": 29,
                 "resolution": "480p",
                 "model": "fal-seedance-2.5",
+                "emissionConformance": {
+                    "score": 9.75,
+                    "verdict": "PASS",
+                    "findings": [{
+                        "severity": "POLISH",
+                        "rule": "length",
+                        "message": "Emission is long.",
+                        "fix": "Compact plumbing only.",
+                        "deduction": 0.25,
+                    }],
+                },
             },
         },
     )
@@ -207,6 +218,35 @@ def test_spend_token_never_leaves_the_server_projection():
         "CURRENT EXACT ANIMATION REQUEST")
     assert session["inspector"]["providerRequest"]["resolution"] == "480p"
     assert session["inspector"]["providerRequest"]["durationSec"] == 29
+    assert session["inspector"]["providerRequest"]["conformance"] == {
+        "score": 9.75,
+        "maximum": 10,
+        "verdict": "PASS",
+        "checkerVerdict": "PASS",
+        "findings": [{
+            "severity": "POLISH",
+            "rule": "length",
+            "message": "Emission is long.",
+            "fix": "Compact plumbing only.",
+            "deduction": 0.25,
+        }],
+    }
+
+
+def test_animation_request_without_checker_report_fails_visible_conformance_closed():
+    session = _session(
+        state=_state(keyframe=True, voice=True, animationDirection=True),
+        preflight=_preflight(provider_ready=True),
+        animation_contract={
+            "verdict": "passed",
+            "finalPrompt": "UNCHECKED ANIMATION REQUEST",
+            "checks": {"durationSec": 29, "resolution": "480p", "model": "seedance"},
+        },
+    )
+    report = session["inspector"]["providerRequest"]["conformance"]
+    assert report["score"] == 0.0
+    assert report["verdict"] == "BLOCK"
+    assert report["findings"][0]["rule"] == "checker-report"
 
 
 def test_dense_animation_spend_projection_warns_before_one_shot_render():

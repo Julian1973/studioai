@@ -260,7 +260,6 @@
     ["Keen's Small Sailboat", "3, 4, 7", "Draft", "A compact wooden single-mast sailboat with plain white sail, rope rigging and natural wood grain."],
     ["Keen's Satchel", "3, 4", "Draft", "A small worn canvas traveller's satchel with buckled flap closure and shoulder strap."],
     ["Drift Net", "7", "Draft", "A ragged discarded fishing drift net, frayed and tangled with weathered dark grey-green mesh."],
-    ["Pollen Sacks", "1", "Draft", "Tiny round fuzzy pollen collection sacks dusted heavily in bright yellow pollen powder."],
   ];
 
   const locationRoster = [
@@ -268,68 +267,6 @@
     ["Crystal Cove – Aida's Sanctuary", "Serene, mystical, meditative, softly glowing", "2", "A sheltered coastal cove with calm turquoise water, pale sand, rose quartz crystals and a carved crystal bowl."],
     ["Keen's Island – The Pier", "Tender, bittersweet, hopeful, quietly emotional", "3", "A modest wooden pier, compact sailboat, soft green island hills and bright reflective water."],
     ["At Sea", "Adventurous, open, then stormy and dangerous", "4, 7", "Open ocean clean plates that move from hopeful daylight to rough storm water and low steel-grey skies."],
-  ];
-
-  const storyboardShots = [
-    { shot: "01", status: "Regen", refs: ["LOC", "CHAR", "SB"], title: "DEEP WITHIN", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "02", status: "Regen", refs: ["SB", "CHAR", "SB"], title: "FUZZBY", characters: ["ZENNY"], setup: "" },
-    { shot: "03", status: "Regen", refs: ["SB", "SB", "CHAR"], title: "FUZZBY", characters: [], setup: "" },
-    { shot: "04", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S04", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "05", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S05", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "06", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S06", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "07", status: "Gen", refs: ["SB", "SB", "CHAR"], title: "S07", characters: ["FUZZBY"], setup: "" },
-    { shot: "08", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S08", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "09", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S09", characters: ["FUZZBY"], setup: "" },
-    { shot: "10", status: "Gen", refs: ["SB", "SB", "CHAR"], title: "S10", characters: ["FUZZBY"], setup: "" },
-    { shot: "11", status: "Gen", refs: ["SB", "SB", "CHAR"], title: "S11", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "12", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S12", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "13", status: "Gen", refs: ["SB", "SB", "CHAR"], title: "S13", characters: ["FUZZBY"], setup: "recycled S10 setup" },
-    { shot: "14", status: "Gen", refs: ["SB", "SB", "CHAR"], title: "S14", characters: ["FUZZBY", "ZENNY"], setup: "recycled S11 setup" },
-    { shot: "15", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S15", characters: ["FUZZBY", "ZENNY"], setup: "" },
-    { shot: "16", status: "Gen", refs: ["SB", "SB", "CHAR", "CHAR"], title: "S16", characters: ["FUZZBY", "ZENNY"], setup: "" },
-  ];
-
-  const footageClips = [
-    {
-      id: "Clip 1",
-      shots: "Shot 1",
-      state: "failed",
-      count: "1 shot · 15s",
-      references: ["Deep Within the Rainforest", "Zenny Wardrobe", "Uploaded"],
-      startFrames: ["!"],
-      prompt: "Shot 1: Extreme wide, 18mm, slow crane down through canopy. Camera descends through enormous tropical flowers, warm amber god rays and floating pollen motes. Tiny Fuzzby and Zenny weave between flower stems with pollen sacks visible on their back legs.",
-      cost: "Generate · 660 tkn · $6.60",
-    },
-    {
-      id: "Clip 2",
-      shots: "Shots 2, 3, 4",
-      state: "ready",
-      count: "3 shots · 15s",
-      references: ["Deep Within the Rainforest", "Fuzzby Wardrobe", "Zenny Wardrobe"],
-      startFrames: ["S4"],
-      prompt: "ENGLISH DIALOGUE ONLY. Shot 1: Medium tracking shot. Zenny glides with balletic precision while Fuzzby zig-zags chaotically behind her. FUZZBY: BIZZY-BIZZY-BIZZY. Cut to. Shot 2: Close-up. Fuzzby dives nose-first into pollen, clips a leaf, tumbles, then catches himself. FUZZBY: Nailed it. Cut to. Shot 3: Medium close-up. Zenny hovers perfectly still beside him, amused and unimpressed.",
-      cost: "Regen · 660 tkn · $6.60",
-    },
-    {
-      id: "Clip 3",
-      shots: "Shots 5, 6, 7",
-      state: "ready",
-      count: "3 shots · 15s",
-      references: ["Deep Within the Rainforest", "Fuzzby Wardrobe", "Zenny Wardrobe"],
-      startFrames: ["S5", "S6", "S7"],
-      prompt: "ENGLISH DIALOGUE ONLY. Shot 1: Close-up. Fuzzby emerges with a thick pollen moustache. FUZZBY: Do I look official? Cut to. Shot 2: Two-shot. Zenny laughs as Fuzzby smears the pollen worse. ZENNY: Yes Fuzzby. Officially nuts! Cut to. Shot 3: Wide shot. Fuzzby tumbles into a blossom and pops back out in a golden dust cloud.",
-      cost: "Regen · 660 tkn · $6.60",
-    },
-    {
-      id: "Clip 4",
-      shots: "Shots 8, 9, 10",
-      state: "ready",
-      count: "3 shots · 15s",
-      references: ["Deep Within the Rainforest", "Fuzzby Wardrobe", "Zenny Wardrobe"],
-      startFrames: ["S8", "S9", "S10"],
-      prompt: "ENGLISH DIALOGUE ONLY. Shot 1: Medium shot. Zenny smiles while Fuzzby hums louder and becomes completely golden with pollen. Cut to. Shot 2: Wide shot. A distant rumble rolls through the rainforest and the warm light cools. Cut to. Shot 3: Close-up. Fuzzby's expression shifts from joy to uncertainty as the storm enters the story.",
-      cost: "Regen · 660 tkn · $6.60",
-    },
   ];
 
   const editorClips = ["S1 C2", "S1 C3", "S1 C4", "S1 C5", "S1 C6", "S2 C1"];
@@ -1127,6 +1064,36 @@
     });
   }
 
+  function renderEmissionConformance(request) {
+    if (request?.kind !== "animation") return "";
+    const report = request.conformance || {
+      score: null,
+      maximum: 10,
+      verdict: "BLOCK",
+      findings: [{
+        severity: "FATAL",
+        rule: "checker-report",
+        message: "The authoritative emission checker did not supply a report.",
+        fix: "Recompile this shot before rendering.",
+      }],
+    };
+    const passed = report.verdict === "PASS";
+    const score = Number.isFinite(Number(report.score)) ? Number(report.score).toFixed(2) : "—";
+    const findings = (report.findings || []).slice(0, 3);
+    return `<div class="emission-conformance ${passed ? "pass" : "block"}" aria-label="Emission pre-flight">
+      <div class="emission-conformance-score">
+        <span>Emission pre-flight</span>
+        <strong>${esc(score)}<small>/${esc(report.maximum || 10)}</small></strong>
+        <b>${esc(report.verdict || "BLOCK")}</b>
+      </div>
+      <div class="emission-conformance-findings">
+        ${findings.length
+          ? findings.map((finding) => `<p><strong>${esc(finding.rule || finding.severity || "Finding")}</strong><span>${esc(finding.message || "Review required.")}</span>${finding.fix ? `<em>${esc(finding.fix)}</em>` : ""}</p>`).join("")
+          : "<p><strong>Clear</strong><span>No blocking findings.</span></p>"}
+      </div>
+    </div>`;
+  }
+
   function renderShotInputs(session) {
     const host = $("#shot-inputs");
     if (!host) return;
@@ -1161,6 +1128,7 @@
     </article>`;
     };
     const prompt = requestPromptText(session);
+    const providerRequest = session.inspector?.providerRequest || null;
     const phaseName = session.phase === "voice"
       ? "Voice performance"
       : stage === "animation" ? "Animation" : "Keyframe";
@@ -1198,6 +1166,7 @@
     ${otherRefs.length ? `<section><div class="shot-input-section-head"><span>Other Locked References</span><strong>${otherRefs.length}</strong></div><div class="shot-input-ref-grid compact">${otherRefs.map(renderRef).join("")}</div></section>` : ""}
     <section class="shot-prompt-panel" data-prompt-copy-panel>
       <div class="shot-input-section-head"><span>Exact Prompt</span><div class="prompt-copy-actions"><strong>${session.inspector?.providerRequest ? "Prepared" : "Pending"}</strong><span class="prompt-copy-status" data-copy-prompt-status aria-live="polite"></span><button type="button" class="prompt-copy-button" data-copy-prompt aria-label="Copy prompt" title="Copy prompt"><span aria-hidden="true"></span></button></div></div>
+      ${renderEmissionConformance(providerRequest)}
       <pre>${esc(prompt)}</pre>
     </section>
     <section class="shot-handoff-rule">
@@ -2571,19 +2540,7 @@
         <label>Shot purpose</label>
         <textarea rows="4" aria-label="${esc(shot.shotId)} purpose" readonly>${esc(shot.purpose || "")}</textarea>
         <div class="generation-meta"><span>${esc(shot.shotId)}</span><span>${esc(app.session?.providerModel || "Seedance")}</span></div>
-      </article>`).join("") : footageClips.map((clip) => `<article class="clip-card ${clip.state}">
-        <div class="clip-card-head">
-          <div><h3>${esc(clip.id)} · ${esc(clip.shots)}</h3><span>${esc(clip.count)}</span></div>
-          <span class="status-pill ${clip.state === "failed" ? "flagged" : "ok"}">${clip.state === "failed" ? "Failed" : "Ready"}</span>
-        </div>
-        ${clip.state === "failed" ? '<p class="error-line">Provider rejected this output. Keep the prompt and references for a safer retry.</p>' : ""}
-        <div class="start-frame-row"><span>Start frame</span>${(clip.startFrames || []).map((frame) => `<b>${esc(frame)}</b>`).join("")}<button type="button" disabled>Edit frame</button></div>
-        <div class="reference-row">${clip.references.map((ref) => `<span>${esc(ref)}</span>`).join("")}<button type="button" disabled>Add reference</button></div>
-        <label>Video prompt</label>
-        <textarea rows="4" aria-label="${esc(clip.id)} video prompt">${esc(clip.prompt)}</textarea>
-        <div class="generation-meta"><span>15s</span><span>Seedance · 1080p</span></div>
-        <div class="pipeline-actions inline"><button type="button" class="secondary" disabled>Reset to auto</button><button type="button" class="primary" disabled>${esc(clip.cost)}</button></div>
-      </article>`).join("")}
+      </article>`).join("") : '<div class="stage-empty"><p>No clips yet.</p><button type="button" class="primary" data-view-jump="director">Open Director</button></div>'}
     </section>
     <div class="pipeline-footer-actions">
       <button type="button" class="secondary" data-next-step="audio">Audio</button>

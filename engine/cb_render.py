@@ -94,6 +94,7 @@ import cb_layout
 import cb_identity
 import cb_voice_director
 import cb_emission_conformance as emission
+import cb_emission_standard
 import cb_engine_rules
 import paths as P
 
@@ -5327,6 +5328,15 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
     }
 
 
+def _emission_conformance_report(shot, specialist, prompt):
+    """Run the golden-fixture checker with the exact production timing inputs."""
+    return cb_emission_standard.preflight(
+        prompt,
+        duration_sec=shot.get("durationSec"),
+        timing_beats=(specialist or {}).get("timingBeats") or [],
+    )
+
+
 def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     pkg, _ = load_pkg(scene, episode)
     shot = _shot(pkg, shot_id)
@@ -5432,6 +5442,13 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     checks["promptSource"] = ("human-working" if using_working else
         "seedance-production-director-approved" if specialist.get("providerPrompt")
         else "legacy-approved-storyboard")
+    emission_conformance = _emission_conformance_report(
+        shot, specialist, resolved_prompt)
+    checks["emissionConformance"] = emission_conformance
+    if emission_conformance["verdict"] != "PASS":
+        blockers.append(
+            f"emission conformance scores {emission_conformance['score']}/10 "
+            f"({emission_conformance['verdict']}); correct the listed findings before render")
     quality = _prompt_quality_gate(shot, resolved_prompt, specialist)
     checks["qualityGate"] = quality
     prompt_limit = cb_departments.animation_provider_prompt_word_limit(

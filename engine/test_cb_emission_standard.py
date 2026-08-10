@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import cb_emission_standard as standard
+import cb_render
 
 
 FIXTURES = Path(__file__).parent / "grammar" / "golden-fixtures" / "scene1-v1"
@@ -37,3 +38,16 @@ def test_accepted_chase_prompt_and_local_render_match_recorded_provenance():
     render = Path(__file__).parent.parent / provenance["render"]["canonicalLocalPath"]
     if render.exists():
         assert hashlib.sha256(render.read_bytes()).hexdigest() == provenance["render"]["sha256"]
+
+
+def test_render_path_uses_the_same_checker_and_timing_inputs():
+    prompt = (FIXTURES / "beat_1_chase.txt").read_text()
+    shot = {"durationSec": 16}
+    specialist = {"timingBeats": [{"type": "travel", "count": 1}]}
+    assert cb_render._emission_conformance_report(shot, specialist, prompt) == (
+        standard.preflight(
+            prompt,
+            duration_sec=shot["durationSec"],
+            timing_beats=specialist["timingBeats"],
+        )
+    )

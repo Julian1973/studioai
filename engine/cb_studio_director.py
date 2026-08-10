@@ -184,6 +184,17 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
     final_prompt = str((animation_contract or {}).get("finalPrompt") or "").strip()
     if phase in ("animation", "review", "final") and final_prompt:
         contract_checks = (animation_contract or {}).get("checks") or {}
+        emission = contract_checks.get("emissionConformance") or {
+            "score": 0.0,
+            "verdict": "BLOCK",
+            "findings": [{
+                "severity": "FATAL",
+                "rule": "checker-report",
+                "message": "The authoritative emission checker did not supply a report.",
+                "fix": "Recompile this shot before rendering.",
+                "deduction": 10.0,
+            }],
+        }
         return {
             "kind": "animation",
             "authoritative": True,
@@ -197,6 +208,13 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
             "durationSec": contract_checks.get("durationSec"),
             "resolution": contract_checks.get("resolution"),
             "providerModelId": contract_checks.get("model"),
+            "conformance": {
+                "score": emission.get("score"),
+                "maximum": 10,
+                "verdict": "PASS" if emission.get("verdict") == "PASS" else "BLOCK",
+                "checkerVerdict": emission.get("verdict"),
+                "findings": list(emission.get("findings") or [])[:3],
+            },
         }
     return None
 

@@ -235,7 +235,30 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "studio-ready-20260809-7" in HTML
+    assert "watch-conformance-20260810-1" in HTML
+
+
+def test_client_bundle_has_no_fabricated_clip_fallbacks_or_banned_canon():
+    client_bundle = "\n".join((HTML, CSS, JS)).lower()
+    banned = (
+        "pollen" + " sacks",
+        "zenny " + "laughs",
+    )
+    for phrase in banned:
+        assert phrase not in client_bundle
+    assert "const storyboardShots" not in JS
+    assert "const footageClips" not in JS
+    assert "footageClips.map" not in JS
+    assert "No clips yet." in JS
+
+
+def test_watch_shows_authoritative_emission_score_verdict_and_findings():
+    assert "renderEmissionConformance(providerRequest)" in JS
+    assert "Emission pre-flight" in JS
+    assert 'verdict: "BLOCK"' in JS
+    assert "report.findings" in JS
+    assert ".emission-conformance-score" in CSS
+    assert ".emission-conformance-findings" in CSS
 
 
 def test_visible_prompts_have_copy_controls_and_feedback():
@@ -312,7 +335,7 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "studio-ready-20260809-7" in HTML
+    assert "watch-conformance-20260810-1" in HTML
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():

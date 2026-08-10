@@ -352,6 +352,22 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .shot-input-ref span { display: block; padding: 0 9px; overflow-wrap: anywhere; }
 .shot-input-ref strong { padding-top: 9px; color: var(--text); font-size: 11px; line-height: 1.3; }
 .shot-input-ref span { padding-top: 4px; padding-bottom: 9px; color: var(--muted); font-size: 10px; line-height: 1.35; }
+.emission-conformance { display: grid; grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); gap: 12px; margin-top: 10px; padding: 10px; border: 1px solid #3b4743; border-radius: 4px; background: #0b100f; }
+.emission-conformance.pass { border-color: #2d6b5c; }
+.emission-conformance.block { border-color: #8b4b45; background: #17100f; }
+.emission-conformance-score { display: grid; align-content: start; gap: 4px; }
+.emission-conformance-score > span { color: var(--muted); font-size: 9px; font-weight: 850; text-transform: uppercase; }
+.emission-conformance-score > strong { color: var(--text); font-size: 24px; line-height: 1; }
+.emission-conformance-score small { color: var(--muted); font-size: 11px; }
+.emission-conformance-score > b { width: max-content; padding: 3px 6px; border-radius: 3px; color: #071413; background: #70d9d1; font-size: 9px; }
+.emission-conformance.block .emission-conformance-score > b { color: #fff; background: #a55049; }
+.emission-conformance-findings { display: grid; gap: 7px; }
+.emission-conformance-findings p { display: grid; gap: 2px; margin: 0; padding-bottom: 7px; border-bottom: 1px solid #27302d; }
+.emission-conformance-findings p:last-child { padding-bottom: 0; border-bottom: 0; }
+.emission-conformance-findings strong { color: var(--text); font-size: 10px; }
+.emission-conformance-findings span,
+.emission-conformance-findings em { color: var(--muted); font-size: 10px; font-style: normal; line-height: 1.35; }
+.emission-conformance-findings em { color: #b9c8c3; }
 .shot-prompt-panel pre {
   max-height: 260px;
   overflow: auto;
@@ -364,6 +380,9 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (max-width: 760px) {
+  .emission-conformance { grid-template-columns: 1fr; }
 }
 .shot-handoff-rule strong { color: var(--text); font-size: 13px; }
 .shot-handoff-rule p,

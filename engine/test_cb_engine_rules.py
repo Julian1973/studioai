@@ -1,4 +1,5 @@
 import cb_engine_rules as rules
+import cb_render as render
 
 
 def _shot(duration=9):
@@ -60,6 +61,29 @@ def test_assets_before_cost_provenance_are_inputs_not_duration_constraints():
     assert not rules.asset_may_constrain_duration(
         {"generatedAt": "2026-08-10T11:00:00+00:00"},
         {**provenance, "authoritative": False})
+
+
+def test_duration_change_carries_only_existing_human_approvals_as_inputs():
+    ledger = {
+        "keyframeApproval": {"approved": True, "at": "2026-08-09T10:00:00+00:00"},
+        "voiceApproval": {"approved": True, "at": "2026-08-09T10:01:00+00:00"},
+    }
+    provenance = rules.duration_provenance(
+        _shot(16), _direction(16), costed_at="2026-08-10T10:00:00+00:00")
+    carried = render._carry_approved_inputs_across_duration_change(ledger, provenance)
+    assert carried == ["keyframeApproval", "voiceApproval"]
+    for key in carried:
+        record = ledger[key]["durationCarryForward"]
+        assert record["newDurationSec"] == 16
+        assert record["costSignature"] == provenance["costSignature"]
+
+
+def test_duration_change_never_invents_missing_approvals():
+    ledger = {"keyframeApproval": None, "voiceApproval": {"approved": False}}
+    provenance = rules.duration_provenance(_shot(16), _direction(16))
+    assert render._carry_approved_inputs_across_duration_change(ledger, provenance) == []
+    assert ledger["keyframeApproval"] is None
+    assert "durationCarryForward" not in ledger["voiceApproval"]
 
 
 def test_meta_rule_separates_engine_fixes_from_director_instances():

@@ -136,7 +136,7 @@ def test_rendering_has_persistent_honest_progress_feedback():
     assert ".generate-status" in CSS
     assert ".generate-status.held" in CSS
     assert "render-ready-panel" in JS
-    assert "Retry prepared" in JS
+    assert "Request prepared" in JS
     assert "Render 480p" in JS
     assert "Sealed request awaiting your approval" in JS
     assert "No video is rendering yet." in JS
@@ -235,7 +235,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "watch-conformance-20260810-1" in HTML
+    assert "watch-conformance-20260810-2" in HTML
 
 
 def test_client_bundle_has_no_fabricated_clip_fallbacks_or_banned_canon():
@@ -335,11 +335,11 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "watch-conformance-20260810-1" in HTML
+    assert "watch-conformance-20260810-2" in HTML
 
 
 def test_browser_and_server_publish_the_same_studio_build_version():
-    assert 'STUDIO_BUILD_VERSION = "watch-conformance-20260810-1"' in SERVER
+    assert 'STUDIO_BUILD_VERSION = "watch-conformance-20260810-2"' in SERVER
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():
@@ -635,6 +635,14 @@ def test_uncompiled_animation_prompt_explains_the_separate_spend_gate():
     assert "The Seedance prompt has not been compiled yet." in JS
     assert "No video is generated until you separately approve spend." in JS
     assert "This does not generate video. No spend happens until render approval." in JS
+
+
+def test_sealed_request_takes_display_priority_over_superseded_candidates():
+    spend_gate = JS.index('if (session.spendDisclosure && (session.decisionActions || []).some((action) => action.id === "approve-spend"))')
+    candidate_gallery = JS.index('if (artifact.type === "video-set" && (artifact.items || []).length)')
+    assert spend_gate < candidate_gallery
+    assert "Request prepared" in JS
+    assert "No new Seedance video exists until you press Render." in JS
 
 
 def test_every_production_stage_has_persistent_scene_and_shot_navigation():

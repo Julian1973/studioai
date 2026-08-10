@@ -202,6 +202,35 @@ def _ledger(pkg, shot_id):
     raise Refused(f"no ledger entry for {shot_id}")
 
 
+def _carry_approved_inputs_across_duration_change(ledger, provenance):
+    """Record R6 carry-forward without turning an old asset into duration authority.
+
+    A keyframe or voice take approved before the current beat-cost decision remains an
+    approved visual/performance input.  The new request duration is owned by the costed
+    direction, never by either asset.  This records that distinction for audit/UI purposes;
+    it does not create an approval when one is missing.
+    """
+    carried = []
+    duration = provenance.get("unitDurationSec")
+    now = _now()
+    records = (
+        ("keyframeApproval", "R6: approved keyframe is input, not duration authority"),
+        ("voiceApproval", "R6: approved performance is input, not duration authority"),
+    )
+    for key, reason in records:
+        approval = ledger.get(key)
+        if not (approval or {}).get("approved"):
+            continue
+        approval["durationCarryForward"] = {
+            "at": now,
+            "reason": reason,
+            "newDurationSec": duration,
+            "costSignature": provenance.get("costSignature"),
+        }
+        carried.append(key)
+    return carried
+
+
 def _require_valid(pkg):
     if not (pkg.get("validation") or {}).get("passed"):
         raise Refused("REFUSED — the production package failed design validation; "
@@ -2778,6 +2807,8 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
                 "reason": "R6: approved performance is input, not duration authority",
                 "newDurationSec": shot["durationSec"],
             }
+        _carry_approved_inputs_across_duration_change(
+            ledger, cb_engine_rules.duration_provenance(shot, direction))
     if ledger.get("pendingSpendAuth"):
         cb_db.void_shot_authorizations(
             HERE.parent, episode, scene, shot_id,
@@ -6139,9 +6170,8 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     previous_provenance = led.get("durationProvenance") or {}
     if (previous_provenance.get("authoritative") and
             previous_provenance.get("costSignature") != provenance.get("costSignature")):
-        raise Refused(
-            "REFUSED — duration provenance changed after an earlier production asset was "
-            "made; recompile and reapprove the affected SEE/HEAR inputs before spend")
+        led.setdefault("durationProvenanceHistory", []).append(previous_provenance)
+        _carry_approved_inputs_across_duration_change(led, provenance)
     led["durationProvenance"] = provenance
     _ensure_character_scale_control(
         shot, scene, episode, _characters_cfg(), same_depth=None)

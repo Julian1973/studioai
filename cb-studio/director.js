@@ -961,6 +961,32 @@
       stage.innerHTML = `<span class="stage-badge">${esc(artifact.label || "Accepted animation")}</span><video controls playsinline preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></video>`;
       return;
     }
+    if (session.spendDisclosure && (session.decisionActions || []).some((action) => action.id === "approve-spend")) {
+      const spend = session.spendDisclosure;
+      const renderAction = (session.decisionActions || []).find((action) => action.id === "approve-spend");
+      const cancelAction = (session.decisionActions || []).find((action) => action.id === "cancel-spend");
+      stage.innerHTML = `<div class="render-ready-panel" role="status" aria-live="polite">
+        <span class="render-kicker">Request prepared</span>
+        <h3>Ready to render ${esc(spend.resolution || "480p")}</h3>
+        <p>The exact request is sealed and waiting for your approval. No new Seedance video exists until you press Render.</p>
+        <div class="render-ready-meta">
+          <span>${esc(spend.providerModelId || session.providerModel || "Seedance")}</span>
+          <span>${esc(Number(spend.shotDurationSec || session.shot?.durationSec || 0))}s</span>
+          <span>${esc(spend.candidateCount || 1)} candidate${Number(spend.candidateCount || 1) === 1 ? "" : "s"}</span>
+          <span>max $${Number(spend.maxBatchCostUsd || 0).toFixed(2)}</span>
+        </div>
+        <div class="render-ready-actions">
+          ${renderAction ? `<button type="button" class="primary" data-stage-action="${esc(renderAction.id)}">Render ${esc(spend.resolution || "480p")}</button>` : ""}
+          ${cancelAction ? `<button type="button" class="secondary" data-stage-action="${esc(cancelAction.id)}">Not yet</button>` : ""}
+        </div>
+      </div>`;
+      stage.querySelectorAll("[data-stage-action]").forEach((button) => button.addEventListener("click", () => {
+        const actions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
+        const action = actions.find((item) => item.id === button.dataset.stageAction);
+        if (action) handleAction(action);
+      }));
+      return;
+    }
     if (artifact.type === "video-set" && (artifact.items || []).length) {
       const items = artifact.items;
       app.selectedCandidate = items[0].n;
@@ -973,32 +999,6 @@
         const video = $("#candidate-video");
         video.src = `${button.dataset.url}?v=${Date.now()}`;
         video.play().catch(() => {});
-      }));
-      return;
-    }
-    if (session.spendDisclosure && (session.decisionActions || []).some((action) => action.id === "approve-spend")) {
-      const spend = session.spendDisclosure;
-      const renderAction = (session.decisionActions || []).find((action) => action.id === "approve-spend");
-      const cancelAction = (session.decisionActions || []).find((action) => action.id === "cancel-spend");
-      stage.innerHTML = `<div class="render-ready-panel" role="status" aria-live="polite">
-        <span class="render-kicker">Retry prepared</span>
-        <h3>Ready to render ${esc(spend.resolution || "480p")}</h3>
-        <p>The corrected request is sealed and waiting for approval. No new Seedance video exists until this render is submitted.</p>
-        <div class="render-ready-meta">
-          <span>${esc(spend.providerModelId || session.providerModel || "Seedance")}</span>
-          <span>${esc(Number(spend.shotDurationSec || session.shot?.durationSec || 0))}s</span>
-          <span>${esc(spend.candidateCount || 1)} candidate</span>
-          <span>max $${Number(spend.maxBatchCostUsd || 0).toFixed(2)}</span>
-        </div>
-        <div class="render-ready-actions">
-          ${renderAction ? `<button type="button" class="primary" data-stage-action="${esc(renderAction.id)}">Render ${esc(spend.resolution || "480p")}</button>` : ""}
-          ${cancelAction ? `<button type="button" class="secondary" data-stage-action="${esc(cancelAction.id)}">Not yet</button>` : ""}
-        </div>
-      </div>`;
-      stage.querySelectorAll("[data-stage-action]").forEach((button) => button.addEventListener("click", () => {
-        const actions = [session.primaryAction, ...(session.decisionActions || [])].filter(Boolean);
-        const action = actions.find((item) => item.id === button.dataset.stageAction);
-        if (action) handleAction(action);
       }));
       return;
     }

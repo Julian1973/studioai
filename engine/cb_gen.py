@@ -535,15 +535,9 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     fal 2.0 comparison inside cb_render's ordinary approval and candidate path.
     raw_prompt=True sends the prompt STRING verbatim (the DEFINITIVE bible prose already carries REFERENCE LAW / AUDIO /
     NEGATIVES — no JSON envelope, so nothing can contradict it). Otherwise the legacy path wraps prose into JSON.
-    video_urls: RETIRED (found still describing this as a live, "additive" mechanism in the 2026-07-08
-    contradiction sweep — every sibling module in this dependency chain, cb_beats.py/cb_qa.py/cb_golden.py/
-    cb_segprompt.py, already carries its own 2026-07-07 retirement note; this docstring was the one gap the
-    sweep never reached). @Video1 (rule 26) was built 2026-07-04 then explicitly retired 2026-07-07 (rule
-    51 — Julian, watching real footage: "the video I don't like it either, I think it confuses things").
-    No current call site ever passes a real value — cb_beats.py passes video_urls=None explicitly;
-    cb_retake.py omits the argument entirely. The parameter stays in the signature (never removed, so a
-    stale caller fails loud rather than with a silent TypeError) but must never be populated again without
-    a fresh ruling."""
+    video_urls: used only by the ruled video-extension continuity mode. Ordinary render
+    continuity remains keyframe handoff; a populated video reference must be disclosed in
+    the sealed envelope and capability-checked before upload."""
     if isinstance(image_urls, str):
         image_urls = [image_urls]
     else:
@@ -556,16 +550,12 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         video_urls = [video_urls]
     else:
         video_urls = list(video_urls or [])
-    if video_urls:
-        raise cb_providers.ProviderCapabilityError(
-            "video references are retired from the approved Crystal Bears route; "
-            "nothing was uploaded and no provider was contacted")
     contract_builder = (cb_providers.comparison_request_contract
                         if comparison_run_id else cb_providers.request_contract)
     contract_kwargs = {
         "fast": fast, "duration": duration, "resolution": resolution,
         "image_count": len(image_urls), "audio_count": len(audio_urls),
-        "video_count": 0, "model_id": model_id,
+        "video_count": len(video_urls), "model_id": model_id,
     }
     if comparison_run_id:
         contract_kwargs["comparison_run_id"] = comparison_run_id
@@ -575,6 +565,9 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
                prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
 
     if contract["transport"] == "byteplus-async":
+        if video_urls:
+            raise cb_providers.ProviderCapabilityError(
+                "video-extension references are not wired for BytePlus inline transport")
         outp, task_id, task = _byteplus_generate_video(
             contract, _pr, image_urls, audio_urls, resolution, duration, out)
         seconds = float(duration)
@@ -617,6 +610,8 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         args["bitrate_mode"] = "high"
     if audio_urls:
         args["audio_urls"] = [_fal_asset_url(p) for p in audio_urls]
+    if video_urls:
+        args["video_urls"] = [_fal_asset_url(p) for p in video_urls]
     endpoint = contract["endpoint"]
     print(f"  seedance ref2vid ({endpoint}): rendering…")
     result = _fal_subscribe(endpoint, arguments=args, with_logs=False)

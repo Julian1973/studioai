@@ -6,6 +6,8 @@ import re
 from dataclasses import dataclass, asdict
 from typing import Iterable
 
+EMISSION_FIRING_FLOOR = 9.5
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -119,7 +121,8 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
     score = max(0.0, 10.0 - sum(item.deduction for item in findings))
     return {
         "score": round(score, 2),
-        "verdict": "PASS" if score >= 9.0 else "BLOCK" if score < 8.0 else "REVISE",
+        "firingFloor": EMISSION_FIRING_FLOOR,
+        "verdict": "PASS" if score >= EMISSION_FIRING_FLOOR else "BLOCK",
         "findings": [asdict(item) for item in findings],
         "clean": not findings,
     }

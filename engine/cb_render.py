@@ -63,6 +63,8 @@ approximates "is it funny").
     python3 cb_render.py save-seedance   <scene> <shotId> "<prompt text>" [episode]
     python3 cb_render.py restore-seedance <scene> <shotId> [episode]
     python3 cb_render.py check-structure  <scene> <shotId> [episode]
+    python3 cb_render.py continuity-mode  <scene> <shotId> <keyframe-handoff|video-extension> [episode]
+    python3 cb_render.py prompt-bank
     python3 cb_render.py department-prepare <scene> <look|cinematography|voice|animation|review-keyframe|review-animation|review-final> <shotId|-> [episode]
     python3 cb_render.py department-status  <scene> <stage> <shotId|-> [episode]
     python3 cb_render.py next     <scene> [episode] [--candidates N] [--spend-token T]
@@ -96,6 +98,7 @@ import cb_voice_director
 import cb_emission_conformance as emission
 import cb_emission_standard
 import cb_engine_rules
+import cb_prompt_bank
 import paths as P
 
 MEDIA = HERE / "media" / "shots"
@@ -4584,6 +4587,9 @@ REVIEW_CRITERIA = ["characterIdentity", "relativeScale", "startingGeography",
                     "dialogueAndMouthPerformance", "continuity", "finalFrameUsability"]
 
 FAILURE_CATEGORIES = ["identity", "geography", "action-timing", "instruction-ignored", "other"]
+CONTINUITY_MODE_KEYFRAME = "keyframe-handoff"
+CONTINUITY_MODE_VIDEO_EXTENSION = "video-extension"
+CONTINUITY_MODES = (CONTINUITY_MODE_KEYFRAME, CONTINUITY_MODE_VIDEO_EXTENSION)
 
 DECISION_LADDER = """THE FAILURE DECISION LADDER (after reviewing a candidate set):
   1. One candidate succeeds            -> approve it (approve <scene> <shotId> <N>)
@@ -4623,6 +4629,79 @@ def _anchor_for(pkg, shot):
                       f"not approved+harvested yet (status: {src.get('status')}) — "
                       f"Julian's eye comes first, always")
     return src["harvestFrame"]
+
+
+def _continuity_mode(ledger):
+    mode = str(ledger.get("continuityMode") or CONTINUITY_MODE_KEYFRAME)
+    if mode not in CONTINUITY_MODES:
+        raise Refused(f"REFUSED — unknown continuity mode {mode!r}; use one of {CONTINUITY_MODES}")
+    return mode
+
+
+def set_continuity_mode(scene, shot_id, mode, episode="Ep1", log=print):
+    mode = str(mode or "").strip()
+    if mode not in CONTINUITY_MODES:
+        raise Refused(f"REFUSED — continuity mode must be one of {CONTINUITY_MODES}")
+    pkg, path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    if shot.get("sourceType") == "opener" and mode == CONTINUITY_MODE_VIDEO_EXTENSION:
+        raise Refused("REFUSED — video-extension continuity needs a previous approved clip; "
+                      "opening shots must use keyframe-handoff")
+    led = _ledger(pkg, shot_id)
+    led["continuityMode"] = mode
+    _save(pkg, path)
+    log(f"CONTINUITY MODE — {shot_id}: {mode}")
+    return {"scene": str(scene), "shotId": shot_id, "episode": episode, "continuityMode": mode}
+
+
+def _previous_approved_clip_for(pkg, shot):
+    if shot.get("sourceType") == "opener":
+        raise Refused("REFUSED — video-extension continuity cannot be used on an opening shot")
+    source_id = shot.get("sourceShotId")
+    src = _ledger(pkg, source_id)
+    clip = src.get("approvedTake")
+    if src.get("status") != "approved" or not clip or not os.path.exists(clip):
+        raise Refused(f"REFUSED — video-extension continuity needs {source_id}'s approved "
+                      "clip as @Video1")
+    return clip
+
+
+def _video_extension_directive(prompt, previous_clip):
+    directive = (
+        "[Video Extension Continuity]\n"
+        "@Video1 is the previous approved clip. Use it only as the continuity master for "
+        "the boundary frame, carried motion direction, camera energy, scene geography, "
+        "lighting and audio feel. Continue forward naturally from @Video1 into this shot. "
+        "Do not repeat the previous action; do not alter @Video1; do not introduce a hard "
+        "cut, black frame, duplicate character or object appearing out of thin air.\n"
+    )
+    return directive + f"Previous approved clip path: {previous_clip}\n\n" + str(prompt)
+
+
+def _bank_animation_prompt(pkg, shot_id, led, *, outcome, candidate=None,
+                           candidate_path=None, diagnosis=None, category=None):
+    shot = _shot(pkg, shot_id)
+    prompt_contract = _animation_prompt_contract(led) or {}
+    prompt = prompt_contract.get("prompt") or shot.get("seedancePrompt") or ""
+    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    conformance = _emission_conformance_report(shot, specialist, prompt)
+    return cb_prompt_bank.bank_prompt(
+        prompt=prompt,
+        episode=str(pkg.get("episode") or "Ep1"),
+        scene=str(pkg.get("sceneNumber") or ""),
+        shot_id=shot_id,
+        outcome=outcome,
+        candidate=candidate,
+        candidate_path=candidate_path,
+        diagnosis=diagnosis,
+        category=category,
+        conformance=conformance,
+        metadata={
+            "batchId": led.get("batchId") or (led.get("batch") or {}).get("batchId"),
+            "promptVersion": _prompt_version(shot),
+            "continuityMode": _continuity_mode(led),
+            "archetype": (specialist.get("archetype") or specialist.get("beatArchetype")),
+        })
 
 
 def _require_confirmed_billing(provider):
@@ -4707,12 +4786,24 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
     references = _reference_records(shot, imgs)
     parent_prompt = _with_intact_turnaround_law(
         shot["seedancePrompt"], references)
+    continuity_mode = _continuity_mode(led)
+    video_references = []
+    if continuity_mode == CONTINUITY_MODE_VIDEO_EXTENSION:
+        previous_clip = _previous_approved_clip_for(pkg, shot)
+        parent_prompt = _video_extension_directive(parent_prompt, previous_clip)
+        video_references = [{
+            "slot": "@Video1",
+            "role": "previous approved clip continuity master",
+            "path": previous_clip,
+            "md5": _file_md5(previous_clip),
+        }]
     if model_id is None:
         try:
             contract = cb_providers.request_contract(
                 fast=fast, duration=int(round(shot["durationSec"])),
                 resolution=_review_video_resolution(),
-                image_count=len(imgs), audio_count=1 if led.get("voPath") else 0)
+                image_count=len(imgs), audio_count=1 if led.get("voPath") else 0,
+                video_count=len(video_references))
         except cb_providers.ProviderCapabilityError as exc:
             raise Refused(f"REFUSED — provider capability: {exc}") from exc
         per = round(cb_costs.estimate_video_cost(
@@ -4720,6 +4811,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
         return {
             "schemaVersion": 1,
             "mode": "single-qualified-provider-call",
+            "continuityMode": continuity_mode,
             "studioShotId": shot["shotId"],
             "studioDurationSec": shot["durationSec"],
             "providerModelId": contract["providerModelId"],
@@ -4734,6 +4826,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                 "promptHash": hashlib.sha256(parent_prompt.encode()).hexdigest(),
                 "dynamicOpeningRelay": False,
                 "references": references,
+                "videoReferences": video_references,
                 "audio": ({"path": led.get("voPath"),
                            "md5": _file_md5(led.get("voPath"))}
                           if led.get("voPath") else None),
@@ -5458,6 +5551,23 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     checks["durationSec"] = shot.get("durationSec")
     checks["resolution"] = _review_video_resolution()
     checks["aspectRatio"] = "16:9"
+    video_refs = []
+    try:
+        continuity_mode = _continuity_mode(led)
+        checks["continuityMode"] = continuity_mode
+        if continuity_mode == CONTINUITY_MODE_VIDEO_EXTENSION:
+            previous_clip = _previous_approved_clip_for(pkg, shot)
+            video_refs = [{
+                "position": len(checks.get("referenceContract") or []) + 1,
+                "assetTag": "@Video1",
+                "role": "previous approved clip continuity master",
+                "path": previous_clip,
+                "contentHash": hashlib.sha256(pathlib.Path(previous_clip).read_bytes()).hexdigest(),
+            }]
+            checks.setdefault("referenceContract", []).extend(video_refs)
+    except Refused as exc:
+        blockers.append(str(exc))
+        checks["continuityMode"] = {"ok": False, "detail": str(exc)}
     try:
         task_mode = specialist.get("taskMode") or "reference-to-video"
         if task_mode != "reference-to-video":
@@ -5467,7 +5577,8 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
             duration=int(round(shot.get("durationSec") or 0)),
             resolution=_review_video_resolution(),
             image_count=len(imgs),
-            audio_count=1 if shot.get("dialogueLines") else 0)
+            audio_count=1 if shot.get("dialogueLines") else 0,
+            video_count=len(video_refs))
         checks["providerContract"] = provider_contract
         checks["model"] = provider_contract["providerModelId"]
     except cb_providers.ProviderCapabilityError as exc:
@@ -6440,6 +6551,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                     ]
                 else:
                     image_inputs = [item["path"] for item in segment["references"]]
+                video_inputs = [item["path"] for item in segment.get("videoReferences") or []]
                 audio_inputs = ([segment["audio"]["path"]]
                                 if (segment.get("audio") or {}).get("path") else None)
 
@@ -6464,15 +6576,21 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                         f"({segment['durationSec']:g}s"
                         f"{', @Audio1' if audio_inputs else ''}) ..."
                     )
+                    generate_kwargs = {
+                        "audio_urls": audio_inputs,
+                        "resolution": segment["contract"]["resolution"],
+                        "duration": f"{int(round(segment['durationSec']))}",
+                        "out": str(segment_out),
+                        "fast": fast,
+                        "raw_prompt": True,
+                        "production_route": "cb_render",
+                        "model_id": segment["contract"]["providerModelId"],
+                        "comparison_run_id": execution_plan.get("comparisonRunId"),
+                    }
+                    if video_inputs:
+                        generate_kwargs["video_urls"] = video_inputs
                     cb_gen.generate_video_seedance_ref(
-                        segment["prompt"], image_inputs, audio_urls=audio_inputs,
-                        resolution=segment["contract"]["resolution"],
-                        duration=f"{int(round(segment['durationSec']))}",
-                        out=str(segment_out), fast=fast, raw_prompt=True,
-                        production_route="cb_render",
-                        model_id=segment["contract"]["providerModelId"],
-                        comparison_run_id=execution_plan.get("comparisonRunId"),
-                    )
+                        segment["prompt"], image_inputs, **generate_kwargs)
                     if segment_count > 1:
                         cb_db.complete_candidate_segment(
                             HERE.parent, batch["token"], i, segment_index, segment_out)
@@ -6674,6 +6792,14 @@ def approve_shot(scene, shot_id, candidate=1, episode="Ep1", reviewed_by="Julian
             "selectedGuideSha256": _sha256_file(selected),
             "postLaneStatus": "required",
         }
+    bank_record = _bank_animation_prompt(
+        pkg, shot_id, led, outcome="approved", candidate=candidate,
+        candidate_path=selected)
+    led.setdefault("promptBankRecords", []).append({
+        "recordId": bank_record["recordId"],
+        "outcome": bank_record["outcome"],
+        "bankedAt": bank_record["bankedAt"],
+    })
     _save(pkg, path)
     # off-machine backup of the approved take — ported from cb_beats (the 2026-07-08
     # operational-risk fix); fail-soft, never blocks an approval
@@ -6717,9 +6843,17 @@ def reject_shot(scene, shot_id, correction, category="other", episode="Ep1",
                  "scoreInferred": False}
     with open(arch / "REJECTED.json", "w") as f:
         json.dump(rejection, f, indent=1)
+    bank_record = _bank_animation_prompt(
+        pkg, shot_id, led, outcome="rejected", diagnosis=correction,
+        category=category)
     attempts = led.get("batchAttempts", 0) + 1
     led.setdefault("renderHistory", []).extend(history)
     led.setdefault("rejections", []).append(rejection)
+    led.setdefault("promptBankRecords", []).append({
+        "recordId": bank_record["recordId"],
+        "outcome": bank_record["outcome"],
+        "bankedAt": bank_record["bankedAt"],
+    })
     led.update({"batchAttempts": attempts, "candidatePaths": None, "batchId": None})
     if attempts >= MAX_BATCH_ATTEMPTS:
         led["status"] = "model-limited"
@@ -7418,6 +7552,10 @@ if __name__ == "__main__":
             restore_seedance_working(pos[0], pos[1], episode=ep(2))
         elif cmd == "check-structure":
             print(json.dumps(check_seedance_structure(pos[0], pos[1], ep(2)), indent=1))
+        elif cmd == "continuity-mode":
+            print(json.dumps(set_continuity_mode(pos[0], pos[1], pos[2], ep(3)), indent=1))
+        elif cmd == "prompt-bank":
+            print(json.dumps(cb_prompt_bank.report(), indent=1, ensure_ascii=False))
         elif cmd == "department-prepare":
             prepare_department(pos[0], pos[1], None if pos[2] == "-" else pos[2], ep(3))
         elif cmd == "department-status":

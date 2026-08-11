@@ -20,8 +20,18 @@ def test_golden_fixtures_score_at_least_nine_and_pass_manifests():
         prompt = (FIXTURES / name).read_text()
         flight = standard.preflight(prompt)
         manifest = standard.manifest_checks(archetype, prompt)
-        assert flight["score"] >= 9.0, (name, flight)
+        assert flight["score"] >= standard.EMISSION_FIRING_FLOOR, (name, flight)
+        assert flight["verdict"] == "PASS", (name, flight)
         assert manifest["ready"], (name, manifest)
+
+
+def test_emission_firing_floor_is_nine_point_five():
+    prompt = "Shot 1: Camera holds on the open flower. End state: The flower is open."
+    flight = standard.preflight(prompt)
+    assert standard.EMISSION_FIRING_FLOOR == 9.5
+    assert flight["score"] == 9.25
+    assert flight["firingFloor"] == 9.5
+    assert flight["verdict"] == "BLOCK"
 
 
 def test_duplicate_story_lock_is_a_mechanical_regression():

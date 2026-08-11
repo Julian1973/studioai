@@ -126,17 +126,37 @@ def test_fal_25_contract_enforces_live_limits():
         cb_providers.request_contract(duration=10, image_count=31)
 
 
-def test_retired_video_reference_fails_before_upload(monkeypatch):
+def test_fal_25_adapter_accepts_ruled_video_extension_reference(monkeypatch, tmp_path):
+    image = tmp_path / "frame.png"
+    video = tmp_path / "previous.mp4"
+    output = tmp_path / "candidate.mp4"
+    image.write_bytes(b"image")
+    video.write_bytes(b"video-ref")
     monkeypatch.setattr(cb_gen, "FAL_KEY", "test-key")
     uploads = []
-    monkeypatch.setattr(cb_gen, "_fal_upload", lambda path: uploads.append(path))
+    monkeypatch.setattr(
+        cb_gen, "_fal_asset_url",
+        lambda path: uploads.append(path) or f"https://fal.media/{len(uploads)}")
+    submitted = {}
 
-    with pytest.raises(cb_providers.ProviderCapabilityError, match="retired"):
-        cb_gen.generate_video_seedance_ref(
-            "motion", ["frame.png"], video_urls=["old-guide.mp4"],
-            duration=6, production_route="cb_render")
+    def subscribe(endpoint, arguments=None, with_logs=False):
+        submitted.update({"endpoint": endpoint, "arguments": arguments})
+        return {"video": {"url": "https://fal.media/out.mp4"}}
 
-    assert uploads == []
+    class Response:
+        content = b"render"
+
+    monkeypatch.setattr(cb_gen, "_fal_subscribe", subscribe)
+    monkeypatch.setattr(cb_gen, "_rget", lambda *args, **kwargs: Response())
+    monkeypatch.setattr(cb_gen.cb_costs, "log_spend", lambda *args, **kwargs: None)
+    monkeypatch.setattr(cb_gen.cb_costs, "write_gen_sidecar", lambda *args, **kwargs: None)
+
+    cb_gen.generate_video_seedance_ref(
+        "Continue from @Video1.", [str(image)], video_urls=[str(video)],
+        duration=6, out=str(output), raw_prompt=True, production_route="cb_render")
+
+    assert submitted["arguments"]["video_urls"] == ["https://fal.media/2"]
+    assert uploads == [str(image), str(video)]
 
 
 def test_already_uploaded_reference_url_is_not_uploaded_again(monkeypatch):

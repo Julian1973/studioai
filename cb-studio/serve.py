@@ -17,6 +17,7 @@ DATA = ROOT / "cb-studio" / "data"
 DATA.mkdir(parents=True, exist_ok=True)
 import cb_scripts
 import cb_db
+import cb_asset_registry
 import studio_profile
 
 def _canonical_engine_module(module_name):
@@ -1271,35 +1272,13 @@ def _url_from_abs(abs_path):
     convention shot_media_map's own _url() already uses for its conventional-filename
     lookups. Returns None for anything missing, unresolvable, or outside the approved
     media root (defence in depth — this must never become a path-traversal door)."""
-    if not abs_path:
-        return None
-    try:
-        p = pathlib.Path(abs_path).resolve()
-        if not p.exists() or not p.is_relative_to(MEDIA.resolve()):
-            return None
-        return "/engine/media/" + p.relative_to(MEDIA.resolve()).as_posix()
-    except Exception:
-        return None
+    return cb_asset_registry.url_for_path(abs_path)
 
 
 def _url_from_reference(abs_path):
     """Expose only references already covered by the static-file allow list."""
-    if not abs_path:
-        return None
-    try:
-        path = pathlib.Path(abs_path).resolve()
-        roots = (
-            (MEDIA.resolve(), "/engine/media/"),
-            ((ROOT / "cb-seed" / "assets").resolve(), "/cb-seed/assets/"),
-            ((ROOT / "projects").resolve(), "/projects/"),
-        )
-        for root, prefix in roots:
-            if path.exists() and path.is_relative_to(root):
-                url = prefix + quote(path.relative_to(root).as_posix())
-                return None if _static_blocked(url) else url
-    except Exception:
-        return None
-    return None
+    url = cb_asset_registry.url_for_path(abs_path)
+    return None if (url and _static_blocked(url)) else url
 
 
 def shot_media_map(pkg, scene, episode="Ep1"):
@@ -1325,40 +1304,18 @@ def shot_media_map(pkg, scene, episode="Ep1"):
     shots_dir = MEDIA / "shots"
     def _url(p):
         return ("/engine/media/" + p.relative_to(MEDIA).as_posix()) if p.exists() else None
-    ledger_by_id = {e.get("shotId"): e for e in (pkg.get("continuityLedger") or [])}
+    registry_shots = cb_asset_registry.shot_media_from_registry(pkg, scene, episode)
     shots = {}
     for s in pkg.get("shots") or []:
         sid = s.get("shotId")
         if not sid:
             continue
-        led = ledger_by_id.get(sid) or {}
-        approved_kf = (led.get("keyframeApproval") or {}).get("path")
-        candidate_kf = (led.get("keyframeCandidate") or {}).get("path")
-        # The pending candidate is the decision artefact. The approved frame remains available
-        # separately and continues anchoring downstream work until the replacement is approved.
-        kf_path = candidate_kf or approved_kf
-        candidate_paths = list(led.get("candidatePaths") or [])
-        if not candidate_paths:
-            batch = led.get("batch") or {}
-            transport = batch.get("transportCandidates") or {}
-            for candidate_index in sorted(
-                    {int(value) for value in (batch.get("done") or [])}):
-                candidate_path = (transport.get(str(candidate_index)) or {}).get(
-                    "candidatePath")
-                if candidate_path:
-                    candidate_paths.append(candidate_path)
-        shots[sid] = {"vo":         _url_from_abs(led.get("voPath")),
-                      "keyframe":   _url_from_abs(kf_path),
-                      "keyframeCandidate": _url_from_abs(candidate_kf),
-                      "keyframeApproved": _url_from_abs(approved_kf),
-                      "clip":       _url_from_abs(led.get("approvedTake")),
-                      "finalFrame": _url_from_abs(led.get("harvestFrame")),
-                      # THE CANDIDATE BATCH (2026-07-16): fire/next now generate 1-4 candidates per shot
-                      # ({ep}_{shotId}_c1..cN.mp4, ledger status "candidates-pending") — existence-checked
-                      # here, same as every other entry, so the UI never depends on media-index.json.
-                      "candidates": [c for c in ({"n": i, "url": _url_from_abs(p)}
-                                                 for i, p in enumerate(candidate_paths, 1))
-                                     if c["url"]]}
+        # transportCandidates from in-progress batches are migrated by cb_asset_registry;
+        # the browser still receives them as normal media.candidates entries.
+        shots[sid] = registry_shots.get(sid) or {"vo": None, "keyframe": None,
+                                                 "keyframeCandidate": None,
+                                                 "keyframeApproved": None, "clip": None,
+                                                 "finalFrame": None, "candidates": []}
     timing_path = MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4"
     if not timing_path.exists():
         timing_path = MEDIA / f"{episode}_Scene{scene}_animatic.mp4"
@@ -1490,6 +1447,7 @@ def scenelook_status_server(scene, episode="Ep1"):
     # Use the engine's one authoritative state calculation. The former server-side mirror
     # drifted from the production rules and could make the UI disagree with paid generation.
     cb_render = _canonical_cb_render()
+    cb_asset_registry.migrate_existing(episode)
     raw = cb_render.scenelook_status(scene, episode)
     approved, candidate, active = raw.get("approved"), raw.get("candidate"), raw.get("active")
     history = raw.get("history", [])
@@ -2777,15 +2735,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                or not _SHOT_TOKEN.match(ep):
                 return self._json(400, {"error": "scene, shotId (and optional episode) required as plain "
                                                  "tokens, e.g. /api/shot-keyframe-library?scene=1&shotId=1.B1.S1&episode=Ep1"})
-            if str(CBGEN) not in sys.path:
-                sys.path.insert(0, str(CBGEN))
-            import cb_render as _CBR
             try:
-                items = _CBR.keyframe_library_for_shot(scene, sid, ep)
+                cb_asset_registry.migrate_existing(ep)
+                items = cb_asset_registry.library_for_scene(ep, scene, sid)
             except Exception as e:
                 return self._json(400, {"error": str(e)})
-            out = [{"path": it["path"], "url": _url_from_abs(it["path"]), "at": it.get("at"),
-                    "outcome": it.get("outcome"), "note": it.get("note")} for it in items]
+            out = [{"path": it["path"], "url": it.get("url"), "at": it.get("registeredAt"),
+                    "outcome": it.get("status"), "note": it.get("label"),
+                    "kind": it.get("kind"), "assetId": it.get("assetId")}
+                   for it in items if it.get("url")]
             return self._json(200, {"items": out})
         if self.path.startswith("/api/scenelook-library"):
             # THE SCENE LOOK REFERENCE LIBRARY, READ-ONLY, ZERO SPEND (2026-07-19 UX fix —
@@ -2802,15 +2760,15 @@ class H(http.server.SimpleHTTPRequestHandler):
             if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
                 return self._json(400, {"error": "scene (and optional episode) required as plain "
                                                  "tokens, e.g. /api/scenelook-library?scene=1&episode=Ep1"})
-            if str(CBGEN) not in sys.path:
-                sys.path.insert(0, str(CBGEN))
-            import cb_render as _CBR
             try:
-                items = _CBR.scenelook_reference_library(scene, ep)
+                cb_asset_registry.migrate_existing(ep)
+                items = cb_asset_registry.library_for_scene(ep, scene)
             except Exception as e:
                 return self._json(400, {"error": str(e)})
-            out = [{"path": it["path"], "url": _url_from_abs(it["path"]), "at": it.get("at"),
-                    "outcome": it.get("outcome"), "note": it.get("note")} for it in items]
+            out = [{"path": it["path"], "url": it.get("url"), "at": it.get("registeredAt"),
+                    "outcome": it.get("status"), "note": it.get("label"),
+                    "kind": it.get("kind"), "assetId": it.get("assetId")}
+                   for it in items if it.get("url")]
             return self._json(200, {"items": out})
         # ── CONTAINED CREATIVE CONTROLS — Voice/Animation working versions + the free
         # structure check (2026-07-19, Julian's directive). All four are READ-ONLY, ZERO

@@ -153,6 +153,11 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
     existing = [a for a in data["assets"] if a.get("bindingKey") == key]
     if existing and not replace and pathlib.Path(existing[0]["path"]).resolve() != p:
         raise AssetBindingError(f"Asset binding already exists for {key}")
+    registered_at = (
+        existing[0].get("registeredAt")
+        if existing and pathlib.Path(existing[0].get("path", "")).resolve() == p
+        else _now()
+    )
     data["assets"] = [a for a in data["assets"] if a.get("bindingKey") != key]
     rec = {
         "assetId": _asset_id(episode, scene, shot_id, kind, role, p),
@@ -169,7 +174,7 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
         "displayType": _display_type(p),
         "source": source or "registry",
         "metadata": metadata or {},
-        "registeredAt": _now(),
+        "registeredAt": registered_at,
     }
     data["assets"].append(rec)
     _write(data)
@@ -281,12 +286,25 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
                 created.append(out["assetId"])
 
     # Project reference images are global scene resources returned by every scene resolver.
+    data = _read()
+    before = len(data["assets"])
+    data["assets"] = [
+        item for item in data["assets"]
+        if not (
+            item.get("source") == "cb-seed/assets"
+            and item.get("kind") == "reference_image"
+            and "." not in str(item.get("role") or "")
+        )
+    ]
+    if len(data["assets"]) != before:
+        _write(data)
     for root in (ASSET_ROOT,):
         if root.exists():
             for p in sorted(root.rglob("*")):
                 if p.is_file() and (mimetypes.guess_type(str(p))[0] or "").startswith("image/"):
+                    role = p.relative_to(root).as_posix()
                     out = _register_if_exists(
-                        episode=episode, scene="*", kind="reference_image", role=p.stem,
+                        episode=episode, scene="*", kind="reference_image", role=role,
                         path=p, status="approved", label=p.stem.replace("_", " "),
                         source="cb-seed/assets")
                     if out:

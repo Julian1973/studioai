@@ -7,6 +7,7 @@ CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
 ROOM = (HERE / "room.html").read_text(encoding="utf-8")
+BOARD = (HERE / "board.html").read_text(encoding="utf-8")
 ROOM_INSTRUCTION = (HERE / "CODEX_ROOM_INSTRUCTION.md").read_text(encoding="utf-8")
 UX_CONTRACT = (HERE / "UX_CONTRACT.md").read_text(encoding="utf-8")
 GOLDEN_BROWSER = (HERE / "golden_path_browser.mjs").read_text(encoding="utf-8")
@@ -77,6 +78,20 @@ def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():
     assert '{"text": "..."}' in ROOM_INSTRUCTION
     assert "/api/room-chat" in ROOM
     assert "system: systemBlocks(gate, u)" in ROOM
+
+
+def test_studio_board_is_allowlisted_and_reads_real_shot_media_urls():
+    assert '"/cb-studio/board.html"' in SERVER
+    assert "/api/director-session?episode=" in BOARD
+    assert "s.keyframeUrl||s.imageUrl||null" in BOARD
+    assert "s.clipUrl||s.url||null" in BOARD
+    assert 'a.type==="video-set"' in BOARD
+    assert "no artifact yet" in BOARD
+    assert "def _expose_session_shot_media(session, media):" in SERVER
+    assert 'shot.setdefault("keyframeUrl", keyframe_url)' in SERVER
+    assert 'shot.setdefault("imageUrl", keyframe_url)' in SERVER
+    assert 'shot.setdefault("clipUrl", clip_url)' in SERVER
+    assert 'shot.setdefault("acceptedUrl", clip_url)' in SERVER
 
 
 def test_studio_room_verdicts_map_to_current_director_actions_and_rejects_send_notes():

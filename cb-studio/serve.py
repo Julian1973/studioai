@@ -1399,6 +1399,29 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             "lineage": lineage}
 
 
+def _expose_session_shot_media(session, media):
+    """Add board-friendly media aliases to each shot without changing gate truth."""
+    media_by_id = (media or {}).get("shots") or {}
+    for shot in session.get("shots") or []:
+        shot_id = shot.get("shotId") or shot.get("id")
+        shot_media = media_by_id.get(shot_id) or {}
+        keyframe_url = (
+            shot.get("keyframeUrl") or shot.get("imageUrl") or
+            shot_media.get("keyframeApproved") or shot_media.get("keyframe")
+        )
+        clip_url = shot.get("clipUrl") or shot.get("acceptedUrl") or shot_media.get("clip")
+        voice_url = shot.get("voiceUrl") or shot_media.get("vo")
+        if keyframe_url:
+            shot.setdefault("keyframeUrl", keyframe_url)
+            shot.setdefault("imageUrl", keyframe_url)
+        if clip_url:
+            shot.setdefault("clipUrl", clip_url)
+            shot.setdefault("acceptedUrl", clip_url)
+        if voice_url:
+            shot.setdefault("voiceUrl", voice_url)
+    return session
+
+
 def rough_cut_projection(episode="Ep1"):
     """Browser-safe projection of the persistent episode edit decision list."""
     import cb_rough_cut
@@ -1641,6 +1664,7 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
             }
     session = cb_studio_director.build_session(
         **common, animation_contract=animation_contract)
+    _expose_session_shot_media(session, media)
     workbench = _project_workbench_state("crystal-bears", episode, scene)
     session["savedRetakeNotes"] = dict(workbench.get("retakeNotes") or {})
     return session
@@ -1977,6 +2001,7 @@ _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
     "/cb-studio/director.html",           # outcome-first creative entry
     "/cb-studio/room.html",               # Studio room assistant entry
+    "/cb-studio/board.html",              # Studio board / rough-cut entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
     f"/shows/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
@@ -2107,7 +2132,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         if launch is not None:
             if not allow_launch or parsed.path not in (
                     "/cb-studio/director.html", "/cb-studio/app.html",
-                    "/cb-studio/room.html") or not hmac.compare_digest(
+                    "/cb-studio/room.html", "/cb-studio/board.html") or not hmac.compare_digest(
                     str(launch), LAUNCH_TOKEN):
                 self._deny(401, "invalid Studio launch token")
                 return False
@@ -2121,7 +2146,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 and not self._has_session()
                 and parsed.path in (
                     "/cb-studio/director.html", "/cb-studio/app.html",
-                    "/cb-studio/room.html")
+                    "/cb-studio/room.html", "/cb-studio/board.html")
                 and self._is_loopback_host()):
             location = parsed.path + (("?" + parsed.query) if parsed.query else "")
             self._issue_session_redirect(location)

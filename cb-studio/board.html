@@ -1,0 +1,296 @@
+<title>The Board — Crystal Bears Studio</title>
+<style>
+  :root{
+    --bg:#0e1013; --panel:#15181d; --panel-2:#1b1f26; --line:#272c35;
+    --ink:#e8eaee; --ink-dim:#98a0ad; --ink-faint:#6b7382;
+    --accent:#d9a441; --good:#5bbf88; --bad:#e0685f; --wait:#7aa2d6;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+  header{display:flex;align-items:center;gap:14px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0;font-weight:600}
+  #scene-tabs{display:flex;gap:4px;flex-wrap:wrap}
+  .stab{font-family:var(--mono);font-size:11px;padding:5px 10px;border:1px solid var(--line);border-radius:5px;cursor:pointer;color:var(--ink-dim);background:var(--panel-2)}
+  .stab:hover{color:var(--ink)}
+  .stab.on{border-color:var(--accent);color:var(--ink)}
+  .spacer{flex:1}
+  #pipe-state{font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  #pipe-state.on{color:var(--good)} #pipe-state.off{color:var(--ink-faint)}
+  button{font-family:inherit;font-size:11px;background:var(--panel-2);color:var(--ink-dim);border:1px solid var(--line);border-radius:5px;padding:6px 12px;cursor:pointer}
+  button:hover{color:var(--ink);border-color:var(--ink-faint)}
+  button.primary{background:var(--accent);color:#191307;border:none;font-weight:600}
+
+  /* ── storyboard ── */
+  #board{flex:1;overflow-y:auto;padding:18px 20px}
+  #board .lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px}
+  #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative}
+  .card.approved{cursor:grab}
+  .card.approved:active{cursor:grabbing}
+  .card .thumb{aspect-ratio:16/9;background:#0a0c0f;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:11px;overflow:hidden}
+  .card .thumb img,.card .thumb video{width:100%;height:100%;object-fit:cover;display:block}
+  .card .meta{padding:8px 10px;display:flex;align-items:baseline;gap:8px}
+  .card .id{font-family:var(--mono);font-size:12px}
+  .card .state{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-left:auto}
+  .card.approved .state{color:var(--good)}
+  .card.blocked .state{color:var(--bad)}
+  .card .badge{position:absolute;top:8px;left:8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:rgba(14,16,19,.85);border:1px solid var(--line);border-radius:4px;padding:2px 6px;color:var(--ink-dim)}
+  .card.approved .badge{color:var(--good);border-color:var(--good)}
+  .card .open{position:absolute;top:8px;right:8px;font-size:10px;background:rgba(14,16,19,.85);border:1px solid var(--line);border-radius:4px;padding:2px 7px;color:var(--ink-dim);cursor:pointer}
+  .card .open:hover{color:var(--ink)}
+
+  /* ── timeline ── */
+  #timeline-wrap{border-top:1px solid var(--line);background:var(--panel);padding:12px 20px 16px}
+  #timeline-head{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+  #timeline-head .lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+  #timeline-head .count{font-size:11px;color:var(--ink-dim)}
+  #timeline{display:flex;gap:8px;min-height:96px;align-items:stretch;overflow-x:auto;padding:8px;border:1px dashed var(--line);border-radius:8px}
+  #timeline.dragover{border-color:var(--accent)}
+  #timeline .empty{color:var(--ink-faint);font-size:12px;align-self:center;margin:0 auto}
+  .clip{flex:0 0 150px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative;cursor:grab}
+  .clip .thumb{aspect-ratio:16/9;background:#0a0c0f;overflow:hidden}
+  .clip .thumb img,.clip .thumb video{width:100%;height:100%;object-fit:cover;display:block}
+  .clip .tag{font-family:var(--mono);font-size:10px;padding:4px 7px;display:flex;justify-content:space-between;align-items:center}
+  .clip .rm{cursor:pointer;color:var(--ink-faint)} .clip .rm:hover{color:var(--bad)}
+  .clip .n{position:absolute;top:5px;left:5px;font-family:var(--mono);font-size:9px;background:rgba(14,16,19,.85);border-radius:3px;padding:1px 5px;color:var(--accent)}
+  .clip.dragging{opacity:.4}
+
+  /* ── player overlay ── */
+  #player{position:fixed;inset:0;background:rgba(8,9,11,.96);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:50}
+  #player.on{display:flex}
+  #player video{max-width:88vw;max-height:74vh;border-radius:8px;border:1px solid var(--line)}
+  #player .bar{display:flex;gap:12px;align-items:center;color:var(--ink-dim);font-family:var(--mono);font-size:12px}
+  #note{position:fixed;bottom:14px;right:16px;max-width:340px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;font-size:12px;color:var(--ink-dim);display:none;z-index:60}
+</style>
+
+<header>
+  <h1>The Board</h1>
+  <div id="scene-tabs"></div>
+  <span class="spacer"></span>
+  <span id="pipe-state" class="off">standalone</span>
+  <button id="play" class="primary">▶ Play the cut</button>
+  <button id="export">Export cut list</button>
+  <button id="to-room">Open the Room</button>
+</header>
+
+<div id="board">
+  <p class="lbl" id="board-lbl">Storyboard</p>
+  <div id="cards"></div>
+</div>
+
+<div id="timeline-wrap">
+  <div id="timeline-head">
+    <span class="lbl">Timeline — the cut</span>
+    <span class="count" id="tl-count"></span>
+    <span class="count" style="margin-left:auto">drag approved takes in · drag within to reorder</span>
+  </div>
+  <div id="timeline"></div>
+</div>
+
+<div id="player"><video id="pv" controls autoplay></video>
+  <div class="bar"><span id="pv-label"></span><button id="pv-close">Close</button></div>
+</div>
+<div id="note"></div>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════
+   THE BOARD — the pipeline, seen. Storyboard cards per scene, a
+   timeline you drop approved takes into, and playback of the cut.
+
+   The one law: DRAGGING IS EDITORIAL, NEVER A GATE. Only takes the
+   pipeline has APPROVED can enter the timeline. An unapproved card
+   refuses the drop and tells you which gate it is waiting at — the
+   Room (or the studio UI) is where that gate gets opened.
+═══════════════════════════════════════════════════════════════════ */
+
+const SCENES = [1,2,3,4,5,6,7,8,9,10];
+const SLUGS = {1:"RAINFOREST",2:"SANCTUARY",3:"THE PIER",4:"AT SEA",5:"FOREST EDGE",6:"COVE STORM",7:"THE RESCUE",8:"ARRIVAL",9:"CEREMONY",10:"HONEY"};
+const KEY = "crystal-bears-board-v1";
+const PIPE = {connected:false, episode:"Ep1"};
+
+let state = load();
+let openScene = state.openScene || 1;
+let shots = [];              // cards for the open scene: {id, state, approved, imageUrl, clipUrl}
+let dragSrc = null;          // {from:"board"|"tl", id or index}
+
+function load(){
+  try{ const raw=localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return {openScene:1, timeline:{}};   // timeline per scene: [{id, clipUrl, imageUrl}]
+}
+function save(){ state.openScene=openScene; try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+function tl(){ if(!state.timeline[openScene]) state.timeline[openScene]=[]; return state.timeline[openScene]; }
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+let noteTimer=null;
+function note(msg){ const n=document.getElementById("note"); n.textContent=msg; n.style.display="block";
+  clearTimeout(noteTimer); noteTimer=setTimeout(()=>n.style.display="none", 5200); }
+
+/* ── pipeline read ─────────────────────────────────────────────── */
+function looksApproved(s){
+  const t = ((s.state||"")+" "+(s.phase||"")+" "+(s.status||"")).toLowerCase();
+  return /approved|signed|banked|done|complete|locked/.test(t);
+}
+async function fetchScene(){
+  if(location.protocol==="file:"){ PIPE.connected=false; shots=[]; render(); return; }
+  try{
+    const r = await fetch(`/api/director-session?episode=${PIPE.episode}&scene=${openScene}`, {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const session = await r.json();
+    PIPE.connected = true;
+    const list = Array.isArray(session.shots)?session.shots:[];
+    // Per-shot artifact lookup, done lazily and tolerantly: whatever the
+    // session exposes per shot is used; a per-shot session fetch fills gaps.
+    shots = await Promise.all(list.map(async s=>{
+      const id = s.id||s.shotId||"?";
+      let imageUrl = s.keyframeUrl||s.imageUrl||null;
+      let clipUrl  = s.clipUrl||s.url||null;
+      if(!imageUrl || !clipUrl){
+        try{
+          const rr = await fetch(`/api/director-session?episode=${PIPE.episode}&scene=${openScene}&shotId=${encodeURIComponent(id)}`, {cache:"no-store"});
+          if(rr.ok){
+            const ss = await rr.json();
+            const a = ss.artifact||{};
+            if(a.type==="image" && a.url) imageUrl = imageUrl||a.url;
+            if(a.type==="video" && a.url) clipUrl = clipUrl||a.url;
+            if(a.type==="video-set" && Array.isArray(a.items) && a.items[0]) clipUrl = clipUrl||a.items[0].url;
+          }
+        }catch(e){}
+      }
+      return {id, state:(s.state||s.phase||s.status||""), approved:looksApproved(s), imageUrl, clipUrl};
+    }));
+  }catch(e){
+    if(PIPE.connected) note("Lost the studio connection — the board re-syncs when it returns.");
+    PIPE.connected=false; shots=[];
+  }
+  render();
+}
+
+/* ── render ────────────────────────────────────────────────────── */
+function render(){
+  document.getElementById("scene-tabs").innerHTML = SCENES.map(n=>
+    `<span class="stab ${n===openScene?"on":""}" data-scene="${n}">S${n} ${SLUGS[n]||""}</span>`).join("");
+
+  const ps=document.getElementById("pipe-state");
+  ps.textContent = PIPE.connected?"pipeline connected":"standalone";
+  ps.className = PIPE.connected?"on":"off";
+  document.getElementById("board-lbl").textContent = `Storyboard — Scene ${openScene}`;
+
+  const cards=document.getElementById("cards");
+  if(!shots.length){
+    cards.innerHTML = `<div style="color:var(--ink-faint);font-size:12.5px;line-height:1.6">${
+      PIPE.connected ? "No shots in the pipeline for this scene yet — direct them in the Room and they appear here."
+      : "Standalone: no pipeline visible from file://. Serve this from the studio (see CODEX_ROOM_INSTRUCTION.md) and the storyboard fills itself from the real shots."}</div>`;
+  } else {
+    cards.innerHTML = shots.map(s=>`
+      <div class="card ${s.approved?"approved":""}" draggable="${s.approved?"true":"false"}" data-id="${esc(s.id)}">
+        <div class="badge">${s.approved?"approved":"in gates"}</div>
+        <span class="open" data-open="${esc(s.id)}">room ↗</span>
+        <div class="thumb">${
+          s.clipUrl ? `<video muted preload="metadata" src="${esc(s.clipUrl)}"></video>` :
+          s.imageUrl ? `<img loading="lazy" src="${esc(s.imageUrl)}" alt="">` : "no artifact yet"}</div>
+        <div class="meta"><span class="id">${esc(s.id)}</span><span class="state">${esc(String(s.state))}</span></div>
+      </div>`).join("");
+  }
+
+  const t=tl();
+  document.getElementById("tl-count").textContent = t.length? t.length+" clip"+(t.length>1?"s":"") : "";
+  const tlEl=document.getElementById("timeline");
+  tlEl.innerHTML = t.length ? t.map((c,i)=>`
+    <div class="clip" draggable="true" data-idx="${i}">
+      <span class="n">${i+1}</span>
+      <div class="thumb">${c.clipUrl?`<video muted preload="metadata" src="${esc(c.clipUrl)}"></video>`:c.imageUrl?`<img src="${esc(c.imageUrl)}">`:""}</div>
+      <div class="tag"><span>${esc(c.id)}</span><span class="rm" data-rm="${i}">✕</span></div>
+    </div>`).join("")
+    : `<div class="empty">Drop approved takes here to build the cut</div>`;
+}
+
+/* ── drag & drop ───────────────────────────────────────────────── */
+document.getElementById("cards").addEventListener("dragstart", e=>{
+  const card=e.target.closest(".card"); if(!card) return;
+  if(!card.classList.contains("approved")){ e.preventDefault(); return; }
+  dragSrc={from:"board", id:card.dataset.id};
+  e.dataTransfer.effectAllowed="copy";
+});
+document.getElementById("cards").addEventListener("click", e=>{
+  const open=e.target.closest("[data-open]");
+  if(open){ location.href = "room.html"; return; }
+  const card=e.target.closest(".card"); if(!card) return;
+  const s=shots.find(x=>x.id===card.dataset.id);
+  if(s && !s.approved) note(s.id+" is still in the gates ("+(s.state||"unknown")+"). Open the Room to take it through — only approved takes can join the cut.");
+});
+
+const tlEl=document.getElementById("timeline");
+tlEl.addEventListener("dragover", e=>{ e.preventDefault(); tlEl.classList.add("dragover"); });
+tlEl.addEventListener("dragleave", ()=>tlEl.classList.remove("dragover"));
+tlEl.addEventListener("drop", e=>{
+  e.preventDefault(); tlEl.classList.remove("dragover");
+  if(!dragSrc) return;
+  const t=tl();
+  // insertion index from drop x-position
+  const after=[...tlEl.querySelectorAll(".clip")].filter(c=>{
+    const r=c.getBoundingClientRect(); return e.clientX > r.left + r.width/2;
+  }).length;
+  if(dragSrc.from==="board"){
+    const s=shots.find(x=>x.id===dragSrc.id);
+    if(!s) return;
+    if(!s.approved){ note("The pipeline has not approved "+s.id+" — the timeline only takes approved work."); return; }
+    if(!s.clipUrl){ note(s.id+" is approved but has no clip artifact visible yet."); return; }
+    t.splice(after,0,{id:s.id, clipUrl:s.clipUrl, imageUrl:s.imageUrl});
+    note(s.id+" added to the cut at position "+(after+1)+".");
+  } else if(dragSrc.from==="tl"){
+    const [moved]=t.splice(dragSrc.idx,1);
+    t.splice(after>dragSrc.idx?after-1:after,0,moved);
+  }
+  dragSrc=null; save(); render();
+});
+tlEl.addEventListener("dragstart", e=>{
+  const clip=e.target.closest(".clip"); if(!clip) return;
+  dragSrc={from:"tl", idx:+clip.dataset.idx};
+  clip.classList.add("dragging");
+  e.dataTransfer.effectAllowed="move";
+});
+tlEl.addEventListener("dragend", e=>{ const c=e.target.closest(".clip"); if(c) c.classList.remove("dragging"); });
+tlEl.addEventListener("click", e=>{
+  const rm=e.target.closest("[data-rm]"); if(!rm) return;
+  tl().splice(+rm.dataset.rm,1); save(); render();
+});
+
+/* ── play the cut ──────────────────────────────────────────────── */
+const player=document.getElementById("player"), pv=document.getElementById("pv"), pvLabel=document.getElementById("pv-label");
+let playIdx=0;
+function playCut(){
+  const t=tl().filter(c=>c.clipUrl);
+  if(!t.length){ note("Nothing in the cut yet — drop approved takes into the timeline first."); return; }
+  playIdx=0; player.classList.add("on"); playOne(t);
+}
+function playOne(t){
+  const c=t[playIdx];
+  pvLabel.textContent = `${playIdx+1}/${t.length} — ${c.id}`;
+  pv.src=c.clipUrl; pv.play().catch(()=>{});
+  pv.onended=()=>{ playIdx++; if(playIdx<t.length) playOne(t); else player.classList.remove("on"); };
+}
+document.getElementById("play").addEventListener("click", playCut);
+document.getElementById("pv-close").addEventListener("click", ()=>{ pv.pause(); player.classList.remove("on"); });
+
+/* ── export & nav ──────────────────────────────────────────────── */
+document.getElementById("export").addEventListener("click", ()=>{
+  const payload={episode:PIPE.episode, scene:openScene, exportedAt:new Date().toISOString(),
+    cut: tl().map((c,i)=>({position:i+1, shotId:c.id, clipUrl:c.clipUrl}))};
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+  a.download=`cutlist-scene-${openScene}.json`; a.click();
+  note("Cut list exported — this is the assembly order for post.");
+});
+document.getElementById("to-room").addEventListener("click", ()=>location.href="room.html");
+document.getElementById("scene-tabs").addEventListener("click", e=>{
+  const tab=e.target.closest("[data-scene]"); if(!tab) return;
+  openScene=+tab.dataset.scene; save(); render(); fetchScene();
+});
+
+render();
+fetchScene();
+setInterval(fetchScene, 8000);
+</script>

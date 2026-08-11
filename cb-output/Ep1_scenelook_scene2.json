@@ -1,0 +1,61 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S2_plate_candidate_81444b45.jpeg",
+  "hash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+  "inputSignature": {
+   "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+   "briefHash": "dee5c178956f72e2bbb92870fc09f7223dfe503de338675d192894032693a37c",
+   "referenceHashes": {},
+   "plateHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-08-11T20:40:13",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Downloads/Rose_quartz_singing_bowl_crystal…_202608111041.jpeg",
+  "packageRevision": 1,
+  "approvedAt": "2026-08-11T20:57:39",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-11T20:40:02",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "fbfe3283fb3044288cc3558af95d3dcaba7c8bb9aa97f0131200c015ea93f2c8",
+    "output": {
+     "creativeIntent": "Establish Crystal Cove — Aida’s Sanctuary as a warm, sacred shoreline environment for a young family CGI adventure: calm, inviting, emotionally safe, and quietly magical, with the crystal bowl altar as the defining environmental feature.",
+     "storyOfPlace": "A gentle cove where soft golden sand meets a smooth tide-worn sandy-stone shelf and clear azure water. Beside the water rests Aida’s crystal bowl altar, integrated naturally into the sanctuary rather than feeling like a prop. A forest path rises from the cove edge, suggesting a protected place between ocean, stone, and trees. The morning is clear and peaceful, while a faint sense of distant wind begins far beyond the sanctuary.",
+     "paletteAndLighting": "Warm golden morning light with soft sun and subtle gold god-rays, continuous with a warm waking-world light arc. Palette: golden sand, honey stone, clear azure and turquoise water, soft forest greens, prismatic crystal highlights, gentle warm atmospheric haze. Lighting should feel saturated, readable, and reverent without becoming dark or dramatic.",
+     "materialsAndAtmosphere": "Soft granular sand, smooth tide-polished sandy stone, shallow glassy water with gentle wavelets, clear faceted crystal bowl catching small rainbow refractions, natural coastal plants, mossy forest-edge textures, warm air glow, light sea mist near the waterline. Original 3D CGI animation look for ages 4–8: tactile, appealing, rounded forms, clean silhouettes, high-quality cinematic surfacing, no photoreal harshness.",
+     "continuityRules": [
+      "Environment-only Scene Look plate; no characters, creatures, footprints, props implying recent character action, or staged performance.",
+      "The defining feature must be Aida’s crystal bowl altar beside the water’s edge.",
+      "Maintain morning setting with warm golden light, soft sun, and gold god-rays.",
+      "Keep the cove calm, sacred, and safe; distant wind may be suggested only subtly beyond the sanctuary.",
+      "Use original 3D CGI animated feature styling, Pixar-caliber quality, warm saturated light, bold legible environment design, and tactile materials appropriate for ages 4–8."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated feature, ages 4–8, Pixar-caliber quality. Depict Crystal Cove — Aida’s Sanctuary: a quiet sacred shoreline clearing where soft golden sand blends into a smooth tide-worn sandy-stone shelf beside gentle clear azure water. Aida’s crystal bowl altar sits beside the water’s edge as the defining environmental feature, naturally integrated with the cove, faceted crystal catching warm morning light with subtle rainbow glints. Behind the cove, a small forest path rises from the shoreline into soft green trees and coastal plants. Warm golden morning sunlight, soft sun, gentle gold god-rays, warm saturated color, light sea mist, calm reverent atmosphere. Palette of golden sands, honey stone, azure and turquoise waves, soft forest greens, prismatic crystal highlights. Materials should feel tactile and appealing: soft sand, polished stone, glassy shallow water, rounded natural forms, clean readable silhouettes, cinematic animated surfacing. Clear peaceful weather at the cove with only a very subtle suggestion of distant wind gathering far beyond the sanctuary. No characters, no animals, no footprints, no vehicles, no text, no logos, no photorealistic harshness, no dark storm lighting."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+     "sceneContextHash": "152f8f9d7f4bfff376db8289ac0238fc0c0e6a0ecd6e609086f07801b2dcc64e"
+    }
+   },
+   "history": []
+  }
+ }
+}

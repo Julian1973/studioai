@@ -3,7 +3,7 @@
  "sceneNumber": "2",
  "sceneName": "",
  "doctrine": "THE_DEFINITIVE_PIPELINE.md (2026-07-16, hybrid contract)",
- "revision": 1,
+ "revision": 2,
  "sourceScript": {
   "schemaVersion": 1,
   "episodeId": "Ep1",
@@ -100,7 +100,7 @@
      }
     ]
    },
-   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Aida and @图3 only for the set.\n\nBegin exactly on @图1, the approved opening frame — slow push-in from wide shore to calm medium. Aida sits beside the bowl with the wand just off the rim, then eases it into a slow circle. Her breathing settles, her eyelids close, and the pendant glow gradually lifts light across her face. Aida’s closed-eyed stillness fills the quieted cove.\n\nPreserve character identity and relative scale. Keep rose quartz pendant glowing, crystal bowl beside her visible.",
+   "seedancePrompt": "image_1 defines exactly one Aida: an elder bear with long flowing lilac-purple hair, a jewelled headdress across her brow, layered purple robes and a rose quartz pendant at her chest. Refer to it strictly. Do not use its pose or background.\nimage_2 defines only the sanctuary environment: a quiet cove shoreline with gentle waves and Aida's crystal singing bowl. Do not use or invent characters from it.\nExactly one Aida; no other characters appear.\nThe rose quartz pendant and its pink glow belong to Aida only.\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nNo dialogue in this beat; no narrator, no crowd, no added speech.\n\nShot 1 — the ritual. Camera: a slow push-in from a wide of the quiet cove toward Aida seated beside the crystal bowl. Gentle waves roll onto the shore. She runs the wand softly around the bowl's rim and a low shimmering tone rises <sustained crystal-bowl tone>; the cove seems to quiet around it — the water calms, the air stills. She closes her eyes. Her rose quartz pendant begins to glow, and soft pink light rises across her face from below, growing steadily stronger. Hold on her still, pink-lit face for two full seconds. End state: Aida perfectly still with eyes closed, her face lit in rose-pink, the bowl's tone sustained — a describable frame.\n\nThe singing-bowl tone is diegetic sound, not music. No music. No subtitles, captions or on-screen text. No watermark. No extra characters.",
    "promptWords": 92,
    "referenceSlots": {
     "@图1": "opening keyframe",
@@ -122,74 +122,112 @@
     "2.B2"
    ],
    "durationSec": 9.0,
-   "purpose": "Show Keen’s departure as Aida senses it.",
-   "performanceAssignment": "The vision opens on the pier and waiting boat. Keen stands by his supplies, lifts the satchel strap, checks it, releases it, then repeats the check twice more while glancing toward the nearby adult presence.",
-   "camera": "Vision POV, steady medium-wide with slight drift toward Keen.",
-   "openingPose": "Keen stands near the pier supplies, one hand just reaching for his satchel strap.",
+   "purpose": "Aida's vision shows her who needs her — Keen on the edge of leaving home, and the mother letting him go.",
+   "performanceAssignment": "The vision opens on a wooden pier beside a small sailboat on bright blue water. Keen stands beside his Mum and checks his satchel straps, again, then one more time — each check smaller and quicker than the last, his nerves showing in the repetition. His wrists and forearms stay completely bare. Mum watches with a proud smile that cannot quite hide her worry; one paw lifts slightly toward him and settles back.",
+   "camera": "Vision POV, slow gentle drift toward Keen and Mum on the pier; never cut.",
+   "openingPose": "Keen beside his Mum on the wooden pier near the sailboat, hands reaching toward satchel straps, bare wrists visible.",
    "sourceType": "opener",
    "sourceShotId": null,
    "cutInMotivation": "The pendant glow and bowl tone dissolve into Aida’s inner vision.",
    "dialogueBinding": null,
    "dialogueLines": [],
-   "visualPayoff": "Keen finishes a third careful strap check beside the boat.",
+   "visualPayoff": "Keen mid-check beside Mum, held as the vision's final image and Scene 3 opening plate.",
    "physicalStaging": null,
    "physicalStagings": [],
    "prohibited": [
     "No dialogue",
-    "No slapstick checking",
-    "No focus away from Keen"
+    "No Aida inside the vision",
+    "No wristbands, bands, bracelets, cuffs or straps on Keen",
+    "No extra characters",
+    "No focus away from Keen and Mum"
    ],
    "charactersInFrame": [
-    "Keen"
+    "Keen",
+    "Keen's Mum"
    ],
    "continuityIn": {
-    "lighting": "vision-bright pier daylight, slightly softened at the edges",
-    "cameraSide": "boat and water hold screen-right; shoreward pier holds screen-left",
+    "lighting": "dissolves from 2.B1.S1's final frame: Aida pink-lit, eyes closed; the entire vision is washed in soft rose-pink light",
+    "cameraSide": "wooden pier and shore hold screen-left; small sailboat and bright blue water hold screen-right",
     "characters": [
      {
       "character": "Keen",
-      "screenZone": "frame-center",
-      "facing": "three-quarter toward screen-left",
-      "pose": "standing near supplies, hand reaching toward satchel strap",
-      "expression": "focused and careful",
+      "screenZone": "beside Mum on the pier near the sailboat",
+      "facing": "three-quarter toward Mum and the satchel",
+      "pose": "standing with bare wrists visible while checking satchel straps",
+      "expression": "careful, nervous, trying to look ready",
       "visibleMarks": [
-       "satchel worn with straps visible"
+       "satchel worn across body",
+       "wrists and forearms completely bare; wristband state NONE"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Keen's Mum",
+      "screenZone": "beside Keen on the pier",
+      "facing": "toward Keen",
+      "pose": "standing close, one paw nearly lifting then settling back",
+      "expression": "proud smile that cannot quite hide worry",
+      "visibleMarks": [
+       "pale-blue bow",
+       "ornate gold collar"
       ],
       "heldProps": []
      }
     ]
    },
    "continuityOut": {
-    "lighting": "vision-bright pier daylight, slightly softened at the edges",
-    "cameraSide": "boat and water hold screen-right; shoreward pier holds screen-left",
+    "lighting": "rose-pink vision wash remains steady over the pier image",
+    "cameraSide": "wooden pier and shore hold screen-left; small sailboat and bright blue water hold screen-right",
     "characters": [
      {
       "character": "Keen",
-      "screenZone": "frame-center",
-      "facing": "three-quarter toward screen-left",
-      "pose": "standing with both hands just released from satchel straps",
+      "screenZone": "beside Mum on the pier",
+      "facing": "three-quarter toward Mum and the satchel",
+      "pose": "mid-check on satchel straps with bare wrists visible",
       "expression": "careful, slightly tense",
       "visibleMarks": [
-       "satchel worn with straps visible"
+       "satchel worn across body",
+       "wrists and forearms completely bare; wristband state NONE"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Keen's Mum",
+      "screenZone": "beside Keen on the pier",
+      "facing": "toward Keen",
+      "pose": "watching him, paw settled back after almost reaching out",
+      "expression": "proud smile with contained worry",
+      "visibleMarks": [
+       "pale-blue bow",
+       "ornate gold collar"
       ],
       "heldProps": []
      }
-    ]
+    ],
+    "handoffUse": "This held final image is also Scene 3's opening plate."
    },
-   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen and @图3 only for the set.\n\nBegin exactly on @图1, the approved opening frame — vision POV, steady medium-wide with slight drift toward Keen. The vision opens on the pier and waiting boat. Keen stands by his supplies, lifts the satchel strap, checks it, releases it, then repeats the check twice more while glancing toward the nearby adult presence. Keen finishes a third careful strap check beside the boat.\n\nPreserve character identity and relative scale. Keep satchel worn with straps visible visible.",
-   "promptWords": 93,
+   "seedancePrompt": "image_1 is the first frame — the vision imagery itself: a wooden pier, a small sailboat on bright blue water, Keen beside his Mum. Match its staging and positions exactly. The entire beat stays inside this vision: the image is washed in soft rose-pink light at its edges and gently glowing throughout, dreamlike but clear. Do not use image_1 to alter Keen or Mum identity; those are controlled only by image_2 and image_3.\nimage_2 defines exactly one Keen: a young blue bear cub with an upright white tuft on the crown of his head, a satchel worn across his body. Refer to it strictly. Do not use its pose or background.\nimage_3 defines exactly one Mum: a plump pale-blue adult bear, hair in a neat bun fronted by a pale-blue bow, an ornate gold collar. Refer to it strictly. Do not use its pose or background.\nATTRIBUTE OWNERSHIP: Keen's wrists and forearms stay completely bare for the entire beat — no wristbands, bands, bracelets, cuffs or straps of any kind appear on him. Exactly one Keen and one Mum; no other characters appear.\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm light with the rose-pink vision wash over everything; teal-orange base grade beneath it. Shallow depth of field with soft bokeh, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nNo dialogue in this beat — the vision is silent of speech; its sound stays muffled and distant <muffled waves and gulls, far away, soft and dreamlike>.\n\nShot 1 — what Aida sees. Camera: a slow gentle drift toward the pair on the pier, never cutting. Keen checks the straps on his satchel, then checks them again, then one more time — each check smaller and quicker than the last, his nerves showing in the repetition. His bare wrists are clearly visible as he works the straps. His Mum watches him with a proud smile that cannot quite hide her worry; one paw lifts slightly toward him and settles back. Hold the two of them for a full beat at the end. End state: Keen mid-check beside his Mum on the pier, the rose-pink wash steady — held as the vision's final image.\n\nNo music. No subtitles, captions or on-screen text. No watermark. No extra characters.",
+   "promptWords": 302,
    "referenceSlots": {
-    "@图1": "opening keyframe",
-    "@图2": "Keen",
-    "@图3": "scene plate"
+    "image_1": "approved pier vision plate / first frame",
+    "image_2": "Keen identity reference",
+    "image_3": "Keen's Mum identity reference"
    },
    "audioBrief": null,
-   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Keen (@图1) stands near the pier supplies, one hand just reaching for his satchel strap.\n\nContinuity in: vision-bright pier daylight, slightly softened at the edges; boat and water hold screen-right; shoreward pier holds screen-left. @图2 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
-   "keyframePromptWords": 90,
+   "keyframePrompt": "The literal OPENING FRAME of the inner vision: wooden pier, small sailboat on bright blue water, exactly one Keen beside exactly one Keen's Mum. Aida does not appear inside the vision. Preserve the rose-pink vision wash at the frame edges. Keen's wrists and forearms are completely bare — wristband state NONE, no bands, bracelets, cuffs or straps. Use the pier vision plate as staging authority; use Keen and Mum references only for identity and proportions. Negative: extra characters, wristbands on Keen, dialogue text, subtitles, watermarks, altered reference features.",
+   "keyframePromptWords": 88,
    "keyframeReferenceSlots": {
-    "@图1": "Keen",
-    "@图2": "scene plate"
-   }
+    "image_1": "pier vision plate",
+    "image_2": "Keen identity reference",
+    "image_3": "Keen's Mum identity reference"
+   },
+   "revisionNotes": [
+    {
+     "at": "2026-08-11T20:40:49",
+     "source": "Julian accepted Flova render + locked script correction",
+     "change": "Restored Keen plus Keen's Mum vision cast and bare-wrist constraint."
+    }
+   ]
   },
   {
    "shotId": "2.B3.S1",
@@ -266,7 +304,7 @@
      }
     ]
    },
-   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Aida and @图3 only for the set.\n\nBegin exactly on @图1, the approved opening frame — medium close, then gentle pan right following her exit. Back on shore, the glow fades from Aida’s eyes. She lowers the wand beside the bowl, places one hand over her heart, smiles softly, speaks her single line, then rises and walks toward the forest. Aida exits toward the forest as the bowl tone becomes wind.\n\nUse @Audio1 as the only voice. Lip-sync Aida. Preserve character identity and relative scale. Keep rose quartz pendant glow fading, crystal bowl beside her, rose quartz pendant unlit, crystal bowl left behind near starting spot visible.",
+   "seedancePrompt": "image_1 is the first frame — the final frame of the ritual beat: Aida seated beside the crystal bowl, perfectly still, eyes closed, her face lit in rose-pink from the glowing pendant. Begin naturally from it. Match its staging, light and position exactly. Do not repeat the ritual's action.\nimage_2 defines only the sanctuary environment: the quiet cove shoreline and the crystal bowl. Do not use or invent characters from it.\nExactly one Aida; no other characters appear. The rose quartz pendant and its pink glow belong to Aida only.\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nDialogue language: English. Aida speaks slow and sure, as if she already knows how it ends, going quieter the closer she gets to what matters. Only Aida speaks; no narrator, no crowd, no added speech.\n\nShot 1 — the return. Camera: close on Aida as the pink glow fades gently from her eyes and they open. She places a paw over her heart. A soft knowing smile arrives by degrees, not all at once. She says softly, certain, almost to herself: {It's time.} Hold the pose for a full beat after the line finishes; keep her expression for two full seconds after the line ends.\n\nShot 2 — the exit. She rises gracefully in one unhurried movement, turns, and walks purposefully toward the treeline as the bowl's note fades into the sound of distant wind <bowl tone fading, low wind rising>. The camera holds and lets her go. End state: Aida walking away into the forest edge, the cove quiet behind her — a describable frame.\n\nThe singing-bowl tone is diegetic sound, not music. No music. No subtitles, captions or on-screen text. No watermark. No extra characters.",
    "promptWords": 117,
    "referenceSlots": {
     "@图1": "opening keyframe",
@@ -291,7 +329,7 @@
    "beatCodes": [
     "2.B1"
    ],
-   "status": "designed",
+   "status": "approved",
    "sourceType": "opener",
    "sourceShotId": null,
    "cutInMotivation": null,
@@ -315,8 +353,186 @@
      }
     ]
    },
-   "approvedTake": null,
-   "harvestFrame": null
+   "approvedTake": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_import_20260811T210039_ef0c243bc1.mp4",
+   "harvestFrame": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_final_frame.png",
+   "keyframeCandidate": null,
+   "departmentWork": {
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-08-11T20:58:41",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "sourceHash": "79ae04a7a586d37d04ee6393d1cd057fd335187c5692ef7bc66bccf7be087942",
+      "output": {
+       "shotId": "2.B1.S1",
+       "audienceRead": "A calm reset: the audience first reads Aida alone at the cove, poised at the start of a private listening ritual, with the shore and bowl giving her stillness room to breathe.",
+       "composition": "Literal opening frame is a wide, centered sanctuary tableau that can support the approved slow push-in. Aida sits near frame-center in the lower middle third, readable but not yet in close emotional isolation. The crystal singing bowl sits immediately beside her toward screen-left, close enough for the wand to hover near the rim without making the frame feel busy. The horizon and cove opening remain behind her as a soft, symmetrical calm field, with crystal cliffs framing the edges and a clear performance corridor around Aida, the bowl and pendant.",
+       "lensAndCameraRelationship": "Camera is low and respectful at Aida’s seated eye-line to slightly above bowl height, looking gently toward the ocean opening. Use a moderately wide cinematic lens relationship for the opening frame, around a 32–35mm full-frame feel, with minimal distortion and enough environment to establish the quiet cove before the push-in. Aida is the scale reference; no perspective size alteration is authored.",
+       "lightingAndDepth": "Use the approved scene plate’s warm shore daylight, cool blue ocean fill and soft crystal-rim ambience. Keep the opening pendant glow only subtle and contained at Aida’s chest, not yet a strong face-light payoff. Depth is layered from foreground sand/rug and bowl, to Aida on the same playable plane, to lapping water and distant sunset softened with gentle atmospheric depth and shallow bokeh appropriate to feature-quality stylized CGI.",
+       "geography": [
+        "Ocean and open cove remain screen-left to center background.",
+        "Forest growth and crystal rock wall remain screen-right.",
+        "Aida starts frame-center on the sandy shore, seated beside the crystal bowl.",
+        "The crystal singing bowl sits just screen-left of Aida within easy ritual reach.",
+        "Aida faces three-quarter toward the screen-left ocean, leaving lead room toward the bowl and water.",
+        "The camera looks from shore foreground toward the cove mouth and horizon.",
+        "Keep the sand-and-rug area around Aida and the bowl unobstructed as the shot’s performance corridor."
+       ],
+       "charactersInFrame": [
+        "Aida"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Aida",
+        "referenceHeightFraction": 0.42,
+        "sameDepth": true,
+        "placements": [
+         {
+          "character": "Aida",
+          "centerX": 0.5,
+          "centerY": 0.58,
+          "apparentScale": 1.0,
+          "depthPlane": 0,
+          "bodyAngleDegrees": -25.0,
+          "facing": "three-quarter toward screen-left ocean",
+          "pose": "seated beside the crystal bowl in a quiet anticipation state, wand hovering near the rim, eyes open"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Reserve open water and horizon space screen-left of Aida for the audience’s quiet read toward the ocean.",
+        "Keep a clean low foreground corridor around the bowl and wand path, with no plants, rocks or props crossing it.",
+        "Leave breathable headroom and soft sky behind Aida so the later push-in can settle on her face without visual clutter."
+       ],
+       "referenceUse": [
+        "@图1 is the locked Aida character turnaround; use it strictly for Aida’s identity, proportions, costume, hair, headdress, pendant and materials, not for pose or background.",
+        "@图2 is the approved scene plate; use it for the quiet cove sanctuary environment, palette, crystal shoreline materials and lighting mood, not for adding characters or copying its exact composition.",
+        "Do not assign any layout board, generated pose plate or opening composition reference to an @图 label."
+       ],
+       "continuityProtections": [
+        "Exactly one character appears: Aida only.",
+        "No extra dialogue, captions, subtitles, watermarks, crowd or added speech.",
+        "Opening frame keeps Aida’s eyes open and the wand only hovering near the rim; do not show the later closed-eyed stillness or strong pink face-light payoff yet.",
+        "Rose quartz pendant glow belongs only to Aida and remains subtle at frame one, with no sudden magical burst."
+       ],
+       "providerPrompt": "Use the attached references in this exact order: @图1 Aida locked character turnaround, @图2 approved scene plate.\n\nCreate the literal OPENING FRAME for shot 2.B1.S1 in feature-quality stylized 3D CGI. Exactly one character appears: Aida only. Use @图1 strictly for Aida’s identity, proportions, hair, headdress, layered purple robes, rose quartz pendant and plush material finish; do not copy the turnaround pose or background. Use @图2 for the quiet cove sanctuary palette, crystal shoreline materials, warm shore daylight, cool ocean fill and soft magical ambience; do not add any characters from it.\n\nWide 16:9 opening tableau on the sandy cove shore, camera at calm seated eye-line, looking from shore foreground toward the cove mouth and horizon. Ocean and open water read screen-left to center background; forest growth and crystal rock wall read screen-right. Aida is seated frame-center in the lower middle third beside the crystal singing bowl, facing three-quarter toward the screen-left ocean. The bowl sits just screen-left of Aida within easy ritual reach. Her bowl wand hovers near the rim in a quiet anticipation state, eyes open. Keep the sand and rug area around Aida and the bowl unobstructed, with breathable sky and water behind her for a later slow push-in.\n\nLighting is soft shore daylight with warm amber key, cool blue fill from the water and a delicate rim from the crystals. The rose quartz pendant has only a subtle contained pink glow at her chest in this opening frame, not yet lighting her whole face. Plush fur with individual strands catching light, subsurface scattering, glossy eyes with bright catchlights, rounded appealing proportions, gentle ambient occlusion, shallow depth of field with soft bokeh, subtle film grain, teal-orange cinematic grade, emotionally warm quiet atmosphere.\n\nNegative: extra characters, character redesign, appearance drift from @图1, copied turnaround sheet pose, copied scene-plate composition, strong magical burst, closed eyes, full pink face illumination, dialogue, narrator, subtitles, captions, on-screen text, watermark."
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7f2513d6b84f57ecb5d959d26cf81f3510b9e9c819c16884ccb9e3499ddc319e"
+       },
+       "canonProfileDigest": "688404336e1abf2cc6bec0b8ac9a4131daad1d9394ec52195e28bc8473717bd5",
+       "shotContractHash": "903cadca5cc4f752f741c37ec7aa25dbf84dc6e471e2065bc5039a32157f1c1a",
+       "sceneLookHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "92f469976024f182a582cbde72316546b935e9e17e5bea18134259c179da41a5",
+         "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339"
+        }
+       ]
+      }
+     },
+     "history": []
+    }
+   },
+   "keyframeApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_keyframe_candidate_fcd4d12e.png",
+    "at": "2026-08-11T21:00:12",
+    "reviewedBy": "Julian",
+    "source": "uploaded",
+    "inputSignature": {
+     "cardHash": "557f19bfa2b9f7d156f9718240e78cbf47dc7745fe7f670a279bf4dd4bd2798e",
+     "canonProfileDigest": "688404336e1abf2cc6bec0b8ac9a4131daad1d9394ec52195e28bc8473717bd5",
+     "sceneLookHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+     "selectedAssetHash": "0fe510ade2b0929e5b7f37ac9488363e",
+     "source": "uploaded"
+    },
+    "promptContract": null,
+    "packageRevision": 2,
+    "contentHash": "433f8006d2d243729fe4b292f1e65215c31a2d2915050f11ef04cb943abd1868",
+    "conformanceScreening": {},
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-08-11T21:00:12",
+     "statusAtDecision": "unavailable",
+     "reasonAtDecision": "Objective identity and scale advice was unavailable."
+    }
+   },
+   "keyframePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_keyframe_candidate_fcd4d12e.png",
+   "renderHistory": [
+    {
+     "outcome": "external-take-approved",
+     "shotId": "2.B1.S1",
+     "sourceLabel": "Flova",
+     "sourcePath": "/Users/julianjenkins/Downloads/flova_Shot_Aida_Meditation_And_Glow_final_video_202608111449_bb31cc (1).mp4",
+     "managedPath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_import_20260811T210039_ef0c243bc1.mp4",
+     "contentHash": "ef0c243bc14947b88533b9f317027a0c2a11bab43ee70f709efd38a6ba1e87bd",
+     "reviewed_by": "Julian",
+     "at": "2026-08-11T21:00:39",
+     "provenance": {
+      "provider": "flova",
+      "outcome": "approved",
+      "verdict": "Julian approved",
+      "sourcePrompt": "image_1 defines exactly one Aida: an elder bear with long flowing lilac-purple hair, a jewelled headdress across her brow, layered purple robes and a rose quartz pendant at her chest. Refer to it strictly. Do not use its pose or background.\nimage_2 defines only the sanctuary environment: a quiet cove shoreline with gentle waves and Aida's crystal singing bowl. Do not use or invent characters from it.\nExactly one Aida; no other characters appear.\nThe rose quartz pendant and its pink glow belong to Aida only.\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nNo dialogue in this beat; no narrator, no crowd, no added speech.\n\nShot 1 — the ritual. Camera: a slow push-in from a wide of the quiet cove toward Aida seated beside the crystal bowl. Gentle waves roll onto the shore. She runs the wand softly around the bowl's rim and a low shimmering tone rises <sustained crystal-bowl tone>; the cove seems to quiet around it — the water calms, the air stills. She closes her eyes. Her rose quartz pendant begins to glow, and soft pink light rises across her face from below, growing steadily stronger. Hold on her still, pink-lit face for two full seconds. End state: Aida perfectly still with eyes closed, her face lit in rose-pink, the bowl's tone sustained — a describable frame.\n\nThe singing-bowl tone is diegetic sound, not music. No music. No subtitles, captions or on-screen text. No watermark. No extra characters."
+     }
+    }
+   ],
+   "approvedCandidate": null,
+   "candidatePaths": null,
+   "batchId": null,
+   "batch": null,
+   "pendingSpendAuth": null,
+   "approval": {
+    "approved": true,
+    "candidate": null,
+    "reviewed_by": "Julian",
+    "at": "2026-08-11T21:00:39",
+    "source": "external-director-accepted",
+    "contentHash": "ef0c243bc14947b88533b9f317027a0c2a11bab43ee70f709efd38a6ba1e87bd",
+    "harvestHash": "06266cdef1de1deb5db2a99d1416f7506e087f9c5dc051b371fc19fdf3c2657f",
+    "inputSignature": {
+     "policyVersion": "external-director-accepted-v1",
+     "canonProfileDigest": "8362cfefb79dc9169dba5e23bb0bfce751f002bc130eeb319347107c04d8ccfb",
+     "shotContractHash": "903cadca5cc4f752f741c37ec7aa25dbf84dc6e471e2065bc5039a32157f1c1a",
+     "openingFrameHash": "433f8006d2d243729fe4b292f1e65215c31a2d2915050f11ef04cb943abd1868",
+     "sourceContentHash": "ef0c243bc14947b88533b9f317027a0c2a11bab43ee70f709efd38a6ba1e87bd",
+     "provenanceDigest": "95edb864f6c4931f23adc7edcf8f1ba14493001c993fc84c9f30392ad0a77853"
+    },
+    "packageRevision": 2,
+    "sourceLabel": "Flova",
+    "provenanceDigest": "95edb864f6c4931f23adc7edcf8f1ba14493001c993fc84c9f30392ad0a77853"
+   },
+   "audioProvenance": {
+    "guideSource": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_import_20260811T210039_ef0c243bc1.mp4",
+    "guideSourceSha256": "ef0c243bc14947b88533b9f317027a0c2a11bab43ee70f709efd38a6ba1e87bd",
+    "dialogueAuthority": "approved-voice-master-required-in-post",
+    "postLaneStatus": "required",
+    "directorAcceptedPicture": true
+   }
   },
   {
    "shotId": "2.B2.S1",
@@ -324,29 +540,234 @@
    "beatCodes": [
     "2.B2"
    ],
-   "status": "designed",
+   "status": "approved",
    "sourceType": "opener",
    "sourceShotId": null,
-   "cutInMotivation": "The pendant glow and bowl tone dissolve into Aida’s inner vision.",
+   "cutInMotivation": "The pendant glow and bowl tone dissolve from Aida's closed-eyed final frame into the rose-pink inner vision.",
    "continuityOut": {
-    "lighting": "vision-bright pier daylight, slightly softened at the edges",
-    "cameraSide": "boat and water hold screen-right; shoreward pier holds screen-left",
+    "lighting": "rose-pink vision wash remains steady over the pier image",
+    "cameraSide": "wooden pier and shore hold screen-left; small sailboat and bright blue water hold screen-right",
     "characters": [
      {
       "character": "Keen",
-      "screenZone": "frame-center",
-      "facing": "three-quarter toward screen-left",
-      "pose": "standing with both hands just released from satchel straps",
+      "screenZone": "beside Mum on the pier",
+      "facing": "three-quarter toward Mum and the satchel",
+      "pose": "mid-check on satchel straps with bare wrists visible",
       "expression": "careful, slightly tense",
       "visibleMarks": [
-       "satchel worn with straps visible"
+       "satchel worn across body",
+       "wrists and forearms completely bare; wristband state NONE"
+      ],
+      "heldProps": []
+     },
+     {
+      "character": "Keen's Mum",
+      "screenZone": "beside Keen on the pier",
+      "facing": "toward Keen",
+      "pose": "watching him, paw settled back after almost reaching out",
+      "expression": "proud smile with contained worry",
+      "visibleMarks": [
+       "pale-blue bow",
+       "ornate gold collar"
       ],
       "heldProps": []
      }
-    ]
+    ],
+    "handoffUse": "This held final image is also Scene 3's opening plate."
    },
-   "approvedTake": null,
-   "harvestFrame": null
+   "approvedTake": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_import_20260811T210127_73777ed51a.mp4",
+   "harvestFrame": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_final_frame.png",
+   "revisionNotes": [
+    {
+     "at": "2026-08-11T20:40:49",
+     "source": "Julian accepted Flova render + locked script correction",
+     "change": "Restored Keen plus Keen's Mum vision cast and bare-wrist constraint."
+    }
+   ],
+   "departmentWork": {
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-08-11T20:59:20",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "sourceHash": "f0874f2c40b034579c16758a2bdec6ac4160871df914daaa47be27910d74118f",
+      "output": {
+       "shotId": "2.B2.S1",
+       "audienceRead": "Aida’s inner vision opens as a clear, tender departure image: Keen is small but determined beside his Mum, close to the sailboat and the bright water, with the rose-pink vision wash making the moment feel remembered, distant and emotionally charged.",
+       "composition": "16:9 opening frame on the wooden pier, with Keen and Keen’s Mum staged together slightly left of centre so their relationship is the immediate read. Keen holds the lower, younger visual weight beside Mum’s slightly taller, protective presence. The sailboat and bright blue water occupy screen-right as the destination and emotional pull, while the pier and shore hold screen-left as home. Keep Keen’s satchel area readable without making the keyframe perform the repeated checking action.",
+       "lensAndCameraRelationship": "Vision POV at a gentle child-height-to-waist-height relationship, camera looking slightly across the pier toward the pair and the boat. Use a natural cinematic lens feel, around a 35–45mm equivalent, close enough for emotional readability but wide enough to hold pier, boat and water geography. The frame should feel ready for a slow forward drift, not already pushed into a close-up.",
+       "lightingAndDepth": "Use the approved Scene Look’s soft rose-pink vision wash at the edges and across the image, with a warm teal-orange base grade beneath it. Bright blue water remains luminous but softened by the vision glow. Shallow depth of field keeps Keen and Mum crisp on the same depth plane, with the boat and distant water slightly softened. Plush fur, glossy eyes and soft subsurface character materials catch warm highlights without losing the dreamlike haze.",
+       "geography": [
+        "Wooden pier and shore hold screen-left.",
+        "Small sailboat and bright blue water hold screen-right.",
+        "Keen stands beside Keen’s Mum on the pier near the sailboat.",
+        "Keen and Keen’s Mum share the same depth plane, with Keen slightly screen-right of Mum.",
+        "Both characters face generally inward toward each other and the satchel area, not out to camera.",
+        "The camera looks along the pier on a gentle forward travel axis toward the pair.",
+        "Keep open water visible beyond the sailboat on frame-right.",
+        "No other characters occupy the pier, boat or waterline."
+       ],
+       "charactersInFrame": [
+        "Keen",
+        "Keen's Mum"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Keen",
+        "referenceHeightFraction": 0.42,
+        "sameDepth": true,
+        "placements": [
+         {
+          "character": "Keen",
+          "centerX": 0.52,
+          "centerY": 0.56,
+          "apparentScale": 1.0,
+          "depthPlane": 1,
+          "bodyAngleDegrees": -20.0,
+          "facing": "three-quarter toward Keen's Mum and the satchel area",
+          "pose": "standing in a playable anticipation state beside Mum, satchel worn across body, hands near the strap area, wrists and forearms unobstructed and completely bare"
+         },
+         {
+          "character": "Keen's Mum",
+          "centerX": 0.42,
+          "centerY": 0.54,
+          "apparentScale": 1.0,
+          "depthPlane": 1,
+          "bodyAngleDegrees": 20.0,
+          "facing": "toward Keen",
+          "pose": "standing close in a supportive anticipation state, attentive to Keen, pale-blue bow and ornate gold collar readable"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Reserve open water and sailboat space on frame-right as the visual destination.",
+        "Keep a clear forward drift corridor through the lower-centre pier boards toward Keen and Mum.",
+        "Leave a small breathable gap between Keen and Mum so their silhouettes and scale relationship remain readable.",
+        "Keep the frame edges softly open for the rose-pink vision wash; do not fill them with extra figures or props."
+       ],
+       "referenceUse": [
+        "Use image_1 as the staging and environment authority for the wooden pier, small sailboat, bright blue water and rose-pink vision atmosphere; do not add extra characters.",
+        "Use image_2 only for Keen’s locked identity, proportions, materials and satchel; do not copy its pose or background.",
+        "Use image_3 only for Keen’s Mum’s locked identity, proportions, pale-blue bow, ornate gold collar and materials; do not copy its pose or background.",
+        "Use the approved Scene Look for palette, material response, lighting softness and the rose-pink vision wash."
+       ],
+       "continuityProtections": [
+        "Exactly one Keen and exactly one Keen's Mum appear in frame.",
+        "Aida does not appear inside the vision.",
+        "Keen’s wrists and forearms are completely bare: no wristbands, bands, bracelets, cuffs or straps of any kind on his wrists or forearms.",
+        "Keen’s satchel is worn across his body and remains readable without becoming a wrist strap or cuff-like element."
+       ],
+       "providerPrompt": "Create the literal opening keyframe for shot 2.B2.S1, Aida’s inner vision. Use image_1 as the staging and environment authority: wooden pier and shore on screen-left, small sailboat and bright blue water on screen-right, dreamlike rose-pink vision wash at the frame edges and across the image. Use image_2 only for Keen’s locked identity and proportions. Use image_3 only for Keen’s Mum’s locked identity and proportions. Do not copy poses or backgrounds from the character references.\n\nFrame: 16:9 feature-quality stylized 3D CGI. Camera is a gentle vision POV at a natural 35–45mm cinematic lens feel, staged for a slow future drift toward the pair. Keen and Keen’s Mum stand together on the wooden pier near the sailboat, both on the same depth plane, readable full-to-three-quarter bodies. Keen is slightly screen-right of Mum; Mum is slightly screen-left of Keen. The pair sits slightly left of centre so the sailboat and bright blue water remain visible on frame-right. Keep the pier boards clear in the lower centre as a forward camera-drift corridor.\n\nKeen: young blue bear cub as defined by image_2, upright white tuft on the crown of his head, satchel worn across his body. Opening anticipation only: he stands beside Mum with attention toward the satchel strap area, hands near the satchel, careful and nervous but not mid-animation. His wrists and forearms must be completely bare and clearly visible — wristband state NONE. No wristbands, bands, bracelets, cuffs, ropes, wraps, decorative straps or any strap-like object on either wrist or forearm.\n\nKeen’s Mum: plump pale-blue adult bear as defined by image_3, hair in a neat bun fronted by a pale-blue bow, ornate gold collar. Opening anticipation only: she stands close beside Keen, oriented toward him with a proud, worried warmth, supportive but not performing a reach.\n\nLighting and style: preserve the approved Scene Look: warm light with a soft rose-pink vision wash over everything, teal-orange base grade underneath, bright blue water softened by the dream haze, shallow depth of field with soft bokeh, subtle film grain. Plush character materials with subsurface scattering, soft fur with individual strands catching light, glossy eyes with bright catchlights, rounded appealing features and emotionally warm atmosphere.\n\nStrict negatives: no Aida inside the vision, no extra characters, no dialogue text, no subtitles, no captions, no watermark, no focus away from Keen and Mum, no wristbands or wrist accessories on Keen."
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7f2513d6b84f57ecb5d959d26cf81f3510b9e9c819c16884ccb9e3499ddc319e"
+       },
+       "canonProfileDigest": "688404336e1abf2cc6bec0b8ac9a4131daad1d9394ec52195e28bc8473717bd5",
+       "shotContractHash": "e566db7a70818cea625c8dce5b0cf0360093a80ea633898b8a600c84c2cd9faf",
+       "sceneLookHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+       "references": []
+      }
+     },
+     "history": []
+    }
+   },
+   "keyframeCandidate": null,
+   "keyframeApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_keyframe_candidate_3ac37a96.jpeg",
+    "at": "2026-08-11T21:00:12",
+    "reviewedBy": "Julian",
+    "source": "uploaded",
+    "inputSignature": {
+     "cardHash": "ba339a28cc28087c42041913a3f2364d3f1079e7dfe609354efb57fb025db0bf",
+     "canonProfileDigest": "688404336e1abf2cc6bec0b8ac9a4131daad1d9394ec52195e28bc8473717bd5",
+     "sceneLookHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+     "selectedAssetHash": "08749ad08be531ba269f2a750f9afdaf",
+     "source": "uploaded"
+    },
+    "promptContract": null,
+    "packageRevision": 2,
+    "contentHash": "23063c2ed3109c880e0d92fee5e4479d0b806215b154a3fc80fc32821a67373a",
+    "conformanceScreening": {
+     "status": "unavailable",
+     "reason": "The objective identity and scale check did not complete. The generated image remains available for the human Director's decision.",
+     "detail": "keyframe conformance requires a candidate and its references",
+     "checkedAt": "2026-08-11T21:00:12",
+     "screenVersion": 1,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "candidateSha256": "23063c2ed3109c880e0d92fee5e4479d0b806215b154a3fc80fc32821a67373a"
+    },
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-08-11T21:00:12",
+     "statusAtDecision": "unavailable",
+     "reasonAtDecision": "The objective identity and scale check did not complete. The generated image remains available for the human Director's decision."
+    }
+   },
+   "keyframePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_keyframe_candidate_3ac37a96.jpeg",
+   "renderHistory": [
+    {
+     "outcome": "external-take-approved",
+     "shotId": "2.B2.S1",
+     "sourceLabel": "Flova",
+     "sourcePath": "/Users/julianjenkins/Downloads/flova_Shot_Inner_Vision_Pier_final_video_202608112005_7dbafc.mp4",
+     "managedPath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_import_20260811T210127_73777ed51a.mp4",
+     "contentHash": "73777ed51aa71011354d8c9a19945f3b22cc5a661b94565346db2185f9b99136",
+     "reviewed_by": "Julian",
+     "at": "2026-08-11T21:01:27",
+     "provenance": {
+      "provider": "flova",
+      "outcome": "approved",
+      "verdict": "Julian approved",
+      "sourcePrompt": "image_1 is the first frame — the vision imagery itself: a wooden pier, a small sailboat on bright blue water, Keen beside his Mum. Match its staging and positions exactly. The entire beat stays inside this vision: the image is washed in soft rose-pink light at its edges and gently glowing throughout, dreamlike but clear. Do not use image_1 to alter Keen or Mum identity; those are controlled only by image_2 and image_3.\nimage_2 defines exactly one Keen: a young blue bear cub with an upright white tuft on the crown of his head, a satchel worn across his body. Refer to it strictly. Do not use its pose or background.\nimage_3 defines exactly one Mum: a plump pale-blue adult bear, hair in a neat bun fronted by a pale-blue bow, an ornate gold collar. Refer to it strictly. Do not use its pose or background.\nATTRIBUTE OWNERSHIP: Keen's wrists and forearms stay completely bare for the entire beat — no wristbands, bands, bracelets, cuffs or straps of any kind appear on him. Exactly one Keen and one Mum; no other characters appear.\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm light with the rose-pink vision wash over everything; teal-orange base grade beneath it. Shallow depth of field with soft bokeh, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nNo dialogue in this beat — the vision is silent of speech; its sound stays muffled and distant <muffled waves and gulls, far away, soft and dreamlike>.\n\nShot 1 — what Aida sees. Camera: a slow gentle drift toward the pair on the pier, never cutting. Keen checks the straps on his satchel, then checks them again, then one more time — each check smaller and quicker than the last, his nerves showing in the repetition. His bare wrists are clearly visible as he works the straps. His Mum watches him with a proud smile that cannot quite hide her worry; one paw lifts slightly toward him and settles back. Hold the two of them for a full beat at the end. End state: Keen mid-check beside his Mum on the pier, the rose-pink wash steady — held as the vision's final image.\n\nNo music. No subtitles, captions or on-screen text. No watermark. No extra characters."
+     }
+    }
+   ],
+   "approvedCandidate": null,
+   "candidatePaths": null,
+   "batchId": null,
+   "batch": null,
+   "pendingSpendAuth": null,
+   "approval": {
+    "approved": true,
+    "candidate": null,
+    "reviewed_by": "Julian",
+    "at": "2026-08-11T21:01:27",
+    "source": "external-director-accepted",
+    "contentHash": "73777ed51aa71011354d8c9a19945f3b22cc5a661b94565346db2185f9b99136",
+    "harvestHash": "44e0ef18028bcb6af7e9ec0497dcdc616ec8a84b54ee768b19f9f6dff7b76f77",
+    "inputSignature": {
+     "policyVersion": "external-director-accepted-v1",
+     "canonProfileDigest": "8362cfefb79dc9169dba5e23bb0bfce751f002bc130eeb319347107c04d8ccfb",
+     "shotContractHash": "5c3c7aa3babcceff2a96f07e9e7f97a4c9400fc1215d50b61dc28385c1e08527",
+     "openingFrameHash": "23063c2ed3109c880e0d92fee5e4479d0b806215b154a3fc80fc32821a67373a",
+     "sourceContentHash": "73777ed51aa71011354d8c9a19945f3b22cc5a661b94565346db2185f9b99136",
+     "provenanceDigest": "b8e010eb4aeeab6c27f7114c7110bebb9c419de7bf69adcb1a3000646e6a9db7"
+    },
+    "packageRevision": 2,
+    "sourceLabel": "Flova",
+    "provenanceDigest": "b8e010eb4aeeab6c27f7114c7110bebb9c419de7bf69adcb1a3000646e6a9db7"
+   },
+   "audioProvenance": {
+    "guideSource": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_import_20260811T210127_73777ed51a.mp4",
+    "guideSourceSha256": "73777ed51aa71011354d8c9a19945f3b22cc5a661b94565346db2185f9b99136",
+    "dialogueAuthority": "approved-voice-master-required-in-post",
+    "postLaneStatus": "required",
+    "directorAcceptedPicture": true
+   }
   },
   {
    "shotId": "2.B3.S1",
@@ -354,7 +775,7 @@
    "beatCodes": [
     "2.B3"
    ],
-   "status": "designed",
+   "status": "approved",
    "sourceType": "opener",
    "sourceShotId": null,
    "cutInMotivation": "The bowl tone bridges the vision release back to Aida on the shore.",
@@ -376,8 +797,235 @@
      }
     ]
    },
-   "approvedTake": null,
-   "harvestFrame": null
+   "approvedTake": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_import_20260811T210127_9e0026f64f.mp4",
+   "harvestFrame": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_final_frame.png",
+   "departmentWork": {
+    "cinematography": {
+     "approved": null,
+     "candidate": {
+      "department": "Cinematography",
+      "worker": "Cinematographer / DP",
+      "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+      "model": "gpt-5.5",
+      "preparedAt": "2026-08-11T20:59:56",
+      "editedAt": null,
+      "preparedBy": "specialist",
+      "sourceHash": "5daad7d36b9674c97175862832624c90795d241f370ed08d97656ac6e9d30fb9",
+      "output": {
+       "shotId": "2.B3.S1",
+       "audienceRead": "A quiet return from vision into certainty: Aida is still seated at the shore, the last pink light fading from her pendant and eyes, with the forest path waiting open to the right as the place she will choose next.",
+       "composition": "Literal opening frame is a medium-close 16:9 shore composition. Aida sits slightly left of center beside the rose-quartz singing bowl, readable from head through seated body and nearby props. The bowl and wand sit low in the frame near her, close enough to connect the ritual’s fading tone to her stillness. Leave deliberate lead room and an unobstructed travel corridor toward screen-right forest; keep the ocean glow present screen-left as the emotional source she has just returned from.",
+       "lensAndCameraRelationship": "Camera at Aida’s seated eye level, intimate but not cramped, on a gentle medium-close lens relationship around 45–55mm equivalent. The frame should feel calm and grounded, not heroic or magical-display wide. Perspective remains natural; Aida and bowl share the same shore plane, with no scale distortion.",
+       "lightingAndDepth": "Soft shore daylight from the cove, warm amber sunset key with cool blue ocean fill and a delicate rim from the crystal rocks. Aida’s rose-quartz pendant has a faint pink glow beginning to fade, subtle and localized, not a power burst. Shallow depth of field keeps Aida, bowl and wand crisp while the ocean and forest edge fall into soft cinematic bokeh.",
+       "geography": [
+        "Ocean and cove water remain screen-left.",
+        "Forest edge and exit path remain screen-right.",
+        "Aida starts near frame-center, slightly left of the future exit corridor.",
+        "The crystal bowl sits beside Aida on the sand, low in frame and close to her wand.",
+        "Aida faces three-quarter toward the screen-left ocean at frame one.",
+        "The screen-right side stays clear as her later walking path toward the forest."
+       ],
+       "charactersInFrame": [
+        "Aida"
+       ],
+       "canonicalStyleVersion": "v1.0.0",
+       "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+       "openingFrameLayout": {
+        "aspectRatio": "16:9",
+        "referenceCharacter": "Aida",
+        "referenceHeightFraction": 0.538,
+        "sameDepth": true,
+        "placements": [
+         {
+          "character": "Aida",
+          "centerX": 0.46,
+          "centerY": 0.57,
+          "apparentScale": 1.0,
+          "depthPlane": 0,
+          "bodyAngleDegrees": -25.0,
+          "facing": "three-quarter toward screen-left ocean",
+          "pose": "seated beside the crystal bowl in a calm frame-one anticipation state, eyes closed, wand near the bowl rim, pendant glow beginning to fade"
+         }
+        ]
+       },
+       "negativeSpace": [
+        "Hold clear empty space from mid-frame to frame-right for Aida’s later rise and walk toward the forest.",
+        "Keep the screen-right forest-path opening unobstructed and readable.",
+        "Do not fill the area behind or beyond Aida with extra characters, creatures or decorative distractions."
+       ],
+       "referenceUse": [
+        "@图1 is the locked Aida character turnaround; use it for Aida’s exact identity, proportions, costume, fur, hair, pendant and materials only.",
+        "@图2 is the approved scene plate; use it for the cove shoreline palette, crystal environment, bowl styling, daylight mood and material language only.",
+        "Do not treat any composition board, generated pose plate or opening layout as a provider reference label."
+       ],
+       "continuityProtections": [
+        "Exactly one Aida in frame; no other characters, reflections that read as characters, silhouettes or crowd elements.",
+        "Ocean remains screen-left and forest remains screen-right throughout the staging.",
+        "Aida’s pendant glow is faint and fading, not an active power display.",
+        "The bowl and wand remain near Aida at the opening, matching the ritual aftermath without repeating the ritual action."
+       ],
+       "providerPrompt": "Create the literal opening keyframe for shot 2.B3.S1 as a feature-quality stylized 3D CGI image in 16:9.\n\nUse @图1 as the locked reference for Aida’s exact character identity, proportions, costume, fur, hair, jewelry and materials. Use @图2 as the locked scene-look reference for the quiet crystal cove shoreline, rose-quartz bowl styling, palette, materials and soft shore daylight. Do not invent additional characters.\n\nOpening frame: Aida is seated beside the crystal bowl on the sandy shore, slightly left of center, eyes closed, peaceful and still. Her bowl wand rests near the bowl rim. Her rose-quartz pendant gives only a faint pink glow that is beginning to fade, with a very soft pink trace on her face; no power display. The ocean and cove water remain screen-left. The forest edge and exit path remain screen-right. Hold clear empty space to frame-right for her later walk toward the forest.\n\nCamera and composition: intimate medium-close at Aida’s seated eye level, natural 45–55mm lens feel, Aida readable from head through seated body with bowl and wand low in frame. Keep Aida, bowl and wand sharp; let the ocean, crystal rocks and forest edge fall into gentle shallow-depth bokeh. Warm amber sunset key, cool blue ocean fill, soft rim light from the crystal rocks, teal-orange cinematic grade, plush soft fur with individual strands catching light, subsurface scattering, glossy eyes if visible, gentle ambient occlusion and subtle film grain.\n\nContinuity: exactly one Aida; ocean screen-left, forest screen-right; bowl beside her; wand near rim; pendant glow fading. No extra characters, no on-screen text, no captions, no watermark, no character redesign, no appearance drift from @图1, and no environment drift from @图2."
+      },
+      "packageRevision": 2,
+      "inputSignature": {
+       "stage": "cinematography",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+        "dp": "7f2513d6b84f57ecb5d959d26cf81f3510b9e9c819c16884ccb9e3499ddc319e"
+       },
+       "canonProfileDigest": "688404336e1abf2cc6bec0b8ac9a4131daad1d9394ec52195e28bc8473717bd5",
+       "shotContractHash": "b2fbf19a762e758eae7817965cd03ba67a731680f530c677be7f4fbfe384022b",
+       "sceneLookHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+       "references": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "Aida",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "92f469976024f182a582cbde72316546b935e9e17e5bea18134259c179da41a5",
+         "hash": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1"
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null,
+         "hash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339"
+        }
+       ]
+      }
+     },
+     "history": []
+    }
+   },
+   "keyframeCandidate": null,
+   "keyframeApproval": {
+    "approved": true,
+    "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_keyframe_candidate_305c5191.png",
+    "at": "2026-08-11T21:00:19",
+    "reviewedBy": "Julian",
+    "source": "uploaded",
+    "inputSignature": {
+     "cardHash": "3a833dced975327b4d357052dfd909b1217f906cc03d6e9443edecc36e8ccf70",
+     "canonProfileDigest": "688404336e1abf2cc6bec0b8ac9a4131daad1d9394ec52195e28bc8473717bd5",
+     "sceneLookHash": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339",
+     "selectedAssetHash": "d6d25568bd880d2f17b2c4aba8b51cdc",
+     "source": "uploaded"
+    },
+    "promptContract": null,
+    "packageRevision": 2,
+    "contentHash": "a4bae93255cd640d68c4891356172e071e63d97b638527f652a0e4fd16d1dde0",
+    "conformanceScreening": {
+     "status": "fail",
+     "reason": "Single subject present, but the frame is a close-up that does not match the authored opening composition or relative scale for the shot, and the visible pose/geography omit the required seated shore setup with crystal bowl and forest-path-right context.",
+     "checkedAt": "2026-08-11T21:00:19",
+     "screenVersion": 1,
+     "validatorModel": "gpt-5.4-mini",
+     "mediaProviderCalled": false,
+     "referenceHashes": {
+      "CB_Aida.jpeg": "aa55551ab379a0f64bb5a69181d8cd0ab5e1783660c648bb029dd33688f772a1",
+      "Ep1_S2_plate_candidate_81444b45.jpeg": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339"
+     },
+     "candidateSha256": "a4bae93255cd640d68c4891356172e071e63d97b638527f652a0e4fd16d1dde0",
+     "review": {
+      "verdict": "block",
+      "expectedCharacters": [
+       "Aida"
+      ],
+      "detectedCharacters": [
+       "Aida"
+      ],
+      "expectedSubjectCount": 1,
+      "subjectCount": 1,
+      "summary": "Single subject present, but the frame is a close-up that does not match the authored opening composition or relative scale for the shot, and the visible pose/geography omit the required seated shore setup with crystal bowl and forest-path-right context.",
+      "identityAndDistinguishability": {
+       "score": 2,
+       "visibleEvidence": "The only visible character matches Aida’s identity cues: lilac-purple hair, jeweled brow headdress, and purple robes are present; no extra character is visible.",
+       "correction": "Keep Aida’s canonical hair, headdress, and robe design unchanged."
+      },
+      "relativeScaleAndGeography": {
+       "score": 0,
+       "visibleEvidence": "The character fills nearly the entire frame in a face-close-up, with no valid 16:9 opening placement, no seated full-body scale, and no readable shore layout or path on the right.",
+       "correction": "Pull the camera back to show Aida seated at the shore at the authored scale, with the open forest path visible on the right."
+      },
+      "anatomyAndSilhouette": {
+       "score": 1,
+       "visibleEvidence": "Visible facial anatomy is readable and not obviously malformed, but the crop removes most of the body and silhouette needed to verify the full seated figure and wand/bowl relationship.",
+       "correction": "Show the full seated body and wand so the silhouette and pose can be verified."
+      },
+      "actionReadyComposition": {
+       "score": 0,
+       "visibleEvidence": "The composition is a centered face portrait with eyes closed, lacking the bowl, wand-near-rim action, and the calm frame-one anticipation staging described by the shot contract.",
+       "correction": "Stage Aida seated beside the crystal bowl with eyes closed and the wand near the bowl rim in a loose, action-ready opening composition."
+      },
+      "forbiddenContent": {
+       "score": 2,
+       "visibleEvidence": "No extra subjects, text, logo, watermark, or obvious forbidden bag/load is visible in the candidate frame.",
+       "correction": "Do not add text, watermark, extra subjects, or body-mounted loads."
+      },
+      "recommendedCorrection": "Reframe to a wide 16:9 shot of Aida seated at the shore beside the crystal bowl, eyes closed, wand near the bowl rim, with her full seated body visible at the authored scale and the forest path open on the right; keep her canonical hair, jeweled headdress, and purple robes unchanged."
+     }
+    },
+    "conformanceAdvisoryDecision": {
+     "acceptedBy": "Julian",
+     "acceptedAt": "2026-08-11T21:00:19",
+     "statusAtDecision": "fail",
+     "reasonAtDecision": "Single subject present, but the frame is a close-up that does not match the authored opening composition or relative scale for the shot, and the visible pose/geography omit the required seated shore setup with crystal bowl and forest-path-right context."
+    }
+   },
+   "keyframePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_keyframe_candidate_305c5191.png",
+   "renderHistory": [
+    {
+     "outcome": "external-take-approved",
+     "shotId": "2.B3.S1",
+     "sourceLabel": "Flova",
+     "sourcePath": "/Users/julianjenkins/Downloads/flova_Shot_Aida_Awakening_And_Departure_final_video_202608111952_01de77.mp4",
+     "managedPath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_import_20260811T210127_9e0026f64f.mp4",
+     "contentHash": "9e0026f64fc2fabb03d74ff2c1b8ac8e8d5918dfff274d1ca4e6da070af4629d",
+     "reviewed_by": "Julian",
+     "at": "2026-08-11T21:01:27",
+     "provenance": {
+      "provider": "flova",
+      "outcome": "approved",
+      "verdict": "Julian approved",
+      "sourcePrompt": "image_1 is the first frame — the final frame of the ritual beat: Aida seated beside the crystal bowl, perfectly still, eyes closed, her face lit in rose-pink from the glowing pendant. Begin naturally from it. Match its staging, light and position exactly. Do not repeat the ritual's action.\nimage_2 defines only the sanctuary environment: the quiet cove shoreline and the crystal bowl. Do not use or invent characters from it.\nExactly one Aida; no other characters appear. The rose quartz pendant and its pink glow belong to Aida only.\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nDialogue language: English. Aida speaks slow and sure, as if she already knows how it ends, going quieter the closer she gets to what matters. Only Aida speaks; no narrator, no crowd, no added speech.\n\nShot 1 — the return. Camera: close on Aida as the pink glow fades gently from her eyes and they open. She places a paw over her heart. A soft knowing smile arrives by degrees, not all at once. She says softly, certain, almost to herself: {It's time.} Hold the pose for a full beat after the line finishes; keep her expression for two full seconds after the line ends.\n\nShot 2 — the exit. She rises gracefully in one unhurried movement, turns, and walks purposefully toward the treeline as the bowl's note fades into the sound of distant wind <bowl tone fading, low wind rising>. The camera holds and lets her go. End state: Aida walking away into the forest edge, the cove quiet behind her — a describable frame.\n\nThe singing-bowl tone is diegetic sound, not music. No music. No subtitles, captions or on-screen text. No watermark. No extra characters."
+     }
+    }
+   ],
+   "approvedCandidate": null,
+   "candidatePaths": null,
+   "batchId": null,
+   "batch": null,
+   "pendingSpendAuth": null,
+   "approval": {
+    "approved": true,
+    "candidate": null,
+    "reviewed_by": "Julian",
+    "at": "2026-08-11T21:01:27",
+    "source": "external-director-accepted",
+    "contentHash": "9e0026f64fc2fabb03d74ff2c1b8ac8e8d5918dfff274d1ca4e6da070af4629d",
+    "harvestHash": "e0efa4df0cebe0a051ca2584cc60d33001d3c91704899f216cf80a00a59f933d",
+    "inputSignature": {
+     "policyVersion": "external-director-accepted-v1",
+     "canonProfileDigest": "8362cfefb79dc9169dba5e23bb0bfce751f002bc130eeb319347107c04d8ccfb",
+     "shotContractHash": "61b17734174fbc209fcaef4ccc3a21f3284ae458f3c3aac3487c2fa4b1a91e8d",
+     "openingFrameHash": "a4bae93255cd640d68c4891356172e071e63d97b638527f652a0e4fd16d1dde0",
+     "sourceContentHash": "9e0026f64fc2fabb03d74ff2c1b8ac8e8d5918dfff274d1ca4e6da070af4629d",
+     "provenanceDigest": "9977b08856cae2c43c15e279266c6d3bf7e09ec966092c8e68e7662b2f63ecc1"
+    },
+    "packageRevision": 2,
+    "sourceLabel": "Flova",
+    "provenanceDigest": "9977b08856cae2c43c15e279266c6d3bf7e09ec966092c8e68e7662b2f63ecc1"
+   },
+   "audioProvenance": {
+    "guideSource": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_import_20260811T210127_9e0026f64f.mp4",
+    "guideSourceSha256": "9e0026f64fc2fabb03d74ff2c1b8ac8e8d5918dfff274d1ca4e6da070af4629d",
+    "dialogueAuthority": "approved-voice-master-required-in-post",
+    "postLaneStatus": "required",
+    "directorAcceptedPicture": true
+   }
   }
  ],
  "validation": {
@@ -390,5 +1038,11 @@
   "physics": "weight, contact, follow-through",
   "continuity": "connects naturally to surrounding shots"
  },
- "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json"
+ "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json",
+ "revisionHistory": [
+  {
+   "at": "2026-08-11T20:40:49",
+   "change": "Corrected 2.B2.S1 Director record to match locked script and accepted Flova vision: Keen + Mum, silent vision, bare wrists, Scene 3 opening-plate handoff."
+  }
+ ]
 }

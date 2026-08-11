@@ -1,0 +1,15 @@
+{
+ "episode": "Ep1",
+ "scene": "3",
+ "role": "opening_plate",
+ "sourcePath": "/Users/julianjenkins/Downloads/Keen_and_Mum_on_pier_202608111038.jpeg",
+ "alsoUsedAs": {
+  "episode": "Ep1",
+  "scene": "2",
+  "shotId": "2.B2.S1",
+  "role": "approved_vision_plate"
+ },
+ "status": "approved",
+ "reviewedBy": "Julian",
+ "note": "Scene 3 production package is not present in this checkout; attach to first Scene 3 shot when the package exists."
+}

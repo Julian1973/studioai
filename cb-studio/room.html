@@ -1,301 +1,1034 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crystal Bears Studio Room</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #070a0f;
-      --panel: #111820;
-      --panel-2: #151f2a;
-      --line: #253241;
-      --text: #ecf7ff;
-      --muted: #91a0af;
-      --cyan: #48cee7;
-      --danger: #ee735f;
-      --ok: #42d392;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--line);
-      background: #0b1017;
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-    h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
-    main {
-      display: grid;
-      grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
-      min-height: calc(100vh - 65px);
-    }
-    aside, section { padding: 22px; }
-    aside {
-      border-right: 1px solid var(--line);
-      background: #0c121a;
-    }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-    .label {
-      color: var(--cyan);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-    .value { margin: 6px 0 0; font-weight: 700; }
-    .muted { color: var(--muted); }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    button {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: var(--panel-2);
-      color: var(--text);
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    button.primary { background: var(--cyan); color: #031116; border-color: var(--cyan); }
-    button.danger { border-color: #6a342d; color: #ffb0a4; }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    textarea {
-      width: 100%;
-      min-height: 90px;
-      resize: vertical;
-      background: #080d13;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      color: var(--text);
-      padding: 12px;
-      font: inherit;
-    }
-    #messages {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .message {
-      max-width: 880px;
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--panel);
-      white-space: pre-wrap;
-    }
-    .message.user {
-      margin-left: auto;
-      background: #10222a;
-      border-color: #1b5160;
-    }
-    .status { color: var(--muted); min-height: 20px; }
-    .ok { color: var(--ok); }
-    .bad { color: var(--danger); }
-    @media (max-width: 860px) {
-      main { grid-template-columns: 1fr; }
-      aside { border-right: 0; border-bottom: 1px solid var(--line); }
-    }
-  </style>
-</head>
-<body>
+<title>The Room — Crystal Bears Studio</title>
+<style>
+  :root{
+    --bg:#0e1013; --panel:#15181d; --panel-2:#1b1f26; --line:#272c35;
+    --ink:#e8eaee; --ink-dim:#98a0ad; --ink-faint:#6b7382;
+    --accent:#d9a441; --good:#5bbf88; --bad:#e0685f; --wait:#7aa2d6;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;height:100vh;display:flex;overflow:hidden}
+
+  #rail{width:212px;flex:0 0 212px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column}
+  #rail h1{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0;padding:16px 14px 10px;font-weight:600}
+  #scenes{overflow-y:auto;flex:1}
+  .scene-tab{padding:9px 14px;border-left:3px solid transparent;cursor:pointer;border-bottom:1px solid var(--line)}
+  .scene-tab:hover{background:var(--panel-2)}
+  .scene-tab.on{background:var(--panel-2);border-left-color:var(--accent)}
+  .scene-tab .n{font-size:10px;color:var(--ink-faint);font-family:var(--mono)}
+  .scene-tab .t{font-size:12px;line-height:1.35;margin-top:2px;color:var(--ink-dim)}
+  .scene-tab.on .t{color:var(--ink)}
+  .dots{margin-top:5px;display:flex;gap:3px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
+  .dot.done{background:var(--good)} .dot.live{background:var(--accent)} .dot.bad{background:var(--bad)}
+  #key-row{padding:10px 14px;border-top:1px solid var(--line)}
+  #key-row .lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+  #key{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--ink);font-family:var(--mono);font-size:10px;padding:6px 8px}
+  #key-state{font-size:10px;margin-top:5px}
+  #key-state.live{color:var(--good)} #key-state.off{color:var(--ink-faint)}
+
+  #main{flex:1;display:flex;flex-direction:column;min-width:0}
+  header{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header .slug{font-family:var(--mono);font-size:13px}
+  header .meta{font-size:11px;color:var(--ink-faint)}
+  header .spacer{flex:1}
+  button{font-family:inherit;font-size:11px;background:var(--panel-2);color:var(--ink-dim);border:1px solid var(--line);border-radius:5px;padding:5px 10px;cursor:pointer}
+  button:hover{color:var(--ink);border-color:var(--ink-faint)}
+
+  #talk{flex:1;overflow-y:auto;padding:20px 20px 8px}
+  .turn{max-width:840px;margin:0 auto 16px}
+  .who{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;display:flex;gap:8px;align-items:center}
+  .who .seat{color:var(--accent)}
+  .who .infl{color:var(--ink-faint);text-transform:none;letter-spacing:0;font-style:italic}
+  .body{font-size:14px;line-height:1.6;white-space:pre-wrap}
+  .turn.you .body{background:var(--panel-2);border-left:2px solid var(--wait);padding:10px 14px;border-radius:0 6px 6px 0}
+  .turn.room .body{color:var(--ink-dim);font-size:12.5px}
+  .turn.record .body{font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:6px;background:var(--panel);border:1px solid var(--line)}
+  .turn.record.pass .body{border-left:3px solid var(--good)}
+  .turn.record.reject .body{border-left:3px solid var(--bad)}
+  .turn.thinking .body{color:var(--ink-faint);font-style:italic}
+
+  #stage{border-top:1px solid var(--line);background:var(--panel);padding:0 20px}
+  #stage:empty{display:none;border-top:none}
+  #stage .inner{max-width:840px;margin:10px auto}
+  #stage .cap{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  #stage img,#stage video{max-width:100%;max-height:300px;border-radius:6px;border:1px solid var(--line);display:block}
+  #stage audio{width:100%}
+  #stage .set{display:flex;gap:8px;overflow-x:auto}
+  #stage .set video{max-height:200px}
+  #pipe-state{font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  #pipe-state.on{color:var(--good)} #pipe-state.off{color:var(--ink-faint)}
+  #units{display:flex;gap:8px;padding:10px 20px;border-top:1px solid var(--line);background:var(--panel);overflow-x:auto}
+  .unit{flex:0 0 auto;border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;background:var(--panel-2)}
+  .unit.on{border-color:var(--accent)}
+  .unit .id{font-family:var(--mono);font-size:11px}
+  .unit .gate{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:2px}
+  .unit.done .gate{color:var(--good)} .unit.blocked .gate{color:var(--bad)}
+
+  #composer{border-top:1px solid var(--line);background:var(--panel);padding:12px 20px 16px}
+  #ask{font-size:11px;color:var(--ink-faint);max-width:840px;margin:0 auto 8px}
+  #ask b{color:var(--accent);font-weight:600}
+  .row{display:flex;gap:10px;max-width:840px;margin:0 auto;align-items:flex-end}
+  textarea{flex:1;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:inherit;font-size:14px;line-height:1.5;resize:none;min-height:44px;max-height:170px}
+  textarea:focus{outline:none;border-color:var(--ink-faint)}
+  #send{background:var(--accent);color:#191307;border:none;font-weight:600;font-size:12px;padding:11px 18px}
+  #hint{max-width:840px;margin:7px auto 0;font-size:10.5px;color:var(--ink-faint)}
+</style>
+
+<div id="rail">
+  <h1>The Room</h1>
+  <div id="scenes"></div>
+  <div id="key-row">
+    <div class="lbl">Live crew — Anthropic API key</div>
+    <input id="key" type="password" placeholder="sk-ant-…" autocomplete="off">
+    <div id="key-state" class="off">offline — canon checks only</div>
+  </div>
+</div>
+
+<div id="main">
   <header>
-    <h1>Crystal Bears Studio Room</h1>
-    <div class="row">
-      <button id="refresh">Refresh state</button>
-      <a id="director-link" class="muted" href="/cb-studio/director.html#view=director">Back to Director</a>
-    </div>
+    <span class="slug" id="slug">—</span>
+    <span class="meta" id="meta"></span>
+    <span id="pipe-state" class="off">standalone</span>
+    <span class="spacer"></span>
+    <button id="brief">Copy brief for Claude</button>
+    <button id="export">Export scene record</button>
   </header>
-  <main>
-    <aside>
-      <div class="card">
-        <div class="label">Current decision</div>
-        <p id="decision" class="value">Loading...</p>
-        <p id="orientation" class="muted"></p>
-      </div>
-      <div class="card">
-        <div class="label">Available verdicts</div>
-        <div id="actions" class="row" style="margin-top:12px"></div>
-      </div>
-      <div class="card">
-        <div class="label">Retake note</div>
-        <p class="muted">Required for any reject/refire action.</p>
-        <textarea id="note" placeholder="Plain-English note for the next attempt."></textarea>
-      </div>
-      <div class="card">
-        <div class="label">Action status</div>
-        <p id="status" class="status"></p>
-      </div>
-    </aside>
-    <section>
-      <div id="messages"></div>
-      <div class="card">
-        <div class="label">Ask the room</div>
-        <textarea id="chat-input" placeholder="Ask what to approve, reject, fix, or check next."></textarea>
-        <div class="row" style="margin-top:12px">
-          <button id="send" class="primary">Send</button>
-        </div>
-      </div>
-    </section>
-  </main>
-  <script>
-    const state = {
-      episode: new URL(location.href).searchParams.get("episode") || "Ep1",
-      scene: new URL(location.href).searchParams.get("scene") || "1",
-      shotId: new URL(location.href).searchParams.get("shotId") || "",
-      session: null,
-      messages: [],
-    };
-    const verdictMap = [
-      ["accept-keyframe", "Approve SEE"],
-      ["iterate-keyframe", "Reject SEE"],
-      ["accept-voice", "Approve HEAR"],
-      ["iterate-voice", "Reject HEAR"],
-      ["accept-animation", "Approve WATCH"],
-      ["iterate-animation", "Reject WATCH"],
-      ["reopen-shot", "Reopen shot"],
-      ["accept-master", "Approve master"],
-      ["iterate-master", "Reject master"],
-    ];
-    const rejectFamily = new Set(["iterate-keyframe", "iterate-voice", "iterate-animation", "iterate-master", "reopen-shot"]);
-    const $ = (id) => document.getElementById(id);
-    async function api(path, options) {
-      const response = await fetch(path, {
-        credentials: "same-origin",
-        ...(options || {}),
-        headers: {"content-type": "application/json", ...((options || {}).headers || {})},
-      });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
-      return body;
+  <div id="talk"></div>
+  <div id="stage"></div>
+  <div id="units"></div>
+  <div id="composer">
+    <div id="ask"></div>
+    <div class="row">
+      <textarea id="say" placeholder="Talk it through…" rows="1"></textarea>
+      <button id="send">Send</button>
+    </div>
+    <div id="hint">Enter sends · Shift+Enter newline · a verdict advances the gate · paste a compiled prompt to attach it to the open unit</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════════
+   THE ROOM v2 — the crew talks, with the show bible in its head.
+   Laws: 1. every verdict spoken becomes a RECORD (gates without clicks)
+         2. the room decides WHAT; the deterministic compiler emits the
+            final render prompt — seats draft candidate briefs, the
+            emission itself is never authored here.
+   No backend, no build. With an API key the seats are live (Claude);
+   without one they answer from the baked-in canon. Either way the
+   record-keeping is identical.
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── THE PAGE — the locked Ep1 script, verbatim, scene by scene.
+   The script is the FOUNDATION: every unit's direction begins here.
+   The crew interprets the page; it never rewrites it. ─────────── */
+const SCRIPT = {
+1:`Tall flowers sway gently in the warm breeze. Some stretch high above the grass, with long soft necks and bright open petals full of pollen. FUZZBY and ZENNY weave between them collecting pollen from flower to flower. Fine golden pollen dusts their paws and trails softly through the air. Zenny works with smooth calm precision — neat, efficient, graceful. Fuzzby does not. He zig-zags wildly through the air, humming loudly to himself as he works.
+
+FUZZBY (fun sing-song rhythm): BIZZY-BIZZY-BIZZY, BIZZY-BIZZY-BIZZY…
+
+He dips low into a flower, scoops up pollen — then overdoes it and spins sideways into a leaf. FWIP. He bounces back into the air and straightens up proudly.
+
+FUZZBY: Nailed it.
+
+Zenny glides up beside him. Watches him for a beat. He zooms to another flower, humming louder, and sticks his whole face into it. A beat. He pulls back out completely dusted in pollen like a fuzzy yellow moustache. Zenny tries not to laugh.
+
+FUZZBY: Do I look official?
+ZENNY: Yes Fuzzby. Officially nuts!
+
+Fuzzby gasps. He wipes at his face. Somehow smears the pollen worse. He dives again toward another flower — clips a branch — tumbles end over end through the air. THUP. THUP. THUP. He lands upside down inside a blossom. Beat. His little legs kick. Then he pops back up.
+
+FUZZBY (popping up): Buzz Crash!!
+
+Zenny rolls her eyes, but she is smiling now. Fuzzby hums louder and dives into another flower. He pops back out, somehow even more covered in pollen than before. Zenny watches him. Beat. A distant RUMBLE of thunder. Fuzzby pauses mid-hover.
+
+FUZZBY: …okay that sounded dramatic.
+
+Zenny glances toward the sky. The light has shifted slightly. Something feels different. But they do not see anything yet.
+
+ZENNY: A Storm's coming.
+FUZZBY: Good thing I work well under pressure.
+
+He immediately flies into a flower and gets stuck again. Zenny sighs.`,
+
+2:`Gentle waves roll onto the shore. AIDA sits in stillness beside a crystal bowl. She runs the wand softly around the rim. A low shimmering tone fills the air. The cove seems to quiet around her. She closes her eyes. Her ROSE QUARTZ PENDANT begins to glow. Soft pink light rises across her face.
+
+AIDA'S INNER VISION — THROUGH AIDA'S EYES — A wooden pier. A small sailboat waiting on bright blue water. KEEN standing beside his MUM. He checks the straps on his satchel. Then checks them again. Then one more time. His Mum watches him with a proud smile that cannot quite hide her worry.
+
+BACK TO AIDA — The pink glow fades gently from her eyes. Aida places a paw over her heart. A soft knowing smile.
+
+AIDA (softly): It's time.
+
+She rises gracefully. The bowl's note fades into the sound of distant wind. Aida turns and heads purposefully into the forest.`,
+
+3:`A neat little sailboat bobs beside the dock. KEEN loads his final supplies onto the boat — a rolled map, a satchel, a berry pouch, a blanket. He arranges them carefully. Then rearranges them. Then checks them one more time. His MUM stands nearby, smiling proudly, though her eyes are glassy.
+
+KEEN'S MUM: Keen… are you sure you've got everything?
+KEEN: I've got this, Mum.
+
+He pats the satchel. Pauses. Checks one more pocket just in case. His Mum smiles despite herself.
+
+KEEN'S MUM: I know… it's just… this is a big step.
+
+Keen looks out at the water. He swallows. He is trying very hard to be brave.
+
+KEEN: Like you said… it's part of growing up.
+
+His Mum nods softly. She reaches into her bag and takes out two worn WRISTBANDS. She holds them carefully, like they matter. Keen sees them and stills.
+
+KEEN'S MUM: Keen… it's time for you to have your father's wristbands.
+
+A small breeze moves through the ropes along the pier. Keen looks down at them. His expression softens.
+
+KEEN'S MUM: I still feel him… every day.
+
+She places the wristbands gently into Keen's paws. He turns them over carefully. Feels their weight. Their meaning.
+
+KEEN'S MUM: Promise me you'll always wear them.
+KEEN (quietly/proud): I promise.
+
+He slips them onto his wrists. They fit perfectly. He turns his paws, taking them in. His Mum brushes a paw gently against his cheek.
+
+KEEN'S MUM: Wherever you go… You'll never be alone.
+
+Keen takes that in. A small, real smile.
+
+KEEN: I won't be. (softly) I love you, Mum.
+KEEN'S MUM: I love you… my brave boy.
+
+Keen climbs into the boat. He unties the rope. Pushes off. The boat drifts gently away from the dock. His Mum lifts a paw and waves. Keen waves back. Trying to look confident. Then the boat wobbles unexpectedly. He flails. Catches himself. Pretends that was meant to happen.
+
+KEEN: Still got it!
+
+His Mum laughs through a tear. Suddenly — SPLASH! A DOLPHIN rises beside the boat. Keen startles. Then lights up.
+
+KEEN: Whoa!
+
+The Dolphin chirps happily and leaps again through the sparkling water. Keen leans over the side, delighted.
+
+KEEN: Hey there!
+
+The Dolphin chatters. Keen nods as though he fully understands.
+
+KEEN: Nice to meet you too.
+
+The boat glides farther from the dock. His Mum grows smaller behind him. Keen looks ahead. A little nervous. A little excited. A lot of both.`,
+
+4:`Open water. Endless blue. Keen sails confidently — or at least he tries to. The friendly DOLPHIN keeps pace beside the boat, popping up every so often.
+
+KEEN: Hi! I'm Keen! Nice to meet you, Squeaky!
+
+The Dolphin chatters happily. Keen nods like that settles it.
+
+KEEN: Squeaky. Perfect. You really do sound squeaky.
+
+Squeaky leaps high beside the boat. Keen laughs. He looks at his map. Then ahead. Then back at his map. A little uncertain.
+
+KEEN: Okay… so if this is north… then I am definitely going…
+
+He turns the map upside down.
+
+KEEN: …one of the directions.
+
+A gust of wind hits. The sail FLAPS hard. The boat lurches. Keen stumbles sideways and grabs the mast.
+
+KEEN: Oh!
+
+The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws.
+
+KEEN: No no no no—!
+
+He lunges for it. Misses. The map whips through the air and vanishes into the storm. Keen stands frozen. Rainwater sloshes around his feet. The horizon disappears behind sheets of grey.
+
+KEEN (under his breath): Oh no… I'm lost!!!
+
+Lightning flickers far away. Keen grips the edge of the boat tighter. His breathing quickens. He closes his eyes for just a second. Breathes. Grounds himself.
+
+KEEN (quiet, steadying): I've got this… I've got this…
+
+A familiar CLICKING CHATTER sounds nearby. Keen opens his eyes. Squeaky leaps through the storm water beside the boat. He dips and reappears, signaling insistently in one direction.
+
+KEEN: Follow you?
+
+Squeaky chirps. Keen looks at the rough water. Then at Squeaky. Then nods.
+
+KEEN: Okay… lead on, Squeaky!
+
+Squeaky surges ahead. Keen wrestles the little boat around to follow.`,
+
+5:`The wind picks up around the trees. Leaves shiver. Branches sway harder now. Fuzzby and Zenny move quickly through the air, heading back through the forest. Fuzzby flies slightly ahead — still talking, because of course he is.
+
+FUZZBY: I'm just saying, if this turns into a full storm situation, I am extremely—
+
+He stops dead in mid-air. Completely still. Zenny nearly bumps into him.
+
+ZENNY: Fuzzby?
+
+No response. Fuzzby slowly raises one tiny paw… Points. Zenny follows his gaze. Out beyond the trees. Through the shifting wind and rain, a tiny boat rises and falls in the distance. Barely visible in the storm. Beat. Fuzzby's eyes go WIDE.
+
+FUZZBY: …that is NOT a good place to be.
+
+Zenny's expression softens immediately.
+
+ZENNY: Someone's in trouble.
+
+Fuzzby snaps into action.
+
+FUZZBY: BEARS! BEARS! EMERGENCY BEARS!
+
+He BLASTS off toward the beach at full speed. Immediately flies into a branch. BONK. He recoils. Shakes it off. Keeps going anyway. Zenny follows behind — calm, focused. This time faster.`,
+
+6:`Dark clouds gather over the cove. The Crystal Bears stand together on the shore. AIDA at the front. HOWEY, MISTY, LUNA and the others nearby. They look out at the sea as the wind moves through the grasses. Fuzzby comes HURTLING in. Too fast. He tries to stop. Fail. He pinballs off a shell, ricochets past Howey, loops around a piece of driftwood and lands in a soggy heap. Beat. One tiny paw lifts.
+
+FUZZBY: I meant to do that.
+
+Nobody reacts. He scrambles up, wild-eyed.
+
+FUZZBY: BEARS! BEARS! There's someone out there and they're — they're — they're —
+
+He bends over, completely out of breath. Cannot get the words out. Zenny floats in behind him, steady as ever.
+
+ZENNY: In trouble.
+
+Fuzzby points at her gratefully.
+
+FUZZBY: IN TROUBLE! YES! THAT!
+
+Aida steps forward to the water's edge. The wind stirs her fur gently, but she remains still. She looks out across the stormy sea. Through the rain we glimpse a tiny boat rising and falling between waves.
+
+AIDA: There he is.
+
+The bears all look out. Concern. Hope. Aida turns to them.
+
+AIDA: Everyone — activate your crystal powers.
+
+The bears gather closer. CRYSTAL CALL SEQUENCE. Aida touches her pendant.
+
+AIDA: With heart open wide, I stand with pride — Rose Quartz, be our guide!
+
+Her ROSE QUARTZ glows warmly. The other Crystal Bears touch their crystals one by one. A pulse of color from each. Misty's crystal glows. Luna's. Howey's. Together the bears speak as one.
+
+ALL: With love and with light, together unite — Crystal Bears, shine your light!
+
+A brilliant BURST OF COMBINED LIGHT shoots out across the storm-dark sea. It cuts through the rain like a beacon.`,
+
+7:`The beam of crystal light reaches through the grey. Keen sees it. His face lifts with hope.
+
+KEEN: What is that…?
+
+Then — Squeaky cries out. Keen looks down sharply. The Dolphin is struggling. A ragged drift net is wrapped tightly around his tail, dragging him under.
+
+KEEN: Squeaky!
+
+The boat bucks hard beneath Keen. He nearly goes overboard. Rain lashes his face. He looks at the storm. Looks at Squeaky. No hesitation.
+
+KEEN: Hang on!
+
+He dives into the water.
+
+SHORE – INTERCUT: The Crystal Bears watch tensely. Fuzzby's mouth hangs open.
+
+HOWEY: He jumped in?!
+AIDA (softly, impressed): He didn't think twice.
+
+UNDERWATER: Everything goes muffled and blue-grey. Keen swims hard through swirling water toward Squeaky. He reaches him. The drift net is twisted tightly around the dolphin's tail. Pulling him down. Keen grabs the net and pulls. Nothing. The current shoves them sideways. Keen slips. Reaches again.
+
+KEEN (muffled): I've got you!
+
+Squeaky thrashes weakly. Keen pulls again. Still nothing. His eyes flick upward toward the churning light above. He is running out of strength. A beat. Keen sees his father's wristbands on his arms. A faint glow begins inside them. Soft. Steady. He plants his feet against a submerged rock. Centers himself.
+
+KEEN (to himself): I've got this… I've got this…
+
+SHORE – INTERCUT: Aida watches with calm certainty.
+
+AIDA (gently): He's not alone.
+
+UNDERWATER: Keen grips the net with both paws. The wristbands glow brighter. He PULLS. The net strains. Still tangled. Above them, the shape of a MASSIVE WAVE gathers. Keen looks at Squeaky.
+
+KEEN: Come on…
+
+He braces again.
+
+KEEN (stronger): COME ON!
+
+He yanks with everything he has. SNAP! The net TEARS. In the same instant the massive wave crashes overhead. The world explodes into foam and motion. Keen is thrown sideways. He tumbles through bubbles and dark water. Disoriented. Then he sees Squeaky.
+
+KEEN: Stay with me!
+
+Squeaky surges up beneath him. Keen grabs hold. The dolphin rockets toward the surface. They BURST out of the water. Keen gasps, coughs, then laughs from pure relief.
+
+KEEN: You got me!
+
+Squeaky chirps. Keen clings on as the dolphin races through the storm toward the glowing shore.
+
+SHORE POV: The Crystal Bears watch as a shape rises over the waves. It is Keen — riding Squeaky in on the crest. Howey's jaw drops. Misty claps a paw over her mouth.
+
+SUNNY: The bravest guy I've ever seen.
+MISTY: His boat's gone!!
+
+Then, as Keen comes closer, Fuzzby's panic flips instantly into awe.
+
+FUZZBY (awestruck): When I grow up… I wanna be like him.
+
+Keen bounces over a wave like a tiny cowboy. One paw in the air. A huge grin across his face.
+
+KEEN: YEEHAW!!
+
+Despite the storm, everyone smiles.`,
+
+8:`Squeaky glides into the shallows. Keen hops off onto the sand, stumbling forward. Laughing. Breathless. Soaked from head to toe.
+
+KEEN: Best… ride… ever!
+
+His legs wobble. He nearly falls. Howey instinctively steps in and steadies him. The bears gather around him in a warm circle. SUNNY bounces excitedly. AMIE beams. Everyone curious, gentle, smiling. Keen looks around at them all.
+
+KEEN: Hi… I'm Keen.
+
+Fuzzby zooms right into Keen's face.
+
+FUZZBY: You rode a dolphin. Into a storm. On purpose?!
+
+Keen blinks at him.
+
+KEEN: …kind of?
+
+Fuzzby slowly turns to the others. Points at Keen like he has discovered a legend.
+
+FUZZBY: He's amazing.
+
+Zenny gently drifts in and pulls Fuzzby back by one leg.
+
+ZENNY: Give him space.
+
+The others smile. Together:
+
+ALL: Welcome to Crystal Cove! We're the Crystal Bears!
+
+Keen looks around at the cove — glowing crystals, warm faces, the gentle shelter of the beach. He takes it all in.
+
+KEEN: Wow… this place…
+
+He turns back toward the sea. Squeaky leaps once more just beyond the shallows. Aida steps forward beside Keen. She lifts a paw and makes a small, gentle gesture to the dolphin. Squeaky watches her. Seems to understand. He dips his head once. Then dives back into the waves. Keen watches him go.
+
+KEEN: What did you do?
+
+Aida smiles.
+
+AIDA: Just getting a message home to your Mum. To let her know you're okay.
+
+Keen absorbs that. A soft grateful pause.
+
+KEEN: Thank you.
+
+Aida gives him the smallest nod.`,
+
+9:`The storm has passed. Everything glows fresh and washed clean. Droplets cling to leaves and sparkle in the sunlight. The Crystal Bears gather in a quiet circle. Aida and Keen stand at the center. Keen still wears his father's wristbands. Aida looks at him with warmth and certainty.
+
+AIDA: You followed your heart… and chose courage.
+
+A gentle AQUAMARINE LIGHT begins to shimmer in the air between them. A glowing crystal appears. Keen stares in wonder. The crystal lifts, humming softly, then splits into two smaller gems. They float toward his wrists. One settles into each wristband. Perfectly. A pulse of AZURE LIGHT runs through them. Keen feels it instantly. He lifts his paws, amazed. The light reflects in his eyes.
+
+KEEN (with rising confidence): Brave and bright, with all my might — Aquamarine Crystal, shine with light!
+
+His wristbands glow brighter. The energy settles warmly around him. Fuzzby claps too early. Stops. Then starts clapping again louder to cover it. Howey cheers. Misty beams. Luna smiles softly. And suddenly the whole group surges in and SWAMPS Keen in a giant bear hug. Keen startles. Then melts into it. He hugs them back. The group slowly breaks apart. Keen looks around at all of them. No longer lost. No longer alone.
+
+AIDA: That's what family does. (ALT: Wherever you go… You'll never be alone.)
+
+Keen smiles. A full, real, homecoming smile.`,
+
+10:`The mood has lifted. Waves lap gently at the shore. Keen and the bears walk together along the sand. Fuzzby buzzes up beside Keen, suddenly very serious.
+
+FUZZBY: So… quick question.
+KEEN: Yeah?
+FUZZBY: How do you feel about honey?
+
+Keen looks at him, still catching his breath from everything.
+
+KEEN: Uh… I like it?
+
+Beat. Fuzzby GASPS. His eyes sparkle. This is the best news he has heard all day.
+
+FUZZBY: Oh… this is going to work out VERY well.
+ZENNY: Fuzzby…
+
+But Fuzzby is already buzzing excitedly around Keen.
+
+FUZZBY: Honey cakes, honey snacks, honey naps, honey leaf drizzles, emergency honey—
+
+Zenny gently catches one of his legs and pulls him back.
+
+ZENNY: One thing at a time.
+FUZZBY: I have waited my whole life for this friendship!
+
+Keen laughs. The others laugh too as they continue walking together down the beach. The camera lingers on the cove, bright and peaceful now.
+
+FADE OUT.`
+};
+
+/* ── THE KNOWLEDGE PACK — canon as data, from the studioai repo ── */
+const K = {
+  show: "The Crystal Bears — Ep1 'The Adventure Begins' (locked script, FINAL 2026-04-13)",
+  style: "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+  styleVersion: "v1.0.0 (LOCKED — inject verbatim, never paraphrase)",
+  cast: {
+    "Fuzzby": {look:"larger bee, spectacles ALWAYS present, bulbous tan nose, translucent wings", stage:"frame-LEFT, clearly the larger bee",
+      conduct:"careens, overcommits, barrels, bounces, improvises, presents, rockets", banned:"slinks, hesitates, glides, sulks, waits, creeps",
+      voice:"manic staccato bursts, total unearned conviction, covers fear with bravado — never admits distress",
+      eleven:{id:"DNK8oCkkHjIyEjzlCeQq", stability:0.25, similarity:0.70, style:0.40}},
+    "Zenny": {look:"smaller slender bee, round glasses, long eyelashes, blush cheeks, translucent wings", stage:"frame-RIGHT, clearly the smaller bee",
+      conduct:"glides, observes, settles, arches, softens, levels", banned:"scrambles, flails, rushes, panics, showboats",
+      tic:"eye-roll that softens into a loving smile (LOCKED)",
+      voice:"understated dry deadpan, quiet and unhurried, genuine care underneath",
+      eleven:{id:"XEiPrIitaegdirIGkODX", stability:0.55, similarity:0.90, style:0.10}},
+    "Aida": {look:"elder bear, tall and robed: long flowing lilac-purple hair, jewelled headdress across the brow, layered purple robes, rose quartz pendant",
+      voice:"slow and sure, like she already knows how it ends — quieter the closer she gets to what matters",
+      eleven:{id:"SHuZ9GyczU4QEDzU4QU4"}},
+    "Keen": {look:"sturdy young blue bear cub, MEDIUM size (similar height to Luna/Aida — NOT a tiny cub), signature upright white tuft on the crown ALWAYS present",
+      voice:"leans in before he's ready, gulps hard, and goes anyway — curiosity wins the argument with his own nerves",
+      wristbands:"CONTINUITY LAW — three states: NONE (before Mum's gift, incl. Aida's vision in S2 and S3's opening), VACANT bands (after the gift mid-S3), CRYSTAL bands (after the ceremony in S9). Never render the wrong state.",
+      eleven:{id:"TCRj5m2u9xhZHJ8h9pMv"}},
+    "Keen's Mum": {look:"plump pale-blue adult bear, same size as Aida; pale-blue hair in a neat bun fronted by a pale-blue bow; ornate gold collar at the throat",
+      voice:"steadies her own voice before she steadies anyone else's — reassures with a paw on the shoulder more than words",
+      eleven:{id:"J4zlKWvIIVHQN0EIvCc4"}},
+    "_others": "Howey, Misty, Luna, Sunny, Amie, Bo (bears); Squeaky (dolphin, chirps only — no speech)"
+  },
+  laws: [
+    "Canon: the bees have NO crystal. Bees never carry pollen sacks, bags or harnesses.",
+    "Native audio form: dialogue text in-beat is a PLACEMENT MARKER (guide audio); the approved ElevenLabs take is restored in post. Seedance re-performs — it never passes audio through.",
+    "Continuity by construction: one keyframe, two uses — a unit's final frame IS the next unit's first-frame reference (exact sentence: '@Image N is the first frame.'). Never describe continuity you can anchor with pixels.",
+    "R14: 'no cuts / no handheld' applies only to continuous-relay units — lifted for action units.",
+    "R16 attribute exclusivity: a new visible feature states its owner AND an explicit exclusion for every other character in frame.",
+    "R17/R18: no internal contradiction between fields; state each thing once — twice renders as doubled motion.",
+    "R19 conduct is invariant: emotion changes what a character INTENDS; the body still does what it always does. Confidence never makes Fuzzby competent.",
+    "R20 state handoff: a unit's declared opening state must match the previous unit's declared end state — carried marks, props, light, mood. Name the gap; never render across an unexplained jump.",
+    "Witness law: the payoff of a two-character gag is the held cut to the non-acting character, ≥2.0s, cut only after the line has completely finished.",
+    "The world turns before the characters do (environment beats). Camera always names its subject. Travel must be WRITTEN (parallax, landmarks, scale change) or it reads as motionless. Repeated contacts escalate. Cut on stored energy; withhold the result across the cut. Verify before emotion (self-check precedes pride). Every shot ends in a describable frame."
+  ],
+  beatCosts: {travel:1.8, dodge:1.0, impact:0.8, load_release:2.3, aerial:1.8, tumble:1.2, settle:1.0, self_check:1.2, reaction:1.2, turn:2.0, environment_turn:2.0, reveal:1.5, business:1.5, hold:"≥2.0 (absolute floor)"},
+  costRule: "unit duration = sum of beat costs + 15% margin; over-stuffed units BLOCK. Costs rise only when a verdict diagnoses compression.",
+  preflight: "Score from 10. FATAL −2.0 (contradiction, ref without role/exclusion, no end state, dialogue without language, over-stuffed, unowned new feature). FIX −0.75 (unwritten travel, flat escalation, subjectless camera, detached dialogue, hold <2s, compound move without its own shot, restated action, no music policy). POLISH −0.25. Below 8.0 does not fire.",
+  archetypes: {
+    "false-triumph-chase": "chase w/ written traversal → three escalating contacts → cut on max load → compound aerial in its own shot → landing → self-check → pride → line → held cut to witness",
+    "reveal-and-deadpan-verdict": "transfer shot cutting before the result → close-up reveal → OTS verdict, feature as soft foreground → eye-line travel → micro-tell → line → hold",
+    "escalation-into-verdict": "an action archetype joined to a reaction archetype at the button; cut after the line completely finishes",
+    "environment-turn": "world changes first (light, sky, colour, vegetation) → physical betrayal of the denier → cover line → cut to the reader, stilling → quiet line → overcorrection → long hold → fade",
+    "still-ritual-vision (candidate)": "ritual stillness → glow → pink-washed vision insert (plate keyframe as ref) → return → verdict line → purposeful exit"
+  },
+  scenes: {
+    1:"Rainforest corridor — Fuzzby & Zenny collect pollen; chase, moustache gag, Buzz Crash, storm turn. FOUR BEATS PROVEN in Flova.",
+    2:"Aida's sanctuary — bowl ritual, pendant glow, INNER VISION of Keen+Mum at the pier (NO wristbands), 'It's time.', exit to forest.",
+    3:"Keen's Island pier — Keen loads the boat (no wristbands at open), Mum gives the father's VACANT wristbands mid-scene, farewell, dolphin (Squeaky), sail-off.",
+    4:"At sea — naming Squeaky, map lost to the storm, 'I'm lost', grounding breath, follow Squeaky.",
+    5:"Rainforest edge — bees spot the boat; 'BEARS! BEARS! EMERGENCY BEARS!'; Fuzzby bonks a branch.",
+    6:"Crystal Cove storm — Fuzzby's pinball arrival, 'I meant to do that', Aida sees the boat, CRYSTAL CALL SEQUENCE, beam of light.",
+    7:"Storm sea — Keen sees the light; Squeaky netted; Keen dives; underwater rescue; wristbands first GLOW; wave; burst-out; ride to shore. INTERCUT with shore.",
+    8:"Beach arrival — 'Best… ride… ever!'; the bears circle; introductions; Aida sends Squeaky with a message home.",
+    9:"Gathering area, post-storm — aquamarine ceremony: crystal splits into the two wristbands (VACANT→CRYSTAL), Keen's chant, group hug.",
+    10:"Beach, lifted mood — Fuzzby's honey friendship bit; walk down the beach; fade."
+  }
+};
+
+/* ── GATES & SEATS ─────────────────────────────────────────────── */
+const GATES = ["DIRECT","SEE","HEAR","WATCH","DONE"];
+const SEATS = {
+  DIRECT:{seat:"Director", infl:"Pete Docter · Andrew Stanton",
+    ask:"What's the beat? Give me the joke, the status shift, and what we cut on.",
+    brief:"You are the Director. Turn what Julian says into a beat: name the comedy engine (or emotional engine), the status shift, the shot list (2-4 shots, one clean motion idea each), which archetype it matches or composes, and the beat-cost arithmetic. Challenge weak beats. Never write the final render prompt — describe direction; the compiler emits."},
+  SEE:{seat:"Cinematographer", infl:"Patrick Lin · Jean-Claude Kalache",
+    ask:"That's the frame. Staging, light, and anything on screen that shouldn't be — does it hold?",
+    brief:"You are the Cinematographer/DP. Own keyframes and composition: staging law (Fuzzby LEFT / Zenny RIGHT), identity anchors (spectacles, tuft, wristband STATE), light continuity, lens/depth choices, and what must be EXCLUDED from frame. You may draft a candidate keyframe brief (image-generation prompt with the locked style paragraph verbatim) — mark it CANDIDATE, Julian approves before generation. Interrogate any frame that will be a continuity anchor."},
+  HEAR:{seat:"Voice Director", infl:"ElevenLabs v3 acting craft",
+    ask:"That's the performance. Cadence, delivery, the silences — is that the character?",
+    brief:"You are the Voice Director. Own performances: per-character cadence from canon, ElevenLabs voice IDs and settings from the voice cards, v3 audio-tag direction (pauses, breaths, delivery shifts), and the native-audio law (in-beat text is a placement marker; the approved take is restored in post). Direct the take line by line: what the character wants, what they're covering, where the silence lives."},
+  WATCH:{seat:"Continuity", infl:"state handoff · R20",
+    ask:"That's the take. Did the beat land, and does it hand off cleanly to the next unit?",
+    brief:"You are Continuity. Own R20: carried state (marks, props, wristband state, pollen, light, mood) between units, the one-keyframe-two-uses anchor mechanism, and honest verdict capture. When Julian reports a take, extract the diagnosable defect and say which RULE or COST it feeds — defects go to the system, never to hand-fixes."},
+  DONE:{seat:"Editor", infl:"the cut",
+    ask:"Banked. Anything to note for the next unit before we move on?",
+    brief:"You are the Editor. The unit is banked. Capture what should carry forward: the proven recipe (archetype bank), the end state the next unit opens on, and any note for the cut."}
+};
+
+const SCENES = [
+  {n:1, slug:"EXT. DEEP WITHIN THE RAINFOREST – DAY", units:["S1.B1","S1.B2","S1.B3","S1.B4"]},
+  {n:2, slug:"EXT. CRYSTAL COVE – AIDA'S SANCTUARY – DAY", units:["S2.B1"]},
+  {n:3, slug:"EXT. KEEN'S ISLAND – THE PIER – DAY", units:["S3.B1","S3.B2","S3.B3"]},
+  {n:4, slug:"EXT. AT SEA – DAY", units:["S4.B1","S4.B2","S4.B3"]},
+  {n:5, slug:"EXT. RAINFOREST EDGE – CONTINUOUS", units:["S5.B1","S5.B2"]},
+  {n:6, slug:"EXT. CRYSTAL COVE – STORM BUILDING", units:["S6.B1","S6.B2","S6.B3"]},
+  {n:7, slug:"EXT. OUT AT SEA – STORM", units:["S7.B1","S7.B2","S7.B3","S7.B4"]},
+  {n:8, slug:"EXT. CRYSTAL COVE BEACH – DAY", units:["S8.B1","S8.B2"]},
+  {n:9, slug:"EXT. GATHERING AREA – DAY", units:["S9.B1","S9.B2"]},
+  {n:10, slug:"EXT. CRYSTAL COVE BEACH – CONTINUOUS", units:["S10.B1"]},
+];
+
+/* ── STATE ─────────────────────────────────────────────────────── */
+const KEY = "crystal-bears-room-v2";
+let state = load();
+let openScene = state.openScene || 1;
+let openUnit = state.openUnit || null;
+let busy = false;
+
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return {openScene:1, openUnit:null, units:{}, talk:{}, apiKey:""};
+}
+function save(){
+  state.openScene = openScene; state.openUnit = openUnit;
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ note("⚠ Could not save to browser storage — export the scene record before closing."); }
+}
+function unit(id){ if(!state.units[id]) state.units[id]={id,gate:"DIRECT",prompt:"",records:[]}; return state.units[id]; }
+function sceneOf(n){ return SCENES.find(s=>s.n===n); }
+function talkOf(n){ if(!state.talk[n]) state.talk[n]=[]; return state.talk[n]; }
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ── THE PIPE — connection to the Codex studio (serve.py) ────────
+   When this file is served by the studio, the Room is not a copy of
+   the pipeline — it IS the pipeline's chat surface. Verdicts fire
+   real director-actions; artifacts render inline; the chat walks
+   Julian between them. Standalone (file://), everything still works
+   with local records only. ─────────────────────────────────────── */
+const PIPE = {connected:false, episode:"Ep1", session:null, chatProxy:true, announced:false};
+
+async function pipeFetch(){
+  if(location.protocol==="file:"){ PIPE.connected=false; return; }
+  try{
+    const q = new URLSearchParams({episode:PIPE.episode, scene:String(openScene)});
+    if(openUnit) q.set("shotId", openUnit);
+    const r = await fetch("/api/director-session?"+q, {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    PIPE.session = await r.json();
+    if(!PIPE.connected){
+      PIPE.connected = true;
+      if(!PIPE.announced){ PIPE.announced=true; note("PIPELINE CONNECTED — this room is driving the Codex studio. Verdicts fire real director-actions; artifacts appear below the conversation."); }
     }
-    function actionsFromSession(session) {
-      return [
-        session.primaryAction,
-        ...(session.decisionActions || []),
-        ...(session.scenePlateActions || []),
-      ].filter(Boolean);
-    }
-    function systemPrompt() {
-      return [
-        "You are the Crystal Bears Studio Room agent.",
-        "You discuss the current production state and help Julian decide approve, reject, fix, or continue.",
-        "Do not invent production state. Use only the supplied Director session summary.",
-        "If a reject is needed, ask for a concrete retake note.",
-        "Cache-breakpoint: room-system-v1.",
-        JSON.stringify({
-          episode: state.episode,
-          scene: state.scene,
-          shotId: state.session?.selectedShotId || state.shotId || null,
-          phase: state.session?.phase || null,
-          status: state.session?.status || null,
-          primaryAction: state.session?.primaryAction || null,
-          decisionActions: state.session?.decisionActions || [],
-          runningJob: state.session?.runningJob || null,
-        }),
-      ].join("\n");
-    }
-    function renderMessages() {
-      $("messages").innerHTML = state.messages.map((message) =>
-        `<div class="message ${message.role === "user" ? "user" : ""}">${escapeHtml(message.content)}</div>`
-      ).join("");
-    }
-    function escapeHtml(value) {
-      return String(value || "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[char]));
-    }
-    function renderSession() {
-      const session = state.session;
-      if (!session) return;
-      state.shotId = session.selectedShotId || state.shotId;
-      $("decision").textContent = `${session.phase || "unknown"} · ${session.status || "unknown"}`;
-      $("orientation").textContent = `Scene ${state.scene} · Shot ${state.shotId || "none"}`;
-      $("director-link").href = `/cb-studio/director.html#view=director&scene=${encodeURIComponent(state.scene)}${state.shotId ? `&shot=${encodeURIComponent(state.shotId)}` : ""}`;
-      const available = new Map(actionsFromSession(session).map((action) => [action.id, action]));
-      $("actions").innerHTML = verdictMap.map(([id, label]) => {
-        const enabled = available.has(id);
-        return `<button data-action="${id}" class="${id.includes("iterate") || id === "reopen-shot" ? "danger" : "primary"}" ${enabled ? "" : "disabled"}>${label}</button>`;
-      }).join("");
-      document.querySelectorAll("[data-action]").forEach((button) => {
-        button.addEventListener("click", () => submitVerdict(button.dataset.action));
-      });
-    }
-    async function loadSession() {
-      $("status").textContent = "Loading current Studio state...";
-      const query = new URLSearchParams({episode: state.episode, scene: state.scene});
-      if (state.shotId) query.set("shotId", state.shotId);
-      state.session = await api(`/api/director-session?${query}`);
-      renderSession();
-      $("status").textContent = "Current.";
-    }
-    async function submitVerdict(action) {
-      const note = $("note").value.trim();
-      if (rejectFamily.has(action) && !note) {
-        $("status").innerHTML = '<span class="bad">Reject/refire needs a note.</span>';
-        $("note").focus();
-        return;
+  }catch(e){
+    if(PIPE.connected) note("⚠ Lost the studio connection — records continue locally and re-sync when the server is back.");
+    PIPE.connected=false; PIPE.session=null;
+  }
+}
+
+function pipeActions(){
+  const s=PIPE.session; if(!s) return [];
+  return [s.primaryAction, ...(s.decisionActions||[])].filter(Boolean);
+}
+function resolvePipeAction(verdict){
+  const acts=pipeActions();
+  const want = verdict==="PASS" ? /approve|accept|sign|confirm|keep|lock/i : /reject|retake|refuse|fail|redo|block/i;
+  return acts.find(a=>want.test((a.id||"")+" "+(a.label||""))) || null;
+}
+async function pipeAct(action, reason){
+  const body={episode:PIPE.episode, scene:openScene, shotId:(PIPE.session&&PIPE.session.selectedShotId)||openUnit, action:action.id};
+  if(reason) body.note = reason;
+  const r = await fetch("/api/director-action", {method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify(body)});
+  if(!r.ok){ const t=await r.text(); throw new Error("director-action "+r.status+": "+t.slice(0,200)); }
+  return r.json().catch(()=> ({}));
+}
+
+/* ── CONVERSATION ──────────────────────────────────────────────── */
+function push(t){ talkOf(openScene).push({...t, at:new Date().toISOString()}); save(); render(); }
+function note(text){ push({kind:"room", body:text}); }
+function crewSays(gate, text){ const s=SEATS[gate]; push({kind:"crew", seat:s.seat, infl:s.infl, gate, body:text||s.ask}); }
+
+function readVerdict(text){
+  const t = text.trim().toLowerCase();
+  const yes=/^(y|yes|yep|yeah|good|great|perfect|approved?|pass|land(ed)?|that('| i)?s it|love it|nailed it|bank it|ship it|ok(ay)?\b)/;
+  const no=/^(n|no|nope|nah|reject|block|bad|poor|wrong|not? (right|good|working)|doesn'?t|didn'?t|fail)/;
+  if(yes.test(t)) return "PASS";
+  if(no.test(t)) return "REJECT";
+  return null;
+}
+function advance(u){ u.gate = GATES[Math.min(GATES.indexOf(u.gate)+1, GATES.length-1)]; }
+
+async function handle(text){
+  push({kind:"you", body:text});
+
+  if(text.length>400 && /image_?\d|@图|@Image|\[SHOT|Shot 1 —|AUDIO-AUTHORITY/i.test(text)){
+    if(!openUnit){ note("Open a unit below first, then paste the emission into it."); return; }
+    const u=unit(openUnit); u.prompt=text;
+    note(`Emission attached to ${u.id} (${text.length.toLocaleString()} chars). It is the compiler's text — the room does not edit it.`);
+    save(); return;
+  }
+
+  if(!openUnit){
+    // No unit open — still talk: the room answers as the Director at scene level.
+    await brain("DIRECT", text, null);
+    return;
+  }
+
+  const u=unit(openUnit);
+  const v=readVerdict(text);
+  if(v && u.gate!=="DIRECT"){
+    u.records.push({gate:u.gate, verdict:v, reason:text.trim(), at:new Date().toISOString(), seat:SEATS[u.gate].seat});
+    push({kind:"record", verdict:v, body:`${v} · ${u.id} · ${u.gate} — recorded${v==="REJECT"?" · this becomes a rule, not a hand-fix":""}`});
+
+    // Connected: the verdict is not a note about the pipeline — it drives it.
+    if(PIPE.connected){
+      const act = resolvePipeAction(v);
+      if(act){
+        try{
+          await pipeAct(act, v==="REJECT" ? text.trim() : undefined);
+          note(`→ studio action fired: ${act.label||act.id}`);
+          await pipeFetch();
+        }catch(e){ note("⚠ The studio refused the action: "+(e.message||e)+" — the local record stands; retry or act in the studio UI."); }
+      } else {
+        const avail = pipeActions().map(a=>a.label||a.id).join(" · ");
+        note("⚠ No matching studio action for "+v+" here."+(avail?" Available: "+avail+" — type one of those to fire it.":""));
       }
-      $("status").textContent = `Submitting ${action}...`;
-      await api("/api/director-action", {
-        method: "POST",
-        body: JSON.stringify({
-          episode: state.episode,
-          scene: state.scene,
-          shotId: state.shotId,
-          action,
-          note,
-        }),
-      });
-      $("status").innerHTML = '<span class="ok">Action accepted. Refreshing state...</span>';
-      await loadSession();
     }
-    async function sendMessage() {
-      const text = $("chat-input").value.trim();
-      if (!text) return;
-      $("chat-input").value = "";
-      state.messages.push({role: "user", content: text});
-      renderMessages();
-      $("status").textContent = "Room agent thinking...";
-      const response = await api("/api/room-chat", {
-        method: "POST",
-        body: JSON.stringify({
-          system: systemPrompt(),
-          messages: state.messages.slice(-10),
-        }),
-      });
-      state.messages.push({role: "assistant", content: response.text || "(No response text)"});
-      renderMessages();
-      $("status").textContent = "Current.";
-    }
-    $("refresh").addEventListener("click", () => loadSession().catch((error) => {
-      $("status").innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
-    }));
-    $("send").addEventListener("click", () => sendMessage().catch((error) => {
-      $("status").innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
-    }));
-    loadSession().catch((error) => {
-      $("decision").textContent = "Could not load Studio state";
-      $("status").innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
+
+    if(v==="PASS"){ advance(u); save(); await brain(u.gate, `[${u.id} advanced to ${u.gate} on Julian's PASS: "${text.trim()}"] Open this gate.`, u); }
+    else{ save(); await brain(u.gate, `[${u.id} HELD at ${u.gate} on Julian's REJECT: "${text.trim()}"] Diagnose the defect and say which rule or cost it feeds.`, u); }
+  } else if(PIPE.connected && pipeActions().some(a=>text.trim().toLowerCase()===(a.label||"").toLowerCase()||text.trim().toLowerCase()===(a.id||"").toLowerCase())){
+    // Julian typed an exact studio action name — fire it directly.
+    const act = pipeActions().find(a=>text.trim().toLowerCase()===(a.label||"").toLowerCase()||text.trim().toLowerCase()===(a.id||"").toLowerCase());
+    try{ await pipeAct(act); note(`→ studio action fired: ${act.label||act.id}`); await pipeFetch(); }
+    catch(e){ note("⚠ The studio refused the action: "+(e.message||e)); }
+    save(); render();
+  } else {
+    u.records.push({gate:u.gate, verdict:"NOTE", reason:text.trim(), at:new Date().toISOString(), seat:SEATS[u.gate].seat});
+    save();
+    await brain(u.gate, text, u);
+  }
+}
+
+/* ── THE BRAIN — live Claude when a key is present, canon otherwise ── */
+function systemBlocks(gate, u){
+  const stable =
+`You are the crew of "The Room" — the conversational studio for ${K.show}. Julian Jenkins (showrunner) talks a scene through with you seat by seat. You answer as ONE seat at a time, in character as a world-class practitioner, but always concretely about THIS show — never generic film advice.
+
+THE TWO LAWS OF THE ROOM (never break):
+1. Verdicts become records; a rejection must be diagnosed into a rule or cost change — defects go to the system, never hand-fixes.
+2. The room decides WHAT; the deterministic compiler emits the final Seedance render prompt. You may draft candidate keyframe briefs and voice direction, clearly marked CANDIDATE. You never author the final video emission.
+
+LOCKED STYLE PARAGRAPH ${K.styleVersion}:
+${K.style}
+
+CAST CANON (identity anchors are ALWAYS present; conduct verbs are law — R19):
+${Object.entries(K.cast).filter(([k])=>k!=="_others").map(([n,c])=>
+`• ${n}: ${c.look||""}${c.stage?" | STAGING: "+c.stage:""}${c.conduct?" | conduct: "+c.conduct:""}${c.banned?" | banned verbs: "+c.banned:""}${c.tic?" | tic: "+c.tic:""}${c.wristbands?" | "+c.wristbands:""}
+  voice: ${c.voice||"—"}${c.eleven?" | ElevenLabs "+c.eleven.id+(c.eleven.stability!=null?` (stability ${c.eleven.stability}, similarity ${c.eleven.similarity}, style ${c.eleven.style})`:""):""}`).join("\n")}
+• Others: ${K.cast._others}
+
+PRODUCTION LAW:
+${K.laws.map(l=>"• "+l).join("\n")}
+
+BEAT COSTS (min screen seconds): ${Object.entries(K.beatCosts).map(([k,v])=>k+" "+v).join(" · ")}
+${K.costRule}
+PRE-FLIGHT: ${K.preflight}
+
+PROVEN ARCHETYPES (reuse verbatim until a render dethrones them):
+${Object.entries(K.archetypes).map(([k,v])=>"• "+k+": "+v).join("\n")}
+
+EPISODE MAP:
+${Object.entries(K.scenes).map(([n,s])=>"S"+n+": "+s).join("\n")}
+
+SEAT PERSONAS:
+${Object.entries(SEATS).map(([g,s])=>g+" — "+s.seat+" ("+s.infl+"): "+s.brief).join("\n")}
+
+Voice: talk like a sharp colleague at the table — direct, warm, specific. Keep answers tight (usually under 200 words) unless Julian asks for a full brief. One question at a time, only when it changes the work. When you spot a canon violation (banned verb, wrong staging, wrong wristband state, missing exclusion), say so immediately and cite the rule.`;
+
+  const sc = sceneOf(openScene);
+  const pipeCtx = PIPE.connected && PIPE.session ? `
+STUDIO PIPELINE (live — the Room drives it): phase "${PIPE.session.phase||"?"}" · ${PIPE.session.headline||""} ${PIPE.session.summary||""}
+Available studio actions: ${pipeActions().map(a=>a.label||a.id).join(" · ")||"none"}
+${PIPE.session.request&&PIPE.session.request.conformance?`Emission conformance: ${PIPE.session.request.conformance.score} ${PIPE.session.request.conformance.verdict}`:""}
+When Julian's words amount to a verdict, tell him plainly which studio action it maps to.` : "";
+  const dyn =
+`CURRENT CONTEXT — Scene ${sc.n}: ${sc.slug}
+Scene brief: ${K.scenes[sc.n]}
+
+THE PAGE (locked script — the FOUNDATION; direct from it, never rewrite it; a wanted script change is flagged to the showrunner, not improvised):
+${SCRIPT[sc.n]||"(no page)"}
+${pipeCtx}
+${u ? `Open unit: ${u.id}, at gate ${u.gate}. You are speaking as the ${SEATS[u.gate].seat}.
+Unit record so far:
+${u.records.slice(-12).map(r=>`  ${r.verdict} @${r.gate}: ${r.reason}`).join("\n") || "  (none yet)"}
+${u.prompt ? "An emission is attached ("+u.prompt.length+" chars)." : "No emission attached yet."}` :
+`No unit open — speak as the Director at scene level.`}
+Answer as the ${SEATS[gate].seat} only.`;
+
+  return [
+    {type:"text", text:stable, cache_control:{type:"ephemeral"}},
+    {type:"text", text:dyn}
+  ];
+}
+
+function recentTurns(n){
+  return talkOf(openScene)
+    .filter(t=>t.kind==="you"||t.kind==="crew")
+    .slice(-n)
+    .map(t=>({role: t.kind==="you"?"user":"assistant", content: (t.kind==="crew"?("["+t.seat+"] "):"")+t.body}));
+}
+
+async function brain(gate, text, u){
+  if(busy) return;
+  const key = (state.apiKey||"").trim();
+  const messages = recentTurns(14);
+  if(!messages.length || messages[messages.length-1].role!=="user") messages.push({role:"user", content:text});
+
+  // First choice when connected: the studio's own chat proxy — the key lives
+  // on the Mac with the rest of the pipeline, and same-origin passes the CSP.
+  if(PIPE.connected && PIPE.chatProxy){
+    busy = true;
+    const t = talkOf(openScene); t.push({kind:"thinking", body:SEATS[gate].seat+" is thinking…"}); render();
+    try{
+      const r = await fetch("/api/room-chat", {method:"POST", headers:{"content-type":"application/json"},
+        body: JSON.stringify({system: systemBlocks(gate,u), messages})});
+      t.pop();
+      if(r.status===404){ PIPE.chatProxy=false; note("(Studio has no /api/room-chat yet — using the browser key instead. The Codex instruction for the proxy is in the repo.)"); }
+      else if(!r.ok){ const e=await r.text(); note("⚠ Studio chat failed ("+r.status+"): "+e.slice(0,200)); busy=false; save(); render(); return; }
+      else{
+        const data = await r.json();
+        const out = (data.text||"").trim();
+        if(out) crewSays(gate, out); else note("⚠ Empty response from the studio chat.");
+        busy=false; save(); render(); return;
+      }
+    }catch(e){ t.pop(); PIPE.chatProxy=false; }
+    busy=false;
+  }
+
+  if(!key){ offlineBrain(gate, text, u); return; }
+  busy = true;
+  const t = talkOf(openScene); t.push({kind:"thinking", body:SEATS[gate].seat+" is thinking…"}); render();
+  try{
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key": key,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true",
+        "anthropic-beta":"server-side-fallback-2026-07-01"
+      },
+      body: JSON.stringify({
+        model:"claude-opus-5",
+        max_tokens:2048,
+        fallbacks:"default",
+        system: systemBlocks(gate, u),
+        messages
+      })
     });
-  </script>
-</body>
-</html>
+    t.pop(); // remove thinking line
+    if(!res.ok){
+      const err = await res.text();
+      note(`⚠ Live crew call failed (${res.status}). ${err.slice(0,300)}`);
+      offlineBrain(gate, text, u);
+      return;
+    }
+    const data = await res.json();
+    if(data.stop_reason === "refusal"){
+      note("⚠ The model declined that request (safety classifier). Rephrase and try again.");
+      return;
+    }
+    const out = (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+    if(out) crewSays(gate, out);
+    else note("⚠ Empty response from the live crew — try again.");
+  }catch(e){
+    t.pop();
+    note("⚠ Could not reach the API ("+(e.message||e)+"). Falling back to canon checks. If you opened this file from the studio server, its security policy blocks outside calls — open room.html by double-clicking the file instead.");
+    offlineBrain(gate, text, u);
+  }finally{
+    busy=false; save(); render();
+  }
+}
+
+/* ── OFFLINE BRAIN — deterministic canon checks, no key needed ── */
+function canonChecks(text){
+  const f=[]; const low=text.toLowerCase();
+  for(const [name,c] of Object.entries(K.cast)){
+    if(name==="_others"||!c.banned) continue;
+    for(const verb of c.banned.split(", ")){
+      if(new RegExp(name.toLowerCase()+"[^.]{0,60}\\b"+verb.replace(/s$/,"")+"s?\\b").test(low))
+        f.push(`R19: "${name} ${verb}" is a banned verb — ${name}'s conduct is: ${c.conduct}.`);
+    }
+  }
+  if(/fuzzby[^.]{0,40}(frame.?right|on the right)/.test(low)) f.push("Staging law: Fuzzby stages frame-LEFT.");
+  if(/zenny[^.]{0,40}(frame.?left|on the left)/.test(low)) f.push("Staging law: Zenny stages frame-RIGHT.");
+  if(/(fuzzby|zenny)[^.]{0,60}crystal/.test(low)) f.push("Canon: the bees have NO crystal.");
+  if(/pollen sack|pollen bag|harness/.test(low)) f.push("Canon: no pollen sacks, bags or harnesses — ever.");
+  if(/keen[^.]{0,80}wristband/.test(low)) f.push("Wristband state check: NONE before Mum's gift (S2 vision, S3 open) → VACANT after the gift → CRYSTAL after the S9 ceremony. Confirm which state this unit needs.");
+  return f;
+}
+function estimateBeats(text){
+  const low=text.toLowerCase(); let total=0; const found=[];
+  const map={travel:/(chase|flies|fly across|travel|races?|zooms)/, dodge:/(dodge|near.?miss|swerve)/, impact:/(crash|bonk|hits?|slam|impact)/,
+    load_release:/(wind.?up|spring|recoil|load)/, aerial:/(flip|tuck|twist|aerial|somersault)/, tumble:/(tumble|spiral|spins? out)/,
+    settle:/(lands?|settle|arrives)/, self_check:/(checks himself|pats|looks around at himself|self.?check)/, reaction:/(reacts?|gasps?|jaw drops)/,
+    turn:/(softens|realis|dawns|melts)/, reveal:/(reveal|pulls? back out|shows)/, business:/(fiddl|arrang|packs|loads)/, hold:/(hold|beat\b|linger)/};
+  for(const [k,re] of Object.entries(map)) if(re.test(low)){ const c=K.beatCosts[k]; const s=typeof c==="number"?c:2.0; total+=s; found.push(k+" "+s+"s"); }
+  return found.length?`Beat-cost sketch: ${found.join(" · ")} ≈ ${(total*1.15).toFixed(1)}s with margin. (Rough — name the beats explicitly and I'll cost them properly.)`:null;
+}
+function offlineBrain(gate, text, u){
+  const checks = canonChecks(text);
+  const parts = [];
+  if(checks.length) parts.push("Canon flags:\n"+checks.map(c=>"• "+c).join("\n"));
+  if(gate==="DIRECT"){
+    const est=estimateBeats(text); if(est) parts.push(est);
+    parts.push("Direction wants: the joke/engine, the status shift, 2-4 shots (one motion idea each), the archetype it matches — "+Object.keys(K.archetypes).join(", ")+" — and what we cut on.");
+  }
+  if(gate==="SEE"){
+    const chars=Object.keys(K.cast).filter(n=>n!=="_others"&&text.toLowerCase().includes(n.toLowerCase().split("'")[0]));
+    parts.push("Keyframe checklist: staging (Fuzzby LEFT / Zenny RIGHT) · identity anchors ("+(chars.length?chars.map(n=>n+": "+K.cast[n].look).join(" | "):"name the characters and I'll list their anchors")+") · light continuity with the previous unit · explicit exclusions (what must NOT be in frame) · style paragraph "+K.styleVersion+" verbatim.");
+  }
+  if(gate==="HEAR"){
+    const chars=Object.keys(K.cast).filter(n=>n!=="_others"&&text.toLowerCase().includes(n.toLowerCase().split("'")[0]));
+    parts.push(chars.length? chars.map(n=>{const c=K.cast[n]; return n+" — "+ (c.voice||"") + (c.eleven?"\nElevenLabs "+c.eleven.id+(c.eleven.stability!=null?` · stability ${c.eleven.stability} / similarity ${c.eleven.similarity} / style ${c.eleven.style}`:""):"");}).join("\n\n")
+      : "Name the speaker and I'll give the cadence + ElevenLabs settings from the voice cards. Remember: in-beat dialogue text is a placement marker; the approved take is restored in post.");
+  }
+  if(gate==="WATCH"){
+    parts.push("Verdict capture: what specifically failed (pace / staging / identity / continuity / performance)? Which unit state carries forward (marks, props, wristband state, light, mood)? A one-line diagnosis becomes a rule or a cost change — that's how the fix becomes permanent.");
+  }
+  if(gate==="DONE"){
+    parts.push("Banked. Note the end state for the next unit's opening frame, and whether this recipe should be banked as an archetype.");
+  }
+  parts.push("(Offline canon crew — add an Anthropic API key bottom-left and the seats answer live, with this whole bible in their head.)");
+  crewSays(gate, parts.join("\n\n"));
+}
+
+/* ── RENDER ────────────────────────────────────────────────────── */
+function unitDots(s){
+  return s.units.map(id=>{
+    const u=state.units[id];
+    if(!u) return '<span class="dot"></span>';
+    if(u.gate==="DONE") return '<span class="dot done"></span>';
+    if(u.records.some(r=>r.verdict==="REJECT")) return '<span class="dot bad"></span>';
+    return '<span class="dot live"></span>';
+  }).join("");
+}
+function render(){
+  document.getElementById("scenes").innerHTML = SCENES.map(s=>`
+    <div class="scene-tab ${s.n===openScene?"on":""}" data-scene="${s.n}">
+      <div class="n">SCENE ${s.n}</div><div class="t">${esc(s.slug)}</div>
+      <div class="dots">${unitDots(s)}</div>
+    </div>`).join("");
+
+  const sc=sceneOf(openScene);
+  document.getElementById("slug").textContent=sc.slug;
+  const done=sc.units.filter(id=>state.units[id]?.gate==="DONE").length;
+  document.getElementById("meta").textContent = PIPE.connected && PIPE.session
+    ? `${PIPE.session.phase||""} — ${PIPE.session.headline||""}`.trim()
+    : `${done}/${sc.units.length} banked`;
+
+  const ps=document.getElementById("pipe-state");
+  ps.textContent = PIPE.connected ? "pipeline connected" : "standalone";
+  ps.className = PIPE.connected ? "on" : "off";
+
+  // Units: the pipe's real shots when connected; the local map otherwise.
+  const pipeShots = PIPE.connected && PIPE.session && Array.isArray(PIPE.session.shots) && PIPE.session.shots.length
+    ? PIPE.session.shots : null;
+  document.getElementById("units").innerHTML = pipeShots
+    ? pipeShots.map(s=>{
+        const id = s.id||s.shotId||"?";
+        const label = s.state||s.phase||s.status||"";
+        return `<div class="unit ${id===openUnit?"on":""}" data-unit="${esc(id)}">
+          <div class="id">${esc(id)}</div><div class="gate">${esc(String(label))}</div></div>`;
+      }).join("")
+    : sc.units.map(id=>{
+        const u=state.units[id];
+        const blocked=u?.records.some(r=>r.verdict==="REJECT"&&r.gate===u.gate);
+        return `<div class="unit ${id===openUnit?"on":""} ${u?.gate==="DONE"?"done":""} ${blocked?"blocked":""}" data-unit="${id}">
+          <div class="id">${id}</div><div class="gate">${u?u.gate:"not started"}</div></div>`;
+      }).join("");
+
+  // The stage: whatever the pipeline is asking Julian to judge, inline.
+  const stage=document.getElementById("stage");
+  const art = PIPE.connected && PIPE.session ? PIPE.session.artifact : null;
+  if(art && art.type){
+    const cap = `<div class="cap">${esc(PIPE.session.phase||"")} — the studio is showing you this</div>`;
+    let inner="";
+    if(art.type==="image" && art.url) inner=`<img src="${esc(art.url)}" alt="">`;
+    else if(art.type==="audio" && art.url) inner=`<audio controls src="${esc(art.url)}"></audio>`;
+    else if(art.type==="video" && art.url) inner=`<video controls src="${esc(art.url)}"></video>`;
+    else if(art.type==="video-set" && Array.isArray(art.items)) inner=`<div class="set">${art.items.map(i=>`<video controls src="${esc(i.url)}"></video>`).join("")}</div>`;
+    stage.innerHTML = inner ? `<div class="inner">${cap}${inner}</div>` : "";
+  } else stage.innerHTML="";
+
+  document.getElementById("talk").innerHTML = talkOf(openScene).map(t=>{
+    if(t.kind==="you") return `<div class="turn you"><div class="who">You</div><div class="body">${esc(t.body)}</div></div>`;
+    if(t.kind==="crew") return `<div class="turn"><div class="who"><span class="seat">${esc(t.seat)}</span><span class="infl">${esc(t.infl)}</span></div><div class="body">${esc(t.body)}</div></div>`;
+    if(t.kind==="record") return `<div class="turn record ${t.verdict.toLowerCase()}"><div class="body">${esc(t.body)}</div></div>`;
+    if(t.kind==="thinking") return `<div class="turn thinking"><div class="body">${esc(t.body)}</div></div>`;
+    return `<div class="turn room"><div class="body">${esc(t.body)}</div></div>`;
+  }).join("");
+  const talk=document.getElementById("talk"); talk.scrollTop=talk.scrollHeight;
+
+  const u=openUnit?state.units[openUnit]:null;
+  document.getElementById("ask").innerHTML = u
+    ? `<b>${esc(SEATS[u.gate].seat)}</b> — ${esc(SEATS[u.gate].ask)}`
+    : `Pick a unit for the gates, or just talk — the Director has the floor.`;
+
+  const ks=document.getElementById("key-state");
+  if((state.apiKey||"").trim()){ ks.textContent="live crew connected"; ks.className="live"; }
+  else { ks.textContent="offline — canon checks only"; ks.className="off"; }
+}
+
+/* ── BRIEF & EXPORT ────────────────────────────────────────────── */
+function brief(){
+  const sc=sceneOf(openScene);
+  const lines=[`SCENE ${sc.n} — ${sc.slug}`,""];
+  sc.units.forEach(id=>{
+    const u=state.units[id]; if(!u) return;
+    lines.push(`${id} — at ${u.gate}`);
+    u.records.forEach(r=>lines.push(`  ${r.verdict} @${r.gate} (${r.seat}): ${r.reason}`));
+    if(u.prompt) lines.push(`  emission attached: ${u.prompt.length} chars`);
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+/* ── WIRING ────────────────────────────────────────────────────── */
+document.getElementById("scenes").addEventListener("click", e=>{
+  const tab=e.target.closest("[data-scene]"); if(!tab) return;
+  openScene=+tab.dataset.scene; openUnit=null; save(); render();
+  if(!talkOf(openScene).length){
+    note(`Scene ${openScene}. ${sceneOf(openScene).slug} — ${K.scenes[openScene]}`);
+    crewSays("DIRECT");
+  }
+});
+document.getElementById("units").addEventListener("click", e=>{
+  const el=e.target.closest("[data-unit]"); if(!el) return;
+  openUnit=el.dataset.unit;
+  const u=unit(openUnit); save();
+  crewSays(u.gate, `${u.id} — ${SEATS[u.gate].ask}`);
+  render();
+});
+const say=document.getElementById("say");
+say.addEventListener("input", ()=>{ say.style.height="auto"; say.style.height=Math.min(say.scrollHeight,170)+"px"; });
+say.addEventListener("keydown", e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); fire(); } });
+document.getElementById("send").addEventListener("click", fire);
+function fire(){ const t=say.value.trim(); if(!t||busy) return; say.value=""; say.style.height="auto"; handle(t); }
+
+const keyInput=document.getElementById("key");
+keyInput.value=state.apiKey||"";
+keyInput.addEventListener("change", ()=>{ state.apiKey=keyInput.value.trim(); save(); render();
+  if(state.apiKey) note("Live crew connected — the seats now answer with the full bible in their head. The key stays in this browser only."); });
+
+document.getElementById("brief").addEventListener("click", async ()=>{
+  const text=brief();
+  try{ await navigator.clipboard.writeText(text); note("Brief copied — paste it to Claude."); }
+  catch(e){ note("Clipboard blocked. Here it is:\n\n"+text); }
+});
+document.getElementById("export").addEventListener("click", ()=>{
+  const sc=sceneOf(openScene);
+  const payload={scene:sc.n, slug:sc.slug, exportedAt:new Date().toISOString(),
+    units:sc.units.map(id=>state.units[id]).filter(Boolean), talk:talkOf(sc.n)};
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+  a.download=`scene-${sc.n}-record.json`; a.click();
+  note("Scene record exported.");
+});
+
+if(!talkOf(openScene).length){
+  note(`Scene ${openScene}. ${sceneOf(openScene).slug} — ${K.scenes[openScene]}`);
+  crewSays("DIRECT");
+}
+render();
+
+/* The pipe heartbeat: keep the Room synced to the studio. Paused while a
+   seat is thinking or an action is in flight; recovers on its own. */
+pipeFetch().then(render);
+setInterval(async ()=>{ if(!busy){ await pipeFetch(); render(); } }, 6000);
+</script>

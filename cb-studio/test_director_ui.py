@@ -68,13 +68,15 @@ def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():
     assert '"/cb-studio/room.html"' in SERVER
     assert 'if self.path == "/api/room-chat":' in SERVER
     assert '"model": "claude-opus-5"' in SERVER
+    assert '"max_tokens": int(payload.get("max_tokens") or 2048)' in SERVER
     assert '"system": system' in SERVER
+    assert "isinstance(system, list)" in SERVER
     assert 'return {"text": text}' in SERVER
     assert "system untouched" in ROOM_INSTRUCTION
     assert "claude-opus-5" in ROOM_INSTRUCTION
     assert '{"text": "..."}' in ROOM_INSTRUCTION
     assert "/api/room-chat" in ROOM
-    assert "system: systemPrompt()" in ROOM
+    assert "system: systemBlocks(gate, u)" in ROOM
 
 
 def test_studio_room_verdicts_map_to_current_director_actions_and_rejects_send_notes():
@@ -85,15 +87,11 @@ def test_studio_room_verdicts_map_to_current_director_actions_and_rejects_send_n
     )
     for action_id in expected_actions:
         assert action_id in SERVER
-        assert action_id in ROOM
-        assert f"`{action_id}`" in ROOM_INSTRUCTION
-    for reject_id in (
-        "iterate-keyframe", "iterate-voice", "iterate-animation",
-        "iterate-master", "reopen-shot",
-    ):
-        assert reject_id in ROOM
-    assert "rejectFamily.has(action) && !note" in ROOM
-    assert "note," in ROOM
+    assert "function pipeActions()" in ROOM
+    assert "function resolvePipeAction(verdict)" in ROOM
+    assert "const want = verdict===\"PASS\"" in ROOM
+    assert "await pipeAct(act, v===\"REJECT\" ? text.trim() : undefined)" in ROOM
+    assert "body.note = reason" in ROOM
     assert 'if not note:' in SERVER
 
 

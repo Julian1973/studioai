@@ -439,7 +439,16 @@ def _anthropic_room_chat(payload):
         raise RuntimeError("ANTHROPIC_API_KEY is not set")
     system = payload.get("system")
     messages = payload.get("messages")
-    if not isinstance(system, str) or not system.strip():
+    if isinstance(system, str):
+        if not system.strip():
+            raise ValueError("system is required")
+    elif isinstance(system, list) and system:
+        for block in system:
+            if not isinstance(block, dict):
+                raise ValueError("system blocks must be objects")
+            if block.get("type") != "text" or not isinstance(block.get("text"), str):
+                raise ValueError("system blocks must be Anthropic text blocks")
+    else:
         raise ValueError("system is required")
     if not isinstance(messages, list) or not messages:
         raise ValueError("messages is required")
@@ -454,7 +463,7 @@ def _anthropic_room_chat(payload):
         clean_messages.append({"role": role, "content": content})
     body = json.dumps({
         "model": "claude-opus-5",
-        "max_tokens": int(payload.get("max_tokens") or 900),
+        "max_tokens": int(payload.get("max_tokens") or 2048),
         "system": system,
         "messages": clean_messages,
     }).encode("utf-8")

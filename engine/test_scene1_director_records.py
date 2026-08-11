@@ -16,6 +16,15 @@ CASES = {
 }
 
 
+def _shot_block(prompt, number):
+    import re
+    match = re.search(
+        rf"Shot {number}:\s*(.*?)(?=\nShot \d+:|\nWitness staging:|\n\[|\Z)",
+        prompt, re.S)
+    assert match, f"Shot {number} block missing"
+    return match.group(1)
+
+
 def test_scene1_director_records_recompile_deterministically_and_pass():
     package = json.loads(PACKAGE.read_text())
     shots = {item["shotId"]: item for item in package["shots"]}
@@ -37,3 +46,25 @@ def test_scene1_director_records_recompile_deterministically_and_pass():
             creative_shot, direction)["ready"]
         assert cb_render._engine_rule_report(
             package, creative_shot, direction, cinematography={})["ready"]
+
+
+def test_s1s4_corrected_emission_fixture_and_regressions():
+    prompt = (RECORDS / "S1.SH2.prompt.txt").read_text().rstrip("\n")
+    golden = (ROOT / "engine" / "grammar" / "golden-fixtures" /
+              "scene1-v1" / "beat_4_storm.txt").read_text().rstrip("\n")
+    target = (RECORDS / "S1.SH2_user_prompt_target_20260811.txt").read_text().rstrip("\n")
+
+    assert golden == target
+    assert "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses" not in prompt
+    assert "Fuzzby answers the warning, accelerates as if proving it" not in prompt
+    assert "@图1 is the first frame — the final frame of the previous shot." in prompt
+    assert "Begin naturally from it: Fuzzby is frame-left, coated in golden pollen" in prompt
+    assert "with exhales delivery" not in prompt
+    assert "with quietly delivery" not in prompt
+    assert "with the approved delivery" not in prompt
+    assert "Dialogue placement: Fuzzby, performed calm over covered fear:" in prompt
+    assert "Dialogue placement: Zenny, quiet and unhurried, without drama:" in prompt
+    assert "Dialogue placement: Fuzzby, at full volume, before the launch:" in prompt
+    assert "pose holds a full beat after the line ends" not in _shot_block(prompt, 3)
+    assert prompt.count("Exactly one Fuzzby and one Zenny throughout") == 1
+    assert "No watermark." in prompt

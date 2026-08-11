@@ -50,3 +50,33 @@ def test_reference_slot_and_multi_angle_boilerplate_is_deterministic():
         ("@图1", "Zenny"), ("@图2", "Fuzzby")]) == (
         "Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, "
         "not extra characters.")
+
+
+def test_dialogue_direction_requires_written_prose_and_hold_is_ruled():
+    cue = {"speaker": "Performer", "exactText": "Now."}
+    line = C.dialogue_placement_line(
+        cue, direction="calm over covered fear", hold_after=False)
+    assert line == "Dialogue placement: Performer, calm over covered fear: {Now.}"
+    assert "hold" not in line.casefold()
+    with pytest.raises(C.EmissionConformanceError, match="raw token"):
+        C.dialogue_placement_line(cue, direction="exhales")
+    with pytest.raises(C.EmissionConformanceError, match="raw token"):
+        C.dialogue_placement_line(cue, direction="the approved")
+
+
+def test_r17_drops_superseded_action_before_world_first_replacement():
+    action = (
+        "A performer reacts to thunder. Before either character reacts, the light cools "
+        "and every flower closes.")
+    contract = ["The environment changes completely before either character reacts."]
+    assert C.drop_superseded_action_prefix(action, contract) == (
+        "Before either character reacts, the light cools and every flower closes.")
+    assert C.drop_superseded_action_prefix(action, []) == action
+
+
+def test_instance_lock_equivalence_is_character_agnostic():
+    assert C.is_instance_lock_equivalent(
+        "Exactly one Alpha and one Beta throughout; no duplicates or blended identities.",
+        ["Alpha", "Beta"])
+    assert not C.is_instance_lock_equivalent(
+        "Keep Alpha and Beta on the same route.", ["Alpha", "Beta"])

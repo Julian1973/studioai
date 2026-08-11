@@ -154,18 +154,62 @@ def dialogue_cues(dialogue_lines, *, duration_sec):
     return cues
 
 
-def dialogue_placement_line(cue):
-    """Emit words as a placement marker, not as permission to invent a performance."""
+def written_dialogue_direction(value):
+    """Validate authored performance prose; never leak voice tags into video prompts."""
+    direction = normalize_prose(value).strip(" .,:;-")
+    if not direction:
+        return ""
+    lowered = direction.casefold()
+    raw_tag = bool(re.fullmatch(r"\[?\s*[a-z_-]+\s*\]?", direction, re.I))
+    dangling = lowered in {"the approved", "approved", "the approved delivery"}
+    if raw_tag or dangling:
+        raise EmissionConformanceError(
+            f"dialogue direction must be written performance direction, not a raw token: "
+            f"{direction!r}")
+    return direction
+
+
+def dialogue_placement_line(cue, *, direction="", hold_after=True):
+    """Emit exact dialogue with typed direction and only its ruled post-line hold."""
     speaker = normalize_prose(cue.get("speaker"))
     exact = normalize_prose(cue.get("exactText"))
     if not speaker or not exact:
         raise EmissionConformanceError("dialogue placement requires speaker and exact words")
-    delivery = normalize_prose(cue.get("delivery"))
-    if exact and delivery:
-        delivery = re.sub(re.escape(exact), "", delivery, flags=re.I).strip(" []{}.,;:-")
-    delivery_clause = f" with {delivery} delivery" if delivery else " with the approved delivery"
-    return (f"Dialogue placement: {speaker} speaks in English{delivery_clause}: "
-            f"{{{exact}}}; the pose holds a full beat after the line ends.")
+    performance = written_dialogue_direction(direction)
+    prefix = f"Dialogue placement: {speaker}"
+    if performance:
+        prefix += f", {performance}"
+    line = f"{prefix}: {{{exact}}}"
+    if hold_after:
+        line += " The pose holds a full beat after the line ends."
+    return line
+
+
+def drop_superseded_action_prefix(action, environment_contract):
+    """R17: discard an obsolete character-action prefix before a world-first replacement.
+
+    Director shot plans replace stage summaries. When an older action has accidentally
+    been prepended to the explicit world-first marker, retaining both creates a direct
+    contradiction. This is deliberately marker-led rather than character-specific.
+    """
+    text = normalize_prose(action)
+    contract = " ".join(normalize_prose(item) for item in environment_contract or [])
+    if not re.search(r"environment changes completely before (?:either|any) character reacts", contract, re.I):
+        return text
+    marker = re.search(r"\bBefore (?:either|any) character reacts\b", text, re.I)
+    if not marker or not text[:marker.start()].strip():
+        return text
+    return text[marker.start():]
+
+
+def is_instance_lock_equivalent(value, characters):
+    """Return true when authored consistency prose already restates cast uniqueness."""
+    text = normalize_prose(value).casefold()
+    names = [normalize_prose(name).casefold() for name in characters or []
+             if normalize_prose(name)]
+    return (len(names) > 1 and all(name in text for name in names)
+            and "exactly one" in text
+            and any(word in text for word in ("duplicate", "duplicates", "blended")))
 
 
 def validate_dialogue_synthesis(prompt, dialogue_lines):
@@ -210,8 +254,8 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
             errors.append(
                 f"dialogue line {index + 1} must appear exactly once as {marker!r}")
         placement = re.compile(
-            rf"Dialogue placement:\s*{re.escape(speaker)}\s+speaks in English"
-            rf"(?:\s+with\s+[^:]+\s+delivery)?:\s*{re.escape(marker)}"
+            rf"Dialogue placement:\s*{re.escape(speaker)}"
+            rf"(?:,\s*[^:]+)?:\s*{re.escape(marker)}"
         )
         if not placement.search(text):
             errors.append(

@@ -49,6 +49,21 @@ def _shot_map(package: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
     }
 
 
+def _opening_frame_media(shot: dict[str, Any], media: dict[str, Any] | None) -> dict[str, Any]:
+    """Project the visible opening frame used by authored and relay shots."""
+    shots_media = (media or {}).get("shots") or {}
+    own_media = dict(shots_media.get(shot.get("shotId")) or {})
+    if own_media.get("keyframeApproved") or shot.get("sourceType") != "relay":
+        return own_media
+    source_id = shot.get("sourceShotId")
+    relay_anchor = (shots_media.get(source_id) or {}).get("finalFrame")
+    if relay_anchor:
+        own_media["keyframeApproved"] = relay_anchor
+        own_media["keyframe"] = relay_anchor
+        own_media["relayAnchor"] = relay_anchor
+    return own_media
+
+
 def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
                         shot_id: str | None) -> dict[str, Any] | None:
     matches = []
@@ -131,7 +146,23 @@ def _latest_failed_job(jobs: dict[str, Any] | None, scene: str,
         "status": "failed",
         "error": job.get("error") or detail or job.get("step") or "The provider job failed.",
         "ended": job.get("ended"),
+        "operation": " ".join([str(job.get("gate") or ""), *(
+            str(value) for value in (job.get("args") or []))]).lower(),
     }
+
+
+def _failure_matches_phase(failure: dict[str, Any] | None, phase: str) -> bool:
+    """Keep a failure visible only while it still explains the active decision."""
+    if not failure:
+        return False
+    operation = str(failure.get("operation") or "")
+    if "keyframe" in operation:
+        return phase == "keyframe"
+    if "voice" in operation:
+        return phase == "voice"
+    if any(token in operation for token in (" prepare-render", " fire ", " approve ", " reject ")):
+        return phase == "animation"
+    return True
 
 
 def _shot_complete(shot_state: dict[str, Any]) -> bool:
@@ -217,6 +248,37 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
             },
         }
     return None
+
+
+def _prepared_animation_contract(ledger: dict[str, Any]) -> dict[str, Any] | None:
+    """Expose compiled creative direction before WATCH without implying render readiness."""
+    candidate = (((ledger.get("departmentWork") or {}).get("animation") or {})
+                 .get("candidate") or {})
+    output = candidate.get("output") or {}
+    prompt = str(output.get("providerPrompt") or "").strip()
+    if not prompt:
+        return None
+    preflight = candidate.get("preflight") or {}
+    verdict = "PASS" if preflight.get("verdict") == "PASS" else "BLOCK"
+    voice_approved = bool((ledger.get("voiceApproval") or {}).get("approved"))
+    return {
+        "kind": "animation",
+        "authoritative": True,
+        "renderReady": False,
+        "gate": ("Compile current provider request" if voice_approved else
+                 "HEAR approval required before WATCH"),
+        "source": candidate.get("preparedBy") or "current-direction",
+        "prompt": prompt,
+        "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+        "durationSec": output.get("durationSec"),
+        "conformance": {
+            "score": preflight.get("score"),
+            "maximum": 10,
+            "verdict": verdict,
+            "checkerVerdict": preflight.get("verdict") or "BLOCK",
+            "findings": list(preflight.get("findings") or [])[:3],
+        },
+    }
 
 
 def _spend_disclosure(package: dict[str, Any] | None, shot_id: str | None) -> dict[str, Any] | None:
@@ -376,7 +438,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     selected_state = _choose_shot(state, requested_shot_id)
     shot_id = (selected_state or {}).get("shotId")
     shot = package_shots.get(shot_id) or {}
-    shot_media = ((media or {}).get("shots") or {}).get(shot_id) or {}
+    shot_media = _opening_frame_media(shot, media)
     running = _latest_running_job(jobs, scene, shot_id)
     recent_failure = _latest_failed_job(jobs, scene, shot_id)
     stages = state.get("stages") or {}
@@ -616,7 +678,8 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
 
     # A current reviewable result or sealed request supersedes an older failed attempt.
     # Keep failures visible only while they still explain why the selected shot cannot advance.
-    if status in ("ready_to_review", "complete") and (artifact or spend):
+    if (status in ("ready_to_review", "complete") and (artifact or spend)) or not _failure_matches_phase(
+            recent_failure, phase):
         recent_failure = None
 
     all_shots = state.get("shots") or []
@@ -625,18 +688,16 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     for index, item in enumerate(all_shots, start=1):
         item_shot_id = item.get("shotId")
         source = package_shots.get(item.get("shotId")) or {}
+        item_media = _opening_frame_media(source, media)
         shot_summaries.append({
             "id": item_shot_id,
             "shotId": item_shot_id,
             "number": index,
             "durationSec": source.get("durationSec"),
             "purpose": source.get("purpose"),
-            "acceptedUrl": (((media or {}).get("shots") or {}).get(
-                item_shot_id) or {}).get("clip"),
-            "keyframeUrl": (((media or {}).get("shots") or {}).get(
-                item_shot_id) or {}).get("keyframeApproved"),
-            "voiceUrl": (((media or {}).get("shots") or {}).get(
-                item_shot_id) or {}).get("vo"),
+            "acceptedUrl": item_media.get("clip"),
+            "keyframeUrl": item_media.get("keyframeApproved"),
+            "voiceUrl": item_media.get("vo"),
             "state": "complete" if _shot_complete(item) else item.get("badgeState") or "waiting",
             "selected": item_shot_id == shot_id,
         })
@@ -680,6 +741,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "inspector": {
             "providerRequest": _prompt_contract(
                 preflight, shot_id, phase, animation_contract),
+            "preparedAnimationRequest": _prepared_animation_contract(package_ledger),
             "policyVersion": state.get("policyVersion"),
             "packageRevision": state.get("packageRevision"),
             "structuralClaim": (
@@ -783,6 +845,12 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
 
     model = cb_providers.video_model(require_enabled=True)
     cb_render._require_confirmed_billing(model.provider)
+    package, _ = cb_render.load_pkg(scene, episode)
+    shot = cb_render._shot(package, shot_id)
+    if (shot.get("sourceType") != "relay" and
+            not _direction_current(scene, shot_id, "cinematography", episode)):
+        log("DIRECTOR — refreshing current cinematography direction before render sealing")
+        cb_render.prepare_department(scene, "cinematography", shot_id, episode, log)
     if not _direction_current(scene, shot_id, "animation", episode):
         log("DIRECTOR — preparing current animation direction")
         cb_render.prepare_department(scene, "animation", shot_id, episode, log)

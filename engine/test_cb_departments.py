@@ -49,6 +49,38 @@ def test_every_studio_department_loads_a_real_runtime_skill_contract():
         "Post Supervisor"}
 
 
+def test_cinematography_preserves_canonical_cast_order_without_rejecting_reorder(monkeypatch):
+    direction = D.CinematographyDirection(
+        shotId="S1.SH2",
+        audienceRead="The storm interrupts the warm aftermath.",
+        composition="Fuzzby frame-left and Zenny frame-right.",
+        lensAndCameraRelationship="Medium-wide at bee height.",
+        lightingAndDepth="Warm light turns cool while geometry remains stable.",
+        geography=["The corridor runs frame-left to frame-right."],
+        openingFrameLayout={
+            "referenceCharacter": "Fuzzby", "referenceHeightFraction": 0.3,
+            "sameDepth": True,
+            "placements": [
+                {"character": "Zenny", "centerX": 0.7, "centerY": 0.5,
+                 "depthPlane": 0, "facing": "frame-left", "pose": "steady hover"},
+                {"character": "Fuzzby", "centerX": 0.3, "centerY": 0.5,
+                 "depthPlane": 0, "facing": "frame-right", "pose": "wobbling hover"},
+            ],
+        },
+        negativeSpace=["Keep the narrow sky gap visible."],
+        providerPrompt="A complete provider-facing opening-frame direction for the storm turn.",
+    )
+    monkeypatch.setattr(D.cb_llm, "structured", lambda *_args, **_kwargs: direction)
+
+    result = D.prepare_cinematography({
+        "shot": {"charactersInFrame": ["Fuzzby", "Zenny"]},
+    }, [])
+
+    assert result.charactersInFrame == ["Fuzzby", "Zenny"]
+    assert [item.character for item in result.openingFrameLayout.placements] == [
+        "Fuzzby", "Zenny"]
+
+
 def test_voice_director_may_act_but_not_rewrite_locked_words():
     valid = D.VoiceDirection(
         shotId="S1.SH1", sceneIntention="cover the wobble",
@@ -60,12 +92,39 @@ def test_voice_director_may_act_but_not_rewrite_locked_words():
     with pytest.raises(RuntimeError, match="added, dropped or changed words"):
         D.validate_voice_direction(changed, _locked())
 
+    invented = valid.model_copy(deep=True)
+    invented.lines[0].archetypeId = "fuzzby-invented-archetype"
+    with pytest.raises(RuntimeError, match="selected unregistered archetype"):
+        D.validate_voice_direction(invented, _locked())
+
+    missing_take_tag_purpose = valid.model_copy(deep=True)
+    missing_take_tag_purpose.lines[0].takeRecipes.append(
+        D.VoiceTakeRecipe(
+            recipeId="B", label="alternate", performedText="[casual] Nailed it.",
+            takesCount=2))
+    with pytest.raises(RuntimeError, match="omitted dramatic purpose.*casual"):
+        D.validate_voice_direction(missing_take_tag_purpose, _locked())
+
+
+def test_voice_direction_uses_openai_strict_tag_purpose_rows():
+    from openai.lib._pydantic import to_strict_json_schema
+
+    direction = D.VoiceDirection(
+        shotId="S1.SH1", sceneIntention="cover the wobble", lines=[_voice_line()])
+    assert direction.lines[0].tagPurposes[0].tag == "nervous"
+    schema = to_strict_json_schema(D.VoiceDirection)
+    field = schema["$defs"]["VoiceLineDirection"]["properties"]["tagPurposes"]
+    assert field["type"] == "array"
+    assert field["items"]["$ref"] == "#/$defs/VoiceTagPurpose"
+    assert schema["$defs"]["VoiceTagPurpose"]["additionalProperties"] is False
+
 
 def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeypatch):
     seen = {}
 
     def fake(system, user, schema, **kwargs):
         seen["system"] = system
+        seen["user"] = user
         return schema(
             shotId="S1.SH1", sceneIntention="cover the wobble",
             lines=[_voice_line(performedText="[nervous] Nailed it.")])
@@ -74,6 +133,9 @@ def test_prepare_voice_loads_the_skill_and_stops_at_structured_candidate(monkeyp
     out = D.prepare_voice({"shotId": "S1.SH1"}, _locked(), log=lambda *a, **k: None)
     assert out.lines[0].performedText == "[nervous] Nailed it."
     assert "Runtime worker contract — Voice Director" in seen["system"]
+    assert "REGISTERED VOICE ARCHETYPES" in seen["user"]
+    assert "false-triumph-button" in seen["user"]
+    assert "every bracketed audio tag" in seen["user"]
 
 
 def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
@@ -93,8 +155,8 @@ def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
 
     assert compiled.startswith("AUDIO-AUTHORITY: @Audio1 is the sole authority")
     assert "listeners remain silent and closed-mouth" in compiled
-    assert "Fuzzby speaks in English with the approved delivery: {Nailed it.}" in compiled
-    assert "Zenny speaks in English with the approved delivery: {Officially nuts!}" in compiled
+    assert "Dialogue placement: Fuzzby: {Nailed it.}" in compiled
+    assert "Dialogue placement: Zenny: {Officially nuts!}" in compiled
     assert "@Audio1 remains the sole English dialogue and performance authority." in compiled
     assert compiled.index("[Global Supplement]") < compiled.index("[Audio]")
     for term in ("identity", "character count", "prop ownership", "camera axis",
@@ -254,8 +316,21 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
                 "[Audio]\nNo dialogue; preserve the deck creak and room ambience."))
 
     monkeypatch.setattr(D.cb_llm, "structured", fake)
+    story_lock_args = {}
+    real_story_lock = D.animation_story_lock_report
+
+    def capture_story_lock(shot, prompt, stage_plan=None, shot_plan=None):
+        story_lock_args["shotPlan"] = shot_plan
+        return real_story_lock(shot, prompt, stage_plan, shot_plan)
+
+    monkeypatch.setattr(D, "animation_story_lock_report", capture_story_lock)
     out = D.prepare_animation(
-        {"shot": {"shotId": "S1.SH1", "durationSec": 8},
+        {"shot": {"shotId": "S1.SH1", "durationSec": 8,
+                  "storyboardStagePlanApproved": [{
+                      "stageNumber": 1, "beatIds": ["1.B1"],
+                      "primaryEvent": "His planted paw loads the plank and the deck kicks back.",
+                      "observableEndState": "He holds a readable off-balance silhouette.",
+                  }]},
          "referenceSlots": {"@Image1": "opening frame"}},
         ["opening.png"], log=lambda *a, **k: None)
     assert len(out.shotPlan) == 1
@@ -272,6 +347,7 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     assert "Stage 1: 0-8s" not in compiled
     assert "Audio cues:" not in compiled
     assert out.durationSec == 8
+    assert story_lock_args["shotPlan"] == out.shotPlan
     assert out.referenceContract[0].assetTag == "@Image1"
     assert "Runtime worker contract — Seedance Production Director" in seen["system"]
     assert "Emit every scripted line exactly once inside the stage that owns it" in seen["user"]
@@ -520,8 +596,8 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert primary in prompt
     assert provider_action in prompt
     assert handoff in prompt
-    assert "@Image1 is first frame;" in prompt
-    assert "defines opening composition/state" in prompt
+    assert "@Image1 is the first frame" in prompt
+    assert "@Image1 is the first frame. It defines opening composition and state" in prompt
     assert "Fixed slots: @Image1=opening_frame; @Image2=Fuzzby; @Audio1=audio." in prompt
     assert "Angles: @Image2=one Fuzzby; never extra characters." in prompt
     assert "AUDIO-AUTHORITY: @Audio1 is the sole authority" in prompt
@@ -529,7 +605,7 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "[Timestamp Script Storyboard]" not in prompt
     assert "Stage 1: 0-9s" not in prompt
     assert "Hold: 2.2s" in prompt
-    assert "Dialogue placement: Fuzzby speaks in English with the approved delivery: {Nailed it.}" in prompt
+    assert "Dialogue placement: Fuzzby: {Nailed it.}" in prompt
     assert "Audio cues:" not in prompt
     assert "Physics: Fuzzby's sideways momentum depresses the leaf" in prompt
     assert "Include two readable near-misses before the first impact." in prompt
@@ -626,8 +702,9 @@ def test_dialogue_is_emitted_inside_beat_with_delivery_and_full_beat_hold():
         "speaker": "Performer", "exactText": "Nailed it.",
         "delivery": "[confident] Nailed it.", "startSec": 1, "endSec": 2,
     }], duration_sec=4)[0]
-    line = D.emission.dialogue_placement_line(cue)
-    assert "Performer speaks in English with confident delivery: {Nailed it.}" in line
+    line = D.emission.dialogue_placement_line(
+        cue, direction="with contained confidence")
+    assert "Performer, with contained confidence: {Nailed it.}" in line
     assert "pose holds a full beat after the line ends" in line
 
 

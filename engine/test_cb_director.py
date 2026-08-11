@@ -1,8 +1,79 @@
+import pathlib
+
+import cb_providers
 import cb_studio_director
 import cb_render
 
 
 SHOT_ID = "S1.SH1"
+
+
+def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatch):
+    calls = []
+
+    monkeypatch.setattr(
+        cb_providers, "video_model",
+        lambda require_enabled=True: type("Model", (), {"provider": "fal"})())
+    monkeypatch.setattr(
+        cb_render, "_require_confirmed_billing",
+        lambda provider: calls.append(("billing", provider)))
+    monkeypatch.setattr(
+        cb_studio_director, "_direction_current",
+        lambda scene, shot_id, stage, episode: stage == "animation")
+    monkeypatch.setattr(
+        cb_render, "prepare_department",
+        lambda scene, stage, shot_id, episode, log: calls.append(("prepare", stage)))
+
+    def fire(*_args, **_kwargs):
+        calls.append(("fire", _kwargs["candidates"], _kwargs["spend_token"]))
+        raise cb_render.Refused("SPEND NOT APPROVED")
+
+    package = {
+        "shots": [{"shotId": SHOT_ID, "sourceType": "opener"}],
+        "continuityLedger": [{
+            "shotId": SHOT_ID,
+            "pendingSpendAuth": {"token": "sealed"},
+        }],
+    }
+    monkeypatch.setattr(cb_render, "fire_shot", fire)
+    monkeypatch.setattr(
+        cb_render, "load_pkg", lambda scene, episode: (package, pathlib.Path("pkg.json")))
+    monkeypatch.setattr(
+        cb_render, "_ledger",
+        lambda loaded, shot_id: loaded["continuityLedger"][0])
+
+    cb_studio_director.prepare_render("1", SHOT_ID, log=lambda *_: None)
+
+    assert calls == [
+        ("billing", "fal"),
+        ("prepare", "cinematography"),
+        ("fire", 2, None),
+    ]
+
+
+def test_relay_shot_projects_source_harvest_as_its_opening_frame():
+    media = {
+        "shots": {
+            "S1.A": {"finalFrame": "/engine/media/shots/S1.A_final.png"},
+            "S1.B": {"vo": "/engine/media/shots/S1.B_voice.wav"},
+        }
+    }
+    shot = {"shotId": "S1.B", "sourceType": "relay", "sourceShotId": "S1.A"}
+
+    projected = cb_studio_director._opening_frame_media(shot, media)
+
+    assert projected["keyframeApproved"] == "/engine/media/shots/S1.A_final.png"
+    assert projected["keyframe"] == "/engine/media/shots/S1.A_final.png"
+    assert projected["relayAnchor"] == "/engine/media/shots/S1.A_final.png"
+    assert projected["vo"] == "/engine/media/shots/S1.B_voice.wav"
+    assert "keyframeApproved" not in media["shots"]["S1.B"]
+
+
+def test_failure_is_hidden_after_workflow_moves_to_another_phase():
+    failure = {"operation": "director:refire-keyframe:S1.B cb_studio_director.py refire-keyframe"}
+
+    assert cb_studio_director._failure_matches_phase(failure, "keyframe") is True
+    assert cb_studio_director._failure_matches_phase(failure, "voice") is False
 
 
 def _state(**current):
@@ -163,6 +234,39 @@ def test_voice_is_the_next_visible_outcome_after_keyframe_acceptance():
     assert session["primaryAction"]["id"] == "build-voice"
     assert session["artifact"]["url"] == "/engine/media/accepted.png"
     assert session["inspector"]["providerRequest"]["lines"][0]["speaker"] == "Fuzzby"
+
+
+def test_voice_phase_exposes_prepared_watch_prompt_without_unlocking_render():
+    package = _package()
+    package["continuityLedger"][0]["departmentWork"] = {
+        "animation": {"candidate": {
+            "preparedBy": "deterministic compiler",
+            "output": {
+                "durationSec": 15,
+                "providerPrompt": "CURRENT PREPARED WATCH PROMPT WITH ENOUGH CREATIVE DIRECTION",
+            },
+            "preflight": {
+                "score": 9.75,
+                "verdict": "PASS",
+                "findings": [{"rule": "length", "message": "Long but valid."}],
+            },
+        }},
+    }
+    session = _session(
+        state=_state(keyframe=True),
+        package=package,
+        media=_media(keyframeApproved="/engine/media/accepted.png"),
+    )
+
+    assert session["phase"] == "voice"
+    assert session["primaryAction"]["id"] == "build-voice"
+    assert session["inspector"]["providerRequest"]["kind"] == "voice"
+    preview = session["inspector"]["preparedAnimationRequest"]
+    assert preview["prompt"].startswith("CURRENT PREPARED WATCH PROMPT")
+    assert preview["conformance"]["score"] == 9.75
+    assert preview["conformance"]["verdict"] == "PASS"
+    assert preview["renderReady"] is False
+    assert all(action["id"] != "approve-spend" for action in session["decisionActions"])
 
 
 def test_seedance_qualification_blocks_only_the_animation_phase_with_an_outcome():
@@ -644,7 +748,6 @@ def test_reopen_accepted_take_archives_evidence_and_invalidates_post(tmp_path, m
     monkeypatch.setattr(cb_render, "HERE", tmp_path)
     monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
     monkeypatch.setattr(cb_render, "_save", lambda pkg, path: saved.append((pkg, path)))
-
     archive = cb_render.reopen_approved_shot(
         "1", SHOT_ID, "The emotional turn does not read.", episode="Ep1")
 
@@ -658,3 +761,115 @@ def test_reopen_accepted_take_archives_evidence_and_invalidates_post(tmp_path, m
     assert ledger["renderHistory"][-1]["outcome"] == "accepted-take-reopened"
     assert archive.startswith(str(tmp_path / "media" / "archive" / "shots_reopened"))
     assert saved
+
+
+def test_import_approved_take_copies_media_records_provenance_and_harvests(tmp_path, monkeypatch):
+    source = tmp_path / "golden.mp4"
+    source.write_bytes(b"golden-video")
+    package = {
+        "shots": [{"shotId": SHOT_ID}],
+        "continuityLedger": [{
+            "shotId": SHOT_ID,
+            "status": "designed",
+            "approvedTake": None,
+            "renderHistory": [],
+        }],
+    }
+    saved = []
+    monkeypatch.setattr(cb_render, "HERE", tmp_path)
+    monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "media" / "shots")
+    monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_save", lambda pkg, path: saved.append((pkg, path)))
+    monkeypatch.setattr(cb_render, "_animation_generation_signature",
+                        lambda *args, **kwargs: {"graph": "current", "tier": "standard"})
+    monkeypatch.setattr(
+        cb_render.cb_gen, "last_frame",
+        lambda selected, out: pathlib.Path(out).write_bytes(b"harvest"))
+
+    imported = cb_render.import_approved_take(
+        "1", SHOT_ID, source, reviewed_by="Julian", source_label="Flova",
+        provenance={"fixture": "beat_1_chase.txt"})
+
+    ledger = package["continuityLedger"][0]
+    assert pathlib.Path(imported).read_bytes() == b"golden-video"
+    assert pathlib.Path(ledger["harvestFrame"]).read_bytes() == b"harvest"
+    assert ledger["status"] == "approved"
+    assert ledger["approval"]["source"] == "approved-external-import"
+    assert ledger["approval"]["reviewed_by"] == "Julian"
+    assert ledger["approval"]["inputSignature"]["graph"] == "current"
+    assert ledger["renderHistory"][-1]["provenance"]["fixture"] == "beat_1_chase.txt"
+    assert pathlib.Path(imported + ".import.json").is_file()
+    assert saved
+
+
+def test_import_director_accepted_external_take_marks_audio_as_post_lane(tmp_path, monkeypatch):
+    source = tmp_path / "accepted-section.mp4"
+    source.write_bytes(b"accepted-section")
+    package = {
+        "shots": [{"shotId": SHOT_ID}],
+        "continuityLedger": [{"shotId": SHOT_ID, "status": "designed"}],
+    }
+    monkeypatch.setattr(cb_render, "HERE", tmp_path)
+    monkeypatch.setattr(cb_render, "MEDIA", tmp_path / "media" / "shots")
+    monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_save", lambda pkg, path: None)
+    monkeypatch.setattr(cb_render, "_external_import_input_signature",
+                        lambda *args, **kwargs: {"graph": "external-current"})
+    monkeypatch.setattr(
+        cb_render.cb_gen, "last_frame",
+        lambda selected, out: pathlib.Path(out).write_bytes(b"harvest"))
+
+    cb_render.import_approved_take(
+        "1", SHOT_ID, source, reviewed_by="Julian", source_label="Flova section 2",
+        provenance={"accepted": True}, approval_mode="external-director-accepted")
+
+    ledger = package["continuityLedger"][0]
+    assert ledger["approval"]["source"] == "external-director-accepted"
+    assert ledger["approval"]["inputSignature"]["graph"] == "external-current"
+    assert ledger["audioProvenance"]["postLaneStatus"] == "required"
+    assert ledger["audioProvenance"]["dialogueAuthority"] == (
+        "approved-voice-master-required-in-post")
+
+
+def test_review_animation_signature_allows_external_director_accepted_take(tmp_path, monkeypatch):
+    take = tmp_path / "accepted-section.mp4"
+    take.write_bytes(b"accepted-section")
+    package = {
+        "revision": 4,
+        "validation": {"passed": True},
+        "shots": [{"shotId": SHOT_ID, "dialogueLines": [{"speaker": "Fuzzby"}]}],
+        "continuityLedger": [{
+            "shotId": SHOT_ID,
+            "status": "approved",
+            "approvedTake": str(take),
+            "approval": {
+                "source": "external-director-accepted",
+                "inputSignature": {"graph": "external-current"},
+                "contentHash": "accepted-hash",
+            },
+        }],
+    }
+    monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_save", lambda pkg, path: None)
+    monkeypatch.setattr(cb_render, "_require_current_lineage", lambda pkg, scene, episode: None)
+
+    def fail_generation_signature(*_args, **_kwargs):
+        raise AssertionError("external accepted review must not require Seedance generation signature")
+
+    monkeypatch.setattr(cb_render, "_animation_generation_signature", fail_generation_signature)
+
+    work, _ = cb_render._department_container(package, "1", SHOT_ID, "review-animation", "Ep1")
+    work["candidate"] = {
+        "output": {"artifactType": "animation", "verdict": "pass"},
+        "inputSignature": cb_render._department_input_signature(
+            package, "review-animation", SHOT_ID, "1", "Ep1"),
+    }
+
+    cb_render.decide_department(
+        "1", "review-animation", "approved", shot_id=SHOT_ID,
+        episode="Ep1", reviewed_by="Julian")
+
+    approved = package["continuityLedger"][0]["departmentWork"]["review-animation"]["approved"]
+    assert approved["inputSignature"]["externalImportApprovalSignature"] == {
+        "graph": "external-current"}
+    assert approved["inputSignature"]["generationSignature"] is None

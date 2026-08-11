@@ -5217,13 +5217,20 @@ def _engine_rule_report(pkg, shot, direction=None, cinematography=None):
     data = (direction.model_dump() if hasattr(direction, "model_dump") else
             dict(direction or {}))
     timing = cb_engine_rules.beat_cost_report(shot, data)
-    if cinematography is None:
+    relay_opening = shot.get("sourceType") == "relay"
+    if cinematography is None and not relay_opening:
         cinematography = _approved_department_output(
             pkg, shot.get("shotId"), "cinematography") or {}
-    geometry = (cb_engine_rules.geometry_agreement(cinematography, data)
-                if cinematography and data.get("geography") else
-                {"ready": True, "errors": [],
-                 "rulesVersion": cb_engine_rules.RULES_VERSION})
+    geometry = ({
+        "ready": True,
+        "errors": [],
+        "rulesVersion": cb_engine_rules.RULES_VERSION,
+        "basis": "approved-relay-opening-frame",
+    } if relay_opening else (
+        cb_engine_rules.geometry_agreement(cinematography, data)
+        if cinematography and data.get("geography") else
+        {"ready": True, "errors": [],
+         "rulesVersion": cb_engine_rules.RULES_VERSION}))
     craft = cb_engine_rules.action_unit_report(
         shot, data, prompt=data.get("providerPrompt") or "")
     errors = []
@@ -6849,6 +6856,110 @@ def reopen_approved_shot(scene, shot_id, correction, category="other", episode="
     log(f"REOPENED — {shot_id}'s accepted take archived; correction on record: "
         f"{correction} [{category}]")
     return str(arch)
+
+
+def import_approved_take(scene, shot_id, source_path, episode="Ep1",
+                         reviewed_by="Julian", source_label="external",
+                         provenance=None, approval_mode="generation-graph", log=print):
+    """Import a Director-approved finished clip as the current immutable shot take.
+
+    This is deliberately an approval operation, not a generation shortcut. The caller must
+    name the human reviewer, the source clip is copied into managed media, its hash and
+    provenance are recorded, and the literal last frame becomes the relay anchor. Existing
+    accepted takes must be reopened first so their evidence remains in history.
+    """
+    source = pathlib.Path(source_path).expanduser().resolve()
+    if not source.is_file():
+        raise Refused(f"REFUSED — approved import source does not exist: {source}")
+    if source.suffix.lower() not in {".mp4", ".mov", ".m4v", ".webm"}:
+        raise Refused("REFUSED — approved import must be a supported video file")
+    reviewed_by = str(reviewed_by or "").strip()
+    if not reviewed_by:
+        raise Refused("REFUSED — approved import requires the human reviewer's name")
+
+    with cb_db.scene_lease(HERE.parent, episode, str(scene),
+                           f"cb_render.import-approved:{shot_id}"):
+        pkg, path = load_pkg(scene, episode)
+        led = _ledger(pkg, shot_id)
+        if led.get("status") == "approved" or led.get("approvedTake"):
+            raise Refused(
+                f"REFUSED — {shot_id} already has an accepted take; reopen it before import")
+
+        shot = _shot(pkg, shot_id)
+        digest = _sha256_file(source)
+        if approval_mode == "generation-graph":
+            input_signature = _animation_generation_signature(
+                pkg, shot, str(scene), episode, fast=False)
+        elif approval_mode == "external-director-accepted":
+            input_signature = _external_import_input_signature(
+                pkg, shot, str(scene), episode, digest, provenance or {})
+        else:
+            raise Refused(
+                "REFUSED — approval_mode must be generation-graph or "
+                "external-director-accepted")
+
+        stamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+        destination = MEDIA / (
+            f"{episode}_{shot_id}_import_{stamp}_{digest[:10]}{source.suffix.lower()}")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+
+        harvest = MEDIA / f"{episode}_{shot_id}_final_frame.png"
+        cb_gen.last_frame(str(destination), out=str(harvest))
+        imported_at = _now()
+        import_record = {
+            "outcome": "external-take-approved",
+            "shotId": shot_id,
+            "sourceLabel": str(source_label or "external"),
+            "sourcePath": str(source),
+            "managedPath": str(destination.resolve()),
+            "contentHash": digest,
+            "reviewed_by": reviewed_by,
+            "at": imported_at,
+            "provenance": provenance or {},
+        }
+        pathlib.Path(str(destination) + ".import.json").write_text(json.dumps(
+            import_record, indent=1, ensure_ascii=False))
+        led.setdefault("renderHistory", []).append(import_record)
+        led.update({
+            "status": "approved",
+            "approvedTake": str(destination.resolve()),
+            "approvedCandidate": None,
+            "harvestFrame": str(harvest.resolve()),
+            "candidatePaths": None,
+            "batchId": None,
+            "batch": None,
+            "pendingSpendAuth": None,
+            "approval": {
+                "approved": True,
+                "candidate": None,
+                "reviewed_by": reviewed_by,
+                "at": imported_at,
+                "source": ("approved-external-import" if approval_mode == "generation-graph"
+                           else "external-director-accepted"),
+                "contentHash": digest,
+                "harvestHash": _sha256_file(harvest),
+                "inputSignature": input_signature,
+                "packageRevision": pkg.get("revision"),
+                "sourceLabel": str(source_label or "external"),
+                "provenanceDigest": hashlib.sha256(json.dumps(
+                    provenance or {}, sort_keys=True, ensure_ascii=False,
+                    separators=(",", ":")).encode()).hexdigest(),
+            },
+        })
+        if approval_mode == "external-director-accepted":
+            led["audioProvenance"] = {
+                "guideSource": str(destination.resolve()),
+                "guideSourceSha256": digest,
+                "dialogueAuthority": "approved-voice-master-required-in-post",
+                "postLaneStatus": "required",
+                "directorAcceptedPicture": True,
+            }
+        _save(pkg, path)
+
+    log(f"IMPORTED + APPROVED — {shot_id} from {source_label} by {reviewed_by}; "
+        f"final frame harvested -> {harvest.name}")
+    return str(destination.resolve())
 
 
 def metrics(scene, episode="Ep1", log=print):

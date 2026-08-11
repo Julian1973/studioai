@@ -58,6 +58,23 @@ def _tags(text):
     return [tag.strip().casefold() for tag in _TAG_RE.findall(str(text or ""))]
 
 
+def _tag_purpose_map(value):
+    """Normalize typed V3 tag-purpose rows and legacy dictionaries."""
+    if isinstance(value, dict):
+        return {str(key).casefold(): str(purpose).strip()
+                for key, purpose in value.items()}
+    result = {}
+    for item in value or []:
+        if hasattr(item, "model_dump"):
+            item = item.model_dump()
+        if isinstance(item, dict):
+            tag = str(item.get("tag") or "").casefold().strip()
+            purpose = str(item.get("purpose") or "").strip()
+            if tag:
+                result[tag] = purpose
+    return result
+
+
 def _digest(value):
     return hashlib.sha256(json.dumps(
         value, sort_keys=True, ensure_ascii=False, separators=(",", ":")
@@ -135,8 +152,7 @@ def post_direction_audit(line, locked_line, card, register):
                    f"Short line {recipe_id} includes previous_text runway and at least two takes.")
 
     all_tags = sorted({tag for recipe in recipes for tag in _tags(recipe.get("performedText"))})
-    purposes = {str(key).casefold(): str(value).strip()
-                for key, value in (line.get("tagPurposes") or {}).items()}
+    purposes = _tag_purpose_map(line.get("tagPurposes"))
     missing_purposes = [tag for tag in all_tags if not purposes.get(tag)]
     _check(checks, "tag-purposes", not missing_purposes,
            "Every audio tag has a named dramatic purpose." if not missing_purposes else
@@ -205,7 +221,7 @@ def compile_line(line, locked_line, *, cards=None, registers=None):
         "startsAtSec": line["startsAtSec"],
         "estimatedDurationSec": line["estimatedDurationSec"],
         "pauseReasons": deepcopy(line.get("pauseReasons") or []),
-        "tagPurposes": deepcopy(line.get("tagPurposes") or {}),
+        "tagPurposes": _tag_purpose_map(line.get("tagPurposes")),
         "archetype": deepcopy(register),
         "takeRecipes": deepcopy(line["takeRecipes"]),
         "postDirectionAudit": audit,

@@ -1,6 +1,12 @@
 {
   "source": "/Users/julianjenkins/Downloads/DIRECTOR_RECORDS_S1.md",
   "sourceSha256": "a9a59cfdcbb85359132e8468348d0bbd844114979b1b66684a7a266b8186a36c",
+  "promptTargets": {
+    "S1.SH2": {
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/creative/director-records/scene1-v1/S1.SH2_user_prompt_target_20260811.txt",
+      "sha256": "6bfb5485a251a8d2637d531accb09adeb97c687ae97cb5a763cb3c9d1365ea92"
+    }
+  },
   "units": {
     "S1.SH1B": {
       "preflight": {
@@ -10,7 +16,7 @@
           {
             "severity": "POLISH",
             "rule": "length",
-            "message": "Emission is 4,187 characters.",
+            "message": "Emission is 4,432 characters.",
             "fix": "Compact plumbing only; preserve creative direction.",
             "deduction": 0.25
           }
@@ -90,7 +96,7 @@
             "continuityLanding": 2,
             "promptEconomy": 2
           },
-          "wordCount": 603,
+          "wordCount": 638,
           "advisoryOnly": true
         },
         "authoringContract": {
@@ -387,7 +393,8 @@
         "geometry": {
           "ready": true,
           "errors": [],
-          "rulesVersion": "engine-rules-v2"
+          "rulesVersion": "engine-rules-v2",
+          "basis": "approved-relay-opening-frame"
         },
         "craft": {
           "ready": true,
@@ -478,7 +485,7 @@
           }
         ]
       },
-      "wordCount": 603,
+      "wordCount": 638,
       "goldenWordCount": 746
     },
     "S1.SH1C": {
@@ -489,7 +496,7 @@
           {
             "severity": "POLISH",
             "rule": "length",
-            "message": "Emission is 4,509 characters.",
+            "message": "Emission is 4,757 characters.",
             "fix": "Compact plumbing only; preserve creative direction.",
             "deduction": 0.25
           }
@@ -561,7 +568,7 @@
             "continuityLanding": 2,
             "promptEconomy": 2
           },
-          "wordCount": 665,
+          "wordCount": 701,
           "advisoryOnly": true
         },
         "authoringContract": {
@@ -865,7 +872,8 @@
         "geometry": {
           "ready": true,
           "errors": [],
-          "rulesVersion": "engine-rules-v2"
+          "rulesVersion": "engine-rules-v2",
+          "basis": "approved-relay-opening-frame"
         },
         "craft": {
           "ready": true,
@@ -940,7 +948,7 @@
           }
         ]
       },
-      "wordCount": 665,
+      "wordCount": 701,
       "goldenWordCount": 747
     },
     "S1.SH2": {
@@ -951,7 +959,7 @@
           {
             "severity": "POLISH",
             "rule": "length",
-            "message": "Emission is 5,563 characters.",
+            "message": "Emission is 6,268 characters.",
             "fix": "Compact plumbing only; preserve creative direction.",
             "deduction": 0.25
           }
@@ -1019,7 +1027,7 @@
             "continuityLanding": 2,
             "promptEconomy": 2
           },
-          "wordCount": 822,
+          "wordCount": 934,
           "advisoryOnly": true
         },
         "authoringContract": {
@@ -1144,7 +1152,7 @@
               "status": "pass",
               "required": true,
               "authority": "official-guide",
-              "detail": "3 consecutive shot(s) carry the event progression.",
+              "detail": "4 consecutive shot(s) carry the event progression.",
               "nextAction": ""
             },
             {
@@ -1325,14 +1333,15 @@
         "geometry": {
           "ready": true,
           "errors": [],
-          "rulesVersion": "engine-rules-v2"
+          "rulesVersion": "engine-rules-v2",
+          "basis": "approved-relay-opening-frame"
         },
         "craft": {
           "ready": true,
           "errors": [],
           "rulesVersion": "engine-rules-v2",
           "actionUnit": true,
-          "internalShotCount": 3,
+          "internalShotCount": 4,
           "timingBeatCounts": {
             "environment_turn": 1,
             "reaction": 1,
@@ -1349,7 +1358,7 @@
           {
             "severity": "POLISH",
             "rule": "length",
-            "message": "Emission is 5,024 characters.",
+            "message": "Emission is 5,435 characters.",
             "fix": "Compact plumbing only; preserve creative direction.",
             "deduction": 0.25
           }
@@ -1396,8 +1405,8 @@
           }
         ]
       },
-      "wordCount": 822,
-      "goldenWordCount": 798
+      "wordCount": 934,
+      "goldenWordCount": 871
     }
   }
 }

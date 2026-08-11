@@ -51,6 +51,28 @@ def test_geometry_must_agree_between_keyframe_and_render():
     assert rules.geometry_agreement(bad, _direction())["ready"] is False
 
 
+def test_relay_units_use_the_approved_carried_frame_not_a_second_keyframe_contract(
+        monkeypatch):
+    monkeypatch.setattr(
+        rules, "beat_cost_report",
+        lambda *_args, **_kwargs: {"ready": True})
+    monkeypatch.setattr(
+        rules, "action_unit_report",
+        lambda *_args, **_kwargs: {"ready": True, "errors": []})
+    monkeypatch.setattr(
+        rules, "geometry_agreement",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("relay must not compare against a separately authored keyframe")))
+
+    report = render._engine_rule_report(
+        {}, {"shotId": "UNIT", "sourceType": "relay"},
+        {"geography": ["The carried frame is the opening truth."]},
+        cinematography={"geography": ["A stale parallel brief."]})
+
+    assert report["ready"] is True
+    assert report["geometry"]["basis"] == "approved-relay-opening-frame"
+
+
 def test_assets_before_cost_provenance_are_inputs_not_duration_constraints():
     provenance = rules.duration_provenance(_shot(13), _direction(13),
                                            costed_at="2026-08-10T10:00:00+00:00")
@@ -141,10 +163,29 @@ def test_action_grammar_blocks_flat_single_shot_travel_and_repeated_contacts():
 
 
 def test_r15_requires_attributed_delivery_and_post_line_hold():
-    direction = {"shotPlan": [], "creativeTranslation": {"gagClocks": []}}
+    direction = {"shotPlan": [{
+        "shotNumber": 1,
+        "dialogueLineIndexes": [1],
+        "dialogueDirections": ["calm and resolved"],
+        "holdAfterDialogue": True,
+    }], "creativeTranslation": {"gagClocks": []}}
     shot = {"charactersInFrame": ["Actor"], "dialogueLines": [
         {"speaker": "Actor", "exactText": "Done."}]}
     assert not rules.action_unit_report(shot, direction, "Actor says {Done.}")["ready"]
-    prompt = ("Dialogue placement: Actor speaks in English with calm delivery: {Done.}; "
-              "the pose holds a full beat after the line ends.")
+    prompt = ("Shot 1: Dialogue placement: Actor, calm and resolved: {Done.} "
+              "The pose holds a full beat after the line ends.\n[Audio]\nNatural sound.")
+    assert rules.action_unit_report(shot, direction, prompt)["ready"]
+
+
+def test_r15_suppresses_hold_when_immediate_action_is_typed():
+    direction = {"shotPlan": [{
+        "shotNumber": 1,
+        "dialogueLineIndexes": [1],
+        "dialogueDirections": ["at full volume, before the launch"],
+        "holdAfterDialogue": False,
+    }], "creativeTranslation": {"gagClocks": []}}
+    shot = {"charactersInFrame": ["Actor"], "dialogueLines": [
+        {"speaker": "Actor", "exactText": "Go!"}]}
+    prompt = ("Shot 1: Dialogue placement: Actor, at full volume, before the launch: "
+              "{Go!} The actor launches immediately.\n[Audio]\nNatural sound.")
     assert rules.action_unit_report(shot, direction, prompt)["ready"]

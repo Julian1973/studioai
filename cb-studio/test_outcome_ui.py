@@ -6,6 +6,15 @@ APP = (Path(__file__).parent / "app.html").read_text(encoding="utf-8")
 SERVER = (Path(__file__).parent / "serve.py").read_text(encoding="utf-8")
 
 
+def test_server_freezes_stable_prewarmed_graph_before_accepting_browser_requests():
+    prewarm = SERVER.index("_prewarm_director_session_cache()")
+    collect = SERVER.index("gc.collect()", prewarm)
+    freeze = SERVER.index('gc.freeze()', collect)
+    disable = SERVER.index("gc.disable()", freeze)
+    serve = SERVER.index("ThreadingHTTPServer((BIND_HOST, PORT), H)", disable)
+    assert prewarm < collect < freeze < disable < serve
+
+
 def test_primary_dashboard_cards_expose_explicit_actions():
     assert '<article class="projcard"' in APP
     assert '<article class="epcard"' in APP

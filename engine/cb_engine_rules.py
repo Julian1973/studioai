@@ -85,7 +85,8 @@ def action_unit_report(shot, direction, prompt=""):
     counts = {item["type"]: int(item.get("count", 1)) for item in timing}
     all_text = _norm(" ".join(
         str(value or "") for item in internal for value in item.values()))
-    prompt_text = _norm(prompt or data.get("providerPrompt"))
+    raw_prompt = str(prompt or data.get("providerPrompt") or "")
+    prompt_text = _norm(raw_prompt)
     combined = _norm(all_text + " " + prompt_text)
     errors = []
 
@@ -157,13 +158,40 @@ def action_unit_report(shot, direction, prompt=""):
         errors.append("R14 action unit incorrectly prohibits cuts or handheld camera")
 
     dialogue = list(shot.get("dialogueLines") or [])
-    for line in dialogue:
+    dialogue_owners = {}
+    for internal_shot in internal:
+        directions = list(internal_shot.get("dialogueDirections") or [])
+        for position, line_index in enumerate(
+                internal_shot.get("dialogueLineIndexes") or []):
+            dialogue_owners[int(line_index)] = {
+                "shot": int(internal_shot.get("shotNumber") or 0),
+                "direction": directions[position] if position < len(directions) else "",
+                "hold": bool(internal_shot.get("holdAfterDialogue", True)),
+            }
+    prompt_shots = {
+        int(number): body for number, body in re.findall(
+            r"Shot\s+(\d+):\s*(.*?)(?=\nShot\s+\d+:|\nWitness staging:|\n\[|\Z)",
+            raw_prompt, re.I | re.S)
+    }
+    for line_number, line in enumerate(dialogue, start=1):
         exact = _norm(line.get("exactText"))
         speaker = _norm(line.get("speaker"))
-        if exact and not re.search(
-                rf"{re.escape(speaker)} speaks.+\{{{re.escape(exact)}\}}.+"
-                r"pose holds (?:for )?a full beat after the line ends", prompt_text, re.I):
-            errors.append(f"R15 dialogue {speaker}: {exact} is detached from delivery/action hold")
+        owner = dialogue_owners.get(line_number)
+        if not owner:
+            errors.append(f"R15 dialogue {speaker}: {exact} has no typed internal-shot owner")
+            continue
+        body = prompt_shots.get(owner["shot"], "")
+        marker = (rf"Dialogue placement:\s*{re.escape(speaker)},\s*[^:]+:\s*"
+                  rf"\{{{re.escape(exact)}\}}")
+        if not owner["direction"] or not re.search(marker, body, re.I):
+            errors.append(f"R15 dialogue {speaker}: {exact} has no written in-beat direction")
+            continue
+        has_hold = bool(re.search(
+            r"pose holds (?:for )?a full beat after the line ends", body, re.I))
+        if owner["hold"] and not has_hold:
+            errors.append(f"R15 dialogue {speaker}: {exact} is missing its ruled post-line hold")
+        if not owner["hold"] and has_hold:
+            errors.append(f"R15 dialogue {speaker}: {exact} incorrectly delays immediate action")
 
     return {"ready": not errors, "errors": errors, "rulesVersion": RULES_VERSION,
             "actionUnit": action_unit, "internalShotCount": len(internal),

@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / "cb-output" / "Ep1_scene1_production_package.json"
 SOURCE = Path("/Users/julianjenkins/Downloads/DIRECTOR_RECORDS_S1.md")
 OUTPUT_DIR = ROOT / "cb-output" / "creative" / "director-records" / "scene1-v1"
+SH2_PROMPT_TARGET = OUTPUT_DIR / "S1.SH2_user_prompt_target_20260811.txt"
 REPORT = ROOT / "cb-output" / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.json"
 REPORT_MD = ROOT / "cb-output" / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.md"
 FIXTURES = ROOT / "engine" / "grammar" / "golden-fixtures" / "scene1-v1"
@@ -74,21 +75,25 @@ def stage(number, beat_ids, purpose, opening, cause, event, ending, analysis,
     return value
 
 
-def shot(number, purpose, camera, action, performance, finish, dialogue=(), gags=()):
+def shot(number, purpose, camera, action, performance, finish, dialogue=(), gags=(),
+         dialogue_directions=(), hold_after_dialogue=True):
     return {
         "shotNumber": number, "purpose": purpose,
         "framingLensAndCamera": camera, "causalAction": action,
         "observablePerformance": performance,
         "compositionLightAndMaterials": "Feature-quality tactile fur, translucent wings, responsive petals, separated golden pollen and continuous scene light.",
         "landingImage": finish,
-        "dialogueLineIndexes": list(dialogue), "gagBeatIds": list(gags),
+        "dialogueLineIndexes": list(dialogue),
+        "dialogueDirections": list(dialogue_directions),
+        "holdAfterDialogue": hold_after_dialogue,
+        "gagBeatIds": list(gags),
     }
 
 
 def base(shot_id, duration, goal, delivery, creative, dramatic, before, after,
          owner, freedom, arc, physics, camera, rhythm, breath, shot_plan,
          timing_beats, stages, geography, finish, safeguards, ownership=(),
-         environment=()):
+         environment=(), opening_state=""):
     return {
         "shotId": shot_id, "durationSec": duration,
         "taskMode": "reference-to-video",
@@ -112,6 +117,7 @@ def base(shot_id, duration, goal, delivery, creative, dramatic, before, after,
         "attributeOwnership": list(ownership),
         "environmentContract": list(environment),
         "referenceContract": refs(),
+        "openingCarriedState": opening_state,
         "consistencyContract": [
             "Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities.",
             "Fuzzby remains larger and stages frame-left; Zenny remains smaller, clean and stages frame-right.",
@@ -179,12 +185,14 @@ def records(package):
                  "Close-up on Fuzzby withdrawing from the same flower.",
                  "He pulls back wearing two clear upper-lip pollen curls, lifts his chin and presents the moustache as distinguished status.",
                  "He is entirely unaware, proud but with a small hopeful need for approval.",
-                 "Fuzzby holds proudly frame-left; the target flower remains visible behind him.", dialogue=(1,)),
+                 "Fuzzby holds proudly frame-left; the target flower remains visible behind him.",
+                 dialogue=(1,), dialogue_directions=("proudly seeking confirmation",)),
             shot(3, "Let Zenny inspect, suppress and deliver the affectionate verdict.",
                  "Over Fuzzby's moustache in soft foreground to Zenny sharp frame-right; hold on her after the line.",
                  "Zenny's face and fur remain completely clean. Her eyes travel to the moustache and back to Fuzzby; one mouth corner tightens in a micro-tell before she speaks.",
                  "Her body stays economical and the verdict remains warm, never mocking or broad.",
-                 b_end, dialogue=(2,), gags=("1.B2",)),
+                 b_end, dialogue=(2,), gags=("1.B2",),
+                 dialogue_directions=("quiet, dry and affectionate",)),
         ],
         [{"type": "settle", "count": 1, "source": "leftover triumph"},
          {"type": "business", "count": 2, "source": "arrival and presentation"},
@@ -198,6 +206,9 @@ def records(package):
         locked["S1.SH1B"][0]["observableEndState"],
         ["Do not reveal the moustache before the close-up.", "Keep Fuzzby's body outside the flower.", "Do not transfer pollen to Zenny."],
         ["The pollen moustache belongs to Fuzzby only.", "Zenny's face, lip, fur and body stay completely clean; no pollen touches her."],
+        opening_state=(
+            "Fuzzby enters face-clean frame-left, still riding the approved false triumph; "
+            "Zenny remains clean and calm frame-right"),
     )
 
     c_end = "Fuzzby is completely pollen-covered and proud frame-left; Zenny stays clean as her eye-roll softens into a genuine loving smile frame-right. Harvest this exact frame as SH2's opening."
@@ -245,7 +256,9 @@ def records(package):
                  "He fights each spin too late but never reads as hurt or distressed.", "Held wide on Fuzzby upside down in the blossom, body outside and legs kicking."),
             shot(3, "Land the showman claim before revealing Zenny's loving verdict.", "Hold Fuzzby frame-left for the button; only after the line ends cut to Zenny frame-right.",
                  "Fuzzby pops vertically out in one explosive motion. The full showman pose lands and holds before he speaks. After the line has completely finished, cut to Zenny: her eyes travel over him, one slow eye-roll softens as her eyes come down into a genuine loving smile.",
-                 "He replaces panic with total conviction; her reaction moves visibly from resignation into affection.", c_end, dialogue=(1,), gags=("1.B3",)),
+                 "He replaces panic with total conviction; her reaction moves visibly from resignation into affection.", c_end,
+                 dialogue=(1,), gags=("1.B3",),
+                 dialogue_directions=("at full showman confidence",)),
         ],
         [{"type": "reaction", "count": 1, "source": "failed correction"},
          {"type": "business", "count": 1, "source": "wipe"},
@@ -259,6 +272,9 @@ def records(package):
         locked["S1.SH1C"][0]["observableEndState"],
         ["Do not obscure the widening smear before the bolt.", "Keep Fuzzby's body outside the blossom.", "Do not cut to Zenny before the line finishes."],
         ["All pollen marks, smears and dusting belong to Fuzzby only.", "Zenny's face, lip, fur and body stay completely clean throughout; no pollen touches her."],
+        opening_state=(
+            "Fuzzby carries the intact curled pollen moustache frame-left; Zenny remains "
+            "completely clean frame-right"),
     )
 
     sh2_shot = cb_render._shot_creative_contract_view(package, shots["S1.SH2"], 1, "Ep1")
@@ -289,7 +305,7 @@ def records(package):
          ],
          "generationDesign": {"packagingDecision": "single-unit", "completeGagArcCount": 2,
             "densityJudgement": "Fifteen seconds protects a complete world turn, genuine listening beat, quiet line, boast, impact and final hold.",
-            "splitOrNonSplitRationale": "Three motivated shots preserve one tonal turn and its immediate physical consequence.",
+            "splitOrNonSplitRationale": "Four motivated shots preserve the world turn, Zenny's read, Fuzzby's impact and the separate witness hold.",
             "handoffState": shots["S1.SH2"]["visualPayoff"]}},
         "The same corridor becomes warning-space before Fuzzby's denial produces a final soft capture.",
         "The audience is still enjoying the warm pollen aftermath.",
@@ -297,19 +313,27 @@ def records(package):
         "Seedance may shape wind, pollen tremble, wing hitch and Zenny's listening micro-movements, but geometry, world-first ordering, dialogue ownership and final hold cannot change.",
         "Warm aftermath cools into warning; Fuzzby's physical betrayal becomes cover, Zenny becomes genuinely still, and his overcorrection ends in fond resignation.",
         "Thunder trembles pollen; cooling light and wind furl the flowers; Fuzzby's wings hitch before he covers; his straight launch compresses the receiving flower around his head.",
-        "Medium-wide world turn, close Zenny read, then a clean straight-line launch and motionless closing hold.",
+        "Medium-wide world turn, close Zenny read, a side-tracked straight-line launch, then a separate motionless witness hold.",
         "World turns completely first, wings hitch, cover line, real listen, quiet warning and hold, then boast, crash, wind, stillness and fade.",
         "After the final capture, remove all performance movement; hold the changed world and relationship before the slow fade.",
         [
             shot(1, "Let the environment change before either character responds.", "Medium-wide holding both bees and identical corridor geometry.",
-                 locked["S1.SH2"][0]["primaryEvent"] + " Before either character reacts, thunder trembles the suspended pollen; god-rays thin, sky greys, colour cools, and open flowers furl and droop in the wind. Only then Fuzzby's wings hitch twice, his hover drops, and he exhales into a breezy rebrand.",
-                 "His body betrays fear before his cover line; Zenny does not react until the world turn is complete.", "The full corridor is cool and wind-pressed; Fuzzby has covered his dip and Zenny begins to attend upward.", dialogue=(1,), gags=("1.B4",)),
+                 "Before either character reacts, a distant thunder rumble trembles the suspended pollen; god-rays thin, the sky greys, colour cools, a first wind streams pollen sideways, and open flowers furl and droop. Only after the world has visibly turned do Fuzzby's wings hitch twice, his hover tilts and drops; he catches himself and forces his posture upright.",
+                 "His body betrays fear before his cover line; Zenny does not react until the world turn is complete.", "The full corridor is cool and wind-pressed; Fuzzby has covered his dip and Zenny begins to attend upward.",
+                 dialogue=(1,), gags=("1.B4",),
+                 dialogue_directions=("performed calm over covered fear",)),
             shot(2, "Make Zenny's listening turn the weather into story.", "Close on Zenny frame-right with the changed corridor still present behind her.",
                  "Zenny becomes still, quiets her wings and genuinely listens. Her gaze travels upward to the storm sky before she names it without drama.",
-                 "Concern replaces deadpan; almost no gesture makes her certainty carry weight.", "Zenny remains small, still and sky-aware in the cold light; hold after the line ends.", dialogue=(2,)),
-            shot(3, "Contradict the pressure boast and close on the motionless relationship image.", "Return to the two-character axis and hold the complete final tableau before fading.",
-                 locked["S1.SH2"][1]["primaryEvent"] + " Fuzzby launches in a perfectly straight line. Fuzzby’s forward force pushes into the flower mouth; petals compress around him and hold his body, with pollen quivering from the impact instead of exploding into harmless sparkle.",
-                 "His bravado remains full volume until the soft capture; Zenny's concern settles into fond resignation.", d_end, dialogue=(3,), gags=("1.B5",)),
+                 "Concern replaces deadpan; almost no gesture makes her certainty carry weight.", "Zenny remains small, still and sky-aware in the cold light; hold after the line ends.",
+                 dialogue=(2,), dialogue_directions=("quiet and unhurried, without drama",)),
+            shot(3, "Contradict the pressure boast with one clean physical impact.", "Side-track Fuzzby's perfectly straight launch as stems and leaves pass between him and the lens.",
+                 "Fuzzby straightens too fast and launches in a perfectly straight line immediately after his boast. His forward force drives his face into the flower mouth; petals compress around his head and hold while his body, wings and legs remain outside, kicking in the gusting wind.",
+                 "His bravado remains full volume until the soft capture; after impact only his body, legs and wings remain outside the flower.", "Fuzzby's head is held inside the flower frame-left with his body and kicking legs fully outside.",
+                 dialogue=(3,), dialogue_directions=("at full volume, before the launch",),
+                 hold_after_dialogue=False),
+            shot(4, "Let Zenny's stillness carry the final joke and care.", "Cut to the witness tableau: flower and Fuzzby's kicking legs frame-left, Zenny frame-right; hold before fading.",
+                 "Zenny hovers beside the flower containing Fuzzby's head. Nothing else performs; only the wind moves the cold corridor before a slow fade to black.",
+                 "Patient concern settles into fond resignation through one small breath and a slight head tilt; worry remains underneath.", d_end, gags=("1.B5",)),
         ],
         [{"type": "environment_turn", "count": 1, "source": "two-state world turn"},
          {"type": "reaction", "count": 1, "source": "physical betrayal"},
@@ -323,13 +347,21 @@ def records(package):
         ["Do not change corridor geometry during the weather turn.", "Do not let a character react before the flowers and light turn.", "Add no movement after the final tableau before fade."],
         ["All pollen coating and smears belong to Fuzzby only.", "Zenny's face, lip, fur and body stay completely clean; no pollen touches her."],
         ["The location is defined in TWO states with identical geometry: warm golden and cool blue-grey storm-lit.", "Geometry remains identical; only light, sky, colour, atmospheric pressure and flower posture change.", "The environment changes completely before either character reacts.", "Open flowers furl and droop as the wind rises; vegetation posture changes, not only illumination."],
+        opening_state=(
+            "Fuzzby is frame-left, coated in golden pollen with a bold smeared yellow "
+            "moustache and still proud; Zenny is frame-right, completely clean and "
+            "smiling faintly"),
     )
     return {"S1.SH1B": b, "S1.SH1C": c, "S1.SH2": d}
 
 
-def build(apply=False):
+def build(apply=False, shot_filter=None):
     package = json.loads(PACKAGE.read_text())
     source_hash = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
+    source_hashes = {shot_id: source_hash for shot_id in ARCHETYPES}
+    if SH2_PROMPT_TARGET.is_file():
+        source_hashes["S1.SH2"] = hashlib.sha256(
+            SH2_PROMPT_TARGET.read_bytes()).hexdigest()
     built = {}
     for shot_id, raw in records(package).items():
         creative_shot = cb_render._shot_creative_contract_view(
@@ -342,7 +374,16 @@ def build(apply=False):
         built[shot_id] = direction
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    report = {"source": str(SOURCE), "sourceSha256": source_hash, "units": {}}
+    report = {
+        "source": str(SOURCE), "sourceSha256": source_hash,
+        "promptTargets": {
+            "S1.SH2": {
+                "path": str(SH2_PROMPT_TARGET),
+                "sha256": source_hashes["S1.SH2"],
+            }
+        },
+        "units": {},
+    }
     for shot_id, direction in built.items():
         fixture_name, archetype = ARCHETYPES[shot_id]
         prompt = direction.providerPrompt
@@ -405,8 +446,14 @@ def build(apply=False):
         if failures:
             raise RuntimeError(
                 "Refusing to install non-conforming Director records: " + ", ".join(failures))
+        selected = ({shot_filter} if shot_filter else set(built))
+        unknown = selected - set(built)
+        if unknown:
+            raise RuntimeError("Unknown Director record(s): " + ", ".join(sorted(unknown)))
         ledgers = {item["shotId"]: item for item in package["continuityLedger"]}
         for shot_id, direction in built.items():
+            if shot_id not in selected:
+                continue
             shot_value = next(item for item in package["shots"] if item["shotId"] == shot_id)
             shot_value["durationSec"] = direction.durationSec
             ledger = ledgers[shot_id]
@@ -420,8 +467,12 @@ def build(apply=False):
                 "skill": "human-director-record-import-v1", "model": "deterministic",
                 "preparedAt": now, "editedAt": now,
                 "preparedBy": "Julian Director record import",
-                "sourceHash": source_hash, "output": direction.model_dump(),
+                "sourceHash": source_hashes[shot_id], "output": direction.model_dump(),
                 "engineRuleReport": report["units"][shot_id]["engineRuleReport"],
+                "preflight": report["units"][shot_id]["preflight"],
+                "manifest": report["units"][shot_id]["manifest"],
+                "inputSignature": cb_render._department_input_signature(
+                    package, "animation", shot_id, "1", "Ep1"),
             }
         cb_render._save(package, PACKAGE)
     return report
@@ -430,5 +481,7 @@ def build(apply=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--shot", choices=sorted(ARCHETYPES))
     args = parser.parse_args()
-    print(json.dumps(build(apply=args.apply), indent=2, ensure_ascii=False))
+    print(json.dumps(
+        build(apply=args.apply, shot_filter=args.shot), indent=2, ensure_ascii=False))

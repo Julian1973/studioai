@@ -35,7 +35,7 @@ fired by this module.
 
     python3 cb_engine.py <scene> [episode]     # design + validate + compile one scene
 """
-import os, sys, json, re, pathlib
+import os, sys, json, re, pathlib, hashlib, datetime
 from collections import Counter
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
@@ -43,7 +43,12 @@ from pydantic import BaseModel, Field
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import cb_llm
+import cb_lineage
+import cb_scripts
 import paths as P
+
+ROOT = HERE.parent
+SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
 
 
 def canonical_package_path(scene, episode="Ep1"):
@@ -56,6 +61,18 @@ def canonical_package_path(scene, episode="Ep1"):
     never-imports-cb_render/cb_gen invariant. No new module, no new convention: this is
     the SAME path both modules already computed independently before this correction."""
     return HERE.parent / "cb-output" / f"{episode}_scene{scene}_production_package.json"
+
+
+def _storyboard_path(scene, episode="Ep1"):
+    return HERE.parent / "cb-output" / "creative" / f"{episode}_scene{scene}_storyboard.json"
+
+
+def _sha256_file(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _md5_file(path):
+    return hashlib.md5(path.read_bytes()).hexdigest()
 
 
 MAX_SHOT_PROMPT_WORDS = 210   # hard assertion on every compiled shot contract. Raised 170->210 on
@@ -364,6 +381,29 @@ def _clear_opener_continuity_in(design):
         design.shots[0].continuityIn = None
 
 
+def _hydrate_locked_dialogue_payload(design, beats):
+    """Restore protected script payload by occurrence ID after provider design/repair.
+
+    The director may place a locked dialogue occurrence into a shot, but the immutable
+    occurrence ID, source event, speaker and exact text travel as one unit. If the
+    occurrence ID is present, the remaining protected fields are deterministic source
+    data, not creative authoring.
+    """
+    locked = {
+        item.get("dialogueOccurrenceId"): item
+        for item in _expected_lines(beats)
+        if item.get("dialogueOccurrenceId")
+    }
+    for shot in getattr(design, "shots", []) or []:
+        for line in getattr(shot, "dialogueLines", []) or []:
+            source = locked.get(line.dialogueOccurrenceId)
+            if not source:
+                continue
+            line.sourceEventId = source.get("sourceEventId")
+            line.speaker = source.get("speaker")
+            line.exactText = source.get("exactText")
+
+
 def design_scene(episode, scene_num, log=print):
     d, pkg_path = _load_pkg(episode)
     beats = _scene_beats(d, scene_num)
@@ -380,6 +420,7 @@ def design_scene(episode, scene_num, log=print):
     result = cb_llm.structured(_design_mind(), user, SceneShotList,
                                 label=f"engine_design_s{scene_num}")
     _clear_opener_continuity_in(result)
+    _hydrate_locked_dialogue_payload(result, beats)
 
     # the deterministic validator, then at most ONE repair pass (same discipline as Gate 1's
     # beat_problems loop): errors go back to the same mind, verbatim, fix-only
@@ -393,6 +434,7 @@ def design_scene(episode, scene_num, log=print):
         result = cb_llm.structured(_design_mind(), repair_user, SceneShotList,
                                     label=f"engine_design_s{scene_num}_repair")
         _clear_opener_continuity_in(result)
+        _hydrate_locked_dialogue_payload(result, beats)
         report = validate_scene_design(result, beats, characters_cfg)
     # THE OBSERVABLE-DIRECTION TRANSLATOR (Julian's directive, 2026-07-16): abstract direction is
     # never the user's problem to fix by hand — the Episode Director repairs it automatically,
@@ -1319,9 +1361,69 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
         shots_out.append(rec)
         total_sec += sh.durationSec
 
+    source_script = SCRIPT_STORE.current(episode, required=True)
+    storyboard_path = _storyboard_path(scene_num, episode)
+    storyboard_path.parent.mkdir(parents=True, exist_ok=True)
+    if not storyboard_path.exists():
+        storyboard = {
+            "episodeId": episode,
+            "sceneNumber": str(scene_num),
+            "engineVersion": "cb_engine.py production-package storyboard snapshot",
+            "builtAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "sourceScript": source_script,
+            "sourceBeatPackage": str(pkg_path.name),
+            "approvalState": "generated-pending-human-review",
+            "humanNote": "",
+            "scene": scene,
+            "beats": beats,
+            "shots": [
+                {
+                    "shotId": s["shotId"],
+                    "sourceType": s["sourceType"],
+                    "sourceShotId": s.get("sourceShotId"),
+                    "durationSec": s["durationSec"],
+                    "purpose": s["purpose"],
+                    "performanceAssignment": s["performanceAssignment"],
+                    "camera": s["camera"],
+                    "openingPose": s["openingPose"],
+                    "visualPayoff": s["visualPayoff"],
+                    "dialogueLines": s.get("dialogueLines") or [],
+                }
+                for s in shots_out
+            ],
+        }
+        storyboard["inputSignature"] = cb_lineage.dependency_signature(
+            "scene-storyboard-snapshot",
+            {
+                "scriptVersionId": source_script["scriptVersionId"],
+                "sceneNumber": str(scene_num),
+                "sourceBeatPackage": str(pkg_path.name),
+                "shotIds": [s["shotId"] for s in shots_out],
+            },
+        )
+        storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False))
+    source_storyboard = {
+        "path": str(storyboard_path),
+        "md5": _md5_file(storyboard_path),
+        "sha256": _sha256_file(storyboard_path),
+        "approvalState": (json.load(open(storyboard_path)).get("approvalState")
+                          if storyboard_path.exists() else None),
+    }
+    production_inputs = {
+        "scriptVersionId": source_script["scriptVersionId"],
+        "beatPackageDigest": (d.get("contentSignature") or {}).get("digest"),
+        "storyboardSha256": source_storyboard["sha256"],
+        "creativeCardHashes": {},
+        "canonProfileDigest": None,
+    }
     pkg = {
         "episode": episode, "sceneNumber": str(scene_num), "sceneName": scene.get("name", ""),
         "doctrine": "THE_DEFINITIVE_PIPELINE.md (2026-07-16, hybrid contract)",
+        "revision": 1,
+        "sourceScript": source_script,
+        "sourceStoryboard": source_storyboard,
+        "inputSignature": cb_lineage.dependency_signature(
+            "production-package", production_inputs),
         "directorStatement": design.statement.model_dump(),
         "beatCodes": [b.get("beatCode") for b in beats],
         "shots": shots_out,

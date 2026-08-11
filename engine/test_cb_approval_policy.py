@@ -120,7 +120,7 @@ def _prepare_department(package, shot_id, stage):
 
 def test_current_prepared_direction_is_operational_without_fake_human_approval(
         tmp_path, monkeypatch):
-    package, shot, _ = _pkg(tmp_path)
+    package, shot, opening_frame = _pkg(tmp_path)
     monkeypatch.setattr(render, "_keyframe_input_signature",
                         lambda *args, **kwargs: {"cardHash": "card-v1"})
     candidate = _prepare_department(package, shot["shotId"], "cinematography")
@@ -136,6 +136,22 @@ def test_current_prepared_direction_is_operational_without_fake_human_approval(
     shot["durationSec"] = 6
     assert not render._department_record_status(
         package, shot["shotId"], "cinematography")["current"]
+
+
+def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
+    package, shot, _ = _pkg(tmp_path)
+    candidate = _prepare_department(package, shot["shotId"], "voice")
+    candidate["output"] = {
+        "shotId": shot["shotId"],
+        "sceneIntention": "invalid provider draft",
+        "lines": [{"archetypeId": "invented-voice-archetype"}],
+    }
+
+    status = render._department_record_status(
+        package, shot["shotId"], "voice", "1", "Ep1")
+
+    assert status["current"] is False
+    assert status["reason"].startswith("voice-contract-invalid:")
 
 
 def test_review_evidence_still_requires_a_human_decision(tmp_path):
@@ -337,6 +353,37 @@ def test_animation_approval_carries_forward_and_tracks_its_own_graph(
     assert render._animation_approval_status(package, shot)["current"]
 
     take.write_bytes(b"take-tampered")
+    assert not render._animation_approval_status(package, shot)["current"]
+
+
+def test_external_director_accepted_animation_tracks_contract_anchor_and_content(
+        tmp_path, monkeypatch):
+    package, shot, opening_frame = _pkg(tmp_path)
+    take = tmp_path / "external.mp4"
+    harvest = tmp_path / "external-final.png"
+    take.write_bytes(b"external-take")
+    harvest.write_bytes(b"external-final")
+    ledger = render._ledger(package, shot["shotId"])
+    monkeypatch.setattr(render, "_anchor_for", lambda *args: str(opening_frame))
+    input_signature = render._external_import_input_signature(
+        package, shot, "1", "Ep1", render._sha256_file(take),
+        {"digest": "fixture"})
+    ledger.update({
+        "status": "approved",
+        "approvedTake": str(take),
+        "harvestFrame": str(harvest),
+        "approval": {
+            "approved": True,
+            "source": "external-director-accepted",
+            "inputSignature": input_signature,
+            "contentHash": render._sha256_file(take),
+            "harvestHash": render._sha256_file(harvest),
+            "provenanceDigest": "fixture",
+        },
+    })
+
+    assert render._animation_approval_status(package, shot)["current"]
+    harvest.write_bytes(b"changed")
     assert not render._animation_approval_status(package, shot)["current"]
 
 

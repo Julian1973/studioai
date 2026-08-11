@@ -162,7 +162,7 @@ def manifest_checks(archetype: str, prompt: str) -> dict:
         check("harvestable end state", r"End state:.*?harvest")
     elif archetype == "escalation-into-verdict":
         check("attribute ownership", r"ATTRIBUTE OWNERSHIP")
-        check("opening from previous end", r"opening frame.*?final frame of the previous")
+        check("opening from previous end", r"(?:opening|first) frame.*?final frame of the previous")
         check("correction worsens feature", r"wipe.*?(?:wider|worse|messier)")
         check("self evidence before panic", r"looks? .*?(?:paw|body).*?(?:panic|expression drops)")
         check(
@@ -179,7 +179,7 @@ def manifest_checks(archetype: str, prompt: str) -> dict:
         check("physical betrayal before cover line", r"wings? hitch.*?(?:exhales?|rebrands?).*?\{")
         check("reader stills and listens", r"Zenny.*?(?:stills?|quiet).*?listen")
         check("hold after quiet line", r"Hold .*?after the line ends")
-        check("final still hold and fade", r"no further movement.*?(?:fade|Slow fade)")
+        check("final still hold and fade", r"(?:no further movement|nothing else acts).*?(?:fade|Slow fade)")
     passed = sum(1 for _, ok in checks if ok)
     return {
         "archetype": archetype,

@@ -224,6 +224,12 @@ def install(m):
             )
             if not paths and ledger.get("approvedTake"):
                 paths = [ledger["approvedTake"]]
+            approval = ledger.get("approval") or {}
+            if approval.get("source") == "external-director-accepted":
+                return {**common, "mediaHashes": [file_sha256(path) for path in paths],
+                        "externalImportApprovalSignature": approval.get("inputSignature"),
+                        "externalImportContentHash": approval.get("contentHash"),
+                        "generationSignature": None}
             return {**common, "mediaHashes": [file_sha256(path) for path in paths],
                     "generationSignature": animation_generation_signature(
                         pkg, shot, scene, episode)}
@@ -262,6 +268,17 @@ def install(m):
              if record.get("inputSignature") == expected),
             (None, None),
         )
+        contract_error = None
+        if current_record and stage == "voice":
+            try:
+                shot = m._shot(pkg, shot_id)
+                direction = m.cb_departments.VoiceDirection.model_validate(
+                    current_record.get("output") or {})
+                m.cb_departments.validate_voice_direction(
+                    direction, shot.get("dialogueLines") or [])
+            except (KeyError, TypeError, ValueError, RuntimeError) as exc:
+                contract_error = str(exc)
+                current_source, current_record = None, None
         record = current_record or (existing[0][1] if existing else {})
         if current_record:
             return {"approved": bool(work.get("approved")),
@@ -271,7 +288,9 @@ def install(m):
         return {"approved": bool(work.get("approved")),
                 "prepared": bool(work.get("candidate")),
                 "current": False,
-                "reason": ("direct-input-signature-mismatch" if existing else
+                "reason": ((f"voice-contract-invalid: {contract_error}")
+                           if contract_error else
+                           "direct-input-signature-mismatch" if existing else
                            "not-prepared" if stage in direction_stages else "not-approved"),
                 "record": record, "source": None,
                 "expectedInputSignature": expected}
@@ -409,12 +428,24 @@ def install(m):
         if existing and stage in direction_stages:
             expected = department_input_signature(
                 pkg, stage, shot_id, scene, episode)
+            invalidation_reason = None
             if existing.get("inputSignature") != expected:
+                invalidation_reason = "direct inputs changed before replacement preparation"
+            elif stage == "voice":
+                try:
+                    shot = m._shot(pkg, shot_id)
+                    direction = m.cb_departments.VoiceDirection.model_validate(
+                        existing.get("output") or {})
+                    m.cb_departments.validate_voice_direction(
+                        direction, shot.get("dialogueLines") or [])
+                except (KeyError, TypeError, ValueError, RuntimeError) as exc:
+                    invalidation_reason = f"voice contract failed: {exc}"
+            if invalidation_reason:
                 work.setdefault("history", []).append({
                     **existing,
                     "outcome": "invalidated",
                     "invalidatedAt": m._now(),
-                    "invalidationReason": "direct inputs changed before replacement preparation",
+                    "invalidationReason": invalidation_reason,
                 })
                 work["candidate"] = None
                 save_extra(); m._save(pkg, path)
@@ -685,6 +716,26 @@ def install(m):
         ledger = m._ledger(pkg, shot["shotId"])
         approval = ledger.get("approval") or {}
         recorded = approval.get("inputSignature")
+        if approval.get("source") == "external-director-accepted":
+            try:
+                expected = external_import_input_signature(
+                    pkg, shot, scene, episode, approval.get("contentHash"),
+                    {"digest": approval.get("provenanceDigest")})
+            except (m.Refused, OSError, ValueError) as exc:
+                return {"approved": bool(approval.get("approved")), "current": False,
+                        "reason": str(exc), "record": approval,
+                        "expectedInputSignature": None}
+            take = ledger.get("approvedTake")
+            harvest = ledger.get("harvestFrame")
+            current = bool(
+                ledger.get("status") == "approved" and approval.get("approved") and
+                take and harvest and os.path.exists(take) and os.path.exists(harvest) and
+                recorded == expected and approval.get("contentHash") == file_sha256(take) and
+                approval.get("harvestHash") == file_sha256(harvest))
+            return {"approved": bool(approval.get("approved")), "current": current,
+                    "reason": None if current else
+                    "external-animation-approval-input-or-content-mismatch",
+                    "record": approval, "expectedInputSignature": expected}
         fast = bool((recorded or {}).get("tier") == "fast")
         comparison_model_id = (recorded or {}).get("comparisonModelId")
         comparison_run_id = (recorded or {}).get("comparisonRunId")
@@ -707,6 +758,25 @@ def install(m):
         return {"approved": bool(approval.get("approved")), "current": current,
                 "reason": None if current else "animation-approval-input-or-content-mismatch",
                 "record": approval, "expectedInputSignature": expected}
+
+    def external_import_input_signature(pkg, shot, scene, episode, source_hash, provenance):
+        """Current graph for a human-accepted finished clip imported from another surface.
+
+        It deliberately binds picture approval to canon, shot contract and relay anchor,
+        without claiming the clip was generated by this provider request or voice bundle.
+        Dialogue remains a required post lane recorded by import_approved_take.
+        """
+        provenance_digest = ((provenance or {}).get("digest") if isinstance(provenance, dict)
+                             and set(provenance) == {"digest"} else
+                             json_sha256(provenance or {}))
+        return {
+            "policyVersion": "external-director-accepted-v1",
+            "canonProfileDigest": require_canon(pkg, episode, "animation"),
+            "shotContractHash": json_sha256(shot),
+            "openingFrameHash": file_sha256(m._anchor_for(pkg, shot)),
+            "sourceContentHash": source_hash,
+            "provenanceDigest": provenance_digest,
+        }
 
     def voice_shot(pkg, path, shot_id, episode="Ep1", log=print):
         m._require_valid(pkg)
@@ -1314,6 +1384,7 @@ def install(m):
     m._animation_input_signature = animation_input_signature
     m._animation_generation_signature = animation_generation_signature
     m._animation_approval_status = animation_approval_status
+    m._external_import_input_signature = external_import_input_signature
     m.voice_shot = voice_shot
     m.approve_voice = approve_voice
     m.reject_voice = reject_voice

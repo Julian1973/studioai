@@ -3,7 +3,7 @@ AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, deli
 [Multimodal Reference Layer]
 Fixed slots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=location; @Audio1=audio. Never swap roles.
 Angles: @图2=one Zenny; @图3=one Fuzzby; never extra characters.
-@图1 is the opening frame — the final frame of the previous shot; defines opening composition/state; exclude repeated action and redesign.
+@图1 is the first frame — the final frame of the previous shot. Begin naturally from it: Fuzzby enters face-clean frame-left, still riding the approved false triumph; Zenny remains clean and calm frame-right. Match its staging and positions exactly. Do not repeat the previous shot's action. It defines only opening composition and carried state; exclude redesign and later action.
 @图2 defines Zenny identity/scale; exclude everything else.
 @图3 defines Fuzzby identity/scale; exclude everything else.
 @图4 defines scene/layout/light; exclude characters/action.
@@ -21,12 +21,12 @@ Geography: The same bee-height flower corridor continues without a geography res
 
 [Shot Sequence]
 Shot 1: Camera: Bee-height two-shot; cut before Fuzzby withdraws and before the result is visible. Action: Face clean, Fuzzby launches too hard, overshoots, swings back and arrives faster than he can stop. His face jolts into the bloom; stamens press his upper lip while body, legs and wings stay outside. Performance: Leftover triumph drives an arrival with no stopping distance; Zenny stays clean and outside his route. End state: Cut before he withdraws; the pollen result remains hidden.
-Shot 2: Camera: Close-up on Fuzzby withdrawing from the same flower. Action: He pulls back wearing two clear upper-lip pollen curls, lifts his chin and presents the moustache as distinguished status. Performance: He is entirely unaware, proud but with a small hopeful need for approval. End state: Fuzzby holds proudly frame-left; the target flower remains visible behind him. Dialogue placement: Fuzzby speaks in English with the approved delivery: {Do I look official?}; the pose holds a full beat after the line ends.
-Shot 3: Camera: Over Fuzzby's moustache in soft foreground to Zenny sharp frame-right; hold on her after the line. Action: Zenny's face and fur remain completely clean. Her eyes travel to the moustache and back to Fuzzby; one mouth corner tightens in a micro-tell before she speaks. Performance: Her body stays economical and the verdict remains warm, never mocking or broad. End state: Fuzzby proudly moustachioed frame-left, Zenny clean-faced and quietly smiling frame-right, golden pollen drifting between them. Harvest this exact frame as SH1C's opening. Dialogue placement: Zenny speaks in English with quietly delivery: {Yes Fuzzby Officially nuts!}; the pose holds a full beat after the line ends. Hold: 2.0s — Hold on Zenny's face for a full beat after she finishes.
+Shot 2: Camera: Close-up on Fuzzby withdrawing from the same flower. Action: He pulls back wearing two clear upper-lip pollen curls, lifts his chin and presents the moustache as distinguished status. Performance: He is entirely unaware, proud but with a small hopeful need for approval. End state: Fuzzby holds proudly frame-left; the target flower remains visible behind him. Dialogue placement: Fuzzby, proudly seeking confirmation: {Do I look official?} The pose holds a full beat after the line ends.
+Shot 3: Camera: Over Fuzzby's moustache in soft foreground to Zenny sharp frame-right; hold on her after the line. Action: Zenny's face and fur remain completely clean. Her eyes travel to the moustache and back to Fuzzby; one mouth corner tightens in a micro-tell before she speaks. Performance: Her body stays economical and the verdict remains warm, never mocking or broad. End state: Fuzzby proudly moustachioed frame-left, Zenny clean-faced and quietly smiling frame-right, golden pollen drifting between them. Harvest this exact frame as SH1C's opening. Dialogue placement: Zenny, quiet, dry and affectionate: {Yes Fuzzby Officially nuts!} The pose holds a full beat after the line ends. Hold: 2.0s — Hold on Zenny's face for a full beat after she finishes.
 Witness staging: Fuzzby stages frame-left; Zenny holds frame-right as the witness. Hold on the non-acting witness; their stillness and the hold length carry the joke.
 
 [Global Supplement]
-Exactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain Exactly one Fuzzby and one Zenny throughout; no duplicates or blended identities. Safeguard: Do not reveal the moustache before the close-up. Safeguard: Fuzzby's body outside the flower.
+Exactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain Fuzzby remains larger and stages frame-left; Zenny remains smaller, clean and stages frame-right. Safeguard: Do not reveal the moustache before the close-up. Safeguard: Fuzzby's body outside the flower.
 
 [Audio]
-Generated dialogue is guide audio; restore approved @Audio1 in post. No music.
+Generated dialogue is guide audio; restore approved @Audio1 in post. No music. No watermark.

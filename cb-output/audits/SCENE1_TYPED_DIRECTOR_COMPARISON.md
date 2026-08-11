@@ -4,9 +4,9 @@ No provider calls, renders or approvals were made.
 
 | Unit | Duration | Compiled words | Score | Manifest | Golden score | Golden manifest | Contract | Engine |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| S1.SH1B | 14s | 603 | 9.75/10 | 11/11 | 9.0/10 | 11/11 | PASS | PASS |
-| S1.SH1C | 18s | 665 | 9.75/10 | 9/9 | 9.75/10 | 9/9 | PASS | PASS |
-| S1.SH2 | 15s | 822 | 9.75/10 | 8/8 | 9.75/10 | 8/8 | PASS | PASS |
+| S1.SH1B | 14s | 638 | 9.75/10 | 11/11 | 9.0/10 | 11/11 | PASS | PASS |
+| S1.SH1C | 18s | 701 | 9.75/10 | 9/9 | 9.75/10 | 9/9 | PASS | PASS |
+| S1.SH2 | 15s | 934 | 9.75/10 | 8/8 | 9.75/10 | 8/8 | PASS | PASS |
 
 ## Provenance
 

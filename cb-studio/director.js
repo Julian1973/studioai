@@ -465,6 +465,16 @@
     if (view === "pipeline") renderPipeline();
   }
 
+  function openShot(scene, shotId) {
+    if (scene != null) app.scene = String(scene);
+    app.shotId = shotId ? String(shotId) : null;
+    app.view = "director";
+    resetShotScopedState();
+    writeHash();
+    setView("director");
+    loadSession();
+  }
+
   function toast(message, isError) {
     const node = $("#toast");
     clearTimeout(app.toastTimer);
@@ -527,10 +537,7 @@
         Shot ${shot.number}${shot.durationSec ? ` · ${Number(shot.durationSec)}s` : ""}
       </button>`).join("");
     host.querySelectorAll("[data-shot]").forEach((button) => button.addEventListener("click", () => {
-      app.shotId = button.dataset.shot;
-      resetShotScopedState();
-      writeHash();
-      loadSession();
+      openShot(session.scene || app.scene, button.dataset.shot);
     }));
   }
 
@@ -550,11 +557,7 @@
     host.querySelectorAll("[data-director-scene]").forEach((button) => button.addEventListener("click", () => {
       const scene = button.dataset.directorScene;
       if (scene === String(app.scene)) return;
-      app.scene = scene;
-      app.shotId = null;
-      resetShotScopedState();
-      writeHash();
-      loadSession();
+      openShot(scene, null);
     }));
     host.querySelector("[data-next-decision]")?.addEventListener("click", openNextDecision);
   }
@@ -706,18 +709,22 @@
 
   function renderProgress(session) {
     const job = session.runningJob || {};
-    const activityLabel = job.activityLabel || (session.phase === "animation" ? "Render in progress" : "Build in progress");
+    const isAnimation = session.phase === "animation";
+    const isVoice = session.phase === "voice";
+    const activityLabel = job.activityLabel || (isAnimation ? "Render in progress" : isVoice ? "Voice generation in progress" : "Build in progress");
     const provider = job.providerModelId || session.providerModel || "Production provider";
     const duration = Number(job.durationSec || session.shot?.durationSec || 0);
     const candidates = Number(job.candidateCount || 0);
     const cost = Number(job.maxBatchCostUsd || 0);
-    const providerLabel = session.phase === "animation" ? provider : "Opening-frame build";
-    const trackLabel = session.phase === "animation" ? "Provider render is active" : "Studio build is active";
-    const fallbackMessage = session.phase === "animation"
+    const providerLabel = isAnimation ? provider : isVoice ? "Voice performance build" : "Opening-frame build";
+    const trackLabel = isAnimation ? "Provider render is active" : isVoice ? "ElevenLabs voice build is active" : "Studio build is active";
+    const fallbackMessage = isAnimation
       ? "The request has been submitted and the provider is processing it."
-      : "The Studio is building this step. No animation render has been submitted.";
+      : isVoice
+        ? "The Studio is creating the dialogue performance. No animation render has been submitted."
+        : "The Studio is building this step. No animation render has been submitted.";
     const details = [
-      session.phase === "animation" && duration ? `${duration}s clip` : "",
+      isAnimation && duration ? `${duration}s clip` : "",
       candidates ? `${candidates} candidate${candidates === 1 ? "" : "s"}` : "",
       cost ? `up to $${cost.toFixed(2)}` : "",
     ].filter(Boolean);
@@ -1014,9 +1021,15 @@
   }
 
   function requestPromptText(session) {
-    const request = session.inspector?.providerRequest;
+    const request = visiblePromptRequest(session);
     if (!request) return "The Seedance prompt has not been compiled yet. Compile it to review the exact request, references and cost. No video is generated until you separately approve spend.";
     return request.prompt || (request.lines || []).map((line) => `${line.speaker}: ${line.performedText}`).join("\n") || "No provider text is required for this step.";
+  }
+
+  function visiblePromptRequest(session) {
+    // Show newly compiled direction before the provider request attached to older clips.
+    // Render eligibility still reads providerRequest directly, so this cannot authorize spend.
+    return session.inspector?.preparedAnimationRequest || session.inspector?.providerRequest || null;
   }
 
   async function copyVisiblePrompt(button) {
@@ -1128,7 +1141,8 @@
     </article>`;
     };
     const prompt = requestPromptText(session);
-    const providerRequest = session.inspector?.providerRequest || null;
+    const providerRequest = visiblePromptRequest(session);
+    const showingPreparedAnimation = Boolean(session.inspector?.preparedAnimationRequest);
     const phaseName = session.phase === "voice"
       ? "Voice performance"
       : stage === "animation" ? "Animation" : "Keyframe";
@@ -1165,7 +1179,8 @@
     </div>
     ${otherRefs.length ? `<section><div class="shot-input-section-head"><span>Other Locked References</span><strong>${otherRefs.length}</strong></div><div class="shot-input-ref-grid compact">${otherRefs.map(renderRef).join("")}</div></section>` : ""}
     <section class="shot-prompt-panel" data-prompt-copy-panel>
-      <div class="shot-input-section-head"><span>Exact Prompt</span><div class="prompt-copy-actions"><strong>${session.inspector?.providerRequest ? "Prepared" : "Pending"}</strong><span class="prompt-copy-status" data-copy-prompt-status aria-live="polite"></span><button type="button" class="prompt-copy-button" data-copy-prompt aria-label="Copy prompt" title="Copy prompt"><span aria-hidden="true"></span></button></div></div>
+      <div class="shot-input-section-head"><span>Exact Prompt</span><div class="prompt-copy-actions"><strong>${providerRequest ? "Prepared" : "Pending"}</strong><span class="prompt-copy-status" data-copy-prompt-status aria-live="polite"></span><button type="button" class="prompt-copy-button" data-copy-prompt aria-label="Copy prompt" title="Copy prompt"><span aria-hidden="true"></span></button></div></div>
+    ${showingPreparedAnimation ? `<div class="prepared-prompt-notice"><strong>WATCH direction ready</strong><span>${session.phase === "animation" ? "HEAR is approved. Compile the current provider request to inspect its final prompt and cost before rendering." : "Creative direction is ready to inspect. Complete HEAR before render preparation or spend."}</span></div>` : ""}
       ${renderEmissionConformance(providerRequest)}
       <pre>${esc(prompt)}</pre>
     </section>
@@ -1177,7 +1192,7 @@
   }
 
   async function loadInlineShotContext(session) {
-    const key = `${session.episode}:${session.scene}:${session.selectedShotId || ""}`;
+    const key = `${session.episode}:${session.scene}:${session.selectedShotId || ""}:${session.phase || ""}:${session.inspector?.packageRevision || ""}`;
     if (!session.selectedShotId || app.inlineReferencesKey === key || app.inlineReferencesLoading) {
       renderShotInputs(session);
       return;
@@ -1667,6 +1682,9 @@
   function relayMedia(stage, session) {
     const selected = selectedShotSummary(session);
     const artifact = session.artifact || {};
+    if (session.status === "rendering" && stage === relayStage(session)) {
+      return renderProgress(session);
+    }
     if (stage === 1) {
       const url = session.phase === "keyframe" && artifact.type === "image" ? artifact.url : selected.keyframeUrl;
       return url ? `<button type="button" class="relay-keyframe-preview" data-keyframe-preview="${esc(url)}" aria-label="Enlarge keyframe" title="Enlarge keyframe">
@@ -1676,10 +1694,10 @@
     }
     if (stage === 2) {
       const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
-      return url ? `<div class="relay-audio-player">${audioWaveformMarkup("Approved voice performance")}<audio controls preload="metadata" src="${esc(url)}"></audio></div>` : `<div class="relay-empty">Voice is locked until SEE is approved.</div>`;
-    }
-    if (session.status === "rendering") {
-      return renderProgress(session);
+      if (url) return `<div class="relay-audio-player">${audioWaveformMarkup("Approved voice performance")}<audio controls preload="metadata" src="${esc(url)}"></audio></div>`;
+      return `<div class="relay-empty">${relayStage(session) >= 2
+        ? "No voice performance has been created yet."
+        : "Voice is locked until SEE is approved."}</div>`;
     }
     if (artifact.type === "video-set" && (artifact.items || []).length) {
       const items = artifact.items;
@@ -1764,7 +1782,7 @@
       </div>
       ${renderStageComms(session)}
       ${renderRecentFailure(session)}
-      ${renderGenerateStatus(session)}
+      ${session.status === "rendering" ? "" : renderGenerateStatus(session)}
       <section class="relay-grid">${[1, 2, 3].map((item) => relayCard(item, session)).join("")}</section>`;
     host.querySelectorAll("audio,video").forEach((media) => {
       const prior = mediaState.find((item) => item.src === (media.currentSrc || media.src));
@@ -3019,7 +3037,7 @@
     ].filter(Boolean).join("");
     let workflowActions = "";
     if (stepState.kind === "current") {
-      workflowActions = step.id === "audio" ? "" : `${liveActionButtons || '<button type="button" class="primary" data-view-jump="director">Open current scene</button>'}
+      workflowActions = step.id === "audio" ? "" : `${liveActionButtons || '<button type="button" class="primary" data-open-current-shot>Open current shot</button>'}
           <button type="button" class="secondary" data-open-references>References</button>
           <button type="button" class="secondary" data-open-request>Exact request</button>`;
     } else if (stepState.kind === "completed") {
@@ -3068,7 +3086,16 @@
       writeHash();
       renderPipeline();
     }));
-    panel.querySelectorAll("[data-view-jump]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.viewJump)));
+    panel.querySelectorAll("[data-view-jump]").forEach((button) => button.addEventListener("click", () => {
+      if (button.dataset.viewJump === "director") {
+        openShot(app.scene, button.dataset.productionShot || app.shotId || app.session?.selectedShotId || null);
+      } else {
+        setView(button.dataset.viewJump);
+      }
+    }));
+    panel.querySelectorAll("[data-open-current-shot]").forEach((button) => button.addEventListener("click", () => {
+      openShot(app.scene, app.shotId || app.session?.selectedShotId || null);
+    }));
     panel.querySelectorAll("[data-jump-current]").forEach((button) => button.addEventListener("click", () => {
       app.pipelineStep = button.dataset.jumpCurrent;
       writeHash();
@@ -3076,26 +3103,15 @@
     }));
     panel.querySelectorAll("[data-production-scene]").forEach((button) => button.addEventListener("click", () => {
       if (button.dataset.productionScene === app.scene) return;
-      app.scene = button.dataset.productionScene;
-      app.shotId = null;
-      resetShotScopedState();
-      writeHash();
-      loadSession();
+      openShot(button.dataset.productionScene, null);
     }));
     panel.querySelectorAll("[data-pipeline-scene]").forEach((button) => button.addEventListener("click", () => {
       if (button.dataset.pipelineScene === app.scene) return;
-      app.scene = button.dataset.pipelineScene;
-      app.shotId = null;
-      resetShotScopedState();
-      writeHash();
-      loadSession();
+      openShot(button.dataset.pipelineScene, null);
     }));
     panel.querySelectorAll("[data-production-shot]").forEach((button) => button.addEventListener("click", () => {
       if (button.dataset.productionShot === app.shotId) return;
-      app.shotId = button.dataset.productionShot;
-      resetShotScopedState();
-      writeHash();
-      loadSession();
+      openShot(app.scene, button.dataset.productionShot);
     }));
     const candidateButtons = panel.querySelectorAll("[data-pipeline-candidate]");
     if (candidateButtons.length) {

@@ -14,10 +14,11 @@ import pathlib
 import re
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 import cb_llm
 import cb_emission_conformance as emission
+import cb_voice_director
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -202,6 +203,11 @@ class CinematographyDirection(BaseModel):
     providerPrompt: str = Field(min_length=40)
 
 
+class VoiceTagPurpose(BaseModel):
+    tag: str = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+
+
 class VoiceLineDirection(BaseModel):
     dialogueOccurrenceId: str = ""
     sourceEventId: str = ""
@@ -223,8 +229,17 @@ class VoiceLineDirection(BaseModel):
     startsAtSec: float = Field(gt=0)
     estimatedDurationSec: float = Field(gt=0, le=15)
     pauseReasons: List[str] = Field(default_factory=list, max_length=6)
-    tagPurposes: dict[str, str]
+    tagPurposes: List[VoiceTagPurpose] = Field(default_factory=list, max_length=8)
     takeRecipes: List["VoiceTakeRecipe"] = Field(min_length=1, max_length=3)
+
+    @field_validator("tagPurposes", mode="before")
+    @classmethod
+    def accept_legacy_tag_purpose_map(cls, value):
+        """Read existing canon records while emitting a strict provider-safe schema."""
+        if isinstance(value, dict):
+            return [{"tag": tag, "purpose": purpose}
+                    for tag, purpose in value.items()]
+        return value
 
 
 class VoicePerformanceQuestions(BaseModel):
@@ -265,6 +280,13 @@ class InternalShotDirection(BaseModel):
     dialogueLineIndexes: List[int] = Field(
         default_factory=list, max_length=8,
         description="One-based locked-script lines spoken inside this internal shot.")
+    dialogueDirections: List[str] = Field(
+        default_factory=list, max_length=8,
+        description="Written performance direction aligned with dialogueLineIndexes; "
+                    "never raw ElevenLabs tags.")
+    holdAfterDialogue: bool = Field(
+        default=True,
+        description="False when launch, impact or other action follows the line immediately.")
     gagBeatIds: List[str] = Field(
         default_factory=list, max_length=8,
         description="Gag clocks whose explicit hold is owned by this internal shot.")
@@ -456,6 +478,9 @@ class AnimationDirection(BaseModel):
         default_factory=canonical_motion_vocabulary,
         description="Canonical belongs/banned motion verbs injected from versioned data.")
     referenceContract: List[ReferenceDirection] = Field(default_factory=list, max_length=50)
+    openingCarriedState: str = Field(
+        default="",
+        description="Visible state carried by a relay opening frame, stated explicitly.")
     consistencyContract: List[str] = Field(min_length=1, max_length=6)
     audioContract: str = Field(
         min_length=1,
@@ -501,6 +526,12 @@ class AnimationDirection(BaseModel):
         shot_numbers = [shot.shotNumber for shot in self.shotPlan]
         if shot_numbers != list(range(1, len(shot_numbers) + 1)):
             raise ValueError("internal shots must be consecutive and begin at 1")
+        for internal_shot in self.shotPlan:
+            if (internal_shot.dialogueDirections and
+                    len(internal_shot.dialogueDirections) !=
+                    len(internal_shot.dialogueLineIndexes)):
+                raise ValueError(
+                    "dialogueDirections must align one-to-one with dialogueLineIndexes")
         if self.durationSec > 15 and self.pacingMode != "timestamp":
             raise ValueError("production units over 15 seconds require timestamp pacing")
         if self.pacingMode == "timestamp":
@@ -835,11 +866,16 @@ def prepare_cinematography(context, images, *, log=print):
     expected_cast = list(dict.fromkeys(
         str(name).strip() for name in shot.get("charactersInFrame") or []
         if str(name).strip()))
-    placed_cast = [item.character for item in result.openingFrameLayout.placements]
-    if placed_cast != expected_cast:
+    placements = list(result.openingFrameLayout.placements)
+    placed_cast = [item.character for item in placements]
+    if (len(placed_cast) != len(expected_cast) or
+            set(placed_cast) != set(expected_cast)):
         raise RuntimeError(
-            "Cinematography changed or reordered charactersInFrame: "
+            "Cinematography changed charactersInFrame: "
             f"expected {expected_cast}, got {placed_cast}")
+    placement_by_character = {item.character: item for item in placements}
+    result.openingFrameLayout.placements = [
+        placement_by_character[name] for name in expected_cast]
     style_version, style_text = canonical_style_paragraph()
     result.charactersInFrame = expected_cast
     result.canonicalStyleVersion = style_version
@@ -859,6 +895,7 @@ def validate_voice_direction(result, locked_lines):
     got = result.lines
     if len(got) != len(locked_lines):
         raise RuntimeError(f"Voice Director returned {len(got)} line(s); {len(locked_lines)} are locked")
+    registers = (cb_voice_director.archetype_registers().get("registers") or {})
     for idx, (out, locked) in enumerate(zip(got, locked_lines), start=1):
         if locked.get("dialogueOccurrenceId"):
             if out.dialogueOccurrenceId != locked["dialogueOccurrenceId"]:
@@ -873,6 +910,26 @@ def validate_voice_direction(result, locked_lines):
             raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
         if _spoken_words(out.performedText) != _spoken_words(locked["exactText"]):
             raise RuntimeError(f"Voice Director added, dropped or changed words on line {idx}")
+        if out.archetypeId not in registers:
+            raise RuntimeError(
+                f"Voice Director selected unregistered archetype {out.archetypeId!r} "
+                f"on line {idx}; choose one of: {', '.join(sorted(registers))}")
+        purposes = {
+            item.tag.strip().casefold(): item.purpose.strip()
+            for item in out.tagPurposes
+            if item.tag.strip()
+        }
+        recipe_tags = {
+            tag.strip().casefold()
+            for recipe in out.takeRecipes
+            for tag in re.findall(r"\[([^\]]+)\]", recipe.performedText)
+            if tag.strip()
+        }
+        missing_purposes = sorted(tag for tag in recipe_tags if not purposes.get(tag))
+        if missing_purposes:
+            raise RuntimeError(
+                f"Voice Director omitted dramatic purpose(s) for take tag(s) on line {idx}: "
+                f"{', '.join(missing_purposes)}")
     return result
 
 
@@ -987,6 +1044,7 @@ def creative_translation_report(shot, direction, provider_prompt=None):
             "gag clocks added, dropped or reordered approved comedy beats: "
             f"expected {expected_codes}, got {actual_codes}")
 
+    shot_plan_supersedes = bool(data.get("shotPlan"))
     for approved_clock, actual_clock in zip(approved, clocks):
         comparisons = (
             ("mode", "mode"),
@@ -1009,7 +1067,8 @@ def creative_translation_report(shot, direction, provider_prompt=None):
                 compiled_action = re.sub(
                     re.escape(spoken), "the assigned dialogue placement",
                     compiled_action, flags=re.I)
-        if compiled_action and " ".join(compiled_action.split()).casefold() not in prompt:
+        if (not shot_plan_supersedes and compiled_action and
+                " ".join(compiled_action.split()).casefold() not in prompt):
             errors.append(
                 f"{actual_clock.get('beatCode') or '?'} providerAction is absent from providerPrompt")
         hold_sec = actual_clock.get("recoveryHoldSec")
@@ -1025,7 +1084,8 @@ def creative_translation_report(shot, direction, provider_prompt=None):
 
         physical_staging = approved_clock.get("physicalStaging") or {}
         contact_and_weight = str(physical_staging.get("contactAndWeight") or "").strip()
-        if contact_and_weight and " ".join(contact_and_weight.split()).casefold() not in prompt:
+        if (not shot_plan_supersedes and contact_and_weight and
+                " ".join(contact_and_weight.split()).casefold() not in prompt):
             errors.append(
                 f"{actual_clock.get('beatCode') or '?'} approved contact-and-weight staging "
                 "is absent from providerPrompt")
@@ -1049,11 +1109,25 @@ def creative_translation_report(shot, direction, provider_prompt=None):
 
 
 def prepare_voice(context, locked_lines, *, log=print):
+    registers = cb_voice_director.archetype_registers().get("registers") or {}
+    register_contract = {
+        key: {
+            "intent": value.get("intent"),
+            "cadence": value.get("cadence"),
+            "allowedTags": value.get("allowedTags") or [],
+        }
+        for key, value in registers.items()
+    }
     result = cb_llm.structured(
         _system("voice",
                 "Direct the locked words as an ElevenLabs v3 performance reconciled with "
                 "the approved body action. Never add an ad-lib or rewrite a word."),
         "APPROVED SHOT CONTEXT:\n" + _j(context) +
+        "\n\nREGISTERED VOICE ARCHETYPES (archetypeId must be one exact key; "
+        "use only its allowedTags):\n" + _j(register_contract) +
+        "\n\nTAG PURPOSE LAW: every bracketed audio tag used in performedText or in any "
+        "takeRecipes.performedText must have one matching tagPurposes row. The tag value "
+        "must omit brackets and its purpose must explain the dramatic job of that tag.\n" +
         "\n\nLOCKED LINES (same count/order/speaker/words must be returned):\n" + _j(locked_lines),
         VoiceDirection, label="department_voice", log=log)
     return validate_voice_direction(result, locked_lines)
@@ -1091,7 +1165,8 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
             "@Audio1 remains the film dialogue in post.\n\n" + text
         )
         placements = "[Dialogue Placement]\n" + "\n".join(
-            emission.dialogue_placement_line(item) for item in dialogue)
+            emission.dialogue_placement_line(item, hold_after=False)
+            for item in dialogue)
         audio_heading = re.search(r"(?im)^\s*\[Audio\]\s*$", text)
         if audio_heading:
             start = audio_heading.start()
@@ -1239,14 +1314,26 @@ def compile_animation_provider_prompt(shot, direction):
                 exclusion = ""
             if role == "opening_frame":
                 if re.search(r"previous (?:unit|shot)|final frame", controls, re.I):
+                    carried_state = str(data.get("openingCarriedState") or "").strip()
+                    if not carried_state:
+                        first_stage = next(iter(data.get("stagePlan") or []), {})
+                        first_stage = (first_stage.model_dump() if hasattr(first_stage, "model_dump")
+                                       else dict(first_stage))
+                        carried_state = str(
+                            first_stage.get("initialOrCarriedState") or "").strip()
+                    if not carried_state:
+                        raise ValueError(
+                            "relay opening frame requires openingCarriedState (R20)")
                     reference_lines.append(
-                        f"{tag} is the opening frame — the final frame of the previous "
-                        "shot; defines opening composition/state; exclude repeated action "
-                        "and redesign.")
+                        f"{tag} is the first frame — the final frame of the previous shot. "
+                        f"Begin naturally from it: {carried_state.rstrip('.')}"
+                        ". Match its staging and positions exactly. Do not repeat the "
+                        "previous shot's action. It defines only opening composition and "
+                        "carried state; exclude redesign and later action.")
                 else:
                     reference_lines.append(
-                        f"{tag} is first frame; defines opening composition/state; exclude "
-                        "later action/redesign.")
+                        f"{tag} is the first frame. It defines opening composition and "
+                        "state; exclude later action and redesign.")
             elif role == "character_identity":
                 reference_lines.append(
                     f"{tag} defines {role_label} identity/scale; exclude everything else.")
@@ -1328,8 +1415,10 @@ def compile_animation_provider_prompt(shot, direction):
             camera = concise(
                 item.get("framingLensAndCamera"), words=34,
                 context=f"Internal shot {number} camera")
+            authored_action = emission.drop_superseded_action_prefix(
+                item.get("causalAction"), environment_contract)
             action = concise(
-                item.get("causalAction"), words=70,
+                authored_action, words=70,
                 context=f"Internal shot {number} action")
             performance_value = str(item.get("observablePerformance") or "").strip()
             performance = (
@@ -1346,11 +1435,18 @@ def compile_animation_provider_prompt(shot, direction):
                 parts.append(f"Performance: {performance}")
             if landing:
                 parts.append(f"End state: {landing}")
-            for line_index in item.get("dialogueLineIndexes") or []:
+            directions = list(item.get("dialogueDirections") or [])
+            for dialogue_position, line_index in enumerate(
+                    item.get("dialogueLineIndexes") or []):
                 if not 1 <= int(line_index) <= len(audio_cues):
                     raise ValueError(
                         f"Internal shot {number} references invalid dialogue line {line_index}")
-                parts.append(emission.dialogue_placement_line(audio_cues[int(line_index) - 1]))
+                direction_text = (directions[dialogue_position]
+                                  if dialogue_position < len(directions) else "")
+                parts.append(emission.dialogue_placement_line(
+                    audio_cues[int(line_index) - 1],
+                    direction=direction_text,
+                    hold_after=bool(item.get("holdAfterDialogue", True))))
                 emitted_dialogue.append(int(line_index))
             for beat_id in item.get("gagBeatIds") or []:
                 clock = gag_clocks.get(str(beat_id))
@@ -1488,9 +1584,10 @@ def compile_animation_provider_prompt(shot, direction):
                   data.get("surgicalSafeguards") or [] if str(item).strip()]
     finish = str(data.get("continuityFinish") or "").strip().rstrip(".")
     instance_lock = emission.character_instance_lock(shot.get("charactersInFrame") or [])
-    if (instance_lock and consistency and
-            re.search(r"references as identity and scale locks", consistency[0], re.I)):
-        consistency = consistency[1:]
+    if instance_lock:
+        consistency = [item for item in consistency if not
+                       emission.is_instance_lock_equivalent(
+                           item, shot.get("charactersInFrame") or [])]
     supplement = [*(item for item in [instance_lock] if item),
                   *(f"Maintain {item}." for item in consistency[:1]),
                   *(f"Safeguard: {item}." for item in safeguards[:2])]
@@ -1519,6 +1616,8 @@ def compile_animation_provider_prompt(shot, direction):
         audio = audio_contract
         if split_unit and not re.search(r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b", audio, re.I):
             audio = audio.rstrip(" .") + ". No music."
+    if not re.search(r"\bno watermark\b", audio, re.I):
+        audio = audio.rstrip(" .") + ". No watermark."
     sections.append("[Audio]\n" + audio)
     prompt = "\n\n".join(section for section in sections if section.strip())
     prompt_sections(prompt)
@@ -1657,7 +1756,7 @@ def prepare_animation(context, images, *, log=print):
                 "Animation Director added, dropped, merged, reordered or reassigned approved "
                 f"story stages: expected {expected}, got {actual}")
         lock_report = animation_story_lock_report(
-            shot, result.providerPrompt, result.stagePlan)
+            shot, result.providerPrompt, result.stagePlan, result.shotPlan)
         if not lock_report["ready"]:
             raise RuntimeError(
                 "Animation Director weakened or reordered approved visual events: "

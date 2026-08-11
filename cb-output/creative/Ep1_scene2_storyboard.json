@@ -1,0 +1,340 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "2",
+ "engineVersion": "cb_engine.py production-package storyboard snapshot",
+ "builtAt": "2026-08-11T14:24:49.340690+00:00",
+ "sourceScript": {
+  "schemaVersion": 1,
+  "episodeId": "Ep1",
+  "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "sha256": "b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "byteLength": 17826,
+  "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.txt",
+  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.json",
+  "displayFile": "Ep1_The_Adventure_Begins.txt",
+  "title": "The Adventure Begins",
+  "activationId": "c0279c729dae4f8d9effc7502d6bbaa4",
+  "activatedAt": "2026-08-05T09:39:02+00:00",
+  "activatedBy": "Julian explicit no-pollen-bags direction, applied by Codex",
+  "previousScriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19"
+ },
+ "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json",
+ "approvalState": "generated-pending-human-review",
+ "humanNote": "",
+ "scene": {},
+ "beats": [
+  {
+   "sceneNumber": 2,
+   "beatCode": "2.B1",
+   "sourceBeatId": "source-beat:sha256:a9f67052685c0af434a03cfa50846be88655a000566b43ba93b3e34b91e57219",
+   "sourceEventRange": {
+    "firstEventIndex": 17,
+    "lastEventIndex": 17,
+    "firstEventId": "script-event:sha256:dc5fc197ec267878f417421a7de2a0319508f27dfc7cf0835abcda836fecaf61",
+    "lastEventId": "script-event:sha256:dc5fc197ec267878f417421a7de2a0319508f27dfc7cf0835abcda836fecaf61",
+    "eventCount": 1
+   },
+   "sourceEventIds": [
+    "script-event:sha256:dc5fc197ec267878f417421a7de2a0319508f27dfc7cf0835abcda836fecaf61"
+   ],
+   "dialogueOccurrenceIds": [],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:dc5fc197ec267878f417421a7de2a0319508f27dfc7cf0835abcda836fecaf61",
+       "sourceEventIndex": 17,
+       "sourceSceneNumber": 2,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Gentle waves roll onto the shore. AIDA sits in stillness beside a crystal bowl. She runs the wand softly around the rim. A low shimmering tone fills the air. The cove seems to quiet around her. She closes her eyes. Her ROSE QUARTZ PENDANT begins to glow. Soft pink light rises across her face."
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "a9f67052685c0af434a03cfa50846be88655a000566b43ba93b3e34b91e57219"
+   },
+   "location": "CRYSTAL COVE",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Keen"
+   ],
+   "storyBeat": "Aida’s stillness resets the episode’s pace. Her bowl tone quiets the cove and her Rose Quartz glow becomes a listening instrument, not a power display; she is sensing a need before anyone asks for help.",
+   "want": "Aida wants to listen deeply enough to know where she is needed.",
+   "need": "She needs to trust quiet perception rather than control events by force.",
+   "kidRead": "Aida makes a magical bowl sound and pink light starts to glow.",
+   "adultRead": "The elder’s power is patient attention; she prepares to support a goodbye she cannot soften by taking over.",
+   "emotionalIntent": "Move from bee chaos into sacred calm, making stillness feel active and full.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:dc5fc197ec267878f417421a7de2a0319508f27dfc7cf0835abcda836fecaf61",
+     "sourceEventIndex": 17,
+     "sourceSceneNumber": 2,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Gentle waves roll onto the shore. AIDA sits in stillness beside a crystal bowl. She runs the wand softly around the rim. A low shimmering tone fills the air. The cove seems to quiet around her. She closes her eyes. Her ROSE QUARTZ PENDANT begins to glow. Soft pink light rises across her face."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 2,
+   "beatCode": "2.B2",
+   "sourceBeatId": "source-beat:sha256:22aee3df78422d26fbdddabcc058e0a33f3b477a4c12f8987c183d4b814e97f1",
+   "sourceEventRange": {
+    "firstEventIndex": 18,
+    "lastEventIndex": 18,
+    "firstEventId": "script-event:sha256:37bfff219694648feeeaad5a6dc736087d71b8cd219d3ce744d2dd84e3adeeb8",
+    "lastEventId": "script-event:sha256:37bfff219694648feeeaad5a6dc736087d71b8cd219d3ce744d2dd84e3adeeb8",
+    "eventCount": 1
+   },
+   "sourceEventIds": [
+    "script-event:sha256:37bfff219694648feeeaad5a6dc736087d71b8cd219d3ce744d2dd84e3adeeb8"
+   ],
+   "dialogueOccurrenceIds": [],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:37bfff219694648feeeaad5a6dc736087d71b8cd219d3ce744d2dd84e3adeeb8",
+       "sourceEventIndex": 18,
+       "sourceSceneNumber": 2,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "AIDA’S INNER VISION — THROUGH AIDA’S EYES - A wooden pier. A small sailboat waiting on bright blue water. KEEN standing beside his MUM. He checks the straps on his satchel. Then checks them again. Then one more time. His Mum watches him with a proud smile that cannot quite hide her worry."
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "22aee3df78422d26fbdddabcc058e0a33f3b477a4c12f8987c183d4b814e97f1"
+   },
+   "location": "CRYSTAL COVE",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Keen"
+   ],
+   "storyBeat": "Aida’s vision fills the frame with the pier, the waiting boat, Keen checking his supplies too many times, and Mum’s proud smile that cannot hide worry. The future adventure is introduced as a relationship moment before it is a plot departure.",
+   "want": "Aida wants to understand the shape of what is coming for Keen and his Mum.",
+   "need": "She needs to witness without intruding; this is their threshold to cross.",
+   "kidRead": "Aida sees Keen, his Mum and the little boat in a magic vision.",
+   "adultRead": "The repeated checking and glassy parental pride reveal that the real storm begins before the weather does.",
+   "emotionalIntent": "Plant the goodbye as the episode’s heart, with the vision mysterious but emotionally plain.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:37bfff219694648feeeaad5a6dc736087d71b8cd219d3ce744d2dd84e3adeeb8",
+     "sourceEventIndex": 18,
+     "sourceSceneNumber": 2,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "AIDA’S INNER VISION — THROUGH AIDA’S EYES - A wooden pier. A small sailboat waiting on bright blue water. KEEN standing beside his MUM. He checks the straps on his satchel. Then checks them again. Then one more time. His Mum watches him with a proud smile that cannot quite hide her worry."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 2,
+   "beatCode": "2.B3",
+   "sourceBeatId": "source-beat:sha256:810ba72a205eb8d2193d99b0937c9a9308f3f9d23f9a6711eafe2464a0235e69",
+   "sourceEventRange": {
+    "firstEventIndex": 19,
+    "lastEventIndex": 22,
+    "firstEventId": "script-event:sha256:c9f2f9fdfa8c575773550009ba51c41a0749ded41143abae683d9a0510b9b95d",
+    "lastEventId": "script-event:sha256:b8a9f9369f29c1438ea9565b189cf058a875efe2ca86fdcd0627c80e2a66ff86",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:c9f2f9fdfa8c575773550009ba51c41a0749ded41143abae683d9a0510b9b95d",
+    "script-event:sha256:c4b962a2111892e14e58973aad57c79deb3416b7006cf8b2535e069e924f441e",
+    "script-event:sha256:0e19481eea77db15af31d238e24ef27d04dd670b2cc1fbfcdea3bb16ec44744c",
+    "script-event:sha256:b8a9f9369f29c1438ea9565b189cf058a875efe2ca86fdcd0627c80e2a66ff86"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:0f099c22b1f8bc8758c675197ce54526233bb110e5dda29ea93d50f4eb972fe9"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:c9f2f9fdfa8c575773550009ba51c41a0749ded41143abae683d9a0510b9b95d",
+       "sourceEventIndex": 19,
+       "sourceSceneNumber": 2,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "BACK TO AIDA"
+      },
+      {
+       "sourceEventId": "script-event:sha256:c4b962a2111892e14e58973aad57c79deb3416b7006cf8b2535e069e924f441e",
+       "sourceEventIndex": 20,
+       "sourceSceneNumber": 2,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "The pink glow fades gently from her eyes. Aida places a paw over her heart. A soft knowing smile."
+      },
+      {
+       "sourceEventId": "script-event:sha256:0e19481eea77db15af31d238e24ef27d04dd670b2cc1fbfcdea3bb16ec44744c",
+       "sourceEventIndex": 21,
+       "sourceSceneNumber": 2,
+       "sourceType": "dialogue",
+       "speaker": "Aida",
+       "text": "It’s time.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:0f099c22b1f8bc8758c675197ce54526233bb110e5dda29ea93d50f4eb972fe9"
+      },
+      {
+       "sourceEventId": "script-event:sha256:b8a9f9369f29c1438ea9565b189cf058a875efe2ca86fdcd0627c80e2a66ff86",
+       "sourceEventIndex": 22,
+       "sourceSceneNumber": 2,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "She rises gracefully. The bowl’s note fades into the sound of distant wind. Aida turns and heads purposefully into the forest."
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "810ba72a205eb8d2193d99b0937c9a9308f3f9d23f9a6711eafe2464a0235e69"
+   },
+   "location": "CRYSTAL COVE",
+   "time": "DAY",
+   "characters": [
+    "Aida",
+    "Keen"
+   ],
+   "storyBeat": "The vision releases Aida back to the shore. She touches her heart, smiles knowingly, and moves toward the forest as the bowl tone becomes distant wind — a quiet decision has been made.",
+   "want": "Aida wants to arrive when the path opens.",
+   "need": "She needs to act from trust, not urgency.",
+   "kidRead": "Aida knows it is time and goes to help.",
+   "adultRead": "The elder accepts that she is part of the support system, not the author of the child’s leaving.",
+   "emotionalIntent": "End in purposeful calm, letting the distant wind bridge toward the outside world.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:c9f2f9fdfa8c575773550009ba51c41a0749ded41143abae683d9a0510b9b95d",
+     "sourceEventIndex": 19,
+     "sourceSceneNumber": 2,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "BACK TO AIDA"
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:c4b962a2111892e14e58973aad57c79deb3416b7006cf8b2535e069e924f441e",
+     "sourceEventIndex": 20,
+     "sourceSceneNumber": 2,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "The pink glow fades gently from her eyes. Aida places a paw over her heart. A soft knowing smile."
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:0e19481eea77db15af31d238e24ef27d04dd670b2cc1fbfcdea3bb16ec44744c",
+     "sourceEventIndex": 21,
+     "sourceSceneNumber": 2,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0f099c22b1f8bc8758c675197ce54526233bb110e5dda29ea93d50f4eb972fe9",
+     "speaker": "Aida",
+     "exactText": "It’s time.",
+     "dialogue": "Aida: It’s time.",
+     "action": null
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:b8a9f9369f29c1438ea9565b189cf058a875efe2ca86fdcd0627c80e2a66ff86",
+     "sourceEventIndex": 22,
+     "sourceSceneNumber": 2,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "She rises gracefully. The bowl’s note fades into the sound of distant wind. Aida turns and heads purposefully into the forest."
+    }
+   ]
+  }
+ ],
+ "shots": [
+  {
+   "shotId": "2.B1.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "durationSec": 11.0,
+   "purpose": "Reset the pace through Aida’s quiet listening ritual.",
+   "performanceAssignment": "Aida sits beside the bowl with the wand just off the rim, then eases it into a slow circle. Her breathing settles, her eyelids close, and the pendant glow gradually lifts light across her face.",
+   "camera": "Slow push-in from wide shore to calm medium.",
+   "openingPose": "Aida seated frame-center beside the bowl, wand hovering near the rim, eyes open.",
+   "visualPayoff": "Aida’s closed-eyed stillness fills the quieted cove.",
+   "dialogueLines": []
+  },
+  {
+   "shotId": "2.B2.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "durationSec": 9.0,
+   "purpose": "Show Keen’s departure as Aida senses it.",
+   "performanceAssignment": "The vision opens on the pier and waiting boat. Keen stands by his supplies, lifts the satchel strap, checks it, releases it, then repeats the check twice more while glancing toward the nearby adult presence.",
+   "camera": "Vision POV, steady medium-wide with slight drift toward Keen.",
+   "openingPose": "Keen stands near the pier supplies, one hand just reaching for his satchel strap.",
+   "visualPayoff": "Keen finishes a third careful strap check beside the boat.",
+   "dialogueLines": []
+  },
+  {
+   "shotId": "2.B3.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "durationSec": 12.0,
+   "purpose": "Aida accepts what she sensed and leaves to help.",
+   "performanceAssignment": "Back on shore, the glow fades from Aida’s eyes. She lowers the wand beside the bowl, places one hand over her heart, smiles softly, speaks her single line, then rises and walks toward the forest.",
+   "camera": "Medium close, then gentle pan right following her exit.",
+   "openingPose": "Aida seated beside the bowl, eyes closed, wand near rim, pendant glow beginning to fade.",
+   "visualPayoff": "Aida exits toward the forest as the bowl tone becomes wind.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0f099c22b1f8bc8758c675197ce54526233bb110e5dda29ea93d50f4eb972fe9",
+     "sourceEventId": "script-event:sha256:0e19481eea77db15af31d238e24ef27d04dd670b2cc1fbfcdea3bb16ec44744c",
+     "speaker": "Aida",
+     "exactText": "It’s time.",
+     "delivery": "soft, certain, with a small breath before the words",
+     "startSec": 4.3,
+     "endSec": 5.4
+    }
+   ]
+  }
+ ],
+ "inputSignature": {
+  "kind": "scene-storyboard-snapshot",
+  "schemaVersion": 1,
+  "inputs": {
+   "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+   "sceneNumber": "2",
+   "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json",
+   "shotIds": [
+    "2.B1.S1",
+    "2.B2.S1",
+    "2.B3.S1"
+   ]
+  },
+  "algorithm": "sha256",
+  "digest": "fa8bc71a69c9a831dad8b9bb37e7cd1984bce254605f892c18feb021efb76429"
+ }
+}

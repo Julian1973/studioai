@@ -1,0 +1,394 @@
+{
+ "episode": "Ep1",
+ "sceneNumber": "2",
+ "sceneName": "",
+ "doctrine": "THE_DEFINITIVE_PIPELINE.md (2026-07-16, hybrid contract)",
+ "revision": 1,
+ "sourceScript": {
+  "schemaVersion": 1,
+  "episodeId": "Ep1",
+  "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "sha256": "b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "byteLength": 17826,
+  "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.txt",
+  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.json",
+  "displayFile": "Ep1_The_Adventure_Begins.txt",
+  "title": "The Adventure Begins",
+  "activationId": "c0279c729dae4f8d9effc7502d6bbaa4",
+  "activatedAt": "2026-08-05T09:39:02+00:00",
+  "activatedBy": "Julian explicit no-pollen-bags direction, applied by Codex",
+  "previousScriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19"
+ },
+ "sourceStoryboard": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/creative/Ep1_scene2_storyboard.json",
+  "md5": "2b2054f278d3e76d84696964ed22fce0",
+  "sha256": "49b297e8fc42e1063439131d70cb2baa18424790dd806b77499c0832c144d14a",
+  "approvalState": "generated-pending-human-review"
+ },
+ "inputSignature": {
+  "kind": "production-package",
+  "schemaVersion": 1,
+  "inputs": {
+   "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+   "beatPackageDigest": "7ab0def81f431974205dfa01ee8f62171eca3d021019cb41efd079f7ff8c14a8",
+   "storyboardSha256": "49b297e8fc42e1063439131d70cb2baa18424790dd806b77499c0832c144d14a",
+   "creativeCardHashes": {},
+   "canonProfileDigest": null
+  },
+  "algorithm": "sha256",
+  "digest": "2ba1df9ee3278d574307f3d4bb908b618b33588a9163933f3b7f95b353b24409"
+ },
+ "directorStatement": {
+  "audienceFeeling": "Calmed, attentive, and gently drawn toward Keen’s coming departure.",
+  "whoseScene": "Aida’s scene.",
+  "emotionalChange": "Aida moves from still listening to a quiet, chosen action.",
+  "theLaugh": "No comedy beat; the scene plays as soft anticipation.",
+  "visualSurprise": "The pendant glow opens into a pier vision without becoming flashy.",
+  "carryForward": "Aida heads toward the forest to reach Keen before the journey."
+ },
+ "beatCodes": [
+  "2.B1",
+  "2.B2",
+  "2.B3"
+ ],
+ "shots": [
+  {
+   "shotId": "2.B1.S1",
+   "beatCode": "2.B1",
+   "beatCodes": [
+    "2.B1"
+   ],
+   "durationSec": 11.0,
+   "purpose": "Reset the pace through Aida’s quiet listening ritual.",
+   "performanceAssignment": "Aida sits beside the bowl with the wand just off the rim, then eases it into a slow circle. Her breathing settles, her eyelids close, and the pendant glow gradually lifts light across her face.",
+   "camera": "Slow push-in from wide shore to calm medium.",
+   "openingPose": "Aida seated frame-center beside the bowl, wand hovering near the rim, eyes open.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": null,
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Aida’s closed-eyed stillness fills the quieted cove.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "No extra dialogue",
+    "No sudden magical burst",
+    "No comic interruption"
+   ],
+   "charactersInFrame": [
+    "Aida"
+   ],
+   "continuityIn": null,
+   "continuityOut": {
+    "lighting": "soft shore daylight with subtle pendant glow on Aida",
+    "cameraSide": "ocean remains screen-left, forest remains screen-right",
+    "characters": [
+     {
+      "character": "Aida",
+      "screenZone": "frame-center",
+      "facing": "three-quarter toward screen-left ocean",
+      "pose": "seated beside crystal bowl, wand circling rim",
+      "expression": "eyes closed, peaceful",
+      "visibleMarks": [
+       "rose quartz pendant glowing",
+       "crystal bowl beside her"
+      ],
+      "heldProps": [
+       "bowl wand"
+      ]
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Aida and @图3 only for the set.\n\nBegin exactly on @图1, the approved opening frame — slow push-in from wide shore to calm medium. Aida sits beside the bowl with the wand just off the rim, then eases it into a slow circle. Her breathing settles, her eyelids close, and the pendant glow gradually lifts light across her face. Aida’s closed-eyed stillness fills the quieted cove.\n\nPreserve character identity and relative scale. Keep rose quartz pendant glowing, crystal bowl beside her visible.",
+   "promptWords": 92,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Aida",
+    "@图3": "scene plate"
+   },
+   "audioBrief": null,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Aida (@图1) seated frame-center beside the bowl, wand hovering near the rim, eyes open.\n\n@图2 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 70,
+   "keyframeReferenceSlots": {
+    "@图1": "Aida",
+    "@图2": "scene plate"
+   }
+  },
+  {
+   "shotId": "2.B2.S1",
+   "beatCode": "2.B2",
+   "beatCodes": [
+    "2.B2"
+   ],
+   "durationSec": 9.0,
+   "purpose": "Show Keen’s departure as Aida senses it.",
+   "performanceAssignment": "The vision opens on the pier and waiting boat. Keen stands by his supplies, lifts the satchel strap, checks it, releases it, then repeats the check twice more while glancing toward the nearby adult presence.",
+   "camera": "Vision POV, steady medium-wide with slight drift toward Keen.",
+   "openingPose": "Keen stands near the pier supplies, one hand just reaching for his satchel strap.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The pendant glow and bowl tone dissolve into Aida’s inner vision.",
+   "dialogueBinding": null,
+   "dialogueLines": [],
+   "visualPayoff": "Keen finishes a third careful strap check beside the boat.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "No dialogue",
+    "No slapstick checking",
+    "No focus away from Keen"
+   ],
+   "charactersInFrame": [
+    "Keen"
+   ],
+   "continuityIn": {
+    "lighting": "vision-bright pier daylight, slightly softened at the edges",
+    "cameraSide": "boat and water hold screen-right; shoreward pier holds screen-left",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "frame-center",
+      "facing": "three-quarter toward screen-left",
+      "pose": "standing near supplies, hand reaching toward satchel strap",
+      "expression": "focused and careful",
+      "visibleMarks": [
+       "satchel worn with straps visible"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "vision-bright pier daylight, slightly softened at the edges",
+    "cameraSide": "boat and water hold screen-right; shoreward pier holds screen-left",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "frame-center",
+      "facing": "three-quarter toward screen-left",
+      "pose": "standing with both hands just released from satchel straps",
+      "expression": "careful, slightly tense",
+      "visibleMarks": [
+       "satchel worn with straps visible"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen and @图3 only for the set.\n\nBegin exactly on @图1, the approved opening frame — vision POV, steady medium-wide with slight drift toward Keen. The vision opens on the pier and waiting boat. Keen stands by his supplies, lifts the satchel strap, checks it, releases it, then repeats the check twice more while glancing toward the nearby adult presence. Keen finishes a third careful strap check beside the boat.\n\nPreserve character identity and relative scale. Keep satchel worn with straps visible visible.",
+   "promptWords": 93,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Keen",
+    "@图3": "scene plate"
+   },
+   "audioBrief": null,
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Keen (@图1) stands near the pier supplies, one hand just reaching for his satchel strap.\n\nContinuity in: vision-bright pier daylight, slightly softened at the edges; boat and water hold screen-right; shoreward pier holds screen-left. @图2 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 90,
+   "keyframeReferenceSlots": {
+    "@图1": "Keen",
+    "@图2": "scene plate"
+   }
+  },
+  {
+   "shotId": "2.B3.S1",
+   "beatCode": "2.B3",
+   "beatCodes": [
+    "2.B3"
+   ],
+   "durationSec": 12.0,
+   "purpose": "Aida accepts what she sensed and leaves to help.",
+   "performanceAssignment": "Back on shore, the glow fades from Aida’s eyes. She lowers the wand beside the bowl, places one hand over her heart, smiles softly, speaks her single line, then rises and walks toward the forest.",
+   "camera": "Medium close, then gentle pan right following her exit.",
+   "openingPose": "Aida seated beside the bowl, eyes closed, wand near rim, pendant glow beginning to fade.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The bowl tone bridges the vision release back to Aida on the shore.",
+   "dialogueBinding": "Aida’s line lands after the heart touch, before she rises.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0f099c22b1f8bc8758c675197ce54526233bb110e5dda29ea93d50f4eb972fe9",
+     "sourceEventId": "script-event:sha256:0e19481eea77db15af31d238e24ef27d04dd670b2cc1fbfcdea3bb16ec44744c",
+     "speaker": "Aida",
+     "exactText": "It’s time.",
+     "delivery": "soft, certain, with a small breath before the words",
+     "startSec": 4.3,
+     "endSec": 5.4
+    }
+   ],
+   "visualPayoff": "Aida exits toward the forest as the bowl tone becomes wind.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "No added lines",
+    "No rushing the heart touch",
+    "No power display"
+   ],
+   "charactersInFrame": [
+    "Aida"
+   ],
+   "continuityIn": {
+    "lighting": "soft shore daylight with pendant glow fading",
+    "cameraSide": "ocean remains screen-left, forest remains screen-right",
+    "characters": [
+     {
+      "character": "Aida",
+      "screenZone": "frame-center",
+      "facing": "three-quarter toward screen-left ocean",
+      "pose": "seated beside crystal bowl, wand near rim",
+      "expression": "eyes closed, peaceful",
+      "visibleMarks": [
+       "rose quartz pendant glow fading",
+       "crystal bowl beside her"
+      ],
+      "heldProps": [
+       "bowl wand"
+      ]
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "soft shore daylight, pendant no longer glowing",
+    "cameraSide": "ocean remains screen-left, forest remains screen-right",
+    "characters": [
+     {
+      "character": "Aida",
+      "screenZone": "frame-right edge",
+      "facing": "toward screen-right forest",
+      "pose": "walking out toward the forest path",
+      "expression": "soft smile, settled",
+      "visibleMarks": [
+       "rose quartz pendant unlit",
+       "crystal bowl left behind near starting spot"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Aida and @图3 only for the set.\n\nBegin exactly on @图1, the approved opening frame — medium close, then gentle pan right following her exit. Back on shore, the glow fades from Aida’s eyes. She lowers the wand beside the bowl, places one hand over her heart, smiles softly, speaks her single line, then rises and walks toward the forest. Aida exits toward the forest as the bowl tone becomes wind.\n\nUse @Audio1 as the only voice. Lip-sync Aida. Preserve character identity and relative scale. Keep rose quartz pendant glow fading, crystal bowl beside her, rose quartz pendant unlit, crystal bowl left behind near starting spot visible.",
+   "promptWords": 117,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Aida",
+    "@图3": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 2.B3.S1 — voice-only performance for @Audio1.\nAida: \"It’s time.\" — soft, certain, with a small breath before the words. Target 4.3-5.4s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Aida (@图1) seated beside the bowl, eyes closed, wand near rim, pendant glow beginning to fade.\n\nContinuity in: soft shore daylight with pendant glow fading; ocean remains screen-left, forest remains screen-right. @图2 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 87,
+   "keyframeReferenceSlots": {
+    "@图1": "Aida",
+    "@图2": "scene plate"
+   }
+  }
+ ],
+ "totalSec": 32.0,
+ "continuityLedger": [
+  {
+   "shotId": "2.B1.S1",
+   "beatCode": "2.B1",
+   "beatCodes": [
+    "2.B1"
+   ],
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": null,
+   "continuityOut": {
+    "lighting": "soft shore daylight with subtle pendant glow on Aida",
+    "cameraSide": "ocean remains screen-left, forest remains screen-right",
+    "characters": [
+     {
+      "character": "Aida",
+      "screenZone": "frame-center",
+      "facing": "three-quarter toward screen-left ocean",
+      "pose": "seated beside crystal bowl, wand circling rim",
+      "expression": "eyes closed, peaceful",
+      "visibleMarks": [
+       "rose quartz pendant glowing",
+       "crystal bowl beside her"
+      ],
+      "heldProps": [
+       "bowl wand"
+      ]
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "2.B2.S1",
+   "beatCode": "2.B2",
+   "beatCodes": [
+    "2.B2"
+   ],
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The pendant glow and bowl tone dissolve into Aida’s inner vision.",
+   "continuityOut": {
+    "lighting": "vision-bright pier daylight, slightly softened at the edges",
+    "cameraSide": "boat and water hold screen-right; shoreward pier holds screen-left",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "frame-center",
+      "facing": "three-quarter toward screen-left",
+      "pose": "standing with both hands just released from satchel straps",
+      "expression": "careful, slightly tense",
+      "visibleMarks": [
+       "satchel worn with straps visible"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "2.B3.S1",
+   "beatCode": "2.B3",
+   "beatCodes": [
+    "2.B3"
+   ],
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": "The bowl tone bridges the vision release back to Aida on the shore.",
+   "continuityOut": {
+    "lighting": "soft shore daylight, pendant no longer glowing",
+    "cameraSide": "ocean remains screen-left, forest remains screen-right",
+    "characters": [
+     {
+      "character": "Aida",
+      "screenZone": "frame-right edge",
+      "facing": "toward screen-right forest",
+      "pose": "walking out toward the forest path",
+      "expression": "soft smile, settled",
+      "visibleMarks": [
+       "rose quartz pendant unlit",
+       "crystal bowl left behind near starting spot"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "issues": []
+ },
+ "reviewCriteria": {
+  "canon": "characters and world accurate vs references",
+  "direction": "acting, humour and emotion land",
+  "physics": "weight, contact, follow-through",
+  "continuity": "connects naturally to surrounding shots"
+ },
+ "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json"
+}

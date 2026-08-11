@@ -3,6 +3,7 @@ import importlib.util
 import json
 import pathlib
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
@@ -43,6 +44,36 @@ def _request(port, method, path, headers=None, body=None):
     result = response.status, dict(response.getheaders()), payload
     connection.close()
     return result
+
+
+def test_uncached_director_builds_are_serialized_across_different_shots(monkeypatch):
+    module = _load_server_module("cb_studio_serve_build_serialization_test")
+    active = 0
+    max_active = 0
+    state_lock = threading.Lock()
+
+    def fake_director_session(scene, episode="Ep1", requested_shot_id=None):
+        nonlocal active, max_active
+        with state_lock:
+            active += 1
+            max_active = max(max_active, active)
+        time.sleep(0.05)
+        with state_lock:
+            active -= 1
+        return {"scene": scene, "shot": requested_shot_id}
+
+    monkeypatch.setattr(module, "_director_session", fake_director_session)
+    module._clear_director_session_cache()
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(
+            lambda shot: module._cached_director_session("1", "Ep1", shot),
+            ("S1.SH1A", "S1.SH1B", "S1.SH1C", "S1.SH2"),
+        ))
+
+    assert max_active == 1
+    assert [result["shot"] for result in results] == [
+        "S1.SH1A", "S1.SH1B", "S1.SH1C", "S1.SH2",
+    ]
 
 
 def test_launch_token_establishes_http_only_session_and_cleans_url(studio):

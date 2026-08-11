@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Animation Studio local server: projects, episodes, canon and media production."""
-import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac, selectors
+import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile, signal, sys, uuid, hashlib, secrets, hmac, selectors, gc
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
@@ -412,8 +412,11 @@ PROCS = {}  # jobId -> Popen (live process group, so a firing can be stopped mid
 _JOB_LOCK = threading.RLock()
 _DIRECTOR_SESSION_CACHE = {}
 _DIRECTOR_SESSION_CACHE_LOCK = threading.RLock()
-_DIRECTOR_SESSION_BUILD_LOCKS = {}
-_DIRECTOR_SESSION_CACHE_TTL_SEC = 60.0
+_DIRECTOR_SESSION_BUILD_LOCK = threading.Lock()
+# Production mutations and completed jobs explicitly invalidate this cache. Keep
+# browser polling on the proven projection instead of rebuilding the full ledger
+# every minute; the freshness guard restarts the server for code/data-file changes.
+_DIRECTOR_SESSION_CACHE_TTL_SEC = 3600.0
 DIRECTOR_ACTION_IDS = {
     "open-inspector", "open-provider-setup", "direct-scene",
     "build-scene-plate", "select-scene-plate-library", "select-scene-plate-upload",
@@ -426,7 +429,63 @@ DIRECTOR_ACTION_IDS = {
     "run-quality-review", "accept-quality", "reopen-shot",
     "build-master", "run-final-review", "accept-master", "iterate-master",
     "save-retake-note",
-}
+                }
+
+
+def _anthropic_room_chat(payload):
+    """Proxy one Studio-room message to Claude without altering the system prompt."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set")
+    system = payload.get("system")
+    messages = payload.get("messages")
+    if not isinstance(system, str) or not system.strip():
+        raise ValueError("system is required")
+    if not isinstance(messages, list) or not messages:
+        raise ValueError("messages is required")
+    clean_messages = []
+    for item in messages:
+        if not isinstance(item, dict):
+            raise ValueError("messages must contain objects")
+        role = str(item.get("role") or "").strip()
+        content = str(item.get("content") or "").strip()
+        if role not in ("user", "assistant") or not content:
+            raise ValueError("each message needs role user|assistant and content")
+        clean_messages.append({"role": role, "content": content})
+    body = json.dumps({
+        "model": "claude-opus-5",
+        "max_tokens": int(payload.get("max_tokens") or 900),
+        "system": system,
+        "messages": clean_messages,
+    }).encode("utf-8")
+    conn = http.client.HTTPSConnection("api.anthropic.com", timeout=90)
+    try:
+        conn.request(
+            "POST", "/v1/messages", body=body,
+            headers={
+                "content-type": "application/json",
+                "anthropic-version": "2023-06-01",
+                "x-api-key": api_key,
+            },
+        )
+        response = conn.getresponse()
+        raw = response.read()
+    finally:
+        conn.close()
+    try:
+        data = json.loads(raw.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        data = {"error": {"message": raw.decode("utf-8", errors="replace")[:500]}}
+    if response.status >= 400:
+        message = ((data.get("error") or {}).get("message") or
+                   data.get("message") or f"Anthropic returned HTTP {response.status}")
+        raise RuntimeError(message)
+    text = "".join(
+        str(part.get("text") or "")
+        for part in (data.get("content") or [])
+        if isinstance(part, dict) and part.get("type") == "text"
+    ).strip()
+    return {"text": text}
 
 
 def _clear_director_session_cache(scene=None, episode=None):
@@ -1536,18 +1595,29 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
                 line.get("dialogueOccurrenceId"): line
                 for line in (output.get("lines") or [])
             }
-            provider_lines = cb_render._approved_voice_lines(package, shot)
-            inputs.update({
-                "voiceLines": [{
-                    "speaker": line.get("speaker"),
-                    "performedText": line.get("text"),
-                    "dramaticIntention": (
-                        direction_by_occurrence.get(line.get("dialogueOccurrenceId"), {})
-                        .get("dramaticIntention")),
-                } for line in provider_lines],
-                "voiceDirectionSource": (
-                    "human-working" if ledger.get("workingVoice") else source),
-            })
+            try:
+                provider_lines = cb_render._approved_voice_lines(package, shot)
+            except (cb_render.Refused, ValueError) as exc:
+                blockers.append({
+                    "code": "VOICE_PROMPT_CONTRACT",
+                    "stage": "voice",
+                    "shotId": selected_id,
+                    "message": str(exc),
+                    "action": "Correct and prepare current Voice direction.",
+                })
+                preflight["ok"] = False
+            else:
+                inputs.update({
+                    "voiceLines": [{
+                        "speaker": line.get("speaker"),
+                        "performedText": line.get("text"),
+                        "dramaticIntention": (
+                            direction_by_occurrence.get(line.get("dialogueOccurrenceId"), {})
+                            .get("dramaticIntention")),
+                    } for line in provider_lines],
+                    "voiceDirectionSource": (
+                        "human-working" if ledger.get("workingVoice") else source),
+                })
         if inputs:
             preflight["productionInputs"]["shots"][selected_id] = inputs
 
@@ -1574,10 +1644,10 @@ def _cached_director_session(scene, episode="Ep1", requested_shot_id=None):
         cached = _DIRECTOR_SESSION_CACHE.get(key)
         if cached and now - cached["at"] < _DIRECTOR_SESSION_CACHE_TTL_SEC:
             return cached["session"]
-        build_lock = _DIRECTOR_SESSION_BUILD_LOCKS.setdefault(key, threading.Lock())
-    # Several open Studio tabs often ask for the same scene together. Only one thread
-    # performs the expensive authoritative build; followers recheck and share its result.
-    with build_lock:
+    # Different Studio tabs can request different shots at once. The authoritative
+    # build touches a large shared production graph, so only one uncached build may
+    # run at a time. Fresh cached sessions remain lock-free and return immediately.
+    with _DIRECTOR_SESSION_BUILD_LOCK:
         now = time.time()
         with _DIRECTOR_SESSION_CACHE_LOCK:
             cached = _DIRECTOR_SESSION_CACHE.get(key)
@@ -1897,6 +1967,7 @@ def _storyboard_approval(d):
 _APPROVED_FILES = {
     "/cb-studio/app.html",                # the SPA entry
     "/cb-studio/director.html",           # outcome-first creative entry
+    "/cb-studio/room.html",               # Studio room assistant entry
     "/engine/config/characters.json",     # character reference the UI reads (Show Bible + character pages)
     "/crystal_bears_locked_canon.md",     # the show-bible doc the UI renders (projects.json showBibleFile)
     f"/shows/{ACTIVE_SHOW.profile.showId}/canon/characters.json",
@@ -2026,7 +2097,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         launch = (parse_qs(parsed.query).get("launchToken") or [None])[0]
         if launch is not None:
             if not allow_launch or parsed.path not in (
-                    "/cb-studio/director.html", "/cb-studio/app.html") or not hmac.compare_digest(
+                    "/cb-studio/director.html", "/cb-studio/app.html",
+                    "/cb-studio/room.html") or not hmac.compare_digest(
                     str(launch), LAUNCH_TOKEN):
                 self._deny(401, "invalid Studio launch token")
                 return False
@@ -2038,7 +2110,9 @@ class H(http.server.SimpleHTTPRequestHandler):
             return False
         if (allow_launch and self.command in ("GET", "HEAD") and not PUBLIC_ORIGIN
                 and not self._has_session()
-                and parsed.path in ("/cb-studio/director.html", "/cb-studio/app.html")
+                and parsed.path in (
+                    "/cb-studio/director.html", "/cb-studio/app.html",
+                    "/cb-studio/room.html")
                 and self._is_loopback_host()):
             location = parsed.path + (("?" + parsed.query) if parsed.query else "")
             self._issue_session_redirect(location)
@@ -2864,6 +2938,12 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/room-chat":
+            try:
+                self._json(200, _anthropic_room_chat(self._body()))
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/project-workbench-state":
             try:
                 d = self._body()
@@ -3110,7 +3190,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "configBase": "projects/" + pid, "showBibleFile": "projects/" + pid + "/show_bible.md",
                     "episodesFile": "projects/" + pid + "/episodes.json", "mediaBase": "projects/" + pid + "/media",
                     "createdAt": str(datetime.date.today()),
-                }
+}
                 if cover_image:
                     meta["coverImage"] = cover_image
                     meta["episodeCoverImage"] = cover_image
@@ -3885,6 +3965,18 @@ def main():
     # the first browser click does not race a cold state audit.
     if os.environ.get("CB_STUDIO_SKIP_PREWARM") != "1":
         _prewarm_director_session_cache()
+    # Python 3.14's cyclic collector can otherwise rescan the complete imported
+    # production stack during ordinary browser polling. In the Studio process that
+    # graph is immutable after prewarm; freezing it prevents multi-gigabyte GC scans
+    # that leave the port listening while every browser request times out.
+    gc.collect()
+    if hasattr(gc, "freeze"):
+        gc.freeze()
+    # Python 3.14's automatic cyclic collector can spend minutes traversing the
+    # dynamically imported production graph while holding the GIL. Reference
+    # counting still releases ordinary request/session objects; disabling the
+    # automatic collector keeps this long-running local UI responsive.
+    gc.disable()
     with http.server.ThreadingHTTPServer((BIND_HOST, PORT), H) as httpd:
         base_url = PUBLIC_ORIGIN or f"http://{BIND_HOST}:{PORT}"
         launch_url = f"{base_url}/cb-studio/director.html?launchToken={LAUNCH_TOKEN}"

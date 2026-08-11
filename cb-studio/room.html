@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crystal Bears Studio Room</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070a0f;
+      --panel: #111820;
+      --panel-2: #151f2a;
+      --line: #253241;
+      --text: #ecf7ff;
+      --muted: #91a0af;
+      --cyan: #48cee7;
+      --danger: #ee735f;
+      --ok: #42d392;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: #0b1017;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    main {
+      display: grid;
+      grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+      min-height: calc(100vh - 65px);
+    }
+    aside, section { padding: 22px; }
+    aside {
+      border-right: 1px solid var(--line);
+      background: #0c121a;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .label {
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .value { margin: 6px 0 0; font-weight: 700; }
+    .muted { color: var(--muted); }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button.primary { background: var(--cyan); color: #031116; border-color: var(--cyan); }
+    button.danger { border-color: #6a342d; color: #ffb0a4; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      background: #080d13;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 12px;
+      font: inherit;
+    }
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .message {
+      max-width: 880px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      white-space: pre-wrap;
+    }
+    .message.user {
+      margin-left: auto;
+      background: #10222a;
+      border-color: #1b5160;
+    }
+    .status { color: var(--muted); min-height: 20px; }
+    .ok { color: var(--ok); }
+    .bad { color: var(--danger); }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Crystal Bears Studio Room</h1>
+    <div class="row">
+      <button id="refresh">Refresh state</button>
+      <a id="director-link" class="muted" href="/cb-studio/director.html#view=director">Back to Director</a>
+    </div>
+  </header>
+  <main>
+    <aside>
+      <div class="card">
+        <div class="label">Current decision</div>
+        <p id="decision" class="value">Loading...</p>
+        <p id="orientation" class="muted"></p>
+      </div>
+      <div class="card">
+        <div class="label">Available verdicts</div>
+        <div id="actions" class="row" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <div class="label">Retake note</div>
+        <p class="muted">Required for any reject/refire action.</p>
+        <textarea id="note" placeholder="Plain-English note for the next attempt."></textarea>
+      </div>
+      <div class="card">
+        <div class="label">Action status</div>
+        <p id="status" class="status"></p>
+      </div>
+    </aside>
+    <section>
+      <div id="messages"></div>
+      <div class="card">
+        <div class="label">Ask the room</div>
+        <textarea id="chat-input" placeholder="Ask what to approve, reject, fix, or check next."></textarea>
+        <div class="row" style="margin-top:12px">
+          <button id="send" class="primary">Send</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const state = {
+      episode: new URL(location.href).searchParams.get("episode") || "Ep1",
+      scene: new URL(location.href).searchParams.get("scene") || "1",
+      shotId: new URL(location.href).searchParams.get("shotId") || "",
+      session: null,
+      messages: [],
+    };
+    const verdictMap = [
+      ["accept-keyframe", "Approve SEE"],
+      ["iterate-keyframe", "Reject SEE"],
+      ["accept-voice", "Approve HEAR"],
+      ["iterate-voice", "Reject HEAR"],
+      ["accept-animation", "Approve WATCH"],
+      ["iterate-animation", "Reject WATCH"],
+      ["reopen-shot", "Reopen shot"],
+      ["accept-master", "Approve master"],
+      ["iterate-master", "Reject master"],
+    ];
+    const rejectFamily = new Set(["iterate-keyframe", "iterate-voice", "iterate-animation", "iterate-master", "reopen-shot"]);
+    const $ = (id) => document.getElementById(id);
+    async function api(path, options) {
+      const response = await fetch(path, {
+        credentials: "same-origin",
+        ...(options || {}),
+        headers: {"content-type": "application/json", ...((options || {}).headers || {})},
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+      return body;
+    }
+    function actionsFromSession(session) {
+      return [
+        session.primaryAction,
+        ...(session.decisionActions || []),
+        ...(session.scenePlateActions || []),
+      ].filter(Boolean);
+    }
+    function systemPrompt() {
+      return [
+        "You are the Crystal Bears Studio Room agent.",
+        "You discuss the current production state and help Julian decide approve, reject, fix, or continue.",
+        "Do not invent production state. Use only the supplied Director session summary.",
+        "If a reject is needed, ask for a concrete retake note.",
+        "Cache-breakpoint: room-system-v1.",
+        JSON.stringify({
+          episode: state.episode,
+          scene: state.scene,
+          shotId: state.session?.selectedShotId || state.shotId || null,
+          phase: state.session?.phase || null,
+          status: state.session?.status || null,
+          primaryAction: state.session?.primaryAction || null,
+          decisionActions: state.session?.decisionActions || [],
+          runningJob: state.session?.runningJob || null,
+        }),
+      ].join("\n");
+    }
+    function renderMessages() {
+      $("messages").innerHTML = state.messages.map((message) =>
+        `<div class="message ${message.role === "user" ? "user" : ""}">${escapeHtml(message.content)}</div>`
+      ).join("");
+    }
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[char]));
+    }
+    function renderSession() {
+      const session = state.session;
+      if (!session) return;
+      state.shotId = session.selectedShotId || state.shotId;
+      $("decision").textContent = `${session.phase || "unknown"} · ${session.status || "unknown"}`;
+      $("orientation").textContent = `Scene ${state.scene} · Shot ${state.shotId || "none"}`;
+      $("director-link").href = `/cb-studio/director.html#view=director&scene=${encodeURIComponent(state.scene)}${state.shotId ? `&shot=${encodeURIComponent(state.shotId)}` : ""}`;
+      const available = new Map(actionsFromSession(session).map((action) => [action.id, action]));
+      $("actions").innerHTML = verdictMap.map(([id, label]) => {
+        const enabled = available.has(id);
+        return `<button data-action="${id}" class="${id.includes("iterate") || id === "reopen-shot" ? "danger" : "primary"}" ${enabled ? "" : "disabled"}>${label}</button>`;
+      }).join("");
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => submitVerdict(button.dataset.action));
+      });
+    }
+    async function loadSession() {
+      $("status").textContent = "Loading current Studio state...";
+      const query = new URLSearchParams({episode: state.episode, scene: state.scene});
+      if (state.shotId) query.set("shotId", state.shotId);
+      state.session = await api(`/api/director-session?${query}`);
+      renderSession();
+      $("status").textContent = "Current.";
+    }
+    async function submitVerdict(action) {
+      const note = $("note").value.trim();
+      if (rejectFamily.has(action) && !note) {
+        $("status").innerHTML = '<span class="bad">Reject/refire needs a note.</span>';
+        $("note").focus();
+        return;
+      }
+      $("status").textContent = `Submitting ${action}...`;
+      await api("/api/director-action", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: state.episode,
+          scene: state.scene,
+          shotId: state.shotId,
+          action,
+          note,
+        }),
+      });
+      $("status").innerHTML = '<span class="ok">Action accepted. Refreshing state...</span>';
+      await loadSession();
+    }
+    async function sendMessage() {
+      const text = $("chat-input").value.trim();
+      if (!text) return;
+      $("chat-input").value = "";
+      state.messages.push({role: "user", content: text});
+      renderMessages();
+      $("status").textContent = "Room agent thinking...";
+      const response = await api("/api/room-chat", {
+        method: "POST",
+        body: JSON.stringify({
+          system: systemPrompt(),
+          messages: state.messages.slice(-10),
+        }),
+      });
+      state.messages.push({role: "assistant", content: response.text || "(No response text)"});
+      renderMessages();
+      $("status").textContent = "Current.";
+    }
+    $("refresh").addEventListener("click", () => loadSession().catch((error) => {
+      $("status").innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
+    }));
+    $("send").addEventListener("click", () => sendMessage().catch((error) => {
+      $("status").innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
+    }));
+    loadSession().catch((error) => {
+      $("decision").textContent = "Could not load Studio state";
+      $("status").innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
+    });
+  </script>
+</body>
+</html>

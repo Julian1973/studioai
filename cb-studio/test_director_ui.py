@@ -6,6 +6,8 @@ HTML = (HERE / "director.html").read_text(encoding="utf-8")
 CSS = (HERE / "director.css").read_text(encoding="utf-8")
 JS = (HERE / "director.js").read_text(encoding="utf-8")
 SERVER = (HERE / "serve.py").read_text(encoding="utf-8")
+ROOM = (HERE / "room.html").read_text(encoding="utf-8")
+ROOM_INSTRUCTION = (HERE / "CODEX_ROOM_INSTRUCTION.md").read_text(encoding="utf-8")
 UX_CONTRACT = (HERE / "UX_CONTRACT.md").read_text(encoding="utf-8")
 GOLDEN_BROWSER = (HERE / "golden_path_browser.mjs").read_text(encoding="utf-8")
 PUSH_GATE = (HERE.parent / "scripts" / "verify_push.sh").read_text(encoding="utf-8")
@@ -62,12 +64,52 @@ def test_frontend_consumes_one_authoritative_director_state_and_action_route():
     assert "That action is no longer current" in SERVER
 
 
+def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():
+    assert '"/cb-studio/room.html"' in SERVER
+    assert 'if self.path == "/api/room-chat":' in SERVER
+    assert '"model": "claude-opus-5"' in SERVER
+    assert '"system": system' in SERVER
+    assert 'return {"text": text}' in SERVER
+    assert "system untouched" in ROOM_INSTRUCTION
+    assert "claude-opus-5" in ROOM_INSTRUCTION
+    assert '{"text": "..."}' in ROOM_INSTRUCTION
+    assert "/api/room-chat" in ROOM
+    assert "system: systemPrompt()" in ROOM
+
+
+def test_studio_room_verdicts_map_to_current_director_actions_and_rejects_send_notes():
+    expected_actions = (
+        "accept-keyframe", "iterate-keyframe", "accept-voice", "iterate-voice",
+        "accept-animation", "iterate-animation", "reopen-shot",
+        "accept-master", "iterate-master",
+    )
+    for action_id in expected_actions:
+        assert action_id in SERVER
+        assert action_id in ROOM
+        assert f"`{action_id}`" in ROOM_INSTRUCTION
+    for reject_id in (
+        "iterate-keyframe", "iterate-voice", "iterate-animation",
+        "iterate-master", "reopen-shot",
+    ):
+        assert reject_id in ROOM
+    assert "rejectFamily.has(action) && !note" in ROOM
+    assert "note," in ROOM
+    assert 'if not note:' in SERVER
+
+
 def test_exact_request_is_separate_and_named_authoritative():
     assert 'id="request-drawer"' in HTML
     assert "Exact provider request" in HTML
     assert "app.session?.inspector?.providerRequest" in JS
     assert "shot.seedancePrompt" not in JS
     assert "keyframePrompt" not in JS
+
+
+def test_watch_shows_new_prepared_prompt_without_authorizing_render():
+    assert ("return session.inspector?.preparedAnimationRequest || "
+            "session.inspector?.providerRequest || null;") in JS
+    assert '$$("#request-button").disabled' not in JS
+    assert '$("#request-button").disabled = !session.inspector?.providerRequest;' in JS
 
 
 def test_references_are_available_for_keyframe_and_animation_without_clutter():
@@ -185,14 +227,22 @@ def test_director_decisions_survive_expensive_authoritative_checks():
 
 
 def test_duplicate_and_background_session_reads_do_not_compete():
-    assert "_DIRECTOR_SESSION_BUILD_LOCKS" in SERVER
-    assert "with build_lock:" in SERVER
+    assert "_DIRECTOR_SESSION_BUILD_LOCK = threading.Lock()" in SERVER
+    assert "with _DIRECTOR_SESSION_BUILD_LOCK:" in SERVER
+    assert "_DIRECTOR_SESSION_CACHE_TTL_SEC = 3600.0" in SERVER
     assert 'document.visibilityState !== "visible"' in JS
     assert "setTimeout(pollLiveSession, 15000)" in JS
     assert 'document.addEventListener("visibilitychange"' in JS
     assert "Reconnecting to Studio state" in JS
     assert "Retrying automatically..." in JS
     assert "app.pollTimer = setTimeout(loadSession, 2000)" in JS
+
+
+def test_voice_contract_failure_is_contained_in_hear_instead_of_losing_studio():
+    assert '"code": "VOICE_PROMPT_CONTRACT"' in SERVER
+    assert '"stage": "voice"' in SERVER
+    assert '"action": "Correct and prepare current Voice direction."' in SERVER
+    assert "except (cb_render.Refused, ValueError) as exc:" in SERVER
 
 
 def test_success_is_published_only_after_director_cache_refresh():
@@ -228,6 +278,14 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert "Scene Plate" in JS
     assert "Character Turnarounds" in JS
     assert "Exact Prompt" in JS
+    assert "preparedAnimationRequest" in JS
+    assert "WATCH direction ready" in JS
+    assert "HEAR is approved. Compile the current provider request" in JS
+    assert "Complete HEAR before render preparation or spend." in JS
+    assert 'session.inspector?.packageRevision || ""' in JS
+    assert 'session.status === "rendering" && stage === relayStage(session)' in JS
+    assert '${session.status === "rendering" ? "" : renderGenerateStatus(session)}' in JS
+    assert 'if (session.status === "rendering") {\n      return renderProgress(session);\n    }' not in JS
     assert "Complete uncropped turnaround · identity authority" in JS
     assert "final accepted frame becomes the handoff truth for the next shot" in JS
     assert "Create the still frame first" in JS
@@ -522,6 +580,12 @@ def test_watch_relay_shows_every_candidate_and_requires_explicit_selection():
     assert '.relay-candidate.selected' in CSS
 
 
+def test_hear_relay_distinguishes_ready_from_locked_without_fake_media():
+    assert "No voice performance has been created yet." in JS
+    assert "Voice is locked until SEE is approved." in JS
+    assert "relayStage(session) >= 2" in JS
+
+
 def test_watch_relay_keeps_superseded_renders_visible_without_approval_controls():
     assert "Previous renders — view only" in JS
     assert "artifact.stale" in JS
@@ -629,6 +693,12 @@ def test_workbench_actions_show_immediate_and_persistent_activity_status():
     assert "${renderGenerateStatus(session)}" in JS
     assert 'button.textContent = action.id === "prepare-render" ? "Compiling prompt..." : "Working..."' in JS
     assert 'button.setAttribute("aria-busy", "true")' in JS
+
+
+def test_progress_copy_distinguishes_voice_from_keyframe_and_animation():
+    assert 'isVoice ? "Voice performance build" : "Opening-frame build"' in JS
+    assert 'isVoice ? "ElevenLabs voice build is active"' in JS
+    assert "The Studio is creating the dialogue performance." in JS
 
 
 def test_uncompiled_animation_prompt_explains_the_separate_spend_gate():

@@ -3504,10 +3504,14 @@ class H(http.server.SimpleHTTPRequestHandler):
 
                 if action in ("open-inspector", "open-provider-setup"):
                     stage = "animation" if action == "open-provider-setup" else session.get("phase")
-                    route = ("/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=" +
-                             quote(ep) + "&sc=" + quote(scene) + "&st=" +
-                             quote(str(stage or "storyboard")) +
-                             (("&shot=" + quote(target)) if target else ""))
+                    if action == "open-inspector" and stage == "story":
+                        route = ("/cb-studio/director.html#view=pipeline&scene=" +
+                                 quote(scene) + "&step=storyboard")
+                    else:
+                        route = ("/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=" +
+                                 quote(ep) + "&sc=" + quote(scene) + "&st=" +
+                                 quote(str(stage or "storyboard")) +
+                                 (("&shot=" + quote(target)) if target else ""))
                     self._json(200, {"ok": True, "navigate": route, "zeroSpend": True}); return
                 if action == "direct-scene":
                     args = ["cb_creative.py", "scene", scene, ep]

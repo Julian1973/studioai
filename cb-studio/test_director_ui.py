@@ -65,6 +65,14 @@ def test_frontend_consumes_one_authoritative_director_state_and_action_route():
     assert "That action is no longer current" in SERVER
 
 
+def test_story_review_stays_inside_director_pipeline_not_legacy_projects():
+    open_inspector = SERVER[SERVER.index('if action in ("open-inspector", "open-provider-setup"):'):SERVER.index('if action == "direct-scene":')]
+    assert 'stage == "story"' in open_inspector
+    assert '"/cb-studio/director.html#view=pipeline&scene="' in open_inspector
+    assert '"&step=storyboard"' in open_inspector
+    assert 'app.html#pg=projects' not in open_inspector
+
+
 def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():
     assert '"/cb-studio/room.html"' in SERVER
     assert 'if self.path == "/api/room-chat":' in SERVER

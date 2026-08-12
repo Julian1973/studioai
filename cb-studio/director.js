@@ -3978,6 +3978,9 @@
       const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`, undefined, 60000);
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
+      if (app.view === "pipeline" && session.phase === "story" && app.pipelineStep !== "analysis") {
+        app.pipelineStep = "analysis";
+      }
       if (session.phase === "keyframe") {
         await Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary(session)]);
       }

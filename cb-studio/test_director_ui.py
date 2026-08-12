@@ -82,6 +82,11 @@ def test_director_analysis_step_exposes_story_direction_review_gate():
     assert 'step.id === "analysis" ? renderStoryDirectionDesk()' in JS
 
 
+def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
+    assert 'app.view === "pipeline" && session.phase === "story" && app.pipelineStep !== "analysis"' in JS
+    assert 'app.pipelineStep = "analysis"' in JS
+
+
 def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():
     assert '"/cb-studio/room.html"' in SERVER
     assert 'if self.path == "/api/room-chat":' in SERVER

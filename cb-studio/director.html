@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#151918">
   <title>Animation Studio Director</title>
-  <meta name="studio-build" content="watch-conformance-20260810-2">
-  <link rel="stylesheet" href="/cb-studio/director.css?v=watch-conformance-20260810-2">
-  <script src="/cb-studio/director.js?v=relay-truth-20260811-1" defer></script>
+  <meta name="studio-build" content="scene-plate-direct-select-20260812-1">
+  <link rel="stylesheet" href="/cb-studio/director.css?v=scene-plate-direct-select-20260812-1">
+  <script src="/cb-studio/director.js?v=scene-plate-direct-select-20260812-1" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -35,11 +35,14 @@
         <button type="button" class="nav-button" data-view="episodes" aria-label="Scenes" title="Scenes">
           <span class="nav-symbol" aria-hidden="true">02</span><span>Scenes</span>
         </button>
+        <button type="button" class="nav-button" data-view="assets" aria-label="Asset Library" title="Asset Library">
+          <span class="nav-symbol" aria-hidden="true">03</span><span>Asset Library</span>
+        </button>
         <button type="button" class="nav-button" data-view="pipeline" aria-label="Pipeline status" title="Pipeline status">
-          <span class="nav-symbol" aria-hidden="true">03</span><span>Pipeline</span>
+          <span class="nav-symbol" aria-hidden="true">04</span><span>Pipeline</span>
         </button>
         <button type="button" class="nav-button" data-view="review" aria-label="Master" title="Master">
-          <span class="nav-symbol" aria-hidden="true">04</span><span>Master</span>
+          <span class="nav-symbol" aria-hidden="true">05</span><span>Master</span>
         </button>
       </div>
       <div class="nav-foot">
@@ -117,6 +120,23 @@
         <div class="scene-list" id="scene-list" aria-live="polite"></div>
       </section>
 
+      <section class="studio-view" id="view-assets" aria-labelledby="asset-library-title" hidden>
+        <div class="asset-library-tabs" role="tablist" aria-label="Asset Library categories">
+          <button type="button" class="active" data-asset-category="characters">Characters</button>
+          <button type="button" data-asset-category="scenes">Scenes</button>
+          <button type="button" data-asset-category="props">Props</button>
+        </div>
+        <div class="asset-library-category active" id="asset-category-characters" data-asset-category-panel="characters">
+          <div class="asset-library-shell" id="character-library"></div>
+        </div>
+        <div class="asset-library-category" id="asset-category-scenes" data-asset-category-panel="scenes" hidden>
+          <div class="asset-library-shell" id="scene-asset-library-view"></div>
+        </div>
+        <div class="asset-library-category" id="asset-category-props" data-asset-category-panel="props" hidden>
+          <div class="asset-library-shell" id="prop-library"></div>
+        </div>
+      </section>
+
       <section class="studio-view" id="view-director" aria-labelledby="director-title" hidden>
         <div class="director-heading">
           <div>
@@ -180,8 +200,9 @@
     <nav class="mobile-nav" aria-label="Studio views">
       <button type="button" class="active" data-view="director"><span aria-hidden="true">01</span>Shot</button>
       <button type="button" data-view="episodes"><span aria-hidden="true">02</span>Scenes</button>
-      <button type="button" data-view="pipeline"><span aria-hidden="true">03</span>Pipeline</button>
-      <button type="button" data-view="review"><span aria-hidden="true">04</span>Master</button>
+      <button type="button" data-view="assets"><span aria-hidden="true">03</span>Assets</button>
+      <button type="button" data-view="pipeline"><span aria-hidden="true">04</span>Pipeline</button>
+      <button type="button" data-view="review"><span aria-hidden="true">05</span>Master</button>
     </nav>
   </div>
 

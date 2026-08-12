@@ -493,7 +493,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     else:
         current = selected_state.get("current") or {}
         pending = selected_state.get("pending") or {}
-        purpose = str(shot.get("purpose") or "").strip()
+        purpose = str(shot.get("purpose") or shot.get("storyBeat") or "").strip()
         keyframe_headline = (((preflight.get("productionInputs") or {}).get("shots") or {})
                              .get(shot_id) or {}).get("keyframePromptHeadline")
 
@@ -689,12 +689,14 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         item_shot_id = item.get("shotId")
         source = package_shots.get(item.get("shotId")) or {}
         item_media = _opening_frame_media(source, media)
+        shot_purpose = source.get("purpose") or source.get("storyBeat")
         shot_summaries.append({
             "id": item_shot_id,
             "shotId": item_shot_id,
             "number": index,
             "durationSec": source.get("durationSec"),
-            "purpose": source.get("purpose"),
+            "purpose": shot_purpose,
+            "storyBeat": source.get("storyBeat"),
             "acceptedUrl": item_media.get("clip"),
             "keyframeUrl": item_media.get("keyframeApproved"),
             "voiceUrl": item_media.get("vo"),
@@ -716,8 +718,16 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "shot": ({
             "shotId": shot_id,
             "durationSec": shot.get("durationSec"),
-            "purpose": shot.get("purpose"),
-            "visualPayoff": shot.get("visualPayoff"),
+            "purpose": shot.get("purpose") or shot.get("storyBeat"),
+            "storyBeat": shot.get("storyBeat"),
+            "visualPayoff": shot.get("visualPayoff") or shot.get("kidRead") or shot.get("emotionalIntent"),
+            "emotionalIntent": shot.get("emotionalIntent"),
+            "kidRead": shot.get("kidRead"),
+            "adultRead": shot.get("adultRead"),
+            "action": shot.get("action"),
+            "dialogueLines": shot.get("dialogueLines") or [],
+            "continuityConstraints": shot.get("continuityConstraints") or [],
+            "directorRecord": shot.get("directorRecord") or {},
             "characters": shot.get("charactersInFrame") or [],
         } if shot_id else None),
         "progress": {"complete": completed, "total": len(all_shots)},

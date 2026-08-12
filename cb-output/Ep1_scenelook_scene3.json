@@ -1,0 +1,59 @@
+{
+ "approved": null,
+ "candidate": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S3_plate_candidate_a57f65c8.jpeg",
+  "hash": "aaa9793e92e6b5a5403e11c656ed33b6c13fa6276343a8c4bc737d6e750b3a36",
+  "inputSignature": {
+   "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+   "briefHash": "854c255801f2cfe128733dfab18d9c87c1b252bc2b81db1a7627618cd9912ea1",
+   "referenceHashes": {},
+   "plateHash": "aaa9793e92e6b5a5403e11c656ed33b6c13fa6276343a8c4bc737d6e750b3a36"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-08-12T09:36:03",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/asset-registry/Ep1_scene3_sailboat_pier_scene_plate_aaa9793e92.jpeg",
+  "packageRevision": 1
+ },
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": null,
+   "candidate": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-12T09:35:53",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "92ce955f865a5c06467e33aa48d4300c7436a6c4c5f129cb90b5f14055fc1443",
+    "output": {
+     "creativeIntent": "Create a warm, inviting environment-only Scene Look plate for Crystal Cove Pier: a modest working seaside departure point that feels safe, breezy, and full of late-morning possibility. The place should communicate readiness for a small journey without drama or danger.",
+     "storyOfPlace": "Crystal Cove Pier is a weathered wooden pier at the sheltered edge of the beach, with a small practical loading area and a neat little sailboat tied at the dock, ready to leave. Beyond the dock, clear coastal water opens into a sparkling bay, suggesting the wider adventure ahead. The pier is humble, tidy, and well-used rather than grand or touristy.",
+     "paletteAndLighting": "Warm clear late-morning daylight continuing toward midday, saturated but natural. Sun-warmed honey and gray-brown pier planks, clean turquoise-to-deep-blue coastal water, pale sand tones, soft cream sailcloth, muted nautical reds and blues in small accents. Lighting should feel bright, safe, and breezy, with crisp sun highlights, soft open-sky fill, and lively sparkle on the water.",
+     "materialsAndAtmosphere": "Weathered wood planking with softened edges, visible grain, salt wear, and gentle scuffs; coiled rope with fibrous texture; small sailboat materials including painted hull, clean sailcloth, simple rigging, and tied dock lines; clear seawater with animated-film clarity, shallow edge transparency, and glinting surface movement. Atmosphere is clean coastal air with a light breeze, no fog, no storm threat, no clutter beyond believable working-pier details.",
+     "continuityRules": [
+      "Environment-only plate: no characters, no animals, no silhouettes, no implied character action.",
+      "Keep the location as Crystal Cove Pier: a modest working wooden pier beside a small sailboat tied to the dock, with open sparkling coastal water beyond.",
+      "Time of day is late morning moving toward midday, warm clear daylight, safe and breezy.",
+      "Maintain original 3D CGI animated feature quality for ages 4-8: tactile materials, bold readable shapes, warm saturated color, friendly realism.",
+      "Do not make the pier luxurious, crowded, stormy, industrial, or abandoned."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated feature for ages 4-8, Pixar-caliber quality without copying any specific film: Crystal Cove Pier, a modest working wooden pier at the sheltered edge of a bright beach, weathered honey-gray planks with visible grain and salt wear, a small tidy loading area with coiled rope, simple dock cleats, a few neat nautical details, and a small sailboat tied securely to the dock ready for departure. Open clear coastal water stretches beyond the pier, sparkling in warm late-morning daylight moving toward midday; gentle breeze implied through slight sailcloth and rope tension, safe and inviting atmosphere. Palette of sun-warmed wood browns, clean turquoise and deep blue water, pale sand, cream sailcloth, muted nautical red and blue accents. Materials should feel tactile and animation-ready: softened wood edges, fibrous rope, painted boat hull, clean sail fabric, simple rigging, transparent shallow water near the dock, bright glints on the bay. Clear breezy weather, warm saturated light, soft sky fill, crisp friendly highlights, no storm, no fog, no crowding. No characters, no animals, no silhouettes, no text, no logos, no dramatic action; environment look development plate only."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+     "sceneContextHash": "81f0f5f286aeb927dbe3d6950a1eef7cf6b972fb9a5ab2a7d7ffa5e528c7b925"
+    }
+   },
+   "history": []
+  }
+ }
+}

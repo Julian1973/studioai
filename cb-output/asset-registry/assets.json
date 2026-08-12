@@ -1,6 +1,71 @@
 {
   "assets": [
     {
+      "assetId": "e1a85b47871ef105ba2262d1",
+      "bindingKey": "Ep1|3||reference_image|prop_reference_Keens_Satchel",
+      "displayType": "image",
+      "episode": "Ep1",
+      "kind": "reference_image",
+      "label": "Keens Satchel",
+      "metadata": {
+        "assetUse": "prop_reference",
+        "description": "Keens Satchel",
+        "filename": "Requesting_professional_turnarou\u2026_202608120909.jpeg",
+        "libraryGroup": "props",
+        "scenes": ""
+      },
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/uploads_incoming/asset_library/props_9e88cd682f.jpg",
+      "registeredAt": "2026-08-12T08:10:03Z",
+      "role": "prop_reference_Keens_Satchel",
+      "scene": "3",
+      "shotId": null,
+      "source": "studio-upload",
+      "status": "draft",
+      "url": "/engine/media/uploads_incoming/asset_library/props_9e88cd682f.jpg"
+    },
+    {
+      "assetId": "e38b483c6a628ceaeaa7625b",
+      "bindingKey": "Ep1|3||scene_plate|scene_plate_candidate_sailboat_pier",
+      "displayType": "image",
+      "episode": "Ep1",
+      "kind": "scene_plate",
+      "label": "Scene 3 Sailboat Pier Scene Plate",
+      "metadata": {
+        "assetUse": "scene_plate",
+        "description": "Sailboat moored at wooden pier; Scene 3 pier departure plate candidate.",
+        "filename": "Sailboat_moored_at_wooden_pier_202608120911.jpeg",
+        "libraryGroup": "scenes",
+        "requiresJulianSignoff": true
+      },
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/asset-registry/Ep1_scene3_sailboat_pier_scene_plate_aaa9793e92.jpeg",
+      "registeredAt": "2026-08-12T08:31:09Z",
+      "role": "scene_plate_candidate_sailboat_pier",
+      "scene": "3",
+      "shotId": null,
+      "source": "julian-upload",
+      "status": "candidate",
+      "url": "/engine/media/asset-registry/Ep1_scene3_sailboat_pier_scene_plate_aaa9793e92.jpeg"
+    },
+    {
+      "assetId": "9868270851e2e3284e230128",
+      "bindingKey": "Ep1|2|2.B2.S1|opening_plate|approved_vision_plate",
+      "displayType": "image",
+      "episode": "Ep1",
+      "kind": "opening_plate",
+      "label": "Scene 2 approved_vision_plate",
+      "metadata": {
+        "originalPath": "/Users/julianjenkins/Downloads/Keen_and_Mum_on_pier_202608111038.jpeg"
+      },
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg",
+      "registeredAt": "2026-08-11T20:48:31Z",
+      "role": "approved_vision_plate",
+      "scene": "2",
+      "shotId": "2.B2.S1",
+      "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scene3_opening_plate.json",
+      "status": "approved",
+      "url": "/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg"
+    },
+    {
       "assetId": "da0effe45a275e6eb67f4f79",
       "bindingKey": "Ep1|1||scene_plate|scene_plate_approved",
       "displayType": "image",
@@ -33,6 +98,23 @@
       "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scenelook_scene2.json",
       "status": "approved",
       "url": "/engine/media/Ep1_S2_plate_candidate_81444b45.jpeg"
+    },
+    {
+      "assetId": "24f73379f85e1d3a3736fb6b",
+      "bindingKey": "Ep1|3||scene_plate|scene_plate_candidate",
+      "displayType": "image",
+      "episode": "Ep1",
+      "kind": "scene_plate",
+      "label": "Scene 3 candidate scene plate",
+      "metadata": {},
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S3_plate_candidate_a57f65c8.jpeg",
+      "registeredAt": "2026-08-12T08:36:20Z",
+      "role": "scene_plate_candidate",
+      "scene": "3",
+      "shotId": null,
+      "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scenelook_scene3.json",
+      "status": "candidate",
+      "url": "/engine/media/Ep1_S3_plate_candidate_a57f65c8.jpeg"
     },
     {
       "assetId": "6a8ea803d190f09ab9333674",
@@ -441,44 +523,6 @@
       "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scene2_production_package.json",
       "status": "approved",
       "url": "/engine/media/shots/Ep1_2.B3.S1_keyframe_candidate_305c5191.png"
-    },
-    {
-      "assetId": "0f2ae05116caf01c318ff763",
-      "bindingKey": "Ep1|3|3.B1.S1|opening_plate|scene_opening_plate",
-      "displayType": "image",
-      "episode": "Ep1",
-      "kind": "opening_plate",
-      "label": "Scene 3 opening plate",
-      "metadata": {
-        "originalPath": "/Users/julianjenkins/Downloads/Keen_and_Mum_on_pier_202608111038.jpeg"
-      },
-      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg",
-      "registeredAt": "2026-08-11T20:48:31Z",
-      "role": "scene_opening_plate",
-      "scene": "3",
-      "shotId": "3.B1.S1",
-      "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scene3_opening_plate.json",
-      "status": "approved",
-      "url": "/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg"
-    },
-    {
-      "assetId": "9868270851e2e3284e230128",
-      "bindingKey": "Ep1|2|2.B2.S1|opening_plate|approved_vision_plate",
-      "displayType": "image",
-      "episode": "Ep1",
-      "kind": "opening_plate",
-      "label": "Scene 2 approved_vision_plate",
-      "metadata": {
-        "originalPath": "/Users/julianjenkins/Downloads/Keen_and_Mum_on_pier_202608111038.jpeg"
-      },
-      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg",
-      "registeredAt": "2026-08-11T20:48:31Z",
-      "role": "approved_vision_plate",
-      "scene": "2",
-      "shotId": "2.B2.S1",
-      "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scene3_opening_plate.json",
-      "status": "approved",
-      "url": "/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg"
     },
     {
       "assetId": "846f766fdbcd94e86071c10a",
@@ -4084,6 +4128,10 @@
       "status": "approved",
       "url": "/cb-seed/assets/locations/rainforest_flower_meadow.png"
     }
+  ],
+  "deletedBindingKeys": [
+    "Ep1|3||reference_image|uploaded_props_Keens_Boat",
+    "Ep1|3||scene_plate|scene_plate_Codex_upload_smoke_scene_plate"
   ],
   "schemaVersion": 1
 }

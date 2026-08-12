@@ -51,13 +51,14 @@ def _now() -> str:
 
 def _read() -> dict[str, Any]:
     if not REGISTRY_PATH.exists():
-        return {"schemaVersion": 1, "assets": []}
+        return {"schemaVersion": 1, "assets": [], "deletedBindingKeys": []}
     raw = REGISTRY_PATH.read_text(encoding="utf-8")
     if not raw.strip():
         return {"schemaVersion": 1, "assets": []}
     data = json.loads(raw)
     data.setdefault("schemaVersion", 1)
     data.setdefault("assets", [])
+    data.setdefault("deletedBindingKeys", [])
     return data
 
 
@@ -150,6 +151,8 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
 
     data = _read()
     key = _binding_key(episode, scene, shot_id, kind, role)
+    if key in set(data.get("deletedBindingKeys") or []):
+        raise AssetBindingError(f"Asset binding was deleted for {key}")
     existing = [a for a in data["assets"] if a.get("bindingKey") == key]
     if existing and not replace and pathlib.Path(existing[0]["path"]).resolve() != p:
         raise AssetBindingError(f"Asset binding already exists for {key}")
@@ -179,6 +182,86 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
     data["assets"].append(rec)
     _write(data)
     return rec
+
+
+def remove_asset(asset_id: str) -> dict[str, Any]:
+    asset_id = str(asset_id or "").strip()
+    if not asset_id:
+        raise AssetBindingError("assetId is required.")
+    data = _read()
+    before = len(data.get("assets") or [])
+    removed = [item for item in data.get("assets") or [] if item.get("assetId") == asset_id]
+    data["assets"] = [item for item in data.get("assets") or [] if item.get("assetId") != asset_id]
+    if len(data["assets"]) == before:
+        raise AssetBindingError(f"No asset binding exists for assetId: {asset_id}")
+    deleted = set(data.get("deletedBindingKeys") or [])
+    for item in removed:
+        if item.get("bindingKey"):
+            deleted.add(item["bindingKey"])
+    data["deletedBindingKeys"] = sorted(deleted)
+    _write(data)
+    return {"removed": removed, "assetCount": len(data["assets"])}
+
+
+def update_asset(asset_id: str, *, label: str | None = None, scene: str | int | None = None,
+                 kind: str | None = None, role: str | None = None,
+                 status: str | None = None, path: str | pathlib.Path | None = None,
+                 metadata: dict[str, Any] | None = None) -> dict[str, Any]:
+    asset_id = str(asset_id or "").strip()
+    if not asset_id:
+        raise AssetBindingError("assetId is required.")
+    data = _read()
+    for index, rec in enumerate(data.get("assets") or []):
+        if rec.get("assetId") != asset_id:
+            continue
+        next_rec = dict(rec)
+        if label is not None:
+            next_rec["label"] = str(label).strip() or next_rec.get("label") or "Asset"
+        if status is not None:
+            next_rec["status"] = str(status).strip() or next_rec.get("status") or "draft"
+        if role is not None:
+            next_rec["role"] = str(role).strip() or next_rec.get("role") or next_rec.get("kind")
+        if kind is not None:
+            kind = str(kind or "").strip()
+            if kind not in KINDS:
+                raise AssetBindingError(f"Unsupported asset kind: {kind}")
+            next_rec["kind"] = kind
+        if scene is not None:
+            next_rec["scene"] = str(scene or "").strip() or next_rec.get("scene") or "*"
+        if path is not None:
+            p = pathlib.Path(path).expanduser().resolve()
+            if not p.exists():
+                raise AssetBindingError(f"Asset file does not exist: {p}")
+            url = url_for_path(p)
+            if not url:
+                raise AssetBindingError(f"Asset is not displayable by Studio static routes: {p}")
+            next_rec["path"] = str(p)
+            next_rec["url"] = url
+            next_rec["displayType"] = _display_type(p)
+            next_rec["assetId"] = _asset_id(
+                next_rec.get("episode") or "",
+                next_rec.get("scene") or "",
+                next_rec.get("shotId"),
+                next_rec.get("kind") or "",
+                next_rec.get("role"),
+                p,
+            )
+        if metadata is not None:
+            current_meta = dict(next_rec.get("metadata") or {})
+            current_meta.update({k: v for k, v in metadata.items() if v is not None})
+            next_rec["metadata"] = current_meta
+        next_rec["bindingKey"] = _binding_key(
+            next_rec.get("episode") or "",
+            next_rec.get("scene") or "",
+            next_rec.get("shotId"),
+            next_rec.get("kind") or "",
+            next_rec.get("role"),
+        )
+        next_rec["updatedAt"] = _now()
+        data["assets"][index] = next_rec
+        _write(data)
+        return next_rec
+    raise AssetBindingError(f"No asset binding exists for assetId: {asset_id}")
 
 
 def _register_if_exists(**kwargs: Any) -> dict[str, Any] | None:

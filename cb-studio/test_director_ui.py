@@ -306,7 +306,119 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert ".shot-inputs" in CSS
     assert ".shot-prompt-panel pre" in CSS
     assert ".shot-input-ref-grid" in CSS
-    assert "watch-conformance-20260810-2" in HTML
+    assert "scene-plate-direct-select-20260812-1" in HTML
+
+
+def test_shot_context_sits_above_see_hear_watch_and_carries_continuity_refs():
+    assert "renderShotContextPanel(session)" in JS
+    assert "Direction, continuity and references for this shot" in JS
+    assert "Do not break these in SEE, HEAR or WATCH" in JS
+    assert "These are the shot references going into SEE" in JS
+    assert "renderContinuityConstraints(session)" in JS
+    assert "${renderShotContextPanel(session)}\n      <section class=\"relay-grid\"" in JS
+    assert "stage === 1 && current ? `${renderKeyframeSourcePanel(session)}`" in JS
+    assert "Keen wristband state" in Path(HERE.parent / "cb-output" / "Ep1_scene3_production_package.json").read_text(encoding="utf-8")
+    assert "no aquamarine stones and no glow" in Path(HERE.parent / "cb-output" / "Ep1_scene3_production_package.json").read_text(encoding="utf-8").lower()
+    assert ".shot-context-panel" in CSS
+    assert ".shot-context-grid" in CSS
+    assert ".shot-continuity-brief" in CSS
+
+
+def test_scene_three_keeps_keen_wrist_states_distinct():
+    assert "sceneContinuityRules" in JS
+    assert "Keen starts bare-wrist" in JS
+    assert "wrists and forearms completely bare" in JS
+    assert "Keen Bare-Wrist State" in JS
+    assert "CB_Keen_nocuffs_front-back.jpeg" in JS
+    assert "Keen's Father's Wristbands — Vacant" in JS
+    assert "CB_Keen_wristband_vacant.jpeg" in JS
+    assert "No crystals, no aquamarine stones and no glow in Scenes 3, 4, 7 or 8." in JS
+    assert "Keen's Father's Wristbands — Aquamarine Charged" in JS
+    assert "CB_Keen_wristband_crystal.jpeg" in JS
+    assert "Aquamarine stones and glowing charged wristbands are locked to the end-of-episode gift state, not Scene 3." in JS
+    assert "Keen — Pier Departure, Bare Wrists" in JS
+    assert "Keen — Vacant Wristbands, No Crystals" in JS
+    assert "Keen — Charged Wristbands, Aquamarine Stones" in JS
+
+
+def test_left_rail_has_project_asset_libraries():
+    assert 'data-view="assets"' in HTML
+    assert 'id="view-assets"' in HTML
+    assert "Asset Library" in HTML
+    assert 'data-asset-category="characters"' in HTML
+    assert 'data-asset-category="scenes"' in HTML
+    assert 'data-asset-category="props"' in HTML
+    assert 'data-asset-category-panel="characters"' in HTML
+    assert 'data-asset-category-panel="scenes"' in HTML
+    assert 'data-asset-category-panel="props"' in HTML
+    assert 'legacyAssetCategory' in JS
+    assert 'renderAssetLibraryView' in JS
+    assert 'bindAssetLibraryTabs' in JS
+    assert 'id="character-library"' in HTML
+    assert 'id="scene-asset-library-view"' in HTML
+    assert 'id="prop-library"' in HTML
+    assert "renderCharacterLibraryView()" in JS
+    assert "renderSceneAssetLibraryView()" in JS
+    assert "renderPropLibraryView()" in JS
+    assert "loadProjectAssetLibrary" in JS
+    assert "/api/project-asset-library?" in JS
+    assert "registryLibraryItems" in JS
+    assert "Opening plate" in JS
+    assert "Approved scene plate" in JS
+    assert "Scenery reference" in JS
+    assert '"priority": scene_priority' in SERVER
+    assert 'key = rec["url"] if rec["group"] == "scenes"' in SERVER
+    assert "stable asset IDs" in JS
+    assert 'if self.path.startswith("/api/project-asset-library"):' in SERVER
+    assert '"libraryGroup": kind' in SERVER
+    assert "data-delete-asset" in JS
+    assert "app.assetLibraryDrafts.deleted" in JS
+    assert "drafts.deleted[kind].push(key)" in JS
+    assert ".filter(visible)" in JS
+    assert "data-remove-registry-asset" in JS
+    assert 'api("/api/asset-library-delete"' in JS
+    assert 'if self.path == "/api/asset-library-delete":' in SERVER
+    assert "remove_asset(asset_id)" in SERVER
+    assert ">Delete<" in JS
+    assert "Canon character references available to keyframes" in JS
+    assert "Reusable worlds, opening plates and location images available to SEE" in JS
+    assert "Story-critical objects and their current reference state" in JS
+    assert "data-asset-add-form" in JS
+    assert "data-asset-edit-form" in JS
+    assert 'name="imageFile"' in JS
+    assert "data-asset-image-upload" in JS
+    assert "uploadedAssetImageUrl" in JS
+    assert "uploadAssetImage" in JS
+    assert "removeProjectAssetLibraryItem" in JS
+    assert "removeAssetDraftCopies" in JS
+    assert "updateRegistryAssetFromForm" in JS
+    assert 'api("/api/asset-library-update"' in JS
+    assert "app.projectAssetLibraryKey = \"\";" in JS
+    assert "app.sceneAssetLibraryKey = \"\";" in JS
+    assert "assetUse" in JS
+    assert "Project use" in JS
+    assert "episode: app.episode || app.session?.episode || \"Ep1\"" in JS
+    assert "scene: app.scene || app.session?.scene || \"*\"" in JS
+    assert "loadProjectAssetLibrary({ episode: app.episode, scene: app.scene })" in JS
+    assert 'api("/api/asset-library-upload"' in JS
+    assert 'if self.path == "/api/asset-library-upload":' in SERVER
+    assert 'if self.path == "/api/asset-library-update":' in SERVER
+    assert "cb_asset_registry.update_asset" in SERVER
+    assert '"assetUse": asset_use' in SERVER
+    assert '"description": str(d.get("description") or "")' in SERVER
+    assert '"scenes": scenes' in SERVER
+    assert "data-edit-asset" in JS
+    assert "data-copy-asset-reference" in JS
+    assert "bindAssetLibraryEditing" in JS
+    assert "cb-studio:asset-library-drafts" in JS
+    assert "Copy Reference" in JS
+    assert "Use for Current Shot" in JS
+    assert ".asset-library-card" in CSS
+    assert ".asset-library-preview" in CSS
+    assert ".asset-inline-editor" in CSS
+    assert ".asset-add-panel" in CSS
+    assert '.asset-add-panel input[type="file"]' in CSS
+    assert ".primary:disabled, .secondary:disabled { opacity: .5; cursor: not-allowed; }" in CSS
 
 
 def test_client_bundle_has_no_fabricated_clip_fallbacks_or_banned_canon():
@@ -352,6 +464,9 @@ def test_scene_plate_source_buttons_are_valid_and_clickable():
     assert 'data-fire-scene-plate>Fire Scene Plate' not in JS
     assert 'host.querySelectorAll("[data-toggle-scene-plate-library]")' in JS
     assert 'host.querySelectorAll("[data-fire-scene-plate]")' in JS
+    assert "selectScenePlateSourceDirect" in JS
+    assert 'api("/api/scenelook-select-source"' in JS
+    assert 'if self.path == "/api/scenelook-select-source":' in SERVER
 
 
 def test_voice_review_shows_keyframe_context_and_specific_actions():
@@ -406,11 +521,11 @@ def test_shot_inputs_are_phase_specific_not_generic_keyframe_copy():
 
 def test_director_first_scene_workbench_matches_build_brief():
     assert 'id="scene-workbench"' in HTML
-    assert "watch-conformance-20260810-2" in HTML
+    assert "scene-plate-direct-select-20260812-1" in HTML
 
 
 def test_browser_and_server_publish_the_same_studio_build_version():
-    assert 'STUDIO_BUILD_VERSION = "watch-conformance-20260810-2"' in SERVER
+    assert 'STUDIO_BUILD_VERSION = "scene-plate-direct-select-20260812-1"' in SERVER
 
 
 def test_three_signoff_relay_and_parallel_scene_board_are_present():
@@ -464,13 +579,18 @@ def test_scene_workbench_is_active_beat_driven():
 
 def test_three_signoff_relay_exposes_real_inputs_and_source_choices():
     assert 'scene-workbench ~ .shot-inputs' not in CSS
-    assert 'Choose scene plate or keyframe source' in JS
+    assert 'Choose the world plate before keyframe work' in JS
     assert 'renderKeyframeSourcePanel(session)' in JS
+    assert 'renderSeeKeyframeReferences(session)' in JS
+    assert 'These are the shot references going into SEE' in JS
+    assert 'Scene plate selection is available now' in JS
+    assert '/api/scenelook-library?episode=' in JS
+    assert '.see-reference-pack' in CSS
     assert 'data-keyframe-upload' in JS
     assert 'data-select-keyframe-library' in JS
     assert 'data-select-scene-plate-asset' in JS
     assert 'if (session.phase === "keyframe")' in JS
-    assert 'Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary()])' in JS
+    assert 'Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary(session)])' in JS
 
 
 def test_audio_references_use_waveform_artwork_not_broken_images():
@@ -634,7 +754,7 @@ def test_production_pipeline_uses_the_canonical_creative_path():
     assert HTML.index('data-pipeline-step="audio"') < HTML.index('data-pipeline-step="footage"')
     assert "renderCanonicalPipelineStep(step)" in JS
     assert 'view: "director"' in JS
-    assert '? params.get("view") : "director"' in JS
+    assert '? requestedView : legacyAssetCategory ? "assets" : "director"' in JS
     assert '? requestedStep : "storyboard"' in JS
     assert "production-board" in JS
     assert "shotPipelineRail(shot)" in JS

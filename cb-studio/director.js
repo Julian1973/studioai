@@ -20,6 +20,7 @@
     keyframeLibraryKey: null,
     keyframeLibraryLoading: false,
     sceneAssetLibrary: null,
+    sceneAssetLibraryKey: null,
     sceneAssetLibraryLoading: false,
     scenePlateLibraryOpen: false,
     workbenchState: null,
@@ -35,6 +36,7 @@
     roughCutStatus: null,
     roughCutStatusKey: null,
     roughCutLoading: false,
+    assetLibraryDrafts: null,
     agentBrief: null,
     agentBriefKey: null,
     agentLoading: false,
@@ -131,9 +133,9 @@
       identity: "Small-to-medium young bear with warm mid-brown fur, round youthful face, wide bright eyes, small button nose and full rounded cheeks.",
       reference: "Generate a wardrobe first",
       wardrobes: [
-        { label: "Keen — Pier Departure, Dry", scenes: "3", state: "gen", initial: "K" },
-        { label: "Keen — At Sea and Storm, Soaked", scenes: "4, 7", state: "gen", initial: "K" },
-        { label: "Keen — Crystal Cove Beach, Post-Storm", scenes: "8, 9, 10", state: "gen", initial: "K" },
+        { label: "Keen — Pier Departure, Bare Wrists", scenes: "3", state: "gen", initial: "K" },
+        { label: "Keen — Vacant Wristbands, No Crystals", scenes: "3, 4, 7, 8", state: "gen", initial: "K" },
+        { label: "Keen — Charged Wristbands, Aquamarine Stones", scenes: "9, 10", state: "gen", initial: "K" },
       ],
     },
     {
@@ -256,11 +258,33 @@
   const propRoster = [
     ["Aida's Rose Quartz Pendant", "2, 6, 9", "Generated", "A smooth polished rose quartz crystal pendant hanging on a fine natural cord, pale semi-translucent pink stone with a soft warm inner glow."],
     ["Crystal Singing Bowl and Wand", "2", "Draft", "A clear polished quartz crystal singing bowl with a padded cloth-tipped wooden wand, isolated on a neutral grey studio backdrop."],
-    ["Keen's Father's Wristbands", "3, 4, 7, 8, 9, 10", "Draft", "A pair of worn aged leather wristbands with small aquamarine crystal gems glowing softly with azure light."],
+    ["Keen Bare-Wrist State", "3", "Required", "Scene 3 opening state for Keen: wrists and forearms completely bare. No wristbands, bands, bracelets, cuffs, straps, crystals or glow."],
+    ["Keen's Father's Wristbands — Vacant", "3, 4, 7, 8", "Required", "A pair of worn inherited leather wristbands with empty settings only. No crystals, no aquamarine stones and no glow in Scenes 3, 4, 7 or 8."],
+    ["Keen's Father's Wristbands — Aquamarine Charged", "9, 10", "Locked Later", "The same inherited wristbands only after the end-of-episode gift beat: aquamarine stones seated in the bands with a controlled crystal glow."],
     ["Keen's Small Sailboat", "3, 4, 7", "Draft", "A compact wooden single-mast sailboat with plain white sail, rope rigging and natural wood grain."],
     ["Keen's Satchel", "3, 4", "Draft", "A small worn canvas traveller's satchel with buckled flap closure and shoulder strap."],
     ["Drift Net", "7", "Draft", "A ragged discarded fishing drift net, frayed and tangled with weathered dark grey-green mesh."],
   ];
+
+  const sceneContinuityRules = {
+    "3": [
+      {
+        label: "Keen starts bare-wrist",
+        value: "Scene 3 departure starts with Keen's wrists and forearms completely bare: no wristbands, bracelets, cuffs, straps, crystals or glow.",
+        severity: "critical",
+      },
+      {
+        label: "Vacant wristbands only",
+        value: "When Keen's inherited wristbands appear in Scene 3, they are empty leather bands only: no aquamarine stones, no crystal inserts and no glow.",
+        severity: "critical",
+      },
+      {
+        label: "Crystal version locked later",
+        value: "Aquamarine stones and glowing charged wristbands are locked to the end-of-episode gift state, not Scene 3.",
+        severity: "critical",
+      },
+    ],
+  };
 
   const locationRoster = [
     ["Deep Within the Rainforest", "Warm, lush, playful, gently ominous as storm approaches", "1", "A dense tropical rainforest interior with towering flowers, drifting pollen, dappled golden sunlight and a cooler storm shift."],
@@ -430,8 +454,12 @@
 
   function readHash() {
     const params = new URLSearchParams(location.hash.replace(/^#/, ""));
-    app.view = ["pipeline", "episodes", "director", "review"].includes(params.get("view"))
-      ? params.get("view") : "director";
+    const requestedView = params.get("view");
+    const legacyAssetCategory = { characters: "characters", "scene-assets": "scenes", props: "props" }[requestedView];
+    app.view = ["pipeline", "episodes", "director", "review", "assets"].includes(requestedView)
+      ? requestedView : legacyAssetCategory ? "assets" : "director";
+    app.assetCategory = params.get("asset") || legacyAssetCategory || app.assetCategory || "characters";
+    if (!["characters", "scenes", "props"].includes(app.assetCategory)) app.assetCategory = "characters";
     app.scene = params.get("scene") || "1";
     app.shotId = params.get("shot") || null;
     app.explicitLocation = params.has("scene") || params.has("shot");
@@ -447,6 +475,7 @@
     if (app.shotId) params.set("shot", app.shotId);
     if (app.activeBeatId) params.set("beat", app.activeBeatId);
     if (app.view === "pipeline") params.set("step", app.pipelineStep);
+    if (app.view === "assets") params.set("asset", app.assetCategory || "characters");
     const next = `#${params.toString()}`;
     if (location.hash !== next) history.replaceState(null, "", next);
   }
@@ -463,6 +492,7 @@
     writeHash();
     $("#workspace").scrollTo({ top: 0, behavior: "smooth" });
     if (view === "pipeline") renderPipeline();
+    if (view === "assets") renderAssetLibraryView();
   }
 
   function openShot(scene, shotId) {
@@ -1126,20 +1156,7 @@
       : stageData.error
         ? `Reference load failed: ${stageData.error}`
         : "";
-    const plateRefs = refs.filter((item) => /scene|plate|location|look|corridor|environment/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
-    const characterRefs = refs.filter((item) => item.identity?.intactTurnaround || /character|turnaround|zenny|fuzzby|aida|keen|lunar|squeaky/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
-    const otherRefs = refs.filter((item) => !plateRefs.includes(item) && !characterRefs.includes(item));
-    const renderRef = (item) => {
-      const label = item.role || item.label || "Shot reference";
-      const isAudio = Boolean(item.url) && (
-        item.kind === "audio" || /\.(?:wav|mp3|m4a|aac|ogg)(?:\?|$)/i.test(item.url) ||
-        /audio|voice|dialogue|performance track/i.test(label));
-      return `<article class="shot-input-ref ${isAudio ? "audio-reference" : ""}">
-      ${isAudio ? audioWaveformMarkup(label) : item.url ? `<img src="${esc(item.url)}" alt="${esc(label)}">` : '<div class="shot-input-ref-missing">Missing</div>'}
-      <strong>${esc(item.role || item.label || item.slot || "Reference")}</strong>
-      <span>${esc(item.identity?.intactTurnaround ? "Complete uncropped turnaround · identity authority" : item.message || item.status || "Locked reference")}</span>
-    </article>`;
-    };
+    const { plateRefs, characterRefs, otherRefs } = splitShotReferences(refs);
     const prompt = requestPromptText(session);
     const providerRequest = visiblePromptRequest(session);
     const showingPreparedAnimation = Boolean(session.inspector?.preparedAnimationRequest);
@@ -1170,14 +1187,14 @@
     <div class="shot-input-grid">
       <section>
         <div class="shot-input-section-head"><span>Scene Plate</span><strong>${referenceMessage ? "..." : plateRefs.length || 0}</strong></div>
-        <div class="shot-input-ref-grid">${plateRefs.map(renderRef).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || "No scene plate reference loaded yet.")}</div>`}</div>
+        <div class="shot-input-ref-grid">${plateRefs.map(renderShotReferenceCard).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || "No scene plate reference loaded yet.")}</div>`}</div>
       </section>
       <section>
         <div class="shot-input-section-head"><span>Character Turnarounds</span><strong>${referenceMessage ? "..." : characterRefs.length || 0}</strong></div>
-        <div class="shot-input-ref-grid">${characterRefs.map(renderRef).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || "No character turnaround loaded yet.")}</div>`}</div>
+        <div class="shot-input-ref-grid">${characterRefs.map(renderShotReferenceCard).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || "No character turnaround loaded yet.")}</div>`}</div>
       </section>
     </div>
-    ${otherRefs.length ? `<section><div class="shot-input-section-head"><span>Other Locked References</span><strong>${otherRefs.length}</strong></div><div class="shot-input-ref-grid compact">${otherRefs.map(renderRef).join("")}</div></section>` : ""}
+    ${otherRefs.length ? `<section><div class="shot-input-section-head"><span>Other Locked References</span><strong>${otherRefs.length}</strong></div><div class="shot-input-ref-grid compact">${otherRefs.map(renderShotReferenceCard).join("")}</div></section>` : ""}
     <section class="shot-prompt-panel" data-prompt-copy-panel>
       <div class="shot-input-section-head"><span>Exact Prompt</span><div class="prompt-copy-actions"><strong>${providerRequest ? "Prepared" : "Pending"}</strong><span class="prompt-copy-status" data-copy-prompt-status aria-live="polite"></span><button type="button" class="prompt-copy-button" data-copy-prompt aria-label="Copy prompt" title="Copy prompt"><span aria-hidden="true"></span></button></div></div>
     ${showingPreparedAnimation ? `<div class="prepared-prompt-notice"><strong>WATCH direction ready</strong><span>${session.phase === "animation" ? "HEAR is approved. Compile the current provider request to inspect its final prompt and cost before rendering." : "Creative direction is ready to inspect. Complete HEAR before render preparation or spend."}</span></div>` : ""}
@@ -1209,6 +1226,7 @@
       app.inlineReferencesLoading = false;
       if (app.session?.selectedShotId === session.selectedShotId) {
         renderShotInputs(app.session);
+        if (app.view === "director") renderSignoffRelay(app.session);
       }
     }
   }
@@ -1359,6 +1377,55 @@
     </div>`).join("");
   }
 
+  function inlineReferenceStageData(session, stage = currentReferenceStage(session)) {
+    const keyPrefix = `${session.episode}:${session.scene}:${session.selectedShotId || ""}:`;
+    const referencesCurrent = Boolean(app.inlineReferencesKey && app.inlineReferencesKey.startsWith(keyPrefix));
+    return referencesCurrent ? (app.inlineReferences?.[stage] || {}) : {};
+  }
+
+  function splitShotReferences(refs) {
+    const plateRefs = refs.filter((item) => /scene|plate|location|look|corridor|environment|vision|pier|cove|island/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
+    const characterRefs = refs.filter((item) => item.identity?.intactTurnaround || /character|turnaround|zenny|fuzzby|aida|keen|mum|lunar|squeaky/i.test(`${item.role || ""} ${item.label || ""} ${item.slot || ""}`));
+    const otherRefs = refs.filter((item) => !plateRefs.includes(item) && !characterRefs.includes(item));
+    return { plateRefs, characterRefs, otherRefs };
+  }
+
+  function renderShotReferenceCard(item) {
+    const label = item.role || item.label || "Shot reference";
+    const isAudio = Boolean(item.url) && (
+      item.kind === "audio" || /\.(?:wav|mp3|m4a|aac|ogg)(?:\?|$)/i.test(item.url) ||
+      /audio|voice|dialogue|performance track/i.test(label));
+    return `<article class="shot-input-ref ${isAudio ? "audio-reference" : ""}">
+      ${isAudio ? audioWaveformMarkup(label) : item.url ? `<img src="${esc(item.url)}" alt="${esc(label)}">` : '<div class="shot-input-ref-missing">Missing</div>'}
+      <strong>${esc(item.role || item.label || item.slot || "Reference")}</strong>
+      <span>${esc(item.identity?.intactTurnaround ? "Complete uncropped turnaround · identity authority" : item.message || item.status || "Locked reference")}</span>
+    </article>`;
+  }
+
+  function renderSeeKeyframeReferences(session) {
+    const stageData = inlineReferenceStageData(session, "keyframe");
+    const refs = stageData.references || [];
+    const referenceMessage = app.inlineReferencesLoading
+      ? "Loading locked keyframe references..."
+      : stageData.error
+        ? `Reference load failed: ${stageData.error}`
+        : "";
+    const { plateRefs, characterRefs, otherRefs } = splitShotReferences(refs);
+    const renderGroup = (title, items, empty) => `<section>
+      <div class="shot-input-section-head"><span>${esc(title)}</span><strong>${referenceMessage ? "..." : items.length || 0}</strong></div>
+      <div class="shot-input-ref-grid compact">${items.map(renderShotReferenceCard).join("") || `<div class="shot-inputs-empty">${esc(referenceMessage || empty)}</div>`}</div>
+    </section>`;
+    return `<section class="see-reference-pack">
+      <div class="source-panel-head">
+        <div><span>Keyframe references</span><strong>These are the shot references going into SEE</strong></div>
+        <em>${esc(referenceMessage ? "Loading" : `${refs.length} refs`)}</em>
+      </div>
+      ${renderGroup("Scene Plate", plateRefs, "No scene plate reference loaded yet.")}
+      ${renderGroup("Character Turnarounds", characterRefs, "No character turnaround loaded yet.")}
+      ${otherRefs.length ? renderGroup("Other Locked References", otherRefs, "") : ""}
+    </section>`;
+  }
+
   function hasVisibleKeyframeArtifact(session) {
     return session?.phase === "keyframe" &&
       session?.artifact?.type === "image" &&
@@ -1398,73 +1465,607 @@
     return `/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/${clean}`;
   }
 
-  async function loadSceneAssetLibrary() {
-    if (app.sceneAssetLibrary || app.sceneAssetLibraryLoading) return;
+  function slugAssetName(value) {
+    return String(value || "")
+      .replace(/['’]/g, "")
+      .replace(/[^a-z0-9]+/gi, "")
+      .toLowerCase();
+  }
+
+  function libraryAssetUrlForName(name, kind = "character") {
+    const compact = slugAssetName(name);
+    const characterMap = {
+      zenny: "/cb-seed/assets/final_turnarounds/CB_Zenny.jpeg",
+      aida: "/cb-seed/assets/final_turnarounds/CB_Aida.jpeg",
+      keen: "/cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+      keensmum: "/cb-seed/assets/final_turnarounds/CB_KeensMum.jpeg",
+      howey: "/cb-seed/assets/final_turnarounds/CB_Howey.jpeg",
+      misty: "/cb-seed/assets/final_turnarounds/CB_Misty.jpeg",
+      luna: "/cb-seed/assets/final_turnarounds/CB_Luna.jpeg",
+      sunny: "/cb-seed/assets/final_turnarounds/CB_Sunny.jpeg",
+      amie: "/cb-seed/assets/final_turnarounds/CB_Amie.jpeg",
+      squeaky: "/cb-seed/assets/final_turnarounds/CB_Squeaky.jpeg",
+      fuzzby: "/cb-seed/assets/CB_Fuzzby_full_turnaround.png",
+    };
+    const propMap = {
+      aidasrosequartzpendant: "/cb-seed/assets/CB_Aida_anchor.png",
+      crystalsingingbowlandwand: "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg",
+      keenbarewriststate: "/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+      keensfatherswristbandsvacant: "/cb-seed/assets/ep1/CB_Keen_wristband_vacant.jpeg",
+      keensfatherswristbandsaquamarinecharged: "/cb-seed/assets/ep1/CB_Keen_wristband_crystal.jpeg",
+      keenssmallsailboat: "/cb-seed/assets/ep1/CB_Scene_KeenPier_1.jpeg",
+      keenssatchel: "/cb-seed/assets/CB_Keen_anchor.jpeg",
+      driftnet: "/cb-seed/assets/ep1/CB_Scene_KeenPier_5.jpeg",
+    };
+    const sceneMap = {
+      deepwithintherainforest: "/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+      crystalcoveaidassanctuary: "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg",
+      keensislandthepier: "/cb-seed/assets/CB_Pier_plate.png",
+      atsea: "/cb-seed/assets/ep1/CB_Scene_KeenPier_5.jpeg",
+    };
+    if (kind === "prop") return propMap[compact] || "";
+    if (kind === "scene") return sceneMap[compact] || "";
+    return characterMap[compact] || "";
+  }
+
+  function renderAssetLibraryHeading(kicker, title, copy, actions = "") {
+    return `<div class="asset-library-heading">
+      <div><span>${esc(kicker)}</span><h1>${esc(title)}</h1><p>${esc(copy)}</p></div>
+      <div class="asset-library-actions">${actions}</div>
+    </div>`;
+  }
+
+  function renderLibraryReferenceThumb(url, label) {
+    return url
+      ? `<img src="${esc(url)}" alt="${esc(label)}">`
+      : `<div class="asset-library-missing">No image</div>`;
+  }
+
+  function assetLibraryDrafts() {
+    if (app.assetLibraryDrafts) return app.assetLibraryDrafts;
+    try {
+      app.assetLibraryDrafts = JSON.parse(localStorage.getItem("cb-studio:asset-library-drafts") || "{}");
+    } catch (_) {
+      app.assetLibraryDrafts = {};
+    }
+    app.assetLibraryDrafts.characters ||= {};
+    app.assetLibraryDrafts.scenes ||= {};
+    app.assetLibraryDrafts.props ||= {};
+    app.assetLibraryDrafts.added ||= { characters: [], scenes: [], props: [] };
+    app.assetLibraryDrafts.deleted ||= { characters: [], scenes: [], props: [] };
+    app.assetLibraryDrafts.added.characters ||= [];
+    app.assetLibraryDrafts.added.scenes ||= [];
+    app.assetLibraryDrafts.added.props ||= [];
+    app.assetLibraryDrafts.deleted.characters ||= [];
+    app.assetLibraryDrafts.deleted.scenes ||= [];
+    app.assetLibraryDrafts.deleted.props ||= [];
+    return app.assetLibraryDrafts;
+  }
+
+  function saveAssetLibraryDrafts() {
+    localStorage.setItem("cb-studio:asset-library-drafts", JSON.stringify(assetLibraryDrafts()));
+  }
+
+  function libraryItems(kind) {
+    const drafts = assetLibraryDrafts();
+    const deleted = new Set(drafts.deleted[kind] || []);
+    const applyDrafts = (item) => ({ ...item, ...(drafts[kind][item.key || slugAssetName(item.name)] || {}) });
+    const visible = (item) => !deleted.has(item.key || slugAssetName(item.name));
+    if (kind === "characters") {
+      return [...characterRoster.map((item) => ({ ...item, key: slugAssetName(item.name), imageUrl: libraryAssetUrlForName(item.name, "character") })), ...drafts.added.characters]
+        .filter(visible)
+        .map(applyDrafts);
+    }
+    if (kind === "scenes") {
+      return [...locationRoster.map((item) => ({
+        key: slugAssetName(item[0]), name: item[0], mood: item[1], scenes: item[2],
+        prompt: item[3], imageUrl: libraryAssetUrlForName(item[0], "scene"),
+      })), ...drafts.added.scenes].filter(visible).map(applyDrafts);
+    }
+    return [...propRoster.map((item) => ({
+      key: slugAssetName(item[0]), name: item[0], scenes: item[1], status: item[2],
+      prompt: item[3], imageUrl: libraryAssetUrlForName(item[0], "prop"),
+    })), ...drafts.added.props].filter(visible).map(applyDrafts);
+  }
+
+  function registryLibraryItems(kind) {
+    const groups = app.projectAssetLibrary?.groups || {};
+    return (groups[kind] || []).map((item) => ({
+      key: item.assetId || slugAssetName(item.label || item.path),
+      name: item.label || item.role || item.assetId || "Project asset",
+      scenes: item.scene === "*" ? "Project-wide" : item.scene || "",
+      status: item.status || "approved",
+      role: item.role || item.kind || "",
+      prompt: [item.kind, item.source].filter(Boolean).join(" · "),
+      imageUrl: item.url,
+      path: item.path,
+      assetId: item.assetId,
+      source: item.source,
+      kind: item.kind,
+      priority: item.priority,
+      assetUse: item.metadata?.assetUse || "",
+      canDelete: true,
+      registry: true,
+    }));
+  }
+
+  function renderInlineAssetEditor(kind, item) {
+    const key = item.key || slugAssetName(item.name);
+    const description = item.prompt || item.role || "";
+    return `<form class="asset-inline-editor" data-asset-edit-form="${esc(kind)}" data-asset-key="${esc(key)}" data-asset-id="${esc(item.assetId || "")}">
+      <label>Name<input name="name" value="${esc(item.name)}"></label>
+      <label>Scenes<input name="scenes" value="${esc(item.scenes || "")}"></label>
+      <label>Image path or URL<input name="imageUrl" value="${esc(item.imageUrl || "")}"></label>
+      <label>Upload image<input type="file" accept="image/png,image/jpeg,image/webp" name="imageFile" data-asset-image-upload></label>
+      <label>Project use${renderAssetUseSelect(kind, item.assetUse || "")}</label>
+      ${kind === "scenes" ? `<label>Mood<input name="mood" value="${esc(item.mood || "")}"></label>` : kind === "props" ? `<label>Status<input name="status" value="${esc(item.status || "")}"></label>` : `<label>Status<input name="status" value="${esc(item.status || "")}"></label>`}
+      <label class="wide">Description<textarea name="description" rows="4">${esc(description)}</textarea></label>
+      <div><button type="submit" class="primary">Save</button><button type="button" class="secondary" data-cancel-asset-edit>Cancel</button></div>
+    </form>`;
+  }
+
+  function renderAssetUseSelect(kind, selected = "") {
+    const defaults = {
+      characters: "character_turnaround",
+      scenes: "scene_plate",
+      props: "prop_reference",
+    };
+    const current = selected || defaults[kind] || "general_reference";
+    const options = [
+      ["character_turnaround", "Character turnaround / identity"],
+      ["scene_plate", "Scene plate / world look"],
+      ["opening_plate", "Opening plate / handoff"],
+      ["prop_reference", "Prop reference"],
+      ["general_reference", "General reference"],
+    ];
+    return `<select name="assetUse">${options.map(([value, label]) => `<option value="${esc(value)}"${value === current ? " selected" : ""}>${esc(label)}</option>`).join("")}</select>`;
+  }
+
+  function renderAssetAddForm(kind, label) {
+    return `<details class="asset-add-panel">
+      <summary>Add ${esc(label)}</summary>
+      <form data-asset-add-form="${esc(kind)}">
+        <label>Name<input name="name" placeholder="${esc(label)} name"></label>
+        <label>Scenes<input name="scenes" placeholder="Scene numbers"></label>
+        <label>Image path or URL<input name="imageUrl" placeholder="cb-seed/assets/..."></label>
+        <label>Upload image<input type="file" accept="image/png,image/jpeg,image/webp" name="imageFile" data-asset-image-upload></label>
+        <label>Project use${renderAssetUseSelect(kind)}</label>
+        ${kind === "scenes" ? `<label>Mood<input name="mood" placeholder="Mood / look"></label>` : `<label>Status<input name="status" placeholder="Draft / approved"></label>`}
+        <label class="wide">Description<textarea name="description" rows="4" placeholder="What this asset defines and what must not change"></textarea></label>
+        <button type="submit" class="primary">Add ${esc(label)}</button>
+      </form>
+    </details>`;
+  }
+
+  async function uploadAssetImage(form, kind) {
+    const file = form.querySelector('input[name="imageFile"]')?.files?.[0];
+    if (!file) return null;
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type || "")) {
+      throw new Error("Upload a PNG, JPEG or WebP image.");
+    }
+    const data = new FormData(form);
+    const dataB64 = await readFileAsDataUrl(file);
+    return api("/api/asset-library-upload", {
+      method: "POST",
+      body: JSON.stringify({
+        kind,
+        episode: app.episode || app.session?.episode || "Ep1",
+        scene: app.scene || app.session?.scene || "*",
+        label: data.get("name") || file.name,
+        status: data.get("status") || "draft",
+        scenes: data.get("scenes") || "",
+        description: data.get("description") || "",
+        assetUse: data.get("assetUse") || "",
+        filename: file.name,
+        dataB64,
+      }),
+    });
+  }
+
+  async function uploadedAssetImageUrl(form, kind, fallbackUrl) {
+    const uploaded = await uploadAssetImage(form, kind);
+    if (!uploaded) return String(fallbackUrl || "");
+    return uploaded.url || uploaded.sourcePath || "";
+  }
+
+  async function updateRegistryAssetFromForm(form, kind, assetId) {
+    const file = form.querySelector('input[name="imageFile"]')?.files?.[0];
+    if (file && !/^image\/(png|jpeg|webp)$/.test(file.type || "")) {
+      throw new Error("Upload a PNG, JPEG or WebP image.");
+    }
+    const data = new FormData(form);
+    const body = {
+      assetId,
+      kind,
+      episode: app.episode || app.session?.episode || "Ep1",
+      scene: app.scene || app.session?.scene || "*",
+      label: data.get("name") || "",
+      scenes: data.get("scenes") || "",
+      status: data.get("status") || "draft",
+      description: data.get("description") || "",
+      assetUse: data.get("assetUse") || "",
+      filename: file?.name || "",
+    };
+    if (file) body.dataB64 = await readFileAsDataUrl(file);
+    return api("/api/asset-library-update", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  }
+
+  function removeAssetDraftCopies(kind, assetId, imageUrl) {
+    const drafts = assetLibraryDrafts();
+    drafts.added[kind] = (drafts.added[kind] || []).filter((item) => (
+      item.assetId !== assetId && (!imageUrl || item.imageUrl !== imageUrl)
+    ));
+    Object.entries(drafts[kind] || {}).forEach(([key, item]) => {
+      if (item?.assetId === assetId || (imageUrl && item?.imageUrl === imageUrl)) delete drafts[kind][key];
+    });
+    saveAssetLibraryDrafts();
+  }
+
+  function removeProjectAssetLibraryItem(assetId) {
+    if (!assetId || !app.projectAssetLibrary?.groups) return null;
+    let removed = null;
+    Object.keys(app.projectAssetLibrary.groups).forEach((group) => {
+      app.projectAssetLibrary.groups[group] = (app.projectAssetLibrary.groups[group] || []).filter((item) => {
+        if (item.assetId === assetId) {
+          removed = item;
+          return false;
+        }
+        return true;
+      });
+    });
+    return removed;
+  }
+
+  function bindAssetLibraryEditing(host, kind, rerender) {
+    host.querySelectorAll("[data-edit-asset]").forEach((button) => button.addEventListener("click", () => {
+      host.querySelectorAll(".asset-library-card.editing").forEach((card) => card.classList.remove("editing"));
+      button.closest(".asset-library-card")?.classList.add("editing");
+    }));
+    host.querySelectorAll("[data-cancel-asset-edit]").forEach((button) => button.addEventListener("click", () => {
+      button.closest(".asset-library-card")?.classList.remove("editing");
+    }));
+    host.querySelectorAll("[data-delete-asset]").forEach((button) => button.addEventListener("click", () => {
+      const key = button.dataset.deleteAsset;
+      const drafts = assetLibraryDrafts();
+      drafts.added[kind] = (drafts.added[kind] || []).filter((item) => item.key !== key);
+      delete drafts[kind][key];
+      if (!drafts.deleted[kind].includes(key)) drafts.deleted[kind].push(key);
+      saveAssetLibraryDrafts();
+      toast("Asset deleted from this Studio library.");
+      rerender();
+    }));
+    host.querySelectorAll("[data-remove-registry-asset]").forEach((button) => button.addEventListener("click", async () => {
+      const assetId = button.dataset.removeRegistryAsset;
+      if (!assetId) return toast("No asset binding found.", true);
+      button.disabled = true;
+      try {
+        await api("/api/asset-library-delete", {
+          method: "POST",
+          body: JSON.stringify({ assetId }),
+        });
+        const removed = removeProjectAssetLibraryItem(assetId);
+        removeAssetDraftCopies(kind, assetId, removed?.url);
+        app.projectAssetLibraryKey = "";
+        await loadProjectAssetLibrary({ episode: app.episode, scene: app.scene });
+        toast("Asset removed from the Studio library.");
+        rerender();
+      } catch (error) {
+        toast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    }));
+    host.querySelectorAll("[data-asset-edit-form]").forEach((form) => form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const key = form.dataset.assetKey;
+      const assetId = form.dataset.assetId || "";
+      const drafts = assetLibraryDrafts();
+      form.classList.add("saving");
+      try {
+        if (assetId) {
+          await updateRegistryAssetFromForm(form, kind, assetId);
+          app.projectAssetLibraryKey = "";
+          await loadProjectAssetLibrary({ episode: app.episode, scene: app.scene });
+          toast("Asset updated.");
+          rerender();
+          return;
+        }
+        const uploaded = await uploadAssetImage(form, kind);
+        if (uploaded?.assetId) {
+          delete drafts[kind][key];
+          removeAssetDraftCopies(kind, uploaded.assetId, uploaded.url);
+          app.projectAssetLibraryKey = "";
+          await loadProjectAssetLibrary({ episode: app.episode, scene: app.scene });
+          toast("Asset uploaded and registered in the project library.");
+          rerender();
+          return;
+        }
+        const imageUrl = String(data.get("imageUrl") || "");
+        drafts[kind][key] = {
+          key,
+          name: data.get("name"),
+          scenes: data.get("scenes"),
+          imageUrl,
+          mood: data.get("mood"),
+          status: data.get("status"),
+          prompt: data.get("description"),
+          role: data.get("description"),
+          assetUse: data.get("assetUse"),
+        };
+        saveAssetLibraryDrafts();
+        toast("Asset updated.");
+        rerender();
+      } catch (error) {
+        toast(error.message, true);
+      } finally {
+        form.classList.remove("saving");
+      }
+    }));
+    host.querySelectorAll("[data-asset-add-form]").forEach((form) => form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const name = String(data.get("name") || "").trim();
+      if (!name) return toast("Name is required.", true);
+      form.classList.add("saving");
+      try {
+        const uploaded = await uploadAssetImage(form, kind);
+        if (uploaded?.assetId) {
+          removeAssetDraftCopies(kind, uploaded.assetId, uploaded.url);
+          app.projectAssetLibraryKey = "";
+          await loadProjectAssetLibrary({ episode: app.episode, scene: app.scene });
+          toast("Asset uploaded and registered in the project library.");
+          form.reset();
+          rerender();
+          return;
+        }
+        const imageUrl = String(data.get("imageUrl") || "");
+        const item = {
+          key: `${slugAssetName(name)}-${Date.now()}`,
+          name,
+          scenes: data.get("scenes"),
+          imageUrl,
+          mood: data.get("mood"),
+          status: data.get("status") || "Draft",
+          prompt: data.get("description"),
+          role: data.get("description"),
+          assetUse: data.get("assetUse"),
+        };
+        const drafts = assetLibraryDrafts();
+        drafts.added[kind].push(item);
+        saveAssetLibraryDrafts();
+        toast("Asset added.");
+        rerender();
+      } catch (error) {
+        toast(error.message, true);
+      } finally {
+        form.classList.remove("saving");
+      }
+    }));
+  }
+
+  function bindAssetReferenceCopy(host) {
+    host.querySelectorAll("[data-copy-asset-reference]").forEach((button) => button.addEventListener("click", async () => {
+      const value = button.dataset.copyAssetReference || "";
+      if (!value) return toast("No reference path available.", true);
+      try {
+        await (navigator.clipboard?.writeText(value) || Promise.reject(new Error("Clipboard unavailable")));
+        toast("Reference path copied.");
+      } catch (_) {
+        const area = document.createElement("textarea");
+        area.value = value;
+        document.body.append(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        toast("Reference path copied.");
+      }
+    }));
+  }
+
+  function renderCharacterLibraryView() {
+    const host = $("#character-library");
+    if (!host) return;
+    const items = [...registryLibraryItems("characters"), ...libraryItems("characters")];
+    host.innerHTML = `${renderAssetLibraryHeading(
+      "Project library",
+      "Characters",
+      "Canon character references available to keyframes, animation and shot prompts. Registered files use stable asset IDs; display names are only labels.",
+      '<button type="button" class="secondary" data-refresh-project-library>Refresh</button>'
+    )}
+    ${renderAssetAddForm("characters", "Character")}
+    <div class="asset-library-grid">
+      ${items.map((character) => {
+        const url = character.imageUrl || libraryAssetUrlForName(character.name, "character");
+        return `<article class="asset-library-card character">
+          <div class="asset-library-preview">${renderLibraryReferenceThumb(url, `${character.name} reference`)}</div>
+          <div class="asset-library-copy">
+            <div><strong>${esc(character.name)}</strong><span>${esc(character.status === "ready" ? "Approved reference" : "Needs sign-off")}</span></div>
+            <p>${esc(character.role)}</p>
+            <dl>
+              <div><dt>Scenes</dt><dd>${esc(character.scenes)}</dd></div>
+              <div><dt>Reference</dt><dd>${esc(character.assetId || character.reference || character.path || "")}</dd></div>
+            </dl>
+          </div>
+          <div class="asset-library-card-actions">
+            <button type="button" class="secondary" data-edit-asset="${esc(character.key)}">Edit</button>
+            ${character.registry ? `<button type="button" class="secondary danger" data-remove-registry-asset="${esc(character.assetId)}">Delete</button>` : `<button type="button" class="secondary danger" data-delete-asset="${esc(character.key)}">Delete</button>`}
+            <button type="button" class="secondary" data-copy-asset-reference="${esc(url)}">Copy Reference</button>
+          </div>
+          ${renderInlineAssetEditor("characters", { ...character, imageUrl: url })}
+        </article>`;
+      }).join("")}
+    </div>`;
+    bindProjectLibraryRefresh(host, renderCharacterLibraryView);
+    bindAssetLibraryEditing(host, "characters", renderCharacterLibraryView);
+    bindAssetReferenceCopy(host);
+  }
+
+  function renderSceneAssetLibraryView() {
+    const host = $("#scene-asset-library-view");
+    if (!host) return;
+    const assetItems = Array.isArray(app.sceneAssetLibrary) && app.sceneAssetLibraryKey === `${app.episode}:${app.scene}` ? app.sceneAssetLibrary : [];
+    const registryItems = registryLibraryItems("scenes");
+    const items = [...registryItems, ...libraryItems("scenes")];
+    host.innerHTML = `${renderAssetLibraryHeading(
+      "Project library",
+      "Scene Plates",
+      "Reusable worlds, opening plates and location images available to SEE.",
+      '<button type="button" class="secondary" data-refresh-scene-library>Refresh</button>'
+    )}
+    ${renderAssetAddForm("scenes", "Scene Plate")}
+    <div class="asset-library-grid">
+      ${items.map((location) => {
+        const { name, mood, scenes, prompt } = location;
+        const url = location.imageUrl || libraryAssetUrlForName(name, "scene");
+        const label = location.registry && location.kind === "opening_plate" ? "Opening plate"
+          : location.registry && location.kind === "scene_plate" ? "Approved scene plate"
+          : location.registry ? "Scenery reference" : "Scene plate source";
+        return `<article class="asset-library-card scene">
+          <div class="asset-library-preview">${renderLibraryReferenceThumb(url, `${name} plate`)}</div>
+          <div class="asset-library-copy">
+            <div><strong>${esc(name)}</strong><span>${esc(label)}</span></div>
+            <p>${esc(prompt)}</p>
+            <dl>
+              <div><dt>Scenes</dt><dd>${esc(scenes)}</dd></div>
+              <div><dt>Mood</dt><dd>${esc(mood)}</dd></div>
+            </dl>
+          </div>
+          <div class="asset-library-card-actions">
+            <button type="button" class="secondary" data-edit-asset="${esc(location.key)}">Edit</button>
+            ${location.registry ? `<button type="button" class="secondary danger" data-remove-registry-asset="${esc(location.assetId)}">Delete</button>` : `<button type="button" class="secondary danger" data-delete-asset="${esc(location.key)}">Delete</button>`}
+            ${url ? `<button type="button" class="primary" data-select-scene-plate-asset="${esc(location.path || (url.startsWith("/") ? url.slice(1) : url))}">Use for Current Shot</button>` : `<button type="button" class="secondary" disabled>No plate</button>`}
+          </div>
+          ${renderInlineAssetEditor("scenes", { ...location, imageUrl: url })}
+        </article>`;
+      }).join("")}
+      ${assetItems.map((item) => `<article class="asset-library-card scene registry">
+        <div class="asset-library-preview">${renderLibraryReferenceThumb(item.url, item.title)}</div>
+        <div class="asset-library-copy">
+          <div><strong>${esc(item.title)}</strong><span>${esc(item.type || "Registry asset")}</span></div>
+          <p>${esc(item.subtitle || "Registered project asset")}</p>
+          <dl><div><dt>Registry</dt><dd>${esc(item.assetId || item.path || "")}</dd></div></dl>
+        </div>
+        <div class="asset-library-card-actions">
+          <button type="button" class="primary" data-select-scene-plate-asset="${esc(item.path)}">Use for Current Shot</button>
+        </div>
+      </article>`).join("")}
+    </div>`;
+    host.querySelectorAll("[data-refresh-scene-library]").forEach((button) => button.addEventListener("click", async () => {
+      app.sceneAssetLibraryKey = "";
+      await loadSceneAssetLibrary({ episode: app.episode, scene: app.scene });
+      renderSceneAssetLibraryView();
+    }));
+    bindScenePlateAssetButtons(host);
+    bindProjectLibraryRefresh(host, renderSceneAssetLibraryView);
+    bindAssetLibraryEditing(host, "scenes", renderSceneAssetLibraryView);
+  }
+
+  function renderPropLibraryView() {
+    const host = $("#prop-library");
+    if (!host) return;
+    const items = [...registryLibraryItems("props"), ...libraryItems("props")];
+    host.innerHTML = `${renderAssetLibraryHeading(
+      "Project library",
+      "Props",
+      "Story-critical objects and their current reference state. Registered files use stable asset IDs; display names are only labels.",
+      '<button type="button" class="secondary" data-refresh-project-library>Refresh</button>'
+    )}
+    ${renderAssetAddForm("props", "Prop")}
+    <div class="asset-library-grid">
+      ${items.map((prop) => {
+        const { name, scenes, status, prompt } = prop;
+        const url = prop.imageUrl || libraryAssetUrlForName(name, "prop");
+        return `<article class="asset-library-card prop">
+          <div class="asset-library-preview">${renderLibraryReferenceThumb(url, `${name} reference`)}</div>
+          <div class="asset-library-copy">
+            <div><strong>${esc(name)}</strong><span>${esc(status)}</span></div>
+            <p>${esc(prompt)}</p>
+            <dl><div><dt>Scenes</dt><dd>${esc(scenes)}</dd></div></dl>
+          </div>
+          <div class="asset-library-card-actions">
+            <button type="button" class="secondary" data-edit-asset="${esc(prop.key)}">Edit</button>
+            ${prop.registry ? `<button type="button" class="secondary danger" data-remove-registry-asset="${esc(prop.assetId)}">Delete</button>` : `<button type="button" class="secondary danger" data-delete-asset="${esc(prop.key)}">Delete</button>`}
+            <button type="button" class="secondary" data-copy-asset-reference="${esc(url)}">Copy Reference</button>
+          </div>
+          ${renderInlineAssetEditor("props", { ...prop, imageUrl: url })}
+        </article>`;
+      }).join("")}
+    </div>`;
+    bindProjectLibraryRefresh(host, renderPropLibraryView);
+    bindAssetLibraryEditing(host, "props", renderPropLibraryView);
+    bindAssetReferenceCopy(host);
+  }
+
+  async function renderAssetLibraryView() {
+    await loadProjectAssetLibrary({ episode: app.episode, scene: app.scene });
+    const category = app.assetCategory || "characters";
+    $$("[data-asset-category]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.assetCategory === category);
+    });
+    $$("[data-asset-category-panel]").forEach((panel) => {
+      const active = panel.dataset.assetCategoryPanel === category;
+      panel.hidden = !active;
+      panel.classList.toggle("active", active);
+    });
+    if (category === "characters") renderCharacterLibraryView();
+    if (category === "scenes") renderSceneAssetLibraryView();
+    if (category === "props") renderPropLibraryView();
+  }
+
+  function bindAssetLibraryTabs() {
+    $$("[data-asset-category]").forEach((button) => button.addEventListener("click", () => {
+      app.assetCategory = button.dataset.assetCategory || "characters";
+      writeHash();
+      renderAssetLibraryView();
+    }));
+  }
+
+  async function loadProjectAssetLibrary(session = app.session) {
+    const scene = session?.scene || app.scene || "*";
+    const episode = session?.episode || app.episode || "Ep1";
+    const key = `${episode}:${scene}`;
+    if (app.projectAssetLibraryKey === key && app.projectAssetLibrary || app.projectAssetLibraryLoading) return;
+    app.projectAssetLibraryKey = key;
+    app.projectAssetLibraryLoading = true;
+    try {
+      app.projectAssetLibrary = await api(`/api/project-asset-library?episode=${encodeURIComponent(episode)}&scene=${encodeURIComponent(scene)}`);
+    } catch (error) {
+      app.projectAssetLibrary = { error: error.message, groups: { characters: [], scenes: [], props: [], references: [] } };
+    } finally {
+      app.projectAssetLibraryLoading = false;
+    }
+  }
+
+  function bindProjectLibraryRefresh(host, rerender) {
+    host.querySelectorAll("[data-refresh-project-library]").forEach((button) => button.addEventListener("click", async () => {
+      app.projectAssetLibraryKey = "";
+      await loadProjectAssetLibrary({ episode: app.episode, scene: app.scene });
+      rerender();
+    }));
+  }
+
+  async function loadSceneAssetLibrary(session = app.session) {
+    if (!session?.scene) return;
+    const key = `${session.episode || app.episode}:${session.scene}`;
+    if (app.sceneAssetLibraryKey === key && app.sceneAssetLibrary || app.sceneAssetLibraryLoading) return;
+    app.sceneAssetLibraryKey = key;
     app.sceneAssetLibraryLoading = true;
     try {
-      const [loclib, houses] = await Promise.all([
-        api("/api/loclib"),
-        api("/api/houses"),
-      ]);
-      const items = [];
-      const manifest = loclib.manifest || {};
-      Object.keys(manifest).forEach((key) => {
-        const item = manifest[key] || {};
-        const rel = item.file ? `cb-seed/assets/locations/${item.file}` : "";
-        if (assetPathToUrl(rel)) {
-          items.push({
-            type: "Location",
-            title: item.name || item.locationId || key,
-            subtitle: item.source || item.location || "Reusable scene plate",
-            path: assetPathToAbsolute(rel),
-            url: assetPathToUrl(rel),
-          });
-        }
-      });
-      (loclib.uploadedRefs || []).forEach((item) => {
-        const rel = item.file || "";
-        if (assetPathToUrl(rel)) {
-          items.push({
-            type: "Scene",
-            title: item.name || rel.split("/").pop(),
-            subtitle: "Uploaded scene reference",
-            path: assetPathToAbsolute(rel),
-            url: assetPathToUrl(rel),
-          });
-        }
-      });
-      (loclib.scenes || []).forEach((item) => {
-        if (item.master) {
-          const rel = String(item.master).replace(/^\/+/, "");
-          if (assetPathToUrl(rel)) {
-            items.push({
-              type: "Scene master",
-              title: item.name || item.location || `Scene ${item.scene}`,
-              subtitle: `Scene ${item.scene} · ${item.time || "scene plate"}`,
-              path: assetPathToAbsolute(rel),
-              url: assetPathToUrl(rel),
-            });
-          }
-        }
-      });
-      (houses.houses || []).forEach((house) => {
-        [
-          ["House interior", house.interior],
-          ["House interior multicam", house.interiorMulticam],
-          ["House exterior", house.exterior],
-          ["House exterior multicam", house.exteriorMulticam],
-        ].forEach(([type, rel]) => {
-          if (assetPathToUrl(rel)) {
-            items.push({
-              type,
-              title: `${house.character} ${type.replace("House ", "")}`,
-              subtitle: type.includes("interior") ? house.interiorDesc : house.exteriorDesc,
-              path: assetPathToAbsolute(rel),
-              url: assetPathToUrl(rel),
-            });
-          }
-        });
-      });
+      const payload = await api(`/api/scenelook-library?episode=${encodeURIComponent(session.episode || app.episode)}&scene=${encodeURIComponent(session.scene)}`);
+      const priority = { scene_plate: 0, opening_plate: 1, final_frame: 2, keyframe: 3, reference_image: 4 };
+      const items = (payload.items || []).map((item) => ({
+        type: item.kind || "Asset",
+        title: item.note || item.outcome || item.assetId || "Scene asset",
+        subtitle: [item.kind, item.outcome, item.at].filter(Boolean).join(" · "),
+        path: item.path,
+        url: item.url,
+        assetId: item.assetId,
+        priority: priority[item.kind] ?? 9,
+      })).sort((a, b) => (a.priority - b.priority) || String(a.title).localeCompare(String(b.title)));
       const seen = new Set();
       app.sceneAssetLibrary = items.filter((item) => {
         if (!item.path || seen.has(item.path)) return false;
@@ -1478,15 +2079,78 @@
     }
   }
 
+  function bindScenePlateAssetButtons(host) {
+    host.querySelectorAll("[data-select-scene-plate-asset]").forEach((button) => button.addEventListener("click", () => {
+      selectScenePlateSourceDirect(button.dataset.selectScenePlateAsset, "library");
+    }));
+  }
+
+  function renderContinuityConstraints(session) {
+    const shotRules = session.shot?.continuityConstraints || session.shot?.directorRecord?.continuityConstraints || [];
+    const sceneRules = sceneContinuityRules[String(session.scene || "")] || [];
+    const constraints = [...sceneRules, ...shotRules];
+    if (!constraints.length) return "";
+    return `<section class="shot-continuity-brief" aria-label="Shot continuity constraints">
+      <div class="source-panel-head">
+        <div><span>Continuity lock</span><strong>Do not break these in SEE, HEAR or WATCH</strong></div>
+        <em>${esc(constraints.length)} rule${constraints.length === 1 ? "" : "s"}</em>
+      </div>
+      <ul>${constraints.map((item) => `<li class="${esc(item.severity || "normal")}">
+        <strong>${esc(item.label || "Continuity")}</strong>
+        <span>${esc(item.value || item.text || "")}</span>
+      </li>`).join("")}</ul>
+    </section>`;
+  }
+
+  function renderShotStoryboardBrief(session) {
+    const shot = session.shot || {};
+    const dialogue = (shot.dialogueLines || shot.directorRecord?.dialogueLines || [])
+      .map((line) => `${line.speaker || "Speaker"}: ${line.text || line.line || ""}`.trim())
+      .filter(Boolean);
+    const rows = [
+      ["Story beat", shot.storyBeat || shot.purpose],
+      ["Action", shot.action || shot.directorRecord?.action],
+      ["Emotional intent", shot.emotionalIntent || shot.directorRecord?.emotionalIntent],
+      ["Kid read", shot.kidRead || shot.directorRecord?.kidRead],
+      ["Adult read", shot.adultRead || shot.directorRecord?.adultRead],
+      ["Cast", (shot.characters || []).join(", ")],
+      ["Dialogue", dialogue.join("\n")],
+    ].filter(([, value]) => String(value || "").trim());
+    if (!rows.length) return "";
+    return `<section class="shot-storyboard-brief" aria-label="Shot storyboard direction">
+      <div class="source-panel-head">
+        <div><span>Shot storyboard</span><strong>Team direction for this shot</strong></div>
+        <em>${esc(session.selectedShotId || "Shot")}</em>
+      </div>
+      <dl>${rows.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl>
+    </section>`;
+  }
+
+  function renderShotContextPanel(session) {
+    return `<section class="shot-context-panel" aria-label="Current shot context">
+      <div class="source-panel-head shot-context-head">
+        <div><span>Shot context</span><strong>Direction, continuity and references for this shot</strong></div>
+        <em>${esc(session.selectedShotId || "Shot")}</em>
+      </div>
+      <div class="shot-context-grid">
+        ${renderShotStoryboardBrief(session)}
+        ${renderContinuityConstraints(session)}
+        ${renderSeeKeyframeReferences(session)}
+      </div>
+    </section>`;
+  }
+
   function renderKeyframeSourcePanel(session) {
-    if (session.phase !== "keyframe") return "";
+    const keyframeToolsAvailable = session.phase === "keyframe";
     const locked = keyframeSourceLocked(session);
     const items = app.keyframeLibrary?.items || [];
     const libraryReady = app.keyframeLibraryKey === `${session.episode}:${session.scene}:${session.selectedShotId}`;
     const sourceMessage = locked
       ? "A keyframe candidate is already waiting. Review it, approve it, or refire it before replacing the source."
+      : !keyframeToolsAvailable
+        ? "Scene plate selection is available now. Keyframe source controls unlock after the scene direction package is current."
       : "Pick a previous keyframe from this shot's library, upload your own frame, or generate a new one.";
-    const assetItems = Array.isArray(app.sceneAssetLibrary) ? app.sceneAssetLibrary : [];
+    const assetItems = Array.isArray(app.sceneAssetLibrary) && app.sceneAssetLibraryKey === `${session.episode}:${session.scene}` ? app.sceneAssetLibrary : [];
     const assetError = app.sceneAssetLibrary && !Array.isArray(app.sceneAssetLibrary) ? app.sceneAssetLibrary.error : "";
     const sceneLook = session.sceneLook || {};
     const scenePlateUrl = sceneLook.plateUrl || sceneLook.approved?.url || sceneLook.candidate?.url || "";
@@ -1526,7 +2190,7 @@
               </article>`).join("")
               : `<div class="source-empty">No scene or house library assets found.</div>`}
       </div>` : ""}
-      <div class="source-panel-head">
+      ${keyframeToolsAvailable ? `<div class="source-panel-head">
         <div><span>Keyframe source</span><strong>Generate, previous keyframe, or upload</strong></div>
         <em>${esc(locked ? "Review candidate first" : "Ready")}</em>
       </div>
@@ -1550,7 +2214,7 @@
                 <button type="button" data-select-keyframe-library="${esc(item.path)}" ${locked ? "disabled" : ""}>Use</button>
               </article>`).join("")
               : `<div class="source-empty">No prior keyframes for this shot yet.</div>`}
-      </div>
+      </div>` : `<div class="source-empty">${esc(sourceMessage)}</div>`}
     </section>`;
   }
 
@@ -1749,10 +2413,7 @@
       <header><span>${stage}</span><div><strong>${names[stage]}</strong><p>${descriptions[stage]}</p></div><em>${stateLabel}</em></header>
       <div class="relay-media">${relayMedia(stage, session)}</div>
       ${locked ? `<p class="relay-lock">Complete ${names[stage - 1]} before this sign-off unlocks.</p>` : `
-        ${stage === 1 && current ? `<details class="relay-source-drawer">
-          <summary>Choose scene plate or keyframe source</summary>
-          ${renderKeyframeSourcePanel(session)}
-        </details>` : ""}
+        ${stage === 1 && current ? `${renderKeyframeSourcePanel(session)}` : ""}
         <label class="relay-notes">Retake notes<textarea data-relay-note="${stage}" placeholder="What needs to change? Plain English is enough.">${esc(savedNote)}</textarea><span class="relay-note-status" data-relay-note-status="${stage}">${savedNote ? "Saved" : ""}</span></label>
         <div class="relay-actions">
           ${primary ? `<button type="button" class="primary" data-relay-action="${esc(primary.id)}">${esc(primary.id === "direct-scene" ? "Start scene → generate keyframes" : primary.label)}</button>` : complete ? `<span>Approved</span>` : ""}
@@ -1783,6 +2444,7 @@
       ${renderStageComms(session)}
       ${renderRecentFailure(session)}
       ${session.status === "rendering" ? "" : renderGenerateStatus(session)}
+      ${renderShotContextPanel(session)}
       <section class="relay-grid">${[1, 2, 3].map((item) => relayCard(item, session)).join("")}</section>`;
     host.querySelectorAll("audio,video").forEach((media) => {
       const prior = mediaState.find((item) => item.src === (media.currentSrc || media.src));
@@ -1849,16 +2511,15 @@
     host.querySelectorAll("[data-select-keyframe-library]").forEach((button) => button.addEventListener("click", () => {
       selectKeyframeFromLibrary(button.dataset.selectKeyframeLibrary);
     }));
-    host.querySelectorAll("[data-toggle-scene-plate-library]").forEach((button) => button.addEventListener("click", () => {
+    host.querySelectorAll("[data-toggle-scene-plate-library]").forEach((button) => button.addEventListener("click", async () => {
       app.scenePlateLibraryOpen = !app.scenePlateLibraryOpen;
+      if (app.scenePlateLibraryOpen) await loadSceneAssetLibrary(app.session || session);
       renderSignoffRelay(app.session || session);
     }));
     host.querySelectorAll("[data-fire-scene-plate]").forEach((button) => button.addEventListener("click", () => {
       runScenePlateAction("build-scene-plate");
     }));
-    host.querySelectorAll("[data-select-scene-plate-asset]").forEach((button) => button.addEventListener("click", () => {
-      runScenePlateAction("select-scene-plate-library", button.dataset.selectScenePlateAsset);
-    }));
+    bindScenePlateAssetButtons(host);
     host.querySelectorAll("[data-keyframe-upload]").forEach((input) => input.addEventListener("change", () => {
       const file = input.files && input.files[0];
       if (file) uploadKeyframeSource(file);
@@ -2005,8 +2666,9 @@
     host.querySelectorAll("[data-select-keyframe-library]").forEach((button) => button.addEventListener("click", () => {
       selectKeyframeFromLibrary(button.dataset.selectKeyframeLibrary);
     }));
-    host.querySelectorAll("[data-toggle-scene-plate-library]").forEach((button) => button.addEventListener("click", () => {
+    host.querySelectorAll("[data-toggle-scene-plate-library]").forEach((button) => button.addEventListener("click", async () => {
       app.scenePlateLibraryOpen = !app.scenePlateLibraryOpen;
+      if (app.scenePlateLibraryOpen) await loadSceneAssetLibrary(app.session || session);
       renderSceneWorkbench(app.session || session);
     }));
     host.querySelectorAll("[data-fire-scene-plate]").forEach((button) => button.addEventListener("click", () => {
@@ -2026,7 +2688,7 @@
       input.value = "";
     }));
     loadKeyframeLibrary(session);
-    loadSceneAssetLibrary();
+    if (app.scenePlateLibraryOpen) loadSceneAssetLibrary(session);
   }
 
   function directorActionLabel(action) {
@@ -3230,7 +3892,7 @@
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
       if (session.phase === "keyframe") {
-        await Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary()]);
+        await Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary(session)]);
       }
       clearLocalActivityForSession(session);
       let approvedAdvance = false;
@@ -3471,6 +4133,32 @@
     }
   }
 
+  async function selectScenePlateSourceDirect(sourcePath, mode = "upload") {
+    if (!app.session) return;
+    setSourceSelectionActivity(
+      "Selecting scene plate...",
+      "Assigning the uploaded plate directly to this scene. This does not approve the current keyframe."
+    );
+    try {
+      await api("/api/scenelook-select-source", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode,
+          scene: app.session.scene,
+          sourcePath,
+          mode,
+        }),
+      }, 60000);
+      setLocalActivity(null);
+      await loadSession();
+      toast("Scene plate updated.");
+    } catch (error) {
+      setLocalActivity(null);
+      await loadSession();
+      toast(error.message, true);
+    }
+  }
+
   async function uploadScenePlateSource(file) {
     if (!app.session) return;
     setSourceSelectionActivity("Uploading scene plate...", "Preserving the uploaded plate before assigning it to the scene.");
@@ -3485,7 +4173,7 @@
           dataB64,
         }),
       });
-      await runScenePlateAction("select-scene-plate-upload", uploaded.sourcePath);
+      await selectScenePlateSourceDirect(uploaded.sourcePath, "upload");
     } catch (error) {
       setLocalActivity(null);
       await loadSession();
@@ -3709,6 +4397,7 @@
       if (document.visibilityState === "visible") loadSession();
     });
     $$('[data-view]').forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
+    bindAssetLibraryTabs();
     $$("[data-pipeline-step]").forEach((button) => button.addEventListener("click", () => {
       if (button.disabled) return;
       app.pipelineStep = button.dataset.pipelineStep;
@@ -3760,10 +4449,16 @@
       const previousScene = app.scene;
       const previousShot = app.shotId;
       const previousStep = app.pipelineStep;
+      const previousAssetCategory = app.assetCategory;
       readHash();
       setView(app.view);
       if (app.scene !== previousScene || app.shotId !== previousShot) loadSession();
       if (app.view === "pipeline" && app.pipelineStep !== previousStep) renderPipeline();
+      if (app.view === "assets" && (app.assetCategory !== previousAssetCategory || app.scene !== previousScene || app.shotId !== previousShot)) {
+        app.projectAssetLibraryKey = "";
+        app.sceneAssetLibraryKey = "";
+        renderAssetLibraryView();
+      }
     });
   }
 

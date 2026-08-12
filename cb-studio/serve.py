@@ -119,7 +119,7 @@ def _load_or_create_session_token():
 
 
 SESSION_TOKEN = _load_or_create_session_token()
-STUDIO_BUILD_VERSION = "watch-conformance-20260810-2"
+STUDIO_BUILD_VERSION = "scene-plate-direct-select-20260812-1"
 SESSION_COOKIE = "cb_studio_session"
 MAX_REQUEST_BYTES = 64 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 20 * 1024 * 1024
@@ -2443,7 +2443,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
             scene = (q.get("scene") or [""])[0]
-            shot_id = (q.get("shotId") or [None])[0]
+            shot_id = (q.get("shotId") or q.get("shot") or [None])[0]
             stage = (q.get("stage") or [None])[0]
             ep = (q.get("episode") or ["Ep1"])[0]
             if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
@@ -2530,7 +2530,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             q = parse_qs(urlparse(self.path).query)
             scene = (q.get("scene") or [""])[0]
             ep = (q.get("episode") or ["Ep1"])[0]
-            shot_id = (q.get("shotId") or [None])[0]
+            shot_id = (q.get("shotId") or q.get("shot") or [None])[0]
             if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
                     (shot_id and not _SHOT_TOKEN.match(shot_id))):
                 return self._json(400, {
@@ -2549,7 +2549,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             q = parse_qs(urlparse(self.path).query)
             scene = (q.get("scene") or [""])[0]
             ep = (q.get("episode") or ["Ep1"])[0]
-            shot_id = (q.get("shotId") or [None])[0]
+            shot_id = (q.get("shotId") or q.get("shot") or [None])[0]
             mode = (q.get("mode") or ["HELP"])[0].upper()
             if (not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep) or
                     (shot_id and not _SHOT_TOKEN.match(shot_id)) or
@@ -2603,6 +2603,76 @@ class H(http.server.SimpleHTTPRequestHandler):
             _CBR = _canonical_cb_render()
             try:
                 manifest = _CBR.shot_reference_manifest(scene, sid, ep)
+                try:
+                    pkg = json.loads(_shot_pkg_path(scene, ep).read_text())
+                    shot = next((item for item in (pkg.get("shots") or [])
+                                 if item.get("shotId") == sid), {})
+                except Exception:
+                    shot = {}
+
+                def _norm_ref_name(value):
+                    return re.sub(r"[^a-z0-9]+", "", str(value or "").casefold()
+                                  .replace("'s", "s"))
+
+                def _registry_reference_fallback():
+                    items = cb_asset_registry.library_for_scene(ep, scene, sid)
+                    chars = [str(c) for c in (shot.get("charactersInFrame") or []) if str(c).strip()]
+                    refs = []
+                    scene_items = [
+                        item for item in items
+                        if item.get("kind") in ("scene_plate", "opening_plate", "final_frame")
+                        or re.search(r"\b(scene|plate|pier|cove|island|vision|environment)\b",
+                                     f"{item.get('label') or ''} {item.get('role') or ''}",
+                                     flags=re.I)
+                    ]
+                    for item in scene_items[:2]:
+                        refs.append({
+                            "slot": item.get("assetId"),
+                            "role": item.get("label") or "Scene plate",
+                            "label": item.get("label") or item.get("kind") or "Scene plate",
+                            "kind": item.get("kind"),
+                            "ready": bool(item.get("url")),
+                            "status": item.get("status") or "approved",
+                            "message": "Registry-bound scene/opening plate used for keyframe staging.",
+                            "url": item.get("url"),
+                        })
+                    for char in chars:
+                        target = _norm_ref_name(char)
+                        candidates = []
+                        for item in items:
+                            if item.get("kind") != "reference_image":
+                                continue
+                            haystack = _norm_ref_name(" ".join(str(item.get(k) or "")
+                                                               for k in ("label", "role", "path")))
+                            if target and target not in haystack:
+                                continue
+                            text = f"{item.get('label') or ''} {item.get('role') or ''} {item.get('path') or ''}".casefold()
+                            score = 0
+                            if "final_turnarounds" in text:
+                                score += 100
+                            if "turnaround" in text:
+                                score += 80
+                            if "turn4" in text or "front-back" in text or "modelsheet" in text:
+                                score += 40
+                            if "expression" in text or "house" in text:
+                                score -= 25
+                            candidates.append((score, item))
+                        if not candidates:
+                            continue
+                        item = sorted(candidates, key=lambda pair: pair[0], reverse=True)[0][1]
+                        refs.append({
+                            "slot": item.get("assetId"),
+                            "role": f"{char} turnaround",
+                            "label": item.get("label") or f"{char} turnaround",
+                            "kind": item.get("kind"),
+                            "ready": bool(item.get("url")),
+                            "status": item.get("status") or "approved",
+                            "message": "Registry-bound character turnaround used as identity authority.",
+                            "url": item.get("url"),
+                            "identity": {"intactTurnaround": True},
+                        })
+                    return refs
+
                 for stage_name in ("keyframe", "animation"):
                     stage = manifest.get(stage_name) or {}
                     for item in stage.get("references") or []:
@@ -2616,6 +2686,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                             })
                     stage["ready"] = bool(stage.get("ready")) and all(
                         item.get("ready") for item in stage.get("references") or [])
+                    if not stage.get("references"):
+                        fallback_refs = _registry_reference_fallback()
+                        stage["references"] = fallback_refs
+                        stage["ready"] = bool(fallback_refs) and all(
+                            item.get("ready") for item in fallback_refs)
+                        stage["reason"] = (
+                            "Using registry-bound shot references because the compiled "
+                            "provider manifest has not emitted reference records yet."
+                        )
                 for control in (manifest.get("technicalControls") or {}).values():
                     path = control.pop("path", None)
                     control["url"] = _url_from_reference(path)
@@ -2770,6 +2849,85 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "kind": it.get("kind"), "assetId": it.get("assetId")}
                    for it in items if it.get("url")]
             return self._json(200, {"items": out})
+        if self.path.startswith("/api/project-asset-library"):
+            # One frontend-readable view of the project asset registry. The UI may
+            # display friendly labels, but selection/copy must use assetId/path from
+            # this resolver, not hardcoded card names.
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            scene = (q.get("scene") or ["*"])[0]
+            if not _SHOT_TOKEN.match(ep) or (scene != "*" and not _SHOT_TOKEN.match(scene)):
+                return self._json(400, {"error": "episode and scene must be plain tokens"})
+            try:
+                cb_asset_registry.migrate_existing(ep)
+                items = cb_asset_registry.library_for_scene(ep, scene) if scene != "*" else cb_asset_registry.resolve_assets(ep, "*")
+
+                def normalised(item):
+                    label = str(item.get("label") or item.get("role") or item.get("assetId") or "Asset")
+                    role = str(item.get("role") or "")
+                    path = str(item.get("path") or "")
+                    library_group = str((item.get("metadata") or {}).get("libraryGroup") or "")
+                    if library_group in {"characters", "scenes", "props"}:
+                        group = library_group
+                    else:
+                        group = ""
+                    haystack = " ".join([label, role, path]).casefold()
+                    if not group and ("/characters/" in haystack or "final_turnarounds" in haystack or any(
+                        token in haystack for token in ("turnaround", "turn4", "front-back", "modelsheet", "refsheet")
+                    )):
+                        group = "characters"
+                    elif not group and ("/locations/" in haystack or "/houses/" in haystack or any(
+                        token in haystack for token in ("scene", "plate", "pier", "cove", "rainforest", "island", "house", "sanctuary", "meadow")
+                    )):
+                        group = "scenes"
+                    elif not group and any(token in haystack for token in ("wristband", "pendant", "bowl", "wand", "satchel", "sailboat", "net", "prop")):
+                        group = "props"
+                    elif not group:
+                        group = "references"
+                    scene_priority = {
+                        "scene_plate": 0,
+                        "opening_plate": 1,
+                        "final_frame": 2,
+                        "keyframe": 3,
+                    }.get(str(item.get("kind") or ""), 9)
+                    if group == "scenes" and str(item.get("scene")) == scene:
+                        scene_priority -= 4
+                    if group == "scenes" and str(item.get("kind") or "") == "reference_image":
+                        scene_priority += 8
+                    return {
+                        "assetId": item.get("assetId"),
+                        "group": group,
+                        "kind": item.get("kind"),
+                        "label": label,
+                        "role": role,
+                        "status": item.get("status") or "approved",
+                        "path": path,
+                        "url": item.get("url"),
+                        "scene": item.get("scene"),
+                        "shotId": item.get("shotId"),
+                        "source": item.get("source"),
+                        "metadata": item.get("metadata") or {},
+                        "registeredAt": item.get("registeredAt"),
+                        "priority": scene_priority,
+                    }
+
+                grouped = {"characters": [], "scenes": [], "props": [], "references": []}
+                seen = set()
+                for item in items:
+                    if not item.get("url"):
+                        continue
+                    rec = normalised(item)
+                    key = rec["url"] if rec["group"] == "scenes" else rec["assetId"] or rec["path"]
+                    if not key or key in seen:
+                        continue
+                    seen.add(key)
+                    grouped[rec["group"]].append(rec)
+                for values in grouped.values():
+                    values.sort(key=lambda r: (r.get("priority", 9), r.get("label") or "", r.get("path") or ""))
+                return self._json(200, {"episode": ep, "scene": scene, "groups": grouped})
+            except Exception as e:
+                return self._json(400, {"error": str(e)})
         # ── CONTAINED CREATIVE CONTROLS — Voice/Animation working versions + the free
         # structure check (2026-07-19, Julian's directive). All four are READ-ONLY, ZERO
         # COST, direct in-process reads (same precedent as /api/shot-reassess and
@@ -3719,6 +3877,212 @@ class H(http.server.SimpleHTTPRequestHandler):
                 out = incoming / f"{ep}_S{scene}_scenelook_incoming_{uuid.uuid4().hex[:8]}{ext}"
                 out.write_bytes(blob)
                 self._json(200, {"ok": True, "sourcePath": str(out)})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/scenelook-select-source":
+            # Zero-spend scene plate source assignment. This is intentionally
+            # independent from the current Director action list so a freshly
+            # uploaded plate cannot fail with "action no longer current".
+            try:
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                source_path = d.get("sourcePath")
+                mode = str(d.get("mode") or "upload").strip()
+                if mode not in ("upload", "library"):
+                    self._json(400, {"error": "mode must be upload or library"}); return
+                if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(ep):
+                    self._json(400, {"error": "scene (and optional episode) required as plain tokens"}); return
+                if not source_path or not isinstance(source_path, str):
+                    self._json(400, {"error": "Choose a scene plate source first."}); return
+                try:
+                    sp = pathlib.Path(source_path).resolve()
+                    roots = (MEDIA.resolve(), (ROOT / "cb-seed" / "assets").resolve())
+                    if not sp.exists() or not any(sp.is_relative_to(root) for root in roots):
+                        self._json(400, {"error": "sourcePath must be an existing file under engine/media or cb-seed/assets"}); return
+                except Exception:
+                    self._json(400, {"error": "sourcePath is not a valid path"}); return
+                _CBR = _canonical_cb_render()
+                try:
+                    st = _CBR.scenelook_status(scene, ep)
+                    if st.get("candidate"):
+                        _CBR.reject_scenelook(
+                            scene,
+                            "Superseded by direct Scene Plate library/upload selection in the Director workspace.",
+                            episode=ep,
+                            reviewed_by=str(d.get("by") or "Julian"),
+                        )
+                    _CBR.select_scenelook_source(
+                        scene, mode, ep,
+                        library_path=str(sp) if mode == "library" else None,
+                        upload_path=str(sp) if mode == "upload" else None,
+                    )
+                    _CBR.approve_scenelook(scene, ep)
+                except _CBR.Refused as e:
+                    self._json(409, {"error": str(e)}); return
+                with _DIRECTOR_SESSION_CACHE_LOCK:
+                    for key in list(_DIRECTOR_SESSION_CACHE):
+                        if key[0] == str(scene) and key[1] == str(ep):
+                            _DIRECTOR_SESSION_CACHE.pop(key, None)
+                self._json(200, {"ok": True, "sourcePath": str(sp), "mode": mode})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/asset-library-upload":
+            # Generic library image upload for Characters / Scene Plates / Props.
+            # This preserves a validated local image and binds it into the
+            # project asset registry with an explicit intended production use.
+            try:
+                d = self._body()
+                kind = slug(str(d.get("kind") or "asset")).lower()
+                asset_use = slug(str(d.get("assetUse") or "")).lower()
+                raw = d.get("dataB64")
+                if kind not in ("characters", "scenes", "props", "asset"):
+                    self._json(400, {"error": "kind must be characters, scenes or props"}); return
+                allowed_uses = {
+                    "character_turnaround", "scene_plate", "opening_plate",
+                    "prop_reference", "general_reference", "",
+                }
+                if asset_use not in allowed_uses:
+                    self._json(400, {"error": "assetUse must be character_turnaround, scene_plate, opening_plate, prop_reference or general_reference"}); return
+                if not raw:
+                    self._json(400, {"error": "dataB64 (the image data) is required"}); return
+                blob, ext = decode_image_upload(raw)
+                incoming = MEDIA / "uploads_incoming" / "asset_library"
+                incoming.mkdir(parents=True, exist_ok=True)
+                out = incoming / f"{kind}_{uuid.uuid4().hex[:10]}{ext}"
+                out.write_bytes(blob)
+                if not asset_use:
+                    asset_use = {
+                        "characters": "character_turnaround",
+                        "scenes": "scene_plate",
+                        "props": "prop_reference",
+                        "asset": "general_reference",
+                    }[kind]
+                group_kind = {
+                    "character_turnaround": "reference_image",
+                    "scene_plate": "scene_plate",
+                    "opening_plate": "opening_plate",
+                    "prop_reference": "reference_image",
+                    "general_reference": "reference_image",
+                }[asset_use]
+                label = str(d.get("label") or d.get("filename") or kind).strip() or kind
+                scenes = str(d.get("scenes") or "").strip()
+                bound_scene = str(d.get("scene") or "*").strip() or "*"
+                if scenes:
+                    first_scene = next((part.strip() for part in scenes.replace(",", " ").split() if part.strip()), "")
+                    if first_scene:
+                        bound_scene = first_scene
+                rec = cb_asset_registry.register_asset(
+                    episode=str(d.get("episode") or "Ep1"),
+                    scene=bound_scene,
+                    kind=group_kind,
+                    path=out,
+                    role=f"{asset_use}_{slug(label)}",
+                    status="draft",
+                    label=label,
+                    source="studio-upload",
+                    metadata={
+                        "libraryGroup": kind,
+                        "assetUse": asset_use,
+                        "filename": str(d.get("filename") or ""),
+                        "description": str(d.get("description") or ""),
+                        "scenes": scenes,
+                    },
+                )
+                reindex_media()
+                self._json(200, {
+                    "ok": True,
+                    "sourcePath": str(out),
+                    "url": "/engine/media/" + out.relative_to(MEDIA).as_posix(),
+                    "assetId": rec.get("assetId"),
+                    "assetUse": asset_use,
+                    "kind": group_kind,
+                    "scene": bound_scene,
+                })
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/asset-library-delete":
+            # Unbind an asset from the Studio library. This does not delete the
+            # source file from disk; it removes the registry record so the asset
+            # no longer appears as a selectable project-library item.
+            try:
+                d = self._body()
+                asset_id = str(d.get("assetId") or "").strip()
+                if not asset_id:
+                    self._json(400, {"error": "assetId is required"}); return
+                result = cb_asset_registry.remove_asset(asset_id)
+                self._json(200, {"ok": True, **result})
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
+        if self.path == "/api/asset-library-update":
+            # Edit an existing registry asset. If a replacement image is supplied,
+            # the same asset record is rebound to the new displayable file.
+            try:
+                d = self._body()
+                asset_id = str(d.get("assetId") or "").strip()
+                if not asset_id:
+                    self._json(400, {"error": "assetId is required"}); return
+                kind = slug(str(d.get("kind") or "asset")).lower()
+                asset_use = slug(str(d.get("assetUse") or "")).lower()
+                if kind not in ("characters", "scenes", "props", "asset"):
+                    self._json(400, {"error": "kind must be characters, scenes or props"}); return
+                allowed_uses = {
+                    "character_turnaround", "scene_plate", "opening_plate",
+                    "prop_reference", "general_reference", "",
+                }
+                if asset_use not in allowed_uses:
+                    self._json(400, {"error": "assetUse must be character_turnaround, scene_plate, opening_plate, prop_reference or general_reference"}); return
+                if not asset_use:
+                    asset_use = {
+                        "characters": "character_turnaround",
+                        "scenes": "scene_plate",
+                        "props": "prop_reference",
+                        "asset": "general_reference",
+                    }[kind]
+                group_kind = {
+                    "character_turnaround": "reference_image",
+                    "scene_plate": "scene_plate",
+                    "opening_plate": "opening_plate",
+                    "prop_reference": "reference_image",
+                    "general_reference": "reference_image",
+                }[asset_use]
+                label = str(d.get("label") or d.get("filename") or kind).strip() or kind
+                scenes = str(d.get("scenes") or "").strip()
+                bound_scene = str(d.get("scene") or "*").strip() or "*"
+                if scenes:
+                    first_scene = next((part.strip() for part in scenes.replace(",", " ").split() if part.strip()), "")
+                    if first_scene:
+                        bound_scene = first_scene
+                raw = d.get("dataB64")
+                replacement = None
+                if raw:
+                    blob, ext = decode_image_upload(raw)
+                    incoming = MEDIA / "uploads_incoming" / "asset_library"
+                    incoming.mkdir(parents=True, exist_ok=True)
+                    replacement = incoming / f"{kind}_{uuid.uuid4().hex[:10]}{ext}"
+                    replacement.write_bytes(blob)
+                rec = cb_asset_registry.update_asset(
+                    asset_id,
+                    label=label,
+                    scene=bound_scene,
+                    kind=group_kind,
+                    role=f"{asset_use}_{slug(label)}",
+                    status=str(d.get("status") or "draft"),
+                    path=replacement,
+                    metadata={
+                        "libraryGroup": kind,
+                        "assetUse": asset_use,
+                        "filename": str(d.get("filename") or ""),
+                        "description": str(d.get("description") or ""),
+                        "scenes": scenes,
+                    },
+                )
+                reindex_media()
+                self._json(200, {"ok": True, "asset": rec})
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

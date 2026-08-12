@@ -81,6 +81,16 @@ function oneSecondWav() {
 }
 const silentWav = oneSecondWav();
 const emptyVideo = "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDE=";
+const fixtureScenePlatePath = path.join(root, "engine", "media", "golden-fixture-scene-plate.png");
+const fixtureScenePlate = {
+  path: fixtureScenePlatePath,
+  url: onePixelPng,
+  at: "2026-08-12T00:00:00Z",
+  outcome: "approved",
+  note: "Golden Path registered scene plate",
+  kind: "scene_plate",
+  assetId: "golden-scene-plate-001",
+};
 
 function action(id, label, { paid = false, destructive = false } = {}) {
   return { id, label, paid, destructive };
@@ -201,7 +211,8 @@ async function run() {
     if (pathname === "/api/director-board") return json({ sceneCount: 10, nextDecision: { scene: "1", shotId: "S1.SH1A" }, scenes: [] });
     if (pathname === "/api/project-workbench-state") return json({ project: "crystal-bears", episode: "Ep1", scene: "1", retakeNotes: { ...notes } });
     if (pathname === "/api/shot-keyframe-library") return json({ items: [] });
-    if (pathname === "/api/scene-asset-library") return json({ items: [] });
+    if (pathname === "/api/scene-asset-library") return json({ items: [fixtureScenePlate] });
+    if (pathname === "/api/scenelook-library") return json({ items: [fixtureScenePlate] });
     if (pathname === "/api/studio-agent") return json({ summary: "Golden Path assistant ready." });
     if (pathname === "/api/shot-references") return json({ keyframe: { references: [] }, animation: { references: [] } });
     if (pathname === "/api/shot-voice-status") return json({ hasTake: step !== "voice-ready", takeUrl: voiceUrl, takeMatchesCurrent: true });
@@ -219,10 +230,13 @@ async function run() {
     }
     if (pathname === "/api/director-action") {
       const body = request.postDataJSON();
-      requests.push(body.action);
+      requests.push(body);
       if (body.action === "save-retake-note") {
         notes[`${body.shotId}:${body.stage}`] = body.note;
         return json({ ok: true, zeroSpend: true, savedNote: body.note });
+      }
+      if (body.action === "select-scene-plate-library") {
+        return json({ ok: true, zeroSpend: true, session: sessionFor(step, notes, voiceUrl) });
       }
       if (body.action === "accept-keyframe") step = "voice-ready";
       else if (body.action === "build-voice") {
@@ -247,6 +261,18 @@ async function run() {
   await page.goto(target, { waitUntil: "domcontentloaded" });
   await page.getByText("Scene 1 of 10 · Shot 1 · Sign-off 1 of 3", { exact: true }).waitFor();
   const navigationBaseline = mainNavigations;
+  await page.getByRole("button", { name: "From Library", exact: true }).click();
+  await page.locator(".source-library-card.scene-asset").first().waitFor();
+  const scenePlateCards = await page.locator(".source-library-card.scene-asset").count();
+  if (scenePlateCards < 1) {
+    throw new Error("Scene plate picker rendered zero cards for a scene with registered assets.");
+  }
+  await page.locator('[data-select-scene-plate-asset]').first().click();
+  await page.locator("#toast").getByText(/Scene plate (updated|source submitted)/).waitFor();
+  const scenePlateSelection = requests.find((item) => item.action === "select-scene-plate-library");
+  if (!scenePlateSelection || scenePlateSelection.sourcePath !== fixtureScenePlatePath) {
+    throw new Error(`Scene plate picker did not bind the selected asset: ${JSON.stringify(scenePlateSelection)}`);
+  }
   await page.locator('[data-relay-note="1"]').fill("Keep the bee-height chase lane open.");
   await page.locator('[data-relay-note="1"]').blur();
   await page.getByText("Saved", { exact: true }).waitFor();
@@ -272,12 +298,14 @@ async function run() {
 
   if (mainNavigations !== navigationBaseline) throw new Error("Golden Path reloaded the page instead of updating state in place.");
   if (notes["S1.SH1A:1"] !== "Keep the bee-height chase lane open.") throw new Error("Director note was not persisted.");
-  const expected = ["accept-keyframe", "build-voice", "build-voice", "accept-voice", "prepare-render", "approve-spend", "accept-animation"];
-  const productionActions = requests.filter((item) => item !== "save-retake-note");
-  if (!requests.includes("save-retake-note") || JSON.stringify(productionActions) !== JSON.stringify(expected)) {
+  const expected = ["select-scene-plate-library", "accept-keyframe", "build-voice", "build-voice", "accept-voice", "prepare-render", "approve-spend", "accept-animation"];
+  const requestActions = requests.map((item) => item.action);
+  const productionActions = requestActions.filter((item) => item !== "save-retake-note");
+  if (!requestActions.includes("save-retake-note") || JSON.stringify(productionActions) !== JSON.stringify(expected)) {
     throw new Error(`Unexpected action relay: ${JSON.stringify(requests)}`);
   }
   console.log("PASS Golden Path: launch -> SEE -> HEAR -> WATCH -> verdict");
+  console.log("PASS Scene plate library rendered selectable assets and bound the selected source");
   console.log("PASS Orientation remained explicit at every sign-off");
   console.log("PASS Provider refusal exposed its real cause and a Fix voice setup action");
   console.log("PASS Retake note persisted as a production diagnosis");

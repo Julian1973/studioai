@@ -2081,7 +2081,7 @@
 
   function bindScenePlateAssetButtons(host) {
     host.querySelectorAll("[data-select-scene-plate-asset]").forEach((button) => button.addEventListener("click", () => {
-      selectScenePlateSourceDirect(button.dataset.selectScenePlateAsset, "library");
+      runScenePlateAction("select-scene-plate-library", button.dataset.selectScenePlateAsset);
     }));
   }
 

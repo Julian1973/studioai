@@ -36,6 +36,9 @@
     roughCutStatus: null,
     roughCutStatusKey: null,
     roughCutLoading: false,
+    storyIntake: null,
+    storyIntakeKey: null,
+    storyIntakeLoading: false,
     assetLibraryDrafts: null,
     agentBrief: null,
     agentBriefKey: null,
@@ -3665,6 +3668,80 @@
     return "";
   }
 
+  function renderStoryDirectionDesk() {
+    const intake = app.storyIntake || {};
+    if (app.storyIntakeLoading && app.storyIntakeKey !== app.episode) {
+      return `<section class="story-direction-desk"><div class="voice-desk-loading">Loading Story &amp; Direction review...</div></section>`;
+    }
+    if (intake.error) {
+      return `<section class="story-direction-desk">
+        <div class="voice-desk-loading error-line">${esc(intake.error)}</div>
+        <button type="button" class="secondary" data-story-direction-refresh>Retry</button>
+      </section>`;
+    }
+    const candidate = intake.candidate || {};
+    const scenes = candidate.scenes || [];
+    const beats = candidate.beats || [];
+    const scene = scenes.find((item) => String(item.sceneNumber) === String(app.scene)) || {};
+    const sceneBeats = beats.filter((beat) => String(beat.sceneNumber) === String(app.scene));
+    const waiting = intake.hasCandidate && !intake.approved;
+    const status = waiting ? "Your decision" : intake.approved ? "Approved" : "Not ready";
+    const title = scene.location
+      ? `Scene ${scene.sceneNumber} — ${scene.location}`
+      : (candidate.title || `Scene ${app.scene}`);
+    return `<section class="story-direction-desk">
+      <div class="voice-desk-head">
+        <div><span class="stage-label">STORY &amp; DIRECTION · Scene ${esc(app.scene)}</span><h3>${esc(title)}</h3></div>
+        <span class="voice-source ${waiting ? "working" : ""}">${esc(status)}</span>
+      </div>
+      ${candidate.logline ? `<p class="story-direction-logline">${esc(candidate.logline)}</p>` : ""}
+      <div class="story-direction-list">
+        ${sceneBeats.slice(0, 6).map((beat) => `<article>
+          <strong>${esc(beat.beatCode || "Beat")}</strong>
+          <p>${esc(beat.storyBeat || beat.want || "Direction beat pending.")}</p>
+        </article>`).join("") || `<article><strong>No scene beats visible yet</strong><p>Run or refresh Story &amp; Direction before production can unlock.</p></article>`}
+      </div>
+      <label class="relay-notes">Review note<textarea data-story-direction-note placeholder="What needs to change? Leave blank if approving."></textarea></label>
+      <div class="canonical-actions story-direction-actions">
+        <button type="button" class="secondary" data-story-direction-refresh>Refresh</button>
+        ${waiting ? `<button type="button" class="secondary danger" data-story-direction-verdict="reject">Iterate direction</button>
+        <button type="button" class="primary" data-story-direction-verdict="approve">Approve Story &amp; Direction</button>` : `<button type="button" class="primary" data-story-direction-refresh>Refresh Story &amp; Direction</button>`}
+      </div>
+    </section>`;
+  }
+
+  async function loadStoryDirection(force = false) {
+    if (!force && (app.storyIntakeLoading || app.storyIntakeKey === app.episode)) return;
+    app.storyIntakeLoading = true;
+    app.storyIntakeKey = app.episode;
+    if (app.view === "pipeline" && app.pipelineStep === "analysis") renderPipeline();
+    try {
+      app.storyIntake = await api(`/api/story-intake-status?episode=${encodeURIComponent(app.episode)}`);
+    } catch (error) {
+      app.storyIntake = { error: error.message };
+    } finally {
+      app.storyIntakeLoading = false;
+      if (app.view === "pipeline" && app.pipelineStep === "analysis") renderPipeline();
+    }
+  }
+
+  async function decideStoryDirection(verdict) {
+    const note = document.querySelector("[data-story-direction-note]")?.value || "";
+    try {
+      await api("/api/story-intake-decide", {
+        method: "POST",
+        body: JSON.stringify({ episode: app.episode, verdict, note, by: "Julian" }),
+      });
+      app.storyIntakeKey = null;
+      app.storyIntake = null;
+      toast(verdict === "approve" ? "Story & Direction approved. Scene production is unlocking." : "Story & Direction sent back for iteration.");
+      await loadSession();
+      await loadStoryDirection(true);
+    } catch (error) {
+      toast(error.message, true);
+    }
+  }
+
   function renderCanonicalPipelineStep(step) {
     const details = {
       upload: ["Brief & script", "Import and lock the screenplay that governs every scene, line and story beat."],
@@ -3689,6 +3766,7 @@
     const acceptAction = availableActions.find((action) => action.id.startsWith("accept-"));
     const iterateAction = availableActions.find((action) => action.id.startsWith("iterate-"));
     const otherActions = availableActions.filter((action) => action !== acceptAction && action !== iterateAction);
+    const storyDesk = step.id === "analysis" ? renderStoryDirectionDesk() : "";
     const voiceDesk = step.id === "audio" ? renderVoicePerformanceDesk(availableActions) : "";
     const roughCutDesk = step.id === "rough-cut" ? renderRoughCutDesk() : "";
     const liveActionButtons = [
@@ -3723,6 +3801,7 @@
         <div><span>Current shot</span><strong>${esc(selectedShot?.shotId || app.shotId || "Select in Director")}${selectedShot?.durationSec ? ` · ${Number(selectedShot.durationSec)}s` : ""}</strong></div>
         <div><span>Outcome</span><strong>${esc(session.headline || "Ready for production")}</strong></div>
       </div>`}
+      ${storyDesk}
       ${voiceDesk}
       ${roughCutDesk}
       ${stepState.kind === "blocked" || stepState.kind === "locked" ? `<p class="pipeline-blocker">${esc(stepState.reason)}</p>` : ""}
@@ -3798,6 +3877,14 @@
         };
       }
       handleAction(action);
+    }));
+    panel.querySelectorAll("[data-story-direction-refresh]").forEach((button) => button.addEventListener("click", () => {
+      button.disabled = true;
+      loadStoryDirection(true);
+    }));
+    panel.querySelectorAll("[data-story-direction-verdict]").forEach((button) => button.addEventListener("click", () => {
+      button.disabled = true;
+      decideStoryDirection(button.dataset.storyDirectionVerdict);
     }));
     panel.querySelectorAll("[data-open-evidence]").forEach((button) => button.addEventListener("click", () => openEvidence(button.dataset.openEvidence)));
     panel.querySelectorAll("[data-open-references]").forEach((button) => button.addEventListener("click", openReferences));
@@ -3893,6 +3980,9 @@
       if (!app.shotId) app.shotId = session.selectedShotId || null;
       if (session.phase === "keyframe") {
         await Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary(session)]);
+      }
+      if (session.phase === "story" || (app.view === "pipeline" && app.pipelineStep === "analysis")) {
+        await loadStoryDirection();
       }
       clearLocalActivityForSession(session);
       let approvedAdvance = false;

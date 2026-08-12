@@ -69,8 +69,17 @@ def test_story_review_stays_inside_director_pipeline_not_legacy_projects():
     open_inspector = SERVER[SERVER.index('if action in ("open-inspector", "open-provider-setup"):'):SERVER.index('if action == "direct-scene":')]
     assert 'stage == "story"' in open_inspector
     assert '"/cb-studio/director.html#view=pipeline&scene="' in open_inspector
-    assert '"&step=storyboard"' in open_inspector
+    assert '"&step=analysis"' in open_inspector
     assert 'app.html#pg=projects' not in open_inspector
+
+
+def test_director_analysis_step_exposes_story_direction_review_gate():
+    assert "function renderStoryDirectionDesk()" in JS
+    assert "/api/story-intake-status?episode=" in JS
+    assert '"/api/story-intake-decide"' in JS
+    assert 'data-story-direction-verdict="approve"' in JS
+    assert "Approve Story &amp; Direction" in JS
+    assert 'step.id === "analysis" ? renderStoryDirectionDesk()' in JS
 
 
 def test_studio_room_is_allowlisted_and_uses_the_claude_proxy_contract():

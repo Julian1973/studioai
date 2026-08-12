@@ -3506,7 +3506,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     stage = "animation" if action == "open-provider-setup" else session.get("phase")
                     if action == "open-inspector" and stage == "story":
                         route = ("/cb-studio/director.html#view=pipeline&scene=" +
-                                 quote(scene) + "&step=storyboard")
+                                 quote(scene) + "&step=analysis")
                     else:
                         route = ("/cb-studio/app.html#p=crystal-bears&pg=pipeline&ep=" +
                                  quote(ep) + "&sc=" + quote(scene) + "&st=" +

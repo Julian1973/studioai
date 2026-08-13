@@ -89,6 +89,9 @@ def test_director_analysis_step_exposes_scene_storyboard_review_when_scene_packa
     assert "Approve scene plan" in JS
     assert "This scene has ${shots.length || 0} production shot" in JS
     assert '"/api/storyboard-approve"' in JS
+    assert "scene-storyboard-snapshot" in SERVER
+    assert "_snapshot_storyboard_handover" in SERVER
+    assert "production package source storyboard signature is stale" in SERVER
 
 
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():

@@ -103,6 +103,15 @@ def _write_storyboard_snapshot(*, scene: str, episode: str, source: dict[str, An
             "shotIds": [shot.get("shotId") for shot in shots],
         },
     )
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            existing = {}
+        if existing.get("inputSignature") == storyboard["inputSignature"]:
+            for key in ("approvalState", "humanNote", "approvalLog"):
+                if key in existing:
+                    storyboard[key] = existing[key]
     path.write_text(json.dumps(storyboard, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return {
         "path": str(path),

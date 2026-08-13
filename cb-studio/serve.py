@@ -1854,6 +1854,50 @@ class StoryboardApprovalRefused(RuntimeError):
     pass
 
 
+def _snapshot_storyboard_handover(storyboard_path, episode, scene):
+    """Promote scene-package storyboard snapshots without the legacy Creative Room mapper."""
+    out_path = OUT / f"{episode}_scene{scene}_production_package.json"
+    if not out_path.exists():
+        raise StoryboardApprovalRefused(
+            "REFUSED — production package is missing; rebuild Story & Direction")
+    package, package_digest = cb_db.read_json_document(ROOT, out_path)
+    source_storyboard = package.get("sourceStoryboard") or {}
+    reviewed_path = pathlib.Path(storyboard_path).resolve()
+    expected_rel = pathlib.Path("cb-output") / "creative" / f"{episode}_scene{scene}_storyboard.json"
+    try:
+        reviewed_rel = reviewed_path.relative_to(ROOT.resolve())
+    except ValueError:
+        reviewed_rel = None
+    source_path_text = str(source_storyboard.get("path") or "")
+    source_path = pathlib.Path(source_path_text)
+    source_rel = pathlib.Path(source_path_text)
+    if source_path.is_absolute():
+        try:
+            source_rel = source_path.resolve().relative_to(ROOT.resolve())
+        except ValueError:
+            source_rel = pathlib.Path(*source_path.parts[-3:])
+    if reviewed_rel != expected_rel or source_rel != expected_rel:
+        raise StoryboardApprovalRefused(
+            "REFUSED — production package did not bind to the reviewed storyboard")
+    storyboard, _ = cb_db.read_json_document(ROOT, storyboard_path)
+    if source_storyboard.get("inputSignature") != storyboard.get("inputSignature"):
+        raise StoryboardApprovalRefused(
+            "REFUSED — production package source storyboard signature is stale")
+    if not (package.get("validation") or {}).get("passed"):
+        raise StoryboardApprovalRefused("REFUSED — production package validation failed")
+    source_storyboard["approvalState"] = storyboard.get("approvalState")
+    source_storyboard["humanNote"] = storyboard.get("humanNote")
+    source_storyboard["approvalLog"] = list(storyboard.get("approvalLog") or [])
+    cb_db.atomic_write_json(ROOT, out_path, package, expected_digest=package_digest)
+    return {
+        "revision": package.get("revision"),
+        "path": str(out_path),
+        "carriedForward": [],
+        "reset": [shot.get("shotId") for shot in package.get("shots") or [] if shot.get("shotId")],
+        "archivedPrevious": None,
+    }
+
+
 def _storyboard_approval(d):
     """Apply a storyboard decision and its production handover under one scene lease."""
     ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
@@ -1892,31 +1936,35 @@ def _storyboard_approval(d):
         handover = None
         if target == "scene" and verdict == "approved":
             try:
-                import cb_handover
-                shot_ids = [
-                    shot.get("shotId") for shot in (package.get("shots") or [])
-                    if shot.get("shotId")
-                ]
-                preview, _ = cb_handover.promote_to_canonical(
-                    str(path), sc, shot_ids, ep, dry_run=True, log=lambda *a, **k: None)
-                if not (preview.get("validation") or {}).get("passed"):
-                    issues = [
-                        issue for issue in (preview.get("validation") or {}).get("issues", [])
-                        if issue.get("severity") == "ERROR"
+                signature_kind = ((package.get("inputSignature") or {}).get("kind") or "")
+                if signature_kind == "scene-storyboard-snapshot":
+                    handover = _snapshot_storyboard_handover(path, ep, sc)
+                else:
+                    import cb_handover
+                    shot_ids = [
+                        shot.get("shotId") for shot in (package.get("shots") or [])
+                        if shot.get("shotId")
                     ]
-                    raise RuntimeError(
-                        "production handover validation failed" +
-                        (f": {issues[0].get('code')}" if issues else "")
-                    )
-                promoted, archived = cb_handover.promote_to_canonical(
-                    str(path), sc, shot_ids, ep, dry_run=False, log=lambda *a, **k: None)
-                handover = {
-                    "revision": promoted.get("revision"),
-                    "carriedForward": (promoted.get("handover") or {}).get(
-                        "carriedForwardUnchangedShots", []),
-                    "reset": (promoted.get("handover") or {}).get("resetChangedShots", []),
-                    "archivedPrevious": str(archived) if archived else None,
-                }
+                    preview, _ = cb_handover.promote_to_canonical(
+                        str(path), sc, shot_ids, ep, dry_run=True, log=lambda *a, **k: None)
+                    if not (preview.get("validation") or {}).get("passed"):
+                        issues = [
+                            issue for issue in (preview.get("validation") or {}).get("issues", [])
+                            if issue.get("severity") == "ERROR"
+                        ]
+                        raise RuntimeError(
+                            "production handover validation failed" +
+                            (f": {issues[0].get('code')}" if issues else "")
+                        )
+                    promoted, archived = cb_handover.promote_to_canonical(
+                        str(path), sc, shot_ids, ep, dry_run=False, log=lambda *a, **k: None)
+                    handover = {
+                        "revision": promoted.get("revision"),
+                        "carriedForward": (promoted.get("handover") or {}).get(
+                            "carriedForwardUnchangedShots", []),
+                        "reset": (promoted.get("handover") or {}).get("resetChangedShots", []),
+                        "archivedPrevious": str(archived) if archived else None,
+                    }
             except Exception as exc:
                 cb_db.atomic_write_bytes(
                     ROOT, path, original_bytes, expected_digest=decision_digest)

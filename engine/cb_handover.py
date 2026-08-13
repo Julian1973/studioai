@@ -179,17 +179,29 @@ def _require_storyboard_lineage(sb, episode):
 
     signature = sb.get("inputSignature") or {}
     inputs = signature.get("inputs") or {}
-    if (not cb_lineage.signature_matches(signature, "scene-storyboard", inputs) or
-            inputs.get("scriptVersionId") != current["scriptVersionId"] or
-            inputs.get("beatPackageDigest") != expected_beat["digest"] or
-            inputs.get("canonProfileDigest") != lock["profileDigests"]["storyboard"]):
-        raise HandoverRefused("REFUSED — storyboard dependency signature is missing or stale")
-    storyboard_lock = sb.get("canonLock") or {}
-    if (storyboard_lock.get("manifestDigest") != lock["manifestDigest"] or
-            storyboard_lock.get("profileDigest") !=
-            lock["profileDigests"]["storyboard"]):
-        raise HandoverRefused(
-            "REFUSED — storyboard does not carry the exact current storyboard-canon lock")
+    if signature.get("kind") == "scene-storyboard-snapshot":
+        expected_inputs = {
+            "scriptVersionId": current["scriptVersionId"],
+            "beatPackageDigest": expected_beat["digest"],
+            "sceneNumber": str(sb.get("sceneNumber")),
+            "sourceBeatIds": [beat.get("sourceBeatId") for beat in source_beats],
+            "shotIds": [shot.get("shotId") for shot in (sb.get("shots") or [])],
+        }
+        if not cb_lineage.signature_matches(
+                signature, "scene-storyboard-snapshot", expected_inputs):
+            raise HandoverRefused("REFUSED — storyboard dependency signature is missing or stale")
+    else:
+        if (not cb_lineage.signature_matches(signature, "scene-storyboard", inputs) or
+                inputs.get("scriptVersionId") != current["scriptVersionId"] or
+                inputs.get("beatPackageDigest") != expected_beat["digest"] or
+                inputs.get("canonProfileDigest") != lock["profileDigests"]["storyboard"]):
+            raise HandoverRefused("REFUSED — storyboard dependency signature is missing or stale")
+        storyboard_lock = sb.get("canonLock") or {}
+        if (storyboard_lock.get("manifestDigest") != lock["manifestDigest"] or
+                storyboard_lock.get("profileDigest") !=
+                lock["profileDigests"]["storyboard"]):
+            raise HandoverRefused(
+                "REFUSED — storyboard does not carry the exact current storyboard-canon lock")
     return current, expected_beat, lock
 
 # Raw room deliberation never reaches production. A compact creativeIntent projection is

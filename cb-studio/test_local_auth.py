@@ -76,6 +76,57 @@ def test_uncached_director_builds_are_serialized_across_different_shots(monkeypa
     ]
 
 
+def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatch, tmp_path):
+    module = _load_server_module("cb_studio_serve_snapshot_handover_test")
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "OUT", tmp_path / "cb-output")
+    creative = module.OUT / "creative"
+    creative.mkdir(parents=True)
+    signature = {
+        "kind": "scene-storyboard-snapshot",
+        "schemaVersion": 1,
+        "inputs": {"sceneNumber": "3"},
+        "algorithm": "sha256",
+        "digest": "fixture",
+    }
+    storyboard_path = creative / "Ep1_scene3_storyboard.json"
+    storyboard_path.write_text(json.dumps({
+        "episodeId": "Ep1",
+        "sceneNumber": "3",
+        "approvalState": "generated-pending-human-review",
+        "humanNote": "",
+        "inputSignature": signature,
+    }))
+    package_path = module.OUT / "Ep1_scene3_production_package.json"
+    package_path.write_text(json.dumps({
+        "episode": "Ep1",
+        "sceneNumber": 3,
+        "revision": 1,
+        "sourceStoryboard": {
+            "path": str(storyboard_path),
+            "inputSignature": signature,
+        },
+        "validation": {"passed": True},
+        "shots": [{"shotId": "3.B1.S1"}, {"shotId": "3.B2.S1"}],
+    }))
+
+    result = module._storyboard_approval({
+        "episode": "Ep1",
+        "scene": "3",
+        "target": "scene",
+        "verdict": "approved",
+        "note": "approved by Julian",
+        "by": "Julian",
+    })
+
+    assert result["ok"] is True
+    assert result["handover"]["reset"] == ["3.B1.S1", "3.B2.S1"]
+    assert json.loads(storyboard_path.read_text())["approvalState"] == "approved"
+    written = json.loads(package_path.read_text())
+    assert written["sourceStoryboard"]["approvalState"] == "approved"
+    assert written["sourceStoryboard"]["humanNote"] == "approved by Julian"
+
+
 def test_launch_token_establishes_http_only_session_and_cleans_url(studio):
     module, port = studio
     status, headers, _ = _request(port, "GET", "/cb-studio/app.html")

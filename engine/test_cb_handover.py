@@ -971,6 +971,24 @@ def _canonical_env(tmp_path, monkeypatch, sb_state="approved"):
     return sb_p, pkg_dir
 
 
+def _convert_to_snapshot_storyboard(sb_p):
+    sb = json.load(open(sb_p))
+    source_beat_ids = [beat.get("sourceBeatId") for beat in sb.get("beats", [])]
+    shot_ids = [shot.get("shotId") for shot in sb.get("shots", [])]
+    inputs = {
+        "scriptVersionId": sb["sourceScript"]["scriptVersionId"],
+        "beatPackageDigest": sb["sourceBeatPackage"]["contentSignature"]["digest"],
+        "sceneNumber": str(sb.get("sceneNumber")),
+        "sourceBeatIds": source_beat_ids,
+        "shotIds": shot_ids,
+    }
+    sb["inputSignature"] = cb_lineage.dependency_signature(
+        "scene-storyboard-snapshot", inputs)
+    sb.pop("canonLock", None)
+    json.dump(sb, open(sb_p, "w"))
+    return sb
+
+
 def test_promote_to_canonical_dry_run_writes_nothing_and_reports_honest_validation(tmp_path, monkeypatch):
     sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
     new_pkg, archived = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
@@ -980,6 +998,31 @@ def test_promote_to_canonical_dry_run_writes_nothing_and_reports_honest_validati
     #                                                                never a hardcoded True
     assert list((pkg_dir).iterdir()) == []                        # nothing written
     assert archived is None                                       # no prior package to archive
+
+
+def test_promote_to_canonical_accepts_current_storyboard_snapshot_signature(tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    _convert_to_snapshot_storyboard(sb_p)
+
+    new_pkg, archived = H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                                                 dry_run=True, log=lambda *a, **k: None)
+
+    assert new_pkg["shots"][0]["shotId"] == "S1.SH1"
+    assert archived is None
+    assert list(pkg_dir.iterdir()) == []
+
+
+def test_promote_to_canonical_refuses_stale_storyboard_snapshot_signature(tmp_path, monkeypatch):
+    sb_p, pkg_dir = _canonical_env(tmp_path, monkeypatch)
+    sb = _convert_to_snapshot_storyboard(sb_p)
+    sb["inputSignature"]["inputs"]["shotIds"] = ["S1.STALE"]
+    json.dump(sb, open(sb_p, "w"))
+
+    with pytest.raises(H.HandoverRefused, match="storyboard dependency signature is missing or stale"):
+        H.promote_to_canonical(sb_p, "1", ["S1.SH1"], episode="Ep1",
+                               dry_run=True, log=lambda *a, **k: None)
+
+    assert list(pkg_dir.iterdir()) == []
 
 
 def test_promote_to_canonical_writes_canonical_shape_and_archives_the_old_package(tmp_path, monkeypatch):

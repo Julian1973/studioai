@@ -39,6 +39,7 @@
     storyIntake: null,
     storyIntakeKey: null,
     storyIntakeLoading: false,
+    sceneStoryboard: null,
     assetLibraryDrafts: null,
     agentBrief: null,
     agentBriefKey: null,
@@ -3670,13 +3671,41 @@
 
   function renderStoryDirectionDesk() {
     const intake = app.storyIntake || {};
+    const storyboard = app.sceneStoryboard || {};
     if (app.storyIntakeLoading && app.storyIntakeKey !== app.episode) {
       return `<section class="story-direction-desk"><div class="voice-desk-loading">Loading Story &amp; Direction review...</div></section>`;
     }
-    if (intake.error) {
+    if (intake.error && storyboard.error) {
       return `<section class="story-direction-desk">
-        <div class="voice-desk-loading error-line">${esc(intake.error)}</div>
+        <div class="voice-desk-loading error-line">${esc(storyboard.error || intake.error)}</div>
         <button type="button" class="secondary" data-story-direction-refresh>Retry</button>
+      </section>`;
+    }
+    if (storyboard && !storyboard.error && storyboard.approvalState && storyboard.approvalState !== "approved") {
+      const beats = storyboard.beats || [];
+      const shots = storyboard.shots || [];
+      const status = storyboard.approvalState === "generated-pending-human-review" ? "Your decision" : storyboard.approvalState;
+      return `<section class="story-direction-desk">
+        <div class="voice-desk-head">
+          <div><span class="stage-label">SCENE STORYBOARD · Scene ${esc(app.scene)}</span><h3>Approve the scene plan before keyframes</h3></div>
+          <span class="voice-source working">${esc(status)}</span>
+        </div>
+        <p class="story-direction-logline">This scene has ${shots.length || 0} production shot${shots.length === 1 ? "" : "s"} drafted from the approved episode direction. Approving this hands Scene ${esc(app.scene)} to production and unlocks scene plate, keyframe, voice and render work.</p>
+        <div class="story-direction-list">
+          ${shots.slice(0, 8).map((shot) => `<article>
+            <strong>${esc(shot.shotId || "Shot")}${shot.durationSec || shot.targetDurationSec ? ` · ${esc(shot.durationSec || shot.targetDurationSec)}s` : ""}</strong>
+            <p>${esc(shot.purpose || shot.storyBeat || shot.description || "Shot direction pending.")}</p>
+          </article>`).join("") || beats.slice(0, 8).map((beat) => `<article>
+            <strong>${esc(beat.beatId || beat.beatCode || "Beat")}</strong>
+            <p>${esc(beat.storyBeat || beat.want || "Direction beat pending.")}</p>
+          </article>`).join("") || `<article><strong>No scene shots visible yet</strong><p>Refresh or draft the scene storyboard before production can unlock.</p></article>`}
+        </div>
+        <label class="relay-notes">Review note<textarea data-story-direction-note placeholder="What needs to change? Leave blank if approving."></textarea></label>
+        <div class="canonical-actions story-direction-actions">
+          <button type="button" class="secondary" data-story-direction-refresh>Refresh</button>
+          <button type="button" class="secondary danger" data-scene-storyboard-verdict="rejected">Reject scene plan</button>
+          <button type="button" class="primary" data-scene-storyboard-verdict="approved">Approve scene plan</button>
+        </div>
       </section>`;
     }
     const candidate = intake.candidate || {};
@@ -3716,9 +3745,15 @@
     app.storyIntakeKey = app.episode;
     if (app.view === "pipeline" && app.pipelineStep === "analysis") renderPipeline();
     try {
-      app.storyIntake = await api(`/api/story-intake-status?episode=${encodeURIComponent(app.episode)}`);
+      const [intake, storyboard] = await Promise.all([
+        api(`/api/story-intake-status?episode=${encodeURIComponent(app.episode)}`),
+        api(`/api/storyboard?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}`).catch((error) => ({ error: error.message })),
+      ]);
+      app.storyIntake = intake;
+      app.sceneStoryboard = storyboard;
     } catch (error) {
       app.storyIntake = { error: error.message };
+      app.sceneStoryboard = { error: error.message };
     } finally {
       app.storyIntakeLoading = false;
       if (app.view === "pipeline" && app.pipelineStep === "analysis") renderPipeline();
@@ -3735,6 +3770,30 @@
       app.storyIntakeKey = null;
       app.storyIntake = null;
       toast(verdict === "approve" ? "Story & Direction approved. Scene production is unlocking." : "Story & Direction sent back for iteration.");
+      await loadSession();
+      await loadStoryDirection(true);
+    } catch (error) {
+      toast(error.message, true);
+    }
+  }
+
+  async function decideSceneStoryboard(verdict) {
+    const note = document.querySelector("[data-story-direction-note]")?.value || "";
+    try {
+      await api("/api/storyboard-approve", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.episode,
+          scene: String(app.scene),
+          target: "scene",
+          verdict,
+          note,
+          by: "Julian",
+        }),
+      });
+      app.storyIntakeKey = null;
+      app.sceneStoryboard = null;
+      toast(verdict === "approved" ? "Scene storyboard approved. Production is unlocking." : "Scene storyboard rejected for revision.");
       await loadSession();
       await loadStoryDirection(true);
     } catch (error) {
@@ -3885,6 +3944,10 @@
     panel.querySelectorAll("[data-story-direction-verdict]").forEach((button) => button.addEventListener("click", () => {
       button.disabled = true;
       decideStoryDirection(button.dataset.storyDirectionVerdict);
+    }));
+    panel.querySelectorAll("[data-scene-storyboard-verdict]").forEach((button) => button.addEventListener("click", () => {
+      button.disabled = true;
+      decideSceneStoryboard(button.dataset.sceneStoryboardVerdict);
     }));
     panel.querySelectorAll("[data-open-evidence]").forEach((button) => button.addEventListener("click", () => openEvidence(button.dataset.openEvidence)));
     panel.querySelectorAll("[data-open-references]").forEach((button) => button.addEventListener("click", openReferences));

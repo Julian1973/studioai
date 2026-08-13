@@ -82,6 +82,15 @@ def test_director_analysis_step_exposes_story_direction_review_gate():
     assert 'step.id === "analysis" ? renderStoryDirectionDesk()' in JS
 
 
+def test_director_analysis_step_exposes_scene_storyboard_review_when_scene_package_exists():
+    assert "/api/storyboard?episode=" in JS
+    assert "app.sceneStoryboard" in JS
+    assert 'data-scene-storyboard-verdict="approved"' in JS
+    assert "Approve scene plan" in JS
+    assert "This scene has ${shots.length || 0} production shot" in JS
+    assert '"/api/storyboard-approve"' in JS
+
+
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
     assert 'app.view === "pipeline" && session.phase === "story" && app.pipelineStep !== "analysis"' in JS
     assert 'app.pipelineStep = "analysis"' in JS

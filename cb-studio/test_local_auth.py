@@ -1,7 +1,9 @@
 import http.client
+import hashlib
 import importlib.util
 import json
 import pathlib
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -11,6 +13,11 @@ import pytest
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
+ENGINE = ROOT / "engine"
+if str(ENGINE) not in sys.path:
+    sys.path.insert(0, str(ENGINE))
+
+import cb_lineage
 
 
 def _load_server_module(name="cb_studio_serve_auth_test"):
@@ -97,6 +104,14 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
         "humanNote": "",
         "inputSignature": signature,
     }))
+    original_storyboard_sha = cb_lineage.sha256_file(storyboard_path)
+    package_inputs = {
+        "scriptVersionId": "sha256:" + "a" * 64,
+        "beatPackageDigest": "beat-digest",
+        "storyboardSha256": original_storyboard_sha,
+        "creativeCardHashes": {},
+        "canonProfileDigest": None,
+    }
     package_path = module.OUT / "Ep1_scene3_production_package.json"
     package_path.write_text(json.dumps({
         "episode": "Ep1",
@@ -104,8 +119,12 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
         "revision": 1,
         "sourceStoryboard": {
             "path": str(storyboard_path),
+            "md5": hashlib.md5(storyboard_path.read_bytes()).hexdigest(),
+            "sha256": original_storyboard_sha,
             "inputSignature": signature,
         },
+        "inputSignature": cb_lineage.dependency_signature(
+            "production-package", package_inputs),
         "validation": {"passed": True},
         "shots": [{"shotId": "3.B1.S1"}, {"shotId": "3.B2.S1"}],
     }))
@@ -123,8 +142,18 @@ def test_snapshot_storyboard_approval_promotes_existing_scene_package(monkeypatc
     assert result["handover"]["reset"] == ["3.B1.S1", "3.B2.S1"]
     assert json.loads(storyboard_path.read_text())["approvalState"] == "approved"
     written = json.loads(package_path.read_text())
+    approved_storyboard_bytes = storyboard_path.read_bytes()
+    approved_storyboard_sha = cb_lineage.sha256_file(storyboard_path)
     assert written["sourceStoryboard"]["approvalState"] == "approved"
     assert written["sourceStoryboard"]["humanNote"] == "approved by Julian"
+    assert written["sourceStoryboard"]["md5"] == hashlib.md5(approved_storyboard_bytes).hexdigest()
+    assert written["sourceStoryboard"]["sha256"] == approved_storyboard_sha
+    assert written["inputSignature"]["inputs"]["storyboardSha256"] == approved_storyboard_sha
+    assert cb_lineage.signature_matches(
+        written["inputSignature"],
+        "production-package",
+        {**package_inputs, "storyboardSha256": approved_storyboard_sha},
+    )
 
 
 def test_launch_token_establishes_http_only_session_and_cleans_url(studio):

@@ -18,6 +18,7 @@ DATA.mkdir(parents=True, exist_ok=True)
 import cb_scripts
 import cb_db
 import cb_asset_registry
+import cb_lineage
 import studio_profile
 
 def _canonical_engine_module(module_name):
@@ -1255,15 +1256,23 @@ def scene_lineage(pkg, scene, episode="Ep1"):
     so it cannot itself hash the live storyboard file to check it still matches what the
     package claims it was built from. "current" is True ONLY when both hashes are present
     AND equal — never inferred true by omission."""
-    sb_path = _storyboard_file(scene, episode)
-    live_md5 = None
-    if sb_path.exists():
-        import hashlib
-        live_md5 = hashlib.md5(sb_path.read_bytes()).hexdigest()
-    pkg_md5 = (pkg.get("sourceStoryboard") or {}).get("md5")
-    return {"current": bool(pkg_md5) and bool(live_md5) and pkg_md5 == live_md5,
-            "packageStoryboardMd5": pkg_md5, "liveStoryboardMd5": live_md5,
-            "packageRevision": pkg.get("revision")}
+    renderer = _canonical_cb_render()
+    return renderer.lineage_status(pkg, scene, episode)
+
+
+def _sync_package_storyboard_provenance(package, storyboard_path, storyboard):
+    source_storyboard = package.setdefault("sourceStoryboard", {})
+    source_storyboard["md5"] = hashlib.md5(pathlib.Path(storyboard_path).read_bytes()).hexdigest()
+    source_storyboard["sha256"] = cb_lineage.sha256_file(storyboard_path)
+    source_storyboard["approvalState"] = storyboard.get("approvalState")
+    source_storyboard["humanNote"] = storyboard.get("humanNote", "")
+    source_storyboard["approvalLog"] = list(storyboard.get("approvalLog") or [])
+    package_inputs = dict((package.get("inputSignature") or {}).get("inputs") or {})
+    if package_inputs:
+        package_inputs["storyboardSha256"] = source_storyboard["sha256"]
+        package["inputSignature"] = cb_lineage.dependency_signature(
+            "production-package", package_inputs)
+    return source_storyboard
 
 
 def _url_from_abs(abs_path):
@@ -1885,9 +1894,7 @@ def _snapshot_storyboard_handover(storyboard_path, episode, scene):
             "REFUSED — production package source storyboard signature is stale")
     if not (package.get("validation") or {}).get("passed"):
         raise StoryboardApprovalRefused("REFUSED — production package validation failed")
-    source_storyboard["approvalState"] = storyboard.get("approvalState")
-    source_storyboard["humanNote"] = storyboard.get("humanNote")
-    source_storyboard["approvalLog"] = list(storyboard.get("approvalLog") or [])
+    _sync_package_storyboard_provenance(package, storyboard_path, storyboard)
     cb_db.atomic_write_json(ROOT, out_path, package, expected_digest=package_digest)
     return {
         "revision": package.get("revision"),

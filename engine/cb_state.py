@@ -88,18 +88,30 @@ def _storyboard_status(scene, episode, intake):
     if not storyboard:
         return None, False, "missing"
     signature = storyboard.get("inputSignature") or {}
-    signature_ok = cb_lineage.signature_matches(
-        signature, "scene-storyboard", signature.get("inputs") or {})
     source_version = (storyboard.get("sourceScript") or {}).get("scriptVersionId")
     inputs = signature.get("inputs") or {}
     active_beat_digest = intake.get("canonicalBeatPackageDigest")
     active_canon_digest = (intake.get("canonProfileDigests") or {}).get("storyboard")
+    if signature.get("kind") == "scene-storyboard-snapshot":
+        expected_inputs = {
+            "scriptVersionId": intake.get("scriptVersionId"),
+            "beatPackageDigest": active_beat_digest,
+            "sceneNumber": str(storyboard.get("sceneNumber")),
+            "sourceBeatIds": [beat.get("sourceBeatId") for beat in storyboard.get("beats") or []],
+            "shotIds": [shot.get("shotId") for shot in storyboard.get("shots") or []],
+        }
+        signature_ok = cb_lineage.signature_matches(
+            signature, "scene-storyboard-snapshot", expected_inputs)
+        canon_ok = True
+    else:
+        signature_ok = cb_lineage.signature_matches(
+            signature, "scene-storyboard", inputs)
+        canon_ok = inputs.get("canonProfileDigest") == active_canon_digest
     current = bool(
         intake.get("canonicalCurrent") and
         storyboard.get("approvalState") == "approved" and signature_ok and
         source_version and source_version == intake.get("scriptVersionId") and
-        inputs.get("beatPackageDigest") == active_beat_digest and
-        inputs.get("canonProfileDigest") == active_canon_digest)
+        inputs.get("beatPackageDigest") == active_beat_digest and canon_ok)
     reason = None
     if not intake.get("canonicalCurrent"):
         reason = "story-intake-source-contract-missing-or-stale"
@@ -111,7 +123,7 @@ def _storyboard_status(scene, episode, intake):
         reason = "storyboard-script-version-mismatch"
     elif inputs.get("beatPackageDigest") != active_beat_digest:
         reason = "storyboard-beat-package-mismatch"
-    elif inputs.get("canonProfileDigest") != active_canon_digest:
+    elif not canon_ok:
         reason = "storyboard-canon-lock-mismatch"
     return storyboard, current, reason
 

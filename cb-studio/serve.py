@@ -3824,8 +3824,21 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "episode and verdict (approve|reject) required"})
                     return
                 import cb_intake as _CBI
-                rec = _CBI.decide_intake(ep, verdict, note=str(d.get("note") or ""),
-                                         reviewed_by=str(d.get("by") or "Julian"))
+                try:
+                    rec = _CBI.decide_intake(ep, verdict, note=str(d.get("note") or ""),
+                                             reviewed_by=str(d.get("by") or "Julian"))
+                except _CBI.Refused:
+                    status = _CBI.intake_status(ep)
+                    if (verdict == "approve" and status.get("canonicalCurrent") and
+                            status.get("candidateCurrent") and
+                            (status.get("candidate") or {}).get("approvalState") == "approved"):
+                        rec = {
+                            "state": "approved",
+                            "alreadyCurrent": True,
+                            "message": "Story & Direction is already approved for this script and canon lock.",
+                        }
+                    else:
+                        raise
                 reindex_episodes()
                 self._json(200, {"ok": True, "record": rec})
             except _CBI.Refused as e:

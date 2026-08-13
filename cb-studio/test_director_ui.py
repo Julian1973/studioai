@@ -94,6 +94,13 @@ def test_director_analysis_step_exposes_scene_storyboard_review_when_scene_packa
     assert "production package source storyboard signature is stale" in SERVER
 
 
+def test_story_intake_approval_is_idempotent_when_package_is_already_current():
+    assert 'status.get("canonicalCurrent")' in SERVER
+    assert 'status.get("candidateCurrent")' in SERVER
+    assert '"alreadyCurrent": True' in SERVER
+    assert "Story & Direction is already approved for this script and canon lock." in SERVER
+
+
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
     assert 'app.view === "pipeline" && session.phase === "story" && app.pipelineStep !== "analysis"' in JS
     assert 'app.pipelineStep = "analysis"' in JS

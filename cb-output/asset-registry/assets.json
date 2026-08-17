@@ -1794,6 +1794,23 @@
       "url": "/engine/media/shots/Ep1_6.B3.S1_vo_candidate_7589142d.wav"
     },
     {
+      "assetId": "8cf793a8a45c8afa13838499",
+      "bindingKey": "Ep1|6|6.B3.S1|candidate_take|transport_candidate_1",
+      "displayType": "video",
+      "episode": "Ep1",
+      "kind": "candidate_take",
+      "label": "6.B3.S1 transport candidate 1",
+      "metadata": {},
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_6.B3.S1_c1.mp4",
+      "registeredAt": "2026-08-17T09:48:06Z",
+      "role": "transport_candidate_1",
+      "scene": "6",
+      "shotId": "6.B3.S1",
+      "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/Ep1_scene6_production_package.json",
+      "status": "candidate",
+      "url": "/engine/media/shots/Ep1_6.B3.S1_c1.mp4"
+    },
+    {
       "assetId": "846f766fdbcd94e86071c10a",
       "bindingKey": "Ep1|*||reference_image|CB_Aida_anchor.png",
       "displayType": "image",

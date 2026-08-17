@@ -199,7 +199,7 @@ def _byteplus_task_url(endpoint):
 
 
 def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolution,
-                             duration, out, *, poll_interval=10, timeout=3600):
+                             duration, out, *, generate_audio=True, poll_interval=10, timeout=3600):
     """Submit and retrieve one ModelArk asynchronous video task.
 
     Provider capability, spend authorization and billing confirmation happen before this
@@ -223,7 +223,7 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
     body = {
         "model": contract["providerModelId"],
         "content": content,
-        "generate_audio": True,
+        "generate_audio": bool(generate_audio),
         "resolution": resolution,
         "ratio": "16:9",
         "duration": seconds,
@@ -524,7 +524,7 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
 def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False,
                                 production_route=None, model_id=None,
-                                comparison_run_id=None):
+                                comparison_run_id=None, generate_audio=True):
     _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video through the exact selected capability-gated transport.
 
@@ -569,7 +569,8 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
             raise cb_providers.ProviderCapabilityError(
                 "video-extension references are not wired for BytePlus inline transport")
         outp, task_id, task = _byteplus_generate_video(
-            contract, _pr, image_urls, audio_urls, resolution, duration, out)
+            contract, _pr, image_urls, audio_urls, resolution, duration, out,
+            generate_audio=generate_audio)
         seconds = float(duration)
         cb_costs.log_spend(
             "seedance_ref2vid",
@@ -602,7 +603,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
         # generate_audio ON: Seedance carries the supplied @Audio1 dialogue timing plus synchronized foley/ambience.
         # Music is not auto-requested here; scene-level score is generated/selected in post after approved split
         # units are stitched, unless a deliberately approved single-shot prompt explicitly asks for native music.
-        "generate_audio": True,
+        "generate_audio": bool(generate_audio),
     }
     # Seedance 2.0 exposed bitrate_mode; the live 2.5 schema does not. Keep the
     # comparison request byte-compatible without sending an invalid field to 2.5.

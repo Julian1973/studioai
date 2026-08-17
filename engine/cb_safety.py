@@ -740,7 +740,8 @@ def install(m):
 
     def animation_generation_signature(pkg, shot, scene, episode, fast=False,
                                        comparison_model_id=None,
-                                       comparison_run_id=None):
+                                       comparison_run_id=None,
+                                       include_audio_reference=True):
         direction = current_direction_record(pkg, shot["shotId"], "animation")
         prompt = str((direction.get("output") or {}).get("providerPrompt") or "").strip()
         if not prompt:
@@ -761,7 +762,8 @@ def install(m):
                 m._slot_paths(shot, "referenceSlots", anchor, scene, episode,
                               m._characters_cfg()),
                 anchor, fast, comparison_model_id, comparison_run_id,
-                materialize_audio=False)
+                materialize_audio=False,
+                include_audio_reference=include_audio_reference)
         except (cb_providers.ProviderCapabilityError,
                 m.cb_seedance_transport.TransportPlanError) as exc:
             raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
@@ -771,6 +773,7 @@ def install(m):
             "shotContractHash": json_sha256(shot),
             "animationDirectionSignature": direction.get("inputSignature"),
             "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
+            "audioReferencePolicy": ("guide" if include_audio_reference else "post-only"),
             "openingFrameHash": file_sha256(anchor),
             "references": refs,
             "audioHash": (file_sha256(ledger.get("voPath"))
@@ -1398,7 +1401,7 @@ def install(m):
 
     def fire_shot(scene, shot_id, episode="Ep1", candidates=3, fast=False,
                   spend_token=None, dry_run=False, comparison_model_id=None,
-                  comparison_run_id=None, log=print):
+                  comparison_run_id=None, log=print, include_audio_reference=True):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
         stored = ((ledger.get("batch") or {}).get("envelope") or
@@ -1430,10 +1433,11 @@ def install(m):
         generation_signature = animation_generation_signature(
             pkg, shot, scene, episode, fast=fast,
             comparison_model_id=comparison_model_id,
-            comparison_run_id=comparison_run_id)
+            comparison_run_id=comparison_run_id,
+            include_audio_reference=include_audio_reference)
         result = original["fire_shot"](
             scene, shot_id, episode, candidates, fast, spend_token, dry_run,
-            comparison_model_id, comparison_run_id, log)
+            comparison_model_id, comparison_run_id, log, include_audio_reference)
         pkg, path = m.load_pkg(scene, episode)
         ledger = m._ledger(pkg, shot_id)
         batch = ledger.get("batch") or {}
@@ -1443,7 +1447,8 @@ def install(m):
         current_signature = animation_generation_signature(
             pkg, m._shot(pkg, shot_id), scene, episode, fast=fast,
             comparison_model_id=comparison_model_id,
-            comparison_run_id=comparison_run_id)
+            comparison_run_id=comparison_run_id,
+            include_audio_reference=include_audio_reference)
         if current_signature != generation_signature:
             raise m.Refused(
                 f"REFUSED — {shot_id}'s direct generation inputs changed while its batch ran")

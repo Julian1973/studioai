@@ -5378,7 +5378,7 @@ def _comparison_args(comparison_model_id, comparison_run_id):
 
 def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                               comparison_model_id=None, comparison_run_id=None,
-                              materialize_audio=False):
+                              materialize_audio=False, include_audio_reference=True):
     """Return every exact provider call that will produce one Studio candidate."""
     import cb_costs
     model_id, run_id = _comparison_args(comparison_model_id, comparison_run_id)
@@ -5401,7 +5401,8 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             contract = cb_providers.request_contract(
                 fast=fast, duration=int(round(shot["durationSec"])),
                 resolution=_review_video_resolution(),
-                image_count=len(imgs), audio_count=1 if led.get("voPath") else 0,
+                image_count=len(imgs), audio_count=1 if (
+                    include_audio_reference and led.get("voPath")) else 0,
                 video_count=len(video_references))
         except cb_providers.ProviderCapabilityError as exc:
             raise Refused(f"REFUSED — provider capability: {exc}") from exc
@@ -5428,7 +5429,8 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                 "videoReferences": video_references,
                 "audio": ({"path": led.get("voPath"),
                            "md5": _file_md5(led.get("voPath"))}
-                          if led.get("voPath") else None),
+                          if (include_audio_reference and led.get("voPath")) else None),
+                "generateAudio": bool(include_audio_reference),
                 "contract": contract,
                 "costUsd": per,
             }],
@@ -5440,7 +5442,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
          "path": item["path"], "contentHash": _sha256_file(item["path"])}
         for index, item in enumerate(references, start=1)
     ]
-    if led.get("voPath"):
+    if include_audio_reference and led.get("voPath"):
         attached.append({
             "position": len(attached) + 1, "assetTag": "@Audio1",
             "role": "approved dialogue and performance track",
@@ -5454,7 +5456,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
     except cb_seedance_transport.TransportPlanError as exc:
         raise Refused(f"REFUSED — comparison transport: {exc}") from exc
 
-    audio_master = led.get("voPath")
+    audio_master = led.get("voPath") if include_audio_reference else None
     audio_master_hash = _file_md5(audio_master) if audio_master else None
     total_cost = 0.0
     for segment in plan["segments"]:
@@ -5467,6 +5469,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             }, *references[1:]]
         else:
             segment["references"] = list(references)
+        segment["generateAudio"] = bool(include_audio_reference)
         has_dialogue = bool(segment["dialogueLineIndexes"])
         audio = None
         if has_dialogue:
@@ -7139,7 +7142,7 @@ def rate_prompt_render(scene, shot_id, artifact_type, candidate_id, scores,
 
 def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,
               spend_token=None, dry_run=False, comparison_model_id=None,
-              comparison_run_id=None, log=print):
+              comparison_run_id=None, log=print, include_audio_reference=True):
     """Generate one CONTROLLED CANDIDATE BATCH behind Julian's six spend protections
     (2026-07-16): (1) approval is SERVER-SIDE, SINGLE-USE and bound to the exact package
     hash + provider + model + candidate count + cost rate + max batch cost — anything that
@@ -7232,7 +7235,8 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         pkg, shot, led, imgs, anchor, fast,
         comparison_model_id=comparison_model_id,
         comparison_run_id=comparison_run_id,
-        materialize_audio=True)
+        materialize_audio=True,
+        include_audio_reference=include_audio_reference)
 
     # ── RESUME PATH (protection 2): an in-flight batch completes its MISSING candidates
     # only, under its ORIGINAL token — completed candidates are never regenerated or repaid
@@ -7464,6 +7468,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                         "production_route": "cb_render",
                         "model_id": segment["contract"]["providerModelId"],
                         "comparison_run_id": execution_plan.get("comparisonRunId"),
+                        "generate_audio": bool(segment.get("generateAudio", True)),
                     }
                     if video_inputs:
                         generate_kwargs["video_urls"] = video_inputs

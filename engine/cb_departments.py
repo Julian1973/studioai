@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 import cb_llm
 import cb_emission_conformance as emission
+import cb_engine_rules
 import cb_voice_director
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -25,9 +26,6 @@ ROOT = HERE.parent
 
 RUNTIME_START = "<!-- RUNTIME_WORKER_START -->"
 RUNTIME_END = "<!-- RUNTIME_WORKER_END -->"
-# BytePlus recommends Seedance prompts under 1,000 English words. The hard
-# production guard adds 10% transport headroom; the compiler still targets <1,000.
-MAX_ANIMATION_PROVIDER_PROMPT_WORDS = 1100
 DIRECTOR_GRAMMAR_PACK = HERE / "grammar_pack.json"
 
 
@@ -62,10 +60,6 @@ def prompt_sections(prompt):
         sections[clean_name] = clean_body
     return sections
 
-
-def animation_provider_prompt_word_limit(duration_sec):
-    """Provider-aligned hard guard; duration does not change Seedance's text input."""
-    return MAX_ANIMATION_PROVIDER_PROMPT_WORDS
 
 SKILLS = {
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
@@ -411,6 +405,18 @@ class CreativeTranslationDirection(BaseModel):
     gagClocks: List[GagClockDirection] = Field(default_factory=list, max_length=8)
     generationDesign: GenerationDesignDirection
 
+    @model_validator(mode="before")
+    @classmethod
+    def derive_gag_count_from_clocks(cls, value):
+        """Derive the reporting count from its authored gag-clock source."""
+        if not isinstance(value, dict):
+            return value
+        normalized = dict(value)
+        design = dict(normalized.get("generationDesign") or {})
+        design["completeGagArcCount"] = len(normalized.get("gagClocks") or [])
+        normalized["generationDesign"] = design
+        return normalized
+
     @model_validator(mode="after")
     def gag_count_matches_design(self):
         if self.generationDesign.completeGagArcCount != len(self.gagClocks):
@@ -481,6 +487,14 @@ class AnimationDirection(BaseModel):
     openingCarriedState: str = Field(
         default="",
         description="Visible state carried by a relay opening frame, stated explicitly.")
+    openingMotionBridge: str = Field(
+        default="",
+        description="The first causal movement that resolves an inherited opening pose "
+                    "before the new shot action begins.")
+    actionOwnership: List[str] = Field(
+        default_factory=list, max_length=6,
+        description="Explicit actor, object and non-owner locks for actions whose "
+                    "authorship must remain visually unambiguous.")
     consistencyContract: List[str] = Field(min_length=1, max_length=6)
     audioContract: str = Field(
         min_length=1,
@@ -567,12 +581,6 @@ class AnimationDirection(BaseModel):
                 if re.search(pattern, directed_text, re.I):
                     raise ValueError(
                         f"motion vocabulary violation: {character} cannot '{verb}'")
-        prompt_words = len(self.providerPrompt.split())
-        prompt_limit = animation_provider_prompt_word_limit(self.durationSec)
-        if prompt_words > prompt_limit:
-            raise ValueError(
-                f"providerPrompt is {prompt_words} words; the production ceiling is "
-                f"{prompt_limit}")
         return self
 
 
@@ -844,7 +852,8 @@ def prepare_cinematography(context, images, *, log=print):
         "openingFrameLayout staging envelope. Return geography as one to eight concise, "
         "literal screen-direction, travel-axis and spatial-relation statements. It becomes "
         "the approved geography ledger used verbatim by both image and video compilers. "
-        "Include every charactersInFrame entry exactly "
+        "Include every openingCharactersInFrame entry exactly when that field is present; "
+        "otherwise include every charactersInFrame entry exactly "
         "once. Normalized centres indicate loose starting zones, not pixel locks. Facing and "
         "pose describe only a playable frame-one anticipation state; do not prescribe exact "
         "limb, wing, facial or later action choreography. Canonical physical height is "
@@ -864,7 +873,10 @@ def prepare_cinematography(context, images, *, log=print):
         images=images)
     shot = context.get("shot") or {}
     expected_cast = list(dict.fromkeys(
-        str(name).strip() for name in shot.get("charactersInFrame") or []
+        str(name).strip() for name in (
+            shot.get("openingCharactersInFrame")
+            if shot.get("openingCharactersInFrame") is not None
+            else shot.get("charactersInFrame") or [])
         if str(name).strip()))
     placements = list(result.openingFrameLayout.placements)
     placed_cast = [item.character for item in placements]
@@ -891,12 +903,25 @@ def _spoken_words(text):
     return [w.lower() for w in _WORD.findall(_TAG.sub("", text or ""))]
 
 
+def _locked_line_text(line):
+    return str(line.get("exactText") if line.get("exactText") is not None else line.get("text") or "")
+
+
 def validate_voice_direction(result, locked_lines):
     got = result.lines
     if len(got) != len(locked_lines):
         raise RuntimeError(f"Voice Director returned {len(got)} line(s); {len(locked_lines)} are locked")
     registers = (cb_voice_director.archetype_registers().get("registers") or {})
     for idx, (out, locked) in enumerate(zip(got, locked_lines), start=1):
+        is_chorus = (
+            str(locked.get("voiceTreatment") or "").casefold() == "group_chorus" and
+            bool(locked.get("chorusMembers")))
+        # A collective label is a locked script role, not a fabricated character. LLMs
+        # often try to nominate one cast member for ALL; restore the typed collective
+        # authority only when the line carries an explicit, non-empty chorus roster.
+        if is_chorus:
+            out.speaker = str(locked["speaker"])
+            out.character = str(locked["speaker"])
         if locked.get("dialogueOccurrenceId"):
             if out.dialogueOccurrenceId != locked["dialogueOccurrenceId"]:
                 raise RuntimeError(f"Voice Director changed occurrence ID on line {idx}")
@@ -906,9 +931,10 @@ def validate_voice_direction(result, locked_lines):
             raise RuntimeError(f"Voice Director changed speaker on line {idx}")
         if out.character.strip().lower() != str(locked["speaker"]).strip().lower():
             raise RuntimeError(f"Voice Director changed character on line {idx}")
-        if _spoken_words(out.exactDialogue) != _spoken_words(locked["exactText"]):
+        locked_text = _locked_line_text(locked)
+        if _spoken_words(out.exactDialogue) != _spoken_words(locked_text):
             raise RuntimeError(f"Voice Director changed locked dialogue on line {idx}")
-        if _spoken_words(out.performedText) != _spoken_words(locked["exactText"]):
+        if _spoken_words(out.performedText) != _spoken_words(locked_text):
             raise RuntimeError(f"Voice Director added, dropped or changed words on line {idx}")
         if out.archetypeId not in registers:
             raise RuntimeError(
@@ -1192,8 +1218,22 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
         controls = str(item.get("controls") or "").strip().rstrip(".")
         if not tag or not controls or role == "audio":
             continue
-        reference_lines.append(
-            f"{tag} defines only {controls}. {exclusions.get(role, 'Do not use unrelated background or content from it.')}")
+        if role == "character_identity":
+            subject = re.match(
+                r"^(.+?)(?:'s|’s)?\s+(?:controls|defines|owns)?\s*.*?"
+                r"\b(?:identity|turnaround)\b",
+                controls, re.I)
+            label = subject.group(1).strip() if subject else "character"
+            reference_lines.append(_character_reference_authority_line(
+                tag, label, controls))
+        elif role == "location":
+            reference_lines.append(
+                f"{tag} defines scene/layout/light only. Do not use characters or action "
+                "from it.")
+        else:
+            reference_lines.append(
+                f"{tag} defines only {controls}. "
+                f"{exclusions.get(role, 'Do not use unrelated background or content from it.')}")
     if reference_lines:
         reference_section = "[Multimodal Reference Layer]\n" + "\n".join(reference_lines)
         reference_pattern = re.compile(
@@ -1231,6 +1271,157 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
     return text.rstrip() + "\n\n" + consistency
 
 
+def _image_tag_number(tag):
+    match = re.match(r"^@(?:图|Image)\s*(\d+)$", str(tag or "").strip(), re.I)
+    return int(match.group(1)) if match else 10_000
+
+
+def _character_reference_label(controls):
+    """Read a character name from either subject-first or authority-first prose."""
+    text = str(controls or "").strip()
+    patterns = (
+        r"^(?:controls|defines|owns)\s+(.+?)(?:'s|’s)?\s+"
+        r"(?:(?:character|exact|complete|uncropped|360)\s+)*(?:identity|turnaround)\b",
+        r"^(.+?)(?:'s|’s)?\s+(?:character\s+)?"
+        r"(?:(?:exact|complete|uncropped|360)\s+)*(?:identity|turnaround)\b",
+        r"^(.+?)(?:'s|’s)?\s+(?:controls|defines|owns)\s+.*?\bidentity\b",
+    )
+    for pattern in patterns:
+        match = re.match(pattern, text, re.I)
+        if match:
+            return match.group(1).strip()
+    return "character identity"
+
+
+_WEARABLE_STATE_RE = re.compile(
+    r"\b(wearables?|clothing|costumes?|accessor(?:y|ies)|wristbands?|bracelets?|"
+    r"cuffs?|bands?|necklaces?|collars?|pendants?|headdresses?|glasses|spectacles|"
+    r"satchels?)\b", re.I)
+
+
+def _character_reference_authority_line(tag, label, controls, ownership=()):
+    """Keep approved character-state wearables under the character reference's authority."""
+    state_locks = []
+    controls_text = str(controls or "").strip().rstrip(".")
+    if _WEARABLE_STATE_RE.search(controls_text):
+        state_locks.append(controls_text)
+    owner_name = re.sub(
+        r"(?:'s|’s)\s+dolphin$", "", str(label or "").strip(), flags=re.I)
+    owner_prefix = re.compile(rf"^{re.escape(owner_name)}(?:\b|'s\b|’s\b)", re.I)
+    for value in ownership or []:
+        lock = str(value or "").strip().rstrip(".")
+        if (lock and _WEARABLE_STATE_RE.search(lock)
+                and owner_prefix.search(lock)):
+            state_locks.append(lock)
+    state_locks = list(dict.fromkeys(state_locks))
+    if state_locks:
+        return (
+            f"{tag} defines exactly one {label} identity, proportions, scale and approved "
+            f"wearable state: {'; '.join(state_locks)}. Refer to that wearable state "
+            "strictly; exclude background, pose, unrelated props and scene."
+        )
+    return (
+        f"{tag} defines exactly one {label} identity/scale only; "
+        "exclude background, pose, props and scene."
+    )
+
+
+def _render_reference_order(references):
+    """Mirror provider upload semantics for provider-facing prompt tags.
+
+    Stored shot records can use stable project slots such as @图4 for the approved
+    opening frame. The provider sees a compact upload list, so the prompt must be
+    rewritten against that upload order. Otherwise the prompt can say @图4 is the
+    first frame while the actual first uploaded image is @图1.
+    """
+    references = list(references or [])
+    image_items = []
+    for item in references:
+        data = item.model_dump() if hasattr(item, "model_dump") else dict(item or {})
+        match = re.match(r"^@(?:图|Image)\s*(\d+)$", str(data.get("assetTag") or ""), re.I)
+        if match:
+            image_items.append((int(match.group(1)), item))
+
+    # A contiguous slot map has already been rebound to the provider's sealed upload
+    # order. Re-sorting it by semantic role would make the prompt describe different
+    # files from the ones actually uploaded (for example, calling a boat a location).
+    numbers = [number for number, _ in image_items]
+    if (numbers and len(numbers) == len(set(numbers))
+            and sorted(numbers) == list(range(1, len(numbers) + 1))):
+        image_by_number = {number: item for number, item in image_items}
+        non_images = [
+            item for item in references
+            if not re.match(
+                r"^@(?:图|Image)\s*\d+$",
+                str((item.model_dump() if hasattr(item, "model_dump")
+                     else dict(item or {})).get("assetTag") or ""), re.I)
+        ]
+        return [image_by_number[number] for number in sorted(image_by_number)] + non_images
+
+    role_rank = {
+        "opening_frame": 0,
+        "previous shot final frame": 0,
+        "opening keyframe": 0,
+        "location": 3,
+        "scene plate": 3,
+        "character_identity": 2,
+        "prop": 4,
+        "style": 5,
+        "closing_frame": 6,
+        "audio": 99,
+    }
+
+    def key(item):
+        data = item.model_dump() if hasattr(item, "model_dump") else dict(item or {})
+        role = str(data.get("role") or "").strip()
+        if role == "character_identity":
+            rank = role_rank[role]
+        else:
+            rank = role_rank.get(role, 50)
+        return (rank, _image_tag_number(data.get("assetTag")))
+
+    return sorted(references, key=key)
+
+
+def enforce_aerial_camera_contract(direction):
+    """Emit the R11 camera contract from typed aerial ownership, not model wording."""
+    data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    has_aerial = any(
+        str(item.get("type") or "").casefold() == "aerial"
+        for item in (data.get("timingBeats") or []))
+    if not has_aerial:
+        return direction
+    aerial_pattern = re.compile(
+        r"\b(aerial|leap|dive|breach|half[- ]roll|double back|double backward|"
+        r"triple twist|multi-rotation|biles)\b",
+        re.I)
+    owned = [
+        item for item in direction.shotPlan
+        if aerial_pattern.search(" ".join((item.purpose, item.causalAction)))
+    ]
+    if len(owned) == 1 and not re.search(
+            r"track(?:s|ing)? (?:the )?(?:full|complete) (?:arc|aerial|rotation)",
+            owned[0].framingLensAndCamera, re.I):
+        owned[0].framingLensAndCamera = (
+            owned[0].framingLensAndCamera.rstrip(" .") +
+            ". Camera tracks the full arc."
+        )
+    return direction
+
+
+def _approved_attribute_ownership(data, character_state_locks=None):
+    ownership = [
+        str(item).strip() for item in data.get("attributeOwnership") or []
+        if (str(item).strip()
+            and not re.match(r"^@(?:图|Image)\s*\d+\b", str(item).strip(), re.I))
+    ]
+    ownership.extend(
+        str(lock).strip() for lock in (character_state_locks or {}).values()
+        if str(lock).strip()
+    )
+    return list(dict.fromkeys(ownership))
+
+
 def compile_animation_provider_prompt(shot, direction):
     """Compile the provider prompt from typed, approved Animation direction.
 
@@ -1241,8 +1432,10 @@ def compile_animation_provider_prompt(shot, direction):
     role and handoff once, in the shape expected by the Seedance prompt preflight.
     """
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
+    character_state_locks = dict(shot.get("characterStateLocks") or {})
+    approved_ownership = _approved_attribute_ownership(data, character_state_locks)
     dialogue = list(shot.get("dialogueLines") or [])
-    references = list(data.get("referenceContract") or [])
+    references = _render_reference_order(data.get("referenceContract") or [])
     stages = emission.time_tiles(
         list(data.get("stagePlan") or []),
         data.get("durationSec") or shot.get("durationSec"),
@@ -1260,16 +1453,66 @@ def compile_animation_provider_prompt(shot, direction):
         if str(item.get("beatCode") or "").strip()
     }
 
-    def concise(value, *, words=28, context="render direction"):
-        """Keep prose lean only at authored boundaries; never cut a sentence in half."""
-        return emission.compact_complete_sentence(
-            value, max_words=words, context=context)
+    def complete(value, *, context="render direction"):
+        """Preserve the complete approved direction without length-based rewriting."""
+        return emission.ensure_complete_sentence(value, context=context)
 
     def consistency_clause(value):
         text = " ".join(str(value or "").split()).strip().rstrip(".")
         text = re.sub(r"^(?:use|keep|maintain|preserve|protect)\s+", "", text,
                       flags=re.I)
-        return concise(text, words=22, context="render consistency").rstrip(".")
+        return text
+
+    def strip_request_parameters(value):
+        text = " ".join(str(value or "").split()).strip()
+        text = re.sub(r"\b(?:generate|create)\s+a\s+(\d+\s*[- ]\s*second\s+)",
+                      lambda match: match.group(0).replace(match.group(1), ""),
+                      text, flags=re.I)
+        text = re.sub(r"\b\d+\s*[- ]\s*second\s+(?=(?:reference-to-video|video|unit|shot)\b)",
+                      "", text, flags=re.I)
+        text = re.sub(r"\b(?:in\s+)?(?:16:9|9:16|1:1)\s+(?:frame|composition|format)\b",
+                      "frame", text, flags=re.I)
+        text = re.sub(r"\b(?:16:9|9:16|1:1)\b", "frame", text, flags=re.I)
+        text = re.sub(r"\b(?:480p|720p|1080p|2160p)\b", "", text, flags=re.I)
+        return text
+
+    def camera_clause(value, number):
+        text = " ".join(str(value or "").split()).strip()
+        text = re.sub(rf"^(?:cut\s+to\.?\s*)?shot\s+{number}\s*[:\-—]\s*",
+                      "", text, flags=re.I)
+        text = re.sub(r"^cut\s+to\.?\s*", "", text, flags=re.I)
+        return text.strip()
+
+    def normalize_reference_grammar(text):
+        lines = []
+        for line in str(text or "").splitlines():
+            stripped = line.strip()
+            if re.match(r"^@(?:图|Image)\s*\d+\s+owns\b", stripped, re.I) and re.search(
+                    r"\b(?:opening composition|carried state|first frame)\b",
+                    stripped, re.I):
+                line = re.sub(
+                    r"^(@(?:图|Image)\s*\d+)\s+owns\b.*$",
+                    r"\1 is the first frame. It defines opening composition and carried "
+                    r"state only. Do not use it to redesign identity, proportions, "
+                    r"materials or later action.",
+                    stripped,
+                    flags=re.I)
+            elif re.match(r"^@(?:图|Image)\s*\d+\s+(?:controls|owns)\b", stripped, re.I):
+                line = re.sub(
+                    r"^(@(?:图|Image)\s*\d+)\s+(?:controls|owns)\s+(.+?)\s+only\b.*$",
+                    r"\1 defines \2 only. Do not use unrelated background, pose, "
+                    r"composition, props or scene from \1.",
+                    stripped,
+                    flags=re.I)
+                if line == stripped:
+                    line = re.sub(
+                        r"^(@(?:图|Image)\s*\d+)\s+(?:controls|owns)\s+(.+?)\.?$",
+                        r"\1 defines \2 only. Do not use unrelated background, characters, "
+                        r"action, props or scene.",
+                        stripped,
+                        flags=re.I)
+            lines.append(line)
+        return "\n".join(lines)
 
     sections = []
     if dialogue:
@@ -1291,20 +1534,25 @@ def compile_animation_provider_prompt(shot, direction):
     reference_lines = []
     slot_bindings = []
     collapse_bindings = []
-    for reference in references:
+    location_tag = next((
+        f"@图{index}"
+        for index, reference in enumerate(references, start=1)
+        if str((reference.model_dump() if hasattr(reference, "model_dump")
+                else dict(reference)).get("role") or "").strip() == "location"
+    ), "the location reference")
+    for index, reference in enumerate(references, start=1):
         item = reference.model_dump() if hasattr(reference, "model_dump") else dict(reference)
-        tag = str(item.get("assetTag") or "").strip()
+        original_tag = str(item.get("assetTag") or "").strip()
+        tag = f"@图{index}" if re.match(r"^@(?:图|Image)\s*\d+$", original_tag, re.I) else original_tag
         role = str(item.get("role") or "").strip()
-        controls = concise(item.get("controls"), words=15,
-                           context=f"{tag or 'reference'} role").rstrip(".")
+        raw_controls = str(item.get("controls") or "").strip()
+        controls = complete(raw_controls,
+                            context=f"{tag or 'reference'} role").rstrip(".")
         if not tag or not controls:
             continue
         role_label = role
         if role == "character_identity":
-            subject = re.match(
-                r"^(.+?)(?:'s)?\s+(?:(?:exact|complete|uncropped|360)\s+)*"
-                r"(?:identity|turnaround)\b", controls, re.I)
-            role_label = subject.group(1).strip() if subject else "character identity"
+            role_label = _character_reference_label(raw_controls)
             collapse_bindings.append((tag, role_label))
         slot_bindings.append((tag, role_label))
         if role != "audio":
@@ -1313,7 +1561,11 @@ def compile_animation_provider_prompt(shot, direction):
             if re.search(r"\b(?:exclude|does not define|do not use)\b", controls, re.I):
                 exclusion = ""
             if role == "opening_frame":
-                if re.search(r"previous (?:unit|shot)|final frame", controls, re.I):
+                is_relay_opening = bool(
+                    re.search(r"previous (?:unit|shot)|final frame", controls, re.I)
+                    or shot.get("sourceType") == "relay"
+                    or shot.get("sourceShotId"))
+                if is_relay_opening:
                     carried_state = str(data.get("openingCarriedState") or "").strip()
                     if not carried_state:
                         first_stage = next(iter(data.get("stagePlan") or []), {})
@@ -1325,31 +1577,35 @@ def compile_animation_provider_prompt(shot, direction):
                         raise ValueError(
                             "relay opening frame requires openingCarriedState (R20)")
                     reference_lines.append(
-                        f"{tag} is the first frame — the final frame of the previous shot. "
-                        f"Begin naturally from it: {carried_state.rstrip('.')}"
-                        ". Match its staging and positions exactly. Do not repeat the "
-                        "previous shot's action. It defines only opening composition and "
-                        "carried state; exclude redesign and later action.")
+                        f"{tag} is the first frame and the previous shot's approved final "
+                        "frame. Use it only for carried character state: it controls the "
+                        "exact opening pose, emotion, light and carried prop state only: "
+                        f"{carried_state.rstrip('.')}. "
+                        "Do not use it as the scene geography, camera framing, pier layout "
+                        f"or boat-position authority; {location_tag} and Geography control the "
+                        "wider scene. If an Opening Motion Bridge is present, it alone "
+                        "controls how this inherited pose resolves into the new action.")
                 else:
                     reference_lines.append(
                         f"{tag} is the first frame. It defines opening composition and "
                         "state; exclude later action and redesign.")
             elif role == "character_identity":
-                reference_lines.append(
-                    f"{tag} defines {role_label} identity/scale; exclude everything else.")
+                reference_lines.append(_character_reference_authority_line(
+                    tag, role_label, raw_controls, approved_ownership))
             elif role == "location":
                 reference_lines.append(
-                    f"{tag} defines scene/layout/light; exclude characters/action.")
+                    f"{tag} defines scene/layout/light only; exclude characters/action.")
             else:
                 reference_lines.append(
                     f"{tag} defines {controls}."
                     + (f" {exclusion}" if exclusion else ""))
     if reference_lines:
         stability = emission.reference_slot_stability_line(slot_bindings).replace(
-            "Project-stable slots:", "Fixed slots:")
+            "Project-stable slots:", "Slots:").replace(
+            ". Never swap roles.", "; never swap.")
         collapse = emission.multi_angle_collapse_summary(collapse_bindings).replace(
             "Multi-angle collapse:", "Angles:").replace(
-            "; views are angles, not extra characters.", "; never extra characters.")
+            "; views are angles, not extra characters.", "; views are not extra characters.")
         reference_lines = [
             line.replace("This first frame defines ", "Defines ")
             for line in reference_lines
@@ -1358,25 +1614,66 @@ def compile_animation_provider_prompt(shot, direction):
         sections.append("[Multimodal Reference Layer]\n" + "\n".join(
             line for line in lines if line))
 
-    ownership = [str(item).strip() for item in data.get("attributeOwnership") or []
-                 if str(item).strip()]
+    opening_motion_bridge = str(data.get("openingMotionBridge") or "").strip()
+    if opening_motion_bridge:
+        sections.append(
+            "[Opening Motion Bridge]\n" +
+            complete(opening_motion_bridge, context="opening motion bridge"))
+
+    action_ownership = [
+        complete(item, context="action ownership")
+        for item in data.get("actionOwnership") or [] if str(item).strip()
+    ]
+    if action_ownership:
+        sections.append("[ACTION OWNERSHIP]\n" + "\n".join(action_ownership))
+
+    ownership = approved_ownership
     if ownership:
         sections.append("[ATTRIBUTE OWNERSHIP]\n" + "\n".join(ownership))
 
     environment_contract = [
-        str(item).strip() for item in data.get("environmentContract") or []
+        strip_request_parameters(item).strip() for item in data.get("environmentContract") or []
         if str(item).strip()
     ]
     if environment_contract:
         sections.append("[ENVIRONMENT CONTRACT]\n" + "\n".join(environment_contract))
 
-    goal = str(data.get("generationGoal") or data.get("dramaticBeat") or "").strip()
+    scene_state_lines = []
+    action_has_departed = bool(re.search(
+        r"\b(?:already (?:moving|underway)|moving away|has departed|underway)\b",
+        str(shot.get("action") or ""), re.I))
+    for lock in shot.get("sceneContinuityLocks") or []:
+        item = lock.model_dump() if hasattr(lock, "model_dump") else dict(lock)
+        label = str(item.get("label") or "Scene continuity").strip()
+        lock_text = " ".join(str(item.get(key) or "") for key in ("value", "forbidden"))
+        if action_has_departed and re.search(
+                r"\b(?:moored|alongside the pier|before departure|move the sailboat away)\b",
+                lock_text, re.I):
+            continue
+        value = complete(item.get("value"),
+                         context=f"{label} scene continuity").rstrip(".")
+        if not value:
+            continue
+        line = f"{label}: {value}."
+        forbidden = complete(item.get("forbidden"),
+                             context=f"{label} forbidden continuity").rstrip(".")
+        if forbidden:
+            line += f" Forbidden: {forbidden}."
+        scene_state_lines.append(line)
+    if scene_state_lines:
+        sections.append("[Scene Continuity State]\n" + "\n".join(scene_state_lines))
+
+    goal = strip_request_parameters(
+        data.get("generationGoal") or data.get("dramaticBeat") or "")
     sections.append("[One-Sentence Summary]\n" + goal)
 
     global_lines = []
     style_version, style_text = canonical_style_paragraph()
     global_lines.append(f"Style ({style_version}): {style_text}")
-    geography = [str(item).strip() for item in data.get("geography") or [] if str(item).strip()]
+    geography = [
+        strip_request_parameters(item).strip()
+        for item in data.get("geography") or []
+        if str(item).strip()]
     if geography:
         global_lines.append("Geography: " + " ".join(geography))
     mechanism = str(interpretation.get("mechanism") or "").strip()
@@ -1389,10 +1686,10 @@ def compile_animation_provider_prompt(shot, direction):
     if not short_unit and not data.get("shotPlan"):
         global_values.extend([
             ("Comic or emotional mechanism", mechanism),
-            ("Performance", concise(data.get("performanceArc"), words=28,
-                                    context="performance arc")),
-            ("Physical causality", concise(data.get("physicalCauseAndEffect"), words=32,
-                                           context="physical causality")),
+            ("Performance", complete(data.get("performanceArc"),
+                                     context="performance arc")),
+            ("Physical causality", complete(data.get("physicalCauseAndEffect"),
+                                            context="physical causality")),
             ("Emotional heart", heart),
         ])
     for label, value in global_values:
@@ -1406,29 +1703,36 @@ def compile_animation_provider_prompt(shot, direction):
     multi_shot = len(internal_shots) > 1
     emitted_holds = set()
     emitted_dialogue = []
+    sailing_causality_injected = False
     if internal_shots:
         shot_lines = []
         for index, internal_shot in enumerate(internal_shots):
             item = (internal_shot.model_dump() if hasattr(internal_shot, "model_dump")
                     else dict(internal_shot))
             number = int(item.get("shotNumber") or index + 1)
-            camera = concise(
-                item.get("framingLensAndCamera"), words=34,
+            camera = complete(
+                item.get("framingLensAndCamera"),
                 context=f"Internal shot {number} camera")
+            camera = strip_request_parameters(camera_clause(camera, number))
             authored_action = emission.drop_superseded_action_prefix(
                 item.get("causalAction"), environment_contract)
-            action = concise(
-                authored_action, words=70,
+            sailing_action = cb_engine_rules.sailing_departure_action(
+                authored_action, shot, data)
+            sailing_causality_injected = (
+                sailing_causality_injected or sailing_action != authored_action)
+            action = complete(
+                strip_request_parameters(sailing_action),
                 context=f"Internal shot {number} action")
             performance_value = str(item.get("observablePerformance") or "").strip()
             performance = (
-                concise(performance_value, words=28,
-                        context=f"Internal shot {number} performance")
+                complete(strip_request_parameters(performance_value),
+                         context=f"Internal shot {number} performance")
                 if performance_value else "")
             landing_value = str(item.get("landingImage") or "").strip()
             landing = (
                 emission.ensure_complete_sentence(
-                    landing_value, context=f"Internal shot {number} end state")
+                    strip_request_parameters(landing_value),
+                    context=f"Internal shot {number} end state")
                 if landing_value else "")
             parts = [f"Shot {number}: Camera: {camera}", f"Action: {action}"]
             if performance:
@@ -1464,9 +1768,12 @@ def compile_animation_provider_prompt(shot, direction):
         sides = [str(item).strip() for item in data.get("witnessStagingSides") or []
                  if str(item).strip()]
         if sides:
+            witness_payoff = (
+                "carry the joke" if gag_clocks else "carry the emotional truth")
             shot_lines.append(
                 "Witness staging: " + " ".join(sides) +
-                " Hold on the non-acting witness; their stillness and the hold length carry the joke.")
+                " Hold on the non-acting witness; their stillness and the hold length " +
+                witness_payoff + ".")
         # The shot plan already owns story, gag action and physics. Re-emitting the
         # source fields here makes the provider parse competing versions of the same
         # action and violates the emission standard's state-each-action-once rule.
@@ -1495,10 +1802,12 @@ def compile_animation_provider_prompt(shot, direction):
     for index, stage in enumerate(stages):
         if multi_shot:
             break
+        if internal_shots:
+            break
         item = stage.model_dump() if hasattr(stage, "model_dump") else dict(stage)
         stage_number = int(item.get("stageNumber") or index + 1)
         beat_label = ", ".join(str(value) for value in item.get("beatIds") or [])
-        purpose = beat_label or concise(item.get("purpose") or "Story event", words=9)
+        purpose = beat_label or " ".join(str(item.get("purpose") or "Story event").split())
         start, end = item.get("startSec"), item.get("endSec")
         performance_led = short_unit
         if not performance_led and start is not None and end is not None:
@@ -1537,8 +1846,9 @@ def compile_animation_provider_prompt(shot, direction):
             physics = approved_physics.get(str(beat_id))
             if physics:
                 physics_lines.append(f"Physics: {emission.require_complete_sentence(physics, context=f'{beat_id} physical staging')}")
-        stage_audio = [cue for cue in audio_cues
-                       if cue["startSec"] < float(end) and cue["endSec"] > float(start)]
+        stage_audio = [] if internal_shots else [
+            cue for cue in audio_cues
+            if cue["startSec"] < float(end) and cue["endSec"] > float(start)]
         dialogue_markers = [emission.dialogue_placement_line(cue) for cue in stage_audio]
         hold_lines = []
         for beat_id in item.get("beatIds") or []:
@@ -1554,15 +1864,15 @@ def compile_animation_provider_prompt(shot, direction):
             emitted_holds.add(str(beat_id))
         lines = [
             heading,
-            f"{prefix}: {concise(item.get('initialOrCarriedState'), words=28, context=f'Stage {stage_number} initial state')}",
+            f"{prefix}: {complete(item.get('initialOrCarriedState'), context=f'Stage {stage_number} initial state')}",
             f"Cause: {emission.require_complete_sentence(item.get('cause'), context=f'Stage {stage_number} cause')}",
             f"Action/Expression: {action}",
             *physics_lines,
             *hold_lines,
             *([] if internal_shots else [
                 "Emotion/Camera Analysis: "
-                + concise(item.get("emotionOrCameraAnalysis"), words=20,
-                          context=f"Stage {stage_number} emotion/camera analysis")
+                + complete(item.get("emotionOrCameraAnalysis"),
+                           context=f"Stage {stage_number} emotion/camera analysis")
             ]),
             *dialogue_markers,
             f"End state: {str(item.get('observableEndState') or '').strip()}",
@@ -1591,6 +1901,13 @@ def compile_animation_provider_prompt(shot, direction):
     supplement = [*(item for item in [instance_lock] if item),
                   *(f"Maintain {item}." for item in consistency[:1]),
                   *(f"Safeguard: {item}." for item in safeguards[:2])]
+    traversal = cb_engine_rules.travel_traversal_boilerplate(shot, data)
+    if traversal:
+        supplement.append(traversal)
+    sailing = cb_engine_rules.sailing_departure_boilerplate(shot, data)
+    if sailing and not sailing_causality_injected:
+        supplement.append(sailing)
+    supplement.append(cb_engine_rules.living_performance_boilerplate(shot, data))
     # A short unit's last stage already carries its complete observable handoff. Repeating
     # it in compiler boilerplate spends words without adding creative direction.
     if finish and not short_unit:
@@ -1605,21 +1922,21 @@ def compile_animation_provider_prompt(shot, direction):
     if dialogue:
         foley = re.search(
             r"(?:only|retain|add)\s+[^.;]*foley[^.;]*", audio_contract, re.I)
-        audio = ("Generated dialogue is guide audio; restore approved @Audio1 in post.")
+        audio = ("@Audio1 guides dialogue timing and mouth shapes; final approved "
+                 "dialogue is restored in post. No extra voices.")
         if foley:
             audio += " " + foley.group(0).strip().capitalize() + "."
-        if split_unit or re.search(
-                r"\bno\b[^.;]{0,120}\b(?:musical underscore|music|bgm)\b",
-                audio_contract, re.I):
+        if not re.search(r"\bno\b[^.;]{0,120}\b(?:musical underscore|music|bgm)\b", audio, re.I):
             audio += " No music."
     else:
         audio = audio_contract
-        if split_unit and not re.search(r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b", audio, re.I):
+        if not re.search(r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b", audio, re.I):
             audio = audio.rstrip(" .") + ". No music."
     if not re.search(r"\bno watermark\b", audio, re.I):
         audio = audio.rstrip(" .") + ". No watermark."
     sections.append("[Audio]\n" + audio)
-    prompt = "\n\n".join(section for section in sections if section.strip())
+    prompt = normalize_reference_grammar(
+        "\n\n".join(section for section in sections if section.strip()))
     prompt_sections(prompt)
     for line in prompt.splitlines():
         if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|Dialogue performance|End state):", line):
@@ -1708,8 +2025,20 @@ def prepare_animation(context, images, *, log=print):
         "and endSec values on every stage as broad budgets, not frame-accurate commands; "
         "storyline mode omits both. "
         "Emit every scripted line exactly once inside the stage that owns it, attributed to the "
-        "named speaker with the approved delivery and the instruction that the pose holds a full "
-        "beat after the line ends. @Audio1 remains sole authority for voice identity, cadence, "
+        "named speaker with the approved delivery. Protect a full-beat pose hold after a line when "
+        "the story needs its recognition, reaction or comic button to register. Suppress that hold "
+        "when the approved action begins immediately with or after the line, such as a launch, impact "
+        "or interruption; name that immediate action in the same stage instead. In a dialogue-rich "
+        "shot, at least one non-immediate recognition or reaction line must retain readable air. "
+        "R8 is mandatory: when timingBeats contains travel, dodge, impact, load_release, tumble "
+        "or aerial action, return two to four motivated internal shots, one clean motion or "
+        "story idea per shot. Place any cut deliberately at a change of story job or maximum "
+        "stored energy; a continuous camera intention may connect those phases but may not "
+        "collapse them into one undifferentiated internal shot. "
+        "Classify ordinary locomotion by a character whose normal movement is flight as travel, "
+        "not aerial. Use timing beat type aerial only for an explicitly approved compound, "
+        "multi-rotation or multi-stage airborne manoeuvre that needs its own tracked arc. "
+        "@Audio1 remains sole authority for voice identity, cadence, "
         "delivery, mouth timing and silence. Use the exact attached asset tags and bind each one separately in the prompt "
         "to what it defines and what it must not contribute. For dialogue shots, preserve the "
         "house audio-lock header as line one. Adapt the official ByteDance Seedance 2.5 "
@@ -1728,8 +2057,8 @@ def prepare_animation(context, images, *, log=print):
         "ElevenLabs. The prompt must begin from the approved opening state and end on a usable "
         "held handoff frame, with causal "
         "physical action, observable performance, motivated camera, readable composition, and "
-        "established light/material behaviour. Keep providerPrompt between 280 and 405 words "
-        "for 4-15 second units, or between 400 and 655 words for 16-30 second units; the "
+        "established light/material behaviour. Preserve all direction required to deliver "
+        "the approved beat and emotional outcome; never shorten it to meet a word count. The "
         "compiler adds the canonical audio and continuity shell before validation: "
         "each instruction appears once, reference bindings stay one concise line each, and stage "
         "direction states only the action, visible performance, camera purpose and end state. "
@@ -1737,6 +2066,7 @@ def prepare_animation(context, images, *, log=print):
         "exceptional actor and camera crew, not an animation checklist.",
         AnimationDirection, label="department_animation", log=log, images=images)
 
+    result = enforce_aerial_camera_contract(result)
     result.providerPrompt = compile_animation_provider_prompt(shot, result)
 
     if result.durationSec != duration:
@@ -1745,8 +2075,9 @@ def prepare_animation(context, images, *, log=print):
             f"{result.durationSec}s")
     approved_geography = (
         context.get("sceneGeographyLedger") or shot.get("geographyLedgerApproved") or [])
-    if approved_geography and list(result.geography) != list(approved_geography):
-        raise RuntimeError("Animation Director changed the approved scene geography ledger")
+    if approved_geography:
+        result.geography = list(approved_geography)
+        result.providerPrompt = compile_animation_provider_prompt(shot, result)
     approved_stages = shot.get("storyboardStagePlanApproved") or []
     if approved_stages:
         expected = [list(stage.get("beatIds") or []) for stage in approved_stages]

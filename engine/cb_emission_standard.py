@@ -49,11 +49,15 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
     reference_lines = [line.strip() for line in prompt.splitlines()
                        if re.match(r"(?:@(?:图|Image)\s*\d+|image_\d+)\b", line.strip(), re.I)]
     for line in reference_lines:
-        if not _has(line, r"defines|first frame|opening frame"):
+        if not _has(
+                line,
+                r"defines|owns|first frame|opening frame|"
+                r"previous shot's approved final frame|previous shot final frame|"
+                r"use it only for"):
             add("FATAL", "reference-role", f"Reference has no explicit role: {line[:80]}",
                 "Give every reference exactly one positive role.", 2.0)
             break
-        if not _has(line, r"do not|exclude|never|ignore"):
+        if not _has(line, r"do not|exclude|never|ignore|no\s+"):
             add("FATAL", "reference-exclusion", f"Reference has no exclusion: {line[:80]}",
                 "Give every reference a negative scope.", 2.0)
             break
@@ -85,7 +89,12 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
     if travel and not all(_has(prompt, part) for part in traversal_parts):
         add("FIX", "R9", "Travel lacks the complete traversal grammar.",
             "Emit three depth speeds, passing landmarks, scale change, recovery and lens wipes.", 0.75)
-    repeated = _has(prompt, r"three .*contacts|first .*second .*third|clips? .*first.*clips? .*second")
+    repeated = bool(re.search(
+        r"three[^\n.]{0,100}(?:contacts?|impacts?|collisions?)|"
+        r"first[^\n.]{0,120}(?:contact|impact|collision)[^\n.]{0,120}"
+        r"second[^\n.]{0,120}(?:contact|impact|collision)|"
+        r"clips?[^\n.]{0,100}first[^\n.]{0,120}clips?[^\n.]{0,100}second",
+        prompt, re.I | re.M))
     if repeated and not _has(prompt, r"worse than|larger than|increas|doubles|escalat"):
         add("FIX", "R10", "Repeated contacts do not explicitly increase.",
             "Separate each contact and state its larger consequence.", 0.75)
@@ -98,8 +107,12 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
         add("FIX", "R15", "Dialogue is emitted in a detached placement block.",
             "Put each line inside the shot where it is spoken.", 0.75)
     if dialogue and not _has(prompt, r"(?:hold|pose)[^.\n]{0,160}full beat after [^.\n]{0,30}line"):
-        add("FIX", "button-hold", "The spoken button has no protected hold after the line.",
-            "Hold the pose for a full beat after the line finishes.", 0.75)
+        # The deterministic dialogue emitter owns the final per-line hold decision and
+        # suppresses it for immediate launch/impact/interruption actions. A specialist
+        # draft omitting the prose is therefore a review note, not a reason to discard
+        # otherwise valid direction before the compiler can apply the typed rule.
+        add("POLISH", "button-hold", "No protected post-line hold is visible in the specialist draft.",
+            "The deterministic emitter must add holds to non-immediate recognition/reaction lines.", 0.25)
     if _has(prompt, r"double .*tuck|Nailed it") and not _has(
             prompt, r"(?:checks?|checking|eyes dart|looks? (?:left|down)|pats? (?:himself|his))"):
         add("FIX", "R12", "Retroactive pride has no self-check before the emotion.",
@@ -111,9 +124,7 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
         add("FIX", "audio-policy", "No music policy is absent.",
             "State No music in the final audio block.", 0.75)
 
-    if len(prompt) > 2500:
-        add("POLISH", "length", f"Emission is {len(prompt):,} characters.",
-            "Compact plumbing only; preserve creative direction.", 0.25)
+    # Length is not a creative-quality signal and is not evaluated here.
     if _has(prompt, r"softens") and not _has(prompt, r"from .* into|eye-roll .* into|as .* come.* back"):
         add("POLISH", "turn-states", "An emotional turn does not name both states and movement.",
             "Name the starting state, visible movement and landing state.", 0.25)

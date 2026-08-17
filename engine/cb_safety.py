@@ -24,12 +24,13 @@ def selected_voice_recipe(recipes, selected, candidates, current_compiled_hash=N
     selected_candidate = next(
         (item for item in candidates or []
          if item.get("candidateId") == selected.get("candidateId")), {})
+    selected_text = selected_candidate.get("performedText") or selected.get("performedText")
     for recipe in recipes or []:
         if recipe.get("recipeId") != selected.get("recipeId"):
             continue
         same_compiler_record = selected.get("compiledHash") == current_compiled_hash
         same_provider_text = (
-            str(selected_candidate.get("performedText") or "") ==
+            str(selected_text or "") ==
             str(recipe.get("performedText") or ""))
         if same_compiler_record or same_provider_text:
             return recipe
@@ -279,6 +280,25 @@ def install(m):
             except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                 contract_error = str(exc)
                 current_source, current_record = None, None
+        if current_record and stage == "animation":
+            output = current_record.get("output") or {}
+            if not str(output.get("providerPrompt") or "").strip():
+                contract_error = "animation-provider-prompt-missing"
+                current_source, current_record = None, None
+            else:
+                try:
+                    shot = m._shot(pkg, shot_id)
+                    creative_shot = m._shot_context(
+                        pkg, shot, m._ledger(pkg, shot_id), scene, episode)["shot"]
+                    direction = m.cb_departments.AnimationDirection.model_validate(output)
+                    compiled = m.cb_departments.compile_animation_provider_prompt(
+                        creative_shot, direction)
+                    if compiled != output.get("providerPrompt"):
+                        contract_error = "animation-compiler-output-stale"
+                        current_source, current_record = None, None
+                except (KeyError, TypeError, ValueError, RuntimeError) as exc:
+                    contract_error = f"animation-compiler-contract-failed: {exc}"
+                    current_source, current_record = None, None
         record = current_record or (existing[0][1] if existing else {})
         if current_record:
             return {"approved": bool(work.get("approved")),
@@ -289,7 +309,9 @@ def install(m):
                 "prepared": bool(work.get("candidate")),
                 "current": False,
                 "reason": ((f"voice-contract-invalid: {contract_error}")
-                           if contract_error else
+                           if contract_error and stage == "voice" else
+                           f"animation-contract-invalid: {contract_error}"
+                           if contract_error and stage == "animation" else
                            "direct-input-signature-mismatch" if existing else
                            "not-prepared" if stage in direction_stages else "not-approved"),
                 "record": record, "source": None,
@@ -440,6 +462,19 @@ def install(m):
                         direction, shot.get("dialogueLines") or [])
                 except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                     invalidation_reason = f"voice contract failed: {exc}"
+            elif stage == "animation":
+                try:
+                    shot = m._shot(pkg, shot_id)
+                    creative_shot = m._shot_context(
+                        pkg, shot, m._ledger(pkg, shot_id), scene, episode)["shot"]
+                    output = existing.get("output") or {}
+                    direction = m.cb_departments.AnimationDirection.model_validate(output)
+                    compiled = m.cb_departments.compile_animation_provider_prompt(
+                        creative_shot, direction)
+                    if compiled != output.get("providerPrompt"):
+                        invalidation_reason = "deterministic animation compiler changed"
+                except (KeyError, TypeError, ValueError, RuntimeError) as exc:
+                    invalidation_reason = f"animation compiler contract failed: {exc}"
             if invalidation_reason:
                 work.setdefault("history", []).append({
                     **existing,
@@ -518,35 +553,75 @@ def install(m):
         except m.cb_voice_director.VoiceContractError as exc:
             raise m.Refused(str(exc)) from exc
         ledger = m._ledger(pkg, shot["shotId"])
+        working_by_occurrence = {
+            line.get("dialogueOccurrenceId"): line
+            for line in ((ledger.get("workingVoice") or {}).get("lines") or [])
+            if line.get("dialogueOccurrenceId")
+        }
         selected = ((ledger.get("voiceAuditions") or {}).get("selected") or {})
+        selections = ledger.get("voiceAuditionSelections") or {}
         audition_candidates = ((ledger.get("voiceAuditions") or {}).get("candidates") or [])
+        generated_by_occurrence = {
+            line.get("dialogueOccurrenceId"): line
+            for line in (ledger.get("voGeneratedFrom") or [])
+            if line.get("dialogueOccurrenceId")
+        }
         result = []
         for item, source in zip(track["lines"], locked):
             recipes = item.get("takeRecipes") or []
+            occurrence_id = source.get("dialogueOccurrenceId")
+            line_selected = dict(selections.get(occurrence_id) or selected)
+            # The audition panel contains candidates for only its currently displayed
+            # line. Preserve earlier human choices across a direction refresh by using
+            # the accepted provider request snapshot as their audible-text evidence.
+            generated_line = generated_by_occurrence.get(occurrence_id) or {}
+            if generated_line.get("text") and not line_selected.get("performedText"):
+                line_selected["performedText"] = generated_line["text"]
             recipe = selected_voice_recipe(
-                recipes, selected, audition_candidates, item.get("compiledHash"))
+                recipes, line_selected, audition_candidates, item.get("compiledHash"))
             if len(recipes) > 1 and recipe is None:
+                exact_text = source.get("exactText") if source.get("exactText") is not None else source.get("text")
                 raise m.Refused(
-                    f"REFUSED - choose a HEAR audition for {source.get('exactText')} first")
+                    f"REFUSED - choose a HEAR audition for {exact_text} first")
             recipe = recipe or next((value for value in recipes if value.get("primary")), recipes[0])
+            # Julian's explicit HEAR edit is the final audible text authority. The Voice
+            # Director still owns voice identity, settings, context runway and recipe
+            # provenance, but may not silently restore tags or punctuation that the human
+            # removed to correct a glitch or cadence fault.
+            working_line = working_by_occurrence.get(source.get("dialogueOccurrenceId"))
+            provider_text = ((working_line or {}).get("text") or
+                             recipe["performedText"])
             result.append({
                 "dialogueOccurrenceId": source.get("dialogueOccurrenceId"),
                 "sourceEventId": source.get("sourceEventId"),
                 "speaker": source["speaker"],
-                "text": recipe["performedText"],
+                "text": provider_text,
                 "voiceId": item["voiceId"],
                 "modelId": item["modelId"],
                 "voiceSettings": item["voiceSettings"],
                 "previousText": item["previousText"],
                 "compiledHash": item["compiledHash"],
                 "recipeId": recipe["recipeId"],
+                "voiceTreatment": item.get("voiceTreatment", "single_voice"),
+                "chorusMembers": item.get("chorusMembers") or [],
+                "voiceIds": item.get("voiceIds") or [item["voiceId"]],
             })
         return result
 
     def voice_signature(pkg, shot, lines):
         characters = m._characters_cfg()
-        ids = [(characters.get(m._resolve_char(line["speaker"], characters)) or {}).get("voiceId")
-               for line in (shot.get("dialogueLines") or [])]
+        generated_by_occurrence = {
+            line.get("dialogueOccurrenceId"): line for line in (lines or [])
+            if line.get("dialogueOccurrenceId")
+        }
+        ids = []
+        for line in (shot.get("dialogueLines") or []):
+            generated = generated_by_occurrence.get(line.get("dialogueOccurrenceId")) or {}
+            if generated.get("voiceTreatment") == "group_chorus":
+                ids.extend(generated.get("voiceIds") or [])
+            else:
+                ids.append((characters.get(
+                    m._resolve_char(line["speaker"], characters)) or {}).get("voiceId"))
         episode = pkg.get("episode") or pkg.get("episodeId") or "Ep1"
         return {"canonProfileDigest": require_canon(pkg, episode, "voice"),
                 "dialogueHash": hashlib.sha256(json.dumps(
@@ -631,6 +706,8 @@ def install(m):
         """
         ledger = m._ledger(pkg, shot["shotId"])
         anchor = m._anchor_for(pkg, shot)
+        shot = m._with_effective_reference_slots(
+            pkg, shot, "referenceSlots", scene, episode)
         plan = m._provider_attachment_plan(
             shot, "referenceSlots", anchor, scene, episode, m._characters_cfg())
         refs = [item["path"] for item in plan]
@@ -670,6 +747,8 @@ def install(m):
             raise m.Refused(
                 f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
         anchor = m._anchor_for(pkg, shot)
+        shot = m._with_effective_reference_slots(
+            pkg, shot, "referenceSlots", scene, episode)
         refs = ordered_slot_signature(shot, "referenceSlots", anchor, scene, episode)
         voice = voice_approval_status(pkg, shot, scene, episode)
         if shot.get("dialogueLines") and not voice["current"]:
@@ -762,18 +841,29 @@ def install(m):
     def external_import_input_signature(pkg, shot, scene, episode, source_hash, provenance):
         """Current graph for a human-accepted finished clip imported from another surface.
 
-        It deliberately binds picture approval to canon, shot contract and relay anchor,
-        without claiming the clip was generated by this provider request or voice bundle.
+        It deliberately binds picture approval to canon, shot contract and the bytes of the
+        opening image that actually fed the finished clip, without claiming the clip was
+        generated by the current provider request or voice bundle.  A later preflight rule
+        must not retroactively prevent the Director from accepting already-rendered picture.
         Dialogue remains a required post lane recorded by import_approved_take.
         """
         provenance_digest = ((provenance or {}).get("digest") if isinstance(provenance, dict)
                              and set(provenance) == {"digest"} else
                              json_sha256(provenance or {}))
+        ledger = m._ledger(pkg, shot["shotId"])
+        if shot.get("sourceType") == "opener":
+            opening_path = (ledger.get("keyframeApproval") or {}).get("path")
+        else:
+            source_ledger = m._ledger(pkg, shot.get("sourceShot"))
+            opening_path = source_ledger.get("harvestFrame")
+        if not opening_path or not os.path.isfile(opening_path):
+            raise m.Refused(
+                "REFUSED — the finished clip's opening-image evidence is missing")
         return {
             "policyVersion": "external-director-accepted-v1",
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotContractHash": json_sha256(shot),
-            "openingFrameHash": file_sha256(m._anchor_for(pkg, shot)),
+            "openingFrameHash": file_sha256(opening_path),
             "sourceContentHash": source_hash,
             "provenanceDigest": provenance_digest,
         }
@@ -793,13 +883,34 @@ def install(m):
         except m.cb_voice_director.VoiceContractError as exc:
             raise m.Refused(str(exc)) from exc
 
-        audition_line = next((line for line in compiled_track["lines"]
-                              if len(line.get("takeRecipes") or []) > 1), None)
         selected = ((ledger.get("voiceAuditions") or {}).get("selected") or {})
-        selection_current = bool(
-            audition_line and selected.get("compiledHash") == audition_line.get("compiledHash"))
+        selections = ledger.get("voiceAuditionSelections") or {}
+        selected_hashes = set(ledger.get("voiceAuditionSelectionsByHash") or [])
+        if selected.get("compiledHash"):
+            selected_hashes.add(selected["compiledHash"])
+        selected_occurrences = set()
+        for occurrence_id, choice in selections.items():
+            if choice.get("compiledHash"):
+                selected_hashes.add(choice["compiledHash"])
+            selected_occurrences.add(occurrence_id)
+
+        def _line_has_hear_selection(line):
+            if line.get("compiledHash") in selected_hashes:
+                return True
+            choice = selections.get(line.get("dialogueOccurrenceId"))
+            if not choice:
+                return False
+            return selected_voice_recipe(
+                line.get("takeRecipes") or [], choice, [], line.get("compiledHash")) is not None
+
+        audition_line = next(
+            (line for line in compiled_track["lines"]
+             if len(line.get("takeRecipes") or []) > 1
+             and not _line_has_hear_selection(line)),
+            None)
+        selection_current = bool(audition_line is None)
         if audition_line and not selection_current:
-            requests = m.cb_voice_director.emit_v3_requests(audition_line)
+            requests = m.cb_voice_director.emit_v3_requests(audition_line, max_requests=2)
             run_id = uuid.uuid4().hex[:8]
             bundle = {
                 "status": "generating", "runId": run_id,
@@ -873,9 +984,26 @@ def install(m):
                 generation_kind="regeneration" if previous else "generation",
                 production_route="cb_render")
             timing_path = cb_audio_timing.dialogue_timing_path(raw_out)
+            raw_out, timing_path = m.cb_gen.replace_group_chorus_segments(
+                raw_out, timing_path, lines, production_route="cb_render")
+            raw_out, timing_path = pathlib.Path(raw_out), pathlib.Path(timing_path)
+        timing_by_occurrence = {
+            line.get("dialogueOccurrenceId"): line
+            for line in (compiled_track.get("lines") or [])
+            if line.get("dialogueOccurrenceId")
+        }
+        timed_dialogue_lines = []
+        for original in (shot.get("dialogueLines") or []):
+            timed = dict(original)
+            directed = timing_by_occurrence.get(original.get("dialogueOccurrenceId")) or {}
+            if timed.get("startSec") is None and directed.get("startsAtSec") is not None:
+                timed["startsAtSec"] = directed.get("startsAtSec")
+            if timed.get("endSec") is None and directed.get("estimatedDurationSec") is not None:
+                timed["estimatedDurationSec"] = directed.get("estimatedDurationSec")
+            timed_dialogue_lines.append(timed)
         try:
             placement = cb_audio_timing.render_timed_dialogue_master(
-                raw_out, timing_path, shot.get("dialogueLines") or [],
+                raw_out, timing_path, timed_dialogue_lines,
                 shot.get("durationSec"), out)
         except cb_audio_timing.AudioTimingError as exc:
             ledger["voicePlacementFailure"] = {
@@ -916,8 +1044,21 @@ def install(m):
     def approve_voice(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
         pkg, path = current_package(scene, episode)
         shot, ledger = m._shot(pkg, shot_id), m._ledger(pkg, shot_id)
-        signature = voice_signature(pkg, shot, voice_lines(pkg, shot))
-        if ledger.get("voInputSignature") != signature:
+        current_lines = voice_lines(pkg, shot)
+        signature = voice_signature(pkg, shot, current_lines)
+        generated_signature = ledger.get("voInputSignature") or {}
+        same_nonperformance_inputs = {
+            key: value for key, value in generated_signature.items()
+            if key != "performanceHash"
+        } == {
+            key: value for key, value in signature.items()
+            if key != "performanceHash"
+        }
+        same_provider_request = (
+            voice_provider_projection(ledger.get("voGeneratedFrom") or []) ==
+            voice_provider_projection(current_lines))
+        if generated_signature != signature and not (
+                same_nonperformance_inputs and same_provider_request):
             raise m.Refused(f"REFUSED — {shot_id}'s voice was not generated from current signed direction")
         for field in ("voPath", "voRawPath", "voTimingPath", "voPlacementPath"):
             value = ledger.get(field)
@@ -1138,6 +1279,15 @@ def install(m):
             human_advisory_accepted)
         stored_signature = record.get("inputSignature") or {}
         signatures_match = stored_signature == expected
+        signature_diff = set(m._signature_diff(stored_signature, expected))
+        human_lineage_carry = bool(
+            (record.get("lineageCarryForward") or {}).get("reviewedBy"))
+        # A human may explicitly keep an approved image as visual truth after its
+        # compiled brief changes. This covers compiler-only rewrites without weakening
+        # asset, canon, Scene Look, reference, or file-integrity checks.
+        if (not signatures_match and human_lineage_carry and
+                signature_diff == {"briefHash"}):
+            signatures_match = True
         # Compiler improvements must not rewrite the provenance of an image Julian already
         # approved. If only the compiled brief hash changed, retain the historical prompt
         # and prove that its protected Director sections still match current direction.
@@ -1145,7 +1295,7 @@ def install(m):
         # continue to invalidate the approval normally.
         if (not signatures_match and
                 record.get("source", "generated") == "generated" and
-                set(m._signature_diff(stored_signature, expected)) == {"briefHash"}):
+                signature_diff == {"briefHash"}):
             prompt_contract = record.get("promptContract") or {}
             historical_prompt = str(prompt_contract.get("prompt") or "")
             historical_hash = hashlib.sha256(historical_prompt.encode()).hexdigest()
@@ -1202,8 +1352,13 @@ def install(m):
             approval = m._ledger(pkg, shot["shotId"]).get("keyframeApproval") or {}
             state = keyframe_record_status(pkg, shot, approval)
         else:
-            source_shot = m._shot(pkg, shot["sourceShotId"])
-            state = animation_approval_status(pkg, source_shot)
+            # For relay shots, original["_anchor_for"] has already enforced the hard
+            # requirement: the source shot is human-approved and has a harvested final
+            # frame. That harvested frame is a state handoff into the next shot, not a
+            # demand that the source shot's old render prompt graph still be current after
+            # later scene-plate/geography corrections. The current shot's references,
+            # scene plate and compiler prompt own the next emission.
+            return result
         if not state["current"]:
             raise m.Refused(
                 "REFUSED — opening-frame approval is stale against its direct inputs")

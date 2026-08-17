@@ -51,6 +51,25 @@ def test_geometry_must_agree_between_keyframe_and_render():
     assert rules.geometry_agreement(bad, _direction())["ready"] is False
 
 
+def test_static_dock_screen_sides_do_not_create_two_travel_routes():
+    cine = {
+        "geography": [
+            "The sailboat is moored along the screen-right side of the dock.",
+            "Island sand and foliage sit screen-left.",
+            "Keen works beside the boat supplies."
+        ],
+        "lensAndCameraRelationship": "Low intimate dock camera.",
+        "negativeSpace": [
+            "Keep the dock corridor between Keen and the sailboat unobstructed.",
+            "Hold open space inside the right-side sailboat for the supplies."
+        ],
+        "openingFrameLayout": {"placements": [{
+            "character": "Keen", "facing": "screen-right toward the sailboat"}]},
+    }
+    anim = {"cameraBehaviour": "Low intimate dock camera."}
+    assert rules.geometry_agreement(cine, anim)["ready"] is True
+
+
 def test_relay_units_use_the_approved_carried_frame_not_a_second_keyframe_contract(
         monkeypatch):
     monkeypatch.setattr(
@@ -147,6 +166,106 @@ def test_r8_to_r14_action_grammar_accepts_proven_flova_structure():
     assert report["internalShotCount"] == 4
 
 
+def test_r14_allows_an_explicitly_approved_continuous_action_unit():
+    shot = {
+        "camera": "One continuous tracking shot through the flight path.",
+        "charactersInFrame": ["Actor", "Witness"],
+        "dialogueLines": [],
+    }
+    prompt = "No cuts. " + rules.living_performance_boilerplate(shot, _action_direction())
+    report = rules.action_unit_report(shot, _action_direction(), prompt)
+    assert not [error for error in report["errors"] if error.startswith("R14")]
+
+
+def test_travel_boilerplate_satisfies_every_r9_control():
+    direction = _action_direction()
+    for item in direction["shotPlan"]:
+        item["causalAction"] = "The subject continues through the environment."
+    prompt = rules.travel_traversal_boilerplate(
+        {"purpose": "A continuous departure"}, direction)
+    report = rules.action_unit_report(
+        {"charactersInFrame": ["Actor"], "dialogueLines": []},
+        direction,
+        prompt,
+    )
+    assert prompt
+    assert not [error for error in report["errors"] if error.startswith("R9")]
+
+
+def test_non_travel_units_do_not_receive_traversal_boilerplate():
+    assert rules.travel_traversal_boilerplate(
+        {"purpose": "A still reaction"},
+        {"timingBeats": [{"type": "reaction", "count": 1}]},
+    ) == ""
+
+
+def test_sailing_departure_boilerplate_requires_real_world_causality():
+    shot = {
+        "purpose": "A child departs in a sailboat",
+        "action": "He unties the mooring and sails away.",
+        "dialogueLines": [],
+        "charactersInFrame": ["Child"],
+    }
+    direction = {"shotPlan": [], "creativeTranslation": {"gagClocks": []}}
+    prompt = rules.sailing_departure_boilerplate(shot, direction)
+
+    assert "remains alongside the pier" in prompt
+    assert "mooring line is visibly released" in prompt
+    assert "exactly one active mooring line" in prompt
+    assert "no second bow or stern line exists" in prompt
+    assert "bow-first toward open water" in prompt
+    assert "No sideways slide, stern-first departure" in prompt
+    assert "controls the sheet or boom" in prompt
+    assert "Wind visibly fills" in prompt
+    assert "only after that load" in prompt
+    report_prompt = prompt + " " + rules.living_performance_boilerplate(shot, direction)
+    assert not [error for error in rules.action_unit_report(
+        shot, direction, report_prompt)["errors"] if error.startswith("R16")]
+
+
+def test_living_performance_boilerplate_keeps_final_holds_alive():
+    prompt = rules.living_performance_boilerplate({
+        "charactersInFrame": ["Lead", "Witness"],
+    })
+
+    assert "motivated eyeline target" in prompt
+    assert "subtle breathing" in prompt
+    assert "natural blink timing" in prompt
+    assert "No vacant forward stare" in prompt
+    assert "witness looks toward the beat owner or visible evidence" in prompt
+
+
+def test_sailing_causality_is_owned_by_the_departure_action():
+    shot = {
+        "purpose": "A child departs in a sailboat",
+        "action": "He unties the mooring and sails away.",
+    }
+    action = rules.sailing_departure_action(
+        "He climbs aboard, unties the mooring rope and pushes off.", shot, {})
+
+    assert "mooring line is visibly released" in action
+    assert "controls the sheet or boom" in action
+    assert "Wind visibly fills and tensions the sail" in action
+    assert "only after that load does the hull heel slightly" in action
+
+
+def test_non_sailing_departure_does_not_receive_sailing_boilerplate():
+    assert rules.sailing_departure_boilerplate(
+        {"purpose": "A child walks away", "action": "He leaves the pier."},
+        {"shotPlan": []},
+    ) == ""
+
+
+def test_already_underway_sailboat_does_not_replay_mooring_departure():
+    assert rules.sailing_departure_boilerplate(
+        {
+            "purpose": "A companion joins the departure",
+            "action": "The sailboat is already moving away while the pier recedes behind.",
+        },
+        {"shotPlan": []},
+    ) == ""
+
+
 def test_action_grammar_blocks_flat_single_shot_travel_and_repeated_contacts():
     direction = _action_direction()
     direction["shotPlan"] = [direction["shotPlan"][0]]
@@ -173,7 +292,10 @@ def test_r15_requires_attributed_delivery_and_post_line_hold():
         {"speaker": "Actor", "exactText": "Done."}]}
     assert not rules.action_unit_report(shot, direction, "Actor says {Done.}")["ready"]
     prompt = ("Shot 1: Dialogue placement: Actor, calm and resolved: {Done.} "
-              "The pose holds a full beat after the line ends.\n[Audio]\nNatural sound.")
+              "The pose holds a full beat after the line ends. Living performance lock: Actor "
+              "has a specific motivated eyeline target and a readable active thought throughout. "
+              "No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or "
+              "generic camera-facing expression.\n[Audio]\nNatural sound.")
     assert rules.action_unit_report(shot, direction, prompt)["ready"]
 
 
@@ -187,5 +309,8 @@ def test_r15_suppresses_hold_when_immediate_action_is_typed():
     shot = {"charactersInFrame": ["Actor"], "dialogueLines": [
         {"speaker": "Actor", "exactText": "Go!"}]}
     prompt = ("Shot 1: Dialogue placement: Actor, at full volume, before the launch: "
-              "{Go!} The actor launches immediately.\n[Audio]\nNatural sound.")
+              "{Go!} The actor launches immediately. Living performance lock: Actor has a "
+              "specific motivated eyeline target and a readable active thought throughout. "
+              "No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or "
+              "generic camera-facing expression.\n[Audio]\nNatural sound.")
     assert rules.action_unit_report(shot, direction, prompt)["ready"]

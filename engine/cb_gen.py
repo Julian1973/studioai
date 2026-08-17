@@ -724,6 +724,125 @@ def _concat_audio_parts(parts, outp):
             pass
 
 
+def replace_group_chorus_segments(raw_audio, timing_path, performances,
+                                  *, production_route=None):
+    """Replace placeholder collective lines with synchronised canon-voice choruses.
+
+    ElevenLabs Text-to-Dialogue accepts one voice per input turn. A typed
+    ``group_chorus`` line is therefore first carried as a timing placeholder, then
+    rebuilt from every explicitly named canon voice and mixed in synchrony. The
+    returned audio and timing sidecar retain one logical script occurrence.
+    """
+    _require_production_route(production_route, "replace_group_chorus_segments")
+    raw_audio = pathlib.Path(raw_audio)
+    timing_path = pathlib.Path(timing_path)
+    timing = json.loads(timing_path.read_text(encoding="utf-8"))
+    segments = timing.get("voiceSegments") or []
+    chorus_indexes = {
+        index for index, item in enumerate(performances or [])
+        if item.get("voiceTreatment") == "group_chorus" and item.get("voiceIds")
+    }
+    if not chorus_indexes:
+        return str(raw_audio), str(timing_path)
+    if len(segments) != len(performances or []):
+        raise RuntimeError("Chorus replacement requires timing for every dialogue input")
+
+    with tempfile.TemporaryDirectory(prefix="cb-chorus-") as tmp:
+        tmp_path = pathlib.Path(tmp)
+        rebuilt = []
+        rebuilt_segments = []
+        cursor = 0.0
+        for index, (segment, performance) in enumerate(zip(segments, performances)):
+            if index not in chorus_indexes:
+                part = tmp_path / f"line_{index:02d}.wav"
+                start = float(segment["startTimeSec"])
+                duration = float(segment["endTimeSec"]) - start
+                subprocess.run([
+                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                    "-ss", str(start), "-t", str(duration), "-i", str(raw_audio),
+                    "-ar", "48000", "-ac", "2", str(part),
+                ], check=True)
+            else:
+                voices = []
+                text = str(performance.get("text") or "").strip()
+                for member_index, voice_id in enumerate(performance["voiceIds"]):
+                    voice = tmp_path / f"chorus_{index:02d}_{member_index:02d}.mp3"
+                    eleven_tts(
+                        text, voice_id, model_id=performance.get("modelId", "eleven_v3"),
+                        out=str(voice), stability=float(
+                            performance.get("voiceSettings", {}).get("stability", 0.4)),
+                        similarity_boost=float(performance.get(
+                            "voiceSettings", {}).get("similarity_boost", 0.9)),
+                        style=float(performance.get("voiceSettings", {}).get("style", 0.15)),
+                        production_route=production_route)
+                    voices.append(voice)
+                durations = [_ffprobe_duration(path) for path in voices]
+                natural_target = max(durations)
+                directed_target = float(performance.get("estimatedDurationSec") or 0)
+                # A chorus may breathe more broadly than its written estimate, but it
+                # cannot consume the following action or final visual hold. Permit 35%
+                # acting latitude, then align every member to that shared duration.
+                target = (min(natural_target, directed_target * 1.35)
+                          if directed_target > 0 else natural_target)
+                if target <= 0:
+                    raise RuntimeError("Chorus voices returned no playable audio")
+                part = tmp_path / f"line_{index:02d}.wav"
+                command = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+                for voice in voices:
+                    command.extend(["-i", str(voice)])
+                filters = []
+                labels = []
+                for member_index, duration in enumerate(durations):
+                    tempo = max(0.5, min(2.0, duration / target))
+                    delay = member_index * 12
+                    label = f"v{member_index}"
+                    filters.append(
+                        f"[{member_index}:a]atempo={tempo:.6f},adelay={delay}|{delay},"
+                        f"apad,atrim=0:{target + delay / 1000:.6f}[{label}]")
+                    labels.append(f"[{label}]")
+                filters.append(
+                    "".join(labels) + f"amix=inputs={len(labels)}:normalize=1,"
+                    "alimiter=limit=0.92[out]")
+                command.extend([
+                    "-filter_complex", ";".join(filters), "-map", "[out]",
+                    "-ar", "48000", "-ac", "2", str(part),
+                ])
+                subprocess.run(command, check=True)
+            duration = _ffprobe_duration(part)
+            rebuilt.append(part)
+            rebuilt_segments.append({
+                **segment,
+                "voiceId": ("GROUP_CHORUS" if index in chorus_indexes
+                            else segment.get("voiceId")),
+                "voiceIds": (performance.get("voiceIds") if index in chorus_indexes
+                             else [segment.get("voiceId")]),
+                "startTimeSec": cursor,
+                "endTimeSec": cursor + duration,
+            })
+            cursor += duration
+        rebuilt_audio = raw_audio.with_name(raw_audio.stem + "_chorus.mp3")
+        concat_file = tmp_path / "concat.txt"
+        concat_file.write_text("".join(
+            f"file '{str(path.resolve()).replace(chr(39), chr(39) + chr(92) + chr(39) + chr(39))}'\n"
+            for path in rebuilt), encoding="utf-8")
+        subprocess.run([
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-f", "concat", "-safe", "0", "-i", str(concat_file),
+            "-ar", "48000", "-ac", "2", "-codec:a", "libmp3lame", "-q:a", "2",
+            str(rebuilt_audio),
+        ], check=True)
+    rebuilt_timing = pathlib.Path(str(rebuilt_audio) + ".dialogue.json")
+    timing.update({
+        "audioPath": str(rebuilt_audio.resolve()),
+        "audioSha256": __import__("hashlib").sha256(rebuilt_audio.read_bytes()).hexdigest(),
+        "voiceSegments": rebuilt_segments,
+        "groupChorusResolved": True,
+    })
+    rebuilt_timing.write_text(
+        json.dumps(timing, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return str(rebuilt_audio), str(rebuilt_timing)
+
+
 def _eleven_dialogue_tts_fallback(inputs, out, model_id, generation_kind, error_text):
     """Operational fallback for production: if Text-to-Dialogue refuses, still create
     a usable line-ordered voice take. This is not the preferred performance route, but it

@@ -1,0 +1,127 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S6_plate_candidate_a3d66afe.png",
+  "hash": "a214e9354c7f006217bb8757d1cbb968ad4cbaa3fc63338aee8a59a1b9bfd71f",
+  "inputSignature": {
+   "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+   "briefHash": "23a3072f51429f611b9aa707017c37234dd2b2d8246d401ccaa1c1c815d19f86",
+   "referenceHashes": {
+    "Ep1_S2_plate_candidate_81444b45.jpeg": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339"
+   },
+   "plateHash": "a214e9354c7f006217bb8757d1cbb968ad4cbaa3fc63338aee8a59a1b9bfd71f"
+  },
+  "referencePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S2_plate_candidate_81444b45.jpeg",
+  "generatedAt": "2026-08-15T16:11:27",
+  "packageRevision": 1,
+  "approvedAt": "2026-08-15T16:12:41",
+  "reviewedBy": "Julian"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S6_plate_candidate_25cf52e1.png",
+   "hash": "9f765c3f89313185ba3edb8de5925f16eae545adf2f8b0c83f2bf3f3f64db50c",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "c3d7e2b2d3edae401dbd6049626b243859770a6f658f3cea3486e9a93e644ec8",
+    "referenceHashes": {
+     "Ep1_S2_plate_candidate_81444b45.jpeg": "c3138677a7b7469513236dd55725e783954363534a9e8945249f1c48a0dff339"
+    },
+    "plateHash": "9f765c3f89313185ba3edb8de5925f16eae545adf2f8b0c83f2bf3f3f64db50c"
+   },
+   "referencePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S2_plate_candidate_81444b45.jpeg",
+   "generatedAt": "2026-08-15T16:07:26",
+   "packageRevision": 1,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-15T16:08:13",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Too photorealistic and generic. Preserve Crystal Cove's stylized crystalline rock walls, sheltered cove geometry, tactile animated-feature materials and child-readable design from the approved Scene 2 plate. Transform weather to storm midday, remove the foreground singing-bowl setup from this shore area, retain a broad performance beach, rough sea, wind-bent grasses and a clear Fuzzby crash path.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260815T160813/Ep1_S6_plate_candidate_25cf52e1.png"
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-15T16:09:06",
+    "editedAt": "2026-08-15T16:09:28",
+    "preparedBy": "specialist",
+    "sourceHash": "c9529ef4bc7196e788ec9b44ac9ee3e1d667415d5bde5d31cd3b28ce58d9529d",
+    "output": {
+     "creativeIntent": "Create an environment-only Scene Look plate for Crystal Cove at the beginning of the storm-light arc: a child-readable, emotionally urgent beach under real weather pressure, with the shore feeling windy, wet, and alive but still inviting in the warm, tactile language of original 3D CGI animation.",
+     "storyOfPlace": "Crystal Cove’s storm-lashed edge where wet sand meets rough open sea. Wind-bent shore grasses strain behind the beach, rain sweeps across the cove, and dark midday storm clouds press low over hard-breaking surf. The environment should preserve a clear crash path through natural beach obstacles toward the waterline.",
+     "paletteAndLighting": "Dark cool storm light, midday but heavily clouded; blue-gray clouds, slate ocean, deep teal shadows, rain-softened contrast, wet sand reflecting muted sky light. Keep a subtle warm animated undertone in the sand and grasses so the world remains approachable for ages 4–8, never grim or photoreal-harsh.",
+     "materialsAndAtmosphere": "Glossy wet sand with shallow puddle sheen, wind-flattened dune grasses, soaked driftwood, rounded beach stones, foam-streaked rough surf, rain streaks, sea mist, airborne spray, and gust-shaped grass movement. Materials should feel tactile, stylized-real, and physically weighted: soft rounded forms, saturated but storm-muted color, clean readable silhouettes.",
+     "continuityRules": [
+      "Environment only: no characters, no animals, no vehicles, no readable text, no signage.",
+      "Maintain Crystal Cove canon: wet sand meeting rough open sea, wind-bent shore grasses behind, clear crash path from beach obstacles toward the waterline.",
+      "Time is midday under dark storm clouds; this is still the stormy start of the S6/S8-9 clearing-light arc, not yet clearing.",
+      "Weather must show hard wind, driving rain, sea spray, and rough surf.",
+      "Use original 3D CGI animation style for ages 4–8: Pixar-caliber polish, bold readable shapes, tactile materials, warm saturated undertone within cool storm lighting."
+     ],
+     "providerPrompt": "@Image1 is the approved Crystal Cove geography and stylized animated-world authority. Preserve its sheltered cove shape, crystal-studded rock walls, beach proportions, ocean opening, tactile rounded 3D CGI materials and child-readable design. Transform only the weather, light and shore state for Scene 6.\n\nEnvironment-only Scene Look plate for an original feature-quality stylized 3D CGI family animation. Show the same Crystal Cove shore at storm-building midday: crystalline rock walls still recognisable on both sides, crystals dimly catching cold blue storm light, a broad wet performance beach, rough slate sea, heavy rain, white surf, wind-bent shore grasses, slick shells and driftwood arranged into a clear readable crash path toward the waterline. Remove the foreground singing bowl, mat and wand from this wider communal shore area; do not erase the cove's crystalline identity or replace it with a generic beach. Keep the scene beautiful, tactile, saturated and emotionally readable for ages 4-8, with rounded animated-feature forms, soft volumetric storm light, subtle warm bounce in the rocks and a faint hidden brightness behind clouds for the later beacon. No characters, animals, boats, buildings, footprints, text, logos, photoreal live-action surf, bleak realism, horror, night, sunset or sunshine."
+    },
+    "packageRevision": 1,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+     "sceneContextHash": "d624cdca2fe905cb6fbc55a6d86c07604c72c64850523db13f5364d925971dd5"
+    },
+    "editedBy": "Codex director test",
+    "outcome": "approved",
+    "decisionAt": "2026-08-15T16:09:28",
+    "reviewedBy": "Codex director test",
+    "note": "Retake direction: preserve Scene 2 Crystal Cove as an unmistakable stylized crystalline location; storm-state transformation only."
+   },
+   "candidate": null,
+   "history": [
+    {
+     "department": "Look Development",
+     "worker": "Cinematographer / DP",
+     "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+     "model": "gpt-5.5",
+     "preparedAt": "2026-08-15T16:05:02",
+     "editedAt": null,
+     "preparedBy": "specialist",
+     "sourceHash": "c9529ef4bc7196e788ec9b44ac9ee3e1d667415d5bde5d31cd3b28ce58d9529d",
+     "output": {
+      "creativeIntent": "Establish Crystal Cove as a beautiful but pressured storm shore: wild, windy, and physically real, yet still readable and inviting for ages 4–8. The scene-wide look should make the beach feel like it is bracing under weather, with the sea pushing hard toward shore and the grasses flattened by wind.",
+      "storyOfPlace": "Crystal Cove sits at the rough edge where wet sand meets dark open water. A natural crash path cuts through beach obstacles toward the waterline, suggesting recent movement and danger from the surf without adding any characters. Behind the beach, shore grasses bend almost sideways in the gusts; ahead, heavy waves break and throw white foam across the rain-dark sand.",
+      "paletteAndLighting": "Midday storm light: cool, dark blue-gray clouds, slate ocean, charcoal wet sand, muted tan grasses, white sea foam, and small restrained warm notes in exposed sand and grass tips so the image remains child-friendly and legible. This is the beginning of the later clearing-light arc, so allow a faint diffused brightness trapped behind the storm cloud cover, but do not show blue sky or sunshine yet.",
+      "materialsAndAtmosphere": "Everything is wet, wind-hit, and tactile: glossy compacted sand, scattered slick stones, damp driftwood, flattened sea grass, frothy surf, airborne spray, and visible rain streaks. Atmosphere should feel dense and moving, with storm mist softening the far water while foreground materials stay clear and readable in original high-end 3D CGI animation style.",
+      "continuityRules": [
+       "Environment-only Scene Look plate; no characters, no animals, no footprints from specific characters, no vehicles, no buildings, no readable text.",
+       "Keep the time as midday under dark storm clouds, not night, sunset, or a fully clearing sky.",
+       "Maintain the locked storm-to-clearing arc: stormy and cool now, with only a subtle hidden brightness behind clouds.",
+       "Show Crystal Cove’s defining feature: wind-bent shore grasses over a rough, storm-lashed sea.",
+       "Include a clear natural crash path from beach obstacles toward the waterline, but do not stage action or imply a specific camera shot around it."
+      ],
+      "providerPrompt": "Environment-only Scene Look plate for an original high-end 3D CGI animated family film, Crystal Cove storm shore at midday: wet dark sand meeting rough open sea, heavy blue-gray storm clouds, hard wind and driving rain, rough surf breaking against the beach with white foam and spray, wind-bent shore grasses flattened behind the sand, slick stones, damp driftwood, kelp, and a clear natural crash path through beach obstacles toward the waterline. Cool dark storm palette of slate ocean, charcoal wet sand, muted tan-green grasses, white foam, with a faint diffused brightness hidden behind the clouds hinting at a later clearing but no blue sky or sunshine. Tactile wet materials, glossy sand, frothy water, rain streaks, misty distant surf, bold readable shapes, warm child-friendly animated realism. No characters, no animals, no buildings, no vehicles, no text, no logos."
+     },
+     "packageRevision": 1,
+     "inputSignature": {
+      "stage": "look",
+      "model": "gpt-5.5",
+      "skillHashes": {
+       "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+      },
+      "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+      "sceneContextHash": "d624cdca2fe905cb6fbc55a6d86c07604c72c64850523db13f5364d925971dd5"
+     },
+     "outcome": "superseded",
+     "decisionAt": "2026-08-15T16:05:24",
+     "reviewedBy": "Codex director test",
+     "note": "Approved look direction. Preserve Crystal Cove geography from the approved Scene 2 plate; transform only weather, surf, light and storm-state materials.",
+     "supersededAt": "2026-08-15T16:09:28"
+    }
+   ]
+  }
+ }
+}

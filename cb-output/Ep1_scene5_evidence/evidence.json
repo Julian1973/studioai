@@ -1,0 +1,1991 @@
+{
+ "episode": "Ep1",
+ "scene": "5",
+ "generatedAt": "2026-08-15T12:50:31",
+ "validation": {
+  "passed": true,
+  "errors": 0,
+  "warnings": 0,
+  "issues": [],
+  "validatedAt": "2026-07-16",
+  "revision": 3
+ },
+ "shots": [
+  {
+   "shotId": "5.B1.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "input": {
+    "beatCode": "5.B1",
+    "purpose": "A single escalating discovery-and-action chain: Fuzzby’s chatter is cut off by the sight of danger, Zenny confirms the stakes, then Fuzzby turns alarm into action with one comic collision on the way out.",
+    "dialogueLines": [
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f",
+      "sourceEventId": "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
+      "speaker": "Fuzzby",
+      "exactText": "I’m just saying, if this turns into a full storm situation, I am extremely—",
+      "delivery": "Fast, breathless chatter into the wind; the final word cuts off cleanly when he freezes.",
+      "startSec": 1.4,
+      "endSec": 5.1
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
+      "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+      "speaker": "Zenny",
+      "exactText": "Fuzzby?",
+      "delivery": "Small, cautious question after nearly bumping into him; only Zenny’s mouth moves.",
+      "startSec": 6.6,
+      "endSec": 7.2
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
+      "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+      "speaker": "Fuzzby",
+      "exactText": "…that is NOT a good place to be.",
+      "delivery": "Quiet at first, then firmer on NOT; spoken while staring toward the distant boat.",
+      "startSec": 13.1,
+      "endSec": 15.2
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
+      "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+      "speaker": "Zenny",
+      "exactText": "Someone’s in trouble.",
+      "delivery": "Soft, direct, and focused; only Zenny’s mouth moves while Fuzzby holds his stare.",
+      "startSec": 16.2,
+      "endSec": 17.6
+     },
+     {
+      "dialogueOccurrenceId": "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab",
+      "sourceEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+      "speaker": "Fuzzby",
+      "exactText": "BEARS! BEARS! EMERGENCY BEARS!",
+      "delivery": "Sudden loud alarm, projected forward as he starts his launch; only Fuzzby’s mouth moves.",
+      "startSec": 18.7,
+      "endSec": 20.9
+     }
+    ],
+    "openingPose": "Fuzzby is airborne slightly ahead at screen-center-right, facing screen-right into the wind with mouth just opening to continue speaking; Zenny is airborne behind at screen-left, facing screen-right and closing the distance. Tree branches ahead bend across their path, leaving clear space before any contact."
+   },
+   "compiledInstruction": {
+    "seedancePrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=location; @Audio1=audio; never swap.\nAngles: @图2=one Zenny; @图3=one Fuzzby; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Zenny identity/scale only; exclude background, pose, props and scene.\n@图3 defines exactly one Fuzzby identity/scale only; exclude background, pose, props and scene.\n@图4 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nThe existing forward flight continues for a short beat before Fuzzby’s line-driven chatter is cut off by the distant danger and he stops mid-air.\n\n[ACTION OWNERSHIP]\nFuzzby owns the abrupt stop, pointing, alarm launch, branch impact, rebound, wobble, shake and continued forward flight.\nZenny owns the near-bump, steadying, eyeline follow, soft concern and trailing acceleration.\nThe branch owns the visible flex and spring-back caused by Fuzzby’s contact; it does not strike Zenny.\n\n[ATTRIBUTE OWNERSHIP]\n@图2 defines Zenny identity, scale and character continuity only. Do not use unrelated background, pose, composition, props or scene from @图2.\n@图3 defines Fuzzby identity, scale and character continuity only. Do not use unrelated background, pose, composition, props or scene from @图3.\n@图4 defines the rainforest, storm, beach/ocean direction, palette, materials and established world only. Do not use unrelated background, pose, composition, props or scene from @图4.\nDo not transfer character traits, markings, props or facial features between Fuzzby and Zenny.\n\n[ENVIRONMENT CONTRACT]\nStorm-dim rainforest light and wind-driven rain persist for the full unit.\nBranches bend in the wind before Fuzzby reaches them, but the impact branch does not contact him until the launch stage.\nThe distant tiny boat appears only through the trees in the screen-right beach/ocean direction.\nWet leaves, bark and wings catch intermittent blue storm light and warm reflected highlights without obscuring the bees.\n\n[One-Sentence Summary]\nFuzzby and Zenny discover a tiny boat in danger through the storm, turn concern into urgent rescue flight, and Fuzzby’s heroic launch is punctured by one visible branch bonk before they continue toward the beach.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: The flight path runs screen-left to screen-right through the rainforest toward the beach and ocean. Fuzzby starts airborne at screen-center-right, slightly ahead of Zenny on the same path. Zenny starts airborne at screen-left, trailing Fuzzby and closing the distance. Both characters face and anticipate travel screen-right in the opening frame. Bending tree branches sit ahead in frame-right, crossing the future path but leaving clear empty air before any contact. The camera remains on the same side of the flight path, tracking laterally with the characters. Rain and foliage layer in foreground and background, but the bees and performance corridor stay unobstructed. The beach and ocean direction is through the trees toward screen-right beyond the branch corridor.\n\n[Shot Sequence]\nShot 1: Camera: medium two-shot, useful 35mm equivalent, camera tracks laterally screen-right at bee height on the same storm-side of the path. Action: Begin exactly on @图1; Fuzzby flies slightly ahead and talks into the wind until the sight beyond the trees stops him mid-air. Performance: Fuzzby’s forward energy cuts off into a suspended stare; Zenny nearly bumps into him, checks herself, and looks to him for explanation. End state: Fuzzby held ahead, Zenny steadied behind, both suspended in the rain with the branch corridor still visible ahead. Dialogue placement: Fuzzby, Fuzzby fast and breathless into the wind, cutting off cleanly as he freezes: {I’m just saying, if this turns into a full storm situation, I am extremely—} The pose holds a full beat after the line ends. Dialogue placement: Zenny, Zenny gives a small cautious question after nearly bumping into him; only Zenny’s mouth moves: {Fuzzby?} The pose holds a full beat after the line ends.\nShot 2: Camera: continuous reframed eyeline view, useful 50-70mm feel as the camera eases past Fuzzby and racks through rain and branches to the tiny distant boat, then drifts back to the bees. Action: Fuzzby slowly points through the trees; the camera follows his gaze, holds the boat small beyond the forest, then returns to the characters for the recognition. Performance: Fuzzby’s eyes widen and his confidence drains into focused alarm; Zenny follows his gaze and softens into concern without losing the direction of travel. End state: Fuzzby and Zenny both face screen-right toward the same distant danger, with readable concern and the route to the beach established. Dialogue placement: Fuzzby, Fuzzby starts quiet while staring toward the boat, then firms up on the warning emphasis: {…that is NOT a good place to be.} The pose holds a full beat after the line ends. Dialogue placement: Zenny, Zenny speaks softly, directly and focused while Fuzzby holds his stare; only Zenny’s mouth moves: {Someone’s in trouble.} The pose holds a full beat after the line ends.\nShot 3: Camera: continuous whip-pan back into lateral tracking, useful 28-35mm equivalent, camera stays with Fuzzby’s launch and keeps Zenny, branch and flight path readable. Action: Fuzzby snaps forward yelling through @Audio1, launches screen-right, collides with the branch, rebounds, shakes once, reorients and continues toward the beach as Zenny accelerates behind. Performance: Fuzzby’s bravery is real but chaotic; the bonk briefly scrambles him, then he insists forward with urgent alertness while Zenny follows without speaking. End state: Camera at bee height tracks screen-right: Fuzzby screen-right slightly ahead in forward flight with a brief post-bonk wobble settling, Zenny screen-left to center-left trailing faster, both facing the beach under storm-dim forest light. Dialogue placement: Fuzzby, Fuzzby projects sudden loud alarm as the launch begins; only Fuzzby’s mouth moves, then all further character voices remain silent: {BEARS! BEARS! EMERGENCY BEARS!} Hold: 2.4s — Fuzzby wobbles for a beat, then flies on screen-right toward the beach with Zenny following faster behind him as the rain and branches whip past.\nWitness staging: Fuzzby stays slightly ahead on the screen-right side of the flight path. Zenny stays trailing screen-left to center-left, witnessing Fuzzby’s stop, the boat reveal and the branch impact without taking over the action. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Global Supplement]\nExactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain character identity and relative scale from the assigned reference slots. Safeguard: Do not hide the branch impact behind foreground leaves, camera blur or a cut. Safeguard: Do not let Fuzzby pass the branch before contact; show approach, compression, branch bend, rebound and recovery in order. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Fuzzby, Zenny has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Storm-dim forest light with wind-driven rain visible; tree movement remains strong. Camera remains on the same side of the flight path. Fuzzby ends screen-right, slightly ahead of Zenny, facing screen-right toward the beach, airborne in forward flight after recovering from the branch impact, urgent and alert with a brief post-bonk wobble settling. Zenny ends screen-left to center-left, trailing Fuzzby, facing screen-right toward the beach, airborne in steady forward flight, focused and concerned.\n\n[Audio]\n@Audio1 guides dialogue timing and mouth shapes; final approved dialogue is restored in post. No extra voices. No music. No watermark.",
+    "promptWords": 267,
+    "referenceSlots": {
+     "@图1": "opening keyframe",
+     "@图2": "Zenny",
+     "@图3": "Fuzzby",
+     "@图4": "scene plate",
+     "@Audio1": "voice track"
+    },
+    "keyframePrompt": "[Opening Stage]\nCreate a playable 16:9 opening for 5.B1.S1; frame-one anticipation, not portrait or payoff.\n\n[References]\n- Project-stable slots: @图1=Zenny; @图2=Fuzzby; @图3=scene plate. Never swap roles.\n- Multi-angle collapse: @图1=one Zenny; @图2=one Fuzzby; views are angles, not extra characters.\n- @图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority. Match Zenny exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority. Match Fuzzby exactly as the same character shown in the turnaround. Preserve every visible feature and proportion. Ignore background and static pose; do not describe, redesign, simplify, beautify or reinterpret it.\n- @图3 is the locked Scene Look plate; inherit world, viewpoint, scale, materials, light and atmosphere only.\n- Keep Zenny and Fuzzby distinct; never blend or swap traits.\n\n[Characters In Frame]\n- Fuzzby\n- Zenny\n\n[Intended Read]\nA storm-side forest flight path with Fuzzby slightly ahead and Zenny closing behind: the audience should immediately feel forward momentum into danger, with clear room ahead for the coming discovery and branch gag without the opening frame already playing the stop or impact.\n\n[Canonical Style]\nFeature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\n\n[Geography]\nThe flight path runs screen-left to screen-right through the rainforest toward the beach and ocean.\nFuzzby starts airborne at screen-center-right, slightly ahead of Zenny on the same path.\nZenny starts airborne at screen-left, trailing Fuzzby and closing the distance.\nBoth characters face and anticipate travel screen-right in the opening frame.\nBending tree branches sit ahead in frame-right, crossing the future path but leaving clear empty air before any contact.\nThe camera remains on the same side of the flight path, tracking laterally with the characters.\nRain and foliage layer in foreground and background, but the bees and performance corridor stay unobstructed.\nThe beach and ocean direction is through the trees toward screen-right beyond the branch corridor.\n\n[Frame]\n- Fuzzby @ middle-centre area; airborne forward-flight anticipation into wind, slightly ahead, ready to continue speaking; facing screen-right.\n- Zenny @ middle-left area; airborne trailing flight anticipation, closing distance behind Fuzzby; facing screen-right.\n- Same depth: Fuzzby 14 inches; Zenny 12 inches; preserve relative-size truth only.\n\n[Negative Space]\nLead room stays open frame-right for the approved direction of travel.\nHold clear empty air from Fuzzby to frame-right for the later stop, launch and branch approach.\nKeep a visible gap before the bending branches so no contact is implied in frame one.\nReserve the right-side corridor through foliage as the travel path toward the beach.\nDo not fill the mid-right eyeline corridor with foreground leaves, rain streaks or extra objects that would block the later reveal path.\n\n[Camera]\nSide-tracking relationship with a gentle feature-animation medium lens feel, close enough for face and body readability but wide enough to show the approaching branch space. Camera is level with the airborne characters, not looking down on them, preserving a lateral screen-left-to-screen-right travel axis toward the beach.\n\n[Light]\nStorm-dim rainforest light from the supplied Scene Look: cool blue-green ambient rain light, wet leaf speculars, soft ocean spill beyond the trees, and subtle rim separation on the characters. Keep foreground foliage and rain layered for depth, with the bees on the same readable depth plane and no perspective scaling that changes their canon relative size.\n\n[Performance Freedom]\nAnimation owns performance, movement, recovery and camera evolution.\n\n[Protect]\nExactly one Fuzzby and one Zenny appear in this image.\nKeep Fuzzby and Zenny at the same distance from the camera; Fuzzby appears about 17% taller than Zenny.\nInclude exactly Fuzzby and Zenny; no extra characters.\nNo crystals on the bees, no redesign, no appearance drift from the supplied turnarounds.\nOpening frame must not show Fuzzby already frozen, pointing, colliding, rebounding or shouting; it is only the playable anticipation before those actions begin Animation-side later in the shot.\nLiving performance lock: Fuzzby, Zenny has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\n[Forbidden]\nNo portrait, locked extreme action pose or payoff, identity or scale drift, changed accessories, omitted reference features, duplicates, anatomy errors, extra props, text, watermark or body-mounted bags, sacks, baskets or dangling loads. Preserve the locked Scene Look.",
+    "audioBrief": "SHOT 5.B1.S1 — voice-only performance for @Audio1.\nFuzzby: \"I’m just saying, if this turns into a full storm situation, I am extremely—\" — Fast, breathless chatter into the wind; the final word cuts off cleanly when he freezes.. Target 1.4-5.1s.\nZenny: \"Fuzzby?\" — Small, cautious question after nearly bumping into him; only Zenny’s mouth moves.. Target 6.6-7.2s.\nFuzzby: \"…that is NOT a good place to be.\" — Quiet at first, then firmer on NOT; spoken while staring toward the distant boat.. Target 13.1-15.2s.\nZenny: \"Someone’s in trouble.\" — Soft, direct, and focused; only Zenny’s mouth moves while Fuzzby holds his stare.. Target 16.2-17.6s.\nFuzzby: \"BEARS! BEARS! EMERGENCY BEARS!\" — Sudden loud alarm, projected forward as he starts his launch; only Fuzzby’s mouth moves.. Target 18.7-20.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track."
+   },
+   "assets": {
+    "voice": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_vo_candidate_96035da2.wav",
+     "exists": true,
+     "bytes": 5376078,
+     "costEntries": []
+    },
+    "keyframe": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_keyframe_candidate_156fb8c0.png",
+     "exists": true,
+     "bytes": 497003,
+     "providerRequest": {
+      "ts": 1786791409.6582332,
+      "recorded_at": "2026-08-15T11:56:49",
+      "op": "keyframe_image",
+      "model": "bytedance/seedream/v5/pro/edit",
+      "aspect": "16:9",
+      "num_image_refs": 3
+     },
+     "costEntries": [
+      {
+       "ts": 1786791409.65752,
+       "op": "keyframe_image",
+       "cost_usd": 0.144,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_5.B1.S1_keyframe_candidate_156fb8c0.png",
+       "meta": {
+        "model": "bytedance/seedream/v5/pro/edit",
+        "num_refs": 3
+       }
+      }
+     ]
+    },
+    "candidates": [
+     {
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_c1.mp4",
+      "exists": true,
+      "bytes": 6535093,
+      "providerRequest": {
+       "ts": 1786793271.069236,
+       "recorded_at": "2026-08-15T12:27:51",
+       "op": "seedance_ref2vid",
+       "endpoint": "bytedance/seedance-2.5/reference-to-video",
+       "providerModelId": "fal-seedance-2.5",
+       "modelVersion": "2.5",
+       "transport": "fal-subscribe",
+       "resolution": "480p",
+       "duration": "28",
+       "seconds": 28.0,
+       "fast": false,
+       "aspectRatio": "16:9",
+       "num_image_refs": 4,
+       "num_audio_refs": 1
+      },
+      "costEntries": [
+       {
+        "ts": 1786793271.0684679,
+        "op": "seedance_ref2vid",
+        "cost_usd": 6.174,
+        "episode": null,
+        "code": null,
+        "out": "Ep1_5.B1.S1_c1.mp4",
+        "meta": {
+         "resolution": "480p",
+         "fast": false,
+         "seconds": 28.0
+        }
+       }
+      ]
+     },
+     {
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_c2.mp4",
+      "exists": false,
+      "bytes": null,
+      "costEntries": [
+       {
+        "ts": 1786793522.467499,
+        "op": "seedance_ref2vid",
+        "cost_usd": 6.174,
+        "episode": null,
+        "code": null,
+        "out": "Ep1_5.B1.S1_c2.mp4",
+        "meta": {
+         "resolution": "480p",
+         "fast": false,
+         "seconds": 28.0
+        }
+       }
+      ]
+     }
+    ],
+    "take": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_c1.mp4",
+     "exists": true,
+     "bytes": 6535093,
+     "providerRequest": {
+      "ts": 1786793271.069236,
+      "recorded_at": "2026-08-15T12:27:51",
+      "op": "seedance_ref2vid",
+      "endpoint": "bytedance/seedance-2.5/reference-to-video",
+      "providerModelId": "fal-seedance-2.5",
+      "modelVersion": "2.5",
+      "transport": "fal-subscribe",
+      "resolution": "480p",
+      "duration": "28",
+      "seconds": 28.0,
+      "fast": false,
+      "aspectRatio": "16:9",
+      "num_image_refs": 4,
+      "num_audio_refs": 1
+     },
+     "costEntries": [
+      {
+       "ts": 1786793271.0684679,
+       "op": "seedance_ref2vid",
+       "cost_usd": 6.174,
+       "episode": null,
+       "code": null,
+       "out": "Ep1_5.B1.S1_c1.mp4",
+       "meta": {
+        "resolution": "480p",
+        "fast": false,
+        "seconds": 28.0
+       }
+      }
+     ]
+    },
+    "harvestFrame": {
+     "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_final_frame.png",
+     "exists": true,
+     "bytes": 511957,
+     "costEntries": []
+    }
+   },
+   "state": {
+    "status": "approved",
+    "batchAttempts": 0,
+    "candidatesGenerated": 2,
+    "disclosure": {
+     "shotId": "5.B1.S1",
+     "candidateCount": 2,
+     "costPerCandidateUsd": 6.174,
+     "maxBatchCostUsd": 12.348,
+     "promptVersion": "74fdbbef",
+     "bindingHash": "84604951ecab7bd7e42207b0231c4113",
+     "envelopeHash": "74e8dc2001b546e9f19aafb5f799c8611013aba4a03516b1778f1e23f4898ad2",
+     "packageHash": "82990fbe5aa6552a",
+     "rerollOfUnchangedPackage": false,
+     "packageRevision": 3,
+     "referenceSlots": {
+      "@图1": "opening keyframe",
+      "@图2": "Zenny · complete-turnaround turnaround view",
+      "@图3": "Fuzzby · complete-turnaround turnaround view",
+      "@图4": "scene plate"
+     },
+     "logicalReferenceSlots": {
+      "@图1": "opening keyframe",
+      "@图2": "Zenny",
+      "@图3": "Fuzzby",
+      "@图4": "scene plate",
+      "@Audio1": "voice track"
+     },
+     "openingAnchor": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_keyframe_candidate_156fb8c0.png",
+     "audioAsset": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_vo_candidate_96035da2.wav",
+     "shotDurationSec": 28.0,
+     "provider": "fal",
+     "providerModelId": "fal-seedance-2.5",
+     "modelVersion": "2.5",
+     "resolution": "480p",
+     "comparisonRunId": null,
+     "internalProviderCalls": [
+      {
+       "segmentIndex": 1,
+       "durationSec": 28.0,
+       "stageNumbers": []
+      }
+     ],
+     "tier": "standard"
+    },
+    "approval": {
+     "approved": true,
+     "candidate": 1,
+     "reviewed_by": "Codex AI Director — delegated Scene 5 trial",
+     "at": "2026-08-15T12:38:11",
+     "packageRevision": 3,
+     "inputSignature": {
+      "canonProfileDigest": "70261cf7083629269093371e53bb4f27e0d1ce7b24442e774bc95ff606d62e8a",
+      "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+      "animationDirectionSignature": {
+       "stage": "animation",
+       "model": "gpt-5.5",
+       "skillHashes": {
+        "animation": "db04acf26801beee8c49a8597cd2acaaee1442f5184789f2d20863e7f6d99ab0"
+       },
+       "canonProfileDigest": "70261cf7083629269093371e53bb4f27e0d1ce7b24442e774bc95ff606d62e8a",
+       "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+       "shotHash": "b0dac98374d51ee4ab33a1031cae01c7ad662961be05b50f3774c8343cd791bf",
+       "openingFrameHash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+       "sceneLookHash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2",
+       "referenceOrder": [
+        "@图1",
+        "@图2",
+        "@图3",
+        "@图4"
+       ],
+       "referenceBindings": [
+        {
+         "slot": "@图1",
+         "sourceSlot": "@图1",
+         "role": "opening keyframe",
+         "view": null,
+         "sameCharacterGroup": null
+        },
+        {
+         "slot": "@图2",
+         "sourceSlot": "@图2",
+         "role": "Zenny",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "6d3238b01ada18a755a338e4b0329850587e8ffcca334e378c281a8f6bdf495f"
+        },
+        {
+         "slot": "@图3",
+         "sourceSlot": "@图3",
+         "role": "Fuzzby",
+         "view": "complete-turnaround",
+         "sameCharacterGroup": "759d65aba682e3c21cac83df858ba08ae935632f5e4cf7855e43f88e38998158"
+        },
+        {
+         "slot": "@图4",
+         "sourceSlot": "@图4",
+         "role": "scene plate",
+         "view": null,
+         "sameCharacterGroup": null
+        }
+       ],
+       "referenceHashes": [
+        "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+        "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f",
+        "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3",
+        "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+       ],
+       "voiceHash": "28f2cfa6b577eef9519ca7af8bb617f2620960795ef3391103ef7aa9d80d8e70",
+       "voiceApprovalSignature": {
+        "canonProfileDigest": "3ba08fd89fdecc847e39719522f8d861bff88e8ed11ee90a6ad010b1ab3a647f",
+        "dialogueHash": "d280d75d4ab9cbe202405e7b811bdf9f5e5192ae4d574d8798cda09c4440c673",
+        "performanceHash": "e5d467d22d655d1b8eecdf056623fda14fd9a746bbd3511dfdb3242571d3bd38",
+        "voiceCardsHash": "77021084edf5a5ed16f27119a30d0db91605a73b0f16034a0aa9e8555eb6d8b0",
+        "voiceRegistersHash": "34a85ae3819a64fcfba2bf731016be27cdabe750fd5552b9d3a149083d42e149",
+        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "DNK8oCkkHjIyEjzlCeQq",
+         "XEiPrIitaegdirIGkODX",
+         "DNK8oCkkHjIyEjzlCeQq",
+         "XEiPrIitaegdirIGkODX",
+         "DNK8oCkkHjIyEjzlCeQq"
+        ]
+       }
+      },
+      "promptHash": "77d7d324385484fd77fb7f394cbceaa7b786a211c3781d00634fc268ddb07346",
+      "openingFrameHash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+      "references": [
+       {
+        "slot": "@图1",
+        "sourceSlot": "@图1",
+        "role": "opening keyframe",
+        "view": null,
+        "sameCharacterGroup": null,
+        "hash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b"
+       },
+       {
+        "slot": "@图2",
+        "sourceSlot": "@图2",
+        "role": "Zenny",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "6d3238b01ada18a755a338e4b0329850587e8ffcca334e378c281a8f6bdf495f",
+        "hash": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+       },
+       {
+        "slot": "@图3",
+        "sourceSlot": "@图3",
+        "role": "Fuzzby",
+        "view": "complete-turnaround",
+        "sameCharacterGroup": "759d65aba682e3c21cac83df858ba08ae935632f5e4cf7855e43f88e38998158",
+        "hash": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+       },
+       {
+        "slot": "@图4",
+        "sourceSlot": "@图4",
+        "role": "scene plate",
+        "view": null,
+        "sameCharacterGroup": null,
+        "hash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+       }
+      ],
+      "audioHash": "28f2cfa6b577eef9519ca7af8bb617f2620960795ef3391103ef7aa9d80d8e70",
+      "durationSec": 28.0,
+      "comparisonModelId": null,
+      "comparisonRunId": null,
+      "executionPlanHash": "1569d7300dcce73b89fc4560bfaba5214a3d40b6afe5c73ccc4461370a8567d6",
+      "provider": "fal",
+      "providerModelId": "fal-seedance-2.5",
+      "modelVersion": "2.5",
+      "transport": "fal-subscribe",
+      "endpoint": "bytedance/seedance-2.5/reference-to-video",
+      "resolution": "480p",
+      "capabilityVerifiedAt": "2026-08-07",
+      "tier": "standard"
+     },
+     "contentHash": "8ab57e062338e50a715e93f6a60a63085e743129d8362c7b45f24fe4b863ea70",
+     "harvestHash": "90c46843d5b1abd9bbd73b7c63b03a89e6aadc4a268fd14f7cc666c78d2b6856",
+     "batchId": "5.B1.S1-b1-20260815T122345-9197e6b0"
+    },
+    "rejections": [],
+    "machineReview": {
+     "shotId": "5.B1.S1",
+     "batchId": "5.B1.S1-b1-20260815T122345-9197e6b0",
+     "candidate": 1,
+     "at": "2026-08-15T12:27:51",
+     "criteria": {
+      "characterIdentity": null,
+      "relativeScale": null,
+      "startingGeography": null,
+      "actionReadability": null,
+      "physicalCauseAndEffect": null,
+      "comicOrEmotionalPerformance": null,
+      "cameraBehaviour": null,
+      "dialogueAndMouthPerformance": null,
+      "continuity": null,
+      "finalFrameUsability": null
+     },
+     "note": "human review only — the machine never approves creative quality",
+     "machineNotes": []
+    },
+    "departmentWork": {
+     "cinematography": {
+      "approved": {
+       "department": "Cinematography",
+       "worker": "Cinematographer / DP",
+       "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-08-15T11:48:19",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "6f9232c50802d8701dd4401d648080c67c9807debd623ad769fb6205232895e0",
+       "output": {
+        "shotId": "5.B1.S1",
+        "audienceRead": "A storm-side forest flight path with Fuzzby slightly ahead and Zenny closing behind: the audience should immediately feel forward momentum into danger, with clear room ahead for the coming discovery and branch gag without the opening frame already playing the stop or impact.",
+        "composition": "16:9 medium airborne two-shot from the same side of the flight path, camera at bee height. Fuzzby holds screen-center-right as the leading subject, Zenny trails at screen-left, both readable against a darker storm-rainforest edge. Keep generous lead room to frame-right and an unobstructed corridor between the bees and the bending branches ahead. Use the forest canopy and hanging vines as a stormy frame, but do not crowd the characters or hide their flight path.",
+        "lensAndCameraRelationship": "Side-tracking relationship with a gentle feature-animation medium lens feel, close enough for face and body readability but wide enough to show the approaching branch space. Camera is level with the airborne characters, not looking down on them, preserving a lateral screen-left-to-screen-right travel axis toward the beach.",
+        "lightingAndDepth": "Storm-dim rainforest light from the supplied Scene Look: cool blue-green ambient rain light, wet leaf speculars, soft ocean spill beyond the trees, and subtle rim separation on the characters. Keep foreground foliage and rain layered for depth, with the bees on the same readable depth plane and no perspective scaling that changes their canon relative size.",
+        "geography": [
+         "The flight path runs screen-left to screen-right through the rainforest toward the beach and ocean.",
+         "Fuzzby starts airborne at screen-center-right, slightly ahead of Zenny on the same path.",
+         "Zenny starts airborne at screen-left, trailing Fuzzby and closing the distance.",
+         "Both characters face and anticipate travel screen-right in the opening frame.",
+         "Bending tree branches sit ahead in frame-right, crossing the future path but leaving clear empty air before any contact.",
+         "The camera remains on the same side of the flight path, tracking laterally with the characters.",
+         "Rain and foliage layer in foreground and background, but the bees and performance corridor stay unobstructed.",
+         "The beach and ocean direction is through the trees toward screen-right beyond the branch corridor."
+        ],
+        "charactersInFrame": [
+         "Fuzzby",
+         "Zenny"
+        ],
+        "canonicalStyleVersion": "v1.0.0",
+        "canonicalStyleParagraph": "Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.",
+        "openingFrameLayout": {
+         "aspectRatio": "16:9",
+         "referenceCharacter": "Fuzzby",
+         "referenceHeightFraction": 0.34,
+         "sameDepth": true,
+         "placements": [
+          {
+           "character": "Fuzzby",
+           "centerX": 0.57,
+           "centerY": 0.48,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 0.0,
+           "facing": "screen-right",
+           "pose": "airborne forward-flight anticipation into wind, slightly ahead, ready to continue speaking"
+          },
+          {
+           "character": "Zenny",
+           "centerX": 0.34,
+           "centerY": 0.51,
+           "apparentScale": 1.0,
+           "depthPlane": 1,
+           "bodyAngleDegrees": 0.0,
+           "facing": "screen-right",
+           "pose": "airborne trailing flight anticipation, closing distance behind Fuzzby"
+          }
+         ]
+        },
+        "negativeSpace": [
+         "Hold clear empty air from Fuzzby to frame-right for the later stop, launch and branch approach.",
+         "Keep a visible gap before the bending branches so no contact is implied in frame one.",
+         "Reserve the right-side corridor through foliage as the travel path toward the beach.",
+         "Do not fill the mid-right eyeline corridor with foreground leaves, rain streaks or extra objects that would block the later reveal path."
+        ],
+        "referenceUse": [
+         "Use @图1 only for Zenny identity, proportions and materials.",
+         "Use @图2 only for Fuzzby identity, proportions and materials.",
+         "Use @图3 only for the storm rainforest scene look, palette, lighting, wet foliage materials and coastal environment atmosphere.",
+         "Do not assign any composition board, sizing board or generated pose plate to an @图 label."
+        ],
+        "continuityProtections": [
+         "Include exactly Fuzzby and Zenny; no extra characters.",
+         "Preserve canon relative scale: Fuzzby is physically taller than Zenny, with both on the same depth plane and apparentScale 1.0.",
+         "No crystals on the bees, no redesign, no appearance drift from the supplied turnarounds.",
+         "Opening frame must not show Fuzzby already frozen, pointing, colliding, rebounding or shouting; it is only the playable anticipation before those actions begin Animation-side later in the shot."
+        ],
+        "providerPrompt": "Stylised feature-quality 3D CGI opening keyframe, 16:9. Use @图1 only for Zenny, @图2 only for Fuzzby, and @图3 only for the storm rainforest scene look, palette, wet materials, rain, lighting and coastal environment atmosphere. Preserve exact character identity, proportions, materials and canon relative scale from the references; no redesign.\n\nLiteral opening frame of shot 5.B1.S1: a medium airborne two-shot from the same side of the forest flight path, camera at bee height, tracking relationship implied screen-left to screen-right toward the beach. Fuzzby is airborne slightly ahead at screen-center-right, facing screen-right into the wind, in a playable forward-flight anticipation as if about to continue speaking. Zenny is airborne behind at screen-left, facing screen-right and closing the distance on the same depth plane. Fuzzby and Zenny remain fully readable, with Fuzzby slightly larger by canon height only, not by perspective.\n\nStorm-dim rainforest surrounds them: rain, wet leaves, hanging vines, dark branches and cool blue-green ocean storm light consistent with @图3. Bending tree branches occupy the future path in frame-right, but leave a clear empty gap before any contact; the performance corridor from the characters to frame-right is unobstructed. Keep generous lead room toward screen-right and preserve the screen-left-to-screen-right travel axis toward the beach and ocean beyond the trees.\n\nNo extra characters, no on-screen text, no turnaround sheet labels, no collision yet, no pointing yet, no shouting pose, no frozen mannequin expression, no hidden branch contact, no crystals on the bees."
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "cinematography",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68",
+         "dp": "7f2513d6b84f57ecb5d959d26cf81f3510b9e9c819c16884ccb9e3499ddc319e"
+        },
+        "canonProfileDigest": "1d9a362658dc12ad5dc8956c34d48222ade9ba253ee5dc91493c476f046290f7",
+        "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+        "sceneLookHash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "Zenny",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "98c0e56360439ef20553de72ab5455d3d5abde8a250780c52d4f1e61bbba6dc9",
+          "hash": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "Fuzzby",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "c93544560c0c4eefe0970d6e75b08f01eff1f7ab9d8c743443e68a666e8deb73",
+          "hash": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图3",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+         }
+        ]
+       },
+       "outcome": "approved",
+       "decisionAt": "2026-08-15T11:48:19",
+       "reviewedBy": "Studio contract migration",
+       "note": "Refreshed to the current typed keyframe contract."
+      },
+      "candidate": null,
+      "history": []
+     },
+     "review-keyframe": {
+      "approved": {
+       "department": "Director Review",
+       "worker": "Director Review / Continuity Supervisor",
+       "skill": "skills/crystal-bears-continuity/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-08-15T11:59:17",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "ec6b25455ddbd742be2032f56783e6bcc76992695c2e304350695c968217e29b",
+       "output": {
+        "artifactType": "keyframe",
+        "verdict": "revise",
+        "summary": "Strong production value and mostly correct character scale/identity, but the opening keyframe is not safe to approve as the opener for this discovery-and-branch-collision shot. The bees are flying screen-right with Fuzzby ahead and Zenny trailing, but the frame already reveals the beach/ocean strongly and does not clearly stage a branch across their forward flight path for the later visible BONK. Expressions read cheerful/pleasant rather than wind-driven chatter on Fuzzby with Zenny closing behind. Recommend revising before animation so the collision geography and discovery reveal are protected.",
+        "intendedRead": "Fuzzby slightly ahead, airborne screen-center-right, facing screen-right into storm wind with mouth just opening mid-chatter; Zenny behind screen-left, also airborne and closing distance; branches ahead bend across their path but leave clear space before contact, setting up a continuous later discovery of the tiny boat and branch collision.",
+        "actualRead": "Two bees fly rightward through a polished rainy coastal forest view. Fuzzby is larger and ahead on the right, Zenny smaller and behind on the left. Both look pleasantly alert with slight smiles/open mouths. The beach and ocean are already prominent in the background, while branches frame the scene but no obvious branch is staged directly across Fuzzby’s near-future flight path.",
+        "finalFrameUsable": false,
+        "recommendedCandidate": null,
+        "candidateAssessments": [
+         {
+          "candidateId": "Ep1_5.B1.S1_keyframe_candidate_156fb8c0",
+          "verdict": "revise",
+          "summary": "Visually attractive and close on basic two-character placement, but weak as an approved animation opener because the later branch impact is not clearly pre-staged and the beach/ocean reveal is already too exposed.",
+          "beatLands": false,
+          "strongestEvidence": "Fuzzby is visibly larger and slightly ahead at screen-right, Zenny trails at screen-left, both airborne and facing/traveling screen-right in rainy forest-coast lighting.",
+          "weakestDimension": "Physical/camera staging: the collision branch and discovery reveal geography are not protected in the opening frame."
+         }
+        ],
+        "beatDelivery": {
+         "score": 2,
+         "intended": "The opener should set up an escalating discovery-and-action chain: chatter interrupted by danger, eyeline reveal to distant boat, then urgent launch and comic branch collision.",
+         "observed": "The image reads as an attractive flying two-shot near the coast, but it already exposes the beach/ocean and does not create a clear visual setup for a later hidden-through-trees boat reveal or branch BONK.",
+         "diagnosis": "As a still keyframe it cannot deliver the full beat, but it should preserve the shot mechanics. The current frame undercuts two central mechanics: the reveal through trees and the visible branch collision setup.",
+         "confidence": "high"
+        },
+        "actingAndPerformance": {
+         "score": 2,
+         "intended": "Fuzzby should be mid-breathless chatter into the wind, mouth just opening; Zenny should be behind, closing distance, not yet equally performative.",
+         "observed": "Both characters have pleasant open-mouth expressions. Fuzzby reads cheerful/curious rather than wind-driven chatter; Zenny also appears smiling/open-mouthed, which risks looking like she is speaking at the same time.",
+         "diagnosis": "The facial poses are appealing but too generic and friendly for the tense storm-side opener. Listener mouth openness is a concern for later dialogue discipline, though this is only a still.",
+         "confidence": "medium"
+        },
+        "physicalCausality": {
+         "score": 2,
+         "intended": "Tree branches ahead should bend across the flight path while leaving clear pre-contact space, visibly enabling the later approach, bend, BONK, recoil, wobble, and continuation.",
+         "observed": "Branches frame the top and right edge, but no branch is clearly placed in Fuzzby’s imminent flight path. The visible open space ahead of him leads mostly toward ocean/background rather than an impending branch obstacle.",
+         "diagnosis": "The later physical gag is not adequately planted. If animated from this frame, the provider may invent, hide, or offscreen the collision branch, increasing risk of the prohibited hidden/teleporting impact.",
+         "confidence": "high"
+        },
+        "timingAndReaction": {
+         "score": 1,
+         "intended": "Opening frame should support Fuzzby speaking first, Zenny trailing, then later stopping/reaction beats.",
+         "observed": "Both bees appear similarly engaged and cheerful in the same direction; the frame does not strongly distinguish Fuzzby’s active chatter from Zenny’s trailing/listening state.",
+         "diagnosis": "A still cannot prove timing, but the pose hierarchy is soft. Fuzzby does not clearly own the first speaking beat.",
+         "confidence": "medium"
+        },
+        "cameraAndEdit": {
+         "score": 2,
+         "intended": "One continuous storm-side tracking shot from forest flight path; begin in medium two-shot, later ease into Fuzzby’s eyeline through rain/branches to a distant tiny boat, then return and whip-pan with launch.",
+         "observed": "The frame is a wide cinematic two-shot with ocean and beach already prominent at right. The camera is attractively placed but the eyeline reveal is partially spent before the shot begins.",
+         "diagnosis": "The composition favors scenic coastal exposure over a forest-obscured discovery path. This weakens the intended camera motivation and suspense.",
+         "confidence": "high"
+        },
+        "compositionAndContinuity": {
+         "score": 2,
+         "intended": "Storm-dim forest light, rain, strong tree movement, characters screen-right toward beach, with tree branches ahead across their path and clear space before contact.",
+         "observed": "Rain and stormy coastal forest lighting are present and polished. Character screen geography is broadly correct. However, the beach is too visible for an opening forest-path frame, and branch geography is not collision-ready.",
+         "diagnosis": "Continuity of look is strong, but continuity of action geography is weak.",
+         "confidence": "high"
+        },
+        "identityAndReferenceUse": {
+         "score": 2,
+         "intended": "Preserve exact Zenny and Fuzzby identities, relative scale, proportions, materials, glasses, wings, and no redesigns.",
+         "observed": "Fuzzby reads as the larger bee with glasses and rounded nose; Zenny reads smaller with lashes/blush/glasses. Relative scale is broadly correct. Materials and fur/wings match the reference style well.",
+         "diagnosis": "Identity is the strongest area. Minor concern: Zenny’s open mouth and shared glasses silhouette make her expression feel close to Fuzzby’s performance, but this is not a design block.",
+         "confidence": "high"
+        },
+        "finishAndProductionValue": {
+         "score": 2,
+         "intended": "Feature-quality stylized 3D CGI in approved storm rainforest/coastal palette with rain and wet foliage.",
+         "observed": "High-quality render, convincing wet foliage, rain streaks, atmospheric depth, translucent wings, and cohesive lighting.",
+         "diagnosis": "Finish is approval-level; the problem is staging, not render quality.",
+         "confidence": "high"
+        },
+        "likelyRootCause": "opening-frame",
+        "rootCauseReasoning": "The visible failures are embedded in the still opener: the camera/geography already reveal the beach and do not place a branch across the forward flight path. This is less a provider finish issue and more an opening composition/staging issue that would propagate into animation.",
+        "cheapestNextAction": {
+         "action": "free-upstream-revision",
+         "rerenderRequired": true,
+         "reason": "Do not proceed to animation from this opener. The cheapest useful fix is to revise the keyframe/staging before any full 28-second animation spend, because edit recovery cannot add reliable collision geography or restore the intended discovery reveal once animated.",
+         "changeOneLever": "Adjust only the opening-frame composition/staging to make the forward flight path forest-obscured with a clearly visible branch ahead crossing Fuzzby’s route while keeping characters in the same screen-left/screen-right relationship.",
+         "preserveExactly": [
+          "Fuzzby larger and slightly ahead at screen-center-right, facing/traveling screen-right",
+          "Zenny smaller behind at screen-left, facing/traveling screen-right",
+          "Storm-dim rainforest/coastal lighting, rain, wet foliage, and feature-quality 3D finish",
+          "Approved character identities, relative scale, glasses, wings, fur materials, and no extra characters",
+          "Clear pre-contact space before the branch so no collision has happened in the opening frame"
+         ],
+         "proofOfImprovement": "In the revised keyframe, before playback, Julian can point to a specific branch visibly crossing or bending into Fuzzby’s upcoming screen-right flight path, with Fuzzby still not yet contacting it, and the distant beach/boat area should feel partially obscured through forest/rain rather than already fully revealed.",
+         "zeroCostChecksFirst": [
+          "Confirm there is no alternate existing keyframe candidate with clearer branch-in-path staging.",
+          "Check whether a crop/reframe of this still can reduce the premature beach reveal; if it cannot also create a collision branch, do not use it for animation.",
+          "Verify reference-slot naming before revision because the shot-level animation prompt and keyframe prompt use different @图 numbering for Zenny/Fuzzby."
+         ]
+        },
+        "learningTags": [
+         "keyframe-staging",
+         "branch-collision-setup",
+         "premature-reveal",
+         "forest-flight-geography",
+         "identity-good-finish-good",
+         "opening-frame-root-cause"
+        ],
+        "findings": [
+         {
+          "severity": "BLOCK",
+          "criterion": "Branch collision setup must be visible and physically motivated from the opening geography.",
+          "visibleEvidence": "No clear branch crosses Fuzzby’s imminent screen-right flight path; branches are mostly framing the top/right perimeter rather than positioned as a readable future obstacle.",
+          "owner": "director",
+          "suggestedAction": "Revise the opener so a specific branch is visibly ahead across the flight path with clear space before contact."
+         },
+         {
+          "severity": "BLOCK",
+          "criterion": "Opening frame should preserve the intended discovery reveal through trees/rain to the distant boat/beach direction.",
+          "visibleEvidence": "The beach and ocean are already prominent in the right half of the frame, reducing the sense that the camera will later discover danger through branches.",
+          "owner": "cinematography",
+          "suggestedAction": "Recompose the opener toward a more forest-obscured flight path while preserving screen-right travel."
+         },
+         {
+          "severity": "NOTE",
+          "criterion": "Fuzzby should own the first chatter beat while Zenny trails/listens.",
+          "visibleEvidence": "Both Fuzzby and Zenny have pleasant open-mouth expressions; Zenny may read as speaking or equally animated in the opener.",
+          "owner": "animation",
+          "suggestedAction": "For the revised opener, keep Fuzzby’s mouth just opening for chatter and make Zenny’s expression more clearly trailing/listening."
+         },
+         {
+          "severity": "NOTE",
+          "criterion": "Reference identity and scale.",
+          "visibleEvidence": "Fuzzby is larger, ahead, rounder with nose/glasses; Zenny is smaller behind with lashes/blush/glasses; both match the furry bee material style.",
+          "owner": "continuity",
+          "suggestedAction": "Preserve these identity and scale choices in any revision."
+         },
+         {
+          "severity": "NOTE",
+          "criterion": "Production finish and scene look.",
+          "visibleEvidence": "Rain, wet foliage, atmospheric coastal light, translucent wings, and fur render quality are strong.",
+          "owner": "post",
+          "suggestedAction": "Preserve the render quality, storm palette, and wet rainforest materials."
+         }
+        ]
+       },
+       "reviewedMediaPaths": [
+        "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_keyframe_candidate_156fb8c0.png"
+       ],
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "review-keyframe",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "review": "8b6d8668632b679538b891dd722171985f51368247d55c8449e1a97786c6d798"
+        },
+        "canonProfileDigest": "d7068a9595af9f3b94f7aa85cac0cc0d3b6ddad89a7e679373391d3d89142bca",
+        "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+        "mediaHash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+        "references": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "Zenny",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "98c0e56360439ef20553de72ab5455d3d5abde8a250780c52d4f1e61bbba6dc9",
+          "hash": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "Fuzzby",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "c93544560c0c4eefe0970d6e75b08f01eff1f7ab9d8c743443e68a666e8deb73",
+          "hash": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图3",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null,
+          "hash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+         }
+        ]
+       },
+       "outcome": "approved",
+       "decisionAt": "2026-08-15T12:00:46",
+       "reviewedBy": "Codex for Julian",
+       "note": "Candidate 2 preserves the corrected distinct identities, clear scale hierarchy and exact authored lead/trail geography. Automated placement complaint is contradicted by its own x-position evidence."
+      },
+      "candidate": null,
+      "history": [
+       {
+        "department": "Director Review",
+        "worker": "Director Review / Continuity Supervisor",
+        "skill": "skills/crystal-bears-continuity/SKILL.md",
+        "model": "gpt-5.5",
+        "preparedAt": "2026-08-15T11:53:27",
+        "editedAt": null,
+        "preparedBy": "specialist",
+        "sourceHash": "dfb72e16b178b7d92535416883faf4674f0a491e0bd110c10015db05ff4145e6",
+        "output": {
+         "artifactType": "keyframe",
+         "verdict": "recommend-approve",
+         "summary": "The rendered keyframe is a strong usable opener for 5.B1.S1. It clearly places Fuzzby larger and slightly ahead on screen-right, Zenny trailing on screen-left, both airborne and traveling screen-right through stormy forest toward the beach. Character identity, scale, lighting, rain, and scene look read well. The main weakness is performance specificity: Fuzzby’s mouth does not clearly read as just opening for fast chatter, and both faces feel pleasantly alert rather than wind-buffeted or on the edge of interruption. This is a note-level issue, not a blocker for the opening frame.",
+         "intendedRead": "Opening frame of a continuous storm-side tracking shot: Fuzzby ahead, airborne, facing screen-right into the wind with mouth just opening to continue speaking; Zenny behind, airborne, closing the distance; branches ahead leave clear space before later contact.",
+         "actualRead": "A polished storm-forest two-shot with Fuzzby larger and ahead at right, Zenny smaller behind at left, both flying screen-right toward a beach/ocean gap. The geography and direction are clear, but the expressions read more cheerful/pleasant than breathless or tense, and Fuzzby’s mouth is not clearly open for the first line.",
+         "finalFrameUsable": true,
+         "recommendedCandidate": "Ep1_5.B1.S1_keyframe_candidate_6c6d7e01",
+         "candidateAssessments": [
+          {
+           "candidateId": "Ep1_5.B1.S1_keyframe_candidate_6c6d7e01",
+           "verdict": "recommend-approve",
+           "summary": "Best available keyframe candidate shown. It satisfies the required opening geography, relative scale, character placement, storm look, and direction of travel. Minor acting/mouth-shape softness can likely be recovered in animation/lip-sync rather than requiring a new keyframe.",
+           "beatLands": true,
+           "strongestEvidence": "Fuzzby is visibly ahead at screen-right, Zenny trails at screen-left, both airborne and oriented screen-right through rain-soaked forest toward the coast.",
+           "weakestDimension": "Fuzzby’s initial speaking pose and wind-buffeted performance are not as specific as intended; his expression reads content rather than breathless chatter about the storm."
+          }
+         ],
+         "beatDelivery": {
+          "score": 2,
+          "intended": "Set up the discovery-and-action chain by starting with Fuzzby mid-chatter, ahead of Zenny, flying through storm forest toward screen-right.",
+          "observed": "The visual setup reads clearly as two bees flying through a storm-side forest path toward the beach, with Fuzzby leading and Zenny following.",
+          "diagnosis": "The keyframe supports the intended beat geography and relationship. The dramatic tension is slightly softened by the friendly expressions, but the opener still provides a workable launch point for the planned freeze, discovery, and later collision.",
+          "confidence": "high"
+         },
+         "actingAndPerformance": {
+          "score": 2,
+          "intended": "Fuzzby should be airborne into the wind with mouth just opening to continue fast chatter; Zenny should be behind and closing distance with motivated eyeline.",
+          "observed": "Both characters are airborne and looking screen-right. Fuzzby’s mouth appears more like a small closed smile than a clear speaking onset; Zenny also wears a gentle smile.",
+          "diagnosis": "Performance is readable but under-specific for the storm urgency. The key emotional state leans pleasant/adventurous rather than breathless, cautious, or wind-pressed.",
+          "confidence": "high"
+         },
+         "physicalCausality": {
+          "score": 2,
+          "intended": "Opening frame should leave clear space before any branch contact, with branches ahead across the path for the later Fuzzby bonk.",
+          "observed": "There is open air around both characters and visible branches/vines on the right/top edge. No premature contact is shown.",
+          "diagnosis": "The frame avoids the prohibited early collision and gives room for animation. The exact future collision branch is not strongly foregrounded at character height, but this can be staged in the subsequent camera move/animation.",
+          "confidence": "medium"
+         },
+         "timingAndReaction": {
+          "score": 1,
+          "intended": "Only the opening instant is shown, before the stop, eyeline rack, reactions, launch, and bonk.",
+          "observed": "Single still frame; no temporal delivery, freeze, dialogue timing, reaction, or collision timing can be verified.",
+          "diagnosis": "Timing cannot be judged from the keyframe beyond whether it provides a plausible start pose. It does.",
+          "confidence": "high"
+         },
+         "cameraAndEdit": {
+          "score": 2,
+          "intended": "Medium two-shot tracking screen-right from the forest flight path, with Fuzzby slightly ahead and Zenny behind.",
+          "observed": "Wide cinematic two-shot with both characters in the lower half, Fuzzby right/ahead, Zenny left/behind, forest framing and coast visible in the direction of travel.",
+          "diagnosis": "Composition supports the one-shot lateral travel plan and establishes the beach direction. It is a little more scenic/wide than a tight medium two-shot, but still usable and motivated.",
+          "confidence": "high"
+         },
+         "compositionAndContinuity": {
+          "score": 2,
+          "intended": "Storm-dim forest light, rain, strong tree presence, screen-right path toward the beach, no extra characters or text.",
+          "observed": "Rain, wet foliage, stormy blue-green lighting, beach/ocean beyond trees, and only Fuzzby and Zenny are visible. No on-screen text appears in the rendered keyframe.",
+          "diagnosis": "Continuity with the approved scene look is strong. The character-containing frame is somewhat closer to the coast than the empty plate, but it preserves the storm-side rainforest/beach geography.",
+          "confidence": "high"
+         },
+         "identityAndReferenceUse": {
+          "score": 2,
+          "intended": "Use Zenny reference for the smaller bee, Fuzzby reference for the larger bee; preserve character identity and relative scale.",
+          "observed": "Zenny is smaller with lashes/rosy cheeks and round glasses; Fuzzby is larger/rounder with matching glasses and proportions. Relative scale is clear.",
+          "diagnosis": "Identity binding is successful. No visible redesign, extra crystals, or incorrect character features are apparent.",
+          "confidence": "high"
+         },
+         "finishAndProductionValue": {
+          "score": 2,
+          "intended": "Stylised feature-quality 3D CGI with rain, storm light, natural materials, and polished integration.",
+          "observed": "High-quality fur, translucent wings, rain streaks, wet foliage, atmospheric depth, and coherent lighting are visible.",
+          "diagnosis": "Finish is strong and production-ready for a keyframe. Wings are present and readable; still image cannot confirm wing motion.",
+          "confidence": "high"
+         },
+         "likelyRootCause": "no-material-failure",
+         "rootCauseReasoning": "Visible evidence meets the core keyframe requirements: character placement, direction, identity, scale, storm forest geography, and clear pre-contact flight space. The only notable weakness is performance nuance in Fuzzby’s mouth/affect, which is small enough to address during animation/lip-sync rather than indicating a failed prompt, bad reference binding, or need for paid rerender.",
+         "cheapestNextAction": {
+          "action": "approve",
+          "rerenderRequired": false,
+          "reason": "This keyframe is usable as the opener; the minor acting/mouth-shape softness does not justify spending on a new render before animation.",
+          "changeOneLever": "No rerender lever recommended. If animation proceeds, use lip-sync/performance timing to make Fuzzby’s first line breathless and cut off cleanly.",
+          "preserveExactly": [
+           "Fuzzby ahead at screen-right and larger than Zenny",
+           "Zenny trailing at screen-left/center-left",
+           "Both characters facing/traveling screen-right",
+           "Storm-dim rainforest lighting with visible rain",
+           "Beach/ocean direction visible beyond the trees",
+           "No extra characters, text, crystals, or design changes"
+          ],
+          "proofOfImprovement": "In animation, Fuzzby’s mouth should visibly form the opening chatter at 1.4s, then cut off on the freeze; Zenny should remain the listener until her line, and the later branch impact should remain visible with contact, bend, recoil, wobble, and recovery.",
+          "zeroCostChecksFirst": [
+           "Confirm the animation system can open Fuzzby’s mouth on the first line without altering the keyframe render.",
+           "Check that the branch used for the later bonk can be staged visibly from the existing right/top forest geometry.",
+           "Verify no listener mouth movement is introduced during the other character’s dialogue."
+          ]
+         },
+         "learningTags": [
+          "keyframe-opener-usable",
+          "minor-performance-softness",
+          "strong-reference-binding",
+          "storm-forest-continuity",
+          "screen-right-geography-clear",
+          "no-rerender-needed"
+         ],
+         "findings": [
+          {
+           "severity": "NOTE",
+           "criterion": "Opening performance: Fuzzby mouth just opening for fast chatter",
+           "visibleEvidence": "Fuzzby’s face reads as a small pleasant smile; the mouth is not clearly open for the first spoken line.",
+           "owner": "animation",
+           "suggestedAction": "Carry the needed specificity in animation/lip-sync: start Fuzzby with an unmistakable speaking mouth shape and breathless chatter energy before the freeze."
+          },
+          {
+           "severity": "NOTE",
+           "criterion": "Storm urgency / wind-buffeted acting",
+           "visibleEvidence": "Both bees have soft, cheerful expressions despite the storm setting; neither looks especially wind-pressed or worried in the still.",
+           "owner": "director",
+           "suggestedAction": "In animation, add wind resistance, urgency, and interruption timing so the pleasant keyframe does not flatten the discovery beat."
+          },
+          {
+           "severity": "NOTE",
+           "criterion": "Future branch collision setup",
+           "visibleEvidence": "Branches and vines are visible on the right/top edge, but the eventual collision branch is not strongly isolated at Fuzzby’s flight height in this opening frame.",
+           "owner": "cinematography",
+           "suggestedAction": "When animating the continuous move, ensure the branch that Fuzzby hits becomes clearly visible before contact and remains visible through bend, recoil, wobble, and recovery."
+          }
+         ]
+        },
+        "reviewedMediaPaths": [
+         "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_keyframe_candidate_6c6d7e01.png"
+        ],
+        "packageRevision": 3,
+        "inputSignature": {
+         "stage": "review-keyframe",
+         "model": "gpt-5.5",
+         "skillHashes": {
+          "review": "8b6d8668632b679538b891dd722171985f51368247d55c8449e1a97786c6d798"
+         },
+         "canonProfileDigest": "d7068a9595af9f3b94f7aa85cac0cc0d3b6ddad89a7e679373391d3d89142bca",
+         "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+         "mediaHash": "45e9a7a2290b74253673b64054a0ca5dcc0f7a27c4462d923c8729efe008c9ef",
+         "references": [
+          {
+           "slot": "@图1",
+           "sourceSlot": "@图1",
+           "role": "Zenny",
+           "view": "complete-turnaround",
+           "sameCharacterGroup": "98c0e56360439ef20553de72ab5455d3d5abde8a250780c52d4f1e61bbba6dc9",
+           "hash": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+          },
+          {
+           "slot": "@图2",
+           "sourceSlot": "@图2",
+           "role": "Fuzzby",
+           "view": "complete-turnaround",
+           "sameCharacterGroup": "c93544560c0c4eefe0970d6e75b08f01eff1f7ab9d8c743443e68a666e8deb73",
+           "hash": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+          },
+          {
+           "slot": "@图3",
+           "sourceSlot": "@图3",
+           "role": "scene plate",
+           "view": null,
+           "sameCharacterGroup": null,
+           "hash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+          }
+         ]
+        },
+        "outcome": "superseded",
+        "decisionAt": "2026-08-15T11:54:14",
+        "reviewedBy": "Codex for Julian",
+        "note": "Strong geography, identity and storm continuity; animation must sharpen wind resistance and speaking onset.",
+        "supersededAt": "2026-08-15T12:00:46"
+       }
+      ]
+     },
+     "voice": {
+      "approved": null,
+      "candidate": {
+       "department": "Voice",
+       "worker": "Voice Director",
+       "skill": "skills/crystal-bears-voice-director/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-08-15T12:01:54",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "28fe4edd4eab7b55ca0a5154472510aa52a0410604528d485f492ed9c6673896",
+       "output": {
+        "shotId": "5.B1.S1",
+        "sceneIntention": "Escalate from Fuzzby’s wind-driven chatter into a shared discovery of real danger, then convert alarm into urgent forward action while preserving the comic physical collision as a visual payoff, not a spoken gag.",
+        "lines": [
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f",
+          "sourceEventId": "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
+          "speaker": "Fuzzby",
+          "character": "Fuzzby",
+          "exactDialogue": "I’m just saying, if this turns into a full storm situation, I am extremely—",
+          "performedText": "[breathes] I’m just saying, if this turns into a full storm situation, I am extremely—",
+          "dramaticIntention": "Keep talking to manage his own nerves until the sight of the boat stops him cold.",
+          "subtext": "If I keep explaining the danger, maybe it will feel less dangerous.",
+          "cadenceAndBreath": "Fast, forward-leaning, lightly overstuffed phrasing; one quick breath at the top, then ride the sentence without settling. Cut off the final word cleanly, as if his body freezes before the thought finishes.",
+          "timingAndBody": "Starts airborne into wind at 1.4s. Maintain chatter through forward flight; on the dash, freeze mid-air with the mouth cutting off at 5.1s. No trailing vocalization after the cutoff.",
+          "archetypeId": "chaos-chant",
+          "performanceQuestions": {
+           "intention": "Fill the stormy silence with expert-sounding chatter.",
+           "subtext": "I am worried, but I am trying to sound in control.",
+           "thoughtBefore": "This is getting worse, so I should explain it before anyone panics.",
+           "changeDuring": "The chatter collapses into stunned recognition.",
+           "operativeWords": [
+            "full storm situation",
+            "extremely"
+           ]
+          },
+          "physicalState": "Flying slightly ahead into wind-driven rain; breath is working harder than he wants to admit.",
+          "emotionalState": {
+           "entry": "nervous but performing competence",
+           "exit": "stopped cold by sudden danger"
+          },
+          "listener": "Zenny, behind him in the flight path",
+          "bodyVoiceRelationship": "The voice is being pushed through wind and motion; when his body halts, the voice halts just as abruptly.",
+          "previousText": "Start of shot; no previous dialogue in this shot.",
+          "startsAtSec": 1.4,
+          "estimatedDurationSec": 3.7,
+          "pauseReasons": [
+           "The dash cutoff is motivated by Fuzzby seeing the distant boat through the trees."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "breathes",
+            "purpose": "Places a quick working breath before the rapid chatter so the line feels airborne and wind-pressed rather than casually spoken."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "5.B1.S1-Fuzzby-01-primary",
+            "label": "Breathless wind chatter, clean freeze cutoff",
+            "performedText": "[breathes] I’m just saying, if this turns into a full storm situation, I am extremely—",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
+          "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+          "speaker": "Zenny",
+          "character": "Zenny",
+          "exactDialogue": "Fuzzby?",
+          "performedText": "[hesitates] Fuzzby?",
+          "dramaticIntention": "Check whether Fuzzby is all right without breaking the fragile silence of his discovery.",
+          "subtext": "Why did you stop like that, and should I be scared too?",
+          "cadenceAndBreath": "Small and cautious, with a tiny held moment before the name. Do not overplay fear; the question is intimate and practical.",
+          "timingAndBody": "After nearly bumping him, Zenny steadies herself and asks at 6.6s. Keep it short and contained, ending by 7.2s; only Zenny’s mouth moves.",
+          "archetypeId": "quiet-warning",
+          "performanceQuestions": {
+           "intention": "Gently pull Fuzzby back enough to understand what he sees.",
+           "subtext": "Something is wrong because you never stop talking like that.",
+           "thoughtBefore": "He froze.",
+           "changeDuring": "Concern sharpens into attention.",
+           "operativeWords": [
+            "Fuzzby"
+           ]
+          },
+          "physicalState": "Airborne just behind him, braking from the near-collision and steadying in the wind.",
+          "emotionalState": {
+           "entry": "startled and careful",
+           "exit": "focused on his eyeline"
+          },
+          "listener": "Fuzzby",
+          "bodyVoiceRelationship": "Her body has just checked its momentum, so the voice stays small and suspended.",
+          "previousText": "Fuzzby has cut himself off mid-thought and is frozen, staring through the trees.",
+          "startsAtSec": 6.6,
+          "estimatedDurationSec": 0.6,
+          "pauseReasons": [
+           "The pause before this line lets the camera and Zenny register Fuzzby’s sudden stop."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "hesitates",
+            "purpose": "Marks Zenny’s careful read of Fuzzby’s frozen body before she risks breaking the silence."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "5.B1.S1-Zenny-01-primary",
+            "label": "Tiny cautious check-in",
+            "performedText": "[hesitates] Fuzzby?",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
+          "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+          "speaker": "Fuzzby",
+          "character": "Fuzzby",
+          "exactDialogue": "…that is NOT a good place to be.",
+          "performedText": "[quietly] …that is NOT a good place to be.",
+          "dramaticIntention": "Name the danger plainly enough that Zenny understands the stakes.",
+          "subtext": "There is someone out there, and the storm just became real.",
+          "cadenceAndBreath": "Begin almost under the breath, eyes locked on the boat. Let the ellipsis feel like the continuation of the interrupted thought. Firm up distinctly on NOT without turning it into a shout.",
+          "timingAndBody": "Delivered while staring toward the distant tiny boat, around 13.1s to 15.2s. Keep the body still, with the pointing/eyeline doing the work.",
+          "archetypeId": "quiet-warning",
+          "performanceQuestions": {
+           "intention": "Translate what he sees into a warning.",
+           "subtext": "I wish I were exaggerating, but I am not.",
+           "thoughtBefore": "That boat should not be there.",
+           "changeDuring": "Shock becomes a clear warning.",
+           "operativeWords": [
+            "NOT",
+            "good place"
+           ]
+          },
+          "physicalState": "Suspended in place, eyes wide, pointing through rain and branches.",
+          "emotionalState": {
+           "entry": "hushed disbelief",
+           "exit": "certain and alarmed"
+          },
+          "listener": "Zenny, while Fuzzby’s eyes remain on the distant boat",
+          "bodyVoiceRelationship": "The stillness compresses the voice; the emphasis on NOT is the only release of pressure.",
+          "previousText": "Zenny has quietly asked, “Fuzzby?” and followed his gaze.",
+          "startsAtSec": 13.1,
+          "estimatedDurationSec": 2.1,
+          "pauseReasons": [
+           "The long visual hold before the line lets the camera reveal the tiny boat and lets Fuzzby process it."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keeps the warning grounded in real discovery rather than immediate panic, so the danger lands through restraint."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "5.B1.S1-Fuzzby-02-primary",
+            "label": "Quiet recognition, firm NOT",
+            "performedText": "[quietly] …that is NOT a good place to be.",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
+          "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+          "speaker": "Zenny",
+          "character": "Zenny",
+          "exactDialogue": "Someone’s in trouble.",
+          "performedText": "[quietly] Someone’s in trouble.",
+          "dramaticIntention": "Confirm the human stakes and shift the moment from observation to responsibility.",
+          "subtext": "We cannot just watch this happen.",
+          "cadenceAndBreath": "Soft, direct, and focused; a simple sentence with no ornament. Let “trouble” carry concern, not melodrama.",
+          "timingAndBody": "At 16.2s, Zenny has softened her face and locked onto the boat. End by 17.6s. Fuzzby remains silent and staring.",
+          "archetypeId": "quiet-warning",
+          "performanceQuestions": {
+           "intention": "Make the emergency personal and immediate.",
+           "subtext": "That tiny shape is a person who needs us.",
+           "thoughtBefore": "There is someone out there.",
+           "changeDuring": "Concern settles into resolve.",
+           "operativeWords": [
+            "Someone’s",
+            "trouble"
+           ]
+          },
+          "physicalState": "Airborne and steady behind Fuzzby, gaze aligned with his through the rain.",
+          "emotionalState": {
+           "entry": "concerned and softened",
+           "exit": "focused and ready to move"
+          },
+          "listener": "Fuzzby, though the line is anchored to the distant boat",
+          "bodyVoiceRelationship": "Her stillness gives the line weight; she does not push volume, she clarifies the truth.",
+          "previousText": "Fuzzby has identified the boat as being in a dangerous place.",
+          "startsAtSec": 16.2,
+          "estimatedDurationSec": 1.4,
+          "pauseReasons": [
+           "A brief pause after Fuzzby’s warning allows Zenny to understand the stakes before speaking."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Supports Zenny’s soft, focused realization without adding panic or theatricality."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "5.B1.S1-Zenny-02-primary",
+            "label": "Soft confirmation of stakes",
+            "performedText": "[quietly] Someone’s in trouble.",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab",
+          "sourceEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+          "speaker": "Fuzzby",
+          "character": "Fuzzby",
+          "exactDialogue": "BEARS! BEARS! EMERGENCY BEARS!",
+          "performedText": "[gasps] BEARS! BEARS! EMERGENCY BEARS!",
+          "dramaticIntention": "Convert alarm into a call to action and launch toward help.",
+          "subtext": "No more discussing; move now.",
+          "cadenceAndBreath": "Explosive and projected forward, with each BEARS as a clear alarm beat. The final phrase should be bigger but still intelligible; avoid turning it into a blur.",
+          "timingAndBody": "At 18.7s, Fuzzby snaps forward and launches screen-right on the first BEARS. Carry the alarm through 20.9s as the whip-pan begins. The later branch BONK is visual/physical only, with no added spoken reaction.",
+          "archetypeId": "chaos-chant",
+          "performanceQuestions": {
+           "intention": "Summon immediate rescue energy while already moving.",
+           "subtext": "Everyone who can help needs to know right now.",
+           "thoughtBefore": "Someone is in trouble.",
+           "changeDuring": "Frozen alarm becomes urgent action.",
+           "operativeWords": [
+            "BEARS",
+            "EMERGENCY"
+           ]
+          },
+          "physicalState": "Launching hard into the storm toward the beach, just before the visible branch collision and rebound.",
+          "emotionalState": {
+           "entry": "shocked into urgency",
+           "exit": "propelled and committed"
+          },
+          "listener": "Anyone ahead who can help, with Zenny following behind",
+          "bodyVoiceRelationship": "The shout rides the launch; the body shoots forward and the voice projects in the same direction.",
+          "previousText": "Zenny has stated that someone is in trouble.",
+          "startsAtSec": 18.7,
+          "estimatedDurationSec": 2.2,
+          "pauseReasons": [
+           "The beat before the shout is the decision point where Fuzzby turns from staring to action."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "gasps",
+            "purpose": "Gives Fuzzby a sudden intake before the alarm, matching the snap from stunned stillness into action."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "5.B1.S1-Fuzzby-03-primary",
+            "label": "Projected emergency launch",
+            "performedText": "[gasps] BEARS! BEARS! EMERGENCY BEARS!",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         }
+        ]
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "voice",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+        },
+        "canonProfileDigest": "3ba08fd89fdecc847e39719522f8d861bff88e8ed11ee90a6ad010b1ab3a647f",
+        "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+        "dialogueHash": "9a01911adad2c4e5fd171b4a8a54aad40893915dabff54da825ce347fd1702f7",
+        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "voiceCardsHash": "77021084edf5a5ed16f27119a30d0db91605a73b0f16034a0aa9e8555eb6d8b0",
+        "voiceRegistersHash": "34a85ae3819a64fcfba2bf731016be27cdabe750fd5552b9d3a149083d42e149",
+        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "DNK8oCkkHjIyEjzlCeQq",
+         "XEiPrIitaegdirIGkODX",
+         "DNK8oCkkHjIyEjzlCeQq",
+         "XEiPrIitaegdirIGkODX",
+         "DNK8oCkkHjIyEjzlCeQq"
+        ]
+       }
+      },
+      "history": []
+     },
+     "animation": {
+      "approved": {
+       "department": "Animation",
+       "worker": "Seedance Production Director",
+       "skill": "skills/seedance-production-director/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-08-15T12:20:39",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "f14cb2f9aa9c4f071a38c1f69f3ed319be2b07f2708ee3bd11d0d1755f7057fe",
+       "output": {
+        "shotId": "5.B1.S1",
+        "durationSec": 28,
+        "taskMode": "reference-to-video",
+        "pacingMode": "timestamp",
+        "generationGoal": "Fuzzby and Zenny discover a tiny boat in danger through the storm, turn concern into urgent rescue flight, and Fuzzby’s heroic launch is punctured by one visible branch bonk before they continue toward the beach.",
+        "deliveryPlan": "Use the approved opening frame as the first composition, play the discovery as a continuous lateral tracking move with three motivated view phases, preserve @Audio1 as the sole dialogue authority, and give the branch impact enough readable cause, compression, rebound and recovery to land without hiding the rescue urgency.",
+        "creativeTranslation": {
+         "interpretation": {
+          "jokeOrAche": "The ache is that someone is genuinely in danger; the joke is Fuzzby converting fear into heroism so fast that the forest immediately edits his confidence with a branch.",
+          "mechanism": "A serious storm reveal tightens the stakes, then a sudden panic-powered launch creates stored speed that collides with an established obstacle in the same travel lane.",
+          "statusBefore": "Fuzzby is chattering nervously ahead of Zenny, trying to narrate the storm rather than face it.",
+          "statusAfter": "Both bees are committed to rescue, with Fuzzby still leading but visibly humbled by the bonk and Zenny focused behind him.",
+          "audienceProgression": [
+           "Amused by Fuzzby’s breathless storm anxiety.",
+           "Pulled into concern when the distant boat reads as the real danger.",
+           "Released into a laugh when his emergency courage immediately hits the branch, then carried forward by the rescue momentum."
+          ],
+          "emotionalHeart": "Fuzzby is ridiculous because he is scared, but lovable because the instant someone needs help he goes anyway."
+         },
+         "gagClocks": [
+          {
+           "beatCode": "5.B3",
+           "mode": "BIG",
+           "setup": "Fuzzby’s alarm turns into a full-speed heroic launch toward the beach.",
+           "anticipation": "The bending branch remains visibly ahead on the same screen-right flight path as Fuzzby accelerates into it.",
+           "impact": "Fuzzby ricochets off the branch with a clear BONK.",
+           "reaction": "The branch flexes at the contact point as Fuzzby recoils backward, wobbles, and has to re-find his direction.",
+           "recoveryHold": "Fuzzby wobbles for a beat, then flies on screen-right toward the beach with Zenny following faster behind him as the rain and branches whip past.",
+           "recoveryHoldSec": 2.4,
+           "button": "Fuzzby continues anyway, still urgent despite the visible post-bonk wobble.",
+           "retroactive": false,
+           "providerAction": "Fuzzby’s forward motion carries him directly into the branch; the branch bends at the contact point, his body motion compresses against it, then the stored bend springs him slightly backward before he regains forward motion."
+          }
+         ],
+         "generationDesign": {
+          "packagingDecision": "single-unit",
+          "completeGagArcCount": 1,
+          "densityJudgement": "Guided density is required because the unit combines dialogue timing, a storm reveal, two-character eyelines, and a visible contact gag, but the action remains one clean discovery-to-launch chain.",
+          "splitOrNonSplitRationale": "The approved unit has one clear job and one continuous camera grammar: chatter is interrupted by danger, concern becomes action, and the branch impact pays off the launch without needing a protected split.",
+          "handoffState": "Fuzzby ricochets off the branch with a clear BONK, wobbles for a beat, then flies on screen-right toward the beach with Zenny following faster behind him as the rain and branches whip past."
+         }
+        },
+        "dramaticBeat": "A single escalating discovery-and-action chain: Fuzzby’s chatter is cut off by the sight of danger, Zenny confirms the stakes, then Fuzzby turns alarm into action with one comic collision on the way out.",
+        "audienceBefore": "The audience expects storm banter and anxious flight through the rainforest.",
+        "audienceAfter": "The audience understands the rescue stakes and leaves with forward momentum, plus the comic image of Fuzzby recovering from his own overexcited launch.",
+        "beatOwner": "Fuzzby owns the comic turn and launch; Zenny owns the quiet recognition of the real danger.",
+        "performanceFreedom": "Seedance may discover wing flutter cadence, overlap, small eye-focus changes, rain resistance, Zenny’s near-bump recovery, Fuzzby’s exact wobble flavor and the organic camera catch-up, as long as dialogue authority, eyeline geography, branch contact and final handoff remain clear.",
+        "performanceArc": "Fuzzby moves from nervous chatter to frozen recognition to alarmed rescue action; Zenny moves from following curiosity to careful concern to committed pursuit.",
+        "physicalCauseAndEffect": "Fuzzby stops so abruptly that Zenny nearly catches him; both look through the trees to the distant boat; Fuzzby’s sudden screen-right acceleration carries him into the established branch, which bends, rebounds him, and releases him back into forward flight.",
+        "cameraBehaviour": "One continuous storm-side tracking shot with three motivated view phases: lateral two-shot travel, eyeline reveal through rain and branches, then whip-pan launch with visible impact and recovery on the same side of the flight path.",
+        "timingAndRhythm": "Breathless moving chatter, abrupt stillness, quiet reveal air, focused confirmation, explosive launch, sharp impact-recoil-shake, then urgent forward continuation.",
+        "landingBreath": "Hold the post-bonk recovery long enough to see Fuzzby’s residual wobble settle while he keeps flying screen-right and Zenny trails faster behind, preserving urgency rather than ending on a frozen joke pose.",
+        "directionDensity": "guided",
+        "precisionReasons": [
+         "Dialogue timing and mouth ownership must remain locked to @Audio1 with listeners silent.",
+         "The branch collision must remain visible with contact, bend, rebound and recovery in the same flight path.",
+         "The final screen geography must carry both characters screen-right toward the beach for the next unit."
+        ],
+        "shotPlan": [
+         {
+          "shotNumber": 1,
+          "purpose": "Traveling setup and Fuzzby’s interruption.",
+          "framingLensAndCamera": "Shot 1: medium two-shot, useful 35mm equivalent, camera tracks laterally screen-right at bee height on the same storm-side of the path.",
+          "causalAction": "Begin exactly on @图1; Fuzzby flies slightly ahead and talks into the wind until the sight beyond the trees stops him mid-air.",
+          "observablePerformance": "Fuzzby’s forward energy cuts off into a suspended stare; Zenny nearly bumps into him, checks herself, and looks to him for explanation.",
+          "compositionLightAndMaterials": "Wet foreground leaves streak past but keep the performance corridor clear; storm-blue skylight silhouettes the path; warm bounce catches faces and glasses; rain beads and wing translucency respond to the side light.",
+          "landingImage": "Fuzzby held ahead, Zenny steadied behind, both suspended in the rain with the branch corridor still visible ahead.",
+          "dialogueLineIndexes": [
+           1,
+           2
+          ],
+          "dialogueDirections": [
+           "Fuzzby fast and breathless into the wind, cutting off cleanly as he freezes.",
+           "Zenny gives a small cautious question after nearly bumping into him; only Zenny’s mouth moves."
+          ],
+          "holdAfterDialogue": true,
+          "gagBeatIds": []
+         },
+         {
+          "shotNumber": 2,
+          "purpose": "Eyeline reveal and shared recognition of the stakes.",
+          "framingLensAndCamera": "Shot 2: continuous reframed eyeline view, useful 50-70mm feel as the camera eases past Fuzzby and racks through rain and branches to the tiny distant boat, then drifts back to the bees.",
+          "causalAction": "Fuzzby slowly points through the trees; the camera follows his gaze, holds the boat small beyond the forest, then returns to the characters for the recognition.",
+          "observablePerformance": "Fuzzby’s eyes widen and his confidence drains into focused alarm; Zenny follows his gaze and softens into concern without losing the direction of travel.",
+          "compositionLightAndMaterials": "Branches form a wet dark frame around the small boat; rain veils the distance; ocean light glints coldly beyond the leaves; shallow focus separates the boat reveal from the foreground foliage.",
+          "landingImage": "Fuzzby and Zenny both face screen-right toward the same distant danger, with readable concern and the route to the beach established.",
+          "dialogueLineIndexes": [
+           3,
+           4
+          ],
+          "dialogueDirections": [
+           "Fuzzby starts quiet while staring toward the boat, then firms up on the warning emphasis.",
+           "Zenny speaks softly, directly and focused while Fuzzby holds his stare; only Zenny’s mouth moves."
+          ],
+          "holdAfterDialogue": true,
+          "gagBeatIds": []
+         },
+         {
+          "shotNumber": 3,
+          "purpose": "Alarmed launch, visible branch impact, recovery and handoff.",
+          "framingLensAndCamera": "Shot 3: continuous whip-pan back into lateral tracking, useful 28-35mm equivalent, camera stays with Fuzzby’s launch and keeps Zenny, branch and flight path readable.",
+          "causalAction": "Fuzzby snaps forward yelling through @Audio1, launches screen-right, collides with the branch, rebounds, shakes once, reorients and continues toward the beach as Zenny accelerates behind.",
+          "observablePerformance": "Fuzzby’s bravery is real but chaotic; the bonk briefly scrambles him, then he insists forward with urgent alertness while Zenny follows without speaking.",
+          "compositionLightAndMaterials": "The branch is a clear midground obstacle before contact; wet bark flexes and sheds droplets on impact; rain streaks with the whip-pan; blue storm backlight and leaf highlights separate both bees from the forest.",
+          "landingImage": "Camera at bee height tracks screen-right: Fuzzby screen-right slightly ahead in forward flight with a brief post-bonk wobble settling, Zenny screen-left to center-left trailing faster, both facing the beach under storm-dim forest light.",
+          "dialogueLineIndexes": [
+           5
+          ],
+          "dialogueDirections": [
+           "Fuzzby projects sudden loud alarm as the launch begins; only Fuzzby’s mouth moves, then all further character voices remain silent."
+          ],
+          "holdAfterDialogue": false,
+          "gagBeatIds": [
+           "5.B3"
+          ]
+         }
+        ],
+        "timingBeats": [
+         {
+          "type": "travel",
+          "count": 1,
+          "source": "Fuzzby and Zenny fly screen-right through the rainforest at the start."
+         },
+         {
+          "type": "reaction",
+          "count": 2,
+          "source": "Fuzzby freezes at the sight of danger; Zenny nearly bumps, steadies and follows his gaze."
+         },
+         {
+          "type": "reveal",
+          "count": 1,
+          "source": "The camera racks through rain and branches to the distant tiny boat."
+         },
+         {
+          "type": "travel",
+          "count": 1,
+          "source": "Fuzzby launches screen-right toward the beach, with Zenny accelerating behind."
+         },
+         {
+          "type": "impact",
+          "count": 1,
+          "source": "Fuzzby hits the branch, compresses it, rebounds and recovers."
+         },
+         {
+          "type": "settle",
+          "count": 1,
+          "source": "Fuzzby’s brief post-bonk wobble settles as both continue flying toward the beach."
+         }
+        ],
+        "witnessStagingSides": [
+         "Fuzzby stays slightly ahead on the screen-right side of the flight path.",
+         "Zenny stays trailing screen-left to center-left, witnessing Fuzzby’s stop, the boat reveal and the branch impact without taking over the action."
+        ],
+        "stagePlan": [
+         {
+          "stageNumber": 1,
+          "beatIds": [
+           "5.B1"
+          ],
+          "purpose": "Moving chatter interrupted by danger.",
+          "startSec": 0.0,
+          "endSec": 8.0,
+          "initialOrCarriedState": "Begin exactly on @图1: Fuzzby airborne slightly ahead at screen-center-right facing screen-right into the wind with mouth just opening; Zenny airborne behind at screen-left facing screen-right and closing the distance; bending branches are ahead but not yet contacted.",
+          "cause": "Both bees are already traveling through wind-driven rain toward the beach along the same screen-left to screen-right path.",
+          "primaryEvent": "Fuzzby flies slightly ahead through the wind while talking; he stops abruptly in mid-air, holds still, slowly points out through the trees, widens his eyes.",
+          "observableEndState": "Fuzzby is frozen ahead and pointing through the trees; Zenny has nearly bumped him, steadied, and is looking from him toward his eyeline.",
+          "emotionOrCameraAnalysis": "The sudden stop converts comic chatter into suspense, and the continuous lateral track keeps the audience aware that the branch corridor remains ahead."
+         },
+         {
+          "stageNumber": 2,
+          "beatIds": [
+           "5.B2"
+          ],
+          "purpose": "Eyeline reveal and stakes confirmation.",
+          "startSec": 8.0,
+          "endSec": 18.0,
+          "initialOrCarriedState": "Continue from the previous stage with Fuzzby held ahead, Zenny steadied behind, and both oriented toward screen-right through the trees.",
+          "cause": "Fuzzby’s fixed stare and pointing lead the camera and Zenny to the same distant target.",
+          "primaryEvent": "The camera eases past him into his eyeline and racks through rain and branches to the distant tiny boat. Hold the boat small in the frame, then drift back to Fuzzby and Zenny for their reactions.",
+          "observableEndState": "The tiny boat is established beyond the trees in the beach and ocean direction, and both bees have registered that someone is in trouble.",
+          "emotionOrCameraAnalysis": "Holding the boat small makes the danger feel distant and vulnerable, then returning to the bees lets Zenny’s quiet concern give the reveal moral weight."
+         },
+         {
+          "stageNumber": 3,
+          "beatIds": [
+           "5.B3"
+          ],
+          "purpose": "Emergency launch, branch bonk and forward handoff.",
+          "startSec": 18.0,
+          "endSec": 28.0,
+          "initialOrCarriedState": "Continue from the previous stage with both bees facing screen-right toward the beach, the branch still visibly crossing the future flight path.",
+          "cause": "The confirmed danger turns Fuzzby’s alarm into immediate rescue motion.",
+          "primaryEvent": "On Fuzzby’s shout, whip-pan with his launch, catch the branch impact in the same lateral direction, then continue tracking as both head toward the beach.",
+          "observableEndState": "Fuzzby is airborne in forward flight screen-right, slightly ahead of Zenny, urgent and alert with a residual wobble settling; Zenny is screen-left to center-left, trailing in steady forward flight, focused and concerned.",
+          "emotionOrCameraAnalysis": "The whip-pan releases stored urgency into action, while keeping the branch contact visible lets the joke land as a physical consequence rather than an offscreen gag."
+         }
+        ],
+        "geography": [
+         "The flight path runs screen-left to screen-right through the rainforest toward the beach and ocean.",
+         "Fuzzby starts airborne at screen-center-right, slightly ahead of Zenny on the same path.",
+         "Zenny starts airborne at screen-left, trailing Fuzzby and closing the distance.",
+         "Both characters face and anticipate travel screen-right in the opening frame.",
+         "Bending tree branches sit ahead in frame-right, crossing the future path but leaving clear empty air before any contact.",
+         "The camera remains on the same side of the flight path, tracking laterally with the characters.",
+         "Rain and foliage layer in foreground and background, but the bees and performance corridor stay unobstructed.",
+         "The beach and ocean direction is through the trees toward screen-right beyond the branch corridor."
+        ],
+        "attributeOwnership": [
+         "@图2 controls Zenny identity, scale and character continuity only.",
+         "@图3 controls Fuzzby identity, scale and character continuity only.",
+         "@图4 controls the rainforest, storm, beach/ocean direction, palette, materials and established world only.",
+         "Do not transfer character traits, markings, props or facial features between Fuzzby and Zenny."
+        ],
+        "environmentContract": [
+         "Storm-dim rainforest light and wind-driven rain persist for the full unit.",
+         "Branches bend in the wind before Fuzzby reaches them, but the impact branch does not contact him until the launch stage.",
+         "The distant tiny boat appears only through the trees in the screen-right beach/ocean direction.",
+         "Wet leaves, bark and wings catch intermittent blue storm light and warm reflected highlights without obscuring the bees."
+        ],
+        "motionVocabulary": [
+         {
+          "character": "Fuzzby",
+          "belongs": [
+           "careens",
+           "overcommits",
+           "barrels",
+           "bounces",
+           "improvises",
+           "presents",
+           "rockets"
+          ],
+          "banned": [
+           "slinks",
+           "hesitates",
+           "glides",
+           "sulks",
+           "waits",
+           "creeps"
+          ]
+         },
+         {
+          "character": "Zenny",
+          "belongs": [
+           "glides",
+           "observes",
+           "settles",
+           "arches",
+           "softens",
+           "levels"
+          ],
+          "banned": [
+           "scrambles",
+           "flails",
+           "rushes",
+           "panics",
+           "showboats"
+          ]
+         }
+        ],
+        "referenceContract": [
+         {
+          "assetTag": "@图1",
+          "role": "opening_frame",
+          "controls": "Approved opening composition and state only; begin exactly on this frame and resolve its carried poses before new action develops.",
+          "scope": "continuity"
+         },
+         {
+          "assetTag": "@图2",
+          "role": "character_identity",
+          "controls": "Zenny identity, proportions, scale relationship and continuity only; do not use it for Fuzzby, scene geography or opening composition.",
+          "scope": "canon"
+         },
+         {
+          "assetTag": "@图3",
+          "role": "character_identity",
+          "controls": "Fuzzby identity, proportions, scale relationship and continuity only; do not use it for Zenny, scene geography or opening composition.",
+          "scope": "canon"
+         },
+         {
+          "assetTag": "@图4",
+          "role": "location",
+          "controls": "Established rainforest coast look, storm light, rain, foliage, ocean direction, materials and atmosphere; do not override the opening composition.",
+          "scope": "episode"
+         },
+         {
+          "assetTag": "@Audio1",
+          "role": "audio",
+          "controls": "The only voice track: all spoken words, speaker identity, timing, delivery, lip-sync and silence relationships.",
+          "scope": "continuity"
+         }
+        ],
+        "openingCarriedState": "Fuzzby is airborne slightly ahead at screen-center-right, facing screen-right into the wind with mouth just opening to continue speaking; Zenny is airborne behind at screen-left, facing screen-right and closing the distance; tree branches ahead bend across their path, leaving clear space before any contact.",
+        "openingMotionBridge": "The existing forward flight continues for a short beat before Fuzzby’s line-driven chatter is cut off by the distant danger and he stops mid-air.",
+        "actionOwnership": [
+         "Fuzzby owns the abrupt stop, pointing, alarm launch, branch impact, rebound, wobble, shake and continued forward flight.",
+         "Zenny owns the near-bump, steadying, eyeline follow, soft concern and trailing acceleration.",
+         "The branch owns the visible flex and spring-back caused by Fuzzby’s contact; it does not strike Zenny."
+        ],
+        "consistencyContract": [
+         "Preserve character identity and relative scale from the assigned reference slots.",
+         "Keep wings moving while the bees are airborne.",
+         "Keep the camera on the same side of the flight path; characters travel screen-right toward the beach.",
+         "No added characters, on-screen text, invented voices, narration, ad-libs, humming or extra mouth movement."
+        ],
+        "audioContract": "@Audio1 is the sole voice authority. Lip-sync only the speaker assigned by the approved audio at each moment; listeners keep mouths closed. No added dialogue, narration, exertion sounds, humming, music or alternate voices.",
+        "continuityFinish": "Storm-dim forest light with wind-driven rain visible; tree movement remains strong. Camera remains on the same side of the flight path. Fuzzby ends screen-right, slightly ahead of Zenny, facing screen-right toward the beach, airborne in forward flight after recovering from the branch impact, urgent and alert with a brief post-bonk wobble settling. Zenny ends screen-left to center-left, trailing Fuzzby, facing screen-right toward the beach, airborne in steady forward flight, focused and concerned.",
+        "surgicalSafeguards": [
+         "Do not hide the branch impact behind foreground leaves, camera blur or a cut.",
+         "Do not let Fuzzby pass the branch before contact; show approach, compression, branch bend, rebound and recovery in order.",
+         "Do not animate listener mouth movement during another character’s @Audio1 line."
+        ],
+        "editScope": "One continuous generation unit with three motivated internal view phases and no arbitrary cut.",
+        "contentToPreserve": [
+         "Approved opening frame state from @图1.",
+         "All five locked dialogue occurrences via @Audio1 only.",
+         "Distant tiny boat reveal through rain and branches.",
+         "Visible branch impact, rebound, single shake, reorientation and continued flight.",
+         "Final screen-right rescue trajectory with Fuzzby ahead and Zenny following."
+        ],
+        "extensionDirection": "forward",
+        "transitionTrigger": "",
+        "transitionTransformation": "",
+        "transitionArrivalState": "",
+        "audioTransition": "",
+        "firstFrameTag": "@图1",
+        "lastFrameTag": "Fuzzby screen-right slightly ahead in forward flight with residual wobble settling; Zenny screen-left to center-left trailing faster, both facing screen-right toward the beach in storm rain.",
+        "storyboardTag": "",
+        "storyboardReadingOrder": "",
+        "blockoutKind": "coarse",
+        "blockoutMappings": [],
+        "providerPrompt": "AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions. Dialogue language: English.\n\n[Multimodal Reference Layer]\nSlots: @图1=opening_frame; @图2=Zenny; @图3=Fuzzby; @图4=location; @Audio1=audio; never swap.\nAngles: @图2=one Zenny; @图3=one Fuzzby; views are not extra characters.\n@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.\n@图2 defines exactly one Zenny identity/scale only; exclude background, pose, props and scene.\n@图3 defines exactly one Fuzzby identity/scale only; exclude background, pose, props and scene.\n@图4 defines scene/layout/light only; exclude characters/action.\n\n[Opening Motion Bridge]\nThe existing forward flight continues for a short beat before Fuzzby’s line-driven chatter is cut off by the distant danger and he stops mid-air.\n\n[ACTION OWNERSHIP]\nFuzzby owns the abrupt stop, pointing, alarm launch, branch impact, rebound, wobble, shake and continued forward flight.\nZenny owns the near-bump, steadying, eyeline follow, soft concern and trailing acceleration.\nThe branch owns the visible flex and spring-back caused by Fuzzby’s contact; it does not strike Zenny.\n\n[ATTRIBUTE OWNERSHIP]\n@图2 defines Zenny identity, scale and character continuity only. Do not use unrelated background, pose, composition, props or scene from @图2.\n@图3 defines Fuzzby identity, scale and character continuity only. Do not use unrelated background, pose, composition, props or scene from @图3.\n@图4 defines the rainforest, storm, beach/ocean direction, palette, materials and established world only. Do not use unrelated background, pose, composition, props or scene from @图4.\nDo not transfer character traits, markings, props or facial features between Fuzzby and Zenny.\n\n[ENVIRONMENT CONTRACT]\nStorm-dim rainforest light and wind-driven rain persist for the full unit.\nBranches bend in the wind before Fuzzby reaches them, but the impact branch does not contact him until the launch stage.\nThe distant tiny boat appears only through the trees in the screen-right beach/ocean direction.\nWet leaves, bark and wings catch intermittent blue storm light and warm reflected highlights without obscuring the bees.\n\n[One-Sentence Summary]\nFuzzby and Zenny discover a tiny boat in danger through the storm, turn concern into urgent rescue flight, and Fuzzby’s heroic launch is punctured by one visible branch bonk before they continue toward the beach.\n\n[Global Settings]\nStyle (v1.0.0): Feature-quality stylized 3D CGI. Plush character materials with subsurface scattering; soft fur with individual strands catching the light; glossy eyes with bright catchlights; translucent wing membranes where light passes through. Warm amber key light with cool blue fill and a soft rim light; teal-orange cinematic grade. Shallow depth of field with soft bokeh, gentle ambient occlusion, subtle film grain. Appealing exaggerated proportions, large expressive eyes, soft rounded features. Emotionally warm atmosphere.\nGeography: The flight path runs screen-left to screen-right through the rainforest toward the beach and ocean. Fuzzby starts airborne at screen-center-right, slightly ahead of Zenny on the same path. Zenny starts airborne at screen-left, trailing Fuzzby and closing the distance. Both characters face and anticipate travel screen-right in the opening frame. Bending tree branches sit ahead in frame-right, crossing the future path but leaving clear empty air before any contact. The camera remains on the same side of the flight path, tracking laterally with the characters. Rain and foliage layer in foreground and background, but the bees and performance corridor stay unobstructed. The beach and ocean direction is through the trees toward screen-right beyond the branch corridor.\n\n[Shot Sequence]\nShot 1: Camera: medium two-shot, useful 35mm equivalent, camera tracks laterally screen-right at bee height on the same storm-side of the path. Action: Begin exactly on @图1; Fuzzby flies slightly ahead and talks into the wind until the sight beyond the trees stops him mid-air. Performance: Fuzzby’s forward energy cuts off into a suspended stare; Zenny nearly bumps into him, checks herself, and looks to him for explanation. End state: Fuzzby held ahead, Zenny steadied behind, both suspended in the rain with the branch corridor still visible ahead. Dialogue placement: Fuzzby, Fuzzby fast and breathless into the wind, cutting off cleanly as he freezes: {I’m just saying, if this turns into a full storm situation, I am extremely—} The pose holds a full beat after the line ends. Dialogue placement: Zenny, Zenny gives a small cautious question after nearly bumping into him; only Zenny’s mouth moves: {Fuzzby?} The pose holds a full beat after the line ends.\nShot 2: Camera: continuous reframed eyeline view, useful 50-70mm feel as the camera eases past Fuzzby and racks through rain and branches to the tiny distant boat, then drifts back to the bees. Action: Fuzzby slowly points through the trees; the camera follows his gaze, holds the boat small beyond the forest, then returns to the characters for the recognition. Performance: Fuzzby’s eyes widen and his confidence drains into focused alarm; Zenny follows his gaze and softens into concern without losing the direction of travel. End state: Fuzzby and Zenny both face screen-right toward the same distant danger, with readable concern and the route to the beach established. Dialogue placement: Fuzzby, Fuzzby starts quiet while staring toward the boat, then firms up on the warning emphasis: {…that is NOT a good place to be.} The pose holds a full beat after the line ends. Dialogue placement: Zenny, Zenny speaks softly, directly and focused while Fuzzby holds his stare; only Zenny’s mouth moves: {Someone’s in trouble.} The pose holds a full beat after the line ends.\nShot 3: Camera: continuous whip-pan back into lateral tracking, useful 28-35mm equivalent, camera stays with Fuzzby’s launch and keeps Zenny, branch and flight path readable. Action: Fuzzby snaps forward yelling through @Audio1, launches screen-right, collides with the branch, rebounds, shakes once, reorients and continues toward the beach as Zenny accelerates behind. Performance: Fuzzby’s bravery is real but chaotic; the bonk briefly scrambles him, then he insists forward with urgent alertness while Zenny follows without speaking. End state: Camera at bee height tracks screen-right: Fuzzby screen-right slightly ahead in forward flight with a brief post-bonk wobble settling, Zenny screen-left to center-left trailing faster, both facing the beach under storm-dim forest light. Dialogue placement: Fuzzby, Fuzzby projects sudden loud alarm as the launch begins; only Fuzzby’s mouth moves, then all further character voices remain silent: {BEARS! BEARS! EMERGENCY BEARS!} Hold: 2.4s — Fuzzby wobbles for a beat, then flies on screen-right toward the beach with Zenny following faster behind him as the rain and branches whip past.\nWitness staging: Fuzzby stays slightly ahead on the screen-right side of the flight path. Zenny stays trailing screen-left to center-left, witnessing Fuzzby’s stop, the boat reveal and the branch impact without taking over the action. Hold on the non-acting witness; their stillness and the hold length carry the joke.\n\n[Global Supplement]\nExactly one Fuzzby and one Zenny throughout; no duplicates of either character. Maintain character identity and relative scale from the assigned reference slots. Safeguard: Do not hide the branch impact behind foreground leaves, camera blur or a cut. Safeguard: Do not let Fuzzby pass the branch before contact; show approach, compression, branch bend, rebound and recovery in order. Travel traversal: show three parallax speeds: foreground elements pass fastest, midground landmarks pass the camera and vanish behind, and the distant environment moves slowest. The subject pulls ahead and appears smaller; the camera surges to recover it. Let the subject drift off-centre, then reframe to recover it. Use occasional foreground elements to wipe across the lens. Living performance lock: Fuzzby, Zenny has a specific motivated eyeline target and a readable active thought throughout. In every hold and final landing preserve subtle breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. The beat owner looks toward the story target; the witness looks toward the beat owner or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin stillness or generic camera-facing expression. Final handoff: Storm-dim forest light with wind-driven rain visible; tree movement remains strong. Camera remains on the same side of the flight path. Fuzzby ends screen-right, slightly ahead of Zenny, facing screen-right toward the beach, airborne in forward flight after recovering from the branch impact, urgent and alert with a brief post-bonk wobble settling. Zenny ends screen-left to center-left, trailing Fuzzby, facing screen-right toward the beach, airborne in steady forward flight, focused and concerned.\n\n[Audio]\n@Audio1 guides dialogue timing and mouth shapes; final approved dialogue is restored in post. No extra voices. No music. No watermark."
+       },
+       "preflight": {
+        "verdict": "PASS",
+        "score": 10.0,
+        "maximum": 10,
+        "checkerVerdict": "PASS",
+        "findings": [],
+        "seedanceAuthoring": {
+         "status": "ready",
+         "score": 12,
+         "maximum": 12,
+         "normalizedScore": 10.0,
+         "firingFloor": 9.5,
+         "summary": "Prompt matches every required authoring check."
+        },
+        "qualityGate": {
+         "score": 20,
+         "maximum": 20,
+         "threshold": 17,
+         "needsRevision": false,
+         "criticalFailures": []
+        }
+       },
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "animation",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "animation": "db04acf26801beee8c49a8597cd2acaaee1442f5184789f2d20863e7f6d99ab0"
+        },
+        "canonProfileDigest": "70261cf7083629269093371e53bb4f27e0d1ce7b24442e774bc95ff606d62e8a",
+        "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+        "shotHash": "b0dac98374d51ee4ab33a1031cae01c7ad662961be05b50f3774c8343cd791bf",
+        "openingFrameHash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+        "sceneLookHash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2",
+        "referenceOrder": [
+         "@图1",
+         "@图2",
+         "@图3",
+         "@图4"
+        ],
+        "referenceBindings": [
+         {
+          "slot": "@图1",
+          "sourceSlot": "@图1",
+          "role": "opening keyframe",
+          "view": null,
+          "sameCharacterGroup": null
+         },
+         {
+          "slot": "@图2",
+          "sourceSlot": "@图2",
+          "role": "Zenny",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "6d3238b01ada18a755a338e4b0329850587e8ffcca334e378c281a8f6bdf495f"
+         },
+         {
+          "slot": "@图3",
+          "sourceSlot": "@图3",
+          "role": "Fuzzby",
+          "view": "complete-turnaround",
+          "sameCharacterGroup": "759d65aba682e3c21cac83df858ba08ae935632f5e4cf7855e43f88e38998158"
+         },
+         {
+          "slot": "@图4",
+          "sourceSlot": "@图4",
+          "role": "scene plate",
+          "view": null,
+          "sameCharacterGroup": null
+         }
+        ],
+        "referenceHashes": [
+         "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+         "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f",
+         "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3",
+         "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+        ],
+        "voiceHash": "28f2cfa6b577eef9519ca7af8bb617f2620960795ef3391103ef7aa9d80d8e70",
+        "voiceApprovalSignature": {
+         "canonProfileDigest": "3ba08fd89fdecc847e39719522f8d861bff88e8ed11ee90a6ad010b1ab3a647f",
+         "dialogueHash": "d280d75d4ab9cbe202405e7b811bdf9f5e5192ae4d574d8798cda09c4440c673",
+         "performanceHash": "e5d467d22d655d1b8eecdf056623fda14fd9a746bbd3511dfdb3242571d3bd38",
+         "voiceCardsHash": "77021084edf5a5ed16f27119a30d0db91605a73b0f16034a0aa9e8555eb6d8b0",
+         "voiceRegistersHash": "34a85ae3819a64fcfba2bf731016be27cdabe750fd5552b9d3a149083d42e149",
+         "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+         "voiceCompilerVersion": "voice-director-v1",
+         "voiceIds": [
+          "DNK8oCkkHjIyEjzlCeQq",
+          "XEiPrIitaegdirIGkODX",
+          "DNK8oCkkHjIyEjzlCeQq",
+          "XEiPrIitaegdirIGkODX",
+          "DNK8oCkkHjIyEjzlCeQq"
+         ]
+        }
+       },
+       "outcome": "approved",
+       "decisionAt": "2026-08-15T12:21:16",
+       "reviewedBy": "Codex for Julian",
+       "note": "10.0/10 Seedance conformance and 20/20 quality gate. Three motivated internal shots protect the discovery, danger recognition and branch-impact rescue launch while preserving the 28-second unit."
+      },
+      "candidate": null,
+      "history": []
+     },
+     "review-animation": {
+      "approved": null,
+      "candidate": {
+       "department": "Director Review",
+       "worker": "Director Review / Continuity Supervisor",
+       "skill": "skills/crystal-bears-continuity/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-08-15T12:33:34",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "6b9ec0b69e4db1e6cdca6aee5b7ae4237020869fc1be115b95748b734bd009d3",
+       "output": {
+        "artifactType": "animation",
+        "verdict": "block",
+        "summary": "Neither visible candidate demonstrates the approved 28-second discovery-and-launch chain. The supplied actual frames show Fuzzby and Zenny flying screen-right in the rainy forest/coast setting with acceptable identity and relative scale, but there is no visible freeze, pointing eyeline, distant tiny boat hold, Zenny near-bump/reaction, Fuzzby alarm launch, branch BONK, rebound, wobble, or recovery. Because the comic collision and stakes reveal are the purpose of the shot, this is not ready to present as an approvable animation candidate from the visible evidence.",
+        "intendedRead": "A continuous storm-side tracking shot where Fuzzby’s chatter is interrupted by spotting a tiny boat in danger, Zenny confirms the stakes, then Fuzzby launches into urgent action and comically ricochets off a branch before both continue toward the beach.",
+        "actualRead": "Two bees fly steadily through a lush stormy forest/coastline environment, mostly smiling or neutrally alert. The frames read as forward travel, not as an escalating discovery, alarm, collision, and recovery sequence.",
+        "finalFrameUsable": false,
+        "recommendedCandidate": null,
+        "candidateAssessments": [
+         {
+          "candidateId": "C1",
+          "verdict": "block",
+          "summary": "C1 has the stronger environmental read: the second frame opens to the coastline and maintains Fuzzby ahead with Zenny trailing. However, the visible frames still show only forward flight; none of the required discovery, boat hold, branch impact, rebound, or post-bonk recovery is evidenced.",
+          "beatLands": false,
+          "strongestEvidence": "C1 frame 2 keeps the characters moving screen-right with the beach/coast visible beyond the forest, broadly matching the intended travel direction toward the beach.",
+          "weakestDimension": "Beat delivery and physical causality: no freeze/point/boat confirmation/launch/branch BONK/rebound/wobble is visible."
+         },
+         {
+          "candidateId": "C2",
+          "verdict": "block",
+          "summary": "C2 preserves the two-character flight setup and identities, but the visible frames read even more like uninterrupted travel and chatter. It does not show the intended halt, eyeline discovery, stakes confirmation, alarm launch, or branch collision payoff.",
+          "beatLands": false,
+          "strongestEvidence": "C2 maintains Fuzzby slightly ahead and Zenny trailing behind in the same forest-side screen-right movement.",
+          "weakestDimension": "Dramatic escalation: both visible frames remain in a similar flying pose with no clear change of emotional state or action beat."
+         }
+        ],
+        "beatDelivery": {
+         "score": 2,
+         "intended": "Fuzzby’s chatter cuts off at danger; the tiny boat is established; Zenny recognizes someone is in trouble; Fuzzby converts alarm into action with a comic branch collision.",
+         "observed": "Visible frames show only the characters flying forward. There is no visible boat hold, freeze, point, reaction exchange, shouted launch, branch contact, or recovery.",
+         "diagnosis": "The core story/comic beat is not legible from the actual frames provided. The shot reads as generic travel rather than a discovery-and-action chain.",
+         "confidence": "high"
+        },
+        "actingAndPerformance": {
+         "score": 2,
+         "intended": "Fuzzby should shift from breathless chatter to frozen alarm, then urgent shouted action; Zenny should nearly bump him, question him, soften with concern, and follow silently.",
+         "observed": "Both candidates show pleasant or mildly attentive flying expressions. Fuzzby’s mouth is open in some frames as if talking, but the frames do not show a sharp cutoff, widened alarm, Zenny’s near-bump, or differentiated listener/speaker behavior.",
+         "diagnosis": "Performance changes appear underspecified or not achieved in the rendered motion; the visible acting lacks the required contrast between chatter, discovery, concern, and emergency.",
+         "confidence": "medium"
+        },
+        "physicalCausality": {
+         "score": 1,
+         "intended": "Fuzzby’s forward motion must carry him into a visible branch; the branch bends, compresses him, springs him backward, he shakes once, then continues forward.",
+         "observed": "No branch impact, branch bend, compression, rebound, wobble, or recovery is visible in either candidate’s supplied frames.",
+         "diagnosis": "The required physical gag/payoff is absent from visible evidence. This is a major story failure because the BONK is the visual payoff of beat 5.B3.",
+         "confidence": "high"
+        },
+        "timingAndReaction": {
+         "score": 2,
+         "intended": "The shot needs clear timing: chatter cutoff around the freeze, pause and eyeline reveal, Zenny’s cautious question, Fuzzby’s assessment, Zenny’s line, then sudden launch and immediate collision/recovery.",
+         "observed": "Representative frames do not show readable timing progression; poses remain broadly similar between frames, with no clear pause, acceleration, impact, or reaction spacing.",
+         "diagnosis": "Either the extracted frames missed all important moments or the animation did not stage them. Based on visible evidence, timing and reaction are not reviewable as successful.",
+         "confidence": "medium"
+        },
+        "cameraAndEdit": {
+         "score": 2,
+         "intended": "One continuous motivated storm-side tracking move: medium two-shot, ease into Fuzzby’s eyeline to a tiny boat, drift back to reactions, whip-pan with launch, catch impact, continue tracking screen-right.",
+         "observed": "Frames show a lateral tracking/two-shot feel, and C1 briefly reveals the coastline, but there is no visible eyeline rack to a tiny boat, no reaction drift back, no whip-pan, and no collision catch.",
+         "diagnosis": "The camera preserves some travel direction but does not visibly execute the intended motivated reveal-and-payoff structure.",
+         "confidence": "medium"
+        },
+        "compositionAndContinuity": {
+         "score": 2,
+         "intended": "Fuzzby and Zenny remain visible with branch and flight path through launch, impact, rebound, and recovery; geography points screen-right toward the beach with the boat beyond the trees.",
+         "observed": "The characters are visible and maintain Fuzzby ahead/Zenny behind. The beach/coast appears in some frames, but the distant boat is not visible and the branch/collision geography is not established.",
+         "diagnosis": "Basic character placement continuity is acceptable, but essential geography for danger and collision is missing.",
+         "confidence": "high"
+        },
+        "identityAndReferenceUse": {
+         "score": 0,
+         "intended": "Preserve Fuzzby and Zenny identities, relative scale, materials, no crystals, no extra characters.",
+         "observed": "Both candidates retain the bee characters with glasses, fuzzy materials, wings, and relative scale similar to the opening keyframe and turnarounds. No extra characters or crystals are visible.",
+         "diagnosis": "Identity/reference fidelity is the strongest area. Minor expression/pose sameness is a performance issue rather than a redesign issue.",
+         "confidence": "high"
+        },
+        "finishAndProductionValue": {
+         "score": 0,
+         "intended": "Feature-quality stylized CGI in storm-dim rainforest light with wind-driven rain and strong tree movement atmosphere.",
+         "observed": "The renders look polished, with lush foliage, wet highlights, storm-blue background light, and readable character materials. Rain/wind is present but not strongly evidenced in every frame.",
+         "diagnosis": "Production value is high enough visually, but finish cannot compensate for the missing staged beats.",
+         "confidence": "high"
+        },
+        "likelyRootCause": "action-overload",
+        "rootCauseReasoning": "The prompt asks one generated clip to satisfy five locked dialogue moments, a camera rack to a distant boat, reaction acting, a whip-pan launch, and a physically specific branch collision/rebound. The visible outputs preserve the easy continuous-flight setup and look but drop the complex multi-step staging and physical gag, which is characteristic of action overload rather than a character reference or scene-look problem.",
+        "cheapestNextAction": {
+         "action": "free-upstream-revision",
+         "rerenderRequired": true,
+         "reason": "No existing visible candidate contains the required boat reveal plus branch BONK/rebound payoff, so selecting C1 or C2 would not recover the shot. Before paying, do zero-cost verification of the full clips/audio to ensure the missing moments are not simply absent from the sampled frames; if truly absent, use a free upstream revision if available.",
+         "changeOneLever": "Reduce the animation task to one primary staged action chain: preserve the current look/identities/opening but prioritize the freeze-eyeline reveal and visible branch BONK/rebound/recovery over decorative forward travel.",
+         "preserveExactly": [
+          "Fuzzby ahead at screen-right with Zenny trailing screen-left/center-left",
+          "Storm-dim rainforest/coast palette and rainy atmosphere",
+          "Character identities, glasses, fuzzy materials, wings, and relative scale",
+          "Screen-right travel direction toward the beach",
+          "No added dialogue, no extra characters, no arbitrary cuts"
+         ],
+         "proofOfImprovement": "A reviewable render must visibly show: Fuzzby stopping and pointing/looking out; a tiny boat held small beyond rain/branches; Zenny reacting after nearly bumping him; Fuzzby launching; his body contacting a branch on-screen; branch bend/compression; backward recoil; one wobble/shake; then both characters continuing screen-right.",
+         "zeroCostChecksFirst": [
+          "Scrub both full candidate clips at the dialogue timestamps and around 18.7-22s to confirm whether the boat reveal and branch BONK are truly absent rather than missed by the sampled frames.",
+          "Check the audio/lip-sync track for exact five dialogue occurrences and listener stillness before deciding whether any edit recovery is possible.",
+          "Look for any usable continuous segment in C1 where the coast/eyeline is clearer, since C1 has the better visible geography.",
+          "Confirm there is no hidden offscreen collision or late-frame rebound in either full clip."
+         ]
+        },
+        "learningTags": [
+         "multi-beat-action-overload",
+         "missing-physical-payoff",
+         "missing-boat-reveal",
+         "continuous-shot-staging-failure",
+         "identity-good-story-fail",
+         "candidate-C1-stronger-geography"
+        ],
+        "findings": [
+         {
+          "severity": "BLOCK",
+          "criterion": "Required discovery beat: distant tiny boat must be established as the danger target.",
+          "visibleEvidence": "In the supplied actual frames, the coastline/beach is visible in C1, but no tiny boat is visible through the trees or held small in frame in either candidate.",
+          "owner": "director",
+          "suggestedAction": "Verify the full clips for a boat reveal; if absent, revise upstream so the eyeline target/boat is a mandatory visible story element."
+         },
+         {
+          "severity": "BLOCK",
+          "criterion": "Required comic physical payoff: Fuzzby hits a branch, rebounds, wobbles, and continues.",
+          "visibleEvidence": "None of the actual frames show branch contact, branch bend, compression, recoil, wobble, or recovery. Fuzzby remains in normal forward flight poses.",
+          "owner": "animation",
+          "suggestedAction": "Do not approve either candidate unless the full clip contains a clear on-screen branch BONK sequence; otherwise revise the animation staging."
+         },
+         {
+          "severity": "BLOCK",
+          "criterion": "Escalating performance chain across five dialogue beats.",
+          "visibleEvidence": "The visible frames show similar forward-flight expressions and mouth shapes, without a readable abrupt freeze, alarmed eye-widening, Zenny near-bump, soft concerned confirmation, or emergency launch.",
+          "owner": "director",
+          "suggestedAction": "Check full-timeline lip-sync and acting. If the acting remains this uniform, revise for distinct poses/reactions at the locked dialogue beats."
+         },
+         {
+          "severity": "BLOCK",
+          "criterion": "Motivated continuous camera move including eyeline rack and whip-pan impact catch.",
+          "visibleEvidence": "The frames preserve a two-shot tracking feel, but do not show a rack/hold to the tiny boat, drift back to reactions, whip-pan launch, or impact catch.",
+          "owner": "cinematography",
+          "suggestedAction": "If not present in the full clip, revise camera staging to prioritize the eyeline reveal and collision catch within the continuous move."
+         },
+         {
+          "severity": "NOTE",
+          "criterion": "Character identity and relative scale.",
+          "visibleEvidence": "Fuzzby remains larger and ahead; Zenny remains smaller and trailing; both retain glasses, fuzzy bee bodies, translucent wings, and no visible crystals or extra characters.",
+          "owner": "continuity",
+          "suggestedAction": "Preserve this identity and scale fidelity in any revised attempt."
+         },
+         {
+          "severity": "NOTE",
+          "criterion": "Scene look / storm rainforest continuity.",
+          "visibleEvidence": "The renders maintain lush wet foliage, storm-blue background light, and coastal geography broadly consistent with the approved scene look, especially in C1 frame 2.",
+          "owner": "continuity",
+          "suggestedAction": "Preserve the current palette, rain-coast environment, and screen-right geography while fixing the missing story actions."
+         }
+        ]
+       },
+       "reviewedMediaPaths": [
+        "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_c1.mp4",
+        "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_5.B1.S1_c2.mp4"
+       ],
+       "packageRevision": 3,
+       "inputSignature": {
+        "stage": "review-animation",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "review": "8b6d8668632b679538b891dd722171985f51368247d55c8449e1a97786c6d798"
+        },
+        "canonProfileDigest": "d7068a9595af9f3b94f7aa85cac0cc0d3b6ddad89a7e679373391d3d89142bca",
+        "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+        "mediaHashes": [
+         "8ab57e062338e50a715e93f6a60a63085e743129d8362c7b45f24fe4b863ea70",
+         "66423e59b14bfc18d01026c812d2a7e6749b6c1354841585a88f7b0a5e421c17"
+        ],
+        "generationSignature": {
+         "canonProfileDigest": "70261cf7083629269093371e53bb4f27e0d1ce7b24442e774bc95ff606d62e8a",
+         "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+         "animationDirectionSignature": {
+          "stage": "animation",
+          "model": "gpt-5.5",
+          "skillHashes": {
+           "animation": "db04acf26801beee8c49a8597cd2acaaee1442f5184789f2d20863e7f6d99ab0"
+          },
+          "canonProfileDigest": "70261cf7083629269093371e53bb4f27e0d1ce7b24442e774bc95ff606d62e8a",
+          "shotContractHash": "3e7a8a1dfd6cf4753a9e821dca4d201e534186808cb570fe8209ca745dd4e2a7",
+          "shotHash": "b0dac98374d51ee4ab33a1031cae01c7ad662961be05b50f3774c8343cd791bf",
+          "openingFrameHash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+          "sceneLookHash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2",
+          "referenceOrder": [
+           "@图1",
+           "@图2",
+           "@图3",
+           "@图4"
+          ],
+          "referenceBindings": [
+           {
+            "slot": "@图1",
+            "sourceSlot": "@图1",
+            "role": "opening keyframe",
+            "view": null,
+            "sameCharacterGroup": null
+           },
+           {
+            "slot": "@图2",
+            "sourceSlot": "@图2",
+            "role": "Zenny",
+            "view": "complete-turnaround",
+            "sameCharacterGroup": "6d3238b01ada18a755a338e4b0329850587e8ffcca334e378c281a8f6bdf495f"
+           },
+           {
+            "slot": "@图3",
+            "sourceSlot": "@图3",
+            "role": "Fuzzby",
+            "view": "complete-turnaround",
+            "sameCharacterGroup": "759d65aba682e3c21cac83df858ba08ae935632f5e4cf7855e43f88e38998158"
+           },
+           {
+            "slot": "@图4",
+            "sourceSlot": "@图4",
+            "role": "scene plate",
+            "view": null,
+            "sameCharacterGroup": null
+           }
+          ],
+          "referenceHashes": [
+           "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+           "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f",
+           "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3",
+           "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+          ],
+          "voiceHash": "28f2cfa6b577eef9519ca7af8bb617f2620960795ef3391103ef7aa9d80d8e70",
+          "voiceApprovalSignature": {
+           "canonProfileDigest": "3ba08fd89fdecc847e39719522f8d861bff88e8ed11ee90a6ad010b1ab3a647f",
+           "dialogueHash": "d280d75d4ab9cbe202405e7b811bdf9f5e5192ae4d574d8798cda09c4440c673",
+           "performanceHash": "e5d467d22d655d1b8eecdf056623fda14fd9a746bbd3511dfdb3242571d3bd38",
+           "voiceCardsHash": "77021084edf5a5ed16f27119a30d0db91605a73b0f16034a0aa9e8555eb6d8b0",
+           "voiceRegistersHash": "34a85ae3819a64fcfba2bf731016be27cdabe750fd5552b9d3a149083d42e149",
+           "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+           "voiceCompilerVersion": "voice-director-v1",
+           "voiceIds": [
+            "DNK8oCkkHjIyEjzlCeQq",
+            "XEiPrIitaegdirIGkODX",
+            "DNK8oCkkHjIyEjzlCeQq",
+            "XEiPrIitaegdirIGkODX",
+            "DNK8oCkkHjIyEjzlCeQq"
+           ]
+          }
+         },
+         "promptHash": "77d7d324385484fd77fb7f394cbceaa7b786a211c3781d00634fc268ddb07346",
+         "openingFrameHash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b",
+         "references": [
+          {
+           "slot": "@图1",
+           "sourceSlot": "@图1",
+           "role": "opening keyframe",
+           "view": null,
+           "sameCharacterGroup": null,
+           "hash": "0d6ac63e7d52e27f78d790ed8a565a301521731962607d3ca12d3aac04f6389b"
+          },
+          {
+           "slot": "@图2",
+           "sourceSlot": "@图2",
+           "role": "Zenny",
+           "view": "complete-turnaround",
+           "sameCharacterGroup": "6d3238b01ada18a755a338e4b0329850587e8ffcca334e378c281a8f6bdf495f",
+           "hash": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
+          },
+          {
+           "slot": "@图3",
+           "sourceSlot": "@图3",
+           "role": "Fuzzby",
+           "view": "complete-turnaround",
+           "sameCharacterGroup": "759d65aba682e3c21cac83df858ba08ae935632f5e4cf7855e43f88e38998158",
+           "hash": "b13a5b75a4d94154c3dab6b561d5cbc6023e401a2c564afd160eff48deaf23c3"
+          },
+          {
+           "slot": "@图4",
+           "sourceSlot": "@图4",
+           "role": "scene plate",
+           "view": null,
+           "sameCharacterGroup": null,
+           "hash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+          }
+         ],
+         "audioHash": "28f2cfa6b577eef9519ca7af8bb617f2620960795ef3391103ef7aa9d80d8e70",
+         "durationSec": 28.0,
+         "comparisonModelId": null,
+         "comparisonRunId": null,
+         "executionPlanHash": "1569d7300dcce73b89fc4560bfaba5214a3d40b6afe5c73ccc4461370a8567d6",
+         "provider": "fal",
+         "providerModelId": "fal-seedance-2.5",
+         "modelVersion": "2.5",
+         "transport": "fal-subscribe",
+         "endpoint": "bytedance/seedance-2.5/reference-to-video",
+         "resolution": "480p",
+         "capabilityVerifiedAt": "2026-08-07",
+         "tier": "standard"
+        }
+       }
+      },
+      "history": []
+     }
+    }
+   }
+  }
+ ],
+ "timingSlate": null,
+ "stitchedOutput": null,
+ "finalMaster": null,
+ "postManifest": null
+}

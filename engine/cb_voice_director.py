@@ -54,6 +54,10 @@ def _words(text):
     return [word.casefold() for word in _WORD_RE.findall(_TAG_RE.sub("", str(text or "")))]
 
 
+def _locked_text(line):
+    return str(line.get("exactText") if line.get("exactText") is not None else line.get("text") or "")
+
+
 def _tags(text):
     return [tag.strip().casefold() for tag in _TAG_RE.findall(str(text or ""))]
 
@@ -104,8 +108,9 @@ def post_direction_audit(line, locked_line, card, register):
            str(line.get("character") or "").casefold() ==
            str(locked_line.get("speaker") or "").casefold(),
            "Character matches the locked script speaker.")
+    locked_text = _locked_text(locked_line)
     _check(checks, "exact-dialogue-lock",
-           _words(line.get("exactDialogue")) == _words(locked_line.get("exactText")),
+           _words(line.get("exactDialogue")) == _words(locked_text),
            "Exact dialogue preserves every locked script word.")
 
     recipes = line.get("takeRecipes") or []
@@ -118,11 +123,15 @@ def post_direction_audit(line, locked_line, card, register):
         text = str(recipe.get("performedText") or "")
         recipe_id = recipe.get("recipeId") or "unnamed"
         _check(checks, f"script-fidelity:{recipe_id}",
-               _words(text) == _words(locked_line.get("exactText")),
+               _words(text) == _words(locked_text),
                f"{recipe_id} preserves every locked script word.")
+        spoken_text = _TAG_RE.sub("", text).strip()
+        locked_spoken_text = _TAG_RE.sub("", locked_text).strip()
+        deliberately_interrupted = locked_spoken_text.endswith(("—", "--", "...", "…"))
         try:
-            emission.require_complete_sentence(
-                _TAG_RE.sub("", text), context=f"voice recipe {recipe_id}")
+            if not deliberately_interrupted:
+                emission.require_complete_sentence(
+                    spoken_text, context=f"voice recipe {recipe_id}")
             sentence_complete = True
         except emission.EmissionConformanceError:
             sentence_complete = False
@@ -145,7 +154,7 @@ def post_direction_audit(line, locked_line, card, register):
         take_count = int(recipe.get("takesCount") or 0)
         _check(checks, f"take-count:{recipe_id}", take_count >= 1,
                f"{recipe_id} has a positive takes count.")
-        if len(_words(locked_line.get("exactText"))) <= int(rules["shortLineMaxWords"]):
+        if len(_words(locked_text)) <= int(rules["shortLineMaxWords"]):
             has_context = bool(str(line.get("previousText") or "").strip())
             _check(checks, f"short-line-context:{recipe_id}", has_context and
                    take_count >= int(rules["shortLineMinimumTakes"]),
@@ -189,7 +198,33 @@ def compile_line(line, locked_line, *, cards=None, registers=None):
     cards = cards or voice_cards()
     registers = registers or archetype_registers()
     character = str(line.get("character") or "")
-    card = cards.get("characters", {}).get(character)
+    chorus_members = list(locked_line.get("chorusMembers") or [])
+    is_chorus = (
+        str(locked_line.get("voiceTreatment") or "").casefold() == "group_chorus" and
+        bool(chorus_members))
+    character_cards = cards.get("characters", {})
+    if is_chorus:
+        missing = [name for name in chorus_members if name not in character_cards]
+        if missing:
+            raise VoiceContractError(
+                "No canon voice card for chorus member(s): " + ", ".join(missing))
+        member_cards = [character_cards[name] for name in chorus_members]
+        banned_sets = [
+            {tag.casefold() for tag in member.get("bannedTags", [])}
+            for member in member_cards
+        ]
+        card = {
+            "voiceId": member_cards[0]["voiceId"],
+            "modelId": member_cards[0].get("modelId", "eleven_v3"),
+            "settings": deepcopy(member_cards[0]["settings"]),
+            "cadenceSignature": "Synchronous ensemble built from each named canon voice.",
+            "physicalSignature": "The named ensemble breathes and resolves as one group.",
+            "defaultTags": sorted({
+                tag for member in member_cards for tag in member.get("defaultTags", [])}),
+            "bannedTags": sorted(set.intersection(*banned_sets)) if banned_sets else [],
+        }
+    else:
+        card = character_cards.get(character)
     if not card:
         raise VoiceContractError(f"No canon voice card for {character or 'unnamed character'}")
     register = registers.get("registers", {}).get(str(line.get("archetypeId") or ""))
@@ -206,12 +241,16 @@ def compile_line(line, locked_line, *, cards=None, registers=None):
         "dialogueOccurrenceId": line["dialogueOccurrenceId"],
         "sourceEventId": line.get("sourceEventId") or locked_line.get("sourceEventId"),
         "character": character,
+        "voiceTreatment": "group_chorus" if is_chorus else "single_voice",
+        "chorusMembers": deepcopy(chorus_members),
+        "voiceIds": ([character_cards[name]["voiceId"] for name in chorus_members]
+                     if is_chorus else [card["voiceId"]]),
         "voiceId": card["voiceId"],
         "modelId": card.get("modelId", "eleven_v3"),
         "voiceSettings": deepcopy(card["settings"]),
         "cadenceSignature": card["cadenceSignature"],
         "physicalSignature": card["physicalSignature"],
-        "exactDialogue": locked_line["exactText"],
+        "exactDialogue": _locked_text(locked_line),
         "performanceQuestions": deepcopy(line["performanceQuestions"]),
         "physicalState": line["physicalState"],
         "emotionalState": deepcopy(line["emotionalState"]),
@@ -231,7 +270,7 @@ def compile_line(line, locked_line, *, cards=None, registers=None):
     return compiled
 
 
-def emit_v3_requests(compiled):
+def emit_v3_requests(compiled, *, max_requests=None):
     """Emit stable provider request specs in recipe order, then take order."""
     requests = []
     for recipe in compiled["takeRecipes"]:
@@ -256,6 +295,8 @@ def emit_v3_requests(compiled):
             item["requestId"] = _digest({
                 "compiledHash": compiled["compiledHash"], **item})[:20]
             requests.append(item)
+            if max_requests is not None and len(requests) >= int(max_requests):
+                return requests
     return requests
 
 

@@ -38,7 +38,7 @@ def _provider_identities(monkeypatch, paths):
     }
     monkeypatch.setattr(cb_render, "_identity_packs_cfg", lambda: packs)
 
-    def provider_record(name, characters_cfg, usage="keyframe"):
+    def provider_record(name, characters_cfg, usage="keyframe", **_context):
         canonical = cb_render._resolve_char(name, characters_cfg)
         path = pathlib.Path(paths[canonical])
         return {
@@ -119,6 +119,9 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
     assert "@图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority" in prompt
     assert "Match Zenny exactly as the same character shown in the turnaround" in prompt
     assert "@图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority" in prompt
+    assert "Natural staging lock:" in prompt
+    assert "Never copy a turnaround's front, side or presentation pose" in prompt
+    assert "no arms held out from the body, T-pose" in prompt
     assert "round glasses" not in prompt
     assert "rosy blush" not in prompt
     assert "@图3 is the locked Scene Look plate" in prompt
@@ -129,7 +132,7 @@ def test_each_turnaround_remains_one_intact_provider_attachment(monkeypatch, tmp
     assert "omitted reference features" in prompt
     assert "[Canonical Style]" in prompt
     assert "Hold frame-right open for the later flower reveal." in prompt
-    assert len(prompt.split()) <= cb_render.MAX_KEYFRAME_INTEGRATION_WORDS
+    assert "Hold frame-right open for the later flower reveal." in prompt
 
 
 def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monkeypatch):
@@ -138,7 +141,7 @@ def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monk
         "characterOrder": ["Zenny", "Fuzzby"],
         "keyframeRoleOrder": ["character_identity", "scene plate"],
     })
-    monkeypatch.setattr(cb_render, "_provider_identity_records", lambda role, *_: [{
+    monkeypatch.setattr(cb_render, "_provider_identity_records", lambda role, *_, **__: [{
         "character": role, "view": "complete-turnaround"}])
     first = {
         "keyframeReferenceSlots": {
@@ -152,6 +155,52 @@ def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monk
     roles_b = [item["role"] for item in cb_render._expanded_reference_blueprint(
         second, "keyframeReferenceSlots", characters)]
     assert roles_a == roles_b == ["Zenny", "Fuzzby", "scene plate"]
+
+
+def test_keen_identity_reference_follows_episode_wristband_state():
+    characters = cb_render._characters_cfg()
+
+    bare = cb_render._provider_identity_record(
+        "Keen", characters, shot={
+            "continuityConstraints": [{
+                "value": "Keen's wrists remain bare while he receives the cuffs in his paws."
+            }]
+        }, scene="3", episode="Ep1")
+    transition = cb_render._provider_identity_record(
+        "Keen", characters, shot={
+            "shotId": "3.B3.S1",
+            "continuityConstraints": [{
+                "value": "Keen may put on the inherited wristbands in this shot."
+            }]
+        }, scene="3", episode="Ep1")
+    after_transition = cb_render._provider_identity_record(
+        "Keen", characters, shot={"shotId": "3.B4.S1"}, scene="3", episode="Ep1")
+    vacant = cb_render._provider_identity_record(
+        "Keen", characters, shot={
+            "continuityConstraints": [{
+                "value": "Keen is now wearing the inherited wristbands as vacant bands."
+            }]
+        }, scene="4", episode="Ep1")
+    later_vacant = cb_render._provider_identity_record(
+        "Keen", characters, shot={"shotId": "8.B4.S1"}, scene="8", episode="Ep1")
+    award_opening = cb_render._provider_identity_record(
+        "Keen", characters, shot={"shotId": "9.B1.S1"}, scene="9", episode="Ep1")
+    award_transition = cb_render._provider_identity_record(
+        "Keen", characters, shot={"shotId": "9.B2.S1"}, scene="9", episode="Ep1")
+    crystal = cb_render._provider_identity_record(
+        "Keen", characters, shot={"shotId": "9.B3.S1"}, scene="9", episode="Ep1")
+
+    assert bare["characterState"] == "no-cuffs"
+    assert transition["characterState"] == "no-cuffs"
+    assert after_transition["characterState"] == "vacant-wristbands"
+    assert bare["fileName"] == "CB_Keen_nocuffs_front-back.jpeg"
+    assert vacant["characterState"] == later_vacant["characterState"] == "vacant-wristbands"
+    assert vacant["fileName"] == "CB_Keen_turnaround_vacant_cuffs.png"
+    assert "blank cuff settings with no crystals and no glow" in vacant["distinguishingFeatures"]
+    assert award_opening["characterState"] == "vacant-wristbands"
+    assert award_transition["characterState"] == "vacant-wristbands"
+    assert crystal["characterState"] == "crystal-set-wristbands"
+    assert crystal["fileName"] == "CB_Keen.jpeg"
 
 
 def test_reference_manifest_exposes_keyframe_and_animation_in_provider_order(
@@ -206,8 +255,8 @@ def test_animation_prompt_binds_each_intact_sheet_to_one_character():
     prompt = cb_render._with_intact_turnaround_law(
         "Animate the approved performance.", references)
 
-    assert "@图2 is Zenny's complete, uncropped 360 turnaround sheet" in prompt
-    assert "@图3 is Fuzzby's complete, uncropped 360 turnaround sheet" in prompt
+    assert "@图2 defines Zenny's complete, uncropped 360 turnaround sheet" in prompt
+    assert "@图3 defines Fuzzby's complete, uncropped 360 turnaround sheet" in prompt
     assert prompt.count("render exactly one instance of this character") == 2
     assert prompt.endswith("Animate the approved performance.")
 
@@ -222,6 +271,114 @@ def test_reference_resolution_refuses_an_asset_from_an_older_workspace(
 
     with pytest.raises(cb_render.Refused, match="outside this canonical Studio"):
         cb_render._slot_path_for_role("scene plate", None, "1", "Ep1", {})
+
+
+def test_prop_reference_role_resolves_from_the_asset_registry(monkeypatch, tmp_path):
+    prop = _write(tmp_path / "engine" / "media" / "wristbands.jpeg")
+    monkeypatch.setattr(cb_render.cb_asset_registry, "resolve_assets", lambda *args, **kwargs: [{
+        "path": str(prop),
+        "role": "prop_reference_keen_fathers_wristbands",
+        "metadata": {
+            "assetUse": "prop_reference",
+            "propId": "keen_fathers_wristbands",
+        },
+    }])
+    monkeypatch.setattr(cb_render, "_reference_path_is_approved", lambda path: True)
+
+    resolved = cb_render._slot_path_for_role(
+        "prop:keen_fathers_wristbands", None, "3", "Ep1", {},
+        shot={"shotId": "3.B3.S1"}, usage="animation")
+
+    assert resolved == str(prop)
+
+
+def test_required_prop_reference_gate_does_not_accept_prose_or_inherited_pixels():
+    shot = {
+        "shotId": "6.B2.S1",
+        "sourceType": "relay",
+        "requiredPropReferences": ["story_vehicle"],
+        "performanceAssignment": "The vehicle continues through frame.",
+        "referenceSlots": {
+            "@图1": "previous shot final frame",
+            "@图2": "scene plate",
+        },
+    }
+
+    report = cb_render._required_prop_reference_report(
+        shot, "6", "TestEpisode", [
+            {"role": "previous shot final frame"},
+            {"role": "scene plate"},
+        ])
+
+    assert report["ok"] is False
+    assert report["missing"] == ["prop:story_vehicle"]
+    with pytest.raises(cb_render.Refused, match="required continuity prop authority"):
+        cb_render._require_prop_reference_authority(
+            shot, "6", "TestEpisode", [
+                {"role": "previous shot final frame"},
+                {"role": "scene plate"},
+            ])
+
+
+def test_required_prop_reference_gate_accepts_exact_sealed_attachment_role():
+    shot = {
+        "shotId": "6.B2.S1",
+        "requiredPropReferences": ["story_vehicle"],
+    }
+
+    report = cb_render._require_prop_reference_authority(
+        shot, "6", "TestEpisode", [
+            {"role": "previous shot final frame"},
+            {"role": "prop:story_vehicle"},
+        ])
+
+    assert report["ok"] is True
+    assert report["present"] == ["prop:story_vehicle"]
+
+
+def test_prop_authority_uploads_after_characters_and_before_scene_plate(monkeypatch):
+    characters = {
+        "Lead": {"sizeRank": 1},
+        "Witness": {"sizeRank": 2},
+    }
+    shot = {
+        "keyframeReferenceSlots": {
+            "@图1": "Lead",
+            "@图2": "Witness",
+            "@图3": "prop:story_vehicle",
+            "@图4": "scene plate",
+        },
+        "referenceSlots": {
+            "@图1": "opening keyframe",
+            "@图2": "Lead",
+            "@图3": "Witness",
+            "@图4": "prop:story_vehicle",
+            "@图5": "scene plate",
+        },
+    }
+    monkeypatch.setattr(
+        cb_render, "_provider_identity_records",
+        lambda role, cfg, usage, **kwargs: [{"character": role, "path": f"/{role}.png"}],
+    )
+
+    keyframe = cb_render._expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", characters)
+    animation = cb_render._expanded_reference_blueprint(
+        shot, "referenceSlots", characters)
+
+    assert [item["role"] for item in keyframe] == [
+        "Lead", "Witness", "prop:story_vehicle", "scene plate"]
+    assert [item["role"] for item in animation] == [
+        "opening keyframe", "Lead", "Witness", "prop:story_vehicle", "scene plate"]
+
+
+def test_continuity_constraints_accept_text_and_structured_records():
+    assert cb_render._continuity_constraint_text("Keep the existing satchel.") == (
+        "Keep the existing satchel.")
+    assert cb_render._continuity_constraint_text({
+        "label": "Boat cargo",
+        "value": "The open satchel remains in the boat.",
+    }) == "The open satchel remains in the boat."
 
 
 def test_composition_and_scale_controls_remain_local_while_locked_assets_own_provider_input(

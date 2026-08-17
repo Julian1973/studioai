@@ -564,7 +564,9 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
             "camera language, character styling, performance core and prohibited items.",
             required=task_mode in {"thirty-second-video", "ultra-long-video"})
 
-        shot_sequence = _section_body(text, "Shot Sequence")
+        shot_sequence = (
+            _section_body(text, "Shot Sequence")
+            or _section_body(text, "Camera and Shot Plan"))
         shot_numbers = [int(value) for value in re.findall(
             r"(?im)^\s*Shot\s+(\d+)\s*:", shot_sequence)]
         multi_shot = bool(shot_sequence and shot_numbers)

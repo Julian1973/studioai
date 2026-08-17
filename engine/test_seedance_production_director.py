@@ -139,16 +139,12 @@ def test_animation_direction_requires_declared_creative_latitude():
     else:
         raise AssertionError("a 30-second unit must use a complete timestamp stage plan")
 
-    try:
-        AnimationDirection.model_validate({
-            **base,
-            "performanceFreedom": "Seedance may discover the detailed performance.",
-            "providerPrompt": " ".join(["direction"] * 1101),
-        })
-    except ValidationError as exc:
-        assert "production ceiling is 1100" in str(exc)
-    else:
-        raise AssertionError("provider prompts over provider headroom must fail software-wide")
+    over_legacy_target = AnimationDirection.model_validate({
+        **base,
+        "performanceFreedom": "Seedance may discover the detailed performance.",
+        "providerPrompt": " ".join(["direction"] * 1101),
+    })
+    assert len(over_legacy_target.providerPrompt.split()) == 1101
 
     long_form = {
         **base,
@@ -161,14 +157,10 @@ def test_animation_direction_requires_declared_creative_latitude():
         "providerPrompt": " ".join(["direction"] * 1100),
     }
     AnimationDirection.model_validate(long_form)
-    try:
-        AnimationDirection.model_validate({
-            **long_form, "providerPrompt": " ".join(["direction"] * 1101),
-        })
-    except ValidationError as exc:
-        assert "production ceiling is 1100" in str(exc)
-    else:
-        raise AssertionError("long-form provider prompts over provider headroom must fail")
+    long_over_legacy_target = AnimationDirection.model_validate({
+        **long_form, "providerPrompt": " ".join(["direction"] * 1400),
+    })
+    assert len(long_over_legacy_target.providerPrompt.split()) == 1400
 
     incomplete = AnimationDirection.model_validate({
         **base,

@@ -51,6 +51,35 @@ def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatc
     ]
 
 
+def test_prepare_render_refreshes_stale_cinematography_for_relay_shots(monkeypatch):
+    calls = []
+    package = {
+        "shots": [{"shotId": SHOT_ID, "sourceType": "relay", "sourceShotId": "S1.PREV"}],
+        "continuityLedger": [{"shotId": SHOT_ID, "pendingSpendAuth": {"token": "sealed"}}],
+    }
+    monkeypatch.setattr(
+        cb_providers, "video_model",
+        lambda require_enabled=True: type("Model", (), {"provider": "fal"})())
+    monkeypatch.setattr(cb_render, "_require_confirmed_billing", lambda provider: None)
+    monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, pathlib.Path("pkg.json")))
+    monkeypatch.setattr(cb_render, "_ledger", lambda loaded, shot_id: loaded["continuityLedger"][0])
+    monkeypatch.setattr(
+        cb_studio_director, "_direction_current",
+        lambda scene, shot_id, stage, episode: stage == "animation")
+    monkeypatch.setattr(
+        cb_render, "prepare_department",
+        lambda scene, stage, shot_id, episode, log: calls.append(("prepare", stage)))
+
+    def fire(*_args, **_kwargs):
+        raise cb_render.Refused("SPEND NOT APPROVED")
+
+    monkeypatch.setattr(cb_render, "fire_shot", fire)
+
+    cb_studio_director.prepare_render("1", SHOT_ID, log=lambda *_: None)
+
+    assert calls == [("prepare", "cinematography")]
+
+
 def test_relay_shot_projects_source_harvest_as_its_opening_frame():
     media = {
         "shots": {
@@ -69,11 +98,105 @@ def test_relay_shot_projects_source_harvest_as_its_opening_frame():
     assert "keyframeApproved" not in media["shots"]["S1.B"]
 
 
+def test_relay_shot_session_inherits_source_frame_and_advances_to_voice():
+    source_id = "S1.A"
+    relay_id = "S1.B"
+    final_frame = "/engine/media/shots/S1.A_final.png"
+    state = {
+        "policyVersion": "test-policy",
+        "episode": "Ep1",
+        "scene": "1",
+        "packageExists": True,
+        "packageCurrent": True,
+        "packageRevision": 3,
+        "lineage": {"current": True},
+        "stages": {"storyboard": {"state": "approved"}},
+        "shots": [
+            {
+                "shotId": source_id,
+                "talky": False,
+                "badgeState": "approved",
+                "current": {"keyframe": True, "voice": True, "animation": True},
+                "pending": {"keyframe": False, "voice": False, "animation": False},
+            },
+            {
+                "shotId": relay_id,
+                "talky": True,
+                "badgeState": "ready",
+                "current": {"keyframe": False, "voice": False, "animation": False},
+                "pending": {"keyframe": False, "voice": False, "animation": False},
+            },
+        ],
+    }
+    package = {
+        "episode": "Ep1",
+        "sceneNumber": "1",
+        "sceneName": "Relay proof scene",
+        "shots": [
+            {"shotId": source_id, "sourceType": "opener", "durationSec": 8},
+            {
+                "shotId": relay_id,
+                "sourceType": "relay",
+                "sourceShotId": source_id,
+                "durationSec": 9,
+                "purpose": "Continue from the approved final frame.",
+                "dialogueLines": [{"speaker": "Keen", "text": "I can do this."}],
+            },
+        ],
+        "continuityLedger": [{"shotId": relay_id}],
+    }
+    preflight = {
+        "episode": "Ep1",
+        "scene": "1",
+        "blockers": [],
+        "productionInputs": {"shots": {relay_id: {
+            "voiceLines": [{"speaker": "Keen", "performedText": "[steady] I can do this."}],
+            "voiceDirectionSource": "prepared",
+        }}},
+        "providerCapabilities": {"selectionReady": True},
+    }
+    media = {"shots": {source_id: {"finalFrame": final_frame}, relay_id: {}}}
+
+    session = cb_studio_director.build_session(
+        state=state,
+        preflight=preflight,
+        package=package,
+        media=media,
+        requested_shot_id=relay_id,
+        scene_look={},
+        jobs={},
+    )
+
+    assert session["selectedShotId"] == relay_id
+    assert session["phase"] == "voice"
+    assert session["status"] == "ready_to_fire"
+    assert session["primaryAction"]["id"] == "build-voice"
+    assert session["artifact"] == {
+        "type": "image",
+        "url": final_frame,
+        "label": "Accepted opening frame",
+    }
+    assert session["shot"]["sourceType"] == "relay"
+    assert session["shot"]["sourceShotId"] == source_id
+    assert session["shot"]["relayAnchorUrl"] == final_frame
+    selected = next(item for item in session["shots"] if item["shotId"] == relay_id)
+    assert selected["keyframeUrl"] == final_frame
+    assert "build-keyframe" not in cb_studio_director.allowed_action_ids(session)
+
+
 def test_failure_is_hidden_after_workflow_moves_to_another_phase():
     failure = {"operation": "director:refire-keyframe:S1.B cb_studio_director.py refire-keyframe"}
 
     assert cb_studio_director._failure_matches_phase(failure, "keyframe") is True
     assert cb_studio_director._failure_matches_phase(failure, "voice") is False
+
+
+def test_scene_continuity_rules_are_projected_from_canonical_config():
+    rules = cb_studio_director._scene_continuity_rules("Ep1", "3")
+
+    assert rules
+    assert any("approved 3.B3.S1 handoff" in rule["value"] for rule in rules)
+    assert all("After 3.B5" not in rule["value"] for rule in rules)
 
 
 def _state(**current):
@@ -118,6 +241,34 @@ def _package(pending_spend=None):
             "pendingSpendAuth": pending_spend,
         }],
     }
+
+
+def _with_ai_review(package, stage, verdict="recommend-approve"):
+    output = {
+        "verdict": verdict,
+        "summary": "The performance and story beat read clearly in the actual artifact.",
+        "intendedRead": "Pride is contradicted by visible physical evidence.",
+        "actualRead": "Fuzzby's pride remains readable after the physical failure.",
+        "recommendedCandidate": "C1" if stage == "review-animation" else None,
+        "beatDelivery": {"score": 2, "observed": "The beat lands.",
+                         "diagnosis": "No correction needed.", "confidence": "high"},
+        "actingAndPerformance": {"score": 2, "observed": "The acting is specific.",
+                                  "diagnosis": "No correction needed.", "confidence": "high"},
+    }
+    reviewed_paths = (["/engine/media/candidate.png"] if stage == "review-keyframe"
+                      else ["/engine/media/c1.mp4"])
+    ledger = package["continuityLedger"][0]
+    if stage == "review-keyframe":
+        ledger["keyframeCandidate"] = {"path": reviewed_paths[0]}
+    else:
+        ledger["candidatePaths"] = reviewed_paths
+    ledger.setdefault("departmentWork", {})[stage] = {
+        "candidate": {"preparedAt": "2026-08-15T10:00:00Z", "output": output,
+                      "reviewedMediaPaths": reviewed_paths},
+        "approved": None,
+        "history": [],
+    }
+    return package
 
 
 def _preflight(provider_ready=False):
@@ -189,6 +340,15 @@ def test_provider_route_does_not_block_keyframe_work():
     assert not session["providerReady"]
 
 
+def test_talky_shot_cannot_skip_to_voice_without_an_approved_keyframe():
+    session = _session(media=_media())
+    assert session["phase"] == "keyframe"
+    assert session["status"] == "ready_to_fire"
+    assert session["primaryAction"]["id"] == "build-keyframe"
+    assert session["artifact"]["label"] == "Current Scene Look"
+    assert "build-voice" not in cb_studio_director.allowed_action_ids(session)
+
+
 def test_shot_summaries_expose_stable_id_aliases():
     session = _session()
     selected = next(shot for shot in session["shots"] if shot["selected"])
@@ -201,6 +361,7 @@ def test_keyframe_review_uses_current_exact_request_not_stale_package_copy():
     state["shots"][0]["pending"]["keyframe"] = True
     session = _session(
         state=state,
+        package=_with_ai_review(_package(), "review-keyframe"),
         media=_media(keyframeCandidate="/engine/media/candidate.png"),
     )
     assert session["status"] == "ready_to_review"
@@ -211,6 +372,91 @@ def test_keyframe_review_uses_current_exact_request_not_stale_package_copy():
     assert request["authoritative"] is True
     assert request["prompt"] == "CURRENT EXACT KEYFRAME REQUEST"
     assert "STALE PACKAGE PROMPT" not in request["prompt"]
+
+
+def test_keyframe_cannot_be_accepted_until_ai_director_reviews_actual_image():
+    state = _state()
+    state["shots"][0]["pending"]["keyframe"] = True
+    session = _session(
+        state=state,
+        media=_media(keyframeCandidate="/engine/media/candidate.png"),
+    )
+
+    assert session["primaryAction"]["id"] == "run-ai-review"
+    assert session["decisionActions"] == []
+    assert session["humanReview"]["currentDecision"]["aiReview"]["verdict"] == "not-run"
+    assert session["humanReview"]["currentDecision"]["canApprove"] is False
+
+
+def test_ai_director_recommends_but_never_has_approval_authority():
+    state = _state()
+    state["shots"][0]["pending"]["keyframe"] = True
+    session = _session(
+        state=state,
+        package=_with_ai_review(_package(), "review-keyframe"),
+        media=_media(keyframeCandidate="/engine/media/candidate.png"),
+    )
+
+    ai_review = session["humanReview"]["currentDecision"]["aiReview"]
+    assert ai_review["verdict"] == "recommend-approve"
+    assert ai_review["advisoryOnly"] is True
+    assert ai_review["mayApprove"] is False
+    assert session["humanReview"]["authority"] == "Julian"
+    assert {action["id"] for action in session["decisionActions"]} == {
+        "accept-keyframe", "iterate-keyframe"
+    }
+
+
+def test_ai_recommendation_for_an_older_artifact_never_unlocks_acceptance():
+    state = _state()
+    state["shots"][0]["pending"]["keyframe"] = True
+    package = _with_ai_review(_package(), "review-keyframe")
+    package["continuityLedger"][0]["keyframeCandidate"]["path"] = "/engine/media/new.png"
+    session = _session(
+        state=state,
+        package=package,
+        media=_media(keyframeCandidate="/engine/media/new.png"),
+    )
+
+    ai_review = session["humanReview"]["currentDecision"]["aiReview"]
+    assert ai_review["verdict"] == "stale"
+    assert session["primaryAction"]["id"] == "run-ai-review"
+    assert session["decisionActions"] == []
+
+
+def test_human_review_requires_visible_artifact_and_preserves_human_authority():
+    state = _state()
+    state["shots"][0]["pending"]["keyframe"] = True
+    session = _session(state=state, media=_media())
+
+    review = session["humanReview"]
+    assert review["authority"] == "Julian"
+    assert review["currentStage"] == "see"
+    assert review["currentDecision"]["required"] is True
+    assert review["currentDecision"]["artifactVisible"] is False
+    assert review["currentDecision"]["canApprove"] is False
+    assert review["currentDecision"]["advisoryOnly"] is True
+    assert "Only Julian" in review["rule"]
+
+
+def test_human_review_tracks_every_creative_checkpoint():
+    session = _session()
+    stages = session["humanReview"]["stages"]
+
+    assert [stage["id"] for stage in stages] == [
+        "direction", "see", "hear", "watch", "qc", "post"
+    ]
+    assert next(stage for stage in stages if stage["id"] == "direction")["status"] == "signed"
+    assert next(stage for stage in stages if stage["id"] == "see")["current"] is True
+
+
+def test_human_review_marks_downstream_signoff_for_recheck_when_upstream_is_missing():
+    state = _state(voice=True)
+    session = _session(state=state)
+    stages = {stage["id"]: stage for stage in session["humanReview"]["stages"]}
+
+    assert stages["see"]["status"] == "current"
+    assert stages["hear"]["status"] == "recheck"
 
 
 def test_approved_keyframe_suppresses_retained_rejection_history():
@@ -234,6 +480,116 @@ def test_voice_is_the_next_visible_outcome_after_keyframe_acceptance():
     assert session["primaryAction"]["id"] == "build-voice"
     assert session["artifact"]["url"] == "/engine/media/accepted.png"
     assert session["inspector"]["providerRequest"]["lines"][0]["speaker"] == "Fuzzby"
+
+
+def test_voice_auditions_are_a_reviewable_hear_decision():
+    package = _package()
+    package["continuityLedger"][0]["voiceAuditions"] = {
+        "status": "ready_for_hear_verdict",
+        "selected": {},
+        "candidates": [
+            {
+                "candidateId": "audition-1",
+                "path": "/engine/media/shots/audition-1.mp3",
+                "label": "Fragile borrowed courage",
+                "recipeId": "take-1-primary",
+                "takeNumber": 1,
+                "performedText": "[quietly] Like you said... it is part of growing up.",
+                "primary": True,
+            },
+            {
+                "candidateId": "audition-2",
+                "path": "/engine/media/shots/audition-2.mp3",
+                "label": "Less tremble",
+                "recipeId": "take-2-simpler",
+                "takeNumber": 2,
+                "performedText": "[quietly] Like you said... it is part of growing up.",
+                "primary": False,
+            },
+        ],
+    }
+    session = _session(
+        state=_state(keyframe=True),
+        package=package,
+        media=_media(keyframeApproved="/engine/media/accepted.png"),
+    )
+
+    assert session["phase"] == "voice"
+    assert session["status"] == "ready_to_review"
+    assert session["headline"] == "Choose the voice performance"
+    assert session["artifact"]["type"] == "audio-set"
+    assert [item["candidateId"] for item in session["artifact"]["items"]] == [
+        "audition-1", "audition-2"
+    ]
+    assert {item["id"] for item in session["decisionActions"]} == {
+        "accept-voice", "iterate-voice"
+    }
+
+
+def test_complete_voice_track_takes_priority_over_old_auditions():
+    package = _package()
+    package["continuityLedger"][0]["voiceAuditions"] = {
+        "status": "ready_for_hear_verdict",
+        "selected": {},
+        "candidates": [{
+            "candidateId": "audition-1",
+            "path": "/engine/media/shots/audition-1.mp3",
+            "label": "Short direction audition",
+            "takeNumber": 1,
+            "performedText": "[quietly] Test line.",
+            "primary": True,
+        }],
+    }
+    state = _state(keyframe=True)
+    state["shots"][0]["pending"]["voice"] = True
+    session = _session(
+        state=state,
+        package=package,
+        media=_media(
+            keyframeApproved="/engine/media/accepted.png",
+            vo="/engine/media/shots/complete-track.wav",
+        ),
+    )
+
+    assert session["phase"] == "voice"
+    assert session["status"] == "ready_to_review"
+    assert session["headline"] == "Do the performances sound true?"
+    assert session["artifact"] == {
+        "type": "audio",
+        "url": "/engine/media/shots/complete-track.wav",
+        "label": "Complete voice performance",
+    }
+
+
+def test_approved_voice_ignores_old_auditions_and_advances_to_watch():
+    package = _package()
+    package["continuityLedger"][0]["voiceAuditions"] = {
+        "status": "ready_for_hear_verdict",
+        "selected": {},
+        "candidates": [{
+            "candidateId": "old-audition",
+            "path": "/engine/media/shots/old-audition.mp3",
+            "label": "Old audition",
+            "takeNumber": 1,
+            "performedText": "[quietly] Old line.",
+            "primary": True,
+        }],
+    }
+    state = _state(keyframe=True, voice=True)
+    state["shots"][0]["pending"]["animation"] = True
+    session = _session(
+        state=state,
+        package=package,
+        media=_media(
+            keyframeApproved="/engine/media/accepted.png",
+            candidates=[{"n": 1, "url": "/engine/media/shots/c1.mp4"}],
+        ),
+    )
+
+    assert session["phase"] == "animation"
+    assert session["status"] == "ready_to_review"
+    assert session["headline"] == "Watch the result"
+    assert session["artifact"]["type"] == "video-set"
 
 
 def test_voice_phase_exposes_prepared_watch_prompt_without_unlocking_render():
@@ -265,6 +621,10 @@ def test_voice_phase_exposes_prepared_watch_prompt_without_unlocking_render():
     assert preview["prompt"].startswith("CURRENT PREPARED WATCH PROMPT")
     assert preview["conformance"]["score"] == 9.75
     assert preview["conformance"]["verdict"] == "PASS"
+    assert preview["seedancePromptContract"] == {
+        "score": None, "maximum": 10, "repairActions": [],
+    }
+    assert preview["qualityGate"] is None
     assert preview["renderReady"] is False
     assert all(action["id"] != "approve-spend" for action in session["decisionActions"])
 
@@ -311,6 +671,24 @@ def test_spend_token_never_leaves_the_server_projection():
                         "deduction": 0.25,
                     }],
                 },
+                "seedancePromptContract": {
+                    "score": 13,
+                    "maximum": 13,
+                    "normalizedScore": 10,
+                    "status": "ready",
+                    "summary": "Prompt matches every required authoring check.",
+                    "repairActions": [],
+                },
+                "qualityGate": {
+                    "score": 19,
+                    "maximum": 20,
+                    "needsRevision": False,
+                    "criticalFailures": [],
+                },
+                "creativeTranslation": {
+                    "ready": True,
+                    "errors": [],
+                },
             },
         },
     )
@@ -334,6 +712,26 @@ def test_spend_token_never_leaves_the_server_projection():
             "fix": "Compact plumbing only.",
             "deduction": 0.25,
         }],
+    }
+    assert session["inspector"]["providerRequest"]["seedancePromptContract"] == {
+        "score": 10,
+        "maximum": 10,
+        "normalizedScore": 10,
+        "rawScore": 13,
+        "rawMaximum": 13,
+        "status": "ready",
+        "summary": "Prompt matches every required authoring check.",
+        "repairActions": [],
+    }
+    assert session["inspector"]["providerRequest"]["qualityGate"] == {
+        "score": 19,
+        "maximum": 20,
+        "needsRevision": False,
+        "criticalFailures": [],
+    }
+    assert session["inspector"]["providerRequest"]["creativeTranslation"] == {
+        "ready": True,
+        "errors": [],
     }
 
 
@@ -400,7 +798,7 @@ def test_dense_animation_candidate_review_also_warns_against_blind_retry():
     session = _session(
         state=state,
         preflight=_preflight(provider_ready=True),
-        package=package,
+        package=_with_ai_review(package, "review-animation"),
         media=_media(candidates=[{"n": 1, "url": "/engine/media/c1.mp4"}]),
     )
     assert session["status"] == "ready_to_review"

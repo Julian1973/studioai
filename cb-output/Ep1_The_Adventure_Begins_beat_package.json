@@ -796,21 +796,21 @@
   "schemaVersion": 1,
   "inputs": {
    "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-   "canonProfileDigest": "4fea65d3fd8ed2c1be358e6824f99550d54405352eadc64e64459d1fa82c8c93"
+   "canonProfileDigest": "53590c2c6a309bd531739a25edd88fb6a2afcfca32684623f8b32cd8d263a879"
   },
   "algorithm": "sha256",
-  "digest": "579b344a487f77eceb13f6ecefb68ae3847129b26621cefa7e0a555251b51685"
+  "digest": "72f5f2bccb6b33100fb8795361ac259b9e53892f4958505b709a477fe5963f0c"
  },
  "canonLock": {
-  "manifestDigest": "93e40b9d3ce7c0beb02c152fc2def97e285abd953c41fd02e1aeff320a488ec7",
+  "manifestDigest": "cce5895647784065c1609b1f9dc674932d05d7f45e0630d4a6fa39c2745d86ed",
   "profile": "story",
-  "profileDigest": "4fea65d3fd8ed2c1be358e6824f99550d54405352eadc64e64459d1fa82c8c93",
+  "profileDigest": "53590c2c6a309bd531739a25edd88fb6a2afcfca32684623f8b32cd8d263a879",
   "sourceHashes": {
    "showBible": "12c85aea9dfeae83d35e90a90d7ff2a9584478b86da4f343a27a6b870dcf21c7",
    "studioBible": "51b44ba88d6134f40c6e6864d13416358b9149ec945557a4fc839e578e716215",
-   "characters": "e0fbdd875b9b2c5c2c1884a243f8cc597671989807913c8633d1bf15e1db0b66",
+   "characters": "5ad78d509f3f3b5c8eb03757021e4d5c3d1d8238e70a428ad164486c058c5683",
    "locations": "700db5114d5ae703f55e76f8308a5db33fc8eaa1ecbd4a15392a639899302df0",
-   "continuity": "8d7a5a9a2ee2429ed8e4285fea5025491f17f3bb744208420b6e0530ced3824a",
+   "continuity": "db8bf00f2bf37ddf94159881fe65c70b72b0db9c6ce1d80f903e562f890261db",
    "episodeArc": "7e06f051effa4eacaae41410f6170aed86772a3ed23599d599cec610d572ed2b",
    "gagLocks": "8693e988ca59aec4e2be24cd3357504ad281e4ed96d6300596554628d9d143d3",
    "bannedVocabulary": "2dedb1c356b1d9b8d3a55a3a3fd658594309717f84438cf8491a99171deb6897",
@@ -14166,5 +14166,18 @@
   },
   "algorithm": "sha256",
   "digest": "7ab0def81f431974205dfa01ee8f62171eca3d021019cb41efd079f7ff8c14a8"
+ },
+ "canonRebind": {
+  "at": "2026-08-14T06:22:25",
+  "reason": "Current canon adds approved asset and continuity authority; immutable script, source-event contract, beat content and Julian approval are unchanged.",
+  "priorInputSignatureDigest": "579b344a487f77eceb13f6ecefb68ae3847129b26621cefa7e0a555251b51685",
+  "currentInputSignatureDigest": "57c610008e5fc2933b7497aa2645d324f1ced0782963fd7d8f0db0759aac1242",
+  "humanApprovalPreserved": true
+ },
+ "provenanceRebase": {
+  "at": "2026-08-15T22:42:58",
+  "reviewedBy": "Julian",
+  "reason": "Approved canon changed; script, source events and creative content unchanged.",
+  "previousPackageDigest": "2484be7a735dc78a8170308e432248349ce40b6a18cbd83836a2150f0732e7e2"
  }
 }

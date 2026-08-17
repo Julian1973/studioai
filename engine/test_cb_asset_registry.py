@@ -1,9 +1,12 @@
 import json
 import pathlib
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
 import cb_asset_registry as A
+
+registry = A
 
 
 def _tmp_registry(monkeypatch, tmp_path):
@@ -140,3 +143,57 @@ def test_update_asset_rebinds_image_and_metadata(monkeypatch, tmp_path):
     assert updated["scene"] == "4"
     assert updated["url"] == "/engine/media/new.png"
     assert updated["metadata"]["assetUse"] == "scene_plate"
+
+
+def test_concurrent_registrations_are_atomic_and_preserve_both_assets(monkeypatch, tmp_path):
+    registry_dir = tmp_path / "asset-registry"
+    monkeypatch.setattr(registry, "REGISTRY_DIR", registry_dir)
+    monkeypatch.setattr(registry, "REGISTRY_PATH", registry_dir / "assets.json")
+    first = tmp_path / "first.png"
+    second = tmp_path / "second.png"
+    first.write_bytes(b"first")
+    second.write_bytes(b"second")
+
+    def register(item):
+        role, path = item
+        return registry.register_asset(
+            episode="Ep1", scene="4", kind="reference_image", role=role,
+            path=path, require_displayable=False)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        list(pool.map(register, (("first", first), ("second", second))))
+
+    data = registry._read()
+    assert {item["role"] for item in data["assets"]} == {"first", "second"}
+    assert not list(registry_dir.glob("*.tmp"))
+
+
+def test_shot_media_deduplicates_transport_aliases(monkeypatch, tmp_path):
+    c1 = tmp_path / "c1.mp4"
+    c2 = tmp_path / "c2.mp4"
+    c1.write_bytes(b"one")
+    c2.write_bytes(b"two")
+    assets = [
+        {"assetId": "c1", "episode": "Ep1", "scene": "3", "shotId": "3.B1.S1",
+         "kind": "candidate_take", "role": "candidate_1", "status": "candidate",
+         "path": str(c1), "url": "/media/c1.mp4"},
+        {"assetId": "tc1", "episode": "Ep1", "scene": "3", "shotId": "3.B1.S1",
+         "kind": "candidate_take", "role": "transport_candidate_1", "status": "candidate",
+         "path": str(c1), "url": "/media/c1.mp4"},
+        {"assetId": "c2", "episode": "Ep1", "scene": "3", "shotId": "3.B1.S1",
+         "kind": "candidate_take", "role": "candidate_2", "status": "candidate",
+         "path": str(c2), "url": "/media/c2.mp4"},
+        {"assetId": "tc2", "episode": "Ep1", "scene": "3", "shotId": "3.B1.S1",
+         "kind": "candidate_take", "role": "transport_candidate_2", "status": "candidate",
+         "path": str(c2), "url": "/media/c2.mp4"},
+    ]
+    monkeypatch.setattr(registry, "migrate_existing", lambda episode: None)
+    monkeypatch.setattr(registry, "resolve_assets", lambda *args, **kwargs: assets)
+
+    media = registry.shot_media_from_registry(
+        {"shots": [{"shotId": "3.B1.S1"}]}, "3", "Ep1")
+
+    assert media["3.B1.S1"]["candidates"] == [
+        {"n": 1, "url": "/media/c1.mp4"},
+        {"n": 2, "url": "/media/c2.mp4"},
+    ]

@@ -154,6 +154,22 @@ def test_invalid_voice_contract_is_never_treated_as_current_direction(tmp_path):
     assert status["reason"].startswith("voice-contract-invalid:")
 
 
+def test_animation_direction_without_provider_prompt_is_not_current(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    monkeypatch.setattr(render, "_keyframe_input_signature",
+                        lambda *args, **kwargs: {"cardHash": "card-v1",
+                                                 "canonProfileDigest": TEST_CANON_DIGEST})
+    candidate = _prepare_department(package, shot["shotId"], "animation")
+    candidate["output"].pop("providerPrompt", None)
+    candidate["output"]["shotId"] = shot["shotId"]
+
+    status = render._department_record_status(
+        package, shot["shotId"], "animation", "1", "Ep1")
+
+    assert status["current"] is False
+    assert status["reason"] == "animation-contract-invalid: animation-provider-prompt-missing"
+
+
 def test_review_evidence_still_requires_a_human_decision(tmp_path):
     package, shot, _ = _pkg(tmp_path)
     work = render._ledger(package, shot["shotId"]).setdefault(
@@ -317,6 +333,27 @@ def test_approved_keyframe_keeps_historical_prompt_after_compiler_only_change(
     assert not render._keyframe_record_status(package, shot, approval)["current"]
 
 
+def test_human_lineage_carry_survives_compiler_brief_change_only(
+        tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    approval = render._ledger(package, shot["shotId"])["keyframeApproval"]
+    approval["inputSignature"]["briefHash"] = "old-compiler-brief"
+    approval["lineageCarryForward"] = {
+        "reviewedBy": "Julian",
+        "reason": "Keep the signed opening image as visual truth.",
+    }
+    monkeypatch.setattr(render, "_keyframe_input_signature", lambda *args, **kwargs: {
+        "cardHash": "card-v1",
+        "canonProfileDigest": TEST_CANON_DIGEST,
+        "briefHash": "new-compiler-brief",
+    })
+
+    assert render._keyframe_record_status(package, shot, approval)["current"]
+
+    approval["inputSignature"]["cardHash"] = "different-direction"
+    assert not render._keyframe_record_status(package, shot, approval)["current"]
+
+
 def test_animation_approval_carries_forward_and_tracks_its_own_graph(
         tmp_path, monkeypatch):
     package, shot, _ = _pkg(tmp_path)
@@ -364,7 +401,10 @@ def test_external_director_accepted_animation_tracks_contract_anchor_and_content
     take.write_bytes(b"external-take")
     harvest.write_bytes(b"external-final")
     ledger = render._ledger(package, shot["shotId"])
-    monkeypatch.setattr(render, "_anchor_for", lambda *args: str(opening_frame))
+    monkeypatch.setattr(
+        render, "_anchor_for",
+        lambda *args: (_ for _ in ()).throw(
+            AssertionError("finished-picture approval must not rerun generation gates")))
     input_signature = render._external_import_input_signature(
         package, shot, "1", "Ep1", render._sha256_file(take),
         {"digest": "fixture"})
@@ -435,3 +475,52 @@ def test_current_working_scene_look_feeds_keyframes_without_plate_approval(
     assert state["active"]["path"] == str(candidate)
     assert state["activeSource"] == "working"
     assert state["approved"]["path"] == str(plate)
+
+
+def test_human_working_voice_text_overrides_director_recipe(tmp_path, monkeypatch):
+    package, shot, _ = _pkg(tmp_path)
+    shot["dialogueLines"] = [{
+        "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
+        "speaker": "Fuzzby", "exactText": "I still feel him... every day.",
+    }]
+    ledger = render._ledger(package, shot["shotId"])
+    ledger["workingVoice"] = {"lines": [{
+        "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
+        "speaker": "Fuzzby", "text": "[quietly] I still feel him, every day.",
+    }]}
+    directed = {
+        "shotId": shot["shotId"], "sceneIntention": "Connected memory.",
+        "lines": [{
+            "dialogueOccurrenceId": "dialogue-1", "sourceEventId": "event-1",
+            "speaker": "Fuzzby", "character": "Fuzzby",
+            "exactDialogue": "I still feel him... every day.",
+            "performedText": "[quietly] I still feel him... [exhales] every day.",
+            "dramaticIntention": "Keep the thought connected.", "subtext": "Memory lives on.",
+            "cadenceAndBreath": "Quiet and connected.", "timingAndBody": "Stay still.",
+            "archetypeId": "held-heart", "performanceQuestions": {
+                "intention": "Connect the thought.", "subtext": "Memory lives on.",
+                "thoughtBefore": "Say it plainly.", "changeDuring": "She opens.",
+                "operativeWords": ["every day"],
+            }, "physicalState": "Still.",
+            "emotionalState": {"entry": "Held", "exit": "Open"},
+            "listener": "Zenny", "bodyVoiceRelationship": "Still body.",
+            "previousText": "A quiet look.", "startsAtSec": 1.0,
+            "estimatedDurationSec": 2.0, "pauseReasons": [],
+            "tagPurposes": [{"tag": "quietly", "purpose": "Intimacy"},
+                            {"tag": "exhales", "purpose": "Release"}],
+            "takeRecipes": [{"recipeId": "A", "label": "Primary",
+                              "performedText": "[quietly] I still feel him... [exhales] every day.",
+                              "primary": True, "takesCount": 1}],
+        }],
+    }
+    ledger.setdefault("departmentWork", {}).setdefault(
+        "voice", {"approved": None, "candidate": None, "history": []})["candidate"] = {
+        "output": directed,
+        "inputSignature": render._department_input_signature(
+            package, "voice", shot["shotId"], "1", "Ep1"),
+        "packageRevision": package["revision"],
+    }
+
+    emitted = render._approved_voice_lines(package, shot)
+
+    assert emitted[0]["text"] == "[quietly] I still feel him, every day."

@@ -9,10 +9,22 @@
         },
         {
           "scenes": "3-8",
-          "wristbandState": "vacant-wristbands"
+          "wristbandState": "vacant-wristbands",
+          "transitionShot": "3.B3.S1",
+          "incomingState": "no-cuffs",
+          "afterTransitionState": "vacant-wristbands",
+          "rule": "Keen is bare-wristed before the approved 3.B3.S1 handoff. In the approved take Mum visibly fits both vacant aged-gold cuffs; every later shot keeps both cuffs on his wrists until Aida visibly installs the crystals."
         },
         {
-          "scenes": "9-10",
+          "scenes": "9",
+          "wristbandState": "vacant-wristbands",
+          "transitionShot": "9.B2.S1",
+          "incomingState": "vacant-wristbands",
+          "afterTransitionState": "crystal-set-wristbands",
+          "rule": "The cuffs remain vacant through the opening of Aida's award shot; only Aida's visible crystal installation changes them to crystal-set."
+        },
+        {
+          "scenes": "10",
           "wristbandState": "crystal-set-wristbands"
         }
       ]
@@ -23,6 +35,38 @@
         "lostInScene": "7",
         "forbiddenFromScene": "8",
         "sourceEvidence": "Misty confirms that Keen's boat is gone after the storm rescue."
+      }
+    ],
+    "referenceRequiredProps": [
+      {
+        "propId": "keen_sailboat",
+        "scenes": "3-7",
+        "aliases": [
+          "sailboat",
+          "boat",
+          "hull",
+          "mast",
+          "rigging",
+          "tiller",
+          "sail"
+        ],
+        "requiredWhenMentioned": true,
+        "rule": "Any shot whose approved direction uses Keen's sailboat must bind an approved prop:keen_sailboat provider reference. Prompt wording, a scene plate, or inherited pixels do not replace dedicated prop authority."
+      },
+      {
+        "propId": "keen_sailboat_departure_state",
+        "scenes": "4-7",
+        "aliases": [
+          "sailboat",
+          "boat",
+          "hull",
+          "mast",
+          "rigging",
+          "tiller",
+          "sail"
+        ],
+        "requiredWhenMentioned": true,
+        "rule": "Every post-departure boat shot must bind the approved wide departure frame as prop:keen_sailboat_departure_state. It is the visual authority for the loaded cargo arrangement established while Keen leaves Mum: satchel, map, rolled blanket and food pouch remain aboard in their fixed cluster until an approved action visibly changes them."
       }
     ]
   }

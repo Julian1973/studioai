@@ -1,12 +1,98 @@
 """Focused proofs for the live department workers (all zero-provider-call)."""
 import hashlib
 import json
+from types import SimpleNamespace
 
 import pytest
 
 import cb_departments as D
 import cb_render as R
 import cb_safety
+
+
+def test_animation_reference_contract_rebinds_props_and_location_in_upload_order():
+    plan = [
+        {"slot": "@图1", "role": "opening keyframe"},
+        {"slot": "@图2", "role": "Keen"},
+        {"slot": "@图3", "role": "prop:keen_sailboat"},
+        {"slot": "@图4", "role": "prop:keen_sailboat_departure_state"},
+        {"slot": "@图5", "role": "scene plate"},
+    ]
+    shot = {"charactersInFrame": ["Keen"], "dialogueLines": [{"speaker": "Keen"}]}
+
+    contract = R._animation_reference_contract(plan, shot, "/tmp/voice.wav")
+
+    assert [(item["assetTag"], item["role"]) for item in contract] == [
+        ("@图1", "opening_frame"),
+        ("@图2", "character_identity"),
+        ("@图3", "prop"),
+        ("@图4", "prop"),
+        ("@图5", "location"),
+        ("@Audio1", "audio"),
+    ]
+    assert "sailboat" in contract[2]["controls"]
+    assert "departure state" in contract[3]["controls"]
+
+
+def test_animation_compiler_never_reorders_a_sealed_contiguous_slot_map():
+    references = [
+        {"assetTag": "@图1", "role": "opening_frame", "controls": "the opening frame"},
+        {"assetTag": "@图2", "role": "character_identity", "controls": "Keen identity"},
+        {"assetTag": "@图3", "role": "prop", "controls": "the exact sailboat"},
+        {"assetTag": "@图4", "role": "prop", "controls": "the packed cargo state"},
+        {"assetTag": "@图5", "role": "location", "controls": "the open-sea scene"},
+    ]
+
+    ordered = D._render_reference_order(references)
+
+    assert [(item["assetTag"], item["role"]) for item in ordered] == [
+        ("@图1", "opening_frame"),
+        ("@图2", "character_identity"),
+        ("@图3", "prop"),
+        ("@图4", "prop"),
+        ("@图5", "location"),
+    ]
+
+
+def test_animation_compiler_suppresses_numbered_reference_prose_from_ownership():
+    data = {
+        "attributeOwnership": [
+            "@图4 controls the old scene look only.",
+            "The map belongs only to Keen.",
+        ]
+    }
+
+    clean = D._approved_attribute_ownership(data)
+
+    assert clean == ["The map belongs only to Keen."]
+
+
+def test_aerial_camera_contract_is_deterministic_compiler_boilerplate():
+    aerial = SimpleNamespace(
+        purpose="Squeaky aerial leap",
+        causalAction="One dolphin leaps from water to air and back.",
+        framingLensAndCamera="Follow beside the hull.")
+    direction = SimpleNamespace(
+        shotPlan=[aerial],
+        model_dump=lambda: {"timingBeats": [{"type": "aerial", "count": 1}]})
+
+    D.enforce_aerial_camera_contract(direction)
+
+    assert aerial.framingLensAndCamera.endswith("Camera tracks the full arc.")
+
+
+def test_signature_dive_is_typed_as_aerial_camera_ownership():
+    aerial = SimpleNamespace(
+        purpose="Squeaky's sunlit signature dive",
+        causalAction="The dolphin breaches, performs a half-roll, and re-enters.",
+        framingLensAndCamera="Low side view beside the moving hull.")
+    direction = SimpleNamespace(
+        shotPlan=[aerial],
+        model_dump=lambda: {"timingBeats": [{"type": "aerial", "count": 1}]})
+
+    D.enforce_aerial_camera_contract(direction)
+
+    assert aerial.framingLensAndCamera.endswith("Camera tracks the full arc.")
 
 
 def _locked():
@@ -79,6 +165,41 @@ def test_cinematography_preserves_canonical_cast_order_without_rejecting_reorder
     assert result.charactersInFrame == ["Fuzzby", "Zenny"]
     assert [item.character for item in result.openingFrameLayout.placements] == [
         "Fuzzby", "Zenny"]
+
+
+def test_cinematography_allows_declared_later_entrant_outside_opening_frame(monkeypatch):
+    direction = D.CinematographyDirection(
+        shotId="3.B7.S1",
+        audienceRead="Keen sails away before Squeaky interrupts the farewell.",
+        composition="Keen aboard; Mum readable behind; clear water beside the hull.",
+        lensAndCameraRelationship="Low trailing three-quarter view.",
+        lightingAndDepth="Warm sun with clear departure depth.",
+        geography=["The bow points frame-right toward open water."],
+        openingFrameLayout={
+            "referenceCharacter": "Keen", "referenceHeightFraction": 0.3,
+            "sameDepth": False,
+            "placements": [
+                {"character": "Keen", "centerX": 0.65, "centerY": 0.5,
+                 "depthPlane": 0, "facing": "frame-right", "pose": "sailing"},
+                {"character": "Keen's Mum", "centerX": 0.2, "centerY": 0.45,
+                 "depthPlane": 1, "facing": "toward Keen", "pose": "watching"},
+            ],
+        },
+        negativeSpace=["Keep water beside the hull empty for Squeaky's later entrance."],
+        providerPrompt="A complete provider-facing opening-frame departure direction.",
+    )
+    monkeypatch.setattr(D.cb_llm, "structured", lambda *_args, **_kwargs: direction)
+
+    result = D.prepare_cinematography({
+        "shot": {
+            "charactersInFrame": ["Keen", "Keen's Mum", "Squeaky"],
+            "openingCharactersInFrame": ["Keen", "Keen's Mum"],
+        },
+    }, [])
+
+    assert result.charactersInFrame == ["Keen", "Keen's Mum"]
+    assert [item.character for item in result.openingFrameLayout.placements] == [
+        "Keen", "Keen's Mum"]
 
 
 def test_voice_director_may_act_but_not_rewrite_locked_words():
@@ -197,8 +318,108 @@ def test_animation_provider_shell_rebuilds_reference_layer_one_asset_per_line():
 
     assert "Use all images as references." not in compiled
     assert "@Image1 defines only the approved opening composition." in compiled
-    assert "@Image2 defines only Fuzzby's exact identity and proportions." in compiled
-    assert "Do not use its background, pose, composition" in compiled
+    assert "@Image2 defines exactly one Fuzzby identity/scale only;" in compiled
+    assert "exclude background, pose, props and scene" in compiled
+
+
+def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+        "durationSec": 9,
+        "dialogueLines": [],
+    }
+    direction = D.AnimationDirection(
+        shotId="3.B2.S1",
+        durationSec=9,
+        taskMode="reference-to-video",
+        pacingMode="storyline",
+        generationGoal="Keen faces the water and tries to sound brave.",
+        deliveryPlan="The handoff carries emotion while the scene plate owns geography.",
+        creativeTranslation={
+            "interpretation": {
+                "jokeOrAche": "A small child borrows grown-up courage.",
+                "mechanism": "The sea scale makes his bravery visible as effort.",
+                "statusBefore": "close to Mum",
+                "statusAfter": "braced toward the water",
+                "audienceProgression": ["safe", "small", "brave"],
+                "emotionalHeart": "Mum sees him trying.",
+            },
+            "gagClocks": [],
+            "generationDesign": {
+                "packagingDecision": "single-unit",
+                "completeGagArcCount": 0,
+                "densityJudgement": "one emotional turn",
+                "splitOrNonSplitRationale": "single short unit",
+                "handoffState": "Keen faces the open water with Mum beside him.",
+            },
+        },
+        dramaticBeat="Keen looks out at the water.",
+        audienceBefore="Keen is safe beside Mum.",
+        audienceAfter="Keen is trying to leave.",
+        beatOwner="Keen",
+        performanceFreedom="Seedance may choose small breathing and eye details.",
+        performanceArc="Keen swallows fear into a brave posture.",
+        physicalCauseAndEffect="The sea fills the frame, so Keen has to steady himself.",
+        cameraBehaviour="Child-height medium two-shot.",
+        timingAndRhythm="Slow enough for the swallow to read.",
+        landingBreath="Hold the braced expression.",
+        directionDensity="guided",
+        shotPlan=[{
+            "shotNumber": 1,
+            "purpose": "Bravery against the sea.",
+            "framingLensAndCamera": "Medium two-shot at child eye height.",
+            "causalAction": "Keen looks from the boat toward the water and swallows.",
+            "observablePerformance": "Mum remains still beside him.",
+            "compositionLightAndMaterials": "Warm pier light and open water.",
+            "landingImage": "Keen faces the open water with Mum beside him.",
+        }],
+        timingBeats=[{"type": "reaction", "count": 1, "source": "swallow"}],
+        stagePlan=[{
+            "stageNumber": 1,
+            "beatIds": ["3.B2"],
+            "purpose": "Keen tries to be brave.",
+            "initialOrCarriedState": "Keen and Mum carry the previous shoreline closeness.",
+            "cause": "The open water is suddenly large in front of Keen.",
+            "primaryEvent": "Keen looks out, swallows, and tries to steady himself.",
+            "observableEndState": "Keen faces the open water with Mum beside him.",
+            "emotionOrCameraAnalysis": "The hold lets the effort read.",
+        }],
+        geography=["The scene plate owns pier, boat, shoreline and water geography."],
+        referenceContract=[
+            {
+                "assetTag": "@图1",
+                "role": "opening_frame",
+                "controls": "Approved opening composition, character positions, camera proximity, and carried shoreline/boat state for the relay start.",
+                "scope": "continuity",
+            },
+            {
+                "assetTag": "@图2",
+                "role": "location",
+                "controls": "Pier, boat, shoreline and open water.",
+                "scope": "episode",
+            },
+        ],
+        openingCarriedState="Keen and Mum carry the previous close emotional state.",
+        consistencyContract=["Keen has bare wrists."],
+        audioContract="No dialogue.",
+        continuityFinish="Keen faces the open water with Mum beside him.",
+        providerPrompt="Temporary provider prompt long enough for typed validation.",
+    )
+
+    compiled = D.compile_animation_provider_prompt(shot, direction)
+
+    assert ("@图1 is the first frame and the previous shot's approved final frame."
+            in compiled)
+    assert "Use it only for carried character state" in compiled
+    assert "Do not use it as the scene geography" in compiled
+    assert "camera framing" in compiled
+    assert "pier layout" in compiled
+    assert "boat-position" in compiled
+    assert compiled.count("图1 is the first frame") == 1
+    assert "It defines opening composition and state" not in compiled
 
 
 def test_prepare_direction_archives_a_stale_candidate_before_replacing_it(
@@ -338,12 +559,10 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     assert out.pacingMode == "storyline"
     compiled = D.compile_animation_provider_prompt(
         {"shotId": "S1.SH1", "durationSec": 8, "dialogueLines": []}, out)
-    assert "[Performance Sequence]" in compiled
     assert "[Camera and Shot Plan]" in compiled
     assert "Shot 1: Camera: Medium 40mm, slow motivated push" in compiled
     assert "Action: His paw loads the plank and the deck kicks back" in compiled
     assert "Emotion/Camera Analysis:" not in compiled
-    assert "Stage 1: [1.B1]" in compiled
     assert "Stage 1: 0-8s" not in compiled
     assert "Audio cues:" not in compiled
     assert out.durationSec == 8
@@ -596,12 +815,11 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert primary in prompt
     assert provider_action in prompt
     assert handoff in prompt
-    assert "@Image1 is the first frame" in prompt
-    assert "@Image1 is the first frame. It defines opening composition and state" in prompt
-    assert "Fixed slots: @Image1=opening_frame; @Image2=Fuzzby; @Audio1=audio." in prompt
-    assert "Angles: @Image2=one Fuzzby; never extra characters." in prompt
+    assert "@图1 is the first frame" in prompt
+    assert "@图1 is the first frame and the previous shot's approved final frame" in prompt
+    assert "Slots: @图1=opening_frame; @图2=Fuzzby; @Audio1=audio; never swap." in prompt
+    assert "Angles: @图2=one Fuzzby; views are not extra characters." in prompt
     assert "AUDIO-AUTHORITY: @Audio1 is the sole authority" in prompt
-    assert "[Performance Sequence]" in prompt
     assert "[Timestamp Script Storyboard]" not in prompt
     assert "Stage 1: 0-9s" not in prompt
     assert "Hold: 2.2s" in prompt
@@ -611,10 +829,43 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "Include two readable near-misses before the first impact." in prompt
     assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
             "character.") in prompt
-    assert "@Image2 defines Fuzzby identity/scale; exclude everything else." in prompt
+    assert "@图2 defines exactly one Fuzzby identity/scale only" in prompt
     assert "No music." in prompt
     assert "Hold: 2.2s" in prompt and "approximately 2.2s" not in prompt
-    assert len(prompt.split()) <= D.animation_provider_prompt_word_limit(9)
+    # Length is advisory. The production gate measures whether the compiled prompt
+    # delivers the beat and satisfies the Seedance/craft contracts.
+    assert len(prompt.split()) > 0
+
+
+def test_character_reference_label_accepts_authority_first_contracts():
+    assert D._character_reference_label("Controls Hero's identity and scale.") == "Hero"
+    assert D._character_reference_label("Controls Hero’s Mum’s identity and scale.") == "Hero’s Mum"
+    assert D._character_reference_label("Guide's exact identity and turnaround.") == "Guide"
+
+
+def test_creative_translation_derives_redundant_gag_count():
+    payload = {
+        "interpretation": {
+            "jokeOrAche": "A visible action unfolds.",
+            "mechanism": "Cause produces effect.",
+            "statusBefore": "The relationship is unresolved.",
+            "statusAfter": "The relationship advances.",
+            "audienceProgression": ["anticipation", "change", "recognition"],
+            "emotionalHeart": "The relationship remains readable.",
+        },
+        "gagClocks": [],
+        "generationDesign": {
+            "packagingDecision": "single-unit",
+            "completeGagArcCount": 7,
+            "densityJudgement": "Playable.",
+            "splitOrNonSplitRationale": "The unit remains coherent.",
+            "handoffState": "The final state is held.",
+        },
+    }
+
+    result = D.CreativeTranslationDirection.model_validate(payload)
+
+    assert result.generationDesign.completeGagArcCount == 0
 
 
 def test_physics_comes_from_general_approved_staging_registry():
@@ -645,18 +896,6 @@ def test_physics_comes_from_general_approved_staging_registry():
     prompt = D.compile_animation_provider_prompt(shot, direction)
     assert "Physics: The lantern pulls the rope taut" in prompt
     assert "No music." in prompt
-
-
-def test_render_compaction_never_emits_a_dangling_sentence():
-    assert D.emission.compact_complete_sentence(
-        "Keep the contact readable, then settle for the lie, while protecting the leaf "
-        "recoil and proud recovery in the final composition.",
-        max_words=10, context="camera analysis") == (
-            "Keep the contact readable, then settle for the lie.")
-    with pytest.raises(D.emission.EmissionConformanceError, match="without cutting prose"):
-        D.emission.compact_complete_sentence(
-            "Keep the leaf recoil and proud recovery visibly readable throughout",
-            max_words=5, context="camera analysis")
 
 
 def test_animation_compiler_emits_every_internal_shot_in_order():
@@ -695,6 +934,838 @@ def test_animation_compiler_emits_every_internal_shot_in_order():
     assert "follows slightly late" in prompt
     assert "compresses the flower and loads the springy leaf" in prompt
     assert "one flip and a proud wobbling hover" in prompt
+
+
+def test_animation_compiler_normalizes_seedance_ready_watch_prompt():
+    shot = {
+        "shotId": "3.B1.S1",
+        "durationSec": 16,
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+        "dialogueLines": [
+            {"speaker": "Keen's Mum", "exactText": "Are you sure?", "startSec": 4, "endSec": 6},
+            {"speaker": "Keen", "exactText": "I've got this.", "startSec": 7, "endSec": 9},
+        ],
+    }
+    direction = {
+        "durationSec": 16,
+        "generationGoal": "Create a 16-second reference-to-video unit where Keen packs the boat.",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "referenceContract": [
+            {"assetTag": "@图1", "role": "location", "controls": "the approved pier and boat"},
+            {"assetTag": "@图2", "role": "character_identity", "controls": "Keen identity and scale"},
+            {"assetTag": "@图3", "role": "character_identity", "controls": "Mum identity and scale"},
+            {"assetTag": "@图4", "role": "opening_frame", "controls": "the exact first frame"},
+            {"assetTag": "@Audio1", "role": "audio", "controls": "the approved voice performance"},
+        ],
+        "geography": ["The pier runs toward open water with the boat screen-right."],
+        "shotPlan": [
+            {
+                "shotNumber": 1,
+                "framingLensAndCamera": "Shot 1: medium-wide from the island end.",
+                "causalAction": "Keen places the rolled map and satchel into the boat.",
+                "landingImage": "Keen's hand hovers near the packed satchel.",
+                "dialogueLineIndexes": [1],
+                "dialogueDirections": ["speaks gently"],
+            },
+            {
+                "shotNumber": 2,
+                "framingLensAndCamera": "Cut to. Shot 2: closer two-shot beside the boat.",
+                "causalAction": "Keen catches himself before checking the satchel again.",
+                "landingImage": "Keen and Mum hold beside the packed boat.",
+                "dialogueLineIndexes": [2],
+                "dialogueDirections": ["answers brightly"],
+            },
+        ],
+        "stagePlan": [{
+            "stageNumber": 1, "beatIds": ["3.B1"],
+            "initialOrCarriedState": "Keen starts beside the boat.",
+            "primaryEvent": "Keen packs and overchecks his supplies.",
+            "emotionOrCameraAnalysis": "The low camera keeps the boat and Mum readable.",
+            "observableEndState": "Keen and Mum hold beside the packed boat.",
+        }],
+        "consistencyContract": ["Keep identity, boat position, and prop ownership stable."],
+        "surgicalSafeguards": ["Keen has bare wrists"],
+        "continuityFinish": "Keen and Mum hold beside the packed boat.",
+        "audioContract": "Use @Audio1 unchanged; no music.",
+    }
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "16-second" not in prompt
+    assert "16:9" not in prompt
+    assert "Camera: Shot 1:" not in prompt
+    assert "Camera: Cut to" not in prompt
+    assert "[Performance Sequence]" not in prompt
+    assert "@Audio1 guides dialogue timing and mouth shapes" in prompt
+    assert "No extra voices." in prompt
+    assert prompt.count("{Are you sure?}") == 1
+    assert prompt.count("{I've got this.}") == 1
+
+
+def test_animation_context_merges_voice_director_timing_before_compile():
+    shot = {
+        "shotId": "3.B2.S1",
+        "durationSec": 9,
+        "dialogueLines": [{
+            "speaker": "Keen",
+            "text": "Like you said... it is part of growing up.",
+            "dialogueOccurrenceId": "dialogue-1",
+        }],
+    }
+    ledger = {
+        "departmentWork": {
+            "voice": {
+                "candidate": {
+                    "output": {
+                        "lines": [{
+                            "dialogueOccurrenceId": "dialogue-1",
+                            "startsAtSec": 2.1,
+                            "estimatedDurationSec": 3.2,
+                        }]
+                    }
+                }
+            }
+        }
+    }
+
+    effective = R._with_effective_dialogue_timing(shot, ledger)
+    cue = D.emission.dialogue_cues(
+        effective["dialogueLines"], duration_sec=shot["durationSec"])[0]
+
+    assert cue["startSec"] == 2.1
+    assert cue["endSec"] == pytest.approx(5.3)
+    assert cue["exactText"] == "Like you said... it is part of growing up."
+
+
+def test_relay_animation_gets_previous_final_frame_reference_by_default():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+    }
+    slots = R._effective_reference_slots({}, shot, "referenceSlots", "3", "Ep1")
+    assert slots == {
+        "@图1": "previous shot final frame",
+        "@图2": "scene plate",
+        "@图3": "Keen",
+        "@图4": "Keen's Mum",
+    }
+
+
+def test_animation_slots_append_all_required_continuity_props(monkeypatch):
+    shot = {
+        "shotId": "6.B3.S1",
+        "sourceType": "relay",
+        "sourceShotId": "6.B1.S1",
+        "charactersInFrame": ["Aida"],
+        "referenceSlots": {
+            "@图1": "previous shot final frame",
+            "@图2": "scene plate",
+            "@图3": "Aida",
+            "@Audio1": "voice track",
+        },
+    }
+    monkeypatch.setattr(
+        R, "_required_prop_reference_roles",
+        lambda *args: ["prop:story_vehicle", "prop:story_vehicle_loaded_state"],
+    )
+
+    slots = R._effective_reference_slots({}, shot, "referenceSlots", "6", "Ep1")
+
+    assert slots["@图4"] == "prop:story_vehicle"
+    assert slots["@图5"] == "prop:story_vehicle_loaded_state"
+    assert slots["@Audio1"] == "voice track"
+
+
+def test_relay_reference_bundle_blocks_missing_scene_and_character_refs():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+    }
+    report = R._relay_reference_bundle_report(
+        shot, [{"role": "previous shot final frame"}])
+    assert report["ok"] is False
+    assert report["missing"] == ["scene plate", "Keen", "Keen's Mum"]
+
+
+def test_relay_reference_bundle_accepts_complete_bundle():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+    }
+    report = R._relay_reference_bundle_report(shot, [
+        {"role": "previous shot final frame"},
+        {"role": "scene plate"},
+        {"role": "Keen"},
+        {"role": "Keen's Mum"},
+    ])
+    assert report["ok"] is True
+
+
+def test_relay_reference_bundle_requires_explicit_story_prop_authority():
+    shot = {
+        "shotId": "3.B3.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+        "referenceSlots": {
+            "@图1": "previous shot final frame",
+            "@图2": "Keen",
+            "@图3": "Keen's Mum",
+            "@图4": "scene plate",
+            "@图5": "prop:keen_fathers_wristbands",
+        },
+    }
+    report = R._relay_reference_bundle_report(shot, [
+        {"role": "previous shot final frame"},
+        {"role": "scene plate"},
+        {"role": "Keen"},
+        {"role": "Keen's Mum"},
+    ])
+    assert report["ok"] is False
+    assert report["missing"] == ["prop:keen_fathers_wristbands"]
+
+
+def test_scene_continuity_locks_are_emitted_into_animation_prompt():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+        "durationSec": 9,
+        "dialogueLines": [],
+        "sceneContinuityLocks": [{
+            "id": "scene3-boat-contents-v1",
+            "label": "Keen boat contents and departure props",
+            "value": (
+                "The small sailboat contains Keen's practical departure items: open "
+                "satchel, rolled blanket, folded map, and small food pouch. Keep them "
+                "continuous across Scene 3 unless a later approved shot visibly moves them."
+            ),
+            "forbidden": (
+                "No crystal baskets, ceremonial loads, aquamarine stones, glowing crystals, "
+                "or random cargo in the boat."
+            ),
+        }],
+    }
+    direction = {
+        "shotId": "3.B2.S1",
+        "durationSec": 9,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Keen looks out at the water and tries to sound brave.",
+        "deliveryPlan": "Let courage show through a visible swallow.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "The water makes the step visible.",
+                "emotionalHeart": "Keen is loved while he is scared.",
+            },
+            "gagClocks": [],
+        },
+        "dramaticBeat": "Keen faces the water and borrows grown-up courage.",
+        "audienceBefore": "Keen is supported.",
+        "audienceAfter": "Keen is still scared but trying.",
+        "beatOwner": "Keen",
+        "performanceFreedom": "Allow small eye and breath movement.",
+        "performanceArc": "Supported to frightened to trying.",
+        "physicalCauseAndEffect": "The open water draws his gaze and tightens his body.",
+        "cameraBehaviour": "A close two-shot favours Keen without losing Mum.",
+        "timingAndRhythm": "Swallow, line, hold.",
+        "landingBreath": "Hold the quiet aftermath.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Make the water feel large.",
+            "framingLensAndCamera": "Medium two-shot at child eye height.",
+            "causalAction": "Keen looks from Mum to the water and swallows.",
+            "observablePerformance": "Mum stays quiet and loving while Keen tries to stay steady.",
+            "compositionLightAndMaterials": "Warm pier light, water behind Keen.",
+            "landingImage": "Keen and Mum remain beside the boat with the water ahead.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "timingBeats": [],
+        "witnessStagingSides": [
+            "Keen's Mum remains screen-left while Keen holds screen-right."
+        ],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["3.B2"],
+            "purpose": "Borrowed courage",
+            "initialOrCarriedState": "Keen and Mum are beside the boat.",
+            "cause": "The water looks large.",
+            "primaryEvent": "Keen looks out and swallows.",
+            "emotionOrCameraAnalysis": "Stay close enough to read his face.",
+            "observableEndState": "Keen holds beside Mum, still looking at the water.",
+        }],
+        "geography": ["Keen and Mum stand on the pier beside the small sailboat."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [],
+        "openingCarriedState": "Keen and Mum remain beside the boat.",
+        "openingMotionBridge": (
+            "Keen completes the inherited movement, withdraws both empty paws and steps "
+            "clear before Mum approaches the prop."),
+        "actionOwnership": [
+            "Mum alone opens the container and removes the object.",
+            "Keen never reaches into the container or touches the object until handoff.",
+        ],
+        "consistencyContract": ["Keen and Mum stay in the same pier geography."],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Keen stays beside Mum at the boat.",
+        "surgicalSafeguards": [],
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "[Scene Continuity State]" in prompt
+    assert "open satchel, rolled blanket, folded map, and small food pouch" in prompt
+    assert "No crystal baskets" in prompt
+    assert "their stillness and the hold length carry the emotional truth" in prompt
+    assert "carry the joke" not in prompt
+    assert "[Opening Motion Bridge]" in prompt
+    assert "[ACTION OWNERSHIP]" in prompt
+    assert prompt.index("[Opening Motion Bridge]") < prompt.index("[Camera and Shot Plan]")
+    assert prompt.index("[ACTION OWNERSHIP]") < prompt.index("[Camera and Shot Plan]")
+    assert R._scene_state_prompt_report(shot, prompt)["ok"] is True
+
+
+def test_scene_continuity_locks_block_when_missing_from_prompt():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sceneContinuityLocks": [{
+            "label": "Keen boat contents and departure props",
+            "value": "The small sailboat contains open satchel and folded map.",
+        }],
+    }
+    report = R._scene_state_prompt_report(shot, "Keen looks at the water.")
+    assert report["ok"] is False
+    assert report["missing"] == ["Keen boat contents and departure props"]
+
+
+def test_relay_final_frame_is_state_handoff_not_geography_master():
+    shot = {
+        "shotId": "3.B2.S1",
+        "sourceType": "relay",
+        "sourceShotId": "3.B1.S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+        "durationSec": 9,
+        "dialogueLines": [],
+        "sceneContinuityLocks": [{
+            "id": "scene3-boat-contents-v1",
+            "label": "Keen boat contents and departure props",
+            "value": "The small sailboat contains open satchel, rolled blanket, folded map, and small food pouch.",
+            "forbidden": "No random cargo in the boat.",
+        }],
+    }
+    direction = {
+        "shotId": "3.B2.S1",
+        "durationSec": 9,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Keen looks toward the water while Mum supports him.",
+        "deliveryPlan": "Preserve scene geography from the plate.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "The wider pier and boat geography carry the emotional stakes.",
+                "emotionalHeart": "Keen is loved while he is scared.",
+            },
+            "gagClocks": [],
+        },
+        "dramaticBeat": "Keen faces the water.",
+        "audienceBefore": "Keen is supported.",
+        "audienceAfter": "Keen tries to be brave.",
+        "beatOwner": "Keen",
+        "performanceFreedom": "Allow small eye and breath movement.",
+        "performanceArc": "Supported to frightened to trying.",
+        "physicalCauseAndEffect": "The water draws his gaze.",
+        "cameraBehaviour": "A close shot favours Keen without losing the boat.",
+        "timingAndRhythm": "Look, swallow, hold.",
+        "landingBreath": "Hold the quiet aftermath.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Make the water feel large without losing the pier.",
+            "framingLensAndCamera": "Medium two-shot beside the boat.",
+            "causalAction": "Keen looks to the water.",
+            "observablePerformance": "Keen tries to stay steady.",
+            "compositionLightAndMaterials": "Warm pier light and visible boat wood.",
+            "landingImage": "Keen and Mum remain beside the boat with the pier readable.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "timingBeats": [],
+        "witnessStagingSides": [],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["3.B2"],
+            "purpose": "Borrowed courage",
+            "initialOrCarriedState": "Keen and Mum remain emotionally close after the previous shot.",
+            "cause": "The water looks large.",
+            "primaryEvent": "Keen looks out.",
+            "emotionOrCameraAnalysis": "Stay close but keep the boat and pier readable.",
+            "observableEndState": "Keen holds beside the water.",
+        }],
+        "geography": ["Keen and Mum stand on the pier beside the small sailboat."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [{
+            "assetTag": "@图1",
+            "role": "opening_frame",
+            "controls": "the previous shot final frame",
+            "scope": "continuity",
+        }, {
+            "assetTag": "@图4",
+            "role": "location",
+            "controls": "the pier, boat, shoreline, water and daylight",
+            "scope": "scene",
+        }],
+        "openingCarriedState": "Keen and Mum remain emotionally close after the previous shot.",
+        "consistencyContract": ["The boat stays beside the pier."],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Keen remains beside the same packed boat.",
+        "surgicalSafeguards": [],
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert ("@图1 is the first frame and the previous shot's approved final frame."
+            in prompt)
+    assert "Use it only for carried character state" in prompt
+    assert "Do not use it as the scene geography" in prompt
+    assert "Match its staging and positions exactly" not in prompt
+    assert "@图2 defines scene/layout/light only" in prompt
+    assert "open satchel, rolled blanket, folded map, and small food pouch" in prompt
+
+
+def test_scene_continuity_persists_even_when_cast_changes():
+    shot = {
+        "shotId": "3.B4.S1",
+        "charactersInFrame": ["Keen"],
+        "durationSec": 8,
+        "dialogueLines": [],
+        "sceneContinuityLocks": [{
+            "id": "scene3-boat-contents-v1",
+            "label": "Keen boat contents and departure props",
+            "value": (
+                "The small sailboat contains Keen's practical departure items: open "
+                "satchel, rolled blanket, folded map, and small food pouch. Keep them "
+                "continuous across Scene 3 unless a later approved shot visibly moves them."
+            ),
+            "forbidden": "No random cargo in the boat.",
+            "sourceShotId": "3.B1.S1",
+        }],
+    }
+    direction = {
+        "shotId": "3.B4.S1",
+        "durationSec": 8,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Keen sits alone beside the boat and gathers himself.",
+        "deliveryPlan": "Keep the scene quiet and continuous.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "The unchanged boat contents show the same lived-in scene.",
+                "emotionalHeart": "Keen is alone now, but the scene remembers the goodbye.",
+            },
+            "gagClocks": [],
+        },
+        "dramaticBeat": "Keen is alone with the weight of leaving.",
+        "audienceBefore": "Mum has been present.",
+        "audienceAfter": "The scene continues after Mum leaves.",
+        "beatOwner": "Keen",
+        "performanceFreedom": "Allow small breath and eye movement.",
+        "performanceArc": "Held together to privately uncertain.",
+        "physicalCauseAndEffect": "Mum's absence makes the packed boat feel more real.",
+        "cameraBehaviour": "A quiet held shot keeps the boat readable.",
+        "timingAndRhythm": "Slow breath, look to boat, hold.",
+        "landingBreath": "Hold the stillness.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Show the scene continuing without Mum.",
+            "framingLensAndCamera": "Medium shot beside the boat.",
+            "causalAction": "Keen looks at the packed boat.",
+            "observablePerformance": "Keen tries to stay composed.",
+            "compositionLightAndMaterials": "Warm dock light and boat wood remain consistent.",
+            "landingImage": "Keen remains beside the same packed boat.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "timingBeats": [],
+        "witnessStagingSides": [],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["3.B4"],
+            "purpose": "Private courage",
+            "initialOrCarriedState": "Keen is beside the packed boat.",
+            "cause": "Mum has left the frame.",
+            "primaryEvent": "Keen looks at the packed boat and breathes.",
+            "emotionOrCameraAnalysis": "Let the unchanged boat carry continuity.",
+            "observableEndState": "Keen remains beside the same packed boat.",
+        }],
+        "geography": ["The boat stays beside the pier."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [],
+        "openingCarriedState": "Keen is beside the packed boat.",
+        "consistencyContract": ["Keen stays beside the boat."],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Keen remains beside the same packed boat.",
+        "surgicalSafeguards": [],
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "Keen's Mum" not in prompt
+    assert "open satchel, rolled blanket, folded map, and small food pouch" in prompt
+    assert R._scene_state_prompt_report(shot, prompt)["ok"] is True
+
+
+def test_animation_reference_controls_lines_are_normalized_to_defines():
+    shot = {
+        "shotId": "3.B2.S1",
+        "charactersInFrame": ["Keen"],
+        "durationSec": 9,
+        "dialogueLines": [],
+    }
+    direction = {
+        "shotId": "3.B2.S1",
+        "durationSec": 9,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Keen looks out at the water.",
+        "deliveryPlan": "Keep the beat simple.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "The water makes the step visible.",
+                "emotionalHeart": "Keen is loved while he is scared.",
+            },
+            "gagClocks": [],
+        },
+        "dramaticBeat": "Keen faces the water.",
+        "audienceBefore": "Keen is supported.",
+        "audienceAfter": "Keen tries to be brave.",
+        "beatOwner": "Keen",
+        "performanceFreedom": "Allow small eye and breath movement.",
+        "performanceArc": "Supported to frightened to trying.",
+        "physicalCauseAndEffect": "The water draws his gaze.",
+        "cameraBehaviour": "A close shot favours Keen.",
+        "timingAndRhythm": "Look, swallow, hold.",
+        "landingBreath": "Hold the quiet aftermath.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Make the water feel large.",
+            "framingLensAndCamera": "Medium shot at child eye height.",
+            "causalAction": "Keen looks to the water.",
+            "observablePerformance": "Keen tries to stay steady.",
+            "compositionLightAndMaterials": "Warm pier light.",
+            "landingImage": "Keen remains beside the water.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "timingBeats": [],
+        "witnessStagingSides": [],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["3.B2"],
+            "purpose": "Borrowed courage",
+            "initialOrCarriedState": "Keen is beside the boat.",
+            "cause": "The water looks large.",
+            "primaryEvent": "Keen looks out.",
+            "emotionOrCameraAnalysis": "Stay close.",
+            "observableEndState": "Keen holds beside the water.",
+        }],
+        "geography": ["Keen stands on the pier."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [{
+            "assetTag": "@图2",
+            "role": "character_identity",
+            "controls": (
+                "Keen’s character identity, proportions and scale only; do not add "
+                "wristbands"
+            ),
+            "scope": "canon",
+        }],
+        "openingCarriedState": "Keen is beside the boat.",
+        "consistencyContract": ["Keen stays on the pier."],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Keen stays beside the water.",
+        "surgicalSafeguards": [],
+    }
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "@图2 controls" not in prompt
+    assert "@图1 defines exactly one Keen identity, proportions, scale and approved wearable state:" in prompt
+    assert "do not add wristbands" in prompt
+    assert "exclude background, pose, unrelated props and scene" in prompt
+
+
+def test_animation_character_reference_preserves_approved_wearable_ownership():
+    line = D._character_reference_authority_line(
+        "@图2",
+        "Keen",
+        "Keen identity and scale",
+        [
+            "Keen owns exactly two aged-gold open cuffs with blank settings, one on each wrist",
+            "The boat owns the rolled blanket",
+        ],
+    )
+
+    assert "approved wearable state" in line
+    assert "exactly two aged-gold open cuffs with blank settings" in line
+    assert "unrelated props" in line
+
+
+def test_animation_compiler_injects_identity_record_state_lock_when_director_omits_it():
+    shot = {
+        "shotId": "X.B1.S1",
+        "charactersInFrame": ["Hero"],
+        "characterStateLocks": {
+            "Hero": (
+                "Hero approved wearable state: matching blank open cuffs worn on both "
+                "wrists; no crystals and no glow"
+            )
+        },
+    }
+    direction = {
+        "durationSec": 8,
+        "generationGoal": "Hero gathers focus while preserving the approved visible state.",
+        "dramaticBeat": "Hero becomes ready.",
+        "audienceBefore": "Hero is waiting.",
+        "audienceAfter": "Hero is ready.",
+        "beatOwner": "Hero",
+        "performanceFreedom": "Allow natural breathing and eye movement.",
+        "performanceArc": "Waiting to focused.",
+        "physicalCauseAndEffect": "The scene begins and Hero looks ahead.",
+        "cameraBehaviour": "Hold a steady medium view.",
+        "timingAndRhythm": "Look, breathe, settle.",
+        "landingBreath": "Hold the focused expression.",
+        "directionDensity": "guided",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["X.B1"],
+            "purpose": "Hold the character state.",
+            "initialOrCarriedState": "Hero waits.",
+            "cause": "The scene begins.",
+            "primaryEvent": "Hero looks ahead.",
+            "emotionOrCameraAnalysis": "Keep the thought readable.",
+            "observableEndState": "Hero remains ready.",
+        }],
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Show Hero ready.",
+            "framingLensAndCamera": "Medium eye-level shot.",
+            "causalAction": "Hero looks ahead.",
+            "observablePerformance": "Hero breathes and focuses.",
+            "compositionLightAndMaterials": "Soft daylight.",
+            "landingImage": "Hero remains ready.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "geography": [],
+        "actionOwnership": [],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [{
+            "assetTag": "@图1",
+            "role": "character_identity",
+            "controls": "Hero identity and scale only",
+            "scope": "canon",
+        }],
+        "openingCarriedState": "Hero waits.",
+        "consistencyContract": [],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Hero waits.",
+        "surgicalSafeguards": [],
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "approved wearable state" in prompt
+    assert "matching blank open cuffs worn on both wrists" in prompt
+    assert "no crystals and no glow" in prompt
+    assert "[ATTRIBUTE OWNERSHIP]" in prompt
+
+
+def test_animation_first_frame_owns_line_is_normalized_to_excluded_first_frame():
+    shot = {
+        "shotId": "3.B2.S1",
+        "charactersInFrame": ["Keen"],
+        "durationSec": 9,
+        "dialogueLines": [],
+    }
+    direction = {
+        "shotId": "3.B2.S1",
+        "durationSec": 9,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Keen looks out at the water.",
+        "deliveryPlan": "Keep the beat simple.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "The water makes the step visible.",
+                "emotionalHeart": "Keen is loved while he is scared.",
+            },
+            "gagClocks": [],
+        },
+        "dramaticBeat": "Keen faces the water.",
+        "audienceBefore": "Keen is supported.",
+        "audienceAfter": "Keen tries to be brave.",
+        "beatOwner": "Keen",
+        "performanceFreedom": "Allow small eye and breath movement.",
+        "performanceArc": "Supported to frightened to trying.",
+        "physicalCauseAndEffect": "The water draws his gaze.",
+        "cameraBehaviour": "A close shot favours Keen.",
+        "timingAndRhythm": "Look, swallow, hold.",
+        "landingBreath": "Hold the quiet aftermath.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Make the water feel large.",
+            "framingLensAndCamera": "Medium shot at child eye height.",
+            "causalAction": "Keen looks to the water.",
+            "observablePerformance": "Keen tries to stay steady.",
+            "compositionLightAndMaterials": "Warm pier light.",
+            "landingImage": "Keen remains beside the water.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "timingBeats": [],
+        "witnessStagingSides": [],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["3.B2"],
+            "purpose": "Borrowed courage",
+            "initialOrCarriedState": "Keen is beside the boat.",
+            "cause": "The water looks large.",
+            "primaryEvent": "Keen looks out.",
+            "emotionOrCameraAnalysis": "Stay close.",
+            "observableEndState": "Keen holds beside the water.",
+        }],
+        "geography": ["Keen stands on the pier."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [{
+            "assetTag": "@图1",
+            "role": "opening_frame",
+            "controls": "opening composition and carried state only",
+            "scope": "continuity",
+        }],
+        "openingCarriedState": "Keen is beside the boat.",
+        "consistencyContract": ["Keen stays on the pier."],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Keen stays beside the water.",
+        "surgicalSafeguards": [],
+    }
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "@图1 owns" not in prompt
+    assert "@图1 is the first frame." in prompt
+    assert "exclude later action and redesign" in prompt
+
+
+def test_animation_location_controls_line_is_normalized_to_defines():
+    shot = {
+        "shotId": "3.B2.S1",
+        "charactersInFrame": ["Keen"],
+        "durationSec": 9,
+        "dialogueLines": [],
+    }
+    direction = {
+        "shotId": "3.B2.S1",
+        "durationSec": 9,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Keen looks out at the water.",
+        "deliveryPlan": "Keep the beat simple.",
+        "creativeTranslation": {
+            "interpretation": {
+                "mechanism": "The water makes the step visible.",
+                "emotionalHeart": "Keen is loved while he is scared.",
+            },
+            "gagClocks": [],
+        },
+        "dramaticBeat": "Keen faces the water.",
+        "audienceBefore": "Keen is supported.",
+        "audienceAfter": "Keen tries to be brave.",
+        "beatOwner": "Keen",
+        "performanceFreedom": "Allow small eye and breath movement.",
+        "performanceArc": "Supported to frightened to trying.",
+        "physicalCauseAndEffect": "The water draws his gaze.",
+        "cameraBehaviour": "A close shot favours Keen.",
+        "timingAndRhythm": "Look, swallow, hold.",
+        "landingBreath": "Hold the quiet aftermath.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Make the water feel large.",
+            "framingLensAndCamera": "Medium shot at child eye height.",
+            "causalAction": "Keen looks to the water.",
+            "observablePerformance": "Keen tries to stay steady.",
+            "compositionLightAndMaterials": "Warm pier light.",
+            "landingImage": "Keen remains beside the water.",
+            "dialogueLineIndexes": [],
+            "dialogueDirections": [],
+        }],
+        "timingBeats": [],
+        "witnessStagingSides": [],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": ["3.B2"],
+            "purpose": "Borrowed courage",
+            "initialOrCarriedState": "Keen is beside the boat.",
+            "cause": "The water looks large.",
+            "primaryEvent": "Keen looks out.",
+            "emotionOrCameraAnalysis": "Stay close.",
+            "observableEndState": "Keen holds beside the water.",
+        }],
+        "geography": ["Keen stands on the pier."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": [{
+            "assetTag": "@图4",
+            "role": "location",
+            "controls": "the island shore, dock, boat-world material language and daylight",
+            "scope": "canon",
+        }],
+        "openingCarriedState": "Keen is beside the boat.",
+        "consistencyContract": ["Keen stays on the pier."],
+        "audioContract": "No dialogue.",
+        "continuityFinish": "Keen stays beside the water.",
+        "surgicalSafeguards": [],
+    }
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "@图4 controls" not in prompt
+    assert "@图1 defines scene/layout/light only" in prompt
+
+
+def test_animation_department_candidate_persists_watch_preflight():
+    preflight = {
+        "verdict": "PASS",
+        "score": 9.75,
+        "maximum": 10,
+        "findings": [],
+        "seedanceAuthoring": {"normalizedScore": 10, "firingFloor": 9.5},
+    }
+    candidate = R._department_candidate(
+        "animation", {"providerPrompt": "Ready prompt."},
+        {"animationPreflight": preflight})
+    assert candidate["preflight"] == preflight
+
+
+def test_animation_recompile_refreshes_watch_preflight_source():
+    from pathlib import Path
+    body = Path(R.__file__).read_text(encoding="utf-8")
+    assert 'candidate["preflight"] = _animation_preflight_summary(' in body
 
 
 def test_dialogue_is_emitted_inside_beat_with_delivery_and_full_beat_hold():

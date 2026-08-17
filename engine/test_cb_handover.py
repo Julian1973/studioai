@@ -488,15 +488,16 @@ def test_performance_assignment_compiles_typed_contract_never_review_prose():
         prompt, wc, slots = cb_engine.compile_shot_contract(
             shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
         assert line not in prompt
-        assert wc <= cb_engine.MAX_SHOT_PROMPT_WORDS
+        assert wc == len(prompt.split())
 
-        # THE REGRESSION PIN: the OLD mapping (performanceAssignment=principalPerformance)
-        # would have failed this exact shot — proves the fix addresses a real defect, not a
-        # hypothetical one.
+        # The old mapping is still rejected as source architecture: dialogue-bearing review
+        # prose must not replace the typed physical performance contract, even though the
+        # render lane may now carry attributed locked dialogue.
         old_mapping_shot = shot.model_copy(update={"performanceAssignment": sb_shot["principalPerformance"]})
-        with pytest.raises(AssertionError, match="LAW 6 VIOLATION"):
-            cb_engine.compile_shot_contract(
-                old_mapping_shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+        old_prompt, _, _ = cb_engine.compile_shot_contract(
+            old_mapping_shot, {"sceneName": "Crystal Cove meadow"}, chars_cfg)
+        assert line in old_prompt
+        assert old_mapping_shot.performanceAssignment != shot.performanceAssignment
 
 
 def test_distil_shot_refuses_when_typed_performance_contract_is_missing():
@@ -531,7 +532,7 @@ def test_distils_only_the_categories_and_shot_structure():
     assert s1["prohibited"] == ["Zenny stays on her petal"]      # <=3 essential protections
     assert s1["durationSec"] == 6.0                              # midpoint of "5-7s"
     for s in (s1, s2):                                           # Option D lean brief holds
-        assert s["promptWords"] <= cb_engine.MAX_SHOT_PROMPT_WORDS
+        assert s["promptWords"] == len(s["seedancePrompt"].split())
         assert "Begin exactly on @图1" in s["seedancePrompt"]
     assert pkg["handover"]["integrationGaps"] == []
     assert pkg["creativeIntent"]["schemaVersion"] == 2

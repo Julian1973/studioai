@@ -98,3 +98,39 @@ def test_voice_status_uses_compiled_track_instead_of_stale_working_prompt(monkey
     assert status["generatedLineCount"] == 1
     assert status["expectedLineCount"] == 1
     assert status["shotDurationSec"] == 9
+
+
+def test_take_remains_current_when_only_compiler_audit_hash_changes(
+        tmp_path, monkeypatch):
+    take = tmp_path / "voice.wav"
+    take.write_bytes(b"voice")
+    generated = [{
+        "dialogueOccurrenceId": "occ-1", "sourceEventId": "event-1",
+        "speaker": "Fuzzby", "text": "[casual] Nailed it.",
+        "voiceId": "voice-1", "modelId": "eleven_v3",
+        "voiceSettings": {"stability": 0.4}, "previousText": "He lands.",
+        "recipeId": "primary", "compiledHash": "old-audit-hash",
+    }]
+    current = [{**generated[0], "compiledHash": "new-audit-hash"}]
+    package = {
+        "sceneNumber": "1", "episode": "Ep1",
+        "shots": [{
+            "shotId": "S1.SH1", "durationSec": 9,
+            "dialogueLines": [{
+                "dialogueOccurrenceId": "occ-1", "sourceEventId": "event-1",
+                "speaker": "Fuzzby", "exactText": "Nailed it.",
+            }],
+        }],
+        "continuityLedger": [{
+            "shotId": "S1.SH1", "voPath": str(take),
+            "voGeneratedFrom": generated,
+        }],
+    }
+    monkeypatch.setattr(
+        cb_render, "load_pkg", lambda scene, episode="Ep1": (package, tmp_path / "pkg.json"))
+    monkeypatch.setattr(cb_render, "_approved_department_output", lambda *args: {"lines": []})
+    monkeypatch.setattr(cb_render, "_approved_voice_lines", lambda pkg, shot: current)
+
+    status = cb_render.voice_performance_status("1", "S1.SH1", "Ep1")
+
+    assert status["takeMatchesCurrent"] is True

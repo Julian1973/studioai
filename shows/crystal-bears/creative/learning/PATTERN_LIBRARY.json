@@ -103,6 +103,74 @@
    "maturity": "observation",
    "approvalState": "awaiting-human-decision",
    "regression": null
+  },
+  {
+   "patternId": "pat-582c8da8",
+   "proposedAt": "2026-08-16T05:54:17",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on shot 4.B1.S1: “Julian approved the locked Scene 4 30-second production-unit structure. This approves direction and packing only; SEE, HEAR and WATCH remain separate human gates.”",
+   "supportingEvidence": [
+    "ev-4ebc1592e8"
+   ],
+   "contradictingEvidence": [],
+   "scope": "shot",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-24256fbf",
+   "proposedAt": "2026-08-16T05:54:17",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on shot 4.B3.S1: “Julian approved the locked Scene 4 30-second production-unit structure. This approves direction and packing only; SEE, HEAR and WATCH remain separate human gates.”",
+   "supportingEvidence": [
+    "ev-bb9b6bb55d"
+   ],
+   "contradictingEvidence": [],
+   "scope": "shot",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-18a505b5",
+   "proposedAt": "2026-08-16T05:54:17",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on shot 4.B5.S1: “Julian approved the locked Scene 4 30-second production-unit structure. This approves direction and packing only; SEE, HEAR and WATCH remain separate human gates.”",
+   "supportingEvidence": [
+    "ev-a873ac1b73"
+   ],
+   "contradictingEvidence": [],
+   "scope": "shot",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
+  },
+  {
+   "patternId": "pat-f9ab11ad",
+   "proposedAt": "2026-08-16T10:14:34",
+   "proposedBy": "human_feedback(Julian)",
+   "lesson": "User feedback on scene 6: “Approved for Scene 6 production: storm-cove emergency arrival, Aida locating Keen, the bears closing ranks, and the crystal response remain the directed scene spine.”",
+   "supportingEvidence": [
+    "ev-e95eacb841"
+   ],
+   "contradictingEvidence": [],
+   "scope": "scene",
+   "category": "creative",
+   "confidence": "low",
+   "proposedSource": null,
+   "maturity": "observation",
+   "approvalState": "awaiting-human-decision",
+   "regression": null
   }
  ]
 }

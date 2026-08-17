@@ -653,6 +653,7 @@
     "wristband_states": {
       "none": [],
       "vacant": [
+        "../cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
         "../cb-seed/assets/ep1/CB_Keen_wristband_vacant.jpeg"
       ],
       "crystal": [
@@ -683,7 +684,7 @@
       "cuffs": {
         "label": "With cuffs \u2014 canonical",
         "canonical": true,
-        "turnaround": "../cb-seed/assets/characters/Keen/CB_Keen_char-sheet.jpeg",
+        "turnaround": "../cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
         "wristbandStates": [
           "none",
           "vacant",

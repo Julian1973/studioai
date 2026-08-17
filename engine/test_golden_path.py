@@ -1529,6 +1529,9 @@ def test_batch_resume_is_idempotent_never_repays(world):
         assert led["batch"]["status"] == "generating"
         assert led["batch"]["done"] == [1, 2]
         assert led["batch"]["failed"][0]["candidate"] == 3          # failure persisted
+        # Legacy/session records may carry JSON null rather than omitting the counter.
+        # Completing a resumable batch must normalize that state, not lose landed media.
+        led["candidatesGenerated"] = None
         # a resume WITHOUT the original token is refused
         with _pt.raises(R.Refused, match="original spend token"):
             R.fire_shot("9", "1.B1.S1", "EpT", spend_token="deadbeef" * 4,

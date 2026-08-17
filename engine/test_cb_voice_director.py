@@ -95,3 +95,32 @@ def test_voice_path_rejects_a_dangling_performed_sentence():
     item["takeRecipes"][0]["performedText"] = "[exhales][confident] Nailed it"
     with pytest.raises(V.VoiceContractError, match="complete spoken sentence"):
         V.compile_line(item, LOCKED)
+
+
+def test_voice_path_preserves_a_scripted_interruption():
+    locked = {**LOCKED, "exactText": "I am extremely—"}
+    item = copy.deepcopy(direction())
+    item["exactDialogue"] = "I am extremely—"
+    item["takeRecipes"] = [{**item["takeRecipes"][0],
+                             "performedText": "[exhales][confident] I am extremely—"}]
+    item["pauseReasons"] = ["The dash is an interruption caused by a visible discovery."]
+    compiled = V.compile_line(item, locked)
+    requests = V.emit_v3_requests(compiled)
+    assert requests[0]["body"]["text"] == "[exhales][confident] I am extremely—"
+
+
+def test_group_chorus_binds_every_named_canon_voice():
+    locked = {
+        **LOCKED,
+        "speaker": "ALL",
+        "voiceTreatment": "group_chorus",
+        "chorusMembers": ["Aida", "Amie", "Howey"],
+    }
+    item = copy.deepcopy(direction())
+    item.update({"character": "ALL", "speaker": "ALL"})
+    compiled = V.compile_line(item, locked)
+    cards = V.voice_cards()["characters"]
+    assert compiled["voiceTreatment"] == "group_chorus"
+    assert compiled["chorusMembers"] == ["Aida", "Amie", "Howey"]
+    assert compiled["voiceIds"] == [
+        cards[name]["voiceId"] for name in ("Aida", "Amie", "Howey")]

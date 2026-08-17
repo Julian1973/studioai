@@ -1,0 +1,127 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S4_plate_candidate_9cf748dc.png",
+  "hash": "bc130f58c332ae21a281c532267afbdb07797a5164f0c610277ceac89d957aad",
+  "inputSignature": {
+   "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+   "briefHash": "c74377596d6fec0eb88c05db8ab82cee61ccb462567a99dbe10cedb8c181933c",
+   "referenceHashes": {},
+   "plateHash": "bc130f58c332ae21a281c532267afbdb07797a5164f0c610277ceac89d957aad"
+  },
+  "referencePath": null,
+  "generatedAt": "2026-08-15T22:43:07",
+  "source": "library",
+  "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S4_plate_candidate_771dc941.png",
+  "packageRevision": 3,
+  "approvedAt": "2026-08-15T22:43:07",
+  "reviewedBy": "Continuity signature migration"
+ },
+ "candidate": null,
+ "history": [
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S4_plate_candidate_1e1cd79b.png",
+   "hash": "d819f648d171999b733a9de927e88b56b13c488d2b46337d7f3d6732b6d0a87f",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "c74377596d6fec0eb88c05db8ab82cee61ccb462567a99dbe10cedb8c181933c",
+    "referenceHashes": {},
+    "plateHash": "d819f648d171999b733a9de927e88b56b13c488d2b46337d7f3d6732b6d0a87f"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-15T08:52:50",
+   "source": "library",
+   "libraryOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_3.B7.S1_final_frame.png",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-15T20:47:25",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Not an environment-only open-sea plate: contains Keen and visible island. Retain only as Scene 3 continuity evidence; Scene 4 needs open water with no land or characters.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260815T204725/Ep1_S4_plate_candidate_1e1cd79b.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S4_plate_candidate_66646736.png",
+   "hash": "05a416d5131e80743c09b8e16bbfa937c9a0e46d8396da1b74357807490f9b21",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "c74377596d6fec0eb88c05db8ab82cee61ccb462567a99dbe10cedb8c181933c",
+    "referenceHashes": {
+     "Ep1_3.B7.S1_final_frame.png": "d819f648d171999b733a9de927e88b56b13c488d2b46337d7f3d6732b6d0a87f"
+    },
+    "plateHash": "05a416d5131e80743c09b8e16bbfa937c9a0e46d8396da1b74357807490f9b21"
+   },
+   "referencePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_3.B7.S1_final_frame.png",
+   "generatedAt": "2026-08-15T20:49:12",
+   "packageRevision": 3,
+   "outcome": "rejected",
+   "rejectedAt": "2026-08-15T20:49:48",
+   "reviewedBy": "Julian",
+   "rejectedNote": "Still not an environment-only plate: Keen dominates frame and his approved empty cuffs are absent. Use a characterless open-sea plate; carry boat and character continuity through their dedicated references.",
+   "rejectedArchivedFile": "media/archive/scenelook_rejected/20260815T204948/Ep1_S4_plate_candidate_66646736.png"
+  },
+  {
+   "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S4_plate_candidate_771dc941.png",
+   "hash": "bc130f58c332ae21a281c532267afbdb07797a5164f0c610277ceac89d957aad",
+   "inputSignature": {
+    "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+    "briefHash": "c74377596d6fec0eb88c05db8ab82cee61ccb462567a99dbe10cedb8c181933c",
+    "referenceHashes": {},
+    "plateHash": "bc130f58c332ae21a281c532267afbdb07797a5164f0c610277ceac89d957aad"
+   },
+   "referencePath": null,
+   "generatedAt": "2026-08-15T20:51:23",
+   "source": "uploaded",
+   "preservedOriginal": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/uploads/Ep1_S4_scenelook_upload_7bacf083.png",
+   "packageRevision": 3,
+   "approvedAt": "2026-08-15T20:51:23",
+   "reviewedBy": "Julian",
+   "outcome": "superseded",
+   "supersededAt": "2026-08-15T22:43:07",
+   "archivedFile": "media/archive/scenelook_superseded/20260815T224307/Ep1_S4_plate_candidate_771dc941.png"
+  }
+ ],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-15T08:51:59",
+    "editedAt": "2026-08-15T08:52:49",
+    "preparedBy": "specialist",
+    "sourceHash": "584413408cb03ef6a0cd2747618f84109bf8c00d2219789211e98208a0cf0b15",
+    "output": {
+     "creativeIntent": "Establish the scene-wide look of a small-vessel voyage turning dangerous: open water that begins in readable midday adventure light but is being overtaken by a cold, fast-building storm. The emotional beat is isolation, scale, and weather pressure without becoming too frightening for ages 4–8.",
+     "storyOfPlace": "Endless open ocean far from Crystal Cove, with no land visible anywhere. The sea feels widening and exposed, blue-grey water stretching under a sky that is rapidly filling with dense storm cloud. A lone small sailboat may appear only as a tiny environmental scale marker, dwarfed by the water and weather, never treated as a character moment.",
+     "paletteAndLighting": "Cooling midday palette: remaining traces of softened golden daylight draining into cold blue-grey, slate, misty teal, and storm violet. Light is dimmed and diffused by thick cloud cover, with brighter breaks muted behind cloud layers. Rain curtains and cloud shadows create gentle tonal contrast while keeping forms bold and legible for family animation.",
+     "materialsAndAtmosphere": "Stylized but physically believable CGI ocean: weighty rolling swells, wind-ruffled chop, soft white foam, wet reflective water surfaces, damp haze, and suspended rain. Storm clouds are voluminous and layered, with soft animated-feature sculpting rather than photoreal menace. Atmosphere should feel windy, cool, and spacious, with readable shapes and appealing saturated color beneath the grey weather.",
+     "continuityRules": [
+      "Environment-only Scene Look plate; no characters, creatures, faces, or acting beats.",
+      "No land, coastline, harbor, buildings, rocks, buoys, or other vessels on any horizon.",
+      "If included, the small sailboat must remain a tiny distant environmental scale element only, solitary and visually dwarfed by sea and sky.",
+      "Midday storm transition must be clear: daylight cooling and dimming, not night, sunset, or moonlight.",
+      "Maintain original high-end 3D CGI family animation style: appealing shapes, bold readable silhouettes, real material weight, and age-appropriate storm intensity."
+     ],
+     "providerPrompt": "Use the approved final frame of Scene 3 as Scene 4's exact continuity authority. Preserve the same little sailboat, tan sail, mast, rigging, established cargo layout, bow-first left-to-right travel, bright open-water daylight, camera side and family-animation materials. Scene 4 begins in the same bright sea state before later weather changes. Do not add land, extra vessels, characters, props or storm conditions to this opening plate. Do not alter the boat, cargo, lighting direction or travel axis."
+    },
+    "packageRevision": 3,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+     "sceneContextHash": "7d3cf65f18573daa33448b705e973e4ab78fd5c4a19460d7b1f98ba52a223545"
+    },
+    "editedBy": "Codex continuity compiler",
+    "outcome": "approved",
+    "decisionAt": "2026-08-15T08:52:49",
+    "reviewedBy": "Codex continuity compiler",
+    "note": "Internal direction approval: bind the already-approved Scene 3 final frame as Scene 4 continuity authority; no new media approved."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

@@ -130,6 +130,46 @@
       "schemaVersion": 1,
       "source": "cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
       "coverage": "360",
+      "stateSources": {
+        "no-cuffs": {
+          "source": "cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
+          "coverage": "front-and-rear",
+          "turnaroundViews": [
+            {"view": "front", "crop": [0.0, 0.0, 0.5, 1.0]},
+            {"view": "rear", "crop": [0.5, 0.0, 1.0, 1.0]}
+          ],
+          "distinguishingFeatures": [
+            "aquamarine-blue fur",
+            "upright pale-white crown tuft",
+            "both wrists and forearms completely bare"
+          ]
+        },
+        "vacant-wristbands": {
+          "source": "cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
+          "coverage": "360",
+          "turnaroundViews": [
+            {"view": "front", "crop": [0.0, 0.12, 0.25, 0.9]},
+            {"view": "three-quarter", "crop": [0.25, 0.12, 0.5, 0.9]},
+            {"view": "side", "crop": [0.5, 0.12, 0.75, 0.9]},
+            {"view": "rear", "crop": [0.75, 0.12, 1.0, 0.9]}
+          ],
+          "distinguishingFeatures": [
+            "aquamarine-blue fur",
+            "upright pale-white crown tuft",
+            "matching aged-gold vacant open cuffs worn on both wrists",
+            "blank cuff settings with no crystals and no glow"
+          ]
+        },
+        "crystal-set-wristbands": {
+          "source": "cb-seed/assets/final_turnarounds/CB_Keen.jpeg",
+          "coverage": "360",
+          "distinguishingFeatures": [
+            "aquamarine-blue fur",
+            "upright pale-white crown tuft",
+            "gold wrist cuffs with aquamarine gems"
+          ]
+        }
+      },
       "providerViews": {
         "default": {"view": "front", "crop": [0.035, 0.3, 0.295, 0.92]}
       },

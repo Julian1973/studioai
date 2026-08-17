@@ -7227,13 +7227,13 @@
       "worker": "Voice Director",
       "skill": "skills/crystal-bears-voice-director/SKILL.md",
       "model": "gpt-5.5",
-      "preparedAt": "2026-08-11T14:34:53",
+      "preparedAt": "2026-08-16T08:00:36",
       "editedAt": null,
       "preparedBy": "specialist",
-      "sourceHash": "9cb27e6b8caf37930e6582b213dd5d1ee97bbceb3a9588a79b7e34068fe79c41",
+      "sourceHash": "cb23db71f5655bd02d3306f501c04a68bfe793190b58f9939f38596d816eb716",
       "output": {
        "shotId": "S1.SH1B",
-       "sceneIntention": "Protect the pollen moustache reveal as Fuzzby tries to convert a visible accident into rank, then let Zenny’s restrained affection puncture it with dry precision.",
+       "sceneIntention": "Protect the pollen moustache reveal as Fuzzby’s invented status, then let Zenny’s still, affectionate deadpan turn the evidence into the relationship punchline.",
        "lines": [
         {
          "dialogueOccurrenceId": "dialogue-occurrence:sha256:7ad21a791c2158e10a3948696d39aeded8ad28cd6194dda92759c467cb5b6424",
@@ -7242,45 +7242,45 @@
          "character": "Fuzzby",
          "exactDialogue": "Do I look official?",
          "performedText": "[proud] Do I look official?",
-         "dramaticIntention": "Turn the pollen moustache into an invented badge of authority and invite Zenny to validate the fantasy.",
-         "subtext": "Please agree this looks important, not ridiculous.",
-         "cadenceAndBreath": "Bright, compact question with chest-forward confidence; slight lift on “official” where the need for approval leaks through. Do not rush the words—let him present the moustache first.",
-         "timingAndBody": "Start after the two curled pollen marks are fully readable. Fuzzby holds a proud hover, but the body still wobbles underneath the pose; antennae/spectacles can settle late after the line.",
+         "dramaticIntention": "Turn the accidental pollen moustache into a badge of authority and invite Zenny to validate the performance.",
+         "subtext": "Please agree this looks impressive, not like I just face-planted into a flower.",
+         "cadenceAndBreath": "Bright, compact, chest-forward. Slightly puffed first half, then a tiny exposed lift into “official?”",
+         "timingAndBody": "Start only after the two pollen curls are readable. He holds a proud presentation hover, still wobbling, with his face angled toward Zenny for judgement.",
          "archetypeId": "false-triumph-button",
          "performanceQuestions": {
-          "intention": "Can I make Zenny name this accident as status?",
-          "subtext": "I know it might be a mess, but I am choosing to call it official.",
-          "thoughtBefore": "This looks like something important bees have.",
-          "changeDuring": "Confidence stays high, but the last word exposes a little need for her answer.",
+          "intention": "Can I make this mess count as rank?",
+          "subtext": "Tell me this is working.",
+          "thoughtBefore": "This looks important if I present it correctly.",
+          "changeDuring": "Confidence leaks into need for approval on the question ending.",
           "operativeWords": [
            "look",
            "official"
           ]
          },
-         "physicalState": "Hovering chest-forward beside the flower, pollen moustache displayed, still slightly unstable from the previous impact.",
+         "physicalState": "Overworked wings, chest puffed, pollen-heavy upper lip, body not fully settled from the flower contact.",
          "emotionalState": {
-          "entry": "Proud false triumph, eager to sell the accident.",
-          "exit": "Expectant, waiting for Zenny’s judgment."
+          "entry": "False triumph, eager to sell the accident.",
+          "exit": "Still proud, but waiting for Zenny’s verdict."
          },
          "listener": "Zenny",
-         "bodyVoiceRelationship": "The voice tries to sound official while the wobbling body and pollen evidence contradict him.",
+         "bodyVoiceRelationship": "The voice tries to sound official while the wobbling body and pollen moustache prove the opposite.",
          "previousText": "Nailed it.",
          "startsAtSec": 3.0,
          "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "Pause before the line so the moustache transfer reads as evidence.",
-          "Pause after the line to give Zenny room to withhold the laugh and inspect the upper lip."
+          "Moustache transfer must read before the question.",
+          "Leave a small pocket after the line for Zenny to almost laugh but hold it."
          ],
          "tagPurposes": [
           {
            "tag": "proud",
-           "purpose": "Frames Fuzzby’s accidental pollen moustache as self-awarded rank rather than embarrassment."
+           "purpose": "Gives Fuzzby a self-appointed official tone that deliberately contrasts with the ridiculous pollen evidence."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "primary",
-           "label": "Proud badge presentation",
+           "label": "Proud badge request",
            "performedText": "[proud] Do I look official?",
            "primary": true,
            "takesCount": 3
@@ -7293,48 +7293,48 @@
          "speaker": "Zenny",
          "character": "Zenny",
          "exactDialogue": "Yes Fuzzby Officially nuts!",
-         "performedText": "[quietly] Yes, Fuzzby. Officially nuts!",
-         "dramaticIntention": "Answer with exact, loving deadpan: grant his setup, then gently redefine the title as nonsense.",
-         "subtext": "I see exactly what happened, and I still like you.",
-         "cadenceAndBreath": "Very still and economical. “Yes, Fuzzby” is almost a sincere confirmation; tiny dry turn before “Officially nuts!” with no big laugh in the voice. Warmth lands only at the end.",
-         "timingAndBody": "Do not begin until the moustache has clearly read and Zenny’s eyes have moved to it. She stays in compact hover; only a tiny eye shift or restrained mouth change should accompany the line.",
+         "performedText": "[quietly] Yes Fuzzby Officially nuts!",
+         "dramaticIntention": "Answer with economical truth: she grants his wording, then gently punctures it.",
+         "subtext": "I see exactly what happened, and I am fond of you anyway.",
+         "cadenceAndBreath": "Dry and still, almost underplayed. Tiny pause-feel after “Yes” without adding words; “Officially nuts!” lands clean, not mean.",
+         "timingAndBody": "Do not start until the moustache evidence has sat in frame. Zenny’s eyes track the upper lip first, then she delivers with minimal head movement and a restrained amused exit.",
          "archetypeId": "deadpan-affection",
          "performanceQuestions": {
-          "intention": "Can I tell the truth without making Fuzzby feel abandoned?",
-          "subtext": "You are ridiculous, and I am fond of you.",
-          "thoughtBefore": "That is absolutely not official.",
-          "changeDuring": "Starts as confirmation, pivots into dry judgment, exits with affection rather than cruelty.",
+          "intention": "Name the truth while staying close to him.",
+          "subtext": "You are ridiculous, and I like you.",
+          "thoughtBefore": "Let the moustache speak first.",
+          "changeDuring": "Flat judgement warms slightly at the end.",
           "operativeWords": [
            "Yes",
            "Officially",
            "nuts"
           ]
          },
-         "physicalState": "Compact nearly still hover, facing Fuzzby’s upper lip, amusement held behind composure.",
+         "physicalState": "Compact nearly still hover, controlled breath, amusement held mostly in the eyes.",
          "emotionalState": {
-          "entry": "Contained amusement, carefully rationed.",
-          "exit": "Dry affection with the smallest softened smile."
+          "entry": "Composed, withholding a laugh.",
+          "exit": "Dryly amused, affectionate but contained."
          },
          "listener": "Fuzzby",
-         "bodyVoiceRelationship": "The voice is small because the still body is doing the comic work; her restraint makes the punchline sharper.",
+         "bodyVoiceRelationship": "The stillness is the joke: her small voice lands harder because she refuses to join his chaos.",
          "previousText": "Do I look official?",
          "startsAtSec": 6.0,
          "estimatedDurationSec": 1.2,
          "pauseReasons": [
-          "Hold before speaking so Zenny lets the evidence be seen first.",
-          "Micro-pause after “Fuzzby” allows the deadpan reclassification to land."
+          "Let Fuzzby’s expectant hold hang.",
+          "Let the audience read Zenny’s eye movement to the moustache before the judgement."
          ],
          "tagPurposes": [
           {
            "tag": "quietly",
-           "purpose": "Keeps Zenny’s judgment contained and affectionate, letting stillness carry the joke instead of volume."
+           "purpose": "Keeps Zenny’s answer economical and affectionate, making the deadpan judgement land without cruelty."
           }
          ],
          "takeRecipes": [
           {
            "recipeId": "primary",
-           "label": "Quiet deadpan affection",
-           "performedText": "[quietly] Yes, Fuzzby. Officially nuts!",
+           "label": "Quiet dry affection",
+           "performedText": "[quietly] Yes Fuzzby Officially nuts!",
            "primary": true,
            "takesCount": 3
           }
@@ -7349,7 +7349,7 @@
        "skillHashes": {
         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
        },
-       "canonProfileDigest": "2dd5ac44bfb93deaa90f20626dbea07d9b07ca6a5b76d3ae39dc2c99021bf313",
+       "canonProfileDigest": "3ba08fd89fdecc847e39719522f8d861bff88e8ed11ee90a6ad010b1ab3a647f",
        "shotContractHash": "95e95e574aeb8f8a5a804b3e58d638bd4bf746496ecf862c56e16129881296f3",
        "dialogueHash": "8d81c67e1b802e05bed640d7dfd3da372c8b4ffd11c01bbb850b7a81570bbb85",
        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
@@ -7363,7 +7363,152 @@
        ]
       }
      },
-     "history": []
+     "history": [
+      {
+       "department": "Voice",
+       "worker": "Voice Director",
+       "skill": "skills/crystal-bears-voice-director/SKILL.md",
+       "model": "gpt-5.5",
+       "preparedAt": "2026-08-11T14:34:53",
+       "editedAt": null,
+       "preparedBy": "specialist",
+       "sourceHash": "9cb27e6b8caf37930e6582b213dd5d1ee97bbceb3a9588a79b7e34068fe79c41",
+       "output": {
+        "shotId": "S1.SH1B",
+        "sceneIntention": "Protect the pollen moustache reveal as Fuzzby tries to convert a visible accident into rank, then let Zenny’s restrained affection puncture it with dry precision.",
+        "lines": [
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:7ad21a791c2158e10a3948696d39aeded8ad28cd6194dda92759c467cb5b6424",
+          "sourceEventId": "script-event:sha256:38a6895d1df2b31624e9d058a61dbf26dd280561d01ddb31c64c58fc1e57985b",
+          "speaker": "Fuzzby",
+          "character": "Fuzzby",
+          "exactDialogue": "Do I look official?",
+          "performedText": "[proud] Do I look official?",
+          "dramaticIntention": "Turn the pollen moustache into an invented badge of authority and invite Zenny to validate the fantasy.",
+          "subtext": "Please agree this looks important, not ridiculous.",
+          "cadenceAndBreath": "Bright, compact question with chest-forward confidence; slight lift on “official” where the need for approval leaks through. Do not rush the words—let him present the moustache first.",
+          "timingAndBody": "Start after the two curled pollen marks are fully readable. Fuzzby holds a proud hover, but the body still wobbles underneath the pose; antennae/spectacles can settle late after the line.",
+          "archetypeId": "false-triumph-button",
+          "performanceQuestions": {
+           "intention": "Can I make Zenny name this accident as status?",
+           "subtext": "I know it might be a mess, but I am choosing to call it official.",
+           "thoughtBefore": "This looks like something important bees have.",
+           "changeDuring": "Confidence stays high, but the last word exposes a little need for her answer.",
+           "operativeWords": [
+            "look",
+            "official"
+           ]
+          },
+          "physicalState": "Hovering chest-forward beside the flower, pollen moustache displayed, still slightly unstable from the previous impact.",
+          "emotionalState": {
+           "entry": "Proud false triumph, eager to sell the accident.",
+           "exit": "Expectant, waiting for Zenny’s judgment."
+          },
+          "listener": "Zenny",
+          "bodyVoiceRelationship": "The voice tries to sound official while the wobbling body and pollen evidence contradict him.",
+          "previousText": "Nailed it.",
+          "startsAtSec": 3.0,
+          "estimatedDurationSec": 1.2,
+          "pauseReasons": [
+           "Pause before the line so the moustache transfer reads as evidence.",
+           "Pause after the line to give Zenny room to withhold the laugh and inspect the upper lip."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "proud",
+            "purpose": "Frames Fuzzby’s accidental pollen moustache as self-awarded rank rather than embarrassment."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "primary",
+            "label": "Proud badge presentation",
+            "performedText": "[proud] Do I look official?",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         },
+         {
+          "dialogueOccurrenceId": "dialogue-occurrence:sha256:fb31026e611316f3499c8b2b745276ed5167ae1076d921dc0ad694c86a86fd94",
+          "sourceEventId": "script-event:sha256:04ce7eeee96e60eccde5d66f9c617d13c01ea690ee6451002e4d26fd49d1e305",
+          "speaker": "Zenny",
+          "character": "Zenny",
+          "exactDialogue": "Yes Fuzzby Officially nuts!",
+          "performedText": "[quietly] Yes, Fuzzby. Officially nuts!",
+          "dramaticIntention": "Answer with exact, loving deadpan: grant his setup, then gently redefine the title as nonsense.",
+          "subtext": "I see exactly what happened, and I still like you.",
+          "cadenceAndBreath": "Very still and economical. “Yes, Fuzzby” is almost a sincere confirmation; tiny dry turn before “Officially nuts!” with no big laugh in the voice. Warmth lands only at the end.",
+          "timingAndBody": "Do not begin until the moustache has clearly read and Zenny’s eyes have moved to it. She stays in compact hover; only a tiny eye shift or restrained mouth change should accompany the line.",
+          "archetypeId": "deadpan-affection",
+          "performanceQuestions": {
+           "intention": "Can I tell the truth without making Fuzzby feel abandoned?",
+           "subtext": "You are ridiculous, and I am fond of you.",
+           "thoughtBefore": "That is absolutely not official.",
+           "changeDuring": "Starts as confirmation, pivots into dry judgment, exits with affection rather than cruelty.",
+           "operativeWords": [
+            "Yes",
+            "Officially",
+            "nuts"
+           ]
+          },
+          "physicalState": "Compact nearly still hover, facing Fuzzby’s upper lip, amusement held behind composure.",
+          "emotionalState": {
+           "entry": "Contained amusement, carefully rationed.",
+           "exit": "Dry affection with the smallest softened smile."
+          },
+          "listener": "Fuzzby",
+          "bodyVoiceRelationship": "The voice is small because the still body is doing the comic work; her restraint makes the punchline sharper.",
+          "previousText": "Do I look official?",
+          "startsAtSec": 6.0,
+          "estimatedDurationSec": 1.2,
+          "pauseReasons": [
+           "Hold before speaking so Zenny lets the evidence be seen first.",
+           "Micro-pause after “Fuzzby” allows the deadpan reclassification to land."
+          ],
+          "tagPurposes": [
+           {
+            "tag": "quietly",
+            "purpose": "Keeps Zenny’s judgment contained and affectionate, letting stillness carry the joke instead of volume."
+           }
+          ],
+          "takeRecipes": [
+           {
+            "recipeId": "primary",
+            "label": "Quiet deadpan affection",
+            "performedText": "[quietly] Yes, Fuzzby. Officially nuts!",
+            "primary": true,
+            "takesCount": 3
+           }
+          ]
+         }
+        ]
+       },
+       "packageRevision": 4,
+       "inputSignature": {
+        "stage": "voice",
+        "model": "gpt-5.5",
+        "skillHashes": {
+         "voice": "51ae206d1b90072b6521c7d8d6eecddbbf9bbd631f53cdd544a28b4ef4b8a3b2"
+        },
+        "canonProfileDigest": "2dd5ac44bfb93deaa90f20626dbea07d9b07ca6a5b76d3ae39dc2c99021bf313",
+        "shotContractHash": "95e95e574aeb8f8a5a804b3e58d638bd4bf746496ecf862c56e16129881296f3",
+        "dialogueHash": "8d81c67e1b802e05bed640d7dfd3da372c8b4ffd11c01bbb850b7a81570bbb85",
+        "workingPerformanceHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "voiceCardsHash": "77021084edf5a5ed16f27119a30d0db91605a73b0f16034a0aa9e8555eb6d8b0",
+        "voiceRegistersHash": "34a85ae3819a64fcfba2bf731016be27cdabe750fd5552b9d3a149083d42e149",
+        "voiceRulebookHash": "28df03f64dc88ab0d78cd8dadd140ff6dd2933c0229c648c1d7891e6fd91ca36",
+        "voiceCompilerVersion": "voice-director-v1",
+        "voiceIds": [
+         "DNK8oCkkHjIyEjzlCeQq",
+         "XEiPrIitaegdirIGkODX"
+        ]
+       },
+       "outcome": "invalidated",
+       "invalidatedAt": "2026-08-16T08:00:16",
+       "invalidationReason": "direct inputs changed before replacement preparation"
+      }
+     ]
     },
     "review-animation": {
      "approved": {

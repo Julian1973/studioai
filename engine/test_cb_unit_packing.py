@@ -57,6 +57,35 @@ def test_short_dramatic_split_is_visible_for_showrunner_merge_review():
     assert audit["mergeReviewRequired"][0]["combinedDurationSec"] == 27
 
 
+def test_emotional_continuity_split_under_thirty_seconds_blocks_without_real_loss():
+    first = _unit("S1.SH1", 16, "dramatic_editorial_break", ["1.B1"])
+    first["purpose"] = "A quiet leaving home goodbye: child packs while Mum hides worry."
+    first["providerBoundaryExplanation"] = "Cut here because this is the next paragraph."
+    second = _unit("S1.SH2", 9, "scene_end", ["1.B2"])
+    second["purpose"] = "The child swallows, borrows courage and tries to be brave."
+
+    audit = P.audit_units([first, second])
+
+    assert audit["ready"] is False
+    assert audit["blockingIssues"][0]["code"] == "AVOIDABLE_EMOTIONAL_SPLIT"
+    assert "emotional-continuity" in audit["blockingIssues"][0]["message"]
+
+
+def test_emotional_continuity_split_is_allowed_for_specific_object_handoff():
+    first = _unit("S1.SH1", 16, "dramatic_editorial_break", ["1.B1"])
+    first["purpose"] = "A quiet leaving home goodbye: child packs while Mum hides worry."
+    first["providerBoundaryExplanation"] = (
+        "The next unit introduces a new wristband object handoff and needs a new reference.")
+    second = _unit("S1.SH2", 9, "scene_end", ["1.B2"])
+    second["purpose"] = "The child swallows, borrows courage and tries to be brave."
+
+    audit = P.audit_units([first, second])
+
+    assert audit["ready"] is True
+    assert audit["needsHumanMergeReview"] is True
+    assert audit["mergeReviewRequired"][0]["combinedDurationSec"] == 25
+
+
 def test_reference_change_protects_a_short_boundary():
     audit = P.audit_units([
         _unit("S1.SH1", 11, "reference_regime_change"),

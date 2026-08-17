@@ -366,6 +366,16 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
     }
 
 
+def _active_package_shots(pkg):
+    """Return only production units that still belong to the live scene route."""
+    retired = {"superseded", "archived", "inactive"}
+    return [
+        shot for shot in (pkg.get("shots") or [])
+        if str(shot.get("status") or "").strip().lower() not in retired
+        and not shot.get("superseded")
+    ]
+
+
 def production_state(scene, episode="Ep1", intake=None):
     """Return the sole approval/readiness document for one scene."""
     scene = str(scene)
@@ -577,7 +587,7 @@ def production_state(scene, episode="Ep1", intake=None):
 
     shots = [
         _shot_state(pkg, shot, scene, episode, scene_look_current, package_current)
-        for shot in (pkg.get("shots") or [])
+        for shot in _active_package_shots(pkg)
     ]
 
     talky = [shot for shot in shots if shot["talky"]]

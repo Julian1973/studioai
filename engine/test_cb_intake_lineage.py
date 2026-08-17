@@ -180,6 +180,32 @@ def test_new_script_approval_archives_previous_canonical_package(tmp_path, monke
     assert json.loads(archived[0].read_text())["sourceScript"]["scriptVersionId"] == first["scriptVersionId"]
 
 
+def test_canon_rebase_preserves_approved_creative_content(tmp_path, monkeypatch):
+    _, current, _ = _workspace(tmp_path, monkeypatch)
+    cb_intake.candidate_path("Ep1").write_text(json.dumps(_candidate(current)))
+    approved = cb_intake.decide_intake("Ep1", "approve", log=lambda *_: None)
+    package_path = tmp_path / approved["canonicalPackage"]
+    before = json.loads(package_path.read_text())
+
+    new_digest = "n" * 64
+    monkeypatch.setattr(cb_intake.cb_canon, "status", lambda *args, **kwargs: {
+        **_canon_status(), "profileDigests": {"story": new_digest, "storyboard": "d" * 64}})
+    monkeypatch.setattr(cb_intake.cb_canon, "require_locked", lambda *args, **kwargs: {
+        **_canon_status(), "profileDigests": {"story": new_digest, "storyboard": "d" * 64}})
+    monkeypatch.setattr(cb_intake.cb_canon, "source_hashes",
+                        lambda profile, root=None: {"showBible": "b" * 64})
+
+    result = cb_intake.rebase_canon_lock("Ep1", reviewed_by="Julian", log=lambda *_: None)
+    after = json.loads(package_path.read_text())
+
+    assert result["outcome"] == "rebased"
+    assert after["beats"] == before["beats"]
+    assert after["contentSignature"] == before["contentSignature"]
+    assert after["canonLock"]["profileDigest"] == new_digest
+    assert cb_intake.intake_status("Ep1")["canonicalCurrent"] is True
+    assert len(list((tmp_path / "cb-output/archive/canon_rebases").glob("*.json"))) == 1
+
+
 def test_scene_roster_ignores_a_stale_legacy_package(tmp_path, monkeypatch):
     _, current, _ = _workspace(tmp_path, monkeypatch)
     legacy = tmp_path / "cb-output" / "Ep1_Legacy_beat_package.json"

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "showId": "crystal-bears",
-  "lockedAt": "2026-08-08T15:10:37+00:00",
-  "lockedBy": "Codex",
+  "lockedAt": "2026-08-15T21:42:57+00:00",
+  "lockedBy": "Julian",
   "policySha256": "669a1222e596e90c29e9ebdfa1cab8350db75b5ad1f5c040de2e95119b7ae0ab",
   "sources": {
     "bannedVocabulary": {
@@ -15,7 +15,7 @@
     },
     "characters": {
       "path": "shows/crystal-bears/canon/characters.json",
-      "sha256": "e0fbdd875b9b2c5c2c1884a243f8cc597671989807913c8633d1bf15e1db0b66"
+      "sha256": "5ad78d509f3f3b5c8eb03757021e4d5c3d1d8238e70a428ad164486c058c5683"
     },
     "cinematographyTaste": {
       "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
@@ -23,7 +23,7 @@
     },
     "continuity": {
       "path": "shows/crystal-bears/canon/continuity.json",
-      "sha256": "8d7a5a9a2ee2429ed8e4285fea5025491f17f3bb744208420b6e0530ced3824a"
+      "sha256": "db8bf00f2bf37ddf94159881fe65c70b72b0db9c6ce1d80f903e562f890261db"
     },
     "directorTaste": {
       "path": "shows/crystal-bears/creative/DIRECTOR_TASTE_CANON.md",
@@ -43,7 +43,7 @@
     },
     "identityPacks": {
       "path": "shows/crystal-bears/canon/identity_packs.json",
-      "sha256": "5c7d92e3eb18bdc0b51ca14b5efd0756e3ed7696643c5d481f92e3e249d27814"
+      "sha256": "bc5a0cff30539127c6fdc5ac6288d387684f5b03b7db92c2a79f41d392c07f1c"
     },
     "locationAssetManifest": {
       "path": "cb-seed/assets/locations/_manifest.json",
@@ -769,8 +769,7 @@
         {
           "path": "cb-seed/assets/characters/Keen/CB_Keen_char-sheet.jpeg",
           "roles": [
-            "refs[6]",
-            "states.cuffs.turnaround"
+            "refs[6]"
           ],
           "sha256": "227b36e28c6fe3cdc6e3792ea591187f968ead0441ee0354c89e55e12cdb5621"
         },
@@ -811,6 +810,14 @@
           "sha256": "6e112af38983acc25f14531b314f7e4763c217165d03b7439a6a032b13865de7"
         },
         {
+          "path": "cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
+          "roles": [
+            "states.cuffs.turnaround",
+            "wristband_states.vacant[1]"
+          ],
+          "sha256": "a20f85dfa96702cc9e395002e7e3d0207d8655f61acbeed00b2dfc2b69528a0e"
+        },
+        {
           "path": "cb-seed/assets/ep1/CB_Keen_wristband_crystal.jpeg",
           "roles": [
             "wristband_states.crystal[1]"
@@ -820,7 +827,7 @@
         {
           "path": "cb-seed/assets/ep1/CB_Keen_wristband_vacant.jpeg",
           "roles": [
-            "wristband_states.vacant[1]"
+            "wristband_states.vacant[2]"
           ],
           "sha256": "c17662469e556f97f86e9f4ed05a1f448741399cf95d05b334610352f0e25eef"
         },
@@ -1224,5 +1231,5 @@
       "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
     }
   ],
-  "manifestDigest": "b84f227e9dc28e0ff31aceaa8c3acbc53fd36999c2e15a7952c76eefeb26bbba"
+  "manifestDigest": "cce5895647784065c1609b1f9dc674932d05d7f45e0630d4a6fa39c2745d86ed"
 }

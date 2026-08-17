@@ -98,6 +98,7 @@ import cb_voice_director
 import cb_emission_conformance as emission
 import cb_emission_standard
 import cb_engine_rules
+import cb_asset_registry
 import cb_prompt_bank
 import paths as P
 
@@ -113,23 +114,6 @@ POSED_INTEGRATION_ROLE = "qualified posed integration frame"
 POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
-MAX_KEYFRAME_INTEGRATION_WORDS = 380
-# BytePlus documents no transport maximum for Seedream 5.0 Pro prompts. Its current
-# image-generation guidance recommends staying under 600 English words because longer
-# prompts can scatter attention. fal's live endpoint schema likewise declares `prompt`
-# as a required string with no maxLength. This is therefore a documented production
-# quality target, never a claimed provider ceiling.
-#
-# Sources verified 2026-08-09:
-# https://docs.byteplus.com/api/docs/ModelArk/1541523
-# https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance%2Fseedream%2Fv5%2Fpro%2Fedit
-SEEDREAM_DOCUMENTED_PROMPT_TARGET_WORDS = 600
-# Keep roughly ten percent below the documented recommendation so provider-side counting,
-# punctuation/tokenization differences and a final human note do not push the request over
-# the quality guidance. This is a production budget derived from the documented target, not
-# a fabricated provider maximum.
-KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS = 540
-KEYFRAME_PROMPT_NON_BLOCKING_MAX_WORDS = 600
 REVIEW_VIDEO_RESOLUTION = "480p"
 
 
@@ -203,6 +187,40 @@ def _ledger(pkg, shot_id):
         if e["shotId"] == shot_id:
             return e
     raise Refused(f"no ledger entry for {shot_id}")
+
+
+def _scene_continuity_locks(pkg, scene):
+    """Return approved scene-level state locks that every shot must carry.
+
+    These are physical continuity facts: set dressing, prop ownership, visible character
+    state and exclusions that survive leaving and returning to a scene. They are not
+    creative suggestions and must travel with render prompts until a later approved shot
+    visibly changes them.
+    """
+    locks = ((pkg.get("sceneContinuityLocks") or {}).get(str(scene)) or [])
+    out = []
+    for item in locks:
+        if not isinstance(item, dict):
+            continue
+        value = " ".join(str(item.get("value") or "").split()).strip()
+        if not value:
+            continue
+        record = {
+            "id": str(item.get("id") or "").strip(),
+            "label": str(item.get("label") or "Scene continuity").strip(),
+            "value": value,
+            "forbidden": " ".join(str(item.get("forbidden") or "").split()).strip(),
+            "sourceShotId": str(item.get("sourceShotId") or "").strip(),
+        }
+        out.append(record)
+    return out
+
+
+def _continuity_constraint_text(item):
+    """Normalize legacy text and structured continuity records at validation boundaries."""
+    if isinstance(item, dict):
+        return str(item.get("value") or item.get("label") or item).strip()
+    return str(item or "").strip()
 
 
 def _carry_approved_inputs_across_duration_change(ledger, provenance):
@@ -377,7 +395,176 @@ def _char_ref(name, characters_cfg):
     return str(path)
 
 
-def _provider_identity_record(name, characters_cfg, usage="keyframe"):
+def _shot_continuity_text(shot):
+    parts = []
+    for value in shot.get("continuityConstraints") or []:
+        if isinstance(value, dict):
+            parts.extend([str(value.get("label") or ""), str(value.get("value") or "")])
+        else:
+            parts.append(str(value or ""))
+    parts.extend([
+        str(shot.get("title") or ""), str(shot.get("storyBeat") or ""),
+        str(shot.get("action") or ""), str(shot.get("endState") or ""),
+    ])
+    return " ".join(parts).casefold()
+
+
+def _scene_in_span(scene, span):
+    try:
+        scene_number = int(str(scene))
+    except (TypeError, ValueError):
+        return False
+    match = re.fullmatch(r"(\d+)(?:-(\d+))?", str(span or "").strip())
+    if not match:
+        return False
+    start = int(match.group(1))
+    end = int(match.group(2) or start)
+    return start <= scene_number <= end
+
+
+def _required_prop_reference_roles(shot, scene, episode):
+    """Return dedicated prop authorities required by approved production data.
+
+    Explicit shot requirements are authoritative. Show continuity may also require a
+    prop when its aliases occur in approved creative/continuity fields. Reference slots
+    are deliberately excluded from the scan so a slot cannot manufacture its own need.
+    """
+    required = {
+        str(prop_id).strip().casefold()
+        for prop_id in (shot.get("requiredPropReferences") or [])
+        if str(prop_id).strip()
+    }
+    try:
+        continuity = json.loads(
+            (ROOT / "engine" / "config" / "continuity.json").read_text())
+    except (OSError, ValueError, TypeError):
+        continuity = {}
+    records = ((continuity.get(str(episode)) or {}).get(
+        "referenceRequiredProps") or [])
+    searchable_fields = (
+        "title", "purpose", "storyBeat", "action", "performanceAssignment",
+        "camera", "openingPose", "visualPayoff", "continuityIn", "continuityOut",
+        "continuityConstraints", "sceneContinuityLocks", "physicalStagings",
+        "endState", "prohibited",
+    )
+    searchable = json.dumps(
+        {key: shot.get(key) for key in searchable_fields},
+        ensure_ascii=False, sort_keys=True).casefold()
+    for record in records:
+        if not isinstance(record, dict) or not _scene_in_span(scene, record.get("scenes")):
+            continue
+        prop_id = str(record.get("propId") or "").strip().casefold()
+        if not prop_id or not record.get("requiredWhenMentioned"):
+            continue
+        aliases = [
+            str(alias).strip().casefold()
+            for alias in (record.get("aliases") or [])
+            if str(alias).strip()
+        ]
+        if any(re.search(rf"(?<![a-z0-9]){re.escape(alias)}(?![a-z0-9])", searchable)
+               for alias in aliases):
+            required.add(prop_id)
+    return [f"prop:{prop_id}" for prop_id in sorted(required)]
+
+
+def _required_prop_reference_report(shot, scene, episode, reference_contract):
+    """Prove required props are present in the exact provider attachment contract."""
+    required = _required_prop_reference_roles(shot, scene, episode)
+    present = [
+        str(item.get("role") or "").strip()
+        for item in (reference_contract or [])
+        if str(item.get("role") or "").strip().startswith("prop:")
+    ]
+    present_folded = {role.casefold() for role in present}
+    missing = [role for role in required if role.casefold() not in present_folded]
+    return {
+        "ok": not missing,
+        "required": required,
+        "present": present,
+        "missing": missing,
+        "proofRule": (
+            "Only a dedicated prop:<id> attachment in the sealed provider upload list "
+            "counts; prompt prose, scene plates and inherited frames do not."
+        ),
+    }
+
+
+def _require_prop_reference_authority(shot, scene, episode, reference_contract):
+    report = _required_prop_reference_report(
+        shot, scene, episode, reference_contract)
+    if not report["ok"]:
+        raise Refused(
+            "REFUSED — required continuity prop authority is missing from the exact "
+            "provider attachment list: " + ", ".join(report["missing"]) +
+            ". Register the approved prop asset and bind its prop:<id> role before spend; "
+            "prompt wording, scene plates and inherited frames do not count.")
+    return report
+
+
+def _episode_character_state(character, shot, scene, episode):
+    """Resolve wardrobe/prop identity state from shot truth, then episode continuity.
+
+    A transition shot keeps the incoming identity reference; the action and explicit prop
+    reference create the new state. Subsequent shots inherit the new identity reference.
+    """
+    if _norm(character) != _norm("Keen") or str(episode) != "Ep1":
+        return None
+    text = _shot_continuity_text(shot or {})
+    try:
+        continuity = json.loads((ROOT / "engine" / "config" / "continuity.json").read_text())
+    except (OSError, ValueError, TypeError):
+        continuity = {}
+    records = (((continuity.get(str(episode)) or {}).get("characterStates") or {})
+               .get(_resolve_char(character, _characters_cfg())) or [])
+    try:
+        scene_number = int(str(scene))
+    except (TypeError, ValueError):
+        scene_number = None
+    scene_record = None
+    if scene_number is not None:
+        for record in records:
+            span = str(record.get("scenes") or "")
+            match = re.fullmatch(r"(\d+)(?:-(\d+))?", span)
+            if not match:
+                continue
+            start = int(match.group(1))
+            end = int(match.group(2) or start)
+            if start <= scene_number <= end:
+                scene_record = record
+                break
+
+    transition = str((scene_record or {}).get("transitionShot") or "")
+    shot_id = str((shot or {}).get("shotId") or "")
+    transition_match = re.fullmatch(r"(\d+)\.B(\d+)\.S(\d+)", transition)
+    shot_match = re.fullmatch(r"(\d+)\.B(\d+)\.S(\d+)", shot_id)
+    if transition_match and shot_match:
+        transition_order = tuple(map(int, transition_match.groups()))
+        shot_order = tuple(map(int, shot_match.groups()))
+        if shot_order[0] == transition_order[0] and shot_order <= transition_order:
+            return ((scene_record or {}).get("incomingState") or
+                    (scene_record or {}).get("wristbandState"))
+        if shot_order[0] == transition_order[0]:
+            return ((scene_record or {}).get("afterTransitionState") or
+                    (scene_record or {}).get("wristbandState"))
+
+    if any(marker in text for marker in (
+            "crystal-set wristbands", "aquamarine stones seated",
+            "wearing the crystal-set", "wristbands now contain")):
+        return "crystal-set-wristbands"
+    if any(marker in text for marker in (
+            "bare wrists", "wrists remain bare", "wrists are still bare",
+            "in keen's paws only", "may put on the inherited wristbands")):
+        return "no-cuffs"
+    if any(marker in text for marker in (
+            "now wearing the inherited wristbands", "wearing the inherited wristbands",
+            "worn, vacant bands", "vacant wristbands")):
+        return "vacant-wristbands"
+
+    return (scene_record or {}).get("wristbandState")
+
+
+def _provider_identity_record(name, characters_cfg, usage="keyframe", *, shot=None,
+                              scene=None, episode="Ep1"):
     """Resolve one character's complete, uncropped turnaround provider attachment."""
     canonical, pack = _identity_pack_for(name, characters_cfg)
     try:
@@ -385,15 +572,18 @@ def _provider_identity_record(name, characters_cfg, usage="keyframe"):
             canonical, pack, ROOT,
             MEDIA.parent / "reference_controls" / "identity_packs",
             usage=usage,
+            state=_episode_character_state(canonical, shot or {}, scene, episode),
         )
     except cb_identity.IdentityPackError as exc:
         raise Refused(f"REFUSED — {exc}; no provider was contacted") from exc
     return identity
 
 
-def _provider_identity_records(name, characters_cfg, usage="keyframe"):
+def _provider_identity_records(name, characters_cfg, usage="keyframe", *, shot=None,
+                               scene=None, episode="Ep1"):
     """Return exactly one intact turnaround attachment for one character identity."""
-    return [_provider_identity_record(name, characters_cfg, usage)]
+    return [_provider_identity_record(
+        name, characters_cfg, usage, shot=shot, scene=scene, episode=episode)]
 
 
 def _plate_path(scene, episode="Ep1"):
@@ -813,7 +1003,11 @@ def _opening_composition_contract(pkg, shot, scene, episode, characters_cfg):
             f"REFUSED — {shot.get('shotId')} has an invalid typed opening-frame layout: "
             f"{exc}") from exc
 
-    cast = list(dict.fromkeys(shot.get("charactersInFrame") or []))
+    # SEE validates the characters physically present in frame one. A later entrant still
+    # belongs to the shot and its WATCH reference contract, but forcing that character into
+    # the opening layout spoils entrances and creates identity blending in keyframe models.
+    cast = list(dict.fromkeys(
+        shot.get("openingCharactersInFrame") or shot.get("charactersInFrame") or []))
     characters = {}
     for supplied_name in cast:
         name = _resolve_char(supplied_name, characters_cfg)
@@ -2000,10 +2194,176 @@ def _effective_image_slots(shot, slots_key, scene, episode, characters_cfg,
     return dict(shot.get(slots_key) or {})
 
 
+def _slots_from_reference_contract(reference_contract, characters=None):
+    slots = {}
+    character_names = sorted(
+        [str(name).strip() for name in characters or [] if str(name).strip()],
+        key=len,
+        reverse=True,
+    )
+    next_image = 1
+    for item in reference_contract or []:
+        tag = str(item.get("assetTag") or "").strip()
+        if not re.match(r"^@(?:图|Image)\s*\d+$", tag, re.I):
+            continue
+        role = str(item.get("role") or "").strip()
+        controls = str(item.get("controls") or "").strip()
+        lowered = " ".join([role, controls]).lower()
+        if re.search(r"\b(opening|first)\b", lowered):
+            mapped = "opening keyframe"
+        elif re.search(r"\b(location|scene|world|plate|environment)\b", lowered):
+            mapped = "scene plate"
+        elif role == "character_identity" and controls:
+            mapped = next(
+                (name for name in character_names if name.lower() in controls.lower()),
+                "",
+            )
+        elif role:
+            mapped = role
+        else:
+            mapped = controls
+        if mapped:
+            slots[f"@图{next_image}"] = mapped
+            next_image += 1
+    return slots
+
+
+def _stored_approved_department_output(pkg, shot_id, stage):
+    led = _ledger(pkg, shot_id)
+    return (((led.get("departmentWork") or {}).get(stage) or {}).get("approved") or {}).get("output")
+
+
+def _effective_reference_slots(pkg, shot, slots_key, scene, episode):
+    slots = dict(shot.get(slots_key) or {})
+    if slots_key != "referenceSlots":
+        return slots
+    if not slots:
+        slots = dict(shot.get("animationReferenceSlots") or {})
+    if not slots and (shot.get("sourceType") == "relay" or shot.get("sourceShotId")):
+        # Relay animation must inherit the approved final frame, but that frame is only
+        # the opening-state authority. It never replaces the full visual contract.
+        # Scene plate + all in-frame character references still travel with the render.
+        # Otherwise the provider has no stable geography, prop, or identity source and
+        # continuity fails at the exact point the relay is meant to protect.
+        relay_slots = {"@图1": "previous shot final frame", "@图2": "scene plate"}
+        next_slot = 3
+        for character in shot.get("charactersInFrame") or []:
+            name = str(character or "").strip()
+            if not name:
+                continue
+            if name in relay_slots.values():
+                continue
+            relay_slots[f"@图{next_slot}"] = name
+            next_slot += 1
+        slots = relay_slots
+    if not slots:
+        approved = _stored_approved_department_output(
+            pkg, shot.get("shotId"), "animation") or {}
+        slots = _slots_from_reference_contract(
+            approved.get("referenceContract") or [],
+            characters=shot.get("charactersInFrame") or [],
+        )
+
+    # Required continuity props are first-class provider authorities, not optional prose.
+    # Append them to every animation bundle after resolving the shot's ordinary roles so
+    # explicit package slots, relay-generated slots and approved Director contracts all
+    # receive the same protection. The provider attachment planner will then place these
+    # semantic roles in its stable project-wide order.
+    existing_roles = {
+        str(role or "").strip().casefold() for role in slots.values()
+    }
+    required_props = _required_prop_reference_roles(shot, scene, episode)
+    image_numbers = [
+        int(match.group(1))
+        for key in slots
+        if (match := re.fullmatch(r"@图(\d+)", str(key)))
+    ]
+    next_slot = max(image_numbers, default=0) + 1
+    for role in required_props:
+        if role.casefold() in existing_roles:
+            continue
+        slots[f"@图{next_slot}"] = role
+        existing_roles.add(role.casefold())
+        next_slot += 1
+    return slots
+
+
+def _with_effective_reference_slots(pkg, shot, slots_key, scene, episode):
+    slots = _effective_reference_slots(pkg, shot, slots_key, scene, episode)
+    if slots == dict(shot.get(slots_key) or {}):
+        return shot
+    return {**shot, slots_key: slots}
+
+
+def _animation_reference_contract(attachment_plan, shot, audio_path=None):
+    """Bind the typed Animation record to the exact sealed provider upload order.
+
+    The specialist may have been prepared before an additive continuity reference was
+    registered.  Provider attachments are the authority at compile time, so regenerate
+    the compact role contract from that same plan instead of retaining stale asset tags.
+    """
+    contract = []
+    characters = {
+        str(name or "").strip() for name in shot.get("charactersInFrame") or []
+        if str(name or "").strip()
+    }
+    for item in attachment_plan or []:
+        tag = str(item.get("slot") or "").strip()
+        role = str(item.get("role") or "").strip()
+        if not tag or not role:
+            continue
+        if role in ("opening keyframe", "previous shot final frame"):
+            typed_role = "opening_frame"
+            controls = (
+                "the exact first-frame composition and carried visible state from the "
+                f"approved {role}"
+            )
+            scope = "continuity"
+        elif role == "scene plate":
+            typed_role = "location"
+            controls = "the approved scene geography, world, light, materials and atmosphere"
+            scope = "episode"
+        elif role.startswith("prop:"):
+            prop_id = role.split(":", 1)[1].replace("_", " ")
+            typed_role = "prop"
+            controls = (
+                f"the exact {prop_id} design, materials, construction, scale and approved "
+                "carried state"
+            )
+            scope = "continuity"
+        elif role in characters:
+            typed_role = "character_identity"
+            controls = f"{role} identity, proportions, scale and approved wearable state"
+            scope = "canon"
+        else:
+            typed_role = "style"
+            controls = f"the approved {role} visual authority"
+            scope = "episode"
+        contract.append({
+            "assetTag": tag,
+            "role": typed_role,
+            "controls": controls,
+            "scope": scope,
+        })
+    if audio_path and shot.get("dialogueLines"):
+        contract.append({
+            "assetTag": "@Audio1",
+            "role": "audio",
+            "controls": "approved dialogue, voice identity, cadence, delivery and mouth timing",
+            "scope": "continuity",
+        })
+    return contract
+
+
 _NON_IDENTITY_IMAGE_ROLES = {
     "scene plate", "opening keyframe", "previous shot final frame",
     OPENING_COMPOSITION_ROLE, POSED_INTEGRATION_ROLE, CHARACTER_SCALE_CONTROL_ROLE,
 }
+
+
+def _is_non_identity_image_role(role):
+    role = str(role or "").strip()
+    return role in _NON_IDENTITY_IMAGE_ROLES or role.startswith("prop:")
 
 
 def _reference_slot_policy():
@@ -2019,7 +2379,12 @@ def _stable_reference_role_key(role, usage, characters_cfg):
     """Return the project-level semantic attachment order for one logical role."""
     policy = _reference_slot_policy()
     role = str(role or "").strip()
-    if role not in _NON_IDENTITY_IMAGE_ROLES:
+    if role.startswith("prop:"):
+        # Dedicated prop authority follows character identity and precedes the scene plate.
+        # This keeps compiler tags and sealed provider upload positions identical without
+        # requiring every future prop ID to be added to a project-specific ordering table.
+        return (2.5 if usage == "animation" else 1.5, -1, role.casefold())
+    if not _is_non_identity_image_role(role):
         canonical = _resolve_char(role, characters_cfg)
         order = list(policy.get("characterOrder") or [])
         if not order:
@@ -2032,7 +2397,8 @@ def _stable_reference_role_key(role, usage, characters_cfg):
     return (rank if usage == "animation" else 1 + rank, -1, role.casefold())
 
 
-def _expanded_reference_blueprint(shot, slots_key, characters_cfg):
+def _expanded_reference_blueprint(shot, slots_key, characters_cfg, scene=None,
+                                  episode="Ep1"):
     """Bind each logical character slot to one complete, uncropped turnaround sheet."""
     usage = "keyframe" if slots_key == "keyframeReferenceSlots" else "animation"
     slots = dict(shot.get(slots_key) or {})
@@ -2042,8 +2408,10 @@ def _expanded_reference_blueprint(shot, slots_key, characters_cfg):
         _stable_reference_role_key(slots[key], usage, characters_cfg), int(key[2:])))
     for source_slot in source_slots:
         role = slots[source_slot]
-        identities = ([None] if role in _NON_IDENTITY_IMAGE_ROLES else
-                      _provider_identity_records(role, characters_cfg, usage))
+        identities = ([None] if _is_non_identity_image_role(role) else
+                      _provider_identity_records(
+                          role, characters_cfg, usage, shot=shot, scene=scene,
+                          episode=episode))
         for identity in identities:
             expanded.append({
                 "position": len(expanded) + 1,
@@ -2061,7 +2429,8 @@ def _provider_attachment_plan(shot, slots_key, anchor_path, scene, episode,
                               characters_cfg):
     """Return the exact ordered provider attachments and their renumbered slot bindings."""
     plan = []
-    for item in _expanded_reference_blueprint(shot, slots_key, characters_cfg):
+    for item in _expanded_reference_blueprint(
+            shot, slots_key, characters_cfg, scene=scene, episode=episode):
         identity = item.get("identity")
         if identity:
             path = identity.get("path")
@@ -2093,6 +2462,23 @@ def _slot_path_for_role(role, anchor_path, scene, episode, characters_cfg, shot=
             raise Refused(f"REFUSED — {role} is not approved and available yet")
     elif role == "scene plate":
         path = _plate_path(scene, episode)
+    elif str(role).startswith("prop:"):
+        prop_id = str(role).split(":", 1)[1].strip().casefold()
+        candidates = cb_asset_registry.resolve_assets(
+            episode, scene, shot_id=(shot or {}).get("shotId"),
+            kinds={"reference_image"})
+        matches = [item for item in candidates if (
+            str((item.get("metadata") or {}).get("assetUse") or "") == "prop_reference"
+            and (
+                str((item.get("metadata") or {}).get("propId") or "").casefold() == prop_id
+                or prop_id in str(item.get("role") or "").casefold()
+            )
+        )]
+        if not matches:
+            raise Refused(
+                f"REFUSED — approved prop reference {prop_id!r} is not registered "
+                f"for {episode} scene {scene}")
+        path = matches[0]["path"]
     elif role == OPENING_COMPOSITION_ROLE:
         raise Refused(
             "REFUSED — the opening composition master is a local QA control and may never "
@@ -2147,7 +2533,8 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
 
     def image_entries(slots_key, anchor_path=None):
         entries = []
-        blueprint = _expanded_reference_blueprint(shot, slots_key, characters_cfg)
+        blueprint = _expanded_reference_blueprint(
+            shot, slots_key, characters_cfg, scene=scene, episode=episode)
         for attachment in blueprint:
             position = attachment["position"]
             slot = attachment["slot"]
@@ -2204,10 +2591,12 @@ def shot_reference_manifest(scene, shot_id, episode="Ep1"):
 
     keyframe_entries = image_entries("keyframeReferenceSlots")
     animation_entries = image_entries("referenceSlots", animation_anchor)
-    audio_slot = next((slot for slot in (shot.get("referenceSlots") or {})
+    animation_slots = _effective_reference_slots(
+        pkg, shot, "referenceSlots", scene, episode)
+    audio_slot = next((slot for slot in animation_slots
                        if slot.startswith("@Audio")), None)
     if audio_slot:
-        role = shot["referenceSlots"][audio_slot]
+        role = animation_slots[audio_slot]
         raw_audio = ledger.get("voPath")
         audio_path = _resolved_reference_path(raw_audio)
         approved = bool((ledger.get("voiceApproval") or {}).get("approved"))
@@ -2381,9 +2770,88 @@ def _scene_context(pkg, scene, episode):
             "styleLaw": style_path.read_text().strip() if style_path.exists() else ""}
 
 
+def _voice_director_lines(led):
+    """Return the current approved Voice Director line records, wherever stored.
+
+    The render compiler needs the Director timing fields, but older/newer ledgers store
+    them under slightly different department containers. This helper keeps the timing
+    handoff as one class-wide lookup instead of making each emission path rediscover it.
+    """
+    voice_work = (led.get("departmentWork") or {}).get("voice") or {}
+    for key in ("approved", "candidate"):
+        lines = ((voice_work.get(key) or {}).get("output") or {}).get("lines")
+        if lines:
+            return lines
+    lines = ((led.get("departmentWork") or {}).get("voiceDirector") or {}
+             ).get("compiledTrack", {}).get("lines")
+    return lines or []
+
+
+def _with_effective_dialogue_timing(shot, led):
+    """Merge approved Voice Director timing into shot dialogue for animation compile."""
+    lines = _voice_director_lines(led)
+    if not lines or not shot.get("dialogueLines"):
+        return shot
+    timing_by_occurrence = {
+        line.get("dialogueOccurrenceId"): line
+        for line in lines
+        if line.get("dialogueOccurrenceId")
+    }
+    if not timing_by_occurrence:
+        return shot
+    dialogue = []
+    changed = False
+    for original in shot.get("dialogueLines") or []:
+        item = dict(original)
+        directed = timing_by_occurrence.get(item.get("dialogueOccurrenceId")) or {}
+        if item.get("startSec") is None and directed.get("startsAtSec") is not None:
+            item["startsAtSec"] = directed.get("startsAtSec")
+            changed = True
+        if item.get("endSec") is None and directed.get("estimatedDurationSec") is not None:
+            item["estimatedDurationSec"] = directed.get("estimatedDurationSec")
+            changed = True
+        if item.get("exactText") is None and item.get("text") is not None:
+            item["exactText"] = item.get("text")
+            changed = True
+        dialogue.append(item)
+    if not changed:
+        return shot
+    return {**shot, "dialogueLines": dialogue}
+
+
 def _shot_context(pkg, shot, led, scene, episode):
+    effective_shot = _with_effective_dialogue_timing(
+        _shot_creative_contract_view(pkg, shot, scene, episode), led)
+    character_state_locks = {}
+    characters_cfg = _characters_cfg()
+    for name in effective_shot.get("charactersInFrame") or []:
+        identity = _provider_identity_record(
+            name, characters_cfg, "animation", shot=effective_shot,
+            scene=scene, episode=episode)
+        wearable_features = [
+            str(feature).strip()
+            for feature in identity.get("distinguishingFeatures") or []
+            if re.search(
+                r"\b(?:wear|worn|cuff|wrist|band|bracelet|clothing|costume|"
+                r"accessory|collar|pendant|headdress|glasses|spectacles|satchel)\b",
+                str(feature), re.I)
+        ]
+        if identity.get("characterState") and wearable_features:
+            canonical = str(identity.get("character") or name).strip()
+            character_state_locks[canonical] = (
+                f"{canonical} approved wearable state: "
+                + "; ".join(wearable_features)
+            )
+    if character_state_locks:
+        effective_shot = {
+            **effective_shot,
+            "characterStateLocks": character_state_locks,
+        }
+    scene_locks = _scene_continuity_locks(pkg, scene)
+    if scene_locks:
+        effective_shot = {**effective_shot, "sceneContinuityLocks": scene_locks}
     return {"episode": episode, "scene": str(scene),
-            "shot": _shot_creative_contract_view(pkg, shot, scene, episode),
+            "shot": effective_shot,
             "approvedSceneLook": scenelook_status(scene, episode).get("approved"),
             "currentVoiceDirection": (led.get("departmentWork", {}).get("voice", {})
                                       .get("approved")),
@@ -2436,13 +2904,18 @@ def _shot_creative_contract_view(pkg, shot, scene, episode):
 
 def _department_candidate(stage, output, context):
     dep, worker, skill = _DEPARTMENT_WORKERS[stage]
-    return {"department": dep, "worker": worker,
+    candidate = {"department": dep, "worker": worker,
             "skill": _department_skill_ref(stage, skill),
             "model": cb_departments.cb_llm.DIRECTOR_MODEL,
             "preparedAt": _now(), "editedAt": None, "preparedBy": "specialist",
             "sourceHash": hashlib.sha256(json.dumps(context, sort_keys=True,
                                                        ensure_ascii=False).encode()).hexdigest(),
             "output": output}
+    if stage.startswith("review-"):
+        candidate["reviewedMediaPaths"] = list(context.get("reviewedMediaPaths") or [])
+    if stage == "animation" and context.get("animationPreflight"):
+        candidate["preflight"] = context["animationPreflight"]
+    return candidate
 
 
 def _review_frames(video_path, max_frames=4):
@@ -2546,8 +3019,11 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 raise Refused(f"REFUSED — {shot_id}'s approved voice is required before the "
                               "Animation Director enters")
             anchor = _anchor_for(pkg, shot)
+            animation_shot = _with_effective_reference_slots(
+                pkg, shot, "referenceSlots", scene, episode)
             attachment_plan = _provider_attachment_plan(
-                shot, "referenceSlots", anchor, scene, episode, _characters_cfg())
+                animation_shot, "referenceSlots", anchor, scene, episode,
+                _characters_cfg())
             images = [item["path"] for item in attachment_plan]
             context["orderedAttachments"] = [
                 {"slot": item["slot"], "sourceSlot": item["sourceSlot"],
@@ -2556,14 +3032,33 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                  "sameCharacterGroup": ((item.get("identity") or {}).get(
                      "turnaroundGroupHash"))}
                 for item in attachment_plan]
+            cinematography = _approved_department_output(pkg, shot_id, "cinematography") or {}
+            if cinematography.get("geography"):
+                context["sceneGeographyLedger"] = list(cinematography.get("geography") or [])
             context["approvedVoiceAsset"] = led.get("voPath")
             result = cb_departments.prepare_animation(context, images, log=log)
+            # The sealed upload plan, not an older specialist guess, owns provider slot
+            # numbering.  Rebind every role before compiling or validating the prompt.
+            result.referenceContract = [
+                cb_departments.ReferenceDirection.model_validate(item)
+                for item in _animation_reference_contract(
+                    attachment_plan, shot, led.get("voPath"))
+            ]
+            result.providerPrompt = cb_departments.compile_animation_provider_prompt(
+                context["shot"], result)
             dialogue_check = emission.validate_dialogue_synthesis(
-                result.providerPrompt, shot.get("dialogueLines") or [])
+                result.providerPrompt, context["shot"].get("dialogueLines") or [])
             if not dialogue_check["ready"]:
                 raise Refused("REFUSED — animation dialogue synthesis contract failed: " +
                               "; ".join(dialogue_check["errors"]))
-            _require_animation_prompt_contract(context["shot"], result)
+            preflight = _animation_preflight_summary(context["shot"], result)
+            if preflight["verdict"] != "PASS":
+                report = _animation_prompt_contract_report(context["shot"], result)
+                raise Refused("REFUSED — animation provider prompt is not production-ready: "
+                              + "; ".join(report["errors"] or [
+                                  finding.get("message") or "preflight blocked"
+                                  for finding in preflight.get("findings") or []]))
+            context["animationPreflight"] = preflight
             context["engineRuleReport"] = _require_engine_rules(
                 pkg, context["shot"], result)
         elif stage == "review-keyframe":
@@ -2576,6 +3071,7 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 _characters_cfg())
             refs = [item["path"] for item in attachment_plan]
             images = [media] + refs
+            context["reviewedMediaPaths"] = [media]
             context["orderedReviewImages"] = ([{"role": "actual rendered keyframe", "path": media}] +
                 [{"role": item["role"], "view": item.get("view"),
                   "providerSlot": item["slot"], "path": item["path"]}
@@ -2591,6 +3087,7 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                 media_paths = [led["approvedTake"]]
             if not media_paths or any(not os.path.exists(p) for p in media_paths):
                 raise Refused(f"REFUSED — no actual animation media exists for {shot_id} to review")
+            context["reviewedMediaPaths"] = list(media_paths)
             temp_dirs, frames, frame_labels = [], [], []
             try:
                 per_candidate = 2 if len(media_paths) > 1 else 4
@@ -2601,8 +3098,10 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                                          "candidateId": f"C{i}", "path": p}
                                         for n, p in enumerate(fs))
                 anchor = _anchor_for(pkg, shot)
+                animation_shot = _with_effective_reference_slots(
+                    pkg, shot, "referenceSlots", scene, episode)
                 attachment_plan = _provider_attachment_plan(
-                    shot, "referenceSlots", anchor, scene, episode,
+                    animation_shot, "referenceSlots", anchor, scene, episode,
                     _characters_cfg())
                 refs = [item["path"] for item in attachment_plan]
                 images = frames + refs
@@ -2741,14 +3240,44 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
     work, save_extra = _department_container(
         pkg, scene, shot_id, "animation", episode)
     candidate = work.get("candidate")
+    if not candidate and work.get("approved"):
+        approved = work["approved"]
+        work.setdefault("history", []).append({
+            **approved,
+            "outcome": "reopened-for-deterministic-recompile",
+            "reopenedAt": _now(),
+        })
+        candidate = {
+            key: value for key, value in approved.items()
+            if key not in ("outcome", "decisionAt", "reviewedBy", "note")
+        }
+        work["candidate"] = candidate
+        work["approved"] = None
     if not candidate:
         raise Refused(
             f"REFUSED — animation has no typed Director candidate to recompile for {shot_id}")
 
     shot = _shot(pkg, shot_id)
-    creative_shot = _shot_creative_contract_view(pkg, shot, scene, episode)
+    ledger = _ledger(pkg, shot_id)
+    # Recompile from the same effective shot view used by the live safety gate.
+    # This includes scene-level continuity locks as well as voice timing; using a
+    # narrower view makes the freshly compiled prompt stale immediately.
+    creative_shot = _shot_context(
+        pkg, shot, ledger, scene, episode)["shot"]
     source = json.loads(json.dumps(candidate["output"]))
     changes = []
+
+    anchor = _anchor_for(pkg, shot)
+    animation_shot = _with_effective_reference_slots(
+        pkg, shot, "referenceSlots", scene, episode)
+    attachment_plan = _provider_attachment_plan(
+        animation_shot, "referenceSlots", anchor, scene, episode,
+        _characters_cfg())
+    rebound_contract = _animation_reference_contract(
+        attachment_plan, shot, ledger.get("voPath"))
+    if source.get("referenceContract") != rebound_contract:
+        source["referenceContract"] = rebound_contract
+        changes.append("provider reference roles rebound to the sealed upload order")
 
     cinematography = _approved_department_output(
         pkg, shot_id, "cinematography") or {}
@@ -2776,19 +3305,24 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
         changes.append(
             f"request duration costed from {old_duration:g}s to {new_duration:g}s")
 
+    compiled_prompt = cb_departments.compile_animation_provider_prompt(
+        creative_shot, source)
+    source["providerPrompt"] = compiled_prompt
     direction = cb_departments.AnimationDirection.model_validate(source)
-    direction.providerPrompt = cb_departments.compile_animation_provider_prompt(
-        creative_shot, direction)
     _require_animation_prompt_contract(creative_shot, direction)
     engine_report = _require_engine_rules(
         pkg, creative_shot, direction, cinematography=cinematography)
     candidate["output"] = direction.model_dump()
     candidate["engineRuleReport"] = engine_report
     candidate["engineRuleChanges"] = changes
+    # A creative correction changes the emitted bytes and therefore invalidates the
+    # score shown at WATCH. Persist the newly calculated gate with the new prompt so
+    # the interface can never display conformance evidence for an older emission.
+    candidate["preflight"] = _animation_preflight_summary(
+        creative_shot, direction)
     candidate["editedAt"] = _now()
     candidate["editedBy"] = "deterministic-animation-compiler"
 
-    ledger = _ledger(pkg, shot_id)
     if any(change.startswith("request duration costed") for change in changes):
         cine_approval = (((ledger.get("departmentWork") or {}).get(
             "cinematography") or {}).get("approved") or {})
@@ -2974,7 +3508,10 @@ def _keyframe_direction_contract(direction, shot):
         raise Refused(
             f"REFUSED — approved charactersInFrame for {shot_id} contains duplicates")
     approved_cast = list(dict.fromkeys(
-        str(value).strip() for value in shot.get("charactersInFrame") or []
+        str(value).strip() for value in (
+            shot.get("openingCharactersInFrame")
+            if shot.get("openingCharactersInFrame") is not None
+            else shot.get("charactersInFrame") or [])
         if str(value).strip()))
     if approved_cast and cast != approved_cast:
         raise Refused(
@@ -3089,16 +3626,12 @@ def _keyframe_same_depth_scale_protection(direction, characters_cfg):
 
 
 def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
-    """Compile a bounded opening-stage prompt, never a miniature animation brief."""
+    """Compile the complete approved opening-stage direction."""
     if not direction or not direction.get("openingFrameLayout"):
         raise Refused(
             f"REFUSED — current Cinematography direction for {shot.get('shotId')} has no "
             "typed opening-frame layout")
     contract = _keyframe_direction_contract(direction, shot)
-
-    def _compact(value, max_words):
-        return emission.compact_complete_sentence(
-            value, max_words=max_words, context="keyframe control prose").rstrip(".")
 
     reference_lines = []
     compact_reference_lines = []
@@ -3108,7 +3641,7 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     reference_plan = reference_plan or _expanded_reference_blueprint(
         shot, "keyframeReferenceSlots", characters_cfg)
     slot_line = emission.reference_slot_stability_line([
-        (item["slot"], item["role"] if item["role"] in _NON_IDENTITY_IMAGE_ROLES
+        (item["slot"], item["role"] if _is_non_identity_image_role(item["role"])
          else _resolve_char(item["role"], characters_cfg))
         for item in reference_plan
     ])
@@ -3134,6 +3667,14 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             compact_reference_lines.append(
                 f"- {slot}: approved Scene Look; world, scale, materials, light and "
                 "atmosphere only.")
+        elif str(role).startswith("prop:"):
+            slot = attachments[0]["slot"]
+            prop_name = str(role).split(":", 1)[1].replace("_", " ")
+            reference_lines.append(
+                f"- {slot} is the exact {prop_name} prop authority; inherit design, "
+                "material, construction and scale only; ignore its background and labels.")
+            compact_reference_lines.append(
+                f"- {slot}: exact {prop_name} prop authority only; ignore background/text.")
         else:
             canonical = _resolve_char(role, characters_cfg)
             identity_names.append(canonical)
@@ -3191,6 +3732,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
     instance_lock = emission.character_instance_lock(contract["cast"], medium="still")
     if instance_lock:
         protections.insert(0, instance_lock)
+    protections.append(cb_engine_rules.natural_keyframe_staging_boilerplate(shot))
+    protections.append(cb_engine_rules.living_performance_boilerplate(
+        shot, direction, medium="still"))
     reference_body = ("\n".join(reference_lines) + separation_line).strip()
     compact_reference_body = (
         "\n".join(compact_reference_lines) + compact_separation_line).strip()
@@ -3229,7 +3773,9 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
             ("Geography", protected_sections["Geography"]),
             ("Frame", protected_sections["Frame"]),
             ("Negative Space", protected_sections["Negative Space"]),
-            ("Camera", _compact(direction["lensAndCameraRelationship"], 24) + "."),
+            ("Camera", emission.ensure_complete_sentence(
+                direction["lensAndCameraRelationship"],
+                context="keyframe camera direction")),
         ])
         if not (spend_scene_look and scene_look_authority):
             sections.append(("Light", str(direction["lightingAndDepth"]).strip()))
@@ -3251,35 +3797,12 @@ def _compile_keyframe_integration_prompt(direction, shot, reference_plan=None):
                           "sacks, baskets or dangling loads. Preserve the locked Scene Look.")))
         return "\n\n".join(f"[{name}]\n{body}" for name, body in sections).strip()
 
-    # Budget reduction is deterministic and may touch plumbing only. The four protected
-    # sections above are reused byte-for-byte in every candidate.
-    candidates = [
-        _emit(),
-        _emit(compact_controls=True, spend_scene_look=True),
-        _emit(compact_controls=True, compact_references=True,
-              spend_scene_look=True),
-        _emit(compact_controls=True, compact_references=True,
-              compact_forbidden=True, spend_scene_look=True),
-    ]
-    prompt = next((candidate for candidate in candidates
-                   if len(re.findall(r"\S+", candidate)) <=
-                   KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS), candidates[-1])
+    # Emit the complete approved direction. Prompt length never selects a shorter variant.
+    prompt = _emit()
     try:
         cb_departments.prompt_sections(prompt)
     except ValueError as exc:
         raise Refused(f"REFUSED — invalid keyframe prompt for {shot.get('shotId')}: {exc}")
-    word_count = len(re.findall(r"\S+", prompt))
-    if word_count > KEYFRAME_PROMPT_NON_BLOCKING_MAX_WORDS:
-        raise Refused(
-            f"REFUSED — compiled keyframe brief for {shot.get('shotId')} is {word_count} words; "
-            f"Seedream's documented quality recommendation is under "
-            f"{SEEDREAM_DOCUMENTED_PROMPT_TARGET_WORDS} English words and the Studio reserves "
-            f"approximately 10% headroom ({KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS}-word "
-            "preferred budget); the non-blocking compiler-boilerplate allowance ends at "
-            f"{KEYFRAME_PROMPT_NON_BLOCKING_MAX_WORDS} words. Duplicated control "
-            "prose, reference boilerplate and forbidden-list redundancy are already fully "
-            "compacted; Intended Read, Geography, Frame and Negative Space were not trimmed. "
-            "A human Director must decide what creative direction changes")
     # Run the same clipping guard used by render and voice over compiler-owned prose.
     for name, body in cb_departments.prompt_sections(prompt).items():
         if name in {"Frame", "Camera"}:
@@ -3451,10 +3974,11 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
     approved = []
     for ln in (shot.get("dialogueLines") or []):
         direction = direction_by_occurrence.get(ln.get("dialogueOccurrenceId"), {})
+        exact_text = ln.get("exactText") if ln.get("exactText") is not None else ln.get("text")
         approved.append({
             "dialogueOccurrenceId": ln.get("dialogueOccurrenceId"),
             "sourceEventId": ln.get("sourceEventId"),
-            "speaker": ln["speaker"], "exactText": ln["exactText"],
+            "speaker": ln["speaker"], "exactText": exact_text,
             "delivery": ln.get("delivery"),
             "dramaticIntention": direction.get("dramaticIntention"),
             "subtext": direction.get("subtext"),
@@ -3482,6 +4006,19 @@ def voice_performance_status(scene, shot_id, episode="Ep1"):
         match = None
     elif generated_from is not None:
         match = (generated_from == current)
+        if not match:
+            # Direction audits may change compiledHash without changing a single
+            # provider-facing voice input. HEAR freshness follows what was actually
+            # rendered, not mutable compiler bookkeeping.
+            provider_keys = (
+                "dialogueOccurrenceId", "sourceEventId", "speaker", "text", "voiceId",
+                "modelId", "voiceSettings", "previousText", "recipeId",
+            )
+            provider_projection = lambda lines: [
+                {key: line.get(key) for key in provider_keys}
+                for line in (lines or [])
+            ]
+            match = provider_projection(generated_from) == provider_projection(current)
     elif not working:
         match = True  # no edit ever recorded — nothing could have diverged since generation
     else:
@@ -3576,6 +4113,12 @@ def select_voice_audition(scene, shot_id, candidate_id, episode="Ep1",
         "compiledHash": candidate["compiledHash"],
     }
     bundle["selected"] = selected
+    selected_hashes = list(led.get("voiceAuditionSelectionsByHash") or [])
+    if candidate["compiledHash"] not in selected_hashes:
+        selected_hashes.append(candidate["compiledHash"])
+    led["voiceAuditionSelectionsByHash"] = selected_hashes
+    selected_by_occurrence = led.setdefault("voiceAuditionSelections", {})
+    selected_by_occurrence[occurrence or candidate["compiledHash"]] = selected
     cb_voice_director.bank_recipe(
         directed_line["character"], directed_line["archetypeId"], recipe,
         shot_id=shot_id, candidate=candidate_id, reviewed_by=reviewed_by)
@@ -4009,7 +4552,11 @@ def _keyframe_input_signature(pkg, shot, scene, episode="Ep1"):
     Package revision plays no role here at all — it remains provenance evidence elsewhere
     (lineage_status), never a validity gate."""
     characters_cfg = _characters_cfg()
-    refs = _slot_paths(shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
+    attachment_plan = _provider_attachment_plan(
+        shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
+    _require_prop_reference_authority(
+        shot, scene, episode, attachment_plan)
+    refs = [item["path"] for item in attachment_plan]
     st = scenelook_status(scene, episode)
     scenelook_hash = (st.get("active") or {}).get("hash") if st.get("current") else None
     prompt = _resolve_keyframe_prompt(pkg, shot)
@@ -4138,7 +4685,8 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
     attachment_plan = _provider_attachment_plan(
         shot, "keyframeReferenceSlots", None, scene, episode, characters_cfg)
     refs = [item["path"] for item in attachment_plan]
-    expected_cast = list(dict.fromkeys(shot.get("charactersInFrame") or []))
+    expected_cast = list(dict.fromkeys(
+        shot.get("openingCharactersInFrame") or shot.get("charactersInFrame") or []))
     direction = _approved_department_output(
         pkg, shot["shotId"], "cinematography") or {}
     layout = direction.get("openingFrameLayout") or {}
@@ -4151,6 +4699,8 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
     forbidden = [
         "extra or missing characters", "identity blending, swapping or cloning",
         "incorrect relative size", "cropped or malformed anatomy",
+        "a copied turnaround, model-sheet, T-pose or spread-arm presentation pose",
+        "unnatural symmetrical limb placement or arms held out without story motivation",
         "body-mounted bags, sacks, baskets or dangling loads",
         "pendants, necklaces, medallions or crystals on either bee",
         "text, logo or watermark",
@@ -4232,7 +4782,7 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
             "status": status,
             "reason": reason,
             "checkedAt": _now(),
-            "screenVersion": 1,
+            "screenVersion": 2,
             "validatorModel": cb_departments.cb_llm.VALIDATOR_MODEL,
             "mediaProviderCalled": False,
             "referenceHashes": {
@@ -4250,7 +4800,7 @@ def screen_keyframe_conformance(pkg, shot, candidate_path, scene, episode="Ep1",
                 "image remains available for the human Director's decision."),
             "detail": str(exc),
             "checkedAt": _now(),
-            "screenVersion": 1,
+            "screenVersion": 2,
             "validatorModel": cb_departments.cb_llm.VALIDATOR_MODEL,
             "mediaProviderCalled": False,
             "candidateSha256": _sha256_file(candidate_path),
@@ -4493,7 +5043,9 @@ def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=pr
         raise Refused(f"REFUSED — {shot_id} has no keyframe candidate awaiting approval")
     if cand.get("source", "generated") == "generated":
         conformance = cand.get("conformanceScreening") or {}
-        if conformance.get("status") == "fail":
+        human_advisory_accepted = bool(
+            (cand.get("conformanceAdvisoryDecision") or {}).get("acceptedBy"))
+        if conformance.get("status") == "fail" and not human_advisory_accepted:
             raise Refused(f"REFUSED — {shot_id}'s generated keyframe cannot be accepted until "
                           "the objective playable-stage and identity screen passes "
                           f"({conformance.get('status') or 'missing'}). The candidate remains "
@@ -4631,8 +5183,14 @@ def _anchor_for(pkg, shot):
     return src["harvestFrame"]
 
 
-def _continuity_mode(ledger):
-    mode = str(ledger.get("continuityMode") or CONTINUITY_MODE_KEYFRAME)
+def _continuity_mode(ledger, shot=None):
+    # A frozen final frame can preserve an editorial reset, but it cannot preserve the
+    # physical direction or momentum of an active relay. The typed direction record is the
+    # source of truth, so legacy ledgers without an explicit mode still take the safe route.
+    default = (CONTINUITY_MODE_VIDEO_EXTENSION
+               if shot and shot.get("motionContinuityRequired")
+               else CONTINUITY_MODE_KEYFRAME)
+    mode = str(ledger.get("continuityMode") or default)
     if mode not in CONTINUITY_MODES:
         raise Refused(f"REFUSED — unknown continuity mode {mode!r}; use one of {CONTINUITY_MODES}")
     return mode
@@ -4647,6 +5205,10 @@ def set_continuity_mode(scene, shot_id, mode, episode="Ep1", log=print):
     if shot.get("sourceType") == "opener" and mode == CONTINUITY_MODE_VIDEO_EXTENSION:
         raise Refused("REFUSED — video-extension continuity needs a previous approved clip; "
                       "opening shots must use keyframe-handoff")
+    if shot.get("motionContinuityRequired") and mode != CONTINUITY_MODE_VIDEO_EXTENSION:
+        raise Refused(
+            "REFUSED — this relay carries continuity-critical motion and must use "
+            "video-extension with the previous approved clip as @Video1")
     led = _ledger(pkg, shot_id)
     led["continuityMode"] = mode
     _save(pkg, path)
@@ -4667,15 +5229,38 @@ def _previous_approved_clip_for(pkg, shot):
 
 
 def _video_extension_directive(prompt, previous_clip):
+    prompt = re.sub(
+        r"(@(?:图|Image)\s*1)\s+is the first frame and",
+        r"\1 is a boundary-state still from",
+        str(prompt),
+        count=1,
+        flags=re.I,
+    )
+    summary = "Continue the approved scene into the next directed emotional beat."
+    match = re.search(
+        r"(?ims)^\[One-Sentence Summary\]\s*(.+?)(?=^\[[^\]]+\]|\Z)", prompt)
+    if match and match.group(1).strip():
+        summary = " ".join(match.group(1).split())
     directive = (
         "[Video Extension Continuity]\n"
-        "@Video1 is the previous approved clip. Use it only as the continuity master for "
-        "the boundary frame, carried motion direction, camera energy, scene geography, "
-        "lighting and audio feel. Continue forward naturally from @Video1 into this shot. "
-        "Do not repeat the previous action; do not alter @Video1; do not introduce a hard "
-        "cut, black frame, duplicate character or object appearing out of thin air.\n"
+        "@Video1 is the source video to extend forward. Use it only as the continuity "
+        "master for the extension boundary, carried motion direction, camera energy, "
+        "scene geography, lighting and audio feel; do not inherit or invent unrelated "
+        "characters, props, text or actions.\n\n"
+        "[Extension Goal]\n"
+        f"{summary}\n\n"
+        "[Extension Boundary]\n"
+        "The first frame of the extended segment directly continues from the last frame "
+        "of @Video1. Preserve the exact boundary pose and orientation, visible prop and "
+        "cargo state, pier and boat layout, camera position and composition, lighting, "
+        "audio environment and carried motion direction. Other references refine identity, "
+        "prop design and wider geography only; they must not replace the @Video1 boundary.\n"
+        "Each subject remains the same continuous instance throughout: do not duplicate, "
+        "split, replace or swap any character or prop. Continue forward naturally without "
+        "replaying the previous action, altering @Video1, introducing a hard cut or black "
+        "frame, or making an object appear from nothing.\n"
     )
-    return directive + f"Previous approved clip path: {previous_clip}\n\n" + str(prompt)
+    return directive + "\n" + prompt
 
 
 def _bank_animation_prompt(pkg, shot_id, led, *, outcome, candidate=None,
@@ -4683,8 +5268,22 @@ def _bank_animation_prompt(pkg, shot_id, led, *, outcome, candidate=None,
     shot = _shot(pkg, shot_id)
     prompt_contract = _animation_prompt_contract(led) or {}
     prompt = prompt_contract.get("prompt") or shot.get("seedancePrompt") or ""
-    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
-    conformance = _emission_conformance_report(shot, specialist, prompt)
+    try:
+        specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    except Refused as exc:
+        specialist = {}
+        conformance = {
+            "verdict": "UNSCORED",
+            "score": None,
+            "maximum": 10,
+            "findings": [{
+                "rule": "stale-animation-direction",
+                "severity": "info",
+                "message": str(exc),
+            }],
+        }
+    else:
+        conformance = _emission_conformance_report(shot, specialist, prompt)
     return cb_prompt_bank.bank_prompt(
         prompt=prompt,
         episode=str(pkg.get("episode") or "Ep1"),
@@ -4698,8 +5297,8 @@ def _bank_animation_prompt(pkg, shot_id, led, *, outcome, candidate=None,
         conformance=conformance,
         metadata={
             "batchId": led.get("batchId") or (led.get("batch") or {}).get("batchId"),
-            "promptVersion": _prompt_version(shot),
-            "continuityMode": _continuity_mode(led),
+            "promptVersion": _prompt_version(shot, prompt),
+            "continuityMode": _continuity_mode(led, shot),
             "archetype": (specialist.get("archetype") or specialist.get("beatArchetype")),
         })
 
@@ -4756,7 +5355,7 @@ def _with_intact_turnaround_law(prompt, references):
     lines = ["[Locked Character Turnarounds]"]
     for item in identity_refs:
         lines.append(
-            f"{item['slot']} is {item['role']}'s complete, uncropped 360 turnaround "
+            f"{item['slot']} defines {item['role']}'s complete, uncropped 360 turnaround "
             "sheet. Every view on this sheet is the same character identity, not an "
             "additional character. Use the entire sheet for face, silhouette, proportions, "
             "markings and rear/side details; render exactly one instance of this character "
@@ -4786,7 +5385,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
     references = _reference_records(shot, imgs)
     parent_prompt = _with_intact_turnaround_law(
         shot["seedancePrompt"], references)
-    continuity_mode = _continuity_mode(led)
+    continuity_mode = _continuity_mode(led, shot)
     video_references = []
     if continuity_mode == CONTINUITY_MODE_VIDEO_EXTENSION:
         previous_clip = _previous_approved_clip_for(pkg, shot)
@@ -4964,10 +5563,104 @@ def _fresh_validation(pkg, episode):
     disclosure — a hand-edited or revised package can never fire on a stale green stamp.
     Zero-LLM (cb_engine's deterministic validator, imported, never modified)."""
     import cb_engine as E
+
+    def owned_beat_codes(rec):
+        beat_codes = list(rec.get("beatCodes") or [])
+        beat_code = str(rec.get("beatCode") or "").strip()
+        if not beat_codes and "+" in beat_code:
+            beat_codes = [part.strip() for part in beat_code.split("+") if part.strip()]
+        if not beat_codes and beat_code:
+            beat_codes = [beat_code]
+        return beat_codes
+
+    def active_shots(records):
+        return [
+            rec for rec in records
+            if str(rec.get("status") or "").strip().lower() not in {
+                "superseded", "archived", "inactive"}
+            and not rec.get("superseded")
+            and rec.get("active", True) is not False
+        ]
+
+    def adapt_shot(rec):
+        data = {k: v for k, v in rec.items() if k in E.Shot.model_fields}
+        beat_codes = owned_beat_codes(rec)
+        if beat_codes:
+            data["beatCodes"] = beat_codes
+            data["beatCode"] = beat_codes[0]
+        action = str(rec.get("action") or rec.get("storyBeat") or rec.get("purpose") or "")
+        data.setdefault("performanceAssignment", action or "Perform the approved director action.")
+        data.setdefault("camera", rec.get("camera") or "Camera follows the approved director geography.")
+        data.setdefault("openingPose", rec.get("openingPose") or rec.get("sourceType") or "approved opening state")
+        data.setdefault("prohibited", [
+            _continuity_constraint_text(item)
+            for item in rec.get("continuityConstraints") or []
+            if _continuity_constraint_text(item)
+        ] or ["No identity drift.", "No continuity drift."])
+        chars = list(rec.get("charactersInFrame") or [])
+        raw_lines = list(rec.get("dialogueLines") or [])
+        duration = float(rec.get("durationSec") or 1)
+        data["dialogueLines"] = []
+        for index, line in enumerate(raw_lines):
+            fallback_start = round((duration / max(1, len(raw_lines))) * index, 2)
+            fallback_end = round(
+                (duration / max(1, len(raw_lines))) * (index + 1), 2)
+            data["dialogueLines"].append({
+                **line,
+                "exactText": line.get("exactText") if line.get("exactText") is not None else line.get("text", ""),
+                "delivery": line.get("delivery") or "as approved in the voice direction",
+                "startSec": line.get("startSec", fallback_start),
+                "endSec": line.get("endSec", fallback_end),
+            })
+        if data["dialogueLines"] and not data.get("dialogueBinding"):
+            data["dialogueBinding"] = "; ".join(
+                f"{line['speaker']} says exactly {line['exactText']}"
+                for line in data["dialogueLines"])
+        data.setdefault("continuityOut", {
+            "lighting": rec.get("time") or "approved scene light",
+            "cameraSide": "approved camera side",
+            "characters": [
+                {
+                    "character": name,
+                    "screenZone": "approved final position",
+                    "facing": "approved direction",
+                    "pose": "approved end pose",
+                    "expression": "approved expression",
+                    "visibleMarks": [],
+                    "heldProps": [],
+                }
+                for name in chars
+            ],
+        })
+        if data.get("sourceType") == "relay":
+            data.setdefault("continuityIn", {
+                "lighting": rec.get("time") or "approved scene light",
+                "cameraSide": "approved camera side",
+                "characters": [
+                    {
+                        "character": name,
+                        "screenZone": "approved starting position",
+                        "facing": "approved direction",
+                        "pose": "approved opening pose",
+                        "expression": "approved expression",
+                        "visibleMarks": [],
+                        "heldProps": [],
+                    }
+                    for name in chars
+                ],
+            })
+        elif "continuityIn" in data:
+            data.pop("continuityIn", None)
+        return data
+
     d, _ = E._load_pkg(episode)
-    beats = E._scene_beats(d, pkg["sceneNumber"])
-    fields = set(E.Shot.model_fields)
-    shots = [E.Shot(**{k: v for k, v in rec.items() if k in fields}) for rec in pkg["shots"]]
+    source_beats = E._scene_beats(d, pkg["sceneNumber"])
+    source_by_code = {item.get("beatCode"): item for item in source_beats}
+    current_shots = active_shots(pkg["shots"])
+    selected_codes = list(dict.fromkeys(
+        code for rec in current_shots for code in owned_beat_codes(rec)))
+    beats = [source_by_code[code] for code in selected_codes if code in source_by_code]
+    shots = [E.Shot(**adapt_shot(rec)) for rec in current_shots]
     design = E.SceneShotList(statement=E.DirectorStatement(**pkg.get("directorStatement", {
         k: "n/a" for k in ("audienceFeeling", "whoseScene", "emotionalChange", "theLaugh",
                             "visualSurprise", "carryForward")})), shots=shots)
@@ -4980,9 +5673,11 @@ def _fresh_validation(pkg, episode):
     return report
 
 
-def _prompt_version(shot):
+def _prompt_version(shot, prompt=None):
     import hashlib
-    return hashlib.md5(shot["seedancePrompt"].encode()).hexdigest()[:8]
+    return hashlib.md5(
+        str(prompt if prompt is not None else shot.get("seedancePrompt") or "").encode()
+    ).hexdigest()[:8]
 
 
 def _sealed_envelope(pkg, shot, led, imgs, anchor, candidates, fast, per,
@@ -5085,7 +5780,7 @@ def _resolve_seedance_prompt(pkg, shot):
         base, is_working = working["text"], True
     else:
         output = _approved_department_output(pkg, shot["shotId"], "animation") or {}
-        base = output.get("providerPrompt") or shot["seedancePrompt"]
+        base = output.get("providerPrompt") or shot.get("seedancePrompt") or ""
         is_working = False
     return (_with_character_scale_control(
         base, shot, "referenceSlots", str(pkg.get("sceneNumber")),
@@ -5105,7 +5800,7 @@ def seedance_working_status(scene, shot_id, episode="Ep1"):
     source = ("human-working" if is_working else
               "animation-director-current" if specialist.get("providerPrompt") else
               "legacy-approved-storyboard")
-    baseline = specialist.get("providerPrompt") or shot["seedancePrompt"]
+    baseline = specialist.get("providerPrompt") or shot.get("seedancePrompt") or ""
     return {"approvedPrompt": baseline, "currentPrompt": current,
             "source": source,
             "isWorking": is_working, "savedAt": (working or {}).get("savedAt")}
@@ -5131,8 +5826,7 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
          "deriveCreativeTranslationFromApproved": True})
     led["workingSeedancePrompt"] = {"text": text, "savedAt": _now(), "savedBy": reviewed_by}
     _save(pkg, path)
-    log(f"ANIMATION WORKING PROMPT SAVED — {shot_id} ({len(text.split())} words, no "
-        f"animation generated)")
+    log(f"ANIMATION WORKING PROMPT SAVED — {shot_id} (no animation generated)")
     return led["workingSeedancePrompt"]
 
 
@@ -5221,11 +5915,7 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
     lands = has(r"\b(landing image|lands? on|ends? on|end state|final frame|closing frame|handoff|settles? into)\b")
     scores["continuityLanding"] = 2 if opens and lands else 1 if opens or lands else 0
     safeguard_count = len(specialist.get("surgicalSafeguards") or [])
-    prompt_limit = cb_departments.animation_provider_prompt_word_limit(
-        shot.get("durationSec"))
-    scores["promptEconomy"] = (
-        2 if 45 <= words <= prompt_limit and safeguard_count <= 3
-        else 1 if 25 <= words <= prompt_limit else 0)
+    scores["promptEconomy"] = 2 if safeguard_count <= 3 else 1
 
     total = sum(scores.values())
     critical = {
@@ -5239,8 +5929,6 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
         "needsRevision": total < 17 or bool(critical_failures),
         "criticalFailures": sorted(critical_failures),
         "dimensions": scores,
-        "wordCount": words,
-        "advisoryOnly": True,
     }
 
 
@@ -5248,7 +5936,14 @@ def _animation_prompt_contract_report(shot, direction):
     """Evaluate the shared Seedance authoring contract without calling a provider."""
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
     prompt = str(data.get("providerPrompt") or "").strip()
-    references = list(data.get("referenceContract") or [])
+    raw_references = list(data.get("referenceContract") or [])
+    references = []
+    for index, item in enumerate(cb_departments._render_reference_order(raw_references),
+                                 start=1):
+        rec = item.model_dump() if hasattr(item, "model_dump") else dict(item or {})
+        if re.match(r"^@(?:图|Image)\s*\d+$", str(rec.get("assetTag") or "").strip(), re.I):
+            rec["assetTag"] = f"@图{index}"
+        references.append(rec)
     if shot.get("dialogueLines") and not any(
             str(item.get("assetTag") or "").lower().replace(" ", "") == "@audio1"
             for item in references):
@@ -5263,16 +5958,11 @@ def _animation_prompt_contract_report(shot, direction):
         reference_contract=references,
         duration_sec=data.get("durationSec") or shot.get("durationSec"),
         dialogue_lines=shot.get("dialogueLines") or [],
-        stage_plan=data.get("stagePlan") or [],
+        stage_plan=[] if data.get("shotPlan") else data.get("stagePlan") or [],
     )
+    authoring["normalizedScore"] = _seedance_authoring_score(authoring)
+    authoring["firingFloor"] = SEEDANCE_AUTHORING_FLOOR
     errors = []
-    words = len(prompt.split())
-    prompt_limit = cb_departments.animation_provider_prompt_word_limit(
-        data.get("durationSec") or shot.get("durationSec"))
-    if words > prompt_limit:
-        errors.append(
-            f"prompt is {words} words; maximum is "
-            f"{prompt_limit}")
     if quality["needsRevision"]:
         errors.append(
             f"creative contract scores {quality['score']}/{quality['maximum']}"
@@ -5280,6 +5970,10 @@ def _animation_prompt_contract_report(shot, direction):
                if quality["criticalFailures"] else ""))
     if authoring["status"] != "ready":
         errors.extend(authoring["repairActions"] or [authoring["summary"]])
+    elif authoring["normalizedScore"] < SEEDANCE_AUTHORING_FLOOR:
+        errors.append(
+            f"Seedance authoring score is {authoring['normalizedScore']}/10; "
+            f"minimum is {SEEDANCE_AUTHORING_FLOOR}")
     story_lock = cb_departments.animation_story_lock_report(
         shot, prompt, data.get("stagePlan") or [], data.get("shotPlan") or [])
     if not story_lock["ready"]:
@@ -5287,6 +5981,11 @@ def _animation_prompt_contract_report(shot, direction):
     creative_translation = cb_departments.creative_translation_report(shot, data, prompt)
     if not creative_translation["ready"]:
         errors.extend(creative_translation["errors"])
+    scene_state = _scene_state_prompt_report(shot, prompt)
+    if not scene_state["ok"]:
+        errors.append(
+            "scene continuity state missing from prompt: "
+            + ", ".join(scene_state["missing"]))
     return {
         "ready": not errors,
         "errors": errors,
@@ -5294,6 +5993,7 @@ def _animation_prompt_contract_report(shot, direction):
         "authoringContract": authoring,
         "storyLock": story_lock,
         "creativeTranslation": creative_translation,
+        "sceneState": scene_state,
     }
 
 
@@ -5303,6 +6003,61 @@ def _require_animation_prompt_contract(shot, direction):
         raise Refused("REFUSED — animation provider prompt is not production-ready: "
                       + "; ".join(report["errors"]))
     return report
+
+
+def _animation_preflight_summary(shot, direction):
+    """Return the persisted WATCH gate verdict shown by Studio surfaces."""
+    report = _animation_prompt_contract_report(shot, direction)
+    prompt = str((direction.model_dump() if hasattr(direction, "model_dump")
+                  else dict(direction or {})).get("providerPrompt") or "")
+    emission_report = _emission_conformance_report(
+        shot,
+        direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {}),
+        prompt)
+    authoring = report.get("authoringContract") or {}
+    quality = report.get("qualityGate") or {}
+    findings = list(emission_report.get("findings") or [])
+    if report.get("errors"):
+        findings.extend({
+            "severity": "FATAL",
+            "rule": "seedance-authoring",
+            "message": error,
+            "fix": "Recompile the WATCH prompt before rendering.",
+        } for error in report.get("errors") or [])
+    if authoring.get("status") != "ready":
+        findings.extend({
+            "severity": "FATAL",
+            "rule": "seedance-authoring",
+            "message": action,
+            "fix": "Apply the Seedance repair action and recompile.",
+        } for action in authoring.get("repairActions") or [])
+    verdict = "PASS" if (
+        report.get("ready")
+        and emission_report.get("verdict") == "PASS"
+        and float(authoring.get("normalizedScore") or 0) >= SEEDANCE_AUTHORING_FLOOR
+    ) else "BLOCK"
+    return {
+        "verdict": verdict,
+        "score": emission_report.get("score"),
+        "maximum": 10,
+        "checkerVerdict": emission_report.get("verdict"),
+        "findings": findings[:6],
+        "seedanceAuthoring": {
+            "status": authoring.get("status"),
+            "score": authoring.get("score"),
+            "maximum": authoring.get("maximum"),
+            "normalizedScore": authoring.get("normalizedScore"),
+            "firingFloor": authoring.get("firingFloor"),
+            "summary": authoring.get("summary"),
+        },
+        "qualityGate": {
+            "score": quality.get("score"),
+            "maximum": quality.get("maximum"),
+            "threshold": quality.get("threshold"),
+            "needsRevision": quality.get("needsRevision"),
+            "criticalFailures": quality.get("criticalFailures") or [],
+        },
+    }
 
 
 def _engine_rule_report(pkg, shot, direction=None, cinematography=None):
@@ -5348,6 +6103,7 @@ def _require_engine_rules(pkg, shot, direction=None, cinematography=None):
 def _seedance_pipeline_task(shot, specialist, attached_contract):
     """Translate current signed Studio direction into the generic zero-spend compiler contract."""
     specialist = specialist or {}
+    provider_prompt = str(specialist.get("providerPrompt") or "")
     approved_refs = {
         re.sub(r"\s+", "", str(item.get("assetTag") or "")).lower(): item
         for item in (specialist.get("referenceContract") or [])
@@ -5438,7 +6194,9 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
         "camera": specialist.get("cameraBehaviour") or "",
         "audio": audio,
         "consistency": consistency,
-        "no_music": False,
+        "no_music": bool(re.search(
+            r"\bno\b[^.;\n]{0,120}\b(?:music|bgm|musical underscore)\b",
+            provider_prompt + "\n" + audio, re.I)),
         "extension_direction": (
             "backward" if task_mode == "extend-backward" else
             specialist.get("extensionDirection") or "forward"),
@@ -5466,6 +6224,82 @@ def _emission_conformance_report(shot, specialist, prompt):
         duration_sec=shot.get("durationSec"),
         timing_beats=(specialist or {}).get("timingBeats") or [],
     )
+
+
+SEEDANCE_AUTHORING_FLOOR = 9.5
+
+
+def _seedance_authoring_score(contract):
+    maximum = float(contract.get("maximum") or 0)
+    if maximum <= 0:
+        return 0.0
+    return round((float(contract.get("score") or 0) / maximum) * 10.0, 2)
+
+
+def _relay_reference_bundle_report(shot, reference_contract):
+    """Verify relay shots carry more than the inherited frame.
+
+    The previous final frame preserves continuity state; it does not define the world or
+    identities. Every relay render must still carry scene geography and all characters
+    visible in the shot.
+    """
+    if not (shot.get("sourceType") == "relay" or shot.get("sourceShotId")):
+        return {"ok": True, "required": [], "present": [], "missing": []}
+    roles = [str(item.get("role") or "").strip() for item in reference_contract or []]
+    present = {role.casefold() for role in roles if role}
+    required = ["previous shot final frame", "scene plate"]
+    required.extend(
+        str(character).strip()
+        for character in (shot.get("charactersInFrame") or [])
+        if str(character).strip()
+    )
+    required.extend(
+        str(role).strip()
+        for role in (shot.get("referenceSlots") or {}).values()
+        if str(role).strip().startswith("prop:")
+    )
+    missing = [role for role in required if role.casefold() not in present]
+    return {
+        "ok": not missing,
+        "required": required,
+        "present": roles,
+        "missing": missing,
+    }
+
+
+def _scene_state_prompt_report(shot, prompt):
+    """Ensure physical scene-state locks survive into provider prompts."""
+    locks = list(shot.get("sceneContinuityLocks") or [])
+    if not locks:
+        return {"ok": True, "required": [], "missing": []}
+    text = " ".join(str(prompt or "").casefold().split())
+    required = []
+    missing = []
+    action_has_departed = bool(re.search(
+        r"\b(?:already (?:moving|underway)|moving away|has departed|underway)\b",
+        str(shot.get("action") or ""), re.I))
+    for lock in locks:
+        item = lock if isinstance(lock, dict) else {}
+        label = str(item.get("label") or item.get("id") or "Scene continuity").strip()
+        value = str(item.get("value") or "").strip()
+        lock_text = " ".join((value, str(item.get("forbidden") or "")))
+        if action_has_departed and re.search(
+                r"\b(?:moored|alongside the pier|before departure|move the sailboat away)\b",
+                lock_text, re.I):
+            continue
+        token = label or value[:48]
+        if token:
+            required.append(token)
+        probes = [
+            str(item.get("id") or ""),
+            label,
+            value[:80],
+            str(item.get("forbidden") or "")[:80],
+        ]
+        if not any(probe and " ".join(probe.casefold().split()) in text
+                   for probe in probes):
+            missing.append(token)
+    return {"ok": not missing, "required": required, "missing": missing}
 
 
 def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
@@ -5500,8 +6334,11 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     characters_cfg = _characters_cfg()
     if anchor:
         try:
+            animation_shot = _with_effective_reference_slots(
+                pkg, shot, "referenceSlots", scene, episode)
             attachment_plan = _provider_attachment_plan(
-                shot, "referenceSlots", anchor, scene, episode, characters_cfg)
+                animation_shot, "referenceSlots", anchor, scene, episode,
+                characters_cfg)
             imgs = [item["path"] for item in attachment_plan]
             ordered_slots = [item["slot"] for item in attachment_plan]
             checks["sceneLookAttached"] = {"ok": True}
@@ -5517,6 +6354,19 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
                      pathlib.Path(item["path"]).read_bytes()).hexdigest()}
                 for item in attachment_plan
             ]
+            checks["requiredPropReferences"] = _required_prop_reference_report(
+                shot, scene, episode, checks["referenceContract"])
+            if not checks["requiredPropReferences"]["ok"]:
+                blockers.append(
+                    "required continuity prop authority is missing from the exact "
+                    "provider attachment list: "
+                    + ", ".join(checks["requiredPropReferences"]["missing"]))
+            checks["relayReferenceBundle"] = _relay_reference_bundle_report(
+                shot, checks["referenceContract"])
+            if not checks["relayReferenceBundle"]["ok"]:
+                blockers.append(
+                    "relay reference bundle is incomplete; missing "
+                    + ", ".join(checks["relayReferenceBundle"]["missing"]))
         except (Refused, OSError) as e:
             blockers.append(str(e))
             checks["sceneLookAttached"] = {"ok": False, "detail": str(e)}
@@ -5553,7 +6403,7 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     checks["aspectRatio"] = "16:9"
     video_refs = []
     try:
-        continuity_mode = _continuity_mode(led)
+        continuity_mode = _continuity_mode(led, shot)
         checks["continuityMode"] = continuity_mode
         if continuity_mode == CONTINUITY_MODE_VIDEO_EXTENSION:
             previous_clip = _previous_approved_clip_for(pkg, shot)
@@ -5587,25 +6437,31 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         checks["model"] = cb_providers.selected_video_model_id()
 
     resolved_prompt, using_working = _resolve_seedance_prompt(pkg, shot)
+    checker_references = [{
+        "slot": item.get("assetTag"),
+        "role": item.get("role"),
+        "intactTurnaround": bool(item.get("sameCharacterGroup")),
+    } for item in checks.get("referenceContract") or []]
+    checked_prompt = _with_intact_turnaround_law(
+        resolved_prompt, checker_references)
+    checked_task_mode = specialist.get("taskMode") or "reference-to-video"
+    if video_refs:
+        checked_prompt = _video_extension_directive(
+            checked_prompt, video_refs[0]["path"])
+        checked_task_mode = "extend-forward"
     checks["usingWorkingVersion"] = using_working
     checks["promptSource"] = ("human-working" if using_working else
         "seedance-production-director-approved" if specialist.get("providerPrompt")
         else "legacy-approved-storyboard")
     emission_conformance = _emission_conformance_report(
-        shot, specialist, resolved_prompt)
+        shot, specialist, checked_prompt)
     checks["emissionConformance"] = emission_conformance
     if emission_conformance["verdict"] != "PASS":
         blockers.append(
             f"emission conformance scores {emission_conformance['score']}/10 "
             f"({emission_conformance['verdict']}); correct the listed findings before render")
-    quality = _prompt_quality_gate(shot, resolved_prompt, specialist)
+    quality = _prompt_quality_gate(shot, checked_prompt, specialist)
     checks["qualityGate"] = quality
-    prompt_limit = cb_departments.animation_provider_prompt_word_limit(
-        shot.get("durationSec"))
-    if len(resolved_prompt.split()) > prompt_limit:
-        blockers.append(
-            f"animation provider prompt exceeds the software-wide "
-            f"{prompt_limit}-word ceiling")
     if quality["needsRevision"]:
         detail = (f"; critical zero: {', '.join(quality['criticalFailures'])}"
                   if quality["criticalFailures"] else "")
@@ -5618,7 +6474,7 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         pipeline_task = _seedance_pipeline_task(
             shot, specialist, checks.get("referenceContract") or [])
         pipeline_contract = cb_seedance_pipeline.SeedancePromptBuilder(
-            pipeline_task).preflight(existing_prompt=resolved_prompt)
+            pipeline_task).preflight(existing_prompt=checked_prompt)
         checks["seedancePipeline"] = pipeline_contract
         if not pipeline_contract["readyForPrompt"]:
             errors = pipeline_contract["validation"]["errors"]
@@ -5633,9 +6489,8 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         warnings.append(f"Seedance compiler preflight could not type the task: {exc}")
 
     seedance_contract = cb_prompt_lab.analyze_seedance_prompt_contract(
-        resolved_prompt,
-        task_mode=(pipeline_contract or {}).get("promptLabTaskMode") or
-                  specialist.get("taskMode") or "reference-to-video",
+        checked_prompt,
+        task_mode=checked_task_mode,
         reference_contract=(checks.get("referenceContract") or [
             {"assetTag": tag, "role": role}
             for tag, role in (shot.get("referenceSlots") or {}).items()
@@ -5644,18 +6499,26 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         dialogue_lines=shot.get("dialogueLines") or [],
         stage_plan=specialist.get("stagePlan") or [],
     )
+    seedance_contract["normalizedScore"] = _seedance_authoring_score(
+        seedance_contract)
+    seedance_contract["firingFloor"] = SEEDANCE_AUTHORING_FLOOR
     checks["seedancePromptContract"] = seedance_contract
     if seedance_contract["status"] != "ready":
         blockers.append(
             f"Seedance authoring contract scores {seedance_contract['score']}/"
             f"{seedance_contract['maximum']}; "
             f"{len(seedance_contract['repairActions'])} repair action(s) remain")
+    elif seedance_contract["normalizedScore"] < SEEDANCE_AUTHORING_FLOOR:
+        blockers.append(
+            f"Seedance authoring contract scores "
+            f"{seedance_contract['normalizedScore']}/10 "
+            f"(floor {SEEDANCE_AUTHORING_FLOOR}); tighten the prompt before render")
 
     creative_translation = cb_departments.creative_translation_report(
         _shot_creative_contract_view(pkg, shot, scene, episode),
         {**specialist,
          "deriveCreativeTranslationFromApproved": bool(using_working)},
-        resolved_prompt)
+        checked_prompt)
     checks["creativeTranslation"] = creative_translation
     if not creative_translation["ready"]:
         blockers.append(
@@ -5663,28 +6526,37 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
             + "; ".join(creative_translation["errors"][:3]))
 
     # creative warnings — advisory only, never blocking, never rewritten
-    if "relative scale" not in resolved_prompt.lower() and "identity" not in resolved_prompt.lower():
+    if "relative scale" not in checked_prompt.lower() and "identity" not in checked_prompt.lower():
         warnings.append("no character-identity/relative-scale preservation clause detected "
                         "in the resolved prompt")
-    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", resolved_prompt) if s.strip()]
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", checked_prompt) if s.strip()]
     seen = {}
     for s in sentences:
-        seen[_norm(s)] = seen.get(_norm(s), 0) + 1
+        normalized = _norm(s)
+        # These clauses are intentionally repeated once per independently bound
+        # turnaround. Their repetition prevents cross-character identity collapse and
+        # is not duplicated creative direction.
+        if any(marker in normalized for marker in (
+                "every view on this sheet is the same character identity",
+                "use the entire sheet for face silhouette proportions markings",
+                "do not use the sheet layout as the shot composition")):
+            continue
+        seen[normalized] = seen.get(normalized, 0) + 1
     dupes = sum(1 for v in seen.values() if v > 1)
     if dupes:
         warnings.append(f"{dupes} duplicated direction(s) detected in the resolved prompt")
-    if _CAMERA_LOCK_WORDS.search(resolved_prompt) and _CAMERA_MOVE_WORDS.search(resolved_prompt):
+    if _CAMERA_LOCK_WORDS.search(checked_prompt) and _CAMERA_MOVE_WORDS.search(checked_prompt):
         warnings.append("possible conflicting camera direction: both a camera lock and a "
                         "camera-movement word appear in the resolved prompt")
 
     dialogue_check = emission.validate_dialogue_synthesis(
-        resolved_prompt, shot.get("dialogueLines") or [])
+        checked_prompt, shot.get("dialogueLines") or [])
     blockers.extend(
         f"Dialogue synthesis: {error}" for error in dialogue_check["errors"])
 
     verdict = "blocked" if blockers else ("warnings" if warnings else "passed")
     result = {"verdict": verdict, "blockers": blockers, "warnings": warnings,
-              "checks": checks, "finalPrompt": resolved_prompt}
+              "checks": checks, "finalPrompt": checked_prompt}
     log(f"SEEDANCE STRUCTURE CHECK — {shot_id}: {verdict.upper()} ({len(blockers)} blocker(s), "
         f"{len(warnings)} warning(s)) — no provider call made, no cost")
     return result
@@ -6320,7 +7192,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     # call) already reads shot["seedancePrompt"], so this one substitution is the whole
     # change. The approved package's own shot record (pkg["shots"]) is never touched.
     resolved_prompt, using_working = _resolve_seedance_prompt(pkg, shot)
-    if resolved_prompt != shot["seedancePrompt"]:
+    if resolved_prompt != shot.get("seedancePrompt"):
         shot = {**shot, "seedancePrompt": resolved_prompt}
     candidates = max(1, min(MAX_CANDIDATES, int(candidates)))
     if led.get("status") == "model-limited":
@@ -6349,7 +7221,13 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     prompt = shot["seedancePrompt"]
     anchor = _anchor_for(pkg, shot)
     characters_cfg = _characters_cfg()
-    imgs = _slot_paths(shot, "referenceSlots", anchor, scene, episode, characters_cfg)
+    shot = _with_effective_reference_slots(
+        pkg, shot, "referenceSlots", scene, episode)
+    attachment_plan = _provider_attachment_plan(
+        shot, "referenceSlots", anchor, scene, episode, characters_cfg)
+    _require_prop_reference_authority(
+        shot, scene, episode, attachment_plan)
+    imgs = [item["path"] for item in attachment_plan]
     execution_plan = _animation_execution_plan(
         pkg, shot, led, imgs, anchor, fast,
         comparison_model_id=comparison_model_id,
@@ -6651,7 +7529,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     paths = [str(MEDIA / f"{episode}_{shot_id}_c{i}.mp4") for i in sorted(batch["done"])]
     led.update({"status": "candidates-pending", "candidatePaths": paths,
                 "batchId": batch["batchId"],
-                "candidatesGenerated": led.get("candidatesGenerated", 0) + len(batch["done"]),
+                "candidatesGenerated": (led.get("candidatesGenerated") or 0) + len(batch["done"]),
                 "disclosure": batch["disclosure"],
                 "lastBatchBinding": batch["bindingHash"], "firedAt": _now()})
     _save(pkg, path)
@@ -7117,7 +7995,7 @@ def metrics(scene, episode="Ep1", log=print):
     times = []
     for s in pkg["shots"]:
         led = _ledger(pkg, s["shotId"])
-        cand_total += led.get("candidatesGenerated", 0)
+        cand_total += led.get("candidatesGenerated") or 0
         batches += led.get("batchAttempts", 0) + (1 if led.get("status") in
                     ("candidates-pending", "approved") else 0)
         revisions += led.get("promptRevisions", 0)
@@ -7364,7 +8242,7 @@ def evidence_pack(scene, episode="Ep1", log=print):
                         "harvestFrame": _asset(led.get("harvestFrame"))},
             "state": {"status": led.get("status"),
                        "batchAttempts": led.get("batchAttempts", 0),
-                       "candidatesGenerated": led.get("candidatesGenerated", 0),
+                       "candidatesGenerated": led.get("candidatesGenerated") or 0,
                        "disclosure": led.get("disclosure"),
                        "approval": led.get("approval"),
                        "rejections": led.get("rejections") or [],

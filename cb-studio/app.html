@@ -3583,7 +3583,7 @@ function structurePanelHTML(tok,sc){
     <div class="cchead">Cinematic craft gate · ${_esc(q.score)}/${_esc(q.maximum)}
       <span class="stbadge" style="color:var(${q.needsRevision?"--warn":"--ok"});background:var(${q.needsRevision?"--warnbg":"--okbg"})">${q.needsRevision?"revise before firing":"director-ready"}</span></div>
     ${Object.entries(q.dimensions||{}).map(([k,v])=>`<div class="ccrow"><span style="display:inline-block;width:22px;color:var(${v==2?"--ok":v==1?"--warn":"--danger"})">${_esc(v)}/2</span>${_esc(qlabels[k]||k)}</div>`).join("")}
-    <div class="ccref">Target ${_esc(q.threshold)}/20 · ${_esc(q.wordCount)} words · advisory craft judgement; provider blockers remain separate.</div>
+    <div class="ccref">Target ${_esc(q.threshold)}/20 · beat, continuity and craft judgement; provider blockers remain separate.</div>
   </div>`:"";
   const refs=((sc.checks||{}).referenceContract||[]).map(r=>`<div class="ccrow"><b>${_esc(r.assetTag)}</b> · ${_esc(r.role)}
     <div class="ccref">${_esc(r.path||"")} · ${_esc((r.contentHash||"").slice(0,12))}</div></div>`).join("");
@@ -3822,7 +3822,7 @@ function promptLabPanelHTML(tok,type,data){
   const directionNotes=(data.existingFeedback||[]).filter(item=>item.kind!=="render-comment").map(item=>plFeedbackRow(tok,type,item,selected)).join("");
   const diagnostics=`<details class="techdetails"><summary>Prompt diagnostics · structure ${_esc(analysis.score)}/${_esc(analysis.maximum)}</summary>
     <div class="plmatrix"><div class="plmh">Craft signal</div><div class="plmh plnum">${contract.analysisAppliesToRender?"Prompt":"Direction"}</div><div class="plmh plnum">Dailies</div>${matrix}</div>
-    <div class="plmeta" style="margin-top:8px">${_esc(analysis.wordCount)} words · deterministic analysis</div>
+    <div class="plmeta" style="margin-top:8px">Deterministic structure and outcome analysis</div>
     ${contract.analysisAppliesToRender?"":`<div class="plwarn">This analysis is current direction, not a claimed generation prompt for this legacy render.</div>`}
     ${warnings}</details>`;
   const audit=`<details class="techdetails plaudit"><summary>Audit details</summary>
@@ -4165,11 +4165,10 @@ function renderShotStage(mode){
   // provider is s.keyframePrompt (compile_keyframe_prompt's output, a completely different,
   // still-frame-only text). Branch by mode so "Technical details" always shows the real
   // brief for THIS stage's own generation call, never a sibling stage's.
-  const techWords=mode=="keyframe"?s.keyframePromptWords:s.promptWords;
   const techPrompt=mode=="keyframe"?s.keyframePrompt:s.seedancePrompt;
   const techMeta=mode=="keyframe"
-    ?`${techWords?techWords+" words · ":""}opening frame · ${_esc(s.sourceType||"")}`
-    :`${techWords?techWords+" words · ":""}${_esc(s.durationSec||"")}s · ${_esc(s.sourceType||"")}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}`;
+    ?`opening frame · ${_esc(s.sourceType||"")}`
+    :`${_esc(s.durationSec||"")}s · ${_esc(s.sourceType||"")}${s.sourceShotId?" ← "+_esc(s.sourceShotId):""}`;
   const decisionTitle=mode==="keyframe"?(resultFirst?"Review the opening keyframe":"Build the opening keyframe"):
     mode==="voice"?(resultFirst?"Review the performance":"Create the performance"):
     (resultFirst?"Review the animation take":"Create the animation take");

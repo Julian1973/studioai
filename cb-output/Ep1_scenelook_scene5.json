@@ -1,0 +1,65 @@
+{
+ "approved": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/Ep1_S5_plate_candidate_e71790d7.png",
+  "hash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2",
+  "inputSignature": {
+   "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+   "briefHash": "95e70051a650de34b0a9eeac5c3f9a29b7539d17c7ea9b04ecf3b6f3c197222e",
+   "referenceHashes": {
+    "deep_rainforest.png": "b6971fa06bad5527a41d6fbf10dcd3b870f0031af47aaf97dbf4c23ab6b7b87a"
+   },
+   "plateHash": "18acda7096354f0ad524c6eca85782fd98a9027070263d63621a6b26b31e91d2"
+  },
+  "referencePath": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-seed/assets/locations/deep_rainforest.png",
+  "generatedAt": "2026-08-15T11:46:27",
+  "packageRevision": 3,
+  "approvedAt": "2026-08-15T11:47:44",
+  "reviewedBy": "Codex for Julian"
+ },
+ "candidate": null,
+ "history": [],
+ "departmentWork": {
+  "look": {
+   "approved": {
+    "department": "Look Development",
+    "worker": "Cinematographer / DP",
+    "skill": "skills/crystal-bears-cinematographer/SKILL.md",
+    "model": "gpt-5.5",
+    "preparedAt": "2026-08-15T11:43:43",
+    "editedAt": null,
+    "preparedBy": "specialist",
+    "sourceHash": "c7b5363fa34e7d8670132fc709df3b2733379758e4a2e73bfe9de55ff21a0085",
+    "output": {
+     "creativeIntent": "Establish the Rainforest Edge as a child-readable, emotionally clear threshold between sheltered jungle and a threatening offshore storm: beautiful, wet, windy, and tense, but not frightening or grim.",
+     "storyOfPlace": "The outer Whispering Woods canopy breaks open toward Crystal Cove’s coast. Rain-soaked rainforest plants, bending branches, and dripping leaves create a natural frame around a clear view to the dark, stormy sea beyond. The storm has intensified since the previous scene and is now visible offshore, pressing toward land under cold midday light.",
+     "paletteAndLighting": "Cold blue-grey storm daylight dominates, continuous with the locked S4-5 deepening light arc. Use dark teal foliage, wet emerald leaf highlights, slate clouds, charcoal ocean, pale sea mist, and small glints of silver rainwater. Keep saturation appealing for ages 4-8 while maintaining a stormy midday mood. Lighting is diffuse, overcast, and wind-driven, with soft reflections on wet bark, leaves, stones, and puddled ground.",
+     "materialsAndAtmosphere": "Glossy wet leaves, slick dark bark, flexible vine clusters, rain-beaded ferns, muddy root textures, shallow puddles, salt mist, wind-torn spray, and layered storm clouds offshore. The air should feel humid and moving: rain streaks, leaf drip, sea haze, and subtle branch bend imply building wind without adding characters or creatures.",
+     "continuityRules": [
+      "Environment-only Scene Look plate: no characters, no animals, no vehicles, no props that imply character action.",
+      "Must match the Rainforest Edge canon: wet trees and branches framing a sightline out to the stormy sea.",
+      "Time is midday, but light is cold storm-grey rather than sunny.",
+      "Weather is continuous with an intensifying coastal storm; offshore storm must be visible.",
+      "Original 3D CGI animated feature look for ages 4-8: tactile, polished, bold, readable, and emotionally warm despite the cold storm palette."
+     ],
+     "providerPrompt": "Environment-only Scene Look plate for an original 3D CGI animated children’s feature, Pixar-caliber polish, ages 4-8. Depict the Rainforest Edge at the outer Whispering Woods where dense wet rainforest opens toward Crystal Cove’s coast. No characters, no animals, no vehicles, no story props. A wind-lashed treeline of glossy rain-soaked leaves, dark slick bark, ferns, vines, roots, puddled earth, and dripping branches surrounds a clear natural opening to the stormy sea beyond. Midday under cold blue-grey overcast storm light, continuous deepening storm mood. Offshore, the ocean is charcoal-slate with choppy waves, sea mist, rain streaks, and layered dark storm clouds advancing toward shore. Palette: dark teal rainforest, wet emerald highlights, slate-blue sky, charcoal sea, silver rain glints. Materials feel tactile and animated: beaded water on leaves, reflective puddles, slick bark, flexible bending branches, humid air, salt spray haze. Appealing, bold, legible, saturated-but-stormy animated look; beautiful and tense, never horror, never photorealistic."
+    },
+    "packageRevision": 3,
+    "inputSignature": {
+     "stage": "look",
+     "model": "gpt-5.5",
+     "skillHashes": {
+      "cinematography": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
+     },
+     "canonProfileDigest": "4c05ff7134b7d771b5e5c3e520ae8200c1ac3d191e3d049f4f88626314623115",
+     "sceneContextHash": "f7f848cada0d01952a922a0ace2887a83eb9b0555a88464bf04b93cdd174ac14"
+    },
+    "outcome": "approved",
+    "decisionAt": "2026-08-15T11:47:44",
+    "reviewedBy": "Codex for Julian",
+    "note": "Approved under Julian delegated Scene 5 authority: storm-edge geography, wet materials, sea sightline and child-readable tension all support the discovery beat."
+   },
+   "candidate": null,
+   "history": []
+  }
+ }
+}

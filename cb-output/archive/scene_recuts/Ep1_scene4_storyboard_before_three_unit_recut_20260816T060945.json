@@ -1,0 +1,963 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "4",
+ "engineVersion": "cb_engine.py production-package storyboard snapshot",
+ "builtAt": "2026-08-14T20:52:11.984039+00:00",
+ "sourceScript": {
+  "schemaVersion": 1,
+  "episodeId": "Ep1",
+  "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "sha256": "b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "byteLength": 17826,
+  "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.txt",
+  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.json",
+  "displayFile": "Ep1_The_Adventure_Begins.txt",
+  "title": "The Adventure Begins",
+  "activationId": "c0279c729dae4f8d9effc7502d6bbaa4",
+  "activatedAt": "2026-08-05T09:39:02+00:00",
+  "activatedBy": "Julian explicit no-pollen-bags direction, applied by Codex",
+  "previousScriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19"
+ },
+ "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json",
+ "approvalState": "generated-pending-human-review",
+ "humanNote": "",
+ "scene": {},
+ "beats": [
+  {
+   "sceneNumber": 4,
+   "beatCode": "4.B1",
+   "sourceBeatId": "source-beat:sha256:ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656",
+   "sourceEventRange": {
+    "firstEventIndex": 51,
+    "lastEventIndex": 54,
+    "firstEventId": "script-event:sha256:6946ddc609d42cc63ec7786461d68f44134de5f1f5a01da0f4997fb6c7406dd6",
+    "lastEventId": "script-event:sha256:c02b8be6e6b86b5a353982add43083eb715cfb1a0b57840fd2ae1992bcfd4be6",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:6946ddc609d42cc63ec7786461d68f44134de5f1f5a01da0f4997fb6c7406dd6",
+    "script-event:sha256:2a404e4a9b420f10e590c7d88d6804ebf50a5a1fdd77bd3dc34e141947807118",
+    "script-event:sha256:86a1faf08c8984a5cefbdac877778ffc904dbf04cd960e5b025f5fb414d5f53c",
+    "script-event:sha256:c02b8be6e6b86b5a353982add43083eb715cfb1a0b57840fd2ae1992bcfd4be6"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:5a977bccd32b4d871b3c85793780fb09ed96dce951fd2b8f6bc44d27b973add2",
+    "dialogue-occurrence:sha256:c51dcca1e1656ba3ac9fe363b73b606dba2af8c3d6f39de0145e20a1a05a6177"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:6946ddc609d42cc63ec7786461d68f44134de5f1f5a01da0f4997fb6c7406dd6",
+       "sourceEventIndex": 51,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Open water. Endless blue. Keen sails confidently — or at least he tries to. The friendly DOLPHIN keeps pace beside the boat, popping up every so often."
+      },
+      {
+       "sourceEventId": "script-event:sha256:2a404e4a9b420f10e590c7d88d6804ebf50a5a1fdd77bd3dc34e141947807118",
+       "sourceEventIndex": 52,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Hi! I’m Keen! Nice to meet you, Squeaky!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:5a977bccd32b4d871b3c85793780fb09ed96dce951fd2b8f6bc44d27b973add2"
+      },
+      {
+       "sourceEventId": "script-event:sha256:86a1faf08c8984a5cefbdac877778ffc904dbf04cd960e5b025f5fb414d5f53c",
+       "sourceEventIndex": 53,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "The Dolphin chatters happily. Keen nods like that settles it."
+      },
+      {
+       "sourceEventId": "script-event:sha256:c02b8be6e6b86b5a353982add43083eb715cfb1a0b57840fd2ae1992bcfd4be6",
+       "sourceEventIndex": 54,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Squeaky. Perfect. You really do sound squeaky.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:c51dcca1e1656ba3ac9fe363b73b606dba2af8c3d6f39de0145e20a1a05a6177"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656"
+   },
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Open water makes Keen small, but he tries to sail confidently while Squeaky keeps pace. Naming Squeaky turns the dolphin from surprise into companion, and Keen’s misunderstanding of chirps is sweetly self-assured.",
+   "want": "Keen wants to make the open sea feel friendly and manageable.",
+   "need": "He needs companionship, even before he admits the scale scares him.",
+   "kidRead": "Keen sails with his new dolphin friend and gives him a perfect name.",
+   "adultRead": "The child fills uncertainty with chatter and friendship because silence would reveal how big the water is.",
+   "emotionalIntent": "Keep the surface playful while the wide sea quietly enlarges around him.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:6946ddc609d42cc63ec7786461d68f44134de5f1f5a01da0f4997fb6c7406dd6",
+     "sourceEventIndex": 51,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Open water. Endless blue. Keen sails confidently — or at least he tries to. The friendly DOLPHIN keeps pace beside the boat, popping up every so often."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:2a404e4a9b420f10e590c7d88d6804ebf50a5a1fdd77bd3dc34e141947807118",
+     "sourceEventIndex": 52,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:5a977bccd32b4d871b3c85793780fb09ed96dce951fd2b8f6bc44d27b973add2",
+     "speaker": "Keen",
+     "exactText": "Hi! I’m Keen! Nice to meet you, Squeaky!",
+     "dialogue": "Keen: Hi! I’m Keen! Nice to meet you, Squeaky!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:86a1faf08c8984a5cefbdac877778ffc904dbf04cd960e5b025f5fb414d5f53c",
+     "sourceEventIndex": 53,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "The Dolphin chatters happily. Keen nods like that settles it."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:c02b8be6e6b86b5a353982add43083eb715cfb1a0b57840fd2ae1992bcfd4be6",
+     "sourceEventIndex": 54,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c51dcca1e1656ba3ac9fe363b73b606dba2af8c3d6f39de0145e20a1a05a6177",
+     "speaker": "Keen",
+     "exactText": "Squeaky. Perfect. You really do sound squeaky.",
+     "dialogue": "Keen: Squeaky. Perfect. You really do sound squeaky.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "4.B2",
+   "sourceBeatId": "source-beat:sha256:17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8",
+   "sourceEventRange": {
+    "firstEventIndex": 55,
+    "lastEventIndex": 58,
+    "firstEventId": "script-event:sha256:2d7e55d8f599b63b37be5e0594a6755c1a0dfc3814725fed63f3d36f69c4b26b",
+    "lastEventId": "script-event:sha256:58cfd50a7fdf9cf423b8dd6094e835bfff97786e45faac388e3088452ea74f58",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:2d7e55d8f599b63b37be5e0594a6755c1a0dfc3814725fed63f3d36f69c4b26b",
+    "script-event:sha256:b8182236287cefa141f42bf60cf062f6712f6dc81b60716229feb5b104cfe768",
+    "script-event:sha256:be30a4b4ac73d58125437544e07f075fb4c40977095433957b9fb80042a2dcb0",
+    "script-event:sha256:58cfd50a7fdf9cf423b8dd6094e835bfff97786e45faac388e3088452ea74f58"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:31e5b9dc858f0774e41c01acc65db2f67a8e330ae336bcb033713f218ba768e4",
+    "dialogue-occurrence:sha256:58e7908ee6594a8dcd30692bf470eb1bde69b6ca5ec08f534dd41d4bb6775109"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:2d7e55d8f599b63b37be5e0594a6755c1a0dfc3814725fed63f3d36f69c4b26b",
+       "sourceEventIndex": 55,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Squeaky leaps high beside the boat. Keen laughs. He looks at his map. Then ahead. Then back at his map. A little uncertain."
+      },
+      {
+       "sourceEventId": "script-event:sha256:b8182236287cefa141f42bf60cf062f6712f6dc81b60716229feb5b104cfe768",
+       "sourceEventIndex": 56,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Okay… so if this is north… then I am definitely going…",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:31e5b9dc858f0774e41c01acc65db2f67a8e330ae336bcb033713f218ba768e4"
+      },
+      {
+       "sourceEventId": "script-event:sha256:be30a4b4ac73d58125437544e07f075fb4c40977095433957b9fb80042a2dcb0",
+       "sourceEventIndex": 57,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "He turns the map upside down."
+      },
+      {
+       "sourceEventId": "script-event:sha256:58cfd50a7fdf9cf423b8dd6094e835bfff97786e45faac388e3088452ea74f58",
+       "sourceEventIndex": 58,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "…one of the directions.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:58e7908ee6594a8dcd30692bf470eb1bde69b6ca5ec08f534dd41d4bb6775109"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8"
+   },
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "The map turns from tool to comic threat. Keen tries to reason his way through directions, flips the map, and lands on uncertainty as a joke rather than a confession.",
+   "want": "Keen wants to prove he can navigate by himself.",
+   "need": "He needs to accept help before pride turns uncertainty into danger.",
+   "kidRead": "Keen gets confused by the map and turns it upside down.",
+   "adultRead": "His cover-up is still charming, but now the stakes are beginning to outgrow the joke.",
+   "emotionalIntent": "Use gentle map comedy to expose vulnerability without humiliating him.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:2d7e55d8f599b63b37be5e0594a6755c1a0dfc3814725fed63f3d36f69c4b26b",
+     "sourceEventIndex": 55,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Squeaky leaps high beside the boat. Keen laughs. He looks at his map. Then ahead. Then back at his map. A little uncertain."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:b8182236287cefa141f42bf60cf062f6712f6dc81b60716229feb5b104cfe768",
+     "sourceEventIndex": 56,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:31e5b9dc858f0774e41c01acc65db2f67a8e330ae336bcb033713f218ba768e4",
+     "speaker": "Keen",
+     "exactText": "Okay… so if this is north… then I am definitely going…",
+     "dialogue": "Keen: Okay… so if this is north… then I am definitely going…",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:be30a4b4ac73d58125437544e07f075fb4c40977095433957b9fb80042a2dcb0",
+     "sourceEventIndex": 57,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "He turns the map upside down."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:58cfd50a7fdf9cf423b8dd6094e835bfff97786e45faac388e3088452ea74f58",
+     "sourceEventIndex": 58,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:58e7908ee6594a8dcd30692bf470eb1bde69b6ca5ec08f534dd41d4bb6775109",
+     "speaker": "Keen",
+     "exactText": "…one of the directions.",
+     "dialogue": "Keen: …one of the directions.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "4.B3",
+   "sourceBeatId": "source-beat:sha256:c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
+   "sourceEventRange": {
+    "firstEventIndex": 59,
+    "lastEventIndex": 62,
+    "firstEventId": "script-event:sha256:12156e276056eaab71dd657d27d84ae3e866455a2af982e615d44d3cd69c808a",
+    "lastEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:12156e276056eaab71dd657d27d84ae3e866455a2af982e615d44d3cd69c808a",
+    "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
+    "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
+    "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c",
+    "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:12156e276056eaab71dd657d27d84ae3e866455a2af982e615d44d3cd69c808a",
+       "sourceEventIndex": 59,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "A gust of wind hits. The sail FLAPS hard. The boat lurches. Keen stumbles sideways and grabs the mast."
+      },
+      {
+       "sourceEventId": "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
+       "sourceEventIndex": 60,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Oh!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c"
+      },
+      {
+       "sourceEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
+       "sourceEventIndex": 61,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
+      },
+      {
+       "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+       "sourceEventIndex": 62,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "No no no no—!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80"
+   },
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "The first hard gust turns uncertainty into physical danger. The boat lurches, the sky darkens, Squeaky disappears, rain arrives in sheets, and the wind steals the map — Keen’s performed control is stripped away by the world.",
+   "want": "Keen wants to hold onto the boat, the map and the idea that he can still manage this.",
+   "need": "He needs to feel the fear honestly before a real decision can emerge.",
+   "kidRead": "The wind gets strong, rain pours, and the map flies away.",
+   "adultRead": "The symbols of independence — boat, map, command — fail all at once, leaving only the child inside the performance.",
+   "emotionalIntent": "Shift the episode into genuine jeopardy while keeping the action legible and not frightening beyond safe adventure.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:12156e276056eaab71dd657d27d84ae3e866455a2af982e615d44d3cd69c808a",
+     "sourceEventIndex": 59,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "A gust of wind hits. The sail FLAPS hard. The boat lurches. Keen stumbles sideways and grabs the mast."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
+     "sourceEventIndex": 60,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c",
+     "speaker": "Keen",
+     "exactText": "Oh!",
+     "dialogue": "Keen: Oh!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
+     "sourceEventIndex": 61,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+     "sourceEventIndex": 62,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff",
+     "speaker": "Keen",
+     "exactText": "No no no no—!",
+     "dialogue": "Keen: No no no no—!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "4.B4",
+   "sourceBeatId": "source-beat:sha256:7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+   "sourceEventRange": {
+    "firstEventIndex": 63,
+    "lastEventIndex": 64,
+    "firstEventId": "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
+    "lastEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
+    "eventCount": 2
+   },
+   "sourceEventIds": [
+    "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
+    "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:db48a4ec2e15cc04820777633e5977d88b19c0c3cb7158051ce536518799b626"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
+       "sourceEventIndex": 63,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "He lunges for it. Misses. The map whips through the air and vanishes into the storm. Keen stands frozen. Rainwater sloshes around his feet. The horizon disappears behind sheets of grey."
+      },
+      {
+       "sourceEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
+       "sourceEventIndex": 64,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Oh no… I’m lost!!!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:db48a4ec2e15cc04820777633e5977d88b19c0c3cb7158051ce536518799b626"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449"
+   },
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Keen misses the map and freezes as the horizon vanishes. His admission that he is lost lands as the first open crack in the brave mask.",
+   "want": "Keen wants the map back because it was his proof of control.",
+   "need": "He needs to admit that he does not know the way.",
+   "kidRead": "The map is gone, everything is grey, and Keen says he is lost.",
+   "adultRead": "The child’s first real helplessness arrives when there is no adult in frame to hand the answer back.",
+   "emotionalIntent": "Let fear land cleanly, with the storm swallowing geography around him.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
+     "sourceEventIndex": 63,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "He lunges for it. Misses. The map whips through the air and vanishes into the storm. Keen stands frozen. Rainwater sloshes around his feet. The horizon disappears behind sheets of grey."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
+     "sourceEventIndex": 64,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:db48a4ec2e15cc04820777633e5977d88b19c0c3cb7158051ce536518799b626",
+     "speaker": "Keen",
+     "exactText": "Oh no… I’m lost!!!",
+     "dialogue": "Keen: Oh no… I’m lost!!!",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "4.B5",
+   "sourceBeatId": "source-beat:sha256:7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093",
+   "sourceEventRange": {
+    "firstEventIndex": 65,
+    "lastEventIndex": 66,
+    "firstEventId": "script-event:sha256:48d4c69e7731e9f4b644a1e1368718c5b980fe0cc345971876e789962f4a46ad",
+    "lastEventId": "script-event:sha256:50d050d4a5346c2876fada978d1821807f94379b89ebde6d4f19a08dde50a9d8",
+    "eventCount": 2
+   },
+   "sourceEventIds": [
+    "script-event:sha256:48d4c69e7731e9f4b644a1e1368718c5b980fe0cc345971876e789962f4a46ad",
+    "script-event:sha256:50d050d4a5346c2876fada978d1821807f94379b89ebde6d4f19a08dde50a9d8"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:c02f69c0652f4eec811d365bdec5fde70ab6195a641e6c06668326c2a13e55c9"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:48d4c69e7731e9f4b644a1e1368718c5b980fe0cc345971876e789962f4a46ad",
+       "sourceEventIndex": 65,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Lightning flickers far away. Keen grips the edge of the boat tighter. His breathing quickens. He closes his eyes for just a second. Breathes. Grounds himself."
+      },
+      {
+       "sourceEventId": "script-event:sha256:50d050d4a5346c2876fada978d1821807f94379b89ebde6d4f19a08dde50a9d8",
+       "sourceEventIndex": 66,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "I’ve got this… I’ve got this…",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:c02f69c0652f4eec811d365bdec5fde70ab6195a641e6c06668326c2a13e55c9"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093"
+   },
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Keen grips the boat, breathes, grounds himself and repeats his brave phrase. It is not full courage yet; it is a small self-rescue, the attempt to keep from coming apart.",
+   "want": "Keen wants to steady himself enough to choose the next action.",
+   "need": "He needs to discover that bravery can begin as a shaky breath, not a fearless leap.",
+   "kidRead": "Keen holds on, closes his eyes, breathes and tells himself he can do it.",
+   "adultRead": "A child uses the phrase he has been using as performance and begins turning it into an actual foothold.",
+   "emotionalIntent": "Hold the panic just long enough for the audience to feel the first inward steadiness.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:48d4c69e7731e9f4b644a1e1368718c5b980fe0cc345971876e789962f4a46ad",
+     "sourceEventIndex": 65,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Lightning flickers far away. Keen grips the edge of the boat tighter. His breathing quickens. He closes his eyes for just a second. Breathes. Grounds himself."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:50d050d4a5346c2876fada978d1821807f94379b89ebde6d4f19a08dde50a9d8",
+     "sourceEventIndex": 66,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c02f69c0652f4eec811d365bdec5fde70ab6195a641e6c06668326c2a13e55c9",
+     "speaker": "Keen",
+     "exactText": "I’ve got this… I’ve got this…",
+     "dialogue": "Keen: I’ve got this… I’ve got this…",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 4,
+   "beatCode": "4.B6",
+   "sourceBeatId": "source-beat:sha256:ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79",
+   "sourceEventRange": {
+    "firstEventIndex": 67,
+    "lastEventIndex": 71,
+    "firstEventId": "script-event:sha256:41d903234900312b83627dcc511739ce8ced01b0f349830ed86c3ba6fece4d9a",
+    "lastEventId": "script-event:sha256:2aa9cd6d41d058606f5f6e0770ed2903428141e01efdfdbd28098aa9e8dc269d",
+    "eventCount": 5
+   },
+   "sourceEventIds": [
+    "script-event:sha256:41d903234900312b83627dcc511739ce8ced01b0f349830ed86c3ba6fece4d9a",
+    "script-event:sha256:3ee9256e0a4bb7a4290443158a50296afa3a62ca2ebc6c7e98be340ae9b3915c",
+    "script-event:sha256:0d548b4419ded2698693aa28ad1035ab8eb71473ca04c8fbef00dfd3f0594e7f",
+    "script-event:sha256:72356e51fe547cc79eec22b3e847256d5ee3f6bc986020855756cd841bac9e02",
+    "script-event:sha256:2aa9cd6d41d058606f5f6e0770ed2903428141e01efdfdbd28098aa9e8dc269d"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:a8b593ec7bb15b5115179d7d32b06cb77c95693c0d09f9c4416a9432b850edb0",
+    "dialogue-occurrence:sha256:c4e36e7c6007407361055ffa2ea79d0fa5c53da87d333c2ada28e722e8ff1e6d"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:41d903234900312b83627dcc511739ce8ced01b0f349830ed86c3ba6fece4d9a",
+       "sourceEventIndex": 67,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "A familiar CLICKING CHATTER sounds nearby. Keen opens his eyes. Squeaky leaps through the storm water beside the boat. He dips and reappears, signaling insistently in one direction."
+      },
+      {
+       "sourceEventId": "script-event:sha256:3ee9256e0a4bb7a4290443158a50296afa3a62ca2ebc6c7e98be340ae9b3915c",
+       "sourceEventIndex": 68,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Follow you?",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:a8b593ec7bb15b5115179d7d32b06cb77c95693c0d09f9c4416a9432b850edb0"
+      },
+      {
+       "sourceEventId": "script-event:sha256:0d548b4419ded2698693aa28ad1035ab8eb71473ca04c8fbef00dfd3f0594e7f",
+       "sourceEventIndex": 69,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Squeaky chirps. Keen looks at the rough water. Then at Squeaky. Then nods."
+      },
+      {
+       "sourceEventId": "script-event:sha256:72356e51fe547cc79eec22b3e847256d5ee3f6bc986020855756cd841bac9e02",
+       "sourceEventIndex": 70,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "Okay… lead on, Squeaky!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:c4e36e7c6007407361055ffa2ea79d0fa5c53da87d333c2ada28e722e8ff1e6d"
+      },
+      {
+       "sourceEventId": "script-event:sha256:2aa9cd6d41d058606f5f6e0770ed2903428141e01efdfdbd28098aa9e8dc269d",
+       "sourceEventIndex": 71,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Squeaky surges ahead. Keen wrestles the little boat around to follow."
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79"
+   },
+   "location": "AT SEA",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Squeaky"
+   ],
+   "storyBeat": "Squeaky returns through the storm, signaling a direction. Keen looks from rough water to his friend and decides to follow, choosing trust over solitary control.",
+   "want": "Keen wants a way through the storm.",
+   "need": "He needs to accept guidance from someone else without feeling smaller.",
+   "kidRead": "Squeaky shows him where to go, and Keen follows.",
+   "adultRead": "The lost child’s first real mature choice is not command but trust.",
+   "emotionalIntent": "Turn panic toward motion and hope, with Squeaky as connection rather than solution.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:41d903234900312b83627dcc511739ce8ced01b0f349830ed86c3ba6fece4d9a",
+     "sourceEventIndex": 67,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "A familiar CLICKING CHATTER sounds nearby. Keen opens his eyes. Squeaky leaps through the storm water beside the boat. He dips and reappears, signaling insistently in one direction."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:3ee9256e0a4bb7a4290443158a50296afa3a62ca2ebc6c7e98be340ae9b3915c",
+     "sourceEventIndex": 68,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:a8b593ec7bb15b5115179d7d32b06cb77c95693c0d09f9c4416a9432b850edb0",
+     "speaker": "Keen",
+     "exactText": "Follow you?",
+     "dialogue": "Keen: Follow you?",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:0d548b4419ded2698693aa28ad1035ab8eb71473ca04c8fbef00dfd3f0594e7f",
+     "sourceEventIndex": 69,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Squeaky chirps. Keen looks at the rough water. Then at Squeaky. Then nods."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:72356e51fe547cc79eec22b3e847256d5ee3f6bc986020855756cd841bac9e02",
+     "sourceEventIndex": 70,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c4e36e7c6007407361055ffa2ea79d0fa5c53da87d333c2ada28e722e8ff1e6d",
+     "speaker": "Keen",
+     "exactText": "Okay… lead on, Squeaky!",
+     "dialogue": "Keen: Okay… lead on, Squeaky!",
+     "action": null
+    },
+    {
+     "n": 5,
+     "sourceEventId": "script-event:sha256:2aa9cd6d41d058606f5f6e0770ed2903428141e01efdfdbd28098aa9e8dc269d",
+     "sourceEventIndex": 71,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Squeaky surges ahead. Keen wrestles the little boat around to follow."
+    }
+   ]
+  }
+ ],
+ "shots": [
+  {
+   "shotId": "4.B1.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "durationSec": 30.0,
+   "purpose": "Make the empty sea feel enormous, turn Squeaky into Keen's first companion, then let Keen's confident map-reading reveal that he has no idea where he is going.",
+   "performanceAssignment": "Shot 1: the small sailboat travels left-to-right across endless blue water. Keen performs confidence while making quick balance corrections. Squeaky surfaces at screen-right, keeps pace, and chatters; Keen greets him, listens, names him, and the friendship lands in one shared look. Shot 2: without resetting the boat or screen direction, Squeaky makes one playful leap while Keen laughs and lifts the map from the boat. Keen checks the map, looks over the bow, checks it again, rotates it upside down, then peeks over its edge and completes the directions joke. The boat keeps travelling throughout.",
+   "camera": "Open wide with the boat small against endless water, starboard side and left-to-right travel. Push to a warm medium two-shot for the naming beat. Cut on Squeaky's leap to a medium on Keen, then push toward the upside-down map while Squeaky remains readable at screen-right. Preserve the same boat, travel axis, sail, cargo and open-water light.",
+   "openingPose": "Keen stands center-left in the boat with one hand lightly on the tiller and the other beginning to lift; Squeaky is just below the surface at screen-right with ripples rising where the next pop-up will happen.",
+   "visualPayoff": "Keen holds the map visibly upside down, peeks over it toward the open water and lands 'one of the directions' while Squeaky keeps pace beside the moving boat.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:5a977bccd32b4d871b3c85793780fb09ed96dce951fd2b8f6bc44d27b973add2",
+     "sourceEventId": "script-event:sha256:2a404e4a9b420f10e590c7d88d6804ebf50a5a1fdd77bd3dc34e141947807118",
+     "speaker": "Keen",
+     "exactText": "Hi! I’m Keen! Nice to meet you, Squeaky!",
+     "delivery": "Bright greeting, slightly breathy from balancing on the boat; friendly and proud of the new name.",
+     "startSec": 4.6,
+     "endSec": 7.8
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c51dcca1e1656ba3ac9fe363b73b606dba2af8c3d6f39de0145e20a1a05a6177",
+     "sourceEventId": "script-event:sha256:c02b8be6e6b86b5a353982add43083eb715cfb1a0b57840fd2ae1992bcfd4be6",
+     "speaker": "Keen",
+     "exactText": "Squeaky. Perfect. You really do sound squeaky.",
+     "delivery": "Satisfied and matter-of-fact, with a small nod on “Perfect.”",
+     "startSec": 10.9,
+     "endSec": 14.3
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:31e5b9dc858f0774e41c01acc65db2f67a8e330ae336bcb033713f218ba768e4",
+     "sourceEventId": "script-event:sha256:b8182236287cefa141f42bf60cf062f6712f6dc81b60716229feb5b104cfe768",
+     "speaker": "Keen",
+     "exactText": "Okay… so if this is north… then I am definitely going…",
+     "delivery": "Quiet reasoning aloud, slowing as the map stops helping.",
+     "startSec": 17.5,
+     "endSec": 22.4
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:58e7908ee6594a8dcd30692bf470eb1bde69b6ca5ec08f534dd41d4bb6775109",
+     "sourceEventId": "script-event:sha256:58cfd50a7fdf9cf423b8dd6094e835bfff97786e45faac388e3088452ea74f58",
+     "speaker": "Keen",
+     "exactText": "…one of the directions.",
+     "delivery": "Small, sheepish confidence; the pause before the line lets the upside-down map read first.",
+     "startSec": 24.5,
+     "endSec": 26.4
+    }
+   ],
+   "beatCodes": [
+    "4.B1",
+    "4.B2"
+   ],
+   "continuityConstraints": [
+    {
+     "label": "Scene 3 handoff state",
+     "value": "Begin from the approved final state of 3.B7.S1. Preserve the same little sailboat, tan sail, mast and rigging, established loaded cargo, bow-first left-to-right travel, coherent wake, bright open-water light, exactly one Keen and exactly one Squeaky.",
+     "severity": "blocking"
+    },
+    {
+     "label": "Keen wristband state",
+     "value": "Keen wears exactly two inherited aged-gold open cuffs with blank settings, one on each wrist. No crystals, aquamarine stones or glow. The cuffs never vanish, duplicate, swap wrists or change form.",
+     "severity": "blocking"
+    },
+    {
+     "label": "Boat cargo state",
+     "value": "The same established cargo remains aboard and spatially continuous: open satchel, rolled blanket, folded map and small food pouch. Nothing appears, disappears, duplicates or changes ownership unless a later approved action visibly changes it.",
+     "severity": "blocking"
+    },
+    {
+     "label": "Squeaky state",
+     "value": "Exactly one Squeaky matches the approved turnaround and remains outside the boat at screen-right beside the moving hull. Squeaky uses friendly nonverbal dolphin chirps, clicks and squeaks only; no English or human speech.",
+     "severity": "blocking"
+    },
+    {
+     "label": "Sailing physics",
+     "value": "The filled sail drives the boat bow-first through the water; stern follows, hull heels gently, wake trails coherently, and the boat never slides sideways or travels stern-first. Preserve the established starboard camera side and left-to-right travel axis.",
+     "severity": "blocking"
+    }
+   ],
+   "motionContinuityRequired": null
+  },
+  {
+   "shotId": "4.B3.S1",
+   "sourceType": "relay",
+   "sourceShotId": "4.B1.S1",
+   "durationSec": 30.0,
+   "purpose": "Let the storm dismantle Keen's performed control in one escalating cause-and-effect run, ending with the map gone and Keen finally admitting that he is lost.",
+   "performanceAssignment": "Shot 1: continue from the upside-down-map landing. A hard gust loads the sail, the boat heels and rocks, and Keen slides, grabs the mast and yelps. The light falls, rain builds from drops to sheets, and Squeaky dives below the rough water and disappears. Shot 2: Keen tries to steer with one hand and clamp the map with the other. A stronger gust visibly catches the map and tears it from his fingers; he reaches and calls after it. Shot 3: match Keen's reach as the boat drops beneath him. His hand closes on empty rain; the map vanishes into the grey. He regains his feet, sees that the horizon has gone, lets the loss register, and admits that he is lost.",
+   "camera": "Begin medium on Keen, map and sail from the established starboard side. Jolt with the first heel, then widen to reveal darkening sky, rough water and Squeaky's disappearance. Track the stolen map toward screen-right, cut at maximum reach, and tighten slowly on Keen only after the map and horizon have both disappeared.",
+   "openingPose": "Keen stands center-left with both hands on the upside-down map at chest height, knees flexed; the sail is just beginning to pull hard from an incoming gust at screen-right, and Squeaky is still visible near the waterline.",
+   "visualPayoff": "Keen stands in the rocking boat with empty hands, rainwater around his feet and no visible horizon, then says 'Oh no... I'm lost!!!' without performing confidence.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c",
+     "sourceEventId": "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
+     "speaker": "Keen",
+     "exactText": "Oh!",
+     "delivery": "Short startled yelp on the first lurch.",
+     "startSec": 2.2,
+     "endSec": 2.8
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff",
+     "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+     "speaker": "Keen",
+     "exactText": "No no no no—!",
+     "delivery": "Fast, panicked, cut off by the map whipping away.",
+     "startSec": 20.0,
+     "endSec": 22.1
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:db48a4ec2e15cc04820777633e5977d88b19c0c3cb7158051ce536518799b626",
+     "sourceEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
+     "speaker": "Keen",
+     "exactText": "Oh no… I’m lost!!!",
+     "delivery": "Begins small on “Oh no,” then breaks into a frightened shout on “I’m lost.”",
+     "startSec": 26.0,
+     "endSec": 28.1
+    }
+   ],
+   "beatCodes": [
+    "4.B3",
+    "4.B4"
+   ],
+   "continuityConstraints": null,
+   "motionContinuityRequired": true
+  },
+  {
+   "shotId": "4.B5.S1",
+   "sourceType": "relay",
+   "sourceShotId": "4.B3.S1",
+   "durationSec": 30.0,
+   "purpose": "Turn Keen's fear into a small act of self-regulation, then let Squeaky's return give him a choice: accept help and steer toward trust.",
+   "performanceAssignment": "Shot 1: continue with Keen alone in the same storm. A distant lightning flicker makes him grip the boat edge. His shoulders show quick breaths; he closes his eyes, takes one slower breath, repeats his brave phrase, and settles only slightly. Shot 2: Squeaky's offscreen clicking makes Keen open his eyes and turn before Squeaky appears. Squeaky leaps beside the hull, dives, resurfaces farther ahead and repeatedly indicates a clear screen-right route. Keen questions him, studies the water, meets Squeaky's eyeline, decides, and nods. Shot 3: Keen answers with growing resolve, braces his feet and hauls the tiller. The bow pivots under water resistance and the sail remains wind-loaded as the boat follows Squeaky rather than sliding sideways.",
+   "camera": "Ride the established starboard-side boat motion in a steadier medium close while Keen breathes. Let Squeaky's chatter bridge into a pan toward screen-right, then widen to show Squeaky leading and the bow physically turning after him. End with both characters' motivated eyelines and a readable forward route through the storm.",
+   "openingPose": "Keen stands frozen at center of the boat with arms lowered and fingers beginning to curl upward toward the edge as distant lightning starts to flicker behind the rain.",
+   "visualPayoff": "Squeaky surges ahead through the storm while Keen, still worried but no longer alone, turns the boat onto Squeaky's path and commits to following him.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c02f69c0652f4eec811d365bdec5fde70ab6195a641e6c06668326c2a13e55c9",
+     "sourceEventId": "script-event:sha256:50d050d4a5346c2876fada978d1821807f94379b89ebde6d4f19a08dde50a9d8",
+     "speaker": "Keen",
+     "exactText": "I’ve got this… I’ve got this…",
+     "delivery": "Soft, shaky repetition with a breath between the two phrases.",
+     "startSec": 4.8,
+     "endSec": 7.5
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:a8b593ec7bb15b5115179d7d32b06cb77c95693c0d09f9c4416a9432b850edb0",
+     "sourceEventId": "script-event:sha256:3ee9256e0a4bb7a4290443158a50296afa3a62ca2ebc6c7e98be340ae9b3915c",
+     "speaker": "Keen",
+     "exactText": "Follow you?",
+     "delivery": "Questioning and cautious, pitched over the storm noise.",
+     "startSec": 14.5,
+     "endSec": 15.5
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c4e36e7c6007407361055ffa2ea79d0fa5c53da87d333c2ada28e722e8ff1e6d",
+     "sourceEventId": "script-event:sha256:72356e51fe547cc79eec22b3e847256d5ee3f6bc986020855756cd841bac9e02",
+     "speaker": "Keen",
+     "exactText": "Okay… lead on, Squeaky!",
+     "delivery": "Starts hesitant on “Okay,” then grows firmer and louder on the name.",
+     "startSec": 20.0,
+     "endSec": 22.3
+    }
+   ],
+   "beatCodes": [
+    "4.B5",
+    "4.B6"
+   ],
+   "continuityConstraints": null,
+   "motionContinuityRequired": true
+  }
+ ],
+ "inputSignature": {
+  "kind": "scene-storyboard-snapshot",
+  "schemaVersion": 1,
+  "inputs": {
+   "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+   "beatPackageDigest": "7ab0def81f431974205dfa01ee8f62171eca3d021019cb41efd079f7ff8c14a8",
+   "sceneNumber": "4",
+   "sourceBeatIds": [
+    "source-beat:sha256:ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656",
+    "source-beat:sha256:17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8",
+    "source-beat:sha256:c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
+    "source-beat:sha256:7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+    "source-beat:sha256:7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093",
+    "source-beat:sha256:ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79"
+   ],
+   "shotIds": [
+    "4.B1.S1",
+    "4.B3.S1",
+    "4.B5.S1"
+   ]
+  },
+  "algorithm": "sha256",
+  "digest": "3e49e5f700aee66b98be5d4091b680b97a670a9bbf1247a4618ec33f3fd2ef13"
+ },
+ "approvalLog": [
+  {
+   "target": "scene",
+   "state": "approved",
+   "note": "",
+   "at": "2026-08-15T08:11:34",
+   "by": "Julian"
+  },
+  {
+   "target": "4.B1.S1",
+   "state": "approved",
+   "note": "Julian approved the locked Scene 4 30-second production-unit structure. This approves direction and packing only; SEE, HEAR and WATCH remain separate human gates.",
+   "at": "2026-08-16T05:54:17",
+   "by": "Julian"
+  },
+  {
+   "target": "4.B3.S1",
+   "state": "approved",
+   "note": "Julian approved the locked Scene 4 30-second production-unit structure. This approves direction and packing only; SEE, HEAR and WATCH remain separate human gates.",
+   "at": "2026-08-16T05:54:17",
+   "by": "Julian"
+  },
+  {
+   "target": "4.B5.S1",
+   "state": "approved",
+   "note": "Julian approved the locked Scene 4 30-second production-unit structure. This approves direction and packing only; SEE, HEAR and WATCH remain separate human gates.",
+   "at": "2026-08-16T05:54:17",
+   "by": "Julian"
+  }
+ ]
+}

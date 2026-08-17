@@ -1,0 +1,914 @@
+{
+ "episode": "Ep1",
+ "sceneNumber": "4",
+ "sceneName": "",
+ "doctrine": "THE_DEFINITIVE_PIPELINE.md (2026-07-16, hybrid contract)",
+ "revision": 2,
+ "sourceScript": {
+  "schemaVersion": 1,
+  "episodeId": "Ep1",
+  "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "sha256": "b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "byteLength": 17826,
+  "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.txt",
+  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.json",
+  "displayFile": "Ep1_The_Adventure_Begins.txt",
+  "title": "The Adventure Begins",
+  "activationId": "c0279c729dae4f8d9effc7502d6bbaa4",
+  "activatedAt": "2026-08-05T09:39:02+00:00",
+  "activatedBy": "Julian explicit no-pollen-bags direction, applied by Codex",
+  "previousScriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19"
+ },
+ "sourceStoryboard": {
+  "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/creative/Ep1_scene4_storyboard.json",
+  "md5": "824e2026db81a4999e9cfd1fc4810ac5",
+  "sha256": "f3b7f23fb27ed31a12159535502a459e1ef381da2aba9bd1ad3d85897fa506f7",
+  "approvalState": "generated-pending-human-review"
+ },
+ "inputSignature": {
+  "kind": "production-package",
+  "schemaVersion": 1,
+  "inputs": {
+   "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+   "beatPackageDigest": "7ab0def81f431974205dfa01ee8f62171eca3d021019cb41efd079f7ff8c14a8",
+   "storyboardSha256": "f3b7f23fb27ed31a12159535502a459e1ef381da2aba9bd1ad3d85897fa506f7",
+   "creativeCardHashes": {},
+   "canonProfileDigest": null
+  },
+  "algorithm": "sha256",
+  "digest": "528c0180284ea74317b3e4b52f5935122c42ce020fb9409123fd0b79102fdeb6"
+ },
+ "directorStatement": {
+  "audienceFeeling": "Keen feels tiny in open water, then funny and capable for a moment, then frightened when the storm removes his map, and finally relieved when he chooses to follow Squeaky.",
+  "whoseScene": "Keen’s scene, with Squeaky as the visible companion who first plays beside him and later gives him a direction to follow.",
+  "emotionalChange": "Keen moves from performed confidence, to comic uncertainty, to panic, to a small steadying breath, to trusting Squeaky’s lead.",
+  "theLaugh": "Keen confidently names Squeaky and then treats an upside-down map as enough information to be going in “one of the directions.”",
+  "visualSurprise": "The friendly open water turns into a storm fast enough to swallow the horizon and snatch the map away.",
+  "carryForward": "Keen is still in rough weather, without the map, following Squeaky through the storm."
+ },
+ "beatCodes": [
+  "4.B1",
+  "4.B2",
+  "4.B3",
+  "4.B4",
+  "4.B5",
+  "4.B6"
+ ],
+ "shots": [
+  {
+   "shotId": "4.B1.S1",
+   "beatCode": "4.B1",
+   "beatCodes": [
+    "4.B1"
+   ],
+   "durationSec": 17.0,
+   "purpose": "Establish Keen trying to look confident in a huge empty seascape and turn Squeaky from surprise into companion.",
+   "performanceAssignment": "Keen rides the small boat left-to-right across open water with a lifted chest and quick balancing corrections; Squeaky keeps pace at screen-right, surfacing beside the boat between Keen’s looks. Keen raises one hand in greeting, speaks, listens to Squeaky’s chatter, then nods once as if the name is settled before delivering the second line.",
+   "camera": "Wide opening on endless water with the boat small in frame, camera on the starboard side looking across the boat toward screen-right travel; slow push to a medium two-shot as Squeaky pops up beside the hull, holding consistent left-to-right screen direction.",
+   "openingPose": "Keen stands center-left in the boat with one hand lightly on the tiller and the other beginning to lift; Squeaky is just below the surface at screen-right with ripples rising where the next pop-up will happen.",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": null,
+   "dialogueBinding": "Keen speaks both lines; Squeaky only chatters between them and does not form words.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:5a977bccd32b4d871b3c85793780fb09ed96dce951fd2b8f6bc44d27b973add2",
+     "sourceEventId": "script-event:sha256:2a404e4a9b420f10e590c7d88d6804ebf50a5a1fdd77bd3dc34e141947807118",
+     "speaker": "Keen",
+     "exactText": "Hi! I’m Keen! Nice to meet you, Squeaky!",
+     "delivery": "Bright greeting, slightly breathy from balancing on the boat; friendly and proud of the new name.",
+     "startSec": 5.2,
+     "endSec": 8.4
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c51dcca1e1656ba3ac9fe363b73b606dba2af8c3d6f39de0145e20a1a05a6177",
+     "sourceEventId": "script-event:sha256:c02b8be6e6b86b5a353982add43083eb715cfb1a0b57840fd2ae1992bcfd4be6",
+     "speaker": "Keen",
+     "exactText": "Squeaky. Perfect. You really do sound squeaky.",
+     "delivery": "Satisfied and matter-of-fact, with a small nod on “Perfect.”",
+     "startSec": 11.5,
+     "endSec": 14.9
+    }
+   ],
+   "visualPayoff": "Squeaky chatters happily at screen-right, Keen nods toward Squeaky, and the boat continues left-to-right with Keen still balancing himself in the open water.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "Do not move Squeaky’s mouth as if speaking words.",
+    "Do not show Keen already frightened in this shot.",
+    "Do not reverse the boat’s left-to-right travel."
+   ],
+   "charactersInFrame": [
+    "Keen",
+    "Squeaky"
+   ],
+   "continuityIn": null,
+   "continuityOut": {
+    "lighting": "Bright open-water daylight.",
+    "cameraSide": "Starboard side of boat, looking across Keen toward Squeaky on screen-right.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "toward Squeaky at screen-right",
+      "pose": "standing with one hand back on the tiller after a small greeting gesture",
+      "expression": "pleased and settled",
+      "visibleMarks": [
+       "dry"
+      ],
+      "heldProps": [
+       "tiller"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right beside the boat at the waterline",
+      "facing": "toward Keen",
+      "pose": "surfaced beside the hull after chattering",
+      "expression": "playful",
+      "visibleMarks": [
+       "wet from surfacing"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen, @图3 only for Squeaky and @图4 only for the set.\n\nBegin exactly on @图1, the approved opening frame — wide opening on endless water with the boat small in frame, camera on the starboard side looking across the boat toward screen-right travel; slow push to a medium two-shot as Squeaky pops up beside the hull, holding consistent left-to-right screen direction. Keen rides the small boat left-to-right across open water with a lifted chest and quick balancing corrections; Squeaky keeps pace at screen-right, surfacing beside the boat between Keen’s looks. Keen raises one hand in greeting, speaks, listens to Squeaky’s chatter, then nods once as if the name is settled before delivering the second line. Squeaky chatters happily at screen-right, Keen nods toward Squeaky, and the boat continues left-to-right with Keen still balancing himself in the open water.\n\nUse @Audio1 as the only voice. Lip-sync Keen; Squeaky's mouth remains closed. Preserve character identity and relative scale. Keep dry, wet from surfacing visible.",
+   "promptWords": 172,
+   "referenceSlots": {
+    "@图1": "opening keyframe",
+    "@图2": "Keen",
+    "@图3": "Squeaky",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 4.B1.S1 — voice-only performance for @Audio1.\nKeen: \"Hi! I’m Keen! Nice to meet you, Squeaky!\" — Bright greeting, slightly breathy from balancing on the boat; friendly and proud of the new name.. Target 5.2-8.4s.\nKeen: \"Squeaky. Perfect. You really do sound squeaky.\" — Satisfied and matter-of-fact, with a small nod on “Perfect.”. Target 11.5-14.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "keyframePrompt": "Stylised feature-quality 3D CGI with natural weight. Preserve the exact character designs, proportions, materials, lighting and environment from the references.\n\nThe literal OPENING FRAME of the shot, exactly as approved: Keen (@图1, smaller bear) stands center-left in the boat with one hand lightly on the tiller and the other beginning to lift; Squeaky (@图2, larger bear) is just below the surface at screen-right with ripples rising where the next pop-up will happen.\n\n@图3 scene plate anchors palette, materials and lighting only — never composition or geography.\n\nLiving performance lock: Keen, Squeaky has a specific motivated eyeline target and a readable active thought in the eyes. Use a precise asymmetric expression; no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic camera-facing expression.\n\nNegative: character redesign, appearance drift from the references, extra characters, on-screen text.",
+   "keyframePromptWords": 136,
+   "keyframeReferenceSlots": {
+    "@图1": "Keen",
+    "@图2": "Squeaky",
+    "@图3": "scene plate"
+   },
+   "internalConstraints": "Hard constraints: Do not move Squeaky’s mouth as if speaking words; Do not show Keen already frightened in this shot; Do not reverse the boat’s left-to-right travel; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no floating or sinking through ground."
+  },
+  {
+   "shotId": "4.B2.S1",
+   "beatCode": "4.B2",
+   "beatCodes": [
+    "4.B2"
+   ],
+   "durationSec": 16.0,
+   "purpose": "Turn the map from a useful object into a comic problem while Keen tries to keep acting certain.",
+   "performanceAssignment": "Squeaky arcs up beside the boat and splashes down at screen-right. Keen laughs, then brings the map up from the boat, checks it, looks ahead over the bow, checks it again, and hesitates. During the first line he points at the map as if locating north. After the line, he rotates the map upside down with both hands, pauses, then says the final line while looking over the top edge of the map.",
+   "camera": "Continue from the previous two-shot; gentle drift into a medium shot on Keen with Squeaky still visible at screen-right during the leap, then a motivated push-in to the map in Keen’s hands as his attention drops to it.",
+   "openingPose": "Keen’s shoulders are lifted from the end of his pleased nod, one hand still on the tiller while his free hand starts down toward the folded map; Squeaky is coiling at the waterline for a leap at screen-right.",
+   "sourceType": "relay",
+   "sourceShotId": "4.B1.S1",
+   "cutInMotivation": "Matched continuation of Squeaky keeping pace beside the boat; the next pop-up becomes a higher leap that draws Keen’s laugh and leads his hand to the map.",
+   "dialogueBinding": "Keen speaks both lines while holding the map; Squeaky only splashes and chatters silently around the dialogue.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:31e5b9dc858f0774e41c01acc65db2f67a8e330ae336bcb033713f218ba768e4",
+     "sourceEventId": "script-event:sha256:b8182236287cefa141f42bf60cf062f6712f6dc81b60716229feb5b104cfe768",
+     "speaker": "Keen",
+     "exactText": "Okay… so if this is north… then I am definitely going…",
+     "delivery": "Quiet reasoning aloud, slowing as the map stops helping.",
+     "startSec": 5.4,
+     "endSec": 10.3
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:58e7908ee6594a8dcd30692bf470eb1bde69b6ca5ec08f534dd41d4bb6775109",
+     "sourceEventId": "script-event:sha256:58cfd50a7fdf9cf423b8dd6094e835bfff97786e45faac388e3088452ea74f58",
+     "speaker": "Keen",
+     "exactText": "…one of the directions.",
+     "delivery": "Small, sheepish confidence; the pause before the line lets the upside-down map read first.",
+     "startSec": 12.4,
+     "endSec": 14.3
+    }
+   ],
+   "visualPayoff": "Keen holds the map upside down in front of him, peeks over it toward the water ahead, and lets the final words land while the boat continues left-to-right.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "Do not make the map disappear or tear in this shot.",
+    "Do not have Squeaky steer the boat.",
+    "Do not change travel direction."
+   ],
+   "charactersInFrame": [
+    "Keen",
+    "Squeaky"
+   ],
+   "continuityIn": {
+    "lighting": "Bright open-water daylight.",
+    "cameraSide": "Starboard side of boat, looking across Keen toward Squeaky on screen-right.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "toward screen-right, then down to the map",
+      "pose": "standing with one hand on the tiller and the other reaching toward the map",
+      "expression": "pleased, shifting into uncertain concentration",
+      "visibleMarks": [
+       "dry"
+      ],
+      "heldProps": [
+       "tiller"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right beside the boat at the waterline",
+      "facing": "toward Keen",
+      "pose": "coiled low at the surface before a leap",
+      "expression": "playful",
+      "visibleMarks": [
+       "wet from surfacing"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Bright open-water daylight with the first faint dimming at the horizon.",
+    "cameraSide": "Starboard side of boat, looking across Keen toward screen-right travel.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "down toward the upside-down map, then forward toward screen-right",
+      "pose": "standing with knees flexed, both hands holding the upside-down map at chest height",
+      "expression": "uncertain but trying to stay composed",
+      "visibleMarks": [
+       "dry"
+      ],
+      "heldProps": [
+       "map"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right beside the boat, just beyond the bow line",
+      "facing": "toward Keen and the boat’s direction of travel",
+      "pose": "back at the waterline after a leap",
+      "expression": "playful",
+      "visibleMarks": [
+       "wet from surfacing"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen, @图3 only for Squeaky and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — continue from the previous two-shot; gentle drift into a medium shot on Keen with Squeaky still visible at screen-right during the leap, then a motivated push-in to the map in Keen’s hands as his attention drops to it. Squeaky arcs up beside the boat and splashes down at screen-right. Keen laughs, then brings the map up from the boat, checks it, looks ahead over the bow, checks it again, and hesitates. During the first line he points at the map as if locating north. After the line, he rotates the map upside down with both hands, pauses, then says the final line while looking over the top edge of the map. Keen holds the map upside down in front of him, peeks over it toward the water ahead, and lets the final words land while the boat continues left-to-right.\n\nUse @Audio1 as the only voice. Lip-sync Keen; Squeaky's mouth remains closed. Preserve character identity and relative scale. Keep dry, wet from surfacing visible.",
+   "promptWords": 203,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Keen",
+    "@图3": "Squeaky",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 4.B2.S1 — voice-only performance for @Audio1.\nKeen: \"Okay… so if this is north… then I am definitely going…\" — Quiet reasoning aloud, slowing as the map stops helping.. Target 5.4-10.3s.\nKeen: \"…one of the directions.\" — Small, sheepish confidence; the pause before the line lets the upside-down map read first.. Target 12.4-14.3s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not make the map disappear or tear in this shot; Do not have Squeaky steer the boat; Do not change travel direction; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no floating or sinking through ground."
+  },
+  {
+   "shotId": "4.B3.S1",
+   "beatCode": "4.B3",
+   "beatCodes": [
+    "4.B3"
+   ],
+   "durationSec": 25.0,
+   "purpose": "Strip away Keen’s performed control as weather, boat movement, and the stolen map overpower him.",
+   "performanceAssignment": "A hard gust hits from screen-right. The sail snaps and flaps; the boat tilts left, then rocks back. Keen stumbles sideways, drops one hand from the map, and grabs the mast. He blurts the first line as his feet slide. Clouds roll in, the light drops, Squeaky slips below the surface and vanishes, rain begins as visible drops and quickly turns into sheets. Keen tries to steer with one hand and clamp the map with the other. A stronger gust yanks the map free; Keen’s fingers chase it as he calls out the second line.",
+   "camera": "Start in medium on Keen and the sail; when the gust hits, the camera jolts with the boat but keeps the same starboard-side geography. Internal move widens to include darkening sky, rougher water, and Squeaky’s disappearance, then tracks the map as it tears free toward screen-right and upward.",
+   "openingPose": "Keen stands center-left with both hands on the upside-down map at chest height, knees flexed; the sail is just beginning to pull hard from an incoming gust at screen-right, and Squeaky is still visible near the waterline.",
+   "sourceType": "relay",
+   "sourceShotId": "4.B2.S1",
+   "cutInMotivation": "The slight dimming at the end of the map joke becomes the incoming gust; the cut lands on the sail beginning to pull hard.",
+   "dialogueBinding": "Keen speaks both lines; Squeaky disappears underwater and has no dialogue.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c",
+     "sourceEventId": "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
+     "speaker": "Keen",
+     "exactText": "Oh!",
+     "delivery": "Short startled yelp on the first lurch.",
+     "startSec": 2.2,
+     "endSec": 2.8
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff",
+     "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+     "speaker": "Keen",
+     "exactText": "No no no no—!",
+     "delivery": "Fast, panicked, cut off by the map whipping away.",
+     "startSec": 21.1,
+     "endSec": 23.2
+    }
+   ],
+   "visualPayoff": "The map is torn from Keen’s hands and whips upward toward screen-right into the rain while Keen releases the tiller and reaches after it from the rocking boat.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "Do not keep the map in Keen’s hands at the end.",
+    "Do not leave Squeaky visible after he dives under the storm water.",
+    "Do not make the storm instantly calm again."
+   ],
+   "charactersInFrame": [
+    "Keen",
+    "Squeaky"
+   ],
+   "closingCharactersInFrame": [
+    "Keen"
+   ],
+   "continuityIn": {
+    "lighting": "Bright daylight beginning to dim at the horizon.",
+    "cameraSide": "Starboard side of boat, keeping left-to-right travel.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "down toward the upside-down map and then toward screen-right",
+      "pose": "standing with knees flexed, both hands holding the upside-down map at chest height",
+      "expression": "uncertain concentration",
+      "visibleMarks": [
+       "dry"
+      ],
+      "heldProps": [
+       "map"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right beside the boat, just beyond the bow line",
+      "facing": "toward Keen and the boat’s direction of travel",
+      "pose": "at the waterline after a leap",
+      "expression": "playful",
+      "visibleMarks": [
+       "wet from surfacing"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Dark storm light with rain in sheets and horizon nearly obscured.",
+    "cameraSide": "Starboard side of boat, still oriented to the original left-to-right travel though the boat is rocking.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "up and screen-right toward the airborne map",
+      "pose": "one hand just off the tiller, body pitched forward, other hand reaching after the map",
+      "expression": "alarmed",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen, @图3 only for Squeaky and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — start in medium on Keen and the sail; when the gust hits, the camera jolts with the boat but keeps the same starboard-side geography. Internal move widens to include darkening sky, rougher water, and Squeaky’s disappearance, then tracks the map as it tears free toward screen-right and upward. A hard gust hits from screen-right. The sail snaps and flaps; the boat tilts left, then rocks back. Keen stumbles sideways, drops one hand from the map, and grabs the mast. He blurts the first line as his feet slide. Clouds roll in, the light drops, Squeaky slips below the surface and vanishes, rain begins as visible drops and quickly turns into sheets. Keen tries to steer with one hand and clamp the map with the other. A stronger gust yanks the map free; Keen’s fingers chase it as he calls out the second line. The map is torn from Keen’s hands and whips upward toward screen-right into the rain while Keen releases the tiller and reaches after it from the rocking boat.\n\nUse @Audio1 as the only voice. Lip-sync Keen; Squeaky's mouth remains closed. Preserve character identity and relative scale. Keep dry, wet from surfacing, rain-wet, water sloshing at feet visible.",
+   "promptWords": 240,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Keen",
+    "@图3": "Squeaky",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 4.B3.S1 — voice-only performance for @Audio1.\nKeen: \"Oh!\" — Short startled yelp on the first lurch.. Target 2.2-2.8s.\nKeen: \"No no no no—!\" — Fast, panicked, cut off by the map whipping away.. Target 21.1-23.2s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not keep the map in Keen’s hands at the end; Do not leave Squeaky visible after he dives under the storm water; Do not make the storm instantly calm again; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no floating or sinking through ground."
+  },
+  {
+   "shotId": "4.B4.S1",
+   "beatCode": "4.B4",
+   "beatCodes": [
+    "4.B4"
+   ],
+   "durationSec": 9.0,
+   "purpose": "Let the loss of the map land, then reveal Keen’s first open admission that he is lost.",
+   "performanceAssignment": "Keen lunges from the same reach, stretching toward the airborne map. The boat drops under him; his hand closes on empty rain. The map spins away into the grey sheets and disappears. Keen lands with both feet apart, arms lowered and stiff. Water sloshes around his feet as the horizon vanishes behind rain. He holds still for a beat before speaking.",
+   "camera": "Matched-action continuation from Keen’s reach; medium-wide with the map crossing screen-right and out into the storm, then a slow tightening on Keen as the horizon disappears behind him.",
+   "openingPose": "Keen is pitched forward at center-left, one arm already extending toward the airborne map just ahead of his fingertips at screen-right; rain sheets across the frame and the boat is dropping into the next wave.",
+   "sourceType": "relay",
+   "sourceShotId": "4.B3.S1",
+   "cutInMotivation": "Matched action on Keen’s reach after the wind snatches the map; the cut continues the lunge and resolves whether he catches it.",
+   "dialogueBinding": "Keen speaks after the map has vanished; no other character is visible or vocalizing words.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:db48a4ec2e15cc04820777633e5977d88b19c0c3cb7158051ce536518799b626",
+     "sourceEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
+     "speaker": "Keen",
+     "exactText": "Oh no… I’m lost!!!",
+     "delivery": "Begins small on “Oh no,” then breaks into a frightened shout on “I’m lost.”",
+     "startSec": 5.3,
+     "endSec": 7.4
+    }
+   ],
+   "visualPayoff": "Keen stands frozen in the boat with empty hands, rainwater sloshing around his feet and no visible horizon beyond the sheets of grey rain.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "Do not let Keen catch the map.",
+    "Do not show Squeaky in this shot.",
+    "Do not clear the horizon before the line."
+   ],
+   "charactersInFrame": [
+    "Keen"
+   ],
+   "continuityIn": {
+    "lighting": "Dark storm light with rain in sheets and horizon nearly obscured.",
+    "cameraSide": "Starboard side of boat, still oriented to the original left-to-right travel though the boat is rocking.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "up and screen-right toward the airborne map",
+      "pose": "body pitched forward, one hand reaching after the map",
+      "expression": "alarmed",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Dark storm light with dense grey rain; horizon fully obscured.",
+    "cameraSide": "Starboard side of boat, boat rocking in place relative to the camera.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center of the boat",
+      "facing": "forward into the rain toward screen-right",
+      "pose": "standing frozen with feet apart and arms lowered",
+      "expression": "frightened",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen and @图3 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — matched-action continuation from Keen’s reach; medium-wide with the map crossing screen-right and out into the storm, then a slow tightening on Keen as the horizon disappears behind him. Keen lunges from the same reach, stretching toward the airborne map. The boat drops under him; his hand closes on empty rain. The map spins away into the grey sheets and disappears. Keen lands with both feet apart, arms lowered and stiff. Water sloshes around his feet as the horizon vanishes behind rain. He holds still for a beat before speaking. Keen stands frozen in the boat with empty hands, rainwater sloshing around his feet and no visible horizon beyond the sheets of grey rain.\n\nUse @Audio1 as the only voice. Lip-sync Keen. Preserve character identity and relative scale. Keep rain-wet, water sloshing at feet visible.",
+   "promptWords": 170,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Keen",
+    "@图3": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 4.B4.S1 — voice-only performance for @Audio1.\nKeen: \"Oh no… I’m lost!!!\" — Begins small on “Oh no,” then breaks into a frightened shout on “I’m lost.”. Target 5.3-7.4s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not let Keen catch the map; Do not show Squeaky in this shot; Do not clear the horizon before the line; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no floating or sinking through ground."
+  },
+  {
+   "shotId": "4.B5.S1",
+   "beatCode": "4.B5",
+   "beatCodes": [
+    "4.B5"
+   ],
+   "durationSec": 10.0,
+   "purpose": "Show Keen making a small self-rescue: grip, breathe, and repeat the brave phrase without fully solving the danger.",
+   "performanceAssignment": "A far lightning flicker flashes behind the rain. Keen’s hands lift from his frozen sides and clamp onto the boat edge. His breathing becomes quick and visible in his shoulders. He closes his eyes for one second, then takes a slower breath while keeping both hands locked on the edge. He speaks the line quietly through the rain as his shoulders lower a little.",
+   "camera": "Medium close on Keen at the boat edge, rain streaking foreground; the lightning flicker is distant and brief, with no cutaway. Camera stays on the same side and rides the boat’s rocking with a softer, steadier movement than the previous storm shot.",
+   "openingPose": "Keen stands frozen at center of the boat with arms lowered and fingers beginning to curl upward toward the edge as distant lightning starts to flicker behind the rain.",
+   "sourceType": "relay",
+   "sourceShotId": "4.B4.S1",
+   "cutInMotivation": "Reaction continuation from Keen’s frozen admission; the next visible change is the lightning flicker and his hands moving to grip the boat.",
+   "dialogueBinding": "Keen speaks under his breath; no other character is visible or speaking.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c02f69c0652f4eec811d365bdec5fde70ab6195a641e6c06668326c2a13e55c9",
+     "sourceEventId": "script-event:sha256:50d050d4a5346c2876fada978d1821807f94379b89ebde6d4f19a08dde50a9d8",
+     "speaker": "Keen",
+     "exactText": "I’ve got this… I’ve got this…",
+     "delivery": "Soft, shaky repetition with a breath between the two phrases.",
+     "startSec": 5.2,
+     "endSec": 7.9
+    }
+   ],
+   "visualPayoff": "Keen remains gripping the boat edge with both hands, eyes closed, shoulders lower than before, rain still driving across him.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "Do not make Keen look fully calm.",
+    "Do not show Squeaky before the next shot.",
+    "Do not stop the rain or rough water."
+   ],
+   "charactersInFrame": [
+    "Keen"
+   ],
+   "continuityIn": {
+    "lighting": "Dark storm light with dense grey rain; horizon fully obscured.",
+    "cameraSide": "Starboard side of boat, boat rocking in place relative to the camera.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center of the boat",
+      "facing": "forward into the rain toward screen-right",
+      "pose": "standing frozen with feet apart and arms lowered",
+      "expression": "frightened",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Dark storm light with rain in sheets and occasional distant lightning.",
+    "cameraSide": "Starboard side of boat, boat rocking under the same camera-side geography.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center of the boat at the near edge",
+      "facing": "down toward the boat edge with eyes closed",
+      "pose": "both hands gripping the edge, elbows bent, shoulders slightly lowered",
+      "expression": "frightened but steadier",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": [
+       "boat edge"
+      ]
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen and @图3 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — medium close on Keen at the boat edge, rain streaking foreground; the lightning flicker is distant and brief, with no cutaway. Camera stays on the same side and rides the boat’s rocking with a softer, steadier movement than the previous storm shot. A far lightning flicker flashes behind the rain. Keen’s hands lift from his frozen sides and clamp onto the boat edge. His breathing becomes quick and visible in his shoulders. He closes his eyes for one second, then takes a slower breath while keeping both hands locked on the edge. He speaks the line quietly through the rain as his shoulders lower a little. Keen remains gripping the boat edge with both hands, eyes closed, shoulders lower than before, rain still driving across him.\n\nUse @Audio1 as the only voice. Lip-sync Keen. Preserve character identity and relative scale. Keep rain-wet, water sloshing at feet visible.",
+   "promptWords": 183,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Keen",
+    "@图3": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 4.B5.S1 — voice-only performance for @Audio1.\nKeen: \"I’ve got this… I’ve got this…\" — Soft, shaky repetition with a breath between the two phrases.. Target 5.2-7.9s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not make Keen look fully calm; Do not show Squeaky before the next shot; Do not stop the rain or rough water; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech; no floating or sinking through ground."
+  },
+  {
+   "shotId": "4.B6.S1",
+   "beatCode": "4.B6",
+   "beatCodes": [
+    "4.B6"
+   ],
+   "durationSec": 18.0,
+   "purpose": "Bring Squeaky back as a trustworthy guide and have Keen choose to follow rather than handle the storm alone.",
+   "performanceAssignment": "A clicking chatter sounds nearby before Squeaky appears. Keen opens his eyes and turns toward screen-right. Squeaky leaps through the storm water beside the boat, dips under, then reappears farther ahead at screen-right, repeatedly angling his body and splashing toward a clear direction. Keen asks the first line while looking from Squeaky to the rough water ahead. Squeaky chirps. Keen looks at the water, back to Squeaky, nods once, then speaks the second line. Squeaky surges ahead and Keen hauls the tiller, bracing his feet as the boat pivots to follow screen-right.",
+   "camera": "Sound bridge from offscreen chatter into a medium on Keen opening his eyes; pan to include Squeaky’s leap at screen-right, then widen as Squeaky moves ahead and the boat turns after him. Camera remains on the starboard side and preserves Squeaky leading toward screen-right.",
+   "openingPose": "Keen is still gripping the boat edge with both hands, eyes closed and shoulders lowered; rain sheets across the frame as offscreen clicking begins near screen-right.",
+   "sourceType": "relay",
+   "sourceShotId": "4.B5.S1",
+   "cutInMotivation": "Sound bridge from Squeaky’s clicking chatter interrupts Keen’s repeated phrase and motivates Keen opening his eyes toward the source.",
+   "dialogueBinding": "Keen speaks both lines; Squeaky only clicks and chirps in response, without word-shaped mouth movement.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:a8b593ec7bb15b5115179d7d32b06cb77c95693c0d09f9c4416a9432b850edb0",
+     "sourceEventId": "script-event:sha256:3ee9256e0a4bb7a4290443158a50296afa3a62ca2ebc6c7e98be340ae9b3915c",
+     "speaker": "Keen",
+     "exactText": "Follow you?",
+     "delivery": "Questioning and cautious, pitched over the storm noise.",
+     "startSec": 5.6,
+     "endSec": 6.6
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:c4e36e7c6007407361055ffa2ea79d0fa5c53da87d333c2ada28e722e8ff1e6d",
+     "sourceEventId": "script-event:sha256:72356e51fe547cc79eec22b3e847256d5ee3f6bc986020855756cd841bac9e02",
+     "speaker": "Keen",
+     "exactText": "Okay… lead on, Squeaky!",
+     "delivery": "Starts hesitant on “Okay,” then grows firmer and louder on the name.",
+     "startSec": 11.2,
+     "endSec": 13.5
+    }
+   ],
+   "visualPayoff": "Squeaky pulls ahead at screen-right through the storm water while Keen braces in the boat and turns the tiller so the bow follows Squeaky’s path.",
+   "physicalStaging": null,
+   "physicalStagings": [],
+   "prohibited": [
+    "Do not have Squeaky speak human words.",
+    "Do not restore the lost map.",
+    "Do not turn the boat away from Squeaky at the end."
+   ],
+   "charactersInFrame": [
+    "Keen",
+    "Squeaky"
+   ],
+   "openingCharactersInFrame": [
+    "Keen"
+   ],
+   "continuityIn": {
+    "lighting": "Dark storm light with rain in sheets and occasional distant lightning.",
+    "cameraSide": "Starboard side of boat, boat rocking under the same camera-side geography.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center of the boat at the near edge",
+      "facing": "down toward the boat edge with eyes closed",
+      "pose": "both hands gripping the edge, elbows bent, shoulders slightly lowered",
+      "expression": "frightened but steadier",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": [
+       "boat edge"
+      ]
+     }
+    ]
+   },
+   "continuityOut": {
+    "lighting": "Dark storm light with rain still falling hard; faintly clearer water path in Squeaky’s direction.",
+    "cameraSide": "Starboard side of boat, now tracking the boat as it follows screen-right behind Squeaky.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "toward screen-right after Squeaky",
+      "pose": "feet braced wide, one hand pulling the tiller, the other gripping the boat edge",
+      "expression": "focused and still worried",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": [
+       "tiller",
+       "boat edge"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right ahead of the boat",
+      "facing": "toward the direction of travel",
+      "pose": "surging forward through storm water with splashes trailing behind",
+      "expression": "alert and insistent",
+      "visibleMarks": [
+       "wet from storm water"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "seedancePrompt": "Stylised feature-quality 3D CGI matching @图1. Use @图2 only for Keen, @图3 only for Squeaky and @图4 only for the set.\n\nBegin exactly on @图1, the approved final frame of the previous shot, and continue the new action immediately — sound bridge from offscreen chatter into a medium on Keen opening his eyes; pan to include Squeaky’s leap at screen-right, then widen as Squeaky moves ahead and the boat turns after him. Camera remains on the starboard side and preserves Squeaky leading toward screen-right. A clicking chatter sounds nearby before Squeaky appears. Keen opens his eyes and turns toward screen-right. Squeaky leaps through the storm water beside the boat, dips under, then reappears farther ahead at screen-right, repeatedly angling his body and splashing toward a clear direction. Keen asks the first line while looking from Squeaky to the rough water ahead. Squeaky chirps. Keen looks at the water, back to Squeaky, nods once, then speaks the second line. Squeaky surges ahead and Keen hauls the tiller, bracing his feet as the boat pivots to follow screen-right. Squeaky pulls ahead at screen-right through the storm water while Keen braces in the boat and turns the tiller so the bow follows Squeaky’s path.\n\nUse @Audio1 as the only voice. Lip-sync Keen; Squeaky's mouth remains closed. Preserve character identity and relative scale. Keep rain-wet, water sloshing at feet, wet from storm water visible.",
+   "promptWords": 230,
+   "referenceSlots": {
+    "@图1": "previous shot final frame",
+    "@图2": "Keen",
+    "@图3": "Squeaky",
+    "@图4": "scene plate",
+    "@Audio1": "voice track"
+   },
+   "audioBrief": "SHOT 4.B6.S1 — voice-only performance for @Audio1.\nKeen: \"Follow you?\" — Questioning and cautious, pitched over the storm noise.. Target 5.6-6.6s.\nKeen: \"Okay… lead on, Squeaky!\" — Starts hesitant on “Okay,” then grows firmer and louder on the name.. Target 11.2-13.5s.\nPreserve the exact words. No narration, ad-libs, sound effects or music in the voice track.",
+   "internalConstraints": "Hard constraints: Do not have Squeaky speak human words; Do not restore the lost map; Do not turn the boat away from Squeaky at the end; no character redesign; no extra characters; no on-screen text; no invented voices; no camera cut; no foreign-language speech."
+  }
+ ],
+ "totalSec": 95.0,
+ "continuityLedger": [
+  {
+   "shotId": "4.B1.S1",
+   "beatCode": "4.B1",
+   "beatCodes": [
+    "4.B1"
+   ],
+   "status": "designed",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "cutInMotivation": null,
+   "continuityOut": {
+    "lighting": "Bright open-water daylight.",
+    "cameraSide": "Starboard side of boat, looking across Keen toward Squeaky on screen-right.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "toward Squeaky at screen-right",
+      "pose": "standing with one hand back on the tiller after a small greeting gesture",
+      "expression": "pleased and settled",
+      "visibleMarks": [
+       "dry"
+      ],
+      "heldProps": [
+       "tiller"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right beside the boat at the waterline",
+      "facing": "toward Keen",
+      "pose": "surfaced beside the hull after chattering",
+      "expression": "playful",
+      "visibleMarks": [
+       "wet from surfacing"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "4.B2.S1",
+   "beatCode": "4.B2",
+   "beatCodes": [
+    "4.B2"
+   ],
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "4.B1.S1",
+   "cutInMotivation": "Matched continuation of Squeaky keeping pace beside the boat; the next pop-up becomes a higher leap that draws Keen’s laugh and leads his hand to the map.",
+   "continuityOut": {
+    "lighting": "Bright open-water daylight with the first faint dimming at the horizon.",
+    "cameraSide": "Starboard side of boat, looking across Keen toward screen-right travel.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "down toward the upside-down map, then forward toward screen-right",
+      "pose": "standing with knees flexed, both hands holding the upside-down map at chest height",
+      "expression": "uncertain but trying to stay composed",
+      "visibleMarks": [
+       "dry"
+      ],
+      "heldProps": [
+       "map"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right beside the boat, just beyond the bow line",
+      "facing": "toward Keen and the boat’s direction of travel",
+      "pose": "back at the waterline after a leap",
+      "expression": "playful",
+      "visibleMarks": [
+       "wet from surfacing"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "4.B3.S1",
+   "beatCode": "4.B3",
+   "beatCodes": [
+    "4.B3"
+   ],
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "4.B2.S1",
+   "cutInMotivation": "The slight dimming at the end of the map joke becomes the incoming gust; the cut lands on the sail beginning to pull hard.",
+   "continuityOut": {
+    "lighting": "Dark storm light with rain in sheets and horizon nearly obscured.",
+    "cameraSide": "Starboard side of boat, still oriented to the original left-to-right travel though the boat is rocking.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "up and screen-right toward the airborne map",
+      "pose": "one hand just off the tiller, body pitched forward, other hand reaching after the map",
+      "expression": "alarmed",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "4.B4.S1",
+   "beatCode": "4.B4",
+   "beatCodes": [
+    "4.B4"
+   ],
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "4.B3.S1",
+   "cutInMotivation": "Matched action on Keen’s reach after the wind snatches the map; the cut continues the lunge and resolves whether he catches it.",
+   "continuityOut": {
+    "lighting": "Dark storm light with dense grey rain; horizon fully obscured.",
+    "cameraSide": "Starboard side of boat, boat rocking in place relative to the camera.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center of the boat",
+      "facing": "forward into the rain toward screen-right",
+      "pose": "standing frozen with feet apart and arms lowered",
+      "expression": "frightened",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "4.B5.S1",
+   "beatCode": "4.B5",
+   "beatCodes": [
+    "4.B5"
+   ],
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "4.B4.S1",
+   "cutInMotivation": "Reaction continuation from Keen’s frozen admission; the next visible change is the lightning flicker and his hands moving to grip the boat.",
+   "continuityOut": {
+    "lighting": "Dark storm light with rain in sheets and occasional distant lightning.",
+    "cameraSide": "Starboard side of boat, boat rocking under the same camera-side geography.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center of the boat at the near edge",
+      "facing": "down toward the boat edge with eyes closed",
+      "pose": "both hands gripping the edge, elbows bent, shoulders slightly lowered",
+      "expression": "frightened but steadier",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": [
+       "boat edge"
+      ]
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  },
+  {
+   "shotId": "4.B6.S1",
+   "beatCode": "4.B6",
+   "beatCodes": [
+    "4.B6"
+   ],
+   "status": "designed",
+   "sourceType": "relay",
+   "sourceShotId": "4.B5.S1",
+   "cutInMotivation": "Sound bridge from Squeaky’s clicking chatter interrupts Keen’s repeated phrase and motivates Keen opening his eyes toward the source.",
+   "continuityOut": {
+    "lighting": "Dark storm light with rain still falling hard; faintly clearer water path in Squeaky’s direction.",
+    "cameraSide": "Starboard side of boat, now tracking the boat as it follows screen-right behind Squeaky.",
+    "characters": [
+     {
+      "character": "Keen",
+      "screenZone": "center-left on the boat",
+      "facing": "toward screen-right after Squeaky",
+      "pose": "feet braced wide, one hand pulling the tiller, the other gripping the boat edge",
+      "expression": "focused and still worried",
+      "visibleMarks": [
+       "rain-wet",
+       "water sloshing at feet"
+      ],
+      "heldProps": [
+       "tiller",
+       "boat edge"
+      ]
+     },
+     {
+      "character": "Squeaky",
+      "screenZone": "screen-right ahead of the boat",
+      "facing": "toward the direction of travel",
+      "pose": "surging forward through storm water with splashes trailing behind",
+      "expression": "alert and insistent",
+      "visibleMarks": [
+       "wet from storm water"
+      ],
+      "heldProps": []
+     }
+    ]
+   },
+   "approvedTake": null,
+   "harvestFrame": null
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "errors": 0,
+  "warnings": 0,
+  "issues": [],
+  "validatedAt": "2026-07-16",
+  "revision": 2
+ },
+ "reviewCriteria": {
+  "canon": "characters and world accurate vs references",
+  "direction": "acting, humour and emotion land",
+  "physics": "weight, contact, follow-through",
+  "continuity": "connects naturally to surrounding shots"
+ },
+ "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json",
+ "repairLog": []
+}

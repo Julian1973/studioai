@@ -108,8 +108,13 @@ def render_timed_dialogue_master(raw_audio, timing_path, dialogue_lines,
     authored = []
     for index, (line, source_range) in enumerate(zip(dialogue_lines, ranges)):
         try:
-            target_start = float(line["startSec"])
-            target_end = float(line["endSec"])
+            target_start = float(
+                line.get("startSec")
+                if line.get("startSec") is not None else line.get("startsAtSec"))
+            target_end = float((line.get("endSec") if line.get("endSec") is not None else (
+                target_start + float(line["estimatedDurationSec"])
+                if line.get("estimatedDurationSec") is not None else None
+            )))
         except (KeyError, TypeError, ValueError) as exc:
             raise AudioTimingError(f"dialogue line {index + 1} has no approved timing window") from exc
         if target_start < 0 or target_end <= target_start or target_end > duration_sec + 0.001:

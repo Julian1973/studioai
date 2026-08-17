@@ -64,6 +64,23 @@ def test_voice_take_can_extend_past_estimated_end_without_clipping(tmp_path):
     assert contract["placements"][0]["edgeFadeSec"] == cb_audio_timing.EDGE_FADE_SEC
 
 
+def test_director_dialogue_timing_fields_are_accepted(tmp_path):
+    raw = tmp_path / "raw.mp3"
+    _silent_audio(raw, 1)
+    timing = cb_audio_timing.dialogue_timing_path(raw)
+    timing.write_text(json.dumps({
+        "audioSha256": cb_audio_timing.file_sha256(raw),
+        "voiceSegments": [
+            {"dialogueInputIndex": 0, "startTimeSec": 0, "endTimeSec": 1},
+        ],
+    }), encoding="utf-8")
+    contract = cb_audio_timing.render_timed_dialogue_master(
+        raw, timing, [{"startsAtSec": 1.2, "estimatedDurationSec": 1.0}],
+        5, tmp_path / "out.wav")
+    assert contract["placements"][0]["targetStartSec"] == 1.2
+    assert contract["placements"][0]["approvedWindowEndSec"] == 2.2
+
+
 def test_voice_take_that_overlaps_next_start_anchor_refuses(tmp_path):
     raw = tmp_path / "raw.mp3"
     _silent_audio(raw, 3)

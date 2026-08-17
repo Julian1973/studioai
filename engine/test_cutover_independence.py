@@ -84,7 +84,7 @@ def test_new_spine_imports_and_compiles_with_old_pipeline_absent():
                               facing='right', pose='hover', expression='bright',
                               visibleMarks=[], heldProps=[])]))
         prompt, wc, slots = E.compile_shot_contract(shot, {}, {'Fuzzby': {'sizeRank': 2, 'avoid': 'bee'}})
-        assert E.OPENER_ANCHOR[:-1] in prompt and wc <= E.MAX_SHOT_PROMPT_WORDS
+        assert E.OPENER_ANCHOR[:-1] in prompt and wc == len(prompt.split())
         # deferred item 7 (resolver): self-contained, exact-match-only, no old-path code
         cfg = {'Fuzzby': {}, "Keen's Mum": {}, 'Keen': {}}
         assert R._resolve_char('FUZZBY', cfg) == 'Fuzzby'

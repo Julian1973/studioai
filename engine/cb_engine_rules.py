@@ -12,11 +12,15 @@ import re
 
 HERE = pathlib.Path(__file__).resolve().parent
 BEAT_COST_PATH = HERE / "config" / "beat_costs.json"
-RULES_VERSION = "engine-rules-v2"
+RULES_VERSION = "engine-rules-v4"
 
 
 def _norm(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def _line_text(line):
+    return _norm(line.get("exactText") if line.get("exactText") is not None else line.get("text"))
 
 
 def load_beat_costs(path=BEAT_COST_PATH):
@@ -76,8 +80,99 @@ def infer_timing_beats(shot, direction):
     return beats
 
 
+def travel_traversal_boilerplate(shot, direction):
+    """Emit the minimum visible traversal evidence required by R9."""
+    if not any(item["type"] == "travel" for item in infer_timing_beats(shot, direction)):
+        return ""
+    return (
+        "Travel traversal: show three parallax speeds: foreground elements pass fastest, "
+        "midground landmarks pass the camera and vanish behind, and the distant environment "
+        "moves slowest. The subject pulls ahead and appears smaller; the camera surges to "
+        "recover it. Let the subject drift off-centre, then reframe to recover it. Use "
+        "occasional foreground elements to wipe across the lens."
+    )
+
+
+def sailing_departure_boilerplate(shot, direction):
+    """Require visible real-world cause and effect for a wind-powered departure."""
+    values = [shot.get("title"), shot.get("purpose"), shot.get("storyBeat"),
+              shot.get("action")]
+    values.extend(str(value or "") for value in
+                  (shot.get("continuityConstraints") or []))
+    values.extend([direction.get("physicalCauseAndEffect"),
+                   direction.get("continuityFinish")])
+    values.extend(str(value or "") for item in (direction.get("shotPlan") or [])
+                  for value in (item.values() if isinstance(item, dict) else []))
+    text = _norm(" ".join(str(value or "") for value in values)).casefold()
+    if not re.search(r"\b(sailboat|sailing boat)\b", text) or not re.search(
+            r"\b(untie|mooring|push(?:es|ed|ing)? off|cast(?:s|ing)? off|"
+            r"releas(?:e|es|ed|ing) (?:the )?(?:line|rope))\b", text):
+        return ""
+    return (
+        "Wind-powered departure causality: show exactly one active mooring line, visibly "
+        "running from one boat attachment point to one cleat or post; no second bow or stern "
+        "line exists. The hull remains alongside the pier while that single mooring line is "
+        "visibly released from the cleat or post and brought fully aboard. The "
+        "sailor then controls the sheet or boom to bring the sail around. Wind visibly fills "
+        "and tensions the sail; only after that load does the hull heel slightly, gather way "
+        "and move away bow-first toward open water, with the stern following naturally. No "
+        "sideways slide, stern-first departure, motor-like drift, teleporting departure, or "
+        "boat movement while still tethered."
+    )
+
+
+def sailing_departure_action(action, shot, direction):
+    """Place sailing causality inside the internal action that owns departure."""
+    text = _norm(action)
+    clause = sailing_departure_boilerplate(shot, direction)
+    if not clause or not re.search(
+            r"\b(untie|mooring|push(?:es|ed|ing)? off|sails? away)\b", text, re.I):
+        return text
+    if re.search(r"wind.+(?:fills?|loads?|tensions?).+sail", text, re.I) and re.search(
+            r"only after.+(?:hull|boat).+(?:heel|gather|move)", text, re.I):
+        return text
+    return text.rstrip(".") + ". " + clause
+
+
+def living_performance_boilerplate(shot, direction=None, *, medium="animation"):
+    """Keep eyelines and inner life readable through every held story landing."""
+    cast = [str(name).strip() for name in shot.get("charactersInFrame") or []
+            if str(name).strip()]
+    subjects = ", ".join(cast) if cast else "every visible character"
+    if medium == "still":
+        return (
+            f"Living performance lock: {subjects} has a specific motivated eyeline target "
+            "and a readable active thought in the eyes. Use a precise asymmetric expression; "
+            "no vacant forward stare, unfocused eyes, frozen smile, mannequin pose or generic "
+            "camera-facing expression."
+        )
+    return (
+        f"Living performance lock: {subjects} has a specific motivated eyeline target and a "
+        "readable active thought throughout. In every hold and final landing preserve subtle "
+        "breathing, natural blink timing, focused eyes and a precise asymmetric micro-expression. "
+        "The beat owner looks toward the story target; the witness looks toward the beat owner "
+        "or visible evidence. No vacant forward stare, unfocused eyes, frozen smile, mannequin "
+        "stillness or generic camera-facing expression."
+    )
+
+
+def natural_keyframe_staging_boilerplate(shot):
+    """Prevent identity turnarounds from donating their neutral presentation pose."""
+    cast = [str(name).strip() for name in shot.get("openingCharactersInFrame") or
+            shot.get("charactersInFrame") or [] if str(name).strip()]
+    subjects = ", ".join(cast) if cast else "Every visible character"
+    return (
+        f"Natural staging lock: restage {subjects} from identity reference into the authored "
+        "scene action. Each body has believable balance, weight through the feet or supported "
+        "hover, relaxed shoulders and naturally bent elbows; arms rest by the body or perform "
+        "a motivated story action. Never copy a turnaround's front, side or presentation pose; "
+        "no arms held out from the body, T-pose, model-sheet stance, evenly spread limbs or "
+        "symmetrical display posture."
+    )
+
+
 def action_unit_report(shot, direction, prompt=""):
-    """R8-R15 production grammar checks for action, comedy and dialogue units."""
+    """R8-R16 production grammar checks for action, comedy and dialogue units."""
     data = direction or {}
     internal = [item.model_dump() if hasattr(item, "model_dump") else dict(item)
                 for item in data.get("shotPlan") or []]
@@ -114,6 +209,28 @@ def action_unit_report(shot, direction, prompt=""):
                 re.search(pattern, combined, re.I) for pattern in traversal_checks.values()):
             errors.append("R9 motion is described only as blur")
 
+    sailing = sailing_departure_boilerplate(shot, data)
+    if sailing:
+        sailing_checks = {
+            "mooring released before movement": r"mooring (?:line|rope).+(?:released|untied).+(?:before|only after).+(?:hull|boat).+(?:move|gather)",
+            "sail is deliberately controlled": r"(?:controls?|pulls?|hauls?).+(?:sheet|boom).+(?:sail|bring)",
+            "wind visibly loads the sail": r"wind.+(?:fills?|loads?|tensions?).+sail",
+            "loaded sail causes hull response": r"only after.+(?:load|fills?).+(?:hull|boat).+(?:heel|gather|move)",
+            "bow leads the departure": r"bow[- ]first.+(?:open water|stern)|bow.+leads?.+stern",
+        }
+        sailing_text = combined
+        for label, pattern in sailing_checks.items():
+            if not re.search(pattern, sailing_text, re.I):
+                errors.append(f"R16 sailing departure is missing {label}")
+
+    if raw_prompt and not re.search(
+            r"Living performance lock:.+motivated eyeline target.+active thought", raw_prompt,
+            re.I | re.S):
+        errors.append("R17 prompt is missing the living-performance eyeline and inner-life lock")
+    if raw_prompt and not re.search(
+            r"no vacant forward stare.+unfocused eyes.+frozen smile", raw_prompt, re.I | re.S):
+        errors.append("R17 prompt does not forbid vacant landing performance")
+
     impact_count = counts.get("impact", 0)
     if impact_count > 1:
         ordinal = all(re.search(rf"\b{word}\b", combined, re.I)
@@ -128,7 +245,8 @@ def action_unit_report(shot, direction, prompt=""):
 
     if counts.get("aerial"):
         aerial_shots = [item for item in internal if re.search(
-            r"\b(aerial|double back|double backward|triple twist|multi-rotation|biles)\b",
+            r"\b(aerial|leap|dive|breach|half[- ]roll|double back|double backward|"
+            r"triple twist|multi-rotation|biles)\b",
             _norm(" ".join(str(value or "") for value in item.values())), re.I)]
         if len(aerial_shots) != 1:
             errors.append("R11 compound aerial must own exactly one dedicated internal shot")
@@ -154,7 +272,12 @@ def action_unit_report(shot, direction, prompt=""):
                          r"\b(still|motionless)\b.+\b(witness|listener)\b", combined, re.I):
             errors.append("R13 payoff does not hold on the non-acting witness")
 
-    if action_unit and re.search(r"\bno cuts?\b|\bno handheld\b", prompt_text, re.I):
+    approved_camera = _norm(shot.get("camera"))
+    continuous_unit = bool(re.search(
+        r"\bone continuous\b|\bcontinuous (?:shot|move|take)\b",
+        approved_camera + " " + prompt_text, re.I))
+    if (action_unit and not continuous_unit and
+            re.search(r"\bno cuts?\b|\bno handheld\b", prompt_text, re.I)):
         errors.append("R14 action unit incorrectly prohibits cuts or handheld camera")
 
     dialogue = list(shot.get("dialogueLines") or [])
@@ -174,7 +297,7 @@ def action_unit_report(shot, direction, prompt=""):
             raw_prompt, re.I | re.S)
     }
     for line_number, line in enumerate(dialogue, start=1):
-        exact = _norm(line.get("exactText"))
+        exact = _line_text(line)
         speaker = _norm(line.get("speaker"))
         owner = dialogue_owners.get(line_number)
         if not owner:
@@ -292,7 +415,7 @@ def geometry_agreement(cinematography, animation):
     errors = []
     cine_geo = [_norm(item) for item in cine.get("geography") or []]
     anim_geo = [_norm(item) for item in anim.get("geography") or []]
-    if cine_geo != anim_geo:
+    if anim_geo and cine_geo != anim_geo:
         errors.append("keyframe and render geography are not verbatim-identical")
     camera = _norm(anim.get("cameraBehaviour") or cine.get("lensAndCameraRelationship"))
     follow = bool(re.search(r"\b(follow|chase|behind|slightly late|drone)\b", camera, re.I))
@@ -304,10 +427,16 @@ def geometry_agreement(cinematography, animation):
                 errors.append(
                     f"{item.get('character') or 'subject'} faces camera while the render camera follows travel")
     negative = " ".join(_norm(item) for item in cine.get("negativeSpace") or [])
-    if re.search(r"\b(frame|screen)-right\b", " ".join(cine_geo), re.I):
+    route_text = " ".join(
+        item for item in cine_geo
+        if re.search(
+            r"\b(?:travel|route|lead room|moves?|heads?|flies?|walks?|runs?)\s+"
+            r"(?:toward|to|into|along|through)\b",
+            item, re.I))
+    if re.search(r"\b(frame|screen)-right\b", route_text, re.I):
         if not re.search(r"\b(frame|screen)-right\b", negative, re.I):
             errors.append("opening frame has no lead room on the ruled frame-right route")
-    if re.search(r"\b(frame|screen)-left\b", " ".join(cine_geo), re.I):
+    if re.search(r"\b(frame|screen)-left\b", route_text, re.I):
         if not re.search(r"\b(frame|screen)-left\b", negative, re.I):
             errors.append("opening frame has no lead room on the ruled frame-left route")
     return {"ready": not errors, "errors": errors, "rulesVersion": RULES_VERSION}

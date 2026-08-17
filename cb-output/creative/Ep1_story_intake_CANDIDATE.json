@@ -1,6 +1,6 @@
 {
  "episode": "Ep1",
- "builtAt": "2026-08-05T10:42:30",
+ "builtAt": "2026-08-14T07:54:36",
  "scriptPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.txt",
  "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
  "scriptSha256": "b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
@@ -17,21 +17,21 @@
   "schemaVersion": 1,
   "inputs": {
    "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-   "canonProfileDigest": "4fea65d3fd8ed2c1be358e6824f99550d54405352eadc64e64459d1fa82c8c93"
+   "canonProfileDigest": "c5eca7f5152a8196168a93a5109357d9cd34a2b836e2a0d46282094cfebe10e5"
   },
   "algorithm": "sha256",
-  "digest": "3d9f9d8e83fdbd3321702ca084ea8ded452dd5144a22a1c6a2d213dc2ec8f662"
+  "digest": "8b404da19d21f0efd5fb1b9d71a5f19a122c1fd9da6f8a6f5adcd5e1e52f81e8"
  },
  "canonLock": {
-  "manifestDigest": "93e40b9d3ce7c0beb02c152fc2def97e285abd953c41fd02e1aeff320a488ec7",
+  "manifestDigest": "4af5c2a773e732ae0c503399ba6c5ec1736bcb69948d78fdd600ce11893dfe4c",
   "profile": "story",
-  "profileDigest": "4fea65d3fd8ed2c1be358e6824f99550d54405352eadc64e64459d1fa82c8c93",
+  "profileDigest": "c5eca7f5152a8196168a93a5109357d9cd34a2b836e2a0d46282094cfebe10e5",
   "sourceHashes": {
    "showBible": "12c85aea9dfeae83d35e90a90d7ff2a9584478b86da4f343a27a6b870dcf21c7",
    "studioBible": "51b44ba88d6134f40c6e6864d13416358b9149ec945557a4fc839e578e716215",
-   "characters": "e0fbdd875b9b2c5c2c1884a243f8cc597671989807913c8633d1bf15e1db0b66",
+   "characters": "5ad78d509f3f3b5c8eb03757021e4d5c3d1d8238e70a428ad164486c058c5683",
    "locations": "700db5114d5ae703f55e76f8308a5db33fc8eaa1ecbd4a15392a639899302df0",
-   "continuity": "8d7a5a9a2ee2429ed8e4285fea5025491f17f3bb744208420b6e0530ced3824a",
+   "continuity": "8ca26f29d33ec1fdc9afce64904cd78930f7cd8369e1a845eac6341b10b79753",
    "episodeArc": "7e06f051effa4eacaae41410f6170aed86772a3ed23599d599cec610d572ed2b",
    "gagLocks": "8693e988ca59aec4e2be24cd3357504ad281e4ed96d6300596554628d9d143d3",
    "bannedVocabulary": "2dedb1c356b1d9b8d3a55a3a3fd658594309717f84438cf8491a99171deb6897",
@@ -48,23 +48,23 @@
   "loaded": true
  },
  "title": "The Adventure Begins",
- "logline": "When eager young Keen sails away from home and into a storm, he discovers that courage is not looking fearless — it is hearing someone else need him, feeling the gulp, and going anyway.",
+ "logline": "When eager young Keen sails away from home and into a sudden storm, saving a trapped dolphin teaches him that real courage begins with the gulp before the leap — and earns him his place among the Crystal Bears.",
  "leadBear": "Keen",
  "episodeVision": {
-  "premise": "Keen leaves his Mum and the safety of home, sails into weather bigger than he expected, saves Squeaky before he has any crystal power, and is welcomed into the Crystal Bears when the courage already inside him finds its visible form.",
-  "dramaticQuestion": "Can Keen stop performing bravery long enough to discover the real thing — acting through fear for someone who needs him?",
-  "theme": "Courage is not the absence of fear; it is the scared part and the brave part moving together.",
-  "externalJourney": "Keen packs a small sailboat, says goodbye at the pier, meets Squeaky, gets lost in a storm, follows Squeaky toward help, dives underwater to free him from a net, reaches Crystal Cove, receives the Aquamarine in his father’s wristbands, and walks into his new family.",
-  "internalJourney": "Keen begins trying to prove he is ready and fearless, keeps covering wobble with confidence, meets his real valley when the storm strips away map, boat and certainty, then acts without hesitation for Squeaky and learns that the fear he felt did not cancel his courage — it made the courage real.",
-  "relationshipChanges": "Keen and his Mum move from close protection to trusted distance through the wristbands. Keen and Squeaky become friends through play, danger, rescue and mutual rescue. Aida moves from distant witness to welcomer, completing Mum’s act of letting go with a found-family welcome. Fuzzby shifts from comic self-importance to genuine awe of Keen.",
-  "emotionalCurve": "Warm morning play and goodbye, then comic buoyancy, then cooling uncertainty, storm panic, the underwater nadir with one charged wordless wristband beat, explosive relief, soft welcome, ceremonial belonging, and a golden-hour laugh that still remembers the boat and the goodbye.",
-  "comedyCurve": "Fuzzby’s proud-bumbler pollen escalation opens the episode, then Keen inherits the same cover-up grammar in his wobble and map confusion. As danger rises, comedy narrows into release valves — Fuzzby’s emergency crashes, Zenny’s dry precision, the dolphin-cowboy ride — before ending with Fuzzby’s honey-friendship overcommitment.",
-  "setupPayoffMap": "Fuzzby’s 'Nailed it' cover-up sets the comic grammar for Keen’s 'Still got it.' Mum’s vacant wristbands are handed over with no glow, then self-glow underwater when Keen finds courage from within, then receive Aquamarine gems in the ceremony. Aida’s bowl vision of pier, boat and Mum pays off in her timely rescue beacon and later message home. Squeaky’s playful chatter pays off as urgent signaling in the storm and mutual rescue at the surface.",
-  "visualMotifs": "Empty gold wristbands becoming faint aqua, then crystal-set azure; small figures against wide water; paws closing around objects of trust; warm home receding into distance; storm-grey swallowing horizon; rose-pink beacon cutting through rain; wet sand and droplets after cost; final golden beach path with the group moving as one.",
-  "sonicMotifs": "Fuzzby’s manic buzz-crash rhythm; Zenny’s dry stillness after chaos; Aida’s low bowl tone blooming into rose light; Keen’s repeated self-steadying phrase; Squeaky’s chirps shifting from play to distress to relief; Aquamarine’s B-note emerging from muffled underwater hush into the group chord.",
-  "climax": "Underwater, with Squeaky tangled and the massive wave gathering, Keen sees his father’s vacant wristbands faintly glow, centers himself, pulls with everything he has, tears the net free, is thrown by the wave, and is then carried back up by the friend he saved.",
-  "resolution": "Aida awards Keen the Aquamarine, the crystal splits into two gems that settle into his father’s wristbands, the group swamps him in a hug, and the phrase from Mum’s goodbye returns as a found-family truth: wherever he goes, he will not be alone.",
-  "intendedFinalFeeling": "Warm, buoyant belonging with a visible trace of cost — the storm has passed and everyone laughs, but Keen’s boat is gone, Mum had to let him go, and the wristbands carry both loss and home."
+  "premise": "Keen leaves the safety of his Mum and Crystal Cove with empty heirloom wristbands, gets lost in a storm, saves Squeaky before he feels ready, and is welcomed into the Crystal Bears when his earned courage becomes visible.",
+  "dramaticQuestion": "Can Keen discover that courage is not looking fearless, but acting through the fear when someone else needs him?",
+  "theme": "You can be scared and brave at the same time; belonging travels with you, and sometimes it is waiting for you on the far shore.",
+  "externalJourney": "A warm morning goodbye becomes a solo sailing trip, a storm, a lost boat, an underwater rescue, a beach landing, and finally a post-storm ceremony where Keen receives the Aquamarine gems in his wristbands.",
+  "internalJourney": "Keen starts performing readiness for his Mum, loses his map and certainty, steadies himself through the fear, acts selflessly for Squeaky, and ends no longer pretending to be brave because the group has witnessed the real thing.",
+  "relationshipChanges": "Keen and his Mum move from held safety to trusted separation; Keen and Squeaky become rescue-bonded friends; Aida moves from distant knower to welcoming elder; the Crystal Bears shift from strangers on the shore to Keen's new family; Fuzzby and Zenny turn from comic witnesses into the alarm that connects the worlds.",
+  "emotionalCurve": "Playful morning comedy opens into a held parental goodbye, tips into storm fear and underwater strain, releases through rescue laughter, settles into grateful welcome, and closes warmer than it began with the memory of Mum still behind him.",
+  "comedyCurve": "Fuzzby's body-first bee chaos starts the episode, returns as emergency slapstick under pressure, then transforms into worshipful awe of Keen and finally the honey-friendship button; Keen inherits the same cover-up comedy in his boat wobble.",
+  "setupPayoffMap": "Fuzzby's 'Nailed it' bravado sets up Keen's 'Still got it' cover; the empty wristbands from Mum pay off as faint self-glow underwater and then as Aquamarine-set gems; Aida's vision of the pier pays off in her arrival and welcome; Squeaky's playful chirps pay off as urgent calls and then the rescue ride; Mum's 'never alone' lands again through Aida and the group hug.",
+  "visualMotifs": "Gold pollen and bee-scale flowers; empty gold wristbands; warm hands letting go; a tiny boat against huge water; aqua light in cold blue storm water; a crystal beacon cutting rain; washed-clean droplets; a circle becoming a hug; golden-hour beach path.",
+  "sonicMotifs": "Fuzzby's manic buzzing and crash impacts; Zenny's dry stillness; Aida's bowl tone dissolving into wind; Squeaky's chirps shifting from play to distress to relief; Keen's breath/gulp motif; Aquamarine B-note emerging from faint wristband hum; the bears' combined crystal chord as rescue beacon.",
+  "climax": "Underwater, with Squeaky trapped and a massive wave building above, Keen plants himself against the rock, the vacant wristbands glow from within, and he tears the net free before being thrown through the storm water and carried back by Squeaky.",
+  "resolution": "Aida awards the Aquamarine, the gems settle into Keen's father’s wristbands, the group swamps him in a hug, and he accepts that he has found family without losing the one he sailed away from.",
+  "intendedFinalFeeling": "Bright, relieved belonging with a bittersweet trace: Keen is laughing with new friends in golden light, but the journey still carries the cost of Mum opening her hands at the pier."
  },
  "scenes": [
   {
@@ -210,12 +210,12 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "The episode opens at bee scale in a bright flower field: Zenny’s graceful competence and Fuzzby’s chaotic overconfidence are instantly legible. Fuzzby’s first pollen dive becomes a crash he rebrands as mastery, planting the whole episode’s comic idea that bravado is not the same as courage.",
-   "want": "Fuzzby wants to collect pollen like an impressive professional and be seen doing it.",
-   "need": "He needs to know he belongs even when his body betrays his grand self-image.",
-   "kidRead": "Funny bee zooms too fast, hits a leaf, bounces back and pretends he meant it.",
-   "adultRead": "A tiny performer is already covering embarrassment with status — lovable because the mask is transparent.",
-   "emotionalIntent": "Start with easy laughter, high energy and immediate character contrast, with no danger yet beyond Fuzzby’s own momentum.",
+   "storyBeat": "At bee height in the wildflower field, Zenny's graceful work and Fuzzby's chaotic self-importance define the comedy world before his first overcommitted pollen scoop rebounds off a leaf and he claims mastery anyway.",
+   "want": "Fuzzby wants to look like a brilliant, efficient pollen professional.",
+   "need": "He needs to be loved even when his body proves he is messy and ridiculous.",
+   "kidRead": "Funny bee zooms, bonks, bounces, and says he meant it.",
+   "adultRead": "A tiny performer is trying to earn status by covering embarrassment instantly.",
+   "emotionalIntent": "Buoyant opening laugh; establish character contrast and the bravado mask before any danger appears.",
    "cuts": [
     {
      "n": 1,
@@ -342,12 +342,12 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "Fuzzby escalates from pollen collector to self-appointed official by accidentally wearing a pollen moustache. Zenny’s almost-withheld laugh and dry tease make the relationship the punchline: she sees exactly who he is and stays beside him anyway.",
-   "want": "Fuzzby wants his pollen-covered face to look important, not ridiculous.",
-   "need": "He needs Zenny’s affection more than her admiration, though he would never admit it.",
-   "kidRead": "Fuzzby gets a silly pollen moustache and Zenny calls him nuts.",
-   "adultRead": "The dry line is affectionate intimacy disguised as judgement; the joke is a tiny couple’s rhythm of being known too well.",
-   "emotionalIntent": "Keep the laughter warm, not humiliating; the memorable image is the proud bee moustache beside the still bee trying not to smile.",
+   "storyBeat": "Fuzzby dives face-first into another flower and emerges with a pollen moustache, inviting Zenny to certify his importance; her restrained tease turns the mess into affectionate relationship comedy.",
+   "want": "Fuzzby wants Zenny to validate his official-looking grandeur.",
+   "need": "He needs her attention and affection more than actual authority.",
+   "kidRead": "He has a silly yellow moustache and gets called nuts.",
+   "adultRead": "Zenny's dry line is fondness disguised as judgement; she sees him and stays.",
+   "emotionalIntent": "Let the joke live in contrast: his puffed-up display against her almost-hidden smile.",
    "cuts": [
     {
      "n": 1,
@@ -448,12 +448,12 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "Fuzzby tries to fix the moustache and only makes it worse, then turns the whole field into a chain-reaction tumble. The gag escalates through overcommitment: every attempt to recover becomes a bigger physical confession of failure.",
-   "want": "Fuzzby wants to regain dignity immediately.",
-   "need": "He needs to stop treating every mistake as something to hide.",
-   "kidRead": "He smears the pollen, bonks through things, lands upside down in a flower, and pops out again.",
-   "adultRead": "The harder he works to control the image, the more his own body tells the truth.",
-   "emotionalIntent": "Deliver the biggest pure slapstick of the opening, with Zenny’s smile confirming we laugh with him, not at a victim.",
+   "storyBeat": "Fuzzby tries to repair the moustache and only escalates the disaster, tumbling through branch and blossom until even Zenny's restraint cracks into a smile.",
+   "want": "Fuzzby wants to recover dignity and keep working like nothing happened.",
+   "need": "He needs to stop treating every mistake as a threat to belonging.",
+   "kidRead": "More wiping makes it worse; he gets stuck upside down with kicking legs.",
+   "adultRead": "The harder he conceals failure, the more visible and lovable the failure becomes.",
+   "emotionalIntent": "Escalating slapstick with warmth; laughter with him, not at a victim.",
    "cuts": [
     {
      "n": 1,
@@ -565,12 +565,12 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "The first thunder rumble cuts through the comedy. Fuzzby tries to fold the sound into his performance while Zenny’s stillness sharpens into real attention; the weather shift turns the scene from play to warning without breaking either character’s grammar.",
-   "want": "Fuzzby wants the moment to stay part of his act; Zenny wants to read what has changed.",
-   "need": "Fuzzby needs to let seriousness interrupt him; Zenny needs to let her care show through precision.",
-   "kidRead": "A big rumble happens, Fuzzby gets worried for a second, and Zenny notices a storm is coming.",
-   "adultRead": "The tonal pivot lives inside the joke: one character performs over danger, the other becomes more still because she is already caring.",
-   "emotionalIntent": "Let the room breathe in; the laugh thins into alertness while remaining character-comic.",
+   "storyBeat": "A distant thunder rumble interrupts the pollen comedy; Fuzzby tries to fold the sound into his act while Zenny reads the shifted light and names the approaching storm.",
+   "want": "Fuzzby wants the world to keep treating danger as part of his performance.",
+   "need": "He needs to let seriousness enter without losing himself.",
+   "kidRead": "Thunder surprises the silly bee, and Zenny notices the storm first.",
+   "adultRead": "The episode pivots from harmless play to responsibility, with each bee responding in opposite character grammar.",
+   "emotionalIntent": "A clean tonal turn inside the joke: the laugh catches, then the air changes.",
    "cuts": [
     {
      "n": 1,
@@ -674,12 +674,12 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "Fuzzby instantly boasts that pressure suits him, then flies straight into a flower and gets stuck again. The storm is now real, but the scene exits on a perfectly character-owned button: competence performed, incompetence revealed, Zenny sighing because of course.",
-   "want": "Fuzzby wants to prove that the coming pressure will only make him more impressive.",
-   "need": "He needs to accept that usefulness may look messy and urgent, not polished.",
-   "kidRead": "He says he is good under pressure and immediately gets stuck.",
-   "adultRead": "The boast is a little denial machine; the cut-point lets comedy release the first hint of weather anxiety.",
-   "emotionalIntent": "Button the opening with a laugh that carries a small grey cloud into the next scene.",
+   "storyBeat": "Fuzzby boasts that pressure suits him and immediately flies into another flower, giving the storm warning a comic button while leaving the bees with a real problem to carry forward.",
+   "want": "Fuzzby wants to look brave and capable under pressure.",
+   "need": "He needs to become useful without pretending competence first.",
+   "kidRead": "He says he is good under pressure and instantly gets stuck.",
+   "adultRead": "The cover-up reflex is intact, but the coming storm will demand actual action.",
+   "emotionalIntent": "Release the warning with a laugh while keeping the threat alive.",
    "cuts": [
     {
      "n": 1,
@@ -747,12 +747,12 @@
     "Aida",
     "Keen"
    ],
-   "storyBeat": "Aida’s stillness resets the episode’s pace. Her bowl tone quiets the cove and her Rose Quartz glow becomes a listening instrument, not a power display; she is sensing a need before anyone asks for help.",
+   "storyBeat": "Aida's still ritual quiets the cove; her Rose Quartz responds to the bowl tone, showing that the elder feels a coming need before anyone has asked for help.",
    "want": "Aida wants to listen deeply enough to know where she is needed.",
-   "need": "She needs to trust quiet perception rather than control events by force.",
-   "kidRead": "Aida makes a magical bowl sound and pink light starts to glow.",
-   "adultRead": "The elder’s power is patient attention; she prepares to support a goodbye she cannot soften by taking over.",
-   "emotionalIntent": "Move from bee chaos into sacred calm, making stillness feel active and full.",
+   "need": "She needs to trust that holding the world sometimes means moving toward someone else's threshold, not controlling it.",
+   "kidRead": "A magical bowl hums and pink light glows on Aida's face.",
+   "adultRead": "An elder senses the goodbye before she witnesses it; stillness becomes action in seed form.",
+   "emotionalIntent": "Sacred quiet, patient anticipation, the feeling of the world leaning in.",
    "cuts": [
     {
      "n": 1,
@@ -808,12 +808,12 @@
     "Aida",
     "Keen"
    ],
-   "storyBeat": "Aida’s vision fills the frame with the pier, the waiting boat, Keen checking his supplies too many times, and Mum’s proud smile that cannot hide worry. The future adventure is introduced as a relationship moment before it is a plot departure.",
-   "want": "Aida wants to understand the shape of what is coming for Keen and his Mum.",
-   "need": "She needs to witness without intruding; this is their threshold to cross.",
-   "kidRead": "Aida sees Keen, his Mum and the little boat in a magic vision.",
-   "adultRead": "The repeated checking and glassy parental pride reveal that the real storm begins before the weather does.",
-   "emotionalIntent": "Plant the goodbye as the episode’s heart, with the vision mysterious but emotionally plain.",
+   "storyBeat": "Inside Aida's vision, the frame fills with the pier: Keen overchecks his satchel while his Mum's proud smile can't hide what it costs to let him go.",
+   "want": "Aida wants to understand what her vision is showing her.",
+   "need": "She needs to see both Keen's readiness act and his Mum's held tremble as part of the same courage story.",
+   "kidRead": "Aida magically sees Keen and his Mum by a little boat.",
+   "adultRead": "The vision is not a plot alert; it is a parent-child separation seen before either can name it.",
+   "emotionalIntent": "Tender foreknowledge, with the ache carried by hands, straps, and a smile that almost holds.",
    "cuts": [
     {
      "n": 1,
@@ -899,12 +899,12 @@
     "Aida",
     "Keen"
    ],
-   "storyBeat": "The vision releases Aida back to the shore. She touches her heart, smiles knowingly, and moves toward the forest as the bowl tone becomes distant wind — a quiet decision has been made.",
-   "want": "Aida wants to arrive when the path opens.",
-   "need": "She needs to act from trust, not urgency.",
+   "storyBeat": "Aida returns from the vision with a paw to her heart, speaks the smallest possible decision, and moves toward the forest as the bowl tone becomes wind.",
+   "want": "Aida wants to answer the call she has sensed.",
+   "need": "She needs to act from quiet certainty rather than explanation.",
    "kidRead": "Aida knows it is time and goes to help.",
-   "adultRead": "The elder accepts that she is part of the support system, not the author of the child’s leaving.",
-   "emotionalIntent": "End in purposeful calm, letting the distant wind bridge toward the outside world.",
+   "adultRead": "The elder does not interrupt the goodbye; she prepares to meet its consequence.",
+   "emotionalIntent": "Calm resolve; the supernatural becomes purposeful and grounded.",
    "cuts": [
     {
      "n": 1,
@@ -959,25 +959,23 @@
   {
    "sceneNumber": 3,
    "beatCode": "3.B1",
-   "sourceBeatId": "source-beat:sha256:49ab4d4a1d93fe06538e52f90fcee91fa2f79beac3a44c7247347480fd233c23",
+   "sourceBeatId": "source-beat:sha256:8bec6c37e610ddcb573a2e6e21162ba3e11f44d7cd16c12c5946b8b11287ce3f",
    "sourceEventRange": {
     "firstEventIndex": 23,
-    "lastEventIndex": 27,
+    "lastEventIndex": 26,
     "firstEventId": "script-event:sha256:499412b375bf6cae382cb0fde04776a340c72c3055879b4ab91e992f13cd86ba",
-    "lastEventId": "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
-    "eventCount": 5
+    "lastEventId": "script-event:sha256:8e1c76d760322148642ba6e207ad5af86f314921548a0cf3792329dbab724bdf",
+    "eventCount": 4
    },
    "sourceEventIds": [
     "script-event:sha256:499412b375bf6cae382cb0fde04776a340c72c3055879b4ab91e992f13cd86ba",
     "script-event:sha256:1597abdb1fbd73ea00671c5ac43f306b1b455991cd079e9c530e5628201bab79",
     "script-event:sha256:275bb3b82d273bd7ccaafa21d22292211e5e08904e5a69e80fea524f57440750",
-    "script-event:sha256:8e1c76d760322148642ba6e207ad5af86f314921548a0cf3792329dbab724bdf",
-    "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3"
+    "script-event:sha256:8e1c76d760322148642ba6e207ad5af86f314921548a0cf3792329dbab724bdf"
    ],
    "dialogueOccurrenceIds": [
     "dialogue-occurrence:sha256:81482e25eeb3b22f194617b45080aa5196b6dec1c5ec97d0d2bd3baecc7359ac",
-    "dialogue-occurrence:sha256:4656cf20a6c8ca57fdbf2dba047a04cda8cdf36bf0ee36bb890e619a75e859a2",
-    "dialogue-occurrence:sha256:2d369f95ad2a26a39813a8a04b43cc61a05737bb19e6d5259e9762da48a486ec"
+    "dialogue-occurrence:sha256:4656cf20a6c8ca57fdbf2dba047a04cda8cdf36bf0ee36bb890e619a75e859a2"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -1018,20 +1016,11 @@
        "sourceType": "action",
        "speaker": null,
        "text": "He pats the satchel. Pauses. Checks one more pocket just in case. His Mum smiles despite herself."
-      },
-      {
-       "sourceEventId": "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
-       "sourceEventIndex": 27,
-       "sourceSceneNumber": 3,
-       "sourceType": "dialogue",
-       "speaker": "Keen's Mum",
-       "text": "I know… it’s just… this is a big step.",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:2d369f95ad2a26a39813a8a04b43cc61a05737bb19e6d5259e9762da48a486ec"
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "49ab4d4a1d93fe06538e52f90fcee91fa2f79beac3a44c7247347480fd233c23"
+    "digest": "8bec6c37e610ddcb573a2e6e21162ba3e11f44d7cd16c12c5946b8b11287ce3f"
    },
    "location": "KEEN’S ISLAND",
    "time": "DAY",
@@ -1039,12 +1028,12 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "At the pier, Keen over-organizes his supplies while insisting he has everything under control. Mum’s glassy pride and his repeated checking make the want/need gap visible: he wants readiness to look tidy, but his body is already asking for reassurance.",
-   "want": "Keen wants to prove to Mum and himself that he is ready to leave.",
-   "need": "He needs permission to be unsure and still go.",
-   "kidRead": "Keen packs and checks and checks again before sailing away.",
-   "adultRead": "A child is performing independence in front of a parent who can see every crack and chooses not to crush it.",
-   "emotionalIntent": "Make the goodbye ordinary and tactile before it becomes ceremonial.",
+   "storyBeat": "At the pier, Keen fusses over supplies to prove readiness while Mum watches with pride and glassy eyes; his confidence line is undercut by one last pocket check.",
+   "want": "Keen wants Mum to believe he is ready to leave on his own.",
+   "need": "He needs permission to be unsure without losing her trust.",
+   "kidRead": "Keen packs and checks everything again because leaving is big.",
+   "adultRead": "Both child and parent are performing steadiness for each other.",
+   "emotionalIntent": "Warm goodbye tension with a small comic wobble in Keen's bravado.",
    "cuts": [
     {
      "n": 1,
@@ -1093,37 +1082,27 @@
      "exactText": null,
      "dialogue": null,
      "action": "He pats the satchel. Pauses. Checks one more pocket just in case. His Mum smiles despite herself."
-    },
-    {
-     "n": 5,
-     "sourceEventId": "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
-     "sourceEventIndex": 27,
-     "sourceSceneNumber": 3,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2d369f95ad2a26a39813a8a04b43cc61a05737bb19e6d5259e9762da48a486ec",
-     "speaker": "Keen's Mum",
-     "exactText": "I know… it’s just… this is a big step.",
-     "dialogue": "Keen's Mum: I know… it’s just… this is a big step.",
-     "action": null
     }
    ]
   },
   {
    "sceneNumber": 3,
    "beatCode": "3.B2",
-   "sourceBeatId": "source-beat:sha256:f5c03a207498d02a9d058d2da0d91fccaf4455edb509f8505c087e44cfc9217a",
+   "sourceBeatId": "source-beat:sha256:a8c8cef2274748e937f66a26b8abcf55b744203e201b5db8ca174e20f1ea7c9a",
    "sourceEventRange": {
-    "firstEventIndex": 28,
+    "firstEventIndex": 27,
     "lastEventIndex": 29,
-    "firstEventId": "script-event:sha256:1c103d502c4e6836fe9ae40f2af7cbb18d77b0771dd3878c553a633b49561167",
+    "firstEventId": "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
     "lastEventId": "script-event:sha256:bb591bc6917ef2508ee6c2d07c82f4b880354f34370cc82773ceef502a265232",
-    "eventCount": 2
+    "eventCount": 3
    },
    "sourceEventIds": [
+    "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
     "script-event:sha256:1c103d502c4e6836fe9ae40f2af7cbb18d77b0771dd3878c553a633b49561167",
     "script-event:sha256:bb591bc6917ef2508ee6c2d07c82f4b880354f34370cc82773ceef502a265232"
    ],
    "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:2d369f95ad2a26a39813a8a04b43cc61a05737bb19e6d5259e9762da48a486ec",
     "dialogue-occurrence:sha256:145930ad551c6c078c03ff78220df6ce090cd9d3e6170ec37f168a5b8fec35fe"
    ],
    "sourceEventSignature": {
@@ -1132,6 +1111,15 @@
     "inputs": {
      "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
      "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
+       "sourceEventIndex": 27,
+       "sourceSceneNumber": 3,
+       "sourceType": "dialogue",
+       "speaker": "Keen's Mum",
+       "text": "I know… it’s just… this is a big step.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:2d369f95ad2a26a39813a8a04b43cc61a05737bb19e6d5259e9762da48a486ec"
+      },
       {
        "sourceEventId": "script-event:sha256:1c103d502c4e6836fe9ae40f2af7cbb18d77b0771dd3878c553a633b49561167",
        "sourceEventIndex": 28,
@@ -1152,7 +1140,7 @@
      ]
     },
     "algorithm": "sha256",
-    "digest": "f5c03a207498d02a9d058d2da0d91fccaf4455edb509f8505c087e44cfc9217a"
+    "digest": "a8c8cef2274748e937f66a26b8abcf55b744203e201b5db8ca174e20f1ea7c9a"
    },
    "location": "KEEN’S ISLAND",
    "time": "DAY",
@@ -1160,15 +1148,27 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "Mum names the size of the step, and Keen looks out at the water, swallows, and borrows grown-up words about growing up. This is the first clear fear shot: not a speech, a throat catch against open water.",
-   "want": "Keen wants to sound mature enough for the journey.",
-   "need": "He needs to let the fear be part of the step, not evidence against it.",
-   "kidRead": "Keen looks at the water and feels a bit wobbly but says the brave thing.",
-   "adultRead": "The line is a child repeating what he has been taught, trying to make borrowed courage fit his own chest.",
-   "emotionalIntent": "Let the warmth tighten gently; courage must have a visible gulp before it can mean anything.",
+   "storyBeat": "Mum admits this is a big step; Keen looks to the water, swallows, and repeats the growing-up idea like a borrowed truth he is trying to make fit.",
+   "want": "Keen wants to answer Mum's worry with grown-up certainty.",
+   "need": "He needs to let the gulp be part of the courage, not evidence against it.",
+   "kidRead": "Keen looks nervous but says the big-kid thing anyway.",
+   "adultRead": "A child is quoting the parent's lesson back to make the leaving bearable for them both.",
+   "emotionalIntent": "Let the surface bravery thin enough for the audience to see the trembling paws underneath.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:2b5dc3df087778283f0d9c238acc07407300dc4a53b243a3a19692af663adbd3",
+     "sourceEventIndex": 27,
+     "sourceSceneNumber": 3,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:2d369f95ad2a26a39813a8a04b43cc61a05737bb19e6d5259e9762da48a486ec",
+     "speaker": "Keen's Mum",
+     "exactText": "I know… it’s just… this is a big step.",
+     "dialogue": "Keen's Mum: I know… it’s just… this is a big step.",
+     "action": null
+    },
+    {
+     "n": 2,
      "sourceEventId": "script-event:sha256:1c103d502c4e6836fe9ae40f2af7cbb18d77b0771dd3878c553a633b49561167",
      "sourceEventIndex": 28,
      "sourceSceneNumber": 3,
@@ -1180,7 +1180,7 @@
      "action": "Keen looks out at the water. He swallows. He is trying very hard to be brave."
     },
     {
-     "n": 2,
+     "n": 3,
      "sourceEventId": "script-event:sha256:bb591bc6917ef2508ee6c2d07c82f4b880354f34370cc82773ceef502a265232",
      "sourceEventIndex": 29,
      "sourceSceneNumber": 3,
@@ -1196,23 +1196,21 @@
   {
    "sceneNumber": 3,
    "beatCode": "3.B3",
-   "sourceBeatId": "source-beat:sha256:1f9ba9898360ee76ae47d89a07e54d903a4720481ef94742357c5b3ccf30c304",
+   "sourceBeatId": "source-beat:sha256:95725e68827a4d62349e5afe578115ee2cd9b37fd0e172d6387920a6db354188",
    "sourceEventRange": {
     "firstEventIndex": 30,
-    "lastEventIndex": 33,
+    "lastEventIndex": 32,
     "firstEventId": "script-event:sha256:333ddd487b2a0d3c8076a2cb184894d974044e90d10b580992c2d94e89c725a2",
-    "lastEventId": "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
-    "eventCount": 4
+    "lastEventId": "script-event:sha256:30d0f80610a9086ded3af7f7a0155078d4fc8ba47b636bd679ad865ad62f83b3",
+    "eventCount": 3
    },
    "sourceEventIds": [
     "script-event:sha256:333ddd487b2a0d3c8076a2cb184894d974044e90d10b580992c2d94e89c725a2",
     "script-event:sha256:24dc87f85ebb7fb5ff4cb7fb7f0cb7af863a1105654e594e0c0e096d5e2721a3",
-    "script-event:sha256:30d0f80610a9086ded3af7f7a0155078d4fc8ba47b636bd679ad865ad62f83b3",
-    "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806"
+    "script-event:sha256:30d0f80610a9086ded3af7f7a0155078d4fc8ba47b636bd679ad865ad62f83b3"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:a46e727966a3aac5f8f30a1800759c910fa5681d05baa35091251aa85de50a66",
-    "dialogue-occurrence:sha256:d7add78c91ff794e7c941f90bff206303d8ef571896a8771878fc35ddab6651c"
+    "dialogue-occurrence:sha256:a46e727966a3aac5f8f30a1800759c910fa5681d05baa35091251aa85de50a66"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -1244,20 +1242,11 @@
        "sourceType": "action",
        "speaker": null,
        "text": "A small breeze moves through the ropes along the pier. Keen looks down at them. His expression softens."
-      },
-      {
-       "sourceEventId": "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
-       "sourceEventIndex": 33,
-       "sourceSceneNumber": 3,
-       "sourceType": "dialogue",
-       "speaker": "Keen's Mum",
-       "text": "I still feel him… every day.",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:d7add78c91ff794e7c941f90bff206303d8ef571896a8771878fc35ddab6651c"
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "1f9ba9898360ee76ae47d89a07e54d903a4720481ef94742357c5b3ccf30c304"
+    "digest": "95725e68827a4d62349e5afe578115ee2cd9b37fd0e172d6387920a6db354188"
    },
    "location": "KEEN’S ISLAND",
    "time": "DAY",
@@ -1265,12 +1254,12 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "Mum brings out the worn, vacant wristbands. The pier quiets around the object; Keen stills because this is not equipment, it is family memory made wearable.",
-   "want": "Mum wants to pass on his father’s wristbands without making the moment too heavy for Keen.",
-   "need": "She needs to let go by placing trust in his paws, not by holding him back.",
-   "kidRead": "Keen’s Mum gives him special wristbands from his dad.",
-   "adultRead": "A parent hands over grief as protection and tries to keep the tremble out of the gift.",
-   "emotionalIntent": "Treat the empty gold bands as sacred; nothing glows yet, because restraint is the feeling.",
+   "storyBeat": "Mum reveals the worn empty wristbands, and the pier seems to hush; Keen stills because the object carries his father's absence before anyone explains it.",
+   "want": "Mum wants to entrust Keen with something that belongs to his father.",
+   "need": "She needs to pass love forward without using it to hold Keen back.",
+   "kidRead": "Mum brings out special wristbands that matter a lot.",
+   "adultRead": "An heirloom becomes grief, protection, and permission in one small object.",
+   "emotionalIntent": "Charged stillness; the empty gold should feel heavier than any magic.",
    "cuts": [
     {
      "n": 1,
@@ -1307,38 +1296,28 @@
      "exactText": null,
      "dialogue": null,
      "action": "A small breeze moves through the ropes along the pier. Keen looks down at them. His expression softens."
-    },
-    {
-     "n": 4,
-     "sourceEventId": "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
-     "sourceEventIndex": 33,
-     "sourceSceneNumber": 3,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d7add78c91ff794e7c941f90bff206303d8ef571896a8771878fc35ddab6651c",
-     "speaker": "Keen's Mum",
-     "exactText": "I still feel him… every day.",
-     "dialogue": "Keen's Mum: I still feel him… every day.",
-     "action": null
     }
    ]
   },
   {
    "sceneNumber": 3,
    "beatCode": "3.B4",
-   "sourceBeatId": "source-beat:sha256:dfe30be76b6a03c2d72bbd46577c636b1158ad246ff6a51826ee0803ed469caf",
+   "sourceBeatId": "source-beat:sha256:0f3cca59e84b8ec8d0472d5b6d8414830329078353a79d478af148277be9f93c",
    "sourceEventRange": {
-    "firstEventIndex": 34,
+    "firstEventIndex": 33,
     "lastEventIndex": 36,
-    "firstEventId": "script-event:sha256:4051b0641c3d474fcec722dfefebe9fed95693689e22e7be85333235020f016f",
+    "firstEventId": "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
     "lastEventId": "script-event:sha256:f2db3fd06b8edc6f6da2791098149cfd7bcdc10efefc024fa154e2dacc0d6b3c",
-    "eventCount": 3
+    "eventCount": 4
    },
    "sourceEventIds": [
+    "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
     "script-event:sha256:4051b0641c3d474fcec722dfefebe9fed95693689e22e7be85333235020f016f",
     "script-event:sha256:7a397ed72e0a50777d44bce0491ff8b800b16b12dd04ddfe8ec1b07411e34433",
     "script-event:sha256:f2db3fd06b8edc6f6da2791098149cfd7bcdc10efefc024fa154e2dacc0d6b3c"
    ],
    "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:d7add78c91ff794e7c941f90bff206303d8ef571896a8771878fc35ddab6651c",
     "dialogue-occurrence:sha256:d432564d59e8c2b0b4d3be87d3ef6ceea1c01152a743ac48b37b6a06b7767c44",
     "dialogue-occurrence:sha256:f386060f5230bd16107d9d2ce90959fe5aa35c087729cd605b61152072d37b9c"
    ],
@@ -1348,6 +1327,15 @@
     "inputs": {
      "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
      "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
+       "sourceEventIndex": 33,
+       "sourceSceneNumber": 3,
+       "sourceType": "dialogue",
+       "speaker": "Keen's Mum",
+       "text": "I still feel him… every day.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:d7add78c91ff794e7c941f90bff206303d8ef571896a8771878fc35ddab6651c"
+      },
       {
        "sourceEventId": "script-event:sha256:4051b0641c3d474fcec722dfefebe9fed95693689e22e7be85333235020f016f",
        "sourceEventIndex": 34,
@@ -1377,7 +1365,7 @@
      ]
     },
     "algorithm": "sha256",
-    "digest": "dfe30be76b6a03c2d72bbd46577c636b1158ad246ff6a51826ee0803ed469caf"
+    "digest": "0f3cca59e84b8ec8d0472d5b6d8414830329078353a79d478af148277be9f93c"
    },
    "location": "KEEN’S ISLAND",
    "time": "DAY",
@@ -1385,15 +1373,27 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "The wristbands land in Keen’s paws and he feels their weight. Mum asks for the promise, Keen gives it, and the object becomes a bond between past father, present mother and future self.",
-   "want": "Keen wants to be worthy of what he has been given.",
-   "need": "He needs to feel that courage can be carried from love, not manufactured alone.",
-   "kidRead": "He holds the wristbands carefully and promises to wear them.",
-   "adultRead": "The promise is less about jewelry than about carrying an absent parent forward without saying all the grief aloud.",
-   "emotionalIntent": "Let the handoff breathe with tenderness and cost, without tipping into sentimentality.",
+   "storyBeat": "Mum lets the truth of Keen's father touch the air, then places the wristbands in Keen's paws; he feels their weight and promises to wear them.",
+   "want": "Mum wants Keen to carry the wristbands and the promise safely.",
+   "need": "Keen needs to feel that his father and Mum can travel with him without making him less independent.",
+   "kidRead": "Keen gets the wristbands and makes a promise.",
+   "adultRead": "The parent hands over memory as a shield, and the child accepts more than he fully understands.",
+   "emotionalIntent": "The episode's tender handoff; ache, restraint, and no glow yet.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:23e65002b42ca67f03bb8826d632d6c516108d8b1c8acbdba5fa79d492f6e806",
+     "sourceEventIndex": 33,
+     "sourceSceneNumber": 3,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d7add78c91ff794e7c941f90bff206303d8ef571896a8771878fc35ddab6651c",
+     "speaker": "Keen's Mum",
+     "exactText": "I still feel him… every day.",
+     "dialogue": "Keen's Mum: I still feel him… every day.",
+     "action": null
+    },
+    {
+     "n": 2,
      "sourceEventId": "script-event:sha256:4051b0641c3d474fcec722dfefebe9fed95693689e22e7be85333235020f016f",
      "sourceEventIndex": 34,
      "sourceSceneNumber": 3,
@@ -1405,7 +1405,7 @@
      "action": "She places the wristbands gently into Keen’s paws. He turns them over carefully. Feels their weight. Their meaning."
     },
     {
-     "n": 2,
+     "n": 3,
      "sourceEventId": "script-event:sha256:7a397ed72e0a50777d44bce0491ff8b800b16b12dd04ddfe8ec1b07411e34433",
      "sourceEventIndex": 35,
      "sourceSceneNumber": 3,
@@ -1417,7 +1417,7 @@
      "action": null
     },
     {
-     "n": 3,
+     "n": 4,
      "sourceEventId": "script-event:sha256:f2db3fd06b8edc6f6da2791098149cfd7bcdc10efefc024fa154e2dacc0d6b3c",
      "sourceEventIndex": 36,
      "sourceSceneNumber": 3,
@@ -1433,25 +1433,21 @@
   {
    "sceneNumber": 3,
    "beatCode": "3.B5",
-   "sourceBeatId": "source-beat:sha256:a38bd68f2fbaa7f43aee0b100f4414f7d1aa60e7ff172b79f676e5ffd12e92d8",
+   "sourceBeatId": "source-beat:sha256:9f189ef3df13a903f6494880074608add0a52e25836f38f5a2b6f149a99ca603",
    "sourceEventRange": {
     "firstEventIndex": 37,
-    "lastEventIndex": 41,
+    "lastEventIndex": 39,
     "firstEventId": "script-event:sha256:5077315ad3af788dad5394fc3d4cf91c0fce54bb7ea64696df900baa3efa1fa5",
-    "lastEventId": "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a",
-    "eventCount": 5
+    "lastEventId": "script-event:sha256:2e4b17b80b36c52ce416c26568f617e925452c1100ab6db06309739daaed2209",
+    "eventCount": 3
    },
    "sourceEventIds": [
     "script-event:sha256:5077315ad3af788dad5394fc3d4cf91c0fce54bb7ea64696df900baa3efa1fa5",
     "script-event:sha256:5770fb05d6a496612baf9db8230484587d4b6454246d3a2517dd359441931c74",
-    "script-event:sha256:2e4b17b80b36c52ce416c26568f617e925452c1100ab6db06309739daaed2209",
-    "script-event:sha256:3698e4f49bda70f7023cee01a0841385e639bb600ef813c56549de2b447a4d96",
-    "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a"
+    "script-event:sha256:2e4b17b80b36c52ce416c26568f617e925452c1100ab6db06309739daaed2209"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:65215d2d3ebff25677d0634805cdbaa59fb86f1917f5d71546f67eeccabfb000",
-    "dialogue-occurrence:sha256:fbdda50bbae6c0459a0ecb4f1a98b991cc849f27ccc4b58523f967ed24800d5c",
-    "dialogue-occurrence:sha256:6a2d5483384cdd64c1bb2e340420fd14640756e75716ac0b696b280ab0b6394a"
+    "dialogue-occurrence:sha256:65215d2d3ebff25677d0634805cdbaa59fb86f1917f5d71546f67eeccabfb000"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -1483,29 +1479,11 @@
        "sourceType": "action",
        "speaker": null,
        "text": "Keen takes that in. A small, real smile."
-      },
-      {
-       "sourceEventId": "script-event:sha256:3698e4f49bda70f7023cee01a0841385e639bb600ef813c56549de2b447a4d96",
-       "sourceEventIndex": 40,
-       "sourceSceneNumber": 3,
-       "sourceType": "dialogue",
-       "speaker": "Keen",
-       "text": "I won’t be. I love you, Mum.",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbdda50bbae6c0459a0ecb4f1a98b991cc849f27ccc4b58523f967ed24800d5c"
-      },
-      {
-       "sourceEventId": "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a",
-       "sourceEventIndex": 41,
-       "sourceSceneNumber": 3,
-       "sourceType": "dialogue",
-       "speaker": "Keen's Mum",
-       "text": "I love you… my brave boy.",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:6a2d5483384cdd64c1bb2e340420fd14640756e75716ac0b696b280ab0b6394a"
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "a38bd68f2fbaa7f43aee0b100f4414f7d1aa60e7ff172b79f676e5ffd12e92d8"
+    "digest": "9f189ef3df13a903f6494880074608add0a52e25836f38f5a2b6f149a99ca603"
    },
    "location": "KEEN’S ISLAND",
    "time": "DAY",
@@ -1513,12 +1491,12 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "Keen puts the wristbands on and Mum’s touch turns the object into belonging: wherever he goes, he will not be alone. Keen receives that enough to answer with real love, and Mum answers with the brave-boy phrase that both blesses and burdens him.",
-   "want": "Mum wants Keen to leave feeling accompanied rather than abandoned.",
-   "need": "She needs to open her hands and trust that home can travel with him.",
-   "kidRead": "The wristbands fit, Mum touches his cheek, and they say they love each other.",
-   "adultRead": "The parent gives the child a portable home while accepting that the child is about to move beyond reach.",
-   "emotionalIntent": "Make this the softest human center of the episode; warmth and ache occupy the same frame.",
+   "storyBeat": "Keen slips on the vacant wristbands and receives Mum's touch and assurance; the goodbye turns from inherited grief to the living promise that he will not be alone.",
+   "want": "Keen wants the wristbands to make him feel steady enough to go.",
+   "need": "He needs to believe connection can remain when distance opens.",
+   "kidRead": "The wristbands fit, Mum touches his cheek, and Keen smiles for real.",
+   "adultRead": "A parent gives a child a portable home and then has to let that be enough.",
+   "emotionalIntent": "Soft safety before separation; the real smile is the first earned warmth.",
    "cuts": [
     {
      "n": 1,
@@ -1555,9 +1533,72 @@
      "exactText": null,
      "dialogue": null,
      "action": "Keen takes that in. A small, real smile."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 3,
+   "beatCode": "3.B6",
+   "sourceBeatId": "source-beat:sha256:fd2f3f055fd3ce13df6200a74424dcbb2764c9d2ffb404a0dd53277f1560229f",
+   "sourceEventRange": {
+    "firstEventIndex": 40,
+    "lastEventIndex": 41,
+    "firstEventId": "script-event:sha256:3698e4f49bda70f7023cee01a0841385e639bb600ef813c56549de2b447a4d96",
+    "lastEventId": "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a",
+    "eventCount": 2
+   },
+   "sourceEventIds": [
+    "script-event:sha256:3698e4f49bda70f7023cee01a0841385e639bb600ef813c56549de2b447a4d96",
+    "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:fbdda50bbae6c0459a0ecb4f1a98b991cc849f27ccc4b58523f967ed24800d5c",
+    "dialogue-occurrence:sha256:6a2d5483384cdd64c1bb2e340420fd14640756e75716ac0b696b280ab0b6394a"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:3698e4f49bda70f7023cee01a0841385e639bb600ef813c56549de2b447a4d96",
+       "sourceEventIndex": 40,
+       "sourceSceneNumber": 3,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "I won’t be. I love you, Mum.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:fbdda50bbae6c0459a0ecb4f1a98b991cc849f27ccc4b58523f967ed24800d5c"
+      },
+      {
+       "sourceEventId": "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a",
+       "sourceEventIndex": 41,
+       "sourceSceneNumber": 3,
+       "sourceType": "dialogue",
+       "speaker": "Keen's Mum",
+       "text": "I love you… my brave boy.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:6a2d5483384cdd64c1bb2e340420fd14640756e75716ac0b696b280ab0b6394a"
+      }
+     ]
     },
+    "algorithm": "sha256",
+    "digest": "fd2f3f055fd3ce13df6200a74424dcbb2764c9d2ffb404a0dd53277f1560229f"
+   },
+   "location": "KEEN’S ISLAND",
+   "time": "DAY",
+   "characters": [
+    "Keen",
+    "Keen's Mum"
+   ],
+   "storyBeat": "The love is spoken plainly and quietly, completing the emotional exchange before the physical leaving begins.",
+   "want": "Keen and Mum each want the other to know the love before the dock opens between them.",
+   "need": "They both need the goodbye to be honest, not merely brave-looking.",
+   "kidRead": "They say they love each other before Keen leaves.",
+   "adultRead": "The last words before departure carry everything neither can keep saying once the boat moves.",
+   "emotionalIntent": "A brief, full-hearted catch before the scene releases into action.",
+   "cuts": [
     {
-     "n": 4,
+     "n": 1,
      "sourceEventId": "script-event:sha256:3698e4f49bda70f7023cee01a0841385e639bb600ef813c56549de2b447a4d96",
      "sourceEventIndex": 40,
      "sourceSceneNumber": 3,
@@ -1569,7 +1610,7 @@
      "action": null
     },
     {
-     "n": 5,
+     "n": 2,
      "sourceEventId": "script-event:sha256:028b936236bd43cbab61d2da421d621df50556735d2d72ec5aa36e86507fb52a",
      "sourceEventIndex": 41,
      "sourceSceneNumber": 3,
@@ -1584,7 +1625,7 @@
   },
   {
    "sceneNumber": 3,
-   "beatCode": "3.B6",
+   "beatCode": "3.B7",
    "sourceBeatId": "source-beat:sha256:b36010337ca93481291d7a5ead01b5ddfbfb048e2495c5d65b13897764c25ac2",
    "sourceEventRange": {
     "firstEventIndex": 42,
@@ -1634,12 +1675,12 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "Keen climbs into the boat, pushes off, waves, wobbles, flails, and covers the embarrassment with a tiny captain’s boast. The comedy releases the goodbye without erasing Mum’s tear.",
-   "want": "Keen wants his departure to look confident and capable.",
-   "need": "He needs to know wobbling does not disqualify him from going.",
-   "kidRead": "The boat wobbles and Keen pretends he meant it.",
-   "adultRead": "The same cover-up shape as Fuzzby’s 'Nailed it' now belongs to a child leaving home; Mum laughs because love sees through it.",
-   "emotionalIntent": "Catch and release: a tear, then a laugh within the same breath.",
+   "storyBeat": "Keen pushes off, tries to look confident, wobbles, flails, and covers the mistake as Mum laughs through a tear.",
+   "want": "Keen wants his first boat move to look capable and impressive.",
+   "need": "He needs to survive looking imperfect in front of Mum and still be loved.",
+   "kidRead": "The boat wobbles and Keen pretends it was on purpose.",
+   "adultRead": "The same cover-up shape as Fuzzby becomes a departing child's brave little performance.",
+   "emotionalIntent": "Comedy releases the goodbye without erasing it; Mum's laugh should carry a tear.",
    "cuts": [
     {
      "n": 1,
@@ -1669,7 +1710,7 @@
   },
   {
    "sceneNumber": 3,
-   "beatCode": "3.B7",
+   "beatCode": "3.B8",
    "sourceBeatId": "source-beat:sha256:37f51af13b5955e832ea30e7aa3eccde8157c5278b7d22b7eb94baef6903f56a",
    "sourceEventRange": {
     "firstEventIndex": 44,
@@ -1759,12 +1800,12 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "Squeaky bursts beside the boat and turns the farewell into first adventure. Keen’s startle becomes delight, and his comic misread of dolphin chatter makes him feel less alone before the dock is fully behind him.",
-   "want": "Keen wants to greet the unknown as a friend, not a threat.",
-   "need": "He needs connection on the far side of leaving Mum.",
-   "kidRead": "A dolphin pops up, chirps, and Keen decides they are friends.",
-   "adultRead": "The world answers the parent’s letting-go with a new companion, easing separation without denying it.",
-   "emotionalIntent": "Let play rush in like sunlight after the ache, while keeping Mum visible in emotional memory.",
+   "storyBeat": "Squeaky splashes into the goodbye, turning the leaving moment toward play; Keen lights up and treats the dolphin's chatter as perfectly understandable.",
+   "want": "Keen wants to meet the surprising new friend and make the trip feel like adventure.",
+   "need": "He needs delight to meet him on the far side of leaving home.",
+   "kidRead": "A dolphin appears, chirps, and Keen talks to him like a friend.",
+   "adultRead": "The world rewards the child who just left safety with connection, not isolation.",
+   "emotionalIntent": "Bright release, wonder, and a new bond forming through play.",
    "cuts": [
     {
      "n": 1,
@@ -1842,7 +1883,7 @@
   },
   {
    "sceneNumber": 3,
-   "beatCode": "3.B8",
+   "beatCode": "3.B9",
    "sourceBeatId": "source-beat:sha256:a677866d8c5e2524330c3e1b50b637550b2bcb2657433df2e34a25d267e76d36",
    "sourceEventRange": {
     "firstEventIndex": 50,
@@ -1880,12 +1921,12 @@
     "Keen",
     "Keen's Mum"
    ],
-   "storyBeat": "The boat glides farther out, Mum grows smaller, and Keen faces forward carrying both nerves and excitement. The scene settles on the truth of transition: he is not one feeling, he is a lot of both.",
-   "want": "Keen wants to keep moving toward the adventure.",
-   "need": "He needs to allow mixed feelings instead of choosing only brave excitement.",
-   "kidRead": "Keen sails away, a little nervous and a little excited.",
-   "adultRead": "The parent-child distance becomes visual; growing up is the frame widening between them.",
-   "emotionalIntent": "Leave a bittersweet wake behind the boat, not a clean reset.",
+   "storyBeat": "As the boat glides farther away, Mum shrinks behind Keen while he faces forward with nerves and excitement tangled together.",
+   "want": "Keen wants to keep looking ahead.",
+   "need": "He needs to allow both feelings to exist in the same chest.",
+   "kidRead": "Keen sails away feeling nervous and excited.",
+   "adultRead": "The final pier image keeps the cost visible: the parent is smaller now, but not gone.",
+   "emotionalIntent": "Bittersweet launch; warmth with the first real distance.",
    "cuts": [
     {
      "n": 1,
@@ -1973,12 +2014,12 @@
     "Keen",
     "Squeaky"
    ],
-   "storyBeat": "Open water makes Keen small, but he tries to sail confidently while Squeaky keeps pace. Naming Squeaky turns the dolphin from surprise into companion, and Keen’s misunderstanding of chirps is sweetly self-assured.",
-   "want": "Keen wants to make the open sea feel friendly and manageable.",
-   "need": "He needs companionship, even before he admits the scale scares him.",
-   "kidRead": "Keen sails with his new dolphin friend and gives him a perfect name.",
-   "adultRead": "The child fills uncertainty with chatter and friendship because silence would reveal how big the water is.",
-   "emotionalIntent": "Keep the surface playful while the wide sea quietly enlarges around him.",
+   "storyBeat": "On open water, Keen's confidence becomes playful as he names Squeaky and the dolphin accepts the friendship in chirps and leaps.",
+   "want": "Keen wants to turn the unknown voyage into a friendly adventure.",
+   "need": "He needs connection as ballast before the sea tests him.",
+   "kidRead": "Keen makes dolphin friends and gives him a squeaky name.",
+   "adultRead": "A child alone in a big world invents companionship fast because he needs it.",
+   "emotionalIntent": "Light, buoyant confidence with an undertow of vastness.",
    "cuts": [
     {
      "n": 1,
@@ -2102,12 +2143,12 @@
     "Keen",
     "Squeaky"
    ],
-   "storyBeat": "The map turns from tool to comic threat. Keen tries to reason his way through directions, flips the map, and lands on uncertainty as a joke rather than a confession.",
-   "want": "Keen wants to prove he can navigate by himself.",
-   "need": "He needs to accept help before pride turns uncertainty into danger.",
-   "kidRead": "Keen gets confused by the map and turns it upside down.",
-   "adultRead": "His cover-up is still charming, but now the stakes are beginning to outgrow the joke.",
-   "emotionalIntent": "Use gentle map comedy to expose vulnerability without humiliating him.",
+   "storyBeat": "Keen tries to navigate with the map, turns it upside down, and covers uncertainty with a joke-like admission.",
+   "want": "Keen wants to prove he knows where he is going.",
+   "need": "He needs to admit not knowing before the world forces the issue.",
+   "kidRead": "The map is confusing and he turns it the wrong way.",
+   "adultRead": "The bravado is still gentle, but the competence performance is starting to fray.",
+   "emotionalIntent": "Comic uncertainty; make the sea feel bigger around his small boat.",
    "cuts": [
     {
      "n": 1,
@@ -2162,23 +2203,20 @@
   {
    "sceneNumber": 4,
    "beatCode": "4.B3",
-   "sourceBeatId": "source-beat:sha256:c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
+   "sourceBeatId": "source-beat:sha256:b810a0fd5001813bfb85b39f4d0f561a5cd0a117e6dbe6ec91efaf05c26e1fef",
    "sourceEventRange": {
     "firstEventIndex": 59,
-    "lastEventIndex": 62,
+    "lastEventIndex": 60,
     "firstEventId": "script-event:sha256:12156e276056eaab71dd657d27d84ae3e866455a2af982e615d44d3cd69c808a",
-    "lastEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
-    "eventCount": 4
+    "lastEventId": "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
+    "eventCount": 2
    },
    "sourceEventIds": [
     "script-event:sha256:12156e276056eaab71dd657d27d84ae3e866455a2af982e615d44d3cd69c808a",
-    "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01",
-    "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
-    "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1"
+    "script-event:sha256:1147bc811433630bdf7d14caac5fd721f3ca79e03dd8c3f4cb0b7bc9f8c1da01"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c",
-    "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff"
+    "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -2202,28 +2240,11 @@
        "speaker": "Keen",
        "text": "Oh!",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:edb92967e1823c935a5a5c810addf1b893ed9ae82f49d180a9df50c9a209915c"
-      },
-      {
-       "sourceEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
-       "sourceEventIndex": 61,
-       "sourceSceneNumber": 4,
-       "sourceType": "action",
-       "speaker": null,
-       "text": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
-      },
-      {
-       "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
-       "sourceEventIndex": 62,
-       "sourceSceneNumber": 4,
-       "sourceType": "dialogue",
-       "speaker": "Keen",
-       "text": "No no no no—!",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff"
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80"
+    "digest": "b810a0fd5001813bfb85b39f4d0f561a5cd0a117e6dbe6ec91efaf05c26e1fef"
    },
    "location": "AT SEA",
    "time": "DAY",
@@ -2231,12 +2252,12 @@
     "Keen",
     "Squeaky"
    ],
-   "storyBeat": "The first hard gust turns uncertainty into physical danger. The boat lurches, the sky darkens, Squeaky disappears, rain arrives in sheets, and the wind steals the map — Keen’s performed control is stripped away by the world.",
-   "want": "Keen wants to hold onto the boat, the map and the idea that he can still manage this.",
-   "need": "He needs to feel the fear honestly before a real decision can emerge.",
-   "kidRead": "The wind gets strong, rain pours, and the map flies away.",
-   "adultRead": "The symbols of independence — boat, map, command — fail all at once, leaving only the child inside the performance.",
-   "emotionalIntent": "Shift the episode into genuine jeopardy while keeping the action legible and not frightening beyond safe adventure.",
+   "storyBeat": "A hard gust lurches the boat and knocks Keen into the mast, turning navigation confusion into physical jeopardy.",
+   "want": "Keen wants to stay upright and in control.",
+   "need": "He needs to respect that the world is bigger than his performance of readiness.",
+   "kidRead": "The wind hits, the sail flaps, and Keen almost falls.",
+   "adultRead": "The environment stops being a backdrop and starts answering his false confidence.",
+   "emotionalIntent": "First jolt of danger, still survivable but no longer playful.",
    "cuts": [
     {
      "n": 1,
@@ -2261,49 +2282,28 @@
      "exactText": "Oh!",
      "dialogue": "Keen: Oh!",
      "action": null
-    },
-    {
-     "n": 3,
-     "sourceEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
-     "sourceEventIndex": 61,
-     "sourceSceneNumber": 4,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
-    },
-    {
-     "n": 4,
-     "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
-     "sourceEventIndex": 62,
-     "sourceSceneNumber": 4,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff",
-     "speaker": "Keen",
-     "exactText": "No no no no—!",
-     "dialogue": "Keen: No no no no—!",
-     "action": null
     }
    ]
   },
   {
    "sceneNumber": 4,
    "beatCode": "4.B4",
-   "sourceBeatId": "source-beat:sha256:7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+   "sourceBeatId": "source-beat:sha256:e809d358d401a16cd64dbccf518736f42f66fa8d3d04ba27c9161a53ba81b4e7",
    "sourceEventRange": {
-    "firstEventIndex": 63,
+    "firstEventIndex": 61,
     "lastEventIndex": 64,
-    "firstEventId": "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
+    "firstEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
     "lastEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
-    "eventCount": 2
+    "eventCount": 4
    },
    "sourceEventIds": [
+    "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
+    "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
     "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
     "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069"
    ],
    "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff",
     "dialogue-occurrence:sha256:db48a4ec2e15cc04820777633e5977d88b19c0c3cb7158051ce536518799b626"
    ],
    "sourceEventSignature": {
@@ -2312,6 +2312,23 @@
     "inputs": {
      "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
      "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
+       "sourceEventIndex": 61,
+       "sourceSceneNumber": 4,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
+      },
+      {
+       "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+       "sourceEventIndex": 62,
+       "sourceSceneNumber": 4,
+       "sourceType": "dialogue",
+       "speaker": "Keen",
+       "text": "No no no no—!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff"
+      },
       {
        "sourceEventId": "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
        "sourceEventIndex": 63,
@@ -2332,7 +2349,7 @@
      ]
     },
     "algorithm": "sha256",
-    "digest": "7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449"
+    "digest": "e809d358d401a16cd64dbccf518736f42f66fa8d3d04ba27c9161a53ba81b4e7"
    },
    "location": "AT SEA",
    "time": "DAY",
@@ -2340,15 +2357,39 @@
     "Keen",
     "Squeaky"
    ],
-   "storyBeat": "Keen misses the map and freezes as the horizon vanishes. His admission that he is lost lands as the first open crack in the brave mask.",
-   "want": "Keen wants the map back because it was his proof of control.",
-   "need": "He needs to admit that he does not know the way.",
-   "kidRead": "The map is gone, everything is grey, and Keen says he is lost.",
-   "adultRead": "The child’s first real helplessness arrives when there is no adult in frame to hand the answer back.",
-   "emotionalIntent": "Let fear land cleanly, with the storm swallowing geography around him.",
+   "storyBeat": "The storm rapidly overtakes Keen; rain sheets down, Squeaky disappears, the map is snatched away, and Keen freezes as he realizes he is lost.",
+   "want": "Keen wants to keep the map and steer through the storm.",
+   "need": "He needs to face helplessness without collapsing into it.",
+   "kidRead": "The storm steals the map and Keen is lost.",
+   "adultRead": "All the props of readiness vanish, leaving only the child and the weather.",
+   "emotionalIntent": "Fear blooms; the horizon disappearing should feel like certainty being erased.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:01198f1dd39148bb5afcc24f594d9bc1ee0b3dfbf3cc2c82c2985a158cb1f39c",
+     "sourceEventIndex": 61,
+     "sourceSceneNumber": 4,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "The sky darkens. Clouds roll in faster than he expected. Squeaky disappears beneath the water. Another gust. Stronger. Rain starts as a few drops. Then many. Then sheets. The sea roughens. The boat CREAKS. Keen tries to keep hold of the map while steering. The wind SNATCHES it from his paws."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:831f139fd9725c9bb0d93b54cc1bd6164fc6cadd9e890b51c742320c52476ca1",
+     "sourceEventIndex": 62,
+     "sourceSceneNumber": 4,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:d0b5f756fbb3de6b6335530e6b7e6bb05440172ade30e6eca97dba53d3200bff",
+     "speaker": "Keen",
+     "exactText": "No no no no—!",
+     "dialogue": "Keen: No no no no—!",
+     "action": null
+    },
+    {
+     "n": 3,
      "sourceEventId": "script-event:sha256:1e925e1fc453e74cd35860ade1813b349125390bda8030c10c8eabe48c19c85a",
      "sourceEventIndex": 63,
      "sourceSceneNumber": 4,
@@ -2360,7 +2401,7 @@
      "action": "He lunges for it. Misses. The map whips through the air and vanishes into the storm. Keen stands frozen. Rainwater sloshes around his feet. The horizon disappears behind sheets of grey."
     },
     {
-     "n": 2,
+     "n": 4,
      "sourceEventId": "script-event:sha256:ae72061a9414dc2c73d96984ac20ebcc07dfa7e83216e5c0cb900ca07c6f7069",
      "sourceEventIndex": 64,
      "sourceSceneNumber": 4,
@@ -2425,12 +2466,12 @@
     "Keen",
     "Squeaky"
    ],
-   "storyBeat": "Keen grips the boat, breathes, grounds himself and repeats his brave phrase. It is not full courage yet; it is a small self-rescue, the attempt to keep from coming apart.",
-   "want": "Keen wants to steady himself enough to choose the next action.",
-   "need": "He needs to discover that bravery can begin as a shaky breath, not a fearless leap.",
-   "kidRead": "Keen holds on, closes his eyes, breathes and tells himself he can do it.",
-   "adultRead": "A child uses the phrase he has been using as performance and begins turning it into an actual foothold.",
-   "emotionalIntent": "Hold the panic just long enough for the audience to feel the first inward steadiness.",
+   "storyBeat": "Keen grips the boat, closes his eyes for one second, and repeats his steadying phrase while the storm keeps battering him.",
+   "want": "Keen wants to calm his body enough to keep going.",
+   "need": "He needs to discover that courage can start as a tiny breath, not a grand pose.",
+   "kidRead": "Keen is frightened but tells himself he can do it.",
+   "adultRead": "A child self-soothes with the same words he used as bravado, now more fragile and real.",
+   "emotionalIntent": "Small interior bravery inside exterior chaos.",
    "cuts": [
     {
      "n": 1,
@@ -2539,12 +2580,12 @@
     "Keen",
     "Squeaky"
    ],
-   "storyBeat": "Squeaky returns through the storm, signaling a direction. Keen looks from rough water to his friend and decides to follow, choosing trust over solitary control.",
-   "want": "Keen wants a way through the storm.",
-   "need": "He needs to accept guidance from someone else without feeling smaller.",
-   "kidRead": "Squeaky shows him where to go, and Keen follows.",
-   "adultRead": "The lost child’s first real mature choice is not command but trust.",
-   "emotionalIntent": "Turn panic toward motion and hope, with Squeaky as connection rather than solution.",
+   "storyBeat": "Squeaky reappears and signals through the storm; Keen weighs the rough water against trust in his new friend, then follows.",
+   "want": "Keen wants a way out of being lost.",
+   "need": "He needs to accept help instead of proving he can do everything alone.",
+   "kidRead": "Squeaky points the way, and Keen follows him.",
+   "adultRead": "The first mature decision is not control but trust.",
+   "emotionalIntent": "Hope through relationship; the storm remains, but Keen is no longer choosing alone.",
    "cuts": [
     {
      "n": 1,
@@ -2611,23 +2652,20 @@
   {
    "sceneNumber": 5,
    "beatCode": "5.B1",
-   "sourceBeatId": "source-beat:sha256:9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
+   "sourceBeatId": "source-beat:sha256:bcc7ea281d63f99d3b19b96aa124fb868e7730e9dac640df48dd17fd3809c556",
    "sourceEventRange": {
     "firstEventIndex": 72,
-    "lastEventIndex": 75,
+    "lastEventIndex": 73,
     "firstEventId": "script-event:sha256:b3dda834bdda4e87cc34b5816a42ce5d4faf8550f1a539f30df67bae4d1aa533",
-    "lastEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
-    "eventCount": 4
+    "lastEventId": "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
+    "eventCount": 2
    },
    "sourceEventIds": [
     "script-event:sha256:b3dda834bdda4e87cc34b5816a42ce5d4faf8550f1a539f30df67bae4d1aa533",
-    "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
-    "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
-    "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d"
+    "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f",
-    "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c"
+    "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -2651,28 +2689,11 @@
        "speaker": "Fuzzby",
        "text": "I’m just saying, if this turns into a full storm situation, I am extremely—",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f"
-      },
-      {
-       "sourceEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
-       "sourceEventIndex": 74,
-       "sourceSceneNumber": 5,
-       "sourceType": "action",
-       "speaker": null,
-       "text": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
-      },
-      {
-       "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
-       "sourceEventIndex": 75,
-       "sourceSceneNumber": 5,
-       "sourceType": "dialogue",
-       "speaker": "Zenny",
-       "text": "Fuzzby?",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c"
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a"
+    "digest": "bcc7ea281d63f99d3b19b96aa124fb868e7730e9dac640df48dd17fd3809c556"
    },
    "location": "RAINFOREST EDGE",
    "time": "CONTINUOUS",
@@ -2680,12 +2701,12 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "Back at the treeline, Fuzzby talks over the rising wind until he stops dead — a rare interruption of his own momentum. Zenny nearly bumps into him, and that break in his nonstop performance tells us he has seen something truly serious.",
-   "want": "Fuzzby wants to keep narrating himself as storm-capable.",
-   "need": "He needs to let the sight of danger cut through the act.",
-   "kidRead": "Fuzzby is chattering, then suddenly freezes because he spots something.",
-   "adultRead": "For once, the chaos bee’s silence has weight; seriousness registers by the absence of performance.",
-   "emotionalIntent": "Use Fuzzby’s stillness as alarm, making the tiny distant boat feel dangerous.",
+   "storyBeat": "Fuzzby and Zenny hurry through the wind-lashed trees, with Fuzzby still performing confidence until the world interrupts him mid-sentence.",
+   "want": "Fuzzby wants to narrate himself as impressively prepared for storm duty.",
+   "need": "He needs to notice danger before turning it into a show.",
+   "kidRead": "Fuzzby talks and talks while the wind gets stronger.",
+   "adultRead": "His patter is a shield, and the storm is about to puncture it.",
+   "emotionalIntent": "Fast comic motion under increasingly serious weather pressure.",
    "cuts": [
     {
      "n": 1,
@@ -2710,53 +2731,29 @@
      "exactText": "I’m just saying, if this turns into a full storm situation, I am extremely—",
      "dialogue": "Fuzzby: I’m just saying, if this turns into a full storm situation, I am extremely—",
      "action": null
-    },
-    {
-     "n": 3,
-     "sourceEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
-     "sourceEventIndex": 74,
-     "sourceSceneNumber": 5,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
-    },
-    {
-     "n": 4,
-     "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
-     "sourceEventIndex": 75,
-     "sourceSceneNumber": 5,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
-     "speaker": "Zenny",
-     "exactText": "Fuzzby?",
-     "dialogue": "Zenny: Fuzzby?",
-     "action": null
     }
    ]
   },
   {
    "sceneNumber": 5,
    "beatCode": "5.B2",
-   "sourceBeatId": "source-beat:sha256:23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
+   "sourceBeatId": "source-beat:sha256:a5df562ef21a7b9dc96a7de81c89acaa94a4d35a3e256be863b74c196cbc2634",
    "sourceEventRange": {
-    "firstEventIndex": 76,
-    "lastEventIndex": 79,
-    "firstEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
-    "lastEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+    "firstEventIndex": 74,
+    "lastEventIndex": 77,
+    "firstEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+    "lastEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
     "eventCount": 4
    },
    "sourceEventIds": [
+    "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+    "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
     "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
-    "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
-    "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
-    "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a"
+    "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
-    "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94"
+    "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
+    "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -2764,6 +2761,23 @@
     "inputs": {
      "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
      "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+       "sourceEventIndex": 74,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
+      },
+      {
+       "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+       "sourceEventIndex": 75,
+       "sourceSceneNumber": 5,
+       "sourceType": "dialogue",
+       "speaker": "Zenny",
+       "text": "Fuzzby?",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c"
+      },
       {
        "sourceEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
        "sourceEventIndex": 76,
@@ -2780,7 +2794,102 @@
        "speaker": "Fuzzby",
        "text": "…that is NOT a good place to be.",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24"
-      },
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "a5df562ef21a7b9dc96a7de81c89acaa94a4d35a3e256be863b74c196cbc2634"
+   },
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby stops dead, points through the trees, and both bees register the tiny boat rising and falling in the storm.",
+   "want": "Fuzzby wants Zenny to see what he sees because words briefly fail him.",
+   "need": "He needs to let fear make him useful rather than pompous.",
+   "kidRead": "The bees spot a little boat in trouble far away.",
+   "adultRead": "The manic bee's sudden stillness carries real alarm; his silence is the turn.",
+   "emotionalIntent": "A gasp without exaggeration; comedy gives way to care.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+     "sourceEventIndex": 74,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+     "sourceEventIndex": 75,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
+     "speaker": "Zenny",
+     "exactText": "Fuzzby?",
+     "dialogue": "Zenny: Fuzzby?",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
+     "sourceEventIndex": 76,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "No response. Fuzzby slowly raises one tiny paw… Points. Zenny follows his gaze. Out beyond the trees. Through the shifting wind and rain, a tiny boat rises and falls in the distance. Barely visible in the storm. Beat. Fuzzby’s eyes go WIDE."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+     "sourceEventIndex": 77,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
+     "speaker": "Fuzzby",
+     "exactText": "…that is NOT a good place to be.",
+     "dialogue": "Fuzzby: …that is NOT a good place to be.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "5.B3",
+   "sourceBeatId": "source-beat:sha256:acd8419d278917045d09b6d302094d714c658b67acbae51c100bb33312eac3a3",
+   "sourceEventRange": {
+    "firstEventIndex": 78,
+    "lastEventIndex": 81,
+    "firstEventId": "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
+    "lastEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
+    "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+    "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
+    "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
+    "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
       {
        "sourceEventId": "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
        "sourceEventIndex": 78,
@@ -2797,100 +2906,7 @@
        "speaker": "Zenny",
        "text": "Someone’s in trouble.",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94"
-      }
-     ]
-    },
-    "algorithm": "sha256",
-    "digest": "23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154"
-   },
-   "location": "RAINFOREST EDGE",
-   "time": "CONTINUOUS",
-   "characters": [
-    "Fuzzby",
-    "Zenny"
-   ],
-   "storyBeat": "Through rain and trees, the bees identify the tiny boat in trouble. Fuzzby’s eyes go wide and Zenny’s face softens immediately; their comic contrast becomes shared concern.",
-   "want": "They want to understand what they are seeing quickly enough to help.",
-   "need": "Fuzzby needs to let fear become action; Zenny needs to let affection show as urgency.",
-   "kidRead": "They see a little boat bouncing in the storm and know someone needs help.",
-   "adultRead": "The deadpan crack matters: Zenny’s softness tells us the rescue has become personal before any bear knows.",
-   "emotionalIntent": "Let comedy give way to care, with the storm now aimed at a person.",
-   "cuts": [
-    {
-     "n": 1,
-     "sourceEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
-     "sourceEventIndex": 76,
-     "sourceSceneNumber": 5,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "No response. Fuzzby slowly raises one tiny paw… Points. Zenny follows his gaze. Out beyond the trees. Through the shifting wind and rain, a tiny boat rises and falls in the distance. Barely visible in the storm. Beat. Fuzzby’s eyes go WIDE."
-    },
-    {
-     "n": 2,
-     "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
-     "sourceEventIndex": 77,
-     "sourceSceneNumber": 5,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
-     "speaker": "Fuzzby",
-     "exactText": "…that is NOT a good place to be.",
-     "dialogue": "Fuzzby: …that is NOT a good place to be.",
-     "action": null
-    },
-    {
-     "n": 3,
-     "sourceEventId": "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
-     "sourceEventIndex": 78,
-     "sourceSceneNumber": 5,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "Zenny’s expression softens immediately."
-    },
-    {
-     "n": 4,
-     "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
-     "sourceEventIndex": 79,
-     "sourceSceneNumber": 5,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
-     "speaker": "Zenny",
-     "exactText": "Someone’s in trouble.",
-     "dialogue": "Zenny: Someone’s in trouble.",
-     "action": null
-    }
-   ]
-  },
-  {
-   "sceneNumber": 5,
-   "beatCode": "5.B3",
-   "sourceBeatId": "source-beat:sha256:d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7",
-   "sourceEventRange": {
-    "firstEventIndex": 80,
-    "lastEventIndex": 82,
-    "firstEventId": "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
-    "lastEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
-    "eventCount": 3
-   },
-   "sourceEventIds": [
-    "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
-    "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
-    "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613"
-   ],
-   "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab"
-   ],
-   "sourceEventSignature": {
-    "kind": "source-beat-events",
-    "schemaVersion": 1,
-    "inputs": {
-     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-     "orderedEvents": [
+      },
       {
        "sourceEventId": "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
        "sourceEventIndex": 80,
@@ -2907,19 +2923,11 @@
        "speaker": "Fuzzby",
        "text": "BEARS! BEARS! EMERGENCY BEARS!",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab"
-      },
-      {
-       "sourceEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
-       "sourceEventIndex": 82,
-       "sourceSceneNumber": 5,
-       "sourceType": "action",
-       "speaker": null,
-       "text": "He BLASTS off toward the beach at full speed. Immediately flies into a branch. BONK. He recoils. Shakes it off. Keeps going anyway. Zenny follows behind — calm, focused. This time faster."
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7"
+    "digest": "acd8419d278917045d09b6d302094d714c658b67acbae51c100bb33312eac3a3"
    },
    "location": "RAINFOREST EDGE",
    "time": "CONTINUOUS",
@@ -2927,15 +2935,39 @@
     "Fuzzby",
     "Zenny"
    ],
-   "storyBeat": "Fuzzby blasts off to get the bears, immediately bonks into a branch, and keeps going anyway. His crash is no longer mere foolishness; it is messy usefulness driven by concern.",
-   "want": "Fuzzby wants to raise the alarm as fast and dramatically as possible.",
-   "need": "He needs to be helpful without being polished.",
-   "kidRead": "He yells for emergency bears, hits a branch, and keeps zooming.",
-   "adultRead": "His familiar crash pattern is transformed: the same flaw becomes part of his care.",
-   "emotionalIntent": "Convert slapstick into rescue momentum, ending with Zenny following faster than usual.",
+   "storyBeat": "Zenny's expression softens, names the trouble, and Fuzzby converts panic into an emergency call for the bears.",
+   "want": "The bees want to get help fast.",
+   "need": "Fuzzby needs to let Zenny's clarity complete his chaos; Zenny needs to let care show through the deadpan.",
+   "kidRead": "They know someone needs help and zoom to tell the bears.",
+   "adultRead": "Their double-act becomes functional: motion plus precision equals rescue.",
+   "emotionalIntent": "Urgency with relational warmth; the comedy pair becomes the bridge to action.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
+     "sourceEventIndex": 78,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Zenny’s expression softens immediately."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+     "sourceEventIndex": 79,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
+     "speaker": "Zenny",
+     "exactText": "Someone’s in trouble.",
+     "dialogue": "Zenny: Someone’s in trouble.",
+     "action": null
+    },
+    {
+     "n": 3,
      "sourceEventId": "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
      "sourceEventIndex": 80,
      "sourceSceneNumber": 5,
@@ -2947,7 +2979,7 @@
      "action": "Fuzzby snaps into action."
     },
     {
-     "n": 2,
+     "n": 4,
      "sourceEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
      "sourceEventIndex": 81,
      "sourceSceneNumber": 5,
@@ -2957,9 +2989,58 @@
      "exactText": "BEARS! BEARS! EMERGENCY BEARS!",
      "dialogue": "Fuzzby: BEARS! BEARS! EMERGENCY BEARS!",
      "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "5.B4",
+   "sourceBeatId": "source-beat:sha256:3d95103e9234d7e0fb1cb31b101699533101522d262c6b8f9d1086644c86879f",
+   "sourceEventRange": {
+    "firstEventIndex": 82,
+    "lastEventIndex": 82,
+    "firstEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
+    "lastEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
+    "eventCount": 1
+   },
+   "sourceEventIds": [
+    "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613"
+   ],
+   "dialogueOccurrenceIds": [],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
+       "sourceEventIndex": 82,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "He BLASTS off toward the beach at full speed. Immediately flies into a branch. BONK. He recoils. Shakes it off. Keeps going anyway. Zenny follows behind — calm, focused. This time faster."
+      }
+     ]
     },
+    "algorithm": "sha256",
+    "digest": "3d95103e9234d7e0fb1cb31b101699533101522d262c6b8f9d1086644c86879f"
+   },
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby blasts off, immediately bonks a branch, and keeps going anyway while Zenny follows faster than usual.",
+   "want": "Fuzzby wants to be the heroic messenger.",
+   "need": "He needs persistence more than flawless execution.",
+   "kidRead": "He crashes into a branch but still races to help.",
+   "adultRead": "His blunder no longer stops the mission; the messy self is finally useful.",
+   "emotionalIntent": "Purposeful slapstick: the laugh proves he is scared and trying.",
+   "cuts": [
     {
-     "n": 3,
+     "n": 1,
      "sourceEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
      "sourceEventIndex": 82,
      "sourceSceneNumber": 5,
@@ -2975,20 +3056,29 @@
   {
    "sceneNumber": 6,
    "beatCode": "6.B1",
-   "sourceBeatId": "source-beat:sha256:498b83cd4b8700d4bf0a675eaa2a21c70f6895b416d564dc589290a802d33803",
+   "sourceBeatId": "source-beat:sha256:4158df5ebbe77648aab2f273488e3c732df2e9617487896f4f4a4d326e2b3aa2",
    "sourceEventRange": {
     "firstEventIndex": 83,
-    "lastEventIndex": 84,
+    "lastEventIndex": 90,
     "firstEventId": "script-event:sha256:8757aa7d3e3371dd8d7ee00f76dbbb5dc4c2264c4e8549464607bad78e30e20c",
-    "lastEventId": "script-event:sha256:ce68e194f1d1e49f543c8c71626ce6782edc7b13f5fb4782c1bd927fc66e46c4",
-    "eventCount": 2
+    "lastEventId": "script-event:sha256:1299af356df21e0651980d0221235d0147856054d4381ab111ecacdb18a4e1c9",
+    "eventCount": 8
    },
    "sourceEventIds": [
     "script-event:sha256:8757aa7d3e3371dd8d7ee00f76dbbb5dc4c2264c4e8549464607bad78e30e20c",
-    "script-event:sha256:ce68e194f1d1e49f543c8c71626ce6782edc7b13f5fb4782c1bd927fc66e46c4"
+    "script-event:sha256:ce68e194f1d1e49f543c8c71626ce6782edc7b13f5fb4782c1bd927fc66e46c4",
+    "script-event:sha256:6760b6e99086683b3dcfdc7090bdb6ce56ee6468256e7ebec5414a6787b119f5",
+    "script-event:sha256:4eb6ae042b3556e6e7fe534a7aa20d3765438a437b677eb520f0b690f5fb3832",
+    "script-event:sha256:461e7fb0d890aa3ba55f6ba967ff8bf417a333d95159828f6469e1de3962681b",
+    "script-event:sha256:72b4f80fd3983b64f25c1f3b0e8d4de16d5c3cbaf15737cf36232a4768a594d4",
+    "script-event:sha256:16ba7a9a6046c517f07f72c93895ffddcf818c24199a8eaa1cf5311d7f77b160",
+    "script-event:sha256:1299af356df21e0651980d0221235d0147856054d4381ab111ecacdb18a4e1c9"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:0630abae4048ccb1e90a8de770cd00aa8923ec1c83e7408e46d8f80e4d6da23d"
+    "dialogue-occurrence:sha256:0630abae4048ccb1e90a8de770cd00aa8923ec1c83e7408e46d8f80e4d6da23d",
+    "dialogue-occurrence:sha256:a0fb2ec16cd32cd173229e82593b453ea4aa5cddf4127adcf56d58ace445f992",
+    "dialogue-occurrence:sha256:4affd4ec277a7e7e21e378a4cdf2cc95efee7fccfadc400702a1d76ac4095d24",
+    "dialogue-occurrence:sha256:c23d09f7b0adc0a73aba06123aa35ac7b132723efe204e243c56d5625ac1c6e4"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -3012,85 +3102,7 @@
        "speaker": "Fuzzby",
        "text": "I meant to do that.",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:0630abae4048ccb1e90a8de770cd00aa8923ec1c83e7408e46d8f80e4d6da23d"
-      }
-     ]
-    },
-    "algorithm": "sha256",
-    "digest": "498b83cd4b8700d4bf0a675eaa2a21c70f6895b416d564dc589290a802d33803"
-   },
-   "location": "CRYSTAL COVE",
-   "time": "STORM BUILDING",
-   "characters": [
-    "Aida",
-    "Fuzzby",
-    "Howey",
-    "Luna",
-    "Misty",
-    "Zenny"
-   ],
-   "storyBeat": "Fuzzby hurtles into the gathered bears and lands in a soggy heap, still trying to claim intention. The gag opens the rescue scene with relief, but nobody’s reaction tells us the emergency is larger than the joke.",
-   "want": "Fuzzby wants to arrive as the heroic messenger.",
-   "need": "He needs the message to matter more than his entrance.",
-   "kidRead": "Fuzzby crashes onto the beach and says he meant it.",
-   "adultRead": "The room’s lack of reaction punctures his cover-up because everyone is already braced for something worse.",
-   "emotionalIntent": "Give one laugh at the threshold of danger, then let urgency take over.",
-   "cuts": [
-    {
-     "n": 1,
-     "sourceEventId": "script-event:sha256:8757aa7d3e3371dd8d7ee00f76dbbb5dc4c2264c4e8549464607bad78e30e20c",
-     "sourceEventIndex": 83,
-     "sourceSceneNumber": 6,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "Dark clouds gather over the cove. The Crystal Bears stand together on the shore. AIDA at the front. HOWEY, MISTY, LUNA and the others nearby. They look out at the sea as the wind moves through the grasses. Fuzzby comes HURTLING in. Too fast. He tries to stop. Fail. He pinballs off a shell, ricochets past Howey, loops around a piece of driftwood and lands in a soggy heap. Beat. One tiny paw lifts."
-    },
-    {
-     "n": 2,
-     "sourceEventId": "script-event:sha256:ce68e194f1d1e49f543c8c71626ce6782edc7b13f5fb4782c1bd927fc66e46c4",
-     "sourceEventIndex": 84,
-     "sourceSceneNumber": 6,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0630abae4048ccb1e90a8de770cd00aa8923ec1c83e7408e46d8f80e4d6da23d",
-     "speaker": "Fuzzby",
-     "exactText": "I meant to do that.",
-     "dialogue": "Fuzzby: I meant to do that.",
-     "action": null
-    }
-   ]
-  },
-  {
-   "sceneNumber": 6,
-   "beatCode": "6.B2",
-   "sourceBeatId": "source-beat:sha256:16b7857deb624b6f755ef49b7612f9dbcfc6ccb6f0b9e82e2ff96174abf73ce2",
-   "sourceEventRange": {
-    "firstEventIndex": 85,
-    "lastEventIndex": 90,
-    "firstEventId": "script-event:sha256:6760b6e99086683b3dcfdc7090bdb6ce56ee6468256e7ebec5414a6787b119f5",
-    "lastEventId": "script-event:sha256:1299af356df21e0651980d0221235d0147856054d4381ab111ecacdb18a4e1c9",
-    "eventCount": 6
-   },
-   "sourceEventIds": [
-    "script-event:sha256:6760b6e99086683b3dcfdc7090bdb6ce56ee6468256e7ebec5414a6787b119f5",
-    "script-event:sha256:4eb6ae042b3556e6e7fe534a7aa20d3765438a437b677eb520f0b690f5fb3832",
-    "script-event:sha256:461e7fb0d890aa3ba55f6ba967ff8bf417a333d95159828f6469e1de3962681b",
-    "script-event:sha256:72b4f80fd3983b64f25c1f3b0e8d4de16d5c3cbaf15737cf36232a4768a594d4",
-    "script-event:sha256:16ba7a9a6046c517f07f72c93895ffddcf818c24199a8eaa1cf5311d7f77b160",
-    "script-event:sha256:1299af356df21e0651980d0221235d0147856054d4381ab111ecacdb18a4e1c9"
-   ],
-   "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:a0fb2ec16cd32cd173229e82593b453ea4aa5cddf4127adcf56d58ace445f992",
-    "dialogue-occurrence:sha256:4affd4ec277a7e7e21e378a4cdf2cc95efee7fccfadc400702a1d76ac4095d24",
-    "dialogue-occurrence:sha256:c23d09f7b0adc0a73aba06123aa35ac7b132723efe204e243c56d5625ac1c6e4"
-   ],
-   "sourceEventSignature": {
-    "kind": "source-beat-events",
-    "schemaVersion": 1,
-    "inputs": {
-     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-     "orderedEvents": [
+      },
       {
        "sourceEventId": "script-event:sha256:6760b6e99086683b3dcfdc7090bdb6ce56ee6468256e7ebec5414a6787b119f5",
        "sourceEventIndex": 85,
@@ -3145,7 +3157,7 @@
      ]
     },
     "algorithm": "sha256",
-    "digest": "16b7857deb624b6f755ef49b7612f9dbcfc6ccb6f0b9e82e2ff96174abf73ce2"
+    "digest": "4158df5ebbe77648aab2f273488e3c732df2e9617487896f4f4a4d326e2b3aa2"
    },
    "location": "CRYSTAL COVE",
    "time": "STORM BUILDING",
@@ -3157,15 +3169,39 @@
     "Misty",
     "Zenny"
    ],
-   "storyBeat": "Fuzzby scrambles up, wild-eyed, but cannot get the words out. Zenny arrives steady and supplies the crucial phrase, completing their double-act under pressure.",
-   "want": "Fuzzby wants to communicate the danger before breath and panic fail him.",
-   "need": "He needs Zenny’s calm as more than a punchline — as partnership.",
-   "kidRead": "Fuzzby is too puffed out to talk, so Zenny says the important part.",
-   "adultRead": "The comic couple’s rhythm becomes functional care: she understands him and finishes the message.",
-   "emotionalIntent": "Keep urgency readable through comedy, showing that relationship itself is a rescue tool.",
+   "storyBeat": "On the stormy shore, the gathered bears receive Fuzzby's emergency through a spectacular crash and Zenny's economical translation.",
+   "want": "Fuzzby wants to deliver the emergency dramatically and successfully.",
+   "need": "He needs Zenny's steadiness and the group's attention more than his own dignity.",
+   "kidRead": "Fuzzby comes flying in, crashes, and Zenny says the important bit.",
+   "adultRead": "Panic scrambles language; partnership turns it back into useful information.",
+   "emotionalIntent": "Comic impact that does not undercut the danger; chaos lands, then clarity lands.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:8757aa7d3e3371dd8d7ee00f76dbbb5dc4c2264c4e8549464607bad78e30e20c",
+     "sourceEventIndex": 83,
+     "sourceSceneNumber": 6,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Dark clouds gather over the cove. The Crystal Bears stand together on the shore. AIDA at the front. HOWEY, MISTY, LUNA and the others nearby. They look out at the sea as the wind moves through the grasses. Fuzzby comes HURTLING in. Too fast. He tries to stop. Fail. He pinballs off a shell, ricochets past Howey, loops around a piece of driftwood and lands in a soggy heap. Beat. One tiny paw lifts."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:ce68e194f1d1e49f543c8c71626ce6782edc7b13f5fb4782c1bd927fc66e46c4",
+     "sourceEventIndex": 84,
+     "sourceSceneNumber": 6,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:0630abae4048ccb1e90a8de770cd00aa8923ec1c83e7408e46d8f80e4d6da23d",
+     "speaker": "Fuzzby",
+     "exactText": "I meant to do that.",
+     "dialogue": "Fuzzby: I meant to do that.",
+     "action": null
+    },
+    {
+     "n": 3,
      "sourceEventId": "script-event:sha256:6760b6e99086683b3dcfdc7090bdb6ce56ee6468256e7ebec5414a6787b119f5",
      "sourceEventIndex": 85,
      "sourceSceneNumber": 6,
@@ -3177,7 +3213,7 @@
      "action": "Nobody reacts. He scrambles up, wild-eyed."
     },
     {
-     "n": 2,
+     "n": 4,
      "sourceEventId": "script-event:sha256:4eb6ae042b3556e6e7fe534a7aa20d3765438a437b677eb520f0b690f5fb3832",
      "sourceEventIndex": 86,
      "sourceSceneNumber": 6,
@@ -3189,7 +3225,7 @@
      "action": null
     },
     {
-     "n": 3,
+     "n": 5,
      "sourceEventId": "script-event:sha256:461e7fb0d890aa3ba55f6ba967ff8bf417a333d95159828f6469e1de3962681b",
      "sourceEventIndex": 87,
      "sourceSceneNumber": 6,
@@ -3201,7 +3237,7 @@
      "action": "He bends over, completely out of breath. Cannot get the words out. Zenny floats in behind him, steady as ever."
     },
     {
-     "n": 4,
+     "n": 6,
      "sourceEventId": "script-event:sha256:72b4f80fd3983b64f25c1f3b0e8d4de16d5c3cbaf15737cf36232a4768a594d4",
      "sourceEventIndex": 88,
      "sourceSceneNumber": 6,
@@ -3213,7 +3249,7 @@
      "action": null
     },
     {
-     "n": 5,
+     "n": 7,
      "sourceEventId": "script-event:sha256:16ba7a9a6046c517f07f72c93895ffddcf818c24199a8eaa1cf5311d7f77b160",
      "sourceEventIndex": 89,
      "sourceSceneNumber": 6,
@@ -3225,7 +3261,7 @@
      "action": "Fuzzby points at her gratefully."
     },
     {
-     "n": 6,
+     "n": 8,
      "sourceEventId": "script-event:sha256:1299af356df21e0651980d0221235d0147856054d4381ab111ecacdb18a4e1c9",
      "sourceEventIndex": 90,
      "sourceSceneNumber": 6,
@@ -3240,7 +3276,7 @@
   },
   {
    "sceneNumber": 6,
-   "beatCode": "6.B3",
+   "beatCode": "6.B2",
    "sourceBeatId": "source-beat:sha256:afe4c5fed61339f32d47d1aab713b63f95d23e95a93fea0b85e1c660ece72650",
    "sourceEventRange": {
     "firstEventIndex": 91,
@@ -3303,12 +3339,12 @@
     "Misty",
     "Zenny"
    ],
-   "storyBeat": "Aida steps to the water’s edge, unmoved by wind, and finds the tiny boat through rain. Her stillness gathers everyone’s concern into a single focused point.",
-   "want": "Aida wants to locate Keen and give the group a clear target.",
-   "need": "She needs to hold the room steady without making the danger smaller than it is.",
-   "kidRead": "Aida sees the little boat out in the storm.",
-   "adultRead": "The elder’s calm is not denial; it is the only frame strong enough to contain communal fear.",
-   "emotionalIntent": "Center the rescue emotionally around Aida’s grounded certainty.",
+   "storyBeat": "Aida steps to the water's edge, stays still against the wind, and locates Keen's tiny boat through the rain.",
+   "want": "Aida wants the group to see the person they are going to help.",
+   "need": "She needs to anchor panic into calm, shared focus.",
+   "kidRead": "Aida sees Keen out in the storm.",
+   "adultRead": "Leadership here is not volume; it is stillness that organizes fear.",
+   "emotionalIntent": "Shift from alarm to collective purpose.",
    "cuts": [
     {
      "n": 1,
@@ -3350,28 +3386,21 @@
   },
   {
    "sceneNumber": 6,
-   "beatCode": "6.B4",
-   "sourceBeatId": "source-beat:sha256:dc6b2fd66eaa746bf735ee668f27b2b02d65f484b1bad8c738c3018f4abae7e9",
+   "beatCode": "6.B3",
+   "sourceBeatId": "source-beat:sha256:6de85a240df409cec043f72277e3ec73a1a4e0acfe46ac66fe97e55a669dbcae",
    "sourceEventRange": {
     "firstEventIndex": 94,
-    "lastEventIndex": 100,
+    "lastEventIndex": 95,
     "firstEventId": "script-event:sha256:cbb67d6b189fd7998e2585a7bef9d9e04dae72ada7124c93e5d2fc4853dcf5b4",
-    "lastEventId": "script-event:sha256:f2eaebbbe73196719e6aaf3e8c79cf9d8deb3c0b6ded62c8c93edd049a7f5022",
-    "eventCount": 7
+    "lastEventId": "script-event:sha256:721a3704132ff2fb9b4eed15d3a6fa98552edcb6ae23222cdb04c1233c9e4add",
+    "eventCount": 2
    },
    "sourceEventIds": [
     "script-event:sha256:cbb67d6b189fd7998e2585a7bef9d9e04dae72ada7124c93e5d2fc4853dcf5b4",
-    "script-event:sha256:721a3704132ff2fb9b4eed15d3a6fa98552edcb6ae23222cdb04c1233c9e4add",
-    "script-event:sha256:700fa14d7aed7001aa95beb8ae105c13b78212a0aae31c2b5e15b79d3a37f924",
-    "script-event:sha256:301cf5f752ced5ef64d44934b625f46abace52899a914f79df29bf8cf5e9b8f4",
-    "script-event:sha256:dfcf3b424329b46c66816d29afb07a7039a3f8356f7d3a83ab570cd7b8285f8d",
-    "script-event:sha256:b98a927100dfd09752a4bcc4fadfd11b2dde4a851a4d5cfedf33f09725a9792d",
-    "script-event:sha256:f2eaebbbe73196719e6aaf3e8c79cf9d8deb3c0b6ded62c8c93edd049a7f5022"
+    "script-event:sha256:721a3704132ff2fb9b4eed15d3a6fa98552edcb6ae23222cdb04c1233c9e4add"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:aeb0b2235b7e0a4747e26770d7981161c2353743b29374ae57f1d7a717209faf",
-    "dialogue-occurrence:sha256:fc7958f0bf65c4396bc5126851bc20e22fa6da8cd6931565fee5e4f7a73f9134",
-    "dialogue-occurrence:sha256:89d1b1574ef53461bcce468fa3be83d4995d444c061c2e71f9d89b9caede0984"
+    "dialogue-occurrence:sha256:aeb0b2235b7e0a4747e26770d7981161c2353743b29374ae57f1d7a717209faf"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -3395,7 +3424,84 @@
        "sourceType": "action",
        "speaker": null,
        "text": "The bears gather closer."
-      },
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "6de85a240df409cec043f72277e3ec73a1a4e0acfe46ac66fe97e55a669dbcae"
+   },
+   "location": "CRYSTAL COVE",
+   "time": "STORM BUILDING",
+   "characters": [
+    "Aida",
+    "Fuzzby",
+    "Howey",
+    "Luna",
+    "Misty",
+    "Zenny"
+   ],
+   "storyBeat": "Aida calls the bears together, and the group closes ranks for the crystal response.",
+   "want": "Aida wants the bears to combine their strengths into a beacon.",
+   "need": "The group needs connection rather than individual heroics to reach Keen.",
+   "kidRead": "The Crystal Bears get ready to use their powers together.",
+   "adultRead": "The rescue begins as a communal act, not a single savior's solution.",
+   "emotionalIntent": "Warm, focused gathering under dark weather.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:cbb67d6b189fd7998e2585a7bef9d9e04dae72ada7124c93e5d2fc4853dcf5b4",
+     "sourceEventIndex": 94,
+     "sourceSceneNumber": 6,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:aeb0b2235b7e0a4747e26770d7981161c2353743b29374ae57f1d7a717209faf",
+     "speaker": "Aida",
+     "exactText": "Everyone — activate your crystal powers.",
+     "dialogue": "Aida: Everyone — activate your crystal powers.",
+     "action": null
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:721a3704132ff2fb9b4eed15d3a6fa98552edcb6ae23222cdb04c1233c9e4add",
+     "sourceEventIndex": 95,
+     "sourceSceneNumber": 6,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "The bears gather closer."
+    }
+   ]
+  },
+  {
+   "sceneNumber": 6,
+   "beatCode": "6.B4",
+   "sourceBeatId": "source-beat:sha256:80810a734f63e86dcb9833a0366426d399735aff69bae40b5d517802294fa9ec",
+   "sourceEventRange": {
+    "firstEventIndex": 96,
+    "lastEventIndex": 101,
+    "firstEventId": "script-event:sha256:700fa14d7aed7001aa95beb8ae105c13b78212a0aae31c2b5e15b79d3a37f924",
+    "lastEventId": "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349",
+    "eventCount": 6
+   },
+   "sourceEventIds": [
+    "script-event:sha256:700fa14d7aed7001aa95beb8ae105c13b78212a0aae31c2b5e15b79d3a37f924",
+    "script-event:sha256:301cf5f752ced5ef64d44934b625f46abace52899a914f79df29bf8cf5e9b8f4",
+    "script-event:sha256:dfcf3b424329b46c66816d29afb07a7039a3f8356f7d3a83ab570cd7b8285f8d",
+    "script-event:sha256:b98a927100dfd09752a4bcc4fadfd11b2dde4a851a4d5cfedf33f09725a9792d",
+    "script-event:sha256:f2eaebbbe73196719e6aaf3e8c79cf9d8deb3c0b6ded62c8c93edd049a7f5022",
+    "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:fc7958f0bf65c4396bc5126851bc20e22fa6da8cd6931565fee5e4f7a73f9134",
+    "dialogue-occurrence:sha256:89d1b1574ef53461bcce468fa3be83d4995d444c061c2e71f9d89b9caede0984"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
       {
        "sourceEventId": "script-event:sha256:700fa14d7aed7001aa95beb8ae105c13b78212a0aae31c2b5e15b79d3a37f924",
        "sourceEventIndex": 96,
@@ -3437,136 +3543,7 @@
        "speaker": "ALL",
        "text": "With love and with light, together unite — Crystal Bears, shine your light!",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:89d1b1574ef53461bcce468fa3be83d4995d444c061c2e71f9d89b9caede0984"
-      }
-     ]
-    },
-    "algorithm": "sha256",
-    "digest": "dc6b2fd66eaa746bf735ee668f27b2b02d65f484b1bad8c738c3018f4abae7e9"
-   },
-   "location": "CRYSTAL COVE",
-   "time": "STORM BUILDING",
-   "characters": [
-    "Aida",
-    "Fuzzby",
-    "Howey",
-    "Luna",
-    "Misty",
-    "Zenny"
-   ],
-   "storyBeat": "Aida turns concern into coordinated action and the bears gather for the Crystal Call. The crystals are not personal fireworks here; they are a communal beacon born from witnessing someone in danger.",
-   "want": "Aida wants everyone to unite their strengths to reach Keen.",
-   "need": "The group needs to act together rather than each trying to solve the storm alone.",
-   "kidRead": "The Crystal Bears use their powers together to help Keen.",
-   "adultRead": "Community becomes visible light; nobody fixes Keen’s fear, but they make sure he is not unseen inside it.",
-   "emotionalIntent": "Build from storm anxiety into sincere collective lift.",
-   "cuts": [
-    {
-     "n": 1,
-     "sourceEventId": "script-event:sha256:cbb67d6b189fd7998e2585a7bef9d9e04dae72ada7124c93e5d2fc4853dcf5b4",
-     "sourceEventIndex": 94,
-     "sourceSceneNumber": 6,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:aeb0b2235b7e0a4747e26770d7981161c2353743b29374ae57f1d7a717209faf",
-     "speaker": "Aida",
-     "exactText": "Everyone — activate your crystal powers.",
-     "dialogue": "Aida: Everyone — activate your crystal powers.",
-     "action": null
-    },
-    {
-     "n": 2,
-     "sourceEventId": "script-event:sha256:721a3704132ff2fb9b4eed15d3a6fa98552edcb6ae23222cdb04c1233c9e4add",
-     "sourceEventIndex": 95,
-     "sourceSceneNumber": 6,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "The bears gather closer."
-    },
-    {
-     "n": 3,
-     "sourceEventId": "script-event:sha256:700fa14d7aed7001aa95beb8ae105c13b78212a0aae31c2b5e15b79d3a37f924",
-     "sourceEventIndex": 96,
-     "sourceSceneNumber": 6,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "CRYSTAL CALL SEQUENCE."
-    },
-    {
-     "n": 4,
-     "sourceEventId": "script-event:sha256:301cf5f752ced5ef64d44934b625f46abace52899a914f79df29bf8cf5e9b8f4",
-     "sourceEventIndex": 97,
-     "sourceSceneNumber": 6,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "Aida touches her pendant."
-    },
-    {
-     "n": 5,
-     "sourceEventId": "script-event:sha256:dfcf3b424329b46c66816d29afb07a7039a3f8356f7d3a83ab570cd7b8285f8d",
-     "sourceEventIndex": 98,
-     "sourceSceneNumber": 6,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fc7958f0bf65c4396bc5126851bc20e22fa6da8cd6931565fee5e4f7a73f9134",
-     "speaker": "Aida",
-     "exactText": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
-     "dialogue": "Aida: With heart open wide, I stand with pride — Rose Quartz, be our guide!",
-     "action": null
-    },
-    {
-     "n": 6,
-     "sourceEventId": "script-event:sha256:b98a927100dfd09752a4bcc4fadfd11b2dde4a851a4d5cfedf33f09725a9792d",
-     "sourceEventIndex": 99,
-     "sourceSceneNumber": 6,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "Her ROSE QUARTZ glows warmly. The other Crystal Bears touch their crystals one by one. A pulse of color from each. Misty’s crystal glows. Luna’s. Howey’s. Together the bears speak as one."
-    },
-    {
-     "n": 7,
-     "sourceEventId": "script-event:sha256:f2eaebbbe73196719e6aaf3e8c79cf9d8deb3c0b6ded62c8c93edd049a7f5022",
-     "sourceEventIndex": 100,
-     "sourceSceneNumber": 6,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:89d1b1574ef53461bcce468fa3be83d4995d444c061c2e71f9d89b9caede0984",
-     "speaker": "ALL",
-     "exactText": "With love and with light, together unite — Crystal Bears, shine your light!",
-     "dialogue": "ALL: With love and with light, together unite — Crystal Bears, shine your light!",
-     "action": null
-    }
-   ]
-  },
-  {
-   "sceneNumber": 6,
-   "beatCode": "6.B5",
-   "sourceBeatId": "source-beat:sha256:1e9ca5ba66bcac4fba2727eb8ad7152ac5ea0f9581188f12e1c7c6350ccb7a0a",
-   "sourceEventRange": {
-    "firstEventIndex": 101,
-    "lastEventIndex": 101,
-    "firstEventId": "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349",
-    "lastEventId": "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349",
-    "eventCount": 1
-   },
-   "sourceEventIds": [
-    "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349"
-   ],
-   "dialogueOccurrenceIds": [],
-   "sourceEventSignature": {
-    "kind": "source-beat-events",
-    "schemaVersion": 1,
-    "inputs": {
-     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-     "orderedEvents": [
+      },
       {
        "sourceEventId": "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349",
        "sourceEventIndex": 101,
@@ -3578,7 +3555,7 @@
      ]
     },
     "algorithm": "sha256",
-    "digest": "1e9ca5ba66bcac4fba2727eb8ad7152ac5ea0f9581188f12e1c7c6350ccb7a0a"
+    "digest": "80810a734f63e86dcb9833a0366426d399735aff69bae40b5d517802294fa9ec"
    },
    "location": "CRYSTAL COVE",
    "time": "STORM BUILDING",
@@ -3590,15 +3567,75 @@
     "Misty",
     "Zenny"
    ],
-   "storyBeat": "The combined light shoots across the storm-dark sea like a beacon. The group’s connection becomes a physical path through rain, handing the next scene hope rather than rescue completed.",
-   "want": "The bears want their light to reach Keen across distance and weather.",
-   "need": "They need to trust that support can guide without taking the brave act away from him.",
-   "kidRead": "A huge crystal beam shines through the storm toward Keen.",
-   "adultRead": "The family on shore cannot do the dangerous choice for him, but they can make loneliness less total.",
-   "emotionalIntent": "End the scene on hope cutting through darkness, not yet safety.",
+   "storyBeat": "The crystal call sequence turns the group's care into light: Aida's Rose Quartz leads, the other crystals answer, and the combined glow shoots across the storm as a beacon.",
+   "want": "The bears want their light to reach Keen through the rain.",
+   "need": "They need to make belonging visible before he knows them.",
+   "kidRead": "The bears say their crystal words and make a bright rescue beam.",
+   "adultRead": "A stranger is already being claimed by a family he has not met.",
+   "emotionalIntent": "Earned wonder; magic as connection, not spectacle alone.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:700fa14d7aed7001aa95beb8ae105c13b78212a0aae31c2b5e15b79d3a37f924",
+     "sourceEventIndex": 96,
+     "sourceSceneNumber": 6,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "CRYSTAL CALL SEQUENCE."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:301cf5f752ced5ef64d44934b625f46abace52899a914f79df29bf8cf5e9b8f4",
+     "sourceEventIndex": 97,
+     "sourceSceneNumber": 6,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Aida touches her pendant."
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:dfcf3b424329b46c66816d29afb07a7039a3f8356f7d3a83ab570cd7b8285f8d",
+     "sourceEventIndex": 98,
+     "sourceSceneNumber": 6,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fc7958f0bf65c4396bc5126851bc20e22fa6da8cd6931565fee5e4f7a73f9134",
+     "speaker": "Aida",
+     "exactText": "With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+     "dialogue": "Aida: With heart open wide, I stand with pride — Rose Quartz, be our guide!",
+     "action": null
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:b98a927100dfd09752a4bcc4fadfd11b2dde4a851a4d5cfedf33f09725a9792d",
+     "sourceEventIndex": 99,
+     "sourceSceneNumber": 6,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Her ROSE QUARTZ glows warmly. The other Crystal Bears touch their crystals one by one. A pulse of color from each. Misty’s crystal glows. Luna’s. Howey’s. Together the bears speak as one."
+    },
+    {
+     "n": 5,
+     "sourceEventId": "script-event:sha256:f2eaebbbe73196719e6aaf3e8c79cf9d8deb3c0b6ded62c8c93edd049a7f5022",
+     "sourceEventIndex": 100,
+     "sourceSceneNumber": 6,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:89d1b1574ef53461bcce468fa3be83d4995d444c061c2e71f9d89b9caede0984",
+     "speaker": "ALL",
+     "exactText": "With love and with light, together unite — Crystal Bears, shine your light!",
+     "dialogue": "ALL: With love and with light, together unite — Crystal Bears, shine your light!",
+     "action": null
+    },
+    {
+     "n": 6,
      "sourceEventId": "script-event:sha256:a6e954fc062d8ef1e6c05d7f15bd60559a210ac4116a94330a457ff4136d6349",
      "sourceEventIndex": 101,
      "sourceSceneNumber": 6,
@@ -3668,12 +3705,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Keen sees the crystal beam and his face lifts. For one breath, the storm contains a sign that someone out there is trying to reach him.",
-   "want": "Keen wants to understand the strange light and follow hope.",
-   "need": "He needs to feel accompanied before he knows by whom.",
-   "kidRead": "A magic light appears and Keen feels hopeful.",
-   "adultRead": "Support arrives as a signal, not a solution — a child still has to choose what to do next.",
-   "emotionalIntent": "Open the climax with a sharp inhale of hope.",
+   "storyBeat": "The beacon reaches Keen and lifts his face with hope, but the hope is instantly challenged when Squeaky cries out below.",
+   "want": "Keen wants to understand the light and believe rescue is possible.",
+   "need": "He needs to turn from being rescued to rescuing someone else.",
+   "kidRead": "Keen sees the bright light, then hears Squeaky in trouble.",
+   "adultRead": "The story refuses passive rescue; hope becomes responsibility.",
+   "emotionalIntent": "A bright inhale that flips immediately into alarm.",
    "cuts": [
     {
      "n": 1,
@@ -3787,12 +3824,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Squeaky’s cry yanks Keen from hope into immediate danger. The dolphin is trapped and being dragged under; the boat bucks, rain lashes, and Keen looks from storm to friend with no hesitation before diving in.",
-   "want": "Keen wants to save Squeaky now.",
-   "need": "He needs to act from care before he can evaluate whether he feels ready.",
-   "kidRead": "Squeaky is stuck, so Keen jumps in to help him.",
-   "adultRead": "The origin of his courage is selfless urgency: he does not feel fearless, he simply cannot leave his friend.",
-   "emotionalIntent": "Make the leap decisive but preceded by real danger, so courage is visible as action through fear.",
+   "storyBeat": "Keen sees Squeaky trapped by the drift net, registers the storm and the bucking boat, and dives with no hesitation.",
+   "want": "Keen wants to get to Squeaky before the net drags him under.",
+   "need": "He needs to act through danger for someone else, not to look brave.",
+   "kidRead": "Squeaky is stuck, and Keen jumps in to save him.",
+   "adultRead": "The fear shot is compressed by urgency: his choice reveals the courage he was trying to perform earlier.",
+   "emotionalIntent": "Selfless ignition; the brave act begins before any crystal reward.",
    "cuts": [
     {
      "n": 1,
@@ -3933,12 +3970,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "On shore, the bears register the shock of Keen’s dive. Howey’s disbelief and Aida’s quiet certainty frame the act for the audience: he did not think twice because his heart moved first.",
-   "want": "The bears want to understand whether Keen can survive what he just chose.",
-   "need": "They need to witness his courage without taking ownership of it.",
-   "kidRead": "Everyone on shore sees that Keen jumped in and is amazed.",
-   "adultRead": "The community recognizes a brave act in real time, before the child himself can name it.",
-   "emotionalIntent": "Let awe replace panic for a beat, while the danger remains unresolved.",
+   "storyBeat": "From shore, the bears witness Keen's impossible dive; Howey blurts the shock while Aida recognizes the meaning of the act.",
+   "want": "The bears want to know whether Keen can survive what he just chose.",
+   "need": "They need to witness courage rather than define it for him.",
+   "kidRead": "Everyone on shore is amazed that Keen jumped in.",
+   "adultRead": "Aida sees the inner truth before the ceremony; the group is watching an origin happen.",
+   "emotionalIntent": "Awe and concern held together.",
    "cuts": [
     {
      "n": 1,
@@ -4056,12 +4093,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Underwater, the world becomes muffled and cold. Keen reaches Squeaky and fights the net, but the current shoves them sideways and the first pulls fail; the physical world resists every good intention.",
-   "want": "Keen wants to free Squeaky from the net by sheer effort.",
-   "need": "He needs to find steadiness deeper than panic or force.",
-   "kidRead": "Keen pulls on the net, but it is stuck and the water pushes him around.",
-   "adultRead": "Love gets him into the water; courage now has to become persistence under failure.",
-   "emotionalIntent": "Compress the audience into the underwater struggle, making effort and helplessness tangible.",
+   "storyBeat": "Underwater, the world goes muffled and cold as Keen reaches Squeaky, pulls at the tight net, slips in the current, and refuses to let go.",
+   "want": "Keen wants to free Squeaky by force and persistence.",
+   "need": "He needs more than panic-strength; he needs to center himself in the fear.",
+   "kidRead": "Keen swims hard and pulls but the net won't come loose.",
+   "adultRead": "The rescue is effortful and frightening; bravery does not make the obstacle easy.",
+   "emotionalIntent": "Strain, breathlessness, and the pressure of time.",
    "cuts": [
     {
      "n": 1,
@@ -4104,20 +4141,24 @@
   {
    "sceneNumber": 7,
    "beatCode": "7.B5",
-   "sourceBeatId": "source-beat:sha256:2f69ab622cb9d951a412137bcd5eccb3b7fe72c31dd1267ee40049cc3eb05446",
+   "sourceBeatId": "source-beat:sha256:d28b2fdabde4850c0e6ede5685e4cd12f0f2e1d634ce517b68abf7b5720fdb2f",
    "sourceEventRange": {
     "firstEventIndex": 116,
-    "lastEventIndex": 117,
+    "lastEventIndex": 120,
     "firstEventId": "script-event:sha256:8a38b45ac1ccf53c14e991643700fa16903e563a4650b4b8487cd1aef30fa4bf",
-    "lastEventId": "script-event:sha256:d4fda1136795a1cb0aa5551f66e22cd9b3eb12cdff29d1bfa5f899410d61b740",
-    "eventCount": 2
+    "lastEventId": "script-event:sha256:1ce3251f5077d547685cf7b3ccc4caadc7c47b5c555bbafed128e777e618522f",
+    "eventCount": 5
    },
    "sourceEventIds": [
     "script-event:sha256:8a38b45ac1ccf53c14e991643700fa16903e563a4650b4b8487cd1aef30fa4bf",
-    "script-event:sha256:d4fda1136795a1cb0aa5551f66e22cd9b3eb12cdff29d1bfa5f899410d61b740"
+    "script-event:sha256:d4fda1136795a1cb0aa5551f66e22cd9b3eb12cdff29d1bfa5f899410d61b740",
+    "script-event:sha256:19438f1cf8ed4413d566a00e8712d2abd4bec934904417eae2a8749f8b28a682",
+    "script-event:sha256:6ec884628960754bf6d05d921328bfb26124303cce857fbabda34bb500454433",
+    "script-event:sha256:1ce3251f5077d547685cf7b3ccc4caadc7c47b5c555bbafed128e777e618522f"
    ],
    "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:dd8605b7384d9d780376c663fc664ab83e318d8fe7d19e9ac019adbdc872147e"
+    "dialogue-occurrence:sha256:dd8605b7384d9d780376c663fc664ab83e318d8fe7d19e9ac019adbdc872147e",
+    "dialogue-occurrence:sha256:eae799ee1e6dba0dedeff62f244b18e06305c0f28d2a39635df19b20d3e142f8"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -4141,81 +4182,7 @@
        "speaker": "Keen",
        "text": "I’ve got this… I’ve got this…",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:dd8605b7384d9d780376c663fc664ab83e318d8fe7d19e9ac019adbdc872147e"
-      }
-     ]
-    },
-    "algorithm": "sha256",
-    "digest": "2f69ab622cb9d951a412137bcd5eccb3b7fe72c31dd1267ee40049cc3eb05446"
-   },
-   "location": "OUT AT SEA",
-   "time": "STORM",
-   "characters": [
-    "Aida",
-    "Fuzzby",
-    "Howey",
-    "Keen",
-    "Misty",
-    "Squeaky",
-    "Sunny"
-   ],
-   "storyBeat": "At the nadir, Keen is running out of strength. In the episode’s charged wordless held beat, he sees his father’s vacant wristbands and the faint glow beginning inside them — courage from within, before any crystal is awarded. Then he plants against the rock and centers himself.",
-   "want": "Keen wants one more way to help when pulling has not worked.",
-   "need": "He needs to feel that he is not empty just because he is afraid and exhausted.",
-   "kidRead": "His special wristbands start to glow softly, and he gets ready to pull again.",
-   "adultRead": "The father’s memory, Mum’s trust and Keen’s own choice meet without explanation; the object finally answers the need it was given for.",
-   "emotionalIntent": "Hold longer than comfortable in silence and let the crystal-heart truth carry the turn.",
-   "cuts": [
-    {
-     "n": 1,
-     "sourceEventId": "script-event:sha256:8a38b45ac1ccf53c14e991643700fa16903e563a4650b4b8487cd1aef30fa4bf",
-     "sourceEventIndex": 116,
-     "sourceSceneNumber": 7,
-     "sourceType": "action",
-     "dialogueOccurrenceId": null,
-     "speaker": null,
-     "exactText": null,
-     "dialogue": null,
-     "action": "Squeaky thrashes weakly. Keen pulls again. Still nothing. His eyes flick upward toward the churning light above. He is running out of strength. A beat. Keen sees his father’s wristbands on his arms. A faint glow begins inside them. Soft. Steady. He plants his feet against a submerged rock. Centers himself."
-    },
-    {
-     "n": 2,
-     "sourceEventId": "script-event:sha256:d4fda1136795a1cb0aa5551f66e22cd9b3eb12cdff29d1bfa5f899410d61b740",
-     "sourceEventIndex": 117,
-     "sourceSceneNumber": 7,
-     "sourceType": "dialogue",
-     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dd8605b7384d9d780376c663fc664ab83e318d8fe7d19e9ac019adbdc872147e",
-     "speaker": "Keen",
-     "exactText": "I’ve got this… I’ve got this…",
-     "dialogue": "Keen: I’ve got this… I’ve got this…",
-     "action": null
-    }
-   ]
-  },
-  {
-   "sceneNumber": 7,
-   "beatCode": "7.B6",
-   "sourceBeatId": "source-beat:sha256:bc871d2ea000451b0fa9aa33304c12a92d34757cce3092c4bd25c20d7d5e7dda",
-   "sourceEventRange": {
-    "firstEventIndex": 118,
-    "lastEventIndex": 120,
-    "firstEventId": "script-event:sha256:19438f1cf8ed4413d566a00e8712d2abd4bec934904417eae2a8749f8b28a682",
-    "lastEventId": "script-event:sha256:1ce3251f5077d547685cf7b3ccc4caadc7c47b5c555bbafed128e777e618522f",
-    "eventCount": 3
-   },
-   "sourceEventIds": [
-    "script-event:sha256:19438f1cf8ed4413d566a00e8712d2abd4bec934904417eae2a8749f8b28a682",
-    "script-event:sha256:6ec884628960754bf6d05d921328bfb26124303cce857fbabda34bb500454433",
-    "script-event:sha256:1ce3251f5077d547685cf7b3ccc4caadc7c47b5c555bbafed128e777e618522f"
-   ],
-   "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:eae799ee1e6dba0dedeff62f244b18e06305c0f28d2a39635df19b20d3e142f8"
-   ],
-   "sourceEventSignature": {
-    "kind": "source-beat-events",
-    "schemaVersion": 1,
-    "inputs": {
-     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-     "orderedEvents": [
+      },
       {
        "sourceEventId": "script-event:sha256:19438f1cf8ed4413d566a00e8712d2abd4bec934904417eae2a8749f8b28a682",
        "sourceEventIndex": 118,
@@ -4244,7 +4211,7 @@
      ]
     },
     "algorithm": "sha256",
-    "digest": "bc871d2ea000451b0fa9aa33304c12a92d34757cce3092c4bd25c20d7d5e7dda"
+    "digest": "d28b2fdabde4850c0e6ede5685e4cd12f0f2e1d634ce517b68abf7b5720fdb2f"
    },
    "location": "OUT AT SEA",
    "time": "STORM",
@@ -4257,15 +4224,39 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Aida watches from shore and speaks the truth the wristbands have just shown: Keen is not alone. The line is not a fix; it is a witness naming the invisible support around his underwater choice.",
-   "want": "Aida wants the group to understand what is happening inside Keen’s act.",
-   "need": "She needs to affirm belonging without interrupting his agency.",
-   "kidRead": "Aida knows Keen has help with him, even underwater.",
-   "adultRead": "The show’s emotional thesis becomes visible: home can be present when the parent is not.",
-   "emotionalIntent": "Let shore and underwater connect emotionally through faith rather than control.",
+   "storyBeat": "At the nadir, Keen is running out of strength; he sees his father's wristbands, their empty recesses glow faintly from within, and he plants himself before repeating the words that now carry real need.",
+   "want": "Keen wants to find one more pull in himself.",
+   "need": "He needs to feel that he is not alone and that courage was inside him before the crystal existed.",
+   "kidRead": "The wristbands start glowing and Keen gets ready to try again.",
+   "adultRead": "The inherited object becomes inner courage, not a magic shortcut; the parent is present in the glow without being there.",
+   "emotionalIntent": "The one held-heart beat: cold, quiet, almost wordless before the final effort.",
    "cuts": [
     {
      "n": 1,
+     "sourceEventId": "script-event:sha256:8a38b45ac1ccf53c14e991643700fa16903e563a4650b4b8487cd1aef30fa4bf",
+     "sourceEventIndex": 116,
+     "sourceSceneNumber": 7,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Squeaky thrashes weakly. Keen pulls again. Still nothing. His eyes flick upward toward the churning light above. He is running out of strength. A beat. Keen sees his father’s wristbands on his arms. A faint glow begins inside them. Soft. Steady. He plants his feet against a submerged rock. Centers himself."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:d4fda1136795a1cb0aa5551f66e22cd9b3eb12cdff29d1bfa5f899410d61b740",
+     "sourceEventIndex": 117,
+     "sourceSceneNumber": 7,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:dd8605b7384d9d780376c663fc664ab83e318d8fe7d19e9ac019adbdc872147e",
+     "speaker": "Keen",
+     "exactText": "I’ve got this… I’ve got this…",
+     "dialogue": "Keen: I’ve got this… I’ve got this…",
+     "action": null
+    },
+    {
+     "n": 3,
      "sourceEventId": "script-event:sha256:19438f1cf8ed4413d566a00e8712d2abd4bec934904417eae2a8749f8b28a682",
      "sourceEventIndex": 118,
      "sourceSceneNumber": 7,
@@ -4277,7 +4268,7 @@
      "action": "SHORE – INTERCUT"
     },
     {
-     "n": 2,
+     "n": 4,
      "sourceEventId": "script-event:sha256:6ec884628960754bf6d05d921328bfb26124303cce857fbabda34bb500454433",
      "sourceEventIndex": 119,
      "sourceSceneNumber": 7,
@@ -4289,7 +4280,7 @@
      "action": "Aida watches with calm certainty."
     },
     {
-     "n": 3,
+     "n": 5,
      "sourceEventId": "script-event:sha256:1ce3251f5077d547685cf7b3ccc4caadc7c47b5c555bbafed128e777e618522f",
      "sourceEventIndex": 120,
      "sourceSceneNumber": 7,
@@ -4304,7 +4295,7 @@
   },
   {
    "sceneNumber": 7,
-   "beatCode": "7.B7",
+   "beatCode": "7.B6",
    "sourceBeatId": "source-beat:sha256:4e724035a0caa17b8a2e448c72bc0c30fa10f3c54c379787489029e5f6bb09fc",
    "sourceEventRange": {
     "firstEventIndex": 121,
@@ -4397,12 +4388,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Keen grips the net as the wristbands brighten and the massive wave gathers overhead. He braces, pulls, strains, and finally tears the net free just as the wave explodes over them.",
+   "storyBeat": "Keen grips the net with both paws as the wristbands brighten, braces against the rock, and pulls against the approaching massive wave until the net finally tears.",
    "want": "Keen wants to free Squeaky before the wave hits.",
-   "need": "He needs to commit fully even when success is not guaranteed.",
-   "kidRead": "Keen pulls super hard, the net snaps, and a huge wave crashes.",
-   "adultRead": "This is courage as expenditure, not glamour: he spends everything he has with no promise he will be safe afterward.",
-   "emotionalIntent": "Deliver the physical climax with maximum clarity: brace, pull, snap, impact.",
+   "need": "He needs to commit everything without knowing he will be safe.",
+   "kidRead": "Keen pulls super hard, the net snaps, and the big wave crashes.",
+   "adultRead": "Courage is costly; success and danger arrive in the same instant.",
+   "emotionalIntent": "Peak exertion and release, with the aqua glow cutting through the darkest water.",
    "cuts": [
     {
      "n": 1,
@@ -4480,7 +4471,7 @@
   },
   {
    "sceneNumber": 7,
-   "beatCode": "7.B8",
+   "beatCode": "7.B7",
    "sourceBeatId": "source-beat:sha256:5f440fcc1581440e585ec48fa05c12577e0842f881eda9bec2433d1602a2cf38",
    "sourceEventRange": {
     "firstEventIndex": 127,
@@ -4555,12 +4546,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Thrown through bubbles and dark water, Keen still reaches emotionally for Squeaky. Then Squeaky returns the rescue, surging beneath him and rocketing them both to air and relief.",
-   "want": "Keen wants Squeaky to stay with him through the chaos.",
-   "need": "He needs to learn that saving and being saved can belong to the same friendship.",
-   "kidRead": "Squeaky helps Keen back up, and they burst out of the water together.",
-   "adultRead": "The rescued friend becomes rescuer, turning bravery from solo heroics into mutual care.",
-   "emotionalIntent": "Release the underwater terror into breath, cough, laughter and gratitude.",
+   "storyBeat": "Thrown through foam and bubbles, Keen reaches for Squeaky, and the rescued dolphin becomes rescuer, carrying him to the surface.",
+   "want": "Keen wants Squeaky to stay with him and reach air.",
+   "need": "He needs to receive help after giving it.",
+   "kidRead": "Squeaky saves Keen back and they burst out of the water.",
+   "adultRead": "The rescue becomes reciprocal; being brave also means grabbing the help offered.",
+   "emotionalIntent": "Relief explosion after suffocation; laughter as oxygen.",
    "cuts": [
     {
      "n": 1,
@@ -4614,7 +4605,7 @@
   },
   {
    "sceneNumber": 7,
-   "beatCode": "7.B9",
+   "beatCode": "7.B8",
    "sourceBeatId": "source-beat:sha256:649ec93a865ff6f2ff9798a1fd2fcbd11dff264542867fb141633989b0c4c018",
    "sourceEventRange": {
     "firstEventIndex": 131,
@@ -4709,12 +4700,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "From shore, the bears see Keen riding Squeaky in over the waves. Awe, relief and loss collide: he is safe and astonishing, but Misty sees that his boat is gone.",
-   "want": "The bears want proof that Keen survived.",
-   "need": "They need to hold both triumph and cost in the same moment.",
-   "kidRead": "Keen comes back riding Squeaky and everyone is amazed, but the boat is gone.",
-   "adultRead": "The victory does not erase the price; the origin story keeps the ache visible.",
-   "emotionalIntent": "Let cheers catch in the throat for a half-second because safety and loss arrive together.",
+   "storyBeat": "From the shore, the bears see Keen riding Squeaky in over the waves; awe spreads through the group, even as Misty notices the boat is gone.",
+   "want": "The group wants confirmation that Keen and Squeaky survived.",
+   "need": "They need to hold joy and cost in the same frame.",
+   "kidRead": "Keen rides the dolphin back like a hero, but the boat is gone.",
+   "adultRead": "The rescue is triumphant but not costless; the story refuses to reset the storm's damage.",
+   "emotionalIntent": "Awe with a visible trace of loss.",
    "cuts": [
     {
      "n": 1,
@@ -4792,7 +4783,7 @@
   },
   {
    "sceneNumber": 7,
-   "beatCode": "7.B10",
+   "beatCode": "7.B9",
    "sourceBeatId": "source-beat:sha256:d48dde891654ab42d29426e1d0579fd56900855f1845c84d2ed4ead415f586f6",
    "sourceEventRange": {
     "firstEventIndex": 137,
@@ -4856,12 +4847,12 @@
     "Squeaky",
     "Sunny"
    ],
-   "storyBeat": "Keen bounces over a wave like a tiny cowboy and yells with pure release. Even in the storm, everyone smiles; the danger has not vanished, but the emotional weather has turned.",
-   "want": "Keen wants to ride the relief instead of collapsing under what just happened.",
-   "need": "He needs laughter to let the fear leave his body.",
-   "kidRead": "Keen rides the dolphin like a cowboy and everyone smiles.",
-   "adultRead": "The child converts trauma into play for a moment, and the community lets him because the joy is real and earned.",
-   "emotionalIntent": "Give the climax its laugh-out-loud release without pretending the storm cost nothing.",
+   "storyBeat": "Keen bounces over a wave like a tiny cowboy, yelling with pure release, and everyone smiles despite the storm.",
+   "want": "Keen wants to celebrate being alive and having saved his friend.",
+   "need": "He needs joy after fear, not denial of fear.",
+   "kidRead": "Keen rides the wave and shouts happily.",
+   "adultRead": "The child gets a comic victory image after a genuinely frightening choice.",
+   "emotionalIntent": "Big release, playful hero image, storm still present but no longer ruling the frame.",
    "cuts": [
     {
      "n": 1,
@@ -4979,12 +4970,12 @@
     "Sunny",
     "Zenny"
    ],
-   "storyBeat": "Squeaky brings Keen into the shallows, and Keen stumbles onto sand soaked, laughing and breathless. Howey steadies him instinctively and the bears form a warm circle; the stranger is physically caught before he is socially introduced.",
-   "want": "Keen wants to arrive upright and make sense of the faces around him.",
-   "need": "He needs to be held by the new community before he has to perform for them.",
-   "kidRead": "Keen gets off Squeaky, wobbles, and the bears help him.",
-   "adultRead": "Belonging begins as a hand catching a shaking body, not as a speech of welcome.",
-   "emotionalIntent": "Turn rescue into first contact, softening adrenaline into safety.",
+   "storyBeat": "Squeaky glides into the shallows and Keen stumbles onto the sand soaked, laughing, and wobbly; Howey steadies him as the bears gather gently around.",
+   "want": "Keen wants to land lightly and make sense of all the new faces.",
+   "need": "He needs to be physically and emotionally held after the rescue.",
+   "kidRead": "Keen gets off the dolphin, almost falls, and the bears help him.",
+   "adultRead": "The hero is still a soaked child who needs a steadying paw.",
+   "emotionalIntent": "Soft landing after climax; belonging begins as someone catching your wobble.",
    "cuts": [
     {
      "n": 1,
@@ -5154,12 +5145,12 @@
     "Sunny",
     "Zenny"
    ],
-   "storyBeat": "Fuzzby rockets into Keen’s personal space, turning awe into a comic interrogation. Keen’s uncertain answer and Fuzzby’s legend-discovery reaction show that Keen is already larger in their eyes than he feels in his own body.",
-   "want": "Fuzzby wants to confirm that he has met a living legend.",
-   "need": "Keen needs space to arrive as himself, not just as the brave story everyone saw.",
-   "kidRead": "Fuzzby gets way too excited about Keen riding a dolphin into a storm.",
-   "adultRead": "The rescued child is immediately mythologized, and Zenny’s job is to protect the person from the story.",
-   "emotionalIntent": "Use comedy to release group awe while keeping Keen’s overwhelm gentle and readable.",
+   "storyBeat": "Fuzzby invades Keen's space with breathless hero worship, Keen can only answer uncertainly, and Zenny gently pulls Fuzzby back to give the newcomer room.",
+   "want": "Fuzzby wants to crown Keen a legend immediately.",
+   "need": "Keen needs space to arrive as himself, not only as the story others tell about him.",
+   "kidRead": "Fuzzby gets too close because he is so impressed, and Zenny pulls him back.",
+   "adultRead": "Admiration can overwhelm; kindness sometimes means making space around someone after a big event.",
+   "emotionalIntent": "Comic decompression with genuine care underneath.",
    "cuts": [
     {
      "n": 1,
@@ -5337,12 +5328,12 @@
     "Sunny",
     "Zenny"
    ],
-   "storyBeat": "The group welcomes Keen and names themselves. Keen takes in glowing crystals, warm faces and the sheltered beach — the world he sailed toward becomes emotionally real.",
-   "want": "The bears want Keen to know where he is and that he is welcome.",
-   "need": "Keen needs to feel wonder without having to prove anything else.",
+   "storyBeat": "The bears welcome Keen to Crystal Cove, and he takes in the glowing crystals, warm faces, and sheltered beach as a new home begins to form around him.",
+   "want": "The group wants Keen to know who they are and that he is welcome.",
+   "need": "Keen needs to feel found rather than merely rescued.",
    "kidRead": "Everyone says welcome, and Keen sees the magical cove.",
-   "adultRead": "After being lost in grey water, he receives a place with faces, warmth and a name.",
-   "emotionalIntent": "Let the welcome feel broad and bright but still tender from the rescue.",
+   "adultRead": "The lost child is not just safe; he is being received by a community.",
+   "emotionalIntent": "Wonder and belonging widening around him.",
    "cuts": [
     {
      "n": 1,
@@ -5501,12 +5492,12 @@
     "Sunny",
     "Zenny"
    ],
-   "storyBeat": "Aida quietly sends Squeaky with a message home to Mum. Keen realizes that the bears have thought of the person he left behind, and his gratitude is small because the feeling is large.",
-   "want": "Aida wants Keen’s Mum to know he is safe and Keen to feel that home is still connected.",
-   "need": "Keen needs his new belonging not to require abandoning the old one.",
-   "kidRead": "Aida asks Squeaky to tell Keen’s Mum he is okay, and Keen says thank you.",
-   "adultRead": "The elder completes the parent-child thread by caring for the mother’s fear as well as the child’s safety.",
-   "emotionalIntent": "Touch the ache of Mum’s absence, then release it softly through gratitude.",
+   "storyBeat": "Aida sends Squeaky with a message home to Mum; Keen watches his dolphin friend go, understands the kindness, and thanks Aida softly.",
+   "want": "Aida wants Keen's Mum to know he is safe.",
+   "need": "Keen needs the new family to honor the old one, not replace it.",
+   "kidRead": "Aida sends Squeaky to tell Mum Keen is okay.",
+   "adultRead": "The elder completes the parent's held worry without making the child carry it alone.",
+   "emotionalIntent": "Gentle gratitude; connection stretches back across the sea.",
    "cuts": [
     {
      "n": 1,
@@ -5650,12 +5641,12 @@
     "Luna",
     "Misty"
    ],
-   "storyBeat": "After the storm, the gathered circle glows clean and fresh. Aida and Keen stand at the center, and she names what the audience has watched: he followed his heart and chose courage.",
-   "want": "Aida wants to mark Keen’s act truthfully in front of the family.",
-   "need": "Keen needs his courage witnessed as a choice, not a lucky accident.",
-   "kidRead": "Everyone gathers, and Aida says Keen chose courage.",
-   "adultRead": "Ceremony gives language to what the body already proved, without taking the proof away from him.",
-   "emotionalIntent": "Shift from rescue aftermath into earned recognition.",
+   "storyBeat": "After the storm, the washed-clean circle gathers around Aida and Keen; she names the courage he chose while his father's wristbands remain visibly empty.",
+   "want": "Aida wants to recognize what Keen has already earned.",
+   "need": "Keen needs the truth of his act witnessed before any magical reward appears.",
+   "kidRead": "Everyone gathers after the storm, and Aida says Keen was brave.",
+   "adultRead": "The ceremony validates the inner change before externalizing it in crystal.",
+   "emotionalIntent": "Fresh, ceremonial calm; the storm's cost still glistens on leaves.",
    "cuts": [
     {
      "n": 1,
@@ -5739,12 +5730,12 @@
     "Luna",
     "Misty"
    ],
-   "storyBeat": "Aquamarine light appears, splits into two gems, and settles perfectly into the vacant wristbands. The object from Mum becomes the vessel for Keen’s earned crystal; his wonder and Call make the inner courage visible at last.",
-   "want": "Keen wants to understand and receive what is happening to him.",
-   "need": "He needs to feel that the power is recognition of what he already did, not a replacement for it.",
-   "kidRead": "A blue crystal splits and fills his wristbands with glowing gems.",
-   "adultRead": "The inheritance and the self-made act fuse: family gave him the bands, but his choice filled them.",
-   "emotionalIntent": "Make the transformation awe-filled and deeply earned, not a generic power-up.",
+   "storyBeat": "Aquamarine light forms between them, splits into two gems, and settles into the vacant wristbands; Keen's first crystal call follows the installation as wonder becomes identity.",
+   "want": "Keen wants to understand the new light in his wrists.",
+   "need": "He needs to accept that the courage was his and the crystal only makes it visible.",
+   "kidRead": "A blue crystal appears, splits, and goes into his wristbands.",
+   "adultRead": "The heirloom from his father becomes the vessel for the strength he earned himself.",
+   "emotionalIntent": "Origin awe; the empty spaces fill without erasing where they came from.",
    "cuts": [
     {
      "n": 1,
@@ -5837,12 +5828,12 @@
     "Luna",
     "Misty"
    ],
-   "storyBeat": "The glow settles, Fuzzby claps too early and covers it, and the group swamps Keen in a hug. Aida echoes Mum’s promise in found-family form, and Keen’s full smile lands because he is no longer lost and no longer alone.",
-   "want": "The group wants to celebrate and claim Keen as one of them.",
-   "need": "Keen needs to let himself be embraced rather than staying the lone brave sailor.",
-   "kidRead": "Everyone hugs Keen and he smiles like he is home.",
-   "adultRead": "Mum’s goodbye line returns from a new mouth, proving that letting go did not leave him unheld.",
-   "emotionalIntent": "Land the belonging payoff with laughter inside the hug and a homecoming smile as the emotional seal.",
+   "storyBeat": "The group celebrates too eagerly, Fuzzby mistimes his clap, and the bears swamp Keen in a hug; Aida echoes Mum's promise, and Keen's smile becomes full homecoming.",
+   "want": "The Crystal Bears want Keen to feel fully claimed as family.",
+   "need": "Keen needs to let himself melt into being held rather than stand apart as a solo hero.",
+   "kidRead": "Everyone hugs Keen and he is part of the family now.",
+   "adultRead": "Mum's words return through Aida, proving the new belonging extends the old one rather than replacing it.",
+   "emotionalIntent": "Warm flood of connection, with a comic clap releasing sentiment before it lingers too long.",
    "cuts": [
     {
      "n": 1,
@@ -5977,12 +5968,12 @@
     "Keen",
     "Zenny"
    ],
-   "storyBeat": "Golden-hour calm replaces storm pressure as Keen walks with the bears. Fuzzby approaches with grave seriousness, treating honey compatibility as the most important next step in friendship.",
-   "want": "Fuzzby wants to assess whether Keen can join his personal honey-centered universe.",
-   "need": "Keen needs ordinary silliness after extraordinary events.",
-   "kidRead": "Fuzzby asks a very serious question about honey.",
-   "adultRead": "After survival and ceremony, friendship becomes beautifully mundane — the everyday is the proof of safety.",
-   "emotionalIntent": "Open the ripple with relaxed warmth and a comic handoff from epic to domestic.",
+   "storyBeat": "In golden-hour calm, Fuzzby approaches Keen with grave seriousness to ask the most important friendship question he can imagine: honey.",
+   "want": "Fuzzby wants to test whether this new hero can also be his perfect honey friend.",
+   "need": "He needs to invite Keen into ordinary friendship after mythologizing him.",
+   "kidRead": "Fuzzby asks if Keen likes honey like it is very serious.",
+   "adultRead": "After an epic rescue, belonging becomes wonderfully small and domestic.",
+   "emotionalIntent": "Light, absurd intimacy; the episode steps down from ceremony into friendship.",
    "cuts": [
     {
      "n": 1,
@@ -6061,25 +6052,30 @@
   {
    "sceneNumber": 10,
    "beatCode": "10.B2",
-   "sourceBeatId": "source-beat:sha256:9dd843608418ed8d76ba1799630a64e48e0b558ad9ea7370073333006a070c69",
+   "sourceBeatId": "source-beat:sha256:c5b042fa1a7e88d435f23ffdfa113a37f2233364cddf966af2dbe062f49ca875",
    "sourceEventRange": {
     "firstEventIndex": 176,
-    "lastEventIndex": 180,
+    "lastEventIndex": 183,
     "firstEventId": "script-event:sha256:fc3a8371cfcf95c06c91055bc0f9dc7e0341c67c90b932f8004b28afc301e58f",
-    "lastEventId": "script-event:sha256:9b08df2ff3726584e0c2b27a5fd8710654250b9cdda0029e765b386bbcdbbf23",
-    "eventCount": 5
+    "lastEventId": "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3",
+    "eventCount": 8
    },
    "sourceEventIds": [
     "script-event:sha256:fc3a8371cfcf95c06c91055bc0f9dc7e0341c67c90b932f8004b28afc301e58f",
     "script-event:sha256:8202b06db2dda942b03be315bfe9f863779d1c7974cac45c3a9690e3b5e9d478",
     "script-event:sha256:ca827d5a37b378b221f9c6c433a96f9b23fc82964a7ef323b3a4715eab5ec3b1",
     "script-event:sha256:22714ace9a88751f65a3a76283e128ad91f924d9140f7731b2f02f9a65da12f4",
-    "script-event:sha256:9b08df2ff3726584e0c2b27a5fd8710654250b9cdda0029e765b386bbcdbbf23"
+    "script-event:sha256:9b08df2ff3726584e0c2b27a5fd8710654250b9cdda0029e765b386bbcdbbf23",
+    "script-event:sha256:4a256516225f253304a7fe0b487c440b78f71396063402984b8ba5708097e99a",
+    "script-event:sha256:6ab6184aba5e5a4110dc6cd2dd5268731230fb0fbe8c215c4bebfe2383d07758",
+    "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3"
    ],
    "dialogueOccurrenceIds": [
     "dialogue-occurrence:sha256:3490342d0e9f40bb7ee16dc55dbd0e4c28531d5488d45288c2a59ad4c7cd36e1",
     "dialogue-occurrence:sha256:97c1c9b218e54ed0698478e37013d397ddb7146065524dbb2a0d83073cd00a1d",
-    "dialogue-occurrence:sha256:02ce7c38f70711db2e8d64ad8e56d0a4a00403717b1fa25785e82e7cbb5a33d9"
+    "dialogue-occurrence:sha256:02ce7c38f70711db2e8d64ad8e56d0a4a00403717b1fa25785e82e7cbb5a33d9",
+    "dialogue-occurrence:sha256:8723b195898ee782899717f7bbaaf9eb407beb038b712f17db2500cbf9841e9a",
+    "dialogue-occurrence:sha256:4e069ec6701d6aaae934a89c98f9757f5dbf543302b52c5876b363668e46c1c1"
    ],
    "sourceEventSignature": {
     "kind": "source-beat-events",
@@ -6129,11 +6125,37 @@
        "speaker": "Fuzzby",
        "text": "Honey cakes, honey snacks, honey naps, honey leaf drizzles, emergency honey—",
        "dialogueOccurrenceId": "dialogue-occurrence:sha256:02ce7c38f70711db2e8d64ad8e56d0a4a00403717b1fa25785e82e7cbb5a33d9"
+      },
+      {
+       "sourceEventId": "script-event:sha256:4a256516225f253304a7fe0b487c440b78f71396063402984b8ba5708097e99a",
+       "sourceEventIndex": 181,
+       "sourceSceneNumber": 10,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Zenny gently catches one of his legs and pulls him back."
+      },
+      {
+       "sourceEventId": "script-event:sha256:6ab6184aba5e5a4110dc6cd2dd5268731230fb0fbe8c215c4bebfe2383d07758",
+       "sourceEventIndex": 182,
+       "sourceSceneNumber": 10,
+       "sourceType": "dialogue",
+       "speaker": "Zenny",
+       "text": "One thing at a time.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:8723b195898ee782899717f7bbaaf9eb407beb038b712f17db2500cbf9841e9a"
+      },
+      {
+       "sourceEventId": "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3",
+       "sourceEventIndex": 183,
+       "sourceSceneNumber": 10,
+       "sourceType": "dialogue",
+       "speaker": "Fuzzby",
+       "text": "I have waited my whole life for this friendship!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:4e069ec6701d6aaae934a89c98f9757f5dbf543302b52c5876b363668e46c1c1"
       }
      ]
     },
     "algorithm": "sha256",
-    "digest": "9dd843608418ed8d76ba1799630a64e48e0b558ad9ea7370073333006a070c69"
+    "digest": "c5b042fa1a7e88d435f23ffdfa113a37f2233364cddf966af2dbe062f49ca875"
    },
    "location": "CRYSTAL COVE BEACH",
    "time": "CONTINUOUS",
@@ -6142,12 +6164,12 @@
     "Keen",
     "Zenny"
    ],
-   "storyBeat": "Keen’s hesitant approval of honey detonates Fuzzby’s delight. The bee spins possibility into an overstuffed friendship future, and Zenny’s warning arrives because she knows exactly where this is headed.",
-   "want": "Fuzzby wants to convert Keen’s honey preference into instant lifelong best-friend status.",
-   "need": "He needs to pace affection so Keen can actually receive it.",
-   "kidRead": "Fuzzby gets wildly excited because Keen likes honey.",
-   "adultRead": "A new friendship is being claimed with comic excess; the love is real, the dosage is absurd.",
-   "emotionalIntent": "Let the final laugh bloom from Fuzzby’s sincere overcommitment.",
+   "storyBeat": "Keen's hesitant approval sends Fuzzby into ecstatic plans for honey everything, while Zenny reins him in with one steady line and leg-pull.",
+   "want": "Fuzzby wants to fast-forward the entire friendship into honey-fueled excess.",
+   "need": "He needs Zenny's boundary so affection becomes livable, not overwhelming.",
+   "kidRead": "Fuzzby gets super excited about honey snacks and Zenny stops him.",
+   "adultRead": "Found family immediately becomes negotiation: enthusiasm needs someone loving enough to pace it.",
+   "emotionalIntent": "Final comic release from character, not randomness; Zenny's restraint is affection.",
    "cuts": [
     {
      "n": 1,
@@ -6208,82 +6230,9 @@
      "exactText": "Honey cakes, honey snacks, honey naps, honey leaf drizzles, emergency honey—",
      "dialogue": "Fuzzby: Honey cakes, honey snacks, honey naps, honey leaf drizzles, emergency honey—",
      "action": null
-    }
-   ]
-  },
-  {
-   "sceneNumber": 10,
-   "beatCode": "10.B3",
-   "sourceBeatId": "source-beat:sha256:2482d82a14a15e3fb144f5a5bbbe00a6b3140bc805be5260fb333168d31d5a44",
-   "sourceEventRange": {
-    "firstEventIndex": 181,
-    "lastEventIndex": 183,
-    "firstEventId": "script-event:sha256:4a256516225f253304a7fe0b487c440b78f71396063402984b8ba5708097e99a",
-    "lastEventId": "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3",
-    "eventCount": 3
-   },
-   "sourceEventIds": [
-    "script-event:sha256:4a256516225f253304a7fe0b487c440b78f71396063402984b8ba5708097e99a",
-    "script-event:sha256:6ab6184aba5e5a4110dc6cd2dd5268731230fb0fbe8c215c4bebfe2383d07758",
-    "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3"
-   ],
-   "dialogueOccurrenceIds": [
-    "dialogue-occurrence:sha256:8723b195898ee782899717f7bbaaf9eb407beb038b712f17db2500cbf9841e9a",
-    "dialogue-occurrence:sha256:4e069ec6701d6aaae934a89c98f9757f5dbf543302b52c5876b363668e46c1c1"
-   ],
-   "sourceEventSignature": {
-    "kind": "source-beat-events",
-    "schemaVersion": 1,
-    "inputs": {
-     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
-     "orderedEvents": [
-      {
-       "sourceEventId": "script-event:sha256:4a256516225f253304a7fe0b487c440b78f71396063402984b8ba5708097e99a",
-       "sourceEventIndex": 181,
-       "sourceSceneNumber": 10,
-       "sourceType": "action",
-       "speaker": null,
-       "text": "Zenny gently catches one of his legs and pulls him back."
-      },
-      {
-       "sourceEventId": "script-event:sha256:6ab6184aba5e5a4110dc6cd2dd5268731230fb0fbe8c215c4bebfe2383d07758",
-       "sourceEventIndex": 182,
-       "sourceSceneNumber": 10,
-       "sourceType": "dialogue",
-       "speaker": "Zenny",
-       "text": "One thing at a time.",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:8723b195898ee782899717f7bbaaf9eb407beb038b712f17db2500cbf9841e9a"
-      },
-      {
-       "sourceEventId": "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3",
-       "sourceEventIndex": 183,
-       "sourceSceneNumber": 10,
-       "sourceType": "dialogue",
-       "speaker": "Fuzzby",
-       "text": "I have waited my whole life for this friendship!",
-       "dialogueOccurrenceId": "dialogue-occurrence:sha256:4e069ec6701d6aaae934a89c98f9757f5dbf543302b52c5876b363668e46c1c1"
-      }
-     ]
     },
-    "algorithm": "sha256",
-    "digest": "2482d82a14a15e3fb144f5a5bbbe00a6b3140bc805be5260fb333168d31d5a44"
-   },
-   "location": "CRYSTAL COVE BEACH",
-   "time": "CONTINUOUS",
-   "characters": [
-    "Fuzzby",
-    "Keen",
-    "Zenny"
-   ],
-   "storyBeat": "Zenny gently catches Fuzzby by the leg and pulls him back, rationing the friendship to one thing at a time. Her restraint protects both the joke and the newcomer.",
-   "want": "Zenny wants Fuzzby to slow down before he overwhelms Keen.",
-   "need": "She needs to show care through control, not confession.",
-   "kidRead": "Zenny pulls Fuzzby back and tells him to do one thing at a time.",
-   "adultRead": "The straight-bee is managing everyone’s nervous system with one small tug and one dry line.",
-   "emotionalIntent": "Give the comedy its deadpan counterweight and keep the welcome from becoming too much.",
-   "cuts": [
     {
-     "n": 1,
+     "n": 6,
      "sourceEventId": "script-event:sha256:4a256516225f253304a7fe0b487c440b78f71396063402984b8ba5708097e99a",
      "sourceEventIndex": 181,
      "sourceSceneNumber": 10,
@@ -6295,7 +6244,7 @@
      "action": "Zenny gently catches one of his legs and pulls him back."
     },
     {
-     "n": 2,
+     "n": 7,
      "sourceEventId": "script-event:sha256:6ab6184aba5e5a4110dc6cd2dd5268731230fb0fbe8c215c4bebfe2383d07758",
      "sourceEventIndex": 182,
      "sourceSceneNumber": 10,
@@ -6307,7 +6256,7 @@
      "action": null
     },
     {
-     "n": 3,
+     "n": 8,
      "sourceEventId": "script-event:sha256:f9c4f57ccc9da7b1b4694093b2b9ee142e7aef598a02aa6e451d22f57ccee2a3",
      "sourceEventIndex": 183,
      "sourceSceneNumber": 10,
@@ -6322,7 +6271,7 @@
   },
   {
    "sceneNumber": 10,
-   "beatCode": "10.B4",
+   "beatCode": "10.B3",
    "sourceBeatId": "source-beat:sha256:83c65c8a25118a2f59933d405d9943fd596be7d2087f97823d1c76310b4f618e",
    "sourceEventRange": {
     "firstEventIndex": 184,
@@ -6370,12 +6319,12 @@
     "Keen",
     "Zenny"
    ],
-   "storyBeat": "Keen and the others laugh as they continue down the beach, and the camera lingers on the bright, peaceful cove. The final image is warmer than the start but still carries the day’s trace: a storm washed clean, a boat gone, wristbands glowing, and a new family walking forward.",
-   "want": "The group wants to keep moving together into ordinary life.",
-   "need": "Keen needs belonging to feel light enough to laugh in, not only sacred or heroic.",
-   "kidRead": "Everyone laughs and walks together by the peaceful water.",
-   "adultRead": "The ache has not been erased; it has been given company, sunlight and a path forward.",
-   "emotionalIntent": "End with buoyant peace and a visible aftertaste of cost — the laugh and the lump together.",
+   "storyBeat": "Keen and the others laugh and continue down the bright peaceful cove, ending on the beach's calm after the storm with the new friendship moving forward.",
+   "want": "The group wants to keep walking together into ordinary life.",
+   "need": "Keen needs the adventure to settle into belonging he can live inside.",
+   "kidRead": "Everyone laughs and walks together by the peaceful beach.",
+   "adultRead": "The final image is warmer than the start but still remembers the storm, the lost boat, and the mother waiting for news.",
+   "emotionalIntent": "Settled golden-hour hope; a memorable final image of laughter moving along a storm-washed shore.",
    "cuts": [
     {
      "n": 1,
@@ -6418,34 +6367,34 @@
    "source-beat:sha256:a9f67052685c0af434a03cfa50846be88655a000566b43ba93b3e34b91e57219",
    "source-beat:sha256:22aee3df78422d26fbdddabcc058e0a33f3b477a4c12f8987c183d4b814e97f1",
    "source-beat:sha256:810ba72a205eb8d2193d99b0937c9a9308f3f9d23f9a6711eafe2464a0235e69",
-   "source-beat:sha256:49ab4d4a1d93fe06538e52f90fcee91fa2f79beac3a44c7247347480fd233c23",
-   "source-beat:sha256:f5c03a207498d02a9d058d2da0d91fccaf4455edb509f8505c087e44cfc9217a",
-   "source-beat:sha256:1f9ba9898360ee76ae47d89a07e54d903a4720481ef94742357c5b3ccf30c304",
-   "source-beat:sha256:dfe30be76b6a03c2d72bbd46577c636b1158ad246ff6a51826ee0803ed469caf",
-   "source-beat:sha256:a38bd68f2fbaa7f43aee0b100f4414f7d1aa60e7ff172b79f676e5ffd12e92d8",
+   "source-beat:sha256:8bec6c37e610ddcb573a2e6e21162ba3e11f44d7cd16c12c5946b8b11287ce3f",
+   "source-beat:sha256:a8c8cef2274748e937f66a26b8abcf55b744203e201b5db8ca174e20f1ea7c9a",
+   "source-beat:sha256:95725e68827a4d62349e5afe578115ee2cd9b37fd0e172d6387920a6db354188",
+   "source-beat:sha256:0f3cca59e84b8ec8d0472d5b6d8414830329078353a79d478af148277be9f93c",
+   "source-beat:sha256:9f189ef3df13a903f6494880074608add0a52e25836f38f5a2b6f149a99ca603",
+   "source-beat:sha256:fd2f3f055fd3ce13df6200a74424dcbb2764c9d2ffb404a0dd53277f1560229f",
    "source-beat:sha256:b36010337ca93481291d7a5ead01b5ddfbfb048e2495c5d65b13897764c25ac2",
    "source-beat:sha256:37f51af13b5955e832ea30e7aa3eccde8157c5278b7d22b7eb94baef6903f56a",
    "source-beat:sha256:a677866d8c5e2524330c3e1b50b637550b2bcb2657433df2e34a25d267e76d36",
    "source-beat:sha256:ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656",
    "source-beat:sha256:17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8",
-   "source-beat:sha256:c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
-   "source-beat:sha256:7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+   "source-beat:sha256:b810a0fd5001813bfb85b39f4d0f561a5cd0a117e6dbe6ec91efaf05c26e1fef",
+   "source-beat:sha256:e809d358d401a16cd64dbccf518736f42f66fa8d3d04ba27c9161a53ba81b4e7",
    "source-beat:sha256:7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093",
    "source-beat:sha256:ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79",
-   "source-beat:sha256:9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
-   "source-beat:sha256:23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
-   "source-beat:sha256:d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7",
-   "source-beat:sha256:498b83cd4b8700d4bf0a675eaa2a21c70f6895b416d564dc589290a802d33803",
-   "source-beat:sha256:16b7857deb624b6f755ef49b7612f9dbcfc6ccb6f0b9e82e2ff96174abf73ce2",
+   "source-beat:sha256:bcc7ea281d63f99d3b19b96aa124fb868e7730e9dac640df48dd17fd3809c556",
+   "source-beat:sha256:a5df562ef21a7b9dc96a7de81c89acaa94a4d35a3e256be863b74c196cbc2634",
+   "source-beat:sha256:acd8419d278917045d09b6d302094d714c658b67acbae51c100bb33312eac3a3",
+   "source-beat:sha256:3d95103e9234d7e0fb1cb31b101699533101522d262c6b8f9d1086644c86879f",
+   "source-beat:sha256:4158df5ebbe77648aab2f273488e3c732df2e9617487896f4f4a4d326e2b3aa2",
    "source-beat:sha256:afe4c5fed61339f32d47d1aab713b63f95d23e95a93fea0b85e1c660ece72650",
-   "source-beat:sha256:dc6b2fd66eaa746bf735ee668f27b2b02d65f484b1bad8c738c3018f4abae7e9",
-   "source-beat:sha256:1e9ca5ba66bcac4fba2727eb8ad7152ac5ea0f9581188f12e1c7c6350ccb7a0a",
+   "source-beat:sha256:6de85a240df409cec043f72277e3ec73a1a4e0acfe46ac66fe97e55a669dbcae",
+   "source-beat:sha256:80810a734f63e86dcb9833a0366426d399735aff69bae40b5d517802294fa9ec",
    "source-beat:sha256:583a9805886d0470a02d0a66f02c9011adf03fb5c90f8ca045710574e35cd99f",
    "source-beat:sha256:ac78f4e9bbf1856c2376055517a111def5a0cf92cc63db90aa359354231b827e",
    "source-beat:sha256:f83539e5aacf308e2c40a56d868a390ce114aafa37b19bf056a9b81eb47faaee",
    "source-beat:sha256:f3e487af6dbc60769e8917e6625e75a9275ab69ee1cb54d81248400ad0a6280e",
-   "source-beat:sha256:2f69ab622cb9d951a412137bcd5eccb3b7fe72c31dd1267ee40049cc3eb05446",
-   "source-beat:sha256:bc871d2ea000451b0fa9aa33304c12a92d34757cce3092c4bd25c20d7d5e7dda",
+   "source-beat:sha256:d28b2fdabde4850c0e6ede5685e4cd12f0f2e1d634ce517b68abf7b5720fdb2f",
    "source-beat:sha256:4e724035a0caa17b8a2e448c72bc0c30fa10f3c54c379787489029e5f6bb09fc",
    "source-beat:sha256:5f440fcc1581440e585ec48fa05c12577e0842f881eda9bec2433d1602a2cf38",
    "source-beat:sha256:649ec93a865ff6f2ff9798a1fd2fcbd11dff264542867fb141633989b0c4c018",
@@ -6458,8 +6407,7 @@
    "source-beat:sha256:ff1509ea49b765e9cc129c758ab27ca8650ec399a5aacb01ad7199c5a0929e55",
    "source-beat:sha256:5d200cefd19044658f7bdb1edbdd28352b457921fcecf835a93bd3a89da720b8",
    "source-beat:sha256:43f4a92b09bc4348a7c84efb609145e3c6a3799f5fe527d343e98734c8eb09ed",
-   "source-beat:sha256:9dd843608418ed8d76ba1799630a64e48e0b558ad9ea7370073333006a070c69",
-   "source-beat:sha256:2482d82a14a15e3fb144f5a5bbbe00a6b3140bc805be5260fb333168d31d5a44",
+   "source-beat:sha256:c5b042fa1a7e88d435f23ffdfa113a37f2233364cddf966af2dbe062f49ca875",
    "source-beat:sha256:83c65c8a25118a2f59933d405d9943fd596be7d2087f97823d1c76310b4f618e"
   ],
   "sourceBeatSignatureDigests": [
@@ -6471,34 +6419,34 @@
    "a9f67052685c0af434a03cfa50846be88655a000566b43ba93b3e34b91e57219",
    "22aee3df78422d26fbdddabcc058e0a33f3b477a4c12f8987c183d4b814e97f1",
    "810ba72a205eb8d2193d99b0937c9a9308f3f9d23f9a6711eafe2464a0235e69",
-   "49ab4d4a1d93fe06538e52f90fcee91fa2f79beac3a44c7247347480fd233c23",
-   "f5c03a207498d02a9d058d2da0d91fccaf4455edb509f8505c087e44cfc9217a",
-   "1f9ba9898360ee76ae47d89a07e54d903a4720481ef94742357c5b3ccf30c304",
-   "dfe30be76b6a03c2d72bbd46577c636b1158ad246ff6a51826ee0803ed469caf",
-   "a38bd68f2fbaa7f43aee0b100f4414f7d1aa60e7ff172b79f676e5ffd12e92d8",
+   "8bec6c37e610ddcb573a2e6e21162ba3e11f44d7cd16c12c5946b8b11287ce3f",
+   "a8c8cef2274748e937f66a26b8abcf55b744203e201b5db8ca174e20f1ea7c9a",
+   "95725e68827a4d62349e5afe578115ee2cd9b37fd0e172d6387920a6db354188",
+   "0f3cca59e84b8ec8d0472d5b6d8414830329078353a79d478af148277be9f93c",
+   "9f189ef3df13a903f6494880074608add0a52e25836f38f5a2b6f149a99ca603",
+   "fd2f3f055fd3ce13df6200a74424dcbb2764c9d2ffb404a0dd53277f1560229f",
    "b36010337ca93481291d7a5ead01b5ddfbfb048e2495c5d65b13897764c25ac2",
    "37f51af13b5955e832ea30e7aa3eccde8157c5278b7d22b7eb94baef6903f56a",
    "a677866d8c5e2524330c3e1b50b637550b2bcb2657433df2e34a25d267e76d36",
    "ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656",
    "17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8",
-   "c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
-   "7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+   "b810a0fd5001813bfb85b39f4d0f561a5cd0a117e6dbe6ec91efaf05c26e1fef",
+   "e809d358d401a16cd64dbccf518736f42f66fa8d3d04ba27c9161a53ba81b4e7",
    "7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093",
    "ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79",
-   "9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
-   "23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
-   "d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7",
-   "498b83cd4b8700d4bf0a675eaa2a21c70f6895b416d564dc589290a802d33803",
-   "16b7857deb624b6f755ef49b7612f9dbcfc6ccb6f0b9e82e2ff96174abf73ce2",
+   "bcc7ea281d63f99d3b19b96aa124fb868e7730e9dac640df48dd17fd3809c556",
+   "a5df562ef21a7b9dc96a7de81c89acaa94a4d35a3e256be863b74c196cbc2634",
+   "acd8419d278917045d09b6d302094d714c658b67acbae51c100bb33312eac3a3",
+   "3d95103e9234d7e0fb1cb31b101699533101522d262c6b8f9d1086644c86879f",
+   "4158df5ebbe77648aab2f273488e3c732df2e9617487896f4f4a4d326e2b3aa2",
    "afe4c5fed61339f32d47d1aab713b63f95d23e95a93fea0b85e1c660ece72650",
-   "dc6b2fd66eaa746bf735ee668f27b2b02d65f484b1bad8c738c3018f4abae7e9",
-   "1e9ca5ba66bcac4fba2727eb8ad7152ac5ea0f9581188f12e1c7c6350ccb7a0a",
+   "6de85a240df409cec043f72277e3ec73a1a4e0acfe46ac66fe97e55a669dbcae",
+   "80810a734f63e86dcb9833a0366426d399735aff69bae40b5d517802294fa9ec",
    "583a9805886d0470a02d0a66f02c9011adf03fb5c90f8ca045710574e35cd99f",
    "ac78f4e9bbf1856c2376055517a111def5a0cf92cc63db90aa359354231b827e",
    "f83539e5aacf308e2c40a56d868a390ce114aafa37b19bf056a9b81eb47faaee",
    "f3e487af6dbc60769e8917e6625e75a9275ab69ee1cb54d81248400ad0a6280e",
-   "2f69ab622cb9d951a412137bcd5eccb3b7fe72c31dd1267ee40049cc3eb05446",
-   "bc871d2ea000451b0fa9aa33304c12a92d34757cce3092c4bd25c20d7d5e7dda",
+   "d28b2fdabde4850c0e6ede5685e4cd12f0f2e1d634ce517b68abf7b5720fdb2f",
    "4e724035a0caa17b8a2e448c72bc0c30fa10f3c54c379787489029e5f6bb09fc",
    "5f440fcc1581440e585ec48fa05c12577e0842f881eda9bec2433d1602a2cf38",
    "649ec93a865ff6f2ff9798a1fd2fcbd11dff264542867fb141633989b0c4c018",
@@ -6511,8 +6459,7 @@
    "ff1509ea49b765e9cc129c758ab27ca8650ec399a5aacb01ad7199c5a0929e55",
    "5d200cefd19044658f7bdb1edbdd28352b457921fcecf835a93bd3a89da720b8",
    "43f4a92b09bc4348a7c84efb609145e3c6a3799f5fe527d343e98734c8eb09ed",
-   "9dd843608418ed8d76ba1799630a64e48e0b558ad9ea7370073333006a070c69",
-   "2482d82a14a15e3fb144f5a5bbbe00a6b3140bc805be5260fb333168d31d5a44",
+   "c5b042fa1a7e88d435f23ffdfa113a37f2233364cddf966af2dbe062f49ca875",
    "83c65c8a25118a2f59933d405d9943fd596be7d2087f97823d1c76310b4f618e"
   ],
   "orderedSourceEventIds": [
@@ -6805,34 +6752,34 @@
      "source-beat:sha256:a9f67052685c0af434a03cfa50846be88655a000566b43ba93b3e34b91e57219",
      "source-beat:sha256:22aee3df78422d26fbdddabcc058e0a33f3b477a4c12f8987c183d4b814e97f1",
      "source-beat:sha256:810ba72a205eb8d2193d99b0937c9a9308f3f9d23f9a6711eafe2464a0235e69",
-     "source-beat:sha256:49ab4d4a1d93fe06538e52f90fcee91fa2f79beac3a44c7247347480fd233c23",
-     "source-beat:sha256:f5c03a207498d02a9d058d2da0d91fccaf4455edb509f8505c087e44cfc9217a",
-     "source-beat:sha256:1f9ba9898360ee76ae47d89a07e54d903a4720481ef94742357c5b3ccf30c304",
-     "source-beat:sha256:dfe30be76b6a03c2d72bbd46577c636b1158ad246ff6a51826ee0803ed469caf",
-     "source-beat:sha256:a38bd68f2fbaa7f43aee0b100f4414f7d1aa60e7ff172b79f676e5ffd12e92d8",
+     "source-beat:sha256:8bec6c37e610ddcb573a2e6e21162ba3e11f44d7cd16c12c5946b8b11287ce3f",
+     "source-beat:sha256:a8c8cef2274748e937f66a26b8abcf55b744203e201b5db8ca174e20f1ea7c9a",
+     "source-beat:sha256:95725e68827a4d62349e5afe578115ee2cd9b37fd0e172d6387920a6db354188",
+     "source-beat:sha256:0f3cca59e84b8ec8d0472d5b6d8414830329078353a79d478af148277be9f93c",
+     "source-beat:sha256:9f189ef3df13a903f6494880074608add0a52e25836f38f5a2b6f149a99ca603",
+     "source-beat:sha256:fd2f3f055fd3ce13df6200a74424dcbb2764c9d2ffb404a0dd53277f1560229f",
      "source-beat:sha256:b36010337ca93481291d7a5ead01b5ddfbfb048e2495c5d65b13897764c25ac2",
      "source-beat:sha256:37f51af13b5955e832ea30e7aa3eccde8157c5278b7d22b7eb94baef6903f56a",
      "source-beat:sha256:a677866d8c5e2524330c3e1b50b637550b2bcb2657433df2e34a25d267e76d36",
      "source-beat:sha256:ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656",
      "source-beat:sha256:17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8",
-     "source-beat:sha256:c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
-     "source-beat:sha256:7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+     "source-beat:sha256:b810a0fd5001813bfb85b39f4d0f561a5cd0a117e6dbe6ec91efaf05c26e1fef",
+     "source-beat:sha256:e809d358d401a16cd64dbccf518736f42f66fa8d3d04ba27c9161a53ba81b4e7",
      "source-beat:sha256:7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093",
      "source-beat:sha256:ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79",
-     "source-beat:sha256:9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
-     "source-beat:sha256:23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
-     "source-beat:sha256:d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7",
-     "source-beat:sha256:498b83cd4b8700d4bf0a675eaa2a21c70f6895b416d564dc589290a802d33803",
-     "source-beat:sha256:16b7857deb624b6f755ef49b7612f9dbcfc6ccb6f0b9e82e2ff96174abf73ce2",
+     "source-beat:sha256:bcc7ea281d63f99d3b19b96aa124fb868e7730e9dac640df48dd17fd3809c556",
+     "source-beat:sha256:a5df562ef21a7b9dc96a7de81c89acaa94a4d35a3e256be863b74c196cbc2634",
+     "source-beat:sha256:acd8419d278917045d09b6d302094d714c658b67acbae51c100bb33312eac3a3",
+     "source-beat:sha256:3d95103e9234d7e0fb1cb31b101699533101522d262c6b8f9d1086644c86879f",
+     "source-beat:sha256:4158df5ebbe77648aab2f273488e3c732df2e9617487896f4f4a4d326e2b3aa2",
      "source-beat:sha256:afe4c5fed61339f32d47d1aab713b63f95d23e95a93fea0b85e1c660ece72650",
-     "source-beat:sha256:dc6b2fd66eaa746bf735ee668f27b2b02d65f484b1bad8c738c3018f4abae7e9",
-     "source-beat:sha256:1e9ca5ba66bcac4fba2727eb8ad7152ac5ea0f9581188f12e1c7c6350ccb7a0a",
+     "source-beat:sha256:6de85a240df409cec043f72277e3ec73a1a4e0acfe46ac66fe97e55a669dbcae",
+     "source-beat:sha256:80810a734f63e86dcb9833a0366426d399735aff69bae40b5d517802294fa9ec",
      "source-beat:sha256:583a9805886d0470a02d0a66f02c9011adf03fb5c90f8ca045710574e35cd99f",
      "source-beat:sha256:ac78f4e9bbf1856c2376055517a111def5a0cf92cc63db90aa359354231b827e",
      "source-beat:sha256:f83539e5aacf308e2c40a56d868a390ce114aafa37b19bf056a9b81eb47faaee",
      "source-beat:sha256:f3e487af6dbc60769e8917e6625e75a9275ab69ee1cb54d81248400ad0a6280e",
-     "source-beat:sha256:2f69ab622cb9d951a412137bcd5eccb3b7fe72c31dd1267ee40049cc3eb05446",
-     "source-beat:sha256:bc871d2ea000451b0fa9aa33304c12a92d34757cce3092c4bd25c20d7d5e7dda",
+     "source-beat:sha256:d28b2fdabde4850c0e6ede5685e4cd12f0f2e1d634ce517b68abf7b5720fdb2f",
      "source-beat:sha256:4e724035a0caa17b8a2e448c72bc0c30fa10f3c54c379787489029e5f6bb09fc",
      "source-beat:sha256:5f440fcc1581440e585ec48fa05c12577e0842f881eda9bec2433d1602a2cf38",
      "source-beat:sha256:649ec93a865ff6f2ff9798a1fd2fcbd11dff264542867fb141633989b0c4c018",
@@ -6845,8 +6792,7 @@
      "source-beat:sha256:ff1509ea49b765e9cc129c758ab27ca8650ec399a5aacb01ad7199c5a0929e55",
      "source-beat:sha256:5d200cefd19044658f7bdb1edbdd28352b457921fcecf835a93bd3a89da720b8",
      "source-beat:sha256:43f4a92b09bc4348a7c84efb609145e3c6a3799f5fe527d343e98734c8eb09ed",
-     "source-beat:sha256:9dd843608418ed8d76ba1799630a64e48e0b558ad9ea7370073333006a070c69",
-     "source-beat:sha256:2482d82a14a15e3fb144f5a5bbbe00a6b3140bc805be5260fb333168d31d5a44",
+     "source-beat:sha256:c5b042fa1a7e88d435f23ffdfa113a37f2233364cddf966af2dbe062f49ca875",
      "source-beat:sha256:83c65c8a25118a2f59933d405d9943fd596be7d2087f97823d1c76310b4f618e"
     ],
     "sourceBeatSignatureDigests": [
@@ -6858,34 +6804,34 @@
      "a9f67052685c0af434a03cfa50846be88655a000566b43ba93b3e34b91e57219",
      "22aee3df78422d26fbdddabcc058e0a33f3b477a4c12f8987c183d4b814e97f1",
      "810ba72a205eb8d2193d99b0937c9a9308f3f9d23f9a6711eafe2464a0235e69",
-     "49ab4d4a1d93fe06538e52f90fcee91fa2f79beac3a44c7247347480fd233c23",
-     "f5c03a207498d02a9d058d2da0d91fccaf4455edb509f8505c087e44cfc9217a",
-     "1f9ba9898360ee76ae47d89a07e54d903a4720481ef94742357c5b3ccf30c304",
-     "dfe30be76b6a03c2d72bbd46577c636b1158ad246ff6a51826ee0803ed469caf",
-     "a38bd68f2fbaa7f43aee0b100f4414f7d1aa60e7ff172b79f676e5ffd12e92d8",
+     "8bec6c37e610ddcb573a2e6e21162ba3e11f44d7cd16c12c5946b8b11287ce3f",
+     "a8c8cef2274748e937f66a26b8abcf55b744203e201b5db8ca174e20f1ea7c9a",
+     "95725e68827a4d62349e5afe578115ee2cd9b37fd0e172d6387920a6db354188",
+     "0f3cca59e84b8ec8d0472d5b6d8414830329078353a79d478af148277be9f93c",
+     "9f189ef3df13a903f6494880074608add0a52e25836f38f5a2b6f149a99ca603",
+     "fd2f3f055fd3ce13df6200a74424dcbb2764c9d2ffb404a0dd53277f1560229f",
      "b36010337ca93481291d7a5ead01b5ddfbfb048e2495c5d65b13897764c25ac2",
      "37f51af13b5955e832ea30e7aa3eccde8157c5278b7d22b7eb94baef6903f56a",
      "a677866d8c5e2524330c3e1b50b637550b2bcb2657433df2e34a25d267e76d36",
      "ab991161f1dd414f3e424d7a3a787861f1e11789bb7f88f11f2b437b7dd52656",
      "17144f7fde780e48cf838acbeb1f42d93acfc70c43c16cacea538be6e740e6f8",
-     "c091d7d15965aeee5732e419210a989ce784fdac09b888fd5cfdce92fe41cb80",
-     "7b415a19eb238b7e5d8ffdc9d422e3ab8e37efdf5fb2330152c81d4899412449",
+     "b810a0fd5001813bfb85b39f4d0f561a5cd0a117e6dbe6ec91efaf05c26e1fef",
+     "e809d358d401a16cd64dbccf518736f42f66fa8d3d04ba27c9161a53ba81b4e7",
      "7bbd14cee60d89d003d3570e13b780620559d7c1bc7abfd17fab5c4759958093",
      "ba0c600236e68e1bd45072ca9ea8085c25163ba79b47e48a843965d47e3ecb79",
-     "9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
-     "23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
-     "d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7",
-     "498b83cd4b8700d4bf0a675eaa2a21c70f6895b416d564dc589290a802d33803",
-     "16b7857deb624b6f755ef49b7612f9dbcfc6ccb6f0b9e82e2ff96174abf73ce2",
+     "bcc7ea281d63f99d3b19b96aa124fb868e7730e9dac640df48dd17fd3809c556",
+     "a5df562ef21a7b9dc96a7de81c89acaa94a4d35a3e256be863b74c196cbc2634",
+     "acd8419d278917045d09b6d302094d714c658b67acbae51c100bb33312eac3a3",
+     "3d95103e9234d7e0fb1cb31b101699533101522d262c6b8f9d1086644c86879f",
+     "4158df5ebbe77648aab2f273488e3c732df2e9617487896f4f4a4d326e2b3aa2",
      "afe4c5fed61339f32d47d1aab713b63f95d23e95a93fea0b85e1c660ece72650",
-     "dc6b2fd66eaa746bf735ee668f27b2b02d65f484b1bad8c738c3018f4abae7e9",
-     "1e9ca5ba66bcac4fba2727eb8ad7152ac5ea0f9581188f12e1c7c6350ccb7a0a",
+     "6de85a240df409cec043f72277e3ec73a1a4e0acfe46ac66fe97e55a669dbcae",
+     "80810a734f63e86dcb9833a0366426d399735aff69bae40b5d517802294fa9ec",
      "583a9805886d0470a02d0a66f02c9011adf03fb5c90f8ca045710574e35cd99f",
      "ac78f4e9bbf1856c2376055517a111def5a0cf92cc63db90aa359354231b827e",
      "f83539e5aacf308e2c40a56d868a390ce114aafa37b19bf056a9b81eb47faaee",
      "f3e487af6dbc60769e8917e6625e75a9275ab69ee1cb54d81248400ad0a6280e",
-     "2f69ab622cb9d951a412137bcd5eccb3b7fe72c31dd1267ee40049cc3eb05446",
-     "bc871d2ea000451b0fa9aa33304c12a92d34757cce3092c4bd25c20d7d5e7dda",
+     "d28b2fdabde4850c0e6ede5685e4cd12f0f2e1d634ce517b68abf7b5720fdb2f",
      "4e724035a0caa17b8a2e448c72bc0c30fa10f3c54c379787489029e5f6bb09fc",
      "5f440fcc1581440e585ec48fa05c12577e0842f881eda9bec2433d1602a2cf38",
      "649ec93a865ff6f2ff9798a1fd2fcbd11dff264542867fb141633989b0c4c018",
@@ -6898,8 +6844,7 @@
      "ff1509ea49b765e9cc129c758ab27ca8650ec399a5aacb01ad7199c5a0929e55",
      "5d200cefd19044658f7bdb1edbdd28352b457921fcecf835a93bd3a89da720b8",
      "43f4a92b09bc4348a7c84efb609145e3c6a3799f5fe527d343e98734c8eb09ed",
-     "9dd843608418ed8d76ba1799630a64e48e0b558ad9ea7370073333006a070c69",
-     "2482d82a14a15e3fb144f5a5bbbe00a6b3140bc805be5260fb333168d31d5a44",
+     "c5b042fa1a7e88d435f23ffdfa113a37f2233364cddf966af2dbe062f49ca875",
      "83c65c8a25118a2f59933d405d9943fd596be7d2087f97823d1c76310b4f618e"
     ],
     "orderedSourceEventIds": [
@@ -7180,7 +7125,7 @@
     ]
    },
    "algorithm": "sha256",
-   "digest": "e9e3b350d46ffcf2ef5faa5842ec3775e5cb8b0525338c1e63b8cf2a7ce1adae"
+   "digest": "7ebb772436c979881f15a501f388212e8f16f2ab0e91241da4bc89854329c0f8"
   }
  },
  "sourceEventCoverage": {
@@ -7197,10 +7142,5 @@
   "candidateLines": 86,
   "issues": []
  },
- "approvalState": "approved",
- "approval": {
-  "reviewedBy": "Julian",
-  "at": "2026-08-05T10:43:05",
-  "canonicalPackage": "Ep1_The_Adventure_Begins_beat_package.json"
- }
+ "approvalState": "awaiting-human-approval"
 }

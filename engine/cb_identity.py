@@ -31,7 +31,8 @@ def _contract_hash(value: dict[str, Any]) -> str:
 
 def materialize_provider_view(
         character: str, pack: dict[str, Any], root: str | pathlib.Path,
-        output_dir: str | pathlib.Path, *, usage: str = "keyframe") -> dict[str, Any]:
+        output_dir: str | pathlib.Path, *, usage: str = "keyframe",
+        state: str | None = None) -> dict[str, Any]:
     """Return the locked, complete turnaround as one provider attachment.
 
     The historical function name remains for callers, but no image is materialized and no
@@ -43,7 +44,12 @@ def materialize_provider_view(
     if pack.get("schemaVersion") != IDENTITY_PACK_SCHEMA_VERSION:
         raise IdentityPackError(
             f"{character}'s identity pack schema is unsupported")
-    source_raw = pack.get("source")
+    state_pack = (pack.get("stateSources") or {}).get(state) if state else None
+    if state and not isinstance(state_pack, dict):
+        raise IdentityPackError(
+            f"{character}'s provider identity pack has no {state!r} state source")
+    effective = {**pack, **(state_pack or {})}
+    source_raw = effective.get("source")
     if not isinstance(source_raw, str):
         raise IdentityPackError(
             f"{character}'s identity pack has no turnaround source")
@@ -56,12 +62,13 @@ def materialize_provider_view(
     contract = {
         "schemaVersion": IDENTITY_PACK_SCHEMA_VERSION,
         "character": character,
+        "characterState": state or "default",
         "usage": usage,
         "view": "complete-turnaround",
         "source": str(source.resolve()),
         "sourceSha256": source_hash,
         "attachmentMode": "intact-turnaround",
-        "coverage": pack.get("coverage") or "declared-turnaround",
+        "coverage": effective.get("coverage") or "declared-turnaround",
     }
     digest = _contract_hash(contract)
 
@@ -76,16 +83,17 @@ def materialize_provider_view(
         "singleSubject": False,
         "singleCharacterIdentity": True,
         "turnaroundAuthority": True,
-        "turnaroundViewCount": len(pack.get("turnaroundViews") or []),
+        "turnaroundViewCount": len(effective.get("turnaroundViews") or []),
         "turnaroundGroupHash": digest,
-        "distinguishingFeatures": list(pack.get("distinguishingFeatures") or []),
-        "mustNotBorrow": list(pack.get("mustNotBorrow") or []),
+        "distinguishingFeatures": list(effective.get("distinguishingFeatures") or []),
+        "mustNotBorrow": list(effective.get("mustNotBorrow") or []),
     }
 
 
 def materialize_provider_views(
         character: str, pack: dict[str, Any], root: str | pathlib.Path,
-        output_dir: str | pathlib.Path, *, usage: str = "keyframe") -> list[dict[str, Any]]:
+        output_dir: str | pathlib.Path, *, usage: str = "keyframe",
+        state: str | None = None) -> list[dict[str, Any]]:
     """Return exactly one intact turnaround attachment for one character identity."""
     return [materialize_provider_view(
-        character, pack, root, output_dir, usage=usage)]
+        character, pack, root, output_dir, usage=usage, state=state)]

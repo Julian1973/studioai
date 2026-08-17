@@ -164,3 +164,41 @@ def test_shot_handover_and_engine_validator_preserve_duplicate_occurrences():
     codes = {issue["code"] for issue in broken["issues"]}
     assert "DIALOGUE_OCCURRENCE_DUPLICATED" in codes
     assert "DIALOGUE_OCCURRENCE_ORDER_CHANGED" in codes
+
+
+def test_packed_shot_owns_dialogue_from_every_declared_beat():
+    """A longer provider unit can combine adjacent script beats without making the
+    later beat's locked dialogue look invented. Ownership must remain explicit."""
+    _, first, _ = _source_fixture()
+    second = copy.deepcopy(first)
+    second["beatCode"] = "1.B2"
+    second["sourceBeatId"] = "source-beat:packed-second"
+    for cut in second["cuts"]:
+        cut["dialogueOccurrenceId"] += ":second"
+        cut["sourceEventId"] += ":second"
+
+    first_occurrences = _creative_occurrences(first)
+    second_occurrences = _creative_occurrences(second)
+    state = _state()
+    shot = E.Shot(
+        shotId="S1.SH1", beatCode="1.B1", beatCodes=["1.B1", "1.B2"],
+        durationSec=8, purpose="land both repetitions",
+        performanceAssignment="Fuzzby repeats the insistence twice.",
+        camera="still at eye level", openingPose="Fuzzby hovering",
+        sourceType="opener", sourceShotId=None, cutInMotivation=None,
+        dialogueBinding="Fuzzby owns all four locked repetitions",
+        dialogueLines=[
+            E.DialogueLine(
+                dialogueOccurrenceId=occ.dialogueOccurrenceId,
+                sourceEventId=occ.sourceEventId, speaker=occ.speaker,
+                exactText=occ.exactText, delivery="bright insistence",
+                startSec=index * 1.5, endSec=index * 1.5 + 1.0)
+            for index, occ in enumerate(first_occurrences + second_occurrences)
+        ],
+        visualPayoff="Both repetitions settle", prohibited=[],
+        charactersInFrame=["FUZZBY"], continuityIn=None, continuityOut=state)
+    statement = E.DirectorStatement(**{
+        key: "x" for key in E.DirectorStatement.model_fields})
+    report = E.validate_scene_design(
+        E.SceneShotList(statement=statement, shots=[shot]), [first, second], {})
+    assert report["passed"] is True, report["issues"]

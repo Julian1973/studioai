@@ -62,6 +62,35 @@ def normalize_prose(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
+def locked_dialogue_text(line):
+    return normalize_prose(
+        line.get("exactText") if line.get("exactText") is not None else line.get("text"))
+
+
+def dialogue_words(value):
+    text = str(value or "").replace("\u2018", "'").replace("\u2019", "'")
+    return [word.casefold() for word in re.findall(r"[A-Za-z0-9']+", text)]
+
+
+def dialogue_marker_pattern(value):
+    words = dialogue_words(value)
+    if not words:
+        return re.compile(r"a^")
+    between = r"[\s,.;:!\?\u2026\u2018\u2019'\"-]+"
+    return re.compile(r"\{" + between.join(re.escape(word) for word in words) + r"\}", re.I)
+
+
+def marker_word_matches(text, exact):
+    expected = dialogue_words(exact)
+    if not expected:
+        return []
+    return [
+        "{" + value + "}"
+        for value in re.findall(r"\{([^{}]+)\}", str(text or ""))
+        if dialogue_words(value) == expected
+    ]
+
+
 def require_complete_sentence(value, *, context):
     """Reject empty or mechanically clipped prose before it reaches any provider."""
     text = normalize_prose(value)
@@ -79,32 +108,6 @@ def ensure_complete_sentence(value, *, context):
     if not text:
         raise EmissionConformanceError(f"{context} is empty")
     return require_complete_sentence(_with_terminal(text), context=context)
-
-
-def compact_complete_sentence(value, *, max_words, context):
-    """Compact only at an authored clause/sentence boundary, never mid-phrase."""
-    text = normalize_prose(value)
-    if not text:
-        raise EmissionConformanceError(f"{context} is empty")
-    if len(text.split()) <= max_words:
-        return require_complete_sentence(_with_terminal(text), context=context)
-
-    # Prefer a complete authored sentence. A comma is an acceptable clause boundary,
-    # but the compiler owns the full stop it adds after that intact clause.
-    boundaries = list(re.finditer(r"[.!?\u2026](?=\s|$)|,(?=\s)", text))
-    candidates = [text[:match.end()].rstrip(" ,") for match in boundaries
-                  if len(text[:match.end()].split()) <= max_words]
-    if not candidates:
-        words = text.split()
-        # Synthetic/control prose is sometimes an exact repeated phrase. Collapse the
-        # repetition rather than cutting an arbitrary word count through it.
-        for unit_size in range(1, min(max_words, len(words)) + 1):
-            if len(words) % unit_size == 0 and words == words[:unit_size] * (len(words) // unit_size):
-                return require_complete_sentence(
-                    _with_terminal(" ".join(words[:unit_size])), context=context)
-        raise EmissionConformanceError(
-            f"{context} cannot be compacted below {max_words} words without cutting prose")
-    return require_complete_sentence(_with_terminal(candidates[-1]), context=context)
 
 
 def _with_terminal(text):
@@ -138,13 +141,22 @@ def dialogue_cues(dialogue_lines, *, duration_sec):
     cues = []
     duration = float(duration_sec)
     for index, line in enumerate(dialogue_lines):
-        start = float(line.get("startSec"))
-        end = float(line.get("endSec"))
+        try:
+            start = float(
+                line.get("startSec")
+                if line.get("startSec") is not None else line.get("startsAtSec"))
+            end = float((line.get("endSec") if line.get("endSec") is not None else (
+                start + float(line["estimatedDurationSec"])
+                if line.get("estimatedDurationSec") is not None else None
+            )))
+        except (TypeError, ValueError, KeyError) as exc:
+            raise EmissionConformanceError(
+                f"audio cue {index + 1} has no approved timing window") from exc
         speaker = str(line.get("speaker") or "").strip()
         if not speaker or start < 0 or end <= start or end > duration + 0.001:
             raise EmissionConformanceError(
                 f"audio cue {index + 1} is outside the approved 0-{duration:g}s route")
-        exact = normalize_prose(line.get("exactText"))
+        exact = locked_dialogue_text(line)
         if not exact:
             raise EmissionConformanceError(f"audio cue {index + 1} has no locked dialogue")
         cues.append({"startSec": start, "endSec": end, "speaker": speaker,
@@ -176,6 +188,19 @@ def dialogue_placement_line(cue, *, direction="", hold_after=True):
     if not speaker or not exact:
         raise EmissionConformanceError("dialogue placement requires speaker and exact words")
     performance = written_dialogue_direction(direction)
+    if performance:
+        # The typed hold flag owns pacing. Strip any specialist-authored copy
+        # before deterministically emitting the ruled hold (or no hold) below.
+        performance = re.sub(
+            r"(?:^|[;,]\s*)\b(?:hold|pause|linger|wait)\b[^.;]*?"
+            r"\bafter (?:the )?line(?: ends?)?\b[^.;]*[.;]?",
+            "", performance, flags=re.I).strip(" .,:;-")
+        if not hold_after and re.search(
+                r"\b(?:hold|pause|linger|wait)\b[^.;]*?"
+                r"\bafter (?:the )?line(?: ends?)?\b",
+                performance, re.I):
+            raise EmissionConformanceError(
+                "dialogue direction contradicts holdAfterDialogue=false")
     prefix = f"Dialogue placement: {speaker}"
     if performance:
         prefix += f", {performance}"
@@ -247,23 +272,26 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
     expected = []
     for index, line in enumerate(lines):
         speaker = normalize_prose(line.get("speaker"))
-        exact = normalize_prose(line.get("exactText"))
+        exact = locked_dialogue_text(line)
         marker = "{" + exact + "}"
         expected.append(marker)
-        if text.count(marker) != 1:
+        matches = marker_word_matches(text, exact)
+        if len(matches) != 1:
             errors.append(
                 f"dialogue line {index + 1} must appear exactly once as {marker!r}")
+        marker_pattern = re.escape(matches[0]) if matches else re.escape(marker)
         placement = re.compile(
             rf"Dialogue placement:\s*{re.escape(speaker)}"
-            rf"(?:,\s*[^:]+)?:\s*{re.escape(marker)}"
-        )
+            rf"(?:,\s*[^:]+)?:\s*{marker_pattern}",
+            re.I)
         if not placement.search(text):
             errors.append(
                 f"dialogue line {index + 1} is not attributed to {speaker} in English")
 
     emitted = re.findall(r"\{([^{}]+)\}", text)
-    expected_text = [normalize_prose(line.get("exactText")) for line in lines]
-    if emitted != expected_text:
+    expected_text = [locked_dialogue_text(line) for line in lines]
+    if [dialogue_words(value) for value in emitted] != [
+            dialogue_words(value) for value in expected_text]:
         errors.append("dialogue markers are invented, reordered or duplicated")
     return {"ready": not errors, "errors": errors, "markers": expected}
 

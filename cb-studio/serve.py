@@ -428,6 +428,7 @@ DIRECTOR_ACTION_IDS = {
     "accept-voice", "iterate-voice",
     "approve-spend", "cancel-spend",
     "accept-animation", "iterate-animation",
+    "run-ai-review",
     "run-quality-review", "accept-quality", "reopen-shot",
     "build-master", "run-final-review", "accept-master", "iterate-master",
     "save-retake-note",
@@ -1319,12 +1320,23 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         sid = s.get("shotId")
         if not sid:
             continue
+        ledger = next((item for item in (pkg.get("continuityLedger") or [])
+                       if item.get("shotId") == sid), {})
         # transportCandidates from in-progress batches are migrated by cb_asset_registry;
         # the browser still receives them as normal media.candidates entries.
-        shots[sid] = registry_shots.get(sid) or {"vo": None, "keyframe": None,
-                                                 "keyframeCandidate": None,
-                                                 "keyframeApproved": None, "clip": None,
-                                                 "finalFrame": None, "candidates": []}
+        record = dict(registry_shots.get(sid) or {})
+        record.setdefault("keyframe", None)
+        record.setdefault("keyframeCandidate", None)
+        record.setdefault("keyframeApproved", None)
+        record.setdefault("clip", None)
+        record.setdefault("finalFrame", None)
+        record.setdefault("candidates", [])
+        # A freshly generated HEAR track is authoritative shot state immediately. Asset
+        # registry persistence may follow in the same workflow, but the decision surface
+        # must never keep showing older auditions while the ledger already contains the
+        # complete current track.
+        record["vo"] = record.get("vo") or _url_from_abs(ledger.get("voPath"))
+        shots[sid] = record
     timing_path = MEDIA / f"{episode}_Scene{scene}_timing_slate.mp4"
     if not timing_path.exists():
         timing_path = MEDIA / f"{episode}_Scene{scene}_animatic.mp4"
@@ -2577,6 +2589,22 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json(200, cb_production_preflight.production_preflight(scene, ep))
             except Exception as e:
                 return self._json(400, {"error": str(e), "zeroSpend": True})
+        if urlsplit(self.path).path == "/api/post-workspace":
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            ep = (q.get("episode") or ["Ep1"])[0]
+            if not _SHOT_TOKEN.match(ep):
+                return self._json(400, {"error": "episode must be a plain token"})
+            try:
+                import cb_post_workspace
+                payload = cb_post_workspace.workspace(ep)
+                payload["jobs"] = [
+                    dict(job) for job in _jobs_snapshot().values()
+                    if str(job.get("gate") or "").startswith("post:")
+                ]
+                return self._json(200, payload)
+            except Exception as exc:
+                return self._json(400, {"error": str(exc)})
         if urlsplit(self.path).path == "/api/director-session":
             # The outcome-first product surface. This is a read-only projection over the
             # same authoritative state, preflight, package and media evidence used by the
@@ -3490,6 +3518,44 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
+        if self.path == "/api/post-workspace":
+            try:
+                import cb_post_workspace
+                d = self._body()
+                episode = str(d.get("episode") or "Ep1").strip()
+                action = str(d.get("action") or "").strip()
+                if not _SHOT_TOKEN.match(episode):
+                    raise ValueError("episode must be a plain token")
+                if action in ("approve", "reject"):
+                    payload = cb_post_workspace.record_verdict(
+                        episode,
+                        "approved" if action == "approve" else "rejected",
+                        str(d.get("note") or ""),
+                        str(d.get("reviewer") or "Julian"),
+                    )
+                    self._json(200, payload)
+                    return
+                if action == "rebuild":
+                    music_gain = float(d.get("musicGain", 0.18))
+                    ambience_gain = float(d.get("ambienceGain", 0.04))
+                    target_lufs = float(d.get("targetLufs", -14.0))
+                    if not 0 <= music_gain <= 1 or not 0 <= ambience_gain <= 1:
+                        raise ValueError("music and ambience gains must be between 0 and 1")
+                    if not -24 <= target_lufs <= -9:
+                        raise ValueError("target LUFS must be between -24 and -9")
+                    args = [
+                        "../tools/build_episode_post95_master.py",
+                        "--music-gain", str(music_gain),
+                        "--ambience-gain", str(ambience_gain),
+                        "--target-lufs", str(target_lufs),
+                    ]
+                    job_id = _start(_jid(f"post_{episode}"), "post:episode-master", "post", args)
+                    self._json(200, {"ok": True, "jobId": job_id})
+                    return
+                raise ValueError("action must be approve, reject or rebuild")
+            except Exception as e:
+                self._json(400, {"error": str(e)})
+            return
         if self.path == "/api/department-run":
             # One explicit specialist thinking call. The subprocess can use the LLM but its
             # cb_render command has no path to cb_gen: it stores an awaiting-approval brief
@@ -3634,10 +3700,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                         f"director:{command}:{target}", scene,
                         ["cb_studio_director.py", command, scene, target, ep])
                 elif action == "accept-keyframe":
+                    import cb_render as _CBR
+                    review_work = ((((session.get("humanReview") or {}).get(
+                        "currentDecision") or {}).get("aiReview") or {}))
+                    if review_work.get("available"):
+                        _CBR.decide_department(
+                            scene, "review-keyframe", "approved", shot_id=target,
+                            note="Julian accepted the keyframe after considering the AI Director recommendation.",
+                            episode=ep, reviewed_by=str(d.get("by") or "Julian"))
                     job_id = shot_run_job("approve-keyframe", scene, ep, target)
                 elif action == "iterate-keyframe":
                     if not note:
                         self._json(400, {"error": "Tell the Director what must change."}); return
+                    import cb_render as _CBR
+                    review_work = ((((session.get("humanReview") or {}).get(
+                        "currentDecision") or {}).get("aiReview") or {}))
+                    if review_work.get("available"):
+                        _CBR.decide_department(
+                            scene, "review-keyframe", "rejected", shot_id=target,
+                            note=note, episode=ep,
+                            reviewed_by=str(d.get("by") or "Julian"))
                     job_id = _start(
                         _jid(f"director_refire-keyframe_{target}"),
                         f"director:refire-keyframe:{target}", scene,
@@ -3675,12 +3757,40 @@ class H(http.server.SimpleHTTPRequestHandler):
                         candidate = -1
                     if candidate not in available:
                         self._json(400, {"error": "Choose a current animation candidate."}); return
+                    import cb_render as _CBR
+                    review_work = ((((session.get("humanReview") or {}).get(
+                        "currentDecision") or {}).get("aiReview") or {}))
+                    if review_work.get("available"):
+                        _CBR.decide_department(
+                            scene, "review-animation", "approved", shot_id=target,
+                            note="Julian accepted the selected take after considering the AI Director recommendation.",
+                            episode=ep, reviewed_by=str(d.get("by") or "Julian"))
                     job_id = shot_run_job("approve", scene, ep, target, candidate=candidate)
                 elif action == "iterate-animation":
                     if not note:
                         self._json(400, {"error": "Tell the Director what must change."}); return
+                    import cb_render as _CBR
+                    review_work = ((((session.get("humanReview") or {}).get(
+                        "currentDecision") or {}).get("aiReview") or {}))
+                    if review_work.get("available"):
+                        _CBR.decide_department(
+                            scene, "review-animation", "rejected", shot_id=target,
+                            note=note, episode=ep,
+                            reviewed_by=str(d.get("by") or "Julian"))
                     job_id = shot_run_job("reject", scene, ep, target, note,
                                           category="other")
+                elif action == "run-ai-review":
+                    review_stage = {
+                        "keyframe": "review-keyframe",
+                        "animation": "review-animation",
+                    }.get(session.get("phase"))
+                    if not review_stage:
+                        self._json(409, {"error": "No visual artifact is awaiting AI review."}); return
+                    job_id = _start(
+                        _jid(f"director_ai_review_{target}"),
+                        f"director:ai-review:{target}", scene,
+                        ["cb_render.py", "department-prepare", scene,
+                         review_stage, target, ep])
                 elif action == "run-quality-review":
                     job_id = _start(
                         _jid(f"director_quality_{target}"),

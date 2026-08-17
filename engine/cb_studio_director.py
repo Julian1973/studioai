@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import pathlib
 import re
 import sys
 from typing import Any
@@ -26,6 +27,35 @@ _COMPLEXITY_SIGNALS = (
     "chase", "tumble", "crash", "collision", "reveal", "moustache", "mustache",
     "flower", "stamen", "gymnastic", "physical comedy", "fast", "drone",
 )
+
+
+def _scene_continuity_rules(episode: str, scene: str) -> list[dict[str, str]]:
+    """Project the canonical character-state rules relevant to this scene."""
+    path = pathlib.Path(__file__).resolve().parent / "config" / "continuity.json"
+    try:
+        config = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    try:
+        scene_number = int(scene)
+    except (TypeError, ValueError):
+        return []
+    rows = []
+    for character, states in (((config.get(episode) or {}).get("characterStates") or {}).items()):
+        for state in states or []:
+            scope = str(state.get("scenes") or "")
+            match = re.fullmatch(r"(\d+)(?:-(\d+))?", scope)
+            if not match:
+                continue
+            first = int(match.group(1)); last = int(match.group(2) or first)
+            rule = str(state.get("rule") or "").strip()
+            if first <= scene_number <= last and rule:
+                rows.append({
+                    "label": f"{character} — {state.get('wristbandState') or 'continuity'}",
+                    "value": rule,
+                    "severity": "critical",
+                })
+    return rows
 
 
 def _action(action_id: str, label: str, *, paid: bool = False,
@@ -96,6 +126,9 @@ def _latest_running_job(jobs: dict[str, Any] | None, scene: str,
     elif "approve-spend" in operation_text or " cb_render.py fire " in f" {operation_text} ":
         activity_label = "Render in progress"
         fallback_step = "Submitting the approved Seedance render..."
+    elif "ai-review" in operation_text or "review-keyframe" in operation_text or "review-animation" in operation_text:
+        activity_label = "AI Director review in progress"
+        fallback_step = "Reviewing the actual artifact against story, performance and continuity..."
     else:
         activity_label = "Production job in progress"
         fallback_step = "Building the next result..."
@@ -215,6 +248,17 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
     final_prompt = str((animation_contract or {}).get("finalPrompt") or "").strip()
     if phase in ("animation", "review", "final") and final_prompt:
         contract_checks = (animation_contract or {}).get("checks") or {}
+        seedance = dict(contract_checks.get("seedancePromptContract") or {})
+        if seedance:
+            raw_score = seedance.get("score")
+            raw_maximum = seedance.get("maximum")
+            normalized = seedance.get("normalizedScore")
+            if normalized is None and raw_maximum:
+                normalized = round((float(raw_score or 0) / float(raw_maximum)) * 10, 2)
+            seedance["rawScore"] = raw_score
+            seedance["rawMaximum"] = raw_maximum
+            seedance["score"] = normalized
+            seedance["maximum"] = 10
         emission = contract_checks.get("emissionConformance") or {
             "score": 0.0,
             "verdict": "BLOCK",
@@ -246,6 +290,9 @@ def _prompt_contract(preflight: dict[str, Any], shot_id: str | None,
                 "checkerVerdict": emission.get("verdict"),
                 "findings": list(emission.get("findings") or [])[:3],
             },
+            "seedancePromptContract": seedance,
+            "qualityGate": contract_checks.get("qualityGate"),
+            "creativeTranslation": contract_checks.get("creativeTranslation"),
         }
     return None
 
@@ -278,6 +325,14 @@ def _prepared_animation_contract(ledger: dict[str, Any]) -> dict[str, Any] | Non
             "checkerVerdict": preflight.get("verdict") or "BLOCK",
             "findings": list(preflight.get("findings") or [])[:3],
         },
+        "seedancePromptContract": {
+            **(preflight.get("seedanceAuthoring") or {}),
+            "score": (preflight.get("seedanceAuthoring") or {}).get("normalizedScore"),
+            "maximum": 10,
+            "repairActions": [],
+        },
+        "qualityGate": preflight.get("qualityGate"),
+        "creativeTranslation": {"ready": True, "errors": []},
     }
 
 
@@ -296,6 +351,32 @@ def _spend_disclosure(package: dict[str, Any] | None, shot_id: str | None) -> di
         "modelVersion", "resolution", "tier", "internalProviderCalls",
     )
     return {key: disclosure.get(key) for key in allowed if key in disclosure}
+
+
+def _voice_audition_candidates(ledger: dict[str, Any]) -> list[dict[str, Any]]:
+    auditions = ledger.get("voiceAuditions") or {}
+    if auditions.get("status") != "ready_for_hear_verdict":
+        return []
+    out = []
+    for index, candidate in enumerate(auditions.get("candidates") or [], start=1):
+        path = str(candidate.get("path") or "").strip()
+        if not path:
+            continue
+        out.append({
+            "n": index,
+            "candidateId": candidate.get("candidateId"),
+            "url": path,
+            "label": candidate.get("label") or f"Voice take {index}",
+            "recipeId": candidate.get("recipeId"),
+            "takeNumber": candidate.get("takeNumber"),
+            "performedText": candidate.get("performedText"),
+            "primary": bool(candidate.get("primary")),
+            "selected": (
+                (auditions.get("selected") or {}).get("candidateId") ==
+                candidate.get("candidateId")
+            ),
+        })
+    return out
 
 
 def _production_advisories(shot: dict[str, Any], session_phase: str,
@@ -424,6 +505,207 @@ def _scene_plate_actions(phase: str, status: str) -> list[dict[str, Any]]:
     ]
 
 
+def _ai_creative_review(ledger: dict[str, Any], phase: str) -> dict[str, Any]:
+    """Expose the specialist's actual-artifact review without granting it authority."""
+    stage = {
+        "keyframe": "review-keyframe",
+        "animation": "review-animation",
+    }.get(phase)
+    if not stage:
+        return {
+            "available": False,
+            "stage": None,
+            "verdict": "human-review",
+            "summary": (
+                "This stage still requires Julian's direct judgement; no visual AI review "
+                "is applicable to the current artifact."
+            ),
+            "advisoryOnly": True,
+            "mayApprove": False,
+        }
+    work = ((ledger.get("departmentWork") or {}).get(stage) or {})
+    event = work.get("candidate") or work.get("approved") or {}
+    output = event.get("output") or {}
+    reviewed_paths = sorted(str(path) for path in (event.get("reviewedMediaPaths") or []) if path)
+    if phase == "keyframe":
+        record = ledger.get("keyframeCandidate") or ledger.get("keyframeApproval") or {}
+        current_paths = [str(record.get("path"))] if record.get("path") else []
+    else:
+        current_paths = (
+            [str(ledger.get("approvedTake"))]
+            if ledger.get("status") == "approved" and ledger.get("approvedTake")
+            else [str(path) for path in (ledger.get("candidatePaths") or []) if path]
+        )
+    review_current = bool(reviewed_paths) and reviewed_paths == sorted(current_paths)
+    if output and not review_current:
+        return {
+            "available": False,
+            "stage": stage,
+            "verdict": "stale",
+            "summary": "The saved recommendation belongs to an older artifact. Review this result again.",
+            "advisoryOnly": True,
+            "mayApprove": False,
+        }
+    if not output:
+        return {
+            "available": False,
+            "stage": stage,
+            "verdict": "not-run",
+            "summary": "The AI Director has not reviewed the actual artifact yet.",
+            "advisoryOnly": True,
+            "mayApprove": False,
+        }
+    dimensions = []
+    for key, label in (
+        ("beatDelivery", "Beat delivery"),
+        ("actingAndPerformance", "Acting and performance"),
+        ("physicalCausality", "Physical causality"),
+        ("timingAndReaction", "Timing and reaction"),
+        ("cameraAndEdit", "Camera and edit"),
+        ("compositionAndContinuity", "Composition and continuity"),
+        ("identityAndReferenceUse", "Identity and references"),
+        ("finishAndProductionValue", "Finish and production value"),
+    ):
+        item = output.get(key) or {}
+        if item:
+            dimensions.append({
+                "id": key,
+                "label": label,
+                "score": item.get("score"),
+                "observed": item.get("observed"),
+                "diagnosis": item.get("diagnosis"),
+                "confidence": item.get("confidence"),
+            })
+    return {
+        "available": True,
+        "stage": stage,
+        "verdict": output.get("verdict") or "reviewed",
+        "summary": output.get("summary") or "The actual artifact has been reviewed.",
+        "intendedRead": output.get("intendedRead"),
+        "actualRead": output.get("actualRead"),
+        "beatLands": (output.get("beatDelivery") or {}).get("score") == 2,
+        "recommendedCandidate": output.get("recommendedCandidate"),
+        "dimensions": dimensions,
+        "likelyRootCause": output.get("likelyRootCause"),
+        "rootCauseReasoning": output.get("rootCauseReasoning"),
+        "cheapestNextAction": output.get("cheapestNextAction"),
+        "preparedAt": event.get("preparedAt"),
+        "advisoryOnly": True,
+        "mayApprove": False,
+    }
+
+
+def _human_review_contract(*, phase: str, status: str, state: dict[str, Any],
+                           selected_state: dict[str, Any] | None,
+                           artifact: dict[str, Any] | None,
+                           shot: dict[str, Any], ledger: dict[str, Any],
+                           quality_review: dict[str, Any] | None,
+                           blocker: dict[str, Any] | None,
+                           primary: dict[str, Any] | None,
+                           decisions: list[dict[str, Any]]) -> dict[str, Any]:
+    """Project the existing human gates without creating a second approval path."""
+    current = (selected_state or {}).get("current") or {}
+    pending = (selected_state or {}).get("pending") or {}
+    stages = state.get("stages") or {}
+    current_id = {
+        "story": "direction", "keyframe": "see", "voice": "hear",
+        "animation": "watch", "review": "qc", "final": "post",
+    }.get(phase, "direction")
+    talky = bool((selected_state or {}).get("talky"))
+    signed = {
+        "direction": bool(state.get("packageCurrent")),
+        "see": bool(current.get("keyframe")),
+        "hear": not talky or bool(current.get("voice")),
+        "watch": bool(current.get("animation")),
+        "qc": bool(current.get("directorReview")),
+        "post": (stages.get("final") or {}).get("state") == "approved",
+    }
+    pending_by_stage = {
+        "direction": not signed["direction"] and phase == "story" and status == "ready_to_review",
+        "see": bool(pending.get("keyframe")),
+        "hear": bool(pending.get("voice")),
+        "watch": bool(pending.get("animation")),
+        "qc": phase == "review" and status == "ready_to_review",
+        "post": phase == "final" and status == "ready_to_review",
+    }
+    definitions = [
+        ("direction", "DIRECTION", "The script beat, emotional outcome and playable staging are clear."),
+        ("see", "SEE", "The opening image protects identity, geography, props and room for the action."),
+        ("hear", "HEAR", "The performance carries the exact line, acting intention and pace."),
+        ("watch", "WATCH", "The action, acting, continuity and ending beat land on screen."),
+        ("qc", "QC", "A fresh viewing confirms the accepted take still works in sequence."),
+        ("post", "POST", "Picture, dialogue, effects, music, rhythm and delivery work together."),
+    ]
+    review_stages = []
+    reached_current = False
+    upstream_current = True
+    for stage_id, label, intent in definitions:
+        is_current = stage_id == current_id
+        reached_current = reached_current or is_current
+        stage_not_required = stage_id == "hear" and not talky
+        if signed[stage_id] and not upstream_current and not stage_not_required:
+            stage_status = "recheck"
+        elif signed[stage_id]:
+            stage_status = "signed"
+        elif pending_by_stage[stage_id] or (is_current and status == "ready_to_review"):
+            stage_status = "decision"
+        elif is_current:
+            stage_status = "working" if status == "rendering" else "current"
+        elif reached_current:
+            stage_status = "locked"
+        else:
+            stage_status = "complete"
+        if stage_not_required:
+            stage_status = "not_required"
+        review_stages.append({
+            "id": stage_id, "label": label, "status": stage_status,
+            "intent": intent, "current": is_current,
+            "humanRequired": stage_status not in ("locked", "not_required"),
+        })
+        if not stage_not_required:
+            upstream_current = upstream_current and stage_status == "signed"
+
+    intended_outcome = str(
+        shot.get("visualPayoff") or shot.get("emotionalIntent") or
+        shot.get("purpose") or shot.get("storyBeat") or ""
+    ).strip()
+    evidence = []
+    artifact_visible = bool(artifact and (artifact.get("url") or artifact.get("items")))
+    evidence.append(
+        f"Visible artifact: {artifact.get('label') or artifact.get('type') or 'current result'}"
+        if artifact_visible else "No review artifact is visible yet."
+    )
+    if blocker:
+        evidence.append(str(blocker.get("message") or blocker.get("action") or "A blocker is open."))
+    if quality_review:
+        finding = (quality_review.get("actualRead") or quality_review.get("verdict") or
+                   quality_review.get("cheapestNextAction"))
+        if finding:
+            evidence.append(str(finding))
+    ai_review = _ai_creative_review(ledger, phase)
+    actions = [item.get("id") for item in [primary, *decisions] if item and item.get("id")]
+    return {
+        "schemaVersion": 1,
+        "authority": "Julian",
+        "rule": (
+            "The AI Director reviews and recommends. It cannot approve or reject. "
+            "Only Julian's decision is final."
+        ),
+        "currentStage": current_id,
+        "stages": review_stages,
+        "currentDecision": {
+            "required": status == "ready_to_review",
+            "canApprove": status == "ready_to_review" and artifact_visible and bool(decisions),
+            "artifactVisible": artifact_visible,
+            "intendedOutcome": intended_outcome,
+            "evidence": evidence,
+            "actions": actions,
+            "aiReview": ai_review,
+            "advisoryOnly": True,
+        },
+    }
+
+
 def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                   package: dict[str, Any] | None = None,
                   media: dict[str, Any] | None = None,
@@ -493,6 +775,8 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
     else:
         current = selected_state.get("current") or {}
         pending = selected_state.get("pending") or {}
+        keyframe_ready = bool(current.get("keyframe") or shot_media.get("keyframeApproved"))
+        voice_ready = bool(not selected_state.get("talky") or current.get("voice"))
         purpose = str(shot.get("purpose") or shot.get("storyBeat") or "").strip()
         keyframe_headline = (((preflight.get("productionInputs") or {}).get("shots") or {})
                              .get(shot_id) or {}).get("keyframePromptHeadline")
@@ -564,11 +848,14 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             summary = keyframe_headline or purpose
             artifact = {"type": "image", "url": shot_media.get("keyframeCandidate")
                         or shot_media.get("keyframe"), "label": "Opening-frame candidate"}
-            decisions = [
-                _action("accept-keyframe", "Accept"),
-                _action("iterate-keyframe", "Iterate", destructive=True),
-            ]
-        elif not current.get("keyframe"):
+            if _ai_creative_review(package_ledger, phase)["available"]:
+                decisions = [
+                    _action("accept-keyframe", "Accept"),
+                    _action("iterate-keyframe", "Iterate", destructive=True),
+                ]
+            else:
+                primary = _action("run-ai-review", "Run AI Director review")
+        elif not keyframe_ready:
             phase = "keyframe"
             status = "ready_to_fire"
             headline = "Build the opening stage"
@@ -577,7 +864,32 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             if (scene_look or {}).get("plateUrl"):
                 artifact = {"type": "image", "url": scene_look.get("plateUrl"),
                             "label": "Current Scene Look"}
-        elif pending.get("voice"):
+        voice_auditions = _voice_audition_candidates(package_ledger)
+        if (not all_animations_current and keyframe_ready and pending.get("voice")
+                and shot_media.get("vo")):
+            phase = "voice"
+            status = "ready_to_review"
+            headline = "Do the performances sound true?"
+            summary = purpose
+            artifact = {"type": "audio", "url": shot_media.get("vo"),
+                        "label": "Complete voice performance"}
+            decisions = [
+                _action("accept-voice", "Accept"),
+                _action("iterate-voice", "Iterate", destructive=True),
+            ]
+        elif (not all_animations_current and keyframe_ready and voice_auditions
+              and not current.get("voice")):
+            phase = "voice"
+            status = "ready_to_review"
+            headline = "Choose the voice performance"
+            summary = purpose
+            artifact = {"type": "audio-set", "items": voice_auditions,
+                        "label": "Voice performance auditions"}
+            decisions = [
+                _action("accept-voice", "Accept"),
+                _action("iterate-voice", "Iterate", destructive=True),
+            ]
+        elif not all_animations_current and keyframe_ready and pending.get("voice"):
             phase = "voice"
             status = "ready_to_review"
             headline = "Do the performances sound true?"
@@ -588,7 +900,8 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                 _action("accept-voice", "Accept"),
                 _action("iterate-voice", "Iterate", destructive=True),
             ]
-        elif selected_state.get("talky") and not current.get("voice"):
+        elif (not all_animations_current and keyframe_ready and selected_state.get("talky")
+              and not current.get("voice")):
             phase = "voice"
             status = "ready_to_fire"
             headline = "Opening frame accepted. Create the performances."
@@ -599,7 +912,8 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             primary = _action("build-voice", "Create performances", paid=True)
             artifact = {"type": "image", "url": shot_media.get("keyframeApproved")
                         or shot_media.get("keyframe"), "label": "Accepted opening frame"}
-        elif pending.get("animation"):
+        elif (not all_animations_current and keyframe_ready and voice_ready
+              and pending.get("animation")):
             phase = "animation"
             status = "ready_to_review"
             headline = "Watch the result"
@@ -607,12 +921,16 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             candidates = shot_media.get("candidates") or []
             artifact = {"type": "video-set", "items": candidates,
                         "label": "Animation candidates"}
-            decisions = [
-                _action("accept-animation", "Accept", candidate=(candidates[0].get("n")
-                                                                  if len(candidates) == 1 else None)),
-                _action("iterate-animation", "Iterate", destructive=True),
-            ]
-        elif not current.get("animation"):
+            if _ai_creative_review(package_ledger, phase)["available"]:
+                decisions = [
+                    _action("accept-animation", "Accept", candidate=(candidates[0].get("n")
+                                                                      if len(candidates) == 1 else None)),
+                    _action("iterate-animation", "Iterate", destructive=True),
+                ]
+            else:
+                primary = _action("run-ai-review", "Run AI Director review")
+        elif (not all_animations_current and keyframe_ready and voice_ready
+              and not current.get("animation")):
             phase = "animation"
             previous_candidates = shot_media.get("candidates") or []
             stale_batch = package_ledger.get("batch") or {}
@@ -652,7 +970,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
                     "This does not submit a paid render."
                 )
                 primary = _action("prepare-render", "Compile prompt & show cost")
-        else:
+        elif not all_animations_current and keyframe_ready and voice_ready:
             phase = "final"
             status = "complete"
             headline = "Shot accepted"
@@ -710,6 +1028,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "episode": episode,
         "scene": scene,
         "sceneName": (package or {}).get("sceneName") or "Scene " + scene,
+        "sceneContinuityRules": _scene_continuity_rules(episode, scene),
         "status": status,
         "phase": phase,
         "headline": headline,
@@ -729,6 +1048,9 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             "continuityConstraints": shot.get("continuityConstraints") or [],
             "directorRecord": shot.get("directorRecord") or {},
             "characters": shot.get("charactersInFrame") or [],
+            "sourceType": shot.get("sourceType"),
+            "sourceShotId": shot.get("sourceShotId"),
+            "relayAnchorUrl": shot_media.get("relayAnchor"),
         } if shot_id else None),
         "progress": {"complete": completed, "total": len(all_shots)},
         "shots": shot_summaries,
@@ -744,6 +1066,12 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "scenePlateActions": _scene_plate_actions(phase, status),
         "advisories": _production_advisories(shot, phase, spend),
         "qualityReview": quality_review,
+        "humanReview": _human_review_contract(
+            phase=phase, status=status, state=state, selected_state=selected_state,
+            artifact=artifact, shot=shot, ledger=package_ledger,
+            quality_review=quality_review,
+            blocker=blocker, primary=primary, decisions=decisions,
+        ),
         "stages": stages,
         "lineageCurrent": bool((state.get("lineage") or {}).get("current")),
         "providerReady": bool((preflight.get("providerCapabilities") or {}).get("selectionReady")),
@@ -856,9 +1184,8 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
     model = cb_providers.video_model(require_enabled=True)
     cb_render._require_confirmed_billing(model.provider)
     package, _ = cb_render.load_pkg(scene, episode)
-    shot = cb_render._shot(package, shot_id)
-    if (shot.get("sourceType") != "relay" and
-            not _direction_current(scene, shot_id, "cinematography", episode)):
+    cb_render._shot(package, shot_id)
+    if not _direction_current(scene, shot_id, "cinematography", episode):
         log("DIRECTOR — refreshing current cinematography direction before render sealing")
         cb_render.prepare_department(scene, "cinematography", shot_id, episode, log)
     if not _direction_current(scene, shot_id, "animation", episode):

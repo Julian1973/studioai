@@ -11,6 +11,8 @@ No LLM or generation call is ever made (compile paths asserted under a tripwire)
     pytest test_cb_engine.py -q
 """
 import copy
+import inspect
+import json
 import pytest
 
 import cb_engine as E
@@ -18,7 +20,9 @@ import cb_engine as E
 
 # ── fixtures ────────────────────────────────────────────────────────────────────────────
 CFG = {"Fuzzby": {"sizeRank": 2, "avoid": "bee"}, "Zenny": {"sizeRank": 3, "avoid": "bee"},
-       "Keen": {"sizeRank": 5}, "Keen's Mum": {"sizeRank": 4}}
+       "Keen": {"sizeRank": 5, "species": "bear"},
+       "Keen's Mum": {"sizeRank": 4, "species": "bear"},
+       "Squeaky": {"species": "dolphin"}}
 
 BEATS = [
     {"beatCode": "1.B1", "comedyMode": "BIG", "storyBeat": "Fuzzby crashes.",
@@ -171,6 +175,15 @@ def test_continuity_cast_incomplete_blocks():
     # exercises a shot with real continuityIn, so it targets shots[1] instead.
     d.shots[1].continuityIn.characters = d.shots[1].continuityIn.characters[:1]
     assert "CONTINUITY_CAST_INCOMPLETE" in _codes(E.validate_scene_design(d, BEATS, CFG))
+
+
+def test_later_entrant_does_not_pollute_opening_continuity_cast():
+    d = _clean_design()
+    shot = d.shots[1]
+    shot.openingCharactersInFrame = [shot.charactersInFrame[0]]
+    shot.continuityIn.characters = shot.continuityIn.characters[:1]
+    assert "CONTINUITY_CAST_INCOMPLETE" not in _codes(
+        E.validate_scene_design(d, BEATS, CFG))
 
 
 def test_opener_continuity_in_not_cleared_blocks():
@@ -355,8 +368,7 @@ def test_option_d_internal_contract_preserved_provider_brief_lean():
     assert "let Zenny react broadly" not in brief             # not repeated at the provider
     assert "Hard constraints:" not in brief
     assert "the pose itself" not in brief and sh.purpose not in brief  # planning stays internal
-    assert wc <= E.MAX_SHOT_PROMPT_WORDS                      # hard ceiling
-    assert wc <= 170                                          # genuinely lean for a simple shot
+    assert wc == len(brief.split())
     # the brief carries exactly the Option-D sections
     assert E.OPENER_ANCHOR[:-1] in brief                      # exact opening anchor
     assert "Use @Audio1 as the only voice" in brief           # audio + mouth assignment
@@ -406,29 +418,19 @@ def test_cap_applies_only_to_conditionals_authored_never_dropped():
         assert t in line                                      # the five, always
 
 
-def test_word_overflow_fails_loud_with_no_llm_call(monkeypatch):
+def test_long_direction_is_preserved_and_makes_no_llm_call(monkeypatch):
     import cb_llm
     def _boom(*a, **k):
-        raise AssertionError("an over-budget contract must FAIL, never auto-compress via LLM")
+        raise AssertionError("prompt length must never invoke an LLM rewrite")
     monkeypatch.setattr(cb_llm, "structured", _boom)
     sh = _clean_design().shots[0]
     sh.performanceAssignment = " ".join(["Fuzzby weaves between the tall blossoms"] * 60)
-    with pytest.raises(ValueError, match="hard ceiling"):
-        E.compile_shot_contract(sh, {}, CFG)
+    prompt, word_count, _ = E.compile_shot_contract(sh, {}, CFG)
+    assert word_count == len(prompt.split())
+    assert sh.performanceAssignment in prompt
 
 
-# ── THE 2026-07-17 SECOND FIELD-BUDGET CORRECTION (Julian's explicit decision,
-# PIPELINE_CUTOVER_LEDGER.md §10): performanceAssignment's own isolated 50-word cap is
-# REMOVED from FIELD_WORD_BUDGETS. The four proofs below pin exactly what stays true and
-# what changes: the governing constraint is now the COMPILED brief's own real ceiling
-# (MAX_SHOT_PROMPT_WORDS) plus the COMPILABILITY check, never a second, field-isolated cap;
-# Law 6 and abstract-direction validation are untouched.
-def test_a_seventy_to_ninety_word_physical_performance_passes_within_the_210_word_brief():
-    """PROOF 1: a real, Gate-5-shaped 72-92-word physicalPerformance — exactly the length
-    range found on the real, approved Ep1 Scene 1 shots — must PASS validate_scene_design
-    (no FIELD_OVERBUDGET) whenever the COMPILED brief stays within the real 210-word
-    ceiling. FIELD_WORD_BUDGETS no longer has an entry for performanceAssignment at all."""
-    assert "performanceAssignment" not in E.FIELD_WORD_BUDGETS
+def test_long_physical_performance_passes_without_a_length_gate():
     d = _clean_design()
     # a real Gate-5-shaped body-first direction, 76 words — verbatim shape of the real
     # approved S1.SH1 physicalPerformance text this correction exists to unblock.
@@ -441,59 +443,47 @@ def test_a_seventy_to_ninety_word_physical_performance_passes_within_the_210_wor
         "chase the impact; her stillness makes his recovery look even louder.")
     assert 70 <= len(d.shots[0].performanceAssignment.split()) <= 92
     report = E.validate_scene_design(d, BEATS, CFG)
-    assert "FIELD_OVERBUDGET" not in _codes(report), report["issues"]
     assert report["passed"], report["issues"]
     prompt, wc, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
-    assert wc <= E.MAX_SHOT_PROMPT_WORDS                       # the real, governing ceiling
+    assert wc == len(prompt.split())
 
 
-def test_a_brief_exceeding_210_words_still_refuses():
-    """PROOF 2: the per-field cap is gone, but the OVERALL compiled-brief ceiling is not —
-    validate_scene_design's own COMPILABILITY check (a real compile_shot_contract call)
-    still fails a shot whose performanceAssignment is long enough to blow the real 210-word
-    ceiling, exactly as before this correction."""
+def test_long_brief_remains_compilable():
     d = _clean_design()
     d.shots[0].performanceAssignment = " ".join(
         ["Fuzzby weaves between the tall blossoms, wings beating hard, chest leading"] * 15)
-    with pytest.raises(ValueError, match="hard ceiling"):
-        E.compile_shot_contract(d.shots[0], {}, CFG)
+    prompt, word_count, _ = E.compile_shot_contract(d.shots[0], {}, CFG)
+    assert word_count == len(prompt.split())
+    assert d.shots[0].performanceAssignment in prompt
     report = E.validate_scene_design(d, BEATS, CFG)
     codes = _codes(report)
-    assert "SHOT_OVERBUDGET" in codes or "COMPILE_GUARD" in codes
-    assert not report["passed"]
+    assert "SHOT_OVERBUDGET" not in codes
+    assert "COMPILE_GUARD" not in codes
 
 
-def test_explicit_seedance_25_packed_unit_uses_its_bounded_long_form_ceiling():
+def test_explicit_seedance_25_packed_unit_preserves_long_form_direction():
     d = _clean_design()
     d.shots[0].beatCodes = ["1.B1"]
     d.shots[0].performanceAssignment = " ".join(
         ["Fuzzby weaves between the tall blossoms, wings beating hard, chest leading"] * 15)
 
     _prompt, words, _slots = E.compile_shot_contract(d.shots[0], {}, CFG)
-    assert E.MAX_SHOT_PROMPT_WORDS < words <= E.MAX_PACKED_UNIT_PROMPT_WORDS
+    assert words == len(_prompt.split())
     report = E.validate_scene_design(d, BEATS, CFG)
     assert report["passed"], report["issues"]
 
 
-def test_verbatim_dialogue_inside_performance_assignment_still_refuses():
-    """PROOF 3: Law 6 is untouched by the field-budget removal — performanceAssignment
-    quoting a locked line verbatim still fails compile_shot_contract's own
-    _assert_no_spoken_words, exactly as before, regardless of word count."""
+def test_render_performance_assignment_may_carry_locked_dialogue():
+    """Render performance may carry the locked line; keyframes remain dialogue-free."""
     d = _clean_design()
     d.shots[0].performanceAssignment = (
         'Fuzzby commits fully, chest leading into the recovery, and declares "Nailed it." '
         "as the whole beat turns on it.")
-    with pytest.raises(AssertionError, match="LAW 6 VIOLATION"):
-        E.compile_shot_contract(d.shots[0], {}, CFG)
+    prompt, _words, _slots = E.compile_shot_contract(d.shots[0], {}, CFG)
+    assert "Nailed it." in prompt
 
 
-def test_field_word_budgets_now_empty_and_generic_lookup_still_safe():
-    """The removal is structural, not a special-case: FIELD_WORD_BUDGETS is now an empty
-    dict, and both call sites that read it (_field_rejections' repair-loop check,
-    validate_scene_design's own FIELD_OVERBUDGET check) use .get() against it — neither
-    raises, and neither field-level budget check can ever fire again for ANY field name,
-    proving no replacement field limit was introduced anywhere."""
-    assert E.FIELD_WORD_BUDGETS == {}
+def test_field_rejections_ignore_length_for_every_field():
     long_text = " ".join(["word"] * 200)
     assert E._field_rejections("performanceAssignment", long_text) == []
     assert E._field_rejections("visualPayoff", long_text) == []
@@ -603,7 +593,7 @@ def test_keyframe_prompt_omits_continuity_paragraph_when_nothing_inherited():
     kf, wc, _ = E.compile_keyframe_prompt(shot, {}, CFG)
     assert "continuity in" not in kf.lower()
     assert "never composition or geography" in kf.lower()   # the plate's job line still prints
-    assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
+    assert wc == len(kf.split())
 
 
 def test_keyframe_prompt_prints_continuity_paragraph_when_real_state_inherited():
@@ -628,7 +618,7 @@ def test_keyframe_prompt_is_reference_first_and_appearance_free():
     kf, wc, _ = E.compile_keyframe_prompt(_clean_design().shots[0], {}, CFG)
     assert "wider" not in kf.lower()                  # the room-to-breathe law is GONE
     assert "never composition or geography" in kf.lower()   # the plate's job is explicitly scoped
-    assert wc <= E.MAX_KEYFRAME_PROMPT_WORDS
+    assert wc == len(kf.split())
     # rule 5: the compiler's own fixed text never describes appearance
     for banned in ("yellow", "stripe", "spectacles", "glasses", "fur", "fuzzy"):
         assert banned not in kf.lower()
@@ -710,12 +700,42 @@ def test_name_binding_never_fires_inside_longer_cast_name():
     assert ")'s Mum" not in text
 
 
+def test_cross_species_binding_uses_canonical_species_without_invented_size_comparison():
+    sh = _shot(chars=("Keen", "Squeaky"))
+    sh.openingPose = "Keen stands in the sailboat while Squeaky waits below the waterline."
+    text, _ = E._inline_bindings(sh.openingPose, sh, CFG, start=1)
+    assert "Keen (@图1, bear)" in text
+    assert "Squeaky (@图2, dolphin)" in text
+    assert "larger bear" not in text
+    assert "smaller bear" not in text
+
+
 def test_duration_bounds_enforced_by_schema():
     assert _shot(dur=30.0).durationSec == 30.0
     with pytest.raises(Exception):
         _shot(dur=31.0)
     with pytest.raises(Exception):
         _shot(dur=2.0)
+
+
+def test_source_storyboard_record_carries_dependency_signature(tmp_path):
+    """A generated package must be approvable without a stale-signature dead end."""
+    path = tmp_path / "storyboard.json"
+    signature = {"kind": "scene-storyboard-snapshot", "digest": "signed-storyboard"}
+    path.write_text(json.dumps({"approvalState": "generated-pending-human-review",
+                                "inputSignature": signature}))
+
+    record = E._source_storyboard_record(path)
+
+    assert record["inputSignature"] == signature
+    assert record["approvalState"] == "generated-pending-human-review"
+    assert record["sha256"] and record["md5"]
+
+
+def test_storyboard_snapshot_signature_shape_matches_state_gate():
+    source = inspect.getsource(E.compile_scene_package)
+    assert '"beatPackageDigest": (d.get("contentSignature") or {}).get("digest")' in source
+    assert '"sourceBeatIds": [b.get("sourceBeatId") for b in beats]' in source
 
 
 if __name__ == "__main__":

@@ -77,7 +77,7 @@ End state: Fuzzby hangs off balance above the bent flower while Zenny remains on
 [Stage 2]
 Continue from the previous stage: identities, positions and the bent flower remain unchanged.
 Primary event: the stem rebounds, Fuzzby recovers into a proud pose, and Zenny answers with a restrained eye movement.
-Dialogue placement: FUZZBY speaks in English: {Nailed it.}
+Dialogue placement: FUZZBY, speaks in English with contained pride: {Nailed it.}
 End state: Fuzzby holds the pose screen left while Zenny remains screen right with her mouth closed.
 [Maintain Consistency]
 Keep both identities, relative scale, flower ownership, screen direction, light direction and audio relationships stable.
@@ -127,7 +127,7 @@ End state: the bent flower holds Fuzzby visibly off balance.
 Stage 2: 8-18s [Recovery and denial]
 Continue from the previous stage: identity, bent flower and screen direction remain unchanged.
 Action/Expression: the stem rebounds, Fuzzby catches himself and converts the mistake into a proud pose.
-Dialogue placement: FUZZBY speaks in English: {Nailed it.}
+Dialogue placement: FUZZBY, speaks in English with contained pride: {Nailed it.}
 Emotion/Camera Analysis: a restrained push and delayed eye flick reveal that he knows exactly what happened.
 End state: Fuzzby holds the readable pose screen left while Zenny remains silent off his eyeline.
 [Global Supplement]
@@ -159,6 +159,40 @@ Use @Audio1 exactly for Fuzzby. Zenny remains silent with her mouth closed; pres
     assert "requires at least one image or video" in result["guideSemantics"]["audioOnly"]
     assert result["authorityScores"]["official-guide"]["score"] == result["authorityScores"]["official-guide"]["maximum"]
     assert result["authorityScores"]["studio-policy"]["score"] == result["authorityScores"]["studio-policy"]["maximum"]
+
+
+def test_seedance_contract_accepts_camera_and_shot_plan_grammar():
+    prompt = """AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions.
+[Multimodal Reference Layer]
+@图1 is the first frame. It defines opening composition and state; exclude later action and redesign.
+@Audio1 is the sole source of Keen's English voice, performance and timing.
+[One-Sentence Summary]
+Keen looks from Mum to the open water, swallows his fear, and says the brave thing.
+[Global Settings]
+Style: Feature-quality stylized 3D CGI with soft fur, warm light, shallow depth of field and emotionally warm atmosphere.
+[Camera and Shot Plan]
+Shot 1: Camera: Medium two-shot at Keen's eye height, a very slight settling push toward Keen. Action: Keen looks from Mum to the open water, swallows, then speaks via @Audio1. Performance: Keen keeps his gaze outward; Mum listens silently with her mouth closed. End state: Keen holds beside Mum, still facing the water. Dialogue placement: Keen, careful and brave: {Like you said... it's part of growing up.} The pose holds a full beat after the line ends.
+[Global Supplement]
+Exactly one Keen and one Keen's Mum throughout; no duplicates of either character.
+[Audio]
+Use @Audio1 as the timing and mouth-shape guide for dialogue performance. Final approved dialogue will be restored in post. No extra voices. No music. No watermark."""
+    result = cb_prompt_lab.analyze_seedance_prompt_contract(
+        prompt,
+        reference_contract=[
+            {"assetTag": "@图1", "role": "opening_frame"},
+            {"assetTag": "@Audio1", "role": "audio"},
+        ],
+        duration_sec=9,
+        dialogue_lines=[{
+            "speaker": "Keen",
+            "text": "Like you said… it’s part of growing up.",
+        }],
+        stage_plan=[],
+    )
+
+    assert result["status"] == "ready"
+    assert next(check for check in result["checks"]
+                if check["code"] == "stages")["label"] == "Consecutive directed shots"
 
 
 def test_seedance_authoring_contract_returns_specific_repairs_without_gating():

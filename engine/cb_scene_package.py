@@ -168,7 +168,8 @@ def _continuity_constraints(beat: dict[str, Any]) -> list[dict[str, str]]:
     if "keen" in text_l:
         if "wristband" not in text_l and beat_index >= 6:
             state = (
-                "Keen is now wearing the inherited wristbands as vacant leather bands. "
+                "Keen is now wearing both inherited wristbands as aged-gold open cuffs "
+                "with blank settings, one cuff on each wrist. "
                 "No crystals, no aquamarine stones and no glow appear in or on them."
             )
         elif "wristband" not in text_l:
@@ -179,7 +180,8 @@ def _continuity_constraints(beat: dict[str, Any]) -> list[dict[str, str]]:
         elif "slips them onto his wrists" in text_l or "puts the wristbands on" in text_l:
             state = (
                 "Keen may put on the inherited wristbands in this shot. They are worn, "
-                "vacant bands only: no crystals, no aquamarine stones and no glow."
+                "aged-gold open cuffs with blank settings only: no crystals, no "
+                "aquamarine stones and no glow."
             )
         elif "wristbands land in keen" in text_l or "holds the wristbands" in text_l:
             state = (
@@ -189,7 +191,8 @@ def _continuity_constraints(beat: dict[str, Any]) -> list[dict[str, str]]:
             )
         elif "brings out" in text_l or "father" in text_l:
             state = (
-                "Mum introduces the inherited wristbands as vacant bands. Keen's wrists "
+                "Mum introduces the inherited wristbands as aged-gold open cuffs with "
+                "blank settings. Keen's wrists "
                 "are still bare in this shot. No crystals, aquamarine stones or glow."
             )
         else:
@@ -203,6 +206,36 @@ def _continuity_constraints(beat: dict[str, Any]) -> list[dict[str, str]]:
             "severity": "critical",
         })
     return constraints
+
+
+def _reference_slots(characters: list[str], *, opener: bool,
+                     has_dialogue: bool) -> tuple[dict[str, str], dict[str, str]]:
+    """Create complete provider-role bindings when a shot first enters production.
+
+    Direction prose is not an attachment. Every generated package therefore carries the
+    character identities and Scene Look explicitly; opener animation also carries its
+    approved opening frame, and dialogue shots reserve the audio authority slot.
+    """
+    cast = [str(name).strip() for name in characters if str(name).strip()]
+    keyframe = {f"@图{index}": name for index, name in enumerate(cast, start=1)}
+    keyframe[f"@图{len(keyframe) + 1}"] = "scene plate"
+
+    animation: dict[str, str] = {}
+    if opener:
+        animation["@图1"] = "opening keyframe"
+        next_index = 2
+    else:
+        animation["@图1"] = "previous shot final frame"
+        animation["@图2"] = "scene plate"
+        next_index = 3
+    for name in cast:
+        animation[f"@图{next_index}"] = name
+        next_index += 1
+    if opener:
+        animation[f"@图{next_index}"] = "scene plate"
+    if has_dialogue:
+        animation["@Audio1"] = "voice track"
+    return animation, keyframe
 
 
 def build_scene_package(scene: str | int, episode: str = "Ep1") -> tuple[dict[str, Any], pathlib.Path]:
@@ -223,6 +256,10 @@ def build_scene_package(scene: str | int, episode: str = "Ep1") -> tuple[dict[st
         shot_id = f"{beat_code}.S1"
         previous_shot_id = shots[-1]["shotId"] if shots else None
         duration = _duration_for_beat(beat)
+        dialogue_lines = _dialogue_lines(beat)
+        reference_slots, keyframe_reference_slots = _reference_slots(
+            beat.get("characters") or [], opener=idx == 1,
+            has_dialogue=bool(dialogue_lines))
         shot = {
             "shotId": shot_id,
             "sceneNumber": int(scene_s) if scene_s.isdigit() else scene_s,
@@ -241,7 +278,10 @@ def build_scene_package(scene: str | int, episode: str = "Ep1") -> tuple[dict[st
             "kidRead": beat.get("kidRead"),
             "adultRead": beat.get("adultRead"),
             "action": _action_text(beat),
-            "dialogueLines": _dialogue_lines(beat),
+            "dialogueLines": dialogue_lines,
+            "referenceSlots": reference_slots,
+            "keyframeReferenceSlots": keyframe_reference_slots,
+            "openingCharactersInFrame": beat.get("characters") or [],
             "continuityConstraints": _continuity_constraints(beat),
             "directorRecord": {
                 "storyBeat": beat.get("storyBeat"),
@@ -249,7 +289,7 @@ def build_scene_package(scene: str | int, episode: str = "Ep1") -> tuple[dict[st
                 "kidRead": beat.get("kidRead"),
                 "adultRead": beat.get("adultRead"),
                 "action": _action_text(beat),
-                "dialogueLines": _dialogue_lines(beat),
+                "dialogueLines": dialogue_lines,
                 "continuityConstraints": _continuity_constraints(beat),
             },
             "sourceBeatId": beat.get("sourceBeatId"),

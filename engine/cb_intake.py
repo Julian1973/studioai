@@ -873,6 +873,81 @@ def decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julian
         raise Refused(str(exc)) from exc
 
 
+def rebase_canon_lock(episode="Ep1", reviewed_by="Julian", log=print):
+    """Carry an unchanged, approved beat package onto a newly approved canon lock.
+
+    This is deliberately narrower than Story & Direction. It can change provenance only:
+    the immutable script, exact source-event partition and content signature must all still
+    verify before the new canon profile is attached. Creative text is never regenerated or
+    rewritten by this operation.
+    """
+    current = script_record_for(episode)
+    canon_lock = cb_canon.require_locked(episode, root=ROOT)
+    paths = canonical_package_glob(episode)
+    if not paths:
+        raise Refused(f"REFUSED — {episode} has no approved beat package to rebase")
+    pkg_path = paths[-1]
+    pkg, pkg_digest = cb_db.read_json_document(ROOT, pkg_path)
+    if _package_script_version(pkg) != current["scriptVersionId"]:
+        raise Refused("REFUSED — canon rebase cannot cross an immutable script version")
+    source_report = cb_lineage.validate_beat_package_source_contract(pkg)
+    if not source_report["ok"]:
+        raise Refused("REFUSED — canon rebase source-event contract is stale: " +
+                      "; ".join(source_report["issues"][:5]))
+    content_signature = cb_lineage.beat_package_signature(pkg)
+    if pkg.get("contentSignature") != content_signature:
+        raise Refused("REFUSED — canon rebase cannot sign changed creative content")
+
+    vision_path = episode_vision_path(episode)
+    vision = vision_digest = None
+    if vision_path.exists():
+        vision, vision_digest = cb_db.read_json_document(ROOT, vision_path)
+        if (vision.get("sourceBeatPackageSignature") != content_signature or
+                (vision.get("sourceScript") or {}).get("scriptVersionId") !=
+                current["scriptVersionId"]):
+            raise Refused("REFUSED — episode vision does not match the unchanged beat package")
+
+    archive = OUT / "archive" / "canon_rebases"
+    stamp = _now().replace(":", "").replace("-", "")
+    backup = archive / f"{pkg_path.stem}_{stamp}_{pkg_digest[:12]}.json"
+    cb_db.atomic_write_json(ROOT, backup, pkg)
+
+    story_inputs = {
+        "scriptVersionId": current["scriptVersionId"],
+        "canonProfileDigest": canon_lock["profileDigests"]["story"],
+    }
+    pkg["inputSignature"] = cb_lineage.dependency_signature(
+        "beat-package-input", story_inputs)
+    pkg["canonLock"] = {
+        "manifestDigest": canon_lock["manifestDigest"],
+        "profile": "story",
+        "profileDigest": canon_lock["profileDigests"]["story"],
+        "sourceHashes": cb_canon.source_hashes("story", ROOT),
+    }
+    pkg["provenanceRebase"] = {
+        "at": _now(), "reviewedBy": reviewed_by,
+        "reason": "Approved canon changed; script, source events and creative content unchanged.",
+        "previousPackageDigest": pkg_digest,
+    }
+    cb_db.atomic_write_json(ROOT, pkg_path, pkg, expected_digest=pkg_digest)
+
+    if vision is not None:
+        vision_inputs = cb_lineage.episode_vision_inputs(
+            current["scriptVersionId"], content_signature,
+            canon_lock["profileDigests"]["story"])
+        vision["inputSignature"] = cb_lineage.dependency_signature(
+            "episode-vision", vision_inputs)
+        vision["canonLock"] = pkg["canonLock"]
+        vision["provenanceRebase"] = pkg["provenanceRebase"]
+        cb_db.atomic_write_json(
+            ROOT, vision_path, vision, expected_digest=vision_digest)
+
+    log(f"CANON REBASE APPROVED — {episode} by {reviewed_by}; creative beat content unchanged")
+    return {"outcome": "rebased", "canonicalPackage": str(pkg_path.relative_to(ROOT)),
+            "backup": str(backup.relative_to(ROOT)),
+            "contentSignature": content_signature}
+
+
 def _backfill_source_occurrences(beats, events, script_version_id):
     """Attach source identities only after old cuts prove an exact event partition."""
     migrated = json.loads(json.dumps(beats))
@@ -1037,6 +1112,8 @@ if __name__ == "__main__":
         apply = "--apply" in sys.argv[3:]
         print(json.dumps(migrate_source_occurrence_contract(ep, dry_run=not apply), indent=1,
                          ensure_ascii=False))
+    elif cmd == "rebase-canon":
+        print(json.dumps(rebase_canon_lock(ep), indent=1, ensure_ascii=False))
     else:
         print(__doc__)
         sys.exit(1)

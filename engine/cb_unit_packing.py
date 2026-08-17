@@ -15,6 +15,18 @@ COMPLEXITY_KEYWORDS = (
     "flower", "stamen", "gymnastic", "physical comedy", "fast", "drone",
 )
 
+EMOTIONAL_CONTINUITY_KEYWORDS = (
+    "goodbye", "letting go", "leaving home", "pride", "worry", "worried",
+    "reassurance", "brave", "courage", "swallows", "hesitates", "quiet",
+    "tender", "warmth", "mother", "mum", "parent", "child",
+)
+
+MERGE_LOSS_KEYWORDS = (
+    "location", "time", "reference", "reset", "new anchor", "new geography",
+    "new camera", "new point of view", "new pov", "reveal", "wristband",
+    "object handoff", "screen direction", "continuity break", "complexity",
+)
+
 BOUNDARY_REASONS = {
     "scene_end",
     "duration_limit",
@@ -65,6 +77,8 @@ def _unit_row(unit):
                             for key in ("purpose", "primaryEvent", "observableEndState"))
     complexity_hits = sorted({word for word in COMPLEXITY_KEYWORDS
                               if word in text.casefold()})
+    emotional_hits = sorted({word for word in EMOTIONAL_CONTINUITY_KEYWORDS
+                             if word in text.casefold()})
     return {
         "shotId": str(_value(unit, "shotId") or "").strip(),
         "beatIds": list(_value(unit, "beatIds", []) or []),
@@ -72,11 +86,17 @@ def _unit_row(unit):
         "stageCount": len(stages),
         "internalShotCount": len(internal_shots),
         "complexitySignals": complexity_hits,
+        "emotionalContinuitySignals": emotional_hits,
         "providerBoundaryReason": str(
             _value(unit, "providerBoundaryReason") or "").strip(),
         "providerBoundaryExplanation": str(
             _value(unit, "providerBoundaryExplanation") or "").strip(),
     }
+
+
+def _has_merge_loss_explanation(boundary):
+    text = str(boundary.get("explanation") or "").casefold()
+    return any(keyword in text for keyword in MERGE_LOSS_KEYWORDS)
 
 
 def audit_units(units):
@@ -175,7 +195,23 @@ def audit_units(units):
             protected.append({**boundary, "status": "protected"})
         elif reason in JUDGEMENT_SPLIT_REASONS:
             if combined <= MAX_UNIT_SECONDS:
-                merge_reviews.append({**boundary, "status": "showrunner-review"})
+                emotional_pair = bool(
+                    row["emotionalContinuitySignals"] and
+                    next_row["emotionalContinuitySignals"] and
+                    not row["complexitySignals"] and
+                    not next_row["complexitySignals"])
+                if emotional_pair and not _has_merge_loss_explanation(boundary):
+                    blocking.append({
+                        "code": "AVOIDABLE_EMOTIONAL_SPLIT",
+                        "shotId": shot_id,
+                        "message": (
+                            f"{shot_id} and {boundary['toUnit']} total {combined}s, share "
+                            "emotional-continuity signals and fit inside one Seedance request. "
+                            "Merge them unless the boundary explanation names a concrete loss "
+                            "from remaining continuous."),
+                    })
+                else:
+                    merge_reviews.append({**boundary, "status": "showrunner-review"})
             else:
                 protected.append({**boundary, "status": "protected"})
 
@@ -190,8 +226,8 @@ def audit_units(units):
                  if NEAR_FULL_SECONDS <= row["targetDurationSec"] < MAX_UNIT_SECONDS]
     short = [row["shotId"] for row in rows if row["targetDurationSec"] < NEAR_FULL_SECONDS]
     signature_rows = [{key: row[key] for key in (
-        "shotId", "beatIds", "targetDurationSec", "stageCount", "internalShotCount",
-        "providerBoundaryReason", "providerBoundaryExplanation")} for row in rows]
+            "shotId", "beatIds", "targetDurationSec", "stageCount", "internalShotCount",
+            "providerBoundaryReason", "providerBoundaryExplanation")} for row in rows]
     digest = hashlib.sha256(json.dumps(
         signature_rows, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
@@ -226,6 +262,10 @@ def audit_units(units):
             "splitWhen": (
                 "Split protected units for dense physical comedy, exact reveals, route-sensitive "
                 "causality, major geography changes, or more than one competing camera job."),
+            "emotionalContinuity": (
+                "Quiet emotional beats in the same place with the same cast should stay in one "
+                "longer unit up to 30s unless the cut protects a concrete new reference, "
+                "geography, object handoff, point of view or complexity boundary."),
             "continuity": (
                 f"Every unit must end on a usable held handoff frame of about "
                 f"{HANDOFF_HOLD_SECONDS:g}s; the next unit starts from that approved frame."),

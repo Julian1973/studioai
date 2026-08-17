@@ -50,6 +50,8 @@
     explicitLocation: false,
     explicitBeat: false,
     keyframeZoom: 1,
+    postWorkspace: null,
+    postTimer: null,
   };
 
   const STUDIO_BUILD = document.querySelector('meta[name="studio-build"]')?.content || "unknown";
@@ -262,33 +264,13 @@
   const propRoster = [
     ["Aida's Rose Quartz Pendant", "2, 6, 9", "Generated", "A smooth polished rose quartz crystal pendant hanging on a fine natural cord, pale semi-translucent pink stone with a soft warm inner glow."],
     ["Crystal Singing Bowl and Wand", "2", "Draft", "A clear polished quartz crystal singing bowl with a padded cloth-tipped wooden wand, isolated on a neutral grey studio backdrop."],
-    ["Keen Bare-Wrist State", "3", "Required", "Scene 3 opening state for Keen: wrists and forearms completely bare. No wristbands, bands, bracelets, cuffs, straps, crystals or glow."],
-    ["Keen's Father's Wristbands — Vacant", "3, 4, 7, 8", "Required", "A pair of worn inherited leather wristbands with empty settings only. No crystals, no aquamarine stones and no glow in Scenes 3, 4, 7 or 8."],
+    ["Keen Bare-Wrist State", "Before approved 3.B3", "Required", "Keen remains bare-wristed until Mum visibly fits both cuffs in the approved 3.B3 take. No wristbands, bands, bracelets, cuffs, straps, crystals or glow appear before that fitting."],
+    ["Keen's Father's Wristbands — Vacant", "After approved 3.B3–9.B2", "Required", "Exactly two inherited aged-gold open cuffs, one on each wrist, with blank settings. No crystals, aquamarine stones or glow until Aida visibly installs the crystals."],
     ["Keen's Father's Wristbands — Aquamarine Charged", "9, 10", "Locked Later", "The same inherited wristbands only after the end-of-episode gift beat: aquamarine stones seated in the bands with a controlled crystal glow."],
     ["Keen's Small Sailboat", "3, 4, 7", "Draft", "A compact wooden single-mast sailboat with plain white sail, rope rigging and natural wood grain."],
     ["Keen's Satchel", "3, 4", "Draft", "A small worn canvas traveller's satchel with buckled flap closure and shoulder strap."],
     ["Drift Net", "7", "Draft", "A ragged discarded fishing drift net, frayed and tangled with weathered dark grey-green mesh."],
   ];
-
-  const sceneContinuityRules = {
-    "3": [
-      {
-        label: "Keen starts bare-wrist",
-        value: "Scene 3 departure starts with Keen's wrists and forearms completely bare: no wristbands, bracelets, cuffs, straps, crystals or glow.",
-        severity: "critical",
-      },
-      {
-        label: "Vacant wristbands only",
-        value: "When Keen's inherited wristbands appear in Scene 3, they are empty leather bands only: no aquamarine stones, no crystal inserts and no glow.",
-        severity: "critical",
-      },
-      {
-        label: "Crystal version locked later",
-        value: "Aquamarine stones and glowing charged wristbands are locked to the end-of-episode gift state, not Scene 3.",
-        severity: "critical",
-      },
-    ],
-  };
 
   const locationRoster = [
     ["Deep Within the Rainforest", "Warm, lush, playful, gently ominous as storm approaches", "1", "A dense tropical rainforest interior with towering flowers, drifting pollen, dappled golden sunlight and a cooler storm shift."],
@@ -497,6 +479,7 @@
     $("#workspace").scrollTo({ top: 0, behavior: "smooth" });
     if (view === "pipeline") renderPipeline();
     if (view === "assets") renderAssetLibraryView();
+    if (view === "review") loadPostWorkspace();
   }
 
   function openShot(scene, shotId) {
@@ -630,7 +613,11 @@
 
   function agentKey(session) {
     if (!session) return null;
-    return `${session.episode}:${session.scene}:${session.selectedShotId || "-"}`;
+    const artifact = session.artifact || {};
+    const aiReview = session.humanReview?.currentDecision?.aiReview || {};
+    return [session.episode, session.scene, session.selectedShotId || "-", session.phase,
+      session.status, artifact.url || "", (artifact.items || []).length,
+      aiReview.verdict || "not-reviewed", aiReview.preparedAt || ""].join(":");
   }
 
   function renderStudioAgent() {
@@ -1061,9 +1048,9 @@
   }
 
   function visiblePromptRequest(session) {
-    // Show newly compiled direction before the provider request attached to older clips.
-    // Render eligibility still reads providerRequest directly, so this cannot authorize spend.
-    return session.inspector?.preparedAnimationRequest || session.inspector?.providerRequest || null;
+    // A sealed current request is authoritative at WATCH. The prepared projection is the
+    // pre-spend fallback only; preferring it after sealing can hide passing checker reports.
+    return session.inspector?.providerRequest || session.inspector?.preparedAnimationRequest || null;
   }
 
   async function copyVisiblePrompt(button) {
@@ -1111,6 +1098,30 @@
     });
   }
 
+  function scoreValue(value, decimals = 2) {
+    return Number.isFinite(Number(value)) ? Number(value).toFixed(decimals) : "—";
+  }
+
+  function renderScoreTile(label, score, maximum, verdict, stateClass = "") {
+    return `<div class="watch-score-tile ${esc(stateClass)}">
+      <span>${esc(label)}</span>
+      <strong>${esc(scoreValue(score))}<small>/${esc(maximum || 10)}</small></strong>
+      <b>${esc(verdict || "BLOCK")}</b>
+    </div>`;
+  }
+
+  function renderOutcomeValidation(request) {
+    const translation = request?.creativeTranslation || {};
+    const ready = translation.ready !== false && !(translation.errors || []).length;
+    const errors = (translation.errors || []).slice(0, 3);
+    return `<div class="watch-outcome ${ready ? "pass" : "block"}">
+      <strong>${ready ? "Outcome validated" : "Outcome blocked"}</strong>
+      ${errors.length
+        ? errors.map((error) => `<p>${esc(error)}</p>`).join("")
+        : "<p>Director beat, emotional outcome and continuity handoff are aligned with the compiled WATCH prompt.</p>"}
+    </div>`;
+  }
+
   function renderEmissionConformance(request) {
     if (request?.kind !== "animation") return "";
     const report = request.conformance || {
@@ -1125,20 +1136,138 @@
       }],
     };
     const passed = report.verdict === "PASS";
-    const score = Number.isFinite(Number(report.score)) ? Number(report.score).toFixed(2) : "—";
+    const seedance = request.seedancePromptContract || {
+      score: null,
+      maximum: 13,
+      status: "missing",
+      summary: "The Seedance authoring checker did not supply a report.",
+      repairActions: ["Recompile this shot before rendering."],
+    };
+    const quality = request.qualityGate || {
+      score: null,
+      maximum: 20,
+      needsRevision: true,
+      criticalFailures: ["quality-gate-report-missing"],
+    };
+    const seedancePassed = String(seedance.status || "").toLowerCase() === "ready" ||
+      Number(seedance.score || 0) >= Number(seedance.maximum || 13);
+    const qualityPassed = !quality.needsRevision && !(quality.criticalFailures || []).length;
     const findings = (report.findings || []).slice(0, 3);
-    return `<div class="emission-conformance ${passed ? "pass" : "block"}" aria-label="Emission pre-flight">
-      <div class="emission-conformance-score">
-        <span>Emission pre-flight</span>
-        <strong>${esc(score)}<small>/${esc(report.maximum || 10)}</small></strong>
-        <b>${esc(report.verdict || "BLOCK")}</b>
+    const repairs = (seedance.repairActions || []).slice(0, 3);
+    const criticalFailures = (quality.criticalFailures || []).slice(0, 3);
+    return `<div class="emission-conformance ${passed && seedancePassed && qualityPassed ? "pass" : "block"}" aria-label="WATCH pre-flight">
+      <div class="watch-score-grid">
+        ${renderScoreTile("Seedance score", seedance.score, seedance.maximum || 13, seedancePassed ? "READY" : "BLOCK", seedancePassed ? "pass" : "block")}
+        ${renderScoreTile("Emission score", report.score, report.maximum || 10, report.verdict || "BLOCK", passed ? "pass" : "block")}
+        ${renderScoreTile("Craft score", quality.score, quality.maximum || 20, qualityPassed ? "PASS" : "REVIEW", qualityPassed ? "pass" : "block")}
       </div>
       <div class="emission-conformance-findings">
+        <p><strong>Seedance outcome</strong><span>${esc(seedance.summary || "Prompt matches every required authoring check.")}</span>${repairs.length ? `<em>${esc(repairs.join(" · "))}</em>` : ""}</p>
+        ${renderOutcomeValidation(request)}
+        ${criticalFailures.length ? `<p><strong>Craft gate</strong><span>${esc(criticalFailures.join(" · "))}</span></p>` : ""}
         ${findings.length
           ? findings.map((finding) => `<p><strong>${esc(finding.rule || finding.severity || "Finding")}</strong><span>${esc(finding.message || "Review required.")}</span>${finding.fix ? `<em>${esc(finding.fix)}</em>` : ""}</p>`).join("")
           : "<p><strong>Clear</strong><span>No blocking findings.</span></p>"}
       </div>
+      </div>`;
+  }
+
+  function actionById(session, id) {
+    return [session.primaryAction, ...(session.decisionActions || [])]
+      .filter(Boolean)
+      .find((action) => action.id === id);
+  }
+
+  function renderWatchResult(session) {
+    const artifact = session.artifact || {};
+    if (session.status === "rendering") return renderProgress(session);
+    if (artifact.type === "video-set" && (artifact.items || []).length) {
+      const items = artifact.items;
+      if (!app.selectedCandidate) app.selectedCandidate = items[0].n;
+      return `<section class="watch-render-result" aria-label="Returned render candidates">
+        <div class="watch-flow-head"><span>Returned render</span><strong>${items.length} candidate${items.length === 1 ? "" : "s"}</strong></div>
+        <div class="watch-candidate-grid">
+          ${items.map((item) => `<article class="watch-candidate ${Number(item.n) === Number(app.selectedCandidate) ? "selected" : ""}">
+            <header><strong>Candidate ${esc(item.n)}</strong><span>${Number(item.n) === Number(app.selectedCandidate) ? "Selected" : "Ready"}</span></header>
+            <video controls playsinline preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></video>
+            <button type="button" data-watch-candidate="${esc(item.n)}">${Number(item.n) === Number(app.selectedCandidate) ? "Selected for approval" : `Select candidate ${esc(item.n)}`}</button>
+          </article>`).join("")}
+        </div>
+      </section>`;
+    }
+    if (artifact.type === "video" && artifact.url) {
+      return `<section class="watch-render-result" aria-label="Returned render">
+        <div class="watch-flow-head"><span>Returned render</span><strong>${esc(artifact.label || "Accepted animation")}</strong></div>
+        <video controls playsinline preload="metadata" src="${esc(artifact.url)}?v=${Date.now()}"></video>
+      </section>`;
+    }
+    return `<section class="watch-render-empty" aria-label="No returned render yet">
+      <strong>No render returned yet</strong>
+      <p>When the provider finishes, the clip appears here for your accept/refire decision.</p>
+    </section>`;
+  }
+
+  function renderWatchVerdictControls(session) {
+    const accept = actionById(session, "accept-animation");
+    const refire = actionById(session, "iterate-animation");
+    if (!accept && !refire) return "";
+    const savedNote = session.savedRetakeNotes?.[`${session.selectedShotId}:3`] || "";
+    return `<section class="watch-verdict-panel" aria-label="WATCH verdict">
+      <label>Refire notes<textarea data-watch-note placeholder="What needs to change? Plain English is enough.">${esc(savedNote)}</textarea></label>
+      <div class="watch-verdict-actions">
+        ${accept ? `<button type="button" class="primary" data-watch-action="${esc(accept.id)}">${esc(directorActionLabel(accept))}</button>` : ""}
+        ${refire ? `<button type="button" class="secondary danger" data-watch-retake="${esc(refire.id)}">Refire with notes</button>` : ""}
+      </div>
+    </section>`;
+  }
+
+  function renderWatchFlow(session, request) {
+    const isWatch = request?.kind === "animation" || ["animation", "review", "final"].includes(session.phase);
+    if (!isWatch) return "";
+    const renderAction = actionById(session, "approve-spend");
+    const cancelAction = actionById(session, "cancel-spend");
+    const spend = session.spendDisclosure || {};
+    const renderPanel = renderAction ? `<section class="watch-action-panel" aria-label="Render action">
+      <div class="watch-flow-head"><span>Next action</span><strong>Fire WATCH render</strong></div>
+      <p>The prompt and references above are the sealed Seedance request. Press Render only after the score and outcome evidence are acceptable.</p>
+      <div class="render-ready-meta">
+        <span>${esc(spend.providerModelId || session.providerModel || "Seedance")}</span>
+        <span>${esc(spend.resolution || "480p")}</span>
+        <span>${esc(Number(spend.shotDurationSec || session.shot?.durationSec || 0))}s</span>
+        <span>${esc(spend.candidateCount || 1)} candidate${Number(spend.candidateCount || 1) === 1 ? "" : "s"}</span>
+        <span>max $${Number(spend.maxBatchCostUsd || 0).toFixed(2)}</span>
+      </div>
+      <div class="watch-fire-actions">
+        <button type="button" class="primary" data-watch-action="${esc(renderAction.id)}">Render ${esc(spend.resolution || "480p")}</button>
+        ${cancelAction ? `<button type="button" class="secondary" data-watch-action="${esc(cancelAction.id)}">Not yet</button>` : ""}
+      </div>
+    </section>` : "";
+    return `<div class="watch-flow" aria-label="WATCH workflow">
+      ${renderPanel}
+      ${renderWatchResult(session)}
+      ${renderWatchVerdictControls(session)}
     </div>`;
+  }
+
+  function bindWatchFlowActions(root) {
+    root.querySelectorAll("[data-watch-candidate]").forEach((button) => button.addEventListener("click", () => {
+      app.selectedCandidate = Number(button.dataset.watchCandidate);
+      renderShotInputs(app.session);
+    }));
+    root.querySelectorAll("[data-watch-action]").forEach((button) => button.addEventListener("click", () => {
+      const action = actionById(app.session || {}, button.dataset.watchAction);
+      if (!action) return toast("That WATCH action changed. Refreshing current state.", true), loadSession();
+      button.disabled = true;
+      handleAction(action);
+    }));
+    root.querySelectorAll("[data-watch-retake]").forEach((button) => button.addEventListener("click", () => {
+      const note = root.querySelector("[data-watch-note]")?.value.trim();
+      if (!note) return toast("Write the retake diagnosis first.", true);
+      const action = actionById(app.session || {}, button.dataset.watchRetake);
+      if (!action) return toast("That WATCH retake changed. Refreshing current state.", true), loadSession();
+      button.disabled = true;
+      submitAction(action, note);
+    }));
   }
 
   function renderShotInputs(session) {
@@ -1150,7 +1279,10 @@
       return;
     }
     const stage = currentReferenceStage(session);
-    const referencesCurrent = app.inlineReferencesKey === `${session.episode}:${session.scene}:${session.selectedShotId}`;
+    const referenceKeyPrefix = `${session.episode}:${session.scene}:${session.selectedShotId}:`;
+    const referencesCurrent = Boolean(
+      app.inlineReferencesKey && app.inlineReferencesKey.startsWith(referenceKeyPrefix)
+    );
     const stageData = referencesCurrent ? (app.inlineReferences?.[stage] || {}) : {};
     const refs = referencesCurrent
       ? (stageData.references || [])
@@ -1204,12 +1336,14 @@
     ${showingPreparedAnimation ? `<div class="prepared-prompt-notice"><strong>WATCH direction ready</strong><span>${session.phase === "animation" ? "HEAR is approved. Compile the current provider request to inspect its final prompt and cost before rendering." : "Creative direction is ready to inspect. Complete HEAR before render preparation or spend."}</span></div>` : ""}
       ${renderEmissionConformance(providerRequest)}
       <pre>${esc(prompt)}</pre>
+      ${renderWatchFlow(session, providerRequest)}
     </section>
     <section class="shot-handoff-rule">
       <strong>Continuity rule</strong>
       <p>If animation is approved, the final accepted frame becomes the handoff truth for the next shot in this scene. The next shot still uses its own scene plate, character turnarounds and prompt.</p>
     </section>`;
     bindPromptCopyButtons(host);
+    bindWatchFlowActions(host);
   }
 
   async function loadInlineShotContext(session) {
@@ -1495,7 +1629,7 @@
       aidasrosequartzpendant: "/cb-seed/assets/CB_Aida_anchor.png",
       crystalsingingbowlandwand: "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.jpeg",
       keenbarewriststate: "/cb-seed/assets/characters/Keen/CB_Keen_nocuffs_front-back.jpeg",
-      keensfatherswristbandsvacant: "/cb-seed/assets/ep1/CB_Keen_wristband_vacant.jpeg",
+      keensfatherswristbandsvacant: "/cb-seed/assets/ep1/CB_Keen_turnaround_vacant_cuffs.png",
       keensfatherswristbandsaquamarinecharged: "/cb-seed/assets/ep1/CB_Keen_wristband_crystal.jpeg",
       keenssmallsailboat: "/cb-seed/assets/ep1/CB_Scene_KeenPier_1.jpeg",
       keenssatchel: "/cb-seed/assets/CB_Keen_anchor.jpeg",
@@ -2091,7 +2225,7 @@
 
   function renderContinuityConstraints(session) {
     const shotRules = session.shot?.continuityConstraints || session.shot?.directorRecord?.continuityConstraints || [];
-    const sceneRules = sceneContinuityRules[String(session.scene || "")] || [];
+    const sceneRules = session.sceneContinuityRules || [];
     const constraints = [...sceneRules, ...shotRules];
     if (!constraints.length) return "";
     return `<section class="shot-continuity-brief" aria-label="Shot continuity constraints">
@@ -2109,7 +2243,7 @@
   function renderShotStoryboardBrief(session) {
     const shot = session.shot || {};
     const dialogue = (shot.dialogueLines || shot.directorRecord?.dialogueLines || [])
-      .map((line) => `${line.speaker || "Speaker"}: ${line.text || line.line || ""}`.trim())
+      .map((line) => `${line.speaker || "Speaker"}: ${line.exactText || line.text || line.line || ""}`.trim())
       .filter(Boolean);
     const rows = [
       ["Story beat", shot.storyBeat || shot.purpose],
@@ -2354,13 +2488,24 @@
       return renderProgress(session);
     }
     if (stage === 1) {
-      const url = session.phase === "keyframe" && artifact.type === "image" ? artifact.url : selected.keyframeUrl;
+      const isRelay = session.shot?.sourceType === "relay";
+      const url = session.phase === "keyframe" && artifact.type === "image" ? artifact.url : selected.keyframeUrl || session.shot?.relayAnchorUrl;
       return url ? `<button type="button" class="relay-keyframe-preview" data-keyframe-preview="${esc(url)}" aria-label="Enlarge keyframe" title="Enlarge keyframe">
-        <img src="${esc(url)}" alt="Shot keyframe for sign-off">
-        <span>View full size</span>
-      </button>` : `<div class="relay-empty">No keyframe has been created yet.</div>`;
+        <img src="${esc(url)}" alt="${esc(isRelay ? "Inherited opening frame from previous approved shot" : "Shot keyframe for sign-off")}">
+        <span>${esc(isRelay ? `Inherited from ${session.shot?.sourceShotId || "previous shot"}` : "View full size")}</span>
+      </button>` : `<div class="relay-empty">${esc(isRelay ? "No inherited final frame is available from the previous approved shot." : "No keyframe has been created yet.")}</div>`;
     }
     if (stage === 2) {
+      if (artifact.type === "audio-set" && (artifact.items || []).length) {
+        return `<div class="relay-candidate-grid voice-audition-relay">
+          ${artifact.items.map((item) => `<article class="relay-candidate ${item.selected ? "selected" : ""}">
+            <header><strong>${esc(item.label || `Voice take ${item.n}`)}</strong><span>${item.primary ? "Primary direction" : `Take ${esc(item.takeNumber || item.n)}`}</span></header>
+            ${item.performedText ? `<code>${esc(item.performedText)}</code>` : ""}
+            <div class="relay-audio-player">${audioWaveformMarkup(item.label || "Voice performance")}<audio controls preload="metadata" src="${esc(item.url)}?v=${Date.now()}"></audio></div>
+            <button type="button" data-voice-audition="${esc(item.candidateId || "")}" ${item.selected ? "disabled" : ""}>${item.selected ? "Direction chosen" : "Choose this voice"}</button>
+          </article>`).join("")}
+        </div>`;
+      }
       const url = session.phase === "voice" && artifact.type === "audio" ? artifact.url : selected.voiceUrl;
       if (url) return `<div class="relay-audio-player">${audioWaveformMarkup("Approved voice performance")}<audio controls preload="metadata" src="${esc(url)}"></audio></div>`;
       return `<div class="relay-empty">${relayStage(session) >= 2
@@ -2426,6 +2571,55 @@
     </article>`;
   }
 
+  function renderHumanEye(session) {
+    const review = session.humanReview || {};
+    const stages = review.stages || [];
+    if (!stages.length) return "";
+    const decision = review.currentDecision || {};
+    const active = stages.find((stage) => stage.current) || stages[0];
+    const aiReview = decision.aiReview || {};
+    const verdictCopy = {
+      "recommend-approve": "RECOMMEND APPROVE",
+      revise: "REVISE",
+      block: "BLOCK",
+      stale: "REVIEW STALE",
+      "not-run": "REVIEW NOT RUN",
+      "human-review": "JULIAN REVIEWS",
+      reviewed: "REVIEWED",
+    };
+    const topDimensions = (aiReview.dimensions || [])
+      .filter((item) => item.score !== undefined && item.score !== null)
+      .sort((a, b) => Number(a.score) - Number(b.score))
+      .slice(0, 3);
+    const stateCopy = {
+      signed: "Signed", decision: "Your decision", working: "Working",
+      current: "Current", locked: "Locked", complete: "Complete",
+      not_required: "No dialogue", recheck: "Recheck",
+    };
+    return `<section class="human-eye" aria-label="Human creative review">
+      <div class="human-eye-head">
+        <div><span class="stage-label">AI DIRECTOR + FINAL HUMAN EYE · ${esc(active.label)}</span><h3>The agent reviews. You decide.</h3></div>
+        <span class="human-eye-authority">${esc(review.authority || "Human")} decides</span>
+      </div>
+      <div class="human-eye-chain">
+        ${stages.map((stage) => `<div class="human-eye-stage ${esc(stage.status)} ${stage.current ? "active" : ""}"><span>${esc(stage.label)}</span><strong>${esc(stateCopy[stage.status] || stage.status)}</strong></div>`).join("")}
+      </div>
+      <div class="human-eye-brief">
+        <div><span>What must land</span><p>${esc(decision.intendedOutcome || active.intent || session.summary || "The approved story outcome must be visible in the artifact.")}</p></div>
+        <div><span>What you are judging</span><p>${esc(decision.artifactVisible ? (session.artifact?.label || "The current visible artifact") : "Nothing yet. Approval stays unavailable until the artifact is visible.")}</p></div>
+        <div class="ai-director-review">
+          <span>AI Director recommendation · advisory only</span>
+          <strong class="ai-review-verdict ${esc(aiReview.verdict || "not-run")}">${esc(verdictCopy[aiReview.verdict] || aiReview.verdict || "REVIEW NOT RUN")}</strong>
+          <p>${esc(aiReview.summary || "The AI Director has not reviewed the actual artifact yet.")}</p>
+          ${aiReview.actualRead ? `<p><b>What it actually reads as:</b> ${esc(aiReview.actualRead)}</p>` : ""}
+          ${aiReview.recommendedCandidate ? `<p><b>Recommended take:</b> ${esc(aiReview.recommendedCandidate)}</p>` : ""}
+          ${topDimensions.length ? `<ul>${topDimensions.map((item) => `<li><b>${esc(item.label)} ${esc(item.score)}/2:</b> ${esc(item.diagnosis || item.observed || "Reviewed")}</li>`).join("")}</ul>` : `<ul>${(decision.evidence || []).map((item) => `<li>${esc(item)}</li>`).join("") || "<li>No automated evidence yet.</li>"}</ul>`}
+        </div>
+      </div>
+      <p class="human-eye-rule">${esc(review.rule || "The AI Director recommends; only Julian's decision is final.")}</p>
+    </section>`;
+  }
+
   function renderSignoffRelay(session) {
     const host = $("#scene-workbench");
     if (!host) return;
@@ -2441,6 +2635,7 @@
     const shotNumber = selected.number || 1;
     const stage = relayStage(session);
     host.innerHTML = `<div class="relay-orientation">Scene ${esc(session.scene)} of ${sceneTotal} · Shot ${shotNumber} · Sign-off ${stage} of 3</div>
+      ${renderHumanEye(session)}
       <div class="workbench-top relay-heading">
         <div><span class="stage-label">${esc(session.sceneName || `Scene ${session.scene}`)}</span><h2>${esc(session.selectedShotId || "Scene direction")}</h2><p>${esc(session.shot?.purpose || session.summary || "")}</p></div>
         <span class="workbench-status ${esc(session.phase)}">${esc(session.status === "ready_to_review" ? "YOUR DECISION" : session.status === "rendering" ? "WORKING" : "READY")}</span>
@@ -3968,7 +4163,13 @@
 
   function renderReview(session) {
     const shots = session.shots || [];
+    if (app.postWorkspace?.available) {
+      const verdict = app.postWorkspace.verdict?.verdict;
+      $("#review-count").textContent = `Scenes 1-3 · ${postTime(app.postWorkspace.durationSec)} post master`;
+      $("#master-band").innerHTML = `<div><span class="stage-label">CURRENT POST MASTER</span><h2>${verdict === "approved" ? "Signed by Julian" : verdict === "rejected" ? "Returned to post" : "95% pass ready for your review"}</h2></div><span class="master-status">${app.postWorkspace.qc?.passed ? "Technical pass" : "QC required"}</span>`;
+    } else {
     $("#review-count").textContent = `${session.progress?.complete || 0} of ${session.progress?.total || 0} shots accepted`;
+    }
     $("#review-reel").innerHTML = shots.map((shot) => `
       <div class="review-shot">
         ${shot.acceptedUrl ? `<video controls playsinline preload="metadata" src="${esc(shot.acceptedUrl)}"></video>` : `<div class="review-placeholder">${shot.state === "complete" ? "Accepted take unavailable" : "No accepted take"}</div>`}
@@ -3976,7 +4177,146 @@
         <span class="review-state ${shot.state === "complete" ? "complete" : ""}">${shot.state === "complete" ? "Accepted" : statusText(shot.state)}</span>
       </div>`).join("") || '<div class="reference-unavailable">No production shots yet.</div>';
     const allAccepted = shots.length > 0 && shots.every((shot) => shot.state === "complete");
-    $("#master-band").innerHTML = `<div><span class="stage-label">FINAL MASTER</span><h2>${allAccepted ? "Ready for quality review" : "Waiting for accepted animation"}</h2></div><span class="master-status">${allAccepted ? "Next" : "Not ready"}</span>`;
+    if (!app.postWorkspace?.available) $("#master-band").innerHTML = `<div><span class="stage-label">FINAL MASTER</span><h2>${allAccepted ? "Ready for quality review" : "Waiting for accepted animation"}</h2></div><span class="master-status">${allAccepted ? "Next" : "Not ready"}</span>`;
+  }
+
+  function postTime(seconds) {
+    const total = Math.max(0, Math.round(Number(seconds) || 0));
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+  }
+
+  function renderPostWorkspace(payload) {
+    const panel = $("#post-workspace");
+    if (!panel) return;
+    if (!payload?.available) {
+      $("#review-reel").hidden = false;
+      panel.innerHTML = `<div class="post-empty"><strong>No post candidate yet</strong><p>${esc(payload?.message || "Build the accepted picture into a post-production candidate first.")}</p></div>`;
+      return;
+    }
+    $("#review-reel").hidden = true;
+    $("#review-count").textContent = `Scenes 1-3 · ${postTime(payload.durationSec)} post master`;
+    $("#master-band").innerHTML = `<div><span class="stage-label">CURRENT POST MASTER</span><h2>${payload.verdict?.verdict === "approved" ? "Signed by Julian" : payload.verdict?.verdict === "rejected" ? "Returned to post" : "95% pass ready for your review"}</h2></div><span class="master-status">${payload.qc?.passed ? "Technical pass" : "QC required"}</span>`;
+    const qc = payload.qc || {};
+    const policy = payload.mixPolicy || {};
+    const job = [...(payload.jobs || [])].sort((a, b) => Number(b.started || 0) - Number(a.started || 0))[0];
+    const running = job?.status === "running" || job?.status === "finalizing";
+    const approved = payload.verdict?.verdict === "approved";
+    const rejected = payload.verdict?.verdict === "rejected";
+    const musicPercent = Math.round(Number(policy.musicLinearGain ?? 0.18) * 100);
+    const ambiencePercent = Math.round(Number(policy.ambienceLinearGain ?? 0.04) * 100);
+    const findings = [
+      { label: "Integrated loudness", value: qc.integratedLufs != null ? `${Number(qc.integratedLufs).toFixed(2)} LUFS` : "Pending", pass: Math.abs(Number(qc.integratedLufs) - Number(policy.targetIntegratedLufs || -14)) <= .5 },
+      { label: "True peak", value: qc.truePeakDbtp != null ? `${Number(qc.truePeakDbtp).toFixed(2)} dBTP` : "Pending", pass: Number(qc.truePeakDbtp) <= -1 },
+      { label: "Picture lock", value: qc.pictureLocked ? "Unchanged" : "Not proven", pass: qc.pictureLocked === true },
+      { label: "Playback integrity", value: qc.decodePassed && Number(qc.blackFrameEvents) === 0 ? "Passed" : "Check required", pass: qc.decodePassed === true && Number(qc.blackFrameEvents) === 0 },
+    ];
+    const postHumanReview = {
+      authority: "Julian",
+      rule: "Technical checks advise. Only Julian can approve or return the finished programme.",
+      stages: [
+        { label: "DIRECTION", status: "signed" }, { label: "SEE", status: "signed" },
+        { label: "HEAR", status: "signed" }, { label: "WATCH", status: "signed" },
+        { label: "QC", status: qc.passed ? "signed" : "decision" },
+        { label: "POST", status: approved ? "signed" : "decision", current: true },
+      ],
+      currentDecision: {
+        intendedOutcome: "The episode must play as one emotionally coherent, technically clean finished programme.",
+        artifactVisible: Boolean(payload.masterUrl),
+        evidence: [
+          qc.passed ? "Technical post preflight passed." : "Technical post preflight needs attention.",
+          payload.masterUrl ? "The current post master is visible and playable." : "No post master is visible yet.",
+        ],
+      },
+    };
+    panel.innerHTML = `
+      ${renderHumanEye({ humanReview: postHumanReview, artifact: { label: "Current post master" }, summary: "Final episode review" })}
+      <div class="post-orientation">
+        <div><span class="stage-label">95% POST PASS</span><h2>Scenes 1-3 review master</h2><p>${esc(payload.scope || "Approved picture with post sound and mastering.")} · ${postTime(payload.durationSec)}</p></div>
+        <span class="post-verdict ${approved ? "approved" : rejected ? "rejected" : ""}">${approved ? "Approved by Julian" : rejected ? "Returned to post" : "Julian sign-off required"}</span>
+      </div>
+      ${running ? `<div class="post-activity"><span class="loading-mark" aria-hidden="true"></span><div><strong>Building the new mix</strong><p>${esc(job.step || "Working...")} · ${formatRenderElapsed(job.started)}</p></div></div>` : job?.status === "failed" ? `<div class="post-activity failed"><strong>Post build failed</strong><p>${esc(job.error || job.step || "Open the build log for details.")}</p></div>` : ""}
+      <div class="post-preview-layout">
+        <div class="post-monitor">
+          <div class="post-monitor-head"><strong>Programme monitor</strong><div class="post-ab"><button type="button" class="active" data-post-source="${esc(payload.masterUrl)}">Post master</button>${payload.originalUrl ? `<button type="button" data-post-source="${esc(payload.originalUrl)}">Native A/B</button>` : ""}</div></div>
+          <video id="post-master-player" controls playsinline preload="metadata" src="${esc(payload.masterUrl)}"></video>
+        </div>
+        <div class="post-qc">
+          <span class="stage-label">DELIVERY QC</span>
+          <h3>${qc.passed ? "Technical pass" : "Technical review required"}</h3>
+          ${findings.map((item) => `<div class="post-qc-row"><span class="post-qc-dot ${item.pass ? "pass" : ""}"></span><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>`).join("")}
+          <p>Picture hash ${esc(String(payload.masterSha256 || "").slice(0, 12))}</p>
+        </div>
+      </div>
+      <div class="post-controls-layout">
+        <section class="post-mixer" aria-labelledby="post-mixer-title">
+          <div class="post-section-head"><div><span class="stage-label">MIX CONTROL</span><h3 id="post-mixer-title">Music, atmosphere and delivery</h3></div><span>-14 LUFS streaming master</span></div>
+          <label><span>Music <output id="post-music-output">${musicPercent}%</output></span><input id="post-music-gain" type="range" min="0" max="40" step="1" value="${musicPercent}"></label>
+          <label><span>Ambience <output id="post-ambience-output">${ambiencePercent}%</output></span><input id="post-ambience-gain" type="range" min="0" max="20" step="1" value="${ambiencePercent}"></label>
+          <label><span>Mastering target</span><select id="post-target-lufs"><option value="-14" ${Number(policy.targetIntegratedLufs) === -14 ? "selected" : ""}>Streaming · -14 LUFS</option><option value="-16" ${Number(policy.targetIntegratedLufs) === -16 ? "selected" : ""}>Dialogue-led · -16 LUFS</option><option value="-23" ${Number(policy.targetIntegratedLufs) === -23 ? "selected" : ""}>Broadcast · -23 LUFS</option></select></label>
+          <button type="button" class="primary" id="post-rebuild" ${running ? "disabled" : ""}>${running ? "Building..." : "Build new mix"}</button>
+          <p class="post-policy">Native lip-synced dialogue and picture stay locked. Rebuilds change only music, ambience and final mastering.</p>
+        </section>
+        <section class="post-audio-assets">
+          <span class="stage-label">SCENE CUES</span><h3>Score and ambience</h3>
+          <div class="post-cue-list">${(payload.sceneCues || []).map((cue) => `<div class="post-cue"><strong>${esc(String(cue.scene || "Scene").replace(/^scene/i, "Scene "))}</strong>${cue.musicUrl ? `<label>Music<audio controls preload="none" src="${esc(cue.musicUrl)}"></audio></label>` : ""}${cue.ambienceUrl ? `<label>Ambience<audio controls preload="none" src="${esc(cue.ambienceUrl)}"></audio></label>` : ""}</div>`).join("") || "No scene cues registered."}</div>
+        </section>
+      </div>
+      <section class="post-stems"><div class="post-section-head"><div><span class="stage-label">EDITABLE DELIVERY</span><h3>24-bit stems</h3></div><span>CapCut, Resolve or final dub stage</span></div><div class="post-stem-grid">${(payload.stems || []).map((stem) => `<div><strong>${esc(stem.label)}</strong><audio controls preload="none" src="${esc(stem.url)}"></audio><a href="${esc(stem.url)}" download>Download</a></div>`).join("")}</div></section>
+      <section class="post-signoff">
+        <div><span class="stage-label">FINAL HUMAN DECISION</span><h3>${approved ? "This exact master is signed" : "Does this play as the episode should?"}</h3><p>Technical checks can clear the file. Only Julian can approve the creative finish.</p></div>
+        <label><span>Post notes</span><textarea id="post-review-note" placeholder="What should change? Plain English is enough.">${esc(payload.verdict?.note || "")}</textarea></label>
+        <div class="post-signoff-actions"><button type="button" class="secondary" id="post-reject" ${running ? "disabled" : ""}>Return to post</button><button type="button" class="primary" id="post-approve" ${running || !qc.passed ? "disabled" : ""}>Approve 95% pass</button></div>
+      </section>`;
+
+    panel.querySelectorAll("[data-post-source]").forEach((button) => button.addEventListener("click", () => {
+      const player = $("#post-master-player");
+      const currentTime = player.currentTime;
+      const wasPlaying = !player.paused;
+      panel.querySelectorAll("[data-post-source]").forEach((item) => item.classList.toggle("active", item === button));
+      player.src = button.dataset.postSource;
+      player.addEventListener("loadedmetadata", () => { player.currentTime = Math.min(currentTime, player.duration || currentTime); if (wasPlaying) player.play(); }, { once: true });
+    }));
+    const bindRange = (id, output) => $(id)?.addEventListener("input", (event) => { $(output).textContent = `${event.target.value}%`; });
+    bindRange("#post-music-gain", "#post-music-output");
+    bindRange("#post-ambience-gain", "#post-ambience-output");
+    $("#post-rebuild")?.addEventListener("click", rebuildPostMix);
+    $("#post-approve")?.addEventListener("click", () => decidePost("approve"));
+    $("#post-reject")?.addEventListener("click", () => decidePost("reject"));
+  }
+
+  async function loadPostWorkspace() {
+    clearTimeout(app.postTimer);
+    try {
+      app.postWorkspace = await api(`/api/post-workspace?episode=${encodeURIComponent(app.episode)}`, undefined, 60000);
+      renderPostWorkspace(app.postWorkspace);
+      const active = (app.postWorkspace.jobs || []).some((job) => ["running", "finalizing"].includes(job.status));
+      if (active && app.view === "review") app.postTimer = setTimeout(loadPostWorkspace, 1500);
+    } catch (error) {
+      $("#post-workspace").innerHTML = `<div class="post-empty"><strong>Post desk unavailable</strong><p>${esc(error.message)}</p><button type="button" class="secondary" id="post-retry">Retry</button></div>`;
+      $("#post-retry")?.addEventListener("click", loadPostWorkspace);
+      if (app.view === "review") app.postTimer = setTimeout(loadPostWorkspace, 2000);
+    }
+  }
+
+  async function rebuildPostMix() {
+    const button = $("#post-rebuild");
+    button.disabled = true;
+    button.textContent = "Starting...";
+    try {
+      await api("/api/post-workspace", { method: "POST", body: JSON.stringify({ episode: app.episode, action: "rebuild", musicGain: Number($("#post-music-gain").value) / 100, ambienceGain: Number($("#post-ambience-gain").value) / 100, targetLufs: Number($("#post-target-lufs").value) }) }, 60000);
+      toast("Post mix started. Progress is live here.");
+      loadPostWorkspace();
+    } catch (error) { toast(error.message, true); button.disabled = false; button.textContent = "Build new mix"; }
+  }
+
+  async function decidePost(action) {
+    const note = $("#post-review-note")?.value.trim() || "";
+    if (action === "reject" && !note) { toast("Tell the post team what needs to change.", true); $("#post-review-note")?.focus(); return; }
+    try {
+      app.postWorkspace = await api("/api/post-workspace", { method: "POST", body: JSON.stringify({ episode: app.episode, action, note, reviewer: "Julian" }) }, 60000);
+      renderPostWorkspace(app.postWorkspace);
+      toast(action === "approve" ? "This exact post master is signed." : "Returned to post with your notes.");
+    } catch (error) { toast(error.message, true); }
   }
 
   async function loadRoster() {

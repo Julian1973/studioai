@@ -5,15 +5,113 @@
       "character": "Fuzzby",
       "archetypeId": "false-triumph-button",
       "recipe": {
-        "recipeId": "C",
-        "label": "Casual cover",
-        "performedText": "[casual] Nailed it.",
-        "primary": false,
+        "recipeId": "6B1S1-FUZZBY-01W",
+        "label": "Primary: restrained post-impact breath",
+        "performedText": "[exhales] I meant to do that.",
+        "primary": true,
+        "takesCount": 1
+      },
+      "sourceShotId": "6.B1.S1",
+      "approvedCandidate": "f5c228be-6B1S1-FUZZBY-01W-1",
+      "approvedBy": "Julian"
+    },
+    "Keen's Mum::held-heart": {
+      "character": "Keen's Mum",
+      "archetypeId": "held-heart",
+      "recipe": {
+        "recipeId": "primary",
+        "label": "Contained held-heart confession",
+        "performedText": "[softly] I know… [exhales] it’s just… this is a big step.",
+        "primary": true,
         "takesCount": 3
       },
-      "sourceShotId": "S1.SH1A",
-      "approvedCandidate": "0a6635c8-C-1",
+      "sourceShotId": "3.B1.S1",
+      "approvedCandidate": "2b59d1e3-primary-1",
       "approvedBy": "Julian"
+    },
+    "Keen::false-triumph-button": {
+      "character": "Keen",
+      "archetypeId": "false-triumph-button",
+      "recipe": {
+        "recipeId": "primary",
+        "label": "Neat performed confidence",
+        "performedText": "[confident] I’ve got this, Mum.",
+        "primary": true,
+        "takesCount": 3
+      },
+      "sourceShotId": "3.B1.S1",
+      "approvedCandidate": "c28f34b8-primary-2",
+      "approvedBy": "Julian"
+    },
+    "Keen::held-heart": {
+      "character": "Keen",
+      "archetypeId": "held-heart",
+      "recipe": {
+        "recipeId": "primary",
+        "label": "fragile self-coaching",
+        "performedText": "[softly] I’ve got this… [exhales] I’ve got this…",
+        "primary": true,
+        "takesCount": 3
+      },
+      "sourceShotId": "4.B5.S1",
+      "approvedCandidate": "325f3d2e-primary-1",
+      "approvedBy": "Codex under Julian scene-level delegation"
+    },
+    "Keen::chaos-chant": {
+      "character": "Keen",
+      "archetypeId": "chaos-chant",
+      "recipe": {
+        "recipeId": "3.B7.S1-k3-primary",
+        "label": "Understands every chirp",
+        "performedText": "[playfully] Nice to meet you too.",
+        "primary": true,
+        "takesCount": 3
+      },
+      "sourceShotId": "3.B7.S1",
+      "approvedCandidate": "4a5de2e5-3.B7.S1-k3-primary-1",
+      "approvedBy": "Julian"
+    },
+    "Keen::quiet-warning": {
+      "character": "Keen",
+      "archetypeId": "quiet-warning",
+      "recipe": {
+        "recipeId": "primary",
+        "label": "hesitation into resolve",
+        "performedText": "[hesitates] Okay… lead on, Squeaky!",
+        "primary": true,
+        "takesCount": 3
+      },
+      "sourceShotId": "4.B5.S1",
+      "approvedCandidate": "613ff994-primary-1",
+      "approvedBy": "Codex under Julian scene-level delegation"
+    },
+    "Fuzzby::chaos-chant": {
+      "character": "Fuzzby",
+      "archetypeId": "chaos-chant",
+      "recipe": {
+        "recipeId": "6B1S1-FUZZBY-04A",
+        "label": "Primary: grateful explosion",
+        "performedText": "[gasps] IN TROUBLE! YES! THAT!",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "6.B1.S1",
+      "approvedCandidate": "1425f22b-6B1S1-FUZZBY-04A-1",
+      "approvedBy": "Codex-director-pass"
+    },
+    "Zenny::quiet-warning": {
+      "character": "Zenny",
+      "archetypeId": "quiet-warning",
+      "recipe": {
+        "recipeId": "6B1S1-ZENNY-03A",
+        "label": "Primary: calm completion",
+        "performedText": "[quietly] In trouble.",
+        "primary": true,
+        "takesCount": 2
+      },
+      "sourceShotId": "6.B1.S1",
+      "approvedCandidate": "3c46b61b-6B1S1-ZENNY-03A-2",
+      "approvedBy": "Codex-director-pass"
     }
   }
 }

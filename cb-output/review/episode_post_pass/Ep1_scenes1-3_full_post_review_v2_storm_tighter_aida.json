@@ -1,0 +1,79 @@
+{
+  "status": "review-only-human-approval-required",
+  "scope": "approved picture through Scene 3; Scene 4 has no approved WATCH render",
+  "master": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/Ep1_scenes1-3_full_post_review_v2_storm_tighter_aida.mp4",
+  "durationSec": 169.5,
+  "masterSha256": "d3cb36b123a6cd721b32930de62256cfd5b194995f77a31efbce62977ade27b3",
+  "sources": [
+    {
+      "name": "s1a",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_S1.SH1A_import_20260811T075732_49a715c743.mp4",
+      "sha256": "49a715c74380f7ebf00742e7abf150462eebe7236924321aca1d90dca3b0b96d",
+      "gainDb": 4.0,
+      "trim": null
+    },
+    {
+      "name": "s1b",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_S1.SH1B_import_20260811T080746_3a4997c147.mp4",
+      "sha256": "3a4997c1475a9c9bd502fb95c1fc99b00b99502f86a59a4b0b65c5214df94678",
+      "gainDb": 4.0,
+      "trim": null
+    },
+    {
+      "name": "s1c",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_S1.SH1C_import_20260811T080824_bd67c41103.mp4",
+      "sha256": "bd67c4110395f9ccc1623296c00d03ae730e2382583b915bfa65b5ed2e4c8a86",
+      "gainDb": 2.0,
+      "trim": null
+    },
+    {
+      "name": "s1d",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_S1.SH2_c2.mp4",
+      "sha256": "a165e613419499d6ac602f23963fb18598341263354e6c344990d72537ff93bf",
+      "gainDb": 3.0,
+      "trim": null
+    },
+    {
+      "name": "s2a",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B1.S1_import_20260811T210039_ef0c243bc1.mp4",
+      "sha256": "ef0c243bc14947b88533b9f317027a0c2a11bab43ee70f709efd38a6ba1e87bd",
+      "gainDb": 14.0,
+      "trim": [
+        1.0,
+        null
+      ]
+    },
+    {
+      "name": "s2b",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B2.S1_import_20260811T210127_73777ed51a.mp4",
+      "sha256": "73777ed51aa71011354d8c9a19945f3b22cc5a661b94565346db2185f9b99136",
+      "gainDb": 14.0,
+      "trim": null
+    },
+    {
+      "name": "s2c",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/shots/Ep1_2.B3.S1_import_20260811T210127_9e0026f64f.mp4",
+      "sha256": "9e0026f64fc2fabb03d74ff2c1b8ac8e8d5918dfff274d1ca4e6da070af4629d",
+      "gainDb": 10.0,
+      "trim": [
+        0.0,
+        8.0
+      ]
+    },
+    {
+      "name": "s3",
+      "path": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/scene3_pace_pass/Ep1_scene3_sync_safe_cut_v6_no_nice_to_meet_you.mp4",
+      "sha256": "b424fe92f177146331d6554c641d56afc41f3d2f338546c62b4f790c18e7ce23",
+      "gainDb": 2.0,
+      "trim": null
+    }
+  ],
+  "policies": {
+    "lipSync": "native picture and audio remain paired; no redub or time stretch",
+    "scene1Joins": "hard cuts",
+    "scene2Joins": "0.65 second dissolves for vision transitions",
+    "betweenScenes": "0.5 second dissolves",
+    "delivery": "854x480, 24fps, Rec.709, H.264/AAC 48kHz stereo",
+    "loudness": "-16 LUFS target, -1.5 dBTP ceiling, LRA 11"
+  }
+}

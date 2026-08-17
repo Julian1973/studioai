@@ -7,10 +7,14 @@ all UI/API surfaces resolve through this module instead of re-reading sidecars.
 from __future__ import annotations
 
 import hashlib
+import functools
+import fcntl
 import json
 import mimetypes
+import os
 import pathlib
 import shutil
+import tempfile
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import quote
@@ -62,11 +66,34 @@ def _read() -> dict[str, Any]:
     return data
 
 
+def _locked_registry(func):
+    """Serialize each registry read-modify-write transaction across server threads/processes."""
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        REGISTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = REGISTRY_PATH.with_suffix(".lock")
+        with lock_path.open("a+", encoding="utf-8") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                return func(*args, **kwargs)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    return wrapped
+
+
 def _write(data: dict[str, Any]) -> None:
     REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
-    tmp = REGISTRY_PATH.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    tmp.replace(REGISTRY_PATH)
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f".{REGISTRY_PATH.name}.", suffix=".tmp", dir=REGISTRY_DIR)
+    tmp = pathlib.Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        tmp.replace(REGISTRY_PATH)
+    finally:
+        tmp.unlink(missing_ok=True)
 
 
 def url_for_path(path_value: str | pathlib.Path | None) -> str | None:
@@ -128,6 +155,7 @@ def ensure_displayable_copy(source: str | pathlib.Path, label: str) -> pathlib.P
     return dst.resolve()
 
 
+@_locked_registry
 def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pathlib.Path,
                    shot_id: str | None = None, role: str | None = None,
                    status: str = "approved", label: str | None = None,
@@ -184,6 +212,7 @@ def register_asset(*, episode: str, scene: str | int, kind: str, path: str | pat
     return rec
 
 
+@_locked_registry
 def remove_asset(asset_id: str) -> dict[str, Any]:
     asset_id = str(asset_id or "").strip()
     if not asset_id:
@@ -203,6 +232,7 @@ def remove_asset(asset_id: str) -> dict[str, Any]:
     return {"removed": removed, "assetCount": len(data["assets"])}
 
 
+@_locked_registry
 def update_asset(asset_id: str, *, label: str | None = None, scene: str | int | None = None,
                  kind: str | None = None, role: str | None = None,
                  status: str | None = None, path: str | pathlib.Path | None = None,
@@ -328,8 +358,16 @@ def migrate_existing(episode: str = "Ep1") -> dict[str, Any]:
             # full batch finishes. Preserve the old transportCandidates surface
             # through the registry instead of making the UI read batch internals.
             transport = ((led.get("batch") or {}).get("transportCandidates") or {})
+            current_candidate_paths = {
+                str(pathlib.Path(value).expanduser().resolve())
+                for value in (led.get("candidatePaths") or []) if value
+            }
             for key, item in sorted(transport.items()):
                 candidate_path = (item or {}).get("candidatePath")
+                if (candidate_path and
+                        str(pathlib.Path(candidate_path).expanduser().resolve())
+                        in current_candidate_paths):
+                    continue
                 out = _register_if_exists(
                     episode=episode, scene=scene, shot_id=sid, kind="candidate_take",
                     role=f"transport_candidate_{key}", path=candidate_path,
@@ -462,7 +500,14 @@ def shot_media_from_registry(pkg: dict[str, Any], scene: str | int, episode: str
         approved_take = latest("approved_take", "approved")
         final_frame = latest("final_frame", "approved")
         voice = latest("voice")
-        candidates = [e for e in entries if e.get("kind") == "candidate_take"]
+        candidates = []
+        candidate_paths = set()
+        for entry in (e for e in entries if e.get("kind") == "candidate_take"):
+            path_key = str(pathlib.Path(entry.get("path") or "").expanduser().resolve())
+            if not path_key or path_key in candidate_paths:
+                continue
+            candidate_paths.add(path_key)
+            candidates.append(entry)
         out[sid] = {
             "vo": voice.get("url") if voice else None,
             "keyframe": (candidate_kf or approved_kf or {}).get("url"),

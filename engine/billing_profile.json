@@ -69,5 +69,15 @@
     "confirmed": true
    }
   }
+ },
+ "byteplus": {
+  "plan": "Production Plan",
+  "planConfirmed": true,
+  "billingCadence": "monthly",
+  "cadenceConfirmed": true,
+  "confirmedBy": "Julian",
+  "confirmedAt": "2026-08-16",
+  "pricingSource": "BytePlus Seedance 2.5 account pricing supplied by Julian",
+  "effectiveDate": "2026-08-16"
  }
 }

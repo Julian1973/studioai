@@ -22,6 +22,8 @@ LEDGER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cost_led
 RATES = {
     "seedance_25_fal_480p_per_sec":  (0.2205, "second", "published fal rate — 2026-08-07"),
     "seedance_25_fal_720p_per_sec":  (0.4730, "second", "published fal rate — 2026-08-07"),
+    # BytePlus account range supplied by Julian; upper bound converted for 480p.
+    "seedance_25_byteplus_480p_per_sec": (0.1041, "second", "BytePlus account upper bound — 0.0107 USD/K tokens"),
     "seedance_standard_per_sec":       (0.3034, "second", "confirmed — Julian, 2026-07-16"),  # ref2vid standard, 720p, no video input; the higher of fal's two printed figures ($0.3024 token-derived / $0.3034 prose) per Julian's ruling — the spending bound; billing_profile.json v2026-07-16.2 is the confirmation record
     "seedance_fast_per_sec":           (0.24,  "second", "medium"),      # ref2vid, no video input, fast tier
     "seedance_i2v_per_sec":            (0.30,  "second", "medium"),      # image-to-video (generate_video_seedance), same base rate assumed

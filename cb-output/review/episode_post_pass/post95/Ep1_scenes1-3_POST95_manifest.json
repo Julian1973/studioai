@@ -1,0 +1,61 @@
+{
+  "status": "95-percent-review-human-signoff-required",
+  "scope": "approved Scenes 1-3 picture and native lip-synced dialogue",
+  "source": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/Ep1_scenes1-3_full_post_review_v2_storm_tighter_aida.mp4",
+  "sourceSha256": "d3cb36b123a6cd721b32930de62256cfd5b194995f77a31efbce62977ade27b3",
+  "durationSec": 169.589,
+  "outputs": {
+    "master": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/post95/Ep1_scenes1-3_POST95_review_master.mp4",
+    "nativeDialogueAndSfxStem": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/post95/Ep1_scenes1-3_native_dialogue_sfx_24bit.wav",
+    "musicStem": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/post95/Ep1_scenes1-3_music_post95_24bit.wav",
+    "ambienceStem": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/post95/Ep1_scenes1-3_ambience_post95_24bit.wav",
+    "finalMixStem": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/cb-output/review/episode_post_pass/post95/Ep1_scenes1-3_POST95_final_mix_24bit.wav"
+  },
+  "mixPolicy": {
+    "nativeDialogue": "preserved; never stripped, regenerated, shifted or time-stretched",
+    "music": "one generated instrumental cue per scene, crossfaded at scene transitions",
+    "ambience": "one subtle continuous bed per scene, crossfaded at scene transitions",
+    "ducking": "score and ambience sidechain-duck beneath the native soundtrack",
+    "musicLinearGain": 0.18,
+    "ambienceLinearGain": 0.04,
+    "targetIntegratedLufs": -14.0,
+    "targetTruePeakDbtp": -1.5,
+    "targetLraLu": 11.0,
+    "remainingFivePercent": "human taste review and any frame-specific SFX nudges"
+  },
+  "preNormalizationMeasurement": {
+    "input_i": -19.43,
+    "input_tp": -2.76,
+    "input_lra": 7.3,
+    "input_thresh": -30.29,
+    "output_i": -14.67,
+    "output_tp": -1.5,
+    "output_lra": 7.2,
+    "output_thresh": -25.31,
+    "target_offset": 0.67
+  },
+  "assets": [
+    {
+      "scene": "scene1",
+      "music": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/post95/Ep1_Scene1_score_post95.mp3",
+      "musicSha256": "d205bb930724d9edbdb62107ce7327d62669c714f296d03d8faf35e4bf3bd339",
+      "ambience": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/post95/Ep1_Scene1_ambience_post95.mp3",
+      "ambienceSha256": "142c9cf86d8aa9cf31cfebcecf2a9979cc38df18afdc5bbd3235e1d8b5f4c98d"
+    },
+    {
+      "scene": "scene2",
+      "music": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/post95/Ep1_Scene2_score_post95.mp3",
+      "musicSha256": "6acb709443339a3c7f473d76cb21de48b1dedf9536e6febf5f2177f7990a5997",
+      "ambience": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/post95/Ep1_Scene2_ambience_post95.mp3",
+      "ambienceSha256": "6efc1b3eb3a53825ec83af3a354beee94d50bccffcfe1c57ee16cf23b2b5ee85"
+    },
+    {
+      "scene": "scene3",
+      "music": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/post95/Ep1_Scene3_score_post95.mp3",
+      "musicSha256": "a17262f4e552f4188f24b17e20d8fa587263f05b762a9dbb141c01dae35a77f2",
+      "ambience": "/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/engine/media/post95/Ep1_Scene3_ambience_post95.mp3",
+      "ambienceSha256": "adcbe8bbde9402c359119d980e8fd19fb9affb465fe319220dfff93e4b74cadf"
+    }
+  ],
+  "masterSha256": "fe174f314104c02a141d79f615b3d0090e3ee5cd8fddb2217c2bde5b641f23dd"
+}

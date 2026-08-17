@@ -13,6 +13,7 @@ UX_CONTRACT = (HERE / "UX_CONTRACT.md").read_text(encoding="utf-8")
 GOLDEN_BROWSER = (HERE / "golden_path_browser.mjs").read_text(encoding="utf-8")
 PUSH_GATE = (HERE.parent / "scripts" / "verify_push.sh").read_text(encoding="utf-8")
 PRE_PUSH = (HERE.parent / ".githooks" / "pre-push").read_text(encoding="utf-8")
+CONTINUITY = (HERE.parent / "engine" / "config" / "continuity.json").read_text(encoding="utf-8")
 
 
 def test_seven_ux_laws_are_the_versioned_interface_contract():
@@ -63,6 +64,22 @@ def test_frontend_consumes_one_authoritative_director_state_and_action_route():
         assert internal_route not in JS
     assert "allowed_action_ids(session)" in SERVER
     assert "That action is no longer current" in SERVER
+
+
+def test_ai_director_advises_every_final_human_signoff_without_approval_authority():
+    assert "function renderHumanEye(session)" in JS
+    assert "AI Director recommendation · advisory only" in JS
+    assert "The agent reviews. You decide." in JS
+    assert "RECOMMEND APPROVE" in JS
+    assert 'action.id === "run-ai-review"' not in JS
+    for stage in ("DIRECTION", "SEE", "HEAR", "WATCH", "QC", "POST"):
+        assert stage in JS
+    assert "human-eye-chain" in CSS
+    assert 'api("/api/human-review"' not in JS
+
+
+def test_shot_storyboard_displays_locked_dialogue_text():
+    assert 'line.exactText || line.text || line.line' in JS
 
 
 def test_story_review_stays_inside_director_pipeline_not_legacy_projects():
@@ -160,8 +177,8 @@ def test_exact_request_is_separate_and_named_authoritative():
 
 
 def test_watch_shows_new_prepared_prompt_without_authorizing_render():
-    assert ("return session.inspector?.preparedAnimationRequest || "
-            "session.inspector?.providerRequest || null;") in JS
+    assert ("return session.inspector?.providerRequest || "
+            "session.inspector?.preparedAnimationRequest || null;") in JS
     assert '$$("#request-button").disabled' not in JS
     assert '$("#request-button").disabled = !session.inspector?.providerRequest;' in JS
 
@@ -307,6 +324,10 @@ def test_success_is_published_only_after_director_cache_refresh():
     assert '!["running", "queued", "finalizing"].includes(job.status)' in JS
 
 
+def test_fresh_voice_track_is_visible_before_registry_catches_up():
+    assert 'record["vo"] = record.get("vo") or _url_from_abs(ledger.get("voPath"))' in SERVER
+
+
 def test_keyframe_refire_is_one_visible_replacement_job():
     assert 'action.id === "iterate-keyframe"' in JS
     assert "Keyframe refire in progress" in JS
@@ -330,6 +351,7 @@ def test_current_shot_has_inline_creation_and_animation_inputs():
     assert "loadInlineShotContext(session)" in JS
     assert "currentReferenceStage(session)" in JS
     assert "Scene Plate" in JS
+    assert 'app.inlineReferencesKey.startsWith(referenceKeyPrefix)' in JS
     assert "Character Turnarounds" in JS
     assert "Exact Prompt" in JS
     assert "preparedAnimationRequest" in JS
@@ -366,17 +388,17 @@ def test_shot_context_sits_above_see_hear_watch_and_carries_continuity_refs():
 
 
 def test_scene_three_keeps_keen_wrist_states_distinct():
-    assert "sceneContinuityRules" in JS
-    assert "Keen starts bare-wrist" in JS
-    assert "wrists and forearms completely bare" in JS
+    assert "session.sceneContinuityRules" in JS
+    assert "Before approved 3.B3" in JS
+    assert "Mum visibly fits both cuffs in the approved 3.B3 take" in JS
     assert "Keen Bare-Wrist State" in JS
     assert "CB_Keen_nocuffs_front-back.jpeg" in JS
     assert "Keen's Father's Wristbands — Vacant" in JS
-    assert "CB_Keen_wristband_vacant.jpeg" in JS
-    assert "No crystals, no aquamarine stones and no glow in Scenes 3, 4, 7 or 8." in JS
+    assert "CB_Keen_turnaround_vacant_cuffs.png" in JS
+    assert "After approved 3.B3–9.B2" in JS
     assert "Keen's Father's Wristbands — Aquamarine Charged" in JS
     assert "CB_Keen_wristband_crystal.jpeg" in JS
-    assert "Aquamarine stones and glowing charged wristbands are locked to the end-of-episode gift state, not Scene 3." in JS
+    assert "only Aida's visible crystal installation changes them to crystal-set" in CONTINUITY
     assert "Keen — Pier Departure, Bare Wrists" in JS
     assert "Keen — Vacant Wristbands, No Crystals" in JS
     assert "Keen — Charged Wristbands, Aquamarine Stones" in JS
@@ -478,11 +500,41 @@ def test_client_bundle_has_no_fabricated_clip_fallbacks_or_banned_canon():
 
 def test_watch_shows_authoritative_emission_score_verdict_and_findings():
     assert "renderEmissionConformance(providerRequest)" in JS
-    assert "Emission pre-flight" in JS
+    assert "WATCH pre-flight" in JS
+    assert "Seedance score" in JS
+    assert "Emission score" in JS
+    assert "Craft score" in JS
+    assert "Outcome validated" in JS
+    assert "Director beat, emotional outcome and continuity handoff are aligned" in JS
     assert 'verdict: "BLOCK"' in JS
     assert "report.findings" in JS
-    assert ".emission-conformance-score" in CSS
+    assert "request.seedancePromptContract" in JS
+    assert "request.qualityGate" in JS
+    assert "request?.creativeTranslation" in JS
+    assert ".watch-score-grid" in CSS
+    assert ".watch-score-tile" in CSS
+    assert ".watch-outcome" in CSS
     assert ".emission-conformance-findings" in CSS
+    assert "session.inspector?.providerRequest || session.inspector?.preparedAnimationRequest" in JS
+
+
+def test_watch_lane_orders_score_render_result_then_verdict_controls():
+    score = JS.index("renderEmissionConformance(providerRequest)")
+    prompt = JS.index("<pre>${esc(prompt)}</pre>")
+    watch_flow = JS.index("renderWatchFlow(session, providerRequest)")
+    result = JS.index("function renderWatchResult(session)")
+    verdict = JS.index("function renderWatchVerdictControls(session)")
+    assert score < prompt < watch_flow
+    assert result < verdict
+    assert "Fire WATCH render" in JS
+    assert 'data-watch-action="${esc(renderAction.id)}"' in JS
+    assert 'data-watch-retake="${esc(refire.id)}"' in JS
+    assert "Returned render" in JS
+    assert "When the provider finishes, the clip appears here for your accept/refire decision." in JS
+    assert "bindWatchFlowActions(host)" in JS
+    assert ".watch-action-panel" in CSS
+    assert ".watch-render-result" in CSS
+    assert ".watch-verdict-panel" in CSS
 
 
 def test_visible_prompts_have_copy_controls_and_feedback():
@@ -632,6 +684,20 @@ def test_three_signoff_relay_exposes_real_inputs_and_source_choices():
     assert 'data-select-scene-plate-asset' in JS
     assert 'if (session.phase === "keyframe")' in JS
     assert 'Promise.all([loadKeyframeLibrary(session), loadSceneAssetLibrary(session)])' in JS
+
+
+def test_relay_shots_show_inherited_opening_frame_not_missing_keyframe_copy():
+    assert 'session.shot?.sourceType === "relay"' in JS
+    assert 'session.shot?.relayAnchorUrl' in JS
+    assert 'Inherited from ${session.shot?.sourceShotId || "previous shot"}' in JS
+    assert 'No inherited final frame is available from the previous approved shot.' in JS
+
+
+def test_hear_relay_renders_voice_auditions_as_current_decision_cards():
+    assert 'artifact.type === "audio-set"' in JS
+    assert 'data-voice-audition="${esc(item.candidateId || "")}"' in JS
+    assert "Choose this voice" in JS
+    assert "voice-audition-relay" in JS
 
 
 def test_audio_references_use_waveform_artwork_not_broken_images():

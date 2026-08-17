@@ -182,12 +182,12 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
     assert ("Carry the prior aftermath: visible pollen coating and a smeared pollen "
             "moustache must already be present in the opening frame." in prompt)
     assert "Exactly one Fuzzby and one Zenny appear in this image." in prompt
-    assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
+    assert "[Intended Read]" in prompt
     assert "[Generation Goal]" not in prompt
     assert "[Starting Staging Envelope]" not in prompt
 
 
-def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(monkeypatch):
+def test_stage_prompt_preserves_verbose_specialist_direction(monkeypatch):
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": (
@@ -224,14 +224,14 @@ def test_stage_prompt_compacts_verbose_specialist_direction_below_hard_limit(mon
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
 
-    assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
+    assert direction["audienceRead"] in prompt
     assert "chest-forward overcommitted hover beginning a zig-zag entry" in prompt
     assert "compact steady hover on a clean glide line" in prompt
     assert "beginning a." not in prompt
     assert "body-mounted bags, sacks, baskets or dangling loads" in prompt
 
 
-def test_stage_prompt_allows_reasonable_over_target_tolerance(monkeypatch):
+def test_stage_prompt_has_no_length_target(monkeypatch):
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": " ".join(["A readable bee-height chase lane protects comic cause and effect"] * 10),
@@ -257,8 +257,7 @@ def test_stage_prompt_allows_reasonable_over_target_tolerance(monkeypatch):
         "keyframeReferenceSlots": {
             "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
     })
-    assert (cb_render.MAX_KEYFRAME_INTEGRATION_WORDS < len(prompt.split()) <=
-            cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS)
+    assert direction["audienceRead"] in prompt
 
 
 def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
@@ -310,10 +309,10 @@ def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
         "\n".join(negative_space))
     assert fuzzby_pose in sections["Frame"]
     assert fuzzby_facing in sections["Frame"]
-    assert len(prompt.split()) <= cb_render.KEYFRAME_PROMPT_PRODUCTION_BUDGET_WORDS
+    assert intended_read in prompt
 
 
-def test_keyframe_budget_returns_unresolved_creative_overage_to_human(monkeypatch):
+def test_keyframe_word_count_never_blocks_load_bearing_direction(monkeypatch):
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": " ".join(["load-bearing-drama"] * 610),
@@ -328,17 +327,14 @@ def test_keyframe_budget_returns_unresolved_creative_overage_to_human(monkeypatc
     monkeypatch.setattr(cb_render, "_characters_cfg", lambda: {
         "Fuzzby": {"heightIn": 14}, "Zenny": {"heightIn": 12}})
 
-    with pytest.raises(cb_render.Refused) as exc:
-        cb_render._compile_keyframe_integration_prompt(direction, {
-            "shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby", "Zenny"],
-            "keyframeReferenceSlots": {
-                "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
-        })
+    prompt = cb_render._compile_keyframe_integration_prompt(direction, {
+        "shotId": "S1.SH1A", "charactersInFrame": ["Fuzzby", "Zenny"],
+        "keyframeReferenceSlots": {
+            "@图1": "Zenny", "@图2": "Fuzzby", "@图3": "scene plate"},
+    })
 
-    message = str(exc.value)
-    assert "documented quality recommendation" in message
-    assert "were not trimmed" in message
-    assert "human Director must decide" in message
+    assert " ".join(["load-bearing-drama"] * 610) in prompt
+    assert cb_departments.prompt_sections(prompt)["Intended Read"] == direction["audienceRead"]
 
 
 def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):

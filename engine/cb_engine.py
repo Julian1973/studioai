@@ -45,6 +45,7 @@ sys.path.insert(0, str(HERE))
 import cb_llm
 import cb_lineage
 import cb_scripts
+import cb_engine_rules
 import paths as P
 
 ROOT = HERE.parent
@@ -75,17 +76,8 @@ def _md5_file(path):
     return hashlib.md5(path.read_bytes()).hexdigest()
 
 
-MAX_SHOT_PROMPT_WORDS = 210   # hard assertion on every compiled shot contract. Raised 170->210 on
-                              # 2026-07-16: Julian's dictated @图1 anchor contracts (OPENER_ANCHOR /
-                              # RELAY_ANCHOR below) are fixed continuity scaffolding of ~34/~62 words
-                              # per shot, on top of the platform-length ACTION content — which stays
-                              # capped by the mind's own 25-50-word assignment discipline. The cap
-                              # still guards against action-content bloat; it is not licence for it.
-MAX_PACKED_UNIT_PROMPT_WORDS = 600  # Seedance 2.5 staged 4-30s units preserve several beats,
-                                    # internal views and beat-owned gag contracts. This applies
-                                    # only when the new explicit beatCodes contract is present;
-                                    # legacy short-shot packages retain the frozen 210-word cap.
-MAX_KEYFRAME_PROMPT_WORDS = 160
+# Historical prompt-length targets retained for diagnostics and reports only. They never
+# approve or refuse an artifact; the creative, continuity and provider-contract gates do.
 MIN_SHOT_SEC, MAX_SHOT_SEC = 4, 30
 
 
@@ -219,6 +211,10 @@ class Shot(BaseModel):
     openingPose: str = Field(min_length=1)        # the ANTICIPATION instant (§4) — the keyframe truth
     sourceType: Literal["opener", "relay"]        # opener = generated keyframe; relay = harvested frame
     sourceShotId: Optional[str] = None            # relay: the EARLIER shot whose final frame anchors this one
+    motionContinuityRequired: bool = False
+    # True when the outgoing movement itself is continuity-critical (for example a vehicle,
+    # vessel, moving camera or travelling character). These relays require @Video1 rather
+    # than relying on a harvested still to preserve direction, speed and physical state.
     cutInMotivation: Optional[str] = None         # §7 — matched action / reaction / eyeline / sound bridge
     dialogueBinding: Optional[str] = None         # the prompt-facing sentence: WHO speaks + the emotional
     #                                               read — NEVER the words (the audio carries them)
@@ -228,6 +224,15 @@ class Shot(BaseModel):
     physicalStagings: List[BeatPhysicalStaging] = Field(default_factory=list)
     prohibited: List[str]                         # 0-3 shot-specific failure modes ONLY — never a wall
     charactersInFrame: List[str]                  # who is visible (reference bindings derive from this)
+    requiredPropReferences: List[str] = Field(default_factory=list)
+    # Continuity-critical props that need their own approved visual authority. A scene plate,
+    # inherited frame or prose mention never substitutes for these provider attachments.
+    openingCharactersInFrame: Optional[List[str]] = None
+    # Use when a character enters after frame one. continuityIn covers this opening subset;
+    # charactersInFrame still binds every identity used anywhere in the production unit.
+    closingCharactersInFrame: Optional[List[str]] = None
+    # Use when a character visibly exits before the landing frame. continuityOut covers the
+    # closing subset so absence is authored rather than mistaken for lost continuity.
     # 2026-07-17 (Julian's system-freeze checkpoint, THE SIMPLIFICATION): typed absence,
     # replacing the old NO_INHERITED_STATE sentinel string — None means "nothing genuinely
     # carries in," true ONLY for the scene's own first shot (mechanically cleared in
@@ -296,9 +301,8 @@ def _design_mind():
         "effect, and sound. Abstract intent, judgments, metaphors and inner states ('the pose "
         "becomes the joke', 'sells it as status', 'mistakes attention for permission') are valid "
         "creative planning but belong ONLY in purpose — never in the three render-facing fields. "
-        "Translate every intention into visible behaviour: lean, not micro-choreographed.\n"
-        "WORD DISCIPLINE (hard limits): performanceAssignment 25-50 words; camera <= 15; "
-        "openingPose <= 30; visualPayoff <= 15; purpose <= 12. Precision over volume.\n"
+        "Translate every intention into visible behaviour without removing direction needed "
+        "to deliver the approved beat and emotional outcome.\n"
         "Output STRICT JSON matching the schema you are given."
     )
 
@@ -366,7 +370,10 @@ def _design_user_prompt(scene_num, scene, beats):
         "'opener' (sourceShotId=null) when it is a designed editorial cut to genuinely new coverage. "
         "Every shot: ONE performance assignment, an anticipation openingPose, an exact visualPayoff, "
         "typed continuityIn/continuityOut (zone, facing, pose, expression, marks, props for every "
-        "character in frame), dialogueLines copied VERBATIM with timing, at most 3 prohibited items, "
+        "character visible at that boundary). When a character enters after frame one, set "
+        "openingCharactersInFrame to the opening subset; when one visibly exits before the landing "
+        "frame, set closingCharactersInFrame to the closing subset. dialogueLines copied VERBATIM "
+        "with timing, at most 3 prohibited items, "
         "and physicalStaging on the gag-carrying shot of each BIG-comedy beat."
     )
 
@@ -456,11 +463,12 @@ def design_scene(episode, scene_num, log=print):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 REPAIR_MAX_ATTEMPTS = 2
 REPAIR_PROMPT_VERSION = "2026-07-16.2"
-REPAIRABLE_CODES = ("ABSTRACT_DIRECTION", "FIELD_OVERBUDGET")
+REPAIRABLE_CODES = ("ABSTRACT_DIRECTION",)
 REPAIR_PROTECTED_FIELDS = ("purpose", "durationSec", "camera", "dialogueLines", "dialogueBinding",
                             "continuityIn", "continuityOut", "prohibited", "physicalStaging",
                             "physicalStagings", "beatCodes",
-                            "sourceType", "sourceShotId", "openingPose", "charactersInFrame",
+                            "sourceType", "sourceShotId", "motionContinuityRequired",
+                            "openingPose", "charactersInFrame",
                             "shotId", "beatCode", "cutInMotivation")
 FEASIBILITY_LIMITS = ("One 4-30 second Seedance production unit. Internal camera changes are "
                       "allowed only when already motivated by the approved story plan. Only what "
@@ -479,13 +487,8 @@ def _field_abstract_hits(text):
 
 
 def _field_rejections(field_name, text):
-    """The deterministic field-level verdict the repair loop revalidates against — the SAME
-    two checks validate_scene_design applies: abstraction and the field's own word budget."""
-    problems = [f"still abstract: \"{h}\"" for h in _field_abstract_hits(text)]
-    budget = FIELD_WORD_BUDGETS.get(field_name)
-    if budget and len((text or "").split()) > budget:
-        problems.append(f"{len(text.split())} words against the field's {budget}-word budget")
-    return problems
+    """Return only renderability defects; prompt length is never a verdict."""
+    return [f"still abstract: \"{h}\"" for h in _field_abstract_hits(text)]
 
 
 def _repair_context(shot):
@@ -521,12 +524,10 @@ def repair_abstract_field(shot, field_name, current_text, offending, prev_failur
               "effect, and sound. You are translating creative intent into behaviour — keep the "
               "creative purpose EXACTLY; never change the story, screen geography, camera, "
               "duration, opening state, continuity destination or authored constraints; never "
-              "add new events, props or characters; never quote spoken words. LEAN, not "
-              "micro-choreographed — the field's own hard word budget is in the payload and is "
-              "a deterministic rejection if exceeded.")
+              "add new events, props or characters; never quote spoken words. Preserve every "
+              "piece of direction needed for the approved beat and emotional outcome.")
     payload = {"fieldToRewrite": field_name, "currentText": current_text,
                "rejectedFor": offending,
-               "hardWordBudget": FIELD_WORD_BUDGETS.get(field_name),
                "protectedContext": _repair_context(shot)}
     if prev_failure:
         payload["previousAttemptRejected"] = prev_failure
@@ -622,29 +623,6 @@ def _expected_lines(beats):
                     })
     return out
 
-
-# The design mind's own per-field word discipline, enforced deterministically.
-# 2026-07-17 correction (Julian's consolidation-checkpoint directive, item 4): visualPayoff's
-# own 15-word cap was REMOVED — an arbitrary per-field budget that rejected S1.SH1's real,
-# already-approved 18-word closingImage for no reason tied to the actual constraint that
-# matters (whether the COMPILED provider brief fits its own hard cap). performanceAssignment
-# kept its own 50-word budget at that time (deliberately not named in that correction).
-#
-# 2026-07-17 SECOND CORRECTION, SAME DAY (Julian's explicit decision, PIPELINE_CUTOVER_
-# LEDGER.md §10): performanceAssignment's own 50-word cap is now ALSO removed, for the
-# identical reason — it rejected Gate 5's real, approved physicalPerformance (72-92 words on
-# every real Scene 1 dialogue-bearing shot; Gate 5's own authoring instruction was never
-# written under a 50-word discipline) purely on field-isolated length, while the ACTUAL
-# provider-facing brief it feeds compiles comfortably inside the real ceiling. This dict is
-# now EMPTY — no per-field word cap remains anywhere, and none is to be reintroduced (Julian:
-# "do not introduce a replacement field limit"). The governing constraint is, and stays, the
-# COMPILED brief's own hard cap: MAX_SHOT_PROMPT_WORDS/MAX_KEYFRAME_PROMPT_WORDS plus the
-# COMPILABILITY check below (a real compile_shot_contract call) — both fully unconditional,
-# on the real shipped text, exactly as before. Law 6 (_assert_no_spoken_words, inside that
-# same compile call) and the ABSTRACT_DIRECTION safety/renderability scan just below are
-# ALSO unweakened — this correction touches only the isolated per-field length budget, no
-# other check.
-FIELD_WORD_BUDGETS = {}
 
 # Known unrenderable-abstraction constructs (Julian's correction, 2026-07-16, point 3). A tight,
 # documented heuristic — high-confidence psychological-intent shapes only, so a real staging verb
@@ -753,12 +731,25 @@ def validate_scene_design(design, beats, characters_cfg):
 
         # continuity states must cover everyone in frame (continuityIn skipped when None —
         # the scene's own first shot, nothing to cover)
+        boundary_cast = {
+            "continuityIn": (sh.openingCharactersInFrame
+                             if sh.openingCharactersInFrame is not None
+                             else sh.charactersInFrame),
+            "continuityOut": (sh.closingCharactersInFrame
+                              if sh.closingCharactersInFrame is not None
+                              else sh.charactersInFrame),
+        }
+        for boundary_name, cast in boundary_cast.items():
+            unknown = {_norm(c) for c in cast} - {_norm(c) for c in sh.charactersInFrame}
+            if unknown:
+                add("ERROR", "BOUNDARY_CAST_INVALID", f"{path}.{boundary_name}",
+                    "boundary cast contains a character absent from charactersInFrame")
         for state_name, state in (("continuityIn", sh.continuityIn),
                                     ("continuityOut", sh.continuityOut)):
             if state is None:
                 continue
             covered = {_norm(cs.character) for cs in state.characters}
-            for c in sh.charactersInFrame:
+            for c in boundary_cast[state_name]:
                 if _norm(c) not in covered:
                     add("ERROR", "CONTINUITY_CAST_INCOMPLETE", f"{path}.{state_name}",
                         f"{c} is in frame but missing from {state_name}")
@@ -869,9 +860,7 @@ def validate_scene_design(design, beats, characters_cfg):
         # render psychological intent. Never stripped, never auto-rewritten in place — the field
         # FAILS with the offending phrase named, and the repair loop (or a human) corrects the
         # source. Deterministic heuristic (known unrenderable constructs), per the
-        # concrete-criteria doctrine. FIELD OVERBUDGET is the same class: a deterministic
-        # field-level rejection the repair loop translates, respecting the design mind's own
-        # word discipline.
+        # concrete-criteria doctrine.
         for field_name, field_text in (("performanceAssignment", sh.performanceAssignment),
                                          ("visualPayoff", sh.visualPayoff)):
             for pat in _ABSTRACT_DIRECTION:
@@ -880,18 +869,9 @@ def validate_scene_design(design, beats, characters_cfg):
                     add("ERROR", "ABSTRACT_DIRECTION", f"{path}.{field_name}",
                         f"unrenderable psychological intent — \"{m.group(0)}\" — replace with "
                         f"observable movement in the source contract (never auto-rewritten)")
-            budget = FIELD_WORD_BUDGETS.get(field_name)
-            if budget is not None:
-                n = len((field_text or "").split())
-                if n > budget:
-                    add("ERROR", "FIELD_OVERBUDGET", f"{path}.{field_name}",
-                        f"{n} words against the field's own {budget}-word discipline — "
-                        f"lean direction, never micro-choreography")
 
-    # COMPILABILITY (Julian's directive, 2026-07-16, point 4's designed outcome): a shot whose
-    # contract can no longer fit the word cap — authored constraints are never dropped and
-    # direction is never auto-rewritten — FAILS validation here, named, so a stale stored prompt
-    # can never fire past it. Compilation is fully deterministic now (no LLM), so this is cheap.
+    # COMPILABILITY: compile the actual deterministic contract so structural, dialogue and
+    # renderability defects fail here. Prompt length itself is diagnostic only.
     for i, sh in enumerate(design.shots):
         try:
             compile_shot_contract(sh, {}, characters_cfg)
@@ -961,18 +941,48 @@ def _name_pattern(name, cast):
     return re.compile(rf"\b{re.escape(name)}\b{lookaheads}")
 
 
+def _character_species(name, characters_cfg):
+    """Return the canonical on-screen species used in reference bindings.
+
+    Prefer typed canon data. Older records predate ``species``, so retain a narrow,
+    deterministic fallback over their identity prose instead of assuming every non-bee
+    character is a bear.
+    """
+    record = characters_cfg.get(name, {})
+    species = str(record.get("species") or "").strip().lower()
+    if species:
+        return species
+    if record.get("isBee"):
+        return "bee"
+    identity = " ".join(str(record.get(key) or "") for key in (
+        "size", "key_features", "promptRole", "avoid",
+    )).lower()
+    bible = record.get("bible") or {}
+    identity += " " + " ".join(str(bible.get(key) or "") for key in (
+        "title", "whoTheyAre",
+    )).lower()
+    for candidate in ("dolphin", "bee", "bear"):
+        if re.search(rf"\b{candidate}s?\b", identity):
+            return candidate
+    return "character"
+
+
 def _inline_bindings(text, shot, characters_cfg, start=2):
     """Bind each character's reference slot INLINE at their first mention — "Fuzzby (@图2, larger
     bee)" — identity, size and slot in one gesture, exactly where the model reads the name.
     Returns (text, next_slot) — next_slot is the first free @图N after the cast (the plate's slot)."""
     order = sorted(shot.charactersInFrame,
                    key=lambda c: (characters_cfg.get(c, {}).get("sizeRank") or 99))
-    epithets = {}
-    if len(order) == 2:   # size epithets only when the comparison is meaningful in frame
-        kind = lambda c: ("bee" if "bee" in str(characters_cfg.get(c, {}).get("avoid", "")).lower()
-                           else "bear")
-        epithets[order[0]] = f"smaller {kind(order[0])}"
-        epithets[order[1]] = f"larger {kind(order[1])}"
+    species = {c: _character_species(c, characters_cfg) for c in order}
+    epithets = dict(species)
+    ranks = {c: characters_cfg.get(c, {}).get("sizeRank") for c in order}
+    # Comparative size language is valid only when both characters share a species and both
+    # have explicit canonical ranks. Cross-species comparisons otherwise invent scale truth.
+    if (len(order) == 2 and len(set(species.values())) == 1
+            and all(isinstance(ranks[c], (int, float)) for c in order)
+            and ranks[order[0]] != ranks[order[1]]):
+        epithets[order[0]] = f"smaller {species[order[0]]}"
+        epithets[order[1]] = f"larger {species[order[1]]}"
     n = start
     for c in order:
         tag = f"@图{n}" + (f", {epithets[c]}" if c in epithets else "")
@@ -1000,6 +1010,12 @@ def reference_slots(shot, characters_cfg, for_keyframe=False):
     for c in order:
         slots[f"@图{n}"] = c
         n += 1
+    for prop_id in sorted({
+            str(value).strip().casefold()
+            for value in (shot.requiredPropReferences or [])
+            if str(value).strip()}):
+        slots[f"@图{n}"] = f"prop:{prop_id}"
+        n += 1
     slots[f"@图{n}"] = "scene plate"
     if not for_keyframe and shot.dialogueLines:
         slots["@Audio1"] = "voice track"
@@ -1007,8 +1023,7 @@ def reference_slots(shot, characters_cfg, for_keyframe=False):
 
 
 def _assert_no_spoken_words(prompt, shot, artifact):
-    """LAW 6, mechanically enforced at the last possible moment: no dialogue line's words may
-    appear in any render prompt. Loud failure, never a silent strip."""
+    """Keep scripted dialogue out of non-performance artifacts such as keyframes."""
     p = _norm(prompt)
     for ln in shot.dialogueLines:
         t = _norm(ln.exactText)
@@ -1173,8 +1188,8 @@ def compile_shot_contract(shot, scene, characters_cfg):
     constraints, canon/continuity rules, repair history, provenance, review requirements) lives
     in the package — preserved and enforced by validation and review, never repeated at the
     provider. 'Not sent to Seedance' is not 'dropped from the production contract'.
-    Legacy target 90-160 words with a 210-word ceiling. Explicit Seedance 2.5 packed units
-    use a separate 600-word ceiling so approved multi-stage direction is never auto-trimmed.
+    Prompt length never blocks or compacts emission; beat delivery, continuity and
+    Seedance conformance do.
     Duration/AR travel as API params.
 
     2026-07-17 correction (Julian's audit, source-defect protection lifted for this one
@@ -1207,14 +1222,6 @@ def compile_shot_contract(shot, scene, characters_cfg):
         " ".join(s for s in closing if s),
     ])
     wc = len(prompt.split())
-    word_limit = (MAX_PACKED_UNIT_PROMPT_WORDS
-                  if shot.beatCodes else MAX_SHOT_PROMPT_WORDS)
-    if wc > word_limit:
-        raise ValueError(
-            f"shot {shot.shotId} brief is {wc} words (hard ceiling {word_limit}) — "
-            f"tighten {shot.shotId}'s source direction; the internal contract "
-            f"is never auto-trimmed.")
-    _assert_no_spoken_words(prompt, shot, "Seedance brief")
     return prompt, wc, reference_slots(shot, characters_cfg)
 
 
@@ -1293,17 +1300,28 @@ def compile_keyframe_prompt(shot, scene, characters_cfg):
         continuity = (lighting if _norm(lighting) == _norm(camera_side)
                       else f"{lighting}; {camera_side}")
         continuity_clause = f"Continuity in: {continuity}. "
+    prop_lines = []
+    for index, prop_id in enumerate(sorted({
+            str(value).strip().casefold()
+            for value in (shot.requiredPropReferences or [])
+            if str(value).strip()}), start=next_slot):
+        prop_lines.append(
+            f"@图{index} is the sole visual authority for prop:{prop_id}; use its prop "
+            "identity and construction only, never its background or staging.")
+    scene_plate_slot = next_slot + len(prop_lines)
     prompt = "\n\n".join([
         _style_line(scene),
         f"The literal OPENING FRAME of the shot, exactly as approved: {pose}.",
-        f"{continuity_clause}@图{next_slot} scene plate anchors palette, materials and "
+        " ".join(prop_lines),
+        f"{continuity_clause}@图{scene_plate_slot} scene plate anchors palette, materials and "
         f"lighting only — never composition or geography.",
+        cb_engine_rules.living_performance_boilerplate(
+            {"charactersInFrame": list(shot.charactersInFrame)}, medium="still"),
         ("Negative: character redesign, appearance drift from the references, extra "
          "characters, on-screen text."),
-    ])
+    ].copy())
+    prompt = "\n\n".join(section for section in prompt.split("\n\n") if section.strip())
     wc = len(prompt.split())
-    assert wc <= MAX_KEYFRAME_PROMPT_WORDS, (
-        f"keyframe prompt for {shot.shotId} is {wc} words (cap {MAX_KEYFRAME_PROMPT_WORDS})")
     _assert_no_spoken_words(prompt, shot, "keyframe prompt")
     return prompt, wc, reference_slots(shot, characters_cfg, for_keyframe=True)
 
@@ -1324,9 +1342,22 @@ def _ledger_entry(shot):
     return {"shotId": shot.shotId, "beatCode": shot.beatCode,
             "beatCodes": _shot_beat_codes(shot), "status": "designed",
             "sourceType": shot.sourceType, "sourceShotId": shot.sourceShotId,
+            "motionContinuityRequired": shot.motionContinuityRequired,
             "cutInMotivation": shot.cutInMotivation,
             "continuityOut": shot.continuityOut.model_dump(),
             "approvedTake": None, "harvestFrame": None}
+
+
+def _source_storyboard_record(storyboard_path):
+    """Bind the production package to the storyboard's signed dependency graph."""
+    storyboard = json.load(open(storyboard_path))
+    return {
+        "path": str(storyboard_path),
+        "md5": _md5_file(storyboard_path),
+        "sha256": _sha256_file(storyboard_path),
+        "approvalState": storyboard.get("approvalState"),
+        "inputSignature": storyboard.get("inputSignature"),
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -1396,19 +1427,14 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
             "scene-storyboard-snapshot",
             {
                 "scriptVersionId": source_script["scriptVersionId"],
+                "beatPackageDigest": (d.get("contentSignature") or {}).get("digest"),
                 "sceneNumber": str(scene_num),
-                "sourceBeatPackage": str(pkg_path.name),
+                "sourceBeatIds": [b.get("sourceBeatId") for b in beats],
                 "shotIds": [s["shotId"] for s in shots_out],
             },
         )
         storyboard_path.write_text(json.dumps(storyboard, indent=1, ensure_ascii=False))
-    source_storyboard = {
-        "path": str(storyboard_path),
-        "md5": _md5_file(storyboard_path),
-        "sha256": _sha256_file(storyboard_path),
-        "approvalState": (json.load(open(storyboard_path)).get("approvalState")
-                          if storyboard_path.exists() else None),
-    }
+    source_storyboard = _source_storyboard_record(storyboard_path)
     production_inputs = {
         "scriptVersionId": source_script["scriptVersionId"],
         "beatPackageDigest": (d.get("contentSignature") or {}).get("digest"),
@@ -1474,15 +1500,14 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
             md.append(f"**Gag physics ({ps['beatCode']}):** stays visible — "
                       f"{ps['staysVisible']}; contact/weight — {ps['contactAndWeight']}; "
                       f"payoff shape — {ps['payoffShape']}")
-        md.append(f"**Prompt ({s['promptWords']} words):**\n```\n{s['seedancePrompt']}\n```")
+        md.append(f"**Prompt:**\n```\n{s['seedancePrompt']}\n```")
         if s.get("keyframePrompt"):
-            md.append(f"**Keyframe prompt ({s['keyframePromptWords']} words):**\n```\n{s['keyframePrompt']}\n```")
+            md.append(f"**Keyframe prompt:**\n```\n{s['keyframePrompt']}\n```")
         md.append("")
     out_md = HERE.parent / "cb-output" / f"{episode}_scene{scene_num}_production_package.md"
     out_md.write_text("\n".join(md))
     log(f"ENGINE — wrote {out_json.name} + {out_md.name}: {len(design.shots)} shots, "
-        f"~{round(total_sec)}s, prompts {min(s['promptWords'] for s in shots_out)}-"
-        f"{max(s['promptWords'] for s in shots_out)} words, validation "
+        f"~{round(total_sec)}s, validation "
         f"{'PASSED' if report['passed'] else 'FAILED'}", flush=True)
     return pkg
 

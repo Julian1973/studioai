@@ -80,6 +80,32 @@ def test_multiple_declared_views_still_produce_one_intact_attachment(tmp_path):
         assert turnaround.getpixel((150, 50)) == (0, 0, 255)
 
 
+def test_state_source_replaces_identity_and_is_part_of_contract(tmp_path):
+    default = tmp_path / "default.png"
+    vacant = tmp_path / "vacant.png"
+    Image.new("RGB", (80, 80), "blue").save(default)
+    Image.new("RGB", (160, 90), "gold").save(vacant)
+    pack = _pack(default)
+    pack["stateSources"] = {
+        "vacant-wristbands": {
+            "source": str(vacant),
+            "coverage": "360",
+            "turnaroundViews": [{"view": "front"}, {"view": "rear"}],
+            "distinguishingFeatures": ["vacant cuffs with blank settings"],
+        }
+    }
+
+    identity = cb_identity.materialize_provider_view(
+        "Keen", pack, tmp_path, tmp_path / "derived",
+        state="vacant-wristbands")
+
+    assert identity["path"] == str(vacant.resolve())
+    assert identity["characterState"] == "vacant-wristbands"
+    assert identity["turnaroundViewCount"] == 2
+    assert identity["distinguishingFeatures"] == [
+        "vacant cuffs with blank settings"]
+
+
 def test_keyframe_conformance_cannot_pass_with_wrong_cast_or_partial_score():
     dimension = {"score": 2, "visibleEvidence": "Clearly matches."}
     payload = {

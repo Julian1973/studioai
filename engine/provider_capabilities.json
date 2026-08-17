@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "defaultVideoModelId": "fal-seedance-2.5",
+  "defaultVideoModelId": "dreamina-seedance-2-5-260628",
   "models": [
     {
       "modelId": "fal-seedance-2.5",
@@ -129,9 +129,9 @@
       "displayName": "Seedance 2.5 via BytePlus ModelArk",
       "modelVersion": "2.5-260628",
       "transport": "byteplus-async",
-      "enabled": false,
-      "status": "qualification-required",
-      "verifiedAt": "2026-08-04",
+      "enabled": true,
+      "status": "production",
+      "verifiedAt": "2026-08-16",
       "sourceUrl": "https://docs.byteplus.com/en/docs/modelark/1520757",
       "endpoints": {
         "reference-to-video": "/api/v3/contents/generations/tasks",
@@ -139,26 +139,27 @@
         "video-editing": "/api/v3/contents/generations/tasks"
       },
       "modes": [
-        "reference-to-video",
-        "video-extension",
-        "video-editing"
+        "reference-to-video"
       ],
       "duration": {
-        "minSec": null,
-        "maxSec": null,
+        "minSec": 4,
+        "maxSec": 30,
         "supportsAuto": false
       },
       "referenceLimits": {
-        "images": null,
-        "audio": null,
-        "video": null,
-        "recommendedCombined": null
+        "images": 30,
+        "audio": 10,
+        "video": 10,
+        "recommendedCombined": 50
       },
-      "resolutions": [],
-      "nativeAudio": null,
-      "costRateKeys": {},
+      "resolutions": ["480p"],
+      "nativeAudio": true,
+      "costRateKeys": {
+        "reference-to-video": "seedance_25_byteplus_480p_per_sec",
+        "reference-to-video:480p": "seedance_25_byteplus_480p_per_sec"
+      },
       "fallbackModelId": null,
-      "disableReason": "The authenticated BytePlus model catalogue confirms dreamina-seedance-2-5-260628 with multimodal-to-video, extension and editing task families, but this account has not activated the model. Model-specific limits, pricing, terms and a controlled paid request are not yet qualified."
+      "disableReason": null
     }
   ]
 }

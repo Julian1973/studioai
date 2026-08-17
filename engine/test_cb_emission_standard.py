@@ -40,6 +40,35 @@ def test_duplicate_story_lock_is_a_mechanical_regression():
     assert any(item["rule"] == "R18" for item in flight["findings"])
 
 
+def test_specialist_missing_hold_is_polish_until_typed_emitter_runs():
+    prompt = (FIXTURES / "beat_1_chase.txt").read_text().replace(
+        "The pose holds for a full beat after the line ends.", "")
+    flight = standard.preflight(prompt)
+    hold = [item for item in flight["findings"] if item["rule"] == "button-hold"]
+    assert hold and hold[0]["severity"] == "POLISH"
+    assert flight["score"] >= standard.EMISSION_FIRING_FLOOR
+
+
+def test_separate_shot_ordinals_do_not_invent_repeated_contacts():
+    prompt = """Shot 1: First companion appears. End state: Keen sees him.
+Shot 2: A dolphin completes one water-to-air-to-water arc. End state: He re-enters.
+Shot 3: Third view reveals home receding. End state: The boat sails onward.
+No music."""
+
+    flight = standard.preflight(prompt)
+
+    assert not any(item["rule"] == "R10" for item in flight["findings"])
+
+
+def test_true_repeated_contacts_still_require_escalation():
+    prompt = """Shot 1: Fuzzby makes three readable impacts. End state: He settles.
+No music."""
+
+    flight = standard.preflight(prompt)
+
+    assert any(item["rule"] == "R10" for item in flight["findings"])
+
+
 def test_accepted_chase_prompt_and_local_render_match_recorded_provenance():
     provenance = json.loads((FIXTURES / "ACCEPTED_RENDER_PROVENANCE.json").read_text())
     prompt = FIXTURES / provenance["fixture"]

@@ -1,0 +1,479 @@
+{
+ "episodeId": "Ep1",
+ "sceneNumber": "5",
+ "engineVersion": "cb_engine.py production-package storyboard snapshot",
+ "builtAt": "2026-08-15T10:33:54.908369+00:00",
+ "sourceScript": {
+  "schemaVersion": 1,
+  "episodeId": "Ep1",
+  "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "sha256": "b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+  "byteLength": 17826,
+  "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.txt",
+  "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep1/b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5.json",
+  "displayFile": "Ep1_The_Adventure_Begins.txt",
+  "title": "The Adventure Begins",
+  "activationId": "c0279c729dae4f8d9effc7502d6bbaa4",
+  "activatedAt": "2026-08-05T09:39:02+00:00",
+  "activatedBy": "Julian explicit no-pollen-bags direction, applied by Codex",
+  "previousScriptVersionId": "sha256:ed5e4108ee4f5345c986c0eb683083f797af29a22b29cb4d30b13d029a6d0d19"
+ },
+ "sourceBeatPackage": "Ep1_The_Adventure_Begins_beat_package.json",
+ "approvalState": "approved",
+ "humanNote": "",
+ "scene": {},
+ "beats": [
+  {
+   "sceneNumber": 5,
+   "beatCode": "5.B1",
+   "sourceBeatId": "source-beat:sha256:9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
+   "sourceEventRange": {
+    "firstEventIndex": 72,
+    "lastEventIndex": 75,
+    "firstEventId": "script-event:sha256:b3dda834bdda4e87cc34b5816a42ce5d4faf8550f1a539f30df67bae4d1aa533",
+    "lastEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:b3dda834bdda4e87cc34b5816a42ce5d4faf8550f1a539f30df67bae4d1aa533",
+    "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
+    "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+    "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f",
+    "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:b3dda834bdda4e87cc34b5816a42ce5d4faf8550f1a539f30df67bae4d1aa533",
+       "sourceEventIndex": 72,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "The wind picks up around the trees. Leaves shiver. Branches sway harder now. Fuzzby and Zenny move quickly through the air, heading back through the forest. Fuzzby flies slightly ahead — still talking, because of course he is."
+      },
+      {
+       "sourceEventId": "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
+       "sourceEventIndex": 73,
+       "sourceSceneNumber": 5,
+       "sourceType": "dialogue",
+       "speaker": "Fuzzby",
+       "text": "I’m just saying, if this turns into a full storm situation, I am extremely—",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f"
+      },
+      {
+       "sourceEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+       "sourceEventIndex": 74,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
+      },
+      {
+       "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+       "sourceEventIndex": 75,
+       "sourceSceneNumber": 5,
+       "sourceType": "dialogue",
+       "speaker": "Zenny",
+       "text": "Fuzzby?",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a"
+   },
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Back at the treeline, Fuzzby talks over the rising wind until he stops dead — a rare interruption of his own momentum. Zenny nearly bumps into him, and that break in his nonstop performance tells us he has seen something truly serious.",
+   "want": "Fuzzby wants to keep narrating himself as storm-capable.",
+   "need": "He needs to let the sight of danger cut through the act.",
+   "kidRead": "Fuzzby is chattering, then suddenly freezes because he spots something.",
+   "adultRead": "For once, the chaos bee’s silence has weight; seriousness registers by the absence of performance.",
+   "emotionalIntent": "Use Fuzzby’s stillness as alarm, making the tiny distant boat feel dangerous.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:b3dda834bdda4e87cc34b5816a42ce5d4faf8550f1a539f30df67bae4d1aa533",
+     "sourceEventIndex": 72,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "The wind picks up around the trees. Leaves shiver. Branches sway harder now. Fuzzby and Zenny move quickly through the air, heading back through the forest. Fuzzby flies slightly ahead — still talking, because of course he is."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:ea83d4686d777b5f1a987cb46ed869397865c7b22d6abae4b445b73104df04fe",
+     "sourceEventIndex": 73,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9f",
+     "speaker": "Fuzzby",
+     "exactText": "I’m just saying, if this turns into a full storm situation, I am extremely—",
+     "dialogue": "Fuzzby: I’m just saying, if this turns into a full storm situation, I am extremely—",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:f9d47f8cc3151723fdd1a99e153c07a35b610e4457a59a3ac9f736c10ab78aaf",
+     "sourceEventIndex": 74,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "He stops dead in mid-air. Completely still. Zenny nearly bumps into him."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+     "sourceEventIndex": 75,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
+     "speaker": "Zenny",
+     "exactText": "Fuzzby?",
+     "dialogue": "Zenny: Fuzzby?",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "5.B2",
+   "sourceBeatId": "source-beat:sha256:23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
+   "sourceEventRange": {
+    "firstEventIndex": 76,
+    "lastEventIndex": 79,
+    "firstEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
+    "lastEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+    "eventCount": 4
+   },
+   "sourceEventIds": [
+    "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
+    "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+    "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
+    "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
+    "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
+       "sourceEventIndex": 76,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "No response. Fuzzby slowly raises one tiny paw… Points. Zenny follows his gaze. Out beyond the trees. Through the shifting wind and rain, a tiny boat rises and falls in the distance. Barely visible in the storm. Beat. Fuzzby’s eyes go WIDE."
+      },
+      {
+       "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+       "sourceEventIndex": 77,
+       "sourceSceneNumber": 5,
+       "sourceType": "dialogue",
+       "speaker": "Fuzzby",
+       "text": "…that is NOT a good place to be.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24"
+      },
+      {
+       "sourceEventId": "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
+       "sourceEventIndex": 78,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Zenny’s expression softens immediately."
+      },
+      {
+       "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+       "sourceEventIndex": 79,
+       "sourceSceneNumber": 5,
+       "sourceType": "dialogue",
+       "speaker": "Zenny",
+       "text": "Someone’s in trouble.",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94"
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154"
+   },
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Through rain and trees, the bees identify the tiny boat in trouble. Fuzzby’s eyes go wide and Zenny’s face softens immediately; their comic contrast becomes shared concern.",
+   "want": "They want to understand what they are seeing quickly enough to help.",
+   "need": "Fuzzby needs to let fear become action; Zenny needs to let affection show as urgency.",
+   "kidRead": "They see a little boat bouncing in the storm and know someone needs help.",
+   "adultRead": "The deadpan crack matters: Zenny’s softness tells us the rescue has become personal before any bear knows.",
+   "emotionalIntent": "Let comedy give way to care, with the storm now aimed at a person.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:c5443ddca65bf7e81d9acacf4414f09c3cf10a09bd96cb26c70a6529eeabfefd",
+     "sourceEventIndex": 76,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "No response. Fuzzby slowly raises one tiny paw… Points. Zenny follows his gaze. Out beyond the trees. Through the shifting wind and rain, a tiny boat rises and falls in the distance. Barely visible in the storm. Beat. Fuzzby’s eyes go WIDE."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+     "sourceEventIndex": 77,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
+     "speaker": "Fuzzby",
+     "exactText": "…that is NOT a good place to be.",
+     "dialogue": "Fuzzby: …that is NOT a good place to be.",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:fae6f06073af96c51a4b66a4853fe50dbca8be14dd2ea81506559ea8bccaa035",
+     "sourceEventIndex": 78,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Zenny’s expression softens immediately."
+    },
+    {
+     "n": 4,
+     "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+     "sourceEventIndex": 79,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
+     "speaker": "Zenny",
+     "exactText": "Someone’s in trouble.",
+     "dialogue": "Zenny: Someone’s in trouble.",
+     "action": null
+    }
+   ]
+  },
+  {
+   "sceneNumber": 5,
+   "beatCode": "5.B3",
+   "sourceBeatId": "source-beat:sha256:d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7",
+   "sourceEventRange": {
+    "firstEventIndex": 80,
+    "lastEventIndex": 82,
+    "firstEventId": "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
+    "lastEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
+    "eventCount": 3
+   },
+   "sourceEventIds": [
+    "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
+    "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+    "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613"
+   ],
+   "dialogueOccurrenceIds": [
+    "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab"
+   ],
+   "sourceEventSignature": {
+    "kind": "source-beat-events",
+    "schemaVersion": 1,
+    "inputs": {
+     "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+     "orderedEvents": [
+      {
+       "sourceEventId": "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
+       "sourceEventIndex": 80,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "Fuzzby snaps into action."
+      },
+      {
+       "sourceEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+       "sourceEventIndex": 81,
+       "sourceSceneNumber": 5,
+       "sourceType": "dialogue",
+       "speaker": "Fuzzby",
+       "text": "BEARS! BEARS! EMERGENCY BEARS!",
+       "dialogueOccurrenceId": "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab"
+      },
+      {
+       "sourceEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
+       "sourceEventIndex": 82,
+       "sourceSceneNumber": 5,
+       "sourceType": "action",
+       "speaker": null,
+       "text": "He BLASTS off toward the beach at full speed. Immediately flies into a branch. BONK. He recoils. Shakes it off. Keeps going anyway. Zenny follows behind — calm, focused. This time faster."
+      }
+     ]
+    },
+    "algorithm": "sha256",
+    "digest": "d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7"
+   },
+   "location": "RAINFOREST EDGE",
+   "time": "CONTINUOUS",
+   "characters": [
+    "Fuzzby",
+    "Zenny"
+   ],
+   "storyBeat": "Fuzzby blasts off to get the bears, immediately bonks into a branch, and keeps going anyway. His crash is no longer mere foolishness; it is messy usefulness driven by concern.",
+   "want": "Fuzzby wants to raise the alarm as fast and dramatically as possible.",
+   "need": "He needs to be helpful without being polished.",
+   "kidRead": "He yells for emergency bears, hits a branch, and keeps zooming.",
+   "adultRead": "His familiar crash pattern is transformed: the same flaw becomes part of his care.",
+   "emotionalIntent": "Convert slapstick into rescue momentum, ending with Zenny following faster than usual.",
+   "cuts": [
+    {
+     "n": 1,
+     "sourceEventId": "script-event:sha256:b962ecef9d86f60d3a3934e8646ef4dfd5a4e99736312aed88f510956b0d9e23",
+     "sourceEventIndex": 80,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "Fuzzby snaps into action."
+    },
+    {
+     "n": 2,
+     "sourceEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+     "sourceEventIndex": 81,
+     "sourceSceneNumber": 5,
+     "sourceType": "dialogue",
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab",
+     "speaker": "Fuzzby",
+     "exactText": "BEARS! BEARS! EMERGENCY BEARS!",
+     "dialogue": "Fuzzby: BEARS! BEARS! EMERGENCY BEARS!",
+     "action": null
+    },
+    {
+     "n": 3,
+     "sourceEventId": "script-event:sha256:24343aa1d802bc187a51470b68b1bb0d5e1a5d7e3a5e882c9952880b7b5bc613",
+     "sourceEventIndex": 82,
+     "sourceSceneNumber": 5,
+     "sourceType": "action",
+     "dialogueOccurrenceId": null,
+     "speaker": null,
+     "exactText": null,
+     "dialogue": null,
+     "action": "He BLASTS off toward the beach at full speed. Immediately flies into a branch. BONK. He recoils. Shakes it off. Keeps going anyway. Zenny follows behind — calm, focused. This time faster."
+    }
+   ]
+  }
+ ],
+ "shots": [
+  {
+   "shotId": "5.B1.S1",
+   "sourceType": "opener",
+   "sourceShotId": null,
+   "durationSec": 28.0,
+   "purpose": "A single escalating discovery-and-action chain: Fuzzby’s chatter is cut off by the sight of danger, Zenny confirms the stakes, then Fuzzby turns alarm into action with one comic collision on the way out.",
+   "performanceAssignment": "Fuzzby flies slightly ahead through the wind while talking; he stops abruptly in mid-air, holds still, slowly points out through the trees, widens his eyes, then snaps forward yelling and launches toward the beach. Zenny nearly bumps into him, steadies, follows his gaze, softens her face, then accelerates after him. During the launch, Fuzzby hits a branch, rebounds, shakes once, reorients, and continues forward while Zenny follows behind without speaking.",
+   "camera": "One continuous storm-side tracking shot from the forest flight path. Start in a medium two-shot moving screen-right with the characters; when Fuzzby stops, the camera eases past him into his eyeline and racks through rain and branches to the distant tiny boat. Hold the boat small in the frame, then drift back to Fuzzby and Zenny for their reactions. On Fuzzby’s shout, whip-pan with his launch, catch the branch impact in the same lateral direction, then continue tracking as both head toward the beach.",
+   "openingPose": "Fuzzby is airborne slightly ahead at screen-center-right, facing screen-right into the wind with mouth just opening to continue speaking; Zenny is airborne behind at screen-left, facing screen-right and closing the distance. Tree branches ahead bend across their path, leaving clear space before any contact.",
+   "visualPayoff": "Fuzzby ricochets off the branch with a clear BONK, wobbles for a beat, then flies on screen-right toward the beach with Zenny following faster behind him as the rain and branches whip past.",
+   "dialogueLines": [
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:34840f880105d941cfcde26d8276af04ca65ed8e129c7161f8416d291bf56c9",
+     "sourceEventId": null,
+     "speaker": "Fuzzby",
+     "exactText": "I’m just saying, if this turns into a full storm situation, I am extremely—",
+     "delivery": "Fast, breathless chatter into the wind; the final word cuts off cleanly when he freezes.",
+     "startSec": 1.4,
+     "endSec": 5.1
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:fe5f134fa71d3fab878c0dd8ff2d286a165896b952cff4e77ca3bdb06e0e893c",
+     "sourceEventId": "script-event:sha256:3097ecaa6383cbf883ff23b1abf8904d6a3c1bdc4a7ea75bc35a097a7570486d",
+     "speaker": "Zenny",
+     "exactText": "Fuzzby?",
+     "delivery": "Small, cautious question after nearly bumping into him; only Zenny’s mouth moves.",
+     "startSec": 6.6,
+     "endSec": 7.2
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:700cc30aea58a3be7aa5c5e0e11baf4e93fb104e385c8ca470ad120651e7ec24",
+     "sourceEventId": "script-event:sha256:ccd6b4d086b9ec0f0b5fe0464e56226bd27508d2f7610ae07ab5b913c9a4371b",
+     "speaker": "Fuzzby",
+     "exactText": "…that is NOT a good place to be.",
+     "delivery": "Quiet at first, then firmer on NOT; spoken while staring toward the distant boat.",
+     "startSec": 13.1,
+     "endSec": 15.2
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:4b2a0a9f3594e468c580259e7be2beb5d676ceb2a5e3e8765fe7020e6b475e94",
+     "sourceEventId": "script-event:sha256:31546b6283b8b1f4b0574df1a32e6fbc0415b4d29f10048fc7ab36986628fa7a",
+     "speaker": "Zenny",
+     "exactText": "Someone’s in trouble.",
+     "delivery": "Soft, direct, and focused; only Zenny’s mouth moves while Fuzzby holds his stare.",
+     "startSec": 16.2,
+     "endSec": 17.6
+    },
+    {
+     "dialogueOccurrenceId": "dialogue-occurrence:sha256:549b2316295d926a070dc2be601358a05fbd55dca8eb642898ae5d639cfb04ab",
+     "sourceEventId": "script-event:sha256:abb5bd091394153a1e6f3e6a834ccc08fe4480754cc094cf7c2e87aa977d6f4a",
+     "speaker": "Fuzzby",
+     "exactText": "BEARS! BEARS! EMERGENCY BEARS!",
+     "delivery": "Sudden loud alarm, projected forward as he starts his launch; only Fuzzby’s mouth moves.",
+     "startSec": 18.7,
+     "endSec": 20.9
+    }
+   ]
+  }
+ ],
+ "inputSignature": {
+  "kind": "scene-storyboard-snapshot",
+  "schemaVersion": 1,
+  "inputs": {
+   "scriptVersionId": "sha256:b913e2a941fce212b23a626cd0e0ddaf2b3469ffafca8475e639a29b2fadfca5",
+   "beatPackageDigest": "7ab0def81f431974205dfa01ee8f62171eca3d021019cb41efd079f7ff8c14a8",
+   "sceneNumber": "5",
+   "sourceBeatIds": [
+    "source-beat:sha256:9d87c70e61308c530225667596344e994aa1e21bc41ed7160f2206ab94a6c69a",
+    "source-beat:sha256:23bbb0bd7317dd2c651e1fa8eb10f77d95eed71d3ba463b76fa9afdd7bc55154",
+    "source-beat:sha256:d8861e89de4f255548f08804917a76427969ef96bfc4e7dda4c110434e6a85d7"
+   ],
+   "shotIds": [
+    "5.B1.S1"
+   ]
+  },
+  "algorithm": "sha256",
+  "digest": "245ca93038cff723d9e6335295ed64c78d7b5d3455632fb19ac2bb1c0ab01cd4"
+ },
+ "approvalLog": [
+  {
+   "target": "scene",
+   "state": "approved",
+   "note": "",
+   "at": "2026-08-15T11:39:39",
+   "by": "Julian"
+  }
+ ]
+}

@@ -3,4 +3,6 @@ requests>=2.31,<3
 openai>=1.50,<2
 fal-client>=0.5,<1
 pillow>=10,<13
+numpy>=2.0,<3
+scipy>=1.14,<2
 pytest>=8,<10

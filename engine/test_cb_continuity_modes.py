@@ -13,7 +13,7 @@ def _isolate_continuity_tests_from_prompt_quality_gates(monkeypatch):
     )
     monkeypatch.setattr(
         R,
-        "_prompt_quality_gate",
+        "_prompt_contract_completeness",
         lambda *args, **kwargs: {
             "score": 20,
             "maximum": 20,
@@ -67,7 +67,7 @@ def test_video_extension_plan_uses_previous_approved_clip_as_video_reference(tmp
     assert "Continue forward naturally without" in segment["prompt"]
     assert "[Extension Goal]" in segment["prompt"]
     assert "@Video1 is the source video to extend forward" in segment["prompt"]
-    assert "first frame of the extended segment directly continues from the last frame" in segment["prompt"]
+    assert "first frame of the extension continues directly from the last frame" in segment["prompt"]
     assert "same continuous instance" in segment["prompt"]
     assert "Previous approved clip path:" not in segment["prompt"]
 

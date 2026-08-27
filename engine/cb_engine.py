@@ -206,7 +206,9 @@ class Shot(BaseModel):
     shotRole: Literal["establish", "coverage", "button"] = "coverage"
     establishJob: Optional[Literal["location", "scale", "threat", "emotion"]] = None
     buttonChange: Optional[str] = None
-    frameSource: Optional[Literal["chain_cut", "chain_continue"]] = None
+    frameSource: Optional[Literal[
+        "scene_plate", "keyframe", "chain_cut", "chain_continue"
+    ]] = None
     durationSec: float = Field(ge=MIN_SHOT_SEC, le=MAX_SHOT_SEC)
     purpose: str = Field(min_length=1)            # this shot's ONE job, one line
     performanceAssignment: str = Field(min_length=1)  # one cause with its visible consequences —
@@ -376,11 +378,16 @@ def _design_user_prompt(scene_num, scene, beats):
         "frame it continues from, usually the previous one) when the action flows on directly, or "
         "'opener' (sourceShotId=null) when it is a designed editorial cut to genuinely new coverage. "
         "Every shot: ONE performance assignment, an anticipation openingPose, an exact visualPayoff, "
-        "shotRole='establish'|'coverage'|'button'; the first shot must be establish and the final "
-        "shot must be button. Establish and button shots are 3-5 seconds, "
-        "silent, have one dominant camera action and a held final composition for one full second. "
+        "shotRole='establish'|'coverage'|'button'. These are story functions, not mandatory "
+        "bookends: open directly on coverage when inherited geography or character experience is "
+        "the stronger choice, and close on coverage when no distinct consequence image is earned. "
+        "Use an establish only when location, scale, threat or emotional temperature must be made "
+        "legible; use a button only when a separate consequence image strengthens the exit. "
+        "Establish and button shots are silent, have one dominant camera action and a held final "
+        "composition for one full second. "
         "An establish declares establishJob='location'|'scale'|'threat'|'emotion'; a button declares "
-        "buttonChange; wrapper frameSource is 'chain_cut' or 'chain_continue'. "
+        "buttonChange. Wrapper frameSource is 'scene_plate' or 'keyframe' for a fresh designed "
+        "opening, and 'chain_cut' or 'chain_continue' when inheriting a held predecessor frame. "
         "typed continuityIn/continuityOut (zone, facing, pose, expression, marks, props for every "
         "character visible at that boundary). When a character enters after frame one, set "
         "openingCharactersInFrame to the opening subset; when one visibly exits before the landing "
@@ -696,9 +703,11 @@ def validate_scene_design(design, beats, characters_cfg):
             if sh.dialogueLines:
                 add("ERROR", "WRAPPER_DIALOGUE_FORBIDDEN", f"{path}.dialogueLines",
                     "buttons carry ambience only; dialogue belongs in the edit")
-        if sh.shotRole in {"establish", "button"} and sh.frameSource not in {"chain_cut", "chain_continue"}:
+        if sh.shotRole in {"establish", "button"} and sh.frameSource not in {
+                "scene_plate", "keyframe", "chain_cut", "chain_continue"}:
             add("ERROR", "WRAPPER_FRAME_SOURCE_MISSING", f"{path}.frameSource",
-                "an establish or button must declare chain_cut or chain_continue")
+                "an establish or button must declare scene_plate, keyframe, chain_cut or "
+                "chain_continue")
         for beat_code in shot_beat_codes:
             if source_beat_codes and beat_code not in source_beat_codes:
                 add("ERROR", "UNKNOWN_BEAT", f"{path}.beatCodes", beat_code)

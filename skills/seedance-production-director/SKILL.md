@@ -60,6 +60,9 @@ Create playable screen direction, not a wall of constraints. Preserve the writer
 - Always read [references/quality-gates.md](references/quality-gates.md) before delivery.
 - Read [references/official-capabilities.md](references/official-capabilities.md) before making a Seedance 2.5 capability, limit, setting or platform claim.
 - Read [references/extension-workflow.md](references/extension-workflow.md) for Extend/Continue work, chained scenes, join repair, backwards-leading material or bridges.
+- Apply [the shot-extension skill](../../studio/skills/seedance-shot-extension/SKILL.md) when
+  producing the typed extension boundary; exchange its data through
+  `engine.cb_seedance_contract.ExtensionContract`.
 - Read [references/ensemble-continuity.md](references/ensemble-continuity.md) for recurring characters, several similar characters, group blocking or The Crystal Bears.
 - Read [references/output-contract.md](references/output-contract.md) for full scripts, multiple clips, application data or production ledgers.
 
@@ -210,3 +213,10 @@ Match the request:
 - **Application integration:** follow the output contract.
 
 Never claim a provider request was sent unless an actual request record confirms it.
+
+## Interchange vocabulary
+
+External skill and cross-repository records use the versioned snake_case contract emitted by
+`engine.cb_seedance_contract`. Existing application packages may retain camelCase internally.
+Convert only through the typed adapter, reject unknown fields and never maintain two untested
+spellings of the same semantic field.

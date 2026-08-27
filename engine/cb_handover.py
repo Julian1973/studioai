@@ -487,6 +487,26 @@ def _validate_supervision_contracts(storyboard):
                     f"REFUSED - {beat_id}.powerMoment is malformed or breaks canon identity")
 
     shots = list(storyboard.get("shots") or [])
+    if int(storyboard.get("creativeDirectingStandardVersion") or 0) >= 3:
+        budget_keys = {"emotionalTurnCount", "propStateChangeCount", "dialogueHeavy",
+                       "silentActingReserveSec", "landingHoldSec",
+                       "minimumHonestDurationSec", "decision", "rationale"}
+        visual_keys = {"emotionalDistanceStart", "emotionalDistanceEnd", "revealStrategy",
+                       "performanceVisibility", "editorialPurpose", "memorableLandingImage"}
+        for shot in shots:
+            budget = shot.get("performanceBudget")
+            if not isinstance(budget, dict) or set(budget) != budget_keys:
+                raise HandoverRefused(
+                    f"REFUSED - {shot.get('shotId')} has no complete performanceBudget")
+            if (budget.get("decision") != "single-unit" or
+                    float(budget.get("minimumHonestDurationSec") or 0) >
+                    float(shot.get("targetDurationSec") or 0)):
+                raise HandoverRefused(
+                    f"REFUSED - {shot.get('shotId')} exceeds its honest performance budget")
+            cine = shot.get("cinematographyContract") or {}
+            if any(not str(cine.get(key) or "").strip() for key in visual_keys):
+                raise HandoverRefused(
+                    f"REFUSED - {shot.get('shotId')} has incomplete visual-performance intent")
     carrier_by_beat = {}
     for beat_id in big_beats:
         eligible = [shot for shot in shots if beat_id in (shot.get("beatIds") or [])]
@@ -818,7 +838,10 @@ def _cinematography_instruction(contract, shot_id):
     expected = {"storyPointOfView", "shotScale", "lensIntent", "cameraHeight",
                 "composition", "depthStrategy", "cameraBehavior", "focusStrategy",
                 "lightingFunction", "paletteFunction", "providerInstruction"}
-    if not isinstance(contract, dict) or set(contract) != expected:
+    forward = {"emotionalDistanceStart", "emotionalDistanceEnd", "revealStrategy",
+               "performanceVisibility", "editorialPurpose", "memorableLandingImage"}
+    if (not isinstance(contract, dict) or not expected.issubset(set(contract)) or
+            set(contract) - expected - forward):
         raise HandoverRefused(
             f"REFUSED - {shot_id} has no complete typed cinematographyContract")
     if any(not str(contract.get(key) or "").strip() for key in expected):
@@ -915,6 +938,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
                 "comedyContractsApproved": list(comedy_contracts or []),
                 "emotionContractsApproved": list(emotion_contracts or []),
                 "cinematographyContractApproved": cinematography_contract or None,
+                "performanceBudgetApproved": sb_shot.get("performanceBudget"),
                 "targetDurationSecApproved": sb_shot.get("targetDurationSec"),
                 "storyboardStagePlanApproved": list(sb_shot.get("stagePlan") or []),
                 "storyboardInternalShotPlanApproved": list(
@@ -1042,6 +1066,7 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
 
     new_rev = int(old.get("revision") or 0) + 1
     pkg = {"episode": sb.get("episodeId", "Ep1"), "sceneNumber": str(sb.get("sceneNumber", "")),
+           "creativeDirectingStandardVersion": sb.get("creativeDirectingStandardVersion", 0),
            "sceneName": scene["sceneName"],
            "doctrine": "CREATIVE ROOM vNEXT handover — the approved storyboard is the sole "
                         "creative source (cb_handover.py)",
@@ -1053,7 +1078,14 @@ def promote(storyboard_path, pkg_path, dry_run=True, log=print):
                             f"sealed envelope and spend token is stale (binding hash changed).",
            "sourceStoryboard": {"path": str(storyboard_path), "md5": _md5(storyboard_path),
                                  "approvalState": sb["approvalState"],
-                                 "humanNote": sb.get("humanNote", "")},
+                                 "humanNote": sb.get("humanNote", ""),
+                                 "creativeDirectingStandardVersion": sb.get(
+                                     "creativeDirectingStandardVersion", 0),
+                                 "creativeCardHashes": {
+                                     item["shotId"]: hashlib.sha256(json.dumps(
+                                         item, sort_keys=True, ensure_ascii=False
+                                     ).encode()).hexdigest()
+                                     for item in sb.get("shots") or []}},
            "handover": {"distilled": ["opening state", "principal performance",
                                         "principal camera intention", "voice/audio relationship",
                                         "typed continuity in/out", "typed creative intent",
@@ -1144,6 +1176,7 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
 
     new_rev = int(old.get("revision") or 0) + 1
     pkg = {"episode": sb.get("episodeId", "Ep1"), "sceneNumber": str(sb.get("sceneNumber", "")),
+           "creativeDirectingStandardVersion": sb.get("creativeDirectingStandardVersion", 0),
            "sceneName": scene["sceneName"], "scope": f"single-shot handover: {shot_id}",
            "doctrine": "CREATIVE ROOM vNEXT single-shot handover — the approved storyboard "
                         "is the sole creative source (cb_handover.promote_shot)",
@@ -1155,7 +1188,12 @@ def promote_shot(storyboard_path, shot_id, pkg_path, dry_run=True, log=print):
                             f"sealed envelope and spend token for this shot is stale.",
            "sourceStoryboard": {"path": str(storyboard_path), "md5": _md5(storyboard_path),
                                  "approvalState": sb["approvalState"],
-                                 "humanNote": sb.get("humanNote", "")},
+                                 "humanNote": sb.get("humanNote", ""),
+                                 "creativeDirectingStandardVersion": sb.get(
+                                     "creativeDirectingStandardVersion", 0),
+                                 "creativeCardHashes": {shot_id: hashlib.sha256(json.dumps(
+                                     sb_shot, sort_keys=True, ensure_ascii=False
+                                 ).encode()).hexdigest()}},
            "handover": {"distilled": ["opening state", "principal performance",
                                         "principal camera intention", "voice/audio relationship",
                                         "typed continuity in/out", "typed creative intent",
@@ -1382,6 +1420,7 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
     }
     new_pkg = {
         "episode": episode, "sceneNumber": str(scene_num),
+        "creativeDirectingStandardVersion": sb.get("creativeDirectingStandardVersion", 0),
         "sceneName": scene["sceneName"],
         "doctrine": "creative-room-2.2 -> cb_handover.promote_to_canonical -> the existing "
                      "cb_render canonical package format (2026-07-17 source-level handover)",
@@ -1425,6 +1464,8 @@ def promote_to_canonical(storyboard_path, scene_num, shot_ids, episode="Ep1", dr
                               "sha256": storyboard_sha256,
                               "approvalState": sb["approvalState"],
                               "humanNote": sb.get("humanNote", ""),
+                              "creativeDirectingStandardVersion": sb.get(
+                                  "creativeDirectingStandardVersion", 0),
                               "creativeCardHashes": card_hashes,
                               "inputSignature": sb.get("inputSignature")},
         "inputSignature": cb_lineage.dependency_signature(

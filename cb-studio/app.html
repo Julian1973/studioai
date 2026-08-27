@@ -2213,10 +2213,11 @@ function deriveSceneStateLegacy(bundle,scriptApproved,scene){
     const done=talky.filter(s=>{const led=ledgerFor(s.shotId); return !!(led.voiceApproval&&led.voiceApproval.approved&&led.voiceApproval.packageRevision===(bundle.pkg&&bundle.pkg.revision));}).length;
     const generatedN=talky.filter(s=>(media[s.shotId]||{}).vo).length;
     const timingCurrent=!!(bundle.media&&bundle.media.timingSlateCurrent);
-    if(!talky.length) out.voice=timingCurrent
-      ?{state:"approved", sub:"Silent timing slate is current"}
+    const timingApproved=!!(bundle.media&&bundle.media.timingSlateApproved);
+    if(!talky.length) out.voice=timingApproved
+      ?{state:"approved", sub:"Silent timing slate rhythm approved"}
       :{state:"ready", sub:"Build the silent scene timing slate"};
-    else if(done==talky.length&&timingCurrent) out.voice={state:"approved", sub:done+" of "+talky.length+" approved · timing current"};
+    else if(done==talky.length&&timingApproved) out.voice={state:"approved", sub:done+" of "+talky.length+" approved · rhythm approved"};
     else if(done==talky.length) out.voice={state:"ready", sub:"Performances approved · build or refresh timing slate"};
     else if(generatedN>0) out.voice={state:"ready", sub:done+" of "+talky.length+" approved · "+generatedN+" awaiting your decision"};
     else out.voice={state:"ready", sub:"0 of "+talky.length+" generated"};
@@ -4059,12 +4060,14 @@ function renderShotStage(mode){
   } else if(mode=="voice"){
     const slate=(SH_MEDIA&&SH_MEDIA.timingSlate)||null;
     const slateCurrent=!!(SH_MEDIA&&SH_MEDIA.timingSlateCurrent);
+    const slateApproved=!!(SH_MEDIA&&SH_MEDIA.timingSlateApproved);
     const slatePanel=`<div class="ccpanel" style="margin-bottom:14px">
       <div class="cchead">Scene timing slate · performance before pixels
-        ${slate?`<span class="stbadge" style="color:var(${slateCurrent?"--ok":"--warn"});background:var(${slateCurrent?"--okbg":"--warnbg"})">${slateCurrent?"current":"stale"}</span>`:""}</div>
+        ${slate?`<span class="stbadge" style="color:var(${slateApproved?"--ok":"--warn"});background:var(${slateApproved?"--okbg":"--warnbg"})">${slateApproved?"rhythm approved":slateCurrent?"awaiting review":"stale"}</span>`:""}</div>
       <div class="dec-caption">Checks approved voices, dialogue position, broad shot duration and total scene length before final opening frames. It is not evidence of final staging or animation quality.</div>
       ${slate?`<video controls src="${BASE}${_esc(slate)}?v=${MEDIA_V}" style="width:100%;margin-top:10px"></video>
-        ${slateCurrent?"":`<div class="ccrow" style="color:var(--warn)">⚠ ${_esc((SH_MEDIA&&SH_MEDIA.timingSlateReason)||"An approved performance or shot duration changed.")}</div>`}
+        ${slateApproved?"":`<div class="ccrow" style="color:var(--warn)">${_esc((SH_MEDIA&&SH_MEDIA.timingSlateReason)||"Review the current voice timing and performance breathing.")}</div>`}
+        ${slateCurrent&&!slateApproved?`<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" onclick="shRun('approve-timing-slate')">Approve rhythm</button><button class="btn ghost" onclick="shRun('reject-timing-slate')">Revise timing</button></div>`:""}
         <button class="btn ghost" style="margin-top:8px" onclick="shRun('animatic')">↻ Rebuild timing slate — local, no media provider</button>`
         :`<button class="btn ghost" style="margin-top:10px" onclick="shRun('animatic')">Build timing slate — local, no media provider</button>`}
     </div>`;
@@ -4620,6 +4623,7 @@ async function shRestoreSeedanceWork(tok){
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 const SH_LABEL={voice:"Voice all",animatic:"Timing slate",scenelook:"Build Scene World","approve-scenelook":"Accept Scene Look","reject-scenelook":"Iterate Scene Look",keyframe:"Build keyframe",fire:"Fire candidates",next:"Fire next",approve:"Accept candidate",reject:"Iterate batch",stitch:"Build post master",
+  "approve-timing-slate":"Approve slate rhythm","reject-timing-slate":"Revise slate timing",
   "select-upload":"Use uploaded image","select-library":"Use library image","select-previous":"Use previous final frame",
   "approve-voice":"Accept voice","reject-voice":"Iterate voice"};
 const REJECT_CATS=["identity","geography","action-timing","instruction-ignored","other"];   // mirrors serve.py's REJECT_CATEGORIES exactly
@@ -4716,6 +4720,11 @@ async function shRun(cmd,shotId,opts){
     // archives the current take, clears the approval, requires a stated reason.
     correction=(opts.correction!=null?opts.correction:
       (prompt("Why is this voice take being rejected? (goes on record in History):","")||"")).trim();
+    if(!correction)return;
+  }
+  if(cmd=="reject-timing-slate"){
+    correction=(opts.correction!=null?opts.correction:
+      (prompt("What must change in the voice timing, breathing room or landing rhythm?","")||"")).trim();
     if(!correction)return;
   }
   const body={cmd,scene:String(SH_SC),episode:SH_EP};

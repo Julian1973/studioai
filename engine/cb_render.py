@@ -35,6 +35,8 @@ approximates "is it funny").
 
     python3 cb_render.py voice    <scene> [episode]
     python3 cb_render.py animatic <scene> [episode]
+    python3 cb_render.py approve-timing-slate <scene> [episode]
+    python3 cb_render.py reject-timing-slate <scene> "<reason>" [episode]
     python3 cb_render.py scenelook         <scene> [episode] [referencePath]
     python3 cb_render.py approve-scenelook <scene> [episode]
     python3 cb_render.py reject-scenelook  <scene> "<note>" [episode]
@@ -117,6 +119,7 @@ POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
 REVIEW_VIDEO_RESOLUTION = "480p"
+CREATIVE_DIRECTING_STANDARD_VERSION = 3
 
 
 class Refused(RuntimeError):
@@ -2823,10 +2826,11 @@ _DEPARTMENT_WORKERS = {
 }
 
 
-def _department_skill_ref(stage, skill):
+def _department_skill_ref(stage, skill, standard_version=0):
+    suffix = "-v3" if int(standard_version or 0) >= CREATIVE_DIRECTING_STANDARD_VERSION else ""
     if stage == "animation":
-        return "skills/seedance-production-director/SKILL.md"
-    return f"skills/crystal-bears-{skill}/SKILL.md"
+        return f"skills/seedance-production-director{suffix}/SKILL.md"
+    return f"skills/crystal-bears-{skill}{suffix}/SKILL.md"
 
 
 def _department_container(pkg, scene, shot_id, stage, episode="Ep1"):
@@ -2882,6 +2886,8 @@ def _scene_context(pkg, scene, episode):
     sb_path = _storyboard_path(scene, episode)
     sb = json.load(open(sb_path)) if sb_path.exists() else {}
     return {"episode": episode, "scene": str(scene), "sceneName": pkg.get("sceneName"),
+            "creativeDirectingStandardVersion": int(
+                pkg.get("creativeDirectingStandardVersion") or 0),
             "approvedStoryboardScene": sb.get("scene"),
             "selectedTreatment": sb.get("treatmentSelection"),
             "locationCanon": (locs.get(episode) or {}).get(str(scene)),
@@ -2937,6 +2943,63 @@ def _with_effective_dialogue_timing(shot, led):
     return {**shot, "dialogueLines": dialogue}
 
 
+def _performance_budget_report(shot, led):
+    """Compare approved performance capacity with the real approved voice timing."""
+    budget = shot.get("performanceBudgetApproved") or shot.get("performanceBudget")
+    if not budget:
+        return {"applicable": False, "ready": True, "reason": "legacy shot has no v3 budget"}
+    duration = float(shot.get("durationSec") or 0)
+    lines = _voice_director_lines(led) or shot.get("dialogueLines") or []
+    intervals = []
+    for line in lines:
+        start = line.get("startsAtSec", line.get("startSec"))
+        end = line.get("endSec")
+        if end is None and start is not None:
+            estimate = line.get("estimatedDurationSec")
+            if estimate is not None:
+                end = float(start) + float(estimate)
+        if start is None or end is None:
+            continue
+        start, end = max(0.0, float(start)), min(duration, float(end))
+        if end > start:
+            intervals.append((start, end))
+    merged = []
+    for start, end in sorted(intervals):
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    occupied = sum(end - start for start, end in merged)
+    available = max(0.0, duration - occupied)
+    reserve = float(budget.get("silentActingReserveSec") or 0)
+    landing = float(budget.get("landingHoldSec") or 0)
+    required_unvoiced = reserve + landing
+    minimum = float(budget.get("minimumHonestDurationSec") or 0)
+    reasons = []
+    if budget.get("decision") != "single-unit":
+        reasons.append("Director marked this unit for a split before generation")
+    if minimum > duration:
+        reasons.append(
+            f"minimum honest duration is {minimum:g}s but the unit is {duration:g}s")
+    if available + 0.05 < required_unvoiced:
+        reasons.append(
+            f"voice leaves {available:.2f}s unoccupied but acting and landing require "
+            f"{required_unvoiced:.2f}s")
+    return {
+        "applicable": True,
+        "ready": not reasons,
+        "durationSec": duration,
+        "dialogueOccupiedSec": round(occupied, 3),
+        "dialogueOccupancyRatio": round(occupied / duration, 3) if duration else 0,
+        "availableUnvoicedSec": round(available, 3),
+        "requiredSilentActingAndLandingSec": round(required_unvoiced, 3),
+        "emotionalTurnCount": budget.get("emotionalTurnCount"),
+        "propStateChangeCount": budget.get("propStateChangeCount"),
+        "reasons": reasons,
+        "recommendedAction": "split-at-strongest-story-boundary" if reasons else "proceed-to-animatic",
+    }
+
+
 def _shot_context(pkg, shot, led, scene, episode):
     effective_shot = _with_effective_dialogue_timing(
         _shot_creative_contract_view(pkg, shot, scene, episode), led)
@@ -2969,6 +3032,8 @@ def _shot_context(pkg, shot, led, scene, episode):
     if scene_locks:
         effective_shot = {**effective_shot, "sceneContinuityLocks": scene_locks}
     return {"episode": episode, "scene": str(scene),
+            "creativeDirectingStandardVersion": int(
+                pkg.get("creativeDirectingStandardVersion") or 0),
             "shot": effective_shot,
             "approvedSceneLook": scenelook_status(scene, episode).get("approved"),
             "currentVoiceDirection": (led.get("departmentWork", {}).get("voice", {})
@@ -3020,12 +3085,50 @@ def _shot_creative_contract_view(pkg, shot, scene, episode):
     }
 
 
+def _require_forward_directing_source(pkg, shot, scene, episode):
+    """Require the signed Gate 0-6 source only for forward-standard packages."""
+    version = int(pkg.get("creativeDirectingStandardVersion") or 0)
+    if version < CREATIVE_DIRECTING_STANDARD_VERSION:
+        return None
+    source = pkg.get("sourceStoryboard") or {}
+    path = pathlib.Path(source.get("path") or _storyboard_path(scene, episode))
+    if source.get("approvalState") != "approved" or not path.exists():
+        raise Refused(
+            f"REFUSED — {shot['shotId']} needs a human-approved Director storyboard before "
+            "new forward-standard department work")
+    storyboard = json.load(open(path))
+    if storyboard.get("approvalState") != "approved":
+        raise Refused(
+            f"REFUSED — {shot['shotId']}'s Director storyboard is no longer approved")
+    if int(storyboard.get("creativeDirectingStandardVersion") or 0) < version:
+        raise Refused(
+            f"REFUSED — {shot['shotId']}'s storyboard predates directing standard v{version}")
+    card = next((item for item in storyboard.get("shots") or []
+                 if item.get("shotId") == shot.get("shotId")), None)
+    if not card:
+        raise Refused(f"REFUSED — {shot['shotId']} has no signed Director shot card")
+    actual_hash = hashlib.sha256(json.dumps(
+        card, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    expected_hash = (source.get("creativeCardHashes") or {}).get(shot.get("shotId"))
+    if not expected_hash or actual_hash != expected_hash:
+        raise Refused(f"REFUSED — {shot['shotId']}'s signed Director shot card is stale")
+    missing = [name for name in ("performanceBudget", "cinematographyContract",
+                                  "performanceContract") if not card.get(name)]
+    if missing:
+        raise Refused(
+            f"REFUSED — {shot['shotId']} lacks forward directing contracts: "
+            + ", ".join(missing))
+    return card
+
+
 def _department_candidate(stage, output, context):
     dep, worker, skill = _DEPARTMENT_WORKERS[stage]
+    standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
     candidate = {"department": dep, "worker": worker,
-            "skill": _department_skill_ref(stage, skill),
+            "skill": _department_skill_ref(stage, skill, standard_version),
             "model": cb_departments.cb_llm.DIRECTOR_MODEL,
             "preparedAt": _now(), "editedAt": None, "preparedBy": "specialist",
+            "creativeDirectingStandardVersion": standard_version,
             "sourceHash": hashlib.sha256(json.dumps(context, sort_keys=True,
                                                        ensure_ascii=False).encode()).hexdigest(),
             "output": output}
@@ -3033,6 +3136,8 @@ def _department_candidate(stage, output, context):
         candidate["reviewedMediaPaths"] = list(context.get("reviewedMediaPaths") or [])
     if stage == "animation" and context.get("animationPreflight"):
         candidate["preflight"] = context["animationPreflight"]
+    if stage == "animation" and context.get("voiceTimedPerformanceBudget"):
+        candidate["performanceBudget"] = context["voiceTimedPerformanceBudget"]
     return candidate
 
 
@@ -3097,6 +3202,8 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
     else:
         shot = _shot(pkg, shot_id)
         led = _ledger(pkg, shot_id)
+        if stage in ("cinematography", "animation"):
+            _require_forward_directing_source(pkg, shot, scene, episode)
         context = _shot_context(pkg, shot, led, scene, episode)
         if stage == "cinematography":
             chars = _characters_cfg()
@@ -3136,6 +3243,12 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
             if not (led.get("voiceApproval") or {}).get("approved") and shot.get("dialogueLines"):
                 raise Refused(f"REFUSED — {shot_id}'s approved voice is required before the "
                               "Animation Director enters")
+            budget_report = _performance_budget_report(context["shot"], led)
+            context["voiceTimedPerformanceBudget"] = budget_report
+            if not budget_report["ready"]:
+                raise Refused(
+                    f"REFUSED — {shot_id}'s voice-timed performance budget is overloaded: "
+                    + "; ".join(budget_report.get("reasons") or []))
             anchor = _anchor_for(pkg, shot)
             animation_shot = _with_effective_reference_slots(
                 pkg, shot, "referenceSlots", scene, episode)
@@ -4572,16 +4685,29 @@ def timing_slate_status(scene, episode="Ep1"):
     sidecar = pathlib.Path(str(out) + ".contract.json")
     if not out.exists() or not sidecar.exists():
         return {"exists": out.exists(), "current": False, "path": str(out),
+                "approved": False,
                 "reason": "not built from a recorded input contract"}
     try:
         pkg, _ = load_pkg(scene, episode)
         record = json.loads(sidecar.read_text())
-        current = record.get("inputSignature") == _timing_slate_input_signature(pkg)
+        signature = _timing_slate_input_signature(pkg)
+        current = record.get("inputSignature") == signature
+        review = pkg.get("timingSlateReview") or {}
+        approved = review.get("approved") or {}
+        approved_current = bool(
+            current and approved.get("inputSignature") == signature and
+            approved.get("path") == str(out) and
+            approved.get("contentHash") == _sha256_file(out))
         return {"exists": True, "current": current, "path": str(out),
                 "generatedAt": record.get("generatedAt"),
-                "reason": None if current else "shot timing or an approved voice take changed"}
+                "approved": approved_current,
+                "review": approved if approved_current else review.get("candidate"),
+                "reason": (None if approved_current else
+                           "current voice-timed slate awaits human rhythm approval" if current
+                           else "shot timing or an approved voice take changed")}
     except (OSError, ValueError, Refused) as exc:
-        return {"exists": True, "current": False, "path": str(out), "reason": str(exc)}
+        return {"exists": True, "current": False, "approved": False,
+                "path": str(out), "reason": str(exc)}
 
 
 def animatic_scene(scene, episode="Ep1", log=print):
@@ -4608,10 +4734,50 @@ def animatic_scene(scene, episode="Ep1", log=print):
         "approvesOnly": ["dialogue accuracy", "voice assignment", "shot duration",
                          "scene length", "dialogue position"],
     }, indent=1, ensure_ascii=False))
+    if int(pkg.get("creativeDirectingStandardVersion") or 0) >= CREATIVE_DIRECTING_STANDARD_VERSION:
+        review = pkg.setdefault("timingSlateReview", {"candidate": None, "approved": None,
+                                                       "history": []})
+        review["candidate"] = {
+            "path": str(out), "contentHash": _sha256_file(out),
+            "inputSignature": input_signature, "preparedAt": _now(),
+            "approvesOnly": ["dialogue accuracy", "voice assignment", "shot duration",
+                             "scene length", "dialogue position", "performance breathing",
+                             "reaction and landing room"],
+        }
+        _save(pkg, path)
     log(f"TIMING SLATE — scene {scene}: {len(clips)} shots -> {out.name} · approves dialogue "
         f"accuracy, voice assignment, shot durations, scene length and line position ONLY — "
         f"it does not prove staging, physical comedy or final rhythm")
     return str(out)
+
+
+def decide_timing_slate(scene, verdict, note="", episode="Ep1", reviewed_by="Julian", log=print):
+    """Record the human rhythm decision; never generates media or grants WATCH approval."""
+    if verdict not in ("approved", "rejected"):
+        raise Refused("REFUSED — timing-slate verdict must be approved|rejected")
+    pkg, path = load_pkg(scene, episode)
+    review = pkg.get("timingSlateReview") or {}
+    candidate = review.get("candidate")
+    status = timing_slate_status(scene, episode)
+    if not candidate or not status.get("current"):
+        raise Refused("REFUSED — no current voice-timed slate awaits a decision")
+    if verdict == "rejected" and not str(note or "").strip():
+        raise Refused("REFUSED — timing-slate rejection needs a plain-language note")
+    event = {**candidate, "outcome": verdict, "decisionAt": _now(),
+             "reviewedBy": reviewed_by, "note": str(note or "").strip()}
+    if verdict == "approved":
+        if review.get("approved"):
+            review.setdefault("history", []).append(
+                {**review["approved"], "outcome": "superseded", "supersededAt": _now()})
+        review["approved"] = event
+    else:
+        review.setdefault("history", []).append(event)
+    review["candidate"] = None
+    pkg["timingSlateReview"] = review
+    _save(pkg, path)
+    log(f"TIMING SLATE {verdict.upper()} — scene {scene} by {reviewed_by}; "
+        "this approves rhythm only, never final acting, physics or WATCH media")
+    return event
 
 
 def _slate(shot, episode):
@@ -5781,7 +5947,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             duration_sec=shot["durationSec"],
             dialogue_lines=[], stage_plan=[])
         authoring_score = _seedance_authoring_score(audit)
-        creative_gate = _prompt_quality_gate(shot, parent_prompt, {})
+        creative_gate = _prompt_contract_completeness(shot, parent_prompt, {})
         audit["authoringScore10"] = authoring_score
         audit["authoringMaximum"] = 10
         audit["firingFloor10"] = SEEDANCE_AUTHORING_FLOOR
@@ -5792,13 +5958,14 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             "ready": not creative_gate["needsRevision"],
             "criticalFailures": creative_gate["criticalFailures"],
         }
+        audit["contractCompleteness"] = dict(audit["creativeGate"])
         if audit["status"] != "ready":
             raise Refused(
                 f"REFUSED — provider prompt audit is {audit['score']}/{audit['maximum']}; "
                 "repair the current prompt before spend")
         if creative_gate["needsRevision"] or authoring_score < SEEDANCE_AUTHORING_FLOOR:
             raise Refused(
-                f"REFUSED — prompt scores creative {creative_gate['score']}/"
+                f"REFUSED — prompt contract completeness is {creative_gate['score']}/"
                 f"{creative_gate['maximum']}, authoring {authoring_score}/10; "
                 f"minimum authoring floor is {SEEDANCE_AUTHORING_FLOOR}/10")
         return {
@@ -5910,9 +6077,9 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
         )
         # Score both gates at the same point that the provider request is assembled. These
         # values travel inside the sealed execution plan and spend disclosure, so the fire
-        # record preserves the exact quality evidence that authorized this prompt.
+        # record preserves the exact contract-completeness evidence for this prompt.
         authoring_score = _seedance_authoring_score(audit)
-        creative_gate = _prompt_quality_gate(
+        creative_gate = _prompt_contract_completeness(
             {**shot, "dialogueLines": [shot["dialogueLines"][index]
                                         for index in segment["dialogueLineIndexes"]]},
             segment["prompt"], specialist)
@@ -5926,6 +6093,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
             "ready": not creative_gate["needsRevision"],
             "criticalFailures": creative_gate["criticalFailures"],
         }
+        audit["contractCompleteness"] = dict(audit["creativeGate"])
         segment["promptAudit"] = audit
         if audit["status"] != "ready":
             failed_codes = [
@@ -6414,10 +6582,11 @@ _CAMERA_MOVE_WORDS = re.compile(r"\b(pan|pans|panning|dolly|dollies|truck|trucks
 _CAMERA_LOCK_WORDS = re.compile(r"\bcamera (?:lock|locked|holds|stays? (?:still|locked))\b", re.IGNORECASE)
 
 
-def _prompt_quality_gate(shot, prompt, specialist=None):
-    """Free deterministic craft check for a Seedance shooting script.
+def _prompt_contract_completeness(shot, prompt, specialist=None):
+    """Free deterministic instruction-coverage check for a Seedance shooting script.
 
-    This is an advisory quality gate, not an automatic rewrite and not a provider call.
+    This is contract completeness, not an artistic-quality score, automatic rewrite or
+    provider call. It cannot prove that emotion, comedy, acting or physics will land.
     The four critical dimensions are story beat, canon/reference fidelity, audio/dialogue
     separation and a usable continuity landing.
     """
@@ -6494,6 +6663,11 @@ def _prompt_quality_gate(shot, prompt, specialist=None):
     }
 
 
+def _prompt_quality_gate(shot, prompt, specialist=None):
+    """Backward-compatible alias; callers should display contract completeness."""
+    return _prompt_contract_completeness(shot, prompt, specialist)
+
+
 def _animation_prompt_contract_report(shot, direction):
     """Evaluate the shared Seedance authoring contract without calling a provider."""
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
@@ -6513,7 +6687,7 @@ def _animation_prompt_contract_report(shot, direction):
             "assetTag": "@Audio1",
             "role": "approved dialogue and performance track",
         })
-    quality = _prompt_quality_gate(shot, prompt, data)
+    quality = _prompt_contract_completeness(shot, prompt, data)
     authoring = cb_prompt_lab.analyze_seedance_prompt_contract(
         prompt,
         task_mode=data.get("taskMode") or "reference-to-video",
@@ -6551,6 +6725,7 @@ def _animation_prompt_contract_report(shot, direction):
     return {
         "ready": not errors,
         "errors": errors,
+        "contractCompleteness": quality,
         "qualityGate": quality,
         "authoringContract": authoring,
         "storyLock": story_lock,
@@ -6577,7 +6752,7 @@ def _animation_preflight_summary(shot, direction):
         direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {}),
         prompt)
     authoring = report.get("authoringContract") or {}
-    quality = report.get("qualityGate") or {}
+    quality = report.get("contractCompleteness") or report.get("qualityGate") or {}
     findings = list(emission_report.get("findings") or [])
     if report.get("errors"):
         findings.extend({
@@ -6612,9 +6787,15 @@ def _animation_preflight_summary(shot, direction):
             "firingFloor": authoring.get("firingFloor"),
             "summary": authoring.get("summary"),
         },
-        "qualityGate": {
+        "contractCompleteness": {
             "score": quality.get("score"),
             "maximum": quality.get("maximum"),
+            "threshold": quality.get("threshold"),
+            "needsRevision": quality.get("needsRevision"),
+            "criticalFailures": quality.get("criticalFailures") or [],
+        },
+        "qualityGate": {
+            "score": quality.get("score"), "maximum": quality.get("maximum"),
             "threshold": quality.get("threshold"),
             "needsRevision": quality.get("needsRevision"),
             "criticalFailures": quality.get("criticalFailures") or [],
@@ -6908,6 +7089,12 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
     led = _ledger(pkg, shot_id)
     specialist = _approved_department_output(pkg, shot_id, "animation") or {}
     blockers, warnings, checks = [], [], {}
+    budget = _performance_budget_report(
+        _shot_creative_contract_view(pkg, shot, scene, episode), led)
+    checks["performanceBudget"] = budget
+    if not budget["ready"]:
+        blockers.append("voice-timed performance budget is overloaded: "
+                        + "; ".join(budget.get("reasons") or []))
 
     try:
         target_model = cb_providers.video_model(require_enabled=False)
@@ -7067,13 +7254,14 @@ def check_seedance_structure(scene, shot_id, episode="Ep1", log=print):
         blockers.append(
             f"emission conformance scores {emission_conformance['score']}/10 "
             f"({emission_conformance['verdict']}); correct the listed findings before render")
-    quality = _prompt_quality_gate(shot, checked_prompt, specialist)
-    checks["qualityGate"] = quality
+    quality = _prompt_contract_completeness(shot, checked_prompt, specialist)
+    checks["contractCompleteness"] = quality
+    checks["qualityGate"] = quality  # compatibility for historical Studio clients
     if quality["needsRevision"]:
         detail = (f"; critical zero: {', '.join(quality['criticalFailures'])}"
                   if quality["criticalFailures"] else "")
         blockers.append(
-            f"craft gate scores {quality['score']}/{quality['maximum']} "
+            f"prompt contract completeness is {quality['score']}/{quality['maximum']} "
             f"(target {quality['threshold']}){detail}")
 
     pipeline_contract = None
@@ -7768,6 +7956,18 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
     animation_direction = _approved_department_output(pkg, shot_id, "animation") or {}
+    budget = _performance_budget_report(
+        _shot_creative_contract_view(pkg, shot, scene, episode), led)
+    if not budget["ready"]:
+        raise Refused(
+            f"REFUSED — {shot_id}'s voice-timed performance budget is overloaded: "
+            + "; ".join(budget.get("reasons") or []))
+    if int(pkg.get("creativeDirectingStandardVersion") or 0) >= CREATIVE_DIRECTING_STANDARD_VERSION:
+        slate = timing_slate_status(scene, episode)
+        if not slate.get("approved"):
+            raise Refused(
+                f"REFUSED — scene {scene}'s current voice-timed slate needs Julian's rhythm "
+                "approval before forward-standard WATCH generation")
     _require_engine_rules(pkg, shot, animation_direction)
     provenance = cb_engine_rules.duration_provenance(shot, animation_direction)
     previous_provenance = led.get("durationProvenance") or {}
@@ -7915,6 +8115,8 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                        "modelVersion": envelope["modelVersion"],
                        "resolution": envelope["executionPlan"]["segments"][0]["contract"]["resolution"],
                        "promptScores": {
+                           "contractCompleteness": envelope["executionPlan"]["segments"][0]
+                           .get("promptAudit", {}).get("contractCompleteness"),
                            "creative": envelope["executionPlan"]["segments"][0]
                            .get("promptAudit", {}).get("creativeGate"),
                            "authoringScore10": envelope["executionPlan"]["segments"][0]
@@ -9106,6 +9308,10 @@ if __name__ == "__main__":
             voice_shot(pkg, pkg_path, pos[1], ep(2))
         elif cmd in ("animatic", "slate"):
             animatic_scene(pos[0], ep(1))
+        elif cmd == "approve-timing-slate":
+            decide_timing_slate(pos[0], "approved", episode=ep(1))
+        elif cmd == "reject-timing-slate":
+            decide_timing_slate(pos[0], "rejected", pos[1], episode=ep(2))
         elif cmd == "scenelook":
             generate_scenelook_plate(pos[0], ep(1),
                                      reference_path=(pos[2] if len(pos) > 2 else None))

@@ -78,6 +78,7 @@ CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
+CREATIVE_DIRECTING_STANDARD_VERSION = 3
 UNIT_PACKING_CONTRACT_VERSION = 1
 MAX_INTERNAL_REVISIONS = 2
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
@@ -307,6 +308,9 @@ class ShotCinematographyContract(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     storyPointOfView: str = Field(min_length=1)
+    emotionalDistanceStart: str = ""
+    emotionalDistanceEnd: str = ""
+    revealStrategy: str = ""
     shotScale: str = Field(min_length=1)
     lensIntent: str = Field(min_length=1)
     cameraHeight: str = Field(min_length=1)
@@ -316,7 +320,24 @@ class ShotCinematographyContract(BaseModel):
     focusStrategy: str = Field(min_length=1)
     lightingFunction: str = Field(min_length=1)
     paletteFunction: str = Field(min_length=1)
+    performanceVisibility: str = ""
+    editorialPurpose: str = ""
+    memorableLandingImage: str = ""
     providerInstruction: str = Field(min_length=1, max_length=240)
+
+
+class ShotPerformanceBudget(BaseModel):
+    """Director's honest capacity decision before a provider unit is approved."""
+    model_config = ConfigDict(extra="forbid")
+
+    emotionalTurnCount: int = Field(ge=0, le=2)
+    propStateChangeCount: int = Field(ge=0, le=3)
+    dialogueHeavy: bool
+    silentActingReserveSec: float = Field(ge=1.0, le=12.0)
+    landingHoldSec: float = Field(ge=0.8, le=4.0)
+    minimumHonestDurationSec: float = Field(ge=4.0, le=45.0)
+    decision: Literal["single-unit", "split-before-generation"]
+    rationale: str = Field(min_length=1)
 
 
 class StoryboardStage(BaseModel):
@@ -392,6 +413,7 @@ class StoryboardCard(BaseModel):
         description="Why the next material must start a new Seedance request instead of "
                     "remaining inside this unit as a motivated internal cut.")
     cinematographyContract: Optional[ShotCinematographyContract] = None
+    performanceBudget: Optional[ShotPerformanceBudget] = None
     approvalState: str = "draft"
 
     @model_validator(mode="after")
@@ -409,6 +431,13 @@ class StoryboardCard(BaseModel):
                     f"stage {stage.stageNumber} names a beat outside this production unit")
         if self.targetDurationSec and self.targetDurationSec > 15 and len(self.stagePlan) < 2:
             raise ValueError("production units over 15 seconds require at least two story stages")
+        if self.performanceBudget:
+            if self.performanceBudget.decision != "single-unit":
+                raise ValueError("split-before-generation is not an approvable production unit")
+            if (self.targetDurationSec and
+                    self.performanceBudget.minimumHonestDurationSec > self.targetDurationSec):
+                raise ValueError(
+                    "performance budget exceeds the production-unit duration; split the unit")
         return self
 
 
@@ -864,7 +893,8 @@ def _mind(role, taste_keys, charge):
         worker_keys.append("cinematography")
     if "VOICE" in role:
         worker_keys.append("voice")
-    worker_contracts = "\n\n".join(cb_departments.load_runtime_skill(k)
+    worker_contracts = "\n\n".join(cb_departments.load_runtime_skill(
+        k, CREATIVE_DIRECTING_STANDARD_VERSION)
                                       for k in worker_keys)
     return (f"You are the {role} of the Crystal Bears creative room — a world-class family-"
             f"animation voice for ages 4-8 with adult-rewarding wit. The show's OWN world "
@@ -1305,7 +1335,14 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "lens intent, camera height, composition, depth, camera behaviour, focus, "
               "lighting function and palette function before reducing them to one concise, "
               "observable providerInstruction. These are choices for this story beat, never "
-              "a lens checklist. providerInstruction must not contain empty quality labels "
+              "a lens checklist. Every card requires performanceBudget. Count emotional turns "
+              "and prop-state changes, reserve explicit silent acting and landing time, estimate "
+              "the minimum honest duration, and set decision=split-before-generation when the "
+              "performance cannot breathe. Such a card is a redesign signal, not an approvable "
+              "unit. Every cinematographyContract must also state emotionalDistanceStart, "
+              "emotionalDistanceEnd, revealStrategy, performanceVisibility, editorialPurpose "
+              "and memorableLandingImage. These express visual arc and performance need, not "
+              "decorative coverage. providerInstruction must not contain empty quality labels "
               "such as cinematic, beautiful, award-winning or Pixar."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
@@ -1319,6 +1356,18 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
         if not shot.cinematographyContract:
             raise RuntimeError(
                 f"CINEMATOGRAPHY CONTRACT MISSING for {shot.shotId}")
+        missing_visual_intent = [
+            name for name in (
+                "emotionalDistanceStart", "emotionalDistanceEnd", "revealStrategy",
+                "performanceVisibility", "editorialPurpose", "memorableLandingImage")
+            if not str(getattr(shot.cinematographyContract, name, "") or "").strip()
+        ]
+        if missing_visual_intent:
+            raise RuntimeError(
+                f"CINEMATOGRAPHY VISUAL INTENT MISSING for {shot.shotId}: "
+                + ", ".join(missing_visual_intent))
+        if not shot.performanceBudget:
+            raise RuntimeError(f"PERFORMANCE BUDGET MISSING for {shot.shotId}")
         provider_line = _norm(shot.cinematographyContract.providerInstruction)
         empty_labels = ("cinematic", "beautiful", "award winning", "pixar")
         if any(label in provider_line for label in empty_labels):
@@ -2038,6 +2087,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
     pkg = {"episodeId": episode, "sceneNumber": str(scene_num),
            "engineVersion": ENGINE_VERSION, "canonVersion": CANON_VERSION,
            "unitPackingContractVersion": UNIT_PACKING_CONTRACT_VERSION,
+           "creativeDirectingStandardVersion": CREATIVE_DIRECTING_STANDARD_VERSION,
            "builtAt": _now(), "vision": vision,
            "sourceScript": source_pkg.get("sourceScript"),
            "sourceBeatPackage": {"path": str(_script_package(episode).relative_to(ROOT)),

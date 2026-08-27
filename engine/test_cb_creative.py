@@ -66,6 +66,12 @@ def _cinematography_contract():
         focusStrategy="hold Fuzzby and leaf together through contact",
         lightingFunction="warm side light keeps the leaf compression legible",
         paletteFunction="green corridor gives Fuzzby's pink silhouette clean separation",
+        emotionalDistanceStart="embedded in Fuzzby's unchecked confidence",
+        emotionalDistanceEnd="held back far enough to see the embarrassing recoil",
+        revealStrategy="the leaf enters only when his late steering makes contact inevitable",
+        performanceVisibility="keep wings, leaf contact and delayed social recovery readable",
+        editorialPurpose="preserve one cause-and-effect gag without reaction coverage",
+        memorableLandingImage="Fuzzby suspended beside the still-trembling leaf",
         providerInstruction=(
             "Eye-level medium-wide pursuit through foreground stems; keep Fuzzby and the "
             "leaf sharp together, then settle as the compressed leaf rebounds him."))
@@ -100,7 +106,12 @@ def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
                           "continuing would dilute the impact; the new image re-scales the gag",
         providerBoundaryReason="scene_end",
         providerBoundaryExplanation="This fixture contains only one scene-ending unit.",
-        cinematographyContract=_cinematography_contract())
+        cinematographyContract=_cinematography_contract(),
+        performanceBudget=C.ShotPerformanceBudget(
+            emotionalTurnCount=1, propStateChangeCount=1, dialogueHeavy=False,
+            silentActingReserveSec=1.5, landingHoldSec=1.0,
+            minimumHonestDurationSec=6.0, decision="single-unit",
+            rationale="Seven seconds preserves approach, recoil, reaction and landing."))
 
 
 def _performance_contract(beat_id="1.B1"):

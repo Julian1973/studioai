@@ -1234,7 +1234,7 @@ def relay_approve_beat(scene, winner_code, episode="Ep1", fast=False):
 # package.json). Nothing here touches GATE_SEQ, the beat pipeline, or any existing route — the two endpoints
 # (/api/shot-package GET, /api/shot-run POST) plus these helpers are the whole footprint. Jobs run through the
 # SAME _jid/_start/_stream runner every existing gate action uses (fresh subprocess, argv list, never a shell).
-SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "scenelook", "approve-scenelook", "reject-scenelook",
+SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "approve-timing-slate", "reject-timing-slate", "scenelook", "approve-scenelook", "reject-scenelook",
              "pose", "approve-pose", "reject-pose", "select-pose-upload",
              "build-keyframe", "keyframe", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
              "select-upload", "select-library", "select-previous",
@@ -1366,7 +1366,11 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         _CBR = _canonical_cb_render()
         timing_status = _CBR.timing_slate_status(scene, episode)
         timing_current = bool(timing_status.get("current"))
-        timing_reason = timing_status.get("reason")
+        forward_standard = int(pkg.get("creativeDirectingStandardVersion") or 0) >= 3
+        timing_approved = (bool(timing_status.get("approved")) if forward_standard
+                           else timing_current)
+        timing_reason = (timing_status.get("reason") if forward_standard or not timing_current
+                         else None)
         lineage = _CBR.lineage_status(pkg, scene, episode)
         post_status = _CBR.post_status(pkg, scene, episode)
         selected_post = (post_status["candidate"] if post_status["candidate"]["exists"] else
@@ -1383,6 +1387,7 @@ def shot_media_map(pkg, scene, episode="Ep1"):
         post_media["qc"] = (post_manifest or {}).get("qc")
     except Exception as exc:
         timing_current = False
+        timing_approved = False
         timing_reason = str(exc)
         lineage = {"current": False, "reasonCodes": ["state-evaluation-failed"],
                    "error": str(exc)}
@@ -1392,6 +1397,7 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             # animatic filename kept as a fallback so an older existing render still shows.
             "timingSlate": _url(timing_path),
             "timingSlateCurrent": timing_current,
+            "timingSlateApproved": timing_approved,
             "timingSlateReason": timing_reason,
             "animatic": _url(MEDIA / f"{episode}_Scene{scene}_animatic.mp4"),
             "picture": post_media.get("master16x9"),
@@ -1879,6 +1885,8 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
     if cmd == "reject-scenelook":
         args.append(str(correction))
     if cmd == "reject-voice":
+        args.append(str(correction))
+    if cmd == "reject-timing-slate":
         args.append(str(correction))
     if cmd in ("select-upload", "select-library"):
         # THE non-generation opening-frame sources (2026-07-18): the upload/library file's own
@@ -4423,6 +4431,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": "reject-scenelook needs a plain-language note"}); return
                 if cmd == "reject-voice" and not correction:
                     self._json(400, {"error": "reject-voice needs a plain-language reason"}); return
+                if cmd == "reject-timing-slate" and not correction:
+                    self._json(400, {"error": "reject-timing-slate needs a plain-language reason"}); return
                 # THE NON-GENERATION OPENING-FRAME SOURCES (2026-07-18): 'select-upload' needs a
                 # server-side path from a prior /api/shot-keyframe-upload call; 'select-library'
                 # needs an item's path from /api/shot-keyframe-library — both validated as real,

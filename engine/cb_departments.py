@@ -71,6 +71,13 @@ SKILLS = {
     "post": ROOT / "skills/crystal-bears-post/SKILL.md",
 }
 
+SKILLS_V3 = {
+    "director": ROOT / "skills/crystal-bears-director-v3/SKILL.md",
+    "cinematography": ROOT / "skills/crystal-bears-cinematographer-v3/SKILL.md",
+    "dp": ROOT / "skills/crystal-bears-dp-v3/SKILL.md",
+    "animation": ROOT / "skills/seedance-production-director-v3/SKILL.md",
+}
+
 DEPARTMENTS = [
     {"id": "story", "stage": "storyboard", "department": "Story & Direction",
      "worker": "Director", "influences": "Pete Docter · Andrew Stanton",
@@ -112,14 +119,14 @@ def roster():
     return out
 
 
-def load_runtime_skill(worker):
+def load_runtime_skill(worker, standard_version=0):
     """Read the marked runtime contract from the real SKILL.md on every worker call.
 
     The repository's historical skill documents contain useful research plus superseded
     pipeline notes.  Only the concise marked contract is executable; the source document
     remains available to humans without letting stale instructions silently enter a call.
     """
-    path = SKILLS[worker]
+    path = (SKILLS_V3.get(worker) if int(standard_version or 0) >= 3 else None) or SKILLS[worker]
     text = path.read_text(encoding="utf-8")
     if RUNTIME_START not in text or RUNTIME_END not in text:
         raise RuntimeError(f"{path} has no executable runtime worker contract")
@@ -730,8 +737,8 @@ class KeyframeConformanceReview(BaseModel):
         return self
 
 
-def _system(worker, job):
-    return (load_runtime_skill(worker) + "\n\nTHIS RUN:\n" + job +
+def _system(worker, job, standard_version=0):
+    return (load_runtime_skill(worker, standard_version) + "\n\nTHIS RUN:\n" + job +
             "\n\nYou are preparing a candidate for human approval. Do not claim it is "
             "approved. Do not call or simulate a media provider. Return only the requested "
             "structured result.")
@@ -829,24 +836,26 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
 
 
 def prepare_look(context, *, log=print):
+    standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
     return cb_llm.structured(
         _system("cinematography",
                 "Own the scene-wide environment, palette, material, light and atmosphere. "
-                "Do not compose a shot or place a character."),
+                "Do not compose a shot or place a character.", standard_version),
         "APPROVED SCENE CONTEXT:\n" + _j(context) +
         "\n\nReturn the exact image-provider prompt for one environment-only Scene Look plate.",
         LookDirection, label="department_look", log=log)
 
 
 def prepare_cinematography(context, images, *, log=print):
+    standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
     result = cb_llm.structured(
         _system("cinematography",
                 "Own this shot's performance-ready opening stage. Establish the world, "
                 "camera, light, cast identity, canon relative scale, loose starting "
                 "relationship and clear action space. Do not pre-perform or freeze the "
                 "acting that belongs to Animation. The attached images are in the exact "
-                "labelled provider-reference order in the context.") + "\n\n" +
-                load_runtime_skill("dp"),
+                "labelled provider-reference order in the context.", standard_version) + "\n\n" +
+                load_runtime_skill("dp", standard_version),
         "APPROVED SHOT CONTRACT AND ORDERED IMAGE LABELS:\n" + _j(context) +
         "\n\nReturn one keyframe-provider direction and one machine-readable "
         "openingFrameLayout staging envelope. Return geography as one to eight concise, "
@@ -2097,13 +2106,14 @@ def prepare_animation(context, images, *, log=print):
             f"Animation Director requires an approved 4-30s integer duration; got {raw_duration!r}")
 
     locked_visual_events = animation_locked_visual_events(shot)
+    standard_version = int(context.get("creativeDirectingStandardVersion") or 0)
     result = cb_llm.structured(
         _system("animation",
                 "Turn the approved dramatic beat into one playable Seedance generation unit. "
                 "The first attached image is the approved opening frame; remaining attachments "
                 "follow the exact reference order in the context. Continuous relay may use one "
                 "shot; action units use two to four internal shots, each with one clean motion "
-                "idea and a real story, performance or reaction purpose."),
+                "idea and a real story, performance or reaction purpose.", standard_version),
         "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
         "\n\nDIRECTORIAL FREEDOM CONTRACT:\n"
         "Lock only story truth, exact audio, canon, reference roles, opening state and the "
@@ -2247,7 +2257,11 @@ def review_media(artifact_type, context, images, *, log=print):
         _system("post" if artifact_type == "final" else "review",
                 "Run dailies review on visible evidence. Findings are advice for Julian, "
                 "never an automatic approval, rewrite or generation instruction. Judge "
-                "whether the intended dramatic or comic beat is actually felt, then acting, "
+                "whether the intended dramatic or comic beat is actually felt. Compare the "
+                "approved emotional entry, pressure, visible turn, exit and held-after-beat "
+                "against what is observable. For comedy, identify setup, expectation, "
+                "disruption, reaction, button and hold separately; presence is not a landing. "
+                "Then judge acting, prop contact, weight, anticipation, follow-through, "
                 "physical causality, timing/reaction, motivated camera/edit, continuity, "
                 "reference fidelity and finish. Separate visible evidence from inference. "
                 "Diagnose the most likely root cause and confidence. Recommend the cheapest "

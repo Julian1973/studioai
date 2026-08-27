@@ -1,5 +1,6 @@
 import pathlib
 
+import cb_canon
 import cb_providers
 import cb_studio_director
 import cb_render
@@ -331,6 +332,46 @@ def test_direct_scene_is_an_explicit_provider_call():
     }
 
 
+def test_stale_handover_keeps_preserved_shot_visible_but_blocks_actions():
+    state = _state(keyframe=True, voice=True, animation=True)
+    state["packageCurrent"] = False
+    state["preservedPackageView"] = True
+    state["stages"]["storyboard"] = {
+        "state": "awaiting",
+        "sub": "review the current Story & Direction candidate",
+    }
+    state["blockers"] = [{
+        "code": "STORYBOARD_NOT_APPROVED",
+        "message": "The current Story & Direction candidate needs a human decision.",
+    }]
+    session = cb_studio_director.build_session(
+        state=state,
+        preflight=_preflight(provider_ready=True),
+        package=_package(),
+        media=_media(
+            keyframeApproved="/engine/media/opening.png",
+            vo="/engine/media/voice.wav",
+            clip="/engine/media/approved.mp4",
+        ),
+        scene_look={"plateUrl": "/engine/media/world.png"},
+        jobs={},
+        requested_shot_id=SHOT_ID,
+    )
+
+    assert session["preservedPackageView"] is True
+    assert session["selectedShotId"] == SHOT_ID
+    assert session["phase"] == "animation"
+    assert session["status"] == "blocked"
+    assert session["artifact"] == {
+        "type": "video",
+        "url": "/engine/media/approved.mp4",
+        "label": "Preserved accepted animation",
+    }
+    assert session["shots"][0]["shotId"] == SHOT_ID
+    assert session["primaryAction"]["id"] == "open-inspector"
+    assert cb_studio_director.allowed_action_ids(session) == {"open-inspector"}
+
+
 def test_provider_route_does_not_block_keyframe_work():
     session = _session()
     assert session["status"] == "ready_to_fire"
@@ -372,6 +413,32 @@ def test_keyframe_review_uses_current_exact_request_not_stale_package_copy():
     assert request["authoritative"] is True
     assert request["prompt"] == "CURRENT EXACT KEYFRAME REQUEST"
     assert "STALE PACKAGE PROMPT" not in request["prompt"]
+
+
+def test_keyframe_review_projects_two_provider_see_candidates(monkeypatch):
+    state = _state()
+    state["shots"][0]["pending"]["keyframe"] = True
+    package = _package()
+    package["continuityLedger"][0]["keyframeCandidates"] = [
+        {"candidateId": "A", "label": "A - Seedream 5 Pro", "provider": "byteplus",
+         "model": "seedream", "path": "/tmp/a.png"},
+        {"candidateId": "B", "label": "B - Nano Banana 2", "provider": "google",
+         "model": "nb2", "path": "/tmp/b.png"},
+    ]
+    package["continuityLedger"][0]["keyframeCandidate"] = \
+        package["continuityLedger"][0]["keyframeCandidates"][0]
+    monkeypatch.setattr(
+        cb_studio_director.cb_asset_registry, "url_for_path",
+        lambda path: {"/tmp/a.png": "/a.png", "/tmp/b.png": "/b.png"}.get(path))
+
+    session = _session(state=state, package=package, media=_media())
+
+    assert session["artifact"]["type"] == "image-set"
+    assert [item["candidateId"] for item in session["artifact"]["items"]] == ["A", "B"]
+    assert session["artifact"]["selectedCandidateId"] is None
+    assert session["decisionActions"] == []
+    assert session["primaryAction"] is None
+    assert "select-keyframe-candidate" in cb_studio_director.allowed_action_ids(session)
 
 
 def test_keyframe_cannot_be_accepted_until_ai_director_reviews_actual_image():
@@ -1227,6 +1294,32 @@ def test_import_director_accepted_external_take_marks_audio_as_post_lane(tmp_pat
     assert ledger["audioProvenance"]["postLaneStatus"] == "required"
     assert ledger["audioProvenance"]["dialogueAuthority"] == (
         "approved-voice-master-required-in-post")
+
+
+def test_external_import_signature_accepts_source_shot_id_relay(tmp_path, monkeypatch):
+    opening = tmp_path / "source-final.png"
+    opening.write_bytes(b"source-final")
+    package = {
+        "shots": [{
+            "shotId": SHOT_ID,
+            "sourceType": "relay",
+            "sourceShotId": "S1.PREV",
+        }],
+        "continuityLedger": [
+            {"shotId": SHOT_ID, "status": "designed"},
+            {"shotId": "S1.PREV", "status": "approved", "harvestFrame": str(opening)},
+        ],
+    }
+    monkeypatch.setattr(
+        cb_canon, "require_locked",
+        lambda *args, **kwargs: {"profileDigests": {"animation": "canon"}})
+
+    signature = cb_render._external_import_input_signature(
+        package, package["shots"][0], "1", "Ep1", "source-hash",
+        {"accepted": True})
+
+    assert signature["openingFrameHash"] == cb_render._sha256_file(opening)
+    assert signature["sourceContentHash"] == "source-hash"
 
 
 def test_review_animation_signature_allows_external_director_accepted_take(tmp_path, monkeypatch):

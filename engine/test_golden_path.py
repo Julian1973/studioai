@@ -44,11 +44,14 @@ TEST_CANON_DIGESTS = {name: (name[0] * 64) for name in (
 
 def _voice_direction_output(shot):
     lines = []
-    for line in shot.get("dialogueLines") or []:
+    for idx, line in enumerate(shot.get("dialogueLines") or []):
         exact = line["exactText"]
+        occurrence_id = line.get("dialogueOccurrenceId") or (
+            f"{shot['shotId']}.dialogue.{idx + 1}")
+        source_event_id = line.get("sourceEventId") or occurrence_id
         lines.append({
-            "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
-            "sourceEventId": line.get("sourceEventId"),
+            "dialogueOccurrenceId": occurrence_id,
+            "sourceEventId": source_event_id,
             "speaker": line["speaker"], "character": line["speaker"],
             "exactDialogue": exact, "performedText": exact,
             "dramaticIntention": "Make the listener accept the action.",
@@ -191,7 +194,7 @@ def _install_provider_identity_fixture(monkeypatch, engine):
 
     monkeypatch.setattr(R, "_identity_packs_cfg", lambda: packs)
 
-    def provider_record(name, characters_cfg, usage="keyframe"):
+    def provider_record(name, characters_cfg, usage="keyframe", **kwargs):
         canonical = R._resolve_char(name, characters_cfg)
         pack = packs[canonical]
         return {
@@ -406,6 +409,7 @@ class Providers:
             return out
         monkeypatch.setattr(R.cb_gen, "eleven_dialogue", eleven_dialogue)
         monkeypatch.setattr(R.cb_gen, "generate_image", generate_image)
+        monkeypatch.setattr(R.cb_gen, "generate_image_nanobanana_ab", generate_image)
         monkeypatch.setattr(R.cb_gen, "_fal_upload", _fal_upload)
         monkeypatch.setattr(R.cb_gen, "generate_video_seedance_ref", generate_video_seedance_ref)
         monkeypatch.setattr(R.cb_gen, "last_frame", last_frame)
@@ -621,10 +625,153 @@ def _led(scene="9", ep="EpT"):
     return {e["shotId"]: e for e in pkg["continuityLedger"]}
 
 
+def _fixture_reference_contract(shot):
+    contract = []
+    for tag, controls in (shot.get("referenceSlots") or {}).items():
+        low = str(controls).casefold()
+        if str(tag).casefold().startswith("@audio") or "voice" in low:
+            role, scope = "audio", "continuity"
+        elif "opening" in low or "previous shot final frame" in low:
+            role, scope = "opening_frame", "continuity"
+        elif "scene plate" in low or "location" in low:
+            role, scope = "location", "episode"
+        else:
+            role, scope = "character_identity", "canon"
+        contract.append({
+            "assetTag": tag,
+            "role": role,
+            "controls": str(controls),
+            "scope": scope,
+        })
+    return contract
+
+
+def _current_animation_fixture(shot, geography=None):
+    duration = int(round(float(shot.get("durationSec") or 6)))
+    dialogue = list(shot.get("dialogueLines") or [])
+    data = {
+        "shotId": shot["shotId"],
+        "durationSec": duration,
+        "taskMode": "reference-to-video",
+        "pacingMode": "timestamp" if duration > 15 else "storyline",
+        "generationGoal": "Deliver the approved story beat with readable cause and effect.",
+        "deliveryPlan": "Use the approved stage, references, voice authority and continuity finish.",
+        "creativeTranslation": {
+            "interpretation": {
+                "jokeOrAche": "The approved fixture beat.",
+                "mechanism": "Visible cause creates a readable emotional result.",
+                "statusBefore": "The character enters with intent.",
+                "statusAfter": "The character exits in the approved handoff state.",
+                "audienceProgression": ["setup", "change", "landing"],
+                "emotionalHeart": "The performance makes the story turn legible.",
+            },
+            "gagClocks": [],
+            "generationDesign": {
+                "packagingDecision": "single-unit",
+                "completeGagArcCount": 0,
+                "densityJudgement": "The fixture fits one provider unit.",
+                "splitOrNonSplitRationale": "One causal beat is enough for the test.",
+                "handoffState": "The approved final frame remains usable.",
+            },
+        },
+        "dramaticBeat": "The approved fixture beat lands cleanly.",
+        "audienceBefore": "The audience understands the setup.",
+        "audienceAfter": "The audience understands the result.",
+        "beatOwner": (shot.get("charactersInFrame") or ["Fuzzby"])[0],
+        "performanceFreedom": "Allow micro-expression and secondary motion only.",
+        "performanceArc": (
+            "The eyes settle before the action, then the shoulders soften after the result."
+        ),
+        "physicalCauseAndEffect": (
+            "As Fuzzby moves, he turns and steps because the approved cause moves him, "
+            "then stops so that the visible result lands."
+        ),
+        "cameraBehaviour": shot.get("camera") or (
+            "A medium-wide camera tracks the action, then holds the final framing."
+        ),
+        "timingAndRhythm": "Keep the beat moving while preserving the landing hold.",
+        "landingBreath": "Hold the final image long enough to read.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Deliver the approved action.",
+            "framingLensAndCamera": shot.get("camera") or "Readable framed camera.",
+            "causalAction": (
+                "Fuzzby turns and moves because the visible cause prompts him, then stops "
+                "so that the result lands before the reaction."
+            ),
+            "observablePerformance": (
+                "The eyes focus before the move; after it lands, breath and posture soften."
+            ),
+            "compositionLightAndMaterials": (
+                "Layer foreground, midground and background under warm controlled light; "
+                "preserve fur texture, soft contact shadow, scale and materials."
+            ),
+            "landingImage": shot.get("visualPayoff") or "Approved final state.",
+            "dialogueLineIndexes": list(range(1, len(dialogue) + 1)),
+            "dialogueDirections": [
+                str(line.get("delivery") or "Act the line from the body.")
+                for line in dialogue
+            ],
+            "holdAfterDialogue": not bool(dialogue),
+            "gagBeatIds": [],
+        }],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": [shot.get("beatCode") or "1.B1"],
+            "purpose": "Deliver the approved story event in one readable unit.",
+            "initialOrCarriedState": "The approved opening establishes the physical stage.",
+            "cause": "The character action begins from the approved setup.",
+            "primaryEvent": "The character completes the approved causal action.",
+            "observableEndState": "The shot lands on the approved handoff state.",
+            "emotionOrCameraAnalysis": "The camera lets the performance turn read.",
+            **({"startSec": 0.0, "endSec": float(duration)}
+               if duration > 15 else {}),
+        }],
+        "geography": list(geography or [
+            "Preserve the approved scene geography and camera axis."
+        ]),
+        "referenceContract": _fixture_reference_contract(shot),
+        "consistencyContract": [
+            "Keep identity, character count, scale, props, geography, light and camera axis stable."
+        ],
+        "audioContract": (
+            "@Audio1 is the sole source of dialogue, voice, performance, timing and silence."
+            if dialogue else "No dialogue. Preserve approved ambience only."
+        ),
+        "continuityFinish": shot.get("visualPayoff") or "End on the approved handoff frame.",
+        "providerPrompt": "Temporary fixture prompt until deterministic compilation.",
+    }
+    direction = R.cb_departments.AnimationDirection.model_validate(data)
+    output = direction.model_dump()
+    output["providerPrompt"] = R.cb_departments.compile_animation_provider_prompt(
+        shot, direction)
+    return output
+
+
 def _approve_animation_direction(shot_id, scene="9", ep="EpT"):
     """Test-only human approval record over the now-current direct animation inputs."""
     pkg, path = R.load_pkg(scene, ep)
-    approved = R._ledger(pkg, shot_id)["departmentWork"]["animation"]["approved"]
+    shot = R._shot(pkg, shot_id)
+    work = R._ledger(pkg, shot_id)["departmentWork"]
+    approved = work["animation"]["approved"]
+    cinematography = ((work.get("cinematography") or {}).get("approved") or {}).get(
+        "output") or {}
+    previous_stages = list((approved.get("output") or {}).get("stagePlan") or [])
+    output = _current_animation_fixture(shot, cinematography.get("geography"))
+    if previous_stages and float(shot.get("durationSec") or 0) > 15:
+        output["stagePlan"] = []
+        for stage in previous_stages:
+            normalized = dict(stage)
+            normalized.setdefault(
+                "cause", normalized.get("initialOrCarriedState") or
+                "The approved carried state motivates this stage.")
+            output["stagePlan"].append(normalized)
+        direction = R.cb_departments.AnimationDirection.model_validate(output)
+        output = direction.model_dump()
+        output["providerPrompt"] = R.cb_departments.compile_animation_provider_prompt(
+            shot, direction)
+    approved["output"] = output
     approved["inputSignature"] = R._department_input_signature(
         pkg, "animation", shot_id, scene, ep)
     R._save(pkg, path)
@@ -783,6 +930,8 @@ def test_golden_path_package_to_approved_scene_master(world):
     # Gate 6 — the opener keyframe receives the locked identities and Scene Look directly.
     # Generated poses and sizing/composition controls remain optional local evidence.
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
     kf_call = prov.image_calls[-1]
     assert [os.path.basename(r) for r in kf_call["refs"]] == \
            ["Zenny_provider_front.png", "Fuzzby_provider_front.png",
@@ -836,7 +985,7 @@ def test_golden_path_package_to_approved_scene_master(world):
     assert f1["audio_urls"][0].endswith(".wav")
     assert f1["prompt"].count("{Nailed it.}") == 1
     assert "@Audio1 is the sole authority" in f1["prompt"]
-    assert "no alternative performance is permitted" in f1["prompt"]
+    assert "no alternative performance is permitted" in f1["prompt"].lower()
     assert f1["duration"] == "6"      # deferred re-home item 8: always the shot's explicit
     #                                   seconds, never 'auto' (the old 15s literals can't bite)
     # per-candidate review sheets: human criteria all null — machine never approves quality
@@ -959,7 +1108,7 @@ def test_failed_keyframe_identity_screen_preserves_candidate_for_human_decision(
     assert ledger["keyframeCandidate"]["conformanceScreening"]["status"] == "fail"
     assert pathlib.Path(ledger["keyframeCandidate"]["path"]).exists()
     assert ledger.get("keyframeRejected") is None
-    assert len(prov.image_calls) == 1
+    assert len(prov.image_calls) == 2
 
     R.reject_keyframe(
         "9", "1.B1.S1", "The staging does not match the shot.", episode="EpT",
@@ -980,6 +1129,8 @@ def test_unavailable_keyframe_identity_screen_preserves_candidate_for_human_acce
     monkeypatch.setattr(
         R.cb_departments, "review_keyframe_conformance", unavailable)
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
 
     candidate = _led()["1.B1.S1"]["keyframeCandidate"]
     assert candidate["conformanceScreening"]["status"] == "unavailable"
@@ -988,7 +1139,118 @@ def test_unavailable_keyframe_identity_screen_preserves_candidate_for_human_acce
         log=lambda *a, **k: None)
     approval = _led()["1.B1.S1"]["keyframeApproval"]
     assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
-    assert len(prov.image_calls) == 1
+    assert len(prov.image_calls) == 2
+
+
+def test_watch_refuses_human_accepted_keyframe_with_physical_stage_failure(
+        world, monkeypatch):
+    def physical_stage_failure(context=None, images=None, **kwargs):
+        expected = list((context or {}).get("expectedCharacters") or ["Fuzzby", "Zenny"])
+        ok_dimension = {
+            "score": 2,
+            "visibleEvidence": "Identities are readable.",
+            "correction": "",
+        }
+        failed_stage = {
+            "score": 0,
+            "visibleEvidence": (
+                "The rescue net is visibly attached to the boat hull, so the frame "
+                "does not prove the required loose physical relationship."
+            ),
+            "correction": (
+                "Rebuild SEE with visible water gap between the boat and every net "
+                "strand before WATCH."
+            ),
+        }
+        return R.cb_departments.KeyframeConformanceReview.model_validate({
+            "verdict": "block",
+            "expectedCharacters": expected,
+            "detectedCharacters": expected,
+            "expectedSubjectCount": len(expected),
+            "subjectCount": len(expected),
+            "summary": (
+                "Opening geography and physical causality fail: the keyframe shows "
+                "the net attached to the boat instead of floating free."
+            ),
+            "identityAndDistinguishability": ok_dimension,
+            "relativeScaleAndGeography": failed_stage,
+            "anatomyAndSilhouette": ok_dimension,
+            "actionReadyComposition": failed_stage,
+            "forbiddenContent": ok_dimension,
+            "recommendedCorrection": (
+                "SEE must prove the physical stage contract before WATCH; text "
+                "cannot safely override this opening frame."
+            ),
+        })
+
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance", physical_stage_failure)
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
+    R.approve_keyframe(
+        "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
+        log=lambda *a, **k: None)
+
+    approval = _led()["1.B1.S1"]["keyframeApproval"]
+    assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
+
+    with pytest.raises(R.Refused, match="SEE frame does not prove the physical stage contract"):
+        R.fire_shot("9", "1.B1.S1", "EpT", candidates=1,
+                    log=lambda *a, **k: None)
+
+
+def test_watch_allows_explicit_stage_contract_override(world, monkeypatch):
+    def physical_stage_failure(context=None, images=None, **kwargs):
+        expected = list((context or {}).get("expectedCharacters") or ["Fuzzby", "Zenny"])
+        ok_dimension = {
+            "score": 2,
+            "visibleEvidence": "Identities are readable.",
+            "correction": "",
+        }
+        failed_stage = {
+            "score": 0,
+            "visibleEvidence": "The rescue net placement does not match the authored stage.",
+            "correction": "Human Director may override only with an explicit stage contract record.",
+        }
+        return R.cb_departments.KeyframeConformanceReview.model_validate({
+            "verdict": "block",
+            "expectedCharacters": expected,
+            "detectedCharacters": expected,
+            "expectedSubjectCount": len(expected),
+            "subjectCount": len(expected),
+            "summary": "Opening geography and physical staging fail.",
+            "identityAndDistinguishability": ok_dimension,
+            "relativeScaleAndGeography": failed_stage,
+            "anatomyAndSilhouette": ok_dimension,
+            "actionReadyComposition": failed_stage,
+            "forbiddenContent": ok_dimension,
+            "recommendedCorrection": "SEE failed physical stage conformance.",
+        })
+
+    monkeypatch.setattr(
+        R.cb_departments, "review_keyframe_conformance", physical_stage_failure)
+    R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
+    R.approve_keyframe(
+        "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
+        log=lambda *a, **k: None)
+
+    pkg, path = R.load_pkg("9", "EpT")
+    R._shot(pkg, "1.B1.S1")["dialogueLines"] = []
+    approval = R._ledger(pkg, "1.B1.S1")["keyframeApproval"]
+    approval["stageContractOverride"] = {
+        "acceptedBy": "TestReviewer",
+        "acceptedAt": "2026-08-17T00:00:00",
+        "reason": "Human director selected emotional composition over automated layout advice.",
+    }
+    R._save(pkg, path)
+
+    with pytest.raises(R.Refused) as exc:
+        R.fire_shot("9", "1.B1.S1", "EpT", candidates=1,
+                    log=lambda *a, **k: None)
+    assert "SEE frame does not prove the physical stage contract" not in str(exc.value)
 
 
 def test_human_uploaded_keyframe_accepts_when_automated_advice_is_unavailable(
@@ -1081,6 +1343,8 @@ def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay
     _voice_and_approve("9", "EpT", log=lambda *a, **k: None)
     R.animatic_scene("9", "EpT", log=lambda *a, **k: None)
     R.keyframe_shot("9", shot["shotId"], "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", shot["shotId"], "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe("9", shot["shotId"], "EpT", reviewed_by="TestReviewer",
                        log=lambda *a, **k: None)
     _approve_animation_direction(shot["shotId"])
@@ -1326,6 +1590,8 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
                     log=lambda *a, **k: None)
     R.animatic_scene("1", "Ep1", log=lambda *a, **k: None)
     R.keyframe_shot("1", "S1.SH1", "Ep1", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "1", "S1.SH1", "A", "Ep1", log=lambda *a, **k: None)
     R.approve_keyframe("1", "S1.SH1", "Ep1", reviewed_by="TestReviewer",
                        log=lambda *a, **k: None)
     token = _token("S1.SH1", "1", "Ep1", candidates=1)
@@ -1355,7 +1621,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     assert state["stages"]["continuity"]["state"] == "approved"
     assert state["stages"]["final"]["state"] == "approved"
     assert len(providers.voice_calls) == 1
-    assert len(providers.image_calls) == 1
+    assert len(providers.image_calls) == 2
     assert len(providers.fire_calls) == 1
 
 
@@ -1397,6 +1663,8 @@ def test_failure_ladder_unchanged_reroll_then_model_limited(world):
     prov, tmp, _ = world
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     t1 = _token("1.B1.S1", candidates=2)
     R.fire_shot("9", "1.B1.S1", "EpT", candidates=2, spend_token=t1,
@@ -1453,6 +1721,8 @@ def test_stale_token_refused_when_spend_envelope_changes(world):
     prov, _, _ = world
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     tok = _token("1.B1.S1")
     with pytest.raises(R.Refused, match="STALE"):
@@ -1469,6 +1739,8 @@ def test_parallel_fire_cannot_claim_the_same_spend_token_twice(world, monkeypatc
     prov, _, _ = world
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     token = _token("1.B1.S1", candidates=1)
 
@@ -1510,6 +1782,8 @@ def test_batch_resume_is_idempotent_never_repays(world):
     prov, tmp, _ = world
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
     tok = _token("1.B1.S1")
     real = R.cb_gen.generate_video_seedance_ref
@@ -1564,6 +1838,8 @@ def test_animation_direction_goes_stale_when_approved_opening_frame_changes(worl
     """The cinematic prompt is bound to its direct media inputs, not only package text."""
     _voice_and_approve()
     R.keyframe_shot("9", "1.B1.S1", "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate(
+        "9", "1.B1.S1", "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe(
         "9", "1.B1.S1", "EpT", reviewed_by="TestReviewer",
         log=lambda *a, **k: None)
@@ -1578,3 +1854,19 @@ def test_animation_direction_goes_stale_when_approved_opening_frame_changes(worl
     pkg, _ = R.load_pkg("9", "EpT")
     with pytest.raises(R.Refused, match="Animation direction is stale"):
         R._approved_seedance_prompt(pkg, R._shot(pkg, "1.B1.S1"))
+
+
+def test_reference_slot_validator_accepts_possessive_character_name():
+    """Keen's Mum is one canonical role, not a conflicting assignment to Keen."""
+    R._require_prompt_slot_text_consistency(
+        "@图2 defines Keen's Mum's complete turnaround and exact identity.",
+        [{"slot": "@图2", "role": "Keen's Mum"}],
+    )
+
+
+def test_reference_slot_validator_still_blocks_real_character_swap():
+    with pytest.raises(R.Refused, match="sealed as Keen's Mum, but prompt text assigns Keen"):
+        R._require_prompt_slot_text_consistency(
+            "@图2 is Keen and controls his identity.",
+            [{"slot": "@图2", "role": "Keen's Mum"}],
+        )

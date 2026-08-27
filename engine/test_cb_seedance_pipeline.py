@@ -92,7 +92,7 @@ def test_reference_prompt_compiles_parameters_outside_the_provider_prompt():
         "goal": "Generate a 15-second cinematic smartwatch ad in a rainy neon city.",
         "duration_seconds": 15,
         "aspect_ratio": "16:9",
-        "resolution": "720p",
+        "resolution": "480p",
         "references": [_image_ref(subject="Smartwatch")],
         "assets": {"images": [{"subject": "Smartwatch"}]},
         "scene_style": "Realistic commercial cinematography with wet reflections.",
@@ -111,12 +111,12 @@ def test_reference_prompt_compiles_parameters_outside_the_provider_prompt():
 
     assert "15-second" not in prompt
     assert "16:9" not in prompt
-    assert "720p" not in prompt
+    assert "480p" not in prompt
     assert preflight["requestSettings"] == {
         "durationSec": 15.0,
         "aspectRatio": "16:9",
-        "resolution": "720p",
-        "modelId": "fal-seedance-2.5",
+        "resolution": "480p",
+        "modelId": "dreamina-seedance-2-5-260628",
     }
     assert preflight["zeroSpend"] is True
     assert preflight["providerCalled"] is False
@@ -263,7 +263,7 @@ def test_long_form_authoring_can_be_ready_while_provider_route_remains_blocked()
     assert "No enabled provider route" in result["providerQualification"]["reason"]
 
 
-def test_seedance_25_reference_authoring_uses_live_fal_route():
+def test_seedance_25_reference_authoring_uses_default_byteplus_route():
     ready = S.SeedancePromptBuilder({
         "type": "reference_based_generation",
         "goal": "Animate the approved hero reaction.",
@@ -276,8 +276,9 @@ def test_seedance_25_reference_authoring_uses_live_fal_route():
     }).preflight()
     assert ready["readyForPrompt"] is True
     assert ready["readyForProvider"] is True
-    assert ready["providerQualification"]["providerModelId"] == "fal-seedance-2.5"
-    assert ready["providerQualification"]["provider"] == "fal"
+    assert ready["providerQualification"]["providerModelId"] == (
+        "dreamina-seedance-2-5-260628")
+    assert ready["providerQualification"]["provider"] == "byteplus"
 
     thirty = S.SeedancePromptBuilder({
         "type": "thirty_second_video",

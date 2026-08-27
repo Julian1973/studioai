@@ -22,6 +22,7 @@ Calls (all schema-constrained + Pydantic-validated):
 A Pydantic ValidationError propagates (the caller repairs / stops + reports); both providers failing → SystemExit.
 """
 import os, re, json, base64, mimetypes, pathlib
+from typing import get_origin
 from pydantic import ValidationError
 import cb_gen   # importing cb_gen loads engine/.env into os.environ (keys never leave the backend)
 
@@ -33,6 +34,11 @@ GEMINI_MODEL = os.environ.get("DIRECTOR_GEMINI_MODEL", "gemini-3.1-pro-preview")
 # STOPS with the EXACT OpenAI error instead of silently producing inconsistent Gemini results. Set =true to re-enable.
 ENABLE_GEMINI_FALLBACK = os.environ.get("DIRECTOR_ENABLE_GEMINI_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 MAX_OUTPUT_TOKENS = 32000
+try:
+    PROVIDER_TIMEOUT_SECONDS = max(
+        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "45")))
+except (TypeError, ValueError):
+    PROVIDER_TIMEOUT_SECONDS = 45.0
 
 # FIXED 2026-07-12 (full-codebase audit continued): PROVIDER + DIRECTOR_PROVIDER (a "config summary" dict built
 # from PROVIDER/DIRECTOR_MODEL/VALIDATOR_MODEL/GEMINI_MODEL/ENABLE_GEMINI_FALLBACK) had zero callers anywhere in
@@ -56,7 +62,10 @@ def _client_get():
     global _client
     if _client is None:
         from openai import OpenAI
-        _client = OpenAI(api_key=_openai_key())
+        # A stalled Director call must fail once and return control to the Studio;
+        # the SDK's default retries multiply the timeout and look like a hang.
+        _client = OpenAI(api_key=_openai_key(), timeout=PROVIDER_TIMEOUT_SECONDS,
+                         max_retries=0)
     return _client
 
 def _image_part(path):
@@ -140,6 +149,34 @@ def _loads(text):
     except Exception:
         return json.loads(repair_truncated(body))
 
+
+def _normalize_single_list_model(value, schema):
+    """Accept a bare list for a model whose only field is that list.
+
+    Gemini occasionally follows the inner array in a JSON schema while omitting
+    the one-field object wrapper. The payload is otherwise complete and can be
+    validated without weakening any item-level or length constraints.
+    """
+    if not isinstance(value, list):
+        return value
+    fields = getattr(schema, "model_fields", {})
+    if len(fields) != 1:
+        return value
+    field_name, field = next(iter(fields.items()))
+    if get_origin(field.annotation) is not list:
+        return value
+    return {field_name: value}
+
+
+def _gemini_generation_config(schema):
+    """Build Gemini JSON mode with the same schema enforced by OpenAI/Pydantic."""
+    return {
+        "temperature": 0.6,
+        "maxOutputTokens": 65536,
+        "responseMimeType": "application/json",
+        "responseJsonSchema": schema.model_json_schema(),
+    }
+
 def _gemini_call(system, user, schema, images=None):
     """FALLBACK ONLY — Gemini JSON mode, then re-validate against the SAME Pydantic schema (off-schema raises
     ValidationError just like the OpenAI path). Uses the existing Gemini config in cb_gen — kept, not removed."""
@@ -157,9 +194,9 @@ def _gemini_call(system, user, schema, images=None):
             "data": base64.b64encode(p.read_bytes()).decode("ascii")}})
     body = {"system_instruction": {"parts": [{"text": system}]},
             "contents": [{"role": "user", "parts": parts}],
-            "generationConfig": {"temperature": 0.6, "maxOutputTokens": 65536, "responseMimeType": "application/json"}}
+            "generationConfig": _gemini_generation_config(schema)}
     r = requests.post(url, headers={"x-goog-api-key": cb_gen.GEMINI_KEY, "Content-Type": "application/json"},
-                      json=body, timeout=600)
+                      json=body, timeout=PROVIDER_TIMEOUT_SECONDS)
     if r.status_code != 200:
         raise RuntimeError(f"Gemini {r.status_code}: {r.text[:200]}")
     rj = r.json()
@@ -174,7 +211,8 @@ def _gemini_call(system, user, schema, images=None):
     if not rj.get("candidates"):
         raise RuntimeError(f"Gemini returned no candidates (likely a safety block): {str(rj)[:300]}")
     text = rj["candidates"][0]["content"]["parts"][0]["text"]
-    return schema.model_validate(_loads(text))
+    payload = _normalize_single_list_model(_loads(text), schema)
+    return schema.model_validate(payload)
 
 def structured(system, user, schema, *, model=None, label="director", log=print, images=None):
     """ONE structured Director call — OpenAI FIRST, then Gemini FALLBACK on a PROVIDER error. `model` is the OpenAI

@@ -78,5 +78,6 @@ def test_superseded_units_are_excluded_from_live_production_state():
         "3.B1.S1",
         "3.B3.S1",
         "3.B5.S1",
+        "3.B6R.S1",
         "3.B7.S1",
     ]

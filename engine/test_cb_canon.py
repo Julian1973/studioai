@@ -197,6 +197,18 @@ def test_script_semantics_are_checked_against_locked_contracts(tmp_path):
     assert aligned["ok"] is True
 
 
+def test_locked_dialogue_check_accepts_pdf_wrapped_numbered_lines(tmp_path):
+    policy = _workspace(tmp_path)
+    report = cb_canon.validate_script(
+        "31 AIDA\n"
+        "31    With heart open wide, I stand\n"
+        "with pride — Rose Quartz, be our guide!\n",
+        policy,
+    )
+
+    assert report["ok"] is True
+
+
 def test_script_parser_maps_declared_alias_and_refuses_unknown_cue(monkeypatch):
     monkeypatch.setattr(cb_intake, "_character_aliases", lambda: {"HOWIE": "Howey"})
     parsed = cb_intake.parse_script(

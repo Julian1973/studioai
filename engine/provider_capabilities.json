@@ -139,7 +139,8 @@
         "video-editing": "/api/v3/contents/generations/tasks"
       },
       "modes": [
-        "reference-to-video"
+        "reference-to-video",
+        "video-extension"
       ],
       "duration": {
         "minSec": 4,
@@ -156,7 +157,9 @@
       "nativeAudio": true,
       "costRateKeys": {
         "reference-to-video": "seedance_25_byteplus_480p_per_sec",
-        "reference-to-video:480p": "seedance_25_byteplus_480p_per_sec"
+        "reference-to-video:480p": "seedance_25_byteplus_480p_per_sec",
+        "video-extension": "seedance_25_byteplus_480p_per_sec",
+        "video-extension:480p": "seedance_25_byteplus_480p_per_sec"
       },
       "fallbackModelId": null,
       "disableReason": null

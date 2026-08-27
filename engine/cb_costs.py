@@ -15,7 +15,7 @@ in sync with it. Update the numbers here (and bump RATES_UPDATED) the day you co
 """
 import os, re, json, time
 
-RATES_UPDATED = "2026-08-07"
+RATES_UPDATED = "2026-08-23"
 LEDGER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cost_ledger.jsonl")
 
 # {op: (usd_per_unit, unit_label, confidence)} — confidence: high / medium / low-derived / low-unresolved
@@ -34,15 +34,10 @@ RATES = {
     # logged at the old $0.04 rate under-counted real cost by roughly 2.5x. Kept, not deleted, for rollback
     # (CB_IMAGE_PROVIDER=nanobanana) alongside the new default, seedream5pro_image, below.
     "nanobanana2_image":               (0.101, "image",  "high"),
-    # Seedream 5 Pro (bytedance/seedream/v5/pro/edit, fal.ai) — THE NEW DEFAULT keyframe model (Julian's ruling,
-    # 2026-07-09, "we go Seedream 5 pro" — see cb_gen.py's IMAGE_PROVIDER doctrine comment for the evidence).
-    # Sourced directly from fal.ai's own model page the same day: $0.135/image for the 1536-2048px output tier
-    # (our real 1.B1 test rendered at 2752x1536, in this tier) + $0.0045 per reference image beyond the first
-    # free one — a real keyframe beat sends 2-4 references (identity refs + plate/chain), so 0.135 + (n-1)*0.0045
-    # for n>=1 refs is the true per-call cost; 0.144 below assumes the common 3-ref case (2 characters + plate)
-    # as a flat estimate, matching this ledger's existing single-flat-rate convention (see nanobanana2_image
-    # above) rather than threading ref-count through every caller.
-    "seedream5pro_image":              (0.144, "image",  "high"),
+    # BytePlus ModelArk Seedream 5.0 Pro. This conservative 2K disclosure uses the
+    # upper output tier; estimate_image_cost() adds each chargeable reference after
+    # the first. It is an estimate, not an account billing record.
+    "seedream5pro_image":              (0.090, "image",  "official upper output tier — 2026-08-23"),
     "elevenlabs_tts_v3_per_1k_chars":  (0.165, "1000 chars", "published Pro-derived — plan unconfirmed"),  # FALLBACK ONLY: billing_profile.json is the pricing source (Julian's directive, 2026-07-16). Derived from the OFFICIAL published Pro plan ($99/600k credits, 1 credit/char on v3, elevenlabs.io/pricing) — NOT the verified account cost until Julian confirms plan + billing cadence.
     "elevenlabs_dialogue_v3_per_1k_chars": (0.165, "1000 chars", "published Pro-derived — plan unconfirmed"),  # FALLBACK ONLY — see billing_profile.json, the configured source
     "elevenlabs_voice_change_per_min": (0.12,  "minute", "medium"),      # speech-to-speech (RETIRED code path, rule 56 — kept for completeness, should never fire)
@@ -135,13 +130,13 @@ def estimate_video_cost(op_key, seconds):
     return rate * float(seconds or 15)  # HANDLE_TOTAL default when duration is "auto"
 
 
-def estimate_image_cost(provider="seedream5pro"):
-    """provider: "seedream5pro" (default keyframe model, 2026-07-09) or "nanobanana2" (rollback path) —
-    picks the matching RATES key; never invents a third option, mirroring cb_gen.IMAGE_PROVIDER's own
-    two-value switch exactly."""
-    key = "nanobanana2_image" if provider == "nanobanana2" else "seedream5pro_image"
-    rate, _, _ = RATES[key]
-    return rate
+def estimate_image_cost(provider="seedream5pro", num_refs=1, output_tier="2K"):
+    """Return a conservative image estimate before a paid request is authorized."""
+    if provider == "nanobanana2":
+        return RATES["nanobanana2_image"][0]
+    output_cost = 0.09 if output_tier == "2K" else 0.045
+    reference_cost = max(0, int(num_refs or 0) - 1) * 0.003
+    return output_cost + reference_cost
 
 
 BILLING_PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),

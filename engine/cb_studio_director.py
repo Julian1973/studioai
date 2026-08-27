@@ -14,6 +14,8 @@ import re
 import sys
 from typing import Any
 
+import cb_asset_registry
+
 
 SCHEMA_VERSION = 1
 SESSION_STATES = {
@@ -416,6 +418,81 @@ def _production_advisories(shot: dict[str, Any], session_phase: str,
     return []
 
 
+def _line_state(active: bool, complete: bool, blocked: bool, waiting: bool = False) -> str:
+    if active:
+        return "active"
+    if complete:
+        return "complete"
+    if blocked:
+        return "blocked"
+    if waiting:
+        return "waiting"
+    return "pending"
+
+
+def _production_line(*, phase: str, status: str, state: dict[str, Any],
+                     selected_state: dict[str, Any] | None,
+                     selected_shot_id: str | None, all_animations_current: bool,
+                     all_shots: list[dict[str, Any]]) -> dict[str, Any]:
+    """Collapse overlapping gates into one visible production sequence."""
+    current = (selected_state or {}).get("current") or {}
+    talky = bool((selected_state or {}).get("talky"))
+    keyframe_complete = bool(current.get("keyframe"))
+    voice_complete = bool((not talky) or current.get("voice"))
+    animation_complete = bool(current.get("animation"))
+    blocked = status == "blocked"
+    story_complete = bool(state.get("packageCurrent"))
+    complete_count = sum(1 for item in all_shots if _shot_complete(item))
+    total_count = len(all_shots)
+    steps = [
+        {
+            "id": "story",
+            "label": "Story",
+            "state": _line_state(phase == "story", story_complete,
+                                 blocked and phase == "story"),
+            "summary": "Script and Director storyboard package",
+        },
+        {
+            "id": "see",
+            "label": "SEE",
+            "state": _line_state(phase == "keyframe", keyframe_complete,
+                                 blocked and phase == "keyframe", not story_complete),
+            "summary": "Approved opening frame",
+        },
+        {
+            "id": "hear",
+            "label": "HEAR",
+            "state": _line_state(phase == "voice", voice_complete,
+                                 blocked and phase == "voice", not keyframe_complete),
+            "summary": "Approved voice performance",
+        },
+        {
+            "id": "watch",
+            "label": "WATCH",
+            "state": _line_state(phase == "animation", animation_complete,
+                                 blocked and phase == "animation", not voice_complete),
+            "summary": "Seedance prompt, spend, render and take",
+        },
+        {
+            "id": "review",
+            "label": "Review",
+            "state": _line_state(phase in ("review", "final"),
+                                 bool(all_animations_current and status == "complete"),
+                                 blocked and phase in ("review", "final"),
+                                 not all_animations_current),
+            "summary": "Quality check, scene master and final approval",
+        },
+    ]
+    active = next((step for step in steps if step["state"] == "active"), None)
+    return {
+        "mode": "production-line",
+        "activeStep": (active or {}).get("id") or phase,
+        "selectedShotId": selected_shot_id,
+        "shotProgress": {"complete": complete_count, "total": total_count},
+        "steps": steps,
+    }
+
+
 def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
                           artifact: dict[str, Any] | None) -> dict[str, Any] | None:
     candidate = ledger.get("keyframeCandidate") or {}
@@ -435,14 +512,16 @@ def _keyframe_stage_comms(ledger: dict[str, Any], status: str,
                     "The generated keyframe is available for your review, but the automated "
                     "checks found an issue."),
                 "nextAction": "Review the visible image, then choose Approve or Refire.",
-                "artifactVisible": bool((artifact or {}).get("url")),
+                "artifactVisible": bool((artifact or {}).get("url") or
+                                        (artifact or {}).get("items")),
             }
         return {
             "severity": "info",
             "title": "Keyframe ready for your review",
             "message": "The generated keyframe is visible. Your decision controls whether it moves forward.",
             "nextAction": "Choose Approve if it works, or Refire with a correction if it does not.",
-            "artifactVisible": bool((artifact or {}).get("url")),
+            "artifactVisible": bool((artifact or {}).get("url") or
+                                    (artifact or {}).get("items")),
         }
     if rejected:
         return {
@@ -754,7 +833,48 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
 
     if not state.get("packageCurrent"):
         story_state = (stages.get("storyboard") or {}).get("state")
-        if story_state == "ready":
+        if state.get("preservedPackageView") and selected_state is not None and package:
+            status = "blocked"
+            blocker = next(iter(state.get("blockers") or []), None)
+            summary = ((blocker or {}).get("message") or
+                       "The preserved shot is visible, but its production graph needs refresh.")
+            primary = _action("open-inspector", "Resolve in Inspector")
+            preserved_see_candidates = list(package_ledger.get("keyframeCandidates") or [])
+            if len(preserved_see_candidates) > 1:
+                phase = "keyframe"
+                headline = "Preserved SEE A/B comparison"
+                artifact = {
+                    "type": "image-set",
+                    "label": "SEE A/B comparison",
+                    "selectedCandidateId": package_ledger.get("selectedKeyframeCandidateId"),
+                    "items": [{
+                        "candidateId": item.get("candidateId"),
+                        "label": item.get("label"),
+                        "provider": item.get("provider"),
+                        "model": item.get("model"),
+                        "url": cb_asset_registry.url_for_path(item.get("path")),
+                    } for item in preserved_see_candidates
+                        if cb_asset_registry.url_for_path(item.get("path"))],
+                }
+            elif shot_media.get("clip"):
+                phase = "animation"
+                headline = "Preserved animation take"
+                artifact = {"type": "video", "url": shot_media.get("clip"),
+                            "label": "Preserved accepted animation"}
+            elif shot_media.get("vo"):
+                phase = "voice"
+                headline = "Preserved voice track"
+                artifact = {"type": "audio", "url": shot_media.get("vo"),
+                            "label": "Preserved approved voice"}
+            elif shot_media.get("keyframeApproved") or shot_media.get("keyframe"):
+                phase = "keyframe"
+                headline = "Preserved opening frame"
+                artifact = {
+                    "type": "image",
+                    "url": shot_media.get("keyframeApproved") or shot_media.get("keyframe"),
+                    "label": "Preserved approved opening frame",
+                }
+        elif story_state == "ready":
             status = "ready_to_fire"
             headline = "Direct this scene"
             summary = (stages.get("storyboard") or {}).get("sub") or summary
@@ -846,9 +966,32 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             status = "ready_to_review"
             headline = "Does this stage give the performance room to land?"
             summary = keyframe_headline or purpose
-            artifact = {"type": "image", "url": shot_media.get("keyframeCandidate")
-                        or shot_media.get("keyframe"), "label": "Opening-frame candidate"}
-            if _ai_creative_review(package_ledger, phase)["available"]:
+            keyframe_candidates = list(package_ledger.get("keyframeCandidates") or [])
+            if len(keyframe_candidates) > 1:
+                selected_keyframe_candidate_id = package_ledger.get("selectedKeyframeCandidateId")
+                artifact = {
+                    "type": "image-set",
+                    "label": "SEE A/B comparison",
+                    "selectedCandidateId": selected_keyframe_candidate_id,
+                    "items": [{
+                        "candidateId": item.get("candidateId"),
+                        "label": item.get("label"),
+                        "provider": item.get("provider"),
+                        "model": item.get("model"),
+                        "url": cb_asset_registry.url_for_path(item.get("path")),
+                    } for item in keyframe_candidates
+                        if cb_asset_registry.url_for_path(item.get("path"))],
+                }
+            else:
+                artifact = {"type": "image", "url": shot_media.get("keyframeCandidate")
+                            or shot_media.get("keyframe"), "label": "Opening-frame candidate"}
+            if len(keyframe_candidates) > 1 and not selected_keyframe_candidate_id:
+                headline = "Choose the SEE stage to review"
+                summary = ("Compare A from Seedream 5.0 Pro with B from Nano Banana 2. "
+                           "Selecting a candidate does not approve it.")
+                primary = None
+                decisions = []
+            elif _ai_creative_review(package_ledger, phase)["available"]:
                 decisions = [
                     _action("accept-keyframe", "Accept"),
                     _action("iterate-keyframe", "Iterate", destructive=True),
@@ -1028,6 +1171,7 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
         "episode": episode,
         "scene": scene,
         "sceneName": (package or {}).get("sceneName") or "Scene " + scene,
+        "preservedPackageView": bool(state.get("preservedPackageView")),
         "sceneContinuityRules": _scene_continuity_rules(episode, scene),
         "status": status,
         "phase": phase,
@@ -1053,6 +1197,10 @@ def build_session(*, state: dict[str, Any], preflight: dict[str, Any],
             "relayAnchorUrl": shot_media.get("relayAnchor"),
         } if shot_id else None),
         "progress": {"complete": completed, "total": len(all_shots)},
+        "productionLine": _production_line(
+            phase=phase, status=status, state=state, selected_state=selected_state,
+            selected_shot_id=shot_id, all_animations_current=all_animations_current,
+            all_shots=all_shots),
         "shots": shot_summaries,
         "artifact": artifact,
         "primaryAction": primary,
@@ -1103,6 +1251,8 @@ def allowed_action_ids(session: dict[str, Any]) -> set[str]:
             session.get("status") != "rendering" and
             not (session.get("artifact") or {}).get("url")):
         out.update({"select-keyframe-library", "select-keyframe-upload"})
+    if ((session.get("artifact") or {}).get("type") == "image-set"):
+        out.add("select-keyframe-candidate")
     return out
 
 

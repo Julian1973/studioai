@@ -239,7 +239,9 @@ class SeedanceTask(BaseModel):
         default="16:9",
         validation_alias=AliasChoices("aspect_ratio", "aspectRatio"),
     )
-    resolution: str = "720p"
+    # Match the verified default provider route. Higher resolutions must be an
+    # explicit model/route choice rather than making every default preflight fail.
+    resolution: str = "480p"
     model_id: Optional[str] = Field(
         default=None,
         validation_alias=AliasChoices("model_id", "modelId"),

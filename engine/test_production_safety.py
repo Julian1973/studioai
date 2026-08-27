@@ -50,7 +50,7 @@ def test_preflight_stops_at_episode_story_direction_approval(monkeypatch):
     assert report["stages"]["storyboard"]["state"] == "awaiting"
     assert report["providerCapabilities"]["selectionReady"] is True
     assert report["providerCapabilities"]["selectedVideoModelId"] == (
-        "fal-seedance-2.5")
+        "dreamina-seedance-2-5-260628")
     assert "VIDEO_PROVIDER_NOT_QUALIFIED" not in codes
     assert report["showProfile"]["showId"] == "crystal-bears"
     assert report["showProfile"]["adapterReady"] is True
@@ -59,7 +59,7 @@ def test_preflight_stops_at_episode_story_direction_approval(monkeypatch):
 
 
 def test_preflight_blocks_an_unqualified_selected_video_model(monkeypatch):
-    monkeypatch.setenv("CB_VIDEO_MODEL_ID", "dreamina-seedance-2-5-260628")
+    monkeypatch.setenv("CB_VIDEO_MODEL_ID", "byteplus-seedance-2.0")
     report = cb_production_preflight.production_preflight("1", "Ep1")
 
     blockers = {item["code"]: item for item in report["blockers"]}

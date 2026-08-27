@@ -538,7 +538,7 @@ So…
 quick question.
 
 83	 KEEN
-Yeah?
+Go ahead, Fuzzby. Ask what you want.
 
 84	 FUZZBY
 How do you feel about honey?
@@ -552,7 +552,7 @@ I like it?
 Beat. Fuzzby GASPS. His eyes sparkle. This is the best news he has heard all day.
 
 86	 FUZZBY
-Oh… this is going to work out VERY well.
+Oh… this is going to work out VERY VERY well.
 
 87 	ZENNY
 Fuzzby…

@@ -321,6 +321,9 @@ def install(m):
         state = department_record_status(pkg, shot_id, stage)
         rec = state["record"]
         if not state["current"]:
+            if (stage in ("voice", "animation") and rec.get("manualCurrentOverride") and
+                    (rec.get("output") or {})):
+                return rec
             label = {"cinematography": "Cinematography", "voice": "Voice",
                      "animation": "Animation"}.get(stage, stage.title())
             if state["reason"] in ("not-prepared", "not-approved"):
@@ -741,9 +744,20 @@ def install(m):
     def animation_generation_signature(pkg, shot, scene, episode, fast=False,
                                        comparison_model_id=None,
                                        comparison_run_id=None,
-                                       include_audio_reference=True):
+                                       include_audio_reference=True,
+                                       generate_audio=True):
         direction = current_direction_record(pkg, shot["shotId"], "animation")
-        prompt = str((direction.get("output") or {}).get("providerPrompt") or "").strip()
+        # The working prompt is the prompt the director has actually iterated.
+        # The signature must audit the same text that fire_shot will send; using
+        # only the older approved compiler output makes the gate score a
+        # different prompt from the one shown in the studio.
+        ledger = m._ledger(pkg, shot["shotId"])
+        working = ledger.get("workingSeedancePrompt") or {}
+        prompt = str(
+            working.get("text")
+            or (direction.get("output") or {}).get("providerPrompt")
+            or ""
+        ).strip()
         if not prompt:
             raise m.Refused(
                 f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
@@ -755,7 +769,6 @@ def install(m):
         if shot.get("dialogueLines") and not voice["current"]:
             raise m.Refused(
                 f"REFUSED — {shot['shotId']}'s approved voice is missing or stale")
-        ledger = m._ledger(pkg, shot["shotId"])
         try:
             plan = m._animation_execution_plan(
                 pkg, {**shot, "seedancePrompt": prompt}, ledger,
@@ -763,7 +776,8 @@ def install(m):
                               m._characters_cfg()),
                 anchor, fast, comparison_model_id, comparison_run_id,
                 materialize_audio=False,
-                include_audio_reference=include_audio_reference)
+                include_audio_reference=include_audio_reference,
+                generate_audio=generate_audio)
         except (cb_providers.ProviderCapabilityError,
                 m.cb_seedance_transport.TransportPlanError) as exc:
             raise m.Refused(f"REFUSED — provider capability: {exc}") from exc
@@ -773,7 +787,8 @@ def install(m):
             "shotContractHash": json_sha256(shot),
             "animationDirectionSignature": direction.get("inputSignature"),
             "promptHash": hashlib.sha256(prompt.encode()).hexdigest(),
-            "audioReferencePolicy": ("guide" if include_audio_reference else "post-only"),
+            "audioReferencePolicy": ("guide" if include_audio_reference else
+                                     ("native" if generate_audio else "post-only")),
             "openingFrameHash": file_sha256(anchor),
             "references": refs,
             "audioHash": (file_sha256(ledger.get("voPath"))
@@ -857,7 +872,8 @@ def install(m):
         if shot.get("sourceType") == "opener":
             opening_path = (ledger.get("keyframeApproval") or {}).get("path")
         else:
-            source_ledger = m._ledger(pkg, shot.get("sourceShot"))
+            source_shot = shot.get("sourceShot") or shot.get("sourceShotId")
+            source_ledger = m._ledger(pkg, source_shot)
             opening_path = source_ledger.get("harvestFrame")
         if not opening_path or not os.path.isfile(opening_path):
             raise m.Refused(
@@ -1138,25 +1154,34 @@ def install(m):
         result = original["keyframe_shot"](scene, shot_id, episode, log)
         pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
-        candidate = ledger.get("keyframeCandidate")
-        if not candidate:
+        candidates = list(ledger.get("keyframeCandidates") or [])
+        if not candidates and ledger.get("keyframeCandidate"):
+            candidates = [ledger["keyframeCandidate"]]
+        if not candidates:
             return result
-        candidate["packageRevision"] = pkg.get("revision")
-        candidate["inputSignature"] = keyframe_signature(
-            pkg, shot, candidate, scene, episode)
-        candidate["contentHash"] = file_sha256(candidate.get("path"))
-        candidate["conformanceScreening"] = candidate.get("conformanceScreening") or \
-            m.screen_keyframe_conformance(
-                pkg, shot, candidate.get("path"), scene, episode, log)
+        for candidate in candidates:
+            candidate["packageRevision"] = pkg.get("revision")
+            candidate["inputSignature"] = keyframe_signature(
+                pkg, shot, candidate, scene, episode)
+            candidate["contentHash"] = file_sha256(candidate.get("path"))
+            candidate["conformanceScreening"] = candidate.get("conformanceScreening") or \
+                m.screen_keyframe_conformance(
+                    pkg, shot, candidate.get("path"), scene, episode, log)
+        selected_id = ledger.get("selectedKeyframeCandidateId")
+        ledger["keyframeCandidate"] = next(
+            (item for item in candidates if item.get("candidateId") == selected_id),
+            candidates[0])
         m._save(pkg, path)
-        screening = candidate["conformanceScreening"]
-        if screening.get("status") == "fail":
-            review = screening.get("review") or {}
-            correction = (review.get("recommendedCorrection") or
-                          screening.get("reason") or
-                          "The keyframe failed objective identity and scale checks.")
-            log(f"KEYFRAME QC WARNING — {shot_id}: {correction}; "
-                "candidate remains available for the human Director's Accept or Refire decision")
+        for candidate in candidates:
+            screening = candidate["conformanceScreening"]
+            if screening.get("status") == "fail":
+                review = screening.get("review") or {}
+                correction = (review.get("recommendedCorrection") or
+                              screening.get("reason") or
+                              "The keyframe failed objective identity and scale checks.")
+                log(f"KEYFRAME QC WARNING — {shot_id} SEE {candidate.get('candidateId')}: "
+                    f"{correction}; candidate remains available for the human Director's "
+                    "Accept or Refire decision")
         return result
 
     def select_keyframe(scene, shot_id, mode, episode="Ep1", upload_path=None,
@@ -1213,9 +1238,15 @@ def install(m):
 
     def approve_keyframe(scene, shot_id, episode="Ep1", reviewed_by="Julian", log=print):
         pkg, path = current_package(scene, episode); shot = m._shot(pkg, shot_id)
+        ledger = m._ledger(pkg, shot_id)
+        ab_candidates = list(ledger.get("keyframeCandidates") or [])
+        selected_id = str(ledger.get("selectedKeyframeCandidateId") or "").strip().upper()
+        if len(ab_candidates) > 1 and not selected_id:
+            raise m.Refused(
+                f"REFUSED — {shot_id} requires an explicit SEE A/B selection before approval")
         composition = m._load_opening_composition_master(
             shot, scene, episode, m._characters_cfg())
-        candidate = m._ledger(pkg, shot_id).get("keyframeCandidate") or {}
+        candidate = ledger.get("keyframeCandidate") or {}
         screening = candidate.get("geometryScreening") or {
             "status": "unavailable",
             "reason": ("local stage guide is missing or stale" if not composition else
@@ -1324,6 +1355,46 @@ def install(m):
                     else "keyframe-input-or-content-mismatch"),
                 "expectedInputSignature": expected}
 
+    def keyframe_stage_contract_report(record):
+        """WATCH gate: SEE is physical stage evidence, not just a pretty frame.
+
+        A Director may still accept soft automated advice, but WATCH must not spend when
+        the accepted SEE frame already failed the physical relationship the render depends on.
+        Seedance will generally preserve the opening frame's causality over prompt text.
+        """
+        override = record.get("stageContractOverride") or {}
+        if override.get("acceptedBy"):
+            return {"ready": True, "reason": None}
+        screening = record.get("conformanceScreening") or {}
+        status = str(screening.get("status") or "").strip().lower()
+        if status == "pass":
+            return {"ready": True, "reason": None}
+        review = screening.get("review") or {}
+        evidence = " ".join(str(value or "") for value in (
+            screening.get("reason"),
+            review.get("summary"),
+            review.get("recommendedCorrection"),
+            (review.get("relativeScaleAndGeography") or {}).get("visibleEvidence"),
+            (review.get("relativeScaleAndGeography") or {}).get("correction"),
+            (review.get("actionReadyComposition") or {}).get("visibleEvidence"),
+            (review.get("actionReadyComposition") or {}).get("correction"),
+            (record.get("conformanceAdvisoryDecision") or {}).get("reasonAtDecision"),
+        )).casefold()
+        physical_stage_terms = (
+            "causality", "geography", "action-ready", "action ready", "playable",
+            "stage", "staging", "physical relationship", "attached", "tether",
+            "towline", "mooring", "rope", "net", "strand", "tail", "rescue path",
+            "dive path", "corridor", "gunwale", "hull", "boat", "prop",
+            "trigger", "relationship", "position", "placement", "layout",
+        )
+        if any(term in evidence for term in physical_stage_terms):
+            reason = (
+                screening.get("reason") or review.get("summary") or
+                "approved SEE frame failed physical stage conformance"
+            )
+            return {"ready": False, "reason": reason}
+        return {"ready": True, "reason": None}
+
     def reassess_keyframe(scene, shot_id, episode="Ep1"):
         pkg, _ = m.load_pkg(scene, episode)
         shot = m._shot(pkg, shot_id)
@@ -1367,19 +1438,22 @@ def install(m):
                 "REFUSED — opening-frame approval is stale against its direct inputs")
         return result
 
-    def seedance_prompt(pkg, shot):
+    def seedance_prompt(pkg, shot, scene=None, episode="Ep1", require_current_working=False):
         led = m._ledger(pkg, shot["shotId"])
         working = led.get("workingSeedancePrompt") or {}
         prompt = str(working.get("text") or "").strip()
         is_working = bool(prompt)
+        if require_current_working and not is_working:
+            raise m.Refused(
+                f"REFUSED — no current working Seedance prompt for {shot['shotId']}")
         if not prompt:
             prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
                          .get("providerPrompt") or "").strip()
         if not prompt:
             raise m.Refused(f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
         return (m._with_character_scale_control(
-            prompt, shot, "referenceSlots", str(pkg.get("sceneNumber")),
-            pkg.get("episode") or "Ep1"), is_working)
+            prompt, shot, "referenceSlots", str(scene or pkg.get("sceneNumber")),
+            episode or pkg.get("episode") or "Ep1"), is_working)
 
     def approved_seedance_prompt(pkg, shot):
         prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
@@ -1401,9 +1475,17 @@ def install(m):
 
     def fire_shot(scene, shot_id, episode="Ep1", candidates=3, fast=False,
                   spend_token=None, dry_run=False, comparison_model_id=None,
-                  comparison_run_id=None, log=print, include_audio_reference=True):
+                  comparison_run_id=None, log=print, include_audio_reference=True,
+                  generate_audio=True):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
+        stage_report = keyframe_stage_contract_report(
+            ledger.get("keyframeApproval") or {})
+        if not stage_report["ready"]:
+            raise m.Refused(
+                "REFUSED — WATCH blocked because the approved SEE frame does not prove "
+                "the physical stage contract. SEE is the render's opening causality "
+                f"evidence, so text cannot safely override it: {stage_report['reason']}")
         stored = ((ledger.get("batch") or {}).get("envelope") or
                   (ledger.get("pendingSpendAuth") or {}).get("envelope") or {})
         if stored.get("comparisonRunId"):
@@ -1434,10 +1516,12 @@ def install(m):
             pkg, shot, scene, episode, fast=fast,
             comparison_model_id=comparison_model_id,
             comparison_run_id=comparison_run_id,
-            include_audio_reference=include_audio_reference)
+            include_audio_reference=include_audio_reference,
+            generate_audio=generate_audio)
         result = original["fire_shot"](
             scene, shot_id, episode, candidates, fast, spend_token, dry_run,
-            comparison_model_id, comparison_run_id, log, include_audio_reference)
+            comparison_model_id, comparison_run_id, log, include_audio_reference,
+            generate_audio)
         pkg, path = m.load_pkg(scene, episode)
         ledger = m._ledger(pkg, shot_id)
         batch = ledger.get("batch") or {}
@@ -1448,7 +1532,8 @@ def install(m):
             pkg, m._shot(pkg, shot_id), scene, episode, fast=fast,
             comparison_model_id=comparison_model_id,
             comparison_run_id=comparison_run_id,
-            include_audio_reference=include_audio_reference)
+            include_audio_reference=include_audio_reference,
+            generate_audio=generate_audio)
         if current_signature != generation_signature:
             raise m.Refused(
                 f"REFUSED — {shot_id}'s direct generation inputs changed while its batch ran")
@@ -1541,6 +1626,8 @@ def install(m):
     m._approved_voice_lines = voice_lines
     m._voice_input_signature = voice_signature
     m._voice_approval_status = voice_approval_status
+    m._voice_signature = voice_signature
+    m._animation_input_signature = animation_input_signature
     m._animation_input_signature = animation_input_signature
     m._animation_generation_signature = animation_generation_signature
     m._animation_approval_status = animation_approval_status

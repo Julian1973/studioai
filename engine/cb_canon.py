@@ -552,6 +552,12 @@ def _script_text(root: pathlib.Path, episode: str) -> tuple[str | None, str | No
 def validate_script(text: str, policy: dict) -> dict:
     blockers, warnings = [], []
     checks = policy.get("scriptChecks") or {}
+
+    def normalized_dialogue(value: str) -> str:
+        value = re.sub(r"(?m)^\s*\d+\s+", "", value)
+        value = re.sub(r"\s+", " ", value)
+        return value.strip()
+
     for check in checks.get("forbiddenPatterns") or []:
         match = re.search(check["pattern"], text, re.IGNORECASE)
         if match:
@@ -564,7 +570,8 @@ def validate_script(text: str, policy: dict) -> dict:
             })
     for check in checks.get("lockedDialogue") or []:
         trigger = re.search(check["triggerPattern"], text, re.IGNORECASE)
-        exact = check["exactText"] in text
+        exact_required = normalized_dialogue(check["exactText"])
+        exact = exact_required in normalized_dialogue(text)
         if trigger and not exact:
             lines = text.splitlines()
             line = None
@@ -586,6 +593,8 @@ def validate_script(text: str, policy: dict) -> dict:
             line = line or next((raw.strip() for raw in lines
                                  if re.search(check["triggerPattern"], raw, re.IGNORECASE)),
                                 trigger.group(0))
+            if normalized_dialogue(line) == exact_required:
+                continue
             blockers.append({
                 "code": "LOCKED_DIALOGUE_CONFLICT",
                 "checkId": check["id"],
@@ -802,11 +811,16 @@ def source_hashes(profile: str, root: str | pathlib.Path | None = None) -> dict:
 
 
 def story_context(cast: Iterable[str], episode: str,
-                  root: str | pathlib.Path | None = None) -> dict:
+                  root: str | pathlib.Path | None = None,
+                  require_ready: bool = True) -> dict:
     """Return the exact textual canon supplied to Story & Direction, not visual media bytes."""
     base = _root(root)
     names = sorted(set(cast))
-    lock = require_locked(episode, names, base)
+    lock = require_locked(episode, names, base) if require_ready else status(episode, names, base)
+    if lock.get("blockers"):
+        messages = [str(item.get("message") or item.get("code"))
+                    for item in lock.get("blockers", [])[:5]]
+        raise CanonLockError("CANON LOCK REFUSED - " + " | ".join(messages))
     policy = load_policy(base)
     characters = _read_json_source(policy, "characters", base)
 

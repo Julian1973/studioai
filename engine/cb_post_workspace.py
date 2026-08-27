@@ -48,6 +48,10 @@ def _verdict_path(episode: str) -> pathlib.Path:
     return STATE_ROOT / f"{episode}_post_review.json"
 
 
+def _verdict_history_path(episode: str) -> pathlib.Path:
+    return STATE_ROOT / f"{episode}_post_review_history.jsonl"
+
+
 def _read_json(path: pathlib.Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -96,12 +100,19 @@ def workspace(episode: str = "Ep1") -> dict[str, Any]:
     return {
         "episode": episode,
         "available": True,
+        "stage": manifest.get("stage") or manifest.get("status") or "post-review-human-signoff-required",
         "status": "approved" if verdict and verdict.get("verdict") == "approved" else "review-required",
         "masterUrl": _media_url(str(master_path)),
         "originalUrl": _media_url(outputs.get("pictureOriginal")),
         "masterSha256": master_hash,
         "durationSec": manifest.get("durationSec"),
         "scope": manifest.get("scope"),
+        "shotCount": manifest.get("shotCount"),
+        "sceneCount": manifest.get("sceneCount"),
+        "cutPolicy": manifest.get("cutPolicy") or {},
+        "audioPolicy": manifest.get("audioPolicy") or {},
+        "approvalContract": manifest.get("approvalContract") or {},
+        "timeline": manifest.get("timeline") or [],
         "mixPolicy": manifest.get("mixPolicy") or {},
         "qc": manifest.get("finalQc") or {},
         "stems": [stem for stem in stems if stem["url"]],
@@ -129,6 +140,8 @@ def record_verdict(episode: str, verdict: str, note: str = "", reviewer: str = "
         "note": note,
         "reviewer": reviewer,
         "masterSha256": current["masterSha256"],
+        "stage": current.get("stage"),
+        "approvalMeaning": (current.get("approvalContract") or {}).get("approvalMeaning"),
         "reviewedAt": datetime.now(timezone.utc).isoformat(),
     }
     target = _verdict_path(episode)
@@ -136,4 +149,7 @@ def record_verdict(episode: str, verdict: str, note: str = "", reviewer: str = "
     temporary = target.with_suffix(".tmp")
     temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     temporary.replace(target)
+    history = _verdict_history_path(episode)
+    with history.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, sort_keys=True) + "\n")
     return workspace(episode)

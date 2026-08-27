@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tools/backup_media.py — the OFF-MACHINE BACKUP for rendered media (2026-07-08, operational-risk fix).
+"""Back up irreplaceable Crystal Bears production data to Google Drive.
 
 Confirmed gap: engine/media/ (rendered clips, keyframes, plates, settle/re-mint frames — 453MB as of this
 writing) is gitignored by design (generated output, not source) and was found to have ZERO off-machine
@@ -7,13 +7,10 @@ backup — a local-disk failure would lose every paid-for render with no recover
 which are safely in git -> GitHub. shows/crystal-bears/canon/ is already git-backed; it's included here too
 as a zero-cost belt-and-suspenders copy, not because it needed a new mechanism.
 
-Destination: Julian's own choice (asked directly, 2026-07-08) — the mounted external drive at /Volumes/5t,
-not iCloud Drive (my own first pick, correctly stopped before anything synced — an agent choosing an external
-cloud destination for proprietary project media without asking is exactly the kind of thing that needs a
-human's own call, not mine). Never deletes or moves anything from the source; this is a pure, additive,
-repeatable COPY (rsync -a --delete on the backup side only, so the backup mirrors current state without ever
-touching engine/media/ itself). Written to fail SAFE if the drive isn't mounted, rather than erroring or
-guessing at another location.
+Destination: the configured Google Drive Desktop folder under ``The Crystal Bears Final``. Never deletes or
+moves anything from the source; this is a repeatable mirror whose ``--delete`` applies only inside the
+dedicated backup folders. It fails safe if Google Drive Desktop is unavailable and never guesses another
+cloud destination.
 
 Usage:
     python3 tools/backup_media.py           # full sync now
@@ -23,15 +20,32 @@ Called automatically (per-beat, not full-sync) by cb_beats.record_approval() the
 see that function's own call to backup_one(). This script's __main__ path is for the full catch-up sync and
 for a human to re-run manually at any time.
 """
-import os, shutil, subprocess, sys, argparse
+import argparse
+import datetime
+import json
+import os
+import shutil
+import subprocess
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DRIVE = "/Volumes/5t"
-BACKUP_ROOT = os.path.join(DRIVE, "CrystalBears_Backup")
+CONFIG_PATH = os.path.join(ROOT, "engine", "config", "backup.json")
+
+
+def _load_config():
+    with open(CONFIG_PATH, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+CONFIG = _load_config()
+BACKUP_ROOT = os.path.abspath(os.path.expanduser(
+    os.environ.get("CRYSTAL_BEARS_BACKUP_ROOT", CONFIG["root"])))
+DRIVE = os.path.dirname(BACKUP_ROOT)
 
 SOURCES = [
     ("engine/media", "media"),
     ("shows/crystal-bears/canon", "canon"),
+    ("cb-output", "production-state"),
     # Added 2026-07-08 (workspace-clutter pass): these three are real, irreplaceable Crystal Bears assets
     # (cb-seed/ holds the locked character turnarounds cb_prompts.py references by filename — hand-curated,
     # not regenerable by the pipeline; archive/ and cb_pages/ are historical record) — but at ~790MB combined,
@@ -43,13 +57,34 @@ SOURCES = [
 
 
 def _available():
-    return os.path.isdir(DRIVE)
+    try:
+        return os.path.isdir(DRIVE) and os.access(DRIVE, os.W_OK)
+    except OSError:
+        return False
+
+
+def _write_status():
+    status = {
+        "schemaVersion": 1,
+        "provider": CONFIG["provider"],
+        "driveFolderId": CONFIG.get("driveFolderId"),
+        "completedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "sourceRoot": ROOT,
+        "backupRoot": BACKUP_ROOT,
+        "sources": [{"source": source, "destination": destination}
+                    for source, destination in SOURCES],
+    }
+    path = os.path.join(BACKUP_ROOT, "BACKUP_STATUS.json")
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(status, handle, indent=2)
+        handle.write("\n")
+    return path
 
 
 def full_sync(dry_run=False):
     if not _available():
-        print(f"  BACKUP SKIPPED — {DRIVE} is not mounted right now. "
-              "Nothing was copied; the local-only risk still stands until the drive is connected.",
+        print(f"  BACKUP SKIPPED — Google Drive Desktop is unavailable at {DRIVE}. "
+              "Nothing was copied; local-only risk remains until Drive is available.",
               flush=True)
         return False
     if not dry_run:
@@ -61,15 +96,19 @@ def full_sync(dry_run=False):
             print(f"  (skip — {src_rel} doesn't exist)", flush=True)
             continue
         dst = os.path.join(BACKUP_ROOT, dst_name)
-        cmd = ["rsync", "-a", "--delete"] + (["--dry-run", "-v"] if dry_run else []) + [src + "/", dst + "/"]
+        cmd = ["rsync", "-rt", "--delete", "--exclude=.DS_Store"] + (
+            ["--dry-run", "-v"] if dry_run else []) + [src + "/", dst + "/"]
         print(f"  {'DRY-RUN' if dry_run else 'sync'}: {src_rel} -> {dst}", flush=True)
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             print(f"    FAILED: {r.stderr[:300]}", flush=True)
             ok = False
         elif dry_run:
-            lines = [l for l in r.stdout.splitlines() if l and not l.startswith(("sending", "sent ", "total"))]
+            lines = [l for l in r.stdout.splitlines() if l and not l.startswith(
+                ("sending", "Transfer starting", "sent ", "total"))]
             print(f"    {len(lines)} file(s) would change", flush=True)
+    if ok and not dry_run:
+        print(f"  status: {_write_status()}", flush=True)
     return ok
 
 
@@ -97,6 +136,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Back up engine/media/ + canon to the 5t external drive")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+    print(f"Backup provider: {CONFIG['provider']}", flush=True)
     print(f"Backup destination: {BACKUP_ROOT}", flush=True)
     ok = full_sync(dry_run=a.dry_run)
     sys.exit(0 if ok else 1)

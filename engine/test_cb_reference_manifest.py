@@ -460,11 +460,14 @@ def test_composition_and_scale_controls_remain_local_while_locked_assets_own_pro
         "openingFrameLayout": layout,
         "continuityProtections": ["No impact yet."],
     }
-    keyframe_prompt = cb_render._compile_keyframe_integration_prompt(direction, shot)
+    keyframe_blueprint = cb_render._expanded_reference_blueprint(
+        shot, "keyframeReferenceSlots", characters)
+    keyframe_prompt = cb_render._compile_keyframe_integration_prompt(
+        direction, shot, keyframe_blueprint)
     animation_prompt = cb_render._with_character_scale_control(
         "Animate the approved performance.", shot, "referenceSlots", "1", "Ep1")
-    assert "@图1: Zenny's complete, uncropped 360 turnaround is the 100% identity authority" in keyframe_prompt
-    assert "@图2: Fuzzby's complete, uncropped 360 turnaround is the 100% identity authority" in keyframe_prompt
+    assert "@图1: Zenny's single-subject character anchor is the 100% identity authority" in keyframe_prompt
+    assert "@图2: Fuzzby's single-subject character anchor is the 100% identity authority" in keyframe_prompt
     assert "round glasses" not in keyframe_prompt
     assert "@图3 is the locked Scene Look plate" in keyframe_prompt
     assert "[Performance Freedom]" in keyframe_prompt

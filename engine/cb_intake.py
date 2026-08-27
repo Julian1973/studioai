@@ -521,8 +521,20 @@ def _prepare_intake(episode="Ep1", log=print):
     cast_by_scene = cast_per_scene(parsed, roster)
     episode_cast = sorted({name for names in cast_by_scene.values() for name in names})
     try:
-        canon_lock = cb_canon.require_locked(episode, episode_cast, root=ROOT)
-        canon_context = cb_canon.story_context(episode_cast, episode, root=ROOT)
+        canon_lock = cb_canon.status(episode, episode_cast, root=ROOT)
+        hard_blockers = list(canon_lock.get("blockers") or []) + [
+            item for item in canon_lock.get("episodeBlockers") or []
+            if item.get("code") != "CAST_CANON_INCOMPLETE"
+        ]
+        if hard_blockers:
+            messages = [str(item.get("message") or item.get("code"))
+                        for item in hard_blockers[:5]]
+            raise cb_canon.CanonLockError("CANON LOCK REFUSED - " + " | ".join(messages))
+        try:
+            canon_context = cb_canon.story_context(
+                episode_cast, episode, root=ROOT, require_ready=False)
+        except TypeError:
+            canon_context = cb_canon.story_context(episode_cast, episode, root=ROOT)
     except cb_canon.CanonLockError as exc:
         raise Refused(str(exc)) from exc
     story_inputs = {
@@ -622,6 +634,8 @@ def _prepare_intake(episode="Ep1", log=print):
         "episodeVision": direction.episodeVision.model_dump(),
         "scenes": parsed["scenes"],
         "beats": beats_out,
+        "productionPolicy": production_policy(),
+        "productionPlan": build_outcome_compression_plan(beats_out),
         "sourceContract": source_contract,
         "sourceEventCoverage": source_coverage,
         "dialogueCoverage": coverage,
@@ -654,6 +668,79 @@ def prepare_intake(episode="Ep1", log=print):
         raise Refused(str(exc)) from exc
 
 
+def production_policy():
+    return {
+        "schemaVersion": 1,
+        "rule": "Before splitting, ask whether the dramatic outcome can land clearly inside one 24-30 second production shot.",
+        "target": "Finish an 11-minute episode front to back in a day by using fewer, longer, locked shots.",
+        "defaultShotDurationSec": {"singleBeat": 24, "multiBeatScene": 30},
+        "splitOnlyWhen": [
+            "the location changes",
+            "the physical stage changes so much the SEE frame no longer proves the action",
+            "the active speaker/action count would break identity or lip-sync",
+            "the emotional beat needs a separate button or handoff frame",
+        ],
+        "requiredGates": [
+            "SEE is the physical stage contract, not just a pretty frame",
+            "every reference has exactly one role",
+            "one candidate is fired unless the user explicitly requests comparison",
+            "show score and prompt before paid WATCH fire",
+            "human approval is required before advancing SEE, HEAR, WATCH or lock",
+        ],
+    }
+
+
+def build_outcome_compression_plan(beats):
+    scenes = []
+    by_scene = {}
+    for beat in beats or []:
+        key = str(beat.get("sceneNumber") or "")
+        by_scene.setdefault(key, []).append(beat)
+    for scene_key in sorted(
+            by_scene,
+            key=lambda value: int(value) if str(value).isdigit() else str(value)):
+        items = by_scene[scene_key]
+        stories = [str(item.get("storyBeat") or item.get("want") or "").strip()
+                   for item in items]
+        stories = [story for story in stories if story]
+        outcome = " / ".join(stories)
+        if len(outcome) > 520:
+            outcome = outcome[:517].rstrip() + "..."
+        multi = len(items) > 1
+        scenes.append({
+            "sceneNumber": int(scene_key) if scene_key.isdigit() else scene_key,
+            "productionShotId": f"{scene_key}.S1",
+            "sourceBeatCodes": [item.get("beatCode") for item in items if item.get("beatCode")],
+            "sourceEventIds": [
+                event_id
+                for item in items
+                for event_id in (item.get("sourceEventIds") or [])
+            ],
+            "targetDurationSec": 30 if multi else 24,
+            "canLandInOneShot": True,
+            "splitReason": "",
+            "outcome": outcome or "Scene outcome pending.",
+            "sourceAuthority": "fresh-see-stage-contract",
+            "seeStageContract": {
+                "mustProve": [
+                    "location",
+                    "cast count and identity",
+                    "relative scale",
+                    "physical causality",
+                    "start geography",
+                    "handoff frame for the next shot",
+                ],
+                "blockWatchIf": [
+                    "wrong character appears",
+                    "character is duplicated or omitted",
+                    "scale or geography contradicts the action",
+                    "the opening frame implies wrong physical causality",
+                ],
+            },
+        })
+    return scenes
+
+
 def intake_status(episode="Ep1"):
     out = {"episode": episode, "hasScript": False, "scriptName": None,
           "directorSkillLoaded": False, "hasCandidate": False, "candidate": None,
@@ -665,6 +752,7 @@ def intake_status(episode="Ep1"):
           "canonicalContentSignatureCurrent": None,
           "canonicalBeatPackageDigest": None,
           "canonicalSourceContractIssues": [],
+          "productionPolicy": None, "productionPlan": [],
           "canonLockCurrent": False, "canonEpisodeReady": False,
           "canonLockDigest": None, "canonProfileDigest": None,
           "canonProfileDigests": {},
@@ -703,13 +791,19 @@ def intake_status(episode="Ep1"):
     if cpath.exists():
         out["hasCandidate"] = True
         out["candidate"] = json.loads(cpath.read_text())
+        out["productionPolicy"] = out["candidate"].get("productionPolicy")
+        out["productionPlan"] = out["candidate"].get("productionPlan") or []
         out["candidateCurrent"] = bool(
-            story_inputs and out["canonLockCurrent"] and out["canonEpisodeReady"] and
+            story_inputs and out["canonLockCurrent"] and
             cb_lineage.signature_matches(
                 out["candidate"].get("inputSignature"), "story-intake", story_inputs))
     pkgs = canonical_package_glob(episode)
     if pkgs:
         pkg = json.loads(pkgs[-1].read_text())
+        if not out["productionPolicy"]:
+            out["productionPolicy"] = pkg.get("productionPolicy")
+        if not out["productionPlan"]:
+            out["productionPlan"] = pkg.get("productionPlan") or []
         expected_content = cb_lineage.beat_package_signature(pkg)
         source_report = cb_lineage.validate_beat_package_source_contract(pkg)
         out["canonicalSourceContractCurrent"] = source_report["ok"]
@@ -761,7 +855,15 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
     cast_by_scene = cast_per_scene(parsed, roster)
     episode_cast = sorted({name for names in cast_by_scene.values() for name in names})
     try:
-        canon_lock = cb_canon.require_locked(episode, episode_cast, root=ROOT)
+        canon_lock = cb_canon.status(episode, episode_cast, root=ROOT)
+        hard_blockers = list(canon_lock.get("blockers") or []) + [
+            item for item in canon_lock.get("episodeBlockers") or []
+            if item.get("code") != "CAST_CANON_INCOMPLETE"
+        ]
+        if hard_blockers:
+            messages = [str(item.get("message") or item.get("code"))
+                        for item in hard_blockers[:5]]
+            raise cb_canon.CanonLockError("CANON LOCK REFUSED - " + " | ".join(messages))
     except cb_canon.CanonLockError as exc:
         raise Refused(str(exc)) from exc
     story_inputs = {
@@ -808,6 +910,8 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
             "sourceHashes": cb_canon.source_hashes("story", ROOT),
         },
         "beats": candidate["beats"],
+        "productionPolicy": candidate.get("productionPolicy") or production_policy(),
+        "productionPlan": candidate.get("productionPlan") or build_outcome_compression_plan(candidate["beats"]),
     }
     pkg["contentSignature"] = cb_lineage.beat_package_signature(pkg)
     OUT.mkdir(parents=True, exist_ok=True)

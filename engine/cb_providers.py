@@ -191,8 +191,10 @@ def _cost_rate_key(model, mode, resolution):
 
 
 def request_contract(*, fast=False, duration, resolution="720p", image_count=0,
-                     audio_count=0, video_count=0, model_id=None):
-    mode = "reference-to-video-fast" if fast else "reference-to-video"
+                     audio_count=0, video_count=0, model_id=None, mode=None):
+    mode = str(mode or ("reference-to-video-fast" if fast else "reference-to-video"))
+    if fast and mode != "reference-to-video-fast":
+        raise ProviderCapabilityError(f"fast tier is not verified for {mode}")
     model = validate_video_request(
         mode=mode, duration=duration, resolution=resolution,
         image_count=image_count, audio_count=audio_count, video_count=video_count,

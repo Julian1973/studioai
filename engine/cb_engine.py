@@ -203,6 +203,10 @@ class Shot(BaseModel):
     shotId: str                                   # e.g. "1.B1.S1"
     beatCode: str                                 # the beat this shot photographs
     beatCodes: List[str] = Field(default_factory=list)  # every beat in a packed provider unit
+    shotRole: Literal["establish", "coverage", "button"] = "coverage"
+    establishJob: Optional[Literal["location", "scale", "threat", "emotion"]] = None
+    buttonChange: Optional[str] = None
+    frameSource: Optional[Literal["chain_cut", "chain_continue"]] = None
     durationSec: float = Field(ge=MIN_SHOT_SEC, le=MAX_SHOT_SEC)
     purpose: str = Field(min_length=1)            # this shot's ONE job, one line
     performanceAssignment: str = Field(min_length=1)  # one cause with its visible consequences —
@@ -224,6 +228,9 @@ class Shot(BaseModel):
     physicalStagings: List[BeatPhysicalStaging] = Field(default_factory=list)
     prohibited: List[str]                         # 0-3 shot-specific failure modes ONLY — never a wall
     charactersInFrame: List[str]                  # who is visible (reference bindings derive from this)
+    offscreenSpeakers: List[str] = Field(default_factory=list)
+    # Dialogue speakers who are intentionally heard but not visible. These do not bind
+    # provider identity references; dialogueBinding/prompt text must keep them offscreen.
     requiredPropReferences: List[str] = Field(default_factory=list)
     # Continuity-critical props that need their own approved visual authority. A scene plate,
     # inherited frame or prose mention never substitutes for these provider attachments.
@@ -369,6 +376,11 @@ def _design_user_prompt(scene_num, scene, beats):
         "frame it continues from, usually the previous one) when the action flows on directly, or "
         "'opener' (sourceShotId=null) when it is a designed editorial cut to genuinely new coverage. "
         "Every shot: ONE performance assignment, an anticipation openingPose, an exact visualPayoff, "
+        "shotRole='establish'|'coverage'|'button'; the first shot must be establish and the final "
+        "shot must be button. Establish and button shots are 3-5 seconds, "
+        "silent, have one dominant camera action and a held final composition for one full second. "
+        "An establish declares establishJob='location'|'scale'|'threat'|'emotion'; a button declares "
+        "buttonChange; wrapper frameSource is 'chain_cut' or 'chain_continue'. "
         "typed continuityIn/continuityOut (zone, facing, pose, expression, marks, props for every "
         "character visible at that boundary). When a character enters after frame one, set "
         "openingCharactersInFrame to the opening subset; when one visibly exits before the landing "
@@ -661,6 +673,32 @@ def validate_scene_design(design, beats, characters_cfg):
                 sh.beatCode != shot_beat_codes[0]):
             add("ERROR", "INVALID_BEAT_OWNERSHIP", f"{path}.beatCodes",
                 "packed beatCodes must be unique, non-empty and begin with beatCode")
+        # Scene-wrapper contract: explicit wrapper roles are silent and inherit
+        # their held frame through a declared chain source. Establishers may be
+        # longer than buttons because they often carry location discovery.
+        if sh.shotRole == "establish":
+            if sh.establishJob is None:
+                add("ERROR", "ESTABLISH_JOB_MISSING", f"{path}.establishJob",
+                    "an establishing shot must name one job: location, scale, threat or emotion")
+            if not 3.0 <= sh.durationSec <= 10.0:
+                add("ERROR", "ESTABLISH_DURATION", f"{path}.durationSec",
+                    "an establishing shot must be 3-10 seconds")
+            if sh.dialogueLines:
+                add("ERROR", "WRAPPER_DIALOGUE_FORBIDDEN", f"{path}.dialogueLines",
+                    "establishing shots carry ambience only; dialogue belongs in the edit")
+        elif sh.shotRole == "button":
+            if not sh.buttonChange:
+                add("ERROR", "BUTTON_CHANGE_MISSING", f"{path}.buttonChange",
+                    "a button must state what changed in the wider frame")
+            if not 3.0 <= sh.durationSec <= 5.0:
+                add("ERROR", "BUTTON_DURATION", f"{path}.durationSec",
+                    "a button must be 3-5 seconds")
+            if sh.dialogueLines:
+                add("ERROR", "WRAPPER_DIALOGUE_FORBIDDEN", f"{path}.dialogueLines",
+                    "buttons carry ambience only; dialogue belongs in the edit")
+        if sh.shotRole in {"establish", "button"} and sh.frameSource not in {"chain_cut", "chain_continue"}:
+            add("ERROR", "WRAPPER_FRAME_SOURCE_MISSING", f"{path}.frameSource",
+                "an establish or button must declare chain_cut or chain_continue")
         for beat_code in shot_beat_codes:
             if source_beat_codes and beat_code not in source_beat_codes:
                 add("ERROR", "UNKNOWN_BEAT", f"{path}.beatCodes", beat_code)
@@ -689,9 +727,13 @@ def validate_scene_design(design, beats, characters_cfg):
 
         # dialogue: speaker visible, timing sane, binding consistent
         in_frame = {_norm(c) for c in sh.charactersInFrame}
+        audible_offscreen = {_norm(c) for c in sh.offscreenSpeakers}
         for j, ln in enumerate(sh.dialogueLines):
             lp = f"{path}.dialogueLines[{j}]"
-            if _norm(ln.speaker) not in in_frame and _norm(ln.speaker) != "all":
+            speaker_norm = _norm(ln.speaker)
+            if (speaker_norm not in in_frame
+                    and speaker_norm not in audible_offscreen
+                    and speaker_norm != "all"):
                 add("ERROR", "SPEAKER_NOT_VISIBLE", lp, f"{ln.speaker} is not in charactersInFrame")
             if ln.endSec > sh.durationSec:
                 add("ERROR", "DIALOGUE_OVERRUN", lp,
@@ -1212,6 +1254,21 @@ def compile_shot_contract(shot, scene, characters_cfg):
     payoff = shot.visualPayoff.strip().rstrip(".").lstrip(". ")
     action.append(payoff[:1].upper() + payoff[1:] + ".")
 
+    wrapper = []
+    if shot.shotRole == "establish":
+        wrapper = [
+            f"[ESTABLISH — job: {shot.establishJob}] One dominant camera action only; "
+            "show the foreground, midground and background geography clearly.",
+            "Ambient sound only, no dialogue, no narration, no music unless diegetic. "
+            "End on the authored composition, held completely stable for the final full second.",
+        ]
+    elif shot.shotRole == "button":
+        wrapper = [
+            f"[BUTTON] The wider frame shows the consequence: {shot.buttonChange.strip().rstrip('.') }.",
+            "One dominant camera action only; no dialogue. Hold the final composition completely "
+            "stable for the final full second so the next scene can inherit it.",
+        ]
+
     closing = [_lip_sync_sentence(shot, characters_cfg),
                "Preserve character identity and relative scale."]
     closing += _render_critical(shot)
@@ -1219,6 +1276,7 @@ def compile_shot_contract(shot, scene, characters_cfg):
     prompt = "\n\n".join([
         f"{_style_line(scene, shot)} {_reference_role_sentence(shot, scene, characters_cfg)}".strip(),
         " ".join(action),
+        " ".join(wrapper),
         " ".join(s for s in closing if s),
     ])
     wc = len(prompt.split())
@@ -1341,6 +1399,8 @@ def compile_audio_brief(shot):
 def _ledger_entry(shot):
     return {"shotId": shot.shotId, "beatCode": shot.beatCode,
             "beatCodes": _shot_beat_codes(shot), "status": "designed",
+            "shotRole": shot.shotRole, "establishJob": shot.establishJob,
+            "buttonChange": shot.buttonChange, "frameSource": shot.frameSource,
             "sourceType": shot.sourceType, "sourceShotId": shot.sourceShotId,
             "motionContinuityRequired": shot.motionContinuityRequired,
             "cutInMotivation": shot.cutInMotivation,
@@ -1410,6 +1470,10 @@ def compile_scene_package(scene_num, episode="Ep1", log=print):
             "shots": [
                 {
                     "shotId": s["shotId"],
+                    "shotRole": s["shotRole"],
+                    "establishJob": s.get("establishJob"),
+                    "buttonChange": s.get("buttonChange"),
+                    "frameSource": s.get("frameSource"),
                     "sourceType": s["sourceType"],
                     "sourceShotId": s.get("sourceShotId"),
                     "durationSec": s["durationSec"],

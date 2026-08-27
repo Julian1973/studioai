@@ -1,3 +1,5 @@
+import pytest
+
 import cb_engine_rules as rules
 import cb_render as render
 
@@ -35,6 +37,25 @@ def test_only_compression_verdicts_raise_versioned_costs():
         "beatType": "impact", "increaseSec": 0.2, "verdictId": "V1"})
     assert applied is True
     assert updated["costsSec"]["impact"] == data["costsSec"]["impact"] + 0.2
+
+
+def test_complex_multi_character_watch_requires_approved_stage_keyframe(tmp_path):
+    shot = {
+        "shotId": "7.B9.S1",
+        "charactersInFrame": [
+            "Aida", "Misty", "Howey", "Amie", "Luna", "Sunny", "Fuzzby", "Zenny",
+        ],
+        "dialogueLines": [],
+        "purpose": "Full team beach payoff with exact cast, scale check and stage contract.",
+        "action": "Everyone on the beach reacts to the rescue.",
+    }
+    with pytest.raises(render.Refused, match="approved SEE keyframe"):
+        render._require_stage_contract_keyframe(shot, {"keyframeApproval": None})
+
+    approved_path = tmp_path / "approved.png"
+    approved_path.write_bytes(b"stage")
+    render._require_stage_contract_keyframe(
+        shot, {"keyframeApproval": {"approved": True, "path": str(approved_path)}})
 
 
 def test_geometry_must_agree_between_keyframe_and_render():
@@ -254,6 +275,24 @@ def test_non_sailing_departure_does_not_receive_sailing_boilerplate():
         {"purpose": "A child walks away", "action": "He leaves the pier."},
         {"shotPlan": []},
     ) == ""
+
+
+def test_negative_mooring_constraint_does_not_trigger_departure_boilerplate():
+    shot = {
+        "purpose": "A child dives from a storm-tossed sailboat to rescue a friend.",
+        "action": "He sees the friend trapped in the water and dives from the boat.",
+        "continuityConstraints": [
+            {
+                "label": "Loose net is not boat-attached",
+                "value": (
+                    "No rope, net strand, towline, tether, mooring line or any "
+                    "connection links the friend or the net to the boat."
+                ),
+            }
+        ],
+    }
+
+    assert rules.sailing_departure_boilerplate(shot, {"shotPlan": []}) == ""
 
 
 def test_already_underway_sailboat_does_not_replay_mooring_departure():

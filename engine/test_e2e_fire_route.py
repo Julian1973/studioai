@@ -382,7 +382,7 @@ def golden_path_scratch_pkg(monkeypatch, tmp_path):
         })
     monkeypatch.setattr(
         cb_render, "_provider_identity_records",
-        lambda name, cfg, usage="keyframe": [
+            lambda name, cfg, usage="keyframe", **kwargs: [
             {"path": str(provider_refs[cb_render._resolve_char(name, cfg)][view]),
              "character": cb_render._resolve_char(name, cfg),
              "view": view, "derived": True, "providerSafe": True,
@@ -532,6 +532,7 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
         return out
 
     monkeypatch.setattr(cb_gen, "generate_image", fake_generate_image)
+    monkeypatch.setattr(cb_gen, "generate_image_nanobanana_ab", fake_generate_image)
     monkeypatch.setattr(
         cb_render, "screen_keyframe_conformance",
         lambda *args, **kwargs: {
@@ -542,12 +543,13 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     shot_id = json.load(open(golden_path_scratch_pkg))["shots"][0]["shotId"]
     out_path = cb_render.keyframe_shot("1", shot_id, "Ep1", log=lambda *a, **k: None)
 
-    assert len(calls) == 1                                          # exactly one provider call
-    call = calls[0]
-    assert call["out"] == out_path
-    assert shot_id in pathlib.Path(out_path).name
-    assert pathlib.Path(out_path).exists()
-    assert pathlib.Path(out_path).read_bytes() == b"fake"            # the stub's own marker —
+    assert len(calls) == 2                                          # sealed A/B provider pair
+    assert len(out_path) == 2
+    for call, candidate_path in zip(calls, out_path):
+        assert call["out"] == candidate_path
+        assert shot_id in pathlib.Path(candidate_path).name
+        assert pathlib.Path(candidate_path).exists()
+        assert pathlib.Path(candidate_path).read_bytes() == b"fake"
     #                                                                   never real media
     # LEGACY_STRINGS is curated for the LEGACY MOTION/video prompt shape (0-5s, crash-lands
     # into pride, etc.) — irrelevant to a keyframe (still-image) prompt, which has its own,
@@ -570,7 +572,8 @@ def test_golden_path_s1sh1_keyframe_passes_real_require_valid_when_lineage_is_cu
     # decision — never auto-approved, never a bare keyframePath pointer on its own.
     written = json.load(open(golden_path_scratch_pkg))
     led = [x for x in written["continuityLedger"] if x["shotId"] == shot_id][0]
-    assert led["keyframeCandidate"]["path"] == out_path
+    assert led["keyframeCandidate"]["path"] == out_path[0]
+    assert [item["path"] for item in led["keyframeCandidates"]] == out_path
     assert "keyframeApproval" not in led
     assert real_live.read_bytes() == real_before                    # real file never touched
 

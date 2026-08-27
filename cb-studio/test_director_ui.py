@@ -78,6 +78,18 @@ def test_ai_director_advises_every_final_human_signoff_without_approval_authorit
     assert 'api("/api/human-review"' not in JS
 
 
+def test_post_workspace_is_full_episode_non_destructive_assembly_review():
+    for phrase in (
+        "FULL EPISODE ASSEMBLY", "Full Episode 1 picture order",
+        "Zero automatic head trims", "No frozen holds",
+        "Approve picture order", "build-assembly",
+    ):
+        assert phrase in JS
+    assert "Scenes 1-3 review master" not in JS
+    assert "Approve 95% pass" not in JS
+    assert '"--episode", episode' in SERVER
+
+
 def test_shot_storyboard_displays_locked_dialogue_text():
     assert 'line.exactText || line.text || line.line' in JS
 
@@ -97,6 +109,28 @@ def test_director_analysis_step_exposes_story_direction_review_gate():
     assert 'data-story-direction-verdict="approve"' in JS
     assert "Approve Story &amp; Direction" in JS
     assert 'step.id === "analysis" ? renderStoryDirectionDesk()' in JS
+
+
+def test_director_hash_routes_to_requested_episode_and_preserves_it():
+    assert 'routeParams.get("episode") || params.get("episode") || params.get("ep")' in JS
+    assert 'requestedEpisode.startsWith("Ep")' in JS
+    assert 'episode: app.episode, scene: app.scene' in JS
+    assert 'if (app.episode !== previousEpisode)' in JS
+    assert "function renderEpisodeContext()" in JS
+    assert '$("#pipeline-title").textContent = `Ep ${number}`' in JS
+    assert 'Ep2: "Bo\'s Big Day"' in JS
+    assert '$("#nav-episode-title").textContent = title' in JS
+    assert '!["upload", "style", "analysis"].includes(app.pipelineStep)' in JS
+    assert 'id="nav-episode-label"' in HTML
+    assert 'id="episodes-eyebrow"' in HTML
+
+
+def test_director_does_not_let_old_session_responses_repaint_new_state():
+    assert "sessionRequestSerial: 0" in JS
+    assert "const requestSerial = ++app.sessionRequestSerial" in JS
+    assert "requestSerial !== app.sessionRequestSerial" in JS
+    assert '`${app.episode}:${app.scene}:${app.shotId || ""}`' in JS
+    assert '`${session.episode || "Episode 1"} · Scene ${session.scene}`' in JS
 
 
 def test_director_analysis_step_exposes_scene_storyboard_review_when_scene_package_exists():
@@ -119,7 +153,9 @@ def test_story_intake_approval_is_idempotent_when_package_is_already_current():
 
 
 def test_story_phase_pipeline_autocorrects_to_analysis_review_step():
-    assert 'app.view === "pipeline" && session.phase === "story" && app.pipelineStep !== "analysis"' in JS
+    assert 'app.view === "pipeline" &&' in JS
+    assert 'session.phase === "story" &&' in JS
+    assert '!["upload", "style", "analysis"].includes(app.pipelineStep)' in JS
     assert 'app.pipelineStep = "analysis"' in JS
 
 
@@ -237,7 +273,7 @@ def test_rendering_has_persistent_honest_progress_feedback():
     assert 'const preparingRetry = action.id === "iterate-animation"' in JS
     assert "actionActivityCopy(action, previousSession, preparingRetry)" in JS
     assert "Keyframe build in progress" in JS
-    assert "This is the still stage. No Seedance animation render has been submitted." in JS
+    assert "Seedream 5 Pro and Nano Banana 2 each create one still." in JS
     assert "No provider spend is occurring yet" in JS
     assert "const previousSession = app.session" in JS
     assert "renderGenerateStatus(session)" in JS
@@ -293,7 +329,9 @@ def test_director_decisions_survive_expensive_authoritative_checks():
     assert JS.count("shotId=${encodeURIComponent(app.session.selectedShotId)}`, undefined, 60000)") == 1
     action_route = SERVER[SERVER.index('if self.path == "/api/director-action"'):]
     session_check = action_route[:action_route.index('if action in ("open-inspector"')]
-    assert "session = _cached_director_session(scene, ep, shot_id)" in session_check
+    assert 'read_only_action = action in ("open-inspector", "open-provider-setup")' in session_check
+    assert "_director_session(scene, ep, shot_id)" in session_check
+    assert "_cached_director_session(scene, ep, shot_id)" in session_check
     assert "_clear_director_session_cache(scene=scene, episode=ep)" not in session_check
 
 
@@ -331,14 +369,22 @@ def test_fresh_voice_track_is_visible_before_registry_catches_up():
 def test_keyframe_refire_is_one_visible_replacement_job():
     assert 'action.id === "iterate-keyframe"' in JS
     assert "Keyframe refire in progress" in JS
-    assert "Seedream is generating the replacement" in JS
+    assert "generating the A/B replacement pair" in JS
     assert '"cb_studio_director.py", "refire-keyframe"' in SERVER
     assert 'f"director:refire-keyframe:{target}"' in SERVER
 
 
 def test_director_action_area_explains_current_outcome_before_button():
     assert "actionGuidance(session)" in JS
-    assert "Creates one keyframe candidate for this shot." in JS
+    assert "Creates one Seedream and one Nano Banana SEE candidate for this shot." in JS
+
+
+def test_see_ab_comparison_is_visible_and_requires_explicit_selection():
+    assert 'artifact.type === "image-set"' in JS
+    assert 'data-see-candidate' in JS
+    assert 'action: "select-keyframe-candidate"' in JS
+    assert "SEE ${candidateId} selected for review. It is not approved yet." in JS
+    assert '"select-keyframe-candidate"' in SERVER
     assert "No animation render is submitted at this stage." in JS
     assert "Review cost, references and prompt before pressing Render." in JS
     assert ".action-guidance" in CSS
@@ -795,6 +841,20 @@ def test_dense_render_advisories_are_visible_before_provider_actions():
     assert "session.advisories || []" in JS
     assert "Check the split before rendering" in SERVER or "DENSE_UNIT_REVIEW" in (HERE.parent / "engine" / "cb_studio_director.py").read_text(encoding="utf-8")
     assert ".director-advisory" in CSS
+
+
+def test_director_surfaces_one_production_line_not_a_gate_maze():
+    director_engine = (HERE.parent / "engine" / "cb_studio_director.py").read_text(encoding="utf-8")
+    assert 'id="production-line"' in HTML
+    assert '"productionLine": _production_line(' in director_engine
+    assert '"mode": "production-line"' in director_engine
+    assert "Story" in director_engine
+    assert "SEE" in director_engine
+    assert "HEAR" in director_engine
+    assert "WATCH" in director_engine
+    assert "renderProductionLine(session)" in JS
+    assert "session.productionLine || {}" in JS
+    assert ".production-line-steps" in CSS
 
 
 def test_pipeline_footage_displays_reviewable_video_candidates():

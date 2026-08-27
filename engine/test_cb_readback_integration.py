@@ -1,6 +1,7 @@
 import cb_readback
 import cb_render
 import cb_safety
+from test_golden_path import _current_animation_fixture
 
 
 def test_prompt_readback_uses_current_approved_prompt_and_never_generates(
@@ -13,7 +14,6 @@ def test_prompt_readback_uses_current_approved_prompt_and_never_generates(
     })
     frame = tmp_path / "opening.png"
     frame.write_bytes(b"approved-opening-frame")
-    approved_prompt = "Fuzzby rebounds from the leaf and recovers his hover."
     package = {
         "episode": "Ep1",
         "sceneNumber": "1",
@@ -37,8 +37,10 @@ def test_prompt_readback_uses_current_approved_prompt_and_never_generates(
     monkeypatch.setattr(cb_render, "_anchor_for", lambda *args: str(frame))
     work, _ = cb_render._department_container(
         package, "1", "S1.SH1", "animation", "Ep1")
+    animation_output = _current_animation_fixture(package["shots"][0])
+    approved_prompt = animation_output["providerPrompt"]
     work["approved"] = {
-        "output": {"providerPrompt": approved_prompt},
+        "output": animation_output,
         "inputSignature": cb_render._department_input_signature(
             package, "animation", "S1.SH1", "1", "Ep1"),
     }

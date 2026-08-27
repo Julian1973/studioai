@@ -4,6 +4,26 @@ import cb_costs
 import cb_render as R
 
 
+@pytest.fixture(autouse=True)
+def _isolate_continuity_tests_from_prompt_quality_gates(monkeypatch):
+    monkeypatch.setattr(
+        R.cb_prompt_lab,
+        "analyze_seedance_prompt_contract",
+        lambda *args, **kwargs: {"status": "ready", "score": 10, "maximum": 10},
+    )
+    monkeypatch.setattr(
+        R,
+        "_prompt_quality_gate",
+        lambda *args, **kwargs: {
+            "score": 20,
+            "maximum": 20,
+            "threshold": 19,
+            "needsRevision": False,
+            "criticalFailures": [],
+        },
+    )
+
+
 def test_video_extension_plan_uses_previous_approved_clip_as_video_reference(tmp_path, monkeypatch):
     previous = tmp_path / "previous.mp4"
     anchor = tmp_path / "anchor.png"
@@ -182,3 +202,38 @@ def test_video_extension_mode_refuses_on_opening_shot(tmp_path, monkeypatch):
     monkeypatch.setattr(R, "_save", lambda *args, **kwargs: None)
     with pytest.raises(R.Refused, match="opening shots"):
         R.set_continuity_mode("1", "S1", R.CONTINUITY_MODE_VIDEO_EXTENSION, "EpT")
+
+
+def test_video_extension_reference_bundle_uses_video_as_stage_authority():
+    shot = {
+        "sourceType": "relay",
+        "sourceShotId": "S1",
+        "charactersInFrame": ["Keen", "Keen's Mum"],
+        "referenceSlots": {"@Image 1": "Keen's Mum"},
+    }
+    contract = [
+        {"role": "Keen's Mum"},
+        {"role": "prop:keen_sailboat"},
+    ]
+
+    report = R._relay_reference_bundle_report(
+        shot, contract, R.CONTINUITY_MODE_VIDEO_EXTENSION)
+
+    assert report["ok"] is True
+    assert report["required"] == ["Keen's Mum"]
+    assert report["continuityAuthority"] == "@Video1 previous approved clip"
+
+
+def test_keyframe_relay_still_requires_full_reference_bundle():
+    shot = {
+        "sourceType": "relay",
+        "sourceShotId": "S1",
+        "charactersInFrame": ["Keen"],
+        "referenceSlots": {},
+    }
+
+    report = R._relay_reference_bundle_report(
+        shot, [{"role": "Keen"}], R.CONTINUITY_MODE_KEYFRAME)
+
+    assert report["ok"] is False
+    assert report["missing"] == ["previous shot final frame", "scene plate"]

@@ -52,6 +52,7 @@
     keyframeZoom: 1,
     postWorkspace: null,
     postTimer: null,
+    sessionRequestSerial: 0,
   };
 
   const STUDIO_BUILD = document.querySelector('meta[name="studio-build"]')?.content || "unknown";
@@ -111,6 +112,11 @@
     { id: "footage", label: "Footage", phase: "Production", step: 9 },
     { id: "rough-cut", label: "Rough Cut", phase: "Production", step: 10 },
   ];
+
+  const episodeTitles = {
+    Ep1: "The Adventure Begins",
+    Ep2: "Bo's Big Day",
+  };
 
   const characterRoster = [
     {
@@ -440,6 +446,13 @@
 
   function readHash() {
     const params = new URLSearchParams(location.hash.replace(/^#/, ""));
+    // The outer route is the canonical deep-link target. A stale hash from an
+    // earlier window must not silently move the Director to another episode.
+    const routeParams = new URLSearchParams(location.search);
+    const requestedEpisode = routeParams.get("episode") || params.get("episode") || params.get("ep");
+    app.episode = requestedEpisode
+      ? (requestedEpisode.startsWith("Ep") ? requestedEpisode : `Ep${requestedEpisode}`)
+      : "Ep1";
     const requestedView = params.get("view");
     const legacyAssetCategory = { characters: "characters", "scene-assets": "scenes", props: "props" }[requestedView];
     app.view = ["pipeline", "episodes", "director", "review", "assets"].includes(requestedView)
@@ -457,13 +470,24 @@
   }
 
   function writeHash() {
-    const params = new URLSearchParams({ view: app.view, scene: app.scene });
+    const params = new URLSearchParams({ view: app.view, episode: app.episode, scene: app.scene });
     if (app.shotId) params.set("shot", app.shotId);
     if (app.activeBeatId) params.set("beat", app.activeBeatId);
     if (app.view === "pipeline") params.set("step", app.pipelineStep);
     if (app.view === "assets") params.set("asset", app.assetCategory || "characters");
     const next = `#${params.toString()}`;
     if (location.hash !== next) history.replaceState(null, "", next);
+  }
+
+  function renderEpisodeContext() {
+    const number = String(app.episode || "Ep1").replace(/^Ep/i, "") || "1";
+    const firstEpisode = number === "1";
+    const title = episodeTitles[app.episode] || `Episode ${number}`;
+    $("#pipeline-title").textContent = `Ep ${number}`;
+    $("#nav-episode-label").textContent = `Episode ${number}`;
+    $("#nav-episode-title").textContent = title;
+    $("#episodes-eyebrow").textContent = `Crystal Bears · Episode ${number}`;
+    $("#episodes-title").textContent = title;
   }
 
   function setView(view) {
@@ -694,6 +718,36 @@
     </article>`).join("");
   }
 
+  function renderProductionLine(session) {
+    const host = $("#production-line");
+    if (!host) return;
+    const line = session.productionLine || {};
+    const steps = line.steps || [];
+    if (!steps.length) {
+      host.innerHTML = "";
+      host.hidden = true;
+      return;
+    }
+    host.hidden = false;
+    const progress = line.shotProgress || {};
+    const progressText = Number(progress.total || 0)
+      ? `${Number(progress.complete || 0)} of ${Number(progress.total || 0)} shots accepted`
+      : "Shot sequence waiting";
+    host.innerHTML = `<div class="production-line-head">
+      <div>
+        <span class="stage-label">Production line</span>
+        <strong>${esc(session.selectedShotId || session.sceneName || "Scene setup")}</strong>
+      </div>
+      <span>${esc(progressText)}</span>
+    </div>
+    <ol class="production-line-steps">
+      ${steps.map((step, index) => `<li class="${esc(step.state || "pending")}">
+        <span class="production-line-index">${String(index + 1).padStart(2, "0")}</span>
+        <div><strong>${esc(step.label || step.id)}</strong><em>${esc(step.summary || "")}</em></div>
+      </li>`).join("")}
+    </ol>`;
+  }
+
   function renderProductionNavigator(step) {
     if (!["storyboard", "audio", "footage", "rough-cut"].includes(step.id)) return "";
     const scenes = app.roster?.scenes || [];
@@ -787,8 +841,8 @@
       return {
         label: "Keyframe refire in progress",
         step: "Applying your note and building a corrected opening frame...",
-        message: "Your retake note is recorded. Seedream is generating the replacement for your review.",
-        provider: "Seedream 5 Pro",
+        message: "Your retake note is recorded. Seedream 5 Pro and Nano Banana 2 are generating the A/B replacement pair.",
+        provider: "Seedream 5 Pro + Nano Banana 2",
         showDuration: false,
       };
     }
@@ -813,9 +867,9 @@
     if (action.id === "build-keyframe") {
       return {
         label: "Keyframe build in progress",
-        step: "Building the opening frame in Seedream 5 Pro...",
-        message: "This is the still stage. No Seedance animation render has been submitted.",
-        provider: "Seedream 5 Pro",
+        step: "Building SEE A/B from one sealed brief...",
+        message: "Seedream 5 Pro and Nano Banana 2 each create one still. No Seedance animation render has been submitted.",
+        provider: "Seedream 5 Pro + Nano Banana 2",
         showDuration: false,
       };
     }
@@ -962,6 +1016,28 @@
       stage.innerHTML = renderProgress(session);
       return;
     }
+    if (artifact.type === "image-set" && (artifact.items || []).length) {
+      const items = artifact.items;
+      app.selectedCandidate = artifact.selectedCandidateId || null;
+      stage.innerHTML = `<span class="stage-badge">${esc(artifact.label || "SEE A/B comparison")}</span>
+        <div class="relay-candidate-grid see-ab-grid">
+          ${items.map((item) => `<article class="relay-candidate ${String(item.candidateId) === String(app.selectedCandidate) ? "selected" : ""}">
+            <header><strong>${esc(item.label || `Candidate ${item.candidateId}`)}</strong><span>${String(item.candidateId) === String(app.selectedCandidate) ? "Selected" : "Ready to compare"}</span></header>
+            <button type="button" class="relay-keyframe-preview" data-keyframe-preview="${esc(item.url)}" aria-label="Enlarge ${esc(item.label || `candidate ${item.candidateId}`)}">
+              <img src="${esc(item.url)}?v=${Date.now()}" alt="${esc(item.label || `SEE candidate ${item.candidateId}`)}">
+            </button>
+            <small>${esc(item.provider || "provider")} · ${esc(item.model || "model")}</small>
+            <button type="button" data-see-candidate="${esc(item.candidateId)}" ${String(item.candidateId) === String(app.selectedCandidate) && artifact.selectedCandidateId ? "disabled" : ""}>${String(item.candidateId) === String(app.selectedCandidate) && artifact.selectedCandidateId ? "Selected for review" : `Select ${esc(item.candidateId)}`}</button>
+          </article>`).join("")}
+        </div>`;
+      stage.querySelectorAll("[data-see-candidate]").forEach((button) => button.addEventListener("click", () => {
+        selectSeeCandidate(button.dataset.seeCandidate);
+      }));
+      stage.querySelectorAll("[data-keyframe-preview]").forEach((button) => button.addEventListener("click", () => {
+        openKeyframePreview(button.dataset.keyframePreview);
+      }));
+      return;
+    }
     if (artifact.type === "image" && artifact.url) {
       stage.innerHTML = `<span class="stage-badge">${esc(artifact.label || "Current image")}</span><img src="${esc(artifact.url)}?v=${Date.now()}" alt="${esc(artifact.label || "Current production image")}">`;
       return;
@@ -1035,6 +1111,31 @@
       return;
     }
     stage.innerHTML = emptyStage(session.status === "blocked" ? "No result can be built from the current route yet." : "No rendered result yet.", false);
+  }
+
+  async function selectSeeCandidate(candidateId) {
+    if (!candidateId || !app.session) return;
+    try {
+      const result = await api("/api/director-action", {
+        method: "POST",
+        body: JSON.stringify({
+          episode: app.session.episode,
+          scene: app.session.scene,
+          shotId: app.session.selectedShotId,
+          action: "select-keyframe-candidate",
+          candidate: candidateId,
+        }),
+      });
+      app.selectedCandidate = candidateId;
+      if (result.session) {
+        app.session = result.session;
+        renderDirector(app.session);
+        if (app.view === "pipeline") renderPipeline();
+      }
+      toast(`SEE ${candidateId} selected for review. It is not approved yet.`);
+    } catch (error) {
+      toast(error.message, true);
+    }
   }
 
   function currentReferenceStage(session) {
@@ -1600,7 +1701,7 @@
 
   function assetPathToAbsolute(path) {
     const clean = String(path || "").replace(/^\/+/, "");
-    return `/Users/julianjenkins/Desktop/8Th Hour v2.2/canonical/${clean}`;
+    return `/Users/julianjenkins/Desktop/Ai Studio/${clean}`;
   }
 
   function slugAssetName(value) {
@@ -2396,6 +2497,14 @@
       </div>`;
     }
     const artifact = session.artifact || {};
+    if (artifact.type === "image-set" && (artifact.items || []).length) {
+      return `<div class="relay-candidate-grid see-ab-grid">
+        ${artifact.items.map((item) => `<article class="relay-candidate ${artifact.selectedCandidateId && String(item.candidateId) === String(artifact.selectedCandidateId) ? "selected" : ""}">
+          <header><strong>${esc(item.label || `Candidate ${item.candidateId}`)}</strong><span>${esc(item.provider || "provider")}</span></header>
+          <img src="${esc(item.url)}?v=${Date.now()}" alt="${esc(item.label || `SEE candidate ${item.candidateId}`)}">
+        </article>`).join("")}
+      </div>`;
+    }
     if (artifact.type === "image" && artifact.url) {
       return `<div class="workbench-artifact-frame">
         <span>${esc(artifact.label || beat.keyframe || "Current keyframe")}</span>
@@ -2488,6 +2597,16 @@
       return renderProgress(session);
     }
     if (stage === 1) {
+      if (session.phase === "keyframe" && artifact.type === "image-set" && (artifact.items || []).length) {
+        const selectedId = artifact.selectedCandidateId || app.selectedCandidate || null;
+        return `<div class="relay-candidate-grid see-ab-grid">
+          ${artifact.items.map((item) => `<article class="relay-candidate ${String(item.candidateId) === String(selectedId) ? "selected" : ""}">
+            <header><strong>${esc(item.label || `Candidate ${item.candidateId}`)}</strong><span>${String(item.candidateId) === String(selectedId) ? "Selected" : "Ready to compare"}</span></header>
+            <button type="button" class="relay-keyframe-preview" data-keyframe-preview="${esc(item.url)}" aria-label="Enlarge ${esc(item.label || `candidate ${item.candidateId}`)}"><img src="${esc(item.url)}?v=${Date.now()}" alt="${esc(item.label || `SEE candidate ${item.candidateId}`)}"></button>
+            <button type="button" data-see-candidate="${esc(item.candidateId)}">${String(item.candidateId) === String(selectedId) && artifact.selectedCandidateId ? "Selected for review" : `Select ${esc(item.candidateId)}`}</button>
+          </article>`).join("")}
+        </div>`;
+      }
       const isRelay = session.shot?.sourceType === "relay";
       const url = session.phase === "keyframe" && artifact.type === "image" ? artifact.url : selected.keyframeUrl || session.shot?.relayAnchorUrl;
       return url ? `<button type="button" class="relay-keyframe-preview" data-keyframe-preview="${esc(url)}" aria-label="Enlarge keyframe" title="Enlarge keyframe">
@@ -2660,6 +2779,9 @@
     });
     host.querySelectorAll("[data-keyframe-preview]").forEach((button) => button.addEventListener("click", () => {
       openKeyframePreview(button.dataset.keyframePreview);
+    }));
+    host.querySelectorAll("[data-see-candidate]").forEach((button) => button.addEventListener("click", () => {
+      selectSeeCandidate(button.dataset.seeCandidate);
     }));
     host.querySelectorAll("[data-relay-candidate]").forEach((button) => button.addEventListener("click", () => {
       app.selectedCandidate = Number(button.dataset.relayCandidate);
@@ -2917,7 +3039,7 @@
     const byAction = {
       "build-keyframe": {
         now: "Opening frame",
-        outcome: "Creates one keyframe candidate for this shot.",
+        outcome: "Creates one Seedream and one Nano Banana SEE candidate for this shot.",
         next: "Review the image, then Approve or Refire.",
         guard: "No animation render is submitted at this stage.",
       },
@@ -3020,7 +3142,7 @@
   function renderDirector(session) {
     const legacyOutcome = document.querySelector(".director-outcome");
     if (legacyOutcome) legacyOutcome.hidden = true;
-    $("#scene-kicker").textContent = `Episode 1 · Scene ${session.scene}`;
+    $("#scene-kicker").textContent = `${session.episode || "Episode 1"} · Scene ${session.scene}`;
     $("#director-title").textContent = session.sceneName || `Scene ${session.scene}`;
     $("#phase-label").textContent = phaseLabel(session.phase);
     $("#outcome-headline").textContent = session.headline || "Current decision";
@@ -3042,6 +3164,7 @@
     $("#full-inspector-link").href = inspectorUrl;
     $("#drawer-inspector-link").href = inspectorUrl;
     renderDirectorSceneStrip(session);
+    renderProductionLine(session);
     renderShotSwitcher(session);
     renderSignoffRelay(session);
     renderArtifact(session);
@@ -3906,8 +4029,10 @@
     const candidate = intake.candidate || {};
     const scenes = candidate.scenes || [];
     const beats = candidate.beats || [];
+    const productionPlan = intake.productionPlan || candidate.productionPlan || [];
     const scene = scenes.find((item) => String(item.sceneNumber) === String(app.scene)) || {};
     const sceneBeats = beats.filter((beat) => String(beat.sceneNumber) === String(app.scene));
+    const sceneProduction = productionPlan.filter((shot) => String(shot.sceneNumber) === String(app.scene));
     const waiting = intake.hasCandidate && !intake.approved;
     const status = waiting ? "Your decision" : intake.approved ? "Approved" : "Not ready";
     const title = scene.location
@@ -3920,6 +4045,11 @@
       </div>
       ${candidate.logline ? `<p class="story-direction-logline">${esc(candidate.logline)}</p>` : ""}
       <div class="story-direction-list">
+        ${sceneProduction.slice(0, 4).map((shot) => `<article>
+          <strong>${esc(shot.productionShotId || "Production shot")}${shot.targetDurationSec ? ` · ${esc(shot.targetDurationSec)}s` : ""}</strong>
+          <p>${esc(shot.outcome || "Outcome-compressed production unit.")}</p>
+          <p class="small-muted">SEE gate: ${esc(((shot.seeStageContract || {}).mustProve || []).join(", ") || "stage contract pending")}</p>
+        </article>`).join("")}
         ${sceneBeats.slice(0, 6).map((beat) => `<article>
           <strong>${esc(beat.beatCode || "Beat")}</strong>
           <p>${esc(beat.storyBeat || beat.want || "Direction beat pending.")}</p>
@@ -4165,8 +4295,8 @@
     const shots = session.shots || [];
     if (app.postWorkspace?.available) {
       const verdict = app.postWorkspace.verdict?.verdict;
-      $("#review-count").textContent = `Scenes 1-3 · ${postTime(app.postWorkspace.durationSec)} post master`;
-      $("#master-band").innerHTML = `<div><span class="stage-label">CURRENT POST MASTER</span><h2>${verdict === "approved" ? "Signed by Julian" : verdict === "rejected" ? "Returned to post" : "95% pass ready for your review"}</h2></div><span class="master-status">${app.postWorkspace.qc?.passed ? "Technical pass" : "QC required"}</span>`;
+      $("#review-count").textContent = `${app.postWorkspace.sceneCount || 10} scenes · ${app.postWorkspace.shotCount || 27} approved shots · ${postTime(app.postWorkspace.durationSec)}`;
+      $("#master-band").innerHTML = `<div><span class="stage-label">FULL EPISODE ASSEMBLY</span><h2>${verdict === "approved" ? "Picture order signed by Julian" : verdict === "rejected" ? "Returned to assembly" : "Human picture review required"}</h2></div><span class="master-status">${app.postWorkspace.qc?.passed ? "Technical pass" : "QC required"}</span>`;
     } else {
     $("#review-count").textContent = `${session.progress?.complete || 0} of ${session.progress?.total || 0} shots accepted`;
     }
@@ -4194,78 +4324,71 @@
       return;
     }
     $("#review-reel").hidden = true;
-    $("#review-count").textContent = `Scenes 1-3 · ${postTime(payload.durationSec)} post master`;
-    $("#master-band").innerHTML = `<div><span class="stage-label">CURRENT POST MASTER</span><h2>${payload.verdict?.verdict === "approved" ? "Signed by Julian" : payload.verdict?.verdict === "rejected" ? "Returned to post" : "95% pass ready for your review"}</h2></div><span class="master-status">${payload.qc?.passed ? "Technical pass" : "QC required"}</span>`;
+    $("#review-count").textContent = `${payload.sceneCount || 10} scenes · ${payload.shotCount || 27} approved shots · ${postTime(payload.durationSec)}`;
+    $("#master-band").innerHTML = `<div><span class="stage-label">FULL EPISODE ASSEMBLY</span><h2>${payload.verdict?.verdict === "approved" ? "Picture order signed by Julian" : payload.verdict?.verdict === "rejected" ? "Returned to assembly" : "Human picture review required"}</h2></div><span class="master-status">${payload.qc?.passed ? "Technical pass" : "QC required"}</span>`;
     const qc = payload.qc || {};
-    const policy = payload.mixPolicy || {};
     const job = [...(payload.jobs || [])].sort((a, b) => Number(b.started || 0) - Number(a.started || 0))[0];
     const running = job?.status === "running" || job?.status === "finalizing";
     const approved = payload.verdict?.verdict === "approved";
     const rejected = payload.verdict?.verdict === "rejected";
-    const musicPercent = Math.round(Number(policy.musicLinearGain ?? 0.18) * 100);
-    const ambiencePercent = Math.round(Number(policy.ambienceLinearGain ?? 0.04) * 100);
     const findings = [
-      { label: "Integrated loudness", value: qc.integratedLufs != null ? `${Number(qc.integratedLufs).toFixed(2)} LUFS` : "Pending", pass: Math.abs(Number(qc.integratedLufs) - Number(policy.targetIntegratedLufs || -14)) <= .5 },
-      { label: "True peak", value: qc.truePeakDbtp != null ? `${Number(qc.truePeakDbtp).toFixed(2)} dBTP` : "Pending", pass: Number(qc.truePeakDbtp) <= -1 },
-      { label: "Picture lock", value: qc.pictureLocked ? "Unchanged" : "Not proven", pass: qc.pictureLocked === true },
-      { label: "Playback integrity", value: qc.decodePassed && Number(qc.blackFrameEvents) === 0 ? "Passed" : "Check required", pass: qc.decodePassed === true && Number(qc.blackFrameEvents) === 0 },
+      { label: "Approved sources", value: qc.allSourceHashesVerified ? `${qc.sourceCount || payload.shotCount} verified` : "Check required", pass: qc.allSourceHashesVerified === true },
+      { label: "Shot boundaries", value: qc.zeroAutomaticTrims ? "No automatic trims" : "Check required", pass: qc.zeroAutomaticTrims === true },
+      { label: "Native soundtrack", value: qc.nativeAudioPreservedByPolicy ? "Complete" : "Check required", pass: qc.nativeAudioPreservedByPolicy === true },
+      { label: "Playback integrity", value: qc.decodePassed && qc.hasAudio ? "Passed" : "Check required", pass: qc.decodePassed === true && qc.hasAudio === true },
     ];
     const postHumanReview = {
       authority: "Julian",
-      rule: "Technical checks advise. Only Julian can approve or return the finished programme.",
+      rule: "Technical checks advise. Only Julian can lock or return the episode assembly.",
       stages: [
         { label: "DIRECTION", status: "signed" }, { label: "SEE", status: "signed" },
         { label: "HEAR", status: "signed" }, { label: "WATCH", status: "signed" },
-        { label: "QC", status: qc.passed ? "signed" : "decision" },
-        { label: "POST", status: approved ? "signed" : "decision", current: true },
+        { label: "ASSEMBLY QC", status: qc.passed ? "signed" : "decision" },
+        { label: "PICTURE LOCK", status: approved ? "signed" : "decision", current: true },
       ],
       currentDecision: {
-        intendedOutcome: "The episode must play as one emotionally coherent, technically clean finished programme.",
+        intendedOutcome: "The 27 approved WATCH masters must play in story order with their full native picture and sound intact.",
         artifactVisible: Boolean(payload.masterUrl),
         evidence: [
-          qc.passed ? "Technical post preflight passed." : "Technical post preflight needs attention.",
-          payload.masterUrl ? "The current post master is visible and playable." : "No post master is visible yet.",
+          qc.passed ? "Assembly integrity checks passed." : "Assembly integrity checks need attention.",
+          payload.masterUrl ? "The full episode review assembly is visible and playable." : "No assembly is visible yet.",
         ],
       },
     };
     panel.innerHTML = `
-      ${renderHumanEye({ humanReview: postHumanReview, artifact: { label: "Current post master" }, summary: "Final episode review" })}
+      ${renderHumanEye({ humanReview: postHumanReview, artifact: { label: "Full episode assembly" }, summary: "Picture-order review" })}
       <div class="post-orientation">
-        <div><span class="stage-label">95% POST PASS</span><h2>Scenes 1-3 review master</h2><p>${esc(payload.scope || "Approved picture with post sound and mastering.")} · ${postTime(payload.durationSec)}</p></div>
-        <span class="post-verdict ${approved ? "approved" : rejected ? "rejected" : ""}">${approved ? "Approved by Julian" : rejected ? "Returned to post" : "Julian sign-off required"}</span>
+        <div><span class="stage-label">ASSEMBLY REVIEW</span><h2>Full Episode 1 picture order</h2><p>${esc(payload.scope || "Approved WATCH masters with complete native sound.")} · ${postTime(payload.durationSec)}</p></div>
+        <span class="post-verdict ${approved ? "approved" : rejected ? "rejected" : ""}">${approved ? "Picture order approved" : rejected ? "Returned to assembly" : "Julian sign-off required"}</span>
       </div>
-      ${running ? `<div class="post-activity"><span class="loading-mark" aria-hidden="true"></span><div><strong>Building the new mix</strong><p>${esc(job.step || "Working...")} · ${formatRenderElapsed(job.started)}</p></div></div>` : job?.status === "failed" ? `<div class="post-activity failed"><strong>Post build failed</strong><p>${esc(job.error || job.step || "Open the build log for details.")}</p></div>` : ""}
+      ${running ? `<div class="post-activity"><span class="loading-mark" aria-hidden="true"></span><div><strong>Building the episode assembly</strong><p>${esc(job.step || "Working...")} · ${formatRenderElapsed(job.started)}</p></div></div>` : job?.status === "failed" ? `<div class="post-activity failed"><strong>Assembly build failed</strong><p>${esc(job.error || job.step || "Open the build log for details.")}</p></div>` : ""}
       <div class="post-preview-layout">
         <div class="post-monitor">
-          <div class="post-monitor-head"><strong>Programme monitor</strong><div class="post-ab"><button type="button" class="active" data-post-source="${esc(payload.masterUrl)}">Post master</button>${payload.originalUrl ? `<button type="button" data-post-source="${esc(payload.originalUrl)}">Native A/B</button>` : ""}</div></div>
+          <div class="post-monitor-head"><strong>Programme monitor</strong><div class="post-ab"><button type="button" class="active" data-post-source="${esc(payload.masterUrl)}">Assembly review</button></div></div>
           <video id="post-master-player" controls playsinline preload="metadata" src="${esc(payload.masterUrl)}"></video>
         </div>
         <div class="post-qc">
-          <span class="stage-label">DELIVERY QC</span>
+          <span class="stage-label">ASSEMBLY QC</span>
           <h3>${qc.passed ? "Technical pass" : "Technical review required"}</h3>
           ${findings.map((item) => `<div class="post-qc-row"><span class="post-qc-dot ${item.pass ? "pass" : ""}"></span><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>`).join("")}
-          <p>Picture hash ${esc(String(payload.masterSha256 || "").slice(0, 12))}</p>
+          <p>Candidate hash ${esc(String(payload.masterSha256 || "").slice(0, 12))}</p>
         </div>
       </div>
       <div class="post-controls-layout">
         <section class="post-mixer" aria-labelledby="post-mixer-title">
-          <div class="post-section-head"><div><span class="stage-label">MIX CONTROL</span><h3 id="post-mixer-title">Music, atmosphere and delivery</h3></div><span>-14 LUFS streaming master</span></div>
-          <label><span>Music <output id="post-music-output">${musicPercent}%</output></span><input id="post-music-gain" type="range" min="0" max="40" step="1" value="${musicPercent}"></label>
-          <label><span>Ambience <output id="post-ambience-output">${ambiencePercent}%</output></span><input id="post-ambience-gain" type="range" min="0" max="20" step="1" value="${ambiencePercent}"></label>
-          <label><span>Mastering target</span><select id="post-target-lufs"><option value="-14" ${Number(policy.targetIntegratedLufs) === -14 ? "selected" : ""}>Streaming · -14 LUFS</option><option value="-16" ${Number(policy.targetIntegratedLufs) === -16 ? "selected" : ""}>Dialogue-led · -16 LUFS</option><option value="-23" ${Number(policy.targetIntegratedLufs) === -23 ? "selected" : ""}>Broadcast · -23 LUFS</option></select></label>
-          <button type="button" class="primary" id="post-rebuild" ${running ? "disabled" : ""}>${running ? "Building..." : "Build new mix"}</button>
-          <p class="post-policy">Native lip-synced dialogue and picture stay locked. Rebuilds change only music, ambience and final mastering.</p>
+          <div class="post-section-head"><div><span class="stage-label">CUT CONTRACT</span><h3 id="post-mixer-title">Approved sources only</h3></div><span>Non-destructive review</span></div>
+          <p class="post-policy">Zero automatic head trims. Zero automatic tail trims. No frozen holds. Hard cuts only. The complete native dialogue, music, ambience and SFX from every approved WATCH master remain in place.</p>
+          <button type="button" class="primary" id="post-rebuild" ${running ? "disabled" : ""}>${running ? "Building..." : "Rebuild approved assembly"}</button>
         </section>
         <section class="post-audio-assets">
-          <span class="stage-label">SCENE CUES</span><h3>Score and ambience</h3>
-          <div class="post-cue-list">${(payload.sceneCues || []).map((cue) => `<div class="post-cue"><strong>${esc(String(cue.scene || "Scene").replace(/^scene/i, "Scene "))}</strong>${cue.musicUrl ? `<label>Music<audio controls preload="none" src="${esc(cue.musicUrl)}"></audio></label>` : ""}${cue.ambienceUrl ? `<label>Ambience<audio controls preload="none" src="${esc(cue.ambienceUrl)}"></audio></label>` : ""}</div>`).join("") || "No scene cues registered."}</div>
+          <span class="stage-label">NEXT GATE</span><h3>Audio and finishing</h3>
+          <p>After picture order is signed, the system will build a separate dialogue, music, SFX and loudness plan. Nothing in this assembly approval silently approves that later mix.</p>
         </section>
       </div>
-      <section class="post-stems"><div class="post-section-head"><div><span class="stage-label">EDITABLE DELIVERY</span><h3>24-bit stems</h3></div><span>CapCut, Resolve or final dub stage</span></div><div class="post-stem-grid">${(payload.stems || []).map((stem) => `<div><strong>${esc(stem.label)}</strong><audio controls preload="none" src="${esc(stem.url)}"></audio><a href="${esc(stem.url)}" download>Download</a></div>`).join("")}</div></section>
       <section class="post-signoff">
-        <div><span class="stage-label">FINAL HUMAN DECISION</span><h3>${approved ? "This exact master is signed" : "Does this play as the episode should?"}</h3><p>Technical checks can clear the file. Only Julian can approve the creative finish.</p></div>
+        <div><span class="stage-label">HUMAN PICTURE DECISION</span><h3>${approved ? "This exact picture order is signed" : "Does the approved episode flow in the right order?"}</h3><p>Technical checks clear only file integrity. Only Julian can lock the picture order.</p></div>
         <label><span>Post notes</span><textarea id="post-review-note" placeholder="What should change? Plain English is enough.">${esc(payload.verdict?.note || "")}</textarea></label>
-        <div class="post-signoff-actions"><button type="button" class="secondary" id="post-reject" ${running ? "disabled" : ""}>Return to post</button><button type="button" class="primary" id="post-approve" ${running || !qc.passed ? "disabled" : ""}>Approve 95% pass</button></div>
+        <div class="post-signoff-actions"><button type="button" class="secondary" id="post-reject" ${running ? "disabled" : ""}>Return to assembly</button><button type="button" class="primary" id="post-approve" ${running || !qc.passed ? "disabled" : ""}>Approve picture order</button></div>
       </section>`;
 
     panel.querySelectorAll("[data-post-source]").forEach((button) => button.addEventListener("click", () => {
@@ -4276,9 +4399,6 @@
       player.src = button.dataset.postSource;
       player.addEventListener("loadedmetadata", () => { player.currentTime = Math.min(currentTime, player.duration || currentTime); if (wasPlaying) player.play(); }, { once: true });
     }));
-    const bindRange = (id, output) => $(id)?.addEventListener("input", (event) => { $(output).textContent = `${event.target.value}%`; });
-    bindRange("#post-music-gain", "#post-music-output");
-    bindRange("#post-ambience-gain", "#post-ambience-output");
     $("#post-rebuild")?.addEventListener("click", rebuildPostMix);
     $("#post-approve")?.addEventListener("click", () => decidePost("approve"));
     $("#post-reject")?.addEventListener("click", () => decidePost("reject"));
@@ -4303,10 +4423,10 @@
     button.disabled = true;
     button.textContent = "Starting...";
     try {
-      await api("/api/post-workspace", { method: "POST", body: JSON.stringify({ episode: app.episode, action: "rebuild", musicGain: Number($("#post-music-gain").value) / 100, ambienceGain: Number($("#post-ambience-gain").value) / 100, targetLufs: Number($("#post-target-lufs").value) }) }, 60000);
-      toast("Post mix started. Progress is live here.");
+      await api("/api/post-workspace", { method: "POST", body: JSON.stringify({ episode: app.episode, action: "build-assembly" }) }, 60000);
+      toast("Episode assembly started. Progress is live here.");
       loadPostWorkspace();
-    } catch (error) { toast(error.message, true); button.disabled = false; button.textContent = "Build new mix"; }
+    } catch (error) { toast(error.message, true); button.disabled = false; button.textContent = "Rebuild approved assembly"; }
   }
 
   async function decidePost(action) {
@@ -4315,7 +4435,7 @@
     try {
       app.postWorkspace = await api("/api/post-workspace", { method: "POST", body: JSON.stringify({ episode: app.episode, action, note, reviewer: "Julian" }) }, 60000);
       renderPostWorkspace(app.postWorkspace);
-      toast(action === "approve" ? "This exact post master is signed." : "Returned to post with your notes.");
+      toast(action === "approve" ? "This exact picture order is signed." : "Returned to assembly with your notes.");
     } catch (error) { toast(error.message, true); }
   }
 
@@ -4353,9 +4473,12 @@
       app.pollTimer = setTimeout(pollLiveSession, 15000);
       return;
     }
+    const requestSerial = ++app.sessionRequestSerial;
+    const requestKey = `${app.episode}:${app.scene}:${app.shotId || ""}`;
     const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
     try {
       const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`, undefined, 60000);
+      if (requestSerial !== app.sessionRequestSerial || requestKey !== `${app.episode}:${app.scene}:${app.shotId || ""}`) return;
       const changed = directorSessionSignature(session) !== directorSessionSignature(app.session);
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
@@ -4373,15 +4496,22 @@
 
   async function loadSession() {
     clearTimeout(app.pollTimer);
+    const requestSerial = ++app.sessionRequestSerial;
+    const requestKey = `${app.episode}:${app.scene}:${app.shotId || ""}`;
     const shot = app.shotId ? `&shotId=${encodeURIComponent(app.shotId)}` : "";
     try {
       if (!app.workbenchState || app.workbenchState.scene !== app.scene || app.workbenchState.episode !== app.episode) {
         await loadProjectWorkbenchState();
       }
       const session = await api(`/api/director-session?episode=${encodeURIComponent(app.episode)}&scene=${encodeURIComponent(app.scene)}${shot}`, undefined, 60000);
+      if (requestSerial !== app.sessionRequestSerial || requestKey !== `${app.episode}:${app.scene}:${app.shotId || ""}`) return;
       app.session = session;
       if (!app.shotId) app.shotId = session.selectedShotId || null;
-      if (app.view === "pipeline" && session.phase === "story" && app.pipelineStep !== "analysis") {
+      if (
+        app.view === "pipeline" &&
+        session.phase === "story" &&
+        !["upload", "style", "analysis"].includes(app.pipelineStep)
+      ) {
         app.pipelineStep = "analysis";
       }
       if (session.phase === "keyframe") {
@@ -4414,6 +4544,7 @@
       app.pollTimer = setTimeout(
         pollLiveSession, session.status === "rendering" ? 1600 : 4500);
     } catch (error) {
+      if (requestSerial !== app.sessionRequestSerial || requestKey !== `${app.episode}:${app.scene}:${app.shotId || ""}`) return;
       const workbench = $("#scene-workbench");
       if (workbench) workbench.innerHTML = `<div class="relay-load-error"><strong>Reconnecting to Studio state</strong><p>${esc(error.message)} Retrying automatically...</p><button type="button" class="primary" data-retry-session>Retry now</button></div>`;
       workbench?.querySelector("[data-retry-session]")?.addEventListener("click", loadSession);
@@ -4942,13 +5073,19 @@
       await submitAction(action);
     });
     window.addEventListener("hashchange", () => {
+      const previousEpisode = app.episode;
       const previousScene = app.scene;
       const previousShot = app.shotId;
       const previousStep = app.pipelineStep;
       const previousAssetCategory = app.assetCategory;
       readHash();
+      renderEpisodeContext();
       setView(app.view);
-      if (app.scene !== previousScene || app.shotId !== previousShot) loadSession();
+      if (app.episode !== previousEpisode) {
+        app.shotId = null;
+        resetShotScopedState();
+        loadRoster().then(loadSession);
+      } else if (app.scene !== previousScene || app.shotId !== previousShot) loadSession();
       if (app.view === "pipeline" && app.pipelineStep !== previousStep) renderPipeline();
       if (app.view === "assets" && (app.assetCategory !== previousAssetCategory || app.scene !== previousScene || app.shotId !== previousShot)) {
         app.projectAssetLibraryKey = "";
@@ -4960,6 +5097,7 @@
 
   async function init() {
     readHash();
+    renderEpisodeContext();
     bindEvents();
     await loadRoster();
     if (!app.explicitLocation && app.view === "director" && app.directorBoard?.nextDecision) {

@@ -122,7 +122,7 @@ def test_deferred_item_8_no_duration_literal_dependency():
     rate, _, _ = cb_costs.RATES["seedance_standard_per_sec"]
     assert abs(cb_costs.estimate_video_cost("seedance_standard_per_sec", 6) - rate * 6) < 1e-9
     src = (HERE / "cb_render.py").read_text()
-    assert 'duration=f"{int(round(segment[\'durationSec\']))}"' in src
+    assert '"duration": f"{int(round(segment[\'durationSec\']))}"' in src
     assert '"auto"' not in src
 
 

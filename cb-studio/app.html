@@ -245,6 +245,7 @@ img.zoom:hover{filter:brightness(1.08)}
 .wtree-shot.cur{background:var(--honeybg);color:var(--honey);font-weight:600}
 .wtree-shot.dim{color:var(--hint);cursor:default}
 .wtree-shot.dim:hover{background:transparent}
+.wtree-shot-id{font-size:10.5px;color:var(--hint);font-weight:400}
 .wtree-shot-state{font-size:10.5px;color:var(--hint);font-weight:400}
 
 .artefact-center{display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -2924,6 +2925,12 @@ function sceneContentsShotLabel(shots,i){
   const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
   try{ return shotPipelineState(shots,i,shLedger,mediaMap,lineageOk,shSceneLookOk(),shReassess).label; }catch(e){ return ""; }
 }
+function productionUnitLabel(i){
+  return `Scene ${SH_SC} Shot ${Number(i)+1}`;
+}
+function shotTreeButton(s,i,onClick){
+  return `<button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="${onClick}"><span>${_esc(productionUnitLabel(i))}</span><span class="wtree-shot-id">${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(pShots(),i))}</span></button>`;
+}
 function sceneContentsHTML(){
   const beats=(PSB&&PSB.beats)||[];
   const shots=pShots();
@@ -2933,7 +2940,7 @@ function sceneContentsHTML(){
       const codes=(s.beatCodes&&s.beatCodes.length?s.beatCodes:s.beatIds&&s.beatIds.length?s.beatIds:[s.beatCode]).filter(Boolean);
       const beatLabel=codes.length>1?codes[0]+"–"+codes[codes.length-1]:(codes[0]||"Unit "+(i+1));
       return `<div class="wtree-beat"><div class="wtree-beat-id">${_esc(beatLabel)}</div>
-        <button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button></div>`;
+        ${shotTreeButton(s,i,`PSHOT_I=${i};renderWorkspaceBody()`)}</div>`;
     }).join("");
   }
   if(beats.length){
@@ -2944,12 +2951,12 @@ function sceneContentsHTML(){
       return `<div class="wtree-beat"><div class="wtree-beat-id">${_esc(b.beatId)}</div>
         ${bshots.length?bshots.map(s=>{
           const i=shots.indexOf(s);
-          return `<button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button>`;
+          return shotTreeButton(s,i,`PSHOT_I=${i};renderWorkspaceBody()`);
         }).join(""):`<div class="wtree-shot dim">no shot yet</div>`}
       </div>`;
     }).join("");
   }
-  return shots.map((s,i)=>`<button type="button" class="wtree-shot ${i==PSHOT_I?'cur':''}" onclick="PSHOT_I=${i};renderWorkspaceBody()"><span>${_esc(s.shotId)}</span><span class="wtree-shot-state">${_esc(sceneContentsShotLabel(shots,i))}</span></button>`).join("");
+  return shots.map((s,i)=>shotTreeButton(s,i,`PSHOT_I=${i};renderWorkspaceBody()`)).join("");
 }
 
 function openPromptReviewShot(index){
@@ -2980,8 +2987,8 @@ function renderPromptReviewWorkspace(){
     SH_REFERENCE_CACHE[referenceKey]={loading:true};
     setTimeout(()=>shLoadReferences(tok,true),0);
   }
-  const shotRows=shots.map((item,index)=>`<button type="button" class="wtree-shot ${index===PSHOT_I?'cur':''}" onclick="openPromptReviewShot(${index})"><span>${_esc(item.shotId)}</span><span class="wtree-shot-state">Review</span></button>`).join("");
-  const shotOptions=shots.map((item,index)=>`<option value="${index}" ${index===PSHOT_I?'selected':''}>${_esc(item.shotId)}</option>`).join("");
+  const shotRows=shots.map((item,index)=>`<button type="button" class="wtree-shot ${index===PSHOT_I?'cur':''}" onclick="openPromptReviewShot(${index})"><span>${_esc(productionUnitLabel(index))}</span><span class="wtree-shot-id">${_esc(item.shotId)}</span><span class="wtree-shot-state">Review</span></button>`).join("");
+  const shotOptions=shots.map((item,index)=>`<option value="${index}" ${index===PSHOT_I?'selected':''}>${_esc(productionUnitLabel(index))} · ${_esc(item.shotId)}</option>`).join("");
   const panels=types.map(type=>referenceManifestHTML(
     tok,type,SH_REFERENCE_CACHE[referenceKey])+promptLabPanelHTML(
     tok,type,SH_PROMPTLAB_CACHE[plCacheKey(tok,type)])).join("");
@@ -3949,7 +3956,7 @@ function renderShotStage(mode){
   }
   const nav=`<div class="pshotnav">
     <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==0?"disabled":""} onclick="PSHOT_I--;renderWorkspaceBody()">← Previous</button>
-    <span class="cnt">${_esc(s.shotId)} · Shot ${PSHOT_I+1} of ${shots.length}</span>
+    <span class="cnt">${_esc(productionUnitLabel(PSHOT_I))} of ${shots.length} · ${_esc(s.shotId)}</span>
     <button class="btn ghost" style="padding:6px 12px" ${PSHOT_I==shots.length-1?"disabled":""} onclick="PSHOT_I++;renderWorkspaceBody()">Next →</button>
   </div>`;
   let body="", decActions=[], decVersion="—", decHistory="", resultFirst=false;
@@ -4126,6 +4133,7 @@ function renderShotStage(mode){
       body=`<div class="artefact-empty"><div style="color:var(--danger)">Two batches rejected — this shot needs human redesign before firing again.</div></div>`;
       decVersion="Blocked";
       decActions=[`<button class="btn" onclick="deptRun('animation','${tok}')">Redesign with Animation Director — no media spend</button>`,
+        `<button class="btn ghost" onclick="shOverrideModelLimited('${tok}')">Human override — reopen shot</button>`,
         `<button class="btn ghost" onclick="openStageOutcome('storyboard')">Review Story &amp; Direction</button>`];
     } else {
       // PER-SHOT GATE (2026-07-18 correction): Animation unlocks INDEPENDENTLY for each
@@ -4676,6 +4684,11 @@ async function shRun(cmd,shotId,opts){
     correction=(prompt("One-sentence correction for the "+shotId+" batch (goes on record; drives the redesign — 2 rejected batches marks the shot model-limited):","")||"").trim();
     if(!correction)return;   // cancelled or empty — a rejection always needs its correction
   }
+  if(cmd=="override-model-limited"){
+    correction=(opts.correction!=null?opts.correction:
+      (prompt("Why are you overriding the model-limited stop? This is zero-spend and keeps the rejection history:","Human Director override: setup is now corrected and we want to run the normal Seedance gate/spend path again.")||"")).trim();
+    if(!correction)return;
+  }
   if(cmd=="reject-keyframe"){
     // THE KEYFRAME LIFECYCLE (2026-07-17): rejection is atomic on the server — archived to
     // History with this exact reason, cleared from the current candidate position, and it
@@ -4725,6 +4738,9 @@ async function shRun(cmd,shotId,opts){
     if(typeof showToast=="function")showToast("▶ "+cmd+(shotId?" · "+shotId:"")+" — started",true);
     shPollStart();if(page=="pipeline")renderControl();
   }catch(e){alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+}
+function shOverrideModelLimited(shotId){
+  shRun("override-model-limited",shotId,{afterJob:()=>shRefresh()});
 }
 // ── THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive) ────────────────────
 // Four ways an opening frame may come to exist for a shot needing one: generate (paid,

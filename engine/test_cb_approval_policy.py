@@ -6,6 +6,7 @@ import pytest
 
 import cb_safety
 import cb_render as render
+from test_golden_path import _current_animation_fixture
 
 
 TEST_CANON_DIGEST = "c" * 64
@@ -49,7 +50,7 @@ def _pkg(tmp_path):
         "beatCode": "1.B1",
         "durationSec": 5,
         "dialogueLines": [],
-        "referenceSlots": {},
+        "referenceSlots": {"@图1": "opening keyframe"},
         "keyframeReferenceSlots": {},
         "keyframePrompt": "approved opening composition",
         "seedancePrompt": "approved motion",
@@ -90,6 +91,9 @@ def _approve_department(package, shot_id, stage):
     }
     if stage == "voice":
         output = {"lines": []}
+    elif stage == "animation":
+        output = _current_animation_fixture(
+            next(item for item in package["shots"] if item["shotId"] == shot_id))
     work["approved"] = {
         "outcome": "approved",
         "output": output,
@@ -109,6 +113,9 @@ def _prepare_department(package, shot_id, stage):
     }
     if stage == "voice":
         output = {"lines": []}
+    elif stage == "animation":
+        output = _current_animation_fixture(
+            next(item for item in package["shots"] if item["shotId"] == shot_id))
     work["candidate"] = {
         "output": output,
         "packageRevision": package["revision"],
@@ -159,6 +166,7 @@ def test_animation_direction_without_provider_prompt_is_not_current(tmp_path, mo
     monkeypatch.setattr(render, "_keyframe_input_signature",
                         lambda *args, **kwargs: {"cardHash": "card-v1",
                                                  "canonProfileDigest": TEST_CANON_DIGEST})
+    monkeypatch.setattr(render, "_reference_path_is_approved", lambda path: True)
     candidate = _prepare_department(package, shot["shotId"], "animation")
     candidate["output"].pop("providerPrompt", None)
     candidate["output"]["shotId"] = shot["shotId"]
@@ -363,6 +371,7 @@ def test_animation_approval_carries_forward_and_tracks_its_own_graph(
                         lambda *args, **kwargs: {
                             "cardHash": "card-v1",
                             "canonProfileDigest": TEST_CANON_DIGEST})
+    monkeypatch.setattr(render, "_reference_path_is_approved", lambda path: True)
     _approve_department(package, shot["shotId"], "animation")
 
     take = tmp_path / "take.mp4"

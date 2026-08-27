@@ -97,8 +97,6 @@ def sailing_departure_boilerplate(shot, direction):
     """Require visible real-world cause and effect for a wind-powered departure."""
     values = [shot.get("title"), shot.get("purpose"), shot.get("storyBeat"),
               shot.get("action")]
-    values.extend(str(value or "") for value in
-                  (shot.get("continuityConstraints") or []))
     values.extend([direction.get("physicalCauseAndEffect"),
                    direction.get("continuityFinish")])
     values.extend(str(value or "") for item in (direction.get("shotPlan") or [])
@@ -256,11 +254,17 @@ def action_unit_report(shot, direction, prompt=""):
 
     clocks = list(((data.get("creativeTranslation") or {}).get("gagClocks") or []))
     retroactive = any(bool(item.get("retroactive")) for item in clocks)
+    retroactive_pride = bool(re.search(
+        r"\b(retroactive pride|cover[- ]?up|covered it|meant to do that|"
+        r"pretends? (?:it|that)|claims? (?:it|that).+(?:intentional|planned)|"
+        r"acts? like.+(?:intentional|planned|fine)|false triumph)\b",
+        combined, re.I))
     if retroactive:
-        if not counts.get("self_check"):
+        if retroactive_pride and not counts.get("self_check"):
             errors.append("R12 retroactive button has no typed self_check beat")
-        if not re.search(r"\b(checks?|looks? around|looks? left|looks? right|intact|unhurt|fine)\b",
-                         combined, re.I):
+        if retroactive_pride and not re.search(
+                r"\b(checks?|looks? around|looks? left|looks? right|intact|unhurt|fine)\b",
+                combined, re.I):
             errors.append("R12 retroactive button has no visible self-check performance")
 
     cast = list(shot.get("charactersInFrame") or [])
@@ -293,7 +297,7 @@ def action_unit_report(shot, direction, prompt=""):
             }
     prompt_shots = {
         int(number): body for number, body in re.findall(
-            r"Shot\s+(\d+):\s*(.*?)(?=\nShot\s+\d+:|\nWitness staging:|\n\[|\Z)",
+            r"(?:Shot|Phase)\s+(\d+):\s*(.*?)(?=\n(?:Shot|Phase)\s+\d+:|\nWitness staging:|\n\[|\Z)",
             raw_prompt, re.I | re.S)
     }
     for line_number, line in enumerate(dialogue, start=1):
@@ -304,7 +308,7 @@ def action_unit_report(shot, direction, prompt=""):
             errors.append(f"R15 dialogue {speaker}: {exact} has no typed internal-shot owner")
             continue
         body = prompt_shots.get(owner["shot"], "")
-        marker = (rf"Dialogue placement:\s*{re.escape(speaker)},\s*[^:]+:\s*"
+        marker = (rf"(?:Dialogue placement|Spoken action):\s*{re.escape(speaker)}\b[^\n{{}}]*:\s*"
                   rf"\{{{re.escape(exact)}\}}")
         if not owner["direction"] or not re.search(marker, body, re.I):
             errors.append(f"R15 dialogue {speaker}: {exact} has no written in-beat direction")
@@ -460,7 +464,14 @@ def playable_stage_report(shot, cinematography):
             errors.append("opening frame does not reserve lead room for travel")
         for item in placements:
             facing = _norm(item.get("facing"))
-            if re.search(r"\b(toward|faces?) (?:the )?camera\b|\bfront[- ]facing\b", facing, re.I):
+            camera_facing = re.search(
+                r"\b(toward|faces?) (?:the )?camera\b|\bfront[- ]facing\b",
+                facing, re.I)
+            negated_camera_facing = re.search(
+                r"\b(?:not|never)\s+(?:toward|facing?|front[- ]facing)\s+(?:the\s+)?camera\b"
+                r"|\brather than\s+(?:toward|facing?)\s+(?:the\s+)?camera\b",
+                facing, re.I)
+            if camera_facing and not negated_camera_facing:
                 errors.append(
                     f"{item.get('character') or 'subject'} faces camera instead of travelling across or away")
     purpose = _norm(shot.get("purpose"))
@@ -469,8 +480,12 @@ def playable_stage_report(shot, cinematography):
         for token in ("flower", "leaf", "branch", "door", "table", "vehicle", "prop"):
             if re.search(rf"\b{token}s?\b", purpose, re.I):
                 required.append(token)
+    route_aliases = {
+        "door": r"\b(?:doors?|doorways?)\b",
+    }
     missing = [item for item in required if not re.search(
-        rf"\b{re.escape(str(item))}s?\b", geography, re.I)]
+        route_aliases.get(str(item), rf"\b{re.escape(str(item))}s?\b"),
+        geography, re.I)]
     if missing:
         errors.append("required route elements are absent from geography: " + ", ".join(missing))
     if travelling and re.search(r"\b(follow|chase|behind|drone|slightly late)\b", camera, re.I):

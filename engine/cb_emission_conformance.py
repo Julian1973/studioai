@@ -184,7 +184,7 @@ def written_dialogue_direction(value):
 def dialogue_placement_line(cue, *, direction="", hold_after=True):
     """Emit exact dialogue with typed direction and only its ruled post-line hold."""
     speaker = normalize_prose(cue.get("speaker"))
-    exact = normalize_prose(cue.get("exactText"))
+    exact = locked_dialogue_text(cue)
     if not speaker or not exact:
         raise EmissionConformanceError("dialogue placement requires speaker and exact words")
     performance = written_dialogue_direction(direction)
@@ -201,7 +201,7 @@ def dialogue_placement_line(cue, *, direction="", hold_after=True):
                 performance, re.I):
             raise EmissionConformanceError(
                 "dialogue direction contradicts holdAfterDialogue=false")
-    prefix = f"Dialogue placement: {speaker}"
+    prefix = f"Spoken action: {speaker}"
     if performance:
         prefix += f", {performance}"
     line = f"{prefix}: {{{exact}}}"
@@ -262,12 +262,14 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
         "no alternative performance",
         "listeners remain silent and closed-mouth",
         "no narration",
-        "no extra words",
         "no subtitles or captions",
     )
     for phrase in required_phrases:
         if phrase not in low:
             errors.append(f"dialogue authority is missing {phrase!r}")
+    if not any(phrase in low for phrase in (
+            "no extra words", "no improvised or extra words")):
+        errors.append("dialogue authority is missing 'no extra words'")
 
     expected = []
     for index, line in enumerate(lines):
@@ -275,14 +277,15 @@ def validate_dialogue_synthesis(prompt, dialogue_lines):
         exact = locked_dialogue_text(line)
         marker = "{" + exact + "}"
         expected.append(marker)
-        matches = marker_word_matches(text, exact)
+        exact_count = text.count(marker)
+        matches = [marker] if exact_count == 1 else marker_word_matches(text, exact)
         if len(matches) != 1:
             errors.append(
                 f"dialogue line {index + 1} must appear exactly once as {marker!r}")
         marker_pattern = re.escape(matches[0]) if matches else re.escape(marker)
         placement = re.compile(
-            rf"Dialogue placement:\s*{re.escape(speaker)}"
-            rf"(?:,\s*[^:]+)?:\s*{marker_pattern}",
+            rf"(?:Dialogue placement|Spoken action):\s*{re.escape(speaker)}"
+            rf"\b[^\n{{}}]*:\s*{marker_pattern}",
             re.I)
         if not placement.search(text):
             errors.append(

@@ -3,8 +3,7 @@
 Crystal Bears — local generation module (the app's provider layer).
 
 Wires the crew's prompts to the real APIs, locally (no Replit):
-  - generate_image()  -> DP keyframes; dispatches to Seedream 5 Pro (fal.ai, default, 2026-07-09) or
-                         Nano Banana 2 (gemini-3.1-flash-image, kept live, CB_IMAGE_PROVIDER=nanobanana)
+  - generate_image()  -> Seedream 5.0 Pro keyframes through BytePlus ModelArk
   - generate_video_seedance_ref() -> the capability-gated Seedance video adapter. Crystal Bears
                          targets Seedance 2.5 through BytePlus ModelArk; the historical fal 2.0
                          route is retained as code evidence but disabled in the provider registry.
@@ -23,7 +22,8 @@ corrected above to match what the code actually does.
 Keys come from cb-gen/.env (gitignored): GEMINI_API_KEY, ELEVENLABS_API_KEY.
 Endpoints verified against ai.google.dev + elevenlabs.io docs (June 2026).
 """
-import os, sys, json, time, base64, mimetypes, argparse, pathlib, subprocess, tempfile
+import os, sys, json, time, base64, hashlib, mimetypes, argparse, pathlib, subprocess, tempfile
+import urllib.parse
 import requests
 import cb_costs
 import cb_providers
@@ -48,26 +48,12 @@ _load_env()
 # of that decision, not rewritten — see IMAGE_PROVIDER below for the current, superseding decision.
 IMAGE_MODEL = os.environ.get("CB_IMAGE_MODEL", "gemini-3.1-flash-image")  # NB2 — the A/B winner for the cascade
 
-# THE PROVIDER SWITCH (Julian's ruling, 2026-07-09 — "we go Seedream 5 pro, it's the one the industry is
-# suggesting"): a real, evidence-based side-by-side on 1.B1's actual production prompt+references (identical
-# 1086-word prompt, identical 3 refs — Fuzzby turnaround, Zenny turnaround, scene plate — fired through both
-# models) found NB2 violated the Crystal World Rule outright (invented glowing hearts + swirling magic-light
-# crystal auras, directly contradicting the prompt's own "NO crystal self-glow, aura, beams, particles" line)
-# and dropped Zenny's signature identity detail (rosy blush cheeks, present on her turnaround); Seedream 5 Pro
-# held both correctly. n=1 — a single seed each, not a benchmark, and generation is stochastic — so NB2 is
-# KEPT LIVE, never deleted, selectable via CB_IMAGE_PROVIDER=nanobanana for rollback or a future re-test.
-# Cost: Seedream 5 Pro runs ~40% more per image (~$0.144 vs NB2's real ~$0.101 at 2K, both confirmed against
-# each vendor's own pricing page the same day — see cb_costs.py's RATES, also corrected today) — accepted as
-# immaterial at episode scale (~43 keyframes).
-IMAGE_PROVIDER = os.environ.get("CB_IMAGE_PROVIDER", "seedream")  # "seedream" (default) | "nanobanana" (rollback)
-SEEDREAM_ENDPOINT = os.environ.get("CB_SEEDREAM_ENDPOINT", "bytedance/seedream/v5/pro/edit")
-# THE SCENE LOOK PROVIDER-ROUTING FIX (2026-07-19): SEEDREAM_ENDPOINT above is an EDIT/reference
-# endpoint — fal.ai requires at least one image in image_urls for it, and rejects an empty list
-# with a deterministic 422 (found live: every Scene Look fire, which always called this endpoint
-# with refs=[]). A no-reference generation must use a genuine TEXT-TO-IMAGE endpoint instead —
-# left UNSET by default rather than guessing a plausible-looking model id (never invent an
-# endpoint); set CB_SEEDREAM_T2I_ENDPOINT to enable no-reference generation on this provider.
-SEEDREAM_T2I_ENDPOINT = os.environ.get("CB_SEEDREAM_T2I_ENDPOINT", "")
+# Crystal Bears production images are fixed to the official BytePlus ModelArk Seedream
+# 5.0 Pro endpoint. The older fal/Nano Banana implementations remain below only as
+# historical code; generate_image() cannot route production work to them.
+IMAGE_PROVIDER = os.environ.get("CB_IMAGE_PROVIDER", "seedream")
+SEEDREAM_MODEL_ID = "dola-seedream-5-0-pro-260628"
+SEEDREAM_ENDPOINT = "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations"
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 ELEVEN_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
@@ -168,11 +154,50 @@ def _fal_subscribe(endpoint, arguments=None, with_logs=False):
 def _byteplus_asset_url(value, kind):
     """Return a BytePlus-compatible URL/data URI without uploading to another provider."""
     value = str(value)
-    if value.startswith(("https://", "http://", "asset://", "data:")):
+    if value.startswith(("https://", "http://", "asset://")):
+        return value
+    if value.startswith("data:"):
+        if kind == "video":
+            raise ValueError("BytePlus video references require hosted URLs, not data URIs")
         return value
     path = pathlib.Path(value)
     if not path.is_file():
         raise FileNotFoundError(f"BytePlus {kind} reference does not exist: {path}")
+    if kind == "video":
+        hosted_base = os.environ.get("CB_BYTEPLUS_VIDEO_BASE_URL", "").strip().rstrip("/")
+        if hosted_base:
+            return hosted_base + "/" + urllib.parse.quote(path.name)
+        sidecar = pathlib.Path(str(path) + ".gen.json")
+        if sidecar.is_file():
+            try:
+                meta = json.loads(sidecar.read_text())
+            except Exception:
+                meta = {}
+            hosted_url = str(meta.get("hostedUrl") or "").strip()
+            hosted_hash = str(meta.get("hostedContentHash") or "").strip()
+            if hosted_url.startswith(("https://", "http://")):
+                actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+                if hosted_hash and hosted_hash != actual_hash:
+                    raise ValueError(
+                        f"BytePlus hosted video reference hash does not match local "
+                        f"approved source: {path.name}")
+                return hosted_url
+            task_id = str(meta.get("providerTaskId") or "").strip()
+            endpoint = str(meta.get("endpoint") or "/api/v3/contents/generations/tasks").strip()
+            if task_id:
+                _need(BYTEPLUS_ARK_KEY, "BYTEPLUS_ARK_API_KEY")
+                task_url = _byteplus_task_url(endpoint)
+                task = _rget(
+                    f"{task_url}/{task_id}",
+                    headers={"Authorization": f"Bearer {BYTEPLUS_ARK_KEY}"},
+                    timeout=(20, 120),
+                ).json()
+                video_url = ((task or {}).get("content") or {}).get("video_url")
+                if video_url:
+                    return video_url
+        raise ValueError(
+            f"BytePlus video reference must be a hosted URL or a local BytePlus output "
+            f"with a providerTaskId sidecar: {path.name}")
     mime = (mimetypes.guess_type(path.name)[0] or "").lower()
     allowed = {
         "image": {"image/jpeg", "image/png", "image/webp", "image/bmp", "image/tiff",
@@ -181,13 +206,24 @@ def _byteplus_asset_url(value, kind):
     }
     if kind not in allowed or mime not in allowed[kind]:
         raise ValueError(f"unsupported BytePlus {kind} reference type: {mime or path.suffix}")
-    size_limit = 30 * 1024 * 1024 if kind == "image" else 15 * 1024 * 1024
+    size_limit = (30 * 1024 * 1024 if kind == "image" else
+                  48 * 1024 * 1024 if kind == "video" else 15 * 1024 * 1024)
     if path.stat().st_size >= size_limit:
         raise ValueError(
             f"BytePlus {kind} reference is too large for an inline request: {path.name}")
-    data = base64.b64encode(path.read_bytes()).decode("ascii")
+    data_bytes = path.read_bytes()
     canonical_mime = "audio/wav" if mime == "audio/x-wav" else (
         "audio/mpeg" if mime == "audio/mp3" else mime)
+    if kind == "audio" and canonical_mime == "audio/mpeg":
+        # BytePlus rejects local MP3 data URLs on the content-generation endpoint.
+        # Keep the approved source file, but submit a WAV data URI for transport.
+        converted = subprocess.run(
+            ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(path),
+             "-f", "wav", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "44100", "pipe:1"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        data_bytes = converted.stdout
+        canonical_mime = "audio/wav"
+    data = base64.b64encode(data_bytes).decode("ascii")
     return f"data:{canonical_mime};base64,{data}"
 
 
@@ -199,7 +235,8 @@ def _byteplus_task_url(endpoint):
 
 
 def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolution,
-                             duration, out, *, generate_audio=True, poll_interval=10, timeout=3600):
+                             duration, out, *, generate_audio=True, poll_interval=10,
+                             timeout=3600, progress_callback=None, video_refs=None):
     """Submit and retrieve one ModelArk asynchronous video task.
 
     Provider capability, spend authorization and billing confirmation happen before this
@@ -213,6 +250,10 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
     if float(duration) != seconds:
         raise ValueError("BytePlus duration must be an integer number of seconds")
 
+    def progress(event, **data):
+        if progress_callback:
+            progress_callback({"event": event, **data})
+
     content = [{"type": "text", "text": str(prompt)}]
     content.extend({"type": "image_url", "image_url": {
         "url": _byteplus_asset_url(value, "image")}, "role": "reference_image"}
@@ -220,33 +261,51 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
     content.extend({"type": "audio_url", "audio_url": {
         "url": _byteplus_asset_url(value, "audio")}, "role": "reference_audio"}
         for value in audio_refs)
+    video_refs = list(video_refs or [])
+    content.extend({"type": "video_url", "video_url": {
+        "url": _byteplus_asset_url(value, "video")}, "role": "reference_video"}
+        for value in video_refs)
     body = {
         "model": contract["providerModelId"],
         "content": content,
         "generate_audio": bool(generate_audio),
         "resolution": resolution,
-        "ratio": "16:9",
         "duration": seconds,
         "watermark": False,
         "return_last_frame": True,
     }
-    if len(json.dumps(body, ensure_ascii=False).encode("utf-8")) > BYTEPLUS_MAX_REQUEST_BYTES:
+    if not video_refs:
+        body["ratio"] = "16:9"
+    body_bytes = len(json.dumps(body, ensure_ascii=False).encode("utf-8"))
+    if body_bytes > BYTEPLUS_MAX_REQUEST_BYTES:
         raise ValueError(
             "BytePlus request body exceeds 64 MB; use public/asset URLs for larger references")
 
     headers = {"Authorization": f"Bearer {BYTEPLUS_ARK_KEY}",
                "Content-Type": "application/json"}
     task_url = _byteplus_task_url(contract["endpoint"])
-    created = _rpost(task_url, headers=headers, json=body, timeout=120).json()
+    progress("submitting", endpoint=task_url, requestBytes=body_bytes,
+             imageRefs=len(image_refs), audioRefs=len(audio_refs),
+             videoRefs=len(video_refs), duration=seconds)
+    print(
+        f"BYTEPLUS SUBMITTING — {seconds}s · {len(image_refs)} image ref(s) · "
+        f"{len(audio_refs)} audio ref(s) · {len(video_refs)} video ref(s) · {body_bytes} bytes",
+        flush=True,
+    )
+    created = _rpost(task_url, headers=headers, json=body, timeout=(20, 180)).json()
     task_id = str(created.get("id") or "").strip()
     if not task_id:
         raise RuntimeError("BytePlus video task creation returned no task ID")
+    progress("submitted", taskId=task_id, response=created)
+    print(f"BYTEPLUS SUBMITTED — task {task_id}", flush=True)
 
     deadline = time.monotonic() + timeout
     task = None
     while time.monotonic() < deadline:
-        task = _rget(f"{task_url}/{task_id}", headers=headers, timeout=120).json()
+        task = _rget(f"{task_url}/{task_id}", headers=headers, timeout=(20, 120)).json()
         status = str(task.get("status") or "").lower()
+        progress("poll", taskId=task_id, status=status, response=task)
+        print(f"BYTEPLUS POLL — task {task_id} · {status or 'blank'}", flush=True)
         if status == "succeeded":
             break
         if status in {"failed", "expired"}:
@@ -263,10 +322,15 @@ def _byteplus_generate_video(contract, prompt, image_refs, audio_refs, resolutio
     url = ((task or {}).get("content") or {}).get("video_url")
     if not url:
         raise RuntimeError("BytePlus video task succeeded without a video URL")
-    video = _rget(url, timeout=300)
+    progress("downloading", taskId=task_id, videoUrl=url)
+    print(f"BYTEPLUS DOWNLOADING — task {task_id}", flush=True)
+    video = _rget(url, timeout=(20, 300))
     outp = MEDIA / out
     outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_bytes(video.content)
+    progress("downloaded", taskId=task_id, outputPath=str(outp),
+             outputBytes=outp.stat().st_size)
+    print(f"BYTEPLUS DOWNLOADED — task {task_id} -> {outp}", flush=True)
     return outp, task_id, task
 
 # ── Last-frame extractor (first/last-frame chaining for continuous flow) ──────
@@ -300,66 +364,84 @@ def _require_production_route(production_route, op):
 def generate_image(prompt, refs=None, aspect="16:9", out="keyframe.png",
                    model=None, image_size="2K", production_route=None):
     _require_production_route(production_route, "generate_image")
-    """THE single keyframe-generation entry point every cb_scene.py call site uses — unchanged signature, so
-    no caller needed to change for the provider swap. Dispatches on IMAGE_PROVIDER (module-level, env-overridable
-    via CB_IMAGE_PROVIDER): "seedream" (default, Seedream 5 Pro via fal.ai) or "nanobanana" (NB2 via direct
-    Gemini API, kept live for rollback). `model=` is NB2-specific (a Gemini model id) and ignored by the
-    Seedream path; passing it explicitly forces the nanobanana path's model regardless of IMAGE_PROVIDER,
-    matching the old function's own back-compat contract for any caller that still passes model= explicitly."""
-    if model or IMAGE_PROVIDER == "nanobanana":
-        return _generate_image_nanobanana(prompt, refs, aspect, out, model or IMAGE_MODEL, image_size)
+    """Generate a Crystal Bears production image through Seedream 5 Pro only.
+
+    The older Nano Banana implementation remains below for archive/reproducibility work, but
+    it is not an authorized SEE or keyframe production route.
+    """
+    if model or IMAGE_PROVIDER != "seedream":
+        raise RuntimeError(
+            "REFUSED — Crystal Bears SEE/keyframe production is locked to Seedream 5 Pro "
+            f"({SEEDREAM_ENDPOINT}); model overrides and CB_IMAGE_PROVIDER fallbacks are disabled.")
     return _generate_image_seedream(prompt, refs, aspect, out, image_size)
 
+
+def generate_image_nanobanana_ab(prompt, refs=None, aspect="16:9", out="keyframe.png",
+                                 image_size="2K", production_route=None):
+    """Generate the Google half of an explicitly requested SEE A/B comparison.
+
+    This is deliberately not a fallback for Seedream. The canonical SEE compiler calls it
+    only after producing candidate A from the identical sealed prompt and reference list.
+    """
+    _require_production_route(production_route, "generate_image_nanobanana_ab")
+    return _generate_image_nanobanana(
+        prompt, refs=refs, aspect=aspect, out=out,
+        model=IMAGE_MODEL, image_size=image_size)
+
 def _generate_image_seedream(prompt, refs=None, aspect="16:9", out="keyframe.png", image_size="2K"):
-    """Seedream 5 Pro (bytedance/seedream/v5/pro/edit, fal.ai) — the default keyframe model as of 2026-07-09
-    (see IMAGE_PROVIDER's doctrine comment above). Same reference-image contract as the NB2 path: a list of
-    local file paths, uploaded to fal then passed as image_urls alongside the identical prompt text — the
-    prompt/reference doctrine (rule 5's appearance-non-leak law, the four-anchor-style reference stack) is
-    model-agnostic by design, so no prompt-building code changes for this swap."""
-    _need(FAL_KEY, "FAL_KEY")
-    os.environ["FAL_KEY"] = FAL_KEY
-    import fal_client
-    ref_urls = [_fal_upload(str(pathlib.Path(r))) for r in (refs or [])]
-    # FIXED 2026-07-11 (full-codebase audit): this call never sent the requested aspect ratio or resolution at
-    # all — both were silently dropped, despite generate_image()'s own public signature accepting them (and
-    # the cost sidecar already logging aspect= as if it had been honoured). fal.ai's ByteDance-family image
-    # endpoints accept "image_size" (a preset string, e.g. "square_hd"/"portrait_4_3"/"landscape_16_9", or a
-    # {width,height} object) and "aspect_ratio" — mapped here to the SAME image_size convention this module's
-    # NB2 path already uses ("2K" etc.) plus the beat's own aspect string, rather than silently omitted.
-    #
-    # PROVIDER ROUTING (2026-07-19 fix): SEEDREAM_ENDPOINT is edit-mode-only and fal.ai deterministically
-    # 422s an empty image_urls list — never send it there. A call with real reference(s) uses the edit
-    # endpoint exactly as before; a call with none uses the configured text-to-image endpoint, or refuses
-    # loudly (no network call made) if none is configured, rather than inventing an endpoint id.
-    if ref_urls:
-        endpoint = SEEDREAM_ENDPOINT
-        args = {"prompt": prompt, "image_urls": ref_urls, "image_size": image_size, "aspect_ratio": aspect}
-    else:
-        if not SEEDREAM_T2I_ENDPOINT:
-            raise RuntimeError(
-                "REFUSED — no reference image supplied and no supported Seedream text-to-image "
-                "endpoint is configured (CB_SEEDREAM_T2I_ENDPOINT is unset). Refusing rather than "
-                f"sending an empty image_urls list to the edit endpoint ({SEEDREAM_ENDPOINT}), which "
-                "fal.ai always rejects with a 422 (confirmed 2026-07-19). Set "
-                "CB_SEEDREAM_T2I_ENDPOINT to a real fal.ai text-to-image model id, or supply a "
-                "reference image, before generating.")
-        endpoint = SEEDREAM_T2I_ENDPOINT
-        args = {"prompt": prompt, "image_size": image_size, "aspect_ratio": aspect}
-    result = _fal_subscribe(endpoint, arguments=args, with_logs=False)
-    url = None
-    if result.get("images"):
-        url = result["images"][0].get("url")
-    elif result.get("image"):
-        url = result["image"].get("url")
+    """Generate one Seedream 5.0 Pro image through BytePlus ModelArk.
+
+    References are assigned by the compiler and submitted in that stable order. ModelArk
+    accepts text-only, single-image and multi-image input on this endpoint.
+    """
+    _need(BYTEPLUS_ARK_KEY, "BYTEPLUS_ARK_API_KEY")
+    refs = list(refs or [])
+    if len(refs) > 10:
+        raise ValueError(
+            f"Seedream 5.0 Pro accepts at most 10 reference images; received {len(refs)}")
+    if image_size not in {"1K", "2K"}:
+        raise ValueError("Seedream 5.0 Pro image_size must be 1K or 2K")
+
+    body = {
+        "model": SEEDREAM_MODEL_ID,
+        "prompt": str(prompt),
+        "size": image_size,
+        "output_format": "png",
+        "response_format": "url",
+        "optimize_prompt_options": {"mode": "standard"},
+        "watermark": False,
+    }
+    if refs:
+        images = [_byteplus_asset_url(value, "image") for value in refs]
+        body["image"] = images[0] if len(images) == 1 else images
+    response = _rpost(
+        SEEDREAM_ENDPOINT,
+        headers={"Authorization": f"Bearer {BYTEPLUS_ARK_KEY}",
+                 "Content-Type": "application/json"},
+        json=body,
+        timeout=(20, 300),
+    )
+    result = response.json()
+    data = result.get("data") or []
+    url = data[0].get("url") if data and isinstance(data[0], dict) else None
     if not url:
-        raise SystemExit(f"Seedream returned no image url: {json.dumps(result)[:900]}")
-    img = _rget(url, timeout=120)
+        raise RuntimeError(
+            f"Seedream 5.0 Pro returned no image URL: {json.dumps(result)[:900]}")
+    img = _rget(url, timeout=(20, 300))
     outp = MEDIA / out
+    outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_bytes(img.content)
-    cb_costs.log_spend("keyframe_image", cb_costs.estimate_image_cost(provider="seedream5pro"),
-                        out=out, meta={"model": endpoint, "num_refs": len(ref_urls)})
-    cb_costs.write_gen_sidecar(outp, op="keyframe_image", model=endpoint, aspect=aspect,
-                                num_image_refs=len(ref_urls))
+    cost = cb_costs.estimate_image_cost(
+        provider="seedream5pro", num_refs=len(refs), output_tier=image_size)
+    cb_costs.log_spend(
+        "keyframe_image", cost, out=out,
+        meta={"provider": "byteplus", "model": SEEDREAM_MODEL_ID,
+              "endpoint": SEEDREAM_ENDPOINT, "num_refs": len(refs)})
+    cb_costs.write_gen_sidecar(
+        outp, op="keyframe_image", provider="byteplus", model=SEEDREAM_MODEL_ID,
+        endpoint=SEEDREAM_ENDPOINT, aspect=aspect, size=image_size,
+        output_format="png", response_format="url", prompt_optimization="standard",
+        num_image_refs=len(refs), output_url_retention_hours=24)
     return str(outp)
 
 def _generate_image_nanobanana(prompt, refs=None, aspect="16:9", out="keyframe.png",
@@ -524,7 +606,8 @@ def generate_video_seedance(prompt, keyframe, resolution="720p", duration=8,
 def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=None, resolution="720p",
                                 duration="auto", out="clip_ref.mp4", fast=False, raw_prompt=False,
                                 production_route=None, model_id=None,
-                                comparison_run_id=None, generate_audio=True):
+                                comparison_run_id=None, generate_audio=True,
+                                progress_callback=None):
     _require_production_route(production_route, "generate_video_seedance_ref")
     """Seedance reference-to-video through the exact selected capability-gated transport.
 
@@ -559,18 +642,18 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
     }
     if comparison_run_id:
         contract_kwargs["comparison_run_id"] = comparison_run_id
+    if not comparison_run_id and video_urls:
+        contract_kwargs["mode"] = "video-extension"
     contract = contract_builder(**contract_kwargs)
     _pr = (str(prompt) if raw_prompt or contract["transport"] == "byteplus-async" else
            _seedance_json_prompt(
                prompt, duration=(None if str(duration) == "auto" else duration), ref=True))
 
     if contract["transport"] == "byteplus-async":
-        if video_urls:
-            raise cb_providers.ProviderCapabilityError(
-                "video-extension references are not wired for BytePlus inline transport")
         outp, task_id, task = _byteplus_generate_video(
             contract, _pr, image_urls, audio_urls, resolution, duration, out,
-            generate_audio=generate_audio)
+            generate_audio=generate_audio, progress_callback=progress_callback,
+            video_refs=video_urls)
         seconds = float(duration)
         cb_costs.log_spend(
             "seedance_ref2vid",
@@ -584,6 +667,7 @@ def generate_video_seedance_ref(prompt, image_urls, audio_urls=None, video_urls=
             transport=contract["transport"], providerTaskId=task_id,
             resolution=resolution, duration=str(duration), seconds=seconds, fast=False,
             num_image_refs=len(image_urls), num_audio_refs=len(audio_urls),
+            num_video_refs=len(video_urls),
             returnedDuration=(task or {}).get("duration"),
             completionTokens=((task or {}).get("usage") or {}).get("completion_tokens"))
         return str(outp)

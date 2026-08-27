@@ -117,6 +117,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
 .studio-view[hidden] { display: none; }
 .eyebrow, .stage-label { margin: 0 0 7px; color: var(--teal-dark); font-size: 10px; line-height: 1.3; font-weight: 900; text-transform: uppercase; }
 h1, h2, p { overflow-wrap: anywhere; }
+.small-muted { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.35; }
 h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 31px; line-height: 1.12; font-weight: 700; }
 h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 
@@ -545,6 +546,105 @@ h2 { margin: 0; font-size: 21px; line-height: 1.2; }
 .stage-empty p { margin: 0; font-size: 13px; }
 .loading-mark { width: 24px; height: 24px; border: 2px solid #3b4743; border-top-color: #70d9d1; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.production-line {
+  display: grid;
+  gap: 12px;
+  padding: 14px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.production-line[hidden] { display: none !important; }
+.production-line-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+}
+.production-line-head strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.25;
+}
+.production-line-head > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.production-line-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.production-line-steps li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid #303b38;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .025);
+  color: var(--muted);
+}
+.production-line-index {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: #202825;
+  color: #9ba8a4;
+  font-size: 10px;
+  font-weight: 900;
+}
+.production-line-steps strong {
+  display: block;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.25;
+}
+.production-line-steps em {
+  display: block;
+  margin-top: 3px;
+  color: inherit;
+  font-style: normal;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.production-line-steps li.complete {
+  border-color: rgba(88, 199, 147, .36);
+  background: rgba(88, 199, 147, .06);
+}
+.production-line-steps li.complete .production-line-index {
+  background: rgba(88, 199, 147, .18);
+  color: var(--success);
+}
+.production-line-steps li.active {
+  border-color: rgba(112, 217, 209, .58);
+  background: rgba(112, 217, 209, .08);
+  color: #dce5e2;
+}
+.production-line-steps li.active .production-line-index {
+  background: #70d9d1;
+  color: #10201e;
+}
+.production-line-steps li.blocked {
+  border-color: rgba(245, 177, 92, .55);
+  background: rgba(245, 177, 92, .08);
+}
+.production-line-steps li.blocked .production-line-index {
+  background: rgba(245, 177, 92, .18);
+  color: var(--amber);
+}
+.production-line-steps li.waiting {
+  opacity: .68;
+}
 .render-progress { width: min(640px, calc(100% - 40px)); display: grid; gap: 16px; padding: 24px; color: #f2f5f3; background: #151b19; border: 1px solid #35413d; border-radius: 6px; box-shadow: 0 16px 36px rgba(0, 0, 0, .25); }
 .render-progress-head { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 14px; align-items: center; }
 .render-progress-head > div { min-width: 0; display: grid; gap: 4px; }
@@ -3281,6 +3381,9 @@ body.studio-stale .workspace, body.studio-stale .side-nav { pointer-events: none
   .pipeline-main { min-height: 0; border-left: 1px solid #242630; border-radius: 5px; padding: 20px; }
   .canonical-step { min-height: 0; padding: 24px; }
   .truth-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .production-line-steps { grid-template-columns: 1fr; }
+  .production-line-head { align-items: start; flex-direction: column; gap: 6px; }
+  .production-line-head > span { white-space: normal; }
   .rough-cut-layout { grid-template-columns: 1fr; }
   .shot-input-grid { grid-template-columns: 1fr; }
   .shot-inputs-head { grid-template-columns: 1fr; }

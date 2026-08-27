@@ -20,6 +20,7 @@ def test_workspace_projects_only_browser_served_media_and_hash_bound_verdict(tmp
         path.write_bytes(content)
     (folder / "review_manifest.json").write_text(json.dumps({
         "masterSha256": _hash(master),
+        "stage": "assembly-review-human-signoff-required",
         "durationSec": 12.5,
         "outputs": {"master": str(master), "pictureOriginal": str(original), "musicStem": str(stem)},
         "finalQc": {"passed": True, "pictureLocked": True},
@@ -31,10 +32,15 @@ def test_workspace_projects_only_browser_served_media_and_hash_bound_verdict(tmp
     projected = post.workspace("Ep1")
     assert projected["masterUrl"] == "/engine/media/post95/Ep1_episode/master.mp4"
     assert projected["originalUrl"] == "/engine/media/post95/Ep1_episode/native.mp4"
+    assert projected["stage"] == "assembly-review-human-signoff-required"
     assert projected["verdict"] is None
 
     approved = post.record_verdict("Ep1", "approved")
     assert approved["verdict"]["reviewer"] == "Julian"
+    assert approved["verdict"]["stage"] == "assembly-review-human-signoff-required"
+    history = (state / "Ep1_post_review_history.jsonl").read_text().splitlines()
+    assert len(history) == 1
+    assert json.loads(history[0])["masterSha256"] == _hash(master)
     master.write_bytes(b"changed")
     try:
         post.workspace("Ep1")

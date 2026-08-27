@@ -23,7 +23,8 @@ def _has(text: str, pattern: str) -> bool:
 
 
 def _shots(text: str) -> list[str]:
-    starts = list(re.finditer(r"(?im)^Shot\s+\d+\s*(?:[-—:]|\.)", text))
+    starts = list(re.finditer(
+        r"(?im)^(?:Shot|Phase)\s+\d+\s*(?:[-—:]|\.)", text))
     return [
         text[item.start():(starts[index + 1].start() if index + 1 < len(starts) else len(text))]
         for index, item in enumerate(starts)
@@ -120,9 +121,13 @@ def preflight(prompt: str, *, duration_sec: float | None = None,
     if _has(prompt, r"Story lock:|Gag action \(|Physics \("):
         add("FIX", "R18", "The shot action is restated in compiler supplement fields.",
             "Let the shot sequence be the story; emit each action once.", 0.75)
-    if not _has(prompt, r"\bNo music\b"):
-        add("FIX", "audio-policy", "No music policy is absent.",
-            "State No music in the final audio block.", 0.75)
+    if not (
+        _has(prompt, r"\bNo music\b")
+        or _has(prompt, r"Seedance may generate non-verbal music, ambience and SFX")
+    ):
+        add("FIX", "audio-policy", "Music/SFX policy is absent.",
+            "State either No music or the approved Seedance non-verbal music/SFX policy.",
+            0.75)
 
     # Length is not a creative-quality signal and is not evaluated here.
     if _has(prompt, r"softens") and not _has(prompt, r"from .* into|eye-roll .* into|as .* come.* back"):
@@ -176,7 +181,10 @@ def manifest_checks(archetype: str, prompt: str) -> dict:
         check("harvestable end state", r"End state:.*?harvest")
     elif archetype == "escalation-into-verdict":
         check("attribute ownership", r"ATTRIBUTE OWNERSHIP")
-        check("opening from previous end", r"(?:opening|first) frame.*?final frame of the previous")
+        check(
+            "opening from previous end",
+            r"(?:opening|first) frame.*?(?:final frame of the previous|previous shot(?:'s|’s) approved final frame)",
+        )
         check("correction worsens feature", r"wipe.*?(?:wider|worse|messier)")
         check("self evidence before panic", r"looks? .*?(?:paw|body).*?(?:panic|expression drops)")
         check(

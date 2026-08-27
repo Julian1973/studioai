@@ -4,7 +4,7 @@ import os, re, json, http.server, pathlib, subprocess, threading, time, zipfile,
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent   # Desktop/8Th Hour
+ROOT = pathlib.Path(__file__).resolve().parent.parent   # Desktop/Ai Studio (isolated workspace)
 CBGEN = ROOT / "engine"
 sys.path.insert(0, str(CBGEN))   # FIXED 2026-07-17 (state-integrity checkpoint): every OTHER
 # engine-touching operation runs in its own subprocess (cwd=CBGEN), which is why THAT never
@@ -192,6 +192,14 @@ def _freshness_watch():
 def slug(s):
     return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_") or "Untitled"
 
+def _pdf_text_has_screenplay_structure(text):
+    if not isinstance(text, str) or not text.strip():
+        return False
+    scene_re = re.compile(
+        r"^\s*(?:INT|EXT|INT/EXT|I/E)\.\s+.+?\s+\d+\s*$",
+        re.IGNORECASE)
+    return any(scene_re.match(line) for line in text.splitlines())
+
 def extract_doc_text(raw, name=""):
     """Extract plain text from an uploaded script document (base64). Supports
     txt/md/fountain (direct), docx (built-in zip+xml), rtf (basic), pdf (if a lib is installed)."""
@@ -233,7 +241,20 @@ def extract_doc_text(raw, name=""):
                 r = mod.PdfReader(io.BytesIO(blob))
                 if len(r.pages) > 500:
                     raise ValueError("the uploaded PDF has more than 500 pages")
-                return "\n".join((p.extract_text() or "") for p in r.pages).strip()
+                plain = "\n".join((p.extract_text() or "") for p in r.pages).strip()
+                if _pdf_text_has_screenplay_structure(plain):
+                    return plain
+                layout_parts = []
+                for p in r.pages:
+                    try:
+                        layout_parts.append(p.extract_text(extraction_mode="layout") or "")
+                    except TypeError:
+                        layout_parts = []
+                        break
+                layout = "\n".join(layout_parts).strip()
+                if _pdf_text_has_screenplay_structure(layout):
+                    return layout
+                return layout or plain
             except Exception:
                 continue
         try:
@@ -423,6 +444,7 @@ DIRECTOR_ACTION_IDS = {
     "open-inspector", "open-provider-setup", "direct-scene",
     "build-scene-plate", "select-scene-plate-library", "select-scene-plate-upload",
     "select-keyframe-library", "select-keyframe-upload",
+    "select-keyframe-candidate",
     "build-keyframe", "build-voice", "prepare-render",
     "accept-keyframe", "iterate-keyframe",
     "accept-voice", "iterate-voice",
@@ -1218,7 +1240,7 @@ SHOT_CMDS = ("voice", "voice-shot", "regen-voice", "animatic", "scenelook", "app
              "select-upload", "select-library", "select-previous",
              "select-scenelook-upload", "select-scenelook-library",
              "approve-voice", "reject-voice",
-             "fire", "next", "approve", "reject", "stitch")
+             "fire", "next", "approve", "reject", "override-model-limited", "stitch")
 # THE OPENING-FRAME SOURCE CHOICE (2026-07-18, Julian's directive): select-upload/select-library/
 # select-previous are the three NON-GENERATION opening-frame sources (cb_render.select_keyframe_source) —
 # each only ever COPIES an existing file into a new immutable candidate; none calls cb_gen. Routed through
@@ -1552,6 +1574,26 @@ def _director_session(scene, episode="Ep1", requested_shot_id=None):
     except Exception:
         scene_look = {}
 
+    # A stale scene handover must block new production, but it must never make existing
+    # shot work disappear from the Director. Project the package's preserved shots through
+    # the same read-only state calculator with package_current=False: every mutating action
+    # remains disabled while approved frames, voices and takes stay visible for recovery.
+    if package and not (state.get("shots") or []):
+        try:
+            preserved_shots = [
+                cb_state._shot_state(
+                    package, shot, scene, episode,
+                    bool(scene_look.get("current")), False)
+                for shot in cb_state._active_package_shots(package)
+            ]
+        except (OSError, ValueError, TypeError, KeyError):
+            preserved_shots = []
+        if preserved_shots:
+            state = dict(state)
+            state["shots"] = preserved_shots
+            state["_per"] = preserved_shots
+            state["preservedPackageView"] = True
+
     common = {
         "state": state,
         "preflight": preflight,
@@ -1815,7 +1857,7 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
     token resumes: only the missing candidates generate (ledger batch.status == "generating").
     Every value travels as its own argv element — never a shell string."""
     args = ["cb_render.py", cmd, str(scene)]
-    if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+    if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                "pose", "approve-pose", "reject-pose", "select-pose-upload",
                "select-upload", "select-library", "select-previous",
                "approve-voice", "reject-voice", "regen-voice"):
@@ -1828,6 +1870,8 @@ def shot_run_job(cmd, scene, episode="Ep1", shot_id=None, correction=None,
         args.append(str(correction))
         if category:
             args += ["--category", str(category)]
+    if cmd == "override-model-limited":
+        args.append(str(correction))
     if cmd == "reject-keyframe":
         args.append(str(correction))
     if cmd == "reject-pose":
@@ -3535,24 +3579,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                     )
                     self._json(200, payload)
                     return
-                if action == "rebuild":
-                    music_gain = float(d.get("musicGain", 0.18))
-                    ambience_gain = float(d.get("ambienceGain", 0.04))
-                    target_lufs = float(d.get("targetLufs", -14.0))
-                    if not 0 <= music_gain <= 1 or not 0 <= ambience_gain <= 1:
-                        raise ValueError("music and ambience gains must be between 0 and 1")
-                    if not -24 <= target_lufs <= -9:
-                        raise ValueError("target LUFS must be between -24 and -9")
+                if action in ("rebuild", "build-assembly"):
                     args = [
                         "../tools/build_episode_post95_master.py",
-                        "--music-gain", str(music_gain),
-                        "--ambience-gain", str(ambience_gain),
-                        "--target-lufs", str(target_lufs),
+                        "--episode", episode,
                     ]
-                    job_id = _start(_jid(f"post_{episode}"), "post:episode-master", "post", args)
+                    job_id = _start(_jid(f"post_{episode}"), "post:episode-assembly", "post", args)
                     self._json(200, {"ok": True, "jobId": job_id})
                     return
-                raise ValueError("action must be approve, reject or rebuild")
+                raise ValueError("action must be approve, reject or build-assembly")
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return
@@ -3609,12 +3644,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(200, {"ok": True, "zeroSpend": True,
                                      "savedNote": note,
                                      "updatedAt": state.get("updatedAt")}); return
-                # The browser has just rendered this exact authoritative session. Reuse it
-                # for action availability instead of discarding it and synchronously
-                # rebuilding the whole scene (which can take longer than an HTTP request).
-                # Every mutating engine command still performs its own current-signature,
-                # approval and spend checks; _start() clears this cache before dispatch.
-                session = _cached_director_session(scene, ep, shot_id)
+                # Mutating actions must be admitted by a fresh state projection. A cached
+                # Director session is fine for navigation, but it can preserve a button from
+                # before SEE/HEAR/WATCH state, references, or signed prompts changed.
+                read_only_action = action in ("open-inspector", "open-provider-setup")
+                session = (
+                    _cached_director_session(scene, ep, shot_id)
+                    if read_only_action else
+                    _director_session(scene, ep, shot_id)
+                )
                 import cb_studio_director as _CBD
                 if action not in _CBD.allowed_action_ids(session):
                     self._json(409, {
@@ -3687,6 +3725,24 @@ class H(http.server.SimpleHTTPRequestHandler):
                         self._json(400, {"error": "sourcePath is not a valid path"}); return
                     command = "select-library" if action == "select-keyframe-library" else "select-upload"
                     job_id = shot_run_job(command, scene, ep, target, source_path=str(sp))
+                elif action == "select-keyframe-candidate":
+                    if not target:
+                        self._json(409, {"error": "No current shot is available"}); return
+                    candidate = str(d.get("candidate") or "").strip().upper()
+                    _CBR = _canonical_cb_render()
+                    try:
+                        _CBR.select_keyframe_candidate(
+                            scene, target, candidate, episode=ep,
+                            log=lambda message: print(message, flush=True))
+                    except _CBR.Refused as e:
+                        self._json(409, {"error": str(e), "session": session}); return
+                    _clear_director_session_cache(scene=scene, episode=ep)
+                    self._json(200, {
+                        "ok": True,
+                        "zeroSpend": True,
+                        "selectedCandidateId": candidate,
+                        "session": _director_session(scene, ep, target),
+                    }); return
                 elif action in ("build-keyframe", "build-voice", "prepare-render"):
                     if not target:
                         self._json(409, {"error": "No current shot is available"}); return
@@ -3701,6 +3757,11 @@ class H(http.server.SimpleHTTPRequestHandler):
                         ["cb_studio_director.py", command, scene, target, ep])
                 elif action == "accept-keyframe":
                     import cb_render as _CBR
+                    candidate = str(d.get("candidate") or "").strip().upper()
+                    if candidate:
+                        _CBR.select_keyframe_candidate(
+                            scene, target, candidate, episode=ep,
+                            log=lambda message: print(message, flush=True))
                     review_work = ((((session.get("humanReview") or {}).get(
                         "currentDecision") or {}).get("aiReview") or {}))
                     if review_work.get("available"):
@@ -4341,7 +4402,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 correction = str(d.get("correction")).strip() if d.get("correction") not in (None, "") else None
                 if not scene or not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(episode):
                     self._json(400, {"error": "scene and episode must be plain tokens (e.g. 1, Ep1)"}); return
-                if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
+                if cmd in ("fire", "voice-shot", "build-keyframe", "keyframe", "approve", "reject", "override-model-limited", "approve-keyframe", "rescreen-keyframe", "reject-keyframe",
                            "pose", "approve-pose", "reject-pose", "select-pose-upload",
                            "select-upload", "select-library", "select-previous",
                            "approve-voice", "reject-voice", "regen-voice") \
@@ -4352,6 +4413,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                     self._json(400, {"error": f"{cmd} needs a valid character name"}); return
                 if cmd == "reject" and not correction:
                     self._json(400, {"error": "reject needs a one-sentence correction"}); return
+                if cmd == "override-model-limited" and not correction:
+                    self._json(400, {"error": "override-model-limited needs a written reason"}); return
                 if cmd == "reject-keyframe" and not correction:
                     self._json(400, {"error": "reject-keyframe needs a plain-language reason"}); return
                 if cmd == "reject-pose" and not correction:

@@ -148,6 +148,47 @@ Use @Audio1 exactly for Fuzzby. Zenny remains silent with her mouth closed; pres
 
     assert result["status"] == "ready"
     assert result["stageCount"] == 2
+
+
+def test_seedance_contract_accepts_continuous_timed_phase_units():
+    prompt = """AUDIO-AUTHORITY: @Audio1 is the sole authority for voice identity, cadence, delivery, mouth timing and silence. No alternative performance is permitted. Listeners remain silent and closed-mouth. No narration; no extra words; no subtitles or captions.
+[Multimodal Reference Layer]
+@Image1 is the first frame. It defines opening composition and state; exclude later action and redesign.
+@Image2 defines exactly one Aida identity, proportions and scale; exclude background, pose and scene.
+@Audio1 is the sole approved dialogue and performance source.
+[One-Sentence Summary]
+Aida names Keen's courage while the circle remains hushed and correctly scaled.
+[Global Settings]
+Environment and texture: wide crystal clearing after rain.
+Visual style: feature-quality stylised 3D animation.
+Camera language: one continuous slow push-in, not separate coverage.
+Character styling: preserve all approved identities and scale relationships.
+Performance core: quiet emotion, focused eyelines and natural breathing.
+Prohibited items: no duplicate characters, no extra voices, no captions.
+[Timed Action Phases — One Continuous Render]
+Phase 1: Camera: wide-to-medium group composition. Action: Aida turns her attention to Keen and speaks via @Audio1 while Keen listens silently. Performance: Aida is the only mouth moving during the line; listeners remain closed-mouth. End state: Aida holds warmly on Keen, and Keen's empty wristbands remain visible. Spoken action: Aida, quiet and certain: {You followed your heart… and chose courage.} The pose holds a full beat after the line ends.
+[Global Supplement]
+Throughout, keep identity, relative scale, prop ownership, camera axis and final handoff stable.
+[Audio]
+@Audio1 guides dialogue timing and mouth shapes. No extra voices. Seedance may generate non-verbal ambience and SFX."""
+    result = cb_prompt_lab.analyze_seedance_prompt_contract(
+        prompt,
+        reference_contract=[
+            {"assetTag": "@Image1", "role": "opening_frame"},
+            {"assetTag": "@Image2", "role": "character_identity"},
+            {"assetTag": "@Audio1", "role": "audio"},
+        ],
+        duration_sec=12,
+        dialogue_lines=[
+            {"speaker": "Aida", "exactText": "You followed your heart… and chose courage."}
+        ],
+        stage_plan=[{"stageNumber": 1}],
+    )
+
+    assert result["status"] == "ready"
+    assert result["stageCount"] == 1
+    assert next(check for check in result["checks"]
+                if check["code"] == "stages")["status"] == "pass"
     assert result["source"]["lastUpdated"] == "2026-08-07"
     assert result["source"]["url"].startswith("https://docs.byteplus.com/")
     assert result["source"]["larkUrl"].startswith("https://bytedance.larkoffice.com/")

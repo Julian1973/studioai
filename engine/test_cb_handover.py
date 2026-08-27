@@ -197,10 +197,13 @@ def _vp(speaker, text, occurrence=None):
             "sourceBeatId": occurrence.get("sourceBeatId", "source-beat:test:1.B1"),
             "speaker": speaker, "exactDialogue": text, "voiceIdentity": "",
             "dramaticIntention": "Claim admiration before the crash is classified.",
-            "subtext": "x", "relationshipTarget": "Zenny", "emotionalEntry": "x",
-            "emotionalExit": "x", "operativeWords": ["nailed"], "pace": "x", "rhythm": "x",
-            "pauses": "x", "breaths": "x", "nonVerbalActions": "x",
-            "elevenLabsV3Direction": "x",
+            "subtext": "He needs Zenny to believe the recovery was deliberate.",
+            "relationshipTarget": "Zenny", "emotionalEntry": "Bright confidence.",
+            "emotionalExit": "Covered embarrassment.", "operativeWords": ["nailed"],
+            "pace": "Quick and assured.", "rhythm": "A clean claim with a tiny catch.",
+            "pauses": "No pause before the claim.", "breaths": "One small recovery breath.",
+            "nonVerbalActions": "His chest lifts as his eyes check Zenny.",
+            "elevenLabsV3Direction": "[proud, covering a wobble]",
             "physicalActionRelationship": "Enters only after the rebound settles.",
             "expectedTiming": "just after the rebound"}
 

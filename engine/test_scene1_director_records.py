@@ -57,14 +57,14 @@ def test_s1s4_corrected_emission_fixture_and_regressions():
     assert golden == target
     assert "A distant thunder rumble interrupts the pollen aftermath; Fuzzby pauses" not in prompt
     assert "Fuzzby answers the warning, accelerates as if proving it" not in prompt
-    assert "@图1 is the first frame — the final frame of the previous shot." in prompt
-    assert "Begin naturally from it: Fuzzby is frame-left, coated in golden pollen" in prompt
+    assert "@图1 is the first frame and the previous shot's approved final frame." in prompt
+    assert "Fuzzby is frame-left, coated in golden pollen" in prompt
     assert "with exhales delivery" not in prompt
     assert "with quietly delivery" not in prompt
     assert "with the approved delivery" not in prompt
-    assert "Dialogue placement: Fuzzby, performed calm over covered fear:" in prompt
-    assert "Dialogue placement: Zenny, quiet and unhurried, without drama:" in prompt
-    assert "Dialogue placement: Fuzzby, at full volume, before the launch:" in prompt
+    assert "Spoken action: Fuzzby, performed calm over covered fear:" in prompt
+    assert "Spoken action: Zenny, quiet and unhurried, without drama:" in prompt
+    assert "Spoken action: Fuzzby, at full volume, before the launch:" in prompt
     assert "pose holds a full beat after the line ends" not in _shot_block(prompt, 3)
     assert prompt.count("Exactly one Fuzzby and one Zenny throughout") == 1
     assert "No watermark." in prompt

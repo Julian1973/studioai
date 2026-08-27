@@ -67,6 +67,24 @@ def test_animation_compiler_suppresses_numbered_reference_prose_from_ownership()
     assert clean == ["The map belongs only to Keen."]
 
 
+def test_seedance25_prompt_adapter_removes_legacy_controls_without_rewriting_action():
+    source = (
+        "4K ultra HD, 60fps, HDR, subject {1.2}, "
+        "Consistency/Creativity: Consistency 80 / Creativity 20. "
+        "High Quality + Cloth Simulation Optimization. "
+        "Fuzzby loads the leaf with his weight, then recovers into a proud hold."
+    )
+
+    adapted = D.adapt_seedance25_prompt(source)
+
+    assert "4K" not in adapted and "60fps" not in adapted and "HDR" not in adapted
+    assert "{1.2}" not in adapted
+    assert "Consistency/Creativity" not in adapted
+    assert "Cloth Simulation Optimization" not in adapted
+    assert "Fuzzby loads the leaf with his weight" in adapted
+    assert "recovers into a proud hold" in adapted
+
+
 def test_aerial_camera_contract_is_deterministic_compiler_boilerplate():
     aerial = SimpleNamespace(
         purpose="Squeaky aerial leap",
@@ -223,8 +241,10 @@ def test_voice_director_may_act_but_not_rewrite_locked_words():
         D.VoiceTakeRecipe(
             recipeId="B", label="alternate", performedText="[casual] Nailed it.",
             takesCount=2))
-    with pytest.raises(RuntimeError, match="omitted dramatic purpose.*casual"):
-        D.validate_voice_direction(missing_take_tag_purpose, _locked())
+    repaired = D.validate_voice_direction(missing_take_tag_purpose, _locked())
+    purposes = {item.tag: item.purpose for item in repaired.lines[0].tagPurposes}
+    assert "casual" in purposes
+    assert purposes["casual"]
 
 
 def test_voice_direction_uses_openai_strict_tag_purpose_rows():
@@ -276,8 +296,12 @@ def test_animation_provider_shell_enforces_audio_lock_and_continuity_contract():
 
     assert compiled.startswith("AUDIO-AUTHORITY: @Audio1 is the sole authority")
     assert "listeners remain silent and closed-mouth" in compiled
-    assert "Dialogue placement: Fuzzby: {Nailed it.}" in compiled
-    assert "Dialogue placement: Zenny: {Officially nuts!}" in compiled
+    assert "[AUDIO AND EXCLUSIONS]" in compiled
+    assert "No improvised or extra words" in compiled
+    assert "no duplicated cast members" in compiled
+    assert "Seedance may generate non-verbal music, ambience and SFX" in compiled
+    assert "Spoken action: Fuzzby: {Nailed it.}" in compiled
+    assert "Spoken action: Zenny: {Officially nuts!}" in compiled
     assert "@Audio1 remains the sole English dialogue and performance authority." in compiled
     assert compiled.index("[Global Supplement]") < compiled.index("[Audio]")
     for term in ("identity", "character count", "prop ownership", "camera axis",
@@ -416,8 +440,9 @@ def test_relay_opening_frame_contract_overrides_stale_first_frame_wording():
     assert "Use it only for carried character state" in compiled
     assert "Do not use it as the scene geography" in compiled
     assert "camera framing" in compiled
-    assert "pier layout" in compiled
-    assert "boat-position" in compiled
+    assert "environment layout" in compiled
+    assert "pier layout" not in compiled
+    assert "boat-position" not in compiled
     assert compiled.count("图1 is the first frame") == 1
     assert "It defines opening composition and state" not in compiled
 
@@ -560,7 +585,7 @@ def test_seedance_director_returns_shot_plan_and_separate_reference_contract(mon
     compiled = D.compile_animation_provider_prompt(
         {"shotId": "S1.SH1", "durationSec": 8, "dialogueLines": []}, out)
     assert "[Camera and Shot Plan]" in compiled
-    assert "Shot 1: Camera: Medium 40mm, slow motivated push" in compiled
+    assert "Phase 1: Camera: Medium 40mm, slow motivated push" in compiled
     assert "Action: His paw loads the plank and the deck kicks back" in compiled
     assert "Emotion/Camera Analysis:" not in compiled
     assert "Stage 1: 0-8s" not in compiled
@@ -823,18 +848,84 @@ def test_animation_prompt_is_compiled_from_typed_beat_truth_not_free_prose():
     assert "[Timestamp Script Storyboard]" not in prompt
     assert "Stage 1: 0-9s" not in prompt
     assert "Hold: 2.2s" in prompt
-    assert "Dialogue placement: Fuzzby: {Nailed it.}" in prompt
+    assert "Spoken action: Fuzzby: {Nailed it.}" in prompt
     assert "Audio cues:" not in prompt
     assert "Physics: Fuzzby's sideways momentum depresses the leaf" in prompt
     assert "Include two readable near-misses before the first impact." in prompt
     assert ("Exactly one Fuzzby and one Zenny throughout; no duplicates of either "
             "character.") in prompt
     assert "@图2 defines exactly one Fuzzby identity/scale only" in prompt
-    assert "No music." in prompt
+    assert "[AUDIO AND EXCLUSIONS]" in prompt
+    assert "No narration. No improvised or extra words." in prompt
+    assert "no duplicated cast members" in prompt
+    assert "Seedance may generate non-verbal music, ambience and SFX" in prompt
     assert "Hold: 2.2s" in prompt and "approximately 2.2s" not in prompt
     # Length is advisory. The production gate measures whether the compiled prompt
     # delivers the beat and satisfies the Seedance/craft contracts.
     assert len(prompt.split()) > 0
+
+
+def test_animation_provider_prompt_emits_deterministic_dialogue_placements():
+    shot = {
+        "shotId": "7.B3.S1",
+        "durationSec": 20,
+        "charactersInFrame": ["Howey", "Aida", "Keen", "Squeaky"],
+        "dialogueLines": [
+            {"speaker": "Howey", "exactText": "He jumped in?!",
+             "delivery": "startled and immediate", "startSec": 0.3, "endSec": 1.4},
+            {"speaker": "Aida", "exactText": "He didn’t think twice.",
+             "delivery": "quiet and immediate", "startSec": 1.35, "endSec": 3.8},
+            {"speaker": "Keen", "exactText": "I’ve got you!",
+             "delivery": "breathy surface gasp", "startSec": 10.6, "endSec": 12.7},
+            {"speaker": "Keen", "exactText": "I’ve got this… I’ve got this…",
+             "delivery": "breathless surface self-command", "startSec": 13.2,
+             "endSec": 16.0},
+        ],
+    }
+    direction = {
+        "providerPrompt": "Make a loose rescue scene.",
+        "generationGoal": "Keep rescue physics and speech timing causal.",
+        "dramaticBeat": "Keen chooses courage while still failing to free Squeaky.",
+        "performanceArc": "Witness fear becomes Keen surface-breath determination.",
+        "physicalCauseAndEffect": "Keen surfaces to speak, then dives back under silently.",
+        "cameraBehaviour": "Tight witness opening, no cuts, no handheld, then storm-water struggle.",
+        "creativeTranslation": {"interpretation": {
+            "mechanism": "Surface breaks own all clean speech.",
+            "emotionalHeart": "Keen reassures Squeaky before the rescue is solved.",
+        }},
+        "referenceContract": [{"assetTag": "@Audio1", "role": "audio",
+                               "controls": "the approved voice performance"}],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "startSec": 0.0,
+            "endSec": 20.0,
+            "beatIds": ["7.B3"],
+            "purpose": "Witness, dive and unresolved first rescue contact",
+            "initialOrCarriedState": "Howey and Aida look out to the distant boat.",
+            "cause": "Keen has jumped into the storm water.",
+            "primaryEvent": "Keen surfaces to speak and dives back under silently.",
+            "emotionOrCameraAnalysis": "Keep surface breath and underwater silence readable.",
+            "observableEndState": "Squeaky remains trapped and the rescue is unresolved.",
+        }],
+        "consistencyContract": ["No clean underwater speech."],
+        "geography": ["Storm-cove shore and storm water."],
+        "surgicalSafeguards": ["Squeaky is not freed in this shot."],
+        "continuityFinish": "Squeaky remains trapped and the rescue is unresolved.",
+        "audioContract": "Use @Audio1 unchanged; no music.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert "16:9" not in prompt
+    assert "480p" not in prompt
+    assert "model" not in prompt.lower()
+    assert "no cuts" not in prompt.lower()
+    assert "no handheld" not in prompt.lower()
+    assert "Spoken action: Howey, startled and immediate: {He jumped in?!}" in prompt
+    assert "Spoken action: Aida, quiet and immediate: {He didn’t think twice.}" in prompt
+    assert "Spoken action: Keen, breathy surface gasp: {I’ve got you!}" in prompt
+    assert ("Spoken action: Keen, breathless surface self-command: "
+            "{I’ve got this… I’ve got this…}") in prompt
 
 
 def test_character_reference_label_accepts_authority_first_contracts():
@@ -895,10 +986,10 @@ def test_physics_comes_from_general_approved_staging_registry():
     }
     prompt = D.compile_animation_provider_prompt(shot, direction)
     assert "Physics: The lantern pulls the rope taut" in prompt
-    assert "No music." in prompt
+    assert "Seedance may generate non-verbal music, ambience and SFX" in prompt
 
 
-def test_animation_compiler_emits_every_internal_shot_in_order():
+def test_animation_compiler_emits_continuous_internal_units_as_timed_phases():
     shot = {
         "shotId": "S1.SH9A", "durationSec": 12, "charactersInFrame": ["A", "B"],
         "dialogueLines": [],
@@ -930,7 +1021,10 @@ def test_animation_compiler_emits_every_internal_shot_in_order():
         "audioContract": "Natural movement and plant foley only.",
     }
     prompt = D.compile_animation_provider_prompt(shot, direction)
-    assert prompt.index("Shot 1:") < prompt.index("Shot 2:") < prompt.index("Shot 3:")
+    assert "[Timed Action Phases" in prompt
+    assert "One continuous Seedance render" in prompt
+    assert "Shot 1:" not in prompt
+    assert prompt.index("Phase 1:") < prompt.index("Phase 2:") < prompt.index("Phase 3:")
     assert "follows slightly late" in prompt
     assert "compresses the flower and loads the springy leaf" in prompt
     assert "one flip and a proud wobbling hover" in prompt

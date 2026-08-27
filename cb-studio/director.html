@@ -46,8 +46,8 @@
         </button>
       </div>
       <div class="nav-foot">
-        <span>Episode 1</span>
-        <strong>The Adventure Begins</strong>
+        <span id="nav-episode-label">Episode 1</span>
+        <strong id="nav-episode-title">The Adventure Begins</strong>
       </div>
     </nav>
 
@@ -108,7 +108,7 @@
       <section class="studio-view" id="view-episodes" aria-labelledby="episodes-title" hidden>
         <div class="view-heading">
           <div>
-            <p class="eyebrow">Crystal Bears · Episode 1</p>
+            <p class="eyebrow" id="episodes-eyebrow">Crystal Bears · Episode 1</p>
             <h1 id="episodes-title">The Adventure Begins</h1>
           </div>
           <button type="button" class="primary compact" id="continue-directing">Continue directing</button>
@@ -147,6 +147,7 @@
         </div>
         <div class="director-scene-strip" id="director-scene-strip" aria-label="Episode scenes"></div>
         <section class="scene-workbench" id="scene-workbench" aria-live="polite"></section>
+        <section class="production-line" id="production-line" aria-label="Production line"></section>
 
         <div class="media-stage" id="media-stage" aria-live="polite">
           <div class="stage-empty">

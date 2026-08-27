@@ -308,10 +308,24 @@ def compile_track(direction, locked_lines):
     compiled = []
     for index, line in enumerate(direction.get("lines") or []):
         locked = by_occurrence.get(line.get("dialogueOccurrenceId"))
-        if locked is None and line.get("dialogueOccurrenceId") is None and index < len(locked_lines):
+        if locked is None and index < len(locked_lines):
             positional = locked_lines[index]
-            if positional.get("dialogueOccurrenceId") is None:
-                locked = positional
+            # Legacy packages created before dialogue occurrence IDs were mandatory can
+            # still be compiled, but only when the positional line proves the same speaker
+            # and exact words. Promote the direction's ID into an in-memory copy so every
+            # downstream audit remains occurrence-bound. Never rewrite the script lock.
+            same_speaker = (
+                str(line.get("character") or line.get("speaker") or "").casefold() ==
+                str(positional.get("speaker") or "").casefold()
+            )
+            same_words = _words(line.get("exactDialogue")) == _words(
+                _locked_text(positional))
+            if (positional.get("dialogueOccurrenceId") is None and
+                    same_speaker and same_words):
+                locked = deepcopy(positional)
+                locked["dialogueOccurrenceId"] = line.get("dialogueOccurrenceId")
+                locked["sourceEventId"] = (
+                    locked.get("sourceEventId") or line.get("sourceEventId"))
         if not locked:
             raise VoiceContractError(
                 f"Direction references an unlocked dialogue occurrence: "

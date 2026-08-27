@@ -135,7 +135,7 @@ def test_dialogue_direction_requires_written_prose_and_hold_is_ruled():
     cue = {"speaker": "Performer", "exactText": "Now."}
     line = C.dialogue_placement_line(
         cue, direction="calm over covered fear", hold_after=False)
-    assert line == "Dialogue placement: Performer, calm over covered fear: {Now.}"
+    assert line == "Spoken action: Performer, calm over covered fear: {Now.}"
     assert "hold" not in line.casefold()
     with pytest.raises(C.EmissionConformanceError, match="raw token"):
         C.dialogue_placement_line(cue, direction="exhales")
@@ -152,7 +152,7 @@ def test_false_hold_flag_removes_specialist_pause_prose():
             "line ends before moving on"),
         hold_after=False)
     assert line == (
-        "Dialogue placement: Performer, brightens into welcome: {Hello.}")
+        "Spoken action: Performer, brightens into welcome: {Hello.}")
     assert "hold" not in line.casefold()
 
 
@@ -164,7 +164,7 @@ def test_true_hold_flag_emits_one_compiler_owned_hold():
             "softens; hold the expression a full beat after the line ends before turning"),
         hold_after=True)
     assert line == (
-        "Dialogue placement: Performer, softens: {Goodbye.} "
+        "Spoken action: Performer, softens: {Goodbye.} "
         "The pose holds a full beat after the line ends.")
     assert line.casefold().count("hold") == 1
 
@@ -201,6 +201,23 @@ No music."""
     report = S.preflight(prompt, duration_sec=30, timing_beats=[])
 
     assert len(prompt) > 2500
+    assert report["score"] == 10.0
+    assert report["verdict"] == "PASS"
+
+
+def test_emission_accepts_seedance_nonverbal_music_sfx_policy():
+    import cb_emission_standard as S
+
+    prompt = """image_1 defines the opening frame. Do not use its text.
+Dialogue language: English.
+Shot 1: Camera: hold the approved composition. Action: Keen looks to Aida and speaks.
+{Thank you.} Hold the pose for a full beat after the line ends.
+End state: the approved emotional beat is visibly complete.
+[AUDIO AND EXCLUSIONS]
+No narration. No improvised or extra words. No extra voices. No subtitles, captions, text overlays, or watermark. No character redesign, no wardrobe changes, no duplicated cast members, and no mouth movement from silent listeners. Seedance may generate non-verbal music, ambience and SFX that support the scene; do not add sung lyrics, vocal music, narration, or any additional spoken words."""
+
+    report = S.preflight(prompt, duration_sec=15, timing_beats=[])
+
     assert report["score"] == 10.0
     assert report["verdict"] == "PASS"
     assert not any(item["rule"] == "length" for item in report["findings"])

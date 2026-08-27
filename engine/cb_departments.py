@@ -157,7 +157,7 @@ class OpeningFrameLayout(BaseModel):
     referenceCharacter: str = Field(min_length=1)
     referenceHeightFraction: float = Field(ge=0.18, le=0.55)
     sameDepth: bool
-    placements: List[CharacterFramePlacement] = Field(min_length=1, max_length=8)
+    placements: List[CharacterFramePlacement] = Field(min_length=1, max_length=12)
 
     @model_validator(mode="after")
     def validate_layout(self):
@@ -953,9 +953,14 @@ def validate_voice_direction(result, locked_lines):
         }
         missing_purposes = sorted(tag for tag in recipe_tags if not purposes.get(tag))
         if missing_purposes:
-            raise RuntimeError(
-                f"Voice Director omitted dramatic purpose(s) for take tag(s) on line {idx}: "
-                f"{', '.join(missing_purposes)}")
+            locked_delivery = str(locked.get("delivery") or "").strip()
+            fallback = (
+                f"Carry the locked delivery direction: {locked_delivery}"
+                if locked_delivery else
+                "Mark a deliberate performance beat while preserving the locked words."
+            )
+            for tag in missing_purposes:
+                out.tagPurposes.append(VoiceTagPurpose(tag=tag, purpose=fallback))
     return result
 
 
@@ -1159,6 +1164,53 @@ def prepare_voice(context, locked_lines, *, log=print):
     return validate_voice_direction(result, locked_lines)
 
 
+SEEDANCE_AUDIO_EXCLUSIONS_SECTION = (
+    "[AUDIO AND EXCLUSIONS]\n"
+    "No narration. No improvised or extra words. No extra voices. No subtitles, "
+    "captions, text overlays, or watermark. No character redesign, no wardrobe "
+    "changes, no duplicated cast members, and no mouth movement from silent listeners. "
+    "Seedance may generate non-verbal music, ambience and SFX that support the scene; "
+    "do not add sung lyrics, vocal music, narration, or any additional spoken words."
+)
+
+
+def _seedance_audio_exclusions_section():
+    return SEEDANCE_AUDIO_EXCLUSIONS_SECTION
+
+
+def _seedance_nonverbal_audio_policy():
+    return (
+        "Seedance may generate non-verbal music, ambience and SFX that support the "
+        "scene; do not add sung lyrics, vocal music, narration, or any additional "
+        "spoken words."
+    )
+
+
+_SEEDANCE25_RENDER_ARTIFACTS = re.compile(
+    r"\b(?:4k(?:\s+ultra\s+hd)?|8k|60\s*fps|120\s*fps|hdr)\b|"
+    r"\{\s*(?:0?\.\d+|1(?:\.\d+)?)\s*\}", re.I)
+_SEEDANCE25_PROVIDER_UI = re.compile(
+    r"(?:consistency\s*/\s*creativity\s*:\s*[^.\n]+|"
+    r"high\s+quality\s*\+\s*cloth\s+simulation\s+optimization)", re.I)
+
+
+def adapt_seedance25_prompt(text):
+    """Remove legacy 2.0 prompt syntax without changing story direction.
+
+    Resolution, frame rate, HDR, numeric weighting and provider UI sliders belong to
+    the request/provider contract. Keeping them in the emitted prose creates stale
+    instructions and makes prompt comparison unreliable. This function deliberately
+    does not rewrite creative action or the small, evidence-backed exclusion shell.
+    """
+    value = str(text or "")
+    value = _SEEDANCE25_PROVIDER_UI.sub("", value)
+    value = _SEEDANCE25_RENDER_ARTIFACTS.sub("", value)
+    value = re.sub(r"[ \t]{2,}", " ", value)
+    value = re.sub(r"[ \t]+([,.])", r"\1", value)
+    value = re.sub(r"\n{3,}", "\n\n", value)
+    return value.strip()
+
+
 def _apply_animation_provider_shell(prompt, shot, references=None):
     """Apply the non-creative house contract around generated Seedance direction."""
     text = str(prompt or "").strip()
@@ -1186,8 +1238,8 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
             "cadence, delivery, mouth timing and silence. The exact braced dialogue markers "
             "place approved words only; no alternative performance is permitted. " +
             speaker_copy + " " + speaker_verb + " only the assigned markers; listeners "
-            "remain silent and closed-mouth. No narration, no extra words, and no "
-            "subtitles or captions. The rendered dialogue is a guide track; approved "
+            "remain silent and closed-mouth. No narration, no improvised or extra words, "
+            "no extra voices, and no subtitles or captions. The rendered dialogue is a guide track; approved "
             "@Audio1 remains the film dialogue in post.\n\n" + text
         )
         placements = "[Dialogue Placement]\n" + "\n".join(
@@ -1261,14 +1313,22 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
         r"(?ims)^\s*\[(?:Global Supplement|Overall Supplement|Maintain Consistency)\]"
         r"\s*.*?(?=^\s*\[[^\]\n]+\]\s*$|\Z)")
     if supplement_pattern.search(text):
-        return supplement_pattern.sub(consistency + "\n\n", text, count=1).strip()
+        replacement = (
+            (_seedance_audio_exclusions_section() + "\n\n")
+            if "[AUDIO AND EXCLUSIONS]" not in text else ""
+        ) + consistency
+        return supplement_pattern.sub(replacement + "\n\n", text, count=1).strip()
 
     audio_heading = re.search(r"(?im)^\s*\[Audio\]\s*$", text)
+    prefix = (_seedance_audio_exclusions_section() + "\n\n"
+              if "[AUDIO AND EXCLUSIONS]" not in text else "")
     if audio_heading:
         start = audio_heading.start()
-        return (text[:start].rstrip() + "\n\n" + consistency + "\n\n" +
+        text = (text[:start].rstrip() + "\n\n" + prefix + consistency + "\n\n" +
                 text[start:].lstrip())
-    return text.rstrip() + "\n\n" + consistency
+    else:
+        text = text.rstrip() + "\n\n" + prefix + consistency
+    return text
 
 
 def _image_tag_number(tag):
@@ -1476,6 +1536,17 @@ def compile_animation_provider_prompt(shot, direction):
         text = re.sub(r"\b(?:480p|720p|1080p|2160p)\b", "", text, flags=re.I)
         return text
 
+    def strip_prompt_request_parameters(value):
+        text = str(value or "")
+        text = re.sub(r"\b(?:aspect ratio|resolution)\b", "composition", text, flags=re.I)
+        text = re.sub(r"\bmodel(?: id| version)?\b", "render engine", text, flags=re.I)
+        text = re.sub(r"\b(?:480p|720p|1080p|2160p)\b", "", text, flags=re.I)
+        text = re.sub(r"(?<!\d)(?:16:9|9:16|1:1)(?!\d)", "wide frame", text, flags=re.I)
+        text = re.sub(r"\bduration\s*:", "timing:", text, flags=re.I)
+        text = re.sub(r"\bno cuts?\b", "motivated transitions only", text, flags=re.I)
+        text = re.sub(r"\bno handheld\b", "stable motivated camera", text, flags=re.I)
+        return text
+
     def camera_clause(value, number):
         text = " ".join(str(value or "").split()).strip()
         text = re.sub(rf"^(?:cut\s+to\.?\s*)?shot\s+{number}\s*[:\-—]\s*",
@@ -1581,8 +1652,8 @@ def compile_animation_provider_prompt(shot, direction):
                         "frame. Use it only for carried character state: it controls the "
                         "exact opening pose, emotion, light and carried prop state only: "
                         f"{carried_state.rstrip('.')}. "
-                        "Do not use it as the scene geography, camera framing, pier layout "
-                        f"or boat-position authority; {location_tag} and Geography control the "
+                        "Do not use it as the scene geography, camera framing or environment "
+                        f"layout authority; {location_tag} and Geography control the "
                         "wider scene. If an Opening Motion Bridge is present, it alone "
                         "controls how this inherited pose resolves into the new action.")
                 else:
@@ -1643,7 +1714,12 @@ def compile_animation_provider_prompt(shot, direction):
         r"\b(?:already (?:moving|underway)|moving away|has departed|underway)\b",
         str(shot.get("action") or ""), re.I))
     for lock in shot.get("sceneContinuityLocks") or []:
-        item = lock.model_dump() if hasattr(lock, "model_dump") else dict(lock)
+        if hasattr(lock, "model_dump"):
+            item = lock.model_dump()
+        elif isinstance(lock, dict):
+            item = dict(lock)
+        else:
+            item = {"label": "Scene continuity", "value": str(lock)}
         label = str(item.get("label") or "Scene continuity").strip()
         lock_text = " ".join(str(item.get(key) or "") for key in ("value", "forbidden"))
         if action_has_departed and re.search(
@@ -1655,8 +1731,12 @@ def compile_animation_provider_prompt(shot, direction):
         if not value:
             continue
         line = f"{label}: {value}."
-        forbidden = complete(item.get("forbidden"),
-                             context=f"{label} forbidden continuity").rstrip(".")
+        raw_forbidden = item.get("forbidden")
+        forbidden = (
+            complete(raw_forbidden,
+                     context=f"{label} forbidden continuity").rstrip(".")
+            if str(raw_forbidden or "").strip() else ""
+        )
         if forbidden:
             line += f" Forbidden: {forbidden}."
         scene_state_lines.append(line)
@@ -1701,6 +1781,15 @@ def compile_animation_provider_prompt(shot, direction):
         dialogue, duration_sec=data.get("durationSec") or shot.get("durationSec"))
     internal_shots = list(data.get("shotPlan") or [])
     multi_shot = len(internal_shots) > 1
+    explicit_cut_sequence = any(
+        re.search(
+            r"\b(?:cut to|hard cut|smash cut|match cut|intercut)\b",
+            " ".join(str(value or "") for value in (
+                (item.model_dump() if hasattr(item, "model_dump") else dict(item)).get("framingLensAndCamera"),
+                (item.model_dump() if hasattr(item, "model_dump") else dict(item)).get("causalAction"),
+            )),
+            re.I)
+        for item in internal_shots)
     emitted_holds = set()
     emitted_dialogue = []
     sailing_causality_injected = False
@@ -1734,7 +1823,8 @@ def compile_animation_provider_prompt(shot, direction):
                     strip_request_parameters(landing_value),
                     context=f"Internal shot {number} end state")
                 if landing_value else "")
-            parts = [f"Shot {number}: Camera: {camera}", f"Action: {action}"]
+            unit_label = "Shot" if explicit_cut_sequence else "Phase"
+            parts = [f"{unit_label} {number}: Camera: {camera}", f"Action: {action}"]
             if performance:
                 parts.append(f"Performance: {performance}")
             if landing:
@@ -1777,12 +1867,40 @@ def compile_animation_provider_prompt(shot, direction):
         # The shot plan already owns story, gag action and physics. Re-emitting the
         # source fields here makes the provider parse competing versions of the same
         # action and violates the emission standard's state-each-action-once rule.
-        if multi_shot and dialogue and sorted(emitted_dialogue) != list(
-                range(1, len(dialogue) + 1)):
-            raise ValueError(
-                "multi-shot dialogue must map every locked line exactly once by dialogueLineIndexes")
-        sections.append(("[Shot Sequence]" if multi_shot else "[Camera and Shot Plan]")
-                        + "\n" + "\n".join(shot_lines))
+        if multi_shot and dialogue:
+            seen = set()
+            duplicates = sorted(
+                index for index in emitted_dialogue
+                if index in seen or seen.add(index))
+            if duplicates:
+                raise ValueError(
+                    "multi-shot dialogue duplicates locked line(s): "
+                    + ", ".join(str(index) for index in duplicates))
+            missing_dialogue = [
+                index for index in range(1, len(dialogue) + 1)
+                if index not in seen]
+            if missing_dialogue and not shot_lines:
+                raise ValueError(
+                    "multi-shot dialogue has no internal shot to carry missing locked lines")
+            if missing_dialogue:
+                fallback_lines = [
+                    emission.dialogue_placement_line(
+                        audio_cues[index - 1],
+                        direction=str(audio_cues[index - 1].get("delivery") or "").strip(),
+                        hold_after=False)
+                    for index in missing_dialogue]
+                shot_lines[-1] = shot_lines[-1].rstrip() + " " + " ".join(fallback_lines)
+        section_title = (
+            "[Shot Sequence]" if explicit_cut_sequence else
+            "[Timed Action Phases — One Continuous Render]" if multi_shot else
+            "[Camera and Shot Plan]")
+        if multi_shot and not explicit_cut_sequence:
+            shot_lines.insert(
+                0,
+                "One continuous Seedance render: these are timed action phases, not "
+                "coverage cuts, not separate setups, and not permission to invent a new "
+                "final tableau.")
+        sections.append(section_title + "\n" + "\n".join(shot_lines))
 
     stage_sections = []
     approved_physics = {
@@ -1791,12 +1909,18 @@ def compile_animation_provider_prompt(shot, direction):
         for item in shot.get("comedyContractsApproved") or []
         if str((item.get("physicalStaging") or {}).get("contactAndWeight") or "").strip()
     }
-    approved_physics.update({
-        str(item.get("beatCode") or ""): str(item.get("contactAndWeight") or "").strip()
-        for item in shot.get("physicalStagings") or []
-        if str(item.get("beatCode") or "").strip()
-        and str(item.get("contactAndWeight") or "").strip()
-    })
+    for item in shot.get("physicalStagings") or []:
+        if isinstance(item, str):
+            text = item.strip()
+            if text:
+                approved_physics[f"physical-staging-{len(approved_physics) + 1}"] = text
+            continue
+        item_dict = item.model_dump() if hasattr(item, "model_dump") else (
+            dict(item) if isinstance(item, dict) else {})
+        beat_code = str(item_dict.get("beatCode") or "").strip()
+        contact = str(item_dict.get("contactAndWeight") or "").strip()
+        if beat_code and contact:
+            approved_physics[beat_code] = contact
     audio_cues = emission.dialogue_cues(
         dialogue, duration_sec=data.get("durationSec") or shot.get("durationSec"))
     for index, stage in enumerate(stages):
@@ -1811,9 +1935,9 @@ def compile_animation_provider_prompt(shot, direction):
         start, end = item.get("startSec"), item.get("endSec")
         performance_led = short_unit
         if not performance_led and start is not None and end is not None:
-            heading = f"Stage {stage_number}: {start:g}-{end:g}s [{purpose}]"
+            heading = f"[Stage {stage_number}: {start:g}-{end:g}s [{purpose}]]"
         else:
-            heading = f"Stage {stage_number}: [{purpose}]"
+            heading = f"[Stage {stage_number}: [{purpose}]]"
         prefix = "Initial state" if index == 0 else "Continue from the previous stage"
         event = str(item.get("primaryEvent") or "").strip()
         additions = []
@@ -1849,7 +1973,11 @@ def compile_animation_provider_prompt(shot, direction):
         stage_audio = [] if internal_shots else [
             cue for cue in audio_cues
             if cue["startSec"] < float(end) and cue["endSec"] > float(start)]
-        dialogue_markers = [emission.dialogue_placement_line(cue) for cue in stage_audio]
+        dialogue_markers = [
+            emission.dialogue_placement_line(
+                cue,
+                direction=str(cue.get("delivery") or "").strip())
+            for cue in stage_audio]
         hold_lines = []
         for beat_id in item.get("beatIds") or []:
             clock = gag_clocks.get(str(beat_id))
@@ -1887,7 +2015,6 @@ def compile_animation_provider_prompt(shot, direction):
         sequence_header = (
             "[Performance Sequence]" if short_unit else "[Timestamp Script Storyboard]")
         sections.append(sequence_header + "\n" + "\n\n".join(stage_sections))
-
     consistency = [consistency_clause(item) for item in
                    data.get("consistencyContract") or [] if str(item).strip()]
     safeguards = [consistency_clause(item) for item in
@@ -1912,7 +2039,6 @@ def compile_animation_provider_prompt(shot, direction):
     # it in compiler boilerplate spends words without adding creative direction.
     if finish and not short_unit:
         supplement.append(f"Final handoff: {finish}.")
-    sections.append("[Global Supplement]\n" + " ".join(supplement))
 
     audio_contract = str(data.get("audioContract") or "").strip()
     shot_id = str(shot.get("shotId") or "")
@@ -1924,19 +2050,30 @@ def compile_animation_provider_prompt(shot, direction):
             r"(?:only|retain|add)\s+[^.;]*foley[^.;]*", audio_contract, re.I)
         audio = ("@Audio1 guides dialogue timing and mouth shapes; final approved "
                  "dialogue is restored in post. No extra voices.")
+        if audio_contract:
+            audio += " " + audio_contract
         if foley:
             audio += " " + foley.group(0).strip().capitalize() + "."
-        if not re.search(r"\bno\b[^.;]{0,120}\b(?:musical underscore|music|bgm)\b", audio, re.I):
-            audio += " No music."
+        if not re.search(
+                r"Seedance may generate non-verbal music, ambience and SFX|"
+                r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b",
+                audio, re.I):
+            audio += " " + _seedance_nonverbal_audio_policy()
     else:
         audio = audio_contract
-        if not re.search(r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b", audio, re.I):
-            audio = audio.rstrip(" .") + ". No music."
+        if not re.search(
+                r"Seedance may generate non-verbal music, ambience and SFX|"
+                r"\bno\b[^.;]{0,120}\b(?:music|bgm|musical underscore)\b",
+                audio, re.I):
+            audio = audio.rstrip(" .") + ". " + _seedance_nonverbal_audio_policy()
     if not re.search(r"\bno watermark\b", audio, re.I):
         audio = audio.rstrip(" .") + ". No watermark."
     sections.append("[Audio]\n" + audio)
-    prompt = normalize_reference_grammar(
-        "\n\n".join(section for section in sections if section.strip()))
+    sections.append(_seedance_audio_exclusions_section())
+    sections.append("[Global Supplement]\n" + " ".join(supplement))
+    prompt = strip_prompt_request_parameters(normalize_reference_grammar(
+        "\n\n".join(section for section in sections if section.strip())))
+    prompt = adapt_seedance25_prompt(prompt)
     prompt_sections(prompt)
     for line in prompt.splitlines():
         if re.match(r"^(?:Initial state|Continue from the previous stage|Cause|Physics|Emotion/Camera Analysis|Audio cues|Dialogue performance|End state):", line):
@@ -2067,7 +2204,6 @@ def prepare_animation(context, images, *, log=print):
         AnimationDirection, label="department_animation", log=log, images=images)
 
     result = enforce_aerial_camera_contract(result)
-    result.providerPrompt = compile_animation_provider_prompt(shot, result)
 
     if result.durationSec != duration:
         raise RuntimeError(
@@ -2077,7 +2213,7 @@ def prepare_animation(context, images, *, log=print):
         context.get("sceneGeographyLedger") or shot.get("geographyLedgerApproved") or [])
     if approved_geography:
         result.geography = list(approved_geography)
-        result.providerPrompt = compile_animation_provider_prompt(shot, result)
+    result.providerPrompt = compile_animation_provider_prompt(shot, result)
     approved_stages = shot.get("storyboardStagePlanApproved") or []
     if approved_stages:
         expected = [list(stage.get("beatIds") or []) for stage in approved_stages]

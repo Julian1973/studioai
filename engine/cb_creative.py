@@ -634,7 +634,7 @@ _CANON_SOURCES = {
 }
 
 
-def _script_package(episode):
+def _script_package(episode, cast_scope=None, validate_canon=True):
     cands = sorted((ROOT / "cb-output").glob(f"{episode}_*beat_package.json"),
                    key=lambda p: p.stat().st_mtime)
     if not cands:
@@ -653,12 +653,15 @@ def _script_package(episode):
             f"{current['scriptVersionId']} is active. Approve Story & Direction for the active script first.")
     if source.get("sha256") != current["sha256"]:
         raise RuntimeError(f"SCRIPT LINEAGE CORRUPT — {path.name}'s script hash does not match its version ID")
-    cast = sorted({name for beat in pkg.get("beats") or []
-                   for name in beat.get("characters") or [] if name})
-    try:
-        lock = cb_canon.require_locked(episode, cast, root=ROOT)
-    except cb_canon.CanonLockError as exc:
-        raise RuntimeError(str(exc)) from exc
+    cast = sorted(cast_scope) if cast_scope is not None else sorted({
+        name for beat in pkg.get("beats") or []
+        for name in beat.get("characters") or [] if name})
+    lock = cb_canon.status(episode, cast, root=ROOT)
+    if validate_canon:
+        try:
+            lock = cb_canon.require_locked(episode, cast, root=ROOT)
+        except cb_canon.CanonLockError as exc:
+            raise RuntimeError(str(exc)) from exc
     expected_input = cb_lineage.dependency_signature(
         "beat-package-input", {
             "scriptVersionId": current["scriptVersionId"],
@@ -672,7 +675,7 @@ def _script_package(episode):
     return path
 
 
-def load_canon_envelope(episode="Ep1", log=print):
+def load_canon_envelope(episode="Ep1", cast_scope=None, log=print):
     env = {"episode": episode, "canonVersion": CANON_VERSION, "builtAt": _now(),
            "sources": {}, "gaps": [], "conflicts": []}
     for key, path in _CANON_SOURCES.items():
@@ -681,10 +684,11 @@ def load_canon_envelope(episode="Ep1", log=print):
                                      "sha256": cb_lineage.sha256_file(path)}
         else:
             env["gaps"].append(f"{key}: {path.name} not present (optional context)")
-    spath = _script_package(episode)
+    spath = _script_package(episode, cast_scope=cast_scope)
     pkg = json.loads(spath.read_text())
-    cast = sorted({name for beat in pkg.get("beats") or []
-                   for name in beat.get("characters") or [] if name})
+    cast = sorted(cast_scope) if cast_scope is not None else sorted({
+        name for beat in pkg.get("beats") or []
+        for name in beat.get("characters") or [] if name})
     try:
         lock = cb_canon.require_locked(episode, cast, root=ROOT)
     except cb_canon.CanonLockError as exc:
@@ -730,7 +734,7 @@ def _canonical_exemplars(limit=6):
 
 
 def _script_beats(episode, scene_num=None):
-    d = json.load(open(_script_package(episode)))
+    d = json.load(open(_script_package(episode, validate_canon=False)))
     # Readers may order or scope their own view, but must never mutate the loaded canonical
     # package: its signed content identity cannot depend on which helper happened to read it.
     beats = list(d.get("beats") or [])
@@ -939,17 +943,17 @@ def gate0_readiness(episode, scene_num, brief, log=print):
     unresolved performance fields, authors a PROPOSED canon completion for human
     approval. The run proceeds on ESTABLISHED canon only — proposals are saved for
     Julian's decision, never fed into directing."""
-    env = load_canon_envelope(episode, log=log)
     beats, script_pkg = _script_beats(episode, scene_num)
     if not beats:
         raise RuntimeError(f"no script material for scene {scene_num}")
+    cast = sorted({c for b in beats for c in (b.get("characters") or [])})
+    env = load_canon_envelope(episode, cast_scope=cast, log=log)
     source_report = cb_lineage.validate_beat_package_source_contract(script_pkg)
     if not source_report["ok"]:
         raise RuntimeError(
             "STALE STORY INTAKE — the canonical beat package has no valid exact-event "
             "contract (" + ", ".join(source_report["issues"][:5]) + "). Rebuild or "
             "mechanically migrate Story Intake before directing this scene.")
-    cast = sorted({c for b in beats for c in (b.get("characters") or [])})
     unresolved = _unresolved_fields_for(cast)
     proposal_path = None
     if unresolved:
@@ -1104,6 +1108,20 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         f"order). Source IDs are immutable facts and will be mechanically restored after "
         f"your creative pass; never merge, drop, duplicate or reorder a source beat.",
         SceneDirection, label=f"gate3_beats_s{scene_num}")
+    missing_supervision = [
+        beat.beatId for beat in sd.beats
+        if not beat.emotionContract or not beat.comedyContract
+    ]
+    if missing_supervision and not review_notes:
+        repair_note = (
+            "Validation repair: every beat must include both a complete typed "
+            "emotionContract and a complete typed comedyContract, including NONE comedy. "
+            "Missing on: " + ", ".join(missing_supervision)
+        )
+        log(f"  [director] gate3_beats_s{scene_num}: {repair_note} - rerunning once", flush=True)
+        return gate3_beats(
+            episode, scene_num, vision, selection, treatment, ready,
+            review_notes=repair_note, log=log)
     # The Director owns meaning inside each beat, never source identity.
     expected_codes = [str(beat.get("beatCode")) for beat in ready["beats"]]
     returned_codes = [str(beat.beatId) for beat in sd.beats]
@@ -1218,7 +1236,7 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
                           review_notes="", log=print):
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (redesign the SEQUENCE — never patch "
              f"wording): {review_notes}" if review_notes else "")
-    sc = cb_llm.structured(
+    sc = cb_llm.structured_with_repair(
         _mind("DIRECTOR AND CINEMATOGRAPHER, IN SHOT CONFERENCE",
               ["directorTaste", "cinematographyTaste"],
               "Design the sequence TOGETHER as Seedance 2.5 PRODUCTION UNITS, not routine "
@@ -1318,8 +1336,9 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # GATE 5 — PERFORMANCE AND VOICE SYNTHESIS
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
-    pp = cb_llm.structured(
+def gate5_performance(episode, scene_num, treatment, sd, shots,
+                      review_notes="", log=print):
+    pp = cb_llm.structured_with_repair(
         _mind("DIRECTOR", ["directorTaste"],
               "The visual sequence now exists. Author each shot's PHYSICAL PERFORMANCE, "
               "ANIMATION TIMING and typed performanceContract. performanceContract.beatOwner "
@@ -1357,7 +1376,9 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
         + _characters_for(sorted({name for beat in sd.beats
                                   for name in beat.participatingCharacters}))[:10000]
         + f"\n\nTHE SHOT SEQUENCE:\n"
-        + "\n".join(s.model_dump_json() for s in shots),
+        + "\n".join(s.model_dump_json() for s in shots)
+        + (f"\n\nVALIDATION REPAIR - return the complete performance pass again. "
+           f"Do not change the shot sequence: {review_notes}" if review_notes else ""),
         PerformancePass, label=f"gate5_perf_s{scene_num}")
     expected_ids = [shot.shotId for shot in shots]
     returned_ids = [shot.shotId for shot in pp.shots]
@@ -1400,9 +1421,18 @@ def gate5_performance(episode, scene_num, treatment, sd, shots, log=print):
                 f"PERFORMANCE CONTRACT DUPLICATED CHARACTER TRUTH in {s.shotId}")
         for truth in contract.characterTruths:
             if _norm(truth.character) not in allowed_norm:
-                raise RuntimeError(
+                message = (
                     f"PERFORMANCE CONTRACT UNKNOWN CHARACTER TRUTH - {s.shotId} names "
-                    f"{truth.character}")
+                    f"{truth.character}; every characterTruth and phase performer must be "
+                    f"one of {allowed} or ENVIRONMENT for this shot"
+                )
+                if not review_notes:
+                    log(f"  [director] gate5_perf_s{scene_num}: {message} - rerunning once",
+                        flush=True)
+                    return gate5_performance(
+                        episode, scene_num, treatment, sd, shots,
+                        review_notes=message, log=log)
+                raise RuntimeError(message)
         performing_characters = {
             _norm(phase.performer) for phase in contract.phases
             if _norm(phase.performer) != "environment"
@@ -1493,6 +1523,14 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
         if isinstance(locked, dict):
             speaker, exact_text = locked["speaker"], locked["exactText"]
             occurrence_id = locked["dialogueOccurrenceId"]
+            # Provider output may preserve the immutable digest while dropping this
+            # repository-owned namespace. Restore the namespace mechanically; never ask
+            # a creative model to author source identity.
+            if (voice.dialogueOccurrenceId and
+                    occurrence_id.endswith(voice.dialogueOccurrenceId) and
+                    occurrence_id.rsplit(voice.dialogueOccurrenceId, 1)[0] ==
+                    "dialogue-occurrence:"):
+                voice.dialogueOccurrenceId = occurrence_id
             if voice.dialogueOccurrenceId != occurrence_id:
                 raise RuntimeError(
                     f"VOICE PASS CHANGED/REORDERED occurrence {index}: expected "
@@ -1592,7 +1630,15 @@ def _assign_dialogue_occurrences(shots, voices, details):
         detail = detail_by_id.get(shot.shotId)
         if detail is None:
             continue
+        normalized_ids = []
         for occurrence_id in detail.dialogueOccurrenceIds:
+            matches = [expected_id for expected_id in expected
+                       if expected_id.endswith(occurrence_id)]
+            if occurrence_id not in owner_by_id and len(matches) == 1:
+                occurrence_id = matches[0]
+            normalized_ids.append(occurrence_id)
+        detail.dialogueOccurrenceIds = normalized_ids
+        for occurrence_id in normalized_ids:
             if occurrence_id not in owner_by_id:
                 raise RuntimeError(
                     f"DIALOGUE ASSIGNMENT UNKNOWN — {shot.shotId} names {occurrence_id}")

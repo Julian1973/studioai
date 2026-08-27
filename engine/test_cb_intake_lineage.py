@@ -158,6 +158,25 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     )
 
 
+def test_outcome_compression_plan_groups_beats_by_scene():
+    beats = [
+        {"sceneNumber": 1, "beatCode": "1.B1", "storyBeat": "Keen meets Fuzzby.",
+         "sourceEventIds": ["a"]},
+        {"sceneNumber": 1, "beatCode": "1.B2", "storyBeat": "The joke lands.",
+         "sourceEventIds": ["b"]},
+        {"sceneNumber": 2, "beatCode": "2.B1", "storyBeat": "A new location.",
+         "sourceEventIds": ["c"]},
+    ]
+
+    plan = cb_intake.build_outcome_compression_plan(beats)
+
+    assert [item["productionShotId"] for item in plan] == ["1.S1", "2.S1"]
+    assert plan[0]["sourceBeatCodes"] == ["1.B1", "1.B2"]
+    assert plan[0]["targetDurationSec"] == 30
+    assert plan[1]["targetDurationSec"] == 24
+    assert plan[0]["seeStageContract"]["blockWatchIf"]
+
+
 def test_new_script_approval_archives_previous_canonical_package(tmp_path, monkeypatch):
     store, first, episodes = _workspace(tmp_path, monkeypatch)
     old = tmp_path / "cb-output" / "Ep1_Old_beat_package.json"

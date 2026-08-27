@@ -1,70 +1,61 @@
 #!/usr/bin/env python3
-"""Zero-cost tests for cb_gen.generate_image()'s provider dispatcher (2026-07-09, THE PROVIDER SWITCH —
-Seedream 5 Pro is now the default keyframe model, NB2 kept live for rollback via CB_IMAGE_PROVIDER). No
-real API calls — the two provider implementations are monkeypatched, so this proves the ROUTING logic
-only, exactly matching the manual verification run before this file was written."""
-import cb_gen
+"""Zero-cost tests for the production image route lock.
+
+Every provider mutation is scoped through pytest's monkeypatch fixture. Running
+provider checks at import time used to leak stubs into unrelated production tests.
+"""
 import json
 
-PASS = 0
-FAIL = 0
+import pytest
 
-def check(label, cond):
-    global PASS, FAIL
-    if cond:
-        PASS += 1
-        print(f"  PASS  {label}")
-    else:
-        FAIL += 1
-        print(f"  FAIL  {label}")
-
-_orig_provider = cb_gen.IMAGE_PROVIDER
-
-def _reset():
-    cb_gen.IMAGE_PROVIDER = _orig_provider
-
-def _stub():
-    calls = []
-    cb_gen._generate_image_seedream = lambda *a, **k: calls.append(("seedream", a, k)) or "SEEDREAM_OUT"
-    cb_gen._generate_image_nanobanana = lambda *a, **k: calls.append(("nanobanana", a, k)) or "NB2_OUT"
-    return calls
-
-print("=== default provider (seedream) routes new calls to Seedream ===")
-_reset()
-calls = _stub()
-r = cb_gen.generate_image("prompt", ["ref1.png"], "16:9", "out1.png", production_route="cb_render")
-check("default IMAGE_PROVIDER is 'seedream'", cb_gen.IMAGE_PROVIDER == "seedream")
-check("returns the seedream path", r == "SEEDREAM_OUT")
-check("routed to the seedream implementation", calls and calls[-1][0] == "seedream")
-
-print("=== an explicit model= kwarg forces the nanobanana path regardless of IMAGE_PROVIDER ===")
-_reset()
-calls = _stub()
-r = cb_gen.generate_image("prompt", ["ref2.png"], "16:9", "out2.png", model="gemini-3.1-flash-image", production_route="cb_render")
-check("returns the nanobanana path", r == "NB2_OUT")
-check("routed to the nanobanana implementation", calls and calls[-1][0] == "nanobanana")
-check("model kwarg forwarded through", calls[-1][1][4] == "gemini-3.1-flash-image")
-
-print("=== CB_IMAGE_PROVIDER=nanobanana (rollback) routes with no explicit model ===")
-_reset()
-cb_gen.IMAGE_PROVIDER = "nanobanana"
-calls = _stub()
-r = cb_gen.generate_image("prompt", ["ref3.png"], "16:9", "out3.png", production_route="cb_render")
-check("returns the nanobanana path", r == "NB2_OUT")
-check("routed to the nanobanana implementation", calls and calls[-1][0] == "nanobanana")
-check("falls back to the module default IMAGE_MODEL", calls[-1][1][4] == cb_gen.IMAGE_MODEL)
-_reset()
-
-print("=== cb_costs.estimate_image_cost() matches the two-provider switch exactly ===")
 import cb_costs
-check("default (seedream) returns the seedream rate", cb_costs.estimate_image_cost() == cb_costs.RATES["seedream5pro_image"][0])
-check("provider='nanobanana2' returns the nanobanana rate", cb_costs.estimate_image_cost(provider="nanobanana2") == cb_costs.RATES["nanobanana2_image"][0])
-check("the two rates are genuinely different (not a copy-paste no-op)", cb_costs.RATES["seedream5pro_image"][0] != cb_costs.RATES["nanobanana2_image"][0])
+import cb_gen
 
-print(f"\n{PASS}/{PASS+FAIL} passed.")
-if FAIL:
-    raise SystemExit(f"{FAIL} FAILURE(S)")
-print("ALL PASS")
+
+def test_default_image_route_is_seedream(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        cb_gen, "_generate_image_seedream",
+        lambda *args, **kwargs: calls.append((args, kwargs)) or "SEEDREAM_OUT")
+
+    assert cb_gen.IMAGE_PROVIDER == "seedream"
+    assert cb_gen.generate_image(
+        "prompt", ["ref1.png"], "16:9", "out1.png",
+        production_route="cb_render") == "SEEDREAM_OUT"
+    assert len(calls) == 1
+
+
+def test_explicit_image_model_override_is_refused(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        cb_gen, "_generate_image_seedream",
+        lambda *args, **kwargs: calls.append((args, kwargs)) or "SEEDREAM_OUT")
+
+    with pytest.raises(RuntimeError, match="model overrides"):
+        cb_gen.generate_image(
+            "prompt", ["ref2.png"], "16:9", "out2.png",
+            model="gemini-3.1-flash-image", production_route="cb_render")
+    assert calls == []
+
+
+def test_image_provider_fallback_is_refused(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cb_gen, "IMAGE_PROVIDER", "nanobanana")
+    monkeypatch.setattr(
+        cb_gen, "_generate_image_seedream",
+        lambda *args, **kwargs: calls.append((args, kwargs)) or "SEEDREAM_OUT")
+
+    with pytest.raises(RuntimeError, match="locked to Seedream 5 Pro"):
+        cb_gen.generate_image(
+            "prompt", ["ref3.png"], "16:9", "out3.png",
+            production_route="cb_render")
+    assert calls == []
+
+
+def test_image_cost_discloses_provider_and_reference_difference():
+    assert cb_costs.estimate_image_cost() == cb_costs.RATES["seedream5pro_image"][0]
+    assert cb_costs.estimate_image_cost(num_refs=3) == 0.096
+    assert cb_costs.RATES["seedream5pro_image"][0] != cb_costs.RATES["nanobanana2_image"][0]
 
 
 # ── THE BILLING PROFILE (Julian's directives, 2026-07-16: configured pricing, never a

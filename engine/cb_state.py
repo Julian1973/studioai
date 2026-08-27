@@ -369,10 +369,13 @@ def _shot_state(pkg, shot, scene, episode, scene_look_current, package_current):
 def _active_package_shots(pkg):
     """Return only production units that still belong to the live scene route."""
     retired = {"superseded", "archived", "inactive"}
+    def is_retired(shot):
+        status = str(shot.get("status") or "").strip().lower()
+        return (status in retired or status.startswith("skipped-") or
+                bool(shot.get("superseded")))
     return [
         shot for shot in (pkg.get("shots") or [])
-        if str(shot.get("status") or "").strip().lower() not in retired
-        and not shot.get("superseded")
+        if not is_retired(shot)
     ]
 
 

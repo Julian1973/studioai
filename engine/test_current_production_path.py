@@ -10,6 +10,7 @@ import cb_render as R
 from test_golden_path import (world, _approve_animation_direction,
                               _approve_director_review,
                               _cinematography_output,
+                              _fixture_reference_contract,
                               _voice_direction_output,
                               _test_seedance_25_contract)
 
@@ -30,6 +31,11 @@ def _approve_specialist_inputs(pkg):
     by_id = {s["shotId"]: s for s in pkg["shots"]}
     for ledger in pkg["continuityLedger"]:
         shot = by_id[ledger["shotId"]]
+        for index, line in enumerate(shot.get("dialogueLines") or []):
+            occurrence_id = line.get("dialogueOccurrenceId") or (
+                f"{shot['shotId']}.dialogue.{index + 1}")
+            line["dialogueOccurrenceId"] = occurrence_id
+            line["sourceEventId"] = line.get("sourceEventId") or occurrence_id
         ledger["departmentWork"] = {
             "cinematography": {"approved": {
                 "packageRevision": revision,
@@ -39,8 +45,110 @@ def _approve_specialist_inputs(pkg):
                 "output": _voice_direction_output(shot)}},
             "animation": {"approved": {
                 "packageRevision": revision,
-                "output": {"providerPrompt": shot["seedancePrompt"]}}},
+                "output": _animation_direction_output(shot)}},
         }
+
+
+def _animation_direction_output(shot):
+    duration = int(round(float(shot.get("durationSec") or 6)))
+    beat_id = shot.get("beatCode") or "1.B1"
+    data = {
+        "shotId": shot["shotId"],
+        "durationSec": duration,
+        "taskMode": "reference-to-video",
+        "pacingMode": "storyline",
+        "generationGoal": "Deliver the approved production beat with readable cause and effect.",
+        "deliveryPlan": "Use the approved stage, references, voice authority, and continuity finish.",
+        "creativeTranslation": {
+            "interpretation": {
+                "jokeOrAche": "The approved fixture beat.",
+                "mechanism": "Visible cause creates a readable emotional result.",
+                "statusBefore": "The character enters the beat with intent.",
+                "statusAfter": "The character exits with the approved handoff state.",
+                "audienceProgression": ["Setup", "change", "landing"],
+                "emotionalHeart": "The performance makes the story turn legible.",
+            },
+            "gagClocks": [],
+            "generationDesign": {
+                "packagingDecision": "single-unit",
+                "completeGagArcCount": 0,
+                "densityJudgement": "The fixture fits one provider unit.",
+                "splitOrNonSplitRationale": "One causal beat is enough for the test.",
+                "handoffState": "The approved final frame remains usable.",
+            },
+        },
+        "dramaticBeat": "The approved fixture beat lands cleanly.",
+        "audienceBefore": "The audience understands the setup.",
+        "audienceAfter": "The audience understands the result.",
+        "beatOwner": (shot.get("charactersInFrame") or ["Fuzzby"])[0],
+        "performanceFreedom": "Allow micro-expression and secondary motion only.",
+        "performanceArc": (
+            "The eyes settle before the action, then the shoulders soften after the result."
+        ),
+        "physicalCauseAndEffect": (
+            "The character turns and moves because the visible cause prompts them, then "
+            "stops so that the result lands."
+        ),
+        "cameraBehaviour": shot.get("camera") or (
+            "A medium-wide camera tracks the action, then holds the final framing."
+        ),
+        "timingAndRhythm": "Keep the beat moving while preserving the landing hold.",
+        "landingBreath": "Hold the final image long enough to read.",
+        "directionDensity": "guided",
+        "shotPlan": [{
+            "shotNumber": 1,
+            "purpose": "Deliver the approved action.",
+            "framingLensAndCamera": shot.get("camera") or "Readable framed camera.",
+            "causalAction": (
+                "The character turns and moves because the visible cause prompts them, then "
+                "stops so that the result lands before the reaction."
+            ),
+            "observablePerformance": (
+                "The eyes focus before the move; after it lands, breath and posture soften."
+            ),
+            "compositionLightAndMaterials": (
+                "Layer foreground, midground and background under warm controlled light; "
+                "preserve fur texture, contact shadow, scale and materials."
+            ),
+            "landingImage": shot.get("visualPayoff") or "Approved final state.",
+            "dialogueLineIndexes": list(range(
+                1, len(shot.get("dialogueLines") or []) + 1)),
+            "dialogueDirections": [
+                str(line.get("delivery") or "Act the line from the body.")
+                for line in (shot.get("dialogueLines") or [])],
+            "holdAfterDialogue": not bool(shot.get("dialogueLines")),
+            "gagBeatIds": [],
+        }],
+        "stagePlan": [{
+            "stageNumber": 1,
+            "beatIds": [beat_id],
+            "purpose": "Deliver the approved story event in one readable unit.",
+            "initialOrCarriedState": "The approved opening frame establishes the stage.",
+            "cause": "The character action begins from the approved physical setup.",
+            "primaryEvent": "The character completes the approved causal action.",
+            "observableEndState": "The shot lands on the approved describable handoff state.",
+            "emotionOrCameraAnalysis": "The camera holds long enough for the performance turn to read.",
+        }],
+        "geography": [
+            "The flower corridor travels frame-left to frame-right at bee height, "
+            "with the springy leaf visible on the route."],
+        "attributeOwnership": [],
+        "environmentContract": [],
+        "referenceContract": _fixture_reference_contract(shot),
+        "consistencyContract": [
+            "Keep identity, character count, scale, props, scene geography, light direction, and camera axis stable."
+        ],
+        "audioContract": (
+            "@Audio1 is the sole source of dialogue, voice, performance, timing and silence."
+            if shot.get("dialogueLines") else "No dialogue."),
+        "continuityFinish": shot.get("visualPayoff") or "End on the approved describable frame.",
+        "providerPrompt": "Temporary fixture prompt until compiled by the deterministic animation compiler.",
+    }
+    direction = R.cb_departments.AnimationDirection.model_validate(data)
+    data = direction.model_dump()
+    data["providerPrompt"] = R.cb_departments.compile_animation_provider_prompt(
+        shot, direction)
+    return data
 
 
 def _approve_scene_look(tmp, pkg):
@@ -112,6 +220,7 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
     # The opener gets a reviewed keyframe. Relay shots use the prior approved final frame.
     first = pkg["shots"][0]["shotId"]
     R.keyframe_shot("9", first, "EpT", log=lambda *a, **k: None)
+    R.select_keyframe_candidate("9", first, "A", "EpT", log=lambda *a, **k: None)
     R.approve_keyframe("9", first, "EpT", reviewed_by="Test",
                        log=lambda *a, **k: None)
 
@@ -128,7 +237,7 @@ def test_current_path_reaches_an_approved_master_without_provider_spend(
     final_pkg, _ = R.load_pkg("9", "EpT")
     assert R.post_status(final_pkg, "9", "EpT")["approved"]["current"] is True
     assert len(providers.voice_calls) == 2
-    assert len(providers.image_calls) == 1
+    assert len(providers.image_calls) == 2
     assert len(providers.fire_calls) == 3
     assert [x["prompt"] for x in providers.fire_calls] == [
-        s["seedancePrompt"] for s in pkg["shots"]]
+        R._approved_seedance_prompt(final_pkg, s) for s in final_pkg["shots"]]

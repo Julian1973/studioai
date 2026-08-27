@@ -154,7 +154,7 @@ _TIME_RANGE = re.compile(
     r"\s*(?:s|sec(?:ond)?s?)?\b",
     re.I)
 _STAGE_HEADING = re.compile(
-    r"(?im)^\s*(?:\[\s*Stage\s+(\d+)(?:\s*\|[^\]]*)?\s*\]|"
+    r"(?im)^\s*(?:\[\s*Stage\s+(\d+)[^\n]*\]\s*|"
     r"Stage\s+(\d+)\s*:\s*[^\n]*)\s*$")
 
 _FEEDBACK_PATTERNS = OrderedDict([
@@ -551,6 +551,8 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
 
     global_supplement = ""
     stage_matches = []
+    shot_numbers = []
+    multi_shot = False
     if task_mode in staged_generation_modes:
         global_settings, global_heading = _first_section_body(
             text, ("Global Settings", "Global Scene Setting", "Global Setting"))
@@ -566,13 +568,15 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
 
         shot_sequence = (
             _section_body(text, "Shot Sequence")
+            or _section_body(text, "Timed Action Phases — One Continuous Render")
             or _section_body(text, "Camera and Shot Plan"))
         shot_numbers = [int(value) for value in re.findall(
-            r"(?im)^\s*Shot\s+(\d+)\s*:", shot_sequence)]
+            r"(?im)^\s*(?:Shot|Phase)\s+(\d+)\s*:", shot_sequence)]
         multi_shot = bool(shot_sequence and shot_numbers)
         if multi_shot:
             numbered = shot_numbers == list(range(1, len(shot_numbers) + 1))
-            shot_lines = re.findall(r"(?im)^\s*Shot\s+\d+\s*:.*$", shot_sequence)
+            shot_lines = re.findall(
+                r"(?im)^\s*(?:Shot|Phase)\s+\d+\s*:.*$", shot_sequence)
             directed = bool(shot_lines) and all(
                 re.search(r"\bCamera\s*:", line, re.I) and
                 re.search(r"\bAction\s*:", line, re.I) and
@@ -580,7 +584,8 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
                 for line in shot_lines)
             add("stages", "Consecutive directed shots", numbered,
                 f"{len(shot_numbers)} consecutive shot(s) carry the event progression.",
-                "Use consecutive Shot N lines inside [Shot Sequence].")
+                "Use consecutive Shot N lines inside [Shot Sequence], or Phase N lines "
+                "inside [Timed Action Phases — One Continuous Render].")
             add("approved-stage-plan", "Approved story plan", True,
                 "The typed approved stage plan remains the compiler source behind the shot sequence.",
                 "Restore the typed story plan before compiling.",
@@ -889,7 +894,7 @@ def analyze_seedance_prompt_contract(prompt, *, task_mode="reference-to-video",
                     f"{len(required_checks) - passed} authoring repair(s) remain before approval."),
         "referenceCount": len(expected_refs),
         "referenceCounts": reference_counts,
-        "stageCount": len(stage_matches),
+        "stageCount": len(shot_numbers) if multi_shot else len(stage_matches),
         "checks": checks,
         "repairActions": repair_actions,
         "advisoryOnly": True,

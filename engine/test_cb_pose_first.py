@@ -89,7 +89,7 @@ def test_stage_anchor_contract_uploads_only_locked_characters_and_scene_look(
         })
     monkeypatch.setattr(
         cb_render, "_provider_identity_records",
-        lambda role, cfg, usage="keyframe": [
+        lambda role, cfg, usage="keyframe", **kwargs: [
             cb_render._provider_identity_record(role, cfg, usage)])
     monkeypatch.setattr(cb_render, "_plate_path", lambda scene, episode="Ep1": str(plate))
     monkeypatch.setattr(
@@ -310,6 +310,14 @@ def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
     assert fuzzby_pose in sections["Frame"]
     assert fuzzby_facing in sections["Frame"]
     assert intended_read in prompt
+    assert list(sections).index("Intended Read") < list(sections).index("References")
+    assert list(sections).index("References") < list(sections).index("Frame")
+    assert list(sections).index("Frame") < list(sections).index("Canonical Style")
+    assert list(sections).index("Canonical Style") < list(sections).index(
+        "Physical Integration")
+    assert "natural contact shadows" in sections["Physical Integration"]
+    assert list(sections).index("Physical Integration") < list(sections).index("Protect")
+    assert list(sections).index("Protect") < list(sections).index("Forbidden")
 
 
 def test_keyframe_word_count_never_blocks_load_bearing_direction(monkeypatch):

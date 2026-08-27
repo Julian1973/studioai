@@ -79,5 +79,15 @@
   "confirmedAt": "2026-08-16",
   "pricingSource": "BytePlus Seedance 2.5 account pricing supplied by Julian",
   "effectiveDate": "2026-08-16"
+ },
+ "google": {
+  "plan": "pay-as-you-go",
+  "planConfirmed": true,
+  "billingCadence": "usage-metered",
+  "cadenceConfirmed": true,
+  "confirmedBy": "Julian",
+  "confirmedAt": "2026-08-24",
+  "pricingSource": "Google Gemini API account authorized by Julian for SEE A/B testing",
+  "effectiveDate": "2026-08-24"
  }
 }

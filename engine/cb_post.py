@@ -758,10 +758,11 @@ def _asset_record(actual_path, final_path, probe=False):
 
 
 def replace_guide_dialogue(video, approved_voice, out):
-    """Remove provider guide audio and restore the approved full-shot voice master.
+    """Keep Seedance's sound bed and lay the approved full-shot voice over it.
 
-    Foley, ambience and score are separate post layers. This deliberately never mixes a
-    regenerated provider voice underneath the approved performance.
+    The approved HEAR performance is padded to the picture duration. Seedance remains
+    responsible for non-verbal SFX, ambience and music; its guide voice is instructed
+    away at generation time and is kept only as transport evidence when present.
     """
     duration = _dur(video)
     if duration <= 0 or not approved_voice or not os.path.exists(approved_voice):
@@ -769,9 +770,12 @@ def replace_guide_dialogue(video, approved_voice, out):
     cmd = [
         "ffmpeg", "-y", "-i", str(video), "-i", str(approved_voice),
         "-filter_complex",
-        (f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
-         f"apad,atrim=0:{duration:.6f}[dialogue]"),
-        "-map", "0:v:0", "-map", "[dialogue]", "-c:v", "copy",
+        (f"[0:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+         "volume=0.35[seedance_bed];"
+         f"[1:a]aformat=sample_rates={DELIVERY_AUDIO_HZ}:channel_layouts=stereo,"
+         f"apad,atrim=0:{duration:.6f}[dialogue];"
+         "[seedance_bed][dialogue]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0[mix]"),
+        "-map", "0:v:0", "-map", "[mix]", "-c:v", "copy",
         "-c:a", "aac", "-ar", str(DELIVERY_AUDIO_HZ), "-ac", "2",
         "-b:a", "256k", "-movflags", "+faststart", str(out),
     ]

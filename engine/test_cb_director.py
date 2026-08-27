@@ -48,7 +48,7 @@ def test_prepare_render_refreshes_stale_cinematography_before_sealing(monkeypatc
     assert calls == [
         ("billing", "fal"),
         ("prepare", "cinematography"),
-        ("fire", 2, None),
+        ("fire", 1, None),
     ]
 
 

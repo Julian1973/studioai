@@ -421,8 +421,12 @@ def geometry_agreement(cinematography, animation):
     anim_geo = [_norm(item) for item in anim.get("geography") or []]
     if anim_geo and cine_geo != anim_geo:
         errors.append("keyframe and render geography are not verbatim-identical")
-    camera = _norm(anim.get("cameraBehaviour") or cine.get("lensAndCameraRelationship"))
-    follow = bool(re.search(r"\b(follow|chase|behind|slightly late|drone)\b", camera, re.I))
+    shot_plan = anim.get("shotPlan") or []
+    opening_camera = _norm(
+        (shot_plan[0].get("framingLensAndCamera") if shot_plan else "") or
+        anim.get("cameraBehaviour") or cine.get("lensAndCameraRelationship"))
+    follow = bool(re.search(
+        r"\b(follow|chase|behind|slightly late|drone)\b", opening_camera, re.I))
     placements = ((cine.get("openingFrameLayout") or {}).get("placements") or [])
     if follow:
         for item in placements:

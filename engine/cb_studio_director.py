@@ -1327,14 +1327,15 @@ def build_voice(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> No
 
 
 def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) -> None:
-    """Prepare direction and seal the standard two-candidate 480p comedy request."""
+    """Prepare AI direction and seal one efficient, reviewable WATCH request."""
     import cb_providers
     import cb_render
 
     model = cb_providers.video_model(require_enabled=True)
     cb_render._require_confirmed_billing(model.provider)
     package, _ = cb_render.load_pkg(scene, episode)
-    cb_render._shot(package, shot_id)
+    shot = cb_render._shot(package, shot_id)
+    ledger = cb_render._ledger(package, shot_id)
     if not _direction_current(scene, shot_id, "cinematography", episode):
         log("DIRECTOR — refreshing current cinematography direction before render sealing")
         cb_render.prepare_department(scene, "cinematography", shot_id, episode, log)
@@ -1342,7 +1343,7 @@ def prepare_render(scene: str, shot_id: str, episode: str = "Ep1", log=print) ->
         log("DIRECTOR — preparing current animation direction")
         cb_render.prepare_department(scene, "animation", shot_id, episode, log)
     try:
-        cb_render.fire_shot(scene, shot_id, episode, candidates=2, spend_token=None, log=log)
+        cb_render.fire_shot(scene, shot_id, episode, candidates=1, spend_token=None, log=log)
     except cb_render.Refused as exc:
         package, _ = cb_render.load_pkg(scene, episode)
         pending = (cb_render._ledger(package, shot_id).get("pendingSpendAuth") or {})

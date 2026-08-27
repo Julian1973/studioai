@@ -720,11 +720,14 @@ def install(m):
             raise m.Refused(
                 f"REFUSED — {shot['shotId']}'s approved voice is missing or stale")
         voice_approval = voice["record"]
+        opening_contract = (((ledger.get("keyframeApproval") or {}).get("promptContract") or {})
+                            .get("directionContract") or {})
         return {
             "canonProfileDigest": require_canon(pkg, episode, "animation"),
             "shotHash": hashlib.sha256(json.dumps(
                 shot, sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
             "openingFrameHash": file_sha256(anchor),
+            "openingStageContractHash": json_sha256(opening_contract),
             "sceneLookHash": ((look.get("active") or {}).get("hash")
                               if look.get("current") else None),
             "referenceOrder": [item["slot"] for item in plan],
@@ -739,6 +742,12 @@ def install(m):
                           if shot.get("dialogueLines") else None),
             "voiceApprovalSignature": (voice_approval.get("inputSignature")
                                        if shot.get("dialogueLines") else None),
+            "directorFeedbackHash": json_sha256({
+                "workingPrompt": ledger.get("workingSeedancePrompt"),
+                "watchFeedback": ledger.get("watchDirectorFeedback"),
+                "latestRejection": ((ledger.get("rejections") or [])[-1]
+                                    if ledger.get("rejections") else None),
+            }),
         }
 
     def animation_generation_signature(pkg, shot, scene, episode, fast=False,
@@ -1439,21 +1448,16 @@ def install(m):
         return result
 
     def seedance_prompt(pkg, shot, scene=None, episode="Ep1", require_current_working=False):
-        led = m._ledger(pkg, shot["shotId"])
-        working = led.get("workingSeedancePrompt") or {}
-        prompt = str(working.get("text") or "").strip()
-        is_working = bool(prompt)
-        if require_current_working and not is_working:
-            raise m.Refused(
-                f"REFUSED — no current working Seedance prompt for {shot['shotId']}")
-        if not prompt:
-            prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
-                         .get("providerPrompt") or "").strip()
+        # WATCH always submits the deterministic compiler output from the current
+        # Animation Director record. A saved working prompt is creative feedback in the
+        # department context, not an alternate provider-request authority.
+        prompt = str(current_direction_output(pkg, shot["shotId"], "animation")
+                     .get("providerPrompt") or "").strip()
         if not prompt:
             raise m.Refused(f"REFUSED — current Animation direction for {shot['shotId']} has no prompt")
         return (m._with_character_scale_control(
             prompt, shot, "referenceSlots", str(scene or pkg.get("sceneNumber")),
-            episode or pkg.get("episode") or "Ep1"), is_working)
+            episode or pkg.get("episode") or "Ep1"), False)
 
     def approved_seedance_prompt(pkg, shot):
         prompt = str(current_direction_output(pkg, shot["shotId"], "animation")

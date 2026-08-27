@@ -21,7 +21,7 @@ Calls (all schema-constrained + Pydantic-validated):
   • repair_call()            — a single repair call on the VALIDATOR model, seeded with business-rule errors.
 A Pydantic ValidationError propagates (the caller repairs / stops + reports); both providers failing → SystemExit.
 """
-import os, re, json, base64, mimetypes, pathlib
+import os, re, json, base64, mimetypes, pathlib, time
 from typing import get_origin
 from pydantic import ValidationError
 import cb_gen   # importing cb_gen loads engine/.env into os.environ (keys never leave the backend)
@@ -36,9 +36,14 @@ ENABLE_GEMINI_FALLBACK = os.environ.get("DIRECTOR_ENABLE_GEMINI_FALLBACK", "fals
 MAX_OUTPUT_TOKENS = 32000
 try:
     PROVIDER_TIMEOUT_SECONDS = max(
-        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "45")))
+        10.0, float(os.environ.get("DIRECTOR_PROVIDER_TIMEOUT_SECONDS", "180")))
 except (TypeError, ValueError):
-    PROVIDER_TIMEOUT_SECONDS = 45.0
+    PROVIDER_TIMEOUT_SECONDS = 180.0
+try:
+    PROVIDER_ATTEMPTS = min(
+        3, max(1, int(os.environ.get("DIRECTOR_PROVIDER_ATTEMPTS", "2"))))
+except (TypeError, ValueError):
+    PROVIDER_ATTEMPTS = 2
 
 # FIXED 2026-07-12 (full-codebase audit continued): PROVIDER + DIRECTOR_PROVIDER (a "config summary" dict built
 # from PROVIDER/DIRECTOR_MODEL/VALIDATOR_MODEL/GEMINI_MODEL/ENABLE_GEMINI_FALLBACK) had zero callers anywhere in
@@ -220,19 +225,29 @@ def structured(system, user, schema, *, model=None, label="director", log=print,
     NOT a fallback case (the model answered, just off-schema) — it propagates so the caller can repair. Returns the
     validated Pydantic instance."""
     model = model or DIRECTOR_MODEL
-    try:
-        return _openai_call(model, system, user, schema, images=images)
-    except ValidationError:
-        raise
-    except Exception as e:
-        if not ENABLE_GEMINI_FALLBACK:
-            # Gemini fallback is OFF by default — STOP cleanly and surface the EXACT OpenAI error (rather than
-            # silently producing inconsistent Gemini results). Re-enable with DIRECTOR_ENABLE_GEMINI_FALLBACK=true.
-            raise SystemExit(f"Director provider error ({label}): OpenAI ({model}) failed and the Gemini fallback is "
-                             f"DISABLED (set DIRECTOR_ENABLE_GEMINI_FALLBACK=true to allow it). "
-                             f"Exact OpenAI error — {type(e).__name__}: {e}")
-        log(f"  [director] {label}: OpenAI {model} error: {str(e)[:130]} — DIRECTOR_ENABLE_GEMINI_FALLBACK=true, "
-            f"falling back to Gemini {GEMINI_MODEL}", flush=True)
+    openai_error = None
+    for attempt in range(1, PROVIDER_ATTEMPTS + 1):
+        try:
+            return _openai_call(model, system, user, schema, images=images)
+        except ValidationError:
+            raise
+        except Exception as exc:
+            openai_error = exc
+            if attempt < PROVIDER_ATTEMPTS:
+                log(f"  [director] {label}: OpenAI {model} transport failure on attempt "
+                    f"{attempt}/{PROVIDER_ATTEMPTS}; retrying the same typed call", flush=True)
+                time.sleep(min(2.0 * attempt, 4.0))
+    e = openai_error
+    if not ENABLE_GEMINI_FALLBACK:
+        # Gemini fallback is OFF by default — STOP cleanly and surface the EXACT OpenAI error (rather than
+        # silently producing inconsistent Gemini results). Re-enable with DIRECTOR_ENABLE_GEMINI_FALLBACK=true.
+        raise SystemExit(f"Director provider error ({label}): OpenAI ({model}) failed after "
+                         f"{PROVIDER_ATTEMPTS} attempt(s) and the Gemini fallback is DISABLED "
+                         f"(set DIRECTOR_ENABLE_GEMINI_FALLBACK=true to allow it). "
+                         f"Exact OpenAI error — {type(e).__name__}: {e}")
+    log(f"  [director] {label}: OpenAI {model} error after {PROVIDER_ATTEMPTS} attempt(s): "
+        f"{str(e)[:130]} — DIRECTOR_ENABLE_GEMINI_FALLBACK=true, falling back to Gemini "
+        f"{GEMINI_MODEL}", flush=True)
     try:
         obj = _gemini_call(system, user, schema, images=images)
         log(f"  [director] {label}: served by Gemini fallback ({GEMINI_MODEL})", flush=True)

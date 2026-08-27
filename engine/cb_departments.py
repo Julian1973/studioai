@@ -774,6 +774,8 @@ class BeatSplit(BaseModel):
     kidRead: str = Field(min_length=1)
     adultRead: str = Field(min_length=1)
     emotionalIntent: str = Field(min_length=1)
+    charactersInFrame: List[str]
+    offscreenCharacters: List[str]
 
 
 class StoryTruthDirection(BaseModel):
@@ -895,7 +897,12 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
                 "action-based story truth; exactly seven ordered transformation movements; "
                 "a restrained physical, visual, colour/light, source-sound, music and "
                 "environment tapestry; and a sequence blueprint covering the supplied scenes "
-                "in story order. Do not invent events or dialogue to complete it. Every scene "
+                "in story order. For every beat, list the exact canon character names physically "
+                "visible during that beat in charactersInFrame, including a character seen inside "
+                "a vision, and list speaking characters who remain outside the image in "
+                "offscreenCharacters. A character merely named in dialogue is not present. "
+                "Bo's Mum is locked offscreen-only and can never appear in charactersInFrame. "
+                "Do not invent events or dialogue to complete it. Every scene "
                 "needs at least one beat, and its first "
                 "beat's own firstEventIndex must equal that scene's own first event "
                 "index."),
@@ -1325,8 +1332,9 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
             "place approved words only; no alternative performance is permitted. " +
             speaker_copy + " " + speaker_verb + " only the assigned markers; listeners "
             "remain silent and closed-mouth. No narration, no improvised or extra words, "
-            "no extra voices, and no subtitles or captions. The rendered dialogue is a guide track; approved "
-            "@Audio1 remains the film dialogue in post.\n\n" + text
+            "no extra voices, and no subtitles or captions. Do not synthesize an alternate spoken "
+            "performance: use the supplied @Audio1 for dialogue timing, mouth timing and voice; "
+            "Seedance may create only non-verbal SFX, ambience and music.\n\n" + text
         )
         placements = "[Dialogue Placement]\n" + "\n".join(
             emission.dialogue_placement_line(item, hold_after=False)
@@ -1373,7 +1381,18 @@ def _apply_animation_provider_shell(prompt, shot, references=None):
                 f"{tag} defines only {controls}. "
                 f"{exclusions.get(role, 'Do not use unrelated background or content from it.')}")
     if reference_lines:
-        reference_section = "[Multimodal Reference Layer]\n" + "\n".join(reference_lines)
+        opening = next((item for item in references
+                        if str((item.model_dump() if hasattr(item, "model_dump") else item)
+                               .get("role") or "").strip() in
+                        {"opening_frame", "opening keyframe", "previous shot final frame"}), None)
+        opening_line = (
+            "OPENING-FRAME AUTHORITY: the first attached image is the approved opening frame. "
+            "The video must begin on that image's composition and physical state before any "
+            "motion, reframing or internal cut. Do not replace it with a prop close-up or a "
+            "later action state.\n"
+            if opening else ""
+        )
+        reference_section = "[Multimodal Reference Layer]\n" + opening_line + "\n".join(reference_lines)
         reference_pattern = re.compile(
             r"(?ims)^\s*\[Multimodal Reference Layer\]\s*.*?"
             r"(?=^\s*\[[^\]\n]+\]\s*$|\Z)")
@@ -1568,6 +1587,26 @@ def _approved_attribute_ownership(data, character_state_locks=None):
     return list(dict.fromkeys(ownership))
 
 
+def provider_dialogue_lines(shot):
+    """Return dialogue with character-name casing made safe for speech providers."""
+    names = {
+        str(name).strip() for name in (shot.get("charactersInFrame") or [])
+        if len(str(name).strip()) > 1
+    }
+    lines = []
+    for source in shot.get("dialogueLines") or []:
+        line = dict(source)
+        text = str(line.get("exactText") or line.get("text") or "")
+        for name in sorted(names, key=len, reverse=True):
+            text = re.sub(rf"\b{re.escape(name.upper())}\b", name, text)
+        if line.get("exactText") is not None:
+            line["exactText"] = text
+        else:
+            line["text"] = text
+        lines.append(line)
+    return lines
+
+
 def compile_animation_provider_prompt(shot, direction):
     """Compile the provider prompt from typed, approved Animation direction.
 
@@ -1580,7 +1619,7 @@ def compile_animation_provider_prompt(shot, direction):
     data = direction.model_dump() if hasattr(direction, "model_dump") else dict(direction or {})
     character_state_locks = dict(shot.get("characterStateLocks") or {})
     approved_ownership = _approved_attribute_ownership(data, character_state_locks)
-    dialogue = list(shot.get("dialogueLines") or [])
+    dialogue = provider_dialogue_lines(shot)
     references = _render_reference_order(data.get("referenceContract") or [])
     stages = emission.time_tiles(
         list(data.get("stagePlan") or []),
@@ -1936,9 +1975,16 @@ def compile_animation_provider_prompt(shot, direction):
                 hold_sec = clock.get("recoveryHoldSec")
                 if hold_sec is None:
                     raise ValueError(f"{beat_id} gag button has no numeric recoveryHoldSec")
+                hold_direction = str(clock.get("recoveryHold") or "").strip()
+                if (item.get("holdAfterDialogue", True) and
+                        re.search(r"\bbefore (?:the )?(?:line|dialogue)\b",
+                                  hold_direction, re.I)):
+                    hold_direction = (
+                        "Hold after the spoken line so the body truth lands before the next "
+                        "action or cut.")
                 parts.append(
                     f"Hold: {float(hold_sec):.1f}s — "
-                    f"{str(clock.get('recoveryHold') or '').strip()}")
+                    f"{hold_direction}")
                 emitted_holds.add(str(beat_id))
             shot_lines.append(" ".join(parts))
         sides = [str(item).strip() for item in data.get("witnessStagingSides") or []
@@ -2193,6 +2239,11 @@ def prepare_animation(context, images, *, log=print):
                 "idea and a real story, performance or reaction purpose.", standard_version),
         "APPROVED SHOT, VOICE DIRECTION AND ORDERED ATTACHMENTS:\n" + _j(context) +
         "\n\nDIRECTORIAL FREEDOM CONTRACT:\n"
+        "When humanWorkingAnimationPrompt or watchDirectorFeedback is present, treat it as "
+        "approved bounded review feedback: preserve its requested emotional, physical, "
+        "continuity and sound corrections "
+        "while translating them into this typed direction and the deterministic provider prompt. "
+        "Do not copy its prose wholesale and do not let it override locked canon, SEE or HEAR. "
         "Lock only story truth, exact audio, canon, reference roles, opening state and the "
         "required landing. Direct intention, relationship, playable cause-and-effect and "
         "rhythmic contrast; leave Seedance genuine latitude to discover acting cadence, "

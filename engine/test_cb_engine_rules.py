@@ -1,6 +1,7 @@
 import pytest
 
 import cb_engine_rules as rules
+import cb_departments
 import cb_render as render
 
 
@@ -70,6 +71,34 @@ def test_geometry_must_agree_between_keyframe_and_render():
     bad = {**cine, "openingFrameLayout": {"placements": [{
         "character": "Subject", "facing": "toward camera"}]}}
     assert rules.geometry_agreement(bad, _direction())["ready"] is False
+
+
+def test_front_facing_opening_allows_a_later_motivated_follow_camera():
+    cine = {
+        "geography": ["Travel runs toward frame-right."],
+        "negativeSpace": ["Lead room stays open frame-right."],
+        "openingFrameLayout": {"placements": [{
+            "character": "Bo", "facing": "toward camera"}]},
+    }
+    animation = {
+        **_direction(),
+        "cameraBehaviour": "Begin intimate, then follow Bo toward the doorway.",
+        "shotPlan": [
+            {"framingLensAndCamera": "Static intimate opening on Bo and the satchel."},
+            {"framingLensAndCamera": "Low follow behind Bo toward the doorway."},
+        ],
+    }
+
+    assert rules.geometry_agreement(cine, animation)["ready"] is True
+
+
+def test_provider_dialogue_uses_character_name_casing_without_changing_words():
+    lines = cb_departments.provider_dialogue_lines({
+        "charactersInFrame": ["Bo"],
+        "dialogueLines": [{"speaker": "Bo's Mum", "exactText": "BO, it is time."}],
+    })
+
+    assert lines[0]["exactText"] == "Bo, it is time."
 
 
 def test_static_dock_screen_sides_do_not_create_two_travel_routes():

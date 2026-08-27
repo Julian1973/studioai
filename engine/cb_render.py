@@ -332,10 +332,31 @@ def _current_storyboard_md5(scene, episode="Ep1"):
     return hashlib.md5(p.read_bytes()).hexdigest()
 
 
+def _declared_storyboard_path(pkg, scene, episode="Ep1"):
+    """Resolve the exact approved storyboard artifact declared by this package.
+
+    Whole-scene packages continue to use the canonical scene storyboard. A human-approved
+    shot-scoped contract may declare a different in-repository JSON artifact so one approved
+    unit can advance without falsely approving unfinished sibling units.
+    """
+    declared = str((pkg.get("sourceStoryboard") or {}).get("path") or "").strip()
+    if not declared:
+        return _storyboard_path(scene, episode)
+    path = pathlib.Path(declared)
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        path.resolve().relative_to(ROOT.resolve())
+    except ValueError:
+        return _storyboard_path(scene, episode)
+    return path
+
+
 def lineage_status(pkg, scene, episode="Ep1"):
     """Return authoritative source-graph freshness for a production package."""
     pkg_md5 = (pkg.get("sourceStoryboard") or {}).get("md5")
-    live_md5 = _current_storyboard_md5(scene, episode)
+    live_path = _declared_storyboard_path(pkg, scene, episode)
+    live_md5 = hashlib.md5(live_path.read_bytes()).hexdigest() if live_path.exists() else None
     storyboard_current = bool(pkg_md5) and bool(live_md5) and pkg_md5 == live_md5
     package_script = (pkg.get("sourceScript") or {}).get("scriptVersionId")
     current_script = None
@@ -356,9 +377,9 @@ def lineage_status(pkg, scene, episode="Ep1"):
         package_inputs.get("scriptVersionId") == current_script and
         package_inputs.get("storyboardSha256") ==
         (pkg.get("sourceStoryboard") or {}).get("sha256") and
-        (not _storyboard_path(scene, episode).exists() or
+        (not live_path.exists() or
          package_inputs.get("storyboardSha256") ==
-         cb_lineage.sha256_file(_storyboard_path(scene, episode)))
+         cb_lineage.sha256_file(live_path))
     )
     reasons = []
     if not script_current:
@@ -2884,7 +2905,7 @@ def _scene_context(pkg, scene, episode):
     loc_path = HERE.parent / "shows/crystal-bears/canon/locations.json"
     style_path = HERE.parent / "shows/crystal-bears/laws/style.txt"
     locs = json.load(open(loc_path)) if loc_path.exists() else {}
-    sb_path = _storyboard_path(scene, episode)
+    sb_path = _declared_storyboard_path(pkg, scene, episode)
     sb = json.load(open(sb_path)) if sb_path.exists() else {}
     return {"episode": episode, "scene": str(scene), "sceneName": pkg.get("sceneName"),
             "creativeDirectingStandardVersion": int(
@@ -3040,7 +3061,10 @@ def _shot_context(pkg, shot, led, scene, episode):
             "currentVoiceDirection": (led.get("departmentWork", {}).get("voice", {})
                                       .get("approved")),
             "humanWorkingVoice": led.get("workingVoice"),
-            "humanWorkingAnimationPrompt": led.get("workingSeedancePrompt")}
+            "humanWorkingAnimationPrompt": led.get("workingSeedancePrompt"),
+            "watchDirectorFeedback": led.get("watchDirectorFeedback"),
+            "latestAnimationRejection": ((led.get("rejections") or [])[-1]
+                                          if led.get("rejections") else None)}
 
 
 def _shot_creative_contract_view(pkg, shot, scene, episode):
@@ -3054,7 +3078,7 @@ def _shot_creative_contract_view(pkg, shot, scene, episode):
     if shot.get("comedyContractsApproved") and shot.get("emotionContractsApproved"):
         return shot
     source = pkg.get("sourceStoryboard") or {}
-    path = pathlib.Path(source.get("path") or _storyboard_path(scene, episode))
+    path = _declared_storyboard_path(pkg, scene, episode)
     if not path.exists() or hashlib.md5(path.read_bytes()).hexdigest() != source.get("md5"):
         return shot
     storyboard = json.load(open(path))
@@ -3092,7 +3116,7 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
     if version < 3:
         return None
     source = pkg.get("sourceStoryboard") or {}
-    path = pathlib.Path(source.get("path") or _storyboard_path(scene, episode))
+    path = _declared_storyboard_path(pkg, scene, episode)
     if source.get("approvalState") != "approved" or not path.exists():
         raise Refused(
             f"REFUSED — {shot['shotId']} needs a human-approved Director storyboard before "
@@ -3271,7 +3295,12 @@ def prepare_department(scene, stage, shot_id=None, episode="Ep1", log=print):
                      "turnaroundGroupHash"))}
                 for item in attachment_plan]
             cinematography = _approved_department_output(pkg, shot_id, "cinematography") or {}
-            if cinematography.get("geography"):
+            opening_contract = (((led.get("keyframeApproval") or {}).get("promptContract") or {})
+                                .get("directionContract") or {})
+            opening_geography = list(opening_contract.get("geography") or [])
+            if opening_geography:
+                context["sceneGeographyLedger"] = opening_geography
+            elif cinematography.get("geography"):
                 context["sceneGeographyLedger"] = list(cinematography.get("geography") or [])
             context["approvedVoiceAsset"] = led.get("voPath")
             result = cb_departments.prepare_animation(context, images, log=log)
@@ -3519,7 +3548,10 @@ def recompile_animation_candidate(scene, shot_id, episode="Ep1", log=print):
 
     cinematography = _approved_department_output(
         pkg, shot_id, "cinematography") or {}
-    approved_geography = list(cinematography.get("geography") or [])
+    opening_contract = (((ledger.get("keyframeApproval") or {}).get("promptContract") or {})
+                        .get("directionContract") or {})
+    approved_geography = (list(opening_contract.get("geography") or []) or
+                          list(cinematography.get("geography") or []))
     if approved_geography and source.get("geography") != approved_geography:
         source["geography"] = approved_geography
         changes.append("render geography rebound to approved SEE geography")
@@ -5916,6 +5948,28 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                               generate_audio=True):
     """Return every exact provider call that will produce one Studio candidate."""
     import cb_costs
+    def provider_audio_path(master, duration):
+        """Fit the approved HEAR master to the picture without changing its speech."""
+        if not master or not os.path.exists(master):
+            return master
+        master_duration = _audio_dur(master)
+        if master_duration >= float(duration) - 0.02:
+            return master
+        key = hashlib.sha256(f"{master}|{_file_md5(master)}|{duration}".encode()).hexdigest()[:16]
+        out = MEDIA / "transport" / f"{shot['shotId']}_{key}_hear_bed.wav"
+        if not out.exists():
+            out.parent.mkdir(parents=True, exist_ok=True)
+            result = subprocess.run([
+                "ffmpeg", "-y", "-v", "error", "-i", str(master), "-af",
+                f"apad,atrim=0:{float(duration):.6f}", "-ar", "48000", "-ac", "2",
+                "-c:a", "pcm_s16le", str(out),
+            ], capture_output=True, text=True)
+            if result.returncode or not out.exists():
+                raise Refused("REFUSED - could not fit approved HEAR audio to the shot duration")
+        return str(out)
+
+    fitted_audio = (provider_audio_path(led.get("voPath"), shot["durationSec"])
+                    if include_audio_reference else None)
     model_id, run_id = _comparison_args(comparison_model_id, comparison_run_id)
     references = _reference_records(shot, imgs)
     parent_prompt = _with_intact_turnaround_law(
@@ -5995,9 +6049,11 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
                 "dynamicOpeningRelay": False,
                 "references": references,
                 "videoReferences": video_references,
-                "audio": ({"path": led.get("voPath"),
-                           "md5": _file_md5(led.get("voPath"))}
-                          if (include_audio_reference and led.get("voPath")) else None),
+                "audio": ({"path": fitted_audio,
+                           "md5": _file_md5(fitted_audio),
+                           "sourcePath": led.get("voPath"),
+                           "sourceMd5": _file_md5(led.get("voPath"))}
+                          if fitted_audio else None),
                 "generateAudio": bool(generate_audio),
                 "contract": contract,
                 "costUsd": per,
@@ -6014,7 +6070,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
         attached.append({
             "position": len(attached) + 1, "assetTag": "@Audio1",
             "role": "approved dialogue and performance track",
-            "path": led["voPath"], "contentHash": _sha256_file(led["voPath"]),
+            "path": fitted_audio, "contentHash": _sha256_file(fitted_audio),
         })
     base_task = _seedance_pipeline_task(shot, specialist, attached)
     try:
@@ -6024,7 +6080,7 @@ def _animation_execution_plan(pkg, shot, led, imgs, anchor, fast,
     except cb_seedance_transport.TransportPlanError as exc:
         raise Refused(f"REFUSED — comparison transport: {exc}") from exc
 
-    audio_master = led.get("voPath") if include_audio_reference else None
+    audio_master = fitted_audio
     audio_master_hash = _file_md5(audio_master) if audio_master else None
     total_cost = 0.0
     for segment in plan["segments"]:
@@ -6315,13 +6371,20 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
                            if rec.get("shotId") == target_shot_id), None)
         if target_voice.get("approved") and target_rec and target_rec.get("dialogueLines"):
             target_codes = set(owned_beat_codes(target_rec))
+            target_lines = list(target_rec.get("dialogueLines") or [])
             for beat in beats:
                 if beat.get("beatCode") not in target_codes:
                     continue
                 original_cuts = list(beat.get("cuts") or [])
                 action_cuts = [cut for cut in original_cuts if not (cut.get("dialogue") or "").strip()]
+                original_occurrences = {
+                    cut.get("dialogueOccurrenceId") for cut in original_cuts
+                    if cut.get("dialogueOccurrenceId")
+                }
                 voice_cuts = []
-                for index, line in enumerate(target_rec.get("dialogueLines") or [], start=1):
+                for index, line in enumerate(target_lines, start=1):
+                    if line.get("dialogueOccurrenceId") not in original_occurrences:
+                        continue
                     text = str(line.get("exactText") or line.get("text") or "").strip()
                     speaker = str(line.get("speaker") or "").strip()
                     if not text or not speaker:
@@ -6341,7 +6404,6 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
                     cut["dialogueOccurrenceId"] for cut in voice_cuts
                     if cut.get("dialogueOccurrenceId")
                 ]
-                break
     shots = [
         E.Shot(**adapt_shot(rec, is_first=index == 0))
         for index, rec in enumerate(current_shots)
@@ -6528,7 +6590,12 @@ def seedance_working_status(scene, shot_id, episode="Ep1"):
     current, is_working = _resolve_seedance_prompt(pkg, shot, scene, episode)
     led = _ledger(pkg, shot_id)
     working = led.get("workingSeedancePrompt")
-    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    try:
+        specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    except Refused:
+        work, _ = _department_container(pkg, scene, shot_id, "animation", episode)
+        record = work.get("candidate") or work.get("approved") or {}
+        specialist = record.get("output") or {}
     source = ("human-working" if is_working else
               "animation-director-current" if specialist.get("providerPrompt") else
               "legacy-approved-storyboard")
@@ -6551,7 +6618,12 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
     if not dialogue_check["ready"]:
         raise Refused("REFUSED — working prompt violates the dialogue synthesis contract: " +
                       "; ".join(dialogue_check["errors"]))
-    specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    try:
+        specialist = _approved_department_output(pkg, shot_id, "animation") or {}
+    except Refused:
+        work, _ = _department_container(pkg, scene, shot_id, "animation", episode)
+        record = work.get("candidate") or work.get("approved") or {}
+        specialist = record.get("output") or {}
     _require_animation_prompt_contract(
         _shot_creative_contract_view(pkg, shot, scene, episode),
         {**specialist, "providerPrompt": text,
@@ -6576,6 +6648,28 @@ def restore_seedance_working(scene, shot_id, episode="Ep1", log=print):
     led["workingSeedancePrompt"] = None
     _save(pkg, path)
     log(f"ANIMATION WORKING PROMPT RESTORED — {shot_id}: reverted to the approved storyboard's prompt")
+
+
+def save_watch_director_feedback(scene, shot_id, feedback, episode="Ep1",
+                                 reviewed_by="Julian", log=print):
+    """Store bounded human review feedback as AI Director input, never provider prose."""
+    pkg, path = load_pkg(scene, episode)
+    _shot(pkg, shot_id)
+    note = str(feedback or "").strip()
+    if not note:
+        raise Refused("REFUSED — WATCH Director feedback cannot be blank")
+    ledger = _ledger(pkg, shot_id)
+    previous = ledger.get("watchDirectorFeedback")
+    if previous:
+        ledger.setdefault("watchDirectorFeedbackHistory", []).append(previous)
+    ledger["watchDirectorFeedback"] = {
+        "text": note,
+        "savedAt": _now(),
+        "savedBy": reviewed_by,
+    }
+    _save(pkg, path)
+    log(f"WATCH FEEDBACK SAVED — {shot_id} (AI Director input; no provider call)")
+    return ledger["watchDirectorFeedback"]
 
 
 # ── THE SEEDANCE STRUCTURE CHECK (Julian's directive, 2026-07-19) ───────────────────────
@@ -6819,6 +6913,13 @@ def _engine_rule_report(pkg, shot, direction=None, cinematography=None):
     if cinematography is None and not relay_opening:
         cinematography = _approved_department_output(
             pkg, shot.get("shotId"), "cinematography") or {}
+    if cinematography and not relay_opening:
+        ledger = _ledger(pkg, shot.get("shotId"))
+        opening_contract = (((ledger.get("keyframeApproval") or {}).get("promptContract") or {})
+                            .get("directionContract") or {})
+        opening_geography = list(opening_contract.get("geography") or [])
+        if opening_geography:
+            cinematography = {**cinematography, "geography": opening_geography}
     geometry = ({
         "ready": True,
         "errors": [],
@@ -6917,7 +7018,8 @@ def _seedance_pipeline_task(shot, specialist, attached_contract):
         "mouth timing and silence. Exact braced dialogue markers place approved words "
         "only; no alternative performance is permitted. Listeners remain silent and "
         "closed-mouth. No narration, no extra words, and no subtitles or captions. "
-        "Provider dialogue is guide audio; approved @Audio1 is restored in post.\n" +
+        "Do not generate an alternate spoken performance; use @Audio1 for the approved "
+        "dialogue timing and voice. Seedance supplies only non-verbal sound.\n" +
         "\n".join(emission.dialogue_placement_line(line)
                   for line in shot.get("dialogueLines") or []) +
         "\nSeedance may generate non-dialogue ambience, foley, comedy impacts, wing "
@@ -7380,7 +7482,10 @@ def prompt_readback(scene, shot_id, episode="Ep1", log=print):
     _require_current_lineage(pkg, scene, episode)
     shot = _shot(pkg, shot_id)
     prompt, using_working = _resolve_seedance_prompt(
-        pkg, shot, scene, episode, require_current_working=True)
+        # Readback is advisory: a current approved compiled direction is a valid
+        # source even when no separate human working override is present. The
+        # paid fire path still requires the current working prompt explicitly.
+        pkg, shot, scene, episode, require_current_working=False)
     try:
         anchor = _anchor_for(pkg, shot)
     except Refused:
@@ -8387,15 +8492,31 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
                 _save(pkg, path)
             if len(segment_paths) > 1:
                 cb_seedance_transport.join_segments(segment_paths, out)
+            review_audio = _restore_approved_voice_for_review(
+                shot, led, out, batch["batchId"], i)
+            if review_audio:
+                transport["providerGuidePath"] = review_audio["providerGuidePath"]
+                transport["providerGuideHash"] = review_audio["providerGuideSha256"]
+                transport["approvedHearReviewPath"] = review_audio["reviewPath"]
+                transport["approvedHearReviewHash"] = review_audio["reviewSha256"]
+                for item in transport.get("segments") or []:
+                    if item.get("outputPath") == str(out):
+                        item["outputPath"] = review_audio["providerGuidePath"]
+                        item["outputHash"] = review_audio["providerGuideSha256"]
             transport["status"] = "joined"
             transport["candidatePath"] = str(out)
             transport["candidateHash"] = _sha256_file(out)
             if batch.get("audioProvenance") is not None:
                 batch["audioProvenance"].setdefault("guideCandidates", []).append({
-                    "candidate": i, "path": str(out),
-                    "sha256": _sha256_file(out),
+                    "candidate": i,
+                    "path": (review_audio or {}).get("providerGuidePath", str(out)),
+                    "sha256": (review_audio or {}).get(
+                        "providerGuideSha256", _sha256_file(out)),
                     "exactApprovedWaveformPassthrough": False,
                 })
+                if review_audio:
+                    batch["audioProvenance"].setdefault("reviewCandidates", []).append(
+                        review_audio)
             _save(pkg, path)
         except (Exception, SystemExit) as e:
             # protection 6: the failure is PERSISTED, the batch stays resumable
@@ -8452,6 +8573,54 @@ def _candidate_review(shot, clip, batch_id, index):
     with open(clip + ".review.json", "w") as f:
         json.dump(review, f, indent=1)
     return review
+
+
+def _restore_approved_voice_for_review(shot, ledger, candidate_path, batch_id, candidate):
+    """Present dialogue dailies with the human-approved HEAR master.
+
+    Seedance may use @Audio1 for performance conditioning without returning that exact
+    performance. Preserve the provider file as audit evidence, then remove its guide audio
+    from the review copy so Julian never judges or approves the wrong voice by accident.
+    """
+    candidate_path = pathlib.Path(candidate_path)
+    voice_path = ledger.get("voPath")
+    if not shot.get("dialogueLines") or not voice_path:
+        return None
+    if not candidate_path.is_file() or not pathlib.Path(voice_path).is_file():
+        raise Refused(
+            f"REFUSED — cannot restore approved HEAR audio for {shot['shotId']} candidate "
+            f"{candidate}: review media or voice master is missing")
+
+    audit_dir = MEDIA / "transport" / batch_id / f"c{candidate}"
+    audit_dir.mkdir(parents=True, exist_ok=True)
+    provider_guide = audit_dir / "provider_guide.mp4"
+    restored_tmp = audit_dir / "approved_hear_review.tmp.mp4"
+    if provider_guide.exists():
+        provider_guide.unlink()
+    if restored_tmp.exists():
+        restored_tmp.unlink()
+    os.replace(candidate_path, provider_guide)
+    try:
+        if not cb_post.replace_guide_dialogue(provider_guide, voice_path, restored_tmp):
+            raise RuntimeError("approved HEAR restoration returned no review media")
+        os.replace(restored_tmp, candidate_path)
+    except Exception:
+        if restored_tmp.exists():
+            restored_tmp.unlink()
+        if not candidate_path.exists() and provider_guide.exists():
+            os.replace(provider_guide, candidate_path)
+        raise
+    return {
+        "candidate": candidate,
+        "providerGuidePath": str(provider_guide),
+        "providerGuideSha256": _sha256_file(provider_guide),
+        "reviewPath": str(candidate_path),
+        "reviewSha256": _sha256_file(candidate_path),
+        "approvedMasterPath": str(voice_path),
+        "approvedMasterSha256": _sha256_file(voice_path),
+        "providerGuideRemoved": True,
+        "approvedHearRestored": True,
+    }
 
 
 def next_shot(scene, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast=False,

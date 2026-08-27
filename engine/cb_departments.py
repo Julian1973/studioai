@@ -62,6 +62,7 @@ def prompt_sections(prompt):
 
 
 SKILLS = {
+    "story-architect": ROOT / "skills/emotional-story-architecture/SKILL.md",
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
     "cinematography": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
     "dp": ROOT / "skills/crystal-bears-dp/SKILL.md",
@@ -775,10 +776,69 @@ class BeatSplit(BaseModel):
     emotionalIntent: str = Field(min_length=1)
 
 
+class StoryTruthDirection(BaseModel):
+    protagonist: str
+    falseBelief: str
+    practicalWant: str
+    keyRelationship: str
+    emotionalFearOrWound: str
+    transformedAction: str
+    themeProvenThroughAction: str
+
+
+class TransformationMovementDirection(BaseModel):
+    movement: Literal[
+        "opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
+        "low-point", "climax-choice", "new-normal"]
+    believes: str
+    feels: str
+    does: str
+    relationshipCondition: str
+    audienceFeeling: str
+
+
+class EpisodeTapestryDirection(BaseModel):
+    physicalMotifArc: str
+    visualMotifArc: str
+    colourAndLightJourney: str
+    sourceSoundArc: str
+    musicMotifArc: str
+    environmentalMetaphor: str
+    openingImage: str
+    finalImage: str
+    transformedMeaning: str
+
+
+class SequenceBlueprintDirection(BaseModel):
+    sequenceId: str
+    sceneIds: List[str] = Field(min_length=1)
+    runtimeTarget: str
+    externalObjective: str
+    emotionalStart: str
+    pressureOrComplication: str
+    emotionalTurn: str
+    endCondition: str
+    dominantAudienceFeeling: str
+    nextQuestion: str
+
+
+class EpisodeStoryArchitectureDirection(BaseModel):
+    storyTruth: StoryTruthDirection
+    transformationMap: List[TransformationMovementDirection] = Field(min_length=7, max_length=7)
+    tapestryMap: EpisodeTapestryDirection
+    sequenceBlueprint: List[SequenceBlueprintDirection] = Field(min_length=1, max_length=12)
+
+    @model_validator(mode="after")
+    def transformation_movements_are_complete_and_ordered(self):
+        expected = ["opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
+                    "low-point", "climax-choice", "new-normal"]
+        if [item.movement for item in self.transformationMap] != expected:
+            raise ValueError("transformationMap movements are incomplete or out of order")
+        return self
+
+
 class EpisodeVisionDirection(BaseModel):
-    """Same 14 fields cb_creative.EpisodeVision already defines — reused verbatim (never
-    a second vision schema) so an approved candidate here drops straight into
-    cb_creative.py's own {episode}_episode_vision.json shape without translation."""
+    """The complete cb_creative.EpisodeVision schema used by approved story intake."""
     premise: str
     dramaticQuestion: str
     theme: str
@@ -793,6 +853,7 @@ class EpisodeVisionDirection(BaseModel):
     climax: str
     resolution: str
     intendedFinalFeeling: str
+    storyArchitecture: EpisodeStoryArchitectureDirection
 
 
 class StoryIntakeDirection(BaseModel):
@@ -814,6 +875,7 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
     the Director never even sees, let alone preserves, everything past the cut."""
     return cb_llm.structured(
         _system("director",
+                load_runtime_skill("story-architect") + "\n\n"
                 "You are breaking a LOCKED, already-approved script into its scenes and "
                 "beats for this studio's storyboard pipeline. The script's scene order, "
                 "its characters and every spoken line are LOCKED SOURCE EVIDENCE — you "
@@ -829,7 +891,12 @@ def prepare_story(script_events, cast_by_scene, canon_context, *, log=print):
                 "why, in your own words), want (the surface goal), need (the underlying "
                 "emotional need), kidRead and adultRead (the two co-viewing layers this "
                 "show is built on), and emotionalIntent. Also suggest the episode's title, "
-                "logline and lead bear. Every scene needs at least one beat, and its first "
+                "logline and lead bear. episodeVision.storyArchitecture must contain one "
+                "action-based story truth; exactly seven ordered transformation movements; "
+                "a restrained physical, visual, colour/light, source-sound, music and "
+                "environment tapestry; and a sequence blueprint covering the supplied scenes "
+                "in story order. Do not invent events or dialogue to complete it. Every scene "
+                "needs at least one beat, and its first "
                 "beat's own firstEventIndex must equal that scene's own first event "
                 "index."),
         "SIGNED STORY CANON — these are the exact human-locked inputs for this run. "
@@ -2274,7 +2341,10 @@ def review_media(artifact_type, context, images, *, log=print):
                 "without explanatory dialogue. Judge whether environment, physical motif, "
                 "colour/light and sound deepen the same emotional argument rather than "
                 "decorate it or order a feeling; identify whether the beat remains legible "
-                "muted. For comedy, identify setup, expectation, "
+                "muted and in silhouette/staging. Check that must-understand information is "
+                "clear, protected information is not revealed early, relationship distance, "
+                "power, touch and eyelines carry the intended change, and score respects the "
+                "approved silence rule. For comedy, identify setup, expectation, "
                 "disruption, reaction, button and hold separately; presence is not a landing. "
                 "Then judge acting, prop contact, weight, anticipation, follow-through, "
                 "physical causality, timing/reaction, motivated camera/edit, continuity, "

@@ -122,7 +122,17 @@ def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
             environmentPressure="The narrowing stems make his unchecked speed costly.",
             soundStory="Wing buzz stops at contact; leaf tremor carries the held aftermath.",
             motifUse="The leaf changes from speed marker to witness of the mistake.",
-            thoughtChangeAndCut="Hold until his social pose returns one beat too late."))
+            thoughtChangeAndCut="Hold until his social pose returns one beat too late.",
+            mustUnderstand="Fuzzby knows the mistake was visible.",
+            mustNotKnowYet="Whether Zenny will tease or support him.",
+            reactionBeat="His grin returns only after he checks the unseen witness.",
+            relationshipDistance="The witness remains close enough to matter but offscreen.",
+            relationshipPowerDynamic="Fuzzby loses control of how the moment is interpreted.",
+            touchOrAvoidance="He avoids the trembling leaf after contact.",
+            eyelineRule="His first recovered eyeline seeks the witness, not the route.",
+            silhouetteRead="A compressed rebound resolves into an over-neat hover.",
+            silenceRule="Drop wing buzz for the held recognition beat.",
+            scoreInstruction="Withhold the bright motif until recovery becomes connection."))
 
 
 def _heart_contract():
@@ -154,6 +164,40 @@ def _heart_contract():
             openingClosingRhyme="The same corridor that flatters speed frames the recovery."))
 
 
+def _episode_architecture():
+    return C.EpisodeStoryArchitecture(
+        storyTruth=C.StoryTruthFormula(
+            protagonist="Fuzzby", falseBelief="Speed proves mastery.",
+            practicalWant="Cross the flower corridor cleanly.",
+            keyRelationship="Zenny's honest attention",
+            emotionalFearOrWound="Being seen failing will cost admiration.",
+            transformedAction="Remain present and recover without pretending nothing happened.",
+            themeProvenThroughAction="Connection survives visible imperfection."),
+        transformationMap=[C.TransformationMovement(
+            movement=movement, believes=f"belief at {movement}", feels=f"feeling at {movement}",
+            does=f"action at {movement}", relationshipCondition=f"relationship at {movement}",
+            audienceFeeling=f"audience at {movement}") for movement in (
+                "opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
+                "low-point", "climax-choice", "new-normal")],
+        tapestryMap=C.EpisodeTapestryMap(
+            physicalMotifArc="A leaf changes from scenery to witness to shared shelter.",
+            visualMotifArc="Open lanes narrow under pressure and reopen through connection.",
+            colourAndLightJourney="Warm play cools at failure and returns as shared warmth.",
+            sourceSoundArc="Wing buzz breaks, disappears, then rejoins the garden rhythm.",
+            musicMotifArc="A bright figure fragments, withholds, then returns in harmony.",
+            environmentalMetaphor="The corridor resists speed but supports recovery.",
+            openingImage="Fuzzby alone in an open flower lane.",
+            finalImage="Fuzzby and Zenny share the lane beside the leaf.",
+            transformedMeaning="The lane no longer measures individual mastery."),
+        sequenceBlueprint=[C.SequenceBlueprintItem(
+            sequenceId="SEQ1", sceneIds=["S1"], runtimeTarget="one scene",
+            externalObjective="Cross the corridor.", emotionalStart="unchecked confidence",
+            pressureOrComplication="The living environment resists his speed.",
+            emotionalTurn="performance becomes honest recovery",
+            endCondition="Fuzzby remains connected after failing.",
+            dominantAudienceFeeling="affection", nextQuestion="Can he accept help?")])
+
+
 def _performance_contract(beat_id="1.B1"):
     return C.ShotPerformanceContract(
         beatOwner=beat_id,
@@ -175,6 +219,14 @@ def _performance_contract(beat_id="1.B1"):
             pressureResponse="recovers his social pose before his balance",
             observableSignature="wings reset first, grin returns one beat late",
             substitutionTest="Zenny would acknowledge the evidence instead of performing past it")])
+
+
+def test_episode_story_architecture_requires_the_seven_movements_in_order():
+    architecture = _episode_architecture().model_dump()
+    architecture["transformationMap"][0], architecture["transformationMap"][1] = (
+        architecture["transformationMap"][1], architecture["transformationMap"][0])
+    with pytest.raises(ValueError, match="transformationMap must follow"):
+        C.EpisodeStoryArchitecture.model_validate(architecture)
 
 
 def _boundary(closing=False):
@@ -255,7 +307,9 @@ def _fake_llm(record, review_script=None):
     def fake(system, user, schema, label="", **k):
         record.append((label, schema.__name__, user))
         if schema is C.EpisodeVision:
-            return C.EpisodeVision(**{k: "x" for k in C.EpisodeVision.model_fields})
+            return C.EpisodeVision(**{
+                k: (_episode_architecture() if k == "storyArchitecture" else "x")
+                for k in C.EpisodeVision.model_fields})
         if schema is C.CanonCompletionProposal:
             return C.CanonCompletionProposal(completions=[C.CharacterCompletion(
                 character="Fuzzby", proposals=[C.FieldProposal(

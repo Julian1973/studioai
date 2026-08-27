@@ -522,10 +522,22 @@ def _validate_supervision_contracts(storyboard):
                       "secondaryAudienceFeeling", "outerAction", "innerAction",
                       "performanceDirection", "mutedRead", "environmentPressure",
                       "soundStory", "motifUse", "thoughtChangeAndCut"}
+        expanded_story_keys = {"mustUnderstand", "mustNotKnowYet", "reactionBeat",
+                               "relationshipDistance", "relationshipPowerDynamic",
+                               "touchOrAvoidance", "eyelineRule", "silhouetteRead",
+                               "silenceRule", "scoreInstruction"}
         for shot in shots:
             story_intent = shot.get("storyIntent")
-            if (not isinstance(story_intent, dict) or set(story_intent) != story_keys or
-                    any(not str(story_intent.get(key) or "").strip() for key in story_keys)):
+            intent_keys = set(story_intent) if isinstance(story_intent, dict) else set()
+            expanded_present = bool(intent_keys & expanded_story_keys)
+            if (not isinstance(story_intent, dict) or
+                    not story_keys.issubset(intent_keys) or
+                    not intent_keys.issubset(story_keys | expanded_story_keys) or
+                    any(not str(story_intent.get(key) or "").strip() for key in story_keys) or
+                    (expanded_present and (
+                        not expanded_story_keys.issubset(intent_keys) or
+                        any(not str(story_intent.get(key) or "").strip()
+                            for key in expanded_story_keys)))):
                 raise HandoverRefused(
                     f"REFUSED - {shot.get('shotId')} has no complete shot story intent")
     carrier_by_beat = {}

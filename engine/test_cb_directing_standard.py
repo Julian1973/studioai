@@ -68,7 +68,17 @@ def _card(budget):
             "environmentPressure": "The open doorway turns the safe room into a decision.",
             "soundStory": "Packing sounds stop whenever the outside world intrudes.",
             "motifUse": "The conker changes from comfort object to delayed choice.",
-            "thoughtChangeAndCut": "Hold when Bo admits the retreat through action."})
+            "thoughtChangeAndCut": "Hold when Bo admits the retreat through action.",
+            "mustUnderstand": "Bo is delaying because leaving frightens him.",
+            "mustNotKnowYet": "How Keen will respond when he arrives.",
+            "reactionBeat": "Bo checks the doorway, then returns to the conker.",
+            "relationshipDistance": "Mum remains close in sound but outside Bo's frame.",
+            "relationshipPowerDynamic": "Mum's confidence increases the pressure on Bo.",
+            "touchOrAvoidance": "Bo grips the conker instead of crossing the doorway.",
+            "eyelineRule": "Doorway glances lead every retreat to the table.",
+            "silhouetteRead": "Bo's forward lean repeatedly folds back toward safety.",
+            "silenceRule": "Protect the pause after Mum's last reassurance.",
+            "scoreInstruction": "Withhold melodic reassurance until Bo makes a real choice."})
 
 
 def test_storyboard_card_refuses_a_budget_that_cannot_breathe():

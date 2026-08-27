@@ -1445,6 +1445,40 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
              "Speed, impact, private flinch.", "The leaf answers his boast.",
              "Warm pollen and springy leaves.", "Wing hum and leaf twang.",
              "The leaf rebounds.", "Fuzzby stays airborne.", "Warm amusement."))}
+    vision["storyArchitecture"] = {
+        "storyTruth": {
+            "protagonist": "Fuzzby", "falseBelief": "Control must look effortless.",
+            "practicalWant": "Cross the meadow cleanly.", "keyRelationship": "Zenny",
+            "emotionalFearOrWound": "Being seen making a mistake.",
+            "transformedAction": "Stay connected after the wobble.",
+            "themeProvenThroughAction": "He lets Zenny see the recovery."},
+        "transformationMap": [{
+            "movement": movement, "believes": "Control protects confidence.",
+            "feels": "Increasingly exposed.", "does": "Adapts after the rebound.",
+            "relationshipCondition": "Zenny becomes a witness and ally.",
+            "audienceFeeling": "Amusement deepening into affection."}
+            for movement in (
+                "opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
+                "low-point", "climax-choice", "new-normal")],
+        "tapestryMap": {
+            "physicalMotifArc": "The leaf changes from obstacle to shared evidence.",
+            "visualMotifArc": "An open flight lane closes and reopens.",
+            "colourAndLightJourney": "Warm play cools at impact and returns.",
+            "sourceSoundArc": "Wing hum breaks on the leaf twang, then settles.",
+            "musicMotifArc": "The confident figure pauses before returning gently.",
+            "environmentalMetaphor": "The meadow bends confidence without breaking it.",
+            "openingImage": "Fuzzby owns an open flight lane.",
+            "finalImage": "Fuzzby shares that lane with Zenny.",
+            "transformedMeaning": "The lane now holds connection, not mastery."},
+        "sequenceBlueprint": [{
+            "sequenceId": "SEQ1", "sceneIds": ["S1"], "runtimeTarget": "one scene",
+            "externalObjective": "Cross the meadow.",
+            "emotionalStart": "Unchecked confidence.",
+            "pressureOrComplication": "The springy leaf resists his speed.",
+            "emotionalTurn": "A private wobble becomes an honest recovery.",
+            "endCondition": "Fuzzby remains connected after failing.",
+            "dominantAudienceFeeling": "Warm amusement.",
+            "nextQuestion": "Can he accept help next time?"}]}
 
     def prepare_story(events, cast_by_scene, canon_context, log=print):
         assert [event["type"] for event in events] == ["action", "dialogue"]

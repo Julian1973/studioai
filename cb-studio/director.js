@@ -4027,6 +4027,7 @@
             <strong>${esc(shot.shotId || "Shot")}${shot.durationSec || shot.targetDurationSec ? ` · ${esc(shot.durationSec || shot.targetDurationSec)}s` : ""}</strong>
             <p>${esc(shot.purpose || shot.storyBeat || shot.description || "Shot direction pending.")}</p>
             ${shot.storyIntent ? `<p class="small-muted">${esc(shot.storyIntent.primaryAudienceFeeling)} · ${esc(shot.storyIntent.innerAction)} · ${esc(shot.storyIntent.thoughtChangeAndCut)}</p>` : ""}
+            ${shot.storyIntent?.mustUnderstand ? `<p class="small-muted"><strong>Audience information:</strong> ${esc(shot.storyIntent.mustUnderstand)} · protect: ${esc(shot.storyIntent.mustNotKnowYet)}</p>` : ""}
           </article>`).join("") || beats.slice(0, 8).map((beat) => `<article>
             <strong>${esc(beat.beatId || beat.beatCode || "Beat")}</strong>
             <p>${esc(beat.storyBeat || beat.want || "Direction beat pending.")}</p>
@@ -4041,6 +4042,10 @@
       </section>`;
     }
     const candidate = intake.candidate || {};
+    const architecture = candidate.episodeVision?.storyArchitecture || {};
+    const storyTruth = architecture.storyTruth || {};
+    const tapestry = architecture.tapestryMap || {};
+    const sequences = architecture.sequenceBlueprint || [];
     const scenes = candidate.scenes || [];
     const beats = candidate.beats || [];
     const productionPlan = intake.productionPlan || candidate.productionPlan || [];
@@ -4058,6 +4063,12 @@
         <span class="voice-source ${waiting ? "working" : ""}">${esc(status)}</span>
       </div>
       ${candidate.logline ? `<p class="story-direction-logline">${esc(candidate.logline)}</p>` : ""}
+      ${storyTruth.protagonist ? `<div class="story-direction-list">
+        <article><strong>Episode story truth</strong><p>${esc(storyTruth.protagonist)} believes ${esc(storyTruth.falseBelief)}, pursues ${esc(storyTruth.practicalWant)}, and must choose ${esc(storyTruth.transformedAction)} through ${esc(storyTruth.keyRelationship)}.</p></article>
+        <article><strong>Theme proved through action</strong><p>${esc(storyTruth.themeProvenThroughAction)}</p></article>
+        <article><strong>Episode tapestry</strong><p>${esc(tapestry.physicalMotifArc)} · ${esc(tapestry.musicMotifArc)} · ${esc(tapestry.transformedMeaning)}</p></article>
+        <article><strong>Sequence architecture</strong><p>${sequences.length} sequence${sequences.length === 1 ? "" : "s"} · ${sequences.map((item) => item.dominantAudienceFeeling).filter(Boolean).join(" → ")}</p></article>
+      </div>` : ""}
       <div class="story-direction-list">
         ${sceneProduction.slice(0, 4).map((shot) => `<article>
           <strong>${esc(shot.productionShotId || "Production shot")}${shot.targetDurationSec ? ` · ${esc(shot.targetDurationSec)}s` : ""}</strong>

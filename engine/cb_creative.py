@@ -406,6 +406,16 @@ class ShotStoryIntent(BaseModel):
     soundStory: str = Field(min_length=1)
     motifUse: str = Field(min_length=1)
     thoughtChangeAndCut: str = Field(min_length=1)
+    mustUnderstand: str = ""
+    mustNotKnowYet: str = ""
+    reactionBeat: str = ""
+    relationshipDistance: str = ""
+    relationshipPowerDynamic: str = ""
+    touchOrAvoidance: str = ""
+    eyelineRule: str = ""
+    silhouetteRead: str = ""
+    silenceRule: str = ""
+    scoreInstruction: str = ""
 
 
 class StoryboardStage(BaseModel):
@@ -630,6 +640,78 @@ class Scene(BaseModel):
     sourceApprovalState: str = "draft"
 
 
+class StoryTruthFormula(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    protagonist: str = Field(min_length=1)
+    falseBelief: str = Field(min_length=1)
+    practicalWant: str = Field(min_length=1)
+    keyRelationship: str = Field(min_length=1)
+    emotionalFearOrWound: str = Field(min_length=1)
+    transformedAction: str = Field(min_length=1)
+    themeProvenThroughAction: str = Field(min_length=1)
+
+
+class TransformationMovement(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    movement: Literal[
+        "opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
+        "low-point", "climax-choice", "new-normal"]
+    believes: str = Field(min_length=1)
+    feels: str = Field(min_length=1)
+    does: str = Field(min_length=1)
+    relationshipCondition: str = Field(min_length=1)
+    audienceFeeling: str = Field(min_length=1)
+
+
+class EpisodeTapestryMap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    physicalMotifArc: str = Field(min_length=1)
+    visualMotifArc: str = Field(min_length=1)
+    colourAndLightJourney: str = Field(min_length=1)
+    sourceSoundArc: str = Field(min_length=1)
+    musicMotifArc: str = Field(min_length=1)
+    environmentalMetaphor: str = Field(min_length=1)
+    openingImage: str = Field(min_length=1)
+    finalImage: str = Field(min_length=1)
+    transformedMeaning: str = Field(min_length=1)
+
+
+class SequenceBlueprintItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    sequenceId: str = Field(min_length=1)
+    sceneIds: List[str] = Field(min_length=1)
+    runtimeTarget: str = Field(min_length=1)
+    externalObjective: str = Field(min_length=1)
+    emotionalStart: str = Field(min_length=1)
+    pressureOrComplication: str = Field(min_length=1)
+    emotionalTurn: str = Field(min_length=1)
+    endCondition: str = Field(min_length=1)
+    dominantAudienceFeeling: str = Field(min_length=1)
+    nextQuestion: str = Field(min_length=1)
+
+
+class EpisodeStoryArchitecture(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    storyTruth: StoryTruthFormula
+    transformationMap: List[TransformationMovement] = Field(min_length=7, max_length=7)
+    tapestryMap: EpisodeTapestryMap
+    sequenceBlueprint: List[SequenceBlueprintItem] = Field(min_length=1, max_length=12)
+
+    @model_validator(mode="after")
+    def transformation_movements_are_complete_and_ordered(self):
+        expected = ["opening", "inciting-pressure", "first-adaptation", "midpoint-truth",
+                    "low-point", "climax-choice", "new-normal"]
+        actual = [item.movement for item in self.transformationMap]
+        if actual != expected:
+            raise ValueError(f"transformationMap must follow {expected}")
+        return self
+
+
 class EpisodeVision(BaseModel):
     premise: str
     dramaticQuestion: str
@@ -645,6 +727,7 @@ class EpisodeVision(BaseModel):
     climax: str
     resolution: str
     intendedFinalFeeling: str
+    storyArchitecture: Optional[EpisodeStoryArchitecture] = None
 
 
 class SceneDirection(BaseModel):
@@ -956,6 +1039,8 @@ def _mind(role, taste_keys, charge):
     # elsewhere in the long skill documents).  This remains the ONE existing Gate 0-6
     # creative path; no parallel storyboard pipeline is introduced.
     worker_keys = []
+    if "EPISODE STORY ARCHITECT" in role:
+        worker_keys.append("story-architect")
     if "EMOTIONAL STORY-TO-SCREEN" in role:
         worker_keys.append("heart-director")
     if "DIRECTOR" in role:
@@ -1005,13 +1090,22 @@ def episode_vision(episode="Ep1", log=print):
         + "\n".join(f"  {c.get('dialogue')}" for c in (b.get('cuts') or []) if c.get('dialogue'))
         for b in beats)
     v = cb_llm.structured(
-        _mind("SHOWRUNNER", ["showrunnerTaste"],
+        _mind("SHOWRUNNER AND EPISODE STORY ARCHITECT", ["showrunnerTaste"],
               "Read the COMPLETE episode before anything is directed. Establish what this "
               "episode is really about beneath the plot, what changes, which relationship "
               "carries its heart, where the audience laughs, leans forward, becomes still, "
-              "and what remains after it ends."),
+              "and what remains after it ends. Include storyArchitecture: one action-based "
+              "story truth; exactly seven ordered transformation movements; a restrained "
+              "episode tapestry across physical and visual motif, colour/light, source sound, "
+              "music and environment; and a sequence blueprint covering the supplied scenes "
+              "in story order. The climax must require transformed action, not only spectacle."),
         f"THE COMPLETE APPROVED SCRIPT (dialogue verbatim-locked):\n{script[:24000]}",
         EpisodeVision, label="creative_vision")
+    if v.storyArchitecture is None:
+        raise RuntimeError(
+            "EPISODE STORY ARCHITECTURE MISSING — newly authored Story & Direction must "
+            "define the action truth, seven transformation movements, episode tapestry "
+            "and sequence blueprint before scene direction begins")
     beat_signature = cb_lineage.beat_package_signature(d)
     script_version = (d.get("sourceScript") or {}).get("scriptVersionId")
     canon_digest = cb_canon.profile_digest(
@@ -1110,7 +1204,11 @@ def emotional_story_contract(episode, scene_num, vision, ready, log=print):
               "physical motif, sonic motif, colour/light progression, thematic visual "
               "contrast and an opening/closing image rhyme whose meaning changes. Name what "
               "can be removed from dialogue because behaviour, image or silence carries it. "
-              "The environment must apply emotional or physical pressure, not act as wallpaper."),
+              "The environment must apply emotional or physical pressure, not act as wallpaper. "
+              "Treat this scene as one specific movement inside the approved episode "
+              "storyArchitecture: preserve its sequence objective, audience feeling and "
+              "tapestry trajectory, and never manufacture a local emotional resolution that "
+              "contradicts or arrives before the episode transformation."),
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:6000]}\n\n"
         f"LOCKED SCENE SCRIPT:\n{script}\n\n"
         f"CHARACTER + RELATIONSHIP CANON:\n{_characters_for(ready['cast'])[:9000]}"
@@ -1458,6 +1556,10 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "performance direction, what remains legible with sound muted, how the environment "
               "applies pressure, how sound deepens rather than rescues the beat, how the signed "
               "motif is used, and the exact change in thought that motivates the cut or hold. "
+              "It also states what the audience must understand and must not know yet; the "
+              "meaning-changing reaction; relationship distance, power, touch/avoidance and "
+              "eyeline; the silhouette read; where silence is protected; and how score enters, "
+              "develops, withholds or stays absent without instructing emotion. "
               "providerInstruction must not contain empty quality labels "
               "such as cinematic, beautiful, award-winning or Pixar."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
@@ -1488,6 +1590,17 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
             raise RuntimeError(f"PERFORMANCE BUDGET MISSING for {shot.shotId}")
         if not shot.storyIntent:
             raise RuntimeError(f"STORY INTENT MISSING for {shot.shotId}")
+        expanded_story_intent = (
+            "mustUnderstand", "mustNotKnowYet", "reactionBeat", "relationshipDistance",
+            "relationshipPowerDynamic", "touchOrAvoidance", "eyelineRule", "silhouetteRead",
+            "silenceRule", "scoreInstruction")
+        missing_story_intent = [
+            name for name in expanded_story_intent
+            if not str(getattr(shot.storyIntent, name, "") or "").strip()]
+        if missing_story_intent:
+            raise RuntimeError(
+                f"EXPANDED STORY INTENT MISSING for {shot.shotId}: "
+                + ", ".join(missing_story_intent))
         provider_line = _norm(shot.cinematographyContract.providerInstruction)
         empty_labels = ("cinematic", "beautiful", "award winning", "pixar")
         if any(label in provider_line for label in empty_labels):
@@ -1740,7 +1853,11 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
               "ordinary-life truth, costly choice and final after-feeling must be visible in "
               "accumulated behaviour. Reject motifs, music, colour or environment that decorate "
               "without carrying the signed emotional argument. At least one important beat must "
-              "remain legible muted, and cuts must follow changes in thought rather than line ends. "
+              "remain legible muted and in silhouette/staging. Reject a shot that reveals "
+              "information marked mustNotKnowYet, fails to make mustUnderstand legible, or leaves "
+              "relationship distance, power, touch/avoidance or eyeline dramatically inert. "
+              "Reject score that commands emotion before behaviour earns it. Cuts must follow "
+              "changes in thought rather than line ends. "
               "decision. Seedance 2.5 can carry a complete 30-second arc with internal cuts, "
               "so reject avoidable joins: if two adjacent units total 30 seconds or less, "
               "accept the split only when its named boundary protects a real location/time, "

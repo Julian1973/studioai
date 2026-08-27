@@ -1042,3 +1042,12 @@ def test_rough_cut_uses_a_saved_approved_take_bin():
     assert "Add shot" in JS
     assert 'self.path == "/api/rough-cut-draft"' in SERVER
     assert "rough_cut_projection" in SERVER
+
+
+def test_story_direction_exposes_episode_architecture_and_audience_information():
+    for phrase in (
+        "storyArchitecture", "Episode story truth", "Theme proved through action",
+        "Episode tapestry", "Sequence architecture", "mustUnderstand", "mustNotKnowYet",
+        "Audience information:",
+    ):
+        assert phrase in JS

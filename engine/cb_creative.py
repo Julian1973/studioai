@@ -78,7 +78,7 @@ CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
-CREATIVE_DIRECTING_STANDARD_VERSION = 3
+CREATIVE_DIRECTING_STANDARD_VERSION = 4
 UNIT_PACKING_CONTRACT_VERSION = 1
 MAX_INTERNAL_REVISIONS = 2
 SCRIPT_STORE = cb_scripts.ScriptStore(ROOT)
@@ -139,6 +139,57 @@ class TreatmentSelection(BaseModel):
     rejectionChecks: str                         # how each candidate fared against the
     #                                              forbidden dependencies (fixed lanes, habitual
     #                                              coverage, safe cameras, mechanical counts...)
+
+
+class SceneEmotionalNorthStar(BaseModel):
+    """The direct human truth every department must express through this scene."""
+    model_config = ConfigDict(extra="forbid")
+
+    surfaceStory: str = Field(min_length=1)
+    universalTruth: str = Field(min_length=1)
+    childClearWant: str = Field(min_length=1)
+    emotionalNeed: str = Field(min_length=1)
+    falseBeliefUnderPressure: str = Field(min_length=1)
+    relationshipEngine: str = Field(min_length=1)
+    ordinaryLifeTruth: str = Field(min_length=1)
+    sceneTurn: str = Field(min_length=1)
+    audienceJourney: List[str] = Field(min_length=3, max_length=8)
+    finalAfterFeeling: str = Field(min_length=1)
+    dialogueSubtractionOpportunity: str = Field(min_length=1)
+    environmentPressure: str = Field(min_length=1)
+
+
+class CharacterSceneTransformation(BaseModel):
+    """A playable belief-to-action change, not invented psychology or a stated lesson."""
+    model_config = ConfigDict(extra="forbid")
+
+    emotionalOwner: str = Field(min_length=1)
+    entryBelief: str = Field(min_length=1)
+    entryFeeling: str = Field(min_length=1)
+    pressureBehaviour: str = Field(min_length=1)
+    costlyChoice: str = Field(min_length=1)
+    exitBelief: str = Field(min_length=1)
+    exitAction: str = Field(min_length=1)
+
+
+class TapestryContract(BaseModel):
+    """How image, environment and sound echo one emotional argument without ornament."""
+    model_config = ConfigDict(extra="forbid")
+
+    physicalMotif: str = Field(min_length=1)
+    sonicMotif: str = Field(min_length=1)
+    colourAndLightProgression: str = Field(min_length=1)
+    thematicVisualContrast: str = Field(min_length=1)
+    openingClosingRhyme: str = Field(min_length=1)
+
+
+class EmotionalStoryToScreenContract(BaseModel):
+    """Upstream Heart Director contract consumed by the existing Gate 1-6 room."""
+    model_config = ConfigDict(extra="forbid")
+
+    northStar: SceneEmotionalNorthStar
+    transformation: CharacterSceneTransformation
+    tapestry: TapestryContract
 
 
 class DialogueOccurrence(BaseModel):
@@ -340,6 +391,23 @@ class ShotPerformanceBudget(BaseModel):
     rationale: str = Field(min_length=1)
 
 
+class ShotStoryIntent(BaseModel):
+    """The meaning carried by one shot before camera and provider instructions are authored."""
+    model_config = ConfigDict(extra="forbid")
+
+    narrativeFunction: str = Field(min_length=1)
+    primaryAudienceFeeling: str = Field(min_length=1)
+    secondaryAudienceFeeling: str = Field(min_length=1)
+    outerAction: str = Field(min_length=1)
+    innerAction: str = Field(min_length=1)
+    performanceDirection: str = Field(min_length=1)
+    mutedRead: str = Field(min_length=1)
+    environmentPressure: str = Field(min_length=1)
+    soundStory: str = Field(min_length=1)
+    motifUse: str = Field(min_length=1)
+    thoughtChangeAndCut: str = Field(min_length=1)
+
+
 class StoryboardStage(BaseModel):
     """One causal story step inside a Seedance production unit."""
     model_config = ConfigDict(extra="forbid")
@@ -414,6 +482,7 @@ class StoryboardCard(BaseModel):
                     "remaining inside this unit as a motivated internal cut.")
     cinematographyContract: Optional[ShotCinematographyContract] = None
     performanceBudget: Optional[ShotPerformanceBudget] = None
+    storyIntent: Optional[ShotStoryIntent] = None
     approvalState: str = "draft"
 
     @model_validator(mode="after")
@@ -887,6 +956,8 @@ def _mind(role, taste_keys, charge):
     # elsewhere in the long skill documents).  This remains the ONE existing Gate 0-6
     # creative path; no parallel storyboard pipeline is introduced.
     worker_keys = []
+    if "EMOTIONAL STORY-TO-SCREEN" in role:
+        worker_keys.append("heart-director")
     if "DIRECTOR" in role:
         worker_keys.append("director")
     if "CINEMATOGRAPHER" in role:
@@ -1017,9 +1088,43 @@ def gate0_readiness(episode, scene_num, brief, log=print):
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
+# HEART CONTRACT — emotional meaning before treatments, boards or prompts
+# ─────────────────────────────────────────────────────────────────────────────────────────
+def emotional_story_contract(episode, scene_num, vision, ready, log=print):
+    script = json.dumps([{
+        "beatCode": beat.get("beatCode"), "storyBeat": beat.get("storyBeat"),
+        "dialogue": [cut.get("dialogue") for cut in (beat.get("cuts") or [])
+                     if cut.get("dialogue")],
+        "location": beat.get("location"), "time": beat.get("time")}
+        for beat in ready["beats"]], ensure_ascii=False)
+    brief_line = (f"\n\nUSER AMBITION — audience experience only, never permission to "
+                  f"rewrite canon or dialogue:\n{ready['brief']}" if ready["brief"] else "")
+    contract = cb_llm.structured(
+        _mind("EMOTIONAL STORY-TO-SCREEN DIRECTOR", ["directorTaste"],
+              "Define the scene's simple, direct emotional operating system before any "
+              "treatment or shot exists. A four-to-eight-year-old must understand the "
+              "immediate want through action; an adult should recognise the deeper ordinary-"
+              "life truth without the theme being spoken. Make the relationship cause the "
+              "change. Identify the emotional owner's entry belief, pressure behaviour, "
+              "costly choice and visible exit action. Then define a restrained tapestry of "
+              "physical motif, sonic motif, colour/light progression, thematic visual "
+              "contrast and an opening/closing image rhyme whose meaning changes. Name what "
+              "can be removed from dialogue because behaviour, image or silence carries it. "
+              "The environment must apply emotional or physical pressure, not act as wallpaper."),
+        f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:6000]}\n\n"
+        f"LOCKED SCENE SCRIPT:\n{script}\n\n"
+        f"CHARACTER + RELATIONSHIP CANON:\n{_characters_for(ready['cast'])[:9000]}"
+        + brief_line,
+        EmotionalStoryToScreenContract, label=f"heart_contract_s{scene_num}")
+    log(f"HEART CONTRACT — {contract.northStar.childClearWant[:90]} -> "
+        f"{contract.northStar.finalAfterFeeling[:90]}")
+    return contract
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────
 # GATE 1 — WHOLE-SCENE CREATIVE TREATMENTS (Director + Cinematographer, jointly)
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def gate1_treatments(episode, scene_num, vision, ready, log=print):
+def gate1_treatments(episode, scene_num, vision, ready, heart=None, log=print):
     script = json.dumps([{"beatCode": b.get("beatCode"), "storyBeat": b.get("storyBeat"),
                            "dialogue": [c.get("dialogue") for c in (b.get("cuts") or [])
                                          if c.get("dialogue")],
@@ -1044,7 +1149,9 @@ def gate1_treatments(episode, scene_num, vision, ready, log=print):
               "sides; no automatic action/consequence/reaction coverage; no mechanical shot "
               "thinking at this stage at all."),
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:6000]}\n\n"
-        f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
+        + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
+           f"{heart.model_dump_json()}\n\n" if heart else "")
+        + f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
         f"CHARACTER + RELATIONSHIP CANON:\n{_characters_for(ready['cast'])[:9000]}"
         + brief_line,
         TreatmentSet, label=f"gate1_treatments_s{scene_num}")
@@ -1056,7 +1163,7 @@ def gate1_treatments(episode, scene_num, vision, ready, log=print):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # GATE 2 — SHOWRUNNER TREATMENT SELECTION (before any beat breakdown)
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def gate2_select(vision, treatments, ready, log=print):
+def gate2_select(vision, treatments, ready, heart=None, log=print):
     sel = cb_llm.structured(
         _mind("SHOWRUNNER", ["showrunnerTaste"],
               "Evaluate the three COMPLETE scene treatments before any beat breakdown. "
@@ -1070,6 +1177,8 @@ def gate2_select(vision, treatments, ready, log=print):
               "rejectionChecks. State the ONE governing audience experience the selected "
               "treatment commits the scene to."),
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:5000]}\n\n"
+        + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
+           f"{heart.model_dump_json()}\n\n" if heart else "")
         + ("USER AMBITION: " + ready["brief"] + "\n\n" if ready["brief"] else "")
         + "THE THREE TREATMENTS:\n"
         + "\n\n".join(t.model_dump_json() for t in treatments),
@@ -1091,7 +1200,7 @@ def _selected_treatment(treatments, selection):
 # GATE 3 — BEAT ARCHITECTURE (Director, inside the selected treatment)
 # ─────────────────────────────────────────────────────────────────────────────────────────
 def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
-                review_notes="", log=print):
+                heart=None, review_notes="", log=print):
     script = json.dumps([{"beatCode": b.get("beatCode"),
                            "sourceBeatId": b.get("sourceBeatId"),
                            "sourceEventIds": b.get("sourceEventIds"),
@@ -1128,7 +1237,9 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
               "exists, bind any spoken call by dialogueOccurrenceId rather than copying or "
               "rewriting its words."),
         f"THE SELECTED TREATMENT (this governs everything):\n{treatment.model_dump_json()}\n\n"
-        f"THE SHOWRUNNER'S SELECTION:\n{selection.model_dump_json()}\n\n"
+        + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
+           f"{heart.model_dump_json()}\n\n" if heart else "")
+        + f"THE SHOWRUNNER'S SELECTION:\n{selection.model_dump_json()}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:4000]}\n\n"
         f"THE SCENE'S APPROVED SCRIPT (dialogue verbatim-locked):\n{script}\n\n"
         f"CHARACTER CANON:\n{_characters_for(ready['cast'])[:8000]}{notes}\n\n"
@@ -1151,7 +1262,7 @@ def gate3_beats(episode, scene_num, vision, selection, treatment, ready,
         log(f"  [director] gate3_beats_s{scene_num}: {repair_note} - rerunning once", flush=True)
         return gate3_beats(
             episode, scene_num, vision, selection, treatment, ready,
-            review_notes=repair_note, log=log)
+            heart=heart, review_notes=repair_note, log=log)
     # The Director owns meaning inside each beat, never source identity.
     expected_codes = [str(beat.get("beatCode")) for beat in ready["beats"]]
     returned_codes = [str(beat.beatId) for beat in sd.beats]
@@ -1263,7 +1374,7 @@ def _validate_gate4_production_units(shots, beats):
 
 
 def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                          review_notes="", log=print):
+                          heart=None, review_notes="", log=print):
     notes = (f"\n\nSHOWRUNNER'S RETURN NOTES (redesign the SEQUENCE — never patch "
              f"wording): {review_notes}" if review_notes else "")
     sc = cb_llm.structured_with_repair(
@@ -1342,11 +1453,18 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
               "unit. Every cinematographyContract must also state emotionalDistanceStart, "
               "emotionalDistanceEnd, revealStrategy, performanceVisibility, editorialPurpose "
               "and memorableLandingImage. These express visual arc and performance need, not "
-              "decorative coverage. providerInstruction must not contain empty quality labels "
+              "decorative coverage. Every card also requires storyIntent: narrative function, "
+              "primary and secondary audience feeling, outer action, inner action, playable "
+              "performance direction, what remains legible with sound muted, how the environment "
+              "applies pressure, how sound deepens rather than rescues the beat, how the signed "
+              "motif is used, and the exact change in thought that motivates the cut or hold. "
+              "providerInstruction must not contain empty quality labels "
               "such as cinematic, beautiful, award-winning or Pixar."),
         f"THE SELECTED TREATMENT (the sequence must deliver ITS experience):\n"
         f"{treatment.model_dump_json()}\n\n"
-        f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
+        + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
+           f"{heart.model_dump_json()}\n\n" if heart else "")
+        + f"GOVERNING AUDIENCE EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"THE BEATS:\n" + "\n".join(b.model_dump_json() for b in sd.beats)
         + f"{notes}\n\nshotId = 'S{scene_num}.SH<n>' in sequence order.",
         ShotConference, label=f"gate4_shots_s{scene_num}")
@@ -1368,6 +1486,8 @@ def gate4_shot_conference(episode, scene_num, selection, treatment, sd,
                 + ", ".join(missing_visual_intent))
         if not shot.performanceBudget:
             raise RuntimeError(f"PERFORMANCE BUDGET MISSING for {shot.shotId}")
+        if not shot.storyIntent:
+            raise RuntimeError(f"STORY INTENT MISSING for {shot.shotId}")
         provider_line = _norm(shot.cinematographyContract.providerInstruction)
         empty_labels = ("cinematic", "beautiful", "award winning", "pixar")
         if any(label in provider_line for label in empty_labels):
@@ -1601,7 +1721,8 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # GATE 6 — ADVERSARIAL SHOWRUNNER REVIEW
 # ─────────────────────────────────────────────────────────────────────────────────────────
-def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, log=print):
+def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
+                             heart=None, log=print):
     packing = cb_unit_packing.audit_units(shots)
     review = cb_llm.structured(
         _mind("SHOWRUNNER", ["showrunnerTaste"],
@@ -1615,6 +1736,11 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
               "alone is NOT enough; if the storyboard has lost the treatment's central "
               "experience, fail it and set returnTo to 'gate3' (beat architecture is wrong) "
               "or 'gate4' (the shot sequence is wrong). Audit provider packing as a separate "
+              "decision. Reject emotional posturing: the child-clear want, relationship engine, "
+              "ordinary-life truth, costly choice and final after-feeling must be visible in "
+              "accumulated behaviour. Reject motifs, music, colour or environment that decorate "
+              "without carrying the signed emotional argument. At least one important beat must "
+              "remain legible muted, and cuts must follow changes in thought rather than line ends. "
               "decision. Seedance 2.5 can carry a complete 30-second arc with internal cuts, "
               "so reject avoidable joins: if two adjacent units total 30 seconds or less, "
               "accept the split only when its named boundary protects a real location/time, "
@@ -1625,7 +1751,9 @@ def gate6_adversarial_review(vision, selection, treatment, sd, shots, voices, lo
               "Never request wording patches. Give a WRITTEN judgement — never a score."),
         f"THE SELECTED TREATMENT (the contract this scene must deliver):\n"
         f"{treatment.model_dump_json()}\n\n"
-        f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"
+        + (f"SIGNED EMOTIONAL STORY-TO-SCREEN CONTRACT:\n"
+           f"{heart.model_dump_json()}\n\n" if heart else "")
+        + f"GOVERNING EXPERIENCE: {selection.governingAudienceExperience}\n\n"
         f"EPISODE VISION:\n{json.dumps(vision, ensure_ascii=False)[:3500]}\n\n"
         f"BEATS:\n" + "\n".join(b.model_dump_json()[:1600] for b in sd.beats)
         + "\n\nSHOTS:\n" + "\n".join(s.model_dump_json()[:1800] for s in shots)
@@ -2036,19 +2164,22 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
             "STALE EPISODE VISION — it was not authored from the active immutable script and "
             "canonical beat package. Rebuild Story & Direction before directing this scene.")
 
-    treatments = gate1_treatments(episode, scene_num, vision, ready, log=log)
-    selection = gate2_select(vision, treatments, ready, log=log)
+    heart = emotional_story_contract(episode, scene_num, vision, ready, log=log)
+    treatments = gate1_treatments(episode, scene_num, vision, ready, heart=heart, log=log)
+    selection = gate2_select(vision, treatments, ready, heart=heart, log=log)
     treatment = _selected_treatment(treatments, selection)
 
-    sd = gate3_beats(episode, scene_num, vision, selection, treatment, ready, log=log)
-    shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd, log=log)
+    sd = gate3_beats(episode, scene_num, vision, selection, treatment, ready,
+                     heart=heart, log=log)
+    shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd,
+                                  heart=heart, log=log)
     shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
     voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 
     review, revisions = None, []
     for attempt in range(MAX_INTERNAL_REVISIONS + 1):
         review = gate6_adversarial_review(vision, selection, treatment, sd, shots, voices,
-                                           log=log)
+                                           heart=heart, log=log)
         log(f"GATE 6 — {'accepts' if review.passes else 'REJECTS'}: {review.judgement[:140]}")
         if review.passes or attempt == MAX_INTERNAL_REVISIONS:
             break
@@ -2058,9 +2189,9 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
                            "at": _now()})
         if (review.returnTo or "gate4") == "gate3":     # complete re-architecture
             sd = gate3_beats(episode, scene_num, vision, selection, treatment, ready,
-                              review_notes=notes, log=log)
+                              heart=heart, review_notes=notes, log=log)
         shots = gate4_shot_conference(episode, scene_num, selection, treatment, sd,
-                                        review_notes=notes, log=log)
+                                        heart=heart, review_notes=notes, log=log)
         shots = gate5_performance(episode, scene_num, treatment, sd, shots, log=log)
         voices = gate5_voice(episode, scene_num, sd, shots, log=log)
 
@@ -2089,6 +2220,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "unitPackingContractVersion": UNIT_PACKING_CONTRACT_VERSION,
            "creativeDirectingStandardVersion": CREATIVE_DIRECTING_STANDARD_VERSION,
            "builtAt": _now(), "vision": vision,
+           "emotionalStoryToScreenContract": heart.model_dump(),
            "sourceScript": source_pkg.get("sourceScript"),
            "sourceBeatPackage": {"path": str(_script_package(episode).relative_to(ROOT)),
                                  "contentSignature": beat_signature},

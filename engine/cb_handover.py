@@ -265,7 +265,8 @@ def _creative_intent(storyboard):
             "power": beat.get("powerMoment"),
         })
     return {
-        "schemaVersion": 2,
+        "schemaVersion": 3 if storyboard.get("emotionalStoryToScreenContract") else 2,
+        "emotionalStoryToScreen": storyboard.get("emotionalStoryToScreenContract"),
         "selectedTreatment": selection.get("selectedTreatment"),
         "governingAudienceExperience": selection.get("governingAudienceExperience"),
         "scenePurpose": scene.get("purpose"),
@@ -487,7 +488,8 @@ def _validate_supervision_contracts(storyboard):
                     f"REFUSED - {beat_id}.powerMoment is malformed or breaks canon identity")
 
     shots = list(storyboard.get("shots") or [])
-    if int(storyboard.get("creativeDirectingStandardVersion") or 0) >= 3:
+    standard_version = int(storyboard.get("creativeDirectingStandardVersion") or 0)
+    if standard_version >= 3:
         budget_keys = {"emotionalTurnCount", "propStateChangeCount", "dialogueHeavy",
                        "silentActingReserveSec", "landingHoldSec",
                        "minimumHonestDurationSec", "decision", "rationale"}
@@ -507,6 +509,25 @@ def _validate_supervision_contracts(storyboard):
             if any(not str(cine.get(key) or "").strip() for key in visual_keys):
                 raise HandoverRefused(
                     f"REFUSED - {shot.get('shotId')} has incomplete visual-performance intent")
+    if standard_version >= 4:
+        heart = storyboard.get("emotionalStoryToScreenContract") or {}
+        if set(heart) != {"northStar", "transformation", "tapestry"}:
+            raise HandoverRefused(
+                "REFUSED - storyboard has no complete emotional story-to-screen contract")
+        if any(not isinstance(heart.get(key), dict) or not heart.get(key)
+               for key in ("northStar", "transformation", "tapestry")):
+            raise HandoverRefused(
+                "REFUSED - emotional story-to-screen contract is incomplete")
+        story_keys = {"narrativeFunction", "primaryAudienceFeeling",
+                      "secondaryAudienceFeeling", "outerAction", "innerAction",
+                      "performanceDirection", "mutedRead", "environmentPressure",
+                      "soundStory", "motifUse", "thoughtChangeAndCut"}
+        for shot in shots:
+            story_intent = shot.get("storyIntent")
+            if (not isinstance(story_intent, dict) or set(story_intent) != story_keys or
+                    any(not str(story_intent.get(key) or "").strip() for key in story_keys)):
+                raise HandoverRefused(
+                    f"REFUSED - {shot.get('shotId')} has no complete shot story intent")
     carrier_by_beat = {}
     for beat_id in big_beats:
         eligible = [shot for shot in shots if beat_id in (shot.get("beatIds") or [])]
@@ -939,6 +960,7 @@ def distil_shot(sb_shot, pd, cast, shot_voices, prev, characters_cfg,
                 "emotionContractsApproved": list(emotion_contracts or []),
                 "cinematographyContractApproved": cinematography_contract or None,
                 "performanceBudgetApproved": sb_shot.get("performanceBudget"),
+                "storyIntentApproved": sb_shot.get("storyIntent"),
                 "targetDurationSecApproved": sb_shot.get("targetDurationSec"),
                 "storyboardStagePlanApproved": list(sb_shot.get("stagePlan") or []),
                 "storyboardInternalShotPlanApproved": list(

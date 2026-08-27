@@ -78,6 +78,14 @@ SKILLS_V3 = {
     "animation": ROOT / "skills/seedance-production-director-v3/SKILL.md",
 }
 
+SKILLS_V4 = {
+    "heart-director": ROOT / "skills/emotional-story-to-screen-director-v4/SKILL.md",
+    "director": ROOT / "skills/crystal-bears-director-v4/SKILL.md",
+    "cinematography": ROOT / "skills/crystal-bears-cinematographer-v4/SKILL.md",
+    "dp": ROOT / "skills/crystal-bears-dp-v4/SKILL.md",
+    "animation": ROOT / "skills/seedance-production-director-v4/SKILL.md",
+}
+
 DEPARTMENTS = [
     {"id": "story", "stage": "storyboard", "department": "Story & Direction",
      "worker": "Director", "influences": "Pete Docter · Andrew Stanton",
@@ -126,7 +134,9 @@ def load_runtime_skill(worker, standard_version=0):
     pipeline notes.  Only the concise marked contract is executable; the source document
     remains available to humans without letting stale instructions silently enter a call.
     """
-    path = (SKILLS_V3.get(worker) if int(standard_version or 0) >= 3 else None) or SKILLS[worker]
+    version = int(standard_version or 0)
+    path = ((SKILLS_V4.get(worker) if version >= 4 else None) or
+            (SKILLS_V3.get(worker) if version >= 3 else None) or SKILLS[worker])
     text = path.read_text(encoding="utf-8")
     if RUNTIME_START not in text or RUNTIME_END not in text:
         raise RuntimeError(f"{path} has no executable runtime worker contract")
@@ -2259,7 +2269,12 @@ def review_media(artifact_type, context, images, *, log=print):
                 "never an automatic approval, rewrite or generation instruction. Judge "
                 "whether the intended dramatic or comic beat is actually felt. Compare the "
                 "approved emotional entry, pressure, visible turn, exit and held-after-beat "
-                "against what is observable. For comedy, identify setup, expectation, "
+                "against what is observable. Test whether the child-clear want, hidden "
+                "inner action, relationship pressure and change in thought remain direct "
+                "without explanatory dialogue. Judge whether environment, physical motif, "
+                "colour/light and sound deepen the same emotional argument rather than "
+                "decorate it or order a feeling; identify whether the beat remains legible "
+                "muted. For comedy, identify setup, expectation, "
                 "disruption, reaction, button and hold separately; presence is not a landing. "
                 "Then judge acting, prop contact, weight, anticipation, follow-through, "
                 "physical causality, timing/reaction, motivated camera/edit, continuity, "

@@ -111,7 +111,47 @@ def _card(shot_id="S1.SH1", transition="PLANNED_CUT"):
             emotionalTurnCount=1, propStateChangeCount=1, dialogueHeavy=False,
             silentActingReserveSec=1.5, landingHoldSec=1.0,
             minimumHonestDurationSec=6.0, decision="single-unit",
-            rationale="Seven seconds preserves approach, recoil, reaction and landing."))
+            rationale="Seven seconds preserves approach, recoil, reaction and landing."),
+        storyIntent=C.ShotStoryIntent(
+            narrativeFunction="Turn Fuzzby's speed into revealing social embarrassment.",
+            primaryAudienceFeeling="amusement", secondaryAudienceFeeling="affection",
+            outerAction="Fuzzby clips the leaf and rebounds.",
+            innerAction="He tries to preserve confidence after the evidence changes.",
+            performanceDirection="Play the attempt to hide embarrassment, not embarrassment.",
+            mutedRead="The collision, delayed recovery and trembling leaf tell the turn.",
+            environmentPressure="The narrowing stems make his unchecked speed costly.",
+            soundStory="Wing buzz stops at contact; leaf tremor carries the held aftermath.",
+            motifUse="The leaf changes from speed marker to witness of the mistake.",
+            thoughtChangeAndCut="Hold until his social pose returns one beat too late."))
+
+
+def _heart_contract():
+    return C.EmotionalStoryToScreenContract(
+        northStar=C.SceneEmotionalNorthStar(
+            surfaceStory="Fuzzby races through flowers and hits a leaf.",
+            universalTruth="Confidence becomes lovable when it survives honest embarrassment.",
+            childClearWant="Fuzzby wants to look fast and skilful.",
+            emotionalNeed="Accept the mishap without losing connection.",
+            falseBeliefUnderPressure="A mistake must be disguised to preserve admiration.",
+            relationshipEngine="The unseen audience makes recovery more important than balance.",
+            ordinaryLifeTruth="A child tries to act as if a public stumble was intentional.",
+            sceneTurn="Private confidence becomes visibly performed confidence.",
+            audienceJourney=["delight", "surprise", "affection"],
+            finalAfterFeeling="Mistakes can make confidence more endearing.",
+            dialogueSubtractionOpportunity="The delayed grin replaces an explanation.",
+            environmentPressure="The flower corridor narrows around his speed."),
+        transformation=C.CharacterSceneTransformation(
+            emotionalOwner="Fuzzby", entryBelief="Speed proves mastery.",
+            entryFeeling="exuberant", pressureBehaviour="He turns later and flies harder.",
+            costlyChoice="He stays visible after the collision.",
+            exitBelief="Recovery can preserve connection better than denial.",
+            exitAction="He resets his wings and lets the grin arrive late."),
+        tapestry=C.TapestryContract(
+            physicalMotif="The leaf changes from obstacle to witness.",
+            sonicMotif="Wing buzz breaks into one dry tremor.",
+            colourAndLightProgression="Open warm colour tightens into the green impact plane.",
+            thematicVisualContrast="Free speed meets elastic natural resistance.",
+            openingClosingRhyme="The same corridor that flatters speed frames the recovery."))
 
 
 def _performance_contract(beat_id="1.B1"):
@@ -223,6 +263,8 @@ def _fake_llm(record, review_script=None):
                     groundedIn="bible.motionRule")])])
         if schema is C.TreatmentSet:
             return C.TreatmentSet(treatments=[_treatment(n) for n in ("A", "B", "C")])
+        if schema is C.EmotionalStoryToScreenContract:
+            return _heart_contract()
         if schema is C.TreatmentSelection:
             return _selection()
         if schema is C.SceneDirection:
@@ -299,7 +341,8 @@ def test_treatment_selection_precedes_beat_architecture(monkeypatch):
     _isolated(monkeypatch, record)
     C.run_scene(1, "Ep1", log=lambda *a, **k: None)
     order = [schema for _, schema, _ in record]
-    assert order.index("TreatmentSet") < order.index("TreatmentSelection") \
+    assert order.index("EmotionalStoryToScreenContract") < order.index("TreatmentSet") \
+           < order.index("TreatmentSelection") \
            < order.index("SceneDirection") < order.index("ShotConference")
 
 

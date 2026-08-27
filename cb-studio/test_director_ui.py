@@ -78,6 +78,16 @@ def test_ai_director_advises_every_final_human_signoff_without_approval_authorit
     assert 'api("/api/human-review"' not in JS
 
 
+def test_v4_heart_contract_is_visible_before_scene_storyboard_approval():
+    for phrase in (
+        "emotionalStoryToScreenContract", "Child-clear want", "Human truth",
+        "Relationship engine", "Visible transformation", "Final after-feeling", "Tapestry",
+    ):
+        assert phrase in JS
+    assert "shot.storyIntent.primaryAudienceFeeling" in JS
+    assert "shot.storyIntent.thoughtChangeAndCut" in JS
+
+
 def test_post_workspace_is_full_episode_non_destructive_assembly_review():
     for phrase in (
         "FULL EPISODE ASSEMBLY", "Full Episode 1 picture order",

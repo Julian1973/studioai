@@ -56,7 +56,19 @@ def _card(budget):
         transitionType="PLANNED_CUT", transitionReason="The next entrance changes the power.",
         providerBoundaryReason="dramatic_editorial_break",
         providerBoundaryExplanation="Keen's arrival begins a new relationship beat.",
-        cinematographyContract=_cinematography(), performanceBudget=budget)
+        cinematographyContract=_cinematography(), performanceBudget=budget,
+        storyIntent={
+            "narrativeFunction": "Make avoidance funny before vulnerability becomes clear.",
+            "primaryAudienceFeeling": "protective amusement",
+            "secondaryAudienceFeeling": "recognition",
+            "outerAction": "Bo rehearses leaving and returns to the conker.",
+            "innerAction": "He tries to make fear look like practical preparation.",
+            "performanceDirection": "Play the attempt to conceal fear, not generic fear.",
+            "mutedRead": "Repeated doorway glances and retreat make avoidance visible.",
+            "environmentPressure": "The open doorway turns the safe room into a decision.",
+            "soundStory": "Packing sounds stop whenever the outside world intrudes.",
+            "motifUse": "The conker changes from comfort object to delayed choice.",
+            "thoughtChangeAndCut": "Hold when Bo admits the retreat through action."})
 
 
 def test_storyboard_card_refuses_a_budget_that_cannot_breathe():
@@ -98,7 +110,7 @@ def test_timing_slate_requires_and_records_human_rhythm_approval(tmp_path, monke
         "generatedAt": "now", "inputSignature": signature}))
     candidate = {"path": str(slate), "contentHash": hashlib.sha256(slate.read_bytes()).hexdigest(),
                  "inputSignature": signature, "preparedAt": "now"}
-    pkg = {"creativeDirectingStandardVersion": 3,
+    pkg = {"creativeDirectingStandardVersion": 4,
            "timingSlateReview": {"candidate": candidate, "approved": None, "history": []}}
     monkeypatch.setattr(R, "HERE", here)
     monkeypatch.setattr(R, "load_pkg", lambda scene, episode: (pkg, tmp_path / "pkg.json"))
@@ -121,16 +133,19 @@ def test_prompt_score_is_named_contract_completeness_not_artistic_quality():
 
 
 def test_forward_department_work_requires_signed_v3_director_card(tmp_path):
-    card = {"shotId": "3.B1.S1", "performanceBudget": {"decision": "single-unit"},
+    card = {"shotId": "3.B1.S1", "storyIntent": {"narrativeFunction": "hesitation"},
+            "performanceBudget": {"decision": "single-unit"},
             "cinematographyContract": _cinematography(),
             "performanceContract": {"beatOwner": "3.B1"}}
-    storyboard = {"approvalState": "approved", "creativeDirectingStandardVersion": 3,
+    storyboard = {"approvalState": "approved", "creativeDirectingStandardVersion": 4,
+                  "emotionalStoryToScreenContract": {"northStar": {"x": "y"},
+                      "transformation": {"x": "y"}, "tapestry": {"x": "y"}},
                   "shots": [card]}
     path = tmp_path / "storyboard.json"
     path.write_text(json.dumps(storyboard))
     card_hash = hashlib.sha256(json.dumps(
         card, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    pkg = {"creativeDirectingStandardVersion": 3,
+    pkg = {"creativeDirectingStandardVersion": 4,
            "sourceStoryboard": {"path": str(path), "approvalState": "approved",
                                   "creativeCardHashes": {"3.B1.S1": card_hash}}}
     assert R._require_forward_directing_source(
@@ -142,10 +157,32 @@ def test_forward_department_work_requires_signed_v3_director_card(tmp_path):
 
 def test_v3_runtime_is_versioned_without_changing_legacy_canon_skill():
     legacy = D.load_runtime_skill("director")
-    forward = D.load_runtime_skill("director", 3)
+    forward_v3 = D.load_runtime_skill("director", 3)
+    forward = D.load_runtime_skill("director", 4)
     assert "Director v3" not in legacy
-    assert "Director v3" in forward
+    assert "Director v3" in forward_v3
+    assert "Director v4" in forward
+    assert "ordinary-life test" in D.load_runtime_skill("heart-director", 4)
     assert R._department_skill_ref("animation", "seedance-production-director", 0) == (
         "skills/seedance-production-director/SKILL.md")
     assert R._department_skill_ref("animation", "seedance-production-director", 3) == (
         "skills/seedance-production-director-v3/SKILL.md")
+    assert R._department_skill_ref("animation", "seedance-production-director", 4) == (
+        "skills/seedance-production-director-v4/SKILL.md")
+
+
+def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path):
+    card = {"shotId": "S1.SH1", "performanceBudget": {"decision": "single-unit"},
+            "cinematographyContract": {"storyPointOfView": "with Bo"},
+            "performanceContract": {"beatOwner": "1.B1"}}
+    storyboard = {"approvalState": "approved", "creativeDirectingStandardVersion": 3,
+                  "shots": [card]}
+    path = tmp_path / "v3-storyboard.json"
+    path.write_text(json.dumps(storyboard))
+    card_hash = hashlib.sha256(json.dumps(
+        card, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    pkg = {"creativeDirectingStandardVersion": 3,
+           "sourceStoryboard": {"path": str(path), "approvalState": "approved",
+                                  "creativeCardHashes": {"S1.SH1": card_hash}}}
+    assert R._require_forward_directing_source(
+        pkg, {"shotId": "S1.SH1"}, "1", "Ep1") == card

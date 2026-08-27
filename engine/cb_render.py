@@ -119,7 +119,7 @@ POSED_INTEGRATION_MARKER = "[QUALIFIED POSED INTEGRATION FRAME]"
 POSE_QUALIFICATION_VERSION = 1
 POSE_LIBRARY_VERSION = 1
 REVIEW_VIDEO_RESOLUTION = "480p"
-CREATIVE_DIRECTING_STANDARD_VERSION = 3
+CREATIVE_DIRECTING_STANDARD_VERSION = 4
 
 
 class Refused(RuntimeError):
@@ -2827,7 +2827,8 @@ _DEPARTMENT_WORKERS = {
 
 
 def _department_skill_ref(stage, skill, standard_version=0):
-    suffix = "-v3" if int(standard_version or 0) >= CREATIVE_DIRECTING_STANDARD_VERSION else ""
+    version = int(standard_version or 0)
+    suffix = "-v4" if version >= 4 else "-v3" if version >= 3 else ""
     if stage == "animation":
         return f"skills/seedance-production-director{suffix}/SKILL.md"
     return f"skills/crystal-bears-{skill}{suffix}/SKILL.md"
@@ -3088,7 +3089,7 @@ def _shot_creative_contract_view(pkg, shot, scene, episode):
 def _require_forward_directing_source(pkg, shot, scene, episode):
     """Require the signed Gate 0-6 source only for forward-standard packages."""
     version = int(pkg.get("creativeDirectingStandardVersion") or 0)
-    if version < CREATIVE_DIRECTING_STANDARD_VERSION:
+    if version < 3:
         return None
     source = pkg.get("sourceStoryboard") or {}
     path = pathlib.Path(source.get("path") or _storyboard_path(scene, episode))
@@ -3112,8 +3113,14 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
     expected_hash = (source.get("creativeCardHashes") or {}).get(shot.get("shotId"))
     if not expected_hash or actual_hash != expected_hash:
         raise Refused(f"REFUSED — {shot['shotId']}'s signed Director shot card is stale")
-    missing = [name for name in ("performanceBudget", "cinematographyContract",
-                                  "performanceContract") if not card.get(name)]
+    if version >= 4 and not storyboard.get("emotionalStoryToScreenContract"):
+        raise Refused(
+            f"REFUSED — {shot['shotId']}'s storyboard lacks the signed emotional North Star")
+    required = (("storyIntent", "performanceBudget", "cinematographyContract",
+                 "performanceContract") if version >= 4 else
+                ("performanceBudget", "cinematographyContract", "performanceContract"))
+    missing = [name for name in required
+               if not card.get(name)]
     if missing:
         raise Refused(
             f"REFUSED — {shot['shotId']} lacks forward directing contracts: "
@@ -4734,7 +4741,7 @@ def animatic_scene(scene, episode="Ep1", log=print):
         "approvesOnly": ["dialogue accuracy", "voice assignment", "shot duration",
                          "scene length", "dialogue position"],
     }, indent=1, ensure_ascii=False))
-    if int(pkg.get("creativeDirectingStandardVersion") or 0) >= CREATIVE_DIRECTING_STANDARD_VERSION:
+    if int(pkg.get("creativeDirectingStandardVersion") or 0) >= 3:
         review = pkg.setdefault("timingSlateReview", {"candidate": None, "approved": None,
                                                        "history": []})
         review["candidate"] = {
@@ -7962,7 +7969,7 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
         raise Refused(
             f"REFUSED — {shot_id}'s voice-timed performance budget is overloaded: "
             + "; ".join(budget.get("reasons") or []))
-    if int(pkg.get("creativeDirectingStandardVersion") or 0) >= CREATIVE_DIRECTING_STANDARD_VERSION:
+    if int(pkg.get("creativeDirectingStandardVersion") or 0) >= 3:
         slate = timing_slate_status(scene, episode)
         if not slate.get("approved"):
             raise Refused(

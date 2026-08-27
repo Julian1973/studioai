@@ -4003,6 +4003,10 @@
     if (storyboard && !storyboard.error && storyboard.approvalState && storyboard.approvalState !== "approved") {
       const beats = storyboard.beats || [];
       const shots = storyboard.shots || [];
+      const heart = storyboard.emotionalStoryToScreenContract || {};
+      const north = heart.northStar || {};
+      const transformation = heart.transformation || {};
+      const tapestry = heart.tapestry || {};
       const status = storyboard.approvalState === "generated-pending-human-review" ? "Your decision" : storyboard.approvalState;
       return `<section class="story-direction-desk">
         <div class="voice-desk-head">
@@ -4010,10 +4014,19 @@
           <span class="voice-source working">${esc(status)}</span>
         </div>
         <p class="story-direction-logline">This scene has ${shots.length || 0} production shot${shots.length === 1 ? "" : "s"} drafted from the approved episode direction. Approving this hands Scene ${esc(app.scene)} to production and unlocks scene plate, keyframe, voice and render work.</p>
+        ${north.childClearWant ? `<div class="story-direction-list">
+          <article><strong>Child-clear want</strong><p>${esc(north.childClearWant)}</p></article>
+          <article><strong>Human truth</strong><p>${esc(north.universalTruth)}</p></article>
+          <article><strong>Relationship engine</strong><p>${esc(north.relationshipEngine)}</p></article>
+          <article><strong>Visible transformation</strong><p>${esc(transformation.entryBelief)} → ${esc(transformation.exitAction)}</p></article>
+          <article><strong>Final after-feeling</strong><p>${esc(north.finalAfterFeeling)}</p></article>
+          <article><strong>Tapestry</strong><p>${esc(tapestry.physicalMotif)} · ${esc(tapestry.sonicMotif)} · ${esc(tapestry.openingClosingRhyme)}</p></article>
+        </div>` : ""}
         <div class="story-direction-list">
           ${shots.slice(0, 8).map((shot) => `<article>
             <strong>${esc(shot.shotId || "Shot")}${shot.durationSec || shot.targetDurationSec ? ` · ${esc(shot.durationSec || shot.targetDurationSec)}s` : ""}</strong>
             <p>${esc(shot.purpose || shot.storyBeat || shot.description || "Shot direction pending.")}</p>
+            ${shot.storyIntent ? `<p class="small-muted">${esc(shot.storyIntent.primaryAudienceFeeling)} · ${esc(shot.storyIntent.innerAction)} · ${esc(shot.storyIntent.thoughtChangeAndCut)}</p>` : ""}
           </article>`).join("") || beats.slice(0, 8).map((beat) => `<article>
             <strong>${esc(beat.beatId || beat.beatCode || "Beat")}</strong>
             <p>${esc(beat.storyBeat || beat.want || "Direction beat pending.")}</p>

@@ -3087,6 +3087,8 @@ function renderStoryboardStage(){
     return;
   }
   const v=PSB.scene||{}, beats=PSB.beats||[], shots=PSB.shots||[];
+  const heart=PSB.emotionalStoryToScreenContract||{};
+  const north=heart.northStar||{}, transform=heart.transformation||{}, tapestry=heart.tapestry||{};
   const packing=PSB.unitPackingAudit||{};
   const fullThirty=(packing.fullThirtySecondUnitIds||[]).length;
   const mergeReviews=packing.mergeReviewRequired||[];
@@ -3098,9 +3100,18 @@ function renderStoryboardStage(){
     ${(b.exactDialogue||[]).map(l=>`<div class="beatcard-line">"${_esc(l)}"</div>`).join("")}</div>`).join("");
   const shotSeq=shots.map((s,i)=>`<div class="shotcard"><div class="shotcard-id">${i+1}. ${_esc(s.shotId)} · ${_esc(s.targetDurationSec||"?")}s · ${(s.stagePlan||[]).length} stage${(s.stagePlan||[]).length===1?"":"s"} · ${(s.internalShotPlan||[]).length} view${(s.internalShotPlan||[]).length===1?"":"s"}</div>
     <div class="shotcard-line">${_esc(s.purpose||"")}</div>
+    ${s.storyIntent?`<div class="ccref" style="margin-top:6px"><b>${_esc(s.storyIntent.primaryAudienceFeeling||"")}</b> · ${_esc(s.storyIntent.innerAction||"")}<br>${_esc(s.storyIntent.thoughtChangeAndCut||"")}</div>`:""}
     ${(s.stagePlan||[]).length?`<details class="techdetails"><summary>Story stages</summary>${(s.stagePlan||[]).map(stage=>`<div class="ccrow"><b>${_esc(stage.stageNumber)}. ${_esc(stage.purpose||"")}</b><div class="ccref">${_esc(stage.observableEndState||"")}</div></div>`).join("")}<div class="ccrow"><b>Boundary after this unit</b><div class="ccref">${_esc(boundaryLabel(s.providerBoundaryReason))}: ${_esc(s.providerBoundaryExplanation||"")}</div></div></details>`:""}</div>`).join("");
   art.innerHTML=`<div class="artefact-center" style="text-align:left;overflow:auto">
     <div class="sb-purpose">${purpose}</div>
+    ${north.childClearWant?`<div class="ccpanel" style="margin:14px 0"><div class="cchead">Emotional story-to-screen contract</div>
+      <div class="ccrow"><b>Child-clear want</b><div class="ccref">${_esc(north.childClearWant)}</div></div>
+      <div class="ccrow"><b>Human truth</b><div class="ccref">${_esc(north.universalTruth)}</div></div>
+      <div class="ccrow"><b>Relationship engine</b><div class="ccref">${_esc(north.relationshipEngine)}</div></div>
+      <div class="ccrow"><b>Visible change</b><div class="ccref">${_esc(transform.entryBelief)} → ${_esc(transform.exitAction)}</div></div>
+      <div class="ccrow"><b>Final after-feeling</b><div class="ccref">${_esc(north.finalAfterFeeling)}</div></div>
+      <div class="ccrow"><b>Tapestry</b><div class="ccref">${_esc(tapestry.physicalMotif)} · ${_esc(tapestry.sonicMotif)} · ${_esc(tapestry.openingClosingRhyme)}</div></div>
+    </div>`:""}
     <div class="ccpanel" style="margin:14px 0"><div class="cchead">Seedance 2.5 production plan</div><div class="ccref">${beats.length} story beat${beats.length===1?"":"s"} → ${shots.length} production unit${shots.length===1?"":"s"} · ${fullThirty} full 30s${plannedSeconds?` · ${plannedSeconds}s planned`:""} · internal cuts stay inside each unit</div></div>
     ${mergeReviews.length?`<div style="border:1px solid var(--warn);background:var(--warnbg);border-radius:8px;padding:10px 12px;margin-bottom:12px"><b style="color:var(--warn)">${mergeReviews.length} short provider split${mergeReviews.length===1?"":"s"} explicitly reviewed</b><div class="ccref" style="margin-top:4px">${_esc(PSB.packingJudgement||"The Showrunner must confirm why these pairs should not become one 30-second request.")}</div></div>`:""}
     <div class="wcol-head" style="margin-top:18px">The beats</div>${beatRows}

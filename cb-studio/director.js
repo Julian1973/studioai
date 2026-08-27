@@ -470,7 +470,8 @@
   }
 
   function writeHash() {
-    const params = new URLSearchParams({ view: app.view, episode: app.episode, scene: app.scene });
+    const params = new URLSearchParams({ view: app.view, scene: app.scene });
+    if (app.episode && app.episode !== "Ep1") params.set("episode", app.episode);
     if (app.shotId) params.set("shot", app.shotId);
     if (app.activeBeatId) params.set("beat", app.activeBeatId);
     if (app.view === "pipeline") params.set("step", app.pipelineStep);

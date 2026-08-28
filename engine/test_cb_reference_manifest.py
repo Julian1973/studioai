@@ -165,8 +165,8 @@ def test_keen_identity_reference_follows_episode_wristband_state(monkeypatch):
         try:
             return original(name, characters, *args, **kwargs)
         except cb_render.Refused:
-            state = cb_render._keen_identity_state(kwargs.get("shot") or {},
-                                                    kwargs.get("scene"), kwargs.get("episode"))
+            state = cb_render._episode_character_state(
+                name, kwargs.get("shot") or {}, kwargs.get("scene"), kwargs.get("episode"))
             return {"character": name, "characterState": state,
                     "fileName": {"no-cuffs": "CB_Keen_nocuffs_front-back.jpeg",
                                  "vacant-wristbands": "CB_Keen_turnaround_vacant_cuffs.png",

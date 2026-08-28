@@ -3221,8 +3221,10 @@
       button.classList.toggle("active", button.dataset.pipelineStep === app.pipelineStep);
     });
     const step = pipelineSteps.find((item) => item.id === app.pipelineStep) || pipelineSteps[0];
-    const progress = Math.round((step.step / pipelineSteps.length) * 100);
-    $("#pipeline-subtitle").textContent = `${step.phase} · Step ${step.step} of ${pipelineSteps.length}`;
+    const phase = step.id === "upload" ? "Script" : ["style", "analysis", "characters", "props", "locations", "storyboard", "audio"].includes(step.id) ? "Production Package" : step.id === "footage" ? "Render" : "Review";
+    const phasePosition = {Script: 1, "Production Package": 2, Render: 3, Review: 4}[phase];
+    const progress = Math.round((phasePosition / 4) * 100);
+    $("#pipeline-subtitle").textContent = `${phase} · Phase ${phasePosition} of 4`;
     $("#pipeline-progress-copy").textContent = `${progress}%`;
     const bar = $(".pipeline-progress-track i");
     if (bar) bar.style.width = `${progress}%`;

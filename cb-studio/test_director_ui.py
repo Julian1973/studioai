@@ -46,8 +46,12 @@ def test_director_includes_anyfilm_style_pipeline_plus_outcome_views():
     for view in ("pipeline", "episodes", "director", "review"):
         assert f'id="view-{view}"' in HTML
         assert f'data-view="{view}"' in HTML
-    for step in ("Upload", "Style", "Analysis", "Characters", "Props", "Locations", "Storyboard", "Footage", "Audio", "Rough Cut"):
+    for step in ("Script", "Production Package", "Render", "Review"):
         assert step in HTML
+    assert 'aria-label="Production phases"' in HTML
+    assert 'data-pipeline-step="style"' not in HTML
+    assert 'data-pipeline-step="analysis"' not in HTML
+    assert 'data-pipeline-step="characters"' not in HTML
     assert "Houses" not in HTML
     assert "Departments" not in HTML
     assert "Scene creation path" not in HTML
@@ -64,6 +68,7 @@ def test_frontend_consumes_one_authoritative_director_state_and_action_route():
         assert internal_route not in JS
     assert "allowed_action_ids(session)" in SERVER
     assert "That action is no longer current" in SERVER
+    assert "providerRequest" in JS
 
 
 def test_ai_director_advises_every_final_human_signoff_without_approval_authority():
@@ -928,7 +933,9 @@ def test_production_pipeline_uses_the_canonical_creative_path():
     assert 'id: "audio"' in JS
     assert 'id: "rough-cut"' in JS
     assert JS.index('id: "audio"') < JS.index('id: "footage"')
-    assert HTML.index('data-pipeline-step="audio"') < HTML.index('data-pipeline-step="footage"')
+    assert HTML.index('data-pipeline-step="storyboard"') < HTML.index('data-pipeline-step="footage"')
+    assert 'data-pipeline-step="rough-cut"' in HTML
+    assert "Phase ${phasePosition} of 4" in JS
     assert "renderCanonicalPipelineStep(step)" in JS
     assert 'view: "director"' in JS
     assert '? requestedView : legacyAssetCategory ? "assets" : "director"' in JS

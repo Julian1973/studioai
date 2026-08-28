@@ -1792,10 +1792,10 @@ function showToast(msg,ok){
 // cb_costs.py's own RATES table so cost numbers never drift from the real ledger). No new
 // persisted production state anywhere in this module.
 // ─────────────────────────────────────────────────────────────────────────────────────────
-// PSTAGES remain the internal state-machine contract. PPHASES is the Director-facing journey:
-// Stage prepares story/world/voice/opening frame; Take creates and reviews performance; Master
-// finishes delivery. Grouping changes presentation only — every underlying approval, lineage,
-// reference and spend gate remains authoritative.
+// PSTAGES remain the internal state-machine contract. PPHASES is the only Director-facing journey.
+// Grouping changes presentation only — every underlying approval, lineage, reference and spend
+// check remains authoritative. Script is the only human approval before the package is inspected;
+// package preparation and render QA remain automatic until Fire or the final dailies decision.
 const PSTAGES=[
   {id:"script",name:"Script",glyph:"✎"},
   {id:"storyboard",name:"Story & Direction",glyph:"▤"},
@@ -1807,9 +1807,10 @@ const PSTAGES=[
   {id:"final",name:"Final Master",glyph:"✓"}
 ];
 const PPHASES=[
-  {id:"stage",name:"Stage",members:["storyboard","scenelook","keyframe","voice"]},
-  {id:"take",name:"Take",members:["animation","continuity"]},
-  {id:"master",name:"Master",members:["final"]}
+  {id:"script",name:"Script",glyph:"✎",members:["script"]},
+  {id:"package",name:"Production Package",glyph:"▤",members:["storyboard","scenelook","keyframe","voice"]},
+  {id:"render",name:"Render",glyph:"►",members:["animation"]},
+  {id:"review",name:"Review",glyph:"★",members:["continuity","final"]}
 ];
 const STATE_LABEL={ready:"Ready",generating:"Working",awaiting:"Ready for review",
                     approved:"Current",rejected:"Needs attention",blocked:"Needs attention",locked:"Waiting"};
@@ -1819,7 +1820,11 @@ const STATE_BG   ={ready:"--brandbg",generating:"--infobg",awaiting:"--honeybg",
                     rejected:"--warnbg",blocked:"--warnbg",locked:"--surface2"};
 const STATE_GLYPH={ready:"○",generating:"●",awaiting:"◐",approved:"✓",rejected:"!",blocked:"!",locked:"–"};
 
-function productionPhase(id){return PPHASES.find(phase=>phase.id===id||phase.members.includes(id));}
+function productionPhase(id){
+  const legacy={stage:"package",take:"render",master:"review"};
+  id=legacy[id]||id;
+  return PPHASES.find(phase=>phase.id===id||phase.members.includes(id));
+}
 function phaseState(phase,stages){
   phase=typeof phase==="string"?productionPhase(phase):phase;stages=stages||{};
   const states=(phase&&phase.members||[]).map(id=>(stages[id]||{}).state||"locked");
@@ -2805,11 +2810,8 @@ function renderStageRail(){
     </button>`);
     if(i<PPHASES.length-1){ parts.push(`<div class="pconn ${st=="approved"?'fill':''}"></div>`); }
   });
-  parts.push(`<button type="button" class="pstage reviewstage ${focused==="review"?"active":""}" onclick="pFocusStage('review')" title="Human render ratings">
-    <div class="pglyph">★</div><div class="pname">Render Review</div><div class="pstate" style="color:var(--brandink)">Available</div>
-  </button>`);
   const completed=PPHASES.filter(phase=>phaseState(phase,stages)==="approved").length;
-  const currentName=focused==="review"?"Render Review":((focusedPhase||{}).name||((PSTAGES.find(stage=>stage.id===focused)||{}).name||"Production"));
+  const currentName=(focusedPhase||{}).name||((PSTAGES.find(stage=>stage.id===focused)||{}).name||"Production");
   const progress=Math.round((completed/Math.max(1,PPHASES.length))*100);
   return `<details class="praildetails"><summary aria-label="Open production progress">
       <span class="prailsummary-label">Production progress</span>

@@ -118,9 +118,10 @@ def test_storyboard_leads_with_seedance_units_and_exposes_packing_reasons():
 
 def test_scene_review_exposes_the_simple_director_journey():
     assert 'aria-label="Scene creation path"' in APP
-    assert '{id:"stage",name:"Stage",members:["storyboard","scenelook","keyframe","voice"]}' in APP
-    assert '{id:"take",name:"Take",members:["animation","continuity"]}' in APP
-    assert '{id:"master",name:"Master",members:["final"]}' in APP
+    assert '{id:"script",name:"Script",glyph:"✎",members:["script"]}' in APP
+    assert '{id:"package",name:"Production Package",glyph:"▤",members:["storyboard","scenelook","keyframe","voice"]}' in APP
+    assert '{id:"render",name:"Render",glyph:"►",members:["animation"]}' in APP
+    assert '{id:"review",name:"Review",glyph:"★",members:["continuity","final"]}' in APP
     assert APP.index('{id:"keyframe",name:"Keyframe"') < APP.index('{id:"voice",name:"Voice & Timing"')
     assert "function phaseState(phase,stages)" in APP
     assert "function phaseTarget(phase,stages)" in APP

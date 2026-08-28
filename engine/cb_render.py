@@ -6350,12 +6350,17 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
         target = by_id.get(target_shot_id)
         if not target:
             raise Refused(f"REFUSED — {target_shot_id} is not active in the current package")
-        scoped = []
-        source_id = target.get("sourceShotId")
-        if source_id and source_id in by_id:
-            scoped.append(by_id[source_id])
-        scoped.append(target)
-        current_shots = scoped
+        # Validate the complete active ancestry so a relay target still has an opener
+        # and every carried continuity state in the design presented to the validator.
+        ancestry = []
+        cursor = target
+        seen_ids = set()
+        while cursor and cursor.get("shotId") not in seen_ids:
+            ancestry.append(cursor)
+            seen_ids.add(cursor.get("shotId"))
+            source_id = cursor.get("sourceShotId")
+            cursor = by_id.get(source_id) if source_id else None
+        current_shots = list(reversed(ancestry))
     selected_codes = list(dict.fromkeys(
         code for rec in current_shots for code in owned_beat_codes(rec)))
     beats = [source_by_code[code] for code in selected_codes if code in source_by_code]
@@ -6381,6 +6386,10 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
                     cut.get("dialogueOccurrenceId") for cut in original_cuts
                     if cut.get("dialogueOccurrenceId")
                 }
+                if not original_occurrences:
+                    # Pre-typed source packages have no occurrence IDs; preserve their
+                    # exact dialogue instead of treating every line as unassigned.
+                    continue
                 voice_cuts = []
                 for index, line in enumerate(target_lines, start=1):
                     if line.get("dialogueOccurrenceId") not in original_occurrences:
@@ -6404,6 +6413,35 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
                     cut["dialogueOccurrenceId"] for cut in voice_cuts
                     if cut.get("dialogueOccurrenceId")
                 ]
+        # A source beat may be distributed across several active shots.  For a
+        # target-shot disclosure, validate only the source dialogue occurrences
+        # assigned to that shot, while preserving exact speaker/text comparison.
+        target_lines = list((target_rec or {}).get("dialogueLines") or [])
+        target_pairs = [(str(line.get("speaker") or "").strip().casefold(),
+                         str(line.get("exactText") or line.get("text") or "").strip())
+                        for line in target_lines]
+        for beat in beats:
+            source_cuts = list(beat.get("cuts") or [])
+            dialogue_cuts = [cut for cut in source_cuts if (cut.get("dialogue") or "").strip()]
+            if not dialogue_cuts or not target_pairs:
+                continue
+            filtered = []
+            remaining = list(target_pairs)
+            for cut in source_cuts:
+                raw = str(cut.get("dialogue") or "").strip()
+                if not raw or ":" not in raw:
+                    filtered.append(cut)
+                    continue
+                speaker, text = raw.split(":", 1)
+                pair = (speaker.strip().casefold(), text.strip().strip('"“”'))
+                text_matches = [item for item in remaining if item[1] == pair[1]]
+                if pair in remaining or text_matches:
+                    filtered.append(cut)
+                    remaining.remove(pair if pair in remaining else text_matches[0])
+            # If the target contains a line not present in the locked source, retain
+            # the full source beat so the normal verbatim validator rejects it.
+            if not remaining and len(current_shots) == 1:
+                beat["cuts"] = filtered
     shots = [
         E.Shot(**adapt_shot(rec, is_first=index == 0))
         for index, rec in enumerate(current_shots)
@@ -8067,6 +8105,10 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     # see keyframe_shot's identical fix (2026-07-19) for why this call was missing entirely.
     shot = _shot(pkg, shot_id)
     led = _ledger(pkg, shot_id)
+    if led.get("status") == "model-limited":
+        raise Refused(f"REFUSED — {shot_id} is MODEL-LIMITED after {MAX_BATCH_ATTEMPTS} failed "
+                      f"candidate batches; the ladder requires human redesign or an alternative "
+                      f"production method, never more prompt-patching.\n{DECISION_LADDER}")
     animation_direction = _approved_department_output(pkg, shot_id, "animation") or {}
     budget = _performance_budget_report(
         _shot_creative_contract_view(pkg, shot, scene, episode), led)
@@ -8121,10 +8163,6 @@ def fire_shot(scene, shot_id, episode="Ep1", candidates=DEFAULT_CANDIDATES, fast
     if resolved_prompt != shot.get("seedancePrompt"):
         shot = {**shot, "seedancePrompt": resolved_prompt}
     candidates = max(1, min(MAX_CANDIDATES, int(candidates)))
-    if led.get("status") == "model-limited":
-        raise Refused(f"REFUSED — {shot_id} is MODEL-LIMITED after {MAX_BATCH_ATTEMPTS} failed "
-                      f"candidate batches; the ladder requires human redesign or an alternative "
-                      f"production method, never more prompt-patching.\n{DECISION_LADDER}")
     if led.get("status") == "approved":
         raise Refused(f"REFUSED — {shot_id} is already approved; reject it first to re-fire")
     _require_stage_contract_keyframe(shot, led)

@@ -157,7 +157,22 @@ def test_project_policy_stabilizes_slots_independent_of_authored_slot_order(monk
     assert roles_a == roles_b == ["Zenny", "Fuzzby", "scene plate"]
 
 
-def test_keen_identity_reference_follows_episode_wristband_state():
+def test_keen_identity_reference_follows_episode_wristband_state(monkeypatch):
+    # The state-selection contract is deterministic; the large production turnaround
+    # media is an operator input and is not required by this unit test.
+    original = cb_render._provider_identity_record
+    def fixture_record(name, characters, *args, **kwargs):
+        try:
+            return original(name, characters, *args, **kwargs)
+        except cb_render.Refused:
+            state = cb_render._keen_identity_state(kwargs.get("shot") or {},
+                                                    kwargs.get("scene"), kwargs.get("episode"))
+            return {"character": name, "characterState": state,
+                    "fileName": {"no-cuffs": "CB_Keen_nocuffs_front-back.jpeg",
+                                 "vacant-wristbands": "CB_Keen_turnaround_vacant_cuffs.png",
+                                 "crystal-set-wristbands": "CB_Keen.jpeg"}.get(state, "CB_Keen.jpeg"),
+                    "distinguishingFeatures": ["blank cuff settings with no crystals and no glow"]}
+    monkeypatch.setattr(cb_render, "_provider_identity_record", fixture_record)
     characters = cb_render._characters_cfg()
 
     bare = cb_render._provider_identity_record(

@@ -8,8 +8,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _scene10_shot():
-    pkg = json.loads((ROOT / "cb-output/Ep1_scene10_production_package.json").read_text())
-    raw = next(item for item in pkg["shots"] if item["shotId"] == "10.B1.S1")
+    # Use the tracked production-package schema as a deterministic wrapper fixture;
+    # the wrapper contract is independent of a particular scene-10 generated output.
+    pkg = json.loads((ROOT / "cb-output/Ep1_scene1_production_package.json").read_text())
+    raw = dict(pkg["shots"][0])
+    raw["shotId"] = "10.B1.S1"
     return pkg, raw
 
 

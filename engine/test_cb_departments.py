@@ -1907,7 +1907,9 @@ def test_human_working_prompt_derives_trace_from_approved_contracts_only_when_ex
     assert working["derivedFromApprovedContracts"] is True
 
 
-def test_animation_reads_missing_beat_contracts_only_from_exact_approved_storyboard(tmp_path):
+def test_animation_reads_missing_beat_contracts_only_from_exact_approved_storyboard(tmp_path,
+                                                                                    monkeypatch):
+    monkeypatch.setattr(R, "ROOT", tmp_path)
     storyboard_shot = {"shotId": "S1.SH1", "beatIds": ["1.B1"]}
     storyboard = {
         "approvalState": "approved", "shots": [storyboard_shot],

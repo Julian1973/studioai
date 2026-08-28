@@ -413,6 +413,11 @@ class Providers:
         monkeypatch.setattr(R.cb_gen, "_fal_upload", _fal_upload)
         monkeypatch.setattr(R.cb_gen, "generate_video_seedance_ref", generate_video_seedance_ref)
         monkeypatch.setattr(R.cb_gen, "last_frame", last_frame)
+        def restore_approved_hear(provider_clip, voice_path, out):
+            pathlib.Path(out).write_bytes(
+                pathlib.Path(provider_clip).read_bytes() + b"|APPROVED_HEAR")
+            return str(out)
+        monkeypatch.setattr(R.cb_post, "replace_guide_dialogue", restore_approved_hear)
         posed = tmp / "engine" / "media" / "reference_controls" / "approved_posed_integration.png"
         posed.parent.mkdir(parents=True, exist_ok=True)
         posed.write_bytes(b"APPROVED-POSED-INTEGRATION")
@@ -1380,7 +1385,7 @@ def test_same_process_comparison_returns_one_candidate_from_approved_stage_relay
     assert calls[1]["image_urls"][0].endswith("segment_1_final.png")
     assert len(joined) == 1 and len(joined[0]) == 2
     assert len(paths) == 1 and pathlib.Path(paths[0]).read_bytes() == \
-        b"JOINED-COMPARISON-CANDIDATE"
+        b"JOINED-COMPARISON-CANDIDATE|APPROVED_HEAR"
     final_ledger = _led()[shot["shotId"]]
     assert final_ledger["status"] == "candidates-pending"
     assert final_ledger["batch"]["transportCandidates"]["1"]["status"] == "joined"
@@ -1489,6 +1494,8 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
             "beats": [{
                 "sceneNumber": 1, "firstEventIndex": 0, "beatCode": "1.B1",
                 "storyBeat": "Fuzzby boasts just as the leaf challenges his control.",
+                "charactersInFrame": ["Fuzzby", "Zenny"],
+                "offscreenCharacters": [],
                 "want": "Look effortless.", "need": "Recover without hiding the wobble.",
                 "kidRead": "A funny bounce.", "adultRead": "Confidence can bend.",
                 "emotionalIntent": "Pride turns into resilient amusement.",

@@ -1343,6 +1343,10 @@ def test_review_animation_signature_allows_external_director_accepted_take(tmp_p
     monkeypatch.setattr(cb_render, "load_pkg", lambda scene, episode: (package, tmp_path / "pkg.json"))
     monkeypatch.setattr(cb_render, "_save", lambda pkg, path: None)
     monkeypatch.setattr(cb_render, "_require_current_lineage", lambda pkg, scene, episode: None)
+    monkeypatch.setattr(cb_canon, "require_locked", lambda *args, **kwargs: {
+        "profileDigests": {name: "canon" for name in
+                            ("animation", "review", "story", "storyboard", "look",
+                             "cinematography", "voice", "post")}})
 
     def fail_generation_signature(*_args, **_kwargs):
         raise AssertionError("external accepted review must not require Seedance generation signature")

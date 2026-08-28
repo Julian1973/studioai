@@ -142,7 +142,8 @@ def test_prompt_score_is_named_contract_completeness_not_artistic_quality():
     assert "quality" not in report
 
 
-def test_forward_department_work_requires_signed_v3_director_card(tmp_path):
+def test_forward_department_work_requires_signed_v3_director_card(tmp_path, monkeypatch):
+    monkeypatch.setattr(R, "ROOT", tmp_path)
     card = {"shotId": "3.B1.S1", "storyIntent": {"narrativeFunction": "hesitation"},
             "performanceBudget": {"decision": "single-unit"},
             "cinematographyContract": _cinematography(),
@@ -181,7 +182,8 @@ def test_v3_runtime_is_versioned_without_changing_legacy_canon_skill():
         "skills/seedance-production-director-v4/SKILL.md")
 
 
-def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path):
+def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path, monkeypatch):
+    monkeypatch.setattr(R, "ROOT", tmp_path)
     card = {"shotId": "S1.SH1", "performanceBudget": {"decision": "single-unit"},
             "cinematographyContract": {"storyPointOfView": "with Bo"},
             "performanceContract": {"beatOwner": "1.B1"}}

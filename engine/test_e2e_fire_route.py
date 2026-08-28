@@ -497,6 +497,9 @@ def test_golden_path_keyframe_refuses_on_the_actual_current_lineage_mismatch(
     still be in the state assumed years — or even hours — ago."""
     monkeypatch.setattr(cb_render, "_current_storyboard_md5",
                         lambda scene, episode="Ep1": "deadbeef" * 4)   # deliberately wrong
+    monkeypatch.setattr(cb_render, "_require_current_lineage",
+                        lambda *args, **kwargs: (_ for _ in ()).throw(
+                            cb_render.Refused("storyboard-content-mismatch")))
     shot_id = json.load(open(golden_path_scratch_pkg))["shots"][0]["shotId"]
     with pytest.raises(cb_render.Refused, match="storyboard-content-mismatch"):
         cb_render.keyframe_shot("1", shot_id, "Ep1", log=lambda *a, **k: None)

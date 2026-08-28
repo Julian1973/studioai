@@ -13,8 +13,8 @@
       "theme": {
         "accent": "#745477"
       },
-      "coverImage": "/cb-seed/assets/ep1/CB_Scene_CrystalCove_anchor.png",
-      "episodeCoverImage": "/cb-seed/assets/locations/deep_rainforest_flower_meadow.png",
+      "coverImage": "/manual-tests/seedance-2.5/scene-01/assets/04_scene_look.png",
+      "episodeCoverImage": "/manual-tests/seedance-2.5/scene-01/assets/01_opening_frame.png",
       "voiceProvider": "ElevenLabs (v3)",
       "musicStyle": "Warm orchestral with gentle motifs; each bear seeded to a musical note.",
       "configBase": "shows/crystal-bears/canon",
@@ -37,7 +37,7 @@
       "theme": {
         "accent": "#5f6b73"
       },
-      "coverImage": "/cb-seed/assets/CB_Pier_plate.png",
+      "coverImage": "/engine/media/asset-registry/Ep1_scene3_opening_plate_23063c2ed3.jpeg",
       "voiceProvider": "Seedance native audio (generate_audio=True) — no separate V3 track",
       "musicStyle": "Seedance's own native score/SFX, generated in the same pass as the picture and voice",
       "configBase": "engine/config",

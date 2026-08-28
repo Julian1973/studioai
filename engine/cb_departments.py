@@ -1902,6 +1902,11 @@ def compile_animation_provider_prompt(shot, direction):
             global_lines.append(f"{label}: {value}")
     sections.append("[Global Settings]\n" + "\n".join(global_lines))
 
+    # Keep every generated take physically alive at the held beat: the provider needs
+    # an executable eyeline, active thought and non-vacant landing, not just plot verbs.
+    sections.append("[Living Performance]\n" +
+                    cb_engine_rules.living_performance_boilerplate(shot, data))
+
     audio_cues = emission.dialogue_cues(
         dialogue, duration_sec=data.get("durationSec") or shot.get("durationSec"))
     internal_shots = list(data.get("shotPlan") or [])

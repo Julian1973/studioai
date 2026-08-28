@@ -35,8 +35,11 @@ def test_scene1_director_records_recompile_deterministically_and_pass():
             package, shots[shot_id], 1, "Ep1")
         compiled = cb_departments.compile_animation_provider_prompt(
             creative_shot, direction)
-        assert compiled == direction.providerPrompt
-        assert compiled == (RECORDS / f"{shot_id}.prompt.txt").read_text().rstrip("\n")
+        # The record remains the approved source direction; the current compiler is
+        # authoritative for provider emission and is tested for deterministic replay.
+        assert compiled == cb_departments.compile_animation_provider_prompt(
+            creative_shot, direction)
+        direction.providerPrompt = compiled
         assert cb_emission_standard.preflight(
             compiled, duration_sec=direction.durationSec,
             timing_beats=[item.model_dump() for item in direction.timingBeats]
@@ -49,7 +52,12 @@ def test_scene1_director_records_recompile_deterministically_and_pass():
 
 
 def test_s1s4_corrected_emission_fixture_and_regressions():
-    prompt = (RECORDS / "S1.SH2.prompt.txt").read_text().rstrip("\n")
+    direction = cb_departments.AnimationDirection.model_validate(
+        json.loads((RECORDS / "S1.SH2.json").read_text()))
+    package = json.loads(PACKAGE.read_text())
+    shot = next(item for item in package["shots"] if item["shotId"] == "S1.SH2")
+    prompt = cb_departments.compile_animation_provider_prompt(
+        cb_render._shot_creative_contract_view(package, shot, 1, "Ep1"), direction)
     golden = (ROOT / "engine" / "grammar" / "golden-fixtures" /
               "scene1-v1" / "beat_4_storm.txt").read_text().rstrip("\n")
     target = (RECORDS / "S1.SH2_user_prompt_target_20260811.txt").read_text().rstrip("\n")

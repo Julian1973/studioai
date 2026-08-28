@@ -11,6 +11,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import cb_departments as departments
@@ -20,7 +21,10 @@ import cb_render
 
 ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = ROOT / "cb-output" / "Ep1_scene1_production_package.json"
-SOURCE = Path("/Users/julianjenkins/Downloads/DIRECTOR_RECORDS_S1.md")
+SOURCE = Path(os.environ.get(
+    "CB_DIRECTOR_RECORDS_SOURCE",
+    str(ROOT / "engine" / "grammar" / "golden-fixtures" /
+        "scene1-v1" / "DIRECTOR_RECORDS_S1.md")))
 OUTPUT_DIR = ROOT / "cb-output" / "creative" / "director-records" / "scene1-v1"
 SH2_PROMPT_TARGET = OUTPUT_DIR / "S1.SH2_user_prompt_target_20260811.txt"
 REPORT = ROOT / "cb-output" / "audits" / "SCENE1_TYPED_DIRECTOR_COMPARISON.json"

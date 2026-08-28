@@ -1483,6 +1483,10 @@ def install(m):
                   generate_audio=True):
         pkg, _ = current_package(scene, episode); shot = m._shot(pkg, shot_id)
         ledger = m._ledger(pkg, shot_id)
+        if ledger.get("status") == "model-limited":
+            raise m.Refused(
+                f"REFUSED — {shot_id} is MODEL-LIMITED after {m.MAX_BATCH_ATTEMPTS} failed "
+                "candidate batches; human redesign is required before another fire")
         stage_report = keyframe_stage_contract_report(
             ledger.get("keyframeApproval") or {})
         if not stage_report["ready"]:

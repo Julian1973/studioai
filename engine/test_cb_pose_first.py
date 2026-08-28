@@ -26,6 +26,14 @@ def _write(path, data=b"asset"):
     return path
 
 
+def _stub_provider_identity(monkeypatch):
+    """Prompt unit tests use symbolic identity attachments; no canon media is required."""
+    monkeypatch.setattr(cb_render, "_provider_identity_record", lambda name, *args, **kwargs: {
+        "character": name, "path": f"/fixture/{name}.jpeg", "fileName": f"{name}.jpeg",
+        "view": "complete-turnaround", "providerSafe": True, "singleSubject": True,
+    })
+
+
 def test_stage_anchor_contract_uploads_only_locked_characters_and_scene_look(
         monkeypatch, tmp_path):
     media_root = tmp_path / "engine" / "media"
@@ -142,6 +150,7 @@ def test_pose_prompt_preserves_fuzzby_silhouette_and_requests_only_one_actor(
 
 def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_props(
         monkeypatch):
+    _stub_provider_identity(monkeypatch)
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": "Fuzzby's chaos is measured against Zenny's calm.",
@@ -188,6 +197,7 @@ def test_stage_prompt_keeps_pose_flexible_and_never_forwards_stale_composition_p
 
 
 def test_stage_prompt_preserves_verbose_specialist_direction(monkeypatch):
+    _stub_provider_identity(monkeypatch)
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": (
@@ -232,6 +242,7 @@ def test_stage_prompt_preserves_verbose_specialist_direction(monkeypatch):
 
 
 def test_stage_prompt_has_no_length_target(monkeypatch):
+    _stub_provider_identity(monkeypatch)
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": " ".join(["A readable bee-height chase lane protects comic cause and effect"] * 10),
@@ -261,6 +272,7 @@ def test_stage_prompt_has_no_length_target(monkeypatch):
 
 
 def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
+    _stub_provider_identity(monkeypatch)
     intended_read = " ".join([
         "The audience reads Fuzzby's confidence before the physical evidence contradicts him"
     ] * 10)
@@ -321,6 +333,7 @@ def test_keyframe_budget_never_trims_director_creative_core(monkeypatch):
 
 
 def test_keyframe_word_count_never_blocks_load_bearing_direction(monkeypatch):
+    _stub_provider_identity(monkeypatch)
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": " ".join(["load-bearing-drama"] * 610),
@@ -346,6 +359,7 @@ def test_keyframe_word_count_never_blocks_load_bearing_direction(monkeypatch):
 
 
 def test_keyframe_prompt_recompiles_from_exact_approved_direction(monkeypatch):
+    _stub_provider_identity(monkeypatch)
     direction = {
         **_approved_keyframe_fields(),
         "audienceRead": "Fuzzby commits to the chase while Zenny holds steady.",

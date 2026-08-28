@@ -4,6 +4,7 @@ import copy
 import cb_intake
 import cb_production_preflight
 import cb_render
+import cb_canon
 import cb_safety
 
 
@@ -161,6 +162,8 @@ def test_scene_look_refuses_before_provider_without_current_direction(monkeypatc
         },
     )
     monkeypatch.setattr(cb_render.cb_gen, "generate_image", lambda *a, **k: called.append(True))
+    monkeypatch.setattr(cb_canon, "require_locked", lambda *a, **k: {
+        "current": True, "manifestDigest": "fixture", "profileDigests": {}})
     try:
         cb_render.generate_scenelook_plate("1", "Ep1")
     except cb_render.Refused as exc:

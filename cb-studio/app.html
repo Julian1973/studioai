@@ -2324,7 +2324,7 @@ function badge(state,sub){
 // THE SCENE BOARD — the episode's production command centre. Scenes in script order;
 // every scene keeps its own pipeline state; one scene never blocks another.
 // ═══════════════════════════════════════════════════════════════════════════════════════
-let BOARD_SCENES=null, BOARD_FILTER="all", BOARD_LOADING=false;
+let BOARD_SCENES=null, BOARD_FILTER="all", BOARD_LOADING=false, SB_BOARD_POLL=null;
 async function renderSceneBoard(){
   const view=document.getElementById("view");
   view.innerHTML=`${projectScreenHeaderHTML({eyebrow:`${(CURRENT_PROJECT&&CURRENT_PROJECT.name)||"Production"} · Episode ${(CUR&&CUR.number)||""}`,title:(CUR&&CUR.title)||("Episode "+(CUR&&CUR.number)),subtitle:"Scene production in script order.",art:(CUR&&CUR.coverImage)||(CURRENT_PROJECT&&(CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage))})}
@@ -2351,6 +2351,31 @@ async function loadBoard(){
       return Object.assign({},r,{bundle,stages,latestFrame,status:sceneCardStatus(stages)});
     });
   }finally{ BOARD_LOADING=false; }
+}
+function boardStoryboardProgressHTML(){
+  const total=(BOARD_SCENES||[]).length;
+  const complete=(BOARD_SCENES||[]).filter(s=>s.bundle&&s.bundle.storyboard).length;
+  const pct=total?Math.round((complete/total)*100):0;
+  const active=complete<total;
+  return `<div class="storyboard-progress" aria-label="Storyboard population progress" style="margin:0 0 14px;padding:11px 13px;border:1px solid var(--line);background:var(--surface);border-radius:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-bottom:7px">
+      <b>Storyboard population</b><span style="color:var(--muted)">${complete}/${total} scenes${active?" · Director working":" · Complete"}</span>
+    </div>
+    <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--brand);transition:width .3s ease"></div></div>
+    <div style="font-size:11px;color:var(--hint);margin-top:6px">${pct}% of scene plans populated for review</div>
+  </div>`;
+}
+function startStoryboardBoardPoll(){
+  if(SB_BOARD_POLL||!BOARD_SCENES||!BOARD_SCENES.length)return;
+  if(BOARD_SCENES.every(s=>s.bundle&&s.bundle.storyboard))return;
+  SB_BOARD_POLL=setInterval(async()=>{
+    if(page!=="sceneboard"){clearInterval(SB_BOARD_POLL);SB_BOARD_POLL=null;return;}
+    if(BOARD_LOADING)return;
+    BOARD_SCENES=null; await loadBoard(); renderBoardBody();
+    if((BOARD_SCENES||[]).length&&(BOARD_SCENES||[]).every(s=>s.bundle&&s.bundle.storyboard)){
+      clearInterval(SB_BOARD_POLL);SB_BOARD_POLL=null;
+    }
+  },5000);
 }
 // ═══════════════════════════════════════════════════════════════════════════════════════
 // THE DIRECTOR'S SCRIPT INTAKE — Story & Direction, the one department that runs before
@@ -2553,7 +2578,13 @@ async function storyIntakeDecide(verdict,presetNote){
       body:JSON.stringify({episode:SH_EP||("Ep"+(CUR&&CUR.number)),verdict,note,by:REVIEWER})});
     const j=await r.json();
     if(!r.ok||!j.ok){alert(j.error||"Could not record the decision"); return;}
-    showToast(verdict=="approve"?"Approved & locked — the scene/storyboard process is now unlocked":"Rejected — archived, nothing canonical was written",true);
+    const queued=Number(j.sceneStoryboardCount||0);
+    showToast(verdict=="approve"
+      ?(queued?`Approved & locked — drafting ${queued} scene plan${queued===1?"":"s"} now`:
+        (j.record&&j.record.sceneStoryboardQueueError
+          ?"Approved & locked — scene-plan drafting needs a retry"
+          :"Approved & locked — scene plans are ready to review"))
+      :"Rejected — archived, nothing canonical was written",true);
     // THE STALE-CACHE FIX (2026-07-19): an approval is the one moment the canonical beat
     // package first exists — invalidate the roster/bundle cache and refetch the Scene Board
     // so its 10 (or however many) scene cards appear immediately, no manual reload needed.
@@ -2578,9 +2609,34 @@ function renderBoardBody(){
   const shown=BOARD_FILTER=="all"?BOARD_SCENES:BOARD_SCENES.filter(s=>s.status==BOARD_FILTER);
   const bar=`<div class="filterbar">${FILTERS.map(([k,label])=>
     `<button class="filterchip ${BOARD_FILTER==k?'active':''}" onclick="BOARD_FILTER='${k}';renderBoardBody()">${_esc(label)}${counts[k]?` <span class="fc">${counts[k]}</span>`:''}</button>`).join("")}</div>`;
+  const createButton=`<div style="display:flex;justify-content:flex-end;margin:0 0 12px">
+    <button type="button" class="btn" onclick="startEpisodeProduction()">▶ Start Episode Production</button>
+  </div>`;
   el.className="";
-  el.innerHTML=bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
+  el.innerHTML=createButton+boardStoryboardProgressHTML()+bar+(shown.length?`<div class="sceneboard">${shown.map(sceneCardHTML).join("")}</div>`
                                 :outcomePanelHTML({title:"No scenes match this filter",body:"Clear the filter to return to every available production outcome.",actions:[{label:"Show all scenes",onclick:"BOARD_FILTER='all';renderBoardBody()"}]}));
+  startStoryboardBoardPoll();
+}
+async function storyboardBootstrap(){
+  try{
+    const episode=SH_EP||((CUR&&CUR.number)?("Ep"+CUR.number):"Ep1");
+    const r=await fetch(BASE+"/api/storyboard-bootstrap",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){alert(j.error||"Could not start Story & Direction");return;}
+    showToast(j.sceneStoryboardCount?`Story & Direction started — drafting ${j.sceneStoryboardCount} scene plan${j.sceneStoryboardCount===1?"":"s"}`:"Story & Direction is already complete",true);
+    BOARD_SCENES=null; await loadBoard(); renderBoardBody();
+  }catch(e){alert("Can't reach the studio server.");}
+}
+async function startEpisodeProduction(){
+  try{
+    const episode=SH_EP||((CUR&&CUR.number)?("Ep"+CUR.number):"Ep1");
+    const r=await fetch(BASE+"/api/episode-production-start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){alert(j.error||"Could not start episode production");return;}
+    const n=Number(j.sceneStoryboardCount||0);
+    showToast(n?`Episode production started — preparing ${n} scene${n===1?"":"s"}`:"Episode production is ready — open a scene to continue",true);
+    BOARD_SCENES=null; await loadBoard(); renderBoardBody();
+  }catch(e){alert("Can't reach the studio server.");}
 }
 function sceneCardHTML(s){
   const active=nextReadyStage(s.stages);
@@ -3640,6 +3696,16 @@ function readbackPanelHTML(tok,rb){
 function plCacheKey(tok,type){return (SH_EP||"Ep")+"|"+(SH_SC||"scene")+"|"+tok+"|"+type;}
 function plPanelId(tok,type){return "promptLab_"+String(tok+"_"+type).replace(/[^A-Za-z0-9_-]/g,"_");}
 function plDraftKey(data){return [data.episode,data.scene,data.shotId,data.artifactType,data.selectedCandidateId,(data.promptContract||{}).promptHash].join("|");}
+function dailiesKey(data){return [data.episode,data.scene,data.shotId,data.selectedCandidateId].join("|");}
+function dailiesRef(data){window.CB_DAILIES_DATA=window.CB_DAILIES_DATA||{};const id=String(dailiesKey(data)).replace(/[^A-Za-z0-9_-]/g,"_");window.CB_DAILIES_DATA[id]=data;return id;}
+function dailiesDraft(data){window.CB_DAILIES=window.CB_DAILIES||{};const key=dailiesKey(data);return window.CB_DAILIES[key]||(window.CB_DAILIES[key]={rating:null,decision:null,note:""});}
+function dailiesSet(data,key,value){const draft=dailiesDraft(data);draft[key]=value;const panel=document.getElementById("dailies_"+String(dailiesKey(data)).replace(/[^A-Za-z0-9_-]/g,"_"));if(panel){panel.querySelectorAll(`[data-daily-${key}]`).forEach(b=>{const active=String(b.dataset.value)===String(value);b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});const save=panel.querySelector("[data-daily-save]");if(save)save.disabled=!(draft.rating&&draft.decision);}}
+function dailiesNote(data,value){dailiesDraft(data).note=value;}
+function dailiesSetById(id,key,value){const data=(window.CB_DAILIES_DATA||{})[id];if(data)dailiesSet(data,key,value);}
+function dailiesNoteById(id,value){const data=(window.CB_DAILIES_DATA||{})[id];if(data)dailiesNote(data,value);}
+function saveDailiesById(id){const data=(window.CB_DAILIES_DATA||{})[id];if(data)saveDailies(data);}
+async function saveDailies(data){const draft=dailiesDraft(data);if(!draft.rating||!draft.decision)return;const panel=document.getElementById("dailies_"+String(dailiesKey(data)).replace(/[^A-Za-z0-9_-]/g,"_"));const save=panel&&panel.querySelector("[data-daily-save]");if(save)save.disabled=true;try{const r=await fetch(BASE+"/api/dailies-review",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode:data.episode,scene:data.scene,shotId:data.shotId,candidateId:data.selectedCandidateId,rating:draft.rating,decision:draft.decision,note:draft.note,by:REVIEWER})}),j=await r.json();if(!r.ok||!j.ok){alert(j.error||"Could not save the dailies call");if(save)save.disabled=false;return;}showToast("Dailies call recorded · "+(j.review.analysis&&j.review.analysis.likelyFailedLayer?"diagnosis ready":"no correction proposed"),true);if(j.compare)showToast("Retake comparison recorded",true);if(panel)panel.querySelector("[data-daily-status]").textContent=j.review.analysis.nextAction;await shLoadPromptLab(data.shotId,"animation",data.selectedCandidateId,false);}catch(e){alert("Can't reach the studio server. Reload and try again.");if(save)save.disabled=false;}}
+function dailiesPanelHTML(data){if(!data||data.artifactType!=="animation"||!data.selectedCandidateId||!data.canRate)return "";const draft=dailiesDraft(data),ref=dailiesRef(data),id="dailies_"+ref;const ratings=[1,2,3,4,5].map(n=>`<button type="button" class="plsegbtn ${draft.rating===n?"active":""}" data-daily-rating data-value="${n}" aria-pressed="${draft.rating===n}" onclick="dailiesSetById('${ref}','rating',${n})">${n}</button>`).join("");const decisions=[["approve","Approve"],["retake","Retake"],["reject","Reject"]].map(([v,l])=>`<button type="button" class="plsegbtn ${draft.decision===v?"active":""}" data-daily-decision data-value="${v}" aria-pressed="${draft.decision===v}" onclick="dailiesSetById('${ref}','decision','${v}')">${l}</button>`).join("");return `<section id="${id}" class="plquick" aria-label="Dailies review"><div class="cchead">Dailies call</div><div class="plmeta">Watch the current take, then give only your taste call. The agent analyses the production package automatically.</div><div class="pldimension"><div class="pldimension-label">Rating · 1 to 5</div><div class="plseg">${ratings}</div></div><div class="pldimension"><div class="pldimension-label">Decision</div><div class="plseg">${decisions}</div></div><textarea class="ccta" style="min-height:52px;margin-top:8px" maxlength="1000" placeholder="Optional short note" oninput="dailiesNoteById('${ref}',this.value)">${_esc(draft.note)}</textarea><div class="plflow-actions"><button type="button" class="btn" data-daily-save ${draft.rating&&draft.decision?"":"disabled"} onclick="saveDailiesById('${ref}')">Save dailies call</button></div><div class="plmeta" data-daily-status>Below 4 or Retake produces a diagnosis for your confirmation. It never fires automatically.</div></section>`;}
 function plDraft(data){
   const key=plDraftKey(data);
   return SH_PROMPTLAB_DRAFTS[key]||(SH_PROMPTLAB_DRAFTS[key]={scores:{},overallRead:null,note:""});
@@ -3861,6 +3927,7 @@ function promptLabPanelHTML(tok,type,data){
       <div class="plmeta">Story · Prompt · Result · Next</div></div>
       <button class="btn ghost" onclick="shLoadPromptLab('${_esc(tok)}','${_esc(type)}','${_esc(selected||"")}',true)">Refresh</button></div>
     ${selector}
+    ${dailiesPanelHTML(data)}
     ${plTraceHTML(tok,type,data,preview)}
     ${audit}
   </div>`;

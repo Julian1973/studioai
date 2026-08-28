@@ -1070,6 +1070,26 @@ def _start(jobId, gate, scene, args):
     threading.Thread(target=_stream, args=(jobId, args), daemon=True).start()
     return jobId
 
+def _queue_episode_storyboards(episode):
+    """Start the no-spend scene storyboard pass immediately after intake approval.
+
+    Episode acceptance is the handoff from the approved script/vision into the scene
+    board. The scene plans are still reviewable candidates; this only runs the Director's
+    text pass and never creates media or advances a human gate.
+    """
+    import cb_intake
+    roster = cb_intake.scene_roster(episode)
+    jobs = []
+    for scene in roster.get("scenes") or []:
+        number = str(scene.get("sceneNumber", "")).strip()
+        if not number:
+            continue
+        jobs.append(_start(
+            _jid(f"creative_scene_{episode}_{number}"),
+            "creative:scene", number,
+            ["cb_creative.py", "scene", number, episode]))
+    return jobs
+
 def fire_gate(scene, gate, force=False, episode="Ep1"):
     # Gate 1 is idempotent (a plain re-fire just re-displays the existing beats); a FORCE re-fire runs `redirect`,
     # which backs up + removes the package and re-authors the whole episode with the current (hardened) Director.
@@ -2360,6 +2380,15 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"metrics": cb_learning.metrics(),
                                    "patterns": cb_learning.patterns(),
                                    "activeMemory": cb_learning.active_memory()})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path.startswith("/api/dailies"):
+            # Compact dailies evidence and trends. Detailed Prompt Lab evidence remains
+            # available separately; this endpoint is the only required human interaction.
+            try:
+                import cb_dailies
+                self._json(200, {"ok": True, "rows": cb_dailies.rows(), "report": cb_dailies.report(), "zeroSpend": True})
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return
@@ -3952,6 +3981,54 @@ class H(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(500, {"error": str(e), "zeroSpend": True})
             return
+        if self.path == "/api/dailies-review":
+            # One lightweight human call after a render. Diagnosis is advisory and a retake
+            # is never fired here; the existing approval ledger remains authoritative.
+            try:
+                import cb_dailies
+                import cb_render as _CBR
+                d = self._body()
+                scene = str(d.get("scene", "")).strip()
+                sid = str(d.get("shotId", "")).strip()
+                ep = str(d.get("episode") or "Ep1").strip() or "Ep1"
+                candidate = str(d.get("candidateId") or "").strip()
+                if (not _SHOT_TOKEN.match(scene) or not _SHOT_TOKEN.match(sid) or
+                        not _SHOT_TOKEN.match(ep) or not _SHOT_TOKEN.match(candidate)):
+                    self._json(400, {"error": "invalid dailies review target"}); return
+                rating = int(d.get("rating"))
+                decision = str(d.get("decision") or "").strip().lower()
+                if rating not in range(1, 6) or decision not in {"approve", "retake", "reject"}:
+                    self._json(400, {"error": "rating must be 1-5 and decision must be approve, retake or reject"}); return
+                snapshot = _CBR._prompt_lab_snapshot(scene, sid, "animation", ep, candidate)
+                selected = snapshot.get("selected") or {}
+                shot = snapshot.get("shot") or {}
+                contract = selected.get("promptContract") or {}
+                ledger = snapshot.get("ledger") or {}
+                review = cb_dailies.record({
+                    "episode": ep, "scene": scene, "beat": shot.get("beat") or shot.get("purpose"),
+                    "shotId": sid, "candidateId": candidate, "take": candidate,
+                    "assetPath": selected.get("path"), "assetHash": selected.get("expectedAssetHash"),
+                    "promptHash": contract.get("promptHash"), "promptVersion": contract.get("promptHash"),
+                    "keyframeVersion": ((ledger.get("keyframeApproval") or {}).get("contentHash")),
+                    "audioVersion": ((ledger.get("audioApproval") or {}).get("contentHash") or
+                                     (ledger.get("voiceApproval") or {}).get("contentHash")),
+                    "provider": contract.get("provider"), "providerModelId": contract.get("providerModelId"),
+                    "operationId": ((ledger.get("batch") or {}).get("batchId")),
+                    "openingFrame": shot.get("openingPose"), "landingFrame": shot.get("continuityFinish"),
+                    "audioAsset": ledger.get("approvedAudio") or ledger.get("voiceApproved"),
+                    "storyBeat": shot.get("purpose"), "automatedScores": snapshot.get("aiReview") or {},
+                    "timing": {"durationSec": shot.get("durationSec")},
+                }, rating=rating, decision=decision, note=str(d.get("note") or ""),
+                   reviewer=str(d.get("by") or "Julian"), cost=d.get("cost"),
+                   retake_of=d.get("retakeOf"))
+                self._json(200, {"ok": True, "review": review, "compare": cb_dailies.compare(review["recordId"]), "zeroSpend": True})
+            except _CBR.Refused as e:
+                self._json(409, {"error": str(e), "zeroSpend": True})
+            except (ValueError, TypeError) as e:
+                self._json(400, {"error": str(e), "zeroSpend": True})
+            except Exception as e:
+                self._json(500, {"error": str(e), "zeroSpend": True})
+            return
         if self.path in ("/api/department-save", "/api/department-decide"):
             # Plain ledger edits/decisions: no LLM and no media provider call.
             try:
@@ -4026,7 +4103,17 @@ class H(http.server.SimpleHTTPRequestHandler):
                     else:
                         raise
                 reindex_episodes()
-                self._json(200, {"ok": True, "record": rec})
+                queued = []
+                if rec.get("outcome") == "approved":
+                    try:
+                        queued = _queue_episode_storyboards(ep)
+                    except Exception as queue_error:
+                        # Intake approval remains valid; expose the handoff failure so
+                        # the UI can show a retryable state instead of implying completion.
+                        rec["sceneStoryboardQueueError"] = str(queue_error)
+                self._json(200, {"ok": True, "record": rec,
+                                 "sceneStoryboardJobs": queued,
+                                 "sceneStoryboardCount": len(queued)})
             except _CBI.Refused as e:
                 self._json(400, {"error": str(e)})
             except Exception as e:
@@ -4048,6 +4135,40 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"ok": True,
                                   "jobId": _start(_jid(f"creative_{cmd}_{scene or ep}"),
                                                    "creative:" + cmd, scene or "-", args)})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        if self.path in ("/api/storyboard-bootstrap", "/api/episode-production-start"):
+            # Explicit, repeatable Scene Production handoff. No approval is changed and
+            # no image, voice or video provider is called by this endpoint.
+            try:
+                d = self._body()
+                ep = (str(d.get("episode") or "Ep1").strip() or "Ep1")
+                if not _SHOT_TOKEN.match(ep):
+                    self._json(400, {"error": "valid episode required"}); return
+                import cb_intake as _CBI
+                status = _CBI.intake_status(ep)
+                if not status.get("canonicalCurrent"):
+                    # The common post-update case is a runtime skill hash changing while
+                    # the approved script/creative package is unchanged. Refresh only that
+                    # software contract and carry the approved package forward; never bypass
+                    # a real script, canon, cast or asset blocker.
+                    codes = {str(item.get("code")) for item in (status.get("canonBlockers") or [])}
+                    if (status.get("hasCanonicalPackage") and codes == {"CANON_SOURCE_DRIFT"}
+                            and all("runtime" in str(item.get("source") or "").lower()
+                                    for item in (status.get("canonBlockers") or []))):
+                        import cb_canon as _CBC
+                        _CBC.write_lock(ROOT, locked_by="Julian via Start Episode Production")
+                        _CBI.rebase_canon_lock(ep, reviewed_by="Julian")
+                        status = _CBI.intake_status(ep)
+                    if not status.get("canonicalCurrent"):
+                        self._json(409, {"error": "The episode has a real script or canon change that needs review before production can start", "blockers": status.get("canonBlockers") or []}); return
+                jobs = _queue_episode_storyboards(ep)
+                self._json(200, {"ok": True, "sceneStoryboardJobs": jobs,
+                                 "sceneStoryboardCount": len(jobs),
+                                 "workflow": ["storyboard", "world-build", "keyframe",
+                                              "voice-timing", "seedance-watch", "review"],
+                                 "next": "Open a scene card to activate its workflow. Fire remains the paid human decision."})
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return

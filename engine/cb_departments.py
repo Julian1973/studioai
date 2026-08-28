@@ -62,29 +62,22 @@ def prompt_sections(prompt):
 
 
 SKILLS = {
-    "story-architect": ROOT / "skills/emotional-story-architecture/SKILL.md",
+    # One owner per production responsibility.  Compatibility names resolve here so
+    # versioned skill families cannot silently become alternate runtime authorities.
+    "story-architect": ROOT / "skills/crystal-bears-director/SKILL.md",
     "director": ROOT / "skills/crystal-bears-director/SKILL.md",
     "cinematography": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
-    "dp": ROOT / "skills/crystal-bears-dp/SKILL.md",
+    "dp": ROOT / "skills/crystal-bears-cinematographer/SKILL.md",
     "voice": ROOT / "skills/crystal-bears-voice-director/SKILL.md",
     "animation": ROOT / "skills/seedance-production-director/SKILL.md",
     "review": ROOT / "skills/crystal-bears-continuity/SKILL.md",
     "post": ROOT / "skills/crystal-bears-post/SKILL.md",
 }
 
-SKILLS_V3 = {
-    "director": ROOT / "skills/crystal-bears-director-v3/SKILL.md",
-    "cinematography": ROOT / "skills/crystal-bears-cinematographer-v3/SKILL.md",
-    "dp": ROOT / "skills/crystal-bears-dp-v3/SKILL.md",
-    "animation": ROOT / "skills/seedance-production-director-v3/SKILL.md",
-}
-
-SKILLS_V4 = {
-    "heart-director": ROOT / "skills/emotional-story-to-screen-director-v4/SKILL.md",
-    "director": ROOT / "skills/crystal-bears-director-v4/SKILL.md",
-    "cinematography": ROOT / "skills/crystal-bears-cinematographer-v4/SKILL.md",
-    "dp": ROOT / "skills/crystal-bears-dp-v4/SKILL.md",
-    "animation": ROOT / "skills/seedance-production-director-v4/SKILL.md",
+SKILL_ALIASES = {
+    "heart-director": "director",
+    "story-director": "director",
+    "screenwriter": "writer",
 }
 
 DEPARTMENTS = [
@@ -122,8 +115,6 @@ def roster():
                "cinematography": "cinematography", "voice": "voice",
                "animation": "animation", "review": "review", "post": "post"}[rec["id"]]
         item["loaded"] = bool(load_runtime_skill(key))
-        if rec["id"] == "cinematography":
-            item["loaded"] = item["loaded"] and bool(load_runtime_skill("dp"))
         out.append(item)
     return out
 
@@ -135,9 +126,9 @@ def load_runtime_skill(worker, standard_version=0):
     pipeline notes.  Only the concise marked contract is executable; the source document
     remains available to humans without letting stale instructions silently enter a call.
     """
-    version = int(standard_version or 0)
-    path = ((SKILLS_V4.get(worker) if version >= 4 else None) or
-            (SKILLS_V3.get(worker) if version >= 3 else None) or SKILLS[worker])
+    del standard_version  # retained as a read-compatible API argument
+    worker = SKILL_ALIASES.get(worker, worker)
+    path = SKILLS[worker]
     text = path.read_text(encoding="utf-8")
     if RUNTIME_START not in text or RUNTIME_END not in text:
         raise RuntimeError(f"{path} has no executable runtime worker contract")

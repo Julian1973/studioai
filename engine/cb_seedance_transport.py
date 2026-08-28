@@ -1,4 +1,4 @@
-"""Provider transport planning for one approved Studio animation unit.
+"""Legacy comparison-only transport planning for one approved Studio animation unit.
 
 Studio shots remain the creative and review unit. When an explicitly selected comparison
 provider has a shorter request limit, this module groups consecutive approved Animation
@@ -21,6 +21,7 @@ import cb_seedance_pipeline
 
 
 COMPARISON_MODEL_ID = "fal-seedance-2.0"
+MODE = "legacy_compare"
 MIN_SEGMENT_SEC = 4.0
 MAX_SEGMENT_SEC = 15.0
 

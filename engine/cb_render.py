@@ -2848,11 +2848,12 @@ _DEPARTMENT_WORKERS = {
 
 
 def _department_skill_ref(stage, skill, standard_version=0):
-    version = int(standard_version or 0)
-    suffix = "-v4" if version >= 4 else "-v3" if version >= 3 else ""
+    del standard_version  # runtime skill families were consolidated in Pass 2
     if stage == "animation":
-        return f"skills/seedance-production-director{suffix}/SKILL.md"
-    return f"skills/crystal-bears-{skill}{suffix}/SKILL.md"
+        return "skills/seedance-production-director/SKILL.md"
+    if skill == "dp":
+        skill = "cinematographer"
+    return f"skills/crystal-bears-{skill}/SKILL.md"
 
 
 def _department_container(pkg, scene, shot_id, stage, episode="Ep1"):

@@ -166,20 +166,21 @@ def test_forward_department_work_requires_signed_v3_director_card(tmp_path, monk
         R._require_forward_directing_source(pkg, {"shotId": "3.B1.S1"}, "3", "Ep2")
 
 
-def test_v3_runtime_is_versioned_without_changing_legacy_canon_skill():
-    legacy = D.load_runtime_skill("director")
-    forward_v3 = D.load_runtime_skill("director", 3)
-    forward = D.load_runtime_skill("director", 4)
-    assert "Director v3" not in legacy
-    assert "Director v3" in forward_v3
-    assert "Director v4" in forward
-    assert "ordinary-life test" in D.load_runtime_skill("heart-director", 4)
+def test_runtime_roles_have_one_current_owner_and_compatibility_aliases():
+    current = D.load_runtime_skill("director")
+    assert "Crystal Bears Director" in current
+    assert D.load_runtime_skill("director", 3) == current
+    assert D.load_runtime_skill("director", 4) == current
+    assert D.load_runtime_skill("heart-director", 4) == current
+    assert D.load_runtime_skill("story-director") == current
     assert R._department_skill_ref("animation", "seedance-production-director", 0) == (
         "skills/seedance-production-director/SKILL.md")
     assert R._department_skill_ref("animation", "seedance-production-director", 3) == (
-        "skills/seedance-production-director-v3/SKILL.md")
+        "skills/seedance-production-director/SKILL.md")
     assert R._department_skill_ref("animation", "seedance-production-director", 4) == (
-        "skills/seedance-production-director-v4/SKILL.md")
+        "skills/seedance-production-director/SKILL.md")
+    assert R._department_skill_ref("cinematography", "dp", 4) == (
+        "skills/crystal-bears-cinematographer/SKILL.md")
 
 
 def test_v3_source_contract_remains_valid_without_v4_heart_fields(tmp_path, monkeypatch):

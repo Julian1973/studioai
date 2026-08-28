@@ -1090,17 +1090,6 @@ def _queue_episode_storyboards(episode):
             ["cb_creative.py", "scene", number, episode]))
     return jobs
 
-def fire_gate(scene, gate, force=False, episode="Ep1"):
-    # Gate 1 is idempotent (a plain re-fire just re-displays the existing beats); a FORCE re-fire runs `redirect`,
-    # which backs up + removes the package and re-authors the whole episode with the current (hardened) Director.
-    # --episode=<ep> retargets cb_pipeline.py's EP/PKG globals for THIS invocation (see cb_pipeline.py __main__) —
-    # without it every gate action silently ran against Ep1 regardless of which episode was actually selected.
-    if str(gate) == "1" and force:
-        return _start(_jid(f"g1s{scene}"), gate, scene,
-                      ["cb_pipeline.py", "redirect", str(scene), f"--episode={episode}"])
-    return _start(_jid(f"g{gate}s{scene}"), gate, scene,
-                  ["cb_pipeline.py", str(gate), str(scene), f"--episode={episode}"])
-
 def write_script(seed, episode="Ep1"):
     """GATE 0 — the Writers' Room: turn a seed into a finished, scored, LOCKED screenplay (cb_writer)."""
     SCRIPTS.mkdir(parents=True, exist_ok=True)
@@ -1135,35 +1124,6 @@ def stop_all():
     for jid in ids: stop_job(jid)
     return ids
 
-def approve_gate(scene, gate, episode="Ep1", reviewed_by="Julian"):
-    args = ["python3", "cb_pipeline.py", "approve", str(gate), str(scene), f"--episode={episode}"]
-    if reviewed_by:
-        args.append(f"--reviewed-by={reviewed_by}")
-    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
-    return p.returncode == 0, (p.stdout + p.stderr).strip()
-
-def unapprove_gate(scene, gate, episode="Ep1"):
-    """Reverse a sign-off (un-sign a step) — clears the gate + everything downstream, and resets the scene master
-    if the foundation is un-signed (cb_pipeline.unapprove)."""
-    p = subprocess.run(["python3", "cb_pipeline.py", "unapprove", str(gate), str(scene), f"--episode={episode}"],
-                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
-    return p.returncode == 0, (p.stdout + p.stderr).strip()
-
-def set_master_studio(scene, beat_code, character, episode="Ep1", scope="location", force=False):
-    """★ Set a CHARACTER MASTER from a beat's keyframe (synchronous; QA-gated inside cb_pipeline). Returns (ok, log)."""
-    args = ["python3", "cb_pipeline.py", "set-master", str(scene), str(beat_code), str(character), str(episode), str(scope)]
-    if force: args.append("force")
-    p = subprocess.run(args, cwd=str(CBGEN), capture_output=True, text=True, timeout=150, stdin=subprocess.DEVNULL)
-    out = (p.stdout + p.stderr).strip()
-    return ("★ MASTER SET" in out), out
-
-def clear_master_studio(scene, character, episode="Ep1"):
-    """Retire a character's master for this scene's location (→ falls back to the Character Box). Returns (ok, log)."""
-    p = subprocess.run(["python3", "cb_pipeline.py", "clear-master", str(scene), str(character), str(episode)],
-                       cwd=str(CBGEN), capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
-    out = (p.stdout + p.stderr).strip()
-    return ("cleared" in out), out
-
 # server-side gate guard (defense in depth — the HTTP boundary itself refuses to fire/regen past an unsigned step)
 # ⚠ DUPLICATED (deliberately, not shared) from engine/cb_pipeline.py's own GATE_SEQ — a separate process. If a gate
 # is ever added/renamed/reordered, update BOTH lists in the SAME change, or this HTTP-layer guard and cb_pipeline's
@@ -1174,60 +1134,6 @@ GATE_SEQ = ["1", "1.6", "2a", "2b", "3", "4", "5"]   # 1.6 = THE PREVIZ REEL (20
 # own, never a member of this list. See engine/cb_previz.py's module docstring for the full note.
 def _scene_locks(scene, episode="Ep1"):
     return locked_state().get(episode or "Ep1", {}).get(str(scene), {})
-def _gate_ready(scene, gate, episode="Ep1"):
-    """(ok, msg) — is this gate fireable? Its previous gate must be signed off."""
-    g = str(gate).lower()
-    if g not in GATE_SEQ or GATE_SEQ.index(g) == 0:
-        return True, ""
-    prev = GATE_SEQ[GATE_SEQ.index(g) - 1]
-    if _scene_locks(scene, episode).get(prev):
-        return True, ""
-    return False, f"Gate {prev} not signed off for scene {scene} — sign it off first."
-
-def regen_shot(scene, shot_code, kind, note, target="both", episode="Ep1"):
-    return _start(_jid(f"regen_{kind}_{shot_code}"), f"regen:{shot_code}", scene,
-                  ["cb_pipeline.py", "regen", str(scene), str(shot_code), kind, note or "", target, f"--episode={episode}"])
-
-# ---- TICKET 4: per-beat Linear Gated Cascade drivers (mirror the gate drivers above) ----
-def gen_audio_beat(scene, beat, episode="Ep1"):
-    """Generate the dialogue track for ONE beat (job; cb_pipeline gen-audio prints AUDIO_DUR + the track path)."""
-    return _start(_jid(f"audio_{beat}"), f"audio:{beat}", scene,
-                  ["cb_pipeline.py", "gen-audio", str(scene), str(beat), f"--episode={episode}"])
-
-def gen_keyframe_beat(scene, beat, chain_from=None, episode="Ep1"):
-    """Build ONE beat's opening keyframe (job; optionally chained off the previous beat's last frame)."""
-    args = ["cb_pipeline.py", "build-beat", str(scene), str(beat)]
-    if chain_from:
-        args.append(str(chain_from))
-    args.append(f"--episode={episode}")
-    return _start(_jid(f"kf_{beat}"), f"keyframe:{beat}", scene, args)
-
-def render_beat_clip(scene, beat, episode="Ep1"):
-    """Render ONE beat's 10-12s Seedance take (job; cb_pipeline render-beat -> cb_beats.run for that beat)."""
-    return _start(_jid(f"render_{beat}"), f"render:{beat}", scene,
-                  ["cb_pipeline.py", "render-beat", str(scene), str(beat), f"--episode={episode}"])
-
-def approve_beat(scene, beat, stage, episode="Ep1", value=True):
-    """Lock (value=True) or UNLOCK (value=False) ONE beat's stage (audio|keyframe|clip) synchronously (mirror approve_gate).
-    Returns (ok, log, next). For a keyframe approval, cb_pipeline prints 'NEXT=<code>'/'NEXT=NONE' — parsed for the chain auto-fire."""
-    p = subprocess.run(["python3", "cb_pipeline.py", "approve-beat", str(scene), str(beat), str(stage),
-                        ("true" if value else "false"), f"--episode={episode}"],
-                       cwd=str(CBGEN), capture_output=True, text=True, stdin=subprocess.DEVNULL)
-    out = (p.stdout + p.stderr).strip()
-    nxt = None
-    for line in out.splitlines():
-        line = line.strip()
-        if line.startswith("NEXT="):
-            val = line[len("NEXT="):].strip()
-            nxt = None if val.upper() == "NONE" or not val else val
-    return p.returncode == 0, out, nxt
-
-def rebuild_keyframes(scene, episode="Ep1"):
-    """CLEAN rebuild of ALL keyframes for a scene — deletes stale frames + re-renders every beat fresh.
-    Tagged gate '2b' so the studio shows it LIVE as a keyframe build (progress bar + storyboard populating)."""
-    return _start(_jid(f"rebuild_kf_{scene}"), "2b", scene,
-                  ["cb_pipeline.py", "rebuild", str(scene), f"--episode={episode}"])
-
 # ── THE RELAY, front door (Julian, 2026-07-03) — job-launch wrappers around cb_pipeline.relay_prepare/
 #    relay_approve. relay_approve_beat is the ONLY function in this file that may fire fire_next_beat's
 #    approved=True launch — the Approve Anchor button in app.html is the only caller of it.
@@ -3214,12 +3120,6 @@ class H(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"ok": True, "jobId": write_script(seed, episode)})
             except Exception as e:
                 self._json(400, {"error": str(e)})
-            return
-        if self.path == "/api/restart":     # reload the studio with the latest code (refused if a job is running)
-            if PROCS:
-                self._json(409, {"error": "a job is running — stop it or let it finish, then restart"}); return
-            self._json(200, {"ok": True, "reloading": True})
-            threading.Thread(target=lambda: (time.sleep(0.3), _reexec()), daemon=True).start()
             return
         # [removed 2026-07-16 cutover: /api/fire — handled by the 410 gate above]
         # [removed 2026-07-16 cutover: /api/retakes — handled by the 410 gate above]

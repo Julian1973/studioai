@@ -18,6 +18,7 @@ if str(ENGINE) not in sys.path:
     sys.path.insert(0, str(ENGINE))
 
 import cb_lineage
+import cb_intake
 
 
 def _load_server_module(name="cb_studio_serve_auth_test"):
@@ -51,6 +52,46 @@ def _request(port, method, path, headers=None, body=None):
     result = response.status, dict(response.getheaders()), payload
     connection.close()
     return result
+
+
+def test_accept_direction_queues_all_eight_scene_compilers_without_provider_calls(monkeypatch,
+                                                                                   tmp_path):
+    module = _load_server_module("cb_studio_accept_direction_queue_test")
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(cb_intake, "scene_roster", lambda episode: {
+        "scenes": [{"sceneNumber": number} for number in range(1, 9)]})
+    calls = []
+    monkeypatch.setattr(module, "_start", lambda job_id, gate, scene, args: (
+        calls.append((gate, scene, args)) or job_id))
+
+    jobs = module._queue_episode_storyboards("Ep2")
+
+    assert len(jobs) == 8
+    assert [scene for _gate, scene, _args in calls] == [str(n) for n in range(1, 9)]
+    assert all(gate == "creative:scene" for gate, _scene, _args in calls)
+    assert all(args == ["cb_creative.py", "scene", scene, "Ep2"]
+               for _gate, scene, args in calls)
+    assert not any("seedream" in " ".join(args).lower() or
+                   "eleven" in " ".join(args).lower() or
+                   "seedance" in " ".join(args).lower()
+                   for _gate, _scene, args in calls)
+
+
+def test_episode_retry_skips_completed_scene_direction_packages(monkeypatch, tmp_path):
+    module = _load_server_module("cb_studio_retry_missing_scenes_test")
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    complete = tmp_path / "cb-output/creative/Ep2_scene2_storyboard.json"
+    complete.parent.mkdir(parents=True)
+    complete.write_text("{}")
+    monkeypatch.setattr(cb_intake, "scene_roster", lambda episode: {
+        "scenes": [{"sceneNumber": number} for number in range(1, 4)]})
+    calls = []
+    monkeypatch.setattr(module, "_start", lambda job_id, gate, scene, args: (
+        calls.append(scene) or job_id))
+
+    module._queue_episode_storyboards("Ep2")
+
+    assert calls == ["1", "3"]
 
 
 def test_uncached_director_builds_are_serialized_across_different_shots(monkeypatch):

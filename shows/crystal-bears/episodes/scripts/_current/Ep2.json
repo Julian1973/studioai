@@ -1,0 +1,15 @@
+{
+ "schemaVersion": 1,
+ "episodeId": "Ep2",
+ "scriptVersionId": "sha256:fdb4840751f2c9ab96712052fc25f7b2ac989e1024531658bec3cd0a616b5d7d",
+ "sha256": "fdb4840751f2c9ab96712052fc25f7b2ac989e1024531658bec3cd0a616b5d7d",
+ "byteLength": 9317,
+ "contentPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/fdb4840751f2c9ab96712052fc25f7b2ac989e1024531658bec3cd0a616b5d7d.txt",
+ "versionRecordPath": "shows/crystal-bears/episodes/scripts/_versions/Ep2/fdb4840751f2c9ab96712052fc25f7b2ac989e1024531658bec3cd0a616b5d7d.json",
+ "displayFile": "Ep2_Bo_s_Big_Day_V2.txt",
+ "title": "Bo's Big Day V2",
+ "activationId": "290888e844a14d61ab573ab64fb59d92",
+ "activatedAt": "2026-08-28T09:29:24+00:00",
+ "activatedBy": "Julian",
+ "previousScriptVersionId": null
+}

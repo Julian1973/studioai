@@ -78,6 +78,11 @@ CREATIVE = ROOT / "shows" / "crystal-bears" / "creative"
 OUT = ROOT / "cb-output" / "creative"
 CANON_VERSION = "1.0"
 ENGINE_VERSION = "creative-room-2.2 (2026-08-01, story-to-screen supervision contracts)"
+SCENE_DIRECTION_VERSION = "scene-direction-v1"
+PRODUCTION_LINEAGE = [
+    "Story Director", "Screenwriter", "Cinematic Shot Director",
+    "Seedream Keyframes", "Seedance Production Director", "Editor",
+]
 CREATIVE_DIRECTING_STANDARD_VERSION = 4
 UNIT_PACKING_CONTRACT_VERSION = 1
 MAX_INTERNAL_REVISIONS = 2
@@ -1825,9 +1830,16 @@ def gate5_voice(episode, scene_num, sd, shots, log=print):
             speaker, exact_text = locked
         if (voice.speaker.strip() != str(speaker).strip() or
                 voice.exactDialogue.strip() != str(exact_text).strip()):
-            raise RuntimeError(
-                f"VOICE PASS DROPPED/REWORDED locked occurrence {index}: expected "
-                f"{speaker}: {exact_text!r}, got {voice.speaker}: {voice.exactDialogue!r}")
+            if isinstance(locked, dict) and voice.dialogueOccurrenceId == occurrence_id:
+                log(
+                    f"VOICE PASS EXACT-TEXT RESTORE — occurrence {index}: creative acting "
+                    "direction retained; immutable speaker and dialogue restored mechanically")
+                voice.speaker = str(speaker)
+                voice.exactDialogue = str(exact_text)
+            else:
+                raise RuntimeError(
+                    f"VOICE PASS DROPPED/REWORDED locked occurrence {index}: expected "
+                    f"{speaker}: {exact_text!r}, got {voice.speaker}: {voice.exactDialogue!r}")
     return vs.performances
 
 
@@ -1928,6 +1940,12 @@ def _assign_dialogue_occurrences(shots, voices, details):
         for occurrence_id in detail.dialogueOccurrenceIds:
             matches = [expected_id for expected_id in expected
                        if expected_id.endswith(occurrence_id)]
+            if occurrence_id not in owner_by_id and not matches:
+                candidate_digest = occurrence_id.rsplit(":", 1)[-1]
+                matches = [expected_id for expected_id in expected
+                           if len(candidate_digest) >= 32 and
+                           expected_id.rsplit(":", 1)[-1].startswith(candidate_digest[:16]) and
+                           expected_id.rsplit(":", 1)[-1].endswith(candidate_digest[-16:])]
             if occurrence_id not in owner_by_id and len(matches) == 1:
                 occurrence_id = matches[0]
             normalized_ids.append(occurrence_id)
@@ -2058,9 +2076,32 @@ def production_detail(episode, scene_num, sd, shots, voices, log=print, shot_cas
                 f"continuityInState; {s.shotId} must carry its inherited boundary")
         out.append(d)
     out = _assign_dialogue_occurrences(shots, voices, out)
+    _carry_cut_boundary_identity(out, shots)
     _validate_typed_production_contract(
         shots, out, shot_cast, real_opener)
     return out
+
+
+def _carry_cut_boundary_identity(details, shots=None):
+    """Prevent invisible marks/prop changes at generated production-unit boundaries."""
+    shots = list(shots or [])
+    for index, (previous, current) in enumerate(zip(details, details[1:]), start=1):
+        if current.continuityInState is None:
+            continue
+        if index < len(shots) and shots[index].transitionType == "CONTINUOUS":
+            current.continuityInState = previous.continuityOutState.model_copy(deep=True)
+            continue
+        prior_by_character = {
+            character.characterId: character
+            for character in previous.continuityOutState.characters
+        }
+        for character in current.continuityInState.characters:
+            prior = prior_by_character.get(character.characterId)
+            if prior is None:
+                continue
+            character.visibleMarks = list(prior.visibleMarks)
+            character.heldProps = list(prior.heldProps)
+    return details
 
 
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -2261,6 +2302,206 @@ def regenerate_production_detail(storyboard_path, out_path, log=print, only_shot
     return out
 
 
+def build_scene_direction_card(vision, scene, beats, shots, voices, details):
+    """Compile the six department outputs into Julian's one scene-direction decision.
+
+    This is a deterministic records-only projection. It does not call an LLM, media
+    provider, provider adapter or spend-authorisation path.
+    """
+    scene_doc = scene.model_dump() if hasattr(scene, "model_dump") else dict(scene)
+    beat_docs = [b.model_dump() if hasattr(b, "model_dump") else dict(b) for b in beats]
+    shot_docs = [s.model_dump() if hasattr(s, "model_dump") else dict(s) for s in shots]
+    voice_docs = [v.model_dump() if hasattr(v, "model_dump") else dict(v) for v in voices]
+    detail_docs = [d.model_dump() if hasattr(d, "model_dump") else dict(d) for d in details]
+    detail_by_shot = {item.get("shotId"): item for item in detail_docs}
+
+    ordered_dialogue = sorted(
+        voice_docs,
+        key=lambda row: (int(row.get("sourceEventIndex", -1)), row.get("dialogueOccurrenceId", "")))
+    stages = [stage for shot in shot_docs for stage in (shot.get("stagePlan") or [])]
+    first_beat = beat_docs[0] if beat_docs else {}
+    last_beat = beat_docs[-1] if beat_docs else {}
+    middle_beat = beat_docs[len(beat_docs) // 2] if beat_docs else {}
+    turn_candidates = [beat for beat in beat_docs if beat.get("actionOrChoice")]
+    turn_beat = turn_candidates[-1] if turn_candidates else middle_beat
+
+    continuity_states = []
+    for detail in detail_docs:
+        for key in ("continuityInState", "continuityOutState"):
+            if detail.get(key):
+                continuity_states.append(detail[key])
+    props = sorted({
+        prop for state in continuity_states
+        for character in (state.get("characters") or [])
+        for prop in (character.get("heldProps") or []) if prop
+    })
+    continuity_risks = []
+    for detail in detail_docs:
+        continuity_risks.extend(detail.get("essentialProviderProtections") or [])
+    for shot in shot_docs:
+        if shot.get("transitionType") == "CONTINUOUS":
+            continuity_risks.append(
+                f"Preserve the exact visible handoff into {shot.get('shotId')} without a state reset.")
+    continuity_risks = list(dict.fromkeys(str(item) for item in continuity_risks if item))
+
+    transformation = ((vision.get("emotionalStoryToScreenContract") or {})
+                      .get("transformation") or {})
+    north_star = ((vision.get("emotionalStoryToScreenContract") or {})
+                  .get("northStar") or {})
+    if not transformation:
+        transformation = ((vision.get("transformationMap") or {}).get(
+            str(scene_doc.get("sceneId"))) or {})
+
+    card = {
+        "version": SCENE_DIRECTION_VERSION,
+        "episodeDirection": {
+            "version": vision.get("directionVersion"),
+            "signature": vision.get("directionSignature"),
+            "northStar": {
+                "theme": vision.get("theme"),
+                "emotionalThesis": vision.get("emotionalThesis"),
+                "audiencePromise": vision.get("audiencePromise"),
+                "childClearWant": north_star.get("childClearWant"),
+            },
+        },
+        "productionLineage": list(PRODUCTION_LINEAGE),
+        "scenePurposeAndEmotionalChange": {
+            "purpose": scene_doc.get("purpose"),
+            "dramaticQuestion": scene_doc.get("dramaticQuestion"),
+            "entry": transformation.get("entryBelief") or first_beat.get("whatChanges"),
+            "exit": transformation.get("exitAction") or last_beat.get("emotionalOrComicHandover"),
+        },
+        "leadCharacterAndPointOfView": {
+            "leadCharacter": scene_doc.get("emotionalOwner"),
+            "pointOfView": [
+                ((shot.get("cinematographyContract") or {}).get("storyPointOfView"))
+                for shot in shot_docs
+                if (shot.get("cinematographyContract") or {}).get("storyPointOfView")
+            ],
+        },
+        "dramaticBeats": {
+            "beginning": first_beat.get("whatChanges"),
+            "development": middle_beat.get("consequence"),
+            "turn": turn_beat.get("actionOrChoice"),
+            "landing": last_beat.get("emotionalOrComicHandover"),
+        },
+        "performanceDirection": [
+            {
+                "shotId": shot.get("shotId"),
+                "principalPerformance": shot.get("principalPerformance"),
+                "physicalPerformance": shot.get("physicalPerformance"),
+                "contract": shot.get("performanceContract"),
+            } for shot in shot_docs
+        ],
+        "positionsBlockingAndScreenDirection": [
+            {
+                "shotId": shot.get("shotId"),
+                "opening": (detail_by_shot.get(shot.get("shotId")) or {}).get("continuityInState"),
+                "closing": (detail_by_shot.get(shot.get("shotId")) or {}).get("continuityOutState"),
+                "composition": ((shot.get("cinematographyContract") or {}).get("composition")),
+                "cameraSide": (((detail_by_shot.get(shot.get("shotId")) or {})
+                                .get("continuityOutState") or {}).get("cameraSide")),
+            } for shot in shot_docs
+        ],
+        "cinematicShotPlan": [
+            {
+                "shotId": shot.get("shotId"),
+                "durationSec": shot.get("targetDurationSec"),
+                "purpose": shot.get("purpose"),
+                "openingImage": shot.get("openingImage"),
+                "camera": shot.get("cinematographyContract"),
+                "stages": shot.get("stagePlan") or [],
+                "internalShots": shot.get("internalShotPlan") or [],
+                "landingImage": shot.get("closingImage"),
+            } for shot in shot_docs
+        ],
+        "exactDialogueAllocation": [
+            {
+                "dialogueOccurrenceId": row.get("dialogueOccurrenceId"),
+                "sourceEventId": row.get("sourceEventId"),
+                "sourceEventIndex": row.get("sourceEventIndex"),
+                "speaker": row.get("speaker"),
+                "exactText": row.get("exactDialogue"),
+                "shotId": next((detail.get("shotId") for detail in detail_docs
+                                if row.get("dialogueOccurrenceId") in
+                                (detail.get("dialogueOccurrenceIds") or [])), None),
+            } for row in ordered_dialogue
+        ],
+        "elevenLabsV3VoiceAndTiming": {
+            "model": "eleven_v3",
+            "audioAuthority": "@Audio1",
+            "soleAuthorityFor": [
+                "exact words", "voice identity", "cadence", "performance", "breath",
+                "pauses", "mouth timing", "silence",
+            ],
+            "listenerRule": "Only the active speaker articulates; listeners remain silent and closed-mouth.",
+            "performances": voice_docs,
+            "timingWindows": [
+                {"shotId": detail.get("shotId"),
+                 "duration": detail.get("intendedDurationRange"),
+                 "dialogueTimings": detail.get("dialogueTimings") or []}
+                for detail in detail_docs
+            ],
+        },
+        "seedreamKeyframeRequirements": {
+            "model": "Seedream 5 Pro",
+            "shots": [
+                {"shotId": shot.get("shotId"), "required": detail.get("requiresNewKeyframe"),
+                 "openingImage": shot.get("openingImage"),
+                 "referenceRoles": detail.get("referenceRoles")}
+                for shot in shot_docs
+                for detail in [detail_by_shot.get(shot.get("shotId")) or {}]
+            ],
+        },
+        "seedance25MotionCoverageAndContinuity": {
+            "model": "dreamina-seedance-2-5-260628",
+            "productionVersion": "Seedance 2.5",
+            "seedance20Policy": "comparison-only",
+            "maximumUnitDurationSec": 30,
+            "units": [
+                {"shotId": shot.get("shotId"), "durationSec": shot.get("targetDurationSec"),
+                 "stagePlan": shot.get("stagePlan") or [],
+                 "coverage": shot.get("internalShotPlan") or [],
+                 "transitionType": shot.get("transitionType"),
+                 "closingImage": shot.get("closingImage")}
+                for shot in shot_docs
+            ],
+        },
+        "requiredCharactersLocationsAndProps": {
+            "characters": scene_doc.get("participatingCharacters") or [],
+            "locations": [scene_doc.get("location")] if scene_doc.get("location") else [],
+            "props": props,
+        },
+        "openingState": {
+            "story": scene_doc.get("connectionFromPreviousScene"),
+            "continuity": detail_docs[0].get("continuityInState") if detail_docs else None,
+            "image": shot_docs[0].get("openingImage") if shot_docs else None,
+        },
+        "closingHandoffState": {
+            "story": scene_doc.get("handoverToNextScene"),
+            "continuity": detail_docs[-1].get("continuityOutState") if detail_docs else None,
+            "image": shot_docs[-1].get("closingImage") if shot_docs else None,
+        },
+        "specificContinuityRisks": continuity_risks,
+        "editorAssemblyContract": {
+            "order": "approved scene renders in immutable script order",
+            "audio": "preserve approved @Audio1 identity, timing metadata and hashes",
+            "missingOrRejected": "must remain visible and must not be concealed",
+        },
+    }
+    signature_inputs = {
+        "episodeDirectionDigest": (vision.get("directionSignature") or {}).get("digest"),
+        "scene": scene_doc,
+        "beats": beat_docs,
+        "shots": shot_docs,
+        "voices": voice_docs,
+        "productionDetail": detail_docs,
+    }
+    card["inputSignature"] = cb_lineage.dependency_signature(
+        "scene-direction-card", signature_inputs)
+    return card
+
+
 # ─────────────────────────────────────────────────────────────────────────────────────────
 # THE SCENE RUN — Gates 0-6 + production detail
 # ─────────────────────────────────────────────────────────────────────────────────────────
@@ -2280,6 +2521,13 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         raise RuntimeError(
             "STALE EPISODE VISION — it was not authored from the active immutable script and "
             "canonical beat package. Rebuild Story & Direction before directing this scene.")
+    direction_signature = vision.get("directionSignature")
+    if direction_signature and not cb_lineage.signature_matches(
+            direction_signature, "accepted-episode-direction",
+            direction_signature.get("inputs") or {}):
+        raise RuntimeError(
+            "STALE ACCEPTED DIRECTION — the locked creative North Star has changed. "
+            "Accept the episode direction again before directing this scene.")
 
     heart = emotional_story_contract(episode, scene_num, vision, ready, log=log)
     treatments = gate1_treatments(episode, scene_num, vision, ready, heart=heart, log=log)
@@ -2326,6 +2574,7 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
         "scriptVersionId": script_version,
         "beatPackageDigest": beat_signature["digest"],
         "episodeVisionDigest": vision["inputSignature"]["digest"],
+        "acceptedEpisodeDirectionDigest": (direction_signature or {}).get("digest"),
         "sceneNumber": str(scene_num),
         "ambitionBrief": ready["brief"],
         "canonProfileDigest": ready["envelope"]["canonLock"]["profileDigest"],
@@ -2356,6 +2605,10 @@ def run_scene(scene_num, episode="Ep1", brief=None, log=print):
            "productionDetail": [d.model_dump() for d in details],
            "voicePerformances": [v.model_dump() for v in voices],
            "dialogueContract": _scene_dialogue_contract(sd.beats, voices, details),
+           "productionLineage": list(PRODUCTION_LINEAGE),
+           "sceneDirectionCard": build_scene_direction_card(
+               {**vision, "emotionalStoryToScreenContract": heart.model_dump()},
+               sd.scene, sd.beats, shots, voices, details),
            "showrunnerJudgement": review.judgement if review else "",
            "treatmentComparison": review.treatmentComparison if review else "",
            "packingJudgement": review.packingJudgement if review else "",

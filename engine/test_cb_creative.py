@@ -811,6 +811,74 @@ def test_verbatim_dialogue_snap_and_voice_lock(monkeypatch):
                        [_card()], log=lambda *a, **k: None)
 
 
+def test_canonical_voice_occurrence_restores_exact_words_after_acting_pass(monkeypatch):
+    occurrence = "dialogue-occurrence:digest-1"
+    locked = {"dialogueOccurrenceId": occurrence, "sourceEventId": "event-1",
+              "sourceEventIndex": 3, "beatId": "1.B1", "sourceBeatId": "source-1",
+              "speaker": "FUZZBY", "exactText": "ZZZZZ …"}
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId="digest-1", speaker="FUZZBY", exactDialogue="ZZZZ …",
+        dramaticIntention="sleep deeply", subtext="none", relationshipTarget="room",
+        emotionalEntry="asleep", emotionalExit="asleep", operativeWords=["ZZZZ"],
+        pace="slow", rhythm="even", pauses="natural", breaths="sleep breaths",
+        nonVerbalActions="sleep", elevenLabsV3Direction="sleeping vocalisation",
+        physicalActionRelationship="body remains asleep", expectedTiming="1s")
+    monkeypatch.setattr(C, "_script_beats", lambda *_args: ([{}], {}))
+    monkeypatch.setattr(C, "_locked_dialogue", lambda _beats: [locked])
+    monkeypatch.setattr(C.cb_llm, "structured",
+                        lambda *_args, **_kwargs: C.VoiceScript(performances=[voice]))
+
+    result = C.gate5_voice("Ep2", 1, None, [_card()], log=lambda *_: None)
+
+    assert result[0].dialogueOccurrenceId == occurrence
+    assert result[0].exactDialogue == "ZZZZZ …"
+    assert result[0].speaker == "FUZZBY"
+
+
+def test_cut_boundary_mechanically_preserves_marks_and_held_props():
+    first = _detail("S1.SH1")
+    first.continuityOutState.characters[0].visibleMarks = ["pollen"]
+    first.continuityOutState.characters[0].heldProps = ["honey spoon"]
+    second = _detail("S1.SH2")
+    second.continuityInState.characters[0].visibleMarks = []
+    second.continuityInState.characters[0].heldProps = []
+
+    C._carry_cut_boundary_identity([first, second])
+
+    carried = second.continuityInState.characters[0]
+    assert carried.visibleMarks == ["pollen"]
+    assert carried.heldProps == ["honey spoon"]
+
+
+def test_continuous_boundary_inherits_the_complete_previous_state():
+    first = _detail("S1.SH1")
+    second = _detail("S1.SH2")
+    second.continuityInState.cameraSide = "wrong side"
+    continuous = _card("S1.SH2", transition="CONTINUOUS")
+
+    C._carry_cut_boundary_identity([first, second], [_card("S1.SH1"), continuous])
+
+    assert (second.continuityInState.model_dump() ==
+            first.continuityOutState.model_dump())
+
+
+def test_dialogue_assignment_repairs_only_a_unique_long_hash_abbreviation():
+    full = "dialogue-occurrence:sha256:c30e400b3246adc794f4e3ba97aded0b12888a65431c48f4c34e17d5c12bf052"
+    shortened = "dialogue-occurrence:sha256:c30e400b3246adc794f4c34e17d5c12bf052"
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId=full, beatId="1.B1", speaker="KEEN", exactDialogue="Hi!",
+        dramaticIntention="greet", subtext="friendly", relationshipTarget="Bo",
+        emotionalEntry="open", emotionalExit="open", operativeWords=["Hi"], pace="warm",
+        rhythm="simple", pauses="none", breaths="natural", nonVerbalActions="wave",
+        elevenLabsV3Direction="friendly greeting", physicalActionRelationship="wave",
+        expectedTiming="1s")
+    detail = _detail(occurrence_ids=[shortened])
+
+    result = C._assign_dialogue_occurrences([_card()], [voice], [detail])
+
+    assert result[0].dialogueOccurrenceIds == [full]
+
+
 # ── the rejected exemplar feeds the room; no provider access ────────────────────────────
 def test_rejected_exemplar_reaches_role_minds_and_no_provider_access():
     mind = C._mind("DIRECTOR", ["directorTaste"], "charge")
@@ -819,6 +887,45 @@ def test_rejected_exemplar_reaches_role_minds_and_no_provider_access():
     src = (HERE / "cb_creative.py").read_text()
     assert "import cb_gen" not in src and "import cb_render" not in src
     assert "generate_video" not in src and "_fal_" not in src
+
+
+def test_scene_direction_card_unifies_departments_without_changing_dialogue():
+    beat = _beat()
+    shot = _card()
+    detail = _detail(occurrence_ids=["dlg-1"])
+    voice = C.VoicePerformance(
+        dialogueOccurrenceId="dlg-1", sourceEventId="event-1", sourceEventIndex=4,
+        beatId="1.B1", sourceBeatId="source-beat-1", speaker="FUZZBY",
+        exactDialogue="Nailed it.", voiceIdentity="fuzzby-voice",
+        dramaticIntention="cover the wobble", subtext="please believe me",
+        relationshipTarget="Zenny", emotionalEntry="buoyant",
+        emotionalExit="privately rattled", operativeWords=["Nailed"], pace="quick",
+        rhythm="bright then held", pauses="hold after the line", breaths="one settling breath",
+        nonVerbalActions="recover the grin", elevenLabsV3Direction="play confidence past impact",
+        physicalActionRelationship="line follows the rebound", expectedTiming="1.0-2.0s")
+    vision = {
+        "directionVersion": "accepted-episode-direction-v1",
+        "directionSignature": C.cb_lineage.dependency_signature(
+            "accepted-episode-direction", {"direction": "locked"}),
+        "theme": "connection survives visible imperfection",
+        "emotionalThesis": "honesty preserves belonging",
+        "audiencePromise": "warm character comedy",
+        "emotionalStoryToScreenContract": _heart_contract().model_dump(),
+    }
+    card = C.build_scene_direction_card(
+        vision, _scene(), [beat], [shot], [voice], [detail])
+
+    assert card["productionLineage"] == C.PRODUCTION_LINEAGE
+    assert card["episodeDirection"]["signature"] == vision["directionSignature"]
+    assert [line["exactText"] for line in card["exactDialogueAllocation"]] == ["Nailed it."]
+    assert card["elevenLabsV3VoiceAndTiming"]["model"] == "eleven_v3"
+    assert card["elevenLabsV3VoiceAndTiming"]["audioAuthority"] == "@Audio1"
+    assert "listeners remain silent and closed-mouth" in card["elevenLabsV3VoiceAndTiming"]["listenerRule"]
+    assert card["seedance25MotionCoverageAndContinuity"]["productionVersion"] == "Seedance 2.5"
+    assert card["seedance25MotionCoverageAndContinuity"]["seedance20Policy"] == "comparison-only"
+    assert C.cb_lineage.signature_matches(
+        card["inputSignature"], "scene-direction-card",
+        card["inputSignature"]["inputs"])
 
 
 def test_no_fixed_lane_or_mandatory_coverage_language_in_contract():

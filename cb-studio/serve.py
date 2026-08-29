@@ -874,6 +874,17 @@ def _humanise(line, gate=None):
     """Turn a raw pipeline log line into a friendly 'current step' for the UI."""
     l = line.strip()
     low = l.lower()
+    if str(gate or "").startswith("creative"):
+        if "insufficient_quota" in low or "no credits remaining" in low:
+            return "Director paused — OpenAI text credits required"
+        if "canon envelope" in low: return "Checking canon and scene continuity…"
+        if "heart contract" in low: return "Story Director — shaping the scene’s emotional purpose…"
+        if "gate 1" in low: return "Director and Cinematographer — exploring scene treatments…"
+        if "gate 2" in low: return "Showrunner — selecting the strongest treatment…"
+        if "gate 4" in low: return "Cinematic Shot Director — packing the production units…"
+        if "gate 6" in low: return "Showrunner — challenging the complete scene direction…"
+        if "voice pass" in low: return "Voice Director — preserving exact dialogue and performance…"
+        if "storyboard v2" in low: return "Scene Direction ready for review ✓"
     if "writers' room" in low or "writers’ room" in low: return "Writers’ Room — opening the room…"
     if "passes 0-3" in low or "heart lock" in low: return "Writers’ Room — Heart Lock · the Game · the Outline…"
     if "passes 4-7" in low or "draft locked" in low: return "Writers’ Room — drafting · co-watch · Braintrust · lock…"
@@ -996,7 +1007,7 @@ def _stream(jobId, args):
                                           ("refused", "error", "failed", "invalid"))), None)
                     job["error"] = (detail or lines[-1] if lines else
                                     "The provider process ended without a usable result.")[:600]
-                    job["step"] = job["error"]
+                    job["step"] = _humanise(job["error"], job.get("gate"))
     except Exception as e:
         with _JOB_LOCK:
             if job.get("stopped"):
@@ -1083,6 +1094,9 @@ def _queue_episode_storyboards(episode):
     for scene in roster.get("scenes") or []:
         number = str(scene.get("sceneNumber", "")).strip()
         if not number:
+            continue
+        if (ROOT / "cb-output" / "creative" /
+                f"{episode}_scene{number}_storyboard.json").exists():
             continue
         jobs.append(_start(
             _jid(f"creative_scene_{episode}_{number}"),
@@ -3476,6 +3490,31 @@ class H(http.server.SimpleHTTPRequestHandler):
                     entry.setdefault("refs", [])
                     if turn_path not in entry["refs"]:
                         entry["refs"].insert(0, turn_path)
+                reference_data = d.get("referenceData") or []
+                if not isinstance(reference_data, list):
+                    raise ValueError("referenceData must be a list")
+                if len(reference_data) > 12:
+                    raise ValueError("a character update accepts at most 12 reference images")
+                if reference_data:
+                    char_dir = ROOT / "cb-seed" / "assets" / "characters" / slug(name)
+                    char_dir.mkdir(parents=True, exist_ok=True)
+                    entry.setdefault("refs", [])
+                    for index, reference in enumerate(reference_data, start=1):
+                        if not isinstance(reference, dict) or not reference.get("data"):
+                            raise ValueError("each reference image requires data and a filename")
+                        raw = str(reference["data"])
+                        if raw.strip().startswith("data:") and "," in raw:
+                            raw = raw.split(",", 1)[1]
+                        ext = str(reference.get("name") or "").rsplit(".", 1)[-1].lower()
+                        if ext not in ("png", "jpg", "jpeg", "webp"):
+                            ext = "png"
+                        source_stem = re.sub(r"[^A-Za-z0-9]+", "_", pathlib.Path(str(reference.get("name") or f"reference_{index}")).stem).strip("_")
+                        filename = f"CB_{slug(name)}_{source_stem or ('reference_' + str(index))}.{ext}"
+                        out = char_dir / filename
+                        out.write_bytes(base64.b64decode(raw))
+                        rel = "../" + out.relative_to(ROOT).as_posix()
+                        if rel not in entry["refs"]:
+                            entry["refs"].append(rel)
                 for k in ("key_features", "voiceId", "size", "sizeRef", "cadence",
                           "tier", "crystal", "feeling", "colour", "note", "home"):
                     if d.get(k) not in (None, ""):

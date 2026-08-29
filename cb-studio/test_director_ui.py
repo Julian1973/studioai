@@ -545,6 +545,14 @@ def test_left_rail_has_project_asset_libraries():
     assert ".primary:disabled, .secondary:disabled { opacity: .5; cursor: not-allowed; }" in CSS
 
 
+def test_character_api_accepts_multiple_identity_references_without_approval():
+    assert 'reference_data = d.get("referenceData") or []' in SERVER
+    assert 'len(reference_data) > 12' in SERVER
+    assert 'entry.setdefault("refs", [])' in SERVER
+    assert 'entry["refs"].append(rel)' in SERVER
+    assert '"canonAction": "Review this change, then explicitly re-lock canon."' in SERVER
+
+
 def test_client_bundle_has_no_fabricated_clip_fallbacks_or_banned_canon():
     client_bundle = "\n".join((HTML, CSS, JS)).lower()
     banned = (

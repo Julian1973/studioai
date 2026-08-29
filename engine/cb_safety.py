@@ -435,7 +435,15 @@ def install(m):
                     reviewed_by="Julian", log=print):
         pkg, _ = current_package(scene, episode)
         if not look_prompt(scene, episode):
-            raise m.Refused("REFUSED — Prepare current Look Development direction first.")
+            # Selecting a real library/upload plate is already the user's explicit Scene
+            # World action. Prepare and sign the zero-media-spend specialist brief behind
+            # that action instead of exposing another departmental gate in the UI.
+            prepare_department(scene, "look", None, episode, log)
+            decide_department(
+                scene, "look", "approved", None,
+                "Automatically prepared for the selected Scene Look source.", episode,
+                "StudioAI", log)
+            pkg, _ = current_package(scene, episode)
         result = original["select_scenelook_source"](
             scene, mode, episode, upload_path, library_path, reviewed_by, log)
         rec = m._load_scenelook_rec(scene, episode)

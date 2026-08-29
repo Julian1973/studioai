@@ -562,8 +562,10 @@ def _prepare_intake(episode="Ep1", log=print):
         f"{parsed['dialogueCount']} locked dialogue line(s), "
         f"{len(parsed['events'])} event(s) total")
 
+    log("DIRECTOR PASS — interpreting emotional turns, comedy beats and playable scene coverage")
     direction = cb_departments.prepare_story(
         parsed["events"], cast_by_scene, canon_context, log=log)
+    log(f"DIRECTOR PASS COMPLETE — {len(direction.beats)} proposed beat(s); validating exact script coverage")
 
     ranged = _repair_beat_splits(direction.beats, parsed)
     scene_by_num = {s["sceneNumber"]: s for s in parsed["scenes"]}
@@ -601,6 +603,7 @@ def _prepare_intake(episode="Ep1", log=print):
             "cuts": cuts,
         })
 
+    log("COVERAGE VALIDATION — checking every action and dialogue event before review")
     coverage = dialogue_coverage_report(parsed["events"], beats_out)
     if not coverage["ok"]:
         raise Refused("REFUSED — dialogue coverage is not exact; no candidate saved. "
@@ -935,6 +938,14 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
     vision_inputs = cb_lineage.episode_vision_inputs(
         current["scriptVersionId"], pkg["contentSignature"],
         canon_lock["profileDigests"]["story"])
+    direction_inputs = {
+        "scriptVersionId": current["scriptVersionId"],
+        "beatPackageDigest": pkg["contentSignature"]["digest"],
+        "canonProfileDigest": canon_lock["profileDigests"]["story"],
+        "direction": candidate["episodeVision"],
+    }
+    direction_signature = cb_lineage.dependency_signature(
+        "accepted-episode-direction", direction_inputs)
     vision_pkg = {"episodeId": episode, "title": candidate["title"],
                  "sourceScriptVersion": _md5_text(json.dumps(pkg, sort_keys=True)),
                  "sourceScript": _script_ref(current),
@@ -942,7 +953,14 @@ def _decide_intake(episode="Ep1", verdict="approve", note="", reviewed_by="Julia
                  "inputSignature": cb_lineage.dependency_signature(
                      "episode-vision", vision_inputs),
                  "canonLock": pkg["canonLock"],
-                 "canonVersion": "1.0", **candidate["episodeVision"],
+                 "canonVersion": "1.0",
+                 "directionVersion": "accepted-episode-direction-v1",
+                 "directionSignature": direction_signature,
+                 "productionLineage": [
+                     "Story Director", "Screenwriter", "Cinematic Shot Director",
+                     "Seedream Keyframes", "Seedance Production Director", "Editor",
+                 ],
+                 **candidate["episodeVision"],
                  "showrunnerJudgement": "", "approvalState": "approved",
                  "provenance": {"role": "director-intake", "at": _now(),
                                 "reviewedBy": reviewed_by}}

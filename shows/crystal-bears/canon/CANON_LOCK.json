@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "showId": "crystal-bears",
-  "lockedAt": "2026-08-15T21:42:57+00:00",
+  "lockedAt": "2026-08-28T09:48:53+00:00",
   "lockedBy": "Julian",
-  "policySha256": "669a1222e596e90c29e9ebdfa1cab8350db75b5ad1f5c040de2e95119b7ae0ab",
+  "policySha256": "beac492f5afb965ec5cff3a2003cee2895691808d3189d0f1d88c5c01ff0fd3e",
   "sources": {
     "bannedVocabulary": {
       "path": "shows/crystal-bears/canon/banned_vocabulary.json",
@@ -15,7 +15,7 @@
     },
     "characters": {
       "path": "shows/crystal-bears/canon/characters.json",
-      "sha256": "5ad78d509f3f3b5c8eb03757021e4d5c3d1d8238e70a428ad164486c058c5683"
+      "sha256": "956200fb50971fd16d6b35098c2692bd3d47608a4dc67078c08097e2a3423205"
     },
     "cinematographyTaste": {
       "path": "shows/crystal-bears/creative/CINEMATOGRAPHY_TASTE_CANON.md",
@@ -43,11 +43,11 @@
     },
     "identityPacks": {
       "path": "shows/crystal-bears/canon/identity_packs.json",
-      "sha256": "bc5a0cff30539127c6fdc5ac6288d387684f5b03b7db92c2a79f41d392c07f1c"
+      "sha256": "2cc83aee0c528ff6057583d5967bfb62ebab1e1cb39b4de5a3336e7e592f74e5"
     },
     "locationAssetManifest": {
       "path": "cb-seed/assets/locations/_manifest.json",
-      "sha256": "3cabf35ca93454dcba61b57ed5c7a1dc04d5303dc3d52e2219eda51e749c3a52"
+      "sha256": "201df4d67c916a9b709e7f7cd2310ef66c456af0ef101d7f19ddbdaa76691c35"
     },
     "locations": {
       "path": "shows/crystal-bears/canon/locations.json",
@@ -59,11 +59,11 @@
     },
     "runtimeAnimation": {
       "path": "skills/seedance-production-director/SKILL.md",
-      "sha256": "db04acf26801beee8c49a8597cd2acaaee1442f5184789f2d20863e7f6d99ab0"
+      "sha256": "424f14d38e552f0104d51b9254529596fb277be30c1834f48944cb95a7af8504"
     },
     "runtimeCamera": {
-      "path": "skills/crystal-bears-camera/SKILL.md",
-      "sha256": "31fd1210c7d1c61833049ae123819e9b5becf86b49ef0543f539af9f39121d2e"
+      "path": "skills/crystal-bears-cinematographer/SKILL.md",
+      "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
     },
     "runtimeCinematographer": {
       "path": "skills/crystal-bears-cinematographer/SKILL.md",
@@ -82,8 +82,8 @@
       "sha256": "41b837a597f5f5b0d3a4cdfdfecbe9e76b28a8a13fa533b81702e7faa81d13c0"
     },
     "runtimeDp": {
-      "path": "skills/crystal-bears-dp/SKILL.md",
-      "sha256": "7f2513d6b84f57ecb5d959d26cf81f3510b9e9c819c16884ccb9e3499ddc319e"
+      "path": "skills/crystal-bears-cinematographer/SKILL.md",
+      "sha256": "7eece9b1905b83e9b4a4639c0b113b0324115de11620b17082d8339cba6ebd68"
     },
     "runtimePost": {
       "path": "skills/crystal-bears-post/SKILL.md",
@@ -103,7 +103,7 @@
     },
     "showBible": {
       "path": "shows/crystal-bears/canon/LOCKED_CANON.md",
-      "sha256": "12c85aea9dfeae83d35e90a90d7ff2a9584478b86da4f343a27a6b870dcf21c7"
+      "sha256": "c49d38a2a2fd143b9aae2465345bf64341035ef621fde7282f48cb64402a30b6"
     },
     "showrunnerTaste": {
       "path": "shows/crystal-bears/creative/SHOWRUNNER_TASTE_CANON.md",
@@ -1102,18 +1102,114 @@
     },
     "Bo": {
       "tier": "recurring-guest",
-      "status": "stub",
-      "voiceMode": "unassigned",
-      "assets": []
+      "status": "locked",
+      "voiceMode": "elevenlabs-v3",
+      "assets": [
+        {
+          "path": "cb-seed/assets/characters/Bo/CB_Bo_char-turnaround.png",
+          "roles": [
+            "refs[1]"
+          ],
+          "sha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+        },
+        {
+          "path": "cb-seed/assets/characters/Bo/CB_Bo_conker_turnaround.png",
+          "roles": [
+            "refs[7]"
+          ],
+          "sha256": "60345ff72748da0cab85d69b86ed73062309ebdd2b606effb95e0424537e5d47"
+        },
+        {
+          "path": "cb-seed/assets/final_turnarounds/CB_Bo.png",
+          "roles": [
+            "anchor",
+            "render_ref",
+            "turn4",
+            "turnaround"
+          ],
+          "sha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Bo_house-int-door-view.png",
+          "roles": [
+            "house.interior",
+            "refs[4]"
+          ],
+          "sha256": "0ed1e64a9adc904818947bd10a68012bccc7cc1f2de01fe407c70905358e5108"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Bo_house-int-reverse-view.png",
+          "roles": [
+            "refs[5]"
+          ],
+          "sha256": "ceb06644c706df4e8688b434541960c498c5c43d771b8d2e7d4c6e350d4b44b0"
+        },
+        {
+          "path": "cb-seed/assets/houses/CB_Bo_house-turnaround.png",
+          "roles": [
+            "refs[3]"
+          ],
+          "sha256": "fb02790d94e6452562f54f094c1946ecae7de562befe23513a91c1119ce92803"
+        },
+        {
+          "path": "cb-seed/assets/props/CB_Bo_conker_turnaround.png",
+          "roles": [
+            "refs[6]"
+          ],
+          "sha256": "60345ff72748da0cab85d69b86ed73062309ebdd2b606effb95e0424537e5d47"
+        },
+        {
+          "path": "cb-seed/assets/props/CB_Bo_satchel.png",
+          "roles": [
+            "refs[2]"
+          ],
+          "sha256": "061a0387c5de27ae788aabab77961d4b8605cd0fd65a3cab32b4585257add0c1"
+        }
+      ]
     }
   },
   "locationAssets": [
+    {
+      "path": "cb-seed/assets/locations/crystal_cove_main_crystal_clearing_locked.png",
+      "roles": [
+        "locationLibrary.crystal_cove_main_crystal_clearing_locked"
+      ],
+      "sha256": "f27016eb3a40038b3be34d0254875d7e3f9064bbb2206f4a18dd30762a7e2cbb"
+    },
     {
       "path": "cb-seed/assets/locations/crystal_cove_meadow.png",
       "roles": [
         "locationLibrary.crystal_cove_meadow"
       ],
       "sha256": "7483f457784a1fb48563322bd8c3043849aa9d5b421ca315847709474cfc7098"
+    },
+    {
+      "path": "cb-seed/assets/locations/crystal_woods_camera_angles.png",
+      "roles": [
+        "locationLibrary.crystal_woods_camera_angles"
+      ],
+      "sha256": "7df9d2b73d62dd52b2449d4dd446ec3940a00df17dacf9e87df43428ce562dc5"
+    },
+    {
+      "path": "cb-seed/assets/locations/crystal_woods_forest_path.png",
+      "roles": [
+        "locationLibrary.crystal_woods_forest_path"
+      ],
+      "sha256": "0a77f773ca76500ba180542fbf0a2098e372adfc3ded3c94ab05bfc3e0238b5b"
+    },
+    {
+      "path": "cb-seed/assets/locations/crystal_woods_learning_circle.png",
+      "roles": [
+        "locationLibrary.crystal_woods_learning_circle"
+      ],
+      "sha256": "8ccffc25c1badb5b7f36d8b914d1022f9ee046cfc8307ddc2a40ebac489f9a0c"
+    },
+    {
+      "path": "cb-seed/assets/locations/crystal_woods_learning_circle_camera_plan.png",
+      "roles": [
+        "locationLibrary.crystal_woods_learning_circle_camera_plan"
+      ],
+      "sha256": "38c947ad1543b4c70598cbad854d6ae23c0b59b1a81a3daff2a0dff17473e95f"
     },
     {
       "path": "cb-seed/assets/locations/deep_rainforest.png",
@@ -1166,6 +1262,13 @@
         "Amie.source"
       ],
       "sha256": "8e521c72177e835505f82edbb32f136d0240ab54492827fd94c5742a5b2171d4"
+    },
+    {
+      "path": "cb-seed/assets/final_turnarounds/CB_Bo.png",
+      "roles": [
+        "Bo.source"
+      ],
+      "sha256": "2dc857268518341489fb6ffc7b3f9449557ae9dc4ce5a66cefd1656e7f02ba58"
     },
     {
       "path": "cb-seed/assets/final_turnarounds/CB_Fuzzby.jpeg",
@@ -1231,5 +1334,5 @@
       "sha256": "237d217605e045693f5daf6b14d4007df0e3616fdeda6115bf04135f9aab756f"
     }
   ],
-  "manifestDigest": "cce5895647784065c1609b1f9dc674932d05d7f45e0630d4a6fa39c2745d86ed"
+  "manifestDigest": "4fa0ce5c19d87228239d2e95481a3490a4c3f097bc947490704d9e2d93e061ea"
 }

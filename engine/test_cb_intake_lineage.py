@@ -149,6 +149,14 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
         current["scriptVersionId"], pkg["contentSignature"], CANON_DIGEST)
     assert cb_lineage.signature_matches(
         vision["inputSignature"], "episode-vision", expected_inputs)
+    assert vision["directionVersion"] == "accepted-episode-direction-v1"
+    assert cb_lineage.signature_matches(
+        vision["directionSignature"], "accepted-episode-direction",
+        vision["directionSignature"]["inputs"])
+    assert vision["productionLineage"] == [
+        "Story Director", "Screenwriter", "Cinematic Shot Director",
+        "Seedream Keyframes", "Seedance Production Director", "Editor",
+    ]
     status = cb_intake.intake_status("Ep1")
     assert status["candidateCurrent"] is True
     assert status["canonicalCurrent"] is True
@@ -156,6 +164,17 @@ def test_intake_approval_persists_script_and_package_signatures(tmp_path, monkey
     assert status["candidate"]["approval"]["canonicalPackage"] == (
         result["canonicalPackage"].rsplit("/", 1)[-1]
     )
+
+
+def test_episode_two_production_script_has_eight_scenes_and_57_exact_dialogue_lines():
+    script_path = cb_intake.ROOT / "cb-studio/data/scripts/Ep2_Bos_Big_Day_V2.txt"
+    parsed = cb_intake.parse_script(
+        script_path.read_text(encoding="utf-8"), cb_intake._load_roster(),
+        log=lambda *_: None)
+    dialogue = [event for event in parsed["events"] if event["type"] == "dialogue"]
+    assert len(parsed["scenes"]) == 8
+    assert len(dialogue) == 57
+    assert all(event["text"] for event in dialogue)
 
 
 def test_outcome_compression_plan_groups_beats_by_scene():

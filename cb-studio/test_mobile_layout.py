@@ -36,6 +36,25 @@ def test_dense_forms_and_modals_reflow_on_mobile():
     assert 'class="table-scroll"' in APP
 
 
+def test_character_profile_can_store_production_imagery_and_voice():
+    assert "Add or update imagery and voice" in APP
+    assert 'id="character_voice_id"' in APP
+    assert 'id="character_anchor"' in APP
+    assert 'id="character_turnaround"' in APP
+    assert 'id="character_references"' in APP
+    assert "multiple" in APP
+    assert "saveCharacterAssets()" in APP
+    assert "Review and re-lock canon before production." in APP
+
+
+def test_story_direction_run_has_visible_live_progress():
+    assert "storyIntakeProgressHTML(job)" in APP
+    assert 'aria-label="Story and Direction progress"' in APP
+    assert 'role="progressbar"' in APP
+    assert "Directing story, emotion and comedy" in APP
+    assert "dialogue lines" in APP
+
+
 def test_mobile_navigation_remains_reachable_without_page_overflow():
     assert ".top{position:sticky;top:0;display:grid" in APP
     assert 'class="mobile-menu-toggle"' in APP

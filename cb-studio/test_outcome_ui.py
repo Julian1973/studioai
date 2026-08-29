@@ -118,10 +118,10 @@ def test_storyboard_leads_with_seedance_units_and_exposes_packing_reasons():
 
 def test_scene_review_exposes_the_simple_director_journey():
     assert 'aria-label="Scene creation path"' in APP
-    assert '{id:"script",name:"Script",glyph:"✎",members:["script"]}' in APP
-    assert '{id:"package",name:"Production Package",glyph:"▤",members:["storyboard","scenelook","keyframe","voice"]}' in APP
-    assert '{id:"render",name:"Render",glyph:"►",members:["animation"]}' in APP
-    assert '{id:"review",name:"Review",glyph:"★",members:["continuity","final"]}' in APP
+    assert '{id:"direction",name:"Direction",glyph:"▤",members:["script","storyboard"]}' in APP
+    assert '{id:"see",name:"See",glyph:"◧",members:["scenelook","keyframe"]}' in APP
+    assert '{id:"hear",name:"Hear",glyph:"♪",members:["voice"]}' in APP
+    assert '{id:"watch",name:"Watch",glyph:"►",members:["animation","continuity","final"]}' in APP
     assert APP.index('{id:"keyframe",name:"Keyframe"') < APP.index('{id:"voice",name:"Voice & Timing"')
     assert "function phaseState(phase,stages)" in APP
     assert "function phaseTarget(phase,stages)" in APP
@@ -133,6 +133,12 @@ def test_scene_review_exposes_the_simple_director_journey():
     assert "openDisclosureModal('keyframe'" in APP
     assert "s.beatCodes&&s.beatCodes.length" in APP
     assert 'codes[0]+"–"+codes[codes.length-1]' in APP
+    assert "Fire Seedance 2.5" in APP
+    assert "Run Seedance 2.0 comparison" not in APP
+    assert "storyboard-progress-fill" in APP
+    assert "storyboard-working" in APP
+    assert "stopped on protection" in APP
+    assert "Retry unfinished scene directions" in APP
 
 
 def test_internal_direction_is_not_a_fake_human_approval_gate():
@@ -175,8 +181,8 @@ def test_completed_job_refresh_finishes_before_deferred_outcome_resumes():
     )
     assert poll
     body = poll.group(1)
-    refresh = 'if(page=="pipeline")await renderControl();'
-    resume = "if(afterJob)await afterJob(j);"
+    refresh = 'if(page=="pipeline"&&completedHere)await renderControl();'
+    resume = "if(afterJob&&completedHere)await afterJob(j);"
     assert refresh in body
     assert body.index(refresh) < body.index(resume)
     assert 'if(page=="pipeline")renderControl();else renderJobBanner();' not in body
@@ -223,7 +229,40 @@ def test_pipeline_defaults_to_one_calm_outcome_before_production_detail():
     assert '<div class="wcol wcol-decision" id="wdecision"></div>' in APP
     assert '<details class="focus-context"><summary>Scene &amp; shot map</summary>' in APP
     assert '<details class="focus-evidence"><summary>Direction &amp; review evidence</summary>' in APP
-    assert 'return `<div class="wcol-head">Now</div>' in APP
+    assert 'return `<div class="wcol-head">Your decision</div>' in APP
+
+
+def test_active_production_job_survives_navigation_and_refresh():
+    assert 'localStorage.setItem("cb_active_production_job"' in APP
+    assert 'localStorage.getItem("cb_active_production_job")' in APP
+    assert 'if(SH_JOB)setTimeout(()=>shPollStart(),0)' in APP
+    assert 'function shJobBelongsHere()' in APP
+
+
+def test_see_hear_watch_keep_the_stage_media_visible():
+    assert 'keyframe:["SEE","Opening keyframe"]' in APP
+    assert 'voice:["HEAR","ElevenLabs v3 voice bed"]' in APP
+    assert 'animation:["WATCH","Seedance 2.5 render"]' in APP
+    assert 'class="zoom pmedia img"' in APP
+    assert 'class="stage-audio"' in APP
+    assert 'onloadedmetadata="mediaDurationLoaded(this)"' in APP
+    assert '<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>' in APP
+    assert '<details class="focus-evidence"><summary>Exact dialogue and performance notes</summary>' in APP
+
+
+def test_see_has_an_obvious_full_screen_image_control():
+    assert 'function expandCurrentStageImage()' in APP
+    assert 'aria-label="View keyframe full screen"' in APP
+    assert 'aria-label="View scene image full screen"' in APP
+    assert 'onclick="expandCurrentStageImage()"' in APP
+
+
+def test_populated_stage_is_a_top_level_media_and_decision_desk():
+    assert '.focus-workspace.result-first{display:grid;grid-template-columns:minmax(0,1fr) 300px' in APP
+    assert '.focus-workspace.result-first .wcol-artefact{grid-column:1;grid-row:1' in APP
+    assert '.focus-workspace.result-first .wcol-decision{grid-column:2;grid-row:1' in APP
+    assert '@media(max-width:900px){.focus-workspace.result-first{display:flex' in APP
+    assert 'workspace.classList.toggle("result-first",resultFirst)' in APP
     assert '"Creative direction"' in APP
 
 

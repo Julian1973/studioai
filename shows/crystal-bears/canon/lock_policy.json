@@ -137,7 +137,7 @@
     "Zenny": {"tier": "principal", "status": "locked", "voiceMode": "elevenlabs-v3"},
     "Keen's Mum": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"},
     "Squeaky": {"tier": "recurring-guest", "status": "locked", "voiceMode": "nonverbal-sfx"},
-    "Bo": {"tier": "recurring-guest", "status": "stub", "voiceMode": "unassigned"}
+    "Bo": {"tier": "recurring-guest", "status": "locked", "voiceMode": "elevenlabs-v3"}
   },
   "characterAliases": {
     "HOWIE": "Howey",

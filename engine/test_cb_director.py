@@ -11,6 +11,21 @@ import cb_render
 SHOT_ID = "S1.SH1"
 
 
+def test_non_first_opener_resolves_previous_shot_as_its_inherited_frame_source():
+    package = {
+        "shots": [
+            {"shotId": "S1.SH1", "sourceType": "opener"},
+            {"shotId": "S1.SH2", "sourceType": "opener", "sourceShotId": None},
+            {"shotId": "S1.SH3", "sourceType": "relay", "sourceShotId": "S1.SH1"},
+        ],
+    }
+    first, second, relay = package["shots"]
+
+    assert cb_render._previous_shot_id_for_opening_frame(package, first) is None
+    assert cb_render._previous_shot_id_for_opening_frame(package, second) == "S1.SH1"
+    assert cb_render._previous_shot_id_for_opening_frame(package, relay) == "S1.SH1"
+
+
 def test_recover_approved_shot_requires_matching_registry_review_and_prompt_bank(
         tmp_path, monkeypatch):
     take = tmp_path / "Ep2_S2.SH1_c2.mp4"

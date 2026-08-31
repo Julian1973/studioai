@@ -3156,6 +3156,35 @@ function continueCurrentShotToWatch(){
   // later spoken shot without redirecting this Seedance-SFX-only shot away from WATCH.
   openShotOutcome("animation",PSHOT_I);
 }
+async function continueToNextProductionShot(){
+  const shots=pShots(),nextIndex=PSHOT_I+1;
+  if(nextIndex>=shots.length){openStageOutcome("continuity");return;}
+  const next=shots[nextIndex],policy=shotPipelineState(shots,nextIndex);
+  const current=policy.current||{};
+  if(policy.needsKeyframe&&!current.keyframe){
+    // The next shot's SEE brief must be current before its opening candidate is installed.
+    // Keep this as one reviewer action: quietly prepare Cinematography, inherit the
+    // preceding approved landing frame when needed, then stop on SEE for approval.
+    await prepareDirectionThen("cinematography",next.shotId,async()=>{
+      const refreshed=shLedger(next.shotId);
+      const candidate=refreshed.keyframeCandidate;
+      if(candidate){
+        if(!candidate.inputSignature||!candidate.contentHash){
+          shRun("rescreen-keyframe",next.shotId,{afterJob:job=>{
+            if(job&&job.status==="done")openShotOutcome("keyframe",nextIndex);
+          }});
+        }else openShotOutcome("keyframe",nextIndex);
+        return;
+      }
+      shRun("select-previous",next.shotId,{afterJob:job=>{
+        if(job&&job.status==="done")openShotOutcome("keyframe",nextIndex);
+      }});
+    });
+    return;
+  }
+  if(policy.talky&&!current.voice){openShotOutcome("voice",nextIndex);return;}
+  openShotOutcome("animation",nextIndex);
+}
 function focusShotReview(index){
   openShotOutcome("continuity",index);
   setTimeout(()=>{const panel=document.querySelector("#wdecision .deptpanel");if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});},0);
@@ -4951,10 +4980,10 @@ function renderShotStage(mode){
         body=`${keyframeRevisionMedia(m.keyframe,led,s,"APPROVED")}
           <div class="dec-caption" style="margin-top:16px">Replace this opening frame:</div>${shOpeningFrameChoices(tok,s)}`;
         decVersion=`Revision ${kfInfo.revision} · Approved`;
-        const nextKf=shots.findIndex((shot,i)=>i!=PSHOT_I&&(()=>{const state=shotPipelineState(shots,i),cur=state.current||{};return state.needsKeyframe&&!cur.keyframe;})());
-        decActions=[`<span class="dec-caption">${badge("approved")}</span>`,nextKf>=0
-          ?`<button class="btn" onclick="openShotOutcome('keyframe',${nextKf})">Open next unresolved keyframe</button>`
-          :`<button class="btn" onclick="openStageOutcome('animation')">Continue to Animation</button>`];
+        const current=pst.current||{},nextStage=pst.talky&&!current.voice?"voice":"animation";
+        const nextLabel=nextStage==="voice"?"Continue to HEAR":"Continue to WATCH";
+        decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+          `<button class="btn" onclick="openShotOutcome('${nextStage}',PSHOT_I)">${nextLabel}</button>`];
       } else if(pst.kf=="rejected"){
         const rejected=led.keyframeRejected||{},rf=rejected.rejectedFile;
         body=rf?`<div class="kf-current"><div class="kf-current-tag" style="border-color:var(--danger)"><span style="color:var(--danger)">PREVIOUS · REJECTED</span> REVISION ${Math.max(1,kfInfo.revision-1)}</div><img class="zoom pmedia img" data-cap="${_esc(s.shotId)} · rejected revision ${Math.max(1,kfInfo.revision-1)}" src="${BASE}/engine/${_esc(rf)}?v=${MEDIA_V}"/></div><div class="kf-no-current"><b>No current keyframe yet.</b><br>The image above is the rejected revision. Your requested change is: ${_esc(rejected.reason||"Create a corrected opening keyframe.")}</div>`:`<div class="artefact-empty"><div style="color:var(--muted)">The previous revision was rejected. No current keyframe has been created yet.</div></div>`;
@@ -5089,6 +5118,7 @@ function renderShotStage(mode){
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
       decVersion="Approved take";
       decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+        PSHOT_I<shots.length-1?`<button class="btn" onclick="continueToNextProductionShot()">Continue to ${_esc(shots[PSHOT_I+1].shotId)} →</button>`:"",
         `<button class="btn" onclick="openStageOutcome('continuity')">Open Director's Seat</button>`,
         `<button class="btn ghost" onclick="shRefireTake('${tok}')">Refire full take</button>`,
         `<button class="btn ghost" onclick="shEditTake('${tok}',${Number(s.durationSec||0)})">Edit part of take</button>`];
@@ -5997,9 +6027,9 @@ function shOverrideModelLimited(shotId){
 // existing disclosure-modal path, unchanged), upload (a human-supplied file, no generation
 // cost), library (one of THIS shot's own prior artefacts — a past candidate, a rejected
 // take, a superseded approval, or a currently-pending one — re-selected deliberately, no
-// generation cost), and previousFinalFrame (only when the shot is NOT a scene opener — the
-// shot it relays off, once approved+harvested, carried forward as a fresh candidate, no
-// generation cost). Every one of the last three ends at the SAME approval area as
+// generation cost), and previousFinalFrame (for every shot after the first — the preceding
+// approved+harvested landing frame carried forward as a fresh candidate, no generation
+// cost). Every one of the last three ends at the SAME approval area as
 // generation — "Approve" / "Choose another" — selection is never approval.
 function shOpeningFrameChoices(tok,s){
   const refs=SH_REFERENCE_CACHE[refCacheKey(tok)]||{},build=refs.keyframeBuild||{};
@@ -6007,7 +6037,7 @@ function shOpeningFrameChoices(tok,s){
   const conservativeCalls=1;
   const maxCost=build.estimatedMaxUsd!=null?Number(build.estimatedMaxUsd):(fallback==null?null:fallback*conservativeCalls);
   const genCost=maxCost!=null?(" · up to $"+maxCost.toFixed(3)):"";
-  const isOpener=s.sourceType=="opener";
+  const hasPrevious=PSHOT_I>0;
   const buildLabel="Build keyframe";
   return `<div class="ofc">
     <div class="ofc-row"><button class="btn" onclick="openDisclosureModal('keyframe',{shotId:'${_esc(tok)}'})">${_esc(buildLabel+genCost)}</button>
@@ -6015,7 +6045,7 @@ function shOpeningFrameChoices(tok,s){
       <input type="file" id="ofcUpload_${_esc(tok)}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="shOpenFrameUpload('${_esc(tok)}',this)"/></div>
     <details class="ofc-alternatives"><summary>Use an existing image instead</summary><div class="ofc-alternatives-body">
       <div class="ofc-row"><button class="btn ghost" onclick="shOpenFrameLibrary('${_esc(tok)}')">Choose from Asset Library · no generation cost</button></div>
-      ${isOpener?"":`<div class="ofc-row"><button class="btn ghost" onclick="shRun('select-previous','${_esc(tok)}')">Use previous approved final frame · no generation cost</button></div>`}
+      ${hasPrevious?`<div class="ofc-row"><button class="btn ghost" onclick="shRun('select-previous','${_esc(tok)}')">Use previous approved final frame · no generation cost</button></div>`:""}
     </div></details>
   </div>`;
 }

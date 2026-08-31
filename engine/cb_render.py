@@ -5553,9 +5553,10 @@ def rescreen_keyframe_geometry(scene, shot_id, episode="Ep1", log=print):
 #   3. library      — a prior artefact for THIS shot (a past candidate, rejected take,
 #                      superseded approval, or a currently-pending one) the human
 #                      deliberately re-selects, no generation cost, never automatic
-#   4. previousFinalFrame — the previous shot's own approved+harvested final frame, carried
-#                      forward as a fresh candidate for THIS shot (only when this shot is
-#                      NOT a scene opener) — no generation cost
+#   4. previousFinalFrame — the immediately previous shot's own approved+harvested final
+#                      frame, carried forward as a fresh candidate for THIS shot. This is
+#                      available to every shot after the first, including an editorial-cut
+#                      opener that still needs a separate human SEE approval — no cost
 # Every one of 2-4 NEVER calls a generation provider; each only ever COPIES an existing file
 # into a new, immutable, shot-owned candidate path. The result always lands as
 # keyframeCandidate, awaiting the exact same approve/"choose another" decision as a
@@ -5568,6 +5569,19 @@ def _immutable_candidate_copy(src_path, shot_id, episode):
     out = MEDIA / f"{episode}_{shot_id}_keyframe_candidate_{uuid.uuid4().hex[:8]}{ext}"
     shutil.copy2(src_path, out)
     return str(out)
+
+
+def _previous_shot_id_for_opening_frame(pkg, shot):
+    """Return the explicit relay source or the immediate predecessor for a later opener."""
+    if shot.get("sourceShotId"):
+        return shot["sourceShotId"]
+    ordered_shots = list(pkg.get("shots") or [])
+    shot_index = next(
+        (index for index, item in enumerate(ordered_shots)
+         if item.get("shotId") == shot.get("shotId")), -1)
+    if shot_index <= 0:
+        return None
+    return ordered_shots[shot_index - 1].get("shotId")
 
 
 def keyframe_library_for_shot(scene, shot_id, episode="Ep1"):
@@ -5613,8 +5627,8 @@ def select_keyframe_source(scene, shot_id, mode, episode="Ep1", upload_path=None
     unchanged at its own permanent path AND copied to an immutable shot-owned candidate),
     'library' (a copy of one of this shot's own prior artefacts, per keyframe_library_for_shot
     above — the source file there is itself already immutable archive/media, never touched),
-    and 'previousFinalFrame' (only for a non-opener shot — a copy of the shot it relays off,
-    once THAT shot is itself approved+harvested). NEVER calls cb_gen. Refuses if a candidate
+    and 'previousFinalFrame' (for any shot after the scene's first — a copy of the immediately
+    preceding shot once it is approved+harvested). NEVER calls cb_gen. Refuses if a candidate
     is already pending (matching keyframe_shot's own rule — reject it first)."""
     if mode not in ("upload", "library", "previousFinalFrame"):
         raise Refused(f"REFUSED — unknown opening-frame source {mode!r}; must be "
@@ -5659,20 +5673,20 @@ def select_keyframe_source(scene, shot_id, mode, episode="Ep1", upload_path=None
         cand_path = _immutable_candidate_copy(library_path, shot_id, episode)
         source_note = {"source": "library", "libraryOriginal": library_path}
     else:  # previousFinalFrame
-        if shot["sourceType"] == "opener":
-            raise Refused(f"REFUSED — {shot_id} is a scene opener; there is no previous "
-                          f"shot's final frame to use. This choice only applies to a "
-                          f"continuous (relay) shot.")
-        src = _ledger(pkg, shot["sourceShotId"])
+        source_shot_id = _previous_shot_id_for_opening_frame(pkg, shot)
+        if not source_shot_id:
+            raise Refused(f"REFUSED — {shot_id} is the scene's first shot; there is no "
+                          "previous final frame to carry forward")
+        src = _ledger(pkg, source_shot_id)
         harvest = src.get("harvestFrame")
-        fallback = HERE / "media" / "shots" / f"{episode}_{shot['sourceShotId']}_final_frame.png"
+        fallback = HERE / "media" / "shots" / f"{episode}_{source_shot_id}_final_frame.png"
         if not harvest and fallback.is_file():
             harvest = str(fallback)
         if (src.get("status") != "approved" or not harvest) and not fallback.is_file():
-            raise Refused(f"REFUSED — {shot['sourceShotId']} is not approved+harvested yet; "
+            raise Refused(f"REFUSED — {source_shot_id} is not approved+harvested yet; "
                           f"there is no final frame to carry forward")
         cand_path = _immutable_candidate_copy(harvest, shot_id, episode)
-        source_note = {"source": "previousFinalFrame", "sourceShotId": shot["sourceShotId"]}
+        source_note = {"source": "previousFinalFrame", "sourceShotId": source_shot_id}
 
     led["keyframeCandidate"] = {"path": cand_path, "generatedAt": _now(), **source_note}
     _save(pkg, path)

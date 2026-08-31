@@ -1075,6 +1075,17 @@ def test_rough_cut_uses_a_saved_approved_take_bin():
     assert "rough_cut_projection" in SERVER
 
 
+def test_approved_take_flows_to_next_shot_through_inherited_see_frame():
+    assert "async function continueToNextProductionShot()" in APP
+    assert 'prepareDirectionThen("cinematography",next.shotId' in APP
+    assert 'shRun("rescreen-keyframe",next.shotId' in APP
+    assert 'shRun("select-previous",next.shotId' in APP
+    assert 'openShotOutcome("keyframe",nextIndex)' in APP
+    assert "Use previous approved final frame · no generation cost" in APP
+    assert "Continue to HEAR" in APP
+    assert "Continue to WATCH" in APP
+
+
 def test_story_direction_exposes_episode_architecture_and_audience_information():
     for phrase in (
         "storyArchitecture", "Episode story truth", "Theme proved through action",

@@ -1329,7 +1329,10 @@ def install(m):
 
     def select_keyframe(scene, shot_id, mode, episode="Ep1", upload_path=None,
                         library_path=None, reviewed_by="Julian", log=print):
-        current_package(scene, episode)
+        pkg, _ = current_package(scene, episode)
+        # Source selection mutates the ledger. Validate SEE direction before copying or
+        # superseding a candidate so a refused action cannot change production state.
+        current_direction_output(pkg, shot_id, "cinematography")
         result = original["select_keyframe_source"](
             scene, shot_id, mode, episode, upload_path, library_path, reviewed_by, log)
         pkg, path = m.load_pkg(scene, episode); shot = m._shot(pkg, shot_id)
@@ -1366,6 +1369,12 @@ def install(m):
         screening = m.screen_keyframe_conformance(
             pkg, shot, record["path"], scene, episode, log)
         record["conformanceScreening"] = screening
+        # A zero-cost rescreen is also the recovery path for imported candidates whose
+        # earlier selection was interrupted after the file copy. Re-seal the unchanged
+        # file against current SEE inputs so it can return to the human approval screen.
+        record["packageRevision"] = pkg.get("revision")
+        record["inputSignature"] = keyframe_signature(pkg, shot, record, scene, episode)
+        record["contentHash"] = file_sha256(record.get("path"))
         m._save(pkg, path)
         if (ledger.get("keyframeCandidate") is record and
                 record.get("source", "generated") == "generated" and

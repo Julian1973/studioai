@@ -6845,7 +6845,13 @@ def _verify_envelope(auth):
 def _seedance_working_input_signature(pkg, shot, scene, episode="Ep1"):
     """Inputs that make a saved human WATCH prompt current enough to submit."""
     led = _ledger(pkg, shot["shotId"])
-    specialist = _approved_department_output(pkg, shot["shotId"], "animation") or {}
+    try:
+        specialist = _approved_department_output(pkg, shot["shotId"], "animation") or {}
+    except Refused:
+        work, _ = _department_container(
+            pkg, scene, shot["shotId"], "animation", episode)
+        record = work.get("candidate") or work.get("approved") or {}
+        specialist = record.get("output") or {}
     keyframe = led.get("keyframeApproval") or {}
     voice = led.get("voiceApproval") or {}
     refs = []
@@ -6963,12 +6969,13 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
     # the next provider call can be authorised.
     led["pendingSpendAuth"] = None
     work, _ = _department_container(pkg, scene, shot_id, "animation", episode)
-    if work.get("approved"):
+    direction_record = work.get("candidate") or work.get("approved")
+    if direction_record:
         # The working prompt is a validated human override layered on the approved typed
         # direction. Its presence intentionally changes the direct-input signature, so mark
-        # that approved record as the retained baseline instead of making the supported
+        # that current record as the retained baseline instead of making the supported
         # Director-edit workflow immediately report itself stale.
-        work["approved"]["manualCurrentOverride"] = True
+        direction_record["manualCurrentOverride"] = True
     _save(pkg, path)
     log(f"ANIMATION WORKING PROMPT SAVED — {shot_id} (no animation generated)")
     return led["workingSeedancePrompt"]
@@ -6982,9 +6989,10 @@ def restore_seedance_working(scene, shot_id, episode="Ep1", log=print):
     led = _ledger(pkg, shot_id)
     led["workingSeedancePrompt"] = None
     work, _ = _department_container(pkg, scene, shot_id, "animation", episode)
-    if work.get("approved"):
-        work["approved"].pop("manualCurrentOverride", None)
-        work["approved"]["inputSignature"] = _department_input_signature(
+    direction_record = work.get("candidate") or work.get("approved")
+    if direction_record:
+        direction_record.pop("manualCurrentOverride", None)
+        direction_record["inputSignature"] = _department_input_signature(
             pkg, "animation", shot_id, scene, episode)
     _save(pkg, path)
     log(f"ANIMATION WORKING PROMPT RESTORED — {shot_id}: reverted to the approved storyboard's prompt")

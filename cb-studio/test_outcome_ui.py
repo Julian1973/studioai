@@ -4,6 +4,7 @@ from pathlib import Path
 
 APP = (Path(__file__).parent / "app.html").read_text(encoding="utf-8")
 SERVER = (Path(__file__).parent / "serve.py").read_text(encoding="utf-8")
+RENDER = (Path(__file__).parent.parent / "engine" / "cb_render.py").read_text(encoding="utf-8")
 
 
 def test_server_freezes_stable_prewarmed_graph_before_accepting_browser_requests():
@@ -682,3 +683,36 @@ def test_stale_voice_take_cannot_be_approved_against_corrected_words():
     assert "takeMatchesCurrent===false" in APP
     assert "Regenerate corrected performance" in APP
     assert "cannot be approved against the corrected words" in APP
+
+
+def test_fire_uses_durable_department_direction_during_preflight_cache_lag():
+    direction_start = APP.index("function currentProductionDirection")
+    direction_end = APP.index("function directionLabel", direction_start)
+    direction = APP[direction_start:direction_end]
+    assert "const led=shotId?shLedger(shotId):null" in direction
+    assert "work.candidate||work.approved" in direction
+    assert "animationPrompt:output.providerPrompt" in direction
+
+    modal_start = APP.index("function openAnimationConfirmModal")
+    modal_end = APP.index("function openTimingReviewModal", modal_start)
+    modal = APP[modal_start:modal_end]
+    assert 'currentProductionDirection("animation",shotId)' in modal
+
+
+def test_working_prompt_keeps_current_animation_candidate_valid():
+    signature_start = RENDER.index("def _seedance_working_input_signature")
+    signature_end = RENDER.index("def _resolve_seedance_prompt", signature_start)
+    signature = RENDER[signature_start:signature_end]
+    assert "except Refused:" in signature
+    assert 'record = work.get("candidate") or work.get("approved") or {}' in signature
+
+    save_start = RENDER.index("def save_seedance_working")
+    save_end = RENDER.index("def restore_seedance_working", save_start)
+    save = RENDER[save_start:save_end]
+    assert 'direction_record = work.get("candidate") or work.get("approved")' in save
+    assert 'direction_record["manualCurrentOverride"] = True' in save
+
+    restore_start = save_end
+    restore_end = RENDER.index("def save_watch_director_feedback", restore_start)
+    restore = RENDER[restore_start:restore_end]
+    assert 'direction_record.pop("manualCurrentOverride", None)' in restore

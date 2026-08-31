@@ -5251,13 +5251,21 @@ function renderShotStage(mode){
 }
 function currentProductionDirection(stage,shotId){
   const inputs=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs;
-  if(!inputs)return null;
-  if(stage==="look")return inputs.look&&inputs.look.prompt?inputs.look:null;
-  const shot=inputs.shots&&inputs.shots[shotId];
-  if(!shot)return null;
-  if(stage==="cinematography")return shot.keyframePrompt?shot:null;
-  if(stage==="voice")return Array.isArray(shot.voiceLines)&&shot.voiceLines.length?shot:null;
-  if(stage==="animation")return shot.animationPrompt?shot:null;
+  if(inputs){
+    if(stage==="look"&&inputs.look&&inputs.look.prompt)return inputs.look;
+    const shot=inputs.shots&&inputs.shots[shotId];
+    if(stage==="cinematography"&&shot&&shot.keyframePrompt)return shot;
+    if(stage==="voice"&&shot&&Array.isArray(shot.voiceLines)&&shot.voiceLines.length)return shot;
+    if(stage==="animation"&&shot&&shot.animationPrompt)return shot;
+  }
+  // The package is durable authority. A completed specialist job can be current before
+  // the derived preflight cache refreshes; that cache lag must not start preparation again.
+  const led=shotId?shLedger(shotId):null;
+  const work=led&&led.departmentWork&&led.departmentWork[stage];
+  const record=work&&(work.candidate||work.approved),output=record&&record.output;
+  if(stage==="cinematography"&&output&&(output.providerPrompt||output.keyframePrompt))return output;
+  if(stage==="voice"&&output&&Array.isArray(output.lines))return {...output,voiceLines:output.lines};
+  if(stage==="animation"&&output&&output.providerPrompt)return {...output,animationPrompt:output.providerPrompt};
   return null;
 }
 function directionLabel(stage){
@@ -5475,7 +5483,7 @@ function openAnimationConfirmModal(shotId){
   const led=shLedger(shotId); const auth=led&&led.pendingSpendAuth;
   if(!auth||!auth.token){ alert("No disclosure on record yet — click Generate first."); return; }
   const d=auth.disclosure||{};
-  const inp=SH_PREFLIGHT&&SH_PREFLIGHT.productionInputs&&SH_PREFLIGHT.productionInputs.shots&&SH_PREFLIGHT.productionInputs.shots[shotId];
+  const inp=currentProductionDirection("animation",shotId);
   if(!inp||!inp.animationPrompt){alert("Animation direction is still being prepared.");return;}
   const pick=(...ks)=>{for(const k of ks) if(d[k]!=null&&d[k]!=="") return d[k]; return "?";};
   const modelId=pick("providerModelId");

@@ -1155,7 +1155,7 @@ def test_unavailable_keyframe_identity_screen_preserves_candidate_for_human_acce
     assert len(prov.image_calls) == 2
 
 
-def test_watch_refuses_human_accepted_keyframe_with_physical_stage_failure(
+def test_watch_honors_human_accepted_keyframe_with_physical_stage_warning(
         world, monkeypatch):
     def physical_stage_failure(context=None, images=None, **kwargs):
         expected = list((context or {}).get("expectedCharacters") or ["Fuzzby", "Zenny"])
@@ -1208,12 +1208,40 @@ def test_watch_refuses_human_accepted_keyframe_with_physical_stage_failure(
     approval = _led()["1.B1.S1"]["keyframeApproval"]
     assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
 
+    # Approval is persisted in the package. Both UI state derivation and the fire gate
+    # consume this same record after a fresh load, so a reload cannot resurrect the warning.
+    reloaded_pkg, _ = R.load_pkg("9", "EpT")
+    reloaded_approval = R._ledger(
+        reloaded_pkg, "1.B1.S1")["keyframeApproval"]
+    assert R._keyframe_stage_contract_report(reloaded_approval) == {
+        "ready": True,
+        "reason": None,
+    }
+
     # The human accepted the exact advisory during SEE. WATCH must not demand a
     # second hidden approval for the same automated composition warning.
     with pytest.raises(R.Refused) as exc:
         R.fire_shot("9", "1.B1.S1", "EpT", candidates=1,
                     log=lambda *a, **k: None)
     assert "SEE frame does not prove the physical stage contract" not in str(exc.value)
+
+
+def test_watch_blocks_unapproved_physical_stage_warning(world):
+    record = {
+        "approved": True,
+        "conformanceScreening": {
+            "status": "block",
+            "reason": "Opening geography and physical staging fail.",
+            "review": {
+                "summary": "The prop placement does not match the authored stage.",
+                "recommendedCorrection": "Correct the opening frame before WATCH.",
+            },
+        },
+    }
+
+    report = R._keyframe_stage_contract_report(record)
+    assert report["ready"] is False
+    assert report["reason"] == "Opening geography and physical staging fail."
 
 
 def test_watch_allows_explicit_stage_contract_override(world, monkeypatch):

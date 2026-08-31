@@ -90,3 +90,30 @@ def test_render_path_uses_the_same_checker_and_timing_inputs():
             timing_beats=specialist["timingBeats"],
         )
     )
+
+
+def test_typed_non_travel_beats_override_incidental_travel_wording():
+    prompt = """Shot 1: Camera finishes travelling deep into a stationary doorway reveal.
+Bo and Keen remain planted on the stone floor. End state: Both hold at the threshold.
+No music."""
+
+    flight = standard.preflight(
+        prompt,
+        duration_sec=13,
+        timing_beats=[{"type": "reveal", "count": 1}, {"type": "hold", "count": 1}],
+    )
+
+    assert not any(item["rule"] == "R9" for item in flight["findings"])
+
+
+def test_typed_travel_beat_requires_complete_traversal_grammar():
+    prompt = """Shot 1: Bo crosses the room. End state: Bo reaches Keen.
+No music."""
+
+    flight = standard.preflight(
+        prompt,
+        duration_sec=13,
+        timing_beats=[{"type": "travel", "count": 1}],
+    )
+
+    assert any(item["rule"] == "R9" for item in flight["findings"])

@@ -964,6 +964,54 @@ def test_character_reference_label_accepts_authority_first_contracts():
     assert D._character_reference_label("Guide's exact identity and turnaround.") == "Guide"
 
 
+def test_animation_compiler_ignores_legacy_gag_marker_without_approved_clock():
+    shot = {
+        "shotId": "S3.SH5",
+        "durationSec": 8,
+        "charactersInFrame": ["Bo", "Keen"],
+        "dialogueLines": [{
+            "speaker": "Keen", "exactText": "See? Nothing.",
+            "delivery": "light and kind", "startSec": 2.0, "endSec": 3.2,
+        }],
+    }
+    direction = {
+        "durationSec": 8,
+        "generationGoal": "Keen's harmless self-joke gives Bo room to soften.",
+        "creativeTranslation": {"interpretation": {}, "gagClocks": []},
+        "referenceContract": [{
+            "assetTag": "@Audio1", "role": "audio",
+            "controls": "the approved voice performance",
+        }],
+        "shotPlan": [{
+            "shotNumber": 1,
+            "framingLensAndCamera": "Hold both faces in a warm interior two-shot.",
+            "causalAction": "Keen presents his still tail while Bo watches.",
+            "observablePerformance": "Keen stays playful and Bo begins to relax.",
+            "landingImage": "Bo remains beside Keen with a cautious almost-smile.",
+            "dialogueLineIndexes": [1],
+            "gagBeatIds": ["3.B5.gag1"],
+        }],
+        "stagePlan": [{
+            "stageNumber": 1, "beatIds": ["3.B5"],
+            "initialOrCarriedState": "Bo and Keen begin together inside the hollow.",
+            "cause": "Keen redirects attention onto his own still tail.",
+            "primaryEvent": "Keen presents his tail and Bo watches.",
+            "emotionOrCameraAnalysis": "The shared frame makes the kindness readable.",
+            "observableEndState": "Bo remains beside Keen with a cautious almost-smile.",
+        }],
+        "consistencyContract": ["Keep Bo and Keen together inside the hollow."],
+        "geography": ["The doorway remains beyond them as their destination."],
+        "surgicalSafeguards": [],
+        "continuityFinish": "Bo remains beside Keen with a cautious almost-smile.",
+        "audioContract": "Use @Audio1 unchanged.",
+    }
+
+    prompt = D.compile_animation_provider_prompt(shot, direction)
+
+    assert prompt.count("{See? Nothing.}") == 1
+    assert "3.B5.gag1" not in prompt
+
+
 def test_creative_translation_derives_redundant_gag_count():
     payload = {
         "interpretation": {

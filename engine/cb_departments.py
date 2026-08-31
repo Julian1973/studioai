@@ -2071,10 +2071,11 @@ def compile_animation_provider_prompt(shot, direction):
             for beat_id in item.get("gagBeatIds") or []:
                 clock = gag_clocks.get(str(beat_id))
                 if not clock:
-                    # Silent visual shots may carry a stale inherited gag marker;
-                    # without a defined gag clock it cannot contribute audio/timing
-                    # and must not block an otherwise valid animation prompt.
-                    if not gag_clocks and not dialogue_lines:
+                    # A specialist may inherit a legacy gag marker even when the
+                    # approved shot defines no gag clocks. It contributes no timing
+                    # contract in that case, regardless of whether the shot has
+                    # dialogue, so it must not block an otherwise valid prompt.
+                    if not gag_clocks:
                         continue
                     raise ValueError(
                         f"Internal shot {number} references unknown gag beat {beat_id}")

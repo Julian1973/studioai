@@ -1242,6 +1242,33 @@ def creative_translation_report(shot, direction, provider_prompt=None):
     }
 
 
+def carry_approved_gag_clock_text(shot, direction):
+    """Restore storyboard-locked gag wording before provider prompt compilation.
+
+    Animation owns staging and performance translation, while the approved setup,
+    disruption, recovery hold and button remain immutable story facts. Structured model
+    output may paraphrase those fields despite being instructed to copy them. Normalize
+    that harmless drift here and let the existing report continue to reject missing,
+    reordered or otherwise weakened gag contracts.
+    """
+    approved_by_code = {
+        str(item.get("beatCode") or ""): item
+        for item in (shot.get("comedyContractsApproved") or [])
+        if item.get("mode") in {"SMALL", "BIG"}
+    }
+    translation = getattr(direction, "creativeTranslation", None)
+    for clock in list(getattr(translation, "gagClocks", None) or []):
+        approved = approved_by_code.get(str(clock.beatCode or ""))
+        if not approved:
+            continue
+        clock.mode = approved["mode"]
+        clock.setup = approved["setup"]
+        clock.impact = approved["disruption"]
+        clock.recoveryHold = approved["hold"]
+        clock.button = approved["button"]
+    return direction
+
+
 def prepare_voice(context, locked_lines, *, log=print):
     locked_lines = cb_audio_authority.route_lines(locked_lines)["spokenDialogue"]
     if not locked_lines:
@@ -2456,6 +2483,7 @@ def prepare_animation(context, images, *, log=print):
         AnimationDirection, label="department_animation", log=log, images=images)
 
     result = enforce_aerial_camera_contract(result)
+    result = carry_approved_gag_clock_text(shot, result)
 
     if result.durationSec != duration:
         raise RuntimeError(

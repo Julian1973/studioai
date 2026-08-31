@@ -682,6 +682,36 @@ def test_creative_translation_preserves_approved_gag_clock_and_provider_action()
     assert "providerAction is absent" in report["errors"][0]
 
 
+def test_animation_carries_approved_gag_wording_over_model_paraphrase():
+    approved = {
+        "beatCode": "2.B2", "mode": "BIG",
+        "setup": "Keen's sneeze interrupts Aida's still ritual circle.",
+        "disruption": "The sneeze opens the circle into shared movement.",
+        "hold": "Aida includes Keen without losing her grounded calm.",
+        "button": "Aida's final blessing restores affectionate calm.",
+    }
+    clock = D.GagClockDirection(
+        beatCode="2.B2", mode="BIG", setup="A sneeze happens.",
+        anticipation="Keen's breath catches visibly.", impact="Aida looks up.",
+        reaction="Aida turns warmly toward Keen.",
+        recoveryHold="They pause together.", recoveryHoldSec=2.0,
+        button="The scene ends.",
+        providerAction="Keen sneezes and Aida turns toward him with a warm smile.")
+    direction = SimpleNamespace(
+        creativeTranslation=SimpleNamespace(gagClocks=[clock]))
+
+    D.carry_approved_gag_clock_text(
+        {"comedyContractsApproved": [approved]}, direction)
+
+    assert clock.mode == "BIG"
+    assert clock.setup == approved["setup"]
+    assert clock.impact == approved["disruption"]
+    assert clock.recoveryHold == approved["hold"]
+    assert clock.button == approved["button"]
+    assert clock.anticipation == "Keen's breath catches visibly."
+    assert clock.providerAction.startswith("Keen sneezes")
+
+
 def test_big_gag_requires_numeric_two_second_landing():
     common = {
         "beatCode": "1.B1", "mode": "BIG", "setup": "Fuzzby enters too fast.",

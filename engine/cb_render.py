@@ -6578,7 +6578,15 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
                 for line in data["dialogueLines"])
         data["continuityOut"] = complete_validation_continuity(
             data.get("continuityOut"), "final")
-        if data.get("sourceType") == "relay":
+        if target_shot_id and is_first and data.get("sourceType") == "relay":
+            # This validator receives one current production unit at disclosure time.
+            # _anchor_for has already proved the real predecessor's human approval and
+            # harvested bytes, so represent the target as the validation slice's opener
+            # instead of revalidating completed upstream story ownership.
+            data["sourceType"] = "opener"
+            data["sourceShotId"] = None
+            data.pop("continuityIn", None)
+        elif data.get("sourceType") == "relay":
             data["continuityIn"] = complete_validation_continuity(
                 data.get("continuityIn"), "starting")
         elif is_first and "continuityIn" in data:
@@ -6594,20 +6602,34 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
         target = by_id.get(target_shot_id)
         if not target:
             raise Refused(f"REFUSED — {target_shot_id} is not active in the current package")
-        # Validate the complete active ancestry so a relay target still has an opener
-        # and every carried continuity state in the design presented to the validator.
-        ancestry = []
-        cursor = target
-        seen_ids = set()
-        while cursor and cursor.get("shotId") not in seen_ids:
-            ancestry.append(cursor)
-            seen_ids.add(cursor.get("shotId"))
-            source_id = cursor.get("sourceShotId")
-            cursor = by_id.get(source_id) if source_id else None
-        current_shots = list(reversed(ancestry))
+        # Validate only the unit being disclosed. Completed ancestors are immutable media
+        # handoffs; their approval and harvested bytes were already enforced by _anchor_for.
+        # Revalidating their old beat ownership after a downstream edit is the blanket-reset
+        # failure this shot-scoped path exists to prevent.
+        current_shots = [target]
     selected_codes = list(dict.fromkeys(
         code for rec in current_shots for code in owned_beat_codes(rec)))
-    beats = [source_by_code[code] for code in selected_codes if code in source_by_code]
+    beats = [json.loads(json.dumps(source_by_code[code]))
+             for code in selected_codes if code in source_by_code]
+
+    if target_shot_id:
+        # BIG-gag staging is owned by exactly one production unit. A later unit may
+        # legitimately continue the same source beat after that physical gag has already
+        # landed in approved media. Keep the source event for dialogue/action validation,
+        # while requiring a new BIG staging contract only when this target owns one.
+        target_stage_codes = {
+            str(item.get("beatCode") or "")
+            for item in (
+                list(target.get("physicalStagings") or []) +
+                ([target.get("physicalStaging")]
+                 if isinstance(target.get("physicalStaging"), dict) else [])
+            )
+            if isinstance(item, dict)
+        }
+        for beat in beats:
+            if (str(beat.get("comedyMode") or "").upper() == "BIG" and
+                    str(beat.get("beatCode") or "") not in target_stage_codes):
+                beat["comedyMode"] = "SMALL"
 
     # A shot-level voice approval can intentionally replace the dialogue wording from
     # an older beat-package snapshot. Keep this reconciliation narrow: it applies only
@@ -6626,37 +6648,30 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
             # but using it here dropped a pure sneeze and stripped SFX text from mixed lines,
             # producing false UNKNOWN/PAYLOAD_CHANGED lineage errors at WATCH Fire.
             target_lines = list(target_rec.get("dialogueLines") or [])
-            for beat in beats:
-                if beat.get("beatCode") not in target_codes:
-                    continue
+            target_beats = [beat for beat in beats if beat.get("beatCode") in target_codes]
+            for beat_index, beat in enumerate(target_beats):
                 original_cuts = list(beat.get("cuts") or [])
                 action_cuts = [cut for cut in original_cuts if not (cut.get("dialogue") or "").strip()]
-                original_occurrences = {
-                    cut.get("dialogueOccurrenceId") for cut in original_cuts
-                    if cut.get("dialogueOccurrenceId")
-                }
-                if not original_occurrences:
-                    # Pre-typed source packages have no occurrence IDs; preserve their
-                    # exact dialogue instead of treating every line as unassigned.
-                    continue
                 voice_cuts = []
-                for index, line in enumerate(target_lines, start=1):
-                    if line.get("dialogueOccurrenceId") not in original_occurrences:
-                        continue
-                    text = str(line.get("exactText") or line.get("text") or "").strip()
-                    speaker = str(line.get("speaker") or "").strip()
-                    if not text or not speaker:
-                        continue
-                    voice_cuts.append({
-                        "n": index,
-                        "sourceEventId": line.get("sourceEventId"),
-                        "sourceEventType": "approved-shot-voice",
-                        "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
-                        "speaker": speaker,
-                        "exactText": text,
-                        "dialogue": f"{speaker}: {text}",
-                        "action": None,
-                    })
+                # A current HEAR approval is the exact shot-level dialogue bundle. Put it
+                # once on the first owned source beat even when a cleaned script edit has
+                # changed occurrence IDs or collapsed an older multi-beat split.
+                if beat_index == 0:
+                    for index, line in enumerate(target_lines, start=1):
+                        text = str(line.get("exactText") or line.get("text") or "").strip()
+                        speaker = str(line.get("speaker") or "").strip()
+                        if not text or not speaker:
+                            continue
+                        voice_cuts.append({
+                            "n": index,
+                            "sourceEventId": line.get("sourceEventId"),
+                            "sourceEventType": "approved-shot-voice",
+                            "dialogueOccurrenceId": line.get("dialogueOccurrenceId"),
+                            "speaker": speaker,
+                            "exactText": text,
+                            "dialogue": f"{speaker}: {text}",
+                            "action": None,
+                        })
                 beat["cuts"] = voice_cuts + action_cuts
                 beat["dialogueOccurrenceIds"] = [
                     cut["dialogueOccurrenceId"] for cut in voice_cuts
@@ -6672,7 +6687,14 @@ def _fresh_validation(pkg, episode, target_shot_id=None):
         for beat in beats:
             source_cuts = list(beat.get("cuts") or [])
             dialogue_cuts = [cut for cut in source_cuts if (cut.get("dialogue") or "").strip()]
-            if not dialogue_cuts or not target_pairs:
+            if not dialogue_cuts:
+                continue
+            if not target_pairs:
+                beat["cuts"] = [
+                    cut for cut in source_cuts
+                    if not (cut.get("dialogue") or "").strip()
+                ]
+                beat["dialogueOccurrenceIds"] = []
                 continue
             filtered = []
             remaining = list(target_pairs)

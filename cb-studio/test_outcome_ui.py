@@ -620,6 +620,16 @@ def test_keyframe_replacement_updates_inline_without_leaving_the_review_surface(
     assert 'preserveView:true,progressLabel:"Moving the current revision to History"' in APP
 
 
+def test_keyframe_screen_keeps_scene_plate_and_opening_frame_distinct():
+    assert 'function visualAnchorPairHTML(media)' in APP
+    assert 'aria-label="Scene plate and opening keyframe"' in APP
+    assert '1 · Scene plate' in APP
+    assert 'The world and lighting' in APP
+    assert '2 · Opening keyframe' in APP
+    assert 'Characters and first composition' in APP
+    assert 'mode==="keyframe"?visualAnchorPairHTML(m):""' in APP
+
+
 def test_stale_voice_take_cannot_be_approved_against_corrected_words():
     assert "takeMatchesCurrent===false" in APP
     assert "Regenerate corrected performance" in APP

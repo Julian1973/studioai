@@ -267,6 +267,13 @@ def test_fire_prepares_internal_direction_then_returns_to_the_visible_outcome():
     assert "Creative direction" in APP
     assert "Firing floor:" in APP
     assert "No critical failures." in APP
+    assert "function fireReferenceStripHTML(shotId,auth)" in APP
+    assert "References sent to Seedance" in APP
+    assert "Exact upload order locked to this paid request" in APP
+    assert '((auth||{}).envelope||{}).references' in APP
+    assert '${referenceStrip}' in APP
+    assert ".fire-reference-grid{display:grid" in APP
+    assert ".fire-reference-grid{grid-template-columns:repeat(2" in APP
     assert 'if(!confirm("PAID BATCH' not in APP
     assert "✓ Approve revision" in APP
     assert "Iterate batch" in APP

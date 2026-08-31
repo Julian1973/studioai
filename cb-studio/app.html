@@ -462,6 +462,15 @@ img.zoom:hover{filter:brightness(1.08)}
 .fire-score-fill{height:100%;background:var(--ok)}
 .fire-score-meta{margin-top:7px;font-size:11.5px;color:var(--hint);line-height:1.45}
 .fire-score-failures{margin-top:10px;padding:10px;border-left:3px solid var(--danger);background:var(--dangerbg);font-size:12px;color:var(--text)}
+.fire-reference-panel{margin-top:14px;padding:14px;border:1px solid var(--line);background:var(--surface2);border-radius:8px}
+.fire-reference-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
+.fire-reference-head b{display:block;font-size:13px}.fire-reference-head span{display:block;margin-top:3px;color:var(--hint);font-size:11px;line-height:1.4}
+.fire-reference-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.fire-reference-card{min-width:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.fire-reference-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#090b10}
+.fire-reference-copy{padding:8px}.fire-reference-slot{color:var(--ok);font-size:10px;font-weight:750;text-transform:uppercase}
+.fire-reference-role{margin-top:3px;color:var(--ink);font-size:11.5px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.fire-reference-file{margin-top:3px;color:var(--hint);font-size:9.5px;line-height:1.3;overflow-wrap:anywhere}
 .disc-k{color:var(--muted)}
 .disc-v{color:var(--ink);font-weight:600;text-align:right}
 
@@ -902,6 +911,7 @@ img,video{max-width:100%}
   .disc-v{text-align:left}
   .fire-score-grid{grid-template-columns:minmax(0,1fr)}
   .fire-scorecard-head{align-items:flex-start}
+  .fire-reference-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cbeat{align-items:flex-start;flex-wrap:wrap}
   .cbeat .cbact{flex-basis:calc(100% - 90px);white-space:normal}
   #toast{left:max(12px,env(safe-area-inset-left))!important;right:max(12px,env(safe-area-inset-right))!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
@@ -5191,6 +5201,35 @@ async function openDisclosureModal(kind,ctx){
   document.getElementById("modal").classList.add("show");
 }
 function _confirmDisclosure(){ if(_PENDING_CONFIRM)_PENDING_CONFIRM(); _PENDING_CONFIRM=null; }
+function fireReferencePathUrl(pathValue){
+  const path=String(pathValue||"");
+  const roots=["/engine/media/","/cb-seed/assets/","/projects/"];
+  for(const root of roots){
+    const index=path.indexOf(root);
+    if(index>=0)return root+path.slice(index+root.length).split("/").map(encodeURIComponent).join("/");
+  }
+  return "";
+}
+function fireReferenceStripHTML(shotId,auth){
+  const cached=SH_REFERENCE_CACHE[refCacheKey(shotId)]||{};
+  let refs=((((cached.animation||{}).references)||[]).filter(item=>item&&item.kind!=="audio"&&item.url));
+  if(!refs.length){
+    refs=((((auth||{}).envelope||{}).references)||[]).map(item=>({
+      ...item,
+      url:fireReferencePathUrl(item.path),
+      fileName:String(item.path||"").split("/").pop()
+    })).filter(item=>item.url);
+  }
+  if(!refs.length)return `<section class="fire-reference-panel" aria-label="References sent to Seedance"><div class="fire-reference-head"><div><b>References sent to Seedance</b><span>The sealed request contains no displayable image references.</span></div></div></section>`;
+  const cards=refs.map((item,index)=>{
+    const slot=item.slot||`@图${index+1}`,identity=item.identity||{};
+    const role=(item.role||"Reference")+(identity.view||item.view?` · ${identity.view||item.view} view`:"");
+    const fileName=item.fileName||String(item.path||"").split("/").pop()||"";
+    const caption=refSlotLabel(slot)+" · "+role;
+    return `<article class="fire-reference-card"><img class="zoom" data-cap="${_esc(caption)}" src="${BASE}${_esc(item.url)}?v=${MEDIA_V}" alt="${_esc(role)}" loading="eager"><div class="fire-reference-copy"><div class="fire-reference-slot">${_esc(refSlotLabel(slot))}</div><div class="fire-reference-role">${_esc(role)}</div><div class="fire-reference-file">${_esc(fileName)}</div></div></article>`;
+  }).join("");
+  return `<section class="fire-reference-panel" aria-label="References sent to Seedance"><div class="fire-reference-head"><div><b>References sent to Seedance</b><span>Exact upload order locked to this paid request. Click any image to inspect it.</span></div><span>${refs.length} image${refs.length===1?"":"s"}</span></div><div class="fire-reference-grid">${cards}</div></section>`;
+}
 function openAnimationConfirmModal(shotId){
   const led=shLedger(shotId); const auth=led&&led.pendingSpendAuth;
   if(!auth||!auth.token){ alert("No disclosure on record yet — click Generate first."); return; }
@@ -5227,9 +5266,11 @@ function openAnimationConfirmModal(shotId){
     ["Cost per candidate","$"+pick("costPerCandidateUsd","costPerCandidate","perCandidate","candidateCost")],
     ["Maximum cost","$"+pick("maxBatchCostUsd","maxBatchCost","maxCost","batchCost")],
     ["Downstream work","Nothing else will run"]];
+  const referenceStrip=fireReferenceStripHTML(shotId,auth);
   document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button>
     <h3>Generate animation candidates</h3>
     ${scorecard}
+    ${referenceStrip}
     <div class="disc-rows">${rows.map(([k,v])=>`<div class="disc-row"><span class="disc-k">${_esc(k)}</span><span class="disc-v">${_esc(String(v))}</span></div>`).join("")}</div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
       <button class="btn ghost" onclick="closeM()">Cancel</button>

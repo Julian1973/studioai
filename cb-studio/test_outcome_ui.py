@@ -318,6 +318,18 @@ def test_hear_keeps_the_audio_outcome_prominent_before_and_after_generation():
     assert '<audio controls preload="metadata"' in APP
 
 
+def test_completed_audio_sits_between_progress_and_scene_shots():
+    rail = '<div id="railwrap">${renderStageRail()}</div>'
+    audio = '<div id="sceneaudio">${completedSceneAudioHTML()}</div>'
+    shots = '<div id="shotoverview">${sceneShotOverviewHTML()}</div>'
+    assert rail in APP and audio in APP and shots in APP
+    assert APP.index(rail) < APP.index(audio) < APP.index(shots)
+    assert 'class="scene-audio-strip"' in APP
+    assert 'if(!media.vo)return ""' in APP
+    assert "openStageOutcome('voice')" in APP
+    assert "sceneAudio.innerHTML=completedSceneAudioHTML()" in APP
+
+
 def test_current_shot_is_visually_unmistakable_and_accessible():
     assert "box-shadow:0 0 0 4px" in APP
     assert "scene-shot-current" in APP
@@ -425,6 +437,13 @@ def test_identity_screening_keeps_the_keyframe_visible_for_review():
     assert 'hard canon, reference, lineage and file-integrity checks' in APP.lower()
     assert '>Reject / Discuss</button>' in APP
     assert 'class="review-warning"' in APP
+
+
+def test_human_keyframe_approval_is_the_single_visible_stage_decision():
+    safety = (Path(__file__).parent.parent / "engine" / "cb_safety.py").read_text()
+    assert 'advisory = record.get("conformanceAdvisoryDecision") or {}' in safety
+    assert 'if advisory.get("acceptedBy"):' in safety
+    assert "Requiring a second hidden override" in safety
 
 
 def test_see_makes_revision_lineage_and_current_decision_explicit():

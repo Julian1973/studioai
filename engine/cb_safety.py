@@ -1512,12 +1512,16 @@ def install(m):
     def keyframe_stage_contract_report(record):
         """WATCH gate: SEE is physical stage evidence, not just a pretty frame.
 
-        A Director may still accept soft automated advice, but WATCH must not spend when
-        the accepted SEE frame already failed the physical relationship the render depends on.
-        Seedance will generally preserve the opening frame's causality over prompt text.
+        Automated stage review remains useful evidence, but an explicit human approval of
+        that exact warning is the production decision. Requiring a second hidden override
+        after approval makes SEE appear complete while WATCH still refuses the same frame.
+        File integrity, input lineage, canon and reference checks remain hard elsewhere.
         """
         override = record.get("stageContractOverride") or {}
         if override.get("acceptedBy"):
+            return {"ready": True, "reason": None}
+        advisory = record.get("conformanceAdvisoryDecision") or {}
+        if advisory.get("acceptedBy"):
             return {"ready": True, "reason": None}
         screening = record.get("conformanceScreening") or {}
         status = str(screening.get("status") or "").strip().lower()

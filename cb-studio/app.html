@@ -992,6 +992,8 @@ body{background:var(--bg);color:var(--ink)}
 .scene-shot-overview-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
 .scene-shot-overview-head b{font-size:13px}.scene-shot-overview-head span{font-size:11px;color:var(--muted)}
 .scene-shot-overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:10px}
+.scene-audio-strip{display:grid;grid-template-columns:minmax(190px,.42fr) minmax(280px,1fr) auto;align-items:center;gap:14px;margin:0 0 14px;padding:11px 12px;border:1px solid color-mix(in srgb,var(--ok) 42%,var(--line));border-left:4px solid var(--ok);border-radius:7px;background:color-mix(in srgb,var(--surface) 92%,var(--okbg))}
+.scene-audio-strip-copy{min-width:0}.scene-audio-strip-copy b,.scene-audio-strip-copy span{display:block}.scene-audio-strip-copy b{font-size:12px;color:var(--ink)}.scene-audio-strip-copy span{margin-top:3px;color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scene-audio-strip-state{color:var(--ok);font-weight:800;text-transform:uppercase}.scene-audio-strip audio{display:block;width:100%;min-width:0;height:38px}.scene-audio-strip .btn{min-width:112px;white-space:nowrap}
 .scene-shot-card{display:grid;grid-template-columns:112px minmax(0,1fr);gap:11px;text-align:left;width:100%;padding:0;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);overflow:hidden;cursor:pointer;min-height:118px}
 .scene-shot-card:hover{border-color:var(--brand)}.scene-shot-card.current{position:relative;border-color:var(--brand);background:var(--brandbg);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 78%,transparent),0 10px 28px rgba(0,0,0,.32),inset 5px 0 0 var(--brand)}.scene-shot-card.current:focus-visible{outline:3px solid var(--ink);outline-offset:6px}.scene-shot-current{display:inline-flex;align-items:center;width:max-content;padding:4px 7px;border-radius:4px;background:var(--brand);color:#140d20;font-size:9px;font-weight:900;letter-spacing:0;text-transform:uppercase}
 .scene-shot-thumb{position:relative;background:#090b10;min-height:118px;overflow:hidden}
@@ -1037,7 +1039,7 @@ body{background:var(--bg);color:var(--ink)}
   .pshotnav .btn:first-child::after{content:'\2190';font-size:20px}
   .pshotnav .btn:last-child::after{content:'\2192';font-size:20px}
   .pshotnav .cnt{font-size:11px}
-  .scene-shot-overview{padding:10px;margin-bottom:12px}.scene-shot-overview-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}.scene-shot-card{grid-template-columns:92px minmax(190px,1fr);min-width:min(86vw,350px);scroll-snap-align:start}.scene-shot-thumb{min-height:112px}
+  .scene-audio-strip{grid-template-columns:minmax(0,1fr);gap:9px;padding:10px}.scene-audio-strip .btn{width:100%;min-height:44px}.scene-shot-overview{padding:10px;margin-bottom:12px}.scene-shot-overview-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}.scene-shot-card{grid-template-columns:92px minmax(190px,1fr);min-width:min(86vw,350px);scroll-snap-align:start}.scene-shot-thumb{min-height:112px}
   .watch-stage{gap:8px}
   .watch-screen-head{padding:8px 9px;font-size:10px}
   .watch-waiting{padding:18px 12px}.watch-waiting small{font-size:11px}
@@ -3267,6 +3269,22 @@ function sceneShotOverviewHTML(){
   return `<section class="scene-shot-overview" aria-label="Scene shot breakdown"><div class="scene-shot-overview-head"><b>Scene ${_esc(SH_SC)} · ${shots.length} production shot${shots.length===1?'':'s'}</b><span>Select a shot to review its full Direction, See, Hear or Watch package</span></div><div class="scene-shot-overview-grid">${cards}</div></section>`;
 }
 
+function completedSceneAudioHTML(){
+  const shots=pShots(),shot=shots[PSHOT_I];
+  if(!shot)return "";
+  const media=shMedia(shot.shotId)||{};
+  if(!media.vo)return "";
+  const ledger=shLedger(shot.shotId)||{};
+  const revision=shotRevision("voice",ledger);
+  const policy=shotPipelineState(shots,PSHOT_I),approved=!!(policy.current&&policy.current.voice);
+  const state=approved?"Approved":"Ready for review";
+  return `<section class="scene-audio-strip" aria-label="Completed voice performance for ${_esc(shot.shotId)}">
+    <div class="scene-audio-strip-copy"><b>${_esc(shot.shotId)} · Voice revision ${revision}</b><span><span class="scene-audio-strip-state">${_esc(state)}</span> · ElevenLabs v3 dialogue and mouth timing</span></div>
+    <audio controls preload="metadata" onloadedmetadata="mediaDurationLoaded(this)" src="${BASE}${_esc(media.vo)}?v=${MEDIA_V}"></audio>
+    <button type="button" class="btn ghost" onclick="openStageOutcome('voice')">Review HEAR</button>
+  </section>`;
+}
+
 async function renderControl(){
   const view=document.getElementById("view");
   view.innerHTML=`<div class="coming">Loading scene…</div>`;
@@ -3279,6 +3297,7 @@ async function renderControl(){
     </div>
     <div id="jobbanner"></div>
     <div id="railwrap">${renderStageRail()}</div>
+    <div id="sceneaudio">${completedSceneAudioHTML()}</div>
     <div id="shotoverview">${sceneShotOverviewHTML()}</div>
     <div id="workspace" class="workspace"></div>
     <details class="production-context"><summary>
@@ -3521,6 +3540,7 @@ async function renderWorkspaceBody(){
   // early, unconditionally, so it still fires even on this function's own early returns below.
   _syncHash();
   document.getElementById("railwrap").innerHTML=renderStageRail();
+  const sceneAudio=document.getElementById("sceneaudio");if(sceneAudio)sceneAudio.innerHTML=completedSceneAudioHTML();
   const overview=document.getElementById("shotoverview");if(overview)overview.innerHTML=sceneShotOverviewHTML();
   renderJobBanner();
   const stage=pFocusedStage();

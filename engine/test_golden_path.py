@@ -1208,9 +1208,12 @@ def test_watch_refuses_human_accepted_keyframe_with_physical_stage_failure(
     approval = _led()["1.B1.S1"]["keyframeApproval"]
     assert approval["conformanceAdvisoryDecision"]["acceptedBy"] == "TestReviewer"
 
-    with pytest.raises(R.Refused, match="SEE frame does not prove the physical stage contract"):
+    # The human accepted the exact advisory during SEE. WATCH must not demand a
+    # second hidden approval for the same automated composition warning.
+    with pytest.raises(R.Refused) as exc:
         R.fire_shot("9", "1.B1.S1", "EpT", candidates=1,
                     log=lambda *a, **k: None)
+    assert "SEE frame does not prove the physical stage contract" not in str(exc.value)
 
 
 def test_watch_allows_explicit_stage_contract_override(world, monkeypatch):

@@ -1497,14 +1497,15 @@ def _expose_session_shot_media(session, media):
     return session
 
 
-def rough_cut_projection(episode="Ep1"):
-    """Browser-safe projection of the persistent episode edit decision list."""
+def rough_cut_projection(episode="Ep1", scene=None):
+    """Browser-safe projection of an episode or scene edit decision list."""
     import cb_rough_cut
-    state = cb_rough_cut.status(episode)
+    state = cb_rough_cut.scene_status(episode, scene) if scene else cb_rough_cut.status(episode)
     for collection in (state.get("available") or [], state.get("sequence") or []):
         for shot in collection:
             approved_take = shot.pop("approvedTake", None)
             shot["url"] = _url_from_abs(approved_take) if approved_take else None
+            shot.pop("dialogueLines", None)
     return state
 
 
@@ -2707,10 +2708,11 @@ class H(http.server.SimpleHTTPRequestHandler):
             from urllib.parse import urlparse, parse_qs
             q = parse_qs(urlparse(self.path).query)
             ep = (q.get("episode") or ["Ep1"])[0]
-            if not _SHOT_TOKEN.match(ep):
-                return self._json(400, {"error": "valid episode required"})
+            scene = (q.get("scene") or [None])[0]
+            if not _SHOT_TOKEN.match(ep) or (scene and not _SHOT_TOKEN.match(scene)):
+                return self._json(400, {"error": "valid episode and scene required"})
             try:
-                return self._json(200, rough_cut_projection(ep))
+                return self._json(200, rough_cut_projection(ep, scene))
             except Exception as e:
                 return self._json(500, {"error": str(e)})
         if self.path.startswith("/api/production-preflight"):
@@ -3345,15 +3347,26 @@ class H(http.server.SimpleHTTPRequestHandler):
                 episode = str(d.get("episode") or "Ep1")
                 shot_id = str(d.get("shotId") or "")
                 action = str(d.get("action") or "add")
-                if not _SHOT_TOKEN.match(episode) or not _SHOT_TOKEN.match(shot_id):
-                    raise ValueError("valid episode and shotId required")
+                scene = str(d.get("scene") or "")
+                if not _SHOT_TOKEN.match(episode):
+                    raise ValueError("valid episode required")
                 if action == "add":
+                    if not _SHOT_TOKEN.match(shot_id):
+                        raise ValueError("valid shotId required")
                     cb_rough_cut.add_shot(episode, shot_id)
                 elif action == "remove":
+                    if not _SHOT_TOKEN.match(shot_id):
+                        raise ValueError("valid shotId required")
                     cb_rough_cut.remove_shot(episode, shot_id)
+                elif action in ("save-scene", "confirm-scene"):
+                    if not _SHOT_TOKEN.match(scene):
+                        raise ValueError("valid scene required")
+                    cb_rough_cut.save_scene_cut(
+                        episode, scene, d.get("sequence"), confirm=action == "confirm-scene")
                 else:
-                    raise ValueError("action must be add or remove")
-                self._json(200, rough_cut_projection(episode))
+                    raise ValueError("action must be add, remove, save-scene or confirm-scene")
+                self._json(200, rough_cut_projection(
+                    episode, scene if action.endswith("-scene") else None))
             except Exception as e:
                 self._json(400, {"error": str(e)})
             return

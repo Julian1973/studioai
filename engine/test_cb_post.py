@@ -401,6 +401,18 @@ def test_conform_plan_protects_dialogue_from_edge_and_settle_trim(monkeypatch):
     assert plan[1]["sceneStartSec"] == 5.5
 
 
+def test_conform_plan_applies_manual_director_trim(monkeypatch):
+    monkeypatch.setattr(cb_post, "_dur", lambda path: 10.0)
+    monkeypatch.setattr(cb_post, "_clip_fps", lambda path: 24.0)
+    plan = cb_post.conform_plan(
+        ["approved.mp4"], protected_windows=[[]],
+        edit_decisions=[{"inSec": 1.25, "outSec": 8.5, "manualTrim": True}])
+    assert plan[0]["sourceStartSec"] == 1.25
+    assert plan[0]["sourceEndSec"] == 8.5
+    assert plan[0]["sceneStartSec"] == 0.0
+    assert plan[0]["sceneEndSec"] == 7.25
+
+
 def test_build_scene_post_is_atomic_hashed_and_caption_exact(monkeypatch, tmp_path):
     clip = tmp_path / "approved.mp4"
     clip.write_bytes(b"approved take")

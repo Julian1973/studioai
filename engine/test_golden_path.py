@@ -630,6 +630,13 @@ def _led(scene="9", ep="EpT"):
     return {e["shotId"]: e for e in pkg["continuityLedger"]}
 
 
+def _lock_scene_cut(scene="9", ep="EpT"):
+    output = R.HERE.parent / "cb-output"
+    state = R.cb_rough_cut.scene_status(ep, scene, out=output)
+    return R.cb_rough_cut.save_scene_cut(
+        ep, scene, state["sequence"], confirm=True, out=output)
+
+
 def _fixture_reference_contract(shot):
     contract = []
     for tag, controls in (shot.get("referenceSlots") or {}).items():
@@ -1040,6 +1047,7 @@ def test_golden_path_package_to_approved_scene_master(world):
         _approve_director_review("review-animation", shot_id)
 
     # Post builds an immutable, QC-passed candidate with every approved shot in order.
+    _lock_scene_cut("9", "EpT")
     master = R.stitch_scene("9", "EpT", log=lambda *a, **k: None)
     data = pathlib.Path(master).read_bytes()
     i1 = data.find(b"1.B1.S1_c2.mp4"); i2 = data.find(b"1.B1.S2_c1.mp4")
@@ -1641,6 +1649,7 @@ def test_immutable_script_to_approved_master_golden_path(monkeypatch, tmp_path):
     R.approve_shot("1", "S1.SH1", 1, "Ep1", reviewed_by="TestReviewer",
                    log=lambda *a, **k: None)
     _approve_director_review("review-animation", "S1.SH1", "1", "Ep1")
+    _lock_scene_cut("1", "Ep1")
     master = R.stitch_scene("1", "Ep1", log=lambda *a, **k: None)
     _approve_director_review("review-final", None, "1", "Ep1")
 

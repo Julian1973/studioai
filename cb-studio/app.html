@@ -449,6 +449,21 @@ img.zoom:hover{filter:brightness(1.08)}
 .controw-arrow{color:var(--hint)}
 .noimg{width:120px;height:68px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--hint);font-size:10px;text-align:center;padding:4px}
 
+.director-seat-workspace{display:block;width:100%;max-width:none}
+.director-seat{width:100%;min-width:0;border:1px solid var(--line);border-radius:7px;background:#101116;overflow:hidden}
+.director-seat-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.director-seat-title{min-width:0}.director-seat-kicker{color:var(--ok);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.director-seat-title h2{margin:3px 0 0;font-size:20px;letter-spacing:0}.director-seat-title p{margin:4px 0 0;color:var(--hint);font-size:11px;line-height:1.4}
+.director-seat-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.director-seat-status{font-size:11px;color:var(--hint);white-space:nowrap}.director-seat-status.current{color:var(--ok)}
+.director-seat-main{display:grid;grid-template-columns:minmax(0,1fr) clamp(240px,22vw,330px);min-height:430px}
+.director-preview{min-width:0;padding:14px 16px 12px;border-right:1px solid var(--line);background:#090a0e}.director-preview-screen{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;max-height:58vh;background:#030406;overflow:hidden}.director-preview-screen video{display:block;width:100%;height:100%;object-fit:contain;background:#030406}.director-preview-empty{color:var(--hint);font-size:12px;text-align:center}
+.director-transport{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding-top:10px}.director-transport-buttons{display:flex;gap:6px}.director-icon{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}.director-icon:hover{border-color:var(--brand)}.director-time{font-variant-numeric:tabular-nums;font-size:11px;color:var(--muted);text-align:right}.director-now{min-width:0;color:var(--ink);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.director-bin{min-width:0;padding:14px;background:var(--surface);overflow:auto;max-height:calc(58vh + 62px)}.director-panel-label{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;color:var(--hint);font-size:10px;font-weight:800;text-transform:uppercase}.director-bin-list{display:grid;gap:8px}.director-bin-item{display:grid;grid-template-columns:96px minmax(0,1fr);gap:9px;align-items:center;padding:7px;border:1px solid var(--line);border-radius:5px;background:var(--surface2);cursor:grab}.director-bin-item.in-cut{opacity:.58}.director-bin-item.pending{border-style:dashed;cursor:default;opacity:.72}.director-bin-item.pending .director-bin-thumb{display:grid;place-items:center;padding:7px;color:var(--warn);font-size:9px;font-weight:800;text-align:center}.director-bin-item video,.director-bin-thumb{display:block;width:96px;aspect-ratio:16/9;object-fit:cover;background:#050608;border-radius:3px}.director-bin-copy{min-width:0}.director-bin-copy b,.director-bin-copy span{display:block}.director-bin-copy b{font-size:11.5px}.director-bin-copy span{margin-top:3px;color:var(--hint);font-size:9.5px}.director-bin-copy p{margin:4px 0 0;color:var(--muted);font-size:9.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.director-timeline-band{padding:14px 16px 16px;border-top:1px solid var(--line);background:#0d0e13}.director-timeline-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}.director-timeline-meta span{color:var(--hint);font-size:10px}.director-timeline{display:flex;align-items:stretch;gap:5px;min-height:86px;padding:8px;border:1px solid var(--line);background:#08090c;overflow-x:auto;overscroll-behavior-x:contain}.director-clip{position:relative;flex:0 0 clamp(148px,var(--clip-width,220px),360px);min-width:148px;display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px;align-items:center;padding:8px;border:2px solid transparent;border-radius:4px;background:#28202d;color:var(--ink);cursor:grab;text-align:left;font:inherit}.director-clip:hover{border-color:#725c75}.director-clip.selected{border-color:var(--brand);background:#332737}.director-clip-index{position:absolute;top:5px;left:5px;z-index:1;display:grid;place-items:center;width:18px;height:18px;border-radius:3px;background:rgba(5,6,8,.82);font-size:9px;font-weight:800}.director-clip img{width:58px;aspect-ratio:16/9;object-fit:cover;border-radius:2px;background:#050608}.director-clip-copy{min-width:0}.director-clip-copy b,.director-clip-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.director-clip-copy b{font-size:11px}.director-clip-copy span{margin-top:4px;color:#b8a9bb;font-size:9.5px}.director-timeline-empty{display:grid;place-items:center;width:100%;min-width:280px;color:var(--hint);font-size:11px;border:1px dashed var(--line)}
+.director-inspector{display:grid;grid-template-columns:minmax(160px,1fr) repeat(2,minmax(110px,150px)) auto;gap:10px;align-items:end;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface)}.director-inspector-copy{min-width:0}.director-inspector-copy b,.director-inspector-copy span{display:block}.director-inspector-copy b{font-size:12px}.director-inspector-copy span{margin-top:4px;color:var(--hint);font-size:10px}.director-trim{display:grid;gap:4px;color:var(--hint);font-size:9px;font-weight:800;text-transform:uppercase}.director-trim input{width:100%;box-sizing:border-box;min-height:38px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:var(--surface2);color:var(--ink);font:inherit;font-size:12px}.director-empty-note{padding:16px;color:var(--hint);font-size:11px;text-align:center}
+
+@media(max-width:900px){.director-seat-main{grid-template-columns:minmax(0,1fr)}.director-preview{border-right:0;border-bottom:1px solid var(--line)}.director-bin{max-height:none}.director-bin-list{grid-template-columns:repeat(2,minmax(0,1fr))}.director-inspector{grid-template-columns:minmax(0,1fr) repeat(2,minmax(100px,1fr))}.director-inspector .btn{grid-column:1/-1;width:100%}}
+@media(max-width:620px){.director-seat-head{align-items:stretch;flex-direction:column}.director-seat-actions{display:grid;grid-template-columns:1fr}.director-seat-actions .btn{width:100%;min-height:46px}.director-preview{padding:8px}.director-preview-screen{max-height:none}.director-transport{grid-template-columns:auto minmax(0,1fr)}.director-time{grid-column:1/-1;text-align:left}.director-bin-list{grid-template-columns:minmax(0,1fr)}.director-timeline-band{padding:12px 8px}.director-clip{flex-basis:160px}.director-inspector{grid-template-columns:minmax(0,1fr)}.director-trim{grid-column:auto}.director-inspector .btn{grid-column:auto}.director-seat-title h2{font-size:18px}}
+
 .disc-rows{display:flex;flex-direction:column;gap:11px;margin-top:14px}
 .disc-row{display:flex;justify-content:space-between;gap:16px;font-size:13.5px;padding-bottom:9px;border-bottom:1px solid var(--line)}
 .disc-row:last-child{border-bottom:none;padding-bottom:0}
@@ -1028,6 +1043,19 @@ body{background:var(--bg);color:var(--ink)}
   .focus-workspace.result-first .dec-actions .btn{min-height:48px}
   .reference-manifest,.refgrid{min-width:0}
 }
+
+/* Production-first shell: one hierarchy from IP to episode to scene. */
+.top-context{display:flex;align-items:center;gap:8px;min-width:0;height:100%}
+.top-context .tl{height:100%}.top-divider{color:#6f6a72;font-size:13px}.top-location{min-width:0;color:#f4f1f7;font-size:13px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-section-label{margin:8px 10px 7px;color:#777482;font-size:9px;font-weight:850;text-transform:uppercase}.nav-production-name{margin:0 10px 14px;color:#f4f1f7;font-size:14px;font-weight:800;line-height:1.3}.nav-back{margin-top:18px!important;border-top:1px solid var(--line)!important;border-radius:0!important;padding-top:14px!important}
+.production-index-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 22px}.production-index-title{min-width:0}.production-index-title .screen-eyebrow{color:var(--brandink)}.production-index-title h1{margin:5px 0 4px;font-family:'Display Slab',Georgia,serif;font-size:42px;line-height:1;letter-spacing:0}.production-index-title p{margin:0;color:var(--muted);font-size:13px}.production-index-actions{display:flex;align-items:center;gap:10px}.production-search{position:relative;min-width:250px}.production-search input{width:100%;box-sizing:border-box;padding:10px 12px 10px 36px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px}.production-search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--hint);pointer-events:none}
+.production-filters{display:flex;gap:7px;margin:0 0 20px;overflow-x:auto;padding-bottom:2px}.production-filter{min-height:36px;padding:7px 13px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--muted);font:inherit;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}.production-filter.active{border-color:var(--brand);background:var(--brandbg);color:var(--ink)}.production-empty{padding:42px 20px;border:1px dashed var(--line);border-radius:7px;text-align:center;color:var(--muted)}
+.projgrid.production-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.production-grid .projcard[data-primary="true"]{grid-column:1/-1;grid-row:auto;display:grid;grid-template-columns:minmax(320px,.95fr) minmax(360px,1.05fr)}.production-grid .projcard[data-primary="true"] .projcard-art{height:100%;min-height:310px;aspect-ratio:auto}.production-grid .projcard-name{font-family:'Display Slab',Georgia,serif;font-size:23px;font-weight:900}.production-grid .projcard[data-primary="true"] .projcard-name{font-size:31px}.production-grid .projcard-body{padding:20px;gap:9px}.production-grid .projcard[data-primary="true"] .projcard-body{padding:26px}.production-grid .projcard-actions{align-items:center}.production-grid .projcard-actions .btn:first-child{min-height:42px}.production-grid .addcard{grid-column:auto;min-height:180px;background:transparent}
+.production-home-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,34%);gap:24px;align-items:stretch;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line)}.production-home-copy{align-self:end}.production-home-copy h1{margin:6px 0 8px;font-family:'Display Slab',Georgia,serif;font-size:38px;line-height:1.05}.production-home-copy p{max-width:720px;margin:0;color:var(--muted);font-size:13px;line-height:1.55}.production-home-art{min-height:170px;overflow:hidden;border:1px solid var(--line);border-radius:7px;background:var(--surface)}.production-home-art img{width:100%;height:100%;object-fit:cover;display:block}
+.production-library{margin-bottom:26px}.production-library-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:10px}.production-library-head h2{margin:0;font-size:14px}.production-library-head span{color:var(--hint);font-size:11px}.production-resource-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:7px;overflow:hidden}.production-resource{min-width:0;padding:14px 13px;border:0;border-right:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer}.production-resource:last-child{border-right:0}.production-resource:hover{background:var(--surface2)}.production-resource.active{box-shadow:inset 0 3px 0 var(--brand);background:var(--brandbg)}.production-resource-icon{display:block;color:var(--brandink);font-size:17px;margin-bottom:7px}.production-resource b{display:block;font-size:12px}.production-resource small{display:block;margin-top:3px;color:var(--hint);font-size:10px;line-height:1.35}.production-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px}.production-section-head h2{margin:0;font-size:18px}.production-section-head span{color:var(--muted);font-size:11px}
+.asset-library-groups{display:grid;gap:10px}.asset-library-group{min-width:0;border:1px solid var(--line);border-radius:7px;background:var(--surface);overflow:hidden}.asset-library-group>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;cursor:pointer;list-style:none}.asset-library-group>summary::-webkit-details-marker{display:none}.asset-library-group>summary h2{margin:0;font-size:14px}.asset-library-group>summary span{color:var(--hint);font-size:11px}.asset-library-group[open]>summary{border-bottom:1px solid var(--line);background:var(--surface2)}.asset-library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px;padding:12px}.asset-library-card{overflow:hidden;border:1px solid var(--line);border-radius:7px;background:var(--surface)}.asset-library-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#090b10}.asset-library-copy{padding:10px}.asset-library-copy b{display:block;font-size:12px;line-height:1.35}.asset-library-copy span{display:block;margin-top:4px;color:var(--hint);font-size:10px}
+@media(max-width:980px){.production-index-head{align-items:flex-start;flex-direction:column}.production-index-actions{width:100%}.production-search{flex:1}.projgrid.production-grid{grid-template-columns:minmax(0,1fr)}.production-grid .projcard[data-primary="true"]{grid-column:auto;grid-template-columns:minmax(260px,.8fr) minmax(320px,1.2fr)}.production-resource-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.production-resource:nth-child(3){border-right:0}.production-resource:nth-child(n+4){border-top:1px solid var(--line)}}
+@media(max-width:700px){.top-context{width:100%;height:auto}.top-context .tl{height:auto}.top-divider,.top-location{display:none}.nav-section-label,.nav-production-name{display:none}.nav-back{margin-top:0!important;border-top:0!important;padding-top:9px!important}.production-index-title h1{font-size:34px}.production-index-actions{display:grid;grid-template-columns:minmax(0,1fr) auto}.production-search{min-width:0}.production-grid .projcard[data-primary="true"]{display:flex}.production-grid .projcard[data-primary="true"] .projcard-art{min-height:0;aspect-ratio:16/9}.production-home-head{grid-template-columns:minmax(0,1fr);gap:14px}.production-home-copy h1{font-size:31px}.production-home-art{grid-row:1;min-height:0;aspect-ratio:16/7}.production-resource-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.production-resource,.production-resource:nth-child(3){border-right:1px solid var(--line);border-top:1px solid var(--line)}.production-resource:nth-child(-n+2){border-top:0}.production-resource:nth-child(2n){border-right:0}.production-resource:last-child{grid-column:1/-1;border-right:0}.production-section-head{align-items:flex-start;flex-direction:column}.production-grid .projcard-actions{display:grid;grid-template-columns:minmax(0,1fr)}.production-grid .projcard-actions .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -1143,6 +1171,7 @@ async function _restoreFromHash(raw){
   if(pg=='characters'){showCharacters();return true;}
   if(pg=='scenes'){showScenes();return true;}
   if(pg=='houses'){showHouses();return true;}
+  if(pg=='assets'){showAssets();return true;}
   if(pg=='bible'){showBible();return true;}
   if(pg=='episodes'||!epNum) return true;   // boot() already rendered + synced the hash
   const scId=params.get('sc');
@@ -1242,6 +1271,9 @@ function outcomePanelHTML(opts){
     <div class="outcome-actions">${actions.map(actionButtonHTML).join("")}</div>
   </section>`;
 }
+let PRODUCTION_FILTER="active",PRODUCTION_QUERY="";
+function setProductionFilter(filter){PRODUCTION_FILTER=filter;renderProjects();}
+function searchProductions(value){PRODUCTION_QUERY=String(value||"").trim().toLowerCase();renderProjects();const input=document.getElementById("production-search");if(input){input.focus();input.setSelectionRange(input.value.length,input.value.length);}}
 async function bootProjects(){
   try{PROJECTS=(((await fetch(BASE+"/api/projects",{cache:"no-store"}).then(r=>r.json()))||{}).projects)||[];}catch(e){PROJECTS=[];}
   CURRENT_PROJECT=null; CUR=null; SHOTS=[]; page="projects"; applyProjectPresentation(null); renderTop(); renderNav(); renderProjects();
@@ -1258,26 +1290,31 @@ function renderProjects(){
       <div class="projcard-artmeta"><span>${p.archived?'Preserved reference':'Live production'}</span><span>${_esc(p.aspectRatio||'')}</span></div>
     </div>
     <div class="projcard-body">
-      <div class="projcard-name"><span>${_esc(p.name)}</span>${p.primary?'<span class="project-role">Flagship</span>':''}</div>
+      <div class="projcard-name"><span>${_esc(p.name)}</span>${p.primary?'<span class="project-role">Main IP</span>':''}</div>
       <div class="projcard-type">${_esc(p.animationType||'—')}</div>
       ${p.premise?`<div class="projcard-premise">${_esc((p.premise||'').slice(0,140))}${(p.premise||'').length>140?'…':''}</div>`:''}
       <div class="projcard-meta">${p.episodeCount||0} episode${p.episodeCount==1?'':'s'} · ${p.characterCount||0} characters${p.aspectRatio?' · '+_esc(p.aspectRatio):''}</div>
       <div id="pcstats_${_esc(p.id)}" class="projcard-stats"><div class="projcard-activity">Loading production status…</div></div>
       <div class="projcard-actions">
-        <button type="button" class="btn" onclick='${p.archived?"enterProject":"continueProject"}(${JSON.stringify(p.id)})'>${p.archived?"Open archive":"Continue production"}</button>
-        ${p.archived?"":`<button type="button" class="btn ghost" onclick='enterProject(${JSON.stringify(p.id)})'>Episodes</button>`}
+        <button type="button" class="btn" onclick='enterProject(${JSON.stringify(p.id)})'>${p.archived?"Open archive":"Open production"}</button>
+        ${p.archived?"":`<button type="button" class="btn ghost" onclick='continueProject(${JSON.stringify(p.id)})'>Continue latest episode</button>`}
       </div>
     </div>
   </article>`;};
-  const primary=PROJECTS.find(p=>p.primary&&!p.archived)||PROJECTS.find(p=>!p.archived);
+  const visible=PROJECTS.filter(p=>{
+    if(PRODUCTION_FILTER==="active"&&p.archived)return false;
+    if(PRODUCTION_FILTER==="archive"&&!p.archived)return false;
+    return !PRODUCTION_QUERY||String(p.name||"").toLowerCase().includes(PRODUCTION_QUERY)||String(p.premise||"").toLowerCase().includes(PRODUCTION_QUERY);
+  });
+  const counts={all:PROJECTS.length,active:PROJECTS.filter(p=>!p.archived).length,archive:PROJECTS.filter(p=>p.archived).length};
   document.getElementById("view").innerHTML=`
-    <header class="screenhead"><div class="screen-eyebrow">Studio slate</div><h1 class="h1">Projects</h1>
-    <p class="sub">Active productions and preserved creative reference.</p></header>
-    ${primary?outcomePanelHTML({title:"Continue "+primary.name,body:"Open the live episode at its next authoritative production action.",actions:[{label:"Continue production",onclick:`continueProject(${JSON.stringify(primary.id)})`}]}):outcomePanelHTML({title:"Create the first project",body:"A project is required before an episode can enter production.",actions:[{label:"New project",onclick:"openProjectWizard()"}]})}
-    <div class="projgrid">${PROJECTS.map(card).join("")}
-      <button type="button" class="addcard" onclick="openProjectWizard()"><span style="font-size:30px;line-height:1">＋</span><span>New Project</span></button>
-    </div>`;
-  PROJECTS.forEach(p=>{
+    <header class="production-index-head">
+      <div class="production-index-title"><div class="screen-eyebrow">Studio workspace</div><h1>Productions</h1><p>Your IP, production libraries and episode pipelines.</p></div>
+      <div class="production-index-actions"><label class="production-search"><span aria-hidden="true">⌕</span><input id="production-search" value="${_attr(PRODUCTION_QUERY)}" oninput="searchProductions(this.value)" placeholder="Search productions" aria-label="Search productions"></label><button type="button" class="btn" onclick="openProjectWizard()">＋ New production</button></div>
+    </header>
+    <div class="production-filters" aria-label="Production filters"><button type="button" class="production-filter ${PRODUCTION_FILTER==='active'?'active':''}" onclick="setProductionFilter('active')">Active ${counts.active}</button><button type="button" class="production-filter ${PRODUCTION_FILTER==='all'?'active':''}" onclick="setProductionFilter('all')">All ${counts.all}</button><button type="button" class="production-filter ${PRODUCTION_FILTER==='archive'?'active':''}" onclick="setProductionFilter('archive')">Archive ${counts.archive}</button></div>
+    ${visible.length?`<div class="projgrid production-grid">${visible.map(card).join("")}<button type="button" class="addcard" onclick="openProjectWizard()"><span style="font-size:30px;line-height:1">＋</span><span>New production</span></button></div>`:`<div class="production-empty">No productions match this view.</div>`}`;
+  visible.forEach(p=>{
     projectStats(p).then(s=>{
       const statsEl=document.getElementById("pcstats_"+p.id), artEl=document.getElementById("pcart_"+p.id);
       if(!statsEl)return;   // the user already navigated away
@@ -1292,7 +1329,7 @@ function renderProjects(){
         const decColor=s.decisions>0?'var(--honey)':s.outcome==="complete"?'var(--ok)':'var(--brandink)';
         statsEl.innerHTML=`
           <div class="projcard-progress">
-            <div class="projcard-progress-row"><span>${s.completion}% complete</span><span>${s.scenes} scene${s.scenes==1?'':'s'}</span></div>
+            <div class="projcard-progress-row"><span>${s.episode?_esc(s.episode.replace(/^Ep/,"Episode "))+" · ":""}${s.completion}% complete</span><span>${s.scenes} scene${s.scenes==1?'':'s'}</span></div>
             <div class="projcard-bar"><i style="width:${s.completion}%"></i></div>
           </div>
           <div class="projcard-decisions" style="color:${decColor}">${s.decisions>0?'◐':s.outcome==="complete"?'✓':'○'} ${decLabel}</div>
@@ -1311,7 +1348,7 @@ async function continueProject(id){
   const p=PROJECTS.find(x=>x.id===id); if(!p){alert("Project not found");return;}
   if(!(await enterProject(id)))return;
   if(p.archived)return;
-  const episode=EPISODES.find(e=>e.script)||EPISODES[0];
+  const episode=EPISODES.filter(e=>e&&e.script).sort((a,b)=>Number(b.number)-Number(a.number))[0]||EPISODES[0];
   if(episode)await openEpisode(episode.number); else addForm();
 }
 function exitProject(){ bootProjects(); }
@@ -1357,9 +1394,12 @@ function renderWizard(){
   else if(S==3){ body=`<div class="lab" style="font-weight:600">3 · Show bible</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Paste the world, tone, rules and canon — refine inside the project later.</p>${ta("wz_bible","The show bible — world, themes, tone, rules, canon…",d.showBible,200)}`; }
   else if(S==4){ body=`<div class="lab" style="font-weight:600">4 · Characters</div><p style="font-size:12px;color:var(--hint);margin:4px 0 10px">Drop in each character with a reference image and key features.</p><div class="wizard-character-add" style="border:1px dashed var(--brand);border-radius:8px;padding:10px"><div style="flex:1;min-width:130px">${inp("wz_cname","Character name",'')}</div><div style="flex:2;min-width:180px">${inp("wz_ckf","Key features",'')}</div><label style="font-size:11px;color:var(--hint)">Ref <input id="wz_cimg" type="file" accept="image/*"/></label><button class="btn" onclick="wizAddChar()">Add</button></div><div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${WIZ.chars.map((c,i)=>`<div style="display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:7px 10px"><div style="width:36px;height:46px;background:var(--surface2);border-radius:5px;overflow:hidden;flex:none">${c.imageData?`<img src="${c.imageData}" style="width:100%;height:100%;object-fit:cover"/>`:''}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${_esc(c.name)}</div><div style="font-size:11px;color:var(--hint)">${_esc(c.keyFeatures||'')}</div></div><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="wizDelChar(${i})">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--hint)">No characters added yet.</div>'}</div>`; }
   else if(S==5){ body=`<div class="lab" style="font-weight:600">5 · Voice &amp; audio</div><div style="display:grid;gap:10px;margin-top:10px">${inp("wz_voice","Voice provider (e.g. ElevenLabs)",d.voiceProvider)}${inp("wz_music","Music / composer style",d.musicStyle)}</div>`; }
-  else if(S==6){ const accent=safeThemeHex(d.accentColor,DEFAULT_PROJECT_THEME.accent);body=`<div class="lab" style="font-weight:600">6 · Review &amp; create</div><div style="margin-top:10px;font-size:13px;line-height:1.7"><b>${_esc(d.name||'(unnamed)')}</b><br><span style="color:var(--hint)">Animation:</span> ${_esc(d.animationType||'—')}<br><span style="color:var(--hint)">Premise:</span> ${_esc(d.premise||'—')}<br><span style="color:var(--hint)">Audience:</span> ${_esc(d.audience||'—')}<br><span style="color:var(--hint)">Format:</span> ${_esc(d.episodeLength||'—')} · ${_esc(d.aspectRatio||'—')}<br><span style="color:var(--hint)">Show bible:</span> ${(d.showBible||'').length} chars<br><span style="color:var(--hint)">Characters:</span> ${WIZ.chars.length} (${_esc(WIZ.chars.map(c=>c.name).join(', '))||'none'})<br><span style="color:var(--hint)">Voice / music:</span> ${_esc(d.voiceProvider||'—')} · ${_esc(d.musicStyle||'—')}<br><span style="color:var(--hint)">Project identity:</span> <span aria-hidden="true" style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${accent};vertical-align:-1px"></span> ${_esc(accent)} · ${d.coverImageData?_esc(d.coverImageName||'key art attached'):'no key art attached'}</div><div id="wz_msg" style="font-size:12px;color:var(--brandink);margin-top:8px"></div>`; }
+  else if(S==6){ const accent=safeThemeHex(d.accentColor,DEFAULT_PROJECT_THEME.accent);body=`<div class="lab" style="font-weight:600">6 · Review &amp; create</div><div style="margin-top:10px;font-size:13px;line-height:1.7"><b>${_esc(d.name||'(unnamed)')}</b><br><span style="color:var(--hint)">Animation:</span> ${_esc(d.animationType||'—')}<br><span style="color:var(--hint)">Premise:</span> ${_esc(d.premise||'—')}<br><span style="color:var(--hint)">Audience:</span> ${_esc(d.audience||'—')}<br><span style="color:var(--hint)">Format:</span> ${_esc(d.episodeLength||'—')} · ${_esc(d.aspectRatio||'—')}<br><span style="color:var(--hint)">Show bible:</span> ${(d.showBible||'').length} chars<br><span style="color:var(--hint)">Characters:</span> ${WIZ.chars.length} (${_esc(WIZ.chars.map(c=>c.name).join(', '))||'none'})<br><span style="color:var(--hint)">Voice / music:</span> ${_esc(d.voiceProvider||'—')} · ${_esc(d.musicStyle||'—')}<br><span style="color:var(--hint)">Production identity:</span> <span aria-hidden="true" style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${accent};vertical-align:-1px"></span> ${_esc(accent)} · ${d.coverImageData?_esc(d.coverImageName||'key art attached'):'no key art attached'}</div><div id="wz_msg" style="font-size:12px;color:var(--brandink);margin-top:8px"></div>`; }
   const dots=[1,2,3,4,5,6].map(n=>`<span style="width:8px;height:8px;border-radius:50%;background:${n===S?'var(--brand)':(n<S?'var(--brandink)':'var(--line)')};display:inline-block"></span>`).join(' ');
-  document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button><h3>New Project</h3><div style="margin:6px 0 14px;display:flex;gap:5px;align-items:center">${dots}<span style="font-size:11px;color:var(--hint);margin-left:8px">Step ${S} of 6</span></div>${body}<div class="modal-actions"><button class="btn ghost" onclick="wizCapture();wizBack()" ${S==1?'disabled style="opacity:.4"':''}>← Back</button>${S<6?`<button class="btn" onclick="wizCapture();wizNext()">Next →</button>`:`<button class="btn" onclick="wizSubmit()">✓ Create project</button>`}</div>`;
+  document.getElementById("sheet").innerHTML=`<button class="x" onclick="closeM()">×</button><h3>New production</h3><div style="margin:6px 0 14px;display:flex;gap:5px;align-items:center">${dots}<span style="font-size:11px;color:var(--hint);margin-left:8px">Step ${S} of 6</span></div>${body}<div class="modal-actions"><button class="btn ghost" onclick="wizCapture();wizBack()" ${S==1?'disabled style="opacity:.4"':''}>← Back</button>${S<6?`<button class="btn" onclick="wizCapture();wizNext()">Next →</button>`:`<button class="btn" onclick="wizSubmit()">✓ Create production</button>`}</div>`;
+}
+function productionPageTitle(){
+  return {episodes:"Episodes",characters:"Characters",scenes:"Scenes",houses:"Locations",assets:"Props & references",bible:"Show Bible",sceneboard:"Episode production",pipeline:"Scene production",script:"Script"}[page]||"Production";
 }
 function renderTop(){
   closeMobileMenu();
@@ -1369,10 +1409,9 @@ function renderTop(){
   // is the single place the hash needs syncing (pFocusStage syncs separately for in-scene
   // stage focus, which doesn't touch the top bar).
   const t=document.getElementById("toplinks");
-  if(!CURRENT_PROJECT){t.innerHTML=`<button type="button" class="tl on" onclick="bootProjects()">Projects</button>`;return;}
-  const ph=`<button type="button" class="tl" onclick="exitProject()">← Projects</button><span class="epchip">${_esc(CURRENT_PROJECT.name)}</span>`;
-  if(CUR){t.innerHTML=ph+`<button type="button" class="tl" onclick="showCharacters()">Characters</button><button type="button" class="tl" onclick="showScenes()">Scenes</button><button type="button" class="tl" onclick="showHouses()">Houses</button><button type="button" class="tl" onclick="showBible()">Show Bible</button><button type="button" class="tl" onclick="goHome()">← Episodes</button>`;}
-  else{t.innerHTML=ph+`<button type="button" class="tl ${page=='episodes'?'on':''}" onclick="goHome()">Episodes</button><button type="button" class="tl ${page=='characters'?'on':''}" onclick="showCharacters()">Characters</button><button type="button" class="tl ${page=='scenes'?'on':''}" onclick="showScenes()">Scenes</button><button type="button" class="tl ${page=='houses'?'on':''}" onclick="showHouses()">Houses</button><button type="button" class="tl ${page=='bible'?'on':''}" onclick="showBible()">Show Bible</button>`;}
+  document.body.classList.toggle("productions-index",!CURRENT_PROJECT);
+  if(!CURRENT_PROJECT){t.innerHTML=`<div class="top-context"><button type="button" class="tl on" onclick="bootProjects()">Productions</button></div>`;return;}
+  t.innerHTML=`<div class="top-context"><button type="button" class="tl" onclick="exitProject()">Productions</button><span class="top-divider" aria-hidden="true">/</span><button type="button" class="tl ${!CUR&&page==='episodes'?'on':''}" onclick="goHome()">${_esc(CURRENT_PROJECT.name)}</button>${CUR?`<span class="top-divider" aria-hidden="true">/</span><span class="top-location">Episode ${_esc(CUR.number)} · ${_esc(productionPageTitle())}</span>`:`<span class="top-divider" aria-hidden="true">/</span><span class="top-location">${_esc(productionPageTitle())}</span>`}</div>`;
 }
 function setMobileMenu(open){
   const links=document.getElementById("toplinks"),button=document.getElementById("mobile-menu-toggle"),icon=document.getElementById("mobile-menu-icon");
@@ -1395,9 +1434,12 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape")closeMobileM
 window.addEventListener("resize",function(){if(window.innerWidth>700)closeMobileMenu();});
 function renderNav(){
   const nav=document.getElementById("nav");
-  if(!CUR){nav.style.display="none";return;}
   nav.style.removeProperty("display");
-  nav.innerHTML=NAV.map(n=>n[0]=="__sep"?'<div class="sep"></div>':`<button type="button" class="${(n[0]==page||(n[0]=="sceneboard"&&page=="pipeline"))?'active':''}" onclick="go('${n[0]}')"><span style="width:16px;display:inline-block;text-align:center">${n[2]}</span>${n[1]}</button>`).join("");
+  if(!CURRENT_PROJECT){nav.innerHTML=`<div class="nav-section-label">Workspace</div><button type="button" class="active" onclick="bootProjects()"><span aria-hidden="true">▣</span>Productions</button><button type="button" onclick="openProjectWizard()"><span aria-hidden="true">＋</span>New production</button>`;return;}
+  if(CUR){
+    nav.innerHTML=`<div class="nav-section-label">${_esc(CURRENT_PROJECT.name)}</div><div class="nav-production-name">Episode ${_esc(CUR.number)}<br><span style="color:var(--hint);font-size:11px;font-weight:600">${_esc(CUR.title||"Untitled")}</span></div><button type="button" class="${(page==='sceneboard'||page==='pipeline')?'active':''}" onclick="go('sceneboard')"><span aria-hidden="true">◈</span>Production</button><button type="button" class="${page==='script'?'active':''}" onclick="go('script')"><span aria-hidden="true">≡</span>Script</button><button type="button" class="nav-back" onclick="goHome()"><span aria-hidden="true">←</span>All episodes</button>`;return;
+  }
+  nav.innerHTML=`<div class="nav-section-label">Production</div><div class="nav-production-name">${_esc(CURRENT_PROJECT.name)}</div><button type="button" class="${page==='episodes'?'active':''}" onclick="goHome()"><span aria-hidden="true">▤</span>Episodes</button><button type="button" class="${page==='bible'?'active':''}" onclick="showBible()"><span aria-hidden="true">≡</span>Show Bible</button><button type="button" class="${page==='characters'?'active':''}" onclick="showCharacters()"><span aria-hidden="true">◉</span>Characters</button><button type="button" class="${page==='scenes'?'active':''}" onclick="showScenes()"><span aria-hidden="true">▧</span>Scenes</button><button type="button" class="${page==='houses'?'active':''}" onclick="showHouses()"><span aria-hidden="true">⌂</span>Locations</button><button type="button" class="${page==='assets'?'active':''}" onclick="showAssets()"><span aria-hidden="true">◇</span>Props & references</button><button type="button" class="nav-back" onclick="exitProject()"><span aria-hidden="true">←</span>All productions</button>`;
 }
 function renderGates(){
   const g=document.getElementById("gatesbar");
@@ -1425,7 +1467,7 @@ async function boot(){
     MEDIA_V=Date.now();
   }catch(e){
     EPISODES=[];
-    document.getElementById("view").innerHTML=outcomePanelHTML({tone:"blocked",title:"Episode state could not load",body:"The Studio did not return a valid episode index. Reconnect with the current launch link, then retry.",actions:[{label:"Retry",onclick:"boot()"},{label:"Projects",onclick:"bootProjects()",kind:"secondary"}]});
+    document.getElementById("view").innerHTML=outcomePanelHTML({tone:"blocked",title:"Episode state could not load",body:"The Studio did not return a valid episode index. Reconnect with the current launch link, then retry.",actions:[{label:"Retry",onclick:"boot()"},{label:"Productions",onclick:"bootProjects()",kind:"secondary"}]});
     return false;
   }
   renderTop();renderNav();render();
@@ -1615,6 +1657,17 @@ async function addCharacter(){
 function go(p){page=p;renderTop();renderNav();document.getElementById("gatesbar").innerHTML="";render();}
 function showScenes(){page="scenes";renderTop();renderNav();document.getElementById("gatesbar").innerHTML="";renderScenes();}
 function showHouses(){page="houses";renderTop();renderNav();document.getElementById("gatesbar").innerHTML="";renderHouses();}
+function showAssets(){page="assets";renderTop();renderNav();document.getElementById("gatesbar").innerHTML="";renderAssets();}
+async function renderAssets(){
+  const latest=EPISODES.slice().sort((a,b)=>Number(b.number)-Number(a.number))[0];
+  const episode="Ep"+((latest&&latest.number)||1);
+  let data={groups:{characters:[],scenes:[],props:[],references:[]}};
+  try{data=await fetch(BASE+"/api/project-asset-library?episode="+encodeURIComponent(episode)+"&scene=*",{cache:"no-store"}).then(r=>r.json());}catch(e){}
+  const groups=data.groups||{},defs=[["props","Props"],["references","Production references"],["scenes","Scene references"],["characters","Character references"]];
+  const card=item=>{const src=assetSrc(item.url||item.path);return `<article class="asset-library-card">${src?`<img src="${_attr(src)}" alt="" loading="lazy">`:''}<div class="asset-library-copy"><b>${_esc(item.label||item.role||"Production asset")}</b><span>${_esc(item.kind||item.group||"reference")}</span></div></article>`;};
+  const sections=defs.filter(([key])=>(groups[key]||[]).length).map(([key,label])=>`<details class="asset-library-group" ${key==='props'?'open':''}><summary><h2>${label}</h2><span>${(groups[key]||[]).length} assets · ${key==='props'?'shown':'open to view'}</span></summary><div class="asset-library-grid">${groups[key].map(card).join("")}</div></details>`).join("");
+  document.getElementById("view").innerHTML=`${productionSectionHeaderHTML("Props & references","Reusable production objects and approved reference imagery.")}${productionLibraryHTML("assets")}${sections?`<div class="asset-library-groups">${sections}</div>`:outcomePanelHTML({title:"No production assets yet",body:"Props and shared references will appear here as they are added to an episode.",actions:[{label:"Open scenes",onclick:"showScenes()"},{label:"Open episodes",onclick:"goHome()",kind:"secondary"}]})}`;
+}
 async function renderHouses(){
   let H={houses:[]};
   try{H=await fetch(BASE+"/api/houses",{cache:"no-store"}).then(r=>r.json());}catch(e){}
@@ -1634,7 +1687,7 @@ async function renderHouses(){
       ${pane('Outside', h.exterior, h.exteriorMulticam, h.exteriorDesc)}
     </div></div>`;
   document.getElementById("view").innerHTML=`
-    ${projectScreenHeaderHTML({eyebrow:"Location library",title:"Houses · Elements",subtitle:`Reusable interiors, exteriors and multi-angle references. ${hs.length} house${hs.length===1?'':'s'} in this production.`,art:CURRENT_PROJECT&&(CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage)})}
+    ${projectScreenHeaderHTML({eyebrow:"Production library",title:"Locations",subtitle:`Reusable interiors, exteriors and multi-angle references. ${hs.length} location set${hs.length===1?'':'s'} in this production.`,art:CURRENT_PROJECT&&(CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage)})}
     ${hs.length?`<div class="library-grid wide">${hs.map(card).join("")}</div>`:outcomePanelHTML({tone:"blocked",title:"No houses are locked yet",body:"Continue with the reusable scene and character elements already available, or return to the episode workflow.",actions:[{label:"Open scenes",onclick:"showScenes()"},{label:"Open characters",onclick:"showCharacters()",kind:"secondary"},{label:"Open episodes",onclick:"goHome()",kind:"secondary"}]})}`;
 }
 async function renderScenes(){
@@ -1747,6 +1800,7 @@ function render(){
   if(page=="bible")return renderBible();
   if(page=="scenes")return renderScenes();
   if(page=="houses")return renderHouses();
+  if(page=="assets")return renderAssets();
   if(page=="character")return renderCharacterDetail();
   if(page=="script")return renderScript();
   if(page=="pipeline")return renderControl();
@@ -1756,6 +1810,20 @@ function render(){
   view.innerHTML=`<h1 class="h1">${_nm}</h1>${outcomePanelHTML({title:"Continue in the production workspace",body:"This view now lives inside the scene pipeline.",actions:[{label:CUR?"Open all scenes":"Open episodes",onclick:CUR?"backToBoard()":"goHome()"},{label:"Open projects",onclick:"bootProjects()",kind:"secondary"}]})}`;
 }
 
+function productionLibraryHTML(active){
+  const items=[
+    ["episodes","▤","Episodes",`${EPISODES.length} in this production`,"goHome()"],
+    ["bible","≡","Show Bible","Canon and production rules","showBible()"],
+    ["characters","◉","Characters",`${Object.keys(CHARCFG||{}).length} locked identities`,"showCharacters()"],
+    ["scenes","▧","Scenes","Locations and scene plates","showScenes()"],
+    ["assets","◇","Props & references","Shared production assets","showAssets()"],
+  ];
+  return `<section class="production-library"><div class="production-library-head"><h2>Production library</h2><span>Shared by every episode</span></div><div class="production-resource-grid">${items.map(([id,icon,label,meta,action])=>`<button type="button" class="production-resource ${active===id?'active':''}" onclick="${action}"><span class="production-resource-icon" aria-hidden="true">${icon}</span><b>${label}</b><small>${_esc(meta)}</small></button>`).join("")}</div></section>`;
+}
+function productionSectionHeaderHTML(title,subtitle){
+  const art=assetSrc((CURRENT_PROJECT&&CURRENT_PROJECT.coverImage)||"");
+  return `<header class="production-home-head"><div class="production-home-copy"><div class="screen-eyebrow">${_esc((CURRENT_PROJECT&&CURRENT_PROJECT.name)||"Production")}</div><h1>${_esc(title)}</h1><p>${_esc(subtitle||"")}</p></div>${art?`<div class="production-home-art"><img src="${_attr(art)}" alt="" onerror="this.closest('.production-home-art').remove()"></div>`:""}</header>`;
+}
 function renderEpisodes(){
   document.getElementById("gatesbar").innerHTML="";
   const cards=EPISODES.map(e=>{
@@ -1779,11 +1847,8 @@ function renderEpisodes(){
         ${e.script?`<button type="button" class="btn ghost" onclick="openEpisodeScript(${e.number})">Script</button>`:""}</div></div></article>`;
   }).join("");
   const next=EPISODES.find(e=>e.storyIntakeState==="awaiting-review")||EPISODES.find(e=>e.packageCurrent)||EPISODES.find(e=>e.script)||EPISODES[0];
-  const screenOutcome=next
-    ?outcomePanelHTML({tone:next.storyIntakeState==="awaiting-review"?"review":"ready",title:next.storyIntakeState==="awaiting-review"?"Story & Direction needs your decision":next.packageCurrent?"Continue scene production":"Run Story & Direction",body:"Episode "+next.number+" · "+(next.title||"Untitled"),actions:[{label:next.storyIntakeState==="awaiting-review"?"Review candidate":next.packageCurrent?"Open scenes":"Open Story & Direction",onclick:`openEpisode(${next.number})`}]})
-    :outcomePanelHTML({title:"Create the first episode",body:"Upload a script to begin Story & Direction.",actions:[{label:"Add episode",onclick:"addForm()"}]});
-  document.getElementById("view").innerHTML=`${projectScreenHeaderHTML({eyebrow:"Episode slate",title:(CURRENT_PROJECT&&CURRENT_PROJECT.name)||"Episodes",subtitle:`${EPISODES.length} episode${EPISODES.length===1?'':'s'} in the current production slate.`,art:CURRENT_PROJECT&&(CURRENT_PROJECT.episodeCoverImage||CURRENT_PROJECT.coverImage)})}
-    ${screenOutcome}<div class="epgrid">${cards}<button type="button" class="addcard" onclick="addForm()"><span style="font-size:26px">＋</span><span>Add episode</span></button></div>`;
+  const title=(CURRENT_PROJECT&&CURRENT_PROJECT.name)||"Production";
+  document.getElementById("view").innerHTML=`${productionSectionHeaderHTML(title,(CURRENT_PROJECT&&CURRENT_PROJECT.premise)||`${EPISODES.length} episodes in this production.`)}${productionLibraryHTML("episodes")}<div class="production-section-head"><div><h2>Episodes</h2><span>${EPISODES.length} episode${EPISODES.length===1?'':'s'} · open one to enter its scene pipeline</span></div>${next?`<button type="button" class="btn" onclick="openEpisode(${next.number})">Continue Episode ${next.number}</button>`:`<button type="button" class="btn" onclick="addForm()">＋ Add episode</button>`}</div><div class="epgrid">${cards}<button type="button" class="addcard" onclick="addForm()"><span style="font-size:26px">＋</span><span>Add episode</span></button></div>`;
 }
 async function openEpisodeScript(num){if(await openEpisode(num))go("script");}
 
@@ -1998,7 +2063,7 @@ const PSTAGES=[
   {id:"keyframe",name:"Keyframe",glyph:"◧"},
   {id:"voice",name:"Voice & Timing",glyph:"♪"},
   {id:"animation",name:"Animation",glyph:"►"},
-  {id:"continuity",name:"Director Review",glyph:"⇄"},
+  {id:"continuity",name:"Director's Seat",glyph:"⇄"},
   {id:"final",name:"Final Master",glyph:"✓"}
 ];
 const PPHASES=[
@@ -2096,16 +2161,22 @@ async function projectStats(p){
   if(p.archived)return {archived:true};
   if(!p.primary)return {unsupported:true};
   try{
-    const roster=await sceneRoster("Ep1");
+    let episode="Ep1";
+    try{
+      const episodeIndex=await fetch(BASE+"/"+(p.episodesFile||"cb-studio/data/episodes.json"),{cache:"no-store"}).then(r=>r.json());
+      const active=(Array.isArray(episodeIndex)?episodeIndex:[]).filter(e=>e&&e.script).sort((a,b)=>Number(b.number)-Number(a.number))[0];
+      if(active)episode="Ep"+Number(active.number);
+    }catch(e){}
+    const roster=await sceneRoster(episode);
     if(!roster.length){
       const [intake,state]=await Promise.all([
-        fetch(BASE+"/api/story-intake-status?episode=Ep1",{cache:"no-store"}).then(r=>r.json()).catch(()=>null),
-        fetch(BASE+"/api/production-state?scene=1&episode=Ep1",{cache:"no-store"}).then(r=>r.json()).catch(()=>null),
+        fetch(BASE+"/api/story-intake-status?episode="+encodeURIComponent(episode),{cache:"no-store"}).then(r=>r.json()).catch(()=>null),
+        fetch(BASE+"/api/production-state?scene=1&episode="+encodeURIComponent(episode),{cache:"no-store"}).then(r=>r.json()).catch(()=>null),
         fetchJobsNow(),
       ]);
       const candidate=intake&&intake.candidate||{};
-      const running=jobFor("storyintake","-","Ep1");
-      const latest=latestJobFor("storyintake","-","Ep1");
+      const running=jobFor("storyintake","-",episode);
+      const latest=latestJobFor("storyintake","-",episode);
       if(running){
         return {completion:0,decisions:0,outcome:"working",artwork:null,
                 activity:running.step||"Story & Direction is working",
@@ -2132,7 +2203,7 @@ async function projectStats(p){
       }
       return {empty:true};
     }
-    const bundles=await Promise.all(roster.map(r=>fetchSceneBundle(r.scene,"Ep1")));
+    const bundles=await Promise.all(roster.map(r=>fetchSceneBundle(r.scene,episode)));
     await fetchJobsNow();
     let doneStages=0,totalStages=0,decisions=0,artwork=null;
     roster.forEach((r,i)=>{
@@ -2146,14 +2217,14 @@ async function projectStats(p){
       PSTAGES.map(p=>p.id).forEach(id=>{const x=stages[id];if(!x)return;totalStages++;if(x.state=="approved")doneStages++;});
       if(!artwork&&r.plate)artwork="/engine/media/"+r.plate;
     });
-    const jobs=Object.values(PJOBS).filter(j=>j.ended||j.started).sort((a,b)=>(b.ended||b.started)-(a.ended||a.started));
+    const jobs=Object.values(PJOBS).filter(j=>(j.ended||j.started)&&(!Array.isArray(j.args)||j.args.includes(episode))).sort((a,b)=>(b.ended||b.started)-(a.ended||a.started));
     const latest=jobs[0];
     const activity=latest
       ? relTime(latest.ended||latest.started)+" · "+_jobGateLabel(latest.gate)+(latest.scene&&latest.scene!="—"?" · Scene "+latest.scene:"")
       : "No activity yet";
     const completion=totalStages?Math.round(100*doneStages/totalStages):0;
     const outcome=completion===100?"complete":decisions?"review":latest&&latest.status==="running"?"working":"ready";
-    return {completion, decisions, outcome, artwork, activity, scenes:roster.length};
+    return {completion, decisions, outcome, artwork, activity, scenes:roster.length,episode};
   }catch(e){ return {error:true}; }
 }
 function _jobMatches(j,kind,scene,episode){
@@ -2963,8 +3034,18 @@ function sceneCardHTML(s){
 }
 function openScene(scene,deferRender){
   SH_SC=String(scene); SH_PKG=null; SH_MEDIA=null; PSB=null; PSHOT_I=0; PSTAGE=null;
+  SH_DIRECTOR_CUT=null;SH_DIRECTOR_CUT_KEY=null;SH_DIRECTOR_SELECTED=0;SH_DIRECTOR_AUTOPLAY=false;
   page="pipeline"; renderTop(); renderNav(); document.getElementById("gatesbar").innerHTML="";
   if(!deferRender)renderControl();
+}
+async function continueToNextScene(){
+  const roster=await ensureRoster();
+  const current=roster.findIndex(item=>String(item.scene)===String(SH_SC));
+  if(current>=0&&current<roster.length-1){
+    openScene(roster[current+1].scene);
+    return;
+  }
+  backToBoard();
 }
 async function resolveCurrentDirection(){
   const scene=String(SH_SC||"");
@@ -2983,6 +3064,8 @@ let PSB=null,PSB_ERR=null;
 let PSHOT_I=0;
 let PSTAGE=null;
 let _PENDING_CONFIRM=null;
+let SH_DIRECTOR_CUT=null,SH_DIRECTOR_CUT_KEY=null,SH_DIRECTOR_CUT_LOADING=false;
+let SH_DIRECTOR_SELECTED=0,SH_DIRECTOR_DRAG=null,SH_DIRECTOR_AUTOPLAY=false;
 
 async function pFetchStoryboard(){
   PSB=null;PSB_ERR=null;
@@ -4918,10 +5001,8 @@ function renderShotStage(mode){
       resultFirst=true;
       body=`${m.clip?`<video controls src="${BASE}${m.clip}?v=${MEDIA_V}"></video>`:`<img class="pmedia img" src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`}`;
       decVersion="Approved take";
-      const nextAnim=shots.findIndex((shot,i)=>i!=PSHOT_I&&!((shotPipelineState(shots,i).current||{}).animation));
-      decActions=[`<span class="dec-caption">${badge("approved")}</span>`,nextAnim>=0
-        ?`<button class="btn" onclick="openShotOutcome('animation',${nextAnim})">Open next unfinished shot</button>`
-        :`<button class="btn" onclick="openStageOutcome('continuity')">Continue to Director Review</button>`,
+      decActions=[`<span class="dec-caption">${badge("approved")}</span>`,
+        `<button class="btn" onclick="openStageOutcome('continuity')">Open Director's Seat</button>`,
         `<button class="btn ghost" onclick="shRefireTake('${tok}')">Refire full take</button>`,
         `<button class="btn ghost" onclick="shEditTake('${tok}',${Number(s.durationSec||0)})">Edit part of take</button>`];
     } else if(stLabel=="model-limited"){
@@ -5297,41 +5378,140 @@ function openTimingReviewModal(){
   document.getElementById("modal").classList.add("show");
 }
 
-// ── DIRECTOR REVIEW — outgoing frame vs the next shot's incoming frame, one outcome per shot ──
+// ── DIRECTOR'S SEAT — scene rough cut from immutable approved WATCH takes ──
+function directorCutKey(){return `${SH_EP||"Ep1"}:${SH_SC||"1"}`;}
+async function loadDirectorCut(force){
+  const key=directorCutKey();
+  if(!force&&(SH_DIRECTOR_CUT_LOADING||(SH_DIRECTOR_CUT&&SH_DIRECTOR_CUT_KEY===key)))return;
+  SH_DIRECTOR_CUT_LOADING=true;SH_DIRECTOR_CUT_KEY=key;
+  try{
+    const r=await fetch(BASE+"/api/rough-cut-draft?episode="+encodeURIComponent(SH_EP)+"&scene="+encodeURIComponent(SH_SC),{cache:"no-store"});
+    const j=await r.json();
+    SH_DIRECTOR_CUT=r.ok?j:{error:j.error||"Director's Seat could not load"};
+    SH_DIRECTOR_SELECTED=Math.max(0,Math.min(SH_DIRECTOR_SELECTED,(SH_DIRECTOR_CUT.sequence||[]).length-1));
+  }catch(e){SH_DIRECTOR_CUT={error:"Can't reach the Studio server."};}
+  finally{SH_DIRECTOR_CUT_LOADING=false;if(page==="pipeline"&&pFocusedStage()==="continuity")renderContinuityStage();}
+}
+function directorCutSequence(){return (SH_DIRECTOR_CUT&&SH_DIRECTOR_CUT.sequence)||[];}
+function directorCutFrame(shotId){const m=shMedia(shotId);return m.finalFrame||m.keyframe||null;}
+function directorCutPayload(){
+  return directorCutSequence().map(entry=>({
+    shotId:entry.shotId,inSec:Number(entry.inSec||0),outSec:Number(entry.outSec||entry.durationSec||0),
+    manualTrim:!!entry.manualTrim,addedAt:entry.addedAt||null
+  }));
+}
+async function saveDirectorCut(confirmCut,message){
+  if(!directorCutSequence().length){alert("Add at least one approved take to the timeline first.");return false;}
+  const action=confirmCut?"confirm-scene":"save-scene";
+  try{
+    const r=await fetch(BASE+"/api/rough-cut-draft",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode:SH_EP,scene:String(SH_SC),action,sequence:directorCutPayload()})});
+    const j=await r.json();
+    if(!r.ok){alert(j.error||"The scene cut could not be saved.");return false;}
+    SH_DIRECTOR_CUT=j;SH_DIRECTOR_CUT_KEY=directorCutKey();
+    if(message&&typeof showToast==="function")showToast(message,true);
+    renderContinuityStage();return true;
+  }catch(e){alert("Can't reach the Studio server. Reload and try again.");return false;}
+}
+function directorCutChanged(message){
+  SH_DIRECTOR_CUT.confirmed=false;SH_DIRECTOR_CUT.confirmedCurrent=false;
+  renderContinuityStage();saveDirectorCut(false,message||"Scene cut saved");
+}
+function directorCutSelect(index,play){
+  SH_DIRECTOR_SELECTED=Math.max(0,Math.min(Number(index)||0,directorCutSequence().length-1));
+  SH_DIRECTOR_AUTOPLAY=false;renderContinuityStage();
+  if(play)requestAnimationFrame(()=>directorPreviewPlay(false));
+}
+function directorCutStep(delta){directorCutSelect(SH_DIRECTOR_SELECTED+Number(delta||0),true);}
+function directorCutRemove(index){
+  const sequence=directorCutSequence(),removed=sequence.splice(Number(index),1)[0];
+  SH_DIRECTOR_SELECTED=Math.max(0,Math.min(SH_DIRECTOR_SELECTED,sequence.length-1));
+  directorCutChanged((removed&&removed.shotId||"Take")+" removed from the scene cut");
+}
+function directorCutAdd(shotId){
+  const source=((SH_DIRECTOR_CUT&&SH_DIRECTOR_CUT.available)||[]).find(item=>item.shotId===shotId);
+  if(!source||directorCutSequence().some(item=>item.shotId===shotId))return;
+  directorCutSequence().push({...source,inSec:0,outSec:Number(source.durationSec||0),manualTrim:false,addedAt:new Date().toISOString(),current:true});
+  SH_DIRECTOR_SELECTED=directorCutSequence().length-1;
+  directorCutChanged(shotId+" added to the scene cut");
+}
+function directorCutDragStart(event,index){SH_DIRECTOR_DRAG={kind:"timeline",index:Number(index)};event.dataTransfer.effectAllowed="move";}
+function directorBinDragStart(event,shotId){SH_DIRECTOR_DRAG={kind:"bin",shotId};event.dataTransfer.effectAllowed="copy";}
+function directorCutDrop(event,index){
+  event.preventDefault();if(!SH_DIRECTOR_DRAG)return;
+  if(SH_DIRECTOR_DRAG.kind==="bin"){directorCutAdd(SH_DIRECTOR_DRAG.shotId);SH_DIRECTOR_DRAG=null;return;}
+  const sequence=directorCutSequence(),from=SH_DIRECTOR_DRAG.index,to=Math.max(0,Math.min(Number(index),sequence.length-1));
+  if(from!==to&&sequence[from]){const moved=sequence.splice(from,1)[0];sequence.splice(to,0,moved);SH_DIRECTOR_SELECTED=to;directorCutChanged("Scene cut order saved");}
+  SH_DIRECTOR_DRAG=null;
+}
+function directorCutDropAtEnd(event){
+  event.preventDefault();if(!SH_DIRECTOR_DRAG)return;
+  if(SH_DIRECTOR_DRAG.kind==="bin")directorCutAdd(SH_DIRECTOR_DRAG.shotId);
+  else{const sequence=directorCutSequence(),from=SH_DIRECTOR_DRAG.index;if(sequence[from]&&from!==sequence.length-1){sequence.push(sequence.splice(from,1)[0]);SH_DIRECTOR_SELECTED=sequence.length-1;directorCutChanged("Scene cut order saved");}}
+  SH_DIRECTOR_DRAG=null;
+}
+function directorCutTrim(index,field,value){
+  const entry=directorCutSequence()[Number(index)];if(!entry)return;
+  const duration=Number(entry.durationSec||0),numeric=Math.round(Number(value)*1000)/1000;
+  if(!Number.isFinite(numeric))return;
+  if(field==="inSec")entry.inSec=Math.max(0,Math.min(numeric,Number(entry.outSec||duration)-.1));
+  else entry.outSec=Math.min(duration,Math.max(numeric,Number(entry.inSec||0)+.1));
+  entry.manualTrim=true;directorCutChanged(entry.shotId+" trim saved");
+}
+function directorCutResetTrim(index){const entry=directorCutSequence()[Number(index)];if(!entry)return;entry.inSec=0;entry.outSec=Number(entry.durationSec||0);entry.manualTrim=false;directorCutChanged(entry.shotId+" restored to automatic handles");}
+function directorPreviewPlay(sequenceMode){
+  const video=document.getElementById("directorPreview"),entry=directorCutSequence()[SH_DIRECTOR_SELECTED];if(!video||!entry)return;
+  SH_DIRECTOR_AUTOPLAY=!!sequenceMode;
+  const start=Number(entry.inSec||0),end=Number(entry.outSec||entry.durationSec||0);
+  if(video.currentTime<start||video.currentTime>=end-.04)video.currentTime=start;
+  video.play().catch(()=>{});
+}
+function directorPlayCut(){if(!directorCutSequence().length)return;SH_DIRECTOR_SELECTED=0;SH_DIRECTOR_AUTOPLAY=true;renderContinuityStage();requestAnimationFrame(()=>directorPreviewPlay(true));}
+function directorPreviewTick(video){
+  const entry=directorCutSequence()[SH_DIRECTOR_SELECTED];if(!entry)return;
+  const end=Number(entry.outSec||entry.durationSec||0);if(video.currentTime<end-.04)return;
+  video.pause();
+  if(SH_DIRECTOR_AUTOPLAY&&SH_DIRECTOR_SELECTED<directorCutSequence().length-1){SH_DIRECTOR_SELECTED++;renderContinuityStage();requestAnimationFrame(()=>directorPreviewPlay(true));}
+  else SH_DIRECTOR_AUTOPLAY=false;
+}
+async function directorCutConfirmAndBuild(){
+  if(!await saveDirectorCut(true,"Scene cut locked — building the master"))return;
+  await shRun("stitch");
+}
 function renderContinuityStage(){
-  const art=document.getElementById("wartefact"), dec=document.getElementById("wdecision");
-  const shots=pShots();
-  const rows=shots.map(s=>{
-    const led=shLedger(s.shotId), m=shMedia(s.shotId);
-    return `<div class="controw"><div class="controw-id">${_esc(s.shotId)}</div>
-      <div class="controw-frames">
-        ${m.finalFrame?`<img src="${BASE}${m.finalFrame}?v=${MEDIA_V}"/>`:`<div class="noimg">no outgoing frame</div>`}
-        <span class="controw-arrow">→</span>
-        ${m.keyframe?`<img src="${BASE}${m.keyframe}?v=${MEDIA_V}"/>`:`<div class="noimg">n/a</div>`}
-      </div></div>`;
+  const workspace=document.getElementById("workspace");if(!workspace)return;
+  workspace.classList.add("director-seat-workspace");workspace.classList.remove("focus-workspace","result-first");
+  if(SH_DIRECTOR_CUT_KEY!==directorCutKey())SH_DIRECTOR_CUT=null;
+  if(!SH_DIRECTOR_CUT){workspace.innerHTML=`<section class="director-seat"><div class="director-empty-note"><span class="stage-spinner" aria-hidden="true"></span><div style="margin-top:10px">Loading approved WATCH takes…</div></div></section>`;loadDirectorCut();return;}
+  if(SH_DIRECTOR_CUT.error){workspace.innerHTML=`<section class="director-seat"><div class="director-empty-note">${_esc(SH_DIRECTOR_CUT.error)}<div style="margin-top:12px"><button class="btn" onclick="loadDirectorCut(true)">Retry</button></div></div></section>`;return;}
+  const sequence=directorCutSequence(),available=SH_DIRECTOR_CUT.available||[];
+  SH_DIRECTOR_SELECTED=Math.max(0,Math.min(SH_DIRECTOR_SELECTED,sequence.length-1));
+  const selected=sequence[SH_DIRECTOR_SELECTED]||null;
+  const finalState=pStatus("final"),hasMaster=!!(SH_MEDIA&&SH_MEDIA.picture);
+  const allShotsApproved=!!SH_DIRECTOR_CUT.allShotsApproved;
+  const primary=hasMaster
+    ?`<button class="btn" onclick="openStageOutcome('final')">Open final master</button>`
+    :SH_DIRECTOR_CUT.confirmedCurrent
+      ?`<button class="btn" onclick="shRun('stitch')">Build scene master</button>`
+      :allShotsApproved
+        ?`<button class="btn" onclick="directorCutConfirmAndBuild()">Lock cut &amp; build master</button>`
+        :`<button class="btn" disabled title="Approve every WATCH take first">Waiting for ${Number(SH_DIRECTOR_CUT.expectedCount||0)-Number(SH_DIRECTOR_CUT.approvedCount||0)} WATCH take${Number(SH_DIRECTOR_CUT.expectedCount||0)-Number(SH_DIRECTOR_CUT.approvedCount||0)===1?'':'s'}</button>`;
+  const timeline=sequence.map((entry,index)=>{
+    const frame=directorCutFrame(entry.shotId),duration=Number(entry.editDurationSec||(Number(entry.outSec||0)-Number(entry.inSec||0))||entry.durationSec||0);
+    const width=Math.max(148,Math.min(360,duration*12));
+    return `<button type="button" draggable="true" class="director-clip ${index===SH_DIRECTOR_SELECTED?'selected':''}" style="--clip-width:${width}px" onclick="directorCutSelect(${index},true)" ondragstart="directorCutDragStart(event,${index})" ondragover="event.preventDefault()" ondrop="directorCutDrop(event,${index})" aria-label="Edit ${_esc(entry.shotId)}">
+      <span class="director-clip-index">${index+1}</span>${frame?`<img src="${BASE}${frame}?v=${MEDIA_V}" alt="">`:`<span class="director-bin-thumb"></span>`}<span class="director-clip-copy"><b>${_esc(entry.shotId)}</b><span>${duration.toFixed(1)}s${entry.manualTrim?' · trimmed':''}</span></span></button>`;
   }).join("");
-  art.innerHTML=`<div class="artefact-center" style="text-align:left;overflow:auto">
-    <div style="color:var(--muted);margin-bottom:14px">Each shot's outgoing frame beside the next shot's incoming frame.</div>${rows}</div>`;
-  // Director Review is recorded per shot. The stage opens after every current animation take
-  // exists, then advances each take through its own explicit review outcome.
-  const per=(SH_PKG&&SH_PKG.shots||[]).map((s,i)=>{
-    const mediaMap=(SH_MEDIA&&SH_MEDIA.shots)||{};
-    const lineageOk=!!(SH_MEDIA&&SH_MEDIA.lineage&&SH_MEDIA.lineage.current);
-    return shotPipelineState(SH_PKG.shots,i,shLedger,mediaMap,lineageOk,shSceneLookOk(),null,SH_PKG&&SH_PKG.revision);
-  });
-  const completeN=per.filter(p=>p.label=="Complete").length;
-  const incompleteI=per.findIndex(p=>!((p.current||{}).continuity));
-  const continuityAction=!per.length
-    ?`<button class="btn" onclick="openStageOutcome('storyboard')">Open Story &amp; Direction</button>`
-    :incompleteI>=0
-      ?`<button class="btn" onclick="focusShotReview(${incompleteI})">Review ${_esc((shots[incompleteI]||{}).shotId||"next shot")}</button>`
-      :`<button class="btn" onclick="openStageOutcome('final')">Continue to Final Master</button>`;
-  dec.innerHTML=decisionShell("Continuity", completeN+" of "+per.length+" complete",
-    [`<div class="dec-caption">Director Review must record an outcome for every current animation take before the final master can be built.</div>`,continuityAction],"");
-  const rs=shots[Math.min(PSHOT_I,Math.max(0,shots.length-1))];
-  if(rs){const rm=shMedia(rs.shotId),reviewStage=(rm.clip||rm.finalFrame)?"review-animation":"review-keyframe";
-    if(rm.clip||rm.finalFrame||rm.keyframe)attachDepartmentPanel(dec,reviewStage,rs.shotId);
-    else dec.insertAdjacentHTML("beforeend",`<div class="deptpanel"><div class="deptname">Director Review / Continuity Supervisor</div><div class="dec-caption">Waiting for actual rendered media. This department never reviews a prompt in place of the result.</div></div>`);}
+  const approvedIds=new Set(available.map(item=>item.shotId));
+  const pending=pShots().filter(shot=>!approvedIds.has(shot.shotId)).map(shot=>`<article class="director-bin-item pending"><div class="director-bin-thumb">WATCH pending</div><div class="director-bin-copy"><b>${_esc(shot.shotId)}</b><span>Approve the take to file it here</span><p>${_esc(shot.purpose||'Production shot')}</p></div></article>`).join("");
+  const bin=available.map(item=>`<article class="director-bin-item ${item.inCut?'in-cut':''}" draggable="${item.inCut?'false':'true'}" ondragstart="directorBinDragStart(event,'${_esc(item.shotId)}')">
+    ${item.url?`<video muted playsinline preload="metadata" src="${BASE}${_esc(item.url)}"></video>`:`<div class="director-bin-thumb">Approved</div>`}<div class="director-bin-copy"><b>${_esc(item.shotId)}</b><span>${Number(item.durationSec||0).toFixed(1)}s · ${item.inCut?'on timeline':'drag to timeline'}</span><p>${_esc(item.purpose||'Approved WATCH take')}</p></div></article>`).join("");
+  workspace.innerHTML=`<section class="director-seat" aria-label="Scene ${_esc(SH_SC)} Director's Seat">
+    <header class="director-seat-head"><div class="director-seat-title"><span class="director-seat-kicker">Scene ${_esc(SH_SC)} · Director's Seat</span><h2>Build the scene cut</h2><p>Approved WATCH takes stay protected. Reorder or trim the scene, then lock one cut for Final Master.</p></div><div class="director-seat-actions"><span class="director-seat-status ${SH_DIRECTOR_CUT.confirmedCurrent?'current':''}">${SH_DIRECTOR_CUT.confirmedCurrent?'Cut locked':SH_DIRECTOR_CUT.saved?'Changes saved':'Ready to edit'}</span><button class="btn ghost" onclick="continueToNextScene()">Next scene</button>${primary}</div></header>
+    <div class="director-seat-main"><div class="director-preview"><div class="director-preview-screen">${selected&&selected.url?`<video id="directorPreview" controls playsinline preload="metadata" src="${BASE}${_esc(selected.url)}?v=${MEDIA_V}" onloadedmetadata="this.currentTime=${Number(selected.inSec||0)}" ontimeupdate="directorPreviewTick(this)"></video>`:`<div class="director-preview-empty">Select an approved take from the timeline.</div>`}</div><div class="director-transport"><div class="director-transport-buttons"><button class="director-icon" title="Previous clip" aria-label="Previous clip" onclick="directorCutStep(-1)">|◀</button><button class="director-icon" title="Play scene cut" aria-label="Play scene cut" onclick="directorPlayCut()">▶</button><button class="director-icon" title="Next clip" aria-label="Next clip" onclick="directorCutStep(1)">▶|</button></div><div class="director-now">${selected?_esc(selected.shotId+" · "+(selected.purpose||"Approved take")):"No clip selected"}</div><div class="director-time">${selected?Number(selected.inSec||0).toFixed(1)+"–"+Number(selected.outSec||selected.durationSec||0).toFixed(1)+"s":"0.0s"} · cut ${Number(SH_DIRECTOR_CUT.totalDurationSec||0).toFixed(1)}s</div></div></div>
+      <aside class="director-bin"><div class="director-panel-label"><span>Scene shot bin</span><span>${Number(SH_DIRECTOR_CUT.approvedCount||available.length)}/${Number(SH_DIRECTOR_CUT.expectedCount||pShots().length)} approved</span></div><div class="director-bin-list">${bin}${pending}${!bin&&!pending?`<div class="director-empty-note">Approved WATCH takes will appear here automatically.</div>`:""}</div></aside></div>
+    <div class="director-timeline-band"><div class="director-timeline-meta"><span>VIDEO · drag clips to reorder</span><span>${sequence.length} clip${sequence.length===1?'':'s'}</span></div><div class="director-timeline" ondragover="event.preventDefault()" ondrop="directorCutDropAtEnd(event)">${timeline||`<div class="director-timeline-empty">Drag an approved take here</div>`}</div></div>
+    ${selected?`<div class="director-inspector"><div class="director-inspector-copy"><b>${_esc(selected.shotId)}</b><span>${selected.manualTrim?'Manual trim active':'Automatic live-motion handles will be used in the master'}</span></div><label class="director-trim">In point<input type="number" min="0" max="${Number(selected.durationSec||0)}" step="0.1" value="${Number(selected.inSec||0)}" onchange="directorCutTrim(${SH_DIRECTOR_SELECTED},'inSec',this.value)"></label><label class="director-trim">Out point<input type="number" min="0.1" max="${Number(selected.durationSec||0)}" step="0.1" value="${Number(selected.outSec||selected.durationSec||0)}" onchange="directorCutTrim(${SH_DIRECTOR_SELECTED},'outSec',this.value)"></label><button class="btn ghost" onclick="directorCutResetTrim(${SH_DIRECTOR_SELECTED})">Reset trim</button><button class="btn ghost" onclick="directorCutRemove(${SH_DIRECTOR_SELECTED})">Remove from cut</button></div>`:`<div class="director-empty-note">Add a take to begin the scene cut.</div>`}
+  </section>`;
 }
 
 // ── FINAL — the assembled scene ──
@@ -5371,7 +5551,7 @@ function renderFinalStage(){
     let finalActions=[`<span class="dec-caption">${badge(finalState.state,finalState.sub)}</span>`];
     if(finalState.state=="ready"||finalState.state=="blocked")finalActions.push(`<button class="btn" onclick="shRun('stitch')">${finalState.state=="blocked"?"Rebuild current":"Build"} post master</button>`);
     else if(finalState.state=="generating")finalActions.push(`<button class="btn ghost" onclick="renderControl()">Refresh progress</button>`);
-    else finalActions.push(`<button class="btn" onclick="openStageOutcome('continuity')">Resolve in Director Review</button>`);
+    else finalActions.push(`<button class="btn" onclick="openStageOutcome('continuity')">Open Director's Seat</button>`);
     dec.innerHTML=decisionShell("Final Master","Conform · mix · captions · delivery QC",finalActions,"");
   }
   if(has)attachDepartmentPanel(dec,"review-final",null);

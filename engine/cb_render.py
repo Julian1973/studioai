@@ -90,6 +90,7 @@ sys.path.insert(0, str(HERE))
 import cb_engine
 import cb_gen
 import cb_post
+import cb_rough_cut
 import cb_departments
 import cb_lineage
 import cb_scripts
@@ -9844,8 +9845,14 @@ def metrics(scene, episode="Ep1", log=print):
 # ── Gate 9 — transactional post candidate, then human final-master approval ─────────────
 def _post_input_signature(pkg, scene, episode="Ep1"):
     """Exact approved source graph for one post build."""
+    edit_decision = cb_rough_cut.scene_edit_decision(
+        episode, str(scene), out=HERE.parent / "cb-output")
+    package_shots = {shot["shotId"]: shot for shot in (pkg.get("shots") or [])}
     shots = []
-    for shot in pkg.get("shots") or []:
+    for cut in edit_decision["sequence"]:
+        shot = package_shots.get(cut["shotId"])
+        if not shot:
+            raise Refused(f"REFUSED — scene cut references unknown shot {cut['shotId']}")
         ledger = _ledger(pkg, shot["shotId"])
         review = ((ledger.get("departmentWork") or {}).get("review-animation") or {}).get(
             "approved") or {}
@@ -9869,12 +9876,14 @@ def _post_input_signature(pkg, scene, episode="Ep1"):
             "directorReviewEvidenceHash": hashlib.sha256(json.dumps(
                 review_evidence, sort_keys=True, ensure_ascii=False,
                 separators=(",", ":")).encode()).hexdigest(),
+            "editDecision": cut,
         })
     inputs = {
         "postPolicyVersion": cb_post.POST_POLICY_VERSION,
         "postRuntimeHash": _sha256_file(cb_post.__file__),
         "packageInputSignature": pkg.get("inputSignature"),
         "orderedApprovedShots": shots,
+        "directorCut": edit_decision,
         "masteringPlatform": cb_post.DEFAULT_PLATFORM,
     }
     return cb_lineage.dependency_signature("scene-post", inputs)
@@ -9939,9 +9948,9 @@ def post_status(pkg, scene=None, episode=None):
             "history": list(container.get("history") or [])}
 
 
-def _scene_post_sources(pkg):
+def _scene_post_sources(pkg, scene=None, episode=None):
     """Collect only live approved units; retired design history is not a blocker."""
-    sources, missing = [], []
+    source_by_id, missing = {}, []
     for s in pkg["shots"]:
         led = _ledger(pkg, s["shotId"])
         statuses = {
@@ -9954,18 +9963,36 @@ def _scene_post_sources(pkg):
                 for status in statuses if status)):
             continue
         if led.get("status") == "approved" and led.get("approvedTake"):
-            sources.append({"shotId": s["shotId"], "approvedTake": led["approvedTake"],
-                            "dialogueLines": list(s.get("dialogueLines") or []),
-                            "approvedVoice": led.get("voPath"),
-                            "audioProvenance": led.get("audioProvenance")})
+            source_by_id[s["shotId"]] = {
+                "shotId": s["shotId"], "approvedTake": led["approvedTake"],
+                "dialogueLines": list(s.get("dialogueLines") or []),
+                "approvedVoice": led.get("voPath"),
+                "audioProvenance": led.get("audioProvenance")}
         else:
             missing.append(s["shotId"])
+    if missing or scene is None:
+        return list(source_by_id.values()), missing
+    episode = episode or pkg.get("episode") or "Ep1"
+    cut = cb_rough_cut.scene_edit_decision(
+        episode, str(scene), out=HERE.parent / "cb-output")
+    if not cut.get("confirmedCurrent"):
+        raise Refused("REFUSED — lock the current Director's Seat cut before building the master")
+    sources = []
+    for entry in cut["sequence"]:
+        source = source_by_id.get(entry["shotId"])
+        if not source:
+            raise Refused(f"REFUSED — scene cut source is unavailable: {entry['shotId']}")
+        sources.append({
+            **source, "editInSec": entry.get("inSec"),
+            "editOutSec": entry.get("outSec"),
+            "manualTrim": bool(entry.get("manualTrim")),
+        })
     return sources, missing
 
 
 def stitch_scene(scene, episode="Ep1", log=print):
     pkg, path = load_pkg(scene, episode)
-    sources, missing = _scene_post_sources(pkg)
+    sources, missing = _scene_post_sources(pkg, scene, episode)
     if missing:
         raise Refused(f"REFUSED — cannot stitch scene {scene}: unapproved shots {missing}")
     post = pkg.setdefault("postProduction", {"candidate": None, "approved": None,

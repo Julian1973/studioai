@@ -228,7 +228,7 @@ EDGE_FRAMES = 4     # "3 to 5 frames" — trimmed off EVERY clip's own opening e
                     # where the motion is alive, not where it's still ramping up or ramping down.
 DEFAULT_FPS = DELIVERY_FPS  # fallback only if a clip's own fps can't be read.
 POST_SCHEMA_VERSION = 2
-POST_POLICY_VERSION = "scene-post-v2-delivery-qc"
+POST_POLICY_VERSION = "scene-post-v3-director-cut"
 
 def _clip_fps(clip):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
@@ -240,7 +240,8 @@ def _clip_fps(clip):
         return DEFAULT_FPS
 
 
-def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=EDGE_FRAMES):
+def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=EDGE_FRAMES,
+                 edit_decisions=None):
     """Calculate the one authoritative trim and scene-time map used by picture and captions.
     Dialogue windows are protected from the generic edge/settle trim; a clip shorter than an
     approved line refuses instead of clipping words off the final film."""
@@ -249,6 +250,8 @@ def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=ED
     protected_windows = protected_windows or [[] for _ in clips]
     if len(protected_windows) != len(clips):
         raise ValueError("protected dialogue windows must align one-for-one with clips")
+    if edit_decisions is not None and len(edit_decisions) != len(clips):
+        raise ValueError("edit decisions must align one-for-one with clips")
     durs = [_dur(clip) for clip in clips]
     fpss = [_clip_fps(clip) for clip in clips]
     if any(duration <= 0 for duration in durs):
@@ -257,9 +260,19 @@ def conform_plan(clips, protected_windows=None, settle_trim=None, edge_frames=ED
     for index, (clip, duration, fps, windows) in enumerate(
             zip(clips, durs, fpss, protected_windows)):
         edge = edge_frames / fps
-        start = edge
-        end = duration if index == len(clips) - 1 else max(
-            start + 0.5, duration - settle_trim - edge)
+        decision = (edit_decisions or [{} for _ in clips])[index] or {}
+        if decision.get("manualTrim"):
+            try:
+                start = float(decision["inSec"])
+                end = float(decision["outSec"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError(f"malformed edit decision for {clip}") from exc
+            if start < 0 or end <= start or end > duration + 0.01:
+                raise ValueError(f"edit decision falls outside {clip}'s {duration:.3f}s duration")
+        else:
+            start = edge
+            end = duration if index == len(clips) - 1 else max(
+                start + 0.5, duration - settle_trim - edge)
         if windows:
             starts, ends = [], []
             for window in windows:
@@ -788,7 +801,7 @@ def replace_guide_dialogue(video, approved_voice, out):
 
 def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                      platform=DEFAULT_PLATFORM, candidate_id=None, music=None,
-                     ambience=None):
+                     ambience=None, edit_decisions=None):
     """Build one immutable post candidate transactionally.
 
     Nothing is exposed at its final path until conform, mix, vertical derivative, captions,
@@ -844,7 +857,14 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
                 post_sources.append(clip)
         normalized = _norm(post_sources)
         protected = [shot.get("dialogueLines") or [] for shot in shots]
-        plan = conform_plan(normalized, protected_windows=protected)
+        if edit_decisions is None:
+            edit_decisions = [{
+                "inSec": shot.get("editInSec", 0),
+                "outSec": shot.get("editOutSec"),
+                "manualTrim": bool(shot.get("manualTrim")),
+            } for shot in shots]
+        plan = conform_plan(
+            normalized, protected_windows=protected, edit_decisions=edit_decisions)
 
         names = {
             "conformedPicture": "picture_conformed.mp4",
@@ -968,8 +988,9 @@ def build_scene_post(shots, out_root, episode, scene_num, input_signature,
             "inputSignature": input_signature,
             "orderedShots": [{"shotId": shot["shotId"],
                                "approvedTake": str(shot["approvedTake"]),
-                               "approvedTakeHash": _sha256(shot["approvedTake"])}
-                              for shot in shots],
+                               "approvedTakeHash": _sha256(shot["approvedTake"]),
+                               "editDecision": edit_decisions[index]}
+                              for index, shot in enumerate(shots)],
             "audioProvenance": [
                 {**item, "postSourcePath": str(
                     final_dir / pathlib.Path(item["postSourcePath"]).name)}

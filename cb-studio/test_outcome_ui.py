@@ -145,9 +145,9 @@ def test_blocked_rejected_review_and_complete_states_offer_outcomes():
         "Resolve the previous shot",
         "Next: create revision",
         "Redesign with Animation Director",
-        "Open next unfinished shot",
+        "Open Director's Seat",
         "focusShotReview",
-        "Continue to Final Master",
+        "Lock cut &amp; build master",
         "Approve or reject the final review",
         "Rebuild current post master",
         "Back to all scenes",
@@ -231,6 +231,25 @@ def test_scene_review_exposes_the_simple_director_journey():
     assert "storyboard-working" in APP
     assert "stopped on protection" in APP
     assert "Retry unfinished scene directions" in APP
+
+
+def test_approved_watch_takes_open_the_scene_directors_seat():
+    assert "{id:\"continuity\",name:\"Director's Seat\",glyph:\"⇄\"}" in APP
+    assert 'onclick="openStageOutcome(\'continuity\')">Open Director\'s Seat</button>' in APP
+    assert ">Continue to Director Review</button>" not in APP
+    assert "function renderContinuityStage()" in APP
+    assert "Scene shot bin" in APP
+    assert "WATCH pending" in APP
+    assert "directorCutDragStart" in APP and "directorCutDrop" in APP
+    assert "directorCutTrim" in APP
+    assert "Lock cut &amp; build master" in APP
+    assert "/api/rough-cut-draft?episode=" in APP
+    assert 'action,sequence:directorCutPayload()' in APP
+
+
+def test_next_scene_navigation_preserves_scene_progress():
+    assert "async function continueToNextScene()" in APP
+    assert "openScene(roster[current+1].scene)" in APP
 
 
 def test_internal_direction_is_not_a_fake_human_approval_gate():

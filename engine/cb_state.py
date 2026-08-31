@@ -16,9 +16,10 @@ import cb_lineage
 import cb_quality
 import cb_render
 import cb_audio_authority
+import cb_rough_cut
 
 
-POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v4"
+POLICY_VERSION = "canon-locked-current-direction-outcome-approval-v5"
 
 _SHOT_STAGE_DEPENDENCIES = {
     "direction": {
@@ -805,28 +806,31 @@ def production_state(scene, episode="Ep1", intake=None):
             f"{approved_animation} accepted; {ready_animation} ready; "
             f"{max(0, len(shots) - approved_animation - ready_animation)} waiting")
 
-    continuity_count = sum(
-        1 for shot in shots if shot["current"]["continuity"])
-    pending_reviews = sum(
-        1 for shot in shots if shot["pending"]["directorReview"])
-    if stages["animation"]["state"] != "approved":
-        stages["continuity"] = _stage("locked", "accept every current animation take first")
-    elif pending_reviews:
-        stages["continuity"] = _stage(
-            "awaiting", f"{pending_reviews} Director Review decision(s) pending")
-    elif shots and continuity_count == len(shots):
-        stages["continuity"] = _stage(
-            "approved", f"{continuity_count} of {len(shots)} reviewed")
+    if approved_animation == 0:
+        stages["continuity"] = _stage("locked", "accept the first WATCH take to open Director's Seat")
     else:
-        stages["continuity"] = _stage(
-            "ready", f"{continuity_count} of {len(shots)} reviewed")
+        try:
+            cut = cb_rough_cut.scene_status(
+                episode, str(scene), out=cb_render.HERE.parent / "cb-output")
+        except (OSError, ValueError) as exc:
+            stages["continuity"] = _stage("blocked", f"Director's Seat could not load: {exc}")
+        else:
+            if cut["staleCount"]:
+                stages["continuity"] = _stage(
+                    "blocked", f"{cut['staleCount']} approved cut source(s) changed")
+            elif cut["confirmedCurrent"]:
+                stages["continuity"] = _stage(
+                    "approved", f"{len(cut['sequence'])} approved take(s) locked in the scene cut")
+            else:
+                stages["continuity"] = _stage(
+                    "ready", f"{cut['approvedCount']} of {cut['expectedCount']} approved take(s) ready in Director's Seat")
 
     post = cb_render.post_status(pkg, scene, episode)
     final_status = cb_render._department_record_status(
         pkg, None, "review-final", scene, episode)
     final_work = (pkg.get("departmentWork") or {}).get("review-final") or {}
     if stages["continuity"]["state"] != "approved":
-        stages["final"] = _stage("locked", "approve every current Director Review first")
+        stages["final"] = _stage("locked", "lock the scene cut in Director's Seat first")
     elif post["candidate"]["exists"] and not post["candidate"]["current"]:
         stages["final"] = _stage("blocked", "post candidate is stale or changed; rebuild it")
     elif post["candidate"]["current"] and final_work.get("candidate"):

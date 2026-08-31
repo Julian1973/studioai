@@ -5846,28 +5846,16 @@ async function shRestoreVoiceWork(tok){
 async function shCorrectDialogue(tok,occurrenceId,speaker,oldExactText,proposedText){
   const corrected=String(proposedText||"").trim();
   if(!corrected||corrected===String(oldExactText||"").trim())return;
-  if(!confirm("Save these exact words as a new immutable script version? StudioAI will redrive Story & Direction and bring the revised direction back for your approval. Existing media stays in history. No provider will run."))return;
+  if(!confirm("Save these exact words? The approved Direction and keyframe stay locked. StudioAI will reopen only this shot's HEAR and WATCH stages. Existing media stays in history. No provider will run."))return;
   try{
-    showStageWorking("Saving the correction","StudioAI is versioning the exact script words and preparing a revised direction candidate. No media provider will run.");
+    showStageWorking("Saving the correction","StudioAI is versioning the exact words and reopening only this shot's HEAR and WATCH stages. No media provider will run.");
     const r=await fetch(BASE+"/api/script-dialogue-correction",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,dialogueOccurrenceId:occurrenceId,speaker,oldExactText,newExactText:corrected})});
     const j=await r.json();
     if(!j.ok){renderWorkspaceBody();alert("Couldn't correct the script: "+(j.error||"failed"));return;}
-    if(!j.jobId){renderWorkspaceBody();alert("The script was versioned, but Story & Direction did not start. Your existing work remains preserved; retry Story & Direction from the episode board.");return;}
-    SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_POLL_MISSES=0;
-    PJOBS[j.jobId]={jobId:j.jobId,scene:String(SH_SC),gate:"story-intake:correction",
-      args:[String(SH_EP||"")],status:"running",step:"Redriving Story & Direction from the corrected script",started:Date.now()/1000,ended:null};
-    SH_AFTER_JOB=async job=>{
-      if(job&&job.status==="done"){
-        if(typeof showToast==="function")showToast("Revised Story & Direction is ready for your approval",true);
-        location.hash=`p=${encodeURIComponent(PROJ.slug)}&pg=sceneboard&ep=${encodeURIComponent(String(SH_EP).replace(/^Ep/i,""))}`;
-        await renderControl();
-      }else{
-        if(typeof showToast==="function")showToast("The correction is saved, but the direction redrive needs attention. No media ran.",false);
-        renderWorkspaceBody();
-      }
-    };
-    if(typeof showToast=="function")showToast("Script corrected — redriving direction with no media spend",true);
-    shPollStart();renderJobBanner();
+    delete SH_VOICE_CACHE[tok];delete SH_VOICE_DIRTY[tok];
+    if(typeof showToast=="function")showToast("Words corrected — Direction and SEE preserved; HEAR and WATCH reopened",true);
+    location.hash=`p=${encodeURIComponent(PROJ.slug)}&pg=pipeline&ep=${encodeURIComponent(String(SH_EP).replace(/^Ep/i,""))}&sc=${encodeURIComponent(String(SH_SC))}&st=voice&shot=${encodeURIComponent(tok)}`;
+    await renderControl();
   }catch(e){alert("Can't reach the studio server. Reload and try again.");}
 }
 function shScriptLineDirty(input){

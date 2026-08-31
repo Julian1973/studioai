@@ -1455,11 +1455,13 @@ def shot_media_map(pkg, scene, episode="Ep1"):
             "candidateUrl": _url_from_abs(item.get("candidatePath")),
             "sourceUrl": _url_from_abs(item.get("sourcePath") or item.get("path")),
         } for item in (ledger.get("editHistory") or [])[-12:]]
-        # A freshly generated HEAR track is authoritative shot state immediately. Asset
-        # registry persistence may follow in the same workflow, but the decision surface
-        # must never keep showing older auditions while the ledger already contains the
-        # complete current track.
-        record["vo"] = record.get("vo") or _url_from_abs(ledger.get("voPath"))
+        # The continuity ledger is the authority for the current HEAR take. Registry
+        # entries are durable media history and can outlive a scoped dialogue change;
+        # allowing one of those entries to populate `vo` would make superseded audio
+        # appear current and approvable while the replacement is still pending.
+        record["vo"] = _url_from_abs(ledger.get("voPath"))
+        record["voicePrevious"] = _url_from_abs(
+            (ledger.get("voicePrevious") or {}).get("path"))
         # Relay shots must show their inherited opening frame even while a scoped
         # downstream amendment is waiting for review. This is visual evidence only;
         # approval and provider spend remain separate state.
@@ -4825,23 +4827,19 @@ class H(http.server.SimpleHTTPRequestHandler):
                     # The job-finalizer reindex remains useful for publishing its output.
                     synchronize_episode_script_registry(
                         ep, version["scriptVersionId"])
-                    # A dialogue correction changes the immutable script lineage. Start the
-                    # existing no-media Story Director pass as part of the same operation so
-                    # the browser never falls into a stale, apparently empty production
-                    # graph. The resulting direction remains a candidate: Julian must still
-                    # approve it before scene packages can be promoted or any provider can run.
-                    redrive_job = _start(
-                        _jid(f"story_intake_correction_{ep}_{scene}"),
-                        "story-intake:correction", scene,
-                        ["cb_intake.py", "run", ep])
+                    amendment = _CBR.apply_scoped_dialogue_correction(
+                        scene, sid, occurrence_id, old_text, new_text,
+                        version["scriptVersionId"], current.get("scriptVersionId"), ep,
+                        reviewed_by="Julian")
                     self._json(200, {"ok": True, "scriptVersionId": version["scriptVersionId"],
                                      "dialogueOccurrenceId": occurrence_id,
                                      "speaker": speaker, "providerCalled": False,
                                      "changeScope": change_scope,
                                      "affectedScene": scene, "affectedShotId": sid,
-                                     "redriveScope": "story-direction-candidate",
-                                     "jobId": redrive_job,
-                                     "next": "review-story-direction"})
+                                     "amendment": amendment,
+                                     "preservedStages": ["direction", "scenelook", "keyframe"],
+                                     "invalidatedStages": ["voice", "animation", "continuity", "final"],
+                                     "next": "review-hear"})
                 elif self.path == "/api/shot-voice-save":
                     lines = d.get("lines") or []
                     rec = _CBR.save_voice_working(scene, sid, lines, ep)

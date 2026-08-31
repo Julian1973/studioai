@@ -386,8 +386,10 @@ def test_success_is_published_only_after_director_cache_refresh():
     assert '!["running", "queued", "finalizing"].includes(job.status)' in JS
 
 
-def test_fresh_voice_track_is_visible_before_registry_catches_up():
-    assert 'record["vo"] = record.get("vo") or _url_from_abs(ledger.get("voPath"))' in SERVER
+def test_current_voice_track_comes_only_from_the_continuity_ledger():
+    assert 'record["vo"] = _url_from_abs(ledger.get("voPath"))' in SERVER
+    assert 'record["vo"] = record.get("vo") or' not in SERVER
+    assert 'record["voicePrevious"] = _url_from_abs(' in SERVER
 
 
 def test_keyframe_refire_is_one_visible_replacement_job():

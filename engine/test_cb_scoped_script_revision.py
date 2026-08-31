@@ -175,6 +175,41 @@ def test_lineage_accepts_explicit_same_scene_shot_amendment(tmp_path, monkeypatc
     assert cb_render.lineage_status(package, "1", "Ep2")["current"] is True
 
 
+def test_lineage_accepts_explicit_amendment_across_accumulated_script_revisions(
+        tmp_path, monkeypatch):
+    source = tmp_path / "old-script.txt"
+    source.write_text("old immutable script", encoding="utf-8")
+    old_sha = cb_lineage.sha256_file(source)
+    storyboard = tmp_path / "storyboard.json"
+    storyboard.write_text('{"approved":true}', encoding="utf-8")
+    storyboard_md5 = hashlib.md5(storyboard.read_bytes()).hexdigest()
+    storyboard_sha = cb_lineage.sha256_file(storyboard)
+    package_id = "sha256:" + old_sha
+    current_id = "sha256:" + "d" * 64
+    inputs = {"scriptVersionId": package_id, "storyboardSha256": storyboard_sha}
+    package = {
+        "revision": 6,
+        "sourceScript": {"scriptVersionId": package_id, "sha256": old_sha,
+                         "contentPath": source.name},
+        "sourceStoryboard": {"path": storyboard.name, "md5": storyboard_md5,
+                             "sha256": storyboard_sha},
+        "inputSignature": cb_lineage.dependency_signature("production-package", inputs),
+        "scopedAmendments": [{"kind": "dialogue-correction", "shotId": "S3.SH4",
+                              "baseScriptVersionId": package_id,
+                              "scriptVersionId": current_id}],
+    }
+    current = {
+        "scriptVersionId": current_id, "sha256": "d" * 64,
+        "previousScriptVersionId": "sha256:" + "c" * 64,
+        "changeScope": {"kind": "dialogue-correction", "scene": "3",
+                        "shotId": "S3.SH4"},
+    }
+    monkeypatch.setattr(cb_render, "ROOT", tmp_path)
+    monkeypatch.setattr(cb_render, "SCRIPT_STORE", _Store(current))
+
+    assert cb_render.lineage_status(package, "3", "Ep2")["current"] is True
+
+
 def test_v4_forward_gate_accepts_exact_registered_scoped_director_amendment(
         tmp_path, monkeypatch):
     shot = {

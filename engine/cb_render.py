@@ -394,16 +394,17 @@ def lineage_status(pkg, scene, episode="Ep1"):
             amendment = next((item for item in (pkg.get("scopedAmendments") or [])
                               if item.get("shotId") == scope.get("shotId") and
                               item.get("scriptVersionId") == current_script and
-                              item.get("kind") == scope.get("kind")), None)
+                              item.get("kind") == scope.get("kind") and
+                              item.get("baseScriptVersionId", package_script) ==
+                              package_script), None)
             scoped_package_match = bool(
                 prior_scene == changed_scene and scope.get("shotId") and amendment)
             previous_source_match = bool(
                 scope.get("kind") in ("dialogue-correction", "dialogue-format-cleanup") and
                 source_path.is_file() and
-                ((scope.get("kind") == "dialogue-format-cleanup" and
-                  cb_lineage.sha256_file(source_path) == source.get("sha256")) or
-                 (prior_scene and changed_scene and
-                  (prior_scene < changed_scene or scoped_package_match) and
+                (scope.get("kind") == "dialogue-format-cleanup" or
+                 scoped_package_match or
+                 (prior_scene and changed_scene and prior_scene < changed_scene and
                   package_script == current.get("previousScriptVersionId"))) and
                 cb_lineage.sha256_file(source_path) == source.get("sha256"))
         except (OSError, TypeError, ValueError):
@@ -3224,7 +3225,29 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
     if version < 3:
         return None
     source = pkg.get("sourceStoryboard") or {}
+    current_script_id = None
+    try:
+        current_script_id = SCRIPT_STORE.current(episode, required=True)["scriptVersionId"]
+    except (cb_scripts.ScriptStoreError, cb_lineage.LineageError):
+        pass
+    amendment = next((item for item in reversed(pkg.get("scopedAmendments") or [])
+                      if item.get("shotId") == shot.get("shotId") and
+                      (not current_script_id or
+                       item.get("scriptVersionId") == current_script_id)), None)
     path = _declared_storyboard_path(pkg, scene, episode)
+    if amendment and amendment.get("storyboardPath"):
+        path = pathlib.Path(amendment["storyboardPath"])
+        if not path.is_absolute():
+            path = ROOT / path
+        try:
+            path.resolve().relative_to(ROOT.resolve())
+        except ValueError as exc:
+            raise Refused(
+                f"REFUSED — {shot['shotId']}'s scoped Director amendment escapes the studio") from exc
+        if (not path.is_file() or
+                _sha256_file(path) != amendment.get("storyboardSha256")):
+            raise Refused(
+                f"REFUSED — {shot['shotId']}'s scoped Director amendment is missing or changed")
     if source.get("approvalState") != "approved" or not path.exists():
         raise Refused(
             f"REFUSED — {shot['shotId']} needs a human-approved Director storyboard before "
@@ -3240,11 +3263,11 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
     scoped_card = storyboard.get("shot")
     if (storyboard.get("shotId") == shot.get("shotId") and
             isinstance(scoped_card, dict)):
-        amendment = next((item for item in (pkg.get("scopedAmendments") or [])
-                          if item.get("shotId") == shot.get("shotId") and
-                          item.get("scriptVersionId") == storyboard.get("scriptVersionId")),
-                         None)
-        if not amendment:
+        registered = next((item for item in (pkg.get("scopedAmendments") or [])
+                           if item.get("shotId") == shot.get("shotId") and
+                           item.get("scriptVersionId") == storyboard.get("scriptVersionId")),
+                          None)
+        if not registered:
             raise Refused(
                 f"REFUSED — {shot['shotId']}'s scoped Director amendment is not registered")
         if scoped_card != shot:
@@ -3286,6 +3309,159 @@ def _require_forward_directing_source(pkg, shot, scene, episode):
             f"REFUSED — {shot['shotId']} lacks forward directing contracts: "
             + ", ".join(missing))
     return card
+
+
+def apply_scoped_dialogue_correction(scene, shot_id, old_occurrence_id, old_exact_text,
+                                     new_exact_text, script_version_id,
+                                     previous_script_version_id, episode="Ep1",
+                                     reviewed_by="Julian", log=print):
+    """Rebase one locked dialogue occurrence without reopening its scene or siblings.
+
+    The immutable script remains the authority. This transaction changes only the named
+    production shot's dialogue identity/text, preserves its approved visual inputs, and
+    invalidates HEAR/WATCH derivatives. Existing media stays on disk for audit/comparison.
+    """
+    old_exact_text = str(old_exact_text or "").strip()
+    new_exact_text = str(new_exact_text or "").strip()
+    if not old_occurrence_id or not old_exact_text or not new_exact_text:
+        raise Refused("REFUSED — a scoped dialogue correction needs occurrence and exact words")
+    pkg, path = load_pkg(scene, episode)
+    shot = _shot(pkg, shot_id)
+    ledger = _ledger(pkg, shot_id)
+    source_script_id = (pkg.get("sourceScript") or {}).get("scriptVersionId")
+
+    matches = [line for line in (shot.get("dialogueLines") or [])
+               if line.get("dialogueOccurrenceId") == old_occurrence_id and
+               str(line.get("exactText") or "").strip() == old_exact_text]
+    if len(matches) != 1:
+        raise Refused(
+            f"REFUSED — {shot_id} does not contain exactly one matching approved dialogue occurrence")
+
+    import cb_intake  # lazy import keeps the render module's startup dependency acyclic
+    script_path = SCRIPT_STORE.content_path(episode)
+    parsed = cb_intake.parse_script(
+        script_path.read_text(encoding="utf-8"), log=lambda *args, **kwargs: None)
+    cb_intake._annotate_source_events(parsed["events"], script_version_id)
+    current_events = [event for event in parsed["events"]
+                      if str(event.get("scene")) == str(scene) and
+                      event.get("type") == "dialogue" and
+                      _resolve_char(event.get("speaker"), _characters_cfg()) ==
+                      _resolve_char(matches[0].get("speaker"), _characters_cfg()) and
+                      str(event.get("text") or "").strip() == new_exact_text]
+    if len(current_events) != 1:
+        raise Refused(
+            f"REFUSED — the corrected words do not resolve to one current script event in scene {scene}")
+    event = current_events[0]
+
+    line = matches[0]
+    old_event_id = line.get("sourceEventId")
+    line.update({
+        "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+        "sourceEventId": event["sourceEventId"],
+        "exactText": new_exact_text,
+    })
+    delivery = str(line.get("delivery") or "")
+    prefix = re.match(r"^\s*((?:\[[^\]]+\]\s*)+)", delivery)
+    line["delivery"] = ((prefix.group(1) if prefix else "") + new_exact_text).strip()
+
+    def replace_exact(value):
+        return value.replace(old_exact_text, new_exact_text) if isinstance(value, str) else value
+
+    for plan in shot.get("storyboardInternalShotPlanApproved") or []:
+        plan["storyAction"] = replace_exact(plan.get("storyAction"))
+    for brief in shot.get("voiceDirectorBrief") or []:
+        if brief.get("dialogueOccurrenceId") == old_occurrence_id:
+            brief.update({
+                "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+                "sourceEventId": event["sourceEventId"],
+                "exactDialogue": new_exact_text,
+            })
+    shot["audioBrief"] = replace_exact(shot.get("audioBrief"))
+
+    now = _now()
+    for stage in ("voice", "animation", "review-animation"):
+        work = (ledger.get("departmentWork") or {}).get(stage)
+        if not work:
+            continue
+        for key in ("approved", "candidate"):
+            record = work.get(key)
+            if record:
+                archived = json.loads(json.dumps(record))
+                archived.update({"outcome": "superseded-by-script-correction",
+                                 "decisionAt": now, "reviewedBy": reviewed_by})
+                work.setdefault("history", []).append(archived)
+            work[key] = None
+
+    ledger["voiceApproval"] = None
+    ledger["workingVoice"] = None
+    if ledger.get("voPath"):
+        ledger["voicePrevious"] = {
+            "path": ledger["voPath"],
+            "generatedFrom": ledger.get("voGeneratedFrom"),
+            "supersededAt": now,
+            "reason": "script-dialogue-correction",
+        }
+    ledger["voPath"] = None
+    ledger["voGeneratedFrom"] = None
+    ledger["voInputSignature"] = None
+    ledger["voiceStaleDueToScriptCorrection"] = {
+        "at": now, "scriptVersionId": script_version_id,
+        "previousDialogueOccurrenceId": old_occurrence_id,
+        "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+    }
+    for key in ("approval", "approvedCandidate", "approvedTake", "harvestFrame",
+                "candidatePaths", "batch", "batchId", "pendingSpendAuth",
+                "lastBatchBinding", "disclosure", "firedAt"):
+        ledger[key] = None
+    ledger["status"] = "designed"
+
+    amendment_dir = ROOT / "cb-output" / "creative" / "amendments"
+    amendment_dir.mkdir(parents=True, exist_ok=True)
+    amendment_path = amendment_dir / f"{episode}_{shot_id}_{script_version_id.split(':')[-1][:12]}.json"
+    amendment_doc = {
+        "schemaVersion": 1,
+        "approvalState": "approved",
+        "approvedAt": now,
+        "approvedBy": reviewed_by,
+        "kind": "dialogue-correction",
+        "scene": str(scene),
+        "shotId": shot_id,
+        "scriptVersionId": script_version_id,
+        "previousScriptVersionId": previous_script_version_id,
+        "baseScriptVersionId": source_script_id,
+        "previousDialogueOccurrenceId": old_occurrence_id,
+        "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+        "previousSourceEventId": old_event_id,
+        "sourceEventId": event["sourceEventId"],
+        "previousExactText": old_exact_text,
+        "correctedExactText": new_exact_text,
+        "shot": shot,
+    }
+    amendment_path.write_text(
+        json.dumps(amendment_doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    amendment_hash = _sha256_file(amendment_path)
+    scene_look_status_record = scenelook_status(scene, episode)
+    scene_look = (scene_look_status_record.get("active") or
+                  (_load_scenelook_rec(scene, episode).get("candidate") or {}) or
+                  (_load_scenelook_rec(scene, episode).get("approved") or {}))
+    record = {
+        "kind": "dialogue-correction", "scene": str(scene), "shotId": shot_id,
+        "scriptVersionId": script_version_id,
+        "previousScriptVersionId": previous_script_version_id,
+        "baseScriptVersionId": source_script_id,
+        "dialogueOccurrenceId": event["dialogueOccurrenceId"],
+        "storyboardPath": str(amendment_path.relative_to(ROOT)),
+        "storyboardSha256": amendment_hash,
+        "sceneLookContentHash": scene_look.get("hash"),
+        "sceneLookPath": scene_look.get("path"),
+        "preservedStages": ["direction", "scenelook", "keyframe"],
+        "invalidatedStages": ["voice", "animation", "continuity", "final"],
+        "approvedAt": now, "approvedBy": reviewed_by,
+    }
+    pkg.setdefault("scopedAmendments", []).append(record)
+    _save(pkg, path)
+    log(f"SCOPED DIALOGUE CORRECTION — {shot_id}: SEE preserved; HEAR/WATCH reopened")
+    return record
 
 
 def _department_candidate(stage, output, context):

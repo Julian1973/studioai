@@ -70,19 +70,16 @@ def test_scene_board_exposes_keyframe_upload_for_the_next_eligible_shot():
     assert 'shot.sourceType==="opener"&&!ledger.keyframeCandidate' in APP
 
 
-def test_dialogue_correction_redrives_direction_without_abandoning_the_scene():
+def test_dialogue_correction_reopens_only_hear_and_watch_without_redriving_story():
     correction = SERVER.index('if self.path == "/api/script-dialogue-correction":')
     synchronize = SERVER.index("synchronize_episode_script_registry(", correction)
-    start = SERVER.index('"story-intake:correction", scene', correction)
-    assert synchronize < start
-    assert '"story-intake:correction", scene' in SERVER
-    assert '["cb_intake.py", "run", ep]' in SERVER
+    amend = SERVER.index("apply_scoped_dialogue_correction(", correction)
+    assert synchronize < amend
+    assert '"story-intake:correction", scene' not in SERVER[correction:correction + 5000]
     assert '"providerCalled": False' in SERVER
-    assert '"redriveScope": "story-direction-candidate"' in SERVER
-    assert 'SH_JOB=j.jobId;shRememberJob(j.jobId)' in APP
-    assert 'Redriving Story & Direction from the corrected script' in APP
-    assert 'if(job&&job.status==="done")' in APP
-    assert 'Revised Story & Direction is ready for your approval' in APP
+    assert '"next": "review-hear"' in SERVER
+    assert 'Direction and SEE preserved; HEAR and WATCH reopened' in APP
+    assert '&st=voice&shot=' in APP
     assert 'location.reload();' not in re.search(
         r"async function shCorrectDialogue\(.*?\n\}", APP, re.DOTALL
     ).group(0)

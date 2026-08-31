@@ -69,10 +69,15 @@ def _scoped_shot_amendment(intake, scene, pkg):
     except (TypeError, ValueError):
         return None
     changed_stage = _amendment_stage(scope)
+    explicit = next((item for item in reversed(pkg.get("scopedAmendments") or [])
+                     if item.get("shotId") == shot_id and
+                     item.get("scriptVersionId") == intake.get("scriptVersionId") and
+                     item.get("kind") == scope.get("kind") and
+                     item.get("baseScriptVersionId", package_script) == package_script), None)
     if not (
         changed_stage and shot_id and
         current_scene and current_scene == changed_scene and
-        package_script == intake.get("previousScriptVersionId")
+        (package_script == intake.get("previousScriptVersionId") or explicit)
     ):
         return None
     package_shots = {shot.get("shotId") for shot in _active_package_shots(pkg)}
@@ -88,6 +93,7 @@ def _scoped_shot_amendment(intake, scene, pkg):
         "invalidatedStages": list(dependency["invalidated"]),
         "previousScriptVersionId": intake.get("previousScriptVersionId"),
         "currentScriptVersionId": intake.get("scriptVersionId"),
+        "record": explicit,
     }
 
 
@@ -684,11 +690,15 @@ def production_state(scene, episode="Ep1", intake=None):
         pkg, None, "look", scene, episode)
     scene_look_current = bool(scene_look.get("current"))
     if amendment:
-        approved_look = look_record.get("approved") or {}
-        look_path = approved_look.get("path")
+        carried_look = ((amendment.get("record") or {}).get("sceneLookPath") and {
+            "path": (amendment.get("record") or {}).get("sceneLookPath"),
+            "hash": (amendment.get("record") or {}).get("sceneLookContentHash"),
+        }) or scene_look.get("active") or look_record.get("candidate") or \
+            look_record.get("approved") or {}
+        look_path = carried_look.get("path")
         scene_look_current = bool(
             look_path and os.path.exists(look_path) and
-            approved_look.get("hash") == cb_render._sha256_file(look_path))
+            carried_look.get("hash") == cb_render._sha256_file(look_path))
 
     if amendment and scene_look_current:
         stages["scenelook"] = _stage(

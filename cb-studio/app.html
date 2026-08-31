@@ -3316,7 +3316,10 @@ function completedSceneAudioHTML(){
 
 async function renderControl(){
   const view=document.getElementById("view");
-  view.innerHTML=`<div class="coming">Loading scene…</div>`;
+  // Background job completion refreshes must keep the reviewed shot visible. Clearing the
+  // entire view here caused Fire to flash a blank "Loading scene" screen and lose the
+  // reviewer's visual position before the returned candidate was projected.
+  if(!view.querySelector("#workspace"))view.innerHTML=`<div class="coming">Loading scene…</div>`;
   await pLoadAll();
   const focusedStage=pFocusedStage(),focusedPhase=productionPhase(focusedStage);
   const focusedStageName=((PSTAGES.find(item=>item.id===focusedStage)||{}).name)||"Production";
@@ -5995,7 +5998,9 @@ async function shRun(cmd,shotId,opts){
   if(opts.startSec!=null)body.startSec=opts.startSec;
   if(opts.endSec!=null)body.endSec=opts.endSec;
   if(opts.sourcePath)body.sourcePath=opts.sourcePath;          // select-upload/select-library: the holding/library file's own path
-  const preserveView=!!opts.preserveView;
+  // Fire is a transition within the current WATCH decision, not navigation. Keep its
+  // media, references and shot context mounted while disclosure/submission/rendering run.
+  const preserveView=opts.preserveView!=null?!!opts.preserveView:cmd==="fire";
   if(preserveView){
     SH_PRESERVE_VIEW={scrollY:window.scrollY,page,scene:String(SH_SC||""),stage:PSTAGE,shotId:shotId||null};
     showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd));
@@ -6063,7 +6068,7 @@ function showInlineSourceProgress(label){
   dec.classList.add("source-updating");
   let row=document.getElementById("inlineSourceProgress");
   if(!row){row=document.createElement("div");row.id="inlineSourceProgress";row.className="inline-source-progress";dec.prepend(row);}
-  row.innerHTML=`<span class="stage-spinner" aria-hidden="true"></span><span><b>${_esc(label||"Updating this revision")}</b><small>The current image stays visible. This panel will update when the new revision is ready.</small></span>`;
+  row.innerHTML=`<span class="stage-spinner" aria-hidden="true"></span><span><b>${_esc(label||"Updating this revision")}</b><small>The current shot and references stay visible. This panel will update when the result is ready.</small></span>`;
 }
 function clearInlineSourceProgress(){
   const row=document.getElementById("inlineSourceProgress");if(row)row.remove();

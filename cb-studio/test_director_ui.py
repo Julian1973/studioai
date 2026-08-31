@@ -1086,6 +1086,12 @@ def test_approved_take_flows_to_next_shot_through_inherited_see_frame():
     assert "Continue to WATCH" in APP
 
 
+def test_fire_preserves_the_current_watch_screen_while_work_runs():
+    assert 'const preserveView=opts.preserveView!=null?!!opts.preserveView:cmd==="fire"' in APP
+    assert 'if(!view.querySelector("#workspace"))view.innerHTML=' in APP
+    assert 'showInlineSourceProgress(opts.progressLabel||stageWorkingLabel(cmd))' in APP
+
+
 def test_story_direction_exposes_episode_architecture_and_audience_information():
     for phrase in (
         "storyArchitecture", "Episode story truth", "Theme proved through action",

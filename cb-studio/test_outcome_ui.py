@@ -633,7 +633,7 @@ def test_reference_and_pose_cards_stack_at_phone_width():
 def test_keyframe_replacement_updates_inline_without_leaving_the_review_surface():
     assert 'SH_PRESERVE_VIEW={scrollY:window.scrollY,page,scene:String(SH_SC||""),stage:PSTAGE,shotId:shotId||null}' in APP
     assert 'shPollStart();if(page=="pipeline"&&!preserveView)renderControl();' in APP
-    assert 'The current image stays visible. This panel will update when the new revision is ready.' in APP
+    assert 'The current shot and references stay visible. This panel will update when the result is ready.' in APP
     assert 'window.scrollTo({top:preservedView.scrollY,left:0,behavior:"instant"})' in APP
     assert 'sourcePath,preserveView:true,progressLabel:sourceLabel' in APP
     assert 'preserveView:true,progressLabel:"Moving the current revision to History"' in APP

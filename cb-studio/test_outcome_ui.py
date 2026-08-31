@@ -471,6 +471,35 @@ def test_conversational_director_is_present_on_every_decision_surface():
     assert 'Apply to working prompt · no render' in APP
     assert '[DIRECTOR ITERATION]' in APP
     assert 'Director change applied · no render fired' in APP
+    assert 'Applying correction…' in APP
+    assert 'Archiving the rejected takes and updating this shot' in APP
+
+
+def test_director_apply_uses_its_prepared_correction_without_a_second_prompt():
+    run_start = APP.index('async function shRun(cmd,shotId,opts)')
+    run_end = APP.index('function shOverrideModelLimited', run_start)
+    run = APP[run_start:run_end]
+    assert 'correction=(correction!=null?correction:' in run
+    assert 'document.getElementById("shCat_"+tok)' in APP
+    assert 'shRun("reject",tok,{correction,category,preserveView:true' in APP
+    assert 'onStartError:error=>directorApplyFailed(key,error)' in APP
+    assert 'function directorApplyFailed(key,message)' in APP
+    assert 'async function persistAnimationDirectorPrompt(tok,revised)' in APP
+    assert 'function directorProductionInstruction(latest)' in APP
+    assert 'Visible result required: ' in APP
+    assert 'Keep locked: ' in APP
+    assert 'correction:productionInstruction' in APP
+    assert 'Saving the corrected working prompt' in APP
+    assert 'await persistAnimationDirectorPrompt(tok,revised)' in APP
+    assert 'await finishAnimationDirectorCorrection(tok,key)' in APP
+    assert 'applying:false' in APP
+
+
+def test_working_prompt_change_invalidates_the_previous_spend_envelope():
+    render = (Path(__file__).parent.parent / "engine" / "cb_render.py").read_text(encoding="utf-8")
+    save_start = render.index("def save_seedance_working")
+    save_end = render.index("def restore_seedance_working", save_start)
+    assert 'led["pendingSpendAuth"] = None' in render[save_start:save_end]
 
 
 def test_approved_watch_has_clear_approve_refire_and_bounded_edit_paths():

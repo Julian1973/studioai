@@ -6958,6 +6958,10 @@ def save_seedance_working(scene, shot_id, prompt_text, episode="Ep1", reviewed_b
         "savedBy": reviewed_by,
         "inputSignature": _seedance_working_input_signature(pkg, shot, scene, episode),
     }
+    # A spend token seals one exact provider envelope. Changing the working prompt changes
+    # that envelope, so any earlier cost disclosure must be discarded and rebuilt before
+    # the next provider call can be authorised.
+    led["pendingSpendAuth"] = None
     work, _ = _department_container(pkg, scene, shot_id, "animation", episode)
     if work.get("approved"):
         # The working prompt is a validated human override layered on the approved typed

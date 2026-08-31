@@ -3906,11 +3906,12 @@ function directorChatHTML(){
   const data=DIRECTOR_CHAT_CACHE[key]||{loading:true,messages:[]};
   const messages=(data.messages||[]).map(item=>`<div class="director-message ${item.role==="user"?"user":"director"}">${_esc(item.text||"")}</div>`).join("");
   const latest=[...(data.messages||[])].reverse().find(item=>item.role==="director"&&item.readyToApply&&item.correction);
-  const applyLabel=scope.stage==="animation-edit"?"Prepare targeted edit · review cost":scope.stage==="animation-refire"?"Prepare full-take refire · no render":scope.stage==="animation"?"Apply to working prompt · no render":scope.stage==="keyframe"?"Apply to next keyframe revision":"Apply to next revision and return";
+  const applying=!!data.applying;
+  const applyLabel=applying?"Applying correction…":scope.stage==="animation-edit"?"Prepare targeted edit · review cost":scope.stage==="animation-refire"?"Prepare full-take refire · no render":scope.stage==="animation"?"Apply to working prompt · no render":scope.stage==="keyframe"?"Apply to next keyframe revision":"Apply to next revision and return";
   return `<div class="director-chat-backdrop" onclick="closeDirectorAgent()" aria-hidden="true"></div><section class="director-chat" role="dialog" aria-modal="true" aria-label="Director conversation">
     <div class="director-chat-head"><div><div class="director-chat-title">Director</div><div class="director-chat-meta">${_esc(data.model||"small-context OpenAI")} · ${_esc(scope.shotId||"scene")}</div></div><button type="button" class="media-expand" aria-label="Close Director" title="Close Director" onclick="closeDirectorAgent()">×</button></div>
     <div class="director-chat-log">${messages||(!data.loading?`<div class="director-message director">What is not landing?</div>`:"")}${data.loading?`<div class="director-thinking"><span class="stage-spinner" aria-hidden="true"></span>${messages?"Director is thinking…":"Opening the conversation…"}</div>`:""}</div>
-    ${latest?`<div class="director-correction">${latest.changeSummary?`<b>What will visibly change</b><br>${_esc(latest.changeSummary)}<br><br>`:""}${scope.stage==="animation-edit"&&latest.editStartSec!=null?`<b>Edit window</b><br>${_esc(Number(latest.editStartSec).toFixed(2))}-${_esc(Number(latest.editEndSec).toFixed(2))} seconds<br><br>`:""}<b>Iteration instruction</b><br>${_esc(latest.correction)}${(latest.protectedElements||[]).length?`<div style="margin-top:9px;color:var(--muted)"><b style="color:var(--text)">Keep locked</b><br>${latest.protectedElements.map(_esc).join(" · ")}</div>`:""}<button class="btn" onclick="directorApplyCorrection()">${_esc(applyLabel)}</button><small style="display:block;margin-top:8px;color:var(--muted)">This prepares production instructions only. Generate and Fire remain separate decisions.</small></div>`:""}
+    ${latest?`<div class="director-correction">${latest.changeSummary?`<b>What will visibly change</b><br>${_esc(latest.changeSummary)}<br><br>`:""}${scope.stage==="animation-edit"&&latest.editStartSec!=null?`<b>Edit window</b><br>${_esc(Number(latest.editStartSec).toFixed(2))}-${_esc(Number(latest.editEndSec).toFixed(2))} seconds<br><br>`:""}<b>Iteration instruction</b><br>${_esc(latest.correction)}${(latest.protectedElements||[]).length?`<div style="margin-top:9px;color:var(--muted)"><b style="color:var(--text)">Keep locked</b><br>${latest.protectedElements.map(_esc).join(" · ")}</div>`:""}<button class="btn" ${applying?"disabled":""} onclick="directorApplyCorrection()">${_esc(applyLabel)}</button><small style="display:block;margin-top:8px;color:var(--muted)">${applying?"Archiving the rejected takes and updating this shot's working prompt. The current shot remains visible.":"This prepares production instructions only. Generate and Fire remain separate decisions."}</small></div>`:""}
     <textarea id="directorChatInput" placeholder="Tell the Director what feels wrong…" oninput="DIRECTOR_CHAT_DRAFTS['${_attr(key)}']=this.value">${_esc(DIRECTOR_CHAT_DRAFTS[key]||"")}</textarea>
     <div class="director-chat-actions"><button class="btn ghost" onclick="closeDirectorAgent()">Keep reviewing</button><button class="btn" ${data.loading?"disabled":""} onclick="sendDirectorMessage()">Send to Director</button></div>
   </section>`;
@@ -3941,36 +3942,57 @@ async function sendDirectorMessage(){
 function directorStartRejection(stage,shotId,reason){
   openDirectorAgent({stage,shotId,seed:reason?`The current review says: ${reason}\n\nHelp me define the smallest correction before I reject and refire.`:"Help me define the smallest correction before I reject and refire."});
 }
+async function persistAnimationDirectorPrompt(tok,revised){
+  const r=await fetch(BASE+"/api/shot-seedance-save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,prompt:revised})}),j=await r.json();
+  if(!r.ok||!j.ok)throw new Error(j.error||"The working prompt could not be saved.");
+  delete SH_SEEDANCE_CACHE[tok];delete SH_STRUCTURE_CACHE[tok];delete SH_READBACK_CACHE[tok];
+  await shLoadSeedanceWork(tok);
+  return j;
+}
+async function finishAnimationDirectorCorrection(tok,key){
+  clearInlineSourceProgress();
+  DIRECTOR_CHAT_CACHE[key]={...(DIRECTOR_CHAT_CACHE[key]||{}),applying:false,messages:[...((DIRECTOR_CHAT_CACHE[key]||{}).messages||[]),{role:"director",text:"Rejected takes archived and correction applied to the working Seedance prompt. No render was fired.",at:new Date().toISOString()}]};
+  if(typeof showToast==="function")showToast("Director change applied · no render fired · Fire remains separate",true);
+  await pLoadAll();renderWorkspaceBody();
+}
 async function saveAnimationDirectorCorrection(tok,key,revised){
   try{
     showInlineSourceProgress("Director is updating the working prompt");
-    const r=await fetch(BASE+"/api/shot-seedance-save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,prompt:revised})}),j=await r.json();
-    if(!j.ok){clearInlineSourceProgress();alert("Couldn't apply the Director change: "+(j.error||"failed"));return;}
-    delete SH_SEEDANCE_CACHE[tok];delete SH_STRUCTURE_CACHE[tok];delete SH_READBACK_CACHE[tok];
-    await shLoadSeedanceWork(tok);clearInlineSourceProgress();
-    DIRECTOR_CHAT_CACHE[key]={...(DIRECTOR_CHAT_CACHE[key]||{}),messages:[...((DIRECTOR_CHAT_CACHE[key]||{}).messages||[]),{role:"director",text:"Rejected takes archived and correction applied to the working Seedance prompt. No render was fired.",at:new Date().toISOString()}]};
-    if(typeof showToast==="function")showToast("Director change applied · no render fired · Fire remains separate",true);
-    await pLoadAll();renderWorkspaceBody();
-  }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload and try again.");}
+    await persistAnimationDirectorPrompt(tok,revised);
+    await finishAnimationDirectorCorrection(tok,key);
+  }catch(e){clearInlineSourceProgress();directorApplyFailed(key,e&&e.message?e.message:"Can't reach the Studio server. Reload and try again.");}
+}
+function directorApplyFailed(key,message){
+  const data=DIRECTOR_CHAT_CACHE[key]||{},text=String(message||"The correction could not be applied.");
+  DIRECTOR_CHAT_CACHE[key]={...data,applying:false,messages:[...(data.messages||[]),{role:"director",text:"Could not apply the correction: "+text,at:new Date().toISOString()}]};
+  if(typeof showToast==="function")showToast("Director correction was not applied · "+text,false);
+  renderDirectorChatHost();
+}
+function directorProductionInstruction(latest){
+  const correction=String((latest&&latest.correction)||"").trim();
+  const visible=String((latest&&latest.changeSummary)||"").trim();
+  const locked=((latest&&latest.protectedElements)||[]).map(item=>String(item||"").trim()).filter(Boolean);
+  return [correction,visible?"Visible result required: "+visible:"",locked.length?"Keep locked: "+locked.join("; "):""].filter(Boolean).join("\n");
 }
 async function directorApplyCorrection(){
   const scope=directorChatScope(),key=directorChatKey(scope),latest=[...((DIRECTOR_CHAT_CACHE[key]||{}).messages||[])].reverse().find(item=>item.role==="director"&&item.readyToApply&&item.correction);if(!latest)return;
-  const correction=latest.correction,tok=scope.shotId?shTok(scope.shotId):null;
+  const correction=latest.correction,productionInstruction=directorProductionInstruction(latest),tok=scope.shotId?shTok(scope.shotId):null;
+  DIRECTOR_CHAT_CACHE[key]={...(DIRECTOR_CHAT_CACHE[key]||{}),applying:true};renderDirectorChatHost();
   if(scope.stage==="animation-edit"){
     if(latest.editStartSec==null||latest.editEndSec==null){alert("Tell the Director the exact seconds that need editing first.");return;}
     closeDirectorAgent();
-    return shRun("edit",tok,{startSec:Number(latest.editStartSec),endSec:Number(latest.editEndSec),correction});
+    return shRun("edit",tok,{startSec:Number(latest.editStartSec),endSec:Number(latest.editEndSec),correction:productionInstruction});
   }
   if(scope.stage==="animation-refire"){
     DIRECTOR_CHAT_OPEN_KEY=null;DIRECTOR_CHAT_OPEN_SCOPE=null;
     try{
       showInlineSourceProgress("Director is reopening the approved take");
-      const r=await fetch(BASE+"/api/director-action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,action:"reopen-shot",note:correction,by:REVIEWER})}),j=await r.json();
+      const r=await fetch(BASE+"/api/director-action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scene:String(SH_SC),episode:SH_EP,shotId:tok,action:"reopen-shot",note:productionInstruction,by:REVIEWER})}),j=await r.json();
       if(!r.ok||!j.ok){clearInlineSourceProgress();alert("Couldn't reopen the take: "+(j.error||"failed"));return;}
       await pLoadAll();
       let status=SH_SEEDANCE_CACHE[tok];if(!status||status.error){await shLoadSeedanceWork(tok);status=SH_SEEDANCE_CACHE[tok];}
       const base=String((status&&status.currentPrompt)||"").trim();
-      if(base)await saveAnimationDirectorCorrection(tok,key,base+"\n\n[DIRECTOR FULL-TAKE REFIRE]\n"+correction+"\nPreserve every successful identity, geography, continuity, timing, audio-authority and landing decision.");
+      if(base)await saveAnimationDirectorCorrection(tok,key,base+"\n\n[DIRECTOR FULL-TAKE REFIRE]\n"+productionInstruction+"\nPreserve every successful identity, geography, continuity, timing, audio-authority and landing decision.");
       else{clearInlineSourceProgress();renderWorkspaceBody();}
     }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload and try again.");}
     return;
@@ -3981,11 +4003,17 @@ async function directorApplyCorrection(){
     const base=String((status&&status.currentPrompt)||"").trim();
     if(!base){alert("The current Seedance prompt is not ready yet.");return;}
     const marker="\n\n[DIRECTOR ITERATION]\n";
-    const revised=base+marker+"Correct only this observed issue: "+correction+"\nPreserve every successful identity, geography, continuity, timing, audio-authority and landing decision.";
+    const revised=base+marker+"Correct only this observed issue:\n"+productionInstruction+"\nPreserve every successful identity, geography, continuity, timing, audio-authority and landing decision.";
     if((shLedger(tok)||{}).status==="candidates-pending"){
-      DIRECTOR_CHAT_OPEN_KEY=null;
-      return shRun("reject",tok,{correction,category:"creative",preserveView:true,progressLabel:"Archiving rejected takes",afterJob:async job=>{
-        if(job&&job.status==="done")await saveAnimationDirectorCorrection(tok,key,revised);
+      const category=((document.getElementById("shCat_"+tok)||{}).value||"other");
+      try{
+        showInlineSourceProgress("Saving the corrected working prompt");
+        await persistAnimationDirectorPrompt(tok,revised);
+      }catch(e){clearInlineSourceProgress();directorApplyFailed(key,e&&e.message?e.message:"The working prompt could not be saved.");return;}
+      DIRECTOR_CHAT_OPEN_KEY=null;DIRECTOR_CHAT_OPEN_SCOPE=null;
+      return shRun("reject",tok,{correction,category,preserveView:true,progressLabel:"Archiving rejected takes",onStartError:error=>directorApplyFailed(key,error),afterJob:async job=>{
+        if(job&&job.status==="done")await finishAnimationDirectorCorrection(tok,key);
+        else directorApplyFailed(key,(job&&job.error)||"The rejected takes were not archived.");
       }});
     }
     return saveAnimationDirectorCorrection(tok,key,revised);
@@ -5954,7 +5982,8 @@ async function shRun(cmd,shotId,opts){
   opts=opts||{};
   let correction=opts.correction!=null?String(opts.correction).trim():null;
   if(cmd=="reject"){
-    correction=(prompt("One-sentence correction for the "+shotId+" batch (goes on record; drives the redesign — 2 rejected batches marks the shot model-limited):","")||"").trim();
+    correction=(correction!=null?correction:
+      (prompt("One-sentence correction for the "+shotId+" batch (goes on record; drives the redesign — 2 rejected batches marks the shot model-limited):","")||"")).trim();
     if(!correction)return;   // cancelled or empty — a rejection always needs its correction
   }
   if(cmd=="override-model-limited"){
@@ -6021,7 +6050,7 @@ async function shRun(cmd,shotId,opts){
   try{
     const r=await fetch(BASE+"/api/shot-run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     const j=await r.json();
-    if(!j.ok){clearInlineSourceProgress();alert("Couldn't start: "+(j.error||"failed"));return;}
+    if(!j.ok){clearInlineSourceProgress();if(typeof opts.onStartError==="function")opts.onStartError(j.error||"failed");else alert("Couldn't start: "+(j.error||"failed"));return;}
     SH_JOB=j.jobId;shRememberJob(j.jobId);SH_LAST_JOB=null;SH_POLL_MISSES=0;
     // Acknowledge the accepted click immediately. Waiting for the next /api/jobs poll left
     // WATCH visually blank and made a real Fire indistinguishable from a missed click.
@@ -6033,7 +6062,7 @@ async function shRun(cmd,shotId,opts){
     SH_AFTER_JOB=typeof opts.afterJob==="function"?opts.afterJob:null;
     if(typeof showToast=="function")showToast("▶ "+cmd+(shotId?" · "+shotId:"")+" — started",true);
     shPollStart();if(page=="pipeline"&&!preserveView)renderControl();
-  }catch(e){clearInlineSourceProgress();alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
+  }catch(e){clearInlineSourceProgress();if(typeof opts.onStartError==="function")opts.onStartError("Can't reach the Studio server. Reload and try again.");else alert("Can't reach the studio server. Reload (Cmd-Shift-R).");}
 }
 function shOverrideModelLimited(shotId){
   shRun("override-model-limited",shotId,{afterJob:()=>shRefresh()});
